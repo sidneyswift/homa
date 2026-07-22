@@ -238,7 +238,23 @@ const prerequisiteSql = `
     family_id uuid not null,
     name text not null,
     birth_month date not null,
-    context jsonb not null default '{}'::jsonb
+    context jsonb not null default '{}'::jsonb,
+    -- Mirrors the real schema's composite target, so lesson_recordings
+    -- below can carry the same (child_id, family_id) cascade it has in
+    -- production rather than a weaker stand-in.
+    unique (id, family_id)
+  );
+  -- removeChild reads this table BEFORE deleting the child, to collect
+  -- the blob prefixes the cascade is about to make unreachable. The
+  -- harness carries it so that dependency is exercised rather than
+  -- mocked away: without it the delete throws 42P01 here and nowhere
+  -- else, which is exactly how CI caught it.
+  create table public.lesson_recordings (
+    id uuid primary key default gen_random_uuid(),
+    family_id uuid not null,
+    child_id uuid not null,
+    foreign key (child_id, family_id)
+      references public.children (id, family_id) on delete cascade
   );
   create table public.family_members (
     family_id uuid not null references public.families(id)
