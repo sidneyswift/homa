@@ -1,5 +1,6 @@
 import { del, list } from "@vercel/blob";
 
+import { blobConfigured } from "../materials/artifact-store";
 import { childPhotoPrefix } from "../child-photos";
 import { lessonBlobPrefix } from "../lessons/blobs";
 
@@ -59,6 +60,16 @@ export async function purgeChildBlobs(input: {
   childId: string;
   lessonIds: readonly string[];
 }): Promise<number> {
+  // One honest line instead of one scary line per prefix. Local dev and
+  // the disposable E2E have no Blob store, so without this every child
+  // deletion in CI logs a purge failure, and a warning that always
+  // fires is a warning nobody reads by the time it matters.
+  if (!blobConfigured()) {
+    console.warn(
+      `child blob purge skipped for child ${input.childId}: no Blob store configured`,
+    );
+    return 0;
+  }
   const prefixes = childBlobPrefixes(input);
   let deleted = 0;
   for (const prefix of prefixes) {
