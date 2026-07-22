@@ -157,3 +157,26 @@ export function onboardingRowFromMembership(membership: unknown): OnboardingFami
     context: row.context ?? null,
   };
 }
+
+/**
+ * appWouldAdmit(family): would /app let this family in?
+ *
+ * /app's own gate (lib/app-data.ts getAppData) needs a finished profile
+ * AND at least one child, and redirects to /onboarding when either is
+ * missing. Anything that hands a family off to /app has to ask the same
+ * question or it builds a loop: /onboarding sent every profile-complete
+ * family to /app, /app sent the childless ones straight back, and the
+ * product was unreachable for anyone who made an account and stopped
+ * before adding a child. Which is not an exotic state; it is the most
+ * common place to drop out of setup.
+ *
+ * Kept here, named, and tested, because the bug was two pages
+ * disagreeing about who counts as done. One predicate cannot disagree
+ * with itself.
+ */
+export function appWouldAdmit(family: {
+  profileCompletedAt: string | Date | null;
+  childCount: number;
+}): boolean {
+  return family.profileCompletedAt !== null && family.childCount > 0;
+}

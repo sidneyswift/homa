@@ -3,7 +3,11 @@ import { redirect } from "next/navigation";
 
 import { familyWallCheckout } from "../../lib/billing/wall";
 import { fetchChatHistory } from "../../lib/chat-history";
-import { chatOnboardingEnabled, familyOnboardingActive } from "../../lib/onboarding/state";
+import {
+  appWouldAdmit,
+  chatOnboardingEnabled,
+  familyOnboardingActive,
+} from "../../lib/onboarding/state";
 import { requireFamily } from "../../lib/map/session";
 import { loadOnboardingChatFamily } from "../../lib/onboarding/store";
 import { getSlashMenuSkills } from "../../lib/slash-skills";
@@ -49,13 +53,29 @@ async function loadChatProps(): Promise<OnboardingChatProps | null> {
   // Onboarding that has finished has one home, and it is /app. Sending
   // her back into the flow she completed would give her two places the
   // same conversation lives.
+  //
+  // Only ever hand off to a door that will actually open. /app admits a
+  // family with a finished profile AND at least one child, so sending a
+  // childless family there is an infinite redirect: /app bounces her to
+  // /onboarding, /onboarding bounces her back, and the product is
+  // unreachable. That family is not finished, whatever the profile
+  // column says, and the reachable case is not exotic: anybody who made
+  // an account and stopped before adding a child is sitting in it right
+  // now, waiting for this flag to be turned on.
   if (
     !familyOnboardingActive({
       profileCompletedAt: family.profileCompletedAt,
       context: family.context,
     })
   ) {
-    if (family.profileCompletedAt) redirect("/app");
+    if (
+      appWouldAdmit({
+        profileCompletedAt: family.profileCompletedAt,
+        childCount: family.children.length,
+      })
+    ) {
+      redirect("/app");
+    }
     return null;
   }
 

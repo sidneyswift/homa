@@ -4,6 +4,7 @@ import { afterEach, describe, it } from "node:test";
 import {
   chatOnboardingEnabled,
   familyOnboardingActive,
+  appWouldAdmit,
   onboardingActiveForRow,
   onboardingRowFromMembership,
   readOnboardingRecord,
@@ -152,5 +153,27 @@ describe("familyOnboardingActive", () => {
       }),
       false,
     );
+  });
+});
+
+describe("appWouldAdmit", () => {
+  it("admits a finished profile with a child", () => {
+    assert.equal(
+      appWouldAdmit({ profileCompletedAt: "2026-07-22T00:00:00Z", childCount: 1 }),
+      true,
+    );
+  });
+
+  it("refuses a finished profile with no children", () => {
+    // The redirect loop: /onboarding used to hand this family to /app on
+    // the profile column alone, and /app sent it straight back.
+    assert.equal(
+      appWouldAdmit({ profileCompletedAt: "2026-07-22T00:00:00Z", childCount: 0 }),
+      false,
+    );
+  });
+
+  it("refuses an unfinished profile however many children", () => {
+    assert.equal(appWouldAdmit({ profileCompletedAt: null, childCount: 3 }), false);
   });
 });
