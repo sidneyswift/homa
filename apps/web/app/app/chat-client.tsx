@@ -1488,13 +1488,21 @@ export function ChatClient({
       <main
         ref={transcriptRef}
         onScroll={handleTranscriptScroll}
-        className="mx-auto flex w-full max-w-[780px] flex-1 flex-col gap-6 overflow-y-auto px-4 py-6 sm:px-6"
+        // More air above the first line than below the last (founder
+        // note, 2026-07-22). The opening screen has no day separator and
+        // nothing else above it, so at pt-6 Homa's hello started almost
+        // against the top edge, which reads as cramped on the one screen
+        // that should feel calm.
+        className="mx-auto flex w-full max-w-[780px] flex-1 flex-col gap-6 overflow-y-auto px-4 pb-6 pt-10 sm:px-6"
       >
         {/* The morning scrolls into everything above it: a soft fade at
             the top edge whenever there is more past to scroll to. */}
         <div
           aria-hidden="true"
-          className={`pointer-events-none sticky top-0 z-10 -mb-[54px] -mt-6 h-[54px] shrink-0 bg-gradient-to-b from-page to-transparent transition-opacity duration-(--dur-base) ${topFaded ? "opacity-100" : "opacity-0"}`}
+          // -mt-10 tracks the container's pt-10: this pulls the fade back
+          // flush with the scroll edge, so the two have to move together
+          // or the gradient starts below the top and leaves a hard line.
+          className={`pointer-events-none sticky top-0 z-10 -mb-[54px] -mt-10 h-[54px] shrink-0 bg-gradient-to-b from-page to-transparent transition-opacity duration-(--dur-base) ${topFaded ? "opacity-100" : "opacity-0"}`}
         />
         {!hasAnyMessages && !onboarding ? (
           <div className="my-auto text-center">
