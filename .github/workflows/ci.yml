@@ -95,6 +95,12 @@ jobs:
       # The paid run (pnpm eval:journaling-trigger) measures whether Homa
       # actually journals a mother's report, the stage that failed
       # silently in production until 2026-07-21.
+      # The lesson-listen pipeline went fleet-wide 2026-07-21 with its
+      # tests never running in CI: the trust gate, the timestamp
+      # normalizer, and the pronoun law all guard parent-facing output.
+      - name: Lesson pipeline checks
+        run: pnpm check:lessons
+
       - name: Journaling trigger fixtures
         run: pnpm check:journaling-trigger
 
