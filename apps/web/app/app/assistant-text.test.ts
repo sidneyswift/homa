@@ -269,3 +269,39 @@ describe("stripTrailingNarration", () => {
     // onward, so it can never turn a message into nothing by itself.
   });
 });
+
+describe("a card ends the turn for text", () => {
+  // The root cause of every leak this session. eve runs a SECOND step
+  // after a tool result, and a step cannot produce nothing, so a model
+  // told to be silent emits something meta into that slot. Proved from
+  // one opening turn's raw event log:
+  //   step 0 finish=tool-calls  "Hey, I'm Homa..."
+  //   step 0 calls ask_for_details
+  //   step 1 finish=stop        "(no further text, waiting for her...)"
+  // On the founder's run that slot held a verbatim sentence out of
+  // onboarding-mode.ts: prompt text on a parent's screen, which no
+  // narration vocabulary rule could ever have caught.
+  const source = readFileSync(
+    new URL("./message-parts.tsx", import.meta.url),
+    "utf8",
+  );
+
+  it("names both tools whose result says END TURN", () => {
+    // If a third card tool gains that contract, it belongs in this set,
+    // and this test is where that gets noticed.
+    assert.match(source, /ENDS_THE_TURN = new Set\(\["ask_for_details", "start_checklist"\]\)/u);
+  });
+
+  it("drops text parts that follow the card, in the render path", () => {
+    assert.match(source, /if \(turnEnded\) continue;/u);
+  });
+
+  it("closes the turn on the call, not on the output", () => {
+    // A card still streaming has already taken the screen; waiting for
+    // output-available would leave the leak visible while it lands.
+    assert.match(
+      source,
+      /if \(endsTheTurn\(part\)\) turnEnded = true;[\s\S]{0,200}part\.state !== "output-available"/u,
+    );
+  });
+});

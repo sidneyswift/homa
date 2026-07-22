@@ -163,8 +163,46 @@ type AssistantItem =
   | { kind: "details"; card: DetailCardData; sourceActionKey: string }
   | SourcedProgressAssistantItem;
 
+/**
+ * Tools whose result says "END TURN. Emit no text after this tool call."
+ *
+ * The contract has been in both tool descriptions since they were
+ * written. Nothing enforced it, and it turns out nothing the model can
+ * do would satisfy it: eve runs a SECOND step after the tool result, and
+ * a step has no way to produce nothing. Asked to be silent, the model
+ * must still emit a terminal message, so it emits the only thing left,
+ * something meta.
+ *
+ * That one slot is where every leak of this session came from. Proved
+ * from the raw event log of one opening turn:
+ *
+ *   step 0  finish=tool-calls  "Hey, I'm Homa. Your homeschool helper..."
+ *   step 0  calls ask_for_details
+ *   step 1  finish=stop        "(no further text, waiting for her to
+ *                               fill in the card)"
+ *
+ * On the founder's run the same slot held a verbatim sentence out of
+ * agent/instructions/onboarding-mode.ts, which is prompt text on a
+ * parent's screen. Earlier runs held "(waiting for her response)",
+ * "Noted, waiting for her to fill that in", "I'm here whenever you're
+ * ready". Four narration regexes chased four of those and the fifth was
+ * a prompt echo no vocabulary rule could ever have caught.
+ *
+ * So the rule is structural instead: after one of these tool calls, this
+ * message has said everything it is going to say. Cheap, total, and it
+ * cannot be outrun by a new phrasing.
+ */
+const ENDS_THE_TURN = new Set(["ask_for_details", "start_checklist"]);
+
+function endsTheTurn(part: EveMessagePart): boolean {
+  return part.type === "dynamic-tool" && ENDS_THE_TURN.has(part.toolName);
+}
+
 function assistantItems(message: EveMessage): AssistantItem[] {
   const items: AssistantItem[] = [];
+  // Set once a card has claimed the screen; every later text part in
+  // this message is the model filling a silence it was told to keep.
+  let turnEnded = false;
   const materialByPartIndex = new Map(
     selectParentVisibleMaterialMessageParts(message.parts).map((entry) => [
       entry.sourcePartIndex,
@@ -178,6 +216,9 @@ function assistantItems(message: EveMessage): AssistantItem[] {
   const shownText = new Set<string>();
   for (const [partIndex, part] of message.parts.entries()) {
     if (part.type === "text") {
+      // The card already asked. Whatever this is, she was not meant to
+      // read it, and it is the one slot that has leaked all session.
+      if (turnEnded) continue;
       // Trailing narration goes first: "Take your time, I'm here
       // whenever you're ready." shipped as paragraph two of a real
       // reply, where the whole-part predicates below can never reach.
@@ -196,6 +237,10 @@ function assistantItems(message: EveMessage): AssistantItem[] {
       items.push({ kind: "text", text: trimmed });
       continue;
     }
+    // Set on the CALL, not on the output, so a card still streaming has
+    // already closed the turn to text. The card itself is parsed below
+    // from the same part once its output lands.
+    if (endsTheTurn(part)) turnEnded = true;
     if (part.type !== "dynamic-tool" || part.state !== "output-available") continue;
     const progressItem = parseProgressMessagePart(part);
     if (progressItem) {
