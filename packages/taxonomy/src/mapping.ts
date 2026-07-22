@@ -96,6 +96,16 @@ export const MARBLE_DOMAIN_MAP: Record<string, MarbleDomainTarget> = {
   // Marble domains instead of widening the vocabulary.
   "History > Geography": { subject: "social_studies", domainId: "geography", displayName: "Geography", kind: "content" },
   "History > Cultural Studies": { subject: "social_studies", domainId: "cultural-studies", displayName: "Cultural studies", kind: "content" },
+  // Social-studies assessment gap fill (2026-07-22, founder-gated content
+  // PR): these three route Homa-authored topics INTO the reserved
+  // assessment ids, deliberately deviating from the 2026-07-21
+  // non-colliding precedent below. The matching AUTHORED_DOMAINS rows in
+  // domains.ts are removed in the same change so domain ids stay unique;
+  // the ids, subjects, and assessment kind are unchanged, so the bank
+  // items pinned to them in item-domains.ts are unaffected.
+  "History > Geography & Maps": { subject: "social_studies", domainId: "geography-maps", displayName: "Geography & maps", kind: "assessment" },
+  "History > Civics & Government": { subject: "social_studies", domainId: "civics-government", displayName: "Civics & government", kind: "assessment" },
+  "History > Economics & Money": { subject: "social_studies", domainId: "economics-money", displayName: "Economics & money", kind: "assessment" },
   // Inspo-flywheel addition (2026-07-21): Social Studies: All Together
   // (Scott Foresman, Grade 1) surfaced 7 real gaps that semantically belong
   // under the AUTHORED_DOMAINS civics-government/family-community/
