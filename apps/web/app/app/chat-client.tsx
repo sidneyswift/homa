@@ -1645,6 +1645,28 @@ export function ChatClient({
             </span>
             <span>Reconnecting&hellip;</span>
           </div>
+        ) : agent.error && onboarding && !hasVisibleMessages ? (
+          // The opening turn died, so she is looking at an empty screen.
+          // The ordinary line below is wrong twice here: she never sent a
+          // message, and there is no composer to send one with, because
+          // the chrome does not arrive until Homa has spoken. Telling a
+          // brand new parent to try sending it again names an action she
+          // cannot take, on her first ten seconds with the product.
+          <div className="flex flex-col items-center gap-3" role="alert">
+            <p className="text-center text-sm text-danger">
+              Homa did not manage to start. Nothing is lost.
+            </p>
+            <button
+              type="button"
+              // A reload, not a second send path: the kickoff already
+              // retries itself on load when the conversation is empty,
+              // and that path is the tested one.
+              onClick={() => window.location.reload()}
+              className="min-h-11 rounded-pill border border-border bg-card px-5 py-2 text-sm font-bold text-strong shadow-sm transition-colors hover:border-brand"
+            >
+              Try again
+            </button>
+          </div>
         ) : agent.error ? (
           <p className="text-center text-sm text-danger" role="alert">
             Your conversation is safe; that last message didn&apos;t go through. Try
