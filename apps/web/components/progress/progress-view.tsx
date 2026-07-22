@@ -12,10 +12,12 @@ import {
 } from "../../lib/child-progress/view-copy";
 import type { DashboardReport } from "../../lib/dashboard";
 import type { TrajectoryEra } from "../../lib/map/trajectory-eras";
+import { abilitiesSkyFromView } from "../../lib/child-progress/abilities-from-view";
 import { buildTrajectoryStory } from "../../lib/map/trajectory-story";
 import { KidAvatar } from "../dashboard/kid-avatar";
 import { PageColumn } from "../dashboard/page-column";
 import { AskHomaAboutChild } from "./ask-homa-about-child";
+import { AbilitiesCard } from "./abilities-card";
 import { LessonsCard, type ProgressLessonsCardData } from "./lessons-card";
 import { ProgressMap } from "./progress-map";
 import { ProgressSubjects } from "./progress-subjects";
@@ -306,6 +308,18 @@ export function ProgressView({
               />
             </div>
           </div>
+        )}
+
+        {/* The abilities map sits below the numbers, deliberately: the
+            chart answers "how is she doing", the map answers "what has
+            she learned", and the second question is the warmer one to
+            leave a mother with. Suppressed for a never-assessed child
+            so the first check-in stays the page's one ask. */}
+        {neverAssessed ? null : (
+          <AbilitiesCard
+            childName={view.childName}
+            sky={abilitiesSkyFromView(view, now)}
+          />
         )}
 
         {lessons && neverAssessed ? <LessonsCard card={lessons} /> : null}

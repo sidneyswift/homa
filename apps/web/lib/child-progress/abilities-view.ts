@@ -73,6 +73,21 @@ const NEW_WINDOW_DAYS = 7;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
+ * The narrowest the age axis is allowed to get, in months.
+ *
+ * Without a floor, a child with two abilities four months apart would
+ * have them normalized to 0 and 1: one hard against each end of the
+ * strip, with nothing between. That reads as a gap rather than as two
+ * close abilities, which is the opposite of true.
+ */
+const MIN_AXIS_MONTHS = 24;
+
+/** Deterministic horizontal nudge, so two abilities that share a
+ *  typical age do not land exactly on top of each other. Small enough
+ *  that it cannot change which of two stars reads as older. */
+const X_JITTER = 0.015;
+
+/**
  * Deterministic 0-to-1 jitter from an ability id. sha256 keeps
  * neighbours from clumping the way a cheap string hash does, and the
  * id is stable forever, so the sky is stable forever.
@@ -100,18 +115,51 @@ function isNew(observedAt: string | null, now: Date): boolean {
   return now.getTime() - at <= NEW_WINDOW_DAYS * DAY_MS;
 }
 
+/**
+ * The age axis every subject shares.
+ *
+ * This is deliberately ONE axis for the whole sky, not one per subject.
+ * The card draws every subject's stars into a single strip, so a star's
+ * horizontal position has to mean the same thing everywhere: further
+ * right is a later typical age, full stop. Normalizing inside each
+ * subject made x mean "far along for this subject", which put a
+ * two-ability subject's stars at both extremes and left the middle
+ * empty. It also made two stars at the same height mean two different
+ * ages, which is worse than meaningless, it is wrong.
+ */
+function ageAxis(
+  map: readonly SubjectAbilityMap[],
+  ageMonths: number,
+): { min: number; span: number } {
+  const months = map.flatMap((subject) =>
+    subject.nodes.map((node) => node.typicalMonths),
+  );
+  let min = Math.min(...months, ageMonths);
+  let max = Math.max(...months, ageMonths);
+  const short = MIN_AXIS_MONTHS - (max - min);
+  if (short > 0) {
+    // Widen around the middle so the existing stars stay centered
+    // rather than being pushed to one end.
+    min -= short / 2;
+    max += short / 2;
+  }
+  return { min, span: max - min };
+}
+
 function toStar(
   node: AbilityNode,
-  bounds: { min: number; max: number },
+  axis: { min: number; span: number },
   ageMonths: number,
   now: Date,
 ): AbilityStar {
-  const span = Math.max(1, bounds.max - bounds.min);
+  const placed =
+    (node.typicalMonths - axis.min) / axis.span +
+    (jitter(node.itemId, "x") - 0.5) * 2 * X_JITTER;
   return {
     itemId: node.itemId,
     statement: node.statement,
     state: node.state,
-    x: (node.typicalMonths - bounds.min) / span,
+    x: Math.min(1, Math.max(0, placed)),
     y: jitter(node.itemId, "y"),
     size: starSize(node.typicalMonths, ageMonths),
     isNew: isNew(node.observedAt, now),
@@ -130,14 +178,10 @@ export function buildAbilitiesSky(
   now: Date,
   unlitSubjectNames: readonly string[] = [],
 ): AbilitiesSky {
+  const axis = ageAxis(map, ageMonths);
   const subjects: SubjectSky[] = map.map((subject) => {
-    const months = subject.nodes.map((node) => node.typicalMonths);
-    const bounds = {
-      min: Math.min(...months, ageMonths),
-      max: Math.max(...months, ageMonths),
-    };
     const stars = subject.nodes.map((node) =>
-      toStar(node, bounds, ageMonths, now),
+      toStar(node, axis, ageMonths, now),
     );
     const litIds = new Set(stars.map((star) => star.itemId));
     return {
