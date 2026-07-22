@@ -326,7 +326,11 @@ const CSS = `
 .v4-sticky::after{content:""; position:absolute; inset:0; background:var(--v4-poster) center/cover no-repeat;
   opacity:0; pointer-events:none;}
 .v4-scrim{position:absolute; inset:0; pointer-events:none;}
-.v4-scrim-top{background:linear-gradient(180deg, rgba(251,247,240,.94) 0%, rgba(251,247,240,.72) 26%, transparent 58%);}
+/* The hero clip is a bright phone screen, so copy over it needs a real
+   readable band, not a hint of a gradient: hold near-opaque cream through
+   the copy zone, then release. */
+.v4-scrim-top{background:linear-gradient(180deg, rgba(251,247,240,.97) 0%, rgba(251,247,240,.93) 30%,
+  rgba(251,247,240,.7) 46%, rgba(251,247,240,.28) 60%, transparent 74%);}
 .v4-scrim-bottom{background:linear-gradient(0deg, rgba(20,16,12,.82) 0%, rgba(20,16,12,.35) 38%, transparent 68%);}
 .v4-scrim-full{background:linear-gradient(180deg, rgba(12,14,26,.6), rgba(12,14,26,.86));}
 .v4-scrim-right{background:linear-gradient(270deg, rgba(251,247,240,.96) 0%, rgba(251,247,240,.8) 34%, transparent 72%);}
@@ -337,8 +341,12 @@ const CSS = `
 /* waypoint layers: one --w drives opacity and lift */
 .v4-layer{position:absolute; opacity:var(--w,0); transform:translateY(calc((1 - var(--w,0)) * 16px));
   will-change:opacity,transform;}
-.v4-top-center{top:clamp(84px,12vh,140px); left:50%; transform:translateX(-50%) translateY(calc((1 - var(--w,0)) * 16px));
+.v4-top-center{top:clamp(76px,10vh,120px); left:50%; transform:translateX(-50%) translateY(calc((1 - var(--w,0)) * 16px));
   width:min(90vw,760px); text-align:center;}
+/* Belt and braces over moving footage: the scrim carries most of the
+   contrast, this keeps edges crisp where the frame is brightest. */
+.v4-top-center h1,.v4-top-center h2{text-shadow:0 1px 16px rgba(251,247,240,.9), 0 1px 3px rgba(251,247,240,.8);}
+.v4-top-center .v4-body{text-shadow:0 1px 12px rgba(251,247,240,.95);}
 .v4-mid-center{top:50%; left:50%; width:min(90vw,620px); text-align:center;
   transform:translate(-50%,-50%) translateY(calc((1 - var(--w,0)) * 16px));}
 .v4-rail{right:clamp(18px,5vw,64px); top:50%; width:min(84vw,420px);
