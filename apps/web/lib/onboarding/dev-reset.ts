@@ -76,6 +76,25 @@ export async function resetOnboardingFamily(input: {
   // dispatcher texting and emailing a household that is gone.
   await sql`delete from public.agent_schedules where family_id = ${input.familyId}`;
 
+  // The membership goes too, and this one is not housekeeping.
+  //
+  // A soft-deleted family leaves its family_members row behind, so an
+  // account reset eleven times is a member of eleven families. Anything
+  // that resolves a family by asking "which family is this user in" then
+  // has eleven answers and no reason to prefer the live one. The eve
+  // channel picked a retired family that way, and the founder spent a
+  // walk watching Homa answer about a child from three resets ago while
+  // the page showed a family that had none.
+  //
+  // The resolver is fixed too (agent/channels/eve.ts filters deleted
+  // families), but leaving the rows would keep the harness generating
+  // the exact state the fix has to survive, and a test account is worth
+  // more when it looks like a real one: exactly one family.
+  await sql`
+    delete from public.family_members
+    where user_id = ${input.authUserId} and family_id = ${input.familyId}
+  `;
+
   const { familyId: freshId } = await startAnonymousFamily({
     source: "organic",
     utm: {},
