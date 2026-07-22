@@ -26,7 +26,10 @@ export function DevToolbar({ familyId }: { familyId: string | null }) {
   const { phase, message, reset } = useOnboardingReset();
 
   return (
-    <div className="fixed right-3 top-3 z-[60] flex flex-col items-end gap-1 print:hidden">
+    // Half opacity until hovered: at full strength it sat on top of the
+    // day separator and became part of the thing being judged, which is
+    // the opposite of what a dev affordance is for.
+    <div className="fixed right-3 top-3 z-[60] flex flex-col items-end gap-1 opacity-45 transition-opacity duration-(--dur-base) hover:opacity-100 focus-within:opacity-100 print:hidden">
       <button
         type="button"
         onClick={() => void reset()}
