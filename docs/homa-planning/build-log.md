@@ -3,6 +3,59 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-22 · "whos name?" and the rule that guaranteed it
+
+Founder walked onboarding and asked, of the card's first child question,
+**"this is weird. whos name?"** She had just given her own name and state
+and been told "Got it, Sidney. California it is." The next thing on
+screen was "What is their name?" with nothing above it.
+
+**The mechanism.** The card owns exactly one antecedent, the eyebrow
+"About your child", and it is suppressed whenever the card is docked.
+Every live card is docked, because that is the composer morph. So the
+only place the card ever appears is the only place its subject was
+removed, and `aria-label` still carries it, meaning a screen-reader user
+was told whose name and a sighted user was not.
+
+Four unbound referring expressions across two screens, not one:
+`What is their name?`, `When were they born?`, `so the questions match
+their age in months` (twice over: "the questions" is a definite
+reference to a checklist she has not been shown), and the `Add them`
+button, whose plural also implied it added more than one child.
+
+**The part worth keeping.** Fixing the strings makes the card safe when
+it lands cold. It does not stop it landing cold, and three rules written
+in this same build were between them making that certain:
+`SKILL.md` said "Cards appear; your voice is for reactions", and a
+reaction can only refer back to something that already exists;
+`onboarding-mode.ts` had the right words-first rule and scoped it to the
+first turn and to `family_basics`; `ask_for_details.ts` told the model to
+skip the `intro` slot because "the fields speak for themselves", true of
+a card whose fields say "you" and false of one whose fields say "their".
+A copy bug on screen was a policy bug in the instructions. Fixed at both
+ends (`797aa17`, `06e9713`).
+
+**Decided alone:** "your child's **first** name", not "name", because one
+name per concept is a copy law and three parent-visible surfaces already
+call this datum a first name. The name is substituted through a `{name}`
+token rather than a function per label, so `FIELDS` stays a table of
+plain copy findable by searching the words a parent saw; a test asserts
+no literal token ever reaches the screen. Every context-aware candidate
+was rejected for branching on a child count the card cannot trust, or
+asserting a family shape ("one of your kids") a one-child family does
+not have.
+
+**Still open, logged not fixed:** the same class elsewhere. `hub-step`'s
+"ready for their age" leans on layout for its antecedent; `checklist-step`
+says "One more, since that was easy" about a question the 140ms flash has
+already removed; a 409 error names "Progress", a surface a chat-first
+parent has never visited; `report-reveal-card` uses "answers" for two
+different sets one line apart; `content.ts` opens one subject intro on a
+pronoun where its siblings open on nouns. Two vocabulary seams also
+surfaced: "Birth year" vs "Year" between `kids-step` and the shared
+`birthday-fields` built to stop that, and "Your name" vs "What should I
+call you?" for one field.
+
 ## 2026-07-22 · Four bugs found by walking onboarding instead of reading it
 
 All four came out of one afternoon of driving the flow in a browser, and
