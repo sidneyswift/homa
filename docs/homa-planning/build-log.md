@@ -134,6 +134,93 @@ Session-start.sh's own clock check now also reads GitHub's clock instead
 of Slack's, matching the hook and reducing the dependency surface to one
 service this workflow already needs reachable.
 
+## 2026-07-20 · Memory budget moves from write time to render time; phone calls can no longer be turned away
+
+Founder ask, from the Brain tab: why is there a 4,000 character limit,
+what happens at the limit, and "this memory system seems fragile, how
+can it be improved so memory is valuable over time and compacts when
+needed." Plus a directive: phone conversations must be able to save
+memories.
+
+**What the 4,000 actually was.** A prompt budget, correctly: every
+character in `family_memories` is re-injected on every turn of every
+channel. What was wrong was where it was enforced. `saveFamilyMemory`
+and the chat `remember` tool both checked `usage + content > BUDGET`
+*before* inserting and refused the write. Only the chat path could
+recover, by asking the model to consolidate mid-conversation with a
+parent waiting. Voice told the parent to go tidy memories on the
+website. The background extraction loops recorded `budget-full` in a
+JSON audit column and moved on.
+
+**Production evidence (2026-07-20).** No `budget-full` had fired yet, so
+this was latent, not an outage. The Gomes family sat at 3,114 of 4,000
+(77.9%) across 21 active rows with **zero superseded rows**: the
+consolidate-on-full path had never executed for anyone, and shipped with
+no test coverage at all. Nine of their 21 memories came from phone
+calls, so the channel that teaches Homa the most was the one closest to
+the wall and the one that handled it worst. Their store already held
+~1,060 characters carrying ~510 characters of meaning, including a
+2026-07-14 entry recording a plan to test Amalia's syllable awareness
+and a 2026-07-19 entry recording the answer, both pinned forever.
+
+**Founder rulings this session** (see the reconciliation register):
+`memory-render-time-budget` (store always, pin the best 4,000; overflow
+stays stored and searchable via recall) and
+`memory-compaction-high-water` (background compaction triggers at 80% of
+budget).
+
+**Shipped.** `selectPinnedMemories` in `lib/agent-memory.ts` splits
+active rows into pinned and overflow, greedy fill by score, stable
+tiebreak on id, pinned re-sorted chronologically; every input row lands
+in exactly one bucket. Write-time refusal deleted from
+`lib/learning/save-memory.ts`, `agent/tools/remember.ts`, and the voice
+route. `family-context.ts` applies the budget at render and, when there
+is overflow, tells Homa how many memories are waiting and to search them
+with recall rather than claiming ignorance. New
+`lib/learning/compact-memories.ts` plus `agent/memory-compactor.md`: one
+structured model pass proposing merges, then deterministic guarded
+writes. The model sees numbered indices into a list built from this
+family's own rows, never uuids, so it cannot name a foreign memory.
+`validateMerge` enforces the guarantees regardless of model output: no
+merge spans two children or folds a child's fact into a family-wide one
+(the multi-kid law, enforced in code and not only in the prompt), no
+mixing `fact` with `what_works`, injection scan on merged content, and a
+merge that does not shrink the store is rejected as churn. Replaced rows
+are superseded, never deleted, so a bad merge is visible and
+recoverable. Nightly sweep at 05:23 UTC
+(`agent/schedules/memory-compaction.ts`), flag-dark behind
+`HOMA_MEMORY_COMPACTION_ENABLED`, computing who is due from live rows in
+SQL so there is no marker column to drift.
+
+**Fixed on the way.** The family-context memory query was
+`order by created_at limit 200`, the *oldest* 200 rows. Harmless while
+storage was capped near 30 rows; it would have silently hidden a
+long-running family's newest memories the moment storage went unbounded.
+Now `desc`. Also added a `memory_compaction` usage surface distinct from
+the existing `compaction` surface, which is eve compacting a long
+conversation and a different cost entirely.
+
+**Verification.** 20 new tests (`lib/agent-memory.test.ts`,
+`lib/learning/compact-memories.test.ts`) covering the never-drop
+invariant, the prompt bound, cross-turn stability, and every merge law,
+including the real Gomes syllable cluster as a fixture. typecheck, lint,
+`pnpm build`, `VERCEL=1 eve build`, `check:isolation`, `check:events`,
+`check:map`, `check:taxonomy`, `check:fleet-skills`,
+`check:skills-targeting`, `check:fleet-skills-dormant`,
+`check:continuity`, `check:eve-stream-duration` all pass. **No migration
+required**: `model_usage.surface` has no CHECK constraint and nothing
+else changed shape, so this deploys as code only.
+
+**Not verified locally, and the reason.** The compaction model pass
+itself never ran here. Production authenticates to the AI Gateway
+through Vercel OIDC and there is no `AI_GATEWAY_API_KEY` in the
+environment, so `generateObject` cannot be exercised outside a
+deployment. A `dryRun` option was added to `compactFamilyMemories` for
+exactly this: after deploy, run it against the Gomes family to see the
+proposed merges before enabling the flag. The deterministic half is
+tested; the judgment half is not, and enabling the schedule before that
+dry run would be enabling untested judgment.
+
 ## 2026-07-20 · Ingestion engine rebuilt: skills and verifier match the fat-skill reality; four founder rulings
 
 Founder ask: review the last 24h of Material Studio work, inventory

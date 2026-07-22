@@ -109,6 +109,41 @@ interpretation* stays deterministic and lexical. Checking that a
 delivered SMS contains the exact question we sent is verification. Deciding
 what a mother meant is not.
 
+Second exception, on different grounds: **a security floor is not a
+capability.** The law is about components whose low recall means *lost
+signal*, where silence is invisible failure. A deny-list guarding a
+boundary fails the other way: its recall is not the product, and it is
+never the only control. `scanMemoryContent` (lib/agent-memory.ts) pattern
+matches saved memories for instruction-shaped text, which is interpretation
+by the letter of this law, and it stays deterministic anyway because the
+real control is structural (memory renders inside a labelled data block
+that the agent is told is never instructions) and because a model asked to
+judge attacker-controlled text is inside the blast radius of the thing it
+is judging. Keep such floors cheap, keep them honest about what they are,
+and never let one stand in for a capability.
+
+Applied to memory, 2026-07-21: the contradiction guardrail
+(`findConflictingMemories`) was this law's violation in the memory system.
+It judged "does this new fact supersede that one" with one scalar, cosine
+distance under 0.5, calibrated on a single observed pair. Measured against
+the rows compaction later merged, true-conflict distances ran 0.307 to
+0.537 across the threshold, and 5 of 28 rows had no embedding at all. When
+it did fire correctly its only output was advisory prose to a model
+mid-conversation, and the flagged duplicate rode in every prompt for
+eleven days. Fleet-wide it produced two superseded rows in the product's
+lifetime, the same "one evidence row" signature as the journal matcher. It
+was deleted rather than tuned, because the compliant replacement already
+existed: compaction proposes with a model over the whole store and
+verifies in code, off the critical path. Its judgment layer is measured by
+`scripts/memory-compaction-eval.mts` against production language.
+
+A third corollary that fell out of the same work: **a per-item rule
+belongs in the validator, not the transport schema.** The entry-length cap
+sat on the Zod schema, so one merged entry six characters over threw away
+the model's entire response, two correct splits included. Schemas should
+be permissive enough to parse; the validators reject one proposal and let
+the rest through.
+
 ### Required decision sequence
 
 1. Write the fleet-wide parent-facing capability as a procedure first.

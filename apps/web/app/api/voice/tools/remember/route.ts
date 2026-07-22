@@ -16,10 +16,18 @@ import { hasVoiceWebhookSecret } from "../../../../../lib/voice/webhook-auth";
  * memory it writes.
  *
  * Every write goes through the ONE guarded server path
- * (lib/learning/save-memory.ts): injection scan, family budget, dedupe,
- * in-family child resolution. Responses are tool RESULTS the assistant
- * reads back: rejections say why in plain language so the model can
- * relay or self-correct, never silently pretend it saved.
+ * (lib/learning/save-memory.ts): injection scan, dedupe, in-family child
+ * resolution. Responses are tool RESULTS the assistant reads back:
+ * rejections say why in plain language so the model can relay or
+ * self-correct, never silently pretend it saved.
+ *
+ * A call can no longer be turned away for space. Storage is unbounded and
+ * the character budget applies at render time (founder ruling 2026-07-20,
+ * memory-render-time-budget), so "remember this" on the phone always lands.
+ * Cause: a full family used to get told, mid-call, to go tidy memories on
+ * the website, which is the worst possible moment to ask that of a parent
+ * whose hands are busy. It also made the phone, the channel families teach
+ * Homa the most through, the channel that dropped the most.
  */
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -81,8 +89,6 @@ export async function POST(request: Request): Promise<Response> {
       "blocked-by-scan":
         "That reads like an instruction, not a fact about the family. Rephrase it as a plain fact and try again.",
       duplicate: "Already saved. Tell the parent you have it.",
-      "budget-full":
-        "Memory is full for this family. Tell the parent you'll keep it in mind for this call, and they can tidy saved memories at thankshoma.com.",
       "unknown-child":
         "That child name is not in this family. Use the child's name exactly as the family context shows it, or leave the child off for a family-wide fact.",
     };

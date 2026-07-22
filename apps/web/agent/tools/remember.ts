@@ -3,14 +3,9 @@ import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import {
-  FAMILY_MEMORY_CHAR_BUDGET,
   MEMORY_ENTRY_MAX_CHARS,
   MEMORY_KINDS,
-  findConflictingMemories,
-  memoryConflictNote,
-  memoryUsageChars,
   scanMemoryContent,
-  type MemoryConflictCandidate,
 } from "../../lib/agent-memory";
 import { saveFamilyMemory } from "../../lib/learning/save-memory";
 import { embedText } from "../../lib/learning/embeddings";
@@ -68,8 +63,6 @@ export default defineTool({
           "blocked-by-scan":
             "That reads like an instruction, not a fact about the family. Rephrase it as a plain fact.",
           duplicate: "Already saved (no duplicate added).",
-          "budget-full":
-            "Memory is full. Consolidate now: forget stale or overlapping entries, then retry this save in the same turn.",
           "unknown-child":
             "That child id is not in this family. Use an id from the family context block.",
         };
@@ -83,7 +76,7 @@ export default defineTool({
         saved: true,
         done: true,
         content: input.content,
-        note: `Saved. This update is complete; do not repeat it. Mention it to the parent in a short natural aside.${memoryConflictNote(result.conflicts)}`,
+        note: "Saved. This update is complete; do not repeat it. Mention it to the parent in a short natural aside.",
       };
     }
 
@@ -124,41 +117,8 @@ export default defineTool({
       return { saved: true, done: true, note: "Already saved (no duplicate added)." };
     }
 
-    const usage = memoryUsageChars(rows);
-    if (usage + input.content.length > FAMILY_MEMORY_CHAR_BUDGET) {
-      return {
-        saved: false,
-        note: `Memory is at ${usage.toLocaleString()} of ${FAMILY_MEMORY_CHAR_BUDGET.toLocaleString()} characters and this entry will not fit. Consolidate now: forget stale or overlapping entries (see current_memories), then retry this save in the same turn.`,
-        current_memories: rows.map((row) => row.content),
-      };
-    }
-
     // Best-effort semantic index; null just means FTS-only for this row.
     const embedding = await embedText(input.content, { familyId });
-
-    // Contradiction guardrail (agent-memory.ts): fetch embeddings only
-    // for rows the scope rule can match (this child's plus family-wide;
-    // a sibling's rows never load), compare in JS since the RLS client
-    // has no vector operators, and carry any hits into the note below.
-    let conflicts: string[] = [];
-    if (embedding) {
-      const scopeFilter = input.childId
-        ? `child_id.is.null,child_id.eq.${input.childId}`
-        : "child_id.is.null";
-      const { data: candidates } = await db
-        .from("family_memories")
-        .select("content, child_id, embedding")
-        .eq("family_id", familyId)
-        .is("superseded_at", null)
-        .in("kind", [...MEMORY_KINDS])
-        .or(scopeFilter)
-        .not("embedding", "is", null);
-      conflicts = findConflictingMemories(
-        embedding,
-        input.childId ?? null,
-        (candidates ?? []) as MemoryConflictCandidate[],
-      );
-    }
 
     const { error: insertError } = await db.from("family_memories").insert({
       family_id: familyId,
@@ -177,7 +137,7 @@ export default defineTool({
       saved: true,
       done: true,
       content: input.content,
-      note: `Saved. This update is complete; do not repeat it. Mention it to the parent in a short natural aside.${memoryConflictNote(conflicts)}`,
+      note: "Saved. This update is complete; do not repeat it. Mention it to the parent in a short natural aside.",
     };
   },
 });
