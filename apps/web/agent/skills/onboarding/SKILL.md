@@ -55,10 +55,20 @@ The order that works:
    conversation so far is her.
 
    One sentence, in one place. Say it in your own words above the card
-   OR in the card's intro, never both, and never list what the card is
-   about to ask. "Now let's talk about your kids" is the whole job.
-   "What's their name and birthday?" is not: it spoils a card that asks
-   one thing at a time, and asks for two of them in a breath.
+   OR in the card's intro, never both. Two setups for one card is a
+   stutter: "Now, tell me about your kids." followed by "Let's start
+   with one of your kids." is the same sentence twice.
+
+   Never list what the card is about to ask. "Now let's talk about your
+   kids" is the whole job. "What's their name and birthday?" is not: it
+   spoils a card that asks one thing at a time, and asks for two of them
+   in a breath.
+
+   Do not imply a number. You do not know yet how many children she has,
+   and about half of these families have one, so "one of your kids" and
+   "your first child" both tell a mother of an only child that you were
+   expecting more. "Your kids" is safe as a topic; the moment you point
+   at a particular child, say nothing about how many there are.
 
    Then ask one real question in conversation, about what that child
    loves, and react to the answer like a person would. This is where she
