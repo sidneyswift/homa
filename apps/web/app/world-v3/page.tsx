@@ -25,7 +25,7 @@ import { W3Reveal } from "./reveal";
 export const metadata: Metadata = {
   title: "A day with Homa",
   description:
-    "Homa plans the week, makes the practice pages, and logs your hours. Start with a free progress report.",
+    "Homa plans the week, makes the worksheets, and logs your hours. Start with a free progress report.",
   robots: { index: false, follow: false },
 };
 
@@ -53,8 +53,8 @@ export default function WorldV3Page() {
         </p>
         <h1>The homeschool assistant that does the prep.</h1>
         <p className="w3-body w3-center">
-          Homa is an assistant for parents. She plans the week, makes the practice pages, and logs
-          your hours. Kids never use a screen.
+          Homa is an assistant for parents. She plans the week, makes the worksheets, and logs your
+          hours. Kids never use a screen.
         </p>
         <span className="w3-chip w3-chip-clay">Screen-free</span>
         <div className="w3-phone-stage">
@@ -170,17 +170,22 @@ export default function WorldV3Page() {
                 <HomaCharacter size={42} motion="w3-tilt" />
               </div>
               <div className="w3-ph">
-                <span className="w3-ph-t">Count the dinosaurs</span>
+                <div>
+                  <span className="w3-ph-t">Count the dinosaurs</span>
+                  <span className="w3-instr">Count each row. Write how many.</span>
+                </div>
                 <span className="w3-ph-k">Maya &middot; age 4</span>
               </div>
-              {[3, 2, 4].map((n, row) => (
-                <div className="w3-wrow" key={row}>
+              {WORKSHEET_ROWS.map((row, i) => (
+                <div className="w3-wrow" key={row.kind}>
                   <div className="w3-dinos">
-                    {Array.from({ length: n }, (_, i) => (
-                      <Dino key={i} />
+                    {Array.from({ length: row.count }, (_, j) => (
+                      <Dino kind={row.kind} key={j} />
                     ))}
                   </div>
-                  <div className="w3-wbox" />
+                  <div className="w3-ansbox">
+                    <span className="w3-ansnum">{i === 0 ? "3" : ""}</span>
+                  </div>
                 </div>
               ))}
               <div className="w3-pfoot">
@@ -193,22 +198,22 @@ export default function WorldV3Page() {
                 <span>made by Homa for Maya</span>
               </div>
             </div>
-            <div className="w3-photo-chip w3-pc-tr">
-              <img src="/world3/photo-worksheet.webp" alt="A mom and her child coloring together at the table" />
+            <div className="w3-photo-chip w3-pc-bl">
+              <img src="/world3/photo-worksheet.webp" alt="A mom and her child working on the dinosaur counting worksheet" />
             </div>
           </div>
           <div className="w3-beat-copy">
             <p className="w3-eyebrow" style={{ color: "var(--pop-cobalt, #2E6BE6)" }}>
-              Practice pages
+              Worksheets
             </p>
-            <h2>Made for your child, not a grade level.</h2>
+            <h2>Custom worksheets, built for your child.</h2>
             <p className="w3-body">
-              Homa builds each page around what your child loves, at the level the report found.
-              Every page lands in the binder, one place to browse and print. Ask for a change and it
-              comes back fixed.
+              Homa builds each one around what your child loves, at the level the report found. Print
+              it at home. Ask for a change and it comes back fixed.
             </p>
             <ul className="w3-chips">
-              <li className="w3-chip-sky">Practice pages</li>
+              <li className="w3-chip-sky">Worksheets</li>
+              <li className="w3-chip-sky">Coloring pages</li>
               <li className="w3-chip-sky">The binder</li>
             </ul>
           </div>
@@ -338,7 +343,7 @@ export default function WorldV3Page() {
           with every day you log.
         </p>
         <div className="w3-bub-pair">
-          <div className="w3-bub w3-in-bub">Maya&apos;s practice page is ready. It&apos;s in the binder for you.</div>
+          <div className="w3-bub w3-in-bub">Maya&apos;s worksheet is ready. It&apos;s in the binder for you.</div>
           <div className="w3-bub w3-out">Thanks, Homa</div>
         </div>
         <div className="w3-btn-row">
@@ -392,17 +397,70 @@ export default function WorldV3Page() {
   );
 }
 
-function Dino() {
+/**
+ * The worksheet's rows. A real counting page repeats one creature per row and
+ * varies it between rows, which is also what makes the page readable at chip
+ * size: the shapes differ enough to count without reading a caption.
+ */
+const WORKSHEET_ROWS = [
+  { kind: "longneck" as const, count: 3 },
+  { kind: "stego" as const, count: 2 },
+  { kind: "trike" as const, count: 4 },
+];
+
+/**
+ * Line-art dinosaurs for the worksheet fixture. Each species is one closed
+ * outline path (white fill, dark stroke) so it reads as printable clip art at
+ * the ~54px the page renders it at, the way the real generated worksheets do.
+ */
+function Dino({ kind }: { kind: "longneck" | "stego" | "trike" }) {
+  const s = {
+    stroke: "#221E1A",
+    strokeWidth: 2.2,
+    strokeLinejoin: "round" as const,
+    strokeLinecap: "round" as const,
+    fill: "#fff",
+  };
   return (
-    <svg className="w3-dino" viewBox="0 0 40 26" aria-hidden="true">
-      <path
-        d="M33 3c-2 0-3.4 1.2-4 2.8-.8 2-2.6 3.4-5 3.8L13 11c-4.4.8-7.6 4-8 8l-.2 2c-.2 1.6 1 3 2.6 3h2.2c1 0 1.8-.6 2.2-1.4l.8-2c.2-.6.8-1 1.4-1h6c.6 0 1.2.4 1.4 1l.8 2c.4.8 1.2 1.4 2.2 1.4h1.8c1.6 0 2.8-1.4 2.6-3l-.6-5.4c2.8-.6 5-2.6 5.8-5.4l.6-2.2C36 5 35 3 33 3z"
-        fill="none"
-        stroke="#221E1A"
-        strokeWidth="1.8"
-        strokeLinejoin="round"
-      />
-      <circle cx="31.6" cy="6.6" r=".9" fill="#221E1A" />
+    <svg className="w3-dino" viewBox="0 0 60 44" aria-hidden="true">
+      {kind === "longneck" && (
+        <>
+          <path
+            d="M3 29 Q11 30.5 16 26 Q19 20 26 19 Q29 11 34 8 Q40 4.5 44.5 8 Q48 11 44.5 14.5
+               Q41 17 37 16.5 Q35 22 34.5 27 L34.5 39 L29.5 39 L29.5 30.5 L21 30.5 L21 39
+               L16 39 L16 27.5 Q10 30 3 29 Z"
+            {...s}
+          />
+          <circle cx="42.2" cy="9.4" r="1.15" fill="#221E1A" />
+        </>
+      )}
+      {kind === "stego" && (
+        <>
+          <path
+            d="M3 30 Q11 31 16 27 Q19 22 26 21 Q33 20 38 23 Q42 20.5 45.5 22 Q49 24 45.5 27.5
+               Q42 29.5 38.5 28.5 Q37 33 36.5 36 L36.5 39 L31.5 39 L31.5 31 L22 31 L22 39
+               L17 39 L17 28 Q10 31 3 30 Z"
+            {...s}
+          />
+          <path d="M18 24.5 L20.5 17 L24.5 23" fill="none" stroke="#221E1A" strokeWidth="2.2" strokeLinejoin="round" />
+          <path d="M25.5 22.5 L28.5 15 L32.5 21" fill="none" stroke="#221E1A" strokeWidth="2.2" strokeLinejoin="round" />
+          <path d="M33.5 21 L36.5 16 L39 22.5" fill="none" stroke="#221E1A" strokeWidth="2.2" strokeLinejoin="round" />
+          <circle cx="43.4" cy="24.4" r="1.05" fill="#221E1A" />
+        </>
+      )}
+      {kind === "trike" && (
+        <>
+          <path
+            d="M3 30 Q11 31 16 27 Q19 22 26 21 Q32 20 36 23 Q38.5 18 43 17 Q49.5 15.5 52.5 20.5
+               Q55 25 50.5 28 Q45.5 30.5 40 28 Q38 33 37 36 L37 39 L32 39 L32 31 L22 31 L22 39
+               L17 39 L17 28 Q10 31 3 30 Z"
+            {...s}
+          />
+          <path d="M43.5 18 Q46 23 43.5 28" fill="none" stroke="#221E1A" strokeWidth="1.8" strokeLinecap="round" />
+          <path d="M50 19.5 L57.5 15.5" fill="none" stroke="#221E1A" strokeWidth="2.2" strokeLinecap="round" />
+          <circle cx="47.6" cy="23.4" r="1.05" fill="#221E1A" />
+        </>
+      )}
     </svg>
   );
 }
@@ -498,11 +556,17 @@ const CSS = `
   .w3-beat.w3-media-right .w3-beat-media{order:2;}
 }
 .w3-beat-media{position:relative;}
+/* Stacked layout: the photo chips hang off the media's corner, so the copy
+   below needs clearance or the chip lands on the eyebrow. */
+@media (max-width:819px){ .w3-beat-media{margin-bottom:38px;} }
 .w3-photo-chip{position:absolute; width:clamp(110px,22vw,190px); border-radius:16px;
   box-shadow:var(--w3-shadow-lg); border:4px solid var(--surface,#fff); overflow:hidden; transform:rotate(-4deg);}
 .w3-photo-chip img{width:100%; display:block;}
 .w3-pc-br{right:-8px; bottom:-26px; transform:rotate(4deg);}
 .w3-pc-tr{right:-4px; top:-24px;}
+/* Bottom-left on the worksheet beat so the photo overlaps the page corner
+   without covering a single answer box. */
+.w3-pc-bl{left:-16px; bottom:-30px; transform:rotate(-5deg);}
 .w3-peek{position:absolute; left:-12px; top:-22px; z-index:2;}
 
 /* report card */
@@ -525,20 +589,30 @@ html:not(.w3-armed) .w3-traj-dot{opacity:1;}
   background:var(--sage-50,#EAF6EC); color:var(--sage-600,#2F7C40);}
 
 /* worksheet paper */
-.w3-paper{background:#fff; border-radius:6px; box-shadow:var(--w3-shadow-lg); padding:26px 24px 20px;
+.w3-paper{background:#fff; border-radius:6px; box-shadow:var(--w3-shadow-lg); padding:28px 26px 22px;
   position:relative; transform:rotate(-1.5deg); border:1px solid #eee;}
 .w3-paper-char{position:absolute; right:-17px; top:-21px; z-index:2;}
-.w3-ph{display:flex; justify-content:space-between; align-items:baseline; border-bottom:2px solid #f0ede6;
-  padding-bottom:8px; margin-bottom:16px;}
-.w3-ph-t{font-family:var(--font-display); font-weight:700; font-size:1rem; color:#221E1A;}
-.w3-ph-k{font-size:.7rem; color:#9C9186;}
-.w3-wrow{display:flex; align-items:center; justify-content:space-between; padding:12px 4px;
-  border-bottom:1px dashed #eee;}
+.w3-ph{display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
+  border-bottom:2px solid #f0ede6; padding-bottom:10px; margin-bottom:6px;}
+.w3-ph-t{display:block; font-family:var(--font-display); font-weight:700; font-size:1.08rem; color:#221E1A;
+  line-height:1.2;}
+.w3-instr{display:block; font-size:.72rem; color:#8C8478; margin-top:4px;}
+.w3-ph-k{font-size:.68rem; color:#9C9186; white-space:nowrap; padding-top:3px;}
+.w3-wrow{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:15px 2px;
+  border-bottom:1px dashed #e9e5dc;}
 .w3-wrow:last-of-type{border-bottom:none;}
-.w3-dinos{display:flex; gap:8px;}
-.w3-dino{width:34px; height:22px;}
-.w3-wbox{width:26px; height:26px; border:2.5px solid #221E1A; border-radius:6px;}
-.w3-pfoot{display:flex; align-items:center; gap:6px; justify-content:flex-end; margin-top:14px;}
+.w3-dinos{display:flex; gap:12px; flex-wrap:wrap; align-items:center;}
+.w3-dino{width:54px; height:40px; flex-shrink:0;}
+/* The answer box is where a child writes the count, so it reads as a writing
+   field: a ruled guide line inside a printable-weight box, not a checkbox. */
+.w3-ansbox{width:36px; height:36px; border:2.5px solid #221E1A; border-radius:8px; flex-shrink:0;
+  position:relative; background:#fff; display:grid; place-items:center;}
+.w3-ansbox::after{content:""; position:absolute; left:7px; right:7px; bottom:8px;
+  border-bottom:1.5px dashed #CFC8BA;}
+.w3-ansnum{font-family:var(--font-hand, cursive); font-size:1.35rem; line-height:1;
+  color:var(--pop-cobalt,#2E6BE6); transform:translateY(-2px) rotate(-4deg);}
+.w3-pfoot{display:flex; align-items:center; gap:6px; justify-content:flex-end; margin-top:16px;
+  padding-top:10px; border-top:1px solid #f4f1ea;}
 .w3-pfoot span{font-size:.66rem; color:#9C9186;}
 
 /* planner */
