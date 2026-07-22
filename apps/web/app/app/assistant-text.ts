@@ -87,12 +87,31 @@ export function isStageDirection(text: string): boolean {
 const NARRATED_PAUSE =
   /^i(?:'|\u2019)?(?:ll|m| will| am)?\s*(?:going to\s+)?(?:wait|continue|carry on|hold (?:on|off)|pause|stand by|stay (?:here|quiet|put)|be here|let her|leave (?:her|it))\b/;
 
+/**
+ * The same narration that does not open on "I".
+ *
+ * Seen live: "Noted, waiting for her to fill that in." Unwrapped, so the
+ * stage-direction rule does not apply, and it opens on "Noted", so the
+ * rule above does not either. What gives it away is not where it starts
+ * but who it is about: Homa speaks TO the parent as "you", so a sentence
+ * describing herself waiting on "her" is being said to nobody.
+ *
+ * Both orders, because the tell survives the word order: "waiting for
+ * her to answer" and "her reply is what I am waiting for".
+ */
+const THIRD_PERSON_WAIT =
+  /\b(?:wait(?:s|ing)?|await(?:s|ing)?|paus(?:e|es|ing)|hold(?:s|ing)|standing by|listening)\b[^.]{0,80}\b(?:her|him|them|she|he|they|the parent|the user)\b|\b(?:her|his|their|she|he|they|the parent|the user)\b[^.]{0,80}\b(?:wait(?:s|ing)?|await(?:s|ing)?|paus(?:e|es|ing)|standing by)\b/;
+
 export function isNarratedPause(text: string): boolean {
   const trimmed = text.trim();
   if (trimmed.length === 0 || trimmed.length > 140) return false;
   // One sentence. Two means she said something real alongside it.
   if (trimmed.split(/[.!?]\s+\S/).length > 1) return false;
-  return NARRATED_PAUSE.test(trimmed.toLowerCase());
+  const lower = trimmed.toLowerCase();
+  // The whole-part and one-sentence guards above are what make the
+  // second rule safe. Inside that frame, a message whose entire content
+  // is Homa waiting on someone else was never going to be worth reading.
+  return NARRATED_PAUSE.test(lower) || THIRD_PERSON_WAIT.test(lower);
 }
 
 /**

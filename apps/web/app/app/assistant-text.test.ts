@@ -100,6 +100,21 @@ describe("isNarratedPause", () => {
     }
   });
 
+  it("catches narration that does not open on I", () => {
+    // "Noted, waiting for her to fill that in." reached a parent under
+    // Homa's hello. Unwrapped, so the stage-direction rule did not
+    // apply, and it opens on "Noted", so the I-anchored rule did not
+    // either. The tell is who it is about, not where it starts.
+    for (const text of [
+      "Noted, waiting for her to fill that in.",
+      "Waiting for her to answer.",
+      "Standing by while she fills that in.",
+      "Her reply is what I am waiting for.",
+    ]) {
+      assert.equal(isNarratedPause(text), true, text);
+    }
+  });
+
   it("leaves real replies alone, including ones that open with I'll", () => {
     for (const text of [
       "I'll make Mia a worksheet for that tomorrow.",
@@ -108,6 +123,10 @@ describe("isNarratedPause", () => {
       "Tell me about your kids and I will keep track of where they are.",
       "Hey, I'm Homa. Your homeschool helper.",
       "There is no rush, and you can come back to this whenever you like.",
+      // A child can be "she" and can be waiting for something. The rule
+      // must not reach for a sentence that is about a kid.
+      "Mia has been waiting all week for the dinosaur one.",
+      "Leo is listening to that audiobook again.",
     ]) {
       assert.equal(isNarratedPause(text), false, text);
     }

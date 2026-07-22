@@ -45,7 +45,7 @@ const askForDetails = defineTool({
       .max(120)
       .optional()
       .describe(
-        "One short line above the fields, in your voice. Leave it out for family_basics, where the fields speak for themselves and narrating them reads as a form. For a child, use it whenever your own words did not already say which child this is, because the fields alone cannot: they ask 'What is their name?' and 'their' has to point at somebody.",
+        "One short line above the fields that says WHO the card is about, and nothing else. Skip it when the words you just wrote already said who: two setups for one card is worse than none, and family_basics never needs one because its fields say 'you'. Never preview what the card asks for. It asks one question at a time and shows them itself, so a line like 'What's their name and birthday?' both spoils the card and asks for two things at once.",
       ),
   }),
   async execute(input) {
