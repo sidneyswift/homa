@@ -1,5 +1,7 @@
 import type { EveMessage, EveMessagePart } from "eve/react";
 
+import { parseQuestionCardPart } from "./question-card-model";
+
 /**
  * Transcript display logic ported from apps/web/app/app/chat/message-parts.tsx
  * (keep the tool names and labels in sync). Pure functions, no JSX, so
@@ -73,6 +75,9 @@ export function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
 export function partIsRenderable(part: EveMessagePart): boolean {
   if (part.type === "text") return part.text.trim().length > 0;
   if (part.type === "dynamic-tool" && part.state === "output-available") {
+    // Homa's choice card (agent/tools/ask_user_questions.ts) draws as a
+    // real tappable card here; question-card-model.ts owns the parsing.
+    if (parseQuestionCardPart(part) !== null) return true;
     if (
       part.toolName === "create_printable" ||
       part.toolName === "show_material" ||

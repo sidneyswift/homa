@@ -1,8 +1,12 @@
+import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
+
+import { LOOP_BACK_EVENTS } from "../activation/signals";
 import { emailHash } from "../email/hash";
 import { suppressedHashesForDrip } from "../email/suppression";
 import { mapDb } from "../map/db";
 import {
   siteUrl,
+  submitDripLoopBack,
   submitDripReportUnviewed,
   submitDripSetupNudge,
   type HomaEmailSubmission,
@@ -17,26 +21,43 @@ import { mintLinkToken } from "../map/store";
  *
  * The eligibility is a pure function (chooseDripNudge) so the rules are unit
  * tested; the SQL only gathers signals and applies the non-negotiable fences
- * (sandbox out, email required, a real member). Two audiences ship in the
- * sweep, both unambiguous and mutually exclusive:
+ * (sandbox out, email required, a real member). Three audiences ship in the
+ * sweep, each unambiguous:
  *   - setup nudge: signed up, no report yet (setup unfinished, or no kid).
  *   - report unviewed: a report was emailed and the family never opened any.
+ *   - loop back: they said yes to a plan and never told Homa how it went.
+ *     Aimed at the activation ladder's measured cliff (lib/activation
+ *     /signals.ts), because those replies tune everything Homa makes next.
  * The add-a-kid nudge template exists (email.ts) for the founder preview but
  * is NOT in the automated audience: it must never guess a family has more
  * children than it does, so it waits on a durable more-kids signal.
  *
  * Caps (the not-pushy contract): at most one drip email per family per 7
  * days, each nudge kind at most once ever, any email.opt_out stops
- * everything, and every rule is re-checked at send time. A family sits in at
- * most one audience, and each nudge uses a link that cannot collide: the
- * setup nudge mints a resume link, the report nudge uses the durable
- * per-report token.
+ * everything, at most MAX_SENDS_PER_RUN sends per hourly tick so a backlog
+ * trickles instead of bursting, and every rule is re-checked at send time.
+ * A family sits in at most one audience, and each nudge uses a link that
+ * cannot collide: the setup nudge mints a resume link, the report nudge uses
+ * the durable per-report token.
  */
 
 const GLOBAL_CAP_MS = 7 * 24 * 60 * 60 * 1000;
 const SETUP_MIN_AGE_MS = 24 * 60 * 60 * 1000;
 const REPORT_MIN_AGE_MS = 48 * 60 * 60 * 1000;
+/** A full week after the parent said yes: long enough that "did they start
+ * it" is a fair question, and it makes the email's "four weeks" framing
+ * true rather than premature. */
+const LOOP_BACK_MIN_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const SWEEP_LIMIT = 200;
+/**
+ * Ceiling on sends per hourly tick, so a backlog trickles out instead of
+ * arriving as one burst. The first live batch was 21 eligible families from a
+ * domain that had never sent proactive mail, and a burst from a young sender
+ * is exactly what hurts deliverability. At five an hour that queue clears in
+ * an afternoon. The cap is reported in the result, never silent: a run that
+ * stops here must not read as a finished queue.
+ */
+const MAX_SENDS_PER_RUN = 5;
 
 export interface DripSignals {
   familyId: string;
@@ -53,6 +74,14 @@ export interface DripSignals {
   anyReportViewed: boolean;
   unviewedChildName: string | null;
   unviewedReportToken: string | null;
+  /** The most recent plan the parent said yes to, and when. Null when the
+   * family has no plan, which is the only state the loop-back nudge can
+   * honestly address: it names the plan, so it must exist. */
+  planChildName: string | null;
+  planSubjectId: string | null;
+  planCreatedAt: Date | null;
+  /** The parent has told Homa how something went at least once. */
+  closedLoop: boolean;
   /** The family turned proactive email off (journal_opt_out_at set, from an
    * inbound "stop"). Cleared by "start", so it reads current state. */
   optedOut: boolean;
@@ -66,6 +95,7 @@ export interface DripSignals {
 export type DripDecision =
   | { kind: "drip_setup_nudge" }
   | { kind: "drip_report_unviewed"; childName: string; reportToken: string }
+  | { kind: "drip_loop_back"; childName: string; subjectId: string }
   | null;
 
 /**
@@ -99,6 +129,24 @@ export function chooseDripNudge(signals: DripSignals, now: Date): DripDecision {
     };
   }
 
+  // The loop-back nudge, aimed at the activation ladder's measured cliff:
+  // a plan the parent said yes to, and no word back about how it went. It
+  // names the plan, so it only fires when a plan actually exists.
+  const loopBackEligible =
+    signals.planChildName !== null &&
+    signals.planSubjectId !== null &&
+    signals.planCreatedAt !== null &&
+    !signals.closedLoop &&
+    !signals.sentKinds.includes("drip_loop_back") &&
+    now.getTime() - signals.planCreatedAt.getTime() >= LOOP_BACK_MIN_AGE_MS;
+  if (loopBackEligible) {
+    return {
+      kind: "drip_loop_back",
+      childName: signals.planChildName as string,
+      subjectId: signals.planSubjectId as string,
+    };
+  }
+
   const setupEligible =
     !signals.hasReport &&
     (signals.profileCompletedAt === null || !signals.hasKid) &&
@@ -109,11 +157,131 @@ export function chooseDripNudge(signals: DripSignals, now: Date): DripDecision {
   return null;
 }
 
+export interface PlannedDripSend {
+  family: DripSignals;
+  decision: Exclude<DripDecision, null>;
+}
+
+export interface DripPlan {
+  /** The sends this tick may make, already truncated to the cap. */
+  sends: PlannedDripSend[];
+  /** How many families were eligible before the cap. */
+  eligible: number;
+  /** True when the cap held sends back for a later tick. */
+  capped: boolean;
+}
+
+/**
+ * Which nudge goes first when the per-tick cap cannot serve everyone.
+ *
+ * Ordered by how close the family already is to value, and by how fast the
+ * nudge goes stale. A family who finished the whole assessment and never
+ * opened the report is one tap away and her report ages every day, so she
+ * leads. The loop-back nudge asks about a plan that is already a week old, so
+ * a few hours changes nothing. The setup nudge is for families who never
+ * reached value at all, and an hour later is no worse for them.
+ *
+ * Without this the cap took whatever five rows Postgres happened to return,
+ * which put the highest-intent group behind the lowest by luck of row order
+ * (seen live 2026-07-21: nine report-unviewed families waited while setup
+ * nudges went out first).
+ */
+const KIND_PRIORITY: Record<Exclude<DripDecision, null>["kind"], number> = {
+  drip_report_unviewed: 0,
+  drip_loop_back: 1,
+  drip_setup_nudge: 2,
+};
+
+/** The moment that made this family eligible, so the oldest wait goes first
+ * inside a nudge. Keeps the queue FIFO within a priority band: nobody sits at
+ * the back forever because newer families keep arriving. */
+function triggerAt(send: PlannedDripSend): number {
+  const { family, decision } = send;
+  if (decision.kind === "drip_report_unviewed") {
+    return family.reportEmailedAt?.getTime() ?? family.createdAt.getTime();
+  }
+  if (decision.kind === "drip_loop_back") {
+    return family.planCreatedAt?.getTime() ?? family.createdAt.getTime();
+  }
+  return family.createdAt.getTime();
+}
+
+/**
+ * Which families this tick sends to, in one pure pass, so the cadence and
+ * priority rules are unit tested alongside the eligibility rules. Eligibility
+ * is decided for every family first, then the queue is ordered, then the cap
+ * truncates: that way `eligible` reports the true size of the queue rather
+ * than just what fit, and the cap always takes the families that most deserve
+ * this tick rather than an arbitrary five.
+ */
+export function planDripSends(
+  signals: DripSignals[],
+  now: Date,
+  limit: number = MAX_SENDS_PER_RUN,
+): DripPlan {
+  const eligible: PlannedDripSend[] = [];
+  for (const family of signals) {
+    const decision = chooseDripNudge(family, now);
+    if (decision) eligible.push({ family, decision });
+  }
+
+  // Highest intent first, then longest wait, then family id purely so the
+  // order is total and reproducible: two runs over the same data must plan
+  // the same sends, or the queue on /admin/drip stops predicting reality.
+  eligible.sort((left, right) => {
+    const byKind = KIND_PRIORITY[left.decision.kind] - KIND_PRIORITY[right.decision.kind];
+    if (byKind !== 0) return byKind;
+    const byWait = triggerAt(left) - triggerAt(right);
+    if (byWait !== 0) return byWait;
+    return left.family.familyId.localeCompare(right.family.familyId);
+  });
+
+  return {
+    sends: eligible.slice(0, limit),
+    eligible: eligible.length,
+    capped: eligible.length > limit,
+  };
+}
+
+/** Whole days between two moments, floored, for the reason strings. */
+function daysBetween(from: Date, to: Date): number {
+  return Math.max(0, Math.floor((to.getTime() - from.getTime()) / 86_400_000));
+}
+
+/**
+ * Why this family is getting this email, in the founder's words, recorded to
+ * email_sends.meta at send time. Written at SEND time on purpose: the
+ * audience that picked her will have changed by the time anyone asks, so
+ * re-deriving it later would answer a different question.
+ */
+export function dripReason(
+  family: DripSignals,
+  decision: Exclude<DripDecision, null>,
+  now: Date,
+): string {
+  if (decision.kind === "drip_report_unviewed") {
+    const days = family.reportEmailedAt ? daysBetween(family.reportEmailedAt, now) : 0;
+    return `${decision.childName}'s report was emailed ${days}d ago and no report has been opened yet`;
+  }
+  if (decision.kind === "drip_loop_back") {
+    const days = family.planCreatedAt ? daysBetween(family.planCreatedAt, now) : 0;
+    return `said yes to ${decision.childName}'s ${decision.subjectId} plan ${days}d ago, no word back since`;
+  }
+  const days = daysBetween(family.createdAt, now);
+  const stalled = family.profileCompletedAt === null ? "setup never finished" : "no child added";
+  return `signed up ${days}d ago, ${stalled}, no report yet`;
+}
+
 export interface DripSweepResult {
   skipped: boolean;
   considered: number;
   setupSent: number;
   reportSent: number;
+  loopBackSent: number;
+  /** Families eligible this tick, before the per-run cap. */
+  eligible: number;
+  /** True when the cap deferred sends to a later tick. */
+  capped: boolean;
 }
 
 function toDate(value: unknown): Date | null {
@@ -140,6 +308,10 @@ async function loadDripSignals(): Promise<DripSignals[]> {
       report_emailed_at: string | null;
       unviewed_child_name: string | null;
       unviewed_token: string | null;
+      plan_child_name: string | null;
+      plan_subject_id: string | null;
+      plan_created_at: string | null;
+      closed_loop: boolean;
       opted_out: boolean;
       last_drip_sent_at: string | null;
       sent_kinds: string[];
@@ -179,6 +351,28 @@ async function loadDripSignals(): Promise<DripSignals[]> {
         where c.family_id = f.id and r.emailed_at is not null and r.viewed_at is null
         order by r.emailed_at limit 1
       ) as unviewed_token,
+      (
+        select c.name from public.child_plans p
+        join public.children c on c.id = p.child_id
+        where c.family_id = f.id
+        order by p.created_at desc limit 1
+      ) as plan_child_name,
+      (
+        select p.subject_id from public.child_plans p
+        join public.children c on c.id = p.child_id
+        where c.family_id = f.id
+        order by p.created_at desc limit 1
+      ) as plan_subject_id,
+      (
+        select p.created_at from public.child_plans p
+        join public.children c on c.id = p.child_id
+        where c.family_id = f.id
+        order by p.created_at desc limit 1
+      ) as plan_created_at,
+      exists (
+        select 1 from public.events e
+        where e.family_id = f.id and e.name = any(${LOOP_BACK_EVENTS as unknown as string[]})
+      ) as closed_loop,
       f.journal_opt_out_at is not null as opted_out,
       (
         select max(es.created_at) from public.email_sends es
@@ -197,6 +391,13 @@ async function loadDripSignals(): Promise<DripSignals[]> {
       and not coalesce(f.sandbox, false)
       and f.email is not null
       and exists (select 1 from public.family_members m where m.family_id = f.id)
+    -- Deterministic scan. The intent ordering that decides who this tick
+    -- serves happens in planDripSends, because it depends on WHICH nudge each
+    -- family gets and that is decided in TypeScript; expressing it here would
+    -- mean a second copy of the eligibility rules, free to drift from the
+    -- first. This only guarantees the same rows in the same order every run,
+    -- so a capped scan is reproducible instead of arbitrary.
+    order by f.created_at, f.id
     limit ${SWEEP_LIMIT}
   `;
 
@@ -212,6 +413,10 @@ async function loadDripSignals(): Promise<DripSignals[]> {
     anyReportViewed: row.any_report_viewed,
     unviewedChildName: row.unviewed_child_name,
     unviewedReportToken: row.unviewed_token,
+    planChildName: row.plan_child_name,
+    planSubjectId: row.plan_subject_id,
+    planCreatedAt: toDate(row.plan_created_at),
+    closedLoop: row.closed_loop,
     optedOut: row.opted_out,
     suppressed: false,
     lastDripSentAt: toDate(row.last_drip_sent_at),
@@ -250,12 +455,12 @@ async function dripAlreadySent(familyId: string, kind: string): Promise<boolean>
  */
 export async function runDripSweep(now: Date = new Date()): Promise<DripSweepResult> {
   const signals = await loadDripSignals();
+  const plan = planDripSends(signals, now);
   let setupSent = 0;
   let reportSent = 0;
+  let loopBackSent = 0;
 
-  for (const family of signals) {
-    const decision = chooseDripNudge(family, now);
-    if (!decision) continue;
+  for (const { family, decision } of plan.sends) {
     if (await dripAlreadySent(family.familyId, decision.kind)) continue;
 
     let submission: HomaEmailSubmission = { status: "unknown" };
@@ -266,19 +471,97 @@ export async function runDripSweep(now: Date = new Date()): Promise<DripSweepRes
         family.firstName,
         `${siteUrl()}/api/map/resume-link?t=${token}`,
         family.familyId,
+        dripReason(family, decision, now),
       );
       if (submission.status === "submitted") setupSent += 1;
-    } else {
+    } else if (decision.kind === "drip_report_unviewed") {
       submission = await submitDripReportUnviewed(
         family.email,
         family.firstName,
         decision.childName,
         `${siteUrl()}/onboarding/r/${decision.reportToken}`,
         family.familyId,
+        dripReason(family, decision, now),
       );
       if (submission.status === "submitted") reportSent += 1;
+    } else {
+      // Most plans in production are the whole-month plan, which has no
+      // single subject and is NOT in the subject bank: resolving it through
+      // getMapSubject alone would silently skip the majority of this
+      // audience. Same split the retest email makes in /api/map/cron.
+      const isMonth = decision.subjectId === MONTH_PLAN_SUBJECT;
+      const subjectName = isMonth
+        ? null
+        : getMapSubject(decision.subjectId)?.displayName;
+      // An unknown subject id must never reach a parent as a raw slug.
+      if (!isMonth && !subjectName) continue;
+      const planLabel = isMonth
+        ? "this month's plan"
+        : `the ${(subjectName as string).toLowerCase()} plan`;
+      submission = await submitDripLoopBack(
+        family.email,
+        decision.childName,
+        planLabel,
+        family.familyId,
+        dripReason(family, decision, now),
+      );
+      if (submission.status === "submitted") loopBackSent += 1;
     }
   }
 
-  return { skipped: false, considered: signals.length, setupSent, reportSent };
+  return {
+    skipped: false,
+    considered: signals.length,
+    setupSent,
+    reportSent,
+    loopBackSent,
+    eligible: plan.eligible,
+    capped: plan.capped,
+  };
+}
+
+export interface DripQueueEntry {
+  familyId: string;
+  familyFirstName: string | null;
+  kind: Exclude<DripDecision, null>["kind"];
+  reason: string;
+  /** True when this one is inside the current tick's cap. */
+  nextTick: boolean;
+}
+
+export interface DripQueueSnapshot {
+  eligible: number;
+  capped: boolean;
+  considered: number;
+  entries: DripQueueEntry[];
+}
+
+/**
+ * Who the drip would email next, without sending anything. The founder
+ * console reads this so the queue on screen is produced by the same planner
+ * that does the sending: a preview derived from a second implementation
+ * would eventually disagree with the real one, which is worse than no
+ * preview at all.
+ */
+export async function dripQueueSnapshot(
+  now: Date = new Date(),
+  limit = 25,
+): Promise<DripQueueSnapshot> {
+  const signals = await loadDripSignals();
+  const plan = planDripSends(signals, now, Number.MAX_SAFE_INTEGER);
+  const nextTick = new Set(
+    planDripSends(signals, now).sends.map((send) => send.family.familyId),
+  );
+  return {
+    eligible: plan.eligible,
+    capped: plan.eligible > nextTick.size,
+    considered: signals.length,
+    entries: plan.sends.slice(0, limit).map((send) => ({
+      familyId: send.family.familyId,
+      familyFirstName: send.family.firstName,
+      kind: send.decision.kind,
+      reason: dripReason(send.family, send.decision, now),
+      nextTick: nextTick.has(send.family.familyId),
+    })),
+  };
 }

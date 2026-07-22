@@ -37,6 +37,9 @@ export const USAGE_SURFACES = [
   // Distinct from "compaction" above, which is eve compacting a long
   // conversation. This one merges a family's saved memories.
   "memory_compaction",
+  // The judgment step that reads a parent's message for what it says
+  // about her children (AGENTS.md "Models judge, code verifies").
+  "progress_claim_extraction",
   "embedding",
   "lesson_tone",
   "lesson_synthesis",

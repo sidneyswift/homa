@@ -526,3 +526,81 @@ has more children than it does):
 > [Add another child]
 >
 > One at a time is perfectly fine. Turn these off anytime.
+
+## Session 5 (2026-07-20): SMS attribution + the loop-back nudge
+
+Founder asked for both after the activation ladder shipped.
+
+**SMS attribution fixed.** `sms.message_received` never carried a family id
+(231 events, zero attributable), so every inbound text was invisible to any
+per-family metric even though most families text. `emitMapEvent` already
+accepted an `options.familyId`, so the fix passes the id that was already in
+scope: it rides the COLUMN, never the props, so the props contract and the
+MJ-08 registry are unchanged and nothing identifying was added. Historical
+events stay unattributable, which is why the activation ladder keeps reading
+`conversation_messages` (durable, family-scoped, every channel).
+
+**The loop-back nudge**, aimed at the ladder's measured cliff (5 of 36
+families ever told Homa how it went). Audience: said yes to a plan, never
+closed the loop, a full week on. It names the actual plan, so it only fires
+when a plan exists. Shares `lib/activation/signals.ts` with the console, so
+the cliff the console reports and the cliff the drip aims at cannot drift.
+
+Two things caught in verification, both from running the real queries:
+- 13 of 20 plans in production are the whole-month plan (`MONTH_PLAN_SUBJECT`),
+  which is not in the subject bank. Resolving it through `getMapSubject` alone
+  would have silently skipped the majority of the audience. Handled with the
+  same month/subject split `/api/map/cron` makes for the retest email.
+- The funnel's sandbox fence was a negative `not exists`, TRUE for an event
+  whose family id matches no family at all, so orphaned rows from purged
+  anonymous leads counted as families. Fixed to a positive join (shipped with
+  the ladder, PR #68).
+
+Copy gated through `homa-copy-reviewer` then `homa-copy-editor`. The reader
+refused to answer an email that only asked her for work, so it says what Homa
+already did first; the open "what worked and what didn't" became one narrow
+yes/no; and a line reassuring her that not doing the plan was "not a failure"
+was cut for naming a judgment she had not made. The editor pass removed three
+restatements of one idea, named the concrete artifacts, made the CTA its own
+verb-first sentence, and unified the voice to first person. The shared drip
+footer lost its "off switch" metaphor for the actual instruction, and now
+says "progress report" per the one-name-per-concept law.
+
+Still dark: `HOMA_DRIP_ENABLED` is unchanged, and the Phase 4 go-live gates
+(unsubscribe secret set, suppression verified live) still stand.
+
+## Session 6 (2026-07-21): drip observability in the founder console
+
+The drip went live at 05:00 UTC and the founder asked to be able to track it:
+what was sent, why, delivered, opened, and did it work.
+
+New `/admin/drip` (nav entry added). Three parts: a per-nudge scorecard
+(sent, delivered, failed, worked, waiting, unsubscribed), the live queue of
+who gets emailed next, and every send with the reason it was picked.
+
+Two honesty rules are baked in, because both were easy to get wrong:
+- **Effect is scored against the nudge's own stated target**
+  (`lib/drip/labels.ts`), and those targets are the same
+  `lib/activation/signals.ts` rungs the drip aims at, so what is measured and
+  what is nudged cannot drift apart.
+- **A nudge sent an hour ago has not failed, it is waiting.** Effect is only
+  scored once the 7-day window closes, and the rate is reported over settled
+  sends with the settled count beside it. All 22 live sends are currently
+  pending, so the page says "too early" rather than 0%.
+
+**Why** is now recorded at send time into the previously unused
+`email_sends.meta` (no migration): "signed up 5d ago, setup never finished,
+no report yet". Written at send time on purpose, since the audience that
+picked her will have changed by the time anyone asks. Also surfaced on the
+family detail page beside each send.
+
+Caught by running the scoring query against live prod: a bounced send had
+written an `email_suppressions` row, and the draft counted it as
+"unsubscribed". A dead mailbox is not a person choosing to stop. Opt-outs now
+count only `reason in ('unsubscribe','stop')`; bounces stay in `failed`. The
+same check proved the bounce-to-suppression pipeline works in production, and
+that there have been zero real opt-outs across 22 sends.
+
+Opens and clicks are deliberately NOT tracked: no pixel, no rewritten links.
+Outcome is measured by what the family did instead, which is unfakeable and
+is the thing we actually care about. Founder decision pending if that changes.

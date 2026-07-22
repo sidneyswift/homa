@@ -91,8 +91,20 @@ jobs:
       - name: Dynamic prompt suggestion checks
         run: pnpm check:prompt-suggestions
 
+      # Fixture integrity only, no model calls: free and deterministic.
+      # The paid run (pnpm eval:journaling-trigger) measures whether Homa
+      # actually journals a mother's report, the stage that failed
+      # silently in production until 2026-07-21.
+      - name: Journaling trigger fixtures
+        run: pnpm check:journaling-trigger
+
       - name: Chat UI checks (attachment markers, transcript, worked-for, snap card)
         run: pnpm check:chat-ui
+
+      # Fixture hygiene only, no model call. The paid routing eval is
+      # pnpm eval:ask-user-questions, run by hand.
+      - name: Choice-card routing fixtures
+        run: pnpm check:ask-user-questions
 
       - name: Materials checks (page shell pagination, packet bodies, binder model)
         run: pnpm check:materials

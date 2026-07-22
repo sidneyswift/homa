@@ -210,9 +210,17 @@ export default async function AdminFunnelsPage() {
         </EmptyNote>
       )}
 
+      <p className="mt-3 text-sm text-muted">
+        The drip aims at these rungs.{" "}
+        <Link href="/admin/drip" className="font-bold text-strong hover:underline">
+          See what it sent and whether it worked
+        </Link>
+        .
+      </p>
+
       <SectionHead
         eyebrow="Onboarding drip"
-        title="Nudge previews (off by default)"
+        title="Nudge previews"
         sub="The stage-aware drip is wired but dark. Preview each nudge in your own inbox before it ships to anyone."
       />
       <DripPreview founderEmail={founder.email} />

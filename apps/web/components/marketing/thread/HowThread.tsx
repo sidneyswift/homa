@@ -153,6 +153,12 @@ export function HowThread() {
       clearTimeout(t1);
       clearTimeout(t2);
       document.body.removeChild(measSvg);
+      // geomRef is cached geometry for THIS measSvg's path; a re-run effect
+      // (React's dev double-invoke, or a real Activity/offscreen reconnect)
+      // creates a fresh, empty path element, so the cache must not survive
+      // past the element it was measured from, or measure() skips re-setting
+      // `d` on the new element and getPointAtLength throws on an empty path.
+      geomRef.current = null;
     };
   }, []);
 

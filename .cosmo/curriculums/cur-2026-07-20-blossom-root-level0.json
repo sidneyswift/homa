@@ -1,0 +1,593 @@
+{
+  "id": "cur-2026-07-20-blossom-root-level0",
+  "name": "Blossom & Root Level 0 (Kindergarten, Second Edition)",
+  "droppedBy": "carolyng",
+  "droppedAt": "2026-07-19T22:50:29-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784515829.841049",
+  "sourceFiles": [
+    {
+      "filename": "br-l0-arts-history-parent-guide.pdf",
+      "localPath": ".cosmo/inspo-files/br-l0-arts-history-parent-guide.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-20-blossom-root-level0-arts-history-guide/br-l0-arts-history-parent-guide.pdf"
+    },
+    {
+      "filename": "br-l0-captains-log.pdf",
+      "localPath": ".cosmo/inspo-files/br-l0-captains-log.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-20-blossom-root-level0-captains-log/br-l0-captains-log.pdf"
+    },
+    {
+      "filename": "br-l0-history-of-me-notebook.pdf",
+      "localPath": ".cosmo/inspo-files/br-l0-history-of-me-notebook.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-20-blossom-root-level0-history-of-me-notebook/br-l0-history-of-me-notebook.pdf"
+    },
+    {
+      "filename": "br-l0-la-cursive-pages.pdf",
+      "localPath": ".cosmo/inspo-files/br-l0-la-cursive-pages.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-20-blossom-root-level0-la-cursive-pages/br-l0-la-cursive-pages.pdf"
+    },
+    {
+      "filename": "br-l0-la-notebook.pdf",
+      "localPath": ".cosmo/inspo-files/br-l0-la-notebook.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-20-blossom-root-level0-la-notebook/br-l0-la-notebook.pdf"
+    },
+    {
+      "filename": "br-l0-la-parent-guide.pdf",
+      "localPath": ".cosmo/inspo-files/br-l0-la-parent-guide.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-20-blossom-root-level0-la-parent-guide/br-l0-la-parent-guide.pdf"
+    },
+    {
+      "filename": "br-l0-nature-notebook.pdf",
+      "localPath": ".cosmo/inspo-files/br-l0-nature-notebook.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-20-blossom-root-level0-nature-notebook/br-l0-nature-notebook.pdf"
+    },
+    {
+      "filename": "br-l0-nature-study-parent-guide.pdf",
+      "localPath": ".cosmo/inspo-files/br-l0-nature-study-parent-guide.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-20-blossom-root-level0-nature-study-guide/br-l0-nature-study-parent-guide.pdf"
+    },
+    {
+      "filename": "br-l0-nature-study-photographs.pdf",
+      "localPath": ".cosmo/inspo-files/br-l0-nature-study-photographs.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-20-blossom-root-level0-nature-study-photos/br-l0-nature-study-photographs.pdf"
+    },
+    {
+      "filename": "br-l0-science-parent-guide.pdf",
+      "localPath": ".cosmo/inspo-files/br-l0-science-parent-guide.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-20-blossom-root-level0-science-guide/br-l0-science-parent-guide.pdf"
+    }
+  ],
+  "layer1_philosophy": {
+    "methodology": "Charlotte Mason-inspired (publisher self-brands the package as secular)",
+    "principles": [
+      "Living books and real literature over textbooks, worksheets, and time-consuming lap books; the science guide states this explicitly as the founder's own reason for writing the curriculum",
+      "Short, focused lessons: about 10 minutes total for a Language Arts reading lesson, 5-10 minutes for picture and composer study, 10-15 minutes for a nature-study activity",
+      "Narration as the primary comprehension check: the child retells a story or describes a discovery in their own words and a parent transcribes it; no worksheets, no tests, no grading",
+      "Nature study through direct outdoor observation using an explicit three-step method (Inspire with a living book chapter, Explore and Discover outdoors, Record in a nature notebook)",
+      "Picture study and composer study: one artist and one composer studied for about 4 weeks each, using a look-hide-recall technique for art ('gaze upon it, then hide the work and recall as many details as possible') and active listening for music",
+      "History and geography taught inside-out: the child's own personal history and family first ('The History of Me'), then home and neighborhood, before any external historical figures or world content",
+      "Explicit permission to deviate from the plan ('Permission to Go Off-Grid' sections in both the science and nature-study guides) and to follow the child's interest-led rabbit trails rather than a rigid schedule"
+    ],
+    "learningTheory": "developmental-stages",
+    "assessmentApproach": "narration-and-portfolio",
+    "parentRole": "facilitator-and-scribe",
+    "knowledgeBankMatches": [
+      {
+        "topicKey": "charlotte-mason",
+        "topicType": "method_philosophy",
+        "status": "unknown, could not query the live knowledge_bank table from this sandbox (no database credentials available); curriculum-writer.md already documents an extensive Charlotte Mason methodology section independent of the knowledge bank, so a bank row may or may not already exist"
+      }
+    ],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "charlotte-mason",
+        "topicType": "method_philosophy",
+        "title": "Charlotte Mason Method",
+        "summary": "Living books over textbooks, short focused lessons, narration as the primary comprehension check instead of tests or worksheets, nature study through direct outdoor observation, picture study and composer study through repeated short exposure to one artist or composer at a time, and habit training alongside academics. Assessment is by portfolio (notebooks) and narration, not scoring.",
+        "mergedRowId": "6c24ca6d-6a70-4a14-b499-345d53d27243",
+        "mergedAt": "2026-07-21"
+      },
+      {
+        "suggestedKey": "blossom-root-level0-format",
+        "topicType": "method_format",
+        "title": "Blossom & Root Level 0 (Kindergarten) Format",
+        "summary": "A four-guide kindergarten package (Language Arts, Arts and History, Science, Nature Study) plus matching student notebooks, self-branded secular but built on Charlotte Mason methodology. Language Arts and Arts & History each run the full 36-week year; Science ('My Great Space Adventure', an integrated math-and-science dramatic-play narrative with a Captain's Log) and Nature Study ('My Outdoor Classroom') each supply only 18 lessons, and the guides do not state whether these two run on alternating weeks, twice a month, or as two half-year blocks. Companion product to the already-ingested Early Years Vol. 2 (cur-2026-07-19-early-years-v2), one age level up.",
+        "mergedRowId": "9e14cd53-c484-4c08-a79e-e2e324400474",
+        "mergedAt": "2026-07-21"
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Language Arts",
+        "curriculumTopic": "Letter-sound review and phonics progression (consonants, short/long vowels, digraphs)",
+        "homaSubject": "phonics",
+        "homaDomain": "phonics-word-reading",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Language Arts",
+        "curriculumTopic": "Word family building and reading (CVC and beyond)",
+        "homaSubject": "phonics",
+        "homaDomain": "phonics-word-reading",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Language Arts",
+        "curriculumTopic": "Copywork: letter, word, and sentence tracing and printing",
+        "homaSubject": "writing",
+        "homaDomain": "handwriting-transcription",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Language Arts",
+        "curriculumTopic": "Cursive letter tracing (optional supplement)",
+        "homaSubject": "writing",
+        "homaDomain": "handwriting-transcription",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Language Arts",
+        "curriculumTopic": "Oral narration of a weekly read-aloud",
+        "homaSubject": "language",
+        "homaDomain": "speaking-listening",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Language Arts",
+        "curriculumTopic": "Personal journaling (open reflection prompt, parent-transcribed)",
+        "homaSubject": "social_emotional",
+        "homaDomain": "self-awareness",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "Also touches English > Writing Composition; scored primarily as SEL reflection since prompts are personal (favorite games, feelings), not story composition"
+        }
+      },
+      {
+        "curriculumSubject": "Language Arts",
+        "curriculumTopic": "Reading From Literature: cut-apart word cards assembled into a sentence",
+        "homaSubject": "phonics",
+        "homaDomain": "phonics-word-reading",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Language Arts",
+        "curriculumTopic": "Weekly read-aloud literature (picture books and early chapter books)",
+        "homaSubject": "literacy",
+        "homaDomain": "literature",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "Health, wellness, and basic human anatomy",
+        "homaSubject": "science",
+        "homaDomain": "the-human-body",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "Nutrition and fitness",
+        "homaSubject": "life_skills",
+        "homaDomain": "daily-living",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "Daily Living covers routines/self-care broadly; nutrition-specific content is a loose fit"
+        }
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "Living vs. non-living things, requirements for life",
+        "homaSubject": "science",
+        "homaDomain": "organisms-life-processes",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "The sun and its effect on living things; Earth supporting life",
+        "homaSubject": "science",
+        "homaDomain": "earths-systems",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "Phases of the Moon",
+        "homaSubject": "science",
+        "homaDomain": "space-systems",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "Atmosphere",
+        "homaSubject": "science",
+        "homaDomain": "earths-systems",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "Gravity",
+        "homaSubject": "science",
+        "homaDomain": "forces-motion",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "The planets of our Solar System",
+        "homaSubject": "science",
+        "homaDomain": "space-exploration",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "History and technology of space exploration",
+        "homaSubject": "science",
+        "homaDomain": "space-exploration",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "Asteroids, comets, meteors, black holes, nebulae",
+        "homaSubject": "science",
+        "homaDomain": "space-systems",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "Counting up to 20 and back down from 10",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "Greater/fewer, more/less, equal to",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "Positional terms and sequencing",
+        "homaSubject": "math",
+        "homaDomain": "mathematical-thinking",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "Positional/spatial vocabulary is closer to early spatial reasoning than a clean fit for any one existing math domain"
+        }
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "Patterns",
+        "homaSubject": "math",
+        "homaDomain": "algebra-patterns",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "Quantities, numerals, and number lines",
+        "homaSubject": "math",
+        "homaDomain": "number-place-value",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "Measurement",
+        "homaSubject": "math",
+        "homaDomain": "measurement",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "Basic shapes",
+        "homaSubject": "math",
+        "homaDomain": "geometry",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "Calendar and dates",
+        "homaSubject": "math",
+        "homaDomain": "measurement",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "Calendar/date literacy could equally sit under Life Skills > Daily Living; no dedicated calendar-skill domain exists"
+        }
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "Addition and subtraction",
+        "homaSubject": "math",
+        "homaDomain": "addition-subtraction",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science (integrated math)",
+        "curriculumTopic": "Charts, graphs, and pairs",
+        "homaSubject": "math",
+        "homaDomain": "data-statistics",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Nature Study",
+        "curriculumTopic": "Animal families, adaptations for hunting and avoiding predators, animal communication",
+        "homaSubject": "science",
+        "homaDomain": "organisms-life-processes",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Nature Study",
+        "curriculumTopic": "How animals prepare for winter, nocturnal animals, food webs",
+        "homaSubject": "science",
+        "homaDomain": "ecosystems-habitats",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Nature Study",
+        "curriculumTopic": "Tracks and scat; named species profiles (hares, squirrels, badgers, canids, bears, deer, bighorn sheep)",
+        "homaSubject": "science",
+        "homaDomain": "animals-of-the-world",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Nature Study",
+        "curriculumTopic": "Trees and tree observation",
+        "homaSubject": "science",
+        "homaDomain": "organisms-life-processes",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Nature Study",
+        "curriculumTopic": "Seeds, seedlings, how plants grow, parts of a flower, vegetables and fruits",
+        "homaSubject": "science",
+        "homaDomain": "organisms-life-processes",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Nature Study",
+        "curriculumTopic": "Garden helpers (pollinators)",
+        "homaSubject": "science",
+        "homaDomain": "insects-minibeasts",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Nature Study",
+        "curriculumTopic": "Eggs and egg-laying animals; life cycle of a frog",
+        "homaSubject": "science",
+        "homaDomain": "organisms-life-processes",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Nature Study",
+        "curriculumTopic": "Measurement (tree girth/height logging)",
+        "homaSubject": "math",
+        "homaDomain": "measurement",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Arts & The History of Me",
+        "curriculumTopic": "Picture study (9 featured artists across the year: Monet, Asawa, Chagall, Catlett, Rivera, Nevelson, Ringgold, Anatsui, Martinez)",
+        "homaSubject": "art",
+        "homaDomain": "picture-study-appreciation",
+        "homaTopicId": "art.picture-study-observing-and-recalling-artwork",
+        "status": "mapped",
+        "suggested": {
+          "note": "Was unmapped at analysis time (Marble has no Art subject); resolved this session by adding a new content domain under Homa's existing native art bank subject, see decisionsNeeded"
+        }
+      },
+      {
+        "curriculumSubject": "Arts & The History of Me",
+        "curriculumTopic": "Process art activity tied to the weekly artist (painting, wire sculpture, crystallization, etc.)",
+        "homaSubject": "art",
+        "homaDomain": "picture-study-appreciation",
+        "homaTopicId": "art.process-art-inspired-by-an-artists-technique",
+        "status": "mapped",
+        "suggested": {
+          "note": "Same resolution as picture study above"
+        }
+      },
+      {
+        "curriculumSubject": "Arts & The History of Me",
+        "curriculumTopic": "Composer study (9 featured composers across the year: Wallen, Joplin, Chopin, Tchaikovsky, Shenandoah, Chin, Smith Moore, Thorvaldsdottir, Bernstein)",
+        "homaSubject": "music",
+        "homaDomain": "composer-study-appreciation",
+        "homaTopicId": "music.composer-study-active-listening",
+        "status": "mapped",
+        "suggested": {
+          "note": "Was unmapped at analysis time (Marble has no Music subject); resolved this session by adding a new content domain under Homa's existing native music bank subject, see decisionsNeeded"
+        }
+      },
+      {
+        "curriculumSubject": "Arts & The History of Me",
+        "curriculumTopic": "The History of Me (personal name, birthdate, birthplace, favorite things)",
+        "homaSubject": "social_emotional",
+        "homaDomain": "self-awareness",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Arts & The History of Me",
+        "curriculumTopic": "The History of My Family (up to 3 family members: name/story/memory/things they love)",
+        "homaSubject": "social_emotional",
+        "homaDomain": "self-awareness",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "Also touches English > Speaking & Listening through oral family-story sharing; primary fit is Self-Awareness"
+        }
+      },
+      {
+        "curriculumSubject": "Arts & The History of Me",
+        "curriculumTopic": "Where I Live (home, neighborhood, country geography, maps)",
+        "homaSubject": "social_studies",
+        "homaDomain": "geography",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Arts & The History of Me",
+        "curriculumTopic": "Inspiring Profiles (historical or contemporary figures, parent's choice)",
+        "homaSubject": "social_studies",
+        "homaDomain": "cultural-studies",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "Content is entirely parent-chosen, not a fixed curriculum topic set, so mapping quality varies by family"
+        }
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 45,
+      "mapped": 39,
+      "unmapped": 0,
+      "noSubject": 0,
+      "partial": 6
+    }
+  },
+  "layer3_structure": {
+    "cadence": "Varies by guide within one 36-week Level 0 package: Language Arts and Arts & The History of Me each run all 36 weeks; Science ('My Great Space Adventure') and Nature Study ('My Outdoor Classroom') each supply only 18 numbered lessons apiece, with the guides offering a traditional one-lesson-per-week pace, a twice-a-week pace, or a condensed 4-to-6-week unit-study pace, parent's choice",
+    "sessionLengthMinutes": {
+      "language_arts_reading_lesson": 10,
+      "language_arts_copywork": 5,
+      "arts_history_picture_or_composer_study": 8,
+      "nature_study_activity": 12,
+      "nature_study_notebook_entry": 10
+    },
+    "weeklyTemplate": "Language Arts (36 weeks): read a literature selection across the week, then in one sitting do copywork (one letter or word), a journal entry, an oral narration, and a reading lesson (letter-sound review, word building, or, from week 24, Reading From Literature sentence-building). Arts & The History of Me (36 weeks, 4-day suggested split): Day 1 History of Me/family/geography notebook page, Day 2 picture study, Day 3 composer study, Day 4 an art-making activity tied to the week's artist. Science and Nature Study (18 lessons each): Science reads a Mission Control letter then does an integrated math-and-science activity and a Captain's Log entry; Nature Study reads a Nature Lore chapter over several short sessions, then an outdoor activity, then a nature notebook entry.",
+    "progressionModel": "linear-with-spiral-review",
+    "reviewRhythm": "Weekly narration/journal entries and a Captain's Log kept across the year function as an ongoing portfolio rather than periodic tests; the LA guide explicitly reviews prior letter sounds and word families each week before introducing a new one",
+    "totalWeeks": 36,
+    "notes": "The publisher's own text is internally inconsistent about Nature Study's real length: the parent guide's Contents page lists only 18 numbered lessons (through 'Week 18: Cats'), but the same guide's own 'Resources to Support Your Adventures' section says the companion photographs PDF covers 'most (but not all) weeks 1-25.' The photographs PDF itself (45 pages, about 2 photos per week) is more consistent with roughly 22-23 weeks of content than with 18. This session did not resolve the discrepancy; it is recorded honestly rather than guessed at. Neither guide states explicitly whether Science and Nature Study alternate weeks, run twice a month, or are meant to be used as two separate half-year blocks."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "copywork-letter-word-tracing",
+        "description": "A short handwriting lesson: trace a printed model letter or word (dotted guide, 3-line baseline), then print it independently once. One uppercase and one lowercase letter most weeks, a whole word or sentence in later weeks.",
+        "recipe": "copy-work-pages",
+        "status": "have_recipe"
+      },
+      {
+        "type": "cursive-letter-tracing",
+        "description": "An optional supplemental set of dotted-line cursive letter tracing pages with a 3-line guide, matching the print copywork progression but in cursive form.",
+        "recipe": "copy-work-pages",
+        "status": "have_recipe",
+        "notes": "copy-work-pages already documents a print/cursive design-pattern split; no separate recipe needed."
+      },
+      {
+        "type": "reflection-narration-journal-page",
+        "description": "A blank illustration box above wide-ruled dictation lines, with a short warm prompt at the top. Covers the LA notebook's journal-entry and narration pages, the History of Me story/memory pages, nature-notebook open-response pages (a night walk, an underground home, preparing for winter), the Captain's Log's discovery entries, and the 'My Future' shaped-frame pages.",
+        "recipe": "narration-page",
+        "status": "have_recipe",
+        "notes": "No matching recipe existed at analysis time; narration-page was authored this session (see decisionsNeeded). This is also the exact archetypal gap the curriculum-ingestion skill's own worked example describes."
+      },
+      {
+        "type": "reading-from-literature-sentence-build",
+        "description": "A model sentence at the top, followed by that sentence's individual words printed as cut-apart tiles for the child to cut out and rebuild into the sentence, then read aloud together.",
+        "recipe": "cut-and-paste-word-work",
+        "status": "have_recipe",
+        "notes": "Close but not exact match: cut-and-paste-word-work is built around single-word see/write/cut/paste practice, not multi-word sentence reconstruction. A future design-pattern addition to that recipe (a sentence-order variant) would sharpen the fit; flagged as low-urgency in decisionsNeeded rather than authoring a near-duplicate recipe."
+      },
+      {
+        "type": "picture-study-composer-study-card",
+        "description": "A reusable weekly portfolio card: name banner, artwork frame or listening icon, a 'where they were from' map/photo circle, an optional favorite-work box, and a reflection prompt box. Same template reused across all 9 artists and all 9 composers featured in the year.",
+        "recipe": "artist-composer-study-card",
+        "status": "have_recipe",
+        "notes": "No matching recipe existed at analysis time; artist-composer-study-card was authored this session."
+      },
+      {
+        "type": "nature-observation-journal-entry",
+        "description": "A weekly nature-notebook page combining one of: a choice-based species profile (circle which of 2-4 candidates you saw, notes, big drawing box), a five-senses log (I see/I hear/I smell/I feel, plus a circle to attach a real leaf or feather), a side-by-side comparison of two animals, or an open discovery page.",
+        "recipe": "nature-observation-journal",
+        "status": "have_recipe",
+        "notes": "No matching recipe existed at analysis time; nature-observation-journal was authored this session. Distinct from nature-identification-poster, which is a Homa-illustrated wall reference, not a personal observation log."
+      },
+      {
+        "type": "nature-photo-reference-card",
+        "description": "A full-bleed real wildlife photograph per page (about 2 species per numbered week) with a wooden-sign-style species label, included as a separate optional PDF for the parent to show the child alongside the nature lore reading. Reference material, not a child worksheet.",
+        "recipe": "nature-identification-poster",
+        "status": "have_recipe",
+        "notes": "Adjacent, not identical: nature-identification-poster is a Homa-illustrated watercolor grid of many species per page; this source uses real photography, one species per page. Close enough in purpose (parent-facing visual reference for a species) to count as covered."
+      },
+      {
+        "type": "word-family-drill-cards",
+        "description": "Small printed cards, one word per card, cut apart and used with physical letter tiles to build and read words within a family (e.g. the '-at' family). Included in the back of the LA parent guide.",
+        "recipe": "clip-cards",
+        "status": "have_recipe"
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 8,
+      "haveRecipe": 8,
+      "noRecipe": 0
+    }
+  },
+  "decisionsNeeded": [
+    {
+      "category": "knowledge_bank",
+      "item": "RESOLVED 2026-07-21: written to prod knowledge_bank via mergeKnowledgeRow (contributedBy seed, blob-URL citation, all gate checks passed). Row ids: charlotte-mason=6c24ca6d-6a70-4a14-b499-345d53d27243, blossom-root-level0-format=9e14cd53-c484-4c08-a79e-e2e324400474 Original ask: Write the charlotte-mason (method_philosophy) and blossom-root-level0-format (method_format) rows to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
+      "impact": "The gate requires a live Postgres connection (mapDb()) and live citation-URL resolution over the network; this sandbox has neither, so the write could not be attempted honestly. See notes for the exact proposed row content.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "taxonomy",
+      "item": "Founder ratify the two new Marble-import content domains added this session: Art > Picture Study & Art Appreciation (domainId picture-study-appreciation) and Music > Composer Study & Music Appreciation (domainId composer-study-appreciation), both landing under Homa's existing native art/music bank subjects",
+      "impact": "Resolves a gap the earlier Early Years Vol. 2 ingest (cur-2026-07-19-early-years-v2) already flagged as decisionsNeeded and left open ('Add Music Appreciation / Composer Study topic or domain'; 'Expand Fine Arts domain, separate Art Appreciation from Art Creation, add Music'). pnpm check:taxonomy passes with the addition.",
+      "urgency": "medium"
+    },
+    {
+      "category": "recipe",
+      "item": "narration-page, artist-composer-study-card, and nature-observation-journal recipes authored and registered this session (SKILL.md format table, activity-formats.md, GAP_ALIASES for the two differently-named gaps the Early Years Vol. 2 ingest had proposed)",
+      "impact": "Also resolves two more items the Early Years Vol. 2 ingest left open ('Build nature-notebook-page recipe', 'Build picture-study-card recipe'). Recorded here for traceability; no further action needed unless the founder wants a different design direction.",
+      "urgency": "low"
+    },
+    {
+      "category": "product",
+      "item": "Confirm the intended real-world pacing of Science and Nature Study against the 36-week year; the guides never state whether the 18 lessons in each alternate weeks, run twice a month, or are meant as two half-year blocks, and Nature Study's own guide is internally inconsistent about its own length (contents page stops at week 18, but references photos for weeks up to 25)",
+      "impact": "curriculum-writer cannot generate an accurate week-by-week plan for the Science/Nature Study half of this curriculum until this is resolved, either by contacting the publisher, buying/reviewing the first edition for comparison, or a founder judgment call",
+      "urgency": "medium"
+    },
+    {
+      "category": "recipe",
+      "item": "Optional family-tree or family-forest poster-board project, mentioned once in the Arts & History guide as an optional week-6 extension",
+      "impact": "Low-value, optional, one-time side activity outside the weekly cadence; recommend leaving unbuilt unless a family specifically asks for it",
+      "urgency": "low"
+    }
+  ],
+  "notes": "Cosmo's earlier claim to have ingested this drop was fabricated: no cur JSON existed anywhere in git history, Cosmo's own Slack summary said 'Eight PDFs' when there are 10, and the source message carries no :ship: reaction. This analysis is a from-scratch read of all 10 real PDFs (784 total pages: 128+52+64+6+124+84+53+73+45+105), not a check of Cosmo's prior claim. Publisher branding is more nuanced than Carolyng's Slack framing suggests: only the Language Arts guide explicitly says 'A Charlotte Mason-Inspired Approach' in its own text; the Science, Nature Study, and Arts & History guides each self-brand as 'secular' without using the words 'Charlotte Mason,' even though all four share the same methodological DNA (living books, narration, short lessons, picture/composer study, a three-step nature-study method). This curriculum is a companion, one age level up, to the already-ingested cur-2026-07-19-early-years-v2 (same publisher, Blossom & Root); this session's taxonomy and recipe additions retroactively resolve four items that ingestion's decisionsNeeded left open (the missing Art/Music domain, and the nature-notebook-page/picture-study-card recipe gaps, shipped here under the names nature-observation-journal and artist-composer-study-card with GAP_ALIASES entries linking the old proposed names to the new ones). The taxonomy addition reuses Homa's existing native 'art' and 'music' bank subjects (packages/core/src/map/content.ts, packages/taxonomy/src/domains.ts AUTHORED_DOMAINS) rather than inventing new subjects from scratch: those subjects and their assessment domains already existed and needed no changes; only two new content-kind domains were appended under them for this Marble-style enrichment import. Knowledge-bank writes could not be attempted (see decisionsNeeded); everything else in the skill's post-analysis actions was completed and verified green."
+}

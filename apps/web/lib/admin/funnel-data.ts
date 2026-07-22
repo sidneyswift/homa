@@ -1,5 +1,10 @@
 import { MAP_FLOW_STEPS, type MapFlowStep } from "@homa/core";
 
+import {
+  KEPT_PREP_EVENTS,
+  LOOP_BACK_EVENTS,
+  PARENT_INITIATED_EVENTS,
+} from "../activation/signals";
 import { adminDb } from "./db";
 
 /**
@@ -111,9 +116,11 @@ export interface FunnelData {
  * reads child_reports.viewed_at (a durable column) rather than the
  * map.report_viewed event, and "asked" reads conversation_messages
  * (role='user'), which is family-scoped across every channel. Two events
- * that look right are deliberately NOT used: sms.message_received never
- * carries a family_id (231 events, zero attributable), and
- * conversation.reply_resolved is 95% orphaned family ids (203 of 216).
+ * that look right are still NOT used here: sms.message_received only began
+ * carrying a family id on 2026-07-20 (the 231 events before that are
+ * unattributable forever), and conversation.reply_resolved is 95% orphaned
+ * family ids (203 of 216, all purged anonymous leads). conversation_messages
+ * covers both channels durably, so it stays the source either way.
  */
 const ACTIVATION_STAGES: {
   key: string;
@@ -265,13 +272,12 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
         exists (
           select 1 from public.events e
           where e.family_id = c.id
-            and e.name in ('map.plan_consented', 'materials.finalized')
+            and e.name = any(${KEPT_PREP_EVENTS as unknown as string[]})
         ) as kept,
         exists (
           select 1 from public.events e
           where e.family_id = c.id
-            and e.name in ('progress.observation_saved', 'map.answers_corrected',
-                           'chat.hours_logged', 'map.plan_progress')
+            and e.name = any(${LOOP_BACK_EVENTS as unknown as string[]})
         ) as looped,
         (c.created_at < now() - interval '7 days') as w2_eligible,
         (
@@ -284,10 +290,7 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
             select 1 from public.events e
             where e.family_id = c.id
               and e.created_at > c.created_at + interval '7 days'
-              and e.name in ('map.report_viewed', 'report.action_tapped',
-                             'map.plan_consented', 'materials.finalized',
-                             'progress.observation_saved', 'map.answers_corrected',
-                             'chat.hours_logged', 'map.plan_progress')
+              and e.name = any(${PARENT_INITIATED_EVENTS as unknown as string[]})
           )
         ) as w2_returned
       from cohort c

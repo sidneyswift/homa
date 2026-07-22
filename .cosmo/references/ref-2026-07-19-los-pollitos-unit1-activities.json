@@ -1,0 +1,107 @@
+{
+  "id": "ref-2026-07-19-los-pollitos-unit1-activities",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:14:28-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427268.237269",
+  "format": "language-activity-packet",
+  "title": "Los Pollitos Dicen: Unit 1 Activities (Spanish Mama PreK-Elementary Curriculum)",
+  "publisher": "Spanish Mama (Elisabeth Alvarado)",
+  "series": "Los Pollitos Dicen",
+  "gradeLevel": "PreK to Early Elementary (ages 3-7)",
+  "pageCount": 22,
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-19-los-pollitos-unit1-activities/los-pollitos-unit1-activities.pdf",
+  "localPath": ".cosmo/inspo-files/los-pollitos-unit1-activities.pdf",
+  "relatedRefs": [
+    "ref-2026-07-18-los-pollitos-unit1-teacher-guide",
+    "ref-2026-07-18-los-pollitos-unit1-home-supplements"
+  ],
+  "analysisQuality": "full",
+  "overview": "The companion ACTIVITIES packet for the already-ingested Unit 1 teacher's guide and home supplement (both dropped one minute earlier in the same message burst on 2026-07-18). Verified directly with pypdf (real text layer, PowerPoint-exported PDF, 22 pages, no OCR needed) and PyMuPDF page renders of every page at 2x zoom (1080x1440px), not inferred from the filename. Confirmed by the shared Slack Table of Contents on page 2: Animales Vocabulary/Game Cards (p.3), Buenos días Lyrics (p.5), Buenos días Cards (p.6), Los pollitos Lyrics (p.7), Los pollitos Coloring Page (p.8), Los pollitos Puppets (p.9), Me llamo Drawing Page (p.10), ¿Cómo estás? Pages (p.11), Los animales Bingo (p.13-22, 10 boards). Page 2 also lists clip-art credits (Blue Bees Workshop, Kate Hadfield Designs, Zip-A-Dee-Doo-Dah Designs), confirming this uses licensed commercial clip art, not Alvarado's own illustration, same as every other Spanish Mama product. Every lyric/credit page carries a '© Elisabeth Alvarado 2016 www.spanishmama.com' footer, matching the publisher already confirmed in the sibling teacher-guide ref.",
+  "layout": {
+    "structure": "mixed",
+    "spacing": "mixed",
+    "visualHierarchy": "activity-area-dominant on most pages, text-dominant on the two lyric sheets",
+    "whiteSpaceRatio": 0.4,
+    "flowDirection": "top-down",
+    "notes": "Genuinely a packet of distinct sub-formats sharing one 540x720pt page canvas, not one repeated layout: (1) a full-bleed illustrated cover (p.1); (2) a text table of contents plus credits block (p.2); (3) two identical 2x4 vocabulary-card grids, one full-color and one black-and-white line-art duplicate for ink-light printing (p.3-4); (4) two song-lyric sheets with a rounded dashed-line decorative border and small corner icon art, sideways-oriented sun/moon/star icons doubling as time-of-day markers (p.5, p.7); (5) a page of 6 identical rounded-rectangle cutout cards differentiated only by a sun/star/moon icon in the corner, dashed cut border (p.6); (6) a 3-chick black-and-white coloring page with the song's closing line as caption (p.8); (7) a 2x3 grid of colored chick puppet cutouts (p.9); (8) two near-identical drawing-prompt pages: a large rounded-rectangle illustration box over a single fill-in-the-blank line ('Me llamo ___' / 'Estoy ___'), title text rotated 90 degrees on one variant (p.10-11); (9) a 2-card feelings page (happy/sad faces, Kate-Hadfield-style clip art, label text rotated 90 degrees) (p.12); (10) ten LOTERÍA (bingo) boards, each a 3x3 full-color grid of the same 8 farm animals from the vocabulary cards in a different shuffled order, a gold 'LOTERÍA' title, a themed farm-scene corner illustration, and a colored border that changes per board (green, teal, and others sampled), with '¡Gratis!' as the center free space (p.13-22). Density is high on the card and bingo grids, airy on the lyric and drawing-prompt pages; the 0.4 white-space figure is a rough packet-wide average across genuinely different page types, not one page's true measurement."
+  },
+  "skillTargeting": {
+    "subject": "spanish",
+    "domain": "l2-speaking-production",
+    "topics": [
+      { "id": "spanish.understands-words", "kind": "conceptual", "mapped": true, "note": "Every card, song, and bingo board is comprehensible-input listening exposure to the same farm-animal and greeting vocabulary before any expected output; matches the l2-listening-comprehension milestone directly." },
+      { "id": "spanish.says-words", "kind": "procedural", "mapped": true, "note": "Naming animal cards for Concentration/Go Fish/Lotería and filling in 'Me llamo ___' are direct single-word/greeting production, the exact behavior this milestone names." },
+      { "id": "spanish.counts-sings", "kind": "procedural", "mapped": true, "note": "Both 'Buenos días' and 'Los pollitos' are whole memorized songs the packet is explicitly built to be sung, matching this milestone's 'sings a whole song in it' clause." },
+      { "id": "spanish.simple-exchanges", "kind": "procedural", "mapped": true, "note": "The 'Buenos días' call-and-response ('¿Cómo estás? Muy bien, gracias, ¿Y usted?') and the '¿Cómo estás?' feelings-card exchange are short practiced greeting exchanges, a near-exact match to this milestone's own description." }
+    ],
+    "unmappedSkills": [
+      "spanish.thematic-vocabulary-set-farm-animals",
+      "spanish.game-based-vocabulary-recall"
+    ],
+    "notes": "IMPORTANT CORRECTION versus both sibling Los Pollitos refs (ref-2026-07-18-los-pollitos-unit1-teacher-guide and -home-supplements), read first per this session's instructions before analyzing this packet: both siblings used subject 'world-languages' / domain 'spanish' and invented bank ids like 'spanish.greetings-introductions' and 'spanish.farm-animals' that do not exist anywhere in the repo. Checked packages/taxonomy/data/topics.json fresh this session (per this session's own instruction not to trust stale memory, since many topics were added on this branch): it has ZERO Spanish or world-languages entries at all (subjects present are only Art, Computing, English, History, Learning to Learn, Life Skills, Mathematics, Music, Personal & Social Development, Science), confirming Marble's topic-graph genuinely has no Spanish coverage. But Homa has its OWN native second-language pipeline that both sibling refs missed: packages/taxonomy/src/domains.ts AUTHORED_DOMAINS defines subject 'spanish' with three real assessment domains (l2-listening-comprehension, l2-speaking-production, l2-conversation-use), and packages/core/src/map/content.ts already ships 9 real, live, hand-authored 'spanish' bank items (spanish.understands-words through spanish.conversation, exposureBased milestones with ACTFL-aligned typicalMonths) wired to those domains via packages/core/src/map/item-domains.ts. This is the same separate authored-milestone pipeline this session's own Social Studies curriculum ingestion found for family-community/geography-maps/civics-government/economics-money: real, live, but not part of the topics.json Marble-import system this skill's vocabulary-boundary section describes. The four topics above are real matches against that native pipeline, not invented ids. No topics.json edit was made or attempted: this content maps to the assessment-milestone pipeline, not the Marble content-topic pipeline, and packages/taxonomy/src/mapping.ts's marbleDomains() derives its domain registry entries directly from MARBLE_DOMAIN_MAP, so wiring a new topics.json entry at a domain display name like 'Second language' would either collide with the existing homa-origin l2-* domain ids or require inventing a parallel Marble-style domain never seen in any MARBLE_DOMAIN_MAP source, the exact collision risk this session's own instructions warned to check for before touching social_studies-or-similar AUTHORED_DOMAINS-reserved areas. The two unmappedSkills above are genuine granularity gaps within the native pipeline: it tracks broad exposure milestones ('says single words or greetings') but has no per-theme vocabulary-set tracking (there is no bank item for 'knows this specific set of 8 farm-animal words') and no distinct entry for game-based recall practice (Lotería/Concentration/Go Fish) as a mechanism separate from general production. Both are real but belong to a product-architecture decision (whether the milestone bank should ever track theme-level vocabulary at all) well beyond a single reference ingestion; recorded here for a future session rather than acted on."
+  },
+  "difficulty": {
+    "ageBandMonths": [36, 84],
+    "complexity": "layered",
+    "prerequisites": [],
+    "scaffolding": "high",
+    "notes": "No single page is hard; the packet's design is the same 8-word vocabulary set and 2 songs revisited through 6+ different modalities (see, name, color, cut, sing, play), matching the spiral-curriculum design pattern already recorded from the sibling teacher-guide. Every page assumes an adult present: singing along, calling Lotería items, helping with scissors, and reading the drawing prompts aloud for a non-reading 3-year-old."
+  },
+  "theming": {
+    "themeType": "interest-led",
+    "characters": [
+      "8 farm animals: el gato, la vaca, el pollito, el cerdo, el caballo, la gallina, el pato, el perro",
+      "a hen-and-chicks family (Los pollitos lyric sheet illustration)",
+      "generic child self-portrait figures (blank, for the child to complete)",
+      "two Kate-Hadfield-style stylized child faces for the feelings cards"
+    ],
+    "visualStyle": "cartoon / licensed clip-art (credited to Blue Bees Workshop, Kate Hadfield Designs, and Zip-A-Dee-Doo-Dah Designs on the credits page)",
+    "colorPalette": "mixed, deliberately: the vocabulary cards and puppets ship in both a full-color version and a black-and-white line-art duplicate of the identical layout; the lyric sheets, coloring page, drawing prompts, and feelings cards are black-and-white by design; the 10 Lotería boards are full-color only",
+    "appealDrivers": [
+      "a consistent farm-animal cast reused across cards, coloring page, and bingo so recognition compounds instead of resetting each page",
+      "a real cut-and-play game (Lotería) with 10 unique boards, not a single static worksheet",
+      "singable, repetitive folk songs (both are real, well-known Spanish nursery songs, not house-written verse)",
+      "a personal, non-graded self-portrait/feelings prompt among the drill pages"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "custom (540pt x 720pt = 7.5in x 10in, a PowerPoint-slide-derived canvas, not standard US Letter 8.5x11 or A4)",
+    "orientation": "portrait (page canvas), with several pages using 90-degree-rotated instruction/label text along a side margin as a design choice rather than a true landscape layout",
+    "margins": "standard",
+    "inkDensity": "mixed: light on the black-and-white pages (lyric sheets, coloring page, BW vocabulary-card duplicate, drawing prompts, feelings cards), heavy on the 10 full-color Lotería boards and the color vocabulary-card/puppet pages",
+    "colorRequirement": "color optional for most of the packet since black-and-white versions of the vocabulary cards already ship alongside the color ones, but the 10 Lotería boards need color to stay usable since the game depends on recognizing the same animal illustrations at a glance",
+    "notes": "The 7.5x10in custom page size is a real, verified print-format quirk (confirmed via PyMuPDF page.rect on every one of the 22 pages, not assumed): a home printer's 'fit to page' setting handles it fine, but printing at literal/actual size on US Letter paper leaves the content smaller than a full sheet with uneven margins on two sides. Worth carrying into any Homa-generated Spanish-vocabulary material as a reminder to design at Homa's own standard page size rather than copying this artifact."
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "flash-cards",
+      "coloring-page",
+      "cut-and-assemble-craft",
+      "poster",
+      "narration-page",
+      "picture-bingo-board"
+    ],
+    "gaps": [],
+    "notes": "flash-cards (registered in activity-formats.md, no dedicated recipe file) covers the animal vocabulary cards and the 2-card feelings set. coloring-page (registered, no recipe file) covers the 3-chick coloring page. cut-and-assemble-craft is a LOOSE match for the chick puppet cutouts (caveat: that recipe's own framing is a multi-piece fold-and-tab 3D model or layered diagram; these puppets are simpler single-piece color-cut-hold cutouts, but both are 'color, cut, and physically assemble/use a page of illustrated pieces'). poster is a LOOSE match for the two song-lyric sheets (caveat: poster's own framing is reference charts like alphabet or multiplication tables; a decorative-border lyric sheet meant to be sung from repeatedly is a real but different single-page-reference use, close enough not to invent a new gap slug for two pages). narration-page is a LOOSE match for the 'Me llamo'/'Estoy' self-portrait drawing prompts (caveat: narration-page's own recipe specifies 6-8 dictation lines for longer spoken narration; these source pages use a single fill-in-the-blank line, a simpler variant of the same illustration-box-plus-write-in-line shape). picture-bingo-board is a NEW recipe built this session (apps/web/agent/skills/materials-studio/references/recipes/picture-bingo-board.md) specifically because none of the 43 pre-existing recipe files, and nothing in activity-formats.md, covered a shared-item-pool bingo/lotto board set (confirmed by grep across every recipe file and the full activity-formats.md registry for 'bingo' and 'lotería' before concluding this was a genuine gap, not a remembered assumption); it is by far the single biggest format in this packet (10 of 22 pages) and is broadly reusable well beyond Spanish or even language learning, any vocabulary or fact set in any subject can use it. One page (p.6, the 6 identical rounded-cutout cards differentiated only by a sun/moon/star icon, likely a visual aid for singing the 3-verse 'Buenos días' routine but never confirmed) did not cleanly match any format or justify its own gap slug; described honestly in the layout notes above instead of forced into a tracked gap for a single ambiguous page."
+  },
+  "stages": {
+    "captured": "2026-07-21T03:35:23Z",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "recipe",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/picture-bingo-board.md",
+        "apps/web/agent/skills/materials-studio/SKILL.md",
+        "apps/web/agent/activity-formats.md"
+      ],
+      "commit": null
+    },
+    "taxonomy": { "proposedTopics": [], "commit": null },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "notes": "The id's calendar date (2026-07-19) and the droppedAt local timestamp (2026-07-18 evening) disagree by one day on purpose, not an error: the Slack ts 1784427268.237269 falls at 2026-07-19T02:14:28 UTC but 2026-07-18T22:14:28-04:00 in America/New_York, and this session's id was assigned (per the task) from the UTC calendar date while droppedAt correctly records the real local Eastern timestamp per this skill's own law 5. Same one-day pattern independently confirmed on the sibling drop 2 (outdoor-toddler-activity-book) ingested in this same session; worth a founder note since a future session could misread the mismatch as a bug. 'captured' in stages above reflects this local checkout's file mtime (the PDF and its Blob URL were already staged before this session began per the task's own instructions), not a fresh Slack download performed in this session. This packet, together with the two already-ingested sibling refs, completes the full Unit 1 Los Pollitos system Aless dropped in one 2026-07-18 burst: teacher philosophy and pacing, a parent home supplement, and now the actual child-facing printables the other two documents describe. No commentary was left on this specific message by Aless (same rapid-fire link-dump session as the two siblings); the taste signal below is drawn from what the actual file confirms about her stated preferences, consistent with how the sibling refs handled the same no-commentary situation."
+}

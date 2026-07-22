@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { chooseDripNudge, type DripSignals } from "./sweep";
+import { chooseDripNudge, planDripSends, type DripSignals } from "./sweep";
 
 const NOW = new Date("2026-07-20T12:00:00Z");
 const DAYS = (n: number) => new Date(NOW.getTime() - n * 24 * 60 * 60 * 1000);
@@ -20,6 +20,10 @@ function base(overrides: Partial<DripSignals> = {}): DripSignals {
     anyReportViewed: false,
     unviewedChildName: null,
     unviewedReportToken: null,
+    planChildName: null,
+    planSubjectId: null,
+    planCreatedAt: null,
+    closedLoop: false,
     optedOut: false,
     suppressed: false,
     lastDripSentAt: null,
@@ -118,4 +122,157 @@ test("a family with an opened report and full setup gets nothing", () => {
     anyReportViewed: true,
   });
   assert.equal(chooseDripNudge(signals, NOW), null);
+});
+
+function withPlan(overrides: Partial<DripSignals> = {}): DripSignals {
+  return base({
+    profileCompletedAt: DAYS(20),
+    hasKid: true,
+    hasReport: true,
+    anyReportViewed: true,
+    planChildName: "Mia",
+    planSubjectId: "reading",
+    planCreatedAt: DAYS(9),
+    ...overrides,
+  });
+}
+
+test("loop-back nudge fires for a plan with no word back, a week on", () => {
+  assert.deepEqual(chooseDripNudge(withPlan(), NOW), {
+    kind: "drip_loop_back",
+    childName: "Mia",
+    subjectId: "reading",
+  });
+});
+
+test("loop-back nudge does not fire once the parent closed the loop", () => {
+  assert.equal(chooseDripNudge(withPlan({ closedLoop: true }), NOW), null);
+});
+
+test("loop-back nudge waits a full week after the plan", () => {
+  assert.equal(chooseDripNudge(withPlan({ planCreatedAt: DAYS(2) }), NOW), null);
+});
+
+test("loop-back nudge never repeats once sent", () => {
+  assert.equal(
+    chooseDripNudge(withPlan({ sentKinds: ["drip_loop_back"] }), NOW),
+    null,
+  );
+});
+
+test("loop-back nudge needs a real plan to name, never fires without one", () => {
+  assert.equal(chooseDripNudge(withPlan({ planSubjectId: null }), NOW), null);
+});
+
+test("an unopened report outranks the loop-back nudge", () => {
+  const signals = withPlan({
+    anyReportViewed: false,
+    reportEmailedAt: DAYS(3),
+    unviewedChildName: "Mia",
+    unviewedReportToken: "tok-9",
+  });
+  assert.deepEqual(chooseDripNudge(signals, NOW), {
+    kind: "drip_report_unviewed",
+    childName: "Mia",
+    reportToken: "tok-9",
+  });
+});
+
+test("suppression and the 7-day cap silence the loop-back nudge too", () => {
+  assert.equal(chooseDripNudge(withPlan({ suppressed: true }), NOW), null);
+  assert.equal(chooseDripNudge(withPlan({ lastDripSentAt: DAYS(2) }), NOW), null);
+});
+
+test("the per-run cap trickles a backlog and reports the real queue size", () => {
+  const backlog = Array.from({ length: 12 }, (_, i) =>
+    base({ familyId: `fam-${i}` }),
+  );
+  const plan = planDripSends(backlog, NOW, 5);
+  assert.equal(plan.sends.length, 5);
+  assert.equal(plan.eligible, 12);
+  assert.equal(plan.capped, true);
+});
+
+test("a queue under the cap sends everything and reports no cap", () => {
+  const plan = planDripSends([base({ familyId: "a" }), base({ familyId: "b" })], NOW, 5);
+  assert.equal(plan.sends.length, 2);
+  assert.equal(plan.eligible, 2);
+  assert.equal(plan.capped, false);
+});
+
+test("the cap counts only eligible families, never the ineligible", () => {
+  const signals = [
+    base({ familyId: "eligible" }),
+    base({ familyId: "suppressed", suppressed: true }),
+    base({ familyId: "too-new", createdAt: HOURS(1) }),
+  ];
+  const plan = planDripSends(signals, NOW, 5);
+  assert.equal(plan.eligible, 1);
+  assert.equal(plan.sends[0].family.familyId, "eligible");
+  assert.equal(plan.capped, false);
+});
+
+// The per-tick cap decides who waits, so its order is a real product rule,
+// not an implementation detail. Before this, the cap took whatever rows
+// Postgres returned and the highest-intent families could sit behind the
+// lowest (seen live 2026-07-21).
+
+/** A family whose report was emailed and never opened. */
+function withUnopenedReport(overrides: Partial<DripSignals> = {}): DripSignals {
+  return base({
+    profileCompletedAt: DAYS(20),
+    hasKid: true,
+    hasReport: true,
+    anyReportViewed: false,
+    reportEmailedAt: DAYS(4),
+    unviewedChildName: "Mia",
+    unviewedReportToken: "tok",
+    ...overrides,
+  });
+}
+
+test("the cap serves the unopened report before the loop-back and the setup stall", () => {
+  const signals = [
+    base({ familyId: "setup" }),
+    withPlan({ familyId: "loop" }),
+    withUnopenedReport({ familyId: "report" }),
+  ];
+  const plan = planDripSends(signals, NOW, 2);
+  assert.deepEqual(
+    plan.sends.map((send) => send.family.familyId),
+    ["report", "loop"],
+  );
+  assert.equal(plan.eligible, 3);
+  assert.equal(plan.capped, true);
+});
+
+test("inside one nudge, the family who has waited longest goes first", () => {
+  const signals = [
+    withUnopenedReport({ familyId: "newer", reportEmailedAt: DAYS(3) }),
+    withUnopenedReport({ familyId: "oldest", reportEmailedAt: DAYS(9) }),
+    withUnopenedReport({ familyId: "middle", reportEmailedAt: DAYS(6) }),
+  ];
+  assert.deepEqual(
+    planDripSends(signals, NOW, 3).sends.map((send) => send.family.familyId),
+    ["oldest", "middle", "newer"],
+  );
+});
+
+test("the plan is total and reproducible: same input, same order", () => {
+  const signals = [
+    withUnopenedReport({ familyId: "b-family", reportEmailedAt: DAYS(5) }),
+    withUnopenedReport({ familyId: "a-family", reportEmailedAt: DAYS(5) }),
+  ];
+  const first = planDripSends(signals, NOW, 5).sends.map((s) => s.family.familyId);
+  const again = planDripSends([...signals].reverse(), NOW, 5).sends.map((s) => s.family.familyId);
+  assert.deepEqual(first, ["a-family", "b-family"]);
+  assert.deepEqual(again, first);
+});
+
+test("ordering never changes who is eligible, only who goes first", () => {
+  const signals = [base({ familyId: "s" }), withUnopenedReport({ familyId: "r" })];
+  const plan = planDripSends(signals, NOW, 99);
+  assert.equal(plan.eligible, 2);
+  assert.equal(plan.capped, false);
+  assert.equal(plan.sends.length, 2);
 });

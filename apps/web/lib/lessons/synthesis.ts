@@ -81,7 +81,12 @@ demonstrated or visibly struggled with, emit a pair:
   grammatical subject ("Emma read the whole page aloud without help",
   "Emma could not borrow from the tens place yet"). Use words from the
   excerpt wherever possible.
-- excerpt: the verbatim transcript words backing it, copied exactly.
+- excerpt: the verbatim transcript words backing it, copied exactly,
+  spanning the exchange: include the parent's question or framing AND
+  the child's response. A bare fragment of the child's speech ("four,
+  five.") is never enough on its own; quote the words around it that
+  carry the moment's meaning. One or two turns each side is plenty,
+  never a whole page of transcript.
 - segmentSeq: the segment the excerpt came from.
 Only the child's own demonstrated ability counts: not the parent's
 teaching, not tone, not effort. Fewer honest pairs beat many loose
@@ -169,7 +174,13 @@ export async function synthesizeLessonReview(
       `<tone_notes>\n${renderToneNotes(input.segments)}\n</tone_notes>`,
       `<photos>\n${renderMediaCaptions(input.mediaCaptions)}\n</photos>`,
     ].join("\n\n"),
-    maxOutputTokens: 6000,
+    // The schema's own caps allow roughly 19k characters (8 moments, 12
+    // clause pairs with 500-char excerpts, the lists), and JSON adds
+    // structure on top, so 6000 truncated the object and generateObject
+    // failed to parse it once exchange-spanning excerpts made pairs
+    // longer (verified 2026-07-21: analysis threw "No object generated"
+    // on a real lesson that had synthesized fine with short excerpts).
+    maxOutputTokens: 16_000,
     maxRetries: 1,
     providerOptions: {
       gateway: {

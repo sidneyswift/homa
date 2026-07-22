@@ -40,8 +40,11 @@ describe("ProgressView", () => {
     );
 
     // The bare header: freshness line and title, no intro sentence.
+    // The line dates the visit (rendered with the real clock here), not
+    // the newest evidence: no fixed date to assert, only the shape.
     assert.match(html, /Maya(?:&#x27;|')s progress/);
-    assert.match(html, /Updated Jul 11, 2026/);
+    assert.match(html, /As of [A-Z][a-z]{2} \d{1,2}, \d{4}/);
+    assert.doesNotMatch(html, /Updated Jul 1[12], 2026/);
     assert.doesNotMatch(html, /skills you have shared/i);
     assert.doesNotMatch(html, /Latest information/i);
     assert.match(
@@ -147,6 +150,10 @@ describe("ProgressView", () => {
           report={null}
           eras={[]}
           kids={PROGRESS_FIXTURE_KIDS}
+          lessons={{
+            recordHref: "/app/child-1/lessons/record",
+            lessons: [],
+          }}
         />
       </AppRouterContext.Provider>,
     );
@@ -161,11 +168,82 @@ describe("ProgressView", () => {
       html,
       /<a[^>]*href="\/onboarding\?start=child-1"[^>]*>Start Maya(?:&#x27;|')s check-in<\/a>/,
     );
+    // On a never-assessed child the check-in keeps the top spot; the
+    // recording door waits below it rather than competing.
+    assert.ok(
+      html.indexOf("Start Maya") < html.indexOf('aria-label="Lessons"'),
+      "the first check-in must outrank the recording door when unassessed",
+    );
     // Ask HOMA stays as the quieter second door.
     assert.match(html, /Ask HOMA about Maya/);
 
     assert.doesNotMatch(html, /Open the full report/);
     assert.doesNotMatch(html, /Maya(?:&#x27;|')s snapshot/);
     assert.doesNotMatch(html, /Subject by subject/);
+  });
+
+  it("carries the lesson recording door and this child's reviews", () => {
+    const html = renderToStaticMarkup(
+      <AppRouterContext.Provider value={ROUTER}>
+        <ProgressView
+          view={PROGRESS_FIXTURE_VIEW}
+          reportHref={null}
+          report={PROGRESS_FIXTURE_REPORT}
+          eras={PROGRESS_FIXTURE_ERAS}
+          kids={PROGRESS_FIXTURE_KIDS}
+          lessons={{
+            recordHref: "/app/child-1/lessons/record",
+            lessons: [
+              { id: "lesson-1", status: "ready", startedAt: "2026-07-18T15:00:00.000Z" },
+              { id: "lesson-2", status: "transcribing", startedAt: "2026-07-17T15:00:00.000Z" },
+              { id: "lesson-3", status: "failed", startedAt: "2026-07-16T15:00:00.000Z" },
+            ],
+          }}
+        />
+      </AppRouterContext.Provider>,
+    );
+
+    assert.match(html, /aria-label="Lessons"/);
+    assert.match(
+      html,
+      /<a[^>]*href="\/app\/child-1\/lessons\/record"[^>]*>Record a lesson<\/a>/,
+    );
+    assert.match(html, /href="\/app\/lessons\/lesson-1"/);
+
+    // Above the chart, not below it. Shipped below first and a founder
+    // could not find it on a scored child: the chart plus a dozen
+    // subject rows put it a full screen down (2026-07-21).
+    assert.ok(
+      html.indexOf('aria-label="Lessons"') <
+        html.indexOf("Every number here comes from your answers"),
+      "the recording door must render above the subject content",
+    );
+
+    // Status reads in the parent's words, never a pipeline stage.
+    assert.match(html, /Review ready/);
+    assert.match(html, /Review on the way/);
+    assert.match(html, /Homa couldn(?:&#x27;|')t finish/);
+    assert.doesNotMatch(html, /transcribing/);
+  });
+
+  it("offers no recording door when the caller passes no lessons", () => {
+    // Both the flag-off page and the founder console's read-only mirror
+    // land here: a mirror must never offer to start a recording.
+    const html = renderToStaticMarkup(
+      <AppRouterContext.Provider value={ROUTER}>
+        <ProgressView
+          view={PROGRESS_FIXTURE_VIEW}
+          reportHref={null}
+          report={PROGRESS_FIXTURE_REPORT}
+          eras={PROGRESS_FIXTURE_ERAS}
+          kids={PROGRESS_FIXTURE_KIDS}
+          deeperChecks={false}
+        />
+      </AppRouterContext.Provider>,
+    );
+
+    assert.doesNotMatch(html, /aria-label="Lessons"/);
+    assert.doesNotMatch(html, /Record a lesson/);
+    assert.doesNotMatch(html, /lessons\/record/);
   });
 });

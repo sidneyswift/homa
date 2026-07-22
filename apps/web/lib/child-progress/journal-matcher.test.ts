@@ -37,9 +37,13 @@ describe("journal evidence matcher", () => {
       result.matches.map((match) => match.itemId),
       ["literacy.emergent-reader", "literacy.retells-story"],
     );
+    // Both predicates are unqualified: the parent named no independence
+    // cue, so the conservative tier applies (founder ruling
+    // `progress-signal-capture-v2` D4). "Easily" has to be earned by
+    // words like "by herself" or "without help".
     assert.deepEqual(
       result.matches.map((match) => match.answer),
-      ["easily", "easily"],
+      ["getting_there", "getting_there"],
     );
     assert.ok(
       result.matches.every(
@@ -71,7 +75,8 @@ describe("journal evidence matcher", () => {
       [
         {
           itemId: "literacy.emergent-reader",
-          answer: "easily",
+          // Unqualified "can read": conservative tier per D4.
+          answer: "getting_there",
         },
         {
           itemId: "literacy.retells-story",
@@ -164,7 +169,8 @@ describe("journal evidence matcher", () => {
       [
         {
           itemId: "literacy.emergent-reader",
-          answer: "easily",
+          // Unqualified "can read": conservative tier per D4.
+          answer: "getting_there",
         },
         {
           itemId: "literacy.retells-story",

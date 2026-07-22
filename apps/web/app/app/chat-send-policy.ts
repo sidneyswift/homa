@@ -2,7 +2,8 @@ export type ChatTurnModality = "text" | "voice";
 
 export type ChatSendSource =
   | { kind: "composer" }
-  | { kind: "progress_card"; progressActionKey: string };
+  | { kind: "progress_card"; progressActionKey: string }
+  | { kind: "question_card" };
 
 export type ChatSendAcceptance = "rejected" | "queued" | "sent";
 
@@ -28,18 +29,21 @@ export function prepareChatSend(input: {
 }): PreparedChatSend | null {
   const message = input.text.trim();
   if (message.length === 0) return null;
-  const fromProgressCard = input.source.kind === "progress_card";
+  // A tap on a card is not typing: it stays a text turn and it leaves
+  // whatever she had half-written in the composer alone.
+  const fromCard =
+    input.source.kind === "progress_card" || input.source.kind === "question_card";
   return {
     message,
     destination: input.busy ? "queue" : "send",
     modality:
-      fromProgressCard
+      fromCard
         ? "text"
         : input.draftFromVoice
           ? "voice"
           : "text",
-    clearDraft: !fromProgressCard,
-    resetDraftFromVoice: !fromProgressCard,
+    clearDraft: !fromCard,
+    resetDraftFromVoice: !fromCard,
     progressActionKey:
       input.source.kind === "progress_card"
         ? input.source.progressActionKey
