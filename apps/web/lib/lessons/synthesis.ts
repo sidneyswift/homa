@@ -55,6 +55,8 @@ export const lessonInsightsSchema = z.object({
   clausePairs: z.array(lessonClausePairSchema).max(MAX_LESSON_CLAUSES),
 });
 
+export type LessonMoment = z.infer<typeof lessonMomentSchema>;
+
 export type LessonInsights = z.infer<typeof lessonInsightsSchema>;
 
 /** The insights JSONB the review row stores: everything except the

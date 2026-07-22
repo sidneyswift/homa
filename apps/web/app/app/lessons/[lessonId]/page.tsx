@@ -15,6 +15,7 @@ import { lessonMomentSchema } from "../../../../lib/lessons/synthesis";
 import { PageColumn } from "../../../../components/dashboard/page-column";
 import {
   AddLessonPhotos,
+  KeptAudioNotice,
   LessonStatusPoll,
   RetryLessonAnalysis,
 } from "./review-client";
@@ -183,6 +184,18 @@ export default async function LessonReviewPage({
           <p className="mt-2 text-sm text-muted">{insights.siblingNote}</p>
         ) : null}
       </section>
+
+      {/* Homa kept this recording without being asked, so she is told.
+          An automatic retention nobody mentions is not what the
+          keep-their-voice ruling authorized, and the undo sits inside
+          the same box as the news rather than in a settings page. */}
+      {lesson.audioKeptAt !== null && lesson.audioDeletedAt === null ? (
+        <KeptAudioNotice
+          lessonId={lessonId}
+          childName={childName}
+          day={startedAt}
+        />
+      ) : null}
 
       {insights.moments.length > 0 ? (
         <section aria-label="Moments" className="mt-4">

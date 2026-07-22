@@ -35,6 +35,7 @@ import {
   registerLessonSegment,
   releaseSegmentClaim,
   requeueLessonAnalysis,
+  markLessonAudioKept,
   saveLessonReview,
   saveSegmentToneNotes,
   saveSegmentTranscript,
@@ -43,6 +44,7 @@ import {
   type LessonSegmentRow,
 } from "./store";
 import { deleteLessonBlob } from "./blobs";
+import { lessonAudioKeep } from "./keep-audio";
 
 /**
  * The lesson pipeline's working half (plan 2026-07-13-lesson-listen.md
@@ -218,6 +220,14 @@ export async function runLessonAnalysis(
       evidenceCount: ledger.evidenceCount,
       observationCount: ledger.observationCount,
     });
+    // Keep their voice (founder ruling 2026-07-22). The model already
+    // made the only judgment when it labelled a moment; this reads that
+    // typed enum and exempts the recording from the 30-day TTL. The
+    // parent is told on the review page, and deletes it in one tap.
+    const keep = lessonAudioKeep(insights.moments, processed.length);
+    if (keep !== null) {
+      await markLessonAudioKept(lessonId, familyId);
+    }
     const toneCovered = processed.filter(
       (segment) => parseToneNotes(segment.toneNotes) !== null,
     ).length;
@@ -234,6 +244,8 @@ export async function runLessonAnalysis(
       moment_count: insights.moments.length,
       tone_coverage:
         processed.length === 0 ? 0 : toneCovered / processed.length,
+      audio_kept: keep !== null,
+      audio_kept_kind: keep?.kind ?? null,
     });
     return { status: "ready" };
   } catch (error) {

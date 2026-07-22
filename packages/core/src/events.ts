@@ -844,6 +844,13 @@ export const EVENT_SCHEMAS = {
     // Segments with tone notes over total: the PMF read's "was the
     // tone lane deaf" signal (plan §4.7).
     tone_coverage: z.number().min(0).max(1),
+    // Whether this lesson's recording outlived the 30-day TTL, and on
+    // what (founder ruling `keep-their-voice`). Retention is a change
+    // to a stated privacy posture, so its rate is measured from the
+    // first lesson rather than discovered later from a storage bill or
+    // a surprised parent.
+    audio_kept: z.boolean(),
+    audio_kept_kind: z.enum(["breakthrough", "sweet"]).nullable(),
   }),
   "lesson.media_attached": z.object({
     family_id: z.uuid(),
