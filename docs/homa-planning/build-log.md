@@ -3,6 +3,57 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-22 · Four bugs found by walking onboarding instead of reading it
+
+All four came out of one afternoon of driving the flow in a browser, and
+none of them was visible in the code. Recorded together because the
+lesson is the same each time: the thing that looked correct and the
+thing the browser did were different, and only one of them was checked.
+
+**1. The agent answered about a family the page was not showing.**
+`agent/channels/eve.ts` resolved the caller's family with
+`.eq("user_id", ...).limit(1).maybeSingle()`, no order and no status
+filter. Correct while an account has one membership row, silently
+arbitrary at two. The test account had eleven and Postgres returned a
+DELETED family, so every turn read and wrote a retired household while
+the page rendered the live one. **Reachable in production**: any account
+whose family is deleted in the founder console and is then re-attached
+has two rows. Fixed in `fe9c68f`, live families only, newest membership
+first. Verified against prod that no data crossed a tenancy boundary;
+the wrong side of the boundary was being read.
+
+**2. The flag flip trapped anyone who stopped before adding a child.**
+With `HOMA_CHAT_ONBOARDING` on, a family with a finished profile and no
+children bounced `/onboarding` → `/app` → `/onboarding` forever, because
+`/app` requires a child and `/onboarding` handed off on the profile
+column alone. **This would have hit real families the moment the flag
+went on**, and stopping before adding a child is the most common way to
+drop out of setup. Fixed in `25b45c6` through one shared predicate,
+`appWouldAdmit`.
+
+**3. Two colour utilities that were never colours** (see the entry
+below, kept separate because it carries its own guard).
+
+**4. Two ways a new parent could be left on a blank screen.** A turn
+that only called a tool counted as the conversation having started, so
+the composer appeared before Homa had said anything; and the kickoff
+lock outlived a kickoff that never landed, making the blank screen
+permanent across reloads. Fixed in `4c208d1`.
+
+**Decided alone, and worth a founder look:** #2 is fixed by sending
+childless families to the card flow rather than by making them count as
+onboarding-active. Widening `familyOnboardingActive` would also change
+the wall exemption and the agent's mode, which is a policy call, not a
+bug fix. The reversible option was taken.
+
+**Method, since it is the transferable part:** every one of these
+survived typecheck, lint and the guard suite. Three of them survived
+reading the code carefully. They surfaced from `getComputedStyle` in the
+running page, from querying prod for where a turn's messages actually
+landed, and from following an HTTP redirect chain. For anything
+user-facing, check what the browser and the database did, not what the
+source says they should have.
+
 ## 2026-07-22 · Two undefined colour tokens live in production; fixed, plus a guard for the class
 
 **Status: FIXED in `84d8cbf`, on branch `claude/chat-first-onboarding-65b569`,
