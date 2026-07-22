@@ -294,6 +294,24 @@ export function messageRendersSomething(message: EveMessage): boolean {
   return assistantItems(message).length > 0 || workedForSteps(message).length > 0;
 }
 
+/**
+ * messageSaysSomething(message): has anybody actually said anything?
+ *
+ * The stricter sibling of the above, and the difference between them is
+ * one row: a turn that only called a tool renders a collapsed "Worked on
+ * it" eyebrow, which is something on screen but is not Homa speaking.
+ *
+ * Onboarding's progressive chrome asks the second question, not the
+ * first. A first turn that spends itself loading a skill and writes no
+ * words was enough to bring the composer up under an otherwise empty
+ * screen, so a brand new parent was invited to type before Homa had said
+ * hello. The eyebrow is a receipt for work; the chrome waits for words.
+ */
+export function messageSaysSomething(message: EveMessage): boolean {
+  if (message.role === "user") return messageRendersSomething(message);
+  return assistantItems(message).length > 0;
+}
+
 function AssistantItemView({
   item,
   onSendSuggestion,

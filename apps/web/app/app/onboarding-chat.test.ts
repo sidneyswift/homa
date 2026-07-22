@@ -6,6 +6,7 @@ import { visitShapeFromHistory } from "../onboarding/onboarding-chat-props";
 import {
   kickoffDirectiveFor,
   kickoffKindFor,
+  kickoffLockIsStale,
   RESUME_GAP_MS,
   type OnboardingChatConfig,
 } from "./onboarding-chat";
@@ -137,5 +138,34 @@ describe("visitShapeFromHistory", () => {
       now,
     );
     assert.equal(shape.gapMs, 10_000);
+  });
+});
+
+describe("kickoffLockIsStale", () => {
+  // The flag is written before the send, so a kickoff that never landed
+  // leaves it set over an empty conversation. A brand new parent then
+  // opens a permanently blank screen, which is a far worse failure than
+  // the doubled hello the flag exists to prevent.
+  it("calls the lock stale when nothing was ever said", () => {
+    assert.equal(
+      kickoffLockIsStale({ liveMessageCount: 0, archivedCount: 0 }),
+      true,
+    );
+  });
+
+  it("keeps the lock once the session carries anything", () => {
+    assert.equal(
+      kickoffLockIsStale({ liveMessageCount: 1, archivedCount: 0 }),
+      false,
+    );
+  });
+
+  it("keeps the lock on a remount over scrollback", () => {
+    // Nothing live, but the archive proves a conversation happened, so
+    // saying hello again would be Homa forgetting she already had.
+    assert.equal(
+      kickoffLockIsStale({ liveMessageCount: 0, archivedCount: 12 }),
+      false,
+    );
   });
 });

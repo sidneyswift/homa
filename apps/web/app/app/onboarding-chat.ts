@@ -100,3 +100,34 @@ export function markKickoffSent(familyId: string): void {
     // conversation that never starts.
   }
 }
+
+export function clearKickoffSent(familyId: string): void {
+  try {
+    window.localStorage.removeItem(kickoffStorageKey(familyId));
+  } catch {
+    // Nothing to undo if the store was never writable.
+  }
+}
+
+/**
+ * kickoffLockIsStale: the flag says hello was sent, the conversation says
+ * otherwise. Believe the conversation.
+ *
+ * The flag is written before the send, because a lock taken after the
+ * fact is not a lock. The cost is that a kickoff which never lands, a
+ * dropped connection, an expired token, a deploy mid-turn, leaves the
+ * flag set over an empty conversation, and a brand new parent then opens
+ * a permanently blank screen with no way back but clearing site data.
+ * That is a far worse failure than the doubled hello the flag prevents.
+ *
+ * Emptiness here is checked against every record the client has: the
+ * live session, and the archive that server history is folded into. If
+ * all of them are empty then no hello was ever said, so saying one now
+ * cannot repeat anything.
+ */
+export function kickoffLockIsStale(input: {
+  liveMessageCount: number;
+  archivedCount: number;
+}): boolean {
+  return input.liveMessageCount === 0 && input.archivedCount === 0;
+}

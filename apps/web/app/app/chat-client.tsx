@@ -12,8 +12,10 @@ import { WallModal } from "../../components/billing/wall-modal";
 import type { WallCheckout } from "../../lib/billing/wall-types";
 import {
   browserTimeZone,
+  clearKickoffSent,
   kickoffAlreadySent,
   kickoffDirectiveFor,
+  kickoffLockIsStale,
   markKickoffSent,
   type OnboardingChatConfig,
 } from "./onboarding-chat";
@@ -69,7 +71,7 @@ import {
 import {
   busyLabel,
   countLastTurnToolCalls,
-  messageRendersSomething,
+  messageSaysSomething,
   MessageView,
 } from "./message-parts";
 import {
@@ -983,9 +985,10 @@ export function ChatClient({
   const hasAnyMessages = transcript.some((item) => item.kind === "message");
   // The opening directive is a transcript item that renders nothing, and
   // so is a turn that died before writing a word. Neither counts as the
-  // conversation having started.
+  // conversation having started, and neither does a turn that only called
+  // a tool: a lone "Worked on it" eyebrow is work, not hello.
   const hasVisibleMessages = transcript.some(
-    (item) => item.kind === "message" && messageRendersSomething(item.message),
+    (item) => item.kind === "message" && messageSaysSomething(item.message),
   );
   // The chips return whenever a session has no words in it yet: the
   // first run, and a fresh morning over yesterday's scrollback.
@@ -1138,10 +1141,19 @@ export function ChatClient({
     if (!onboarding || kickoffSentRef.current) return;
     if (agent.data.messages.length > 0) return;
     if (archived.length > 0 && onboarding.firstVisit) return;
-    if (kickoffAlreadySent(onboarding.familyId)) {
+    if (
+      kickoffAlreadySent(onboarding.familyId) &&
+      !kickoffLockIsStale({
+        liveMessageCount: agent.data.messages.length,
+        archivedCount: archived.length,
+      })
+    ) {
       kickoffSentRef.current = true;
       return;
     }
+    // A lock over an empty conversation is a kickoff that never landed.
+    // Drop it rather than leave a new parent on a blank screen forever.
+    clearKickoffSent(onboarding.familyId);
     const directive = kickoffDirectiveFor(onboarding, browserTimeZone());
     if (directive === null) {
       kickoffSentRef.current = true;
