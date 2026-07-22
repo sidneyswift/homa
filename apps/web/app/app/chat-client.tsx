@@ -1791,10 +1791,13 @@ export function ChatClient({
           works, and sending mid-turn queues; staged files hold Send
           until the line is free (the queue stays text-only). */}
       <footer
+        // The rule belongs to the composer, which is a low box that needs
+        // an edge to sit against. A docked card brings its own border and
+        // shadow, so the line above it is a second edge a few pixels from
+        // the first, and it cuts the card off from the sentence that
+        // asked for it (founder note, 2026-07-22).
         className={`bg-page px-4 pb-5 pt-3 sm:px-6 ${
-          showComposer || dockedDetail || dockedChecklist
-            ? "border-t border-border-subtle"
-            : ""
+          showComposer ? "border-t border-border-subtle" : ""
         }`}
       >
         {showSuggestions ? (
