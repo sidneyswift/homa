@@ -3,6 +3,35 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-21 · Third stranded Cosmo commit judged superseded and archived, not merged
+
+After both stranded commits on fix/handwrytten-sender were recovered
+(d988ffa on 07-19, 46411c9 via PR #56 today) and that branch was
+deleted, a sweep of the remaining Cosmo branches found one more
+non-equivalent commit: f7f94f9 on cosmo/ingest-20260717-014029, a
+shallow reference-modality ingestion (ref-2026-07-20-inventors-
+scientists, 5KB) of the Venezia inventors-and-scientists drop.
+
+Decision made alone: do not recover it. Evidence: the identical Slack
+drop (same sourceMessageTs 1784598113.867139, same dropper) was
+re-ingested by the PR #78 batch as a full curriculum analysis
+(cur-2026-07-21-getting-to-know-greatest-inventors-scientists, 24KB);
+the taste model's Venezia-wave entry carries strictly richer versions
+of all four of the commit's signal lines; and the commit's remaining
+index rows were either dangling (no backing analysis file on any
+branch: the hwt-readiness-writing-prek and beethoven/greatest-artists
+reference rows) or duplicate IDs with worse stats than main's repaired
+rows. Merging it would have reintroduced the duplicate and dangling
+index rows the 07-19 graduation repair deleted.
+
+The commit stays auditable as tag archive/cosmo-ingest-20260717; the
+branch itself was deleted so Cosmo cannot push to a stale merged
+branch a third time. feat/marketing-ugc-engine was deleted the same
+session after patch-equivalence checks showed it fully drained.
+Future sessions checking for stranded Cosmo commits: origin now has
+no cosmo/* or recovery branches; start from the archive tags and
+`git cherry origin/main <branch>` before trusting any branch state.
+
 ## 2026-07-21 · Signal-capture audit ruled: nine founder decisions set the rebuild
 
 Same day as the Progress header-date fix (PR #79), the founder asked whether
