@@ -414,6 +414,13 @@ export function ChatClient({
   const lastSendRef = useRef<{ text: string; atMs: number } | null>(null);
   const recoveryRef = useRef<AbortController | null>(null);
   const [recovering, setRecovering] = useState(false);
+  /**
+   * Dev only, and only ever set to a time we can prove: when a turn
+   * fails on localhost, ask whether this machine's gateway credential is
+   * the reason before blaming the product. Null in production, where the
+   * route it reads 404s. See app/api/dev/oidc-status/route.ts.
+   */
+  const [staleOidcAt, setStaleOidcAt] = useState<number | null>(null);
   /** True between a stall auto-stop (watchdog / wake grace) and the
    *  onFinish it causes: the one stop that should trigger recovery,
    *  because nobody chose it and the durable turn may have finished. */
@@ -710,6 +717,42 @@ export function ChatClient({
   useEffect(() => {
     sendRef.current = agentSend;
   }, [agentSend]);
+
+  // Only on a failure, so the happy path never pays for it, and only
+  // when the answer is certain: an unreadable or missing token leaves
+  // this null, because "we could not check" must never render as "your
+  // token expired". In production the route 404s and this is a no-op.
+  useEffect(() => {
+    // No synchronous clear: the render is gated on agent.error anyway, so
+    // a leftover value cannot show, and setting state in an effect body
+    // is what cascading renders are made of. Every write happens after
+    // the answer comes back, including the write back to null.
+    if (!agentError) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await fetch("/api/dev/oidc-status");
+        if (cancelled) return;
+        if (!response.ok) {
+          setStaleOidcAt(null);
+          return;
+        }
+        const data = (await response.json()) as {
+          expired?: boolean;
+          expiresAt?: number | null;
+        };
+        if (cancelled) return;
+        const confirmed =
+          data.expired === true && typeof data.expiresAt === "number";
+        setStaleOidcAt(confirmed ? (data.expiresAt as number) : null);
+      } catch {
+        // No route, no network, no opinion.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [agentError]);
 
   useEffect(() => {
     sendMessageRef.current = sendMessage;
@@ -1645,6 +1688,25 @@ export function ChatClient({
             </span>
             <span>Reconnecting&hellip;</span>
           </div>
+        ) : agent.error && staleOidcAt !== null ? (
+          // Localhost only, and only once the dev route has confirmed it.
+          // Deliberately not in Homa's voice and deliberately ugly: this
+          // is a note to whoever is running the server, and the moment it
+          // reads like product copy is the moment it gets mistaken for a
+          // parent-facing string. Sits above the two below so a stale
+          // credential never masquerades as either.
+          <p
+            className="mx-auto max-w-md rounded-md border border-border bg-card px-3 py-2 text-center font-mono text-xs text-body"
+            role="alert"
+          >
+            DEV: the Vercel OIDC token expired at{" "}
+            {new Date(staleOidcAt).toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+            , so every agent turn is failing at the gateway. Not a product
+            bug. Run <code>pnpm dev:token</code>.
+          </p>
         ) : agent.error && onboarding && !hasVisibleMessages ? (
           // The opening turn died, so she is looking at an empty screen.
           // The ordinary line below is wrong twice here: she never sent a
