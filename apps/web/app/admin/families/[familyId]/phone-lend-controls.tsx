@@ -20,7 +20,7 @@ function prettyPhone(e164: string): string {
 }
 
 const chipClass =
-  "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-pill border border-border-default bg-card px-2.5 py-1 text-[0.7rem] font-bold text-muted shadow-sm transition-colors hover:text-strong disabled:opacity-50";
+  "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-pill border border-border bg-card px-2.5 py-1 text-[0.7rem] font-bold text-muted shadow-sm transition-colors hover:text-strong disabled:opacity-50";
 
 export function PhoneLendControls({
   familyId,

@@ -55,7 +55,7 @@ export function SessionTrace({
     );
   }
   return (
-    <ol className="mt-3 flex flex-col gap-2 border-l-2 border-border-default pl-4">
+    <ol className="mt-3 flex flex-col gap-2 border-l-2 border-border pl-4">
       {events.map((event, position) => {
         if (event.kind === "snapshot") {
           const snapshot = detail.snapshots[event.index];

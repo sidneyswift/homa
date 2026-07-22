@@ -19,7 +19,7 @@ export function ScreenTaskCards({
 }) {
   if (schedules.length === 0) {
     return (
-      <p className="mt-3 rounded-md border border-dashed border-border-default bg-card px-3.5 py-3 text-sm text-subtle">
+      <p className="mt-3 rounded-md border border-dashed border-border bg-card px-3.5 py-3 text-sm text-subtle">
         No scheduled tasks yet.
       </p>
     );

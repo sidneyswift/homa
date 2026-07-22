@@ -101,7 +101,7 @@ export function MaterialCard({
             onClick={() => setPageIndex((index) => Math.max(0, index - 1))}
             disabled={pageIndex === 0}
             aria-label="Previous page"
-            className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border-default bg-card text-body transition-colors hover:border-[var(--clay-200)] disabled:opacity-40"
+            className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border bg-card text-body transition-colors hover:border-[var(--clay-200)] disabled:opacity-40"
           >
             <ChevronLeft size={16} aria-hidden="true" />
           </button>
@@ -116,7 +116,7 @@ export function MaterialCard({
             }
             disabled={pageIndex >= pagePreviews.length - 1}
             aria-label="Next page"
-            className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border-default bg-card text-body transition-colors hover:border-[var(--clay-200)] disabled:opacity-40"
+            className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border bg-card text-body transition-colors hover:border-[var(--clay-200)] disabled:opacity-40"
           >
             <ChevronRight size={16} aria-hidden="true" />
           </button>

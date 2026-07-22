@@ -426,7 +426,7 @@ export default async function AdminOverviewPage({
             {data.handledAlerts.map((item) => (
               <li
                 key={`h-${item.source}-${item.sourceId}`}
-                className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-dashed border-border-default bg-card px-3.5 py-2.5 text-sm"
+                className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-dashed border-border bg-card px-3.5 py-2.5 text-sm"
               >
                 <Pill tone="stone">handled</Pill>
                 <span className="font-semibold text-muted">{handledAlertText(item)}</span>

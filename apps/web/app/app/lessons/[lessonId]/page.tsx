@@ -230,7 +230,7 @@ export default async function LessonReviewPage({
             <ul className="mt-2 space-y-1.5 text-sm text-body">
               {insights.whatWorked.map((line) => (
                 <li key={line} className="flex gap-2">
-                  <span aria-hidden="true" className="text-sage-700">
+                  <span aria-hidden="true" className="text-sage">
                     {"\u2022"}
                   </span>
                   {line}

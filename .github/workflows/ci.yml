@@ -52,6 +52,9 @@ jobs:
       - name: Events-registry parity check (MJ-08)
         run: pnpm check:events
 
+      - name: Design-token check (colour utilities name a declared token)
+        run: pnpm check:design-tokens
+
       - name: Fleet-skill package checks (frontmatter, size limits, slash-menu parity)
         run: pnpm check:fleet-skills
 
