@@ -88,7 +88,10 @@ function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
     output.updated === true &&
     typeof output.childName === "string"
   ) {
-    return { label: "Profile updated", detail: output.childName };
+    // "Profile updated" is product-speak: a parent does not think of her
+    // child as having a profile, and she had just told Homa that Story
+    // likes animals, which is not an update to anything she can see.
+    return { label: "Saved", detail: `about ${output.childName}` };
   }
   if (part.toolName === "save_skill" && output.saved === true && typeof output.name === "string") {
     return { label: output.updated === true ? "Skill updated" : "Skill saved", detail: output.name };
@@ -133,11 +136,28 @@ function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
   return null;
 }
 
+/**
+ * A receipt, not a badge (founder note, 2026-07-22: "confusing and too
+ * colorful").
+ *
+ * It was a filled sage pill with a border, which is the visual weight of
+ * a call to action, sitting next to a sentence that already said the
+ * same thing in Homa's own words. Two problems at once: it looked like
+ * something to press, and it was louder than the fact it was reporting.
+ *
+ * Now a quiet line with one small sage dot. The dot keeps the "this
+ * landed" signal that MJ-02 asks a named effect to carry; everything
+ * else steps back so the sentence above it does the talking.
+ */
 function MemoryChip({ chip }: { chip: MemoryChipContent }) {
   return (
-    <p className="inline-flex max-w-full items-baseline gap-1.5 self-start rounded-pill border border-sage/30 bg-sage/10 px-3 py-1.5 text-xs">
-      <span className="font-semibold text-sage">{chip.label}</span>
-      {chip.detail ? <span className="truncate text-body">{chip.detail}</span> : null}
+    <p className="inline-flex max-w-full items-baseline gap-2 self-start text-xs text-subtle">
+      <span
+        aria-hidden="true"
+        className="mb-px h-1.5 w-1.5 shrink-0 self-center rounded-pill bg-sage"
+      />
+      <span className="font-medium">{chip.label}</span>
+      {chip.detail ? <span className="truncate text-muted">{chip.detail}</span> : null}
     </p>
   );
 }

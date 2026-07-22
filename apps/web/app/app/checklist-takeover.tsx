@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 
 import type { MapAnswer } from "@homa/core";
 
@@ -10,25 +9,38 @@ import type { FlowChild } from "../onboarding/flow-types";
 import { checklistPositionFor } from "./onboarding-cards";
 
 /**
- * The questions, taking over the screen
- * (plans/2026-07-21-chat-first-onboarding.md §2.5).
+ * The questions, in the chat, where everything else already is.
  *
- * The existing checklist experience mounts here whole. It carries six
- * dated founder corrections (a fixed-height card that never jumps, the
- * 140ms chip flash, one reserved kicker slot, "undo last answer" rather
- * than "back", time left rather than "question 4 of 41", and the child's
- * name inside every question), and rebuilding any of that inside a chat
- * card would re-fight all six.
+ * This used to take over the whole screen, and the founder called it
+ * (2026-07-22): "why does it go to a separate, non chat page to ask
+ * these questions? Why do I have to go to the chat and back to the
+ * chat? That seems like bad UI/UX." Right on every count. In a product
+ * whose entire onboarding is a conversation, the one moment that leaves
+ * the conversation was the questionnaire, and the leaving cost two
+ * doors, a page transition each way, and a lost view of everything Homa
+ * had just said.
  *
- * It needs almost nothing: a child, a done callback, and an exit
+ * The full page was defended by the six dated founder corrections the
+ * checklist carries: fixed card height so nothing jumps, the 140ms chip
+ * flash, one reserved kicker slot, "undo last answer" rather than
+ * "back", time left rather than "question 4 of 41", and the child's name
+ * inside every question. That defence does not hold up. Every one of
+ * those lives INSIDE the question card and travels with it. The only
+ * thing the page was actually protecting is ReportRail, a side column
+ * that is already absent below lg, so a parent on a phone has been
+ * seeing the compact layout all along.
+ *
+ * So it docks now, in the composer's slot, exactly where the facts card
+ * goes. The transcript stays visible above it, and there is no journey.
+ *
+ * It still needs almost nothing: a child, a done callback, and an exit
  * callback. It computes its own question plan, holds its own answers,
- * saves each tap itself with an idempotency key, and calls onComplete
- * only after every in-flight save has settled. So the only real work
- * here is handing it the child.
+ * saves each tap with an idempotency key, and calls onComplete only
+ * after every in-flight save has settled.
  *
  * Leaving is safe by construction, which is why the close control is a
  * plain quiet link rather than a warning: every tap is already saved,
- * and the card in the transcript will say exactly where she stopped.
+ * and the receipt in the transcript says exactly where she stopped.
  */
 
 interface MapStateChild {
@@ -141,62 +153,39 @@ export function ChecklistTakeover({
     }
   }
 
-  // A portal, because position:fixed is a lie inside a transformed
-  // ancestor: the element positions against that ancestor instead of the
-  // viewport. The onboarding shell's entry animation was exactly such an
-  // ancestor, and this overlay rendered at height zero under the one
-  // button a brand new parent must be able to press. The animation is
-  // fixed too (globals.css, flow-step-in), but this surface does not get
-  // to depend on every future wrapper staying transform-free.
-  return createPortal(
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-page">
-      <div className="mx-auto w-full max-w-[36rem] px-4 py-6 sm:px-6 lg:max-w-[58rem]">
-        <div className="flex justify-end">
+  return (
+    <div className="w-full">
+      {failed ? (
+        <div className="rounded-[22px] border border-border-subtle bg-card px-4 py-5 text-center shadow-md">
+          <p className="text-sm text-body">
+            The questions did not open. Nothing you answered is lost.
+          </p>
           <button
             type="button"
-            onClick={() => void exitWith()}
-            className="min-h-9 rounded-md px-2 py-1.5 text-sm text-subtle underline-offset-2 transition-colors hover:text-strong hover:underline"
+            onClick={() => onClose(null)}
+            className="mt-3 min-h-11 rounded-md border border-border bg-card px-4 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
           >
-            Back to chat
+            Try again
           </button>
         </div>
-        {failed ? (
-          <div className="mt-10 text-center">
-            <p className="text-body">
-              The questions did not open. Nothing you answered is lost. You can
-              try again from the chat.
-            </p>
-            <button
-              type="button"
-              onClick={() => onClose(null)}
-              className="mt-4 min-h-11 rounded-md border border-border bg-card px-4 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
-            >
-              Back to chat
-            </button>
-          </div>
-        ) : child === null ? (
-          // Never a blank frame: she just pressed a button that did
-          // nothing for a day, so the first paint after the tap has to
-          // visibly be something. Same pulse the card flow uses.
-          <div className="mt-10" aria-hidden="true">
-            <div className="h-4 w-2/3 animate-pulse rounded bg-border-subtle" />
-            <div className="mt-3 h-4 w-1/2 animate-pulse rounded bg-border-subtle" />
-          </div>
-        ) : (
-          <div className="flow-step-in mt-2">
-            <ChecklistStep
-              child={child}
-              onComplete={() => void exitWith()}
-              onExit={() => void exitWith()}
-              // The same words as the link at the top, because they are
-              // the same door. Two exits with two names read as two
-              // different places to end up.
-              exitLabel="back to chat"
-            />
-          </div>
-        )}
-      </div>
-    </div>,
-    document.body,
+      ) : child === null ? (
+        // Never a blank frame: she just pressed a button, so the first
+        // paint after the tap has to visibly be something.
+        <div aria-hidden="true">
+          <div className="h-4 w-2/3 animate-pulse rounded bg-border-subtle" />
+          <div className="mt-3 h-4 w-1/2 animate-pulse rounded bg-border-subtle" />
+        </div>
+      ) : (
+        <ChecklistStep
+          child={child}
+          onComplete={() => void exitWith()}
+          onExit={() => void exitWith()}
+          // One door, and it says where it goes. The full-page version
+          // had two, at opposite corners, saying different things.
+          exitLabel="back to the chat"
+          compact
+        />
+      )}
+    </div>
   );
 }

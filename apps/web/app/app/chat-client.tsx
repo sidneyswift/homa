@@ -1053,9 +1053,16 @@ export function ChatClient({
   // one report reveal that may still open the report. Same rule as the
   // snap card: newest, nothing from her after it, and only while the
   // line is free.
-  const activeChecklist = busy
-    ? null
-    : latestChecklistRequest(agent.data.messages);
+  // Two questions, and conflating them was a bug the founder hit: "ok
+  // this didnt make a card". The card HAD been made. Because `active`
+  // was gated on `busy`, it rendered as its own spent pill for the rest
+  // of the turn, so what she saw where a card should be was the grey
+  // receipt that means "already done".
+  //
+  // So: latest decides whether it renders as a card at all, and busy
+  // only decides whether it can be tapped yet.
+  const latestChecklist = latestChecklistRequest(agent.data.messages);
+  const activeChecklist = busy ? null : latestChecklist;
   const activeReport = latestReportReveal(agent.data.messages);
   const promptSuggestionRailAllowed =
     !busy
@@ -1171,7 +1178,11 @@ export function ChatClient({
   // rail hide while any card is docked, so the card is the whole ask.
   // activeChecklist is already null while a turn runs, so during
   // streaming the composer stays and nothing flickers.
-  const dockedChecklist = dockedDetail === null ? activeChecklist : null;
+  // latestChecklist, not activeChecklist: it docks the moment it exists,
+  // including mid-turn. The button below stays disabled until the line
+  // is free, which is the honest split between "here is the ask" and
+  // "you may answer it now".
+  const dockedChecklist = dockedDetail === null ? latestChecklist : null;
   // The composer appears when there is something to reply to. Before
   // Homa has said anything there is not, and while a card is docked the
   // card IS the input. Outside onboarding nothing changes: the box is
@@ -1179,6 +1190,8 @@ export function ChatClient({
   const showComposer =
     dockedDetail === null &&
     dockedChecklist === null &&
+    // While the questions are open the slot is theirs.
+    checklistTakeover === null &&
     (!onboarding || hasVisibleMessages);
   const planEditsSeen = planEditCount(agent.data.messages);
   useEffect(() => {
@@ -1581,9 +1594,11 @@ export function ChatClient({
                   onQuestionTypeInstead={focusComposer}
                   onOpenPlanner={setPlannerCanvas}
                   activeChecklistPartKey={
-                    isLiveMessage ? activeChecklist?.partKey : undefined
+                    isLiveMessage ? latestChecklist?.partKey : undefined
                   }
-                  onOpenChecklist={setChecklistTakeover}
+                  onOpenChecklist={
+                    activeChecklist === null ? undefined : setChecklistTakeover
+                  }
                   activeReportPartKey={
                     isLiveMessage ? activeReport?.partKey : undefined
                   }
@@ -1824,7 +1839,34 @@ export function ChatClient({
             ))}
           </div>
         ) : null}
-        {dockedDetail ? (
+        {checklistTakeover !== null ? (
+          // The questions, docked where the composer was, so answering
+          // them never leaves the conversation (founder note,
+          // 2026-07-22). Ahead of the other two because while she is
+          // answering, nothing else may take the slot.
+          <div className="mx-auto w-full max-w-[780px]">
+            <ChecklistTakeover
+              childId={checklistTakeover}
+              onClose={(exit) => {
+                setChecklistTakeover(null);
+                if (!exit) return;
+                // The handoff. It carries hints, never facts: the counts
+                // are re-derived server-side, and this only tells Homa
+                // which child the parent was just answering for and
+                // roughly where she got to, so her next line is about
+                // the right kid.
+                sendMessageRef.current?.(
+                  formatHiddenDirective("checklist_complete", {
+                    childId: exit.childId,
+                    answered: exit.answered,
+                    remaining: exit.remaining,
+                  }),
+                  { kind: "directive" },
+                );
+              }}
+            />
+          </div>
+        ) : dockedDetail ? (
           // The morph: same width, same corner radius, same shadow and
           // the same spot on screen the box occupied a second ago, so it
           // reads as one object changing shape rather than two objects
@@ -1845,7 +1887,10 @@ export function ChatClient({
               card={dockedChecklist.card}
               active
               docked
-              onOpen={setChecklistTakeover}
+              // Disabled while Homa is still talking, for the same
+              // reason the transcript copy is: the ask is visible, the
+              // answer waits for the line to be free.
+              onOpen={activeChecklist === null ? undefined : setChecklistTakeover}
             />
           </div>
         ) : null}
@@ -2010,27 +2055,6 @@ export function ChatClient({
           </p>
         ) : null}
       </footer>
-      {checklistTakeover !== null ? (
-        <ChecklistTakeover
-          childId={checklistTakeover}
-          onClose={(exit) => {
-            setChecklistTakeover(null);
-            if (!exit) return;
-            // The handoff. It carries hints, never facts: the counts are
-            // re-derived server-side, and this only tells Homa which
-            // child the parent was just answering for and roughly where
-            // she got to, so her next line is about the right kid.
-            sendMessageRef.current?.(
-              formatHiddenDirective("checklist_complete", {
-                childId: exit.childId,
-                answered: exit.answered,
-                remaining: exit.remaining,
-              }),
-              { kind: "directive" },
-            );
-          }}
-        />
-      ) : null}
       {wall ? (
         <WallModal
           door="chat"
