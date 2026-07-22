@@ -335,6 +335,7 @@ function AssistantItemView({
   activeDetailPartKey,
   onDetailsSaved,
   dockedDetailPartKey,
+  dockedChecklistPartKey,
 }: {
   item: AssistantItem;
   onSendSuggestion?: (message: string) => void;
@@ -358,6 +359,8 @@ function AssistantItemView({
   activeDetailPartKey?: string;
   onDetailsSaved?: (summary: string) => void;
   dockedDetailPartKey?: string;
+  /** Same contract for the checklist invite. */
+  dockedChecklistPartKey?: string;
 }) {
   const progressPartIsActionable =
     "sourceActionKey" in item &&
@@ -380,6 +383,11 @@ function AssistantItemView({
     case "chip":
       return <MemoryChip chip={item.chip} />;
     case "checklist":
+      // Docked: the composer is rendering it, so the transcript renders
+      // nothing. Same rule as the details card below. The founder hit
+      // the un-docked version live: the invite card, an open composer,
+      // and a suggestion chip all asking for her next move at once.
+      if (item.sourceActionKey === dockedChecklistPartKey) return null;
       return (
         <ChecklistCard
           card={item.card}
@@ -528,6 +536,7 @@ export function MessageView({
   activeDetailPartKey,
   onDetailsSaved,
   dockedDetailPartKey,
+  dockedChecklistPartKey,
 }: {
   message: EveMessage;
   onSendSuggestion?: (message: string) => void;
@@ -568,6 +577,8 @@ export function MessageView({
   onDetailsSaved?: (summary: string) => void;
   /** The facts card the composer is currently standing in for. */
   dockedDetailPartKey?: string;
+  /** Same contract for the checklist invite. */
+  dockedChecklistPartKey?: string;
 }) {
   if (message.role === "user") {
     const text = message.parts
@@ -646,6 +657,7 @@ export function MessageView({
           activeDetailPartKey={activeDetailPartKey}
           onDetailsSaved={onDetailsSaved}
           dockedDetailPartKey={dockedDetailPartKey}
+          dockedChecklistPartKey={dockedChecklistPartKey}
         />
       ))}
       </div>

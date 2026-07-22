@@ -155,10 +155,15 @@ export function latestChecklistRequest(
 export function ChecklistCard({
   card,
   active,
+  docked = false,
   onOpen,
 }: {
   card: ChecklistCardData;
   active: boolean;
+  /** Standing in for the composer, same contract as DetailCard: the
+   *  swap reads as one object changing shape, and the transcript renders
+   *  nothing for this part while it is down here. */
+  docked?: boolean;
   onOpen?: (childId: string) => void;
 }) {
   const [position, setPosition] = useState<ChecklistPosition | null>(null);
@@ -187,7 +192,16 @@ export function ChecklistCard({
     return (
       <p className="inline-flex max-w-full items-baseline gap-1.5 self-start rounded-pill border border-sage/30 bg-sage/10 px-3 py-1.5 text-xs">
         <span className="font-semibold text-sage">
-          {complete ? "Questions done" : "Questions started"}
+          {/* "ready", not "started", until she has answered something.
+              This pill renders mid-turn, before she has tapped anything,
+              and a receipt may never claim an effect that has not
+              happened. The founder read "Questions started" over a
+              button still saying "Start the questions". */}
+          {complete
+            ? "Questions done"
+            : answered > 0
+              ? "Questions started"
+              : "Questions ready"}
         </span>
         <span className="truncate text-body">
           {card.childName}
@@ -199,7 +213,11 @@ export function ChecklistCard({
 
   return (
     <section
-      className="w-full max-w-[26rem] rounded-lg border border-border-subtle bg-card p-4 shadow-md sm:p-5"
+      className={
+        docked
+          ? "w-full rounded-[22px] border border-border-subtle bg-card px-4 pb-4 pt-4 shadow-md"
+          : "w-full max-w-[26rem] rounded-lg border border-border-subtle bg-card p-4 shadow-md sm:p-5"
+      }
       aria-label={`${card.childName}'s questions`}
     >
       <div className="flex items-center justify-between gap-2">

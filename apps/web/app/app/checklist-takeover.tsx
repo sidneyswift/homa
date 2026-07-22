@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 import type { MapAnswer } from "@homa/core";
 
@@ -140,7 +141,14 @@ export function ChecklistTakeover({
     }
   }
 
-  return (
+  // A portal, because position:fixed is a lie inside a transformed
+  // ancestor: the element positions against that ancestor instead of the
+  // viewport. The onboarding shell's entry animation was exactly such an
+  // ancestor, and this overlay rendered at height zero under the one
+  // button a brand new parent must be able to press. The animation is
+  // fixed too (globals.css, flow-step-in), but this surface does not get
+  // to depend on every future wrapper staying transform-free.
+  return createPortal(
     <div className="fixed inset-0 z-50 overflow-y-auto bg-page">
       <div className="mx-auto w-full max-w-[36rem] px-4 py-6 sm:px-6 lg:max-w-[58rem]">
         <div className="flex justify-end">
@@ -166,16 +174,29 @@ export function ChecklistTakeover({
               Back to chat
             </button>
           </div>
-        ) : child ? (
+        ) : child === null ? (
+          // Never a blank frame: she just pressed a button that did
+          // nothing for a day, so the first paint after the tap has to
+          // visibly be something. Same pulse the card flow uses.
+          <div className="mt-10" aria-hidden="true">
+            <div className="h-4 w-2/3 animate-pulse rounded bg-border-subtle" />
+            <div className="mt-3 h-4 w-1/2 animate-pulse rounded bg-border-subtle" />
+          </div>
+        ) : (
           <div className="flow-step-in mt-2">
             <ChecklistStep
               child={child}
               onComplete={() => void exitWith()}
               onExit={() => void exitWith()}
+              // The same words as the link at the top, because they are
+              // the same door. Two exits with two names read as two
+              // different places to end up.
+              exitLabel="back to chat"
             />
           </div>
-        ) : null}
+        )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

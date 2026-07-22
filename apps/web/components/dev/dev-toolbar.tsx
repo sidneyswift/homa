@@ -29,7 +29,13 @@ export function DevToolbar({ familyId }: { familyId: string | null }) {
     // Half opacity until hovered: at full strength it sat on top of the
     // day separator and became part of the thing being judged, which is
     // the opposite of what a dev affordance is for.
-    <div className="fixed right-3 top-3 z-[60] flex flex-col items-end gap-1 opacity-45 transition-opacity duration-(--dur-base) hover:opacity-100 focus-within:opacity-100 print:hidden">
+    // z-40, BELOW the checklist takeover's z-50, which the header comment
+    // always promised and the class contradicted: at z-[60] the
+    // half-transparent "Restart onboarding" button, whose click deletes
+    // the family, floated directly over the takeover's "Back to chat"
+    // exit. A founder aiming for the exit was one tap from wiping the
+    // walk they were testing.
+    <div className="fixed right-3 top-3 z-40 flex flex-col items-end gap-1 opacity-45 transition-opacity duration-(--dur-base) hover:opacity-100 focus-within:opacity-100 print:hidden">
       <button
         type="button"
         onClick={() => void reset()}

@@ -81,10 +81,16 @@ export function ChecklistStep({
   child,
   onComplete,
   onExit,
+  exitLabel = "back to your family",
 }: {
   child: FlowChild;
   onComplete: () => void;
   onExit: () => void;
+  /** Where leaving actually goes. The card flow returns to the family
+   *  hub; the chat takeover returns to the conversation, and telling a
+   *  chat-first parent she is going "back to your family" names a page
+   *  she has never seen. */
+  exitLabel?: string;
 }) {
   const plans = useMemo(() => planQuestions(child.ageMonths), [child.ageMonths]);
   const [answers, setAnswers] = useState<Record<string, MapAnswer>>(child.answers);
@@ -569,7 +575,7 @@ export function ChecklistStep({
           onClick={exitChecklist}
           className="mt-6 text-sm text-subtle underline-offset-2 hover:underline"
         >
-          {"\u2190"} back to your family
+          {"\u2190"} {exitLabel}
         </button>
       </div>
 

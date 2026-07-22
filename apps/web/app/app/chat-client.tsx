@@ -20,6 +20,7 @@ import {
   type OnboardingChatConfig,
 } from "./onboarding-chat";
 import {
+  ChecklistCard,
   latestChecklistRequest,
   latestReportReveal,
 } from "./onboarding-cards";
@@ -1148,12 +1149,23 @@ export function ChatClient({
   // filling it in while Homa works, which is what she will try to do.
   const activeDetail = latestDetailRequest(agent.data.messages);
   const dockedDetail = activeDetail;
+  // The checklist invite docks for the same reason the facts card does,
+  // and the founder hit the un-docked version live: the invite in the
+  // transcript, an open composer under it, and a suggestion chip between
+  // them, three different answers to "what do I do now" on one screen.
+  // Docking is also what retires the other two: the composer and its
+  // rail hide while any card is docked, so the card is the whole ask.
+  // activeChecklist is already null while a turn runs, so during
+  // streaming the composer stays and nothing flickers.
+  const dockedChecklist = dockedDetail === null ? activeChecklist : null;
   // The composer appears when there is something to reply to. Before
   // Homa has said anything there is not, and while a card is docked the
   // card IS the input. Outside onboarding nothing changes: the box is
   // always there, exactly as it has always been.
   const showComposer =
-    dockedDetail === null && (!onboarding || hasVisibleMessages);
+    dockedDetail === null &&
+    dockedChecklist === null &&
+    (!onboarding || hasVisibleMessages);
   const planEditsSeen = planEditCount(agent.data.messages);
   useEffect(() => {
     const latest = latestPlannerOpen(agent.data.messages);
@@ -1560,6 +1572,9 @@ export function ChatClient({
                   dockedDetailPartKey={
                     isLiveMessage ? dockedDetail?.partKey : undefined
                   }
+                  dockedChecklistPartKey={
+                    isLiveMessage ? dockedChecklist?.partKey : undefined
+                  }
                   onDetailsSaved={handleDetailsSaved}
                   actionableProgressPartKey={
                     actionableInteraction?.partKey
@@ -1763,7 +1778,9 @@ export function ChatClient({
           until the line is free (the queue stays text-only). */}
       <footer
         className={`bg-page px-4 pb-5 pt-3 sm:px-6 ${
-          showComposer || dockedDetail ? "border-t border-border-subtle" : ""
+          showComposer || dockedDetail || dockedChecklist
+            ? "border-t border-border-subtle"
+            : ""
         }`}
       >
         {showSuggestions ? (
@@ -1795,6 +1812,15 @@ export function ChatClient({
               onSaved={(summary) =>
                 sendMessage(summary, { kind: "card_answer" })
               }
+            />
+          </div>
+        ) : dockedChecklist ? (
+          <div className="mx-auto w-full max-w-[780px]">
+            <ChecklistCard
+              card={dockedChecklist.card}
+              active
+              docked
+              onOpen={setChecklistTakeover}
             />
           </div>
         ) : null}

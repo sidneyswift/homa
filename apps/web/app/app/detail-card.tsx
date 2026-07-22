@@ -257,7 +257,14 @@ export function DetailCard({
       const data = (await response.json()) as { ok?: boolean };
       if (!response.ok || !data.ok) throw new Error("save failed");
       const summary = isBasics
-        ? `${all.callMeName?.trim()}, ${all.usState}`
+        ? // The state's name, not its postal code. This string becomes her
+          // own bubble in the transcript, and "Sid, DC" reads as a
+          // database row where "Sid, District of Columbia" reads as an
+          // answer she gave.
+          `${all.callMeName?.trim()}, ${
+            US_STATES.find((state) => state.code === all.usState)?.name ??
+            all.usState
+          }`
         : `${all.childName?.trim()}, born ${spokenDate(all.birthDate)}`;
       setSaved(summary);
       onSaved?.(summary);
