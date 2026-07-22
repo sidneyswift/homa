@@ -3,6 +3,43 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-22 · Founder ruling: capture every child up front, not one at a time
+
+Founder, after using the one-child arc live: "the original said one
+child. but after using it, that is a dumb design. we should capture the
+family info up front." This reverses the spec's original "plan for one
+child now and the next one later" line, and is a founder ruling, not an
+agent decision, recorded here for the same reason every founder ruling
+is: the reasoning should survive without needing this session's context.
+
+Rebuilt beat 3 as a roster loop mirroring the OLD pre-chat add-a-child
+form's real lesson (kids-step.tsx: adding another kid was always cheap
+and never gated behind a question), translated to chat-first as a loop
+rather than a standing form: card commits, Homa reacts to the age,
+offers "any other kids", repeats until she says that's everyone; a
+parent who names several kids in one message gets add_child called once
+each instead of being walked through fields she already typed. A new
+beat, "Go deep with one," then picks which child the rest of the sitting
+is actually about (skipping anyone under two, the age start_checklist
+already refuses), and the closing beat now queues the other child BY
+NAME instead of the old vague promise.
+
+Verified live, two children in one sitting (card for the first, free
+text for the second): the roster and the pick both worked exactly as
+designed. Two real misses recorded honestly rather than smoothed over:
+Homa explained her pick out loud despite being told not to, and guessed
+"he" for a child nobody had used a pronoun for yet, the same guessing
+habit an earlier fix in this file already targeted. Prose does not fully
+pin model behavior; logged as an open finding, not chased further this
+pass.
+
+Also found and fixed while verifying: `.env.development.local` had a
+stray `VERCEL_OIDC_TOKEN` left over from the original `vercel env pull`
+mistake (see the OIDC entry below), and Next's real precedence put that
+file OVER `.env.local`, so every `pnpm dev:token` refresh since has been
+silently shadowed by an old token in the wrong file. `dev:token` now
+detects and removes a stray copy there instead of leaving a trap.
+
 ## 2026-07-22 · Founder's first full walk: dead button root-caused, one-ask rule enforced, five-lens review
 
 Founder walked the whole flow (Sid, DC, child Story) and reported two
