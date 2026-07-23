@@ -271,7 +271,13 @@ export function ReportRevealCard({
           "I'm still writing the words to go with them. Keep going, there's nothing to wait for."
         )}
       </p>
-      {card.strengths.length > 0 ? (
+      {/* "Strongest" is a comparison, so it only renders when there is
+          something to compare against: with two subjects covered and
+          both listed, the label flatters instead of informs, and the
+          persona read caught exactly that ("I answered three questions
+          and I'm pretty sure they were math questions"). A strict
+          subset keeps the claim traceable to her answers. */}
+      {card.strengths.length > 0 && card.strengths.length < card.mappedSubjects ? (
         <div className="mt-3.5">
           <p className="text-xs font-bold uppercase tracking-wide text-subtle">
             Strongest subjects right now

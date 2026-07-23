@@ -139,6 +139,14 @@ export function parseChipsValue(raw: string): string[] {
 }
 
 /**
+ * The homeschool card's summary when she picked nothing. Exported so the
+ * chat client's chained-card run can tell "skipped" from a real pick and
+ * keep the skip out of her combined answer bubble: "Sidney, District of
+ * Columbia, Nothing in particular" is a sentence nobody said.
+ */
+export const NO_STYLES_SUMMARY = "Nothing in particular, noted";
+
+/**
  * The name token. Any string here may contain {name}, and it is replaced
  * with the child's name as she typed it.
  *
@@ -345,7 +353,7 @@ export function DetailCard({
         : isHomeschoolProfile
           ? pickedStyles.length > 0
             ? pickedStyles.join(", ")
-            : "Nothing in particular, noted"
+            : NO_STYLES_SUMMARY
           : `${all.childName?.trim()}, born ${spokenDate(all.birthDate)}`;
       setSaved(summary);
       onSaved?.(summary);

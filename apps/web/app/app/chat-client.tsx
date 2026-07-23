@@ -25,7 +25,7 @@ import {
   latestChecklistRequest,
   latestReportReveal,
 } from "./onboarding-cards";
-import { DetailCard, latestDetailRequest } from "./detail-card";
+import { DetailCard, latestDetailRequest, NO_STYLES_SUMMARY } from "./detail-card";
 import { ChecklistTakeover } from "./checklist-takeover";
 import { formatHiddenDirective } from "../../lib/onboarding/directives";
 import {
@@ -378,6 +378,11 @@ export function ChatClient({
   >(null);
   /** The child whose questions have taken over the screen, or null. */
   const [checklistTakeover, setChecklistTakeover] = useState<string | null>(null);
+  /** True while the app-chained homeschool card holds the composer slot
+   *  (set the moment the basics card saves during onboarding), with the
+   *  basics summary parked until the chained card settles. */
+  const [chainedHomeschool, setChainedHomeschool] = useState(false);
+  const chainedBasicsSummaryRef = useRef<string | null>(null);
   const turnStartedAtRef = useRef<number | null>(null);
   const childNameById = useMemo(
     () => new Map((kids ?? []).map((kid) => [kid.id, kid.name])),
@@ -1171,6 +1176,20 @@ export function ChatClient({
   // filling it in while Homa works, which is what she will try to do.
   const activeDetail = latestDetailRequest(agent.data.messages);
   const dockedDetail = activeDetail;
+  // The chained card run (loop iteration 4). The persona walk measured
+  // the 12-16 second model turn between the basics card and the
+  // homeschool card as pure dead air: a still screen after six taps,
+  // bought back with one sentence. So during onboarding the app chains
+  // the homeschool card itself the moment basics saves, no model turn in
+  // between, and Homa hears ONE combined answer when both have settled.
+  // She reacts once and turns to the kids, which is the same words she
+  // was spending two turns to say.
+  //
+  // Small accepted window: if she reloads after basics saved but before
+  // the chained card settles, the model's family_basics card is still
+  // the latest ask and docks again; every field coalesces server-side,
+  // so refilling costs taps, never data.
+  const dockedChained = chainedHomeschool && onboarding;
   // The checklist invite docks for the same reason the facts card does,
   // and the founder hit the un-docked version live: the invite in the
   // transcript, an open composer under it, and a suggestion chip between
@@ -1183,13 +1202,15 @@ export function ChatClient({
   // including mid-turn. The button below stays disabled until the line
   // is free, which is the honest split between "here is the ask" and
   // "you may answer it now".
-  const dockedChecklist = dockedDetail === null ? latestChecklist : null;
+  const dockedChecklist =
+    dockedDetail === null && !dockedChained ? latestChecklist : null;
   // The composer appears when there is something to reply to. Before
   // Homa has said anything there is not, and while a card is docked the
   // card IS the input. Outside onboarding nothing changes: the box is
   // always there, exactly as it has always been.
   const showComposer =
     dockedDetail === null &&
+    !dockedChained &&
     dockedChecklist === null &&
     // While the questions are open the slot is theirs.
     checklistTakeover === null &&
@@ -1914,6 +1935,31 @@ export function ChatClient({
               }}
             />
           </div>
+        ) : dockedChained ? (
+          // The app-chained homeschool card: docked by the client the
+          // moment basics saved, no model turn in between. Keyed so its
+          // step state can never inherit the basics card's.
+          <div className="mx-auto w-full max-w-[780px]">
+            <DetailCard
+              key="chained-homeschool"
+              card={{ kind: "homeschool_profile", intro: null }}
+              active
+              docked
+              onSaved={(summary) => {
+                const basics = chainedBasicsSummaryRef.current;
+                chainedBasicsSummaryRef.current = null;
+                setChainedHomeschool(false);
+                // A skipped style stays out of her bubble: "Sidney,
+                // District of Columbia, Nothing in particular" is a
+                // sentence nobody said.
+                const combined =
+                  summary === NO_STYLES_SUMMARY || basics === null
+                    ? basics ?? summary
+                    : `${basics} · ${summary}`;
+                sendMessage(combined, { kind: "card_answer" });
+              }}
+            />
+          </div>
         ) : dockedDetail ? (
           // The morph: same width, same corner radius, same shadow and
           // the same spot on screen the box occupied a second ago, so it
@@ -1924,9 +1970,18 @@ export function ChatClient({
               card={dockedDetail.card}
               active
               docked
-              onSaved={(summary) =>
-                sendMessage(summary, { kind: "card_answer" })
-              }
+              onSaved={(summary) => {
+                // Basics chains straight into the homeschool card during
+                // onboarding: her summary parks here and sends as one
+                // combined answer when the chained card settles, which
+                // deletes the dead-air model turn between the two.
+                if (dockedDetail.card.kind === "family_basics" && onboarding) {
+                  chainedBasicsSummaryRef.current = summary;
+                  setChainedHomeschool(true);
+                  return;
+                }
+                sendMessage(summary, { kind: "card_answer" });
+              }}
             />
           </div>
         ) : dockedChecklist ? (
