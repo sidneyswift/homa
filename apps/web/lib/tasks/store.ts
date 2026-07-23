@@ -1259,6 +1259,29 @@ export async function isFirstFailedRunForScheduleDay(
   return (rows[0]?.n ?? 0) === 1;
 }
 
+/**
+ * The retry bound for a reaped MANUAL run. A manual run carries no
+ * scheduled_for (it is not an outbox day), so the day-keyed guard above
+ * cannot see it. Exactly one failed manual run for this schedule inside the
+ * window means the failure has never been retried; a retried run that hangs
+ * again makes the count 2 and fails this check, so a task whose tool call
+ * reliably hangs can never loop.
+ */
+export async function isFirstFailedManualRun(
+  scheduleId: string,
+  withinHours = 24,
+): Promise<boolean> {
+  const sql = mapDb();
+  const rows = await sql<{ n: number }[]>`
+    select count(*)::int as n from public.homa_task_runs
+    where schedule_id = ${scheduleId}
+      and scheduled_for is null
+      and status = 'failed'
+      and started_at >= now() - ${`${withinHours} hours`}::interval
+  `;
+  return (rows[0]?.n ?? 0) === 1;
+}
+
 export async function advanceTaskSchedule(task: DueFamilyTask, now = new Date()): Promise<void> {
   const sql = mapDb();
   const nextRun = nextTaskRunInstant(task.timeZone, task.localHour, task.weekdays, now);
