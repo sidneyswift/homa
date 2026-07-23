@@ -126,6 +126,16 @@ describe("firstsPageFromLedger", () => {
     assert.equal(r.provenance.noQuoteLine, null);
   });
 
+  it("carries the beginning on the top row only, named for this child", () => {
+    const result = page([
+      row({ itemId: "math.how-many-5", observedAt: "2026-03-01T10:00:00.000Z", createdAt: "2026-03-01T10:00:00.000Z" }),
+      row({ itemId: "phonics.first-sound", observedAt: "2026-04-01T10:00:00.000Z", createdAt: "2026-04-01T10:00:00.000Z" }),
+    ]);
+    assert.equal(result.rows[0].beginning?.heading, "Where the record starts");
+    assert.match(result.rows[0].beginning?.body ?? "", /you told me about Story/);
+    assert.equal(result.rows[1].beginning, null);
+  });
+
   it("populates the contested line only for a contested first", () => {
     const uncontested = page([row()]);
     assert.equal(uncontested.rows[0].contestedLine, null);

@@ -274,9 +274,28 @@ describe("deriveChildFirsts", () => {
     assert.equal(mathMarked?.provenance.itemId, BANK_A);
   });
 
-  it("exposes no isBeginning field on any row", () => {
-    const firsts = derive([ev({ answer: "easily" })]);
-    assert.ok(!Object.prototype.hasOwnProperty.call(firsts[0], "isBeginning"));
+  it("marks the top row as the beginning and no other row", () => {
+    const march = ev({ itemId: BANK_A, observedAt: "2026-03-01T10:00:00.000Z", createdAt: "2026-03-01T10:00:00.000Z" });
+    const april = ev({ itemId: BANK_B, observedAt: "2026-04-01T10:00:00.000Z", createdAt: "2026-04-01T10:00:00.000Z" });
+    const firsts = derive([april, march]);
+    assert.deepEqual(
+      firsts.map((f) => f.isBeginning),
+      [true, false],
+    );
+  });
+
+  it("puts the beginning on a row that actually renders", () => {
+    // A retired catalog id drops out after sorting, so the beginning
+    // must land on the first SURVIVING row, never on a hole.
+    const gone = ev({ itemId: "gone.retired", observedAt: "2026-01-01T10:00:00.000Z", createdAt: "2026-01-01T10:00:00.000Z" });
+    const real = ev({ itemId: BANK_A, observedAt: "2026-03-01T10:00:00.000Z", createdAt: "2026-03-01T10:00:00.000Z" });
+    const firsts = derive([gone, real]);
+    assert.equal(firsts.length, 1);
+    assert.equal(firsts[0].isBeginning, true);
+  });
+
+  it("marks no beginning when there are no rows", () => {
+    assert.deepEqual(derive([]), []);
   });
 
   it("returns an empty array for a child with no qualifying rows", () => {

@@ -74,6 +74,30 @@ export function firstsSourceNoun(source: ProgressSourceKind): string {
   }
 }
 
+/**
+ * The beginning marker on the top row (founder ruling
+ * `firsts-beginning-label`, 2026-07-22).
+ *
+ * Every word here is about the RECORD, never about the child. That is
+ * not delicacy, it is the only version the data supports: `observed_at`
+ * carries the request clock on every write path except lessons, so it
+ * knows when a message arrived and cannot know when a thing happened. A
+ * mother catching up on Sunday about a Tuesday morning would otherwise
+ * be told Sunday was the beginning of her child.
+ *
+ * "The first thing you told me" is true by construction, and it is
+ * still the sentence she wants: it names the day her record of him
+ * started.
+ */
+export const FIRSTS_BEGINNING_LABEL = "Where the record starts";
+
+export function firstsBeginningBody(childName: string): string {
+  return (
+    `This is the first thing you told me about ${childName}. ` +
+    "Everything you told me later sits below it."
+  );
+}
+
 export function firstsSubjectMarker(subjectDisplayName: string): string {
   return `The first thing you told me about ${subjectDisplayName}.`;
 }

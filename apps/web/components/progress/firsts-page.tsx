@@ -80,6 +80,21 @@ export function FirstsPage({ page }: { page: ChildFirstsPage }) {
                   id={`first-${row.provenance.evidenceId}`}
                   className="rounded-lg border border-border-subtle bg-card p-5 shadow-sm"
                 >
+                  {/* The beginning marker, top row only. It names the
+                      record, never the child: observed_at is a report
+                      timestamp, so "the earliest thing he did" is a
+                      claim this page cannot make. */}
+                  {row.beginning ? (
+                    <div className="mb-3 border-b border-border-subtle pb-3">
+                      <p className="font-mono text-[0.68rem] font-bold uppercase tracking-widest text-subtle">
+                        {row.beginning.heading}
+                      </p>
+                      <p className="mt-1 text-sm text-body">
+                        {row.beginning.body}
+                      </p>
+                    </div>
+                  ) : null}
+
                   {row.subjectMarker ? (
                     <div className="mb-3">
                       <p className="font-display text-sm font-semibold text-[var(--sage-700)]">

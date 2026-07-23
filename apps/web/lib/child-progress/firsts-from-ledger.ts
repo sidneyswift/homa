@@ -1,5 +1,7 @@
 import {
+  FIRSTS_BEGINNING_LABEL,
   FIRSTS_CONTESTED_LINE,
+  firstsBeginningBody,
   firstsMatchedAbility,
   firstsMeta,
   firstsNoQuote,
@@ -60,6 +62,10 @@ export interface FirstsRowView {
     | { kind: "statement"; text: string };
   contestedLine: string | null;
   subjectMarker: { heading: string; body: string } | null;
+  /** Present on the top row only: where this child's record starts.
+   *  Speaks about the telling, never about the child, because
+   *  observed_at is a report timestamp. */
+  beginning: { heading: string; body: string } | null;
 }
 
 export interface ChildFirstsPage {
@@ -117,6 +123,12 @@ export function firstsPageFromLedger(input: {
               heading: firstsSubjectMarker(first.subjectMarker.displayName),
               body: firstsSubjectMarkerBody(p.source),
             },
+      beginning: first.isBeginning
+        ? {
+            heading: FIRSTS_BEGINNING_LABEL,
+            body: firstsBeginningBody(ledger.child.name),
+          }
+        : null,
     };
   });
 

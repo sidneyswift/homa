@@ -46,6 +46,22 @@ export interface ChildFirst {
   /** Set on the earliest first in each subject, so the page can name
    *  where a subject came into the record. Null everywhere else. */
   subjectMarker: { subjectId: string; displayName: string } | null;
+  /**
+   * True on the top row only: where this child's RECORD starts.
+   *
+   * Deliberately a claim about the telling, not about the child
+   * (founder ruling `firsts-beginning-label`, 2026-07-22). `observed_at`
+   * carries the request clock on every write path except lessons, so it
+   * records when a message arrived, never when a thing happened. "The
+   * earliest thing Story did" is therefore unsupportable, while "the
+   * first thing you told me about Story" is exactly what this column
+   * knows, and it is true by construction: this is the earliest row on
+   * the page and the rest were reported after it.
+   *
+   * Recollection sources are already excluded from founding a first, so
+   * this never lands on one of fifteen signup answers sharing an instant.
+   */
+  isBeginning: boolean;
 }
 
 /** left === right ? 0 : (left < right ? -1 : 1). Reimplemented here
@@ -170,6 +186,7 @@ export function deriveChildFirsts(input: {
   // 7 + 8. Build each first; mark the earliest per subject.
   const seenSubjects = new Set<string>();
   const firsts: ChildFirst[] = [];
+  let beginningAssigned = false;
   for (const timed of founding) {
     // Non-null: this row already produced a record inside the candidate
     // filter above, and buildProvenanceRecord is pure over the same
@@ -180,10 +197,16 @@ export function deriveChildFirsts(input: {
       ? null
       : { subjectId: provenance.subjectId, displayName: provenance.subjectDisplayName };
     seenSubjects.add(provenance.subjectId);
+    // The first row that actually renders, not founding[0]: a row can
+    // still drop out here if the catalog stopped resolving it, and the
+    // beginning must sit on a line a mother can see.
+    const isBeginning = !beginningAssigned;
+    beginningAssigned = true;
     firsts.push({
       provenance,
       contested: openConflictEvidenceIds.has(timed.evidence.id),
       subjectMarker,
+      isBeginning,
     });
   }
   return firsts;

@@ -33,6 +33,7 @@ function quoteRow(overrides: Partial<FirstsRowView> = {}): FirstsRowView {
     lead: { kind: "quote", text: "Story counted five buttons all by himself" },
     contestedLine: null,
     subjectMarker: null,
+    beginning: null,
     ...overrides,
   };
 }
@@ -55,6 +56,7 @@ function statementRow(overrides: Partial<FirstsRowView> = {}): FirstsRowView {
     lead: { kind: "statement", text: "Says the first sound in a spoken word" },
     contestedLine: null,
     subjectMarker: null,
+    beginning: null,
     ...overrides,
   };
 }
@@ -98,11 +100,29 @@ describe("FirstsPage", () => {
     assert.doesNotMatch(html, /<blockquote[^>]*>Says the first sound/);
   });
 
-  it("renders no 'First time' chip and no beginning label", () => {
+  it("renders no 'First time' chip", () => {
     const html = render(page([quoteRow(), statementRow()]));
     assert.doesNotMatch(html, /First time/i);
-    assert.doesNotMatch(html, /where this starts/i);
-    assert.doesNotMatch(html, /the beginning/i);
+  });
+
+  it("renders the beginning marker on the top row only, about the record", () => {
+    const html = render(
+      page([
+        quoteRow({
+          beginning: {
+            heading: "Where the record starts",
+            body: "This is the first thing you told me about Story. Everything you told me later sits below it.",
+          },
+        }),
+        statementRow(),
+      ]),
+    );
+    const markers = html.match(/Where the record starts/gu) ?? [];
+    assert.equal(markers.length, 1);
+    assert.match(html, /the first thing you told me about Story/);
+    // Never the version that dates the child rather than the telling.
+    assert.doesNotMatch(html, /earliest thing Story did/i);
+    assert.doesNotMatch(html, /everything below it came after/i);
   });
 
   it("renders no month, year, or period grouping heading", () => {

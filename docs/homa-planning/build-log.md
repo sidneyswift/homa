@@ -3,6 +3,47 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-22 · Founder ruling: the firsts page names the record, not the child
+
+The receipt spine (PR #125) shipped without the beginning label the
+celebration spec's R3 asks for ("The very first row Homa ever wrote
+about this child sits at the top of the page, labelled as the
+beginning"). The build plan cut it and flagged it for a founder line,
+because `observed_at` carries the request clock on every write path
+except lessons: `manage_child_progress.ts` and `check-in-service.ts`
+both pass `context.now`, and only `lib/lessons/worker.ts` passes a
+distinct time. The column records when a message ARRIVED, so "the
+earliest thing Story did, everything below came after" is a claim about
+message arrival wearing the clothes of a claim about a child. A mother
+catching up on Sunday about a Tuesday morning would have been told
+Sunday was the beginning.
+
+**Ruled: bring the label back, worded about the record.** The plan
+offered two remedies and the founder took the first. The marker now
+reads "Where the record starts" over "This is the first thing you told
+me about {child}. Everything you told me later sits below it." Every
+word is about the telling, which is exactly what `observed_at` knows,
+and it is true by construction: this is the earliest row on the page and
+the rest were reported after it. Recollection sources are already barred
+from founding a first, so it never lands on one of fifteen signup
+answers sharing an instant.
+
+Two tests carry the ruling: the copy test asserts the body says "you
+told me" and rejects any phrasing that dates the child ("earliest thing
+Story did", "came after"), and the derivation test pins the flag to the
+first row that actually RENDERS, not to the first sorted candidate, so a
+retired catalog id cannot leave the marker on a hole.
+
+**Not taken, and still open as a real option:** a capture-time
+`happened_on` column. That is the deeper fix, and it buys something this
+ruling does not: dates on the page would become event dates rather than
+report dates, so a January morning reported in March would sort and read
+as January. It needs an additive migration, a model judgment over the
+parent's own language ("last Tuesday he read a whole page") with code
+verifying the date is real, bounded and not in the future, and a change
+to the write path for every evidence row. Larger and riskier than a
+label, so it stays a separate tranche rather than riding this one.
+
 ## 2026-07-22 · Founder rulings: the remaining five celebration decisions (D2 through D6)
 
 The celebration-system spec
