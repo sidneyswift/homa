@@ -114,7 +114,7 @@ export default async function AdminOverviewPage({
       </div>
 
       <div className="mt-4 flex flex-col gap-2">
-        {data.deliveryTrouble.length === 0 && data.emailTrouble.length === 0 && data.runTrouble.length === 0 && data.inboundTrouble.length === 0 ? (
+        {data.deliveryTrouble.length === 0 && data.emailTrouble.length === 0 && data.runTrouble.length === 0 && data.inboundTrouble.length === 0 && data.offerTrouble.length === 0 ? (
           <AlertRow tone="sky">
             <b>Deliveries look clean {rangeLabel}.</b>{" "}
             {data.handledAlerts.length > 0
@@ -180,6 +180,12 @@ export default async function AdminOverviewPage({
               >
                 <b>{t.channel} turn never answered</b> · {t.familyName ?? "unlinked"} · claimed{" "}
                 {timeAgo(t.at)}, still not delivered
+              </AlertRow>
+            ))}
+            {data.offerTrouble.slice(0, 3).map((t) => (
+              <AlertRow key={`o-${t.id}`} tone="rose">
+                <b>Accepted offer never fulfilled</b> · {t.familyName} · they said yes{" "}
+                {timeAgo(t.at)}, no worksheet or task was made
               </AlertRow>
             ))}
           </>
@@ -345,7 +351,7 @@ export default async function AdminOverviewPage({
         title="Trouble, line by line"
         sub="Failed and uncertain sends with the family they belong to. Uncertain means the provider never confirmed; it is its own bucket on purpose."
       />
-      {data.deliveryTrouble.length === 0 && data.emailTrouble.length === 0 && data.runTrouble.length === 0 && data.inboundTrouble.length === 0 ? (
+      {data.deliveryTrouble.length === 0 && data.emailTrouble.length === 0 && data.runTrouble.length === 0 && data.inboundTrouble.length === 0 && data.offerTrouble.length === 0 ? (
         <EmptyNote>
           Nothing failed or went uncertain {rangeLabel}
           {data.handledAlerts.length > 0
@@ -412,6 +418,18 @@ export default async function AdminOverviewPage({
               </span>
               <span className="ml-auto inline-flex flex-wrap items-center justify-end gap-1.5">
                 <AlertAckButton source="inbound_receipt" sourceId={t.id} />
+              </span>
+            </li>
+          ))}
+          {data.offerTrouble.map((t) => (
+            <li
+              key={`ot-${t.id}`}
+              className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-border-subtle bg-card px-3.5 py-2.5 text-sm shadow-sm"
+            >
+              <span className="font-bold text-strong">{t.familyName}</span>
+              <Pill tone="rose">unfulfilled</Pill>
+              <span className="text-muted">
+                accepted an offer {timeAgo(t.at)}, no artifact was ever made
               </span>
             </li>
           ))}

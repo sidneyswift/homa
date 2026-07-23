@@ -70,6 +70,28 @@ export interface InboundTrouble {
  * is comfortably past in-flight and short enough to notice same-morning. */
 const INBOUND_STALL_MINUTES = 15;
 
+/** A parent said yes to a morning-brief offer (the loop resolved
+ * 'accepted'), but no fulfillment row was ever written: the agent turn that
+ * makes the worksheet or task crashed after the acceptance was booked, so
+ * the family got silence where an artifact was promised. Confirmed live
+ * 2026-07-20 (Chan family, Noah's project-planning worksheet). This is the
+ * semantically-correct unit the receipt-level 'sms turn never answered'
+ * alert only caught by luck: acceptance and fulfillment are decoupled, so
+ * the recoverable signal is an accepted offer with no matching fulfillment.
+ * Stale past the same minutes as an inbound turn (fulfillment rides the same
+ * turn as acceptance, so seconds is normal and minutes means dropped), and
+ * bounded to the 24h window in which reserveAcceptedOfferFulfillment still
+ * treats the offer as re-fulfillable. */
+export interface OfferTrouble {
+  id: string;
+  familyName: string;
+  /** Whole minutes since the parent accepted, for a plain "43m ago" line. */
+  at: string;
+}
+
+const OFFER_FULFILLMENT_STALL_MINUTES = 15;
+const OFFER_FULFILLMENT_WINDOW_HOURS = 24;
+
 export interface FleetOverview {
   rangeDays: OverviewRange;
   snapshots: FamilySnapshot[];
@@ -90,6 +112,9 @@ export interface FleetOverview {
   emailCounts: Record<string, number>;
   emailTrouble: EmailTrouble[];
   inboundTrouble: InboundTrouble[];
+  /** Accepted morning-brief offers whose fulfillment turn dropped: a yes
+   * with no artifact. See OfferTrouble. */
+  offerTrouble: OfferTrouble[];
   cronLastAt: string | null;
   cronLastOk: boolean | null;
   /** True when the newest heartbeat is over two hours old (the cron is
@@ -326,6 +351,34 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
     order by ir.claimed_at desc
     limit 12
   `;
+  // Accepted morning-brief offers whose fulfillment never landed: the loop
+  // resolved 'accepted' but no conversation_offer_fulfillments row exists for
+  // the offer's delivery. That is a promised artifact the family never got,
+  // and until now nothing surfaced it (acceptance and fulfillment are
+  // decoupled). Bounded to the same 24h in which the offer stays
+  // re-fulfillable, hidden once marked handled, sandbox excluded.
+  const offerTroubleRows = await sql<{ id: string; family_name: string; at: string }[]>`
+    select d.id, f.name as family_name, l.resolved_at::text as at
+    from public.conversation_open_loops l
+    join public.conversation_deliveries d
+      on d.id = l.delivery_id and d.family_id = l.family_id
+    join public.homa_task_runs r
+      on r.id = d.task_run_id and r.family_id = d.family_id
+    join public.families f on f.id = l.family_id
+    where l.state = 'resolved'
+      and l.resolved_outcome = 'accepted'
+      and r.kind = 'morning_brief'
+      and d.status = 'sent'
+      and l.resolved_at < now() - ${`${OFFER_FULFILLMENT_STALL_MINUTES} minutes`}::interval
+      and l.resolved_at >= now() - ${`${OFFER_FULFILLMENT_WINDOW_HOURS} hours`}::interval
+      and not f.sandbox
+      and not exists (
+        select 1 from public.conversation_offer_fulfillments cof
+        where cof.source_delivery_id = d.id and cof.family_id = l.family_id
+      )
+    order by l.resolved_at desc
+    limit 12
+  `;
   const cronRows = await sql<{ ran_at: string; ok: boolean }[]>`
     select ran_at::text as ran_at, ok from public.cron_runs
     where job = 'map_cron'
@@ -440,6 +493,11 @@ export async function getFleetOverview(rangeDays: OverviewRange): Promise<FleetO
       id: row.id,
       familyName: row.family_name,
       channel: row.channel,
+      at: row.at,
+    })),
+    offerTrouble: offerTroubleRows.map((row) => ({
+      id: row.id,
+      familyName: row.family_name,
       at: row.at,
     })),
     cronLastAt: cronRows[0]?.ran_at ?? null,
