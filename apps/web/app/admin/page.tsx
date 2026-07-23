@@ -289,10 +289,13 @@ export default async function AdminOverviewPage({
       <div className="mt-5 rounded-lg border border-border-subtle bg-card p-5 shadow-sm">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <p className="text-[0.72rem] font-bold text-muted">Families over time</p>
-          <p className="text-xs text-subtle">Real families only, counted daily since the first signup.</p>
+          <p className="text-xs text-subtle">
+            Every real signup, and how many finished setup by adding a kid. The gap is the
+            onboarding leak.
+          </p>
         </div>
         <div className="mt-2">
-          <GrowthChart points={data.familiesByDay} />
+          <GrowthChart series={data.growth} />
         </div>
       </div>
 

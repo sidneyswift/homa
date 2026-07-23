@@ -99,11 +99,21 @@ export interface OfferTrouble {
 const OFFER_FULFILLMENT_STALL_MINUTES = 15;
 const OFFER_FULFILLMENT_WINDOW_HOURS = 24;
 
-/** One point of the growth line: founder-local day, running total of real
- * families that existed by the end of it. */
+/** One point of a growth line: founder-local day, running total by the
+ * end of it. */
 export interface FamiliesByDayPoint {
   day: string;
   total: number;
+}
+
+/** The two growth lines (founder ruling 2026-07-23): signups counts every
+ * real signup including families that never finished the account step, so
+ * it is top-of-funnel demand; setupDone counts families that finished
+ * setup and added a kid. The vertical gap between them IS the onboarding
+ * leak, which is why this is two fixed lines and not a filter. */
+export interface GrowthSeries {
+  signups: FamiliesByDayPoint[];
+  setupDone: FamiliesByDayPoint[];
 }
 
 /** A family whose sends are blocked because they texted STOP. A choice,
@@ -123,9 +133,10 @@ export interface FleetOverview {
   sandboxCount: number;
   activeFamilies: number;
   newSignups: FamilySnapshot[];
-  /** Cumulative real families per founder-local day, full history. Always
-   * customers-only: the growth line is the story of the business. */
-  familiesByDay: FamiliesByDayPoint[];
+  /** Cumulative real signups and setup-done families per founder-local
+   * day, full history. Always customers-only: the growth lines are the
+   * story of the business. */
+  growth: GrowthSeries;
   runCounts: Record<string, number>;
   runTrouble: RunTrouble[];
   deliveryCounts: Record<string, number>;
@@ -165,19 +176,21 @@ export interface FleetOverview {
   handledAlerts: HandledAlert[];
 }
 
-/** Walks founder-local day keys from the first signup through today and
- * carries the running total across zero-signup days, so the growth line
- * never skips a quiet day. Day keys are plain calendar dates; stepping
- * them with UTC math is safe. */
-function buildFamiliesByDay(
-  signupsPerDay: { day: string; n: number }[],
+/** Walks founder-local day keys from startDay (default: the first row's
+ * day) through today and carries the running total across zero-event
+ * days, so a growth line never skips a quiet day. Both growth lines pass
+ * the same startDay so their x domains align. Day keys are plain
+ * calendar dates; stepping them with UTC math is safe. */
+function buildCumulativeByDay(
+  rowsPerDay: { day: string; n: number }[],
   todayKey: string,
+  startDay: string | undefined = rowsPerDay[0]?.day,
 ): FamiliesByDayPoint[] {
-  if (signupsPerDay.length === 0) return [];
-  const byDay = new Map(signupsPerDay.map((row) => [row.day, row.n]));
+  if (!startDay) return [];
+  const byDay = new Map(rowsPerDay.map((row) => [row.day, row.n]));
   const points: FamiliesByDayPoint[] = [];
   let total = 0;
-  let cursor = new Date(`${signupsPerDay[0].day}T00:00:00Z`);
+  let cursor = new Date(`${startDay}T00:00:00Z`);
   const last = new Date(`${todayKey}T00:00:00Z`);
   while (cursor.getTime() <= last.getTime()) {
     const key = cursor.toISOString().slice(0, 10);
@@ -203,12 +216,31 @@ export async function getFleetOverview(
 
   // Sequential on purpose, never Promise.all: see lib/admin/db.ts.
   const allSnapshots = await getFamilySnapshots();
+  // Every real signup, husks included (founder ruling 2026-07-23): the
+  // signups line measures demand, so it must not require the account
+  // step the roster requires.
   const signupsPerDay = await sql<{ day: string; n: number }[]>`
     select ((f.created_at at time zone ${tz})::date)::text as day, count(*)::int as n
     from public.families f
     where coalesce(f.status, 'open') <> 'deleted'
       and f.sandbox is not true
-      and exists (select 1 from public.family_members m where m.family_id = f.id)
+    group by 1 order by 1
+  `;
+  // Setup done = profile completed and at least one kid added; the
+  // milestone day is whichever of the two happened last.
+  const setupPerDay = await sql<{ day: string; n: number }[]>`
+    select ((greatest(f.profile_completed_at, kid.first_at) at time zone ${tz})::date)::text as day,
+           count(*)::int as n
+    from public.families f
+    join lateral (
+      select min(c.created_at) as first_at
+      from public.children c
+      where c.family_id = f.id
+    ) kid on true
+    where coalesce(f.status, 'open') <> 'deleted'
+      and f.sandbox is not true
+      and f.profile_completed_at is not null
+      and kid.first_at is not null
     group by 1 order by 1
   `;
   const runRows = await sql<{ status: string; n: number }[]>`
@@ -534,7 +566,10 @@ export async function getFleetOverview(
     sandboxCount,
     activeFamilies: activeIds.size,
     newSignups: snapshots.filter((s) => new Date(s.createdAt).getTime() >= cutoff),
-    familiesByDay: buildFamiliesByDay(signupsPerDay, dayKey(now, tz)),
+    growth: {
+      signups: buildCumulativeByDay(signupsPerDay, dayKey(now, tz)),
+      setupDone: buildCumulativeByDay(setupPerDay, dayKey(now, tz), signupsPerDay[0]?.day),
+    },
     runCounts: toCounts(runRows),
     runTrouble: runTroubleRows.map((row) => ({
       id: row.id,
