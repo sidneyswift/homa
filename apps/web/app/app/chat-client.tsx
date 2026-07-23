@@ -17,6 +17,7 @@ import {
   kickoffDirectiveFor,
   kickoffLockIsStale,
   markKickoffSent,
+  ONBOARDING_WELCOME,
   type OnboardingChatConfig,
 } from "./onboarding-chat";
 import {
@@ -1528,6 +1529,27 @@ export function ChatClient({
           </div>
         ) : (
           <>
+            {onboarding ? (
+              // The pre-warmed welcome (§6.1: first bubble in <400ms).
+              // Rendered by the app the moment the page exists, so
+              // arrival is never a blank screen while the first model
+              // turn travels; a live walk measured 11 to 17 seconds of
+              // thinking dot before the model's own hello, and the model
+              // no longer writes one (onboarding-mode tells it this text
+              // is already on screen). Deterministic, not a message row:
+              // it costs nothing, needs no lock, and cannot double.
+              <div className="flex w-full items-start gap-2.5">
+                <span
+                  aria-hidden="true"
+                  className="mt-0.5 inline-flex shrink-0 opacity-70"
+                >
+                  <Logo size={20} variant="mark" />
+                </span>
+                <p className="min-w-0 flex-1 leading-relaxed text-body">
+                  {ONBOARDING_WELCOME}
+                </p>
+              </div>
+            ) : null}
             {transcript.map((item, itemIndex) => {
               // One row for one turn (founder note, 2026-07-22: the mark
               // "starts at one spot, then moves down a little bit and

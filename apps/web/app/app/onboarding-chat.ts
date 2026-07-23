@@ -32,6 +32,22 @@ export const RESUME_GAP_MS = 30 * 60 * 1000;
 export type OnboardingKickoffKind = "kickoff" | "resume" | "none";
 
 /**
+ * The welcome, pre-warmed (plans/2026-07-21-chat-first-onboarding.md
+ * §6.1: "first bubble in <400ms"). The app renders this the instant the
+ * page mounts, so arrival is never a blank screen with a thinking dot:
+ * a live walk measured 11 to 17 seconds before the model's greeting
+ * landed, and a persona read called surviving it "a coin flip." The
+ * model knows this exact text is already on screen (onboarding-mode
+ * carries it) and opens with the basics card instead of a second hello.
+ *
+ * One paragraph, founder-approved wording (2026-07-23). If this changes,
+ * change the copy of it in agent/instructions/onboarding-mode.ts in the
+ * same commit, or Homa will contradict the first thing she ever said.
+ */
+export const ONBOARDING_WELCOME =
+  "Hey, I'm Homa. I'll be doing this school year with you! I keep track of where your kids are in each subject, and I make the worksheets and lesson plans they need. Let's start with a little about you, then your kids.";
+
+/**
  * kickoffKindFor(config): which machine message opens this visit.
  *
  * Silence is a real answer here. A parent who closed the tab for four
