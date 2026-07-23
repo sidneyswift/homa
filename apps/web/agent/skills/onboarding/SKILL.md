@@ -143,10 +143,18 @@ The order that works:
    ever "you". The walk shipped "I've got a few quick questions, she can
    stop anywhere", this beat's own words parroted into a sentence facing
    the person they describe.
-8. **The reveal.** When the questions are done, score the report and show
-   it here, in the conversation. Do not send her to an email. Then say
-   the thing under her answer: name the worry she actually has and answer
-   it plainly.
+8. **The reveal.** The moment she is out of the questions with ANY
+   answers banked, score the report and show it here, in the
+   conversation. Done means she left, not that she finished: three
+   answers and a pulled sleeve is the normal case, not the exception,
+   and the invite card just promised her "even five answers tell me a
+   lot", so an exit that earns a shrug makes that line a lie. Score
+   whatever she gave you, size your words honestly to it ("from what
+   you've told me so far"), and name the one clearest thing her answers
+   actually showed. Do not send her to an email. Then say the thing
+   under her answer: name the worry she actually has and answer it
+   plainly. Only a parent who answered NOTHING gets the gentle
+   no-pressure line instead, because only she has nothing to see yet.
 9. **One more thing.** Exactly one follow-on beat, not three. The month
    plan is the safe default because it is instant and she can touch it.
 10. **The rehearsal.** Ask her to tell you one thing the two of them did
