@@ -689,6 +689,23 @@ export function MessageView({
   const items = assistantItems(message);
   const steps = workedForSteps(message);
   if (items.length === 0 && steps.length === 0) return null;
+  // While everything this turn produced is docked in the composer slot,
+  // the card IS the turn's presence on screen, and the row here would
+  // render nothing but the worked-for eyebrow. A receipt with no words
+  // above the very first card read as the app talking to its engineers
+  // (founder call 2026-07-23, closing the drop-off loop), so the row
+  // waits: the moment the card is spent or superseded it returns as an
+  // honest work receipt in scrollback.
+  const allDocked =
+    items.length > 0 &&
+    items.every(
+      (item) =>
+        (item.kind === "details" &&
+          item.sourceActionKey === dockedDetailPartKey) ||
+        (item.kind === "checklist" &&
+          item.sourceActionKey === dockedChecklistPartKey),
+    );
+  if (allDocked) return null;
   return (
     // The mark stays. It bobs through the wait and then settles here, in
     // the same size and the same place, so the one thing on screen that

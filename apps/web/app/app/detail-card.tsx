@@ -188,19 +188,14 @@ export const FIELDS: Record<DetailCardKind, DetailField[]> = {
       hint: "This decides which homeschool rules I follow for you.",
       kind: "state",
     },
-    {
-      key: "familyName",
-      label: "What does your family go by?",
-      hint: "Something like \"The Chen family\". Skip it if you'd rather not.",
-      kind: "text",
-      optional: true,
-    },
-    {
-      key: "photo",
-      label: "Want to add a photo of yourself?",
-      hint: "Totally optional.",
-      kind: "photo-optional",
-    },
+    // Family name and her photo used to be steps 3 and 4 here. Founder
+    // ruling 2026-07-23, closing the drop-off loop: optional asks with
+    // no visible payoff do not sit between her and her kids. Both stay
+    // capturable in settings, conversationally (save_family_basics
+    // accepts familyName), and at the first moment the product has a
+    // concrete use to name for them. The persona read that pushed this:
+    // "two optional-fluff questions in a four-question card means half
+    // this card was decoration."
   ],
   homeschool_profile: [
     {
