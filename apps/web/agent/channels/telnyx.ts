@@ -18,8 +18,10 @@ import { bindDeliveredProgressCheckIn } from "../../lib/child-progress/delivery-
 import {
   claimInboundReceipt,
   completeInboundReceipt,
+  completeInboundReceiptForTurn,
   failInboundReceipt,
   setInboundReceiptSession,
+  setInboundReceiptTurn,
 } from "../../lib/conversation-continuity/inbound-receipts";
 import {
   markCanonicalMessageDelivered,
@@ -131,6 +133,34 @@ const { bot, channel, send } = chatSdkChannel({
   // cannot lose conversation state.
   state: createMemoryState(),
   events: {
+    // eve's session.auth.current is a single mutable slot (AuthKey), not
+    // one per turn: sending a second inbound text on the same long-lived
+    // SMS session overwrites it before the first turn's completion event
+    // reads it. That silently orphaned real families' replies (confirmed
+    // live: two SMS turns claimed and never answered). turn.started fires
+    // essentially immediately, well before a follow-up text could arrive,
+    // so it is the one safe place left to durably stamp which receipt this
+    // turn owns. Overriding this key replaces eve's default typing
+    // indicator, so it is replicated here.
+    async "turn.started"(event, channel, ctx) {
+      await channel.thread?.startTyping("Working...");
+      const attributes = (ctx.session.auth.current?.attributes ?? {}) as {
+        inboundReceiptId?: string;
+      };
+      if (attributes.inboundReceiptId) {
+        await setInboundReceiptTurn(attributes.inboundReceiptId, event.turnId);
+      }
+    },
+    // Fires exactly once per turn regardless of output, unlike
+    // message.completed (once per assistant step, and not at all when the
+    // final step has no visible text). Looked up by the durable turn stamp
+    // above instead of session.auth.current, so it always resolves the
+    // claim even when message.completed below raced onto the wrong
+    // receipt. No default handler exists for this key, so this is purely
+    // additive.
+    async "turn.completed"(event, channel, ctx) {
+      await completeInboundReceiptForTurn(ctx.session.id, event.turnId);
+    },
     async "message.completed"(event, channel, ctx) {
       if (event.finishReason !== "stop" || !event.message?.trim()) return;
       const attributes = (ctx.session.auth.current?.attributes ?? {}) as {
