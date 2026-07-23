@@ -3,6 +3,58 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-22 · Founder rulings: the remaining five celebration decisions (D2 through D6)
+
+The celebration-system spec
+(`docs/homa-planning/plans/2026-07-22-celebration-system.md`) posed seven
+decisions. D1 and D7 were ruled earlier today (see the entry below). The
+founder ruled the remaining five in one sitting, asked in plain language.
+All five are now in the spec's section 7 and the founder-ruling register.
+
+- **D2 `certificate-wording`.** An area-completion certificate a child will
+  read may carry the child's first name, what they can now do in warm plain
+  words, the date, and "at home." No score, no ranking, nothing a sibling
+  could be measured against. The parent decides whether to print and hand it
+  over. This is the narrow exception to no-child-facing-view: a
+  parent-chosen physical object, never a screen Homa shows the child.
+
+- **D3 `portfolio-proactive`.** Homa MAY proactively remind families in states
+  that legally require a portfolio, ahead of their deadlines. This OVERRODE
+  the spec's recommendation of on-request-only. It creates the one exception
+  to "the Friday letter is the only proactive beat": that invariant now reads
+  "the only proactive *celebration* beat", and a portfolio-deadline reminder
+  is a separate, legally-grounded, non-celebration channel that does not ride
+  the letter. It needs the family's state, per-state deadline data, and the
+  private state crosswalk, so it is a larger build than on-request and has no
+  plan yet; scope separately. It must never invent a date and stay a reminder,
+  not a countdown.
+
+- **D4 `record-export`.** A family can download their child's full record for
+  free for as long as the account exists, indefinitely, including after
+  cancellation. Nothing is ever sealed or made immutable, so a parent can
+  always retrieve the record or delete a sentence they regret. Kept voice
+  clips live with the record, removed only by per-child erase or account
+  deletion. The grace-period-then-delete alternative was declined.
+
+- **D5 `letter-recipient`.** The Friday letter defaults to the adult who has
+  been reporting evidence for that child, only. A second adult opts in
+  explicitly, per child, and mutes per child without affecting the other
+  adult. Auto-including both parents was declined: it risks unrequested
+  celebration about homeschooling reaching a skeptical co-parent.
+
+- **D6 `named-worry-rail`.** The subject the mother named as her worry gets one
+  true sentence at minimum once a month (every fourth weekly letter), including
+  the honest slow answer when nothing moved ("reading did not move this week;
+  what is under him is still under him"). Not every letter. This places a
+  non-celebratory true sentence inside a celebration beat on purpose, so Homa
+  is never seen avoiding the subject the mother cares about most.
+
+D5 and D6 unblock the Friday-letter tranche
+(`docs/homa-planning/plans/celebration-v1/3-friday-letter.md`); the handoff's
+"build the worry rail behind a TODO" caveat is retired, cadence is monthly
+minimum. D2 and D3 govern the certificate and portfolio rungs, which have no
+build plan yet.
+
 ## 2026-07-22 · Founder rulings: keep their voice, and the kid standing chip comes off
 
 Two decisions out of the celebration-system research round

@@ -25,8 +25,17 @@ each doc is the audit trail, not a to-do list.
 
 Rungs still spec-only, no build plan yet: R5 free credit, R7 your own words
 answered, R8 then-and-now, R9 dinner question, R10 ninety days, R11 area
-certificate, R12 portfolio packet. Several of those are blocked on open
-founder decisions (D2 through D6, listed in the spec's section 7).
+certificate, R12 portfolio packet.
+
+All seven founder decisions (D1-D7) are now ruled (spec section 7). The two
+that touch these three tranches are settled: the Friday letter goes to the
+reporting adult by default with per-child opt-in for a second adult (D5), and
+its named-worry rail runs at a monthly minimum (D6). D2 (certificate wording)
+and D3 (Homa may proactively remind about portfolio deadlines in states that
+require one) govern the certificate and portfolio rungs, which have no build
+plan yet. Note D3 created a narrow second proactive channel: see the spec's R6
+reconciliation note before assuming "the Friday letter is the only proactive
+beat" is still literally true.
 
 ## Build order, and why
 

@@ -103,7 +103,9 @@ With a remembered form:
 
 **Never.** The count never appears without named abilities beside it, or it reads as a score. Never enumerate what opened in (b), or a gift becomes a to-do list. Explicit answers stay strictly dominant over implication, which the derivation already enforces (`abilities.ts:139-141`).
 
-### R6. The Friday letter (the only proactive beat)
+### R6. The Friday letter (the only proactive CELEBRATION beat)
+
+> Reconciliation note (D3 ruled 2026-07-22): the Friday letter is the only proactive *celebration* beat. There is now exactly one other proactive channel, and it is not a celebration: a portfolio-deadline reminder for a family in a state that legally requires a portfolio. It does not ride the letter and follows different rules (see §7 D3). Everywhere this doc says "the only proactive beat", read it as "the only proactive celebration beat".
 
 **Trigger.** Once per child per seven days, at the end of the family's own school week, in the family's own time zone. The school day is derived from rhythm memories ("school four mornings a week, Fridays are co-op"), the weekday distribution of parent-initiated events over the last six weeks (`apps/web/lib/activation/signals.ts:18-38`), and her own message pattern. If the derived day does not beat Friday by a clear margin, use Friday. Homa states the derived day out loud the first time and it is changeable in one tap.
 
@@ -456,31 +458,38 @@ Listed separately in `openDecisions`. D1 is time-critical: audio is being destro
 
 ---
 
-## 7. Open founder decisions
+## 7. Founder decisions (all ruled)
 
-### D1 (time-critical, one-way)
+All seven decisions are ruled as of 2026-07-22. The rulings are also in the
+build log and the founder-ruling register (`docs/homa-planning/journeys/10-reconciliation.md` §5).
+Kept here in full because the plans in `celebration-v1/` were written against
+the open questions.
 
-Keep their voice: may a parent, per clip, retain a trimmed 20-second child utterance past the 30-day lesson audio TTL (supabase/migrations/20260714033500_lesson_listen.sql:5-8, :144)? The TTL is a deliberate privacy commitment, so this is a ruling not a patch. Every week the decision stays open, another cohort of the best material the product will ever hold is permanently deleted. Recommended shape if yes: per clip, parent-initiated, one-tap deletable, offered only where the review's siblingNote is null, never a default and never a settings toggle that silently retains everything.
+### D1 (time-critical, one-way) , RULED
 
-### D2 (blocks the certificate)
+Keep their voice: may a parent retain a child utterance past the 30-day lesson audio TTL? **Ruled yes, and NOT opt-in ("if there's a good clip, let's save it for them; they don't need to opt in").** Narrowed the same day and SHIPPED (PR #122): Homa keeps the WHOLE lesson, not a trimmed clip, because the transcriber returns no word timings and no diarization, so a clip of "the child's own voice" cannot be verified. The parent is told on the review page and deletes it in one tap. See `keep-their-voice` ruling.
 
-What may a certificate say when a child is the reader? The ruled law is no child-facing view, deliberately and off the roadmap. A printable certificate is an artifact rather than a view, but a child will read it and it goes on her wall. Needs an explicit boundary before R11 ships: what wording is permitted, whether the child's name may appear, and whether the dated back page may be visible to the child.
+### D2 (blocks the certificate R11) , RULED
 
-### D3
+What may a certificate say when a child will read it? **Ruled: the child's first name, what they can now do in warm plain words, the date, and "at home."** No score, no ranking, nothing a sibling could be measured against. The parent decides whether to print it and hand it over. This is the narrow exception to no-child-facing-view: a parent-chosen physical object, never a screen Homa shows the child.
 
-May the portfolio packet be mentioned proactively at all, or is it strictly on-request? The Friday letter is ruled the only proactive beat. Recommendation: strictly on-request, with one non-anxious mention permitted only inside a turn where she herself raises a filing deadline. Never a scheduled reminder, never a state-default deadline, never a date Homa inferred.
+### D3 , RULED (overrides the spec's recommendation)
 
-### D4
+May the portfolio be mentioned proactively? **Ruled: yes, Homa MAY proactively remind families in states that legally require a portfolio, ahead of their deadlines.** This overrides the recommendation of on-request-only.
 
-Deletion and departure policy. Proposed and built into v2 unless overruled: unconditional free export of any child's full record at any time including after cancellation; per-child erase that removes evidence rows, firsts, kept clips and pending offers; nothing ever sealed or made immutable. Open sub-questions: how long after cancellation the export stays available, and whether kept voice clips survive that window or are deleted at cancellation.
+Consequence to reconcile, not a contradiction to hide: the spec elsewhere calls the Friday letter "the only proactive beat" (§2 R6, §5D). That invariant now has ONE narrow, legally-grounded exception: a portfolio-deadline reminder for a family in a state that requires one. It is not a celebration beat and does not ride the letter. Building it needs the family's state, per-state deadline data, and the private state crosswalk (§4), so it is a larger commitment than "on request" and has no build plan yet; scope it separately. It must still never invent a date, never nag, and stay a reminder rather than a countdown.
 
-### D5
+### D4 , RULED
 
-The second adult. Proposed: the Friday letter is per-adult opt-in, defaulting to the adult who has been reporting evidence for that child, with per-child mute that does not affect the other adult. The alternative (auto-include both primary parents) risks sending unrequested celebration about homeschooling to a co-parent who is skeptical of it. Confirm the opt-in default.
+Deletion and departure. **Ruled: a family can download their child's full record for free for as long as the account exists (until they delete it), indefinitely, including after cancellation.** Nothing is ever sealed or made immutable, so a parent can always retrieve the record or delete a sentence they regret. Kept voice clips live with the record and are removed only by per-child erase or account deletion. The grace-period-then-delete alternative was declined.
 
-### D6
+### D5 , RULED
 
-The named-worry rail cadence. Proposed: at minimum every fourth letter carries one true sentence about the subject the mother herself named as her worry, including the honest slow answer when nothing moved ('reading did not move this week; what is under him is still under him'). This deliberately places a non-celebratory true sentence inside a celebration beat. Confirm that this is wanted, and confirm the minimum cadence.
+The second adult. **Ruled: the Friday letter defaults to the adult who has been reporting evidence for that child only.** A second adult opts in explicitly, per child, and can mute per child without affecting the other adult. Auto-including both parents was declined, because it risks sending unrequested celebration about homeschooling to a co-parent who may be skeptical of it.
+
+### D6 , RULED
+
+The named-worry rail. **Ruled yes: the subject the mother named as her worry gets one true sentence at minimum once a month, including the honest slow answer when nothing moved** ("reading did not move this week; what is under him is still under him"). Minimum cadence is monthly (every fourth weekly letter), not every letter. This deliberately places a non-celebratory true sentence inside a celebration beat, so Homa is never seen to be avoiding the subject the mother cares about most.
 
 ### D7 (live surface, verified in code)
 

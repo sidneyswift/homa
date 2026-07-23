@@ -43,10 +43,14 @@ each as its own PR.
 2. **Guards and truth** (`2-guards-and-truth.md`) , coverage-is-not-ability,
    corrections/regressions, the "is he behind his sister?" chat move,
    measurement. The safety layer.
-3. **Friday letter** (`3-friday-letter.md`) , the only proactive beat, the large
-   ticket. Ships a migration (`celebration_letters`). Its named-worry rail
-   depends on open founder decision D6 (spec section 7); flag that and build the
-   rest, leaving the rail behind a clear TODO rather than inventing a cadence.
+3. **Friday letter** (`3-friday-letter.md`) , the only proactive celebration
+   beat, the large ticket. Ships a migration (`celebration_letters`). Its
+   named-worry rail is now ruled (D6, spec section 7): build it with a monthly
+   minimum cadence (one true sentence about the mother's named worry subject at
+   least every fourth weekly letter, including the honest slow answer when
+   nothing moved). Recipient default is also ruled (D5): the letter goes to the
+   adult who has been reporting evidence for that child, with per-child opt-in
+   for a second adult.
 
 Ship tranche 1 as its own PR and stop for review before starting tranche 2.
 Do not batch them.
@@ -130,9 +134,9 @@ page and delete it before committing.
 - End commit messages with:
   Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
 - End PR bodies with the Claude Code generation line.
-- If a plan conflicts with what you find in the code, or depends on an open
-  founder decision (D2-D6 in the spec), STOP and surface it rather than
-  inventing policy. Founder rulings outrank plan docs.
+- All seven founder decisions (D1-D7) are now ruled; see spec section 7. If a
+  plan still conflicts with what you find in the code, or with a ruling, STOP
+  and surface it rather than inventing policy. Founder rulings outrank plan docs.
 
 Start by reading the four docs above, then re-verify the receipt-spine plan's
 citations against the current code, then build it.
