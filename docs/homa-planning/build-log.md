@@ -3,6 +3,32 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-23 · Founder ruling: homeschool approach moves into the basics card
+
+While tracing onboarding for a "what actually happens, beat by beat" audit, found
+that `save_homeschool_profile` only ever writes when a parent volunteers her
+approach in passing; nothing in onboarding asks for it. Told the founder this was
+by design (deliberate passive capture, not a gap). Founder disagreed: "this
+should be captured." Asked, via a structured choice, where the ask should live,
+naming the real tradeoff: the basics card already sits inside the sub-4-minute-
+aha budget the 2026-07-22 chat-first rebuild fought to protect (see that entry
+below), so a third field there competes directly with it. Founder chose the
+basics card anyway, explicitly accepting that tradeoff over the alternatives
+(rehearsal beat, day-2+, or leaving it purely passive).
+
+Implemented as a third, always-skippable step on the family_basics card: a chip
+multi-select of the existing `HOMESCHOOL_STYLES` enum, writing through the same
+`saveFamilyContext` merge path `save_homeschool_profile` already uses, so a style
+picked here and one mentioned later in conversation land in one bag. Selecting
+none counts as a complete answer; the step never blocks advancing. Code:
+`apps/web/app/app/detail-card.tsx`, `apps/web/app/api/onboarding/basics/route.ts`.
+
+Verified live: picked Montessori and Eclectic, the receipt bubble read the full
+answer back correctly, the write returned 200, and Homa's next line proved the
+data reached her context rather than just echoing the tap ("Montessori with a
+bit of everything mixed in tells me a lot: I'll lean toward hands-on, self-paced
+activities..."). Design-tokens and the full chat-ui guard (97 tests) both green.
+
 ## 2026-07-22 · Reveal card said "ready" before the narrative was
 
 Founder, watching the reveal card in chat: "current, it says its ready,
