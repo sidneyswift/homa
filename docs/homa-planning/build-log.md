@@ -3,6 +3,58 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-23 · The onboarding drop-off loop: five fixes from persona walks
+
+Founder directive: "make onboarding incredible" by looping subagents that
+role-play a busy, skeptical, easily-dropping mom through the live flow,
+fixing what they find. Method each iteration: a real browser walk of the
+live dev flow capturing every beat and its measured latency, a
+fresh-context persona subagent reading that exact captured experience and
+ranking where she quits, one fix, live re-verification, repeat. Two
+research subagents (conversion evidence; agent-first onboarding practice)
+ran first and their findings cross-checked the persona's rankings.
+
+Five fixes shipped, each live-verified (commits 4053e23d, f79b1296,
+76828a0d, 851fdec4, 57a4a495):
+
+1. Leaving the questions early with ANY answers now earns the scored
+   reveal, honestly sized, never a polite shrug. Root cause was "when the
+   questions are done" reading as finished-means-complete at two layers.
+2. Arrival is never a blank screen: the app renders the founder-approved
+   greeting instantly (the §6.1 pre-warmed welcome, previously unbuilt;
+   11-17 measured seconds of thinking dot before), and the model's first
+   turn is just the basics card, no second hello.
+3. A partial reveal ends with an honest anchor (the named remaining
+   questions), never a manufactured promise.
+4. The basics card chains straight into the homeschool card client-side,
+   deleting the 16-second model turn between them; Homa hears one
+   combined answer and reacts once. Same pass: "strongest subjects" only
+   renders as a strict subset of covered subjects, and every reveal claim
+   must trace to an answer she remembers giving.
+5. Stated time pressure ("I gotta go") now outranks the beat order, with
+   the compression named out loud. Prose-steered, not re-verified live.
+
+Decisions made without a founder ruling, all reversible: the chained-card
+run replaces the founder-designed per-card reaction rhythm with one
+combined reaction (the persona measured the rhythm's cost at 16 silent
+seconds; the reaction itself survives, there is just one); the pre-warmed
+welcome leaves scrollback once onboarding completes; a reload inside the
+chained-card window re-docks the basics card (fields coalesce, so it
+costs taps, not data).
+
+Left deliberately unfixed, needing founder rulings, with the persona's
+"good but not incredible" verdict attached: (a) producing a real artifact
+from her own words before the sitting ends (the dinosaur-worksheet
+moment; the plan's A3/V-B territory, and it must ride the offer
+fulfillment machinery that is still flag-gated); (b) the optional asks
+(photo, family name) sitting before her kids, which persona and research
+both rank against and which reverses the 2026-07-23 basics-card ruling;
+(c) remaining per-turn latency (12-17s per model turn is now the floor;
+turn count is minimized, the rest is infra); (d) the "Worked for N
+seconds" receipt as the only thing above the first card. The recurring
+eve dev-runtime stale-snapshot crash after agent-file edits (restart
+fixes it) is noted as a tooling landmine worth its own fix.
+
 ## 2026-07-23 · Founder ruling: homeschool approach moves into the basics card
 
 While tracing onboarding for a "what actually happens, beat by beat" audit, found
