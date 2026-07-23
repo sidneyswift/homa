@@ -67,12 +67,15 @@ describe("MorningOfferFunnel", () => {
       />,
     );
 
-    assert.match(html, /40% of 10 closed windows/u);
-    assert.match(html, /2 windows still open/u);
+    assert.match(html, /40% of the 10 briefs old enough to judge/u);
+    assert.match(html, /2 briefs were sent too recently to count yet/u);
     assert.match(html, /Of the 4 replies, 3 said yes and 2 got their material or task\./u);
-    assert.match(html, /6 briefs closed their 24 hour window with no reply/u);
+    assert.match(html, /6 briefs went a full 24 hours with no reply/u);
     assert.match(html, /1 nearby message could not be tied to a brief/u);
-    assert.match(html, /40% of closed windows got a reply this week\./u);
+    assert.match(html, /40% of the briefs old enough to judge got a reply this week\./u);
+    assert.match(html, /A brief counts once it has had a full 24 hours to be answered\./u);
+    // "Closed window" was engineering vocabulary the founder had to ask about.
+    assert.doesNotMatch(html, /closed window/u);
     assert.match(html, /the number to move is replies, not yes rates/u);
     // The yes-or-no stage is gone: nobody can reply no, so it carried nothing.
     assert.doesNotMatch(html, /Yes or no/u);
@@ -89,7 +92,7 @@ describe("MorningOfferFunnel", () => {
     );
 
     assert.match(html, /No replies yet this week\./u);
-    assert.match(html, /No reply windows have closed yet this week\./u);
-    assert.match(html, /9 windows still open/u);
+    assert.match(html, /No brief has had its full 24 hours yet this week\./u);
+    assert.match(html, /9 briefs were sent too recently to count yet/u);
   });
 });
