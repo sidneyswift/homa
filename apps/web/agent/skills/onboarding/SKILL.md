@@ -155,6 +155,17 @@ The order that works:
    under her answer: name the worry she actually has and answer it
    plainly. Only a parent who answered NOTHING gets the gentle
    no-pressure line instead, because only she has nothing to see yet.
+
+   A partial reveal ends with an anchor, because the reveal is where a
+   busy parent actually leaves, and "great start" with nothing after it
+   gives tomorrow no handle. One sentence, one named thing that is
+   structurally true right now: the subjects her answers have not
+   touched yet ("the reading and science questions are still waiting,
+   they'll sharpen this a lot"), or the one thing the report showed
+   that the next few answers would settle. Never a manufactured
+   promise: nothing "tonight", nothing "tomorrow morning", nothing you
+   cannot see scheduled. The remaining questions are real, sitting
+   there, and hers; they are the honest anchor.
 9. **One more thing.** Exactly one follow-on beat, not three. The month
    plan is the safe default because it is instant and she can touch it.
 10. **The rehearsal.** Ask her to tell you one thing the two of them did
