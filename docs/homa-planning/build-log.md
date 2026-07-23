@@ -3,6 +3,32 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-23 · Founder ruling: all four post-loop items approved
+
+Founder, on the drop-off loop's four parked items: "agree with your 4
+suggestions." Ruled and dispositioned:
+
+1. **The artifact moment** (Homa makes something real from her own words,
+   the dinosaur-worksheet beat, before the sitting ends or ready for her
+   return): approved, NOT built in this session. It must ride the offer
+   fulfillment machinery (acceptance/fulfillment decoupling is the exact
+   failure the 2026-07-23 recovery arc exists for, and the recovery
+   engine is still behind HOMA_OFFER_RECOVERY_ENABLED pending sandbox
+   verification), so it gets its own session rather than a same-day
+   bolt-on. Spawned as a follow-up task.
+2. **Optional asks out of sitting one**: shipped same session
+   (be312e2f). The basics card returns to name + state; family name and
+   photo move to settings, conversation, and the first concrete-use
+   moment. Reverses the placement half of the same-morning basics-card
+   ruling, at the founder's direction.
+3. **Per-turn latency floor** (12-17s per model turn with turn count
+   already minimized): approved as an infra investigation, spawned as a
+   follow-up task rather than guessed at here.
+4. **Bare worked-for receipt above the first card**: shipped same
+   session (be312e2f). A turn whose whole output is docked renders no
+   transcript row until the card is spent; receipts return to scrollback
+   afterward, so no work is hidden.
+
 ## 2026-07-23 · The onboarding drop-off loop: five fixes from persona walks
 
 Founder directive: "make onboarding incredible" by looping subagents that
