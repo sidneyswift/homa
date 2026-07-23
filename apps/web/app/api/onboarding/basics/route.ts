@@ -1,7 +1,8 @@
-import { US_STATES } from "@homa/core";
+import { HOMESCHOOL_STYLES, US_STATES } from "@homa/core";
 import { z } from "zod";
 
 import { emitMapEvent } from "../../../../lib/map/events";
+import { saveFamilyContext } from "../../../../lib/map/store";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
 import { requireFamily } from "../../../../lib/map/session";
 import { saveFamilyBasics } from "../../../../lib/onboarding/store";
@@ -37,13 +38,19 @@ const basicsSchema = z
       .refine((value) => US_STATE_CODES.has(value), "not a US state code")
       .optional(),
     timeZone: z.string().trim().min(3).max(60).optional(),
+    // The basics card's third, optional step (founder call: fold it in
+    // here rather than leave it purely to chance mid-conversation). An
+    // empty array is what "asked, nothing picked" looks like, so it is
+    // its own branch below rather than "nothing to save".
+    homeschoolStyles: z.array(z.enum(HOMESCHOOL_STYLES)).max(HOMESCHOOL_STYLES.length).optional(),
   })
   .refine(
     (value) =>
       value.callMeName !== undefined ||
       value.familyName !== undefined ||
       value.usState !== undefined ||
-      value.timeZone !== undefined,
+      value.timeZone !== undefined ||
+      value.homeschoolStyles !== undefined,
     "nothing to save",
   );
 
@@ -71,6 +78,15 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const { savedFields } = await saveFamilyBasics(family.id, parsed.data);
+    // Same merge path save_homeschool_profile uses in conversation, so a
+    // style picked here and one mentioned in passing land in one bag
+    // rather than two shapes. An empty array still counts as answered:
+    // it means she saw the chips and picked none, which the tool path
+    // has no way to express (it only ever writes what was volunteered).
+    if (parsed.data.homeschoolStyles !== undefined) {
+      await saveFamilyContext(family.id, { styles: parsed.data.homeschoolStyles });
+      savedFields.push("homeschoolStyles");
+    }
     // The same event the form step emits, so the funnel counts one
     // family-setup whichever surface collected it.
     if (!family.profile_completed_at) {

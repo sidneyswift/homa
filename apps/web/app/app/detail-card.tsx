@@ -3,9 +3,10 @@
 import type { EveMessage, EveMessagePart } from "eve/react";
 import { useState } from "react";
 
-import { US_STATES } from "@homa/core";
+import { HOMESCHOOL_STYLES, US_STATES } from "@homa/core";
 
 import { Logo } from "../../components/brand/Logo";
+import { HOMESCHOOL_STYLE_LABELS } from "../../lib/homeschool-styles";
 
 /**
  * The facts card (plans/2026-07-21-chat-first-onboarding.md §2.3).
@@ -117,8 +118,19 @@ export interface DetailField {
   key: string;
   label: string;
   hint?: string;
-  kind: "text" | "state" | "date";
+  kind: "text" | "state" | "date" | "chips-optional";
   autoComplete?: string;
+  /** chips-optional only: the fixed list she picks any number from. */
+  options?: { value: string; label: string }[];
+}
+
+/** Turns the comma-joined chips-optional value back into its list, empty
+ *  string included, since "" split on "," is [""] rather than []. */
+export function parseChipsValue(raw: string): string[] {
+  return raw
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
 }
 
 /**
@@ -162,6 +174,16 @@ export const FIELDS: Record<DetailCardKind, DetailField[]> = {
       label: "Which state are you in?",
       hint: "This decides which homeschool rules I follow for you.",
       kind: "state",
+    },
+    {
+      key: "homeschoolStyles",
+      label: "Any particular homeschool approach you follow?",
+      hint: "Pick any that fit, or skip. Totally optional.",
+      kind: "chips-optional",
+      options: HOMESCHOOL_STYLES.map((value) => ({
+        value,
+        label: HOMESCHOOL_STYLE_LABELS[value],
+      })),
     },
   ],
   child: [
@@ -229,7 +251,9 @@ export function DetailCard({
       ? value.length === 2
       : field.kind === "date"
         ? value.length === 10
-        : value.trim().length > 0;
+        : field.kind === "chips-optional"
+          ? true
+          : value.trim().length > 0;
 
   async function save(all: Record<string, string>): Promise<void> {
     setSaving(true);
@@ -243,6 +267,7 @@ export function DetailCard({
               callMeName: all.callMeName?.trim(),
               usState: all.usState,
               timeZone: browserTimeZone(),
+              homeschoolStyles: parseChipsValue(all.homeschoolStyles ?? ""),
             }),
           })
         : await fetch("/api/map/children", {
@@ -256,15 +281,20 @@ export function DetailCard({
           });
       const data = (await response.json()) as { ok?: boolean };
       if (!response.ok || !data.ok) throw new Error("save failed");
+      const pickedStyles = parseChipsValue(all.homeschoolStyles ?? "").map((value) =>
+        (HOMESCHOOL_STYLE_LABELS as Record<string, string>)[value] ?? value,
+      );
       const summary = isBasics
         ? // The state's name, not its postal code. This string becomes her
           // own bubble in the transcript, and "Sid, DC" reads as a
           // database row where "Sid, District of Columbia" reads as an
-          // answer she gave.
+          // answer she gave. The style names, when she picked any, ride
+          // on the same bubble rather than a second one: it is still one
+          // answer, about herself, from one card.
           `${all.callMeName?.trim()}, ${
             US_STATES.find((state) => state.code === all.usState)?.name ??
             all.usState
-          }`
+          }${pickedStyles.length > 0 ? `, ${pickedStyles.join(", ")}` : ""}`
         : `${all.childName?.trim()}, born ${spokenDate(all.birthDate)}`;
       setSaved(summary);
       onSaved?.(summary);
@@ -289,6 +319,17 @@ export function DetailCard({
 
   function setValue(next: string): void {
     setValues((current) => ({ ...current, [field.key]: next }));
+  }
+
+  /** Toggles one chip in place, preserving pick order, same rule the old
+   *  linear homeschool step used (the first pick stays primary
+   *  downstream, e.g. the plan's style note). */
+  function toggleChip(chipValue: string): void {
+    const current = parseChipsValue(values[field.key] ?? "");
+    const next = current.includes(chipValue)
+      ? current.filter((entry) => entry !== chipValue)
+      : [...current, chipValue];
+    setValue(next.join(","));
   }
 
   // Spent: the settled receipt every other finished card uses. Her
@@ -344,7 +385,28 @@ export function DetailCard({
           <span className="text-sm font-medium text-strong">
             {withChildName(field.label, values)}
           </span>
-          {field.kind === "state" ? (
+          {field.kind === "chips-optional" ? (
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {(field.options ?? []).map((option) => {
+                const selected = parseChipsValue(value).includes(option.value);
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => toggleChip(option.value)}
+                    aria-pressed={selected}
+                    className={`min-h-9 rounded-pill border px-3 py-1.5 text-sm transition-colors ${
+                      selected
+                        ? "border-brand bg-brand-soft text-[var(--clay-700)]"
+                        : "border-border bg-card text-strong hover:border-brand"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          ) : field.kind === "state" ? (
             <select
               autoFocus
               className={FIELD_CLASS}
