@@ -13,6 +13,7 @@ import {
 import type { DashboardReport } from "../../lib/dashboard";
 import type { TrajectoryEra } from "../../lib/map/trajectory-eras";
 import { abilitiesSkyFromView } from "../../lib/child-progress/abilities-from-view";
+import { FIRSTS_DOOR } from "../../lib/child-progress/firsts-copy";
 import { buildTrajectoryStory } from "../../lib/map/trajectory-story";
 import { KidAvatar } from "../dashboard/kid-avatar";
 import { PageColumn } from "../dashboard/page-column";
@@ -158,6 +159,7 @@ export function ProgressView({
   eras,
   kids,
   lessons = null,
+  hasFirsts = false,
   deeperChecks = true,
 }: {
   view: ChildProgressView;
@@ -179,6 +181,12 @@ export function ProgressView({
    * the flag is off, and absent on read-only mirrors, which have no
    * business offering a recording door. */
   lessons?: ProgressLessonsCardData | null;
+  /** Whether the firsts page has anything on it. A boolean, never a
+   * count: the door renders only when there is a keepsake behind it, so
+   * a child reported on honestly with no `easily` rows outside signup
+   * never gets a door into an empty page. Computed on the route from the
+   * same ledger read, degraded to false on failure. */
+  hasFirsts?: boolean;
   /** False on read-only mirrors (the founder console): the subject
    * panel's deep-dive door walks the family's own flow, so only her
    * session offers it. */
@@ -321,6 +329,23 @@ export function ProgressView({
             sky={abilitiesSkyFromView(view, now)}
           />
         )}
+
+        {/* The door to the firsts page. Two gates, each load-bearing.
+            neverAssessed keeps the first check-in as a brand-new child's
+            one ask. hasFirsts keeps the door out of the page for a child
+            reported on honestly with no `easily` rows outside signup,
+            because that door leads to an empty keepsake and was, before
+            the view-context change, one tap from a sibling's full one. */}
+        {!neverAssessed && hasFirsts ? (
+          <div className="mt-6">
+            <Link
+              href={`/app/${view.childId}/firsts`}
+              className="text-sm font-medium text-[var(--sage-700)] underline underline-offset-4 transition-colors hover:text-[var(--sage-800)]"
+            >
+              {FIRSTS_DOOR}
+            </Link>
+          </div>
+        ) : null}
 
         {lessons && neverAssessed ? <LessonsCard card={lessons} /> : null}
       </div>

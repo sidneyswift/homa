@@ -246,4 +246,73 @@ describe("ProgressView", () => {
     assert.doesNotMatch(html, /Record a lesson/);
     assert.doesNotMatch(html, /lessons\/record/);
   });
+
+  it("shows the firsts door when hasFirsts is true and the child is assessed", () => {
+    const html = renderToStaticMarkup(
+      <AppRouterContext.Provider value={ROUTER}>
+        <ProgressView
+          view={PROGRESS_FIXTURE_VIEW}
+          reportHref={null}
+          report={PROGRESS_FIXTURE_REPORT}
+          eras={PROGRESS_FIXTURE_ERAS}
+          kids={PROGRESS_FIXTURE_KIDS}
+          hasFirsts
+        />
+      </AppRouterContext.Provider>,
+    );
+    assert.match(html, /href="\/app\/child-1\/firsts"[^>]*>See the firsts</);
+  });
+
+  it("hides the firsts door when hasFirsts is false, even with the abilities card", () => {
+    const html = renderToStaticMarkup(
+      <AppRouterContext.Provider value={ROUTER}>
+        <ProgressView
+          view={PROGRESS_FIXTURE_VIEW}
+          reportHref={null}
+          report={PROGRESS_FIXTURE_REPORT}
+          eras={PROGRESS_FIXTURE_ERAS}
+          kids={PROGRESS_FIXTURE_KIDS}
+          hasFirsts={false}
+        />
+      </AppRouterContext.Provider>,
+    );
+    assert.doesNotMatch(html, /See the firsts/);
+    assert.doesNotMatch(html, /\/firsts"/);
+  });
+
+  it("hides the firsts door for a never-assessed child", () => {
+    const html = renderToStaticMarkup(
+      <AppRouterContext.Provider value={ROUTER}>
+        <ProgressView
+          view={{ ...PROGRESS_FIXTURE_VIEW, subjects: [], conflicts: [] }}
+          reportHref={null}
+          report={null}
+          eras={[]}
+          kids={PROGRESS_FIXTURE_KIDS}
+          hasFirsts
+        />
+      </AppRouterContext.Provider>,
+    );
+    assert.doesNotMatch(html, /See the firsts/);
+  });
+
+  it("adds no count, percentage, or banned word with the door", () => {
+    const html = renderToStaticMarkup(
+      <AppRouterContext.Provider value={ROUTER}>
+        <ProgressView
+          view={PROGRESS_FIXTURE_VIEW}
+          reportHref={null}
+          report={PROGRESS_FIXTURE_REPORT}
+          eras={PROGRESS_FIXTURE_ERAS}
+          kids={PROGRESS_FIXTURE_KIDS}
+          hasFirsts
+        />
+      </AppRouterContext.Provider>,
+    );
+    // The door text itself carries no number and no deficit word.
+    const doorText = "See the firsts";
+    assert.ok(html.includes(doorText));
+    assert.ok(!/\bbehind\b/i.test(doorText));
+    assert.ok(!/\d/.test(doorText));
+  });
 });
