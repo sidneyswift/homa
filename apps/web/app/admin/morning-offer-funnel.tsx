@@ -31,8 +31,8 @@ export function MorningOfferFunnel({
     footnotes.push(
       countPhrase(
         summary.noLinkedReply,
-        "brief closed its 24 hour window with no reply",
-        "briefs closed their 24 hour window with no reply",
+        "brief went a full 24 hours with no reply",
+        "briefs went a full 24 hours with no reply",
       ),
     );
   }
@@ -43,11 +43,11 @@ export function MorningOfferFunnel({
   }
   if (possibleInterest > 0) {
     footnotes.push(
-      `${countPhrase(
+      countPhrase(
         possibleInterest,
-        "nearby message could not be tied to a brief",
-        "nearby messages could not be tied to a brief",
-      )} and is not counted as a reply`,
+        "nearby message could not be tied to a brief, so it is not counted as a reply",
+        "nearby messages could not be tied to a brief, so they are not counted as replies",
+      ),
     );
   }
 
@@ -91,14 +91,14 @@ export function MorningOfferFunnel({
             {summary.linkedReplies}
             {replyRate ? (
               <span className="ml-2 font-sans text-sm font-normal text-muted">
-                {replyRate} of {summary.maturedOffers} closed windows
+                {replyRate} of the {summary.maturedOffers} briefs old enough to judge
               </span>
             ) : null}
           </p>
           <p className="mt-1.5 text-[0.72rem] text-subtle">
             {summary.waiting > 0
-              ? `${countPhrase(summary.waiting, "window", "windows")} still open`
-              : "no windows still open"}
+              ? `${countPhrase(summary.waiting, "brief was", "briefs were")} sent too recently to count yet`
+              : "every brief has had its full 24 hours"}
           </p>
         </div>
       </div>
@@ -123,8 +123,8 @@ export function MorningOfferFunnel({
         </p>
         <p className="mt-1.5 text-sm text-body">
           {replyRate
-            ? `${replyRate} of closed windows got a reply ${rangeLabel}.`
-            : `No reply windows have closed yet ${rangeLabel}.`}{" "}
+            ? `${replyRate} of the briefs old enough to judge got a reply ${rangeLabel}. A brief counts once it has had a full 24 hours to be answered.`
+            : `No brief has had its full 24 hours yet ${rangeLabel}.`}{" "}
           Nearly everyone who replies says yes, so the number to move is replies, not yes rates.
           The next lever is the message itself: end the brief with one concrete question a parent
           can answer in a word, then compare reply rates week over week.
