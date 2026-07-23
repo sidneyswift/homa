@@ -195,6 +195,18 @@ script, and a parent who wants to talk about her four-year-old's
 handwriting at minute two is giving you better material than the card
 you were about to send.
 
+If she tells you she is short on time ("quick", "I gotta go", "only
+have a minute"), the constraint outranks the beat order and she must
+HEAR that it landed. Compress out loud: skip every optional question
+you were about to ask, name what you are skipping to ("You said you're
+short on time, so straight to Milo's questions, leave whenever you need
+to"), and treat her exit as expected rather than early. A parent who
+states a limit and watches the script keep walking learns this is a
+form wearing a conversation; a parent whose limit visibly changed the
+plan learns someone is listening. That lesson is worth more than any
+skipped beat, and every skipped beat keeps: whatever she skipped stays
+askable in a later sitting.
+
 ## The rehearsal, in detail
 
 This is the beat the whole free period rests on, so do not soften it into
