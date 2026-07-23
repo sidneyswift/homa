@@ -531,6 +531,185 @@ families made anything in the current Monday-to-Monday window, and the
 busiest made 38 against the specced week-one allowance of 10. Whatever the
 right allowance is, 10 is not obviously it. That number is for the §7.5
 ruling.
+## 2026-07-22 · Founder rulings: the remaining five celebration decisions (D2 through D6)
+
+The celebration-system spec
+(`docs/homa-planning/plans/2026-07-22-celebration-system.md`) posed seven
+decisions. D1 and D7 were ruled earlier today (see the entry below). The
+founder ruled the remaining five in one sitting, asked in plain language.
+All five are now in the spec's section 7 and the founder-ruling register.
+
+- **D2 `certificate-wording`.** An area-completion certificate a child will
+  read may carry the child's first name, what they can now do in warm plain
+  words, the date, and "at home." No score, no ranking, nothing a sibling
+  could be measured against. The parent decides whether to print and hand it
+  over. This is the narrow exception to no-child-facing-view: a
+  parent-chosen physical object, never a screen Homa shows the child.
+
+- **D3 `portfolio-proactive`.** Homa MAY proactively remind families in states
+  that legally require a portfolio, ahead of their deadlines. This OVERRODE
+  the spec's recommendation of on-request-only. It creates the one exception
+  to "the Friday letter is the only proactive beat": that invariant now reads
+  "the only proactive *celebration* beat", and a portfolio-deadline reminder
+  is a separate, legally-grounded, non-celebration channel that does not ride
+  the letter. It needs the family's state, per-state deadline data, and the
+  private state crosswalk, so it is a larger build than on-request and has no
+  plan yet; scope separately. It must never invent a date and stay a reminder,
+  not a countdown.
+
+- **D4 `record-export`.** A family can download their child's full record for
+  free for as long as the account exists, indefinitely, including after
+  cancellation. Nothing is ever sealed or made immutable, so a parent can
+  always retrieve the record or delete a sentence they regret. Kept voice
+  clips live with the record, removed only by per-child erase or account
+  deletion. The grace-period-then-delete alternative was declined.
+
+- **D5 `letter-recipient`.** The Friday letter defaults to the adult who has
+  been reporting evidence for that child, only. A second adult opts in
+  explicitly, per child, and mutes per child without affecting the other
+  adult. Auto-including both parents was declined: it risks unrequested
+  celebration about homeschooling reaching a skeptical co-parent.
+
+- **D6 `named-worry-rail`.** The subject the mother named as her worry gets one
+  true sentence at minimum once a month (every fourth weekly letter), including
+  the honest slow answer when nothing moved ("reading did not move this week;
+  what is under him is still under him"). Not every letter. This places a
+  non-celebratory true sentence inside a celebration beat on purpose, so Homa
+  is never seen avoiding the subject the mother cares about most.
+
+D5 and D6 unblock the Friday-letter tranche
+(`docs/homa-planning/plans/celebration-v1/3-friday-letter.md`); the handoff's
+"build the worry rail behind a TODO" caveat is retired, cadence is monthly
+minimum. D2 and D3 govern the certificate and portfolio rungs, which have no
+build plan yet.
+
+## 2026-07-22 · Founder rulings: keep their voice, and the kid standing chip comes off
+
+Two decisions out of the celebration-system research round
+(`docs/homa-planning/plans/2026-07-22-celebration-system.md`, seven
+decisions posed, these two ruled on the spot).
+
+**D1, keep their voice. Ruled yes, and NOT opt-in.** Lesson audio
+deletes on a 30-day timer today, a deliberate privacy commitment in the
+lesson-listen migration; transcripts and rows persist, only the raw
+audio goes. The question was whether a parent may keep a trimmed clip
+of their child working something out past that timer. The founder ruled
+yes and went further than the proposal: "If there's a good clip, let's
+save it for them. They don't need to opt in."
+
+So Homa keeps it on her behalf. That is a real change to a stated
+privacy posture, so the boundary is drawn tight and the honesty
+obligations sit on the retention side, not the deletion side: the model
+judges which clip is worth keeping, code verifies it is this family's
+lesson and the CHILD's own utterance with no sibling present and no
+frustrated beat, the clip is bounded and trimmed, the parent is TOLD
+plainly in the lesson review that Homa kept it, one tap deletes it, and
+it dies with the lesson, the child, or the family. An auto-keep the
+parent is never told about would be a silent retention change, which is
+the one shape this ruling does not authorize.
+
+Time pressure was the reason this got asked first: deletion is one-way,
+so every week the question stayed open destroyed another cohort of the
+best material this product will ever hold.
+
+**D7, the kid standing chip. Removed.** `kid-pill.tsx` put one of
+"Ahead ✦" (gold), "On track" (sage), or "Growing right now" (sky) on
+the per-kid page header, computed from how many of that child's
+subjects scored ahead or growing. It broke no rule the codebase states:
+`BANNED_WORDS` (`packages/core/src/map/copy-laws.ts`) covers "behind"
+but not "ahead", and the narrative gate that enforces it only ever runs
+over model-composed prose, never over a hand-coded chip. That is
+precisely why it was posed as a decision rather than fixed on sight.
+
+The hazard is placement, not vocabulary. The sibling switcher renders
+directly beneath the chip in `kid-view.tsx`, so a mother of two reached
+gold "Ahead ✦" and sky "Growing right now" one tap apart in the same
+spot on the page, and Homa had performed the comparison for her. It was
+also frequently backwards: age bands ask older children harder
+questions while implied closure pushes the other way, so in a rendered
+two-kid case the nine year old drew the softer label and the seven year
+old drew gold. A ranked whole-child label is not merely a comparison,
+it is an unreliable one.
+
+The founder could not picture the problem from the description ("I'm
+not visualizing the problem correctly, so just fix whatever you think
+needs to be fixed"), so it was rendered as two sibling headers one tap
+apart before the fix landed. Scope of the cut is narrow: the
+getting-started chips stay ("Opens at age 2", "Checklist ready", "Just
+getting started"), because those are states rather than judgments, and
+the per-SUBJECT badges inside one child's own page keep the full
+vocabulary, because comparing a child's math to that same child's
+reading is the comparison a mother came here to make and it never
+leaves the child. Once a child is genuinely under way the header now
+says nothing, and the subjects below it carry the real answer in the
+report's own sentences.
+
+## 2026-07-21 · Third stranded Cosmo commit judged superseded and archived, not merged
+
+After both stranded commits on fix/handwrytten-sender were recovered
+(d988ffa on 07-19, 46411c9 via PR #56 today) and that branch was
+deleted, a sweep of the remaining Cosmo branches found one more
+non-equivalent commit: f7f94f9 on cosmo/ingest-20260717-014029, a
+shallow reference-modality ingestion (ref-2026-07-20-inventors-
+scientists, 5KB) of the Venezia inventors-and-scientists drop.
+
+Decision made alone: do not recover it. Evidence: the identical Slack
+drop (same sourceMessageTs 1784598113.867139, same dropper) was
+re-ingested by the PR #78 batch as a full curriculum analysis
+(cur-2026-07-21-getting-to-know-greatest-inventors-scientists, 24KB);
+the taste model's Venezia-wave entry carries strictly richer versions
+of all four of the commit's signal lines; and the commit's remaining
+index rows were either dangling (no backing analysis file on any
+branch: the hwt-readiness-writing-prek and beethoven/greatest-artists
+reference rows) or duplicate IDs with worse stats than main's repaired
+rows. Merging it would have reintroduced the duplicate and dangling
+index rows the 07-19 graduation repair deleted.
+
+The commit stays auditable as tag archive/cosmo-ingest-20260717; the
+branch itself was deleted so Cosmo cannot push to a stale merged
+branch a third time. feat/marketing-ugc-engine was deleted the same
+session after patch-equivalence checks showed it fully drained.
+Future sessions checking for stranded Cosmo commits: origin now has
+no cosmo/* or recovery branches; start from the archive tags and
+`git cherry origin/main <branch>` before trusting any branch state.
+
+## 2026-07-21 · Signal-capture audit ruled: nine founder decisions set the rebuild
+
+Same day as the Progress header-date fix (PR #79), the founder asked whether
+that fix was "a Band-Aid on a bullet wound" and ordered a from-scratch audit
+of the whole capture-to-scoring pipeline. A 21-agent audit (8 subsystem maps,
+7 adversarial hunts, cross-cutting design passes) plus direct prod queries
+found: conversational journaling has produced exactly 1 evidence row ever
+fleet-wide; the check-in system has been started 3 times ever (2 stuck
+paused); and, independent of capture, the trajectory chart cannot gain a
+dated point after onboarding because `saveDerivedProgress` overwrites report
+scores with no history append (56 of 66 prod reports have zero history).
+Full findings: `docs/homa-planning/plans/2026-07-21-progress-signal-capture-audit.md`.
+
+The founder then ruled all nine decisions question by question (registered
+as `progress-signal-capture-v2` in the reconciliation register): per-change
+chart history, model-proposes-code-verifies matching, a per-turn backstop
+sweep, a strength-weighted evidence schema landing before the bridges, the
+`journal_followup` bound-question rail capped at one per family per day, a
+one-time conversational offer of the evening check-in, all five artifact
+bridges (planner, worksheets, plan-edit preservation, hours, photos),
+per-child fan-out with deterministic age gates, and an evals-first build
+order (baseline the broken system, then land every fix with numbers).
+Open: the D6 voice Phase-0 discrepancy (founder to confirm where that
+shipped). Taxonomy topic authoring was first left as its own content
+effort, then the founder amended the ruling later the same day: it joins
+this build as a parallel content track.
+
+Found and fixed the same day, in passing: the lesson-listen trust gate
+rejected 100% of honest clause pairs (a real lesson produced a healthy
+review and zero progress writes, silently). The 0.5 clause-to-excerpt
+overlap floor was calibrated for journal text; lesson dialogue splits
+meaning across speakers. PR #84 grounds the clause in its verbatim-
+verified segment, tightens excerpt provenance to the claimed segment,
+adds number-word aliases to the shared tokenizer, and makes the
+all-rejected case loud (rejected_count on lesson.review_ready plus an
+honest line on the review page). Verified by replaying the four real
+rejected pairs: all pass; invented-claim controls still fail.
 
 ## 2026-07-21 · Homa can ask the parent to choose, on web only; one founder ruling
 
@@ -625,6 +804,92 @@ Session-start.sh's own clock check now also reads GitHub's clock instead
 of Slack's, matching the hook and reducing the dependency surface to one
 service this workflow already needs reachable.
 
+## 2026-07-20 · Memory budget moves from write time to render time; phone calls can no longer be turned away
+
+Founder ask, from the Brain tab: why is there a 4,000 character limit,
+what happens at the limit, and "this memory system seems fragile, how
+can it be improved so memory is valuable over time and compacts when
+needed." Plus a directive: phone conversations must be able to save
+memories.
+
+**What the 4,000 actually was.** A prompt budget, correctly: every
+character in `family_memories` is re-injected on every turn of every
+channel. What was wrong was where it was enforced. `saveFamilyMemory`
+and the chat `remember` tool both checked `usage + content > BUDGET`
+*before* inserting and refused the write. Only the chat path could
+recover, by asking the model to consolidate mid-conversation with a
+parent waiting. Voice told the parent to go tidy memories on the
+website. The background extraction loops recorded `budget-full` in a
+JSON audit column and moved on.
+
+**Production evidence (2026-07-20).** No `budget-full` had fired yet, so
+this was latent, not an outage. The Gomes family sat at 3,114 of 4,000
+(77.9%) across 21 active rows with **zero superseded rows**: the
+consolidate-on-full path had never executed for anyone, and shipped with
+no test coverage at all. Nine of their 21 memories came from phone
+calls, so the channel that teaches Homa the most was the one closest to
+the wall and the one that handled it worst. Their store already held
+~1,060 characters carrying ~510 characters of meaning, including a
+2026-07-14 entry recording a plan to test Amalia's syllable awareness
+and a 2026-07-19 entry recording the answer, both pinned forever.
+
+**Founder rulings this session** (see the reconciliation register):
+`memory-render-time-budget` (store always, pin the best 4,000; overflow
+stays stored and searchable via recall) and
+`memory-compaction-high-water` (background compaction triggers at 80% of
+budget).
+
+**Shipped.** `selectPinnedMemories` in `lib/agent-memory.ts` splits
+active rows into pinned and overflow, greedy fill by score, stable
+tiebreak on id, pinned re-sorted chronologically; every input row lands
+in exactly one bucket. Write-time refusal deleted from
+`lib/learning/save-memory.ts`, `agent/tools/remember.ts`, and the voice
+route. `family-context.ts` applies the budget at render and, when there
+is overflow, tells Homa how many memories are waiting and to search them
+with recall rather than claiming ignorance. New
+`lib/learning/compact-memories.ts` plus `agent/memory-compactor.md`: one
+structured model pass proposing merges, then deterministic guarded
+writes. The model sees numbered indices into a list built from this
+family's own rows, never uuids, so it cannot name a foreign memory.
+`validateMerge` enforces the guarantees regardless of model output: no
+merge spans two children or folds a child's fact into a family-wide one
+(the multi-kid law, enforced in code and not only in the prompt), no
+mixing `fact` with `what_works`, injection scan on merged content, and a
+merge that does not shrink the store is rejected as churn. Replaced rows
+are superseded, never deleted, so a bad merge is visible and
+recoverable. Nightly sweep at 05:23 UTC
+(`agent/schedules/memory-compaction.ts`), flag-dark behind
+`HOMA_MEMORY_COMPACTION_ENABLED`, computing who is due from live rows in
+SQL so there is no marker column to drift.
+
+**Fixed on the way.** The family-context memory query was
+`order by created_at limit 200`, the *oldest* 200 rows. Harmless while
+storage was capped near 30 rows; it would have silently hidden a
+long-running family's newest memories the moment storage went unbounded.
+Now `desc`. Also added a `memory_compaction` usage surface distinct from
+the existing `compaction` surface, which is eve compacting a long
+conversation and a different cost entirely.
+
+**Verification.** 20 new tests (`lib/agent-memory.test.ts`,
+`lib/learning/compact-memories.test.ts`) covering the never-drop
+invariant, the prompt bound, cross-turn stability, and every merge law,
+including the real Gomes syllable cluster as a fixture. typecheck, lint,
+`pnpm build`, `VERCEL=1 eve build`, `check:isolation`, `check:events`,
+`check:map`, `check:taxonomy`, `check:fleet-skills`,
+`check:skills-targeting`, `check:fleet-skills-dormant`,
+`check:continuity`, `check:eve-stream-duration` all pass. **No migration
+required**: `model_usage.surface` has no CHECK constraint and nothing
+else changed shape, so this deploys as code only.
+
+**Not verified locally, and the reason.** The compaction model pass
+itself never ran here. Production authenticates to the AI Gateway
+through Vercel OIDC and there is no `AI_GATEWAY_API_KEY` in the
+environment, so `generateObject` cannot be exercised outside a
+deployment. A `dryRun` option was added to `compactFamilyMemories` for
+exactly this: after deploy, run it against the Gomes family to see the
+proposed merges before enabling the flag. The deterministic half is
+tested; the judgment half is not, and enabling the schedule before that
+dry run would be enabling untested judgment.
 
 ## 2026-07-20 · Ingestion engine rebuilt: skills and verifier match the fat-skill reality; four founder rulings
 
@@ -698,6 +963,23 @@ Agent-decided (no ruling asked): activities-only editing (focus lines,
 retest dates, and check-offs stay out of the model's reach), a 10-
 activity-per-week cap, and no month creation from chat (the report's
 one-tap consent stays the only door, so the wall is never bypassed).
+
+## 2026-07-19 · Second stranded Cosmo commit recovered: marketing-ugc-engine skill
+
+Follow-up to the recovery below. The second stranded commit on
+fix/handwrytten-sender (46411c9, marketing-ugc-engine skill, 8 files)
+is now on main. Decision made alone: the skill belongs on main because
+it fits the `.agents/skills/marketing-*` family that `marketing/AGENTS.md`
+names as the home of pipeline logic, references only surfaces that
+already exist (`marketing/creators/`, `marketing/campaigns/`,
+`marketing/voice/house-style.md`), and encodes the Homa red lines
+(child privacy absolute, never auto-publish, no AI-first framing,
+family data banned). Cherry-picked verbatim to preserve authorship,
+then swept in a follow-up commit: 29 em dashes replaced with
+law-compliant punctuation (the skill restates the no-em-dash law but
+its own prose violated it). Raw source kept in `marketing/raw/` per
+the provenance convention, swept the same way, matching the zero
+em-dash state of every existing raw file.
 
 ## 2026-07-19 · Cosmo's stranded ingest recovered; graduation batch repaired; inspo funnel in /admin/studio
 

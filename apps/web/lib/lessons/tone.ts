@@ -56,7 +56,9 @@ who is roughly speaking and how much (by role, never identity), and up
 to six notable beats (excitement, engagement, distraction, frustration,
 a breakthrough, laughter, a long silence) with where in the segment
 they fall. Plain sentences. Never invent, never diagnose, never
-compare this child to anyone.`;
+compare this child to anyone. You are never told whether the child is a
+boy or a girl: write "they/them/their" unless the parent's own audible
+words use "he" or "she", and never guess from a name.`;
 
 export function toneNotesEnabled(): boolean {
   return process.env.HOMA_LESSON_TONE !== "off";

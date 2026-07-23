@@ -5,6 +5,7 @@ import {
 } from "@homa/core";
 
 import { zonedDateString } from "../time-zone";
+import type { ValidatedClaim } from "./claim-validation";
 import {
   resolveEffectiveProgressEvidence,
 } from "./effective-evidence";
@@ -92,6 +93,20 @@ export interface RecordJournalProgressEvidenceInput {
   /** Lesson listen rides the journal path with its own source label
    * (plan 2026-07-13-lesson-listen.md §4.5). Absent means "journal". */
   source?: "journal" | "lesson_listen";
+  /**
+   * Claims the caller's judgment step proposed and the deterministic
+   * gate accepted (AGENTS.md "Models judge, code verifies"). Present
+   * means the lexical matcher is skipped; an empty array means the
+   * message was read and reports no ability, which still keeps the
+   * parent's words as an observation. Absent means the legacy matcher
+   * path, kept until the rollout is verified.
+   *
+   * Deliberately excluded from the operation payload hash: a retry
+   * re-runs the model and may word its claims slightly differently,
+   * and a replayed operation must still replay rather than fail as an
+   * idempotency mismatch.
+   */
+  claims?: readonly ValidatedClaim[];
 }
 
 export type RecordProgressEvidenceResult =
@@ -449,7 +464,15 @@ export class ChildProgressService {
     );
     const payloadHash = hashChildProgressOperationPayload({
       kind: "journal",
-      ...input,
+      familyId: input.familyId,
+      childId: input.childId,
+      memberUserId: input.memberUserId,
+      quote: input.quote,
+      channel: input.channel,
+      messageId: input.messageId,
+      observedAt: input.observedAt,
+      idempotencyKey: input.idempotencyKey,
+      source: input.source,
       subjectId: input.subjectId ?? null,
     });
     return this.repository.withTransaction(async (transaction) => {
@@ -477,6 +500,47 @@ export class ChildProgressService {
         payloadHash,
       );
       if (replay !== null) return replay;
+
+      // Claims present means the caller already ran the judgment step
+      // and the deterministic gate (AGENTS.md "Models judge, code
+      // verifies"), so the lexical matcher is skipped entirely. Absent
+      // means the legacy path, kept until the extraction rollout is
+      // verified in production.
+      if (input.claims !== undefined) {
+        const writes = this.claimWrites(input, input.claims);
+        if (writes.length === 0) {
+          await this.appendJournalObservation(
+            transaction,
+            input,
+            "no_match",
+            [],
+          );
+          return this.completeOperation(transaction, input, payloadHash, {
+            status: "no_match",
+          });
+        }
+        writes.forEach(validateProgressEvidenceWrite);
+        const pending = this.findPendingConflict(projectionInput, writes);
+        if (pending !== null) {
+          return this.completeOperation(
+            transaction,
+            input,
+            payloadHash,
+            pending,
+          );
+        }
+        const result = await this.recordKnownChildEvidence(
+          transaction,
+          projectionInput,
+          writes,
+        );
+        return this.completeOperation(
+          transaction,
+          input,
+          payloadHash,
+          result,
+        );
+      }
 
       const match = matchJournalEvidence({
         quote: input.quote,
@@ -1498,6 +1562,39 @@ export class ChildProgressService {
       );
     }
     parseOffsetIsoTimestampEpochNanoseconds(observedAt);
+  }
+
+  /**
+   * Validated claims to evidence writes. The claim's quote is the
+   * parent's own words, already proven to appear in her message by
+   * claim-validation.ts, so it carries the same provenance the matcher
+   * path got from the clause it matched.
+   */
+  private claimWrites(
+    input: RecordJournalProgressEvidenceInput,
+    claims: readonly ValidatedClaim[],
+  ): ProgressEvidenceWrite[] {
+    return claims
+      .filter((claim) => claim.childId === input.childId)
+      .map((claim, index) => ({
+        familyId: input.familyId,
+        childId: input.childId,
+        memberUserId: input.memberUserId,
+        source: input.source ?? "journal",
+        itemId: claim.itemId,
+        answer: claim.answer,
+        quote: Array.from(claim.quote).slice(0, 500).join(""),
+        channel: input.channel,
+        messageId: input.messageId,
+        providerMessageId: null,
+        observedAt: input.observedAt,
+        idempotencyKey: journalMatchIdempotencyKey(
+          input.idempotencyKey,
+          claim.itemId,
+          index,
+        ),
+        checkInId: null,
+      }));
   }
 
   private journalWrites(

@@ -8,6 +8,18 @@
       "port": 3007,
       "autoPort": false,
       "url": "http://localhost:3007"
+    },
+    {
+      "name": "homa-web",
+      "runtimeExecutable": "corepack",
+      "runtimeArgs": [
+        "pnpm",
+        "--filter",
+        "web",
+        "dev"
+      ],
+      "port": 3000,
+      "autoPort": true
     }
   ]
 }

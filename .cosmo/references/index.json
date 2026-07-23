@@ -1603,6 +1603,33 @@
       "format": "printable-set"
     },
     {
+      "id": "ref-2026-07-19-listen-and-color-spring",
+      "title": "Listen and Color Spring Worksheet: Garden Animals Coloring Sheet",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:21:35-04:00",
+      "subject": "ela",
+      "domain": "",
+      "format": "coloring page (title-inferred, never confirmed)"
+    },
+    {
+      "id": "ref-2026-07-19-los-pollitos-unit1-activities",
+      "title": "Los Pollitos Dicen: Unit 1 Activities (Spanish Mama PreK-Elementary Curriculum)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:14:28-04:00",
+      "subject": "spanish",
+      "domain": "l2-speaking-production",
+      "format": "language-activity-packet"
+    },
+    {
+      "id": "ref-2026-07-19-presidents-day-coloring-pages",
+      "title": "Presidents Day Coloring Pages: Presidents Day Coloring Sheets Fun Activity",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:27:50-04:00",
+      "subject": "history",
+      "domain": "",
+      "format": "coloring page (title-inferred, never confirmed)"
+    },
+    {
       "id": "ref-2026-07-19-treasury-year-round-pk-activities-2",
       "title": "Treasury of Year-Round Preschool Activities Part 2 (Teacher Created Materials)",
       "droppedBy": "aless",
@@ -1619,6 +1646,51 @@
       "subject": "multi-subject",
       "domain": "preschool-integrated",
       "format": "activity-collection"
+    },
+    {
+      "id": "ref-2026-07-19-volcanoes-and-lava-workbook",
+      "title": "Volcanoes and Lava Workbook",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:26:46-04:00",
+      "subject": "science",
+      "domain": "earth-science",
+      "format": "workbook (title-inferred, never confirmed)"
+    },
+    {
+      "id": "ref-2026-07-20-outdoor-toddler-activity-book",
+      "title": "The Outdoor Toddler Activity Book: 100+ Fun Early Learning Activities for Outside Play",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T22:51:58-04:00",
+      "subject": "multi-subject",
+      "domain": "toddler-outdoor-integrated",
+      "format": "activity-idea-book"
+    },
+    {
+      "id": "ref-2026-07-20-toddlers-science-activity-book",
+      "title": "The Toddler's Science Activity Book: 100+ Fun Early Learning Activities for Curious Kids",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-20T12:18:16-04:00",
+      "subject": "multi-subject",
+      "domain": "scientific-inquiry",
+      "format": "activity-idea-book"
+    },
+    {
+      "id": "ref-2026-07-21-365-science-experiments",
+      "title": "365 Science Experiments",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-20T23:04:05-04:00",
+      "subject": "science",
+      "domain": "scientific-inquiry",
+      "format": "experiment-activity-book"
+    },
+    {
+      "id": "ref-2026-07-21-one-potato-two-potato",
+      "title": "One Potato, Two Potato, Three Potato, Four: 165 Chants for Children",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-20T19:42:42-04:00",
+      "subject": "ela",
+      "domain": "speaking-listening",
+      "format": "chant-anthology-book"
     }
   ]
 }

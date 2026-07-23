@@ -10,6 +10,8 @@ import {
   type LessonClausePair,
   type LessonSegmentText,
 } from "./pairs";
+import { captureJournalClaims } from "../child-progress/journal-capture";
+import { lessonObservedAt } from "./observed-at";
 import {
   assembleLessonTranscript,
   synthesizeLessonReview,
@@ -33,6 +35,7 @@ import {
   registerLessonSegment,
   releaseSegmentClaim,
   requeueLessonAnalysis,
+  markLessonAudioKept,
   saveLessonReview,
   saveSegmentToneNotes,
   saveSegmentTranscript,
@@ -41,6 +44,7 @@ import {
   type LessonSegmentRow,
 } from "./store";
 import { deleteLessonBlob } from "./blobs";
+import { lessonAudioKeep } from "./keep-audio";
 
 /**
  * The lesson pipeline's working half (plan 2026-07-13-lesson-listen.md
@@ -216,6 +220,14 @@ export async function runLessonAnalysis(
       evidenceCount: ledger.evidenceCount,
       observationCount: ledger.observationCount,
     });
+    // Keep their voice (founder ruling 2026-07-22). The model already
+    // made the only judgment when it labelled a moment; this reads that
+    // typed enum and exempts the recording from the 30-day TTL. The
+    // parent is told on the review page, and deletes it in one tap.
+    const keep = lessonAudioKeep(insights.moments, processed.length);
+    if (keep !== null) {
+      await markLessonAudioKept(lessonId, familyId);
+    }
     const toneCovered = processed.filter(
       (segment) => parseToneNotes(segment.toneNotes) !== null,
     ).length;
@@ -232,6 +244,8 @@ export async function runLessonAnalysis(
       moment_count: insights.moments.length,
       tone_coverage:
         processed.length === 0 ? 0 : toneCovered / processed.length,
+      audio_kept: keep !== null,
+      audio_kept_kind: keep?.kind ?? null,
     });
     return { status: "ready" };
   } catch (error) {
@@ -287,6 +301,7 @@ interface LedgerFanOutResult {
   notes: LessonProgressNote[];
 }
 
+
 /**
  * The trust boundary in motion (§4.5): verify each pair, then ride the
  * SAME journal path chat uses, from runtime.ts so the MJ-08 events
@@ -300,13 +315,13 @@ async function recordVerifiedClauses(input: {
   pairs: LessonClausePair[];
 }): Promise<LedgerFanOutResult> {
   const notes: LessonProgressNote[] = [];
-  let evidenceCount = 0;
-  let observationCount = 0;
   let rejectedCount = 0;
   const flagOn = liveProgressEnabled();
-  const observedAt =
-    input.lesson.finishedAt ?? new Date().toISOString();
+  const observedAt = lessonObservedAt(input.lesson.finishedAt);
 
+  // Pass one: provenance. Every clause is checked against the segment it
+  // claims before anything is judged.
+  const verified: LessonClausePair[] = [];
   for (const pair of input.pairs.slice(0, MAX_LESSON_CLAUSES)) {
     const verdict = verifyLessonClausePair(
       pair,
@@ -322,47 +337,85 @@ async function recordVerifiedClauses(input: {
       notes.push({ ...pair, outcome: "skipped_flag_off" });
       continue;
     }
-    const result = await recordJournalProgressEvidence({
-      familyId: input.lesson.familyId,
-      childId: input.lesson.childId,
-      memberUserId: input.lesson.createdBy,
-      quote: pair.clause,
-      channel: "lesson",
-      messageId: null,
-      observedAt,
-      idempotencyKey: lessonClauseIdempotencyKey(
-        input.lesson.id,
-        pair.clause,
-      ),
-      source: "lesson_listen",
-    });
-    const status =
-      result.status === "duplicate"
-        ? result.original.status
-        : result.status;
-    switch (status) {
-      case "recorded":
-        evidenceCount += 1;
-        notes.push({ ...pair, outcome: "evidence" });
-        break;
-      case "conflict_open":
-      case "conflict_pending":
-        evidenceCount += 1;
-        notes.push({ ...pair, outcome: "conflict" });
-        break;
-      case "no_match":
-      case "activity_only":
-      case "ambiguous":
-        observationCount += 1;
-        notes.push({ ...pair, outcome: "observation" });
-        break;
-      default:
-        rejectedCount += 1;
-        notes.push({ ...pair, outcome: "rejected" });
-        break;
-    }
+    verified.push(pair);
   }
-  return { evidenceCount, observationCount, rejectedCount, notes };
+  if (verified.length === 0) {
+    return { evidenceCount: 0, observationCount: 0, rejectedCount, notes };
+  }
+
+  // Pass two: judgment, ONCE for the whole lesson rather than once per
+  // clause. A lesson is one sitting with one child, and the clauses
+  // describe the same few skills from different moments of it. Judging
+  // clause by clause meant nothing could reconcile them: a real lesson
+  // on 2026-07-22 wrote math.one-to-one-counting twice with opposite
+  // answers, because "counted the coins out of order" and "counted two
+  // yellow boxes correctly" were separate calls that never met. Judging
+  // the lesson as a whole lets the deterministic gate's own dedupe
+  // (strongest answer per child and skill) do its job, and costs one
+  // model call instead of one per clause.
+  const message = verified.map((pair) => pair.clause).join(" ");
+  const capture = await captureJournalClaims({
+    familyId: input.lesson.familyId,
+    childId: input.lesson.childId,
+    message,
+    surface: "lesson",
+  });
+  const claims = capture.claims?.filter(
+    (claim) => claim.childId === input.lesson.childId,
+  );
+
+  const result = await recordJournalProgressEvidence({
+    familyId: input.lesson.familyId,
+    childId: input.lesson.childId,
+    memberUserId: input.lesson.createdBy,
+    quote: message,
+    ...(claims ? { claims } : {}),
+    channel: "lesson",
+    messageId: null,
+    observedAt,
+    // Keyed on the lesson, not on a clause: one lesson is one operation,
+    // so a re-analysis replays instead of stacking a second opinion.
+    idempotencyKey: lessonClauseIdempotencyKey(input.lesson.id, message),
+    source: "lesson_listen",
+  });
+  const status =
+    result.status === "duplicate" ? result.original.status : result.status;
+
+  // The parent-facing list still reads clause by clause, so map each
+  // accepted claim back to the clause its quote came from.
+  const scoredClauses = new Set<string>();
+  for (const claim of claims ?? []) {
+    const origin = verified.find((pair) =>
+      pair.clause.toLocaleLowerCase("en-US").includes(
+        claim.quote.toLocaleLowerCase("en-US"),
+      ),
+    );
+    if (origin) scoredClauses.add(origin.clause);
+  }
+  const wrote = status === "recorded" || status === "conflict_open";
+  for (const pair of verified) {
+    notes.push({
+      ...pair,
+      outcome: wrote && scoredClauses.has(pair.clause)
+        ? status === "conflict_open"
+          ? "conflict"
+          : "evidence"
+        : "observation",
+    });
+  }
+
+  const evidenceCount = wrote
+    ? notes.filter(
+        (note) => note.outcome === "evidence" || note.outcome === "conflict",
+      ).length
+    : 0;
+  return {
+    evidenceCount,
+    observationCount: notes.filter((note) => note.outcome === "observation")
+      .length,
+    rejectedCount,
+    notes,
+  };
 }
 
 /** The review row keeps the verified pairs and their outcomes so the

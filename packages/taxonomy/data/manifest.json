@@ -9,18 +9,20 @@
     "ngss-ms"
   ],
   "counts": {
-    "topics": 1634,
+    "topics": 1721,
     "topicsBySubject": {
+      "Art": 3,
       "Computing": 21,
-      "English": 298,
-      "History": 93,
+      "English": 300,
+      "History": 163,
       "Learning to Learn": 18,
       "Life Skills": 42,
-      "Mathematics": 508,
+      "Mathematics": 512,
+      "Music": 4,
       "Personal & Social Development": 90,
-      "Science": 564
+      "Science": 568
     },
-    "dependencies": 3221,
+    "dependencies": 3274,
     "curricula": 7,
     "curriculumStandards": 3261,
     "topicStandardLinks": 1859,
@@ -28,12 +30,12 @@
   },
   "files": {
     "topics.json": {
-      "bytes": 1713602,
-      "sha256": "ec11608885bbecc02f5b0b24dc359052c6bcb9f0bd10c9293608dc982e8829a2"
+      "bytes": 1789604,
+      "sha256": "67d73370e31cb3194a1cd0bf551133c62c508db38655dc8080dd9b035614ea4a"
     },
     "dependencies.json": {
-      "bytes": 696944,
-      "sha256": "86a24efb44b480e5be23082b4bdea653f69f6d6fd54c5409a2f33c185be1d87f"
+      "bytes": 706428,
+      "sha256": "2484073150bfd8250eeb847a6fcec50d179da592dca6cbafee2b4b53fe6c88af"
     },
     "curriculum-standards.json": {
       "bytes": 1621982,
@@ -50,5 +52,5 @@
     "teaching research",
     "visualizations"
   ],
-  "topicCount": 1601
+  "topicCount": 1614
 }

@@ -16,5 +16,6 @@
   blending two sounds, not sight-word drills.
 - Keep it winnable: end with the child's name to trace, a guaranteed success.
 - A family whose curriculum boxes letters instead of using a three-line
-  guide (Handwriting Without Tears, for one) still gets these same rules;
-  see "Letter boxes" above for the exact box geometry.
+  guide (Handwriting Without Tears / Learning Without Tears, for one) still
+  gets these same rules; read the letter-number-formation-practice recipe
+  for the exact box geometry.

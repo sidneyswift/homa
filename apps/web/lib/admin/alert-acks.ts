@@ -1,4 +1,5 @@
 import { adminDb } from "./db";
+import { STOP_ERROR_PATTERNS } from "./delivery-errors";
 
 /**
  * "Mark handled" for the founder console's alert strip (founder ask
@@ -139,6 +140,10 @@ export async function listHandledAlerts(rangeDays: number): Promise<HandledAlert
       and d.status in ('failed', 'uncertain')
       and d.updated_at >= now() - ${interval}::interval
       and a.created_at >= d.updated_at
+      and not (
+        coalesce(d.error, '') ilike ${STOP_ERROR_PATTERNS[0]}
+        or coalesce(d.error, '') ilike ${STOP_ERROR_PATTERNS[1]}
+      )
     order by a.created_at desc
     limit 12
   `;

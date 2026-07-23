@@ -229,9 +229,19 @@ const ADULT_ROLE_TOKENS = new Set([
   "grandpa",
 ]);
 const NEGATIVE_PREDICATE_PATTERN =
-  /\b(?:cannot|can't|could\s+not|couldn't|did\s+not|does\s+not|not\s+yet|not\s+(?:read|retell|write|count|pedal|solve|swim)|needs?\s+help)\b/iu;
+  /\b(?:cannot|can't|could\s+not|couldn't|did\s+not|didn't|does\s+not|doesn't|will\s+not|won't|is\s+not|isn't|never|gave\s+up|not\s+yet|not\s+(?:read|retell|write|count|pedal|solve|swim)|needs?\s+help)\b/iu;
 const EMERGING_PREDICATE_PATTERN =
-  /\b(?:almost|starting\s+to|with\s+(?:(?:some|lots\s+of|a\s+lot\s+of)\s+)?help)\b/iu;
+  /\b(?:almost|starting\s+to|just\s+started|learning\s+to|working\s+on|struggl\w*|had\s+trouble|hard\s+time|with\s+(?:\w+\s+){0,2}help)\b/iu;
+/**
+ * "Easily" is the strongest claim the ledger can hold, so a parent has
+ * to actually say the child did it alone (founder ruling
+ * `progress-signal-capture-v2` D4: unrecognized phrasing records
+ * getting_there, never easily). Before this, any matched sentence
+ * without a negative word recorded mastery, so "Emma read a book with
+ * me at bedtime" asserted independent reading.
+ */
+const INDEPENDENCE_PREDICATE_PATTERN =
+  /\b(?:by\s+(?:her|him|them)self|by\s+herself|by\s+himself|on\s+(?:her|his|their)\s+own|all\s+alone|alone|independently|without\s+(?:any\s+)?help|no\s+help|solo)\b/iu;
 
 function inferPredicateAnswer(
   predicate: string,
@@ -240,7 +250,9 @@ function inferPredicateAnswer(
   if (EMERGING_PREDICATE_PATTERN.test(predicate)) {
     return "getting_there";
   }
-  return "easily";
+  return INDEPENDENCE_PREDICATE_PATTERN.test(predicate)
+    ? "easily"
+    : "getting_there";
 }
 
 function trimPredicateSpan(

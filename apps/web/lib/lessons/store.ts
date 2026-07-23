@@ -36,6 +36,10 @@ export interface LessonRecordingRow {
   durationSeconds: number | null;
   attempts: number;
   audioDeletedAt: string | null;
+  /** Set when the review found a breakthrough or sweet moment: this
+   *  lesson's recording is exempt from the 30-day TTL and the parent
+   *  has been told (founder ruling `keep-their-voice`). */
+  audioKeptAt: string | null;
   error: string | null;
 }
 
@@ -97,6 +101,7 @@ interface LessonRecordingSqlRow {
   duration_seconds: number | null;
   attempts: number;
   audio_deleted_at: string | null;
+  audio_kept_at: string | null;
   error: string | null;
 }
 
@@ -113,6 +118,7 @@ function toLessonRow(row: LessonRecordingSqlRow): LessonRecordingRow {
     durationSeconds: row.duration_seconds,
     attempts: row.attempts,
     audioDeletedAt: row.audio_deleted_at,
+    audioKeptAt: row.audio_kept_at,
     error: row.error,
   };
 }
@@ -152,7 +158,7 @@ export async function createLessonRecording(input: {
     )
     returning id, family_id, child_id, created_by, status, source,
               started_at::text, finished_at::text, duration_seconds,
-              attempts, audio_deleted_at::text, error
+              attempts, audio_deleted_at::text, audio_kept_at::text, error
   `;
   const row = rows[0];
   if (row === undefined) return { status: "unknown_child" };
@@ -167,7 +173,7 @@ export async function getLessonForFamily(
   const rows = await sql<LessonRecordingSqlRow[]>`
     select id, family_id, child_id, created_by, status, source,
            started_at::text, finished_at::text, duration_seconds,
-           attempts, audio_deleted_at::text, error
+           attempts, audio_deleted_at::text, audio_kept_at::text, error
     from public.lesson_recordings
     where id = ${lessonId} and family_id = ${familyId}
   `;
@@ -452,7 +458,7 @@ export async function finishLessonRecording(input: {
       and status in ('recording', 'uploaded')
     returning id, family_id, child_id, created_by, status, source,
               started_at::text, finished_at::text, duration_seconds,
-              attempts, audio_deleted_at::text, error
+              attempts, audio_deleted_at::text, audio_kept_at::text, error
   `;
   return rows[0] === undefined ? null : toLessonRow(rows[0]);
 }
@@ -484,7 +490,7 @@ export async function claimLessonAnalysis(
       )
     returning id, family_id, child_id, created_by, status, source,
               started_at::text, finished_at::text, duration_seconds,
-              attempts, audio_deleted_at::text, error
+              attempts, audio_deleted_at::text, audio_kept_at::text, error
   `;
   return rows[0] === undefined ? null : toLessonRow(rows[0]);
 }
@@ -591,7 +597,7 @@ export async function listLessonsForChild(
   const rows = await sql<LessonRecordingSqlRow[]>`
     select id, family_id, child_id, created_by, status, source,
            started_at::text, finished_at::text, duration_seconds,
-           attempts, audio_deleted_at::text, error
+           attempts, audio_deleted_at::text, audio_kept_at::text, error
     from public.lesson_recordings
     where family_id = ${familyId} and child_id = ${childId}
     order by created_at desc
@@ -658,6 +664,7 @@ export async function listAudioTtlLessons(
     left join public.lesson_segments segment
       on segment.lesson_id = lesson.id
     where lesson.audio_deleted_at is null
+      and lesson.audio_kept_at is null
       and lesson.finished_at is not null
       and lesson.finished_at
         < now() - make_interval(days => ${AUDIO_TTL_DAYS})
@@ -670,6 +677,29 @@ export async function listAudioTtlLessons(
     familyId: row.family_id,
     blobUrls: row.blob_urls ?? [],
   }));
+}
+
+/**
+ * markLessonAudioKept(...): exempts one lesson's raw audio from the
+ * 30-day TTL (founder ruling `keep-their-voice`). Idempotent, and it
+ * never resurrects audio the sweep or the parent already deleted: a row
+ * with `audio_deleted_at` set has no bytes left to keep, so stamping it
+ * would only produce a lesson that claims to hold a recording it does
+ * not have.
+ */
+export async function markLessonAudioKept(
+  lessonId: string,
+  familyId: string,
+): Promise<void> {
+  const sql = mapDb();
+  await sql`
+    update public.lesson_recordings
+    set audio_kept_at = now()
+    where id = ${lessonId}
+      and family_id = ${familyId}
+      and audio_kept_at is null
+      and audio_deleted_at is null
+  `;
 }
 
 /** Stamped after the TTL delete; rows and transcripts stay forever. */

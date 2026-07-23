@@ -1,9 +1,4 @@
-import {
-  FAMILY_MEMORY_CHAR_BUDGET,
-  MEMORY_CONFLICT_MAX_DISTANCE,
-  memoryUsageChars,
-  scanMemoryContent,
-} from "../agent-memory";
+import { scanMemoryContent } from "../agent-memory";
 import { mapDb } from "../map/db";
 import { embedText } from "./embeddings";
 
@@ -14,7 +9,6 @@ import { embedText } from "./embeddings";
  * is never more powerful than a foreground one:
  *
  *   - injection scan (scanMemoryContent, the M2-14 floor),
- *   - the family character budget (refuse when full, never evict),
  *   - exact-content dedupe,
  *   - child attribution only for a child inside THIS family (by id or by
  *     exact case-insensitive name).
@@ -43,15 +37,10 @@ export type SaveMemoryResult =
   | {
       saved: true;
       childId: string | null;
-      /** Active memories the new fact sits semantically close to (same
-       * child or family-wide only, never a sibling's), closest first.
-       * The caller decides whether to surface them; empty when the
-       * embedding was unavailable. */
-      conflicts: string[];
     }
   | {
       saved: false;
-      reason: "too-short" | "blocked-by-scan" | "duplicate" | "budget-full" | "unknown-child";
+      reason: "too-short" | "blocked-by-scan" | "duplicate" | "unknown-child";
     };
 
 export async function saveFamilyMemory(input: SaveMemoryInput): Promise<SaveMemoryResult> {
@@ -78,9 +67,6 @@ export async function saveFamilyMemory(input: SaveMemoryInput): Promise<SaveMemo
   if (memories.some((row) => row.content === content)) {
     return { saved: false, reason: "duplicate" };
   }
-  if (memoryUsageChars(memories) + content.length > FAMILY_MEMORY_CHAR_BUDGET) {
-    return { saved: false, reason: "budget-full" };
-  }
 
   let childId: string | null = null;
   if (input.childId) {
@@ -95,24 +81,6 @@ export async function saveFamilyMemory(input: SaveMemoryInput): Promise<SaveMemo
   // Best-effort semantic index; null just means FTS-only for this row.
   const embedding = await embedText(content, { familyId: input.familyId });
 
-  // Contradiction guardrail (see agent-memory.ts): find active rows the
-  // new fact sits close to BEFORE inserting it, scoped to the same child
-  // plus family-wide rows so one sibling's fact never flags another's.
-  // Distance runs in Postgres; only matching contents come back.
-  let conflicts: string[] = [];
-  if (embedding) {
-    const close = await sql<{ content: string }[]>`
-      select content from public.family_memories
-      where family_id = ${input.familyId} and superseded_at is null
-        and kind in ('fact', 'what_works') and embedding is not null
-        and (child_id is null or child_id = ${childId})
-        and (embedding <=> ${embedding}::extensions.vector(1536)) < ${MEMORY_CONFLICT_MAX_DISTANCE}
-      order by embedding <=> ${embedding}::extensions.vector(1536)
-      limit 2
-    `;
-    conflicts = close.map((row) => row.content);
-  }
-
   await sql`
     insert into public.family_memories
       (family_id, child_id, kind, content, source, embedding, session_id)
@@ -120,5 +88,5 @@ export async function saveFamilyMemory(input: SaveMemoryInput): Promise<SaveMemo
       (${input.familyId}, ${childId}, ${input.kind}, ${content}, ${input.source},
        ${embedding}, ${input.sessionId ?? null})
   `;
-  return { saved: true, childId, conflicts };
+  return { saved: true, childId };
 }

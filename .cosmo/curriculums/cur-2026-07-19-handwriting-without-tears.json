@@ -1,0 +1,350 @@
+{
+  "id": "cur-2026-07-19-handwriting-without-tears",
+  "name": "Get Set for School: Readiness & Writing Pre-K Teacher's Guide (Learning Without Tears, 8th Edition)",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-19T16:25:44-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784492744.978109",
+  "sourceFiles": [
+    {
+      "filename": "hwt-pt1.pdf",
+      "localPath": ".cosmo/inspo-files/hwt-pt1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-hwt-pt1/hwt-pt1.pdf"
+    },
+    {
+      "filename": "hwt-pt2.pdf",
+      "localPath": ".cosmo/inspo-files/hwt-pt2.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-hwt-pt2/hwt-pt2.pdf"
+    }
+  ],
+  "layer1_philosophy": {
+    "methodology": "Handwriting Without Tears / Learning Without Tears developmental, multisensory letter formation (the publisher rebranded from Handwriting Without Tears to Learning Without Tears years ago; every page footer in this PDF reads Learning Without Tears, and the specific book is the Get Set for School Pre-K line's Readiness & Writing Teacher's Guide, not a standalone book titled Handwriting Without Tears)",
+    "principles": [
+      "Multisensory readiness before paper: children build capital letters and a human figure (the guide calls it Mat Man) out of wooden pieces representing the basic strokes (a big line, a little line, a big curve, a little curve) so the letter shapes are learned by hand before they are ever written",
+      "Letters and numbers are grouped and taught by the family of strokes that forms them, not alphabetically or numerically. Capitals are grouped as Vertical and Horizontal letters, then Magic C letters (round, start like a C), then Big and Little Curves, then Diagonals. Lowercase letters regroup again into a same-as-capitals set, a Magic c set, a transition set, a set the guide calls Diver Letters (start high, dive below the baseline), and a final set",
+      "Capitals are taught before lowercase. The guide's own reasoning: capitals are one size, always start at the top, and use only straight lines and simple curves, which is developmentally easier than the two-story, ascender/descender shapes of lowercase letters",
+      "Every stroke of every letter and number is narrated aloud with the same small, consistent vocabulary (line, curve, big, little, up, down, across) while the parent models and the child copies stroke by stroke, so the same words always cue the same motion",
+      "A Wet-Dry-Try multisensory sequence on a small slate: wet a sponge and wipe the letter shape, dry it with a cloth, then trace it with chalk, practicing the same motion three sensory ways before the child ever picks up a pencil",
+      "A full developmental progression across the guide: body awareness and gross/fine motor play, then drawing and pre-writing stroke practice (lines, curves, basic shapes), then guided letter formation with a model to trace and copy, then independent writing. Number writing and early counting run in parallel using the same stroke-narration technique and a matching Starting Corner cue",
+      "Assessment is by developmental benchmark and teacher observation, not testing. Support and differentiation notes for English language learners are built into every single lesson, not bolted on separately",
+      "The guide is explicitly research-grounded: it closes with a bibliography of more than 60 sources spanning developmental psychology, early literacy research, and occupational therapy studies on pencil grip and prewriting skill development"
+    ],
+    "learningTheory": "developmental-stages",
+    "assessmentApproach": "benchmark-and-observation",
+    "parentRole": "demonstrator-model",
+    "knowledgeBankMatches": [
+      {
+        "topicKey": "handwriting-without-tears",
+        "topicType": "method_philosophy",
+        "status": "unknown, could not query the live knowledge_bank table from this sandbox (no database credentials available). apps/web/agent/curriculum-writer.md's Methodology-aware planning rules section (Charlotte Mason, Montessori, Direct Instruction, Play-Based, Singapore Math, Balanced Literacy, Process Writing, Literature-Based/Classical) has no Handwriting Without Tears or Learning Without Tears section, so this is very likely a genuine first entry for this method, independent of whatever the knowledge_bank table itself holds"
+      }
+    ],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "handwriting-without-tears",
+        "topicType": "method_philosophy",
+        "title": "Handwriting Without Tears / Learning Without Tears Method",
+        "summary": "A developmental, multisensory approach to teaching letter and number formation. Letters are grouped and taught by shared stroke family (straight lines, Magic C curves, big/little curves, diagonals), not alphabetically. Capitals are taught before lowercase because they are simpler and more uniform. Every stroke is narrated with a small consistent verbal vocabulary (big line, little line, curve) while a parent models and the child copies. Readiness activities build body awareness and the same basic strokes with wooden pieces before any pencil work begins, and a wet-dry-try slate sequence rehearses each letter's motion three sensory ways before paper. Assessment is developmental benchmark and observation, not testing.",
+        "mergedRowId": "7d072efc-e1bb-4233-af91-8d197b458bc8",
+        "mergedAt": "2026-07-21"
+      },
+      {
+        "suggestedKey": "get-set-for-school-prek-readiness-writing-format",
+        "topicType": "method_format",
+        "title": "Get Set for School Pre-K Readiness & Writing Teacher's Guide Format",
+        "summary": "A single Pre-K teacher's guide (8th edition, 2021, Learning Without Tears) organized into nine skill sections rather than numbered weeks: Readiness, Drawing, Alphabet Knowledge, Colors & Coloring, Pre-Writing, Writing Capital Letters (all 26), Counting & Numbers, Writing Lowercase Letters (all 26), and a Resources appendix (formation charts, an index, and the research bibliography). Each letter or number gets its own lesson page with a consistent template: a model to look at, guided trace-and-copy practice, a check step, an ELL support note, and a Look What We're Learning skills box (foundation skills, writing, sensory-motor, oral language, vocabulary). No day-by-day or week-by-week calendar is given; pacing is left to the teacher's judgment of the child's readiness. The guide is written for a classroom teacher as much as a homeschool parent (it references classroom routines, circle time, and a classroom environment throughout), which is a real product consideration for how Homa should adapt it for a one-child homeschool setting.",
+        "mergedRowId": "484529a8-4a0a-4fd9-a7de-50c1ddfe0fc4",
+        "mergedAt": "2026-07-21"
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Readiness",
+        "curriculumTopic": "Holding a pencil or crayon correctly; demonstrating letter formation as a model for the child",
+        "homaSubject": "writing",
+        "homaDomain": "handwriting-transcription",
+        "homaTopicId": "mt_WBfj79OqXz",
+        "status": "mapped",
+        "suggested": {
+          "note": "Directly matches the existing topic 'Sitting and holding a pencil' under English > Handwriting & Transcription"
+        }
+      },
+      {
+        "curriculumSubject": "Readiness",
+        "curriculumTopic": "Wood Piece Play and Mat Man: building letters and a human figure from wooden pieces representing the four basic strokes",
+        "homaSubject": "fine_motor",
+        "homaDomain": "hand-control",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "fine_motor > hand-control is the closest native Homa domain for pre-pencil manipulative play, but it is an assessment domain with no discrete topic bank (AUTHORED_DOMAINS in packages/taxonomy/src/domains.ts are not populated in topics.json, only Marble-imported subject/domain pairs are), so there is no single topic id to point to. Body-awareness building (assembling a figure from parts) also brushes gross_motor, but hand-control is the better primary fit since the point of the activity is stroke-shape rehearsal, not movement"
+        }
+      },
+      {
+        "curriculumSubject": "Drawing",
+        "curriculumTopic": "Free and guided drawing practice building toward letter strokes",
+        "homaSubject": "art",
+        "homaDomain": "drawing-representation",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Alphabet Knowledge",
+        "curriculumTopic": "Letter names and sounds, matching uppercase to lowercase, letter recognition games",
+        "homaSubject": "literacy",
+        "homaDomain": "letter-knowledge",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Colors & Coloring",
+        "curriculumTopic": "Naming and recognizing colors",
+        "homaSubject": "language",
+        "homaDomain": "speaking-listening",
+        "homaTopicId": "mt_xYlY6CjGN4",
+        "status": "mapped",
+        "suggested": {
+          "note": "RESOLVED 2026-07-21: two independent curricula this session (this one and Dimensions Math PKA) flagged color-related content, but on closer reading they are two different skills: PKA teaches sorting/classifying objects BY color as an attribute (already covered by the existing 'Sorting and Classifying Objects by One Attribute' topic), while this book teaches naming individual colors by sight, a receptive/expressive vocabulary skill. Confirmed by full-text search that zero existing topics taught color-naming before this session (the only 'color' hits anywhere in the taxonomy were color physics at age 11-12, animal camouflage, and the two sorting/pattern topics that use color only as an example attribute). Added mt_xYlY6CjGN4 'Naming Colors by Sight' under English > Speaking & Listening (subject 'language'), an existing non-reserved Marble-origin domain already populated with other age 3-6 oral-language topics (for example 'Joining In with Rhymes and Chants,' age 3-6); explicitly avoided the RESERVED language-subject AUTHORED_DOMAINS (early-talk, speech-clarity, oral-storytelling), which belong to a separate hand-authored milestone bank. No mapping.ts edit needed, no collision."
+        }
+      },
+      {
+        "curriculumSubject": "Colors & Coloring",
+        "curriculumTopic": "Coloring skills: staying in the lines, crayon control, pressure control",
+        "homaSubject": "fine_motor",
+        "homaDomain": "hand-control",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Pre-Writing",
+        "curriculumTopic": "Tracing straight lines, curved lines, and basic shapes before real letters begin",
+        "homaSubject": "writing",
+        "homaDomain": "handwriting-transcription",
+        "homaTopicId": "mt_DMvKfP4uGC",
+        "status": "mapped",
+        "suggested": {
+          "note": "Matches the existing 'Letter Formation Families' topic; pre-writing stroke practice is the same stroke-family grouping one step before it is applied to an actual letter"
+        }
+      },
+      {
+        "curriculumSubject": "Pre-Writing",
+        "curriculumTopic": "Basic shapes (circle, square, triangle, cross, X)",
+        "homaSubject": "math",
+        "homaDomain": "geometry",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Writing Capital Letters",
+        "curriculumTopic": "All 26 capital letters, taught in stroke-family teaching order (Vertical & Horizontal, Magic C, Big & Little Curves, Diagonals) rather than alphabetical order",
+        "homaSubject": "writing",
+        "homaDomain": "handwriting-transcription",
+        "homaTopicId": "mt_H7DquwQi_F",
+        "status": "mapped",
+        "suggested": {
+          "note": "Direct match to the existing 'Forming Capital Letters' topic"
+        }
+      },
+      {
+        "curriculumSubject": "Writing Capital Letters",
+        "curriculumTopic": "Capital Letter Formation Chart: the exact stroke sequence for every capital letter, given as a short verbal cue per letter",
+        "homaSubject": "writing",
+        "homaDomain": "handwriting-transcription",
+        "homaTopicId": "mt_DMvKfP4uGC",
+        "status": "mapped",
+        "suggested": {
+          "note": "Direct match to the existing 'Letter Formation Families' topic"
+        }
+      },
+      {
+        "curriculumSubject": "Counting & Numbers",
+        "curriculumTopic": "Counting, quantity, and one-to-one correspondence, building toward writing the numeral",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Counting & Numbers",
+        "curriculumTopic": "Numeral recognition (0-9) and the printed numeral's shape",
+        "homaSubject": "math",
+        "homaDomain": "number-place-value",
+        "homaTopicId": null,
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Counting & Numbers",
+        "curriculumTopic": "Writing digits 0-9 with a Number Formation Chart and matching Number Stories mnemonic per digit, using the same Starting Corner and stroke-narration technique as the letters",
+        "homaSubject": "writing",
+        "homaDomain": "handwriting-transcription",
+        "homaTopicId": "mt_oAK9GXSfqV",
+        "status": "mapped",
+        "suggested": {
+          "note": "Direct match to the existing 'Writing digits 0-9' topic"
+        }
+      },
+      {
+        "curriculumSubject": "Writing Lowercase Letters",
+        "curriculumTopic": "All 26 lowercase letters, taught in a second, different stroke-family teaching order (same-as-capitals, Magic c, transition group, Diver Letters, final group)",
+        "homaSubject": "writing",
+        "homaDomain": "handwriting-transcription",
+        "homaTopicId": "mt_H7DquwQi_F",
+        "status": "partial",
+        "suggested": {
+          "note": "The existing topic is literally named 'Forming Capital Letters', so it is a strong fit for the capitals half but only a directional match for lowercase; 'Letter Formation Families' (mt_DMvKfP4uGC) is the better-fitting general topic for the lowercase stroke groupings specifically"
+        }
+      },
+      {
+        "curriculumSubject": "Writing Lowercase Letters",
+        "curriculumTopic": "Lowercase Formation Chart: the exact stroke sequence for every lowercase letter",
+        "homaSubject": "writing",
+        "homaDomain": "handwriting-transcription",
+        "homaTopicId": "mt_DMvKfP4uGC",
+        "status": "mapped",
+        "suggested": {
+          "note": "Direct match to the existing 'Letter Formation Families' topic"
+        }
+      },
+      {
+        "curriculumSubject": "Resources",
+        "curriculumTopic": "Joined/cursive letter writing",
+        "homaSubject": null,
+        "homaDomain": null,
+        "homaTopicId": null,
+        "status": "not_present",
+        "suggested": {
+          "note": "This specific PDF (the Pre-K level Readiness & Writing guide) does not teach joined or cursive writing at all, even though English > Handwriting & Transcription already has a 'Joining Letters' topic for it; that topic belongs to a later Learning Without Tears grade level this drop does not include, not a gap in this analysis"
+        }
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 15,
+      "mapped": 12,
+      "unmapped": 0,
+      "noSubject": 0,
+      "partial": 2,
+      "notPresent": 1
+    }
+  },
+  "layer3_structure": {
+    "cadence": "Not stated as a weekly calendar anywhere in either PDF. Unlike a Charlotte Mason-style guide (e.g. the already-ingested Blossom & Root Level 0), this Pre-K teacher's guide is organized by developmental skill section, not by numbered week: Introduction, Readiness, Drawing, Alphabet Knowledge, Colors & Coloring, Pre-Writing, Writing Capital Letters, Counting & Numbers, Writing Lowercase Letters, then Resources. The guide explicitly leaves pacing to the teacher's judgment of the child's readiness rather than a fixed schedule",
+    "sessionLengthMinutes": {
+      "note": "Not stated. Unlike Blossom & Root's guides, which give explicit per-activity minute counts, the sampled pages of this guide describe activities as short and daily in general terms (e.g. one letter or one number per lesson) without printing a minutes figure. Recording an invented number here would not be honest; leaving this unknown rather than guessing"
+    },
+    "weeklyTemplate": "No week-by-week template exists in the source. Every letter and number lesson instead follows the same fixed page template regardless of which week it falls in: a model to Look and Learn from, a Trace and Copy practice step, a Check step, a Support/ELL note, and a Look What We're Learning skills box covering foundation skills, writing, sensory-motor, oral language, and vocabulary for that one letter or number. The guide's own suggested sequence is: Readiness (body awareness and wood-piece stroke play) before Drawing and Alphabet Knowledge, before Pre-Writing (stroke and shape tracing), before Writing Capital Letters (all 26, in stroke-family order), running alongside Counting & Numbers (counting, numeral recognition, and digit formation), before Writing Lowercase Letters (all 26, in a second stroke-family order)",
+    "progressionModel": "developmental-mastery, not spiral or fixed-linear: strokes and letters are sequenced from developmentally easier to harder (straight lines before curves before diagonals; capitals before lowercase) and the guide expects the teacher to judge readiness rather than advance on a calendar",
+    "reviewRhythm": "The Capital Letter Formation Chart, Lowercase Formation Chart, and Number Formation Chart in the Resources section function as ongoing quick-reference review tools rather than periodic tests. Development is tracked through stated Benchmarks (referenced repeatedly in the guide's own index) rather than scored assessments",
+    "totalWeeks": null,
+    "notes": "This guide's own index lists 'classroom environment', 'classroom routines', and 'child development' as recurring topics, and the Readiness section repeatedly frames activities in terms of a group/classroom setting. This is a K-12-school-market teacher's guide (Learning Without Tears sells primarily into preschools and elementary schools) that a homeschool parent is using one-to-one, not a guide written for a single child at home. curriculum-writer should account for that: activities described for a classroom (turn-taking games, group circle time cues) need a light one-child adaptation, not a literal transcription."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "capital-letter-formation-practice",
+        "description": "A single capital letter's own lesson page: a large model letter with its verbal stroke cue underneath (for example, 'Big line down. Little line across the top.'), a row of trace boxes that fade from a solid model to a blank independent-write box, and a starting-point dot marking exactly where the first stroke begins. Letters appear in the guide's own stroke-family order (Vertical & Horizontal, then Magic C, then Big & Little Curves, then Diagonals), not alphabetical order.",
+        "recipe": "letter-number-formation-practice",
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "letter-number-formation-practice",
+          "creationPath": "html",
+          "description": "One letter or digit per page (or half-page): a bold model with a plain-language stroke cue, a formation box (single box for capitals/digits, a three-band ceiling/chair-rail/floor box for lowercase), 4-6 trace repetitions fading from full model to blank, and a starting dot. Groups by shared stroke family when the family's curriculum specifies one.",
+          "complexity": "medium"
+        }
+      },
+      {
+        "type": "lowercase-letter-formation-practice",
+        "description": "The same per-letter lesson template as the capitals, but every lowercase letter's box uses a three-band floor/chair-rail/ceiling line system (since lowercase letters are two-story: tall letters reach the ceiling, round letters stay in the middle band, descenders drop below the floor), and letters are grouped in a second, different stroke-family teaching order from the capitals.",
+        "recipe": "letter-number-formation-practice",
+        "status": "no_recipe",
+        "notes": "Same recipe as capital-letter-formation-practice above; the recipe's design patterns cover both the single-box (capital/digit) and three-band (lowercase) box geometry as two variants of one format, not two separate recipes."
+      },
+      {
+        "type": "number-formation-practice",
+        "description": "A single digit (0-9) with a Number Formation Chart stroke cue and a Number Stories mnemonic (a short verbal story that makes the digit's shape memorable), trace boxes, and independent writing practice, using the same Starting Corner cue as the capital letters.",
+        "recipe": "number-practice-page",
+        "status": "have_recipe",
+        "notes": "Close but not exact: number-practice-page already gives a single-numeral trace section on a generic 3-line guide plus a ten-frame, number-word, and count-and-color section on the same page, which is a stronger multi-activity page than this source's simpler formation-only pages. It does not currently narrate the stroke with the letter-number-formation-practice recipe's plain-language cue style. Recording this as a low-urgency future design-pattern addition to number-practice-page rather than building a third, near-duplicate number recipe."
+      },
+      {
+        "type": "pre-writing-stroke-practice",
+        "description": "Straight-line, curved-line, and basic-shape tracing pages for children not yet ready for real letters, using the same box-and-fade-trace pattern as the letter pages but with no letter at all, just the stroke shape itself.",
+        "recipe": "letter-number-formation-practice",
+        "status": "no_recipe",
+        "notes": "Covered by the same new recipe as a simpler variant (a formation box with a stroke shape instead of a letter); no separate recipe needed."
+      },
+      {
+        "type": "wood-piece-mat-man-building",
+        "description": "A hands-on readiness activity: the child physically assembles a human figure (Mat Man) and, separately, individual capital letters out of wooden pieces shaped like the four basic strokes (big line, little line, big curve, little curve), before any pencil is picked up.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "This is a physical manipulative activity with real wooden (or paper-cutout) pieces, not a printable page; it sits outside what materials-studio produces, the same way the CM toddler-band guides in curriculum-writer.md note that some activities are real-world and not anything materials-studio would generate. No recipe gap to flag here on purpose."
+      },
+      {
+        "type": "wet-dry-try-slate-practice",
+        "description": "A multisensory letter-tracing sequence on a small chalkboard slate: wet a small sponge and wipe the letter shape away, dry it with a cloth, then trace the letter in chalk, rehearsing the same motion three different sensory ways before it ever meets paper.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Also a physical, non-printable activity (slate, sponge, chalk), out of scope for materials-studio the same way as wood-piece building above."
+      },
+      {
+        "type": "uppercase-lowercase-letter-matching",
+        "description": "Alphabet Knowledge activities where the child matches a capital letter to its lowercase partner, or finds a target letter hiding among distractors.",
+        "recipe": "matching-visual-discrimination",
+        "status": "have_recipe"
+      },
+      {
+        "type": "color-recognition-coloring-page",
+        "description": "Simple line-art pages the child colors while a parent names and reinforces color words, plus general fine-motor coloring-within-the-lines practice.",
+        "recipe": "coloring-page",
+        "status": "have_recipe",
+        "notes": "coloring-page is a long-standing activity-formats.md entry generated on the image-direct path; it has no dedicated recipes/*.md file (like handwriting-practice and tracing-guide, it predates the recipe-file system), but it is well-established and simple enough that authoring a new recipe file for it would be duplicate work, not a genuine gap."
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 8,
+      "haveRecipe": 3,
+      "noRecipe": 5
+    }
+  },
+  "decisionsNeeded": [
+    {
+      "category": "knowledge_bank",
+      "item": "RESOLVED 2026-07-21: written to prod knowledge_bank via mergeKnowledgeRow (contributedBy seed, blob-URL citation, all gate checks passed). Row ids: handwriting-without-tears=7d072efc-e1bb-4233-af91-8d197b458bc8, get-set-for-school-prek-readiness-writing-format=484529a8-4a0a-4fd9-a7de-50c1ddfe0fc4 Original ask: Write the handwriting-without-tears (method_philosophy) and get-set-for-school-prek-readiness-writing-format (method_format) rows to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
+      "impact": "The gate requires a live Postgres connection (mapDb()) that this sandbox does not have, so the write could not be attempted honestly. Proposed row content is recorded in layer1_philosophy.knowledgeBankGaps above.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "recipe",
+      "item": "letter-number-formation-practice recipe authored and registered this session (SKILL.md Format library row, activity-formats.md registry entry); covers capital-letter-formation-practice, lowercase-letter-formation-practice, and pre-writing-stroke-practice",
+      "impact": "This is the core activity type of the entire curriculum (spans the Pre-Writing, Writing Capital Letters, and Writing Lowercase Letters sections, roughly 150 of the guide's 276 pages) and was a genuine gap: the existing copy-work-pages recipe is for continuous literature passages, not single-letter box-and-fade formation drill, and number-practice-page uses a generic 3-line guide rather than the capital/digit box or lowercase three-band system this style of curriculum needs.",
+      "urgency": "low, recorded here for traceability, no further action needed unless the founder wants a different design direction"
+    },
+    {
+      "category": "recipe",
+      "item": "apps/web/agent/skills/materials-studio/references/subjects/letters.md line 18-20 pointed to a 'Letter boxes' section 'above' in the same file that does not exist (the file is 21 lines total with no such section); repointed this session to the new letter-number-formation-practice recipe instead of leaving a dangling internal reference",
+      "impact": "Fixes a pre-existing broken cross-reference that would have sent a future session looking for content that was never there",
+      "urgency": "low"
+    },
+    {
+      "category": "method",
+      "item": "Add a Handwriting Without Tears / Learning Without Tears section to curriculum-writer.md's Methodology-aware planning rules, alongside the existing Charlotte Mason, Montessori, Direct Instruction, Play-Based, Singapore Math, Balanced Literacy, Process Writing, and Literature-Based/Classical sections",
+      "impact": "Authored this session. Lets curriculum-writer apply the method's distinctive rules (stroke-family teaching order over alphabetical, capitals-before-lowercase, consistent stroke-narration vocabulary, multisensory readiness before paper) whenever a family says they use Handwriting Without Tears, Learning Without Tears, or Get Set for School for handwriting, even if the rest of their curriculum follows a different overall philosophy",
+      "urgency": "medium"
+    },
+    {
+      "category": "taxonomy",
+      "item": "No new taxonomy entries needed. English > Handwriting & Transcription already has 'Sitting and holding a pencil', 'Forming Capital Letters', 'Letter Formation Families', and 'Writing digits 0-9', which map almost exactly onto this curriculum's own vocabulary; Literacy > Letter Knowledge, Fine Motor > Hand Control, and Math > Geometry/Counting & Cardinality/Number & Place Value cover the rest",
+      "impact": "None; recorded so a future session does not re-check this same ground",
+      "urgency": "low"
+    },
+    {
+      "category": "taxonomy",
+      "item": "RESOLVED 2026-07-21: added mt_xYlY6CjGN4 'Naming Colors by Sight' (English > Speaking & Listening, subject 'language', age 3-5, PROCEDURAL) to cover this book's Colors & Coloring section, a genuine gap independently confirmed by full-text search (zero existing topics named individual colors; the only prior 'color' hits were color physics at age 11-12, animal camouflage, and two sorting/pattern topics using color only as an example attribute). Distinguished this from Dimensions Math PKA's 'sort objects by color' content, which is a different skill (attribute-based sorting) already covered by the existing sorting/classification topic; that curriculum's mapping was left as-is. No mapping.ts edit needed: English > Speaking & Listening already exists in MARBLE_DOMAIN_MAP, non-colliding with the RESERVED language-subject AUTHORED_DOMAINS (early-talk, speech-clarity, oral-storytelling). topics.json append-only diff verified, manifest.json bytes/sha256 updated, pnpm check:taxonomy green.",
+      "impact": "Homa can now assess and plan for basic color-naming vocabulary at ages 3-5, the youngest age band any topic in the taxonomy covers.",
+      "urgency": "resolved"
+    }
+  ],
+  "notes": "Real page counts, verified directly rather than assumed from the filenames: hwt-pt1.pdf is 120 PDF pages (a CamScanner phone scan of physical book spreads, some early pages scanned two or three times by accident) covering physical book pages 1 through 229; hwt-pt2.pdf is 24 PDF pages covering physical book pages 230 through the end of the book (roughly page 276, including the blank Notes pages at the very back). The two PDFs are confirmed to be ONE continuous book split across two Slack uploads, not two different books, grade levels, or editions: pt2's very first lesson page (capital/lowercase E) picks up exactly where pt1's last lesson page (capital/lowercase I) leaves off, mid-way through the same 'Transition Group' of the guide's own Lowercase Teaching Order, and every page in both files carries the identical footer ('Readiness & Writing PreK Teacher's Guide' / '(c) 2021 Learning Without Tears'). The book itself is titled 'Get Set for School (r) by Learning Without Tears: Readiness & Writing Pre-K Teacher's Guide', 8th edition, copyright 2021 Learning Without Tears, the modern rebrand of the company Aless knows as Handwriting Without Tears; this is that company's current Pre-K handwriting-and-readiness volume, not a book with 'Handwriting Without Tears' literally on its cover. It is a school-market teacher's guide (references classroom routines and circle time throughout) rather than a homeschool-authored curriculum, which is worth keeping in mind anywhere Homa adapts its activities for a single child at home. Sampling covered the front matter and table of contents (pt1 pages 1-10), the Readiness section including Wood Piece Play, Mat Man, and pencil-grip guidance (pt1 pages 21-30), the Pre-Writing-to-Capital-Letters transition and the Developmental Teaching stroke-family order (pt1 pages 61-70), the Counting & Numbers section (pt1 pages 91-100), the end of Writing Capital Letters into the start of Writing Lowercase Letters (pt1 pages 111-120), the remainder of Writing Lowercase Letters through the alphabet's end (pt2 pages 1-8), and the Resources section: Help Me Write My Name, the full index, the References bibliography, and the Capital/Lowercase/Number Formation Charts (pt2 pages 17-24). This is representative sampling across the full breadth of both files as instructed, not a page-by-page read of all 144 combined PDF pages. Copyrighted page images and exact proprietary wording (letter mnemonics, Number Stories text, trademarked terms like Mat Man and Wet-Dry-Try) were used only for this session's own analysis and are described here in Homa's own words, never reproduced verbatim into any product file; the new letter-number-formation-practice recipe describes a generic box-and-stroke-cue pedagogy pattern in Homa's own voice, not a copy of this publisher's specific letters, mnemonics, or illustrations."
+}

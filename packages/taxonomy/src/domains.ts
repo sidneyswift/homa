@@ -28,11 +28,11 @@ const AUTHORED_DOMAINS: readonly TaxonomyDomain[] = [
   { id: "speech-clarity", subject: "language", displayName: "Speech clarity", kind: "assessment", origin: "homa" },
   { id: "oral-storytelling", subject: "language", displayName: "Oral storytelling", kind: "assessment", origin: "homa" },
 
-  // social_studies (joins Marble's historical-thinking + history content)
+  // social_studies (joins Marble's historical-thinking + history content).
+  // geography-maps, civics-government, and economics-money moved to
+  // MARBLE_DOMAIN_MAP on 2026-07-22 when their first topics were authored;
+  // family-community remains reserved here until it has topics.
   { id: "family-community", subject: "social_studies", displayName: "Family & community", kind: "assessment", origin: "homa" },
-  { id: "geography-maps", subject: "social_studies", displayName: "Geography & maps", kind: "assessment", origin: "homa" },
-  { id: "civics-government", subject: "social_studies", displayName: "Civics & government", kind: "assessment", origin: "homa" },
-  { id: "economics-money", subject: "social_studies", displayName: "Economics & money", kind: "assessment", origin: "homa" },
 
   // executive_function (joins Marble's learning-to-learn)
   { id: "attention-focus", subject: "executive_function", displayName: "Attention & focus", kind: "assessment", origin: "homa" },

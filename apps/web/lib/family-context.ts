@@ -10,7 +10,7 @@ import {
 import {
   FAMILY_MEMORY_CHAR_BUDGET,
   formatMemoriesForContext,
-  memoryUsageChars,
+  selectPinnedMemories,
   type MemoryRow,
 } from "./agent-memory";
 import { ageInMonths, formatChildAge } from "./child-age";
@@ -230,12 +230,16 @@ export async function loadFamilyContextPinned(
       from public.children where family_id = ${familyId}
       order by created_at
     `,
+    // NEWEST first: the cap is a safety valve, and now that storage is
+    // unbounded an ascending order would quietly hide a long-running
+    // family's most recent facts behind their oldest ones.
+    // selectPinnedMemories re-sorts what it pins back into read order.
     sql<MemoryRow[]>`
       select id, child_id, kind, content, source, created_at::text as created_at
       from public.family_memories
       where family_id = ${familyId} and kind in ('fact', 'what_works')
         and superseded_at is null
-      order by created_at
+      order by created_at desc
       limit 200
     `,
     sql<ChildAnswerRow[]>`
@@ -290,7 +294,12 @@ export function renderFamilyContext(
   const memberNames = members
     .map((member) => member.display_name?.trim())
     .filter((name): name is string => Boolean(name));
-  const usage = memoryUsageChars(memories);
+  // The character budget applies HERE, at render time, not at write time
+  // (founder ruling 2026-07-20, memory-render-time-budget). Everything the
+  // family ever taught Homa is stored; this picks what rides in the prompt.
+  const pinnedSelection = selectPinnedMemories(memories, {
+    focusChildId: focusChild?.id ?? null,
+  });
   const contextChildren = children.slice(0, 8);
   const data = {
     today,
@@ -335,11 +344,19 @@ export function renderFamilyContext(
         4_000,
       ) ?? "",
     savedMemories: {
-      usedCharacters: usage,
+      usedCharacters: pinnedSelection.pinnedChars,
       budgetCharacters: FAMILY_MEMORY_CHAR_BUDGET,
+      // Honesty; Homa must never read a short pinned list as "this is
+      // everything I know". When the store outgrows the prompt the rest
+      // stays in the archive and recall reaches it.
+      ...(pinnedSelection.overflow.length > 0
+        ? {
+            notShownHere: `${pinnedSelection.overflow.length} more saved memories did not fit in this turn's context. They are not gone: search them with recall before telling a parent you do not know something.`,
+          }
+        : {}),
       data:
         boundedContextField(
-          formatMemoriesForContext(memories, childNamesById),
+          formatMemoriesForContext(pinnedSelection.pinned, childNamesById),
           4_000,
         ) ?? "",
     },

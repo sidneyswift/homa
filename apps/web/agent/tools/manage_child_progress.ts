@@ -18,6 +18,7 @@ import {
   takeoverProgressCheckIn,
   undoProgressUpdate,
 } from "../../lib/child-progress/runtime";
+import { captureJournalClaims } from "../../lib/child-progress/journal-capture";
 import {
   executeChildProgressTool,
   type ChildProgressToolOperations,
@@ -45,7 +46,7 @@ const childProgressOperations: ChildProgressToolOperations = {
   resumeCheckIn: resumeProgressCheckIn,
   stopCheckIn: stopProgressCheckIn,
   takeoverCheckIn: takeoverProgressCheckIn,
-  recordJournalEvidence(context, input) {
+  async recordJournalEvidence(context, input) {
     if (
       context.canonicalInboundText === null ||
       context.inboundMessageId === null ||
@@ -55,20 +56,49 @@ const childProgressOperations: ChildProgressToolOperations = {
         context.channel !== "email"
       )
     ) {
-      return Promise.resolve({ status: "no_match" });
+      return { status: "no_match" };
     }
-    return recordJournalProgressEvidence({
+    // Judgment first, outside the transaction, then the deterministic
+    // gate; the service below stays free of language work entirely
+    // (AGENTS.md "Models judge, code verifies").
+    const capture = await captureJournalClaims({
       familyId: context.familyId,
       childId: input.childId,
+      message: context.canonicalInboundText,
+      surface: "journal",
+    });
+    const base = {
+      familyId: context.familyId,
       memberUserId: context.memberUserId,
       quote: context.canonicalInboundText,
       channel: context.channel,
       messageId: context.inboundMessageId,
       observedAt: context.now,
       idempotencyKey: input.idempotencyKey,
-      ...(input.subjectId
-        ? { subjectId: input.subjectId }
-        : {}),
+      ...(input.subjectId ? { subjectId: input.subjectId } : {}),
+    } as const;
+
+    // One family activity becomes one operation per child it names.
+    // Safe by construction: operations are unique per
+    // (child_id, family_id, idempotency_key), so siblings never collide
+    // and each child keeps its own undo token.
+    const siblingIds = capture.childIds.filter(
+      (childId) => childId !== input.childId,
+    );
+    for (const siblingId of siblingIds) {
+      await recordJournalProgressEvidence({
+        ...base,
+        childId: siblingId,
+        ...(capture.claims ? { claims: capture.claims } : {}),
+      });
+    }
+
+    // The child the model named in the call is the one whose result the
+    // parent hears about.
+    return recordJournalProgressEvidence({
+      ...base,
+      childId: input.childId,
+      ...(capture.claims ? { claims: capture.claims } : {}),
     });
   },
   resolveConflict: resolveProgressConflict,

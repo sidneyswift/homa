@@ -1,5 +1,6 @@
 import { aheadCapForAge } from "./bands";
 import { MAP_SUBJECTS, getMapItem, planQuestions, type MapAnswer, type MapItem } from "./bank";
+import { getScorableItem } from "./scorable";
 import { domainForBankItem } from "./item-domains";
 
 /**
@@ -132,7 +133,7 @@ function creditMonths(item: MapItem): number {
 export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScores {
   const bySubject = new Map<string, MapAnswerInput[]>();
   for (const entry of answers) {
-    const found = getMapItem(entry.itemId);
+    const found = getScorableItem(entry.itemId);
     if (!found) continue;
     const list = bySubject.get(found.subject.id) ?? [];
     list.push(entry);
@@ -172,7 +173,7 @@ export function scoreMap(ageMonths: number, answers: MapAnswerInput[]): MapScore
     const bankTop = Math.max(...subject.items.map((item) => item.typicalMonths));
 
     for (const entry of observations) {
-      const found = getMapItem(entry.itemId);
+      const found = getScorableItem(entry.itemId);
       if (!found) continue;
       const anchor = found.item.typicalMonths;
       if (entry.answer === "easily") {

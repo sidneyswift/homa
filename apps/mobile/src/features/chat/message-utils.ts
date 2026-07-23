@@ -1,5 +1,7 @@
 import type { EveMessage, EveMessagePart } from "eve/react";
 
+import { parseQuestionCardPart } from "./question-card-model";
+
 /**
  * Transcript display logic ported from apps/web/app/app/chat/message-parts.tsx
  * (keep the tool names and labels in sync). Pure functions, no JSX, so
@@ -70,46 +72,12 @@ export function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
   return null;
 }
 
-/**
- * Homa's choice card (agent/tools/ask_user_questions.ts) as plain
- * readable lines. Mobile has no tappable card yet, and a tool this app
- * cannot draw renders as nothing at all, so without this the parent
- * would see Homa ask a question and then apparently say nothing. She
- * reads the options here and answers by typing.
- */
-export function askedQuestionLines(part: EveMessagePart): string[] | null {
-  if (
-    part.type !== "dynamic-tool" ||
-    part.toolName !== "ask_user_questions" ||
-    part.state !== "output-available"
-  ) {
-    return null;
-  }
-  const output = (part.output ?? {}) as Record<string, unknown>;
-  if (output.asked !== true || !Array.isArray(output.questions)) return null;
-  const lines: string[] = [];
-  for (const raw of output.questions) {
-    if (typeof raw !== "object" || raw === null) continue;
-    const question = raw as Record<string, unknown>;
-    if (typeof question.question !== "string") continue;
-    if (!Array.isArray(question.options)) continue;
-    const labels = question.options
-      .map((option) =>
-        typeof option === "object" && option !== null
-          ? (option as Record<string, unknown>).label
-          : null,
-      )
-      .filter((label): label is string => typeof label === "string");
-    if (labels.length === 0) continue;
-    lines.push(question.question, ...labels.map((label) => `· ${label}`));
-  }
-  return lines.length > 0 ? lines : null;
-}
-
 export function partIsRenderable(part: EveMessagePart): boolean {
   if (part.type === "text") return part.text.trim().length > 0;
   if (part.type === "dynamic-tool" && part.state === "output-available") {
-    if (askedQuestionLines(part) !== null) return true;
+    // Homa's choice card (agent/tools/ask_user_questions.ts) draws as a
+    // real tappable card here; question-card-model.ts owns the parsing.
+    if (parseQuestionCardPart(part) !== null) return true;
     if (
       part.toolName === "create_printable" ||
       part.toolName === "show_material" ||

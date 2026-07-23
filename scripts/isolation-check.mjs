@@ -3126,6 +3126,9 @@ await expectReadDenied("conversation_inbound_receipts");
 // Accepted-offer fulfillment is server-only attribution. Parents see the
 // resulting material or task, never this analytics edge.
 await expectReadDenied("conversation_offer_fulfillments");
+// Offer-recovery attempt bookkeeping (migration 20260723160000): server-only,
+// same posture as the fulfillment ledger it bounds; parents never read it.
+await expectReadDenied("conversation_offer_recovery");
 // Post-turn review bookkeeping (migration #35): deny-all, server-only.
 await expectEmptyRead("learning_reviews");
 // Capture-time hours record (migration #37): family-scoped, members only.
