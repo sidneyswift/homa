@@ -31,6 +31,27 @@ import type { ReportCardData } from "./onboarding-cards";
  * written narrative and the emailed copy, both through the existing
  * scoring route, which has the long function and the background hook
  * built for exactly that. It is idempotent, so a remount costs nothing.
+ *
+ * Act 3, added 2026-07-22 (founder: "it says its ready, but when you
+ * click it starts the generation... it does not say its ready until it
+ * actually is"). The scores ARE ready the instant Act 2 shows them; the
+ * WORDS are not, and finalizeReport's fire-and-forget POST just started
+ * them writing somewhere the parent cannot see. Saying "ready" and
+ * offering "the whole report" before that write finishes oversold the
+ * card's own claim the moment she tapped through and landed on the
+ * report page's own honest "Homa is writing" screen instead.
+ *
+ * So the card now polls the same token-scoped status endpoint the
+ * report page's own writing beat already uses (narrative-status), and
+ * carries two more states than the one before it: numbers in, words
+ * still writing (headline says exactly that, strengths already shown
+ * since they are real, no button yet because there is nothing whole to
+ * open), then ready for real, the original copy restored. Nothing here
+ * is a new turn or a new server call; the same fire-and-forget kick
+ * from Act 2 keeps running, and the status route self-heals it if it
+ * ever silently failed. She is never asked to wait on this: the
+ * composer beneath the card was never gone, and the arc moves on with
+ * or without a finished narrative.
  */
 
 const LINE_STAGGER_MS = 700;
@@ -67,6 +88,21 @@ function finalizeReport(childId: string): void {
   });
 }
 
+const NARRATIVE_POLL_MS = 2500;
+
+/**
+ * Is the report's written narrative actually done, right now.
+ *
+ * "writing" is the only value that means keep waiting. "off" (the flag
+ * is disabled) and "none" both mean there is nothing to wait FOR, and
+ * every other value is a finished attempt, successful or not; the report
+ * page already falls back to template sentences on a failed one, so this
+ * card only needs to know whether the wait itself is over.
+ */
+export function narrativeSettled(status: string): boolean {
+  return status !== "writing";
+}
+
 export function ReportRevealCard({
   card,
   active,
@@ -93,6 +129,12 @@ export function ReportRevealCard({
     !active || card.alreadyScored ? lines.length : 1,
   );
   const finalizedRef = useRef(false);
+  // A report scored in a past turn has had an entire session's worth of
+  // wall-clock time to finish writing, so it starts settled; only a
+  // fresh live scoring needs to ask the status endpoint at all.
+  const [narrativeReady, setNarrativeReady] = useState(
+    () => !active || card.alreadyScored,
+  );
 
   useEffect(() => {
     if (finalizedRef.current) return;
@@ -102,6 +144,36 @@ export function ReportRevealCard({
     // yesterday's transcript is scrollback, not a reading.
     if (active) beaconChatReveal(card.token);
   }, [card.childId, card.alreadyScored, card.token, active]);
+
+  useEffect(() => {
+    if (!active || card.alreadyScored) return;
+    let cancelled = false;
+    let settled = false;
+
+    async function poll(): Promise<void> {
+      try {
+        const response = await fetch(
+          `/api/map/narrative-status?token=${encodeURIComponent(card.token)}`,
+        );
+        const data = (await response.json()) as { ok: boolean; status?: string };
+        if (cancelled || settled) return;
+        if (data.ok && data.status && narrativeSettled(data.status)) {
+          settled = true;
+          setNarrativeReady(true);
+        }
+      } catch {
+        // The next tick retries. A poll failure is never hers to see;
+        // the card just keeps reading "still writing" a little longer.
+      }
+    }
+
+    void poll();
+    const timer = setInterval(() => void poll(), NARRATIVE_POLL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [active, card.alreadyScored, card.token]);
 
   useEffect(() => {
     if (revealed) return;
@@ -167,7 +239,11 @@ export function ReportRevealCard({
   return (
     <section
       className="w-full max-w-[26rem] rounded-lg border border-border-subtle bg-card p-4 shadow-md sm:p-5"
-      aria-label={`${card.childName}'s progress report`}
+      aria-label={
+        narrativeReady
+          ? `${card.childName}'s progress report`
+          : `${card.childName}'s numbers, report still writing`
+      }
     >
       <div className="flex items-center justify-between gap-2">
         <span className="shrink-0 rounded-pill bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand">
@@ -178,11 +254,22 @@ export function ReportRevealCard({
         </p>
       </div>
       <p className="mt-3 font-display text-lg font-semibold leading-snug text-strong">
-        {card.childName}&apos;s progress report is ready.
+        {narrativeReady
+          ? `${card.childName}'s progress report is ready.`
+          : `${card.childName}'s numbers are in.`}
       </p>
       <p className="mt-1.5 text-sm text-muted">
-        Built from your {card.answered} {card.answered === 1 ? "answer" : "answers"}.
-        {skippedLine ? ` ${skippedLine}` : ""}
+        {narrativeReady ? (
+          <>
+            Built from your {card.answered} {card.answered === 1 ? "answer" : "answers"}.
+            {skippedLine ? ` ${skippedLine}` : ""}
+          </>
+        ) : (
+          // The honest split the report page's own writing beat already
+          // makes: the scores below are real right now; the sentences
+          // are still being written, and nothing here is waiting on her.
+          "I'm still writing the words to go with them. Keep going, there's nothing to wait for."
+        )}
       </p>
       {card.strengths.length > 0 ? (
         <div className="mt-3.5">
@@ -201,14 +288,16 @@ export function ReportRevealCard({
           </div>
         </div>
       ) : null}
-      <button
-        type="button"
-        disabled={onOpenReport === undefined}
-        onClick={() => onOpenReport?.(card.childId)}
-        className="mt-4 flex min-h-12 w-full items-center justify-center gap-2.5 rounded-md bg-brand px-4 py-3 text-base font-bold text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        See the whole report
-      </button>
+      {narrativeReady ? (
+        <button
+          type="button"
+          disabled={onOpenReport === undefined}
+          onClick={() => onOpenReport?.(card.childId)}
+          className="mt-4 flex min-h-12 w-full items-center justify-center gap-2.5 rounded-md bg-brand px-4 py-3 text-base font-bold text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          See the whole report
+        </button>
+      ) : null}
     </section>
   );
 }
