@@ -11,7 +11,7 @@ import {
   type DetailCardKind,
 } from "./detail-card";
 
-const KINDS: DetailCardKind[] = ["family_basics", "child"];
+const KINDS: DetailCardKind[] = ["family_basics", "child", "homeschool_profile"];
 
 function renderCard(kind: DetailCardKind): string {
   return renderToStaticMarkup(
@@ -23,8 +23,11 @@ function renderCard(kind: DetailCardKind): string {
   );
 }
 
+/** Counts questions on screen, not literal form controls: a chips-optional
+ *  step answers one question with a row of buttons, not an <input>, so
+ *  counting raw form elements would misread it as zero questions asked. */
 function countInputs(html: string): number {
-  return (html.match(/<(input|select|textarea)\b/gu) ?? []).length;
+  return (html.match(/<label class="block"/gu) ?? []).length;
 }
 
 /** Static markup escapes the apostrophe in "your child's", so a copy

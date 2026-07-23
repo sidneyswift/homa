@@ -6,6 +6,7 @@ import { useState } from "react";
 import { HOMESCHOOL_STYLES, US_STATES } from "@homa/core";
 
 import { Logo } from "../../components/brand/Logo";
+import { uploadAvatarPhoto } from "../../lib/avatar-upload";
 import { HOMESCHOOL_STYLE_LABELS } from "../../lib/homeschool-styles";
 
 /**
@@ -33,7 +34,9 @@ import { HOMESCHOOL_STYLE_LABELS } from "../../lib/homeschool-styles";
  * second field to a step.
  */
 
-export type DetailCardKind = "family_basics" | "child";
+export type DetailCardKind = "family_basics" | "child" | "homeschool_profile";
+
+const CARD_KINDS: readonly DetailCardKind[] = ["family_basics", "child", "homeschool_profile"];
 
 export interface DetailCardData {
   kind: DetailCardKind;
@@ -50,9 +53,9 @@ export function parseDetailCardPart(part: EveMessagePart): DetailCardData | null
   }
   const output = (part.output ?? {}) as Record<string, unknown>;
   if (output.asked !== true) return null;
-  if (output.kind !== "family_basics" && output.kind !== "child") return null;
+  if (!CARD_KINDS.includes(output.kind as DetailCardKind)) return null;
   return {
-    kind: output.kind,
+    kind: output.kind as DetailCardKind,
     intro: typeof output.intro === "string" ? output.intro : null,
   };
 }
@@ -118,10 +121,12 @@ export interface DetailField {
   key: string;
   label: string;
   hint?: string;
-  kind: "text" | "state" | "date" | "chips-optional";
+  kind: "text" | "state" | "date" | "chips-optional" | "photo-optional";
   autoComplete?: string;
   /** chips-optional only: the fixed list she picks any number from. */
   options?: { value: string; label: string }[];
+  /** text only: never blocks advancing, whatever she typed or left blank. */
+  optional?: boolean;
 }
 
 /** Turns the comma-joined chips-optional value back into its list, empty
@@ -175,6 +180,21 @@ export const FIELDS: Record<DetailCardKind, DetailField[]> = {
       hint: "This decides which homeschool rules I follow for you.",
       kind: "state",
     },
+    {
+      key: "familyName",
+      label: "What does your family go by?",
+      hint: "Something like \"The Chen family\". Skip it if you'd rather not.",
+      kind: "text",
+      optional: true,
+    },
+    {
+      key: "photo",
+      label: "Want to add a photo of yourself?",
+      hint: "Totally optional.",
+      kind: "photo-optional",
+    },
+  ],
+  homeschool_profile: [
     {
       key: "homeschoolStyles",
       label: "Any particular homeschool approach you follow?",
@@ -236,29 +256,49 @@ export function DetailCard({
   onSaved?: (summary: string) => void;
 }) {
   const [values, setValues] = useState<Record<string, string>>({});
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const isBasics = card.kind === "family_basics";
+  const isHomeschoolProfile = card.kind === "homeschool_profile";
   const fields = FIELDS[card.kind];
   const field = fields[Math.min(stepIndex, fields.length - 1)];
   const value = values[field.key] ?? "";
   const isLast = stepIndex === fields.length - 1;
   const ready =
-    field.kind === "state"
-      ? value.length === 2
-      : field.kind === "date"
-        ? value.length === 10
-        : field.kind === "chips-optional"
-          ? true
+    field.kind === "chips-optional" || field.kind === "photo-optional" || field.optional
+      ? true
+      : field.kind === "state"
+        ? value.length === 2
+        : field.kind === "date"
+          ? value.length === 10
           : value.trim().length > 0;
+
+  function setPhoto(file: File | null): void {
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoFile(file);
+    setPhotoPreview(file ? URL.createObjectURL(file) : null);
+  }
 
   async function save(all: Record<string, string>): Promise<void> {
     setSaving(true);
     setError(null);
     try {
+      let avatarUrl: string | undefined;
+      if (isBasics && photoFile) {
+        const uploaded = await uploadAvatarPhoto(photoFile);
+        if (!uploaded) {
+          setError("That photo didn't upload. Try a different one, or clear it and continue.");
+          setSaving(false);
+          return;
+        }
+        avatarUrl = uploaded;
+      }
+
       const response = isBasics
         ? await fetch("/api/onboarding/basics", {
             method: "POST",
@@ -267,18 +307,27 @@ export function DetailCard({
               callMeName: all.callMeName?.trim(),
               usState: all.usState,
               timeZone: browserTimeZone(),
-              homeschoolStyles: parseChipsValue(all.homeschoolStyles ?? ""),
+              familyName: all.familyName?.trim() || undefined,
+              ...(avatarUrl ? { avatarUrl } : {}),
             }),
           })
-        : await fetch("/api/map/children", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: all.childName?.trim(),
-              birthDate: all.birthDate,
-              interests: [],
-            }),
-          });
+        : isHomeschoolProfile
+          ? await fetch("/api/onboarding/homeschool-profile", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                styles: parseChipsValue(all.homeschoolStyles ?? ""),
+              }),
+            })
+          : await fetch("/api/map/children", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                name: all.childName?.trim(),
+                birthDate: all.birthDate,
+                interests: [],
+              }),
+            });
       const data = (await response.json()) as { ok?: boolean };
       if (!response.ok || !data.ok) throw new Error("save failed");
       const pickedStyles = parseChipsValue(all.homeschoolStyles ?? "").map((value) =>
@@ -288,14 +337,16 @@ export function DetailCard({
         ? // The state's name, not its postal code. This string becomes her
           // own bubble in the transcript, and "Sid, DC" reads as a
           // database row where "Sid, District of Columbia" reads as an
-          // answer she gave. The style names, when she picked any, ride
-          // on the same bubble rather than a second one: it is still one
-          // answer, about herself, from one card.
+          // answer she gave.
           `${all.callMeName?.trim()}, ${
             US_STATES.find((state) => state.code === all.usState)?.name ??
             all.usState
-          }${pickedStyles.length > 0 ? `, ${pickedStyles.join(", ")}` : ""}`
-        : `${all.childName?.trim()}, born ${spokenDate(all.birthDate)}`;
+          }`
+        : isHomeschoolProfile
+          ? pickedStyles.length > 0
+            ? pickedStyles.join(", ")
+            : "Nothing in particular, noted"
+          : `${all.childName?.trim()}, born ${spokenDate(all.birthDate)}`;
       setSaved(summary);
       onSaved?.(summary);
     } catch {
@@ -340,11 +391,17 @@ export function DetailCard({
   // filled in, purely because a turn was running: a receipt claiming an
   // effect that never happened, which is the one thing a receipt may
   // never do.
+  const cardTitle = isBasics
+    ? "About you"
+    : isHomeschoolProfile
+      ? "About your homeschool"
+      : "About your child";
+
   if (saved !== null) {
     return (
       <p className="inline-flex max-w-full items-baseline gap-1.5 self-start rounded-pill border border-sage/30 bg-sage/10 px-3 py-1.5 text-xs">
         <span className="font-semibold text-sage">
-          {isBasics ? "Saved" : "Added"}
+          {isBasics || isHomeschoolProfile ? "Saved" : "Added"}
         </span>
         <span className="truncate text-body">{saved}</span>
       </p>
@@ -361,12 +418,12 @@ export function DetailCard({
           ? "w-full rounded-[22px] border border-border-subtle bg-card px-4 pb-4 pt-4 shadow-md"
           : "w-full max-w-[26rem] rounded-lg border border-border-subtle bg-card p-4 shadow-md sm:p-5"
       }
-      aria-label={isBasics ? "About you" : "About your child"}
+      aria-label={cardTitle}
     >
       {docked ? null : (
         <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-subtle">
           <Logo size={15} variant="mark" />
-          {isBasics ? "About you" : "About your child"}
+          {cardTitle}
         </p>
       )}
       {card.intro ? (
@@ -385,7 +442,33 @@ export function DetailCard({
           <span className="text-sm font-medium text-strong">
             {withChildName(field.label, values)}
           </span>
-          {field.kind === "chips-optional" ? (
+          {field.kind === "photo-optional" ? (
+            <div className="mt-1.5 flex items-center gap-3">
+              {photoPreview ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={photoPreview}
+                  alt=""
+                  className="h-12 w-12 rounded-full border border-border object-cover"
+                />
+              ) : null}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(event) => setPhoto(event.target.files?.[0] ?? null)}
+                className="text-sm text-body file:mr-3 file:min-h-9 file:rounded-pill file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-sm file:text-strong"
+              />
+              {photoPreview ? (
+                <button
+                  type="button"
+                  onClick={() => setPhoto(null)}
+                  className="text-xs text-subtle underline-offset-2 hover:underline"
+                >
+                  remove
+                </button>
+              ) : null}
+            </div>
+          ) : field.kind === "chips-optional" ? (
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {(field.options ?? []).map((option) => {
                 const selected = parseChipsValue(value).includes(option.value);
@@ -463,7 +546,9 @@ export function DetailCard({
           : isLast
             ? isBasics
               ? "That's me"
-              : withChildName(`Add ${NAME_TOKEN}`, values)
+              : isHomeschoolProfile
+                ? "Got it"
+                : withChildName(`Add ${NAME_TOKEN}`, values)
             : "Next"}
       </button>
 

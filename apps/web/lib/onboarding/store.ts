@@ -217,10 +217,13 @@ export interface FamilyBasicsInput {
   usState?: string;
   /** IANA zone, captured silently from the browser and confirmed lightly. */
   timeZone?: string;
+  /** Her own photo, already uploaded to the avatars bucket client-side. */
+  avatarUrl?: string;
 }
 
 /**
- * saveFamilyBasics(familyId, input): the micro-gather's one write.
+ * saveFamilyBasics(familyId, input, memberUserId): the micro-gather's one
+ * write.
  *
  * Deliberately NOT lib/map/store.ts saveFamilySetup, which is the
  * settings form's writer: that one sets parent_avatar_url and the address
@@ -232,16 +235,22 @@ export interface FamilyBasicsInput {
  * profile_completed_at is stamped once and never moved. It is what makes
  * /app reachable, and while the onboarding record says active it does NOT
  * end onboarding, because the record outranks the stamp.
+ *
+ * memberUserId mirrors the photo onto her own family_members row too
+ * (same two-writes pattern saveFamilySetup uses), only when the browser
+ * session is authenticated rather than an anonymous resume cookie.
  */
 export async function saveFamilyBasics(
   familyId: string,
   input: FamilyBasicsInput,
+  memberUserId?: string | null,
 ): Promise<{ savedFields: string[] }> {
   const sql = mapDb();
   const callMeName = input.callMeName?.trim() || null;
   const familyName = input.familyName?.trim() || null;
   const usState = input.usState?.trim().toUpperCase() || null;
   const timeZone = input.timeZone?.trim() || null;
+  const avatarUrl = input.avatarUrl?.trim() || null;
   await sql`
     update public.families set
       name = coalesce(${familyName}, name),
@@ -249,14 +258,23 @@ export async function saveFamilyBasics(
       parent_display_name = coalesce(${callMeName}, parent_display_name),
       us_state = coalesce(${usState}, us_state),
       time_zone = coalesce(${timeZone}, time_zone),
+      parent_avatar_url = coalesce(${avatarUrl}, parent_avatar_url),
       profile_completed_at = coalesce(profile_completed_at, now()),
       updated_at = now()
     where id = ${familyId}
   `;
+  if (avatarUrl && memberUserId) {
+    await sql`
+      update public.family_members
+      set avatar_url = coalesce(${avatarUrl}, avatar_url)
+      where family_id = ${familyId} and user_id = ${memberUserId}
+    `;
+  }
   const savedFields: string[] = [];
   if (callMeName) savedFields.push("callMeName");
   if (familyName) savedFields.push("familyName");
   if (usState) savedFields.push("usState");
   if (timeZone) savedFields.push("timeZone");
+  if (avatarUrl) savedFields.push("avatarUrl");
   return { savedFields };
 }
