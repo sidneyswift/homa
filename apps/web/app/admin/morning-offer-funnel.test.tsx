@@ -25,7 +25,7 @@ function summary(
 }
 
 describe("MorningOfferFunnel", () => {
-  it("shows no-data language instead of a false zero acceptance rate", () => {
+  it("says what a delivery is and keeps the pre-tracking notice", () => {
     const html = renderToStaticMarkup(
       <MorningOfferFunnel
         summary={summary({
@@ -40,17 +40,15 @@ describe("MorningOfferFunnel", () => {
       />,
     );
 
-    assert.match(html, /38 offers delivered this week/u);
-    assert.match(html, /No clear yes or no yet/u);
+    assert.match(html, /morning briefs, one offer in each/u);
     assert.match(
       html,
       /8 replies were recorded before yes-or-no tracking started on July 16/u,
     );
-    assert.match(html, /Decision, yes, and completion rates exclude them/u);
-    assert.doesNotMatch(html, /0% accepted/u);
+    assert.match(html, /Yes and completion counts exclude them/u);
   });
 
-  it("names every denominator in the causal chain", () => {
+  it("centers the delivered-to-replied relationship with its denominator", () => {
     const html = renderToStaticMarkup(
       <MorningOfferFunnel
         summary={summary({
@@ -69,34 +67,29 @@ describe("MorningOfferFunnel", () => {
       />,
     );
 
-    assert.match(html, /4 of 10 closed windows replied \(40%\) · 2 still open/u);
-    assert.match(html, /75% of decisions/u);
-    assert.match(html, /67% of yes replies · saved material or task/u);
-    assert.match(html, /1 nearby message could not be tied to an offer/u);
+    assert.match(html, /40% of 10 closed windows/u);
+    assert.match(html, /2 windows still open/u);
+    assert.match(html, /Of the 4 replies, 3 said yes and 2 got their material or task\./u);
+    assert.match(html, /6 briefs closed their 24 hour window with no reply/u);
+    assert.match(html, /1 nearby message could not be tied to a brief/u);
+    assert.match(html, /40% of closed windows got a reply this week\./u);
+    assert.match(html, /the number to move is replies, not yes rates/u);
+    // The yes-or-no stage is gone: nobody can reply no, so it carried nothing.
+    assert.doesNotMatch(html, /Yes or no/u);
+    assert.doesNotMatch(html, /of decisions/u);
   });
 
-  it("keeps waiting, no-reply, and other replies outside the main chain", () => {
+  it("stays honest before any window has closed", () => {
     const html = renderToStaticMarkup(
       <MorningOfferFunnel
-        summary={summary({
-          deliveredOffers: 9,
-          linkedReplies: 3,
-          waiting: 2,
-          noLinkedReply: 4,
-          maturedOffers: 7,
-          decisions: 2,
-          accepted: 1,
-          declined: 1,
-          answered: 1,
-        })}
-        possibleInterest={2}
-        rangeLabel="last 4 weeks"
+        summary={summary({ deliveredOffers: 9, waiting: 9 })}
+        possibleInterest={0}
+        rangeLabel="this week"
       />,
     );
 
-    assert.match(html, /3 of 7 closed windows replied \(43%\) · 2 still open/u);
-    assert.match(html, /4 offers reached 24 hours with no reply/u);
-    assert.match(html, /1 reply asked or said something else/u);
-    assert.match(html, /excluded from reply counts/u);
+    assert.match(html, /No replies yet this week\./u);
+    assert.match(html, /No reply windows have closed yet this week\./u);
+    assert.match(html, /9 windows still open/u);
   });
 });
