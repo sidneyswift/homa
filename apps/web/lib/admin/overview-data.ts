@@ -106,13 +106,16 @@ export interface FamiliesByDayPoint {
   total: number;
 }
 
-/** The two growth lines (founder ruling 2026-07-23): signups counts every
- * real signup including families that never finished the account step, so
- * it is top-of-funnel demand; setupDone counts families that finished
- * setup and added a kid. The vertical gap between them IS the onboarding
- * leak, which is why this is two fixed lines and not a filter. */
+/** The three growth lines (founder rulings 2026-07-23): signups counts
+ * every real signup including families that never finished the account
+ * step, so it is top-of-funnel demand; accounts counts families whose
+ * first member row landed (the population the page headline and roster
+ * count); setupDone counts families that finished setup and added a kid.
+ * The vertical gaps between the lines ARE the funnel leaks, which is why
+ * this is three fixed lines and not a filter. */
 export interface GrowthSeries {
   signups: FamiliesByDayPoint[];
+  accounts: FamiliesByDayPoint[];
   setupDone: FamiliesByDayPoint[];
 }
 
@@ -224,6 +227,22 @@ export async function getFleetOverview(
     from public.families f
     where coalesce(f.status, 'open') <> 'deleted'
       and f.sandbox is not true
+    group by 1 order by 1
+  `;
+  // Account open = the family's first member row; this is the population
+  // the headline and the roster count, so the middle line is the one the
+  // rest of the page agrees with.
+  const accountsPerDay = await sql<{ day: string; n: number }[]>`
+    select ((member.first_at at time zone ${tz})::date)::text as day, count(*)::int as n
+    from public.families f
+    join lateral (
+      select min(m.created_at) as first_at
+      from public.family_members m
+      where m.family_id = f.id
+    ) member on true
+    where coalesce(f.status, 'open') <> 'deleted'
+      and f.sandbox is not true
+      and member.first_at is not null
     group by 1 order by 1
   `;
   // Setup done = profile completed and at least one kid added; the
@@ -568,6 +587,7 @@ export async function getFleetOverview(
     newSignups: snapshots.filter((s) => new Date(s.createdAt).getTime() >= cutoff),
     growth: {
       signups: buildCumulativeByDay(signupsPerDay, dayKey(now, tz)),
+      accounts: buildCumulativeByDay(accountsPerDay, dayKey(now, tz), signupsPerDay[0]?.day),
       setupDone: buildCumulativeByDay(setupPerDay, dayKey(now, tz), signupsPerDay[0]?.day),
     },
     runCounts: toCounts(runRows),
