@@ -1,14 +1,16 @@
-import type { GrowthSeries } from "../../lib/admin/overview-data";
+import type { FamiliesByDayPoint, GrowthSeries } from "../../lib/admin/overview-data";
 import { EmptyNote } from "./ui";
 
 /**
  * The founder's growth lines: cumulative real signups (demand, husks
- * included) and cumulative setup-done families, per day, full product
- * history (founder rulings 2026-07-23: "a graph, not a number", then
- * "count all real"). The vertical gap between the two lines is the
- * onboarding leak, so this stays two fixed lines, never a filter.
- * Hand-rolled server-rendered SVG like ui.tsx's Spark; no hover. The
- * numbers that matter are printed at the line ends.
+ * included), accounts opened (the population the headline and roster
+ * count), and setup-done families, per day, full product history
+ * (founder rulings 2026-07-23: "a graph, not a number", "count all
+ * real", then "all three numbers in one picture"). The vertical gaps
+ * between the lines are the funnel leaks, so this stays fixed lines,
+ * never a filter. Hand-rolled server-rendered SVG like ui.tsx's Spark;
+ * no hover. The numbers that matter are printed at the line ends and
+ * double as the legend.
  */
 
 const WIDTH = 720;
@@ -17,6 +19,9 @@ const INSET_LEFT = 40;
 const INSET_RIGHT = 108;
 const INSET_TOP = 16;
 const INSET_BOTTOM = 28;
+
+/** Endpoint labels never sit closer than this vertically. */
+const LABEL_GAP = 34;
 
 /** The July 13, 2026 conference: the launch elbow in the curve gets a
  * label so it never needs a legend. */
@@ -33,11 +38,41 @@ function isSunday(day: string): boolean {
   return new Date(`${day}T00:00:00Z`).getUTCDay() === 0;
 }
 
+interface Line {
+  points: FamiliesByDayPoint[];
+  label: string;
+  stroke: string;
+  labelFill: string;
+}
+
 export function GrowthChart({ series }: { series: GrowthSeries }) {
-  const { signups, setupDone } = series;
+  const { signups } = series;
   if (signups.length < 2) {
     return <EmptyNote>The growth line starts once two days of signups exist.</EmptyNote>;
   }
+
+  // Top of the funnel first: later lines draw on top, and endpoint
+  // labels stack in this order when they crowd.
+  const lines: Line[] = [
+    {
+      points: signups,
+      label: "signed up",
+      stroke: "var(--clay-500)",
+      labelFill: "var(--text-strong)",
+    },
+    {
+      points: series.accounts,
+      label: "accounts",
+      stroke: "var(--sky-600)",
+      labelFill: "var(--sky-600)",
+    },
+    {
+      points: series.setupDone,
+      label: "set up",
+      stroke: "var(--sage-500)",
+      labelFill: "var(--sage-600)",
+    },
+  ].filter((line) => line.points.length > 1);
 
   const plotLeft = INSET_LEFT;
   const plotRight = WIDTH - INSET_RIGHT;
@@ -56,7 +91,7 @@ export function GrowthChart({ series }: { series: GrowthSeries }) {
   const gridValues: number[] = [];
   for (let v = 0; v <= domainTop; v += step) gridValues.push(v);
 
-  const toLine = (points: { total: number }[]) =>
+  const toPolyline = (points: FamiliesByDayPoint[]) =>
     points
       .map((p, i) => `${x(i, points.length).toFixed(1)},${y(p.total).toFixed(1)}`)
       .join(" ");
@@ -66,16 +101,15 @@ export function GrowthChart({ series }: { series: GrowthSeries }) {
     .filter(({ day }) => isSunday(day));
   const launchIndex = signups.findIndex((p) => p.day === LAUNCH_DAY);
 
-  const lastSignup = signups[signups.length - 1];
-  const lastSetup = setupDone.length > 0 ? setupDone[setupDone.length - 1] : null;
-
-  // End-of-line labels double as the legend. When the two endpoints sit
-  // close together, the setup label is pushed down so they never overlap.
-  const signupLabelY = y(lastSignup.total);
-  let setupLabelY = lastSetup ? y(lastSetup.total) : null;
-  if (setupLabelY !== null && setupLabelY - signupLabelY < 34) {
-    setupLabelY = signupLabelY + 34;
-  }
+  // Endpoint labels, nudged apart top-down so they never overlap.
+  let previousLabelY = -Infinity;
+  const labeled = lines.map((line, index) => {
+    const last = line.points[line.points.length - 1];
+    let labelY = y(last.total);
+    if (labelY - previousLabelY < LABEL_GAP) labelY = previousLabelY + LABEL_GAP;
+    previousLabelY = labelY;
+    return { ...line, last, labelY, primary: index === 0 };
+  });
 
   return (
     <svg
@@ -83,9 +117,9 @@ export function GrowthChart({ series }: { series: GrowthSeries }) {
       width="100%"
       preserveAspectRatio="xMidYMid meet"
       role="img"
-      aria-label={`Families over time: ${lastSignup.total} signed up${
-        lastSetup ? `, ${lastSetup.total} finished setup` : ""
-      }`}
+      aria-label={`Families over time: ${labeled
+        .map((line) => `${line.last.total} ${line.label}`)
+        .join(", ")}`}
     >
       {gridValues.map((v) => (
         <g key={v}>
@@ -152,78 +186,46 @@ export function GrowthChart({ series }: { series: GrowthSeries }) {
           </text>
         </g>
       ) : null}
-      {setupDone.length > 1 ? (
+      {[...labeled].reverse().map((line) => (
         <polyline
-          points={toLine(setupDone)}
+          key={`line-${line.label}`}
+          points={toPolyline(line.points)}
           fill="none"
-          stroke="var(--sage-500)"
-          strokeWidth="2"
+          stroke={line.stroke}
+          strokeWidth={line.primary ? "2.5" : "2"}
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-      ) : null}
-      <polyline
-        points={toLine(signups)}
-        fill="none"
-        stroke="var(--clay-500)"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle
-        cx={x(signups.length - 1, signups.length)}
-        cy={y(lastSignup.total)}
-        r="4"
-        fill="var(--clay-500)"
-      />
-      <text
-        x={plotRight + 14}
-        y={signupLabelY + 4}
-        fontSize="20"
-        fontWeight="600"
-        fill="var(--text-strong)"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
-        {lastSignup.total}
-      </text>
-      <text
-        x={plotRight + 14}
-        y={signupLabelY + 18}
-        className="font-mono"
-        fontSize="10"
-        fill="var(--stone-500)"
-      >
-        signed up
-      </text>
-      {lastSetup && setupLabelY !== null ? (
-        <g>
+      ))}
+      {labeled.map((line) => (
+        <g key={`end-${line.label}`}>
           <circle
-            cx={x(setupDone.length - 1, setupDone.length)}
-            cy={y(lastSetup.total)}
-            r="3.5"
-            fill="var(--sage-500)"
+            cx={x(line.points.length - 1, line.points.length)}
+            cy={y(line.last.total)}
+            r={line.primary ? 4 : 3.5}
+            fill={line.stroke}
           />
           <text
             x={plotRight + 14}
-            y={setupLabelY + 4}
-            fontSize="16"
+            y={line.labelY + 4}
+            fontSize={line.primary ? 20 : 16}
             fontWeight="600"
-            fill="var(--sage-600)"
+            fill={line.labelFill}
             style={{ fontFamily: "var(--font-display)" }}
           >
-            {lastSetup.total}
+            {line.last.total}
           </text>
           <text
             x={plotRight + 14}
-            y={setupLabelY + 17}
+            y={line.labelY + (line.primary ? 18 : 17)}
             className="font-mono"
             fontSize="10"
             fill="var(--stone-500)"
           >
-            set up
+            {line.label}
           </text>
         </g>
-      ) : null}
+      ))}
     </svg>
   );
 }
