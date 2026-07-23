@@ -6,6 +6,12 @@ import {
 } from "../../lib/conversation-continuity/delivery-ledger";
 import { createProactiveEpisode } from "../../lib/conversation-continuity/ledger";
 import {
+  buildFulfillmentRecoveryMessage,
+  recoverUnfulfilledOffers,
+} from "../../lib/conversation-continuity/offer-recovery";
+import { getFamilyPhones } from "../../lib/family-phone";
+import { mapDb } from "../../lib/map/db";
+import {
   buildDispatchAuth,
   buildDispatchTarget,
   preflightTaskDispatch,
@@ -172,6 +178,59 @@ export default defineSchedule({
             `retrying reaped morning brief for family ${run.familyId} (run ${run.runId})`,
           );
           await dispatchScheduledTask(loaded.task, now, dependenciesFor(loaded.task));
+        }
+
+        // Auto-recover accepted offers whose fulfillment turn dropped
+        // (founder ruling 2026-07-23: remake and deliver, do not make the
+        // parent ask again). Dark until HOMA_OFFER_RECOVERY_ENABLED and
+        // verified on a +homatest sandbox family first, because it wakes
+        // agent turns on these same rails. Idempotent via the fulfillment
+        // ledger, bounded by conversation_offer_recovery; the finder and
+        // guarantees live in lib/conversation-continuity/offer-recovery.ts.
+        if (process.env.HOMA_OFFER_RECOVERY_ENABLED === "true") {
+          await recoverUnfulfilledOffers(
+            async (offer) => {
+              const sql = mapDb();
+              const [family] = await sql<{ email: string | null }[]>`
+                select email from public.families where id = ${offer.familyId}
+              `;
+              const phones = await getFamilyPhones(offer.familyId);
+              const episodeId = await createProactiveEpisode({
+                familyId: offer.familyId,
+                now,
+              });
+              // No runId on purpose: a recovery has no homa_task_runs row,
+              // and an absent runId makes the dispatch channel deliver the
+              // composed reply without touching task-run finalization.
+              // acceptedOfferDeliveryId lets create_printable link and
+              // dedupe the fulfillment against this exact offer.
+              await receive(dispatchChannel, {
+                message: buildFulfillmentRecoveryMessage(offer.offerText),
+                target: {
+                  familyId: offer.familyId,
+                  phoneNumbers: phones.map((row) => row.phone_e164),
+                  email: family?.email ?? null,
+                  episodeId,
+                  kind: "custom" as const,
+                  deliveryPref:
+                    offer.channel === "email" ? "email" : "text",
+                },
+                auth: {
+                  authenticator: "dispatcher",
+                  principalId: `dispatch:${offer.familyId}`,
+                  principalType: "user" as const,
+                  attributes: {
+                    channel: "dispatch",
+                    familyId: offer.familyId,
+                    taskKind: "custom",
+                    episodeId,
+                    acceptedOfferDeliveryId: offer.sourceDeliveryId,
+                  },
+                },
+              });
+            },
+            { now },
+          );
         }
       })(),
     );
