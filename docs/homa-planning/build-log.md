@@ -3,6 +3,50 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-22 · Reveal card said "ready" before the narrative was
+
+Founder, watching the reveal card in chat: "current, it says its ready,
+but when you click it starts the generation. expected, the generation
+starts automatically, the user continues onboarding while the report
+generates. it does not say its ready until it actually is." Two of the
+three expectations were already true and needed no fix: `finalizeReport`
+already POSTs to `/api/map/score` fire-and-forget on mount, and nothing
+in the turn or skill flow ever blocked on the narrative finishing, so
+the conversation already moved on while it wrote. The one real gap was
+the card's own claim: deterministic scores exist the instant it
+renders, but the LLM-written narrative is a separate, slower,
+backgrounded step, and the card said "ready" and offered "the whole
+report" regardless, so tapping through early landed on the report
+page's own honest "Homa is writing" screen, which read as the click
+itself having triggered the work.
+
+Fixed by having the card poll the same token-scoped
+`/api/map/narrative-status` endpoint the report page's own writing beat
+(`narrative-beat.tsx`) already polls, no new route and no new agent
+turn. A live reveal now has two sub-states: "numbers are in, words
+still writing" (strengths chips shown since they are real regardless,
+no button since there is nothing whole to open yet), then the original
+"ready" copy once the poll sees the narrative settle. Code:
+`apps/web/app/app/report-reveal-card.tsx`, unit test
+`report-reveal-card.test.ts`.
+
+Deliberately NOT built: Homa proactively interrupting the conversation
+to announce the narrative finished. That is the more invasive,
+judgment-heavy option (when is it worth breaking in with news versus
+letting the parent discover it), and AGENTS.md says not to invent
+policy where the spec is silent, so it stays a reversible, unbuilt idea
+rather than a shipped mechanism, left here for a founder call if wanted.
+
+Verified live end to end on a fresh test family (`f1998881`, child
+Story, 2 of ~50 questions answered so the narrative had genuine work to
+do): the card rendered the writing sub-state first ("Story's numbers
+are in. I'm still writing the words to go with them. Keep going,
+there's nothing to wait for.", Math chip, no button), then flipped
+unprompted to "Story's progress report is ready." with the button
+restored, while Homa's own reply in the same turn had already moved on
+to offering a month plan, independently confirming the "continues
+onboarding while it generates" half of the founder's ask.
+
 ## 2026-07-22 · Founder ruling: capture every child up front, not one at a time
 
 Founder, after using the one-child arc live: "the original said one
