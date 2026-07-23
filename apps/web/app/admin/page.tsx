@@ -303,7 +303,7 @@ export default async function AdminOverviewPage({
         <Tile
           label="Families active"
           value={`${data.activeFamilies} of ${data.snapshots.length}`}
-          sub={`sent a message ${rangeLabel}`}
+          sub={`messaged Homa ${rangeLabel}`}
           subTone="sage"
         />
         <div className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm">
