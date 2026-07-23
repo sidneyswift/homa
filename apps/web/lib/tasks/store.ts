@@ -1277,6 +1277,40 @@ export async function releaseTaskSchedule(task: DueFamilyTask): Promise<void> {
 }
 
 /**
+ * Switches a family's text-delivery schedules to email after the provider
+ * reports the destination region is unreachable (Telnyx 40309). Our sole-prop
+ * 10DLC profile is US-only, so a non-US +1 number (e.g. Canada) that our +1
+ * normalization accepts fails on every send; without this it is retried and
+ * re-logged daily (2026-07-23 founder-console cleanup, Mani Family +1 236).
+ *
+ * Only rows still set to 'text' move, so a repeat rejection in the same run
+ * (a second phone, a second recipient) updates nothing and stays quiet: the
+ * returned count and the event fire only on the transition. The message that
+ * triggered this already fell back to email in the same delivery pass; this
+ * only stops FUTURE runs from texting an un-textable number. Family-scoped,
+ * never touches another family's rows. Mirrors the founder's manual remedy.
+ */
+export async function markFamilyTextSchedulesEmailOnly(
+  familyId: string,
+): Promise<number> {
+  const sql = mapDb();
+  const rows = await sql<{ id: string }[]>`
+    update public.agent_schedules
+    set delivery_pref = 'email'
+    where family_id = ${familyId} and delivery_pref = 'text'
+    returning id
+  `;
+  const switched = rows.length;
+  if (switched > 0) {
+    await emitMapEvent("sms.delivery_region_unsupported", {
+      family_id: familyId,
+      schedules_switched: switched,
+    });
+  }
+  return switched;
+}
+
+/**
  * A fleet run has no schedule row and no family; the run record is its
  * audit trail, its revert handle, and now the durable lock for one
  * research cell. Returns null when another scheduled/manual/lab trigger
