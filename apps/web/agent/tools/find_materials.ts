@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { MATERIAL_KINDS } from "../../lib/materials/artifact-store";
 import {
@@ -26,9 +29,11 @@ export function subjectLessonMaterialFinalOnly(
  * kid with her character"), and fetching one material by id returns its
  * stored html for direct reuse with the theme swapped.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Search this family's saved materials (worksheets, coloring pages, flash cards...) before designing something new. Returns finals by default with their preview URLs; a final's previewUrl can be passed to generate_image as a reference image, and fetching one material by id also returns its html for reuse with a swapped theme or character.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: true,
   inputSchema: z.object({
     materialId: z
       .uuid()
