@@ -7,6 +7,7 @@
  */
 
 import { planSmsParts, smsSegmentCount } from "../sms-segments";
+import { findSmsSuppression } from "../sms-suppression";
 
 const API_BASE = "https://api.telnyx.com/v2";
 
@@ -87,7 +88,7 @@ export async function downloadTelnyxMedia(
  */
 export type HomaSmsSubmission =
   | { status: "submitted"; messageId: string }
-  | { status: "rejected"; reason?: string }
+  | { status: "rejected"; reason?: string; permanentCode?: string }
   | { status: "unknown" };
 
 export function classifyTelnyxHttpFailure(
@@ -96,6 +97,31 @@ export function classifyTelnyxHttpFailure(
   return status === 408 || status === 429 || status >= 500
     ? "unknown"
     : "rejected";
+}
+
+/**
+ * Telnyx error codes that condemn the destination, not just this
+ * message: 40300 (blocked, the recipient texted STOP) and 40309
+ * (invalid destination number). A rejection carrying one is permanent
+ * for the number; the delivery path records it in sms_suppressions so
+ * the next cycle skips instead of re-burning a guaranteed rejection
+ * (morning-brief conversion escalation, 2026-07-23).
+ */
+const PERMANENT_DESTINATION_FAILURE_CODES = new Set(["40300", "40309"]);
+
+export function permanentTelnyxFailureCode(body: string): string | null {
+  try {
+    const payload = JSON.parse(body) as {
+      errors?: Array<{ code?: unknown }>;
+    };
+    return (
+      (payload.errors ?? [])
+        .map((entry) => String(entry.code ?? ""))
+        .find((code) => PERMANENT_DESTINATION_FAILURE_CODES.has(code)) ?? null
+    );
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -182,19 +208,21 @@ async function submitOneTelnyxMessage(input: {
       signal: input.signal,
     });
     if (!response.ok) {
-      const detail = describeTelnyxErrorBody(await response.text());
+      const body = await response.text();
+      const detail = describeTelnyxErrorBody(body);
       console.error(
         `sendHomaSms failed: HTTP ${response.status}${detail ? ` (${detail})` : ""}`,
       );
       const status = classifyTelnyxHttpFailure(response.status);
-      return status === "rejected"
-        ? {
-            status,
-            reason: detail
-              ? `Telnyx rejected the send: ${detail}`
-              : `Telnyx rejected the send (HTTP ${response.status})`,
-          }
-        : { status };
+      if (status !== "rejected") return { status };
+      const permanentCode = permanentTelnyxFailureCode(body);
+      return {
+        status,
+        reason: detail
+          ? `Telnyx rejected the send: ${detail}`
+          : `Telnyx rejected the send (HTTP ${response.status})`,
+        ...(permanentCode ? { permanentCode } : {}),
+      };
     }
     const payload = (await response.json()) as { data?: { id?: unknown } };
     const messageId = payload.data?.id;
@@ -222,6 +250,18 @@ export async function submitHomaSms(
   const fromNumber = process.env.TELNYX_FROM_NUMBER;
   if (process.env.TELNYX_SMS_ENABLED !== "true" || !apiKey || !fromNumber) {
     return { status: "rejected", reason: "SMS channel not configured" };
+  }
+
+  // Internal opt-out honor: a number in sms_suppressions (an inbound
+  // STOP, or a prior permanent rejection) is refused before Telnyx ever
+  // sees it. The read fails open, so a store outage leaves the carrier
+  // block as the backstop, exactly the pre-store behavior.
+  const suppression = await findSmsSuppression(toE164);
+  if (suppression) {
+    return {
+      status: "rejected",
+      reason: `SMS suppressed (${suppression.reason})`,
+    };
   }
 
   const normalizedPayload = normalizePrintablePdfMediaAsLinks(text, mediaUrls);

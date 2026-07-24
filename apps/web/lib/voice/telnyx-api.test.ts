@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { classifyTelnyxHttpFailure, submitHomaSms } from "./telnyx-api";
+import {
+  classifyTelnyxHttpFailure,
+  permanentTelnyxFailureCode,
+  submitHomaSms,
+} from "./telnyx-api";
 
 function restoreEnvironmentValue(
   name: string,
@@ -26,6 +30,40 @@ describe("Telnyx HTTP failure classification", () => {
     assert.equal(classifyTelnyxHttpFailure(429), "unknown");
     assert.equal(classifyTelnyxHttpFailure(500), "unknown");
     assert.equal(classifyTelnyxHttpFailure(503), "unknown");
+  });
+});
+
+describe("permanent destination failure codes", () => {
+  it("recognizes STOP blocks and invalid destination numbers", () => {
+    assert.equal(
+      permanentTelnyxFailureCode(
+        JSON.stringify({
+          errors: [{ code: "40300", title: "Blocked due to STOP message" }],
+        }),
+      ),
+      "40300",
+    );
+    assert.equal(
+      permanentTelnyxFailureCode(
+        JSON.stringify({
+          errors: [{ code: 40309, title: "Invalid destination number" }],
+        }),
+      ),
+      "40309",
+    );
+  });
+
+  it("treats every other rejection as message-scoped, not number-scoped", () => {
+    assert.equal(
+      permanentTelnyxFailureCode(
+        JSON.stringify({
+          errors: [{ code: "40302", title: "Too many message parts" }],
+        }),
+      ),
+      null,
+    );
+    assert.equal(permanentTelnyxFailureCode("not json"), null);
+    assert.equal(permanentTelnyxFailureCode("{}"), null);
   });
 });
 
