@@ -145,6 +145,21 @@ export interface StuckToolCall {
 const STUCK_AFTER_MINUTES = 15;
 
 /**
+ * How far back the sweep looks. A stuck row never resolves: its status
+ * stays 'requested' and finished_at stays null for as long as the row
+ * exists. Without this bound the seven rows from the 07-19 and 07-22
+ * incidents would be reported every hour forever, and an alarm that never
+ * clears is worse than no alarm, because it teaches the reader to skip
+ * the line that finally matters.
+ *
+ * The cron runs hourly, so a genuinely new stuck call still gets roughly
+ * two dozen chances to be seen before it ages out of the window. Use
+ * findStuckToolCalls with an explicit window to go looking at history on
+ * purpose; the recurring signal stays about what is happening now.
+ */
+const STUCK_WINDOW_HOURS = 24;
+
+/**
  * Tool calls that were requested and never finished (MJ-08 gap found
  * 2026-07-23): before this, the only thing that noticed a frozen turn was
  * the 2h task-run reaper, and it could only report the run as producing
@@ -156,6 +171,7 @@ const STUCK_AFTER_MINUTES = 15;
  */
 export async function findStuckToolCalls(
   olderThanMinutes = STUCK_AFTER_MINUTES,
+  windowHours = STUCK_WINDOW_HOURS,
 ): Promise<StuckToolCall[]> {
   try {
     const sql = mapDb();
@@ -179,6 +195,7 @@ export async function findStuckToolCalls(
       where status = 'requested'
         and finished_at is null
         and created_at < now() - make_interval(mins => ${olderThanMinutes})
+        and created_at > now() - make_interval(hours => ${windowHours})
       group by tool, channel
       order by count(*) desc
       limit 20
