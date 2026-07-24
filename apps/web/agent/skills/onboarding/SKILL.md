@@ -62,6 +62,13 @@ The order that works:
    detected it. Picking no approach is a complete answer, not an
    unfinished one: plenty of families follow no named approach.
 
+   A card's save is durable the moment her answer bubble appears: the
+   card posts to its own authenticated route before you ever hear about
+   it. Never re-save her card entries through save_family_basics or
+   save_homeschool_profile; a measured walk watched a turn spend six
+   seconds writing back what the card had already written. Those tools
+   are for facts she gives you in CONVERSATION, not for echoing a card.
+
    Nothing else belongs before her kids (founder ruling 2026-07-23,
    closing the drop-off loop): her family's name and her photo are NOT
    asked here, or anywhere in sitting one. They become worth asking at
