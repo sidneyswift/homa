@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { z } from "zod";
+
 import {
+  defineBoundedTool,
   TOOL_DEADLINE,
   ToolDeadlineError,
   withToolDeadline,
@@ -161,4 +164,44 @@ test("every deadline fits inside the platform's function ceiling", async () => {
   for (const ms of Object.values(TOOL_DEADLINE)) {
     assert.ok(ms < 800_000, `${ms}ms exceeds the function ceiling`);
   }
+});
+
+test("defineBoundedTool hands eve the bounded execute, not the raw one", async () => {
+  // eve's defineTool returns the same object with a brand stamped, so the
+  // execute it holds is whatever we passed in. This is the seam the whole
+  // fix rests on: if the wrapper were applied anywhere else, or lost, the
+  // 47 tools would compile and still freeze.
+  const tool = defineBoundedTool({
+    description: "never answers",
+    inputSchema: z.object({}),
+    deadlineMs: 40,
+    repeatable: true,
+    execute: () => new Promise<string>(() => {}),
+  });
+
+  const started = Date.now();
+  await assert.rejects(
+    (tool.execute as (input: unknown, ctx: unknown) => Promise<string>)({}, {}),
+    (error: unknown) => {
+      assert.ok(error instanceof ToolDeadlineError);
+      assert.equal(error.repeatable, true);
+      return true;
+    },
+  );
+  assert.ok(Date.now() - started < 2000);
+});
+
+test("a bounded tool that answers passes its value straight through", async () => {
+  const tool = defineBoundedTool({
+    description: "answers",
+    inputSchema: z.object({ q: z.string() }),
+    deadlineMs: TOOL_DEADLINE.quick,
+    repeatable: false,
+    execute: (input) => ({ echoed: input.q }),
+  });
+  const out = await (tool.execute as (i: unknown, c: unknown) => Promise<unknown>)(
+    { q: "alphabet pages" },
+    {},
+  );
+  assert.deepEqual(out, { echoed: "alphabet pages" });
 });
