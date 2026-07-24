@@ -85,6 +85,7 @@ describe("live dispatch transport adapter", () => {
           return true;
         },
         inboundSecret: secret,
+        markSmsRegionUnsupported: async () => 0,
       },
     );
 
@@ -99,5 +100,55 @@ describe("live dispatch transport adapter", () => {
       replyTo: buildSignedReplyAddress("delivery-1", secret),
       deliveryVersion: "research_brief_v2",
     }]);
+  });
+
+  it("switches the family to email-only when the SMS region is unsupported", async () => {
+    const recipients: FamilyDeliveryRecipient[] = [
+      {
+        recipientKey: "member:owner",
+        memberUserId: "owner",
+        displayName: "Owner",
+        phoneNumbers: ["+12368462036"],
+        email: "owner@example.test",
+      },
+    ];
+    const ledger = new DispatchTransportLedger();
+    const switchedFamilies: string[] = [];
+
+    const result = await deliverLiveDispatchTask(
+      {
+        familyId: "family-1",
+        episodeId: "episode-1",
+        messageId: "message-1",
+        taskRunId: "run-1",
+        kind: "morning_brief",
+        text: "Morning brief",
+        deliveryMode: "text",
+        recipientMemberUserId: "owner",
+        label: null,
+        deliveryVersion: "legacy",
+      },
+      {
+        listRecipients: async () => recipients,
+        ledger,
+        sendSms: async () => ({
+          status: "rejected",
+          reason:
+            "Telnyx rejected the send: 40309 Invalid destination region",
+          unsupportedRegion: true,
+        }),
+        sendEmail: async () => true,
+        inboundSecret: undefined,
+        markSmsRegionUnsupported: async (familyId) => {
+          switchedFamilies.push(familyId);
+          return 2;
+        },
+      },
+    );
+
+    // Today's brief still reaches the family by email; the family is
+    // switched to email-only so tomorrow skips the un-textable number.
+    assert.equal(result.deliveredChannel, "email");
+    assert.deepEqual(switchedFamilies, ["family-1"]);
   });
 });

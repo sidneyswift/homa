@@ -88,7 +88,12 @@ export async function downloadTelnyxMedia(
  */
 export type HomaSmsSubmission =
   | { status: "submitted"; messageId: string }
-  | { status: "rejected"; reason?: string; permanentCode?: string }
+  | {
+      status: "rejected";
+      reason?: string;
+      permanentCode?: string;
+      unsupportedRegion?: boolean;
+    }
   | { status: "unknown" };
 
 export function classifyTelnyxHttpFailure(
@@ -100,14 +105,20 @@ export function classifyTelnyxHttpFailure(
 }
 
 /**
- * Telnyx error codes that condemn the destination, not just this
- * message: 40300 (blocked, the recipient texted STOP) and 40309
- * (invalid destination number). A rejection carrying one is permanent
- * for the number; the delivery path records it in sms_suppressions so
- * the next cycle skips instead of re-burning a guaranteed rejection
- * (morning-brief conversion escalation, 2026-07-23).
+ * Telnyx error codes that condemn the destination itself, not just this
+ * message: 40300 (blocked, the recipient texted STOP). A rejection
+ * carrying one is permanent for the number; the delivery path records it
+ * in sms_suppressions so the next cycle skips instead of re-burning a
+ * guaranteed rejection (morning-brief conversion escalation, 2026-07-23).
+ *
+ * 40309 used to live in this set too, on the assumption it meant a dead
+ * or invalid number. It does not: it means this messaging profile cannot
+ * reach the destination's region (see TELNYX_UNSUPPORTED_REGION_CODE
+ * below), a number that works fine over email. Suppressing it here would
+ * block the email fallback for a family whose only problem is a Canadian
+ * area code, so it is handled separately and never enters this set.
  */
-const PERMANENT_DESTINATION_FAILURE_CODES = new Set(["40300", "40309"]);
+const PERMANENT_DESTINATION_FAILURE_CODES = new Set(["40300"]);
 
 export function permanentTelnyxFailureCode(body: string): string | null {
   try {
@@ -123,6 +134,19 @@ export function permanentTelnyxFailureCode(body: string): string | null {
     return null;
   }
 }
+
+/**
+ * Telnyx's own code for a destination whose region this messaging profile
+ * cannot reach: "40309 Invalid destination region". Our sole-prop 10DLC
+ * profile is US-only, so a Canadian or other non-US +1 number (which passes
+ * our +1 normalization and the family_phones shape check) is rejected here
+ * on every send. This is the AUTHORITATIVE regional signal: we cannot tell a
+ * US +1 from a Canadian +1 by its digits without duplicating the NANP
+ * registry, but the provider knows, so we let its verdict drive the
+ * email-only switch (dispatch-transport). See the 2026-07-23 founder-console
+ * cleanup and the Mani Family (+1 236, British Columbia) daily failures.
+ */
+const TELNYX_UNSUPPORTED_REGION_CODE = "40309";
 
 /**
  * Keeps printable PDFs out of the MMS media payload and preserves them as
@@ -161,21 +185,33 @@ function normalizePrintablePdfMediaAsLinks(
 
 /** Pulls Telnyx's own error codes and titles out of a failure body so
  *  the log line says WHY, not just the HTTP status (the 2026-07-13
- *  morning-brief incident was diagnosable only by replaying the send). */
-function describeTelnyxErrorBody(body: string): string | null {
+ *  morning-brief incident was diagnosable only by replaying the send).
+ *  `codes` are the raw error codes (stringified, since Telnyx sends them
+ *  as strings but tolerating a number is cheap), so callers can react to a
+ *  specific one (40309, unsupported region) without re-parsing. */
+function describeTelnyxErrorBody(body: string): {
+  detail: string | null;
+  codes: string[];
+} {
   try {
     const payload = JSON.parse(body) as {
-      errors?: Array<{ code?: string; title?: string; detail?: string }>;
+      errors?: Array<{ code?: string | number; title?: string; detail?: string }>;
     };
-    const described = (payload.errors ?? [])
+    const errors = payload.errors ?? [];
+    const described = errors
       .map((entry) =>
         [entry.code, entry.title ?? entry.detail].filter(Boolean).join(" "),
       )
       .filter((line) => line.length > 0)
       .join("; ");
-    return described.length > 0 ? described.slice(0, 300) : null;
+    return {
+      detail: described.length > 0 ? described.slice(0, 300) : null,
+      codes: errors
+        .map((entry) => (entry.code === undefined ? "" : String(entry.code)))
+        .filter((code) => code.length > 0),
+    };
   } catch {
-    return null;
+    return { detail: null, codes: [] };
   }
 }
 
@@ -208,20 +244,30 @@ async function submitOneTelnyxMessage(input: {
       signal: input.signal,
     });
     if (!response.ok) {
-      const body = await response.text();
-      const detail = describeTelnyxErrorBody(body);
+      const { detail, codes } = describeTelnyxErrorBody(await response.text());
       console.error(
         `sendHomaSms failed: HTTP ${response.status}${detail ? ` (${detail})` : ""}`,
       );
       const status = classifyTelnyxHttpFailure(response.status);
       if (status !== "rejected") return { status };
-      const permanentCode = permanentTelnyxFailureCode(body);
+      const permanentCode = codes.find((code) =>
+        PERMANENT_DESTINATION_FAILURE_CODES.has(code),
+      );
       return {
         status,
         reason: detail
           ? `Telnyx rejected the send: ${detail}`
           : `Telnyx rejected the send (HTTP ${response.status})`,
         ...(permanentCode ? { permanentCode } : {}),
+        // The provider's authoritative "I can't reach this region" verdict:
+        // the destination is un-textable from this profile, so the caller
+        // switches the family to email-only rather than retrying daily.
+        // Mutually exclusive with permanentCode in practice (40300 vs
+        // 40309), but both fields are independent so neither masks the
+        // other if Telnyx ever returns both codes at once.
+        ...(codes.includes(TELNYX_UNSUPPORTED_REGION_CODE)
+          ? { unsupportedRegion: true as const }
+          : {}),
       };
     }
     const payload = (await response.json()) as { data?: { id?: unknown } };

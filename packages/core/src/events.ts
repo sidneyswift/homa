@@ -448,6 +448,17 @@ export const EVENT_SCHEMAS = {
     source: z.enum(["signup", "home", "bridge"]),
     replaced: z.boolean(),
   }),
+  // A scheduled-task SMS was rejected because the provider cannot reach
+  // the destination's region (Telnyx 40309): our sole-prop 10DLC profile
+  // is US-only, so a non-US +1 number (e.g. Canada) our +1 normalization
+  // accepts fails on every send. The family's text schedules were flipped
+  // to email-only so the un-textable number is not retried and re-logged
+  // daily (2026-07-23 founder-console cleanup). schedules_switched is how
+  // many agent_schedules rows moved text -> email. No phone number, ever.
+  "sms.delivery_region_unsupported": z.object({
+    family_id: z.uuid(),
+    schedules_switched: z.number().int().min(0),
+  }),
   // MMS attachment lanes (build-log 2026-07-10, superseding the one-day
   // sms.voice_note_received: never deny input). One event per attachment
   // on an inbound text. media_type is the MIME type the carrier

@@ -53,7 +53,12 @@ export interface TaskDeliveryTransports {
   ): Promise<
     | boolean
     | { status: "submitted"; messageId: string }
-    | { status: "rejected"; reason?: string; permanentCode?: string }
+    | {
+        status: "rejected";
+        reason?: string;
+        permanentCode?: string;
+        unsupportedRegion?: boolean;
+      }
     | { status: "unknown" }
   >;
   sendEmail(
@@ -90,6 +95,14 @@ export interface TaskDeliveryDependencies {
   onTransportAccepted?(channel: "sms" | "email" | "none"): void;
   /** Defaults to the postgres sms_suppressions store; tests inject. */
   smsSuppression?: SmsSuppressionStore;
+  /** Fired when the provider rejects an SMS because it cannot reach the
+   * destination's region (Telnyx 40309). The current message still falls
+   * back to email in this same pass; this signal lets the caller stop
+   * texting that family on FUTURE runs (email-only), so an un-textable
+   * number is not retried and re-logged every day. `destination` is the
+   * rejected phone, for the caller's audit; the switch itself is
+   * family-scoped by the caller. */
+  onUnsupportedRegion?(destination: string): void | Promise<void>;
 }
 
 export const postgresTaskDeliveryLedger: TaskDeliveryLedger = {
@@ -178,6 +191,17 @@ async function attemptSms(
       typeof submission === "object" && submission.status === "rejected"
         ? submission.reason
         : undefined;
+    // The provider says this destination's region is unreachable from our
+    // profile: not a transient failure, so tell the caller to stop texting
+    // this family going forward (email-only). Email fallback below still
+    // delivers today's message.
+    if (
+      typeof submission === "object" &&
+      submission.status === "rejected" &&
+      submission.unsupportedRegion
+    ) {
+      await dependencies.onUnsupportedRegion?.(phone);
+    }
     if (delivered) dependencies.onTransportAccepted?.("sms");
     await dependencies.ledger.finishAttempt(
       attempt,

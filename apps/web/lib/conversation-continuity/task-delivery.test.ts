@@ -273,6 +273,64 @@ describe("per-recipient task delivery", () => {
     assert.deepEqual(acceptedChannels, ["email"]);
   });
 
+  it("signals an unsupported region and still falls back to email", async () => {
+    const ledger = new FakeLedger();
+    const unsupportedRegions: string[] = [];
+
+    const result = await deliverTaskMessage(
+      { ...input(), recipients: [recipients[0]] },
+      {
+        ledger,
+        transports: {
+          async sendSms() {
+            return {
+              status: "rejected",
+              reason: "Telnyx rejected the send: 40309 Invalid destination region",
+              unsupportedRegion: true,
+            };
+          },
+          async sendEmail() {
+            return true;
+          },
+        },
+        onUnsupportedRegion: (destination) => {
+          unsupportedRegions.push(destination);
+        },
+      },
+    );
+
+    // Today's message still lands by email; the caller learns the number
+    // is un-textable so future runs skip SMS.
+    assert.equal(result.status, "done");
+    assert.equal(result.deliveredChannel, "email");
+    assert.deepEqual(unsupportedRegions, ["+15550000001"]);
+  });
+
+  it("does not signal an unsupported region for an ordinary rejection", async () => {
+    const ledger = new FakeLedger();
+    let unsupportedRegionCalls = 0;
+
+    await deliverTaskMessage(
+      { ...input(), recipients: [recipients[0]] },
+      {
+        ledger,
+        transports: {
+          async sendSms() {
+            return { status: "rejected", reason: "carrier size limit" };
+          },
+          async sendEmail() {
+            return true;
+          },
+        },
+        onUnsupportedRegion: () => {
+          unsupportedRegionCalls += 1;
+        },
+      },
+    );
+
+    assert.equal(unsupportedRegionCalls, 0);
+  });
+
   it("does not email-fallback or replay when SMS submission is uncertain", async () => {
     const ledger = new FakeLedger();
     let emailCalls = 0;
