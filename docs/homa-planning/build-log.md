@@ -49,16 +49,30 @@ ENDS_THE_TURN rule: structural beats vocabulary. Scope is narrow
 build sessions, SMS, email, dispatch, and subject-lesson sessions keep
 both tools untouched, and finished families' chat is unchanged.
 
-Verified in the live dev flow (+homatest family, fbaebb80 then
-9f3b3ff0): job row durably queued with her words, runner claimed and
-built it in the background, promise card rendered mid-checklist, the
-reveal was never delayed. Milestone copy for single-stage jobs stopped
-saying "every part". New CI: `check:jobs` and `check:onboarding` (the
-onboarding lib tests plus the jobs runner/milestone tests had never
-been wired into CI). Also hit twice while testing: the known eve
-dev-runtime landmine, a fresh snapshot racing the flow bundle
-(`UNLOADABLE_DEPENDENCY` on the SKILL.md `?raw` import); a restart
-with warm snapshots recovers.
+Verified in the live dev flow (+homatest families 9f3b3ff0 and
+d949d3f0): the interest sentence fired the tool unprompted, the job
+row was durably queued with her words, a runner claimed and built a
+real themed coloring page in the background, the promise card
+rendered mid-checklist and morphed in place into the material card
+("Coloring page ready", preview, Print it), and the reveal was never
+delayed. One honest caveat on that verification: the claiming runner
+was PRODUCTION's (dev and prod share the database, and prod's 5-minute
+agent-jobs tick wins the race for any queued row, sandbox or not), so
+the builds ran main's old stage-gating and parked ready_for_review;
+the ready state was then produced by hand-approving the sandbox rows.
+The per-contract gating itself is covered by unit tests and runs
+correctly from this branch's source; it simply cannot be observed
+end-to-end locally until this branch deploys, because prod always
+claims first. That same fact is an operational caveat worth keeping:
+flag-dark dev testing of any new job kind races the prod runner, and
+prod will happily build rows whose contract it does not know (claim
+does not re-validate the plan). Milestone copy for single-stage jobs
+stopped saying "every part". New CI: `check:jobs` and
+`check:onboarding` (the onboarding lib tests plus the jobs
+runner/milestone tests had never been wired into CI). Also hit twice
+while testing: the known eve dev-runtime landmine, a fresh snapshot
+racing the flow bundle (`UNLOADABLE_DEPENDENCY` on the SKILL.md `?raw`
+import); a restart with warm snapshots recovers.
 
 ## 2026-07-23 · Onboarding latency floor measured; skill preload, sentinel tail, and a silent mode-unload fix
 
