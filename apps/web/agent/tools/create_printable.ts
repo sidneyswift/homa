@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { defineTool } from "eve/tools";
+import { defineDynamic, defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
@@ -42,6 +42,10 @@ import {
 } from "../../lib/materials/render-page";
 import { materialSaveFailureNote } from "../../lib/materials/save-failure-note";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
+import {
+  suppressInTurnGeneration,
+  type GenerationGateAttributes,
+} from "../../lib/onboarding/generation-gate";
 import { sendSmsProgressTextOnce } from "../../lib/sms-progress";
 import { readSubjectLessonTrustedContext } from "../../lib/subject-lessons/dispatch-input";
 import { claimSubjectLessonWorksheetEffectPinned } from "../../lib/subject-lessons/store";
@@ -285,7 +289,7 @@ function htmlPageSource(body: string): MaterialSource {
   return /<img\s/i.test(body) ? "hybrid" : "html";
 }
 
-export default defineTool({
+const createPrintable = defineTool({
   description:
     "Render printable material you designed (worksheet, coloring page, flash cards, poster, a multi-page packet, any material) into one real PDF plus per-page previews the parent sees where she is (chat card on web, texted picture on SMS). Three paths: pass your own page HTML, pass a generate_image URL of the whole page, or pass pages to build a multi-page packet (fresh pages and existing materials by id, in any mix, one PDF out). Load the materials-studio skill before your first material of a conversation. For changes, pass revisesId and call again; when the parent approves a version, call mark_material_final.",
   inputSchema: createPrintableInputSchema,
@@ -793,5 +797,21 @@ export default defineTool({
         ? `${deliveryNote}${reviewNote}`
         : `${deliveryNote}${reviewNote} When the parent approves a version, call mark_material_final with this id.`,
     };
+  },
+});
+
+// During web onboarding this tool does not exist (generation-gate.ts):
+// a render there holds the parent's first conversation open on a still
+// screen, and the background first making is the honest path. The
+// agent-job build session that renders that making keeps the tool.
+export default defineDynamic({
+  events: {
+    "turn.started": (_event, ctx) => {
+      const attributes = ctx.session.auth.current?.attributes as
+        | GenerationGateAttributes
+        | undefined;
+      if (suppressInTurnGeneration(attributes)) return null;
+      return createPrintable;
+    },
   },
 });

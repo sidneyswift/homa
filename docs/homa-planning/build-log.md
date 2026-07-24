@@ -3,6 +3,63 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-23 · The artifact moment ships: a background first making, and the in-turn generators leave onboarding
+
+Item 1 of the four-item post-loop ruling ("the artifact moment:
+approved, gets its own session"). Built as ruled: the promise rides
+durable job machinery, never prose. The pieces:
+
+- A `materials-studio` job contract (single stage, never gates): the
+  smallest reusable primitive for "build ONE material in the
+  background". Gating became each contract's own decision
+  (`gatesStage`), because the global gate-stage-one rule would have
+  parked a one-page making as ready-for-review, turning the gift into
+  a chore.
+- `start_first_making`: a web-onboarding-only dynamic tool that
+  durably enqueues that job from the parent's own words (verbatim
+  `herWords` ride the plan; title reuses her phrasing) and returns
+  only after the row is committed, so the promise Homa speaks is
+  backed before it is spoken. Once per child, ever, by idempotency
+  key; once per family+child at a time by the job store's active
+  constraint. Records beat `first_making`.
+- The promise card (`FirstMakingCard`): a transcript-resident pointer
+  polling `/api/onboarding/making-status`; it becomes the material
+  card itself when the page lands (soft entrance), reads "paused for
+  now" honestly when the build parks, and never shows a button while
+  making.
+- Skill beats: start at the boundary right after her interest answer
+  (so the page can land inside the sitting), second chance after the
+  reveal, promise laws (after tool result only, sized honestly, her
+  words once), one making per sitting, exit-ramp naming when it has
+  not landed.
+
+Decision made without a ruling, flagged for review: **during web
+onboarding, `create_printable` and `generate_image` do not exist**
+(`lib/onboarding/generation-gate.ts`; both tools became dynamics).
+Grounds: plan §2.6 already resolved onboarding generation delivery as
+"async, never in-turn masking", and prose alone measurably failed to
+enforce it. In two live dev walks with the first-making tool available
+AND the inlined skill text instructing it, the model still built
+in-turn both times (60-90s of held-open screen, "no need to sit and
+wait" spoken over a queue that blocks her sends). With the in-turn
+tools structurally absent, the very next walk fired the first making
+spontaneously at the interest boundary, unprompted. Same shape as the
+ENDS_THE_TURN rule: structural beats vocabulary. Scope is narrow
+(card-capable web session of an onboarding-active family); agent-job
+build sessions, SMS, email, dispatch, and subject-lesson sessions keep
+both tools untouched, and finished families' chat is unchanged.
+
+Verified in the live dev flow (+homatest family, fbaebb80 then
+9f3b3ff0): job row durably queued with her words, runner claimed and
+built it in the background, promise card rendered mid-checklist, the
+reveal was never delayed. Milestone copy for single-stage jobs stopped
+saying "every part". New CI: `check:jobs` and `check:onboarding` (the
+onboarding lib tests plus the jobs runner/milestone tests had never
+been wired into CI). Also hit twice while testing: the known eve
+dev-runtime landmine, a fresh snapshot racing the flow bundle
+(`UNLOADABLE_DEPENDENCY` on the SKILL.md `?raw` import); a restart
+with warm snapshots recovers.
+
 ## 2026-07-23 · Onboarding latency floor measured; skill preload, sentinel tail, and a silent mode-unload fix
 
 The item-3 infra investigation (per-turn latency floor). Full breakdown

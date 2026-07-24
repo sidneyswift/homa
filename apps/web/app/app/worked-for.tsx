@@ -69,6 +69,7 @@ const STEP_REGISTRY: Record<string, { icon: LucideIcon; label: string }> = {
   start_checklist: { icon: ListChecks, label: "Opened the questions" },
   ask_for_details: { icon: PenLine, label: "Asked for a few details" },
   score_child_report: { icon: Sparkles, label: "Built the progress report" },
+  start_first_making: { icon: Sparkles, label: "Started making a page" },
 };
 
 const FALLBACK_STEP = { icon: Wrench, label: "Worked on it" };
@@ -88,6 +89,9 @@ function stepDetail(toolName: string, output: unknown): string | null {
   if (toolName === "add_child" && typeof record.childName === "string") return record.childName;
   if (toolName === "score_child_report" && typeof record.childName === "string") {
     return record.childName;
+  }
+  if (toolName === "start_first_making" && typeof record.title === "string") {
+    return record.title;
   }
   if (toolName === "recall" && typeof record.results === "number") {
     return record.results === 1 ? "Found 1 note" : `Found ${record.results} notes`;

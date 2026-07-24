@@ -10,6 +10,7 @@ import {
 } from "@homa/core";
 
 import { Logo } from "../../components/brand/Logo";
+import { MaterialCard, type MaterialArtifact } from "./material-card";
 
 /**
  * The two chat cards chat-first onboarding adds
@@ -329,4 +330,156 @@ export function latestReportReveal(
     }
   }
   return latest;
+}
+
+// ---------------------------------------------------------------------------
+// The first making: the artifact-moment promise card (§2.6, founder
+// ruling 2026-07-23). Homa starts a background build from the parent's
+// own words; this card carries the honest promise, and it is a POINTER
+// like the checklist card: it re-reads the making's status while it
+// waits, and when the page is ready it becomes the page itself, right
+// here in the transcript, with the soft entrance every block artifact
+// gets. No button while it makes: there is nothing to press, and
+// nothing in scrollback may look pressable.
+// ---------------------------------------------------------------------------
+
+export type MakingPhase = "making" | "ready" | "stalled" | "stopped";
+
+export interface FirstMakingCardData {
+  jobId: string;
+  childId: string;
+  childName: string;
+  title: string;
+  alreadyStarted: boolean;
+}
+
+export function parseFirstMakingCardPart(
+  part: EveMessagePart,
+): FirstMakingCardData | null {
+  if (
+    part.type !== "dynamic-tool" ||
+    part.toolName !== "start_first_making" ||
+    part.state !== "output-available"
+  ) {
+    return null;
+  }
+  const output = (part.output ?? {}) as Record<string, unknown>;
+  if (output.started !== true) return null;
+  if (
+    typeof output.jobId !== "string" ||
+    typeof output.childId !== "string" ||
+    typeof output.childName !== "string" ||
+    typeof output.title !== "string"
+  ) {
+    return null;
+  }
+  return {
+    jobId: output.jobId,
+    childId: output.childId,
+    childName: output.childName,
+    title: output.title,
+    alreadyStarted: output.alreadyStarted === true,
+  };
+}
+
+interface MakingStatusResponse {
+  phase: MakingPhase;
+  material: (MaterialArtifact & { id: string }) | null;
+}
+
+async function fetchMakingStatus(
+  jobId: string,
+): Promise<MakingStatusResponse | null> {
+  try {
+    const response = await fetch(
+      `/api/onboarding/making-status?jobId=${encodeURIComponent(jobId)}`,
+      { cache: "no-store" },
+    );
+    if (!response.ok) return null;
+    const data = (await response.json()) as {
+      ok?: boolean;
+      phase?: MakingPhase;
+      material?: (MaterialArtifact & { id: string }) | null;
+    };
+    if (!data.ok || typeof data.phase !== "string") return null;
+    return { phase: data.phase, material: data.material ?? null };
+  } catch {
+    return null;
+  }
+}
+
+/** How often the waiting card re-asks, and for how long. Past the cap it
+ * stops asking and the next mount (any re-entry) asks again, so a tab
+ * left open overnight is not a polling loop. */
+const MAKING_POLL_MS = 20_000;
+const MAKING_POLL_CAP_MS = 30 * 60_000;
+
+export function FirstMakingCard({ card }: { card: FirstMakingCardData }) {
+  const [status, setStatus] = useState<MakingStatusResponse | null>(null);
+
+  useEffect(() => {
+    let current = true;
+    let elapsed = 0;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const ask = async () => {
+      const next = await fetchMakingStatus(card.jobId);
+      if (!current) return;
+      if (next) setStatus(next);
+      const settled = next?.phase === "ready" || next?.phase === "stopped";
+      elapsed += MAKING_POLL_MS;
+      if (!settled && elapsed < MAKING_POLL_CAP_MS) {
+        timer = setTimeout(() => void ask(), MAKING_POLL_MS);
+      }
+    };
+    void ask();
+
+    return () => {
+      current = false;
+      if (timer) clearTimeout(timer);
+    };
+  }, [card.jobId]);
+
+  const phase = status?.phase ?? "making";
+
+  if (phase === "ready" && status?.material) {
+    return (
+      <div className="transition-[opacity,translate] duration-(--dur-base) ease-out starting:translate-y-1.5 starting:opacity-0 motion-reduce:transition-none">
+        <MaterialCard material={status.material} />
+      </div>
+    );
+  }
+
+  if (phase === "stopped") {
+    return (
+      <p className="inline-flex max-w-full items-baseline gap-1.5 self-start rounded-pill border border-sage/30 bg-sage/10 px-3 py-1.5 text-xs">
+        <span className="font-semibold text-sage">Making stopped</span>
+        <span className="truncate text-body">{card.title}</span>
+      </p>
+    );
+  }
+
+  return (
+    <section
+      className="w-full max-w-[26rem] rounded-lg border border-border-subtle bg-card p-4 shadow-sm sm:p-5"
+      aria-label={`${card.title}, being made`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="shrink-0 rounded-pill bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand">
+          {card.childName}
+        </span>
+        <p className="shrink-0 font-mono text-xs text-subtle">
+          {phase === "stalled" ? "paused for now" : "being made"}
+        </p>
+      </div>
+      <p className="mt-3 font-display text-lg font-semibold text-strong">
+        {card.title}
+      </p>
+      <p className="mt-1.5 text-sm text-muted">
+        {phase === "stalled"
+          ? "This one hit a snag while building. Nothing is lost, and you can ask Homa about it whenever you like."
+          : "Homa is drawing this now. It usually takes a few minutes, and it will land right here and in your binder. You don't have to wait for it."}
+      </p>
+    </section>
+  );
 }

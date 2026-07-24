@@ -37,9 +37,12 @@ import {
 } from "./question-card";
 import {
   ChecklistCard,
+  FirstMakingCard,
   parseChecklistCardPart,
+  parseFirstMakingCardPart,
   parseReportCardPart,
   type ChecklistCardData,
+  type FirstMakingCardData,
   type ReportCardData,
 } from "./onboarding-cards";
 import {
@@ -180,6 +183,7 @@ type AssistantItem =
   | { kind: "planner"; signal: PlannerOpenSignal }
   | { kind: "checklist"; card: ChecklistCardData; sourceActionKey: string }
   | { kind: "report"; card: ReportCardData; sourceActionKey: string }
+  | { kind: "making"; card: FirstMakingCardData }
   | { kind: "details"; card: DetailCardData; sourceActionKey: string }
   | SourcedProgressAssistantItem;
 
@@ -319,6 +323,11 @@ function assistantItems(message: EveMessage): AssistantItem[] {
         card: reportCard,
         sourceActionKey: `${message.id}:${partIndex}`,
       });
+      continue;
+    }
+    const makingCard = parseFirstMakingCardPart(part);
+    if (makingCard) {
+      items.push({ kind: "making", card: makingCard });
       continue;
     }
     if (
@@ -493,6 +502,11 @@ function AssistantItemView({
           }
         />
       );
+    case "making":
+      // Transcript-resident, never docked: while it makes there is
+      // nothing to press, and when it is ready it becomes the material
+      // itself, which stays useful in scrollback like any other page.
+      return <FirstMakingCard card={item.card} />;
     case "snap":
       return (
         <SnapCard
@@ -778,6 +792,7 @@ const TOOL_STATUS_LABELS: Record<string, string> = {
   save_family_basics: "saving what you told me…",
   save_homeschool_profile: "saving what you told me…",
   start_checklist: "getting the questions ready…",
+  start_first_making: "getting a page started…",
   ask_for_details: "putting up a few fields…",
   // The one wait that is worth narrating rather than labelling. The
   // reveal card takes over from here and says the rest.

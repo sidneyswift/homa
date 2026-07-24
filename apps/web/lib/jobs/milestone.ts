@@ -24,6 +24,9 @@ export interface JobMilestoneInput {
   childId: string | null;
   title: string;
   kind: JobMilestoneKind;
+  /** The job's stage count; a one-stage making words its milestones as
+   * one thing, never "every part". */
+  totalStages?: number;
 }
 
 async function childFirstName(familyId: string, childId: string | null): Promise<string | null> {
@@ -60,9 +63,11 @@ export function compose(
   kind: JobMilestoneKind,
   title: string,
   childName: string | null,
+  totalStages = 2,
 ): { title: string; body: string } {
   const who = childName ? `${childName}'s` : "your";
   const subject = startsWithPossessive(title, childName) ? title : `${who} ${title}`;
+  const onePiece = totalStages === 1;
   if (kind === "gate") {
     return {
       title: `First part of ${title} is ready`,
@@ -72,12 +77,16 @@ export function compose(
   if (kind === "completed") {
     return {
       title: `${title} is all done`,
-      body: `${subject} is finished. Every part is saved in the Binder, ready whenever you are.`,
+      body: onePiece
+        ? `${subject} is ready. It is saved in the Binder and waiting in your Homa chat too.`
+        : `${subject} is finished. Every part is saved in the Binder, ready whenever you are.`,
     };
   }
   return {
     title: `${title} needs a quick look`,
-    body: `The build for ${subject} hit a snag and paused. Everything already built is safe in the Binder. Want me to try the rest again?`,
+    body: onePiece
+      ? `The build for ${subject} hit a snag and paused. Nothing is lost. Want me to try it again?`
+      : `The build for ${subject} hit a snag and paused. Everything already built is safe in the Binder. Want me to try the rest again?`,
   };
 }
 
@@ -88,7 +97,12 @@ export function compose(
  */
 export async function deliverJobMilestone(input: JobMilestoneInput): Promise<string | null> {
   const childName = await childFirstName(input.familyId, input.childId).catch(() => null);
-  const { title, body } = compose(input.kind, input.title, childName);
+  const { title, body } = compose(
+    input.kind,
+    input.title,
+    childName,
+    input.totalStages ?? 2,
+  );
 
   let deliveredChannel: "sms" | "none" = "none";
   try {
