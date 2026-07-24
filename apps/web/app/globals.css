@@ -639,7 +639,15 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: none; }
 }
-.flow-step-in { animation: flow-step-in 260ms var(--ease-out) both; }
+/* `backwards`, never `both`. A fill mode that keeps the animation applied
+   after it ends keeps a TRANSFORM applied after it ends, and an element
+   with an applied transform is the containing block for every
+   position:fixed descendant. With `both`, the checklist takeover's
+   fixed inset-0 overlay resolved against this wrapper instead of the
+   viewport and rendered at height 0: the founder pressed "Start the
+   questions" and nothing visibly happened. The `to` frame equals the
+   static styles, so releasing the fill changes nothing on screen. */
+.flow-step-in { animation: flow-step-in 260ms var(--ease-out) backwards; }
 @media (prefers-reduced-motion: reduce), print {
   .flow-step-in { animation: none; }
 }
@@ -723,6 +731,43 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
 .chat-think-mark { animation: chat-think-bob 1100ms var(--ease-in-out) infinite; }
 @media (prefers-reduced-motion: reduce), print {
   .chat-think-mark { animation: none; }
+}
+
+/* ============================================================================
+   Chat busy label (/chat, ChatClient). A slow light passes left to right
+   across the wait text, so a long turn reads as working rather than as
+   stuck. Text-clipped gradient, no layout and no repaint of anything
+   around it; the label still says what is happening, so the shimmer adds
+   liveness and never carries meaning. Tokens only: the sweep travels
+   between the same two text colors the rest of the surface uses.
+   ========================================================================= */
+@keyframes chat-busy-shimmer {
+  from { background-position: 180% 0; }
+  to   { background-position: -80% 0; }
+}
+.chat-busy-label {
+  background-image: linear-gradient(
+    100deg,
+    var(--text-muted) 0%,
+    var(--text-muted) 40%,
+    var(--text-strong) 50%,
+    var(--text-muted) 60%,
+    var(--text-muted) 100%
+  );
+  background-size: 220% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: chat-busy-shimmer 2600ms var(--ease-in-out) infinite;
+}
+@media (prefers-reduced-motion: reduce), print {
+  .chat-busy-label {
+    animation: none;
+    background-image: none;
+    color: var(--text-muted);
+    -webkit-text-fill-color: currentColor;
+  }
 }
 
 /* ============================================================================

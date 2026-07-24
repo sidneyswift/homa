@@ -53,6 +53,21 @@ test("compose does not falsely match a different child's name as a prefix", () =
   );
 });
 
+// A one-stage making (the onboarding first making) is one thing, so its
+// milestones never say "every part" or offer to build "the rest".
+test("compose words a single-stage job as one thing", () => {
+  const completed = compose("completed", "Mia's dinosaur coloring page", "Mia", 1);
+  assert.equal(
+    completed.body,
+    "Mia's dinosaur coloring page is ready. It is saved in the Binder and waiting in your Homa chat too.",
+  );
+  const needsAttention = compose("needs_attention", "Mia's dinosaur coloring page", "Mia", 1);
+  assert.equal(
+    needsAttention.body,
+    "The build for Mia's dinosaur coloring page hit a snag and paused. Nothing is lost. Want me to try it again?",
+  );
+});
+
 // Titles never doubled (compose never prepends "who" to the title), so this
 // just pins that behavior stays intact alongside the body fix.
 test("compose titles are unaffected", () => {

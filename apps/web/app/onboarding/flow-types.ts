@@ -26,6 +26,10 @@ export type FlowPhase =
   | "loading"
   | "bootstrap-error"
   | "parent"
+  /** Chat-first onboarding: everything after the account is a
+   *  conversation (plans/2026-07-21-chat-first-onboarding.md). Only
+   *  reachable behind HOMA_CHAT_ONBOARDING. */
+  | "chat"
   | "family"
   | "homeschool"
   | "kids"

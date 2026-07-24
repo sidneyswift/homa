@@ -17,6 +17,7 @@ import {
   ListChecks,
   PenLine,
   Search,
+  Sparkles,
   UserRound,
   Users,
   Wrench,
@@ -62,6 +63,13 @@ const STEP_REGISTRY: Record<string, { icon: LucideIcon; label: string }> = {
   create_task: { icon: CalendarClock, label: "Set that up as a task" },
   delete_task: { icon: CalendarClock, label: "Removed a task" },
   list_tasks: { icon: CalendarClock, label: "Checked your tasks" },
+  add_child: { icon: UserRound, label: "Added them to your family" },
+  save_family_basics: { icon: PenLine, label: "Saved your family's basics" },
+  save_homeschool_profile: { icon: PenLine, label: "Saved how you homeschool" },
+  start_checklist: { icon: ListChecks, label: "Opened the questions" },
+  ask_for_details: { icon: PenLine, label: "Asked for a few details" },
+  score_child_report: { icon: Sparkles, label: "Built the progress report" },
+  start_first_making: { icon: Sparkles, label: "Started making a page" },
 };
 
 const FALLBACK_STEP = { icon: Wrench, label: "Worked on it" };
@@ -78,6 +86,13 @@ function stepDetail(toolName: string, output: unknown): string | null {
     if (typeof material.title === "string") return material.title;
   }
   if (toolName === "load_skill" && typeof record.name === "string") return record.name;
+  if (toolName === "add_child" && typeof record.childName === "string") return record.childName;
+  if (toolName === "score_child_report" && typeof record.childName === "string") {
+    return record.childName;
+  }
+  if (toolName === "start_first_making" && typeof record.title === "string") {
+    return record.title;
+  }
   if (toolName === "recall" && typeof record.results === "number") {
     return record.results === 1 ? "Found 1 note" : `Found ${record.results} notes`;
   }

@@ -3,6 +3,669 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-23 · Founder directive: background jobs start immediately; the cron becomes the sweeper
+
+Founder, on hearing the agent-jobs queue waits up to five minutes to
+pick up new work: "this is terrible. background jobs should be picked
+up immediately." Implemented the same session:
+
+- The runner's tick body moved to a shared cycle
+  (`agent/agent-jobs-cycle.ts`), used by both entry points. Spawns
+  resolve at session ACCEPTANCE, so a cycle is cheap.
+- The agent-job channel gained `POST /eve/v1/agent-job/run-now`
+  (CRON_SECRET bearer auth, the dispatch run-now pattern), which runs
+  one cycle on demand.
+- `start_agent_job` and `start_first_making` kick that route the moment
+  a job row commits (`lib/jobs/kick.ts`). The kick targets THIS
+  deployment (VERCEL_URL first, so a preview never runs prod's code),
+  is capped at five seconds, and swallows every failure, because the
+  5-minute cron remains as the reliability sweeper: a missed kick costs
+  at most one sweeper interval, never a job. Retried stages still ride
+  the sweeper on purpose; instant retry of a failing build would be a
+  hot loop.
+
+Measured in dev: enqueue to stage in_progress in 3.5 seconds, against
+up to 300 before. This also applies fleet-wide to curriculum-studio
+builds the moment it deploys.
+
+## 2026-07-23 · The artifact moment ships: a background first making, and the in-turn generators leave onboarding
+
+Item 1 of the four-item post-loop ruling ("the artifact moment:
+approved, gets its own session"). Built as ruled: the promise rides
+durable job machinery, never prose. The pieces:
+
+- A `materials-studio` job contract (single stage, never gates): the
+  smallest reusable primitive for "build ONE material in the
+  background". Gating became each contract's own decision
+  (`gatesStage`), because the global gate-stage-one rule would have
+  parked a one-page making as ready-for-review, turning the gift into
+  a chore.
+- `start_first_making`: a web-onboarding-only dynamic tool that
+  durably enqueues that job from the parent's own words (verbatim
+  `herWords` ride the plan; title reuses her phrasing) and returns
+  only after the row is committed, so the promise Homa speaks is
+  backed before it is spoken. Once per child, ever, by idempotency
+  key; once per family+child at a time by the job store's active
+  constraint. Records beat `first_making`.
+- The promise card (`FirstMakingCard`): a transcript-resident pointer
+  polling `/api/onboarding/making-status`; it becomes the material
+  card itself when the page lands (soft entrance), reads "paused for
+  now" honestly when the build parks, and never shows a button while
+  making.
+- Skill beats: start at the boundary right after her interest answer
+  (so the page can land inside the sitting), second chance after the
+  reveal, promise laws (after tool result only, sized honestly, her
+  words once), one making per sitting, exit-ramp naming when it has
+  not landed.
+
+Decision made without a ruling, flagged for review: **during web
+onboarding, `create_printable` and `generate_image` do not exist**
+(`lib/onboarding/generation-gate.ts`; both tools became dynamics).
+Grounds: plan §2.6 already resolved onboarding generation delivery as
+"async, never in-turn masking", and prose alone measurably failed to
+enforce it. In two live dev walks with the first-making tool available
+AND the inlined skill text instructing it, the model still built
+in-turn both times (60-90s of held-open screen, "no need to sit and
+wait" spoken over a queue that blocks her sends). With the in-turn
+tools structurally absent, the very next walk fired the first making
+spontaneously at the interest boundary, unprompted. Same shape as the
+ENDS_THE_TURN rule: structural beats vocabulary. Scope is narrow
+(card-capable web session of an onboarding-active family); agent-job
+build sessions, SMS, email, dispatch, and subject-lesson sessions keep
+both tools untouched, and finished families' chat is unchanged.
+
+Verified in the live dev flow (+homatest families 9f3b3ff0 and
+d949d3f0): the interest sentence fired the tool unprompted, the job
+row was durably queued with her words, a runner claimed and built a
+real themed coloring page in the background, the promise card
+rendered mid-checklist and morphed in place into the material card
+("Coloring page ready", preview, Print it), and the reveal was never
+delayed. One honest caveat on that verification: the claiming runner
+was PRODUCTION's (dev and prod share the database, and prod's 5-minute
+agent-jobs tick wins the race for any queued row, sandbox or not), so
+the builds ran main's old stage-gating and parked ready_for_review;
+the ready state was then produced by hand-approving the sandbox rows.
+The per-contract gating itself is covered by unit tests and runs
+correctly from this branch's source; it simply cannot be observed
+end-to-end locally until this branch deploys, because prod always
+claims first. That same fact is an operational caveat worth keeping:
+flag-dark dev testing of any new job kind races the prod runner, and
+prod will happily build rows whose contract it does not know (claim
+does not re-validate the plan). Milestone copy for single-stage jobs
+stopped saying "every part". New CI: `check:jobs` and
+`check:onboarding` (the onboarding lib tests plus the jobs
+runner/milestone tests had never been wired into CI). Also hit twice
+while testing: the known eve dev-runtime landmine, a fresh snapshot
+racing the flow bundle (`UNLOADABLE_DEPENDENCY` on the SKILL.md `?raw`
+import); a restart with warm snapshots recovers.
+
+## 2026-07-23 · Onboarding latency floor measured; skill preload, sentinel tail, and a silent mode-unload fix
+
+The item-3 infra investigation (per-turn latency floor). Full breakdown
+with numbers: `plans/2026-07-23-onboarding-turn-latency.md`. Three
+decisions made alone, each the smallest change its measurement
+supported:
+
+1. **The onboarding skill rides inside onboarding-mode's dynamic
+   instructions instead of behind load_skill.** Measured cost of the
+   load_skill step: one whole model call (3.2-6.4s local, 6-16s per
+   prod step) plus a full ~43k-token cache-miss prefill plus a sandbox
+   read, paid on the first turn after the setup cards. The trade is
+   ~5.8k prompt tokens per onboarding turn, scoped to sessions the auth
+   walk stamped onboardingActive. In the deployed eve bundle (no source
+   tree) the composer falls back to the original load_skill line, never
+   worse than before; closing that gap is R4 in the plan.
+2. **ask_for_details' result note asks for eve's `<eve-empty-delivery/>`
+   sentinel instead of the unsatisfiable "emit no text".** The harness
+   retries an empty reply with a nudge, so models invented filler
+   ("I'll wait for her to fill that in.", "(No further text this
+   turn.)", caught live; assistant-text.ts already enumerates five
+   shipped siblings). The sentinel is delivered as true silence and the
+   note now also states the fact that post-card text is never shown
+   (message-parts' ENDS_THE_TURN guard).
+3. **beginOnboarding is now actually called** (onboarding page's
+   loadChatProps): nothing ever wrote the durable onboarding record, so
+   the basics card's profile_completed_at stamp made the fallback
+   predicate read the family as DONE from turn two onward, silently
+   unloading onboarding-mode for the rest of the arc. Found by watching
+   the prompt shrink by exactly the mode block between turns.
+
+Kickoff turn measured 17.8-23.8s before, 6.3-10.9s after. Not touched
+without a founder: reasoning effort (dominant remaining cost),
+prompt-cache breakpoints (gateway-auto gives no stable prefix; 58.8% of
+prod web turns carry a full-miss step), runtime-action cards, and a
+tool-schema diet (50 static tools ≈ 17.9k tokens every step). Each is a
+sized recommendation in the plan.
+
+## 2026-07-23 · Founder ruling: all four post-loop items approved
+
+Founder, on the drop-off loop's four parked items: "agree with your 4
+suggestions." Ruled and dispositioned:
+
+1. **The artifact moment** (Homa makes something real from her own words,
+   the dinosaur-worksheet beat, before the sitting ends or ready for her
+   return): approved, NOT built in this session. It must ride the offer
+   fulfillment machinery (acceptance/fulfillment decoupling is the exact
+   failure the 2026-07-23 recovery arc exists for, and the recovery
+   engine is still behind HOMA_OFFER_RECOVERY_ENABLED pending sandbox
+   verification), so it gets its own session rather than a same-day
+   bolt-on. Spawned as a follow-up task.
+2. **Optional asks out of sitting one**: shipped same session
+   (be312e2f). The basics card returns to name + state; family name and
+   photo move to settings, conversation, and the first concrete-use
+   moment. Reverses the placement half of the same-morning basics-card
+   ruling, at the founder's direction.
+3. **Per-turn latency floor** (12-17s per model turn with turn count
+   already minimized): approved as an infra investigation, spawned as a
+   follow-up task rather than guessed at here.
+4. **Bare worked-for receipt above the first card**: shipped same
+   session (be312e2f). A turn whose whole output is docked renders no
+   transcript row until the card is spent; receipts return to scrollback
+   afterward, so no work is hidden.
+
+## 2026-07-23 · The onboarding drop-off loop: five fixes from persona walks
+
+Founder directive: "make onboarding incredible" by looping subagents that
+role-play a busy, skeptical, easily-dropping mom through the live flow,
+fixing what they find. Method each iteration: a real browser walk of the
+live dev flow capturing every beat and its measured latency, a
+fresh-context persona subagent reading that exact captured experience and
+ranking where she quits, one fix, live re-verification, repeat. Two
+research subagents (conversion evidence; agent-first onboarding practice)
+ran first and their findings cross-checked the persona's rankings.
+
+Five fixes shipped, each live-verified (commits 4053e23d, f79b1296,
+76828a0d, 851fdec4, 57a4a495):
+
+1. Leaving the questions early with ANY answers now earns the scored
+   reveal, honestly sized, never a polite shrug. Root cause was "when the
+   questions are done" reading as finished-means-complete at two layers.
+2. Arrival is never a blank screen: the app renders the founder-approved
+   greeting instantly (the §6.1 pre-warmed welcome, previously unbuilt;
+   11-17 measured seconds of thinking dot before), and the model's first
+   turn is just the basics card, no second hello.
+3. A partial reveal ends with an honest anchor (the named remaining
+   questions), never a manufactured promise.
+4. The basics card chains straight into the homeschool card client-side,
+   deleting the 16-second model turn between them; Homa hears one
+   combined answer and reacts once. Same pass: "strongest subjects" only
+   renders as a strict subset of covered subjects, and every reveal claim
+   must trace to an answer she remembers giving.
+5. Stated time pressure ("I gotta go") now outranks the beat order, with
+   the compression named out loud. Prose-steered, not re-verified live.
+
+Decisions made without a founder ruling, all reversible: the chained-card
+run replaces the founder-designed per-card reaction rhythm with one
+combined reaction (the persona measured the rhythm's cost at 16 silent
+seconds; the reaction itself survives, there is just one); the pre-warmed
+welcome leaves scrollback once onboarding completes; a reload inside the
+chained-card window re-docks the basics card (fields coalesce, so it
+costs taps, not data).
+
+Left deliberately unfixed, needing founder rulings, with the persona's
+"good but not incredible" verdict attached: (a) producing a real artifact
+from her own words before the sitting ends (the dinosaur-worksheet
+moment; the plan's A3/V-B territory, and it must ride the offer
+fulfillment machinery that is still flag-gated); (b) the optional asks
+(photo, family name) sitting before her kids, which persona and research
+both rank against and which reverses the 2026-07-23 basics-card ruling;
+(c) remaining per-turn latency (12-17s per model turn is now the floor;
+turn count is minimized, the rest is infra); (d) the "Worked for N
+seconds" receipt as the only thing above the first card. The recurring
+eve dev-runtime stale-snapshot crash after agent-file edits (restart
+fixes it) is noted as a tooling landmine worth its own fix.
+
+## 2026-07-23 · Founder ruling: homeschool approach moves into the basics card
+
+While tracing onboarding for a "what actually happens, beat by beat" audit, found
+that `save_homeschool_profile` only ever writes when a parent volunteers her
+approach in passing; nothing in onboarding asks for it. Told the founder this was
+by design (deliberate passive capture, not a gap). Founder disagreed: "this
+should be captured." Asked, via a structured choice, where the ask should live,
+naming the real tradeoff: the basics card already sits inside the sub-4-minute-
+aha budget the 2026-07-22 chat-first rebuild fought to protect (see that entry
+below), so a third field there competes directly with it. Founder chose the
+basics card anyway, explicitly accepting that tradeoff over the alternatives
+(rehearsal beat, day-2+, or leaving it purely passive).
+
+Implemented as a third, always-skippable step on the family_basics card: a chip
+multi-select of the existing `HOMESCHOOL_STYLES` enum, writing through the same
+`saveFamilyContext` merge path `save_homeschool_profile` already uses, so a style
+picked here and one mentioned later in conversation land in one bag. Selecting
+none counts as a complete answer; the step never blocks advancing. Code:
+`apps/web/app/app/detail-card.tsx`, `apps/web/app/api/onboarding/basics/route.ts`.
+
+Verified live: picked Montessori and Eclectic, the receipt bubble read the full
+answer back correctly, the write returned 200, and Homa's next line proved the
+data reached her context rather than just echoing the tap ("Montessori with a
+bit of everything mixed in tells me a lot: I'll lean toward hands-on, self-paced
+activities..."). Design-tokens and the full chat-ui guard (97 tests) both green.
+
+## 2026-07-22 · Reveal card said "ready" before the narrative was
+
+Founder, watching the reveal card in chat: "current, it says its ready,
+but when you click it starts the generation. expected, the generation
+starts automatically, the user continues onboarding while the report
+generates. it does not say its ready until it actually is." Two of the
+three expectations were already true and needed no fix: `finalizeReport`
+already POSTs to `/api/map/score` fire-and-forget on mount, and nothing
+in the turn or skill flow ever blocked on the narrative finishing, so
+the conversation already moved on while it wrote. The one real gap was
+the card's own claim: deterministic scores exist the instant it
+renders, but the LLM-written narrative is a separate, slower,
+backgrounded step, and the card said "ready" and offered "the whole
+report" regardless, so tapping through early landed on the report
+page's own honest "Homa is writing" screen, which read as the click
+itself having triggered the work.
+
+Fixed by having the card poll the same token-scoped
+`/api/map/narrative-status` endpoint the report page's own writing beat
+(`narrative-beat.tsx`) already polls, no new route and no new agent
+turn. A live reveal now has two sub-states: "numbers are in, words
+still writing" (strengths chips shown since they are real regardless,
+no button since there is nothing whole to open yet), then the original
+"ready" copy once the poll sees the narrative settle. Code:
+`apps/web/app/app/report-reveal-card.tsx`, unit test
+`report-reveal-card.test.ts`.
+
+Deliberately NOT built: Homa proactively interrupting the conversation
+to announce the narrative finished. That is the more invasive,
+judgment-heavy option (when is it worth breaking in with news versus
+letting the parent discover it), and AGENTS.md says not to invent
+policy where the spec is silent, so it stays a reversible, unbuilt idea
+rather than a shipped mechanism, left here for a founder call if wanted.
+
+Verified live end to end on a fresh test family (`f1998881`, child
+Story, 2 of ~50 questions answered so the narrative had genuine work to
+do): the card rendered the writing sub-state first ("Story's numbers
+are in. I'm still writing the words to go with them. Keep going,
+there's nothing to wait for.", Math chip, no button), then flipped
+unprompted to "Story's progress report is ready." with the button
+restored, while Homa's own reply in the same turn had already moved on
+to offering a month plan, independently confirming the "continues
+onboarding while it generates" half of the founder's ask.
+
+## 2026-07-22 · Founder ruling: capture every child up front, not one at a time
+
+Founder, after using the one-child arc live: "the original said one
+child. but after using it, that is a dumb design. we should capture the
+family info up front." This reverses the spec's original "plan for one
+child now and the next one later" line, and is a founder ruling, not an
+agent decision, recorded here for the same reason every founder ruling
+is: the reasoning should survive without needing this session's context.
+
+Rebuilt beat 3 as a roster loop mirroring the OLD pre-chat add-a-child
+form's real lesson (kids-step.tsx: adding another kid was always cheap
+and never gated behind a question), translated to chat-first as a loop
+rather than a standing form: card commits, Homa reacts to the age,
+offers "any other kids", repeats until she says that's everyone; a
+parent who names several kids in one message gets add_child called once
+each instead of being walked through fields she already typed. A new
+beat, "Go deep with one," then picks which child the rest of the sitting
+is actually about (skipping anyone under two, the age start_checklist
+already refuses), and the closing beat now queues the other child BY
+NAME instead of the old vague promise.
+
+Verified live, two children in one sitting (card for the first, free
+text for the second): the roster and the pick both worked exactly as
+designed. Two real misses recorded honestly rather than smoothed over:
+Homa explained her pick out loud despite being told not to, and guessed
+"he" for a child nobody had used a pronoun for yet, the same guessing
+habit an earlier fix in this file already targeted. Prose does not fully
+pin model behavior; logged as an open finding, not chased further this
+pass.
+
+Also found and fixed while verifying: `.env.development.local` had a
+stray `VERCEL_OIDC_TOKEN` left over from the original `vercel env pull`
+mistake (see the OIDC entry below), and Next's real precedence put that
+file OVER `.env.local`, so every `pnpm dev:token` refresh since has been
+silently shadowed by an old token in the wrong file. `dev:token` now
+detects and removes a stray copy there instead of leaving a trap.
+
+## 2026-07-22 · Founder's first full walk: dead button root-caused, one-ask rule enforced, five-lens review
+
+Founder walked the whole flow (Sid, DC, child Story) and reported two
+things verbatim: "it wont let me click 'start the questions'" and "there
+should not be a start questions card AND a text input card (confusing)."
+
+**The dead button** (`8bdb3e0`): `.flow-step-in` animated a transform
+with fill-mode `both`; a fill that never ends keeps the transform
+applied forever, and a transformed element is the containing block for
+every `position:fixed` descendant, so the checklist takeover mounted at
+375x0. Proved with getBoundingClientRect, fixed twice over (fill mode
+`backwards` plus a portal to document.body), verified live on the
+founder's own stuck family. A five-lens review workflow independently
+reached the same diagnosis and falsified the first theory (a stale kids
+prop; the click path never reads it).
+
+**One ask per screen** (`8bdb3e0`, `2c0aa65`): the checklist invite now
+docks into the composer slot exactly as the facts card does, and the
+suggestion rail is gated out of onboarding and out of any card's turn
+at both the render and the generation layer. Riders: the dev toolbar
+sat at z-[60] OVER the takeover, putting the family-deleting "Restart
+onboarding" button on top of "Back to chat" (now z-40); the spent pill
+claimed "Questions started" before any answer existed (now "Questions
+ready"); the takeover's blank loading frame pulses; both exits say
+"back to chat"; the state code in her bubble became the state's name.
+
+**Voice leaks, fixed at source** (`3a6f461`): the fifth narrated-wait
+variant rode as paragraph two of a real reply, so filtering is now
+paragraph-level for trailing narration; "she can stop anywhere" reached
+the parent because the skill's own beat 5 said those words about her,
+and the model parroted the register; "anything I make her" traced to an
+instruction parenthetical that permitted guessing a child's pronouns.
+All three sources rewritten.
+
+**Escalated, not decided: requireFamily identity precedence.** The map
+resume cookie beats the authenticated session in lib/map/session.ts, so
+a signed-in parent carrying a stale anonymous cookie resolves to the
+wrong family, which is how a takeover can fail to find the child. The
+reviewer proposed session-first; that has its own wrong-family mode (a
+shared computer with one parent signed in hijacks another's anonymous
+walk INTO the signed-in family, writing rather than erring). Both
+orders misroute someone. Which one loses is policy: founder call,
+flagged in the session report, nothing changed.
+
+**Still open from the review, ranked but unbuilt:** the 33s and 44s
+opening turns (skill-load order and streaming are the levers; rendering
+the near-scripted opener instantly would reverse the no-deterministic-
+welcome ruling, founder call); a spent checklist pill is unclickable, so
+an interrupted parent has no path back to the questions; start_checklist
+writes "started" into the funnel record at invite time; bare "Worked on
+it" eyebrows over filtered turns; save_family_basics and
+save_homeschool_profile produce no receipt chips.
+
+## 2026-07-22 · "whos name?" and the rule that guaranteed it
+
+Founder walked onboarding and asked, of the card's first child question,
+**"this is weird. whos name?"** She had just given her own name and state
+and been told "Got it, Sidney. California it is." The next thing on
+screen was "What is their name?" with nothing above it.
+
+**The mechanism.** The card owns exactly one antecedent, the eyebrow
+"About your child", and it is suppressed whenever the card is docked.
+Every live card is docked, because that is the composer morph. So the
+only place the card ever appears is the only place its subject was
+removed, and `aria-label` still carries it, meaning a screen-reader user
+was told whose name and a sighted user was not.
+
+Four unbound referring expressions across two screens, not one:
+`What is their name?`, `When were they born?`, `so the questions match
+their age in months` (twice over: "the questions" is a definite
+reference to a checklist she has not been shown), and the `Add them`
+button, whose plural also implied it added more than one child.
+
+**The part worth keeping.** Fixing the strings makes the card safe when
+it lands cold. It does not stop it landing cold, and three rules written
+in this same build were between them making that certain:
+`SKILL.md` said "Cards appear; your voice is for reactions", and a
+reaction can only refer back to something that already exists;
+`onboarding-mode.ts` had the right words-first rule and scoped it to the
+first turn and to `family_basics`; `ask_for_details.ts` told the model to
+skip the `intro` slot because "the fields speak for themselves", true of
+a card whose fields say "you" and false of one whose fields say "their".
+A copy bug on screen was a policy bug in the instructions. Fixed at both
+ends (`797aa17`, `06e9713`).
+
+**Decided alone:** "your child's **first** name", not "name", because one
+name per concept is a copy law and three parent-visible surfaces already
+call this datum a first name. The name is substituted through a `{name}`
+token rather than a function per label, so `FIELDS` stays a table of
+plain copy findable by searching the words a parent saw; a test asserts
+no literal token ever reaches the screen. Every context-aware candidate
+was rejected for branching on a child count the card cannot trust, or
+asserting a family shape ("one of your kids") a one-child family does
+not have.
+
+**Still open, logged not fixed:** the same class elsewhere. `hub-step`'s
+"ready for their age" leans on layout for its antecedent; `checklist-step`
+says "One more, since that was easy" about a question the 140ms flash has
+already removed; a 409 error names "Progress", a surface a chat-first
+parent has never visited; `report-reveal-card` uses "answers" for two
+different sets one line apart; `content.ts` opens one subject intro on a
+pronoun where its siblings open on nouns. Two vocabulary seams also
+surfaced: "Birth year" vs "Year" between `kids-step` and the shared
+`birthday-fields` built to stop that, and "Your name" vs "What should I
+call you?" for one field.
+
+## 2026-07-22 · Four bugs found by walking onboarding instead of reading it
+
+All four came out of one afternoon of driving the flow in a browser, and
+none of them was visible in the code. Recorded together because the
+lesson is the same each time: the thing that looked correct and the
+thing the browser did were different, and only one of them was checked.
+
+**1. The agent answered about a family the page was not showing.**
+`agent/channels/eve.ts` resolved the caller's family with
+`.eq("user_id", ...).limit(1).maybeSingle()`, no order and no status
+filter. Correct while an account has one membership row, silently
+arbitrary at two. The test account had eleven and Postgres returned a
+DELETED family, so every turn read and wrote a retired household while
+the page rendered the live one. **Reachable in production**: any account
+whose family is deleted in the founder console and is then re-attached
+has two rows. Fixed in `fe9c68f`, live families only, newest membership
+first. Verified against prod that no data crossed a tenancy boundary;
+the wrong side of the boundary was being read.
+
+**2. The flag flip trapped anyone who stopped before adding a child.**
+With `HOMA_CHAT_ONBOARDING` on, a family with a finished profile and no
+children bounced `/onboarding` → `/app` → `/onboarding` forever, because
+`/app` requires a child and `/onboarding` handed off on the profile
+column alone. **This would have hit real families the moment the flag
+went on**, and stopping before adding a child is the most common way to
+drop out of setup. Fixed in `25b45c6` through one shared predicate,
+`appWouldAdmit`.
+
+**3. Two colour utilities that were never colours** (see the entry
+below, kept separate because it carries its own guard).
+
+**4. Two ways a new parent could be left on a blank screen.** A turn
+that only called a tool counted as the conversation having started, so
+the composer appeared before Homa had said anything; and the kickoff
+lock outlived a kickoff that never landed, making the blank screen
+permanent across reloads. Fixed in `4c208d1`.
+
+**Decided alone, and worth a founder look:** #2 is fixed by sending
+childless families to the card flow rather than by making them count as
+onboarding-active. Widening `familyOnboardingActive` would also change
+the wall exemption and the agent's mode, which is a policy call, not a
+bug fix. The reversible option was taken.
+
+**Method, since it is the transferable part:** every one of these
+survived typecheck, lint and the guard suite. Three of them survived
+reading the code carefully. They surfaced from `getComputedStyle` in the
+running page, from querying prod for where a turn's messages actually
+landed, and from following an HTTP redirect chain. For anything
+user-facing, check what the browser and the database did, not what the
+source says they should have.
+
+## 2026-07-22 · Two undefined colour tokens live in production; fixed, plus a guard for the class
+
+**Status: FIXED in `84d8cbf`, on branch `claude/chat-first-onboarding-65b569`,
+NOT YET DEPLOYED.** The branch is unpushed and the founder has not asked for
+a PR, so this is escalated in-reply rather than shipped. Nothing about the
+fix waits on a ruling; it waits on a push.
+
+Found while checking why a position dot on the new facts card was
+invisible. `bg-border-default` turned out not to be a class at all.
+`globals.css` declares only `--color-border` and `--color-border-subtle`,
+so Tailwind emits no rule for it.
+
+Two live instances, both parent-visible:
+
+- `border-border-default`, 31 uses. Falls back to `currentColor`, so
+  material-card's page arrows, the binder's filter pills, empty states and
+  dashed drop targets, and most of `/admin` have been drawing a near-black
+  1px edge on warm cream where stone-300 was intended.
+- `text-sage-700`, 1 use, the "What worked" bullet on the lesson page.
+  `--sage-700` is in the palette but was never lifted into `@theme`, so the
+  bullet renders body-coloured.
+
+Both now name the declared tokens (`border-border`, `text-sage`). No design
+change: this is the colour each author already asked for.
+
+**Decided alone:** that the missing-token failure needs a guard, not just a
+fix. An undefined colour token fails silently and completely, since it
+compiles, lints, typechecks and renders, and a screenshot reads the result
+as a design choice. Nothing in the toolchain has an opinion, and the
+`_adherence.oxlintrc.json` rules catch raw hex and raw px but not this.
+`pnpm check:design-tokens` (`scripts/design-tokens-check.mts`, wired into
+CI) now fails on any colour utility whose token is not declared. It
+inspects only classes reaching into Homa's own vocabulary, keyed on the
+first segment of a real token, which is what lets it catch
+`border-border-default` while leaving `border-dashed` alone.
+
+Method note, because the detection matters more than the fix: this was
+invisible to reading the code and invisible to screenshots. It surfaced
+only by reading `getComputedStyle` in the running app and then searching
+the compiled stylesheet for the class. For anything colour-shaped, check
+what the browser resolved, not what the source says.
+
+## 2026-07-21 · Founder ruling: no deterministic welcome, Homa opens herself
+
+Walked live on the dev server, founder verdict on the pre-warmed
+welcome: **"that seems forced. I don't think that there should be a
+separate deterministic message from Homa. It should start from the
+actual model."**
+
+This overturns a decision the spec locked in section 1 ("the real eve
+agent, with a pre-warmed deterministic welcome; two short copy-gated
+lines render instantly client-side while the kickoff round-trips"). The
+two client-side lines are removed.
+
+**What the welcome was actually covering, and the better fix.** It
+existed because the first turn is the slowest the product runs and she
+watches a blank screen through all of it. The founder screenshot showed
+the real cause: a collapsed "Worked on it" line ABOVE the thinking
+indicator, meaning the model had already spent a tool call before
+writing a word. That call was `load_skill`, fetching the onboarding
+skill, so the first impression cost TWO model round trips, and my own
+architecture caused it by putting the arc in a load-on-demand skill.
+
+The opening line moved into `onboarding-mode.ts`, which is a dynamic
+instruction and is therefore already loaded before the turn starts. The
+skill still owns the whole arc from turn two onward. Verified: the only
+tool call on the opening turn is now the facts card, no `load_skill`,
+and the turn runs 12 to 15 seconds of pure generation instead of two
+passes.
+
+**Instructions that fought themselves.** The first version said "one or
+two sentences on what you are for, then put up the facts card. No
+greeting flourish, no list of features, no questions in prose." It
+produced exactly a feature list and a prose question, because "sentences
+on what you are for" invites a product description, and a bare
+prohibition loses to the model's instinct to explain the card it just
+put up. Rewritten as one sentence of shape plus a worked NEGATIVE
+example (the actual bad output, with the three things wrong with it
+named) and one worked positive. That landed.
+
+**Two anti-slop guards, both from live output.** A model with a tool
+call mid-turn repeats itself: the same sentence rendered above AND below
+the card, word for word, inside one message. And told to say nothing
+after a card, it narrates its silence: it wrote
+`*(waits silently while the card is on her screen)*`. Both now handled
+in the renderer (`app/app/assistant-text.ts`) rather than in a prompt,
+because a prompt is probabilistic and a parent notices both instantly.
+The rules are narrow: no real reply repeats a whole paragraph verbatim
+inside one turn, and no real reply is nothing but a parenthetical about
+what Homa is doing. A wrapped aside addressed to HER survives.
+
+**Tool notes are machine-facing and must read that way.** The card's
+note began "The card is on her screen and this turn is over", warm
+third-person prose, and the model said a version of it out loud under
+the card. Rewritten terse and imperative ("END TURN. Emit no text after
+this tool call.") so it cannot be paraphrased into speech. The sibling
+notes on `start_checklist` and `score_child_report` were the same shape
+and were fixed with it; `score_child_report` says SPEAK AFTER THIS ONE,
+because the reveal genuinely wants her voice over the chart.
+
+## 2026-07-21 · Chat-first onboarding, phase one: the spine, built behind a flag
+
+Founder ask: build the chat-first onboarding described in
+`plans/2026-07-21-chat-first-onboarding.md`, the whole thing, sequenced by
+judgment rather than by the spec's phase list. Everything below is behind
+`HOMA_CHAT_ONBOARDING`, which is off. With it off, `/onboarding` still
+prerenders statically and every path in this entry is unreachable.
+
+**Where the spec was wrong, and what shipped instead.**
+
+*The onboarding predicate.* §2.2 defines onboardingActive as
+`profile_completed_at IS NULL OR families.context.onboarding.state != 'done'`.
+Read literally, the second clause is true for an ABSENT record, and no
+family has that key today (verified in prod: 46 completed families, zero
+with it). So every completed family would have been marked
+onboarding-active forever, and since the same predicate now exempts a
+family from the door wall, that would have taken the live $19 wall down
+fleet-wide. Shipped predicate: the durable record decides when it exists,
+`profile_completed_at` is the fallback for families predating the flow.
+
+*A lean second chat surface.* §9 lists "the lean onboarding chat surface
+(shared parts with chat-client)" as net-new. `chat-client.tsx` turned out
+to be 1675 lines of incident-hardened machinery: a three-defense stall
+triad, lost-turn recovery matching on exact trimmed text, the Vega
+duplicate-bubble guard, 4am session rotation, and two test files
+asserting against its raw source with regexes. A parallel surface would
+re-implement all of it badly, in the one place a parent has no history
+proving recovery works. §2.8 already requires the two to share a storage
+key and session, so onboarding renders the SAME component with one
+`onboarding` prop. The handoff to `/app` stops being a handoff.
+
+*Generalizing the signup tools.* §2.9 asks to give
+`signup_set_family`/`signup_add_child` a web resolution path. Three things
+block it: `lib/signup-session.ts` refuses any channel that is not SMS and
+is keyed on a phone number, `ensureSignupFamily` unconditionally creates an
+ANONYMOUS family, and `saveFamilyBasicsFromSms` hard-refuses a family with
+any `family_members` row, which an authenticated web user always has (that
+guard exists for founder ruling `card-per-family-primary-parent`). Shipped
+five new narrow tools calling the SAME store functions the SMS path and the
+web routes already call, so a child added in chat is byte-identical to one
+added anywhere else.
+
+**Decisions made without a ruling, all reversible.**
+
+1. The wall bypass is flag-gated, so prod behavior is unchanged until the
+   flow ships. Without the gate, 228 abandoned-funnel families would
+   silently stop being walled.
+2. The arc lives in `agent/skills/onboarding/SKILL.md`, not in
+   `onboarding-mode.ts`. AGENTS.md puts procedure and judgment in a fleet
+   skill and reserves dynamic instructions for what must apply before a
+   skill loads or must be fresh every turn. The mode carries the routing
+   and the directive-reading rule; the skill carries the arc.
+3. `score_child_report` scores and returns, and deliberately does NOT
+   write the report narrative or send the email. Both are slow and would
+   hold the turn open while she watches a still screen. The reveal card
+   finishes them through the existing `/api/map/score` route, which has
+   the 300s function and the `after()` hook built for exactly that, and
+   which is idempotent.
+4. The report opens as its own page rather than an in-chat panel. The
+   SidePanel chassis (§2.7) is not built; the reveal card carries the real
+   numbers inline and the whole report is one tap away.
+5. `MAP_FLOW_STEPS` gains "chat" so the existing per-card funnel compares
+   both flows on one chart. `map.report_viewed` gains a third entry value,
+   "chat", which is what makes the rebuild's central claim measurable: one
+   family in four never opens the emailed link.
+6. The credit meter is counted and shown to the founder at
+   `/admin/makings` and enforced nowhere. No tool reads it. Turning it on
+   supersedes four recorded decisions and needs the §7.5 ruling.
+
+**Two bugs the tests caught before a parent could.**
+`formatHiddenDirective` stripped "/" from values, so `America/Chicago`
+arrived as `AmericaChicago` and would have been saved as a time zone that
+parses as nothing. And the queued-bubble list filtered directives out
+while still passing the filtered index to `removeQueuedMessage`, so with a
+directive queued ahead of her words the X removed the wrong message.
+
+**One bug only running it caught.** `child_reports` has no `id` column;
+it is keyed by `child_id`. The existence check asked for `r.id` and threw
+on every call, which would have made `start_checklist` and
+`score_child_report` fail for every family. A green typecheck said nothing.
+
+**First finding from the shadow meter,** read-only against prod: four
+families made anything in the current Monday-to-Monday window, and the
+busiest made 38 against the specced week-one allowance of 10. Whatever the
+right allowance is, 10 is not obviously it. That number is for the §7.5
+ruling.
+
 ## 2026-07-22 · Founder ruling: the firsts page names the record, not the child
 
 The receipt spine (PR #125) shipped without the beginning label the

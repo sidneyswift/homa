@@ -11,6 +11,24 @@ import { sendWallBeacon } from "../../components/billing/wall-beacon";
 import { WallModal } from "../../components/billing/wall-modal";
 import type { WallCheckout } from "../../lib/billing/wall-types";
 import {
+  browserTimeZone,
+  clearKickoffSent,
+  kickoffAlreadySent,
+  kickoffDirectiveFor,
+  kickoffLockIsStale,
+  markKickoffSent,
+  ONBOARDING_WELCOME,
+  type OnboardingChatConfig,
+} from "./onboarding-chat";
+import {
+  ChecklistCard,
+  latestChecklistRequest,
+  latestReportReveal,
+} from "./onboarding-cards";
+import { DetailCard, latestDetailRequest, NO_STYLES_SUMMARY } from "./detail-card";
+import { ChecklistTakeover } from "./checklist-takeover";
+import { formatHiddenDirective } from "../../lib/onboarding/directives";
+import {
   archiveFromServerHistory,
   type ChatHistoryPayload,
 } from "../../lib/chat-history-model";
@@ -38,6 +56,7 @@ import {
 } from "./chat-storage";
 import {
   appendPreparedChatSendToQueue,
+  flushChatQueue,
   focusChatComposerInput,
   prepareChatSend,
   type ChatSendAcceptance,
@@ -51,7 +70,12 @@ import {
   RECORDING_HINT_MESSAGE,
   useDictation,
 } from "./dictation";
-import { busyLabel, countLastTurnToolCalls, MessageView } from "./message-parts";
+import {
+  busyLabel,
+  countLastTurnToolCalls,
+  messageSaysSomething,
+  MessageView,
+} from "./message-parts";
 import {
   beginProgressAction,
   createProgressActionLifecycleState,
@@ -197,6 +221,7 @@ export function ChatClient({
   slashSkills,
   serverHistory = null,
   wall = null,
+  onboarding = null,
 }: {
   storageKey: string;
   familyId: string | null;
@@ -226,6 +251,16 @@ export function ChatClient({
   /** The composer's "/" menu: kids to mention + the advertised skills. */
   kids?: { id: string; name: string; avatarUrl: string | null }[];
   slashSkills?: SlashSkillItem[];
+  /** Chat-first onboarding (plans/2026-07-21-chat-first-onboarding.md).
+   * Null on every ordinary /app visit, which is every visit until the
+   * HOMA_CHAT_ONBOARDING flag is on. Non-null turns this same surface
+   * into the first-days surface: a deterministic welcome renders before
+   * the model can answer, and one machine message opens the
+   * conversation. It is the same component on purpose. A parallel "lean"
+   * chat would re-implement lost-turn recovery, the stall triad, and the
+   * 4am rotation, and would do it exactly where a first-session parent
+   * has the least patience for a dropped turn. */
+  onboarding?: OnboardingChatConfig | null;
 }) {
   const [supabase] = useState(() => createSupabaseBrowserClient());
   // Load + rotation decision, once per mount (fresh morning = fresh
@@ -333,6 +368,21 @@ export function ChatClient({
    *  the first pass records whatever a restored session carries WITHOUT
    *  opening it: a mid-day reload should not throw the panel back up. */
   const handledPlannerPartKeyRef = useRef<string | null | undefined>(undefined);
+  /** One kickoff per mount. See the kickoff effect for the other two locks. */
+  const kickoffSentRef = useRef(false);
+  /** sendMessage is declared below the effects that need it, and the
+   *  React Compiler rejects an effect capturing it directly, the same
+   *  reason sendRef exists for onFinish. */
+  const sendMessageRef = useRef<
+    ((text: string, source: ChatSendSource) => ChatSendAcceptance) | null
+  >(null);
+  /** The child whose questions have taken over the screen, or null. */
+  const [checklistTakeover, setChecklistTakeover] = useState<string | null>(null);
+  /** True while the app-chained homeschool card holds the composer slot
+   *  (set the moment the basics card saves during onboarding), with the
+   *  basics summary parked until the chained card settles. */
+  const [chainedHomeschool, setChainedHomeschool] = useState(false);
+  const chainedBasicsSummaryRef = useRef<string | null>(null);
   const turnStartedAtRef = useRef<number | null>(null);
   const childNameById = useMemo(
     () => new Map((kids ?? []).map((kid) => [kid.id, kid.name])),
@@ -371,6 +421,13 @@ export function ChatClient({
   const lastSendRef = useRef<{ text: string; atMs: number } | null>(null);
   const recoveryRef = useRef<AbortController | null>(null);
   const [recovering, setRecovering] = useState(false);
+  /**
+   * Dev only, and only ever set to a time we can prove: when a turn
+   * fails on localhost, ask whether this machine's gateway credential is
+   * the reason before blaming the product. Null in production, where the
+   * route it reads 404s. See app/api/dev/oidc-status/route.ts.
+   */
+  const [staleOidcAt, setStaleOidcAt] = useState<number | null>(null);
   /** True between a stall auto-stop (watchdog / wake grace) and the
    *  onFinish it causes: the one stop that should trigger recovery,
    *  because nobody chose it and the durable turn may have finished. */
@@ -637,18 +694,25 @@ export function ChatClient({
       // after Stop, which is often pressed exactly to jump the line).
       // A failed turn holds the queue; her next manual send carries it.
       if (!snapshot.error && queued.length > 0) {
-        const message = queued.map((entry) => entry.text).join("\n\n");
-        setQueued([]);
+        // A directive goes out alone and her words go out joined, in the
+        // order the events actually happened (chat-send-policy.ts). What
+        // is left waits for the line after this one.
+        const flush = flushChatQueue(queued);
+        const message = flush.outgoing;
+        setQueued(flush.remaining);
         // Next tick: this callback runs inside the previous send's
         // teardown, and eve rejects overlapping sends.
-        setTimeout(() => {
-          setBusySeconds(0);
-          turnModalityRef.current = queuedTurnModalityRef.current;
-          lastSendRef.current = { text: message, atMs: currentTimeMs() };
-          turnStartedAtRef.current = currentTimeMs();
-          markTurnStarted();
-          void sendRef.current?.({ message });
-        }, 0);
+        if (message !== null) {
+          setTimeout(() => {
+            setBusySeconds(0);
+            turnModalityRef.current =
+              flush.lane === "directive" ? "text" : queuedTurnModalityRef.current;
+            lastSendRef.current = { text: message, atMs: currentTimeMs() };
+            turnStartedAtRef.current = currentTimeMs();
+            markTurnStarted();
+            void sendRef.current?.({ message });
+          }, 0);
+        }
       }
     },
   });
@@ -660,6 +724,46 @@ export function ChatClient({
   useEffect(() => {
     sendRef.current = agentSend;
   }, [agentSend]);
+
+  // Only on a failure, so the happy path never pays for it, and only
+  // when the answer is certain: an unreadable or missing token leaves
+  // this null, because "we could not check" must never render as "your
+  // token expired". In production the route 404s and this is a no-op.
+  useEffect(() => {
+    // No synchronous clear: the render is gated on agent.error anyway, so
+    // a leftover value cannot show, and setting state in an effect body
+    // is what cascading renders are made of. Every write happens after
+    // the answer comes back, including the write back to null.
+    if (!agentError) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await fetch("/api/dev/oidc-status");
+        if (cancelled) return;
+        if (!response.ok) {
+          setStaleOidcAt(null);
+          return;
+        }
+        const data = (await response.json()) as {
+          expired?: boolean;
+          expiresAt?: number | null;
+        };
+        if (cancelled) return;
+        const confirmed =
+          data.expired === true && typeof data.expiresAt === "number";
+        setStaleOidcAt(confirmed ? (data.expiresAt as number) : null);
+      } catch {
+        // No route, no network, no opinion.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [agentError]);
+
+  useEffect(() => {
+    sendMessageRef.current = sendMessage;
+  });
 
   useEffect(() => {
     if (
@@ -929,9 +1033,17 @@ export function ChatClient({
     ),
   });
   const hasAnyMessages = transcript.some((item) => item.kind === "message");
+  // The opening directive is a transcript item that renders nothing, and
+  // so is a turn that died before writing a word. Neither counts as the
+  // conversation having started, and neither does a turn that only called
+  // a tool: a lone "Worked on it" eyebrow is work, not hello.
+  const hasVisibleMessages = transcript.some(
+    (item) => item.kind === "message" && messageSaysSomething(item.message),
+  );
   // The chips return whenever a session has no words in it yet: the
   // first run, and a fresh morning over yesterday's scrollback.
-  const showSuggestions = agent.data.messages.length === 0 && !busy;
+  const showSuggestions =
+    agent.data.messages.length === 0 && !busy && onboarding === null;
   // The snap card's dim rule (founder call): while Homa's camera ask is
   // the live question, everything above it steps back. The only full
   // dim in the product; the card's own message stays full strength.
@@ -941,6 +1053,23 @@ export function ChatClient({
   const activeQuestion = busy
     ? null
     : latestQuestionRequest(agent.data.messages);
+  // Computed here, above the rail gate that reads them; the docking
+  // logic further down shares these same values.
+  // The one checklist card that may still open the questions, and the
+  // one report reveal that may still open the report. Same rule as the
+  // snap card: newest, nothing from her after it, and only while the
+  // line is free.
+  // Two questions, and conflating them was a bug the founder hit: "ok
+  // this didnt make a card". The card HAD been made. Because `active`
+  // was gated on `busy`, it rendered as its own spent pill for the rest
+  // of the turn, so what she saw where a card should be was the grey
+  // receipt that means "already done".
+  //
+  // So: latest decides whether it renders as a card at all, and busy
+  // only decides whether it can be tapped yet.
+  const latestChecklist = latestChecklistRequest(agent.data.messages);
+  const activeChecklist = busy ? null : latestChecklist;
+  const activeReport = latestReportReveal(agent.data.messages);
   const promptSuggestionRailAllowed =
     !busy
     && !recovering
@@ -948,6 +1077,18 @@ export function ChatClient({
     && progressInteraction === null
     && activeSnap === null
     && activeQuestion === null
+    // Never during onboarding. The arc has exactly one next thing at
+    // every beat, and the rail is a second voice proposing a different
+    // one: the founder's walk ended on a card saying "Start the
+    // questions", a chip saying "Explain next step", and an open box,
+    // three answers to what-do-I-do-now. The rail also knew the word
+    // "step", which the mode bans Homa herself from saying.
+    && onboarding === null
+    // And never while any card holds the floor, onboarding or not. The
+    // list knew snap and question cards but was never taught the
+    // checklist invite or the report reveal.
+    && activeChecklist === null
+    && activeReport === null
     && draft.trim().length === 0
     && attachments.staged.length === 0
     && dictation.phase === "idle";
@@ -974,10 +1115,106 @@ export function ChatClient({
     focusChatComposerInput(composerFormRef.current);
   }, []);
 
+  // The whole report, from the reveal card. It is a real page with a
+  // real URL, so it opens as one: the conversation is still here when
+  // she comes back, and the link is hers to keep.
+  const openChildReport = useCallback((childId: string) => {
+    window.location.assign(`/app/${childId}/report`);
+  }, []);
+
+  // A filled facts card hands the conversation back. It goes through the
+  // directive lane, not as her message: she did not type this, and a
+  // summary of her own form arriving as her chat bubble is exactly the
+  // failure the lane exists to prevent. The values are a hint only, so
+  // Homa reacts to the right person; family context carries the truth.
+  const handleDetailsSaved = useCallback((summary: string) => {
+    sendMessageRef.current?.(
+      formatHiddenDirective("details_saved", { summary }),
+      { kind: "directive" },
+    );
+  }, []);
+
   // Canvas auto-open: a NEW open_planner result opens the panel with the
   // tool's own focus. The first pass only records what a restored
   // session already carried, so a reload never re-throws the panel up;
   // the transcript's planner cards reopen it on purpose instead.
+  const queuedParentMessages = queued
+    .map((entry, index) => ({ entry, index }))
+    .filter(({ entry }) => entry.lane !== "directive");
+  // The composer becomes the card (founder note, 2026-07-21 walk).
+  //
+  // A card floating in the transcript with a message box under it asks
+  // her to work out which one is the question. There is only ever one
+  // place to answer, so the box turns into the card and turns back when
+  // the card is done. It also means the card is always where her thumb
+  // already is, which on a phone is the whole ballgame.
+  //
+  // Only cards that ASK dock here. The report reveal is something to
+  // read, not something to answer, so it stays in the transcript where
+  // she can scroll back to it.
+  // Progressive chrome (founder note, 2026-07-21 walk). A brand new
+  // conversation opens as close to bare as it can: Homa's words, and
+  // nothing else. Every affordance appears at the moment it first means
+  // something, rather than sitting there from the start looking like a
+  // form she has to fill in.
+  //
+  // The day separator is the first to go. It separates two days, and on
+  // the opening screen there is no day before it to separate from, so it
+  // is a rule with nothing on the other side of it.
+  const suppressLeadingSeparator = Boolean(onboarding) && archived.length === 0;
+  // Everything before the first real message is a rule with nothing on
+  // the other side of it. Computed once rather than tracked with a flag
+  // during the map, which the React Compiler rejects and which breaks
+  // silently the moment the list is rendered twice.
+  const firstMessageIndex = transcript.findIndex((item) => item.kind === "message");
+  // The one facts card still taking answers.
+  //
+  // NOT gated on busy, unlike the snap and question cards. Those go
+  // inert during a turn because their answers travel through the model,
+  // so taking one mid-turn would race it. This card posts to its own
+  // route and saves itself, so there is nothing to race: she can keep
+  // filling it in while Homa works, which is what she will try to do.
+  const activeDetail = latestDetailRequest(agent.data.messages);
+  const dockedDetail = activeDetail;
+  // The chained card run (loop iteration 4). The persona walk measured
+  // the 12-16 second model turn between the basics card and the
+  // homeschool card as pure dead air: a still screen after six taps,
+  // bought back with one sentence. So during onboarding the app chains
+  // the homeschool card itself the moment basics saves, no model turn in
+  // between, and Homa hears ONE combined answer when both have settled.
+  // She reacts once and turns to the kids, which is the same words she
+  // was spending two turns to say.
+  //
+  // Small accepted window: if she reloads after basics saved but before
+  // the chained card settles, the model's family_basics card is still
+  // the latest ask and docks again; every field coalesces server-side,
+  // so refilling costs taps, never data.
+  const dockedChained = chainedHomeschool && onboarding;
+  // The checklist invite docks for the same reason the facts card does,
+  // and the founder hit the un-docked version live: the invite in the
+  // transcript, an open composer under it, and a suggestion chip between
+  // them, three different answers to "what do I do now" on one screen.
+  // Docking is also what retires the other two: the composer and its
+  // rail hide while any card is docked, so the card is the whole ask.
+  // activeChecklist is already null while a turn runs, so during
+  // streaming the composer stays and nothing flickers.
+  // latestChecklist, not activeChecklist: it docks the moment it exists,
+  // including mid-turn. The button below stays disabled until the line
+  // is free, which is the honest split between "here is the ask" and
+  // "you may answer it now".
+  const dockedChecklist =
+    dockedDetail === null && !dockedChained ? latestChecklist : null;
+  // The composer appears when there is something to reply to. Before
+  // Homa has said anything there is not, and while a card is docked the
+  // card IS the input. Outside onboarding nothing changes: the box is
+  // always there, exactly as it has always been.
+  const showComposer =
+    dockedDetail === null &&
+    !dockedChained &&
+    dockedChecklist === null &&
+    // While the questions are open the slot is theirs.
+    checklistTakeover === null &&
+    (!onboarding || hasVisibleMessages);
   const planEditsSeen = planEditCount(agent.data.messages);
   useEffect(() => {
     const latest = latestPlannerOpen(agent.data.messages);
@@ -989,6 +1226,50 @@ export function ChatClient({
     handledPlannerPartKeyRef.current = latest.partKey;
     setPlannerCanvas(latest.signal);
   }, [agent.data.messages]);
+
+  // The opening machine message (plans/2026-07-21-chat-first-onboarding.md
+  // §2.4.4). Idempotence has four locks, because a doubled kickoff means
+  // Homa says hello twice and reads as forgetting she already had.
+  //   1. A ref, for a re-render inside this mount.
+  //   2. A live session that already carries messages, for a remount
+  //      over a conversation in progress.
+  //   3. Server history for this family, for a remount on a new device
+  //      or after the 4am rotation, where nothing local survives.
+  //   4. A localStorage flag keyed by family, because the first three
+  //      all die with the component and a remount is not exotic: strict
+  //      mode does it every mount in development, and it double-fired
+  //      here on the first real walk.
+  // A visit whose gap is short enough to be a pause sends nothing at
+  // all: she gets her screen back, not a greeting.
+  useEffect(() => {
+    if (!onboarding || kickoffSentRef.current) return;
+    if (agent.data.messages.length > 0) return;
+    if (archived.length > 0 && onboarding.firstVisit) return;
+    if (
+      kickoffAlreadySent(onboarding.familyId) &&
+      !kickoffLockIsStale({
+        liveMessageCount: agent.data.messages.length,
+        archivedCount: archived.length,
+      })
+    ) {
+      kickoffSentRef.current = true;
+      return;
+    }
+    // A lock over an empty conversation is a kickoff that never landed.
+    // Drop it rather than leave a new parent on a blank screen forever.
+    clearKickoffSent(onboarding.familyId);
+    const directive = kickoffDirectiveFor(onboarding, browserTimeZone());
+    if (directive === null) {
+      kickoffSentRef.current = true;
+      return;
+    }
+    kickoffSentRef.current = true;
+    markKickoffSent(onboarding.familyId);
+    sendMessageRef.current?.(directive, { kind: "directive" });
+    // Sending exactly once per mount, gated on its own ref: re-running
+    // when messages arrive is the doubled-hello bug.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onboarding]);
 
   function updateProgressActionLifecycle(
     next: ProgressActionLifecycleState,
@@ -1126,15 +1407,20 @@ export function ChatClient({
     // restarts the durable event cursor.
     if (!agent.session?.sessionId) durableCursorRef.current = 0;
     // A queue held back by a failed turn rides along with the next
-    // manual send, in the order she wrote everything.
-    const outgoing = [
-      ...queued.map((entry) => entry.text),
-      plan.message,
-    ].join("\n\n");
-    setQueued([]);
+    // manual send, in the order she wrote everything. A directive in
+    // that queue still goes alone: it is the app's sentence, and gluing
+    // it to hers is the exact failure the lane exists to prevent.
+    const flush = flushChatQueue(queued, {
+      text: plan.message,
+      lane: plan.lane,
+      progressActionKey: plan.progressActionKey,
+    });
+    const outgoing = flush.outgoing;
+    if (outgoing === null) return "rejected";
+    setQueued(flush.remaining);
     setBusySeconds(0);
     autoStoppedRef.current = false;
-    turnModalityRef.current = plan.modality;
+    turnModalityRef.current = flush.lane === "directive" ? "text" : plan.modality;
     lastSendRef.current = { text: outgoing, atMs: currentTimeMs() };
     turnStartedAtRef.current = currentTimeMs();
     markTurnStarted();
@@ -1237,15 +1523,23 @@ export function ChatClient({
       <main
         ref={transcriptRef}
         onScroll={handleTranscriptScroll}
-        className="mx-auto flex w-full max-w-[780px] flex-1 flex-col gap-6 overflow-y-auto px-4 py-6 sm:px-6"
+        // More air above the first line than below the last (founder
+        // note, 2026-07-22). The opening screen has no day separator and
+        // nothing else above it, so at pt-6 Homa's hello started almost
+        // against the top edge, which reads as cramped on the one screen
+        // that should feel calm.
+        className="mx-auto flex w-full max-w-[780px] flex-1 flex-col gap-6 overflow-y-auto px-4 pb-6 pt-10 sm:px-6"
       >
         {/* The morning scrolls into everything above it: a soft fade at
             the top edge whenever there is more past to scroll to. */}
         <div
           aria-hidden="true"
-          className={`pointer-events-none sticky top-0 z-10 -mb-[54px] -mt-6 h-[54px] shrink-0 bg-gradient-to-b from-page to-transparent transition-opacity duration-(--dur-base) ${topFaded ? "opacity-100" : "opacity-0"}`}
+          // -mt-10 tracks the container's pt-10: this pulls the fade back
+          // flush with the scroll edge, so the two have to move together
+          // or the gradient starts below the top and leaves a hard line.
+          className={`pointer-events-none sticky top-0 z-10 -mb-[54px] -mt-10 h-[54px] shrink-0 bg-gradient-to-b from-page to-transparent transition-opacity duration-(--dur-base) ${topFaded ? "opacity-100" : "opacity-0"}`}
         />
-        {!hasAnyMessages ? (
+        {!hasAnyMessages && !onboarding ? (
           <div className="my-auto text-center">
             <h1 className="font-display text-2xl font-semibold text-strong">
               {parentName ? `Hi ${parentName}, I'm Homa.` : "Hi, I'm Homa."}
@@ -1256,7 +1550,54 @@ export function ChatClient({
           </div>
         ) : (
           <>
-            {transcript.map((item) => {
+            {onboarding ? (
+              // The pre-warmed welcome (§6.1: first bubble in <400ms).
+              // Rendered by the app the moment the page exists, so
+              // arrival is never a blank screen while the first model
+              // turn travels; a live walk measured 11 to 17 seconds of
+              // thinking dot before the model's own hello, and the model
+              // no longer writes one (onboarding-mode tells it this text
+              // is already on screen). Deterministic, not a message row:
+              // it costs nothing, needs no lock, and cannot double.
+              <div className="flex w-full items-start gap-2.5">
+                <span
+                  aria-hidden="true"
+                  className="mt-0.5 inline-flex shrink-0 opacity-70"
+                >
+                  <Logo size={20} variant="mark" />
+                </span>
+                <p className="min-w-0 flex-1 leading-relaxed text-body">
+                  {ONBOARDING_WELCOME}
+                </p>
+              </div>
+            ) : null}
+            {transcript.map((item, itemIndex) => {
+              // One row for one turn (founder note, 2026-07-22: the mark
+              // "starts at one spot, then moves down a little bit and
+              // then moves back up when it answers").
+              //
+              // Measured: the mark sat at 305, jumped to 329, came back
+              // to 305. The 24 is exactly the transcript's gap-6, which
+              // is the giveaway. Mid-turn the assistant message mounts
+              // carrying only a tool call, so it renders its bare
+              // "Worked on it" eyebrow ABOVE the busy row, and for a
+              // beat two rows both say Homa is working. Then text
+              // streams, busyLabel goes null, the busy row leaves, and
+              // everything springs back.
+              //
+              // While the busy row is up it IS her presence, so a
+              // message with nothing to show yet renders nothing. It
+              // comes back the moment it has words, or when the turn
+              // ends and the eyebrow becomes an honest receipt.
+              if (
+                busy &&
+                item.kind === "message" &&
+                itemIndex === transcript.length - 1 &&
+                item.message.role === "assistant" &&
+                !messageSaysSomething(item.message)
+              ) {
+                return null;
+              }
               // Dim rule: everything above the live snap card steps
               // back; the card's own message stays full strength.
               const dimmed =
@@ -1264,6 +1605,9 @@ export function ChatClient({
                 (item.kind === "separator" ||
                   item.message !== activeSnap.message);
               if (item.kind === "separator") {
+                if (suppressLeadingSeparator && itemIndex < firstMessageIndex) {
+                  return null;
+                }
                 return (
                   <div
                     key={item.key}
@@ -1318,6 +1662,26 @@ export function ChatClient({
                   }
                   onQuestionTypeInstead={focusComposer}
                   onOpenPlanner={setPlannerCanvas}
+                  activeChecklistPartKey={
+                    isLiveMessage ? latestChecklist?.partKey : undefined
+                  }
+                  onOpenChecklist={
+                    activeChecklist === null ? undefined : setChecklistTakeover
+                  }
+                  activeReportPartKey={
+                    isLiveMessage ? activeReport?.partKey : undefined
+                  }
+                  onOpenReport={openChildReport}
+                  activeDetailPartKey={
+                    isLiveMessage ? activeDetail?.partKey : undefined
+                  }
+                  dockedDetailPartKey={
+                    isLiveMessage ? dockedDetail?.partKey : undefined
+                  }
+                  dockedChecklistPartKey={
+                    isLiveMessage ? dockedChecklist?.partKey : undefined
+                  }
+                  onDetailsSaved={handleDetailsSaved}
                   actionableProgressPartKey={
                     actionableInteraction?.partKey
                   }
@@ -1367,30 +1731,42 @@ export function ChatClient({
             })}
           </>
         )}
-        {busy && busyLabel(agent.data.messages) ? (
+        {busy && busyLabel(agent.data.messages, busySeconds) ? (
           // The mark bobs while Homa thinks, so the wait is never a blank
           // page (tester ask, evidence memo 1; MJ-06). Goes still under
-          // reduced motion; the label still reads what is happening. Flat
-          // on the page like the replies, with elapsed seconds so long
-          // tool runs read as progress.
-          <div className="flex items-center gap-2.5 text-muted">
-            <span className="chat-think-mark inline-flex" aria-hidden="true">
+          // reduced motion; the label still reads what is happening.
+          //
+          // The clock leads. It is the part that actually moves every
+          // second, so it anchors the row and the words become the thing
+          // that changes occasionally rather than the thing being stared
+          // at. The label shimmers and escalates with the same clock, so
+          // twenty five seconds reads as work rather than as a hang.
+          <div className="flex items-baseline gap-2.5 text-muted">
+            <span className="chat-think-mark inline-flex self-center" aria-hidden="true">
               <Logo size={20} variant="mark" />
             </span>
-            <span>{busyLabel(agent.data.messages)}</span>
             {busySeconds > 0 ? (
-              <span className="text-sm text-subtle">· {busySeconds}s</span>
+              <span className="font-mono text-sm tabular-nums text-subtle">
+                {busySeconds}s
+              </span>
             ) : null}
+            <span className="chat-busy-label">
+              {busyLabel(agent.data.messages, busySeconds)}
+            </span>
           </div>
         ) : null}
-        {queued.length > 0 ? (
+        {queuedParentMessages.length > 0 ? (
           // Messages sent mid-turn wait here as dimmed bubbles (the
           // Cursor queue, in texting clothes) and go out on turn end;
           // the X pulls one back before it sends. "Send now" interrupts:
           // stopping the turn is all it takes, the flush in onFinish
           // delivers the queue the moment the abort settles.
+          // A queued directive is not one of her messages, so it shows
+          // nothing here and carries its true queue index with it: the
+          // X removes what she pointed at, not whatever sits at that
+          // position in a shorter list.
           <div className="flex flex-col items-end gap-2">
-            {queued.map((entry, index) => (
+            {queuedParentMessages.map(({ entry, index }) => (
               <div
                 key={`${index}:${entry.text.slice(0, 24)}`}
                 className="flex max-w-[76%] items-center gap-2"
@@ -1433,6 +1809,47 @@ export function ChatClient({
             </span>
             <span>Reconnecting&hellip;</span>
           </div>
+        ) : agent.error && staleOidcAt !== null ? (
+          // Localhost only, and only once the dev route has confirmed it.
+          // Deliberately not in Homa's voice and deliberately ugly: this
+          // is a note to whoever is running the server, and the moment it
+          // reads like product copy is the moment it gets mistaken for a
+          // parent-facing string. Sits above the two below so a stale
+          // credential never masquerades as either.
+          <p
+            className="mx-auto max-w-md rounded-md border border-border bg-card px-3 py-2 text-center font-mono text-xs text-body"
+            role="alert"
+          >
+            DEV: the Vercel OIDC token expired at{" "}
+            {new Date(staleOidcAt).toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+            , so every agent turn is failing at the gateway. Not a product
+            bug. Run <code>pnpm dev:token</code>.
+          </p>
+        ) : agent.error && onboarding && !hasVisibleMessages ? (
+          // The opening turn died, so she is looking at an empty screen.
+          // The ordinary line below is wrong twice here: she never sent a
+          // message, and there is no composer to send one with, because
+          // the chrome does not arrive until Homa has spoken. Telling a
+          // brand new parent to try sending it again names an action she
+          // cannot take, on her first ten seconds with the product.
+          <div className="flex flex-col items-center gap-3" role="alert">
+            <p className="text-center text-sm text-danger">
+              Homa did not manage to start. Nothing is lost.
+            </p>
+            <button
+              type="button"
+              // A reload, not a second send path: the kickoff already
+              // retries itself on load when the conversation is empty,
+              // and that path is the tested one.
+              onClick={() => window.location.reload()}
+              className="min-h-11 rounded-pill border border-border bg-card px-5 py-2 text-sm font-bold text-strong shadow-sm transition-colors hover:border-brand"
+            >
+              Try again
+            </button>
+          </div>
         ) : agent.error ? (
           <p className="text-center text-sm text-danger" role="alert">
             Your conversation is safe; that last message didn&apos;t go through. Try
@@ -1465,7 +1882,16 @@ export function ChatClient({
           the About tag, mic, send). Typing stays enabled while Homa
           works, and sending mid-turn queues; staged files hold Send
           until the line is free (the queue stays text-only). */}
-      <footer className="border-t border-border-subtle bg-page px-4 pb-5 pt-3 sm:px-6">
+      <footer
+        // The rule belongs to the composer, which is a low box that needs
+        // an edge to sit against. A docked card brings its own border and
+        // shadow, so the line above it is a second edge a few pixels from
+        // the first, and it cuts the card off from the sentence that
+        // asked for it (founder note, 2026-07-22).
+        className={`bg-page px-4 pb-5 pt-3 sm:px-6 ${
+          showComposer ? "border-t border-border-subtle" : ""
+        }`}
+      >
         {showSuggestions ? (
           // The chips dock quietly by the keyboard (D1 steal, founder
           // pick) instead of floating mid-transcript.
@@ -1482,7 +1908,100 @@ export function ChatClient({
             ))}
           </div>
         ) : null}
-        <div className="mx-auto w-full max-w-[780px] rounded-[22px] shadow-md">
+        {checklistTakeover !== null ? (
+          // The questions, docked where the composer was, so answering
+          // them never leaves the conversation (founder note,
+          // 2026-07-22). Ahead of the other two because while she is
+          // answering, nothing else may take the slot.
+          <div className="mx-auto w-full max-w-[780px]">
+            <ChecklistTakeover
+              childId={checklistTakeover}
+              onClose={(exit) => {
+                setChecklistTakeover(null);
+                if (!exit) return;
+                // The handoff. It carries hints, never facts: the counts
+                // are re-derived server-side, and this only tells Homa
+                // which child the parent was just answering for and
+                // roughly where she got to, so her next line is about
+                // the right kid.
+                sendMessageRef.current?.(
+                  formatHiddenDirective("checklist_complete", {
+                    childId: exit.childId,
+                    answered: exit.answered,
+                    remaining: exit.remaining,
+                  }),
+                  { kind: "directive" },
+                );
+              }}
+            />
+          </div>
+        ) : dockedChained ? (
+          // The app-chained homeschool card: docked by the client the
+          // moment basics saved, no model turn in between. Keyed so its
+          // step state can never inherit the basics card's.
+          <div className="mx-auto w-full max-w-[780px]">
+            <DetailCard
+              key="chained-homeschool"
+              card={{ kind: "homeschool_profile", intro: null }}
+              active
+              docked
+              onSaved={(summary) => {
+                const basics = chainedBasicsSummaryRef.current;
+                chainedBasicsSummaryRef.current = null;
+                setChainedHomeschool(false);
+                // A skipped style stays out of her bubble: "Sidney,
+                // District of Columbia, Nothing in particular" is a
+                // sentence nobody said.
+                const combined =
+                  summary === NO_STYLES_SUMMARY || basics === null
+                    ? basics ?? summary
+                    : `${basics} · ${summary}`;
+                sendMessage(combined, { kind: "card_answer" });
+              }}
+            />
+          </div>
+        ) : dockedDetail ? (
+          // The morph: same width, same corner radius, same shadow and
+          // the same spot on screen the box occupied a second ago, so it
+          // reads as one object changing shape rather than two objects
+          // swapping.
+          <div className="mx-auto w-full max-w-[780px]">
+            <DetailCard
+              card={dockedDetail.card}
+              active
+              docked
+              onSaved={(summary) => {
+                // Basics chains straight into the homeschool card during
+                // onboarding: her summary parks here and sends as one
+                // combined answer when the chained card settles, which
+                // deletes the dead-air model turn between the two.
+                if (dockedDetail.card.kind === "family_basics" && onboarding) {
+                  chainedBasicsSummaryRef.current = summary;
+                  setChainedHomeschool(true);
+                  return;
+                }
+                sendMessage(summary, { kind: "card_answer" });
+              }}
+            />
+          </div>
+        ) : dockedChecklist ? (
+          <div className="mx-auto w-full max-w-[780px]">
+            <ChecklistCard
+              card={dockedChecklist.card}
+              active
+              docked
+              // Disabled while Homa is still talking, for the same
+              // reason the transcript copy is: the ask is visible, the
+              // answer waits for the line to be free.
+              onOpen={activeChecklist === null ? undefined : setChecklistTakeover}
+            />
+          </div>
+        ) : null}
+        <div
+          className={`mx-auto w-full max-w-[780px] rounded-[22px] shadow-md ${
+            showComposer ? "" : "hidden"
+          }`}
+        >
           {showPromptSuggestionRail ? (
             <PromptSuggestionRail
               phase={promptSuggestionPhase}

@@ -114,9 +114,14 @@ describe("ChatClient prompt suggestion wiring", () => {
   });
 
   it("hides the rail around every competing composer or card interaction", () => {
+    // The list grew on 2026-07-22: the founder's walk ended on a
+    // checklist invite, an "Explain next step" chip, and an open
+    // composer all at once, because the gate knew the snap and question
+    // cards but had never been taught onboarding, the checklist invite,
+    // or the report reveal.
     assert.match(
       source,
-      /!busy[\s\S]{0,320}promptSuggestionPhase !== "idle"[\s\S]{0,320}progressInteraction === null[\s\S]{0,320}activeSnap === null[\s\S]{0,320}draft\.trim\(\)\.length === 0[\s\S]{0,320}attachments\.staged\.length === 0[\s\S]{0,320}dictation\.phase === "idle"/u,
+      /!busy[\s\S]{0,320}promptSuggestionPhase !== "idle"[\s\S]{0,320}progressInteraction === null[\s\S]{0,320}activeSnap === null[\s\S]{0,320}activeQuestion === null[\s\S]{0,900}onboarding === null[\s\S]{0,900}activeChecklist === null[\s\S]{0,320}activeReport === null[\s\S]{0,320}draft\.trim\(\)\.length === 0[\s\S]{0,320}attachments\.staged\.length === 0[\s\S]{0,320}dictation\.phase === "idle"/u,
     );
     assert.match(source, /!recovering[\s\S]{0,120}promptSuggestionPhase/u);
   });

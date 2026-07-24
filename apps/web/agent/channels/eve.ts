@@ -6,6 +6,10 @@ import {
   resolveInboundContinuity,
   resolvedContinuityAttributes,
 } from "../../lib/conversation-continuity/ledger";
+import {
+  familyOnboardingActive,
+  onboardingRowFromMembership,
+} from "../../lib/onboarding/state";
 import { readViewContextCookie, VIEW_CONTEXT_FAMILY } from "../../lib/view-context";
 
 /**
@@ -57,11 +61,28 @@ function supabaseAuth(): AuthFn<Request> {
     if (error || !userData.user) return null;
 
     // The caller's OWN membership row (user_id filter matters since
-    // migration #49 let members read the whole family roster).
+    // migration #49 let members read the whole family roster). The
+    // embedded family rides the same round trip: chat-first onboarding
+    // needs two of its columns on every turn, and a second query here
+    // would land on the cold path the pre-warmed welcome exists to hide.
+    //
+    // Live families only, newest membership first. This used to be a bare
+    // limit(1) with no order and no status filter, which is correct only
+    // while an account has exactly one membership row and silently picks
+    // an arbitrary one the moment it has two. An account that had its
+    // family deleted and was re-attached has two, and the row Postgres
+    // handed back was the DELETED family: every turn then read and wrote
+    // a retired household while the page rendered the live one, with
+    // nothing anywhere reporting a mismatch. The `!inner` matters, since
+    // a filter on a plain embed narrows the embed rather than the parent.
     const { data: membership, error: membershipError } = await supabase
       .from("family_members")
-      .select("family_id, display_name")
+      .select(
+        "family_id, display_name, created_at, families!inner(profile_completed_at, context, status)",
+      )
       .eq("user_id", userData.user.id)
+      .neq("families.status", "deleted")
+      .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
     if (membershipError) {
@@ -79,6 +100,16 @@ function supabaseAuth(): AuthFn<Request> {
     };
     if (membership?.family_id) attributes.familyId = membership.family_id;
     attributes.memberUserId = userData.user.id;
+    // Chat-first onboarding is a state of the FAMILY, not of a page
+    // (plans/2026-07-21-chat-first-onboarding.md §2.2). Stamping it here
+    // means the mode follows her: abandon /onboarding on the phone,
+    // open /app on a laptop three days later, and the same conversation
+    // picks up from what the family record says, across refreshes,
+    // devices, and the 4am session rotation. Derived from database
+    // truth, so the client is never asked and never trusted.
+    if (familyOnboardingActive(onboardingRowFromMembership(membership))) {
+      attributes.onboardingActive = "true";
+    }
     if (membership?.display_name) attributes.memberName = membership.display_name;
     if (userData.user.email) attributes.email = userData.user.email;
 

@@ -65,7 +65,7 @@ export function StudioFeedbackForm({
               className={
                 active
                   ? "rounded-pill border border-[var(--clay-300)] bg-brand-soft px-3 py-1.5 text-[0.76rem] font-bold text-[var(--clay-700)]"
-                  : "rounded-pill border border-border-default bg-card px-3 py-1.5 text-[0.76rem] font-semibold text-muted hover:text-strong"
+                  : "rounded-pill border border-border bg-card px-3 py-1.5 text-[0.76rem] font-semibold text-muted hover:text-strong"
               }
             >
               {tag}
@@ -80,7 +80,7 @@ export function StudioFeedbackForm({
         rows={3}
         maxLength={2000}
         placeholder="What should have been different about this output?"
-        className="w-full rounded-md border border-border-default bg-card px-3 py-2.5 text-[0.88rem] text-body placeholder:text-subtle"
+        className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-[0.88rem] text-body placeholder:text-subtle"
       />
       <div className="flex flex-wrap items-center gap-3">
         <button

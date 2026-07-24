@@ -3,11 +3,21 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+import { enforceCopyLaws } from "../../lib/copy-laws-runtime";
+
 /**
  * Renders Homa's replies as markdown inside a chat bubble: lists, bold,
  * links, and inline code, styled with design-system tokens and sized to
  * live inside a message bubble (headings render as emphasized lines, not
  * page-scale display type).
+ *
+ * The em-dash law is enforced here rather than only asked for in the
+ * prompt. Every other generated surface already has a deterministic
+ * check behind that ask; chat had only the ask, and it leaked (2 of 208
+ * family-visible assistant messages in prod on 2026-07-21, and the first
+ * turn of the first chat-onboarding walk). Doing it at render covers
+ * live text and scrollback in one place and cannot break streaming,
+ * because the function is pure and idempotent.
  */
 export function MarkdownText({ text }: { text: string }) {
   return (
@@ -58,7 +68,7 @@ export function MarkdownText({ text }: { text: string }) {
           hr: () => <hr className="border-border-subtle" />,
         }}
       >
-        {text}
+        {enforceCopyLaws(text)}
       </ReactMarkdown>
     </div>
   );

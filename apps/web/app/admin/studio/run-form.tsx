@@ -72,7 +72,7 @@ export function StudioRunForm({ families }: { families: StudioFamilyOption[] }) 
             setFamilyId(event.target.value);
             setChildId(null);
           }}
-          className="min-h-10 rounded-md border border-border-default bg-card px-3 text-[0.85rem] text-body"
+          className="min-h-10 rounded-md border border-border bg-card px-3 text-[0.85rem] text-body"
         >
           {families.map((option) => (
             <option key={option.id} value={option.id}>
@@ -92,7 +92,7 @@ export function StudioRunForm({ families }: { families: StudioFamilyOption[] }) 
                 className={
                   active
                     ? "rounded-pill border border-[var(--clay-300)] bg-brand-soft px-3 py-1.5 text-[0.78rem] font-bold text-[var(--clay-700)]"
-                    : "rounded-pill border border-border-default bg-card px-3 py-1.5 text-[0.78rem] font-semibold text-muted hover:text-strong"
+                    : "rounded-pill border border-border bg-card px-3 py-1.5 text-[0.78rem] font-semibold text-muted hover:text-strong"
                 }
               >
                 {child.name}
@@ -115,7 +115,7 @@ export function StudioRunForm({ families }: { families: StudioFamilyOption[] }) 
         rows={3}
         maxLength={600}
         placeholder="What should the parent have asked for?"
-        className="w-full rounded-md border border-border-default bg-card px-3 py-2.5 text-[0.88rem] text-body placeholder:text-subtle"
+        className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-[0.88rem] text-body placeholder:text-subtle"
       />
 
       <div className="flex flex-wrap gap-1.5" role="group" aria-label="Presets">
@@ -124,7 +124,7 @@ export function StudioRunForm({ families }: { families: StudioFamilyOption[] }) 
             key={preset}
             type="button"
             onClick={() => setRequest(preset)}
-            className="rounded-pill border border-border-default bg-card px-3 py-1.5 text-[0.74rem] font-semibold text-muted hover:text-strong"
+            className="rounded-pill border border-border bg-card px-3 py-1.5 text-[0.74rem] font-semibold text-muted hover:text-strong"
           >
             {preset}
           </button>

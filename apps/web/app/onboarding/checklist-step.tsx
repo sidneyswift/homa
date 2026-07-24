@@ -81,10 +81,29 @@ export function ChecklistStep({
   child,
   onComplete,
   onExit,
+  exitLabel = "back to your family",
+  compact = false,
 }: {
   child: FlowChild;
   onComplete: () => void;
   onExit: () => void;
+  /**
+   * Docked inside the chat rather than owning a page.
+   *
+   * Drops the two-column grid and the report rail, which is the ONLY
+   * thing the full-page version was protecting: every founder correction
+   * this component carries (fixed card height, chip scale order, the
+   * 140ms flash, the reserved kicker slot, time-left over "4 of 16", the
+   * child's name inside every question) lives inside the question card
+   * and is untouched. The rail is already absent below lg, so a parent
+   * on a phone sees exactly what she saw before.
+   */
+  compact?: boolean;
+  /** Where leaving actually goes. The card flow returns to the family
+   *  hub; the chat takeover returns to the conversation, and telling a
+   *  chat-first parent she is going "back to your family" names a page
+   *  she has never seen. */
+  exitLabel?: string;
 }) {
   const plans = useMemo(() => planQuestions(child.ageMonths), [child.ageMonths]);
   const [answers, setAnswers] = useState<Record<string, MapAnswer>>(child.answers);
@@ -451,7 +470,11 @@ export function ChecklistStep({
         : null;
 
   return (
-    <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_14rem] lg:gap-10">
+    <div
+      className={
+        compact ? "" : "lg:grid lg:grid-cols-[minmax(0,1fr)_14rem] lg:gap-10"
+      }
+    >
       <div>
         {/* Two tiers so "who" and "what section" each read on their own
             (founder feedback 2026-07-07, mobile review: kid + subject
@@ -470,7 +493,10 @@ export function ChecklistStep({
         </p>
         {/* One continuous hairline, small screens only: the rail carries
             per-subject progress wherever it fits. */}
-        <div className="mt-2 h-1 overflow-hidden rounded-pill bg-border-subtle lg:hidden" aria-hidden="true">
+        <div
+          className={`mt-2 h-1 overflow-hidden rounded-pill bg-border-subtle ${compact ? "" : "lg:hidden"}`}
+          aria-hidden="true"
+        >
           <div
             className="h-full rounded-pill bg-brand transition-[width] duration-(--dur-base) ease-out"
             style={{ width: `${Math.round((subjectsDone / plans.length) * 100)}%` }}
@@ -569,11 +595,13 @@ export function ChecklistStep({
           onClick={exitChecklist}
           className="mt-6 text-sm text-subtle underline-offset-2 hover:underline"
         >
-          {"\u2190"} back to your family
+          {"\u2190"} {exitLabel}
         </button>
       </div>
 
-      <ReportRail childName={child.name} subjects={railSubjects} />
+      {compact ? null : (
+        <ReportRail childName={child.name} subjects={railSubjects} />
+      )}
     </div>
   );
 }

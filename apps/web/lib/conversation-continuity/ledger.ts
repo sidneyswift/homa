@@ -3,6 +3,7 @@ import type { TransactionSql } from "postgres";
 
 import { mapDb } from "../map/db";
 import { emitMapEvent } from "../map/events";
+import { isHiddenDirective } from "../onboarding/directives";
 import {
   hashContinuityKey,
   resolveInboundTurn,
@@ -292,6 +293,37 @@ export function providerMessageIdForRole(
   return role === "user" ? (providerMessageId ?? null) : null;
 }
 
+/**
+ * canonicalMessageVisibility(input): whether a row joins family-visible
+ * history or stays internal.
+ *
+ * Three reasons a row stays internal:
+ * - Dispatch output is promoted only after at least one real delivery
+ *   succeeds. Until then both its internal prompt and unsent narration
+ *   stay outside family-visible history.
+ * - A non-terminal assistant row, and any assistant row on SMS or email,
+ *   is machinery rather than the message that reached her.
+ * - A hidden onboarding directive (lib/onboarding/directives.ts) is the
+ *   app talking on her behalf. She never typed it and never sees it, so
+ *   it must not appear in her scrollback, in recall, or in the founder
+ *   console. The row still exists: turn recovery matches against it.
+ */
+export function canonicalMessageVisibility(input: {
+  channel: PersistCanonicalMessageInput["channel"];
+  role: PersistCanonicalMessageInput["role"];
+  terminal: boolean | undefined;
+  content: string;
+}): "family" | "internal" {
+  if (input.channel === "dispatch") return "internal";
+  if (input.role === "assistant") {
+    if (input.terminal === false) return "internal";
+    if (input.channel === "sms" || input.channel === "email") return "internal";
+    return "family";
+  }
+  if (isHiddenDirective(input.content)) return "internal";
+  return "family";
+}
+
 export async function persistCanonicalMessage(
   input: PersistCanonicalMessageInput,
 ): Promise<{
@@ -319,16 +351,12 @@ export async function persistCanonicalMessage(
     input.providerMessageId ?? attrs.providerMessageId,
   );
   const sql = mapDb();
-  // Dispatch output is promoted only after at least one real delivery
-  // succeeds. Until then both its internal prompt and unsent narration stay
-  // outside family-visible history.
-  const visibility =
-    input.channel === "dispatch" ||
-    (input.role === "assistant" && input.terminal === false) ||
-    (input.role === "assistant" &&
-      (input.channel === "sms" || input.channel === "email"))
-      ? "internal"
-      : "family";
+  const visibility = canonicalMessageVisibility({
+    channel: input.channel,
+    role: input.role,
+    terminal: input.terminal,
+    content,
+  });
   const persisted = await sql.begin(async (tx) => {
     const duplicate = providerMessageId
       ? (

@@ -52,6 +52,9 @@ jobs:
       - name: Events-registry parity check (MJ-08)
         run: pnpm check:events
 
+      - name: Design-token check (colour utilities name a declared token)
+        run: pnpm check:design-tokens
+
       - name: Tool deadline guard (no unbounded tool can freeze a turn)
         run: pnpm check:tool-deadlines
 
@@ -109,6 +112,12 @@ jobs:
 
       - name: Chat UI checks (attachment markers, transcript, worked-for, snap card)
         run: pnpm check:chat-ui
+
+      - name: Job contract registry (schemas parse, skills resolve)
+        run: pnpm check:jobs
+
+      - name: Onboarding checks (state, directives, first-making status, job gating)
+        run: pnpm check:onboarding
 
       # Fixture hygiene only, no model call. The paid routing eval is
       # pnpm eval:ask-user-questions, run by hand.
