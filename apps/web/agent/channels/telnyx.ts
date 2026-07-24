@@ -54,6 +54,11 @@ import {
 } from "../../lib/family-sms-invite-consent";
 import { emitMapEvent } from "../../lib/map/events";
 import { recordLeadContact } from "../../lib/phone-leads";
+import {
+  classifySmsOptKeyword,
+  suppressSmsNumber,
+  unsuppressSmsNumber,
+} from "../../lib/sms-suppression";
 import { signupProgress } from "../../lib/sms-onboarding";
 import { trustedSmsInboundIdentityAttributes } from "../../lib/sms-inbound-auth";
 import {
@@ -420,6 +425,36 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
     },
     { familyId },
   );
+
+  // Carrier opt-out keywords are protocol, not conversation: the exact
+  // single-word commands Telnyx itself matches before blocking the
+  // number at the platform level (40300 on every later send). Recording
+  // the same fact in sms_suppressions lets dispatch skip suppressed
+  // numbers instead of burning agent runs into guaranteed rejections
+  // (morning-brief conversion escalation, 2026-07-23). The agent never
+  // runs for these texts: any reply would already be carrier-blocked.
+  // START/UNSTOP lifts the row so resuming on the Telnyx side resumes
+  // here too.
+  if (normalizedSender) {
+    const optAction = classifySmsOptKeyword({
+      text,
+      hasAttachments: attachments.length > 0,
+    });
+    if (optAction) {
+      if (optAction === "stop") {
+        await suppressSmsNumber(normalizedSender, "inbound-stop");
+      } else {
+        await unsuppressSmsNumber(normalizedSender);
+      }
+      await emitMapEvent(
+        "sms.opt_out_recorded",
+        { action: optAction, linked_family: familyId !== null },
+        { familyId },
+      );
+      await completeInboundReceipt(inboundReceipt.id);
+      return;
+    }
+  }
 
   // A stranger texting IS a lead (lead-funnel-plan LF-2): save the
   // number before anything else can fail. Fire-and-forget by design.

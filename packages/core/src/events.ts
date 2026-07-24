@@ -432,6 +432,14 @@ export const EVENT_SCHEMAS = {
     media_count: z.number().int().min(0),
     linked_family: z.boolean(),
   }),
+  // A carrier opt-out keyword arrived by text (2026-07-23): stop is
+  // STOP and friends recorded into sms_suppressions, start is a
+  // START/UNSTOP lifting one. The agent never runs for these texts.
+  // No phone number in props, ever.
+  "sms.opt_out_recorded": z.object({
+    action: z.enum(["stop", "start"]),
+    linked_family: z.boolean(),
+  }),
   // A phone number was linked to a family workspace (family_phones,
   // migration #22): typed at signup, set on /home, or carried forward by
   // the lead bridge. No phone number in props, ever.
