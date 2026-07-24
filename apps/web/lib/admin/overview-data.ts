@@ -218,7 +218,7 @@ export async function getFleetOverview(
   const [stopPattern40300, stopPatternText] = STOP_ERROR_PATTERNS;
 
   // Sequential on purpose, never Promise.all: see lib/admin/db.ts.
-  const allSnapshots = await getFamilySnapshots();
+  const allSnapshots = await getFamilySnapshots(new Date(), rangeDays);
   // Every real signup, husks included (founder ruling 2026-07-23): the
   // signups line measures demand, so it must not require the account
   // step the roster requires.

@@ -45,7 +45,10 @@ export interface FamilySnapshot {
   hasReport: boolean;
   firstReportAt: string | null;
   lastUserActivityAt: string | null;
-  userMessages7d: number;
+  /** Messages this family sent Homa inside the caller's window (default
+   * 7 days). Follows the console's range toggle so a "last 4 weeks" page
+   * never shows week-sized counts. */
+  userMessagesInRange: number;
   /** User messages per founder-local-adjacent day, oldest first (7 slots). */
   activityByDay: number[];
   latestRuns: Partial<Record<"journal_prompt" | "morning_brief", LatestRun>>;
@@ -71,9 +74,15 @@ interface FamilyRow {
   status: string;
 }
 
-export async function getFamilySnapshots(now: Date = new Date()): Promise<FamilySnapshot[]> {
+export async function getFamilySnapshots(
+  now: Date = new Date(),
+  /** Window for userMessagesInRange; the overview passes its range toggle
+   * so the families table's message counts match the page's period. */
+  rangeDays = 7,
+): Promise<FamilySnapshot[]> {
   const sql = adminDb();
   const priceBook = await getModelPriceBook();
+  const messageInterval = `${rangeDays} days`;
 
   // Sequential on purpose, never Promise.all: see lib/admin/db.ts.
   const families = await sql<FamilyRow[]>`
@@ -106,7 +115,9 @@ export async function getFamilySnapshots(now: Date = new Date()): Promise<Family
   const activity = await sql<{ family_id: string; last_at: string | null; recent: number }[]>`
     select family_id,
            max(created_at) filter (where role = 'user')::text as last_at,
-           count(*) filter (where role = 'user' and created_at >= now() - interval '7 days')::int as recent
+           count(*) filter (
+             where role = 'user' and created_at >= now() - ${messageInterval}::interval
+           )::int as recent
     from public.conversation_messages
     group by family_id
   `;
@@ -226,7 +237,7 @@ export async function getFamilySnapshots(now: Date = new Date()): Promise<Family
       hasReport: (reportRow?.n ?? 0) > 0,
       firstReportAt: reportRow?.first_at ?? null,
       lastUserActivityAt: activityRow?.last_at ?? null,
-      userMessages7d: activityRow?.recent ?? 0,
+      userMessagesInRange: activityRow?.recent ?? 0,
       activityByDay: dayKeys.map((key) => days?.get(key) ?? 0),
       latestRuns: runsBy.get(family.id) ?? {},
       tokens28d: tokensBy.get(family.id) ?? 0,
