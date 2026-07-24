@@ -3,6 +3,44 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-23 · Onboarding latency floor measured; skill preload, sentinel tail, and a silent mode-unload fix
+
+The item-3 infra investigation (per-turn latency floor). Full breakdown
+with numbers: `plans/2026-07-23-onboarding-turn-latency.md`. Three
+decisions made alone, each the smallest change its measurement
+supported:
+
+1. **The onboarding skill rides inside onboarding-mode's dynamic
+   instructions instead of behind load_skill.** Measured cost of the
+   load_skill step: one whole model call (3.2-6.4s local, 6-16s per
+   prod step) plus a full ~43k-token cache-miss prefill plus a sandbox
+   read, paid on the first turn after the setup cards. The trade is
+   ~5.8k prompt tokens per onboarding turn, scoped to sessions the auth
+   walk stamped onboardingActive. In the deployed eve bundle (no source
+   tree) the composer falls back to the original load_skill line, never
+   worse than before; closing that gap is R4 in the plan.
+2. **ask_for_details' result note asks for eve's `<eve-empty-delivery/>`
+   sentinel instead of the unsatisfiable "emit no text".** The harness
+   retries an empty reply with a nudge, so models invented filler
+   ("I'll wait for her to fill that in.", "(No further text this
+   turn.)", caught live; assistant-text.ts already enumerates five
+   shipped siblings). The sentinel is delivered as true silence and the
+   note now also states the fact that post-card text is never shown
+   (message-parts' ENDS_THE_TURN guard).
+3. **beginOnboarding is now actually called** (onboarding page's
+   loadChatProps): nothing ever wrote the durable onboarding record, so
+   the basics card's profile_completed_at stamp made the fallback
+   predicate read the family as DONE from turn two onward, silently
+   unloading onboarding-mode for the rest of the arc. Found by watching
+   the prompt shrink by exactly the mode block between turns.
+
+Kickoff turn measured 17.8-23.8s before, 6.3-10.9s after. Not touched
+without a founder: reasoning effort (dominant remaining cost),
+prompt-cache breakpoints (gateway-auto gives no stable prefix; 58.8% of
+prod web turns carry a full-miss step), runtime-action cards, and a
+tool-schema diet (50 static tools ≈ 17.9k tokens every step). Each is a
+sized recommendation in the plan.
+
 ## 2026-07-23 · Founder ruling: all four post-loop items approved
 
 Founder, on the drop-off loop's four parked items: "agree with your 4

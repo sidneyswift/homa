@@ -137,7 +137,10 @@ export async function writeOnboardingRecord(
  */
 export async function beginOnboarding(familyId: string): Promise<OnboardingRecord | null> {
   const existing = await loadOnboardingState(familyId);
-  if (existing?.record?.state === "done") return existing.record;
+  // A record of either state already makes profile_completed_at
+  // irrelevant, so there is nothing to write; rewriting "active" on
+  // every visit would be a wasted row update per page load.
+  if (existing?.record) return existing.record;
   return writeOnboardingRecord(familyId, { state: "active" });
 }
 

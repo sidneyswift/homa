@@ -53,8 +53,16 @@ const askForDetails = defineTool({
       asked: true,
       kind: input.kind,
       intro: input.intro ?? null,
+      // The sentinel, not "emit no text": the harness never accepts an
+      // empty reply (it retries one with a nudge), so a model told to
+      // say nothing invents filler instead, and five shipped variants of
+      // that filler are enumerated in app/app/assistant-text.ts. The
+      // sentinel is the one reply the harness delivers as real silence.
+      // And it is honest: the web transcript drops every text part that
+      // follows this call (message-parts.tsx, ENDS_THE_TURN), so any
+      // words written here cost the parent seconds and are never shown.
       note:
-        "END TURN. Emit no text after this tool call. The fields are visible to her and the card saves itself; her entries arrive as the next message. Any sentence here is either narrating a card she can already see or asking for what it already asks. If you had something to say, it belonged BEFORE this call: a card with nothing above it reads as a form, not a conversation.",
+        "The fields are on her screen and the card saves itself. This turn is over: reply to THIS tool result with exactly <eve-empty-delivery/> and nothing else. It is delivered as silence, and nothing written after this call is ever shown to her, so any other reply only costs her seconds; your words belonged BEFORE this call. The sentinel is for finishing this turn only. Her entries will arrive as her next message, and that is a new turn where she is owed your real reaction in words, never the sentinel.",
     };
   },
 });

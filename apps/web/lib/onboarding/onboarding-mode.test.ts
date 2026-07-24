@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
-import { onboardingModeMarkdown } from "../../agent/instructions/onboarding-mode";
+import { composeOnboardingModeMarkdown } from "./onboarding-mode";
 
 /**
  * Routing fixtures for onboarding mode
@@ -9,20 +10,46 @@ import { onboardingModeMarkdown } from "../../agent/instructions/onboarding-mode
  * an onboarding session loads it; the adversarial-negative cases prove
  * every other session does not, because a completed family being told
  * she is in her first days with Homa is a visible, embarrassing bug.
+ *
+ * The raw skill is the real file, read the way the eve module's ?raw
+ * import inlines it at build time, so these fixtures exercise the same
+ * composition the deployed function ships.
  */
 
-describe("onboardingModeMarkdown, positive routing", () => {
+const rawSkill = readFileSync(
+  new URL("../../agent/skills/onboarding/SKILL.md", import.meta.url),
+  "utf8",
+);
+
+describe("composeOnboardingModeMarkdown, positive routing", () => {
   it("loads for an authenticated web session with the stamped attribute", () => {
-    const markdown = onboardingModeMarkdown({
-      channel: "web",
-      onboardingActive: "true",
-    });
+    const markdown = composeOnboardingModeMarkdown(
+      { channel: "web", onboardingActive: "true" },
+      rawSkill,
+    );
     assert.ok(markdown);
-    assert.match(markdown, /Load the onboarding skill/);
+    assert.match(markdown, /first days with Homa/);
+  });
+
+  it("carries the whole onboarding skill body, so no turn spends a model round trip on load_skill", () => {
+    const markdown = composeOnboardingModeMarkdown(
+      { channel: "web", onboardingActive: "true" },
+      rawSkill,
+    );
+    assert.ok(markdown);
+    // The preloaded header and a sentence that only exists in the skill
+    // body itself, so a regression back to the load_skill line fails
+    // loudly here rather than re-adding a hidden model round trip.
+    assert.match(markdown, /never call load_skill for "onboarding"/);
+    assert.match(markdown, /She made an account a minute ago/);
+    // The frontmatter stays out: it is a routing hint for load_skill,
+    // not something to spend prompt tokens on every turn.
+    assert.doesNotMatch(markdown, /^---/m);
+    assert.doesNotMatch(markdown, /Use when the session belongs to a family/);
   });
 });
 
-describe("onboardingModeMarkdown, adversarial negatives", () => {
+describe("composeOnboardingModeMarkdown, adversarial negatives", () => {
   const negatives: [string, Record<string, string> | undefined][] = [
     ["a completed family's web session", { channel: "web" }],
     [
@@ -41,7 +68,7 @@ describe("onboardingModeMarkdown, adversarial negatives", () => {
 
   for (const [label, attributes] of negatives) {
     it(`stays silent for ${label}`, () => {
-      assert.equal(onboardingModeMarkdown(attributes), null);
+      assert.equal(composeOnboardingModeMarkdown(attributes, rawSkill), null);
     });
   }
 
@@ -51,7 +78,10 @@ describe("onboardingModeMarkdown, adversarial negatives", () => {
     // did not come from the family row, and neither may open the mode.
     for (const value of ["1", "yes", "TRUE", "active", ""]) {
       assert.equal(
-        onboardingModeMarkdown({ channel: "web", onboardingActive: value }),
+        composeOnboardingModeMarkdown(
+          { channel: "web", onboardingActive: value },
+          rawSkill,
+        ),
         null,
       );
     }

@@ -9,7 +9,10 @@ import {
   familyOnboardingActive,
 } from "../../lib/onboarding/state";
 import { requireFamily } from "../../lib/map/session";
-import { loadOnboardingChatFamily } from "../../lib/onboarding/store";
+import {
+  beginOnboarding,
+  loadOnboardingChatFamily,
+} from "../../lib/onboarding/store";
 import { getSlashMenuSkills } from "../../lib/slash-skills";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { effectiveTimeZone } from "../../lib/time-zone";
@@ -85,6 +88,16 @@ async function loadChatProps(): Promise<OnboardingChatProps | null> {
   // The account step has not run yet, so there is nobody to hold a
   // conversation with. The card flow's own gate takes it from here.
   if (!userId) return null;
+
+  // Entering the chat flow is what makes the durable record the truth
+  // (state.ts). Without this write, the family has no record, so the
+  // predicate falls back to profile_completed_at, and the basics card's
+  // save stamps that column: from the very next turn the auth walk read
+  // the family as done, onboarding-mode silently unloaded, and the rest
+  // of the arc ran without its own instructions (found live in the
+  // 2026-07-23 latency walks; the prompt shrank by the whole mode block
+  // from turn two onward). Idempotent, and never reopens a done family.
+  await beginOnboarding(session.id);
 
   const [slashSkills, wall, serverHistory] = await Promise.all([
     getSlashMenuSkills(),
