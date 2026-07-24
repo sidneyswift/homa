@@ -29,7 +29,7 @@ function snapshot(
     hasReport: false,
     firstReportAt: null,
     lastUserActivityAt: null,
-    userMessages7d: 0,
+    userMessagesInRange: 0,
     activityByDay: [0, 0, 0, 0, 0, 0, 0],
     latestRuns: {},
     tokens28d: 0,
@@ -98,5 +98,54 @@ describe("FamiliesTable", () => {
     assert.match(html, />test</u);
     assert.match(html, /--gold-ink/u);
     assert.doesNotMatch(html, /--rose-600/u);
+  });
+
+  it("sorts by messages the family sent, loudest first and quietest first", () => {
+    const snapshots = [
+      snapshot(1, { name: "Quiet one", userMessagesInRange: 2 }),
+      snapshot(2, { name: "Loud one", userMessagesInRange: 40 }),
+      snapshot(3, { name: "Middle one", userMessagesInRange: 9 }),
+    ];
+    const order = (html: string) =>
+      ["Quiet one", "Loud one", "Middle one"]
+        .map((name) => ({ name, at: html.indexOf(name) }))
+        .sort((a, b) => a.at - b.at)
+        .map((row) => row.name);
+
+    const desc = renderToStaticMarkup(
+      <FamiliesTable
+        snapshots={snapshots}
+        state={{ ...defaultState, sort: "messages", dir: "desc" }}
+        rangeDays={7}
+        includeTests={false}
+      />,
+    );
+    assert.deepEqual(order(desc), ["Loud one", "Middle one", "Quiet one"]);
+
+    const asc = renderToStaticMarkup(
+      <FamiliesTable
+        snapshots={snapshots}
+        state={{ ...defaultState, sort: "messages", dir: "asc" }}
+        rangeDays={7}
+        includeTests={false}
+      />,
+    );
+    assert.deepEqual(order(asc), ["Quiet one", "Middle one", "Loud one"]);
+  });
+
+  it("names the message column's direction and never a bare Messages", () => {
+    const html = renderToStaticMarkup(
+      <FamiliesTable
+        snapshots={[snapshot(1, { userMessagesInRange: 12 })]}
+        state={defaultState}
+        rangeDays={28}
+        includeTests={false}
+      />,
+    );
+    assert.match(html, /From family/u);
+    assert.match(html, /Messages this family sent Homa in the last 28 days/u);
+    assert.match(html, />12</u);
+    // A bare "Messages" header would leave direction to the reader.
+    assert.doesNotMatch(html, />Messages</u);
   });
 });
