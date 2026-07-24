@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import { BANNED_WORDS, EM_DASH } from "@homa/core";
 
 import {
+  FIRSTS_BEGINNING_LABEL,
   FIRSTS_CONTESTED_LINE,
   FIRSTS_DOOR,
   FIRSTS_JUMP_RECENT,
@@ -13,6 +14,7 @@ import {
   firstsEmptyHeading,
   firstsHeading,
   firstsIntro,
+  firstsBeginningBody,
   firstsMatchedAbility,
   firstsMeta,
   firstsNoQuote,
@@ -60,6 +62,8 @@ function everyString(): string[] {
     firstsIntro("Story"),
     firstsEmptyHeading("Story"),
     firstsEmptyBody("Story"),
+    FIRSTS_BEGINNING_LABEL,
+    firstsBeginningBody("Story"),
     firstsSubjectMarker("Math"),
     firstsMatchedAbility("Counts to five"),
     firstsQuoteLabel("Alessa"),
@@ -126,6 +130,31 @@ describe("firsts-copy permanence", () => {
 
   it("states the removal condition in the intro", () => {
     assert.match(firstsIntro("Story"), /takes an answer back/);
+  });
+});
+
+describe("the beginning marker", () => {
+  it("names the record, never the child", () => {
+    // observed_at is a report timestamp on every path except lessons,
+    // so any sentence asserting the child DID this first is a claim the
+    // data cannot support. These two assertions are the whole ruling.
+    const body = firstsBeginningBody("Story");
+    assert.match(body, /you told me/);
+    assert.equal(FIRSTS_BEGINNING_LABEL, "Where the record starts");
+  });
+
+  it("never asserts that one event preceded another", () => {
+    const all = `${FIRSTS_BEGINNING_LABEL} ${firstsBeginningBody("Story")}`;
+    // Banned: any phrasing that dates the CHILD rather than the telling.
+    assert.ok(
+      !/earliest thing (?:Story|he|she|they) did/i.test(all),
+      "must not date the child",
+    );
+    assert.ok(
+      !/first time Story|Story(?:&#x27;|')s first|before (?:this|that)/i.test(all),
+      "must not assert event precedence",
+    );
+    assert.ok(!/came after|happened first/i.test(all));
   });
 });
 
