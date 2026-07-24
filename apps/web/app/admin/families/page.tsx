@@ -86,7 +86,7 @@ export default async function AdminFamiliesPage({
   const snapshots = await getFamilySnapshots();
   const rows = applySort(applyFilter(snapshots, filter), sort);
   const totalKids = snapshots.reduce((sum, s) => sum + s.kidCount, 0);
-  const active = snapshots.filter((s) => s.userMessages7d > 0).length;
+  const active = snapshots.filter((s) => s.userMessagesInRange > 0).length;
   const issues = applyFilter(snapshots, "issues").length;
   const quiet = snapshots.filter((s) => s.stage === "quiet").length;
 

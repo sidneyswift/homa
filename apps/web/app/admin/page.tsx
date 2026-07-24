@@ -87,7 +87,10 @@ export default async function AdminOverviewPage({
     stage: STAGE_PARAMS.includes(params.stage as FamilyStage)
       ? (params.stage as FamilyStage)
       : null,
-    sort: params.sort === "stage" || params.sort === "heard" ? (params.sort as TableSort) : "joined",
+    sort:
+      params.sort === "stage" || params.sort === "heard" || params.sort === "messages"
+        ? (params.sort as TableSort)
+        : "joined",
     dir: params.dir === "asc" ? ("asc" as TableDir) : "desc",
     allRows: params.rows === "all",
   };
