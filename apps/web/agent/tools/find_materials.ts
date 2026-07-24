@@ -111,12 +111,37 @@ export default defineBoundedTool({
       return rest;
     });
 
+    // A library whose earlier work never reached 'final' is invisible to
+    // this search, because status defaults to final. Saying "nothing saved
+    // matches" then is a lie that costs real work: it sends the agent
+    // hunting through filter permutations for pages it already made, and
+    // invites it to rebuild them. The Swift family's alphabet task
+    // (2026-07-19) burned ten find_materials calls that way, three of which
+    // hung, because every one of Story's existing letter pages was still a
+    // draft. Only look when the caller could actually act on the answer.
+    let emptyNote =
+      "Nothing saved matches. Design fresh, and finals you make will be here next time.";
+    if (materials.length === 0 && !finalOnly && filters.status === "final") {
+      const anyStatus = { ...filters, status: "any" as const };
+      const unfinalized =
+        access.mode === "pinned"
+          ? await findMaterialsPinned(access.familyId, anyStatus)
+          : await findMaterialsCaller(access.db, access.familyId, anyStatus);
+      if (unfinalized.length > 0) {
+        emptyNote =
+          `No finals match, but ${unfinalized.length} unfinalized ` +
+          `${unfinalized.length === 1 ? "draft matches" : "drafts match"}. ` +
+          `Pass status:"any" to see them before you build anything, so you ` +
+          `continue that work instead of repeating it.`;
+      }
+    }
+
     return {
       materials: compact,
       note:
         materials.length > 0
           ? "To show one of these to the parent again, call show_material with its id. A previewUrl here works as a generate_image reference; fetch one by materialId to get its html for reuse, or pass its id in create_printable's pages (fromMaterialId) to compile a packet."
-          : "Nothing saved matches. Design fresh, and finals you make will be here next time.",
+          : emptyNote,
     };
   },
 });
