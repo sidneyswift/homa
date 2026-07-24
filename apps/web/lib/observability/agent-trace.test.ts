@@ -99,3 +99,28 @@ describe("stuck tool call signal", () => {
     }
   });
 });
+
+describe("stuck tool call window", () => {
+  it("stops reporting a stuck call once it ages out", async () => {
+    // A stuck row never resolves: status stays 'requested' and finished_at
+    // stays null forever. Unbounded, the sweep would log the same rows
+    // every hour for the life of the table, and an alarm that never clears
+    // teaches the reader to skip the line that finally matters.
+    //
+    // Against production this is the 07-19 and 07-22 incidents: real, worth
+    // having found, and not news any more.
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const password = process.env.SUPABASE_DB_PASSWORD;
+    if (!url || !password) return; // integration-only; unit CI has no database
+
+    const recent = await findStuckToolCalls(15, 24);
+    const everything = await findStuckToolCalls(15, 24 * 365);
+    assert.ok(
+      everything.length >= recent.length,
+      "a wider window can only find the same rows or more",
+    );
+    for (const row of recent) {
+      assert.ok(row.oldestMinutes <= 24 * 60, `${row.tool} is inside the window`);
+    }
+  });
+});
