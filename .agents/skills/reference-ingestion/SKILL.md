@@ -141,7 +141,7 @@ List the actual shipped recipes at analysis time:
 ls apps/web/agent/skills/materials-studio/references/recipes/
 ```
 
-Never match against a remembered list; the library grows and any hardcoded list in prose goes stale (33 recipe files ship today).
+Never match against a remembered list; the library grows and any hardcoded count or list in prose goes stale.
 
 - **Which existing recipe would produce this?** Record filename slugs in `recipeMatch.matchedRecipes`.
 - **What patterns have no recipe?** Record in `recipeMatch.gaps`. **Gap names must be lowercase multi-word hyphen slugs** matching `^[a-z0-9]+(-[a-z0-9]+)+$` (e.g. `cut-and-sort-mat`, not "cut and paste sorting activity"). The coverage tracker in `apps/web/lib/materials/cosmo-funnel.ts` silently drops anything else. Free-prose description goes in `notes`.

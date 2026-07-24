@@ -76,73 +76,33 @@ source text. If any check fails, the claim is dropped, never softened.
 The scorer, the ledger, and every tenancy rule stay exactly as
 deterministic as before.
 
-**Why this is a law and not a preference.** The child-progress journal
-originally matched a mother's sentence to one of 225 skill lines with
-token-overlap scoring and six hand-written alias rules. It looked safe
-("the model has no scoring authority") and it was tested. In production
-it produced **one** evidence row in the product's lifetime: it rejected
-its own documentation's example sentences, read "she" as a different
-person, treated a capitalized book title as a second human, and recorded
-"struggled to read" as mastery. The safety was illusory. We had not
-avoided judgment, we had encoded bad judgment in a place no eval could
-see, and the failure mode was total silent data loss that nobody noticed
-for months. See `docs/homa-planning/plans/2026-07-21-progress-signal-capture-audit.md`.
-
-Corollaries worth stating, because each one was learned the same way:
+Corollaries, each learned from a production failure:
 
 - **Do not pre-filter the model's options with the pattern matcher you
   are replacing.** Pass the whole catalog; a lexical shortlist
   reintroduces the exact recall failure.
-- **Verify provenance, not phrasing.** "This quote appears verbatim in
-  the transcript" is a real guarantee. "This clause shares 50% of its
-  tokens with that quote" is a guess wearing a number.
-- **Measure the judgment layer against real language**, with fixtures
-  taken from production and from the product's own documentation, and
+- **Verify provenance, not phrasing.** A verbatim-quote check is a real
+  guarantee; a token-overlap score is a guess wearing a number.
+- **Measure the judgment layer against real production language** and
   ratchet the number. Deterministic tests below the judgment prove
   nothing about whether signal ever arrives.
 - **A deterministic component that reliably produces nothing is not the
-  safe choice.** Silence is a failure mode, and it is the one least
-  likely to page anyone.
+  safe choice.** Silence is the failure mode least likely to page anyone.
+- **A per-item rule belongs in the validator, not the transport schema.**
+  Schemas parse permissively; validators reject one proposal and let the
+  rest through.
 
-Exception, narrowly: exact string work that is *verification rather than
-interpretation* stays deterministic and lexical. Checking that a
-delivered SMS contains the exact question we sent is verification. Deciding
-what a mother meant is not.
+Two narrow exceptions: exact string work that is verification rather than
+interpretation stays deterministic and lexical, and a security floor is
+not a capability (a deny-list like `scanMemoryContent` may stay
+deterministic because it backstops a structural control, never stands in
+for a capability, and a model judging attacker-controlled text would sit
+inside the blast radius of the thing it judges).
 
-Second exception, on different grounds: **a security floor is not a
-capability.** The law is about components whose low recall means *lost
-signal*, where silence is invisible failure. A deny-list guarding a
-boundary fails the other way: its recall is not the product, and it is
-never the only control. `scanMemoryContent` (lib/agent-memory.ts) pattern
-matches saved memories for instruction-shaped text, which is interpretation
-by the letter of this law, and it stays deterministic anyway because the
-real control is structural (memory renders inside a labelled data block
-that the agent is told is never instructions) and because a model asked to
-judge attacker-controlled text is inside the blast radius of the thing it
-is judging. Keep such floors cheap, keep them honest about what they are,
-and never let one stand in for a capability.
-
-Applied to memory, 2026-07-21: the contradiction guardrail
-(`findConflictingMemories`) was this law's violation in the memory system.
-It judged "does this new fact supersede that one" with one scalar, cosine
-distance under 0.5, calibrated on a single observed pair. Measured against
-the rows compaction later merged, true-conflict distances ran 0.307 to
-0.537 across the threshold, and 5 of 28 rows had no embedding at all. When
-it did fire correctly its only output was advisory prose to a model
-mid-conversation, and the flagged duplicate rode in every prompt for
-eleven days. Fleet-wide it produced two superseded rows in the product's
-lifetime, the same "one evidence row" signature as the journal matcher. It
-was deleted rather than tuned, because the compliant replacement already
-existed: compaction proposes with a model over the whole store and
-verifies in code, off the critical path. Its judgment layer is measured by
-`scripts/memory-compaction-eval.mts` against production language.
-
-A third corollary that fell out of the same work: **a per-item rule
-belongs in the validator, not the transport schema.** The entry-length cap
-sat on the Zod schema, so one merged entry six characters over threw away
-the model's entire response, two correct splits included. Schemas should
-be permissive enough to parse; the validators reject one proposal and let
-the rest through.
+The full ruling text, the journal-matcher and memory-guardrail failures
+that made it law, and the eval evidence live in
+`docs/homa-planning/models-judge-code-verifies.md`. Read it before
+building or reviewing any language-to-structured-data capability.
 
 ### Required decision sequence
 
@@ -226,6 +186,39 @@ result or one authorized side effect?** If yes, build or reuse deterministic
 code. Most substantial capabilities should be a fat fleet skill orchestrating
 a small set of narrow tools, not a growing pile of workflow-shaped tools.
 
+## Context-file authoring rules
+
+These govern every file that loads into an agent's context: `AGENTS.md`
+files, fleet skills, `.agents/skills/`, tool descriptions, and
+`agent/instructions.md`. Rationale and the 2026-07-24 audit behind them:
+`docs/homa-planning/plans/2026-07-24-context-engineering-cleanup.md`.
+
+1. **One home per rule.** A law lives in exactly one canonical file; every
+   other mention is a pointer. Tool how-to lives in the tool description,
+   multi-tool workflow lives in the skill, identity and laws live in the
+   always-on instructions.
+2. **A description is a routing instruction.** `Use when <intents>. Not
+   for <neighbor>; <sibling> owns that.` The negative scope prevents
+   mis-routing.
+3. **Schema before prose.** Closed sets are enums, never described
+   strings. Every parameter gets `.describe()`. A tool description that
+   glosses its own enum values one by one means the schema is
+   under-designed.
+4. **Constrain with intent plus scar, never lexicon.** A hard never/always
+   cites its founder ruling or incident. Without a scar, state the intent
+   and trust model judgment. A lexical ban is only legitimate when code
+   enforces it (the em-dash runtime law).
+5. **Bodies are routers.** A SKILL.md body past roughly 200 lines splits
+   into `references/` files loaded by intent. Directory-scoped gotchas go
+   in that directory's `AGENTS.md`, not the root file.
+6. **Rich references over transcription.** Point at the real artifact (a
+   live JSON file, a golden anchor, a fixture, a component path) instead
+   of embedding a copy that can drift.
+7. **Retire loudly, then delete.** Mark a dead skill retired with a banner
+   routing to its successors, then delete it; git is the archive.
+8. **Never hand-maintain what a command can list.** Counts and file
+   indexes in prose go stale silently; instruct listing them live.
+
 ## Commands
 
 - Install: `pnpm install`
@@ -258,14 +251,9 @@ a small set of narrow tools, not a growing pile of workflow-shaped tools.
 ## Deploys & migrations
 
 - Prod schema and prod code ship together. Never apply a breaking migration (a rename, a drop, a tightened constraint) ahead of the deploy that reads it: push the code, watch the Vercel deploy go READY, then apply the migration, or use expand-contract (add the new shape, dual-read, drop the old later). Additive-only migrations may lead. Cause: the 2026-07-10 /app outage (build-log entry) was the previous deploy reading a renamed column.
-- A green `pnpm build` is not a green deploy. Vercel also runs `eve build`, which compiles agent tool modules outside Next's bundler, so imports Next tolerates (`next/server`, JSON loaders) can still sink the deploy. CI runs it now under `VERCEL=1`; before pushing changes under `apps/web/agent/`, run `VERCEL=1 pnpm --filter web exec eve build` locally, then `VERCEL=1 pnpm check:eve-stream-duration` so the shared `/eve/__server` stream function keeps `maxDuration: "max"`.
+- A green `pnpm build` is not a green deploy: Vercel also runs `eve build` outside Next's bundler. The local pre-push checks for `apps/web/agent/` changes live in `apps/web/AGENTS.md`.
 - After any push that touches schema or the deploy pipeline, stay until the Vercel deployment is READY and probe the live site before calling it done.
-- ChildProgress rollout starts with `HOMA_LIVE_PROGRESS_ENABLED` false. Deploy
-  code and verify READY plus legacy paths first. Then apply the additive
-  migration, run `pnpm progress:reconcile -- --dry-run` and the real
-  reconciliation with an explicit database URL, enable the flag, and probe
-  authenticated Progress, token reports, corrections, and linked SMS.
-  Rollback turns the flag off first and leaves the additive ledger intact.
+- ChildProgress rollout order and rollback are in `BUILD.md` § ChildProgress rollout order; follow it exactly, flag-first both directions.
 
 ## Production bugs
 

@@ -7,6 +7,7 @@ import {
 import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { MATERIAL_KINDS } from "../../lib/materials/kinds";
 import { agentJobsEnabled } from "../../lib/jobs/flag";
 import { refuseJobSpawnedSession } from "../../lib/jobs/guard";
 import { kickAgentJobsRunner } from "../../lib/jobs/kick";
@@ -80,13 +81,10 @@ const startFirstMaking = defineBoundedTool({
       .optional()
       .describe("The personalization hook, e.g. 'dinosaurs'."),
     kind: z
-      .string()
-      .trim()
-      .min(1)
-      .max(60)
+      .enum(MATERIAL_KINDS)
       .optional()
       .describe(
-        "What kind of page fits, e.g. 'coloring' for young kids, 'worksheet' when practice fits better. The build may refine this.",
+        "What kind of page fits; 'coloring' suits young kids, 'worksheet' when practice fits better, 'other' when none of these do. The build may refine this.",
       ),
   }),
   async execute(input, ctx) {

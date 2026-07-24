@@ -142,6 +142,73 @@ function parseFrontmatter(content: string): Frontmatter | null {
   return frontmatter;
 }
 
+/** A skill body that names a file the package does not ship fails only at
+ * runtime, silently, as a degraded build with no error surfaced. These
+ * three checks close that hole: concrete /workspace/skills/ paths must
+ * resolve, every references/ file must be mentioned by the body (no
+ * orphans), and every "Recipe file" table cell must name a shipped
+ * recipe. Placeholder paths (containing < or >) match only up to their
+ * concrete prefix, which is then checked as a directory. */
+const WORKSPACE_PATH_MENTION = /\/workspace\/skills\/([A-Za-z0-9_-]+)\/([A-Za-z0-9_\-./]*)/g;
+
+function checkReferenceIntegrity(
+  packageName: string,
+  files: FileEntry[],
+  skillMdContent: string,
+): void {
+  for (const file of files) {
+    if (!TEXT_FILE_EXTENSION.test(file.relativePath)) continue;
+    const content = readFileSync(file.absolutePath, "utf8");
+    for (const match of content.matchAll(WORKSPACE_PATH_MENTION)) {
+      const [, mentionedPackage, rawRelPath] = match;
+      const relPath = rawRelPath.replace(/[.,;:]+$/, "");
+      const target = path.join(skillsRoot, mentionedPackage, relPath);
+      try {
+        statSync(target);
+      } catch {
+        fail(
+          `${packageName}/${file.relativePath}: mentions /workspace/skills/${mentionedPackage}/${relPath}, which does not ship`,
+        );
+      }
+    }
+  }
+
+  const referenceFiles = files.filter((file) => file.relativePath.startsWith("references/"));
+  for (const file of referenceFiles) {
+    const slug = path.basename(file.relativePath).replace(/\.[^.]+$/, "");
+    if (!skillMdContent.includes(slug)) {
+      fail(
+        `${packageName}: references/ ships ${file.relativePath} but SKILL.md never mentions "${slug}" (orphan reference)`,
+      );
+    }
+  }
+
+  const lines = skillMdContent.split("\n");
+  let inRecipeTable = false;
+  for (const line of lines) {
+    if (/^\|.*\|\s*$/.test(line) && /\|\s*Recipe file\s*\|/i.test(line)) {
+      inRecipeTable = true;
+      continue;
+    }
+    if (!inRecipeTable) continue;
+    if (!/^\|.*\|\s*$/.test(line)) {
+      inRecipeTable = false;
+      continue;
+    }
+    const cells = line.split("|").map((cell) => cell.trim()).filter(Boolean);
+    const slug = cells[cells.length - 1];
+    if (!slug || /^[-\s]+$/.test(slug)) continue;
+    const recipePath = path.join(skillsRoot, packageName, "references/recipes", `${slug}.md`);
+    try {
+      statSync(recipePath);
+    } catch {
+      fail(
+        `${packageName}: SKILL.md recipe-file table names "${slug}" but references/recipes/${slug}.md does not ship`,
+      );
+    }
+  }
+}
+
 /** Package identity digest (§4.3): SHA-256 over the sorted sequence of
  * relative-path NUL byte-length NUL content-bytes. Reported for build
  * provenance; not itself a pass/fail condition. */
@@ -200,6 +267,8 @@ function checkPackage(packageName: string, toolNames: Set<string>, packageNames:
       }
     }
   }
+
+  checkReferenceIntegrity(packageName, files, content);
 
   const digest = packageDigest(packageDir, files);
   pass(`${packageName}: ${files.length} file(s), ${totalBytes} bytes, digest ${digest.slice(0, 12)}...`);
