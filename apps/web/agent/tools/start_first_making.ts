@@ -4,6 +4,7 @@ import { z } from "zod";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { agentJobsEnabled } from "../../lib/jobs/flag";
 import { refuseJobSpawnedSession } from "../../lib/jobs/guard";
+import { kickAgentJobsRunner } from "../../lib/jobs/kick";
 import { startJob } from "../../lib/jobs/store";
 import { loadChecklistState } from "../../lib/onboarding/checklist-state";
 import { writeOnboardingRecord } from "../../lib/onboarding/store";
@@ -141,6 +142,11 @@ const startFirstMaking = defineTool({
     await writeOnboardingRecord(access.familyId, {
       addBeats: ["first_making"],
     });
+
+    // Start the build now rather than at the next sweeper tick (founder
+    // directive 2026-07-23). Best-effort: the row above is the promise,
+    // the kick only makes it faster.
+    if (!result.alreadyExisted) await kickAgentJobsRunner();
 
     if (result.alreadyExisted) {
       return {

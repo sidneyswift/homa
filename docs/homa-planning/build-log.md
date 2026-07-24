@@ -3,6 +3,31 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-23 · Founder directive: background jobs start immediately; the cron becomes the sweeper
+
+Founder, on hearing the agent-jobs queue waits up to five minutes to
+pick up new work: "this is terrible. background jobs should be picked
+up immediately." Implemented the same session:
+
+- The runner's tick body moved to a shared cycle
+  (`agent/agent-jobs-cycle.ts`), used by both entry points. Spawns
+  resolve at session ACCEPTANCE, so a cycle is cheap.
+- The agent-job channel gained `POST /eve/v1/agent-job/run-now`
+  (CRON_SECRET bearer auth, the dispatch run-now pattern), which runs
+  one cycle on demand.
+- `start_agent_job` and `start_first_making` kick that route the moment
+  a job row commits (`lib/jobs/kick.ts`). The kick targets THIS
+  deployment (VERCEL_URL first, so a preview never runs prod's code),
+  is capped at five seconds, and swallows every failure, because the
+  5-minute cron remains as the reliability sweeper: a missed kick costs
+  at most one sweeper interval, never a job. Retried stages still ride
+  the sweeper on purpose; instant retry of a failing build would be a
+  hot loop.
+
+Measured in dev: enqueue to stage in_progress in 3.5 seconds, against
+up to 300 before. This also applies fleet-wide to curriculum-studio
+builds the moment it deploys.
+
 ## 2026-07-23 · The artifact moment ships: a background first making, and the in-turn generators leave onboarding
 
 Item 1 of the four-item post-loop ruling ("the artifact moment:

@@ -1,7 +1,8 @@
-import { defineChannel, GET } from "eve/channels";
+import { defineChannel, GET, POST } from "eve/channels";
 
 import { mapDb } from "../../lib/map/db";
 import { handleUnreportedStage, type ClaimedJob } from "../../lib/jobs/runner";
+import { runAgentJobsCycle } from "../agent-jobs-cycle";
 
 /**
  * The job runner's build channel (agent-jobs runner spec). It wakes a
@@ -59,6 +60,29 @@ async function failIfUnreported(state: AgentJobState, reason: string): Promise<v
   await handleUnreportedStage(job, reason);
 }
 
+/** The send options for one stage's build session, shared by the two
+ * ways a stage gets spawned: the schedule's receive() and the run-now
+ * route below. One builder so the paths cannot drift. */
+function stageSendOptions(input: {
+  target?: Partial<AgentJobState> | undefined;
+  auth?: unknown;
+}) {
+  const target = (input.target ?? {}) as Partial<AgentJobState>;
+  return {
+    auth: (input.auth ?? null) as never,
+    continuationToken: `agent-job:${target.jobId ?? ""}:${target.stageNumber ?? ""}`,
+    state: {
+      familyId: target.familyId ?? null,
+      jobId: target.jobId ?? null,
+      stageNumber: target.stageNumber ?? null,
+      skill: target.skill ?? null,
+      totalStages: target.totalStages ?? null,
+      episodeId: target.episodeId ?? null,
+    } satisfies AgentJobState,
+    title: `agent-job ${target.jobId ?? ""} stage ${target.stageNumber ?? ""}`.trim(),
+  };
+}
+
 export default defineChannel({
   state: {
     familyId: null,
@@ -78,20 +102,7 @@ export default defineChannel({
   },
 
   async receive(input, { send }) {
-    const target = (input.target ?? {}) as Partial<AgentJobState>;
-    return await send(input.message, {
-      auth: input.auth ?? null,
-      continuationToken: `agent-job:${target.jobId ?? ""}:${target.stageNumber ?? ""}`,
-      state: {
-        familyId: target.familyId ?? null,
-        jobId: target.jobId ?? null,
-        stageNumber: target.stageNumber ?? null,
-        skill: target.skill ?? null,
-        totalStages: target.totalStages ?? null,
-        episodeId: target.episodeId ?? null,
-      } satisfies AgentJobState,
-      title: `agent-job ${target.jobId ?? ""} stage ${target.stageNumber ?? ""}`.trim(),
-    });
+    return await send(input.message, stageSendOptions(input));
   },
 
   events: {
@@ -113,5 +124,25 @@ export default defineChannel({
     // A channel with zero routes has no route fingerprint and cannot be
     // dispatched to (same reason the dispatch channel keeps a health route).
     GET("/eve/v1/agent-job/health", async () => Response.json({ ok: true })),
+
+    // Immediate pickup (founder directive 2026-07-23: background jobs
+    // start immediately). The job-starting tools call this the moment a
+    // job row commits; it runs the same claim cycle the sweeper runs,
+    // so the first stage starts building in seconds. Best-effort by
+    // design: a missed kick costs at most one sweeper interval, never a
+    // job. CRON_SECRET bearer auth, same as the dispatch run-now route;
+    // path under /eve/v1/ on purpose, only /eve/* is guaranteed to
+    // reach the eve runtime through proxy.ts and the withEve() mount.
+    POST<AgentJobState>("/eve/v1/agent-job/run-now", async (req, { send }) => {
+      const secret = process.env.CRON_SECRET;
+      if (!secret) return Response.json({ ok: false }, { status: 503 });
+      if (req.headers.get("authorization") !== `Bearer ${secret}`) {
+        return Response.json({ ok: false }, { status: 401 });
+      }
+      const started = await runAgentJobsCycle(async (input) =>
+        await send(input.message, stageSendOptions(input)),
+      );
+      return Response.json({ ok: true, started });
+    }),
   ],
 });
