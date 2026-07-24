@@ -26,6 +26,7 @@ export default defineBoundedTool({
   description:
     "Send a real email to this family's own address on file. Use only when the parent asks for something in writing, or a written summary is clearly the useful next step (e.g., recapping today's conversation, a plan to remember). Do not overuse: this sends a real email every time.",
   deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({
     subject: z.string().trim().min(1).max(120),
     bodyLines: z

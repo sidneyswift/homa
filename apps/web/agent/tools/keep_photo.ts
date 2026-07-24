@@ -29,6 +29,7 @@ export default defineBoundedTool({
   description:
     "Save one search_photos result into this family's own library and get back a permanent image URL. Pass a photoToken exactly as search_photos returned it. The returned URL is the only web-photo URL you may use: embed it with <img> in create_printable html (size it with CSS), or pass it to generate_image as a reference. Keep only the photo you will actually use.",
   deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({
     photoToken: z
       .string()

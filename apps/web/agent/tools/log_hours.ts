@@ -47,6 +47,7 @@ export default defineBoundedTool({
   description:
     "Log a block of school time to the family's hours record the moment the parent mentions one ('we did 45 minutes of math'). These rows are the family's compliance evidence, so log every real mention exactly once. School time only: movies, errands, and waiting rooms never count. When the duration is vague ('most of the morning'), ask one short 'about how long?' first.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: logInput,
   async execute(input, ctx) {
     let access;

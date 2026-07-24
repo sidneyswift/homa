@@ -48,6 +48,7 @@ export default defineBoundedTool({
   description:
     "Save one researched finding to Homa's shared knowledge bank (general education knowledge only, never anything about a specific family or child). Only fleet research sessions may use this. Every claim needs a real, resolving citation URL.",
   deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({
     topicType: z.enum(KNOWLEDGE_TOPIC_TYPES),
     topicKey: z

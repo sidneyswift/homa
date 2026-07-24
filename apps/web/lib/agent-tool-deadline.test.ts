@@ -30,7 +30,7 @@ test("a tool that never settles fails at its deadline instead of hanging", async
 });
 
 test("the failure message reports an unknown outcome, not a failed one", async () => {
-  const error = new ToolDeadlineError(45_000);
+  const error = new ToolDeadlineError(45_000, true);
   // The tool-honesty law. A deadline proves only that we stopped waiting:
   // a write may have landed with just the reply lost. Claiming success is
   // a lie; claiming failure is also a lie, and an empty-but-successful
@@ -42,15 +42,46 @@ test("the failure message reports an unknown outcome, not a failed one", async (
   assert.match(error.message, /do not assume it failed/i);
 });
 
-test("the failure message never invites a blanket retry", async () => {
-  // Retrying a read is free. Retrying send_heads_up, send_followup_email,
-  // or an SMS invite double-texts a real parent, and not every outbound
-  // tool has its own dedupe window. So the guidance is conditional, and
-  // the unsafe half is spelled out rather than left to inference.
-  const message = new ToolDeadlineError(90_000).message;
-  assert.match(message, /if this tool only reads, call it again/i);
-  assert.match(message, /sends, spends, or saves/i);
-  assert.match(message, /do not repeat it/i);
+test("retry advice comes from the tool's flag, never from the model's guess", async () => {
+  // Retrying a read is free. Retrying send_heads_up or an SMS invite
+  // double-texts a real parent, and not every outbound tool has its own
+  // dedupe window. So the caller declares it and the message states it as
+  // a fact; an earlier draft said "try once more if the work is cheap to
+  // repeat", which is an invitation to send that second text.
+  const safe = new ToolDeadlineError(45_000, true).message;
+  assert.match(safe, /safe to repeat: call it again/i);
+  assert.ok(!/do not call it again/i.test(safe));
+
+  const unsafe = new ToolDeadlineError(90_000, false).message;
+  assert.match(unsafe, /NOT safe to repeat/);
+  assert.match(unsafe, /do not call it again/i);
+  assert.match(unsafe, /could not confirm this step/i);
+});
+
+test("withToolDeadline defaults to not repeatable", async () => {
+  // The safe default for every non-tool caller. Being wrongly cautious
+  // costs an honest "I could not confirm"; being wrongly permissive costs
+  // a parent the same text twice.
+  await assert.rejects(
+    withToolDeadline(20, () => new Promise(() => {})),
+    (error: unknown) => {
+      assert.ok(error instanceof ToolDeadlineError);
+      assert.equal(error.repeatable, false);
+      assert.match(error.message, /NOT safe to repeat/);
+      return true;
+    },
+  );
+});
+
+test("a repeatable tool's deadline carries the flag through", async () => {
+  await assert.rejects(
+    withToolDeadline(20, () => new Promise(() => {}), true),
+    (error: unknown) => {
+      assert.ok(error instanceof ToolDeadlineError);
+      assert.equal(error.repeatable, true);
+      return true;
+    },
+  );
 });
 
 test("a tool's own failure is passed through, not relabelled as a deadline", async () => {

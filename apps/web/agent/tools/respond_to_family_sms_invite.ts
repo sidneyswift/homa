@@ -21,6 +21,7 @@ export default defineBoundedTool({
   description:
     "Apply the family-invite response already classified from this unlinked SMS sender's complete message. The authenticated channel supplies the exact invitation, phone, and accept-or-decline decision. A yes only asks the original parent to confirm the full number; it does not grant access. There are no model-selected inputs.",
   deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: responseInput,
   async execute(_input, ctx) {
     const attributes = ctx.session.auth.current?.attributes as

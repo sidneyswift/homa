@@ -18,6 +18,7 @@ export default defineBoundedTool({
   description:
     "Check how a family's background builds are going: pass a jobId for one, or omit it to list all of this family's active builds. Returns real status and stage counts. Never guess progress or a finish date; report exactly what this returns.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: true,
   inputSchema: z.object({
     jobId: z
       .uuid()

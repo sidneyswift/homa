@@ -18,6 +18,7 @@ export default defineBoundedTool({
   description:
     "Finish text signup for one child whose checklist is complete: scores the answers and returns their report link to include in your reply. Requires the family email to be saved first.",
   deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({
     childId: z.uuid(),
   }),

@@ -83,6 +83,7 @@ export default defineBoundedTool({
   description:
     "Validate and stage one morning research brief for delivery. Applies only to the built-in v2 morning brief dispatch, never to a task a family set up themselves. Use only after choosing the single child and eligible cited source supplied in this dispatch run. A failed result says whether revision is retryable; terminal failures must stop and follow the result's note.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: z.object({
     knowledgeId: z.string().uuid(),
     childId: z.string().uuid(),

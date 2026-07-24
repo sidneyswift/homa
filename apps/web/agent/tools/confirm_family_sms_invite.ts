@@ -17,6 +17,7 @@ export default defineBoundedTool({
   description:
     "Apply the coded family-invite confirmation already authenticated from this linked parent's complete SMS. There are no model-selected inputs. Call only when SMS instructions say a valid confirmation or cancellation is present.",
   deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({}),
   async execute(_input, ctx) {
     const attributes = ctx.session.auth.current?.attributes as

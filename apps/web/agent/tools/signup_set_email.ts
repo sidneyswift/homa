@@ -17,6 +17,7 @@ export default defineBoundedTool({
   description:
     "Save the email the report should go to, during text signup. Ask for it near the end ('where should I send the report?'). Refuses emails that already belong to another Homa account.",
   deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({
     email: z.string().email().max(254),
   }),

@@ -46,6 +46,7 @@ export default defineBoundedTool({
   description:
     "Save what an unlinked texter shares about herself (name, email, situation) to Homa's lead record, and mark when you have given her the signup link. Use it the moment details come up; never ask for details just to fill fields. Only works on text conversations from numbers without an account.",
   deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: captureInput,
   async execute(input, ctx) {
     const attributes = ctx.session.auth.current?.attributes as

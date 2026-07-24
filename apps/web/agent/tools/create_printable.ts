@@ -292,6 +292,7 @@ export default defineBoundedTool({
   description:
     "Render printable material you designed (worksheet, coloring page, flash cards, poster, a multi-page packet, any material) into one real PDF plus per-page previews the parent sees where she is (chat card on web, texted picture on SMS). Three paths: pass your own page HTML, pass a generate_image URL of the whole page, or pass pages to build a multi-page packet (fresh pages and existing materials by id, in any mix, one PDF out). Load the materials-studio skill before your first material of a conversation. For changes, pass revisesId and call again; when the parent approves a version, call mark_material_final.",
   deadlineMs: TOOL_DEADLINE.render,
+  repeatable: false,
   inputSchema: createPrintableInputSchema,
   async execute(input, ctx) {
     let access;

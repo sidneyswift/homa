@@ -127,6 +127,7 @@ export default defineBoundedTool({
   description:
     "Manage one family's durable child progress evidence and check-ins. Use record_journal_evidence only for a concrete named child's observable capability in the current trusted inbound message. Use start_check_in when the parent asks to take a progress check-in. Use mark_observation_used only after building on a saved observation whose UUID appears in trusted context. Continue, pause, resume, stop, take over, undo, or resolve only saved UUIDs shown by trusted context or tool results. Never invent quotes, revisions, idempotency keys, scores, or skill items.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: manageChildProgressToolInputSchema,
   async execute(input, ctx) {
     try {

@@ -167,6 +167,7 @@ export default defineBoundedTool({
   description:
     "Explore one child's learning map, read-only. subject_map: the checklist ladder with the child's answers, the chart figure, and the subject's skill-line domains. topic: one skill in depth (what it is, prerequisites with reasons, what it unlocks, a try-at-home check). ready_next: skills whose prerequisites this child has already confirmed, best first. bottleneck: the earliest unconfirmed prerequisite standing before a target skill. teaching_order: sort chosen topics prerequisites-first. search_topics: find real topic and checklist ids by words. Use it to answer where a child is, what is missing, what comes next and why. It never records anything; save evidence with manage_child_progress.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: true,
   inputSchema: exploreToolInputSchema,
   async execute(input, ctx) {
     let access: AgentAccess;

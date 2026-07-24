@@ -74,6 +74,7 @@ export default defineBoundedTool({
   description:
     "Edit the activities on an existing plan (a subject's four weeks, or the month plan with subjectId \"month\"): add an activity to a week, replace one, or remove one. Changes land immediately on the family's planner and plan pages. ALWAYS call open_planner first in the same conversation and address activities by the indices it returned; never guess an index. Removing or replacing an activity also clears or shifts its check-offs honestly. This tool cannot create a new month from nothing: when no plan exists, the parent builds one with one tap in the child's progress report.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: z
     .object({
       childId: z.string().uuid(),

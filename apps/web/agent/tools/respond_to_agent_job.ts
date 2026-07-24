@@ -22,6 +22,7 @@ export default defineBoundedTool({
   description:
     "Steer a running background build: pause it, resume it, approve the part waiting for review so it keeps going, or apply a change to the parts not yet built. Pass the job's id and a response object whose 'action' says what to do; the skill tells you which actions its builds accept.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: z.object({
     jobId: z.uuid().describe("The build to steer, from get_agent_job_status or your context."),
     response: z

@@ -33,6 +33,7 @@ export default defineBoundedTool({
   description:
     "Search this family's saved materials (worksheets, coloring pages, flash cards...) before designing something new. Returns finals by default with their preview URLs; a final's previewUrl can be passed to generate_image as a reference image, and fetching one material by id also returns its html for reuse with a swapped theme or character.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: true,
   inputSchema: z.object({
     materialId: z
       .uuid()

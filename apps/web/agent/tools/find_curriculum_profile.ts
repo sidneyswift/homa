@@ -23,6 +23,7 @@ export default defineBoundedTool({
   description:
     "Look up a curriculum in Homa's vetted atlas by name or facets before searching the web. Returns method, subjects, grade range, approach, religious orientation, price, and the official site for matching curricula. Use this first when a parent names or asks about a curriculum; it is free and carries no risk. Only web_fetch a live page when the atlas has no match.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: true,
   inputSchema: z.object({
     text: z
       .string()

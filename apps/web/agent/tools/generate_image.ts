@@ -57,6 +57,7 @@ export default defineBoundedTool({
   description:
     "Generate one image through the image model: coloring art, a themed header, counting objects, an infographic, or an entire printable page in a single image. Write the full visual description yourself (style first). Optionally pass 1-4 reference image URLs from this family's own materials (a final's previewUrl, an earlier generate_image URL, or a child's photoUrl from the family context) to match a style, swap a character while keeping the layout, or draw the child as an illustrated character in their own material. A child's photo is a drawing reference only, never an identification input, and photorealistic renders of a child are off the table: keep the output in an illustration style. For some formats you can also pass anchorIds to ride on a shared Homa reference image that sets the visual quality bar (see the anchorIds menu). Returns a URL to embed in page HTML or pass to create_printable as pageImageUrl. Each call costs real money; reuse a good image instead of regenerating it.",
   deadlineMs: TOOL_DEADLINE.generate,
+  repeatable: false,
   inputSchema: z.object({
     prompt: z
       .string()

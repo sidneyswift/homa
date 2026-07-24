@@ -17,6 +17,7 @@ export default defineBoundedTool({
   description:
     "Re-read the children in this family with their ages, interests, and current focus. The same data auto-loads at every turn start, so only call this to double-check mid-conversation, e.g. right after a profile change.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: true,
   inputSchema: z.object({}),
   async execute(_input, ctx) {
     let access;

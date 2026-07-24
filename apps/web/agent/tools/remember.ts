@@ -24,6 +24,7 @@ export default defineBoundedTool({
   description:
     "Save one durable fact about this family so future conversations remember it. Use for stable facts (routines, preferences, family rhythm) or per-child what-works teaching signal. Save facts the moment you learn them. Not for task progress, one-off logistics, secrets, or anything sensitive shared in distress.",
   deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({
     content: z
       .string()

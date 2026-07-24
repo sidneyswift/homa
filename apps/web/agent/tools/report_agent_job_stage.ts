@@ -24,6 +24,7 @@ export default defineBoundedTool({
   description:
     "Finish the current stage of the build you are running by naming the material(s) you produced for it. Only call this from inside a job build, once the stage's material is created and passed its quality check.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: z.object({
     materialIds: z
       .array(z.uuid())

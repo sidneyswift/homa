@@ -44,6 +44,7 @@ export default defineBoundedTool({
   description:
     "Update a child's profile when their interests or current focus genuinely change (a new obsession, a mastered skill, a new goal). Provide the full interests list when updating interests; it replaces the old list.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: updateInput,
   async execute(input, ctx) {
     let access;

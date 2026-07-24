@@ -10,11 +10,15 @@
  * it from decaying, because the failure it prevents is invisible until a
  * parent is already staring at a dead chat.
  *
- * Three deterministic checks over apps/web/agent/tools, no network:
+ * Four deterministic checks over apps/web/agent/tools, no network:
  *   1. No tool file imports eve's bare defineTool.
  *   2. Every tool built with defineBoundedTool declares a deadlineMs.
  *   3. Every declared deadline is a known TOOL_DEADLINE tier, or a bare
  *      number carrying a comment that says what measured it.
+ *   4. Every tool declares `repeatable`, which decides whether the timeout
+ *      message invites a retry. There is no default on purpose: guessing
+ *      true for a tool that texts a parent sends the text twice, so an
+ *      author has to state it.
  *
  * Usage: node --experimental-strip-types scripts/tool-deadline-check.mts
  */
@@ -53,6 +57,7 @@ const files = readdirSync(path.join(repoRoot, TOOLS_DIR))
 
 let bounded = 0;
 let disabled = 0;
+let repeatableCount = 0;
 
 for (const name of files) {
   const relativePath = path.join(TOOLS_DIR, name);
@@ -92,6 +97,17 @@ for (const name of files) {
     continue;
   }
 
+  const repeatables = [...source.matchAll(/^\s*repeatable:\s*(true|false),$/gm)];
+  if (repeatables.length !== definitions.length) {
+    problems.push(
+      `${relativePath}: ${definitions.length} tool definition(s) but ` +
+        `${repeatables.length} \`repeatable: true|false\` declaration(s). State whether a ` +
+        `second call after an unknown outcome can reach the parent, spend money, or ` +
+        `duplicate a record. When unsure, false.`,
+    );
+    continue;
+  }
+
   for (const [, value] of deadlines) {
     const tier = value.trim().match(/^TOOL_DEADLINE\.(\w+)$/);
     if (tier) {
@@ -124,6 +140,31 @@ for (const name of files) {
     }
   }
 
+  // A tool claiming to be repeatable must not visibly send, spend, or
+  // insert. This is a deny-list, and a deny-list is a poor judge of what
+  // code means, so it is deliberately only a floor: the real control is
+  // the author stating `repeatable` and this file explaining the bar. It
+  // fails safe, because the only way to trip it is to claim a retry is
+  // harmless in a file that texts somebody. Anything it flags wrongly is
+  // resolved by moving the effect out or marking the tool false, never by
+  // widening this list.
+  if (repeatables.some(([, value]) => value === "true")) {
+    const effects = [
+      ...source.matchAll(/\b(send[A-Z]\w*|upload[A-Z]\w*|insert[A-Z]\w*|create[A-Z]\w*|save[A-Z]\w*)\(/g),
+    ]
+      .map((match) => match[1])
+      .filter((name) => !name.startsWith("createHash") && !name.startsWith("createContext"));
+    if (effects.length > 0) {
+      problems.push(
+        `${relativePath}: marked repeatable but calls ${[...new Set(effects)].join(", ")}. ` +
+          `A retry after an unknown outcome would run that again. Mark it false, or move ` +
+          `the effect out of the tool.`,
+      );
+      continue;
+    }
+    repeatableCount += 1;
+  }
+
   bounded += 1;
 }
 
@@ -138,6 +179,7 @@ if (problems.length > 0) {
 }
 
 console.log(
-  `Tool deadline guard passed: ${bounded} bounded tool file(s), ` +
+  `Tool deadline guard passed: ${bounded} bounded tool file(s) ` +
+    `(${repeatableCount} repeatable, ${bounded - repeatableCount} not), ` +
     `${disabled} disabled sentinel(s), tiers ${TIERS.join("/")}.`,
 );

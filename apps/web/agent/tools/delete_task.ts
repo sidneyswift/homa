@@ -12,6 +12,7 @@ export default defineBoundedTool({
   description:
     "Permanently delete one of this family's CUSTOM scheduled tasks. Only after the parent clearly confirms which one, in this conversation. Built-in tasks (morning brief, evening check-in) cannot be deleted, only paused with update_task.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: z.object({
     taskId: z.string().uuid().describe("The id from list_tasks."),
   }),

@@ -65,6 +65,7 @@ export default defineBoundedTool({
   description:
     "Save the title, optional household materials, three to five teaching steps, and one practice suggestion for the trusted subject lesson build. Lesson and family identity come from the session, not this tool input.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: saveSubjectLessonContentInputSchema,
   async execute(input, ctx) {
     return saveSubjectLessonContentForTrustedSession(

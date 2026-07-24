@@ -31,6 +31,7 @@ export default defineBoundedTool({
   description:
     "Text the parent one short progress message BEFORE slow work in an SMS conversation. Call it first when substantial reasoning, current research, several dependent tools, or a material build would otherwise leave her waiting in silence. Keep the line specific to her request. Do not use it for greetings, quick answers, clarifying questions, signup, consent, invitations, account linking, or one-step record updates. One progress text is allowed per slow turn. The completed reply remains the only reply to the parent's text. On web chat, do not call this: write one short sentence in your reply instead, then start the work.",
   deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: headsUpInput,
   async execute(input, ctx) {
     const attributes = ctx.session.auth.current?.attributes as

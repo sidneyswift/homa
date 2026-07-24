@@ -22,6 +22,7 @@ export default defineBoundedTool({
   description:
     "Retire one saved memory that is wrong or stale, matched by a distinctive phrase from its content. If the parent corrects a fact, forget the old entry and remember the corrected one in the same turn. The old entry stays in searchable history; it just stops being current.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: z.object({
     match: z
       .string()

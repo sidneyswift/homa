@@ -25,6 +25,7 @@ export default defineBoundedTool({
   description:
     "Show the parent an already-made material again, exactly as it is: the card reappears in this chat on web, or the preview picture and direct printable PDF link get re-texted on SMS. Use it when she asks to see, print, or re-send something that exists (\"can you send it again?\", \"I don't see it\", \"print that one from last week\"), with the id from find_materials or an earlier create result. Never rebuild a page just to show it again.",
   deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({
     materialId: z
       .uuid()

@@ -22,6 +22,7 @@ export default defineBoundedTool({
   description:
     "Stop a running background build, only on the parent's clear request. Everything already built stays saved. If a part is being built right now, it finishes that part first, then stops.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: z.object({
     jobId: z.uuid().describe("The build to stop, from get_agent_job_status or your context."),
     reason: z

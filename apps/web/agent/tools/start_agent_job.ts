@@ -22,6 +22,7 @@ export default defineBoundedTool({
   description:
     "Start a finite background job that builds in stages over time, for a skill that needs it (a multi-week curriculum, a multi-part project). Only call this after the skill's procedure says to, and after the parent has confirmed the scope. familyId is taken from the session, never from you. If a job for this skill and child is already running, this returns that one instead of starting a second.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: z.object({
     skill: z
       .string()

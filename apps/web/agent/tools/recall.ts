@@ -61,6 +61,7 @@ export default defineBoundedTool({
   description:
     "Search this family's own history with Homa: past phone calls, past chat messages, and saved memories. Use whenever the parent refers to something you do not see in the current context ('like we talked about', 'that plan from last week', 'what did I say about...') before ever saying you do not know or remember.",
   deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: true,
   inputSchema: z.object({
     query: z
       .string()

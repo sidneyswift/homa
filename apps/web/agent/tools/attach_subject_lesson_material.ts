@@ -62,6 +62,7 @@ export default defineBoundedTool({
   description:
     "Attach one create_printable material to the trusted subject lesson build after its review passes or review is unavailable. The server re-checks family, child, lesson provenance, and build attempt.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: attachSubjectLessonMaterialInputSchema,
   async execute(input, ctx) {
     return attachSubjectLessonMaterialForTrustedSession(

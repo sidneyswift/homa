@@ -22,6 +22,7 @@ export default defineBoundedTool({
   description:
     "Start or resume signing this texter up for Homa. Call it when an unlinked texter says yes to getting set up, or when a mid-signup conversation needs to know what is still missing. Returns the checklist of what to collect next. Never call it for families that already have their report.",
   deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({}),
   async execute(_input, ctx) {
     const session = await resolveSignupSession(ctx.session.auth.current?.attributes);

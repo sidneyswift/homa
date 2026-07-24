@@ -59,23 +59,33 @@ import type { z } from "zod";
 /** Thrown when a tool outruns its declared deadline. */
 export class ToolDeadlineError extends Error {
   readonly deadlineMs: number;
+  readonly repeatable: boolean;
 
-  constructor(deadlineMs: number) {
+  constructor(deadlineMs: number, repeatable: boolean) {
     // Written for the model, which is the only reader: eve turns this into
     // a tool-error in the transcript. It says what is true (we stopped
-    // waiting) without claiming what is not (that nothing happened) and
-    // without inviting a repeat that could double-text a parent. A write
-    // may well have landed with only the reply lost, so "unknown" is the
-    // honest state and the safe one to report.
+    // waiting) without claiming what is not. A write may well have landed
+    // with only the reply lost, so "unknown" is the honest state and the
+    // safe one to report.
+    //
+    // Whether a retry is safe is decided here, by the tool's own declared
+    // `repeatable`, not left for the model to infer from the tool's name.
+    // The first draft of this message said "try once more if the work is
+    // cheap to repeat", which is an invitation to send a second text to a
+    // real parent.
     super(
       `This tool did not answer within ${Math.round(deadlineMs / 1000)}s, so it was given up ` +
         "on. Whether its work finished is unknown. Do not tell the parent it is done and do " +
-        "not assume it failed. If this tool only reads, call it again. If it sends, spends, " +
-        "or saves anything, do not repeat it: say plainly that you could not confirm this " +
-        "step, and let her decide.",
+        "not assume it failed. " +
+        (repeatable
+          ? "This tool is safe to repeat: call it again."
+          : "This tool is NOT safe to repeat, because it sends, spends, or saves something. " +
+            "Do not call it again. Say plainly that you could not confirm this step, and let " +
+            "her decide what to do."),
     );
     this.name = "ToolDeadlineError";
     this.deadlineMs = deadlineMs;
+    this.repeatable = repeatable;
   }
 }
 
@@ -119,6 +129,7 @@ export type ToolDeadline = (typeof TOOL_DEADLINE)[keyof typeof TOOL_DEADLINE];
 export async function withToolDeadline<T>(
   deadlineMs: number,
   work: () => Promise<T> | T,
+  repeatable = false,
 ): Promise<T> {
   const running = (async () => await work())();
   // The race below stops awaiting this promise the moment the deadline
@@ -132,7 +143,10 @@ export async function withToolDeadline<T>(
     return await Promise.race([
       running,
       new Promise<never>((_resolve, reject) => {
-        timer = setTimeout(() => reject(new ToolDeadlineError(deadlineMs)), deadlineMs);
+        timer = setTimeout(
+          () => reject(new ToolDeadlineError(deadlineMs, repeatable)),
+          deadlineMs,
+        );
       }),
     ]);
   } finally {
@@ -155,6 +169,20 @@ export function defineBoundedTool<TSchema extends z.ZodType, TOutput>(definition
   /** How long this tool may legitimately take. Prefer a TOOL_DEADLINE
    * tier; a bare number needs a comment saying what measured it. */
   deadlineMs: number;
+  /**
+   * May Homa call this again when the outcome is unknown?
+   *
+   * True only when a second call cannot reach the parent, cannot spend
+   * money, and cannot leave a duplicate product record. Reads qualify.
+   * Best-effort telemetry (usage events, gap logs) does not disqualify
+   * one, since those writers are already duplicate-tolerant by design.
+   *
+   * Anything that texts, emails, generates, uploads, or inserts a row a
+   * parent would see twice is false. When genuinely unsure, false: the
+   * cost is Homa saying she could not confirm a step, and the cost of
+   * being wrong the other way is a parent getting the same text twice.
+   */
+  repeatable: boolean;
   execute(input: z.output<TSchema>, ctx: ToolContext): Promise<TOutput> | TOutput;
   // Both mirror eve's own defineTool overload rather than restating the
   // shapes; ApprovalContextInput is conditional on TInput, so a hand-written
@@ -162,11 +190,11 @@ export function defineBoundedTool<TSchema extends z.ZodType, TOutput>(definition
   approval?: ToolDefinition<z.output<TSchema>, unknown>["approval"];
   toModelOutput?: ToolDefinition<unknown, TOutput>["toModelOutput"];
 }): ToolDefinition<z.output<TSchema>, TOutput> {
-  const { deadlineMs, execute, ...rest } = definition;
+  const { deadlineMs, repeatable, execute, ...rest } = definition;
   return defineTool({
     ...rest,
     async execute(input: z.output<TSchema>, ctx: ToolContext): Promise<TOutput> {
-      return await withToolDeadline(deadlineMs, () => execute(input, ctx));
+      return await withToolDeadline(deadlineMs, () => execute(input, ctx), repeatable);
     },
   }) as ToolDefinition<z.output<TSchema>, TOutput>;
 }

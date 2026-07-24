@@ -19,6 +19,7 @@ export default defineBoundedTool({
   description:
     "Add one child during text signup: name plus their full birthday (month, day, and year). Returns the child's first checklist question when they are in the scored range (ages 2 to 16).",
   deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({
     name: z.string().min(1).max(80),
     birthDate: z

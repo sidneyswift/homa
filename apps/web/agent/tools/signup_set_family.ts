@@ -16,6 +16,7 @@ export default defineBoundedTool({
   description:
     "Save the signing-up parent's name (and optionally their US state or a family display name) during text signup. Use exactly what she gave; never invent a state.",
   deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({
     parentName: z.string().min(1).max(100).describe("Her name as she gave it."),
     familyName: z.string().max(80).optional().describe("Only if she offered one; otherwise omitted."),

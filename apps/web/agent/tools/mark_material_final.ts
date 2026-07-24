@@ -34,6 +34,7 @@ export default defineBoundedTool({
   description:
     "Mark a material as the approved final version after the parent clearly approves it ('great', 'print it', 'she loves it'). Earlier drafts in its revision chain are superseded and cleaned up; the final becomes reusable as a reference for future materials. Use the id from the create_printable result.",
   deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: z.object({
     materialId: z.uuid().describe("The approved version's id from the create_printable result."),
   }),
