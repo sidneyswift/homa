@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import {
   getMaterialCardCaller,
@@ -18,9 +21,10 @@ import { sendHomaSms } from "../../lib/voice/telnyx-api";
  * direct PDF link. No re-render, no new row; the review gate on SMS delivery is
  * the same one create_printable enforces.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Show the parent an already-made material again, exactly as it is: the card reappears in this chat on web, or the preview picture and direct printable PDF link get re-texted on SMS. Use it when she asks to see, print, or re-send something that exists (\"can you send it again?\", \"I don't see it\", \"print that one from last week\"), with the id from find_materials or an earlier create result. Never rebuild a page just to show it again.",
+  deadlineMs: TOOL_DEADLINE.fetch,
   inputSchema: z.object({
     materialId: z
       .uuid()

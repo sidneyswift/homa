@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { saveFamilyBasicsFromSms } from "../../lib/sms-onboarding";
 import { NOT_SMS_REFUSAL, resolveSignupSession } from "../../lib/signup-session";
 
@@ -9,9 +12,10 @@ import { NOT_SMS_REFUSAL, resolveSignupSession } from "../../lib/signup-session"
  * name, optional family display name, optional US state. Address is
  * never collected over SMS by design.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Save the signing-up parent's name (and optionally their US state or a family display name) during text signup. Use exactly what she gave; never invent a state.",
+  deadlineMs: TOOL_DEADLINE.fetch,
   inputSchema: z.object({
     parentName: z.string().min(1).max(100).describe("Her name as she gave it."),
     familyName: z.string().max(80).optional().describe("Only if she offered one; otherwise omitted."),

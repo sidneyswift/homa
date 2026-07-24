@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import {
   ensureSignupFamily,
   nextChecklistItem,
@@ -15,9 +18,10 @@ import { NOT_SMS_REFUSAL, resolveSignupSession } from "../../lib/signup-session"
  * conversation always knows the next question. Safe to call again
  * mid-flow: it never duplicates, only reports progress.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Start or resume signing this texter up for Homa. Call it when an unlinked texter says yes to getting set up, or when a mid-signup conversation needs to know what is still missing. Returns the checklist of what to collect next. Never call it for families that already have their report.",
+  deadlineMs: TOOL_DEADLINE.fetch,
   inputSchema: z.object({}),
   async execute(_input, ctx) {
     const session = await resolveSignupSession(ctx.session.auth.current?.attributes);

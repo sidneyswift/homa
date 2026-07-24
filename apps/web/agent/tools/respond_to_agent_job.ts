@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { agentJobsEnabled } from "../../lib/jobs/flag";
 import { refuseJobSpawnedSession } from "../../lib/jobs/guard";
@@ -15,9 +18,10 @@ import { respondToJob } from "../../lib/jobs/store";
  * JOB_CONTRACTS (for curriculum-studio: "approve_stage", "revise_plan").
  * familyId comes from the session; the acting adult is recorded.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Steer a running background build: pause it, resume it, approve the part waiting for review so it keeps going, or apply a change to the parts not yet built. Pass the job's id and a response object whose 'action' says what to do; the skill tells you which actions its builds accept.",
+  deadlineMs: TOOL_DEADLINE.quick,
   inputSchema: z.object({
     jobId: z.uuid().describe("The build to steer, from get_agent_job_status or your context."),
     response: z

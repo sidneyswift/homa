@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import {
   setTaskPaused,
@@ -10,9 +13,10 @@ import {
 } from "../../lib/tasks/custom";
 import { refuseScheduleSpawnedSession } from "../../lib/tasks/guard";
 
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Change one of this family's scheduled tasks: pause or resume any task, edit a custom task's label or instructions, or change ANY task's days, hour, or delivery (text, email, or none = saved to the tasks page only). Built-in words stay Homa's: the morning brief and evening check-in label and prompt can never change. Use list_tasks first when the target is ambiguous.",
+  deadlineMs: TOOL_DEADLINE.quick,
   inputSchema: z.object({
     taskId: z.string().uuid().describe("The id from list_tasks."),
     paused: z.boolean().optional().describe("Set to pause/resume; works for every kind."),

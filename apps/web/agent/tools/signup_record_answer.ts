@@ -1,7 +1,10 @@
 import { MAP_ANSWERS } from "@homa/core";
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import {
   legacyProgressTransportIdempotencyKey,
 } from "../../lib/child-progress/legacy-adapters";
@@ -15,9 +18,10 @@ import { NOT_SMS_REFUSAL, resolveSignupSession } from "../../lib/signup-session"
  * and the tool stores the matching chip. The result always carries the
  * next question, so the conversation never stalls or invents items.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Record the parent's answer to the current checklist question during text signup, translated to one of: easily (does it confidently), getting_there (sometimes, with help, emerging), not_yet (not doing it), not_sure, skip (she declined). When her reply is genuinely ambiguous, ask ONE short clarifying question instead of guessing. Returns the next question, or checklist completion.",
+  deadlineMs: TOOL_DEADLINE.fetch,
   inputSchema: z.object({
     childId: z.uuid().describe("The child this answer is for (from signup_add_child or begin_text_signup)."),
     itemId: z.string().min(1).describe("The question item id you are answering, exactly as the tool gave it."),

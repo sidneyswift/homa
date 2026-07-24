@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { agentJobsEnabled } from "../../lib/jobs/flag";
 import { refuseJobSpawnedSession } from "../../lib/jobs/guard";
@@ -15,9 +18,10 @@ import { cancelJob } from "../../lib/jobs/store";
  * familyId comes from the session, so a model id only ever cancels this
  * family's own build.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Stop a running background build, only on the parent's clear request. Everything already built stays saved. If a part is being built right now, it finishes that part first, then stops.",
+  deadlineMs: TOOL_DEADLINE.quick,
   inputSchema: z.object({
     jobId: z.uuid().describe("The build to stop, from get_agent_job_status or your context."),
     reason: z

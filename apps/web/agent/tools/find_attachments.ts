@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { mapDb } from "../../lib/map/db";
 
@@ -95,9 +98,10 @@ async function findAttachmentsPinned(
   `;
 }
 
-export default defineTool({
+export default defineBoundedTool({
   description:
     "List files the parent has shared in chat (photos, PDFs, documents), newest first, each with its url, caption, kind, and date. Use it when she refers to something she already sent ('the photo I sent you', 'that page from last week'), especially in a later session where the original message is out of reach; never ask her to re-send a file this can find. An image url here is inside this family's own space: pass it to generate_image as a referenceImageUrls entry, or embed it with <img src=\"...\"> in create_printable html.",
+  deadlineMs: TOOL_DEADLINE.quick,
   inputSchema: z.object({
     kind: z
       .enum(ATTACHMENT_KINDS)

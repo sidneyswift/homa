@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { getChildrenPinned } from "../../lib/agent-pinned";
 import { ageInMonths } from "../../lib/child-age";
@@ -10,9 +13,10 @@ import { ageInMonths } from "../../lib/child-age";
  * the session auth context, never from model input, and the query runs
  * under the caller's own RLS, so a bad familyId cannot cross a tenant wall.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Re-read the children in this family with their ages, interests, and current focus. The same data auto-loads at every turn start, so only call this to double-check mid-conversation, e.g. right after a profile change.",
+  deadlineMs: TOOL_DEADLINE.quick,
   inputSchema: z.object({}),
   async execute(_input, ctx) {
     let access;

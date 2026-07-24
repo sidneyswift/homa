@@ -1,8 +1,11 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { normalizeUsPhoneE164 } from "@homa/core";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { respondToFamilySmsInvite } from "../../lib/family-sms-invite-response";
 
 /**
@@ -14,9 +17,10 @@ import { respondToFamilySmsInvite } from "../../lib/family-sms-invite-response";
 
 const responseInput = z.object({});
 
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Apply the family-invite response already classified from this unlinked SMS sender's complete message. The authenticated channel supplies the exact invitation, phone, and accept-or-decline decision. A yes only asks the original parent to confirm the full number; it does not grant access. There are no model-selected inputs.",
+  deadlineMs: TOOL_DEADLINE.fetch,
   inputSchema: responseInput,
   async execute(_input, ctx) {
     const attributes = ctx.session.auth.current?.attributes as

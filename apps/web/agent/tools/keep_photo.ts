@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { emitMapEvent } from "../../lib/map/events";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
@@ -22,9 +25,10 @@ import {
  * already work: <img> in create_printable html and generate_image
  * references, with no changes to those tools.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Save one search_photos result into this family's own library and get back a permanent image URL. Pass a photoToken exactly as search_photos returned it. The returned URL is the only web-photo URL you may use: embed it with <img> in create_printable html (size it with CSS), or pass it to generate_image as a reference. Keep only the photo you will actually use.",
+  deadlineMs: TOOL_DEADLINE.fetch,
   inputSchema: z.object({
     photoToken: z
       .string()

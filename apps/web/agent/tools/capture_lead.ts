@@ -1,8 +1,11 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { normalizeUsPhoneE164 } from "@homa/core";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { updatePhoneLead } from "../../lib/phone-leads";
 
 /**
@@ -39,9 +42,10 @@ const captureInput = z.object({
     .describe("True when your reply includes the signup link, so the lead is marked invited."),
 });
 
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Save what an unlinked texter shares about herself (name, email, situation) to Homa's lead record, and mark when you have given her the signup link. Use it the moment details come up; never ask for details just to fill fields. Only works on text conversations from numbers without an account.",
+  deadlineMs: TOOL_DEADLINE.fetch,
   inputSchema: captureInput,
   async execute(input, ctx) {
     const attributes = ctx.session.auth.current?.attributes as

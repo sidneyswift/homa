@@ -1,7 +1,10 @@
 import { RESEARCH_STAGES } from "@homa/core";
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import {
   KNOWLEDGE_LENSES,
   KNOWLEDGE_TOPIC_TYPES,
@@ -41,9 +44,10 @@ export function saveKnowledgeToolResult(
  * cited, gated rows, never through private family context. Every write runs
  * the automated gate; rows that fail stay unavailable to families.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Save one researched finding to Homa's shared knowledge bank (general education knowledge only, never anything about a specific family or child). Only fleet research sessions may use this. Every claim needs a real, resolving citation URL.",
+  deadlineMs: TOOL_DEADLINE.fetch,
   inputSchema: z.object({
     topicType: z.enum(KNOWLEDGE_TOPIC_TYPES),
     topicKey: z

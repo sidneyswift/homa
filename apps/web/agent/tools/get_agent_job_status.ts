@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { agentJobsEnabled } from "../../lib/jobs/flag";
 import { getJobStatus } from "../../lib/jobs/store";
@@ -11,9 +14,10 @@ import { getJobStatus } from "../../lib/jobs/store";
  * family's own rows. Use this when the parent asks how a build is going;
  * quote what it returns, never invent a percentage or a finish date.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Check how a family's background builds are going: pass a jobId for one, or omit it to list all of this family's active builds. Returns real status and stage counts. Never guess progress or a finish date; report exactly what this returns.",
+  deadlineMs: TOOL_DEADLINE.quick,
   inputSchema: z.object({
     jobId: z
       .uuid()
