@@ -1,4 +1,7 @@
-import { defineTool } from "eve/tools";
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { z } from "zod";
 
 import { HOMESCHOOL_STYLES } from "@homa/core";
@@ -65,9 +68,11 @@ const profileInput = z
     { message: "Provide at least one of styles, strictness, curriculums, values." },
   );
 
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Save how this family homeschools: their approach, how structured they want to be, the curriculums they use, and what matters to them. Use it when she tells you any of these in passing. Send only what she said, and never guess an approach from something adjacent.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: profileInput,
   async execute(input, ctx) {
     let access;

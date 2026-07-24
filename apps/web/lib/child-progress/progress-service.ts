@@ -454,6 +454,22 @@ export class ChildProgressService {
     });
   }
 
+  /**
+   * The receipt spine's read: one child's whole ledger, quotes and all.
+   *
+   * getChildProgressView above prefers the cached projection, which is
+   * right for the Progress page and useless here: it holds one effective
+   * row per item and no quote at all, so neither min(observed_at) nor a
+   * parent's own words can be recovered from it. A receipt surface has to
+   * come down to the rows themselves.
+   */
+  getChildProgressLedger(
+    familyId: string,
+    childId: string,
+  ): Promise<ChildProgressProjectionInput | null> {
+    return this.repository.loadProjectionInput(familyId, childId);
+  }
+
   async recordJournalProgressEvidence(
     input: RecordJournalProgressEvidenceInput,
   ): Promise<RecordJournalProgressEvidenceResult> {

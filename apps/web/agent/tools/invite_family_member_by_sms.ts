@@ -1,10 +1,13 @@
 import { createHash } from "node:crypto";
 
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { normalizeUsPhoneE164 } from "@homa/core";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import {
   MissingFamilyContextError,
   resolveAgentAccess,
@@ -76,9 +79,11 @@ function inviteFailureNote(
   }
 }
 
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Invite another adult to this family's Homa by text after the linked parent gives you that adult's US phone number. Use only in a linked SMS conversation, only after the parent agrees to the offer, and only for one real child update. The first text is fixed anonymous consent copy with no child information. A recipient's yes still grants nothing; Homa asks the original parent to confirm the full number with a code before access or the update is released.",
+  deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: inviteInput,
   async execute(input, ctx) {
     const attributes = ctx.session.auth.current?.attributes as

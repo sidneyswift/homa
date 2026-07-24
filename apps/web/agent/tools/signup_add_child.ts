@@ -1,8 +1,11 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { isValidBirthDate } from "@homa/core";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { addChildFromSms, nextChecklistItem } from "../../lib/sms-onboarding";
 import { NOT_SMS_REFUSAL, resolveSignupSession } from "../../lib/signup-session";
 
@@ -12,9 +15,11 @@ import { NOT_SMS_REFUSAL, resolveSignupSession } from "../../lib/signup-session"
  * flows straight into it. The birthday is the full date (founder ruling
  * 2026-07-11: "get the full data so we know how old the kid is").
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Add one child during text signup: name plus their full birthday (month, day, and year). Returns the child's first checklist question when they are in the scored range (ages 2 to 16).",
+  deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({
     name: z.string().min(1).max(80),
     birthDate: z

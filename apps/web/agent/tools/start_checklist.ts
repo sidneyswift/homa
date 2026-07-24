@@ -1,4 +1,9 @@
-import { defineDynamic, defineTool } from "eve/tools";
+import { defineDynamic } from "eve/tools";
+
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
@@ -27,9 +32,11 @@ import { writeOnboardingRecord } from "../../lib/onboarding/store";
 
 const NO_CARD_CHANNELS = new Set(["sms", "email", "dispatch", "agent-job", "subject_lesson"]);
 
-const startChecklist = defineTool({
+const startChecklist = defineBoundedTool({
   description:
     "Open one child's questions on screen so the parent can answer them. Use when she is ready to start or continue a child's questions. Her taps save as she goes and she can stop anywhere. Do not use it to ask her a question yourself, and do not call it twice in a row for the same child.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: z.object({
     childId: z
       .uuid()

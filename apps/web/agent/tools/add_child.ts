@@ -1,4 +1,7 @@
-import { defineTool } from "eve/tools";
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { z } from "zod";
 
 import { MAP_KID_CAP } from "@homa/core";
@@ -40,9 +43,11 @@ const addChildInput = z.object({
     .describe("Anything she already told you this child loves. Leave empty rather than guessing."),
 });
 
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Add one child to this family, with their name and real birthday. Use when the parent introduces a child Homa does not have yet, including when she names two or three in a single message: call this once per child rather than sending her back through a card for facts she already typed. Do not use to edit a child who already exists; that is update_child_profile.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: addChildInput,
   async execute(input, ctx) {
     let access;

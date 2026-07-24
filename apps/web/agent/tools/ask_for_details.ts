@@ -1,4 +1,9 @@
-import { defineDynamic, defineTool } from "eve/tools";
+import { defineDynamic } from "eve/tools";
+
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { z } from "zod";
 
 /**
@@ -31,9 +36,11 @@ import { z } from "zod";
 
 const NO_CARD_CHANNELS = new Set(["sms", "email", "dispatch", "agent-job", "subject_lesson"]);
 
-const askForDetails = defineTool({
+const askForDetails = defineBoundedTool({
   description:
     "Put up a small card of fields for facts you need exactly right, instead of asking for them in a paragraph. Use 'family_basics' once, early, for what to call her and her state. Use 'homeschool_profile' once, right after basics, for any homeschool approach she follows (fully skippable). Use 'child' for one child Homa does not have yet, whether she brought the child up or you are turning to her kids for the first time. It is not a one-shot: call it again, once per child, for as many children as she has, the same way the old add-a-child form let her add one and then another. Say who the card is about in your own words BEFORE you call it: the card asks one question at a time and carries no heading, so a child card sent cold asks about a person nobody has named. She fills it in and it saves itself; you will hear what she entered. If she names a child's facts in full inside her own message instead of through the card, use add_child for that one instead of sending her back through fields she already filled in by typing. Do not ask for the same facts in text as well, and do not use this for anything you can simply ask about in conversation.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: true,
   inputSchema: z.object({
     kind: z
       .enum(["family_basics", "homeschool_profile", "child"])

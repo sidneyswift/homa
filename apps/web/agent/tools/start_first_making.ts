@@ -1,4 +1,9 @@
-import { defineDynamic, defineTool } from "eve/tools";
+import { defineDynamic } from "eve/tools";
+
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { z } from "zod";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
@@ -33,9 +38,11 @@ import { writeOnboardingRecord } from "../../lib/onboarding/store";
 
 const NO_CARD_CHANNELS = new Set(["sms", "email", "dispatch", "agent-job", "subject_lesson"]);
 
-const startFirstMaking = defineTool({
+const startFirstMaking = defineBoundedTool({
   description:
     "Start making one real printable page for a child in the background, from what the parent just told you about them. Use it once per sitting, at a beat boundary, when her own words hand you a theme (what the child loves). The page builds on its own after your reply ends and lands in the conversation and the Binder when it is ready, usually within several minutes. Never promise the page before this tool confirms it started.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: z.object({
     childId: z
       .uuid()

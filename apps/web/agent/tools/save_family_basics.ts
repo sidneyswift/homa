@@ -1,4 +1,7 @@
-import { defineTool } from "eve/tools";
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { z } from "zod";
 
 import { US_STATES } from "@homa/core";
@@ -61,9 +64,11 @@ const basicsInput = z
     { message: "Provide at least one of callMeName, familyName, usState, timeZone." },
   );
 
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Save the family's basics: what to call the parent, the family's own name, their US state, and their time zone. Send only the fields she actually gave you; anything left out keeps its current value.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: basicsInput,
   async execute(input, ctx) {
     let access;

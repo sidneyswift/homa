@@ -4,7 +4,11 @@ import { notFound, redirect } from "next/navigation";
 import { ProgressUnavailable } from "../../../../components/progress/progress-unavailable";
 import { ProgressView } from "../../../../components/progress/progress-view";
 import { getAppData } from "../../../../lib/app-data";
-import { getChildProgressView } from "../../../../lib/child-progress";
+import {
+  getChildProgressLedger,
+  getChildProgressView,
+} from "../../../../lib/child-progress";
+import { firstsPageFromLedger } from "../../../../lib/child-progress/firsts-from-ledger";
 import { liveProgressEnabled } from "../../../../lib/child-progress/flag";
 import { loadChildProgressPageState } from "../../../../lib/child-progress/page-state";
 import { progressRoutePolicy } from "../../../../lib/child-progress/route-policy";
@@ -42,9 +46,11 @@ export default async function ChildProgressPage({
   const child = data.children.find((entry) => entry.id === childId);
   if (!child) notFound();
 
-  // Lessons load alongside the view: both need only the family and the
-  // child already re-scoped above, so neither waits on the other.
-  const [pageState, lessons] = await Promise.all([
+  // Lessons and the firsts ledger load alongside the view: all three
+  // need only the family and the child already re-scoped above, so none
+  // waits on the others. The ledger read is degraded to null on failure
+  // so it can only ever cost the firsts door, never the Progress page.
+  const [pageState, lessons, ledger] = await Promise.all([
     loadChildProgressPageState(
       {
         familyId: data.family.id,
@@ -60,6 +66,7 @@ export default async function ChildProgressPage({
     lessonListenEnabled()
       ? listLessonsForChild(data.family.id, child.id, 5)
       : Promise.resolve([]),
+    getChildProgressLedger(data.family.id, child.id).catch(() => null),
   ]);
   if (pageState.status === "unavailable") {
     console.error(
@@ -73,6 +80,20 @@ export default async function ChildProgressPage({
       />
     );
   }
+
+  // The firsts door only renders when there is something behind it. A
+  // door into an empty keepsake lands hardest on the child whose answers
+  // were honest (all getting_there / not_yet, so not "never assessed"),
+  // which is exactly who the celebration spec's named-worry rail
+  // protects. hasFirsts is a boolean, never a count.
+  const hasFirsts =
+    ledger !== null &&
+    firstsPageFromLedger({
+      ledger,
+      otherChildNames: data.children
+        .filter((entry) => entry.id !== child.id)
+        .map((entry) => entry.name),
+    }).rows.length > 0;
 
   // The permanent token report stays reachable from live Progress
   // (agent-led-live-progress ruling: token and share reports remain).
@@ -96,6 +117,7 @@ export default async function ChildProgressPage({
       reportHref={report?.token ? `/onboarding/r/${report.token}` : null}
       report={report}
       eras={eras}
+      hasFirsts={hasFirsts}
       kids={data.children.map((entry) => ({
         id: entry.id,
         name: entry.name,

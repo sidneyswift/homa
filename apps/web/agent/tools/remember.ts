@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import {
   MEMORY_ENTRY_MAX_CHARS,
@@ -17,9 +20,11 @@ import { embedText } from "../../lib/learning/embeddings";
  * it can re-enter future system prompts (M2-14 floor), and the family
  * character budget forces consolidation instead of hoarding.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Save one durable fact about this family so future conversations remember it. Use for stable facts (routines, preferences, family rhythm) or per-child what-works teaching signal. Save facts the moment you learn them. Not for task progress, one-off logistics, secrets, or anything sensitive shared in distress.",
+  deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({
     content: z
       .string()

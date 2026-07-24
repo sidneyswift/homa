@@ -21,6 +21,19 @@ describe("kidSwitchTargetPath", () => {
       "/app/child-two/report",
     );
   });
+
+  it("sends a firsts-page switch to the sibling's PROGRESS page", () => {
+    // Never the sibling's firsts page: that lands an empty keepsake on
+    // top of a full one and performs a comparison in one tap.
+    assert.equal(
+      kidSwitchTargetPath("/app/child-one/firsts", "child-two"),
+      "/app/child-two/progress",
+    );
+  });
+
+  it("stays put on an unrelated app path", () => {
+    assert.equal(kidSwitchTargetPath("/app/planner", "child-two"), null);
+  });
 });
 
 describe("pageShowsContextSwitcher", () => {

@@ -1,5 +1,10 @@
-import { defineDynamic, defineTool } from "eve/tools";
+import { defineDynamic } from "eve/tools";
 import { z } from "zod";
+
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 
 /**
  * The choice card: when Homa genuinely cannot proceed without the
@@ -77,9 +82,11 @@ const questionSchema = z.object({
     ),
 });
 
-const askUserQuestions = defineTool({
+const askUserQuestions = defineBoundedTool({
   description:
     'Ask the parent to choose ONLY when the answer is a fact about her household that you cannot research, infer from the family block, or pick well yourself: which child she means when the family has several and she named none, which of two curriculums they own she is asking about. This renders a card with tappable options, one question on screen at a time; her taps come back as an ordinary message. Ask the FEWEST questions that unblock you, usually one, never more than four. Build first and reach for this rarely. When she asks you to make something, make the most sensible version now and offer changes once she can see it, rather than opening a card to spec it first. When she asks what to do, research it and propose one answer. A card returns her question to her unanswered, so it is the wrong move whenever your own judgment could settle it. Never use it for yes/no confirmations, for anything she could answer in a sentence, or to check work you should just do.',
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: true,
   inputSchema: z.object({
     questions: z
       .array(questionSchema)

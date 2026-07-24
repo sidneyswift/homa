@@ -3211,6 +3211,10 @@ await expectReadDenied("email_sends");
 // email_sends. Written by the unsubscribe route, the bounce/complaint
 // webhook, and the inbound "stop" handler; read by the drip sweep.
 await expectReadDenied("email_suppressions");
+// SMS suppression list (migration 2026-07-23): server-only deny-all.
+// Written by the inbound opt-out handler and the delivery path's
+// permanent-rejection classifier; read before any outbound SMS.
+await expectReadDenied("sms_suppressions");
 await expectReadDenied("cron_runs");
 // Founder alert acks (migration #81): deny-all, server-only; only the
 // founder-gated /admin action writes.

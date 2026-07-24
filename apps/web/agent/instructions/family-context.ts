@@ -22,11 +22,22 @@ import {
   type FamilyContextRows,
   type MemberRow,
 } from "../../lib/family-context";
+import {
+  TOOL_DEADLINE,
+  ToolDeadlineError,
+  withToolDeadline,
+} from "../../lib/agent-tool-deadline";
 import { loadFamilyChecklistStates } from "../../lib/onboarding/checklist-state";
 import { renderOnboardingContext } from "../../lib/onboarding/context-line";
 import { loadOnboardingState } from "../../lib/onboarding/store";
 import { recordContextSnapshot } from "../../lib/observability/agent-trace";
 import { isSlimMorningBriefDispatchContext } from "../../lib/tasks/brief-context";
+
+/** What Homa is told when this turn's family context is missing, whether
+ * the load failed or ran out of time. She keeps the conversation and drops
+ * the remembered facts, rather than inventing either. */
+const FAMILY_CONTEXT_UNAVAILABLE =
+  "The family context could not be loaded this turn. Rely on the conversation itself, offer to try again, and avoid stating remembered facts you cannot see.";
 
 /**
  * Per-family dynamic context (M2-01/M2-02): the cloud equivalent of the
@@ -337,24 +348,44 @@ export async function resolveFamilyContextInstructionMarkdown(
       "family context load failed:",
       error instanceof Error ? error.message : "unknown",
     );
-    return "The family context could not be loaded this turn. Rely on the conversation itself, offer to try again, and avoid stating remembered facts you cannot see.";
+    return FAMILY_CONTEXT_UNAVAILABLE;
   }
 }
 
 export default defineDynamic({
   events: {
     "turn.started": async (_event, ctx) => {
-      const markdown = await resolveFamilyContextInstructionMarkdown({
-        attributes: ctx.session.auth.current?.attributes as
-          | FamilyContextInstructionAttributes
-          | undefined,
-        sessionId: ctx.session.id,
-        // The dynamic-instructions callback context is typed without `turn`
-        // (SessionContext has it, DynamicResolverContext does not), so read
-        // it defensively; the recorder accepts null.
-        turnId:
-          (ctx.session as { turn?: { id?: string } }).turn?.id ?? null,
-      });
+      // Bounded for the same reason every tool is (lib/agent-tool-deadline.ts),
+      // and more urgently: this runs before the model on EVERY turn, so a
+      // stalled loader freezes the whole conversation without ever writing
+      // an agent_tool_calls row for the stuck-call sweep to find. The
+      // try/catch inside the resolver cannot help, because a promise that
+      // never settles never throws. On the quick tier because this is
+      // database work; there is no production latency series for it yet,
+      // so it inherits the tier rather than inventing a tighter number.
+      let markdown: string | null;
+      try {
+        markdown = await withToolDeadline(TOOL_DEADLINE.quick, () =>
+          resolveFamilyContextInstructionMarkdown({
+            attributes: ctx.session.auth.current?.attributes as
+              | FamilyContextInstructionAttributes
+              | undefined,
+            sessionId: ctx.session.id,
+            // The dynamic-instructions callback context is typed without `turn`
+            // (SessionContext has it, DynamicResolverContext does not), so read
+            // it defensively; the recorder accepts null.
+            turnId:
+              (ctx.session as { turn?: { id?: string } }).turn?.id ?? null,
+          }),
+        );
+      } catch (error) {
+        if (!(error instanceof ToolDeadlineError)) throw error;
+        console.error("family context load timed out; turn continues degraded");
+        // The same honest degradation the resolver's own catch returns: a
+        // turn that admits it cannot see remembered facts beats a turn
+        // that never arrives.
+        markdown = FAMILY_CONTEXT_UNAVAILABLE;
+      }
       return markdown === null ? null : defineInstructions({ markdown });
     },
   },

@@ -9,10 +9,11 @@ import { formatUsd } from "../../lib/model-pricing";
 import { QUIET_AFTER_DAYS, type FamilyStage } from "../../lib/admin/stage";
 import { AgentPromptButton } from "./agent-prompt-button";
 import { AlertAckButton } from "./alert-ack-button";
+import { ConversationCard } from "./conversation-card";
 import { FamiliesTable, type FamiliesTableState, type TableDir, type TableSort } from "./families-table";
 import { GrowthChart } from "./growth-chart";
 import { MorningOfferFunnel } from "./morning-offer-funnel";
-import { AlertRow, SectionHead, Spark, Tile } from "./ui";
+import { AlertRow, SectionHead, Tile } from "./ui";
 
 /**
  * /admin: the founder's overview, rebuilt 2026-07-23 around five
@@ -86,7 +87,10 @@ export default async function AdminOverviewPage({
     stage: STAGE_PARAMS.includes(params.stage as FamilyStage)
       ? (params.stage as FamilyStage)
       : null,
-    sort: params.sort === "stage" || params.sort === "heard" ? (params.sort as TableSort) : "joined",
+    sort:
+      params.sort === "stage" || params.sort === "heard" || params.sort === "messages"
+        ? (params.sort as TableSort)
+        : "joined",
     dir: params.dir === "asc" ? ("asc" as TableDir) : "desc",
     allRows: params.rows === "all",
   };
@@ -299,36 +303,17 @@ export default async function AdminOverviewPage({
         </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Tile
-          label="Families active"
-          value={`${data.activeFamilies} of ${data.snapshots.length}`}
-          sub={`messaged Homa ${rangeLabel}`}
-          subTone="sage"
-        />
-        <div className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm">
-          <p className="text-[0.72rem] font-bold text-muted">Heard from families</p>
-          <p className="mt-1 font-display text-[1.55rem] font-semibold leading-none text-strong">
-            {formatInt(data.userMessages)}
-          </p>
-          <p className="mt-1.5 text-[0.72rem] text-subtle">
-            {messagesPerActiveDay !== null
-              ? `messages · about ${messagesPerActiveDay.toFixed(1)} a day per active family`
-              : "messages"}
-          </p>
-          <div className="mt-1.5">
-            <Spark values={data.messagesByDay.length > 1 ? data.messagesByDay : [0, 0]} />
-          </div>
-        </div>
-        <Tile
-          label="Sent to families"
-          value={formatInt(sentTotal)}
-          sub={
-            data.undeliveredCount > 0
-              ? `${data.undeliveredCount} did not arrive ${rangeLabel}`
-              : `texts and emails · ${briefCount} morning briefs among them`
-          }
-          subTone={data.undeliveredCount > 0 ? "rose" : "muted"}
+      <div className="mt-3 grid items-start gap-3 md:grid-cols-3">
+        <ConversationCard
+          activeFamilies={data.activeFamilies}
+          totalFamilies={data.snapshots.length}
+          userMessages={data.userMessages}
+          messagesByDay={data.messagesByDay}
+          messagesPerActiveDay={messagesPerActiveDay}
+          sentTotal={sentTotal}
+          briefCount={briefCount}
+          undeliveredCount={data.undeliveredCount}
+          rangeLabel={rangeLabel}
         />
         <Tile
           label="AI cost (est)"

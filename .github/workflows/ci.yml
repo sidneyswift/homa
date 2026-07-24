@@ -55,6 +55,9 @@ jobs:
       - name: Design-token check (colour utilities name a declared token)
         run: pnpm check:design-tokens
 
+      - name: Tool deadline guard (no unbounded tool can freeze a turn)
+        run: pnpm check:tool-deadlines
+
       - name: Fleet-skill package checks (frontmatter, size limits, slash-menu parity)
         run: pnpm check:fleet-skills
 

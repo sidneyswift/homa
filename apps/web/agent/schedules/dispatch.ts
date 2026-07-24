@@ -18,15 +18,19 @@ import {
 } from "../../lib/tasks/dispatch-input";
 import { deliveryVersionForNewTaskRun } from "../../lib/tasks/delivery-version";
 import { enabledFamilyTaskKinds } from "../../lib/tasks/kinds";
+import { startManualTaskDispatch } from "../../lib/tasks/manual-dispatch";
+import { planReapedRunRetry } from "../../lib/tasks/reap-retry";
 import {
   dispatchScheduledTask,
   type ScheduledTaskDispatchDependencies,
 } from "../../lib/tasks/scheduled-dispatch";
 import {
   advanceTaskSchedule,
+  beginManualTaskRun,
   beginTaskRun,
   claimDueFamilyTasks,
   finishTaskRun,
+  isFirstFailedManualRun,
   isFirstFailedRunForScheduleDay,
   loadFamilyTaskForRun,
   recordSkippedScheduledTaskRun,
@@ -148,36 +152,69 @@ export default defineSchedule({
           await dispatchScheduledTask(task, now, dependenciesFor(task));
         }
 
-        // DR-2: a reaped morning brief that reached nobody gets exactly
-        // one same-day replacement. The failed run fell out of the
-        // outbox index, so a fresh run for the same schedule and local
-        // day can begin; the delivery window still applies, so a retry
-        // past noon records a skip instead of an afternoon text.
+        // DR-2 (widened 2026-07-23): a reaped run that reached nobody gets
+        // exactly one replacement. Morning briefs kept their original
+        // same-day behaviour: the failed run fell out of the outbox index,
+        // so a fresh run for the same schedule and local day can begin, and
+        // the delivery window still applies, so a retry past noon records a
+        // skip instead of an afternoon text.
+        //
+        // Custom tasks now retry too. A parent's own task could hang on a
+        // single tool call and die with nothing to show: the Swift family's
+        // "Story's alphabet pages, next batch" (2026-07-19) requested
+        // find_materials, never got a result, sat frozen, and was failed by
+        // the reaper three hours later, so the parent had to notice and
+        // re-run it by hand. One automatic retry turns that into a delay
+        // instead of a dead end.
+        //
+        // A manual run has no scheduled_for, so it re-runs through the
+        // manual door rather than the scheduled one: that keeps next_run_at
+        // and the daily outbox untouched, exactly as a Run now click does.
+        // journal_prompt is deliberately excluded: an evening prompt
+        // replayed hours late is worse than none.
         for (const run of reaped) {
-          if (run.kind !== "morning_brief" || run.reachedFamily) continue;
-          if (!run.familyId || !run.scheduleId || !run.scheduledFor) continue;
-          if (
-            !(await isFirstFailedRunForScheduleDay(
-              run.scheduleId,
-              run.scheduledFor,
-            ))
-          ) {
-            continue;
-          }
+          const plan = planReapedRunRetry(run);
+          if (!plan.retry) continue;
+          const firstFailure =
+            plan.door === "manual"
+              ? await isFirstFailedManualRun(plan.scheduleId)
+              : await isFirstFailedRunForScheduleDay(
+                  plan.scheduleId,
+                  plan.scheduledFor,
+                );
+          if (!firstFailure) continue;
           const loaded = await loadFamilyTaskForRun(
-            run.familyId,
-            run.scheduleId,
+            plan.familyId,
+            plan.scheduleId,
           );
           if (!loaded.ok) {
             console.error(
-              `reaped morning brief not retried for family ${run.familyId}: ${loaded.note}`,
+              `reaped ${run.kind} not retried for family ${run.familyId}: ${loaded.note}`,
             );
             continue;
           }
           console.error(
-            `retrying reaped morning brief for family ${run.familyId} (run ${run.runId})`,
+            `retrying reaped ${run.kind} for family ${run.familyId} (run ${run.runId})`,
           );
-          await dispatchScheduledTask(loaded.task, now, dependenciesFor(loaded.task));
+          if (plan.door === "manual") {
+            await startManualTaskDispatch(loaded.task, {
+              preflight: async (manualTask) =>
+                await preflightTaskDispatch(manualTask, "manual"),
+              beginRun: async (manualTask, deliveryVersion) =>
+                await beginManualTaskRun(manualTask, { deliveryVersion }),
+              createEpisode: async (manualTask) =>
+                await createProactiveEpisode({
+                  familyId: manualTask.familyId,
+                  now,
+                }),
+              sendSession: async ({ message, auth, target }) =>
+                await receive(dispatchChannel, { message, target, auth }),
+              setRuntimeSession: setTaskRunRuntimeSession,
+              finishRun: finishTaskRun,
+            });
+          } else {
+            await dispatchScheduledTask(loaded.task, now, dependenciesFor(loaded.task));
+          }
         }
 
         // Auto-recover accepted offers whose fulfillment turn dropped

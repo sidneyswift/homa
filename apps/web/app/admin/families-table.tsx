@@ -7,13 +7,18 @@ import { Pill } from "./ui";
 
 /**
  * One table for every family (founder ask 2026-07-23): name, funnel
- * stage, joined, last heard. Replaces the "New this week" and "The call
- * list" cards; quiet families are the Quiet filter, not a separate box.
- * All controls are links over searchParams, no client JS. Quiet rows use
- * gold ink, never red: family pace is not a failure (house rule).
+ * stage, joined, messages they sent, last heard. Replaces the "New this
+ * week" and "The call list" cards; quiet families are the Quiet filter,
+ * not a separate box. All controls are links over searchParams, no
+ * client JS. Quiet rows use gold ink, never red: family pace is not a
+ * failure (house rule).
+ *
+ * Every column that could be read in two directions names the direction
+ * (founder ask, same day): the message column is "From family", never a
+ * bare "Messages", and its counts follow the page's range toggle.
  */
 
-export type TableSort = "joined" | "stage" | "heard";
+export type TableSort = "joined" | "stage" | "heard" | "messages";
 export type TableDir = "asc" | "desc";
 
 export interface FamiliesTableState {
@@ -42,6 +47,10 @@ function compareSnapshots(sort: TableSort, dir: TableDir) {
       diff = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     } else if (sort === "stage") {
       diff = STAGE_ORDER.indexOf(a.stage) - STAGE_ORDER.indexOf(b.stage);
+    } else if (sort === "messages") {
+      // Desc puts the most talkative first; asc surfaces the silent ones,
+      // which is the call list read.
+      diff = b.userMessagesInRange - a.userMessagesInRange;
     } else {
       // Never-heard rows sort as oldest, so desc puts freshest voices first.
       const aAt = a.lastUserActivityAt ? new Date(a.lastUserActivityAt).getTime() : 0;
@@ -148,6 +157,12 @@ export function FamiliesTable({
               <th className="px-3 py-2 font-bold">
                 <HeaderLink label="Joined" sort="joined" base={base} state={state} />
               </th>
+              <th
+                className="px-3 py-2 font-bold"
+                title={`Messages this family sent Homa in the last ${rangeDays} days`}
+              >
+                <HeaderLink label="From family" sort="messages" base={base} state={state} />
+              </th>
               <th className="px-3 py-2 font-bold">
                 <HeaderLink label="Last heard" sort="heard" base={base} state={state} />
               </th>
@@ -178,6 +193,13 @@ export function FamiliesTable({
                   </td>
                   <td className="px-3 py-2 font-mono text-[0.78rem] text-muted">
                     {joinedLabel(s.createdAt, tz)}
+                  </td>
+                  <td className="px-3 py-2 font-mono text-[0.78rem]">
+                    {s.userMessagesInRange > 0 ? (
+                      <span className="text-muted">{s.userMessagesInRange}</span>
+                    ) : (
+                      <span className="text-subtle">0</span>
+                    )}
                   </td>
                   <td className="px-3 py-2">
                     {s.lastUserActivityAt ? (

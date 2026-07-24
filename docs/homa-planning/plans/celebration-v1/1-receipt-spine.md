@@ -15,6 +15,17 @@ codebase moves. Builds on docs/homa-planning/plans/2026-07-22-celebration-system
 
 ## Summary
 
+> **RULED AND SHIPPED, 2026-07-22 (`firsts-beginning-label`).** This plan cut the
+> beginning label and flagged it for a founder line. The founder ruled it back in,
+> worded about the RECORD rather than the child: "Where the record starts" over
+> "This is the first thing you told me about {child}. Everything you told me later
+> sits below it." That is the first of the two remedies this plan offered, and it is
+> true by construction because `observed_at` knows when a message arrived. The second
+> remedy, a capture-time `happened_on` column that would make the page's dates event
+> dates, was NOT taken and remains open as its own tranche. Everywhere below that says
+> isBeginning is CUT is superseded by that ruling.
+
+
 The receipt spine still ships as pure read-time projections over rows that already exist, with no migration and no new SQL, reusing loadProjectionInput (repository.ts:578-581, postgres-repository.ts:1908-1928) through one new service method. Three objection classes were fatal and are folded in wholesale. First, the retraction rule keyed on a sibling row's source, and four live paths supersede the founding row and append nothing (progress-service.ts:829-835 answer:null, :1018-1023 undo, :1169-1175 batch undo, :1376-1382 walk coverage), reachable from api/map/answer/route.ts:175; the rule is now row-scoped and source-blind: a first stands unless every row on the item was superseded with nothing left active, or that row lost a resolved conflict. Second, conflict resolution never supersedes the loser (check-in-service.ts has no supersedeEvidence call; effective-evidence.ts:296-339 selects the winner at read time), so a row the household settled against would have founded a first; resolved-conflict losers are now retired, and an open conflict no longer removes anything, it marks the line. Third, this is the first parent-facing render of stored quotes anywhere (only apps/web/app/admin/families/[familyId]/progress/page.tsx:133-134 does today), and the write path stores a whole inbound message as the quote (manage_child_progress.ts:73) or a model-chosen 400-character span validated only for provenance (claim-validation.ts:107-112), so a deterministic render gate now suppresses any quote naming another child in the roster or matching BANNED_WORDS/EM_DASH. Also folded in: onboarding_walk and legacy rows can no longer found a first (walk-prompt-store.ts:391 stamps the request clock on a batch of recollections carrying quote null), the beginning label is cut because observed_at is a report timestamp not an event date, taxonomy rows whose statement is a bare topic name (scorable.ts:45) render only behind a parent quote, the permanence copy is rewritten to be literally true, and the door is suppressed and the kid switcher redirected so an empty firsts page is never one tap from a sibling's full one.
 
 ## Files

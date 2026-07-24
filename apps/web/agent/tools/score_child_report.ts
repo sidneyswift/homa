@@ -1,4 +1,7 @@
-import { defineTool } from "eve/tools";
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { z } from "zod";
 
 import { MAP_BANK_VERSION, getMapSubject } from "@homa/core";
@@ -31,9 +34,11 @@ import { loadChecklistState } from "../../lib/onboarding/checklist-state";
  * blank report.
  */
 
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Score one child's answers into their progress report and show it to her here. Use it the moment a child has ANY answers saved and the parent is out of the questions, finished or not: three answers score into a real (smaller) report, and a parent who leaves early should still see what her answers built. It is safe to call again for a child who already has a report; you get the same numbers back.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: z.object({
     childId: z
       .uuid()

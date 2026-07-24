@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { setFamilyEmailSafe } from "../../lib/sms-onboarding";
 import { NOT_SMS_REFUSAL, resolveSignupSession } from "../../lib/signup-session";
 
@@ -10,9 +13,11 @@ import { NOT_SMS_REFUSAL, resolveSignupSession } from "../../lib/signup-session"
  * belongs to another Homa family is refused (no folding accounts
  * without a real sign-in).
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Save the email the report should go to, during text signup. Ask for it near the end ('where should I send the report?'). Refuses emails that already belong to another Homa account.",
+  deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({
     email: z.string().email().max(254),
   }),
