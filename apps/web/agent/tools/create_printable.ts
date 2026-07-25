@@ -28,7 +28,7 @@ import {
   getMaterialPinned,
   type MaterialSummary,
 } from "../../lib/materials/library";
-import { reviewArtifact } from "../../lib/materials/review-artifact";
+import { REVIEW_PAGE_CAP, reviewArtifact } from "../../lib/materials/review-artifact";
 import {
   hasPageBreakMarkup,
   imagePageBody,
@@ -166,7 +166,7 @@ export const createPrintableInputSchema = z.object({
     .max(100_000)
     .optional()
     .describe(
-      "PATH 1: the COMPLETE page content as HTML with its own <style> block (Google Fonts <link>s welcome). Placed inside a letter-size shell that owns @page and the footer. Design for 8.5x11in portrait. One page only: no page-break CSS (use pages for packets). No <script>.",
+      "PATH 1: the COMPLETE page content as HTML with its own <style> block (Google Fonts <link>s welcome). Placed inside a letter-size (8.5x11in) shell that owns @page and the footer, leaving a 7.3in wide x 9.5in tall content area for your HTML (0.6in side margins, 0.55in top, 0.95in reserved at the bottom for the footer). Content past that box is cut, not shrunk to fit, so size and space your layout to that exact area. One page only: no page-break CSS (use pages for packets). No <script>.",
     ),
   pageImageUrl: z
     .string()
@@ -772,13 +772,24 @@ const createPrintable = defineBoundedTool({
               : `The printable link was submitted by text.${pagesNote} Follow with ONE short text naming the child and the skill, and invite tweaks.`
             : "The material is made and saved, but text delivery failed. Tell her it's ready in her Homa chat on the web, and offer to tweak anything."
           : "NOT texted to her yet: fix the issues below (call again with revisesId set to this id), then the passing version sends."
-        : `The card with the preview and print button is already visible in chat.${pagesNote} Tell her it's ready in one warm sentence (child + skill), and invite tweaks; never paste the links.`;
+        : reviewPassed
+          ? `The card with the preview and print button is already visible in chat.${pagesNote} Tell her it's ready in one warm sentence (child + skill), and invite tweaks; never paste the links.`
+          : "This version is NOT shown to her: a flagged draft never renders as a card, on any channel. Fix the issues below (call again with revisesId set to this id); only a passing version appears, and only then is there anything to tell her.";
+    // The reviewer never sees pages past REVIEW_PAGE_CAP (input-token
+    // ceiling), so a pass on a longer document is not a full-document
+    // pass. Say so plainly rather than letting the agent claim more
+    // coverage than the checker actually had.
+    const reviewedPageCount = Math.min(rendered.pageCount, REVIEW_PAGE_CAP);
+    const coverageNote =
+      review !== null && rendered.pageCount > REVIEW_PAGE_CAP
+        ? ` The checker only saw pages 1 to ${reviewedPageCount} of ${rendered.pageCount}; the rest are unreviewed.`
+        : "";
     const reviewNote =
       review === null
         ? ""
         : review.pass
-          ? " Quality check passed."
-          : ` Quality check found issues: ${review.issues.join("; ")}.`;
+          ? ` Quality check passed.${coverageNote}`
+          : ` Quality check found issues: ${review.issues.join("; ")}.${coverageNote}`;
 
     return {
       created: true,
