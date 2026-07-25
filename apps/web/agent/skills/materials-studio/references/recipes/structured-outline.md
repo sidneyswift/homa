@@ -1,7 +1,8 @@
 # Structured outline / essay scaffold
 
-Golden anchor: pass `anchorIds: ["five-paragraph-essay-outline"]` to
-generate_image so the output matches the Homa outline bar (two-column
+Golden anchor: every generate_image call for a structured outline
+carries `anchorIds: ["five-paragraph-essay-outline"]`. The anchor leads
+the reference set and holds the Homa outline bar (two-column
 instruction and work layout, numbered section headers, labeled sub-fields
 with blank writing lines, warm and grown-up). Write your own prompt with
 your own content; the anchor sets the visual bar, not the specifics.

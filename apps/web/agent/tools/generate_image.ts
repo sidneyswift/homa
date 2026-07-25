@@ -61,7 +61,7 @@ export function subjectLessonImageGenerationRestriction(
  */
 const generateImage = defineBoundedTool({
   description:
-    "Generate one image through the image model: coloring art, a themed header, counting objects, an infographic, or an entire printable page in a single image. Write the full visual description yourself (style first). Optionally pass 1-4 reference image URLs from this family's own materials (a final's previewUrl, an earlier generate_image URL, or a child's photoUrl from the family context) to match a style, swap a character while keeping the layout, or draw the child as an illustrated character in their own material. A child's photo is a drawing reference only, never an identification input, and photorealistic renders of a child are off the table: keep the output in an illustration style. For some formats you can also pass anchorIds to ride on a shared Homa reference image that sets the visual quality bar (see the anchorIds menu). Returns a URL to embed in page HTML or pass to create_printable as pageImageUrl. Each call costs real money; reuse a good image instead of regenerating it.",
+    "Generate one image through the image model: coloring art, a themed header, counting objects, an infographic, or an entire printable page in a single image. Write the full visual description yourself (style first). Optionally pass 1-4 reference image URLs from this family's own materials (a final's previewUrl, an earlier generate_image URL, or a child's photoUrl from the family context) to match a style, swap a character while keeping the layout, or draw the child as an illustrated character in their own material. A child's photo is a drawing reference only, never an identification input, and photorealistic renders of a child are off the table: keep the output in an illustration style. When the material you are building is a format with a fleet anchor, every call for it also passes that anchorIds entry, so a shared Homa reference image holds the quality bar (see the anchorIds menu). Returns a URL to embed in page HTML or pass to create_printable as pageImageUrl. Each call costs real money; reuse a good image instead of regenerating it.",
   deadlineMs: TOOL_DEADLINE.generate,
   repeatable: false,
   inputSchema: z.object({
@@ -91,10 +91,16 @@ const generateImage = defineBoundedTool({
       .max(4)
       .optional()
       .describe(
-        `Optional fleet anchor ids: shared Homa reference images that set the visual quality bar and format for a material. The anchor leads the reference set. Choose only when one clearly fits what you are building, then still write your own prompt (your own example content and wording). Menu: ${ANCHOR_MENU}. Omit when none fits.`,
+        `Fleet anchor ids: shared Homa reference images that hold the visual quality bar for a FORMAT of material. Match the MATERIAL you are building against the menu, never this one image: when the material is a menu format, pass its anchor id on every generate_image call for that material, small spot art as much as a full page. The anchor leads the reference set; still write your own prompt (your own example content and wording). Menu: ${ANCHOR_MENU}. No menu entry names the material? Omit anchorIds; never pass a near-miss.`,
       ),
   }),
   async execute(input, ctx) {
+    // Retries after a transient failure tend to shed optional inputs while
+    // the model hunts for the failing knob; the anchor is never that knob,
+    // and dropping it silently lowers the material's quality bar.
+    const anchorRetryReminder = input.anchorIds?.length
+      ? " If you retry this image, keep the same anchorIds."
+      : "";
     const restriction = subjectLessonImageGenerationRestriction(
       input,
       ctx.session.auth.current?.attributes,
@@ -108,7 +114,10 @@ const generateImage = defineBoundedTool({
       access = await resolveAgentAccess(ctx.session.auth.current?.attributes);
     } catch (error) {
       if (error instanceof MissingFamilyContextError) {
-        return { generated: false, note: error.message };
+        return {
+          generated: false,
+          note: `${error.message}${anchorRetryReminder}`,
+        };
       }
       throw error;
     }
@@ -177,7 +186,10 @@ const generateImage = defineBoundedTool({
       anchorBytes,
     });
     if (!result.ok) {
-      return { generated: false, note: result.note };
+      return {
+        generated: false,
+        note: `${result.note}${anchorRetryReminder}`,
+      };
     }
 
     await emitMapEvent("materials.image_generated", {

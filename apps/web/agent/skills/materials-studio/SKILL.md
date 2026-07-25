@@ -174,6 +174,18 @@ from calibration runs, re-check after any model swap):
 
 ## Working with generate_image
 
+- Fleet anchor first: before you write any prompt, match the MATERIAL
+  you are building (never the single image) against the anchor menu on
+  generate_image's anchorIds input. Building a format that has an
+  anchor? Pass that anchor id on EVERY image call for the material,
+  the small spot art as much as the full page, retries and regenerations
+  included; the anchor leads the reference set and holds the format's
+  quality bar. Most formats have no anchor yet, and that is fine; never
+  pass a near-miss.
+- The anchor sets the bar, your prompt supplies the material: with an
+  anchor riding along, still write your OWN prompt with your own
+  example content (your own numbers, your own wording), never a copy
+  of the anchor's or any source's specifics.
 - Name the style first, subject second, constraints last:
 
 > black and white coloring book line art, thick clean outlines, no
@@ -404,25 +416,6 @@ Pick by what the page must DO, not by habit. When two formats fit, the
 subject rules and the child's evidence break the tie. When nothing here
 fits, design from the creation-path and design rules directly; a missing
 recipe is not a reason to force the wrong format.
-
-### Golden anchors (they set the visual bar)
-
-Many materials have a golden anchor: a finished Homa reference image that
-shows the exact quality bar. When you build one of these on the image or
-hybrid path, pass its id to generate_image as `anchorIds` so the image
-model matches the Homa look. Then still write your OWN prompt with your own
-example content (your own numbers, your own wording), never a copy of the
-anchor's or any source's specifics. The anchor sets the bar; your prompt
-supplies the material.
-
-The full menu of anchor ids, with when to reach for each, lives on
-generate_image's `anchorIds` input. It is rendered from the anchor
-registry at load, so it is always current; recipes also name their own
-anchor in their first paragraph.
-
-Most materials have no anchor yet, and that is fine: build from the recipe
-and design rules. Only pass an anchor id that clearly matches what you are
-making.
 
 | Format | Reach for it when the page must... | Recipe file |
 | --- | --- | --- |
