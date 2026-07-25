@@ -25,7 +25,8 @@ Use sources in this order:
 6. The secondary review heuristics in [STANDARDS.md](STANDARDS.md), only where
    they do not conflict with sources above.
 
-`emil-design-eng` is a retired historical reference. It is not Homa authority.
+The retired `emil-design-eng` skill was deleted 2026-07-24; its generic
+motion guidance was never Homa authority and lives on only in git history.
 UI-kit and template motion is prototype evidence unless a current route or test
 establishes that the same behavior ships.
 

@@ -6,7 +6,7 @@ type WebModeAttributes =
     }
   | undefined;
 
-const WEB_MODE_MARKDOWN = `
+export const WEB_MODE_MARKDOWN = `
 ## You are replying in web chat
 
 - Answer the parent's request fully.

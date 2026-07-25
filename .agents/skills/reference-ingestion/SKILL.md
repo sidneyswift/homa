@@ -141,7 +141,7 @@ List the actual shipped recipes at analysis time:
 ls apps/web/agent/skills/materials-studio/references/recipes/
 ```
 
-Never match against a remembered list; the library grows and any hardcoded list in prose goes stale (33 recipe files ship today).
+Never match against a remembered list; the library grows and any hardcoded count or list in prose goes stale.
 
 - **Which existing recipe would produce this?** Record filename slugs in `recipeMatch.matchedRecipes`.
 - **What patterns have no recipe?** Record in `recipeMatch.gaps`. **Gap names must be lowercase multi-word hyphen slugs** matching `^[a-z0-9]+(-[a-z0-9]+)+$` (e.g. `cut-and-sort-mat`, not "cut and paste sorting activity"). The coverage tracker in `apps/web/lib/materials/cosmo-funnel.ts` silently drops anything else. Free-prose description goes in `notes`.
@@ -199,9 +199,9 @@ plus name, what it is, best for, subjects, ages, creation path, example activity
 
 #### 6e. Anchors are founder-gated; you propose, never ship
 
-The golden anchor pipeline is: Homa-authored JPEG at `apps/web/lib/materials/anchor-sources/<id>.jpg` (compressed, roughly 1024px longest side, 60-150KB), then `pnpm build:material-anchors` regenerates `anchor-bytes.generated.ts` (never hand-edit it), a registry entry in `apps/web/lib/materials/anchors.ts`, a Golden anchors table row in materials-studio SKILL.md, and the `anchorIds` paragraph in the matching recipe file. `anchors.test.ts` enforces registry/bytes parity and that the library never shrinks.
+The golden anchor pipeline is: Homa-authored JPEG at `apps/web/lib/materials/anchor-sources/<id>.jpg` (compressed, roughly 1024px longest side, 60-150KB), then `pnpm build:material-anchors` regenerates `anchor-bytes.generated.ts` (never hand-edit it), a registry entry in `apps/web/lib/materials/anchors.ts`, and the `anchorIds` paragraph in the matching recipe file. There is no SKILL.md anchor table anymore (deleted 2026-07-25): generate_image's `anchorIds` schema menu renders from the registry and is the canonical when-to-use list, so a registry entry advertises itself. `anchors.test.ts` enforces registry/bytes parity and that the library never shrinks.
 
-Your ceiling: when a reference deserves a visual exemplar, write a **bench brief** into the ref JSON (`graduation.benchBrief`: what to build, which recipe, what the anchor must demonstrate). The founder produces and approves the page on `/admin/studio`; a coding session performs the five writes. Two of those writes (the SKILL.md anchor-table row and the recipe file's `anchorIds` paragraph) have no automated guard and must be hand-checked. Anchors also lead and share the 4-slot `generate_image` reference budget; family reference images get whatever slots anchors leave.
+Your ceiling: when a reference deserves a visual exemplar, write a **bench brief** into the ref JSON (`graduation.benchBrief`: what to build, which recipe, what the anchor must demonstrate). The founder produces and approves the page on `/admin/studio`; a coding session performs the four writes. The recipe file's `anchorIds` paragraph is guarded by `pnpm check:fleet-skills`, which resolves every anchorIds mention in skill markdown against the registry. Anchors also lead and share the 4-slot `generate_image` reference budget; family reference images get whatever slots anchors leave.
 
 ### 7. Guards for graduation writes
 

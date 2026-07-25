@@ -11,12 +11,9 @@ settled before style gets polished.
 
 ## How to dispatch this gate
 
-Use the current environment's delegation mechanism to run a second
-fresh-context, read-only subagent. Give it only the rulebook, surface context,
-settled reader calls, and copy named below, with no file-editing task. If the
-environment cannot enforce a read-only mode, state the restriction in the
-dispatch and keep all file edits with the main agent. The dispatch prompt must
-contain, in this order, pasted verbatim, never summarized:
+Dispatch mechanics, the delivery instruction, the order law, and the
+shared laws live in `.agents/copy-gate-protocol.md`; follow it exactly.
+This gate's dispatch prompt must contain, in this order, pasted verbatim:
 
 1. The full text of `.agents/skills/homa-copy-writer/SKILL.md` (the
    rulebook). For marketing surfaces, also the full text of
@@ -43,12 +40,8 @@ contain, in this order, pasted verbatim, never summarized:
    routed to the right layer). Name any calls the reader gate already
    settled, so the editor does not reopen them.
 4. The full copy under review.
-5. This delivery instruction, verbatim (subagents' scratch work is not
-   visible to the dispatcher; only the final response comes back):
-
-> Return ALL structured notes INLINE in your final response, as plain
-> markdown, grouped must-fix then suggestion. Never write "see above"
-> or summarize; paste every note in full.
+5. The protocol's delivery instruction, with one addition for this gate:
+   notes come back grouped must-fix then suggestion.
 
 ## What comes back, and what to do with it
 
@@ -69,7 +62,7 @@ banlist lines in `marketing/voice/house-style.md`.
 
 ## Laws
 
-The editor subagent is read-only and never touches files. Never paste real
-family data into a dispatch; fixtures and samples only. This skill never
-weakens a hard law on style grounds: if a law forces awkward phrasing, the
-fix is a plainer sentence, never the banned word.
+Shared laws (read-only subagent, no family data, order law) are in
+`.agents/copy-gate-protocol.md`. Specific to this gate: it never weakens a
+hard law on style grounds. If a law forces awkward phrasing, the fix is a
+plainer sentence, never the banned word.

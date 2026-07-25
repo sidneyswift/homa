@@ -1,5 +1,11 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { existsSync } from "node:fs";
+
+import {
+  DOC_REFERENCE_FILES,
+  validateDocReferences,
+} from "./docs-reference-check.mjs";
 import {
   lstatSync,
   readdirSync,
@@ -3888,6 +3894,30 @@ function check(repoRoot, { allowOpen }) {
     specialRowErrors,
   );
   validateMigrationEvidenceDrift(repoRoot, migrationDriftErrors);
+  const docReferenceErrors = [];
+  validateDocReferences(
+    {
+      docs: DOC_REFERENCE_FILES.map((docPath) => ({
+        path: docPath,
+        text: readFileSync(join(repoRoot, docPath), "utf8"),
+      })),
+      rootScripts: new Set(
+        Object.keys(
+          JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf8"))
+            .scripts ?? {},
+        ),
+      ),
+      webScripts: new Set(
+        Object.keys(
+          JSON.parse(
+            readFileSync(join(repoRoot, "apps/web/package.json"), "utf8"),
+          ).scripts ?? {},
+        ),
+      ),
+      pathExists: (relative) => existsSync(join(repoRoot, relative)),
+    },
+    docReferenceErrors,
+  );
   const claimLedger = inspectClaimLedger(repoRoot, rows, claimLedgerErrors);
   const structuralErrorGroups = [
     ["Immutable first-seen baseline", baselineErrors],
@@ -3897,6 +3927,7 @@ function check(repoRoot, { allowOpen }) {
     ["Lifecycle and disposition", lifecycleErrors],
     ["Special rows and aliases", specialRowErrors],
     ["Migration evidence drift", migrationDriftErrors],
+    ["Doc command and path references", docReferenceErrors],
     ["Claim ledger structure and safety", claimLedgerErrors],
   ];
   const structuralErrors = structuralErrorGroups.flatMap(([, errors]) => errors);
