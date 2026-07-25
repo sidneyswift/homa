@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { CreditCard, LogOut } from "lucide-react";
 
 import { ageInMonths, ageLabel, formatUsPhone } from "@homa/core";
 
 import { getAppData } from "../../../lib/app-data";
+import { familyHasBillingRelationship } from "../../../lib/billing/portal";
 import { getFamilyMemberEmails } from "../../../lib/family-profile";
 import { listPendingInvites } from "../../../lib/family-invites";
 import { getFamilyPhones } from "../../../lib/family-phone";
@@ -73,7 +74,7 @@ export default async function SettingsPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [familyPhones, memoriesResult, members, pendingInvites, memberEmails, homeschool] =
+  const [familyPhones, memoriesResult, members, pendingInvites, memberEmails, homeschool, hasBilling] =
     await Promise.all([
       getFamilyPhones(family.id),
       getMyMemories(family.id),
@@ -81,6 +82,7 @@ export default async function SettingsPage({
       listPendingInvites(family.id),
       getFamilyMemberEmails(family.id),
       getMyFamilyHomeschool(family.id),
+      familyHasBillingRelationship(family.id),
     ]);
   const childNames = new Map(children.map((child) => [child.id, child.name]));
   const memberIds = new Set(members.map((member) => member.user_id));
@@ -197,15 +199,26 @@ export default async function SettingsPage({
 
         <footer className="mt-6 flex flex-wrap items-center justify-between gap-3 px-1">
           <p className="text-sm text-muted">Signed in as {user?.email ?? "your account"}</p>
-          <form action={signOutAction}>
-            <button
-              type="submit"
-              className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-pill border border-border bg-card px-5 py-2 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong"
-            >
-              <LogOut size={15} aria-hidden="true" />
-              Sign out
-            </button>
-          </form>
+          <div className="flex flex-wrap items-center gap-3">
+            {hasBilling ? (
+              <a
+                href="/api/billing/portal"
+                className="inline-flex min-h-10 items-center gap-2 rounded-pill border border-border bg-card px-5 py-2 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong"
+              >
+                <CreditCard size={15} aria-hidden="true" />
+                Manage billing
+              </a>
+            ) : null}
+            <form action={signOutAction}>
+              <button
+                type="submit"
+                className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-pill border border-border bg-card px-5 py-2 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong"
+              >
+                <LogOut size={15} aria-hidden="true" />
+                Sign out
+              </button>
+            </form>
+          </div>
         </footer>
       </div>
     </PageColumn>
