@@ -1,5 +1,5 @@
 ---
-description: Use when the parent asks what is on the planner or the week, wants the week or the month adjusted, asks to put lessons, a curriculum, or a unit study onto the planner, asks how to input things into the planner, or wants to see the plan while you talk. Contains the open-then-edit workflow (open_planner before every edit_plan), the activity writing rules, and the honest limits (you cannot build a new month; the report's one tap does).
+description: Use when the parent asks what is on the planner or the week, wants the week or the month adjusted, asks to schedule an existing lesson, curriculum, or unit study onto the planner or onto specific days, asks how to input things into the planner, or wants to see the plan while you talk. Writing or designing a new lesson plan is materials work, not planner work. Contains the open-then-edit workflow (open_planner before every edit_plan), the activity writing rules, and the honest limits (you cannot build a new month; the report's one tap does).
 metadata:
   homa-tools: open_planner, edit_plan
   homa-related-skills: curriculum-studio, materials-studio
