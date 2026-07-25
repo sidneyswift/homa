@@ -3194,6 +3194,53 @@ if (agentJobSchemaAvailable) {
     true,
   );
 }
+// Device sync mailbox (migration 20260725150000, additive, lands via MCP
+// ahead of the repo replay): sync_devices holds hashed device tokens,
+// sync_events the append-only mailbox the mac-mini pushes into. Both are
+// revoked from every Data API role (the strict posture: permission error,
+// not empty 200); the token-gated /api/sync routes and the applier cron,
+// on the app's own server connection, are the only readers and writers.
+// Same present-or-arms-later guard as link_tokens above.
+const SYNC_TABLES = ["sync_devices", "sync_events"];
+async function syncTablesPresent() {
+  const response = await rest(`sync_devices?select=id&limit=1`, {
+    headers: { Prefer: "" },
+  });
+  if (response.status !== 404) return true;
+  const raw = await response.text();
+  return !raw.includes("PGRST205");
+}
+const syncSchemaAvailable = await syncTablesPresent();
+if (syncSchemaAvailable) {
+  for (const table of SYNC_TABLES) await expectReadDenied(table);
+  await expectInsertDenied(
+    "sync_events",
+    {
+      family_id: "00000000-0000-0000-0000-000000000000",
+      device_id: "00000000-0000-0000-0000-000000000000",
+      kind: "memory.fact",
+      dedupe_key: "intruder",
+      payload: {},
+      produced_at: new Date().toISOString(),
+    },
+    "anon cannot forge sync events",
+  );
+  await expectInsertDenied(
+    "sync_devices",
+    {
+      family_id: "00000000-0000-0000-0000-000000000000",
+      name: "intruder",
+      token_hash: "a".repeat(64),
+    },
+    "anon cannot mint sync devices",
+  );
+} else {
+  for (const table of SYNC_TABLES) coveredTables.add(table);
+  report(
+    "sync tables absent from target (additive migration not applied yet); nothing exposed",
+    true,
+  );
+}
 // The fleet research corpus (migration #50): deny-all; only the gate
 // (lib/knowledge/gate.ts) writes, only server code reads.
 await expectReadDenied("knowledge_bank");
