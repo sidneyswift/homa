@@ -956,10 +956,13 @@ export const EVENT_SCHEMAS = {
     door: z.enum(WALL_DOORS),
   }),
   // She left for Stripe checkout (a Payment Link tab, plan chosen).
+  // tier defaults to "regular" so pre-tier-launch historical rows (the
+  // only tier that ever existed) still validate on replay.
   "wall.checkout_started": z.object({
     family_id: z.uuid(),
     door: z.enum(WALL_DOORS),
     plan: z.enum(["monthly", "annual"]),
+    tier: z.enum(["regular", "plus", "elite"]).default("regular"),
   }),
   // /api/billing/confirm verified the checkout session and stamped
   // trial_started_at. Fires only on the first confirm; a re-visit of

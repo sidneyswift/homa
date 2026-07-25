@@ -1,6 +1,6 @@
 import { mapDb } from "../map/db";
 import { familyOnboardingActive } from "../onboarding/state";
-import type { WallCheckout } from "./wall-types";
+import type { PlanTier, TierCheckout, WallCheckout } from "./wall-types";
 
 /**
  * The wall (plans/2026-07-11-the-wall.md): the paywall between the free
@@ -34,20 +34,68 @@ export function reportLockEnabled(): boolean {
 }
 
 /** Live links first (set only in Vercel production), TEST for local dev
- *  and previews. The monthly link must exist or the wall stays down: a
- *  wall with a broken checkout door would strand her. Annual is
- *  optional (founder ruling 2026-07-18: the flip starts $19 monthly
- *  only; the $99 sticker sits exactly on Homeschool Fox's price and
- *  waits for that read). */
-function paymentLinkBases(): { monthly: string; annual: string | null } | null {
-  const monthly =
-    process.env.NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_MONTHLY_URL ||
-    process.env.NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_MONTHLY_URL;
-  const annual =
-    process.env.NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_ANNUAL_URL ||
-    process.env.NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_ANNUAL_URL;
+ *  and previews. A tier's monthly link must exist or the tier doesn't
+ *  render at all (regular's absence downs the whole wall; plus/elite's
+ *  absence just narrows the offer to fewer tiers). Annual is optional
+ *  per tier (founder ruling 2026-07-18 for regular: the flip starts $19
+ *  monthly only; the $99 sticker sits exactly on Homeschool Fox's price
+ *  and waits for that read; plus/elite follow the same narrowing rule).
+ *
+ *  Written as literal per-tier `process.env.NEXT_PUBLIC_...` accesses on
+ *  purpose, never a templated key: Next.js only inlines NEXT_PUBLIC_ vars
+ *  it can statically see at build time, so `process.env[computedKey]`
+ *  would read as undefined in production. */
+function tierPaymentLinkBases(tier: PlanTier): { monthly: string; annual: string | null } | null {
+  let monthly: string | undefined;
+  let annual: string | undefined;
+  if (tier === "regular") {
+    monthly =
+      process.env.NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_MONTHLY_URL ||
+      process.env.NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_MONTHLY_URL;
+    annual =
+      process.env.NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_ANNUAL_URL ||
+      process.env.NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_ANNUAL_URL;
+  } else if (tier === "plus") {
+    monthly =
+      process.env.NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_PLUS_MONTHLY_URL ||
+      process.env.NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_PLUS_MONTHLY_URL;
+    annual =
+      process.env.NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_PLUS_ANNUAL_URL ||
+      process.env.NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_PLUS_ANNUAL_URL;
+  } else {
+    monthly =
+      process.env.NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_ELITE_MONTHLY_URL ||
+      process.env.NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_ELITE_MONTHLY_URL;
+    annual =
+      process.env.NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_ELITE_ANNUAL_URL ||
+      process.env.NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_ELITE_ANNUAL_URL;
+  }
   if (!monthly) return null;
   return { monthly, annual: annual || null };
+}
+
+/**
+ * Which Stripe Product backs each tier, live and test. Used only to read
+ * back which tier a completed checkout session bought (billing/confirm),
+ * never to build a checkout URL (Payment Links already carry that).
+ * Product ids are stable identity, unlike price nicknames, so a future
+ * price change for a tier never breaks this mapping.
+ */
+const TIER_PRODUCT_IDS: Record<PlanTier, readonly string[]> = {
+  regular: ["prod_Uq02Zo8DUidRnH", "prod_Uq01TGhJROfVQ5"],
+  plus: ["prod_Uq3Syk3GadgBVg", "prod_Uq3StPBgPdzwMX"],
+  elite: ["prod_Ux4oRdW3a7ug6H", "prod_Ux4pENEFJNpBt5"],
+};
+
+/** tierForStripeProduct(productId): the plan tier a checkout session's
+ *  product belongs to, or "regular" if the product is unrecognized (the
+ *  safe default: never over-grant a paid tier from an unmapped id). */
+export function tierForStripeProduct(productId: string | null | undefined): PlanTier {
+  if (!productId) return "regular";
+  for (const tier of Object.keys(TIER_PRODUCT_IDS) as PlanTier[]) {
+    if (TIER_PRODUCT_IDS[tier].includes(productId)) return tier;
+  }
+  return "regular";
 }
 
 function checkoutUrl(base: string, familyId: string, email: string | null): string {
@@ -102,11 +150,11 @@ export function wallExemption(row: WallAccessRow): WallExemption | null {
 export async function familyWallCheckout(familyId: string): Promise<WallCheckout | null> {
   if (!wallEnabled()) return null;
 
-  const links = paymentLinkBases();
-  if (!links) {
+  const regularLinks = tierPaymentLinkBases("regular");
+  if (!regularLinks) {
     // Fail open on purpose: never block a family because an env var is
     // missing. The founder flips the flag only after the links exist.
-    console.error("wall: HOMA_WALL_ENABLED is on but Payment Link envs are missing; doors stay open");
+    console.error("wall: HOMA_WALL_ENABLED is on but regular Payment Link envs are missing; doors stay open");
     return null;
   }
 
@@ -146,9 +194,18 @@ export async function familyWallCheckout(familyId: string): Promise<WallCheckout
       return null;
     }
 
+    function tierCheckout(links: { monthly: string; annual: string | null } | null): TierCheckout | null {
+      if (!links) return null;
+      return {
+        monthlyUrl: checkoutUrl(links.monthly, familyId, row.email),
+        annualUrl: links.annual ? checkoutUrl(links.annual, familyId, row.email) : null,
+      };
+    }
+
     return {
-      monthlyUrl: checkoutUrl(links.monthly, familyId, row.email),
-      annualUrl: links.annual ? checkoutUrl(links.annual, familyId, row.email) : null,
+      regular: tierCheckout(regularLinks) as TierCheckout,
+      plus: tierCheckout(tierPaymentLinkBases("plus")),
+      elite: tierCheckout(tierPaymentLinkBases("elite")),
     };
   } catch (error) {
     // Fail open, always: a billing read must never take a family's
@@ -163,22 +220,38 @@ export async function familyWallCheckout(familyId: string): Promise<WallCheckout
 }
 
 /**
- * startFamilyTrial(familyId, stripeCustomerId): boolean
- * Stamps trial_started_at once (the unlock). Returns true only on the
- * first stamp so billing.trial_started never double-fires when the
- * confirmation URL is revisited.
+ * startFamilyTrial(familyId, stripeCustomerId, tier): boolean
+ * Stamps trial_started_at once (the unlock) and records which tier was
+ * bought. Returns true only on the first stamp so billing.trial_started
+ * never double-fires when the confirmation URL is revisited. plan_tier
+ * always reflects the CURRENT checkout on every call, first or repeat:
+ * a family upgrading tiers reaches this same confirm route on their new
+ * Payment Link, and the tier they just bought must win, not the one
+ * recorded on their original trial.
  */
 export async function startFamilyTrial(
   familyId: string,
   stripeCustomerId: string | null,
+  tier: PlanTier = "regular",
 ): Promise<boolean> {
   const sql = mapDb();
-  const rows = await sql<{ id: string }[]>`
-    update public.families
-    set trial_started_at = now(),
-        stripe_customer_id = coalesce(${stripeCustomerId}, stripe_customer_id)
-    where id = ${familyId} and trial_started_at is null
-    returning id
+  // The `was` CTE reads trial_started_at from the same pre-statement
+  // snapshot the UPDATE itself starts from, so it is the row's value
+  // BEFORE this call touches it, never racing against the update below.
+  const rows = await sql<{ was_first: boolean }[]>`
+    with was as (
+      select trial_started_at from public.families where id = ${familyId}
+    ),
+    updated as (
+      update public.families
+      set trial_started_at = coalesce(trial_started_at, now()),
+          stripe_customer_id = coalesce(${stripeCustomerId}, stripe_customer_id),
+          plan_tier = ${tier}
+      where id = ${familyId}
+      returning id
+    )
+    select (select trial_started_at from was) is null as was_first
+    from updated
   `;
-  return rows.length > 0;
+  return rows[0]?.was_first === true;
 }
