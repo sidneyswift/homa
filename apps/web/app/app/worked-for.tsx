@@ -15,6 +15,7 @@ import {
   History,
   Image as ImageIcon,
   ListChecks,
+  Mail,
   PenLine,
   Search,
   Sparkles,
@@ -70,6 +71,7 @@ const STEP_REGISTRY: Record<string, { icon: LucideIcon; label: string }> = {
   ask_for_details: { icon: PenLine, label: "Asked for a few details" },
   score_child_report: { icon: Sparkles, label: "Built the progress report" },
   start_first_making: { icon: Sparkles, label: "Started making a page" },
+  send_skeptic_brief: { icon: Mail, label: "Sent the report to your inbox" },
 };
 
 const FALLBACK_STEP = { icon: Wrench, label: "Worked on it" };

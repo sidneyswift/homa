@@ -6,12 +6,15 @@ import { suppressedHashesForDrip } from "../email/suppression";
 import { mapDb } from "../map/db";
 import {
   siteUrl,
+  submitDripKid2Pending,
   submitDripLoopBack,
+  submitDripMidChecklist,
   submitDripReportUnviewed,
+  submitDripRevealedNeverReturned,
   submitDripSetupNudge,
   type HomaEmailSubmission,
 } from "../map/email";
-import { mintLinkToken } from "../map/store";
+import { mintLinkToken, mintNamedLinkToken } from "../map/store";
 
 /**
  * The stage-aware onboarding drip (funnel work 2026-07-20,
@@ -48,6 +51,11 @@ const REPORT_MIN_AGE_MS = 48 * 60 * 60 * 1000;
  * it" is a fair question, and it makes the email's "four weeks" framing
  * true rather than premature. */
 const LOOP_BACK_MIN_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+/** Matches the funnel plan's "2-6 days" beat-keyed drip window
+ * (plans/2026-07-21-chat-first-onboarding.md §6.2): long enough that a
+ * few taps left is still true, short enough the questions are still
+ * fresh in mind. Shared by all three beat-keyed audiences below. */
+const BEAT_KEYED_MIN_AGE_MS = 2 * 24 * 60 * 60 * 1000;
 const SWEEP_LIMIT = 200;
 /**
  * Ceiling on sends per hourly tick, so a backlog trickles out instead of
@@ -90,12 +98,35 @@ export interface DripSignals {
   suppressed: boolean;
   lastDripSentAt: Date | null;
   sentKinds: string[];
+  /** Mid-checklist (plans/2026-07-21-chat-first-onboarding.md §9 Phase 2):
+   * a child with at least one answer but no report yet, and how long since
+   * her last answer. Null together means no such child exists, either
+   * because nobody has started or every started child already has a
+   * report. Picks the child with the most answers when more than one
+   * qualifies, so the nudge names whoever is closest to done. */
+  midChecklistChildName: string | null;
+  midChecklistAnswerCount: number;
+  midChecklistLastAnsweredAt: Date | null;
+  /** Kid 2 pending: a second (or later) child on the roster with zero
+   * answers, in a family where at least one other child already has a
+   * report. Chat onboarding collects the whole roster up front (§6.1), so
+   * this child is a real row, not a guess. */
+  kid2PendingChildName: string | null;
+  /** The most recent report this family has, regardless of email or view
+   * state. drip_report_unviewed only sees emailed-and-unopened reports;
+   * a chat reveal happens live in conversation and is never emailed, so
+   * revealed-never-returned needs its own signal to see it at all. */
+  latestReportChildName: string | null;
+  latestReportCreatedAt: Date | null;
 }
 
 export type DripDecision =
   | { kind: "drip_setup_nudge" }
   | { kind: "drip_report_unviewed"; childName: string; reportToken: string }
   | { kind: "drip_loop_back"; childName: string; subjectId: string }
+  | { kind: "drip_revealed_never_returned"; childName: string }
+  | { kind: "drip_kid2_pending"; childName: string }
+  | { kind: "drip_mid_checklist"; childName: string; answerCount: number }
   | null;
 
 /**
@@ -147,6 +178,58 @@ export function chooseDripNudge(signals: DripSignals, now: Date): DripDecision {
     };
   }
 
+  // Kid 2 pending: she is already engaged enough to have finished one
+  // child's report, and a sibling roster entry has sat untouched. Checked
+  // ahead of revealed-never-returned because it is the more actionable of
+  // the two when both apply (a concrete next child to start, not just
+  // "come back"). Gated on a real report existing so this never fires for
+  // a family who has not reached value with ANY child yet (that is
+  // mid-checklist's or setup's job below).
+  const kid2PendingEligible =
+    signals.kid2PendingChildName !== null &&
+    signals.latestReportCreatedAt !== null &&
+    !signals.sentKinds.includes("drip_kid2_pending") &&
+    now.getTime() - signals.latestReportCreatedAt.getTime() >= BEAT_KEYED_MIN_AGE_MS;
+  if (kid2PendingEligible) {
+    return { kind: "drip_kid2_pending", childName: signals.kid2PendingChildName as string };
+  }
+
+  // Revealed, never returned: a report exists but no plan was ever made and
+  // no word has come back, the same "she got value and went quiet" shape as
+  // loop-back, generalized to families whose reveal happened live in chat
+  // rather than by email (so drip_report_unviewed's emailed_at signal
+  // cannot see them). Gated on planChildName === null so a family who DOES
+  // have a plan is loop-back's job, never double-claimed here.
+  const revealedNeverReturnedEligible =
+    signals.latestReportChildName !== null &&
+    signals.latestReportCreatedAt !== null &&
+    signals.planChildName === null &&
+    !signals.closedLoop &&
+    !signals.sentKinds.includes("drip_revealed_never_returned") &&
+    now.getTime() - signals.latestReportCreatedAt.getTime() >= BEAT_KEYED_MIN_AGE_MS;
+  if (revealedNeverReturnedEligible) {
+    return {
+      kind: "drip_revealed_never_returned",
+      childName: signals.latestReportChildName as string,
+    };
+  }
+
+  // Mid-checklist: she started, no report for anyone yet. Further from
+  // value than either beat-keyed audience above, so it ranks last among
+  // the engaged-family nudges.
+  const midChecklistEligible =
+    signals.midChecklistChildName !== null &&
+    signals.midChecklistLastAnsweredAt !== null &&
+    !signals.sentKinds.includes("drip_mid_checklist") &&
+    now.getTime() - signals.midChecklistLastAnsweredAt.getTime() >= BEAT_KEYED_MIN_AGE_MS;
+  if (midChecklistEligible) {
+    return {
+      kind: "drip_mid_checklist",
+      childName: signals.midChecklistChildName as string,
+      answerCount: signals.midChecklistAnswerCount,
+    };
+  }
+
   const setupEligible =
     !signals.hasReport &&
     (signals.profileCompletedAt === null || !signals.hasKid) &&
@@ -189,7 +272,10 @@ export interface DripPlan {
 const KIND_PRIORITY: Record<Exclude<DripDecision, null>["kind"], number> = {
   drip_report_unviewed: 0,
   drip_loop_back: 1,
-  drip_setup_nudge: 2,
+  drip_kid2_pending: 2,
+  drip_revealed_never_returned: 3,
+  drip_mid_checklist: 4,
+  drip_setup_nudge: 5,
 };
 
 /** The moment that made this family eligible, so the oldest wait goes first
@@ -202,6 +288,15 @@ function triggerAt(send: PlannedDripSend): number {
   }
   if (decision.kind === "drip_loop_back") {
     return family.planCreatedAt?.getTime() ?? family.createdAt.getTime();
+  }
+  if (
+    decision.kind === "drip_revealed_never_returned" ||
+    decision.kind === "drip_kid2_pending"
+  ) {
+    return family.latestReportCreatedAt?.getTime() ?? family.createdAt.getTime();
+  }
+  if (decision.kind === "drip_mid_checklist") {
+    return family.midChecklistLastAnsweredAt?.getTime() ?? family.createdAt.getTime();
   }
   return family.createdAt.getTime();
 }
@@ -267,6 +362,21 @@ export function dripReason(
     const days = family.planCreatedAt ? daysBetween(family.planCreatedAt, now) : 0;
     return `said yes to ${decision.childName}'s ${decision.subjectId} plan ${days}d ago, no word back since`;
   }
+  if (decision.kind === "drip_revealed_never_returned") {
+    const days = family.latestReportCreatedAt
+      ? daysBetween(family.latestReportCreatedAt, now)
+      : 0;
+    return `${decision.childName}'s report has existed ${days}d, no plan and no return visit`;
+  }
+  if (decision.kind === "drip_kid2_pending") {
+    return `${decision.childName}'s questions have never been started, a sibling's report is already done`;
+  }
+  if (decision.kind === "drip_mid_checklist") {
+    const days = family.midChecklistLastAnsweredAt
+      ? daysBetween(family.midChecklistLastAnsweredAt, now)
+      : 0;
+    return `${decision.childName} has ${decision.answerCount} answer${decision.answerCount === 1 ? "" : "s"} in, no report yet, last answered ${days}d ago`;
+  }
   const days = daysBetween(family.createdAt, now);
   const stalled = family.profileCompletedAt === null ? "setup never finished" : "no child added";
   return `signed up ${days}d ago, ${stalled}, no report yet`;
@@ -278,6 +388,9 @@ export interface DripSweepResult {
   setupSent: number;
   reportSent: number;
   loopBackSent: number;
+  revealedNeverReturnedSent: number;
+  kid2PendingSent: number;
+  midChecklistSent: number;
   /** Families eligible this tick, before the per-run cap. */
   eligible: number;
   /** True when the cap deferred sends to a later tick. */
@@ -315,6 +428,12 @@ async function loadDripSignals(): Promise<DripSignals[]> {
       opted_out: boolean;
       last_drip_sent_at: string | null;
       sent_kinds: string[];
+      mid_checklist_child_name: string | null;
+      mid_checklist_answer_count: number | null;
+      mid_checklist_last_answered_at: string | null;
+      kid2_pending_child_name: string | null;
+      latest_report_child_name: string | null;
+      latest_report_created_at: string | null;
     }[]
   >`
     select
@@ -385,8 +504,51 @@ async function loadDripSignals(): Promise<DripSignals[]> {
             and es.status in ('submitted', 'delivered')
         ),
         '{}'
-      ) as sent_kinds
+      ) as sent_kinds,
+      mid_checklist.child_name as mid_checklist_child_name,
+      mid_checklist.answer_count as mid_checklist_answer_count,
+      mid_checklist.last_answered_at as mid_checklist_last_answered_at,
+      (
+        select c.name from public.children c
+        where c.family_id = f.id
+          and not exists (select 1 from public.child_answers a where a.child_id = c.id)
+          and exists (
+            select 1 from public.children c2
+            join public.child_reports r2 on r2.child_id = c2.id
+            where c2.family_id = f.id
+          )
+        order by c.created_at
+        limit 1
+      ) as kid2_pending_child_name,
+      (
+        select c.name from public.children c
+        join public.child_reports r on r.child_id = c.id
+        where c.family_id = f.id
+        order by r.generated_at desc limit 1
+      ) as latest_report_child_name,
+      (
+        select r.generated_at from public.children c
+        join public.child_reports r on r.child_id = c.id
+        where c.family_id = f.id
+        order by r.generated_at desc limit 1
+      ) as latest_report_created_at
     from public.families f
+    left join lateral (
+      -- The child closest to done: some answers in, no report yet. One
+      -- lateral subquery computing name/count/last-answered together, so
+      -- the "which child" pick is derived once, never re-derived per
+      -- column (a tripled subquery is exactly how these three columns
+      -- silently disagree about which child they mean).
+      select c.name as child_name, count(a.*) as answer_count,
+        max(a.answered_at) as last_answered_at
+      from public.children c
+      join public.child_answers a on a.child_id = c.id
+      left join public.child_reports r on r.child_id = c.id
+      where c.family_id = f.id and r.child_id is null
+      group by c.id, c.name
+      order by count(a.*) desc
+      limit 1
+    ) mid_checklist on true
     where coalesce(f.status, 'open') <> 'deleted'
       and not coalesce(f.sandbox, false)
       and f.email is not null
@@ -421,6 +583,12 @@ async function loadDripSignals(): Promise<DripSignals[]> {
     suppressed: false,
     lastDripSentAt: toDate(row.last_drip_sent_at),
     sentKinds: Array.isArray(row.sent_kinds) ? row.sent_kinds : [],
+    midChecklistChildName: row.mid_checklist_child_name,
+    midChecklistAnswerCount: row.mid_checklist_answer_count ?? 0,
+    midChecklistLastAnsweredAt: toDate(row.mid_checklist_last_answered_at),
+    kid2PendingChildName: row.kid2_pending_child_name,
+    latestReportChildName: row.latest_report_child_name,
+    latestReportCreatedAt: toDate(row.latest_report_created_at),
   }));
 
   // One batch suppression lookup for the whole candidate set, keyed by the
@@ -459,6 +627,9 @@ export async function runDripSweep(now: Date = new Date()): Promise<DripSweepRes
   let setupSent = 0;
   let reportSent = 0;
   let loopBackSent = 0;
+  let revealedNeverReturnedSent = 0;
+  let kid2PendingSent = 0;
+  let midChecklistSent = 0;
 
   for (const { family, decision } of plan.sends) {
     if (await dripAlreadySent(family.familyId, decision.kind)) continue;
@@ -484,7 +655,7 @@ export async function runDripSweep(now: Date = new Date()): Promise<DripSweepRes
         dripReason(family, decision, now),
       );
       if (submission.status === "submitted") reportSent += 1;
-    } else {
+    } else if (decision.kind === "drip_loop_back") {
       // Most plans in production are the whole-month plan, which has no
       // single subject and is NOT in the subject bank: resolving it through
       // getMapSubject alone would silently skip the majority of this
@@ -506,6 +677,40 @@ export async function runDripSweep(now: Date = new Date()): Promise<DripSweepRes
         dripReason(family, decision, now),
       );
       if (submission.status === "submitted") loopBackSent += 1;
+    } else if (decision.kind === "drip_revealed_never_returned") {
+      const token = await mintNamedLinkToken(family.familyId, decision.kind);
+      submission = await submitDripRevealedNeverReturned(
+        family.email,
+        family.firstName,
+        decision.childName,
+        `${siteUrl()}/api/map/resume-link?t=${token}`,
+        family.familyId,
+        dripReason(family, decision, now),
+      );
+      if (submission.status === "submitted") revealedNeverReturnedSent += 1;
+    } else if (decision.kind === "drip_kid2_pending") {
+      const token = await mintNamedLinkToken(family.familyId, decision.kind);
+      submission = await submitDripKid2Pending(
+        family.email,
+        family.firstName,
+        decision.childName,
+        `${siteUrl()}/api/map/resume-link?t=${token}`,
+        family.familyId,
+        dripReason(family, decision, now),
+      );
+      if (submission.status === "submitted") kid2PendingSent += 1;
+    } else {
+      const token = await mintNamedLinkToken(family.familyId, decision.kind);
+      submission = await submitDripMidChecklist(
+        family.email,
+        family.firstName,
+        decision.childName,
+        decision.answerCount,
+        `${siteUrl()}/api/map/resume-link?t=${token}`,
+        family.familyId,
+        dripReason(family, decision, now),
+      );
+      if (submission.status === "submitted") midChecklistSent += 1;
     }
   }
 
@@ -515,6 +720,9 @@ export async function runDripSweep(now: Date = new Date()): Promise<DripSweepRes
     setupSent,
     reportSent,
     loopBackSent,
+    revealedNeverReturnedSent,
+    kid2PendingSent,
+    midChecklistSent,
     eligible: plan.eligible,
     capped: plan.capped,
   };

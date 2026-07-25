@@ -67,9 +67,28 @@ type SeedableKind = (typeof SEEDABLE_KINDS)[number];
 /** Eligibility SQL per built-in kind. Both require email + zone + kids +
  * a 20-hour-old family; the brief additionally requires a scored report,
  * because a brief with nothing real to say teaches families to ignore
- * it. Kept as one function so the two rules stay side by side. */
-async function seedKind(kind: SeedableKind, now: Date): Promise<void> {
-  const sql = mapDb();
+ * it. Kept as one function so the two rules stay side by side.
+ *
+ * PMF-201 (plans/2026-07-21-chat-first-onboarding.md §6.3/§9): the
+ * 20-hour wait exists so a text-signup family isn't seeded before she
+ * has even added a child. A chat-onboarding family adds a child and
+ * gets a scored report inside the first sitting, so the same wait plus
+ * nextTaskRunInstant's "strictly after now" walk pushes her first
+ * morning brief to day 3 instead of day 2. `context->'onboarding'` is
+ * only ever written by the chat-onboarding tools (lib/onboarding/
+ * store.ts), so its presence is durable DB truth that this family
+ * already cleared the fast path; the 20-hour floor is waived for her
+ * once the real eligibility columns (email, zone, kids, report) hold.
+ *
+ * Takes an injected connection (the file's established xWithDatabase
+ * pattern, see beginTaskRunWithDatabase etc.) so this eligibility rule
+ * is exercisable against the disposable Postgres harness instead of
+ * only ever running live against prod. */
+async function seedKindWithDatabase(
+  sql: Sql,
+  kind: SeedableKind,
+  now: Date,
+): Promise<void> {
   const config = TASK_KIND_CONFIG[kind];
 
   const requireReport = kind === "morning_brief";
@@ -86,7 +105,10 @@ async function seedKind(kind: SeedableKind, now: Date): Promise<void> {
     from public.families f
     where f.email is not null
       and f.time_zone is not null
-      and f.created_at < now() - interval '20 hours'
+      and (
+        f.created_at < now() - interval '20 hours'
+        or (f.context -> 'onboarding') is not null
+      )
       and (${!optOutFilter} or f.journal_opt_out_at is null)
       and exists (select 1 from public.children c where c.family_id = f.id)
       and (
@@ -176,12 +198,19 @@ async function seedKind(kind: SeedableKind, now: Date): Promise<void> {
 
 /** Idempotent seeding + hygiene for every enabled built-in kind, run
  * every dispatcher tick before claiming. */
-export async function seedFamilyTaskSchedules(now = new Date()): Promise<void> {
+export async function seedFamilyTaskSchedulesWithDatabase(
+  sql: Sql,
+  now = new Date(),
+): Promise<void> {
   const enabled = new Set(enabledFamilyTaskKinds());
   for (const kind of SEEDABLE_KINDS) {
     if (!enabled.has(kind)) continue;
-    await seedKind(kind, now);
+    await seedKindWithDatabase(sql, kind, now);
   }
+}
+
+export async function seedFamilyTaskSchedules(now = new Date()): Promise<void> {
+  return await seedFamilyTaskSchedulesWithDatabase(mapDb(), now);
 }
 
 /** Atomically leases due rows across enabled kinds and returns

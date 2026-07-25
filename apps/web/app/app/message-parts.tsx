@@ -797,6 +797,7 @@ const TOOL_STATUS_LABELS: Record<string, string> = {
   // The one wait that is worth narrating rather than labelling. The
   // reveal card takes over from here and says the rest.
   score_child_report: "reading the answers…",
+  send_skeptic_brief: "sending it to your inbox…",
 };
 
 /** The skill whose load marks a material build starting; the studio

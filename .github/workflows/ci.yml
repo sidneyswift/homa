@@ -119,6 +119,9 @@ jobs:
       - name: Onboarding checks (state, directives, first-making status, job gating)
         run: pnpm check:onboarding
 
+      - name: Drip checks (eligibility, priority, beat-keyed audiences)
+        run: pnpm check:drip
+
       # Fixture hygiene only, no model call. The paid routing eval is
       # pnpm eval:ask-user-questions, run by hand.
       - name: Choice-card routing fixtures

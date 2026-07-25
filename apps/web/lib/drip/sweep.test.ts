@@ -28,6 +28,12 @@ function base(overrides: Partial<DripSignals> = {}): DripSignals {
     suppressed: false,
     lastDripSentAt: null,
     sentKinds: [],
+    midChecklistChildName: null,
+    midChecklistAnswerCount: 0,
+    midChecklistLastAnsweredAt: null,
+    kid2PendingChildName: null,
+    latestReportChildName: null,
+    latestReportCreatedAt: null,
     ...overrides,
   };
 }
@@ -275,4 +281,192 @@ test("ordering never changes who is eligible, only who goes first", () => {
   assert.equal(plan.eligible, 2);
   assert.equal(plan.capped, false);
   assert.equal(plan.sends.length, 2);
+});
+
+// Beat-keyed audiences (plans/2026-07-21-chat-first-onboarding.md §9
+// Phase 2): mid-checklist, kid-2-pending, revealed-never-returned.
+
+function withReportOnly(overrides: Partial<DripSignals> = {}): DripSignals {
+  return base({
+    profileCompletedAt: DAYS(20),
+    hasKid: true,
+    hasReport: true,
+    anyReportViewed: true,
+    latestReportChildName: "Mia",
+    latestReportCreatedAt: DAYS(4),
+    ...overrides,
+  });
+}
+
+test("revealed-never-returned fires for a report with no plan, past 2 days", () => {
+  assert.deepEqual(chooseDripNudge(withReportOnly(), NOW), {
+    kind: "drip_revealed_never_returned",
+    childName: "Mia",
+  });
+});
+
+test("revealed-never-returned waits 2 days after the report", () => {
+  assert.equal(
+    chooseDripNudge(withReportOnly({ latestReportCreatedAt: HOURS(6) }), NOW),
+    null,
+  );
+});
+
+test("revealed-never-returned steps aside once a plan exists (loop-back's job)", () => {
+  assert.deepEqual(
+    chooseDripNudge(
+      withReportOnly({ planChildName: "Mia", planSubjectId: "reading", planCreatedAt: DAYS(9) }),
+      NOW,
+    ),
+    { kind: "drip_loop_back", childName: "Mia", subjectId: "reading" },
+  );
+});
+
+test("revealed-never-returned does not fire once the parent closed the loop", () => {
+  assert.equal(chooseDripNudge(withReportOnly({ closedLoop: true }), NOW), null);
+});
+
+test("revealed-never-returned never repeats once sent", () => {
+  assert.equal(
+    chooseDripNudge(
+      withReportOnly({ sentKinds: ["drip_revealed_never_returned"] }),
+      NOW,
+    ),
+    null,
+  );
+});
+
+test("an unopened report outranks revealed-never-returned", () => {
+  const signals = withReportOnly({
+    anyReportViewed: false,
+    reportEmailedAt: DAYS(3),
+    unviewedChildName: "Mia",
+    unviewedReportToken: "tok-9",
+  });
+  assert.deepEqual(chooseDripNudge(signals, NOW), {
+    kind: "drip_report_unviewed",
+    childName: "Mia",
+    reportToken: "tok-9",
+  });
+});
+
+function withKid2Pending(overrides: Partial<DripSignals> = {}): DripSignals {
+  return base({
+    profileCompletedAt: DAYS(20),
+    hasKid: true,
+    hasReport: true,
+    anyReportViewed: true,
+    latestReportChildName: "Mia",
+    latestReportCreatedAt: DAYS(4),
+    kid2PendingChildName: "Leo",
+    ...overrides,
+  });
+}
+
+test("kid-2-pending fires for a sibling with zero answers once a report exists, past 2 days", () => {
+  assert.deepEqual(chooseDripNudge(withKid2Pending(), NOW), {
+    kind: "drip_kid2_pending",
+    childName: "Leo",
+  });
+});
+
+test("kid-2-pending outranks revealed-never-returned when both apply", () => {
+  // A family with a report, no plan, AND an untouched sibling: the
+  // sibling nudge is closer to a fresh ask than a generic "come back".
+  const decision = chooseDripNudge(withKid2Pending(), NOW);
+  assert.equal(decision?.kind, "drip_kid2_pending");
+});
+
+test("kid-2-pending never repeats once sent, falling through to the next-best audience", () => {
+  // withKid2Pending's fixture also satisfies revealed-never-returned (a
+  // report, no plan, no closed loop): once kid-2-pending is used up, that
+  // is the correct next nudge, not silence.
+  assert.deepEqual(
+    chooseDripNudge(withKid2Pending({ sentKinds: ["drip_kid2_pending"] }), NOW),
+    { kind: "drip_revealed_never_returned", childName: "Mia" },
+  );
+});
+
+test("kid-2-pending never repeats once sent, and silence is correct once every fallback is also spent", () => {
+  assert.equal(
+    chooseDripNudge(
+      withKid2Pending({
+        sentKinds: ["drip_kid2_pending", "drip_revealed_never_returned"],
+      }),
+      NOW,
+    ),
+    null,
+  );
+});
+
+test("kid-2-pending never fires without latestReportCreatedAt, even with a name set", () => {
+  // In real data kid2PendingChildName is only ever computed alongside a
+  // real sibling report, so this combination cannot occur in practice;
+  // proven here as a defensive gate, not silence. A family this fresh
+  // (no report, no profile) correctly falls through to the setup nudge.
+  assert.deepEqual(
+    chooseDripNudge(base({ kid2PendingChildName: "Leo" }), NOW),
+    { kind: "drip_setup_nudge" },
+  );
+});
+
+function withMidChecklist(overrides: Partial<DripSignals> = {}): DripSignals {
+  return base({
+    profileCompletedAt: DAYS(5),
+    hasKid: true,
+    hasReport: false,
+    midChecklistChildName: "Mia",
+    midChecklistAnswerCount: 9,
+    midChecklistLastAnsweredAt: DAYS(3),
+    ...overrides,
+  });
+}
+
+test("mid-checklist fires for a partial questionnaire stalled past 2 days", () => {
+  assert.deepEqual(chooseDripNudge(withMidChecklist(), NOW), {
+    kind: "drip_mid_checklist",
+    childName: "Mia",
+    answerCount: 9,
+  });
+});
+
+test("mid-checklist waits 2 days after the last answer", () => {
+  assert.equal(
+    chooseDripNudge(withMidChecklist({ midChecklistLastAnsweredAt: HOURS(6) }), NOW),
+    null,
+  );
+});
+
+test("mid-checklist never repeats once sent", () => {
+  assert.equal(
+    chooseDripNudge(withMidChecklist({ sentKinds: ["drip_mid_checklist"] }), NOW),
+    null,
+  );
+});
+
+test("mid-checklist ranks behind kid-2-pending and revealed-never-returned", () => {
+  const signals = withMidChecklist({
+    latestReportChildName: "Leo",
+    latestReportCreatedAt: DAYS(4),
+  });
+  assert.deepEqual(chooseDripNudge(signals, NOW), {
+    kind: "drip_revealed_never_returned",
+    childName: "Leo",
+  });
+});
+
+test("mid-checklist ranks ahead of the setup nudge, which never fires once a kid is mid-questionnaire", () => {
+  // profileCompletedAt set and hasKid true means setupEligible is false
+  // regardless; this proves the family gets SOME nudge, not silence.
+  assert.notEqual(chooseDripNudge(withMidChecklist(), NOW), null);
+});
+
+test("suppression and the global cap silence every beat-keyed audience too", () => {
+  assert.equal(chooseDripNudge(withReportOnly({ suppressed: true }), NOW), null);
+  assert.equal(chooseDripNudge(withKid2Pending({ suppressed: true }), NOW), null);
+  assert.equal(chooseDripNudge(withMidChecklist({ suppressed: true }), NOW), null);
+  assert.equal(
+    chooseDripNudge(withReportOnly({ lastDripSentAt: DAYS(2) }), NOW),
+    null,
+  );
 });

@@ -2172,6 +2172,7 @@ export function ChatClient({
         childId={plannerCanvas.childId}
         refreshSignal={planEditsSeen}
         onClose={() => setPlannerCanvas(null)}
+        variant={onboarding ? "onboarding" : "app"}
       />
     ) : null}
     </div>

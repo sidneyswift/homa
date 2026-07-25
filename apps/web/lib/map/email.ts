@@ -49,7 +49,16 @@ export type EmailLedgerKind =
   | "drip_setup_nudge"
   | "drip_report_unviewed"
   | "drip_add_kid"
-  | "drip_loop_back";
+  | "drip_loop_back"
+  // Beat-keyed audiences (plans/2026-07-21-chat-first-onboarding.md §9
+  // Phase 2), same DARK-until-reviewed posture as the kinds above.
+  | "drip_revealed_never_returned"
+  | "drip_kid2_pending"
+  | "drip_mid_checklist"
+  // D9, the skeptic brief (plans/2026-07-21-chat-first-onboarding.md
+  // §4.2): a parent-requested, on-demand send to her OWN inbox, never
+  // a drip nudge, so it carries no unsubscribe framing.
+  | "skeptic_brief";
 
 interface EmailLedger {
   kind: EmailLedgerKind;
@@ -633,6 +642,42 @@ export async function sendBandReadyEmail(
 }
 
 /**
+ * D9, the skeptic brief (plans/2026-07-21-chat-first-onboarding.md §4.2):
+ * "want a version of this you can forward to your husband, or your
+ * mother-in-law?" A parent-requested, on-demand send to HER OWN inbox,
+ * never a drip nudge (no unsubscribe headers, no DRIP_OUTER_NOTE), so
+ * she can forward it herself to the doubting co-decider, who is
+ * frequently the credit-card co-decider. DRAFT copy: gate through
+ * homa-copy-reviewer then homa-copy-editor before this reaches a real
+ * family, same discipline the drip templates carry.
+ *
+ * A printable one-pager and a forwardable footer with its own link are
+ * v2, pending a founder call on the viral loop (spec §4.2, §10 P7); v1
+ * is the report itself, reframed for someone who has not been watching
+ * this happen.
+ */
+export async function submitSkepticBrief(
+  to: string,
+  childName: string,
+  reportUrl: string,
+  familyId?: string,
+): Promise<HomaEmailSubmission> {
+  return submit({
+    ledger: { kind: "skeptic_brief", familyId },
+    to,
+    subject: `${childName}'s report, worth forwarding`,
+    preview: "Written so anyone can see it in five minutes.",
+    heading: `${childName}'s report, ready to forward`,
+    bodyLines: [
+      `This is the same report you've already seen, sent here so it's easy to forward: to your husband, your mother-in-law, anyone who wants to see where ${childName} actually stands.`,
+      "It reads on its own, no account needed.",
+    ],
+    cta: { label: `Open ${childName}'s report`, url: reportUrl },
+    footerNote: "Forward it as-is, or not at all. Either way, it's saved here for you.",
+  });
+}
+
+/**
  * The onboarding drip's shared standing promise (Appendix A1 of the funnel
  * plan): the revised "we email you about your family's homeschool" line
  * rides the drip emails ONLY. The other transactional emails keep their
@@ -757,6 +802,106 @@ export async function submitDripLoopBack(
       "Reply to this email with one line.",
     ],
     footerNote: "Want these to stop? Reply with the word stop.",
+    outerNote: DRIP_OUTER_NOTE,
+  });
+}
+
+/**
+ * Beat-keyed drip templates (plans/2026-07-21-chat-first-onboarding.md
+ * §9 Phase 2). DRAFT copy: gate through homa-copy-reviewer then
+ * homa-copy-editor before dripEnabled() reaches a real family through
+ * these three kinds, same discipline DRIP_OUTER_NOTE and
+ * submitDripLoopBack's copy already went through.
+ */
+
+/** She reached a report but there is no plan and no word back. The
+ * generalized loop-back shape for a reveal that happened live in chat,
+ * never emailed, so drip_report_unviewed's signal never sees it. */
+export async function submitDripRevealedNeverReturned(
+  to: string,
+  firstName: string | null,
+  childName: string,
+  resumeUrl: string,
+  familyId?: string,
+  reason?: string,
+): Promise<HomaEmailSubmission> {
+  const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
+  return submit({
+    ledger: {
+      kind: "drip_revealed_never_returned",
+      familyId,
+      meta: reason ? { reason } : {},
+    },
+    headers: unsubscribeHeaders(to),
+    to,
+    subject: `${childName}'s report is still here`,
+    preview: "Whenever you have a few minutes again.",
+    heading: `${childName}'s report is right where you left it`,
+    bodyLines: [
+      `${hi}${childName}'s report is still here, exactly as it was.`,
+      "Come back whenever you have a few minutes, and I'll pick up from there.",
+    ],
+    cta: { label: `Open ${childName}'s report`, url: resumeUrl },
+    footerNote: "No rush. You can turn these off anytime.",
+    outerNote: DRIP_OUTER_NOTE,
+  });
+}
+
+/** A second (or later) child's questions have never been started, while a
+ * sibling's report already exists. The roster is already real (chat
+ * onboarding collects it up front), so this names the waiting child
+ * directly instead of asking whether more kids exist. */
+export async function submitDripKid2Pending(
+  to: string,
+  firstName: string | null,
+  childName: string,
+  resumeUrl: string,
+  familyId?: string,
+  reason?: string,
+): Promise<HomaEmailSubmission> {
+  const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
+  return submit({
+    ledger: { kind: "drip_kid2_pending", familyId, meta: reason ? { reason } : {} },
+    headers: unsubscribeHeaders(to),
+    to,
+    subject: `Ready when you are: ${childName}'s questions`,
+    preview: `About five minutes, from what you've seen ${childName} do.`,
+    heading: `${childName}'s questions are ready whenever you are`,
+    bodyLines: [
+      `${hi}${childName} is still on the list, whenever you have a few minutes for their questions.`,
+      "Same as last time: a few quick questions, then a free report written for their age.",
+    ],
+    cta: { label: `Start ${childName}'s questions`, url: resumeUrl },
+    footerNote: "No rush. You can turn these off anytime.",
+    outerNote: DRIP_OUTER_NOTE,
+  });
+}
+
+/** A child's questionnaire is partway done and stalled before a report
+ * ever formed. Names the real progress already banked, never "N of 41". */
+export async function submitDripMidChecklist(
+  to: string,
+  firstName: string | null,
+  childName: string,
+  answerCount: number,
+  resumeUrl: string,
+  familyId?: string,
+  reason?: string,
+): Promise<HomaEmailSubmission> {
+  const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
+  return submit({
+    ledger: { kind: "drip_mid_checklist", familyId, meta: reason ? { reason } : {} },
+    headers: unsubscribeHeaders(to),
+    to,
+    subject: `A few more taps and ${childName}'s report is ready`,
+    preview: "Your answers so far are already saved.",
+    heading: "Your answers so far are saved",
+    bodyLines: [
+      `${hi}you answered ${answerCount} question${answerCount === 1 ? "" : "s"} about ${childName}, and it's all still saved.`,
+      "A few minutes more and there's a free report on where they are, written for their age.",
+    ],
+    cta: { label: `Finish ${childName}'s questions`, url: resumeUrl },
+    footerNote: "Even a few more answers tell me a lot. You can turn these off anytime.",
     outerNote: DRIP_OUTER_NOTE,
   });
 }
