@@ -49,6 +49,12 @@ jobs:
       - name: Agent context checks (chart parity, injection escaping)
         run: pnpm check:agent-context
 
+      - name: Agent context budget ratchet (always-on bytes per component)
+        run: pnpm check:agent-budget
+
+      - name: Instructions split and voice-mirror invariants (phone persona)
+        run: pnpm check:instructions-split
+
       - name: Eval-host isolation checks (no prod writes from local eval runs)
         run: pnpm check:eval-isolation
 

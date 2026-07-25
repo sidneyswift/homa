@@ -88,7 +88,7 @@ List every distinct activity type the curriculum uses and cross-reference agains
 | Narration page | Blank page with prompt for child to draw/dictate | (none) | ❌ no recipe |
 | Counting mat | Count objects in groups | html or image-direct | ✅ have recipe |
 
-List the actual shipped recipes at analysis time, never from memory (the library grows; 33 recipe files ship today):
+List the actual shipped recipes at analysis time, never from memory (the library grows):
 
 ```
 ls apps/web/agent/skills/materials-studio/references/recipes/
@@ -111,167 +111,17 @@ Missing recipe: "cut-and-sort"
 
 ## Storage format
 
-Write to `.cosmo/curriculums/<id>.json`:
+Write to `.cosmo/curriculums/<id>.json`. For the full shape, open any recent shipped analysis in `.cosmo/curriculums/cur-*.json` and match it exactly; the shipped files are the shape, and `verify-ingestion.py` (below) is the gate that enforces it. Top-level keys, all required:
 
-```json
-{
-  "id": "cur-2026-07-12-charlotte-mason-k",
-  "name": "Charlotte Mason Kindergarten Guide",
-  "droppedBy": "carolyng",
-  "droppedAt": "2026-07-12T15:00:00-04:00",
-  "sourceChannel": "homa-inspo",
-  "sourceMessageTs": "1784229900.000100",
+- `id`, `name`, `droppedBy`, `droppedAt`, `sourceChannel`, `sourceMessageTs`: identity fields. Dates come from the Slack `ts`, never the machine clock; the `id` is `cur-<date>-<slug>`.
+- `layer1_philosophy`: methodology, principles, learningTheory, assessmentApproach, parentRole, plus `knowledgeBankMatches` (existing `topic_key` hits) and `knowledgeBankGaps` (suggested new entries).
+- `layer2_scope`: `mappings` (one row per curriculum topic, with the Homa subject/domain/topic ids and a `status`; unmapped rows carry a `suggested` topic block) and `stats` (mapped/unmapped/noSubject/partial counts).
+- `layer3_structure`: cadence, sessionLengthMinutes, weeklyTemplate, progressionModel, reviewRhythm, totalWeeks.
+- `layer4_activities`: `activityTypes` (each with type slug, description, recipe or null, status; `no_recipe` rows carry a `suggestedRecipe` block) and `stats`.
+- `decisionsNeeded`: one entry per Sid decision, with category, item, impact, urgency.
+- `notes`: one-paragraph analyst summary.
 
-  "layer1_philosophy": {
-    "methodology": "Charlotte Mason",
-    "principles": [
-      "Living books over textbooks",
-      "Short lessons (15-20 min per subject)",
-      "Nature study as core science",
-      "Narration as primary assessment",
-      "Habit training alongside academics"
-    ],
-    "learningTheory": "developmental-stages",
-    "assessmentApproach": "narration-and-portfolio",
-    "parentRole": "facilitator",
-    "knowledgeBankMatches": [
-      {
-        "topicKey": "charlotte-mason",
-        "topicType": "method_philosophy",
-        "status": "exists"
-      }
-    ],
-    "knowledgeBankGaps": [
-      {
-        "suggestedKey": "charlotte-mason-k-format",
-        "topicType": "method_format",
-        "title": "Charlotte Mason Kindergarten Format",
-        "summary": "Short-lesson rotation with narration, nature journals, and living books for ages 4-6"
-      }
-    ]
-  },
-
-  "layer2_scope": {
-    "mappings": [
-      {
-        "curriculumSubject": "Mathematics",
-        "curriculumTopic": "Counting to 20",
-        "homaSubject": "math",
-        "homaDomain": "counting-cardinality",
-        "homaTopicId": "math.counting-objects-to-20",
-        "status": "mapped"
-      },
-      {
-        "curriculumSubject": "Nature Study",
-        "curriculumTopic": "Seasonal nature walks",
-        "homaSubject": "science",
-        "homaDomain": null,
-        "homaTopicId": null,
-        "status": "unmapped",
-        "suggested": {
-          "topicSlug": "science.nature-observation",
-          "domain": "organisms-life-processes",
-          "kind": "conceptual",
-          "teachingWindowMonths": [48, 84]
-        }
-      }
-    ],
-    "stats": {
-      "totalCurriculumTopics": 24,
-      "mapped": 18,
-      "unmapped": 4,
-      "noSubject": 1,
-      "partial": 1
-    }
-  },
-
-  "layer3_structure": {
-    "cadence": "4 days/week",
-    "sessionLengthMinutes": {
-      "math": 15,
-      "reading": 20,
-      "nature": 30,
-      "art": 15
-    },
-    "weeklyTemplate": "M-Th: math (15m) + reading (20m) + rotating subject (30m). Friday: nature walk or free exploration.",
-    "progressionModel": "spiral",
-    "reviewRhythm": "weekly narration, seasonal portfolio review",
-    "totalWeeks": 36
-  },
-
-  "layer4_activities": {
-    "activityTypes": [
-      {
-        "type": "tracing-worksheet",
-        "description": "Letter and number tracing with three-line guides",
-        "recipe": "html",
-        "status": "have_recipe"
-      },
-      {
-        "type": "narration-page",
-        "description": "Blank page with illustration prompt and lined dictation area",
-        "recipe": null,
-        "status": "no_recipe",
-        "suggestedRecipe": {
-          "name": "narration-page",
-          "creationPath": "html",
-          "description": "Top half blank for drawing, bottom half with wide-ruled lines for parent-transcribed narration. Title prompt at top.",
-          "complexity": "low"
-        }
-      }
-    ],
-    "stats": {
-      "totalActivityTypes": 8,
-      "haveRecipe": 5,
-      "noRecipe": 3
-    }
-  },
-
-  "decisionsNeeded": [
-    {
-      "category": "taxonomy",
-      "item": "Add nature-observation topic to science/organisms-life-processes domain",
-      "impact": "Enables nature study curriculum support",
-      "urgency": "medium"
-    },
-    {
-      "category": "recipe",
-      "item": "Build narration-page recipe (html path)",
-      "impact": "Charlotte Mason families need this for every subject",
-      "urgency": "high"
-    },
-    {
-      "category": "method",
-      "item": "Add charlotte-mason-k-format to knowledge_bank",
-      "impact": "Curriculum-writer can generate CM-style weekly plans",
-      "urgency": "medium"
-    }
-  ],
-
-  "notes": "Strong overlap with existing taxonomy in math and ELA. Main gaps are nature study and art appreciation, CM-specific subjects."
-}
-```
-
-The manifest at `.cosmo/curriculums/index.json` (generated, see below):
-
-```json
-{
-  "curriculums": [
-    {
-      "id": "cur-2026-07-12-charlotte-mason-k",
-      "name": "Charlotte Mason Kindergarten Guide",
-      "droppedBy": "carolyng",
-      "droppedAt": "2026-07-12T15:00:00-04:00",
-      "methodology": "Charlotte Mason",
-      "mappedPct": 75,
-      "gapCount": 6,
-      "decisionsCount": 3
-    }
-  ]
-}
-```
-
-The index shown above is the generated shape, not a file you edit: after writing the cur JSON, run `python3 .cosmo/scripts/verify-ingestion.py --regen-index` and it is rebuilt from the individual JSONs. Never hand-edit `index.json`.
+The manifest at `.cosmo/curriculums/index.json` is generated, never hand-edited: after writing the cur JSON, run `python3 .cosmo/scripts/verify-ingestion.py --regen-index` and it is rebuilt from the individual JSONs.
 
 ## Post-analysis actions
 
@@ -327,13 +177,7 @@ The gate handles validation, sanitization, and citation resolution. No new write
 
 ### Enrich taxonomy (exact sequence, append-only)
 
-Layer 2 unmapped topics follow the same binding sequence as reference-ingestion step 8:
-
-1. **Append** entries to the `topics` array in `packages/taxonomy/data/topics.json` and bump its `topicCount` field by the same amount; never re-serialize, re-sort, or dedupe (topic names are legal duplicates across age bands). Structure: `{ id: "mt_<10-char-random>", type: "CONCEPTUAL" or "PROCEDURAL" (the other MarbleTopicType values are valid when genuinely applicable), subject, domain, name, description, ageRangeStart, ageRangeEnd, centrality: 0.01, evidence: [3 items], assessmentPrompt, standards: [] }`.
-2. `subject` and `domain` are both Marble display names, and the pair composed as `<Subject> > <Domain>` (e.g. `Mathematics > Counting & Cardinality`) must exactly match an existing `MARBLE_DOMAIN_MAP` key in `packages/taxonomy/src/mapping.ts`. A genuinely new pair needs a `mapping.ts` edit in the same change.
-3. `pnpm taxonomy:slugs`, then `pnpm taxonomy:progress`, then update `packages/taxonomy/data/manifest.json`: the counts AND the `bytes` + `sha256` entry in `manifest.files` for every touched data file (`shasum -a 256 packages/taxonomy/data/topics.json`). A stale checksum guarantees a red `check:taxonomy`.
-4. `pnpm check:taxonomy` must exit 0 before pushing. There is no `pnpm --filter @homa/taxonomy validate` command; it never existed.
-5. Confirm the `topics.json` diff is insertions only: no existing topic objects deleted or modified, and the topic count (`topicCount` and array length) strictly grew.
+Layer 2 unmapped topics follow the binding sequence in **reference-ingestion step 8** (`.agents/skills/reference-ingestion/SKILL.md`), exactly and completely: append-only `topics.json` edits with `topicCount` bumped to match, `MARBLE_DOMAIN_MAP` pair validation, `pnpm taxonomy:slugs` then `pnpm taxonomy:progress`, manifest counts plus `bytes`/`sha256` refresh, `pnpm check:taxonomy` green, and an insertions-only sanity diff. That skill's copy is canonical; do not work from memory of it. One addition for curriculum drops: topic names are legal duplicates across age bands, so never re-serialize, re-sort, or dedupe the array.
 
 ### Add activity formats and recipes
 

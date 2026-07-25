@@ -415,27 +415,10 @@ example content (your own numbers, your own wording), never a copy of the
 anchor's or any source's specifics. The anchor sets the bar; your prompt
 supplies the material.
 
-| Anchor id | Use it when building... |
-| --- | --- |
-| order-of-operations-chart | an order-of-operations (PEMDAS/GEMDAS) chart, poster, or foldable |
-| five-paragraph-essay-outline | a five-paragraph essay outline or structured writing scaffold |
-| foldable | a foldable or interactive notebook insert |
-| cut-and-paste-word-work | a cut-and-paste CVC word work page |
-| number-practice-page | a single-number practice page (trace, ten-frame, count) |
-| math-practice | a general arithmetic or math practice page |
-| one-page-mini-book | a one-page mini book that folds into eight panels |
-| matching-visual-discrimination | a preschool matching or visual discrimination page |
-| unit-study-packet | a themed, multi-activity unit study packet |
-| activity-pack | a four-quadrant themed activity pack |
-| daily-rhythm-cards | cut-apart daily schedule or rhythm cards |
-| visual-schedule-cards | visual schedule cards for routines |
-| singapore-workbook-page | a Singapore-style concrete-pictorial-abstract math page |
-| hive-puzzle | a hexagonal hive number-constraint puzzle |
-| cross-number-puzzle | a cross-number arithmetic puzzle |
-| fraction-link-puzzle | a fraction-equivalence link puzzle |
-| fraction-maze-escape | a fraction-comparison or ordering maze |
-| decimal-path-puzzle | a decimal comparison or ordering path puzzle |
-| geometry-maze | a geometry or angle maze, or maze-style practice page |
+The full menu of anchor ids, with when to reach for each, lives on
+generate_image's `anchorIds` input. It is rendered from the anchor
+registry at load, so it is always current; recipes also name their own
+anchor in their first paragraph.
 
 Most materials have no anchor yet, and that is fine: build from the recipe
 and design rules. Only pass an anchor id that clearly matches what you are

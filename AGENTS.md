@@ -50,7 +50,7 @@ records the research comparison behind this rule.
 | **Fleet Eve skill** | The hard part is judgment or a reusable procedure: how to reason, choose an approach, sequence existing tools, judge quality, handle variants, or know when to stop. A better model should improve the result without changing code. | `materials-studio` decides difficulty, chooses image/HTML/hybrid, calls the material tools, reviews, revises, and finalizes. `research-brief` selects one family-relevant angle and sequences research, recall, and progress tools. |
 | **Eve tool / deterministic code** | The result or effect must be exact, typed, authenticated, tenant-scoped, idempotent, rate-limited, auditable, or impossible to hallucinate. The model needs an ability it does not currently have. | `manage_child_progress`, `create_printable`, `remember`, `send_followup_email`, database queries, scoring, date math, Blob writes, provider calls. |
 | **Skill + tool** | The capability needs both judgment and a missing exact effect. The skill owns the complete workflow; the tool is the smallest reusable deterministic leaf. | A curriculum-fit skill may use existing recall/web tools plus one narrow catalog lookup tool. Do not turn the whole curriculum-fit workflow into one god tool. |
-| **Always-on or dynamic instructions** | The rule must apply before any skill can load, or the data must be fresh every turn. Keep capability-specific procedures out. | Homa's identity, voice, tenancy and tool-honesty laws stay in `agent/instructions.md`; SMS-only behavior stays in `agent/instructions/sms-mode.ts`; family/progress context is rebuilt on `turn.started`. |
+| **Always-on or dynamic instructions** | The rule must apply before any skill can load, or the data must be fresh every turn. Keep capability-specific procedures out. | Homa's identity, voice, tenancy and tool-honesty laws stay in `apps/web/agent/instructions.md`; SMS-only behavior stays in `apps/web/agent/instructions/sms-mode.ts`; family/progress context is rebuilt on `turn.started`. |
 | **Postgres / Blob / `defineState`** | Durable product truth / durable artifacts / session-only working state. | Family facts and skills in Postgres, PDFs in Blob, a session counter in `defineState`. Never use a skill body, conversation history, or sandbox file as load-bearing state. |
 | **Channel / schedule / UI / subagent** | Transport authentication and delivery / clock-driven activation / parent-visible interaction / genuinely isolated context or privileges. | A new messaging surface is a channel, not a tool. A weekday wake-up is a schedule. Use a subagent only when it needs a different prompt, model, context window, or restricted tool surface; use a skill when optional procedure is enough. |
 
@@ -76,73 +76,33 @@ source text. If any check fails, the claim is dropped, never softened.
 The scorer, the ledger, and every tenancy rule stay exactly as
 deterministic as before.
 
-**Why this is a law and not a preference.** The child-progress journal
-originally matched a mother's sentence to one of 225 skill lines with
-token-overlap scoring and six hand-written alias rules. It looked safe
-("the model has no scoring authority") and it was tested. In production
-it produced **one** evidence row in the product's lifetime: it rejected
-its own documentation's example sentences, read "she" as a different
-person, treated a capitalized book title as a second human, and recorded
-"struggled to read" as mastery. The safety was illusory. We had not
-avoided judgment, we had encoded bad judgment in a place no eval could
-see, and the failure mode was total silent data loss that nobody noticed
-for months. See `docs/homa-planning/plans/2026-07-21-progress-signal-capture-audit.md`.
-
-Corollaries worth stating, because each one was learned the same way:
+Corollaries, each learned from a production failure:
 
 - **Do not pre-filter the model's options with the pattern matcher you
   are replacing.** Pass the whole catalog; a lexical shortlist
   reintroduces the exact recall failure.
-- **Verify provenance, not phrasing.** "This quote appears verbatim in
-  the transcript" is a real guarantee. "This clause shares 50% of its
-  tokens with that quote" is a guess wearing a number.
-- **Measure the judgment layer against real language**, with fixtures
-  taken from production and from the product's own documentation, and
+- **Verify provenance, not phrasing.** A verbatim-quote check is a real
+  guarantee; a token-overlap score is a guess wearing a number.
+- **Measure the judgment layer against real production language** and
   ratchet the number. Deterministic tests below the judgment prove
   nothing about whether signal ever arrives.
 - **A deterministic component that reliably produces nothing is not the
-  safe choice.** Silence is a failure mode, and it is the one least
-  likely to page anyone.
+  safe choice.** Silence is the failure mode least likely to page anyone.
+- **A per-item rule belongs in the validator, not the transport schema.**
+  Schemas parse permissively; validators reject one proposal and let the
+  rest through.
 
-Exception, narrowly: exact string work that is *verification rather than
-interpretation* stays deterministic and lexical. Checking that a
-delivered SMS contains the exact question we sent is verification. Deciding
-what a mother meant is not.
+Two narrow exceptions: exact string work that is verification rather than
+interpretation stays deterministic and lexical, and a security floor is
+not a capability (a deny-list like `scanMemoryContent` may stay
+deterministic because it backstops a structural control, never stands in
+for a capability, and a model judging attacker-controlled text would sit
+inside the blast radius of the thing it judges).
 
-Second exception, on different grounds: **a security floor is not a
-capability.** The law is about components whose low recall means *lost
-signal*, where silence is invisible failure. A deny-list guarding a
-boundary fails the other way: its recall is not the product, and it is
-never the only control. `scanMemoryContent` (lib/agent-memory.ts) pattern
-matches saved memories for instruction-shaped text, which is interpretation
-by the letter of this law, and it stays deterministic anyway because the
-real control is structural (memory renders inside a labelled data block
-that the agent is told is never instructions) and because a model asked to
-judge attacker-controlled text is inside the blast radius of the thing it
-is judging. Keep such floors cheap, keep them honest about what they are,
-and never let one stand in for a capability.
-
-Applied to memory, 2026-07-21: the contradiction guardrail
-(`findConflictingMemories`) was this law's violation in the memory system.
-It judged "does this new fact supersede that one" with one scalar, cosine
-distance under 0.5, calibrated on a single observed pair. Measured against
-the rows compaction later merged, true-conflict distances ran 0.307 to
-0.537 across the threshold, and 5 of 28 rows had no embedding at all. When
-it did fire correctly its only output was advisory prose to a model
-mid-conversation, and the flagged duplicate rode in every prompt for
-eleven days. Fleet-wide it produced two superseded rows in the product's
-lifetime, the same "one evidence row" signature as the journal matcher. It
-was deleted rather than tuned, because the compliant replacement already
-existed: compaction proposes with a model over the whole store and
-verifies in code, off the critical path. Its judgment layer is measured by
-`scripts/memory-compaction-eval.mts` against production language.
-
-A third corollary that fell out of the same work: **a per-item rule
-belongs in the validator, not the transport schema.** The entry-length cap
-sat on the Zod schema, so one merged entry six characters over threw away
-the model's entire response, two correct splits included. Schemas should
-be permissive enough to parse; the validators reject one proposal and let
-the rest through.
+The full ruling text, the journal-matcher and memory-guardrail failures
+that made it law, and the eval evidence live in
+`docs/homa-planning/models-judge-code-verifies.md`. Read it before
+building or reviewing any language-to-structured-data capability.
 
 ### Required decision sequence
 
@@ -170,9 +130,10 @@ the rest through.
   fleet-skill home. It ships with code, is versioned in git, and loads at
   runtime through eve's built-in discovery. Use it for all fleet craft,
   including craft that would once have been a targeted skill-bank row: with
-  four or fewer active skills, advertising every description to every family
-  and letting the loaded skill branch on the family's actual children is
-  cheaper and more reliable than a second targeting system.
+  a small roster of active skills (list `apps/web/agent/skills/` for the
+  current count), advertising every description to every family and letting
+  the loaded skill branch on the family's actual children is cheaper and
+  more reliable than a second targeting system.
 - `skill_bank` and `family_skills` are dormant historical data, not a build
   surface. There is no `save_skill`, no `forget_skill`, and no runtime
   resolver reading either table. Do not add code that reads or writes them;
@@ -215,6 +176,11 @@ the rest through.
 - `familyId` never comes from the model or client. Every model-supplied record
   ID is re-scoped inside the authenticated family. The tool result is the
   only truth about whether an action happened.
+- Every tool ships bounded: `defineBoundedTool` with a deadline tier, never
+  bare `defineTool`. eve (verified through the eve-upgrade-check procedure)
+  gives tools no timeout or abort signal, so Homa bounds every tool herself.
+  `scripts/tool-deadline-check.mts` and its `TOOL_DEADLINE` tiers are the
+  source of truth; `pnpm check:tool-deadlines` is the guard.
 - Exact work stays exact even when a skill asks for it: scoring, arithmetic,
   scheduling, consent classification, policy enforcement, database lookup,
   and security boundaries never move into prose.
@@ -225,6 +191,39 @@ effect if Homa knew the right procedure?** If yes, build the fleet skill.
 result or one authorized side effect?** If yes, build or reuse deterministic
 code. Most substantial capabilities should be a fat fleet skill orchestrating
 a small set of narrow tools, not a growing pile of workflow-shaped tools.
+
+## Context-file authoring rules
+
+These govern every file that loads into an agent's context: `AGENTS.md`
+files, fleet skills, `.agents/skills/`, tool descriptions, and
+`apps/web/agent/instructions.md`. Rationale and the 2026-07-24 audit behind them:
+`docs/homa-planning/plans/2026-07-24-context-engineering-cleanup.md`.
+
+1. **One home per rule.** A law lives in exactly one canonical file; every
+   other mention is a pointer. Tool how-to lives in the tool description,
+   multi-tool workflow lives in the skill, identity and laws live in the
+   always-on instructions.
+2. **A description is a routing instruction.** `Use when <intents>. Not
+   for <neighbor>; <sibling> owns that.` The negative scope prevents
+   mis-routing.
+3. **Schema before prose.** Closed sets are enums, never described
+   strings. Every parameter gets `.describe()`. A tool description that
+   glosses its own enum values one by one means the schema is
+   under-designed.
+4. **Constrain with intent plus scar, never lexicon.** A hard never/always
+   cites its founder ruling or incident. Without a scar, state the intent
+   and trust model judgment. A lexical ban is only legitimate when code
+   enforces it (the em-dash runtime law).
+5. **Bodies are routers.** A SKILL.md body past roughly 200 lines splits
+   into a skill's `references/` subdirectory, loaded by intent. Directory-scoped gotchas go
+   in that directory's `AGENTS.md`, not the root file.
+6. **Rich references over transcription.** Point at the real artifact (a
+   live JSON file, a golden anchor, a fixture, a component path) instead
+   of embedding a copy that can drift.
+7. **Retire loudly, then delete.** Mark a dead skill retired with a banner
+   routing to its successors, then delete it; git is the archive.
+8. **Never hand-maintain what a command can list.** Counts and file
+   indexes in prose go stale silently; instruct listing them live.
 
 ## Commands
 
@@ -239,7 +238,7 @@ a small set of narrow tools, not a growing pile of workflow-shaped tools.
   focused route and card tests; and `pnpm child-progress:e2e` for the
   disposable local PostgreSQL harness. The E2E command creates and removes its
   own cluster and needs no remote credentials.
-- Required guards: `pnpm check:isolation` (tenant isolation, run before any schema/query change), `pnpm check:map` (bank content + scorer), `pnpm check:events` (MJ-08 registry parity), `pnpm check:fleet-skills` (fleet-skill package hygiene and slash-menu parity), `pnpm check:skills-targeting`, and `pnpm check:taxonomy` (skill graph integrity: mapping completeness, ID law, DAG)
+- Required guards, named here because they run BEFORE a change (CI is too late for them): `pnpm check:isolation` (tenant isolation, run before any schema/query change), `pnpm check:map` (bank content + scorer), `pnpm check:events` (MJ-08 registry parity), `pnpm check:fleet-skills` (fleet-skill package hygiene, reference integrity, and slash-menu parity), `pnpm check:skills-targeting`, and `pnpm check:taxonomy` (skill graph integrity: mapping completeness, ID law, DAG). For the full check roster, enumerate `.github/workflows/ci.yml` rather than any hand-copied list
 - Temporary through the fleet-skills dormant window only (docs/homa-planning/plans/2026-07-15-filesystem-first-fleet-skills.md Phase C, opens 2026-07-15, earliest close 2026-07-22): `pnpm check:fleet-skills-dormant` proves the retired dynamic-skill files stay deleted and nothing outside an explicit allowlist queries `family_skills`/`skill_bank`. Retire this check together with `check:skills-targeting` once Phase C closes and a founder reviews the evidence; do not treat either as a permanent fixture of "how skills work here."
 - Local eval runs (`eve eval` in apps/web) are isolated by default:
   evals.config.ts strips durable-write credentials from the eval process
@@ -258,14 +257,9 @@ a small set of narrow tools, not a growing pile of workflow-shaped tools.
 ## Deploys & migrations
 
 - Prod schema and prod code ship together. Never apply a breaking migration (a rename, a drop, a tightened constraint) ahead of the deploy that reads it: push the code, watch the Vercel deploy go READY, then apply the migration, or use expand-contract (add the new shape, dual-read, drop the old later). Additive-only migrations may lead. Cause: the 2026-07-10 /app outage (build-log entry) was the previous deploy reading a renamed column.
-- A green `pnpm build` is not a green deploy. Vercel also runs `eve build`, which compiles agent tool modules outside Next's bundler, so imports Next tolerates (`next/server`, JSON loaders) can still sink the deploy. CI runs it now under `VERCEL=1`; before pushing changes under `apps/web/agent/`, run `VERCEL=1 pnpm --filter web exec eve build` locally, then `VERCEL=1 pnpm check:eve-stream-duration` so the shared `/eve/__server` stream function keeps `maxDuration: "max"`.
+- A green `pnpm build` is not a green deploy: Vercel also runs `eve build` outside Next's bundler. The local pre-push checks for `apps/web/agent/` changes live in `apps/web/AGENTS.md`.
 - After any push that touches schema or the deploy pipeline, stay until the Vercel deployment is READY and probe the live site before calling it done.
-- ChildProgress rollout starts with `HOMA_LIVE_PROGRESS_ENABLED` false. Deploy
-  code and verify READY plus legacy paths first. Then apply the additive
-  migration, run `pnpm progress:reconcile -- --dry-run` and the real
-  reconciliation with an explicit database URL, enable the flag, and probe
-  authenticated Progress, token reports, corrections, and linked SMS.
-  Rollback turns the flag off first and leaves the additive ledger intact.
+- ChildProgress rollout order and rollback are in `BUILD.md` § ChildProgress rollout order; follow it exactly, flag-first both directions.
 
 ## Production bugs
 
@@ -283,7 +277,7 @@ a small set of narrow tools, not a growing pile of workflow-shaped tools.
 
 ## Design system
 
-UI and copy work should use Homa's existing design system, never invent new colors, type, or components. Source of truth: `docs/homa-design/` (start at its `SKILL.md`, then `readme.md`). A spec-compliant token summary for design tooling lives at [`DESIGN.md`](DESIGN.md). Web currently hand-copies tokens, fonts, and the `Logo` component into `globals.css`, `layout.tsx`, and `components/brand/Logo.tsx`. Mobile does the same in `src/theme/tokens.ts` and `src/components/brand/logo.tsx`. These copies remain temporary until `packages/design` lands under ticket M1-17. If `docs/homa-design/` tokens change, update those files and `DESIGN.md`'s front matter too, so nothing drifts.
+UI and copy work should use Homa's existing design system, never invent new colors, type, or components. Source of truth: `docs/homa-design/` (start at its `SKILL.md`, then `readme.md`). A spec-compliant token summary for design tooling lives at [`DESIGN.md`](DESIGN.md). Web currently hand-copies tokens, fonts, and the `Logo` component into `globals.css`, `layout.tsx`, and `apps/web/components/brand/Logo.tsx`. Mobile does the same in `apps/mobile/src/theme/tokens.ts` and `apps/mobile/src/components/brand/logo.tsx`. These copies remain temporary until `packages/design` lands under ticket M1-17. If `docs/homa-design/` tokens change, update those files and `DESIGN.md`'s front matter too, so nothing drifts.
 
 ## Security & boundaries
 

@@ -2,37 +2,28 @@ import { defineDynamic, defineInstructions } from "eve/instructions";
 
 import { LINKED_SMS_PROGRESS_GUIDANCE } from "../../lib/child-progress/instruction-guidance";
 
-/**
- * SMS-mode guidance, injected only for sessions arriving through the
- * Telnyx channel (agent/channels/telnyx.ts). Web sessions get nothing
- * (returning null contributes no instruction block). Detection uses the
- * channel metadata the chat-sdk bridge stamps (adapterName) with the
- * compiler's channel kind as a belt-and-braces fallback.
- */
-export default defineDynamic({
-  events: {
-    "turn.started": (_event, ctx) => {
-      const adapterName = ctx.channel.metadata?.adapterName;
-      const isSms =
-        adapterName === "telnyx" || ctx.channel.kind === "channel:telnyx";
-      if (!isSms) return null;
+export interface SmsModeAttributes {
+  canInviteFamilyMembers?: string;
+  familyId?: string;
+  familySmsInviteDecision?: "accept" | "decline";
+  familySmsInviteLookupFailed?: string;
+  familySmsInviteState?: "pending" | "awaiting-parent" | "expired";
+  familySmsInviterConfirmationDecision?: "confirm" | "cancel";
+  familySmsInviterConfirmationLookupFailed?: string;
+  smsSignupCandidate?: string;
+}
 
-      const attributes = ctx.session.auth.current?.attributes as
-        | {
-            canInviteFamilyMembers?: string;
-            familyId?: string;
-            familySmsInviteDecision?: "accept" | "decline";
-            familySmsInviteLookupFailed?: string;
-            familySmsInviteState?:
-              | "pending"
-              | "awaiting-parent"
-              | "expired";
-            familySmsInviterConfirmationDecision?: "confirm" | "cancel";
-            familySmsInviterConfirmationLookupFailed?: string;
-            smsSignupCandidate?: string;
-          }
-        | undefined;
-      const linked = Boolean(attributes?.familyId);
+/**
+ * Pure composition of the SMS instruction block from the session's
+ * auth attributes. Exported so the journaling-trigger eval
+ * (scripts/journaling-trigger-eval.mts --channel=sms) and the context
+ * budget check can render the real branches without a Telnyx session;
+ * the defineDynamic handler below is only channel detection plus this.
+ */
+export function composeSmsModeMarkdown(
+  attributes: SmsModeAttributes | undefined,
+): string {
+  const linked = Boolean(attributes?.familyId);
       const familySmsInviteDecision = attributes?.familySmsInviteDecision;
       const familySmsInviteLookupFailed =
         attributes?.familySmsInviteLookupFailed === "true";
@@ -115,10 +106,6 @@ export default defineDynamic({
   update_child_profile, and recall all work here exactly like web chat.
   Save durable facts and log school time the moment they come up.
 ${LINKED_SMS_PROGRESS_GUIDANCE}
-- An evening text that reads like "here's how today went" IS the
-  journal: reply warmly in one or two sentences, save the durable
-  bits, and log any school time mentioned. Never recite what you
-  saved; one short natural aside covers it.
 - Materials work here: design the page (materials-studio skill +
   create_printable) and the tool texts her the preview picture and
   a direct link to the printable PDF. Your follow-up is ONE short text
@@ -185,8 +172,7 @@ ${LINKED_SMS_PROGRESS_GUIDANCE}
   payment or pricing over text; if she asks, plans live at
   thankshoma.com and signup itself is free.`;
 
-      return defineInstructions({
-        markdown: `
+  return `
 ## You are texting (SMS)
 
 This conversation is happening over text message, not the web app.
@@ -213,7 +199,30 @@ ${linkage}
 - Never send more than one reply per incoming text. Tool sends (the
   send_heads_up progress line, a material delivery) are not replies; your reply
   is the one message you compose after the work.
-        `.trim(),
+  `.trim();
+}
+
+/**
+ * SMS-mode guidance, injected only for sessions arriving through the
+ * Telnyx channel (agent/channels/telnyx.ts). Web sessions get nothing
+ * (returning null contributes no instruction block). Detection uses the
+ * channel metadata the chat-sdk bridge stamps (adapterName) with the
+ * compiler's channel kind as a belt-and-braces fallback.
+ */
+export default defineDynamic({
+  events: {
+    "turn.started": (_event, ctx) => {
+      const adapterName = ctx.channel.metadata?.adapterName;
+      const isSms =
+        adapterName === "telnyx" || ctx.channel.kind === "channel:telnyx";
+      if (!isSms) return null;
+
+      return defineInstructions({
+        markdown: composeSmsModeMarkdown(
+          ctx.session.auth.current?.attributes as
+            | SmsModeAttributes
+            | undefined,
+        ),
       });
     },
   },
