@@ -273,12 +273,12 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
         exists (
           select 1 from public.events e
           where e.family_id = c.id
-            and e.name = any(${KEPT_PREP_EVENTS as unknown as string[]})
+            and e.name = any(string_to_array(${KEPT_PREP_EVENTS.join(",")}, ','))
         ) as kept,
         exists (
           select 1 from public.events e
           where e.family_id = c.id
-            and e.name = any(${LOOP_BACK_EVENTS as unknown as string[]})
+            and e.name = any(string_to_array(${LOOP_BACK_EVENTS.join(",")}, ','))
         ) as looped,
         (c.created_at < now() - interval '7 days') as w2_eligible,
         (
@@ -291,7 +291,7 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
             select 1 from public.events e
             where e.family_id = c.id
               and e.created_at > c.created_at + interval '7 days'
-              and e.name = any(${PARENT_INITIATED_EVENTS as unknown as string[]})
+              and e.name = any(string_to_array(${PARENT_INITIATED_EVENTS.join(",")}, ','))
           )
         ) as w2_returned
       from cohort c
