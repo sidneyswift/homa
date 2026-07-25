@@ -1,6 +1,13 @@
 import { del, list, put } from "@vercel/blob";
 
+import { isEvalIsolationActive } from "../eval-isolation";
 import { mapDb } from "../map/db";
+import {
+  evalBlobDeleteFamily,
+  evalBlobPut,
+  isEvalBlobFamilyUrl,
+  resolveEvalBlobStore,
+} from "./eval-blob-store";
 import { subjectLessonsEnabled } from "../subject-lessons/flag";
 import { MATERIAL_KINDS, type MaterialKind } from "./kinds";
 
@@ -18,6 +25,14 @@ export { MATERIAL_KINDS, type MaterialKind };
  */
 
 export function blobConfigured(): boolean {
+  // Isolated eval runs (lib/eval-isolation.ts): with the sandbox store
+  // present the pipeline runs at full fidelity against a throwaway
+  // directory; without it the store reports absent even if a token leaked
+  // past the env scrub, because create_printable's honest "not configured"
+  // path beats a real PDF landing in the production store.
+  if (isEvalIsolationActive(process.env)) {
+    return resolveEvalBlobStore(process.env) !== null;
+  }
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 }
 
@@ -31,6 +46,10 @@ const BLOB_HOST_SUFFIX = ".public.blob.vercel-storage.com";
  * from fetching arbitrary internet URLs on the model's say-so.
  */
 export function isFamilyArtifactUrl(url: string, familyId: string): boolean {
+  // Isolated eval runs accept the sandbox store's loopback URLs under the
+  // same path law; resolveEvalBlobStore is null everywhere else.
+  const evalStore = resolveEvalBlobStore(process.env);
+  if (evalStore && isEvalBlobFamilyUrl(evalStore, url, familyId)) return true;
   try {
     const parsed = new URL(url);
     return (
@@ -61,18 +80,19 @@ export async function uploadMaterialArtifacts(input: {
   pageJpegs: readonly Buffer[];
 }): Promise<MaterialArtifactUrls> {
   const base = `families/${input.familyId}/materials/${input.slug}`;
+  const evalStore = resolveEvalBlobStore(process.env);
+  const putBlob = (key: string, body: Buffer, contentType: string) =>
+    evalStore
+      ? evalBlobPut(evalStore, key, body)
+      : put(key, body, { access: "public", contentType, addRandomSuffix: true });
   const [pdfBlob, ...previewBlobs] = await Promise.all([
-    put(`${base}.pdf`, input.pdf, {
-      access: "public",
-      contentType: "application/pdf",
-      addRandomSuffix: true,
-    }),
+    putBlob(`${base}.pdf`, input.pdf, "application/pdf"),
     ...input.pageJpegs.map((jpeg, index) =>
-      put(`${base}${index === 0 ? "" : `-p${index + 1}`}.jpg`, jpeg, {
-        access: "public",
-        contentType: "image/jpeg",
-        addRandomSuffix: true,
-      }),
+      putBlob(
+        `${base}${index === 0 ? "" : `-p${index + 1}`}.jpg`,
+        jpeg,
+        "image/jpeg",
+      ),
     ),
   ]);
   const pagePreviewUrls = previewBlobs.map((blob) => blob.url);
@@ -97,11 +117,15 @@ export async function uploadStudioImageBytes(input: {
   mediaType: string;
 }): Promise<string> {
   const extension = input.mediaType.split("/")[1]?.split("+")[0] || "png";
-  const blob = await put(
-    `families/${input.familyId}/images/${crypto.randomUUID()}.${extension}`,
-    input.bytes,
-    { access: "public", contentType: input.mediaType, addRandomSuffix: true },
-  );
+  const key = `families/${input.familyId}/images/${crypto.randomUUID()}.${extension}`;
+  const evalStore = resolveEvalBlobStore(process.env);
+  const blob = evalStore
+    ? await evalBlobPut(evalStore, key, input.bytes)
+    : await put(key, input.bytes, {
+        access: "public",
+        contentType: input.mediaType,
+        addRandomSuffix: true,
+      });
   return blob.url;
 }
 
@@ -110,6 +134,8 @@ export async function uploadStudioImageBytes(input: {
  * today; the family-deletion story later). Returns how many went.
  */
 export async function deleteFamilyBlobs(familyId: string): Promise<number> {
+  const evalStore = resolveEvalBlobStore(process.env);
+  if (evalStore) return evalBlobDeleteFamily(evalStore, familyId);
   const listed = await list({ prefix: `families/${familyId}/` });
   const urls = listed.blobs.map((blob) => blob.url);
   if (urls.length > 0) await del(urls);
