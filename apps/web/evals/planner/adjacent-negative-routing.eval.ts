@@ -5,13 +5,16 @@ import { defineEval } from "eve/evals";
  * existing lesson between days is planner work and must not pull in
  * the materials studio. Routing assertions only; the eval family has
  * no plan rows, so downstream open_planner results are not asserted.
+ * The child is named on purpose: two fixture children share a reading
+ * focus, and an unnamed "reading lesson" invites the documented
+ * which-child clarifying question instead of a routing decision.
  */
 export default defineEval({
   description:
     "Moving an existing lesson to another day loads planner, not materials-studio.",
   async test(t) {
     const turn = await t.send(
-      "Can you move Tuesday's reading lesson to Thursday?",
+      "Can you move Story's Tuesday reading lesson to Thursday?",
     );
     t.succeeded();
     t.loadedSkill("planner");
