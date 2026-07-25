@@ -3,6 +3,24 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-25 · Carolyng WhatsApp feedback ingested: CG ticket series filed, two suspected prod failures escalated in-doc
+
+Ingestion record for the co-founder feedback thread of 2026-07-25
+(evidence:
+`journeys/evidence/raw/2026-07-25-carolyng-whatsapp-feedback.md`;
+tickets: `plans/2026-07-25-carolyng-feedback-tickets.md`, CG-01 to
+CG-06). Decisions made alone: (a) numbered a new CG series following the
+T-series precedent rather than extending MJ, because these are
+field-evidence tickets, not journey derivations; (b) per the prod-bugs
+ruling, CG-01 (phone-call amnesia, suspected planning-claim fabrication
+recurrence of the 2026-07-19 class) and CG-06 (web replies invisible in
+a live session) are escalations, not stored bugs: the finding session
+had no prod access (Supabase MCP unauthenticated, Vercel logs
+unreachable), so the doc names the failures plainly and the founder
+reply of 2026-07-25 carries them; (c) journey files were NOT edited
+mid-reconciliation, deltas for F2/F4/F5/05/07 are listed in the ticket
+doc for the next reconciliation pass.
+
 ## 2026-07-23 · Founder directive: background jobs start immediately; the cron becomes the sweeper
 
 Founder, on hearing the agent-jobs queue waits up to five minutes to
