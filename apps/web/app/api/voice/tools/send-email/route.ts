@@ -96,6 +96,8 @@ export async function POST(request: Request): Promise<Response> {
     email,
     subject,
     text.split("\n").filter((line) => line.trim().length > 0),
+    undefined,
+    familyId,
   );
   if (!sent) {
     return Response.json({ success: false, error: "The send failed. Tell them you'll try again shortly." });

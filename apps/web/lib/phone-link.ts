@@ -40,11 +40,17 @@ export async function sendPhoneLinkEmail(
 ): Promise<boolean> {
   const token = await mintPhoneLinkRequest(realFamilyId, phoneE164);
   const url = `${siteUrl()}/api/link-phone?t=${token}`;
-  return sendAgentComposedEmail(to, "Connect texting to your Homa account", [
-    "Someone (almost certainly you) was texting with Homa and gave this email as theirs.",
-    `Tap the link to connect that phone number to your Homa account, and those texts will pick up right where your family's records live: ${url}`,
-    "If this wasn't you, ignore this email and nothing changes.",
-  ]);
+  return sendAgentComposedEmail(
+    to,
+    "Connect texting to your Homa account",
+    [
+      "Someone (almost certainly you) was texting with Homa and gave this email as theirs.",
+      `Tap the link to connect that phone number to your Homa account, and those texts will pick up right where your family's records live: ${url}`,
+      "If this wasn't you, ignore this email and nothing changes.",
+    ],
+    undefined,
+    realFamilyId,
+  );
 }
 
 export interface ConsumePhoneLinkResult {
