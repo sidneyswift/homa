@@ -56,6 +56,11 @@ export const EMPTY_ONBOARDING_RECORD: OnboardingRecord = {
  * chatOnboardingEnabled(): the rollout flag. Off means the old card
  * flow runs untouched and nothing in this module changes any behavior,
  * including the wall bypass below.
+ *
+ * Found empty in prod on 2026-07-25 despite being flipped on 2026-07-24;
+ * a plain `vercel redeploy` reuses the env snapshot frozen at the
+ * original build rather than the current value, so restoring the var
+ * alone did not take effect. Fixed by forcing a fresh build.
  */
 export function chatOnboardingEnabled(): boolean {
   const value = (process.env.HOMA_CHAT_ONBOARDING ?? "").trim().toLowerCase();
