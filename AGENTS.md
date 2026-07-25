@@ -241,6 +241,15 @@ a small set of narrow tools, not a growing pile of workflow-shaped tools.
   own cluster and needs no remote credentials.
 - Required guards: `pnpm check:isolation` (tenant isolation, run before any schema/query change), `pnpm check:map` (bank content + scorer), `pnpm check:events` (MJ-08 registry parity), `pnpm check:fleet-skills` (fleet-skill package hygiene and slash-menu parity), `pnpm check:skills-targeting`, and `pnpm check:taxonomy` (skill graph integrity: mapping completeness, ID law, DAG)
 - Temporary through the fleet-skills dormant window only (docs/homa-planning/plans/2026-07-15-filesystem-first-fleet-skills.md Phase C, opens 2026-07-15, earliest close 2026-07-22): `pnpm check:fleet-skills-dormant` proves the retired dynamic-skill files stay deleted and nothing outside an explicit allowlist queries `family_skills`/`skill_bank`. Retire this check together with `check:skills-targeting` once Phase C closes and a founder reviews the evidence; do not treat either as a permanent fixture of "how skills work here."
+- Local eval runs (`eve eval` in apps/web) are isolated by default:
+  evals.config.ts strips durable-write credentials from the eval process
+  (apps/web/lib/eval-isolation.ts), so passing evals no longer write
+  telemetry rows or Blob PDFs into production. Prefer `pnpm eval:sandbox
+  [eve-eval-args]`: it boots a disposable local Postgres with every
+  migration applied plus a throwaway artifact store, so DB and
+  blob-backed tools succeed for real instead of failing closed.
+  `HOMA_EVAL_ALLOW_PROD_WRITES=1` is the explicit, loudly logged opt-out.
+  Guard: `pnpm check:eval-isolation`.
 - Documentation reconciliation: `pnpm check:docs -- --allow-open` during the audit and `pnpm check:docs` for the zero-open completion gate
 - Conversation continuity tests: `pnpm check:continuity` when changing the continuity module or a channel adapter
 - Before ANY eve version bump, no exceptions: `node scripts/eve-upgrade-check.mjs` (procedure: `docs/homa-planning/runbooks/eve-version-bump.md`)
