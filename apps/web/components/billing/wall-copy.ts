@@ -94,16 +94,35 @@ export const WALL_DISMISS = "Not now";
  * never a claim that a specific state's filing is already built and
  * verified today: a wrong legal claim is the one failure mode this
  * exact persona (Monica, docs/homa-planning/journeys/01-personas-jtbd.md
- * P4) cancels same-day over. Elite's features are real, buildable
- * mechanics (a plan_tier column and the makings multiplier already
- * exist, supabase/migrations/20260725040000_family_plan_tier.sql); the
- * enforcement is dark until the base allowance itself ships, matching
- * how the wall's own doors already ship dark before a flag flip.
+ * P4) cancels same-day over. The top tier's features are real,
+ * buildable mechanics (a plan_tier column and the makings multiplier
+ * already exist, supabase/migrations/20260725040000_family_plan_tier.sql);
+ * the enforcement is dark until the base allowance itself ships,
+ * matching how the wall's own doors already ship dark before a flag
+ * flip. Internal key stays "elite" (the DB check constraint, Stripe
+ * product mapping in wall.ts) to avoid a second migration; only the
+ * display name changed, same pattern as "regular" displaying as "Homa".
+ *
+ * Name and copy ran through the same 5-persona panel as the paywall
+ * research (2026-07-25): "Homa Max" won the plurality (3 of 5), and
+ * every candidate implying the lower tiers are lacking (Complete,
+ * Everything, Total) or literally false against the "five times"
+ * figure (Unlimited) was independently flagged by multiple personas.
+ * "Concierge" was the pick of the two plausible top-tier buyers
+ * (Alessa, Monica) but both separately warned it promises a human
+ * service the actual mechanism doesn't back. The description below was
+ * rewritten from the same panel: "best models" was dropped for
+ * implying the CORE teaching/scoring quality is rationed by price
+ * (Rachel's reading, the most severe finding: this would undermine
+ * trust in every cheaper tier, not just fail to sell this one), and
+ * "priority queue" was reframed as an absolute claim about this tier's
+ * own experience rather than a comparison implying other tiers wait
+ * (4 of 5 personas independently flagged the comparative framing).
  */
 export const TIER_NAMES: Record<PlanTier, string> = {
   regular: "Homa",
   plus: "Homa Plus",
-  elite: "Homa Elite",
+  elite: "Homa Max",
 };
 
 const TIER_PRICES: Record<PlanTier, { monthly: number; annual: number | null }> = {
@@ -138,7 +157,7 @@ export function tierDescription(tier: PlanTier): string {
     case "plus":
       return "Everything in Homa, plus state filing support: quarterly reports and homeschool paperwork, prepared from what you've already logged.";
     case "elite":
-      return "Everything in Homa Plus, plus Homa's best models on every generation, five times the makings each week, and priority on your worksheet queue.";
+      return "Everything in Homa Plus, plus the most capable version of Homa for every worksheet and practice page, five times the makings each week, and no delay when things get busy.";
     default: {
       const exhaustive: never = tier;
       throw new Error(`Unhandled plan tier: ${exhaustive}`);
