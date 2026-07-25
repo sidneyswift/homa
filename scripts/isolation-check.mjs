@@ -3139,6 +3139,29 @@ await expectEmptyRead("agent_schedules");
 // Task run history (migration #49): same member-select posture; fleet
 // rows (family_id null) are invisible to every Data API role.
 await expectEmptyRead("homa_task_runs");
+// Durable multi-token resume links (migration 20260724120000, additive,
+// may not have reached this target yet): no client policies at all, on
+// purpose (minted and resolved only from the app's own server
+// connection, lib/map/store.ts). Stricter than agent_schedules above:
+// not even a family member can read their own row over the Data API,
+// only the server. Same present-or-arms-later posture as agent_jobs
+// below, so a not-yet-migrated target never fails this run.
+async function linkTokensTablePresent() {
+  const response = await rest(`link_tokens?select=id&limit=1`, { headers: { Prefer: "" } });
+  if (response.status !== 404) return true;
+  const raw = await response.text();
+  return !raw.includes("PGRST205");
+}
+const linkTokensSchemaAvailable = await linkTokensTablePresent();
+if (linkTokensSchemaAvailable) {
+  await expectEmptyRead("link_tokens");
+} else {
+  coveredTables.add("link_tokens");
+  report(
+    "link_tokens table absent from target (additive migration not applied yet); nothing exposed",
+    true,
+  );
+}
 // Agent jobs (migration 20260718140000, additive, lands via MCP ahead of
 // the repo replay): the general finite-job primitive. Members read their
 // own family's jobs, stages, artifacts, and timeline (the progress/cancel
@@ -3334,6 +3357,17 @@ await expectInsertDenied(
   },
   "anon cannot forge task runs",
 );
+if (linkTokensSchemaAvailable) {
+  await expectInsertDenied(
+    "link_tokens",
+    {
+      family_id: "00000000-0000-0000-0000-000000000000",
+      token_hash: "intruder-hash",
+      kind: "drip_setup_nudge",
+    },
+    "anon cannot forge link tokens",
+  );
+}
 if (agentJobSchemaAvailable) {
   await expectInsertDenied(
     "agent_jobs",
