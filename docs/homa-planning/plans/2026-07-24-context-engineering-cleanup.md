@@ -113,17 +113,36 @@ session while the nested AGENTS.md tree sat nearly empty.
   framework built-ins: `eve/dist/src/runtime/framework-tools/read-file`
   and `runtime/skills/sandbox-access`.)
 
-## Remaining phases (NOT shipped; each needs its own gate)
+## Remaining phases (each needs its own gate)
 
-Phase A, instructions.md compression (eval-gated): delete the tool
-router table, move the check-in and materials procedure blocks to the
-tool description and skill that own them, collapse the duplicate law
-statements to one canonical copy each, replace lexical bans with intent
-statements, and extract the shared voice module for the three writer
-prompts. This changes production agent behavior; it ships only behind
-the behavioral evals, measured before and after. Expected win: several
-thousand always-on tokens per turn, which also serves the open
-onboarding-turn-latency levers.
+Phase A, instructions.md compression: SHIPPED 2026-07-24 (same branch,
+four commits, one per section so each can be reverted alone). 29.8KB to
+21.7KB always-on, roughly 2k tokens per turn. Gated live against
+eval:journaling-trigger (8/9 capture + 8/8 restraint at baseline; the
+first router-table draft regressed the family-wide fan-out case to a
+consistent fail and was fixed before commit, which is the eval gate
+doing its job), eval:progress-check-in (3 PASS), and the eve eval suite
+(failure-set parity with pristine main measured the same hour).
+
+Scope was deliberately narrower than first planned. NOT touched, with
+reasons: the Voice (binding) block and everything above "What you know
+each turn" (the telnyx-provision split point and the hand-mirrored
+voice contract with report-writer.md and curriculum-writer.md, whose
+REPORT_PROMPT_VERSION gate requires fixture regeneration and a founder
+read-aloud); report-writer.md and curriculum-writer.md themselves,
+including their lexical "behind" enumerations; the Memory section
+(standing-feedback is eval-gated and the rest is non-duplicated); the
+two tool-honesty laws (distinct laws, not duplicates). The shared voice
+module extraction and lexical-ban softening move to a later phase that
+schedules the founder read-aloud.
+
+Observed while gating, not caused by this work: the materials-studio
+positive-routing evals (counting-routing, letter-sounds-routing) fail
+6/6 on PRISTINE main as of the evening of 2026-07-24 (a worksheet
+request answers in prose without load_skill), after passing at least
+once earlier the same day. Suspected model or eval-host drift. Needs
+its own investigation against production behavior; it is not
+addressed by this plan.
 
 Phase B, judgment-only NEVER relaxation on the card tools
 (`ask_user_questions`, `ask_for_photo`): same eval gate as Phase A;
