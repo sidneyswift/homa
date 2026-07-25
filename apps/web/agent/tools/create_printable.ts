@@ -778,11 +778,11 @@ const createPrintable = defineBoundedTool({
     // The reviewer never sees pages past REVIEW_PAGE_CAP (input-token
     // ceiling), so a pass on a longer document is not a full-document
     // pass. Say so plainly rather than letting the agent claim more
-    // coverage than the checker actually had.
+    // coverage than the reviewer actually had.
     const reviewedPageCount = Math.min(rendered.pageCount, REVIEW_PAGE_CAP);
     const coverageNote =
       review !== null && rendered.pageCount > REVIEW_PAGE_CAP
-        ? ` The checker only saw pages 1 to ${reviewedPageCount} of ${rendered.pageCount}; the rest are unreviewed.`
+        ? ` The reviewer only saw pages 1 to ${reviewedPageCount} of ${rendered.pageCount}; the rest are unreviewed.`
         : "";
     const reviewNote =
       review === null

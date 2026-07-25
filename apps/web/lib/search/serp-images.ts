@@ -189,14 +189,21 @@ const STOCK_AGENCY_HOSTS = [
   "dreamstime.com",
   "depositphotos.com",
   "123rf.com",
-  "adobe.com",
+  // Not bare "adobe.com": that domain also serves help.adobe.com,
+  // blog.adobe.com, and general marketing pages, none of which are stock
+  // previews. Every other entry here is a single-purpose stock-photo
+  // domain, where blocking the whole thing costs nothing; this one stays
+  // scoped to the storefront so it does not starve an unrelated query.
   "stock.adobe.com",
   "bigstockphoto.com",
   "canstockphoto.com",
 ] as const;
 
 function matchesStockAgencyHost(host: string): boolean {
-  const normalized = host.toLowerCase();
+  // A trailing root-label dot (a syntactically valid, DNS-equivalent
+  // form of the same host, e.g. "gettyimages.com.") would otherwise
+  // defeat both the equality and the endsWith check below.
+  const normalized = host.toLowerCase().replace(/\.+$/, "");
   return STOCK_AGENCY_HOSTS.some(
     (blocked) => normalized === blocked || normalized.endsWith(`.${blocked}`),
   );

@@ -25,6 +25,19 @@ export const MAX_IMAGES_PER_FAMILY_PER_DAY = 30;
  * legitimately needs several. */
 export const IMAGE_BUDGET_WARNING_AT = 24;
 
+/**
+ * Read-then-act, deliberately: this is checked once per generate_image
+ * call, before the (slow, paid) generation itself, with no reservation
+ * or lock held across it. Several calls the model fires in one burst
+ * can all read the same pre-generation count and all proceed, so a
+ * family can overshoot 30/day by roughly the number of concurrent calls
+ * in that burst. An atomic reservation would need its own counter table
+ * and a lock held across a slow external API call (which risks
+ * serializing every image build for that family behind one stuck
+ * request), so this accepts a small, bounded overshoot rather than add
+ * that machinery for a P0 fix. It is still a strict improvement on the
+ * limiter it replaces, which had no cross-instance ceiling at all.
+ */
 export async function imagesGeneratedToday(familyId: string): Promise<number> {
   try {
     const sql = mapDb();

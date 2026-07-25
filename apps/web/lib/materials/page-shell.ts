@@ -107,13 +107,13 @@ export function validatePrintableHtml(html: string, extraText: string): string |
 
   const bodyBannedMatch = BANNED_WORDS.exec(visibleText(html));
   if (EM_DASH.test(visibleText(html)) || bodyBannedMatch) {
-    const token = bodyBannedMatch ? bodyBannedMatch[0] : "an em dash (—)";
+    const token = bodyBannedMatch ? bodyBannedMatch[0] : "an em dash character";
     return `The page HTML was rejected: the visible page text contains "${token}", which the house voice rules forbid (no em dashes, no deficit words: behind, delayed, disorder, diagnosis, screening, assessment, percentile). Remove it from the page text and call the tool again.`;
   }
 
   const metaBannedMatch = BANNED_WORDS.exec(extraText);
   if (EM_DASH.test(extraText) || metaBannedMatch) {
-    const token = metaBannedMatch ? metaBannedMatch[0] : "an em dash (—)";
+    const token = metaBannedMatch ? metaBannedMatch[0] : "an em dash character";
     return `The page itself is fine; this was rejected because of its metadata, not the HTML. The title, skill, subject, curriculum, theme, a character name, the child's name, or the request summary contains "${token}", which the house voice rules forbid. Fix that field (not the page) and call the tool again.`;
   }
 

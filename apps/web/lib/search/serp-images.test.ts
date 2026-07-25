@@ -180,6 +180,45 @@ describe("serp-images", () => {
     assert.equal(normalizeImagesResponse(response, FAMILY_A, 8).length, 1);
   });
 
+  it("catches a stock agency even behind a trailing root-label dot", () => {
+    const response = {
+      images_results: [
+        {
+          title: "Watermarked, dotted host",
+          source: "www.shutterstock.com.",
+          original: "https://media.gettyimages.com./photos/123.jpg",
+          original_width: 2400,
+          original_height: 1600,
+        },
+      ],
+    };
+    assert.equal(normalizeImagesResponse(response, FAMILY_A, 8).length, 0);
+  });
+
+  it("no longer blocks unrelated adobe.com subdomains, only the stock storefront", () => {
+    const response = {
+      images_results: [
+        {
+          title: "Adobe help article screenshot",
+          source: "helpx.adobe.com",
+          original: "https://example.org/screenshot.jpg",
+          original_width: 2400,
+          original_height: 1600,
+        },
+        {
+          title: "Adobe Stock preview",
+          source: "stock.adobe.com",
+          original: "https://as1.ftcdn.net/stock/photo.jpg",
+          original_width: 2400,
+          original_height: 1600,
+        },
+      ],
+    };
+    const photos = normalizeImagesResponse(response, FAMILY_A, 8);
+    assert.equal(photos.length, 1);
+    assert.equal(photos[0].title, "Adobe help article screenshot");
+  });
+
   it("allows raster media types only", () => {
     assert.equal(isAllowedPhotoType("image/jpeg"), true);
     assert.equal(isAllowedPhotoType("image/png; charset=binary"), true);
