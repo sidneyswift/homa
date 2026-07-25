@@ -128,7 +128,7 @@ export async function getDripData(recentLimit = 40): Promise<DripData> {
         when 'drip_loop_back' then exists(
           select 1 from public.events e
           where e.family_id = s.family_id
-            and e.name = any(${LOOP_BACK_EVENTS as unknown as string[]})
+            and e.name = any(string_to_array(${LOOP_BACK_EVENTS.join(",")}, ','))
             and e.created_at > s.created_at
             and e.created_at <= s.created_at + ${window}::interval
         )
