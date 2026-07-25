@@ -206,3 +206,35 @@ markdown against the registry. The format-library table stays in the
 SKILL.md body on purpose: it is the always-consulted routing index over
 references/recipes/, and moving it behind read_file would add a sandbox
 round trip for zero context savings.
+
+## Verification for the 2026-07-25 re-land session
+
+Deterministic, all green on the final tree: typecheck, lint,
+check:fleet-skills (6 packages, including the new anchor-id check),
+check:child-progress (434), check:onboarding (78), check:continuity
+(185), check:journaling-trigger fixtures (18), check:agent-budget,
+check:instructions-split, check:agent-context (42),
+check:tool-deadlines (55 bounded), check:eval-isolation (17),
+check:skills-targeting, check:fleet-skills-dormant, VERCEL=1 eve build,
+VERCEL=1 check:eve-stream-duration, and check:docs --allow-open with an
+error set identical to the same-day pristine-main baseline plus the
+intended deltas (one fewer open manifest row for emil-design-eng, a
+claim-ledger newline fix, and the standard two-error registration noise
+for each of the three new doc files).
+
+Behavioral, measured against same-day pristine-main baselines:
+progress-check-in 3/3 baseline to 9/9 across three runs after;
+journaling-trigger capture 7/9, 7/9, 8/9 baseline to 8/9 x3 after
+(fan-out-collective, which failed 2/3 on main, passes 3/3 after; the
+compressed prose names the family-wide fan-out explicitly), restraint
+8/8 on every run of every channel; new channel variants SMS 8-9/10 and
+email 8/10 at parity with their own pre-deletion baselines; planner
+routing gates 3/3 everywhere on both trees; full eve suite failure set
+equal to the union of the two pre-existing question-parking flakes
+(pass on re-run), the two inherent workflow-harness flakes (their
+harness never includes instructions.md), and the two deliberate red
+trackers (lesson-plan-routing, anchor-usage).
+
+Tried, measured, and reverted: a strengthened always-on hours line
+(evening-recap-with-hours fixture moved only to 1/4). The follow-up is
+deterministic instead: a reminder in the journal tool's own result.
