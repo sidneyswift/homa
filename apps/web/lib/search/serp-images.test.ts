@@ -126,6 +126,60 @@ describe("serp-images", () => {
     assert.equal(normalizeImagesResponse(sampleResponse(), FAMILY_A, 8).length, 0);
   });
 
+  it("drops results whose source is a stock-photo agency", () => {
+    const response = {
+      images_results: [
+        {
+          title: "Watermarked butterfly",
+          source: "www.shutterstock.com",
+          original: "https://example.org/watermarked.jpg",
+          original_width: 2400,
+          original_height: 1600,
+        },
+        {
+          title: "Real one",
+          source: "nps.gov",
+          original: "https://example.org/real.jpg",
+          original_width: 2400,
+          original_height: 1600,
+        },
+      ],
+    };
+    const photos = normalizeImagesResponse(response, FAMILY_A, 8);
+    assert.equal(photos.length, 1);
+    assert.equal(photos[0].title, "Real one");
+  });
+
+  it("also drops a stock agency served off a CDN subdomain, even with a clean source label", () => {
+    const response = {
+      images_results: [
+        {
+          title: "CDN-hosted stock photo",
+          source: "some-blog.example",
+          original: "https://media.gettyimages.com/photos/123.jpg",
+          original_width: 2400,
+          original_height: 1600,
+        },
+      ],
+    };
+    assert.equal(normalizeImagesResponse(response, FAMILY_A, 8).length, 0);
+  });
+
+  it("does not false-positive on an unrelated domain that merely contains a blocked name", () => {
+    const response = {
+      images_results: [
+        {
+          title: "Not actually gettyimages.com",
+          source: "notgettyimages.com.example.org",
+          original: "https://example.org/fine.jpg",
+          original_width: 2400,
+          original_height: 1600,
+        },
+      ],
+    };
+    assert.equal(normalizeImagesResponse(response, FAMILY_A, 8).length, 1);
+  });
+
   it("allows raster media types only", () => {
     assert.equal(isAllowedPhotoType("image/jpeg"), true);
     assert.equal(isAllowedPhotoType("image/png; charset=binary"), true);

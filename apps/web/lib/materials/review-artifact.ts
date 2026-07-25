@@ -61,6 +61,9 @@ parent would notice on paper:
 - broken layout: overlapping or cut-off elements, a mostly blank page
 - exercises that contradict the brief (wrong letter, wrong count, wrong
   difficulty for the stated age)
+- a real photo that carries a visible watermark, stock-agency text or
+  logo, or a sample/preview overlay: that reads on paper and a parent
+  notices it immediately
 
 When told the document has more pages than you were shown, judge only
 the pages you can see; never report unshown pages as missing or broken.
