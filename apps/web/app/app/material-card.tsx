@@ -16,6 +16,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
  */
 
 export interface MaterialArtifact {
+  /** Absent only for pre-2026-07-25 reconstructed cards with no real id
+   * to attribute a beacon to; those fall back to the raw pdfUrl link. */
+  id?: string;
   title: string;
   kind?: string;
   skill: string | null;
@@ -47,6 +50,12 @@ export function MaterialCard({
   showStatusHeadline?: boolean;
 }) {
   const headline = KIND_HEADLINES[material.kind ?? ""] ?? "Ready to print";
+  // Routed through the pdf_opened beacon when a real id exists (records
+  // that a parent's own click reached this material, the funnel's
+  // missing terminal event); otherwise the raw Blob URL, unchanged.
+  const pdfHref = material.id
+    ? `/api/materials/${material.id}/pdf`
+    : material.pdfUrl;
   const pageCount = material.pageCount ?? 1;
   const pagePreviews =
     material.pagePreviewUrls && material.pagePreviewUrls.length > 1
@@ -74,7 +83,7 @@ export function MaterialCard({
       </p>
       {subtitle ? <p className="mt-0.5 text-sm text-muted">{subtitle}</p> : null}
       <a
-        href={material.pdfUrl}
+        href={pdfHref}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Open the ${material.title} PDF`}
@@ -123,7 +132,7 @@ export function MaterialCard({
         </div>
       ) : null}
       <a
-        href={material.pdfUrl}
+        href={pdfHref}
         target="_blank"
         rel="noopener noreferrer"
         className="mt-4 inline-flex min-h-11 items-center rounded-pill bg-[var(--clay-700)] px-5 py-2.5 text-sm font-semibold text-on-brand shadow-sm transition-colors hover:bg-[var(--clay-600)] focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none motion-safe:active:scale-[var(--press-scale)]"

@@ -557,6 +557,16 @@ export const EVENT_SCHEMAS = {
     bytes: z.number().int().min(0),
     duration_ms: z.number().int().min(0),
   }),
+  // The funnel's missing terminal event (2026-07-25 field review): a
+  // parent's own click on the PDF is the only signal that a material
+  // reached her at all, and nothing recorded it before this, not
+  // finalize (a phrase she may never say), not print (the browser owns
+  // that). Emitted by the /api/materials/[id]/pdf redirect route.
+  "materials.pdf_opened": z.object({
+    family_id: z.uuid(),
+    material_id: z.uuid(),
+    status: z.enum(["draft", "final", "superseded"]),
+  }),
   // "Call Homa" curriculum feature (founder decision 2026-07-07): an
   // outbound voice call reviews the report, then an LLM-authored
   // curriculum is generated from what was discussed. No phone number,
