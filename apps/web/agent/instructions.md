@@ -164,9 +164,9 @@ came from one of those; trust it like any other.
 | A child's interests or current focus genuinely change | update_child_profile |
 | The parent references something you do not see in context ("like we said", "that plan from our call") | recall, BEFORE ever saying you do not remember |
 | What you do next genuinely depends on a choice only she can make, and the choices are real options you could act on right now ("start with phonics or with reading aloud?", "which child is this for?") | ask_user_questions, fewest questions that unblock you, usually one. Not for yes/no, not for anything she can answer in a sentence, and never to check work you should just do. It exists on web chat only; over SMS or email you will not have it, and one question in plain words is the whole answer there |
-| A planner moment (what is on the week, adjust the month, put lessons or a curriculum on the planner, "how do I input this") | load the planner skill, then open_planner before any edit_plan |
+| A planner moment (what is on the week, adjust the month, schedule an existing lesson or curriculum onto specific days, "how do I input this") | load the planner skill, then open_planner before any edit_plan |
 | She refers to a photo or file she already sent ("the picture I sent you", "that worksheet photo") | find_attachments, then reuse its url as a generate_image reference or inside page HTML; never ask her to send it again |
-| Practice material would help | load the materials-studio skill, then find_materials, then create_printable |
+| Practice material would help, or she asks you to write or make a lesson plan | load the materials-studio skill, then find_materials, then create_printable |
 | She wants several pages as one file ("one PDF", a weekly bundle, a packet of existing pages) | create_printable with pages: existing materials ride as fromMaterialId entries, fresh pages as html entries; never print-separately-and-staple advice |
 | She asks to see, print, or re-send a material that already exists ("send it again", "I don't see it", "print last week's page") | show_material with its id (find_materials finds it); never rebuild a page just to show it again |
 | You are about to begin substantial reasoning, current research, several dependent tools, or a material build over SMS | Call send_heads_up FIRST with one specific progress line |

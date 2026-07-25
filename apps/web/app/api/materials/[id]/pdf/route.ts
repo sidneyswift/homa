@@ -1,6 +1,9 @@
 import { emitMapEvent } from "../../../../../lib/map/events";
-import { getMaterialCaller } from "../../../../../lib/materials/library";
-import { requireFamily } from "../../../../../lib/map/session";
+import {
+  getMaterialCaller,
+  getMaterialPinned,
+} from "../../../../../lib/materials/library";
+import { requireFamilyWithActor } from "../../../../../lib/map/session";
 import { createSupabaseServerClient } from "../../../../../lib/supabase/server";
 
 /**
@@ -13,6 +16,12 @@ import { createSupabaseServerClient } from "../../../../../lib/supabase/server";
  * every other caller-path material read, then sends her straight to the
  * real Blob URL. The PDF itself stays a public Blob URL either way; this
  * adds a signal, not a gate.
+ *
+ * requireFamilyWithActor resolves through two doors (resume-cookie or
+ * real Supabase auth) but only the auth door leaves an RLS-visible
+ * session; a resume-cookie sitting (anonymous onboarding, the exact
+ * population materials-studio serves) reads through getMaterialPinned
+ * instead, same split as every agent-tool material read.
  */
 export async function GET(
   request: Request,
@@ -21,15 +30,31 @@ export async function GET(
   const { id } = await params;
   const requestUrl = new URL(request.url);
 
-  const family = await requireFamily();
-  if (!family) {
+  let access;
+  try {
+    access = await requireFamilyWithActor();
+  } catch (error) {
+    console.error(
+      "materials/pdf auth lookup failed:",
+      error instanceof Error ? error.message : "unknown",
+    );
+    return new Response("Could not verify your session.", { status: 502 });
+  }
+  if (!access) {
     const signin = new URL("/signin", requestUrl);
     signin.searchParams.set("next", requestUrl.pathname + requestUrl.search);
     return Response.redirect(signin, 302);
   }
+  const { family, memberUserId } = access;
 
-  const supabase = await createSupabaseServerClient();
-  const material = await getMaterialCaller(supabase, family.id, id);
+  const material =
+    memberUserId === null
+      ? await getMaterialPinned(family.id, id)
+      : await getMaterialCaller(
+          await createSupabaseServerClient(),
+          family.id,
+          id,
+        );
   if (!material) {
     return new Response("Material not found.", { status: 404 });
   }
