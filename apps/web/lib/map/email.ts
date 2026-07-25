@@ -32,9 +32,12 @@ export function siteUrl(): string {
 /** The map-flow email kinds the email_sends ledger accepts. This union is
  * the validation for email_sends.kind (free text in the schema, the
  * model_usage posture): a new kind is added here, never in a migration.
- * Task emails (journal, brief, custom) are absent on purpose; the
- * dispatch channel already owns their receipts in conversation_deliveries
- * and one send must never count twice. */
+ * Task emails (journal, brief, dispatch "custom") and reactive email
+ * replies are absent on purpose: those paths already own their receipts
+ * in conversation_deliveries, and one send must never count twice.
+ * "agent_composed" is the opposite case: a live agent-tool or voice-tool
+ * send with no other delivery record at all (2026-07-25 fix; these sends
+ * were previously invisible to the founder console). */
 export type EmailLedgerKind =
   | "report_link"
   | "resume_link"
@@ -43,6 +46,7 @@ export type EmailLedgerKind =
   | "band_ready"
   | "family_invite"
   | "admin_digest"
+  | "agent_composed"
   // The onboarding drip (funnel work 2026-07-20). DARK until the copy
   // clears review and compliance lands (lib/drip/flag.ts). The ledger
   // kinds exist now so the founder preview and the dark sweep both record.
@@ -120,6 +124,11 @@ export function resendFailureDetail(status: number, body: string): string {
 export interface EmailSubmissionOptions {
   fetch?: typeof globalThis.fetch;
   rfcMessageIdTimeoutMs?: number;
+  /** When set, records the send in email_sends under kind
+   * "agent_composed". Leave unset for callers whose delivery is already
+   * tracked elsewhere (dispatch tasks, reactive email replies), so a send
+   * is never counted twice. */
+  familyId?: string | null;
 }
 
 async function retrieveResendRfcMessageId(
@@ -462,6 +471,7 @@ function agentComposedEmailArgs(
   subject: string,
   bodyLines: string[],
   replyTo?: string,
+  familyId?: string | null,
 ): SendArgs {
   return {
     to,
@@ -471,6 +481,9 @@ function agentComposedEmailArgs(
     bodyLines,
     replyTo,
     footerNote: "Homa sent this because you asked, or it followed naturally from a conversation.",
+    ...(familyId !== undefined
+      ? { ledger: { kind: "agent_composed", familyId } }
+      : {}),
   };
 }
 
@@ -479,8 +492,11 @@ export async function sendAgentComposedEmail(
   subject: string,
   bodyLines: string[],
   replyTo?: string,
+  familyId?: string | null,
 ): Promise<boolean> {
-  return send(agentComposedEmailArgs(to, subject, bodyLines, replyTo));
+  return send(
+    agentComposedEmailArgs(to, subject, bodyLines, replyTo, familyId),
+  );
 }
 
 export async function submitAgentComposedEmail(
@@ -491,7 +507,7 @@ export async function submitAgentComposedEmail(
   options: EmailSubmissionOptions = {},
 ): Promise<HomaEmailSubmission> {
   return submit(
-    agentComposedEmailArgs(to, subject, bodyLines, replyTo),
+    agentComposedEmailArgs(to, subject, bodyLines, replyTo, options.familyId),
     options,
   );
 }

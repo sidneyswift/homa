@@ -266,11 +266,14 @@ astronaut, a poster of the child beside their favorite character.
 ## The html path contract
 
 - You write the page's inner HTML with its own `<style>` block. The
-  platform wraps it in a letter-size (8.5x11in portrait) shell with about
-  0.6in side padding and adds a tiny required footer. `html` is ONE page,
-  exactly: the sheet is an exact-height box and anything past 11in is cut
-  off, never spilled onto a second page. Page-break CSS is refused with a
-  pointer to the pages path below.
+  platform wraps it in a letter-size (8.5x11in portrait) shell and adds a
+  tiny required footer, leaving your HTML a **7.3in wide x 9.5in tall**
+  content area (0.6in side margins, 0.55in at the top, 0.95in reserved at
+  the bottom for the footer). Size and space your layout to that box, not
+  to 8.5x11: `html` is ONE page, exactly, the box is exact-height, and
+  anything past it is cut off, never spilled onto a second page or
+  shrunk to fit. Page-break CSS is refused with a pointer to the pages
+  path below.
 - Never declare `@page`, `position: fixed`, or your own "made with Homa"
   line; the shell owns those.
 - Web fonts are welcome:

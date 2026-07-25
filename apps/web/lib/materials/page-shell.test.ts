@@ -48,6 +48,38 @@ test("the brand gate still refuses executable markup after stripping", () => {
   assert.notEqual(validatePrintableHtml(stripCdataWrapper(wrapped), ""), null);
 });
 
+test("a blocked-markup refusal names the actual matched tag", () => {
+  const note = validatePrintableHtml("<div><script>alert(1)</script></div>", "");
+  assert.match(note ?? "", /"<script"/u);
+});
+
+test("a banned word in the page body names the word and says HTML", () => {
+  const note = validatePrintableHtml("<div>She is behind in reading</div>", "");
+  assert.match(note ?? "", /"behind"/u);
+  assert.match(note ?? "", /page HTML/u);
+});
+
+test("an em dash in the page body is refused and named", () => {
+  const note = validatePrintableHtml("<div>counting—practice</div>", "");
+  assert.match(note ?? "", /em dash/u);
+});
+
+test("a banned word only in metadata is refused, but the page HTML is cleared", () => {
+  const note = validatePrintableHtml(
+    "<div>Counting practice</div>",
+    "A worksheet for a child who is behind",
+  );
+  assert.match(note ?? "", /"behind"/u);
+  assert.match(note ?? "", /not the HTML/u);
+});
+
+test("clean body and clean metadata pass", () => {
+  assert.equal(
+    validatePrintableHtml("<div>Counting practice</div>", "A fun counting page"),
+    null,
+  );
+});
+
 test("sprite slicing is refused: the exact shipped 2026-07-19 construct", () => {
   const html =
     "<style>.icon { background-image: url('https://example.com/sheet.png');" +

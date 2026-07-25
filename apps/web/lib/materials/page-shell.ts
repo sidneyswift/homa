@@ -91,13 +91,32 @@ function visibleText(html: string): string {
  * Returns a refusal reason for the model, or null when the sheet passes.
  * Three gates: no executable markup (the renderer draws pages, it never
  * runs the agent's code paths), no sprite slicing (viewer-divergent in
- * print), and the brand laws on visible text.
+ * print), and the brand laws on visible text. Each refusal names the rule
+ * that fired and the exact matched text, and the voice-law gate checks the
+ * page body and the tool's own metadata (title, skill, subject, etc.)
+ * separately so a metadata hit is never reported as a page-HTML problem
+ * (a model that only edits the page can never clear a refusal caused by,
+ * say, its own requestSummary otherwise).
  */
 export function validatePrintableHtml(html: string, extraText: string): string | null {
-  if (BLOCKED_MARKUP.test(html)) return SHEET_GATE_NOTE;
+  const blockedMatch = BLOCKED_MARKUP.exec(html);
+  if (blockedMatch) {
+    return `The page HTML was rejected: it contains "${blockedMatch[0]}", which is not allowed (no <script>, <iframe>, <object>, <embed> tag, and no javascript: URL). Remove it from the page and call the tool again.`;
+  }
   if (hasSpriteSliceMarkup(html)) return SPRITE_SLICE_GATE_NOTE;
-  const text = `${visibleText(html)} ${extraText}`;
-  if (EM_DASH.test(text) || BANNED_WORDS.test(text)) return SHEET_GATE_NOTE;
+
+  const bodyBannedMatch = BANNED_WORDS.exec(visibleText(html));
+  if (EM_DASH.test(visibleText(html)) || bodyBannedMatch) {
+    const token = bodyBannedMatch ? bodyBannedMatch[0] : "an em dash character";
+    return `The page HTML was rejected: the visible page text contains "${token}", which the house voice rules forbid (no em dashes, no deficit words: behind, delayed, disorder, diagnosis, screening, assessment, percentile). Remove it from the page text and call the tool again.`;
+  }
+
+  const metaBannedMatch = BANNED_WORDS.exec(extraText);
+  if (EM_DASH.test(extraText) || metaBannedMatch) {
+    const token = metaBannedMatch ? metaBannedMatch[0] : "an em dash character";
+    return `The page itself is fine; this was rejected because of its metadata, not the HTML. The title, skill, subject, curriculum, theme, a character name, the child's name, or the request summary contains "${token}", which the house voice rules forbid. Fix that field (not the page) and call the tool again.`;
+  }
+
   return null;
 }
 

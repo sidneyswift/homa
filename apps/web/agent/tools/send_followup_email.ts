@@ -80,7 +80,13 @@ export default defineBoundedTool({
       return { sent: false, note: "No email is on file for this family yet." };
     }
 
-    const sent = await sendAgentComposedEmail(email, input.subject, input.bodyLines);
+    const sent = await sendAgentComposedEmail(
+      email,
+      input.subject,
+      input.bodyLines,
+      undefined,
+      familyId,
+    );
     if (!sent) {
       return { sent: false, note: "The email failed to send. Tell the parent you'll try again shortly." };
     }
