@@ -639,6 +639,25 @@ export const EVENT_SCHEMAS = {
     family_id: z.uuid(),
     source: z.enum(["homa", "parent", "onboarding", "call", "review"]),
   }),
+  // Device sync mailbox (mac-mini spec Part 2 v2, 2026-07-25; flag-dark
+  // behind HOMA_DEVICE_SYNC_ENABLED). Counts and kinds only, never
+  // content: the payloads carry family data, the events never do.
+  "mini_sync.batch_received": z.object({
+    family_id: z.uuid(),
+    received: z.number().int().min(0),
+    inserted: z.number().int().min(0),
+    duplicates: z.number().int().min(0),
+    invalid: z.number().int().min(0),
+  }),
+  "mini_sync.event_applied": z.object({
+    family_id: z.uuid(),
+    kind: z.string(),
+  }),
+  "mini_sync.event_rejected": z.object({
+    family_id: z.uuid(),
+    kind: z.string(),
+    reason: z.string(),
+  }),
   // The evening journal prompt (item 7, FR-6 seed; flag-dark). channel
   // arrived with the dispatcher (gateway-plan GW-4): the agent composes,
   // the dispatch channel delivers by text or email.
