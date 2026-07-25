@@ -48,6 +48,20 @@ const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const checkFixturesOnly = process.argv.includes("--check-fixtures");
 
 /**
+ * Which channel's real instruction stack to compose. The journal rule
+ * has one always-on home (instructions.md), but SMS and email turns
+ * ride mode blocks on top of it, and a dedup of those blocks is only
+ * gateable by an eval that actually renders them (2026-07-25; the web
+ * hardcode measured the mode files as zero by construction).
+ */
+const channelArg =
+  process.argv.find((arg) => arg.startsWith("--channel="))?.slice(10) ?? "web";
+if (!["web", "sms", "email"].includes(channelArg)) {
+  console.error(`Unknown --channel=${channelArg} (web, sms, email)`);
+  process.exit(1);
+}
+
+/**
  * Fixture integrity, free and deterministic. This is what CI runs on
  * every PR: it cannot catch a model regression, but it does catch a
  * fixture that names a child who does not exist, a duplicate id, or a
@@ -124,6 +138,24 @@ const instructions = readFileSync(
   "utf8",
 );
 
+async function channelBlock(): Promise<string> {
+  if (channelArg === "sms") {
+    const { composeSmsModeMarkdown } = await import(
+      "../apps/web/agent/instructions/sms-mode"
+    );
+    // The linked-family branch: a real family texting Homa.
+    return composeSmsModeMarkdown({ familyId: "eval-family" });
+  }
+  if (channelArg === "email") {
+    const { EMAIL_MODE_MARKDOWN } = await import(
+      "../apps/web/agent/instructions/email-mode"
+    );
+    return EMAIL_MODE_MARKDOWN;
+  }
+  return "The current channel is web chat.";
+}
+const modeBlock = await channelBlock();
+
 /** The family block Homa reads every turn, in its real shape. */
 const familyContext = [
   "<family_context>",
@@ -188,9 +220,7 @@ function childNameFor(childId: string | undefined): string | undefined {
 async function runFixture(fixture: TriggerFixture): Promise<TriggerOutcome> {
   const result = await generateText({
     model: HOMA_MODEL,
-    system: [instructions, "The current channel is web chat.", familyContext].join(
-      "\n\n",
-    ),
+    system: [instructions, modeBlock, familyContext].join("\n\n"),
     prompt: fixture.message,
     tools,
     maxRetries: 1,
@@ -232,15 +262,20 @@ async function runFixture(fixture: TriggerFixture): Promise<TriggerOutcome> {
   const missing = fixture.childNames.filter(
     (name) => !journaledNames.includes(name),
   );
-  const passed = missing.length === 0;
+  const missingCompanion =
+    fixture.alsoCallsTool !== undefined
+    && !otherTools.includes(fixture.alsoCallsTool);
+  const passed = missing.length === 0 && !missingCompanion;
   return {
     fixture,
     passed,
     detail: passed
-      ? `journaled ${journaledNames.join(", ")}`
+      ? `journaled ${journaledNames.join(", ")}${fixture.alsoCallsTool ? ` + ${fixture.alsoCallsTool}` : ""}`
       : journalCalls.length === 0
         ? `no journal call (used ${otherTools.join(", ") || "no tools"})`
-        : `journaled ${journaledNames.join(", ")}, missing ${missing.join(", ")}`,
+        : missing.length > 0
+          ? `journaled ${journaledNames.join(", ")}, missing ${missing.join(", ")}`
+          : `journaled ${journaledNames.join(", ")} but never called ${fixture.alsoCallsTool}`,
   };
 }
 
@@ -270,8 +305,9 @@ const silent = outcomes.filter((o) => o.fixture.expect === "silent");
 const capture = journaling.filter((o) => o.passed).length;
 const restraint = silent.filter((o) => o.passed).length;
 
+console.log(`\nchannel   ${channelArg}`);
 console.log(
-  `\ncapture   ${capture}/${journaling.length}` +
+  `capture   ${capture}/${journaling.length}` +
     ` (${Math.round((capture / journaling.length) * 100)}%)` +
     `  the mother told Homa something and it reached the record`,
 );

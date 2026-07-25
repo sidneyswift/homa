@@ -47,6 +47,12 @@ export interface TriggerFixture {
    * each one needs its own call (the founder's fan-out requirement).
    */
   childNames: readonly string[];
+  /**
+   * A second tool the same turn must also call (journals cases only).
+   * Used for the hours law: a recap that names a school-time duration
+   * must reach log_hours as well as the journal.
+   */
+  alsoCallsTool?: "log_hours";
   source: "prod_chat" | "prod_lesson" | "instructions" | "audit";
   note: string;
 }
@@ -128,6 +134,17 @@ export const JOURNALING_TRIGGER_FIXTURES: readonly TriggerFixture[] = [
     childNames: ["June", "Miles"],
     source: "audit",
     note: "Two children, two capabilities, in one message.",
+  },
+  {
+    id: "evening-recap-with-hours",
+    message:
+      "Tonight went well. We did 30 minutes of letter sounds and June read a whole page aloud by herself.",
+    expect: "journals",
+    childNames: ["June"],
+    alsoCallsTool: "log_hours",
+    source: "audit",
+    note:
+      "An evening recap naming a school-time duration must reach the journal AND log_hours; the hours law's per-channel restatements are deleted, so this fixture is its measurement.",
   },
 
   // ---- Must never touch the record ----
