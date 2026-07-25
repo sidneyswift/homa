@@ -365,7 +365,9 @@ export function HeroProductDemo() {
                   }}
                 />
                 {/* Fades the crop into the file row below so the worksheet
-                    reads as a deliberate preview peek, not a broken image. */}
+                    reads as a deliberate preview peek, not a broken image.
+                    Both stops use the same RGB as --surface-raised (only
+                    alpha changes) so the fade has no visible color seam. */}
                 <div
                   aria-hidden="true"
                   style={{
@@ -373,8 +375,8 @@ export function HeroProductDemo() {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    height: 34,
-                    background: "linear-gradient(to top, var(--surface-raised) 0%, rgba(255,255,255,0) 100%)",
+                    height: 56,
+                    background: "linear-gradient(to top, rgba(255,253,249,1) 0%, rgba(255,253,249,0) 100%)",
                   }}
                 />
               </div>
