@@ -167,3 +167,42 @@ fixtures confirmed all three fire), `pnpm check:docs -- --allow-open`
 error set identical to the pre-change baseline plus the intended
 terminal-state row, typecheck, lint, `VERCEL=1 eve build`, and
 `check:child-progress` for the tool-contract change.
+
+## Re-landed onto main (2026-07-25)
+
+The original branch fell 37 commits behind main before review, so this
+plan's six commits were re-landed via cherry-pick -x onto a fresh
+branch. Record of the interactions:
+
+- The only conflict was the router-table deletion (instructions.md):
+  main's a4d3b03f had reworded two table rows (the planner row narrowed
+  to scheduling moments; the materials row gained lesson plans) as a
+  same-day production fix for lesson-plan requests popping the planner
+  canvas. Resolution took this branch's compressed prose, and the
+  planner half of a4d3b03f was ported FIRST into the two homes that
+  survive the table: planner/SKILL.md's description and open_planner's
+  description, both now saying scheduling an existing lesson,
+  curriculum, or unit study is planner work while authoring one is
+  materials work. The materials half already lived in
+  materials-studio's description on main.
+- The port shipped behind new routing gates authored before any router
+  change: evals/materials-studio/lesson-plan-routing (improvement
+  tracker; 0/3 loadedSkill on pristine main while
+  notCalledTool(open_planner) held 3/3) and three evals/planner/
+  fixtures (adjacent-negative, curriculum-scheduling, week-view; all
+  3/3 at baseline and 3/3 after the narrowing).
+- The routing-drift observation above is now diagnosed: the 07-24 6/6
+  failures were family-less eval sessions, fixed on main by PR #144's
+  Walker family fixture (HOMA_EVAL_FAMILY_FIXTURE) plus PR #146's eval
+  isolation. counting-routing and letter-sounds-routing pass under the
+  fixture; letter-sounds occasionally parks on a clarifying question,
+  which re-runs distinguish from real regressions.
+
+Phase D is amended by the same session: the golden-anchor table was
+deleted rather than guarded (generate_image's anchorIds describe is the
+canonical menu, rendered from the registry at module load), with
+check:fleet-skills extended to resolve anchor ids mentioned in skill
+markdown against the registry. The format-library table stays in the
+SKILL.md body on purpose: it is the always-consulted routing index over
+references/recipes/, and moving it behind read_file would add a sandbox
+round trip for zero context savings.
