@@ -3,6 +3,39 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-25 · Founder directive: GitHub Issues is the live tracker; HUMAN-TODO retired
+
+Founder: "remove references to humantodo. then lets start using github
+issues. its a smarter way to manage tickets and features." Executed the
+same session:
+
+- Label taxonomy created (type: bug/feature/chore/investigation,
+  priority P0-P2, plus production, founder-decision, founder-action) and
+  the process written into `AGENTS.md` § Tickets and issue tracking.
+  Issue forms in `.github/ISSUE_TEMPLATE/`.
+- Everything verifiably open migrated as issues #170-#185 and #187-#212:
+  the CG series, T5-T9, open CRs (51/56/57/69/70/71), grouped
+  founder-decision issues per plan doc (voice-bridge D2/D4-D6, drip
+  D1-D8, materials FD-1..8, credit lockout, latency R1-R6, annual price,
+  island composer, mobile parity), verified build gaps (finalize gap,
+  offer-recovery flag, LL-5 spike, agent-jobs eval), the materials P0
+  bundle, season/portfolio/readthrough triage groups, and re-filed
+  HUMAN-TODO survivors (DM7 #182, Postiz #183, D10 #184, duplicate
+  family verify #185). Ruled decision sets (celebration D1-D7,
+  abilities-map D1-D5, fat-skill D1/D2, world-v2, signal-capture) were
+  deliberately NOT re-filed.
+- Live `HUMAN-TODO.md` pointers updated (README repo map, agentic
+  architecture doc, marketing-distributor skill, demand-engine spec,
+  gateway/lead-funnel plans, the 07-11 archive header); dated history
+  left untouched. The reconciliation manifest row moved to the
+  preserved-removal terminal state (lifecycle removed, disposition
+  deleted) and its 10 ledger claims resolved as removed with per-claim
+  notes; `docs-reconciliation-check.mjs` gained `gh#N` ticket tokens and
+  a narrow removed-with-policy-basis carve-out so a deleted doc's
+  production/external claims do not demand verification evidence they
+  never asserted. `check:docs -- --allow-open` now differs from main
+  only by pre-existing new-file drift.
+
 ## 2026-07-25 · Carolyng WhatsApp feedback ingested: CG ticket series filed, two suspected prod failures escalated in-doc
 
 Ingestion record for the co-founder feedback thread of 2026-07-25

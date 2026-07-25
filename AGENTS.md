@@ -273,6 +273,46 @@ a small set of narrow tools, not a growing pile of workflow-shaped tools.
 - If the fix truly cannot ship now (missing access, correct behavior needs a founder ruling, change too large to be safe), drop other work and put the failure in front of the founder in your reply, plainly labeled as a live production failure with the user-facing symptom. A "recommendation" or "suggested fix" row is not an escalation.
 - Findings documents carry status on every production bug: FIXED plus the commit hash, or an explicit escalation timestamp. Cause: BUG-P1-1 (2026-07-13) sat fully diagnosed in a field study as recommendation R1 for hours while every new family's report page and emailed link hung in production; the shipped fix was two ::uuid casts (7bf394c) that took minutes once treated as an outage instead of a finding.
 
+## Tickets and issue tracking (founder directive 2026-07-25)
+
+GitHub Issues on `sidneyswift/homa` is the single live tracker for all open
+work: features, bugs, chores, investigations, and anything waiting on the
+founder. `HUMAN-TODO.md` no longer exists (its history is preserved in
+`docs/homa-planning/history/2026-07-11-human-todo-archive.md`); no plan doc,
+status header, or session memory is a substitute for an issue.
+
+- **Docs are the spec and evidence layer; issues are the tracking layer.**
+  An issue links to its plan or evidence doc for depth. Status, priority,
+  and ownership live on the issue. Never fork a spec into an issue body,
+  and never leave open work only in a doc.
+- **Labels.** Exactly one type per issue: `bug`, `feature`, `chore`, or
+  `investigation`. One priority: `P0` (drop everything: live failure or
+  hard deadline), `P1` (next up), `P2` (later). Add `production` when the
+  failure is confirmed or suspected live. Add `founder-decision` (needs a
+  ruling) or `founder-action` (only the founder can do it: logins,
+  payments, external accounts) when blocked on the founder.
+- **Filing.** Use `gh issue create`. Keep an existing series ID in the
+  title when one exists ("CG-05: ..."); new work needs no series ID, the
+  issue number is the ID. A body carries the source or spec link, a 2 to 4
+  sentence summary, and acceptance criteria. A grouped issue with a task
+  list is fine for one doc's decision set or a small fix bundle.
+- **Lifecycle.** PRs that resolve an issue say `Closes #N`. Close only
+  with evidence: a merged PR, a probe result, or a recorded ruling; never
+  on intention. A session that files, advances, or finishes tracked work
+  updates the issue in that same session.
+- **The production-bugs ruling is unchanged.** A live prod bug is fixed in
+  the session that finds it or plainly escalated; an issue records the fix
+  or the escalation and never substitutes for either.
+- **Founder decisions.** When a `founder-decision` issue is ruled, record
+  the ruling where rulings live (`journeys/10-reconciliation.md` §5 and
+  the build-log), then close the issue pointing at the ruling. The issue
+  tracks that a decision is pending; it is never the ruling's home.
+- **Historical registries stay historical.** `03-backlog.md` (M/MJ IDs)
+  and the dated ticket docs in `plans/` keep their IDs as provenance; do
+  not bulk-import them. When an M/MJ item becomes active, file an issue
+  referencing the ID. The reconciliation claim ledger accepts `gh#N`
+  ticket tokens (`scripts/docs-reconciliation-check.mjs`).
+
 ## Code style & voice
 
 - No em dash, ever, anywhere (code comments, UI copy, docs, commit messages). Use a comma, period, colon, or mid-dot instead.

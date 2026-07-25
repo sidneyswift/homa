@@ -1,5 +1,10 @@
 # Homa Cloud : Full Backlog ("ticket everything")
 
+> **Live tracking moved to GitHub Issues on 2026-07-25** (founder
+> directive; process in `AGENTS.md` § Tickets and issue tracking). This
+> file remains the historical ticket-identifier registry; when an M/MJ
+> item becomes active, file an issue referencing its ID here.
+>
 > Canonical ticket-identifier registry, not a current status map. Each row
 > preserves the scope proposed for that ticket. Presence, phase, size, bold text,
 > a launch-blocker symbol, or a later note does not prove that work is unbuilt,

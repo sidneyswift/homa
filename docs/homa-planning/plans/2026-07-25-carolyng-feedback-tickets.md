@@ -1,6 +1,9 @@
 # Carolyng feedback tickets · 2026-07-25 (CG series)
 
 > **STATUS (2026-07-25): ALL OPEN.** Nothing in this doc is shipped.
+> Tracking moved to GitHub Issues the same day (founder directive):
+> CG-01 = #171, CG-02 = #174, CG-03 = #176, CG-04 = #175, CG-05 = #172,
+> CG-06 = #170. This doc stays the spec; the issues carry status.
 > CG-01 and CG-06 contain suspected live production failures and carry
 > explicit escalation notes per the prod-bugs ruling
 > (`prod-bugs-fixed-not-stored`, 2026-07-14): they could not be fixed in
