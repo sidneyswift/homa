@@ -1,5 +1,5 @@
 ---
-description: Use when designing any printable or visual material for a child, worksheets, tracing or coloring pages, flash cards, counting mats, posters, infographics, foldables (interactive notebook inserts), structured outlines and essay scaffolds, and multi-page packets ("make it one PDF", weekly lesson bundles, mini books). Contains the creation-path guide (image model vs HTML vs both), the packet recipe, reference-image discipline, metadata and finalize discipline, and proven recipes.
+description: Use when designing any printable or visual material for a child, worksheets, lesson plans, tracing or coloring pages, flash cards, counting mats, posters, infographics, foldables (interactive notebook inserts), structured outlines and essay scaffolds, and multi-page packets ("make it one PDF", weekly lesson bundles, mini books). Contains the creation-path guide (image model vs HTML vs both), the packet recipe, reference-image discipline, metadata and finalize discipline, and proven recipes.
 ---
 
 # The materials studio
