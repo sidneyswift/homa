@@ -13,7 +13,10 @@ export type DripKind =
   | "drip_setup_nudge"
   | "drip_report_unviewed"
   | "drip_loop_back"
-  | "drip_add_kid";
+  | "drip_add_kid"
+  | "drip_revealed_never_returned"
+  | "drip_kid2_pending"
+  | "drip_mid_checklist";
 
 export interface DripKindInfo {
   label: string;
@@ -43,6 +46,21 @@ export const DRIP_KINDS: Record<DripKind, DripKindInfo> = {
     label: "Add a kid",
     audience: "One kid, evidence of more",
     target: "Added another child",
+  },
+  drip_revealed_never_returned: {
+    label: "Come back",
+    audience: "Report exists, no plan, no return visit",
+    target: "Came back",
+  },
+  drip_kid2_pending: {
+    label: "Sibling's questions",
+    audience: "A sibling's report is done, this child's questions never started",
+    target: "Started that child's questions",
+  },
+  drip_mid_checklist: {
+    label: "Finish the questions",
+    audience: "Some answers in, no report yet",
+    target: "Finished and got a report",
   },
 };
 

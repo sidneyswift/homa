@@ -5,6 +5,7 @@ import { CalendarDays, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { SidePanel } from "../../components/chassis/side-panel";
 import { parsePlanBoardResponse, type PlanBoardPayload } from "../../lib/plan-board";
 import { planChecksStorageKey, overwritePlanChecks } from "../../lib/use-plan-checks";
 import { PlannerView } from "./planner/planner-view";
@@ -19,9 +20,12 @@ import { PlannerView } from "./planner/planner-view";
  * of /api/map/plan/board supplies the data, and each edit_plan result
  * refreshes it, so the parent watches Homa fill the week in place.
  *
- * Desktop: a bordered aside sharing the chat row. Phone: a full-screen
- * sheet over the transcript (the composer stays underneath; closing
- * returns to the exact conversation).
+ * Two geometries, chosen by variant (plans/2026-07-21-chat-first-onboarding.md
+ * §2.7): "app" is the existing full-screen mobile takeover / docked
+ * desktop column, the later app shell, unchanged. "onboarding" comes
+ * down to the shared SidePanel chassis instead, a sheet beside the
+ * chat rather than over it, because a first-days parent should never
+ * lose the conversation she is mid-sitting in.
  */
 
 export interface PlannerOpenSignal {
@@ -143,10 +147,14 @@ export function PlannerCanvasPanel({
   childId,
   refreshSignal,
   onClose,
+  variant = "app",
 }: {
   childId: string | null;
   refreshSignal: number;
   onClose: () => void;
+  /** "app" (default): every existing call site, unchanged. "onboarding":
+   * the shared SidePanel chassis, so chat stays visibly peeking above. */
+  variant?: "app" | "onboarding";
 }) {
   const [state, setState] = useState<BoardState>({ phase: "loading" });
   const lastRefreshRef = useRef(refreshSignal);
@@ -190,62 +198,103 @@ export function PlannerCanvasPanel({
     fetchBoard(true);
   }, [refreshSignal, fetchBoard]);
 
+  const headingId = "planner-canvas-heading";
+  const header = (
+    <header className="flex items-center justify-between gap-3 border-b border-border-subtle px-4 py-3">
+      <p id={headingId} className="text-sm font-semibold text-strong">
+        Week planner
+      </p>
+      <div className="flex items-center gap-3">
+        <Link
+          href="/app/planner"
+          className="text-xs font-semibold text-brand hover:underline"
+        >
+          Full page
+        </Link>
+        <button
+          type="button"
+          aria-label="Close the planner"
+          onClick={onClose}
+          className="flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-card hover:text-strong"
+        >
+          <X size={18} aria-hidden="true" />
+        </button>
+      </div>
+    </header>
+  );
+  const body = (
+    <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-5">
+      {state.phase === "loading" ? (
+        <PlannerBoardSkeleton />
+      ) : state.phase === "error" ? (
+        <p className="text-sm text-muted">
+          The planner didn&apos;t load. It&apos;s still there:{" "}
+          <Link href="/app/planner" className="font-semibold text-brand hover:underline">
+            open the full page
+          </Link>
+          .
+        </p>
+      ) : (
+        <PlannerView
+          kids={state.board.kids.map((kid) => ({
+            id: kid.id,
+            name: kid.name,
+            birth_month: kid.birthMonth,
+            avatar_url: kid.avatarUrl,
+          }))}
+          reports={
+            new Map(
+              state.board.kids.map((kid) => [kid.id, { token: kid.reportToken }]),
+            )
+          }
+          plans={state.board.plans}
+          timeZone={state.board.timeZone}
+          now={new Date()}
+          focusChildId={childId}
+          surface="canvas"
+        />
+      )}
+    </div>
+  );
+
+  if (variant === "onboarding") {
+    return (
+      <SidePanel labelledBy={headingId} onClose={onClose}>
+        {header}
+        {body}
+      </SidePanel>
+    );
+  }
+
   return (
     <aside
       aria-label="Week planner"
       className="fixed inset-0 z-40 flex flex-col bg-page lg:static lg:z-auto lg:w-[min(560px,44vw)] lg:shrink-0 lg:border-l lg:border-border-subtle"
     >
-      <header className="flex items-center justify-between gap-3 border-b border-border-subtle px-4 py-3">
-        <p className="text-sm font-semibold text-strong">Week planner</p>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/app/planner"
-            className="text-xs font-semibold text-brand hover:underline"
-          >
-            Full page
-          </Link>
-          <button
-            type="button"
-            aria-label="Close the planner"
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-card hover:text-strong"
-          >
-            <X size={18} aria-hidden="true" />
-          </button>
-        </div>
-      </header>
-      <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-5">
-        {state.phase === "loading" ? (
-          <p className="text-sm text-muted">Setting up the week…</p>
-        ) : state.phase === "error" ? (
-          <p className="text-sm text-muted">
-            The planner didn&apos;t load. It&apos;s still there:{" "}
-            <Link href="/app/planner" className="font-semibold text-brand hover:underline">
-              open the full page
-            </Link>
-            .
-          </p>
-        ) : (
-          <PlannerView
-            kids={state.board.kids.map((kid) => ({
-              id: kid.id,
-              name: kid.name,
-              birth_month: kid.birthMonth,
-              avatar_url: kid.avatarUrl,
-            }))}
-            reports={
-              new Map(
-                state.board.kids.map((kid) => [kid.id, { token: kid.reportToken }]),
-              )
-            }
-            plans={state.board.plans}
-            timeZone={state.board.timeZone}
-            now={new Date()}
-            focusChildId={childId}
-            surface="canvas"
-          />
-        )}
-      </div>
+      {header}
+      {body}
     </aside>
+  );
+}
+
+/** A board-shaped skeleton at final dimensions (the Monday-Friday day
+ * grid PlannerView renders), so the fill is a 200ms crossfade rather
+ * than a layout jump. Replaces the prior bare-text "Setting up the
+ * week…" line, which the spec calls out as below the bar
+ * (plans/2026-07-21-chat-first-onboarding.md §2.7). */
+function PlannerBoardSkeleton() {
+  return (
+    <div aria-hidden="true" className="grid grid-cols-1 gap-3 sm:grid-cols-5">
+      {Array.from({ length: 5 }, (_, dayIndex) => (
+        <div
+          key={dayIndex}
+          className="rounded-md border border-border-subtle bg-card p-2.5"
+        >
+          <div className="h-3 w-2/3 animate-pulse rounded bg-border-subtle" />
+          <div className="mt-3 h-16 animate-pulse rounded bg-border-subtle" />
+          <div className="mt-2 h-16 animate-pulse rounded bg-border-subtle" />
+        </div>
+      ))}
+    </div>
   );
 }

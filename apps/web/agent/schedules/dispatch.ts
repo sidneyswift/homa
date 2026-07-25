@@ -11,6 +11,12 @@ import {
 } from "../../lib/conversation-continuity/offer-recovery";
 import { getFamilyPhones } from "../../lib/family-phone";
 import { mapDb } from "../../lib/map/db";
+import { chatOnboardingEnabled } from "../../lib/onboarding/state";
+import {
+  buildSitting1RecapMessage,
+  findFamiliesDueForSitting1RecapWithDatabase,
+} from "../../lib/onboarding/sitting1-recap";
+import { writeOnboardingRecord } from "../../lib/onboarding/store";
 import {
   buildDispatchAuth,
   buildDispatchTarget,
@@ -214,6 +220,54 @@ export default defineSchedule({
             });
           } else {
             await dispatchScheduledTask(loaded.task, now, dependenciesFor(loaded.task));
+          }
+        }
+
+        // H1 rep 2, the day-1 evening close-the-loop prompt
+        // (plans/2026-07-21-chat-first-onboarding.md §6.3): no
+        // agent_schedules row, no advance/claim semantics, because this
+        // is a single boundary event, not a recurring cadence. Beat
+        // idempotency is context.onboarding.beatsDone (append-only), not
+        // homa_task_runs, so unlike the built-in kinds a session that
+        // starts but never completes has no reaper to retry it; accepted
+        // here because a missed one-time evening nudge is a low-stakes
+        // miss, not a broken promise (nothing was told to her in advance).
+        if (chatOnboardingEnabled()) {
+          const dueRecaps = await findFamiliesDueForSitting1RecapWithDatabase(
+            mapDb(),
+            now,
+          );
+          for (const recap of dueRecaps) {
+            const episodeId = await createProactiveEpisode({
+              familyId: recap.familyId,
+              now,
+            });
+            await receive(dispatchChannel, {
+              message: buildSitting1RecapMessage(recap),
+              target: {
+                familyId: recap.familyId,
+                phoneNumbers: recap.phoneNumbers,
+                email: recap.email,
+                episodeId,
+                kind: "custom" as const,
+                deliveryPref: recap.phoneNumbers.length > 0 ? "text" : "email",
+                recipientMemberUserId: recap.recipientMemberUserId,
+              },
+              auth: {
+                authenticator: "dispatcher",
+                principalId: `dispatch:${recap.familyId}`,
+                principalType: "user" as const,
+                attributes: {
+                  channel: "dispatch",
+                  familyId: recap.familyId,
+                  taskKind: "custom",
+                  episodeId,
+                },
+              },
+            });
+            await writeOnboardingRecord(recap.familyId, {
+              addBeats: ["sitting1_recap"],
+            });
           }
         }
 

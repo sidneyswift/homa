@@ -564,12 +564,19 @@ export function ChecklistStep({
                   {undoing ? "undoing..." : "undo last answer"}
                 </button>
               ) : null}
+              {/* D12 (plans/2026-07-21-chat-first-onboarding.md §2.5): the
+                  skip flash reuses the same ANSWER_FLASH_MS window the four
+                  answer chips already hold before advancing, so this needs
+                  no new timing, only a label swap during it. "Trust at the
+                  exact moment moms expect to be graded." */}
               <button
                 type="button"
                 onClick={() => answerCurrent("skip")}
                 className="text-sm text-subtle underline-offset-2 hover:underline"
               >
-                skip this one
+                {flashAnswer === "skip"
+                  ? "Skipped. Never counts against her."
+                  : "skip this one"}
               </button>
             </span>
             {easilyStreak >= 3 ? (

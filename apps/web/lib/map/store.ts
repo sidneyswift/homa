@@ -296,8 +296,14 @@ export async function getFamilyByResumeToken(rawToken: string): Promise<FamilyRo
   const rows = await sql<FamilyRow[]>`
     select ${sql.unsafe(FAMILY_COLUMNS)}
     from public.families
-    where (resume_token_hash = ${hash} or link_token_hash = ${hash})
-      and status <> 'deleted'
+    where status <> 'deleted'
+      and (
+        resume_token_hash = ${hash} or link_token_hash = ${hash}
+        or exists (
+          select 1 from public.link_tokens t
+          where t.family_id = families.id and t.token_hash = ${hash}
+        )
+      )
   `;
   return rows[0] ?? null;
 }
@@ -316,6 +322,19 @@ export async function getFamilyByAuthUser(authUserId: string): Promise<FamilyRow
     limit 1
   `;
   return rows[0] ?? null;
+}
+
+/** The family's own address on file, or null. Server-scoped read: the
+ * caller supplies a familyId already re-derived from auth, never from
+ * the model, so this is safe for any tool that needs to email the
+ * parent her own materials (D9, plans/2026-07-21-chat-first-onboarding.md
+ * §4.2, "the skeptic brief"). */
+export async function getFamilyEmail(familyId: string): Promise<string | null> {
+  const sql = mapDb();
+  const rows = await sql<{ email: string | null }[]>`
+    select email from public.families where id = ${familyId}
+  `;
+  return rows[0]?.email ?? null;
 }
 
 export async function getFamilyByEmail(email: string): Promise<{ id: string } | null> {
@@ -338,6 +357,27 @@ export async function mintLinkToken(familyId: string): Promise<string> {
     update public.families
     set link_token_hash = ${hashToken(linkToken)}
     where id = ${familyId}
+  `;
+  return linkToken;
+}
+
+/**
+ * Mints a fresh link token into link_tokens rather than the single
+ * families.link_token_hash column, so it can coexist with another
+ * outstanding link for the same family without invalidating it (the
+ * beat-keyed drip audiences, plans/2026-07-21-chat-first-onboarding.md
+ * §9 Phase 2). getFamilyByResumeToken checks this table too, so a token
+ * minted here resolves exactly like the legacy column's token does.
+ */
+export async function mintNamedLinkToken(
+  familyId: string,
+  kind: string,
+): Promise<string> {
+  const sql = mapDb();
+  const linkToken = newToken();
+  await sql`
+    insert into public.link_tokens (family_id, token_hash, kind)
+    values (${familyId}, ${hashToken(linkToken)}, ${kind})
   `;
   return linkToken;
 }
