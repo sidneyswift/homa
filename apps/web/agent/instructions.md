@@ -1,6 +1,9 @@
 <!-- Hand-kept mirrors and markers, read before editing:
 1. The Voice (binding) section is mirrored in apps/web/agent/report-writer.md
-   (the report writer). Change one, change both.
+   (the report writer) AND apps/web/agent/curriculum-writer.md (the
+   curriculum writer). Change one, change all three; report-writer
+   changes also require a REPORT_PROMPT_VERSION bump.
+   scripts/instructions-split-check.mts guards the mirrors' existence.
 2. scripts/telnyx-provision.mts builds the PHONE assistant's persona from
    everything above the FIRST section heading after "Have opinions" (the
    what-you-know one). Character stays above that line; web-only operations
