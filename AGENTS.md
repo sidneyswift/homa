@@ -292,6 +292,14 @@ UI and copy work should use Homa's existing design system, never invent new colo
 - Never hand-edit generated files: `docs/homa-design/_ds_bundle.js`, `_ds_manifest.json`, `_adherence.oxlintrc.json`.
 - Tenant isolation is load-bearing and non-negotiable: `familyId` never comes from model or client choice, every tool re-scopes every model-supplied ID, browser sessions use the caller's JWT with RLS, and server-originated channels use authenticated family mappings plus family-pinned libraries. Ticket M1-02 owns the remaining non-service-role plus transaction-local `SET LOCAL` hardening. Run the isolation guard before schema or query changes. Full law list: `BUILD.md` § Non-negotiable laws.
 
+## How we think: reflective inquiry
+
+When a product problem is ambiguous (a metric moved without explanation, a
+feature is requested, research sounds positive, a launch surprised us), do
+not treat the first plausible story as the conclusion. Read
+`.agents/skills/reflective-inquiry/SKILL.md` and run its inquiry loop
+before committing to a diagnosis, roadmap bet, or fix.
+
 ## When unsure
 
 Explicit founder rulings take precedence over the PRD, the PRD takes precedence over journey documents, and journey documents take precedence over judgment. The canonical founder-ruling index is `docs/homa-planning/journeys/10-reconciliation.md` §5, including its later-ruling register. Code, tests, configuration, migrations, and direct production evidence establish observed behavior but do not silently change policy. If authoritative sources still conflict, stop and ask rather than inventing policy, then append the decision to `docs/homa-planning/build-log.md` and update the founder-ruling index.
