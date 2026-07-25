@@ -50,7 +50,7 @@ records the research comparison behind this rule.
 | **Fleet Eve skill** | The hard part is judgment or a reusable procedure: how to reason, choose an approach, sequence existing tools, judge quality, handle variants, or know when to stop. A better model should improve the result without changing code. | `materials-studio` decides difficulty, chooses image/HTML/hybrid, calls the material tools, reviews, revises, and finalizes. `research-brief` selects one family-relevant angle and sequences research, recall, and progress tools. |
 | **Eve tool / deterministic code** | The result or effect must be exact, typed, authenticated, tenant-scoped, idempotent, rate-limited, auditable, or impossible to hallucinate. The model needs an ability it does not currently have. | `manage_child_progress`, `create_printable`, `remember`, `send_followup_email`, database queries, scoring, date math, Blob writes, provider calls. |
 | **Skill + tool** | The capability needs both judgment and a missing exact effect. The skill owns the complete workflow; the tool is the smallest reusable deterministic leaf. | A curriculum-fit skill may use existing recall/web tools plus one narrow catalog lookup tool. Do not turn the whole curriculum-fit workflow into one god tool. |
-| **Always-on or dynamic instructions** | The rule must apply before any skill can load, or the data must be fresh every turn. Keep capability-specific procedures out. | Homa's identity, voice, tenancy and tool-honesty laws stay in `agent/instructions.md`; SMS-only behavior stays in `agent/instructions/sms-mode.ts`; family/progress context is rebuilt on `turn.started`. |
+| **Always-on or dynamic instructions** | The rule must apply before any skill can load, or the data must be fresh every turn. Keep capability-specific procedures out. | Homa's identity, voice, tenancy and tool-honesty laws stay in `apps/web/agent/instructions.md`; SMS-only behavior stays in `apps/web/agent/instructions/sms-mode.ts`; family/progress context is rebuilt on `turn.started`. |
 | **Postgres / Blob / `defineState`** | Durable product truth / durable artifacts / session-only working state. | Family facts and skills in Postgres, PDFs in Blob, a session counter in `defineState`. Never use a skill body, conversation history, or sandbox file as load-bearing state. |
 | **Channel / schedule / UI / subagent** | Transport authentication and delivery / clock-driven activation / parent-visible interaction / genuinely isolated context or privileges. | A new messaging surface is a channel, not a tool. A weekday wake-up is a schedule. Use a subagent only when it needs a different prompt, model, context window, or restricted tool surface; use a skill when optional procedure is enough. |
 
@@ -130,9 +130,10 @@ building or reviewing any language-to-structured-data capability.
   fleet-skill home. It ships with code, is versioned in git, and loads at
   runtime through eve's built-in discovery. Use it for all fleet craft,
   including craft that would once have been a targeted skill-bank row: with
-  four or fewer active skills, advertising every description to every family
-  and letting the loaded skill branch on the family's actual children is
-  cheaper and more reliable than a second targeting system.
+  a small roster of active skills (list `apps/web/agent/skills/` for the
+  current count), advertising every description to every family and letting
+  the loaded skill branch on the family's actual children is cheaper and
+  more reliable than a second targeting system.
 - `skill_bank` and `family_skills` are dormant historical data, not a build
   surface. There is no `save_skill`, no `forget_skill`, and no runtime
   resolver reading either table. Do not add code that reads or writes them;
@@ -175,6 +176,11 @@ building or reviewing any language-to-structured-data capability.
 - `familyId` never comes from the model or client. Every model-supplied record
   ID is re-scoped inside the authenticated family. The tool result is the
   only truth about whether an action happened.
+- Every tool ships bounded: `defineBoundedTool` with a deadline tier, never
+  bare `defineTool`. eve (verified through the eve-upgrade-check procedure)
+  gives tools no timeout or abort signal, so Homa bounds every tool herself.
+  `scripts/tool-deadline-check.mts` and its `TOOL_DEADLINE` tiers are the
+  source of truth; `pnpm check:tool-deadlines` is the guard.
 - Exact work stays exact even when a skill asks for it: scoring, arithmetic,
   scheduling, consent classification, policy enforcement, database lookup,
   and security boundaries never move into prose.
@@ -190,7 +196,7 @@ a small set of narrow tools, not a growing pile of workflow-shaped tools.
 
 These govern every file that loads into an agent's context: `AGENTS.md`
 files, fleet skills, `.agents/skills/`, tool descriptions, and
-`agent/instructions.md`. Rationale and the 2026-07-24 audit behind them:
+`apps/web/agent/instructions.md`. Rationale and the 2026-07-24 audit behind them:
 `docs/homa-planning/plans/2026-07-24-context-engineering-cleanup.md`.
 
 1. **One home per rule.** A law lives in exactly one canonical file; every
@@ -209,7 +215,7 @@ files, fleet skills, `.agents/skills/`, tool descriptions, and
    and trust model judgment. A lexical ban is only legitimate when code
    enforces it (the em-dash runtime law).
 5. **Bodies are routers.** A SKILL.md body past roughly 200 lines splits
-   into `references/` files loaded by intent. Directory-scoped gotchas go
+   into a skill's `references/` subdirectory, loaded by intent. Directory-scoped gotchas go
    in that directory's `AGENTS.md`, not the root file.
 6. **Rich references over transcription.** Point at the real artifact (a
    live JSON file, a golden anchor, a fixture, a component path) instead
@@ -232,7 +238,7 @@ files, fleet skills, `.agents/skills/`, tool descriptions, and
   focused route and card tests; and `pnpm child-progress:e2e` for the
   disposable local PostgreSQL harness. The E2E command creates and removes its
   own cluster and needs no remote credentials.
-- Required guards: `pnpm check:isolation` (tenant isolation, run before any schema/query change), `pnpm check:map` (bank content + scorer), `pnpm check:events` (MJ-08 registry parity), `pnpm check:fleet-skills` (fleet-skill package hygiene and slash-menu parity), `pnpm check:skills-targeting`, and `pnpm check:taxonomy` (skill graph integrity: mapping completeness, ID law, DAG)
+- Required guards, named here because they run BEFORE a change (CI is too late for them): `pnpm check:isolation` (tenant isolation, run before any schema/query change), `pnpm check:map` (bank content + scorer), `pnpm check:events` (MJ-08 registry parity), `pnpm check:fleet-skills` (fleet-skill package hygiene, reference integrity, and slash-menu parity), `pnpm check:skills-targeting`, and `pnpm check:taxonomy` (skill graph integrity: mapping completeness, ID law, DAG). For the full check roster, enumerate `.github/workflows/ci.yml` rather than any hand-copied list
 - Temporary through the fleet-skills dormant window only (docs/homa-planning/plans/2026-07-15-filesystem-first-fleet-skills.md Phase C, opens 2026-07-15, earliest close 2026-07-22): `pnpm check:fleet-skills-dormant` proves the retired dynamic-skill files stay deleted and nothing outside an explicit allowlist queries `family_skills`/`skill_bank`. Retire this check together with `check:skills-targeting` once Phase C closes and a founder reviews the evidence; do not treat either as a permanent fixture of "how skills work here."
 - Local eval runs (`eve eval` in apps/web) are isolated by default:
   evals.config.ts strips durable-write credentials from the eval process
@@ -271,7 +277,7 @@ files, fleet skills, `.agents/skills/`, tool descriptions, and
 
 ## Design system
 
-UI and copy work should use Homa's existing design system, never invent new colors, type, or components. Source of truth: `docs/homa-design/` (start at its `SKILL.md`, then `readme.md`). A spec-compliant token summary for design tooling lives at [`DESIGN.md`](DESIGN.md). Web currently hand-copies tokens, fonts, and the `Logo` component into `globals.css`, `layout.tsx`, and `components/brand/Logo.tsx`. Mobile does the same in `src/theme/tokens.ts` and `src/components/brand/logo.tsx`. These copies remain temporary until `packages/design` lands under ticket M1-17. If `docs/homa-design/` tokens change, update those files and `DESIGN.md`'s front matter too, so nothing drifts.
+UI and copy work should use Homa's existing design system, never invent new colors, type, or components. Source of truth: `docs/homa-design/` (start at its `SKILL.md`, then `readme.md`). A spec-compliant token summary for design tooling lives at [`DESIGN.md`](DESIGN.md). Web currently hand-copies tokens, fonts, and the `Logo` component into `globals.css`, `layout.tsx`, and `apps/web/components/brand/Logo.tsx`. Mobile does the same in `apps/mobile/src/theme/tokens.ts` and `apps/mobile/src/components/brand/logo.tsx`. These copies remain temporary until `packages/design` lands under ticket M1-17. If `docs/homa-design/` tokens change, update those files and `DESIGN.md`'s front matter too, so nothing drifts.
 
 ## Security & boundaries
 
