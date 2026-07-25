@@ -60,7 +60,12 @@ export const EMPTY_ONBOARDING_RECORD: OnboardingRecord = {
  * Found empty in prod on 2026-07-25 despite being flipped on 2026-07-24;
  * a plain `vercel redeploy` reuses the env snapshot frozen at the
  * original build rather than the current value, so restoring the var
- * alone did not take effect. Fixed by forcing a fresh build.
+ * alone did not take effect. A second gotcha compounded it: `vercel env
+ * add` piped non-interactively defaults to the "Sensitive" type, and
+ * Sensitive vars are excluded from the Next.js build step entirely
+ * (Vercel only exposes them at runtime), so the flag read empty even
+ * in a genuinely fresh build. Use `--no-sensitive` when setting this
+ * var from the CLI.
  */
 export function chatOnboardingEnabled(): boolean {
   const value = (process.env.HOMA_CHAT_ONBOARDING ?? "").trim().toLowerCase();
