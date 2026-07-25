@@ -23,6 +23,10 @@ import {
   type MemberRow,
 } from "../../lib/family-context";
 import {
+  evalFamilyFixtureRows,
+  isEvalFamilyFixtureEnabled,
+} from "../../lib/family-context-eval-fixture";
+import {
   TOOL_DEADLINE,
   ToolDeadlineError,
   withToolDeadline,
@@ -342,6 +346,17 @@ export async function resolveFamilyContextInstructionMarkdown(
     return markdown;
   } catch (error) {
     if (error instanceof MissingFamilyContextError) {
+      // Local eval sessions have no auth attributes at all, so they land
+      // here on every turn. With the fixture flag on (evals.config.ts,
+      // never Vercel) they get a synthetic set-up family instead of the
+      // "head to /app" line, so behavioral evals test a state production
+      // sessions can actually be in. See lib/family-context-eval-fixture.ts
+      // for the 2026-07-24 routing-eval incident this closes.
+      if (isEvalFamilyFixtureEnabled(input.environment ?? process.env)) {
+        return dependencies.renderFamilyContext(evalFamilyFixtureRows(), {
+          speakingWith: "Rachel",
+        });
+      }
       return "No family context is available on this session: the parent has not finished setup. Warmly point them to /app to set up their family first; do not guess at children or facts.";
     }
     console.error(
