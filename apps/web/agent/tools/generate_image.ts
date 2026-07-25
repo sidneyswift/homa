@@ -7,7 +7,6 @@ import {
 } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { emitMapEvent } from "../../lib/map/events";
-import { rateLimited } from "../../lib/map/ratelimit";
 import {
   suppressInTurnGeneration,
   type GenerationGateAttributes,
@@ -23,11 +22,13 @@ import {
   generateStudioImage,
   IMAGE_SHAPES,
 } from "../../lib/materials/generate-image";
+import {
+  imageBudgetNote,
+  imagesGeneratedToday,
+  MAX_IMAGES_PER_FAMILY_PER_DAY,
+} from "../../lib/materials/image-budget";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
 import { sendSmsProgressTextOnce } from "../../lib/sms-progress";
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-const MAX_IMAGES_PER_FAMILY_PER_DAY = 30;
 
 // The fixed anchor menu, rendered once for the tool schema. The model may
 // only name an id from this list; it can never pass a URL through the
@@ -127,12 +128,11 @@ const generateImage = defineBoundedTool({
         note: "Image generation is not configured on this deployment. Design the page without a generated image.",
       };
     }
-    if (
-      rateLimited(`agent-image:${access.familyId}`, MAX_IMAGES_PER_FAMILY_PER_DAY, DAY_MS)
-    ) {
+    const usedToday = await imagesGeneratedToday(access.familyId);
+    if (usedToday >= MAX_IMAGES_PER_FAMILY_PER_DAY) {
       return {
         generated: false,
-        note: "This family's image budget for today is used up. Design with what you already generated, or use pure CSS.",
+        note: `This family's image budget for today is used up. Design with what you already generated, or use pure CSS. ${imageBudgetNote(usedToday)}`,
       };
     }
 
@@ -190,7 +190,7 @@ const generateImage = defineBoundedTool({
     return {
       generated: true,
       url: result.url,
-      note: "Embed it with <img src=\"...\"> in page HTML, or pass it to create_printable as pageImageUrl when it IS the whole page. Reuse this exact URL for revisions.",
+      note: `Embed it with <img src="..."> in page HTML, or pass it to create_printable as pageImageUrl when it IS the whole page. Reuse this exact URL for revisions. ${imageBudgetNote(usedToday + 1)}`,
     };
   },
 });
