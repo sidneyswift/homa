@@ -7,6 +7,10 @@ import {
   resolvedContinuityAttributes,
 } from "../../lib/conversation-continuity/ledger";
 import {
+  EVAL_FIXTURE_SESSION_ATTRIBUTE,
+  evalFamilyFixtureAuth,
+} from "../../lib/family-context-eval-fixture";
+import {
   familyOnboardingActive,
   onboardingRowFromMembership,
 } from "../../lib/onboarding/state";
@@ -42,6 +46,15 @@ import { readViewContextCookie, VIEW_CONTEXT_FAMILY } from "../../lib/view-conte
  * callers such as subagents), then localDev() (local eve dev tooling).
  * Tools that need a family refuse to act when attributes.familyId is
  * absent, which covers both fallback principals.
+ *
+ * The one exception to that refusal is sandboxed eval runs: localDev()
+ * is wrapped in evalFamilyFixtureAuth, which stamps local-dev eval
+ * sessions as family-pinned on the seeded Walker fixture family, but
+ * only while `pnpm eval:sandbox` provides the disposable database
+ * (lib/family-context-eval-fixture.ts owns the gate; it is inert on
+ * Vercel and under HOMA_EVAL_ALLOW_PROD_WRITES). Requests that a real
+ * authenticator accepts never reach the wrapped entry, so a production
+ * principal can never be re-pinned by it.
  */
 function supabaseAuth(): AuthFn<Request> {
   return async (request) => {
@@ -132,10 +145,18 @@ function supabaseAuth(): AuthFn<Request> {
 }
 
 export default eveChannel({
-  auth: [supabaseAuth(), vercelOidc(), localDev()],
+  auth: [supabaseAuth(), vercelOidc(), evalFamilyFixtureAuth(localDev())],
   async onMessage(ctx, message) {
     const auth = defaultEveAuth(ctx);
     if (!auth) return { auth };
+
+    // Sandboxed eval sessions skip continuity on purpose: they all
+    // authenticate as the same local-dev principal, so the ledger would
+    // stitch unrelated evals into one episode and feed one eval's
+    // messages into the next one's context.
+    if (auth.attributes[EVAL_FIXTURE_SESSION_ATTRIBUTE] === "true") {
+      return { auth };
+    }
 
     const familyId = auth.attributes.familyId;
     const memberUserId = auth.attributes.memberUserId;

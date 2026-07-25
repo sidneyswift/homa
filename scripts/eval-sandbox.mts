@@ -9,10 +9,15 @@
  * Boots a throwaway local PostgreSQL cluster (initdb + pg_ctl, the same
  * approach as scripts/child-progress-postgres-test.mts), applies the
  * Supabase-ambient shim below plus every migration in supabase/migrations,
- * then runs `eve eval` inside apps/web with HOMA_EVAL_DATABASE_URL pointing
+ * seeds the Walker eval fixture family (the same rows the prompt-side
+ * fixture renders; apps/web/lib/family-context-eval-fixture.ts), then runs
+ * `eve eval` inside apps/web with HOMA_EVAL_DATABASE_URL pointing
  * at the sandbox. lib/map/db.ts honors that variable off Vercel, so
  * agent_tool_calls and every other direct-Postgres write lands in the
- * throwaway cluster and dies with it. It also provides a sandbox artifact
+ * throwaway cluster and dies with it. The seeded family is what lets the
+ * eve channel's auth walk stamp eval sessions as family-pinned
+ * (evalFamilyFixtureAuth), so family-scoped tools resolve real rows here
+ * instead of failing closed. It also provides a sandbox artifact
  * store (HOMA_EVAL_BLOB_DIR plus a loopback HTTP server at
  * HOMA_EVAL_BLOB_URL, lib/materials/eval-blob-store.ts), so the materials
  * pipeline runs end to end: generated images upload locally and the PDF
@@ -33,6 +38,8 @@ import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { evalFamilyFixtureSeedSql } from "../apps/web/lib/family-context-eval-fixture";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const MIGRATIONS_DIR = join(REPO_ROOT, "supabase", "migrations");
@@ -56,9 +63,14 @@ create role anon nologin;
 create role authenticated nologin;
 create role service_role nologin bypassrls;
 create schema auth;
+-- email_confirmed_at exists on the real Supabase auth.users and is what
+-- the autoconfirm_new_user trigger (20260705202000_open_signup.sql)
+-- touches on insert; the fixture-family seed below inserts a user, so
+-- the shim must carry it.
 create table auth.users (
   id uuid primary key default gen_random_uuid(),
   email text,
+  email_confirmed_at timestamptz,
   raw_user_meta_data jsonb default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
@@ -350,6 +362,16 @@ async function main(): Promise<number> {
         psqlArgs(["--single-transaction", "-f", join(MIGRATIONS_DIR, file)]),
       );
     }
+
+    // The Walker fixture family, so eval sessions stamped by
+    // evalFamilyFixtureAuth resolve real family rows here. A multi-
+    // statement -c string runs as one implicit transaction.
+    console.error("[eval-sandbox] seeding the Walker eval fixture family");
+    await mustRun(
+      "eval family fixture seed",
+      join(bin, "psql"),
+      psqlArgs(["-c", evalFamilyFixtureSeedSql()]),
+    );
 
     const databaseUrl = `postgres://${DB_USER}@127.0.0.1:${port}/${DB_NAME}`;
     await mkdir(blobDir, { recursive: true });

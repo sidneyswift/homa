@@ -1,3 +1,10 @@
+import { type AuthFn } from "eve/channels/auth";
+
+import { type PinnedAgentChannel } from "./agent-db";
+import {
+  EVAL_ALLOW_PROD_WRITES_FLAG,
+  EVAL_DATABASE_URL_VAR,
+} from "./eval-isolation";
 import { type FamilyContextRows } from "./family-context";
 
 /**
@@ -13,6 +20,23 @@ import { type FamilyContextRows } from "./family-context";
  * channel stamps a caller token or a pinned familyId. The fixture makes
  * eval sessions look like the situation the evals were written for, a
  * set-up family asking Homa for help.
+ *
+ * The fixture has two layers, matching the two places a turn learns its
+ * family:
+ *
+ *   prompt · the flag alone (isEvalFamilyFixtureEnabled) lets the
+ *            family-context instruction render these rows when the
+ *            session has no auth attributes, so plain `eve eval` runs
+ *            still open with a set-up family.
+ *   tools  · under `pnpm eval:sandbox` (isEvalFamilyFixtureDbBacked)
+ *            the auth walk additionally stamps eval sessions as a
+ *            family-pinned channel on EVAL_FIXTURE_FAMILY_ID, and the
+ *            sandbox database is seeded with the same rows
+ *            (evalFamilyFixtureSeedSql). Family-scoped tools then run
+ *            for real against the disposable cluster instead of failing
+ *            closed with MissingFamilyContextError, which used to abort
+ *            whole builds mid-eval (observed 2026-07-25, 1 of 7
+ *            anchor-usage runs).
  *
  * The rows render through the real renderFamilyContext, never a
  * hand-written markdown string, so eval context cannot drift from the
@@ -44,6 +68,13 @@ const FIXTURE_CHILD_FINN = "00000000-0000-4000-8000-000000000001";
 const FIXTURE_CHILD_MAYA = "00000000-0000-4000-8000-000000000002";
 const FIXTURE_CHILD_STORY = "00000000-0000-4000-8000-000000000003";
 
+/** The Walker family and Rachel's membership user, same synthetic scheme. */
+export const EVAL_FIXTURE_FAMILY_ID = "00000000-0000-4000-8000-0000000000f0";
+export const EVAL_FIXTURE_PARENT_USER_ID =
+  "00000000-0000-4000-8000-0000000000a0";
+
+const EVAL_FIXTURE_PARENT_NAME = "Rachel";
+
 /**
  * Ages drift as the calendar advances (birth months are fixed strings);
  * that is fine, the evals assert routing and tenancy, never an exact age.
@@ -53,7 +84,7 @@ export function evalFamilyFixtureRows(): FamilyContextRows {
     family: {
       name: "Walker",
       us_state: "OH",
-      parent_display_name: "Rachel",
+      parent_display_name: EVAL_FIXTURE_PARENT_NAME,
       time_zone: "America/New_York",
     },
     children: [
@@ -92,6 +123,159 @@ export function evalFamilyFixtureRows(): FamilyContextRows {
     ],
     memories: [],
     answers: [],
-    members: [{ display_name: "Rachel" }],
+    members: [{ display_name: EVAL_FIXTURE_PARENT_NAME }],
   };
+}
+
+/**
+ * True when eval sessions may be stamped with the fixture family's pinned
+ * identity: the fixture flag is on (and off Vercel, per the base gate), a
+ * sandbox database exists for the stamped identity to resolve against
+ * (scripts/eval-sandbox.mts sets HOMA_EVAL_DATABASE_URL and seeds the
+ * family), and the run has not opted back into production writes.
+ *
+ * Each leg guards a real failure mode:
+ *   - Without the sandbox URL, plain `eve eval` has no database, so a
+ *     stamped identity would turn today's honest fail-closed tools into
+ *     "family context could not be loaded" noise on every turn. Those
+ *     runs keep the prompt-only fixture.
+ *   - Under HOMA_EVAL_ALLOW_PROD_WRITES=1 the run holds production
+ *     credentials on purpose; a synthetic familyId must never ride into
+ *     production tables, so the stamp stays off.
+ */
+export function isEvalFamilyFixtureDbBacked(
+  environment: Record<string, string | undefined>,
+): boolean {
+  return (
+    isEvalFamilyFixtureEnabled(environment) &&
+    (environment[EVAL_DATABASE_URL_VAR] ?? "").length > 0 &&
+    environment[EVAL_ALLOW_PROD_WRITES_FLAG] !== "1"
+  );
+}
+
+/**
+ * Marker attribute on eval-fixture sessions. The eve channel's onMessage
+ * keys on it to skip conversation continuity: every eval session
+ * authenticates as the same local-dev principal, so the continuity
+ * ledger would stitch unrelated evals into one episode and feed one
+ * eval's messages into the next one's context.
+ */
+export const EVAL_FIXTURE_SESSION_ATTRIBUTE = "evalFamilyFixture";
+
+/**
+ * The channel is typed against the pinned set on purpose: the whole
+ * stamp only works because resolveAgentAccess and the family-context
+ * instruction treat this channel as server-authenticated family-pinned.
+ * materials-lab is the one pinned channel with no channel-specific
+ * behavior gates (no NO_CARD/NO_PANEL membership, no tool restrictions),
+ * so eval sessions keep the most web-like tool surface.
+ */
+const EVAL_FIXTURE_CHANNEL: PinnedAgentChannel = "materials-lab";
+
+/**
+ * Decorates the eve channel's localDev() auth entry. When the run is
+ * db-backed (see isEvalFamilyFixtureDbBacked), a locally-authenticated
+ * eval session is stamped as a family-pinned session on the seeded
+ * Walker family, so family-scoped tools resolve pinned access against
+ * the sandbox instead of throwing MissingFamilyContextError.
+ *
+ * The environment is read per request, not at composition time, so an
+ * eval that needs the no-family state can still unset the fixture flag
+ * in its own body. Only the wrapped entry's successes are stamped: a
+ * request authenticated by Supabase or Vercel OIDC never reaches this
+ * decoration, so a real principal can never be re-pinned. The inner
+ * result is copied, never mutated; localDev() returns a shared module
+ * constant.
+ */
+export function evalFamilyFixtureAuth(
+  inner: AuthFn<Request>,
+  environment?: Record<string, string | undefined>,
+): AuthFn<Request> {
+  return async (request) => {
+    const auth = await inner(request);
+    if (!auth || !isEvalFamilyFixtureDbBacked(environment ?? process.env)) {
+      return auth;
+    }
+    return {
+      ...auth,
+      attributes: {
+        ...auth.attributes,
+        channel: EVAL_FIXTURE_CHANNEL,
+        familyId: EVAL_FIXTURE_FAMILY_ID,
+        memberName: EVAL_FIXTURE_PARENT_NAME,
+        [EVAL_FIXTURE_SESSION_ATTRIBUTE]: "true",
+      },
+    };
+  };
+}
+
+function sqlString(value: string): string {
+  return `'${value.replace(/'/g, "''")}'`;
+}
+
+function sqlJson(value: unknown): string {
+  return `${sqlString(JSON.stringify(value))}::jsonb`;
+}
+
+/** The fixture's YYYY-MM birth months as a Postgres date (day is always 01). */
+function sqlBirthMonth(birthMonth: string): string {
+  const withDay = birthMonth.length === 7 ? `${birthMonth}-01` : birthMonth;
+  return `${sqlString(withDay)}::date`;
+}
+
+/**
+ * Seed statements for the sandbox database, generated from the SAME rows
+ * the prompt fixture renders, so the two layers cannot drift. Only
+ * scripts/eval-sandbox.mts runs this, against the disposable cluster;
+ * the auth.users insert targets that script's shimmed auth schema, not
+ * real Supabase Auth.
+ *
+ * The family is seeded the way a live set-up household looks in the
+ * database: status 'claimed' (map/store.ts stamps that on account
+ * attach), profile completed, onboarding record done (otherwise the
+ * generation gate would suppress the in-turn materials tools the evals
+ * assert), and sandbox=true because that is what test families are.
+ * Children get explicitly staggered created_at values: the pinned
+ * loader orders by created_at, and three rows defaulting to now() in
+ * one statement would tie and make child order nondeterministic.
+ */
+export function evalFamilyFixtureSeedSql(): string {
+  const rows = evalFamilyFixtureRows();
+  const family = rows.family;
+  if (!family) throw new Error("eval family fixture has no family row");
+  const childValues = rows.children
+    .map((child, index) =>
+      [
+        sqlString(child.id),
+        sqlString(EVAL_FIXTURE_FAMILY_ID),
+        sqlString(child.name),
+        sqlBirthMonth(child.birth_month),
+        sqlJson(child.profile ?? {}),
+        `timestamptz '2026-07-01 12:00:00+00' + interval '${index} minutes'`,
+      ].join(", "),
+    )
+    .map((values) => `  (${values})`)
+    .join(",\n");
+  return `
+insert into auth.users (id, email)
+values (${sqlString(EVAL_FIXTURE_PARENT_USER_ID)}, 'walker-fixture@homatest.invalid');
+
+insert into public.families
+  (id, name, us_state, parent_display_name, time_zone, status,
+   profile_completed_at, context, sandbox)
+values
+  (${sqlString(EVAL_FIXTURE_FAMILY_ID)}, ${sqlString(family.name ?? "Walker")},
+   ${sqlString(family.us_state ?? "OH")},
+   ${sqlString(family.parent_display_name ?? EVAL_FIXTURE_PARENT_NAME)},
+   ${sqlString(family.time_zone ?? "America/New_York")}, 'claimed',
+   now(), ${sqlJson({ onboarding: { state: "done" } })}, true);
+
+insert into public.family_members (family_id, user_id, role, display_name)
+values (${sqlString(EVAL_FIXTURE_FAMILY_ID)}, ${sqlString(EVAL_FIXTURE_PARENT_USER_ID)},
+        'parent', ${sqlString(EVAL_FIXTURE_PARENT_NAME)});
+
+insert into public.children (id, family_id, name, birth_month, profile, created_at)
+values
+${childValues};
+`.trim();
 }
