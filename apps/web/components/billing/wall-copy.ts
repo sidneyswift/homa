@@ -1,5 +1,7 @@
 import type { WallDoor } from "@homa/core";
 
+import type { PlanTier } from "../../lib/billing/wall-types";
+
 /**
  * Every parent-facing word on the wall, in one reviewable file
  * (plans/2026-07-11-the-wall.md; copy rulebook:
@@ -83,6 +85,66 @@ export const WALL_BULLETS = [
 ] as const;
 
 export const WALL_DISMISS = "Not now";
+
+/**
+ * The three sellable tiers (2026-07-25: Plus and Elite priced and
+ * launched ahead of their differentiating product work, per founder
+ * direction to test willingness to pay before building). Plus is
+ * described as an active commitment ("adds state filing support"),
+ * never a claim that a specific state's filing is already built and
+ * verified today: a wrong legal claim is the one failure mode this
+ * exact persona (Monica, docs/homa-planning/journeys/01-personas-jtbd.md
+ * P4) cancels same-day over. Elite's features are real, buildable
+ * mechanics (a plan_tier column and the makings multiplier already
+ * exist, supabase/migrations/20260725040000_family_plan_tier.sql); the
+ * enforcement is dark until the base allowance itself ships, matching
+ * how the wall's own doors already ship dark before a flag flip.
+ */
+export const TIER_NAMES: Record<PlanTier, string> = {
+  regular: "Homa",
+  plus: "Homa Plus",
+  elite: "Homa Elite",
+};
+
+const TIER_PRICES: Record<PlanTier, { monthly: number; annual: number | null }> = {
+  regular: { monthly: 19, annual: 99 },
+  plus: { monthly: 49, annual: 470 },
+  elite: { monthly: 199, annual: 1990 },
+};
+
+export function tierMonthlyButton(tier: PlanTier): string {
+  return `Start your 30 free days · then $${TIER_PRICES[tier].monthly} a month`;
+}
+
+export function tierAnnualButton(tier: PlanTier): string | null {
+  const annual = TIER_PRICES[tier].annual;
+  if (annual === null) return null;
+  return `Choose the year instead · then $${annual.toLocaleString("en-US")} a year`;
+}
+
+export function tierAnnualBullets(tier: PlanTier): readonly string[] {
+  const price = TIER_PRICES[tier];
+  if (price.annual === null) return WALL_BULLETS.slice(1);
+  const perMonth = (price.annual / 12).toFixed(2).replace(/\.00$/, "");
+  return [`The year works out to $${perMonth} a month.`, ...WALL_BULLETS.slice(1)];
+}
+
+/** One line per tier, reassurance-shaped (what it adds, in her words),
+ *  never a features table. */
+export function tierDescription(tier: PlanTier): string {
+  switch (tier) {
+    case "regular":
+      return "Weekly plans, printable practice pages made for your child, phone calls with Homa, and chat.";
+    case "plus":
+      return "Everything in Homa, plus state filing support: quarterly reports and homeschool paperwork, prepared from what you've already logged.";
+    case "elite":
+      return "Everything in Homa Plus, plus Homa's best models on every generation, five times the makings each week, and priority on your worksheet queue.";
+    default: {
+      const exhaustive: never = tier;
+      throw new Error(`Unhandled plan tier: ${exhaustive}`);
+    }
+  }
+}
 
 /** The rare race where a door was tapped right as the wall went up on
  *  the server. Copy-kit shape: name it, settle the nerves (her report

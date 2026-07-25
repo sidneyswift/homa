@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { cookies } from "next/headers";
 
-import { startFamilyTrial } from "../../../../lib/billing/wall";
+import { startFamilyTrial, tierForStripeProduct } from "../../../../lib/billing/wall";
 import { emitMapEvent } from "../../../../lib/map/events";
 import { requireFamily } from "../../../../lib/map/session";
 import { childBelongsToFamily } from "../../../../lib/map/store";
@@ -80,7 +80,9 @@ export async function GET(request: Request): Promise<Response> {
 
   try {
     const stripe = new Stripe(secretKey);
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["line_items.data.price.product"],
+    });
     const complete = session.status === "complete";
     const sameFamily = session.client_reference_id === family.id;
     if (!complete || !sameFamily) {
@@ -91,7 +93,10 @@ export async function GET(request: Request): Promise<Response> {
     }
 
     const customerId = typeof session.customer === "string" ? session.customer : null;
-    const fresh = await startFamilyTrial(family.id, customerId);
+    const purchasedProduct = session.line_items?.data[0]?.price?.product;
+    const productId = typeof purchasedProduct === "string" ? purchasedProduct : purchasedProduct?.id;
+    const tier = tierForStripeProduct(productId);
+    const fresh = await startFamilyTrial(family.id, customerId, tier);
     if (fresh) {
       await emitMapEvent("billing.trial_started", { family_id: family.id });
     }
