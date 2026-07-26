@@ -10,5 +10,4 @@ export const FAQ_ITEMS: ReadonlyArray<readonly [string, string]> = [
   ["What ages does it cover?", "The progress report covers ages 2 to 16, with a questionnaire tuned to each age. Personalized materials are richest for the early years and growing from there."],
   ["Does my child ever use it?", "Never. Homa is for you: your child never sees the questionnaire and never talks to an AI."],
   ["What if a week falls apart?", "Tell Homa. She reshuffles, nothing is lost. A lighter week is still a school week."],
-  ["What does it cost?", "The progress report is free. Homa itself is free while the first families shape it. Pricing gets published before anyone pays a cent."],
 ];

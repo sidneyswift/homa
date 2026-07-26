@@ -168,20 +168,7 @@ export function Stories() {
                   }}
                 />
               </div>
-              {/* The caption sits under the snapshot, not on the signature row: it fills the tall column and keeps the label with the faces it names. */}
-              <p
-                style={{
-                  margin: "10px 0 0",
-                  textAlign: "center",
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "0.8rem",
-                  letterSpacing: "0.02em",
-                  color: "var(--text-muted)",
-                }}
-              >
-                Co-founders of Homa
-              </p>
-              {/* A small hand-drawn anchor under the caption: keeps the tall right column from ending in bare white. A heart, not a squiggle, so the headline keeps the section's only squiggle. Its margin lives in .lp-stories-anchor so the stacked layout can pull it closer to the caption. */}
+              {/* A small hand-drawn anchor under the snapshot: keeps the tall right column from ending in bare white. A heart, not a squiggle, so the headline keeps the section's only squiggle. Its margin lives in .lp-stories-anchor so the stacked layout can pull it closer to the photo card. */}
               <div className="lp-stories-anchor">
                 <Doodle name="heart" size={15} color="var(--clay-400)" rotate={-8} />
               </div>

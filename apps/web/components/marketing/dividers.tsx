@@ -38,8 +38,8 @@ export function Wave({
     >
       <path fill={color} d="M0 0 H1440 V12 C1220 46 980 4 720 24 C460 44 220 8 0 32 Z" />
       {/* Optional 1px crest edge for boundaries where the two grounds are
-          near-identical creams (bg-page against bg-page-warm): without it
-          the wave is invisible and the seam reads as a dead join. The
+          near-identical creams (var(--bg-page) against var(--bg-page-warm)):
+          without it the wave is invisible and the seam reads as a dead join. The
           non-scaling stroke keeps the hairline 1px despite the stretched
           viewBox. */}
       {stroke ? (

@@ -139,8 +139,8 @@ export default function LandingPage() {
         {/* Features sits on its own butter paper band (--lp-band-butter, a
             gold-100 mix defined in globals.css) so the long cream midsection
             breaks into chapters that register at full-page scale; plain
-            bg-page-warm sat ~1% from bg-page in luminance and the chapter
-            waves were invisible. The band ground lives on this wrapper, not
+            var(--bg-page-warm) sat ~1% from var(--bg-page) in luminance and
+            the chapter waves were invisible. The band ground lives on this wrapper, not
             the section, because the section is a 1200px rail; the ground
             must bleed full width. Both crests keep the 1px stroke so the
             edge reads like a sheet laid on the desk. */}
