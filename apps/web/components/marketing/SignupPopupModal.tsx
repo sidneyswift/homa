@@ -104,7 +104,7 @@ export function SignupPopupModal({ open, onClose }: { open: boolean; onClose: ()
         ref={cardRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Get your child's free progress report"
+        aria-label="Start your free trial"
         className="signup-popup-card"
         tabIndex={-1}
         onClick={(event) => event.stopPropagation()}

@@ -10,6 +10,12 @@ import type { PlanTier, TierCheckout, WallCheckout } from "./wall-types";
  * a plan or month, a curriculum call, the first chat message). Viewing
  * content that already exists stays open; only new action is gated.
  *
+ * Superseded for NEW families twice since: the report lock (2026-07-18,
+ * four free subjects) and the signup paywall (founder directive
+ * 2026-07-26, signupPaywallEnabled below), which holds the whole account
+ * behind a card-upfront trial before any report exists. The door wall
+ * stays as written for families that predate each change.
+ *
  * Flag off = familyWallCheckout returns null before touching the
  * database, so the conference-era product runs exactly as before, zero
  * added queries. The tenancy law holds: familyId always arrives from
@@ -31,6 +37,26 @@ export function wallEnabled(): boolean {
 export function reportLockEnabled(): boolean {
   const value = (process.env.HOMA_REPORT_LOCK_ENABLED ?? "").trim().toLowerCase();
   return (value === "1" || value === "true") && wallEnabled();
+}
+
+/**
+ * The signup paywall (founder directive 2026-07-26): the card comes out
+ * right after the account is created, before the questionnaire, the
+ * report, or any conversation. Every plan starts with the same
+ * card-upfront 30-day trial the door wall already sells; this flag only
+ * moves WHERE the ask happens. Ships dark; the founder flips it after
+ * verifying the Payment Links. It does not require HOMA_WALL_ENABLED:
+ * the account gate replaces the door wall for new families rather than
+ * layering on it.
+ *
+ * This supersedes two recorded placements for new families while it is
+ * on: "the report stays free forever" (2026-07-11) and chat-first
+ * onboarding's "onboarding families never see the wall" (section 7).
+ * Ruling recorded in docs/homa-planning/build-log.md, 2026-07-26.
+ */
+export function signupPaywallEnabled(): boolean {
+  const value = (process.env.HOMA_SIGNUP_PAYWALL_ENABLED ?? "").trim().toLowerCase();
+  return value === "1" || value === "true";
 }
 
 /** Live links first (set only in Vercel production), TEST for local dev
@@ -105,6 +131,25 @@ function checkoutUrl(base: string, familyId: string, email: string | null): stri
   url.searchParams.set("client_reference_id", familyId);
   if (email) url.searchParams.set("prefilled_email", email);
   return url.toString();
+}
+
+/** The three-tier checkout bundle for one family, or null when the
+ *  regular tier's links are missing (the wall/gate fails open upstream). */
+function buildWallCheckout(familyId: string, email: string | null): WallCheckout | null {
+  const regularLinks = tierPaymentLinkBases("regular");
+  if (!regularLinks) return null;
+  function tierCheckout(links: { monthly: string; annual: string | null } | null): TierCheckout | null {
+    if (!links) return null;
+    return {
+      monthlyUrl: checkoutUrl(links.monthly, familyId, email),
+      annualUrl: links.annual ? checkoutUrl(links.annual, familyId, email) : null,
+    };
+  }
+  return {
+    regular: tierCheckout(regularLinks) as TierCheckout,
+    plus: tierCheckout(tierPaymentLinkBases("plus")),
+    elite: tierCheckout(tierPaymentLinkBases("elite")),
+  };
 }
 
 export interface WallAccessRow {
@@ -194,19 +239,7 @@ export async function familyWallCheckout(familyId: string): Promise<WallCheckout
       return null;
     }
 
-    function tierCheckout(links: { monthly: string; annual: string | null } | null): TierCheckout | null {
-      if (!links) return null;
-      return {
-        monthlyUrl: checkoutUrl(links.monthly, familyId, row.email),
-        annualUrl: links.annual ? checkoutUrl(links.annual, familyId, row.email) : null,
-      };
-    }
-
-    return {
-      regular: tierCheckout(regularLinks) as TierCheckout,
-      plus: tierCheckout(tierPaymentLinkBases("plus")),
-      elite: tierCheckout(tierPaymentLinkBases("elite")),
-    };
+    return buildWallCheckout(familyId, row.email);
   } catch (error) {
     // Fail open, always: a billing read must never take a family's
     // product down (this also covers a flag flipped before migration
@@ -220,6 +253,128 @@ export async function familyWallCheckout(familyId: string): Promise<WallCheckout
 }
 
 /**
+ * The subscription statuses that end access under the signup paywall.
+ * trialing and active keep the doors open; past_due stays open too while
+ * Stripe's smart retries run (dunning is Stripe's job, not a lockout);
+ * these four mean the relationship ended or never completed. Mirrored
+ * onto families by the billing webhook; null (webhook dark, or a family
+ * from before the mirror) reads as fine, never as lapsed.
+ */
+const LAPSED_SUBSCRIPTION_STATUSES = new Set([
+  "canceled",
+  "unpaid",
+  "incomplete_expired",
+  "paused",
+]);
+
+export interface AccountAccessRow {
+  billingExempt: boolean;
+  trialStartedAt: string | null;
+  subscriptionStatus: string | null;
+}
+
+/** Why the account is open, or null when the signup paywall applies. */
+export type AccountAccessGrant = "billing_exempt" | "trial";
+
+/**
+ * accountAccessDecision(row): the account-level entitlement, with no I/O.
+ *
+ * Unlike the door wall there is NO onboarding exemption: the signup
+ * paywall exists precisely to meet the family before the product does.
+ * billing_exempt still wins first (the founder's comp switch outranks
+ * everything), then a started trial counts as long as the mirrored
+ * subscription status has not lapsed. This is the first reader of
+ * stripe_subscription_status: under the account gate, canceling really
+ * ends access at the period boundary instead of leaving the old
+ * permanent trial_started_at unlock in place.
+ */
+export function accountAccessDecision(row: AccountAccessRow): AccountAccessGrant | null {
+  if (row.billingExempt) return "billing_exempt";
+  if (!row.trialStartedAt) return null;
+  if (row.subscriptionStatus && LAPSED_SUBSCRIPTION_STATUSES.has(row.subscriptionStatus)) {
+    return null;
+  }
+  return "trial";
+}
+
+export interface AccountGateState {
+  /** null means the account is open (flag off, links unconfigured, or
+   *  an entitlement above); a WallCheckout means hold the whole account
+   *  behind the trial gate at /onboarding/trial. */
+  checkout: WallCheckout | null;
+  /** True when a walled family once HAD a trial that has since lapsed
+   *  (canceled, unpaid, paused): the gate greets her as a returning
+   *  member instead of a stranger and offers the billing portal. */
+  lapsed: boolean;
+}
+
+const ACCOUNT_OPEN: AccountGateState = { checkout: null, lapsed: false };
+
+/**
+ * familyAccountGate(familyId): the account gate's one question. Fail
+ * posture matches the door wall on purpose: a missing env or a
+ * billing-read error opens the account, because the founder loses a
+ * gate, never a family.
+ */
+export async function familyAccountGate(familyId: string): Promise<AccountGateState> {
+  if (!signupPaywallEnabled()) return ACCOUNT_OPEN;
+
+  if (!tierPaymentLinkBases("regular")) {
+    console.error(
+      "wall: HOMA_SIGNUP_PAYWALL_ENABLED is on but regular Payment Link envs are missing; accounts stay open",
+    );
+    return ACCOUNT_OPEN;
+  }
+
+  try {
+    const sql = mapDb();
+    const rows = await sql<
+      {
+        trial_started_at: string | null;
+        billing_exempt: boolean;
+        stripe_subscription_status: string | null;
+        email: string | null;
+      }[]
+    >`
+      select trial_started_at::text as trial_started_at, billing_exempt,
+             stripe_subscription_status, email
+      from public.families
+      where id = ${familyId}
+    `;
+    const row = rows[0];
+    if (!row) return ACCOUNT_OPEN;
+    if (
+      accountAccessDecision({
+        billingExempt: row.billing_exempt,
+        trialStartedAt: row.trial_started_at,
+        subscriptionStatus: row.stripe_subscription_status,
+      })
+    ) {
+      return ACCOUNT_OPEN;
+    }
+    return {
+      checkout: buildWallCheckout(familyId, row.email),
+      lapsed: row.trial_started_at !== null,
+    };
+  } catch (error) {
+    console.error(
+      "wall: account access read failed, account stays open:",
+      error instanceof Error ? error.message : "unknown",
+    );
+    return ACCOUNT_OPEN;
+  }
+}
+
+/**
+ * familyAccountCheckout(familyId): WallCheckout | null
+ * The gate question for callers that only need open-or-walled (the /app
+ * admission read, /onboarding's redirect).
+ */
+export async function familyAccountCheckout(familyId: string): Promise<WallCheckout | null> {
+  return (await familyAccountGate(familyId)).checkout;
+}
+
+/**
  * startFamilyTrial(familyId, stripeCustomerId, tier): boolean
  * Stamps trial_started_at once (the unlock) and records which tier was
  * bought. Returns true only on the first stamp so billing.trial_started
@@ -227,12 +382,16 @@ export async function familyWallCheckout(familyId: string): Promise<WallCheckout
  * always reflects the CURRENT checkout on every call, first or repeat:
  * a family upgrading tiers reaches this same confirm route on their new
  * Payment Link, and the tier they just bought must win, not the one
- * recorded on their original trial.
+ * recorded on their original trial. A caller that does NOT know the
+ * tier (the webhook's checkout.session.completed handler, which has no
+ * expanded line items) passes null and leaves plan_tier untouched:
+ * defaulting it to "regular" here used to let a webhook arriving after
+ * the confirm route silently downgrade a Plus or Max purchase.
  */
 export async function startFamilyTrial(
   familyId: string,
   stripeCustomerId: string | null,
-  tier: PlanTier = "regular",
+  tier: PlanTier | null = null,
 ): Promise<boolean> {
   const sql = mapDb();
   // The `was` CTE reads trial_started_at from the same pre-statement
@@ -246,7 +405,7 @@ export async function startFamilyTrial(
       update public.families
       set trial_started_at = coalesce(trial_started_at, now()),
           stripe_customer_id = coalesce(${stripeCustomerId}, stripe_customer_id),
-          plan_tier = ${tier}
+          plan_tier = coalesce(${tier}, plan_tier)
       where id = ${familyId}
       returning id
     )

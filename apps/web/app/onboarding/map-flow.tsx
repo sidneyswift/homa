@@ -123,11 +123,18 @@ const SELF_FOCUSING_PHASES: ReadonlySet<FlowPhase> = new Set<FlowPhase>(["parent
 export function MapFlow({
   onPhaseChange,
   chat = null,
+  paywallPending = false,
 }: {
   onPhaseChange?: (phase: FlowPhase) => void;
   /** Chat-first onboarding's server props, or null when the flag is off
    *  and every route below runs exactly as it always has. */
   chat?: OnboardingChatProps | null;
+  /** The signup paywall (founder directive 2026-07-26): true means the
+   *  flow ends at the account moment and hands off to /onboarding/trial,
+   *  where the server re-decides entitlement. A full navigation, not a
+   *  phase: the gate is a server-rendered page, so no client state can
+   *  route past it. */
+  paywallPending?: boolean;
 }) {
   const [phase, setPhase] = useState<FlowPhase>("loading");
   const [children, setChildren] = useState<FlowChild[]>([]);
@@ -325,6 +332,17 @@ export function MapFlow({
         return;
       }
 
+      // The signup paywall: an account exists (the email gate above just
+      // passed) and the server flagged this family as not yet through
+      // the gate, so the trial page is the only next step. Reached in
+      // practice by the Google return, whose account was linked by the
+      // refreshState call above, after the server render already
+      // decided; the trial page re-verifies and bounces anyone entitled.
+      if (paywallPending) {
+        window.location.assign("/onboarding/trial");
+        return;
+      }
+
       // Chat-first onboarding: past the account, there are no more
       // steps to route between. Where she is comes from the family
       // record, and Homa picks up from it. This sits directly under the
@@ -378,10 +396,10 @@ export function MapFlow({
 
       applyPostKidsRoute(decidePostKidsRoute(restored.children), restored.children);
     })();
-    // `chat` is a server-rendered prop that cannot change without a
-    // navigation, and adding it would re-run the resume decision on any
-    // re-render that reshapes it, routing a parent who is midway through
-    // answering back to the top of the flow.
+    // `chat` and `paywallPending` are server-rendered props that cannot
+    // change without a navigation, and adding them would re-run the
+    // resume decision on any re-render that reshapes them, routing a
+    // parent who is midway through answering back to the top of the flow.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshState, bootstrapSession, beginChecklist, applyPostKidsRoute]);
 
@@ -418,6 +436,13 @@ export function MapFlow({
         <ParentStep
           onDone={() => {
             void (async () => {
+              // The signup paywall: the account now exists, and the card
+              // comes out before anything else does. A full navigation
+              // so the server owns the decision.
+              if (paywallPending) {
+                window.location.assign("/onboarding/trial");
+                return;
+              }
               // Chat-first onboarding: the account was the last card.
               // Everything after it is a conversation, and going there
               // now, before another state round trip, is what puts the

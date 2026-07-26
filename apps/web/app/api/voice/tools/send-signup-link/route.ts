@@ -23,9 +23,12 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_PER_NUMBER_PER_DAY = 2;
 
 /** Verbatim user-facing copy: the first text a stranger gets from Homa.
- * Mirrors the onboarding offer in sms-mode.ts; change both together. */
+ * Mirrors the onboarding offer in sms-mode.ts; change both together.
+ * The free-report and no-card promises left 2026-07-26 with the signup
+ * paywall: the trial is the offer now, and this text must stay true
+ * whichever way HOMA_SIGNUP_PAYWALL_ENABLED is set. */
 const SIGNUP_LINK_TEXT =
-  "Homa here, as promised: your child's free progress report starts at thankshoma.com/onboarding. About five minutes, no card needed. If you enter this same phone number when it asks, your texts to me link up automatically.";
+  "Homa here, as promised: your free trial starts at thankshoma.com/onboarding. Five minutes of questions, then your child's progress report. If you enter this same phone number when it asks, your texts to me link up automatically.";
 
 export async function POST(request: Request): Promise<Response> {
   const url = new URL(request.url);

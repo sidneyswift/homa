@@ -10,4 +10,5 @@ export const FAQ_ITEMS: ReadonlyArray<readonly [string, string]> = [
   ["What ages does it cover?", "The progress report covers ages 2 to 16, with a questionnaire tuned to each age. Personalized materials are richest for the early years and growing from there."],
   ["Does my child ever use it?", "Never. Homa is for you: your child never sees the questionnaire and never talks to an AI."],
   ["What if a week falls apart?", "Tell Homa. She reshuffles, nothing is lost. A lighter week is still a school week."],
+  ["How much does Homa cost?", "Every plan starts with 30 free days, and nothing is charged during them. After that, Homa is $19 a month, Homa Plus is $49, and Homa Max is $199; paying for the year takes 20% off. We email you a reminder before the first charge, and you can cancel anytime."],
 ];

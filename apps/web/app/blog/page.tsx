@@ -74,7 +74,7 @@ export default function BlogIndexPage() {
               href="/onboarding"
               className="mt-5 inline-block rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand transition-colors duration-(--dur-base) ease-out hover:bg-brand-hover"
             >
-              Get your free progress report
+              Start your free trial
             </Link>
           </div>
         ) : (

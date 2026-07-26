@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   other: {
     "last-modified": new Date().toISOString(),
     "answer-capsule":
-      "Get a free progress report showing exactly where your child stands. Takes five minutes.",
+      "Try Homa free for 30 days: weekly plans, practice pages made for your child, and a progress report showing exactly where your child stands. Then $19 a month, cancel anytime.",
   },
 };
 
@@ -40,9 +40,9 @@ const webAppJsonLd = {
   operatingSystem: "Any",
   offers: {
     "@type": "Offer",
-    price: "0",
+    price: "19",
     priceCurrency: "USD",
-    description: "Free developmental progress report",
+    description: "30-day free trial, then $19 per month. Cancel anytime.",
   },
   // @id ties into the Organization node in the root layout's site-wide
   // graph; name stays inline for validators that don't resolve across
@@ -64,9 +64,13 @@ const faqJsonLd = {
 /**
  * Landing page (BUILD.md Deliverable 0 + lead magnet v2), built on the
  * designed page at docs/homa-design/ui_kits/landing/LandingPage.jsx with
- * the claims pass applied: no fabricated social proof (C2), no pricing
- * (T2), and signup CTAs open the onboarding entry flow. Sample-report links
- * route to the public demonstration report. Section seams are the kit's waves/ribbons (a
+ * the claims pass applied: no fabricated social proof (C2), and signup
+ * CTAs open the onboarding entry flow. The original no-pricing ruling
+ * (T2) was superseded 2026-07-26 by the signup-paywall founder
+ * directive: with a card-upfront trial as the only door, the trial
+ * terms and price are stated before the click (hero note, FAQ, CTA
+ * band) instead of hidden behind it. Sample-report links route to the
+ * public demonstration report. Section seams are the kit's waves/ribbons (a
  * ribbon IS the seam; never stack a wave at the same boundary). Motion
  * follows the emil-design-eng / review-animations skills: brand ease-out +
  * duration tokens, transform/opacity reveals armed by JS with

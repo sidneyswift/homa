@@ -310,7 +310,7 @@ export function Hero() {
           </p>
           <div
             className="lp-hero-actions"
-            style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 14, marginTop: 26, marginBottom: 28 }}
+            style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 14, marginTop: 26, marginBottom: 10 }}
           >
             {openPopup ? (
               <Button variant="primary" size="lg" onClick={openPopup} iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
@@ -322,6 +322,12 @@ export function Hero() {
               </Button>
             )}
           </div>
+          {/* The trial terms, visible before the click (landing-content.ts
+              note on primaryActionNote): a card-upfront trial that hides
+              its card step behind the button pays for it in trust. */}
+          <p style={{ margin: "0 0 28px", fontSize: "0.9375rem", color: "var(--text-subtle)" }}>
+            {HERO_COPY.primaryActionNote}
+          </p>
           <PlatformStrip />
         </div>
         <div className="lp-hero-visual lp-hero2-visual">
