@@ -72,6 +72,38 @@ export function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
   return null;
 }
 
+/**
+ * userMessageSendState(message): where a user bubble sits between typed
+ * and delivered. The mobile twin of apps/web/app/app/message-parts.tsx's
+ * function of the same name (GH #170 part 2): reads straight from eve's
+ * own optimistic projection (`metadata.optimistic` + `metadata.status`,
+ * message-reducer.js), not a parallel tracker (BUILD.md M1-04, eve
+ * drives state). Before this, a message the client could not confirm
+ * vanished with no sign anything went wrong, exactly the dropped-signal
+ * scenario a phone hits more than a laptop.
+ *
+ *   "sending" - client.message.submitted: posted, not yet confirmed.
+ *   "failed"  - client.message.failed: the send errored or was
+ *               auto-stopped by the watchdog after a long silence. eve
+ *               replaces this same bubble's event in place, never a
+ *               second copy of the message.
+ *   null      - anything else: a plain historical or confirmed message.
+ *
+ * Once the server confirms, eve retires the optimistic id (replaced by
+ * the turn's own message), so "sending" never lingers past confirmation
+ * and there is no separate "delivered" state to render.
+ */
+export function userMessageSendState(
+  message: EveMessage,
+): "sending" | "failed" | null {
+  if (message.role !== "user" || message.metadata?.optimistic !== true) {
+    return null;
+  }
+  if (message.metadata.status === "submitted") return "sending";
+  if (message.metadata.status === "failed") return "failed";
+  return null;
+}
+
 export function partIsRenderable(part: EveMessagePart): boolean {
   if (part.type === "text") return part.text.trim().length > 0;
   if (part.type === "dynamic-tool" && part.state === "output-available") {
