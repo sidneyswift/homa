@@ -1,5 +1,12 @@
 # Hive puzzle
 
+Golden anchor: pass `anchorIds: ["hive-puzzle"]` to generate_image so
+the output matches the Homa hive-puzzle bar (numbered hexagon
+clusters with given and blank cells, a plain-language rule statement
+up top, light bee-and-hive theming in the margins). Write your own
+prompt with your own content; the anchor sets the visual bar, not the
+specifics.
+
 Hexagonal grid logic puzzle where students fill empty hexagons
 following a constraint rule (e.g., "each hexagon contains the smallest
 number not appearing in any adjacent hexagon"). Derived from Beast

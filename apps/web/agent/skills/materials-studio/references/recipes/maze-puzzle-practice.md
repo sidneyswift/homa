@@ -1,5 +1,12 @@
 # Maze / puzzle practice
 
+Golden anchor: pass `anchorIds: ["geometry-maze"]` to generate_image
+so the output matches the Homa maze-practice bar (labeled START and
+FINISH flags, a problem at every decision point with two answer
+choices, the correct answer advancing the path, light themed
+doodles). Write your own prompt with your own content; the anchor
+sets the visual bar, not the specifics.
+
 A maze that transforms rote drill into a navigation challenge.
 Correct answers advance through the maze; wrong answers hit dead
 ends. Self-checking without needing an answer key. This is the format

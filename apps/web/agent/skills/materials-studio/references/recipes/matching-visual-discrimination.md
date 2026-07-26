@@ -1,7 +1,14 @@
 # Matching / visual discrimination worksheet recipe
 
-(Patterns extracted from Treasury of Year-Round Preschool Activities, a
-multi-activity PK page; no Homa-style reference image shipped yet.)
+Golden anchor: pass `anchorIds: ["matching-visual-discrimination"]` to
+generate_image so the output matches the Homa matching bar (large
+friendly thick-outline illustrations, dot-to-dot matching columns,
+clearly sectioned activities, a themed border, preschool-scale
+spacing). Write your own prompt with your own content; the anchor
+sets the visual bar, not the specifics.
+
+(Design patterns below were extracted from Treasury of Year-Round
+Preschool Activities, a multi-activity PK page.)
 
 What it is: two columns of images where the child draws lines to match
 pairs, OR rows of similar images where the child marks the different one.

@@ -1,5 +1,12 @@
 # Daily rhythm cards
 
+Golden anchor: pass `anchorIds: ["daily-rhythm-cards"]` to
+generate_image so the output matches the Homa rhythm-cards bar (a
+card grid with one icon and a bold label per card, blank __:__ time
+slots, dashed cut lines with a scissors icon, color-coded card
+borders). Write your own prompt with your own content; the anchor
+sets the visual bar, not the specifics.
+
 Printable cards for building a visual daily schedule. Each card
 represents one activity block with an icon and label. Designed to
 be cut apart and arranged on a schedule board.
