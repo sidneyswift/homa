@@ -1,0 +1,96 @@
+import type { Metadata } from "next";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
+import { getAppData } from "../../../lib/app-data";
+import { calendarWeekDates } from "../../../lib/calendar-view";
+import { getFamilyEventsForFamily } from "../../../lib/family-events-read";
+import { getHoursLogForFamily } from "../../../lib/hours";
+import { getScheduledActivitiesForFamily } from "../../../lib/plan-schedule-read";
+import { effectiveTimeZone } from "../../../lib/time-zone";
+import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../../lib/view-context";
+import { PageColumn } from "../../../components/dashboard/page-column";
+import { CalendarView } from "./calendar-view";
+
+/**
+ * /app/calendar (issue #176, CG-03: "calendar and homeschool planner in
+ * one"). Same setup gates and view-context scoping as the rest of /app;
+ * auth is enforced by proxy.ts, data access is enforced by RLS
+ * regardless. This page only reads: family_events and
+ * plan_activity_schedule are net-new tables from this same change (NOT
+ * yet applied to production; see the PR body), so an unmigrated target
+ * simply returns empty rows here rather than erroring, exactly like any
+ * other family with nothing on the calendar yet.
+ */
+
+export const metadata: Metadata = {
+  title: "Calendar",
+  robots: { index: false },
+};
+
+export default async function CalendarPage() {
+  const data = await getAppData();
+  if (!data) redirect("/onboarding");
+  const { family, children, reports, plans } = data;
+
+  const cookieStore = await cookies();
+  const viewContext = parseViewContext(
+    cookieStore.get(VIEW_CONTEXT_COOKIE)?.value,
+    children.map((child) => child.id),
+  );
+
+  const timeZone = effectiveTimeZone(family.time_zone);
+  const now = new Date();
+  const days = calendarWeekDates(now, timeZone);
+  const fromDate = days[0].date;
+  const toDate = days[days.length - 1].date;
+
+  // family_events and plan_activity_schedule are net-new tables from
+  // this same change, NOT yet applied to production (the PR body says
+  // so explicitly). Until the founder applies the migration, these
+  // reads fail closed to an empty week rather than a broken page, the
+  // same honest "nothing here yet" a brand-new family would see.
+  // hours_log (migration #37) is long-since live, so its read is not
+  // wrapped: a real failure there should surface normally.
+  const [familyEvents, scheduledActivities, hoursRows] = await Promise.all([
+    getFamilyEventsForFamily(family.id, fromDate, toDate).catch((error: unknown) => {
+      console.error(
+        "calendar: family_events read failed (migration may be unapplied):",
+        error instanceof Error ? error.message : "unknown",
+      );
+      return [];
+    }),
+    getScheduledActivitiesForFamily(family.id, fromDate, toDate).catch((error: unknown) => {
+      console.error(
+        "calendar: plan_activity_schedule read failed (migration may be unapplied):",
+        error instanceof Error ? error.message : "unknown",
+      );
+      return [];
+    }),
+    getHoursLogForFamily(family.id),
+  ]);
+
+  return (
+    <PageColumn>
+      <CalendarView
+        kids={children.map((child) => ({
+          id: child.id,
+          name: child.name,
+          avatar_url: child.avatar_url,
+        }))}
+        plans={plans}
+        reports={reports}
+        familyEvents={familyEvents}
+        scheduledActivities={scheduledActivities}
+        hoursEntries={hoursRows.map((row) => ({
+          childId: row.childId,
+          happenedOn: row.happenedOn,
+          minutes: row.minutes,
+        }))}
+        timeZone={timeZone}
+        now={now}
+        focusChildId={viewContext.kind === "child" ? viewContext.childId : null}
+      />
+    </PageColumn>
+  );
+}

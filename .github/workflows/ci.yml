@@ -106,6 +106,9 @@ jobs:
       - name: Hours page checks (day grouping, totals, filter, editor dialog)
         run: pnpm check:hours-ui
 
+      - name: Calendar page checks (per-kid/family lanes, scheduling, voice digest)
+        run: pnpm check:calendar-ui
+
       - name: Dynamic prompt suggestion checks
         run: pnpm check:prompt-suggestions
 
