@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Check } from "lucide-react";
 
 import type { WallDoor } from "@homa/core";
 
@@ -11,10 +12,14 @@ import {
   BILLING_TOGGLE_ANNUAL_BADGE,
   BILLING_TOGGLE_ANNUAL_LABEL,
   BILLING_TOGGLE_MONTHLY_LABEL,
+  TIER_FEATURED,
+  TIER_MOST_POPULAR_BADGE,
   TIER_NAMES,
   tierBullets,
   tierButtonLabel,
   tierDescription,
+  tierPriceAmount,
+  tierPriceUnit,
 } from "./wall-copy";
 
 const TIER_ORDER: PlanTier[] = ["regular", "plus", "elite"];
@@ -75,46 +80,64 @@ export function TierOptions({
           ))}
         </div>
       ) : null}
-      {TIER_ORDER.map((tier) => {
-        const tierCheckout = checkout[tier];
-        if (!tierCheckout) return null;
-        const usingAnnual = period === "annual" && Boolean(tierCheckout.annualUrl);
-        const url = usingAnnual ? (tierCheckout.annualUrl as string) : tierCheckout.monthlyUrl;
-        return (
-          <div
-            key={tier}
-            className="rounded-md border border-border-subtle bg-card p-4"
-          >
-            <h3 className="font-display text-lg font-bold text-strong">{TIER_NAMES[tier]}</h3>
-            <p className="mt-1 text-sm text-muted">{tierDescription(tier)}</p>
-            <a
-              href={url}
-              onClick={() => {
-                onBeforeCheckout?.();
-                sendWallBeacon({
-                  kind: "checkout_started",
-                  door,
-                  plan: usingAnnual ? "annual" : "monthly",
-                  tier,
-                });
-              }}
-              className={reportButtonClass(
-                tier === "regular" ? "primary" : "secondary",
-                "mt-3 inline-flex min-h-11 items-center justify-center px-5 py-2.5 text-sm font-semibold",
-              )}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:items-start">
+        {TIER_ORDER.map((tier) => {
+          const tierCheckout = checkout[tier];
+          if (!tierCheckout) return null;
+          const usingAnnual = period === "annual" && Boolean(tierCheckout.annualUrl);
+          const effectivePeriod: BillingPeriod = usingAnnual ? "annual" : "monthly";
+          const url = usingAnnual ? (tierCheckout.annualUrl as string) : tierCheckout.monthlyUrl;
+          const isFeatured = tier === TIER_FEATURED;
+          return (
+            <div
+              key={tier}
+              className={
+                isFeatured
+                  ? "relative rounded-md border-2 border-[var(--border-brand)] bg-[var(--brand-soft)] p-5 shadow-md md:-mt-2 md:mb-2"
+                  : "relative rounded-md border border-border-subtle bg-card p-4"
+              }
             >
-              {tierButtonLabel(tier, usingAnnual ? "annual" : "monthly")}
-            </a>
-            <ul className="mt-3 flex flex-col gap-1">
-              {tierBullets(tier, usingAnnual ? "annual" : "monthly").map((line) => (
-                <li key={line} className="text-sm text-muted">
-                  {line}
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-      })}
+              {isFeatured ? (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-pill bg-brand px-3 py-1 text-xs font-semibold text-on-brand">
+                  {TIER_MOST_POPULAR_BADGE}
+                </span>
+              ) : null}
+              <h3 className="font-display text-lg font-bold text-strong">{TIER_NAMES[tier]}</h3>
+              <p className="mt-1 text-sm text-muted">{tierDescription(tier)}</p>
+              <p className="mt-3 font-display text-3xl font-bold text-strong">
+                ${tierPriceAmount(tier, effectivePeriod).toLocaleString("en-US")}
+                <span className="text-sm font-normal text-muted">/{tierPriceUnit(effectivePeriod)}</span>
+              </p>
+              <a
+                href={url}
+                onClick={() => {
+                  onBeforeCheckout?.();
+                  sendWallBeacon({
+                    kind: "checkout_started",
+                    door,
+                    plan: usingAnnual ? "annual" : "monthly",
+                    tier,
+                  });
+                }}
+                className={reportButtonClass(
+                  tier === "regular" ? "primary" : "secondary",
+                  "mt-3 inline-flex min-h-11 items-center justify-center px-5 py-2.5 text-sm font-semibold",
+                )}
+              >
+                {tierButtonLabel(tier, usingAnnual ? "annual" : "monthly")}
+              </a>
+              <ul className="mt-3 flex flex-col gap-1">
+                {tierBullets(tier, usingAnnual ? "annual" : "monthly").map((line) => (
+                  <li key={line} className="flex items-start gap-2 text-sm text-muted">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--sage-600)]" aria-hidden="true" />
+                    {line}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
