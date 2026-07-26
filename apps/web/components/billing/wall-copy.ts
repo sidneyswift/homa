@@ -125,10 +125,13 @@ export const TIER_NAMES: Record<PlanTier, string> = {
   elite: "Homa Max",
 };
 
+/** Every annual price is 20% off the monthly price times twelve, rounded
+ *  to the nearest dollar (founder ruling 2026-07-26): $19, $49, and $199
+ *  a month become $182, $470, and $1,910 a year. */
 const TIER_PRICES: Record<PlanTier, { monthly: number; annual: number | null }> = {
-  regular: { monthly: 19, annual: 99 },
+  regular: { monthly: 19, annual: 182 },
   plus: { monthly: 49, annual: 470 },
-  elite: { monthly: 199, annual: 1990 },
+  elite: { monthly: 199, annual: 1910 },
 };
 
 export function tierMonthlyButton(tier: PlanTier): string {
