@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 
@@ -22,8 +22,12 @@ import { readUtmFromLocation } from "../../lib/waitlist-client";
  * effect after first render" trick; nothing here needs to call setState
  * from an effect body just to animate its own arrival.
  */
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export function SignupPopupModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const router = useRouter();
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -49,10 +53,44 @@ export function SignupPopupModal({ open, onClose }: { open: boolean; onClose: ()
     };
   }, [open]);
 
+  // Focus management (a dialog without it strands keyboard and screen
+  // reader users on the dimmed page): focus moves to the card on open,
+  // Tab cycles inside it, and closing hands focus back to the CTA that
+  // opened it.
+  useEffect(() => {
+    if (!open) return;
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    cardRef.current?.focus();
+    return () => previouslyFocused?.focus();
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const card = cardRef.current;
+      if (!card) return;
+      const focusables = Array.from(card.querySelectorAll<HTMLElement>(FOCUSABLE));
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+      if (!(active instanceof HTMLElement) || !card.contains(active)) {
+        event.preventDefault();
+        first.focus();
+        return;
+      }
+      if (event.shiftKey && (active === first || active === card)) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -63,10 +101,12 @@ export function SignupPopupModal({ open, onClose }: { open: boolean; onClose: ()
   return (
     <div className="signup-popup-overlay" onClick={onClose}>
       <div
+        ref={cardRef}
         role="dialog"
         aria-modal="true"
         aria-label="Get your child's free progress report"
         className="signup-popup-card"
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
         <button type="button" onClick={onClose} aria-label="Close" className="signup-popup-close">
