@@ -629,6 +629,17 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
   .wall-overlay, .wall-card { transition: opacity var(--dur-base) ease; transform: none; }
 }
 
+/* Widens the wall's dialog only, for the 3-tier pricing-card grid
+   (components/billing/tier-options.tsx, founder screenshots
+   2026-07-26). Applied as an ADDITIONAL class alongside .wall-card in
+   wall-modal.tsx ("wall-card wall-card--pricing"), never merged into
+   the base .wall-card rule: that class is shared with the unrelated,
+   intentionally narrow welcome-chooser sheet
+   (app/app/[childId]/report/welcome-chooser.tsx). */
+.wall-card--pricing {
+  max-width: 56rem;
+}
+
 /* ============================================================================
    Onboarding flow step entrance (/onboarding, MapFlow). One gentle rise per
    step change, opacity + transform only, brand ease-out, under 300ms per the

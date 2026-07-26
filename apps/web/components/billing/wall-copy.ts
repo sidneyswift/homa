@@ -125,6 +125,14 @@ export const TIER_NAMES: Record<PlanTier, string> = {
   elite: "Homa Max",
 };
 
+/** The featured/recommended tier for the pricing-card redesign
+ *  (founder screenshots 2026-07-26): Plus is the natural middle upsell
+ *  target between the base and top tiers, so its card carries the
+ *  "Most popular" badge and the elevated styling. */
+export const TIER_FEATURED: PlanTier = "plus";
+
+export const TIER_MOST_POPULAR_BADGE = "Most popular";
+
 /** Every annual price is 20% off the monthly price times twelve, rounded
  *  to the nearest dollar (founder ruling 2026-07-26): $19, $49, and $199
  *  a month become $182, $470, and $1,910 a year. */
@@ -148,6 +156,22 @@ export function tierButtonLabel(tier: PlanTier, period: BillingPeriod): string {
   const annual = TIER_PRICES[tier].annual;
   if (annual === null) return tierMonthlyButton(tier);
   return `Start your 30 free days · then $${annual.toLocaleString("en-US")} a year`;
+}
+
+/** The bare number for the pricing-card redesign's large price display
+ *  (founder screenshots 2026-07-26), shown above the existing CTA
+ *  button, which keeps its own full sentence (tierButtonLabel)
+ *  unchanged. Falls back to the monthly price if this tier's annual
+ *  price is somehow null, matching tierButtonLabel's own fallback. */
+export function tierPriceAmount(tier: PlanTier, period: BillingPeriod): number {
+  if (period === "monthly") return TIER_PRICES[tier].monthly;
+  const annual = TIER_PRICES[tier].annual;
+  return annual === null ? TIER_PRICES[tier].monthly : annual;
+}
+
+/** The small unit label beside the large price number. */
+export function tierPriceUnit(period: BillingPeriod): string {
+  return period === "monthly" ? "month" : "year";
 }
 
 /** The toggle itself: one control above all three cards, so "annual"
