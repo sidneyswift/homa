@@ -1,5 +1,12 @@
 # Unit study packet
 
+Golden anchor: pass `anchorIds: ["unit-study-packet"]` to
+generate_image so the output matches the Homa packet bar (an
+illustrated cover with a big themed title, a banner subtitle, a
+contents checklist, a name field, and one cohesive theme to carry
+across every page). Write your own prompt with your own content; the
+anchor sets the visual bar, not the specifics.
+
 A multi-page themed study bundle containing 8-12 different activity types
 all centered on one topic. Uses the packet recipe (see "Packets: several
 pages, one PDF" above) for assembly.

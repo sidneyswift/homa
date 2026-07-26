@@ -1,5 +1,12 @@
 # One-page mini book
 
+Golden anchor: pass `anchorIds: ["one-page-mini-book"]` to
+generate_image so the output matches the Homa mini-book bar (numbered
+panels split by labeled cut and fold lines, an illustrated cover
+panel, fill-in prompt pages with writing lines, warm hand-drawn art).
+Write your own prompt with your own content; the anchor sets the
+visual bar, not the specifics.
+
 A single letter-size page with an 8-panel grid that folds into an 8-page
 mini book. Requires precise panel placement so pages read in correct order
 after folding: fold along all lines, fold in half, cut center dotted line,
