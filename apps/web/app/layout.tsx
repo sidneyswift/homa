@@ -122,6 +122,12 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${schibstedGrotesk.variable} ${ebGaramond.variable} ${fredoka.variable} ${hankenGrotesk.variable} ${caveat.variable} ${jetBrainsMono.variable} h-full antialiased`}
+      // The landing page arms its scroll-reveal system pre-paint with an
+      // inline script that adds .rv-armed to this element before hydration
+      // (app/page.tsx); suppress the one-level attribute check so React
+      // does not flag that class as a mismatch. Same pattern as pre-paint
+      // theme scripts.
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
         <script

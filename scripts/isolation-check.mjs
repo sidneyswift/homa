@@ -450,6 +450,27 @@ async function subjectLessonSchemaExists() {
 }
 
 /**
+ * hours_log shipped with no UPDATE policy (migration #37: select/insert/
+ * delete only) until the /app/hours page needed one (issue #174,
+ * CG-02). The additive migration may lead this code's own deploy, so
+ * this checks whether it has landed on the target yet, same expand/
+ * contract honesty as materialStatusWriteBoundaryEnforced above: the
+ * probe below asserts the real cross-family guarantee once the policy
+ * exists, and reports an honest "not yet enforced" pass during the
+ * safe window before it does, rather than failing.
+ */
+async function hoursLogUpdatePolicyEnforced() {
+  const rows = await sql`
+    select exists (
+      select 1 from pg_policies
+      where schemaname = 'public' and tablename = 'hours_log'
+        and policyname = 'members update their hours'
+    ) as present
+  `;
+  return rows[0]?.present === true;
+}
+
+/**
  * The subject_lessons migration deliberately ships as an expand/contract
  * pair (2026-07-18 merge-to-main review finding): the enforcing trigger is
  * a SEPARATE, later migration that must not apply until the RPC-aware
@@ -2337,6 +2358,18 @@ async function expectAuthenticatedIsolation() {
       },
       "create Family B memory fixture",
     );
+    const hoursLogBId = await insertFixtureRow(
+      familyBUser,
+      "hours_log",
+      {
+        family_id: familyBId,
+        child_id: childBId,
+        subject: "math",
+        minutes: 45,
+        note: "Isolation check hours fixture.",
+      },
+      "create Family B hours_log fixture",
+    );
     const materialBId = await insertFixtureRow(
       familyBUser,
       "materials",
@@ -2704,6 +2737,42 @@ async function expectAuthenticatedIsolation() {
       0,
       "auth member cannot update another family's child plan",
     );
+
+    // hours_log's update policy is a new additive migration for the
+    // /app/hours page (issue #174): expand/contract honesty, same as
+    // the materials status window above, so this target reports
+    // truthfully whether the migration has landed yet.
+    if (await hoursLogUpdatePolicyEnforced()) {
+      await expectAuthenticatedUpdateFiltered(
+        familyBUser.accessToken,
+        "hours_log",
+        "id",
+        hoursLogBId,
+        { minutes: 60, note: "Edited by its own family." },
+        1,
+        "auth member can edit their own hours_log row",
+      );
+      await expectAuthenticatedUpdateFiltered(
+        familyAUser.accessToken,
+        "hours_log",
+        "id",
+        hoursLogBId,
+        { minutes: 1, note: "Cross-family edit should not apply" },
+        0,
+        "auth member cannot edit another family's hours_log row",
+      );
+    } else {
+      report(
+        "auth member can edit their own hours_log row",
+        true,
+        "not yet enforced: the hours_log update policy migration (issue #174) is deliberately pending on this target",
+      );
+      report(
+        "auth member cannot edit another family's hours_log row",
+        true,
+        "not yet enforced: the hours_log update policy migration (issue #174) is deliberately pending on this target",
+      );
+    }
 
     const childProgressRows = [
       {

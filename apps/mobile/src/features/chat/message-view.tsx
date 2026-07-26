@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import type { EveMessage, EveMessagePart } from "eve/react";
 
 import { fontFamilies } from "../../theme/fonts";
@@ -7,6 +7,7 @@ import { MarkdownText } from "./markdown-text";
 import {
   memoryChipFor,
   partIsRenderable,
+  userMessageSendState,
   type MemoryChipContent,
 } from "./message-utils";
 import { MaterialCard, type MaterialArtifact } from "./material-card";
@@ -143,21 +144,41 @@ function MessagePartView({
   return null;
 }
 
+/** The plain text a retry resends: every text part joined the same way
+ *  sendMessage joins a held-back queue. Mobile carries no attachment
+ *  markers to strip (unlike the web twin), so this is the whole story. */
+function userMessageText(message: EveMessage): string {
+  return message.parts
+    .map((part) => (part.type === "text" ? part.text : ""))
+    .filter((text) => text.length > 0)
+    .join("\n\n");
+}
+
 export function MessageView({
   message,
   questions = {},
+  onRetryFailedMessage,
 }: {
   message: EveMessage;
   questions?: QuestionCardWiring;
+  /** Resends this exact text (a card-equivalent send, so the existing
+   *  session-fork guard and queueing apply the same as any other send).
+   *  Undefined only hides the retry control, never the "Not sent" state
+   *  itself: a message that failed to send stays honest either way. */
+  onRetryFailedMessage?: (text: string) => void;
 }) {
   const isUser = message.role === "user";
   if (!message.parts.some(partIsRenderable)) return null;
+  // Where a user bubble sits between typed and delivered (GH #170 part
+  // 2, message-utils.ts): never set for an assistant message.
+  const sendState = isUser ? userMessageSendState(message) : null;
 
   return (
     <View
       style={{
-        flexDirection: "row",
-        justifyContent: isUser ? "flex-end" : "flex-start",
+        flexDirection: "column",
+        alignItems: isUser ? "flex-end" : "flex-start",
+        gap: 4,
       }}
     >
       <View
@@ -166,10 +187,16 @@ export function MessageView({
           borderRadius: radius.lg,
           paddingHorizontal: space.md,
           paddingVertical: 12,
+          // A message still finding out whether it landed, or one that
+          // did not, dims the same way a queued bubble does elsewhere in
+          // this screen: quieter, never hidden (no pending/failed state
+          // existed before GH #170; a dropped connection used to erase
+          // her words with no sign anything was wrong).
           ...(isUser
             ? {
                 backgroundColor: colors.brand,
                 borderBottomRightRadius: radius.sm,
+                opacity: sendState === null ? 1 : 0.7,
               }
             : {
                 backgroundColor: colors.card,
@@ -190,6 +217,52 @@ export function MessageView({
           />
         ))}
       </View>
+      {sendState === "sending" ? (
+        <Text
+          accessibilityRole="text"
+          style={{
+            fontFamily: fontFamilies.body,
+            fontSize: fontSize.xs,
+            color: colors.textSubtle,
+          }}
+        >
+          Sending&hellip;
+        </Text>
+      ) : sendState === "failed" ? (
+        <View
+          style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}
+        >
+          <Text
+            accessibilityRole="alert"
+            style={{
+              fontFamily: fontFamilies.body,
+              fontSize: fontSize.xs,
+              color: colors.danger,
+            }}
+          >
+            Not sent.
+          </Text>
+          {onRetryFailedMessage ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Retry"
+              onPress={() => onRetryFailedMessage(userMessageText(message))}
+              hitSlop={8}
+            >
+              <Text
+                style={{
+                  fontFamily: fontFamilies.bodySemibold,
+                  fontSize: fontSize.xs,
+                  color: colors.danger,
+                  textDecorationLine: "underline",
+                }}
+              >
+                Retry
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
     </View>
   );
 }
