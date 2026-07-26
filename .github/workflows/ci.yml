@@ -103,6 +103,9 @@ jobs:
       - name: Homa's tasks UI checks (cards, editor dialog)
         run: pnpm check:tasks-ui
 
+      - name: Hours page checks (day grouping, totals, filter, editor dialog)
+        run: pnpm check:hours-ui
+
       - name: Dynamic prompt suggestion checks
         run: pnpm check:prompt-suggestions
 
