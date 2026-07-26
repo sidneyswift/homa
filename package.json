@@ -46,6 +46,8 @@
     "check:continuity": "tsx --test \"apps/web/lib/conversation-continuity/*.test.ts\" \"apps/web/lib/conversation-log.test.ts\" \"apps/web/lib/email-inbound-continuity.test.ts\" \"apps/web/lib/map/email-submission.test.ts\" \"apps/web/lib/map/report-email.test.ts\" \"apps/web/lib/map/family-actor-auth.test.ts\" \"apps/web/lib/sms-inbound-auth.test.ts\" \"apps/web/lib/sms-progress.test.ts\" \"apps/web/lib/sms-segments.test.ts\" \"apps/web/lib/sms-session-epoch.test.ts\" \"apps/web/lib/voice/telnyx-api.test.ts\" \"apps/web/lib/admin/digest-format.test.ts\"",
     "child-progress:e2e": "pnpm test:child-progress:postgres",
     "test:child-progress:postgres": "NODE_OPTIONS=--conditions=react-server tsx scripts/child-progress-postgres-test.mts",
+    "hours-log:e2e": "pnpm test:hours-log:postgres",
+    "test:hours-log:postgres": "NODE_OPTIONS=--conditions=react-server tsx scripts/hours-log-race-test.mts",
     "check:taxonomy": "node packages/taxonomy/scripts/validate.mjs && tsx scripts/taxonomy-check.mts && tsx --test packages/taxonomy/src/progress.test.ts",
     "taxonomy:progress": "tsx packages/taxonomy/scripts/generate-progress-index.mts",
     "taxonomy:slugs": "tsx packages/taxonomy/scripts/generate-slug-map.mts",

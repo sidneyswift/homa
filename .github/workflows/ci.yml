@@ -146,6 +146,12 @@ jobs:
         timeout-minutes: 10
         run: pnpm child-progress:e2e
 
+      # hours_log is compliance evidence: the unique index, the cleanup
+      # migration, and both writers' raced-insert handling (issue #215).
+      - name: hours_log dedupe disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm hours-log:e2e
+
       - name: Morning research brief v2 disposable acceptance
         timeout-minutes: 10
         run: |
