@@ -40,13 +40,6 @@ export default async function AppReportPage({
   searchParams: Promise<{ welcome?: string; fresh?: string }>;
 }) {
   const { childId } = await params;
-  const policy = progressRoutePolicy(
-    { surface: "child_report", childId },
-    liveProgressEnabled(),
-  );
-  if (policy.kind === "redirect") {
-    redirect(policy.href);
-  }
 
   const data = await getAppData();
   if (!data) redirect("/onboarding");
@@ -55,6 +48,27 @@ export default async function AppReportPage({
   if (!child) notFound();
 
   const token = data.reports.get(childId)?.token;
+
+  // The wall (plans/2026-07-11-the-wall.md): null while the flag is off
+  // (the instant no-query path), for exempt or trialing families, and
+  // for a child with no report yet (nothing to lock). Computed before
+  // the route-policy check below so a family currently owed the report
+  // lock is never redirected into the ungated Progress dashboard
+  // (route-policy stays a pure function; only this per-child caller's
+  // boolean is lock-aware). A report-less child keeps its original,
+  // lock-independent redirect to Progress (which tolerates a null
+  // report), since there is nothing yet to hold back.
+  const wall = token ? await familyWallCheckout(data.family.id) : null;
+  const lockApplies = Boolean(token) && Boolean(wall) && reportLockEnabled();
+
+  const policy = progressRoutePolicy(
+    { surface: "child_report", childId },
+    liveProgressEnabled() && !lockApplies,
+  );
+  if (policy.kind === "redirect") {
+    redirect(policy.href);
+  }
+
   if (!token) redirect("/onboarding");
   const report = await getReportByToken(token);
   if (!report) redirect("/onboarding");
@@ -99,9 +113,6 @@ export default async function AppReportPage({
       ? { narrative: report.narrative, rejectedPieces: meta?.rejectedPieces ?? [] }
       : null;
 
-  // The wall (plans/2026-07-11-the-wall.md): null while the flag is off
-  // (the instant no-query path), and for exempt or trialing families.
-  const wall = await familyWallCheckout(data.family.id);
   let viewerIsAccountOwner = false;
   if (lessonFlagOn) {
     try {
@@ -131,9 +142,9 @@ export default async function AppReportPage({
     : [];
 
   // The report lock (plans/2026-07-18-report-lock.md) rides the same
-  // wall decision: a walled family sees the free four in full and the
-  // rest held; an open family (flag off, exempt, trialing) sees
-  // everything, always.
+  // wall decision (the same `wall` computed above, before the route-policy
+  // check): a walled family sees the free four in full and the rest held;
+  // an open family (flag off, exempt, trialing) sees everything, always.
   const reportLock =
     wall && reportLockEnabled()
       ? { freeSubjects: freeReportSubjects(report.scores), checkout: wall }
