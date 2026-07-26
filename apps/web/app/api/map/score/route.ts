@@ -2,6 +2,7 @@ import { after } from "next/server";
 
 import { MAP_BANK_VERSION, mapScoreRequestSchema } from "@homa/core";
 
+import { familyAccountCheckout } from "../../../../lib/billing/wall";
 import { emitMapEvent } from "../../../../lib/map/events";
 import { narrativeEnabled } from "../../../../lib/map/narrative-flag";
 import { runReportNarrative } from "../../../../lib/map/narrative-runner";
@@ -42,6 +43,12 @@ export async function POST(request: Request): Promise<Response> {
   // means the client skipped ahead of the flow it was given.
   if (!family.email) {
     return Response.json({ ok: false, reason: "not-claimed" }, { status: 409 });
+  }
+  // The signup paywall gates the pipeline, not only the pages: this is
+  // the route that generates AND emails the report, the exact value the
+  // gate holds (the dc4ab64b bypass class). /onboarding/trial first.
+  if ((await familyAccountCheckout(family.id)) !== null) {
+    return Response.json({ ok: false, reason: "walled" }, { status: 403 });
   }
 
   let raw: unknown;

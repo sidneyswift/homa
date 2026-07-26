@@ -15,8 +15,12 @@ directive carries for NEW families while the flag is on, recorded here
 because three earlier placements said otherwise:
 
 - "The report stays free forever" (2026-07-11 wall placement): no report
-  exists before the card now. The door wall itself is unchanged for
-  families that predate the flag.
+  exists before the card now. By default the gate applies to EVERY
+  non-exempt family at flag flip, existing free families included;
+  HOMA_SIGNUP_PAYWALL_SINCE (optional grandfather cutoff, set it to the
+  flip moment) scopes it to new signups only, and billing_exempt remains
+  the founder's per-family comp switch. The door wall's own rules are
+  unchanged for whoever the account gate does not reach.
 - Chat-first onboarding §7 "onboarding families never see the wall" and
   the open §5 credit-lockout ruling: the account gate replaces both for
   new signups; the conversation now starts after the card. LockoutCard
@@ -38,7 +42,14 @@ three tier cards; entitlement now READS stripe_subscription_status
 it while Stripe retries), closing the cancel-keeps-access-forever hole
 under the flag; text-message signup refuses deterministically while the
 flag is on (it would hand out the account and report the web gate
-holds); no schema change. Scoring guidance from the research: judge the
+holds); no schema change. A four-reviewer adversarial pass the same
+session hardened the gate beyond page render: the map pipeline routes
+(children/answer/score), the eve agent channel (which mobile mounts
+directly), and every door via familyWallCheckout now consult the same
+account decision, the confirm route and webhook stamp the subscription
+mirror by family id so a re-subscribing lapsed family is never walled
+on a stale "canceled" status, and pnpm check:billing wires the gate and
+copy-pin tests into CI. Scoring guidance from the research: judge the
 test on visitors-to-paid and first-rebill survival, not signups
 (expect roughly half to two-thirds fewer signups, 30-50% trial-to-paid
 healthy, below ~20% at $19/mo is a real negative willingness-to-pay

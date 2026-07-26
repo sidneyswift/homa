@@ -164,6 +164,7 @@ export function MapFlow({
     firstName: string | null;
     familySetupDone: boolean;
     familyContextDone: boolean;
+    hasAccount: boolean;
   } | null> => {
     try {
       const response = await fetch("/api/map/state");
@@ -172,6 +173,7 @@ export function MapFlow({
         email?: string | null;
         firstName?: string | null;
         lastName?: string | null;
+        hasAccount?: boolean;
         familyContextDone?: boolean;
         familySetupDone?: boolean;
         children?: Array<{
@@ -208,6 +210,7 @@ export function MapFlow({
         firstName: resolvedFirstName,
         familySetupDone: Boolean(data.familySetupDone),
         familyContextDone: Boolean(data.familyContextDone),
+        hasAccount: Boolean(data.hasAccount),
       };
     } catch {
       return null;
@@ -332,14 +335,21 @@ export function MapFlow({
         return;
       }
 
-      // The signup paywall: an account exists (the email gate above just
-      // passed) and the server flagged this family as not yet through
-      // the gate, so the trial page is the only next step. Reached in
-      // practice by the Google return, whose account was linked by the
-      // refreshState call above, after the server render already
-      // decided; the trial page re-verifies and bounces anyone entitled.
+      // The signup paywall: the server flagged this family as not yet
+      // through the gate, so the trial page is the only next step, but
+      // ONLY once a real auth account exists. hasAccount, not email, is
+      // the predicate the trial page itself checks (has_account =
+      // family_members exists), and using email here would ping-pong an
+      // email-set account-less family (SMS text signups visiting via an
+      // emailed resume link, pre-2026-07-08 leads) between the two pages
+      // forever. Those families fall through to the account card, whose
+      // claim folds them by email and mints the membership row.
       if (paywallPending) {
-        window.location.assign("/onboarding/trial");
+        if (restored.hasAccount) {
+          window.location.assign("/onboarding/trial");
+          return;
+        }
+        setPhase("parent");
         return;
       }
 

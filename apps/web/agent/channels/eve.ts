@@ -2,6 +2,7 @@ import { extractBearerToken, localDev, vercelOidc, type AuthFn } from "eve/chann
 import { defaultEveAuth, eveChannel } from "eve/channels/eve";
 import { createClient } from "@supabase/supabase-js";
 
+import { familyAccountGate } from "../../lib/billing/wall";
 import {
   resolveInboundContinuity,
   resolvedContinuityAttributes,
@@ -169,6 +170,43 @@ export default eveChannel({
             .join("\n");
     if (typeof familyId !== "string" || text.trim().length === 0) {
       return { auth };
+    }
+
+    // The signup paywall holds at TURN admission, not just page render
+    // (founder directive 2026-07-26): proxy.ts never sees this channel,
+    // and the mobile app mounts it directly, so a page-only gate would
+    // hand walled and lapsed families the whole toolbox through here
+    // (the dc4ab64b bypass class). Denial is deterministic: familyId is
+    // withheld from the session, so every family tool refuses and no
+    // family context loads; the note below only shapes how Homa says
+    // it. familyAccountGate fails open on read errors and is a no-op
+    // while HOMA_SIGNUP_PAYWALL_ENABLED is dark.
+    const accountGate = await familyAccountGate(familyId);
+    if (accountGate.checkout) {
+      const attributes: Record<string, string> = {
+        ...auth.attributes,
+        accountWalled: "true",
+      };
+      delete attributes.familyId;
+      return {
+        auth: {
+          ...auth,
+          attributes,
+        },
+        context: [
+          [
+            "## Account gate",
+            "",
+            "This account's 30 free days have not started, or the",
+            "subscription that opened them has ended, so no family",
+            "context is loaded and family tools are unavailable this",
+            "turn. Answer warmly, and point the way in plainly: her",
+            "trial starts at thankshoma.com/onboarding, everything",
+            "she has saved is waiting there, and nothing is charged",
+            "during the 30 free days. Do not attempt family tools.",
+          ].join("\n"),
+        ],
+      };
     }
 
     try {

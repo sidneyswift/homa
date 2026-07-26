@@ -9,7 +9,7 @@ export const HERO_COPY = {
    *  hiding the card step behind a soft CTA costs trust and day-0
    *  cancellations; naming it raised trial starts in the Blinkist
    *  case). One price, the trial length, and the way out. */
-  primaryActionNote: "30 free days, then $19 a month. Cancel anytime.",
+  primaryActionNote: "30 free days, then plans from $19 a month. Cancel anytime.",
 } as const;
 
 export type PlatformKind = "message" | "web" | "phone";

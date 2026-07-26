@@ -6,10 +6,13 @@ import type { BillingPeriod, PlanTier } from "../../lib/billing/wall-types";
  * Every parent-facing word on the wall, in one reviewable file
  * (plans/2026-07-11-the-wall.md; copy rulebook:
  * .agents/skills/homa-copy-writer/SKILL.md). The wall is an offer, never
- * a scold: the report stays free forever, and the wall only appears at
- * the first tap on an action door. Both copy gates ran 2026-07-11
- * (reader, then editor); the founder read-aloud is the last gate
- * (HUMAN-TODO) before the flag ever flips.
+ * a scold, and it only appears at the first tap on an action door. The
+ * original "report stays free forever" placement was superseded for new
+ * families by the report lock (2026-07-18) and then the signup paywall
+ * (founder directive 2026-07-26, TRIAL_GATE_* below); wallReportLine
+ * still renders true for the pre-gate families the door wall serves.
+ * Both copy gates ran 2026-07-11 (reader, then editor); the founder
+ * read-aloud is the last gate before any flag ever flips.
  *
  * Vocabulary laws for this surface:
  * - The trial is "your 30 free days", never "your free month": the
@@ -284,7 +287,7 @@ export const TRIAL_GATE_HEADLINE = "Try Homa free for 30 days";
 /** Reassurance first: the account is made and everything she does next
  *  is kept. The gate is the next step, not a toll on what she has. */
 export const TRIAL_GATE_REASSURANCE =
-  "Your account is ready. Pick a plan to start your 30 free days; everything below is open the whole time.";
+  "Your account is ready. Pick a plan to start your 30 free days. Everything below is open the whole time.";
 
 /** The Blinkist-style timeline: what happens today, before the charge,
  *  and on day 30, each as one plain fact. */

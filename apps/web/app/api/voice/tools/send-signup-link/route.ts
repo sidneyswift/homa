@@ -28,7 +28,7 @@ const MAX_PER_NUMBER_PER_DAY = 2;
  * paywall: the trial is the offer now, and this text must stay true
  * whichever way HOMA_SIGNUP_PAYWALL_ENABLED is set. */
 const SIGNUP_LINK_TEXT =
-  "Homa here, as promised: your free trial starts at thankshoma.com/onboarding. Five minutes of questions, then your child's progress report. If you enter this same phone number when it asks, your texts to me link up automatically.";
+  "Homa here, as promised: your free trial starts at thankshoma.com/onboarding. Five minutes of questions, then your child's progress report. A card starts your 30 free days, and nothing is charged during them. If you enter this same phone number when it asks, your texts to me link up automatically.";
 
 export async function POST(request: Request): Promise<Response> {
   const url = new URL(request.url);
