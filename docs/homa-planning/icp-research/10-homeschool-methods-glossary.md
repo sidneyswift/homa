@@ -115,7 +115,7 @@ names which proxy backs the ranking, since precise data mostly doesn't exist.
 | 16 | [Principle Approach / Noah Plan](#principle-approach--noah-plan) | No population data; publisher's own copy calls it "isn't quite as common" | Self-description |
 | 17 | [ACE / School of Tomorrow](#ace--school-of-tomorrow) | Peak self-reported 80,000 homeschool families (1980s-90s); no current homeschool-specific count found | Historical organization self-report, likely declined |
 | 18 | [Sudbury model / self-directed education (SDE)](#sudbury-model--self-directed-education-sde) | ~40 schools worldwide; almost never used as a homeschool label | Institutional footprint, near-zero homeschool overlap |
-| — | [Deschooling](#deschooling-not-a-method) | Not a philosophy; a universally-recommended transition phase | N/A, included because parents use the word |
+| - | [Deschooling](#deschooling-not-a-method) | Not a philosophy; a universally-recommended transition phase | N/A, included because parents use the word |
 
 Confidence: Medium-High on rank order for entries 1-9 (multiple converging signals);
 Low-Medium on precise rank order for entries 10-18 (single-signal or qualitative only,

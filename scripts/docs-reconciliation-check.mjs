@@ -274,7 +274,7 @@ const REGISTERED_TICKETS = new Map([
     "ticket:MJ-13",
     {
       locator:
-        "docs/homa-planning/journeys/10-reconciliation.md#2-journey-derived-tickets--global-renumbering-mj-series",
+        "docs/homa-planning/journeys/10-reconciliation.md#2-journey-derived-tickets-global-renumbering-mj-series",
       marker: "| MJ-13",
     },
   ],
@@ -282,7 +282,7 @@ const REGISTERED_TICKETS = new Map([
     "ticket:MJ-21",
     {
       locator:
-        "docs/homa-planning/journeys/10-reconciliation.md#2-journey-derived-tickets--global-renumbering-mj-series",
+        "docs/homa-planning/journeys/10-reconciliation.md#2-journey-derived-tickets-global-renumbering-mj-series",
       marker: "| MJ-21",
     },
   ],
@@ -1235,7 +1235,7 @@ function verifyReferenceTypeRules(repoRoot) {
 
   const misplacedRuling = {
     locator:
-      "docs/homa-planning/journeys/10-reconciliation.md#2-journey-derived-tickets--global-renumbering-mj-series",
+      "docs/homa-planning/journeys/10-reconciliation.md#2-journey-derived-tickets-global-renumbering-mj-series",
     marker: "| D8 |",
   };
   const invalidTicketFragment = {

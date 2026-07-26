@@ -1,4 +1,4 @@
-# 03 — Retention & Monetization Journeys
+# 03: Retention & Monetization Journeys
 
 > Historical journey and acceptance-source snapshot, last updated 2026-07-02.
 > The reconciled PRD retains R2's three weekly-note examples as a dated tone
@@ -19,8 +19,8 @@
 > (anti-guilt law, reassurance-first data, "a lighter day is still a good day").
 >
 > **Pricing branch key** (open call #2 is Sidney's; both branches designed here):
-> - **Branch A — visible credits:** the mom sees a credit meter, per-action prices, packs.
-> - **Branch B — flat fair-use:** flat plans, no customer-facing meter; internal
+> - **Branch A, visible credits:** the mom sees a credit meter, per-action prices, packs.
+> - **Branch B, flat fair-use:** flat plans, no customer-facing meter; internal
 >   `action_costs` ledger and margin law unchanged; only genuinely expensive items
 >   (picture books) surface as labeled premium.
 > - **Recommendation: Branch B.** Reasoning in R4. Everything in R5 is written for both.
@@ -32,7 +32,7 @@
 
 ---
 
-## R1 — The daily loop (the habit engine)
+## R1: The daily loop (the habit engine)
 
 ### Frame
 
@@ -62,7 +62,7 @@ breaking the others. A day where she only sends one voice note is a successful d
 
 | Stage | Touchpoints | What she does | What Homa does | Time | Emotional arc | Friction risks | Delight opportunities |
 |---|---|---|---|---|---|---|---|
-| Morning ask | App home / push "Good morning ☀️" | Opens app, reads today's 2–3 suggestions, picks or edits | Proposes activities keyed to each child's profile position + interests + what-works; offers printable if relevant; respects her stated schedule (co-op Tuesdays = lighter list) | 2–4 min | overwhelmed → oriented | Suggestions feel generic (kills trust in the profile); too many options; wrong child focus | Suggestion references yesterday's voice note ("since she loved the penguin book…") — proof it listens |
+| Morning ask | App home / push "Good morning ☀️" | Opens app, reads today's 2–3 suggestions, picks or edits | Proposes activities keyed to each child's profile position + interests + what-works; offers printable if relevant; respects her stated schedule (co-op Tuesdays = lighter list) | 2–4 min | overwhelmed → oriented | Suggestions feel generic (kills trust in the profile); too many options; wrong child focus | Suggestion references yesterday's voice note ("since she loved the penguin book…"), proof it listens |
 | Materials | Chat, artifact card, phone print dialog | Taps "make it," prints or screens it | Generates within the turn (M0-03 latency budget <2 min), saves to library, asks nothing extra | 1–3 min | oriented → equipped | Print failure on mobile Safari; PDF layout broken on Letter; generation latency >2 min feels broken | The artifact visibly matches the kid (name, current interest, right difficulty) |
 | Ambient capture | Mic button, share sheet | Voice notes as moments happen; sometimes photos of finished work | Transcribes, routes to journal/hours/profile/memory, shows confirmation chip naming the child + the skill it nudged | 10–30 sec × N | proud → *witnessed* | Transcription fails silently; wrong child attributed (two kids mentioned); chip jargon ("subdomain 4.2 updated" = death) | "Logged. That moves Ella's counting confidence up." The system visibly gets smarter, in her words not ours |
 | Evening journal | Email/push → one-tap into chat | Replies in one sentence or one voice note, or skips | Asks ONE question, pre-warmed by the day's captures ("sounds like counting was the win today, anything else stick out?"); routes reply to journal/hours/profile | 1–2 min | tired → *day banked* | Prompt fatigue; prompt lands mid-bedtime chaos; feels like homework for mom | Prompt already knows the day (references her voice notes) so replying feels like finishing a sentence, not filing a report |
@@ -70,19 +70,19 @@ breaking the others. A day where she only sends one voice note is a successful d
 ### Where the habit anchors, what breaks it, re-anchoring mechanics
 
 **Anchors (in order of strength):**
-1. **The evening journal prompt** — it arrives (proactive, earned per product principle 2),
+1. **The evening journal prompt**, it arrives (proactive, earned per product principle 2),
    so it is the metronome. Anchored to *her* actual wind-down time, learned from reply
    timestamps within 2 weeks, adjustable in one tap ("send this later in the evening").
-2. **The physical print moment** — paper in hand is a habit with a body. Morning ask →
+2. **The physical print moment**, paper in hand is a habit with a body. Morning ask →
    print is the strongest daily pairing for P2; weekly batch-print for P5.
-3. **The pride reflex** — the kid does something → she reaches for the mic. This is the
+3. **The pride reflex**, the kid does something → she reaches for the mic. This is the
    deepest anchor because the trigger is the child, not the app. Everything about voice
    capture optimizes for < 5 seconds from impulse to done.
 
 **What breaks it:** sick week (whole family, no school happens), co-op/field-trip days
 (no materials needed), printer death, prompt fatigue (answering starts feeling like a
 chore around week 2–3), a bad generation (materials miss the kid twice in a row = trust
-drop), vacation, and — most dangerous — **a guilt event** (any surface that implies she's
+drop), vacation, and, most dangerous, **a guilt event** (any surface that implies she's
 falling behind ends the relationship; she has Instagram for that).
 
 **Re-anchoring mechanics (all [GA] unless noted):**
@@ -97,7 +97,7 @@ falling behind ends the relationship; she has Instagram for that).
 - **The lighter-day path:** morning ask always includes a low-effort option ("a reading
   day: 20 minutes on the couch with these two books counts"). Permission is a feature.
 - **Co-op/field-trip awareness:** days she marked as out-of-house get a different morning
-  surface ("co-op day, I'll just keep the hours. Have fun") — presence without demand.
+  surface ("co-op day, I'll just keep the hours. Have fun"), presence without demand.
 
 ### The moment that decides
 
@@ -105,7 +105,7 @@ falling behind ends the relationship; she has Instagram for that).
 confidence up." This is the second where Homa stops being a worksheet vending machine
 and becomes the thing that *sees her work*. If capture feels like filing (silent, generic,
 or wrong-child), the daily loop decays to a weekly materials errand and the moat never
-compounds. Abandon-twin: a voice note that fails silently on mobile Safari — she tried to
+compounds. Abandon-twin: a voice note that fails silently on mobile Safari, she tried to
 give Homa the most valuable data she has and the app dropped it.
 
 ### Instrumentation
@@ -117,7 +117,7 @@ Events: `daily.morning_ask_opened`, `daily.suggestion_accepted` (with `edited` f
 (with `latency_min`, `modality`), `daily.prompt_cadence_downgraded`,
 `daily.lighter_day_selected`.
 
-- **The metric:** **capture-days per family-week** — distinct days with ≥1 voice note or
+- **The metric:** **capture-days per family-week**, distinct days with ≥1 voice note or
   journal reply. This is the moat's pulse (profile freshness) and the best single
   predictor of week-8 retention (hypothesis to validate at cohort one).
 - **Counter-metric:** journal reply rate measured *without* cadence downgrades masking it.
@@ -133,7 +133,7 @@ Events: `daily.morning_ask_opened`, `daily.suggestion_accepted` (with `edited` f
    etiquette from SOUL.md port (M2-11): one short question, never a form; if she doesn't
    answer, log to family journal unattributed rather than guessing.
 3. **P2's out-of-range 10-year-old** → morning surface includes her honestly every day
-   (hours, reading log, "here's a library list I found") — never a blank slot. A blank
+   (hours, reading log, "here's a library list I found"), never a blank slot. A blank
    slot next to her siblings reads as "Homa forgot my kid." (Deep mechanics: workstream 4;
    ICP call is 09 §call 3.)
 4. **Generation misses the kid twice in a row** (wrong difficulty, ignored interests) →
@@ -150,12 +150,12 @@ Events: `daily.morning_ask_opened`, `daily.suggestion_accepted` (with `edited` f
 
 M2-07 (journal), M2-05/M2-06 (materials), M2-11 (disambiguation), M1-05 (voice+fallback),
 M2-13 (learning review → the chip), M3-07 (cadence rules). **NEW-TICKET R-07**
-(retention event schema). Gap: schedule inference (learning her hours) has no ticket —
+(retention event schema). Gap: schedule inference (learning her hours) has no ticket,
 folded into NEW-TICKET R-08.
 
 ---
 
-## R2 — The weekly loop (the weekly note is the retention artifact)
+## R2: The weekly loop (the weekly note is the retention artifact)
 
 ### Frame
 
@@ -165,7 +165,7 @@ folded into NEW-TICKET R-08.
   I want Homa to show me what actually moved and what to try next, so I can start Monday
   confident instead of guessing.*
 - **Entry channel:** email (the note itself), deep-linking into the web app for the plan.
-- **[M-R] reality:** cohort one gets concierge notes — Saturday scoring script +
+- **[M-R] reality:** cohort one gets concierge notes, Saturday scoring script +
   Sidney-reviewed sends, with the efficacy before/after hand-written from week one
   (03-backlog M-R wk 6). The template below is the spec for both the concierge writer
   and the eventual generator.
@@ -178,25 +178,25 @@ every week, in this order:
 1. **Subject line** = the win, named. Never "Your weekly report." ("Maya's week: counting
    jumped, and she noticed too")
 2. **Warm open**, one line, her name.
-3. **What grew** — 2–4 bullets, strengths first, always at least one even in the quietest
+3. **What grew**, 2–4 bullets, strengths first, always at least one even in the quietest
    week (confidence-stable skills count: "her sight words from two weeks ago are holding
    strong"). Numbers appear here in growth framing (▲, "up 9 points"), never red, never
    "behind."
-4. **The proof** (the efficacy loop, 00 §value stack) — when attribution exists, one
+4. **The proof** (the efficacy loop, 00 §value stack), when attribution exists, one
    before/after sentence tying materials done → metric moved: *"You started the number
    hunts on the 12th. Since then her counting has moved from 'counts to 20 with help' to
    'counts to 40 in the car, unprompted.' The work is working."* This block is why she
    renews. [M-R]: hand-written. [GA]: M3-11 attribution view feeds it. When no honest
-   attribution exists, the block is omitted — never faked, never correlation-overclaimed
+   attribution exists, the block is omitted, never faked, never correlation-overclaimed
    (progress-with-the-work framing only).
-5. **One gentle next step, MAX ONE** — a single small suggestion with the material
+5. **One gentle next step, MAX ONE**, a single small suggestion with the material
    already attached, framed as optional ("only if the week has room"). One nudge per note
    is law (00 §reconciliation). Two nudges = a to-do list = guilt.
 6. **Hours/compliance line** (P2/P4 only, when the state needs it): "16.5 hours logged
    this week · 412 of 900 for the year, right on pace." Pace framing only when she IS on
    pace; when she isn't, show the count without the target math (the dashboard has the
    detail; the note never does deficit arithmetic at her).
-7. **Week plan offer** — one tap: "Next week's plan is drafted, want me to print it
+7. **Week plan offer**, one tap: "Next week's plan is drafted, want me to print it
    Sunday night?"
 8. **Permission close.** Rotating library of honest lines, never saccharine: "You've got
    this." / "Rest counts as part of the rhythm too." / "A lighter day is still a good day."
@@ -211,7 +211,7 @@ cut bullets, never the proof block.
 > must stay temporal and correlational. It may not claim that an activity caused
 > a child's measured change.
 
-**Note A — the good week** (P1, child "Maya")
+**Note A, the good week** (P1, child "Maya")
 
 > **Subject: Maya's week: counting jumped, and she noticed too**
 >
@@ -239,7 +239,7 @@ cut bullets, never the proof block.
 > You've got this,
 > Homa
 
-**Note B — the quiet week** (P5, child "Sam")
+**Note B, the quiet week** (P5, child "Sam")
 
 > **Subject: A quiet week, and that's fine**
 >
@@ -261,7 +261,7 @@ cut bullets, never the proof block.
 >
 > Homa
 
-**Note C — the regression week** (P3, child "Leo") — the one that must not guilt
+**Note C, the regression week** (P3, child "Leo"), the one that must not guilt
 
 > **Subject: Leo's week: one number moved, here's what it actually means**
 >
@@ -298,7 +298,7 @@ attached action; the close reframes the chart, not the mother.
 
 | Stage | Touchpoints | What she does | What Homa does | Time | Emotional arc | Friction risks | Delight opportunities |
 |---|---|---|---|---|---|---|---|
-| Saturday scoring | none (invisible) | nothing | Re-scores from the week's observations, decays stale confidence, computes attribution joins, drafts note ([M-R]: Sidney reviews) | 0 | — | Scoring on a thin week produces a hollow note; job failure = silent missing note (worse than a bad note) | — |
+| Saturday scoring | none (invisible) | nothing | Re-scores from the week's observations, decays stale confidence, computes attribution joins, drafts note ([M-R]: Sidney reviews) | 0 | - | Scoring on a thin week produces a hollow note; job failure = silent missing note (worse than a bad note) | - |
 | Sunday note | Email, ~5pm local Sunday | Reads on phone (90 sec), maybe forwards to spouse (S1 Marcus) | Delivers the anatomy above | 2–5 min | uncertain → *seen and validated* | Note feels templated by week 3; proof block absent too many weeks running; wrong tone on a hard week | The note quotes HER week back to her (her voice note verbatim as evidence: "you said on Tuesday: 'she counted to 40 in the car'") |
 | Next-step accept | One tap in note → chat | Accepts the one nudge, or ignores it (fine) | Attaches material, adds to Monday's morning ask, tracks the intervention lifecycle (M3-03 folded into note) | 30 sec | validated → equipped | Nudge feels like homework; un-actioned nudges pile up visibly anywhere = guilt ledger | Accepted nudge shows up Monday morning already printed into the plan |
 | Week plan | One tap → plan view/PDF | Confirms or lightens the drafted week | Drafts from profile position + her schedule + accepted nudge; offers "lighter version" toggle always | 2–4 min | equipped → *Monday-ready* | Plan over-programs (five subjects a day for a 4yo reads as judgment); ignores co-op days | "Lighter version" one-tap is permission built into the artifact |
@@ -320,11 +320,11 @@ Events: `weekly.scoring_completed` (per family, with `observation_count`),
 `weekly.plan_confirmed` (with `lightened` flag), `efficacy.before_after_shown`,
 `weekly.note_forwarded` (proxy: unique open device/geo spread).
 
-- **The metric:** **weekly-note action rate** — % of delivered notes that produce ≥1
+- **The metric:** **weekly-note action rate**, % of delivered notes that produce ≥1
   action within 72h (open + next-step accept OR plan confirm OR any chat/capture).
   This is the strongest hypothesized leading indicator of renewal.
 - **Counter-metric:** note opens alone (Apple Mail privacy inflates opens; an "opened,
-  never acted" pattern rising means the note is becoming wallpaper — track
+  never acted" pattern rising means the note is becoming wallpaper, track
   `opened_no_action_2wk` as an explicit churn-risk flag, not a success stat).
 
 ### Edge/failure branches
@@ -336,14 +336,14 @@ Events: `weekly.scoring_completed` (per family, with `observation_count`),
    much this week" as an accusation; confidence-stable skills fill the grew-block.
 3. **The week's only movement is downward** → Note C pattern; if there is genuinely no
    strengths material, pull from the archive ("his best reading session ever is still
-   the 14th, and that hasn't gone anywhere") — always true, never invented.
+   the 14th, and that hasn't gone anywhere"), always true, never invented.
 4. **She replies to the note email** → it routes into chat as a first-class turn (the
    note is a conversation, not a newsletter). [M-R]: routes to Sidney's inbox.
 5. **Multi-child families** → one note, sectioned per child, each child gets a grew-block;
    nudge budget is still ONE for the whole note, rotating focus child weekly. P2's
    out-of-range 10yo gets an hours/reading line inside the family note, never omitted.
 6. **P4 quarterly boundary week** → the note gains one line: "Your Q2 report is ready to
-   generate whenever you want it, everything's already in there" — the compliance
+   generate whenever you want it, everything's already in there", the compliance
    moment surfaced by the retention artifact (cross-ref workstream 4, M3-06).
 
 ### Ticket mapping (detail in R9)
@@ -355,7 +355,7 @@ above.
 
 ---
 
-## R3 — The month curve and homeschool seasonality
+## R3: The month curve and homeschool seasonality
 
 ### Frame
 
@@ -373,7 +373,7 @@ above.
 | **Week 2 dip** | Days 10–17 | Drip ends (structure disappears), novelty fades, prompts start feeling routine, trial decision looms | Second weekly note MUST carry a first mini-proof (even small: "two weeks of journal notes just taught me she learns best with her hands") | hopeful → wobbling | The product goes quiet right when the drip ends; conversion ask lands in the wobble | The week-2 note is the single highest-leverage artifact in the lifecycle; see R4 for the conversion anchor |
 | **Week 4: "is this worth it?"** | Days 24–34 | First paid renewal approaching (converted ~day 12–14); she audits: what did I actually get? | 4th weekly note = **month-in-review edition**: the month's before/afters in one view, materials count, hours banked, one line of trajectory ("her curve since you started") | wobbling → convinced (or gone) | Hollow month = churn; renewal receipt arrives BEFORE the month recap = billing leads value | Month-recap note ships 2–3 days BEFORE the renewal date, always. Receipt references it ("this month: 14 worksheets, counting up 9") |
 | Month 2–3: compounding | Weeks 5–12 | Rhythm set; she stops evaluating and starts relying | Trajectory lines get real slope; retired interventions show outcomes; what-works library visibly steers materials | convinced → invested | Plateau weeks; repetitive nudges; P2's planning load returns if multi-child support is thin | Month-3 note names the compounding explicitly: "Three months in, here's Maya's arc" with the day-1 profile vs today |
-| Month 6: the pile | Weeks 13–26 | The records ARE the asset (council: the durable moat is the accumulating family record) | Hours toward state target, portfolio index, journal archive, what-works — surfaced as HER pile, exportable always | invested → anchored | Complacency reads as staleness if surfaces don't evolve | P4's one-tap quarterly report from the pile = the evangelism moment; P1 goes power-user (R7) |
+| Month 6: the pile | Weeks 13–26 | The records ARE the asset (council: the durable moat is the accumulating family record) | Hours toward state target, portfolio index, journal archive, what-works, surfaced as HER pile, exportable always | invested → anchored | Complacency reads as staleness if surfaces don't evolve | P4's one-tap quarterly report from the pile = the evangelism moment; P1 goes power-user (R7) |
 | **Summer cliff** | June–August | Homeschool stops or goes feral. Usage drops 60–90%. She questions paying for a dormant tool | **Summer mode** (see below) | anchored → dormant-but-warm | Full-price bills against zero usage = cancellation of trust, not just plan | Pause/summer-mode offer arrives BEFORE she has to ask (early June), framed as normal: "most families go lighter now" |
 | **September re-enrollment** | Late Aug–September | The homeschool new year: planning energy, curriculum buying ($300–800/yr), fresh guilt about starting strong | Win-back + re-onboarding: profile picks up where May left off, drafts week one of the new year, annual offer lands HERE | dormant → re-committed | Competitors and curriculum boxes are courting her at the same moment | "I can draft her first week from where she was in May, one tap." Nobody else has May. |
 
@@ -398,7 +398,7 @@ year-rounders' intensity). Three tools, used together, not as alternatives:
 before she asks it, days before the renewal charge. If the first month can't show one
 honest before/after plus a countable pile (materials, hours, journal days), the renewal
 is a coin flip. [M-R]: this is why the concierge notes hand-write the efficacy line from
-week one — cohort one's month curve IS the retention experiment.
+week one, cohort one's month curve IS the retention experiment.
 
 ### Instrumentation
 
@@ -409,7 +409,7 @@ Events: `curve.drip_graduated`, `curve.month_recap_sent/opened`, `curve.renewal_
 
 - **The metric:** **W8 retention** (defined precisely in R8) and **September return rate**
   (% of June-active families active again by Oct 1, counting paused + summer-mode).
-- **Counter-metric:** summer revenue retained via families who *forgot to pause* —
+- **Counter-metric:** summer revenue retained via families who *forgot to pause*,
   if that number is material, we grew it with dark-pattern inertia, not value. We
   proactively offer the pause; this metric audits that we actually did.
 
@@ -437,7 +437,7 @@ mode + pause mechanics), **NEW-TICKET R-05** (September win-back), **NEW-TICKET 
 
 ---
 
-## R4 — Trial → paid (the conversion journey)
+## R4: Trial → paid (the conversion journey)
 
 ### Frame
 
@@ -451,7 +451,7 @@ mode + pause mechanics), **NEW-TICKET R-05** (September win-back), **NEW-TICKET 
   yes without feeling tricked or say no without losing everything.*
 - **Trial economics (08 §council revision):** trial = promotional credits, **no card**,
   hard stop at zero during trial. Weekly loops (scoring, notes) are plan-included, so
-  they run free during trial — the trial is bounded by *generation* spend, not by the
+  they run free during trial, the trial is bounded by *generation* spend, not by the
   retention artifacts. [M-R]: cohort one = invite codes + Stripe Payment Link $29/mo;
   the "conversion screen" is an email from Sidney with the link. Same anchoring rules.
 
@@ -468,19 +468,19 @@ Sequence:
    after big generations. Branch A: "Trial credits: 140 left." Branch B: "Trial: 6 days
    left." No banners, no countdowns on the home surface.
 2. **The ask** (the anchor above): full conversion screen, once. Dismissible.
-3. **Trial end, no conversion:** the account enters **keepsake state** (below) — read-only
+3. **Trial end, no conversion:** the account enters **keepsake state** (below), read-only
    dashboard + export, no generation, no prompts except two emails (day 0 and day 21).
 
 ### The conversion screen (both branches)
 
-**Shared recap block (top of screen, both branches)** — her pile, counted, hers:
+**Shared recap block (top of screen, both branches)**, her pile, counted, hers:
 
 > **Keep everything you've built**
 > In 12 days, you and Homa made 9 worksheets, logged 14 journal moments, banked 11
 > hours, and mapped Maya across 15 skill areas. Two weekly notes showed her counting
 > climb. It compounds from here.
 
-**Branch A — visible credits:**
+**Branch A, visible credits:**
 
 > **Homa · $29/mo**
 > 1,500 credits included monthly, enough for daily chat, about 15 worksheets, journal
@@ -496,7 +496,7 @@ Sequence:
 > [Start with Homa] [Start with Plus]
 > No contracts. Export your records anytime, they're yours. Cancel or pause in two taps.
 
-**Branch B — flat fair-use (recommended):**
+**Branch B, flat fair-use (recommended):**
 
 > **Homa · $29/mo**
 > Materials every day, journal and voice capture, weekly notes with progress proof,
@@ -547,7 +547,7 @@ nothing until day-75 deletion notice.
 
 1. **The meter taxes the habit that builds the moat.** The daily materials loop is the
    profile's food supply. A visible per-worksheet price makes P2 (price-sensitive, three
-   kids) ration exactly that behavior — the council's product reviewer already showed
+   kids) ration exactly that behavior, the council's product reviewer already showed
    the advertised use case (~2,400 credits/mo for two kids) structurally exceeds Basic's
    1,500. Under Branch A the flagship promise ("materials daily") is either a lie or a
    guaranteed top-up treadmill; a treadmill for this audience becomes a Facebook-group
@@ -556,7 +556,7 @@ nothing until day-75 deletion notice.
    I doing enough?" A depleting balance next to her child's name imports spend-guilt
    into a product whose law is anti-guilt. Branch A UX can be softened but never neutral.
 3. **The margin law survives intact.** Branch B keeps `action_costs`, the ledger, per-
-   action COGS, CI enforcement, and the monthly margin review (M1-12/13) — invisible
+   action COGS, CI enforcement, and the monthly margin review (M1-12/13), invisible
    accounting, visible honesty. Expensive items (picture books) surface as clearly
    labeled premium, which moms understand from every craft-supply purchase.
 4. **Simpler conversion screen, simpler renewal argument.** "$29 for all of this" vs
@@ -577,7 +577,7 @@ and the proof is hers ("counting climbed 9 points *and I watched it happen*"). S
 bounces when the screen leads with plan mechanics instead of her two weeks. Corollary:
 a trial that never produced a 2nd weekly note (signed up, went quiet) should get a
 **win-the-trial-back** touch at day 10 (one email, one great artifact offer), not a
-conversion ask — converting a family with no habit buys a month-1 churn statistic.
+conversion ask, converting a family with no habit buys a month-1 churn statistic.
 
 ### Instrumentation
 
@@ -587,7 +587,7 @@ Events: `trial.started` (with `credits_granted`), `trial.credits_50pct/85pct`,
 `trial.expired_no_convert`, `keepsake.entered`, `keepsake.export_downloaded`,
 `keepsake.day21_sent`, `keepsake.reactivated`, `trial.stalled` (no activity 72h+).
 
-- **The metric:** trial→paid conversion, **segmented by "2nd note opened" (yes/no)** —
+- **The metric:** trial→paid conversion, **segmented by "2nd note opened" (yes/no)**,
   the whole thesis is that the delta between those segments is enormous; if it isn't,
   the anchor is wrong.
 - **Counter-metric:** month-1 post-conversion churn. High conversion + high m1 churn =
@@ -602,7 +602,7 @@ Events: `trial.started` (with `credits_granted`), `trial.credits_50pct/85pct`,
    converts get their remaining trial days appended free. ❓ trial sizing, see open
    questions.
 2. **She converts on day 2** (impulse) → allowed, celebrated, and the onboarding drip
-   continues unchanged — conversion must not skip profile-building.
+   continues unchanged, conversion must not skip profile-building.
 3. **Payment fails at conversion** (card typo, not dunning) → inline retry, no state
    change, no email. First-purchase failure gets zero dunning machinery.
 4. **She returns at day 80 of keepsake** → full resume, profile confidence decayed
@@ -621,7 +621,7 @@ screen, keepsake state, day-0/21/75 emails). [M-R]: Payment Link + manual keepsa
 
 ---
 
-## R5 — Low balance & top-up (both branches)
+## R5: Low balance & top-up (both branches)
 
 ### Frame
 
@@ -633,16 +633,16 @@ screen, keepsake state, day-0/21/75 emails). [M-R]: Payment Link + manual keepsa
   I want it handled like a grown-up conversation, so I never feel nickeled, blocked,
   or ashamed.*
 - Governing design (08 + 09 §V1): **grace buffer, never block; auto top-up is explicit
-  opt-in; instant notification + refund window; global kill switch.** [GA] — cohort one
+  opt-in; instant notification + refund window; global kill switch.** [GA], cohort one
   has no ledger (Payment Link + manual watching).
 
-### Branch A — visible credits
+### Branch A: visible credits
 
 **Stage table:**
 
 | Stage | Touchpoints | What she does | What Homa does | Time | Emotional arc | Friction risks | Delight opportunities |
 |---|---|---|---|---|---|---|---|
-| Low balance | Quiet meter in settings; agent aware via dynamic context | Usually nothing; maybe asks "how many credits do I have?" | Answers naturally when asked ("about 120, a worksheet is 40"); NEVER nags proactively mid-conversation | — | neutral | Any proactive nag converts the assistant into a cashier | Agent fluency: "that picture book would use most of your remaining credits this month, want the coloring-page version instead?" only when ASKED |
+| Low balance | Quiet meter in settings; agent aware via dynamic context | Usually nothing; maybe asks "how many credits do I have?" | Answers naturally when asked ("about 120, a worksheet is 40"); NEVER nags proactively mid-conversation | - | neutral | Any proactive nag converts the assistant into a cashier | Agent fluency: "that picture book would use most of your remaining credits this month, want the coloring-page version instead?" only when ASKED |
 | Grace-buffer moment | Post-action card in chat | Finishes her worksheet (always) | Action completes; balance goes modestly negative; THEN one card: see copy below | 10 sec | flow → mild admin | Card interrupting before delivery = broken promise; stacked cards from burst usage | The artifact arrives first, money talk second, always |
 | One-tap top-up | Same card | Taps once (card on file from subscription) | Adds pack instantly, receipt by email, back to silence | 5 sec | admin → done | Anything more than one tap; upsell attach ("add MORE and save!") is banned | "Done. 500 credits added, receipt's in your email." Nothing else |
 | Auto top-up opt-in | Own consent screen, offered at FIRST grace moment only | Reads, opts in or declines | Consent screen per copy below; declining = never re-prompted (settings-only thereafter) | 30 sec | admin → sorted forever | Re-prompting after decline = nag; bundling consent into any other yes = ROSCA violation | Opted-in families get pure silence + instant receipts + 7-day one-tap refund |
@@ -672,9 +672,9 @@ screen, keepsake state, day-0/21/75 emails). [M-R]: Payment Link + manual keepsa
 > Auto top-up just ran: 500 credits, $6, card ending 4242. Monthly total so far: $6 of
 > your $18 cap. Didn't mean to? [Refund this, one tap] · [Adjust auto top-up]
 
-### Branch B — flat fair-use
+### Branch B: flat fair-use
 
-The everyday low-balance journey **does not exist** — that's the point. Two money
+The everyday low-balance journey **does not exist**, that's the point. Two money
 surfaces remain:
 
 1. **Labeled premium at point of use** (picture books on the $29 plan): "A full picture
@@ -711,7 +711,7 @@ back to being useful with what's already made.
 whole trust design shipped in one interaction. Handled right, it's also the single
 best-converting instant for auto top-up opt-in (she just experienced why "never
 interrupt me" is worth having). Handled wrong (block, nag, or a surprise charge), it's
-the screenshot in the co-op Facebook group — the security reviewer's chargeback scenario
+the screenshot in the co-op Facebook group, the security reviewer's chargeback scenario
 starts here.
 
 ### Instrumentation
@@ -758,7 +758,7 @@ sequence content + keepsake handoff + recovery deep link).
 
 ---
 
-## R6 — Churn & win-back
+## R6: Churn & win-back
 
 ### Frame
 
@@ -773,7 +773,7 @@ sequence content + keepsake handoff + recovery deep link).
   design below doubles as the data-collection instrument. Hypothesized churn drivers,
   ranked: (1) life/season overwhelm, silent (largest, mostly *pause-able* not lost);
   (2) price/value doubt at renewal moments (fixable by R3's recap-before-receipt);
-  (3) trust break (bad generation, guilt event, billing surprise — preventable, fatal);
+  (3) trust break (bad generation, guilt event, billing surprise, preventable, fatal);
   (4) kid aged out / out-of-range (honest goodbye, referral still possible);
   (5) card failure (R5's involuntary path, most recoverable).
 
@@ -789,7 +789,7 @@ fleet-doctor cadence (M4-01, [M-R]: Sidney's morning console).
 | 14 days quiet | A stall, possibly burnout (February pattern), possibly product fell out of rotation | **One value-forward touch, zero absence language.** Not "we miss you", not "come back", not a streak. Deliver a thing: a ready-made artifact keyed to the child's last known position + explicit permission. See copy below. Journal prompts drop to weekly automatically (R1 cadence rule) | The touch must be worth opening on its own merits. If we have nothing to GIVE, we don't send |
 | 30 days quiet | Disengaged (or paused-in-spirit without telling us) | **One honest structural offer:** pause. "Want me to hold everything for a while, $0, and keep the records warm? One tap to pause, one tap to resume whenever." Weekly notes stop after this (sending scored notes into a void eventually reads as invoices for a service she's ghosting) | Offering pause BEFORE she has to find the cancel button is the trust play; a paused family churns at a fraction of a canceled one (validate at cohort one) |
 
-**14-day touch copy (the February email — the anti-"we miss you"):**
+**14-day touch copy (the February email, the anti-"we miss you"):**
 
 > **Subject: Made you something for a slow week**
 >
@@ -818,14 +818,14 @@ Reachable in two taps from settings (we promised at conversion). Steps:
    > everything, free, forever yours.
    > [Pause my plan] [Cancel my plan]
    No third option, no retention-offer carousel, no "are you sure" chain. One screen.
-2. **Exit survey** (on cancel, optional, skippable, max 15 seconds): one chip question —
+2. **Exit survey** (on cancel, optional, skippable, max 15 seconds): one chip question,
    "What's the biggest reason?" [Price / Not using it enough / My kids' ages / Taking a
    break, might return / Missing something I needed / Something felt off] + one optional
    text field: *"Did anything about Homa ever make you feel judged, or behind? Be blunt,
    this is the one we most need to hear."* (That question is the counter-metric goldmine;
    a single yes outranks ten feature requests.)
 3. **Export offer, front and center** (not buried post-cancel): "Take your records with
-   you" [Download everything] — fires M4-05 bundle immediately, no email-gate.
+   you" [Download everything], fires M4-05 bundle immediately, no email-gate.
 4. **Confirmation:** effective end-of-period (no clawing back paid days), 90-day
    read-only window stated plainly, deletion date named. One receipt email. Silence
    except the win-back ladder below.
@@ -833,7 +833,7 @@ Reachable in two taps from settings (we promised at conversion). Steps:
 ### Win-back
 
 - **September (the big one, NEW-TICKET R-05):** one email to everyone dormant since
-  spring — paused, canceled, and expired-keepsake (within retention window) — segmented
+  spring, paused, canceled, and expired-keepsake (within retention window), segmented
   only by which records line is true:
 
   > **Subject: Ready when you are (no rush)**
@@ -858,7 +858,7 @@ Reachable in two taps from settings (we promised at conversion). Steps:
 
 **The pause offer landing before she reaches for cancel.** A family that pauses keeps
 the pile, the September hook, and the trust. The abandon-twin is any re-engagement touch
-that smells like a growth hack — this audience screenshots, and the co-op friend (S3)
+that smells like a growth hack, this audience screenshots, and the co-op friend (S3)
 is watching. One "we miss you!! 😢" to a burnt-out February mom costs more than the
 40 families it statistically reactivates elsewhere.
 
@@ -875,26 +875,26 @@ boolean), `churn.export_at_cancel`, `winback.september_sent/reactivated`,
 - **Counter-metrics:** the **guilt flag** from exit surveys (any "yes, I felt judged" is
   a sev-1 on the brand, reviewed weekly, [M-R]: by Sidney personally); unsubscribe rate
   on re-engagement emails (>2% = the touches aren't valuable enough to send); pause
-  abuse pattern (serial pause/resume gaming — expected ~nil, verify before adding rules).
+  abuse pattern (serial pause/resume gaming, expected ~nil, verify before adding rules).
 
 ### Edge/failure branches
 
 1. **She cancels mid-billing-period then returns day 20** → still in period: one-tap
    un-cancel, nothing was lost, celebrate quietly, no "welcome back!" ceremony.
-2. **Quiet family is quiet because of a life crisis** (divorce, illness — support learns
+2. **Quiet family is quiet because of a life crisis** (divorce, illness, support learns
    of it) → manual family flag: all automated touches stop indefinitely; human-only
    contact. The ladder must have a human override switch per family (M1-11 per-family
    kill switch covers this).
 3. **She cancels but keeps opening weekly-note archive in keepsake** → strong September
-   candidate; flag for the win-back segment, do NOT touch earlier — reading the archive
+   candidate; flag for the win-back segment, do NOT touch earlier, reading the archive
    is her choice, reacting to it is surveillance.
 4. **Exit survey says "price" from a P2** → win-back email 60 days later may carry a
-   genuine offer (e.g., extended pause or a lighter plan if one exists by then) — but
+   genuine offer (e.g., extended pause or a lighter plan if one exists by then), but
    only if a real lighter option shipped. No fake "special discount just for you" (it
    poisons every full-price payer in her co-op).
 5. **Kid ages out of range** → honest goodbye flow: export + "when the range grows,
    you'll be the first to know" (M5-06 waitlist tag) + referral still offered ("know a
-   mom with littles?") — the one churn type where a referral ask at exit is appropriate.
+   mom with littles?"), the one churn type where a referral ask at exit is appropriate.
 6. **Deletion at day 90 while a September win-back is queued** → suppression check:
    deletion always wins; never send "your records are waiting" after they aren't.
    (Outbox uniqueness + suppression list, M3-10 pattern.)
@@ -907,7 +907,7 @@ M1-11 (per-family overrides). **NEW-TICKET R-03** (cancel flow + pause + exit su
 
 ---
 
-## R7 — Power-user shift & the referral moment
+## R7: Power-user shift & the referral moment
 
 ### Frame
 
@@ -916,7 +916,7 @@ M1-11 (per-family overrides). **NEW-TICKET R-03** (cancel flow + pause + exit su
   runs my whole week"). Method: power-user-shift (current use case → target use case).
 - **Current use case (month 1):** worksheet vending + journal + weekly note. 3–4 credits-
   meaningful actions/week.
-- **Target use case (month 6):** Homa as the family's operating layer — multi-format
+- **Target use case (month 6):** Homa as the family's operating layer, multi-format
   materials daily, curriculum ingestion, discover outings weekly, hours running
   ambiently, the weekly note as the family's Sunday ritual.
 - **Job story:** *When Homa has proven it knows my kid, I want to hand it more of the
@@ -925,7 +925,7 @@ M1-11 (per-family overrides). **NEW-TICKET R-03** (cancel flow + pause + exit su
 
 ### What P1 looks like at month 6 (the target state, concretely)
 
-- **Materials:** multi-format by default — decodable readers + sentence pyramids +
+- **Materials:** multi-format by default, decodable readers + sentence pyramids +
   a monthly picture book starring the kid's obsession (M2-06); she requests by outcome
   ("something for b/d confusion") not by format.
 - **Curriculum ingestion (M2-12):** she photographs pages of the curriculum she bought
@@ -936,7 +936,7 @@ M1-11 (per-family overrides). **NEW-TICKET R-03** (cancel flow + pause + exit su
 - **Voice notes:** 6–10/day, includes delegation ("remind me Tuesday to re-try the
   scissors"), Marcus (S1) sends 1–2/week from his own account.
 - **The pile:** 200+ artifacts, 60+ hours banked, a portfolio she's shown her evaluator
-  (P4 variant) or her skeptical co-op friend (S3 — the demo that converts the town).
+  (P4 variant) or her skeptical co-op friend (S3, the demo that converts the town).
 
 ### The shift ladder (transition strategy)
 
@@ -950,18 +950,18 @@ of demonstrated value, max one rung per month per family:
 | 2. Week delegation | 3 consecutive week-plans accepted with edits <20% | "I can just have next week ready every Sunday without asking. Stop me anytime" | M2-10 |
 | 3. Curriculum ingestion | She mentions a curriculum by name in chat/journal | "Snap a photo of this week's pages and I'll build the practice around them" | M2-12 |
 | 4. Discover ritual | 2 accepted outing suggestions | "Want a Saturday idea every week? I'll keep it to one, tied to what she's learning" | M3-12 |
-| 5. Second adult | Marcus mentioned 3+ times in journal | "Want to give Marcus his own way to send me notes? His observations count too" | M5 (account sharing — NEW-TICKET R-06 flags the gap) |
+| 5. Second adult | Marcus mentioned 3+ times in journal | "Want to give Marcus his own way to send me notes? His observations count too" | M5 (account sharing, NEW-TICKET R-06 flags the gap) |
 
 ### The referral moment
 
-**When:** immediately after an **efficacy proof moment** — she just viewed a before/after
+**When:** immediately after an **efficacy proof moment**, she just viewed a before/after
 (weekly note proof block tapped, or the dashboard's impact view), OR she just exported/
 shared an artifact of pride (the quarterly report generated, the picture book downloaded).
 Behavioral definition: `efficacy.before_after_shown` followed by a positive action within
 the session.
 
 **Never:** within 7 days of ANY billing event (charge, top-up, dunning email, renewal
-receipt) — suppression is enforced in the event pipeline, not left to campaign hygiene.
+receipt), suppression is enforced in the event pipeline, not left to campaign hygiene.
 Never during a regression-week, never in re-engagement or dunning surfaces, never in the
 cancel flow (except edge 5 in R6).
 
@@ -971,14 +971,14 @@ cancel flow (except edge 5 in R6).
 > this kind of proof for her kids, I'd love to meet her: a month of Homa, on us, from you.
 > [Share an invite] [Maybe later]
 
-**Mechanics:** [M-R] this is literally invite codes (the gated cohort's growth channel —
+**Mechanics:** [M-R] this is literally invite codes (the gated cohort's growth channel,
 each family gets 2 codes; scarcity is honest, we're capacity-limited). [GA/POST-GA]
 productized referral: give-a-month (recipient) + get-a-month (referrer, credited at
-recipient's first paid renewal — rewarding retained referrals, not signups). Branch A
+recipient's first paid renewal, rewarding retained referrals, not signups). Branch A
 could pay in credits, but give-a-month reads cleaner in both branches and doesn't
-entangle open call #2. The share artifact is a **redacted proof card** — the before/after
+entangle open call #2. The share artifact is a **redacted proof card**, the before/after
 chart with the child's name replaced by first initial, in the brand's social template
-(docs/homa-design/social/) — because the *proof* is the word-of-mouth artifact (00 §value
+(docs/homa-design/social/), because the *proof* is the word-of-mouth artifact (00 §value
 stack), not a coupon code.
 
 ### The moment that decides
@@ -1024,7 +1024,7 @@ proof card + suppression rules + second-adult account gap).
 
 ---
 
-## R8 — Instrumentation: the retention metric tree
+## R8: Instrumentation: the retention metric tree
 
 ### What "active" means for a homeschool mom (definitions for THIS product)
 
@@ -1034,17 +1034,17 @@ note is a HEALTHY user at 3 "active days." Definitions:
 
 - **Core action:** message sent, voice note captured, material generated OR
   printed/downloaded, journal reply, week-plan confirm, or weekly-note next-step accept.
-  (Email opens and dashboard views alone are **ambient**, not core — MPP-inflated and
+  (Email opens and dashboard views alone are **ambient**, not core, MPP-inflated and
   intent-free.)
 - **Active family (week):** ≥1 core action in the ISO week. **Engaged family (week):**
   core actions on ≥3 distinct days (the habit signature).
 - **D7 retention:** % of activated families (workstream 2's activation definition:
   wow delivered + ≥1 core action post-onboarding) with ≥1 core action in days 5–9.
-  Window, not day — homeschool weeks are lumpy.
+  Window, not day, homeschool weeks are lumpy.
 - **D30 retention:** ≥1 core action in days 26–34 AND weekly notes not muted.
 - **W8 retention (the number that decides the business):** % of activated families
   active (≥1 core action) in ISO week 8 after activation. Eight weeks = two month-
-  recaps + one full billing renewal survived — past the week-2 dip and the week-4 audit.
+  recaps + one full billing renewal survived, past the week-2 dip and the week-4 audit.
 - **Seasonality law:** all retention cohorts are annotated with school-year month.
   June–Aug quiet does NOT count against W8/D30 for cohorts that entered summer mode or
   paused; those families move to the **September return rate** denominator instead
@@ -1095,18 +1095,18 @@ is the same:
 |---|---|---|---|
 | Week 1 post-first-cohort | Voice capture + note delivery actually working on real phones | error logs, per-family capture counts, note opens | hotfixes; M1-05 fallback quality |
 | Month 1 | Week-2 dip shape; trial→paid on the 2nd-note anchor | funnel events above, concierge-note effort per family | conversion anchor tuning; note anatomy edits |
-| Month 3 | W8 for cohort one; which rungs power users climb; Branch A/B evidence (do moms ask about costs? ration?) | cohort tables, exit surveys (n will be tiny — read every word), support themes | **open call #2 decision data**; GA gate evidence (10 stranger families) |
+| Month 3 | W8 for cohort one; which rungs power users climb; Branch A/B evidence (do moms ask about costs? ration?) | cohort tables, exit surveys (n will be tiny, read every word), support themes | **open call #2 decision data**; GA gate evidence (10 stranger families) |
 | Month 6 | September seasonality live-fire; pause/resume; referral moment conversion | seasonal cohort annotations, win-back outcomes | annual plan go/no-go; summer-mode investment |
 | Month 12 | Full-year retention curve; LTV vs the $29/$49 hypothesis | NRR, realized margin per family (M1-13 review) | pricing v2; M5 sequencing |
 
 Every exit survey and guilt-flag response is read by a human ([M-R]: Sidney) within
 48h; qualitative churn reasons get quoted verbatim (with permission) into the monthly
-retro doc — the churn-reduction analysis in R6 gets re-run with real data at month 3
+retro doc, the churn-reduction analysis in R6 gets re-run with real data at month 3
 and its hypotheses formally scored.
 
 ---
 
-## R9 — Ticket mapping & NEW-TICKET flags
+## R9: Ticket mapping & NEW-TICKET flags
 
 ### Coverage against 03-backlog.md
 
@@ -1143,7 +1143,7 @@ and its hypotheses formally scored.
    cohort-one evidence would confirm or overturn it. Decision needed before M1-12/M1-13
    UI work; everything pre-GA is branch-agnostic (Payment Link).
 2. **❓ Trial shape.** 08 says promotional credits (~300), no card, hard stop; J1 said
-   14 days. R4 assumes both bounds with loops free during trial — but 300 credits ≈ 7
+   14 days. R4 assumes both bounds with loops free during trial, but 300 credits ≈ 7
    worksheets, which P2 burns by day 4, before the 2nd weekly note (the conversion
    anchor) exists. Recommend sizing trial credits so the median 2-kid family reaches
    two weekly notes (~600–800 credits) OR making the early-exhaustion convert path
@@ -1153,7 +1153,7 @@ and its hypotheses formally scored.
    does Basic become "up to 3"? (Interacts with the plan-sizing problem 08 already
    flags.)
 4. **❓ Pause mechanics under Payment Link ([M-R]).** Pause = Sidney manually pausing
-   subscriptions in the Stripe dashboard for cohort one — confirm you're willing to
+   subscriptions in the Stripe dashboard for cohort one, confirm you're willing to
    carry that ops load through summer 2026, since R6 offers pause prominently.
 5. **❓ Annual plan pricing + timing.** R3 recommends 12-for-10 (~$290) offered at
    September and month-3+, never at first conversion. Sanity-check the number against
@@ -1161,14 +1161,14 @@ and its hypotheses formally scored.
 6. **❓ Weekly note channel for cohort one.** R2 assumes email with reply-into-chat
    routing ([M-R]: replies land in your inbox). Confirm email (vs web-push-first),
    since the note is the retention artifact and its channel is load-bearing.
-7. **❓ Referral reward form.** Give-a-month/get-a-month (R7) vs credit grants —
+7. **❓ Referral reward form.** Give-a-month/get-a-month (R7) vs credit grants,
    give-a-month recommended because it's branch-agnostic and doesn't pre-empt open
    call #2. Also: comfortable rewarding the referrer only at the referred family's
    first paid renewal (anti-gaming, but slower gratification)?
 8. **❓ Keepsake window vs September.** 90-day retention means a June trial expiry is
-   deleted by September — right before the strongest win-back moment. Extend keepsake
+   deleted by September, right before the strongest win-back moment. Extend keepsake
    for summer-adjacent expirations to Oct 15, or accept the loss? (Interacts with the
-   M4-04 retention schedule — don't special-case silently.)
+   M4-04 retention schedule, don't special-case silently.)
 9. **❓ Quiet-mode keyword detection (R1 edge 5).** Auto-entering quiet mode from "we
    all have the flu" is high-empathy but is an inference about her life. Comfortable
    shipping inference-triggered quiet mode, or should it always be offered-not-assumed

@@ -67,6 +67,9 @@ jobs:
       - name: Tool deadline guard (no unbounded tool can freeze a turn)
         run: pnpm check:tool-deadlines
 
+      - name: No-em-dash style law (AGENTS.md: no em dash, ever, anywhere)
+        run: pnpm check:em-dash
+
       - name: Fleet-skill package checks (frontmatter, size limits, slash-menu parity)
         run: pnpm check:fleet-skills
 

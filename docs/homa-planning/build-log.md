@@ -1,4 +1,4 @@
-# Build log — decisions agents made alone
+# Build log: decisions agents made alone
 
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
@@ -1900,7 +1900,7 @@ walk into `packages/core/src/map/lesson-target.ts`. The legacy
 `buildFourWeekPlan` now calls the shared selector, so its two targets, practice
 patterns, weeks, and month-plan consumers retain their existing behavior.
 
-Founder decision, 2026-07-18, on the merge into main: swap, not coexist —
+Founder decision, 2026-07-18, on the merge into main: swap, not coexist,
 `WelcomeChooser`'s post-payment per-subject links (report-lock,
 2026-07-18) replace "Homa builds the four-week plan" with the same lesson
 build/open action the report body uses, whenever subject lessons are on.
@@ -10822,8 +10822,8 @@ Decisions made, in the order asked:
    example 8).
 4. **CI added now**, before any Phase A code: `.github/workflows/ci.yml` runs
    typecheck + build + `check:isolation` on every push/PR to `main`. Required
-   secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-   — both public-safe publishable values) set on the GitHub repo. Satisfies
+   secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
+   both public-safe publishable values) set on the GitHub repo. Satisfies
    BUILD.md law #1 ("isolation tests green in CI always") for the first time;
    extend with the MJ-08 events-registry check once that registry covers more
    than `waitlist.joined`.
@@ -10836,8 +10836,8 @@ Decisions made, in the order asked:
    names **M1-08 minimal** (Resend transactional email: welcome, journal-prompt,
    weekly-note, receipt templates + the opens/clicks/unsubscribes webhook
    bridge that `journeys/06 §7` requires for the anti-guilt ratio law) and
-   **MJ-09** (waitlist read path + invite codes + invite email — today's
-   waitlist is write-only with no way to invite anyone off it) — previously
+   **MJ-09** (waitlist read path + invite codes + invite email, today's
+   waitlist is write-only with no way to invite anyone off it), previously
    both were only implicit under FR-1/FR-3.
 7. **Cost-telemetry timing (Gateway `ai-reporting-*` headers + per-key budget
    caps moved into Phase B vs staying in Phase C with FR-11): left open,
@@ -10848,7 +10848,7 @@ Decisions made, in the order asked:
 8. **Resend domain live:** `mail.thankshoma.com` verified in Resend (DKIM, SPF
    MX+TXT, DMARC, tracking CNAME all green; click+open tracking on per
    `journeys/06 §7`'s explicit opens/clicks webhook requirement; inbound
-   receiving deliberately left off — `journeys/02` line 890 defers
+   receiving deliberately left off, `journeys/02` line 890 defers
    reply-to-email to POST-GA, v1 is deep-link-to-chat only).
    `RESEND_API_KEY` is in `apps/web/.env.local` (gitignored) and in Vercel
    production env (added via CLI, type Sensitive).
@@ -10866,7 +10866,7 @@ v2 visual system, closing the loop the grilling session opened.
    trains AI" line. Waitlist band uses "Founding families" framing per
    BUILD.md's hard constraint (no pricing, T2). CTA stays functional ("Join
    the waitlist") rather than the kit's more evocative "Meet your child's
-   map" — no product exists yet for that CTA to honestly lead to.
+   map", no product exists yet for that CTA to honestly lead to.
 2. **Design**: homa-design v2 tokens (colors, radius, shadows, fonts) copied
    into `apps/web/app/globals.css` and wired through Tailwind v4's
    `@theme inline`, so classes like `bg-brand`, `text-strong`, `rounded-pill`
@@ -10878,7 +10878,7 @@ v2 visual system, closing the loop the grilling session opened.
    owns porting the full component library.
 3. **Verification**: typecheck + production build green; rendered and
    screenshotted at desktop and mobile (390px) widths via Playwright for
-   both `/` and `/waitlist` — readable, on-brand, touch-friendly. Founder
+   both `/` and `/waitlist`, readable, on-brand, touch-friendly. Founder
    phone test + Alessa read-aloud (build-log #10's two remaining DoD boxes)
    are next.
 4. Deleted `wireframe-slot.tsx` (no slots remain, per its own comment).
@@ -10895,14 +10895,14 @@ roadmap stance, a contained-blast-radius environment plan (Vercel preview
 branch, real homa-prod schema with tagged+cleaned-up synthetic rows, never
 production), and a verdict rule (any leakage/data-loss/stuck-state = NO-GO
 regardless of the other four; eject to M0-02 on failure). BUILD.md now links
-it. **The spike itself has not been run yet** — this session only produced
+it. **The spike itself has not been run yet**, this session only produced
 the criteria, per the gate's own requirement that they exist first.
 
 ## 2026-07-04 · M0-01 test (a) run: NO-GO
 
 Ran the eve upgrade drill (test a of `m0-01-adversarial-prototype-gate.md`)
 locally, isolated on a throwaway `spike/m0-01` branch (deleted after, no code
-diff to keep — this was a pure test, nothing to merge). Parked a session in
+diff to keep, this was a pure test, nothing to merge). Parked a session in
 HITL under eve 0.18.2, bumped to 0.19.0 (today's `latest`; no newer version
 exists to test a true forward upgrade), and tried to resume it.
 
@@ -10916,7 +10916,7 @@ results in the durable workflow log. Full evidence in `eve-churn-log.md`;
 gate writeup in `m0-01-adversarial-prototype-gate.md`.
 
 **Per the gate's own verdict rule, this single failure is enough: NO-GO.**
-Tests (b)–(e) were not run — the verdict doesn't change once (a) fails this
+Tests (b)–(e) were not run, the verdict doesn't change once (a) fails this
 decisively, and they remain available for a custom-harness retest later.
 **This is now an open decision for Sidney**, not resolved here: eject to
 M0-02 (custom harness) per the rule as written, treat it as a narrower
@@ -10930,23 +10930,23 @@ Asked "what would fix this without diverging too much" after the NO-GO.
 Built three things, all in our own code/process, none touching eve
 internals:
 
-1. `apps/web/lib/harness/resume-session.ts` — narrow seed of M1-14. Every
+1. `apps/web/lib/harness/resume-session.ts`, narrow seed of M1-14. Every
    resume of an eve session must go through this. It doesn't trust eve's
    synchronous `ok: true` alone (the finding showed that's not confirmation);
    it watches the event stream for a real new turn or an explicit failure
    before calling a resume successful, and throws a typed error otherwise.
    Verified against the live bug: 2/2 correctly caught the real corruption,
    1/1 correctly passed a healthy same-version control (no false positive).
-2. `scripts/eve-upgrade-check.mjs` — automates the exact repro against any
+2. `scripts/eve-upgrade-check.mjs`, automates the exact repro against any
    candidate version pair. Verified: correctly passes a same-version no-op,
    correctly fails the known-bad 0.18.2→0.19.0 pair (twice).
-3. `docs/homa-planning/runbooks/eve-version-bump.md` — the procedure: read
+3. `docs/homa-planning/runbooks/eve-version-bump.md`, the procedure: read
    the changelog for tool/replay/workflow language, run the script, check
    for live parked sessions (stubbed until M1-02), deploy, smoke-test, log
    the outcome in `eve-churn-log.md` either way.
 
 This does not resolve the open decision (eject to M0-02 vs. stay on eve with
-these mitigations vs. report upstream and wait) — that's still Sidney's call.
+these mitigations vs. report upstream and wait), that's still Sidney's call.
 It does mean Phase B is no longer flatly blocked: BUILD.md now says
 "mitigated, not resolved" instead of "blocked."
 
@@ -10955,7 +10955,7 @@ It does mean Phase B is no longer flatly blocked: BUILD.md now says
 Resolved the local-vs-production caveat on the deploy/rollback finding.
 Deployed two separate real Vercel previews (fixing a genuine gap along the
 way: no `.vercelignore` existed, so a local `vercel deploy` tried to upload
-the multi-gigabyte `homa-research/`/`homa-macmini/` folders and failed —
+the multi-gigabyte `homa-research/`/`homa-macmini/` folders and failed,
 added `.vercelignore` mirroring `.gitignore`'s exclusions). Started a
 session on the first deployment, let it complete, deployed the second, sent
 a follow-up to the second deployment's URL using the first's session and
@@ -10965,7 +10965,7 @@ token.
 session with real context intact (recalled a secret code from the first
 turn). This is strong evidence the earlier "stuck forever" finding was a
 limitation specific to `eve dev`'s local disk-backed workflow world, not a
-production-relevant risk — Vercel Workflow (the managed service actual
+production-relevant risk, Vercel Workflow (the managed service actual
 production uses) handles cross-deployment continuity correctly.
 
 Still open, narrower: this tests session portability across deployments,
@@ -10982,7 +10982,7 @@ Cleaned up both throwaway preview deployments and the test branch after.
 
 ## 2026-07-05 · Founder decision: stay on eve; spike continued
 
-Sidney: "stay and continue." Resolved the open M0-01 decision — not
+Sidney: "stay and continue." Resolved the open M0-01 decision, not
 ejecting to M0-02, staying on eve with the mitigations from 2026-07-04.
 Continued the spike since committing to eve means the other adversarial
 tests should actually be checked against it:
@@ -10992,18 +10992,18 @@ tests should actually be checked against it:
   sessions, zero cross-session leakage, confirmed twice. Clean pass on the
   single most safety-critical property.
 - **Test (b)** (deploy + rollback mid-turn): failed, reproducibly, across
-  three variants (hard kill, graceful stop, explicit nudge) — a step killed
+  three variants (hard kill, graceful stop, explicit nudge), a step killed
   between start and completion never resumes, with zero server-side error
   logged. **Important caveat**: this is against the local dev workflow
   world, not real Vercel Workflow, which the docs describe as a different,
   managed durability substrate. Needs a Vercel-preview retest before being
   trusted as production-relevant. Logged in full in `eve-churn-log.md` and
   `m0-01-adversarial-prototype-gate.md`.
-- Tests (c) and (d) stay deferred — they need a schedule dispatcher and a
+- Tests (c) and (d) stay deferred, they need a schedule dispatcher and a
   session-rotation state machine that don't exist yet (M3-10/M1-02, M1-15).
   Not skipped, just correctly sequenced.
 - Relocated `resume-session.ts` from `apps/web/agent/harness/` to
-  `apps/web/lib/harness/` — the old path is an eve-discovered directory
+  `apps/web/lib/harness/`, the old path is an eve-discovered directory
   convention and eve's discovery warned on it; the module is app code
   calling eve's API, not an eve capability.
 
@@ -11012,7 +11012,7 @@ rollback finding tracked as an open risk, not a blocker.
 
 ## 2026-07-05 · Playable MVP: auth → family → child → chat → worksheet
 
-Founder asked "can we get an mvp shipped so i can start playing with it" —
+Founder asked "can we get an mvp shipped so i can start playing with it",
 built the trimmed walking-skeleton slice end to end, real code not hacks:
 
 1. **Auth (minimal M1-01):** Supabase Auth email/password via @supabase/ssr.
@@ -11022,14 +11022,14 @@ built the trimmed walking-skeleton slice end to end, real code not hacks:
    founding-family gate: signup requires the invite code in
    `HOMA_SIGNUP_CODE` (set in Vercel prod env; unset locally = open signup
    for dev). MJ-09's real invite codes replace this.
-2. **Family creation (migration #6):** `create_my_family()` RPC — an
+2. **Family creation (migration #6):** `create_my_family()` RPC, an
    authenticated user with no membership creates exactly one family
    atomically; the one-family rule lives in the function body. RLS advisor
    warning is intentional (documented in the migration).
 3. **Child intake (minimal M2-03i):** /home shows create-family → add-child
    → children list; children write to `children.profile` jsonb (interests,
    focus) under the existing "members add children" RLS policy.
-4. **eve auth (FR-1 slice):** `agent/channels/eve.ts` custom AuthFn — chat
+4. **eve auth (FR-1 slice):** `agent/channels/eve.ts` custom AuthFn, chat
    sends the caller's Supabase access token as a bearer (resolved fresh per
    request by useEveAgent), the channel verifies it via `auth.getUser()`,
    resolves familyId under the caller's OWN RLS, and stamps
@@ -11037,7 +11037,7 @@ built the trimmed walking-skeleton slice end to end, real code not hacks:
    The raw token in attributes is server-custody state, never model-visible,
    refreshed per turn; M1-02's SET LOCAL pattern replaces it.
 5. **Agent tools (first two):** `get_children` (reads the family's kids +
-   profiles as the caller — RLS is the wall inside tools too, no service
+   profiles as the caller, RLS is the wall inside tools too, no service
    key exists in the app) and `create_worksheet` (schema-validates the
    worksheet the model composes; the UI renders it as a printable card).
    `lib/agent-db.ts` is the shared caller-scoped DB helper. Instructions
@@ -11057,9 +11057,9 @@ Dino Letter Sounds" card with 5 themed exercises. Test rows deleted from
 homa-prod after. Typecheck, production build, and isolation checks green.
 
 Known deferrals: voice, photo personalization, conversation persistence
-(chat history resets on reload — eve session is durable server-side but the
+(chat history resets on reload, eve session is durable server-side but the
 UI doesn't rehydrate it yet), real invite codes (MJ-09), the reportlab/fal
-worksheet pipeline (M0-03/M2-05 — current output is text-exercise layouts),
+worksheet pipeline (M0-03/M2-05, current output is text-exercise layouts),
 proper session-tracking table.
 
 ## 2026-07-05 · Fixes: signup dead-ended, chat history lost on reload
@@ -11081,7 +11081,7 @@ Two real defects in the MVP slice, both found and fixed:
 2. **Chat history vanished on reload.** The chat didn't persist the eve
    session cursor, so every reload silently started a fresh, memoryless
    conversation. **Fix:** wired eve's documented resumable-sessions pattern
-   into chat-client.tsx — initialEvents/initialSession from localStorage
+   into chat-client.tsx, initialEvents/initialSession from localStorage
    (keyed per user id), snapshot saved onFinish. Added a "New chat" button
    to deliberately start fresh. /chat is now a server component that resolves
    the user id for the storage key.
@@ -11091,7 +11091,7 @@ the code confirms and lands on /home (no email), wrong code shows the
 friendly error, family+child setup works, chat knows the child; a hard
 reload restores the transcript AND a follow-up resumes the SAME durable
 session (POSTs to /eve/v1/session/{id}, and Homa correctly recalled a
-secret word set before the reload — real continuity, not just restored
+secret word set before the reload, real continuity, not just restored
 pixels). All test users deleted from homa-prod after (0 users remain).
 Typecheck, build, lints green.
 
@@ -11103,7 +11103,7 @@ M1-02) is still the future proper version.
 
 Founder chose fully open signup over the invite-only gate. This reverses the
 PRD's "public signup (invite codes only)" non-goal and the founding-families
-framing — a deliberate founder call, logged here as the auditable override.
+framing, a deliberate founder call, logged here as the auditable override.
 
 - **Migration #8:** dropped the invite-enforcing trigger + `private.settings`
   code store from migration #7; replaced with a plain `autoconfirm_new_user`
@@ -11159,7 +11159,7 @@ Test users deleted from homa-prod (0 remain). Typecheck, build, lints green.
   for the M0-01 spike, written before the spike runs.
 - `apps/web/lib/harness/resume-session.ts`: resume-identity + forward-
   progress guard (M1-14 seed), mitigating the M0-01 finding. Lives in
-  `lib/`, not `agent/` — it calls eve's API, it isn't an eve capability.
+  `lib/`, not `agent/`, it calls eve's API, it isn't an eve capability.
 - `scripts/eve-upgrade-check.mjs`: automated pre-bump regression check for
   any eve version change.
 - `docs/homa-planning/runbooks/eve-version-bump.md`: the procedure for
