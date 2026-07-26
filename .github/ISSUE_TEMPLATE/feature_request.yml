@@ -1,0 +1,25 @@
+name: Feature request
+description: New capability or improvement for families or the fleet.
+labels: ["feature"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and who has it
+      description: The parent-facing problem in their words, with source evidence (WhatsApp, Slack drop, field study, journey doc) linked.
+    validations:
+      required: true
+  - type: textarea
+    id: spec
+    attributes:
+      label: Spec or plan doc
+      description: Link the plan/journey doc that owns the depth. Deep specs live in docs, not here.
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance
+      description: The observable outcome that closes this, stated so a fresh session can verify it.
+    validations:
+      required: true

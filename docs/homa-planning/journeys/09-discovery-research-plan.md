@@ -2,8 +2,10 @@
 
 > Mixed lifecycle record. Sections 1 through 6.1 and 6.3 are historical
 > discovery planning from 2026-07-02. Section 6.2 is the current upcoming
-> phone-only M0-07 field-kit specification; HUMAN-TODO.md records that its
-> founder review remains pending. Booth, printer, preorder, fake-door pricing,
+> phone-only M0-07 field-kit specification; the founder queue that tracked
+> its pending review moved to GitHub Issues on 2026-07-25 (HUMAN-TODO.md
+> retired; history in `docs/homa-planning/history/2026-07-11-human-todo-archive.md`).
+> Booth, printer, preorder, fake-door pricing,
 > old plan names, and provider-state claims elsewhere are history. Current tier
 > naming is Homa Plus; live Stripe state is unverified here.
 

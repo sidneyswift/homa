@@ -8,8 +8,8 @@ import { childBelongsToFamily } from "../../../../lib/map/store";
 
 /**
  * GET /api/billing/confirm?session_id={CHECKOUT_SESSION_ID}
- * The Payment Links' after-completion redirect (configured in the Stripe
- * dashboard, HUMAN-TODO). No webhooks in this phase: the same browser
+ * The Payment Links' after-completion redirect (configured by the founder
+ * in the Stripe dashboard). No webhooks in this phase: the same browser
  * that paid lands here, we retrieve the checkout session with the secret
  * key, verify it is complete AND that its client_reference_id names the
  * signed-in family (the tenancy law: the unlock target comes from auth

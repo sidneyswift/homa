@@ -116,7 +116,7 @@ agent, and only receipts stay templates.**
 - [x] Funnel emails and pipeline crons stay deterministic (receipts and
   plumbing, not conversations); logged here and in the build-log.
 
-### GW-8 · Ops handoff (human steps, listed in HUMAN-TODO)
+### GW-8 · Ops handoff (human steps; all completed, founder queue now lives in GitHub Issues)
 - [x] Inbound mail at Resend: MX added via `vercel dns` (2026-07-09
   9:21pm), webhook configured by the founder (`email.received` only),
   `RESEND_INBOUND_SECRET` in Vercel prod + local, live route verified.

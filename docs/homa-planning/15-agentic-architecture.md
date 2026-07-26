@@ -191,8 +191,9 @@ needs is unreplicable; what is unreplicable was already cut on purpose.**
 
 The 2026-07-09 synthetic transcript probe is preserved in the build log as dated
 evidence. It is not proof of the current deployment after later migrations and
-channel changes. Current founder-only production checks live under
-`HUMAN-TODO.md` section Product activation gates.
+channel changes. Founder-only production checks are tracked as GitHub
+Issues labeled `founder-action` (since 2026-07-25; formerly the
+`HUMAN-TODO.md` Product activation gates section).
 
 Decisions locked with the direction:
 
