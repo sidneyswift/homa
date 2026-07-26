@@ -58,6 +58,7 @@ import {
   appendPreparedChatSendToQueue,
   flushChatQueue,
   focusChatComposerInput,
+  isSendLineOccupied,
   prepareChatSend,
   type ChatSendAcceptance,
   type ChatSendSource,
@@ -164,6 +165,26 @@ import { recoverLostTurn } from "./turn-recovery";
  * patches/eve@0.19.0.patch broadens the classifier so those deaths
  * reconnect and replay from streamIndex; maxReconnectAttempts is sized
  * for a phone sleeping repeatedly through a long worksheet turn.
+ *
+ * Never forked (GH #170, co-founder incidents 2026-07-24/25, a subway
+ * losing signal mid-turn): when reconnecting genuinely exhausts itself,
+ * or a stream dies before it can even open (no reconnect attempt covers
+ * that gap), eve's own client wipes its local session cursor rather than
+ * keeping the id (advanceSession in eve's session-utils, no fix
+ * available from here). The durable turn is usually still finishing
+ * server-side regardless, and lost-turn recovery above exists to find
+ * that out, but it can take up to RECOVERY_DEADLINE_MS to decide. A
+ * manual send used to see no session id and no "busy" status in that
+ * window and start a brand new eve session, forking the conversation in
+ * two: whichever session she was not looking at when its reply landed
+ * read as "my message vanished". isSendLineOccupied (chat-send-policy.ts)
+ * folds `recovering` into the same queue gate as `busy`, so a send
+ * during that undecided window queues instead of forking, and
+ * flushQueuedMessages delivers it the moment recovery settles either way.
+ * Message-level pending/failed status (message-parts.tsx, sourced from
+ * eve's own optimistic `client.message.submitted`/`client.message.failed`
+ * projection, never a parallel tracker) gives her a retry affordance
+ * instead of a message that silently disappears.
  */
 
 // agent.ts pins the gateway model: the mid tier in journeys/06 terms.
@@ -324,6 +345,9 @@ export function ChatClient({
   /** Messages sent while a turn was running; flushed as one message the
    *  moment the line is free. */
   const [queued, setQueued] = useState<QueuedChatMessage[]>([]);
+  /** Mirrors `queued` for the recovery callback below, which is memoized
+   *  independently of render and would otherwise read a stale queue. */
+  const queuedRef = useRef<QueuedChatMessage[]>(queued);
   const queuedTurnModalityRef = useRef<ChatTurnModality>("text");
   /** The store's send, held by ref so onFinish can deliver the queue
    *  without capturing `agent` inside its own initializer (the React
@@ -693,27 +717,7 @@ export function ChatClient({
       // out as ONE follow-up turn the moment the line is free (also
       // after Stop, which is often pressed exactly to jump the line).
       // A failed turn holds the queue; her next manual send carries it.
-      if (!snapshot.error && queued.length > 0) {
-        // A directive goes out alone and her words go out joined, in the
-        // order the events actually happened (chat-send-policy.ts). What
-        // is left waits for the line after this one.
-        const flush = flushChatQueue(queued);
-        const message = flush.outgoing;
-        setQueued(flush.remaining);
-        // Next tick: this callback runs inside the previous send's
-        // teardown, and eve rejects overlapping sends.
-        if (message !== null) {
-          setTimeout(() => {
-            setBusySeconds(0);
-            turnModalityRef.current =
-              flush.lane === "directive" ? "text" : queuedTurnModalityRef.current;
-            lastSendRef.current = { text: message, atMs: currentTimeMs() };
-            turnStartedAtRef.current = currentTimeMs();
-            markTurnStarted();
-            void sendRef.current?.({ message });
-          }, 0);
-        }
-      }
+      if (!snapshot.error) flushQueuedMessages();
     },
   });
   const agentError = agent.error;
@@ -857,14 +861,59 @@ export function ChatClient({
     archivedRef.current = archived;
   }, [archived]);
 
+  useEffect(() => {
+    queuedRef.current = queued;
+  }, [queued]);
+
+  /**
+   * flushQueuedMessages(): delivers the head of the queue as the next
+   * turn, the one place besides the composer's own send that starts a
+   * turn. Shared by onFinish (a normal turn just ended) and lost-turn
+   * recovery's three exits (recovered, failed, or timed out): whichever
+   * way the line becomes free again, whatever she typed while it was
+   * occupied goes out the moment it is.
+   */
+  const flushQueuedMessages = useCallback(() => {
+    if (queuedRef.current.length === 0) return;
+    const flush = flushChatQueue(queuedRef.current);
+    const message = flush.outgoing;
+    setQueued(flush.remaining);
+    if (message === null) return;
+    // Next tick: this can run inside the previous send's own teardown
+    // (onFinish) or inside a recovery's async close-out, and eve rejects
+    // overlapping sends.
+    setTimeout(() => {
+      setBusySeconds(0);
+      turnModalityRef.current =
+        flush.lane === "directive" ? "text" : queuedTurnModalityRef.current;
+      lastSendRef.current = { text: message, atMs: currentTimeMs() };
+      turnStartedAtRef.current = currentTimeMs();
+      markTurnStarted();
+      void sendRef.current?.({ message });
+    }, 0);
+  }, []);
+
   /**
    * Lost-turn recovery (incident 2026-07-11 follow-up): the durable
    * run usually outlives a dead stream, so replay the session
    * server-side and fold the finished conversation, reply and material
    * cards included, back into the transcript. Shared by the error
    * banner path and the stall auto-stop path; no-ops while a recovery
-   * is already running, and stands down when she sends (the abort in
-   * sendMessage).
+   * is already running.
+   *
+   * Session-fork fix (GH #170, the 2026-07-24/25 co-founder incidents):
+   * a manual send used to stand down a running recovery and start
+   * sending on whatever session state was left (the eve client wipes its
+   * session cursor the moment the stream dies without a closing boundary
+   * event, so that state has no session id). That raced the durable old
+   * turn, which was usually still finishing server-side, into a second,
+   * unrelated eve session for the same family: two live sessions, and
+   * whichever one she was not looking at when its reply landed read as
+   * "my message vanished". Recovery now runs to its own conclusion
+   * (recovered, failed, or timed out) with sends queued instead of
+   * forking (isSendLineOccupied in chat-send-policy.ts), and
+   * flushQueuedMessages delivers whatever she typed the moment recovery
+   * settles, exactly like a normal turn's onFinish.
    */
   const startLostTurnRecovery = useCallback(() => {
     const lastSend = lastSendRef.current;
@@ -904,6 +953,10 @@ export function ChatClient({
           promptSuggestionLifecycleHandlers,
         );
         setRecovering(false);
+        // Gave up without an answer: the same fresh-session fallback a
+        // failed recovery gets below, so whatever she typed while
+        // waiting still goes out.
+        flushQueuedMessages();
         return;
       }
       if (recovered) {
@@ -948,9 +1001,15 @@ export function ChatClient({
         );
       }
       setRecovering(false);
+      // Whichever way it resolved, the line is free again: send anything
+      // she typed while it was undecided (a fresh session either way,
+      // since eve already wiped this one's session id when the stream
+      // died, or agentReset just did on a clean recovery above).
+      flushQueuedMessages();
     })();
   }, [
     agentReset,
+    flushQueuedMessages,
     liveTimes,
     promptSuggestionLifecycleHandlers,
     storageKey,
@@ -1369,7 +1428,12 @@ export function ChatClient({
   ): ChatSendAcceptance {
     const plan = prepareChatSend({
       text,
-      busy,
+      // Occupied by an active stream OR by lost-turn recovery still
+      // deciding whether the previous, interrupted turn already
+      // finished (chat-send-policy.ts's isSendLineOccupied; GH #170).
+      // Either way a send here must queue, never start a second eve
+      // session racing the one that might still be finishing.
+      busy: isSendLineOccupied({ busy, recovering }),
       draftFromVoice: draftFromVoiceRef.current,
       source,
     });
@@ -1399,9 +1463,12 @@ export function ChatClient({
       );
       return "queued";
     }
-    // A manual send takes the composer back: a still-running recovery
-    // of the previous turn stands down (its reply would land into a
-    // conversation that has already moved on).
+    // Reaching here means the line reads as free (not busy, not
+    // recovering), so any recovery handle left over is already spent or
+    // is the vanishingly small same-tick race between an error landing
+    // and its `recovering` state committing; abort is a defensive no-op
+    // in the ordinary case, not the mechanism that keeps sends from
+    // forking a session anymore (see isSendLineOccupied above).
     recoveryRef.current?.abort();
     // A fresh session (first turn, or the reset after a failed one)
     // restarts the durable event cursor.
@@ -1438,6 +1505,21 @@ export function ChatClient({
   }
 
   /**
+   * The retry affordance on a "Not sent" bubble (GH #170, part 2: a
+   * dropped connection used to erase her words with nothing on screen
+   * to say so). A tap on a card, not typing (chat-send-policy.ts): it
+   * leaves whatever she is mid-typing in the composer untouched and
+   * resends the failed bubble's exact words. sendMessage's own
+   * isSendLineOccupied gate already keeps this from forking a session if
+   * a recovery for the earlier failure happens to still be running
+   * (part 1 of the same fix), and queues it instead, same as anything
+   * else typed in that window.
+   */
+  function retryFailedMessage(text: string): void {
+    sendMessage(text, { kind: "card_answer" });
+  }
+
+  /**
    * The attach send path: trades the staged blob URLs for model parts,
    * marker text, and binder receipts (/api/chat/attachments), then
    * sends ONE turn carrying text + media parts. Runs only while idle
@@ -1445,7 +1527,12 @@ export function ChatClient({
    * the queue stays text-only).
    */
   async function sendMessageWithAttachments(text: string): Promise<void> {
-    if (busy || preparingAttachments) return;
+    // Attachments hold for the idle line already (no queueing for
+    // files); recovering counts as occupied for the same session-fork
+    // reason sendMessage's plan does (GH #170).
+    if (isSendLineOccupied({ busy, recovering }) || preparingAttachments) {
+      return;
+    }
     if (!chatDoorTappedRef.current) {
       chatDoorTappedRef.current = true;
       sendWallBeacon({ kind: "door_tap", door: "chat" });
@@ -1643,6 +1730,9 @@ export function ChatClient({
                   }
                   workedForSeconds={
                     isLiveMessage ? turnSeconds[item.message.id] ?? null : null
+                  }
+                  onRetryFailedMessage={
+                    isLiveMessage ? retryFailedMessage : undefined
                   }
                   progressAnswers={progressAnswersMap}
                   activeSnapPartKey={
