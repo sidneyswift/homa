@@ -37,9 +37,9 @@ export function reportLockEnabled(): boolean {
  *  and previews. A tier's monthly link must exist or the tier doesn't
  *  render at all (regular's absence downs the whole wall; plus/elite's
  *  absence just narrows the offer to fewer tiers). Annual is optional
- *  per tier (founder ruling 2026-07-18 for regular: the flip starts $19
- *  monthly only; the $99 sticker sits exactly on Homeschool Fox's price
- *  and waits for that read; plus/elite follow the same narrowing rule).
+ *  per tier. Every tier's annual price is 20% off its monthly price
+ *  times twelve, rounded to the nearest dollar (founder ruling
+ *  2026-07-26); prices live in wall-copy.ts's TIER_PRICES.
  *
  *  Written as literal per-tier `process.env.NEXT_PUBLIC_...` accesses on
  *  purpose, never a templated key: Next.js only inlines NEXT_PUBLIC_ vars
