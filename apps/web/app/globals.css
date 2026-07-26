@@ -539,6 +539,11 @@ h1, h2, h3, h4, h5, h6 {
 
 html.rv-armed [data-reveal], html.rv-armed [data-reveal-kids] > * { opacity: 0; transform: translateY(14px); transition: opacity 320ms var(--ease-out), transform 320ms var(--ease-out); }
 html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { opacity: 1; transform: none; }
+/* The catch-up sweep in RevealObserver.tsx reveals an element that was
+   already on screen before the intersection observer caught it; animating
+   that reveal is what read as the page "snapping" once a reader stopped
+   scrolling. rv-no-anim skips straight to the resting state. */
+html.rv-armed [data-reveal].rv-no-anim, html.rv-armed [data-reveal-kids].rv-no-anim > * { transition: none !important; }
 [data-reveal-kids] > *:nth-child(2) { transition-delay: 70ms; }
 [data-reveal-kids] > *:nth-child(3) { transition-delay: 140ms; }
 [data-reveal-kids] > *:nth-child(4) { transition-delay: 210ms; }

@@ -16,7 +16,7 @@ import { Logo } from "../brand/Logo";
 const COLUMNS: ReadonlyArray<readonly [string, ReadonlyArray<readonly [string, string]>]> = [
   ["Product", [["Your child's progress report", "/onboarding"], ["How the report works", "/onboarding/method"], ["Features", "/#features"]]],
   ["Company", [["Our story", "/#stories"], ["Blog", "/blog"], ["Joining Homa", "/onboarding"]]],
-  ["Support", [["Privacy", "/privacy"], ["Terms", "/terms"], ["Contact", "mailto:hello@mail.thankshoma.com"]]],
+  ["Support", [["Privacy", "/privacy"], ["Terms", "/terms"], ["Contact", "mailto:hello@thankshoma.com"]]],
 ];
 
 /* The one link long enough to wrap on true phones; at 480px and below it
@@ -76,18 +76,20 @@ const FOOTER_CSS = `
 .lp-footer-link {
   display: inline-block;
   padding: 24px 0 0;
-  color: var(--stone-400);
+  color: var(--on-brand);
   text-decoration: none;
   font-size: 0.9rem;
   line-height: 21px;
-  transition: color var(--dur-fast) var(--ease-out);
+  transition: text-decoration-color var(--dur-fast) var(--ease-out);
 }
-.lp-footer-link:hover { color: var(--stone-100); }
+/* Resting and hover are both on-brand white now, so hover reads via
+   underline instead of color (the focus ring already covers focus). */
+.lp-footer-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 .lp-footer-link:focus-visible {
   outline: 2px solid var(--gold-400);
   outline-offset: 3px;
   border-radius: var(--radius-xs);
-  color: var(--stone-100);
+  color: var(--on-brand);
 }
 .lp-footer-email { margin-top: 33px; }
 /* A pen tail after the email, the one hand-made mark in the brand column's
@@ -148,7 +150,7 @@ const FOOTER_CSS = `
 
 export function Footer() {
   return (
-    <footer className="lp-pad lp-footer" style={{ color: "var(--stone-300)", padding: "76px 40px 36px" }}>
+    <footer className="lp-pad lp-footer" style={{ color: "var(--on-brand)", padding: "76px 40px 36px" }}>
       <style>{FOOTER_CSS}</style>
       <div className="lp-4col lp-footer-grid">
         <div className="lp-footer-brand">
@@ -159,19 +161,17 @@ export function Footer() {
             style={{
               margin: "16px 0 0",
               maxWidth: 420,
-              fontFamily: "var(--font-serif)",
-              fontStyle: "italic",
               fontWeight: 400,
               fontSize: "1.15rem",
               lineHeight: "45px",
-              color: "var(--stone-300)",
+              color: "var(--on-brand)",
               textWrap: "pretty",
             }}
           >
-            The calm assistant for homeschooling families.
+            Your homeschool helper.
           </p>
-          <a href="mailto:hello@mail.thankshoma.com" className="lp-footer-link lp-footer-email">
-            hello@mail.thankshoma.com
+          <a href="mailto:hello@thankshoma.com" className="lp-footer-link lp-footer-email">
+            hello@thankshoma.com
           </a>
           <svg
             className="lp-footer-flourish"
@@ -221,16 +221,14 @@ export function Footer() {
           flexWrap: "wrap",
           gap: "6px 24px",
           fontSize: "0.85rem",
-          color: "var(--stone-400)",
+          color: "var(--on-brand)",
         }}
       >
         <span>&copy; 2026 Homa.</span>
         <span
           style={{
-            fontFamily: "var(--font-serif)",
-            fontStyle: "italic",
             fontSize: "0.95rem",
-            color: "var(--stone-300)",
+            color: "var(--on-brand)",
           }}
         >
           Made for families who teach.

@@ -207,8 +207,6 @@ export function PainBridge() {
           style={{
             margin: 0,
             color: "var(--text-strong)",
-            fontFamily: "var(--font-serif)",
-            fontStyle: "italic",
             fontWeight: 400,
             fontSize: "clamp(1.4rem, 2.6vw, 1.8rem)",
             lineHeight: 1.35,

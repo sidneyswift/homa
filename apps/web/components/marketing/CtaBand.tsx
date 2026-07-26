@@ -88,7 +88,7 @@ export function CtaBand() {
         <p
           data-reveal=""
           className="rv-d1"
-          style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontWeight: 400, fontSize: "clamp(1.3rem, 1.15rem + 0.5vw, 1.5rem)", color: "var(--gold-ink-strong)", margin: "0 0 34px" }}
+          style={{ fontWeight: 400, fontSize: "clamp(1.3rem, 1.15rem + 0.5vw, 1.5rem)", color: "var(--gold-ink-strong)", margin: "0 0 34px" }}
         >
           {/* The nowrap span keeps a 560-600px wrap from stranding "child."
               as a widow; the phrase is ~200px at this size so it can never

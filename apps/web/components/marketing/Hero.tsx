@@ -124,13 +124,6 @@ const HERO_CSS = `
   color: var(--sage-600);
   transform: rotate(-2.5deg);
 }
-.lp-hero2-cta-flourish {
-  position: absolute;
-  left: 50%;
-  bottom: -16px;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
 /* Tablet band only: globals hides the shell doodles below 881px, which
    leaves the rail right of the copy column bare at 541-880px. A star+sun
    pair anchored to the copy column's bottom (the fine-print and chips
@@ -315,46 +308,20 @@ export function Hero() {
           <p style={{ fontSize: "1.22rem", color: "var(--stone-700)", lineHeight: 1.55, margin: "18px 0 0", maxWidth: 500 }}>
             {HERO_COPY.body}
           </p>
-          <div className="lp-hero-actions" style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 14, marginTop: 26 }}>
-            <span style={{ position: "relative", display: "inline-flex" }}>
-              {openPopup ? (
-                <Button variant="primary" size="lg" onClick={openPopup} iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
-                  {HERO_COPY.primaryAction}
-                </Button>
-              ) : (
-                <Button variant="primary" size="lg" href="/onboarding" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
-                  {HERO_COPY.primaryAction}
-                </Button>
-              )}
-              {/* The cobalt squiggle now underlines the one action on the
-                  page instead of floating in dead space. */}
-              <svg className="lp-hero2-cta-flourish" viewBox="0 0 96 12" width={168} height={16} aria-hidden="true">
-                <path
-                  d="M2 8.5 C 10 2.5, 18 2.5, 26 7.5 S 42 10.5, 50 6.5 S 66 2.5, 74 6.5 S 90 10, 94 5"
-                  fill="none"
-                  stroke="var(--pop-cobalt)"
-                  strokeWidth={2.6}
-                  strokeLinecap="round"
-                />
-              </svg>
-            </span>
-          </div>
-          <p
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontStyle: "italic",
-              fontWeight: 400,
-              fontSize: "1.05rem",
-              color: "var(--text-muted)",
-              margin: "20px 0 0",
-              textWrap: "pretty",
-            }}
+          <div
+            className="lp-hero-actions"
+            style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 14, marginTop: 26, marginBottom: 28 }}
           >
-            {/* NBSPs glue the closing phrase so a wrap never strands
-                "per child." as a two-word widow (text-wrap: pretty only
-                rescues single-word last lines). */}
-            No card is needed. The questionnaire takes about {"five minutes per child."}
-          </p>
+            {openPopup ? (
+              <Button variant="primary" size="lg" onClick={openPopup} iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
+                {HERO_COPY.primaryAction}
+              </Button>
+            ) : (
+              <Button variant="primary" size="lg" href="/onboarding" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
+                {HERO_COPY.primaryAction}
+              </Button>
+            )}
+          </div>
           <PlatformStrip />
         </div>
         <div className="lp-hero-visual lp-hero2-visual">

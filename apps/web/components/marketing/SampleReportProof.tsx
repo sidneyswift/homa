@@ -90,8 +90,6 @@ export function SampleReportProof() {
             <p
               style={{
                 margin: 0,
-                fontFamily: "var(--font-serif)",
-                fontStyle: "italic",
                 fontWeight: 400,
                 fontSize: "1.15rem",
                 color: "var(--stone-700)",
