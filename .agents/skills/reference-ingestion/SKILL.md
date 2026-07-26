@@ -171,7 +171,7 @@ This is where Homa actually gets smarter. Every write below follows the post-PR-
 Create `apps/web/agent/skills/materials-studio/references/recipes/<gap-slug>.md`:
 
 - Plain markdown, `# Title` first line, **no frontmatter**
-- If a golden anchor exists for the format, a first paragraph: `Golden anchor: pass anchorIds: ["<id>"] to generate_image ... the anchor sets the visual bar, not the specifics`
+- If a golden anchor exists for the format, a first paragraph: `Golden anchor: every generate_image call for a <format> carries anchorIds: ["<id>"] ... the anchor sets the visual bar, not the specifics` (every-call phrasing on purpose: spot art drops the anchor unless the recipe says the anchor rides every call, 2026-07-25 anchor-usage eval)
 - When-to-use prose, a `Great for:` line
 - Creation path: `html`, `hybrid`, or `image-direct`, with the reasoning
 - A binding section `Design patterns (all binding for <slug>):` with bullet rules

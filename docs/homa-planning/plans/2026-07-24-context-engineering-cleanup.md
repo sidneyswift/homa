@@ -238,3 +238,28 @@ trackers (lesson-plan-routing, anchor-usage).
 Tried, measured, and reverted: a strengthened always-on hours line
 (evening-recap-with-hours fixture moved only to 1/4). The follow-up is
 deterministic instead: a reminder in the journal tool's own result.
+
+## Anchor-usage tracker greened (2026-07-25, follow-up session)
+
+The anchor-usage red tracker is green as of the same-day follow-up.
+Six-repeat transcripts showed the real weak link: Homa read the
+foldable recipe in 6/6 runs (its first paragraph names the anchor) and
+still omitted anchorIds in 3, always on the first generate_image call,
+while following the "Working with generate_image" checklist to the
+letter. The rule was simply not at the decision site, and the describe
+asked her to match "what you are building" at image level, so hybrid
+spot art read as "not a foldable" and omitted. Three changes: the
+anchor rule now opens the "Working with generate_image" checklist and
+matches the MATERIAL (never the single image), the anchorIds describe
+carries the same material-level imperative, and generate_image's
+failure notes remind a retry to keep anchorIds (measured retry chains
+shed the anchor two calls in while hunting for the failing input; the
+deterministic result-note reminder is the same pattern as the journal
+tool's, above). First-call anchor carriage moved 3/6 to 18/18 across
+three repeat batches; on the final tree every call in every run
+carried the anchor (19/19). Remaining eval flake is the harness, not
+the skill: eval sessions resolve no family, every family-scoped tool
+fails closed, and Homa sometimes honestly aborts the build before
+create_printable. Fixing that (seeded sandbox family plus pinned eval
+attributes) is filed as its own follow-up because it touches the auth
+walk.
