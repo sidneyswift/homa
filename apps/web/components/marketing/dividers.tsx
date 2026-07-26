@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
+import { usePrefersReducedMotion } from "./ds/use-interaction-media";
+
 /**
  * Section-seam dividers + the Eyebrow section label, ported verbatim from
  * docs/homa-design/ui_kits/landing/LandingPage.jsx (source of truth); keep
@@ -12,7 +14,15 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
  * prefers-reduced-motion, so static SVG is always the safe default.
  */
 
-export function Wave({ color = "var(--band-sky)", flip = false }: { color?: string; flip?: boolean }) {
+export function Wave({
+  color = "var(--band-sky)",
+  flip = false,
+  stroke = false,
+}: {
+  color?: string;
+  flip?: boolean;
+  stroke?: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 1440 48"
@@ -27,6 +37,20 @@ export function Wave({ color = "var(--band-sky)", flip = false }: { color?: stri
       }}
     >
       <path fill={color} d="M0 0 H1440 V12 C1220 46 980 4 720 24 C460 44 220 8 0 32 Z" />
+      {/* Optional 1px crest edge for boundaries where the two grounds are
+          near-identical creams (bg-page against bg-page-warm): without it
+          the wave is invisible and the seam reads as a dead join. The
+          non-scaling stroke keeps the hairline 1px despite the stretched
+          viewBox. */}
+      {stroke ? (
+        <path
+          d="M1440 12 C1220 46 980 4 720 24 C460 44 220 8 0 32"
+          fill="none"
+          stroke="var(--border-subtle)"
+          strokeWidth={1}
+          vectorEffect="non-scaling-stroke"
+        />
+      ) : null}
     </svg>
   );
 }
@@ -100,17 +124,37 @@ export function Ribbon({
   const phrase = unit.repeat(9);
 
   const unitRef = useRef<SVGTextElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const [loop, setLoop] = useState<{ distance: number; duration: number } | null>(null);
+  // The SMIL ticker only renders while the ribbon is near the viewport and
+  // motion is welcome: an indefinite animation on an off-screen ribbon still
+  // burns main-thread time, and the one-time mount read of the media query
+  // ignored a user toggling reduced motion mid-visit. The loop advances by
+  // exactly one repeating unit, so unmount/remount restarts invisibly.
+  const [onScreen, setOnScreen] = useState(false);
+  const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const unitWidth = unitRef.current?.getComputedTextLength();
     if (!unitWidth) return;
     setLoop({ distance: unitWidth, duration: unitWidth / RIBBON_SCROLL_SPEED });
   }, []);
 
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setOnScreen(entry.isIntersecting),
+      { rootMargin: "120px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const animate = loop !== null && onScreen && !reducedMotion;
+
   return (
-    <div aria-hidden="true" style={{ position: "relative", height: 150, margin: "-1px 0", pointerEvents: "none" }}>
+    <div ref={rootRef} aria-hidden="true" style={{ position: "relative", height: 150, margin: "-1px 0", pointerEvents: "none" }}>
       <svg
         viewBox="0 0 1440 176"
         preserveAspectRatio="xMidYMid slice"
@@ -128,7 +172,7 @@ export function Ribbon({
         <text dominantBaseline="middle" style={{ ...RIBBON_TEXT_STYLE, fill: ink }}>
           <textPath href={`#${rid}`} startOffset={PATH_OVERSCAN}>
             {phrase}
-            {loop ? (
+            {animate && loop ? (
               <animate
                 attributeName="startOffset"
                 values={reverse ? `${PATH_OVERSCAN}; ${PATH_OVERSCAN + loop.distance}` : `${PATH_OVERSCAN}; ${PATH_OVERSCAN - loop.distance}`}
@@ -143,8 +187,11 @@ export function Ribbon({
   );
 }
 
-/** Uppercase tracked section label above headings. */
-export function Eyebrow({ color = "var(--brand)", children }: { color?: string; children: ReactNode }) {
+/** Uppercase tracked section label above headings. Defaults to clay-600,
+    not coral: at 0.8rem this is normal-size text, and coral sits near 3.2:1
+    on cream, under the AA 4.5:1 floor. Coral stays for icons and large
+    display accents where 3:1 suffices. */
+export function Eyebrow({ color = "var(--clay-600)", children }: { color?: string; children: ReactNode }) {
   return (
     <div
       style={{
