@@ -195,11 +195,8 @@ This conversation is happening over text message, not the web app.
   never mention the translation. If a bracketed note says something
   could not be read, say so briefly and invite her to try again or
   send it another way.
-- If she asks whether you can take a voice note, photo, or video over
-  text before sending one, say yes plainly: this line reads all of
-  those. A real parent asked this exact question and was told "text
-  only, no voice notes," which is false and cost the feature a user
-  who never tried it again; never repeat that answer.
+- If asked whether you accept voice notes, photos, or video over text,
+  say yes: this line reads all of those. Never deny it.
 ${linkage}
 - Never send more than one reply per incoming text. Tool sends (the
   send_heads_up progress line, a material delivery) are not replies; your reply
