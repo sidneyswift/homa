@@ -7,10 +7,10 @@ import { Logo } from "../brand/Logo";
  * Support link columns + copyright rule. Evolved from
  * docs/homa-design/ui_kits/landing/LandingPage.jsx with a quiet ruled-paper
  * texture (white at 4%, the notebook Homa keeps). Everything sits on one
- * 45px ruling: link rows are exactly 45px (12+21+12), the tagline leading is
- * 45px so its baselines rest on the rules, and the copyright border lands on
- * a rule. The yellow-to-navy wave seam is rendered by page.tsx above this
- * component; the footer adds no second closing device.
+ * 45px ruling: link rows are exactly 45px (24+21+0) so every baseline rides
+ * its rule the way the tagline's 45px leading does, and the copyright border
+ * lands on a rule. The yellow-to-navy wave seam is rendered by page.tsx above
+ * this component; the footer adds no second closing device.
  */
 
 const COLUMNS: ReadonlyArray<readonly [string, ReadonlyArray<readonly [string, string]>]> = [
@@ -19,8 +19,9 @@ const COLUMNS: ReadonlyArray<readonly [string, ReadonlyArray<readonly [string, s
   ["Support", [["Privacy", "/privacy"], ["Terms", "/terms"], ["Contact", "mailto:hello@mail.thankshoma.com"]]],
 ];
 
-/* The one link long enough to wrap on phones; it gets a two-rule-row
-   treatment (90px) so the ruling stays in tune below it. */
+/* The one link long enough to wrap on true phones; at 480px and below it
+   gets a two-rule-row treatment (90px) so the ruling stays in tune below
+   it. From 481px up the column is wide enough for one line. */
 const TALL_LINK = "Your child's progress report";
 
 /* Ruling geometry, all in px from the footer's top edge:
@@ -28,11 +29,17 @@ const TALL_LINK = "Your child's progress report";
    gap between each column heading (76 to 96) and its first link. The solid
    navy layer above 90px keeps any rule from crossing the wordmark. Row
    heights are built to that pitch: heading block 32px, link row 45px
-   (padding 12 + line 21 + 12), tagline leading 45px, email row framed
-   243 to 288, copyright border on the rule at 333. The mobile row gap of
-   58px keeps stacked nav rows on the same grid (32 + 58 is one whole rule
-   plus one heading block). The focus ring is gold, not clay: clay
-   disappears against navy. */
+   (padding 24 + line 21 + 0), tagline one line of 45px leading on desktop,
+   email row framed 198 to 243, copyright border on the rule at 288. Every
+   stacked band stays in tune because gap 13 + heading 32 is one rule row,
+   and the brand block (28 logo + 16 + 33 margins) plus its 45px rows always
+   ends on a rule. Baselines write ON the rules, measured, not assumed: the
+   tagline's serif baseline sits 4px above its rule, and 24px top padding
+   puts the 15.5px link ascent at 5.5px above its rule, the closest a 21px
+   line box inside a 45px row can get. The tall link's phone treatment
+   switches to 45px line boxes (12px top padding, 33px below) so both of its
+   lines write on their own rule at the same 5.5px offset. The focus ring
+   is gold, not clay: clay disappears against navy. */
 const FOOTER_CSS = `
 .lp-footer {
   background:
@@ -48,6 +55,10 @@ const FOOTER_CSS = `
   justify-content: space-between;
   gap: 44px 32px;
 }
+/* Zero strut: the email + flourish line box must end exactly at the email's
+   45px row, or the inherited body line-height adds a stray px under it and
+   knocks the legal border off its rule. Every child sets its own leading. */
+.lp-footer-brand { line-height: 0; }
 .lp-footer-head {
   color: var(--on-brand);
   font-weight: 700;
@@ -64,7 +75,7 @@ const FOOTER_CSS = `
 }
 .lp-footer-link {
   display: inline-block;
-  padding: 12px 0;
+  padding: 24px 0 0;
   color: var(--stone-400);
   text-decoration: none;
   font-size: 0.9rem;
@@ -79,20 +90,59 @@ const FOOTER_CSS = `
   color: var(--stone-100);
 }
 .lp-footer-email { margin-top: 33px; }
-@media (max-width: 880px) {
+/* A pen tail after the email, the one hand-made mark in the brand column's
+   quiet right side. It shares the email's 45px line box (bottom-aligned, so
+   the curve rides the same rule the email baseline sits on) and stays at 10%
+   white: louder than the 4% rules, quieter than the 14% legal border. */
+.lp-footer-flourish {
+  /* The global reset blockifies svg; inline-block returns it to the
+     email's line box. */
+  display: inline-block;
+  vertical-align: bottom;
+  margin-left: 14px;
+  pointer-events: none;
+}
+.lp-footer-legal { margin: 45px auto 0; }
+@media (max-width: 1120px) {
+  /* The brand column collapses before it can crush: under ~1115px the
+     1.4fr brand track (viewport - 80 padding - 600 link tracks - 96 gaps)
+     falls below the one-line email + flourish measure (184 + 14 + 140 =
+     338px), which would wrap the pen tail onto an orphan row and strand a
+     dead band beside it. So from 1120px down the brand spans the full first
+     row and the three navs share an even row below it. Row gap 13 keeps the
+     ruling in tune (13 + heading 32 is one rule row). Below 880px the shared
+     .lp-4col rule takes the template to two columns; the brand span carries
+     through. */
   .lp-footer-brand { grid-column: 1 / -1; }
-  .lp-footer-grid { gap: 58px 24px; }
+  .lp-footer-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 13px 24px;
+  }
+}
+@media (max-width: 880px) {
   .lp-footer-link { font-size: 0.875rem; text-wrap: balance; }
-  /* Two full rule rows: the rule passes cleanly between the wrapped lines. */
-  .lp-footer-link--tall { padding: 24px 0; max-width: 9em; }
-  /* Support spans both columns as a horizontal utility row, so the 2-up
-     collapse never leaves a vacant grid cell. */
+  /* Support spans both columns as one full-width ruled utility row, so the
+     2-up collapse never leaves a vacant grid cell or a half-empty band. It
+     reads left-anchored like every other list; the two-ended space-between
+     treatment stays unique to the legal band. */
   .lp-footer nav:nth-of-type(3) { grid-column: 1 / -1; }
   .lp-footer nav:nth-of-type(3) .lp-footer-links {
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 0 28px;
+    justify-content: flex-start;
+    gap: 0 64px;
   }
+}
+@media (max-width: 480px) {
+  /* Two full rule rows on phones only, each line riding its own rule: with
+     45px line boxes, baselines land at 12 + 27.5 = 39.5 and 84.5 (half
+     leading (45 - 21) / 2 plus the 15.5px ascent), 5.5px above BOTH rules,
+     the same dialect as every neighbor, and no rule slices between the two
+     lines of one link. 12 + 90 - 12 = 90 keeps the ruling in pitch at two
+     rule rows exactly, so the next link starts on the very next rule
+     instead of leaving a blank ruled row the sibling column fills. */
+  .lp-footer-link--tall { padding: 12px 0 0; margin-bottom: -12px; line-height: 45px; max-width: 9em; }
+  .lp-footer-flourish { display: none; }
 }
 `;
 
@@ -108,7 +158,7 @@ export function Footer() {
           <p
             style={{
               margin: "16px 0 0",
-              maxWidth: 300,
+              maxWidth: 420,
               fontFamily: "var(--font-serif)",
               fontStyle: "italic",
               fontWeight: 400,
@@ -123,6 +173,21 @@ export function Footer() {
           <a href="mailto:hello@mail.thankshoma.com" className="lp-footer-link lp-footer-email">
             hello@mail.thankshoma.com
           </a>
+          <svg
+            className="lp-footer-flourish"
+            width="140"
+            height="45"
+            viewBox="0 0 140 45"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M2 39 C 20 32.5, 38 43.5, 60 38.5 C 78 34.5, 96 43, 116 38 C 124 36.2, 132 36.5, 138 38.5"
+              stroke="rgba(255, 255, 255, 0.1)"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+          </svg>
         </div>
         {COLUMNS.map(([heading, links]) => (
           <nav key={heading} aria-label={heading}>
@@ -146,9 +211,9 @@ export function Footer() {
         ))}
       </div>
       <div
+        className="lp-footer-legal"
         style={{
           maxWidth: 1120,
-          margin: "45px auto 0",
           paddingTop: 22,
           borderTop: "1px solid rgba(255, 255, 255, 0.14)",
           display: "flex",

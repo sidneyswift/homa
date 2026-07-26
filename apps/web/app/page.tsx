@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { CtaBand } from "../components/marketing/CtaBand";
-import { Ribbon, Wave } from "../components/marketing/dividers";
+import { Deckle, Ribbon, Wave } from "../components/marketing/dividers";
 import { Faq } from "../components/marketing/Faq";
 import { Features } from "../components/marketing/Features";
 import { Footer } from "../components/marketing/Footer";
@@ -85,7 +85,7 @@ export default function LandingPage() {
   // never scrolls). clip fences the decorative bleed (ribbons, waves)
   // without creating a scroll container, so the nav pins for real.
   return (
-    <div style={{ background: "var(--bg-page)", fontFamily: "var(--font-sans)", overflowX: "clip" }}>
+    <div className="lp-root" style={{ background: "var(--bg-page)", fontFamily: "var(--font-sans)", overflowX: "clip" }}>
       {/* Structured data for agent discoverability */}
       <script
         type="application/ld+json"
@@ -161,7 +161,14 @@ export default function LandingPage() {
           <Wave color="var(--band-blush)" flip />
         </div>
         <Stories />
-        <Wave color="var(--band-blush)" />
+        {/* The story band is one torn sheet of blush paper: it enters under
+            HowThread's deckle tear, so it exits with a tear as well. A
+            smooth wave here gave the same band one-of-each edge treatment,
+            the only place on the page where two seam grammars met on a
+            single ground. Page-wide the grammar is now: ribbons are
+            tickers, the blush sheet is torn, every other seam is the one
+            smooth wave family. */}
+        <Deckle color="var(--band-blush)" />
         <Faq />
         <Ribbon text="PLAN LESS · BREATHE MORE" color="var(--pop-navy)" ink="var(--gold-400)" phase={0} top="var(--bg-page)" bottom="var(--band-sunshine)" />
         <CtaBand />

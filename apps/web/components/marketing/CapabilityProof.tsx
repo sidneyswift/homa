@@ -1,4 +1,4 @@
-import { Check, Clock3, FileText, FolderOpen, Leaf, Printer, type LucideIcon } from "lucide-react";
+import { Check, Clock3, FileText, FolderOpen, Leaf, type LucideIcon } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 
 import type { CapabilityId } from "./landing-content";
@@ -97,7 +97,10 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
   switch (capabilityId) {
     case "plan":
       return (
-        <ProofShell>
+        // Taller shell and looser rows than the siblings: the plan card's
+        // shorter body left a blank field above the proof, so the checklist
+        // breathes into the difference instead of leaving it empty.
+        <ProofShell style={{ minHeight: 238 }}>
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
             {/* The duration keeps its NBSP, and the whole note shrinks
                 instead of wrapping: at 390px a two-line note made the
@@ -115,7 +118,7 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
               This week
             </Stamp>
           </div>
-          <div style={{ display: "grid", gap: 7, marginTop: 13 }}>
+          <div style={{ display: "grid", gap: 9, marginTop: 15 }}>
             {[
               ["Butterfly math", "Done"],
               ["Butterfly book", "20m"],
@@ -201,23 +204,28 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
                   style={{ display: "block", width: "100%", height: "auto" }}
                 />
               </div>
-              {/* Washi tape holding the page down: pinned to the blank
-                  top-left margin, hanging off the corner like real tape, so
-                  no glyph of the printed title sits under it. Translucent
-                  with clipped, slightly skewed ends so it reads as tape,
-                  not a highlighter swatch. */}
+              {/* Washi tape holding the page down: the strip laps the
+                  paper's top-left corner diagonally, the way corner tape
+                  pins a page. The printed title runs nearly to the corner
+                  (ink starts 8.3% from the paper's left edge), so a strip
+                  that truly grips the corner must cross the cap's
+                  shoulder; at 0.7 opacity the letter stays legible under
+                  it, matching the Stories tape that lies over photo
+                  content. The soft shadow falls under the strip's body so
+                  it reads adhesive over paper, not a highlighter swatch. */}
               <div
                 aria-hidden="true"
                 style={{
                   position: "absolute",
-                  top: -11,
-                  left: "10%",
-                  width: 54,
+                  top: -8,
+                  left: "13%",
+                  width: 50,
                   height: 19,
                   background: "var(--band-sunshine)",
                   opacity: 0.7,
                   clipPath: "polygon(2% 0, 100% 6%, 98% 100%, 0 92%)",
-                  transform: "translateX(-50%) rotate(-5deg)",
+                  transform: "translateX(-50%) rotate(-32deg)",
+                  boxShadow: "var(--shadow-sm)",
                 }}
               />
             </div>
@@ -232,25 +240,13 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
                 chipBg="var(--gold-100)"
                 chipInk="var(--gold-ink)"
               />
-              {/* 46 = chip width 36 + header gap 10, so these lines share
-                  the title's left edge instead of a ragged rag. */}
-              <p
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  margin: 0,
-                  paddingLeft: 46,
-                  color: "var(--sage-700)",
-                  fontSize: "var(--text-xs)",
-                  fontWeight: 700,
-                }}
-              >
-                <Printer size={14} aria-hidden="true" /> Ready to print
-              </p>
+              {/* 46 = chip width 36 + header gap 10, so the stamps share
+                  the title's left edge instead of a ragged rag. One stamp
+                  grammar carries the whole status cluster; the thumbnail
+                  already proves the artifact is a page, so no PDF badge. */}
               <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, paddingLeft: 46 }}>
-                <Stamp ink="var(--clay-600)" rotate={-2}>
-                  PDF
+                <Stamp ink="var(--sage-600)" rotate={-2}>
+                  Ready to print
                 </Stamp>
                 <Stamp ink="var(--sage-600)" rotate={1.5}>
                   Saved to the binder
@@ -267,9 +263,10 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
           {/* Folder tab peeking above the panel: the binder is the one proof
               that IS a container, so it gets the manila-folder cue. The shell
               is positioned after it, so the tab's lower half tucks behind.
-              Same surface as the shell so tab and folder read as one piece
-              of manila; the trapezoid silhouette says tab even without
-              color contrast. */}
+              Same surface as the shell, and borderless like the shell: a
+              hairline here dead-ended into the shell's bare edge and made the
+              tab read pasted-on. The trapezoid silhouette plus the
+              surface-vs-card contrast says tab on their own. */}
           <div
             aria-hidden="true"
             style={{
@@ -279,8 +276,6 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
               width: 84,
               height: 26,
               background: "var(--surface-sunken)",
-              border: "1px solid var(--border-subtle)",
-              borderBottom: "none",
               clipPath: "polygon(6% 100%, 12% 0, 88% 0, 94% 100%)",
             }}
           />
@@ -288,15 +283,20 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
             <ProofHeader
               icon={FolderOpen}
               title="What you kept this week"
-              note="2 items"
+              note="3 items"
               chipBg="var(--clay-100)"
               chipInk="var(--clay-600)"
             />
+            {/* Rows mirror the plan card's grammar: thumb, title, and a
+                right-aligned weekday column so the wide rows keep an
+                anchored right edge. The third row is the progress report,
+                matching the card body's three artifact types and handing
+                off to the report section that follows this grid. */}
             <div style={{ display: "grid", gap: 9, marginTop: 13 }}>
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "46px 1fr",
+                  gridTemplateColumns: "46px 1fr auto",
                   gap: 10,
                   alignItems: "center",
                   padding: 9,
@@ -316,13 +316,14 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
                 </div>
                 <div>
                   <p style={{ margin: 0, color: "var(--text-strong)", fontSize: "0.78rem", fontWeight: 700 }}>Butterfly math</p>
-                  <p style={{ margin: "2px 0 0", color: "var(--text-subtle)", fontSize: "var(--text-xs)" }}>Practice page · Tuesday</p>
+                  <p style={{ margin: "2px 0 0", color: "var(--text-subtle)", fontSize: "var(--text-xs)" }}>Practice page</p>
                 </div>
+                <span style={{ color: "var(--text-muted)", fontSize: "var(--text-2xs)", fontWeight: 500, whiteSpace: "nowrap" }}>Tuesday</span>
               </div>
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "46px 1fr",
+                  gridTemplateColumns: "46px 1fr auto",
                   gap: 10,
                   alignItems: "center",
                   padding: 9,
@@ -345,8 +346,39 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
                 </div>
                 <div>
                   <p style={{ margin: 0, color: "var(--text-strong)", fontSize: "0.78rem", fontWeight: 700 }}>Our science walk</p>
-                  <p style={{ margin: "2px 0 0", color: "var(--text-subtle)", fontSize: "var(--text-xs)" }}>Photo and note · Thursday</p>
+                  <p style={{ margin: "2px 0 0", color: "var(--text-subtle)", fontSize: "var(--text-xs)" }}>Photo and note</p>
                 </div>
+                <span style={{ color: "var(--text-muted)", fontSize: "var(--text-2xs)", fontWeight: 500, whiteSpace: "nowrap" }}>Thursday</span>
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "46px 1fr auto",
+                  gap: 10,
+                  alignItems: "center",
+                  padding: 9,
+                  borderRadius: 12,
+                  background: "var(--surface-raised)",
+                  boxShadow: "var(--shadow-sm)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "grid",
+                    placeItems: "center",
+                    height: 48,
+                    borderRadius: 9,
+                    background: "var(--sky-100)",
+                    color: "var(--sky-600)",
+                  }}
+                >
+                  <FileText size={20} aria-hidden="true" />
+                </div>
+                <div>
+                  <p style={{ margin: 0, color: "var(--text-strong)", fontSize: "0.78rem", fontWeight: 700 }}>Progress report</p>
+                  <p style={{ margin: "2px 0 0", color: "var(--text-subtle)", fontSize: "var(--text-xs)" }}>Four subjects</p>
+                </div>
+                <span style={{ color: "var(--text-muted)", fontSize: "var(--text-2xs)", fontWeight: 500, whiteSpace: "nowrap" }}>Friday</span>
               </div>
             </div>
           </ProofShell>
@@ -355,10 +387,19 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
 
     case "records":
       return (
-        <ProofShell style={{ backgroundImage: "var(--bg-paper)" }}>
+        // Taller shell, a fourth subject, and looser rows: this card shares
+        // its grid row with the three-row binder, which stretches the row,
+        // and the shorter ledger left a blank field between the body copy
+        // and the bottom-anchored shell. The extra bar and breathing room
+        // absorb the difference the same way the plan card does.
+        <ProofShell style={{ minHeight: 238, backgroundImage: "var(--bg-paper)" }}>
+          {/* A dated range, not "This week": the plan stamp and the binder
+              header already say week, and a third repeat read as a chant.
+              March 2 to 6 is a real Monday-to-Friday, so the ledger stays
+              calendar-plausible. */}
           <ProofHeader
             icon={Clock3}
-            title="This week"
+            title="March 2 to 6"
             note="Hours recorded by subject"
             chipBg="var(--sky-100)"
             chipInk="var(--sky-600)"
@@ -366,12 +407,13 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
           {/* Bar widths are proportional to the labeled minutes with the
               105m maximum pinned at 92%, so the ledger reads well-kept
               while surviving a data-literate read: 70m=61, 105m=92,
-              55m=48. */}
-          <div style={{ display: "grid", gap: 9, marginTop: 13 }}>
+              55m=48, 40m=35. */}
+          <div style={{ display: "grid", gap: 11, marginTop: 15 }}>
             {[
               ["Early math", "1h 10m", "61%"],
               ["Language", "1h 45m", "92%"],
               ["Science", "55m", "48%"],
+              ["Handwriting", "40m", "35%"],
             ].map(([subject, time, width]) => (
               <div key={subject}>
                 <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-body)", fontSize: "0.78rem" }}>
@@ -386,17 +428,18 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
               </div>
             ))}
           </div>
-          {/* The ruled-paper shell now carries the ledger structure, so the
-              footnote needs no hairline of its own. */}
-          <p
-            style={{
-              margin: "14px 0 0",
-              color: "var(--text-muted)",
-              fontSize: "var(--text-xs)",
-            }}
-          >
-            State rules are listed with their sources and a last-checked date.
-          </p>
+          {/* State rules carried by the section's stamp grammar, matching
+              the practice card's PDF row, instead of a bare muted sentence:
+              this card's capability is hours AND rules, so the rules half
+              earns the same physical texture the other proofs get. */}
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginTop: 14 }}>
+            <Stamp ink="var(--sky-600)" rotate={-1.5}>
+              State rules
+            </Stamp>
+            <span style={{ color: "var(--text-subtle)", fontSize: "var(--text-xs)" }}>
+              Sources linked · checked this month
+            </span>
+          </div>
         </ProofShell>
       );
 

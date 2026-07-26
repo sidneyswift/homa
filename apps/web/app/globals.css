@@ -565,6 +565,11 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
 }
 .lp-h2-finale { font-size: clamp(2.2rem, 5.5vw, 3rem); }
 
+/* Landing only (.lp-root scopes it off app surfaces): selected text reads
+   like a highlighter pass on paper. The forced ink keeps selected clay
+   headings and the footer's white links readable on the gold sweep. */
+.lp-root ::selection { background: var(--gold-300); color: var(--stone-800); }
+
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
 }

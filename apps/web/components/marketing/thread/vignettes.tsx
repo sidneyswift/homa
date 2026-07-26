@@ -325,8 +325,14 @@ export function ProofVignette() {
       <div style={{ color: "var(--text-muted)", fontSize: "0.92rem", marginTop: 6 }}>since the fractions practice set</div>
       {/* One chart, one datum: both bars sit flush on a shared baseline.
           border-default, not subtle: at DPR1 the subtle hairline vanished
-          against the white card and the bars appeared to float. */}
-      <div style={{ maxWidth: 340, marginTop: 18 }}>
+          against the white card and the bars appeared to float. maxWidth 280
+          plus flex 1 1 0 columns, never a fixed 120px width: an explicit
+          width pinned each flex item's automatic minimum, so the chart could
+          not shrink below 280px and the whole section overflowed at phone
+          widths. The columns split the row equally, so bars resolve to 120px
+          whenever the card allows and the baseline always ends flush with
+          the May column's right edge. */}
+      <div style={{ maxWidth: 280, marginTop: 18 }}>
         <div style={{ display: "flex", alignItems: "flex-end", gap: 40, borderBottom: "1px solid var(--border-default)" }}>
           {(
             [
@@ -334,7 +340,7 @@ export function ProofVignette() {
               ["May", 56, "var(--sage-500)"],
             ] as const
           ).map(([month, barHeight, barColor]) => (
-            <div key={month} style={{ flex: "1 1 120px", maxWidth: 120, height: barHeight, background: barColor, borderRadius: "8px 8px 0 0" }} />
+            <div key={month} style={{ flex: "1 1 0", minWidth: 0, height: barHeight, background: barColor, borderRadius: "8px 8px 0 0" }} />
           ))}
         </div>
         <div style={{ display: "flex", gap: 40, marginTop: 6 }}>
@@ -346,7 +352,7 @@ export function ProofVignette() {
           ).map(([month, position]) => (
             <span
               key={month}
-              style={{ flex: "1 1 120px", maxWidth: 120, textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--text-muted)" }}
+              style={{ flex: "1 1 0", minWidth: 0, textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--text-muted)" }}
             >
               {month} · {position}
             </span>

@@ -29,10 +29,12 @@ import { useSignupPopup } from "./SignupPopupProvider";
  * .lp-nav-row is capped at the page's 1200px content rail, so the logo
  * lands on the hero text edge at wide viewports instead of hugging the
  * viewport corner; the section links sit on true viewport center past
- * 1100px (absolute centering, where the wide auth cluster can no longer
- * collide with them) and float in the free space below that, so wide
- * viewports read as one balanced logo / links / auth rhythm that lines
- * up with the symmetric hero underneath.
+ * 1000px (absolute centering, where the wide auth cluster can no longer
+ * collide with them, measured ~55px of clearance at 1000 with the widest
+ * signed-out cluster) and float in the free space below that, so wide
+ * viewports, including iPad landscape at 1024, read as one balanced
+ * logo / links / auth rhythm that lines up with the symmetric hero
+ * underneath.
  * Base layout styles live in globals.css as .lp-nav; link, rail, scrim,
  * and exit styling live in NAV_CSS below (this component's own
  * stylesheet) because globals.css is owned elsewhere.
@@ -40,7 +42,13 @@ import { useSignupPopup } from "./SignupPopupProvider";
  * An IntersectionObserver over the three anchor targets marks the section
  * currently under the viewport's midline with aria-current, so the nav
  * reflects where the reader is; on routes without those sections (blog,
- * onboarding) no target resolves and the observer never attaches.
+ * onboarding) no target resolves and the observer never attaches. The
+ * phone menu never shows three identical resting ticks: when no section
+ * crosses the spy band it marks the last section the reader crossed,
+ * defaulting to the first link before any scroll (an unscrolled reader
+ * is at "How it works"), so the grown tick always reads as a position
+ * indicator. The desktop links keep the pure spy value; underlining a
+ * link the reader never scrolled to would claim too much there.
  *
  * Phones (<=880px, the kit's breakpoint): everything except the logo and
  * a hamburger toggle hides (.lp-nav-links), founder call 2026-07-08:
@@ -59,7 +67,8 @@ import { useSignupPopup } from "./SignupPopupProvider";
  * timeout fallback in case transitionend never fires, and hands focus
  * back to the toggle so keyboard users are never stranded on <body>.
  * While open, Tab is contained to the toggle plus the menu's focusables,
- * so keyboard and switch users never walk the dimmed page behind it.
+ * and the nav's page siblings go inert, so keyboard, switch, and
+ * screen-reader users never walk the dimmed page behind it.
  *
  * Auth-aware (founder report 2026-07-09: a signed-in parent was still
  * offered sign-up): useSignedIn resolves the Supabase session after
@@ -115,12 +124,14 @@ const NAV_CSS = `
   outline: none;
   box-shadow: 0 0 0 2px var(--brand), var(--shadow-focus);
 }
-/* Below 1100px, auto margins float the links in the free space so they
+/* Below 1000px, auto margins float the links in the free space so they
    collapse gracefully near the 881px breakpoint instead of riding over
-   the logo. Past 1100px the auth cluster is much wider than the logo, so
+   the logo. Past 1000px the auth cluster is much wider than the logo, so
    free-space centering sits visibly left of true center while the hero
-   below is symmetric; with collision impossible there, the links are
-   absolutely centered on the row instead. */
+   below is symmetric; with collision impossible there (measured ~55px
+   between the links and the widest signed-out auth cluster at 1000),
+   the links are absolutely centered on the row instead, which keeps
+   iPad landscape at 1024 on the same centered rhythm as desktop. */
 .lp-nav-primary {
   display: flex;
   align-items: center;
@@ -128,7 +139,7 @@ const NAV_CSS = `
   margin-left: auto;
   margin-right: auto;
 }
-@media (min-width: 1100px) {
+@media (min-width: 1000px) {
   .lp-nav-row {
     position: relative;
   }
@@ -137,6 +148,15 @@ const NAV_CSS = `
     left: 50%;
     transform: translateX(-50%);
     margin: 0;
+  }
+  /* At the band's narrow end the centered links sit close to "Sign in"
+     while acres of air sit after the logo, so the two clusters started
+     reading as one row of links; a wider auth gap plus a left pad keeps
+     the seam legible without moving the links off true center. Doubled
+     selector wins the tie with the base .lp-nav-auth gap below. */
+  .lp-nav-auth.lp-nav-auth {
+    padding-left: 24px;
+    gap: 16px;
   }
 }
 .lp-nav-auth {
@@ -201,8 +221,16 @@ const NAV_CSS = `
   box-shadow: 0 0 0 2px var(--brand), var(--shadow-focus);
 }
 /* A whisper of depth once the frosted surface is in: the bar reads as a
-   sheet of paper lifted off the page, not a line taped across it. */
-.lp-nav[data-scrolled="true"]::before {
+   sheet of paper lifted off the page, not a line taped across it. The
+   fill also steps up from the base 85% cream: at 85%, saturated bands
+   scrolling underneath (the cobalt ticker) ghosted through the blur as
+   muddy smears, and at 92% high-luminance cards (the hero chat card)
+   still passed under the links as a visible light patch, splitting the
+   bar into two tones. 95% keeps one uniform sheet while the blur still
+   whispers that the page is underneath. The doubled selector wins the
+   tie with the base .lp-nav::before background in globals.css. */
+.lp-nav.lp-nav[data-scrolled="true"]::before {
+  background: color-mix(in srgb, var(--surface-raised) 95%, transparent);
   box-shadow: var(--shadow-sm);
 }
 @media (max-width: 880px) {
@@ -211,6 +239,12 @@ const NAV_CSS = `
   }
   .lp-nav.lp-nav {
     padding: 10px 20px;
+  }
+  /* Phones scroll display-size H2s directly under the shallow 64px bar,
+     where even the 95% fill lets dark headings read through the blur as
+     sliced text; 98% stops that while keeping a whisper of frost. */
+  .lp-nav.lp-nav[data-scrolled="true"]::before {
+    background: color-mix(in srgb, var(--surface-raised) 98%, transparent);
   }
   /* The scrim starts at the bar's bottom hairline, so the frosted bar
      stays one crisp sheet above it instead of a half-dimmed band. */
@@ -290,7 +324,7 @@ const NAV_CSS = `
     opacity: 0.3;
     transform: scaleX(1);
     transform-origin: left center;
-    transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+    transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out), width var(--dur-fast) var(--ease-out);
   }
   .lp-nav-menu-link.lp-nav-menu-link:hover,
   .lp-nav-menu-link.lp-nav-menu-link:active {
@@ -309,17 +343,30 @@ const NAV_CSS = `
   .lp-nav-menu-link[aria-current] {
     color: var(--text-strong);
   }
+  /* The current section reads by shape as well as tone: the tick grows to
+     36px, so it never depends on the 0.3-vs-1.0 opacity step alone (an
+     opacity-only cue is near-invisible to low-vision readers). */
   .lp-nav-menu-link[aria-current]::after {
     opacity: 1;
     transform: scaleX(1);
+    width: 36px;
   }
-  /* The rule between links and auth is the brand's hand-drawn squiggle
-     (the same ink doodle Features and the FAQ use), whispered. */
+  /* "Sign in" can never be the current section, so it carries no resting
+     tick; sharing the section-spy mark muddied what the grown tick means. */
+  .lp-nav-menu-link-strong::after {
+    content: none;
+  }
+  /* The rule between links and auth is the brand's hand-drawn squiggle,
+     inked in the same coral as the link ticks so the menu speaks one ink
+     voice (the shared --squiggle-ink token strokes gray, and a data URI
+     cannot read CSS variables, so the same 40x8 wave is restated here
+     with the --brand value from globals.css, clay-500 #E7602F). 0.35
+     sits the wave at the resting ticks' visual weight. */
   .lp-nav-menu-divider.lp-nav-menu-divider {
     height: 8px;
     margin: 8px 14px 6px;
-    background: var(--squiggle-ink) repeat-x left center / 40px 8px;
-    opacity: 0.3;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='8' viewBox='0 0 40 8'%3E%3Cpath d='M0 4 Q5 0 10 4 T20 4 T30 4 T40 4' fill='none' stroke='%23E7602F' stroke-width='1.6'/%3E%3C/svg%3E") repeat-x left center / 40px 8px;
+    opacity: 0.35;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -354,7 +401,14 @@ export function Nav() {
   const signedIn = useSignedIn();
   const [scrolled, setScrolled] = useState(false);
   const [activeHref, setActiveHref] = useState<string | null>(null);
+  // The phone menu's copy of the spy value, kept sticky so its tick is
+  // never uninformative: seeded with the first link once the section
+  // targets resolve (page top, nothing crossing the band yet) and held
+  // at the last crossed section when the reader scrolls past all three
+  // (FAQ, footer). Stays null on routes without the landing sections.
+  const [menuTickHref, setMenuTickHref] = useState<string | null>(null);
   const [menuState, setMenuState] = useState<MenuState>("closed");
+  const navRef = useRef<HTMLElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const prevMenuStateRef = useRef<MenuState>("closed");
   const menuOpen = menuState === "open";
@@ -402,6 +456,10 @@ export function Nav() {
         let current: string | null = null;
         for (const [href] of targets) if (crossing.has(href)) current = href;
         setActiveHref(current);
+        // Sticky tick: the observer's initial pass fires with nothing
+        // crossing at page top, which seeds the first link; afterwards
+        // the tick holds the last crossed section.
+        setMenuTickHref((prev) => current ?? prev ?? LINKS[0][1]);
       },
       { rootMargin: SECTION_SPY_ROOT_MARGIN }
     );
@@ -463,6 +521,28 @@ export function Nav() {
   }, [menuVisible]);
 
   useEffect(() => {
+    // The scrim hides the page visually and the Tab trap contains the
+    // keyboard, but screen-reader virtual cursors and VoiceOver swipes
+    // ignore both, so the dimmed content also leaves the accessibility
+    // tree: every sibling of the nav (the page sections) goes inert while
+    // the menu is open. The nav itself never does, so the toggle and menu
+    // stay reachable. Keyed to open, not visible: the menu's CTA opens
+    // the signup popup (a sibling) during the exit fade, and the popup
+    // must not mount inert. Pre-existing inert siblings are left alone so
+    // cleanup never un-inerts something another overlay owns.
+    if (!menuOpen) return;
+    const nav = navRef.current;
+    if (!nav?.parentElement) return;
+    const dimmed = Array.from(nav.parentElement.children).filter(
+      (el) => el !== nav && !el.hasAttribute("inert")
+    );
+    for (const el of dimmed) el.setAttribute("inert", "");
+    return () => {
+      for (const el of dimmed) el.removeAttribute("inert");
+    };
+  }, [menuOpen]);
+
+  useEffect(() => {
     if (menuState !== "closing") return;
     const timer = window.setTimeout(() => setMenuState("closed"), MENU_EXIT_FALLBACK_MS);
     return () => window.clearTimeout(timer);
@@ -499,7 +579,7 @@ export function Nav() {
   const ctaLabel = HERO_COPY.primaryAction;
 
   return (
-    <nav className="lp-nav lp-pad" data-scrolled={scrolled || menuVisible ? "true" : "false"}>
+    <nav ref={navRef} className="lp-nav lp-pad" data-scrolled={scrolled || menuVisible ? "true" : "false"}>
       <style>{NAV_CSS}</style>
       <div className="lp-nav-row">
         <Link href="/" aria-label="Homa" className="lp-nav-home">
@@ -603,7 +683,7 @@ export function Nav() {
                     key={label}
                     href={href}
                     className="lp-nav-menu-link"
-                    aria-current={activeHref === href ? "true" : undefined}
+                    aria-current={menuTickHref === href ? "true" : undefined}
                     onClick={closeMenu}
                   >
                     {label}

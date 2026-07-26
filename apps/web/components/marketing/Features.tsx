@@ -2,7 +2,6 @@ import type { CSSProperties } from "react";
 
 import { CapabilityProof } from "./CapabilityProof";
 import { Card } from "./ds/Card";
-import { Squiggle } from "./ds/Squiggle";
 import { Doodle } from "./Doodle";
 import { Eyebrow } from "./dividers";
 import { CAPABILITY_ITEMS } from "./landing-content";
@@ -21,6 +20,24 @@ import { CAPABILITY_ITEMS } from "./landing-content";
 
 const REVEAL_STAGGER_MS = 70;
 
+/**
+ * Pinwheel spans (5/7 over 7/5) instead of a uniform 2x2: the practice and
+ * binder proofs carry artwork thumbnails that want width, while the plan
+ * checklist and the hours bars are list-shaped and read well narrow. The
+ * media query mirrors globals.css, which collapses .lp-capability-grid to
+ * one column at 880px and below, so the spans only ever exist where the
+ * twelve tracks do.
+ */
+const SPAN_CLASS = ["lp-cap-n", "lp-cap-w", "lp-cap-w", "lp-cap-n"] as const;
+
+const FEATURES_CSS = `
+@media (min-width: 881px) {
+  .lp-capability-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .lp-capability-grid > .lp-cap-n { grid-column: span 5; }
+  .lp-capability-grid > .lp-cap-w { grid-column: span 7; }
+}
+`;
+
 export function Features() {
   return (
     <section
@@ -28,30 +45,34 @@ export function Features() {
       className="lp-pad lp-section"
       style={{ padding: "76px 40px 72px", maxWidth: 1200, margin: "0 auto", position: "relative" }}
     >
-      {/* The sparkle sits up in the inter-section band so the pause between
-          the pull-quote above and this heading reads inhabited, not empty. */}
-      <Doodle name="sparkle" size={26} color="var(--pop-blush)" rotate={12} style={{ position: "absolute", top: 20, right: "5%" }} />
+      <style>{FEATURES_CSS}</style>
+      {/* One bold mark inhabits the pause between the pull-quote above and
+          this heading: a lone 26px speck read as a stray, so the sparkle
+          grew to carry the corner alone. Its old cobalt star companion is
+          gone on purpose; the sparkle-plus-star pair repeated at other band
+          corners and read copy-pasted at page scale. */}
+      <Doodle name="sparkle" size={38} color="var(--pop-blush)" rotate={-15} style={{ position: "absolute", top: 20, right: "5%" }} />
       <Doodle name="loop" size={34} color="var(--pop-cobalt)" rotate={-8} style={{ position: "absolute", bottom: 34, left: "3%" }} />
       <div data-reveal="" style={{ marginBottom: 56 }}>
         <Eyebrow>What Homa does</Eyebrow>
         <h2 className="lp-h2" style={{ maxWidth: 620, color: "var(--text-strong)", margin: "10px 0 0" }}>
           Plans, pages, and records in <span style={{ color: "var(--brand)" }}>one place.</span>
         </h2>
-        {/* Wave only, no trailing rule: the sibling sections underline their
-            headings with a short coral squiggle, and a wave that settles
-            into a 1000px hairline read as a broken border. Left-set because
-            this header is left-set; segments stay modest so the wave never
-            flatlines mid-run. */}
-        <Squiggle segments={6} line={false} color="var(--brand)" style={{ width: "auto", marginTop: 16 }} />
+        {/* No squiggle underline here on purpose: the wavy mark is reserved
+            for the page's three anchor moments (hero CTA, Stories heading,
+            CTA band); repeated under every section heading it read as
+            template fill. The coral "one place." and the kicker carry the
+            heading's identity. */}
       </div>
       <div
         data-reveal-kids=""
         className="lp-capability-grid"
-        style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 22 }}
+        style={{ display: "grid", gap: 22 }}
       >
         {CAPABILITY_ITEMS.map(({ id, title, body }, index) => (
           <div
             key={id}
+            className={SPAN_CLASS[index % SPAN_CLASS.length]}
             style={
               {
                 "--rv-delay": `${index * REVEAL_STAGGER_MS}ms`,

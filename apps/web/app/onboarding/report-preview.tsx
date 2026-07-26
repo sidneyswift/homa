@@ -96,7 +96,15 @@ export function ReportPreview() {
             </p>
           </div>
 
-          <p className="pt-0.5 text-center text-xs text-body">+ 12 more subjects inside</p>
+          {/* Closes the card in the same micro-label ritual as the header
+              eyebrow and the Homa note, so the last line reads designed
+              rather than defaulted. */}
+          <p
+            className="pt-1 text-center font-mono text-[0.625rem] font-medium uppercase tracking-[0.16em]"
+            style={{ color: "var(--text-muted)" }}
+          >
+            + 12 more subjects inside
+          </p>
         </div>
       </div>
     </a>

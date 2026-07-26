@@ -9,11 +9,16 @@ import { SAMPLE_REPORT_COPY } from "./landing-content";
 /** The free progress report is the page's primary proof and lowest-risk door. */
 export function SampleReportProof() {
   return (
-    <section id="sample-report" className="lp-pad lp-section" style={{ padding: "72px 40px 88px" }}>
+    // Bottom padding 56, not 88: the report sheet, the wave, and the
+    // thread's head padding stacked into the page's largest cream void
+    // (2026-07-26 composition pass); the page keeps its one deep-breath
+    // pause at the Stories band instead.
+    <section id="sample-report" className="lp-pad lp-section" style={{ padding: "72px 40px 56px" }}>
       {/* Below 880px lp-2col stacks and the card moves under the text, so the
           gold wash follows it to the bottom corner; !important outranks the
           inline background. */}
       <style>{`@media (max-width: 880px) { .lp-report-panel { background: radial-gradient(560px 420px at 86% 100%, var(--gold-100) 0%, transparent 70%), var(--surface-card) !important; } }
+@media (min-width: 881px) and (max-width: 1024px) { .lp-report-panel { background: radial-gradient(560px 420px at 86% 0%, var(--gold-100) 0%, transparent 70%), radial-gradient(420px 300px at 92% 100%, var(--gold-100) 0%, transparent 72%), var(--surface-card) !important; } }
 @media (max-width: 400px) { #sample-report .lp-h2 { font-size: 1.85rem; } }`}</style>
       <div
         className="lp-2col lp-report-panel"
@@ -40,14 +45,17 @@ export function SampleReportProof() {
           {/* Shares the page-wide .lp-h2 ritual; the scoped 400px override
               in the style tag above keeps the 1.85rem floor that stops
               "report" landing alone on its own line at 320px. */}
+          {/* No squiggle underline: the wavy mark is reserved for the page's
+              three anchor moments (hero CTA, Stories heading, CTA band). The
+              gold pen stroke under "Free," below stays; that one is a
+              handwritten annotation, not a heading tic. */}
           <h2 className="lp-h2" style={{ maxWidth: 520, margin: "10px 0 14px", color: "var(--text-strong)" }}>
             {SAMPLE_REPORT_COPY.headline}
           </h2>
-          <Squiggle line={false} color="var(--brand)" style={{ width: "auto" }} />
           <p
             style={{
               maxWidth: 500,
-              margin: "22px 0 0",
+              margin: "24px 0 0",
               padding: "14px 16px",
               borderRadius: "var(--radius-md)",
               border: "1px solid var(--sage-100)",
@@ -61,10 +69,10 @@ export function SampleReportProof() {
           >
             {SAMPLE_REPORT_COPY.reassurance}
           </p>
-          <p style={{ maxWidth: 500, margin: "18px 0 0", color: "var(--text-body)", fontSize: "1.05rem", lineHeight: 1.65 }}>
+          <p style={{ maxWidth: 500, margin: "16px 0 0", color: "var(--text-body)", fontSize: "1.05rem", lineHeight: 1.65 }}>
             {SAMPLE_REPORT_COPY.body}
           </p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 28 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 32 }}>
             <Button
               variant="primary"
               size="lg"
@@ -75,8 +83,10 @@ export function SampleReportProof() {
             </Button>
           </div>
           {/* A hand-note tilt (static transform, safe under reduced motion)
-              echoes the report mock's sticker language across the gutter. */}
-          <div style={{ display: "inline-block", margin: "14px 0 0", transform: "rotate(-1deg)" }}>
+              echoes the report mock's sticker language across the gutter;
+              -1.75deg matches the energy of the card's 1.5deg tilt so it
+              reads as a gesture, not misalignment. */}
+          <div style={{ display: "inline-block", margin: "16px 0 0", transform: "rotate(-1.75deg)" }}>
             <p
               style={{
                 margin: 0,
@@ -89,7 +99,18 @@ export function SampleReportProof() {
             >
               Free, and no card is needed.
             </p>
-            <Squiggle line={false} segments={4} color="var(--gold-400)" style={{ width: "auto", marginTop: 3 }} />
+            {/* The underline commits to a word boundary: it emphasizes
+                "Free," only, like a pen stroke under the key word. The
+                uniform scale pulls the stroke's right end back to the comma
+                while keeping the wave's hump proportions in step with the
+                brand squiggle above; the origin keeps its left edge anchored
+                under the F. */}
+            <Squiggle
+              line={false}
+              segments={2}
+              color="var(--gold-400)"
+              style={{ width: "auto", marginTop: 3, transform: "scale(0.8)", transformOrigin: "left center" }}
+            />
           </div>
         </div>
         <div data-reveal="" className="rv-d1" style={{ minWidth: 0 }}>

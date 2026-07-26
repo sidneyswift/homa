@@ -52,7 +52,7 @@ export function CtaBand() {
       </span>
       <Doodle name="star" size={16} color="var(--gold-ink)" rotate={18} style={{ position: "absolute", top: 96, right: "9.5%", opacity: 0.45 }} />
       <Doodle name="heart" size={30} color="var(--clay-600)" rotate={12} style={{ position: "absolute", bottom: 64, right: "9%" }} />
-      <Doodle name="flower" size={40} color="var(--gold-ink)" rotate={-12} style={{ position: "absolute", bottom: 56, left: "9%", opacity: 0.38 }} />
+      <Doodle name="flower" size={40} color="var(--gold-ink)" rotate={-12} style={{ position: "absolute", bottom: 56, left: "9%", opacity: 0.44 }} />
       {/* Below 560px the squiggle slides behind the centered button and the loop
           clumps against the heart, so both step aside; the flower and heart hold
           one clean mark per corner on phones. */}
@@ -64,8 +64,10 @@ export function CtaBand() {
         <Doodle name="squiggle" size={44} color="var(--gold-ink)" rotate={8} />
       </span>
       {/* Sits at 24% so it bridges the corner marks toward the center third
-          instead of pinning the edge. */}
-      <span className="cta-band-loop" aria-hidden="true" style={{ position: "absolute", bottom: 56, right: "24%", opacity: 0.3 }}>
+          instead of pinning the edge. The flower runs a touch heavier (0.44)
+          so the bottom-left answers the heart-plus-loop pair on the right;
+          the squiggle stays the lightest mark at 0.3 since it sits highest. */}
+      <span className="cta-band-loop" aria-hidden="true" style={{ position: "absolute", bottom: 56, right: "24%", opacity: 0.38 }}>
         <Doodle name="loop" size={48} color="var(--gold-ink)" rotate={-9} />
       </span>
       <div style={{ position: "relative", maxWidth: 820, margin: "0 auto" }}>
@@ -86,9 +88,13 @@ export function CtaBand() {
         <p
           data-reveal=""
           className="rv-d1"
-          style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontWeight: 400, fontSize: "1.3rem", color: "var(--gold-ink-strong)", margin: "0 0 34px" }}
+          style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontWeight: 400, fontSize: "clamp(1.3rem, 1.15rem + 0.5vw, 1.5rem)", color: "var(--gold-ink-strong)", margin: "0 0 34px" }}
         >
-          No card is needed. The questionnaire takes about five minutes per child.
+          {/* The nowrap span keeps a 560-600px wrap from stranding "child."
+              as a widow; the phrase is ~200px at this size so it can never
+              overflow a 320px viewport. */}
+          No card is needed. The questionnaire takes about{" "}
+          <span style={{ whiteSpace: "nowrap" }}>five minutes per child.</span>
         </p>
         <div data-reveal="" className="rv-d2" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           {openPopup ? (

@@ -63,6 +63,19 @@ const PLATFORM_CSS = `
 @media (max-width: 600px) {
   .lp-platform-chip:nth-child(3) { margin-top: -1px !important; }
 }
+/* Phone widths wrap the row 2+1. A deeper indent, a stronger re-tilt
+   (standalone rotate composes with the inline transform tilt), and a
+   tuck up into the row above (the negative margin lets the 2.5px white
+   rims overlap, selling die-cut sticker stacking) make the second row
+   read as deliberate placement, not overflow. margin-top needs
+   !important to outrank the max-width 600px nth-child(3) rule. */
+@media (max-width: 420px) {
+  .lp-platform-chip:last-child {
+    margin-left: 34px;
+    margin-top: -3px !important;
+    rotate: -2deg;
+  }
+}
 `;
 
 /**

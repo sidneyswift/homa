@@ -55,6 +55,46 @@ export function Wave({
   );
 }
 
+/* Bottom-tear counterpart to the deckle that ends HowThread
+   (thread/HowThread.tsx DECKLE_D): the blush story band enters as a torn
+   sheet, so it must exit as one too; a smooth wave on the same band read
+   as two different papers. Derived from the source edge (vertically
+   mirrored, horizontally reversed, anchors jittered) so the two tears
+   share one vocabulary, mostly shallow undulation with a handful of deep
+   bites, without being a recognizable copy: a real sheet's two torn
+   edges never match. `color` fills from the top of the strip down to the
+   tear; whatever ground sits behind the strip shows through below it. */
+const TORN_D =
+  "M0 43.3 Q -8 48.0 3 40.6 Q 30 49.3 50 44.1 Q 65 47.8 75 44.4 Q 87 49.8 97 44.6 Q 124 47.3 148 33.5 L 170 48.5 L 202 39.7 Q 224 50.2 249 41.8 Q 267 50.4 285 43.7 Q 301 47.8 311 45.0 Q 326 50.3 338 39.5 Q 365 50.4 387 38.9 L 401 50.1 L 422 43.4 Q 439 49.0 453 41.0 Q 482 50.5 506 40.7 L 521 50.7 L 551 40.4 Q 574 50.0 596 42.1 Q 615 48.1 627 41.1 Q 646 48.2 665 43.2 Q 679 50.4 699 42.4 Q 715 51.7 736 33.8 L 746 50.2 L 773 43.0 Q 795 52.1 818 45.0 Q 841 50.3 866 42.3 L 866 50.7 L 887 37.9 Q 905 48.3 923 37.6 Q 944 49.4 966 42.7 Q 979 50.6 995 40.2 L 1002 50.5 L 1031 39.6 Q 1052 48.2 1077 40.3 Q 1099 48.4 1125 42.8 L 1144 50.6 L 1172 38.0 Q 1197 49.1 1220 45.8 Q 1243 47.9 1261 34.2 L 1279 51.1 L 1321 35.7 L 1328 50.1 L 1358 38.9 L 1368 49.8 L 1393 42.4 L 1402 49.0 L 1418 42.7 L 1427 47.2 L 1440 40.2 L 1440 0 L 0 0 Z";
+
+export function Deckle({ color = "var(--band-blush)" }: { color?: string }) {
+  return (
+    <svg
+      viewBox="0 0 1440 62"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+      style={{ display: "block", width: "100%", height: 62, margin: "-1px 0" }}
+    >
+      <defs>
+        <filter id="lp-deckle-shadow" x="-2%" y="-30%" width="104%" height="160%">
+          <feGaussianBlur stdDeviation="2.2" />
+        </filter>
+      </defs>
+      {/* Cast shadow under the tear only: the torn sheet lies ON the page
+          below, so its bottom edge shadows downward; the sheet's own body
+          covers the rest of the offset copy. The viewBox is 6 units taller
+          than the tear needs so the blur is never clipped at the bottom. */}
+      <path
+        d={TORN_D}
+        transform="translate(0 5)"
+        fill="color-mix(in oklab, var(--text-body) 12%, transparent)"
+        filter="url(#lp-deckle-shadow)"
+      />
+      <path fill={color} d={TORN_D} />
+    </svg>
+  );
+}
+
 const RIBBON_TEXT_STYLE = {
   fontFamily: "var(--font-sans)",
   fontWeight: 700,
