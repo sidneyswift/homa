@@ -245,8 +245,10 @@ files, fleet skills, `.agents/skills/`, tool descriptions, and
   (apps/web/lib/eval-isolation.ts), so passing evals no longer write
   telemetry rows or Blob PDFs into production. Prefer `pnpm eval:sandbox
   [eve-eval-args]`: it boots a disposable local Postgres with every
-  migration applied plus a throwaway artifact store, so DB and
-  blob-backed tools succeed for real instead of failing closed.
+  migration applied plus a throwaway artifact store, seeds the Walker
+  eval fixture family, and stamps eval sessions family-pinned on it
+  (apps/web/lib/family-context-eval-fixture.ts), so DB and blob-backed
+  family tools succeed for real instead of failing closed.
   `HOMA_EVAL_ALLOW_PROD_WRITES=1` is the explicit, loudly logged opt-out.
   Guard: `pnpm check:eval-isolation`.
 - Documentation reconciliation: `pnpm check:docs -- --allow-open` during the audit and `pnpm check:docs` for the zero-open completion gate

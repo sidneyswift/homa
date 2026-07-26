@@ -346,12 +346,15 @@ export async function resolveFamilyContextInstructionMarkdown(
     return markdown;
   } catch (error) {
     if (error instanceof MissingFamilyContextError) {
-      // Local eval sessions have no auth attributes at all, so they land
-      // here on every turn. With the fixture flag on (evals.config.ts,
-      // never Vercel) they get a synthetic set-up family instead of the
-      // "head to /app" line, so behavioral evals test a state production
-      // sessions can actually be in. See lib/family-context-eval-fixture.ts
-      // for the 2026-07-24 routing-eval incident this closes.
+      // Plain `eve eval` sessions (no sandbox database) have no auth
+      // attributes, so they land here on every turn. With the fixture
+      // flag on (evals.config.ts, never Vercel) they get a synthetic
+      // set-up family instead of the "head to /app" line, so behavioral
+      // evals test a state production sessions can actually be in.
+      // Sandboxed runs never reach this catch: the eve channel stamps
+      // them family-pinned on the seeded fixture family upstream. See
+      // lib/family-context-eval-fixture.ts for both layers and the
+      // 2026-07-24 routing-eval incident this closes.
       if (isEvalFamilyFixtureEnabled(input.environment ?? process.env)) {
         return dependencies.renderFamilyContext(evalFamilyFixtureRows(), {
           speakingWith: "Rachel",
