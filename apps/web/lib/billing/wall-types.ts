@@ -7,13 +7,14 @@
 
 export type PlanTier = "regular" | "plus" | "elite";
 
+/** Which price the tier picker's monthly/annual toggle currently shows. */
+export type BillingPeriod = "monthly" | "annual";
+
 export interface TierCheckout {
   /** Stripe Payment Link URLs with client_reference_id (the family id)
    *  and prefilled_email already appended. Annual is null when its link
-   *  is not configured (e.g. the founder ruled the regular tier's flip
-   *  starts monthly-only, $19, while the $99 sticker's Homeschool Fox
-   *  collision is open, 2026-07-18): a missing annual link narrows the
-   *  tier's offer instead of hiding the tier. */
+   *  is not configured for this environment: a missing annual link
+   *  narrows that tier to monthly-only instead of hiding the tier. */
   monthlyUrl: string;
   annualUrl: string | null;
 }

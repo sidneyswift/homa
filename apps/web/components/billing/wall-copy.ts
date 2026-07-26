@@ -1,6 +1,6 @@
 import type { WallDoor } from "@homa/core";
 
-import type { PlanTier } from "../../lib/billing/wall-types";
+import type { BillingPeriod, PlanTier } from "../../lib/billing/wall-types";
 
 /**
  * Every parent-facing word on the wall, in one reviewable file
@@ -138,17 +138,33 @@ export function tierMonthlyButton(tier: PlanTier): string {
   return `Start your 30 free days · then $${TIER_PRICES[tier].monthly} a month`;
 }
 
-export function tierAnnualButton(tier: PlanTier): string | null {
+/** The tier picker's single CTA (2026-07-26: a monthly/annual toggle
+ *  replaced the old two-stacked-buttons layout, one button per tier at
+ *  a time). Falls back to the monthly button if this tier's annual
+ *  link isn't configured, so a stale toggle selection never dead-ends
+ *  a tier that only ships monthly. */
+export function tierButtonLabel(tier: PlanTier, period: BillingPeriod): string {
+  if (period === "monthly") return tierMonthlyButton(tier);
   const annual = TIER_PRICES[tier].annual;
-  if (annual === null) return null;
-  return `Choose the year instead · then $${annual.toLocaleString("en-US")} a year`;
+  if (annual === null) return tierMonthlyButton(tier);
+  return `Start your 30 free days · then $${annual.toLocaleString("en-US")} a year`;
 }
 
-export function tierAnnualBullets(tier: PlanTier): readonly string[] {
+/** The toggle itself: one control above all three cards, so "annual"
+ *  means the same 20%-off-monthly discount everywhere (founder ruling
+ *  2026-07-26) and one badge states it once instead of a per-tier
+ *  dollar figure. */
+export const BILLING_TOGGLE_MONTHLY_LABEL = "Monthly";
+export const BILLING_TOGGLE_ANNUAL_LABEL = "Annual";
+export const BILLING_TOGGLE_ANNUAL_BADGE = "Save 20%";
+
+export function tierBullets(tier: PlanTier, period: BillingPeriod): readonly string[] {
   const price = TIER_PRICES[tier];
-  if (price.annual === null) return WALL_BULLETS.slice(1);
-  const perMonth = (price.annual / 12).toFixed(2).replace(/\.00$/, "");
-  return [`The year works out to $${perMonth} a month.`, ...WALL_BULLETS.slice(1)];
+  if (period === "annual" && price.annual !== null) {
+    const perMonth = (price.annual / 12).toFixed(2).replace(/\.00$/, "");
+    return [`The year works out to $${perMonth} a month.`, ...WALL_BULLETS.slice(1)];
+  }
+  return WALL_BULLETS.slice(1);
 }
 
 /** One line per tier, reassurance-shaped (what it adds, in her words),
