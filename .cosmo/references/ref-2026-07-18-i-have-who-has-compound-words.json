@@ -1,0 +1,46 @@
+{
+  "id": "ref-2026-07-18-i-have-who-has-compound-words",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:30:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428245.542349",
+  "format": "card-game",
+  "title": "I Have, Who Has — Compound Words Phonological Awareness Blending & Segmenting Game",
+  "publisher": "TPT (link expired before download)",
+  "gradeLevel": "K-2nd Grade",
+  "pageCount": "unknown (link expired)",
+  "callouts": [],
+  "overview": {
+    "description": "'I Have, Who Has' is a classic classroom card game. Each player holds a card. One card reads: 'I have [compound word]. Who has [two component words]?' The next player who has the matching card responds: 'I have [those words combined into compound word]. Who has...' The chain continues until all cards have been played. From the filename: this version targets compound words (sun+flower=sunflower, rain+bow=rainbow, etc.) and practices both blending (combining words) and segmenting (splitting words). Phonological awareness game format.",
+    "gameFormat": "Chain game — each card connects to the next. Self-pacing (the chain doesn't continue until the correct player speaks up). Works with 2-30 players.",
+    "skill": "compound word blending and segmenting"
+  },
+  "designPatterns": {
+    "chainGameMechanic": {
+      "description": "A circular chain of cards where each card's 'Who Has' question is answered by exactly one other card's 'I Have' statement. The game flows around the group until the chain returns to the starting card. Self-checking: if the chain breaks, someone made an error.",
+      "value": "Every player is engaged the entire time (listening for their cue). Social game format works for co-ops. Self-correcting chain."
+    },
+    "blendingAndSegmenting": {
+      "description": "Compound words practice two phonological awareness skills: blending (sun + flower = sunflower) and segmenting (sunflower = sun + flower). The game can prompt either direction.",
+      "value": "Phonological awareness at the word level — a step between syllable awareness and phoneme awareness in the developmental sequence."
+    }
+  },
+  "overallSkillTargeting": {
+    "subject": "ela",
+    "domain": "phonological-awareness",
+    "topics": [
+      {"id": "ela.compound-word-blending", "kind": "procedural", "mapped": false},
+      {"id": "ela.compound-word-segmenting", "kind": "procedural", "mapped": false}
+    ]
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "i-have-who-has-game",
+        "description": "A circular chain card game: each card has 'I Have [X]. Who Has [Y]?' where Y is answered by exactly one other card. The chain loops back to the start. Generatable for any matching skill: compound words, math facts, vocabulary definitions, Spanish translations, sight words. Works for 2-30 players. Self-correcting (chain breaks = error)."
+      }
+    ]
+  },
+  "notes": "TPT link expired before download — reference created from filename metadata and known game format. 'I Have, Who Has' is a well-known classroom game mechanic. This is the first GROUP GAME format from Aless (everything else has been individual activities). Signals she values social/cooperative learning formats alongside individual worksheets — consistent with the Peaceful Press co-op guide drop."
+}

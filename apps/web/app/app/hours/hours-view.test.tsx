@@ -1,0 +1,192 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import { renderToStaticMarkup } from "react-dom/server";
+
+import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
+
+import { scopedToViewContext, type HoursEntry } from "../../../lib/hours-view";
+import { HoursEntryOverlay } from "./hours-entry-overlay";
+import { HoursView, type HoursKid } from "./hours-view";
+
+/**
+ * The Hours page and its editor dialog (CG-02, issue #174). Same posture
+ * as the Tasks and Progress UI tests: static server render, assertions
+ * on the HTML contract, no browser. Interactivity (opening the dialog,
+ * confirming a delete) is owned by the same click-handled state the
+ * Tasks editor already exercises this way.
+ */
+
+const ROUTER = {
+  back() {},
+  forward() {},
+  refresh() {},
+  hmrRefresh() {},
+  push() {},
+  replace() {},
+  prefetch: async () => {},
+};
+
+const MAYA: HoursKid = { id: "child-maya", name: "Maya", avatar_url: null };
+const LEO: HoursKid = { id: "child-leo", name: "Leo", avatar_url: null };
+
+function entry(overrides: Partial<HoursEntry> = {}): HoursEntry {
+  return {
+    id: "entry-1",
+    childId: "child-maya",
+    childName: "Maya",
+    subject: "math",
+    minutes: 45,
+    happenedOn: "2026-07-11",
+    source: "chat",
+    note: null,
+    ...overrides,
+  };
+}
+
+// Saturday Jul 11, 2026, 6pm in New York (matches the Tasks fixture).
+const RENDER_NOW = new Date("2026-07-11T22:00:00.000Z");
+
+function renderView(
+  entries: HoursEntry[],
+  kids: HoursKid[] = [MAYA],
+  focusChildId: string | null = null,
+): string {
+  return renderToStaticMarkup(
+    <HoursView
+      kids={kids}
+      entries={entries}
+      focusChildId={focusChildId}
+      timeZone="America/New_York"
+      now={RENDER_NOW}
+    />,
+  );
+}
+
+function renderOverlay(entryToEdit: HoursEntry): string {
+  return renderToStaticMarkup(
+    <AppRouterContext.Provider value={ROUTER}>
+      <HoursEntryOverlay entry={entryToEdit} onClose={() => {}} />
+    </AppRouterContext.Provider>,
+  );
+}
+
+describe("HoursView", () => {
+  it("shows the reassuring empty state with nothing logged", () => {
+    const html = renderView([]);
+    assert.match(html, /Nothing logged yet\./);
+    assert.match(html, /Homa logs school time the moment it comes up/);
+    assert.doesNotMatch(html, /role="dialog"/);
+  });
+
+  it("renders one totals card per visible child with week, month, and school-year figures", () => {
+    const html = renderView(
+      [entry({ id: "a", childId: "child-maya", happenedOn: "2026-07-11", minutes: 45 })],
+      [MAYA, LEO],
+    );
+    assert.match(html, />Maya<\/span>/);
+    assert.match(html, />Leo<\/span>/);
+    assert.match(html, />This week<\/dt>/);
+    assert.match(html, />This month<\/dt>/);
+    assert.match(html, />School year<\/dt>/);
+  });
+
+  it("narrows totals to the focused kid only, never their sibling", () => {
+    // page.tsx pre-scopes entries with scopedToViewContext before handing
+    // them to the view; HoursView itself only narrows the totals cards
+    // (kids full roster stays, for stable avatar tones).
+    const entries = scopedToViewContext(
+      [
+        entry({ id: "a", childId: "child-maya" }),
+        entry({ id: "b", childId: "child-leo", childName: "Leo" }),
+      ],
+      { kind: "child", childId: "child-maya" },
+    );
+    const html = renderView(entries, [MAYA, LEO], "child-maya");
+    assert.match(html, />Maya<\/span>/);
+    assert.doesNotMatch(html, />Leo<\/span>/);
+    assert.match(html, /Every school-time block logged for Maya/);
+  });
+
+  it("groups entries under Today with subject, minutes, note, and source", () => {
+    const html = renderView([
+      entry({ id: "a", subject: "reading", minutes: 30, note: "About 30 min of phonics" }),
+    ]);
+    assert.match(html, />Today<\/h2>/);
+    assert.match(html, />Reading<\/span>/);
+    assert.match(html, />30m<\/span>/);
+    assert.match(html, /About 30 min of phonics/);
+    assert.match(html, />Chat<\/span>/);
+    assert.match(html, />Edit<\/button>/);
+  });
+
+  it("labels every source plainly: chat, text, and phone call", () => {
+    const html = renderView([
+      entry({ id: "a", source: "chat" }),
+      entry({ id: "b", source: "sms", happenedOn: "2026-07-10" }),
+      entry({ id: "c", source: "call", happenedOn: "2026-07-06" }),
+    ]);
+    assert.match(html, />Chat<\/span>/);
+    assert.match(html, />Text<\/span>/);
+    assert.match(html, />Phone call<\/span>/);
+  });
+
+  it("shows which child a block belongs to only when more than one kid exists", () => {
+    // The child-badge span carries its own distinct classes, unlike the
+    // totals card's name (which always renders "Maya" regardless).
+    const soloHtml = renderView([entry({ childId: "child-maya" })], [MAYA]);
+    assert.doesNotMatch(soloHtml, /text-xs font-semibold text-subtle">Maya</);
+
+    const multiHtml = renderView(
+      [
+        entry({ id: "a", childId: "child-maya" }),
+        entry({ id: "b", childId: null, childName: null, happenedOn: "2026-07-10" }),
+      ],
+      [MAYA, LEO],
+    );
+    assert.match(multiHtml, /text-xs font-semibold text-subtle">Maya</);
+    assert.match(multiHtml, /text-xs font-semibold text-subtle">Whole family</);
+  });
+
+  it("only shows the subject filter chips when more than one subject is present", () => {
+    const oneSubject = renderView([entry({ subject: "math" })]);
+    assert.doesNotMatch(oneSubject, /Filter by subject/);
+
+    const twoSubjects = renderView([
+      entry({ id: "a", subject: "math" }),
+      entry({ id: "b", subject: "reading", happenedOn: "2026-07-10" }),
+    ]);
+    assert.match(twoSubjects, /aria-label="Filter by subject"/);
+    assert.match(twoSubjects, /aria-pressed="true"[^>]*>\s*All\s*<\/button>/);
+    assert.match(twoSubjects, />Reading<\/button>/);
+    assert.match(twoSubjects, />Math<\/button>/);
+  });
+});
+
+describe("HoursEntryOverlay", () => {
+  it("opens prefilled with the entry's own subject, minutes, and note", () => {
+    const html = renderOverlay(
+      entry({ subject: "science", minutes: 90, note: "Volcano experiment" }),
+    );
+    assert.match(html, /role="dialog"/);
+    assert.match(html, /aria-modal="true"/);
+    assert.match(html, /<h2 id="hours-entry-title"[^>]*>Edit this block<\/h2>/);
+    assert.match(html, /<option value="science" selected="">Science<\/option>/);
+    assert.match(html, /name="minutes"[^>]*value="90"/);
+    assert.match(html, /Volcano experiment/);
+    assert.match(html, />Save changes<\/button>/);
+  });
+
+  it("names who the block is for, or the whole family", () => {
+    const forKid = renderOverlay(entry({ childName: "Maya" }));
+    assert.match(forKid, /Logged for Maya\./);
+
+    const familyWide = renderOverlay(entry({ childId: null, childName: null }));
+    assert.match(familyWide, /Logged for the whole family\./);
+  });
+
+  it("offers delete without immediately confirming it", () => {
+    const html = renderOverlay(entry());
+    assert.match(html, />Delete this entry<\/button>/);
+    assert.doesNotMatch(html, /can&#x27;t be undone/);
+  });
+});

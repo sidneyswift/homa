@@ -1,9 +1,13 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { agentJobsEnabled } from "../../lib/jobs/flag";
 import { refuseJobSpawnedSession } from "../../lib/jobs/guard";
+import { kickAgentJobsRunner } from "../../lib/jobs/kick";
 import { startJob } from "../../lib/jobs/store";
 
 /**
@@ -15,9 +19,11 @@ import { startJob } from "../../lib/jobs/store";
  * family + skill + child. The skill's SKILL.md owns WHEN to call this;
  * this tool owns the durable, tenant-safe effect.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Start a finite background job that builds in stages over time, for a skill that needs it (a multi-week curriculum, a multi-part project). Only call this after the skill's procedure says to, and after the parent has confirmed the scope. familyId is taken from the session, never from you. If a job for this skill and child is already running, this returns that one instead of starting a second.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: z.object({
     skill: z
       .string()
@@ -83,6 +89,10 @@ export default defineTool({
       startIdempotencyKey: input.startIdempotencyKey ?? null,
     });
     if (!result.ok) return { started: false, note: result.note };
+    // Start the build now rather than at the next sweeper tick (founder
+    // directive 2026-07-23). Best-effort: the row is the promise, the
+    // kick only makes it faster.
+    if (!result.alreadyExisted) await kickAgentJobsRunner();
     return {
       started: true,
       jobId: result.jobId,

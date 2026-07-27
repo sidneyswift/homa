@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { upload } from "@vercel/blob/client";
 
 import { prepareChildPhotoForUpload } from "../../../../lib/child-photo-prepare";
+import { keptAudioNote } from "../../../../lib/lessons/keep-audio";
 
 /**
  * The review page's client slivers (plan 2026-07-13-lesson-listen.md
@@ -86,6 +87,92 @@ export function RetryLessonAnalysis({ lessonId }: { lessonId: string }) {
     >
       {pending ? "Homa is trying again\u2026" : "Have Homa try again"}
     </button>
+  );
+}
+
+/**
+ * The keep-their-voice notice: Homa kept this recording without being
+ * asked, so the parent is told, and the undo lives in the same box as
+ * the news. Two taps rather than one, deliberately: this is the only
+ * irreversible control on the page, and the copy is the only place the
+ * consequence ("the audio goes, the write-up stays") is stated.
+ */
+export function KeptAudioNotice({
+  lessonId,
+  childName,
+  day,
+}: {
+  lessonId: string;
+  childName: string;
+  day: string;
+}) {
+  const router = useRouter();
+  const note = keptAudioNote(childName, day);
+  const [confirming, setConfirming] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [gone, setGone] = useState(false);
+
+  if (gone) {
+    return (
+      <section
+        aria-label="Recording"
+        className="mt-4 rounded-lg border border-border-subtle bg-card p-5"
+      >
+        <p className="text-sm text-body">
+          The recording is deleted. Everything Homa wrote about the
+          lesson is still here.
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      aria-label="Recording"
+      className="mt-4 rounded-lg border border-border-subtle bg-card p-5 shadow-sm"
+    >
+      <p className="font-display text-base font-semibold text-strong">
+        {note.heading}
+      </p>
+      <p className="mt-1 text-sm text-body">{note.body}</p>
+      {confirming ? (
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => {
+              setPending(true);
+              void fetch(`/api/lessons/${lessonId}/audio`, {
+                method: "DELETE",
+              })
+                .then((response) => {
+                  if (response.ok) setGone(true);
+                  router.refresh();
+                })
+                .finally(() => setPending(false));
+            }}
+            className="min-h-10 cursor-pointer rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover disabled:opacity-60"
+          >
+            {pending ? "Deleting…" : "Yes, delete the recording"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirming(false)}
+            className="min-h-10 cursor-pointer text-sm font-medium text-muted underline underline-offset-4"
+          >
+            Keep it
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setConfirming(true)}
+          className="mt-3 min-h-10 cursor-pointer text-sm font-medium text-muted underline underline-offset-4"
+        >
+          {note.action}
+        </button>
+      )}
+    </section>
   );
 }
 

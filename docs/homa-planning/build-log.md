@@ -1,7 +1,1367 @@
-# Build log — decisions agents made alone
+# Build log: decisions agents made alone
 
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
+
+## 2026-07-27 · Founder directive: shorten the signup-paywall trial to 7 days
+
+Founder: "make it a free 7 day trial instead of 30 day." Every parent-
+facing "30 free days" / "30-day trial" string became "7 free days" /
+"7-day trial" (landing, onboarding, the trial gate, chat, SMS, the
+phone line's pitch, drip email, `.env.example`). The gate is still
+flag-dark (`HOMA_SIGNUP_PAYWALL_ENABLED` unset), so nothing live
+changed; this only updates what ships once it flips.
+
+One decision made without a ruling: TRIAL_GATE_TIMELINE's reminder day
+recalculates to day 4 (three days before day 7), matching Stripe's
+`customer.subscription.trial_will_end` webhook cadence (always 3 days
+before trial end, any length) rather than day 23's old "a week before"
+framing, which was specific to the 30-day math. This creates a real gap
+flagged in `.env.example`'s `HOMA_SIGNUP_PAYWALL_ENABLED` comment: no
+code sends this reminder yet. Stripe's OWN dashboard-configured trial
+reminder (the founder checklist item this replaces) fires 7 days before
+trial end, which for a trial this short is day 0, the moment of
+signup, so it cannot keep the day-4 promise the copy now makes. Flagged
+to the founder rather than built, since it is a new capability (a
+webhook handler plus a transactional email) beyond the requested
+change, not a mechanical rename.
+
+**Addendum, same day:** the founder additionally authorized updating the
+LIVE Stripe Payment Links themselves (asked first, since
+`subscription_data.trial_period_days` turned out to be create-only on
+Payment Links, not updatable in place, confirmed via the Stripe CLI's
+own `update --help` vs `create --help` output, so this was never a
+one-line fix). Created 6 new live Payment Links (regular/plus/elite x
+monthly/annual) against the SAME existing Prices/Products, each with
+`trial_period_days=7`, `payment_method_collection=always`, and the same
+`/api/billing/confirm` redirect; verified every field on all 6 against
+the originals before proceeding; repointed the 6
+`NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_*_URL` Vercel production vars via
+`vercel env add --force --no-sensitive`; deactivated the 6 old 30-day
+links afterward. Found and fixed in passing: the regular tier's live
+monthly URL had been unset in production the whole time (a latent gap,
+never hit live because the wall was off). A fresh Vercel production
+build is still required before these values take effect (they are
+inlined at build time); merging PR #236 is the natural trigger and also
+ships the matching copy. Also found in passing: `HOMA_WALL_ENABLED` and
+`HOMA_SIGNUP_PAYWALL_ENABLED` both read empty in production right now,
+contradicting the 2026-07-18 "wall flipped on" record elsewhere in this
+log; nothing customer-facing was touched by today's Stripe change as a
+result, but the discrepancy itself is unresolved and worth a founder
+look.
+
+## 2026-07-26 · Founder directive: the signup paywall (card-upfront trial before the account opens)
+
+Founder: "paywall asap before the free report, just make them pay
+upfront to create an account (maybe a free trial for all subscription
+options). and then remove references to free report on the landing
+page... truly test the market to see if people are willing to pay."
+Built dark behind `HOMA_SIGNUP_PAYWALL_ENABLED` on branch
+`claude/paywall-subscription-onboarding-5e839f`. Supersessions this
+directive carries for NEW families while the flag is on, recorded here
+because three earlier placements said otherwise:
+
+- "The report stays free forever" (2026-07-11 wall placement): no report
+  exists before the card now. By default the gate applies to EVERY
+  non-exempt family at flag flip, existing free families included;
+  HOMA_SIGNUP_PAYWALL_SINCE (optional grandfather cutoff, set it to the
+  flip moment) scopes it to new signups only, and billing_exempt remains
+  the founder's per-family comp switch. The door wall's own rules are
+  unchanged for whoever the account gate does not reach.
+- Chat-first onboarding §7 "onboarding families never see the wall" and
+  the open §5 credit-lockout ruling: the account gate replaces both for
+  new signups; the conversation now starts after the card. LockoutCard
+  stays dark.
+- Landing claims pass T2 "no pricing on the page": inverted deliberately.
+  With a card-upfront trial as the only door, hiding the price until the
+  card screen reads as a trap; the trial terms are now stated at the CTA
+  (hero note), in the FAQ, and on the CTA band.
+
+Decisions made alone, from the 2026-07-26 research pass (opt-out trial
+benchmarks, paywall-placement data, Stripe trial mechanics, ROSCA and
+California ARL): account creation stays card-free and the gate lands
+immediately after it (research: value-first beats pay-before-anything
+for unknown brands; the founder's "pay to create an account" is honored
+as "the account is unusable until the card"); the gate is a full page
+(/onboarding/trial), Blinkist-style trial timeline over the existing
+three tier cards; entitlement now READS stripe_subscription_status
+(canceled/unpaid/paused/incomplete_expired end access; past_due keeps
+it while Stripe retries), closing the cancel-keeps-access-forever hole
+under the flag; text-message signup refuses deterministically while the
+flag is on (it would hand out the account and report the web gate
+holds); no schema change. A four-reviewer adversarial pass the same
+session hardened the gate beyond page render: the map pipeline routes
+(children/answer/score), the eve agent channel (which mobile mounts
+directly), and every door via familyWallCheckout now consult the same
+account decision, the confirm route and webhook stamp the subscription
+mirror by family id so a re-subscribing lapsed family is never walled
+on a stale "canceled" status, and pnpm check:billing wires the gate and
+copy-pin tests into CI. Scoring guidance from the research: judge the
+test on visitors-to-paid and first-rebill survival, not signups
+(expect roughly half to two-thirds fewer signups, 30-50% trial-to-paid
+healthy, below ~20% at $19/mo is a real negative willingness-to-pay
+read).
+
+## 2026-07-25 · Founder directive: GitHub Issues is the live tracker; HUMAN-TODO retired
+
+Founder: "remove references to humantodo. then lets start using github
+issues. its a smarter way to manage tickets and features." Executed the
+same session:
+
+- Label taxonomy created (type: bug/feature/chore/investigation,
+  priority P0-P2, plus production, founder-decision, founder-action) and
+  the process written into `AGENTS.md` § Tickets and issue tracking.
+  Issue forms in `.github/ISSUE_TEMPLATE/`.
+- Everything verifiably open migrated as issues #170-#185 and #187-#212:
+  the CG series, T5-T9, open CRs (51/56/57/69/70/71), grouped
+  founder-decision issues per plan doc (voice-bridge D2/D4-D6, drip
+  D1-D8, materials FD-1..8, credit lockout, latency R1-R6, annual price,
+  island composer, mobile parity), verified build gaps (finalize gap,
+  offer-recovery flag, LL-5 spike, agent-jobs eval), the materials P0
+  bundle, season/portfolio/readthrough triage groups, and re-filed
+  HUMAN-TODO survivors (DM7 #182, Postiz #183, D10 #184, duplicate
+  family verify #185). Ruled decision sets (celebration D1-D7,
+  abilities-map D1-D5, fat-skill D1/D2, world-v2, signal-capture) were
+  deliberately NOT re-filed.
+- Live `HUMAN-TODO.md` pointers updated (README repo map, agentic
+  architecture doc, marketing-distributor skill, demand-engine spec,
+  gateway/lead-funnel plans, the 07-11 archive header); dated history
+  left untouched. The reconciliation manifest row moved to the
+  preserved-removal terminal state (lifecycle removed, disposition
+  deleted) and its 10 ledger claims resolved as removed with per-claim
+  notes; `docs-reconciliation-check.mjs` gained `gh#N` ticket tokens and
+  a narrow removed-with-policy-basis carve-out so a deleted doc's
+  production/external claims do not demand verification evidence they
+  never asserted. `check:docs -- --allow-open` now differs from main
+  only by pre-existing new-file drift.
+
+## 2026-07-25 · Carolyng WhatsApp feedback ingested: CG ticket series filed, two suspected prod failures escalated in-doc
+
+Ingestion record for the co-founder feedback thread of 2026-07-25
+(evidence:
+`journeys/evidence/raw/2026-07-25-carolyng-whatsapp-feedback.md`;
+tickets: `plans/2026-07-25-carolyng-feedback-tickets.md`, CG-01 to
+CG-06). Decisions made alone: (a) numbered a new CG series following the
+T-series precedent rather than extending MJ, because these are
+field-evidence tickets, not journey derivations; (b) per the prod-bugs
+ruling, CG-01 (phone-call amnesia, suspected planning-claim fabrication
+recurrence of the 2026-07-19 class) and CG-06 (web replies invisible in
+a live session) are escalations, not stored bugs: the finding session
+had no prod access (Supabase MCP unauthenticated, Vercel logs
+unreachable), so the doc names the failures plainly and the founder
+reply of 2026-07-25 carries them; (c) journey files were NOT edited
+mid-reconciliation, deltas for F2/F4/F5/05/07 are listed in the ticket
+doc for the next reconciliation pass.
+
+## 2026-07-23 · Founder directive: background jobs start immediately; the cron becomes the sweeper
+
+Founder, on hearing the agent-jobs queue waits up to five minutes to
+pick up new work: "this is terrible. background jobs should be picked
+up immediately." Implemented the same session:
+
+- The runner's tick body moved to a shared cycle
+  (`agent/agent-jobs-cycle.ts`), used by both entry points. Spawns
+  resolve at session ACCEPTANCE, so a cycle is cheap.
+- The agent-job channel gained `POST /eve/v1/agent-job/run-now`
+  (CRON_SECRET bearer auth, the dispatch run-now pattern), which runs
+  one cycle on demand.
+- `start_agent_job` and `start_first_making` kick that route the moment
+  a job row commits (`lib/jobs/kick.ts`). The kick targets THIS
+  deployment (VERCEL_URL first, so a preview never runs prod's code),
+  is capped at five seconds, and swallows every failure, because the
+  5-minute cron remains as the reliability sweeper: a missed kick costs
+  at most one sweeper interval, never a job. Retried stages still ride
+  the sweeper on purpose; instant retry of a failing build would be a
+  hot loop.
+
+Measured in dev: enqueue to stage in_progress in 3.5 seconds, against
+up to 300 before. This also applies fleet-wide to curriculum-studio
+builds the moment it deploys.
+
+## 2026-07-23 · The artifact moment ships: a background first making, and the in-turn generators leave onboarding
+
+Item 1 of the four-item post-loop ruling ("the artifact moment:
+approved, gets its own session"). Built as ruled: the promise rides
+durable job machinery, never prose. The pieces:
+
+- A `materials-studio` job contract (single stage, never gates): the
+  smallest reusable primitive for "build ONE material in the
+  background". Gating became each contract's own decision
+  (`gatesStage`), because the global gate-stage-one rule would have
+  parked a one-page making as ready-for-review, turning the gift into
+  a chore.
+- `start_first_making`: a web-onboarding-only dynamic tool that
+  durably enqueues that job from the parent's own words (verbatim
+  `herWords` ride the plan; title reuses her phrasing) and returns
+  only after the row is committed, so the promise Homa speaks is
+  backed before it is spoken. Once per child, ever, by idempotency
+  key; once per family+child at a time by the job store's active
+  constraint. Records beat `first_making`.
+- The promise card (`FirstMakingCard`): a transcript-resident pointer
+  polling `/api/onboarding/making-status`; it becomes the material
+  card itself when the page lands (soft entrance), reads "paused for
+  now" honestly when the build parks, and never shows a button while
+  making.
+- Skill beats: start at the boundary right after her interest answer
+  (so the page can land inside the sitting), second chance after the
+  reveal, promise laws (after tool result only, sized honestly, her
+  words once), one making per sitting, exit-ramp naming when it has
+  not landed.
+
+Decision made without a ruling, flagged for review: **during web
+onboarding, `create_printable` and `generate_image` do not exist**
+(`lib/onboarding/generation-gate.ts`; both tools became dynamics).
+Grounds: plan §2.6 already resolved onboarding generation delivery as
+"async, never in-turn masking", and prose alone measurably failed to
+enforce it. In two live dev walks with the first-making tool available
+AND the inlined skill text instructing it, the model still built
+in-turn both times (60-90s of held-open screen, "no need to sit and
+wait" spoken over a queue that blocks her sends). With the in-turn
+tools structurally absent, the very next walk fired the first making
+spontaneously at the interest boundary, unprompted. Same shape as the
+ENDS_THE_TURN rule: structural beats vocabulary. Scope is narrow
+(card-capable web session of an onboarding-active family); agent-job
+build sessions, SMS, email, dispatch, and subject-lesson sessions keep
+both tools untouched, and finished families' chat is unchanged.
+
+Verified in the live dev flow (+homatest families 9f3b3ff0 and
+d949d3f0): the interest sentence fired the tool unprompted, the job
+row was durably queued with her words, a runner claimed and built a
+real themed coloring page in the background, the promise card
+rendered mid-checklist and morphed in place into the material card
+("Coloring page ready", preview, Print it), and the reveal was never
+delayed. One honest caveat on that verification: the claiming runner
+was PRODUCTION's (dev and prod share the database, and prod's 5-minute
+agent-jobs tick wins the race for any queued row, sandbox or not), so
+the builds ran main's old stage-gating and parked ready_for_review;
+the ready state was then produced by hand-approving the sandbox rows.
+The per-contract gating itself is covered by unit tests and runs
+correctly from this branch's source; it simply cannot be observed
+end-to-end locally until this branch deploys, because prod always
+claims first. That same fact is an operational caveat worth keeping:
+flag-dark dev testing of any new job kind races the prod runner, and
+prod will happily build rows whose contract it does not know (claim
+does not re-validate the plan). Milestone copy for single-stage jobs
+stopped saying "every part". New CI: `check:jobs` and
+`check:onboarding` (the onboarding lib tests plus the jobs
+runner/milestone tests had never been wired into CI). Also hit twice
+while testing: the known eve dev-runtime landmine, a fresh snapshot
+racing the flow bundle (`UNLOADABLE_DEPENDENCY` on the SKILL.md `?raw`
+import); a restart with warm snapshots recovers.
+
+## 2026-07-23 · Onboarding latency floor measured; skill preload, sentinel tail, and a silent mode-unload fix
+
+The item-3 infra investigation (per-turn latency floor). Full breakdown
+with numbers: `plans/2026-07-23-onboarding-turn-latency.md`. Three
+decisions made alone, each the smallest change its measurement
+supported:
+
+1. **The onboarding skill rides inside onboarding-mode's dynamic
+   instructions instead of behind load_skill.** Measured cost of the
+   load_skill step: one whole model call (3.2-6.4s local, 6-16s per
+   prod step) plus a full ~43k-token cache-miss prefill plus a sandbox
+   read, paid on the first turn after the setup cards. The trade is
+   ~5.8k prompt tokens per onboarding turn, scoped to sessions the auth
+   walk stamped onboardingActive. In the deployed eve bundle (no source
+   tree) the composer falls back to the original load_skill line, never
+   worse than before; closing that gap is R4 in the plan.
+2. **ask_for_details' result note asks for eve's `<eve-empty-delivery/>`
+   sentinel instead of the unsatisfiable "emit no text".** The harness
+   retries an empty reply with a nudge, so models invented filler
+   ("I'll wait for her to fill that in.", "(No further text this
+   turn.)", caught live; assistant-text.ts already enumerates five
+   shipped siblings). The sentinel is delivered as true silence and the
+   note now also states the fact that post-card text is never shown
+   (message-parts' ENDS_THE_TURN guard).
+3. **beginOnboarding is now actually called** (onboarding page's
+   loadChatProps): nothing ever wrote the durable onboarding record, so
+   the basics card's profile_completed_at stamp made the fallback
+   predicate read the family as DONE from turn two onward, silently
+   unloading onboarding-mode for the rest of the arc. Found by watching
+   the prompt shrink by exactly the mode block between turns.
+
+Kickoff turn measured 17.8-23.8s before, 6.3-10.9s after. Not touched
+without a founder: reasoning effort (dominant remaining cost),
+prompt-cache breakpoints (gateway-auto gives no stable prefix; 58.8% of
+prod web turns carry a full-miss step), runtime-action cards, and a
+tool-schema diet (50 static tools ≈ 17.9k tokens every step). Each is a
+sized recommendation in the plan.
+
+## 2026-07-23 · Founder ruling: all four post-loop items approved
+
+Founder, on the drop-off loop's four parked items: "agree with your 4
+suggestions." Ruled and dispositioned:
+
+1. **The artifact moment** (Homa makes something real from her own words,
+   the dinosaur-worksheet beat, before the sitting ends or ready for her
+   return): approved, NOT built in this session. It must ride the offer
+   fulfillment machinery (acceptance/fulfillment decoupling is the exact
+   failure the 2026-07-23 recovery arc exists for, and the recovery
+   engine is still behind HOMA_OFFER_RECOVERY_ENABLED pending sandbox
+   verification), so it gets its own session rather than a same-day
+   bolt-on. Spawned as a follow-up task.
+2. **Optional asks out of sitting one**: shipped same session
+   (be312e2f). The basics card returns to name + state; family name and
+   photo move to settings, conversation, and the first concrete-use
+   moment. Reverses the placement half of the same-morning basics-card
+   ruling, at the founder's direction.
+3. **Per-turn latency floor** (12-17s per model turn with turn count
+   already minimized): approved as an infra investigation, spawned as a
+   follow-up task rather than guessed at here.
+4. **Bare worked-for receipt above the first card**: shipped same
+   session (be312e2f). A turn whose whole output is docked renders no
+   transcript row until the card is spent; receipts return to scrollback
+   afterward, so no work is hidden.
+
+## 2026-07-23 · The onboarding drop-off loop: five fixes from persona walks
+
+Founder directive: "make onboarding incredible" by looping subagents that
+role-play a busy, skeptical, easily-dropping mom through the live flow,
+fixing what they find. Method each iteration: a real browser walk of the
+live dev flow capturing every beat and its measured latency, a
+fresh-context persona subagent reading that exact captured experience and
+ranking where she quits, one fix, live re-verification, repeat. Two
+research subagents (conversion evidence; agent-first onboarding practice)
+ran first and their findings cross-checked the persona's rankings.
+
+Five fixes shipped, each live-verified (commits 4053e23d, f79b1296,
+76828a0d, 851fdec4, 57a4a495):
+
+1. Leaving the questions early with ANY answers now earns the scored
+   reveal, honestly sized, never a polite shrug. Root cause was "when the
+   questions are done" reading as finished-means-complete at two layers.
+2. Arrival is never a blank screen: the app renders the founder-approved
+   greeting instantly (the §6.1 pre-warmed welcome, previously unbuilt;
+   11-17 measured seconds of thinking dot before), and the model's first
+   turn is just the basics card, no second hello.
+3. A partial reveal ends with an honest anchor (the named remaining
+   questions), never a manufactured promise.
+4. The basics card chains straight into the homeschool card client-side,
+   deleting the 16-second model turn between them; Homa hears one
+   combined answer and reacts once. Same pass: "strongest subjects" only
+   renders as a strict subset of covered subjects, and every reveal claim
+   must trace to an answer she remembers giving.
+5. Stated time pressure ("I gotta go") now outranks the beat order, with
+   the compression named out loud. Prose-steered, not re-verified live.
+
+Decisions made without a founder ruling, all reversible: the chained-card
+run replaces the founder-designed per-card reaction rhythm with one
+combined reaction (the persona measured the rhythm's cost at 16 silent
+seconds; the reaction itself survives, there is just one); the pre-warmed
+welcome leaves scrollback once onboarding completes; a reload inside the
+chained-card window re-docks the basics card (fields coalesce, so it
+costs taps, not data).
+
+Left deliberately unfixed, needing founder rulings, with the persona's
+"good but not incredible" verdict attached: (a) producing a real artifact
+from her own words before the sitting ends (the dinosaur-worksheet
+moment; the plan's A3/V-B territory, and it must ride the offer
+fulfillment machinery that is still flag-gated); (b) the optional asks
+(photo, family name) sitting before her kids, which persona and research
+both rank against and which reverses the 2026-07-23 basics-card ruling;
+(c) remaining per-turn latency (12-17s per model turn is now the floor;
+turn count is minimized, the rest is infra); (d) the "Worked for N
+seconds" receipt as the only thing above the first card. The recurring
+eve dev-runtime stale-snapshot crash after agent-file edits (restart
+fixes it) is noted as a tooling landmine worth its own fix.
+
+## 2026-07-23 · Founder ruling: homeschool approach moves into the basics card
+
+While tracing onboarding for a "what actually happens, beat by beat" audit, found
+that `save_homeschool_profile` only ever writes when a parent volunteers her
+approach in passing; nothing in onboarding asks for it. Told the founder this was
+by design (deliberate passive capture, not a gap). Founder disagreed: "this
+should be captured." Asked, via a structured choice, where the ask should live,
+naming the real tradeoff: the basics card already sits inside the sub-4-minute-
+aha budget the 2026-07-22 chat-first rebuild fought to protect (see that entry
+below), so a third field there competes directly with it. Founder chose the
+basics card anyway, explicitly accepting that tradeoff over the alternatives
+(rehearsal beat, day-2+, or leaving it purely passive).
+
+Implemented as a third, always-skippable step on the family_basics card: a chip
+multi-select of the existing `HOMESCHOOL_STYLES` enum, writing through the same
+`saveFamilyContext` merge path `save_homeschool_profile` already uses, so a style
+picked here and one mentioned later in conversation land in one bag. Selecting
+none counts as a complete answer; the step never blocks advancing. Code:
+`apps/web/app/app/detail-card.tsx`, `apps/web/app/api/onboarding/basics/route.ts`.
+
+Verified live: picked Montessori and Eclectic, the receipt bubble read the full
+answer back correctly, the write returned 200, and Homa's next line proved the
+data reached her context rather than just echoing the tap ("Montessori with a
+bit of everything mixed in tells me a lot: I'll lean toward hands-on, self-paced
+activities..."). Design-tokens and the full chat-ui guard (97 tests) both green.
+
+## 2026-07-22 · Reveal card said "ready" before the narrative was
+
+Founder, watching the reveal card in chat: "current, it says its ready,
+but when you click it starts the generation. expected, the generation
+starts automatically, the user continues onboarding while the report
+generates. it does not say its ready until it actually is." Two of the
+three expectations were already true and needed no fix: `finalizeReport`
+already POSTs to `/api/map/score` fire-and-forget on mount, and nothing
+in the turn or skill flow ever blocked on the narrative finishing, so
+the conversation already moved on while it wrote. The one real gap was
+the card's own claim: deterministic scores exist the instant it
+renders, but the LLM-written narrative is a separate, slower,
+backgrounded step, and the card said "ready" and offered "the whole
+report" regardless, so tapping through early landed on the report
+page's own honest "Homa is writing" screen, which read as the click
+itself having triggered the work.
+
+Fixed by having the card poll the same token-scoped
+`/api/map/narrative-status` endpoint the report page's own writing beat
+(`narrative-beat.tsx`) already polls, no new route and no new agent
+turn. A live reveal now has two sub-states: "numbers are in, words
+still writing" (strengths chips shown since they are real regardless,
+no button since there is nothing whole to open yet), then the original
+"ready" copy once the poll sees the narrative settle. Code:
+`apps/web/app/app/report-reveal-card.tsx`, unit test
+`report-reveal-card.test.ts`.
+
+Deliberately NOT built: Homa proactively interrupting the conversation
+to announce the narrative finished. That is the more invasive,
+judgment-heavy option (when is it worth breaking in with news versus
+letting the parent discover it), and AGENTS.md says not to invent
+policy where the spec is silent, so it stays a reversible, unbuilt idea
+rather than a shipped mechanism, left here for a founder call if wanted.
+
+Verified live end to end on a fresh test family (`f1998881`, child
+Story, 2 of ~50 questions answered so the narrative had genuine work to
+do): the card rendered the writing sub-state first ("Story's numbers
+are in. I'm still writing the words to go with them. Keep going,
+there's nothing to wait for.", Math chip, no button), then flipped
+unprompted to "Story's progress report is ready." with the button
+restored, while Homa's own reply in the same turn had already moved on
+to offering a month plan, independently confirming the "continues
+onboarding while it generates" half of the founder's ask.
+
+## 2026-07-22 · Founder ruling: capture every child up front, not one at a time
+
+Founder, after using the one-child arc live: "the original said one
+child. but after using it, that is a dumb design. we should capture the
+family info up front." This reverses the spec's original "plan for one
+child now and the next one later" line, and is a founder ruling, not an
+agent decision, recorded here for the same reason every founder ruling
+is: the reasoning should survive without needing this session's context.
+
+Rebuilt beat 3 as a roster loop mirroring the OLD pre-chat add-a-child
+form's real lesson (kids-step.tsx: adding another kid was always cheap
+and never gated behind a question), translated to chat-first as a loop
+rather than a standing form: card commits, Homa reacts to the age,
+offers "any other kids", repeats until she says that's everyone; a
+parent who names several kids in one message gets add_child called once
+each instead of being walked through fields she already typed. A new
+beat, "Go deep with one," then picks which child the rest of the sitting
+is actually about (skipping anyone under two, the age start_checklist
+already refuses), and the closing beat now queues the other child BY
+NAME instead of the old vague promise.
+
+Verified live, two children in one sitting (card for the first, free
+text for the second): the roster and the pick both worked exactly as
+designed. Two real misses recorded honestly rather than smoothed over:
+Homa explained her pick out loud despite being told not to, and guessed
+"he" for a child nobody had used a pronoun for yet, the same guessing
+habit an earlier fix in this file already targeted. Prose does not fully
+pin model behavior; logged as an open finding, not chased further this
+pass.
+
+Also found and fixed while verifying: `.env.development.local` had a
+stray `VERCEL_OIDC_TOKEN` left over from the original `vercel env pull`
+mistake (see the OIDC entry below), and Next's real precedence put that
+file OVER `.env.local`, so every `pnpm dev:token` refresh since has been
+silently shadowed by an old token in the wrong file. `dev:token` now
+detects and removes a stray copy there instead of leaving a trap.
+
+## 2026-07-22 · Founder's first full walk: dead button root-caused, one-ask rule enforced, five-lens review
+
+Founder walked the whole flow (Sid, DC, child Story) and reported two
+things verbatim: "it wont let me click 'start the questions'" and "there
+should not be a start questions card AND a text input card (confusing)."
+
+**The dead button** (`8bdb3e0`): `.flow-step-in` animated a transform
+with fill-mode `both`; a fill that never ends keeps the transform
+applied forever, and a transformed element is the containing block for
+every `position:fixed` descendant, so the checklist takeover mounted at
+375x0. Proved with getBoundingClientRect, fixed twice over (fill mode
+`backwards` plus a portal to document.body), verified live on the
+founder's own stuck family. A five-lens review workflow independently
+reached the same diagnosis and falsified the first theory (a stale kids
+prop; the click path never reads it).
+
+**One ask per screen** (`8bdb3e0`, `2c0aa65`): the checklist invite now
+docks into the composer slot exactly as the facts card does, and the
+suggestion rail is gated out of onboarding and out of any card's turn
+at both the render and the generation layer. Riders: the dev toolbar
+sat at z-[60] OVER the takeover, putting the family-deleting "Restart
+onboarding" button on top of "Back to chat" (now z-40); the spent pill
+claimed "Questions started" before any answer existed (now "Questions
+ready"); the takeover's blank loading frame pulses; both exits say
+"back to chat"; the state code in her bubble became the state's name.
+
+**Voice leaks, fixed at source** (`3a6f461`): the fifth narrated-wait
+variant rode as paragraph two of a real reply, so filtering is now
+paragraph-level for trailing narration; "she can stop anywhere" reached
+the parent because the skill's own beat 5 said those words about her,
+and the model parroted the register; "anything I make her" traced to an
+instruction parenthetical that permitted guessing a child's pronouns.
+All three sources rewritten.
+
+**Escalated, not decided: requireFamily identity precedence.** The map
+resume cookie beats the authenticated session in lib/map/session.ts, so
+a signed-in parent carrying a stale anonymous cookie resolves to the
+wrong family, which is how a takeover can fail to find the child. The
+reviewer proposed session-first; that has its own wrong-family mode (a
+shared computer with one parent signed in hijacks another's anonymous
+walk INTO the signed-in family, writing rather than erring). Both
+orders misroute someone. Which one loses is policy: founder call,
+flagged in the session report, nothing changed.
+
+**Still open from the review, ranked but unbuilt:** the 33s and 44s
+opening turns (skill-load order and streaming are the levers; rendering
+the near-scripted opener instantly would reverse the no-deterministic-
+welcome ruling, founder call); a spent checklist pill is unclickable, so
+an interrupted parent has no path back to the questions; start_checklist
+writes "started" into the funnel record at invite time; bare "Worked on
+it" eyebrows over filtered turns; save_family_basics and
+save_homeschool_profile produce no receipt chips.
+
+## 2026-07-22 · "whos name?" and the rule that guaranteed it
+
+Founder walked onboarding and asked, of the card's first child question,
+**"this is weird. whos name?"** She had just given her own name and state
+and been told "Got it, Sidney. California it is." The next thing on
+screen was "What is their name?" with nothing above it.
+
+**The mechanism.** The card owns exactly one antecedent, the eyebrow
+"About your child", and it is suppressed whenever the card is docked.
+Every live card is docked, because that is the composer morph. So the
+only place the card ever appears is the only place its subject was
+removed, and `aria-label` still carries it, meaning a screen-reader user
+was told whose name and a sighted user was not.
+
+Four unbound referring expressions across two screens, not one:
+`What is their name?`, `When were they born?`, `so the questions match
+their age in months` (twice over: "the questions" is a definite
+reference to a checklist she has not been shown), and the `Add them`
+button, whose plural also implied it added more than one child.
+
+**The part worth keeping.** Fixing the strings makes the card safe when
+it lands cold. It does not stop it landing cold, and three rules written
+in this same build were between them making that certain:
+`SKILL.md` said "Cards appear; your voice is for reactions", and a
+reaction can only refer back to something that already exists;
+`onboarding-mode.ts` had the right words-first rule and scoped it to the
+first turn and to `family_basics`; `ask_for_details.ts` told the model to
+skip the `intro` slot because "the fields speak for themselves", true of
+a card whose fields say "you" and false of one whose fields say "their".
+A copy bug on screen was a policy bug in the instructions. Fixed at both
+ends (`797aa17`, `06e9713`).
+
+**Decided alone:** "your child's **first** name", not "name", because one
+name per concept is a copy law and three parent-visible surfaces already
+call this datum a first name. The name is substituted through a `{name}`
+token rather than a function per label, so `FIELDS` stays a table of
+plain copy findable by searching the words a parent saw; a test asserts
+no literal token ever reaches the screen. Every context-aware candidate
+was rejected for branching on a child count the card cannot trust, or
+asserting a family shape ("one of your kids") a one-child family does
+not have.
+
+**Still open, logged not fixed:** the same class elsewhere. `hub-step`'s
+"ready for their age" leans on layout for its antecedent; `checklist-step`
+says "One more, since that was easy" about a question the 140ms flash has
+already removed; a 409 error names "Progress", a surface a chat-first
+parent has never visited; `report-reveal-card` uses "answers" for two
+different sets one line apart; `content.ts` opens one subject intro on a
+pronoun where its siblings open on nouns. Two vocabulary seams also
+surfaced: "Birth year" vs "Year" between `kids-step` and the shared
+`birthday-fields` built to stop that, and "Your name" vs "What should I
+call you?" for one field.
+
+## 2026-07-22 · Four bugs found by walking onboarding instead of reading it
+
+All four came out of one afternoon of driving the flow in a browser, and
+none of them was visible in the code. Recorded together because the
+lesson is the same each time: the thing that looked correct and the
+thing the browser did were different, and only one of them was checked.
+
+**1. The agent answered about a family the page was not showing.**
+`agent/channels/eve.ts` resolved the caller's family with
+`.eq("user_id", ...).limit(1).maybeSingle()`, no order and no status
+filter. Correct while an account has one membership row, silently
+arbitrary at two. The test account had eleven and Postgres returned a
+DELETED family, so every turn read and wrote a retired household while
+the page rendered the live one. **Reachable in production**: any account
+whose family is deleted in the founder console and is then re-attached
+has two rows. Fixed in `fe9c68f`, live families only, newest membership
+first. Verified against prod that no data crossed a tenancy boundary;
+the wrong side of the boundary was being read.
+
+**2. The flag flip trapped anyone who stopped before adding a child.**
+With `HOMA_CHAT_ONBOARDING` on, a family with a finished profile and no
+children bounced `/onboarding` → `/app` → `/onboarding` forever, because
+`/app` requires a child and `/onboarding` handed off on the profile
+column alone. **This would have hit real families the moment the flag
+went on**, and stopping before adding a child is the most common way to
+drop out of setup. Fixed in `25b45c6` through one shared predicate,
+`appWouldAdmit`.
+
+**3. Two colour utilities that were never colours** (see the entry
+below, kept separate because it carries its own guard).
+
+**4. Two ways a new parent could be left on a blank screen.** A turn
+that only called a tool counted as the conversation having started, so
+the composer appeared before Homa had said anything; and the kickoff
+lock outlived a kickoff that never landed, making the blank screen
+permanent across reloads. Fixed in `4c208d1`.
+
+**Decided alone, and worth a founder look:** #2 is fixed by sending
+childless families to the card flow rather than by making them count as
+onboarding-active. Widening `familyOnboardingActive` would also change
+the wall exemption and the agent's mode, which is a policy call, not a
+bug fix. The reversible option was taken.
+
+**Method, since it is the transferable part:** every one of these
+survived typecheck, lint and the guard suite. Three of them survived
+reading the code carefully. They surfaced from `getComputedStyle` in the
+running page, from querying prod for where a turn's messages actually
+landed, and from following an HTTP redirect chain. For anything
+user-facing, check what the browser and the database did, not what the
+source says they should have.
+
+## 2026-07-22 · Two undefined colour tokens live in production; fixed, plus a guard for the class
+
+**Status: FIXED in `84d8cbf`, on branch `claude/chat-first-onboarding-65b569`,
+NOT YET DEPLOYED.** The branch is unpushed and the founder has not asked for
+a PR, so this is escalated in-reply rather than shipped. Nothing about the
+fix waits on a ruling; it waits on a push.
+
+Found while checking why a position dot on the new facts card was
+invisible. `bg-border-default` turned out not to be a class at all.
+`globals.css` declares only `--color-border` and `--color-border-subtle`,
+so Tailwind emits no rule for it.
+
+Two live instances, both parent-visible:
+
+- `border-border-default`, 31 uses. Falls back to `currentColor`, so
+  material-card's page arrows, the binder's filter pills, empty states and
+  dashed drop targets, and most of `/admin` have been drawing a near-black
+  1px edge on warm cream where stone-300 was intended.
+- `text-sage-700`, 1 use, the "What worked" bullet on the lesson page.
+  `--sage-700` is in the palette but was never lifted into `@theme`, so the
+  bullet renders body-coloured.
+
+Both now name the declared tokens (`border-border`, `text-sage`). No design
+change: this is the colour each author already asked for.
+
+**Decided alone:** that the missing-token failure needs a guard, not just a
+fix. An undefined colour token fails silently and completely, since it
+compiles, lints, typechecks and renders, and a screenshot reads the result
+as a design choice. Nothing in the toolchain has an opinion, and the
+`_adherence.oxlintrc.json` rules catch raw hex and raw px but not this.
+`pnpm check:design-tokens` (`scripts/design-tokens-check.mts`, wired into
+CI) now fails on any colour utility whose token is not declared. It
+inspects only classes reaching into Homa's own vocabulary, keyed on the
+first segment of a real token, which is what lets it catch
+`border-border-default` while leaving `border-dashed` alone.
+
+Method note, because the detection matters more than the fix: this was
+invisible to reading the code and invisible to screenshots. It surfaced
+only by reading `getComputedStyle` in the running app and then searching
+the compiled stylesheet for the class. For anything colour-shaped, check
+what the browser resolved, not what the source says.
+
+## 2026-07-21 · Founder ruling: no deterministic welcome, Homa opens herself
+
+Walked live on the dev server, founder verdict on the pre-warmed
+welcome: **"that seems forced. I don't think that there should be a
+separate deterministic message from Homa. It should start from the
+actual model."**
+
+This overturns a decision the spec locked in section 1 ("the real eve
+agent, with a pre-warmed deterministic welcome; two short copy-gated
+lines render instantly client-side while the kickoff round-trips"). The
+two client-side lines are removed.
+
+**What the welcome was actually covering, and the better fix.** It
+existed because the first turn is the slowest the product runs and she
+watches a blank screen through all of it. The founder screenshot showed
+the real cause: a collapsed "Worked on it" line ABOVE the thinking
+indicator, meaning the model had already spent a tool call before
+writing a word. That call was `load_skill`, fetching the onboarding
+skill, so the first impression cost TWO model round trips, and my own
+architecture caused it by putting the arc in a load-on-demand skill.
+
+The opening line moved into `onboarding-mode.ts`, which is a dynamic
+instruction and is therefore already loaded before the turn starts. The
+skill still owns the whole arc from turn two onward. Verified: the only
+tool call on the opening turn is now the facts card, no `load_skill`,
+and the turn runs 12 to 15 seconds of pure generation instead of two
+passes.
+
+**Instructions that fought themselves.** The first version said "one or
+two sentences on what you are for, then put up the facts card. No
+greeting flourish, no list of features, no questions in prose." It
+produced exactly a feature list and a prose question, because "sentences
+on what you are for" invites a product description, and a bare
+prohibition loses to the model's instinct to explain the card it just
+put up. Rewritten as one sentence of shape plus a worked NEGATIVE
+example (the actual bad output, with the three things wrong with it
+named) and one worked positive. That landed.
+
+**Two anti-slop guards, both from live output.** A model with a tool
+call mid-turn repeats itself: the same sentence rendered above AND below
+the card, word for word, inside one message. And told to say nothing
+after a card, it narrates its silence: it wrote
+`*(waits silently while the card is on her screen)*`. Both now handled
+in the renderer (`app/app/assistant-text.ts`) rather than in a prompt,
+because a prompt is probabilistic and a parent notices both instantly.
+The rules are narrow: no real reply repeats a whole paragraph verbatim
+inside one turn, and no real reply is nothing but a parenthetical about
+what Homa is doing. A wrapped aside addressed to HER survives.
+
+**Tool notes are machine-facing and must read that way.** The card's
+note began "The card is on her screen and this turn is over", warm
+third-person prose, and the model said a version of it out loud under
+the card. Rewritten terse and imperative ("END TURN. Emit no text after
+this tool call.") so it cannot be paraphrased into speech. The sibling
+notes on `start_checklist` and `score_child_report` were the same shape
+and were fixed with it; `score_child_report` says SPEAK AFTER THIS ONE,
+because the reveal genuinely wants her voice over the chart.
+
+## 2026-07-21 · Chat-first onboarding, phase one: the spine, built behind a flag
+
+Founder ask: build the chat-first onboarding described in
+`plans/2026-07-21-chat-first-onboarding.md`, the whole thing, sequenced by
+judgment rather than by the spec's phase list. Everything below is behind
+`HOMA_CHAT_ONBOARDING`, which is off. With it off, `/onboarding` still
+prerenders statically and every path in this entry is unreachable.
+
+**Where the spec was wrong, and what shipped instead.**
+
+*The onboarding predicate.* §2.2 defines onboardingActive as
+`profile_completed_at IS NULL OR families.context.onboarding.state != 'done'`.
+Read literally, the second clause is true for an ABSENT record, and no
+family has that key today (verified in prod: 46 completed families, zero
+with it). So every completed family would have been marked
+onboarding-active forever, and since the same predicate now exempts a
+family from the door wall, that would have taken the live $19 wall down
+fleet-wide. Shipped predicate: the durable record decides when it exists,
+`profile_completed_at` is the fallback for families predating the flow.
+
+*A lean second chat surface.* §9 lists "the lean onboarding chat surface
+(shared parts with chat-client)" as net-new. `chat-client.tsx` turned out
+to be 1675 lines of incident-hardened machinery: a three-defense stall
+triad, lost-turn recovery matching on exact trimmed text, the Vega
+duplicate-bubble guard, 4am session rotation, and two test files
+asserting against its raw source with regexes. A parallel surface would
+re-implement all of it badly, in the one place a parent has no history
+proving recovery works. §2.8 already requires the two to share a storage
+key and session, so onboarding renders the SAME component with one
+`onboarding` prop. The handoff to `/app` stops being a handoff.
+
+*Generalizing the signup tools.* §2.9 asks to give
+`signup_set_family`/`signup_add_child` a web resolution path. Three things
+block it: `lib/signup-session.ts` refuses any channel that is not SMS and
+is keyed on a phone number, `ensureSignupFamily` unconditionally creates an
+ANONYMOUS family, and `saveFamilyBasicsFromSms` hard-refuses a family with
+any `family_members` row, which an authenticated web user always has (that
+guard exists for founder ruling `card-per-family-primary-parent`). Shipped
+five new narrow tools calling the SAME store functions the SMS path and the
+web routes already call, so a child added in chat is byte-identical to one
+added anywhere else.
+
+**Decisions made without a ruling, all reversible.**
+
+1. The wall bypass is flag-gated, so prod behavior is unchanged until the
+   flow ships. Without the gate, 228 abandoned-funnel families would
+   silently stop being walled.
+2. The arc lives in `agent/skills/onboarding/SKILL.md`, not in
+   `onboarding-mode.ts`. AGENTS.md puts procedure and judgment in a fleet
+   skill and reserves dynamic instructions for what must apply before a
+   skill loads or must be fresh every turn. The mode carries the routing
+   and the directive-reading rule; the skill carries the arc.
+3. `score_child_report` scores and returns, and deliberately does NOT
+   write the report narrative or send the email. Both are slow and would
+   hold the turn open while she watches a still screen. The reveal card
+   finishes them through the existing `/api/map/score` route, which has
+   the 300s function and the `after()` hook built for exactly that, and
+   which is idempotent.
+4. The report opens as its own page rather than an in-chat panel. The
+   SidePanel chassis (§2.7) is not built; the reveal card carries the real
+   numbers inline and the whole report is one tap away.
+5. `MAP_FLOW_STEPS` gains "chat" so the existing per-card funnel compares
+   both flows on one chart. `map.report_viewed` gains a third entry value,
+   "chat", which is what makes the rebuild's central claim measurable: one
+   family in four never opens the emailed link.
+6. The credit meter is counted and shown to the founder at
+   `/admin/makings` and enforced nowhere. No tool reads it. Turning it on
+   supersedes four recorded decisions and needs the §7.5 ruling.
+
+**Two bugs the tests caught before a parent could.**
+`formatHiddenDirective` stripped "/" from values, so `America/Chicago`
+arrived as `AmericaChicago` and would have been saved as a time zone that
+parses as nothing. And the queued-bubble list filtered directives out
+while still passing the filtered index to `removeQueuedMessage`, so with a
+directive queued ahead of her words the X removed the wrong message.
+
+**One bug only running it caught.** `child_reports` has no `id` column;
+it is keyed by `child_id`. The existence check asked for `r.id` and threw
+on every call, which would have made `start_checklist` and
+`score_child_report` fail for every family. A green typecheck said nothing.
+
+**First finding from the shadow meter,** read-only against prod: four
+families made anything in the current Monday-to-Monday window, and the
+busiest made 38 against the specced week-one allowance of 10. Whatever the
+right allowance is, 10 is not obviously it. That number is for the §7.5
+ruling.
+
+## 2026-07-22 · Founder ruling: the firsts page names the record, not the child
+
+The receipt spine (PR #125) shipped without the beginning label the
+celebration spec's R3 asks for ("The very first row Homa ever wrote
+about this child sits at the top of the page, labelled as the
+beginning"). The build plan cut it and flagged it for a founder line,
+because `observed_at` carries the request clock on every write path
+except lessons: `manage_child_progress.ts` and `check-in-service.ts`
+both pass `context.now`, and only `lib/lessons/worker.ts` passes a
+distinct time. The column records when a message ARRIVED, so "the
+earliest thing Story did, everything below came after" is a claim about
+message arrival wearing the clothes of a claim about a child. A mother
+catching up on Sunday about a Tuesday morning would have been told
+Sunday was the beginning.
+
+**Ruled: bring the label back, worded about the record.** The plan
+offered two remedies and the founder took the first. The marker now
+reads "Where the record starts" over "This is the first thing you told
+me about {child}. Everything you told me later sits below it." Every
+word is about the telling, which is exactly what `observed_at` knows,
+and it is true by construction: this is the earliest row on the page and
+the rest were reported after it. Recollection sources are already barred
+from founding a first, so it never lands on one of fifteen signup
+answers sharing an instant.
+
+Two tests carry the ruling: the copy test asserts the body says "you
+told me" and rejects any phrasing that dates the child ("earliest thing
+Story did", "came after"), and the derivation test pins the flag to the
+first row that actually RENDERS, not to the first sorted candidate, so a
+retired catalog id cannot leave the marker on a hole.
+
+**Not taken, and still open as a real option:** a capture-time
+`happened_on` column. That is the deeper fix, and it buys something this
+ruling does not: dates on the page would become event dates rather than
+report dates, so a January morning reported in March would sort and read
+as January. It needs an additive migration, a model judgment over the
+parent's own language ("last Tuesday he read a whole page") with code
+verifying the date is real, bounded and not in the future, and a change
+to the write path for every evidence row. Larger and riskier than a
+label, so it stays a separate tranche rather than riding this one.
+
+## 2026-07-22 · Founder rulings: the remaining five celebration decisions (D2 through D6)
+
+The celebration-system spec
+(`docs/homa-planning/plans/2026-07-22-celebration-system.md`) posed seven
+decisions. D1 and D7 were ruled earlier today (see the entry below). The
+founder ruled the remaining five in one sitting, asked in plain language.
+All five are now in the spec's section 7 and the founder-ruling register.
+
+- **D2 `certificate-wording`.** An area-completion certificate a child will
+  read may carry the child's first name, what they can now do in warm plain
+  words, the date, and "at home." No score, no ranking, nothing a sibling
+  could be measured against. The parent decides whether to print and hand it
+  over. This is the narrow exception to no-child-facing-view: a
+  parent-chosen physical object, never a screen Homa shows the child.
+
+- **D3 `portfolio-proactive`.** Homa MAY proactively remind families in states
+  that legally require a portfolio, ahead of their deadlines. This OVERRODE
+  the spec's recommendation of on-request-only. It creates the one exception
+  to "the Friday letter is the only proactive beat": that invariant now reads
+  "the only proactive *celebration* beat", and a portfolio-deadline reminder
+  is a separate, legally-grounded, non-celebration channel that does not ride
+  the letter. It needs the family's state, per-state deadline data, and the
+  private state crosswalk, so it is a larger build than on-request and has no
+  plan yet; scope separately. It must never invent a date and stay a reminder,
+  not a countdown.
+
+- **D4 `record-export`.** A family can download their child's full record for
+  free for as long as the account exists, indefinitely, including after
+  cancellation. Nothing is ever sealed or made immutable, so a parent can
+  always retrieve the record or delete a sentence they regret. Kept voice
+  clips live with the record, removed only by per-child erase or account
+  deletion. The grace-period-then-delete alternative was declined.
+
+- **D5 `letter-recipient`.** The Friday letter defaults to the adult who has
+  been reporting evidence for that child, only. A second adult opts in
+  explicitly, per child, and mutes per child without affecting the other
+  adult. Auto-including both parents was declined: it risks unrequested
+  celebration about homeschooling reaching a skeptical co-parent.
+
+- **D6 `named-worry-rail`.** The subject the mother named as her worry gets one
+  true sentence at minimum once a month (every fourth weekly letter), including
+  the honest slow answer when nothing moved ("reading did not move this week;
+  what is under him is still under him"). Not every letter. This places a
+  non-celebratory true sentence inside a celebration beat on purpose, so Homa
+  is never seen avoiding the subject the mother cares about most.
+
+D5 and D6 unblock the Friday-letter tranche
+(`docs/homa-planning/plans/celebration-v1/3-friday-letter.md`); the handoff's
+"build the worry rail behind a TODO" caveat is retired, cadence is monthly
+minimum. D2 and D3 govern the certificate and portfolio rungs, which have no
+build plan yet.
+
+## 2026-07-22 · Founder rulings: keep their voice, and the kid standing chip comes off
+
+Two decisions out of the celebration-system research round
+(`docs/homa-planning/plans/2026-07-22-celebration-system.md`, seven
+decisions posed, these two ruled on the spot).
+
+**D1, keep their voice. Ruled yes, and NOT opt-in.** Lesson audio
+deletes on a 30-day timer today, a deliberate privacy commitment in the
+lesson-listen migration; transcripts and rows persist, only the raw
+audio goes. The question was whether a parent may keep a trimmed clip
+of their child working something out past that timer. The founder ruled
+yes and went further than the proposal: "If there's a good clip, let's
+save it for them. They don't need to opt in."
+
+So Homa keeps it on her behalf. That is a real change to a stated
+privacy posture, so the boundary is drawn tight and the honesty
+obligations sit on the retention side, not the deletion side: the model
+judges which clip is worth keeping, code verifies it is this family's
+lesson and the CHILD's own utterance with no sibling present and no
+frustrated beat, the clip is bounded and trimmed, the parent is TOLD
+plainly in the lesson review that Homa kept it, one tap deletes it, and
+it dies with the lesson, the child, or the family. An auto-keep the
+parent is never told about would be a silent retention change, which is
+the one shape this ruling does not authorize.
+
+Time pressure was the reason this got asked first: deletion is one-way,
+so every week the question stayed open destroyed another cohort of the
+best material this product will ever hold.
+
+**D7, the kid standing chip. Removed.** `kid-pill.tsx` put one of
+"Ahead ✦" (gold), "On track" (sage), or "Growing right now" (sky) on
+the per-kid page header, computed from how many of that child's
+subjects scored ahead or growing. It broke no rule the codebase states:
+`BANNED_WORDS` (`packages/core/src/map/copy-laws.ts`) covers "behind"
+but not "ahead", and the narrative gate that enforces it only ever runs
+over model-composed prose, never over a hand-coded chip. That is
+precisely why it was posed as a decision rather than fixed on sight.
+
+The hazard is placement, not vocabulary. The sibling switcher renders
+directly beneath the chip in `kid-view.tsx`, so a mother of two reached
+gold "Ahead ✦" and sky "Growing right now" one tap apart in the same
+spot on the page, and Homa had performed the comparison for her. It was
+also frequently backwards: age bands ask older children harder
+questions while implied closure pushes the other way, so in a rendered
+two-kid case the nine year old drew the softer label and the seven year
+old drew gold. A ranked whole-child label is not merely a comparison,
+it is an unreliable one.
+
+The founder could not picture the problem from the description ("I'm
+not visualizing the problem correctly, so just fix whatever you think
+needs to be fixed"), so it was rendered as two sibling headers one tap
+apart before the fix landed. Scope of the cut is narrow: the
+getting-started chips stay ("Opens at age 2", "Checklist ready", "Just
+getting started"), because those are states rather than judgments, and
+the per-SUBJECT badges inside one child's own page keep the full
+vocabulary, because comparing a child's math to that same child's
+reading is the comparison a mother came here to make and it never
+leaves the child. Once a child is genuinely under way the header now
+says nothing, and the subjects below it carry the real answer in the
+report's own sentences.
+
+## 2026-07-21 · Third stranded Cosmo commit judged superseded and archived, not merged
+
+After both stranded commits on fix/handwrytten-sender were recovered
+(d988ffa on 07-19, 46411c9 via PR #56 today) and that branch was
+deleted, a sweep of the remaining Cosmo branches found one more
+non-equivalent commit: f7f94f9 on cosmo/ingest-20260717-014029, a
+shallow reference-modality ingestion (ref-2026-07-20-inventors-
+scientists, 5KB) of the Venezia inventors-and-scientists drop.
+
+Decision made alone: do not recover it. Evidence: the identical Slack
+drop (same sourceMessageTs 1784598113.867139, same dropper) was
+re-ingested by the PR #78 batch as a full curriculum analysis
+(cur-2026-07-21-getting-to-know-greatest-inventors-scientists, 24KB);
+the taste model's Venezia-wave entry carries strictly richer versions
+of all four of the commit's signal lines; and the commit's remaining
+index rows were either dangling (no backing analysis file on any
+branch: the hwt-readiness-writing-prek and beethoven/greatest-artists
+reference rows) or duplicate IDs with worse stats than main's repaired
+rows. Merging it would have reintroduced the duplicate and dangling
+index rows the 07-19 graduation repair deleted.
+
+The commit stays auditable as tag archive/cosmo-ingest-20260717; the
+branch itself was deleted so Cosmo cannot push to a stale merged
+branch a third time. feat/marketing-ugc-engine was deleted the same
+session after patch-equivalence checks showed it fully drained.
+Future sessions checking for stranded Cosmo commits: origin now has
+no cosmo/* or recovery branches; start from the archive tags and
+`git cherry origin/main <branch>` before trusting any branch state.
+
+## 2026-07-21 · Signal-capture audit ruled: nine founder decisions set the rebuild
+
+Same day as the Progress header-date fix (PR #79), the founder asked whether
+that fix was "a Band-Aid on a bullet wound" and ordered a from-scratch audit
+of the whole capture-to-scoring pipeline. A 21-agent audit (8 subsystem maps,
+7 adversarial hunts, cross-cutting design passes) plus direct prod queries
+found: conversational journaling has produced exactly 1 evidence row ever
+fleet-wide; the check-in system has been started 3 times ever (2 stuck
+paused); and, independent of capture, the trajectory chart cannot gain a
+dated point after onboarding because `saveDerivedProgress` overwrites report
+scores with no history append (56 of 66 prod reports have zero history).
+Full findings: `docs/homa-planning/plans/2026-07-21-progress-signal-capture-audit.md`.
+
+The founder then ruled all nine decisions question by question (registered
+as `progress-signal-capture-v2` in the reconciliation register): per-change
+chart history, model-proposes-code-verifies matching, a per-turn backstop
+sweep, a strength-weighted evidence schema landing before the bridges, the
+`journal_followup` bound-question rail capped at one per family per day, a
+one-time conversational offer of the evening check-in, all five artifact
+bridges (planner, worksheets, plan-edit preservation, hours, photos),
+per-child fan-out with deterministic age gates, and an evals-first build
+order (baseline the broken system, then land every fix with numbers).
+Open: the D6 voice Phase-0 discrepancy (founder to confirm where that
+shipped). Taxonomy topic authoring was first left as its own content
+effort, then the founder amended the ruling later the same day: it joins
+this build as a parallel content track.
+
+Found and fixed the same day, in passing: the lesson-listen trust gate
+rejected 100% of honest clause pairs (a real lesson produced a healthy
+review and zero progress writes, silently). The 0.5 clause-to-excerpt
+overlap floor was calibrated for journal text; lesson dialogue splits
+meaning across speakers. PR #84 grounds the clause in its verbatim-
+verified segment, tightens excerpt provenance to the claimed segment,
+adds number-word aliases to the shared tokenizer, and makes the
+all-rejected case loud (rejected_count on lesson.review_ready plus an
+honest line on the review page). Verified by replaying the four real
+rejected pairs: all pass; invented-claim controls still fail.
+
+## 2026-07-21 · Homa can ask the parent to choose, on web only; one founder ruling
+
+Founder ask: check whether an `ask_user_questions` tool already existed in
+eve, and if not, research it and build the backend and the frontend.
+
+**It did not exist.** The nearest neighbours were `ask_for_photo` (one
+question, camera card) and the progress check-in question card (hardcoded
+to check-ins). eve itself ships no elicitation primitive, and nothing in
+this repo suspends a tool call to wait on a click. So the tool follows the
+existing answer-as-message pattern instead: the tool returns the ask, the
+card renders from `part.output`, and her taps come back as an ordinary
+user message. A reload, a typed reply, or an ignored card all resolve
+naturally, with no orphaned pending call.
+
+**Founder ruling recorded this session** (see the reconciliation
+register): `choice-card-web-only`. The one-question-at-a-time stance was
+raised as a possible conflict, because a four-question card appeared to
+contradict it. The founder ruled that the stance came from SMS, where a
+stack of questions arriving as texts is a burden, and was never a claim
+about cognitive load in general. Web may ask up to four; progress
+check-ins keep their own one-per-turn rule, which this does not touch.
+
+**Shipped.** `agent/tools/ask_user_questions.ts` (1 to 4 questions, 2 to 4
+options each, optional multi-select; pure UI contract, no family data and
+no `familyId`), `app/app/question-card.tsx` (stepped card, one question on
+screen at a time, type-instead and skip always present), wiring through
+`message-parts.tsx` and `chat-client.tsx`, and a `question_card` send
+source so a card tap does not clear a half-typed draft.
+
+**The channel gate is structural, not a refusal.** The first version
+refused at execute time on channels with no chat surface, which still
+costs the model a call and a re-plan to learn something knowable before
+the turn starts. eve's `defineDynamic` resolves tools per turn: returning
+`null` from `turn.started` means the tool does not exist for that turn.
+This is the repo's first use of it; every previous channel difference used
+dynamic instructions or an execute-time refusal. Absent on the telnyx
+adapter, `channel:telnyx`, and the `sms`, `email`, `dispatch`, and
+`agent-job` attributes; present everywhere else.
+
+**Two live-silence risks closed.** Mobile renders `null` for any tool it
+does not recognise, so a web-only card would have had Homa ask a question
+mobile parents never see, deadlocking the conversation on an answer that
+cannot arrive. `message-view.tsx` now renders the ask as plain readable
+lines there. Separately, `instructions.md` ended its honesty block with
+"Ask clarifying questions as plain text in your reply," which forbade the
+new tool outright; it now carves out real option-picks and adds the
+stop-and-wait rule, so Homa never calls the tool and re-asks in prose
+underneath.
+
+Guards: `check:chat-ui` covers the card parser, the composed answer
+message, and the channel gate, including a contract test that runs the
+real tool output through the real transcript parser, the seam where a
+backend rename would silently blank the card.
+
+## 2026-07-21 · Cosmo's real machine still stranding work and skewed after the rewrite; self-healing post-commit hook added
+
+Founder ask: fix the two live issues found while checking #homa-inspo for
+new drops after the 2026-07-20 rewrite. Cosmo's real (separate-machine)
+process had synced to the rewritten skill (its ref JSON used the new
+`stages`/`blobUrl` schema) but two failure modes it was rewritten to
+prevent were still happening: (1) a commit dated Jul 16-17 for content
+from a Jul 21 drop, meaning the clock is still ~4 days slow despite
+`session-start.sh`'s clock check; (2) real, complete analysis work
+committed to `cosmo/ingest-20260717-014029` and never turned into a PR,
+so branch protection (which now blocks direct pushes to main) turned it
+into silently lost work instead of a visible pull request. Recovered
+that specific stranded ref in PR #75.
+
+**Root cause of both:** a preflight script only helps if a session
+actually runs it and respects its exit code. Neither failure mode is
+fixable from this repo by patching a remote machine's clock or its
+agent harness, so the fix instead makes both structurally hard to hit
+regardless of what invokes the session: `.cosmo/scripts/session-start.sh`
+now installs `.cosmo/scripts/post-commit-hook.sh` as a real git
+`post-commit` hook. It fires automatically on every commit on any
+`cosmo/ingest-*` branch, with no dependency on the preflight having run:
+it re-dates a commit whenever the local clock disagrees with GitHub's
+HTTP clock by more than 5 minutes (a recursion guard prevents the
+resulting `commit --amend` from re-triggering itself), and it pushes the
+branch and opens the PR itself the moment the first commit lands, so a
+session that stops without an explicit "ship" step still leaves a
+visible, reviewable PR instead of an orphaned branch. Every step is
+best-effort and never fails the underlying commit; a push or `gh`
+failure prints a warning and continues. Verified in an isolated scratch
+git repo (fake `curl`/`gh` shims): no skew leaves the commit untouched
+and pushes without re-creating an existing PR; simulated 4-day skew
+re-dates the commit exactly once (no recursion) and opens exactly one
+PR; a non-`cosmo/ingest-*` branch is a complete no-op.
+
+Session-start.sh's own clock check now also reads GitHub's clock instead
+of Slack's, matching the hook and reducing the dependency surface to one
+service this workflow already needs reachable.
+
+## 2026-07-20 · Memory budget moves from write time to render time; phone calls can no longer be turned away
+
+Founder ask, from the Brain tab: why is there a 4,000 character limit,
+what happens at the limit, and "this memory system seems fragile, how
+can it be improved so memory is valuable over time and compacts when
+needed." Plus a directive: phone conversations must be able to save
+memories.
+
+**What the 4,000 actually was.** A prompt budget, correctly: every
+character in `family_memories` is re-injected on every turn of every
+channel. What was wrong was where it was enforced. `saveFamilyMemory`
+and the chat `remember` tool both checked `usage + content > BUDGET`
+*before* inserting and refused the write. Only the chat path could
+recover, by asking the model to consolidate mid-conversation with a
+parent waiting. Voice told the parent to go tidy memories on the
+website. The background extraction loops recorded `budget-full` in a
+JSON audit column and moved on.
+
+**Production evidence (2026-07-20).** No `budget-full` had fired yet, so
+this was latent, not an outage. The Gomes family sat at 3,114 of 4,000
+(77.9%) across 21 active rows with **zero superseded rows**: the
+consolidate-on-full path had never executed for anyone, and shipped with
+no test coverage at all. Nine of their 21 memories came from phone
+calls, so the channel that teaches Homa the most was the one closest to
+the wall and the one that handled it worst. Their store already held
+~1,060 characters carrying ~510 characters of meaning, including a
+2026-07-14 entry recording a plan to test Amalia's syllable awareness
+and a 2026-07-19 entry recording the answer, both pinned forever.
+
+**Founder rulings this session** (see the reconciliation register):
+`memory-render-time-budget` (store always, pin the best 4,000; overflow
+stays stored and searchable via recall) and
+`memory-compaction-high-water` (background compaction triggers at 80% of
+budget).
+
+**Shipped.** `selectPinnedMemories` in `lib/agent-memory.ts` splits
+active rows into pinned and overflow, greedy fill by score, stable
+tiebreak on id, pinned re-sorted chronologically; every input row lands
+in exactly one bucket. Write-time refusal deleted from
+`lib/learning/save-memory.ts`, `agent/tools/remember.ts`, and the voice
+route. `family-context.ts` applies the budget at render and, when there
+is overflow, tells Homa how many memories are waiting and to search them
+with recall rather than claiming ignorance. New
+`lib/learning/compact-memories.ts` plus `agent/memory-compactor.md`: one
+structured model pass proposing merges, then deterministic guarded
+writes. The model sees numbered indices into a list built from this
+family's own rows, never uuids, so it cannot name a foreign memory.
+`validateMerge` enforces the guarantees regardless of model output: no
+merge spans two children or folds a child's fact into a family-wide one
+(the multi-kid law, enforced in code and not only in the prompt), no
+mixing `fact` with `what_works`, injection scan on merged content, and a
+merge that does not shrink the store is rejected as churn. Replaced rows
+are superseded, never deleted, so a bad merge is visible and
+recoverable. Nightly sweep at 05:23 UTC
+(`agent/schedules/memory-compaction.ts`), flag-dark behind
+`HOMA_MEMORY_COMPACTION_ENABLED`, computing who is due from live rows in
+SQL so there is no marker column to drift.
+
+**Fixed on the way.** The family-context memory query was
+`order by created_at limit 200`, the *oldest* 200 rows. Harmless while
+storage was capped near 30 rows; it would have silently hidden a
+long-running family's newest memories the moment storage went unbounded.
+Now `desc`. Also added a `memory_compaction` usage surface distinct from
+the existing `compaction` surface, which is eve compacting a long
+conversation and a different cost entirely.
+
+**Verification.** 20 new tests (`lib/agent-memory.test.ts`,
+`lib/learning/compact-memories.test.ts`) covering the never-drop
+invariant, the prompt bound, cross-turn stability, and every merge law,
+including the real Gomes syllable cluster as a fixture. typecheck, lint,
+`pnpm build`, `VERCEL=1 eve build`, `check:isolation`, `check:events`,
+`check:map`, `check:taxonomy`, `check:fleet-skills`,
+`check:skills-targeting`, `check:fleet-skills-dormant`,
+`check:continuity`, `check:eve-stream-duration` all pass. **No migration
+required**: `model_usage.surface` has no CHECK constraint and nothing
+else changed shape, so this deploys as code only.
+
+**Not verified locally, and the reason.** The compaction model pass
+itself never ran here. Production authenticates to the AI Gateway
+through Vercel OIDC and there is no `AI_GATEWAY_API_KEY` in the
+environment, so `generateObject` cannot be exercised outside a
+deployment. A `dryRun` option was added to `compactFamilyMemories` for
+exactly this: after deploy, run it against the Gomes family to see the
+proposed merges before enabling the flag. The deterministic half is
+tested; the judgment half is not, and enabling the schedule before that
+dry run would be enabling untested judgment.
+
+## 2026-07-20 · Ingestion engine rebuilt: skills and verifier match the fat-skill reality; four founder rulings
+
+Founder ask: review the last 24h of Material Studio work, inventory
+#homa-inspo against ingested state, fix the ingestion skills so the PNG
+dump and taxonomy deletion cannot recur, and design a validated
+Slack-to-skill pipeline.
+
+**Audit (25-agent workflow over a full Slack pull, adversarially
+verified).** 115 logical drops in #homa-inspo: 39 ingested, 52 partial,
+26 not ingested. Break point 2026-07-19 ~20:25 UTC: Cosmo's repo writes
+landed in an ephemeral sandbox; 19 drops after it (12 curriculums incl.
+Blossom & Root Year 0 with an explicit "Ingest" command) have zero disk
+trace. 14 TPT links permanently lost to expiry because capture waited
+for analysis. 29 drift items confirmed between the ingestion skills and
+the post-PR-#57 repo.
+
+**Shipped.** Full rewrite of `.agents/skills/reference-ingestion` and
+targeted rewrite of `.agents/skills/curriculum-ingestion`: capture
+before analysis, Slack-ts dating, recipes as files (never SKILL.md
+sections), founder-gated anchors, append-only taxonomy with the
+`Subject > Domain` MARBLE_DOMAIN_MAP key law and manifest sha256
+updates, funnel-shaped gap slugs, PR-only shipping, verifier-gated
+:ship:. `.cosmo/scripts/verify-ingestion.py` rewritten (old step 4
+globbed deleted PNGs and failed every ref repo-wide; new version adds a
+staleness preflight, real gap resolution, additive taxonomy assertion,
+curriculum mode, and --regen-index; index.json files are generated,
+never hand-edited). `.cosmo/open-gaps.json` added: 63 acknowledged open
+gaps. Verifier matrix at ship time: 131/191 pass; the 60 failures are
+the honest re-analysis backlog (59 incomplete five-dimension analyses).
+
+**Founder rulings recorded this session** (see the reconciliation
+register): `main-branch-protection`, `fleet-skill-file-cap-removed`
+(D1 resolved by removal; byte caps stay), `golden-exemplar-anchors`
+(D2 ratified), `inspo-originals-offrepo` (gitignore + Blob; uploads go
+through `.cosmo/scripts/blob-upload.sh`, which pins Homa's production
+Blob store id and refuses a token scoped to any other store, since
+Cosmo's machine holds Vercel credentials for more than one project).
+Cosmo machine hygiene ships as `.cosmo/scripts/session-start.sh` (fresh
+branch off origin/main, clock-skew and stray-commit warnings),
+referenced from the skills.
+
+## 2026-07-19 · Planner canvas in chat: Homa opens and edits the planner (founder ruling: direct writes)
+
+Built after a live family (Chelsea, 2026-07-19 chats) asked how to input
+lessons into the planner and Homa answered honestly that she had no
+visibility into it. Founder ruled **"write directly"**: edit_plan applies
+activity changes to `child_plans` immediately, no propose-then-confirm
+step. Shape follows the Vercel chatbot artifact pattern translated to
+eve's tool-output seam:
+
+- `open_planner` (read-only) returns every plan's current week with
+  activity indices AND opens the week board as a canvas beside the web
+  chat (`planner-canvas.tsx`; the tool-output part is the open signal,
+  the same seam as the snap card). Over SMS/email nothing opens and the
+  tool result says so.
+- `edit_plan` adds/replaces/removes week activities. The pure engine
+  (`lib/map/plan-edits.ts`) validates the whole batch before anything
+  writes and remaps "week.index" check-off keys when indices shift
+  (remove shifts later keys down; replace clears its own check). One
+  UPDATE writes plan + remapped progress together.
+- `GET /api/map/plan/board` feeds the canvas (RLS, signed-in only);
+  each applied edit_plan result refetches it, and the refetch writes
+  the server's remapped check map through to localStorage
+  (`overwritePlanChecks`) so stale local keys cannot tick moved boxes.
+- Judgment lives in the `planner` fleet skill (open-then-edit
+  discipline, activity voice rules, honest limits); the tools stay
+  narrow. New `map.plan_edited` event (counts only, no text).
+
+Agent-decided (no ruling asked): activities-only editing (focus lines,
+retest dates, and check-offs stay out of the model's reach), a 10-
+activity-per-week cap, and no month creation from chat (the report's
+one-tap consent stays the only door, so the wall is never bypassed).
+
+## 2026-07-19 · Second stranded Cosmo commit recovered: marketing-ugc-engine skill
+
+Follow-up to the recovery below. The second stranded commit on
+fix/handwrytten-sender (46411c9, marketing-ugc-engine skill, 8 files)
+is now on main. Decision made alone: the skill belongs on main because
+it fits the `.agents/skills/marketing-*` family that `marketing/AGENTS.md`
+names as the home of pipeline logic, references only surfaces that
+already exist (`marketing/creators/`, `marketing/campaigns/`,
+`marketing/voice/house-style.md`), and encodes the Homa red lines
+(child privacy absolute, never auto-publish, no AI-first framing,
+family data banned). Cherry-picked verbatim to preserve authorship,
+then swept in a follow-up commit: 29 em dashes replaced with
+law-compliant punctuation (the skill restates the no-em-dash law but
+its own prose violated it). Raw source kept in `marketing/raw/` per
+the provenance convention, swept the same way, matching the zero
+em-dash state of every existing raw file.
+
+## 2026-07-19 · Cosmo's stranded ingest recovered; graduation batch repaired; inspo funnel in /admin/studio
+
+Founder ask: investigate .cosmo, update materials-studio, and put the
+whole funnel (Cosmo ingestion → skill graduation → family output) on
+the /admin/studio surface.
+
+**Recovery.** Cosmo's latest batch ingest commit (d988ffa, 70 new
+reference analyses + 11 curriculum analyses + updated taste model) was
+pushed to the already-merged fix/handwrytten-sender branch and never
+reached main; only the graduation commit (0f066b7) did. Restored the
+81 stranded .cosmo files onto this branch. Note for future sessions:
+Cosmo's commit timestamps run about four days behind wall clock (its
+"Jul 15" commits sit on top of Jul 19 merges), and it has now twice
+pushed to a stale PR branch; check origin branches for stranded Cosmo
+commits before trusting main's .cosmo state. A second stranded commit
+(46411c9, marketing-ugc-engine skill) remains unrecovered on that
+branch: out of scope here, flagged to the founder.
+
+**Graduation repair (main CI had three red gates from 0f066b7).**
+(1) check:fleet-skills: em dashes in SKILL.md (15), plus 24 in
+activity-formats.md and 7 in curriculum-writer.md, all replaced with
+law-compliant punctuation. (2) check:materials: SKILL.md cited
+homa-pk-activity-treasury-reference.png which was never shipped;
+citation removed, patterns kept. (3) check:taxonomy: the batch added
+40 topics under 17 unmapped subject>domain pairs in two mixed
+vocabularies, including 6 duplicate topics. Deleted the duplicates
+(no dependency edges touched them), normalized 26 topics onto existing
+Marble domains, added 4 genuinely new mapped pairs (History >
+Geography, History > Cultural Studies, English > Literature as literacy
+content, Life Skills > Daily Living), regenerated the slug map (37 new
+frozen ids) and progress index (1380 assessment topics). One map test
+updated because behavior genuinely improved: PreK math topics now put
+a 40-month-old in window, so the "windows floor at 48 months" premise
+moved to 36 with a new test locking the improvement.
+
+**Skill update from the batch's field directives.** Math-practice
+rules (answer keys mandatory, no bubble grids, challenge blocks,
+pencil-and-paper interactivity, math-log ELA crossover,
+upload-for-review offer), lamination-ready printable manipulatives,
+unit-study resource page + materials list, try-this-together box, and
+four new recipes with registry entries: clip cards, file-folder game,
+cloze story, reading comprehension mini-unit. Gap coverage after this
+pass: 27 of 90 flagged formats covered, 63 open by design (planner and
+curriculum formats belong to the coming lesson-planner layer, not
+materials-studio).
+
+**Inspo funnel.** /admin/studio now opens with the three-stage funnel:
+intake (parsed live from .cosmo analyses), graduation (skill sections,
+registry entries, and the open-gap backlog computed by crossing
+recipeMatch.gaps against shipped recipes), output (materials and
+families from the production ledger). New pure module
+lib/materials/cosmo-funnel.ts with tests in check:materials, disk
+layer lib/admin/cosmo-data.ts, .cosmo JSON/markdown traced into the
+studio functions (heavy inspo images and PDFs excluded,
+outputFileTracingRoot pinned to the monorepo root).
 
 ## 2026-07-18 · Studio lab converged: founder picked direction 3 "Ledger"
 
@@ -639,7 +1999,7 @@ walk into `packages/core/src/map/lesson-target.ts`. The legacy
 `buildFourWeekPlan` now calls the shared selector, so its two targets, practice
 patterns, weeks, and month-plan consumers retain their existing behavior.
 
-Founder decision, 2026-07-18, on the merge into main: swap, not coexist —
+Founder decision, 2026-07-18, on the merge into main: swap, not coexist,
 `WelcomeChooser`'s post-payment per-subject links (report-lock,
 2026-07-18) replace "Homa builds the four-week plan" with the same lesson
 build/open action the report body uses, whenever subject lessons are on.
@@ -9561,8 +10921,8 @@ Decisions made, in the order asked:
    example 8).
 4. **CI added now**, before any Phase A code: `.github/workflows/ci.yml` runs
    typecheck + build + `check:isolation` on every push/PR to `main`. Required
-   secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-   — both public-safe publishable values) set on the GitHub repo. Satisfies
+   secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
+   both public-safe publishable values) set on the GitHub repo. Satisfies
    BUILD.md law #1 ("isolation tests green in CI always") for the first time;
    extend with the MJ-08 events-registry check once that registry covers more
    than `waitlist.joined`.
@@ -9575,8 +10935,8 @@ Decisions made, in the order asked:
    names **M1-08 minimal** (Resend transactional email: welcome, journal-prompt,
    weekly-note, receipt templates + the opens/clicks/unsubscribes webhook
    bridge that `journeys/06 §7` requires for the anti-guilt ratio law) and
-   **MJ-09** (waitlist read path + invite codes + invite email — today's
-   waitlist is write-only with no way to invite anyone off it) — previously
+   **MJ-09** (waitlist read path + invite codes + invite email, today's
+   waitlist is write-only with no way to invite anyone off it), previously
    both were only implicit under FR-1/FR-3.
 7. **Cost-telemetry timing (Gateway `ai-reporting-*` headers + per-key budget
    caps moved into Phase B vs staying in Phase C with FR-11): left open,
@@ -9587,7 +10947,7 @@ Decisions made, in the order asked:
 8. **Resend domain live:** `mail.thankshoma.com` verified in Resend (DKIM, SPF
    MX+TXT, DMARC, tracking CNAME all green; click+open tracking on per
    `journeys/06 §7`'s explicit opens/clicks webhook requirement; inbound
-   receiving deliberately left off — `journeys/02` line 890 defers
+   receiving deliberately left off, `journeys/02` line 890 defers
    reply-to-email to POST-GA, v1 is deep-link-to-chat only).
    `RESEND_API_KEY` is in `apps/web/.env.local` (gitignored) and in Vercel
    production env (added via CLI, type Sensitive).
@@ -9605,7 +10965,7 @@ v2 visual system, closing the loop the grilling session opened.
    trains AI" line. Waitlist band uses "Founding families" framing per
    BUILD.md's hard constraint (no pricing, T2). CTA stays functional ("Join
    the waitlist") rather than the kit's more evocative "Meet your child's
-   map" — no product exists yet for that CTA to honestly lead to.
+   map", no product exists yet for that CTA to honestly lead to.
 2. **Design**: homa-design v2 tokens (colors, radius, shadows, fonts) copied
    into `apps/web/app/globals.css` and wired through Tailwind v4's
    `@theme inline`, so classes like `bg-brand`, `text-strong`, `rounded-pill`
@@ -9617,7 +10977,7 @@ v2 visual system, closing the loop the grilling session opened.
    owns porting the full component library.
 3. **Verification**: typecheck + production build green; rendered and
    screenshotted at desktop and mobile (390px) widths via Playwright for
-   both `/` and `/waitlist` — readable, on-brand, touch-friendly. Founder
+   both `/` and `/waitlist`, readable, on-brand, touch-friendly. Founder
    phone test + Alessa read-aloud (build-log #10's two remaining DoD boxes)
    are next.
 4. Deleted `wireframe-slot.tsx` (no slots remain, per its own comment).
@@ -9634,14 +10994,14 @@ roadmap stance, a contained-blast-radius environment plan (Vercel preview
 branch, real homa-prod schema with tagged+cleaned-up synthetic rows, never
 production), and a verdict rule (any leakage/data-loss/stuck-state = NO-GO
 regardless of the other four; eject to M0-02 on failure). BUILD.md now links
-it. **The spike itself has not been run yet** — this session only produced
+it. **The spike itself has not been run yet**, this session only produced
 the criteria, per the gate's own requirement that they exist first.
 
 ## 2026-07-04 · M0-01 test (a) run: NO-GO
 
 Ran the eve upgrade drill (test a of `m0-01-adversarial-prototype-gate.md`)
 locally, isolated on a throwaway `spike/m0-01` branch (deleted after, no code
-diff to keep — this was a pure test, nothing to merge). Parked a session in
+diff to keep, this was a pure test, nothing to merge). Parked a session in
 HITL under eve 0.18.2, bumped to 0.19.0 (today's `latest`; no newer version
 exists to test a true forward upgrade), and tried to resume it.
 
@@ -9655,7 +11015,7 @@ results in the durable workflow log. Full evidence in `eve-churn-log.md`;
 gate writeup in `m0-01-adversarial-prototype-gate.md`.
 
 **Per the gate's own verdict rule, this single failure is enough: NO-GO.**
-Tests (b)–(e) were not run — the verdict doesn't change once (a) fails this
+Tests (b)–(e) were not run, the verdict doesn't change once (a) fails this
 decisively, and they remain available for a custom-harness retest later.
 **This is now an open decision for Sidney**, not resolved here: eject to
 M0-02 (custom harness) per the rule as written, treat it as a narrower
@@ -9669,23 +11029,23 @@ Asked "what would fix this without diverging too much" after the NO-GO.
 Built three things, all in our own code/process, none touching eve
 internals:
 
-1. `apps/web/lib/harness/resume-session.ts` — narrow seed of M1-14. Every
+1. `apps/web/lib/harness/resume-session.ts`, narrow seed of M1-14. Every
    resume of an eve session must go through this. It doesn't trust eve's
    synchronous `ok: true` alone (the finding showed that's not confirmation);
    it watches the event stream for a real new turn or an explicit failure
    before calling a resume successful, and throws a typed error otherwise.
    Verified against the live bug: 2/2 correctly caught the real corruption,
    1/1 correctly passed a healthy same-version control (no false positive).
-2. `scripts/eve-upgrade-check.mjs` — automates the exact repro against any
+2. `scripts/eve-upgrade-check.mjs`, automates the exact repro against any
    candidate version pair. Verified: correctly passes a same-version no-op,
    correctly fails the known-bad 0.18.2→0.19.0 pair (twice).
-3. `docs/homa-planning/runbooks/eve-version-bump.md` — the procedure: read
+3. `docs/homa-planning/runbooks/eve-version-bump.md`, the procedure: read
    the changelog for tool/replay/workflow language, run the script, check
    for live parked sessions (stubbed until M1-02), deploy, smoke-test, log
    the outcome in `eve-churn-log.md` either way.
 
 This does not resolve the open decision (eject to M0-02 vs. stay on eve with
-these mitigations vs. report upstream and wait) — that's still Sidney's call.
+these mitigations vs. report upstream and wait), that's still Sidney's call.
 It does mean Phase B is no longer flatly blocked: BUILD.md now says
 "mitigated, not resolved" instead of "blocked."
 
@@ -9694,7 +11054,7 @@ It does mean Phase B is no longer flatly blocked: BUILD.md now says
 Resolved the local-vs-production caveat on the deploy/rollback finding.
 Deployed two separate real Vercel previews (fixing a genuine gap along the
 way: no `.vercelignore` existed, so a local `vercel deploy` tried to upload
-the multi-gigabyte `homa-research/`/`homa-macmini/` folders and failed —
+the multi-gigabyte `homa-research/`/`homa-macmini/` folders and failed,
 added `.vercelignore` mirroring `.gitignore`'s exclusions). Started a
 session on the first deployment, let it complete, deployed the second, sent
 a follow-up to the second deployment's URL using the first's session and
@@ -9704,7 +11064,7 @@ token.
 session with real context intact (recalled a secret code from the first
 turn). This is strong evidence the earlier "stuck forever" finding was a
 limitation specific to `eve dev`'s local disk-backed workflow world, not a
-production-relevant risk — Vercel Workflow (the managed service actual
+production-relevant risk, Vercel Workflow (the managed service actual
 production uses) handles cross-deployment continuity correctly.
 
 Still open, narrower: this tests session portability across deployments,
@@ -9721,7 +11081,7 @@ Cleaned up both throwaway preview deployments and the test branch after.
 
 ## 2026-07-05 · Founder decision: stay on eve; spike continued
 
-Sidney: "stay and continue." Resolved the open M0-01 decision — not
+Sidney: "stay and continue." Resolved the open M0-01 decision, not
 ejecting to M0-02, staying on eve with the mitigations from 2026-07-04.
 Continued the spike since committing to eve means the other adversarial
 tests should actually be checked against it:
@@ -9731,18 +11091,18 @@ tests should actually be checked against it:
   sessions, zero cross-session leakage, confirmed twice. Clean pass on the
   single most safety-critical property.
 - **Test (b)** (deploy + rollback mid-turn): failed, reproducibly, across
-  three variants (hard kill, graceful stop, explicit nudge) — a step killed
+  three variants (hard kill, graceful stop, explicit nudge), a step killed
   between start and completion never resumes, with zero server-side error
   logged. **Important caveat**: this is against the local dev workflow
   world, not real Vercel Workflow, which the docs describe as a different,
   managed durability substrate. Needs a Vercel-preview retest before being
   trusted as production-relevant. Logged in full in `eve-churn-log.md` and
   `m0-01-adversarial-prototype-gate.md`.
-- Tests (c) and (d) stay deferred — they need a schedule dispatcher and a
+- Tests (c) and (d) stay deferred, they need a schedule dispatcher and a
   session-rotation state machine that don't exist yet (M3-10/M1-02, M1-15).
   Not skipped, just correctly sequenced.
 - Relocated `resume-session.ts` from `apps/web/agent/harness/` to
-  `apps/web/lib/harness/` — the old path is an eve-discovered directory
+  `apps/web/lib/harness/`, the old path is an eve-discovered directory
   convention and eve's discovery warned on it; the module is app code
   calling eve's API, not an eve capability.
 
@@ -9751,7 +11111,7 @@ rollback finding tracked as an open risk, not a blocker.
 
 ## 2026-07-05 · Playable MVP: auth → family → child → chat → worksheet
 
-Founder asked "can we get an mvp shipped so i can start playing with it" —
+Founder asked "can we get an mvp shipped so i can start playing with it",
 built the trimmed walking-skeleton slice end to end, real code not hacks:
 
 1. **Auth (minimal M1-01):** Supabase Auth email/password via @supabase/ssr.
@@ -9761,14 +11121,14 @@ built the trimmed walking-skeleton slice end to end, real code not hacks:
    founding-family gate: signup requires the invite code in
    `HOMA_SIGNUP_CODE` (set in Vercel prod env; unset locally = open signup
    for dev). MJ-09's real invite codes replace this.
-2. **Family creation (migration #6):** `create_my_family()` RPC — an
+2. **Family creation (migration #6):** `create_my_family()` RPC, an
    authenticated user with no membership creates exactly one family
    atomically; the one-family rule lives in the function body. RLS advisor
    warning is intentional (documented in the migration).
 3. **Child intake (minimal M2-03i):** /home shows create-family → add-child
    → children list; children write to `children.profile` jsonb (interests,
    focus) under the existing "members add children" RLS policy.
-4. **eve auth (FR-1 slice):** `agent/channels/eve.ts` custom AuthFn — chat
+4. **eve auth (FR-1 slice):** `agent/channels/eve.ts` custom AuthFn, chat
    sends the caller's Supabase access token as a bearer (resolved fresh per
    request by useEveAgent), the channel verifies it via `auth.getUser()`,
    resolves familyId under the caller's OWN RLS, and stamps
@@ -9776,7 +11136,7 @@ built the trimmed walking-skeleton slice end to end, real code not hacks:
    The raw token in attributes is server-custody state, never model-visible,
    refreshed per turn; M1-02's SET LOCAL pattern replaces it.
 5. **Agent tools (first two):** `get_children` (reads the family's kids +
-   profiles as the caller — RLS is the wall inside tools too, no service
+   profiles as the caller, RLS is the wall inside tools too, no service
    key exists in the app) and `create_worksheet` (schema-validates the
    worksheet the model composes; the UI renders it as a printable card).
    `lib/agent-db.ts` is the shared caller-scoped DB helper. Instructions
@@ -9796,9 +11156,9 @@ Dino Letter Sounds" card with 5 themed exercises. Test rows deleted from
 homa-prod after. Typecheck, production build, and isolation checks green.
 
 Known deferrals: voice, photo personalization, conversation persistence
-(chat history resets on reload — eve session is durable server-side but the
+(chat history resets on reload, eve session is durable server-side but the
 UI doesn't rehydrate it yet), real invite codes (MJ-09), the reportlab/fal
-worksheet pipeline (M0-03/M2-05 — current output is text-exercise layouts),
+worksheet pipeline (M0-03/M2-05, current output is text-exercise layouts),
 proper session-tracking table.
 
 ## 2026-07-05 · Fixes: signup dead-ended, chat history lost on reload
@@ -9820,7 +11180,7 @@ Two real defects in the MVP slice, both found and fixed:
 2. **Chat history vanished on reload.** The chat didn't persist the eve
    session cursor, so every reload silently started a fresh, memoryless
    conversation. **Fix:** wired eve's documented resumable-sessions pattern
-   into chat-client.tsx — initialEvents/initialSession from localStorage
+   into chat-client.tsx, initialEvents/initialSession from localStorage
    (keyed per user id), snapshot saved onFinish. Added a "New chat" button
    to deliberately start fresh. /chat is now a server component that resolves
    the user id for the storage key.
@@ -9830,7 +11190,7 @@ the code confirms and lands on /home (no email), wrong code shows the
 friendly error, family+child setup works, chat knows the child; a hard
 reload restores the transcript AND a follow-up resumes the SAME durable
 session (POSTs to /eve/v1/session/{id}, and Homa correctly recalled a
-secret word set before the reload — real continuity, not just restored
+secret word set before the reload, real continuity, not just restored
 pixels). All test users deleted from homa-prod after (0 users remain).
 Typecheck, build, lints green.
 
@@ -9842,7 +11202,7 @@ M1-02) is still the future proper version.
 
 Founder chose fully open signup over the invite-only gate. This reverses the
 PRD's "public signup (invite codes only)" non-goal and the founding-families
-framing — a deliberate founder call, logged here as the auditable override.
+framing, a deliberate founder call, logged here as the auditable override.
 
 - **Migration #8:** dropped the invite-enforcing trigger + `private.settings`
   code store from migration #7; replaced with a plain `autoconfirm_new_user`
@@ -9898,7 +11258,7 @@ Test users deleted from homa-prod (0 remain). Typecheck, build, lints green.
   for the M0-01 spike, written before the spike runs.
 - `apps/web/lib/harness/resume-session.ts`: resume-identity + forward-
   progress guard (M1-14 seed), mitigating the M0-01 finding. Lives in
-  `lib/`, not `agent/` — it calls eve's API, it isn't an eve capability.
+  `lib/`, not `agent/`, it calls eve's API, it isn't an eve capability.
 - `scripts/eve-upgrade-check.mjs`: automated pre-bump regression check for
   any eve version change.
 - `docs/homa-planning/runbooks/eve-version-bump.md`: the procedure for

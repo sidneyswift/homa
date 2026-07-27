@@ -1,7 +1,10 @@
 import { emitEvent } from "@homa/core";
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { recordHoursPinned } from "../../lib/agent-pinned";
 import { HOURS_SUBJECTS, type HoursSubject } from "../../lib/hours-model";
@@ -40,9 +43,11 @@ const logInput = z.object({
     .describe("The parent's own words for the audit trail, e.g. 'about 45 min of math after breakfast'."),
 });
 
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Log a block of school time to the family's hours record the moment the parent mentions one ('we did 45 minutes of math'). These rows are the family's compliance evidence, so log every real mention exactly once. School time only: movies, errands, and waiting rooms never count. When the duration is vague ('most of the morning'), ask one short 'about how long?' first.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: logInput,
   async execute(input, ctx) {
     let access;
@@ -126,6 +131,16 @@ export default defineTool({
       note: input.note ?? null,
     });
     if (insertError) {
+      // 23505 from hours_log_block_unique_idx: a concurrent identical
+      // call won the insert after this one's guard SELECT ran; losing
+      // that race is the same outcome as the guard above.
+      if (insertError.code === "23505") {
+        return {
+          logged: true,
+          done: true,
+          note: "That block is already on the record for that day; nothing added twice.",
+        };
+      }
       return { logged: false, note: `Could not log it: ${insertError.message}` };
     }
 

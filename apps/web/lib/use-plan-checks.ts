@@ -102,3 +102,22 @@ export function usePlanChecks({
 export function planChecksStorageKey(token: string, subjectId: string): string {
   return `homa-plan-${token}-${subjectId}`;
 }
+
+/**
+ * Replaces the local copy with the server's map and re-renders every
+ * mounted surface. Only for the moment right after an agent plan edit:
+ * the server just remapped check keys around moved activities, so its
+ * map is the truth and a stale local copy would tick the wrong boxes.
+ * Everywhere else the normal local-over-server merge stands.
+ */
+export function overwritePlanChecks(
+  storageKey: string,
+  checks: Record<string, boolean>,
+): void {
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(checks));
+  } catch {
+    // Private mode: the server copy still renders via initialChecks.
+  }
+  storeListeners.forEach((listener) => listener());
+}

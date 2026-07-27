@@ -3,6 +3,7 @@ import {
   loadBriefV2Context,
   renderBriefContext,
   renderBriefV2Context,
+  researchBriefV2ContextIsAnchorable,
 } from "./brief-context";
 import {
   deliveryVersionForNewTaskRun,
@@ -72,7 +73,10 @@ async function briefMessage(
   let context: string;
   if (v2) {
     const v2Context = await loadV2Context(task.familyId, task.timeZone);
-    if (!v2Context.children.some((child) => child.candidates.length > 0)) {
+    // Skip before a run when no child pairs a candidate with a concrete anchor.
+    // A candidate alone is not a brief: an anchorless family stalls the model at
+    // preparation_load, which would finalize as a false failure (2026-07-20).
+    if (!researchBriefV2ContextIsAnchorable(v2Context)) {
       throw new NoEligibleResearchBriefCandidateError();
     }
     context = renderBriefV2Context(v2Context);

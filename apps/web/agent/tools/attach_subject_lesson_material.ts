@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { readSubjectLessonTrustedContext } from "../../lib/subject-lessons/dispatch-input";
 import { attachSubjectLessonMaterialPinned } from "../../lib/subject-lessons/store";
 
@@ -55,9 +58,11 @@ export async function attachSubjectLessonMaterialForTrustedSession(
       };
 }
 
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Attach one create_printable material to the trusted subject lesson build after its review passes or review is unavailable. The server re-checks family, child, lesson provenance, and build attempt.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: attachSubjectLessonMaterialInputSchema,
   async execute(input, ctx) {
     return attachSubjectLessonMaterialForTrustedSession(

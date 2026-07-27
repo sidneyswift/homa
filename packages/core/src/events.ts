@@ -13,13 +13,48 @@ import { KID_AGE_BANDS, WAITLIST_SOURCES } from "./waitlist";
  * role may insert; see migration 20260704033725.
  */
 
-/** The wall's six doors: the report actions the paywall stands in front
+/** The wall's doors: the report actions the paywall stands in front
  *  of (plans/2026-07-11-the-wall.md), plus "lesson" for the subject-lesson
- *  build door and "report" for the report lock's held-subjects offer
- *  (plans/2026-07-18-report-lock.md). Shared by the wall.* and
- *  report.action_tapped schemas and the beacon route's request schema. */
-export const WALL_DOORS = ["plan", "month", "call", "chat", "lesson", "report"] as const;
+ *  build door, "report" for the report lock's held-subjects offer
+ *  (plans/2026-07-18-report-lock.md), and "signup" for the account-level
+ *  trial gate right after account creation (founder directive 2026-07-26:
+ *  the card comes out before the product, HOMA_SIGNUP_PAYWALL_ENABLED).
+ *  Shared by the wall.* and report.action_tapped schemas and the beacon
+ *  route's request schema. */
+export const WALL_DOORS = ["plan", "month", "call", "chat", "lesson", "report", "signup"] as const;
 export type WallDoor = (typeof WALL_DOORS)[number];
+
+/** The onboarding flow's trackable cards: map-flow.tsx's FlowPhase minus
+ *  the non-card "loading" and "bootstrap-error" states. Emitted once per
+ *  family per step by map.step_viewed, so per-card drop-off is finally
+ *  measurable: before this, a family stuck on the parent (account) step
+ *  was indistinguishable in the data from one that never arrived. Shared
+ *  by the event schema and the /api/map/step route's allowlist. Funnel
+ *  work 2026-07-20 (docs/homa-planning/plans/2026-07-20-onboarding-funnel-drip.md). */
+export const MAP_FLOW_STEPS = [
+  "parent",
+  /** The signup trial gate between the account card and the product
+   *  (founder directive 2026-07-26, HOMA_SIGNUP_PAYWALL_ENABLED): its
+   *  own step so paywall drop-off is visible next to the cards around
+   *  it. */
+  "paywall",
+  /** Chat-first onboarding's one step after the account
+   *  (plans/2026-07-21-chat-first-onboarding.md). Kept in the same
+   *  allowlist as the card steps so the funnel can compare the two
+   *  flows on one chart instead of two. */
+  "chat",
+  "family",
+  "homeschool",
+  "kids",
+  "preparing",
+  "checklist",
+  "extras",
+  "next-kid",
+  "scoring",
+  "deepdive",
+  "hub",
+] as const;
+export type MapFlowStep = (typeof MAP_FLOW_STEPS)[number];
 
 const PROGRESS_EVENT_DIMENSION_ID_SCHEMA = z
   .string()
@@ -125,7 +160,21 @@ export const EVENT_SCHEMAS = {
   "map.report_viewed": z.object({
     family_id: z.uuid(),
     child_id: z.uuid(),
-    entry: z.enum(["instant", "link"]),
+    // "instant" is the report page straight out of the card flow,
+    // "link" is the emailed copy, and "chat" is the reveal landing
+    // inside the conversation (chat-first onboarding). The whole claim
+    // of that rebuild is that a report she is shown beats a report she
+    // is emailed, and this is the field that settles it.
+    entry: z.enum(["instant", "link", "chat"]),
+  }),
+  // Fired once per family per onboarding card reached (map-flow.tsx phase
+  // transitions, beaconed through /api/map/step). The step is a UI phase
+  // name, never content, so this carries no PII. This is the only event
+  // that makes per-card onboarding drop-off measurable. Funnel work
+  // 2026-07-20.
+  "map.step_viewed": z.object({
+    family_id: z.uuid(),
+    step: z.enum(MAP_FLOW_STEPS),
   }),
   "map.reminder_sent": z.object({
     family_id: z.uuid(),
@@ -363,6 +412,17 @@ export const EVENT_SCHEMAS = {
     subject: z.string(),
     done_count: z.number().int().min(0),
   }),
+  // Homa edited a plan's activities from chat (the edit_plan tool, one
+  // event per applied batch). Counts only, no activity text: the funnel
+  // reads how often the agent drives the planner without carrying PII.
+  "map.plan_edited": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid(),
+    subject: z.string(),
+    added: z.number().int().min(0),
+    replaced: z.number().int().min(0),
+    removed: z.number().int().min(0),
+  }),
   // The LLM narrative layer (D8 overturn, 2026-07-06). One event per
   // finished generation; kind separates the report from a four-week plan.
   "map.narrative_generated": z.object({
@@ -390,6 +450,14 @@ export const EVENT_SCHEMAS = {
     media_count: z.number().int().min(0),
     linked_family: z.boolean(),
   }),
+  // A carrier opt-out keyword arrived by text (2026-07-23): stop is
+  // STOP and friends recorded into sms_suppressions, start is a
+  // START/UNSTOP lifting one. The agent never runs for these texts.
+  // No phone number in props, ever.
+  "sms.opt_out_recorded": z.object({
+    action: z.enum(["stop", "start"]),
+    linked_family: z.boolean(),
+  }),
   // A phone number was linked to a family workspace (family_phones,
   // migration #22): typed at signup, set on /home, or carried forward by
   // the lead bridge. No phone number in props, ever.
@@ -397,6 +465,17 @@ export const EVENT_SCHEMAS = {
     family_id: z.uuid(),
     source: z.enum(["signup", "home", "bridge"]),
     replaced: z.boolean(),
+  }),
+  // A scheduled-task SMS was rejected because the provider cannot reach
+  // the destination's region (Telnyx 40309): our sole-prop 10DLC profile
+  // is US-only, so a non-US +1 number (e.g. Canada) our +1 normalization
+  // accepts fails on every send. The family's text schedules were flipped
+  // to email-only so the un-textable number is not retried and re-logged
+  // daily (2026-07-23 founder-console cleanup). schedules_switched is how
+  // many agent_schedules rows moved text -> email. No phone number, ever.
+  "sms.delivery_region_unsupported": z.object({
+    family_id: z.uuid(),
+    schedules_switched: z.number().int().min(0),
   }),
   // MMS attachment lanes (build-log 2026-07-10, superseding the one-day
   // sms.voice_note_received: never deny input). One event per attachment
@@ -486,6 +565,16 @@ export const EVENT_SCHEMAS = {
     bytes: z.number().int().min(0),
     duration_ms: z.number().int().min(0),
   }),
+  // The funnel's missing terminal event (2026-07-25 field review): a
+  // parent's own click on the PDF is the only signal that a material
+  // reached her at all, and nothing recorded it before this, not
+  // finalize (a phrase she may never say), not print (the browser owns
+  // that). Emitted by the /api/materials/[id]/pdf redirect route.
+  "materials.pdf_opened": z.object({
+    family_id: z.uuid(),
+    material_id: z.uuid(),
+    status: z.enum(["draft", "final", "superseded"]),
+  }),
   // "Call Homa" curriculum feature (founder decision 2026-07-07): an
   // outbound voice call reviews the report, then an LLM-authored
   // curriculum is generated from what was discussed. No phone number,
@@ -540,10 +629,42 @@ export const EVENT_SCHEMAS = {
     skipped: z.number().int().min(0),
     messages_reviewed: z.number().int().min(0),
   }),
+  // Background compaction tidied a family's saved memories (founder
+  // rulings 2026-07-20 memory-render-time-budget and 2026-07-21
+  // one-child-per-memory). Counts only, never content: chars_before and
+  // chars_after are what tell us the pass earned its keep, since a run
+  // that shrinks nothing should not be running. splits can legitimately
+  // grow chars, so read the two together, not chars alone.
+  "memory.compacted": z.object({
+    family_id: z.uuid(),
+    merges: z.number().int().min(0),
+    splits: z.number().int().min(0),
+    chars_before: z.number().int().min(0),
+    chars_after: z.number().int().min(0),
+  }),
   // A parent removed a saved memory from /home (the undo surface).
   "memory.forgotten": z.object({
     family_id: z.uuid(),
     source: z.enum(["homa", "parent", "onboarding", "call", "review"]),
+  }),
+  // Device sync mailbox (mac-mini spec Part 2 v2, 2026-07-25; flag-dark
+  // behind HOMA_DEVICE_SYNC_ENABLED). Counts and kinds only, never
+  // content: the payloads carry family data, the events never do.
+  "mini_sync.batch_received": z.object({
+    family_id: z.uuid(),
+    received: z.number().int().min(0),
+    inserted: z.number().int().min(0),
+    duplicates: z.number().int().min(0),
+    invalid: z.number().int().min(0),
+  }),
+  "mini_sync.event_applied": z.object({
+    family_id: z.uuid(),
+    kind: z.string(),
+  }),
+  "mini_sync.event_rejected": z.object({
+    family_id: z.uuid(),
+    kind: z.string(),
+    reason: z.string(),
   }),
   // The evening journal prompt (item 7, FR-6 seed; flag-dark). channel
   // arrived with the dispatcher (gateway-plan GW-4): the agent composes,
@@ -782,10 +903,20 @@ export const EVENT_SCHEMAS = {
     child_id: z.uuid(),
     evidence_count: z.number().int().min(0),
     observation_count: z.number().int().min(0),
+    // Pairs the trust gate turned away: nonzero with zero evidence and
+    // zero observations is the silent-loss signal (2026-07-21 replay).
+    rejected_count: z.number().int().min(0),
     moment_count: z.number().int().min(0),
     // Segments with tone notes over total: the PMF read's "was the
     // tone lane deaf" signal (plan §4.7).
     tone_coverage: z.number().min(0).max(1),
+    // Whether this lesson's recording outlived the 30-day TTL, and on
+    // what (founder ruling `keep-their-voice`). Retention is a change
+    // to a stated privacy posture, so its rate is measured from the
+    // first lesson rather than discovered later from a storage bill or
+    // a surprised parent.
+    audio_kept: z.boolean(),
+    audio_kept_kind: z.enum(["breakthrough", "sweet"]).nullable(),
   }),
   "lesson.media_attached": z.object({
     family_id: z.uuid(),
@@ -833,10 +964,13 @@ export const EVENT_SCHEMAS = {
     door: z.enum(WALL_DOORS),
   }),
   // She left for Stripe checkout (a Payment Link tab, plan chosen).
+  // tier defaults to "regular" so pre-tier-launch historical rows (the
+  // only tier that ever existed) still validate on replay.
   "wall.checkout_started": z.object({
     family_id: z.uuid(),
     door: z.enum(WALL_DOORS),
     plan: z.enum(["monthly", "annual"]),
+    tier: z.enum(["regular", "plus", "elite"]).default("regular"),
   }),
   // /api/billing/confirm verified the checkout session and stamped
   // trial_started_at. Fires only on the first confirm; a re-visit of

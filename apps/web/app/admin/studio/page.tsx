@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { requireFounder } from "../../../lib/admin/gate";
 import { familyDisplayName, timeAgo } from "../../../lib/admin/format";
+import { readCosmoFunnel, type CosmoFunnelView } from "../../../lib/admin/cosmo-data";
 import {
   getStudioLedger,
+  getStudioOutputStats,
   listSandboxFamilies,
+  listSkillRecipeSlugs,
   readSkillPackage,
   type FleetMaterialRow,
+  type StudioOutputStats,
   type StudioRunRow,
 } from "../../../lib/admin/studio-data";
 import { EmptyNote, Pill, SectionHead } from "../ui";
@@ -178,6 +183,225 @@ const LEDGER_FILTERS: { key: LedgerView; label: string }[] = [
   { key: "fleet", label: "Fleet output" },
 ];
 
+function FunnelStageCard({
+  step,
+  title,
+  headline,
+  children,
+}: {
+  step: string;
+  title: string;
+  headline: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="rounded-[var(--radius-md)] border border-border-subtle bg-card p-4">
+      <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.12em] text-subtle">
+        {step} · {title}
+      </p>
+      <p className="mt-1.5 font-display text-[1.05rem] font-bold text-strong">{headline}</p>
+      <div className="mt-1.5 flex flex-col gap-1 text-[0.78rem] text-muted">{children}</div>
+    </div>
+  );
+}
+
+/**
+ * The inspo funnel (founder ask 2026-07-19): the whole pipeline on one
+ * surface. Stage 1 is Cosmo's intake (.cosmo analysis corpus from
+ * #homa-inspo drops), stage 2 is what graduated into the skill package
+ * and format registry, stage 3 is what families actually received. The
+ * open-gaps list is the graduation backlog, straight from the analysis
+ * JSONs, so a drop that never made the skill stays visible instead of
+ * silently resting in a folder.
+ */
+function CosmoFunnel({
+  cosmo,
+  skillSectionCount,
+  output,
+}: {
+  cosmo: CosmoFunnelView | null;
+  skillSectionCount: number | null;
+  output: StudioOutputStats;
+}) {
+  if (cosmo === null) {
+    return (
+      <EmptyNote>
+        The .cosmo corpus could not be read on this deployment. The
+        analysis files ship with the code; check the .cosmo entries under
+        outputFileTracingIncludes in next.config.ts.
+      </EmptyNote>
+    );
+  }
+  const { intake, coverage } = cosmo;
+  const flaggedTotal = coverage.coveredCount + coverage.openCount;
+  const openRows = coverage.rows.filter((row) => !row.covered);
+  const coveredRows = coverage.rows.filter((row) => row.covered);
+  const passRate =
+    output.last30Days > 0
+      ? Math.round((100 * output.last30DaysPassed) / output.last30Days)
+      : null;
+  return (
+    <div className="mt-3 flex flex-col gap-3">
+      <div className="grid gap-3 md:grid-cols-3">
+        <FunnelStageCard
+          step="1"
+          title="Intake: #homa-inspo drops"
+          headline={`${intake.referenceCount} references · ${intake.curriculumCount} curriculums`}
+        >
+          <p>
+            {intake.byDropper
+              .map(({ dropper, count }) => `${dropper} ${count}`)
+              .join(" · ") || "no drops yet"}
+          </p>
+          <p>
+            {intake.latestDropAt
+              ? `latest drop ${timeAgo(intake.latestDropAt)}`
+              : "waiting on the first drop"}
+            {" · "}
+            {intake.matchedReferenceCount} matched an existing recipe on arrival
+          </p>
+        </FunnelStageCard>
+        <FunnelStageCard
+          step="2"
+          title="Graduation: into the skill"
+          headline={
+            skillSectionCount === null
+              ? `${cosmo.registryCount} registry formats`
+              : `${skillSectionCount} skill sections · ${cosmo.registryCount} registry formats`
+          }
+        >
+          <p>
+            {coverage.coveredCount} of {flaggedTotal} flagged formats now have a
+            recipe or registry entry
+          </p>
+          <p>
+            {coverage.openCount === 0 ? (
+              "no open gaps"
+            ) : (
+              <>
+                <span className="font-semibold text-[var(--gold-ink,#8A6410)]">
+                  {coverage.openCount} open
+                </span>{" "}
+                in the graduation backlog below
+              </>
+            )}
+            {" · "}
+            <a href="#skill-package" className="font-semibold text-[var(--clay-600)] hover:underline">
+              read the skill package
+            </a>
+          </p>
+        </FunnelStageCard>
+        <FunnelStageCard
+          step="3"
+          title="Output: what families got"
+          headline={`${output.totalMaterials} materials · ${output.familiesReached} families`}
+        >
+          <p>
+            {output.last7Days} in the last 7 days
+            {passRate !== null
+              ? ` · ${passRate}% passed the quality check (30 days)`
+              : ""}
+          </p>
+          <p>
+            <a href="#ledger" className="font-semibold text-[var(--clay-600)] hover:underline">
+              see every run and material in the ledger
+            </a>
+          </p>
+        </FunnelStageCard>
+      </div>
+
+      <details className="rounded-[var(--radius-md)] border border-border-subtle bg-card px-4 py-3">
+        <summary className="cursor-pointer text-[0.85rem] font-bold text-[var(--clay-600)] [&::-webkit-details-marker]:hidden">
+          Latest drops through the analyzer
+        </summary>
+        <div className="mt-2.5 flex flex-col gap-1.5 border-t border-border-subtle pt-2.5">
+          {intake.latestDrops.map((drop) => (
+            <div
+              key={`${drop.kind}-${drop.entry.id}`}
+              className="flex flex-wrap items-center gap-2.5 text-[0.8rem]"
+            >
+              <span className="min-w-[220px] flex-1 font-semibold text-strong">
+                {drop.kind === "reference" ? drop.entry.title : drop.entry.name}
+              </span>
+              <Pill tone={drop.kind === "reference" ? "sky" : "stone"}>
+                {drop.kind}
+              </Pill>
+              <span className="text-[0.72rem] text-subtle">
+                {drop.entry.droppedBy}
+                {drop.kind === "reference"
+                  ? ` · ${[drop.entry.subject, drop.entry.format].filter(Boolean).join(" · ")}`
+                  : drop.entry.methodology
+                    ? ` · ${drop.entry.methodology}`
+                    : ""}
+                {" · "}
+                {timeAgo(drop.entry.droppedAt)}
+              </span>
+            </div>
+          ))}
+        </div>
+      </details>
+
+      <details className="rounded-[var(--radius-md)] border border-border-subtle bg-card px-4 py-3">
+        <summary className="cursor-pointer text-[0.85rem] font-bold text-[var(--clay-600)] [&::-webkit-details-marker]:hidden">
+          Format gaps: {coverage.openCount} open · {coverage.coveredCount} covered
+        </summary>
+        <div className="mt-2.5 border-t border-border-subtle pt-2.5">
+          <p className="text-[0.74rem] text-muted">
+            Formats Cosmo flagged that no recipe could produce at analysis
+            time. Open ones are the graduation backlog; covered ones now
+            have a SKILL.md recipe or an activity-formats.md entry.
+          </p>
+          {openRows.length > 0 ? (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {openRows.map((row) => (
+                <Pill key={row.slug} tone="gold">
+                  {row.slug}
+                  {row.count > 1 ? ` ×${row.count}` : ""}
+                </Pill>
+              ))}
+            </div>
+          ) : null}
+          {coveredRows.length > 0 ? (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {coveredRows.map((row) => (
+                <Pill key={row.slug} tone="sage">
+                  {row.slug}
+                </Pill>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </details>
+
+      {cosmo.tasteModel ? (
+        <details className="rounded-[var(--radius-md)] border border-border-subtle bg-card px-4 py-3">
+          <summary className="cursor-pointer text-[0.85rem] font-bold text-[var(--clay-600)] [&::-webkit-details-marker]:hidden">
+            Read the taste model
+            {cosmo.catalogStatuses.length > 0
+              ? ` · catalog: ${cosmo.catalogStatuses
+                  .map(({ status, count }) => `${count} ${status}`)
+                  .join(", ")}`
+              : ""}
+          </summary>
+          <pre className="mt-2 max-h-[420px] overflow-auto whitespace-pre-wrap rounded-md bg-page px-3.5 py-3 text-[0.74rem] leading-relaxed text-body">
+            {cosmo.tasteModel}
+          </pre>
+          {cosmo.inspoCatalog ? (
+            <details className="mt-2">
+              <summary className="cursor-pointer text-[0.78rem] font-bold text-[var(--clay-600)]">
+                Read the inspo catalog
+              </summary>
+              <pre className="mt-2 max-h-[420px] overflow-auto whitespace-pre-wrap rounded-md bg-page px-3.5 py-3 text-[0.74rem] leading-relaxed text-body">
+                {cosmo.inspoCatalog}
+              </pre>
+            </details>
+          ) : null}
+        </details>
+      ) : null}
+    </div>
+  );
+}
+
 export default async function AdminStudioPage({
   searchParams,
 }: {
@@ -191,7 +415,16 @@ export default async function AdminStudioPage({
   // batches, so these reads stay sequential.
   const families = await listSandboxFamilies();
   const ledger = await getStudioLedger(30);
+  const output = await getStudioOutputStats();
   const skillPackage = await readSkillPackage();
+  // Recipes ship as sibling files now, not SKILL.md sections, so gap
+  // coverage matches against both the section headings and the recipe slugs.
+  const recipeSlugs = await listSkillRecipeSlugs();
+  // Filesystem, not the pooler: safe after the db reads.
+  const cosmo = await readCosmoFunnel([
+    ...(skillPackage?.sections ?? []),
+    ...recipeSlugs,
+  ]);
 
   const visible = ledger.entries.filter((entry) =>
     view === "all" ? true : view === "lab" ? entry.kind === "run" : entry.kind === "material",
@@ -200,6 +433,19 @@ export default async function AdminStudioPage({
   return (
     <div className="flex flex-col gap-8">
       <div>
+        <SectionHead
+          eyebrow="Inspo funnel"
+          title="From a Slack drop to a family's printer"
+          sub="Stage 1: Cosmo analyzes every #homa-inspo drop into the .cosmo corpus. Stage 2: patterns graduate into the materials-studio skill and the format registry. Stage 3: the skill makes real pages for real families."
+        />
+        <CosmoFunnel
+          cosmo={cosmo}
+          skillSectionCount={skillPackage?.sections.length ?? null}
+          output={output}
+        />
+      </div>
+
+      <div id="ledger">
         <SectionHead
           eyebrow="Material studio"
           title="One timeline of everything the skill makes"
@@ -226,7 +472,7 @@ export default async function AdminStudioPage({
                 className={
                   active
                     ? "rounded-pill border border-[var(--clay-300)] bg-brand-soft px-3.5 py-1.5 text-[0.78rem] font-bold text-[var(--clay-700)]"
-                    : "rounded-pill border border-border-default bg-card px-3.5 py-1.5 text-[0.78rem] font-semibold text-muted hover:text-strong"
+                    : "rounded-pill border border-border bg-card px-3.5 py-1.5 text-[0.78rem] font-semibold text-muted hover:text-strong"
                 }
               >
                 {filter.label}
@@ -267,7 +513,7 @@ export default async function AdminStudioPage({
         </div>
       </div>
 
-      <div>
+      <div id="skill-package">
         <SectionHead
           eyebrow="Skill package"
           title="What the skill actually says"
@@ -293,8 +539,10 @@ export default async function AdminStudioPage({
               </p>
               <p className="mt-2 text-[0.74rem] text-subtle">
                 SKILL.md · {skillPackage.lineCount} lines ·{" "}
-                {skillPackage.sections.length} sections ·{" "}
-                {skillPackage.referenceImages.length} reference images
+                {skillPackage.recipes.length} recipes ·{" "}
+                {skillPackage.subjects.length} subjects ·{" "}
+                {skillPackage.approaches.length} approaches ·{" "}
+                {skillPackage.anchors.length} golden anchors
               </p>
               <details className="mt-3">
                 <summary className="cursor-pointer text-[0.8rem] font-bold text-[var(--clay-600)]">
@@ -346,53 +594,68 @@ export default async function AdminStudioPage({
 
             <div className="rounded-[var(--radius-md)] border border-border-subtle bg-card p-4">
               <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.12em] text-subtle">
-                Reference images, beside the sections they teach
+                Golden anchors · the reference images the model rides on
               </p>
-              {skillPackage.citations.length === 0 ? (
+              {skillPackage.anchors.length === 0 ? (
                 <p className="mt-2 text-[0.8rem] text-muted">
-                  SKILL.md cites no reference images.
+                  No golden anchors registered.
                 </p>
               ) : (
                 <div className="mt-2.5 flex flex-col gap-4">
-                  {skillPackage.citations.map((citation) => (
-                    <div key={citation.file} className="flex flex-wrap items-start gap-4">
-                      {citation.present ? (
-                        <a
-                          href={`/admin/studio/reference/${citation.file}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="shrink-0"
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={`/admin/studio/reference/${citation.file}`}
-                            alt={citation.file}
-                            className="w-[240px] rounded-md border border-border-subtle"
-                          />
-                        </a>
-                      ) : (
-                        <div className="flex h-[160px] w-[240px] shrink-0 items-center justify-center rounded-md border border-dashed border-[var(--rose-500)] bg-[var(--danger-soft,#FBE9E4)] px-3 text-center text-[0.72rem] font-semibold text-[var(--rose-600)]">
-                          Cited by the skill but not shipped in references/
-                        </div>
-                      )}
+                  {skillPackage.anchors.map((anchor) => (
+                    <div key={anchor.id} className="flex flex-wrap items-start gap-4">
+                      <a
+                        href={`/admin/studio/anchor/${anchor.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="shrink-0"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={`/admin/studio/anchor/${anchor.id}`}
+                          alt={anchor.title}
+                          className="w-[240px] rounded-md border border-border-subtle"
+                        />
+                      </a>
                       <div className="min-w-[240px] flex-1">
-                        <p className="font-mono text-[0.68rem] font-bold text-body">{citation.file}</p>
+                        <p className="font-mono text-[0.68rem] font-bold text-body">
+                          {anchor.id}{" "}
+                          <span className="font-sans font-semibold text-subtle">
+                            ({anchor.register})
+                          </span>
+                        </p>
                         <p className="mt-0.5 text-[0.78rem] font-semibold text-strong">
-                          Teaches: {citation.section ?? "the package preamble"}
+                          {anchor.title}
                         </p>
                         <p className="mt-1 text-[0.78rem] leading-relaxed text-muted">
-                          {citation.excerpt}
+                          Use when {anchor.useWhen}.
                         </p>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-              {skillPackage.uncitedFiles.length > 0 ? (
-                <p className="mt-3 text-[0.76rem] font-semibold text-[var(--gold-ink,#8A6410)]">
-                  In references/ but cited nowhere: {skillPackage.uncitedFiles.join(", ")}
-                </p>
-              ) : null}
+              <p className="mt-5 font-mono text-[0.62rem] font-bold uppercase tracking-[0.12em] text-subtle">
+                Shipped reference docs
+              </p>
+              <p className="mt-2 text-[0.78rem] leading-relaxed text-muted">
+                <span className="font-semibold text-strong">
+                  Recipes ({skillPackage.recipes.length}):
+                </span>{" "}
+                {skillPackage.recipes.join(", ")}
+              </p>
+              <p className="mt-1.5 text-[0.78rem] leading-relaxed text-muted">
+                <span className="font-semibold text-strong">
+                  Subjects ({skillPackage.subjects.length}):
+                </span>{" "}
+                {skillPackage.subjects.join(", ")}
+              </p>
+              <p className="mt-1.5 text-[0.78rem] leading-relaxed text-muted">
+                <span className="font-semibold text-strong">
+                  Approaches ({skillPackage.approaches.length}):
+                </span>{" "}
+                {skillPackage.approaches.join(", ")}
+              </p>
             </div>
           </div>
         )}

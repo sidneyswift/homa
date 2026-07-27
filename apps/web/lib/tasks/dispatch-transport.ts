@@ -19,6 +19,7 @@ import {
 import { submitHomaSms } from "../voice/telnyx-api";
 import type { TaskDeliveryVersion } from "./delivery-version";
 import type { FamilyTaskKind } from "./kinds";
+import { markFamilyTextSchedulesEmailOnly } from "./store";
 
 export interface LiveDispatchTransportInput {
   familyId: string;
@@ -50,6 +51,10 @@ export interface LiveDispatchTransportDependencies {
     input: DispatchEmailSubmissionInput,
   ): ReturnType<TaskDeliveryTransports["sendEmail"]>;
   inboundSecret: string | undefined;
+  /** Switches the family to email-only when the provider says the SMS
+   * destination region is unreachable (Telnyx 40309), so an un-textable
+   * number is not retried every day. Returns how many schedules moved. */
+  markSmsRegionUnsupported(familyId: string): Promise<number>;
 }
 
 export async function submitDispatchTaskEmail(
@@ -91,6 +96,7 @@ export async function deliverLiveDispatchTask(
     sendSms: submitHomaSms,
     sendEmail: submitDispatchTaskEmail,
     inboundSecret: process.env.RESEND_INBOUND_SECRET,
+    markSmsRegionUnsupported: markFamilyTextSchedulesEmailOnly,
   },
   onTransportAccepted?: (channel: "sms" | "email" | "none") => void,
 ) {
@@ -128,6 +134,20 @@ export async function deliverLiveDispatchTask(
         },
       },
       onTransportAccepted,
+      // The switch is family-scoped, so the rejected phone (passed by the
+      // delivery layer for its own audit) is not needed here; the family id
+      // is the key. Best-effort: a failed switch never sinks this delivery,
+      // it just means the next run tries SMS once more.
+      onUnsupportedRegion: async () => {
+        try {
+          await dependencies.markSmsRegionUnsupported(input.familyId);
+        } catch (error) {
+          console.error(
+            "dispatch: email-only switch after unsupported SMS region failed:",
+            error instanceof Error ? error.message : "unknown",
+          );
+        }
+      },
     },
   );
 }

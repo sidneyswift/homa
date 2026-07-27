@@ -4,6 +4,7 @@ import path from "node:path";
 
 import { adminDb } from "./db";
 import { ageYears } from "./format";
+import { listStudioAnchors } from "../materials/anchors";
 import {
   parseSkillPackage,
   type SkillReferenceCitation,
@@ -375,6 +376,47 @@ export async function listRecentFleetMaterials(limit: number): Promise<FleetMate
   }));
 }
 
+export interface StudioOutputStats {
+  totalMaterials: number;
+  familiesReached: number;
+  last7Days: number;
+  last30Days: number;
+  /** Of the last 30 days' materials, how many passed the vision
+   * quality check (pass !== "false", same rule as the ledger rows). */
+  last30DaysPassed: number;
+}
+
+/** The funnel's third stage in numbers: what the skill has shipped to
+ * families, all time and lately. One query, db.ts laws apply. */
+export async function getStudioOutputStats(): Promise<StudioOutputStats> {
+  const sql = adminDb();
+  const rows = await sql<
+    {
+      total_materials: number;
+      families_reached: number;
+      last7: number;
+      last30: number;
+      last30_passed: number;
+    }[]
+  >`
+    select count(*)::int as total_materials,
+           count(distinct m.family_id)::int as families_reached,
+           count(*) filter (where m.created_at > now() - interval '7 days')::int as last7,
+           count(*) filter (where m.created_at > now() - interval '30 days')::int as last30,
+           count(*) filter (where m.created_at > now() - interval '30 days'
+             and coalesce(m.generation->'review'->>'pass', 'true') <> 'false')::int as last30_passed
+    from public.materials m
+  `;
+  const row = rows[0];
+  return {
+    totalMaterials: row?.total_materials ?? 0,
+    familiesReached: row?.families_reached ?? 0,
+    last7Days: row?.last7 ?? 0,
+    last30Days: row?.last30 ?? 0,
+    last30DaysPassed: row?.last30_passed ?? 0,
+  };
+}
+
 export interface SkillPackageView {
   /** The frontmatter description, the skill's routing contract. */
   description: string;
@@ -383,8 +425,22 @@ export interface SkillPackageView {
   lineCount: number;
   /** ## headings in body order. */
   sections: string[];
-  /** File names under references/, .png only. */
+  /** File names under references/, .png only (legacy; the anchors below
+   * are the real reference images now). */
   referenceImages: string[];
+  /** The golden anchors, from the code registry (they set the visual bar
+   * and live in code, not the package). This is what the console shows as
+   * the skill's reference images now. */
+  anchors: {
+    id: string;
+    title: string;
+    register: string;
+    useWhen: string;
+  }[];
+  /** Doc slugs shipped under references/recipes, /subjects, /approaches. */
+  recipes: string[];
+  subjects: string[];
+  approaches: string[];
   /** Every references/<file> the body cites: which section reaches for
    * it, the "study it for" excerpt, and whether the file exists. */
   citations: SkillReferenceCitation[];
@@ -435,6 +491,28 @@ export function skillReferenceImagePath(fileName: string): string {
   return path.join(skillDir(), "references", fileName);
 }
 
+/** Slugs of the .md files under one references/ subdirectory, read fresh
+ * per call so a newly graduated file appears with no code change. Since
+ * the fat-skill restructure, recipes, subjects, and approaches live as
+ * sibling files (not SKILL.md sections). */
+async function listReferenceDocSlugs(sub: string): Promise<string[]> {
+  try {
+    const entries = await readdir(path.join(skillDir(), "references", sub));
+    return entries
+      .filter((name) => name.endsWith(".md"))
+      .map((name) => name.slice(0, -3))
+      .sort();
+  } catch {
+    return [];
+  }
+}
+
+/** Shipped recipe slugs: the canonical "what shipped" set for gap
+ * coverage and the console's package view. */
+export async function listSkillRecipeSlugs(): Promise<string[]> {
+  return listReferenceDocSlugs("recipes");
+}
+
 /** The deployed tool surface: module names under agent/tools. Same
  * dual-root resolution as skillDir. */
 async function listAgentToolNames(): Promise<string[]> {
@@ -462,12 +540,25 @@ export async function readSkillPackage(): Promise<SkillPackageView | null> {
   const referenceImages = await listSkillReferenceImages();
   const toolNames = await listAgentToolNames();
   const parsed = parseSkillPackage(raw, referenceImages, toolNames);
+  const recipes = await listSkillRecipeSlugs();
+  const subjects = await listReferenceDocSlugs("subjects");
+  const approaches = await listReferenceDocSlugs("approaches");
+  const anchors = listStudioAnchors().map((anchor) => ({
+    id: anchor.id,
+    title: anchor.title,
+    register: anchor.register,
+    useWhen: anchor.useWhen,
+  }));
   return {
     description: parsed.description,
     body: parsed.body,
     lineCount: parsed.lineCount,
     sections: parsed.sections,
     referenceImages,
+    anchors,
+    recipes,
+    subjects,
+    approaches,
     citations: parsed.citations,
     uncitedFiles: parsed.uncitedFiles,
     toolSurface: parsed.toolMentions.map((mention) => ({

@@ -1,0 +1,71 @@
+{
+  "id": "ref-2026-07-18-winter-animal-tracks-montessori",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:21:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427665.247579",
+  "format": "themed-activity-pack",
+  "title": "Winter Animal Tracks — Forest Footprint Tracing Activity (Montessori, ABC Rhymes)",
+  "publisher": "ABC Rhymes (TPT)",
+  "gradeLevel": "PreK-K (ages 3-6)",
+  "pageCount": 28,
+  "callouts": [],
+  "overview": {
+    "description": "A 28-page Montessori-inspired activity pack themed around winter animal tracks/footprints. Combines FOUR activity types in one themed pack: (1) reference poster (all animals + tracks), (2) pre-writing tracing pages (trace lines from animal to footprint), (3) Montessori 3-part cards (animal + footprint + name), (4) large footprint trace-and-color pages with word tracing. Animals include: lynx, rabbit, badger, wild boar, wolf, moose, deer, bird, bear, fox, squirrel, ferret. Watercolor realistic illustrations throughout."
+  },
+  "activityTypes": [
+    {
+      "type": "reference-poster",
+      "page": 1,
+      "description": "Winter forest scene with all 12+ animals and their footprints scattered across a snowy landscape. Serves as the visual overview and introduction to the theme."
+    },
+    {
+      "type": "pre-writing-tracing",
+      "pages": "3-6",
+      "description": "5 rows per page. Each row: realistic animal on left → dashed/dotted line path → footprint silhouette on right. Child traces the path to 'connect' the animal to its track. Different stroke types per row (zigzag, wavy, looped, angular, smooth curves). Progressive scaffolding: solid dashed → dotted → lighter dots."
+    },
+    {
+      "type": "montessori-3-part-cards",
+      "pages": "7-12",
+      "description": "Two cards per page. Each card: realistic animal image (left box) + footprint silhouette (right box) + name label below (e.g., 'Bird', 'Deer'). Dashed cut lines. Same format as the Solar System and Community Helpers cards."
+    },
+    {
+      "type": "large-footprint-trace-and-color",
+      "pages": "13-28",
+      "description": "One animal per page. Top-right: realistic animal illustration + small footprint. Center: GIANT dashed-outline version of the footprint (fills most of the page). Bottom: word tracing on three-line guide (e.g., 'moose' in dotted letters). Child traces the giant footprint shape AND the animal name. Combines: fine motor (large shape tracing) + science (footprint shape) + writing (word tracing)."
+    }
+  ],
+  "designPatterns": {
+    "singleThemeMultipleFormats": {
+      "description": "ONE theme (winter animal tracks) expressed through FOUR different activity types. The child encounters the same content in different modes: visual overview (poster) → motor practice (tracing paths) → vocabulary matching (3-part cards) → detailed study (giant footprint + word). This is spiral learning within a single pack.",
+      "value": "The child encounters each animal 4+ times through different activities. Repetition without repetitiveness."
+    },
+    "tracingAsNarrativePath": {
+      "description": "The pre-writing pages frame tracing as 'connecting the animal to its track.' The dashed line IS the trail the animal left in the snow. Same narrative-framing pattern as the Paw Patrol pages, but nature-themed instead of character-themed.",
+      "value": "Pre-writing practice embedded in a nature study context."
+    },
+    "giantFootprintTracing": {
+      "description": "Full-page dashed outlines of each animal's footprint. The child traces the SHAPE of the footprint — not a straight line or wavy line, but an organic, irregular shape (moose hooves, bird claws, bear pads). This is more challenging than standard pre-writing strokes because the shapes are complex and varied.",
+      "value": "Advanced fine motor practice. Also teaches observation: 'What shape IS a moose track?' The child has to look carefully to trace it correctly."
+    }
+  },
+  "overallSkillTargeting": {
+    "subject": "multidisciplinary",
+    "domain": "nature-study",
+    "topics": [
+      {"id": "science.animal-tracks-identification", "kind": "conceptual", "mapped": false},
+      {"id": "ela.pre-writing-tracing", "kind": "procedural", "mapped": false},
+      {"id": "ela.word-tracing", "kind": "procedural", "mapped": false}
+    ]
+  },
+  "recipeMatch": {
+    "matchedRecipes": ["tracing-guide"],
+    "gaps": [
+      {
+        "name": "themed-activity-pack",
+        "description": "A multi-format pack around ONE theme: reference poster + pre-writing tracing pages + nomenclature cards + detailed study pages. 4 activity types, one subject. Generates a complete mini-unit from a single topic. Could be built for any nature study subject: butterflies, ocean creatures, dinosaurs, trees, weather."
+      }
+    ]
+  },
+  "notes": "This is Aless's best single drop in terms of demonstrating how ONE theme can generate MULTIPLE activity types. The winter animal tracks theme produces a poster, tracing pages, nomenclature cards, and detailed footprint study pages — all from one concept. This is the exact pattern Homa should follow for nature study: pick a theme, generate 4-5 activity types from it, package as a mini-unit. The watercolor realistic animal illustrations are consistent with the Habitat Schoolhouse aesthetic both users prefer."
+}

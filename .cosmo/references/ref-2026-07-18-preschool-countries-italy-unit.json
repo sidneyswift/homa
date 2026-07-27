@@ -1,0 +1,41 @@
+{
+  "id": "ref-2026-07-18-preschool-countries-italy-unit",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:17:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427406.968419",
+  "format": "country-unit-study-pack",
+  "title": "Preschool Countries: Italy Unit \u2014 Week 10 Activity Pack (ZIP)",
+  "publisher": "Unknown",
+  "gradeLevel": "PreK (ages 3-5)",
+  "overview": {
+    "description": "ZIP archive containing a week-long Italy-themed preschool unit study. Part of a 'Countries' series (week 10 of the series). Likely includes: country facts page, Italian food/culture activities, coloring pages, crafts, simple Italian words, flag recognition. 49MB ZIP suggests multiple files/PDFs inside. Cultural geography for preschoolers."
+  },
+  "skillTargeting": {
+    "subject": "social-studies",
+    "domain": "geography-culture",
+    "topics": [
+      {
+        "id": "social-studies.country-italy",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "social-studies.cultural-awareness",
+        "kind": "conceptual",
+        "mapped": false
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "country-study-pack",
+        "description": "Multi-activity pack for exploring a country: flag coloring, map activity, food/culture page, basic vocabulary in the country's language, fun facts. Preschool-appropriate."
+      }
+    ]
+  },
+  "notes": "ZIP file (49MB). Interesting drop \u2014 first geography/culture unit study from Aless. Combined with the Spanish language drops and Houses Around the World Montessori cards, suggests Aless values cultural exposure and global awareness for young learners."
+}

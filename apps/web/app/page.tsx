@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { CtaBand } from "../components/marketing/CtaBand";
-import { Ribbon, Wave } from "../components/marketing/dividers";
+import { Deckle, Ribbon, Wave } from "../components/marketing/dividers";
 import { Faq } from "../components/marketing/Faq";
 import { Features } from "../components/marketing/Features";
 import { Footer } from "../components/marketing/Footer";
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   other: {
     "last-modified": new Date().toISOString(),
     "answer-capsule":
-      "Get a free progress report showing exactly where your child stands. Takes five minutes.",
+      "Try Homa free for 7 days: weekly plans, practice pages made for your child, and a progress report showing exactly where your child stands. Then $19 a month, cancel anytime.",
   },
 };
 
@@ -40,9 +40,9 @@ const webAppJsonLd = {
   operatingSystem: "Any",
   offers: {
     "@type": "Offer",
-    price: "0",
+    price: "19",
     priceCurrency: "USD",
-    description: "Free developmental progress report",
+    description: "7-day free trial, then $19 per month. Cancel anytime.",
   },
   // @id ties into the Organization node in the root layout's site-wide
   // graph; name stays inline for validators that don't resolve across
@@ -64,9 +64,13 @@ const faqJsonLd = {
 /**
  * Landing page (BUILD.md Deliverable 0 + lead magnet v2), built on the
  * designed page at docs/homa-design/ui_kits/landing/LandingPage.jsx with
- * the claims pass applied: no fabricated social proof (C2), no pricing
- * (T2), and signup CTAs open the onboarding entry flow. Sample-report links
- * route to the public demonstration report. Section seams are the kit's waves/ribbons (a
+ * the claims pass applied: no fabricated social proof (C2), and signup
+ * CTAs open the onboarding entry flow. The original no-pricing ruling
+ * (T2) was superseded 2026-07-26 by the signup-paywall founder
+ * directive: with a card-upfront trial as the only door, the trial
+ * terms and price are stated before the click (hero note, FAQ, CTA
+ * band) instead of hidden behind it. Sample-report links route to the
+ * public demonstration report. Section seams are the kit's waves/ribbons (a
  * ribbon IS the seam; never stack a wave at the same boundary). Motion
  * follows the emil-design-eng / review-animations skills: brand ease-out +
  * duration tokens, transform/opacity reveals armed by JS with
@@ -85,7 +89,7 @@ export default function LandingPage() {
   // never scrolls). clip fences the decorative bleed (ribbons, waves)
   // without creating a scroll container, so the nav pins for real.
   return (
-    <div style={{ background: "var(--bg-page)", fontFamily: "var(--font-sans)", overflowX: "clip" }}>
+    <div className="lp-root" style={{ background: "var(--bg-page)", fontFamily: "var(--font-sans)", overflowX: "clip" }}>
       {/* Structured data for agent discoverability */}
       <script
         type="application/ld+json"
@@ -95,6 +99,15 @@ export default function LandingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd).replace(/</g, "\\u003c") }}
       />
+      {/* Arms the reveal system BEFORE first paint: executed synchronously
+          while the body parses, so [data-reveal] content below the fold is
+          hidden from the very first frame. Arming from the hydration effect
+          instead let the whole page paint visible, blink to opacity 0, then
+          re-animate; on slow devices the page vanished mid-read. No-JS
+          never runs this, and print/reduced-motion CSS forces content
+          visible, so the fallbacks hold. The hero carries no data-reveal on
+          purpose: above-the-fold content must paint before hydration. */}
+      <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('rv-armed');" }} />
       <RevealObserver />
       <SignupPopupProvider>
         {/* Nav sits OUTSIDE the gradient wrapper: sticky never escapes its
@@ -107,9 +120,9 @@ export default function LandingPage() {
             the page and reads through the nav with no hard seam, exactly
             as before. The gradient's geometry is untouched: the wrapper
             occupies the same box on screen, padding standing in for the
-            nav's old slot. A second, much smaller echo of the same
-            gold-100 glow (not a second color) sits mid-left, just enough
-            to keep that side from reading flat next to the top-right one.
+            nav's old slot. One softened gold-100 glow in the top-right
+            corner only: a second mid-left echo read as a detached stain
+            beside the body copy, so it was removed.
             No overflow here on purpose: Hero clips its own doodles, and
             overflow hidden on this wrapper was one of the two things that
             kept the sticky nav from ever pinning on this page. */}
@@ -120,23 +133,46 @@ export default function LandingPage() {
             marginTop: "calc(-1 * var(--lp-nav-height))",
             paddingTop: "var(--lp-nav-height)",
             background:
-              "radial-gradient(18% 22% at 8% 58%, var(--gold-100) 0%, transparent 68%), " +
-              "radial-gradient(100% 130% at 88% 0%, var(--gold-100) 0%, var(--bg-page) 58%)",
+              "radial-gradient(90% 110% at 88% 0%, color-mix(in oklab, var(--gold-100) 62%, var(--bg-page)) 0%, var(--bg-page) 55%)",
           }}
         >
           <Hero />
         </div>
         <Ribbon text="LESS ADMIN · MORE TEACHING" color="var(--pop-cobalt)" phase={0} top="var(--bg-page)" bottom="var(--bg-page)" />
         <PainBridge />
-        <Features />
+        {/* Features sits on its own butter paper band (--lp-band-butter, a
+            gold-100 mix defined in globals.css) so the long cream midsection
+            breaks into chapters that register at full-page scale; plain
+            var(--bg-page-warm) sat ~1% from var(--bg-page) in luminance and
+            the chapter waves were invisible. The band ground lives on this wrapper, not
+            the section, because the section is a 1200px rail; the ground
+            must bleed full width. Both crests keep the 1px stroke so the
+            edge reads like a sheet laid on the desk. */}
+        <Wave color="var(--lp-band-butter)" flip stroke />
+        <div style={{ background: "var(--lp-band-butter)", backgroundImage: "var(--bg-paper)" }}>
+          <Features />
+        </div>
+        <Wave color="var(--lp-band-butter)" stroke />
         <SampleReportProof />
-        <Wave color="var(--bg-page-warm)" flip />
+        <Wave color="var(--bg-page-warm)" flip stroke />
         <HowThread />
+        {/* Layout spacer only, never visible: HowThread ends in a torn
+            deckle edge (its own seam device) and pulls itself down over
+            this 44px strip (marginBottom -44, zIndex 1), so the deckle IS
+            the thread-to-stories seam. The strip stays because the
+            deckle's overlap geometry is built against it. */}
         <div style={{ background: "var(--bg-page-warm)" }}>
           <Wave color="var(--band-blush)" flip />
         </div>
         <Stories />
-        <Wave color="var(--band-blush)" />
+        {/* The story band is one torn sheet of blush paper: it enters under
+            HowThread's deckle tear, so it exits with a tear as well. A
+            smooth wave here gave the same band one-of-each edge treatment,
+            the only place on the page where two seam grammars met on a
+            single ground. Page-wide the grammar is now: ribbons are
+            tickers, the blush sheet is torn, every other seam is the one
+            smooth wave family. */}
+        <Deckle color="var(--band-blush)" />
         <Faq />
         <Ribbon text="PLAN LESS · BREATHE MORE" color="var(--pop-navy)" ink="var(--gold-400)" phase={0} top="var(--bg-page)" bottom="var(--band-sunshine)" />
         <CtaBand />

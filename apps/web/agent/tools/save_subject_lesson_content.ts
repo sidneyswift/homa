@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { readSubjectLessonTrustedContext } from "../../lib/subject-lessons/dispatch-input";
 import { saveSubjectLessonContentPinned } from "../../lib/subject-lessons/store";
 
@@ -58,9 +61,11 @@ export async function saveSubjectLessonContentForTrustedSession(
       };
 }
 
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Save the title, optional household materials, three to five teaching steps, and one practice suggestion for the trusted subject lesson build. Lesson and family identity come from the session, not this tool input.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: saveSubjectLessonContentInputSchema,
   async execute(input, ctx) {
     return saveSubjectLessonContentForTrustedSession(

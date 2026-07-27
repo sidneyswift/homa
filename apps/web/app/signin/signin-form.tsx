@@ -117,7 +117,7 @@ export function SignInForm({
         <p className="mt-4 text-center text-sm text-body">
           New to Homa?{" "}
           <Link href="/onboarding" className="font-semibold text-brand underline underline-offset-2">
-            Get your child&apos;s free progress report
+            Start your free trial
           </Link>
         </p>
       ) : null}

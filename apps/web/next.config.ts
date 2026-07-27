@@ -1,7 +1,12 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 import { withEve } from "eve/next";
 
 const nextConfig: NextConfig = {
+  // Trace from the monorepo root (matches Next's own lockfile-based
+  // detection; stated explicitly because /admin/studio's funnel traces
+  // the repo-root .cosmo corpus, which lives outside apps/web).
+  outputFileTracingRoot: path.join(__dirname, "..", ".."),
   // Workspace packages ship raw TypeScript; Next compiles them in-place.
   // @homa/taxonomy joined when the graph walk's routes became the first
   // full-package import under Next (only the /domains subpath was used
@@ -33,9 +38,35 @@ const nextConfig: NextConfig = {
     // them anyway so any future dynamic render finds the files.
     "/opengraph-image": ["./assets/fonts/*.woff"],
     // The founder console's material studio reads the skill package
-    // (SKILL.md + reference images) off the deployed filesystem.
-    "/admin/studio": ["./agent/skills/materials-studio/**"],
+    // (SKILL.md + reference images) off the deployed filesystem, plus
+    // the inspo funnel's sources: the activity-format registry and
+    // Cosmo's analysis corpus at the repo root (.cosmo JSON and
+    // markdown only; the heavy inspo images and PDFs stay untraced).
+    "/admin/studio": [
+      "./agent/skills/materials-studio/**",
+      "./agent/activity-formats.md",
+      "../../.cosmo/*.md",
+      "../../.cosmo/references/*.json",
+      "../../.cosmo/curriculums/*.json",
+    ],
     "/admin/studio/reference/[file]": ["./agent/skills/materials-studio/**"],
+  },
+  // The funnel's fs reads make Next's tracer emit the whole .cosmo
+  // directory into the studio functions; the source PDFs and page
+  // images (~28 MB) are never read by product code, only the JSON and
+  // markdown are. Both key shapes on purpose: "/*" is the docs' global
+  // form, the explicit routes cover strict single-segment matching.
+  outputFileTracingExcludes: {
+    "/*": ["../../.cosmo/inspo-images/**", "../../.cosmo/inspo-files/**"],
+    "/admin/studio": ["../../.cosmo/inspo-images/**", "../../.cosmo/inspo-files/**"],
+    "/admin/studio/runs/[runId]": [
+      "../../.cosmo/inspo-images/**",
+      "../../.cosmo/inspo-files/**",
+    ],
+    "/admin/studio/reference/[file]": [
+      "../../.cosmo/inspo-images/**",
+      "../../.cosmo/inspo-files/**",
+    ],
   },
   async redirects() {
     return [
@@ -69,6 +100,14 @@ const nextConfig: NextConfig = {
       // keeps the legacy report available during rollout.
       { source: "/app/home", destination: "/app/progress", permanent: false },
       { source: "/app/dashboard", destination: "/app/progress", permanent: false },
+      // The recording door moved off the retired kid card onto Progress
+      // (2026-07-20), so it left /app/kids too. A parent who kept the
+      // old URL open through a lesson lands on the same recorder.
+      {
+        source: "/app/kids/:childId/lessons/record",
+        destination: "/app/:childId/lessons/record",
+        permanent: false,
+      },
     ];
   },
 };

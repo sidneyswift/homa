@@ -1,9 +1,11 @@
 import { existsSync } from "node:fs";
 
 import chromium from "@sparticuz/chromium";
-import puppeteer, { type Browser } from "puppeteer-core";
+import puppeteer, { type Browser, type Page } from "puppeteer-core";
 
+import { resolveEvalBlobStore } from "./eval-blob-store";
 import { isAllowedPrintableSubresourceUrl, SHEET_PAGE_CLASS } from "./page-shell";
+import { rasterizePdfToJpegs } from "./rasterize-pdf";
 
 /**
  * HTML to print artifacts, in the app runtime (the materials studio's
@@ -22,15 +24,26 @@ import { isAllowedPrintableSubresourceUrl, SHEET_PAGE_CLASS } from "./page-shell
  * pageJpegs, pageCount }. The M0-03/M2-05 sandbox pipeline may replace
  * the internals someday without the tool contract moving.
  *
- * Multi-page honesty (the Llanes packet incident, 2026-07-17: a correct
- * 4-page PDF was reported broken because the only preview was a screen
- * screenshot of the first 11 inches): the shell renders each page as an
- * exact 11in box, and this module screenshots each box separately, so
- * the previews the parent and the quality reviewer see are the same
- * pages the printer produces.
+ * Preview honesty, two incidents deep. Multi-page (the Llanes packet,
+ * 2026-07-17: a correct 4-page PDF was reported broken because the only
+ * preview was a screen screenshot of the first 11 inches): every page
+ * gets its own preview. Screen-vs-print divergence (the sprite-slicing
+ * worksheet, 2026-07-19: screen screenshots looked perfect, the vision
+ * QC approved them, and the shipped PDF was broken, because Chromium's
+ * screen renderer and print engine disagree on CSS like background-size
+ * 400% sprite slicing): previews are now rasterized FROM the generated
+ * PDF bytes (rasterize-pdf.ts), so the reviewer and the chat card judge
+ * the shipped bytes, not a lookalike page. Screenshots remain only as a
+ * loudly-logged last-resort fallback, taken under print media emulation.
+ * One honest limit: pdf.js reads a PDF the way Chromium does, and the
+ * 2026-07-19 sprite PDF proved viewers can disagree about the same bytes
+ * (pdf.js drew it fine, Quartz drew blank cells). Constructs known to
+ * render viewer-dependently are therefore refused before rendering
+ * (hasSpriteSliceMarkup in page-shell.ts) instead of trusted to review.
  */
 
-/** Letter at 96dpi. The preview doubles it via deviceScaleFactor. */
+/** Letter at 96dpi: the render viewport, and the clip grid for the
+ * fallback screenshots (which double it via deviceScaleFactor). */
 const LETTER_PX = { width: 816, height: 1056 } as const;
 const RENDER_TIMEOUT_MS = 60_000;
 
@@ -91,13 +104,31 @@ async function getBrowser(): Promise<Browser> {
   return browserPromise;
 }
 
+/**
+ * Closes the cached browser. Test and script harnesses call this so the
+ * process can exit; the deployed function lets the cached instance die
+ * with its sandbox instead.
+ */
+export async function closePrintableRenderer(): Promise<void> {
+  const pending = browserPromise;
+  browserPromise = null;
+  if (!pending) return;
+  try {
+    const browser = await pending;
+    await browser.close();
+  } catch {
+    // A browser that failed to launch has nothing to close.
+  }
+}
+
 export interface RenderedPrintable {
   pdf: Buffer;
   /** Page one, what MMS and the chat card lead with. */
   previewJpeg: Buffer;
-  /** One JPEG per page, in order, capped at PREVIEW_PAGE_CAP. */
+  /** One JPEG per page rasterized from the pdf bytes, in order, capped
+   * at PREVIEW_PAGE_CAP. */
   pageJpegs: Buffer[];
-  /** True page count, from the shell's page boxes (uncapped). */
+  /** True page count of the pdf itself (uncapped). */
   pageCount: number;
 }
 
@@ -124,7 +155,49 @@ export function isPrintableRequestAllowed(
   }
   if (resourceType === "document") return true;
   if (policy?.blockImageResources && resourceType === "image") return false;
+  // Sandboxed eval runs only: this run's own generated images live in the
+  // loopback blob store, and without this branch the wall silently strips
+  // them from every sandbox PDF (found 2026-07-25, the first eval run in
+  // which family tools worked end to end). resolveEvalBlobStore is non-null
+  // only while eval isolation is active (never on Vercel), and only the
+  // exact sandbox origin passes, so the production wall is unchanged.
+  const evalBlobStore = resolveEvalBlobStore(process.env);
+  if (evalBlobStore && url.startsWith(`${evalBlobStore.baseUrl}/`)) return true;
   return isAllowedPrintableSubresourceUrl(url);
+}
+
+/**
+ * Last-resort previews when PDF rasterization is unavailable: per-page
+ * screenshots under print media emulation. Page boxes stack at exact
+ * 11in intervals on screen (the shell's contract), so page N is the
+ * clip at N * 11in; a document without shell page boxes (a legacy
+ * caller) is one page. Still the screen renderer underneath, so these
+ * are NOT proof of the shipped PDF; the caller logs when it lands here.
+ */
+async function screenshotPagesPrintEmulated(
+  page: Page,
+): Promise<{ pageJpegs: Buffer[]; pageCount: number }> {
+  await page.emulateMediaType("print");
+  const pageCount = Math.max(
+    1,
+    await page.evaluate(
+      (pageClass) => document.querySelectorAll(`.${pageClass}`).length,
+      SHEET_PAGE_CLASS,
+    ),
+  );
+  const pageJpegs: Buffer[] = [];
+  for (let index = 0; index < Math.min(pageCount, PREVIEW_PAGE_CAP); index += 1) {
+    pageJpegs.push(
+      Buffer.from(
+        await page.screenshot({
+          type: "jpeg",
+          quality: 85,
+          clip: { x: 0, y: index * LETTER_PX.height, ...LETTER_PX },
+        }),
+      ),
+    );
+  }
+  return { pageJpegs, pageCount };
 }
 
 /**
@@ -197,28 +270,6 @@ export async function renderPrintableHtml(
       ),
     );
 
-    // Page boxes stack at exact 11in intervals on screen (the shell's
-    // contract), so page N's true preview is the clip at N * 11in. A
-    // document without shell page boxes (a legacy caller) is one page.
-    const pageCount = Math.max(
-      1,
-      await page.evaluate(
-        (pageClass) => document.querySelectorAll(`.${pageClass}`).length,
-        SHEET_PAGE_CLASS,
-      ),
-    );
-    const pageJpegs: Buffer[] = [];
-    for (let index = 0; index < Math.min(pageCount, PREVIEW_PAGE_CAP); index += 1) {
-      pageJpegs.push(
-        Buffer.from(
-          await page.screenshot({
-            type: "jpeg",
-            quality: 85,
-            clip: { x: 0, y: index * LETTER_PX.height, ...LETTER_PX },
-          }),
-        ),
-      );
-    }
     const pdf = Buffer.from(
       await page.pdf({
         format: "letter",
@@ -227,6 +278,32 @@ export async function renderPrintableHtml(
         timeout: RENDER_TIMEOUT_MS,
       }),
     );
+
+    // The previews the reviewer and the parent see come from the PDF
+    // bytes themselves, never from the live page: Chromium's screen and
+    // print renderers diverge on real CSS, and the QC must judge the
+    // artifact that ships (the sprite worksheet, 2026-07-19). The
+    // screenshot fallback exists only so a broken raster runtime does
+    // not take material creation down with it; it emulates print media
+    // to stay as close to the shipped PDF as a screenshot can get, and
+    // it logs loudly because previews are no longer proof of the PDF.
+    let pageJpegs: Buffer[];
+    let pageCount: number;
+    try {
+      ({ pageJpegs, pageCount } = await rasterizePdfToJpegs(
+        pdf,
+        PREVIEW_PAGE_CAP,
+      ));
+      if (pageJpegs.length === 0) {
+        throw new Error("PDF rasterization produced zero pages");
+      }
+    } catch (error) {
+      console.error(
+        "printable preview raster failed; falling back to print-emulated screenshots (previews may not match the shipped PDF):",
+        error instanceof Error ? error.message : "unknown",
+      );
+      ({ pageJpegs, pageCount } = await screenshotPagesPrintEmulated(page));
+    }
     return { pdf, previewJpeg: pageJpegs[0], pageJpegs, pageCount };
   } finally {
     await page.close().catch(() => {

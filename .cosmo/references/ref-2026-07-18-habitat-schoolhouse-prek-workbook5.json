@@ -1,0 +1,129 @@
+{
+  "id": "ref-2026-07-18-habitat-schoolhouse-prek-workbook5",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T21:59:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784426393.536249",
+  "format": "preschool-workbook",
+  "title": "Habitat Schoolhouse Preschool Workbook 5 — Part 2 (Letters S, T, U)",
+  "publisher": "The Habitat Schoolhouse Inc / Gumboot Kid",
+  "series": "Preschool with Habitat Schoolhouse",
+  "gradeLevel": "Preschool (ages 3-5)",
+  "workbookNumber": "5 Part 2",
+  "lettersCoovered": ["S", "T", "U"],
+  "callouts": [],
+  "pages": 36,
+  "activityTypes": [
+    {
+      "type": "silly-story-prompt",
+      "description": "Full-page watercolor illustration (pond animals on a log) with prompt: 'Look at the picture below and make up a silly story about what you see.' Oral storytelling from visual prompt.",
+      "skill": "oral language, creative thinking, visual literacy",
+      "frequency": "opens the workbook"
+    },
+    {
+      "type": "big-and-small-sorting",
+      "description": "Letter Ss themed: 'Colour the BIG shapes blue and the SMALL shapes yellow.' Geometric shapes (circles, squares, hexagons, triangles) in a 2x2 grid. Combines letter-of-the-week (S for Small) with shape recognition and size comparison.",
+      "skill": "math concepts (big/small, size comparison), shape recognition, following directions",
+      "frequency": "per letter section"
+    },
+    {
+      "type": "animal-anatomy-diagram",
+      "description": "Full-page watercolor animal (sloth, tiger) with labeled body parts (small black eyes, thick fur, long limbs, curved back, strong claws). Below: 'How many tails does the sloth have?' (dot-trace number) + 'Where do sloths sleep?' (multiple choice: Trees/Caves/Nests).",
+      "skill": "science (animal anatomy), counting, reading comprehension, dot-tracing numbers",
+      "frequency": "per letter section — animal name starts with the focus letter (S=Sloth, T=Tiger)"
+    },
+    {
+      "type": "counting-mat-with-manipulatives",
+      "description": "Letter Ss themed: 'Ss Strawberry — Place the right number of buttons, coins, stones or whatever item you choose onto each strawberry.' 4 numbered strawberries (1-4) in watercolor. Designed for lamination and reuse with physical counters.",
+      "skill": "counting, one-to-one correspondence, fine motor",
+      "frequency": "per letter section"
+    },
+    {
+      "type": "large-letter-coloring",
+      "description": "'THE LETTER T — Colour and decorate the letters below.' Giant outline uppercase T and lowercase t filling the page. Child colors/decorates freely.",
+      "skill": "letter recognition, fine motor, creative expression",
+      "frequency": "per letter section"
+    },
+    {
+      "type": "uppercase-identification",
+      "description": "'Uu Uppercase — Colour or draw a circle around the uppercase letters.' Mixed uppercase and lowercase letters scattered across the page with watercolor cattails/dragonfly decorating the margins. 'How many uppercase letters did you find?' box at bottom.",
+      "skill": "letter case discrimination, counting, visual scanning",
+      "frequency": "per letter section"
+    }
+  ],
+  "designPatterns": {
+    "letterOfTheWeek": {
+      "description": "Each section (S, T, U) has a consistent set of activities: counting mat, letter coloring, animal diagram, sorting activity, uppercase/lowercase identification. The letter appears in bold at the top of every page (Ss, Tt, Uu) with a themed word (Strawberry, Tiger, Uppercase).",
+      "value": "Predictable structure. The child knows what kinds of activities to expect in each letter section."
+    },
+    "watercolorNaturalistArt": {
+      "description": "Every illustration is watercolor naturalist — pond animals, botanical elements, realistic animal anatomy diagrams. The art is museum-quality, not clipart. Consistent with the Pond Map tracking system.",
+      "value": "Beautiful enough that kids want to engage. The art makes the workbook feel special, not disposable."
+    },
+    "multiModalPerLetter": {
+      "description": "Each letter section hits multiple skill areas: visual (letter identification), kinesthetic (coloring, placing manipulatives), oral (silly story), analytical (sorting, counting), and science (animal anatomy). Same multi-modal philosophy as Harcourt's alt teaching strategies, but embedded in the workbook itself.",
+      "value": "Multiple ways to engage with each letter. Different skills reinforce the same content."
+    },
+    "manipulativeIntegration": {
+      "description": "The counting mat pages are designed for physical manipulatives: 'Place the right number of buttons, coins, stones or whatever item you choose.' This echoes Carolyng's directive: suggest household items for manipulatives.",
+      "value": "Concrete-to-abstract pathway. Physical objects before written numbers."
+    },
+    "crossCurricularPerPage": {
+      "description": "The animal diagram pages combine science (anatomy), math (counting body parts), reading (multiple choice comprehension), and fine motor (dot-tracing numbers) in a single page. 4 subjects, one page.",
+      "value": "Maximum learning density without feeling crowded. The watercolor art does the heavy lifting."
+    }
+  },
+  "overallLayout": {
+    "structure": "one activity per page, full-page illustrations",
+    "spacing": "very airy — one concept per page, lots of art, minimal text",
+    "visualHierarchy": "art-dominant — the watercolor illustrations are the centerpiece, text is secondary",
+    "whiteSpaceRatio": 0.20,
+    "flowDirection": "top-down"
+  },
+  "overallSkillTargeting": {
+    "subject": "multidisciplinary",
+    "domain": "early-childhood",
+    "topics": [
+      {"id": "ela.letter-recognition", "kind": "procedural", "mapped": false},
+      {"id": "ela.upper-lower-case", "kind": "conceptual", "mapped": false},
+      {"id": "math.counting-1-10", "kind": "procedural", "mapped": false},
+      {"id": "math.big-small-comparison", "kind": "conceptual", "mapped": false},
+      {"id": "science.animal-anatomy", "kind": "conceptual", "mapped": false}
+    ],
+    "unmappedSkills": ["oral-storytelling-from-visual-prompt", "letter-of-the-week-curriculum"]
+  },
+  "difficulty": {
+    "ageBandMonths": [36, 60],
+    "complexity": "single-skill per page, multi-skill per section",
+    "prerequisites": [],
+    "scaffolding": "high — one concept per page, large illustrations, simple instructions"
+  },
+  "theming": {
+    "themeType": "nature-habitat",
+    "characters": ["pond animals (frog, snail, turtle, salamander)", "themed animals per letter (sloth, tiger, etc.)"],
+    "visualStyle": "watercolor naturalist",
+    "colorPalette": "full-color watercolors — greens, blues, warm naturals",
+    "appealDrivers": ["museum-quality watercolor art", "nature habitat theme throughout", "animals kids love"]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard with watercolor edge bleeds",
+    "inkDensity": "medium-heavy (full watercolor pages)",
+    "colorRequirement": "needs color — the watercolor art is essential"
+  },
+  "recipeMatch": {
+    "matchedRecipes": ["counting-mat", "coloring-page"],
+    "gaps": [
+      {
+        "name": "animal-anatomy-diagram-page",
+        "description": "Full-page watercolor animal illustration with labeled body parts + counting question (dot-trace number) + comprehension question (multiple choice). Combines science, math, reading, and fine motor in one page."
+      },
+      {
+        "name": "letter-section-bundle",
+        "description": "A coordinated set of 5-6 activities all themed around one letter: counting mat, letter coloring, animal diagram, sorting activity, uppercase/lowercase identification, oral story prompt. Packaged as a mini-unit per letter."
+      }
+    ]
+  },
+  "notes": "Fourth Aless drop. This is the STUDENT-FACING workbook that pairs with the Record Keeping system. Together they form a complete preschool curriculum: workbook (instruction) + pond map (progress tracking) + progress cards (assessment). The watercolor naturalist art style is EXACTLY what Carolyng identified as her preference — Aless independently chose the same aesthetic. This confirms both users share the Charlotte Mason / nature study art preference. The activity types map well to Homa's existing recipes (counting mat, coloring page) with two new gaps (animal anatomy diagram, letter section bundle)."
+}

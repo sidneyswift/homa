@@ -97,7 +97,7 @@ export function ChatThread({
 }) {
   if (messages.length === 0) {
     return (
-      <p className="mt-3 rounded-md border border-dashed border-border-default bg-card px-3.5 py-3 text-sm text-subtle">
+      <p className="mt-3 rounded-md border border-dashed border-border bg-card px-3.5 py-3 text-sm text-subtle">
         No messages recorded yet on this scope.
       </p>
     );
@@ -140,7 +140,7 @@ export function ChatThread({
                   <div
                     className={
                       internal
-                        ? "max-w-[82%] rounded-2xl border border-dashed border-border-default bg-[var(--surface-sunken)] px-3.5 py-2.5"
+                        ? "max-w-[82%] rounded-2xl border border-dashed border-border bg-[var(--surface-sunken)] px-3.5 py-2.5"
                         : mine
                           ? "max-w-[82%] rounded-2xl rounded-br-md bg-[var(--clay-100)] px-3.5 py-2.5"
                           : "max-w-[82%] rounded-2xl rounded-bl-md border border-border-subtle bg-card px-3.5 py-2.5 shadow-sm"

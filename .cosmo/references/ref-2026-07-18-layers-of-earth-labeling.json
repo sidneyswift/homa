@@ -1,0 +1,31 @@
+{
+  "id": "ref-2026-07-18-layers-of-earth-labeling",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:20:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428025.883269",
+  "format": "labeling-worksheet",
+  "title": "Layers of the Earth \u2014 Free Labeling Worksheet",
+  "publisher": "TPT (link expired)",
+  "gradeLevel": "K-3rd (ages 5-9)",
+  "overview": {
+    "description": "Free TPT worksheet for labeling the layers of the Earth (crust, mantle, outer core, inner core). Part of Aless's earth science exploration cluster."
+  },
+  "skillTargeting": {
+    "subject": "science",
+    "domain": "earth-science",
+    "topics": [
+      {
+        "id": "science.earth-layers",
+        "kind": "conceptual",
+        "mapped": false
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": []
+  },
+  "notes": "TPT link expired. Earth science labeling activity. Pairs with volcano materials."
+}

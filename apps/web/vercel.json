@@ -4,6 +4,10 @@
     {
       "path": "/api/map/cron",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/sync/cron",
+      "schedule": "7 * * * *"
     }
   ]
 }

@@ -1,0 +1,486 @@
+{
+  "id": "cur-2026-07-20-dimensions-math-pka",
+  "name": "Dimensions Math Teacher's Guide PKA (Pre-Kindergarten, Part A, Singapore Math Inc., copyright 2017, first published 2018, ISBN 978-1-947226-28-9)",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-19T21:19:20-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784510360.985589",
+  "sourceFiles": [
+    {
+      "filename": "dimensions-math-pka-tg.pdf",
+      "localPath": ".cosmo/inspo-files/dimensions-math-pka-tg.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-20-dimensions-math-pka/dimensions-math-pka-tg.pdf"
+    }
+  ],
+  "layer1_philosophy": {
+    "methodology": "A published Singapore-style Pre-Kindergarten math Teacher's Guide built entirely around the Concrete-Pictorial-Abstract (CPA) progression, stated explicitly in the book's own front matter ('Dimensions Math Curriculum' page): 'Through Concrete-Pictorial-Abstract development, students view the same concepts over time with increasing levels of abstraction.' At the PKA level this means every concept is taught hands-on first (real objects, movement, sound) with no pictorial or abstract representation required yet; the pictorial and abstract stages arrive in later levels of the same series (per the book's own multi-level Scope & Sequence reproduced in its front matter). Every lesson follows a fixed five-part shape: Explore (a whole-class hands-on task), Learn (discuss the corresponding textbook page, narrated through five recurring child characters), Whole Group Play (one game), Small Group Center Play (4-6 rotating stations tagged with recurring icons), and an optional Extend (Play, Learn, or Explore) that deepens or re-applies the same concept, often through a themed storybook read-aloud.",
+    "principles": [
+      "CPA is the organizing law of the whole Dimensions Math series (Pre-K through Grade 5, per the front matter's own 'Pedagogical Approach and Methodology' section), and PKA sits at the purely concrete end: every lesson's Lesson Materials list is real objects, manipulatives, or Blackline Masters, never a worksheet as the primary teaching tool; the textbook page is discussed (Learn) only after the hands-on Explore step",
+      "A fixed five-part lesson shape repeats across all 63 lessons in the book's 7 chapters: Objectives and Lesson Materials, then Explore, then Learn, then Whole Group Play, then Small Group Center Play (a menu of 4-6 stations drawn from a recurring icon set: Art, Building, Counting, Dramatic Play, Geoboard, Sort, Match, Patterns, Reading Time, Music, Ten-frame Flash, Roll and Compare, Number Composition), then an optional Extend Play/Learn/Explore idea, then an exercise-page pointer ('Exercise N - page NN' or explicitly 'No exercise for this lesson')",
+      "Five recurring child characters (Emma, Alex, Sofia, Dion, and Mei) appear on every textbook page reproduced in the guide and, in the book's own words, 'help students develop metacognitive reasoning through questions, hints, and ideas'; the Teacher's Guide scripts what to have students notice about each character's comment",
+      "The Singapore Mathematics Framework is reproduced as a pentagon diagram in the front matter (Attitudes: Beliefs, Interest, Appreciation, Perseverance, Confidence; Metacognition: monitoring and self-regulation of learning; Skills: numerical, algebraic, spatial, data, measurement, estimation; Concepts: numerical, algebraic, geometrical, statistical, probabilistic, analytical; Process: reasoning, communication, connections, thinking skills, application, modeling), all organized around a center of 'Mathematical Problem Solving'",
+      "Optional-snack suggestions tied to the lesson's own content recur in nearly every lesson's Lesson Materials list (for example 'apple slices and cheese sticks' for a gymnastics/dance movement-pattern lesson, or cheese sticks 'in the shape of 4s' for the numeral-4 lesson), a distinctive PK-level classroom-snack-time integration not seen in the book's own later-level siblings per its front matter",
+      "Storybook read-aloud tie-ins recur across chapters as an Extend Play/Learn activity or core Explore/Learn hook (Ten in the Bed and Ten Eggs in a Nest for counting-back and counting-to-ten lessons, The Very Hungry Caterpillar for a bees/counting lesson, The Three Little Pigs for an egg-texture/pattern lesson), reinforcing the math concept through independent trade-book literature rather than a curriculum-authored passage"
+    ],
+    "learningTheory": "Concrete-Pictorial-Abstract (CPA) developmental progression, entirely concrete at this specific Pre-K, Part A level (manipulatives, real objects, movement, sound; no bar models, number bonds, or written equations appear anywhere in this volume, those begin at later Dimensions Math levels per the book's own Scope & Sequence). Progression within Part A is linear and cumulative rather than spiral: Chapter 6's own 'Notes' page states this directly ('In Chapter 4: Numbers to 5 - Part 1 and Chapter 5: Numbers to 5 - Part 2, students learned to count by rote, count with one-to-one correspondence, count with cardinality, and identify numerals 1 to 5. In this and the next chapter, students build on that prior knowledge'). The wider Dimensions Math series (Pre-K through Grade 5, per the multi-level Scope & Sequence chart reproduced in this book's own front matter, spanning PKA/PKB/KA/KB through 5A/5B) is spiral across years, revisiting the same broad strands (numbers, measurement, geometry, patterns, later addition/subtraction/multiplication/division) with growing depth each level.",
+    "assessmentApproach": "Practice-lesson-and-workbook-exercise; no formal test appears anywhere in this specific volume. Each of the 7 chapters ends with a numbered 'Practice' lesson (concepts review across the whole chapter) and a 'Workbook Pages' section reproducing every numbered workbook exercise from that chapter at reduced size with the teacher's correct answers circled or filled in. The front matter's own 'Dimensions Math Program Materials' page lists 'Tests' as a separate purchasable series component ('Tests contain differentiated assessments to systematically evaluate student progress'), explicitly not included in this Teacher's Guide.",
+    "parentRole": "facilitator-and-guide, written in classroom-teacher language throughout ('have students...', 'ask the class...', 'send four or five students at a time to find sets of objects...'); like the sibling Harcourt-series and Social Studies volumes drained earlier this session, this is a school-classroom-market book (Whole Group Play assumes a full class doing one activity together; Small Group Center Play assumes several simultaneous stations with multiple children rotating through them; snack quantities are given 'per student'). curriculum-writer should treat this the same way those siblings were treated: a light one-adult-one-child adaptation that keeps the Explore-Learn-Play-Extend shape, the optional-snack and storybook ties, and the five-character narration, while skipping or simplifying anything that assumes peer group size (station rotation becomes sequential single-child play; whole-group games become one-on-one or solo versions where the game logic allows it).",
+    "knowledgeBankMatches": [
+      {
+        "topicKey": "singapore-math-cpa",
+        "topicType": "method_philosophy",
+        "status": "likely already exists, though this session could not query the live knowledge_bank table directly (no database credentials available in this sandbox, the same limitation every ingestion this session has hit). Strong indirect evidence it does: apps/web/agent/curriculum-writer.md already carries a full 'Singapore Math (CPA Progression)' section (lines 237-256) stating the CPA law, the PreK-K-is-concrete rule, number bonds as the K-2 scaffold, three-tier Basics/Practice/Challenge scaffolding, bar models from Grade 2, decreasing visual scaffolding by grade, and mental math strategies, all accurately and all consistent with what this specific book's own front matter describes. This is the CPA method itself, already well-established in Homa's product before this ingestion, unlike the reading-skill-integrated social studies methodology found earlier this session which genuinely had no prior curriculum-writer.md coverage."
+      }
+    ],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "dimensions-math-pka-teachers-guide-format",
+        "topicType": "method_format",
+        "title": "Dimensions Math Teacher's Guide PKA Format",
+        "summary": "A Pre-Kindergarten Part A math Teacher's Guide (Singapore Math Inc., 2017/2018, ISBN 978-1-947226-28-9) organized into 7 chapters (Match, Sort, and Classify; Compare Objects; Patterns; Numbers to 5 - Part 1; Numbers to 5 - Part 2; Numbers to 10 - Part 1; Numbers to 10 - Part 2), 63 lessons total, each following a fixed Objectives / Lesson Materials / Explore / Learn / Whole Group Play / Small Group Center Play / Extend shape, narrated through five recurring child characters (Emma, Alex, Sofia, Dion, Mei). Content is entirely pre-number and pure-counting: sorting and classifying by attribute (color, texture, size), comparing physical attributes (size, length, height, weight), creating and extending simple two-element patterns, and counting/cardinality/numeral-recognition to 10 with heavy ten-frame use from Chapter 6 onward. No addition, subtraction, shapes, or numeral writing appears in this volume (per the book's own front matter Scope & Sequence, those begin in the next book in the series, PKB). Each chapter closes with a Practice lesson and a Workbook Pages answer-key section; a back-matter Blackline Masters cross-reference table lists every reusable card/template and which chapter and lesson needs it.",
+        "mergedRowId": "49207249-eecf-4c6a-a88c-59bbfa8f8ac0",
+        "mergedAt": "2026-07-21"
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Chapter 1, Lessons 1-3: Red and Blue / Yellow and Green / Color Review",
+        "curriculumTopic": "Sort and classify objects by color (red, blue, yellow, green), naming the color as the sorting reason",
+        "homaSubject": "math",
+        "homaDomain": "data-statistics",
+        "homaTopicId": "mt_NJz7vT4Bhp",
+        "status": "mapped",
+        "suggested": {
+          "topicSlug": "math.sorting-and-classifying-objects-by-one-attribute",
+          "domain": "data-statistics",
+          "kind": "conceptual",
+          "teachingWindowMonths": [
+            36,
+            60
+          ],
+          "note": "RESOLVED 2026-07-21 (bookkeeping backfill): mt_NJz7vT4Bhp ('Sorting and Classifying Objects by One Attribute') already exists in topics.json from this same curriculum's own earlier ingestion, and is already the homaTopicId used by the Lessons 4-6 (texture) and Lesson 9 (sort into two groups) mappings below; this color-sorting mapping was simply never backfilled to point at it. Checked 'sort' and 'classif' across all 508 pre-existing Mathematics topics before adding anything; the only hits were 'Sorting into categories' (Data & Statistics, age 5-6 and 6-8) and 'Sorting 2-D and 3-D shapes' (Geometry, age 6-7), all noticeably older than Pre-K and either data-categorization- or shape-specific, not general attribute sorting."
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 1, Lessons 4-6: Soft and Hard / Rough, Bumpy, and Smooth / Sticky and Grainy",
+        "curriculumTopic": "Sort and classify objects by texture, feeling objects in a bag and describing them with texture vocabulary",
+        "homaSubject": "math",
+        "homaDomain": "data-statistics",
+        "homaTopicId": "mt_NJz7vT4Bhp",
+        "status": "mapped",
+        "suggested": {
+          "note": "Same core skill as Lessons 1-3, a different attribute (texture instead of color); the new topic added above already generalizes over any single attribute, not counted as a second gap"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 1, Lessons 7-8: Size - Part 1 / Part 2",
+        "curriculumTopic": "Sort and compare objects by size (big/small, more/fewer of some quality), grouping same-size items and identifying the odd one out",
+        "homaSubject": "math",
+        "homaDomain": "measurement",
+        "homaTopicId": "mt_NtJYlJdUe9",
+        "status": "partial",
+        "suggested": {
+          "note": "Splits across two topics: the sorting-by-size half maps to the new mt_NJz7vT4Bhp above, and the noticing-the-attribute-itself half maps to the existing 'Measurable Attributes of Objects' (Measurement, age 4-6); a real but genuinely split fit, not forced into either topic alone"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 1, Lesson 9: Sort Into Two Groups",
+        "curriculumTopic": "Sort a mixed group of objects into two groups of the child's own choosing, then re-sort the same objects a different way and explain the new reasoning",
+        "homaSubject": "math",
+        "homaDomain": "data-statistics",
+        "homaTopicId": "mt_NJz7vT4Bhp",
+        "status": "mapped",
+        "suggested": {
+          "note": "This is the exact skill the new topic above was written to cover, including the re-sort-a-different-way evidence line"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 2, Lesson 1: Big and Small",
+        "curriculumTopic": "Compare two or more objects and identify which is big and which is small",
+        "homaSubject": "math",
+        "homaDomain": "measurement",
+        "homaTopicId": "mt_NtJYlJdUe9",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Measurable Attributes of Objects' topic (age 4-6) is a direct match for noticing and naming a general size attribute"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 2, Lessons 2-3: Long and Short / Tall and Short",
+        "curriculumTopic": "Compare two or more objects by length or height and identify which is longer/shorter or taller/shorter",
+        "homaSubject": "math",
+        "homaDomain": "measurement",
+        "homaTopicId": "mt_uhuxX8sg9f",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Comparing Lengths & Heights' topic (age 4-6) is a direct, strong match for both lessons"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 2, Lesson 4: Heavy and Light",
+        "curriculumTopic": "Compare two objects on a balance scale and identify which is heavier or lighter",
+        "homaSubject": "math",
+        "homaDomain": "measurement",
+        "homaTopicId": "mt_-P1kdZhHbL",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Measuring mass and weight (age 4+)' topic (age 4-6) is a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 3, Lessons 1-3: Movement Patterns / Sound Patterns / Create Patterns",
+        "curriculumTopic": "Notice, copy, and create simple AB patterns using body movements, sounds, or objects (for example clap-stomp-clap-stomp, or a two-color bead sequence)",
+        "homaSubject": "math",
+        "homaDomain": "algebra-patterns",
+        "homaTopicId": "mt_IOpwXalEo4",
+        "status": "mapped",
+        "suggested": {
+          "topicSlug": "math.creating-and-extending-simple-ab-patterns",
+          "domain": "algebra-patterns",
+          "kind": "procedural",
+          "teachingWindowMonths": [
+            36,
+            60
+          ],
+          "note": "RESOLVED 2026-07-21 (bookkeeping backfill): mt_IOpwXalEo4 ('Creating and Extending Simple AB Patterns') already exists in topics.json from this same curriculum's own earlier ingestion; this mapping was simply never backfilled to point at it. Checked 'pattern' across all 508 pre-existing Mathematics topics; every hit (Mathematical Thinking 'Spotting mathematical patterns' age 5-6, Geometry 'Patterns & Sequences' age 6-7, Mathematical Thinking 'Shape patterns' age 6-7, Geometry 'Shape patterns' age 9-10, Algebra 'Number Pattern Relationships' age 10-11) is older than Pre-K and either about spotting/generalizing an existing pattern or specifically shape- or number-based, not creating a simple two-element AB pattern with movement or sound."
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 4, Lessons 1-2: Count 1 to 5 - Part 1 / Part 2",
+        "curriculumTopic": "Count from 1 to 5 by rote, in songs and rhymes",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": "mt_WcfaSfVT33",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'One-to-one counting' topic (age 4-6) covers rote and correspondence counting together; a strong general fit"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 4, Lessons 3-4: Count Back / Count On and Back",
+        "curriculumTopic": "Count backward from 5 to 1 by rote, and review counting forward and backward within 5",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "No existing Homa Mathematics topic names counting backward as its own distinct skill at this age; the closest is the general 'One-to-one counting' topic, which does not specifically cover the reverse-order rote skill. A real, low-volume gap (2 lessons here, echoed by Chapter 6 Lesson 4's 'Count Back' from 10); not added as a new topic this session to keep additions proportionate, see decisionsNeeded"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 4, Lessons 5-9: Count 1 Object / Count 2 Objects / Count Up to 3, 4, and 5 Objects",
+        "curriculumTopic": "Count a small set of objects with one-to-one correspondence, building the ceiling from 1 to 5 one lesson at a time",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": "mt_WcfaSfVT33",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'One-to-one counting' topic (age 4-6) is a direct match; Homa's own 'How Many in Total?' cardinality-principle topic (age 4-6) applies equally once the count is complete"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 4, Lessons 10-13: How Many? - Part 1 / Part 2, How Many Now? - Part 1 / Part 2",
+        "curriculumTopic": "Count a set of up to 5 objects and answer 'how many', then recognize that rearranging the same objects does not change how many there are",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": "mt_dmNvjroCPT",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'How Many in Total?' topic (age 4-6, the cardinality principle: the last number counted tells how many) is a direct match, including the conservation-of-number idea in the 'How Many Now?' lessons, which is that same cardinality principle applied under rearrangement"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 5, Lessons 1-3: 1, 2, 3 / 1, 2, 3, 4, 5 - Part 1 / Part 2",
+        "curriculumTopic": "Recognize the numerals 1 through 5 and match them to the correct quantity",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": "mt_v4d9h3y8l6",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Number Word Recognition 1-10' topic (age 4-7) is the closest existing match; it is technically framed around the written word form ('five') rather than the numeral symbol ('5'), a minor vocabulary mismatch not worth a dedicated new topic for a five-lesson span, since the underlying skill (associate a written form with a quantity) is the same"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 5, Lessons 4-7: How Many? - Part 1 / Part 2, How Many Do You See? / How Many Do You See Now?",
+        "curriculumTopic": "Recognize small quantities from dot-card arrangements without counting one by one (subitizing), including recognizing the same quantity in a rearranged arrangement",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": "mt_pAcaehday5",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Representing numbers with objects' topic (age 4-6, objects/pictorial representations/number line) is a reasonable match for the dot-arrangement subitizing pattern used throughout these lessons"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 6, Lesson 1: 0",
+        "curriculumTopic": "Understand and recognize zero as meaning none, and recognize the numeral 0",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "Checked all 16 Counting & Cardinality topics; none names zero or an empty set as its own concept. A real, single-lesson gap; not added as a new topic this session given how narrow it is, see decisionsNeeded"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 6, Lessons 2-4: Count to 10 - Part 1 / Part 2, Count Back",
+        "curriculumTopic": "Count by rote from 1 to 10 and back from 10 to 1",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": "mt_yqAL6O5i_v",
+        "status": "partial",
+        "suggested": {
+          "note": "Homa's 'Counting objects to 20' topic (age 5-6) covers rote counting to a higher ceiling than this book needs at this point, a real but loose superset fit; the count-back-from-10 half has the same gap noted for Chapter 4 Lessons 3-4 above"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 6, Lesson 5: Order Numbers",
+        "curriculumTopic": "Put a shuffled set of number cards 1-10 back into the correct counting order",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": "mt__YRJ23GuIK",
+        "status": "partial",
+        "suggested": {
+          "note": "Homa's 'Two written numerals between 1 and 10' topic (age 5-6) covers comparing which of two numerals is greater or less, a related but not identical skill to ordering a full shuffled sequence; a real but imperfect fit"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 6, Lessons 6-11: Count Up to 6, 7, 8, 9 Objects, Count Up to 10 Objects - Part 1 / Part 2",
+        "curriculumTopic": "Count a set of objects with one-to-one correspondence, building the ceiling from 6 to 10 one lesson at a time",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": "mt_yqAL6O5i_v",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Counting objects to 20' topic (age 5-6) covers this book's 1-10 ceiling as a subset; a strong match"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 6, Lesson 12: How Many?",
+        "curriculumTopic": "Count a set of up to 10 objects and answer 'how many'",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": "mt_dmNvjroCPT",
+        "status": "mapped",
+        "suggested": {
+          "note": "Same 'How Many in Total?' match as the Chapter 4 How Many lessons, extended to a ceiling of 10"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 7, Lessons 1-5: 6 / 7 / 8 / 9 / 10",
+        "curriculumTopic": "Recognize the numerals 6 through 10 among distractor numerals",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": "mt_v4d9h3y8l6",
+        "status": "partial",
+        "suggested": {
+          "note": "Same partial fit as Chapter 5 Lessons 1-3: the closest existing topic is framed around word-form recognition, while these lessons are pure numeral-symbol recognition (a giant numeral shape filled with mixed numerals, circle the correct ones); a related but not identical skill, recorded rather than forcing an exact match"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 7, Lesson 6: 0 to 10",
+        "curriculumTopic": "Review recognizing and ordering all numerals 0 through 10",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": "mt_WcfaSfVT33",
+        "status": "mapped",
+        "suggested": {
+          "note": "A general review lesson; folds into the broad one-to-one counting and numeral-recognition coverage already mapped above rather than counted as a separate gap"
+        }
+      },
+      {
+        "curriculumSubject": "Chapter 7, Lessons 7-8: Count and Match - Part 1 / Part 2",
+        "curriculumTopic": "Match a group of objects to the number card showing how many are in the group",
+        "homaSubject": "math",
+        "homaDomain": "counting-cardinality",
+        "homaTopicId": "mt_pAcaehday5",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Representing numbers with objects' topic (age 4-6) is a direct match for matching a quantity to its numeral"
+        }
+      },
+      {
+        "curriculumSubject": "Cross-cutting: ten-frame model, used throughout Chapters 4-7",
+        "curriculumTopic": "Represent and read quantities to 10 using a two-row-of-five ten-frame (Blank Ten-frame and Ten-frame Cards 0-10 Blackline Masters), a core Dimensions Math visual tool introduced well before addition begins",
+        "homaSubject": "math",
+        "homaDomain": "number-place-value",
+        "homaTopicId": "mt_u1c7g0x5k3",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Ten Frame Representation' topic (Number Representation & Place Value, age 4-7) is a direct, purpose-built match for this book's own ten-frame teaching tool"
+        }
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 23,
+      "mapped": 17,
+      "unmapped": 0,
+      "noSubject": 0,
+      "partial": 6
+    }
+  },
+  "layer3_structure": {
+    "cadence": "Not stated as a specific weekly calendar anywhere in the sampled pages. Each Chapter Overview page instead states a 'Suggested number of class periods' (directly confirmed for Chapter 4: 'Suggested number of class periods: 14-15' for its 14 lessons, roughly one class period per lesson). Extrapolating that same ~1:1 lesson-to-period ratio across all 7 chapters' 63 total lessons gives a rough estimate of 60-70 class periods for the whole book, but this is an extrapolation from one directly observed chapter's own stated figure, not a total given anywhere in the book itself, and pacing is otherwise left to the teacher.",
+    "sessionLengthMinutes": {
+      "note": "Not stated anywhere in the sampled pages. No minute-based time language was found for any lesson, chapter, or activity; leaving this unknown rather than guessing, the same honest treatment the sibling Harcourt and Social Studies volumes in this drop wave received for the same reason."
+    },
+    "weeklyTemplate": "No week-by-week template exists in the source; instead every lesson follows the same fixed shape regardless of chapter: Objectives and Lesson Materials at the top, then Explore (a whole-class hands-on task introducing the concept), then Learn (discuss the corresponding textbook page, narrated through Emma, Alex, Sofia, Dion, and Mei), then Whole Group Play (one class-wide game), then Small Group Center Play (a menu of 4-6 rotating stations drawn from a recurring icon set: Art, Building, Counting, Dramatic Play, Geoboard, Sort, Match, Patterns, Reading Time, Music, Ten-frame Flash, Roll and Compare, Number Composition), then an optional Extend Play/Learn/Explore idea (often a storybook tie-in), then a pointer to the matching workbook exercise page or explicitly 'No exercise for this lesson.' Each chapter opens with a Chapter Opener (a full-page illustrated scene plus its own Explore and Extend Learn discussion prompts) and closes with a numbered Practice lesson and a Workbook Pages section reproducing every exercise from that chapter at reduced size with the correct answers filled in.",
+    "progressionModel": "linear-and-cumulative within this Part A: the 7 chapters build directly on one another (sort/classify, then compare, then pattern, then Numbers to 5 Part 1, then Numbers to 5 Part 2, then Numbers to 10 Part 1, then Numbers to 10 Part 2), and Chapter 6's own 'Notes' page states the dependency directly: prior chapters taught rote counting, one-to-one correspondence, cardinality, and numerals 1 to 5, and 'in this and the next chapter, students build on that prior knowledge' to reach 10. This differs from the sibling Social Studies volume's unit-parallel structure and reads instead as a single tight staircase across the whole book. The wider Dimensions Math series (Pre-K through Grade 5, per the book's own front-matter Scope & Sequence spanning PKA/PKB/KA/KB through 5A/5B) is spiral across years, revisiting numbers, measurement, geometry, and patterns with growing depth each level; this book represents only the first, purely-concrete rung of that ladder.",
+    "reviewRhythm": "Each of the 7 chapters closes with a numbered 'Practice' lesson (concepts review across the whole chapter) and a 'Workbook Pages' section reproducing every numbered workbook exercise from that chapter at reduced size with the teacher's correct answers circled or filled in. No tests, quizzes, or graded checkpoints were observed in any sampled page; the front matter's own 'Dimensions Math Program Materials' page lists 'Tests' as a separate purchasable series component, explicitly outside this Teacher's Guide.",
+    "totalWeeks": null,
+    "notes": "The front matter (roughly 20 pages before Chapter 1 begins) includes a complete multi-level 'Dimensions Math Scope & Sequence' chart spanning the whole series from PKA through at least 3B (chapter-by-chapter topic lists for PKA, PKB, KA, KB, 1A, 1B, 2A, 2B, 3A, 3B were all directly sampled), useful context for future ingestions of sibling Dimensions Math volumes but not itself PKA content and not mapped as curriculum topics here. The back matter includes a 'Blackline Masters for PKA' cross-reference table listing every reusable card or template used in the guide (Ten-frame Cards, Number Cards Large/Small/FFR, Dot Cards, Five-frame Cards, Blank Ten-frame, Cuisenaire Rods, Picture Cards, Table Setting, Rhyming Rebus, Vegetable Cards, Octopus Template, Keyboard Template, Counting Up to 5 Template, Four-column Template, Individual Number Paths, Who Needs Teeth?) and exactly which chapter and lesson calls for it, a genuinely useful pattern for how Homa could structure its own recurring-manipulative libraries. Like the sibling Harcourt and Social Studies volumes drained earlier this session, this is a school-classroom-market book (Whole Group Play and multi-station Small Group Center Play assume a full class; snack quantities are given 'per student'); curriculum-writer should adapt lightly for one adult and one child rather than transcribing classroom group routines literally."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "sort-and-classify-by-attribute",
+        "description": "Chapter 1's core workbook format (10 lessons): a page of objects the child sorts by one attribute (color, texture, or size), either drawing lines from objects into two labeled boxes, circling all the objects sharing a target attribute ('circle all the hard objects'), or circling the one object in a row that does not belong.",
+        "recipe": "classification-sorting-mat",
+        "status": "have_recipe",
+        "notes": "classification-sorting-mat's T-chart-plus-cut-out-pieces shape is a strong, direct fit for the 'sort into two groups' workbook pages; matching-visual-discrimination's 'find the different one' variant is an equally strong fit for the several Chapter 1 workbook pages that show a row of similar items and ask the child to circle the odd one out."
+      },
+      {
+        "type": "size-attribute-comparison",
+        "description": "Chapter 2's core workbook format (5 lessons plus recurring practice pages): two or three illustrated items compared by one physical attribute, the child circles the longer/taller/bigger one, colors the smaller/lighter one, or draws a new item longer or shorter than a model; a balance-scale variant compares weight directly.",
+        "recipe": "size-attribute-comparison-page",
+        "status": "no_recipe",
+        "notes": "Genuine gap, built this session: no existing recipe covered comparing two or three items along a single physical attribute (length, height, weight, size) with a circle/color/draw response. Recurs across an entire chapter of this book and is a foundational, broadly reusable format across essentially every early-math and early-science curriculum (Homa's own Harcourt Science volume drained earlier this session had no equivalent activity type flagged either, confirming the gap predates this book). New recipe file at apps/web/agent/skills/materials-studio/references/recipes/size-attribute-comparison-page.md, plus a Format library row in materials-studio SKILL.md and an activity-formats.md entry."
+      },
+      {
+        "type": "pattern-creation-and-extension",
+        "description": "Chapter 3's core workbook format (4 lessons plus recurring practice pages across later chapters): a repeating two-element sequence (colored blocks, beads, or objects) the child copies, continues by filling in the missing next element, matches to its correct continuation among choices, or extends into an original pattern of their own in a blank row.",
+        "recipe": "pattern-extension-practice",
+        "status": "no_recipe",
+        "notes": "Genuine gap, built this session: the closest existing recipes (classification-sorting-mat, matching-visual-discrimination) are sorting and pairing formats, not sequence-continuation formats, and none of the 39 shipped recipes covered copy/continue/choose/create pattern work. A foundational, broadly reusable Pre-K/K format well beyond this one book. New recipe file at apps/web/agent/skills/materials-studio/references/recipes/pattern-extension-practice.md, plus a Format library row in materials-studio SKILL.md and an activity-formats.md entry."
+      },
+      {
+        "type": "counting-and-cardinality-practice",
+        "description": "The dominant workbook format across Chapters 4-7 (dozens of lessons): count a group of objects and circle the group matching a target number, color exactly N objects in a row, or count and write/select how many are shown.",
+        "recipe": "number-practice-page",
+        "status": "have_recipe",
+        "notes": "number-practice-page's Section 4 ('count and color: exactly N themed objects in a row') is a direct conceptual match, though this book's own workbook pages more often show several pre-drawn groups of varying size and ask the child to circle the one matching a target number, a variant of the same skill rather than an identical layout."
+      },
+      {
+        "type": "ten-frame-practice",
+        "description": "Chapters 6-7's pervasive ten-frame format: a two-row-of-five grid the child fills, reads, or matches to a numeral, taught via the Blank Ten-frame and Ten-frame Cards 0-10 Blackline Masters and used in the majority of Chapter 6-7 lessons.",
+        "recipe": "number-practice-page",
+        "status": "have_recipe",
+        "notes": "number-practice-page's Section 2 is a purpose-built 2x5 ten-frame grid, an exact match for this book's own core visual tool."
+      },
+      {
+        "type": "numeral-recognition-search",
+        "description": "Chapter 7's numeral-focus workbook pages (5 lessons: numerals 6 through 10): a giant numeral outline filled with a mix of correct and incorrect numerals for the child to circle, distinct from tracing or writing.",
+        "recipe": "matching-visual-discrimination",
+        "status": "have_recipe",
+        "notes": "A loose fit reused with a caveat: matching-visual-discrimination's visual-scanning, find-the-target-among-distractors design pattern reasonably covers this 'circle the correct numeral' search format, though its own worked examples are pair-matching rather than search-within-a-shape. letter-number-formation-practice was checked and is NOT the right fit here: no numeral tracing or writing was observed anywhere in this specific volume (PKA is recognition-only; writing numerals begins at the next level, KA, per this book's own front-matter Scope & Sequence), so recommending a tracing recipe for this book's own content would overreach the evidence."
+      },
+      {
+        "type": "match-quantity-to-numeral",
+        "description": "A recurring draw-a-line matching format used throughout Chapters 4-7: match a number card to a group of objects or children, match a ten-frame to its numeral, or match a dot-card arrangement to its numeral.",
+        "recipe": "matching-visual-discrimination",
+        "status": "have_recipe",
+        "notes": "A direct, strong fit: matching-visual-discrimination's core 'two columns, draw lines to match pairs' design pattern is exactly this book's own recurring layout."
+      },
+      {
+        "type": "flashcard-manipulative-card-sets",
+        "description": "Several Blackline Masters are simple flashcard sets (Number Cards Large/Small/FFR, Dot Cards, Five-frame Cards, Ten-frame Cards 0-10), each a single number/dot/frame representation per card, used as teaching manipulatives across nearly every chapter.",
+        "recipe": "nomenclature-cards",
+        "status": "have_recipe",
+        "notes": "A loose fit reused with a caveat: nomenclature-cards' same-size, dashed-cut-border card-grid convention reuses cleanly for a simple single-symbol flashcard set, though its own three-part label-plus-image structure is built for vocabulary study rather than a plain number flashcard. clip-cards was also considered but its question-plus-three-choices shape does not match these single-symbol cards."
+      },
+      {
+        "type": "reusable-game-board-templates",
+        "description": "A mixed group of Blackline Master board/template pages (Table Setting, Octopus Template, Keyboard Template, Vegetable Cards, Individual Number Paths, Counting Up to 5 Template, Four-column Template, Cuisenaire Rods) used as reusable, laminate-and-reuse surfaces for hands-on counting and matching games during Small Group Center Play.",
+        "recipe": "file-folder-game",
+        "status": "have_recipe",
+        "notes": "A loose, mixed-precision fit: file-folder-game's reusable-board-plus-moveable-pieces shape covers several of these (Table Setting, Individual Number Paths) reasonably well, while others (Octopus/Keyboard/Vegetable Templates, Cuisenaire Rods) are closer to classification-sorting-mat's laminated counting surface. Given how varied this group of 8 blackline masters is and how low-volume each individual template is, no single new recipe was built for this group this session; existing reusable-mat recipes cover the shape well enough."
+      },
+      {
+        "type": "chapter-opener-illustrated-scene",
+        "description": "The 2-page 'Chapter Opener' that opens each of the 7 chapters: one large illustrated scene establishing the chapter's theme, paired with its own Explore activity and Extend Learn discussion questions, no child-facing worksheet structure.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Same treatment the Social Studies ingestion gave its own 'lesson-comprehension-check' feature earlier this session: a recurring look-and-discuss teaching moment, not something a family would typically ask Homa to regenerate as a standalone printable. No recipe gap flagged on purpose."
+      },
+      {
+        "type": "whole-group-and-small-group-center-play",
+        "description": "The recurring Whole Group Play (one class-wide game) and Small Group Center Play (4-6 rotating hands-on stations tagged with icons: Art, Building, Counting, Dramatic Play, Geoboard, Sort, Match, Patterns, Reading Time, Music, Ten-frame Flash, Roll and Compare, Number Composition) sections in every lesson.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Not a printable at all: these are teacher-facilitated hands-on games and physical stations (races, dress-up, block building, sensory tables), out of scope for materials-studio, which generates printable pages. Recorded here for completeness of the activity-type census, not as a recipe gap."
+      },
+      {
+        "type": "storybook-read-aloud-tie-in",
+        "description": "Trade-book read-aloud references used as an Explore/Learn hook or Extend activity (4 across the book: Ten in the Bed and Ten Eggs in a Nest for counting-back lessons, The Very Hungry Caterpillar for a bees/counting lesson, The Three Little Pigs for a texture/pattern lesson).",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Not a printable: these are references to independently-published, copyrighted trade books the family is expected to already own or borrow, not content Homa generates or reproduces. Same treatment reference-ingestion's non-negotiable law 2 requires for any copyrighted original."
+      },
+      {
+        "type": "rhyming-rebus-picture-card",
+        "description": "The low-volume 'Rhyming Rebus' Blackline Master, used once (Chapter 1, Lesson 1) for a rhyming warm-up activity distinct from the book's own sort/classify content.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "A single instance in this book, too low-volume to justify a dedicated recipe on its own, the same treatment the Social Studies ingestion gave its own single-instance 'interview-dialogue-page' pattern."
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 13,
+      "haveRecipe": 7,
+      "noRecipe": 6
+    }
+  },
+  "decisionsNeeded": [
+    {
+      "category": "knowledge_bank",
+      "item": "RESOLVED 2026-07-21: written to prod knowledge_bank via mergeKnowledgeRow (contributedBy seed, blob-URL citation, all gate checks passed). Row ids: dimensions-math-pka-teachers-guide-format=49207249-eecf-4c6a-a88c-59bbfa8f8ac0 Original ask: Write the dimensions-math-pka-teachers-guide-format (method_format) row to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts. The singapore-math-cpa (method_philosophy) row is very likely already present (curriculum-writer.md already documents the methodology, see layer1_philosophy.knowl",
+      "impact": "The gate requires a live Postgres connection (mapDb()) that this sandbox does not have, so the write could not be attempted honestly. Proposed row content is recorded in layer1_philosophy.knowledgeBankGaps above.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "recipe",
+      "item": "Two new recipe files added this session: size-attribute-comparison-page.md and pattern-extension-practice.md (both at apps/web/agent/skills/materials-studio/references/recipes/), each with a Format library row in materials-studio SKILL.md and an activity-formats.md entry. Gap slugs match the recipe filenames exactly, so no GAP_ALIASES entry was needed in apps/web/lib/materials/cosmo-funnel.ts.",
+      "impact": "Chapters 2 and 3 of this book (9 of its 63 lessons, plus recurring practice pages in other chapters) had no existing recipe at all before this session; both formats are foundational, broadly reusable Pre-K/K patterns well beyond this one book (size comparison and pattern extension appear in essentially every early-math curriculum), closing a real, repeatable gap rather than a one-off.",
+      "urgency": "low, recorded here for traceability, no further action needed unless the founder wants a different design direction"
+    },
+    {
+      "category": "recipe",
+      "item": "IMPORTANT FINDING, not a gap requiring action: the task brief for this ingestion suggested checking whether the existing singapore-workbook-page recipe already covered most or all of this curriculum's activity types. It does not. singapore-workbook-page's own 'Great for' line names grades K-3, addition/subtraction, number bonds, and place value, all content that appears at later Dimensions Math levels, not this one. PKA's actual content (sorting, comparing, patterns, pure counting/cardinality to 10 with no arithmetic anywhere) is almost entirely outside that recipe's scope; only the ten-frame design pattern it documents overlaps (and number-practice-page's own ten-frame section, already in use for this book, covers that overlap better than singapore-workbook-page's arithmetic-oriented page shell would). Recorded honestly per the task's own instruction not to force a fix or paper over a real finding.",
+      "impact": "Materials-studio's Singapore Math coverage is real but narrower than its one recipe name suggests; a future Dimensions Math K-3 ingestion (once addition/subtraction/place-value content appears) would actually exercise singapore-workbook-page, while a PKB ingestion (the next book in this series) would likely need the same Chapter 1-3-style formats built this session, not singapore-workbook-page.",
+      "urgency": "low, informational"
+    },
+    {
+      "category": "taxonomy",
+      "item": "Added 2 new Mathematics topics this session, both append-only under existing MARBLE_DOMAIN_MAP pairs (Mathematics > Data & Statistics, Mathematics > Algebra), no mapping.ts edit needed: mt_NJz7vT4Bhp 'Sorting and Classifying Objects by One Attribute' (Data & Statistics, age 3-5) and mt_IOpwXalEo4 'Creating and Extending Simple AB Patterns' (Algebra, age 3-5). topics.json grew from 1643 to 1645 topics (insertions only, confirmed by diff: 37 insertions, 1 changed line for the topicCount field, 0 deletions of any existing topic). packages/taxonomy/data/manifest.json counts.topics, counts.topicsBySubject.Mathematics, and the topics.json bytes/sha256 entry in manifest.files were all updated to match; pnpm taxonomy:slugs (2 added, 1643 kept), pnpm taxonomy:progress, and pnpm check:taxonomy were all re-run and are green (1645 topics, 108 domains, 0 errors, 0 warnings).",
+      "impact": "Mathematics had zero coverage below age 5 for sorting/classifying by attribute or for pattern creation before this session, despite these being two of the seven chapters (14 of 63 lessons) in this specific book and arguably the two most foundational 'pre-number' reasoning skills in the Singapore Math Pre-K sequence generally, not just this one book.",
+      "urgency": "low"
+    },
+    {
+      "category": "taxonomy",
+      "item": "Explicitly checked packages/taxonomy/src/domains.ts for an AUTHORED_DOMAINS collision risk in mathematics before adding anything, the same check the Social Studies ingestion's civics-government finding earlier this session showed is necessary rather than assumable. Result: no collision exists. AUTHORED_DOMAINS has zero entries for subject 'math' or any mathematics-adjacent subject anywhere in the file (the 12 authored subjects covered are literacy, phonics, language, social_studies, executive_function, computer_science, art, music, gross_motor, fine_motor, self_care, and spanish); every Mathematics domain in Homa's taxonomy comes exclusively from MARBLE_DOMAIN_MAP. This is a genuinely clean append-only path, confirmed rather than assumed, and pnpm check:taxonomy's 'domain ids are unique' check passed with no special handling needed.",
+      "impact": "No architecture blocker for this ingestion, unlike the social_studies civics-government collision the prior session found and had to leave unresolved. Recorded here so a future math-curriculum ingestion does not need to re-check this from scratch.",
+      "urgency": "low, informational"
+    },
+    {
+      "category": "taxonomy",
+      "item": "Real per-lesson gaps recorded as status partial in layer2_scope but NOT filled with a new topic this session, to keep this session's taxonomy addition proportionate: counting backward by rote as its own distinct skill (Chapter 4 Lessons 3-4, echoed in Chapter 6 Lesson 4), the concept of zero/an empty set as its own topic (Chapter 6 Lesson 1), ordering a full shuffled numeral sequence 1-10 as distinct from comparing two numerals (Chapter 6 Lesson 5), and numeral-symbol recognition as distinct from number-word recognition (Chapter 5 Lessons 1-3, Chapter 7 Lessons 1-5).",
+      "impact": "These are genuine, keyword-checked gaps (each was searched across all 508 pre-existing Mathematics topics before being recorded as partial rather than mapped), not assumed ones. All four are narrow, single-lesson-or-pair-of-lessons gaps rather than whole-chapter gaps, so recording them here keeps the backlog honest without over-adding topics in one session for content this book only touches briefly.",
+      "urgency": "low"
+    },
+    {
+      "category": "method",
+      "item": "No curriculum-writer.md edit made this session. Checked first, per this ingestion's own instructions: apps/web/agent/curriculum-writer.md already has a 'Singapore Math (CPA Progression)' section (lines 237-256) that accurately covers the CPA law, the PreK-K-is-concrete rule, number bonds, three-tier scaffolding, bar models, and mental math strategies, all consistent with what this specific book's front matter independently describes.",
+      "impact": "This book's own format-level details not currently captured there (the five-part Explore/Learn/Whole-Group-Play/Small-Group-Center-Play/Extend lesson shape, optional-snack tie-ins, the five-recurring-character device) are optional enrichments, not a missing methodology; the existing section is already correct and sufficient for curriculum-writer to plan Singapore Math content. Not adding an unrequested section keeps this session's product-file changes proportionate to what was actually missing.",
+      "urgency": "low, informational"
+    },
+    {
+      "category": "taxonomy",
+      "item": "RESOLVED 2026-07-21 (bookkeeping backfill): the two mappings above for 'Sort and classify objects by color' (mt_NJz7vT4Bhp) and 'Notice, copy, and create simple AB patterns' (mt_IOpwXalEo4) already carried the real homaTopicId values used by their sibling mappings elsewhere in this same file (Lessons 4-6 and Lesson 9 for the color one; both new topics were added by this curriculum's own earlier ingestion) but still read status 'unmapped'. Flipped both to 'mapped'; layer2_scope.stats updated (mapped 15 -> 17, unmapped 2 -> 0). No taxonomy or topics.json change was needed, this was pure JSON bookkeeping that had never been synced to the taxonomy work already done. Separately confirmed this curriculum's color-sorting content is distinct from, and correctly stays mapped to, the sorting/classification topic here, not the new color-naming-vocabulary topic added elsewhere this session (English > Speaking & Listening): sorting by color as an attribute and naming a color by sight are two different skills, and this book teaches the former.",
+      "impact": "This curriculum now correctly reads as fully mapped for its color-sorting and pattern-creation lessons instead of falsely showing 2 open taxonomy gaps that were actually closed already.",
+      "urgency": "resolved"
+    }
+  ],
+  "notes": "Real page count, verified directly with pypdf and PyMuPDF rather than assumed from the filename: dimensions-math-pka-tg.pdf is 116 PDF pages, each a scanned two-page spread of the physical spiral-bound book (except the single-page front and back cover images), so roughly 230 printed-book page-faces total; pypdf's extract_text returned zero characters of real content on all 116 pages, confirming this is a pure CamScanner-style phone scan of the physical book with no embedded text layer, the same situation as every other volume drained this session. All reading was done visually from PyMuPDF-rendered page images (34 pages sampled at even intervals across the full 1-116 range, roughly one in every 3-4 pages), not from extracted text. Grade/part confirmed directly and unambiguously from the pages themselves, not assumed from the drain order: the front cover reads 'Dimensions Math Teacher's Guide PKA' with a 'Dimensions Math Workbook PKA' insert visible on the same cover; the title page repeats 'Dimensions Math Teacher's Guide PKA'; the copyright page (page ii) states 'Dimensions Math Teacher's Guide Pre-Kindergarten A,' ISBN 978-1-947226-28-9, 'Published by Singapore Math Inc.,' 'First published 2018,' 'Reprinted 2019, 2020, 2021, 2023, 2025,' 'Copyright (c) 2017 by Singapore Math Inc.' The book's own multi-level Scope & Sequence chart (front matter) independently confirms PKA precedes PKB, which precedes KA/KB, which precede 1A/1B and onward, placing this specific volume at the very start of the whole Dimensions Math Pre-K through Grade 5 series. Full table of contents sampled directly (front matter pages iii-vi): 7 chapters (Match, Sort, and Classify; Compare Objects; Patterns; Numbers to 5 - Part 1; Numbers to 5 - Part 2; Numbers to 10 - Part 1; Numbers to 10 - Part 2), 63 lessons total (10+5+4+14+8+13+9), plus a Resources section ('Blackline Masters for PKA,' page 201). Sampling covered the front and back covers, title page, copyright page, full table of contents, the 'Dimensions Math Curriculum' pedagogy page, the 'Dimensions Math Program Materials' and 'Online Resources' pages, the full multi-level Scope & Sequence chart (PKA through at least 3B), the 'Using the Teacher's Guide' explainer page; Chapter 1's Chapter Opener, Lesson 5 (Rough, Bumpy, and Smooth), and Lesson 10 Practice; Chapter 2's Chapter Opener and Lesson 5 Practice; Chapter 3's Lesson 1 (Movement Patterns); Chapter 4's Overview page (with its stated 'Suggested number of class periods: 14-15'), Lesson 2, Lesson 7, and Lesson 12; Chapter 5's Lesson 2 and Lesson 7; Chapter 6's Materials/Blackline-Masters page, Lesson 1, Lesson 4, and Lesson 9, plus two spreads of reproduced Workbook Pages; Chapter 7's Lesson 1, Lesson 6, and Lesson 9 (including its own Workbook Pages spread); and the back-matter 'Blackline Masters for PKA' cross-reference table across both of its pages. This is representative sampling across the full breadth of the book as instructed, not a page-by-page read of all 116 PDF pages. Copyrighted page images and the publisher's specific illustrations, character names, and exact wording were used only for this session's own analysis and are described here in Homa's own words; the two new taxonomy topics, the two new materials-studio recipes, and every activity-type description describe generic early-math concepts and page-layout patterns in Homa's own voice, not a copy of this publisher's specific characters, artwork, or text."
+}

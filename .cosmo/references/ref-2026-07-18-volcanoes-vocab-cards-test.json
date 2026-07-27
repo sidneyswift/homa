@@ -1,0 +1,54 @@
+{
+  "id": "ref-2026-07-18-volcanoes-vocab-cards-test",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:26:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427968.975509",
+  "format": "vocabulary-study-set",
+  "title": "Volcanoes! Vocabulary Cards, Graphic Organizers, and Vocabulary Test (K-3rd Grade)",
+  "publisher": "Teach to the Core (TPT)",
+  "gradeLevel": "K-3rd Grade",
+  "pageCount": 12,
+  "callouts": [],
+  "overview": {
+    "description": "A 12-page vocabulary study set for a volcano science unit. Three components: (1) vocabulary cards (word + part of speech + definition, 4 per page), (2) graphic organizer ('Word + Draw a Picture' two-column table), (3) definition-matching vocabulary test with answer key. Two Lexile levels: 520L (K-1st) and 630L (2nd-3rd). Standards-aligned (RI.4).",
+    "vocabularyWords": ["volcano", "extinct", "dormant", "active", "erupt", "lava", "magma", "crater", "ash", "dust", "surface", "escape", "crust", "vent"],
+    "components": ["Vocabulary Cards (cut-out, 4 per page)", "Vocabulary Graphic Organizer (write word + draw picture)", "Vocabulary Test (definition matching)", "Answer Key"]
+  },
+  "designPatterns": {
+    "vocabularyCardFormat": {
+      "description": "Each card: word in large font (left) + part of speech + definition (right). Clean, two-column layout. 4 cards per page with cut lines. Designed for cutting, laminating, and reuse.",
+      "value": "Portable vocabulary study. Cards can be used for matching games, flash-card review, or pocket-chart activities."
+    },
+    "drawAPictureOrganizer": {
+      "description": "Two-column graphic organizer: 'Word' (left) + 'Draw a Picture' (right). 'Write down the vocabulary words and draw a picture to help you remember what the word means.' The child processes the word VISUALLY, not just linguistically.",
+      "value": "Dual coding — word + image = stronger memory. The child's own drawing is more memorable than someone else's illustration."
+    },
+    "leveledAssessment": {
+      "description": "Vocabulary test comes in two Lexile levels: 520L (K-1st grade) and 630L (2nd-3rd grade). Same words, different sentence complexity in the definitions. Answer key included.",
+      "value": "Differentiation. Same test, two reading levels. Matches Carolyng's interest in leveled materials from the Harcourt drops."
+    },
+    "standardsAlignment": {
+      "description": "Pages marked with RI.4 (Common Core Reading Informational Text Standard 4 — determining word meaning from context). Shows which standard each activity addresses.",
+      "value": "Accountability for standards-based reporting."
+    }
+  },
+  "overallSkillTargeting": {
+    "subject": "science",
+    "domain": "earth-science",
+    "topics": [
+      {"id": "science.volcanoes", "kind": "conceptual", "mapped": false},
+      {"id": "ela.domain-specific-vocabulary", "kind": "conceptual", "mapped": false}
+    ]
+  },
+  "recipeMatch": {
+    "matchedRecipes": ["flash-cards"],
+    "gaps": [
+      {
+        "name": "vocabulary-study-set",
+        "description": "A three-part vocabulary companion for any science/social studies unit: (1) vocabulary cards (word + part of speech + definition, cut-out format), (2) 'Word + Draw a Picture' graphic organizer (child processes each word visually), (3) definition-matching vocabulary test at 2 reading levels + answer key. Generatable for ANY unit topic."
+      }
+    ]
+  },
+  "notes": "This completes a pattern visible across Aless's drops: she values vocabulary/nomenclature as a SYSTEM, not just word lists. Montessori nomenclature cards (image-based, self-correcting), vocabulary flash cards (text-based, definition-focused), and now this vocabulary study set (cards + graphic organizer + assessment). Three different approaches to vocabulary learning, all with the same underlying principle: encounter each word multiple times in multiple modes."
+}

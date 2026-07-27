@@ -1,8 +1,11 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { MAP_INTERESTS_CAP } from "@homa/core";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { updateChildProfilePinned } from "../../lib/agent-pinned";
 import { scanMemoryContent } from "../../lib/agent-memory";
@@ -37,9 +40,11 @@ const updateInput = z
     message: "Provide interests, focus, or both.",
   });
 
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Update a child's profile when their interests or current focus genuinely change (a new obsession, a mastered skill, a new goal). Provide the full interests list when updating interests; it replaces the old list.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: updateInput,
   async execute(input, ctx) {
     let access;

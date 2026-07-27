@@ -43,14 +43,15 @@ either fully ships or fully reports why it cannot.
    asked for staged scheduling, use `-t draft` in Postiz and say where to
    review.
 4. If auth fails or an integration is missing: STOP that channel, publish
-   nothing on it, and print exactly which HUMAN-TODO step is missing
+   nothing on it, and print exactly which founder step is missing
+   (tracked as `founder-action` GitHub Issues; see issue #183)
    (register handle / connect in Postiz / `postiz auth:login`). Other approved
    channels proceed.
 
 **Email (blocked until DM7 is ruled):**
 Refuse with the reason: the waitlist form's promise ("email only used for
 your invite") has not been resolved into a consent ruling. Point at spec §10
-and the HUMAN-TODO DM7 item. Once DM7 is ruled option (a) or (b): send via
+and the DM7 founder-decision issue (#182). Once DM7 is ruled option (a) or (b): send via
 Resend using `RESEND_API_KEY` from `apps/web/.env.local` (never committed),
 recipients per the ruling's scope, aggregate reporting only.
 

@@ -71,7 +71,7 @@ export default async function AdminPulsePage({
             className={
               category === c.key
                 ? "rounded-pill border border-[var(--clay-400)] bg-brand-soft px-3.5 py-1.5 text-sm font-bold text-[var(--clay-700)]"
-                : "rounded-pill border border-border-default bg-card px-3.5 py-1.5 text-sm font-semibold text-body hover:border-[var(--clay-300)]"
+                : "rounded-pill border border-border bg-card px-3.5 py-1.5 text-sm font-semibold text-body hover:border-[var(--clay-300)]"
             }
           >
             {c.label}

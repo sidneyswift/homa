@@ -1,0 +1,37 @@
+{
+  "id": "ref-2026-07-18-hole-punch-fine-motor",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:29:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428192.565579",
+  "format": "fine-motor-activity",
+  "title": "Celebration Theme Hole Punch Cut Strips — Fine Motor Activity (Early Learning Ideas)",
+  "publisher": "Early Learning Ideas / Jennifer Hier (TPT)",
+  "gradeLevel": "PreK (ages 2-5)",
+  "pageCount": 12,
+  "callouts": [],
+  "overview": {
+    "description": "7 celebration-themed hole punch strips. Each strip has themed images (cakes, balloons, presents) with circles on them. Child uses a hole punch to punch holes in the circles, then uses scissors to cut strips apart on dotted lines. Two printing options: home set (all 7 on 1 page) and classroom set (7 copies of each design). Pure fine motor activity — hole punching builds hand strength for writing, cutting builds scissor skills.",
+    "skills": ["hand strength (hole punching)", "bilateral coordination", "scissor skills (cutting)", "hand-eye coordination"]
+  },
+  "designPatterns": {
+    "holePunchAsFinMotor": {
+      "description": "A hole punch requires significant hand strength and bilateral coordination (one hand holds the paper, the other squeezes the punch). This is the same grip strength needed for writing but practiced through a tool that's more fun than a pencil.",
+      "value": "Pre-writing hand strength without a pencil. Kids who struggle with pencil grip often do better building strength through tools first."
+    },
+    "twoStepActivity": {
+      "description": "Step 1: Hole punch the circles. Step 2: Cut the strips apart. Two different fine motor skills in sequence on the same page.",
+      "value": "Sequential instruction + two motor skills per activity. Efficient."
+    }
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "hole-punch-strip",
+        "description": "Printable strips with themed images containing target circles. Child hole-punches the circles, then cuts strips apart. Pure fine motor — builds hand strength for writing. Generatable with any theme (animals, letters, shapes, seasons)."
+      }
+    ]
+  },
+  "notes": "Aless's first pure fine motor drop with no academic content. This signals she values fine motor development as its own skill area, not just a byproduct of writing practice. The hole punch mechanic is new — different from coloring, tracing, cutting, or clipping. It specifically builds the hand strength that writing requires."
+}

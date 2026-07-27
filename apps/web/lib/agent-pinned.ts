@@ -209,11 +209,19 @@ export async function recordHoursPinned(input: {
     return { logged: true, note: "That block is already on the record for that day; nothing added twice." };
   }
 
-  await sql`
+  const inserted = await sql<{ id: string }[]>`
     insert into public.hours_log (family_id, child_id, subject, minutes, happened_on, source, note)
     values (${input.familyId}, ${childId}, ${input.subject}, ${Math.round(input.minutes)},
             ${happenedOn}, ${input.source}, ${input.note?.trim().slice(0, 200) || null})
+    on conflict do nothing
+    returning id
   `;
+  if (inserted.length === 0) {
+    // A concurrent identical call won hours_log_block_unique_idx after
+    // this one's guard SELECT ran; same outcome as the guard, and no
+    // event for a row that never landed.
+    return { logged: true, note: "That block is already on the record for that day; nothing added twice." };
+  }
 
   if (input.source === "call") {
     await emitMapEvent("voice.hours_logged", {

@@ -83,11 +83,11 @@ daily instruction guides, and cross-curricular center cards. These turn your
 week descriptions into something the parent can print and follow.
 
 New format slugs available for weekly orchestration:
-- `[weekly-lesson-planner]` — week-at-a-glance grid showing all subjects across 5 days
-- `[daily-instruction-guide]` — step-by-step teaching guide for one day
-- `[center-activity-card]` — cross-curricular center card themed to the week's anchor
-- `[story-assessment]` — three-part end-of-selection test (vocab + comprehension + writing)
-- `[school-home-connection]` — embeddable callout box with parent bonding activity
+- `[weekly-lesson-planner]`: week-at-a-glance grid showing all subjects across 5 days
+- `[daily-instruction-guide]`: step-by-step teaching guide for one day
+- `[center-activity-card]`: cross-curricular center card themed to the week's anchor
+- `[story-assessment]`: three-part end-of-selection test (vocab + comprehension + writing)
+- `[school-home-connection]`: embeddable callout box with parent bonding activity
 
 ## Balanced Literacy / Story-as-Hub methodology
 
@@ -107,10 +107,12 @@ literature-based approach), structure weeks around the reading selection:
 ## Methodology-aware planning rules
 
 When a parent identifies their teaching methodology or curriculum approach, apply
-these rules to shape the entire curriculum. These are synthesized from 11 curriculum
+these rules to shape the entire curriculum. These are synthesized from 13 curriculum
 analyses (The Good and the Beautiful, Harcourt Trophies, Hometessori Primary, 
-Homeschool Languages Spanish, Write on Track, Teach Your Child to Read in 100 Easy
-Lessons, Peaceful Press Early Years, Playing Preschool Year 1 and Year 2).
+Homeschool Languages Spanish, Write on Track, Get Set for School / Handwriting
+Without Tears, Teach Your Child to Read in 100 Easy
+Lessons, Peaceful Press Early Years, Playing Preschool Year 1 and Year 2,
+Harcourt Art Everywhere).
 
 ### Charlotte Mason
 
@@ -123,8 +125,16 @@ Good and the Beautiful, Peaceful Press, Ambleside Online):
   awareness. Use `[nature-identification-poster]` and nature journal prompts.
 - Copywork from beautiful literature daily. Use `[copy-work-pages]` sourced from the
   family's current read-aloud or a classic poem.
-- Picture study in 4-week artist blocks: one artist per month, child narrates what
-  they see, then creates an art response. Composer study similarly structured.
+- Picture study in artist blocks, child narrates what they see (or, for children
+  too young to narrate reliably, simply discusses what they notice), then creates
+  an art response. Composer study similarly structured. Block length is NOT a
+  fixed "4 weeks": it scales with age. A kindergarten-band CM publisher may run
+  roughly 4-week blocks (9 artists and 9 composers across a 36-week year); the
+  same publisher's Pre-K/toddler volume for the same 36 weeks may instead run
+  four 9-week blocks (one artist and one composer per block) and drop the
+  look-hide-recall memory step entirely, since 2-4 year-olds cannot reliably do
+  it. Check the family's actual guide for its own block length before assuming 4
+  weeks.
 - Narration before written composition for children under 8. Oral narration to the
   parent, who scribes. No formal writing instruction until narration is fluent.
 - Short lessons: 15-20 minutes per subject for ages 4-7, building to 30-45 minutes
@@ -133,7 +143,31 @@ Good and the Beautiful, Peaceful Press, Ambleside Online):
   objects, nature, art, and narration. Activities should be `[copy-work-pages]`,
   `[nature-identification-poster]`, living book discussions, and hands-on exploration.
 - Format preferences: `[copy-work-pages]`, `[nature-identification-poster]`,
+  `[nature-observation-journal]`, `[narration-page]`, `[artist-composer-study-card]`,
   `[labeled-anatomy-diagram]` for science, `[3-part-nomenclature-cards]` for vocabulary.
+- For kindergarten/early-years CM programs (e.g. Blossom & Root Level 0), history and
+  geography often start "inside out": the child's own personal history and family
+  first, then their home and neighborhood, before any world or timeline history. Use
+  `[narration-page]` for the personal-history pages (illustration plus a
+  parent-transcribed story) rather than jumping straight to historical content.
+- Some early-years CM-inspired publishers split science into two half-year strands
+  that alternate across a 36-week year rather than running one science subject every
+  week: roughly 18 weeks of integrated math-and-science (often as a dramatic-play
+  narrative) and 18 weeks of dedicated nature study. Do not assume every CM science
+  block is 36 weeks long; check whether the family's guide describes an alternating
+  or condensed schedule before planning a full year.
+- Toddler and Pre-K (ages 2-4) CM programs are often a CM/Waldorf blend, not pure
+  CM: expect the publisher to name both influences directly, to organize the week
+  around three broad buckets (an experience the parent provides, an environment the
+  parent sets up, and an engagement the parent facilitates during ordinary daily
+  life, sometimes literally called "the Three E's"), and to include at least one
+  genuine Waldorf technique such as wet-on-wet watercolor painting. At this age band
+  expect close to zero worksheets or printables of any kind: activities are sensory
+  bins, open-ended process art with real paint, cooking, and free play, not anything
+  materials-studio would generate. Do not force-fit CM recipes like
+  `[narration-page]` or `[nature-observation-journal]` onto a 2-4 curriculum just
+  because the same publisher's older-band guide uses them; check the actual age
+  scoping on each recipe first (most CM recipe formats are written for ages 4-8+).
 
 ### Montessori
 
@@ -173,7 +207,7 @@ Mastery, or says "we use Direct Instruction":
 - 20-minute daily lessons. Short, focused, and consistent beats long and variable.
 - No decorative art on materials. Clean, minimal, high-contrast. Text and practice only.
 - Modified orthography is acceptable for early lessons (macrons over long vowels,
-  joined letters for digraphs) — these fade as the child progresses.
+  joined letters for digraphs). These fade as the child progresses.
 - Format preferences: `[handwriting-practice]`, `[flash-cards]`, `[themed-worksheet]`
   with scripted instructions. Avoid `[coloring-page]` and `[foldable]` (too unstructured).
 
@@ -224,6 +258,74 @@ When a family says "Singapore Math", "Dimensions Math", "Primary Mathematics", o
 - Format preferences: `[number-practice-page]`, `[counting-mat]`, `[themed-worksheet]`,
   `[notes-and-practice-bundle]`, `[cross-number-puzzle]` for challenge work.
 
+### Advanced / Accelerated Comic-Narrative Math (Beast Academy)
+
+When a family says "Beast Academy" or "Art of Problem Solving" (AoPS), or
+wants noticeably harder, puzzle-driven math than a standard grade-level
+workbook: this is a different shape from Singapore Math above even though
+both are ability-grouped, guided-discovery math programs. Beast Academy
+is deliberately above grade level (its own grade-1 book routinely reaches
+two-digit counting-with-grouping, transformation geometry, and named
+polyomino puzzles that most grade-1 scope-and-sequences push to grade 2-4)
+and teaches almost entirely through a recurring cast of characters rather
+than direct instruction.
+
+- Guided discovery over direct instruction, delivered as story. A short
+  comic-strip scene (illustrated characters trading dialogue) introduces
+  or works through the idea conversationally before any practice problem
+  appears; the child reads the characters reasoning it out, not a
+  teacher stating a rule. Reserve `[comic-narrative-math-page]` for this
+  beat and do not collapse it into a bare instruction line.
+- Genuinely harder content than the grade level implies, by design, not
+  by accident. Do not soften a Beast-Academy-flavored request back down
+  to standard grade-level difficulty; the family chose this program
+  because they want the stretch. Expect puzzle formats a typical
+  grade-level workbook would not introduce for years: shape decomposition
+  into named pieces, informal transformation geometry (recognizing a
+  "spin" or "flip" of a shape), multi-constraint logic puzzles, and
+  distance/comparison reasoning that foreshadows later geometry.
+- Tiered difficulty on every practice set, marked plainly. Most problems
+  are grade-appropriate-and-up; a small number of starred "hardest"
+  problems close each section, each with a corresponding hint (never the
+  full solution) available separately from the practice page itself.
+  When building practice, offer the same shape: a base set, then one or
+  two clearly marked harder extension problems, not hidden inline.
+  `[hive-puzzle]` and `[cross-number-puzzle]` are Beast-Academy-style
+  self-checking constraint puzzles already in the format library for
+  this tier.
+- Play and games carry real content. Dice games, card games, and simple
+  board-path games are named teaching tools for subitizing and number
+  sense, not filler; suggest one when a family's Beast-Academy-flavored
+  session wants a lower-pressure practice rep instead of another
+  worksheet page.
+- Answer keys teach the parent, not just check the child. A Beast
+  Academy-style answer page explains WHY (e.g. why a 7 comes up more
+  often than a 12 on two dice, why a straight path is the shortest
+  distance between two points), so a parent could explain the reasoning
+  back to the child. Carry that habit into any answer key or hint text
+  generated for this methodology: state the reasoning, not just the
+  correct value.
+- Assessment stays inside the practice sets themselves (no separate
+  formal test in the base curriculum); do not suggest quizzes unless the
+  family asks for one.
+- Classification and number-property reasoning is its own recurring
+  strand, not just shapes and arithmetic. Beast Academy's "Categories"
+  content (odd one out with a stated reason, odd/even by splitting into
+  equal groups, prime vs. composite discovered by drawing rectangles on a
+  grid rather than being told a definition, sorting numbers or items into
+  two overlapping circles when something can belong to both categories at
+  once) shows up starting at Level 1 Book B, well before a typical
+  scope-and-sequence introduces prime numbers or Venn-style sorting.
+  Treat a request in this shape as wanting the discovery version (draw
+  it out, notice the pattern) over a stated rule.
+- Format preferences: `[comic-narrative-math-page]` for concept
+  introduction, `[number-practice-page]` and `[size-attribute-comparison-page]`
+  for base counting/comparison practice, `[hive-puzzle]` and
+  `[cross-number-puzzle]` for starred/challenge problems, `[maze-puzzle-practice]`
+  for path-tracing logic puzzles, `[pattern-extension-practice]` for
+  pattern units, `[circle-diagram-two-set-sort]` for the Categories
+  classification strand.
+
 ### Balanced Literacy
 
 (See dedicated section above for full details. Summary for quick reference:)
@@ -265,7 +367,276 @@ or "classical conversations":
 - Rhetoric stage (9-12): original expression and persuasion. Essay scaffolds, debate
   prep, research projects.
 - Integrated subjects through literature: the reading selection drives spelling, grammar,
-  vocabulary, and writing — similar to balanced literacy but with classical literature
+  vocabulary, and writing, similar to balanced literacy but with classical literature
   selections and a moral/character education emphasis.
 - Art and poetry appreciation woven into language arts, not separate subjects.
 - Nature study (Charlotte Mason influence) in many classical curricula.
+
+### Handwriting Without Tears / Learning Without Tears (Developmental Letter Formation)
+
+When a family says "we use Handwriting Without Tears", "we use Learning Without
+Tears", or uses Get Set for School:
+
+- Teach letters and numbers in stroke-family order, never alphabetical or counting
+  order. Group by the strokes that build the shape: straight vertical and horizontal
+  letters first, then round "Magic C" letters, then big-and-little-curve letters,
+  then diagonals. Lowercase letters get their own, different grouping from capitals.
+- Capitals before lowercase, always. Capitals are one size and start at the top every
+  time, which is the easier shape for a young child to control first.
+- Narrate every stroke with the same small, consistent vocabulary: line, curve, big,
+  little, up, down, across, around. Say the same words for the same stroke on every
+  letter so the words themselves become the cue.
+- Formation practice, not copywork, is the core activity at this stage: one letter or
+  digit per page, a model to trace that fades from full support to a blank
+  independent-write box, never a full sentence or passage to copy. Use
+  `[letter-number-formation-practice]` for capitals, lowercase, and digits, and for
+  pre-writing stroke practice (straight lines, curves, shapes) before real letters
+  begin.
+- Readiness comes before paper. For young or brand-new writers, suggest hands-on
+  stroke-shape play (building letters out of found materials like craft sticks or
+  pipe cleaners, or simply "writing" the letter in the air or in a tray of sand)
+  before the first formation-practice page for that letter, if the family has not
+  already covered it.
+- Numbers use the same treatment as letters: one digit per page, its own stroke cue,
+  and a matching "starting corner" convention consistent with the letters.
+- Assessment is by developmental benchmark, not test score. Do not suggest quizzes or
+  graded worksheets for this method; a completed formation-practice page with
+  consistent stroke direction is itself the evidence of progress.
+- Format preferences: `[letter-number-formation-practice]` for letters, numbers, and
+  pre-writing strokes; `[tracing-guide]` for name-writing practice once individual
+  letters are secure; `[number-practice-page]` once a child is ready to combine digit
+  formation with counting and cardinality on the same page.
+
+### Elements & Principles of Design / Skills-Based Art (Harcourt Art, published
+school-market art textbooks)
+
+When a family uses a published, skills-based art textbook (Harcourt Art, or any
+program organized around the seven Elements of Art and six Principles of Design
+rather than a single studied artist per block), do not apply the Charlotte Mason
+picture-study rules above. This is a different art methodology with different
+planning implications:
+
+- Organize by element or principle, not by artist. Each block of lessons teaches
+  ONE formal vocabulary term (line, shape, color, value, form, texture, space,
+  balance, emphasis, pattern, rhythm, unity, variety) as the explicit lesson focus,
+  in increasing complexity across the year. The artwork shown is a brief supporting
+  example of that term, not the object of a slow, single-work study.
+- A hands-on making activity every lesson, with an explicit Plan -> Create ->
+  Reflect (or equivalent named) process, using a different concrete medium and
+  technique almost every lesson: drawing, painting, collage, clay, printmaking,
+  weaving, paper folding, mobile-making, mask- or puppet-making, and assemblage
+  from found objects all rotate through, tied to whichever element or principle
+  is that lesson's focus.
+- Pair the making activity with two or more brief fine-art examples from a broad,
+  diverse artist roster (historical Western masters, folk and self-taught artists,
+  non-Western artists, and named contemporary or student artists), used for quick
+  visual comparison, not a quiet gaze-then-recall exercise. Do not force the CM
+  picture-study "hide it and recall from memory" routine onto this methodology; it
+  is not how these programs teach art appreciation.
+- Where the family's own program ties a reading-comprehension skill to each art
+  unit (for example note details, compare and contrast, make inferences, sequence,
+  draw conclusions, main idea, in increasing complexity across the year), carry
+  that same skill into the unit's reflection question so art class reinforces the
+  same comprehension work the child is doing in reading.
+- Cross-curricular connection spreads are a real, recurring feature, not an
+  afterthought: an artist's biography tied to social studies or science, a
+  geometry or symmetry tie-in for math, a picture-book illustrator for literature.
+  Weave one in every lesson or two rather than saving all of them for a single
+  "connections" unit.
+- Assessment is a "review and reflect" recap at the end of each unit, not a test;
+  the Elements of Art, Principles of Design, and a glossary of art vocabulary
+  function as an ongoing reference the child returns to all year.
+- Map to Homa's `art` subject's assessment domains rather than the CM-specific
+  `Art > Picture Study & Art Appreciation` content domain: `technique-observation`
+  for element/principle/vocabulary and technique content, `art-exploration` for
+  the hands-on making activities, `drawing-representation` for drawing-specific
+  work.
+- Format preferences: `[art-project-instructions]` for every hands-on making
+  activity and for bare technique-reference cards (the recurring format across
+  this methodology, regardless of medium); `[3-part-nomenclature-cards]` for
+  Elements of Art / Principles of Design vocabulary, adapted from the program's
+  own term-plus-photo-example glossary style; `[artist-composer-study-card]` only
+  if the family also wants a picture-study-style portfolio card alongside their
+  textbook, not as the default artist reference (its reflection prompt is written
+  for CM's gaze-and-recall routine, which this methodology does not use).
+
+### Biography-Driven Appreciation Study (Getting to Know series, Mike Venezia)
+
+When a family owns or mentions the "Getting to Know the World's Greatest
+Artists / Composers / Inventors & Scientists" picture-book biographies, or asks
+for artist, composer, or inventor study without a strict Charlotte Mason
+protocol, plan around the biography as the spine:
+
+- One studied person per block. Each 32-page volume is standalone and the
+  series has no order, so sequence blocks by the child's interest, an upcoming
+  museum visit, or era. A volume reads aloud in 15-20 minutes or spreads
+  across a block a few pages per sitting.
+- The method is exposure and affection, not analysis: the child meets the
+  person through humor and story, sees or hears the real works, and connects
+  life events to specific works (the bus accident to the painting, deafness to
+  the Ninth Symphony, the failed vote recorder to the patent lesson). Do not
+  bolt the CM look-hide-recall routine onto these books unless the family is
+  separately running strict CM picture study; the books themselves prescribe
+  no protocol.
+- Always plan the real-works bridge the books end on: artists volumes send
+  the family to museums, the composers volumes to recordings (radio, library,
+  streaming), the inventor volumes to the devices around the house. A block is
+  incomplete without at least one session with the real works.
+- Standard block outputs: `[artist-composer-study-card]` (one per studied
+  person; artist, composer, and inventor variants all documented in the
+  recipe), `[composer-listening-guide]` for each listened piece in a composer
+  block, `[art-project-instructions]` for an in-the-style-of response in an
+  artist block, and `[nomenclature-cards]` for the bolded vocabulary in the
+  newer Scholastic inventor volumes (which add a glossary and index).
+- Map progress to the content topics for knowing the person (Art > Picture
+  Study & Art Appreciation, Music > Composer Study & Music Appreciation,
+  Science > Scientific Inquiry's inventor topic), plus the listening topics
+  for composer blocks. Never print or reproduce the books' own artwork or
+  cartoons in generated materials; the works are copyrighted, so generated
+  pages use Homa's own words and original imagery only.
+
+### Published Elementary Science Textbook (Investigate-Then-Explain, e.g. Harcourt Science)
+
+When a family uses a published, grade-level school-market science textbook
+(Harcourt Science, or any program built on a hands-on "Investigate" activity
+followed by a short "Learn About" reading passage), plan around this
+structure rather than a nature-study or unit-study rhythm:
+
+- Investigate before explaining. Every lesson opens with a short hands-on
+  activity (a materials list plus 2-4 numbered steps) that lets the child
+  observe or test something firsthand, then follows with a brief reading
+  passage (a few short declarative sentences, 1-2 bolded vocabulary words)
+  that names and explains what the child just did. Do not reorder this: the
+  concrete experience always comes before the term.
+- A fixed, named process-skills vocabulary runs through the whole program
+  and is reused deliberately, not just once: Observe, Compare, Classify,
+  Sequence, Infer, Predict, Measure, Communicate, Draw Conclusions, Make
+  Models, Gather Information, Plan, Order. Name the specific skill an
+  activity practices using this vocabulary rather than inventing new terms,
+  the same way the textbook's own "Science Skill" tip box does.
+  `[art-project-instructions]`'s skill-tip callout variant is built for
+  exactly this.
+- Lessons stack into short chapters (2-6 lessons), and each chapter closes
+  with a review that mixes three things in one sitting: a few open "tell
+  what you know" prompts tied to photos, a picture-to-word vocabulary
+  matching set, and 2-4 numbered "Using Science Skills" mini-tasks that
+  apply that chapter's named skills to a new example. Do not compress
+  those to a single quiz format.
+- Chapters stack into units (2 chapters each is typical), and each unit
+  closes with open-ended "Activities for Home or School" enrichment and a
+  "Wrap Up" spread (a writing prompt, often a foldable or flap book; a
+  read-aloud recommendation naming a real trade book; sometimes a
+  suggested website). Treat the writing prompt as a real, separate
+  material, not a footnote.
+- Cross-curricular connection spreads recur every lesson or two, usually a
+  short biography of a real scientist, engineer, or other professional
+  (a geologist, an architect, a hot-air balloonist, a doctor) tied to that
+  lesson's content, alongside a math, social studies, or language-arts
+  tie-in activity. `[artist-composer-study-card]` can be reused for these
+  bios in a pinch (frame, short bio, reflection stem) but its prompts are
+  written for CM-style artist study; adapt the labels rather than using it
+  unedited.
+- Assessment is built into the chapter review above, not a separate test.
+  Do not suggest additional quizzes or graded worksheets unless the family
+  asks for one.
+- A separate glossary (term plus one real-world photo example, page
+  cross-referenced) and separate handbook sections (tool how-to references
+  like a hand lens or thermometer; body-systems pages like the respiratory
+  system) function as ongoing whole-year references, not weekly content to
+  schedule.
+- This is a different shape from Direct Instruction (no script, no
+  choral response) and from nature study or Charlotte Mason science (the
+  investigate-first sequence is explicit and textbook-driven, not child-led
+  outdoor observation), even though all three can coexist in one family's
+  week for different subjects.
+- Map to Homa's `science` subject and its Marble-imported assessment
+  domains (`scientific-inquiry`, `organisms-life-processes`,
+  `ecosystems-habitats`, `matter-materials`, `forces-motion`,
+  `earths-systems`, `weather-climate`, `the-human-body`, and so on,
+  whichever domain matches that lesson's content) rather than inventing a
+  new domain; Homa's Science coverage is broad and deep enough that most
+  lessons in this kind of textbook map directly.
+- Format preferences: `[art-project-instructions]` (skill-tip callout
+  variant) for every "Investigate" hands-on activity and for the Science
+  Handbook's bare tool how-to references; `[matching-visual-discrimination]`
+  for chapter-review vocabulary matching; `[labeled-anatomy-diagram]` for
+  labeled plant-parts or body-systems diagrams; `[3-part-nomenclature-cards]`
+  for the glossary; `[foldable]` for Unit Wrap Up writing prompts that ask
+  for a flap or pull book.
+
+### Published Elementary Social Studies Textbook (Reading-Skill-Integrated, e.g. Scott Foresman Social Studies)
+
+When a family uses a published, grade-level school-market social studies
+textbook (Scott Foresman's "Social Studies" series, or any program that
+teaches a reading-comprehension skill through social studies content rather
+than through a hands-on investigation), plan around this structure. It is a
+different shape from the Investigate-Then-Explain science pattern above:
+there is no materials-list hands-on step at all, and the organizing thread
+is a named reading skill, not a process skill.
+
+- Read before checking. Each unit opens with a "Vocabulary Preview": one
+  illustrated scene labeled with that unit's key terms (for example a city
+  street scene labeled "neighborhood," "community," "law," "leader,"
+  "state," "continent," "ocean"), and names one "Reading Social Studies"
+  target skill for the whole unit (Use Picture Clues, Alike and Different,
+  Put Things in Order, Find the Main Idea, Recall and Retell, Predict).
+  Every lesson in that unit is short (1-2 pages), plain declarative
+  sentences, one or two bolded vocabulary words, built to practice that
+  unit's named reading skill on social studies content, not to teach a
+  process skill the way a science textbook does.
+- Every lesson closes with a fixed "What Did You Learn?" box: two literal
+  recall questions, then a third "Think and Share" or "Write and Share"
+  open-ended question that is usually the actual reading-skill practice
+  (predicting, comparing, sequencing, summarizing). Do not compress this to
+  a single quiz format, and do not drop the third open question, it carries
+  the unit's actual reading-skill target.
+- Recurring feature boxes interleave with the plain lesson content and each
+  has its own job, keep them distinct rather than folding them into the
+  main lesson: "Citizen Heroes" or "Meet [Person]" biography spreads pair a
+  short real person's story with one named citizenship trait (caring,
+  respect, responsibility, fairness, honesty, courage) and a reflection
+  question; "Then and Now" compares something across time (community,
+  toys, a country's flag) in two small panels; "Map and Globe Skills" and
+  "Chart and Graph Skills" teach one concrete skill (use a map key, use
+  four directions, follow a route, read a time line, read a bar graph) in
+  a small callout, separate from the lesson's own comprehension check;
+  "Here and There" makes one specific comparison to another place in the
+  world (money, an endangered species, a custom). Keep each box's own
+  question and its own skill separate from the lesson's "What Did You
+  Learn?" box rather than merging them.
+- Units close with a poem, song, or folktale tied to the unit's theme, then
+  a Unit Review. A dedicated front-matter "Social Studies Handbook" (short
+  citizenship-trait definitions, the five themes of geography) and a
+  back-matter "Reference Guide" (atlas maps, geography terms, a picture
+  glossary with one photo example and a page citation per term) function as
+  ongoing whole-year references, not weekly content to schedule, the same
+  way a science textbook's Science Handbook and Glossary do.
+- Assessment is the lesson's own "What Did You Learn?" box and the Unit
+  Review; do not suggest additional quizzes or graded worksheets unless the
+  family asks for one.
+- This is a different shape from Direct Instruction (no script, no choral
+  response), from the Investigate-Then-Explain science pattern above (no
+  hands-on materials-list step; the organizing thread is a named reading
+  skill, not a process skill), and from Charlotte Mason (feature boxes and
+  a fixed unit structure carry the content, not living books and free
+  narration), even though a family may use any of these for different
+  subjects in the same week.
+- Map to Homa's `social_studies` subject. Community, jobs, goods and
+  services, needs and wants, and money content map cleanly onto Homa's
+  existing `life_skills` subject (`Money & Finance`, `Entrepreneurship`
+  domains) rather than social_studies, that overlap is expected, not a
+  gap. Ancient-history-flavored `social_studies` domains (`ancient-egypt`,
+  `ancient-greece-rome`, `medieval-times`) do not apply to this grade band
+  at all; look instead at `geography` and `cultural-studies` for the
+  closest existing homes for map-skills and world-culture content, and
+  flag community-civics content (national symbols, local leaders and
+  laws, voting) that has no existing topic as a real gap rather than
+  forcing it into an ancient-history domain.
+- Format preferences: `[labeled-anatomy-diagram]` for map-key and
+  four-directions practice and for labeled world/country maps (its own
+  "Great for" line already names geography and map labeling);
+  `[nomenclature-cards]` for the picture glossary and for a national
+  symbols reference set; `[artist-composer-study-card]` reused with
+  adapted labels (not the CM-style prompts) for "Citizen Heroes" and
+  "Meet [Person]" biography spreads; `[then-and-now-comparison]` for
+  "Then and Now" boxes.

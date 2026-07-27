@@ -1,7 +1,10 @@
 import { BANNED_WORDS, EM_DASH } from "@homa/core";
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { emitMapEvent } from "../../lib/map/events";
 import { getFamilyEmail, sendAgentComposedEmail } from "../../lib/map/email";
@@ -19,9 +22,11 @@ const MAX_PER_FAMILY_PER_DAY = 5;
  * into a spam relay). Content still goes through the brand-law check
  * (no em dash, no banned words) before anything is actually sent.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Send a real email to this family's own address on file. Use only when the parent asks for something in writing, or a written summary is clearly the useful next step (e.g., recapping today's conversation, a plan to remember). Do not overuse: this sends a real email every time.",
+  deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({
     subject: z.string().trim().min(1).max(120),
     bodyLines: z
@@ -75,7 +80,13 @@ export default defineTool({
       return { sent: false, note: "No email is on file for this family yet." };
     }
 
-    const sent = await sendAgentComposedEmail(email, input.subject, input.bodyLines);
+    const sent = await sendAgentComposedEmail(
+      email,
+      input.subject,
+      input.bodyLines,
+      undefined,
+      familyId,
+    );
     if (!sent) {
       return { sent: false, note: "The email failed to send. Tell the parent you'll try again shortly." };
     }

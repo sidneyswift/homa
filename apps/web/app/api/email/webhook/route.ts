@@ -4,6 +4,7 @@ import {
   resendWebhookReceiptHttpStatus,
   verifySvixSignature,
 } from "../../../../lib/email-webhook";
+import { suppressHash } from "../../../../lib/email/suppression";
 import { mapDb } from "../../../../lib/map/db";
 import { operationalDiagnostic } from "../../../../lib/operational-diagnostics";
 
@@ -62,6 +63,22 @@ export async function POST(request: Request): Promise<Response> {
         { ok: false, reason: "receipt-not-yet-correlated" },
         { status },
       );
+    }
+    // A hard bounce or a spam complaint suppresses this address for ALL
+    // future sends (deliverability, funnel work 2026-07-20). Best-effort:
+    // a suppression failure must never turn a matched receipt into a retry.
+    if (action.ledgerStatus === "bounced" || action.ledgerStatus === "complained") {
+      try {
+        const suppress = await sql<{ to_hash: string }[]>`
+          select distinct to_hash from public.email_sends
+          where provider_message_id = ${emailId}
+        `;
+        for (const row of suppress) {
+          await suppressHash(row.to_hash, "all", type);
+        }
+      } catch (error) {
+        console.error("email webhook: suppression write failed:", error);
+      }
     }
   } catch {
     console.error(

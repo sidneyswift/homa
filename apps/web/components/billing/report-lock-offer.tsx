@@ -5,16 +5,14 @@ import Link from "next/link";
 
 import { reportButtonClass } from "../../app/onboarding/r/[token]/report-button";
 import type { WallCheckout } from "../../lib/billing/wall-types";
+import { TierOptions } from "./tier-options";
 import { sendWallBeacon } from "./wall-beacon";
 import {
   REPORT_LOCK_SIGNIN_BODY,
   REPORT_LOCK_SIGNIN_HEADLINE,
-  WALL_ANNUAL_BUTTON,
-  WALL_BULLETS,
   WALL_EYEBROW,
   WALL_HEADLINE,
   WALL_MECHANICS_LINE,
-  WALL_MONTHLY_BUTTON,
   WALL_SIGNIN_BUTTON,
   reportLockHeldLine,
   reportLockReadyLine,
@@ -109,43 +107,7 @@ export function ReportLockOffer({
       <p className="mt-3 text-body">{reportLockReadyLine(childName, mappedCount)}</p>
       <p className="mt-2 text-body">{reportLockHeldLine(childName, openCount, lockedCount)}</p>
       <p className="mt-2 text-body">{WALL_MECHANICS_LINE}</p>
-      <div className="mt-5 flex flex-col gap-2 sm:max-w-sm">
-        <a
-          href={checkout.monthlyUrl}
-          onClick={() => {
-            rememberChild();
-            sendWallBeacon({ kind: "checkout_started", door: "report", plan: "monthly" });
-          }}
-          className={reportButtonClass(
-            "primary",
-            "inline-flex min-h-12 items-center justify-center px-6 py-3 text-sm font-semibold",
-          )}
-        >
-          {WALL_MONTHLY_BUTTON}
-        </a>
-        {checkout.annualUrl ? (
-          <a
-            href={checkout.annualUrl}
-            onClick={() => {
-              rememberChild();
-              sendWallBeacon({ kind: "checkout_started", door: "report", plan: "annual" });
-            }}
-            className={reportButtonClass(
-              "secondary",
-              "inline-flex min-h-12 items-center justify-center px-6 py-3 text-sm font-semibold",
-            )}
-          >
-            {WALL_ANNUAL_BUTTON}
-          </a>
-        ) : null}
-      </div>
-      <ul className="mt-4 flex flex-col gap-1">
-        {(checkout.annualUrl ? WALL_BULLETS : WALL_BULLETS.slice(1)).map((line) => (
-          <li key={line} className="text-sm text-muted">
-            {line}
-          </li>
-        ))}
-      </ul>
+      <TierOptions door="report" checkout={checkout} onBeforeCheckout={rememberChild} />
     </div>
   );
 }

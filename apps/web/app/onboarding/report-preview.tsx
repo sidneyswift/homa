@@ -41,7 +41,7 @@ export function ReportPreview() {
       />
 
       <div className="rotate-[1.5deg] overflow-hidden rounded-lg border border-border-subtle bg-card shadow-[var(--shadow-xl)] transition-transform duration-(--dur-base) ease-out motion-safe:group-hover:-translate-y-1 motion-safe:group-hover:rotate-0 group-focus-visible:shadow-[var(--shadow-focus)]">
-        <div className="px-6 pb-5 pt-6" style={{ background: "var(--band-sky)" }}>
+        <div className="relative px-6 pb-5 pt-6" style={{ background: "var(--band-sky)" }}>
           <p className="font-mono text-[0.625rem] font-medium uppercase tracking-[0.16em]" style={{ color: "var(--pop-navy)" }}>
             Sample {"\u00b7"} made for Maya
           </p>
@@ -49,19 +49,30 @@ export function ReportPreview() {
               2026-07-08): the mock sells what YOUR child gets; Maya stays
               in the eyebrow and note as the worked example. Sentence case
               per house style. */}
+          {/* nowrap keeps "progress report" wrapping as a unit; a mid-width
+              break set the coral word alone at the start of line 2. */}
           <p className="mt-1.5 font-display text-2xl font-bold leading-tight text-strong">
-            Your child&apos;s <span style={{ color: "var(--clay-600)" }}>progress report</span>
+            Your child&apos;s <span style={{ color: "var(--clay-600)", whiteSpace: "nowrap" }}>progress report</span>
           </p>
           <p className="mt-1.5 font-mono text-[0.6875rem]" style={{ color: "var(--pop-navy)" }}>
             age 4y 2m {"\u00b7"} 16 subjects {"\u00b7"} national benchmarks
           </p>
+          {/* Anchored to the header seam, not the card: a fixed top offset
+              landed on the wrapped meta line at narrow widths and sliced
+              "national benchmarks" mid-word. */}
+          <div
+            className="absolute -bottom-3.5 right-3 rotate-[3deg] whitespace-nowrap rounded-pill bg-card px-3 py-1.5 text-xs font-bold shadow-[var(--shadow-md)]"
+            style={{ color: "var(--sage-600)" }}
+          >
+            {"\u25b2"} +4 mo since June
+          </div>
         </div>
 
         <div className="space-y-2.5 p-5">
           {PREVIEW_ROWS.map((row) => (
             <div key={row.subject} className="rounded-md border border-border-subtle px-3.5 py-2.5">
               <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-semibold text-strong">{row.subject}</span>
+                <span className="whitespace-nowrap text-sm font-semibold text-strong">{row.subject}</span>
                 <span
                   className="whitespace-nowrap rounded-pill px-2.5 py-1 text-[0.6875rem] font-bold"
                   style={{ background: row.chipBg, color: row.chipInk }}
@@ -85,15 +96,16 @@ export function ReportPreview() {
             </p>
           </div>
 
-          <p className="pt-0.5 text-center text-xs text-subtle">+ 12 more subjects inside</p>
+          {/* Closes the card in the same micro-label ritual as the header
+              eyebrow and the Homa note, so the last line reads designed
+              rather than defaulted. */}
+          <p
+            className="pt-1 text-center font-mono text-[0.625rem] font-medium uppercase tracking-[0.16em]"
+            style={{ color: "var(--text-muted)" }}
+          >
+            + 12 more subjects inside
+          </p>
         </div>
-      </div>
-
-      <div
-        className="absolute -right-2 top-32 rotate-[3deg] rounded-pill bg-card px-3 py-1.5 text-xs font-bold shadow-[var(--shadow-md)]"
-        style={{ color: "var(--sage-600)" }}
-      >
-        {"\u25b2"} +4 mo since June
       </div>
     </a>
   );
