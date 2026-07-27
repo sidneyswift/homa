@@ -242,3 +242,28 @@ describe("week navigation", () => {
     assert.match(html, /href="\/app\/calendar\?week=3"/);
   });
 });
+
+describe("family shapes", () => {
+  it("asks for a child instead of rendering an empty grid when there are none", () => {
+    const html = renderView({ kids: [], reports: new Map() });
+    assert.match(html, /Add a child first to see their calendar/);
+    // No grid, and no crash reaching for kids[0]'s tone.
+    assert.doesNotMatch(html, /All day/);
+  });
+
+  it("skips the filter chips for an only child but still renders the grid", () => {
+    const html = renderView({
+      kids: [MAYA],
+      reports: new Map([["child-maya", { token: "token-maya" }]]),
+      familyEvents: [event({ childId: "child-maya", title: "Swim lesson" })],
+    });
+    assert.doesNotMatch(html, />Everyone</);
+    assert.match(html, /Swim lesson/);
+  });
+
+  it("renders a week with nothing on it without a crash or a bare grid", () => {
+    const html = renderView();
+    assert.match(html, /Nothing on the calendar this week yet/);
+    assert.match(html, /8 AM/);
+  });
+});
