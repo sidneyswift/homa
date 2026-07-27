@@ -96,6 +96,30 @@ export const MARBLE_DOMAIN_MAP: Record<string, MarbleDomainTarget> = {
   // Marble domains instead of widening the vocabulary.
   "History > Geography": { subject: "social_studies", domainId: "geography", displayName: "Geography", kind: "content" },
   "History > Cultural Studies": { subject: "social_studies", domainId: "cultural-studies", displayName: "Cultural studies", kind: "content" },
+  // Social-studies assessment gap fill (2026-07-22, founder-gated content
+  // PR): these three route Homa-authored topics INTO the reserved
+  // assessment ids, deliberately deviating from the 2026-07-21
+  // non-colliding precedent below. The matching AUTHORED_DOMAINS rows in
+  // domains.ts are removed in the same change so domain ids stay unique;
+  // the ids, subjects, and assessment kind are unchanged, so the bank
+  // items pinned to them in item-domains.ts are unaffected.
+  "History > Geography & Maps": { subject: "social_studies", domainId: "geography-maps", displayName: "Geography & maps", kind: "assessment" },
+  "History > Civics & Government": { subject: "social_studies", domainId: "civics-government", displayName: "Civics & government", kind: "assessment" },
+  "History > Economics & Money": { subject: "social_studies", domainId: "economics-money", displayName: "Economics & money", kind: "assessment" },
+  // Inspo-flywheel addition (2026-07-21): Social Studies: All Together
+  // (Scott Foresman, Grade 1) surfaced 7 real gaps that semantically belong
+  // under the AUTHORED_DOMAINS civics-government/family-community/
+  // geography-maps ids (domains.ts), but those are RESERVED assessment-kind
+  // domains already populated by the hand-authored milestone bank
+  // (packages/core/src/map/content.ts / item-domains.ts), a separate
+  // pipeline from this Marble-imported one. Wiring a new content-kind entry
+  // to one of those same ids would create a duplicate domain id and fail
+  // check:taxonomy's "domain ids are unique" check. These two new ids are
+  // deliberately DIFFERENT from the reserved ones, following the same
+  // non-colliding pattern already used above for Geography/Cultural
+  // Studies and for Art/Music elsewhere in this session.
+  "History > Civic Life": { subject: "social_studies", domainId: "civic-life", displayName: "Civic life", kind: "content" },
+  "History > Colonial & Revolutionary America": { subject: "social_studies", domainId: "colonial-revolutionary-america", displayName: "Colonial & Revolutionary America", kind: "content" },
 
   // Personal & Social Development (6 domains) → social_emotional
   "Personal & Social Development > Emotional Literacy": { subject: "social_emotional", domainId: "emotional-literacy", displayName: "Emotional literacy", kind: "assessment" },
@@ -118,6 +142,18 @@ export const MARBLE_DOMAIN_MAP: Record<string, MarbleDomainTarget> = {
   // preschool curriculum drops (routines, time, weather, self-care,
   // chores); joins the parked subject with its siblings.
   "Life Skills > Daily Living": { subject: "life_skills", domainId: "daily-living", displayName: "Daily living", kind: "assessment" },
+
+  // Inspo-flywheel addition (2026-07-20): Blossom & Root Level 0 (a
+  // Charlotte Mason-inspired kindergarten curriculum) introduced weekly
+  // picture study and composer study, and Marble has no Art or Music
+  // subject to receive them. Homa already has fully authored "art" and
+  // "music" bank subjects (packages/core/src/map/content.ts) with their
+  // own assessment domains (see domains.ts AUTHORED_DOMAINS); these two
+  // entries add NEW content-kind domains under those same subjects for
+  // Marble-style enrichment topics, deliberately using domain ids that do
+  // not collide with the existing authored ones.
+  "Art > Picture Study & Art Appreciation": { subject: "art", domainId: "picture-study-appreciation", displayName: "Picture study & art appreciation", kind: "content" },
+  "Music > Composer Study & Music Appreciation": { subject: "music", domainId: "composer-study-appreciation", displayName: "Composer study & music appreciation", kind: "content" },
 };
 
 /** Marble's SCREAMING enum → Homa's lowercase TopicKind. */

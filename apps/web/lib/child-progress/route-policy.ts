@@ -6,7 +6,7 @@ export type ProgressRoutePolicyInput =
         | "token_report";
     }
   | {
-      surface: "child_progress" | "child_report";
+      surface: "child_progress" | "child_report" | "child_firsts";
       childId: string;
     };
 
@@ -24,6 +24,17 @@ export function progressRoutePolicy(
         ? { kind: "continue" }
         : { kind: "redirect", href: "/app/report" };
     case "child_progress":
+      return liveProgressEnabled
+        ? { kind: "continue" }
+        : {
+            kind: "redirect",
+            href:
+              `/app/${encodeURIComponent(route.childId)}/report`,
+          };
+    // The firsts page reads the evidence ledger directly, so it must be
+    // dark wherever the ledger is dark, or it renders a record the
+    // product is not yet serving. Same redirect as child_progress.
+    case "child_firsts":
       return liveProgressEnabled
         ? { kind: "continue" }
         : {

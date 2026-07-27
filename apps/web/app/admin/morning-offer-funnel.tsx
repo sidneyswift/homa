@@ -1,27 +1,14 @@
-import type { ReactNode } from "react";
-
 import type { MorningOfferFunnelSummary } from "../../lib/admin/morning-brief-metrics";
 import { percent } from "../../lib/admin/format";
 
-function FunnelStage({
-  label,
-  value,
-  note,
-}: {
-  label: string;
-  value: number;
-  note: ReactNode;
-}) {
-  return (
-    <div className="min-w-0 rounded-md border border-border-subtle bg-[var(--surface-sunken)] px-3 py-2.5 last:col-span-2 sm:last:col-span-1">
-      <p className="text-[0.72rem] font-bold text-muted">{label}</p>
-      <p className="mt-1 font-display text-xl font-semibold leading-none text-strong">
-        {value}
-      </p>
-      <p className="mt-1.5 text-[0.72rem] leading-snug text-subtle">{note}</p>
-    </div>
-  );
-}
+/**
+ * The morning-brief panel, rebuilt around the one question it can answer:
+ * do families reply to the brief (founder ask 2026-07-23). Delivered and
+ * Replied are the panel; everything after a reply is one line, because
+ * nobody can reply no (the SMS offers no way to), so acceptance rate is a
+ * constant dressed as a metric. The working note at the bottom names the
+ * lever to test next, so the panel reads as a decision aid, not a scoreboard.
+ */
 
 function countPhrase(count: number, singular: string, plural: string): string {
   return `${count} ${count === 1 ? singular : plural}`;
@@ -36,37 +23,45 @@ export function MorningOfferFunnel({
   possibleInterest: number;
   rangeLabel: string;
 }) {
-  const linkedReplyNote =
-    summary.maturedOffers > 0
-      ? `${summary.linkedReplies} of ${summary.maturedOffers} closed windows replied (${percent(summary.linkedReplies, summary.maturedOffers)}) · ${summary.waiting} still open`
-      : `${summary.waiting} reply windows still open`;
-  const acceptedNote =
-    summary.decisions > 0
-      ? `${percent(summary.accepted, summary.decisions)} of decisions`
-      : "No clear yes or no yet";
-  const fulfilledNote =
-    summary.accepted > 0
-      ? `${percent(summary.fulfilled, summary.accepted)} of yes replies · saved material or task`
-      : "Saved material or task · no yes replies yet";
+  const replyRate =
+    summary.maturedOffers > 0 ? percent(summary.linkedReplies, summary.maturedOffers) : null;
+
+  const footnotes: string[] = [];
+  if (summary.noLinkedReply > 0) {
+    footnotes.push(
+      countPhrase(
+        summary.noLinkedReply,
+        "brief went a full 24 hours with no reply",
+        "briefs went a full 24 hours with no reply",
+      ),
+    );
+  }
+  if (summary.answered > 0) {
+    footnotes.push(
+      countPhrase(summary.answered, "reply said something else", "replies said something else"),
+    );
+  }
+  if (possibleInterest > 0) {
+    footnotes.push(
+      countPhrase(
+        possibleInterest,
+        "nearby message could not be tied to a brief, so it is not counted as a reply",
+        "nearby messages could not be tied to a brief, so they are not counted as replies",
+      ),
+    );
+  }
 
   return (
     <section
       aria-labelledby="morning-offer-funnel-title"
-      className="col-span-2 rounded-lg border border-border-subtle bg-card p-4 shadow-sm md:col-span-3 xl:col-span-4"
+      className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm"
     >
-      <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.1em] text-subtle">
+      <p
+        id="morning-offer-funnel-title"
+        className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.1em] text-subtle"
+      >
         Morning brief offers
       </p>
-      <h2
-        id="morning-offer-funnel-title"
-        className="mt-1 font-display text-xl font-semibold text-strong"
-      >
-        {summary.deliveredOffers} offers delivered {rangeLabel}
-      </h2>
-      <div className="mt-1 text-xs text-muted">
-        <p>Each stage follows the same delivered offers.</p>
-        <p>Test families are excluded.</p>
-      </div>
 
       {summary.unclassified > 0 ? (
         <div className="mt-3 rounded-md bg-[var(--gold-100)] px-3 py-2 text-[0.75rem] font-semibold text-[var(--gold-ink)]">
@@ -78,79 +73,63 @@ export function MorningOfferFunnel({
             )}
             .
           </p>
-          <p>Decision, yes, and completion rates exclude them.</p>
+          <p>Yes and completion counts exclude them.</p>
         </div>
       ) : null}
 
-      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-        <FunnelStage
-          label="Delivered"
-          value={summary.deliveredOffers}
-          note="Delivered with one offer"
-        />
-        <FunnelStage
-          label="Replied"
-          value={summary.linkedReplies}
-          note={linkedReplyNote}
-        />
-        <FunnelStage
-          label="Yes or no"
-          value={summary.decisions}
-          note={
-            summary.decisions > 0
-              ? `${summary.accepted} yes · ${summary.declined} no`
-              : "No clear yes or no yet"
-          }
-        />
-        <FunnelStage
-          label="Said yes"
-          value={summary.accepted}
-          note={
-            summary.decisions > 0
-              ? acceptedNote
-              : "No yes replies yet"
-          }
-        />
-        <FunnelStage
-          label="Completed"
-          value={summary.fulfilled}
-          note={fulfilledNote}
-        />
+      <div className="mt-3 flex flex-wrap items-baseline gap-x-10 gap-y-3">
+        <div>
+          <p className="text-[0.72rem] font-bold text-muted">Delivered</p>
+          <p className="mt-1 font-display text-2xl font-semibold leading-none text-strong">
+            {summary.deliveredOffers}
+          </p>
+          <p className="mt-1.5 text-[0.72rem] text-subtle">morning briefs, one offer in each</p>
+        </div>
+        <div>
+          <p className="text-[0.72rem] font-bold text-muted">Replied</p>
+          <p className="mt-1 font-display text-2xl font-semibold leading-none text-strong">
+            {summary.linkedReplies}
+            {replyRate ? (
+              <span className="ml-2 font-sans text-sm font-normal text-muted">
+                {replyRate} of the {summary.maturedOffers} briefs old enough to judge
+              </span>
+            ) : null}
+          </p>
+          <p className="mt-1.5 text-[0.72rem] text-subtle">
+            {summary.waiting > 0
+              ? `${countPhrase(summary.waiting, "brief was", "briefs were")} sent too recently to count yet`
+              : "every brief has had its full 24 hours"}
+          </p>
+        </div>
       </div>
 
-      {summary.noLinkedReply > 0 || summary.answered > 0 ? (
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[0.75rem] text-muted">
-          {summary.noLinkedReply > 0 ? (
-            <span>
-              {countPhrase(
-                summary.noLinkedReply,
-                "offer reached 24 hours with no reply",
-                "offers reached 24 hours with no reply",
-              )}
-            </span>
-          ) : null}
-          {summary.answered > 0 ? (
-            <span>
-              {countPhrase(
-                summary.answered,
-                "reply asked or said something else",
-                "replies asked or said something else",
-              )}
-            </span>
-          ) : null}
-        </div>
+      <p className="mt-4 text-sm text-muted">
+        {summary.linkedReplies > 0
+          ? `Of the ${countPhrase(summary.linkedReplies, "reply", "replies")}, ${
+              summary.accepted
+            } said yes and ${summary.fulfilled} got their material or task.`
+          : `No replies yet ${rangeLabel}.`}
+      </p>
+      {footnotes.length > 0 ? (
+        <p className="mt-1 text-[0.75rem] text-subtle">{footnotes.join(". ")}.</p>
       ) : null}
 
-      {possibleInterest > 0 ? (
-        <p className="mt-2 text-[0.75rem] text-subtle">
-          {countPhrase(
-            possibleInterest,
-            "nearby message could not be tied to an offer",
-            "nearby messages could not be tied to an offer",
-          )}
-          . Checked within four hours and excluded from reply counts.
+      <div
+        className="mt-4 rounded-md bg-[var(--surface-sunken)] px-4 py-3"
+        style={{ borderLeft: "3px solid var(--border-brand)" }}
+      >
+        <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.1em] text-subtle">
+          What this panel is for
         </p>
-      ) : null}
+        <p className="mt-1.5 text-sm text-body">
+          {replyRate
+            ? `${replyRate} of the briefs old enough to judge got a reply ${rangeLabel}. A brief counts once it has had a full 24 hours to be answered.`
+            : `No brief has had its full 24 hours yet ${rangeLabel}.`}{" "}
+          Nearly everyone who replies says yes, so the number to move is replies, not yes rates.
+          The next lever is the message itself: end the brief with one concrete question a parent
+          can answer in a word, then compare reply rates week over week.
+        </p>
+      </div>
     </section>
   );
 }

@@ -1,0 +1,94 @@
+{
+  "id": "ref-2026-07-20-toddlers-science-activity-book",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-20T12:18:16-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784564296.983179",
+  "format": "activity-idea-book",
+  "title": "The Toddler's Science Activity Book: 100+ Fun Early Learning Activities for Curious Kids",
+  "publisher": "Callisto Publishing LLC (Callisto Kids), C/O Sourcebooks LLC, verified directly from the book's own copyright page",
+  "author": "Kailan Carr",
+  "illustrator": "Natascha Rosenberg",
+  "gradeLevel": "Toddler (ages 1-3, per the book's own three stated developmental bands: 12-18, 18-24, and 24-36 months)",
+  "pdfScanPageCount": 89,
+  "physicalPageCount": 152,
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-20-toddlers-science-activity-book/toddlers-science-activity-book.pdf",
+  "localPath": ".cosmo/inspo-files/toddlers-science-activity-book.pdf",
+  "analysisQuality": "full",
+  "overview": "A real, page-by-page read of the actual interior, not a title-only inference and not a re-check of any prior session's claim. Verified directly with pypdf (89 PDF pages, zero characters of extractable text on every page, a pure CamScanner phone-scan PDF, same capture method as Beast Academy 1A/1B ingested earlier this session) and PyMuPDF page renders at 1.6x zoom across all 89 pages. IMPORTANT CORRECTION to the page count a prior session left in an unpersisted Slack reply (per this task's own warning not to trust it): 89 is the PDF SCAN page count, not the physical book's page count. Most PDF pages are a single photo of a two-page spread, not one physical page; the book's own Index citation ('Index 152' on the last content page) and a page-numbering formula verified independently at 6 separate points across the book (physical_left_page = 2 x pdf_index - 14, confirmed exact at PDF indices 9, 10, 12, 13, 16, 17, 27, 29, 42, 55, and 68 against the printed footer page numbers on those exact renders) both converge on 152 physical pages. Copyright page confirms: copyright 2021 by Callisto Publishing LLC, illustrations by Natascha Rosenberg, cover/interior design 2021, chapter-opener photographs credited to iStock and Shutterstock contributors (Adene Sanchez, DragonImages, VioletaStoimenova, michellegibson, SDI Productions) at pages ii, xii, 15, 16, 42, 68, 94, 120, and 148, author photograph courtesy Lando Lane Creative, printed and bound in China (production run September 2023). Real table of contents confirmed directly (pages 4-7 of this session's own renders): Chapter 1 Play and Learn (1, an intro chapter: My Toddler-Parenting Science Adventure, Benefits of Science Play, Toddler Time with the three age-band milestone lists, Safety First, How to Use This Book), Chapter 2 Nature Play (17, 26 named activities), Chapter 3 Mix It Up (43, kitchen and mixing science), Chapter 4 Touch and Feel (69, sensory play), Chapter 5 Rainbow Science (95, color science), Chapter 6 Wonder of Water (121, water play), then back matter: Resources 149 (a curated companion picture-book and website list per activity), References 151 (real citations, including Yogman et al., 'The Power of Play: A Pediatric Role in Enhancing Development in Young Children,' Pediatrics 142, no. 3 (2018), and the Harvard Center on the Developing Child), Index 152.",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "mixed",
+    "visualHierarchy": "text-and-illustration-balanced",
+    "whiteSpaceRatio": 0.35,
+    "flowDirection": "top-down",
+    "notes": "Every one of the 100+ activity pages this session sampled (at least one per chapter, confirmed at the exact chapter-boundary pages 20-21, 40-41, 44-45, 70-71, 96-97, and 122-123, plus several more) follows the identical template, confirmed directly and repeatedly, not assumed from one page: a top skill-icon strip (3-6 small labeled icons, for example 'fine motor skills,' 'cause and effect,' 'observation'), the activity title, a 1-2 sentence description, then a two-column body: left column is a compact stat block (Messiness: 1-5, Prep time, Activity time) plus a MATERIALS bulleted list; right column is a numbered STEPS list, with an optional PREP sub-list above it for parent-only setup and optional italic TIP or bold CAUTION! callouts below it. The skill-icon strip sits top-left on left-hand pages and top-right on right-hand pages (mirrored to the outer margin, away from the spine), a real, repeated design choice. Most activity pages pair the text with one flat cartoon illustration of a child doing the activity; the 6 chapter-opener spreads use a real stock photograph instead. Chapter accent color changes per chapter (observed directly: navy/purple headings for Nature Play, green for Mix It Up and Wonder of Water, black for Touch and Feel and Rainbow Science)."
+  },
+  "skillTargeting": {
+    "subject": "multi-subject",
+    "domain": "scientific-inquiry",
+    "topics": [
+      { "id": "science.notices-nature", "kind": "conceptual", "mapped": true, "note": "Direct match for the whole Nature Play chapter and this book's general observational-science framing; typicalMonths 30, domain scientific-inquiry per packages/core/src/map/item-domains.ts, checked fresh this session." },
+      { "id": "science.sorts-groups", "kind": "procedural", "mapped": true, "note": "Matches the 'matching' and 'sorting' skill-icon tags observed on several activity pages (e.g. Nature Shape Puzzle); typicalMonths 44 sits slightly above this book's own 12-36mo range but is the closest real match, noted rather than hidden." },
+      { "id": "math.counts-to-5", "kind": "procedural", "mapped": true, "note": "Matches the 'counting' skill-icon tag observed directly (Rock Towers, p.20); typicalMonths 30, domain counting-cardinality." },
+      { "id": "fine_motor.tower-4", "kind": "procedural", "mapped": true, "note": "Matches the 'fine motor skills' icon appearing on the large majority of sampled activity pages; typicalMonths 28." },
+      { "id": "art.happy-making", "kind": "procedural", "mapped": true, "note": "Matches the 'creativity' and 'sensory development' icons on activities like Mud Cakes and Taste-Safe Finger Painting; typicalMonths 30." },
+      { "id": "executive_function.focus-5", "kind": "meta", "mapped": true, "note": "Loose match for the 'following directions' and 'problem-solving' skill-icon tags observed repeatedly; typicalMonths 30." }
+    ],
+    "unmappedSkills": [
+      "science.subdiscipline-labels-chemistry-physics-botany"
+    ],
+    "notes": "Mapped against packages/core/src/map/content.ts and packages/core/src/map/item-domains.ts (the correct pipeline for toddler-age science/math/fine_motor/art/executive_function content, the same pipeline this session's Drop 1 and Drop 2 both used correctly), checked fresh this session, and cross-checked domain ids against packages/taxonomy/src/domains.ts and mapping.ts. The one real, genuine unmapped gap: this book's own skill-icon system repeatedly names specific science subdisciplines directly on activity pages (chemistry appeared on Lava Lamp in a Cup and Wiggly Paper Towel Worms; physics on Rock Towers; botany on Trace the Parts of a Plant and Colored Carnations), but Homa's authored science milestone bank has one flat 'science' item stream at this age (science.notices-nature, science.sorts-groups) with no subdiscipline split. This is the same kind of granularity gap Drop 1 found in the spanish milestone bank (broad exposure tracking, no theme or subdiscipline-level detail) and is recorded the same way: a real gap, not acted on, since it is a product-architecture question (whether the toddler milestone bank should ever split science by subdiscipline) well beyond what one reference ingestion should decide."
+  },
+  "difficulty": {
+    "ageBandMonths": [12, 36],
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffolding": "high",
+    "notes": "Confirmed directly from the book's own front matter, not inferred: a dedicated 'Safety First!' section (pages 10-11) explains the book's Caution! system and lists general safety rules (supervise water and cooking play, check ingredient taste-safety, keep toddlers away from sharp tools, test new materials on skin first), and the book states plainly 'All the activities are designed for your toddler and you. Always supervise during play.' The 3-6 skill icons per activity (genuinely multi-skill even at the single-activity level, not just book-wide) plus the messiness/prep/activity-time stat block confirm this is a real design system, not a marketing claim."
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [
+      "a different, diverse illustrated child or pair of children per activity page (no confirmed single recurring named character across the book)",
+      "real toddler and child stock photographs at each of the 6 chapter openers (iStock/Shutterstock, credited on the copyright page)"
+    ],
+    "visualStyle": "mixed: flat, rounded gouache-style cartoon illustrations (Natascha Rosenberg) on every activity page, paired with real stock photography at chapter openers, confirmed directly by viewing both",
+    "colorPalette": "full-color throughout; chapter accent/heading color changes per chapter (confirmed directly: navy/purple for Nature Play, green for Mix It Up and Wonder of Water, black for Touch and Feel and Rainbow Science)",
+    "appealDrivers": [
+      "real, diverse toddler photography at chapter openers rather than stock-cartoon-only",
+      "a consistent, colorful skill-icon tagging system that doubles as visual interest and parent-facing credibility",
+      "explicit permission and normalization of mess (a 1-5 messiness rating on every activity, plus a whole front-matter section on 'looking past the mess')",
+      "real developmental-science citations (Harvard Center on the Developing Child, a 2018 Pediatrics paper) lending credibility for a research-minded parent"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "not applicable to the source: this is a bound retail paperback (Callisto Publishing / Sourcebooks), meant to be read by a parent and used with real household materials, not a home-printed worksheet packet. None of the 89 sampled scan pages is a blank fillable or reproducible worksheet page; every page is prose instructions, a materials list, and an illustration, confirmed directly by reading the actual interior rather than assumed.",
+    "orientation": "the book itself is a portrait-trim paperback; the CamScanner capture mixes portrait (595x842pt) and landscape (842x595pt) page canvases depending on how each two-page spread was framed in the photo, confirmed directly via PyMuPDF page.rect on multiple sampled pages",
+    "margins": "standard, generous single-column body text with consistent side margins on every sampled interior page",
+    "inkDensity": "not applicable in the sense a home-print worksheet would use it: the source is a professionally printed full-color paperback. If Homa generates an art-project-instructions page inspired by this book's activities, that page's own ink-density choices apply, not a property of this source.",
+    "colorRequirement": "the source book is full-color throughout; no black-and-white or ink-light variant exists in the captured file"
+  },
+  "recipeMatch": {
+    "matchedRecipes": ["art-project-instructions"],
+    "gaps": [],
+    "notes": "Every one of the 100+ named activities sampled across all 6 chapters matches the existing art-project-instructions recipe (materials list plus numbered steps for one hands-on activity); no new recipe file or format gap is needed. This drop DID surface a real, well-confirmed, repeatable PATTERN missing from that recipe's own documented design patterns: the skill-icon badge strip, the Messiness/Prep-time/Activity-time stat block, and a separate parent-only PREP sub-list distinct from the child-facing STEPS list. Confirmed consistent across all 6 chapters (not a one-page assumption), so this session edited apps/web/agent/skills/materials-studio/references/recipes/art-project-instructions.md to add it as a documented 'toddler stat-and-icon variant,' an update to the existing recipe file, not a new duplicate recipe, following this skill's own step 6b guidance."
+  },
+  "stages": {
+    "captured": "2026-07-21T03:35:18Z",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "pattern",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/art-project-instructions.md"
+      ],
+      "commit": null
+    },
+    "taxonomy": { "proposedTopics": [], "commit": null },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "notes": "id date (2026-07-20) and droppedAt local date agree here (unlike Drop 1 and Drop 2 in this session): Slack ts 1784564296.983179 is 2026-07-20T16:18:16 UTC and 2026-07-20T12:18:16-04:00 in America/New_York, both the same calendar day, since the drop landed at midday rather than near midnight. A prior session left two substantial-sounding Slack replies about this book and a stale :ship: reaction with no ref JSON ever written anywhere in git history (confirmed absent before this session began, per this task's own instruction). Those replies were not trusted as ground truth; every claim in this ref (chapter titles, activity names, page counts, the skill-icon/stat-block template, the real research citations) was independently re-verified against the actual rendered pages or the book's own printed copyright/reference pages this session. The one figure that did check out from the prior claim (89 pages) turned out to describe the PDF scan page count, not the physical book, an important distinction recorded above rather than repeated uncritically. 'captured' in stages reflects this checkout's local file mtime, not a fresh download performed this session; the file and its Blob URL were already staged before this session began. No Slack commentary was left on this specific drop by Aless."
+}

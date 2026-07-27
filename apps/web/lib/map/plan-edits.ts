@@ -64,6 +64,82 @@ function remapProgressAfterRemove(
 }
 
 /**
+ * One week's surviving scheduled activities after a batch of removals,
+ * as {from, to} index moves. `to === null` means that activity is gone
+ * and its calendar date goes with it.
+ *
+ * This is the schedule half of remapProgressAfterRemove: removing week
+ * 2's activity 0 shifts activity 1 down into slot 0, so a
+ * plan_activity_schedule row still pointing at index 1 would silently
+ * describe a different activity (issue #176's documented known
+ * limitation). The pure mapping lives here beside the check-off remap so
+ * the two can never disagree; editPlanActivities applies it.
+ */
+export interface ScheduleRemap {
+  week: number;
+  moves: { from: number; to: number | null }[];
+}
+
+/**
+ * scheduleRemapForEdits(plan, edits): the index moves a batch of edits
+ * implies, per touched week. Only removals move indices; adds append,
+ * and a replace keeps the slot (its date still describes when she
+ * planned to do that slot, even though the check-off is cleared because
+ * the work itself changed).
+ *
+ * `plan` must be the plan as it was BEFORE the edits, because the
+ * returned indices describe rows written against that shape.
+ */
+export function scheduleRemapForEdits(
+  plan: FourWeekPlan,
+  edits: readonly PlanEdit[],
+): ScheduleRemap[] {
+  // Per week, the identity mapping of every original index, mutated in
+  // the same order the edits apply so successive removals compose.
+  const byWeek = new Map<number, (number | null)[]>();
+  const slotsFor = (week: number): (number | null)[] | undefined => {
+    if (!byWeek.has(week)) {
+      const source = plan.weeks.find((candidate) => candidate.week === week);
+      if (!source) return undefined;
+      byWeek.set(
+        week,
+        source.activities.map((_, index) => index),
+      );
+    }
+    return byWeek.get(week);
+  };
+
+  for (const edit of edits) {
+    if (edit.action !== "remove") continue;
+    const slots = slotsFor(edit.week);
+    if (!slots) continue;
+    // edit.index addresses the CURRENT shape, so find the original index
+    // sitting in that live position and retire it.
+    const live = slots.filter((slot) => slot !== null);
+    const target = live[edit.index];
+    if (target === undefined) continue;
+    const position = slots.indexOf(target);
+    if (position !== -1) slots[position] = null;
+  }
+
+  const remaps: ScheduleRemap[] = [];
+  for (const [week, slots] of byWeek) {
+    const moves: { from: number; to: number | null }[] = [];
+    let next = 0;
+    for (let original = 0; original < slots.length; original += 1) {
+      if (slots[original] === null) {
+        moves.push({ from: original, to: null });
+        continue;
+      }
+      if (next !== original) moves.push({ from: original, to: next });
+      next += 1;
+    }
+    if (moves.length > 0) remaps.push({ week, moves });
+  }
+  return remaps;
+}
+
+/**
  * Applies edits in order against a deep copy; the caller's objects are
  * never mutated. Fails atomically on the first invalid edit (unknown
  * week, index out of range, week over capacity): either every edit

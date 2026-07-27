@@ -18,8 +18,10 @@ import { bindDeliveredProgressCheckIn } from "../../lib/child-progress/delivery-
 import {
   claimInboundReceipt,
   completeInboundReceipt,
+  completeInboundReceiptForTurn,
   failInboundReceipt,
   setInboundReceiptSession,
+  setInboundReceiptTurn,
 } from "../../lib/conversation-continuity/inbound-receipts";
 import {
   markCanonicalMessageDelivered,
@@ -52,6 +54,11 @@ import {
 } from "../../lib/family-sms-invite-consent";
 import { emitMapEvent } from "../../lib/map/events";
 import { recordLeadContact } from "../../lib/phone-leads";
+import {
+  classifySmsOptKeyword,
+  suppressSmsNumber,
+  unsuppressSmsNumber,
+} from "../../lib/sms-suppression";
 import { signupProgress } from "../../lib/sms-onboarding";
 import { trustedSmsInboundIdentityAttributes } from "../../lib/sms-inbound-auth";
 import {
@@ -131,6 +138,34 @@ const { bot, channel, send } = chatSdkChannel({
   // cannot lose conversation state.
   state: createMemoryState(),
   events: {
+    // eve's session.auth.current is a single mutable slot (AuthKey), not
+    // one per turn: sending a second inbound text on the same long-lived
+    // SMS session overwrites it before the first turn's completion event
+    // reads it. That silently orphaned real families' replies (confirmed
+    // live: two SMS turns claimed and never answered). turn.started fires
+    // essentially immediately, well before a follow-up text could arrive,
+    // so it is the one safe place left to durably stamp which receipt this
+    // turn owns. Overriding this key replaces eve's default typing
+    // indicator, so it is replicated here.
+    async "turn.started"(event, channel, ctx) {
+      await channel.thread?.startTyping("Working...");
+      const attributes = (ctx.session.auth.current?.attributes ?? {}) as {
+        inboundReceiptId?: string;
+      };
+      if (attributes.inboundReceiptId) {
+        await setInboundReceiptTurn(attributes.inboundReceiptId, event.turnId);
+      }
+    },
+    // Fires exactly once per turn regardless of output, unlike
+    // message.completed (once per assistant step, and not at all when the
+    // final step has no visible text). Looked up by the durable turn stamp
+    // above instead of session.auth.current, so it always resolves the
+    // claim even when message.completed below raced onto the wrong
+    // receipt. No default handler exists for this key, so this is purely
+    // additive.
+    async "turn.completed"(event, channel, ctx) {
+      await completeInboundReceiptForTurn(ctx.session.id, event.turnId);
+    },
     async "message.completed"(event, channel, ctx) {
       if (event.finishReason !== "stop" || !event.message?.trim()) return;
       const attributes = (ctx.session.auth.current?.attributes ?? {}) as {
@@ -377,10 +412,49 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
   if (!inboundReceipt.claimed) return;
 
   // Best-effort analytics (law #3). No phone number, no content in props.
-  await emitMapEvent("sms.message_received", {
-    media_count: attachments.length,
-    linked_family: familyId !== null,
-  });
+  // The family id rides the COLUMN, never the props, so the props contract
+  // is unchanged and still carries nothing identifying. Without it every
+  // inbound text was unattributable (231 events, zero countable per family),
+  // which made SMS invisible to the activation ladder even though most
+  // families text (funnel work 2026-07-20). Null for a stranger, as before.
+  await emitMapEvent(
+    "sms.message_received",
+    {
+      media_count: attachments.length,
+      linked_family: familyId !== null,
+    },
+    { familyId },
+  );
+
+  // Carrier opt-out keywords are protocol, not conversation: the exact
+  // single-word commands Telnyx itself matches before blocking the
+  // number at the platform level (40300 on every later send). Recording
+  // the same fact in sms_suppressions lets dispatch skip suppressed
+  // numbers instead of burning agent runs into guaranteed rejections
+  // (morning-brief conversion escalation, 2026-07-23). The agent never
+  // runs for these texts: any reply would already be carrier-blocked.
+  // START/UNSTOP lifts the row so resuming on the Telnyx side resumes
+  // here too.
+  if (normalizedSender) {
+    const optAction = classifySmsOptKeyword({
+      text,
+      hasAttachments: attachments.length > 0,
+    });
+    if (optAction) {
+      if (optAction === "stop") {
+        await suppressSmsNumber(normalizedSender, "inbound-stop");
+      } else {
+        await unsuppressSmsNumber(normalizedSender);
+      }
+      await emitMapEvent(
+        "sms.opt_out_recorded",
+        { action: optAction, linked_family: familyId !== null },
+        { familyId },
+      );
+      await completeInboundReceipt(inboundReceipt.id);
+      return;
+    }
+  }
 
   // A stranger texting IS a lead (lead-funnel-plan LF-2): save the
   // number before anything else can fail. Fire-and-forget by design.

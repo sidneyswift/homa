@@ -206,6 +206,7 @@ describe("progressUpdatedLine", () => {
         ],
         scores([], []),
       ),
+      NOW,
     );
     assert.deepEqual(line, {
       label: "Updated today",
@@ -213,7 +214,7 @@ describe("progressUpdatedLine", () => {
     });
   });
 
-  it("dates the newest observation otherwise", () => {
+  it("dates the visit, not the newest evidence, otherwise", () => {
     const line = progressUpdatedLine(
       view(
         [
@@ -228,9 +229,30 @@ describe("progressUpdatedLine", () => {
         ],
         scores([], []),
       ),
+      NOW,
     );
     assert.deepEqual(line, {
-      label: "Updated Jul 8, 2026",
+      label: "As of Jul 12, 2026",
+      today: false,
+    });
+  });
+
+  it("dates the visit in the family's own time zone", () => {
+    // 03:00Z on July 13 is still the evening of July 12 in Los Angeles.
+    const line = progressUpdatedLine(
+      view(
+        [
+          subjectView({
+            subjectId: "math",
+            latestObservedAt: "2026-07-05T12:00:00.000000Z",
+          }),
+        ],
+        scores([], []),
+      ),
+      new Date("2026-07-13T03:00:00.000Z"),
+    );
+    assert.deepEqual(line, {
+      label: "As of Jul 12, 2026",
       today: false,
     });
   });
@@ -241,6 +263,7 @@ describe("progressUpdatedLine", () => {
         [subjectView({ subjectId: "math", latestObservedAt: null })],
         scores([], []),
       ),
+      NOW,
     );
     assert.equal(line, null);
   });

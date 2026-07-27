@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import {
   MissingFamilyContextError,
   resolveAgentAccess,
@@ -44,18 +47,27 @@ const subjectIdSchema = z
  * validates execution. */
 const exploreToolInputSchema = z
   .object({
-    query: z.enum([
-      "subject_map",
-      "topic",
-      "ready_next",
-      "bottleneck",
-      "teaching_order",
-      "search_topics",
-    ]),
-    childId: z.string().uuid(),
+    query: z
+      .enum([
+        "subject_map",
+        "topic",
+        "ready_next",
+        "bottleneck",
+        "teaching_order",
+        "search_topics",
+      ])
+      .describe(
+        "subject_map (needs subjectId): the checklist ladder with the child's answers, chart figure, and skill-line domains. topic (needs topicId): one skill in depth with prerequisites and what it unlocks. ready_next (optional subjectId, domainId, limit): skills whose prerequisites the child has confirmed, best first. bottleneck (needs topicId): the earliest unconfirmed prerequisite before a target skill. teaching_order (needs topicIds): sort chosen topics prerequisites-first. search_topics (needs searchText, optional subjectId, limit): find real topic and checklist ids by words.",
+      ),
+    childId: z
+      .string()
+      .uuid()
+      .describe("A child id from the family context block."),
     subjectId: subjectIdSchema.optional(),
     domainId: subjectIdSchema.optional(),
-    topicId: topicIdSchema.optional(),
+    topicId: topicIdSchema
+      .optional()
+      .describe("A real topic id from a prior result or search_topics; never guessed."),
     topicIds: z.array(topicIdSchema).min(1).max(12).optional(),
     searchText: z.string().trim().min(2).max(120).optional(),
     limit: z.number().int().min(1).max(10).optional(),
@@ -160,9 +172,11 @@ async function loadChildPinned(
 const WRONG_CHILD_NOTE =
   "That child id is not in this family. Use a child id from the family context block.";
 
-export default defineTool({
+export default defineBoundedTool({
   description:
-    "Explore one child's learning map, read-only. subject_map: the checklist ladder with the child's answers, the chart figure, and the subject's skill-line domains. topic: one skill in depth (what it is, prerequisites with reasons, what it unlocks, a try-at-home check). ready_next: skills whose prerequisites this child has already confirmed, best first. bottleneck: the earliest unconfirmed prerequisite standing before a target skill. teaching_order: sort chosen topics prerequisites-first. search_topics: find real topic and checklist ids by words. Use it to answer where a child is, what is missing, what comes next and why. It never records anything; save evidence with manage_child_progress.",
+    "Explore one child's learning map, read-only. Use it to answer where a child is, what is missing, what comes next and why; the query values describe themselves. It never records anything; save evidence with manage_child_progress.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: true,
   inputSchema: exploreToolInputSchema,
   async execute(input, ctx) {
     let access: AgentAccess;

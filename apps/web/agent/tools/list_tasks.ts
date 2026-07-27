@@ -1,13 +1,18 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { listFamilyTasks } from "../../lib/tasks/custom";
 import { refuseScheduleSpawnedSession } from "../../lib/tasks/guard";
 
-export default defineTool({
+export default defineBoundedTool({
   description:
     "List this family's scheduled tasks (the built-in morning brief and evening check-in plus any custom tasks), with days, hour, delivery, and paused state. Use before changing or deleting a task, or when the parent asks what is scheduled.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: true,
   inputSchema: z.object({}),
   async execute(_input, ctx) {
     const attributes = ctx.session.auth.current?.attributes;

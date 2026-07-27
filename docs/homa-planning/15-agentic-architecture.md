@@ -90,7 +90,7 @@ means finishing the third one, not merging them back into files.
 both are live today and both are needed. The trigger loading works exactly as
 on the Mac mini: descriptions are advertised every turn and the model calls
 `load_skill` on match. (The rest of this sentence historically continued
-"...and save_skill grows the library, the skillify loop, cloud edition" —
+"...and save_skill grows the library, the skillify loop, cloud edition",
 superseded 2026-07-15 per the ruling above; there is no runtime skill-growing
 loop now, only repo packages.) Recall is now a typed, family-scoped tool over
 stored transcripts, conversations, and memories. The remaining distinction is
@@ -191,14 +191,21 @@ needs is unreplicable; what is unreplicable was already cut on purpose.**
 
 The 2026-07-09 synthetic transcript probe is preserved in the build log as dated
 evidence. It is not proof of the current deployment after later migrations and
-channel changes. Current founder-only production checks live under
-`HUMAN-TODO.md` section Product activation gates.
+channel changes. Founder-only production checks are tracked as GitHub
+Issues labeled `founder-action` (since 2026-07-25; formerly the
+`HUMAN-TODO.md` Product activation gates section).
 
 Decisions locked with the direction:
 
-- **Memory philosophy: pinned + searchable archive.** family_memories stays
+- **Memory philosophy: pinned + searchable archive.** The pinned set stays
   small and curated (the 4,000-char budget stands); the archive that recall
   searches is transcripts + conversations, not a bigger pinned blob.
+  Amended 2026-07-20 by founder ruling `memory-render-time-budget`: the
+  budget binds what is PINNED into each turn, not what may be stored. A
+  save is never refused for space, and a family that outgrows the budget
+  keeps the remainder stored and searchable rather than losing it. The
+  philosophy is unchanged; it is now enforced at render time, where it
+  always belonged, instead of at the write.
 - **Built-in eve tools:** verified, then the §3 ruling.
 - **Learning-loop writes: auto-apply + visible chip + undo** (PRD FR-9
   posture). Delta guards cap how much one call/turn may write.

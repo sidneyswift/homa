@@ -7,6 +7,7 @@ import {
 } from "./conversation-continuity/ledger";
 import { embedText } from "./learning/embeddings";
 import { mapDb } from "./map/db";
+import { isHiddenDirective } from "./onboarding/directives";
 
 /**
  * Writes one conversation message row for the persist-conversation hook
@@ -177,7 +178,14 @@ async function persistConversationMessageWithDependencies(
   // Best-effort semantic index (about 200-400ms per message inside the
   // hook, after the user already has their streamed text). Null means
   // this row is findable by FTS only, never a failed write.
-  const embedding = await dependencies.embed(content, { familyId });
+  //
+  // A hidden onboarding directive is skipped: it is the app talking, so
+  // indexing it would put machine text in the same vector space recall
+  // searches for the parent's own words, and it would spend an embedding
+  // call on a string nobody will ever look for.
+  const embedding = isHiddenDirective(content)
+    ? null
+    : await dependencies.embed(content, { familyId });
 
   const persisted = await dependencies.persistCanonical({
     attributes: { ...attrs, ...continuityAttributes },

@@ -25,7 +25,7 @@ Droppers are any founder (Sid, Aless, Carolyng). Taste signals come from founder
 1. **Never commit any binary under `apps/web/agent/skills/`.** The skill package is markdown only. The 2026-07-18 ingest committed 27.5MB of PNGs there, broke the `check:fleet-skills` size caps, and every one of those PNGs was later deleted (PR #57). Images the product uses ship only through the anchor pipeline below.
 2. **Never send a copyrighted original, or an image derived from one, into the product.** External inspo files stay out of git entirely (see step 0). Product anchor images are Homa-authored pages produced on the `/admin/studio` bench and founder approved (founder ruling `golden-exemplar-anchors`, 2026-07-20, ratifying plan section 3.4). Generating exploratory images for your own analysis is fine: keep them as local scratch, do not commit them.
 3. **Taxonomy edits are append-only.** Never re-serialize, re-sort, or dedupe `topics.json`. Topic names are legal duplicates across age bands (spiral curriculum). A 2026-07-18 dedupe-by-name pass silently deleted 33 topics and left 131 dangling edges; PR #58 restored them. Follow the exact sequence in step 8.
-4. **Ship on a fresh branch, PR only, never direct to main** (founder ruling `main-branch-protection`, 2026-07-20; the branch is also protected on GitHub). Start every session with `bash .cosmo/scripts/session-start.sh`: it syncs to `origin/main`, creates the fresh branch, warns about stranded commits, and blocks on clock skew. Cosmo has pushed direct to main and left it red twice; it has also stranded commits on already-merged branches.
+4. **Ship on a fresh branch, PR only, never direct to main** (founder ruling `main-branch-protection`, 2026-07-20; the branch is also protected on GitHub). Start every session with `bash .cosmo/scripts/session-start.sh`: it syncs to `origin/main`, creates the fresh branch, warns about stranded commits, blocks on severe clock skew, and installs a `post-commit` git hook that runs automatically on every commit from here on, even in a session that skips this script entirely: it re-dates a commit if the local clock disagrees with GitHub's clock by more than 5 minutes, and it opens the PR itself the moment the first commit lands on a `cosmo/ingest-*` branch, so the branch cannot silently strand even if the session never explicitly runs a "ship" step. Cosmo has pushed direct to main and left it red twice; it has also stranded real, complete analysis work on unopened branches more than once (recovered in PR #75).
 5. **Dates come from the Slack message `ts`, never the machine clock.** The ingest machine's clock has run about 4 days slow and produced wrongly dated ref ids.
 6. **No em dash anywhere**, in this skill's outputs, in ref JSONs, in any graduated prose. `check:fleet-skills` fails on them and a whole cleanup commit (ec25671) exists because of them.
 
@@ -141,7 +141,7 @@ List the actual shipped recipes at analysis time:
 ls apps/web/agent/skills/materials-studio/references/recipes/
 ```
 
-Never match against a remembered list; the library grows and any hardcoded list in prose goes stale (33 recipe files ship today).
+Never match against a remembered list; the library grows and any hardcoded count or list in prose goes stale.
 
 - **Which existing recipe would produce this?** Record filename slugs in `recipeMatch.matchedRecipes`.
 - **What patterns have no recipe?** Record in `recipeMatch.gaps`. **Gap names must be lowercase multi-word hyphen slugs** matching `^[a-z0-9]+(-[a-z0-9]+)+$` (e.g. `cut-and-sort-mat`, not "cut and paste sorting activity"). The coverage tracker in `apps/web/lib/materials/cosmo-funnel.ts` silently drops anything else. Free-prose description goes in `notes`.
@@ -171,7 +171,7 @@ This is where Homa actually gets smarter. Every write below follows the post-PR-
 Create `apps/web/agent/skills/materials-studio/references/recipes/<gap-slug>.md`:
 
 - Plain markdown, `# Title` first line, **no frontmatter**
-- If a golden anchor exists for the format, a first paragraph: `Golden anchor: pass anchorIds: ["<id>"] to generate_image ... the anchor sets the visual bar, not the specifics`
+- If a golden anchor exists for the format, a first paragraph: `Golden anchor: every generate_image call for a <format> carries anchorIds: ["<id>"] ... the anchor sets the visual bar, not the specifics` (every-call phrasing on purpose: spot art drops the anchor unless the recipe says the anchor rides every call, 2026-07-25 anchor-usage eval)
 - When-to-use prose, a `Great for:` line
 - Creation path: `html`, `hybrid`, or `image-direct`, with the reasoning
 - A binding section `Design patterns (all binding for <slug>):` with bullet rules
@@ -199,9 +199,9 @@ plus name, what it is, best for, subjects, ages, creation path, example activity
 
 #### 6e. Anchors are founder-gated; you propose, never ship
 
-The golden anchor pipeline is: Homa-authored JPEG at `apps/web/lib/materials/anchor-sources/<id>.jpg` (compressed, roughly 1024px longest side, 60-150KB), then `pnpm build:material-anchors` regenerates `anchor-bytes.generated.ts` (never hand-edit it), a registry entry in `apps/web/lib/materials/anchors.ts`, a Golden anchors table row in materials-studio SKILL.md, and the `anchorIds` paragraph in the matching recipe file. `anchors.test.ts` enforces registry/bytes parity and that the library never shrinks.
+The golden anchor pipeline is: Homa-authored JPEG at `apps/web/lib/materials/anchor-sources/<id>.jpg` (compressed, roughly 1024px longest side, 60-150KB), then `pnpm build:material-anchors` regenerates `anchor-bytes.generated.ts` (never hand-edit it), a registry entry in `apps/web/lib/materials/anchors.ts`, and the `anchorIds` paragraph in the matching recipe file. There is no SKILL.md anchor table anymore (deleted 2026-07-25): generate_image's `anchorIds` schema menu renders from the registry and is the canonical when-to-use list, so a registry entry advertises itself. `anchors.test.ts` enforces registry/bytes parity and that the library never shrinks.
 
-Your ceiling: when a reference deserves a visual exemplar, write a **bench brief** into the ref JSON (`graduation.benchBrief`: what to build, which recipe, what the anchor must demonstrate). The founder produces and approves the page on `/admin/studio`; a coding session performs the five writes. Two of those writes (the SKILL.md anchor-table row and the recipe file's `anchorIds` paragraph) have no automated guard and must be hand-checked. Anchors also lead and share the 4-slot `generate_image` reference budget; family reference images get whatever slots anchors leave.
+Your ceiling: when a reference deserves a visual exemplar, write a **bench brief** into the ref JSON (`graduation.benchBrief`: what to build, which recipe, what the anchor must demonstrate). The founder produces and approves the page on `/admin/studio`; a coding session performs the four writes. The recipe file's `anchorIds` paragraph is guarded by `pnpm check:fleet-skills`, which resolves every anchorIds mention in skill markdown against the registry. Anchors also lead and share the 4-slot `generate_image` reference budget; family reference images get whatever slots anchors leave.
 
 ### 7. Guards for graduation writes
 

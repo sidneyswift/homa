@@ -1,8 +1,11 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { normalizeUsPhoneE164 } from "@homa/core";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { confirmFamilySmsInvite } from "../../lib/family-sms-invite-confirmation";
 import type { FamilySmsInviteParentDecision } from "../../lib/family-sms-invite-consent";
 
@@ -10,9 +13,11 @@ import type { FamilySmsInviteParentDecision } from "../../lib/family-sms-invite-
  * Applies the original parent's coded confirmation. Every decision input
  * comes from the authenticated SMS channel, never from the model.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Apply the coded family-invite confirmation already authenticated from this linked parent's complete SMS. There are no model-selected inputs. Call only when SMS instructions say a valid confirmation or cancellation is present.",
+  deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({}),
   async execute(_input, ctx) {
     const attributes = ctx.session.auth.current?.attributes as

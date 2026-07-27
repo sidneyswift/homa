@@ -246,6 +246,8 @@ export default defineChannel({
                 ? "Done. No more evening check-ins. Reply 'start' anytime to turn them back on."
                 : "Done. Evening check-ins are back on.",
             ],
+            undefined,
+            familyId,
           );
         }
         await completeInboundReceipt(inboundReceipt.id);

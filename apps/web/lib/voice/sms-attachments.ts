@@ -29,7 +29,11 @@ import { transcribeAudio, transcribeSmsMedia } from "./transcribe";
  *                2026-07-10 evening). The caption rides the turn text
  *                into conversation_messages, where FTS and semantic
  *                search can find it.
- *   audio     -> speech transcript block (Telnyx STT, transcribe.ts)
+ *   audio     -> speech transcript block (Telnyx STT, transcribe.ts);
+ *                voice notes that arrive typed "file" with an audio MIME
+ *                or a known audio filename extension take this same lane
+ *                (CG-05, 2026-07-25: a real voice note arrived file-typed
+ *                and was dropped as unreadable without reaching STT)
  *   video     -> watched-video description block (Twelve Labs Pegasus,
  *                lib/video/twelvelabs.ts: what happens on screen plus
  *                what is said); clips under the vendor floors (4s,
@@ -224,7 +228,9 @@ function bareMediaType(mimeType: string | undefined): string {
 
 /** "file"-typed attachments split into the lanes the model can take.
  *  "document" now covers every office format with a working extraction
- *  lane (pdf passes through natively; docx/xlsx/xls extract to text). */
+ *  lane (pdf passes through natively; docx/xlsx/xls extract to text).
+ *  Audio is rerouted BEFORE this split (fileAudioContentType below):
+ *  a voice note typed "file" belongs to the transcript lane, not here. */
 function kindForFile(mediaType: string): SmsAttachmentKind {
   if (
     MODEL_DOCUMENT_TYPES.has(mediaType) ||
@@ -235,6 +241,59 @@ function kindForFile(mediaType: string): SmsAttachmentKind {
   }
   if (mediaType.startsWith("text/")) return "text";
   return "other";
+}
+
+/** Audio content types resolved from bare filename extensions, for
+ *  voice notes that arrive typed "file" with a generic MIME. Only the
+ *  unambiguously-audio subset of what transcribe.ts's STT upload
+ *  allowlist already handles, including the iPhone AMR/3gpp family;
+ *  extensions that usually mean video (.mp4, .webm) stay out, since a
+ *  "[Voice note, transcribed]" marker on a video would mislabel it. */
+const AUDIO_CONTENT_TYPE_BY_EXTENSION: Record<string, string> = {
+  mp3: "audio/mpeg",
+  m4a: "audio/m4a",
+  wav: "audio/wav",
+  ogg: "audio/ogg",
+  amr: "audio/amr",
+  awb: "audio/amr-wb",
+  "3ga": "audio/3gpp",
+  "3gp": "audio/3gpp",
+  "3gpp": "audio/3gpp",
+  "3g2": "audio/3gpp2",
+};
+
+/** Extension lookup that accepts either a bare filename (attachment
+ *  name) or a full media URL (query strings and fragments ignored). */
+function audioTypeForExtension(candidate: string | undefined): string | null {
+  if (!candidate) return null;
+  let path = candidate;
+  try {
+    path = new URL(candidate).pathname;
+  } catch {
+    // A bare filename is not a URL; use it as given.
+  }
+  const dot = path.lastIndexOf(".");
+  if (dot === -1) return null;
+  return AUDIO_CONTENT_TYPE_BY_EXTENSION[path.slice(dot + 1).toLowerCase()] ?? null;
+}
+
+/** The CG-05 gap (2026-07-25): some gateway stacks deliver a voice note
+ *  typed "file" rather than "audio", and it used to drop as unreadable
+ *  without ever reaching STT. An audio MIME wins outright; otherwise a
+ *  known audio filename extension supplies the content type STT should
+ *  assume, but only when no other lane claims the MIME: a document or
+ *  text type keeps its lane under any filename, and video stays out of
+ *  scope (the "file" split never distinguished it). Null means this
+ *  attachment is not audio. */
+function fileAudioContentType(
+  mediaType: string,
+  fileName: string | undefined,
+  url: string | undefined,
+): string | null {
+  if (mediaType.startsWith("audio/")) return mediaType;
+  if (mediaType.startsWith("video/")) return null;
+  if (kindForFile(mediaType) !== "other") return null;
+  return audioTypeForExtension(fileName) ?? audioTypeForExtension(url);
 }
 
 interface ProcessedSmsAttachment {
@@ -481,6 +540,11 @@ async function processOneSmsAttachment(
       return await processVideo(url, mediaType);
     }
     case "file": {
+      const audioType = fileAudioContentType(mediaType, attachment.name, url);
+      if (audioType !== null) {
+        if (!url) return failedAttachment("audio", audioType);
+        return await processSpeech("audio", url, audioType);
+      }
       const kind = kindForFile(mediaType);
       if (!url || kind === "other") return failedAttachment(kind, mediaType);
       if (kind === "document") return await processDocument(url, mediaType);

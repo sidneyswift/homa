@@ -90,6 +90,55 @@ describe("subject lesson Chromium render policy", () => {
     }
   });
 
+  it("admits the sandbox blob origin only while eval isolation is active", () => {
+    const sandboxImage = "http://127.0.0.1:60270/families/f0/materials/dino.png";
+    const isolationEnv = {
+      HOMA_EVAL_ISOLATION: process.env.HOMA_EVAL_ISOLATION,
+      HOMA_EVAL_BLOB_DIR: process.env.HOMA_EVAL_BLOB_DIR,
+      HOMA_EVAL_BLOB_URL: process.env.HOMA_EVAL_BLOB_URL,
+      VERCEL: process.env.VERCEL,
+    };
+    try {
+      // Production shape: no isolation flag, loopback stays refused.
+      delete process.env.HOMA_EVAL_ISOLATION;
+      delete process.env.HOMA_EVAL_BLOB_DIR;
+      delete process.env.HOMA_EVAL_BLOB_URL;
+      assert.equal(isPrintableRequestAllowed("image", sandboxImage), false);
+
+      // Sandbox shape: this run's own store, and ONLY its exact origin.
+      process.env.HOMA_EVAL_ISOLATION = "1";
+      process.env.HOMA_EVAL_BLOB_DIR = "/tmp/eval-blob";
+      process.env.HOMA_EVAL_BLOB_URL = "http://127.0.0.1:60270";
+      delete process.env.VERCEL;
+      assert.equal(isPrintableRequestAllowed("image", sandboxImage), true);
+      assert.equal(
+        isPrintableRequestAllowed(
+          "image",
+          "http://127.0.0.1:9999/families/f0/materials/dino.png",
+        ),
+        false,
+      );
+      // The subject-lesson image block still wins over the sandbox origin.
+      assert.equal(
+        isPrintableRequestAllowed(
+          "image",
+          sandboxImage,
+          SUBJECT_LESSON_RENDER_POLICY,
+        ),
+        false,
+      );
+
+      // A leaked pair on Vercel changes nothing.
+      process.env.VERCEL = "1";
+      assert.equal(isPrintableRequestAllowed("image", sandboxImage), false);
+    } finally {
+      for (const [name, value] of Object.entries(isolationEnv)) {
+        if (value === undefined) delete process.env[name];
+        else process.env[name] = value;
+      }
+    }
+  });
+
   it("applies the policy inside request interception before rendering", async () => {
     const [renderSource, toolSource] = await Promise.all([
       readFile(new URL("./render-page.ts", import.meta.url), "utf8"),

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { ageInMonths, getMapSubject, isInScoredRange, MONTH_PLAN_SUBJECT } from "@homa/core";
 
-import { currentWeekIndex, type DashboardPlan } from "../../../lib/plan-week";
+import { childTurnsAgeOn, currentWeekIndex, type DashboardPlan } from "../../../lib/plan-week";
 import { weekdayCells, weekSpanLabel } from "../../../lib/time-zone";
 import { KidAvatar } from "../../../components/dashboard/kid-avatar";
 import {
@@ -113,6 +113,21 @@ export function PlannerView({
   const days: PlannerDay[] = weekdayCells(now, timeZone).map((cell) => ({
     cell,
     items: [],
+    // D17, birthday on the board (§4.2): render-only, computed here
+    // where both the cell's calendar date and the visible roster are
+    // already in scope. Every visible kid whose real birthday lands on
+    // this exact day, first-name only (matches the board's existing
+    // first-name convention elsewhere).
+    birthdays: visibleKids
+      .map((kid) => {
+        const age = childTurnsAgeOn(kid.birth_month, {
+          year: cell.year,
+          month: cell.month,
+          day: cell.dayOfMonth,
+        });
+        return age === null ? null : `${kid.name.split(/\s+/)[0]} turns ${age}`;
+      })
+      .filter((label): label is string => label !== null),
   }));
   const dayPlans: PlannerDayPlan[] = [];
   const focusRows: FocusRow[] = [];

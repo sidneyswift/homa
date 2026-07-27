@@ -1,5 +1,11 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { existsSync } from "node:fs";
+
+import {
+  DOC_REFERENCE_FILES,
+  validateDocReferences,
+} from "./docs-reference-check.mjs";
 import {
   lstatSync,
   readdirSync,
@@ -268,7 +274,7 @@ const REGISTERED_TICKETS = new Map([
     "ticket:MJ-13",
     {
       locator:
-        "docs/homa-planning/journeys/10-reconciliation.md#2-journey-derived-tickets--global-renumbering-mj-series",
+        "docs/homa-planning/journeys/10-reconciliation.md#2-journey-derived-tickets-global-renumbering-mj-series",
       marker: "| MJ-13",
     },
   ],
@@ -276,7 +282,7 @@ const REGISTERED_TICKETS = new Map([
     "ticket:MJ-21",
     {
       locator:
-        "docs/homa-planning/journeys/10-reconciliation.md#2-journey-derived-tickets--global-renumbering-mj-series",
+        "docs/homa-planning/journeys/10-reconciliation.md#2-journey-derived-tickets-global-renumbering-mj-series",
       marker: "| MJ-21",
     },
   ],
@@ -1229,7 +1235,7 @@ function verifyReferenceTypeRules(repoRoot) {
 
   const misplacedRuling = {
     locator:
-      "docs/homa-planning/journeys/10-reconciliation.md#2-journey-derived-tickets--global-renumbering-mj-series",
+      "docs/homa-planning/journeys/10-reconciliation.md#2-journey-derived-tickets-global-renumbering-mj-series",
     marker: "| D8 |",
   };
   const invalidTicketFragment = {
@@ -2547,6 +2553,13 @@ function validateLedgerReference(
   const errorCountAtStart = errors.length;
   const isNamedToken = /^(?:ruling|ticket|decision):/.test(reference);
   if (referenceType === "ticket") {
+    // GitHub Issues became the live tracker on 2026-07-25 (founder
+    // directive; AGENTS.md section "Tickets and issue tracking"). gh#N
+    // tokens point at issues in sidneyswift/homa; issue existence is not
+    // verifiable offline, so the token format is the contract here.
+    if (/^gh#[1-9][0-9]*$/.test(reference)) {
+      return { kind: "ticket", repositoryPath: undefined };
+    }
     if (!/^ticket:[A-Za-z0-9][A-Za-z0-9._-]*$/.test(reference)) {
       errors.push(
         `Claim ledger line ${lineNumber} ${label} accepts registered ticket tokens only: ${reference}`,
@@ -2872,6 +2885,16 @@ function validateTerminalClaim(row, context, errors) {
     errors.push(
       `Claim ledger line ${lineNumber} terminal repository claim requires evidence_refs`,
     );
+  }
+  // A claim resolved as "removed" under a policy basis was withdrawn
+  // together with its source document (first case: HUMAN-TODO.md deleted
+  // 2026-07-25 when the founder queue moved to GitHub Issues). It asserts
+  // nothing about production or external state, so the per-kind
+  // verification evidence classes below do not apply. The removal-specific
+  // rules (remediation evidence, per-present-source locators, Git history)
+  // still run in the manifest and ledger passes.
+  if (status === "removed" && truthPrefix === "policy") {
+    return;
   }
   if (row.claim_kind === "production") {
     validateTerminalEvidenceClass(
@@ -3711,7 +3734,17 @@ function inspectClaimLedger(repoRoot, manifestRows, errors) {
     );
     const truthPrefix = truthBasisPrefix(row.truth_basis, lineNumber, errors);
     const allowedTruthPrefixes = CLAIM_KIND_TRUTH_BASIS.get(row.claim_kind);
-    if (allowedTruthPrefixes && !allowedTruthPrefixes.has(truthPrefix)) {
+    // Exception mirroring validateTerminalClaim: a claim resolved as
+    // "removed" on a policy basis was withdrawn with its source document
+    // (HUMAN-TODO.md deletion, 2026-07-25 tracker migration to GitHub
+    // Issues); the kind's verification prefixes do not apply to it.
+    const isPolicyRemoval =
+      row.resolution_status === "removed" && truthPrefix === "policy";
+    if (
+      allowedTruthPrefixes &&
+      !allowedTruthPrefixes.has(truthPrefix) &&
+      !isPolicyRemoval
+    ) {
       errors.push(
         `Claim ledger line ${lineNumber} claim_kind ${row.claim_kind} is incompatible with ${truthPrefix}: truth_basis`,
       );
@@ -3888,6 +3921,30 @@ function check(repoRoot, { allowOpen }) {
     specialRowErrors,
   );
   validateMigrationEvidenceDrift(repoRoot, migrationDriftErrors);
+  const docReferenceErrors = [];
+  validateDocReferences(
+    {
+      docs: DOC_REFERENCE_FILES.map((docPath) => ({
+        path: docPath,
+        text: readFileSync(join(repoRoot, docPath), "utf8"),
+      })),
+      rootScripts: new Set(
+        Object.keys(
+          JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf8"))
+            .scripts ?? {},
+        ),
+      ),
+      webScripts: new Set(
+        Object.keys(
+          JSON.parse(
+            readFileSync(join(repoRoot, "apps/web/package.json"), "utf8"),
+          ).scripts ?? {},
+        ),
+      ),
+      pathExists: (relative) => existsSync(join(repoRoot, relative)),
+    },
+    docReferenceErrors,
+  );
   const claimLedger = inspectClaimLedger(repoRoot, rows, claimLedgerErrors);
   const structuralErrorGroups = [
     ["Immutable first-seen baseline", baselineErrors],
@@ -3897,6 +3954,7 @@ function check(repoRoot, { allowOpen }) {
     ["Lifecycle and disposition", lifecycleErrors],
     ["Special rows and aliases", specialRowErrors],
     ["Migration evidence drift", migrationDriftErrors],
+    ["Doc command and path references", docReferenceErrors],
     ["Claim ledger structure and safety", claimLedgerErrors],
   ];
   const structuralErrors = structuralErrorGroups.flatMap(([, errors]) => errors);

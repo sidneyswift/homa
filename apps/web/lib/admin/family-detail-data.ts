@@ -76,7 +76,15 @@ export interface FamilyDetail {
   messagesByDay14: { day: string; n: number }[];
   runs: { kind: string; status: string; title: string; error: string | null; startedAt: string; deliveredChannel: string | null }[];
   deliveries: { channel: string; status: string; error: string | null; createdAt: string; repliedAt: string | null }[];
-  emailSends: { kind: string; status: string; error: string | null; createdAt: string }[];
+  emailSends: {
+    kind: string;
+    status: string;
+    error: string | null;
+    createdAt: string;
+    /** Why the drip picked this family, recorded at send time. Null for
+     * every email that is not a drip nudge. */
+    reason: string | null;
+  }[];
   materials: { title: string; kind: string; status: string; createdAt: string }[];
   hoursMinutes28d: number;
   memoriesCount: number;
@@ -195,8 +203,8 @@ export async function getFamilyDetail(familyId: string): Promise<FamilyDetail | 
     where family_id = ${familyId}
     order by created_at desc limit 12
   `;
-  const emailSends = await sql<{ kind: string; status: string; error: string | null; created_at: string }[]>`
-    select kind, status, error, created_at::text as created_at
+  const emailSends = await sql<{ kind: string; status: string; error: string | null; created_at: string; reason: string | null }[]>`
+    select kind, status, error, created_at::text as created_at, meta->>'reason' as reason
     from public.email_sends
     where family_id = ${familyId}
     order by created_at desc limit 12
@@ -335,6 +343,7 @@ export async function getFamilyDetail(familyId: string): Promise<FamilyDetail | 
       status: send.status,
       error: send.error,
       createdAt: send.created_at,
+      reason: send.reason,
     })),
     materials: materials.map((material) => ({
       title: material.title,

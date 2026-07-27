@@ -62,6 +62,14 @@ class FakeLedger implements TaskDeliveryLedger {
   }
 }
 
+/** No number suppressed; keeps unit tests off the postgres default. */
+const noSuppression = {
+  async find() {
+    return null;
+  },
+  async suppress() {},
+};
+
 const recipients: FamilyDeliveryRecipient[] = [
   {
     recipientKey: "member:sidney",
@@ -106,6 +114,7 @@ describe("per-recipient task delivery", () => {
     const result = await deliverTaskMessage(input(), {
       ledger,
       transports,
+      smsSuppression: noSuppression,
     });
 
     assert.equal(result.status, "done");
@@ -148,6 +157,7 @@ describe("per-recipient task delivery", () => {
             throw new Error("not called");
           },
         },
+        smsSuppression: noSuppression,
       },
     );
 
@@ -168,6 +178,7 @@ describe("per-recipient task delivery", () => {
     const result = await deliverTaskMessage(input(), {
       ledger,
       transports,
+      smsSuppression: noSuppression,
     });
 
     assert.equal(result.status, "partial");
@@ -190,6 +201,7 @@ describe("per-recipient task delivery", () => {
             throw new Error("not called");
           },
         },
+        smsSuppression: noSuppression,
         saveOnly: true,
       },
     );
@@ -218,6 +230,7 @@ describe("per-recipient task delivery", () => {
             return true;
           },
         },
+        smsSuppression: noSuppression,
       },
     );
 
@@ -243,6 +256,7 @@ describe("per-recipient task delivery", () => {
             return true;
           },
         },
+        smsSuppression: noSuppression,
         onTransportAccepted: (channel) => {
           acceptedChannels.push(channel);
         },
@@ -257,6 +271,64 @@ describe("per-recipient task delivery", () => {
       error: reason,
     });
     assert.deepEqual(acceptedChannels, ["email"]);
+  });
+
+  it("signals an unsupported region and still falls back to email", async () => {
+    const ledger = new FakeLedger();
+    const unsupportedRegions: string[] = [];
+
+    const result = await deliverTaskMessage(
+      { ...input(), recipients: [recipients[0]] },
+      {
+        ledger,
+        transports: {
+          async sendSms() {
+            return {
+              status: "rejected",
+              reason: "Telnyx rejected the send: 40309 Invalid destination region",
+              unsupportedRegion: true,
+            };
+          },
+          async sendEmail() {
+            return true;
+          },
+        },
+        onUnsupportedRegion: (destination) => {
+          unsupportedRegions.push(destination);
+        },
+      },
+    );
+
+    // Today's message still lands by email; the caller learns the number
+    // is un-textable so future runs skip SMS.
+    assert.equal(result.status, "done");
+    assert.equal(result.deliveredChannel, "email");
+    assert.deepEqual(unsupportedRegions, ["+15550000001"]);
+  });
+
+  it("does not signal an unsupported region for an ordinary rejection", async () => {
+    const ledger = new FakeLedger();
+    let unsupportedRegionCalls = 0;
+
+    await deliverTaskMessage(
+      { ...input(), recipients: [recipients[0]] },
+      {
+        ledger,
+        transports: {
+          async sendSms() {
+            return { status: "rejected", reason: "carrier size limit" };
+          },
+          async sendEmail() {
+            return true;
+          },
+        },
+        onUnsupportedRegion: () => {
+          unsupportedRegionCalls += 1;
+        },
+      },
+    );
+
+    assert.equal(unsupportedRegionCalls, 0);
   });
 
   it("does not email-fallback or replay when SMS submission is uncertain", async () => {
@@ -276,6 +348,7 @@ describe("per-recipient task delivery", () => {
             return true;
           },
         },
+        smsSuppression: noSuppression,
       },
     );
 
@@ -304,10 +377,92 @@ describe("per-recipient task delivery", () => {
             return true;
           },
         },
+        smsSuppression: noSuppression,
       },
     );
 
     assert.equal(transportCalls, 0);
     assert.equal(result.status, "uncertain");
+  });
+
+  it("records a suppressed number as a failed delivery and never emails instead", async () => {
+    const ledger = new FakeLedger();
+    let smsCalls = 0;
+    let emailCalls = 0;
+
+    const result = await deliverTaskMessage(
+      { ...input(), recipients: [recipients[0]] },
+      {
+        ledger,
+        transports: {
+          async sendSms() {
+            smsCalls += 1;
+            return true;
+          },
+          async sendEmail() {
+            emailCalls += 1;
+            return true;
+          },
+        },
+        smsSuppression: {
+          async find() {
+            return { reason: "inbound-stop" };
+          },
+          async suppress() {},
+        },
+      },
+    );
+
+    assert.equal(smsCalls, 0);
+    assert.equal(emailCalls, 0);
+    assert.equal(result.status, "failed");
+    assert.equal(result.failedCount, 1);
+    assert.deepEqual(ledger.finished, [
+      {
+        id: "attempt-1",
+        delivered: false,
+        error: "SMS suppressed (inbound-stop)",
+      },
+    ]);
+    assert.equal(ledger.openedLoops.length, 0);
+  });
+
+  it("suppresses the number and skips email on a permanent Telnyx rejection", async () => {
+    const ledger = new FakeLedger();
+    const suppressed: Array<[string, string]> = [];
+    let emailCalls = 0;
+
+    const result = await deliverTaskMessage(
+      { ...input(), recipients: [recipients[0]] },
+      {
+        ledger,
+        transports: {
+          async sendSms() {
+            return {
+              status: "rejected" as const,
+              reason: "Telnyx rejected the send: 40300 Blocked due to STOP",
+              permanentCode: "40300",
+            };
+          },
+          async sendEmail() {
+            emailCalls += 1;
+            return true;
+          },
+        },
+        smsSuppression: {
+          async find() {
+            return null;
+          },
+          async suppress(phone, reason) {
+            suppressed.push([phone, reason]);
+          },
+        },
+      },
+    );
+
+    assert.equal(emailCalls, 0);
+    assert.equal(result.status, "failed");
+    assert.equal(result.failedCount, 1);
+    assert.deepEqual(suppressed, [["+15550000001", "telnyx-40300"]]);
   });
 });

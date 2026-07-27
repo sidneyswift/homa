@@ -1,5 +1,12 @@
 # Number practice page
 
+Golden anchor: pass `anchorIds: ["number-practice-page"]` to
+generate_image so the output matches the Homa number-practice bar
+(numbered activity zones for trace-and-write, ten frame, word
+coloring, and count-and-color, a name/date header, dotted trace
+models, ink-light line art). Write your own prompt with your own
+content; the anchor sets the visual bar, not the specifics.
+
 A single-number focus page with 4-5 activities on one sheet: tracing/writing
 the numeral, ten frame fill-in, number word coloring, object counting
 (color N stars/items). Repeatable template across numbers 1-20.

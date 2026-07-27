@@ -41,8 +41,14 @@ import {
   type SubjectLessonSummaryCandidate,
 } from "../subject-lessons/summary-filter";
 import type { SubjectLessonSummary } from "../subject-lessons/types";
+import { purgeChildBlobs } from "./child-blobs";
 import { mapDb, type DbJson } from "./db";
-import { applyPlanEdits, describePlanEdits, type PlanEdit } from "./plan-edits";
+import {
+  applyPlanEdits,
+  describePlanEdits,
+  scheduleRemapForEdits,
+  type PlanEdit,
+} from "./plan-edits";
 import {
   cleanProfileFocus,
   cleanProfileInterests,
@@ -295,8 +301,14 @@ export async function getFamilyByResumeToken(rawToken: string): Promise<FamilyRo
   const rows = await sql<FamilyRow[]>`
     select ${sql.unsafe(FAMILY_COLUMNS)}
     from public.families
-    where (resume_token_hash = ${hash} or link_token_hash = ${hash})
-      and status <> 'deleted'
+    where status <> 'deleted'
+      and (
+        resume_token_hash = ${hash} or link_token_hash = ${hash}
+        or exists (
+          select 1 from public.link_tokens t
+          where t.family_id = families.id and t.token_hash = ${hash}
+        )
+      )
   `;
   return rows[0] ?? null;
 }
@@ -315,6 +327,19 @@ export async function getFamilyByAuthUser(authUserId: string): Promise<FamilyRow
     limit 1
   `;
   return rows[0] ?? null;
+}
+
+/** The family's own address on file, or null. Server-scoped read: the
+ * caller supplies a familyId already re-derived from auth, never from
+ * the model, so this is safe for any tool that needs to email the
+ * parent her own materials (D9, plans/2026-07-21-chat-first-onboarding.md
+ * §4.2, "the skeptic brief"). */
+export async function getFamilyEmail(familyId: string): Promise<string | null> {
+  const sql = mapDb();
+  const rows = await sql<{ email: string | null }[]>`
+    select email from public.families where id = ${familyId}
+  `;
+  return rows[0]?.email ?? null;
 }
 
 export async function getFamilyByEmail(email: string): Promise<{ id: string } | null> {
@@ -337,6 +362,27 @@ export async function mintLinkToken(familyId: string): Promise<string> {
     update public.families
     set link_token_hash = ${hashToken(linkToken)}
     where id = ${familyId}
+  `;
+  return linkToken;
+}
+
+/**
+ * Mints a fresh link token into link_tokens rather than the single
+ * families.link_token_hash column, so it can coexist with another
+ * outstanding link for the same family without invalidating it (the
+ * beat-keyed drip audiences, plans/2026-07-21-chat-first-onboarding.md
+ * §9 Phase 2). getFamilyByResumeToken checks this table too, so a token
+ * minted here resolves exactly like the legacy column's token does.
+ */
+export async function mintNamedLinkToken(
+  familyId: string,
+  kind: string,
+): Promise<string> {
+  const sql = mapDb();
+  const linkToken = newToken();
+  await sql`
+    insert into public.link_tokens (family_id, token_hash, kind)
+    values (${familyId}, ${hashToken(linkToken)}, ${kind})
   `;
   return linkToken;
 }
@@ -391,31 +437,65 @@ export async function addChild(
  * answers, report, and plans (the "delete anytime" promise, kept). The
  * where clause carries the tenancy re-scope: a childId belonging to a
  * different family deletes nothing.
+ *
+ * The child's BYTES go too, and that half has to happen here because
+ * this is the only moment it is still possible. The cascade destroys
+ * `lesson_recordings` and with it every `lesson_segments.blob_url`, so
+ * the lesson ids are read inside the transaction, before the delete;
+ * afterwards nothing in the database can say where that audio lives and
+ * the 30-day TTL sweep can never reach it again. See lib/map/child-blobs.
+ *
+ * The purge runs after the commit and never blocks it. The row delete is
+ * the promise a parent can verify, so a Blob hiccup must not roll it
+ * back; it leaves a logged orphan instead of leaving the child.
  */
 export async function removeChild(
   familyId: string,
   childId: string,
   sql: MapDatabase = mapDb(),
+  /** Seam for the ordering test, which must not reach Vercel Blob. The
+   *  ordering is the entire fix, so it is worth being able to assert. */
+  purge: typeof purgeChildBlobs = purgeChildBlobs,
 ): Promise<boolean> {
-  return sql.begin(async (tx) => {
+  const outcome = await sql.begin(async (tx) => {
     await tx`
       select pg_advisory_xact_lock_shared(
         ${CHILD_PROGRESS_RECONCILIATION_ADVISORY_LOCK_KEY}::bigint
       )
+    `;
+    // Read before the delete: the cascade is what makes these unfindable.
+    const lessons = await tx<{ id: string }[]>`
+      select id from public.lesson_recordings
+      where child_id = ${childId} and family_id = ${familyId}
     `;
     const rows = await tx<{ id: string }[]>`
       delete from public.children
       where id = ${childId} and family_id = ${familyId}
       returning id
     `;
-    if (rows.length === 0) return false;
+    if (rows.length === 0) return { removed: false, lessonIds: [] as string[] };
     await tx`
       update public.families
       set updated_at = now()
       where id = ${familyId}
     `;
-    return true;
+    return { removed: true, lessonIds: lessons.map((lesson) => lesson.id) };
   });
+
+  if (!outcome.removed) return false;
+  // The row is committed by here. Anything the purge does or fails to
+  // do must not turn a delete that already happened into a 502 for the
+  // parent who asked for it. purgeChildBlobs swallows its own errors;
+  // this belt is so that stays true if it ever stops being.
+  try {
+    await purge({ familyId, childId, lessonIds: outcome.lessonIds });
+  } catch (error) {
+    console.error(
+      `child blob purge threw for child ${childId}:`,
+      error instanceof Error ? error.message : "unknown",
+    );
+  }
+  return true;
 }
 
 /** True when the child exists and belongs to this family. */
@@ -795,6 +875,52 @@ export async function editPlanActivities(
         updated_at = now()
     where id = ${row.id}
   `;
+  // Cascade the index shift into the calendar (issue #176): a removal
+  // slides every later activity in that week down one, so a schedule row
+  // still holding the old index would put a DIFFERENT activity on that
+  // date. Read-side already drops rows that no longer resolve; this
+  // keeps the ones that do resolve pointing at the right activity.
+  // Delete-then-reinsert per week rather than in-place decrements: the
+  // table's natural key is unique, so shifting in place can collide with
+  // a row that has not moved yet.
+  const remaps = scheduleRemapForEdits(row.plan, edits);
+  for (const remap of remaps) {
+    const scheduled = await sql<{ activity_index: number; scheduled_date: string }[]>`
+      select activity_index, scheduled_date
+      from public.plan_activity_schedule
+      where family_id = ${familyId}
+        and child_id = ${childId}
+        and subject_id = ${subjectId}
+        and week = ${remap.week}
+    `;
+    if (scheduled.length === 0) continue;
+    const moveTo = new Map(remap.moves.map((move) => [move.from, move.to]));
+    const survivors = scheduled
+      .map((entry) => {
+        // An index with no move keeps its slot; an explicit null is gone.
+        const to = moveTo.has(entry.activity_index)
+          ? moveTo.get(entry.activity_index)!
+          : entry.activity_index;
+        return to === null ? null : { index: to, date: entry.scheduled_date };
+      })
+      .filter((entry): entry is { index: number; date: string } => entry !== null);
+    await sql`
+      delete from public.plan_activity_schedule
+      where family_id = ${familyId}
+        and child_id = ${childId}
+        and subject_id = ${subjectId}
+        and week = ${remap.week}
+    `;
+    for (const survivor of survivors) {
+      await sql`
+        insert into public.plan_activity_schedule
+          (family_id, child_id, subject_id, week, activity_index, scheduled_date)
+        values (${familyId}, ${childId}, ${subjectId}, ${remap.week}, ${survivor.index}, ${survivor.date})
+        on conflict (family_id, child_id, subject_id, week, activity_index)
+        do update set scheduled_date = excluded.scheduled_date, updated_at = now()
+      `;
+    }
+  }
   await touchFamily(familyId);
   return {
     status: "applied",

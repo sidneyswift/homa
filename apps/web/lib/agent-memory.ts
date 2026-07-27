@@ -23,12 +23,30 @@ export interface MemoryRow {
   created_at: string;
 }
 
-/** Total budget across a family's long-term rows (facts + what-works). When
- *  an add would cross it, the tool returns current entries and asks the
- *  model to consolidate in the same turn instead of silently dropping. */
+/**
+ * Budget for the memories PINNED into the prompt each turn.
+ *
+ * This bounds prompt cost, not storage. Every character here is re-injected
+ * on every turn of every channel, which is the whole reason a limit exists.
+ * Storage is unbounded (founder ruling 2026-07-20, memory-render-time-budget):
+ * a write is never refused for space, because a fact a parent told Homa and
+ * Homa dropped is worse than a fact she has to search for. Anything past the
+ * budget stays in family_memories, findable through recall and visible in the
+ * founder Brain view. selectPinnedMemories below decides what makes the cut.
+ *
+ * Cause: the old write-time gate meant a full family lost facts outright on
+ * the two paths that cannot consolidate, voice and the background extraction
+ * loops. See build-log 2026-07-20.
+ */
 export const FAMILY_MEMORY_CHAR_BUDGET = 4000;
 
-/** Hard cap per entry; mirrors the DB check constraint (500). */
+/** Compaction wakes when a family's active memories cross this share of the
+ *  pinned budget, so merging happens off the critical path and well before
+ *  anything would be pushed out of the prompt. */
+export const MEMORY_COMPACTION_TRIGGER_RATIO = 0.8;
+
+/** Hard cap per entry. The DB check constraint (1 to 500) is the backstop;
+ *  this tighter cap is what the write paths actually enforce. */
 export const MEMORY_ENTRY_MAX_CHARS = 300;
 
 // Invisible/bidi characters that hide payloads from human review.
@@ -63,99 +81,166 @@ export function scanMemoryContent(content: string): string | null {
   return null;
 }
 
-/** Sum of stored characters that count against the family budget. */
+/** Sum of stored characters across the given rows. Against
+ *  FAMILY_MEMORY_CHAR_BUDGET this reads as "would all of it fit in the
+ *  prompt", which is what the compaction trigger and the Brain view ask. */
 export function memoryUsageChars(rows: Pick<MemoryRow, "content">[]): number {
   return rows.reduce((total, row) => total + row.content.length, 0);
 }
 
+/** Postgres hands back "2026-07-19 12:34:56.789+00", which Date.parse reads
+ *  but string comparison would not order safely across formats. */
+function memoryCreatedAtMs(row: MemoryRow): number {
+  const parsed = Date.parse(row.created_at);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+export interface PinnedMemorySelection {
+  /** Rendered into this turn's context block, oldest first so the story of
+   *  a child reads in order. */
+  pinned: MemoryRow[];
+  /** Stored and searchable through recall, just not injected this turn. */
+  overflow: MemoryRow[];
+  pinnedChars: number;
+}
+
 /**
- * Contradiction guardrail for saves. When a new fact lands semantically
- * close to an active memory, the save still succeeds but the tool result
- * names the older entry so the model can retire it with forget in the
- * same turn. Cause: "Story can already count to 3 easily" and "Story can
- * count to about 50" both rendered into every prompt (2026-07-10).
+ * Share of the budget reserved for per-child guarantees before anything
+ * competes openly. Half: enough that no child can be crowded out, not so
+ * much that family-wide rhythm facts lose their place.
+ */
+const MEMORY_CHILD_FLOOR_SHARE = 0.5;
+
+/**
+ * scoreMemoryForPinning(row, focusChildId): number
+ * Higher wins a place in the prompt. Ordering only, never authority: the
+ * budget decides how much rides, this decides what rides first.
  *
- * Threshold calibrated on that real pair: the two counting facts sit at
- * cosine distance 0.42 while unrelated same-family pairs measured 0.58
- * and up, so 0.5 splits them with margin on both sides. A false flag
- * costs one harmless sentence in a tool note; a miss is just the old
- * status quo.
+ * Recency is the spine, because a newer fact about a child is usually the
+ * truer one. Two adjustments, each earned:
+ *
+ *   - what_works outranks fact at equal age. A fact ("Alma has read The
+ *     Hobbit") is re-learnable from a conversation; hard-won teaching
+ *     signal ("beat your own record framing, no countdown") is not.
+ *   - the turn's focus child outranks everyone else's rows, because the
+ *     parent is talking about that child right now.
+ *
+ * Deliberately NOT a model call. This runs on every turn of every channel,
+ * and it has to return the same answer for the same store, or Homa knows
+ * something on Monday and not on Tuesday. Judgment about what a memory is
+ * WORTH belongs at write time, once, carried on the row. See the note on
+ * selectPinnedMemories.
  */
-export const MEMORY_CONFLICT_MAX_DISTANCE = 0.5;
-const MEMORY_CONFLICT_MAX_RESULTS = 2;
-
-export interface MemoryConflictCandidate {
-  content: string;
-  child_id: string | null;
-  /** pgvector literal ("[0.1,...]") as both drivers return it, or null
-   * when the row was saved without an embedding. */
-  embedding: string | null;
+function scoreMemoryForPinning(row: MemoryRow, focusChildId: string | null): number {
+  const DAY = 24 * 60 * 60 * 1000;
+  let score = memoryCreatedAtMs(row) / DAY;
+  if (row.kind === "what_works") score += 30;
+  if (focusChildId && row.child_id === focusChildId) score += 60;
+  return score;
 }
 
-function parseVectorLiteral(literal: string): number[] | null {
-  const inner = literal.trim().replace(/^\[/, "").replace(/\]$/, "");
-  if (inner.length === 0) return null;
-  const values = inner.split(",").map(Number);
-  return values.some((value) => !Number.isFinite(value)) ? null : values;
-}
-
-function cosineDistance(a: number[], b: number[]): number {
-  let dot = 0;
-  let normA = 0;
-  let normB = 0;
-  for (let i = 0; i < a.length; i += 1) {
-    dot += a[i] * b[i];
-    normA += a[i] * a[i];
-    normB += b[i] * b[i];
+/** Greedy fill in score order, skipping rows already taken. Returns what
+ *  fit and what it cost. Shared by the floor pass and the open pass. */
+function fillFrom(
+  ranked: MemoryRow[],
+  taken: Set<string>,
+  room: number,
+): { picked: MemoryRow[]; used: number } {
+  const picked: MemoryRow[] = [];
+  let used = 0;
+  for (const row of ranked) {
+    if (taken.has(row.id)) continue;
+    if (used + row.content.length > room) continue;
+    picked.push(row);
+    used += row.content.length;
+    taken.add(row.id);
   }
-  const denominator = Math.sqrt(normA) * Math.sqrt(normB);
-  if (denominator === 0) return 1;
-  return 1 - dot / denominator;
+  return { picked, used };
 }
 
 /**
- * findConflictingMemories(newEmbedding, newChildId, candidates): string[]
- * Returns the contents of active memories the new fact likely contradicts,
- * closest first. Scope rule (multi-kid law): a child-scoped fact is only
- * compared against that same child's rows and family-wide rows, so one
- * sibling's counting fact can never flag another's. Best-effort by
- * design: no embedding on either side means no comparison.
+ * selectPinnedMemories(rows, options): PinnedMemorySelection
+ * Splits a family's active memories into the set that rides in the prompt
+ * and the set that stays searchable.
+ *
+ * Two passes, and the first one is the point:
+ *
+ *   1. **Per-child floor.** Half the budget is split evenly among the
+ *      children who have memories, and each child's best rows fill their
+ *      own share first. This is what stops a chatty fortnight about one
+ *      child from pushing a quieter sibling out of Homa's head entirely.
+ *      Without it, pure ranking makes the loudest child the only child,
+ *      which is the multi-kid failure the whole product exists to avoid.
+ *   2. **Open fill.** Everything left over, family-wide rows included,
+ *      competes for the remainder by score.
+ *
+ * Greedy within each pass: a long row that does not fit yields to shorter
+ * ones behind it rather than stranding the space.
+ *
+ * Never throws and never drops: every input row lands in exactly one of
+ * pinned or overflow.
  */
-export function findConflictingMemories(
-  newEmbedding: string | null,
-  newChildId: string | null,
-  candidates: MemoryConflictCandidate[],
-): string[] {
-  if (!newEmbedding) return [];
-  const target = parseVectorLiteral(newEmbedding);
-  if (!target) return [];
+export function selectPinnedMemories(
+  rows: MemoryRow[],
+  options?: { focusChildId?: string | null; budget?: number },
+): PinnedMemorySelection {
+  const budget = options?.budget ?? FAMILY_MEMORY_CHAR_BUDGET;
+  const focusChildId = options?.focusChildId ?? null;
 
-  const scored: Array<{ content: string; distance: number }> = [];
-  for (const candidate of candidates) {
-    const sameScope =
-      candidate.child_id === null ||
-      (newChildId !== null && candidate.child_id === newChildId);
-    if (!sameScope || !candidate.embedding) continue;
-    const vector = parseVectorLiteral(candidate.embedding);
-    if (!vector || vector.length !== target.length) continue;
-    const distance = cosineDistance(target, vector);
-    if (distance < MEMORY_CONFLICT_MAX_DISTANCE) {
-      scored.push({ content: candidate.content, distance });
+  const ranked = [...rows].sort((a, b) => {
+    const delta = scoreMemoryForPinning(b, focusChildId) - scoreMemoryForPinning(a, focusChildId);
+    return delta !== 0 ? delta : a.id.localeCompare(b.id);
+  });
+
+  const childIds = [...new Set(rows.map((row) => row.child_id).filter((id): id is string => id !== null))];
+  const taken = new Set<string>();
+  const pinned: MemoryRow[] = [];
+  let used = 0;
+
+  if (childIds.length > 0) {
+    const perChild = Math.floor((budget * MEMORY_CHILD_FLOOR_SHARE) / childIds.length);
+    // Stable order so the floor pass cannot vary with row arrival order.
+    for (const childId of [...childIds].sort()) {
+      const mine = ranked.filter((row) => row.child_id === childId);
+      const { picked, used: spent } = fillFrom(mine, taken, perChild);
+      pinned.push(...picked);
+      used += spent;
     }
   }
-  return scored
-    .sort((a, b) => a.distance - b.distance)
-    .slice(0, MEMORY_CONFLICT_MAX_RESULTS)
-    .map((entry) => entry.content);
+
+  const open = fillFrom(ranked, taken, budget - used);
+  pinned.push(...open.picked);
+  used += open.used;
+
+  const overflow = rows.filter((row) => !taken.has(row.id));
+  pinned.sort((a, b) => memoryCreatedAtMs(a) - memoryCreatedAtMs(b));
+  return { pinned, overflow, pinnedChars: used };
 }
 
-/** The sentence a save result carries when conflicts were found; empty
- * string when there is nothing to say. */
-export function memoryConflictNote(conflicts: string[]): string {
-  if (conflicts.length === 0) return "";
-  const listed = conflicts.map((content) => `"${content}"`).join("; ");
-  return ` This may contradict an older memory: ${listed}. If the new fact replaces it, call forget with a distinctive phrase from the old one in this same turn; if both are genuinely true, leave both.`;
-}
+/*
+ * The contradiction guardrail lived here until 2026-07-21 and is gone on
+ * purpose. It decided "does this new fact supersede that old one", a
+ * judgment about meaning, using one scalar: cosine distance under 0.5,
+ * calibrated on a single observed pair. AGENTS.md "Models judge, code
+ * verifies" names that shape exactly: a guess wearing a number.
+ *
+ * Measured against the rows compaction merged on 2026-07-21 (a labelled
+ * set, since they were merged for saying the same thing): true-conflict
+ * distances ran 0.307 to 0.537, straddling the threshold, and 5 of 28
+ * Gomes rows had no embedding at all, so they were invisible to it. Worse,
+ * when it DID fire correctly (Ara's two reading-pace rows at 0.402) its
+ * only output was advisory prose to a model mid-conversation, and that
+ * duplicate pair still sat in every prompt for eleven days. Fleet-wide it
+ * produced two superseded rows in the product's lifetime.
+ *
+ * Nothing replaces it here, because the replacement already exists and is
+ * better placed: compaction (lib/learning/compact-memories.ts) proposes
+ * merges with a model over the whole store and verifies them in code, off
+ * the critical path with no parent waiting. It caught every pair this
+ * guardrail missed. The agent also sees the family's whole memory list in
+ * context every turn, so it never needed embedding math to notice a
+ * duplicate; instructions.md tells it to forget the superseded one.
+ */
 
 /**
  * formatMemoriesForContext(rows, childNamesById): string

@@ -1,7 +1,7 @@
 {
   "version": "v1",
   "note": "`topicId` depends on `prerequisiteId` (the prerequisite). Directed edges of a DAG.",
-  "edgeCount": 3221,
+  "edgeCount": 3274,
   "dependencies": [
     {
       "topicId": "mt__00ZSLnB7p",
@@ -19328,6 +19328,324 @@
       "prerequisiteId": "mt_M_xcaRcvSo",
       "strength": "soft",
       "reason": "Knight knowledge provides military context for the Crusades"
+    },
+    {
+      "topicId": "mt_s7spKtOztv",
+      "prerequisiteId": "mt_ymkaLpmsfI",
+      "strength": "hard",
+      "reason": "Builds directly on pictures stand for real places"
+    },
+    {
+      "topicId": "mt_pUjHvXqboD",
+      "prerequisiteId": "mt_ymkaLpmsfI",
+      "strength": "hard",
+      "reason": "Builds directly on pictures stand for real places"
+    },
+    {
+      "topicId": "mt_mo3BwwKKhY",
+      "prerequisiteId": "mt_pUjHvXqboD",
+      "strength": "hard",
+      "reason": "Builds directly on what maps and globes are"
+    },
+    {
+      "topicId": "mt_DREIrKwr1w",
+      "prerequisiteId": "mt_pUjHvXqboD",
+      "strength": "hard",
+      "reason": "Builds directly on what maps and globes are"
+    },
+    {
+      "topicId": "mt_NDkJ8wq83H",
+      "prerequisiteId": "mt_pUjHvXqboD",
+      "strength": "hard",
+      "reason": "Builds directly on what maps and globes are"
+    },
+    {
+      "topicId": "mt_l8dcaB8ZTE",
+      "prerequisiteId": "mt_pUjHvXqboD",
+      "strength": "hard",
+      "reason": "Builds directly on what maps and globes are"
+    },
+    {
+      "topicId": "mt_au5UXau1fa",
+      "prerequisiteId": "mt_zdQ6bzwi7w",
+      "strength": "hard",
+      "reason": "Builds directly on position words for everyday things"
+    },
+    {
+      "topicId": "mt_kbtAEEy0ml",
+      "prerequisiteId": "mt_s7spKtOztv",
+      "strength": "hard",
+      "reason": "Builds directly on drawing a first map of a familiar place"
+    },
+    {
+      "topicId": "mt_kbtAEEy0ml",
+      "prerequisiteId": "mt_DREIrKwr1w",
+      "strength": "hard",
+      "reason": "Builds directly on north, south, east, and west on a map"
+    },
+    {
+      "topicId": "mt_kbtAEEy0ml",
+      "prerequisiteId": "mt_mo3BwwKKhY",
+      "strength": "hard",
+      "reason": "Builds directly on reading map symbols and colors"
+    },
+    {
+      "topicId": "mt_tmlIQ6rSZR",
+      "prerequisiteId": "mt_s7spKtOztv",
+      "strength": "hard",
+      "reason": "Builds directly on drawing a first map of a familiar place"
+    },
+    {
+      "topicId": "mt_mJ0aVkSWhS",
+      "prerequisiteId": "mt_mo3BwwKKhY",
+      "strength": "hard",
+      "reason": "Builds directly on reading map symbols and colors"
+    },
+    {
+      "topicId": "mt_lI7wf8ih8n",
+      "prerequisiteId": "mt_mo3BwwKKhY",
+      "strength": "hard",
+      "reason": "Builds directly on reading map symbols and colors"
+    },
+    {
+      "topicId": "mt_jDfgNLxr2v",
+      "prerequisiteId": "mt_DREIrKwr1w",
+      "strength": "hard",
+      "reason": "Builds directly on north, south, east, and west on a map"
+    },
+    {
+      "topicId": "mt_EWlymIvKkT",
+      "prerequisiteId": "mt_mo3BwwKKhY",
+      "strength": "hard",
+      "reason": "Builds directly on reading map symbols and colors"
+    },
+    {
+      "topicId": "mt_8KVp5LWsdz",
+      "prerequisiteId": "mt_NDkJ8wq83H",
+      "strength": "hard",
+      "reason": "Builds directly on finding their state and the United States on a map"
+    },
+    {
+      "topicId": "mt_9YPFucOerr",
+      "prerequisiteId": "mt_l8dcaB8ZTE",
+      "strength": "hard",
+      "reason": "Builds directly on first look at continents and oceans"
+    },
+    {
+      "topicId": "mt_QJ9js12Uv8",
+      "prerequisiteId": "mt_mo3BwwKKhY",
+      "strength": "hard",
+      "reason": "Builds directly on reading map symbols and colors"
+    },
+    {
+      "topicId": "mt_QJ9js12Uv8",
+      "prerequisiteId": "mt_FD0dkcG2QI",
+      "strength": "hard",
+      "reason": "Builds directly on landform and water words"
+    },
+    {
+      "topicId": "mt_sJxWSurj1t",
+      "prerequisiteId": "mt_lI7wf8ih8n",
+      "strength": "hard",
+      "reason": "Builds directly on finding places with a letter and number grid"
+    },
+    {
+      "topicId": "mt_sJxWSurj1t",
+      "prerequisiteId": "mt_9YPFucOerr",
+      "strength": "hard",
+      "reason": "Builds directly on equator, poles, and hemispheres"
+    },
+    {
+      "topicId": "mt_tMheCJ1FJs",
+      "prerequisiteId": "mt_cFjXzXsCRs",
+      "strength": "hard",
+      "reason": "Builds directly on following rules at home"
+    },
+    {
+      "topicId": "mt_7GZlFti3l6",
+      "prerequisiteId": "mt_cFjXzXsCRs",
+      "strength": "hard",
+      "reason": "Builds directly on following rules at home"
+    },
+    {
+      "topicId": "mt_6wG4q6R4kn",
+      "prerequisiteId": "mt_7GZlFti3l6",
+      "strength": "hard",
+      "reason": "Builds directly on fair ways to decide"
+    },
+    {
+      "topicId": "mt_66AJUvXDbb",
+      "prerequisiteId": "mt_tMheCJ1FJs",
+      "strength": "hard",
+      "reason": "Builds directly on why rules exist"
+    },
+    {
+      "topicId": "mt_SlG5sHdOgd",
+      "prerequisiteId": "mt_7GZlFti3l6",
+      "strength": "hard",
+      "reason": "Builds directly on fair ways to decide"
+    },
+    {
+      "topicId": "mt_mRc88GtMPn",
+      "prerequisiteId": "mt_66AJUvXDbb",
+      "strength": "hard",
+      "reason": "Builds directly on rules at home, laws in town"
+    },
+    {
+      "topicId": "mt_lBmfRhQMgm",
+      "prerequisiteId": "mt_YdMhWNFFg5",
+      "strength": "hard",
+      "reason": "Builds directly on who is in charge and why"
+    },
+    {
+      "topicId": "mt_HAl2M1j0i4",
+      "prerequisiteId": "mt_66AJUvXDbb",
+      "strength": "hard",
+      "reason": "Builds directly on rules at home, laws in town"
+    },
+    {
+      "topicId": "mt_8LKYVHrxEF",
+      "prerequisiteId": "mt_6wG4q6R4kn",
+      "strength": "hard",
+      "reason": "Builds directly on voting to decide together"
+    },
+    {
+      "topicId": "mt_8LKYVHrxEF",
+      "prerequisiteId": "mt_lBmfRhQMgm",
+      "strength": "hard",
+      "reason": "Builds directly on mayor, governor, president"
+    },
+    {
+      "topicId": "mt_fW5G0ZX2Th",
+      "prerequisiteId": "mt_mRc88GtMPn",
+      "strength": "hard",
+      "reason": "Builds directly on what a government does"
+    },
+    {
+      "topicId": "mt_0lRFDwUDPH",
+      "prerequisiteId": "mt_mRc88GtMPn",
+      "strength": "hard",
+      "reason": "Builds directly on what a government does"
+    },
+    {
+      "topicId": "mt_djMSIwY9I9",
+      "prerequisiteId": "mt_HAl2M1j0i4",
+      "strength": "hard",
+      "reason": "Builds directly on rights and responsibilities"
+    },
+    {
+      "topicId": "mt_6EP5dW4s36",
+      "prerequisiteId": "mt_7GZlFti3l6",
+      "strength": "hard",
+      "reason": "Builds directly on fair ways to decide"
+    },
+    {
+      "topicId": "mt_PZUjJqkoqA",
+      "prerequisiteId": "mt_0lRFDwUDPH",
+      "strength": "hard",
+      "reason": "Builds directly on groups of people make our laws"
+    },
+    {
+      "topicId": "mt_uOOChmotcy",
+      "prerequisiteId": "mt_0lRFDwUDPH",
+      "strength": "hard",
+      "reason": "Builds directly on groups of people make our laws"
+    },
+    {
+      "topicId": "mt_NjoDli4Zbo",
+      "prerequisiteId": "mt_3gpTNGtype",
+      "strength": "hard",
+      "reason": "Builds directly on naming the coins"
+    },
+    {
+      "topicId": "mt_Vm1vS6eL7U",
+      "prerequisiteId": "mt_NjoDli4Zbo",
+      "strength": "hard",
+      "reason": "Builds directly on what each coin is worth"
+    },
+    {
+      "topicId": "mt_Vsg4SrEX3e",
+      "prerequisiteId": "mt_4Y2bNfGwL2",
+      "strength": "hard",
+      "reason": "Builds directly on money buys things"
+    },
+    {
+      "topicId": "mt_tUZ9qVwpc1",
+      "prerequisiteId": "mt_NjoDli4Zbo",
+      "strength": "hard",
+      "reason": "Builds directly on what each coin is worth"
+    },
+    {
+      "topicId": "mt_iyz7Owv1Fd",
+      "prerequisiteId": "mt_Vm1vS6eL7U",
+      "strength": "hard",
+      "reason": "Builds directly on counting coins that match"
+    },
+    {
+      "topicId": "mt_SYDdoGtNKI",
+      "prerequisiteId": "mt_4Y2bNfGwL2",
+      "strength": "hard",
+      "reason": "Builds directly on money buys things"
+    },
+    {
+      "topicId": "mt_Ee6QfjPjxO",
+      "prerequisiteId": "mt_YT19JCiDP0",
+      "strength": "hard",
+      "reason": "Builds directly on goods and services"
+    },
+    {
+      "topicId": "mt_vG9mp3COMp",
+      "prerequisiteId": "mt_Vsg4SrEX3e",
+      "strength": "hard",
+      "reason": "Builds directly on choosing to spend or save"
+    },
+    {
+      "topicId": "mt_j3wZzCW5Ko",
+      "prerequisiteId": "mt_iyz7Owv1Fd",
+      "strength": "hard",
+      "reason": "Builds directly on counting mixed coins"
+    },
+    {
+      "topicId": "mt_Fp8EzqEeX6",
+      "prerequisiteId": "mt_Vsg4SrEX3e",
+      "strength": "hard",
+      "reason": "Builds directly on choosing to spend or save"
+    },
+    {
+      "topicId": "mt_d8fRdLDnkI",
+      "prerequisiteId": "mt_AXQYZSbVeV",
+      "strength": "hard",
+      "reason": "Builds directly on choosing when you can't have both"
+    },
+    {
+      "topicId": "mt_HdGbXYUDYA",
+      "prerequisiteId": "mt_Ee6QfjPjxO",
+      "strength": "hard",
+      "reason": "Builds directly on producers and consumers"
+    },
+    {
+      "topicId": "mt_HdGbXYUDYA",
+      "prerequisiteId": "mt_SYDdoGtNKI",
+      "strength": "hard",
+      "reason": "Builds directly on barter, trading, and why money helps"
+    },
+    {
+      "topicId": "mt_Qk0GwFMslu",
+      "prerequisiteId": "mt_tUZ9qVwpc1",
+      "strength": "hard",
+      "reason": "Builds directly on reading and comparing prices"
+    },
+    {
+      "topicId": "mt_q3tt86QEtw",
+      "prerequisiteId": "mt_Vsg4SrEX3e",
+      "strength": "hard",
+      "reason": "Builds directly on choosing to spend or save"
+    },
+    {
+      "topicId": "mt_q3tt86QEtw",
+      "prerequisiteId": "mt_iyz7Owv1Fd",
+      "strength": "hard",
+      "reason": "Builds directly on counting mixed coins"
     }
   ]
 }

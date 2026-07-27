@@ -1,8 +1,11 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import {
   MissingFamilyContextError,
   resolveAgentAccess,
@@ -57,9 +60,11 @@ function subjectDisplayName(subjectId: string): string {
   return getMapSubject(subjectId)?.displayName ?? subjectId;
 }
 
-export default defineTool({
+export default defineBoundedTool({
   description:
-    "Open the family's week planner beside the chat and see what is on it. Use when the parent asks what is planned, wants to see or adjust the week or the month, asks how to put lessons on the planner, or when you are about to edit a plan and need the current activities with their indices. Returns every plan's current week: focus, activities, and check-offs. In web chat this also opens the planner panel next to the conversation; over SMS or email no panel opens, so tell the week in plain words instead. Read-only; make changes with edit_plan.",
+    "Open the family's week planner beside the chat and see what is on it. Use when the parent asks what is planned, wants to see or adjust the week or the month, asks to schedule an existing lesson or curriculum onto the planner, asks how to input things into the planner, or when you are about to edit a plan and need the current activities with their indices. Returns every plan's current week: focus, activities, and check-offs. In web chat this also opens the planner panel next to the conversation; over SMS or email no panel opens, so tell the week in plain words instead. Read-only; make changes with edit_plan.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: true,
   inputSchema: z.object({
     childId: z
       .string()

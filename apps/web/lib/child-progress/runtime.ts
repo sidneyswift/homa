@@ -184,6 +184,13 @@ export function getChildProgressView(
   return childProgressService.getChildProgressView(familyId, childId);
 }
 
+export function getChildProgressLedger(
+  familyId: string,
+  childId: string,
+) {
+  return childProgressService.getChildProgressLedger(familyId, childId);
+}
+
 export function startProgressCheckIn(
   context: ProgressCheckInContext,
   input: {

@@ -1,5 +1,12 @@
 # Activity pack
 
+Golden anchor: pass `anchorIds: ["activity-pack"]` to generate_image
+so the output matches the Homa activity-pack bar (four numbered
+quadrants split by dotted lines, one themed title banner, a different
+mini-activity per quadrant, consistent hand-drawn art). Write your
+own prompt with your own content; the anchor sets the visual bar, not
+the specifics.
+
 Single page with 4 mini-activities in quadrants, covering different
 skill types (counting, labeling, creative, knowledge) around one
 theme. Can be cut apart into 4 separate activities.

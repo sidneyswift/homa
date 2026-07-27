@@ -472,7 +472,7 @@ export default async function AdminStudioPage({
                 className={
                   active
                     ? "rounded-pill border border-[var(--clay-300)] bg-brand-soft px-3.5 py-1.5 text-[0.78rem] font-bold text-[var(--clay-700)]"
-                    : "rounded-pill border border-border-default bg-card px-3.5 py-1.5 text-[0.78rem] font-semibold text-muted hover:text-strong"
+                    : "rounded-pill border border-border bg-card px-3.5 py-1.5 text-[0.78rem] font-semibold text-muted hover:text-strong"
                 }
               >
                 {filter.label}

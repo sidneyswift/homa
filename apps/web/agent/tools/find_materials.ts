@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { MATERIAL_KINDS } from "../../lib/materials/artifact-store";
 import {
@@ -9,6 +12,10 @@ import {
   getMaterialCaller,
   getMaterialPinned,
 } from "../../lib/materials/library";
+import {
+  selectMaterialPages,
+  splitPageBodies,
+} from "../../lib/materials/page-shell";
 
 export function subjectLessonMaterialFinalOnly(
   attributes: unknown,
@@ -26,14 +33,21 @@ export function subjectLessonMaterialFinalOnly(
  * kid with her character"), and fetching one material by id returns its
  * stored html for direct reuse with the theme swapped.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Search this family's saved materials (worksheets, coloring pages, flash cards...) before designing something new. Returns finals by default with their preview URLs; a final's previewUrl can be passed to generate_image as a reference image, and fetching one material by id also returns its html for reuse with a swapped theme or character.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: true,
   inputSchema: z.object({
     materialId: z
       .uuid()
       .optional()
       .describe("Fetch exactly this material WITH its html (the reuse path). All other filters are ignored."),
+    pageIndex: z
+      .int()
+      .min(1)
+      .optional()
+      .describe("With materialId on a multi-page packet, return only THIS page's html (1 is the first page) instead of all of them. Use it when you are revising one page: you need that page's html to rewrite it, and the others come back by reference through create_printable's fromMaterialId + pageIndex."),
     childId: z.uuid().optional().describe("Only materials made for this child."),
     kind: z.enum(MATERIAL_KINDS).optional(),
     subject: z.string().trim().max(80).optional().describe("Substring match, e.g. 'handwriting'."),
@@ -75,9 +89,34 @@ export default defineTool({
           note: "No material with that id in this family.",
         };
       }
+      // A multi-page packet's html is the whole document, and on a real
+      // twelve-page packet that is about 45KB. Handing all of it back so
+      // the model can rewrite one page is what pushed a live session to
+      // 276k input tokens on 2026-07-27, and re-emitting it is what
+      // stopped producing a parseable tool call
+      // (plans/2026-07-27-packet-page-revision-failure.md). So: one page
+      // when asked for one, and when not asked, say plainly that asking
+      // is cheaper.
+      const pages = splitPageBodies(material.html ?? "");
+      if (pages.length > 1 && input.pageIndex !== undefined) {
+        const selected = selectMaterialPages(material.html ?? "", input.pageIndex);
+        if (!selected.ok) {
+          return {
+            materials: [],
+            note: `"${material.title}" has ${selected.pageCount} pages, so there is no page ${input.pageIndex}. Pages count from 1.`,
+          };
+        }
+        return {
+          materials: [{ ...material, html: selected.bodies[0] }],
+          note: `Page ${input.pageIndex} of ${pages.length} of "${material.title}". Rewrite this page only; carry the other ${pages.length - 1} into create_printable as fromMaterialId ${material.id} entries with their own pageIndex, so you never retype them.`,
+        };
+      }
       return {
         materials: [material],
-        note: "Reuse the html with the theme or character swapped, or pass previewUrl to generate_image as a reference.",
+        note:
+          pages.length > 1
+            ? `This is all ${pages.length} pages of "${material.title}". Revising ONE page? Ask again with pageIndex for just that page and pass the rest to create_printable by reference (fromMaterialId + pageIndex); retyping a packet this size is slow enough to fail. Otherwise reuse the html with the theme or character swapped.`
+            : "Reuse the html with the theme or character swapped, or pass previewUrl to generate_image as a reference.",
       };
     }
 
@@ -106,12 +145,37 @@ export default defineTool({
       return rest;
     });
 
+    // A library whose earlier work never reached 'final' is invisible to
+    // this search, because status defaults to final. Saying "nothing saved
+    // matches" then is a lie that costs real work: it sends the agent
+    // hunting through filter permutations for pages it already made, and
+    // invites it to rebuild them. The Swift family's alphabet task
+    // (2026-07-19) burned ten find_materials calls that way, three of which
+    // hung, because every one of Story's existing letter pages was still a
+    // draft. Only look when the caller could actually act on the answer.
+    let emptyNote =
+      "Nothing saved matches. Design fresh, and finals you make will be here next time.";
+    if (materials.length === 0 && !finalOnly && filters.status === "final") {
+      const anyStatus = { ...filters, status: "any" as const };
+      const unfinalized =
+        access.mode === "pinned"
+          ? await findMaterialsPinned(access.familyId, anyStatus)
+          : await findMaterialsCaller(access.db, access.familyId, anyStatus);
+      if (unfinalized.length > 0) {
+        emptyNote =
+          `No finals match, but ${unfinalized.length} unfinalized ` +
+          `${unfinalized.length === 1 ? "draft matches" : "drafts match"}. ` +
+          `Pass status:"any" to see them before you build anything, so you ` +
+          `continue that work instead of repeating it.`;
+      }
+    }
+
     return {
       materials: compact,
       note:
         materials.length > 0
           ? "To show one of these to the parent again, call show_material with its id. A previewUrl here works as a generate_image reference; fetch one by materialId to get its html for reuse, or pass its id in create_printable's pages (fromMaterialId) to compile a packet."
-          : "Nothing saved matches. Design fresh, and finals you make will be here next time.",
+          : emptyNote,
     };
   },
 });

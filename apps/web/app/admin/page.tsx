@@ -6,22 +6,26 @@ import { getFleetOverview, type OverviewRange } from "../../lib/admin/overview-d
 import type { HandledAlert } from "../../lib/admin/alert-acks";
 import { familyDisplayName, formatInt, formatTokens, medianExact, timeAgo } from "../../lib/admin/format";
 import { formatUsd } from "../../lib/model-pricing";
-import { accountStatusCopy } from "../../lib/admin/account-status-copy";
-import { QUIET_AFTER_DAYS, STAGE_COPY } from "../../lib/admin/stage";
+import { QUIET_AFTER_DAYS, type FamilyStage } from "../../lib/admin/stage";
 import { AgentPromptButton } from "./agent-prompt-button";
 import { AlertAckButton } from "./alert-ack-button";
+import { ConversationCard } from "./conversation-card";
+import { FamiliesTable, type FamiliesTableState, type TableDir, type TableSort } from "./families-table";
+import { GrowthChart } from "./growth-chart";
 import { MorningOfferFunnel } from "./morning-offer-funnel";
-import { AlertRow, EmptyNote, Pill, SectionHead, Spark, statusTone, Tile } from "./ui";
+import { AlertRow, SectionHead, Tile } from "./ui";
 
 /**
- * /admin: mission control (MJ-14 tile 1..12 shape, refit to the signals
- * that exist today). Alerts first, then the tiles, then the lists a
- * Monday morning actually needs: trouble, new signups, the call list.
- * Every row-backed alert carries a Mark handled chip (founder ask
- * 2026-07-13); handled alerts hide but stay countable and reversible.
- * Every failure row also carries a Prompt for agent chip (founder ask
- * 2026-07-13, same day) that copies a diagnostic packet for an AI
- * coding agent; lib/admin/agent-prompt.ts builds it.
+ * /admin: the founder's overview, rebuilt 2026-07-23 around five
+ * questions in order: is anyone waiting on us, is the fleet growing, are
+ * real families getting value, is the morning brief working, and who
+ * should I call. Test families are out of every count by default
+ * (?families=all widens them back in). Customer choices are never
+ * alerts: STOP opt-outs live in the quiet "Stopped texting" list, and
+ * engineering signals (task runs, cron, email plumbing) live in the
+ * "System health" footnote, both at the bottom on purpose.
+ * Every failure row keeps its Mark handled and Prompt for agent chips
+ * (founder asks, 2026-07-13).
  */
 
 export const metadata: Metadata = { title: "Overview" };
@@ -46,49 +50,76 @@ function handledAlertText(item: HandledAlert): string {
   }
 }
 
+const STAGE_PARAMS: FamilyStage[] = ["new", "onboarding", "activated", "steady", "quiet"];
+
 export default async function AdminOverviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ range?: string; handled?: string }>;
+  searchParams: Promise<{
+    range?: string;
+    handled?: string;
+    families?: string;
+    stage?: string;
+    sort?: string;
+    dir?: string;
+    rows?: string;
+  }>;
 }) {
   await requireFounder();
   const params = await searchParams;
   const rangeDays: OverviewRange = params.range === "28d" ? 28 : 7;
+  const includeTests = params.families === "all";
   const showHandled = params.handled === "1";
-  const data = await getFleetOverview(rangeDays);
-  const rangeQuery = rangeDays === 28 ? "?range=28d" : "";
-  const showHandledHref =
-    rangeDays === 28 ? "/admin?range=28d&handled=1#handled" : "/admin?handled=1#handled";
-  const hideHandledHref = `/admin${rangeQuery}`;
+  const data = await getFleetOverview(rangeDays, { includeTests });
+
+  const baseParams = new URLSearchParams();
+  if (rangeDays === 28) baseParams.set("range", "28d");
+  if (includeTests) baseParams.set("families", "all");
+  const withParam = (key: string, value: string | null): string => {
+    const next = new URLSearchParams(baseParams);
+    if (value === null) next.delete(key);
+    else next.set(key, value);
+    const query = next.toString();
+    return query ? `/admin?${query}` : "/admin";
+  };
+
+  const tableState: FamiliesTableState = {
+    stage: STAGE_PARAMS.includes(params.stage as FamilyStage)
+      ? (params.stage as FamilyStage)
+      : null,
+    sort:
+      params.sort === "stage" || params.sort === "heard" || params.sort === "messages"
+        ? (params.sort as TableSort)
+        : "joined",
+    dir: params.dir === "asc" ? ("asc" as TableDir) : "desc",
+    allRows: params.rows === "all",
+  };
 
   const runsOk = (data.runCounts.done ?? 0) + (data.runCounts.skipped ?? 0);
   const runsTotal = Object.values(data.runCounts).reduce((sum, n) => sum + n, 0);
-  const runsBad = (data.runCounts.failed ?? 0);
+  const runsBad = data.runCounts.failed ?? 0;
   const runsShaky =
     (data.runCounts.uncertain ?? 0) +
     (data.runCounts.partial ?? 0) +
     (data.runCounts.partial_uncertain ?? 0);
   const deliveriesSent = data.deliveryCounts.sent ?? 0;
-  const deliveriesFailed = data.deliveryCounts.failed ?? 0;
-  const deliveriesUncertain = data.deliveryCounts.uncertain ?? 0;
   const quiet = data.snapshots.filter((s) => s.stage === "quiet");
-  const midOnboarding = data.snapshots.filter((s) => s.stage === "new" || s.stage === "onboarding");
-  const trials = data.snapshots.filter((s) => s.trialStartedAt !== null);
-  const paying = data.snapshots.filter(
-    (s) => s.subscriptionStatus === "active" || s.subscriptionStatus === "trialing",
-  );
   const costPerFamily = data.snapshots.filter((s) => s.cost28dUsd > 0).map((s) => s.cost28dUsd);
   const emailSubmitted =
     (data.emailCounts.submitted ?? 0) + (data.emailCounts.delivered ?? 0);
   const emailTroubleCount =
     (data.emailCounts.rejected ?? 0) + (data.emailCounts.bounced ?? 0) + (data.emailCounts.complained ?? 0);
-  const cronLate = data.cronLate;
-  const journalPromptOutcomes = data.taskPromptOutcomes.journal_prompt;
-  const customPromptOutcomes = data.taskPromptOutcomes.custom;
-  const nonBriefPromptsResolved =
-    journalPromptOutcomes.resolvedOffers + customPromptOutcomes.resolvedOffers;
+  const sentTotal = deliveriesSent + emailSubmitted;
+  const briefCount = data.morningOfferFunnel.deliveredOffers;
+  const messagesPerActiveDay =
+    data.activeFamilies > 0 ? data.userMessages / (data.activeFamilies * rangeDays) : null;
 
   const rangeLabel = rangeDays === 7 ? "this week" : "last 4 weeks";
+  const waitingOnUs =
+    data.offerTrouble.length > 0 ||
+    data.inboundTrouble.length > 0 ||
+    data.deliveryTrouble.length > 0 ||
+    data.emailTrouble.length > 0;
 
   return (
     <div>
@@ -96,33 +127,79 @@ export default async function AdminOverviewPage({
         Founder · fleet overview
       </p>
       <h1 className="mt-1 font-display text-2xl font-bold text-strong">
-        {data.snapshots.length} families, one glance
+        {data.snapshots.length} families
       </h1>
-      <div className="mt-3 inline-flex rounded-pill border border-border-subtle bg-card p-0.5 text-sm font-semibold">
-        <Link
-          href="/admin"
-          className={`rounded-pill px-3.5 py-1.5 ${rangeDays === 7 ? "bg-[var(--stone-800)] text-white" : "text-muted"}`}
-        >
-          This week
-        </Link>
-        <Link
-          href="/admin?range=28d"
-          className={`rounded-pill px-3.5 py-1.5 ${rangeDays === 28 ? "bg-[var(--stone-800)] text-white" : "text-muted"}`}
-        >
-          Last 4 weeks
-        </Link>
+      <p className="mt-1 text-sm text-muted">
+        {data.newSignups.length === 0
+          ? `Nobody new joined ${rangeLabel}.`
+          : `${data.newSignups.length} joined ${rangeLabel}.`}
+      </p>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <div className="inline-flex rounded-pill border border-border-subtle bg-card p-0.5 text-sm font-semibold">
+          <Link
+            href={includeTests ? "/admin?families=all" : "/admin"}
+            className={`rounded-pill px-3.5 py-1.5 ${rangeDays === 7 ? "bg-[var(--stone-800)] text-white" : "text-muted"}`}
+          >
+            This week
+          </Link>
+          <Link
+            href={includeTests ? "/admin?range=28d&families=all" : "/admin?range=28d"}
+            className={`rounded-pill px-3.5 py-1.5 ${rangeDays === 28 ? "bg-[var(--stone-800)] text-white" : "text-muted"}`}
+          >
+            Last 4 weeks
+          </Link>
+        </div>
+        <div className="inline-flex rounded-pill border border-border-subtle bg-card p-0.5 text-sm font-semibold">
+          <Link
+            href={rangeDays === 28 ? "/admin?range=28d" : "/admin"}
+            className={`rounded-pill px-3.5 py-1.5 ${!includeTests ? "bg-[var(--stone-800)] text-white" : "text-muted"}`}
+          >
+            Customers
+          </Link>
+          <Link
+            href={rangeDays === 28 ? "/admin?range=28d&families=all" : "/admin?families=all"}
+            className={`rounded-pill px-3.5 py-1.5 ${includeTests ? "bg-[var(--stone-800)] text-white" : "text-muted"}`}
+          >
+            Everyone
+          </Link>
+        </div>
+        <p className="text-xs text-subtle">
+          {includeTests
+            ? "Test families included. Counts are not customer truth."
+            : `${data.sandboxCount} test families hidden.`}
+        </p>
       </div>
 
       <div className="mt-4 flex flex-col gap-2">
-        {data.deliveryTrouble.length === 0 && data.emailTrouble.length === 0 && data.runTrouble.length === 0 && data.inboundTrouble.length === 0 ? (
+        {!waitingOnUs ? (
           <AlertRow tone="sky">
-            <b>Deliveries look clean {rangeLabel}.</b>{" "}
+            <b>Nobody is waiting on us {rangeLabel}.</b>{" "}
             {data.handledAlerts.length > 0
               ? `Everything that failed is marked handled (${data.handledAlerts.length}).`
-              : "No failed or uncertain sends recorded."}
+              : "No family is missing a text, an email, or a promised worksheet."}
           </AlertRow>
         ) : (
           <>
+            {data.offerTrouble.slice(0, 3).map((t) => (
+              <AlertRow key={`o-${t.id}`} tone="rose">
+                <b>{t.familyName} said yes and never got their material</b> · accepted{" "}
+                {timeAgo(t.at)}, nothing was made
+              </AlertRow>
+            ))}
+            {data.inboundTrouble.slice(0, 3).map((t) => (
+              <AlertRow
+                key={`i-${t.id}`}
+                tone="rose"
+                action={
+                  <span className="inline-flex flex-wrap items-center justify-end gap-1.5">
+                    <AlertAckButton source="inbound_receipt" sourceId={t.id} />
+                  </span>
+                }
+              >
+                <b>{t.familyName ?? "A family"} texted and never got an answer</b> · {t.channel}{" "}
+                turn claimed {timeAgo(t.at)}
+              </AlertRow>
+            ))}
             {data.deliveryTrouble.slice(0, 4).map((t) => (
               <AlertRow
                 key={`d-${t.id}`}
@@ -134,23 +211,9 @@ export default async function AdminOverviewPage({
                   </span>
                 }
               >
-                <b>{t.status === "failed" ? "Failed" : "Uncertain"} {t.channel} send</b> ·{" "}
-                {t.familyName} · {t.error ?? "no provider receipt"} · {timeAgo(t.at)}
-              </AlertRow>
-            ))}
-            {data.runTrouble.slice(0, 4).map((t) => (
-              <AlertRow
-                key={`r-${t.id}`}
-                tone={t.status === "failed" ? "rose" : "gold"}
-                action={
-                  <span className="inline-flex flex-wrap items-center justify-end gap-1.5">
-                    <AgentPromptButton source="task_run" sourceId={t.id} />
-                    <AlertAckButton source="task_run" sourceId={t.id} />
-                  </span>
-                }
-              >
-                <b>{t.kind.replace(/_/g, " ")} run {t.status.replace(/_/g, " ")}</b> ·{" "}
-                {t.familyName ?? "fleet"} · {t.error ?? "no error recorded"} · {timeAgo(t.at)}
+                <b>Can&apos;t reach {t.familyName}</b> · {t.channel} send{" "}
+                {t.status === "failed" ? "failed" : "unconfirmed"} ·{" "}
+                {t.error ?? "no provider receipt"} · {timeAgo(t.at)}
               </AlertRow>
             ))}
             {data.emailTrouble.slice(0, 3).map((t) => (
@@ -164,22 +227,11 @@ export default async function AdminOverviewPage({
                   </span>
                 }
               >
-                <b>Email {t.status}</b> · {t.kind.replace(/_/g, " ")} · {t.error ?? "provider receipt"} ·{" "}
-                {timeAgo(t.at)}
-              </AlertRow>
-            ))}
-            {data.inboundTrouble.slice(0, 3).map((t) => (
-              <AlertRow
-                key={`i-${t.id}`}
-                tone="rose"
-                action={
-                  <span className="inline-flex flex-wrap items-center justify-end gap-1.5">
-                    <AlertAckButton source="inbound_receipt" sourceId={t.id} />
-                  </span>
-                }
-              >
-                <b>{t.channel} turn never answered</b> · {t.familyName ?? "unlinked"} · claimed{" "}
-                {timeAgo(t.at)}, still not delivered
+                <b>
+                  An email to {t.familyName ? familyDisplayName(t.familyName) : "a family"}{" "}
+                  {t.status}
+                </b>{" "}
+                · {t.kind.replace(/_/g, " ")} · {timeAgo(t.at)}
               </AlertRow>
             ))}
           </>
@@ -192,21 +244,14 @@ export default async function AdminOverviewPage({
             ({QUIET_AFTER_DAYS}+ quiet days): {quiet.map((s) => familyDisplayName(s.name)).join(", ")}. A call, not a nudge.
           </AlertRow>
         ) : null}
-        {cronLate || data.cronLastOk === false ? (
+        {data.cronLate || data.cronLastOk === false ? (
           <AlertRow
             tone={data.cronLastOk === false ? "rose" : "gold"}
             action={<AgentPromptButton source="cron" sourceId="map_cron" />}
           >
-            {cronLate ? (
-              <>
-                <b>The hourly cron looks stale.</b> Last heartbeat {timeAgo(data.cronLastAt)}.
-              </>
-            ) : (
-              <>
-                <b>The hourly cron errored on its last tick.</b> Last heartbeat{" "}
-                {timeAgo(data.cronLastAt)}.
-              </>
-            )}
+            <b>Morning briefs may not go out.</b> The hourly cron{" "}
+            {data.cronLastOk === false ? "errored on its last tick" : "looks stale"}; last
+            heartbeat {timeAgo(data.cronLastAt)}.
           </AlertRow>
         ) : null}
         {data.handledAlerts.length > 0 ? (
@@ -214,221 +259,20 @@ export default async function AdminOverviewPage({
             {data.handledAlerts.length} handled{" "}
             {data.handledAlerts.length === 1 ? "alert" : "alerts"} hidden {rangeLabel}.{" "}
             <Link
-              href={showHandled ? hideHandledHref : showHandledHref}
+              href={showHandled ? withParam("handled", null) : `${withParam("handled", "1")}#handled`}
               className="font-semibold text-muted underline underline-offset-2 hover:text-strong"
             >
               {showHandled ? "Hide them" : "Show them"}
             </Link>
           </p>
         ) : null}
-      </div>
-
-      <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
-        <Tile
-          label="Families active"
-          value={`${data.activeFamilies} of ${data.snapshots.length}`}
-          sub={`sent anything ${rangeLabel}`}
-          subTone="sage"
-        />
-        <Tile
-          label="New signups"
-          value={String(data.newSignups.length)}
-          sub={
-            data.newSignups.length
-              ? data.newSignups.map((s) => familyDisplayName(s.name)).slice(0, 3).join(", ")
-              : `none ${rangeLabel}`
-          }
-          subTone={data.newSignups.length ? "sage" : "muted"}
-        />
-        <Tile
-          label="Mid-onboarding"
-          value={String(midOnboarding.length)}
-          sub="account open, report not reached"
-          subTone={midOnboarding.length ? "gold" : "muted"}
-        />
-        <Tile
-          label="Task runs"
-          value={`${runsOk} of ${runsTotal || 0}`}
-          sub={`${runsBad} failed · ${runsShaky} uncertain`}
-          subTone={runsBad > 0 ? "rose" : runsShaky > 0 ? "gold" : "sage"}
-        />
-        <Tile
-          label="Deliveries"
-          value={String(deliveriesSent)}
-          sub={`${deliveriesFailed} failed · ${deliveriesUncertain} uncertain`}
-          subTone={deliveriesFailed > 0 ? "rose" : deliveriesUncertain > 0 ? "gold" : "sage"}
-        />
-        <MorningOfferFunnel
-          summary={data.morningOfferFunnel}
-          possibleInterest={data.possibleMorningBriefInterest}
-          rangeLabel={rangeLabel}
-        />
-        <Tile
-          label="Non-brief task prompts"
-          value={String(nonBriefPromptsResolved)}
-          sub={`${journalPromptOutcomes.resolvedOffers} journal · ${customPromptOutcomes.resolvedOffers} custom`}
-        />
-        <Tile
-          label="Other linked replies"
-          value={String(data.nonTaskReplies)}
-          sub="linked replies without a task run"
-        />
-        <Tile
-          label="Quiet 14d+"
-          value={String(quiet.length)}
-          sub="the call list, never a nudge list"
-          subTone={quiet.length ? "gold" : "sage"}
-        />
-        <div className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm">
-          <p className="text-[0.72rem] font-bold text-muted">Messages from families</p>
-          <p className="mt-1 font-display text-[1.55rem] font-semibold leading-none text-strong">
-            {formatInt(data.userMessages)}
-          </p>
-          <div className="mt-1.5">
-            <Spark values={data.messagesByDay.length > 1 ? data.messagesByDay : [0, 0]} />
-          </div>
-        </div>
-        <Tile label="Materials made" value={String(data.materialsCount)} sub="printables, all channels" />
-        <Tile
-          label="Hours logged"
-          value={`${(data.hoursMinutes / 60).toFixed(1)}h`}
-          sub="hours_log rows"
-        />
-        <Tile
-          label="Trials + paying"
-          value={`${trials.length}`}
-          sub={
-            paying.length > 0
-              ? `${paying.length} with a live Stripe subscription`
-              : "subscription mirror fills once the Stripe webhook is configured"
-          }
-          subTone={paying.length > 0 ? "sage" : "muted"}
-        />
-        <Tile
-          label="AI cost (est)"
-          value={formatUsd(data.modelCost.estimatedUsd)}
-          sub={
-            data.modelCost.unpricedModels.length > 0
-              ? `no price on file: ${data.modelCost.unpricedModels.join(", ")} · add it to lib/model-pricing.ts`
-              : `${formatTokens(data.modelTokens)} tokens · ${formatInt(data.modelCalls)} calls · P50 ${formatUsd(medianExact(costPerFamily))}/family (28d) · ${
-                  data.priceBook.source === "gateway" ? "gateway prices" : "pinned prices"
-                }`
-          }
-          subTone={data.modelCost.unpricedModels.length > 0 ? "gold" : "muted"}
-        />
-        <Tile
-          label="Map emails"
-          value={String(emailSubmitted)}
-          sub={
-            emailSubmitted + emailTroubleCount === 0
-              ? "ledger live, next sends will land here"
-              : `${emailTroubleCount} rejected or bounced`
-          }
-          subTone={emailTroubleCount > 0 ? "rose" : "muted"}
-        />
-        <Tile
-          label="Cron heartbeat"
-          value={data.cronLastAt ? timeAgo(data.cronLastAt) : "no ticks yet"}
-          sub={
-            data.cronLastAt
-              ? data.cronLastOk
-                ? "last tick ok"
-                : "last tick errored"
-              : "first heartbeat lands on the next hourly tick"
-          }
-          subTone={data.cronLastAt ? (data.cronLastOk && !cronLate ? "sage" : "rose") : "muted"}
-        />
-      </div>
-
-      <SectionHead
-        eyebrow="Needs a look first"
-        title="Trouble, line by line"
-        sub="Failed and uncertain sends with the family they belong to. Uncertain means the provider never confirmed; it is its own bucket on purpose."
-      />
-      {data.deliveryTrouble.length === 0 && data.emailTrouble.length === 0 && data.runTrouble.length === 0 && data.inboundTrouble.length === 0 ? (
-        <EmptyNote>
-          Nothing failed or went uncertain {rangeLabel}
-          {data.handledAlerts.length > 0
-            ? `, beyond the ${data.handledAlerts.length} marked handled.`
-            : "."}
-        </EmptyNote>
-      ) : (
-        <ul className="mt-3 flex flex-col gap-2">
-          {data.deliveryTrouble.map((t) => (
-            <li
-              key={`dt-${t.id}`}
-              className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-border-subtle bg-card px-3.5 py-2.5 text-sm shadow-sm"
-            >
-              <span className="font-bold text-strong">{t.familyName}</span>
-              <Pill tone={statusTone(t.status)}>{t.status}</Pill>
-              <span className="text-muted">
-                {t.channel} · {t.error ?? "no provider receipt"} · {timeAgo(t.at)}
-              </span>
-              <span className="ml-auto inline-flex flex-wrap items-center justify-end gap-1.5">
-                <AgentPromptButton source="delivery" sourceId={t.id} />
-                <AlertAckButton source="delivery" sourceId={t.id} />
-              </span>
-            </li>
-          ))}
-          {data.runTrouble.map((t) => (
-            <li
-              key={`rt-${t.id}`}
-              className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-border-subtle bg-card px-3.5 py-2.5 text-sm shadow-sm"
-            >
-              <span className="font-bold text-strong">{t.familyName ?? "Fleet"}</span>
-              <Pill tone={statusTone(t.status)}>{t.status.replace(/_/g, " ")}</Pill>
-              <span className="text-muted">
-                {t.kind.replace(/_/g, " ")} run · {t.error ?? "no error recorded"} · {timeAgo(t.at)}
-              </span>
-              <span className="ml-auto inline-flex flex-wrap items-center justify-end gap-1.5">
-                <AgentPromptButton source="task_run" sourceId={t.id} />
-                <AlertAckButton source="task_run" sourceId={t.id} />
-              </span>
-            </li>
-          ))}
-          {data.emailTrouble.map((t) => (
-            <li
-              key={`et-${t.id}`}
-              className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-border-subtle bg-card px-3.5 py-2.5 text-sm shadow-sm"
-            >
-              <span className="font-bold text-strong">{t.kind.replace(/_/g, " ")}</span>
-              <Pill tone={statusTone(t.status)}>{t.status}</Pill>
-              <span className="text-muted">{t.error ?? "provider receipt"} · {timeAgo(t.at)}</span>
-              <span className="ml-auto inline-flex flex-wrap items-center justify-end gap-1.5">
-                <AgentPromptButton source="email_send" sourceId={t.id} />
-                <AlertAckButton source="email_send" sourceId={t.id} />
-              </span>
-            </li>
-          ))}
-          {data.inboundTrouble.map((t) => (
-            <li
-              key={`it-${t.id}`}
-              className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-border-subtle bg-card px-3.5 py-2.5 text-sm shadow-sm"
-            >
-              <span className="font-bold text-strong">{t.familyName ?? "Unlinked"}</span>
-              <Pill tone="rose">stalled</Pill>
-              <span className="text-muted">
-                {t.channel} turn claimed {timeAgo(t.at)}, never answered
-              </span>
-              <span className="ml-auto inline-flex flex-wrap items-center justify-end gap-1.5">
-                <AlertAckButton source="inbound_receipt" sourceId={t.id} />
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-      {showHandled && data.handledAlerts.length > 0 ? (
-        <>
-          <p id="handled" className="mt-5 text-[0.72rem] font-bold text-muted">
-            Marked handled ({data.handledAlerts.length})
-          </p>
-          <ul className="mt-2 flex flex-col gap-2">
+        {showHandled && data.handledAlerts.length > 0 ? (
+          <ul id="handled" className="mt-1 flex flex-col gap-2">
             {data.handledAlerts.map((item) => (
               <li
                 key={`h-${item.source}-${item.sourceId}`}
-                className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-dashed border-border-default bg-card px-3.5 py-2.5 text-sm"
+                className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-dashed border-border bg-card px-3.5 py-2.5 text-sm"
               >
-                <Pill tone="stone">handled</Pill>
                 <span className="font-semibold text-muted">{handledAlertText(item)}</span>
                 <span className="text-subtle">
                   {item.error ?? "no error recorded"} · failed {timeAgo(item.at)} · handled{" "}
@@ -443,63 +287,147 @@ export default async function AdminOverviewPage({
               </li>
             ))}
           </ul>
-        </>
-      ) : null}
+        ) : null}
+      </div>
+
+      <div className="mt-5 rounded-lg border border-border-subtle bg-card p-5 shadow-sm">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <p className="text-[0.72rem] font-bold text-muted">Families over time</p>
+          <p className="text-xs text-subtle">
+            Every real signup, who opened an account, and who finished setup by adding a kid.
+            The gaps are the funnel leaks.
+          </p>
+        </div>
+        <div className="mt-2">
+          <GrowthChart series={data.growth} />
+        </div>
+      </div>
+
+      <div className="mt-3 grid items-start gap-3 md:grid-cols-3">
+        <ConversationCard
+          activeFamilies={data.activeFamilies}
+          totalFamilies={data.snapshots.length}
+          userMessages={data.userMessages}
+          messagesByDay={data.messagesByDay}
+          messagesPerActiveDay={messagesPerActiveDay}
+          sentTotal={sentTotal}
+          briefCount={briefCount}
+          undeliveredCount={data.undeliveredCount}
+          rangeLabel={rangeLabel}
+        />
+        <Tile
+          label="AI cost (est)"
+          value={formatUsd(data.modelCost.estimatedUsd)}
+          sub={
+            data.modelCost.unpricedModels.length > 0
+              ? `no price on file: ${data.modelCost.unpricedModels.join(", ")} · add it to lib/model-pricing.ts`
+              : `${formatTokens(data.modelTokens)} tokens · ${formatInt(data.modelCalls)} calls · P50 ${formatUsd(medianExact(costPerFamily))}/family (28d) · ${
+                  data.priceBook.source === "gateway" ? "gateway prices" : "pinned prices"
+                }`
+          }
+          subTone={data.modelCost.unpricedModels.length > 0 ? "gold" : "muted"}
+        />
+      </div>
+
+      <div className="mt-3">
+        <MorningOfferFunnel
+          summary={data.morningOfferFunnel}
+          possibleInterest={data.possibleMorningBriefInterest}
+          rangeLabel={rangeLabel}
+        />
+      </div>
 
       <SectionHead
         eyebrow="People"
-        title="New and quiet"
-        sub="Who arrived, and who is worth a call this week."
+        title="Every family"
+        sub="Where each family is in the funnel, and when we last heard from them."
       />
-      <div className="mt-3 grid gap-3 md:grid-cols-2">
+      <FamiliesTable
+        snapshots={data.snapshots}
+        state={tableState}
+        rangeDays={rangeDays}
+        includeTests={includeTests}
+      />
+
+      <div className="mt-6 grid gap-3 md:grid-cols-2">
         <div className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm">
-          <p className="text-[0.72rem] font-bold text-muted">New {rangeLabel}</p>
-          {data.newSignups.length === 0 ? (
-            <p className="mt-2 text-sm text-subtle">No new families {rangeLabel}.</p>
+          <p className="text-[0.72rem] font-bold text-muted">Stopped texting</p>
+          {data.optOuts.length === 0 ? (
+            <p className="mt-2 text-sm text-subtle">Nobody has texted STOP {rangeLabel}.</p>
           ) : (
             <ul className="mt-2 flex flex-col gap-1.5 text-sm">
-              {data.newSignups.map((s) => {
-                const account = accountStatusCopy({
-                  status: s.status,
-                  profileCompletedAt: s.profileCompletedAt,
-                });
-                const stage = STAGE_COPY[s.stage];
-                return (
-                  <li key={s.id} className="flex flex-wrap items-center gap-2">
-                    <Link href={`/admin/families/${s.id}`} className="font-bold text-strong hover:underline">
-                      {familyDisplayName(s.name)}
-                    </Link>
-                    <Pill tone={account.tone} title={account.hint}>
-                      {account.label}
-                    </Pill>
-                    <Pill tone={stage.tone} title={stage.hint}>
-                      {stage.label}
-                    </Pill>
-                    <span className="text-subtle">joined {timeAgo(s.createdAt)}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-        <div className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm">
-          <p className="text-[0.72rem] font-bold text-muted">The call list</p>
-          {quiet.length === 0 ? (
-            <p className="mt-2 text-sm text-subtle">Nobody has crossed {QUIET_AFTER_DAYS} quiet days.</p>
-          ) : (
-            <ul className="mt-2 flex flex-col gap-1.5 text-sm">
-              {quiet.map((s) => (
-                <li key={s.id} className="flex flex-wrap items-center gap-2">
-                  <Link href={`/admin/families/${s.id}`} className="font-bold text-strong hover:underline">
-                    {familyDisplayName(s.name)}
-                  </Link>
-                  <span className="text-subtle">
-                    last heard {timeAgo(s.lastUserActivityAt)} · joined {timeAgo(s.createdAt)}
-                  </span>
+              {data.optOuts.map((o) => (
+                <li key={o.familyId}>
+                  <Link
+                    href={`/admin/families/${o.familyId}`}
+                    className="font-semibold text-muted hover:underline"
+                  >
+                    {familyDisplayName(o.familyName)}
+                  </Link>{" "}
+                  <span className="text-subtle">· {timeAgo(o.at)}</span>
                 </li>
               ))}
             </ul>
           )}
+          <p className="mt-3 text-xs text-subtle">
+            Replying STOP is a choice, honored automatically. Reach out another way only if you
+            know them.
+          </p>
+        </div>
+        <div className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm">
+          <p className="text-[0.72rem] font-bold text-muted">System health</p>
+          <ul className="mt-2 flex flex-col gap-1.5 text-sm text-muted">
+            <li>
+              Task runs · <span className="font-mono">{runsOk}</span> of{" "}
+              <span className="font-mono">{runsTotal}</span> clean
+              {runsBad + runsShaky > 0 ? (
+                <>
+                  {" "}
+                  ·{" "}
+                  <span className="font-semibold text-[var(--rose-600)]">
+                    {runsBad} failed, {runsShaky} uncertain
+                  </span>
+                </>
+              ) : null}
+            </li>
+            <li>
+              Report emails · <span className="font-mono">{emailSubmitted}</span> sent
+              {emailTroubleCount > 0 ? (
+                <>
+                  {" "}
+                  ·{" "}
+                  <span className="font-semibold text-[var(--rose-600)]">
+                    {emailTroubleCount} rejected or bounced
+                  </span>
+                </>
+              ) : null}
+            </li>
+            <li>
+              Cron · last tick {timeAgo(data.cronLastAt)},{" "}
+              {data.cronLastOk === false ? (
+                <span className="font-semibold text-[var(--rose-600)]">errored</span>
+              ) : (
+                "ok"
+              )}
+            </li>
+          </ul>
+          {data.runTrouble.length > 0 ? (
+            <ul className="mt-3 flex flex-col gap-1.5 border-t border-border-subtle pt-3 text-[0.78rem] text-subtle">
+              {data.runTrouble.slice(0, 4).map((t) => (
+                <li key={`rt-${t.id}`} className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span>
+                    {t.kind.replace(/_/g, " ")} run {t.status.replace(/_/g, " ")} ·{" "}
+                    {t.familyName ? familyDisplayName(t.familyName) : "fleet"} ·{" "}
+                    {t.error ?? "no error recorded"} · {timeAgo(t.at)}
+                  </span>
+                  <span className="ml-auto inline-flex flex-wrap items-center justify-end gap-1.5">
+                    <AgentPromptButton source="task_run" sourceId={t.id} />
+                    <AlertAckButton source="task_run" sourceId={t.id} />
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </div>
       </div>
     </div>

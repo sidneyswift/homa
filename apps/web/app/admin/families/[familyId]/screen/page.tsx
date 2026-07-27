@@ -110,7 +110,7 @@ export default async function AdminFamilyScreenPage({
         </Link>
       </div>
 
-      <div className="flex flex-col overflow-hidden rounded-b-[var(--radius-lg)] border border-t-0 border-border-default bg-page shadow-[var(--shadow-md)] lg:flex-row">
+      <div className="flex flex-col overflow-hidden rounded-b-[var(--radius-lg)] border border-t-0 border-border bg-page shadow-[var(--shadow-md)] lg:flex-row">
         <aside className="flex shrink-0 gap-1 overflow-x-auto border-b border-border-subtle bg-card p-2.5 lg:w-[184px] lg:flex-col lg:border-b-0 lg:border-r lg:p-3.5">
           <span className="hidden px-2 pb-2 lg:block">
             <Logo size={22} />
@@ -328,7 +328,7 @@ function PlannerTab({
                             className={
                               done
                                 ? "mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--sage-500)] text-[0.6rem] font-bold text-white"
-                                : "mt-0.5 inline-flex h-4 w-4 shrink-0 rounded-full border border-border-default bg-card"
+                                : "mt-0.5 inline-flex h-4 w-4 shrink-0 rounded-full border border-border bg-card"
                             }
                           >
                             {done ? "\u2713" : ""}

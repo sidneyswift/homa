@@ -10,6 +10,11 @@ import {
   parseProgressMessagePart,
   type ProgressAssistantItem,
 } from "./progress-message-parts";
+import { parseDetailCardPart } from "./detail-card";
+import {
+  parseChecklistCardPart,
+  parseReportCardPart,
+} from "./onboarding-cards";
 import { parseSnapCardPart } from "./snap-card";
 
 const PROMPT_SUGGESTION_TRANSCRIPT_MESSAGE_LIMIT = 6;
@@ -44,6 +49,13 @@ function assistantMessageOwnsAction(message: EveMessage): boolean {
     const progressItem = parseProgressMessagePart(part);
     if (progressItem && progressItemOwnsAction(progressItem)) return true;
     if (parseSnapCardPart(part)) return true;
+    // The onboarding cards own the floor exactly as the snap card does.
+    // This list knew two of the four card kinds, so a checklist invite
+    // still spent a model call generating suggestions the rail then had
+    // to be separately taught not to show.
+    if (parseChecklistCardPart(part)) return true;
+    if (parseReportCardPart(part)) return true;
+    if (parseDetailCardPart(part)) return true;
   }
   return false;
 }

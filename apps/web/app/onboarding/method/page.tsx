@@ -134,7 +134,7 @@ export default function MethodPage() {
             href="/onboarding"
             className="inline-flex min-h-12 items-center rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand hover:bg-brand-hover"
           >
-            Get your free progress report
+            Start your free trial
           </Link>
         </p>
       </main>

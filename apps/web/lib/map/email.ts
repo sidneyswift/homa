@@ -6,7 +6,7 @@ import { normalizeRfcMessageId } from "../conversation-continuity/rfc-message-id
 import { escapeHtml } from "../html-escape";
 import type { TaskDeliveryVersion } from "../tasks/delivery-version";
 import { validateResearchBriefFormat } from "../tasks/research-brief-format";
-import { mapDb } from "./db";
+import { mapDb, type DbJson } from "./db";
 
 /**
  * Transactional email for the map flow, sent through Resend's REST API
@@ -32,9 +32,12 @@ export function siteUrl(): string {
 /** The map-flow email kinds the email_sends ledger accepts. This union is
  * the validation for email_sends.kind (free text in the schema, the
  * model_usage posture): a new kind is added here, never in a migration.
- * Task emails (journal, brief, custom) are absent on purpose; the
- * dispatch channel already owns their receipts in conversation_deliveries
- * and one send must never count twice. */
+ * Task emails (journal, brief, dispatch "custom") and reactive email
+ * replies are absent on purpose: those paths already own their receipts
+ * in conversation_deliveries, and one send must never count twice.
+ * "agent_composed" is the opposite case: a live agent-tool or voice-tool
+ * send with no other delivery record at all (2026-07-25 fix; these sends
+ * were previously invisible to the founder console). */
 export type EmailLedgerKind =
   | "report_link"
   | "resume_link"
@@ -43,16 +46,31 @@ export type EmailLedgerKind =
   | "band_ready"
   | "family_invite"
   | "admin_digest"
+  | "agent_composed"
   // The onboarding drip (funnel work 2026-07-20). DARK until the copy
   // clears review and compliance lands (lib/drip/flag.ts). The ledger
   // kinds exist now so the founder preview and the dark sweep both record.
   | "drip_setup_nudge"
   | "drip_report_unviewed"
-  | "drip_add_kid";
+  | "drip_add_kid"
+  | "drip_loop_back"
+  // Beat-keyed audiences (plans/2026-07-21-chat-first-onboarding.md §9
+  // Phase 2), same DARK-until-reviewed posture as the kinds above.
+  | "drip_revealed_never_returned"
+  | "drip_kid2_pending"
+  | "drip_mid_checklist"
+  // D9, the skeptic brief (plans/2026-07-21-chat-first-onboarding.md
+  // §4.2): a parent-requested, on-demand send to her OWN inbox, never
+  // a drip nudge, so it carries no unsubscribe framing.
+  | "skeptic_brief";
 
 interface EmailLedger {
   kind: EmailLedgerKind;
   familyId?: string | null;
+  /** Written to email_sends.meta. The drip records WHY this family was
+   * picked, in the founder's words, so /admin/drip can answer "why did she
+   * get this?" without re-deriving an audience that has since changed. */
+  meta?: Record<string, unknown>;
 }
 
 interface SendArgs {
@@ -106,6 +124,11 @@ export function resendFailureDetail(status: number, body: string): string {
 export interface EmailSubmissionOptions {
   fetch?: typeof globalThis.fetch;
   rfcMessageIdTimeoutMs?: number;
+  /** When set, records the send in email_sends under kind
+   * "agent_composed". Leave unset for callers whose delivery is already
+   * tracked elsewhere (dispatch tasks, reactive email replies), so a send
+   * is never counted twice. */
+  familyId?: string | null;
 }
 
 async function retrieveResendRfcMessageId(
@@ -175,7 +198,7 @@ async function recordEmailSend(
   try {
     const sql = mapDb();
     await sql`
-      insert into public.email_sends (family_id, kind, to_hash, status, provider_message_id, error)
+      insert into public.email_sends (family_id, kind, to_hash, status, provider_message_id, error, meta)
       values (
         ${ledger.familyId ?? null},
         ${ledger.kind},
@@ -184,7 +207,8 @@ async function recordEmailSend(
         ${submission.status === "submitted"
           ? submission.providerSubmissionId
           : null},
-        ${error ?? null}
+        ${error ?? null},
+        ${sql.json((ledger.meta ?? {}) as unknown as DbJson)}
       )
     `;
   } catch (ledgerError) {
@@ -447,6 +471,7 @@ function agentComposedEmailArgs(
   subject: string,
   bodyLines: string[],
   replyTo?: string,
+  familyId?: string | null,
 ): SendArgs {
   return {
     to,
@@ -456,6 +481,9 @@ function agentComposedEmailArgs(
     bodyLines,
     replyTo,
     footerNote: "Homa sent this because you asked, or it followed naturally from a conversation.",
+    ...(familyId !== undefined
+      ? { ledger: { kind: "agent_composed", familyId } }
+      : {}),
   };
 }
 
@@ -464,8 +492,11 @@ export async function sendAgentComposedEmail(
   subject: string,
   bodyLines: string[],
   replyTo?: string,
+  familyId?: string | null,
 ): Promise<boolean> {
-  return send(agentComposedEmailArgs(to, subject, bodyLines, replyTo));
+  return send(
+    agentComposedEmailArgs(to, subject, bodyLines, replyTo, familyId),
+  );
 }
 
 export async function submitAgentComposedEmail(
@@ -476,7 +507,7 @@ export async function submitAgentComposedEmail(
   options: EmailSubmissionOptions = {},
 ): Promise<HomaEmailSubmission> {
   return submit(
-    agentComposedEmailArgs(to, subject, bodyLines, replyTo),
+    agentComposedEmailArgs(to, subject, bodyLines, replyTo, options.familyId),
     options,
   );
 }
@@ -627,6 +658,42 @@ export async function sendBandReadyEmail(
 }
 
 /**
+ * D9, the skeptic brief (plans/2026-07-21-chat-first-onboarding.md §4.2):
+ * "want a version of this you can forward to your husband, or your
+ * mother-in-law?" A parent-requested, on-demand send to HER OWN inbox,
+ * never a drip nudge (no unsubscribe headers, no DRIP_OUTER_NOTE), so
+ * she can forward it herself to the doubting co-decider, who is
+ * frequently the credit-card co-decider. DRAFT copy: gate through
+ * homa-copy-reviewer then homa-copy-editor before this reaches a real
+ * family, same discipline the drip templates carry.
+ *
+ * A printable one-pager and a forwardable footer with its own link are
+ * v2, pending a founder call on the viral loop (spec §4.2, §10 P7); v1
+ * is the report itself, reframed for someone who has not been watching
+ * this happen.
+ */
+export async function submitSkepticBrief(
+  to: string,
+  childName: string,
+  reportUrl: string,
+  familyId?: string,
+): Promise<HomaEmailSubmission> {
+  return submit({
+    ledger: { kind: "skeptic_brief", familyId },
+    to,
+    subject: `${childName}'s report, worth forwarding`,
+    preview: "Written so anyone can see it in five minutes.",
+    heading: `${childName}'s report, ready to forward`,
+    bodyLines: [
+      `This is the same report you've already seen, sent here so it's easy to forward: to your husband, your mother-in-law, anyone who wants to see where ${childName} actually stands.`,
+      "It reads on its own, no account needed.",
+    ],
+    cta: { label: `Open ${childName}'s report`, url: reportUrl },
+    footerNote: "Forward it as-is, or not at all. Either way, it's saved here for you.",
+  });
+}
+
+/**
  * The onboarding drip's shared standing promise (Appendix A1 of the funnel
  * plan): the revised "we email you about your family's homeschool" line
  * rides the drip emails ONLY. The other transactional emails keep their
@@ -636,7 +703,7 @@ export async function sendBandReadyEmail(
  * before dripEnabled() is ever true.
  */
 const DRIP_OUTER_NOTE =
-  "We email you about your family's homeschool: your child's reports, a nudge to pick up where you left off, and news when there is new progress to see. No marketing. Every kind has an off switch.";
+  "I email you about your family's homeschool: your child's progress report, a note when something is ready, and the occasional check-in. No marketing. Reply with the word stop to end any of them.";
 
 /** List-Unsubscribe headers for a proactive email (RFC 2369 + RFC 8058
  * one-click). The mailto path always works (an inbound "unsubscribe" reply
@@ -661,20 +728,21 @@ export async function submitDripSetupNudge(
   firstName: string | null,
   resumeUrl: string,
   familyId?: string,
+  reason?: string,
 ): Promise<HomaEmailSubmission> {
   const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
   return submit({
-    ledger: { kind: "drip_setup_nudge", familyId },
+    ledger: { kind: "drip_setup_nudge", familyId, meta: reason ? { reason } : {} },
     headers: unsubscribeHeaders(to),
     to,
     subject: firstName
       ? `Pick up where you left off, ${firstName}`
       : "Pick up where you left off",
-    preview: "A free report on your child, from a few quick questions.",
+    preview: "A report on your child, from a few quick questions.",
     heading: "Your setup is saved",
     bodyLines: [
       `${hi}you started setting up your family on Homa, and it is all here whenever you are ready.`,
-      "Add your first child and answer a few questions about what you have seen them do. Homa builds a free report on where they are, written for their age, in about five minutes.",
+      "Add your first child and answer a few questions about what you have seen them do. Homa builds a report on where they are, written for their age, in about five minutes. It is all part of your 7 free days.",
     ],
     cta: { label: "Add your first child", url: resumeUrl },
     footerNote: "No rush. You can turn these reminders off anytime.",
@@ -691,10 +759,11 @@ export async function submitDripReportUnviewed(
   childName: string,
   reportUrl: string,
   familyId?: string,
+  reason?: string,
 ): Promise<HomaEmailSubmission> {
   const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
   return submit({
-    ledger: { kind: "drip_report_unviewed", familyId },
+    ledger: { kind: "drip_report_unviewed", familyId, meta: reason ? { reason } : {} },
     headers: unsubscribeHeaders(to),
     to,
     subject: `${childName}'s progress report is ready to open`,
@@ -706,6 +775,149 @@ export async function submitDripReportUnviewed(
     cta: { label: `Open ${childName}'s report`, url: reportUrl },
     footerNote:
       "If now isn't the time, it will be here whenever you are. You can turn these off anytime.",
+    outerNote: DRIP_OUTER_NOTE,
+  });
+}
+
+/**
+ * The loop-back nudge: a family said yes to a plan and never told Homa how
+ * it went. Aimed at the measured cliff in the activation ladder (5 of 36
+ * families on 2026-07-20), because those replies are what tune everything
+ * Homa makes next.
+ *
+ * Copy gated 2026-07-20 through homa-copy-reviewer then homa-copy-editor.
+ * Reader calls that shaped it: say what Homa already did BEFORE asking for
+ * anything, ask one narrow question instead of "what worked and what
+ * didn't", and never reassure her that not doing it is "not a failure"
+ * (that names a judgment she had not made). Editor calls: each fact once,
+ * name the real artifacts, and the CTA is its own verb-first sentence.
+ * There is no button on purpose: the reply IS the action, and a button
+ * beside a reply instruction read as two competing doors.
+ */
+export async function submitDripLoopBack(
+  to: string,
+  childName: string,
+  /** The plan named the way a parent would say it: "this month's plan" or
+   * "the phonics plan". Built by the caller, because the whole-month plan
+   * has no subject to look up. */
+  planLabel: string,
+  familyId?: string,
+  reason?: string,
+): Promise<HomaEmailSubmission> {
+  return submit({
+    ledger: { kind: "drip_loop_back", familyId, meta: reason ? { reason } : {} },
+    headers: unsubscribeHeaders(to),
+    to,
+    subject: `Did ${childName} start ${planLabel}?`,
+    preview: "Your answer shapes the next worksheet.",
+    heading: `${childName}'s plan is saved`,
+    bodyLines: [
+      "You said yes to it, and I built all four weeks of activities.",
+      `Did ${childName} start any of it yet? Either answer helps.`,
+      "Your answer decides what I make next: the worksheets, the activities, the pace.",
+      "Reply to this email with one line.",
+    ],
+    footerNote: "Want these to stop? Reply with the word stop.",
+    outerNote: DRIP_OUTER_NOTE,
+  });
+}
+
+/**
+ * Beat-keyed drip templates (plans/2026-07-21-chat-first-onboarding.md
+ * §9 Phase 2). DRAFT copy: gate through homa-copy-reviewer then
+ * homa-copy-editor before dripEnabled() reaches a real family through
+ * these three kinds, same discipline DRIP_OUTER_NOTE and
+ * submitDripLoopBack's copy already went through.
+ */
+
+/** She reached a report but there is no plan and no word back. The
+ * generalized loop-back shape for a reveal that happened live in chat,
+ * never emailed, so drip_report_unviewed's signal never sees it. */
+export async function submitDripRevealedNeverReturned(
+  to: string,
+  firstName: string | null,
+  childName: string,
+  resumeUrl: string,
+  familyId?: string,
+  reason?: string,
+): Promise<HomaEmailSubmission> {
+  const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
+  return submit({
+    ledger: {
+      kind: "drip_revealed_never_returned",
+      familyId,
+      meta: reason ? { reason } : {},
+    },
+    headers: unsubscribeHeaders(to),
+    to,
+    subject: `${childName}'s report is still here`,
+    preview: "Whenever you have a few minutes again.",
+    heading: `${childName}'s report is right where you left it`,
+    bodyLines: [
+      `${hi}${childName}'s report is still here, exactly as it was.`,
+      "Come back whenever you have a few minutes, and I'll pick up from there.",
+    ],
+    cta: { label: `Open ${childName}'s report`, url: resumeUrl },
+    footerNote: "No rush. You can turn these off anytime.",
+    outerNote: DRIP_OUTER_NOTE,
+  });
+}
+
+/** A second (or later) child's questions have never been started, while a
+ * sibling's report already exists. The roster is already real (chat
+ * onboarding collects it up front), so this names the waiting child
+ * directly instead of asking whether more kids exist. */
+export async function submitDripKid2Pending(
+  to: string,
+  firstName: string | null,
+  childName: string,
+  resumeUrl: string,
+  familyId?: string,
+  reason?: string,
+): Promise<HomaEmailSubmission> {
+  const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
+  return submit({
+    ledger: { kind: "drip_kid2_pending", familyId, meta: reason ? { reason } : {} },
+    headers: unsubscribeHeaders(to),
+    to,
+    subject: `Ready when you are: ${childName}'s questions`,
+    preview: `About five minutes, from what you've seen ${childName} do.`,
+    heading: `${childName}'s questions are ready whenever you are`,
+    bodyLines: [
+      `${hi}${childName} is still on the list, whenever you have a few minutes for their questions.`,
+      "Same as last time: a few quick questions, then a report written for their age.",
+    ],
+    cta: { label: `Start ${childName}'s questions`, url: resumeUrl },
+    footerNote: "No rush. You can turn these off anytime.",
+    outerNote: DRIP_OUTER_NOTE,
+  });
+}
+
+/** A child's questionnaire is partway done and stalled before a report
+ * ever formed. Names the real progress already banked, never "N of 41". */
+export async function submitDripMidChecklist(
+  to: string,
+  firstName: string | null,
+  childName: string,
+  answerCount: number,
+  resumeUrl: string,
+  familyId?: string,
+  reason?: string,
+): Promise<HomaEmailSubmission> {
+  const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
+  return submit({
+    ledger: { kind: "drip_mid_checklist", familyId, meta: reason ? { reason } : {} },
+    headers: unsubscribeHeaders(to),
+    to,
+    subject: `A few more taps and ${childName}'s report is ready`,
+    preview: "Your answers so far are already saved.",
+    heading: "Your answers so far are saved",
+    bodyLines: [
+      `${hi}you answered ${answerCount} question${answerCount === 1 ? "" : "s"} about ${childName}, and it's all still saved.`,
+      "A few minutes more and there's a report on where they are, written for their age.",
+    ],
+    cta: { label: `Finish ${childName}'s questions`, url: resumeUrl },
+    footerNote: "Even a few more answers tell me a lot. You can turn these off anytime.",
     outerNote: DRIP_OUTER_NOTE,
   });
 }

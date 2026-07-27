@@ -12,10 +12,14 @@ import {
 } from "../../lib/child-progress/view-copy";
 import type { DashboardReport } from "../../lib/dashboard";
 import type { TrajectoryEra } from "../../lib/map/trajectory-eras";
+import { abilitiesSkyFromView } from "../../lib/child-progress/abilities-from-view";
+import { FIRSTS_DOOR } from "../../lib/child-progress/firsts-copy";
 import { buildTrajectoryStory } from "../../lib/map/trajectory-story";
 import { KidAvatar } from "../dashboard/kid-avatar";
 import { PageColumn } from "../dashboard/page-column";
 import { AskHomaAboutChild } from "./ask-homa-about-child";
+import { AbilitiesCard } from "./abilities-card";
+import { LessonsCard, type ProgressLessonsCardData } from "./lessons-card";
 import { ProgressMap } from "./progress-map";
 import { ProgressSubjects } from "./progress-subjects";
 import type { SubjectDoorRow } from "./subject-door-context";
@@ -154,6 +158,8 @@ export function ProgressView({
   report,
   eras,
   kids,
+  lessons = null,
+  hasFirsts = false,
   deeperChecks = true,
 }: {
   view: ChildProgressView;
@@ -171,13 +177,24 @@ export function ProgressView({
   eras: TrajectoryEra[];
   /** The family's kids in family order (drives the switcher's tones). */
   kids: ProgressViewKid[];
+  /** The lesson-listen door and this child's latest reviews. Null while
+   * the flag is off, and absent on read-only mirrors, which have no
+   * business offering a recording door. */
+  lessons?: ProgressLessonsCardData | null;
+  /** Whether the firsts page has anything on it. A boolean, never a
+   * count: the door renders only when there is a keepsake behind it, so
+   * a child reported on honestly with no `easily` rows outside signup
+   * never gets a door into an empty page. Computed on the route from the
+   * same ledger read, degraded to false on failure. */
+  hasFirsts?: boolean;
   /** False on read-only mirrors (the founder console): the subject
    * panel's deep-dive door walks the family's own flow, so only her
    * session offers it. */
   deeperChecks?: boolean;
 }) {
-  const updatedLine = progressUpdatedLine(view);
-  const tiles = buildProgressTiles(view, new Date());
+  const now = new Date();
+  const updatedLine = progressUpdatedLine(view, now);
+  const tiles = buildProgressTiles(view, now);
 
   const generatedDate = report
     ? new Date(report.generatedAt).toLocaleDateString("en-US", {
@@ -200,6 +217,11 @@ export function ProgressView({
     displayName: tile.displayName,
     needsConfirm: tile.needsConfirm,
   }));
+
+  // A child with no subjects and no report has never been assessed, so
+  // the first check-in stays the page's one ask and the recording door
+  // waits below it. Every other child sees the door up top.
+  const neverAssessed = view.subjects.length === 0 && report === null;
 
   return (
     <PageColumn>
@@ -233,6 +255,13 @@ export function ProgressView({
           </div>
           <KidSwitcher kids={kids} currentChildId={view.childId} />
         </header>
+
+        {/* Directly under the header, where a parent looking for it will
+            find it. It shipped below the chart first and was invisible
+            in practice (2026-07-21): on a scored child the chart plus a
+            dozen subject rows push it a full screen down, with nothing
+            above hinting it exists. */}
+        {lessons && !neverAssessed ? <LessonsCard card={lessons} /> : null}
 
         {view.subjects.length === 0 ? (
           <div className="mt-7">
@@ -288,6 +317,37 @@ export function ProgressView({
             </div>
           </div>
         )}
+
+        {/* The abilities map sits below the numbers, deliberately: the
+            chart answers "how is she doing", the map answers "what has
+            she learned", and the second question is the warmer one to
+            leave a mother with. Suppressed for a never-assessed child
+            so the first check-in stays the page's one ask. */}
+        {neverAssessed ? null : (
+          <AbilitiesCard
+            childName={view.childName}
+            sky={abilitiesSkyFromView(view, now)}
+          />
+        )}
+
+        {/* The door to the firsts page. Two gates, each load-bearing.
+            neverAssessed keeps the first check-in as a brand-new child's
+            one ask. hasFirsts keeps the door out of the page for a child
+            reported on honestly with no `easily` rows outside signup,
+            because that door leads to an empty keepsake and was, before
+            the view-context change, one tap from a sibling's full one. */}
+        {!neverAssessed && hasFirsts ? (
+          <div className="mt-6">
+            <Link
+              href={`/app/${view.childId}/firsts`}
+              className="text-sm font-medium text-[var(--sage-700)] underline underline-offset-4 transition-colors hover:text-[var(--sage-800)]"
+            >
+              {FIRSTS_DOOR}
+            </Link>
+          </div>
+        ) : null}
+
+        {lessons && neverAssessed ? <LessonsCard card={lessons} /> : null}
       </div>
     </PageColumn>
   );

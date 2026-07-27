@@ -363,7 +363,7 @@ The curriculum writer loads this to recommend buildable activities.
 - **Subjects:** Math (logic, number sense)
 - **Ages:** 7-12. Fewer hexagons and simpler rules for younger; larger clusters and harder rules for older.
 - **Creation path:** image-direct
-- **Example activity:** `[hive-puzzle] 7-hexagon clusters — fill each cell with 1-7 so no touching hexagons share a number`
+- **Example activity:** `[hive-puzzle] 7-hexagon clusters: fill each cell with 1-7 so no touching hexagons share a number`
 
 ### fraction-link-puzzle
 - **Slug:** `[fraction-link-puzzle]`
@@ -373,7 +373,7 @@ The curriculum writer loads this to recommend buildable activities.
 - **Subjects:** Math (fractions)
 - **Ages:** 8-12. Simple fractions (halves, thirds) for younger; complex fractions and mixed numbers for older.
 - **Creation path:** image-direct
-- **Example activity:** `[fraction-link-puzzle] 4x5 grid with fraction equivalence — fill blanks so adjacent cells simplify to the same value`
+- **Example activity:** `[fraction-link-puzzle] 4x5 grid with fraction equivalence: fill blanks so adjacent cells simplify to the same value`
 
 ### fraction-maze-escape
 - **Slug:** `[fraction-maze-escape]`
@@ -383,7 +383,7 @@ The curriculum writer loads this to recommend buildable activities.
 - **Subjects:** Math (fractions, ordering)
 - **Ages:** 8-12. Simple fractions for younger; mixed numbers and improper fractions for older.
 - **Creation path:** image-direct
-- **Example activity:** `[fraction-maze-escape] 5x5 fraction grid — trace a path from top-left to bottom-right using only decreasing fractions`
+- **Example activity:** `[fraction-maze-escape] 5x5 fraction grid: trace a path from top-left to bottom-right using only decreasing fractions`
 
 ### decimal-path-puzzle
 - **Slug:** `[decimal-path-puzzle]`
@@ -403,17 +403,17 @@ The curriculum writer loads this to recommend buildable activities.
 - **Subjects:** Personal & Social Development (routine, executive function)
 - **Ages:** 3-8. Fewer cards and picture-only for younger; more cards with time slots for older.
 - **Creation path:** html
-- **Example activity:** `[daily-rhythm-cards] 12 cards — Morning Circle, Read Aloud, Math Time, Snack, Art, Science, Free Play, Writing, Music, Nature Walk, Clean Up, Story Time`
+- **Example activity:** `[daily-rhythm-cards] 12 cards: Morning Circle, Read Aloud, Math Time, Snack, Art, Science, Free Play, Writing, Music, Nature Walk, Clean Up, Story Time`
 
 ### activity-pack
 - **Slug:** `[activity-pack]`
 - **Name:** Activity pack (multi-activity page)
 - **What it is:** Single page with 4 mini-activities in quadrants around one theme. Covers different skill types (counting, labeling, creative, knowledge). Can be cut apart.
 - **Best for:** Multi-skill reinforcement, unit study companions, choice boards.
-- **Subjects:** Any — themed (animals, seasons, topics). Each quadrant targets a different skill.
+- **Subjects:** Any, themed (animals, seasons, topics). Each quadrant targets a different skill.
 - **Ages:** 3-7. Simpler activities for younger; more complex prompts for older.
 - **Creation path:** hybrid
-- **Example activity:** `[activity-pack] Ocean Animals — count sea creatures, label parts of a fish, draw your favorite ocean animal, true/false ocean facts`
+- **Example activity:** `[activity-pack] Ocean Animals: count sea creatures, label parts of a fish, draw your favorite ocean animal, true/false ocean facts`
 
 ### singapore-workbook-page
 - **Slug:** `[singapore-workbook-page]`
@@ -423,4 +423,174 @@ The curriculum writer loads this to recommend buildable activities.
 - **Subjects:** Math (operations, number bonds, place value)
 - **Ages:** 4-9. Ten-frames and simple addition for younger; bar models and multi-step for older.
 - **Creation path:** hybrid
-- **Example activity:** `[singapore-workbook-page] Addition to 20 — ten-frame dot manipulation showing 8 + 5 by making 10 first`
+- **Example activity:** `[singapore-workbook-page] Addition to 20: ten-frame dot manipulation showing 8 + 5 by making 10 first`
+
+### narration-page
+- **Slug:** `[narration-page]`
+- **Name:** Narration page
+- **What it is:** A title/prompt header, a large blank box for the child's own illustration, and wide-ruled lines below for a parent to transcribe the child's spoken words. No answer key.
+- **Best for:** Charlotte Mason narration and journaling, personal reflection prompts, family-history memory pages, science and nature discovery logs.
+- **Subjects:** ELA (narration), Personal & Social Development (journaling), science and nature study (discovery logs)
+- **Ages:** 4-8. A calendar-tracking header row suits science logs; a shaped illustration frame (heart, book) suits milestone pages.
+- **Creation path:** html
+- **Example activity:** `[narration-page] "What happened in the story today?": illustration box on top, six dictation lines below`
+
+### artist-composer-study-card
+- **Slug:** `[artist-composer-study-card]`
+- **Name:** Artist / composer study card
+- **What it is:** A reusable portfolio card for Charlotte Mason picture study or composer study: name banner, artwork frame or listening icon, a "where they were from" map circle, and a reflection box.
+- **Best for:** Art appreciation, music appreciation, building a running artist/composer portfolio across a school year.
+- **Subjects:** Art (picture study), music (composer study), science (inventor and scientist study)
+- **Ages:** 4-10. One card per artist, composer, or inventor, same template reused week to week.
+- **Creation path:** html
+- **Example activity:** `[artist-composer-study-card] Composer study card for Scott Joplin: name banner, "where they were from" circle, and a reflection box`
+
+### composer-listening-guide
+- **Slug:** `[composer-listening-guide]`
+- **Name:** Composer listening guide
+- **What it is:** A one-page active-listening companion for a single piece of music: a listen-for callout naming one concrete hook, 3-5 ordered moment boxes the child checks or sketches as the music reaches them, and a feeling-response line.
+- **Best for:** Composer study rotations, Charlotte Mason music appreciation, first classical-music listening sessions, program music with a built-in story.
+- **Subjects:** Music (composer study, music appreciation)
+- **Ages:** 5-10. One piece per page; no music notation anywhere.
+- **Creation path:** html
+- **Example activity:** `[composer-listening-guide] Listening guide for Beethoven's Pastoral Symphony: listen for the bird calls, then catch the brook, the storm, and the shepherd's thankful song`
+
+### nature-observation-journal
+- **Slug:** `[nature-observation-journal]`
+- **Name:** Nature observation journal
+- **What it is:** A weekly nature-notebook page the child fills in with their own drawing and words after time outside: a choice profile, five-senses log, side-by-side comparison, or open discovery layout.
+- **Best for:** Charlotte Mason nature study, outdoor observation journals, seasonal nature walks, wildlife and specimen logging.
+- **Subjects:** Science (nature study, animals, plants)
+- **Ages:** 4-10. Mostly blank for the child's own drawing, never Homa-supplied reference art.
+- **Creation path:** html
+- **Example activity:** `[nature-observation-journal] Five-senses tree log: "I see / I hear / I smell / I feel" prompts beside a drawing box, with a circle to attach a leaf`
+
+### letter-number-formation-practice
+- **Slug:** `[letter-number-formation-practice]`
+- **Name:** Letter & number formation practice
+- **What it is:** One letter or digit per page: a bold model with a plain-language stroke cue underneath, a formation box (a single box for capitals and digits, a three-band ceiling/chair-rail/floor box for lowercase), a row of trace repetitions that fade from full model to blank, and a starting dot at the stroke's exact starting point.
+- **Best for:** Developmental or multisensory handwriting curricula that teach letters and numbers stroke by stroke in a shared-shape teaching order (not alphabet or count order), pre-writing stroke practice before real letters begin.
+- **Subjects:** ELA (handwriting), math (number formation)
+- **Ages:** 3-6. Larger boxes and fewer repetitions for younger; smaller boxes and more repetitions for older.
+- **Creation path:** html (exact box geometry and baseline placement are critical)
+- **Example activity:** `[letter-number-formation-practice] Capital letter T: "Big line down, little line across the top," four trace boxes fading to one blank box`
+
+### art-project-instructions
+- **Slug:** `[art-project-instructions]`
+- **Name:** Art project instructions
+- **What it is:** A materials list followed by 3-6 numbered steps for making one concrete art or craft piece, with an optional small inspiration thumbnail and an optional closing reflection question. A bare technique-reference variant drops the thumbnail and reflection box for a plain how-to card. An optional skill-tip callout box names and defines one inquiry skill for a hands-on science investigation instead of the reflection question.
+- **Best for:** Formal skills-based art curricula built around the Elements of Art and Principles of Design, a published science textbook's recurring hands-on "Investigate" activity, or any curriculum with a recurring "make something" or "try this" activity that rotates through different media or materials using the same page shell each time.
+- **Subjects:** Art (making, technique, elements and principles), Science (hands-on investigations and experiments)
+- **Ages:** 5-10. Fewer, larger steps for younger; more steps and a reflection prompt (or skill-tip callout, for science) tied to the family's own comprehension-skill or process-skills vocabulary for older.
+- **Creation path:** hybrid (generate_image for the inspiration thumbnail, HTML for the materials list and steps) or html-only for the bare technique-reference variant
+- **Example activity:** `[art-project-instructions] Paper-plate weaving: materials list, five numbered steps, and a reflection question about the pattern the child made`
+
+### then-and-now-comparison
+- **Slug:** `[then-and-now-comparison]`
+- **Name:** Then and now comparison
+- **What it is:** A two-panel page comparing something from the past against today ("Then"/"Now", "Long Ago"/"Today", "First"/"Now"), each panel with a small illustration and a one- or two-sentence caption, plus a reflection question asking the child to name what changed.
+- **Best for:** Elementary social studies units on communities, chores, toys, transportation, or national symbols across time; science units comparing an early tool or invention to its modern form; any curriculum with a recurring "then and now" or "long ago and today" feature box.
+- **Subjects:** Social studies (communities and change over time), Science (tools and inventions over time)
+- **Ages:** 5-9. A single clear comparison for younger; a comparison plus a written reflection sentence for older.
+- **Creation path:** hybrid (generate_image for the two small illustrations, HTML for the panel frames, labels, and reflection box), or html-only for a text-and-caption-only comparison
+- **Example activity:** `[then-and-now-comparison] How toys have changed: a wooden top labeled "Then" beside a remote-control car labeled "Now," with a reflection question about what stayed the same`
+
+### size-attribute-comparison-page
+- **Slug:** `[size-attribute-comparison-page]`
+- **Name:** Size attribute comparison page
+- **What it is:** A page comparing two or three illustrated items along one physical attribute (length, height, weight, or overall size), where the child circles or colors the correct item ("the longer one," "the heavier one") or draws a new item bigger or smaller than a model. A balance-scale variant compares weight on a seesaw or balance.
+- **Best for:** Pre-number measurement readiness before any unit of measurement is introduced; Singapore-style Pre-K/K comparison lessons (big/small, long/short, tall/short, heavy/light); any early-math curriculum teaching comparative adjectives through paired objects.
+- **Subjects:** Math (measurement readiness, pre-number comparison)
+- **Ages:** 3-6. Two items and one clear attribute for younger; a three-item "circle the biggest" row once the two-item version is solid.
+- **Creation path:** hybrid (generate_image for the compared items, HTML for the instruction line and circle/color prompts), or html-only for a simple two-shape version.
+- **Example activity:** `[size-attribute-comparison-page] Three ribbons of different lengths lined up on a shared baseline; "Circle the longest ribbon."`
+
+### pattern-extension-practice
+- **Slug:** `[pattern-extension-practice]`
+- **Name:** Pattern extension practice
+- **What it is:** A page built around one repeating sequence (an AB pattern like red-blue-red-blue) using colors, shapes, or icons, where the child copies a shown pattern, identifies what comes next, matches the continuation, or creates an original pattern in a blank row.
+- **Best for:** Pre-number pattern and sequence readiness; any early-math curriculum with a dedicated patterns unit (Singapore-style movement/sound/visual pattern lessons, Montessori pattern work, general Pre-K/K "what comes next" pages).
+- **Subjects:** Math (pre-number pattern recognition and sequencing)
+- **Ages:** 3-6. AB (two-element) patterns first; AAB/ABB/ABC variants only once AB is solid.
+- **Creation path:** html (uniform, evenly-spaced shapes or colors) or hybrid when the pattern units are themed illustrations.
+- **Example activity:** `[pattern-extension-practice] A row of red-blue-red-blue-red beads with two blank cells at the end; "Color the beads to finish the pattern."`
+
+### comic-narrative-math-page
+- **Slug:** `[comic-narrative-math-page]`
+- **Name:** Comic narrative math page
+- **What it is:** A short comic strip (2-4 panels) where one or two original illustrated characters trade speech-bubble dialogue that teaches a concept conversationally, ending in a visually separated "stop and try it" box with a question tied to the same scenario. The dialogue IS the lesson, not a caption under one.
+- **Best for:** Any curriculum or family request that wants a concept taught through character and story rather than direct instruction; re-engaging a child who skims past a bare instruction line; making an abstract idea concrete through a relatable everyday scene.
+- **Subjects:** Math and any other subject; the panel-plus-dialogue-plus-question shape is not math-specific.
+- **Ages:** 4-8.
+- **Creation path:** hybrid (generate_image per panel for the characters and scene, HTML for panel frames, speech bubbles, and the closing question box).
+- **Example activity:** `[comic-narrative-math-page] Two kids comparing two curly noodles on a lunch tray, one straight and one curved, arguing about which is longer, ending in a "Which path is shorter: the straight one or the wiggly one?" box.`
+
+### circle-diagram-two-set-sort
+- **Slug:** `[circle-diagram-two-set-sort]`
+- **Name:** Circle diagram two-set sort
+- **What it is:** Two large overlapping circles, each labeled with one category, where the child places items, numbers, or words into one circle only, the other circle only, the overlapping middle (both attributes), or outside both circles (neither attribute). The overlap is the point: some items genuinely belong to both categories at once, unlike a mutually-exclusive column sort.
+- **Best for:** Classifying numbers by two properties at once (odd vs. even, perfect square vs. prime), sorting words or letters by two rules, science classification by two traits (flies vs. swims), and any two-rule sort where an item can qualify for both.
+- **Subjects:** Math (number properties), science (classification), ELA (vocabulary categories)
+- **Ages:** 6-9.
+- **Creation path:** html for plain number/word/letter sorts, hybrid when items are illustrated attribute cards.
+- **Example activity:** `[circle-diagram-two-set-sort] Numbers 1-9 to place in a diagram labeled "perfect squares" and "odd numbers," where 1 and 9 belong in the overlap and 2, 4, 6, 8 belong outside both.`
+
+### picture-bingo-board
+- **Slug:** `[picture-bingo-board]`
+- **Name:** Picture bingo board
+- **What it is:** A set of bingo-style boards built from one shared pool of items (vocabulary, math facts, sight words), each board a grid (usually 3x3) holding a different shuffled arrangement of the same pool plus one labeled free space, so a family can print several unique boards for a caller-led group round without any two boards matching.
+- **Best for:** Vocabulary recall and listening practice in any subject or language, a lower-pressure alternative to flash-card drill, group or co-op play, and foreign-language vocabulary where the caller says the word aloud and the child matches it to the picture.
+- **Subjects:** Any subject or language with a discrete, nameable item pool (animals, sight words, math facts, vocabulary sets)
+- **Ages:** 3-8. A 3x3 grid (8 items plus free space) for ages 3-6 or 8-9 item pools; a 4x4 grid for ages 7+ or larger pools.
+- **Creation path:** hybrid (generate_image once per pool item, reused across every board; HTML for the grid, free space, and per-board frame styling).
+- **Example activity:** `[picture-bingo-board] Four shuffled 3x3 boards of Spanish farm-animal vocabulary (el gato, la vaca, el pollito, el cerdo, el caballo, la gallina, el pato, el perro) with a "¡Gratis!" free space, for a caller-led round.`
+
+### chant-and-rhyme-card
+- **Slug:** `[chant-and-rhyme-card]`
+- **Name:** Chant and rhyme card
+- **What it is:** A one-page say-aloud card for a traditional chant, nursery rhyme, or fingerplay: the full text in large read-aloud type, one spoken line per printed line, with optional leader/everyone chips for call-and-response, italic clap or action hints, and a small parent footer on how to teach it. Nothing to trace, cut, or fill in; the page is for saying together, not writing.
+- **Best for:** Circle-time and morning-basket routines, rhyme and rhythm play that builds phonological awareness before formal phonics, oral language for toddlers and preschoolers, memory work, call-and-response games, and clapping or jump-rope chants for older siblings.
+- **Subjects:** ELA (phonological awareness, oral language), music (steady beat), Spanish and other languages (traditional rhymes in the target language)
+- **Ages:** 2-6 for saying along; 5-8 for jump-rope and clapping-game chants
+- **Creation path:** html (precise typography for cues and line breaks; optional hybrid for one small spot illustration). Traditional public-domain or family-created chants only, never a published compiler's arrangement.
+- **Example activity:** `[chant-and-rhyme-card] "One potato, two potato" counting-out chant with "(tap fists on each potato)" action hints and a parent footer on letting the child join in over several days.`
+
+### biography-timeline-page
+- **Slug:** `[biography-timeline-page]`
+- **Name:** Biography timeline page
+- **What it is:** A chronological strip of 5-8 labeled event boxes, each pairing a year or age with a one-line event and a small illustration, connected by a single line so the sequence reads as forward time. A life-events mode follows a real person's own biographical milestones; an invention-progression mode follows an invention or technology's own timeline instead of a person's life.
+- **Best for:** Biography study of an artist, composer, inventor, or scientist; any curriculum wanting the progression of a technology or invention shown rather than told. Recurred independently across three Getting to Know biography drops (artists, composers, inventors and scientists) this session.
+- **Subjects:** Art, music, science, history (biography and invention history)
+- **Ages:** 6-10.
+- **Creation path:** hybrid (generate_image per event for the small illustrations, HTML for the boxes, connecting line, and labels), or html-only for a text-and-caption-only timeline.
+- **Example activity:** `[biography-timeline-page] Alexander Graham Bell's life: born 1847, taught deaf students and invented visible speech in the 1870s, patented the telephone in 1876, founded a school for the deaf, died 1922.`
+
+### chart-and-graph-skill-practice
+- **Slug:** `[chart-and-graph-skill-practice]`
+- **Name:** Chart and graph skill practice
+- **What it is:** A page teaching one concrete data-reading skill (read a calendar, read a timeline, read a labeled diagram, or read a bar graph): a small worked example models the reading move, then the child answers 2-4 practice questions about a second, independent version of the same display.
+- **Best for:** Cross-subject data literacy: math data & statistics, science process diagrams, social studies chart-reading lessons. An evergreen skill that recurs across every subject, confirmed recurring 5 times in one social studies textbook alone.
+- **Subjects:** Math (data & statistics), science (process diagrams), social studies (chart and calendar reading)
+- **Ages:** 6-10.
+- **Creation path:** html (grid, axis, and tick-mark precision are the point).
+- **Example activity:** `[chart-and-graph-skill-practice] Reading a bar graph: a worked example showing 4 books read on Tuesday, then a practice bar graph of a different week with 3 questions about specific days.`
+
+### lesson-comprehension-check
+- **Slug:** `[lesson-comprehension-check]`
+- **Name:** Lesson comprehension check
+- **What it is:** A fixed "What Did You Learn?" box that closes a taught lesson with exactly 2 literal recall questions plus 1 open "Think and Share" or "Write and Share" question tied to the lesson's actual target skill.
+- **Best for:** Any subject that ends a taught lesson or a read passage with a quick recall-plus-application close. A fixed, recurring feature box in published elementary textbooks (28 occurrences in one social studies book alone), but the shape is subject-agnostic.
+- **Subjects:** Any subject with a taught lesson or read passage (social studies, science, ELA, history)
+- **Ages:** 6-11.
+- **Creation path:** html (a short, precise box; no illustration budget needed).
+- **Example activity:** `[lesson-comprehension-check] Closes a lesson on river crossings: "What did the pioneers use to cross the river?", "Why did the town build a bridge there?", and "How would your family cross a river if there were no bridge nearby?"`
+
+### magic-square-puzzle
+- **Slug:** `[magic-square-puzzle]`
+- **Name:** Magic square puzzle
+- **What it is:** An n-by-n grid (commonly 3x3 or 4x4) where the child fills in missing numbers so every row, every column, AND both diagonals sum to the same stated target. Some cells are given, some blank. Self-checking by constraint satisfaction, and distinct from cross-number-puzzle's edge-labeled row/column sums.
+- **Best for:** Addition fluency, logical reasoning; a well-known, evergreen enrichment-math format used far beyond any one curriculum.
+- **Subjects:** Math (addition fluency, logical reasoning)
+- **Ages:** 7-11. A 3x3 with more given cells for younger; a 3x3 with fewer givens or a 4x4 for older.
+- **Creation path:** html (precise grid layout and borders, matching cross-number-puzzle's cell geometry).
+- **Example activity:** `[magic-square-puzzle] A 3x3 grid where every row, column, and diagonal must sum to 15, with 5 of the 9 cells already filled in.`
