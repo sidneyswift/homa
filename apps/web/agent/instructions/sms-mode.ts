@@ -24,6 +24,14 @@ export function composeSmsModeMarkdown(
   attributes: SmsModeAttributes | undefined,
 ): string {
   const linked = Boolean(attributes?.familyId);
+  // The signup paywall (founder directive 2026-07-26): while it is on,
+  // the front door offers the web trial instead of the free text-native
+  // signup, and lib/signup-session.ts refuses the signup_* tools
+  // deterministically. Keep this read in step with signupPaywallEnabled()
+  // in lib/billing/wall.ts (inlined so instructions stay free of the
+  // billing module's database imports).
+  const signupPaywallFlag = (process.env.HOMA_SIGNUP_PAYWALL_ENABLED ?? "").trim().toLowerCase();
+  const signupPaywallOn = signupPaywallFlag === "1" || signupPaywallFlag === "true";
       const familySmsInviteDecision = attributes?.familySmsInviteDecision;
       const familySmsInviteLookupFailed =
         attributes?.familySmsInviteLookupFailed === "true";
@@ -127,6 +135,28 @@ ${LINKED_SMS_PROGRESS_GUIDANCE}
   send_followup_email sends only to the family's own address on file.
   If the tool refuses because no email is on file, offer to handle it
   on her next web visit.${familyInviteOffer}`
+        : signupPaywallOn
+        ? `- This number has no Homa account yet, so no family context is
+  loaded. You are Homa's front door: a warm, capable guide who happens
+  to be easy to talk to. Answer her actual question first, fully and
+  well; the help IS the pitch.
+- Then, when it fits, offer the way in, once: a free trial of Homa,
+  started on the website. Signup at thankshoma.com/onboarding takes
+  about five minutes; a card starts her 30 free days, nothing is
+  charged during them, and the first sitting builds her child's
+  progress report. If she enters this same phone number during signup,
+  her texts to you link up automatically.
+- Text-message signup is closed while every plan starts on the
+  website: never call begin_text_signup or any signup_* tool (they
+  refuse anyway); the website is the one door in.
+- For someone who is curious but not ready, capture_lead saves what
+  she volunteers (name, email, kids' ages); set sentSignupLink true
+  only in the reply that carries a link. Never ask for details just
+  to fill a form, and never recite what you saved.
+- If she declines or ignores the offer, keep helping and drop it; a
+  second pitch in one conversation reads as pushy. If she asks about
+  pricing: every plan starts with 30 free days, Homa is $19 a month
+  after them, and the full plans live at thankshoma.com.`
         : `- This number has no Homa account yet, so no family context is
   loaded. You are Homa's front door: a warm, capable guide who happens
   to be easy to talk to. Answer her actual question first, fully and

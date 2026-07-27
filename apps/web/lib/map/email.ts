@@ -738,11 +738,11 @@ export async function submitDripSetupNudge(
     subject: firstName
       ? `Pick up where you left off, ${firstName}`
       : "Pick up where you left off",
-    preview: "A free report on your child, from a few quick questions.",
+    preview: "A report on your child, from a few quick questions.",
     heading: "Your setup is saved",
     bodyLines: [
       `${hi}you started setting up your family on Homa, and it is all here whenever you are ready.`,
-      "Add your first child and answer a few questions about what you have seen them do. Homa builds a free report on where they are, written for their age, in about five minutes.",
+      "Add your first child and answer a few questions about what you have seen them do. Homa builds a report on where they are, written for their age, in about five minutes. It is all part of your 30 free days.",
     ],
     cta: { label: "Add your first child", url: resumeUrl },
     footerNote: "No rush. You can turn these reminders off anytime.",
@@ -885,7 +885,7 @@ export async function submitDripKid2Pending(
     heading: `${childName}'s questions are ready whenever you are`,
     bodyLines: [
       `${hi}${childName} is still on the list, whenever you have a few minutes for their questions.`,
-      "Same as last time: a few quick questions, then a free report written for their age.",
+      "Same as last time: a few quick questions, then a report written for their age.",
     ],
     cta: { label: `Start ${childName}'s questions`, url: resumeUrl },
     footerNote: "No rush. You can turn these off anytime.",
@@ -914,7 +914,7 @@ export async function submitDripMidChecklist(
     heading: "Your answers so far are saved",
     bodyLines: [
       `${hi}you answered ${answerCount} question${answerCount === 1 ? "" : "s"} about ${childName}, and it's all still saved.`,
-      "A few minutes more and there's a free report on where they are, written for their age.",
+      "A few minutes more and there's a report on where they are, written for their age.",
     ],
     cta: { label: `Finish ${childName}'s questions`, url: resumeUrl },
     footerNote: "Even a few more answers tell me a lot. You can turn these off anytime.",

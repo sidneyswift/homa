@@ -6,10 +6,13 @@ import type { BillingPeriod, PlanTier } from "../../lib/billing/wall-types";
  * Every parent-facing word on the wall, in one reviewable file
  * (plans/2026-07-11-the-wall.md; copy rulebook:
  * .agents/skills/homa-copy-writer/SKILL.md). The wall is an offer, never
- * a scold: the report stays free forever, and the wall only appears at
- * the first tap on an action door. Both copy gates ran 2026-07-11
- * (reader, then editor); the founder read-aloud is the last gate
- * (HUMAN-TODO) before the flag ever flips.
+ * a scold, and it only appears at the first tap on an action door. The
+ * original "report stays free forever" placement was superseded for new
+ * families by the report lock (2026-07-18) and then the signup paywall
+ * (founder directive 2026-07-26, TRIAL_GATE_* below); wallReportLine
+ * still renders true for the pre-gate families the door wall serves.
+ * Both copy gates ran 2026-07-11 (reader, then editor); the founder
+ * read-aloud is the last gate before any flag ever flips.
  *
  * Vocabulary laws for this surface:
  * - The trial is "your 30 free days", never "your free month": the
@@ -56,6 +59,8 @@ export function wallIncludedLine(door: WallDoor, childName?: string | null): str
       return `Your 30 free days include this chat, four-week plans, worksheets made for ${kid}, and phone calls.`;
     case "report":
       return `Your 30 free days include every subject in ${kid === "your child" ? "the" : `${kid}'s`} report, four-week plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+    case "signup":
+      return `Your 30 free days include the questionnaire and ${kid === "your child" ? "your child's" : `${kid}'s`} full progress report, weekly plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
     default: {
       const exhaustive: never = door;
       throw new Error(`Unhandled wall door: ${exhaustive}`);
@@ -68,18 +73,10 @@ export function wallIncludedLine(door: WallDoor, childName?: string | null): str
 export const WALL_MECHANICS_LINE =
   "A credit card starts your 30 free days. Nothing is charged during them. You get an email before the first charge.";
 
-/** The buttons differ from the first words (editor gate: twin labels
- *  whose only difference sat after the mid-dot forced a compare-the-
- *  endings pause at the commitment point). */
-export const WALL_MONTHLY_BUTTON = "Start your 30 free days \u00b7 then $19 a month";
-
-export const WALL_ANNUAL_BUTTON = "Choose the year instead \u00b7 then $99 a year";
-
-/** The year's math done for her ($99 / 12, real division), and the
- *  children fact as a full sentence (editor gate: "Unlimited kids, one
- *  price" collided with the two prices right above it). */
+/** The children fact as a full sentence (editor gate: "Unlimited kids,
+ *  one price" collided with the two prices right above it). tierBullets
+ *  prepends the per-tier annual math when the toggle sits on annual. */
 export const WALL_BULLETS = [
-  "The year works out to $8.25 a month.",
   "Adding children never changes the price.",
   "Cancel anytime.",
 ] as const;
@@ -186,9 +183,9 @@ export function tierBullets(tier: PlanTier, period: BillingPeriod): readonly str
   const price = TIER_PRICES[tier];
   if (period === "annual" && price.annual !== null) {
     const perMonth = (price.annual / 12).toFixed(2).replace(/\.00$/, "");
-    return [`The year works out to $${perMonth} a month.`, ...WALL_BULLETS.slice(1)];
+    return [`The year works out to $${perMonth} a month.`, ...WALL_BULLETS];
   }
-  return WALL_BULLETS.slice(1);
+  return [...WALL_BULLETS];
 }
 
 /** One line per tier, reassurance-shaped (what it adds, in her words),
@@ -270,6 +267,63 @@ export function reportLockRowLine(subjectName: string, observations: number): st
 export const REPORT_LOCK_SIGNIN_HEADLINE = "The rest of the report is part of Homa membership.";
 
 export const REPORT_LOCK_SIGNIN_BODY = "Sign in to see the offer.";
+
+/**
+ * The signup trial gate (/onboarding/trial, founder directive
+ * 2026-07-26): the one full-page ask between the account card and the
+ * product. Same laws as every wall surface. The shape follows the
+ * best-documented card-upfront pattern (Blinkist's trial timeline,
+ * growth.design case study: leading with the reminder-before-charge
+ * promise raised trial starts 23% and cut complaints 55%): reassure
+ * first, then the plain mechanics as a three-beat timeline, then the
+ * tiers. The reminder promise is real: Stripe's trial reminder email is
+ * a launch requirement for this page (founder checklist on the PR), and
+ * WALL_MECHANICS_LINE already made the same promise at the doors.
+ */
+export const TRIAL_GATE_EYEBROW = "Homa membership";
+
+export const TRIAL_GATE_HEADLINE = "Try Homa free for 30 days";
+
+/** Reassurance first: the account is made and everything she does next
+ *  is kept. The gate is the next step, not a toll on what she has. */
+export const TRIAL_GATE_REASSURANCE =
+  "Your account is ready. Pick a plan to start your 30 free days. Everything below is open the whole time.";
+
+/** The Blinkist-style timeline: what happens today, before the charge,
+ *  and on day 30, each as one plain fact. */
+export const TRIAL_GATE_TIMELINE: ReadonlyArray<{ marker: string; line: string }> = [
+  {
+    marker: "Today",
+    line: "A credit card starts your 30 free days. Nothing is charged today.",
+  },
+  {
+    marker: "Day 23",
+    line: "We email you a reminder, a week before the first charge.",
+  },
+  {
+    marker: "Day 30",
+    line: "Your plan begins. Cancel before then and you pay nothing.",
+  },
+];
+
+/** Above the tiers: what the 30 free days hold, in household words. */
+export const TRIAL_GATE_INCLUDED_LINE =
+  "Your 30 free days include the questionnaire and your child's full progress report, weekly plans, worksheets made for your child, phone calls with Homa, and chat.";
+
+/** Under the tiers: nothing is lost by waiting, and the door out is
+ *  named (offers never commands). */
+export const TRIAL_GATE_SAVED_LINE =
+  "Not ready today? Everything you've entered is saved to your account, and this page will be here when you come back.";
+
+/** The lapsed variant: a family whose subscription ended sees the same
+ *  gate with its own first line, so it never reads as a bug. */
+export const TRIAL_GATE_LAPSED_REASSURANCE =
+  "Welcome back. Your family's records are all still here, exactly as you left them.";
+
+/** Shown with the lapsed line when a Stripe billing relationship
+ *  exists: the self-serve door for fixing a card or restarting the old
+ *  plan, so the gate never traps a former member. */
+export const TRIAL_GATE_MANAGE_BILLING = "Manage billing";
 
 const NUMBER_WORDS: Record<number, string> = {
   1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six",

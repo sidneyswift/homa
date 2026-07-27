@@ -134,6 +134,9 @@ jobs:
       - name: Drip checks (eligibility, priority, beat-keyed audiences)
         run: pnpm check:drip
 
+      - name: Billing gate checks (wall exemptions, account access, wall + landing copy pins)
+        run: pnpm check:billing
+
       # Fixture hygiene only, no model call. The paid routing eval is
       # pnpm eval:ask-user-questions, run by hand.
       - name: Choice-card routing fixtures

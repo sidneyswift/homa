@@ -4,6 +4,7 @@ import { z } from "zod";
 import { liveProgressEnabled } from "../../../../lib/child-progress/flag";
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
+import { familyAccountCheckout } from "../../../../lib/billing/wall";
 import { requireFamilyWithActor } from "../../../../lib/map/session";
 import {
   deleteAnswerWithProgressStatus,
@@ -47,6 +48,12 @@ export async function POST(request: Request): Promise<Response> {
   }
   if (!access) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
+  }
+  // The signup paywall gates the pipeline, not only the pages: a walled
+  // account must not keep answering toward the report the gate exists
+  // to sell (the dc4ab64b bypass class).
+  if ((await familyAccountCheckout(access.family.id)) !== null) {
+    return Response.json({ ok: false, reason: "walled" }, { status: 403 });
   }
 
   let raw: unknown;

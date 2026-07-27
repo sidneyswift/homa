@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { familyWallCheckout } from "../../lib/billing/wall";
+import {
+  familyAccountCheckout,
+  familyWallCheckout,
+  signupPaywallEnabled,
+} from "../../lib/billing/wall";
 import { fetchChatHistory } from "../../lib/chat-history";
 import {
   appWouldAdmit,
@@ -42,9 +46,33 @@ import {
 export const metadata: Metadata = {
   title: "See where your child stands",
   description:
-    "Answer a five-minute questionnaire about what your child can do. Homa checks it against national benchmarks and sends you a free progress report.",
+    "Answer a five-minute questionnaire about what your child can do. Homa checks it against national benchmarks and builds your child's progress report.",
   alternates: { canonical: "/onboarding" },
 };
+
+/**
+ * The signup paywall's routing decision for this page (founder
+ * directive 2026-07-26). "off": flag dark, nothing changes. "entitled":
+ * this family passed the gate (trial, subscription, or comp), run the
+ * flow as always. "pending": somebody on this page will have to pass
+ * through /onboarding/trial before the product; the client flow
+ * forwards them there the moment their account exists. A walled family
+ * whose account already exists never even renders: it redirects to the
+ * gate here, server-side, so no client state can route around it.
+ */
+async function signupPaywallDisposition(): Promise<"off" | "entitled" | "pending"> {
+  if (!signupPaywallEnabled()) return "off";
+  const session = await requireFamily();
+  if (!session) return "pending";
+  const checkout = await familyAccountCheckout(session.id);
+  if (!checkout) return "entitled";
+  if (session.has_account) redirect("/onboarding/trial");
+  // A walled family without a linked account is mid-signup (the
+  // anonymous sitting, or a Google return the next /api/map/state call
+  // will link): the account card still has to run, so the page renders
+  // and the client forwards to the gate right after the account moment.
+  return "pending";
+}
 
 async function loadChatProps(): Promise<OnboardingChatProps | null> {
   if (!chatOnboardingEnabled()) return null;
@@ -122,6 +150,11 @@ async function loadChatProps(): Promise<OnboardingChatProps | null> {
 }
 
 export default async function OnboardingPage() {
-  const chat = await loadChatProps();
-  return <OnboardingShell chat={chat} />;
+  const paywall = await signupPaywallDisposition();
+  // "pending" skips the chat props on purpose: building them runs
+  // beginOnboarding (the durable record write) and would drop an
+  // un-gated family straight into the conversation. Onboarding starts
+  // after the gate, so the family Homa greets has already given a card.
+  const chat = paywall === "pending" ? null : await loadChatProps();
+  return <OnboardingShell chat={chat} paywallPending={paywall === "pending"} />;
 }

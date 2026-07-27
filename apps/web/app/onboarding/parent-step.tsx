@@ -168,10 +168,16 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
               />
             </span>
           </h1>
+          {/* The trial terms live HERE, before the signup doors, because
+              this screen is where the commitment starts (signup paywall,
+              founder directive 2026-07-26): a card ask that first appears
+              two screens later reads as a trap. Same mechanics phrasing as
+              wall-copy.ts's WALL_MECHANICS_LINE so the promise never
+              drifts between surfaces. */}
           <p className="mt-4 max-w-[28rem] text-pretty text-body">
-            Answer a five-minute questionnaire to get your child&apos;s free progress report.
-            Strengths come first. Anything still growing comes with a next step. A free account
-            saves the report.
+            Your free trial starts with a five-minute questionnaire and your child&apos;s
+            progress report. Strengths come first. Anything still growing comes with a next
+            step. A card starts your 30 free days, and nothing is charged during them.
           </p>
 
           {/* Open form, no card: the report preview is the page's one card,

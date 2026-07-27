@@ -3,7 +3,13 @@ export const HERO_COPY = {
   headline: "The homeschool assistant that does the prep.",
   body:
     "Homa is an AI assistant for parents. She plans each week. She makes practice pages for each child. She records the hours you share. Her progress reports show what looks solid and what comes next.",
-  primaryAction: "Get your free report",
+  primaryAction: "Start your free trial",
+  /** Under the primary CTA, everywhere it appears: the card ask must be
+   *  visible BEFORE the click (trial-transparency research 2026-07-26:
+   *  hiding the card step behind a soft CTA costs trust and day-0
+   *  cancellations; naming it raised trial starts in the Blinkist
+   *  case). One price, the trial length, and the way out. */
+  primaryActionNote: "30 free days, then plans from $19 a month. Cancel anytime.",
 } as const;
 
 export type PlatformKind = "message" | "web" | "phone";
@@ -84,7 +90,7 @@ export const CAPABILITY_ITEMS: ReadonlyArray<{
 ];
 
 export const SAMPLE_REPORT_COPY = {
-  eyebrow: "Free progress report",
+  eyebrow: "The progress report",
   headline: "A progress report built from your answers.",
   body:
     "You answer a five-minute questionnaire per child. Homa checks each answer against published national standards and education research. The report groups the answers by subject.",
