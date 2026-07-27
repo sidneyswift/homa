@@ -3,6 +3,53 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-27 · Founder directive: shorten the signup-paywall trial to 7 days
+
+Founder: "make it a free 7 day trial instead of 30 day." Every parent-
+facing "30 free days" / "30-day trial" string became "7 free days" /
+"7-day trial" (landing, onboarding, the trial gate, chat, SMS, the
+phone line's pitch, drip email, `.env.example`). The gate is still
+flag-dark (`HOMA_SIGNUP_PAYWALL_ENABLED` unset), so nothing live
+changed; this only updates what ships once it flips.
+
+One decision made without a ruling: TRIAL_GATE_TIMELINE's reminder day
+recalculates to day 4 (three days before day 7), matching Stripe's
+`customer.subscription.trial_will_end` webhook cadence (always 3 days
+before trial end, any length) rather than day 23's old "a week before"
+framing, which was specific to the 30-day math. This creates a real gap
+flagged in `.env.example`'s `HOMA_SIGNUP_PAYWALL_ENABLED` comment: no
+code sends this reminder yet. Stripe's OWN dashboard-configured trial
+reminder (the founder checklist item this replaces) fires 7 days before
+trial end, which for a trial this short is day 0, the moment of
+signup, so it cannot keep the day-4 promise the copy now makes. Flagged
+to the founder rather than built, since it is a new capability (a
+webhook handler plus a transactional email) beyond the requested
+change, not a mechanical rename.
+
+**Addendum, same day:** the founder additionally authorized updating the
+LIVE Stripe Payment Links themselves (asked first, since
+`subscription_data.trial_period_days` turned out to be create-only on
+Payment Links, not updatable in place, confirmed via the Stripe CLI's
+own `update --help` vs `create --help` output, so this was never a
+one-line fix). Created 6 new live Payment Links (regular/plus/elite x
+monthly/annual) against the SAME existing Prices/Products, each with
+`trial_period_days=7`, `payment_method_collection=always`, and the same
+`/api/billing/confirm` redirect; verified every field on all 6 against
+the originals before proceeding; repointed the 6
+`NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_*_URL` Vercel production vars via
+`vercel env add --force --no-sensitive`; deactivated the 6 old 30-day
+links afterward. Found and fixed in passing: the regular tier's live
+monthly URL had been unset in production the whole time (a latent gap,
+never hit live because the wall was off). A fresh Vercel production
+build is still required before these values take effect (they are
+inlined at build time); merging PR #236 is the natural trigger and also
+ships the matching copy. Also found in passing: `HOMA_WALL_ENABLED` and
+`HOMA_SIGNUP_PAYWALL_ENABLED` both read empty in production right now,
+contradicting the 2026-07-18 "wall flipped on" record elsewhere in this
+log; nothing customer-facing was touched by today's Stripe change as a
+result, but the discrepancy itself is unresolved and worth a founder
+look.
+
 ## 2026-07-26 · Founder directive: the signup paywall (card-upfront trial before the account opens)
 
 Founder: "paywall asap before the free report, just make them pay

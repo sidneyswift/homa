@@ -91,7 +91,7 @@ export function WelcomeChooser({
           className="font-mono text-[0.65rem] uppercase tracking-widest"
           style={{ color: "var(--sage-700)" }}
         >
-          Your 30 free days started
+          Your 7 free days started
         </p>
         <h2 className="mt-2 font-display text-2xl font-bold leading-tight text-strong">
           {childName}&apos;s full report is open.

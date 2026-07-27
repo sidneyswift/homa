@@ -742,7 +742,7 @@ export async function submitDripSetupNudge(
     heading: "Your setup is saved",
     bodyLines: [
       `${hi}you started setting up your family on Homa, and it is all here whenever you are ready.`,
-      "Add your first child and answer a few questions about what you have seen them do. Homa builds a report on where they are, written for their age, in about five minutes. It is all part of your 30 free days.",
+      "Add your first child and answer a few questions about what you have seen them do. Homa builds a report on where they are, written for their age, in about five minutes. It is all part of your 7 free days.",
     ],
     cta: { label: "Add your first child", url: resumeUrl },
     footerNote: "No rush. You can turn these reminders off anytime.",

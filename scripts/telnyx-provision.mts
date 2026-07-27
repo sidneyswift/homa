@@ -407,7 +407,7 @@ async function loadVoiceInstructions(): Promise<string> {
     "  turn, then confirm the text is on its way in one short sentence.",
     "  The text itself carries the trial terms. If they decline, keep",
     "  helping and drop it; a second pitch in one call reads as pushy.",
-    "  If they ask about pricing: every plan starts with 30 free days,",
+    "  If they ask about pricing: every plan starts with 7 free days,",
     "  then Homa is $19 a month, and the full plans live at",
     "  thankshoma.com. Never volunteer pricing beyond that on a call.",
     "- What a call can and cannot do is bound by the rules at the end of",

@@ -15,23 +15,23 @@ import type { BillingPeriod, PlanTier } from "../../lib/billing/wall-types";
  * read-aloud is the last gate before any flag ever flips.
  *
  * Vocabulary laws for this surface:
- * - The trial is "your 30 free days", never "your free month": the
+ * - The trial is "your 7 free days", never "your free month": the
  *   reader gate tangled the trial month with the child's month plan
  *   the instant both were on screen. "month" appears only as the $19
  *   price unit.
- * - Included lines share ONE frame, "Your 30 free days include X",
+ * - Included lines share ONE frame, "Your 7 free days include X",
  *   where X is the thing she just tapped (the reader gate's bridge),
  *   named first in the list (editor gate: stacked "comes with...
  *   along with" was doing containment work twice).
  * - Price labels are the founder's v1 sticker prices (build-log
  *   2026-07-06) and must match the Stripe Payment Links the env vars
- *   point at; change them together, and keep the links' trial at 30
+ *   point at; change them together, and keep the links' trial at 7
  *   days so these words stay true.
  */
 
 export const WALL_EYEBROW = "Homa membership";
 
-export const WALL_HEADLINE = "Try Homa free for 30 days";
+export const WALL_HEADLINE = "Try Homa free for 7 days";
 
 /** The reassurance, first (reader gate: this landing first is what let
  *  her relax): the thing she already has is hers for good. */
@@ -46,21 +46,21 @@ export function wallIncludedLine(door: WallDoor, childName?: string | null): str
   const kid = childName ?? "your child";
   switch (door) {
     case "plan":
-      return `Your 30 free days include the four-week plan you tapped, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+      return `Your 7 free days include the four-week plan you tapped, worksheets made for ${kid}, phone calls with Homa, and chat.`;
     case "month":
       return childName
-        ? `Your 30 free days include ${childName}'s month, worksheets made for ${childName}, phone calls with Homa, and chat.`
-        : `Your 30 free days include the month you tapped, worksheets made for your child, phone calls with Homa, and chat.`;
+        ? `Your 7 free days include ${childName}'s month, worksheets made for ${childName}, phone calls with Homa, and chat.`
+        : `Your 7 free days include the month you tapped, worksheets made for your child, phone calls with Homa, and chat.`;
     case "lesson":
-      return `Your 30 free days include the lesson you tapped, its printable worksheet, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+      return `Your 7 free days include the lesson you tapped, its printable worksheet, worksheets made for ${kid}, phone calls with Homa, and chat.`;
     case "call":
-      return `Your 30 free days include the call you asked for, four-week plans, worksheets made for ${kid}, and chat.`;
+      return `Your 7 free days include the call you asked for, four-week plans, worksheets made for ${kid}, and chat.`;
     case "chat":
-      return `Your 30 free days include this chat, four-week plans, worksheets made for ${kid}, and phone calls.`;
+      return `Your 7 free days include this chat, four-week plans, worksheets made for ${kid}, and phone calls.`;
     case "report":
-      return `Your 30 free days include every subject in ${kid === "your child" ? "the" : `${kid}'s`} report, four-week plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+      return `Your 7 free days include every subject in ${kid === "your child" ? "the" : `${kid}'s`} report, four-week plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
     case "signup":
-      return `Your 30 free days include the questionnaire and ${kid === "your child" ? "your child's" : `${kid}'s`} full progress report, weekly plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+      return `Your 7 free days include the questionnaire and ${kid === "your child" ? "your child's" : `${kid}'s`} full progress report, weekly plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
     default: {
       const exhaustive: never = door;
       throw new Error(`Unhandled wall door: ${exhaustive}`);
@@ -71,7 +71,7 @@ export function wallIncludedLine(door: WallDoor, childName?: string | null): str
 /** The ask, unmistakable on the first pass (reader gate: "card" alone
  *  read as the card on screen), then one fact per sentence. */
 export const WALL_MECHANICS_LINE =
-  "A credit card starts your 30 free days. Nothing is charged during them. You get an email before the first charge.";
+  "A credit card starts your 7 free days. Nothing is charged during them. You get an email before the first charge.";
 
 /** The children fact as a full sentence (editor gate: "Unlimited kids,
  *  one price" collided with the two prices right above it). tierBullets
@@ -140,7 +140,7 @@ const TIER_PRICES: Record<PlanTier, { monthly: number; annual: number | null }> 
 };
 
 export function tierMonthlyButton(tier: PlanTier): string {
-  return `Start your 30 free days · then $${TIER_PRICES[tier].monthly} a month`;
+  return `Start your 7 free days · then $${TIER_PRICES[tier].monthly} a month`;
 }
 
 /** The tier picker's single CTA (2026-07-26: a monthly/annual toggle
@@ -152,7 +152,7 @@ export function tierButtonLabel(tier: PlanTier, period: BillingPeriod): string {
   if (period === "monthly") return tierMonthlyButton(tier);
   const annual = TIER_PRICES[tier].annual;
   if (annual === null) return tierMonthlyButton(tier);
-  return `Start your 30 free days · then $${annual.toLocaleString("en-US")} a year`;
+  return `Start your 7 free days · then $${annual.toLocaleString("en-US")} a year`;
 }
 
 /** The bare number for the pricing-card redesign's large price display
@@ -249,7 +249,7 @@ export function reportLockHeldLine(
   const kid = childName ?? "your child";
   const open = openCount === 1 ? "The subject above is" : `The ${NUMBER_WORDS[openCount] ?? openCount} above are`;
   const held = NUMBER_WORDS[lockedCount] ?? String(lockedCount);
-  return `${open} open in full. Your 30 free days open the other ${held}, plus four-week plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+  return `${open} open in full. Your 7 free days open the other ${held}, plus four-week plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
 }
 
 /** A held subject's whole row: her own answer count (the one honest
@@ -282,33 +282,40 @@ export const REPORT_LOCK_SIGNIN_BODY = "Sign in to see the offer.";
  */
 export const TRIAL_GATE_EYEBROW = "Homa membership";
 
-export const TRIAL_GATE_HEADLINE = "Try Homa free for 30 days";
+export const TRIAL_GATE_HEADLINE = "Try Homa free for 7 days";
 
 /** Reassurance first: the account is made and everything she does next
  *  is kept. The gate is the next step, not a toll on what she has. */
 export const TRIAL_GATE_REASSURANCE =
-  "Your account is ready. Pick a plan to start your 30 free days. Everything below is open the whole time.";
+  "Your account is ready. Pick a plan to start your 7 free days. Everything below is open the whole time.";
 
 /** The Blinkist-style timeline: what happens today, before the charge,
- *  and on day 30, each as one plain fact. */
+ *  and on day 7, each as one plain fact. Day 4 (three days before the
+ *  charge) matches Stripe's customer.subscription.trial_will_end
+ *  webhook, which always fires 3 days before trial end regardless of
+ *  trial length; it does NOT match Stripe's dashboard-configured trial
+ *  reminder email, which fires 7 days before end and would land on day
+ *  0 (the moment of signup) for a trial this short. See .env.example's
+ *  HOMA_SIGNUP_PAYWALL_ENABLED comment before promising this date in a
+ *  channel Stripe's dashboard email actually drives. */
 export const TRIAL_GATE_TIMELINE: ReadonlyArray<{ marker: string; line: string }> = [
   {
     marker: "Today",
-    line: "A credit card starts your 30 free days. Nothing is charged today.",
+    line: "A credit card starts your 7 free days. Nothing is charged today.",
   },
   {
-    marker: "Day 23",
-    line: "We email you a reminder, a week before the first charge.",
+    marker: "Day 4",
+    line: "We email you a reminder, three days before the first charge.",
   },
   {
-    marker: "Day 30",
+    marker: "Day 7",
     line: "Your plan begins. Cancel before then and you pay nothing.",
   },
 ];
 
-/** Above the tiers: what the 30 free days hold, in household words. */
+/** Above the tiers: what the 7 free days hold, in household words. */
 export const TRIAL_GATE_INCLUDED_LINE =
-  "Your 30 free days include the questionnaire and your child's full progress report, weekly plans, worksheets made for your child, phone calls with Homa, and chat.";
+  "Your 7 free days include the questionnaire and your child's full progress report, weekly plans, worksheets made for your child, phone calls with Homa, and chat.";
 
 /** Under the tiers: nothing is lost by waiting, and the door out is
  *  named (offers never commands). */
