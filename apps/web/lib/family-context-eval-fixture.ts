@@ -351,9 +351,15 @@ function evalFixturePacketPageBodies(): string[] {
   const animals = ["fox", "owl", "hedgehog", "deer", "rabbit", "badger"];
   return Array.from({ length: EVAL_FIXTURE_PACKET_PAGES }, (_unused, index) => {
     const page = index + 1;
-    // Padded so the whole document is packet-sized rather than a toy:
-    // the failure being guarded against is about volume.
-    const filler = `<p class="line">Practice line ${page}. ${"blend and read. ".repeat(40)}</p>`;
+    // Padded to REAL packet scale, about 3.6KB per page and 43KB for the
+    // document, because the bug only exists at that size. Measured
+    // 2026-07-27: at the first size (40 repeats, 9.3KB total) a full
+    // twelve-page retype fit under the revision eval's 20KB cost gate,
+    // so the gate could not fire and the eval passed against pre-fix
+    // code 1 run in 4. Carolyng's actual packet was ~45KB. A fixture
+    // that is the right SHAPE but the wrong SCALE cannot reproduce a
+    // failure whose cause is volume.
+    const filler = `<p class="line">Practice line ${page}. ${"blend and read. ".repeat(216)}</p>`;
     const art =
       page === EVAL_FIXTURE_PACKET_ILLUSTRATED_PAGE
         ? `<div class="animal-row">${animals.map(evalFixtureAnimal).join("")}</div>`
