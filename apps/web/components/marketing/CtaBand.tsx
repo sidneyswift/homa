@@ -79,22 +79,24 @@ export function CtaBand() {
           className="lp-h2 lp-h2-finale"
           style={{ color: "var(--gold-ink-strong)", margin: "16px 0 14px" }}
         >
-          {/* The forced break lands the desktop split after "report", never
-              after the hanging verb "is"; phones drop it (see the style tag
-              above) and keep their balanced three-line wrap. */}
-          The free <span style={{ whiteSpace: "nowrap" }}>progress report</span>
-          <br className="cta-h2-br" /> is the place to start.
+          {/* The forced break lands the desktop split after "starts", never
+              mid-number; phones drop it (see the style tag above) and keep
+              their balanced wrap. The nowrap span keeps "7 free days" one
+              unbreakable phrase at every width. */}
+          Every plan starts
+          <br className="cta-h2-br" /> with <span style={{ whiteSpace: "nowrap" }}>7 free days.</span>
         </h2>
         <p
           data-reveal=""
           className="rv-d1"
           style={{ fontWeight: 400, fontSize: "clamp(1.3rem, 1.15rem + 0.5vw, 1.5rem)", color: "var(--gold-ink-strong)", margin: "0 0 34px" }}
         >
-          {/* The nowrap span keeps a 560-600px wrap from stranding "child."
-              as a widow; the phrase is ~200px at this size so it can never
-              overflow a 320px viewport. */}
-          No card is needed. The questionnaire takes about{" "}
-          <span style={{ whiteSpace: "nowrap" }}>five minutes per child.</span>
+          {/* Reassure before inform: nothing charged first, then the
+              reminder promise (the transparency that raised trial starts in
+              the Blinkist case). The nowrap span keeps a 560-600px wrap
+              from stranding "charge." as a widow. */}
+          Nothing is charged during them. We email you a reminder before{" "}
+          <span style={{ whiteSpace: "nowrap" }}>the first charge.</span>
         </p>
         <div data-reveal="" className="rv-d2" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           {openPopup ? (

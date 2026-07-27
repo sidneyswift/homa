@@ -9,8 +9,8 @@ Assumptions are not evidence. Before locking a limiting factor, run the checks t
 3. **Real user artifacts** (support messages, call notes, conversation transcripts the founder is allowed to read, conference feedback with names/dates)
 4. **Instrumented product events** (MJ-08 / product event registry) with clear definitions
 5. **Recent deploy + reconciliation evidence** in planning docs, only when it cites probes
-6. **PRD / journey / plan prose** — context, not proof
-7. **Opinions, vibes, "we should," competitor envy** — hypotheses only
+6. **PRD / journey / plan prose**: context, not proof
+7. **Opinions, vibes, "we should," competitor envy**: hypotheses only
 
 ## Homa-specific probes (use what applies)
 

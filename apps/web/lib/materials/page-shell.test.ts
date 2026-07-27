@@ -5,6 +5,7 @@ import {
   hasPageBreakMarkup,
   joinPageBodies,
   SHEET_PAGE_CLASS,
+  selectMaterialPages,
   splitPageBodies,
   SPRITE_SLICE_GATE_NOTE,
   stripCdataWrapper,
@@ -137,4 +138,62 @@ test("page-break CSS is detected however it is spelled", () => {
   assert.equal(hasPageBreakMarkup("<style>.w{page-break-before: always}</style>"), true);
   assert.equal(hasPageBreakMarkup("<style>.w{break-inside: avoid}</style>"), false);
   assert.equal(hasPageBreakMarkup("<div>take a break after lunch</div>"), false);
+});
+
+test("no pageIndex takes every page of the material, as reuse always did", () => {
+  const stored = joinPageBodies(["<p>one</p>", "<p>two</p>", "<p>three</p>"]);
+  const selected = selectMaterialPages(stored, undefined);
+  assert.equal(selected.ok, true);
+  assert.deepEqual(selected.ok && selected.bodies, [
+    "<p>one</p>",
+    "<p>two</p>",
+    "<p>three</p>",
+  ]);
+});
+
+test("pageIndex counts from 1, the way the parent counts pages", () => {
+  const stored = joinPageBodies(["<p>one</p>", "<p>two</p>", "<p>three</p>"]);
+  assert.deepEqual(selectMaterialPages(stored, 1), { ok: true, bodies: ["<p>one</p>"] });
+  assert.deepEqual(selectMaterialPages(stored, 3), { ok: true, bodies: ["<p>three</p>"] });
+});
+
+test("a page past the end reports the real page count instead of shipping nothing", () => {
+  const stored = joinPageBodies(["<p>one</p>", "<p>two</p>"]);
+  assert.deepEqual(selectMaterialPages(stored, 3), { ok: false, pageCount: 2 });
+});
+
+test("page 0 is out of range, never a silent last page", () => {
+  const stored = joinPageBodies(["<p>one</p>", "<p>two</p>"]);
+  assert.deepEqual(selectMaterialPages(stored, 0), { ok: false, pageCount: 2 });
+});
+
+test("a one-page material still answers pageIndex 1", () => {
+  assert.deepEqual(selectMaterialPages("<p>only</p>", 1), {
+    ok: true,
+    bodies: ["<p>only</p>"],
+  });
+});
+
+test("rebuilding a packet with one page swapped keeps the other pages byte-identical", () => {
+  // The Carolyng case: twelve pages, one edit. Every untouched page must
+  // come back exactly as stored, or a one-page edit quietly rewrites the
+  // packet (plans/2026-07-27-packet-page-revision-failure.md).
+  const original = Array.from({ length: 12 }, (_, i) => `<p>page ${i + 1}</p>`);
+  const stored = joinPageBodies(original);
+  const rebuilt = original.map((_, i) =>
+    i === 3
+      ? "<p>page 4, bigger</p>"
+      : (() => {
+          const one = selectMaterialPages(stored, i + 1);
+          assert.equal(one.ok, true);
+          return one.ok ? one.bodies[0] : "";
+        })(),
+  );
+  assert.deepEqual(rebuilt, [
+    "<p>page 1</p>",
+    "<p>page 2</p>",
+    "<p>page 3</p>",
+    "<p>page 4, bigger</p>",
+    ...original.slice(4),
+  ]);
 });

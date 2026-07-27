@@ -13,12 +13,15 @@ import { KID_AGE_BANDS, WAITLIST_SOURCES } from "./waitlist";
  * role may insert; see migration 20260704033725.
  */
 
-/** The wall's six doors: the report actions the paywall stands in front
+/** The wall's doors: the report actions the paywall stands in front
  *  of (plans/2026-07-11-the-wall.md), plus "lesson" for the subject-lesson
- *  build door and "report" for the report lock's held-subjects offer
- *  (plans/2026-07-18-report-lock.md). Shared by the wall.* and
- *  report.action_tapped schemas and the beacon route's request schema. */
-export const WALL_DOORS = ["plan", "month", "call", "chat", "lesson", "report"] as const;
+ *  build door, "report" for the report lock's held-subjects offer
+ *  (plans/2026-07-18-report-lock.md), and "signup" for the account-level
+ *  trial gate right after account creation (founder directive 2026-07-26:
+ *  the card comes out before the product, HOMA_SIGNUP_PAYWALL_ENABLED).
+ *  Shared by the wall.* and report.action_tapped schemas and the beacon
+ *  route's request schema. */
+export const WALL_DOORS = ["plan", "month", "call", "chat", "lesson", "report", "signup"] as const;
 export type WallDoor = (typeof WALL_DOORS)[number];
 
 /** The onboarding flow's trackable cards: map-flow.tsx's FlowPhase minus
@@ -30,6 +33,11 @@ export type WallDoor = (typeof WALL_DOORS)[number];
  *  work 2026-07-20 (docs/homa-planning/plans/2026-07-20-onboarding-funnel-drip.md). */
 export const MAP_FLOW_STEPS = [
   "parent",
+  /** The signup trial gate between the account card and the product
+   *  (founder directive 2026-07-26, HOMA_SIGNUP_PAYWALL_ENABLED): its
+   *  own step so paywall drop-off is visible next to the cards around
+   *  it. */
+  "paywall",
   /** Chat-first onboarding's one step after the account
    *  (plans/2026-07-21-chat-first-onboarding.md). Kept in the same
    *  allowlist as the card steps so the funnel can compare the two
