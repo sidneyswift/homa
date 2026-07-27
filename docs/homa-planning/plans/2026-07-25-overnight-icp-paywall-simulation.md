@@ -81,7 +81,7 @@ for P2's and P5's stated multi-kid doubt): 0/5. Round 11 made the
 proof captions more specific: 0/5. **Stacking more of the same kind of
 proof did not reliably stack more conversions in this simulation.** Treat
 round 8 as the most interesting single data point in the whole run, not as
-a proven lever — the synthesis agent's own words: "this reversal means the
+a proven lever, the synthesis agent's own words: "this reversal means the
 round-8 'win' cannot be trusted as a stable, reproducible lift... without a
 real, properly powered A/B test on live families."
 
@@ -96,8 +96,8 @@ was wrong.** I re-read the actual code after the run finished:
 {(checkout.annualUrl ? WALL_BULLETS : WALL_BULLETS.slice(1)).map(...)}
 ```
 
-`WALL_BULLETS.slice(1)` — used whenever there's no annual link, which is the
-live state today — still includes `"Adding children never changes the
+`WALL_BULLETS.slice(1)`, used whenever there's no annual link, which is the
+live state today, still includes `"Adding children never changes the
 price."` and `"Cancel anytime."` Only the annual-math bullet
 (`"The year works out to $X a month."`) is hidden without annual. **The live
 product already shows the multi-kid reassurance by default; I told the
@@ -124,13 +124,13 @@ forgotten/hard-to-cancel subscriptions, that vagueness reads as a trap.
 Chasing that down against the real code, not the simulation, found
 something worse than vague copy: **there was no self-serve cancellation
 mechanism in the product at all.** No Stripe billing portal, no cancel
-route, nothing — a family's only path to cancel was asking the founder to
+route, nothing, a family's only path to cancel was asking the founder to
 do it by hand in the Stripe dashboard. "Cancel anytime." has been on the
 live offer card since the wall shipped, unfulfillable by the customer,
 since day one.
 
 **This is fixed and shipped tonight**, independent of this doc:
-[PR #154](https://github.com/sidneyswift/homa/pull/154) — a live Stripe
+[PR #154](https://github.com/sidneyswift/homa/pull/154), a live Stripe
 billing portal configuration (created fresh, none existed) plus
 `GET /api/billing/portal` plus a "Manage billing" link in settings, gated
 to families who actually have a Stripe customer id. Zero real families
@@ -139,7 +139,7 @@ confirmed by direct query), but it would have landed on the first real
 subscriber, and shipping more persuasive paywall copy while an existing
 claim was false would have been the wrong order of operations. This is the
 single highest-value thing that came out of tonight's work, and the
-simulation is what pointed at it — not because the simulation is a proof of
+simulation is what pointed at it, not because the simulation is a proof of
 customer behavior, but because it kept independently surfacing the same
 real objection until it was worth checking against the actual code.
 
@@ -154,7 +154,7 @@ survived every attempted fix on other axes:
 | Cancellation mechanics vague / no visible mechanism | P1, P3, nearly every round | **Fixed tonight, PR #154** |
 | Card required before any real, verifiable proof is shown | P1, P2, P3, P5, rounds 0-7; partially answered round 8+ | Partially addressed; see "safe to build next" |
 | "Does $19 (or $89-109/yr) cover all my kids or is it secretly per-child" | P2 in 6+ rounds, echoed by P5 | Reassurance line already exists in code (see correction above) but is low-visibility; real unresolved piece is P2's spouse-sharing ask below |
-| No way to show the free report to a spouse/co-decision-maker without a card | P2, in rounds 0, 2, 4, 6, 8, 10, 11 | **Not yet built** — see recommendation below |
+| No way to show the free report to a spouse/co-decision-maker without a card | P2, in rounds 0, 2, 4, 6, 8, 10, 11 | **Not yet built**, see recommendation below |
 | No evidence Homa knows this family's actual state filing requirements (NY IHIP/quarterly) | P4, literally every round, 0 through 11 | Correctly never faked; needs a real, unbuilt capability + founder product call |
 | "Will this still be good/personalized in month two" | P1, most rounds; echoed by P5 from round 8 | Not resolved by any tested variant; needs a real second time-separated data point, which cannot be honestly produced at signup |
 | A single annual pull feels riskier than four monthly pulls, even knowing the math | P3, rounds 1-2 | Argues for keeping monthly-first sequencing whenever annual ships |
@@ -169,11 +169,11 @@ already-unlocked report tonight is handing him her unlocked phone.**
 This may already be closer to solved than it looks: the report has a
 shareable, token-based public URL
 (`/onboarding/r/[token]`, `docs/homa-planning/plans/2026-07-18-report-lock.md`)
-that already holds rows for every viewer and renders checkout owner-only —
+that already holds rows for every viewer and renders checkout owner-only,
 exactly the "let someone else look, only the account owner can pay"
 behavior P2 is asking for. What's missing is discoverability: there is no
 "share" or "copy link" affordance anywhere on the in-app report page
-(`apps/web/app/app/[childId]/report/page.tsx`, checked directly — no
+(`apps/web/app/app/[childId]/report/page.tsx`, checked directly, no
 share/copy-link UI exists there tonight). A parent looking at her own
 signed-in report has no visible way to hand the existing shareable link to
 a spouse.
@@ -181,7 +181,7 @@ a spouse.
 This is genuinely safe to build: no pricing change, no new claim, no
 fabrication risk, reuses existing tenancy-safe infrastructure (checkout
 already renders owner-only for any other viewer of that URL). I did not
-build it tonight — two real fixes already shipped this session
+build it tonight, two real fixes already shipped this session
 (the array-param/link_tokens production bug earlier, and the billing portal
 above), and cramming a third UI feature in at this hour risked lower
 quality than giving it a clean, well-scoped start. Recommended as the
@@ -201,7 +201,7 @@ in-app report page, surfacing the token URL that already exists.
   builds a no-card or shorter-preview variant.
 - **A separate, higher compliance tier.** P4 (the NY persona) named $49/mo,
   unprompted, as what she'd pay for a tool that reliably nails her
-  quarterly filing — a different purchase decision from "$19-109 for
+  quarterly filing, a different purchase decision from "$19-109 for
   worksheets and chat." This is a new SKU tied to a product capability
   (a real, state-correct compliance-document generator) that does not
   exist yet. Not a copy change; needs a founder product and pricing

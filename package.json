@@ -7,6 +7,7 @@
     "build:material-anchors": "node --experimental-strip-types scripts/build-material-anchors.mts",
     "check:docs": "node scripts/docs-reconciliation-check.mjs",
     "check:eve-stream-duration": "node scripts/eve-stream-max-duration-check.mjs",
+    "check:em-dash": "node scripts/em-dash-check.mjs",
     "check:child-progress": "tsx --tsconfig apps/web/tsconfig.json --test \"packages/core/src/events.test.ts\" \"apps/web/lib/child-progress/*.test.ts\" \"apps/web/lib/map/walk-answer-event.test.ts\" \"scripts/reconcile-child-progress.test.ts\"",
     "dev:token": "node scripts/refresh-oidc-token.mjs",
     "check:design-tokens": "tsx scripts/design-tokens-check.mts && tsx --test scripts/design-tokens-check.test.ts",

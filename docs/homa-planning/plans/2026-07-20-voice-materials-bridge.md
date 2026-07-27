@@ -91,7 +91,7 @@ enqueue.
 
 ## 5. Plan
 
-### Phase 0 — Honesty (ships immediately, independent of Phases 1-2)
+### Phase 0: Honesty (ships immediately, independent of Phases 1-2)
 
 Truth-first, so that until the bridge exists Homa sets a correct expectation,
 and after it exists the expectation ("I'll text it to you shortly") is true.
@@ -115,7 +115,7 @@ and after it exists the expectation ("I'll text it to you shortly") is true.
    call. Tell her exactly that." This directly counters the email-worksheet
    claim, which does follow a tool call, and is fully shippable in-repo now.
 
-### Phase 1 — Async voice → materials bridge
+### Phase 1: Async voice → materials bridge
 
 **Mechanism corrected 2026-07-20 after reading the code.** The first draft of
 this plan proposed the dispatch proactive rails. That is wrong, for two
@@ -172,7 +172,7 @@ Flow:
 No changes to `create_printable` or `mark_material_final`. New surface is one
 voice webhook, one channel, and one brief builder.
 
-### Phase 2 — Generalize (optional, only if a second channel needs it)
+### Phase 2: Generalize (optional, only if a second channel needs it)
 
 Write the bridge channel-neutrally so the email adapter or a future channel can
 enqueue the same materials run. Do not build this speculatively; it lands only
