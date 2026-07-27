@@ -12,7 +12,12 @@ export type WallBeacon =
   | { kind: "door_tap"; door: WallDoor; childId?: string }
   | { kind: "wall_viewed"; door: WallDoor }
   | { kind: "wall_dismissed"; door: WallDoor }
-  | { kind: "checkout_started"; door: WallDoor; plan: "monthly" | "annual" };
+  | {
+      kind: "checkout_started";
+      door: WallDoor;
+      plan: "monthly" | "annual";
+      tier: "regular" | "plus" | "elite";
+    };
 
 export function sendWallBeacon(beacon: WallBeacon): void {
   try {

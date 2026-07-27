@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { boundedCapturedJson, sanitizeCapturedJson } from "./agent-trace";
+import {
+  boundedCapturedJson,
+  findStuckToolCalls,
+  reportStuckToolCalls,
+  sanitizeCapturedJson,
+  stuckToolCallLine,
+} from "./agent-trace";
 
 describe("agent trace capture sanitizer", () => {
   it("keeps ordinary tool args intact", () => {
@@ -30,5 +36,91 @@ describe("agent trace capture sanitizer", () => {
     const out = boundedCapturedJson(value, 4000) as { truncated?: boolean; preview?: string };
     assert.equal(out.truncated, true);
     assert.ok((out.preview ?? "").length <= 4000);
+  });
+});
+
+describe("stuck tool call signal", () => {
+  it("reports counts an operator can act on", () => {
+    const line = stuckToolCallLine({
+      tool: "find_materials",
+      channel: "dispatch",
+      sessions: 1,
+      calls: 3,
+      oldestMinutes: 158,
+    });
+    assert.equal(
+      line,
+      "[agent_tool_calls] stuck tool=find_materials channel=dispatch " +
+        "calls=3 sessions=1 oldest_minutes=158",
+    );
+  });
+
+  it("names an absent channel instead of printing null", () => {
+    const line = stuckToolCallLine({
+      tool: "mark_material_final",
+      channel: null,
+      sessions: 2,
+      calls: 4,
+      oldestMinutes: 30,
+    });
+    assert.match(line, /channel=unknown/);
+    assert.ok(!line.includes("null"));
+  });
+
+  it("carries no family content, only our own identifiers and counts", () => {
+    // The line goes to runtime logs, which are not a tenant-scoped surface.
+    // Tool and channel names are ours; a family id or session id here would
+    // leak one family's activity into an operator log.
+    const line = stuckToolCallLine({
+      tool: "create_printable",
+      channel: "web",
+      sessions: 9,
+      calls: 12,
+      oldestMinutes: 20,
+    });
+    assert.ok(!/[0-9a-f]{8}-[0-9a-f]{4}/.test(line), "no uuid");
+    assert.ok(!/wrun_/.test(line), "no session id");
+  });
+
+  it("returns nothing rather than breaking the sweep when the database is unreachable", async () => {
+    // Telemetry never breaks the feature emitting it. With no database env
+    // the query throws inside findStuckToolCalls, and the hourly cron must
+    // still finish its other sweeps.
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const password = process.env.SUPABASE_DB_PASSWORD;
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    delete process.env.SUPABASE_DB_PASSWORD;
+    try {
+      assert.deepEqual(await findStuckToolCalls(), []);
+      assert.equal(await reportStuckToolCalls(), 0);
+    } finally {
+      if (url !== undefined) process.env.NEXT_PUBLIC_SUPABASE_URL = url;
+      if (password !== undefined) process.env.SUPABASE_DB_PASSWORD = password;
+    }
+  });
+});
+
+describe("stuck tool call window", () => {
+  it("stops reporting a stuck call once it ages out", async () => {
+    // A stuck row never resolves: status stays 'requested' and finished_at
+    // stays null forever. Unbounded, the sweep would log the same rows
+    // every hour for the life of the table, and an alarm that never clears
+    // teaches the reader to skip the line that finally matters.
+    //
+    // Against production this is the 07-19 and 07-22 incidents: real, worth
+    // having found, and not news any more.
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const password = process.env.SUPABASE_DB_PASSWORD;
+    if (!url || !password) return; // integration-only; unit CI has no database
+
+    const recent = await findStuckToolCalls(15, 24);
+    const everything = await findStuckToolCalls(15, 24 * 365);
+    assert.ok(
+      everything.length >= recent.length,
+      "a wider window can only find the same rows or more",
+    );
+    for (const row of recent) {
+      assert.ok(row.oldestMinutes <= 24 * 60, `${row.tool} is inside the window`);
+    }
   });
 });

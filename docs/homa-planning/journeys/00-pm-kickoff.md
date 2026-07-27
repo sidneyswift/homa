@@ -1,4 +1,4 @@
-# Journey Workstream — PM Kickoff (2026-07-02)
+# Journey Workstream: PM Kickoff (2026-07-02)
 
 > Historical coordination snapshot, 2026-07-02. The shared workstream
 > structure and proto-persona vocabulary are preserved as planning history.
@@ -20,11 +20,11 @@ research (05/07). The personas workstream deepens these; nobody renames them.
 | Code | Name | Snapshot |
 |---|---|---|
 | P1 | **Alessa** (origin archetype) | One preschooler (3), enrichment-driven, wants ahead-of-standards validation, urban, tech-adjacent household, voice-notes-from-pocket habit. Money: comfortable but scrutinizes subscriptions. |
-| P2 | **Rachel** (the median) | Three kids (4, 7, 10), suburban/rural, co-op member, single income, price-sensitive, drowning in planning across ages; hours tracking is a legal must. The 10-year-old is OUTSIDE the v1 materials range — her journey must handle that honestly. |
+| P2 | **Rachel** (the median) | Three kids (4, 7, 10), suburban/rural, co-op member, single income, price-sensitive, drowning in planning across ages; hours tracking is a legal must. The 10-year-old is OUTSIDE the v1 materials range, her journey must handle that honestly. |
 | P3 | **Danielle** (the newcomer) | Pulling her 6-year-old out of public school mid-year. Anxious, guilt-prone, doesn't know her state's law, second-guesses everything. Needs "you're allowed, here's the path" energy. Highest support load, highest word-of-mouth upside. |
 | P4 | **Monica** (compliance-heavy state) | NY/PA: IHIPs, quarterly reports, portfolio evaluations. Records ARE the job. Will churn instantly over a wrong legal claim; will evangelize over a generated quarterly report that works. |
 | P5 | **Jess** (working homeschooler) | Part-time WFH, schools evenings/weekends, time-starved, voice-first, efficiency over enrichment. Most sensitive to friction; most likely to convert on "it makes the plan so I don't have to." |
-| S1–S4 | Secondary cast | **Marcus** (dad, secondary account user), **Grandma Sue** (co-teaching grandparent), **the skeptical co-op friend** (buys nothing, influences everyone), **the child** — NEVER a user (design + legal constraint; the assessment is a test for the mother). |
+| S1–S4 | Secondary cast | **Marcus** (dad, secondary account user), **Grandma Sue** (co-teaching grandparent), **the skeptical co-op friend** (buys nothing, influences everyone), **the child**, NEVER a user (design + legal constraint; the assessment is a test for the mother). |
 
 ## The journey template (every journey uses this structure)
 
@@ -67,4 +67,4 @@ research (05/07). The personas workstream deepens these; nobody renames them.
 Senior-PM reconciliation pass happens after all workstreams land: consistency, gaps,
 ticket deltas rolled into 03-backlog.md, open questions consolidated for Sidney, then
 the roadmap synthesis (vision-to-okrs, now-next-later, ost, p0-p1-p2) and the M-R PRD
-as the capstone deliverables — those two are the senior PM's own job, not delegated.
+as the capstone deliverables, those two are the senior PM's own job, not delegated.

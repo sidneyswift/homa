@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { getFamilyDetail, type FamilyDetailKid } from "../../../../lib/admin/family-detail-data";
 import { requireFounder } from "../../../../lib/admin/gate";
+import { dripLabel } from "../../../../lib/drip/labels";
 import { ageYears, familyDisplayName, formatTokens, timeAgo, timeLabel, adminTimeZone } from "../../../../lib/admin/format";
 import { founderPhoneHome } from "../../../../lib/family-phone";
 import { formatUsd } from "../../../../lib/model-pricing";
@@ -272,8 +273,11 @@ export default async function AdminFamilyDetailPage({
               {detail.emailSends.map((send, index) => (
                 <li key={index} className="flex flex-wrap items-center gap-2">
                   <span className="font-mono text-xs text-subtle">{timeAgo(send.createdAt)}</span>
-                  <span className="font-semibold text-body">{send.kind.replace(/_/g, " ")}</span>
+                  <span className="font-semibold text-body">{dripLabel(send.kind)}</span>
                   <Pill tone={statusTone(send.status)}>{send.status}</Pill>
+                  {send.reason ? (
+                    <span className="basis-full text-[0.72rem] text-subtle">{send.reason}</span>
+                  ) : null}
                 </li>
               ))}
             </ul>

@@ -1,0 +1,322 @@
+{
+  "id": "cur-2026-07-19-early-years-v2",
+  "name": "Early Years Vol. 2 (Second Edition) — Year at a Glance",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-19T09:12:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784466775.664259",
+
+  "layer1_philosophy": {
+    "methodology": "Charlotte Mason / Gentle Classical (Early Years)",
+    "principles": [
+      "Living books over textbooks — every week anchored by a quality picture book with hands-on extension activities",
+      "Nature study as a core subject — weekly observation (plants, trees, birds, night sky, seasons) with dedicated nature notebook entries",
+      "Picture study and art appreciation — rotating through 8 master artists (Hokusai, Renoir, Bonheur, Kahlo, Guyton, Thomas, Howe, Sher-Gil) with child-created art responses",
+      "Music appreciation / composer study — rotating through 8 composers (Mendelssohn, Beethoven, Touré, Boulogne, Frank, Davis, Saint-Saëns, Chaminade) in 4-week blocks",
+      "Kitchen classroom — weekly cooking/baking tied to the letter of the week, learning through food",
+      "Diverse, multicultural literature — intentionally diverse book selections spanning cultures (Korean, Colombian, Indian, Cree, Nigerian, Japanese, Italian, etc.)",
+      "Gentle math progression — starts with counting and numeral recognition, adds addition (wk19), then subtraction (wk29), ends with full addition/subtraction 1-10",
+      "Integrated learning — each week weaves 8 subjects around a cohesive thread (nature observation + math + STEM + art + music + literacy + literature + cooking)"
+    ],
+    "learningTheory": "charlotte-mason-gentle",
+    "assessmentApproach": "nature-notebook-and-observation",
+    "parentRole": "co-explorer-guide",
+    "knowledgeBankMatches": [],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "charlotte-mason-early-years",
+        "topicType": "method_philosophy",
+        "title": "Charlotte Mason Early Years (Gentle Classical)",
+        "summary": "Nature study, picture study, composer study, living books, and hands-on exploration as core pillars. 8-subject weekly rhythm. No workbooks. Observation notebooks for nature. Art responses to master works. Kitchen as classroom. Diverse multicultural literature. Math builds gently from counting through addition/subtraction over 36 weeks."
+      },
+      {
+        "suggestedKey": "early-years-v2-format",
+        "topicType": "method_format",
+        "title": "Early Years Vol. 2 Weekly Format",
+        "summary": "36-week program, 8 parallel subject tracks per week: (1) Nature Study + Nature Notebook, (2) Early Math Foundations, (3) STEM Activity, (4) Picture Study + Art Expression, (5) Music Appreciation, (6) Reading/Writing Readiness (one letter per week, alphabetical), (7) Living Book + Literature Extension, (8) Kitchen Classroom. Artists and composers rotate in 4-week blocks. Math progresses from counting to addition (wk19) to subtraction (wk29). Review weeks every 6th week."
+      }
+    ]
+  },
+
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Nature Study",
+        "curriculumTopic": "Local plants (6 entries), local trees (3 entries), birds (3 entries), night sky (3 entries), seasonal observations (3 entries), butterflies, worms, spiders, bees, compass exploration (4 directions), erosion, conservation, wind, snowflakes, squash, seeds, animal needs",
+        "homaSubject": "Science",
+        "homaDomain": "Multiple",
+        "homaTopicId": null,
+        "status": "mapped",
+        "notes": "Spans Organisms & Life Processes (plants, animals), Earth's Systems (seasons), Space Systems (night sky), Ecosystems (conservation), Scientific Inquiry (observation). Very broad nature coverage."
+      },
+      {
+        "curriculumSubject": "Early Math Foundations",
+        "curriculumTopic": "Counting out quantities, assigning numerals to quantities, patterns, sorting by shape, positional terms, quantity terminology, expanding comprehension (math), oral counting to 20, addition 1-5, subtraction 1-10",
+        "homaSubject": "Mathematics",
+        "homaDomain": "Multiple",
+        "homaTopicId": null,
+        "status": "mapped",
+        "notes": "Covers Counting & Cardinality, Addition & Subtraction (intro), Data & Statistics (sorting/graphing), Geometry (positional terms, sorting by shape), Algebra (patterns). Strong progression."
+      },
+      {
+        "curriculumSubject": "STEM Activities",
+        "curriculumTopic": "Sink/float, block building challenges (4 parts), sorting trays, spiral building, sun prints, oobleck, bridge building, pillow fort, mandala making, marshmallow construction, pendulum bowling, chemistry experiments, fairy house building",
+        "homaSubject": "Science",
+        "homaDomain": "Scientific Inquiry",
+        "homaTopicId": null,
+        "status": "mapped",
+        "notes": "Maps to Scientific Inquiry, Forces & Motion, Matter & Materials. Engineering/building challenges are strong."
+      },
+      {
+        "curriculumSubject": "Picture Study / Art Appreciation",
+        "curriculumTopic": "8 master artists studied over 36 weeks: Hokusai (wk1-4), Renoir (wk5-8), Bonheur (wk9-12), Kahlo (wk13-16), Guyton (wk17-20), Thomas (wk25-28), Howe (wk29-32), Sher-Gil (wk33-36). Art response activities: collage, painting, mixed media, clay, chalk, photography.",
+        "homaSubject": "English",
+        "homaDomain": "Fine Arts",
+        "homaTopicId": null,
+        "status": "partial",
+        "notes": "Homa has 'Art Appreciation' (1 topic) under English/Fine Arts. This curriculum treats art as a full standalone subject with deep artist study. Major gap in taxonomy depth."
+      },
+      {
+        "curriculumSubject": "Music Appreciation",
+        "curriculumTopic": "8 composers in 4-week blocks: Mendelssohn, Beethoven, Touré, Boulogne, Frank, Davis, Saint-Saëns, Chaminade. Diverse (European classical + African + women composers).",
+        "homaSubject": null,
+        "homaDomain": null,
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "music-appreciation-composer-study",
+          "domain": "Fine Arts",
+          "kind": "conceptual",
+          "teachingWindowMonths": [36, 144]
+        },
+        "notes": "No music subject or domain in Homa taxonomy at all. Charlotte Mason curricula treat music appreciation as a core subject."
+      },
+      {
+        "curriculumSubject": "Reading/Writing Readiness",
+        "curriculumTopic": "Letters A-Z introduced one per week (alphabetical order). Review every 6th week. Weeks 32-36 introduce digraphs (Th, Sh, Ch) + 'Letters Together Make a Word'. Alphabet book built throughout.",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": null,
+        "status": "mapped",
+        "notes": "Maps to 'Knowing all letters', phonics topics. Alphabetical order (vs PP's non-alphabetical). Digraph introduction at end is a progression bonus."
+      },
+      {
+        "curriculumSubject": "Literature / Read-Together",
+        "curriculumTopic": "36 living books across cultures: Roxaboxen, Make Way for Ducklings, The Giving Tree, The Very Hungry Caterpillar, Ferdinand, Corduroy, Peter Rabbit, Stellaluna, Mike Mulligan, Harry the Dirty Dog, The Snowy Day, The Gruffalo, Strega Nona, Over and Under the Pond, etc. Extension activities: dramatic play, sensory bins, model-making, crafts, community action.",
+        "homaSubject": "English",
+        "homaDomain": "Reading Comprehension",
+        "homaTopicId": null,
+        "status": "mapped",
+        "notes": "Living books approach. Book list is exceptionally diverse and high-quality. Extension activities are hands-on (consistent with CM philosophy)."
+      },
+      {
+        "curriculumSubject": "Kitchen Classroom",
+        "curriculumTopic": "Weekly cooking/baking tied to the focus letter. Review weeks feature cultural recipes (Mali, another country, familiar favorites, cookie letters, final picnic).",
+        "homaSubject": "Life Skills",
+        "homaDomain": "Daily Living",
+        "homaTopicId": null,
+        "status": "partial",
+        "notes": "Cooking as learning maps loosely to Daily Living but Homa has no dedicated cooking/kitchen-as-classroom topic."
+      },
+      {
+        "curriculumSubject": "Geography / Compass",
+        "curriculumTopic": "Compass exploration (N/E/S/W over 4 sessions), map of where I live, positional terms",
+        "homaSubject": "History",
+        "homaDomain": "Geography",
+        "homaTopicId": null,
+        "status": "partial",
+        "notes": "Homa's Geography domain only has 'Beaches Around the World'. Compass/directions is a gap (also flagged in PP Y2 analysis)."
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 9,
+      "mapped": 5,
+      "unmapped": 1,
+      "noSubject": 0,
+      "partial": 3
+    }
+  },
+
+  "layer3_structure": {
+    "cadence": "1 week = 1 row in the plan. Flexible — no daily breakdown specified. Parent decides how to distribute 8 subject tracks across the week.",
+    "sessionLengthMinutes": {
+      "notes": "Not specified. Charlotte Mason approach implies short lessons (15-20 min per subject). This is a scope/sequence, not a daily schedule."
+    },
+    "weeklyTemplate": "8 parallel tracks each week: Nature Study, Math, STEM, Art, Music, Reading/Writing, Literature, Kitchen. Parent distributes across available days.",
+    "progressionModel": "spiral-with-linear-math",
+    "reviewRhythm": "Letter review every 6th week (wk6: Aa-Ee, wk12: Ff-Jj, wk18: Kk-Oo, wk24: Pp-Tt, wk30: Uu-Zz, wk35: digraphs). Halfway assessment at wk18. Artists/composers rotate in 4-week blocks.",
+    "totalWeeks": 36,
+    "totalUnits": null,
+    "totalDays": null,
+    "artistRotation": [
+      {"weeks": "1-4", "artist": "Hokusai", "composer": "Mendelssohn"},
+      {"weeks": "5-8", "artist": "Renoir", "composer": "Beethoven"},
+      {"weeks": "9-12", "artist": "Bonheur", "composer": "Touré"},
+      {"weeks": "13-16", "artist": "Kahlo", "composer": "Boulogne"},
+      {"weeks": "17-20", "artist": "Guyton", "composer": "Frank"},
+      {"weeks": "21-24", "artist": "Lawrence", "composer": "Satie"},
+      {"weeks": "25-28", "artist": "Thomas", "composer": "Davis"},
+      {"weeks": "29-32", "artist": "Howe", "composer": "Saint-Saëns"},
+      {"weeks": "33-36", "artist": "Sher-Gil", "composer": "Chaminade"}
+    ],
+    "mathProgression": {
+      "weeks1to18": "Counting out quantities, assigning numerals, patterns, sorting by shape, positional terms, expanding comprehension",
+      "weeks19to28": "Addition with 1-5 introduced, oral counting to 20, quantity terminology",
+      "weeks29to36": "Subtraction 1-10 introduced, addition continues, final subtraction mastery"
+    },
+    "letterSequence": "Alphabetical (A-Z over 30 weeks, then digraphs Th/Sh/Ch in weeks 32-35, final review week 36)",
+    "natureStudyPattern": "Recurring longitudinal studies: local plants (6 entries), local trees (3 entries), birds (3 entries), night sky (3 entries), seasonal observations (3 entries). Builds a nature notebook over the full year."
+  },
+
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "nature-notebook-entry",
+        "description": "Guided observation of local plants, trees, birds, night sky, seasons. Child draws/describes what they observe. Longitudinal — same subjects revisited across the year to track changes.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "nature-notebook-page",
+          "creationPath": "html",
+          "description": "Printable observation page: date/location header, large blank drawing area (top 2/3), guided observation prompts below (What did you see? What colors? What was the weather?), optional ruler marks on the side for measuring. Charlotte Mason aesthetic: mostly blank, minimal design, nature-themed border.",
+          "complexity": "low"
+        }
+      },
+      {
+        "type": "picture-study-response",
+        "description": "View a masterwork painting, discuss it, then create an art response using the technique or theme (collage, mixed media, painting, clay, chalk, oil pastel, photography).",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "picture-study-card",
+          "creationPath": "hybrid",
+          "description": "Two-part card: (1) Reference image of the masterwork with artist name, title, year, and 3 discussion prompts (What do you see? How does it make you feel? What colors/shapes do you notice?). (2) Art response instructions with materials list. Could include a thumbnail of the artwork for the child's notebook.",
+          "complexity": "medium"
+        }
+      },
+      {
+        "type": "kitchen-classroom",
+        "description": "Weekly cooking/baking activity tied to the focus letter. Child participates in measuring, mixing, and making food. Cultural recipes on review weeks.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "recipe-card",
+          "creationPath": "html",
+          "description": "Kid-friendly recipe card: large title, ingredient list with illustrations, numbered steps with simple language, focus letter highlighted in ingredient names. Visual measuring guides (1 cup = this much).",
+          "complexity": "medium"
+        }
+      },
+      {
+        "type": "stem-building-challenge",
+        "description": "Engineering challenges with household materials: block building (4 progressive challenges), bridge building, marshmallow/toothpick construction, spiral building, pillow fort, fairy house.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Activity-card recipe (from PP analysis) would cover the guide aspect."
+      },
+      {
+        "type": "living-book-extension",
+        "description": "Hands-on activity extending the week's read-aloud: build a Roxaboxen, visit ducks, make paper flowers, dramatic play, sensory bins, puppets, community action (volunteer, write letters).",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Varied format — some are crafts, some are outings, some are dramatic play. An activity-card recipe would cover most."
+      },
+      {
+        "type": "sorting-and-graphing",
+        "description": "Multi-part sorting and graphing activities that progress through the year.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Graphing-page recipe (from PP Y2 analysis) applies."
+      },
+      {
+        "type": "composer-listening",
+        "description": "Weekly exposure to a composer's work. No specific activity described — listening and responding.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Music appreciation is inherently non-printable. A composer-card with bio/portrait/listening notes could supplement."
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 7,
+      "haveRecipe": 0,
+      "noRecipe": 7
+    }
+  },
+
+  "decisionsNeeded": [
+    {
+      "category": "taxonomy",
+      "item": "Add Music Appreciation / Composer Study topic or domain",
+      "impact": "Charlotte Mason curricula treat music as a core subject. Currently zero coverage in Homa taxonomy.",
+      "urgency": "medium"
+    },
+    {
+      "category": "taxonomy",
+      "item": "Expand Fine Arts domain — separate Art Appreciation from Art Creation, add Music",
+      "impact": "This curriculum has both picture study (appreciation) and art response (creation) as distinct activities. Homa lumps everything into one topic.",
+      "urgency": "medium"
+    },
+    {
+      "category": "taxonomy",
+      "item": "Add compass/directions/basic geography topics",
+      "impact": "Flagged in both PP Y2 and this curriculum. Common early childhood topic.",
+      "urgency": "low"
+    },
+    {
+      "category": "recipe",
+      "item": "Build nature-notebook-page recipe (html) — observation journal page for Charlotte Mason nature study",
+      "impact": "Core format for CM curricula. Reusable for any nature observation activity.",
+      "urgency": "high"
+    },
+    {
+      "category": "recipe",
+      "item": "Build picture-study-card recipe (hybrid) — masterwork reference + discussion prompts + art response guide",
+      "impact": "Picture study is a weekly CM activity. New format type for Homa.",
+      "urgency": "medium"
+    },
+    {
+      "category": "recipe",
+      "item": "Build recipe-card recipe (html) — kid-friendly cooking instruction card",
+      "impact": "Kitchen classroom appears in this curriculum and cooking activities are common across many curricula.",
+      "urgency": "low"
+    },
+    {
+      "category": "method",
+      "item": "Add charlotte-mason-early-years and early-years-v2-format to knowledge_bank",
+      "impact": "Curriculum writer can generate CM-style weekly plans with 8-subject integration",
+      "urgency": "high"
+    },
+    {
+      "category": "curriculum-writer",
+      "item": "Add Charlotte Mason Early Years methodology note — 8-subject integration, nature study spine, artist/composer rotation, living books, kitchen classroom",
+      "impact": "Fundamentally different weekly structure from Playing Preschool. Curriculum writer needs both patterns.",
+      "urgency": "high"
+    }
+  ],
+
+  "comparisonToPlayingPreschool": {
+    "similarities": [
+      "Both target preschool/early years (ages 3-6)",
+      "Both are hands-on and play-based (no worksheets/workbooks)",
+      "Both use books as the core anchor of learning",
+      "Both teach letters one per week with hands-on extension activities",
+      "Both include art, STEM, and sensory activities",
+      "Both emphasize process over mastery",
+      "Both use spiral/progressive skill building in math"
+    ],
+    "differences": [
+      "PP: themed units (Apples, Colors). EY: 8 parallel subject tracks every week.",
+      "PP: no art appreciation or music appreciation. EY: dedicated picture study + composer study.",
+      "PP: fixed daily routine (4 activities). EY: flexible — parent distributes 8 tracks across the week.",
+      "PP: non-alphabetical letter order. EY: alphabetical + digraphs at end.",
+      "PP: no nature study spine. EY: longitudinal nature observation is a core subject.",
+      "PP: no cooking component. EY: weekly 'Kitchen Classroom' tied to the letter.",
+      "PP: detailed daily lesson plans (what to say, what to do). EY: scope/sequence only — parent fills in the details.",
+      "PP: focused on 7 core skills. EY: broader — 8 distinct subjects including music and art appreciation.",
+      "PP: mainstream diverse books. EY: intentionally multicultural literature selection.",
+      "PP: 38 weeks. EY: 36 weeks."
+    ],
+    "complementary": "These two curricula complement each other beautifully. PP provides the detailed daily scaffolding and routine a new homeschool parent needs. EY provides the breadth of subjects (especially art, music, nature study) that PP lacks. A family could use PP as the core daily routine and layer in EY's picture study, composer study, and nature notebook on top. This is likely what Aless is considering."
+  },
+
+  "notes": "This is a very different animal from Playing Preschool. It's a Charlotte Mason-style scope and sequence — 8 subject tracks running in parallel for 36 weeks. The standout features are: (1) diverse artist rotation including non-Western artists (Kahlo, Touré, Sher-Gil, Lawrence, Howe), (2) diverse composer rotation including women and African composers (Chaminade, Touré, Boulogne, Davis), (3) multicultural literature selection, (4) longitudinal nature study (same local plants/trees/birds revisited across the year), (5) kitchen classroom as a distinct subject. This curriculum reveals what Aless wants that Playing Preschool alone doesn't provide: art appreciation, music appreciation, nature journaling, and cultural breadth. The biggest Homa product insight: families want to MIX curricula. The curriculum writer should be able to layer CM-style enrichment (picture study, composer study, nature notebook) onto any base program."
+}

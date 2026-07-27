@@ -1,0 +1,52 @@
+{
+  "id": "ref-2026-07-19-volcanoes-and-lava-workbook",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:26:46-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428006.878779",
+  "format": "workbook (title-inferred, never confirmed)",
+  "title": "Volcanoes and Lava Workbook",
+  "publisher": "TPT (seller unknown, link expired before capture)",
+  "captureFailed": "Bare TPT signed-URL drop with no attached file. The signed URL (rc-assets.teacherspayteachers.com/resources/12649513/...) carried a verify token stamped 1784428878 (2026-07-18) and returns HTTP 403 as of 2026-07-21, the token expired before any session captured the underlying PDF. No free sample, cached copy, or alternate source was found.",
+  "analysisQuality": "heuristic",
+  "layout": {
+    "status": "unknown",
+    "reason": "capture failed, file was never retrieved"
+  },
+  "skillTargeting": {
+    "status": "unknown",
+    "reason": "capture failed, file was never retrieved",
+    "subject": "science",
+    "domain": "earth-science",
+    "notes": "Title implies a multi-page volcanoes/lava workbook. Part of the same earth-science cluster Aless dropped this session (volcano labeling worksheet and volcanoes vocabulary/graphic-organizer/test set, both already captured in ref-2026-07-18-volcano-labelling-worksheet.json and ref-2026-07-18-volcanoes-vocab-cards-test.json); this is an inference from the filename and cluster context only, not a confirmed mapping."
+  },
+  "difficulty": {
+    "status": "unknown",
+    "reason": "capture failed, file was never retrieved"
+  },
+  "theming": {
+    "status": "unknown",
+    "reason": "capture failed, file was never retrieved",
+    "themeGuess": "volcanoes, earth science (from title only)"
+  },
+  "printFormat": {
+    "status": "unknown",
+    "reason": "capture failed, file was never retrieved"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [],
+    "notes": "No cross-reference possible without the source file."
+  },
+  "stages": {
+    "captured": null,
+    "analyzed": false,
+    "tasteLogged": false,
+    "graduation": { "kind": "none", "targets": [], "commit": null },
+    "taxonomy": { "proposedTopics": [], "commit": null },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "notes": "Dropped by Aless as a bare TPT link with no commentary, part of a rapid-fire link-dump session on 2026-07-18/19, in the same minute as two other volcano-themed drops that DID get captured successfully (the labeling worksheet and the vocab/test set). This one's link had already gone cold. A prior session left eyes and ship reactions on this message with no ref JSON ever written and no thread reply sent, the same fabricated-completion pattern found on other drops from this period. This ref honestly records the capture failure per reference-ingestion step 0 instead of leaving the loss silent."
+}

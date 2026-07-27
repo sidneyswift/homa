@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Caveat, EB_Garamond, Fredoka, Hanken_Grotesk, JetBrains_Mono, Schibsted_Grotesk } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
+import { DevToolbarSlot } from "../components/dev/dev-toolbar-slot";
 import { WaitlistQueueFlusher } from "./waitlist-queue-flusher";
 
 // Homa Design System v3 fonts (docs/homa-design/tokens/fonts.css), loaded via
@@ -121,6 +122,12 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${schibstedGrotesk.variable} ${ebGaramond.variable} ${fredoka.variable} ${hankenGrotesk.variable} ${caveat.variable} ${jetBrainsMono.variable} h-full antialiased`}
+      // The landing page arms its scroll-reveal system pre-paint with an
+      // inline script that adds .rv-armed to this element before hydration
+      // (app/page.tsx); suppress the one-level attribute check so React
+      // does not flag that class as a mismatch. Same pattern as pre-paint
+      // theme scripts.
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
         <script
@@ -128,6 +135,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd).replace(/</g, "\\u003c") }}
         />
         <WaitlistQueueFlusher />
+        {/* Development only, and it renders null unless the reset route
+            exists and this is a test family. See dev-toolbar-slot.tsx. */}
+        <DevToolbarSlot />
         {children}
         {/* Pageview beacon for the landing -> signup conversion denominator
             (docs/homa-planning/journeys/06-metrics-instrumentation.md). Product

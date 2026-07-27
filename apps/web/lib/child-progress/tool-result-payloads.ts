@@ -10,6 +10,7 @@ import type {
 } from "./tool-operations";
 import {
   DISABLED_PROGRESS_NOTE,
+  JOURNAL_HOURS_PROGRESS_NOTE,
   manageChildProgressResultSchema,
   OBSERVATION_ALREADY_USED_PROGRESS_NOTE,
   OBSERVATION_USED_PROGRESS_NOTE,
@@ -187,6 +188,7 @@ export async function progressUpdateResult(input: {
   affectedItemIds: readonly string[];
   undoToken: string | null;
   operations: ChildProgressToolOperations;
+  note?: typeof JOURNAL_HOURS_PROGRESS_NOTE;
 }): Promise<ManageChildProgressResult> {
   const view = await input.operations.getChildProgressView(
     input.context.familyId,
@@ -208,6 +210,7 @@ export async function progressUpdateResult(input: {
     affectedTopics,
     undoAvailable: input.undoToken !== null,
     undoToken: input.undoToken,
+    ...(input.note ? { note: input.note } : {}),
   });
 }
 

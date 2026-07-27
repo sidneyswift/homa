@@ -1,0 +1,485 @@
+"use client";
+
+import type { EveMessage, EveMessagePart } from "eve/react";
+import { useEffect, useState } from "react";
+
+import {
+  buildMapQuestionQueue,
+  planQuestions,
+  type MapAnswer,
+} from "@homa/core";
+
+import { Logo } from "../../components/brand/Logo";
+import { MaterialCard, type MaterialArtifact } from "./material-card";
+
+/**
+ * The two chat cards chat-first onboarding adds
+ * (plans/2026-07-21-chat-first-onboarding.md §2.3, §2.5).
+ *
+ * Both follow the card contract every other card here follows: exactly
+ * one card may be active (the newest with no message from her after it),
+ * only the active one may carry a button, and everything above it
+ * renders as a settled receipt so nothing in scrollback looks pressable.
+ *
+ * The checklist card is a POINTER, not a snapshot. It re-reads
+ * /api/map/state every time it mounts, because the numbers it shows are
+ * the one thing in the transcript that keeps changing after it was
+ * written: she answers twelve more questions on her phone, opens the
+ * laptop, and a card that had cached "12 left" would lie to her.
+ */
+
+interface MapStateChild {
+  id: string;
+  name: string;
+  ageMonths: number;
+  inRange: boolean;
+  reportToken: string | null;
+  answered: number;
+  answers: { itemId: string; answer: MapAnswer }[];
+}
+
+/** The checklist screen's own constant, so the two never disagree. */
+const SECONDS_PER_SUBJECT = 18;
+
+export interface ChecklistPosition {
+  answered: number;
+  remaining: number;
+  minutesLeft: number;
+  complete: boolean;
+  reportToken: string | null;
+}
+
+export function checklistPositionFor(child: MapStateChild): ChecklistPosition {
+  const answerMap: Record<string, MapAnswer> = {};
+  for (const entry of child.answers) answerMap[entry.itemId] = entry.answer;
+  const remaining = buildMapQuestionQueue(
+    planQuestions(child.ageMonths),
+    answerMap,
+  ).length;
+  return {
+    answered: child.answered,
+    remaining,
+    minutesLeft: Math.max(1, Math.ceil((remaining * SECONDS_PER_SUBJECT) / 60)),
+    complete: child.answered > 0 && remaining === 0,
+    reportToken: child.reportToken,
+  };
+}
+
+async function fetchChecklistPosition(
+  childId: string,
+): Promise<ChecklistPosition | null> {
+  try {
+    const response = await fetch("/api/map/state", { cache: "no-store" });
+    if (!response.ok) return null;
+    const data = (await response.json()) as {
+      ok?: boolean;
+      children?: MapStateChild[];
+    };
+    if (!data.ok) return null;
+    const child = data.children?.find((entry) => entry.id === childId);
+    return child ? checklistPositionFor(child) : null;
+  } catch {
+    return null;
+  }
+}
+
+export interface ChecklistCardData {
+  childId: string;
+  childName: string;
+  /** The counts as they were when the tool ran; replaced on mount. */
+  answered: number;
+  remaining: number;
+  minutesLeft: number;
+  resumed: boolean;
+}
+
+export function parseChecklistCardPart(
+  part: EveMessagePart,
+): ChecklistCardData | null {
+  if (
+    part.type !== "dynamic-tool" ||
+    part.toolName !== "start_checklist" ||
+    part.state !== "output-available"
+  ) {
+    return null;
+  }
+  const output = (part.output ?? {}) as Record<string, unknown>;
+  if (output.started !== true) return null;
+  if (typeof output.childId !== "string" || typeof output.childName !== "string") {
+    return null;
+  }
+  return {
+    childId: output.childId,
+    childName: output.childName,
+    answered: typeof output.answered === "number" ? output.answered : 0,
+    remaining: typeof output.remaining === "number" ? output.remaining : 0,
+    minutesLeft: typeof output.minutesLeft === "number" ? output.minutesLeft : 1,
+    resumed: output.resumed === true,
+  };
+}
+
+export interface ActiveChecklistRequest {
+  message: EveMessage;
+  partKey: string;
+  card: ChecklistCardData;
+}
+
+/**
+ * The one checklist card that may still be opened: the newest with no
+ * message from her after it. Same rule as the snap card, so two live
+ * cards can never both want the screen.
+ */
+export function latestChecklistRequest(
+  messages: readonly EveMessage[],
+): ActiveChecklistRequest | null {
+  let latest: ActiveChecklistRequest | null = null;
+  for (const message of messages) {
+    if (message.role === "user") {
+      latest = null;
+      continue;
+    }
+    if (message.role !== "assistant") continue;
+    for (const [partIndex, part] of message.parts.entries()) {
+      const card = parseChecklistCardPart(part);
+      if (card) latest = { message, partKey: `${message.id}:${partIndex}`, card };
+    }
+  }
+  return latest;
+}
+
+/**
+ * The live receipt in the transcript. It fronts the questions rather
+ * than containing them: the questions themselves take over the screen,
+ * because that component carries six dated founder corrections and
+ * re-rendering it inside a 26rem chat card would re-fight all six.
+ */
+export function ChecklistCard({
+  card,
+  active,
+  docked = false,
+  onOpen,
+}: {
+  card: ChecklistCardData;
+  active: boolean;
+  /** Standing in for the composer, same contract as DetailCard: the
+   *  swap reads as one object changing shape, and the transcript renders
+   *  nothing for this part while it is down here. */
+  docked?: boolean;
+  onOpen?: (childId: string) => void;
+}) {
+  const [position, setPosition] = useState<ChecklistPosition | null>(null);
+
+  useEffect(() => {
+    let current = true;
+    void fetchChecklistPosition(card.childId).then((next) => {
+      if (current && next) setPosition(next);
+    });
+    return () => {
+      current = false;
+    };
+  }, [card.childId]);
+
+  const answered = position?.answered ?? card.answered;
+  const remaining = position?.remaining ?? card.remaining;
+  const minutesLeft = position?.minutesLeft ?? card.minutesLeft;
+  const complete = position?.complete ?? false;
+  const total = answered + remaining;
+  const filled = total > 0 ? Math.round((answered / total) * 100) : 0;
+
+  // Spent: a settled receipt, in the same pill grammar every other
+  // finished thing uses. It taps through to what she earned, never back
+  // into the questions.
+  if (!active || complete) {
+    return (
+      <p className="inline-flex max-w-full items-baseline gap-1.5 self-start rounded-pill border border-sage/30 bg-sage/10 px-3 py-1.5 text-xs">
+        <span className="font-semibold text-sage">
+          {/* "ready", not "started", until she has answered something.
+              This pill renders mid-turn, before she has tapped anything,
+              and a receipt may never claim an effect that has not
+              happened. The founder read "Questions started" over a
+              button still saying "Start the questions". */}
+          {complete
+            ? "Questions done"
+            : answered > 0
+              ? "Questions started"
+              : "Questions ready"}
+        </span>
+        <span className="truncate text-body">
+          {card.childName}
+          {answered > 0 ? `, ${answered} ${answered === 1 ? "answer" : "answers"}` : ""}
+        </span>
+      </p>
+    );
+  }
+
+  return (
+    <section
+      className={
+        docked
+          ? "w-full rounded-[22px] border border-border-subtle bg-card px-4 pb-4 pt-4 shadow-md"
+          : "w-full max-w-[26rem] rounded-lg border border-border-subtle bg-card p-4 shadow-md sm:p-5"
+      }
+      aria-label={`${card.childName}'s questions`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="shrink-0 rounded-pill bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand">
+          {card.childName}
+        </span>
+        <p className="shrink-0 font-mono text-xs text-subtle">
+          {remaining <= 1
+            ? "almost done"
+            : answered > 0
+              ? `about ${minutesLeft} min left`
+              : `about ${minutesLeft} min`}
+        </p>
+      </div>
+      {/* The hairline, not a rail: on a phone the full rail was a settled
+          simplification and resurrecting it here would re-litigate it. */}
+      <div
+        className="mt-3 h-1 overflow-hidden rounded-pill bg-border-subtle"
+        aria-hidden="true"
+      >
+        <div
+          className="h-full rounded-pill bg-brand transition-[width] duration-(--dur-base) ease-out"
+          style={{ width: `${filled}%` }}
+        />
+      </div>
+      <p className="mt-3 text-sm text-muted">
+        {answered > 0
+          ? `You have given me ${answered} ${answered === 1 ? "answer" : "answers"} about ${card.childName} so far. You can stop whenever you like.`
+          : `Even five answers about ${card.childName} tell me a lot. You can stop whenever you like.`}
+      </p>
+      <button
+        type="button"
+        disabled={onOpen === undefined}
+        onClick={() => onOpen?.(card.childId)}
+        className="mt-4 flex min-h-12 w-full items-center justify-center gap-2.5 rounded-md bg-brand px-4 py-3 text-base font-bold text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <Logo size={17} variant="mark" />
+        {card.resumed || answered > 0 ? "Pick up where you left off" : "Start the questions"}
+      </button>
+    </section>
+  );
+}
+
+export interface ReportCardData {
+  childId: string;
+  childName: string;
+  token: string;
+  answered: number;
+  skipped: number;
+  mappedSubjects: number;
+  totalSubjects: number;
+  strengths: string[];
+  alreadyScored: boolean;
+}
+
+export function parseReportCardPart(part: EveMessagePart): ReportCardData | null {
+  if (
+    part.type !== "dynamic-tool" ||
+    part.toolName !== "score_child_report" ||
+    part.state !== "output-available"
+  ) {
+    return null;
+  }
+  const output = (part.output ?? {}) as Record<string, unknown>;
+  if (output.scored !== true) return null;
+  if (
+    typeof output.childId !== "string" ||
+    typeof output.childName !== "string" ||
+    typeof output.token !== "string"
+  ) {
+    return null;
+  }
+  return {
+    childId: output.childId,
+    childName: output.childName,
+    token: output.token,
+    answered: typeof output.answered === "number" ? output.answered : 0,
+    skipped: typeof output.skipped === "number" ? output.skipped : 0,
+    mappedSubjects:
+      typeof output.mappedSubjects === "number" ? output.mappedSubjects : 0,
+    totalSubjects:
+      typeof output.totalSubjects === "number" ? output.totalSubjects : 0,
+    strengths: Array.isArray(output.strengths)
+      ? output.strengths.filter((entry): entry is string => typeof entry === "string")
+      : [],
+    alreadyScored: output.alreadyScored === true,
+  };
+}
+
+export interface ActiveReportReveal {
+  message: EveMessage;
+  partKey: string;
+  card: ReportCardData;
+}
+
+export function latestReportReveal(
+  messages: readonly EveMessage[],
+): ActiveReportReveal | null {
+  let latest: ActiveReportReveal | null = null;
+  for (const message of messages) {
+    if (message.role === "user") {
+      latest = null;
+      continue;
+    }
+    if (message.role !== "assistant") continue;
+    for (const [partIndex, part] of message.parts.entries()) {
+      const card = parseReportCardPart(part);
+      if (card) latest = { message, partKey: `${message.id}:${partIndex}`, card };
+    }
+  }
+  return latest;
+}
+
+// ---------------------------------------------------------------------------
+// The first making: the artifact-moment promise card (§2.6, founder
+// ruling 2026-07-23). Homa starts a background build from the parent's
+// own words; this card carries the honest promise, and it is a POINTER
+// like the checklist card: it re-reads the making's status while it
+// waits, and when the page is ready it becomes the page itself, right
+// here in the transcript, with the soft entrance every block artifact
+// gets. No button while it makes: there is nothing to press, and
+// nothing in scrollback may look pressable.
+// ---------------------------------------------------------------------------
+
+export type MakingPhase = "making" | "ready" | "stalled" | "stopped";
+
+export interface FirstMakingCardData {
+  jobId: string;
+  childId: string;
+  childName: string;
+  title: string;
+  alreadyStarted: boolean;
+}
+
+export function parseFirstMakingCardPart(
+  part: EveMessagePart,
+): FirstMakingCardData | null {
+  if (
+    part.type !== "dynamic-tool" ||
+    part.toolName !== "start_first_making" ||
+    part.state !== "output-available"
+  ) {
+    return null;
+  }
+  const output = (part.output ?? {}) as Record<string, unknown>;
+  if (output.started !== true) return null;
+  if (
+    typeof output.jobId !== "string" ||
+    typeof output.childId !== "string" ||
+    typeof output.childName !== "string" ||
+    typeof output.title !== "string"
+  ) {
+    return null;
+  }
+  return {
+    jobId: output.jobId,
+    childId: output.childId,
+    childName: output.childName,
+    title: output.title,
+    alreadyStarted: output.alreadyStarted === true,
+  };
+}
+
+interface MakingStatusResponse {
+  phase: MakingPhase;
+  material: (MaterialArtifact & { id: string }) | null;
+}
+
+async function fetchMakingStatus(
+  jobId: string,
+): Promise<MakingStatusResponse | null> {
+  try {
+    const response = await fetch(
+      `/api/onboarding/making-status?jobId=${encodeURIComponent(jobId)}`,
+      { cache: "no-store" },
+    );
+    if (!response.ok) return null;
+    const data = (await response.json()) as {
+      ok?: boolean;
+      phase?: MakingPhase;
+      material?: (MaterialArtifact & { id: string }) | null;
+    };
+    if (!data.ok || typeof data.phase !== "string") return null;
+    return { phase: data.phase, material: data.material ?? null };
+  } catch {
+    return null;
+  }
+}
+
+/** How often the waiting card re-asks, and for how long. Past the cap it
+ * stops asking and the next mount (any re-entry) asks again, so a tab
+ * left open overnight is not a polling loop. */
+const MAKING_POLL_MS = 20_000;
+const MAKING_POLL_CAP_MS = 30 * 60_000;
+
+export function FirstMakingCard({ card }: { card: FirstMakingCardData }) {
+  const [status, setStatus] = useState<MakingStatusResponse | null>(null);
+
+  useEffect(() => {
+    let current = true;
+    let elapsed = 0;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const ask = async () => {
+      const next = await fetchMakingStatus(card.jobId);
+      if (!current) return;
+      if (next) setStatus(next);
+      const settled = next?.phase === "ready" || next?.phase === "stopped";
+      elapsed += MAKING_POLL_MS;
+      if (!settled && elapsed < MAKING_POLL_CAP_MS) {
+        timer = setTimeout(() => void ask(), MAKING_POLL_MS);
+      }
+    };
+    void ask();
+
+    return () => {
+      current = false;
+      if (timer) clearTimeout(timer);
+    };
+  }, [card.jobId]);
+
+  const phase = status?.phase ?? "making";
+
+  if (phase === "ready" && status?.material) {
+    return (
+      <div className="transition-[opacity,translate] duration-(--dur-base) ease-out starting:translate-y-1.5 starting:opacity-0 motion-reduce:transition-none">
+        <MaterialCard material={status.material} />
+      </div>
+    );
+  }
+
+  if (phase === "stopped") {
+    return (
+      <p className="inline-flex max-w-full items-baseline gap-1.5 self-start rounded-pill border border-sage/30 bg-sage/10 px-3 py-1.5 text-xs">
+        <span className="font-semibold text-sage">Making stopped</span>
+        <span className="truncate text-body">{card.title}</span>
+      </p>
+    );
+  }
+
+  return (
+    <section
+      className="w-full max-w-[26rem] rounded-lg border border-border-subtle bg-card p-4 shadow-sm sm:p-5"
+      aria-label={`${card.title}, being made`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="shrink-0 rounded-pill bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand">
+          {card.childName}
+        </span>
+        <p className="shrink-0 font-mono text-xs text-subtle">
+          {phase === "stalled" ? "paused for now" : "being made"}
+        </p>
+      </div>
+      <p className="mt-3 font-display text-lg font-semibold text-strong">
+        {card.title}
+      </p>
+      <p className="mt-1.5 text-sm text-muted">
+        {phase === "stalled"
+          ? "This one hit a snag while building. Nothing is lost, and you can ask Homa about it whenever you like."
+          : "Homa is drawing this now. It usually takes a few minutes, and it will land right here and in your binder. You don't have to wait for it."}
+      </p>
+    </section>
+  );
+}

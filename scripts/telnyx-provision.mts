@@ -350,8 +350,17 @@ async function loadVoiceInstructions(): Promise<string> {
   // this port trims the web-only parts (tools, memory, worksheets) since
   // the hosted assistant has none of them. {{family_context}} resolves at
   // call time via the dynamic-variables webhook (/api/voice/context).
+  // The call-boundary rules (what a call can and cannot do, the honest
+  // worksheet/binder response, the honesty law) live in
+  // apps/web/agent/general-call-instructions.md (voice-materials-bridge
+  // plan Phase 0) and are appended last so they bind hardest.
   const instructionsPath = path.join(REPO_ROOT, "apps/web/agent/instructions.md");
+  const boundaryPath = path.join(
+    REPO_ROOT,
+    "apps/web/agent/general-call-instructions.md",
+  );
   const full = await readFile(instructionsPath, "utf8");
+  const boundary = await readFile(boundaryPath, "utf8");
   const voiceSection = full.split("## What you know each turn")[0];
   return [
     voiceSection.replace(/<!--[\s\S]*?-->/u, "").trim(),
@@ -391,15 +400,18 @@ async function loadVoiceInstructions(): Promise<string> {
     "- If it is empty, this caller has no Homa account yet, and you are",
     "  Homa's front door: a warm, capable guide who is easy to talk to.",
     "  Answer their actual question first, fully and well; the help IS",
-    "  the pitch. Then, when it fits, offer the way in ONCE: their",
-    "  child's free progress report, about five minutes, no card. Offer",
-    "  to text them the link right now; if they say yes, call",
-    "  send_signup_link in that same turn, then confirm the text is on",
-    "  its way in one short sentence. If they decline, keep helping and",
-    "  drop it; a second pitch in one call reads as pushy. Never bring",
-    "  up payment or pricing on a call.",
-    "- You cannot make worksheets on a call yet; offer them for the next",
-    "  web visit instead.",
+    "  the pitch. Then, when it fits, offer the way in ONCE: a free",
+    "  trial of Homa, starting with their child's progress report from",
+    "  about five minutes of questions. Offer to text them the link",
+    "  right now; if they say yes, call send_signup_link in that same",
+    "  turn, then confirm the text is on its way in one short sentence.",
+    "  The text itself carries the trial terms. If they decline, keep",
+    "  helping and drop it; a second pitch in one call reads as pushy.",
+    "  If they ask about pricing: every plan starts with 7 free days,",
+    "  then Homa is $19 a month, and the full plans live at",
+    "  thankshoma.com. Never volunteer pricing beyond that on a call.",
+    "- What a call can and cannot do is bound by the rules at the end of",
+    "  these instructions; they beat everything above them.",
     "- You CAN save durable facts with the remember tool, and for a linked",
     "  family you should: the moment the parent shares something worth",
     "  keeping (family rhythm, a child's new obsession, what worked for",
@@ -431,6 +443,8 @@ async function loadVoiceInstructions(): Promise<string> {
     "    read the email body aloud. After the tool succeeds, confirm in one",
     "    sentence. If it returns an error, tell the parent plainly and never",
     "    pretend it worked.",
+    "",
+    boundary.replace(/<!--[\s\S]*?-->/u, "").trim(),
   ].join("\n");
 }
 

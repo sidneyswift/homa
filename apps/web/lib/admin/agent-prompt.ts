@@ -1,4 +1,5 @@
 import { adminDb } from "./db";
+import { buildStudioBrief } from "../materials/studio-brief";
 
 /**
  * "Prompt for agent" for the founder console (founder ask 2026-07-13):
@@ -19,10 +20,19 @@ import { adminDb } from "./db";
  * ::int (lib/admin/db.ts laws). Callers must be founder-gated.
  */
 
-export type AgentPromptSource = "task_run" | "delivery" | "email_send" | "cron";
+export type AgentPromptSource =
+  | "task_run"
+  | "delivery"
+  | "email_send"
+  | "cron"
+  | "studio_run";
 
 export function parseAgentPromptSource(value: string): AgentPromptSource | null {
-  return value === "task_run" || value === "delivery" || value === "email_send" || value === "cron"
+  return value === "task_run" ||
+    value === "delivery" ||
+    value === "email_send" ||
+    value === "cron" ||
+    value === "studio_run"
     ? value
     : null;
 }
@@ -758,6 +768,172 @@ async function buildCronPrompt(job: string): Promise<string> {
   ].join("\n");
 }
 
+interface StudioRunPromptRow {
+  id: string;
+  family_id: string;
+  family_name: string;
+  child_name: string | null;
+  child_birth: string | null;
+  request: string;
+  session_id: string | null;
+  status: string;
+  error: string | null;
+  feedback: string | null;
+  /** JSON text (db.ts law: cast arrays, fetch_types is off). */
+  feedback_tags: string | null;
+  feedback_at: string | null;
+  started_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * The studio iteration loop's packet (founder ask 2026-07-18 evening):
+ * not a failure diagnosis but an improvement brief. It carries the
+ * founder's verdict on one test run plus everything an agent needs to
+ * reference the run, view the output, and improve the materials-studio
+ * SKILL so future generations land closer.
+ */
+async function buildStudioRunPrompt(runId: string): Promise<string | null> {
+  const sql = adminDb();
+  let rows: StudioRunPromptRow[];
+  try {
+    rows = await sql<StudioRunPromptRow[]>`
+      select r.id, r.family_id, f.name as family_name, c.name as child_name,
+             to_char(c.birth_month, 'YYYY-MM-DD') as child_birth,
+             r.request, r.session_id, r.status, r.error,
+             r.feedback, to_json(r.feedback_tags)::text as feedback_tags,
+             r.feedback_at::text as feedback_at,
+             r.started_by, r.created_at::text as created_at,
+             r.updated_at::text as updated_at
+      from public.materials_studio_runs r
+      join public.families f on f.id = r.family_id
+      left join public.children c on c.id = r.child_id and c.family_id = r.family_id
+      where r.id = ${runId}
+    `;
+  } catch (error) {
+    if ((error as { code?: string }).code === "42P01") return null;
+    throw error;
+  }
+  const run = rows[0];
+  if (!run) return null;
+
+  const materials = run.session_id
+    ? await sql<
+        {
+          id: string;
+          title: string;
+          kind: string;
+          status: string;
+          source: string;
+          preview_url: string;
+          pdf_url: string;
+          generation_input: string | null;
+          review: string | null;
+          created_at: string;
+        }[]
+      >`
+        select m.id, m.title, m.kind, m.status, m.source,
+               m.preview_url, m.pdf_url,
+               (m.generation->'input')::text as generation_input,
+               (m.generation->'review')::text as review,
+               m.created_at::text as created_at
+        from public.materials m
+        where m.generation->>'sessionId' = ${run.session_id}
+        order by m.created_at asc
+      `
+    : [];
+
+  const trace = await sessionTraceSection(run.session_id);
+  const tags = run.feedback_tags ? (JSON.parse(run.feedback_tags) as string[]) : [];
+  const brief = buildStudioBrief({
+    request: run.request,
+    childName: run.child_name,
+  });
+
+  const env = process.env.VERCEL_ENV ?? "local dev";
+  const sha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ?? null;
+
+  return [
+    "# Homa skill improvement packet · materials-studio test run",
+    "",
+    "You are an AI coding agent working in the Homa monorepo. This is NOT a production failure: the founder ran a test generation of the materials-studio fleet skill on the founder console's studio bench (/admin/studio) and left a verdict on the output. Your job is to fold that verdict into the SKILL so future generations land closer, then verify.",
+    "This packet can contain sandbox-family data (names, ids). Only work with it in a trusted session and do not republish it.",
+    "",
+    "## Snapshot",
+    `- Generated: ${new Date().toISOString()} (timestamps UTC)`,
+    `- Console deployment: env ${env}${sha ? ` · commit ${sha}` : ""}`,
+    "- The skill under test: apps/web/agent/skills/materials-studio/SKILL.md (plus references/). Filesystem-first: this file IS the live skill; there is no database copy.",
+    "",
+    "## The founder's verdict",
+    tags.length > 0 ? `- Tags: ${tags.join(", ")}` : "- Tags: none picked",
+    kv("Left at", run.feedback_at ?? "no feedback recorded yet"),
+    "- Feedback:",
+    "```",
+    block(run.feedback ?? "(none written; the tags above and the output below are the signal)", 1600),
+    "```",
+    "",
+    "## The test run",
+    kv("Run id", run.id),
+    kv("Status", run.status),
+    kv("Run error", run.error),
+    kv("Sandbox family", `${run.family_name} (${run.family_id})`),
+    kv(
+      "Target child",
+      run.child_name
+        ? `${run.child_name}${run.child_birth ? ` · born ${run.child_birth}` : ""}`
+        : "none picked (the session chose from family context)",
+    ),
+    kv("Started by", run.started_by),
+    kv("Started", run.created_at),
+    kv("Session id", run.session_id),
+    "- The founder's request (what the session treated as the parent's ask):",
+    "```",
+    block(run.request, 700),
+    "```",
+    "- The exact brief the session received (rebuilt by the current lib/materials/studio-brief.ts builder):",
+    "```",
+    block(brief, 1600),
+    "```",
+    "",
+    "## The output",
+    ...(materials.length === 0
+      ? [
+          run.status === "failed"
+            ? "- No material was produced; the run failed. The trace below shows where it stopped."
+            : "- No material row carries this session id. The session finished without calling create_printable; the trace shows what it did instead.",
+        ]
+      : materials.flatMap((material) => [
+          `- ${material.title} (${material.kind}, source ${material.source}, status ${material.status})`,
+          `  - Preview: ${material.preview_url}`,
+          `  - PDF: ${material.pdf_url}`,
+          `  - create_printable input metadata: ${oneLine(material.generation_input, 500)}`,
+          `  - Quality-check verdict: ${oneLine(material.review, 400)}`,
+        ])),
+    "",
+    ...trace,
+    "",
+    "## What to do with this",
+    "1. Look at the actual output first: open the preview/PDF URLs above. The founder's tags describe THAT rendering.",
+    "2. Read apps/web/agent/skills/materials-studio/SKILL.md, especially the section that governs this material's format, and the difficulty-from-evidence rules at the top.",
+    "3. Fold the verdict into the skill: adjust the relevant recipe, decision rule, or example so the same request generates better output. Judgment and craft go in SKILL.md; do NOT move exact work into tools, and do not touch tenancy or tool code for a style complaint.",
+    "4. If the gap is a missing visual exemplar, add a reference image under references/ AND cite it from the section (the studio's skill X-ray and lib/materials/skill-package.test.ts enforce citation-to-disk parity both ways).",
+    "5. Verify: pnpm check:fleet-skills and pnpm check:materials must stay green; run pnpm typecheck. Then re-run this exact request on /admin/studio against the same family and compare.",
+    "",
+    "## Links and starters",
+    `- This run: ${siteBase()}/admin/studio/runs/${run.id}`,
+    ...(run.session_id
+      ? [`- Full turn-by-turn trace: ${siteBase()}/admin/sessions/${encodeURIComponent(run.session_id)}`]
+      : []),
+    `- SQL, read-only: select * from public.materials_studio_runs where id = '${run.id}';`,
+    ...(run.session_id
+      ? [
+          `- SQL, read-only: select title, kind, generation from public.materials where generation->>'sessionId' = '${run.session_id}';`,
+        ]
+      : []),
+  ].join("\n");
+}
+
 /**
  * The packet builder. Returns null when the source row no longer
  * exists (cron never returns null: an empty heartbeat series is itself
@@ -776,6 +952,8 @@ export async function buildAgentPrompt(
       return await buildEmailSendPrompt(sourceId);
     case "cron":
       return await buildCronPrompt(sourceId);
+    case "studio_run":
+      return await buildStudioRunPrompt(sourceId);
     default: {
       const exhausted: never = source;
       throw new Error(`unknown agent prompt source: ${String(exhausted)}`);

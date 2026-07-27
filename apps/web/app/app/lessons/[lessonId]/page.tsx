@@ -15,6 +15,7 @@ import { lessonMomentSchema } from "../../../../lib/lessons/synthesis";
 import { PageColumn } from "../../../../components/dashboard/page-column";
 import {
   AddLessonPhotos,
+  KeptAudioNotice,
   LessonStatusPoll,
   RetryLessonAnalysis,
 } from "./review-client";
@@ -152,6 +153,9 @@ export default async function LessonReviewPage({
   const observationNotes = insights.progressNotes.filter(
     (note) => note.outcome === "observation",
   );
+  const rejectedNotes = insights.progressNotes.filter(
+    (note) => note.outcome === "rejected",
+  );
   const mediaBySeq = new Map(
     media
       .filter((item) => item.capturedDuringSeq !== null)
@@ -180,6 +184,18 @@ export default async function LessonReviewPage({
           <p className="mt-2 text-sm text-muted">{insights.siblingNote}</p>
         ) : null}
       </section>
+
+      {/* Homa kept this recording without being asked, so she is told.
+          An automatic retention nobody mentions is not what the
+          keep-their-voice ruling authorized, and the undo sits inside
+          the same box as the news rather than in a settings page. */}
+      {lesson.audioKeptAt !== null && lesson.audioDeletedAt === null ? (
+        <KeptAudioNotice
+          lessonId={lessonId}
+          childName={childName}
+          day={startedAt}
+        />
+      ) : null}
 
       {insights.moments.length > 0 ? (
         <section aria-label="Moments" className="mt-4">
@@ -227,7 +243,7 @@ export default async function LessonReviewPage({
             <ul className="mt-2 space-y-1.5 text-sm text-body">
               {insights.whatWorked.map((line) => (
                 <li key={line} className="flex gap-2">
-                  <span aria-hidden="true" className="text-sage-700">
+                  <span aria-hidden="true" className="text-sage">
                     {"\u2022"}
                   </span>
                   {line}
@@ -275,6 +291,21 @@ export default async function LessonReviewPage({
               Homa wasn&apos;t sure about: {insights.openQuestions.join(" ")}
             </p>
           ) : null}
+        </section>
+      ) : null}
+
+      {ledgerNotes.length === 0 &&
+      observationNotes.length === 0 &&
+      rejectedNotes.length > 0 ? (
+        // The honest line for the all-rejected case (2026-07-21): a
+        // review without it reads as if the lesson updated progress
+        // when nothing was written anywhere.
+        <section className="mt-4 rounded-lg border border-border-subtle bg-card p-5 shadow-sm">
+          <p className="text-sm text-muted">
+            Your lesson and this review are saved. Homa heard skill
+            moments but could not tie them to the recording clearly
+            enough to update {childName}&apos;s progress this time.
+          </p>
         </section>
       ) : null}
 
@@ -359,6 +390,8 @@ export default async function LessonReviewPage({
   );
 }
 
+/** Back to where the recording door now lives: Progress, not the
+ *  retired kid card. */
 function BackToKid({
   childId,
   childName,
@@ -368,10 +401,10 @@ function BackToKid({
 }) {
   return (
     <Link
-      href={`/app/kids/${childId}`}
+      href={`/app/${childId}/progress`}
       className="text-sm font-medium text-muted transition-colors hover:text-strong"
     >
-      {"\u2190"} Back to {childName}&apos;s page
+      {"\u2190"} Back to {childName}&apos;s progress
     </Link>
   );
 }

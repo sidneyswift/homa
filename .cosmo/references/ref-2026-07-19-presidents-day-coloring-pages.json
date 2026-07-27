@@ -1,0 +1,51 @@
+{
+  "id": "ref-2026-07-19-presidents-day-coloring-pages",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:27:50-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428070.521679",
+  "format": "coloring page (title-inferred, never confirmed)",
+  "title": "Presidents Day Coloring Pages: Presidents Day Coloring Sheets Fun Activity",
+  "publisher": "TPT (seller unknown, link expired before capture)",
+  "captureFailed": "Bare TPT signed-URL drop with no attached file. The signed URL (rc-assets.teacherspayteachers.com/resources/12925922/...) carried a verify token stamped 1784428959 (2026-07-18) and returns HTTP 403 as of 2026-07-21, the token expired before any session captured the underlying PDF. No free sample, cached copy, or alternate source was found.",
+  "analysisQuality": "heuristic",
+  "layout": {
+    "status": "unknown",
+    "reason": "capture failed, file was never retrieved"
+  },
+  "skillTargeting": {
+    "status": "unknown",
+    "reason": "capture failed, file was never retrieved",
+    "subject": "history",
+    "notes": "Title implies a set of Presidents Day themed coloring pages. Dropped four minutes after Aless's file-folder Presidents Day money-matching activity (ref-2026-07-18-file-folder-presidents-money-match.json, successfully captured), suggesting a shared Presidents Day thread of interest; this is an inference from the filename and timing only, not a confirmed mapping."
+  },
+  "difficulty": {
+    "status": "unknown",
+    "reason": "capture failed, file was never retrieved"
+  },
+  "theming": {
+    "status": "unknown",
+    "reason": "capture failed, file was never retrieved",
+    "themeGuess": "Presidents Day, US history (from title only)"
+  },
+  "printFormat": {
+    "status": "unknown",
+    "reason": "capture failed, file was never retrieved"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [],
+    "notes": "No cross-reference possible without the source file."
+  },
+  "stages": {
+    "captured": null,
+    "analyzed": false,
+    "tasteLogged": false,
+    "graduation": { "kind": "none", "targets": [], "commit": null },
+    "taxonomy": { "proposedTopics": [], "commit": null },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "notes": "Dropped by Aless as a bare TPT link with no commentary, part of a rapid-fire link-dump session on 2026-07-18/19. A prior session left eyes and ship reactions on this message with no ref JSON ever written and no thread reply sent, the same fabricated-completion pattern found on other drops from this period. This ref honestly records the capture failure per reference-ingestion step 0 instead of leaving the loss silent."
+}

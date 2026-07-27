@@ -18,6 +18,7 @@ import {
   selectParentVisibleMaterialRevisions,
   type MaterialRevisionCandidate,
 } from "./materials/parent-visible";
+import { isHiddenDirective } from "./onboarding/directives";
 
 export type ChatHistoryChannel = "web" | "sms" | "email" | "dispatch";
 
@@ -104,6 +105,14 @@ export function toChatHistoryMessage(
   if (!CHANNELS.includes(row.channel as ChatHistoryChannel)) return null;
   const content = (row.content ?? "").trim();
   if (content.length === 0) return null;
+  // A hidden onboarding directive is the app talking on her behalf, so
+  // it renders no bubble. The fetch layer already filters to
+  // visibility='family' and these rows persist internal, so this is the
+  // second lock on the same door: rendering one as her own message is
+  // the exact failure the directive contract exists to prevent, and it
+  // would be invisible in review until a parent saw brackets in her own
+  // scrollback.
+  if (isHiddenDirective(content)) return null;
   const atMs = Date.parse(row.created_at);
   if (Number.isNaN(atMs)) return null;
   return {

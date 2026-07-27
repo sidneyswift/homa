@@ -1,0 +1,42 @@
+{
+  "id": "ref-2026-07-18-spanish-minibook-numeros-colores",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:29:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428171.749299",
+  "format": "cut-fold-minibook",
+  "title": "Mi Libro de Números y Colores — Spanish Numbers & Colors Mini Book",
+  "publisher": "Teaching with Café con Leche (TPT)",
+  "gradeLevel": "PreK-1st Grade (Spanish learners)",
+  "pageCount": 9,
+  "callouts": [],
+  "overview": {
+    "description": "A 9-page printable that folds into a mini-book. 'Mi Libro de Números y Colores' — each page: B&W line art illustration of birds/animals + sentence frame 'Veo ___ pájaro [color].' (I see ___ [color] bird.) Child fills in the number and colors the illustration to match the color word. Combines: Spanish reading, number writing, color recognition, coloring (fine motor). Cut-and-fold format: 2 half-pages per printed page, cut on dashed line, stack, staple = instant book.",
+    "sentenceFrame": "Veo ___ pájaro [color]. (I see ___ [color] bird.)",
+    "skills": ["Spanish color vocabulary", "Spanish number words", "counting", "coloring to match color words", "emergent reading in Spanish"]
+  },
+  "designPatterns": {
+    "cutFoldMinibook": {
+      "description": "Half-sheet pages printed 2-up on a full page. Cut on dashed line, stack in order, staple at the spine. The child has their OWN book — they made it, they filled it in, they colored it. It goes home as a keepsake.",
+      "value": "Ownership. A worksheet goes in the trash. A book the child made goes on the shelf. The act of assembling the book is itself a fine motor + sequencing activity."
+    },
+    "sentenceFrameReading": {
+      "description": "The same sentence frame repeats on every page with one variable changing (the color). 'Veo ___ pájaro negro.' → 'Veo ___ pájaro rojo.' → etc. The child reads the same structure over and over, building fluency. Only the color word changes — so the child can decode the new word from context.",
+      "value": "Predictable text = emergent reader success. The child 'reads' Spanish by recognizing the pattern and decoding just the changing word."
+    },
+    "colorByColorWord": {
+      "description": "Illustrations are B&W line art. The color word in the sentence tells the child what color to use. 'pájaro negro' = black bird. The child must READ the color word to know how to color the picture.",
+      "value": "Reading is required for the fun part (coloring). The color word isn't decorative — it's functional. Intrinsic motivation to decode."
+    }
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "sentence-frame-minibook",
+        "description": "A printable cut-and-fold mini-book with a repeating sentence frame. Each page changes one variable (color, number, animal, food). B&W illustrations that the child colors according to the text. Available in any language. Generatable for: colors, numbers, animals, food, body parts, family members — any vocabulary set. The child assembles, fills in, colors, and keeps the book."
+      }
+    ]
+  },
+  "notes": "Third Spanish drop from Aless. This is the simplest format yet — a cut-and-fold mini-book that a child assembles, fills in, and colors. The sentence-frame approach (same structure, one variable changes) is a proven early reading technique for both L1 and L2 learners. Combined with the Homeschool Languages picture books and the Los Pollitos curriculum, Aless has now shown three different Spanish material formats: reading picture book (passive), mini-book (active — child fills in + colors), and curriculum guide (teacher/parent reference). All three should be in Homa's Spanish toolkit."
+}

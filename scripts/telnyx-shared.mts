@@ -365,7 +365,7 @@ export function sendSignupLinkToolConfig(webhookSecret: string): unknown {
     webhook: {
       name: "send_signup_link",
       description:
-        "Text the caller Homa's signup link (the free progress report at " +
+        "Text the caller Homa's signup link (the free trial at " +
         "thankshoma.com/onboarding) to the number they are calling from. " +
         "Only for callers with no Homa account, only after they say yes " +
         "to the offer. Never call it twice in one conversation.",

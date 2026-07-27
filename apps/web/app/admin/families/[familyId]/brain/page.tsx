@@ -36,6 +36,7 @@ export default async function AdminFamilyBrainPage({
   const timeZone = adminTimeZone();
   const active = brain.memories.filter((memory) => memory.supersededAt === null);
   const superseded = brain.memories.filter((memory) => memory.supersededAt !== null);
+  const overflowCount = active.filter((memory) => !memory.pinned).length;
 
   return (
     <FamilyShell
@@ -46,9 +47,24 @@ export default async function AdminFamilyBrainPage({
       {() => (
         <div>
           <p className="text-sm text-muted">
-            {active.length} active memories ·{" "}
-            {formatInt(brain.activeChars)} of {formatInt(FAMILY_MEMORY_CHAR_BUDGET)} characters used
+            {active.length} active memories · {formatInt(brain.activeChars)} characters saved
             {superseded.length > 0 ? ` · ${superseded.length} superseded kept for the record` : ""}
+          </p>
+          <p className="mt-1 text-sm text-muted">
+            {overflowCount === 0 ? (
+              <>
+                All of it fits in every conversation, using{" "}
+                {formatInt(brain.pinnedChars)} of the{" "}
+                {formatInt(FAMILY_MEMORY_CHAR_BUDGET)} characters Homa can carry per turn.
+              </>
+            ) : (
+              <>
+                {formatInt(brain.pinnedChars)} of {formatInt(FAMILY_MEMORY_CHAR_BUDGET)} characters
+                ride in every conversation. The other {overflowCount}{" "}
+                {overflowCount === 1 ? "memory is" : "memories are"} saved and searchable, just not
+                carried by default.
+              </>
+            )}
           </p>
 
           <div className="mt-3 grid gap-2">
@@ -63,6 +79,7 @@ export default async function AdminFamilyBrainPage({
                   <Pill tone={KIND_TONE[memory.kind] ?? "stone"}>
                     {memory.kind.replace(/_/g, " ")}
                   </Pill>
+                  {memory.pinned ? null : <Pill tone="stone">searchable only</Pill>}
                   <div className="min-w-0 flex-1">
                     <p className="text-sm text-body">{memory.content}</p>
                     <p className="mt-0.5 font-mono text-[0.62rem] text-subtle">

@@ -13,11 +13,13 @@ export { ACTION_COSTS } from "./action-costs";
 
 export {
   EVENT_SCHEMAS,
+  MAP_FLOW_STEPS,
   WALL_DOORS,
   emitEvent,
   type EventName,
   type EventProps,
   type EventSink,
+  type MapFlowStep,
   type WallDoor,
 } from "./events";
 
@@ -61,6 +63,11 @@ export {
   type MapQuestionPlan,
 } from "./map/bank";
 
+export {
+  getScorableItem,
+  isTaxonomyScorable,
+  taxonomyScorableItems,
+} from "./map/scorable";
 export { PERSONALIZATION_EXCEPTION_IDS, personalizeStatement } from "./map/personalize";
 
 export { reportStaleness, type ReportStaleness } from "./map/staleness";

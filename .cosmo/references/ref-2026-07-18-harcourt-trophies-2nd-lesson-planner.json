@@ -1,0 +1,205 @@
+{
+  "id": "ref-2026-07-18-harcourt-trophies-2nd-lesson-planner",
+  "droppedBy": "carolyng",
+  "droppedAt": "2026-07-18T16:52:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784407931.510559",
+  "format": "teacher-guide-lesson-planner",
+  "title": "Harcourt Trophies Grade 2 Teacher Guide — Suggested Lesson Planner + Cross-Curricular Centers",
+  "publisher": "Harcourt",
+  "series": "Trophies",
+  "gradeLevel": "2nd grade",
+  "relatedRefs": [
+    "ref-2026-07-18-harcourt-trophies-2nd-practice-book",
+    "ref-2026-07-18-harcourt-trophies-2nd-assessments"
+  ],
+  "callouts": ["breakdown of lesson and layout", "quick week recap of lessons", "focus on the week", "cross curricular centers"],
+  "pagesShown": {
+    "lessonPlanner": {
+      "pages": ["14C (Day 1-2)", "14D (Day 3-5)"],
+      "story": "The Mixed-Up Chameleon, pp. 16-47",
+      "theme": "Being Me"
+    },
+    "crossCurricularCenters": {
+      "pages": ["2 pages of center activities"],
+      "centers": ["Science Center", "Literacy Center", "Computer Center", "Social Studies Center", "Drama Center"]
+    }
+  },
+  "weeklyLessonPlanner": {
+    "structure": {
+      "description": "A 5-day at-a-glance spread organized as columns (Day 1-5) against rows (skill strands). The left sidebar lists all skill strands; each day column fills in the specific activity for that strand. Everything centers on ONE reading selection for the entire week.",
+      "orientation": "landscape spread across 2 pages",
+      "colorCoding": "Each day gets a distinct color (red, orange, green, blue, pink/purple). Skill strand headers use consistent color-coded badges."
+    },
+    "skillStrands": {
+      "oralLanguage": {
+        "activities": ["Sharing Literature"],
+        "dailyPattern": "Alternates between stories and poems across the 5 days. Day 5 compares story to main selection."
+      },
+      "wordWork": {
+        "activities": ["Phonics", "Spelling", "Vocabulary", "High-Frequency Words"],
+        "dailyPattern": "Day 1: introduce phonograms + pretest. Day 2: review + build words + introduce vocab. Day 3: state generalization. Day 4: expand to syllables + review. Day 5: post-test + writing application."
+      },
+      "reading": {
+        "activities": ["Comprehension", "Fluency", "Decodable Books", "Read the Selection", "Making Connections", "Independent Reading"],
+        "dailyPattern": "Day 1: decodable readers. Day 2: read main selection + comprehension. Day 3: reread for fluency + connected nonfiction. Day 4: comprehension test + locate information. Day 5: fluency reread + self-selected reading."
+      },
+      "languageArts": {
+        "activities": ["Writing (Writer's Craft)", "Grammar", "Daily Language Practice", "Writing Prompt"],
+        "dailyPattern": "Writer's Craft appears all 5 days (Developing Ideas and Topics). Grammar: introduce Day 1, review Days 2-5. Daily Language Practice: error correction exercise every day. Writing prompts get progressively freer (Day 1: favorite topics → Day 5: self-selected topic)."
+      },
+      "dailyRoutines": {
+        "activities": ["Morning Message", "Daily Language Practice", "Writing Prompt"],
+        "description": "Fixed daily routines that happen regardless of the story. Provides predictable structure."
+      }
+    },
+    "weekFocusSummary": {
+      "focusSkill": "Main Idea",
+      "phonics": "Phonograms -id, -ide",
+      "vocabulary": ["dull", "exciting", "handsome", "hardly", "sideways", "sparkling", "spotted"],
+      "highFrequencyWords": ["big", "brown", "eat", "no", "people"],
+      "writersCraft": "Developing Ideas and Topics",
+      "testedSkills": "marked with T symbol throughout"
+    },
+    "progressionPattern": {
+      "description": "Clear introduce → practice → generalize → apply → assess arc across the 5 days. Nothing is one-shot. Every skill gets revisited at least 3 times in different contexts before the post-test.",
+      "days": {
+        "day1": "Introduce + pretest (establish baseline)",
+        "day2": "Build + read main selection (apply in context)",
+        "day3": "Generalize + reread for fluency (deepen)",
+        "day4": "Comprehension check + review (assess understanding)",
+        "day5": "Post-test + self-selected reading + writing application (demonstrate mastery)"
+      }
+    }
+  },
+  "crossCurricularCenters": {
+    "description": "A two-page spread of 5 learning centers, each connected to the story theme (chameleons). Every center targets a DIFFERENT subject while reinforcing the reading selection. Each includes: activity description, time estimate, materials list, and a photo/illustration of the expected output.",
+    "centers": [
+      {
+        "name": "Science Center",
+        "activity": "Chameleon Habitat",
+        "description": "Build a mock chameleon habitat using natural materials (shoe box diorama with real leaves, twigs, sand, construction paper). Discuss blending/camouflage and survival.",
+        "time": "30 minutes",
+        "materials": ["Pupil Edition", "shoe boxes", "real leaves and twigs", "sand", "construction paper"],
+        "subjectConnection": "science (habitats, adaptation, camouflage)",
+        "storyConnection": "extends the chameleon theme into real science"
+      },
+      {
+        "name": "Literacy Center",
+        "activity": "Changing Words",
+        "description": "Use chameleon-shaped acetate cutouts with phonograms -ide and -id. Children place consonant/blend cards in front to build and read words. Record words in Word Building journals.",
+        "time": "15 minutes",
+        "materials": ["chameleon cutouts (acetate)", "consonant/blend poster", "Word Building journals", "pencils"],
+        "subjectConnection": "ELA (phonics, word building)",
+        "storyConnection": "chameleon-themed manipulatives reinforce the week's phonograms"
+      },
+      {
+        "name": "Computer Center",
+        "activity": "Chameleon Composing",
+        "description": "Write compare/contrast sentences: how the story chameleon is different from a real chameleon. Use spell-check. Practices writing + technology.",
+        "time": "15 minutes",
+        "materials": ["computer", "word processing software"],
+        "subjectConnection": "technology + writing (compare/contrast)",
+        "storyConnection": "fiction vs. nonfiction analysis of the chameleon"
+      },
+      {
+        "name": "Social Studies Center",
+        "activity": "Zoo Map",
+        "description": "Draw a map of an imaginary zoo like the one in the story, using letter and number grids. Practices map skills + spatial reasoning.",
+        "time": "30 minutes",
+        "materials": ["construction paper", "crayons or markers", "Pupil Edition"],
+        "subjectConnection": "social studies (map skills, spatial reasoning)",
+        "storyConnection": "the zoo setting from the story becomes the map subject"
+      },
+      {
+        "name": "Drama Center",
+        "activity": "A Day in the Life of a Chameleon",
+        "description": "Act out chameleon behaviors (catching flies with party blowouts as tongues, changing colors). Engage in dialogue and dramatic play.",
+        "time": "15 minutes",
+        "materials": ["party blowouts", "fly cutouts"],
+        "subjectConnection": "drama (role play, creative expression, oral language)",
+        "storyConnection": "embody the chameleon character from the story"
+      }
+    ],
+    "designPattern": {
+      "eachCenterIncludes": ["colored header bar with subject icon", "activity title", "description paragraph", "time clock icon", "MATERIALS list in separate box", "photo of example output"],
+      "iconStrip": "Row of 5 subject icons across the top (Science microscope, Letter & Word ABC, Technology globe, Social Studies earth, Drama masks) — visual wayfinding for which center is which"
+    }
+  },
+  "overallLayout": {
+    "structure": "grid (day columns × skill strand rows)",
+    "spacing": "dense but organized — color coding prevents overwhelm",
+    "visualHierarchy": "color-coded columns dominate, skill strand sidebar provides navigation",
+    "whiteSpaceRatio": 0.15,
+    "flowDirection": "left-right across days, top-down within each day"
+  },
+  "overallSkillTargeting": {
+    "subject": "multidisciplinary",
+    "domain": "integrated-curriculum",
+    "topics": [
+      {"id": "ela.phonogram-word-families", "kind": "procedural", "mapped": false},
+      {"id": "ela.reading-comprehension-fiction", "kind": "conceptual", "mapped": false},
+      {"id": "ela.main-idea", "kind": "conceptual", "mapped": false},
+      {"id": "ela.writing-ideas-topics", "kind": "procedural", "mapped": false},
+      {"id": "science.animal-habitats", "kind": "conceptual", "mapped": false},
+      {"id": "social-studies.map-skills", "kind": "procedural", "mapped": false}
+    ],
+    "unmappedSkills": ["weekly-lesson-planning", "cross-curricular-center-activities"]
+  },
+  "difficulty": {
+    "ageBandMonths": [72, 96],
+    "complexity": "multi-skill (entire week across all subject strands)",
+    "prerequisites": ["basic reading readiness"],
+    "scaffolding": "high (teacher-guided, fully planned)"
+  },
+  "theming": {
+    "themeType": "character-driven",
+    "characters": ["The Mixed-Up Chameleon (story character)"],
+    "visualStyle": "color-coded information design (teacher reference, not student-facing)",
+    "colorPalette": "full-color (red, orange, green, blue, purple day columns)",
+    "appealDrivers": ["at-a-glance weekly overview", "everything-on-one-spread convenience", "color-coded day navigation"]
+  },
+  "printFormat": {
+    "pageSize": "letter (teacher edition spiral-bound)",
+    "orientation": "landscape spread (2 portrait pages side by side)",
+    "margins": "tight (dense information)",
+    "inkDensity": "heavy (full color throughout)",
+    "colorRequirement": "needs color — color coding is structural, not decorative"
+  },
+  "designPatterns": {
+    "weekAtAGlance": {
+      "description": "One two-page spread shows the ENTIRE week's instruction for one reading selection. Parent/teacher can see Monday-Friday at a glance without flipping pages. This is the single most powerful planning feature — it eliminates 'what do I do today?' and shows how each day builds on the last.",
+      "value": "reduces daily planning overhead to near-zero for the parent"
+    },
+    "spiralReview": {
+      "description": "Skills introduced early in the week get reviewed and deepened across subsequent days. Spelling starts with a pretest (Day 1), builds words (Day 2), generalizes the pattern (Day 3), reviews (Day 4), and ends with a post-test + writing application (Day 5). Nothing is taught once and dropped.",
+      "value": "spaced repetition built into the weekly structure"
+    },
+    "storyAsHub": {
+      "description": "Everything radiates from ONE reading selection. Phonics, spelling, vocabulary, comprehension, writing, grammar — all connect back to the same story. The cross-curricular centers extend the story theme into science, social studies, drama, and technology. The story IS the curriculum for the week.",
+      "value": "coherence — the child isn't context-switching between unrelated topics all day"
+    },
+    "centersWithMaterialsLists": {
+      "description": "Every cross-curricular center includes: a clear activity description, estimated time, and a MATERIALS box listing exactly what the parent needs. This is the same 'respect the parent's planning time' pattern Carolyng identified in the school-home connections and unit study drops.",
+      "value": "parent can prepare materials in advance — no mid-lesson scrambling"
+    },
+    "testedSkillMarkers": {
+      "description": "Skills that will appear on the end-of-selection test are marked with a bold T throughout the planner. Parent knows exactly which activities are 'must-do' versus 'nice-to-do.'",
+      "value": "prioritization — if time is short, focus on T-marked activities"
+    }
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "weekly-lesson-planner",
+        "description": "A week-at-a-glance planner that maps daily activities across skill strands for one reading selection or unit topic. 5 day columns, skill strand rows, color-coded. Shows the introduce→practice→generalize→apply→assess arc. This is a PARENT-FACING planning tool, not a student worksheet."
+      },
+      {
+        "name": "cross-curricular-center-cards",
+        "description": "Individual activity cards for learning centers, each themed around the week's story/topic but targeting different subjects (science, literacy, social studies, drama, technology). Each card includes: activity description, time estimate, materials list, example photo/illustration. Could be generated alongside a weekly plan."
+      }
+    ]
+  },
+  "notes": "This is the teacher/parent planning layer of the Trophies system — the orchestration that ties the practice worksheets and assessments together into a coherent weekly flow. Carolyng explicitly loved: (1) the weekly breakdown/layout, (2) the focus on the week as a unit, and (3) the cross-curricular centers. Combined with her earlier two drops (practice pages + assessments), she's now shown us the FULL three-layer architecture of a published curriculum: lesson planner (orchestration) → practice book (daily skill-building) → assessment (verification). This is the most significant product architecture signal yet."
+}

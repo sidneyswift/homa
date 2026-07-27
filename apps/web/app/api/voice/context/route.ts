@@ -7,6 +7,8 @@ import {
   renderFamilyContext,
 } from "../../../../lib/family-context";
 import { recordLeadContact } from "../../../../lib/phone-leads";
+import { effectiveTimeZone, zonedDateString } from "../../../../lib/time-zone";
+import { loadRecentActivityDigest } from "../../../../lib/voice/recent-activity";
 import { hasVoiceWebhookSecret } from "../../../../lib/voice/webhook-auth";
 
 /**
@@ -96,6 +98,20 @@ export async function POST(request: Request): Promise<Response> {
         error instanceof Error ? error.message : "unknown",
       );
     }
+    // Bounded "recent activity" digest (issue #176, CG-03, item 5): the
+    // call INGESTS what happened on other channels in the last 72
+    // hours; it never implies live mid-call awareness of anything else.
+    // An outage here is also an enrichment miss, never a blocker.
+    let recentActivity = "";
+    try {
+      const today = zonedDateString(new Date(), effectiveTimeZone(rows.family?.time_zone));
+      recentActivity = await loadRecentActivityDigest(familyId, today);
+    } catch (error) {
+      console.error(
+        "voice context: recent-activity digest failed:",
+        error instanceof Error ? error.message : "unknown",
+      );
+    }
     return Response.json({
       dynamic_variables: {
         caller_known: "true",
@@ -108,6 +124,7 @@ export async function POST(request: Request): Promise<Response> {
             speakingWith: identity.memberDisplayName,
           }),
           continuityContext,
+          recentActivity,
         ]
           .filter((block) => block.length > 0)
           .join("\n\n"),

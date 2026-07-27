@@ -46,6 +46,10 @@ export interface PlannerDayItem {
 export interface PlannerDay {
   cell: WeekdayCell;
   items: PlannerDayItem[];
+  /** D17, birthday on the board (§4.2): "Mia turns 7", render-only,
+   * one line per visible kid whose real birthday lands on this day.
+   * Empty on every ordinary day. */
+  birthdays?: string[];
 }
 
 function ActivityCard({ item, plan }: { item: PlannerDayItem; plan: PlannerDayPlan }) {
@@ -100,11 +104,21 @@ function ActivityCard({ item, plan }: { item: PlannerDayItem; plan: PlannerDayPl
   );
 }
 
-export function DayGrid({ days, plans }: { days: PlannerDay[]; plans: PlannerDayPlan[] }) {
+export function DayGrid({
+  days,
+  plans,
+  singleColumn = false,
+}: {
+  days: PlannerDay[];
+  plans: PlannerDayPlan[];
+  /** The chat's planner canvas is ~half a viewport wide: five viewport-
+   * breakpoint columns would crush there, so it stacks the days. */
+  singleColumn?: boolean;
+}) {
   const plansByKey = useMemo(() => new Map(plans.map((plan) => [plan.key, plan])), [plans]);
 
   return (
-    <div className="grid gap-3 md:grid-cols-5">
+    <div className={singleColumn ? "grid gap-3" : "grid gap-3 md:grid-cols-5"}>
       {days.map((day) => (
         <section
           key={day.cell.label}
@@ -131,6 +145,18 @@ export function DayGrid({ days, plans }: { days: PlannerDay[]; plans: PlannerDay
               </span>
             ) : null}
           </header>
+          {day.birthdays && day.birthdays.length > 0 ? (
+            <div className="flex flex-col gap-1 px-0.5">
+              {day.birthdays.map((label) => (
+                <span
+                  key={label}
+                  className="w-fit rounded-pill bg-[var(--gold-100)] px-2 py-0.5 text-[0.68rem] font-semibold text-[var(--gold-ink)]"
+                >
+                  {"\u{1F382}"} {label}
+                </span>
+              ))}
+            </div>
+          ) : null}
           {day.items.length > 0 ? (
             day.items.map((item) => {
               const plan = plansByKey.get(item.planKey);

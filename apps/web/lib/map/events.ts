@@ -1,4 +1,4 @@
-import { EVENT_SCHEMAS, type EventName, type EventProps } from "@homa/core";
+import { EVENT_SCHEMAS, type EventName, type EventProps, type MapFlowStep } from "@homa/core";
 
 import { mapDb, type DbJson } from "./db";
 
@@ -80,5 +80,34 @@ export async function emitMapEvent<N extends EventName>(
     `;
   } catch (error) {
     console.error(`emitMapEvent(${name}) failed:`, error);
+  }
+}
+
+/**
+ * Has this family already been counted at this onboarding card? The
+ * map.step_viewed beacon fires on every phase mount (including a resume
+ * days later), so the funnel wants one row per (family, step); the route
+ * checks this before emitting. Best-effort like every analytics path: on a
+ * read error we return true (skip the emit) rather than risk breaking the
+ * onboarding beacon, and the tiny check-then-emit race can at worst leave a
+ * duplicate row, which a distinct-family funnel count already tolerates.
+ */
+export async function stepViewRecorded(
+  familyId: string,
+  step: MapFlowStep,
+): Promise<boolean> {
+  try {
+    const sql = mapDb();
+    const rows = await sql<{ one: number }[]>`
+      select 1 as one from public.events
+      where name = 'map.step_viewed'
+        and family_id = ${familyId}
+        and props->>'step' = ${step}
+      limit 1
+    `;
+    return rows.length > 0;
+  } catch (error) {
+    console.error("stepViewRecorded failed:", error);
+    return true;
   }
 }

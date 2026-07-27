@@ -29,6 +29,14 @@ import { hasVoiceWebhookSecret } from "../../../../../lib/voice/webhook-auth";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_PER_FAMILY_PER_DAY = 5;
 
+/** The success result the assistant reads back. It states the boundary
+ * instead of a bare ok: on 2026-07-19 a call followed this tool with "I've
+ * sent the filled worksheet with visuals" and "I've added the syllable
+ * activity to Amalia's binder", and this tool can do neither. Mirrors the
+ * limits in agent/general-call-instructions.md; change both together. */
+const SENT_NOTE =
+  "Sent as a plain text email containing only the words you wrote. There is no attachment, no worksheet file, and nothing was added to her binder. Confirm you sent it in one short sentence, and do not claim you made a printable or saved anything to the binder on this call.";
+
 interface ToolCallBody {
   subject?: string;
   body?: string;
@@ -88,11 +96,13 @@ export async function POST(request: Request): Promise<Response> {
     email,
     subject,
     text.split("\n").filter((line) => line.trim().length > 0),
+    undefined,
+    familyId,
   );
   if (!sent) {
     return Response.json({ success: false, error: "The send failed. Tell them you'll try again shortly." });
   }
 
   await emitMapEvent("voice.email_sent", { family_id: familyId, child_id: childId ?? undefined });
-  return Response.json({ success: true });
+  return Response.json({ success: true, note: SENT_NOTE });
 }

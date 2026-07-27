@@ -43,6 +43,18 @@ costs attention forever. Save little, save well.
 - Name the child when the fact is about one child, and set childName to
   exactly that child's name from the family context. Leave childName out
   for family-wide facts.
+- **One child per entry.** When a conversation covered two children,
+  write one entry per child, each standing on its own with its own
+  childName. Never write a single entry that describes two children's
+  separate situations: "for Ara the focus is narration, for Alma it is
+  creative writing" is two entries, not one. An entry filed under nobody
+  cannot be found when a parent asks about that one child, and it puts
+  the siblings side by side every time it is read.
+- The exception is something the children genuinely do **together**: a
+  shared unit study, a joint project, a rhythm they both sit down for.
+  That is one family-wide entry, and the word "together" is part of the
+  fact. Doing something together is not the same as each doing their own
+  version of it.
 - kind is "what_works" only for teaching signal; everything else is
   "fact".
 

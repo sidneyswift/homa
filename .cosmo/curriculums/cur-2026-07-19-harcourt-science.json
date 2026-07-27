@@ -1,0 +1,511 @@
+{
+  "id": "cur-2026-07-19-harcourt-science",
+  "name": "Harcourt Science (Grade 1, Harcourt School Publishers pupil edition, copyright 2000)",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-19T17:34:09-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784496849.933829",
+  "sourceFiles": [
+    {
+      "filename": "harcourt-science-pt1.pdf",
+      "localPath": ".cosmo/inspo-files/harcourt-science-pt1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-harcourt-science-pt1/harcourt-science-pt1.pdf"
+    },
+    {
+      "filename": "harcourt-science-pt2.pdf",
+      "localPath": ".cosmo/inspo-files/harcourt-science-pt2.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-harcourt-science-pt2/harcourt-science-pt2.pdf"
+    }
+  ],
+  "layer1_philosophy": {
+    "methodology": "A published, skills-based elementary science textbook organized around a consistent two-step lesson pattern: a hands-on 'Investigate' activity that lets the child observe or test something firsthand, always followed by a short 'Learn About' reading passage that names and explains what the child just did, never the other way around. A fixed, named process-skills vocabulary (Observe, Compare, Classify, Sequence, Infer, Predict, Measure, Communicate, Draw Conclusions, Make Models, Gather Information, Plan, Order) is taught once in a front-matter 'Using Science Skills' spread and then referenced by name throughout the whole book, including inside a small 'Science Skill' tip box on many Investigate activities and in the numbered 'Using Science Skills' tasks that close every chapter review.",
+    "principles": [
+      "Six units (A: Plants and Animals All Around; B: Living Together; C: About Our Earth; D: Weather and the Seasons; E: Matter and Energy; F: Energy and Forces), split evenly across three science branches, two units each: Life Science (A, B), Earth Science (C, D), Physical Science (E, F). Each unit holds 2 chapters, each chapter 3-6 lessons, every lesson a fixed 'Investigate' hands-on activity followed by a 'Learn About' reading passage with 1-2 bolded vocabulary words",
+      "Investigate-then-explain sequencing on every single lesson: a short materials list ('You will need') plus 2-3 numbered hands-on steps comes first, often with a small 'Science Skill' callout box naming and defining the one process-skill the activity practices (for example 'To draw a conclusion, use what you have observed to form an idea'). Only after the hands-on step does the book explain the concept in a few short declarative sentences",
+      "A named, reused process-skills vocabulary (Observe, Compare, Classify, Sequence, Infer, Make Models, Gather Information, Plan, Predict, Measure, Communicate, Draw Conclusions, Order) taught in a dedicated front-matter 'Using Science Skills' spread before Unit A even begins, then referenced by name throughout the book rather than left implicit",
+      "Every chapter (12 across the book, 2 per unit) closes with a fixed three-part 'Review' spread: 'Tell What You Know' (open prompts tied to photos), a picture-to-word 'Vocabulary' matching set, and 2-4 numbered 'Using Science Skills' tasks that apply that chapter's named skills to a new example. No separate test, quiz, or score was observed anywhere in sampled pages",
+      "Cross-curricular 'Links' recur every lesson or two: a short biography of a real scientist, engineer, or other professional (a geologist, an architect, a hot-air balloonist, a doctor, a photographer) tied to that lesson's content, paired with a companion Math, Social Studies/Career, Language Arts, or Art Link activity and a 'Think and Do' follow-up task",
+      "Each unit (6 across the book) closes with open-ended 'Activities for Home or School' enrichment (for example 'Investigate Water Vapor', 'Make a Sail for a Car') and a 'Unit Wrap Up' spread combining a Writing prompt (often a foldable/flap or pull-book format), a Reading recommendation naming one real published trade book, and a 'Computer Center' website suggestion",
+      "A combined References back-matter section functions as an ongoing whole-year reference rather than weekly content: a Science Handbook (how to use a hand lens, thermometer, ruler, measuring cup, clock/stopwatch, balance, and computer), a Health Handbook (body-systems pages, for example a labeled Respiratory System diagram, plus care/safety tips), a roughly 100-plus-term illustrated Glossary (term plus one real-world photo example, page cross-referenced back into the lesson content), and a topical Index"
+    ],
+    "learningTheory": "developmental-sequential, direct-instruction-of-process-skills-and-content-vocabulary, always experience-before-term (the hands-on Investigate activity precedes the reading passage that names and explains it on every lesson; commonly described as an inquiry-based or 'hands-on, minds-on' approach in published US elementary science curricula, offered here as description, not because the book itself uses that term)",
+    "assessmentApproach": "chapter-ending-review-recap ('Tell What You Know' plus vocabulary matching plus 'Using Science Skills' tasks), no separate tests, quizzes, or scores observed in any sampled page; the Science Handbook, Health Handbook, and Glossary function as an ongoing reference the child returns to, not a graded checkpoint",
+    "parentRole": "facilitator-and-co-investigator (gathers the Investigate step's household materials, supervises the hands-on activity, and reads the Learn About passage aloud with or to the young reader)",
+    "knowledgeBankMatches": [
+      {
+        "topicKey": "investigate-then-explain-elementary-science",
+        "topicType": "method_philosophy",
+        "status": "unknown, could not query the live knowledge_bank table from this sandbox (no database credentials available). apps/web/agent/curriculum-writer.md's Methodology-aware planning rules section had no published-science-textbook or investigate-then-explain section before this session (its closest existing section, Direct Instruction / DISTAR, is specifically about scripted phonics reading instruction and does not describe this book's hands-on-first science pattern at all), so this is very likely a genuine first entry for this method, independent of whatever the knowledge_bank table itself holds"
+      }
+    ],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "investigate-then-explain-elementary-science",
+        "topicType": "method_philosophy",
+        "title": "Investigate-Then-Explain Elementary Science (Published Textbook Inquiry Method)",
+        "summary": "A published-textbook approach to elementary science where every lesson opens with a short hands-on 'Investigate' activity (materials list plus 2-3 numbered steps, observe or test something firsthand) and only afterward gives a brief reading passage that names and explains the concept, never the reverse order. A fixed, named process-skills vocabulary (Observe, Compare, Classify, Sequence, Infer, Predict, Measure, Communicate, Draw Conclusions, Make Models, Gather Information, Plan, Order) is taught once in front matter and then referenced by name throughout the year, including inside per-lesson 'Science Skill' tip boxes. Chapters close with a three-part review (open prompts, vocabulary matching, numbered skill-application tasks) instead of a test. This is a distinct methodology from both Direct Instruction (no script, no choral response) and Charlotte-Mason-style nature study (the investigate-first sequence is explicit and textbook-driven, not child-led outdoor observation), even though a family may use any of the three for different subjects in the same week.",
+        "mergedRowId": "77327db2-70db-4af4-a94f-d0ef6d3803a7",
+        "mergedAt": "2026-07-21"
+      },
+      {
+        "suggestedKey": "harcourt-science-grade1-format",
+        "topicType": "method_format",
+        "title": "Harcourt Science Grade 1 Pupil Edition Format",
+        "summary": "A Grade 1 elementary science pupil edition (Harcourt School Publishers, copyright 2000, ISBN 0-15-317496-X) organized into 6 units of 2 chapters each (A: Plants and Animals All Around; B: Living Together; C: About Our Earth; D: Weather and the Seasons; E: Matter and Energy; F: Energy and Forces), split evenly across Life Science, Earth Science, and Physical Science. Every lesson is a fixed Investigate-then-Learn-About spread; every chapter (12 total) closes with a three-part Review; every unit (6 total) closes with Activities for Home or School plus a Unit Wrap Up (Writing/Reading/Computer Center). A combined References back-matter section (Science Handbook, Health Handbook, Glossary, Index) runs roughly 56 pages and serves as a whole-year reference. No week-by-week or day-by-day calendar is given anywhere; pacing is left to the teacher or parent.",
+        "mergedRowId": "4fd5a357-0f53-49f1-968c-ac89cc17e711",
+        "mergedAt": "2026-07-21"
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Unit A, Chapter 1: Living and Nonliving Things",
+        "curriculumTopic": "How Do My Senses Help Me Learn? (sight, hearing, smell, taste, touch)",
+        "homaSubject": "science",
+        "homaDomain": "the-human-body",
+        "homaTopicId": "mt_nwSWPTENmv",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'The Five Senses' topic (age 5-7) is a direct, strong match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit A, Chapter 1: Living and Nonliving Things",
+        "curriculumTopic": "What Are Living and Nonliving Things? (does it need air/water, does it grow)",
+        "homaSubject": "science",
+        "homaDomain": "ecosystems-habitats",
+        "homaTopicId": "mt_Sa48W7KXB5",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Living, Dead & Never Alive' topic (age 6-7) covers the same living/nonliving distinction, filed under Ecosystems & Habitats rather than Organisms & Life Processes, still a genuine direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit A, Chapter 2: All About Plants",
+        "curriculumTopic": "What Are the Parts of a Plant? (roots, stem, leaves, flowers)",
+        "homaSubject": "science",
+        "homaDomain": "organisms-life-processes",
+        "homaTopicId": "mt_6xsEXxKdUX",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'How Plant Parts Work' topic is aged 7-8, a little older than this Grade 1 lesson's likely target age, but the concept is identical"
+        }
+      },
+      {
+        "curriculumSubject": "Unit A, Chapter 2: All About Plants",
+        "curriculumTopic": "How Do Plants Grow? (seed, seed coat, roots, stem, leaves)",
+        "homaSubject": "science",
+        "homaDomain": "organisms-life-processes",
+        "homaTopicId": "mt_0B64gfJf7j",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Seeds & Plant Growth' topic (age 6-7) is a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit A, Chapter 2: All About Plants",
+        "curriculumTopic": "What Do Plants Need? (air, water, sunlight, space)",
+        "homaSubject": "science",
+        "homaDomain": "organisms-life-processes",
+        "homaTopicId": "mt_lutxvMlkwS",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'What Plants Need to Thrive' topic (age 7-8) is a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit A, Chapter 3: All About Animals",
+        "curriculumTopic": "What Do Animals Need? (food, water, shelter, space)",
+        "homaSubject": "science",
+        "homaDomain": "ecosystems-habitats",
+        "homaTopicId": "mt_cM8YS6NXqi",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Habitats & Basic Needs' topic (age 6-8) is a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit A, Chapter 3: All About Animals",
+        "curriculumTopic": "What Are Insects? (body parts, naming and recognizing common insects)",
+        "homaSubject": "science",
+        "homaDomain": "insects-minibeasts",
+        "homaTopicId": "mt_yR1moI5kX1",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Common minibeasts: naming and recognising' topic (age 5-7) is a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit A, Chapter 3: All About Animals",
+        "curriculumTopic": "How Does a Butterfly Grow? (egg, caterpillar, chrysalis, butterfly)",
+        "homaSubject": "science",
+        "homaDomain": "insects-minibeasts",
+        "homaTopicId": "mt_Wr6DDgr_kH",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Caterpillar to butterfly' topic (age 5-7) is a direct, exact match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit A, Chapter 3: All About Animals",
+        "curriculumTopic": "How Does a Frog Grow? (egg, tadpole, frog)",
+        "homaSubject": "science",
+        "homaDomain": "organisms-life-processes",
+        "homaTopicId": "mt_4IVWRAZoNC",
+        "status": "partial",
+        "suggested": {
+          "note": "Homa's 'Life Cycles of Organisms' topic (age 7-9) is a real but general life-cycle topic; there is no frog- or amphibian-specific life-cycle topic the way there is a dedicated butterfly one"
+        }
+      },
+      {
+        "curriculumSubject": "Unit B, Chapter 1: Plants and Animals Need One Another",
+        "curriculumTopic": "How Do Animals Need Plants? / How Do Animals Help Plants? / How Do We Need Plants and Animals?",
+        "homaSubject": "science",
+        "homaDomain": "ecosystems-habitats",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "Correct domain (Ecosystems & Habitats has 36 topics covering food chains, pollination, and interdependence generally), but no single existing topic id names this specific 'plants and animals need each other, including people' three-part relationship as one unit"
+        }
+      },
+      {
+        "curriculumSubject": "Unit B, Chapter 2: A Place to Live",
+        "curriculumTopic": "What Lives in a Forest? / What Lives in the Desert? / What Lives in a Rain Forest?",
+        "homaSubject": "science",
+        "homaDomain": "ecosystems-habitats",
+        "homaTopicId": "mt_Fw0bbM1e_g",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Habitat Vocabulary' topic (age 6-8) covers forest, desert, and rainforest habitats directly"
+        }
+      },
+      {
+        "curriculumSubject": "Unit B, Chapter 2: A Place to Live",
+        "curriculumTopic": "What Lives in the Ocean?",
+        "homaSubject": "science",
+        "homaDomain": "ocean-life",
+        "homaTopicId": "mt_oAg79ju344",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'What Is the Ocean?' topic (age 5-7) is a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit C, Chapter 1: Earth's Land",
+        "curriculumTopic": "What Can We Observe About Rocks? / What Is Soil? / How Do Different Soils Compare?",
+        "homaSubject": "science",
+        "homaDomain": "earths-systems",
+        "homaTopicId": "mt_yhhprm7dZK",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Rocks and soil' topic (age 7-8) is a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit C, Chapter 2: Earth's Air and Water",
+        "curriculumTopic": "Where Is Fresh Water Found? / Where Is Salt Water on Earth?",
+        "homaSubject": "science",
+        "homaDomain": "earths-systems",
+        "homaTopicId": "mt_nRF_VRntrW",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Where water is found on Earth' topic (age 7-8) is a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit C, Chapter 2: Earth's Air and Water",
+        "curriculumTopic": "Where Is Air on Earth?",
+        "homaSubject": "science",
+        "homaDomain": "earths-systems",
+        "homaTopicId": null,
+        "status": "partial",
+        "suggested": {
+          "note": "Correct domain, but no single existing topic names 'air surrounds the whole Earth' as a standalone Grade 1 concept the way water-location does"
+        }
+      },
+      {
+        "curriculumSubject": "Unit D, Chapter 1: Measuring Weather",
+        "curriculumTopic": "What Is Weather? / What Is Temperature? / What Makes Clouds and Rain?",
+        "homaSubject": "science",
+        "homaDomain": "earths-systems",
+        "homaTopicId": "mt_HZvTriQWTh",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Local weather patterns' topic (age 5-6) is a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit D, Chapter 1: Measuring Weather",
+        "curriculumTopic": "What Is Wind?",
+        "homaSubject": "science",
+        "homaDomain": "weather-climate",
+        "homaTopicId": "mt_j7cj9eWN7w",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'What Is Wind?' topic (age 5-7) is an exact title match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit D, Chapter 2: The Seasons",
+        "curriculumTopic": "What Is Spring? / What Is Summer? / What Is Fall? / What Is Winter?",
+        "homaSubject": "science",
+        "homaDomain": "earths-systems",
+        "homaTopicId": "mt_go5i87u2b9",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Seasonal changes' topic (age 5-6) is a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit E, Chapter 1: Investigate Matter",
+        "curriculumTopic": "What Can We Observe About Solids? / Liquids? / Gases? / How Can We Change Objects?",
+        "homaSubject": "science",
+        "homaDomain": "matter-materials",
+        "homaTopicId": "mt_1JFUNQDwAJ",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'States of Matter Vocabulary' topic (age 5-7) is a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit E, Chapter 1: Investigate Matter",
+        "curriculumTopic": "What Objects Sink or Float? (predict, then test, floaters and sinkers, shape affects floating)",
+        "homaSubject": "science",
+        "homaDomain": "matter-materials",
+        "homaTopicId": "mt_vgB4oY7Qyl",
+        "status": "mapped",
+        "suggested": {
+          "topicSlug": "science.floating-and-sinking",
+          "domain": "matter-materials",
+          "kind": "conceptual",
+          "teachingWindowMonths": [
+            60,
+            84
+          ],
+          "note": "RESOLVED 2026-07-21: mt_vgB4oY7Qyl 'Floating and Sinking' already exists in topics.json (added earlier this session, see decisionsNeeded); this mapping was stale bookkeeping and is now backfilled to the real topic id. Checked 'float', 'sink', and 'buoyan' across all 564 existing Science topics; zero hits in Matter & Materials (the 5 'float' and 2 'sink' hits elsewhere are all unrelated: sea ice, tectonic plates, orbital mechanics)."
+        }
+      },
+      {
+        "curriculumSubject": "Unit E, Chapter 2: Heat and Light",
+        "curriculumTopic": "What Is Heat? / How Does Heat Change Matter?",
+        "homaSubject": "science",
+        "homaDomain": "matter-materials",
+        "homaTopicId": "mt_Pl-nsjYGZ3",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Heating & Cooling Changes' topic (age 7-9) is a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit E, Chapter 2: Heat and Light",
+        "curriculumTopic": "What Is Light? / What Can Light Do? (shadows)",
+        "homaSubject": "science",
+        "homaDomain": "waves-light-sound",
+        "homaTopicId": "mt_Oru08pKlxd",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Light & Seeing in the Dark' (age 6-8) and 'How Shadows Form' (age 7-8) topics together are a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit F, Chapter 1: Pushes and Pulls",
+        "curriculumTopic": "What Makes Things Move? / What Are Some Ways Things Move? / Why Do Things Move the Way They Do? / How Do Objects Move on Surfaces?",
+        "homaSubject": "science",
+        "homaDomain": "forces-motion",
+        "homaTopicId": "mt_B3W5EfimJw",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Pushes & Pulls' (age 5-6) and 'Forces Vocabulary' (age 5-8) topics together are a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Unit F, Chapter 1: Pushes and Pulls",
+        "curriculumTopic": "How Do Wheels Help Objects Move?",
+        "homaSubject": "science",
+        "homaDomain": "forces-motion",
+        "homaTopicId": "mt_akAzChSPGT",
+        "status": "mapped",
+        "suggested": {
+          "topicSlug": "science.how-wheels-help-objects-move",
+          "domain": "forces-motion",
+          "kind": "conceptual",
+          "teachingWindowMonths": [
+            60,
+            84
+          ],
+          "note": "RESOLVED 2026-07-21: mt_akAzChSPGT 'How Wheels Help Objects Move' already exists in topics.json (added earlier this session, see decisionsNeeded); this mapping was stale bookkeeping and is now backfilled to the real topic id. Checked 'wheel', 'simple machine', 'wheel and axle', 'ramp', and 'incline' across all 564 existing Science topics; zero hits anywhere in Science before this session's addition."
+        }
+      },
+      {
+        "curriculumSubject": "Unit F, Chapter 2: Magnets",
+        "curriculumTopic": "What Are Magnets? / What Are the Poles of a Magnet? / What Can a Magnet Pull Through? / How Can You Make a Magnet?",
+        "homaSubject": "science",
+        "homaDomain": "forces-motion",
+        "homaTopicId": "mt_9NvuqZKNiV",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Magnetic Materials' (age 7-8) and 'Magnetic Poles' (age 7-9) topics together are a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Health Handbook",
+        "curriculumTopic": "The Respiratory System (nose, mouth, lungs, caring for your respiratory system)",
+        "homaSubject": "science",
+        "homaDomain": "the-human-body",
+        "homaTopicId": "mt_tiPyEkm4cU",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'How Breathing Works' topic (age 5-7) is a direct match"
+        }
+      },
+      {
+        "curriculumSubject": "Front matter: Using Science Skills / References: Science Handbook Investigating",
+        "curriculumTopic": "The 12-term process-skills vocabulary (Observe, Compare, Classify, Sequence, Infer, Make Models, Gather Information, Plan, Predict, Measure, Communicate, Draw Conclusions, Order) and simple tests/data recording",
+        "homaSubject": "science",
+        "homaDomain": "scientific-inquiry",
+        "homaTopicId": "mt_Wa44s-f8Ws",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's Scientific Inquiry domain (31 topics) covers this closely: 'Simple tests and experiments' (age 5-7), 'Observing with simple equipment' (age 5-7), 'Recording Data' (age 5-7), and 'Asking scientific questions' (age 5-8) together map the whole front-matter skills spread"
+        }
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 27,
+      "mapped": 24,
+      "unmapped": 0,
+      "noSubject": 0,
+      "partial": 3
+    }
+  },
+  "layer3_structure": {
+    "cadence": "Not stated as a weekly calendar anywhere in the sampled pages. Organized as 6 units of 2 chapters each (12 chapters total), each chapter holding 3-6 lessons, every lesson a fixed Investigate-then-Learn-About spread. No day-by-day or week-by-week schedule is printed anywhere; a single-period 'science class' cadence (one lesson per sitting) is implied by the format but never stated as a number of minutes or a day of the week, so recording an invented cadence here would not be honest",
+    "sessionLengthMinutes": {
+      "note": "Not stated anywhere in the sampled pages. No time language (minutes, 'short lesson', daily/weekly) was found for any lesson, chapter, or unit. Leaving this unknown rather than guessing"
+    },
+    "weeklyTemplate": "No week-by-week template exists in the source. Every lesson instead follows the same fixed two-step template regardless of unit: an 'Investigate' hands-on activity (You will need + 2-3 numbered steps, often with a Science Skill tip box) followed by a 'Learn About' reading passage (a few short sentences, 1-2 bolded vocabulary words, a supporting photograph). Every chapter (12 across the book) closes with a three-part Review (Tell What You Know, Vocabulary matching, Using Science Skills). Every unit (6 across the book) closes with Activities for Home or School plus a Unit Wrap Up (Writing/Reading/Computer Center). Cross-curricular Links (Math, Social Studies/Career, Language Arts, Art) recur roughly every lesson or two, most pairing a real scientist's or professional's short biography with a companion activity",
+    "progressionModel": "unit-parallel rather than a single linear thread: the 6 units split evenly across 3 independent science branches (Life Science: Units A-B; Earth Science: Units C-D; Physical Science: Units E-F), each branch's own two units running foundational-then-extension (for example Unit A covers senses/living-nonliving then plant parts/needs then animal needs/life cycles). Within a chapter, lessons build lightly on each other, but the book does not spiral concepts back across units the way a Charlotte Mason or classical program does; it reads as a single-pass survey across the three branches for the grade",
+    "reviewRhythm": "A three-part 'Review' spread (Tell What You Know, Vocabulary matching, Using Science Skills) closes each of the 12 chapters. No tests, quizzes, or scores were observed in any sampled page. Each of the 6 units additionally closes with Activities for Home or School and a Unit Wrap Up spread, neither of which is itself an assessment. The Science Handbook, Health Handbook, and Glossary function as an ongoing whole-year reference the child returns to, not a graded checkpoint",
+    "totalWeeks": null,
+    "notes": "Front matter includes a dedicated 'Using Science Skills' spread (Observe, Compare, Classify, Sequence, Infer, Make Models, Gather Information, Plan, Predict, Measure, Communicate, Draw Conclusions, Order, each with its own icon and a one-line kid-facing definition) taught before Unit A begins, then referenced by name throughout the book. A 'Science Safety' spread (Think ahead, Be neat, Be careful, Do not eat or drink things, plus five caution symbols) closes the front matter immediately before Unit A opens. This is a school-classroom-market book (the Science Safety page's 'Be neat' rule shows two children sharing a sink; the Unit D Chapter 2 review references 'a partner'), the same pattern flagged in the Handwriting Without Tears and Harcourt Art Everywhere ingests for their own classroom framing; curriculum-writer should treat this the same way: a light one-adult, one-child adaptation of the Investigate steps rather than a literal transcription of classroom group routines."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "science-investigation-activity",
+        "description": "The 'Investigate' hands-on activity in every lesson (roughly 26 across the book): a short 'You will need' materials list followed by 2-3 numbered steps for a simple hands-on test or observation, often closing with a small 'Science Skill' tip box naming and defining the one process skill practiced (for example 'To draw a conclusion, use what you have observed to form an idea'). The same shape recurs in the Unit 'Activities for Home or School' enrichment spreads.",
+        "recipe": "art-project-instructions",
+        "status": "have_recipe",
+        "notes": "This is the single highest-volume activity type in the entire curriculum, the science equivalent of Harcourt Art Everywhere's 'Artist's Workshop'. art-project-instructions already supplies the exact materials-list-plus-numbered-steps shell, but had no design pattern for the recurring 'Science Skill' tip box. Added a new optional 'Skill-tip callout' design pattern to that recipe file this session (6b: existing format, new pattern), rather than building a near-duplicate recipe. Also updated its 'Great for' line, the materials-studio SKILL.md Format library row, and its activity-formats.md entry to name this science use case explicitly."
+      },
+      {
+        "type": "illustrated-science-reading-passage",
+        "description": "The 'Learn About' reading passage that follows every Investigate activity: a few short declarative sentences, 1-2 bolded vocabulary words, and a supporting photograph, explaining the concept the child just tested or observed firsthand.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "A simple text-plus-photo page; this is the textbook's own expository content, not something a family would typically ask Homa to regenerate as a standalone printable (Homa's lesson-planner surfaces the content directly rather than re-creating the textbook page). Existing simple hybrid/html page conventions cover it if a family ever wants a printed version. No dedicated recipe gap flagged on purpose, the same treatment the Harcourt Art Everywhere ingest gave its low-volume unit-opener text pages."
+      },
+      {
+        "type": "chapter-review-vocabulary-matching",
+        "description": "The 'Vocabulary' portion of every chapter Review: a set of labeled photos (a, b, c...) that the child matches to a numbered list of vocabulary words from that chapter.",
+        "recipe": "matching-visual-discrimination",
+        "status": "have_recipe",
+        "notes": "matching-visual-discrimination's 'two columns of images where the child draws lines to match pairs' shape is a direct fit for this recurring chapter-review task."
+      },
+      {
+        "type": "chapter-review-skill-application-tasks",
+        "description": "The 'Using Science Skills' portion of every chapter Review: 2-4 numbered mini-tasks (for example 'Observe: Collect things in an egg carton...', 'Compare: Make a chart to compare a pencil and a plant...', 'Predict and Investigate: Look at the colors of these shirts...') that apply that chapter's named process skills to a new example.",
+        "recipe": "activity-pack",
+        "status": "have_recipe",
+        "notes": "Reused with a caveat: activity-pack's fixed 4-quadrant layout does not exactly match this section's variable 2-4 numbered items in a single column, but the underlying idea (several distinct short skill-practice tasks around one theme on one page) is the same. Recording as a reusable-but-imprecise fit rather than building a new recipe for what is ultimately a light layout variant."
+      },
+      {
+        "type": "cross-curricular-link-with-career-biography",
+        "description": "The 'Links' spreads recurring every lesson or two: a short biography of a real scientist, engineer, or other professional (a geologist, an architect, a hot-air balloonist, a doctor, a photographer) tied to that lesson's content, paired with a companion Math, Social Studies/Career, Language Arts, or Art Link activity and a 'Think and Do' follow-up task.",
+        "recipe": "artist-composer-study-card",
+        "status": "have_recipe",
+        "notes": "Same situation the Harcourt Art Everywhere ingest recorded for its own artist-biography spreads: usable but not a precise fit. artist-composer-study-card's frame-plus-bio-plus-reflection shape can be reused for a scientist or professional's bio, but its reflection stem ('When I look at [artist]'s work, I think about...') and 'Where they were from' circle are written for CM-style artist study, not a career-connection biography. curriculum-writer.md's new methodology section says to adapt the labels rather than use it unedited; no recipe file edit made this session for this lower-volume (roughly 10-12 across the book) pattern, consistent with the Art Everywhere precedent of not editing a recipe for a lower-priority reuse."
+      },
+      {
+        "type": "unit-enrichment-activity",
+        "description": "The 'Activities for Home or School' open-ended enrichment tasks closing every unit (for example 'Make a Sail for a Car', 'Investigate Water Vapor', 'Find Seasons in a Closet'), a lighter-weight cousin of the in-lesson Investigate activity.",
+        "recipe": "art-project-instructions",
+        "status": "have_recipe",
+        "notes": "Same recipe and reasoning as science-investigation-activity above; folded into that mapping rather than counted as a second gap."
+      },
+      {
+        "type": "unit-wrap-up-foldable-writing-activity",
+        "description": "The 'Writing' portion of every Unit Wrap Up: a flap book or pull-book writing prompt (for example 'Flap Facts: Make a flap book about the seasons. Under each flap, tell one thing about that season' or 'Accordian Book: Make a book that you pull to open and push to close! On each page, write about a push or pull').",
+        "recipe": "foldable",
+        "status": "have_recipe",
+        "notes": "foldable's two-flap/four-flap book and accordion tri-fold layouts are a direct fit for these two recurring Unit Wrap Up writing prompts."
+      },
+      {
+        "type": "vocabulary-glossary-reference-card",
+        "description": "The back-matter Glossary: roughly 100-plus terms A-Z, each paired with one clean real-world photo example and a page cross-reference back into the lesson content (for example 'season' next to four seasonal tree photos, cited to page D27).",
+        "recipe": "3-part-nomenclature-cards",
+        "status": "have_recipe",
+        "notes": "Same reasoning as the Harcourt Art Everywhere ingest's glossary mapping: the control-card grid (image+label) most faithfully reproduces this book's own term-plus-photo reference-card style."
+      },
+      {
+        "type": "labeled-science-diagram",
+        "description": "Leader-line-and-label diagrams used for both plant anatomy (a photographed bean seedling labeled 'leaves', 'stem', 'seed', 'seed coat', 'roots') and human anatomy (the Health Handbook's Respiratory System page, labeling 'nose', 'mouth', 'lungs' on a simple colored illustration).",
+        "recipe": "labeled-anatomy-diagram",
+        "status": "have_recipe",
+        "notes": "A strong, arguably better fit than the Harcourt Art Everywhere ingest's use of this same recipe: labeled-anatomy-diagram's own binding design pattern already calls for 'clean, detailed, B&W line art suitable for coloring' plus leader lines, numbers, and a word bank, which is exactly the shape Homa would generate for either the plant-parts or the respiratory-system page (Homa draws its own line art rather than reproducing the source's photo or illustration), and the recipe's own 'Great for' line already names both 'body systems' and 'plant parts' by name."
+      },
+      {
+        "type": "science-tool-how-to-reference",
+        "description": "The Science Handbook's 'Using Science Tools' pages: a bare step-by-step how-to for one tool (Hand Lens, Thermometer, Ruler, Measuring Cup, Clock and Stopwatch, Balance, Computer, Measurement), not tied to a specific project or lesson.",
+        "recipe": "art-project-instructions",
+        "status": "have_recipe",
+        "notes": "Uses the same recipe's bare technique-reference variant (materials list and numbered steps only, no thumbnail or reflection/skill-tip box) already documented for Harcourt Art Everywhere's Art Techniques pages; not a second, separate recipe."
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 10,
+      "haveRecipe": 9,
+      "noRecipe": 1
+    }
+  },
+  "decisionsNeeded": [
+    {
+      "category": "knowledge_bank",
+      "item": "RESOLVED 2026-07-21: written to prod knowledge_bank via mergeKnowledgeRow (contributedBy seed, blob-URL citation, all gate checks passed). Row ids: investigate-then-explain-elementary-science=77327db2-70db-4af4-a94f-d0ef6d3803a7, harcourt-science-grade1-format=4fd5a357-0f53-49f1-968c-ac89cc17e711 Original ask: Write the investigate-then-explain-elementary-science (method_philosophy) and harcourt-science-grade1-format (method_format) rows to knowledge_bank via the gate at apps/web/lib/knowledge/gate.ts",
+      "impact": "The gate requires a live Postgres connection (mapDb()) that this sandbox does not have, so the write could not be attempted honestly. Proposed row content is recorded in layer1_philosophy.knowledgeBankGaps above.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "recipe",
+      "item": "art-project-instructions.md amended this session with a new optional 'Skill-tip callout' design pattern for hands-on science investigations, plus a matching update to its 'Great for' line, the materials-studio SKILL.md Format library row, and its apps/web/agent/activity-formats.md entry",
+      "impact": "The Investigate activity is the highest-volume activity type in the curriculum (every lesson, roughly 26 instances, plus the Unit enrichment activities). This closes a genuine, repeatable design-pattern gap without duplicating a near-identical recipe file.",
+      "urgency": "low, recorded here for traceability, no further action needed unless the founder wants a different design direction"
+    },
+    {
+      "category": "taxonomy",
+      "item": "Added 2 new Science topics this session, both append-only, no mapping.ts edit needed (both domains already existed in MARBLE_DOMAIN_MAP): mt_vgB4oY7Qyl 'Floating and Sinking' (Matter & Materials, age 5-7) for Unit E's 'What Objects Sink or Float?' lesson, and mt_akAzChSPGT 'How Wheels Help Objects Move' (Forces & Motion, age 5-7) for Unit F's 'How Do Wheels Help Objects Move?' lesson. Checked all 564 pre-existing Science topics by keyword ('float', 'sink', 'buoyan', 'wheel', 'simple machine', 'ramp', 'incline') before concluding these were genuine gaps, not assumed ones. Every other lesson and back-matter section in this curriculum mapped to an existing topic (22 of 27 catalogued rows mapped directly, 3 partial, 2 unmapped, 0 no-subject), confirming the task brief's expectation that Science's existing 564-topic depth would make this curriculum map far more cleanly than the Art ingests did.",
+      "impact": "topics.json grew from 1638 to 1640 topics (insertions only, verified by diff); packages/taxonomy/data/manifest.json counts and topics.json bytes/sha256 updated to match; pnpm taxonomy:slugs, pnpm taxonomy:progress, and pnpm check:taxonomy all re-run and green.",
+      "urgency": "low"
+    },
+    {
+      "category": "taxonomy",
+      "item": "RESOLVED 2026-07-21 (bookkeeping backfill): the two mappings above (mt_vgB4oY7Qyl Floating and Sinking, mt_akAzChSPGT How Wheels Help Objects Move) were still recorded as status 'unmapped' with homaTopicId null in layer2_scope.mappings even though both real topics already existed in topics.json from this same curriculum's own ingestion. Backfilled both homaTopicId fields and flipped status to 'mapped'; layer2_scope.stats updated (mapped 22 -> 24, unmapped 2 -> 0). No taxonomy or topics.json change was needed, this was pure JSON bookkeeping that had never been synced to the taxonomy work already done.",
+      "impact": "This curriculum now correctly reads as fully mapped for these two lessons instead of falsely showing an open taxonomy gap that was actually closed weeks ago.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "method",
+      "item": "Added a new 'Published Elementary Science Textbook (Investigate-Then-Explain, e.g. Harcourt Science)' section to curriculum-writer.md's Methodology-aware planning rules, alongside the existing Charlotte Mason, Montessori, Direct Instruction, Play-Based, Singapore Math, Balanced Literacy, Process Writing, Literature-Based/Classical, Handwriting Without Tears, and Elements & Principles of Design sections",
+      "impact": "curriculum-writer.md had no section describing a hands-on-investigation-first, published-textbook science methodology before this session; the existing Direct Instruction section is specifically about scripted phonics reading (DISTAR) and does not describe this pattern. This lets curriculum-writer apply the method's distinctive rules (investigate before explaining, name the specific process skill practiced, keep the three-part chapter review distinct rather than compressing it into one quiz, treat the Unit Wrap Up writing prompt as a real material) whenever a family uses a published investigate-then-explain science textbook.",
+      "urgency": "medium"
+    },
+    {
+      "category": "product",
+      "item": "No dedicated recipe or recipe edit made for cross-curricular career/scientist biography spreads (reused artist-composer-study-card with a documented caveat instead, same treatment the Art Everywhere ingest gave its own artist-biography spreads)",
+      "impact": "Low-value to build alone from one curriculum at roughly 10-12 instances in this book, but worth a founder call if a future science or social-studies curriculum ingest flags a real-person-biography-card gap a second or third time",
+      "urgency": "low"
+    }
+  ],
+  "notes": "Real page counts, verified directly with pypdf and PyMuPDF rather than assumed from filenames: harcourt-science-pt1.pdf is 120 PDF pages, harcourt-science-pt2.pdf is 84 PDF pages (204 PDF pages total), both CamScanner-style phone scans of the physical hardcover book with no embedded text layer at all (pypdf's extract_text returned zero characters of real content on every one of the 204 pages, confirming this is a pure image scan; all reading in this analysis was done visually from PyMuPDF-rendered page images, not from extracted text). pt1/pt2 relationship confirmed as a genuine, gapless continuation of the same physical book, not a duplicate or a distinct volume: pt1's final rendered spread (PDF page 120) shows the Unit D Chapter 2 Review at printed pages D44-D45, and pt2's first rendered spread (PDF page 1) shows the Unit D 'Activities for Home or School' spread at printed pages D46-D47, immediately followed by pt2 page 2 showing the Unit D Wrap Up (D48) and the Unit E 'Matter and Energy' title page, with no missing or repeated printed page numbers at the seam. Front cover (pt1 pages 1-2) reads 'HARCOURT SCIENCE, Harcourt School Publishers, Orlando Boston Dallas Chicago San Diego'; the copyright page (pt1 page 3) confirms 'Copyright (c) 2000 by Harcourt, Inc.', ISBN 0-15-317496-X. Full table of contents sampled directly (pt1 pages 4-6): 6 units (A: Plants and Animals All Around; B: Living Together; C: About Our Earth; D: Weather and the Seasons; E: Matter and Energy; F: Energy and Forces), each with 2 chapters, References (Science Handbook R2, Health Handbook R11, Glossary R28, Index R42). Grade level is Grade 1, determined from internal content evidence as instructed, not assumed from the drain order or the sibling Harcourt Art Everywhere volume's own Grade 1 finding: (1) every 'Learn About' reading passage sampled across all 6 units uses very short, simple declarative sentences ('A forest is a place where many trees grow. A forest floor is shady. The soil stays moist.'; 'Most plants grow from a seed. The seed may have a covering called a seed coat.'), consistent with an early-elementary independent or supported reader; (2) every chapter Review requires the child to complete full comprehension tasks (open 'Tell what you know' prompts, multi-item picture-to-word vocabulary matching, numbered skill-application tasks), a level of reading and writing demand well beyond a Kindergarten book, which in this same publisher's line is typically almost entirely picture-and-single-word based; (3) cross-referencing this curriculum's own lesson content against Homa's 564-topic Science taxonomy, the closest-matching existing Homa topics cluster tightly at ages 5-7 across every unit (The Five Senses 5-7, Seeds & Plant Growth 6-7, Caterpillar to butterfly 5-7, Local weather patterns 5-6, Seasonal changes 5-6, States of Matter Vocabulary 5-7, Pushes & Pulls 5-6, How Breathing Works 5-7), consistent with a 6-7-year-old reader. Unlike the Harcourt Art series (where 'Art Everywhere' vs 'Art Together' vs 'Art Is...' distinguishes grade level directly in the cover title), the Harcourt Science series front cover for this volume reads simply 'HARCOURT SCIENCE' with no grade-distinguishing subtitle anywhere in the sampled front matter or back matter, so the series-title-convention approach used for Art Everywhere does not apply here and grade level rests entirely on the internal content evidence above. Sampling covered the front cover, copyright page, full table of contents, and front-matter 'Using Science Skills' and 'Science Safety' spreads (pt1 PDF pages 1-16); the Unit A opening and Chapter 1-2 lessons and reviews (pt1 pages 17-30); Unit B's forest habitat lesson (pt1 page 65); Unit C's rocks-and-geologist-link spread (pt1 page 85); Unit D's winter lesson, Art Link, Math Link, and Chapter 2 Review (pt1 pages 118-120); the Unit D/Unit E seam (pt2 pages 1-2); Unit E's floaters-and-sinkers lesson (pt2 page 10); Unit F's pushes-and-pulls and magnet-making lessons (pt2 pages 35, 50, 55, 60); the References front matter and Health Handbook's Respiratory System page (pt2 pages 60, 70); and the back-matter Glossary, Photography Credits, and back cover (pt2 pages 78, 80, 84). This is representative sampling across the full breadth of both files as instructed, not a page-by-page read of all 204 PDF pages. Copyrighted page images and the publisher's specific passage wording were used only for this session's own analysis and are described here in Homa's own words, never reproduced verbatim into any product file; the new taxonomy topics and the art-project-instructions skill-tip-callout pattern describe generic elementary-science concepts and page-layout patterns in Homa's own voice, not a copy of this publisher's specific text, photos, or layout."
+}

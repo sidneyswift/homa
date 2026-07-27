@@ -174,8 +174,9 @@ interface SubjectLessonButtonModule {
     subjectId: string;
     lessonUrl: string | null;
     wall: {
-      monthlyUrl: string;
-      annualUrl: string;
+      regular: { monthlyUrl: string; annualUrl: string | null };
+      plus: { monthlyUrl: string; annualUrl: string | null } | null;
+      elite: { monthlyUrl: string; annualUrl: string | null } | null;
     } | null;
     emphasis: "primary" | "secondary";
   }): React.ReactNode;
@@ -195,8 +196,9 @@ interface SubjectLessonButtonModule {
       childId: string;
       subjectId: string;
       wall: {
-        monthlyUrl: string;
-        annualUrl: string;
+        regular: { monthlyUrl: string; annualUrl: string | null };
+        plus: { monthlyUrl: string; annualUrl: string | null } | null;
+        elite: { monthlyUrl: string; annualUrl: string | null } | null;
       } | null;
     },
     dependencies: {
@@ -385,8 +387,9 @@ describe("SubjectLessonButton", () => {
         childId: CHILD_ID,
         subjectId: "math",
         wall: {
-          monthlyUrl: "https://example.com/monthly",
-          annualUrl: "https://example.com/annual",
+          regular: { monthlyUrl: "https://example.com/monthly", annualUrl: "https://example.com/annual" },
+          plus: null,
+          elite: null,
         },
       },
       {

@@ -2,6 +2,7 @@ import { defineDynamic, defineInstructions } from "eve/instructions";
 
 import {
   createCallerDbClient,
+  isPinnedAgentChannel,
   MissingFamilyContextError,
 } from "../../lib/agent-db";
 import { type MemoryRow } from "../../lib/agent-memory";
@@ -21,8 +22,26 @@ import {
   type FamilyContextRows,
   type MemberRow,
 } from "../../lib/family-context";
+import {
+  evalFamilyFixtureRows,
+  isEvalFamilyFixtureEnabled,
+} from "../../lib/family-context-eval-fixture";
+import {
+  TOOL_DEADLINE,
+  ToolDeadlineError,
+  withToolDeadline,
+} from "../../lib/agent-tool-deadline";
+import { loadFamilyChecklistStates } from "../../lib/onboarding/checklist-state";
+import { renderOnboardingContext } from "../../lib/onboarding/context-line";
+import { loadOnboardingState } from "../../lib/onboarding/store";
 import { recordContextSnapshot } from "../../lib/observability/agent-trace";
 import { isSlimMorningBriefDispatchContext } from "../../lib/tasks/brief-context";
+
+/** What Homa is told when this turn's family context is missing, whether
+ * the load failed or ran out of time. She keeps the conversation and drops
+ * the remembered facts, rather than inventing either. */
+const FAMILY_CONTEXT_UNAVAILABLE =
+  "The family context could not be loaded this turn. Rely on the conversation itself, offer to try again, and avoid stating remembered facts you cannot see.";
 
 /**
  * Per-family dynamic context (M2-01/M2-02): the cloud equivalent of the
@@ -107,6 +126,9 @@ interface FamilyContextInstructionAttributes {
    *  actually focused on the right child. */
   childId?: string;
   memberName?: string;
+  /** Stamped by the eve channel's auth walk from the family row, never
+   *  by the client (plans/2026-07-21-chat-first-onboarding.md §2.2). */
+  onboardingActive?: string;
   episodeId?: string;
   continuityContext?: string;
   taskKind?: string;
@@ -226,10 +248,7 @@ export async function resolveFamilyContextInstructionMarkdown(
       rows = await dependencies.loadCallerFamilyContext(attributes);
     } else if (
       attributes?.familyId &&
-      (attributes.channel === "sms" ||
-        attributes.channel === "email" ||
-        attributes.channel === "dispatch" ||
-        attributes.channel === "subject_lesson")
+      isPinnedAgentChannel(attributes.channel)
     ) {
       rows = await dependencies.loadPinnedFamilyContext(attributes.familyId);
     } else {
@@ -264,6 +283,31 @@ export async function resolveFamilyContextInstructionMarkdown(
         );
       }
     }
+    // Chat-first onboarding: where this family actually is, recomputed
+    // every turn. Only assembled for a session the auth walk marked as
+    // onboarding, so an ordinary /app turn pays nothing for it.
+    let onboardingContext = "";
+    if (attributes?.familyId && attributes.onboardingActive === "true") {
+      try {
+        const [state, children] = await Promise.all([
+          loadOnboardingState(attributes.familyId),
+          loadFamilyChecklistStates(attributes.familyId),
+        ]);
+        onboardingContext =
+          renderOnboardingContext({
+            record: state?.record ?? null,
+            children,
+          }) ?? "";
+      } catch (error) {
+        // Family context is the reliable floor here too. Losing the
+        // onboarding line costs Homa some tact; it must never cost her
+        // the family.
+        console.error(
+          "family context: onboarding state load failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      }
+    }
     let continuityContext = attributes?.continuityContext ?? "";
     if (attributes?.familyId && continuityContext.length === 0) {
       try {
@@ -281,7 +325,12 @@ export async function resolveFamilyContextInstructionMarkdown(
         );
       }
     }
-    const markdown = [familyContext, progressContext, continuityContext]
+    const markdown = [
+      familyContext,
+      progressContext,
+      onboardingContext,
+      continuityContext,
+    ]
       .filter((block) => block.length > 0)
       .join("\n\n");
     // Flight recorder (founder deep view): what this turn actually
@@ -297,30 +346,64 @@ export async function resolveFamilyContextInstructionMarkdown(
     return markdown;
   } catch (error) {
     if (error instanceof MissingFamilyContextError) {
+      // Plain `eve eval` sessions (no sandbox database) have no auth
+      // attributes, so they land here on every turn. With the fixture
+      // flag on (evals.config.ts, never Vercel) they get a synthetic
+      // set-up family instead of the "head to /app" line, so behavioral
+      // evals test a state production sessions can actually be in.
+      // Sandboxed runs never reach this catch: the eve channel stamps
+      // them family-pinned on the seeded fixture family upstream. See
+      // lib/family-context-eval-fixture.ts for both layers and the
+      // 2026-07-24 routing-eval incident this closes.
+      if (isEvalFamilyFixtureEnabled(input.environment ?? process.env)) {
+        return dependencies.renderFamilyContext(evalFamilyFixtureRows(), {
+          speakingWith: "Rachel",
+        });
+      }
       return "No family context is available on this session: the parent has not finished setup. Warmly point them to /app to set up their family first; do not guess at children or facts.";
     }
     console.error(
       "family context load failed:",
       error instanceof Error ? error.message : "unknown",
     );
-    return "The family context could not be loaded this turn. Rely on the conversation itself, offer to try again, and avoid stating remembered facts you cannot see.";
+    return FAMILY_CONTEXT_UNAVAILABLE;
   }
 }
 
 export default defineDynamic({
   events: {
     "turn.started": async (_event, ctx) => {
-      const markdown = await resolveFamilyContextInstructionMarkdown({
-        attributes: ctx.session.auth.current?.attributes as
-          | FamilyContextInstructionAttributes
-          | undefined,
-        sessionId: ctx.session.id,
-        // The dynamic-instructions callback context is typed without `turn`
-        // (SessionContext has it, DynamicResolverContext does not), so read
-        // it defensively; the recorder accepts null.
-        turnId:
-          (ctx.session as { turn?: { id?: string } }).turn?.id ?? null,
-      });
+      // Bounded for the same reason every tool is (lib/agent-tool-deadline.ts),
+      // and more urgently: this runs before the model on EVERY turn, so a
+      // stalled loader freezes the whole conversation without ever writing
+      // an agent_tool_calls row for the stuck-call sweep to find. The
+      // try/catch inside the resolver cannot help, because a promise that
+      // never settles never throws. On the quick tier because this is
+      // database work; there is no production latency series for it yet,
+      // so it inherits the tier rather than inventing a tighter number.
+      let markdown: string | null;
+      try {
+        markdown = await withToolDeadline(TOOL_DEADLINE.quick, () =>
+          resolveFamilyContextInstructionMarkdown({
+            attributes: ctx.session.auth.current?.attributes as
+              | FamilyContextInstructionAttributes
+              | undefined,
+            sessionId: ctx.session.id,
+            // The dynamic-instructions callback context is typed without `turn`
+            // (SessionContext has it, DynamicResolverContext does not), so read
+            // it defensively; the recorder accepts null.
+            turnId:
+              (ctx.session as { turn?: { id?: string } }).turn?.id ?? null,
+          }),
+        );
+      } catch (error) {
+        if (!(error instanceof ToolDeadlineError)) throw error;
+        console.error("family context load timed out; turn continues degraded");
+        // The same honest degradation the resolver's own catch returns: a
+        // turn that admits it cannot see remembered facts beats a turn
+        // that never arrives.
+        markdown = FAMILY_CONTEXT_UNAVAILABLE;
+      }
       return markdown === null ? null : defineInstructions({ markdown });
     },
   },

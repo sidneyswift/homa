@@ -76,6 +76,44 @@ export async function setInboundReceiptSession(
   `;
 }
 
+/** Stamps the eve turn id onto the receipt it belongs to. Call this from
+ * "turn.started", the earliest point in a turn's lifecycle: eve's session
+ * auth context has a single mutable "current" slot (not one per turn), so
+ * this durable stamp is what lets a LATER inbound turn on the same
+ * long-lived SMS/email session safely overwrite that slot without losing
+ * track of which receipt this turn owns. */
+export async function setInboundReceiptTurn(
+  receiptId: string,
+  turnId: string,
+): Promise<void> {
+  const sql = mapDb();
+  await sql`
+    update public.conversation_inbound_receipts
+    set runtime_turn_id = ${turnId}, updated_at = now()
+    where id = ${receiptId} and status = 'claimed'
+  `;
+}
+
+/** Completes whichever receipt owns this (session, turn) pair, per the
+ * durable stamp from setInboundReceiptTurn. Call this from "turn.completed":
+ * unlike "message.completed" (fires once per assistant step, and never at
+ * all when the final step has no visible text), it fires exactly once per
+ * turn regardless of output, so it is the safety net that always resolves
+ * a claim, even when the message.completed-driven completion above raced
+ * with a second inbound text and completed the wrong (or no) receipt. */
+export async function completeInboundReceiptForTurn(
+  sessionId: string,
+  turnId: string,
+): Promise<void> {
+  const sql = mapDb();
+  await sql`
+    update public.conversation_inbound_receipts
+    set status = 'completed', completed_at = now(), updated_at = now()
+    where runtime_session_id = ${sessionId} and runtime_turn_id = ${turnId}
+      and status = 'claimed'
+  `;
+}
+
 export async function completeInboundReceipt(receiptId: string): Promise<void> {
   const sql = mapDb();
   await sql`

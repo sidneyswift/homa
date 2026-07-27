@@ -119,4 +119,40 @@ describe("selectParentVisibleMaterialMessageParts", () => {
       ["Saved page", "Legacy page"],
     );
   });
+
+  it("threads a real material id onto the card for the pdf-open beacon", () => {
+    const [selected] = selectParentVisibleMaterialMessageParts([
+      printablePart({
+        id: "math-v1",
+        title: "Math facts",
+        skill: "addition",
+        childName: "Mateo",
+        previewUrl: "https://blob.example/math-v1.jpg",
+        pdfUrl: "https://blob.example/math-v1.pdf",
+        status: "draft",
+        revisesId: null,
+        reviewPassed: true,
+      }),
+    ]);
+    assert.equal(selected.material.id, "math-v1");
+  });
+
+  it("never leaks the synthetic legacy-part id onto the card", () => {
+    const [selected] = selectParentVisibleMaterialMessageParts([
+      {
+        type: "dynamic-tool",
+        state: "output-available",
+        toolName: "create_worksheet",
+        output: {
+          worksheet: {
+            title: "Legacy page",
+            previewUrl: "https://blob.example/legacy.jpg",
+            pdfUrl: "https://blob.example/legacy.pdf",
+          },
+        },
+      },
+    ]);
+    assert.equal(selected.id, "legacy-part:0");
+    assert.equal(selected.material.id, undefined);
+  });
 });

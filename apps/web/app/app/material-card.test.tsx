@@ -87,4 +87,17 @@ describe("MaterialCard", () => {
     assert.doesNotMatch(html, /Page 1 of/u);
     assert.match(html, /Print all 4 pages/u);
   });
+
+  it("routes both PDF links through the pdf-open beacon when a real id exists", () => {
+    const html = renderToStaticMarkup(
+      <MaterialCard material={artifact({ id: "material-123" })} />,
+    );
+    assert.match(html, /href="\/api\/materials\/material-123\/pdf"/u);
+    assert.doesNotMatch(html, /href="https:\/\/blob\.example\/packet\.pdf"/u);
+  });
+
+  it("falls back to the raw Blob URL when no id is present", () => {
+    const html = renderToStaticMarkup(<MaterialCard material={artifact()} />);
+    assert.match(html, /href="https:\/\/blob\.example\/packet\.pdf"/u);
+  });
 });

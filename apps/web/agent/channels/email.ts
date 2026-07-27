@@ -37,6 +37,7 @@ import {
   setJournalOptOut,
   verifyResendWebhookSignature,
 } from "../../lib/email-inbound";
+import { suppressEmail, unsuppressEmail } from "../../lib/email/suppression";
 import {
   getFamilyEmail,
   retrieveResendRfcMessageIdForSubmission,
@@ -222,6 +223,15 @@ export default defineChannel({
       const intent = optOutIntent(email.text);
       if (intent) {
         await setJournalOptOut(familyId, intent === "stop");
+        // "stop" also suppresses the drip for this address; "start" lifts
+        // it. The drip already honors journal_opt_out_at, but the durable
+        // suppression row is the record that survives address changes and
+        // matches the unsubscribe link's mechanism (funnel work 2026-07-20).
+        if (intent === "stop") {
+          await suppressEmail(email.fromEmail, "drip", "stop");
+        } else {
+          await unsuppressEmail(email.fromEmail, "drip");
+        }
         await emitMapEvent("email.opt_out", {
           family_id: familyId,
           resumed: intent === "start",
@@ -236,6 +246,8 @@ export default defineChannel({
                 ? "Done. No more evening check-ins. Reply 'start' anytime to turn them back on."
                 : "Done. Evening check-ins are back on.",
             ],
+            undefined,
+            familyId,
           );
         }
         await completeInboundReceipt(inboundReceipt.id);

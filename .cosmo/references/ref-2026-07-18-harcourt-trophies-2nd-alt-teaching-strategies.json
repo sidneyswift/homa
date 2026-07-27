@@ -1,0 +1,149 @@
+{
+  "id": "ref-2026-07-18-harcourt-trophies-2nd-alt-teaching-strategies",
+  "droppedBy": "carolyng",
+  "droppedAt": "2026-07-18T17:25:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784409942.845269",
+  "format": "teacher-guide-alt-strategies",
+  "title": "Harcourt Trophies Grade 2 Teacher Guide — Alternative Teaching Strategies (Multi-Modal Skill Pages)",
+  "publisher": "Harcourt",
+  "series": "Trophies",
+  "gradeLevel": "2nd grade",
+  "relatedRefs": [
+    "ref-2026-07-18-harcourt-trophies-2nd-practice-book",
+    "ref-2026-07-18-harcourt-trophies-2nd-assessments",
+    "ref-2026-07-18-harcourt-trophies-2nd-lesson-planner",
+    "ref-2026-07-18-harcourt-trophies-2nd-day-detail-pages"
+  ],
+  "callouts": ["visual, kinesthetic and auditory models included in skill development", "options are encouraged and HOMA can suggest which she feels will work best with the student"],
+  "pagesShown": [
+    {
+      "page": "T5",
+      "skill": "Statements and Questions",
+      "badge": "Grammar Skill — Tested Skill",
+      "models": ["Visual", "Kinesthetic", "Auditory"]
+    },
+    {
+      "page": "T6",
+      "skill": "Commands and Exclamations",
+      "badge": "Grammar Skill — Tested Skill",
+      "models": ["Visual", "Kinesthetic", "Auditory"]
+    },
+    {
+      "page": "T7",
+      "skill": "Narrative Elements (Setting)",
+      "badge": "Focus Skill",
+      "models": ["Visual", "Kinesthetic", "Auditory"]
+    },
+    {
+      "page": "T8",
+      "skill": "Naming Parts of Sentences",
+      "badge": "Grammar Skill — Tested Skill",
+      "models": ["Visual", "Kinesthetic", "Auditory"]
+    }
+  ],
+  "designPatterns": {
+    "triModalTeachingStructure": {
+      "description": "Every Alternative Teaching Strategy page follows the EXACT same structure: Objective → Focus (direct instruction) → Reteach the Skill → Visual Model → Kinesthetic Model → Auditory Model → Summarize/Assess. Three different sensory pathways to the same skill. The parent picks whichever matches how their child learns best.",
+      "consistentStructure": true,
+      "models": {
+        "visual": {
+          "description": "Learning through seeing. Uses charts, written models, illustrations, diagrams, bulletin boards. Examples: write a knock-knock joke to teach questions vs. statements; write a story on chart paper and fill in a 'Setting Clues' chart; match sentence strips on a bulletin board.",
+          "examplesFromPages": [
+            "T5: Write knock-knock joke on board — Person 2 asks questions, Person 1 makes statements. Children create a class joke book.",
+            "T7: Write 'Happy Town' story on chart paper, draw Setting Clues chart with Time and Place columns for children to fill in.",
+            "T8: Bulletin board with sentence strips — match naming parts (Jack and Jill, The Big Bad Wolf) with action parts (went up a hill, tricked Red Riding Hood)."
+          ]
+        },
+        "kinesthetic": {
+          "description": "Learning through moving/doing. Uses physical cards, body movement, crafting, games. Examples: hold up punctuation cards when hearing statements vs. questions; play punctuation hopscotch on the sidewalk; build a shoebox diorama of a story setting; conduct a food survey.",
+          "examplesFromPages": [
+            "T5: Children prepare period cards and question mark cards. Teacher reads sentences aloud — children hold up the matching card.",
+            "T6: Draw hopscotch squares on sidewalk with . ? ! in each square. Children hop, land on a punctuation mark, and say a sentence that matches it.",
+            "T7: Small groups build a shoebox diorama of the story setting using construction paper, modeling clay, and art supplies.",
+            "T8: Small groups conduct a 'Foods We Like' survey — poll classmates, write sentences about results, underline the naming parts."
+          ]
+        },
+        "auditory": {
+          "description": "Learning through hearing/speaking. Uses read-alouds, group discussion, acting out, listening exercises. Examples: act out an argument with a peacemaker asking questions; read sentences without punctuation and use voice to add correct inflection; listen to a passage and identify setting details.",
+          "examplesFromPages": [
+            "T5: Groups of 3 — two children argue, third is peacemaker asking questions. Record questions and responses to share.",
+            "T6: Read items without inflection. Children decide how to read each properly. Add punctuation and re-read with correct voice.",
+            "T7: Teacher reads passage aloud, children identify time and place, describe details that reveal the setting.",
+            "T8: Read sentences aloud, children listen for and identify the naming part (who/what the sentence is about)."
+          ]
+        }
+      },
+      "value": "Not all children learn the same way. Some need to see it, some need to touch/move it, some need to hear it. By offering all three, the parent always has an approach that works — and can try a different one if the first doesn't click."
+    },
+    "reteachNotJustTeach": {
+      "description": "These pages are explicitly labeled 'Reteach the Skill' — they exist for when the main lesson didn't land. The tri-modal approach is the REMEDIATION strategy, not the first-pass instruction. This means the curriculum has a built-in recovery path.",
+      "value": "When a child doesn't get it the first time, the parent has three concrete next steps instead of repeating the same explanation louder."
+    },
+    "summarizeAssessPattern": {
+      "description": "Every page ends with a Summarize/Assess section: have the child state what they learned in their own words, then apply it to stories they've already read. The assessment is oral and application-based, not another worksheet.",
+      "value": "The check for understanding is conversational, not test-like. Lower anxiety, higher signal."
+    },
+    "playfulReteaching": {
+      "description": "The reteach activities are genuinely fun: make a class joke book, play punctuation hopscotch, build a diorama, conduct a food survey, act out an argument. These don't FEEL like reteaching — they feel like play. But the skill is embedded.",
+      "value": "Children who need reteaching are often already frustrated. Fun activities reset the emotional state while still delivering the skill."
+    }
+  },
+  "carolyngProductVision": {
+    "quote": "Love the visual, kinesthetic and auditory models included in skill development. Options are encouraged and HOMA can suggest which she feels will work best with the student",
+    "interpretation": "Carolyng is explicitly requesting that Homa act as a LEARNING STYLE ADVISOR — not just generating materials, but recommending WHICH teaching approach (visual, kinesthetic, auditory) will work best for a specific child. This is personalization at the teaching-strategy level, not just the content level. She wants Homa to know the child well enough to say 'try the kinesthetic version for this one.'",
+    "implication": "This requires a learner profile that tracks: which modalities have worked for this child, which skills they've struggled with, and what approach finally clicked. Over time, Homa could predict: 'For phonics, your child tends to do better with kinesthetic activities. Try the word-building manipulatives.'"
+  },
+  "overallLayout": {
+    "structure": "sectioned — top half is Objective + Focus + Reteach (Visual Model), bottom half is Kinesthetic + Auditory + Summarize/Assess",
+    "spacing": "dense — text-heavy teacher reference pages",
+    "visualHierarchy": "section headers in color (red for Reteach, blue for Kinesthetic/Auditory, green for Summarize), body text in black",
+    "whiteSpaceRatio": 0.10,
+    "flowDirection": "top-down, two-column on some pages"
+  },
+  "overallSkillTargeting": {
+    "subject": "ela",
+    "domain": "grammar-language",
+    "topics": [
+      {"id": "ela.sentence-types-statement-question", "kind": "conceptual", "mapped": false},
+      {"id": "ela.sentence-types-command-exclamation", "kind": "conceptual", "mapped": false},
+      {"id": "ela.narrative-elements-setting", "kind": "conceptual", "mapped": false},
+      {"id": "ela.sentence-parts-subject", "kind": "conceptual", "mapped": false}
+    ],
+    "unmappedSkills": ["multi-modal-reteaching", "learning-style-adaptation"]
+  },
+  "difficulty": {
+    "ageBandMonths": [72, 96],
+    "complexity": "single-skill per page, multi-modal approach",
+    "prerequisites": ["basic sentence awareness"],
+    "scaffolding": "high — three different scaffolding approaches per skill"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": ["nursery rhyme characters used in examples (Jack and Jill, Humpty Dumpty, Little Jack Horner, Old Mother Hubbard, Big Bad Wolf, Cinderella)"],
+    "visualStyle": "text-heavy teacher reference",
+    "colorPalette": "limited color (section headers only)",
+    "appealDrivers": ["playful reteach activities embedded in serious instruction"]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "medium",
+    "colorRequirement": "prints well in B&W"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "multi-modal-activity-set",
+        "description": "For a given skill, generate THREE activity variants: visual (chart/diagram/written model), kinesthetic (physical game/craft/manipulative), and auditory (read-aloud/discussion/acting). Each targets the same learning objective through a different sensory pathway. Homa could recommend which to try based on the child's learner profile."
+      },
+      {
+        "name": "reteach-activity-bank",
+        "description": "When a child doesn't demonstrate mastery on an assessment, generate fun reteach activities (hopscotch games, diorama projects, joke books, surveys) that embed the skill in play. Different from the original practice worksheet."
+      }
+    ]
+  },
+  "notes": "Fifth drop from the Trophies system. This is the FIFTH layer: Alternative Teaching Strategies (remediation/reteaching with multi-modal approaches). Critically, Carolyng made a direct product suggestion: 'HOMA can suggest which she feels will work best with the student.' She's asking for learning-style-aware recommendations — Homa should know the child well enough to recommend visual vs. kinesthetic vs. auditory approaches. This is the first time she's described Homa as having agency/personality ('she feels') — she sees Homa as a teaching partner, not just a material generator."
+}

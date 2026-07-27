@@ -37,6 +37,12 @@ export interface JobContract {
   /** A one-line, non-PII status string for a stage, used by generic status
    * rendering. Receives an already-validated stage payload. */
   describeStage: (payload: unknown) => string;
+  /** Whether this stage parks for the parent's review before the build
+   * continues. Each contract decides deliberately: a 36-week program gates
+   * its first volume as a calibration checkpoint, while a single-page
+   * making must land on its own or the "it will be waiting for you"
+   * promise turns into a review chore she never asked for. */
+  gatesStage: (stageNumber: number) => boolean;
   /** A self-test example so check:jobs can prove the schemas parse. */
   example: { plan: unknown; stagePayload: unknown };
 }
@@ -79,6 +85,33 @@ const curriculumRespondSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("revise_plan"), instruction: z.string().min(1).max(1000) }),
 ]);
 
+// ---------------------------------------------------------------------------
+// materials-studio: build ONE material in the background, a single-stage
+// job. The onboarding artifact moment starts this the moment a parent's
+// own words hand Homa a theme ("she's obsessed with dinosaurs"), so the
+// promise she hears is backed by a durable queued row the runner owns:
+// the build retries on its own, parks loudly when it cannot finish, and
+// the finished page lands in the Binder and the conversation without
+// holding any turn open (chat-first onboarding plan §2.6).
+// ---------------------------------------------------------------------------
+
+const materialPlanSchema = z.object({
+  /** What to make, written for the build session: the material, the child
+   * it is for, and what the parent actually asked for or revealed. */
+  request: z.string().min(10).max(600),
+  /** The parent's own words, verbatim, that sparked this making. The
+   * build reuses her phrasing in the title and theme (aha law A3). */
+  herWords: z.string().min(1).max(300).optional(),
+  theme: z.string().min(1).max(120).optional(),
+  /** e.g. "coloring", "worksheet"; the build may overrule with craft. */
+  kind: z.string().min(1).max(60).optional(),
+  childName: z.string().min(1).max(60).optional(),
+});
+
+/** One stage IS the whole plan: a single-stage job's payload carries the
+ * same shape the plan does. */
+const materialStagePayloadSchema = materialPlanSchema;
+
 export const JOB_CONTRACTS: Record<string, JobContract> = {
   "curriculum-studio": {
     planSchema: curriculumPlanSchema,
@@ -89,6 +122,9 @@ export const JOB_CONTRACTS: Record<string, JobContract> = {
       if (!parsed.success) return "Building the next part";
       return `Building week ${parsed.data.weekNumber}: ${parsed.data.theme}`;
     },
+    // The first volume is the calibration checkpoint: she approves it
+    // before weeks of material follow its shape.
+    gatesStage: (stageNumber) => stageNumber === 1,
     example: {
       plan: {
         curriculumKey: "all-about-learning",
@@ -104,6 +140,43 @@ export const JOB_CONTRACTS: Record<string, JobContract> = {
         theme: "Short a blending",
         focus: "Blend short a CVC words",
         activities: ["Sound tiles for cat, mat, sat", "Trace and read practice"],
+      },
+    },
+  },
+  "materials-studio": {
+    planSchema: materialPlanSchema,
+    stagePayloadSchema: materialStagePayloadSchema,
+    // No skill-specific steering: a one-page build finishes or parks
+    // before a steering conversation could reach it. Generic pause and
+    // resume still apply; anything else is honestly refused.
+    respondSchema: z.never(),
+    describeStage: (payload) => {
+      const parsed = materialStagePayloadSchema.safeParse(payload);
+      if (!parsed.success) return "Making the page";
+      return parsed.data.childName
+        ? `Making ${parsed.data.childName}'s page`
+        : "Making the page";
+    },
+    // A single page never gates: the whole point of the promise is that
+    // it lands finished, and create_printable already runs its own
+    // quality check on the rendered pixels before anything ships.
+    gatesStage: () => false,
+    example: {
+      plan: {
+        request:
+          "A dinosaur coloring page for Mia, 5, who is obsessed with dinosaurs. Big friendly line art she can color.",
+        herWords: "she's obsessed with dinosaurs",
+        theme: "dinosaurs",
+        kind: "coloring",
+        childName: "Mia",
+      },
+      stagePayload: {
+        request:
+          "A dinosaur coloring page for Mia, 5, who is obsessed with dinosaurs. Big friendly line art she can color.",
+        herWords: "she's obsessed with dinosaurs",
+        theme: "dinosaurs",
+        kind: "coloring",
+        childName: "Mia",
       },
     },
   },

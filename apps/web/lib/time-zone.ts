@@ -48,6 +48,15 @@ export interface WeekdayCell {
   label: string;
   /** Day of the month (1-31) as seen in the family's zone. */
   dayOfMonth: number;
+  /** Calendar month (1-12) this cell falls in, e.g. a Dec 29-Jan 2
+   * week's last two cells carry month 1. Added for D17 (birthday on
+   * the board, plans/2026-07-21-chat-first-onboarding.md §4.2): a bare
+   * day-of-month cannot tell a birthday match from any other month's
+   * same day. */
+  month: number;
+  /** Calendar year this cell falls in, same year-boundary reasoning
+   * as month above. */
+  year: number;
   isToday: boolean;
 }
 
@@ -64,7 +73,13 @@ export function weekdayCells(now: Date, timeZone: string): WeekdayCell[] {
   return WEEKDAY_LABELS.map((label, index) => {
     // Date.UTC normalizes day-of-month underflow across month edges.
     const date = new Date(Date.UTC(year, month - 1, day - sinceMonday + index));
-    return { label, dayOfMonth: date.getUTCDate(), isToday: index === sinceMonday };
+    return {
+      label,
+      dayOfMonth: date.getUTCDate(),
+      month: date.getUTCMonth() + 1,
+      year: date.getUTCFullYear(),
+      isToday: index === sinceMonday,
+    };
   });
 }
 

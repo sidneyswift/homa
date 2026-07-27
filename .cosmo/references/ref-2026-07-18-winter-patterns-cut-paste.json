@@ -1,0 +1,41 @@
+{
+  "id": "ref-2026-07-18-winter-patterns-cut-paste",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:36:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428579.642329",
+  "format": "cut-and-paste-worksheet",
+  "title": "Winter Patterns Cut and Paste",
+  "publisher": "TPT (link likely expired)",
+  "gradeLevel": "PreK-K",
+  "callouts": [],
+  "overview": {
+    "description": "Winter-themed pattern recognition activity using cut and paste. Child identifies the pattern (AB, ABB, ABC, etc.), cuts out the correct next piece, and pastes it in position. Combines: pattern recognition (math/logic) + scissor skills (fine motor) + sequencing (cognitive). Winter theme (snowflakes, mittens, etc.) makes it seasonal/engaging."
+  },
+  "overallSkillTargeting": {
+    "subject": "math",
+    "domain": "patterns-algebra",
+    "topics": [
+      {
+        "id": "math.pattern-recognition",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "math.pattern-extension",
+        "kind": "procedural",
+        "mapped": false
+      }
+    ]
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "pattern-cut-and-paste",
+        "description": "A themed pattern extension page: rows of patterns (AB, ABB, ABC, AABB) with a gap. Cut-out pieces at the bottom. Child identifies the pattern, cuts the correct piece, pastes it to complete the sequence. Combines math (patterns) + fine motor (cutting/pasting). Generatable for any theme."
+      }
+    ]
+  },
+  "notes": "Link likely expired. Cross-curricular again: math patterns + fine motor (cutting/pasting) + seasonal theme (winter). The cut-and-paste mechanic appears in multiple Aless drops now (solar system ordering, this pattern extension). It is a consistent format preference."
+}

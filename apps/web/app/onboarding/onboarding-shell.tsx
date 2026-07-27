@@ -8,6 +8,7 @@ import { Footer } from "../../components/marketing/Footer";
 import { Nav } from "../../components/marketing/Nav";
 import type { FlowPhase } from "./flow-types";
 import { MapFlow } from "./map-flow";
+import type { OnboardingChatProps } from "./onboarding-chat-props";
 
 /**
  * Chrome for the onboarding flow (UX review 2026-07-06, approved in full).
@@ -50,14 +51,46 @@ const FULL_CHROME_PHASES: ReadonlySet<FlowPhase> = new Set<FlowPhase>([
  * card below changes height between questions. */
 const TOP_ANCHORED_PHASES: ReadonlySet<FlowPhase> = new Set<FlowPhase>(["checklist", "deepdive"]);
 
-export function OnboardingShell() {
+/** Surfaces that own the whole viewport. Nav, footer, page padding and
+ *  the 68rem measure all belong to a page you read; the conversation is
+ *  a surface you live in, built around the message box at the bottom of
+ *  a phone. The chrome goes away, but the SHAPE of the tree does not:
+ *  see the note in the component. */
+const CHROMELESS_PHASES: ReadonlySet<FlowPhase> = new Set<FlowPhase>(["chat"]);
+
+export function OnboardingShell({
+  chat = null,
+  paywallPending = false,
+}: {
+  /** Chat-first onboarding's server-assembled props, or null when the
+   *  flag is off and the card flow runs exactly as it always has. */
+  chat?: OnboardingChatProps | null;
+  /** The signup paywall's client-side handoff (founder directive
+   *  2026-07-26): true means whoever finishes the account card here is
+   *  forwarded to /onboarding/trial instead of the flow's next step. */
+  paywallPending?: boolean;
+}) {
   const [phase, setPhase] = useState<FlowPhase>("loading");
-  const fullChrome = FULL_CHROME_PHASES.has(phase);
+  const chromeless = CHROMELESS_PHASES.has(phase);
+  const fullChrome = FULL_CHROME_PHASES.has(phase) && !chromeless;
   const topAnchored = TOP_ANCHORED_PHASES.has(phase);
 
+  // MapFlow is rendered in exactly ONE place, and every phase difference
+  // below is a class name or a null sibling. An early return that put it
+  // somewhere else in the tree cost an afternoon: React reconciles by
+  // position, so moving MapFlow unmounted it, its phase reset to
+  // "loading", that flowed back up through onPhaseChange, the shell
+  // moved it back, and the two states chased each other. It showed up as
+  // 911 calls to /api/map/state and a permanent loading skeleton.
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--bg-page-warm)] [background-image:var(--bg-paper)]">
-      {fullChrome ? (
+    <div
+      className={
+        chromeless
+          ? "min-h-dvh bg-page"
+          : "flex min-h-screen flex-col bg-[var(--bg-page-warm)] [background-image:var(--bg-paper)]"
+      }
+    >
+      {chromeless ? null : fullChrome ? (
         <Nav />
       ) : (
         <header className="flex w-full items-center px-6 py-4 sm:px-10">
@@ -71,16 +104,20 @@ export function OnboardingShell() {
           questionnaire grows a report rail; every other step re-constrains
           itself inside MapFlow's phase wrapper. */}
       <main
-        className={`mx-auto flex w-full max-w-[68rem] flex-1 flex-col px-6 ${
-          fullChrome ? "pt-16 pb-24 sm:pt-24 sm:pb-32" : "pt-10 pb-16 sm:pt-12 sm:pb-20"
-        }`}
+        className={
+          chromeless
+            ? "contents"
+            : `mx-auto flex w-full max-w-[68rem] flex-1 flex-col px-6 ${
+                fullChrome ? "pt-16 pb-24 sm:pt-24 sm:pb-32" : "pt-10 pb-16 sm:pt-12 sm:pb-20"
+              }`
+        }
       >
-        <div className={`w-full ${topAnchored ? "" : "my-auto"}`}>
-          <MapFlow onPhaseChange={setPhase} />
+        <div className={chromeless ? "contents" : `w-full ${topAnchored ? "" : "my-auto"}`}>
+          <MapFlow onPhaseChange={setPhase} chat={chat} paywallPending={paywallPending} />
         </div>
       </main>
 
-      {fullChrome ? (
+      {chromeless ? null : fullChrome ? (
         <Footer />
       ) : (
         <footer className="mx-auto w-full max-w-[36rem] px-6 pb-8 text-center text-sm text-subtle">

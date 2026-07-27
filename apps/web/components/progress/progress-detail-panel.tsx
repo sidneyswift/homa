@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
+import { SidePanel } from "../chassis/side-panel";
 import type { ProgressTileModel } from "../../lib/child-progress/map-model";
 import type {
   OpenProgressConflictView,
@@ -18,10 +19,11 @@ import { requestConflictResolution } from "./resolve-conflict-request";
 /**
  * One subject's domains and topics in a modal panel: a right-side sheet
  * on desktop, a bottom sheet on phones (the founder-chosen refined
- * direction, plans/2026-07-12-progress-tab-refined.html). Focus and
- * dismissal follow the house dialog patterns: chart-lightbox's focus
- * trap, mobile-nav's scrim and edge entrance, Escape and scrim tap to
- * close, transform-only motion with a reduced-motion opt-out.
+ * direction, plans/2026-07-12-progress-tab-refined.html). Geometry,
+ * scrim, focus trap, and Escape/scrim dismissal all live in the shared
+ * SidePanel chassis (components/chassis/side-panel.tsx, extracted from
+ * this component as the fit donor, plans/2026-07-21-chat-first-onboarding.md
+ * §2.7); this component owns only its own header, body, and footer.
  *
  * When the subject can take one (tile.deeperCheck), the footer carries
  * the double-check door (founder ask 2026-07-14: a scary number's first
@@ -54,7 +56,6 @@ export function ProgressDetailPanel({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const headingId = `progress-panel-${subject.subjectId}`;
   const summary = progressSubjectSummary(subject, timeZone);
@@ -92,70 +93,8 @@ export function ProgressDetailPanel({
     },
   };
 
-  useEffect(() => {
-    closeRef.current?.focus();
-
-    function focusableElements(): HTMLElement[] {
-      const dialog = dialogRef.current;
-      if (!dialog) return [];
-      return Array.from(
-        dialog.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        ),
-      ).filter((element) => element.tabIndex >= 0);
-    }
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onClose();
-        return;
-      }
-      if (event.key !== "Tab") return;
-      const focusable = focusableElements();
-      if (focusable.length === 0) {
-        event.preventDefault();
-        return;
-      }
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      const active = document.activeElement;
-      if (event.shiftKey && active === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && active === last) {
-        event.preventDefault();
-        first.focus();
-      } else if (!active || !dialogRef.current?.contains(active)) {
-        event.preventDefault();
-        first.focus();
-      }
-    }
-
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [onClose]);
-
   return (
-    <>
-      {/* Tap-catch scrim: any tap outside the panel closes it. */}
-      <div
-        onClick={onClose}
-        aria-hidden="true"
-        className="fixed inset-0 z-40 bg-[rgba(51,42,33,0.42)] transition-opacity duration-(--dur-base) ease-out starting:opacity-0 motion-reduce:transition-none print:hidden"
-      />
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={headingId}
-        className="fixed inset-x-0 bottom-0 z-50 flex max-h-[78dvh] flex-col rounded-t-[var(--radius-xl)] border-t border-border-subtle bg-card shadow-[var(--shadow-xl)] transition-[translate] duration-(--dur-base) ease-out starting:translate-y-full motion-reduce:transition-none lg:inset-x-auto lg:inset-y-0 lg:right-0 lg:max-h-none lg:w-[min(440px,92vw)] lg:rounded-l-[var(--radius-xl)] lg:rounded-tr-none lg:border-l lg:border-t-0 lg:starting:translate-x-full lg:starting:translate-y-0"
-      >
-        {/* The sheet's grabber, phones only: says "this slides away". */}
-        <span
-          aria-hidden="true"
-          className="mx-auto mt-2.5 block h-1.5 w-10 shrink-0 rounded-pill bg-[var(--stone-300)] lg:hidden"
-        />
+    <SidePanel labelledBy={headingId} onClose={onClose} initialFocusRef={closeRef}>
         <div className="flex items-start gap-3 border-b border-border-subtle px-5 pb-3.5 pt-3 lg:pt-5">
           <div className="min-w-0 flex-1">
             <h2
@@ -236,7 +175,6 @@ export function ProgressDetailPanel({
             Tell HOMA something looks wrong
           </ProgressChatDoor>
         </div>
-      </div>
-    </>
+    </SidePanel>
   );
 }

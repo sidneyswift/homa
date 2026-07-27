@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { manageChildProgressResultSchema } from "./tool-result-contract";
+import {
+  JOURNAL_HOURS_PROGRESS_NOTE,
+  manageChildProgressResultSchema,
+} from "./tool-result-contract";
 
 const CHECK_IN_ID = "11111111-1111-4111-8111-111111111111";
 const CONFLICT_ID = "22222222-2222-4222-8222-222222222222";
@@ -138,6 +141,36 @@ describe("client-safe progress result contract", () => {
         false,
       );
     }
+  });
+
+  it("allows only the exact hours reminder on progress updates", () => {
+    const update = {
+      kind: "progress_update",
+      label: "Progress updated",
+      childName: "Maya",
+      affectedTopics: ["Counts out loud from 1 to 5"],
+      undoAvailable: true,
+      undoToken: UNDO_TOKEN,
+    };
+    // Historical transcripts predate the note; they must keep parsing.
+    assert.equal(
+      manageChildProgressResultSchema.safeParse(update).success,
+      true,
+    );
+    assert.equal(
+      manageChildProgressResultSchema.safeParse({
+        ...update,
+        note: JOURNAL_HOURS_PROGRESS_NOTE,
+      }).success,
+      true,
+    );
+    assert.equal(
+      manageChildProgressResultSchema.safeParse({
+        ...update,
+        note: "Free-text guidance a caller made up",
+      }).success,
+      false,
+    );
   });
 
   it("bounds every displayed result array", () => {

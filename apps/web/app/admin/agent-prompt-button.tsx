@@ -107,7 +107,7 @@ export function AgentPromptButton({
         onClick={onClick}
         disabled={pending}
         title="Copies everything an AI agent needs to diagnose this failure"
-        className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-pill border border-border-default bg-card px-2.5 py-1 text-[0.7rem] font-bold text-muted shadow-sm transition-colors hover:text-strong disabled:opacity-50"
+        className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-pill border border-border bg-card px-2.5 py-1 text-[0.7rem] font-bold text-muted shadow-sm transition-colors hover:text-strong disabled:opacity-50"
       >
         <Icon size={12} aria-hidden="true" />
         {copied ? "Copied" : pending ? "Building…" : "Prompt for agent"}

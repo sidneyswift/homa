@@ -77,6 +77,7 @@ const TOKEN_ALIASES: Readonly<Record<string, string>> = {
   aloud: "loud",
   books: "book",
   counted: "count",
+  counting: "count",
   counts: "count",
   ended: "end",
   objects: "object",
@@ -93,6 +94,32 @@ const TOKEN_ALIASES: Readonly<Record<string, string>> = {
   tells: "tell",
   writes: "write",
   wrote: "write",
+  // Parents write number words; bank statements and transcripts carry
+  // digits ("counted five objects" must meet "Counts ... to 5").
+  one: "1",
+  two: "2",
+  three: "3",
+  four: "4",
+  five: "5",
+  six: "6",
+  seven: "7",
+  eight: "8",
+  nine: "9",
+  ten: "10",
+  eleven: "11",
+  twelve: "12",
+  thirteen: "13",
+  fourteen: "14",
+  fifteen: "15",
+  sixteen: "16",
+  seventeen: "17",
+  eighteen: "18",
+  nineteen: "19",
+  twenty: "20",
+  thirty: "30",
+  forty: "40",
+  fifty: "50",
+  hundred: "100",
 };
 
 const JOURNAL_ALIAS_RULES: readonly JournalAliasRule[] = [
@@ -202,9 +229,19 @@ const ADULT_ROLE_TOKENS = new Set([
   "grandpa",
 ]);
 const NEGATIVE_PREDICATE_PATTERN =
-  /\b(?:cannot|can't|could\s+not|couldn't|did\s+not|does\s+not|not\s+yet|not\s+(?:read|retell|write|count|pedal|solve|swim)|needs?\s+help)\b/iu;
+  /\b(?:cannot|can't|could\s+not|couldn't|did\s+not|didn't|does\s+not|doesn't|will\s+not|won't|is\s+not|isn't|never|gave\s+up|not\s+yet|not\s+(?:read|retell|write|count|pedal|solve|swim)|needs?\s+help)\b/iu;
 const EMERGING_PREDICATE_PATTERN =
-  /\b(?:almost|starting\s+to|with\s+(?:(?:some|lots\s+of|a\s+lot\s+of)\s+)?help)\b/iu;
+  /\b(?:almost|starting\s+to|just\s+started|learning\s+to|working\s+on|struggl\w*|had\s+trouble|hard\s+time|with\s+(?:\w+\s+){0,2}help)\b/iu;
+/**
+ * "Easily" is the strongest claim the ledger can hold, so a parent has
+ * to actually say the child did it alone (founder ruling
+ * `progress-signal-capture-v2` D4: unrecognized phrasing records
+ * getting_there, never easily). Before this, any matched sentence
+ * without a negative word recorded mastery, so "Emma read a book with
+ * me at bedtime" asserted independent reading.
+ */
+const INDEPENDENCE_PREDICATE_PATTERN =
+  /\b(?:by\s+(?:her|him|them)self|by\s+herself|by\s+himself|on\s+(?:her|his|their)\s+own|all\s+alone|alone|independently|without\s+(?:any\s+)?help|no\s+help|solo)\b/iu;
 
 function inferPredicateAnswer(
   predicate: string,
@@ -213,7 +250,9 @@ function inferPredicateAnswer(
   if (EMERGING_PREDICATE_PATTERN.test(predicate)) {
     return "getting_there";
   }
-  return "easily";
+  return INDEPENDENCE_PREDICATE_PATTERN.test(predicate)
+    ? "easily"
+    : "getting_there";
 }
 
 function trimPredicateSpan(

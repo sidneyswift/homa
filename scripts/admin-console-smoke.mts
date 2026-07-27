@@ -29,6 +29,14 @@ const { listSessions, getSessionDetail } = await import("../apps/web/lib/admin/s
 const { getFamilyTasks, getFamilyBrain, getFamilyMaterialsDeep, getFamilyProgressDeep } =
   await import("../apps/web/lib/admin/family-deep-data");
 const { getFamilyScreenData } = await import("../apps/web/lib/admin/screen-data");
+const {
+  listSandboxFamilies,
+  listStudioRuns,
+  getStudioRunDetail,
+  getStudioLedger,
+  listRecentFleetMaterials,
+  readSkillPackage,
+} = await import("../apps/web/lib/admin/studio-data");
 
 let failed = false;
 
@@ -131,6 +139,43 @@ try {
       `kids ${screen.children.length} · reports ${screen.reports.size} · plans ${screen.plans.length} · binder ${screen.binder.length}`,
     );
   }
+  // Material studio tab (2026-07-18): counts only, same privacy posture.
+  const sandboxFamilies = await listSandboxFamilies();
+  pass(
+    "studio sandbox families",
+    `${sandboxFamilies.length} rows · kids ${sandboxFamilies.reduce((sum, family) => sum + family.children.length, 0)}`,
+  );
+  const studioRuns = await listStudioRuns(20);
+  pass(
+    "studio runs",
+    studioRuns === null
+      ? "ledger table not migrated yet (page shows its setup note)"
+      : `${studioRuns.length} rows · materials ${studioRuns.reduce((sum, run) => sum + run.materials.length, 0)}`,
+  );
+  if (studioRuns !== null && studioRuns.length > 0) {
+    const runDetail = await getStudioRunDetail(studioRuns[0].id);
+    if (!runDetail) throw new Error("newest studio run detail came back null");
+    pass(
+      "studio run detail (newest)",
+      `status ${runDetail.status} · materials ${runDetail.materials.length} · feedback ${runDetail.feedbackAt ? "yes" : "none"}`,
+    );
+  } else {
+    pass("studio run detail", "skipped, no runs yet");
+  }
+  const fleetMaterials = await listRecentFleetMaterials(10);
+  pass("studio fleet materials", `${fleetMaterials.length} rows`);
+  const ledger = await getStudioLedger(30);
+  pass(
+    "studio ledger",
+    `${ledger.entries.length} entries · ${ledger.labCount} lab · ${ledger.fleetCount} fleet · runs table ${ledger.runsAvailable ? "present" : "absent"}`,
+  );
+  const skillPackage = await readSkillPackage();
+  if (!skillPackage) throw new Error("materials-studio skill package could not be read");
+  const missingReferences = skillPackage.citations.filter((citation) => !citation.present);
+  pass(
+    "studio skill package",
+    `${skillPackage.lineCount} lines · ${skillPackage.sections.length} sections · ${skillPackage.citations.length} citations · ${missingReferences.length} missing references · ${skillPackage.uncitedFiles.length} uncited files · ${skillPackage.toolSurface.length} tools in the surface table`,
+  );
 } catch (error) {
   fail("admin console smoke", error);
 }

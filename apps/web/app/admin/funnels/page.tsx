@@ -5,6 +5,7 @@ import { requireFounder } from "../../../lib/admin/gate";
 import { getFunnelData } from "../../../lib/admin/funnel-data";
 import { familyDisplayName, percent, timeAgo } from "../../../lib/admin/format";
 import { EmptyNote, Pill, SectionHead } from "../ui";
+import { DripPreview } from "./drip-preview";
 
 /**
  * /admin/funnels: two conveyor belts (lab direction 4). The human funnel
@@ -17,9 +18,14 @@ import { EmptyNote, Pill, SectionHead } from "../ui";
 export const metadata: Metadata = { title: "Funnels" };
 
 export default async function AdminFunnelsPage() {
-  await requireFounder();
+  const founder = await requireFounder();
   const data = await getFunnelData(28);
   const max = Math.max(...data.stages.map((stage) => stage.count), 1);
+  // Only cards anyone has reached yet: the event just shipped, so most read
+  // zero until families flow through. An empty list says so rather than
+  // printing eleven zero-rows.
+  const reachedSteps = data.stepFunnel.filter((step) => step.count > 0);
+  const stepMax = Math.max(...reachedSteps.map((step) => step.count), 1);
 
   return (
     <div>
@@ -34,7 +40,7 @@ export default async function AdminFunnelsPage() {
         the window.
       </p>
 
-      <SectionHead eyebrow="Humans" title="Signup to trial" />
+      <SectionHead eyebrow="Humans" title="Signup to report" />
       <p className="mt-1 max-w-2xl text-sm text-muted">
         &quot;Signup screen opened&quot; includes people who never finished Google or
         email/password. &quot;Signed up&quot; is a completed account. &quot;Setup done&quot; is
@@ -70,6 +76,154 @@ export default async function AdminFunnelsPage() {
           );
         })}
       </div>
+
+      <SectionHead
+        eyebrow="Humans"
+        title="Per onboarding card"
+        sub="Distinct families that reached each card, from map.step_viewed. This is where per-card drop-off finally shows up; the account card is the first one after signup."
+      />
+      {reachedSteps.length === 0 ? (
+        <EmptyNote>
+          No per-card data yet. This fills in as families move through onboarding
+          after the map.step_viewed beacon ships.
+        </EmptyNote>
+      ) : (
+        <div className="mt-3 flex flex-col gap-1.5">
+          {reachedSteps.map((step, index) => {
+            const previous = index > 0 ? reachedSteps[index - 1].count : null;
+            return (
+              <div key={step.step}>
+                <div className="grid grid-cols-[minmax(120px,200px)_1fr_60px] items-center gap-3 rounded-md border border-border-subtle bg-card px-3.5 py-2 shadow-sm">
+                  <span>
+                    <span className="text-sm font-bold text-strong">{step.label}</span>
+                    <span className="block font-mono text-[0.62rem] text-subtle">{step.step}</span>
+                  </span>
+                  <span className="h-5 overflow-hidden rounded-md bg-[var(--surface-sunken)]">
+                    <span
+                      className="block h-full rounded-md"
+                      style={{
+                        width: `${Math.max(2, Math.round((step.count / stepMax) * 100))}%`,
+                        background: "linear-gradient(90deg, var(--sage-300), var(--sage-500))",
+                      }}
+                    />
+                  </span>
+                  <span className="text-right font-mono text-sm font-bold text-strong">{step.count}</span>
+                </div>
+                {previous !== null && previous > 0 ? (
+                  <p className="ml-[calc(min(200px,30%)+12px)] py-0.5 text-[0.7rem] text-subtle">
+                    {percent(step.count, previous)} of the previous card
+                  </p>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <SectionHead
+        eyebrow="Humans"
+        title="After the report: the activation ladder"
+        sub="Parent-initiated only. Homa's own work (briefs sent, cards mailed, evidence recorded by the scorer) is excluded on purpose, so this reads what families do, never how busy Homa is."
+      />
+      <p className="mt-1 max-w-2xl text-sm text-muted">
+        Out of {data.activation.base} families who reached a report in this window.
+      </p>
+      <div className="mt-3 flex flex-col gap-1.5">
+        {data.activation.stages.map((stage, index) => {
+          const previous = index > 0 ? data.activation.stages[index - 1].count : data.activation.base;
+          return (
+            <div key={stage.key}>
+              <div className="grid grid-cols-[minmax(120px,220px)_1fr_60px] items-center gap-3 rounded-md border border-border-subtle bg-card px-3.5 py-2 shadow-sm">
+                <span>
+                  <span className="text-sm font-bold text-strong">{stage.name}</span>
+                  <span className="block font-mono text-[0.58rem] leading-tight text-subtle">
+                    {stage.source}
+                  </span>
+                </span>
+                <span className="h-5 overflow-hidden rounded-md bg-[var(--surface-sunken)]">
+                  <span
+                    className="block h-full rounded-md"
+                    style={{
+                      width: `${Math.max(2, Math.round((stage.count / Math.max(data.activation.base, 1)) * 100))}%`,
+                      background: "linear-gradient(90deg, var(--gold-300), var(--clay-500))",
+                    }}
+                  />
+                </span>
+                <span className="text-right font-mono text-sm font-bold text-strong">{stage.count}</span>
+              </div>
+              <p className="ml-[calc(min(220px,30%)+12px)] py-0.5 text-[0.7rem] text-subtle">
+                {stage.blurb}
+                {previous > 0 ? ` · ${percent(stage.count, previous)} of the step above` : null}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-3 rounded-lg border border-border-subtle bg-card p-4 shadow-sm">
+        <p className="text-[0.72rem] font-bold text-muted">Came back in week two</p>
+        {data.activation.weekTwo.eligible === 0 ? (
+          <p className="mt-1 text-sm text-subtle">
+            No family is old enough yet. This fills in once families pass their
+            first week, and it is the number that actually reads retention.
+          </p>
+        ) : (
+          <p className="mt-1 text-sm text-body">
+            <b className="font-display text-lg text-strong">
+              {data.activation.weekTwo.returned}
+            </b>{" "}
+            of {data.activation.weekTwo.eligible} families old enough to have a
+            second week did something in it.
+          </p>
+        )}
+      </div>
+
+      <SectionHead
+        eyebrow="Commercial"
+        title="Trial and billing"
+        sub="Kept separate from activation: the aha is the ladder above, so a zero here should never make activation look broken."
+      />
+      {data.commercial.everRan ? (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {(
+            [
+              ["Trials started", data.commercial.trialStarted],
+              ["Stripe customers", data.commercial.stripeCustomers],
+              ["Subscriptions", data.commercial.subscriptions],
+              ["Billing exempt", data.commercial.billingExempt],
+            ] as const
+          ).map(([label, value]) => (
+            <span
+              key={label}
+              className="rounded-md border border-border-subtle bg-card px-3.5 py-2 shadow-sm"
+            >
+              <b className="block font-display text-lg leading-tight text-strong">{value}</b>
+              <span className="text-xs font-semibold text-body">{label}</span>
+            </span>
+          ))}
+        </div>
+      ) : (
+        <EmptyNote>
+          Billing has never run in production: no trial, no Stripe customer, and
+          no subscription exists on any of the {data.commercial.families} live
+          families ({data.commercial.billingExempt} are billing-exempt). This is
+          a step that has not shipped, not a conversion that is failing.
+        </EmptyNote>
+      )}
+
+      <p className="mt-3 text-sm text-muted">
+        The drip aims at these rungs.{" "}
+        <Link href="/admin/drip" className="font-bold text-strong hover:underline">
+          See what it sent and whether it worked
+        </Link>
+        .
+      </p>
+
+      <SectionHead
+        eyebrow="Onboarding drip"
+        title="Nudge previews"
+        sub="The stage-aware drip is wired but dark. Preview each nudge in your own inbox before it ships to anyone."
+      />
+      <DripPreview founderEmail={founder.email} />
 
       <SectionHead
         eyebrow="Parked right now"

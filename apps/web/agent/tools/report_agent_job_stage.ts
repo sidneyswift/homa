@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { agentJobsEnabled } from "../../lib/jobs/flag";
 import { jobWorkerContext, refuseNonJobWorkerSession } from "../../lib/jobs/guard";
@@ -17,9 +20,11 @@ import { completeStageFromWorker } from "../../lib/jobs/runner";
  * stage must be the one actually building, so a stray call cannot move a
  * job.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Finish the current stage of the build you are running by naming the material(s) you produced for it. Only call this from inside a job build, once the stage's material is created and passed its quality check.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: z.object({
     materialIds: z
       .array(z.uuid())

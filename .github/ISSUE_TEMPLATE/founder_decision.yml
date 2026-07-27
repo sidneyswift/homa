@@ -1,0 +1,22 @@
+name: Founder decision
+description: Work is blocked on a founder ruling.
+labels: ["founder-decision"]
+body:
+  - type: textarea
+    id: decision
+    attributes:
+      label: The decision, with options
+      description: State each open question and its options with trade-offs, so it can be ruled from this issue alone.
+    validations:
+      required: true
+  - type: textarea
+    id: blocked
+    attributes:
+      label: What it blocks
+      description: The work waiting on this ruling (link issues or plan docs).
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        When ruled: record the ruling in `docs/homa-planning/journeys/10-reconciliation.md` §5 and the build-log, then close this issue pointing at the ruling. The issue is never the ruling's home.

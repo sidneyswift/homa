@@ -144,7 +144,7 @@ export default async function PlanPage({
           This plan link isn&apos;t active.
         </h1>
         <p className="mt-3 text-body">
-          Start with your child&apos;s free progress report and every subject gets a plan button.
+          Start with your child&apos;s progress report and every subject gets a plan button.
         </p>
         <Link
           href="/onboarding"
@@ -153,7 +153,7 @@ export default async function PlanPage({
             "mt-6 inline-flex min-h-12 items-center px-6 py-3 text-base font-semibold",
           )}
         >
-          Get your free progress report
+          Start your free trial
         </Link>
       </main>
     );
