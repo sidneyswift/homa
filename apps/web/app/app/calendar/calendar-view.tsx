@@ -1,34 +1,47 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import type { FamilyEventRow } from "../../../lib/family-events";
 import { formatMinutesAsHours } from "../../../lib/hours-view";
 import type { PlanActivityScheduleRow } from "../../../lib/plan-schedule";
 import type { DashboardPlan } from "../../../lib/plan-week";
-import { buildCalendarBoard, type CalendarActivityItem, type CalendarEventItem } from "../../../lib/calendar-view";
+import {
+  buildCalendarBoard,
+  formatTimeRange,
+  layoutTimedItems,
+  timeToMinutes,
+  timedWindow,
+  type CalendarActivityItem,
+} from "../../../lib/calendar-view";
 import { planChecksStorageKey, usePlanChecks } from "../../../lib/use-plan-checks";
 import { avatarTone, KidAvatar } from "../../../components/dashboard/kid-avatar";
 
 /**
  * /app/calendar (issue #176, CG-03: "calendar and homeschool planner in
- * one"). Per-kid lanes plus one family lane, color coded per kid, for
- * the current Monday-to-Sunday week: exactly the structure a co-founder
- * asked for in her own words ("have an option for each kid and then a
- * family calendar... check off each kid's lessons, added homa lessons,
- * family subjects, related activities, appts etc.").
+ * one"), in the unified shape the co-founders pointed at with the
+ * Skylight reference: ONE week grid for the whole family, color coded
+ * per kid ("Color coded per kid with general family can include lessons
+ * from homa plus events she adds in, appts"), instead of a separate
+ * stacked lane per person.
  *
- * Three independent sources merge here (lib/calendar-view.ts owns the
- * pure merge): scheduled plan activities (checkable, the same check-off
- * store /app/planner already uses), family_events (appointments and
- * trips, this family's own calendar, never an external sync), and a
- * lightweight hours_log indicator (editing hours stays on /app/hours).
+ * Anatomy, top to bottom: prev/today/next week controls; per-kid filter
+ * chips (Everyone shows the merged family view); day headers with a
+ * filled badge on today; an all-day strip where trips and undated-time
+ * events span their real days; a plans strip carrying the checkable
+ * scheduled plan activities (the same check-off store /app/planner
+ * uses) and each kid's logged-hours chip; then a real time grid where
+ * timed events sit at their actual hour, sized by duration, side by
+ * side when they overlap, with a clock line across today.
+ *
+ * Color law: kid tones come from avatarTone (the same position-keyed
+ * tones every other surface uses), whole-family items wear a soft
+ * stripe of the kids' tones together. No new colors are invented here.
  *
  * Explicitly NOT built here (see the PR body): an optimizer that
- * reshuffles the week around a new appointment. The data this page
- * reads is exactly what a future skill would need for that; this page
- * only displays it.
+ * reshuffles the week around a new appointment. This page only displays.
  */
 
 export interface CalendarKid {
@@ -37,27 +50,84 @@ export interface CalendarKid {
   avatar_url: string | null;
 }
 
-function EventChip({ event }: { event: CalendarEventItem }) {
-  const timeLabel =
-    event.startTime && !event.multiDay
-      ? event.endTime
-        ? `${event.startTime} to ${event.endTime}`
-        : event.startTime
-      : null;
-  return (
-    <div className="rounded-md border border-border-subtle bg-card px-2 py-1.5 shadow-sm">
-      <p className="text-[0.72rem] font-semibold leading-snug text-strong">{event.title}</p>
-      {timeLabel ? <p className="text-[0.62rem] text-subtle">{timeLabel}</p> : null}
-    </div>
-  );
+/** Pixels per hour on the time grid. */
+const HOUR_PX = 48;
+const GRID_COLUMNS = "3.5rem repeat(7, minmax(0, 1fr))";
+
+/** Whole-family items wear the kids' own tones woven together, the same
+ * trick the reference uses for shared events, built strictly from the
+ * existing avatarTone palette. */
+function familyStripeBackground(kidCount: number): string {
+  const toneCount = Math.max(2, Math.min(kidCount, 4));
+  const stops = Array.from({ length: toneCount }, (_, index) => {
+    const [bg] = avatarTone(index);
+    return `${bg} ${index * 14}px ${(index + 1) * 14}px`;
+  }).join(", ");
+  return `repeating-linear-gradient(135deg, ${stops})`;
+}
+
+interface AllDayBanner {
+  id: string;
+  title: string;
+  startIdx: number;
+  endIdx: number;
+  kidIndex: number | null;
+  note: string | null;
+  dateLabel: string;
+}
+
+/** What the tapped-event detail card shows. */
+interface EventDetails {
+  title: string;
+  /** "Thu 30, 2 to 3 PM" or "Sat 1 to Sun 2, all day". */
+  whenLabel: string;
+  /** The kid's roster index, or null for a whole-family event. */
+  kidIndex: number | null;
+  note: string | null;
+}
+
+/** Greedy row assignment so overlapping all-day banners stack instead of
+ * colliding (camping trip under a same-weekend birthday). */
+function assignBannerTracks(banners: readonly AllDayBanner[]): AllDayBanner[][] {
+  const sorted = [...banners].sort((a, b) => a.startIdx - b.startIdx || b.endIdx - a.endIdx);
+  const tracks: { end: number; members: AllDayBanner[] }[] = [];
+  for (const banner of sorted) {
+    const track = tracks.find((candidate) => candidate.end < banner.startIdx);
+    if (track) {
+      track.members.push(banner);
+      track.end = banner.endIdx;
+    } else {
+      tracks.push({ end: banner.endIdx, members: [banner] });
+    }
+  }
+  return tracks.map((track) => track.members);
+}
+
+function hourLabel(hour: number): string {
+  const hour12 = ((hour + 11) % 12) + 1;
+  return `${hour12} ${hour < 12 ? "AM" : "PM"}`;
+}
+
+/** Minutes since midnight right now, on the family's own clock. */
+function clockMinutesIn(timeZone: string): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour: "numeric",
+    minute: "numeric",
+    hour12: false,
+  }).formatToParts(new Date());
+  const read = (type: string) => Number(parts.find((part) => part.type === type)?.value ?? "0");
+  return (read("hour") % 24) * 60 + read("minute");
 }
 
 function ActivityCard({
   item,
   tone,
+  kid,
 }: {
   item: CalendarActivityItem;
   tone: readonly [string, string];
+  kid: { name: string; index: number; avatarUrl: string | null } | null;
 }) {
   // Wired to the token only when one exists; the rare token-less edge
   // case (see lib/calendar-view.ts's CalendarActivityItem.token comment)
@@ -72,14 +142,19 @@ function ActivityCard({
   const [bg, ink] = tone;
 
   return (
-    <div className="rounded-md p-2" style={{ background: bg }}>
-      <span
-        className="text-[0.56rem] font-bold uppercase tracking-[0.05em]"
-        style={{ color: ink }}
-      >
-        {item.subjectLabel}
-      </span>
-      <label className="mt-1 flex cursor-pointer items-start gap-1.5">
+    <div className="rounded-lg p-1.5 shadow-sm" style={{ background: bg }}>
+      <div className="flex items-center justify-between gap-1">
+        <span
+          className="text-[0.55rem] font-bold uppercase tracking-[0.05em]"
+          style={{ color: ink }}
+        >
+          {item.subjectLabel}
+        </span>
+        {kid ? (
+          <KidAvatar name={kid.name} index={kid.index} avatarUrl={kid.avatarUrl} size={14} />
+        ) : null}
+      </div>
+      <label className="mt-0.5 flex cursor-pointer items-start gap-1.5">
         <input
           type="checkbox"
           checked={checked}
@@ -89,7 +164,9 @@ function ActivityCard({
         />
         <span
           className={
-            checked ? "text-[0.72rem] leading-snug text-subtle" : "text-[0.72rem] leading-snug text-body"
+            checked
+              ? "text-[0.7rem] leading-snug text-subtle line-through"
+              : "text-[0.7rem] leading-snug text-body"
           }
         >
           {item.text}
@@ -110,6 +187,7 @@ export function CalendarView({
   now,
   focusChildId,
   weekOffset,
+  familyName,
 }: {
   /** The FULL family roster, always (tone/avatar keys off list position). */
   kids: CalendarKid[];
@@ -126,7 +204,38 @@ export function CalendarView({
    * matching `?week=` search param and threads the same number into
    * buildCalendarBoard. */
   weekOffset: number;
+  familyName: string | null;
 }) {
+  // The chips filter is instant and local; the view-context switcher's
+  // choice arrives as the initial selection.
+  const [selectedKidId, setSelectedKidId] = useState<string | null>(focusChildId);
+  // The event a parent tapped, shown in a small detail card ("the
+  // calendar is look-but-do-not-touch" was the veteran-mom review's top
+  // fix). Null when nothing is open.
+  const [details, setDetails] = useState<EventDetails | null>(null);
+  useEffect(() => {
+    if (!details) return;
+    const onKeyDown = (keyEvent: KeyboardEvent) => {
+      if (keyEvent.key === "Escape") setDetails(null);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [details]);
+  // The clock line's minute is read on the client only (the server
+  // render never disagrees with the browser about what time it is),
+  // painted on the next frame, then kept honest all day by a one-minute
+  // tick, the way a wall calendar's line creeps down the morning.
+  const [nowMinutes, setNowMinutes] = useState<number | null>(null);
+  useEffect(() => {
+    const update = () => setNowMinutes(clockMinutesIn(timeZone));
+    const frame = requestAnimationFrame(update);
+    const tick = setInterval(update, 60_000);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearInterval(tick);
+    };
+  }, [timeZone]);
+
   const board = buildCalendarBoard({
     kids: kids.map((kid) => ({ id: kid.id, name: kid.name, avatarUrl: kid.avatar_url })),
     plans,
@@ -136,161 +245,524 @@ export function CalendarView({
     reportTokens: new Map(kids.map((kid) => [kid.id, reports.get(kid.id)?.token ?? null])),
     now,
     timeZone,
-    focusChildId,
+    focusChildId: selectedKidId,
     weekOffsetDays: weekOffset * 7,
   });
 
-  const first = board.days[0];
-  const last = board.days[board.days.length - 1];
+  const days = board.days;
+  const weekDates = days.map((day) => day.date);
+  const firstDate = weekDates[0];
+  const lastDate = weekDates[weekDates.length - 1];
+  const kidIndexById = new Map(kids.map((kid, index) => [kid.id, index]));
+
+  const first = days[0];
+  const last = days[days.length - 1];
   const spanLabel =
     first.month === last.month
       ? `${monthName(first.month)} ${first.dayOfMonth} to ${last.dayOfMonth}`
       : `${monthName(first.month)} ${first.dayOfMonth} to ${monthName(last.month)} ${last.dayOfMonth}`;
 
-  const focusKid = focusChildId ? kids.find((kid) => kid.id === focusChildId) : undefined;
-  const hasAnyFamilyEvent = board.familyDays.some((day) => day.events.length > 0);
+  const selectedKid = selectedKidId ? kids.find((kid) => kid.id === selectedKidId) : undefined;
+
+  // Events straight from the rows: the week clip and the kid filter are
+  // the only judgments here, everything else is placement.
+  const visibleEvents = familyEvents.filter(
+    (event) =>
+      event.startsOn <= lastDate &&
+      event.endsOn >= firstDate &&
+      (selectedKidId === null || event.childId === null || event.childId === selectedKidId),
+  );
+  const allDayBanners: AllDayBanner[] = visibleEvents
+    .filter((event) => event.startTime === null || event.startsOn !== event.endsOn)
+    .map((event) => ({
+      id: event.id,
+      title: event.title,
+      note: event.note,
+      startIdx: event.startsOn <= firstDate ? 0 : weekDates.indexOf(event.startsOn),
+      endIdx: event.endsOn >= lastDate ? 6 : weekDates.indexOf(event.endsOn),
+      kidIndex: event.childId === null ? null : (kidIndexById.get(event.childId) ?? null),
+      dateLabel: "",
+    }))
+    .filter((banner) => banner.startIdx !== -1 && banner.endIdx !== -1)
+    .map((banner) => ({
+      ...banner,
+      dateLabel:
+        banner.startIdx === banner.endIdx
+          ? `${days[banner.startIdx].label} ${days[banner.startIdx].dayOfMonth}, all day`
+          : `${days[banner.startIdx].label} ${days[banner.startIdx].dayOfMonth} to ${days[banner.endIdx].label} ${days[banner.endIdx].dayOfMonth}, all day`,
+    }));
+  const bannerTracks = assignBannerTracks(allDayBanners);
+
+  const timedEvents = visibleEvents.filter(
+    (event) => event.startTime !== null && event.startsOn === event.endsOn,
+  );
+  const timedSpans = timedEvents.map((event) => {
+    const startMin = timeToMinutes(event.startTime) ?? 0;
+    const endMin = timeToMinutes(event.endTime) ?? startMin + 45;
+    return {
+      id: event.id,
+      date: event.startsOn,
+      title: event.title,
+      note: event.note,
+      timeLabel: formatTimeRange(event.startTime ?? "", event.endTime),
+      startLabel: formatTimeRange(event.startTime ?? "", null),
+      kidIndex: event.childId === null ? null : (kidIndexById.get(event.childId) ?? null),
+      startMin,
+      endMin: Math.max(endMin, startMin + 20),
+    };
+  });
+  const window = timedWindow(timedSpans);
+  const gridHeight = (window.endHour - window.startHour) * HOUR_PX;
+  const timedByDate = new Map(
+    weekDates.map((date) => [
+      date,
+      layoutTimedItems(timedSpans.filter((span) => span.date === date)),
+    ]),
+  );
+
+  // Date-only school work (scheduled activities, logged hours) rides in
+  // the plans strip: it has a day but no clock time on purpose.
+  const plansStripByDay = weekDates.map((date, dayIndex) => {
+    const cards: { item: CalendarActivityItem; kidIndex: number }[] = [];
+    const hours: { kidIndex: number; minutes: number }[] = [];
+    for (const lane of board.kidLanes) {
+      const day = lane.days[dayIndex];
+      for (const item of day.activities) cards.push({ item, kidIndex: lane.kidIndex });
+      if (day.hoursMinutes > 0) hours.push({ kidIndex: lane.kidIndex, minutes: day.hoursMinutes });
+    }
+    return { date, cards, hours };
+  });
+  const hasPlansStrip = plansStripByDay.some((day) => day.cards.length > 0 || day.hours.length > 0);
+  const weekIsEmpty = visibleEvents.length === 0 && !hasPlansStrip;
+
+  const stripeBackground = familyStripeBackground(kids.length);
 
   return (
     <>
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <Link
-              href={calendarWeekHref(weekOffset - 1)}
-              aria-label="Previous week"
-              className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border bg-card text-body transition-colors hover:border-[var(--clay-200)]"
-            >
-              <ChevronLeft size={16} aria-hidden="true" />
-            </Link>
-            <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
-              {weekLabel(weekOffset)} {"·"} {spanLabel}
-            </p>
-            <Link
-              href={calendarWeekHref(weekOffset + 1)}
-              aria-label="Next week"
-              className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border bg-card text-body transition-colors hover:border-[var(--clay-200)]"
-            >
-              <ChevronRight size={16} aria-hidden="true" />
-            </Link>
-            {weekOffset !== 0 ? (
-              <Link
-                href={calendarWeekHref(0)}
-                className="rounded-pill border border-border bg-card px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.1em] text-subtle transition-colors hover:border-brand"
-              >
-                Today
-              </Link>
-            ) : null}
-          </div>
-          <h1 className="mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-strong">
-            {focusKid ? `${focusKid.name}'s calendar` : "Your calendar"}
+      {/* One compact header row (a veteran mom's request: the afternoon
+          belongs above the fold, not a tall title stack) */}
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="font-display text-[1.45rem] font-semibold leading-tight tracking-[-0.015em] text-strong">
+            {selectedKid ? `${selectedKid.name}'s calendar` : (familyName ?? "Your calendar")}
           </h1>
-          <p className="mt-1.5 max-w-xl text-sm text-muted">
-            School plans and family life in one place. Ask Homa to add an
-            appointment or trip, or schedule a plan activity onto a real day.
+          <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
+            {weekLabel(weekOffset)} {"·"} {spanLabel}
           </p>
         </div>
-        <Link
-          href="/app/planner"
-          className="rounded-pill border border-border bg-card px-5 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
-        >
-          Open the week planner
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href={calendarWeekHref(weekOffset - 1)}
+            aria-label="Previous week"
+            className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border bg-card text-body transition-colors hover:border-[var(--clay-200)]"
+          >
+            <ChevronLeft size={16} aria-hidden="true" />
+          </Link>
+          <Link
+            href={calendarWeekHref(weekOffset + 1)}
+            aria-label="Next week"
+            className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border bg-card text-body transition-colors hover:border-[var(--clay-200)]"
+          >
+            <ChevronRight size={16} aria-hidden="true" />
+          </Link>
+          {weekOffset !== 0 ? (
+            <Link
+              href={calendarWeekHref(0)}
+              className="rounded-pill border border-border bg-card px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.1em] text-subtle transition-colors hover:border-brand"
+            >
+              Today
+            </Link>
+          ) : null}
+          <Link
+            href="/app/planner"
+            className="rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
+          >
+            Open the week planner
+          </Link>
+        </div>
       </header>
 
-      {/* The family lane: whole-family events only (co-op, a family
-          trip). Kid-specific events live on that kid's own lane below. */}
-      <section className="mt-6">
-        <div className="flex items-center gap-2 px-0.5">
-          <span className="text-[0.62rem] font-bold uppercase tracking-[0.1em] text-subtle">
-            Family
-          </span>
+      {kids.length > 1 ? (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setSelectedKidId(null)}
+            aria-pressed={selectedKidId === null}
+            className={
+              selectedKidId === null
+                ? "rounded-pill border border-brand px-4 py-1.5 text-sm font-semibold text-strong"
+                : "rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-semibold text-body transition-colors hover:border-brand"
+            }
+            style={selectedKidId === null ? { background: "var(--clay-100)" } : undefined}
+          >
+            Everyone
+          </button>
+          {kids.map((kid, index) => {
+            const [bg, ink] = avatarTone(index);
+            const active = selectedKidId === kid.id;
+            return (
+              <button
+                key={kid.id}
+                type="button"
+                onClick={() => setSelectedKidId(active ? null : kid.id)}
+                aria-pressed={active}
+                className={
+                  active
+                    ? "flex items-center gap-2 rounded-pill border px-3 py-1.5 text-sm font-semibold"
+                    : "flex items-center gap-2 rounded-pill border border-border bg-card px-3 py-1.5 text-sm font-semibold text-body transition-colors hover:border-brand"
+                }
+                style={active ? { background: bg, color: ink, borderColor: ink } : undefined}
+              >
+                <KidAvatar name={kid.name} index={index} avatarUrl={kid.avatar_url} size={20} />
+                {kid.name}
+              </button>
+            );
+          })}
         </div>
-        <div className="mt-1.5 grid gap-2 md:grid-cols-7">
-          {board.familyDays.map((day, index) => (
-            <div
-              key={day.date}
-              className={
-                board.days[index].isToday
-                  ? "flex flex-col gap-1.5 rounded-lg border border-brand bg-card p-2 shadow-sm"
-                  : "flex flex-col gap-1.5 rounded-lg border border-border-subtle bg-card p-2 shadow-sm"
-              }
-            >
-              <span className="text-[0.6rem] font-bold uppercase tracking-[0.08em] text-subtle">
-                {board.days[index].label} {board.days[index].dayOfMonth}
-              </span>
-              {day.events.length > 0 ? (
-                day.events.map((event) => <EventChip key={event.id} event={event} />)
-              ) : (
-                <span className="text-[0.68rem] text-subtle">{"—"}</span>
-              )}
-            </div>
-          ))}
-        </div>
-        {!hasAnyFamilyEvent ? (
-          <p className="mt-1.5 px-0.5 text-xs text-muted">
-            No family-wide events this week. Ask Homa to add an appointment or trip.
-          </p>
-        ) : null}
-      </section>
+      ) : null}
 
-      {board.kidLanes.length === 0 ? (
+      {kids.length === 0 ? (
         <div className="mt-6 rounded-lg border border-border-subtle bg-card p-8 text-center shadow-sm">
           <p className="font-display text-xl font-semibold text-strong">
             Add a child first to see their calendar.
           </p>
         </div>
       ) : (
-        board.kidLanes.map((lane) => {
-          const tone = avatarTone(lane.kidIndex);
-          return (
-            <section key={lane.childId} className="mt-6">
-              <div className="flex items-center gap-2.5 px-0.5">
-                <KidAvatar
-                  name={lane.childName}
-                  index={lane.kidIndex}
-                  avatarUrl={lane.avatarUrl}
-                  size={24}
-                  label={lane.childName}
-                />
-                <span className="font-display text-base font-semibold text-strong">
-                  {lane.childName}
-                </span>
+        <>
+        {weekIsEmpty ? (
+          <p className="mt-4 text-sm text-muted">
+            Nothing on the calendar this week yet. Ask Homa to add an
+            appointment or trip, or schedule a plan activity onto a real day.
+          </p>
+        ) : null}
+        <section className="mt-4 overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
+          <div className="min-w-[860px]">
+            {/* Day headers */}
+            <div className="grid" style={{ gridTemplateColumns: GRID_COLUMNS }}>
+              <div />
+              {days.map((day) => (
+                <div
+                  key={day.date}
+                  className="flex items-baseline gap-1.5 border-l border-border-subtle px-2 pb-1.5 pt-2.5"
+                >
+                  <span className="text-[0.62rem] font-bold uppercase tracking-[0.08em] text-subtle">
+                    {day.label}
+                  </span>
+                  {day.isToday ? (
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand text-[0.78rem] font-bold text-white">
+                      {day.dayOfMonth}
+                    </span>
+                  ) : (
+                    <span className="font-display text-[1.05rem] font-semibold text-strong">
+                      {day.dayOfMonth}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* All-day banners: trips and family days span their real days */}
+            {bannerTracks.map((track, trackIndex) => (
+              <div
+                key={trackIndex}
+                className="grid pb-1"
+                style={{ gridTemplateColumns: GRID_COLUMNS }}
+              >
+                <div className="flex items-center justify-end pr-1.5">
+                  {trackIndex === 0 ? (
+                    <span className="text-[0.55rem] font-bold uppercase tracking-[0.06em] text-subtle">
+                      All day
+                    </span>
+                  ) : null}
+                </div>
+                {track.map((banner) => {
+                  const kid = banner.kidIndex === null ? null : kids[banner.kidIndex];
+                  const tone = banner.kidIndex === null ? null : avatarTone(banner.kidIndex);
+                  return (
+                    <button
+                      key={banner.id}
+                      type="button"
+                      aria-haspopup="dialog"
+                      aria-label={`${banner.title}, ${banner.dateLabel}`}
+                      onClick={() =>
+                        setDetails({
+                          title: banner.title,
+                          whenLabel: banner.dateLabel,
+                          kidIndex: banner.kidIndex,
+                          note: banner.note,
+                        })
+                      }
+                      className="mx-1 flex cursor-pointer items-center justify-between gap-1.5 rounded-md px-2 py-1 text-left transition-shadow hover:shadow-sm"
+                      style={{
+                        gridColumn: `${banner.startIdx + 2} / ${banner.endIdx + 3}`,
+                        gridRow: 1,
+                        background: tone ? tone[0] : stripeBackground,
+                      }}
+                    >
+                      <span
+                        className="truncate text-[0.7rem] font-bold"
+                        style={{ color: tone ? tone[1] : "var(--ink, inherit)" }}
+                      >
+                        {banner.title}
+                      </span>
+                      {kid ? (
+                        <KidAvatar
+                          name={kid.name}
+                          index={banner.kidIndex!}
+                          avatarUrl={kid.avatar_url}
+                          size={14}
+                        />
+                      ) : (
+                        <span className="flex shrink-0">
+                          {kids.slice(0, 3).map((familyKid, kidIndex) => (
+                            <span key={familyKid.id} className={kidIndex > 0 ? "-ml-1" : ""}>
+                              <KidAvatar
+                                name={familyKid.name}
+                                index={kidIndex}
+                                avatarUrl={familyKid.avatar_url}
+                                size={14}
+                              />
+                            </span>
+                          ))}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
-              <div className="mt-1.5 grid gap-2 md:grid-cols-7">
-                {lane.days.map((day, index) => (
+            ))}
+
+            {/* The plans strip: scheduled activities (checkable) and each
+                kid's logged hours, date-true but clock-free on purpose */}
+            {hasPlansStrip ? (
+              <div
+                className="grid border-t border-border-subtle"
+                style={{ gridTemplateColumns: GRID_COLUMNS }}
+              >
+                <div className="flex justify-end pr-1.5 pt-1.5">
+                  <span className="text-[0.55rem] font-bold uppercase tracking-[0.06em] text-subtle">
+                    School
+                  </span>
+                </div>
+                {plansStripByDay.map((day) => (
                   <div
                     key={day.date}
-                    className={
-                      board.days[index].isToday
-                        ? "flex flex-col gap-1.5 rounded-lg border border-brand bg-card p-2 shadow-sm"
-                        : "flex flex-col gap-1.5 rounded-lg border border-border-subtle bg-card p-2 shadow-sm"
-                    }
+                    className="flex flex-col gap-1 border-l border-border-subtle p-1"
                   >
-                    <div className="flex items-baseline justify-between gap-1">
-                      <span className="text-[0.6rem] font-bold uppercase tracking-[0.08em] text-subtle">
-                        {board.days[index].label} {board.days[index].dayOfMonth}
-                      </span>
-                      {day.hoursMinutes > 0 ? (
-                        <span className="text-[0.58rem] font-semibold text-subtle">
-                          {formatMinutesAsHours(day.hoursMinutes)}
+                    {day.cards.map(({ item, kidIndex }) => {
+                      const kid = kids[kidIndex];
+                      return (
+                        <ActivityCard
+                          key={item.key}
+                          item={item}
+                          tone={avatarTone(kidIndex)}
+                          kid={
+                            kid && selectedKidId === null
+                              ? { name: kid.name, index: kidIndex, avatarUrl: kid.avatar_url }
+                              : null
+                          }
+                        />
+                      );
+                    })}
+                    {day.hours.map(({ kidIndex, minutes }) => {
+                      const [bg, ink] = avatarTone(kidIndex);
+                      return (
+                        <span
+                          key={kidIndex}
+                          className="inline-flex w-fit items-center gap-1 rounded-pill px-2 py-0.5 text-[0.6rem] font-bold"
+                          style={{ background: bg, color: ink }}
+                        >
+                          {formatMinutesAsHours(minutes)} logged
                         </span>
-                      ) : null}
-                    </div>
-                    {day.events.map((event) => (
-                      <EventChip key={event.id} event={event} />
-                    ))}
-                    {day.activities.map((item) => (
-                      <ActivityCard key={item.key} item={item} tone={tone} />
-                    ))}
-                    {day.activities.length === 0 && day.events.length === 0 ? (
-                      <span className="text-[0.68rem] text-subtle">{"—"}</span>
-                    ) : null}
+                      );
+                    })}
                   </div>
                 ))}
               </div>
-            </section>
-          );
-        })
+            ) : null}
+
+            {/* The time grid: events at their real hour, sized by length */}
+            <div
+              className="grid border-t border-border-subtle"
+              style={{ gridTemplateColumns: GRID_COLUMNS }}
+            >
+              <div className="relative" style={{ height: gridHeight }}>
+                {Array.from(
+                  { length: window.endHour - window.startHour },
+                  (_, index) => window.startHour + index,
+                ).map((hour) => (
+                  <span
+                    key={hour}
+                    className="absolute right-1.5 text-[0.6rem] font-semibold text-subtle"
+                    style={{ top: (hour - window.startHour) * HOUR_PX + 2 }}
+                  >
+                    {hourLabel(hour)}
+                  </span>
+                ))}
+              </div>
+              {days.map((day) => {
+                const blocks = timedByDate.get(day.date) ?? [];
+                // One clock line across the WHOLE week whenever today is
+                // in view: a faint hairline on the other days, the solid
+                // coral segment with its dot only on today, so the line
+                // never dead-ends mid-grid at a column border.
+                const nowLineTop =
+                  days.some((cell) => cell.isToday) &&
+                  nowMinutes !== null &&
+                  nowMinutes >= window.startHour * 60 &&
+                  nowMinutes <= window.endHour * 60
+                    ? ((nowMinutes - window.startHour * 60) / 60) * HOUR_PX
+                    : null;
+                return (
+                  <div
+                    key={day.date}
+                    className="relative border-l border-border-subtle"
+                    style={{ height: gridHeight }}
+                  >
+                    {Array.from(
+                      { length: window.endHour - window.startHour },
+                      (_, index) => index,
+                    ).map((row) => (
+                      <div
+                        key={row}
+                        className="absolute inset-x-0 border-t border-border-subtle/60"
+                        style={{ top: row * HOUR_PX }}
+                        aria-hidden="true"
+                      />
+                    ))}
+                    {blocks.map((block) => {
+                      const kid = block.kidIndex === null ? null : kids[block.kidIndex];
+                      const tone = block.kidIndex === null ? null : avatarTone(block.kidIndex);
+                      const top = ((block.startMin - window.startHour * 60) / 60) * HOUR_PX;
+                      const height = Math.max(
+                        24,
+                        ((block.endMin - block.startMin) / 60) * HOUR_PX - 2,
+                      );
+                      const dayCell = days.find((cell) => cell.date === block.date);
+                      return (
+                        <button
+                          key={block.id}
+                          type="button"
+                          aria-haspopup="dialog"
+                          aria-label={`${block.title}, ${block.timeLabel}`}
+                          onClick={() =>
+                            setDetails({
+                              title: block.title,
+                              whenLabel: dayCell
+                                ? `${dayCell.label} ${dayCell.dayOfMonth}, ${block.timeLabel}`
+                                : block.timeLabel,
+                              kidIndex: block.kidIndex,
+                              note: block.note,
+                            })
+                          }
+                          className="absolute cursor-pointer overflow-hidden rounded-lg px-2 py-0.5 text-left shadow-sm transition-shadow hover:shadow-md"
+                          style={{
+                            top,
+                            height,
+                            left: `calc(${(block.slot / block.slotCount) * 100}% + 3px)`,
+                            width: `calc(${(1 / block.slotCount) * 100}% - 6px)`,
+                            background: tone ? tone[0] : stripeBackground,
+                          }}
+                        >
+                          {/* The kid's disc rides every block (three kids
+                              make two pastels a memory quiz) */}
+                          {kid ? (
+                            <span className="absolute right-1 top-1">
+                              <KidAvatar
+                                name={kid.name}
+                                index={block.kidIndex!}
+                                avatarUrl={kid.avatar_url}
+                                size={14}
+                              />
+                            </span>
+                          ) : (
+                            <span className="absolute right-1 top-1 flex">
+                              {kids.slice(0, 3).map((familyKid, kidIndex) => (
+                                <span key={familyKid.id} className={kidIndex > 0 ? "-ml-1" : ""}>
+                                  <KidAvatar
+                                    name={familyKid.name}
+                                    index={kidIndex}
+                                    avatarUrl={familyKid.avatar_url}
+                                    size={14}
+                                  />
+                                </span>
+                              ))}
+                            </span>
+                          )}
+                          {/* Text fitting, learned from the mom reviews:
+                              tall-enough blocks wrap the title to two
+                              lines instead of ellipsizing; squeezed
+                              half-width overlap columns give the whole
+                              block to the title (the tap-for-details
+                              card carries the time); short single-slot
+                              blocks keep the start time pinned right so
+                              truncation can never eat it. */}
+                          {block.slotCount === 1 && height < 34 ? (
+                            <p
+                              className="flex items-baseline justify-between gap-1 pr-4 pt-0.5 text-[0.7rem] leading-tight"
+                              style={{ color: tone ? tone[1] : "var(--ink, inherit)" }}
+                            >
+                              <span className="truncate font-bold">{block.title}</span>
+                              <span className="shrink-0 text-[0.62rem] font-medium">
+                                {block.startLabel}
+                              </span>
+                            </p>
+                          ) : (
+                            <>
+                              <p
+                                className={
+                                  height >= 44 || block.slotCount > 1
+                                    ? "line-clamp-2 pr-4 pt-0.5 text-[0.7rem] font-bold leading-tight"
+                                    : "truncate pr-4 pt-0.5 text-[0.7rem] font-bold leading-tight"
+                                }
+                                style={{ color: tone ? tone[1] : "var(--ink, inherit)" }}
+                              >
+                                {block.title}
+                              </p>
+                              {height >= 34 && block.slotCount === 1 ? (
+                                <p
+                                  className="mt-0.5 text-[0.68rem] font-medium leading-tight"
+                                  style={{ color: tone ? tone[1] : "var(--ink, inherit)" }}
+                                >
+                                  {block.timeLabel}
+                                </p>
+                              ) : null}
+                            </>
+                          )}
+                        </button>
+                      );
+                    })}
+                    {nowLineTop !== null ? (
+                      day.isToday ? (
+                        <div
+                          className="pointer-events-none absolute inset-x-0 z-10"
+                          style={{ top: nowLineTop }}
+                        >
+                          <div
+                            className="relative border-t-2"
+                            style={{ borderColor: "var(--rose-500)" }}
+                          >
+                            <span
+                              className="absolute -top-[5px] left-0 h-2 w-2 rounded-full"
+                              style={{ background: "var(--rose-500)" }}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div
+                          className="pointer-events-none absolute inset-x-0 z-10 border-t"
+                          style={{ top: nowLineTop, borderColor: "var(--rose-100)" }}
+                          aria-hidden="true"
+                        />
+                      )
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+        </>
       )}
 
       <p className="mt-6 text-xs text-muted">
@@ -298,6 +770,61 @@ export function CalendarView({
         appointment or trip; both show up here right away. Hours shown here
         are a quick indicator; edit them on the Hours page.
       </p>
+
+      {details ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={() => setDetails(null)}
+            className="absolute inset-0 bg-black/20"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={details.title}
+            className="relative w-full max-w-sm rounded-xl border border-border bg-card p-5 shadow-lg"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="font-display text-lg font-semibold leading-snug text-strong">
+                  {details.title}
+                </p>
+                <p className="mt-1 text-sm text-body">{details.whenLabel}</p>
+              </div>
+              {details.kidIndex !== null && kids[details.kidIndex] ? (
+                <KidAvatar
+                  name={kids[details.kidIndex].name}
+                  index={details.kidIndex}
+                  avatarUrl={kids[details.kidIndex].avatar_url}
+                  size={28}
+                />
+              ) : null}
+            </div>
+            <p className="mt-1 text-sm text-muted">
+              {details.kidIndex !== null && kids[details.kidIndex]
+                ? `For ${kids[details.kidIndex].name}`
+                : "For the whole family"}
+            </p>
+            {details.note ? <p className="mt-2 text-sm text-body">{details.note}</p> : null}
+            <div className="mt-4 flex items-center justify-between gap-2">
+              <Link
+                href="/app"
+                className="rounded-pill border border-brand px-4 py-2 text-sm font-semibold text-strong transition-colors hover:bg-[var(--clay-100)]"
+              >
+                Ask Homa to change it
+              </Link>
+              <button
+                type="button"
+                onClick={() => setDetails(null)}
+                className="rounded-pill border border-border bg-card px-4 py-2 text-sm font-semibold text-body transition-colors hover:border-brand"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

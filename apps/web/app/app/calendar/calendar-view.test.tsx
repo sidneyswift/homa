@@ -94,6 +94,7 @@ function renderView(props: Partial<Parameters<typeof CalendarView>[0]> = {}): st
         now={NOW}
         focusChildId={null}
         weekOffset={0}
+        familyName="The Chen family"
         {...props}
       />
     </AppRouterContext.Provider>,
@@ -101,9 +102,9 @@ function renderView(props: Partial<Parameters<typeof CalendarView>[0]> = {}): st
 }
 
 describe("CalendarView", () => {
-  it("names the whole family's calendar and the week span", () => {
+  it("names the family's calendar and the week span", () => {
     const html = renderView();
-    assert.match(html, />Your calendar<\/h1>/);
+    assert.match(html, />The Chen family<\/h1>/);
     assert.match(html, /Aug 3 to 9/);
   });
 
@@ -112,16 +113,18 @@ describe("CalendarView", () => {
     assert.match(html, />Leo&#x27;s calendar<\/h1>/);
   });
 
-  it("renders one lane per kid, in family roster order", () => {
+  it("offers a filter chip per kid plus Everyone, in roster order", () => {
     const html = renderView();
-    const mayaIndex = html.indexOf(">Maya<");
-    const leoIndex = html.indexOf(">Leo<");
-    assert.ok(mayaIndex > -1 && leoIndex > -1 && mayaIndex < leoIndex);
+    const everyoneIndex = html.indexOf(">Everyone<");
+    const mayaIndex = html.indexOf("Maya");
+    const leoIndex = html.indexOf("Leo");
+    assert.ok(everyoneIndex > -1 && mayaIndex > -1 && leoIndex > -1);
+    assert.ok(everyoneIndex < mayaIndex && mayaIndex < leoIndex);
   });
 
-  it("shows a reassuring line when nothing is on the family lane", () => {
+  it("shows a reassuring line when the whole week is empty", () => {
     const html = renderView();
-    assert.match(html, /No family-wide events this week/);
+    assert.match(html, /Nothing on the calendar this week yet/);
   });
 
   it("places a scheduled activity on its real day with subject label and checkbox", () => {
@@ -142,21 +145,46 @@ describe("CalendarView", () => {
     assert.match(html, /type="checkbox"[^>]*checked=""/);
   });
 
-  it("renders a whole-family event on the family lane, not any kid's lane", () => {
+  it("renders a timed event once, at a 12-hour time, on the grid", () => {
     const html = renderView({ familyEvents: [event()] });
     assert.match(html, /Doctor&#x27;s appt/);
-    assert.match(html, /14:00 to 15:00/);
-    assert.doesNotMatch(html, /No family-wide events this week/);
+    assert.match(html, /2 to 3 PM/);
+    assert.doesNotMatch(html, /Nothing on the calendar this week yet/);
+    // Rendered exactly once as visible text (one unified grid, never once
+    // per lane); the extra hit inside the hover title attribute is fine.
+    assert.equal(html.split(">Doctor&#x27;s appt<").length - 1, 1);
   });
 
-  it("renders a child-scoped event only under that kid", () => {
+  it("renders an all-day multi-day event as a single spanning banner", () => {
     const html = renderView({
-      familyEvents: [event({ childId: "child-leo", title: "Leo's dentist" })],
+      familyEvents: [
+        event({
+          title: "Camping trip",
+          startsOn: "2026-08-08",
+          endsOn: "2026-08-09",
+          startTime: null,
+          endTime: null,
+        }),
+      ],
     });
-    assert.match(html, /Leo&#x27;s dentist/);
-    // The family lane still shows its empty-state line since this event
-    // is not whole-family.
-    assert.match(html, /No family-wide events this week/);
+    assert.match(html, /All day/);
+    // One banner spanning Sat+Sun (grid columns 7 and 8 after the axis),
+    // not one copy per day; the aria-label repeat does not count.
+    assert.equal(html.split(">Camping trip<").length - 1, 1);
+    assert.match(html, /grid-column:7\s*\/\s*9/);
+  });
+
+  it("filters another kid's event out when one kid is selected", () => {
+    const html = renderView({
+      focusChildId: "child-maya",
+      familyEvents: [
+        event({ childId: "child-leo", title: "Leo's dentist" }),
+        event({ id: "event-2", childId: null, title: "Co-op morning" }),
+      ],
+    });
+    // Maya's filtered view keeps whole-family events and drops Leo's own.
+    assert.doesNotMatch(html, /Leo&#x27;s dentist/);
+    assert.match(html, /Co-op morning/);
   });
 
   it("shows the hours indicator only when time was logged that day", () => {

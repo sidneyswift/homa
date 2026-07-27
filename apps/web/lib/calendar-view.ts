@@ -97,6 +97,103 @@ export function subjectLabelFor(subjectId: string): string {
   return getMapSubject(subjectId)?.displayName ?? subjectId;
 }
 
+/** timeToMinutes("14:00" or "14:00:00"): minutes since midnight. Returns
+ * null on anything unparseable rather than NaN propagating into layout
+ * math. */
+export function timeToMinutes(time: string | null): number | null {
+  if (!time) return null;
+  const match = /^(\d{1,2}):(\d{2})/.exec(time);
+  if (!match) return null;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (hours > 23 || minutes > 59) return null;
+  return hours * 60 + minutes;
+}
+
+function clock(minutes: number, withMeridiem: boolean): string {
+  const hours24 = Math.floor(minutes / 60) % 24;
+  const hours12 = ((hours24 + 11) % 12) + 1;
+  const mins = minutes % 60;
+  const body = mins === 0 ? `${hours12}` : `${hours12}:${String(mins).padStart(2, "0")}`;
+  if (!withMeridiem) return body;
+  return `${body} ${hours24 < 12 ? "AM" : "PM"}`;
+}
+
+/** formatTimeRange("14:00", "15:00") -> "2 to 3 PM"; the shared-meridiem
+ * form drops the first AM/PM the way a parent would say it out loud, and
+ * a missing end time falls back to just the start. */
+export function formatTimeRange(start: string, end: string | null): string {
+  const startMin = timeToMinutes(start);
+  if (startMin === null) return "";
+  const endMin = end === null ? null : timeToMinutes(end);
+  if (endMin === null) return clock(startMin, true);
+  const sameMeridiem = startMin < 720 === endMin < 720;
+  return sameMeridiem
+    ? `${clock(startMin, false)} to ${clock(endMin, true)}`
+    : `${clock(startMin, true)} to ${clock(endMin, true)}`;
+}
+
+export interface TimedSpan {
+  startMin: number;
+  endMin: number;
+}
+
+/**
+ * layoutTimedItems(items): assigns each timed item a slot within its
+ * overlap cluster so concurrent events render side by side instead of
+ * stacked on top of each other (two kids' Friday classes at 4:00 and
+ * 4:30). slotCount is the cluster's width divisor: every member of one
+ * overlapping cluster shares it so the columns line up.
+ */
+export function layoutTimedItems<T extends TimedSpan>(
+  items: readonly T[],
+): (T & { slot: number; slotCount: number })[] {
+  const sorted = [...items].sort((a, b) => a.startMin - b.startMin || a.endMin - b.endMin);
+  const placed: (T & { slot: number; slotCount: number })[] = [];
+  let cluster: (T & { slot: number; slotCount: number })[] = [];
+  let clusterEnd = -1;
+  let slotEnds: number[] = [];
+  const closeCluster = () => {
+    for (const member of cluster) member.slotCount = slotEnds.length;
+  };
+  for (const item of sorted) {
+    if (cluster.length > 0 && item.startMin >= clusterEnd) {
+      closeCluster();
+      cluster = [];
+      slotEnds = [];
+      clusterEnd = -1;
+    }
+    let slot = slotEnds.findIndex((end) => end <= item.startMin);
+    if (slot === -1) {
+      slot = slotEnds.length;
+      slotEnds.push(item.endMin);
+    } else {
+      slotEnds[slot] = item.endMin;
+    }
+    const placedItem = { ...item, slot, slotCount: 1 };
+    cluster.push(placedItem);
+    placed.push(placedItem);
+    clusterEnd = Math.max(clusterEnd, item.endMin);
+  }
+  closeCluster();
+  return placed;
+}
+
+/** The time grid's visible hour window: a school-day 8 to 5 by default,
+ * expanded (never shrunk) to fit whatever is actually scheduled. */
+export function timedWindow(items: readonly TimedSpan[]): {
+  startHour: number;
+  endHour: number;
+} {
+  let startHour = 8;
+  let endHour = 17;
+  for (const item of items) {
+    startHour = Math.min(startHour, Math.floor(item.startMin / 60));
+    endHour = Math.max(endHour, Math.ceil(item.endMin / 60));
+  }
+  return { startHour, endHour };
+}
+
 export interface CalendarActivityItem {
   /** `${childId}:${subjectId}:${week}.${activityIndex}`, stable across
    * renders for React keys and for the existing plan-checks store. */

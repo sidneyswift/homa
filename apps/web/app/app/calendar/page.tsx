@@ -100,6 +100,7 @@ export default async function CalendarPage({
         now={now}
         focusChildId={viewContext.kind === "child" ? viewContext.childId : null}
         weekOffset={weekOffset}
+        familyName={family.name}
       />
     </PageColumn>
   );

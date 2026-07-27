@@ -7,7 +7,11 @@ import type { DashboardPlan } from "./plan-week";
 import {
   buildCalendarBoard,
   calendarWeekDates,
+  formatTimeRange,
+  layoutTimedItems,
   parseWeekOffset,
+  timeToMinutes,
+  timedWindow,
   type BuildCalendarBoardInput,
 } from "./calendar-view";
 
@@ -366,5 +370,100 @@ describe("buildCalendarBoard: week navigation", () => {
     });
     const tuesday = result.familyDays.find((day) => day.date === "2026-07-28")!;
     assert.equal(tuesday.events.length, 1);
+  });
+});
+
+describe("timeToMinutes", () => {
+  it("parses HH:MM and Postgres HH:MM:SS alike", () => {
+    assert.equal(timeToMinutes("14:00"), 840);
+    assert.equal(timeToMinutes("09:30:00"), 570);
+    assert.equal(timeToMinutes("0:05"), 5);
+  });
+
+  it("returns null on garbage instead of NaN", () => {
+    assert.equal(timeToMinutes(null), null);
+    assert.equal(timeToMinutes("noonish"), null);
+    assert.equal(timeToMinutes("25:00"), null);
+    assert.equal(timeToMinutes("12:75"), null);
+  });
+});
+
+describe("formatTimeRange", () => {
+  it("drops the shared meridiem the way a parent says it", () => {
+    assert.equal(formatTimeRange("14:00", "15:00"), "2 to 3 PM");
+    assert.equal(formatTimeRange("09:00", "11:30"), "9 to 11:30 AM");
+  });
+
+  it("keeps both meridiems when the range crosses noon", () => {
+    assert.equal(formatTimeRange("09:30", "13:00"), "9:30 AM to 1 PM");
+  });
+
+  it("falls back to just the start when the end is missing", () => {
+    assert.equal(formatTimeRange("15:30", null), "3:30 PM");
+  });
+});
+
+describe("layoutTimedItems", () => {
+  it("gives non-overlapping items the full width", () => {
+    const placed = layoutTimedItems([
+      { startMin: 540, endMin: 600 },
+      { startMin: 600, endMin: 660 },
+    ]);
+    assert.deepEqual(
+      placed.map((item) => [item.slot, item.slotCount]),
+      [
+        [0, 1],
+        [0, 1],
+      ],
+    );
+  });
+
+  it("sits two overlapping items side by side, sharing the width", () => {
+    const placed = layoutTimedItems([
+      { startMin: 960, endMin: 1020 },
+      { startMin: 990, endMin: 1050 },
+    ]);
+    assert.deepEqual(
+      placed.map((item) => [item.slot, item.slotCount]),
+      [
+        [0, 2],
+        [1, 2],
+      ],
+    );
+  });
+
+  it("reuses a freed slot within one cluster and keeps the cluster width", () => {
+    const placed = layoutTimedItems([
+      { startMin: 540, endMin: 600 },
+      { startMin: 570, endMin: 630 },
+      { startMin: 600, endMin: 660 },
+    ]);
+    assert.deepEqual(
+      placed.map((item) => [item.slot, item.slotCount]),
+      [
+        [0, 2],
+        [1, 2],
+        [0, 2],
+      ],
+    );
+  });
+});
+
+describe("timedWindow", () => {
+  it("keeps the school-day default when everything fits inside it", () => {
+    assert.deepEqual(timedWindow([{ startMin: 600, endMin: 660 }]), {
+      startHour: 8,
+      endHour: 17,
+    });
+  });
+
+  it("expands for an early start and a late end, floored and ceiled to hours", () => {
+    assert.deepEqual(
+      timedWindow([
+        { startMin: 6 * 60 + 30, endMin: 7 * 60 },
+        { startMin: 17 * 60 + 15, endMin: 18 * 60 + 20 },
+      ]),
+      { startHour: 6, endHour: 19 },
+    );
   });
 });
