@@ -24,7 +24,23 @@ import { splitPageBodies } from "../../lib/materials/page-shell";
  * produced no parseable tool call, after which Homa told her three times
  * there was a technical problem, having never called the tool.
  *
- * GRADE THE DOCUMENT, NOT THE ARGUMENTS. The first version of this eval
+ * GRADE BOTH THE DOCUMENT AND THE COST. Neither axis alone works, and
+ * both were measured against pre-fix code rather than reasoned about:
+ *
+ *   arguments only  passed 2/2 against broken code (see below)
+ *   artifact only   passed 1/2 against broken code, because the old
+ *                   path is intermittently correct: retyping twelve
+ *                   pages CAN produce a perfect packet, it just costs
+ *                   ~45KB and minutes and often fails outright
+ *   both            the two pre-fix outcomes fail on different gates,
+ *                   created:false on one and argument size on the other
+ *
+ * That is the real shape of this fix: the old path was not reliably
+ * WRONG, it was reliably EXPENSIVE, and expensive is what stranded a
+ * parent four times in fifteen minutes. An eval that only asks "is the
+ * output correct" is blind to the defect half the time.
+ *
+ * The first version of this eval
  * asserted on create_printable's INPUT: eleven entries carrying
  * fromMaterialId plus pageIndex, one carrying html, under 20KB. It
  * passed 4/4 with the fix. It also passed 2/2 with pageIndex stripped
@@ -72,6 +88,36 @@ export default defineEval({
       : null;
     const pages = produced?.html ? splitPageBodies(produced.html) : [];
 
+    // COST, not just correctness. Measured 2026-07-27: with the artifact
+    // gates alone this eval caught pre-fix code only 1 run in 2, because
+    // the old path is INTERMITTENTLY correct. Re-emitting twelve pages
+    // can produce a perfect packet; it just costs ~45KB of arguments and
+    // minutes, and fails often enough to strand a parent. Both pre-fix
+    // outcomes have to be caught, and they fail differently:
+    //
+    //   the model sends compact references the schema ignores
+    //     -> every reference expands to the whole material, page cap
+    //        blown, created:false, caught by the assertion above
+    //   the model retypes all twelve pages faithfully
+    //     -> a correct artifact, caught only here, by its size
+    //
+    // Size is the honest discriminator: it cannot be faked by a model
+    // emitting a key the schema drops, which is exactly how the first
+    // version of this eval was fooled into passing against broken code.
+    const buildArgChars = Math.min(
+      ...turn.toolCalls
+        .filter((call) => call.name === "create_printable")
+        .map((call) => JSON.stringify(call.input ?? {}).length),
+    );
+
+    t.check(
+      buildArgChars,
+      satisfies(
+        (chars) => (chars as number) < 20_000,
+        "the rebuild was emitted as a small call, not a retyped packet",
+      ),
+    );
+
     t.check(
       pages.length,
       satisfies(
@@ -83,14 +129,22 @@ export default defineEval({
     // Every page still sits at its own number. Reusing a whole material
     // per entry (the pre-fix behavior) duplicates page 1 across the
     // document, which this catches even if the count somehow matched.
+    // The revised page is exempt: Homa rewrites it, and nothing ever told
+    // her to carry an internal data-marker through a rewrite. Demanding
+    // it made this gate fail 1 run in 3 for a page that was otherwise
+    // perfect, which is a test inventing a requirement the product does
+    // not have. The unchanged pages are where position actually matters,
+    // and they are what whole-material reuse scrambles.
     t.check(
       pages,
       satisfies(
         (value) =>
-          (value as string[]).every((body, index) =>
-            body.includes(evalFixturePacketPageMarker(index + 1)),
+          (value as string[]).every(
+            (body, index) =>
+              index + 1 === EVAL_FIXTURE_PACKET_ILLUSTRATED_PAGE
+              || body.includes(evalFixturePacketPageMarker(index + 1)),
           ),
-        "every page kept its own position marker",
+        "every unchanged page kept its own position marker",
       ),
     );
 
