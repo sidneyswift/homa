@@ -1,8 +1,18 @@
 # The report lock's offer card: what's actually blocking conversion, and what isn't
 
-Status: PROPOSAL, D1 open (founder). Written after pulling live paywall
-numbers via direct prod query and reading the actual offer components
-(not assumed from the 2026-07-11/07-18 docs).
+Status: PROPOSAL, D1 open (founder), tracked as issue #194. Written
+after pulling live paywall numbers via direct prod query and reading the
+actual offer components (not assumed from the 2026-07-11/07-18 docs).
+
+**Read the numbers with a date on them (added 2026-07-27).** This was
+written on day 7 of the 14-day kill test and recommends acting "this
+week"; the window closes 2026-08-01. Two changes have since landed
+underneath its funnel read: the signup paywall (card upfront at account
+creation) and `1cd20d76`, which shortened the trial from 30 days to 7.
+The day-7 report-lock funnel it measured is therefore not the funnel
+running today. The two findings that do NOT depend on those numbers, and
+are the reason this is worth keeping, are the correction that this is not
+a copy problem and the discovery of a dormant "Homa Plus" tier.
 
 ## What prompted this
 
@@ -48,7 +58,7 @@ name.
 The essay's paywall skeleton: 2-3 priced options, annual anchored. The
 live offer card renders **one option** (`WALL_MONTHLY_BUTTON`, $19/mo)
 because `checkout.annualUrl` is null: `NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_ANNUAL_URL`
-is unset in production, by deliberate 2026-07-18 founder ruling — the
+is unset in production, by deliberate 2026-07-18 founder ruling: the
 $99/yr sticker collides exactly with Homeschool Fox's annual price and
 was withheld pending a founder read (`report-lock-four-open` ruling,
 point 4).
@@ -82,7 +92,7 @@ chosen price, set the env var, redeploy. No component change needed.
 2026-07-06: "Homa Plus", $49/mo or $249/yr) but **nothing in the
 codebase reads them.** No UI, no wall integration, no plan reference
 beyond the original pricing entry. This isn't a launch blocker and isn't
-part of the current kill test — flagging it here only so it doesn't
+part of the current kill test, flagging it here only so it doesn't
 surface later as a surprise "wait, we already have a Plus price?" Not
 actioned in this document.
 
