@@ -4,6 +4,7 @@ import {
   domainForBankItem,
   getMapItem,
   getMapSubject,
+  getScorableItem,
   scoreMap,
 } from "@homa/core";
 import {
@@ -566,8 +567,12 @@ export function buildChildProgressView(input: {
       ? []
       : [buildSubjectView(subject.id, subjectCandidates)];
   });
+  // One abilities catalog: bank items and assessable taxonomy topics
+  // both carry a typical age, so both can move the number (founder
+  // ruling 2026-07-21). Anything the catalog cannot place still renders
+  // as a topic; it just scores nothing.
   const scoreInputs = resolved.effectiveEvidence.flatMap((evidence) =>
-    getMapItem(evidence.itemId) === undefined
+    getScorableItem(evidence.itemId) === undefined
       ? []
       : [{ itemId: evidence.itemId, answer: evidence.answer }],
   );

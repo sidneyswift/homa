@@ -1,3 +1,7 @@
+import {
+  postgresSmsSuppressionStore,
+  type SmsSuppressionStore,
+} from "../sms-suppression";
 import type { FamilyTaskKind } from "../tasks/kinds";
 import {
   beginDeliveryAttempt,
@@ -49,7 +53,12 @@ export interface TaskDeliveryTransports {
   ): Promise<
     | boolean
     | { status: "submitted"; messageId: string }
-    | { status: "rejected"; reason?: string }
+    | {
+        status: "rejected";
+        reason?: string;
+        permanentCode?: string;
+        unsupportedRegion?: boolean;
+      }
     | { status: "unknown" }
   >;
   sendEmail(
@@ -84,6 +93,16 @@ export interface TaskDeliveryDependencies {
   transports: TaskDeliveryTransports;
   saveOnly?: boolean;
   onTransportAccepted?(channel: "sms" | "email" | "none"): void;
+  /** Defaults to the postgres sms_suppressions store; tests inject. */
+  smsSuppression?: SmsSuppressionStore;
+  /** Fired when the provider rejects an SMS because it cannot reach the
+   * destination's region (Telnyx 40309). The current message still falls
+   * back to email in this same pass; this signal lets the caller stop
+   * texting that family on FUTURE runs (email-only), so an un-textable
+   * number is not retried and re-logged every day. `destination` is the
+   * rejected phone, for the caller's audit; the switch itself is
+   * family-scoped by the caller. */
+  onUnsupportedRegion?(destination: string): void | Promise<void>;
 }
 
 export const postgresTaskDeliveryLedger: TaskDeliveryLedger = {
@@ -109,13 +128,26 @@ export const postgresTaskDeliveryLedger: TaskDeliveryLedger = {
   },
 };
 
+interface SmsAttemptOutcome {
+  attempt: DeliveryAttempt | null;
+  /** A suppressed number or a provider-permanent rejection (STOP,
+   * invalid destination). The failed ledger attempt IS the record;
+   * email must not silently replace it (escalation ruling 2026-07-23:
+   * a hard-failed SMS is a failed delivery, not an invisible email). */
+  hardFailed: boolean;
+}
+
 async function attemptSms(
   input: DeliverTaskMessageInput,
   recipient: FamilyDeliveryRecipient,
   dependencies: TaskDeliveryDependencies,
   contract: TaskReplyContract | null,
-): Promise<DeliveryAttempt | null> {
+): Promise<SmsAttemptOutcome> {
+  const suppressionStore =
+    dependencies.smsSuppression ?? postgresSmsSuppressionStore;
+  let hardFailed = false;
   for (const phone of recipient.phoneNumbers) {
+    const suppression = await suppressionStore.find(phone);
     const attempt = await dependencies.ledger.beginAttempt({
       familyId: input.familyId,
       episodeId: input.episodeId,
@@ -130,7 +162,20 @@ async function attemptSms(
       if (attempt.existingStatus === "sent") {
         dependencies.onTransportAccepted?.("sms");
       }
-      return attempt.existingStatus === "failed" ? null : attempt;
+      return attempt.existingStatus === "failed"
+        ? { attempt: null, hardFailed: false }
+        : { attempt, hardFailed: false };
+    }
+    if (suppression) {
+      // The recorded skip: this number opted out or is invalid, so the
+      // attempt exists in the ledger and fails with its reason instead
+      // of burning a send into a guaranteed provider rejection.
+      await dependencies.ledger.finishAttempt(attempt, {
+        delivered: false,
+        error: `SMS suppressed (${suppression.reason})`,
+      });
+      hardFailed = true;
+      continue;
     }
     if (contract) await dependencies.ledger.openLoop(attempt, contract);
     const submission = await dependencies.transports.sendSms(phone, input.text);
@@ -146,6 +191,17 @@ async function attemptSms(
       typeof submission === "object" && submission.status === "rejected"
         ? submission.reason
         : undefined;
+    // The provider says this destination's region is unreachable from our
+    // profile: not a transient failure, so tell the caller to stop texting
+    // this family going forward (email-only). Email fallback below still
+    // delivers today's message.
+    if (
+      typeof submission === "object" &&
+      submission.status === "rejected" &&
+      submission.unsupportedRegion
+    ) {
+      await dependencies.onUnsupportedRegion?.(phone);
+    }
     if (delivered) dependencies.onTransportAccepted?.("sms");
     await dependencies.ledger.finishAttempt(
       attempt,
@@ -166,10 +222,18 @@ async function attemptSms(
             uncertain,
           },
     );
-    if (delivered) return { ...attempt, existingStatus: "sent" };
-    if (uncertain) return { ...attempt, existingStatus: "uncertain" };
+    if (delivered) return { attempt: { ...attempt, existingStatus: "sent" }, hardFailed: false };
+    if (uncertain) return { attempt: { ...attempt, existingStatus: "uncertain" }, hardFailed: false };
+    const permanentCode =
+      typeof submission === "object" && submission.status === "rejected"
+        ? submission.permanentCode
+        : undefined;
+    if (permanentCode) {
+      await suppressionStore.suppress(phone, `telnyx-${permanentCode}`);
+      hardFailed = true;
+    }
   }
-  return null;
+  return { attempt: null, hardFailed };
 }
 
 async function attemptEmail(
@@ -284,13 +348,15 @@ export async function deliverTaskMessage(
   }> = [];
 
   for (const recipient of input.recipients) {
-    const smsAttempt =
+    const smsOutcome =
       input.deliveryMode === "email"
         ? null
         : await attemptSms(input, recipient, dependencies, contract);
     const successfulAttempt =
-      smsAttempt ??
-      (await attemptEmail(input, recipient, dependencies, contract));
+      smsOutcome?.attempt ??
+      (smsOutcome?.hardFailed
+        ? null
+        : await attemptEmail(input, recipient, dependencies, contract));
     recipientOutcomes.push({
       channel:
         successfulAttempt?.existingStatus === "sent" &&

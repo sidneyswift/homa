@@ -1,0 +1,234 @@
+{
+  "curriculums": [
+    {
+      "id": "cur-2026-07-18-good-and-the-beautiful",
+      "name": "The Good and the Beautiful \u2014 Language Arts & Reading Curriculum (125MB scan)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T23:30:00-04:00",
+      "methodology": "Classical / Literature-Based (Good and the Beautiful)",
+      "mappedPct": 0,
+      "gapCount": 2,
+      "decisionsCount": 2
+    },
+    {
+      "id": "cur-2026-07-18-harcourt-trophies-2nd",
+      "name": "Harcourt Trophies Grade 2 Teacher Edition \u2014 Full Curriculum Architecture",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-18T16:52:00-04:00",
+      "methodology": "Balanced Literacy (Harcourt Trophies)",
+      "mappedPct": 0,
+      "gapCount": 6,
+      "decisionsCount": 8
+    },
+    {
+      "id": "cur-2026-07-18-hometessori-primary-sample",
+      "name": "Hometessori Primary Album Basic Collection Sample (Ages 3-6)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:17:00-04:00",
+      "methodology": "Montessori",
+      "mappedPct": 25,
+      "gapCount": 4,
+      "decisionsCount": 3
+    },
+    {
+      "id": "cur-2026-07-18-spanish-homeschool-languages-textbook",
+      "name": "Homeschool Languages \u2014 Spanish Level 1 Full Textbook",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:13:00-04:00",
+      "methodology": "Immersive Visual Vocabulary",
+      "mappedPct": 0,
+      "gapCount": 1,
+      "decisionsCount": 1
+    },
+    {
+      "id": "cur-2026-07-18-write-in-track-pt2",
+      "name": "Write in Track Part 2 \u2014 Writing & Language Arts Handbook (Companion)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T00:05:00-04:00",
+      "methodology": "Process Writing / Writing Workshop",
+      "mappedPct": null,
+      "gapCount": 0,
+      "decisionsCount": 0
+    },
+    {
+      "id": "cur-2026-07-18-write-on-track",
+      "name": "Write on Track \u2014 Writing & Language Arts Textbook/Handbook",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T23:48:00-04:00",
+      "methodology": "Process Writing / Writing Workshop",
+      "mappedPct": 0,
+      "gapCount": 0,
+      "decisionsCount": 0
+    },
+    {
+      "id": "cur-2026-07-19-100-easy-lessons",
+      "name": "Teach Your Child to Read in 100 Easy Lessons (Engelmann, Haddox & Bruner)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T10:37:00-04:00",
+      "methodology": "Direct Instruction (DISTAR)",
+      "mappedPct": 100,
+      "gapCount": 7,
+      "decisionsCount": 9
+    },
+    {
+      "id": "cur-2026-07-19-early-years-v2",
+      "name": "Early Years Vol. 2 (Second Edition) \u2014 Year at a Glance",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T09:12:00-04:00",
+      "methodology": "Charlotte Mason / Gentle Classical (Early Years)",
+      "mappedPct": 56,
+      "gapCount": 7,
+      "decisionsCount": 8
+    },
+    {
+      "id": "cur-2026-07-19-handwriting-without-tears",
+      "name": "Get Set for School: Readiness & Writing Pre-K Teacher's Guide (Learning Without Tears, 8th Edition)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T16:25:44-04:00",
+      "methodology": "Handwriting Without Tears / Learning Without Tears developmental, multisensory letter formation (the publisher rebranded from Handwriting Without Tears to Learning Without Tears years ago; every page footer in this PDF reads Learning Without Tears, and the specific book is the Get Set for School Pre-K line's Readiness & Writing Teacher's Guide, not a standalone book titled Handwriting Without Tears)",
+      "mappedPct": 80,
+      "gapCount": 5,
+      "decisionsCount": 6
+    },
+    {
+      "id": "cur-2026-07-19-harcourt-art-everywhere",
+      "name": "Harcourt Art Everywhere (Harcourt School Publishers Art series pupil edition, Grade 1 by content evidence and series-title convention, 2006)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T17:15:51-04:00",
+      "methodology": "A published, skills-based elementary art textbook organized around the formal Elements of Art (line, color, value, shape, form, texture, space) and Principles of Design (balance, emphasis, pattern, rhythm and movement, unity, variety), teaching each as explicit vocabulary rather than letting it emerge incidentally. This is a materially different approach from Charlotte Mason picture study: there is no single-artist quiet-observation-then-recall routine anywhere in the sampled pages. Instead every lesson pairs one element or principle with a short hands-on making activity and two or more brief fine-art examples for quick visual comparison.",
+      "mappedPct": 27,
+      "gapCount": 5,
+      "decisionsCount": 5
+    },
+    {
+      "id": "cur-2026-07-19-harcourt-science",
+      "name": "Harcourt Science (Grade 1, Harcourt School Publishers pupil edition, copyright 2000)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T17:34:09-04:00",
+      "methodology": "A published, skills-based elementary science textbook organized around a consistent two-step lesson pattern: a hands-on 'Investigate' activity that lets the child observe or test something firsthand, always followed by a short 'Learn About' reading passage that names and explains what the child just did, never the other way around. A fixed, named process-skills vocabulary (Observe, Compare, Classify, Sequence, Infer, Predict, Measure, Communicate, Draw Conclusions, Make Models, Gather Information, Plan, Order) is taught once in a front-matter 'Using Science Skills' spread and then referenced by name throughout the whole book, including inside a small 'Science Skill' tip box on many Investigate activities and in the numbered 'Using Science Skills' tasks that close every chapter review.",
+      "mappedPct": 89,
+      "gapCount": 1,
+      "decisionsCount": 6
+    },
+    {
+      "id": "cur-2026-07-19-playing-preschool-y1",
+      "name": "Playing Preschool Year 1 by Busy Toddler",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T09:05:00-04:00",
+      "methodology": "Play-Based / Experiential (Busy Toddler)",
+      "mappedPct": 47,
+      "gapCount": 10,
+      "decisionsCount": 9
+    },
+    {
+      "id": "cur-2026-07-19-playing-preschool-y2",
+      "name": "Playing Preschool Year 2 by Busy Toddler",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T09:07:00-04:00",
+      "methodology": "Play-Based / Experiential (Busy Toddler) \u2014 Year 2 continuation",
+      "mappedPct": 65,
+      "gapCount": 10,
+      "decisionsCount": 8
+    },
+    {
+      "id": "cur-2026-07-19-social-studies-all-together",
+      "name": "Social Studies: All Together (Grade 1, Scott Foresman / Pearson Education pupil edition, copyright 2003)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T19:59:19-04:00",
+      "methodology": "A published, reading-skill-integrated elementary social studies textbook. Each of its 6 units opens with a 'Vocabulary Preview' (one large illustrated scene labeled with the unit's key terms) and names one 'Reading Social Studies' target comprehension skill for the whole unit (Use Picture Clues, Alike and Different, Put Things in Order, Find the Main Idea, Recall and Retell, Predict). Every lesson is short (1-2 pages, a few short declarative sentences, 1-2 bolded vocabulary words) and closes with a fixed 'What Did You Learn?' box: two literal recall questions plus a third open 'Think and Share' or 'Write and Share' question that is usually the actual practice of that unit's named reading skill. Unlike the sibling Harcourt Science volume in this drop wave, there is no hands-on 'Investigate' step anywhere and no fixed process-skills vocabulary; the organizing thread is a reading-comprehension skill applied to social studies content, not a science process skill applied through experimentation.",
+      "mappedPct": 59,
+      "gapCount": 1,
+      "decisionsCount": 8
+    },
+    {
+      "id": "cur-2026-07-19-teach-child-read-100-lessons",
+      "name": "Teach Your Child to Read in 100 Easy Lessons (Siegfried Engelmann) \u2014 Parts 1 & 2",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T10:43:00-04:00",
+      "methodology": "Direct Instruction (DISTAR/SRA)",
+      "mappedPct": 0,
+      "gapCount": 2,
+      "decisionsCount": 2
+    },
+    {
+      "id": "cur-2026-07-20-beast-academy-1a",
+      "name": "Beast Academy Math 1A (Grade 1, Book A of 4: Counting, Shapes, Comparing; Art of Problem Solving / AoPS Incorporated, copyright 2021, 2022 printing, ISBN 978-1-934124-69-7)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T21:37:11-04:00",
+      "methodology": "A published, deliberately above-grade-level Grade 1 math curriculum delivered through a recurring comic-strip narrative rather than direct instruction. The book's own front matter states the mission plainly: 'A comprehensive, rigorous, and engaging curriculum for aspiring math beasts.' Every named subsection opens with a multi-panel comic scene (speech-bubble dialogue between four recurring monster-student characters, plus a teacher character 'Ms. Q.' and other school-staff characters) that discusses or discovers the math idea conversationally before any numbered practice problem appears; the 'How to Use This Book' front-matter spread (pages 8-11) explains this explicitly to the child reader: 'Some pages are written like a comic book... The comics follow the math adventures of these four little monsters at Beast Academy,' and instructs the child to stop at embedded 'stop sign' questions and try to answer them before reading on. Difficulty is tiered and marked plainly: most numbered problems are grade-level-and-up, and a smaller number of starred (\u2605) 'hardest' problems close most practice sections, each with a separate hint in the back-matter Hints section (pages 183-186) rather than the full solution. The book is written in second person directly to the child reader ('you'), not scripted for a classroom teacher.",
+      "mappedPct": 58,
+      "gapCount": 7,
+      "decisionsCount": 8
+    },
+    {
+      "id": "cur-2026-07-20-beast-academy-1b",
+      "name": "Beast Academy Math 1B (Grade 1, Book B of 4: Addition, Subtraction, Categories; Art of Problem Solving)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T22:13:01-04:00",
+      "methodology": "Book B of the same guided-discovery, comic-narrative Beast Academy series ingested as 1A earlier this session, confirmed directly rather than assumed: the front cover reads 'Beast Academy By Art of Problem Solving MATH 1B' and page 3's own series-overview spread states 'This is Book 1B in the Beast Academy Level 1 series' with the full breakdown (1A: Chapters 1-3; 1B: Chapter 4 Addition, Chapter 5 Subtraction, Chapter 6 Categories; 1C: Chapters 7-9; 1D: Chapters 10-12). Every named subsection again opens with a multi-panel comic scene carrying the reasoning before any numbered practice problem, with embedded 'stop sign' questions the child is told to try before reading on (same front-matter instruction as 1A, 'How to Use This Book'). This book wraps the same recurring four-monster cast in a different backdrop than 1A: the front cover art is a pirate market/pirate-ship town (crates, a tall ship, a market stall, a hook-handed pirate character), and the Index lists pirate-themed recurring bit characters not present in 1A's campus setting (Barnacle Barny, Betty Buccaneer, Bony Bill, all under a 'Woodshop'/'Kitchen Table' heading), confirming the comic wrapper changes per book even though the four core monster protagonists and the teaching device stay constant across the series.",
+      "mappedPct": 69,
+      "gapCount": 4,
+      "decisionsCount": 7
+    },
+    {
+      "id": "cur-2026-07-20-blossom-root-early-years-v1",
+      "name": "Blossom & Root Early Years Vol. 1 (Pre-K, First Edition)",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-19T22:51:53-04:00",
+      "methodology": "Charlotte Mason and Waldorf-inspired (publisher's own words; secular, no religious content observed)",
+      "mappedPct": 85,
+      "gapCount": 0,
+      "decisionsCount": 5
+    },
+    {
+      "id": "cur-2026-07-20-blossom-root-level0",
+      "name": "Blossom & Root Level 0 (Kindergarten, Second Edition)",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-19T22:50:29-04:00",
+      "methodology": "Charlotte Mason-inspired (publisher self-brands the package as secular)",
+      "mappedPct": 87,
+      "gapCount": 0,
+      "decisionsCount": 5
+    },
+    {
+      "id": "cur-2026-07-20-dimensions-math-pka",
+      "name": "Dimensions Math Teacher's Guide PKA (Pre-Kindergarten, Part A, Singapore Math Inc., copyright 2017, first published 2018, ISBN 978-1-947226-28-9)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T21:19:20-04:00",
+      "methodology": "A published Singapore-style Pre-Kindergarten math Teacher's Guide built entirely around the Concrete-Pictorial-Abstract (CPA) progression, stated explicitly in the book's own front matter ('Dimensions Math Curriculum' page): 'Through Concrete-Pictorial-Abstract development, students view the same concepts over time with increasing levels of abstraction.' At the PKA level this means every concept is taught hands-on first (real objects, movement, sound) with no pictorial or abstract representation required yet; the pictorial and abstract stages arrive in later levels of the same series (per the book's own multi-level Scope & Sequence reproduced in its front matter). Every lesson follows a fixed five-part shape: Explore (a whole-class hands-on task), Learn (discuss the corresponding textbook page, narrated through five recurring child characters), Whole Group Play (one game), Small Group Center Play (4-6 rotating stations tagged with recurring icons), and an optional Extend (Play, Learn, or Explore) that deepens or re-applies the same concept, often through a themed storybook read-aloud.",
+      "mappedPct": 74,
+      "gapCount": 6,
+      "decisionsCount": 8
+    },
+    {
+      "id": "cur-2026-07-21-getting-to-know-greatest-artists",
+      "name": "Getting to Know the World's Greatest Artists compilation (6 complete volumes by Mike Venezia: Henri Rousseau, Frida Kahlo, Da Vinci, Monet, Pierre Auguste Renoir, Michelangelo)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-20T20:36:43-04:00",
+      "methodology": "Biography-driven art appreciation: the 'Getting to Know the World's Greatest Artists' series, written AND illustrated by Mike Venezia, published by Children's Press (Chicago; later volumes by Children's Press / A Division of Grolier Publishing, Danbury, Connecticut). Identity verified directly from the pages, not assumed from the filename: every one of the 6 front covers carries the series badge 'GETTING TO KNOW THE WORLD'S GREATEST ARTISTS' and the credit 'WRITTEN AND ILLUSTRATED BY MIKE VENEZIA', and every title page repeats both. Consultants are credited on some title pages (Monet: consultant Sara Mollman Underhill; Renoir and Michelangelo: consultant Meg Moss). Each volume is a complete, standalone 32-page picture-book biography of one artist that alternates three ingredients on nearly every spread: full-color reproductions of the artist's real works with complete scholarly captions (title, date, medium, dimensions, museum), Venezia's own humorous cartoon gag panels with speech bubbles reacting to the artist's life, and 2 to 6 sentences of very simple, warm prose per page.",
+      "mappedPct": 33,
+      "gapCount": 1,
+      "decisionsCount": 5
+    },
+    {
+      "id": "cur-2026-07-21-getting-to-know-greatest-composers",
+      "name": "Getting to Know the World's Greatest Composers: Ludwig van Beethoven (single complete volume by Mike Venezia)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-20T21:45:57-04:00",
+      "methodology": "Biography-driven music appreciation: 'Getting to Know the World's Greatest Composers: Ludwig van Beethoven', written and illustrated by Mike Venezia, Children's Press (A Division of Grolier Publishing, New York/London/Hong Kong/Sydney, Danbury Connecticut), with a credited subject-expert consultant: Donald Freund, Professor of Composition, Indiana University School of Music. Identity verified directly from the cover and title page renders. Same core Venezia recipe as the artists volumes (humor plus real images plus simple prose, 32 standalone pages, no activities), adapted to music: since the subject's works cannot be printed on a page, the reproductions here are portraits, period paintings and prints, photographs, and sheet-music motifs on the endpapers, and the book compensates with explicit listening guidance woven through the prose, telling the child what to listen for in specific named works.",
+      "mappedPct": 67,
+      "gapCount": 0,
+      "decisionsCount": 6
+    },
+    {
+      "id": "cur-2026-07-21-getting-to-know-greatest-inventors-scientists",
+      "name": "Getting to Know the World's Greatest Inventors & Scientists compilation (2 complete volumes by Mike Venezia: Thomas Edison, Alexander Graham Bell)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-20T21:41:53-04:00",
+      "methodology": "Biography-driven science and invention appreciation: the 'Getting to Know the World's Greatest Inventors & Scientists' series, written and illustrated by Mike Venezia, in the later Scholastic edition (both covers carry the SCHOLASTIC imprint bar and the series badge 'GETTING TO KNOW THE WORLD'S GREATEST INVENTORS & SCIENTISTS'). Same core Venezia recipe as the artists series ingested from the sibling drop: 32-page standalone biography per volume, humorous cartoon gag panels with speech bubbles, simple warm prose, and real images, here archival photographs and period prints instead of artwork reproductions. This newer edition adds explicit literacy scaffolding the older artists volumes lack: key vocabulary bolded in the running text (laboratory, phonograph, telegraph, Morse code, filament, vacuum, incandescent, patent, elocution, hearing impairment), a closing Glossary with phonetic respellings and child-friendly definitions, and a full Index. The Bell volume's copyright block credits a reading consultant (Nanci R. Vargus, Ed.D.) and a content consultant, and each volume carries a subtitle ('Thomas Edison: Inventor with a Lot of Bright Ideas', 'Alexander Graham Bell: Setting the Tone for Communication').",
+      "mappedPct": 57,
+      "gapCount": 1,
+      "decisionsCount": 5
+    }
+  ]
+}

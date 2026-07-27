@@ -78,6 +78,38 @@ export interface BriefV2Context {
   recentTraces: RecentBriefTrace[];
 }
 
+/**
+ * A necessary condition for a v2 morning brief: at least one child has both a
+ * source candidate and a concrete anchor to attach it to, namely a named
+ * frontier statement, a strongest-observed current-work statement, or a fresh
+ * observation. A family whose children have candidates but no anchor for any of
+ * them cannot produce an anchored brief, so the dispatcher skips it before a run
+ * instead of letting the model reach a mid-turn dead stop.
+ *
+ * The check is a coarse necessary condition, not the model's fine per-pair
+ * judgment: it only skips a family that clearly cannot be anchored at all, so it
+ * never denies a brief to a family the model could have served. Cause: the
+ * 2026-07-20 field trace, where an empty-profile family passed the
+ * candidate-only gate, ran, and stalled at preparation_load, finalizing as
+ * failed identically to a real miss.
+ */
+export function researchBriefV2ContextIsAnchorable(
+  context: Pick<BriefV2Context, "children" | "observations">,
+): boolean {
+  const observedChildIds = new Set(
+    context.observations
+      .map((observation) => observation.childId)
+      .filter((childId): childId is string => Boolean(childId)),
+  );
+  return context.children.some(
+    (child) =>
+      child.candidates.length > 0 &&
+      (child.frontierFacts.length > 0 ||
+        child.currentWorkFacts.length > 0 ||
+        observedChildIds.has(child.id)),
+  );
+}
+
 export interface MorningBriefDispatchAttributes {
   channel?: string;
   familyId?: string;

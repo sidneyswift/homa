@@ -68,6 +68,26 @@ describe("live Progress route policy", () => {
     }
   });
 
+  it("continues the firsts page when live progress is enabled", () => {
+    assert.deepEqual(
+      progressRoutePolicy(
+        { surface: "child_firsts", childId: CHILD_ID },
+        true,
+      ),
+      { kind: "continue" },
+    );
+  });
+
+  it("redirects the firsts page to the child's report when disabled, id encoded", () => {
+    assert.deepEqual(
+      progressRoutePolicy(
+        { surface: "child_firsts", childId: "a b/c" },
+        false,
+      ),
+      { kind: "redirect", href: `/app/${encodeURIComponent("a b/c")}/report` },
+    );
+  });
+
   it("never redirects permanent token reports", () => {
     for (const enabled of [false, true]) {
       assert.deepEqual(

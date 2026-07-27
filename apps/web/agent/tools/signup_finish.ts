@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { siteUrl } from "../../lib/map/email";
 import { finishChildReport } from "../../lib/sms-onboarding";
 import { NOT_SMS_REFUSAL, resolveSignupSession } from "../../lib/signup-session";
@@ -11,9 +14,11 @@ import { NOT_SMS_REFUSAL, resolveSignupSession } from "../../lib/signup-session"
  * reply; the report email goes out through the existing background
  * pass, so nothing here double-sends.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Finish text signup for one child whose checklist is complete: scores the answers and returns their report link to include in your reply. Requires the family email to be saved first.",
+  deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({
     childId: z.uuid(),
   }),

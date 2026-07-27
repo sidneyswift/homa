@@ -366,3 +366,84 @@ describe("slim morning brief dynamic context", () => {
     }
   });
 });
+
+describe("eval family fixture", () => {
+  const noLoaderDependencies = {
+    loadCallerFamilyContext: async () => {
+      throw new Error("caller family context must not load");
+    },
+    loadPinnedFamilyContext: async () => {
+      throw new Error("pinned family context must not load");
+    },
+    loadProgressContext: async () => {
+      throw new Error("progress context must not load");
+    },
+    loadContinuityContext: async () => {
+      throw new Error("continuity context must not load");
+    },
+    recordContextSnapshot: async () => {},
+  };
+
+  it("keeps the setup fallback for an attribute-less session when the flag is off", async () => {
+    const markdown = await resolveFamilyContextInstructionMarkdown(
+      {
+        attributes: undefined,
+        environment: {},
+        sessionId: "session-1",
+        turnId: "turn-1",
+      },
+      {
+        ...noLoaderDependencies,
+        renderFamilyContext: () => {
+          throw new Error("fixture must not render with the flag off");
+        },
+      },
+    );
+
+    assert.match(markdown ?? "", /No family context is available/u);
+  });
+
+  it("renders the fixture family through the real renderer path when the flag is on", async () => {
+    let renderedRows: FamilyContextRows | undefined;
+    const markdown = await resolveFamilyContextInstructionMarkdown(
+      {
+        attributes: undefined,
+        environment: { HOMA_EVAL_FAMILY_FIXTURE: "1" },
+        sessionId: "session-1",
+        turnId: "turn-1",
+      },
+      {
+        ...noLoaderDependencies,
+        renderFamilyContext: (rows) => {
+          renderedRows = rows;
+          return "fixture family context";
+        },
+      },
+    );
+
+    assert.equal(markdown, "fixture family context");
+    assert.deepEqual(
+      renderedRows?.children.map((child) => child.name),
+      ["Finn", "Maya", "Story"],
+    );
+  });
+
+  it("never activates on Vercel even when the flag leaks in", async () => {
+    const markdown = await resolveFamilyContextInstructionMarkdown(
+      {
+        attributes: undefined,
+        environment: { HOMA_EVAL_FAMILY_FIXTURE: "1", VERCEL: "1" },
+        sessionId: "session-1",
+        turnId: "turn-1",
+      },
+      {
+        ...noLoaderDependencies,
+        renderFamilyContext: () => {
+          throw new Error("fixture must not render on Vercel");
+        },
+      },
+    );
+
+    assert.match(markdown ?? "", /No family context is available/u);
+  });
+});

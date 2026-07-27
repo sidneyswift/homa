@@ -1,0 +1,31 @@
+{
+  "id": "ref-2026-07-18-volcano-labelling-worksheet",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:17:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427945.841589",
+  "format": "labeling-worksheet",
+  "title": "Volcano Labelling Worksheet with Answer Key (A4)",
+  "publisher": "TPT (link expired)",
+  "gradeLevel": "K-3rd (ages 5-9)",
+  "overview": {
+    "description": "A4 printable volcano labeling worksheet with answer key. Children label the parts of a volcano (crater, lava, magma chamber, etc.). Part of Aless's earth science cluster (paired with volcano vocabulary cards and volcanoes/lava workbook)."
+  },
+  "skillTargeting": {
+    "subject": "science",
+    "domain": "earth-science",
+    "topics": [
+      {
+        "id": "science.volcanism-labeling",
+        "kind": "conceptual",
+        "mapped": false
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": []
+  },
+  "notes": "TPT link expired. Part of Aless's volcano/earth science cluster. Third volcano-related drop alongside vocab cards and lava workbook."
+}

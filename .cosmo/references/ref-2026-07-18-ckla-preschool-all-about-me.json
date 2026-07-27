@@ -1,0 +1,141 @@
+{
+  "id": "ref-2026-07-18-ckla-preschool-all-about-me",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T21:55:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784426138.536949",
+  "format": "curriculum-teacher-guide",
+  "title": "Core Knowledge Language Arts (CKLA) Preschool — Domain 1: All About Me — Teacher Guide",
+  "publisher": "Core Knowledge Foundation",
+  "series": "Core Knowledge Language Arts (CKLA) Preschool",
+  "gradeLevel": "Preschool (ages 3-5)",
+  "license": "Creative Commons Attribution-NonCommercial-ShareAlike 3.0",
+  "pageCount": 310,
+  "callouts": [],
+  "overview": {
+    "description": "A 20-day preschool teacher guide for the 'All About Me' domain — covering body parts, five senses, growth/development, and self-awareness. This is ONE domain out of many in the CKLA Preschool program. 310 pages of detailed instruction for 20 days (13 instruction days + 6 Pausing Point days + 1 Assessment day). Each day requires ~45 min (20 min small-group + 25 min whole-group). Aligned to NY Common Core State Standards for Preschool.",
+    "days": 20,
+    "dailyMinutes": 45,
+    "coreContent": ["body parts", "five senses (eyes/sight, ears/hearing, nose/smell, tongue/taste, skin/touch)", "growth stages (baby → child → adult)", "self-awareness", "individual differences"],
+    "languageArts": ["phonological awareness", "emergent writing", "vocabulary development", "print awareness", "nursery rhymes", "interactive read-alouds"]
+  },
+  "domainStructure": {
+    "dailyComponents": {
+      "startingTheDay": {
+        "description": "Morning routines + nursery rhyme recitation. Routines include taking attendance (progressively more complex methods across the 20 days), learning center sign-in, daily schedule. Nursery rhymes cycle every few days: 'Head and Shoulders, Knees and Toes', 'Open, Shut Them', 'Do Your Ears Hang Low?', 'Where is Thumbkin?', 'Pat-a-Cake'.",
+        "timing": "During existing morning circle (not counted in 45 min)"
+      },
+      "skills": {
+        "description": "Two 10-minute small-group activities run simultaneously (teacher + aide each lead one group, then switch). Activities include: Mystery Sound Box, rhythm games, instrument identification, letter recognition (own name), same/different sound discrimination, rhyming.",
+        "timing": "20 minutes total",
+        "groupSize": "small group (simultaneous rotation)"
+      },
+      "listeningAndLearning": {
+        "description": "Whole-group interactive read-aloud with discussion, vocabulary development, and Picture Talks (next-day review of read-aloud images). Read-alouds are specifically written for this domain — not trade books.",
+        "timing": "25 minutes",
+        "groupSize": "whole group"
+      },
+      "learningCenters": {
+        "description": "Domain-specific learning center (Doctor's Office for 'All About Me') + supplemental centers (writing, library, sensory table, etc.). The Doctor's Office center runs all 20 days — children role-play patient/doctor, use medical vocabulary, practice writing prescriptions.",
+        "timing": "During existing center time (not counted in 45 min)"
+      },
+      "takeHomeMaterial": {
+        "description": "Family letters and activity pages sent home for parent engagement. Day 1: Family Letter. Day 4: 'Body Parts' read-aloud. Day 5: Show Me Activity Page. Day 9: Family Letter 2. Day 11: 'We Use Our Senses' read-aloud. Day 12: Using All Five Senses Activity Page.",
+        "timing": "Home"
+      }
+    },
+    "domainCalendar": {
+      "description": "A 20-day grid showing every component for every day. Rows: Starting the Day (Routines, Learning Center labels/sign-in, Nursery Rhyme), Skills (Small Group 1, Small Group 2), Listening & Learning (Interactive Read-Aloud or Picture Talk, Extension Activity). Pausing Point days (6-8, 17-19) are built-in flexible review days.",
+      "pausingPoints": "Days 6-8 and 17-19 — flexible days for review, re-teaching, or extension. Not scripted — teacher decides based on student needs."
+    },
+    "progressionDesign": {
+      "attendance": "Progresses from 'One at a Time' (simplest) → 'Cubbies' → 'Two Piles' (child sorts own card into present/absent) across 20 days",
+      "nurseryRhymes": "New rhyme introduced every 3-5 days. Repetition builds fluency. Rhymes chosen to complement content (body parts songs during body parts unit).",
+      "vocabulary": "Vocabulary Words to Know list per day. Words defined during read-aloud, encountered in Picture Talk, reinforced in centers. Cumulative vocabulary growth across days."
+    }
+  },
+  "pedagogicalApproach": {
+    "interactiveReadAloud": "Teacher reads from scripted text with embedded discussion prompts, vocabulary definitions, and comprehension checks. Not a 'just read the book' approach — highly interactive.",
+    "pictureTalk": "Day-after review: teacher shows subset of images from yesterday's read-aloud. Students use vocabulary to describe what they see. Builds recall + verbal fluency.",
+    "deepeningUnderstanding": "After read-aloud, expand vocabulary with related words (e.g., learned 'inside' → now learn 'outside'). Connects new words to known concepts.",
+    "extensionActivities": "Multi-day projects during center time. Child-led after teacher models. Examples: drawing body parts, sorting sense-related objects, creating 'All About Me' books.",
+    "emergentWriting": "Writing facilitated in centers. Accept ALL forms: scribbling, letter-like shapes, actual letters. The goal is understanding that writing communicates, not correct spelling.",
+    "domainSpecificLearningCenter": "Doctor's Office center: medical vocabulary, patient/doctor role play, 'prescriptions' (emergent writing), body part identification. Active all 20 days."
+  },
+  "designPatterns": {
+    "standardsAlignmentChart": {
+      "description": "Massive alignment chart maps every CKLA goal to NY Common Core Preschool standards, AND shows which day each goal is practiced (with P markers). A parent/administrator can see exactly which standards are covered and when.",
+      "value": "Accountability and transparency. Parents can prove their homeschool covers standards."
+    },
+    "spiralReviewWithPausingPoints": {
+      "description": "Built-in Pausing Point days (6-8, 17-19) where no new content is taught. Teacher uses these for review, reteaching, or extension based on observed student needs. The curriculum explicitly says: stop, look at where kids are, adjust.",
+      "value": "Responsive teaching. The curriculum has breathing room built in."
+    },
+    "takeHomeFamilyEngagement": {
+      "description": "Family Letters explain the domain content + suggest home activities. Read-alouds sent home for re-reading. Activity pages for parent-child work. Similar to Harcourt's School-Home Connection but more structured.",
+      "value": "Extends learning into the home. Parents know what's being taught and how to reinforce it."
+    },
+    "domainBasedCurriculum": {
+      "description": "Content organized by DOMAINS (All About Me, Plants, Animals, etc.) rather than by skill strands. Skills (phonics, vocabulary, etc.) are taught THROUGH the domain content, not separately. You learn letter sounds while learning about body parts.",
+      "value": "Content-rich instruction. Skills aren't isolated drills — they're embedded in meaningful content."
+    },
+    "scriptedTeacherLanguage": {
+      "description": "Teacher guide provides EXACT language to use: 'Say to students: Point to your nose. Your nose helps you smell. Can you smell something right now?' This level of scripting means even a novice teacher (or parent) can deliver effective instruction.",
+      "value": "Zero guesswork. A parent who's never taught preschool can follow the script and deliver solid instruction."
+    }
+  },
+  "overallLayout": {
+    "structure": "linear daily lessons with consistent section headers (Starting the Day → Skills → Listening & Learning)",
+    "spacing": "dense — 310 pages for 20 days of instruction",
+    "visualHierarchy": "section headers with icons (whole group, small group, learning center, take-home)",
+    "whiteSpaceRatio": 0.25,
+    "flowDirection": "day-by-day linear"
+  },
+  "overallSkillTargeting": {
+    "subject": "ela",
+    "domain": "emergent-literacy",
+    "topics": [
+      {"id": "ela.phonological-awareness", "kind": "procedural", "mapped": false},
+      {"id": "ela.print-awareness", "kind": "conceptual", "mapped": false},
+      {"id": "ela.vocabulary-development", "kind": "conceptual", "mapped": false},
+      {"id": "ela.emergent-writing", "kind": "procedural", "mapped": false},
+      {"id": "ela.interactive-read-aloud", "kind": "conceptual", "mapped": false},
+      {"id": "science.body-parts-five-senses", "kind": "conceptual", "mapped": false}
+    ],
+    "unmappedSkills": ["domain-based-preschool-instruction", "scripted-teacher-language", "learning-center-design"]
+  },
+  "difficulty": {
+    "ageBandMonths": [36, 60],
+    "complexity": "multi-skill embedded in domain content",
+    "prerequisites": [],
+    "scaffolding": "very high — fully scripted, small-group + whole-group, built-in pausing points"
+  },
+  "theming": {
+    "themeType": "domain-driven",
+    "characters": [],
+    "visualStyle": "text-heavy teacher guide with flip book images for students",
+    "colorPalette": "B&W text (flip book images separate)",
+    "appealDrivers": ["content-rich domain approach", "scripted confidence for new teachers/parents"]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "medium",
+    "colorRequirement": "B&W for guide (flip book may be color)"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "preschool-domain-lesson",
+        "description": "A scripted daily preschool lesson organized by domain (topic) rather than skill. Includes: morning routine script, two small-group activities (10 min each), one whole-group read-aloud with embedded vocabulary and discussion prompts, learning center setup instructions, and a take-home activity page. 45 min total."
+      },
+      {
+        "name": "interactive-read-aloud-script",
+        "description": "A fully scripted read-aloud with embedded teacher prompts: when to pause, what questions to ask, which vocabulary to highlight, when to check comprehension. Includes next-day Picture Talk follow-up."
+      }
+    ]
+  },
+  "notes": "Second Aless drop in rapid succession (same minute as Peaceful Press drop). This is a MASSIVE document — 310 pages for a single 20-day preschool domain. It represents the opposite end of the complexity spectrum from the Peaceful Press co-op guide. The Peaceful Press was 4 pages for 26 weeks. CKLA is 310 pages for 20 days. Aless may be showing both extremes deliberately — or she may be dumping everything she has for analysis. The CKLA guide is interesting because it's Creative Commons licensed (free to use and adapt), content-rich (skills taught through domain knowledge, not isolated), and fully scripted (zero guesswork for parents). The standards alignment chart and scripted teacher language are particularly relevant for Homa — we could generate standards-aligned, scripted lessons."
+}

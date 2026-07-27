@@ -1,0 +1,98 @@
+{
+  "id": "ref-2026-07-18-blending-segmenting-phoneme-cards",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:15:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784426111.909559",
+  "format": "phonics-clip-card-set",
+  "title": "Blending & Segmenting Phoneme Cards \u2014 SoR Reading Decodable Words (311 pages)",
+  "publisher": "My Teaching Pal (TPT)",
+  "gradeLevel": "K-3rd (ages 5-9)",
+  "overview": {
+    "description": "Massive 311-page Science of Reading aligned phoneme card set. Students tap dots under each phoneme to segment, then swipe the arrow to blend the whole word, then clip the matching picture. Comprehensive scope covering: CVC (all short vowels) \u2192 FLSZ \u2192 consonant blends (L, R, S, ending) \u2192 Magic E (a_e through u_e) \u2192 digraphs \u2192 R-controlled vowels \u2192 vowel teams \u2192 diphthongs \u2192 ending blends. Each skill section has its own label for storage organization. Cards designed for center-based learning."
+  },
+  "layout": {
+    "structure": "single-focus",
+    "spacing": "airy",
+    "visualHierarchy": "word-dominant",
+    "whiteSpaceRatio": 0.5,
+    "flowDirection": "left-right"
+  },
+  "skillTargeting": {
+    "subject": "ela",
+    "domain": "phonics-word-reading",
+    "topics": [
+      {
+        "id": "ela.phoneme-blending",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.phoneme-segmenting",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.cvc-decoding",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.consonant-blend-decoding",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.digraph-decoding",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.vowel-team-decoding",
+        "kind": "procedural",
+        "mapped": false
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      60,
+      108
+    ],
+    "complexity": "multi-skill",
+    "prerequisites": [
+      "ela.letter-sound-correspondence"
+    ],
+    "scaffolding": "high"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "clean-educational",
+    "colorPalette": "full-color",
+    "appealDrivers": [
+      "tactile (dot tapping, clip matching)",
+      "systematic SoR progression"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "landscape",
+    "margins": "standard",
+    "inkDensity": "medium",
+    "colorRequirement": "needs color"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "clip-card-activity"
+    ],
+    "gaps": [
+      {
+        "name": "phoneme-segmenting-card",
+        "description": "Card with word shown as individual phoneme dots, an arrow for blending, and multiple picture choices for clipping. The physical interaction (tap dots, swipe arrow, clip answer) makes it a multi-sensory center activity."
+      }
+    ]
+  },
+  "notes": "Science of Reading aligned. Labeled as 'early reading curriculum' by Aless. The tap-swipe-clip mechanic is specifically designed for phoneme awareness \u2014 making the abstract concept of 'sounds in words' physical. Pairs with Aless's other phonics drops (rhyming, I Spy, beginning sounds, sentence pyramids)."
+}

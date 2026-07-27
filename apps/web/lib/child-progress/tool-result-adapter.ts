@@ -21,6 +21,7 @@ import {
 import {
   ACTIVITY_ONLY_PROGRESS_NOTE,
   AMBIGUOUS_PROGRESS_NOTE,
+  JOURNAL_HOURS_PROGRESS_NOTE,
   manageChildProgressResultSchema,
   NO_MATCH_PROGRESS_NOTE,
   type ManageChildProgressResult,
@@ -148,6 +149,7 @@ export async function adaptJournalResult(input: {
         affectedItemIds: result.affectedItemIds,
         undoToken: result.operationId ?? null,
         operations: input.operations,
+        note: JOURNAL_HOURS_PROGRESS_NOTE,
       });
     case "conflict_open": {
       const conflictId = result.conflictIds[0];

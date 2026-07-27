@@ -11,12 +11,9 @@ character instead of agreeing with the author.
 
 ## How the orchestrator dispatches this gate
 
-Use the current environment's delegation mechanism to run a fresh-context,
-read-only subagent. Give it only the persona and draft named below, no prior
-drafting conversation and no file-editing task. If the environment cannot
-enforce a read-only mode, state the restriction in the dispatch and keep all
-file edits with the orchestrator. The dispatch prompt must contain, in this
-order, pasted verbatim, not summarized:
+Dispatch mechanics, the delivery instruction, the order law, and the
+shared laws live in `.agents/copy-gate-protocol.md`; follow it exactly.
+This gate's dispatch prompt must contain, in this order, pasted verbatim:
 
 1. The full text of the right persona file from `marketing/personas/`
    (blog-reader for articles and X posts, shortform-viewer for video scripts
@@ -34,23 +31,14 @@ order, pasted verbatim, not summarized:
 > produces content nobody reads.
 
 3. The full draft.
+4. The protocol's delivery instruction.
 
 ## What comes back, and what to do with it
 
 A list of in-character reactions keyed to lines or moments. The main agent
 (the orchestrator) then decides which reactions to accept and rewrites the
-draft itself. The reviewer never touches files; judgment and voice stay in one
-hand.
+draft itself. Voice rules live in `marketing/voice/house-style.md` and are
+the editor gate's job, not this one's.
 
-## The order law
-
-Reader gate always runs before the editor gate. An editor pass first can
-polish jargon into something readable without ever asking whether the mom
-understands or cares; craft-before-comprehension hides the comprehension
-problem. Reader first, editor second, every format, no exceptions.
-
-## Laws (marketing/AGENTS.md, restated)
-
-Never auto-publish. The reviewer subagent is read-only and cannot touch files.
-No family data in drafts or reactions. Voice rules live in
-`marketing/voice/house-style.md` and are the editor's job, not this gate's.
+The order law, read-only law, family-data law, and never-auto-publish law
+are in `.agents/copy-gate-protocol.md`.

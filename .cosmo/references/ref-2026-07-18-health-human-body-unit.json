@@ -1,0 +1,54 @@
+{
+  "id": "ref-2026-07-18-health-human-body-unit",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:28:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428116.515299",
+  "format": "science-unit-study",
+  "title": "Health & the Human Body — Simple Science for Primary Students (Love To Teach Primary)",
+  "publisher": "Love To Teach Primary (TPT)",
+  "gradeLevel": "K-3rd Grade",
+  "pageCount": 35,
+  "callouts": [],
+  "overview": {
+    "description": "A 35-page human body unit covering 6 internal organs: Brain, Heart, Lungs, Stomach, Intestines, Kidneys. Each organ follows an identical multi-page structure: (1) draw the organ on a body outline (small reference image + large blank body), (2) factual information pages, (3) fill-in-the-blank cloze with Word Box. Consistent format means the child knows what to expect for each organ — learns the content, not the format.",
+    "organs": ["Brain", "Heart", "Lungs", "Stomach", "Intestines", "Kidneys"]
+  },
+  "perOrganStructure": {
+    "page1": "Title + 'Draw your [organ] on the body below.' Small reference image showing where the organ is located. Large blank body outline for drawing.",
+    "page2plus": "Factual information about the organ: what it does, interesting facts (e.g., 'The small intestine is about 23 feet long in adults').",
+    "lastPage": "Fill-in-the-blank cloze passage with Word Box containing answer choices. Tests comprehension of the facts from the previous pages."
+  },
+  "designPatterns": {
+    "drawOnBodyOutline": {
+      "description": "A blank human body outline with the prompt 'Draw your [organ] on the body below.' A small reference image in the corner shows the correct location. The child draws the organ in the right position. This is ACTIVE learning — they have to think about WHERE the organ goes, not just read about it.",
+      "value": "Spatial reasoning + recall. Drawing from reference = deeper processing than just reading. Also: the child creates a visual artifact they can reference later."
+    },
+    "consistentOrganTemplate": {
+      "description": "Every organ follows the EXACT same multi-page structure: draw → read facts → fill in blanks. The child learns the format once and then focuses purely on content for each new organ.",
+      "value": "Reduces cognitive load. Same format, different content = the child gets faster and more confident with each organ."
+    },
+    "clozeWithWordBox": {
+      "description": "Fill-in-the-blank sentences with a Word Box containing all answers. 'Your intestines carry out the food after it leaves your _____.' Word Box: 23, waste, stomach, nutrients, 5, colon, guts. The child reads the sentence, identifies the missing word, and selects from the bank.",
+      "value": "Reading comprehension + vocabulary application. The Word Box provides scaffolding — the child isn't generating answers from nothing, but they still have to understand the sentence to pick the right word."
+    }
+  },
+  "overallSkillTargeting": {
+    "subject": "science",
+    "domain": "human-body",
+    "topics": [
+      {"id": "science.internal-organs", "kind": "conceptual", "mapped": false},
+      {"id": "ela.cloze-reading-comprehension", "kind": "procedural", "mapped": false}
+    ]
+  },
+  "recipeMatch": {
+    "matchedRecipes": ["themed-worksheet"],
+    "gaps": [
+      {
+        "name": "body-system-unit",
+        "description": "A multi-page science unit where each topic/organ/system follows the same template: draw-on-body-outline page → factual information pages → cloze fill-in-the-blank assessment with Word Box. Repeatable for ANY body system (digestive, circulatory, skeletal, muscular). The consistent template means the child can focus on content, not format."
+      }
+    ]
+  },
+  "notes": "This connects to Carolyng's earlier drop of the Human Heart Mini Unit Study. Both users are showing human body content — Carolyng's was a more elaborate watercolor unit study with art integration, while Aless's is a simpler worksheet-style unit with a repeatable template. The draw-on-body-outline activity type is new and particularly good for spatial learning. The cloze-with-Word-Box pattern matches the Harcourt practice book format Carolyng showed (word bank + blanks). Both users converging on similar formats from different sources = strong validation."
+}

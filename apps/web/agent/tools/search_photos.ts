@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { emitMapEvent } from "../../lib/map/events";
 import { rateLimited } from "../../lib/map/ratelimit";
@@ -22,9 +25,11 @@ const MAX_SEARCHES_PER_FAMILY_PER_DAY = 10;
  * family-library URL. Query text goes to the search vendor, so the
  * instruction law matches the research brief: topics, never the family.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Search the web (Google Images) for real photographs and reference pictures: real animals and plants for nature study, real coins for money math, landmarks, book or curriculum covers, anything that should look real rather than illustrated (generate_image owns illustration). Returns numbered results with title, source site, and pixel size, each with a photoToken. Results are NOT usable directly: call keep_photo with the photoToken of the one you want, and embed or reference only the URL keep_photo returns. Search about topics, never the family: no child, parent, or family names in queries, ever. Searches are budgeted per day; make one well-worded search rather than several.",
+  deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: true,
   inputSchema: z.object({
     query: z
       .string()

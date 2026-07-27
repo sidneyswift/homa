@@ -9,6 +9,7 @@ import {
 } from "./tool-adapter";
 import { createProgressToolContext } from "./tool-contract";
 import {
+  JOURNAL_HOURS_PROGRESS_NOTE,
   OBSERVATION_ALREADY_USED_PROGRESS_NOTE,
   OBSERVATION_USED_PROGRESS_NOTE,
   REFUSED_PROGRESS_NOTE,
@@ -304,8 +305,39 @@ describe("child progress tool result adapter", () => {
       affectedTopics: ["Reads a short early reader"],
       undoAvailable: true,
       undoToken: OPERATION_ID,
+      note: JOURNAL_HOURS_PROGRESS_NOTE,
     });
     assert.equal(JSON.stringify(result).includes(canonicalText), false);
+  });
+
+  it("keeps the hours reminder off undo results", async () => {
+    const result = await executeChildProgressCommand(
+      {
+        action: "undo_progress_update",
+        operationId: OPERATION_ID,
+      },
+      context(),
+      operations({
+        undoProgressUpdate: async () => ({
+          status: "undone",
+          childId: CHILD_ID,
+          childName: "Maya",
+          operationId: OPERATION_ID,
+          evidenceIds: [EVIDENCE_ID],
+          affectedItemIds: ["literacy.emergent-reader"],
+        }),
+        getChildProgressView: async () => view(),
+      }),
+    );
+
+    assert.deepEqual(result, {
+      kind: "progress_update",
+      label: "Progress updated",
+      childName: "Maya",
+      affectedTopics: ["Reads a short early reader"],
+      undoAvailable: false,
+      undoToken: null,
+    });
   });
 
   it("marks an observation used, including from a dispatch session", async () => {

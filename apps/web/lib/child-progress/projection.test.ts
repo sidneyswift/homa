@@ -194,11 +194,16 @@ describe("child progress projection", () => {
     assert.equal(counting?.topics[0]?.statement, bankEntry.item.statement);
   });
 
-  it("renders a taxonomy-only topic without changing map scores", () => {
+  it("scores a taxonomy-only topic, since abilities are one catalog", () => {
+    // Reversed 2026-07-21 (founder ruling, "one abilities map"). This
+    // used to assert the opposite: a taxonomy skill a parent
+    // demonstrated moved nothing, so roughly 1,350 of ~1,600 abilities
+    // counted for zero. Both kinds carry a typical age, so both score.
     const taxonomyTopic = getProgressTaxonomyTopic(
       TAXONOMY_ONLY_ITEM_ID,
     );
     assert.ok(taxonomyTopic);
+    // Still not a bank item: the bank stays the askable onboarding set.
     assert.equal(getMapItem(TAXONOMY_ONLY_ITEM_ID), undefined);
 
     const view = build({
@@ -211,9 +216,10 @@ describe("child progress projection", () => {
       ],
     });
 
-    assert.deepEqual(
+    assert.notDeepEqual(
       view.scores,
       scoreMap(ageInMonths(CHILD.birthDate, NOW), []),
+      "a demonstrated taxonomy ability must reach the score",
     );
     assert.equal(
       findTopic(view, TAXONOMY_ONLY_ITEM_ID)?.statement,

@@ -61,6 +61,7 @@ export function resolveProgressChildId(
 const PROGRESS_PAGE = /^\/app\/([^/]+)\/progress$/;
 const REPORT_PAGE = /^\/app\/([^/]+)\/report$/;
 const KIDS_PAGE = /^\/app\/kids\/([^/]+)$/;
+const FIRSTS_PAGE = /^\/app\/([^/]+)\/firsts$/;
 
 /**
  * kidSwitchTargetPath(pathname, childId): string | null
@@ -78,6 +79,17 @@ export function kidSwitchTargetPath(
   }
   if (REPORT_PAGE.test(pathname)) return `/app/${childId}/report`;
   if (KIDS_PAGE.test(pathname)) return `/app/kids/${childId}`;
+  // The one deliberate exception to "keep the surface": a kid switch
+  // from the firsts page lands on the sibling's PROGRESS page, never the
+  // sibling's firsts page. Two children's firsts pages are the one pair
+  // of surfaces where a one-tap swap performs a complete comparison with
+  // no number rendered, and in production many multi-kid families have a
+  // child with zero evidence beside a sibling with dozens, so the swap
+  // would drop an empty keepsake directly onto a full one. Progress is
+  // that child's own page and carries its own invitation. Returning null
+  // is wrong here: the switcher would silently stay put, which reads as
+  // the page being broken.
+  if (FIRSTS_PAGE.test(pathname)) return `/app/${childId}/progress`;
   return null;
 }
 

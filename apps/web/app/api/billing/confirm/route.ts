@@ -1,15 +1,19 @@
 import Stripe from "stripe";
 import { cookies } from "next/headers";
 
-import { startFamilyTrial } from "../../../../lib/billing/wall";
+import {
+  recordFamilySubscription,
+  startFamilyTrial,
+  tierForStripeProduct,
+} from "../../../../lib/billing/wall";
 import { emitMapEvent } from "../../../../lib/map/events";
 import { requireFamily } from "../../../../lib/map/session";
 import { childBelongsToFamily } from "../../../../lib/map/store";
 
 /**
  * GET /api/billing/confirm?session_id={CHECKOUT_SESSION_ID}
- * The Payment Links' after-completion redirect (configured in the Stripe
- * dashboard, HUMAN-TODO). No webhooks in this phase: the same browser
+ * The Payment Links' after-completion redirect (configured by the founder
+ * in the Stripe dashboard). No webhooks in this phase: the same browser
  * that paid lands here, we retrieve the checkout session with the secret
  * key, verify it is complete AND that its client_reference_id names the
  * signed-in family (the tenancy law: the unlock target comes from auth
@@ -80,7 +84,9 @@ export async function GET(request: Request): Promise<Response> {
 
   try {
     const stripe = new Stripe(secretKey);
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["line_items.data.price.product", "subscription"],
+    });
     const complete = session.status === "complete";
     const sameFamily = session.client_reference_id === family.id;
     if (!complete || !sameFamily) {
@@ -91,9 +97,27 @@ export async function GET(request: Request): Promise<Response> {
     }
 
     const customerId = typeof session.customer === "string" ? session.customer : null;
-    const fresh = await startFamilyTrial(family.id, customerId);
+    const purchasedProduct = session.line_items?.data[0]?.price?.product;
+    const productId = typeof purchasedProduct === "string" ? purchasedProduct : purchasedProduct?.id;
+    const tier = tierForStripeProduct(productId);
+    const fresh = await startFamilyTrial(family.id, customerId, tier);
     if (fresh) {
       await emitMapEvent("billing.trial_started", { family_id: family.id });
+    }
+
+    // Stamp the subscription mirror from the verified session itself:
+    // the webhook's customer-id match cannot find a re-subscribing
+    // family whose fresh checkout minted a new Stripe customer, and a
+    // stale "canceled" status would wall a family that just paid (see
+    // recordFamilySubscription).
+    const subscription = session.subscription;
+    if (subscription && typeof subscription !== "string") {
+      await recordFamilySubscription(family.id, {
+        id: subscription.id,
+        status: subscription.status,
+        priceId: subscription.items.data[0]?.price.id ?? null,
+        currentPeriodEndSec: subscription.items.data[0]?.current_period_end ?? null,
+      });
     }
 
     // Verified checkout: land on the child's report with the

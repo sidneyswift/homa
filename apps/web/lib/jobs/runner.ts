@@ -1,5 +1,6 @@
 import { mapDb, type DbJson } from "../map/db";
 import { emitMapEvent } from "../map/events";
+import { getJobContract } from "./contracts";
 import { deliverJobMilestone } from "./milestone";
 
 /**
@@ -22,10 +23,14 @@ import { deliverJobMilestone } from "./milestone";
  * model input, exactly like lib/jobs/store.ts.
  */
 
-/** Gate the first stage for review (the calibration checkpoint), then let
- * the rest free-run. Generic default; a skill that wants per-volume gating
- * can widen this later. Pure so it is trivially testable. */
-export function shouldGateStage(stageNumber: number): boolean {
+/** Whether this skill's stage parks for the parent's review. The contract
+ * decides (curriculum-studio gates its first volume as the calibration
+ * checkpoint; a single-page materials-studio build never gates). The
+ * stage-1 default only covers a job whose contract has since been removed
+ * from the registry. Pure so it is trivially testable. */
+export function shouldGateStage(skill: string, stageNumber: number): boolean {
+  const contract = getJobContract(skill);
+  if (contract) return contract.gatesStage(stageNumber);
   return stageNumber === 1;
 }
 
@@ -178,7 +183,7 @@ export interface StageBuiltInput {
 export async function recordStageBuilt(input: StageBuiltInput): Promise<void> {
   const sql = mapDb();
   const { job } = input;
-  const gate = shouldGateStage(job.stageNumber);
+  const gate = shouldGateStage(job.skill, job.stageNumber);
   const newStatus = gate ? "ready_for_review" : "approved";
   const metering = input.metering ?? {};
 
@@ -238,6 +243,7 @@ export async function recordStageBuilt(input: StageBuiltInput): Promise<void> {
       childId: job.childId,
       title: job.title,
       kind: "gate",
+      totalStages: job.totalStages,
     });
     return;
   }
@@ -247,6 +253,7 @@ export async function recordStageBuilt(input: StageBuiltInput): Promise<void> {
       childId: job.childId,
       title: job.title,
       kind: "completed",
+      totalStages: job.totalStages,
     });
     await sql`
       update public.agent_jobs
@@ -403,7 +410,7 @@ export async function completeStageFromWorker(
   // (gate/approve, advance, complete) and the events. Pass materialId null so
   // it does not re-link.
   await recordStageBuilt({ job, materialId: null, metering });
-  return { ok: true, status: shouldGateStage(stageNumber) ? "awaiting_input" : "running" };
+  return { ok: true, status: shouldGateStage(row.skill, stageNumber) ? "awaiting_input" : "running" };
 }
 
 /** How many times a single stage's build session may run before the job is
@@ -473,5 +480,6 @@ export async function handleUnreportedStage(
     childId: job.childId,
     title: job.title,
     kind: "needs_attention",
+    totalStages: job.totalStages,
   });
 }

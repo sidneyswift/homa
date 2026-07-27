@@ -1,4 +1,4 @@
-# Journeys 02 — Acquisition & Activation (discover → land → sign up → wow → week one)
+# Journeys 02: Acquisition & Activation (discover → land → sign up → wow → week one)
 
 > Historical journey and acceptance-source snapshot, originally written
 > 2026-07-02. The reconciled PRD adopts portions of Parts 1 through 3 for FR-1
@@ -23,24 +23,24 @@
 > and explicitly improve three things in the existing kits: (1) `Onboarding.jsx` collects
 > grade via select; we collect birth month + year instead because age bands drive
 > benchmarks and grade is ambiguous for homeschoolers. (2) `Onboarding.jsx` has a
-> "map to my state's standards" toggle; we remove it — standards mapping is the product,
+> "map to my state's standards" toggle; we remove it, standards mapping is the product,
 > defaulted on, revealed at the benchmark moment, never a checkbox decision at minute 1.
 > (3) `LandingPage.jsx` shows $9/$19/$39 pricing, a "Start free for 14 days" CTA, and
-> "Loved by 12,000+ homeschooling families" — all three conflict with the brief
+> "Loved by 12,000+ homeschooling families", all three conflict with the brief
 > ($29/$49), the invite gate [M-R], and honesty (we have ~1 family). Flagged in ❓ and
 > ticket mapping. Everything else (card-on-cream layout, dots progress, `Callout` "a
 > note from HOMA", `Skeleton` wait pattern, check-off celebration) is adopted as spec.
 
 ---
 
-## Part 1 — Discovery → signup, one journey per channel
+## Part 1: Discovery → signup, one journey per channel
 
 Four acquisition journeys share one destination (the activation flow in Part 2) but
 differ in what she saw, what she fears, and what the landing page must prove in 30
 seconds. The invite gate [M-R] is the same mechanism everywhere: a code embedded in the
 URL, never typed by hand on the happy path; no code ⇒ waitlist, not a dead end.
 
-### Journey A1 — Conference QR / waitlist [M-R]
+### Journey A1: Conference QR / waitlist [M-R]
 
 > **Current route correction (verified 2026-07-11): there is no booth.** Alessa
 > uses the phone-based conference field kit. `/conference`, `/waitlist`, and
@@ -99,7 +99,7 @@ Waitlist data feeds cohort prioritization (state coverage, age fit).
 | Scan → landing | Phone camera → `homa.app/i/CONF26` | Skims hero, scrolls once | Conference-variant hero, invite banner, code pre-applied | 20–60 s | "Is this the booth thing? Oh, it is" | Page slow on hall wifi; generic hero breaks continuity | "You found us at {conference}" line; the same sample from the booth |
 | Decide | CTA, pricing line, privacy line | Taps "Claim your invite" or bails to "save for later" | Nothing clever; one CTA, one secondary "email me this link" | 10–30 s | Hopeful, guarding her wallet | Fear of hidden card requirement | "Free to start, no card" directly under the CTA |
 | Deferred return | Email-me-this-link, flyer at home | Opens link Sunday night at home | Link keeps invite attached for 14 days | 0–3 days | Tired, lower intent | Invite context lost; she forgets entirely | Saved-link email subject: "your Homa invite from {conference} (kept your spot)" |
-| → signup | Auth screen | Continues to Part 2 flow | — | — | — | — | — |
+| → signup | Auth screen | Continues to Part 2 flow | - | - | - | - | - |
 
 **The moment that decides:** the *hall-wifi skim*. She gives the page one scroll while
 standing up. If the page doesn't visually match the booth and answer "card?" and "my
@@ -129,7 +129,7 @@ variant is in-scope, see NT-1/NT-7 in Part 7), M4-07 (full marketing site) [GA].
 
 ---
 
-### Journey A2 — Friend referral / co-op word of mouth
+### Journey A2: Friend referral / co-op word of mouth
 
 **Frame.**
 - Persona: P2 and P3 primary (co-op networks), P1 as the *referrer* archetype
@@ -167,16 +167,16 @@ hand-tended); [POST-GA] a referral program can sit on this same attribution rail
 |---|---|---|---|---|---|---|---|
 | The show-and-tell | Friend's phone, a text with a photo | Looks, asks "how much?", asks "is it hard to set up?" | (Nothing; the artifact does the talking) | 1–3 min | Curious, a little envious | Friend can't find her share link fast | One-tap "share Homa" in settings that sends link + a worksheet photo |
 | Link open | Text/DM → landing | Skims with the friend's claim in mind | "{Friend} invited you" banner, two-kid proof section | 30–60 s | Pre-trusting, checking price | Price shock without the anchor | The two-worksheet, two-kids visual |
-| Decide | CTA | Taps "Claim your invite", or asks the friend more questions first | — | 10 s–2 days | Willing | She waits to "ask her husband"; link gets buried in texts | Link stays valid; day-3 nudge is sent by the *friend* flow, not by us (we never email non-signups except waitlist) |
-| → signup | Auth screen | Continues to Part 2 | — | — | — | — | — |
+| Decide | CTA | Taps "Claim your invite", or asks the friend more questions first | - | 10 s–2 days | Willing | She waits to "ask her husband"; link gets buried in texts | Link stays valid; day-3 nudge is sent by the *friend* flow, not by us (we never email non-signups except waitlist) |
+| → signup | Auth screen | Continues to Part 2 | - | - | - | - | - |
 
 **The moment that decides:** the *"mine are different" objection*. If the landing shows
 one perfect preschooler use case, P2 (kids 4, 7, 10) self-disqualifies. The two-kid
 proof section plus an honest age-range line ("materials are richest for ages 2 to 7
-today; hours and records work for every age" — pending ❓ Sidney call #3) decides it.
+today; hours and records work for every age", pending ❓ Sidney call #3) decides it.
 
 **Instrumentation:** journey metric: **referral link → account ≥ 50%** (highest-trust
-channel; it should beat conference). Counter-metric: referrer regret — referred
+channel; it should beat conference). Counter-metric: referrer regret, referred
 families that churn in month 1 damage the friendship channel; track
 `churned_within_30d` by `invited_by` presence.
 
@@ -199,7 +199,7 @@ M4-07 [GA]. Share-from-settings is NT-2 adjacent (Part 7).
 
 ---
 
-### Journey A3 — Facebook group / social mention
+### Journey A3: Facebook group / social mention
 
 **Frame.**
 - Persona: P3 primary (newcomers live in the state homeschool Facebook groups asking
@@ -246,7 +246,7 @@ and we'll invite you with real attention, not a drip campaign."
 | Click → landing | Comment link | Hunts for the catch: price, data, "is it for kids" | Skeptic-ready fold order: proof → child-never-uses-it → data promise | 30–90 s | Testing us | Any marketing-speak triggers the slop detector | The zoomable worksheet; the privacy sentence written like a person wrote it |
 | Waitlist decision [M-R] | Waitlist form | Gives email + state + kids' ages, or leaves | Confirms honestly, sets expectation ("small groups, real attention") | 20–40 s | Cautiously in | Form asks too much; "why do you need my kids' ages" | One-line why: "so we invite families we're ready to serve well" |
 | Invite arrives | Email | Opens days/weeks later, colder | Invite email re-proves value (worksheet sample inline), code link | 1–30 days | Re-warming | Cold invite reads like spam | Subject: "your Homa invite is ready (you asked in {month})" + the sample |
-| → signup | Auth | Continues to Part 2 | — | — | — | — | — |
+| → signup | Auth | Continues to Part 2 | - | - | - | - | - |
 
 **The moment that decides:** the *skeptic's objection resolved on the page*. She
 arrives carrying someone else's doubt. The page either answers "child never uses it +
@@ -278,7 +278,7 @@ watch). Social templates exist in `docs/homa-design/social/` [POST-GA activation
 
 ---
 
-### Journey A4 — SEO [GA]
+### Journey A4: SEO [GA]
 
 **Frame.**
 - Persona: P2/P4 for compliance queries, P1/P3 for materials queries.
@@ -318,7 +318,7 @@ state pages during M-R as waitlist collectors: they take months to rank. See NT-
 | Search | Google SERP | Scans titles for her state/age | Title/meta name the state or age exactly | 10–20 s | Task-focused, low trust | Generic title loses to competitor's exact-match | "Pennsylvania homeschool hours: the 2026 requirements, tracked automatically" |
 | Land | State/age page | Checks: is the requirement right? | Requirement stated + cited + last-verified date; sample artifact | 30–90 s | Verifying | One wrong legal fact = P4 gone forever (kickoff: "will churn instantly over a wrong legal claim") | The citation link; the verified date; no email gate on the sample |
 | Bridge | Page CTA | Realizes it's a product, not a blog | One CTA: "see what Homa would make for your kid" or "track hours automatically" | 10–30 s | Deciding whether to invest 3 min | CTA feels like a bait-and-switch from content to product | CTA sets the time cost honestly: "about 3 minutes to your first page" |
-| → signup [GA] | Auth | Continues to Part 2 | — | — | — | — | — |
+| → signup [GA] | Auth | Continues to Part 2 | - | - | - | - | - |
 
 **The moment that decides:** *the fact check*. On state pages she knows her state's
 rule better than most lawyers; if our number matches and carries a citation, we've
@@ -347,7 +347,7 @@ M4-07 [GA]. ❓ call #3 gates the materials-page age range.
 
 ---
 
-## Part 2 — The activation masterpiece: signup → first wow [M-R]
+## Part 2: The activation masterpiece: signup → first wow [M-R]
 
 This is the original make-or-break journey. Its **account → personalized worksheet in
 under 3 minutes** target is a historical design goal, not a current duration guarantee.
@@ -376,11 +376,11 @@ Current onboarding acceptance follows the reconciled PRD and named tickets.
 
 ### Minute-by-minute
 
-**0:00 — CTA tap → auth screen.**
+**0:00, CTA tap → auth screen.**
 
 One screen. Logo, one line of context, three buttons, one reassurance line. No
 password rules essay, no name field (we ask what to call her later, warmer), no email
-verification gate (verify async, never block the flow — friction strategy 8).
+verification gate (verify async, never block the flow, friction strategy 8).
 
 > **Screen: create account**
 > Heading: "Let's set up your family's Homa"
@@ -394,7 +394,7 @@ from the URL; if she arrived codeless, one field appears above the buttons:
 "Invite code" with "on the waitlist instead?" link. Time: 15–30s (Apple/Google),
 45–60s (email).
 
-**0:30 — the boring form intake (M2-03 split i).** One screen, not a conversation
+**0:30, the boring form intake (M2-03 split i).** One screen, not a conversation
 (council: forms for facts, conversation for feelings).
 
 > **Screen: your family**
@@ -428,7 +428,7 @@ year puts a child outside the v1 band (pending ❓ call #3, assume 2–7):
 Never a rejection, never a grayed-out row, never "unsupported." Time: 40–70s for one
 kid, +15s per additional kid.
 
-**1:15 — 4 questions per child (M2-03 split ii).** One question per screen (friction
+**1:15, 4 questions per child (M2-03 split ii).** One question per screen (friction
 strategy 10: one input per mobile screen), chips over typing wherever possible, dots
 progress (kit pattern), every question skippable. Copy below for "Maya, 4":
 
@@ -463,7 +463,7 @@ Generate child 1's page first (the wow can't wait), then offer:
 This parallelizes his generation with her question-answering and keeps time-to-first-
 wow constant regardless of family size.
 
-**2:00 — generation wait (M0-03 path: sandbox worksheet gen inside a chat turn).**
+**2:00, generation wait (M0-03 path: sandbox worksheet gen inside a chat turn).**
 Latency budget 45–90s. The wait is a *stage*, not a spinner. Kit's `Skeleton` pattern
 extended with live status lines (NT-8):
 
@@ -478,7 +478,7 @@ extended with live status lines (NT-8):
 If generation exceeds 120s: "This one's taking a little longer than usual. It's still
 coming, you don't need to do anything." If it fails outright: see edge branches.
 
-**3:00 — WOW DELIVERED.** The screen the whole funnel exists for.
+**3:00, WOW DELIVERED.** The screen the whole funnel exists for.
 
 > **Screen: her first page**
 > Artifact card: full-bleed preview of the worksheet. Maya's name in the title.
@@ -494,7 +494,7 @@ Print = system print dialog (J3 pattern: PDFs flawless on Letter, no printer
 integration v1). Share exists deliberately: this artifact is the word-of-mouth unit
 (journey A2's supply side).
 
-**3:30 — the rhythm screen + add-to-home-screen.** One screen that sets the contract
+**3:30, the rhythm screen + add-to-home-screen.** One screen that sets the contract
 for week one, then the PWA ask, in that order (value restated before the ask):
 
 > **Screen: how this works**
@@ -605,7 +605,7 @@ in copy), NT-1 (invite), NT-2 (PWA), NT-8 (generation status + retry/escalation)
 
 ---
 
-## Part 3 — Week-one drip journey (day 1–7)
+## Part 3: Week-one drip journey (day 1–7)
 
 The 15-minute questionnaire, re-scoped as the day-1→7 engagement mechanic
 (M2-03 split iii): **3 questions a day**, each answerable in under 20 seconds, each
@@ -661,7 +661,7 @@ likely to answer "yes"** (calibrated by age band + intake answers), because earl
 (kit: "not yet, that's just what's next"). "Not sure" always present, never penalized.
 
 **Day 2, evening.** Journal prompt #2. If she replied day 1, reference it ("did the
-backwards 3 come up again, or was that a one-off?" — continuity is the point). If she
+backwards 3 come up again, or was that a one-off?", continuity is the point). If she
 didn't, fresh and light: "What's one thing Maya did today that made you smile?"
 
 **Day 3.** Drip set 2 (3 questions). After answering, the first **profile-visible
@@ -757,7 +757,7 @@ metric explicitly: she's the persona the efficacy loop was articulated by.
   signed up at 9pm, drips arrive 8pm, not 8am. Journal prompt merges INTO the drip
   message for her (one evening touch, not two: time-starved law).
 - Every drip question voice-answerable: "or just tell me about the day and I'll pull
-  the answers out myself" — a voice ramble auto-answers matching drip questions
+  the answers out myself", a voice ramble auto-answers matching drip questions
   (routing per M2-07 + M2-13). This is her power feature: one 40-second voice note =
   3 drip answers + journal entry + hours.
 - Weekly note arrives Saturday morning but expects Sunday reading; no time-sensitive
@@ -815,7 +815,7 @@ subset (hours in week one), NT-4 (drip scheduler mechanics), M1-08 (email).
 
 ---
 
-## Part 4 — Aha-moment hypothesis analysis
+## Part 4: Aha-moment hypothesis analysis
 
 Per the aha-moment method: qualitative candidates first, then leading indicators and
 the metric bet. **Honesty note:** we have no cohort data (planning stage; n=1
@@ -826,14 +826,14 @@ seeing an artifact; conference moms asked for hours).
 
 ### Candidate ahas
 
-**Candidate 1 — first personalized worksheet (<3 min).**
+**Candidate 1, first personalized worksheet (<3 min).**
 The activation wow. *For:* it's the artifact that sold the friend (A2's founding
 story); it's visual, immediate, shareable. *Against:* it's a one-shot; "AI made a
 worksheet" is increasingly table stakes, and a wow that doesn't recur predicts
 nothing by itself. Verdict: **necessary but not sufficient**: it's the *hook*, the
 thing that earns week one, not the thing that creates a subscriber.
 
-**Candidate 2 — first "logged, that moved her counting up."**
+**Candidate 2, first "logged, that moved her counting up."**
 The moment her spoken words visibly update the child's picture. *For:* this is the
 "it learns" realization: the moat made felt; it's repeatable (every log can deliver
 it); it's Alessa's actual daily habit (voice → log → smarter). *Against:* subtle;
@@ -841,7 +841,7 @@ easy to miss if the confirmation copy is weak; requires her to log at all. Verdi
 **the strongest habit-former hypothesis**. The wow gets her in the door; this is what
 makes day 3 different from day 1.
 
-**Candidate 3 — first weekly note.**
+**Candidate 3, first weekly note.**
 The validation artifact ("am I doing enough?", answered with evidence). *For:* it's
 the emotional core per the value stack; it's the renewal argument in miniature; the
 efficacy before/after lives here from week one (hand-written, M-R). *Against:* it
@@ -849,7 +849,7 @@ arrives on day 6–9, after most abandonment risk has already resolved; it may b
 *retention* aha more than an *activation* aha. Verdict: **the week-two engine**; it
 converts an activated family into a believing one. Owned jointly with workstream 3.
 
-**Candidate 4 — first hours auto-tally.**
+**Candidate 4, first hours auto-tally.**
 "You talked, I logged 1h 45m toward your 900." *For:* the only externally validated
 demand (conference ask); the whole aha for P4 and often P2; zero effort demanded.
 *Against:* irrelevant to P1 and low-regulation states; unemotional for the
@@ -884,7 +884,7 @@ chip-to-freeform ratio.
 
 ---
 
-## Part 5 — Friction audit (every tap, field, and wait, ranked)
+## Part 5: Friction audit (every tap, field, and wait, ranked)
 
 Funnel: QR/link → landing → auth → intake → questions → wait → wow → rhythm/PWA →
 day 1 evening prompt. Risk = estimated drop-off severity × reach. Every row has a
@@ -916,7 +916,7 @@ a bonus; (7) out-of-range ambush → the sage card plus landing-page honesty ups
 
 ---
 
-## Part 6 — Instrumentation: event schema + the funnel dashboard
+## Part 6: Instrumentation: event schema + the funnel dashboard
 
 Naming: `area.event_name`, snake_case, past tense. Common properties on every event:
 `family_id`, `session_id`, `ts`, `platform` (ios-safari | android-chrome | desktop),
@@ -932,7 +932,7 @@ dashboard is NT-3.
 | `acquisition.cta_tapped` | `cta` (claim_invite \| waitlist \| email_me_link) | CTA tap |
 | `acquisition.waitlist_joined` | `state`, `kids_age_bands[]`, `channel` | Waitlist submit |
 | `acquisition.invite_email_sent` / `_opened` / `_claimed` | `waitlist_age_days` | Invite lifecycle |
-| `acquisition.link_saved_for_later` | — | Email-me-this-link |
+| `acquisition.link_saved_for_later` | - | Email-me-this-link |
 
 ### Activation funnel
 
@@ -947,7 +947,7 @@ dashboard is NT-3.
 | `onboarding.wow_delivered` | `latency_ms`, `minutes_since_signup`, `artifact_type`, `retry_count` | Artifact rendered on her screen |
 | `onboarding.wow_engaged` | `action` (print \| save \| share \| zoom) | First engagement action |
 | `onboarding.wow_failed` | `stage`, `fallback` (email_promise) | Generation failure |
-| `onboarding.rhythm_acknowledged` | — | Rhythm screen continue |
+| `onboarding.rhythm_acknowledged` | - | Rhythm screen continue |
 | `pwa.install_prompted` / `_completed` / `_dismissed` | `occasion` (post_wow \| day3) | A2HS lifecycle |
 | `permissions.voice_prompted` / `_granted` / `_denied` | `occasion` (journal_reply \| chat \| q4) | Mic permission lifecycle |
 
@@ -987,7 +987,7 @@ day with ≥3 signups; drip answer rate day-over-day drop >30%.
 
 ---
 
-## Part 7 — Ticket mapping + NEW-TICKET flags
+## Part 7: Ticket mapping + NEW-TICKET flags
 
 ### Coverage against 03-backlog.md
 
@@ -1013,37 +1013,37 @@ day with ≥3 signups; drip answer rate day-over-day drop >30%.
 
 ### NEW-TICKET flags
 
-- **NT-1 — Invite + waitlist service [M-R, blocking wk6].** Code redemption at
+- **NT-1, Invite + waitlist service [M-R, blocking wk6].** Code redemption at
   signup (URL-carried + typed fallback), cohort codes with caps + soft overflow,
   personal share links per subscriber with `invited_by` attribution, waitlist table
   (email, state, kids' age bands, channel), invite-email send with saved-state
   resume, expiry. The M-R plan says "invite codes" and "landing page w/ waitlist"
   but no ticket exists. Size: M.
-- **NT-2 — PWA shell + add-to-home-screen flow [M-R].** Manifest, icons (DS app-icon
+- **NT-2, PWA shell + add-to-home-screen flow [M-R].** Manifest, icons (DS app-icon
   spec exists in `brand-logo-lockup`), iOS illustrated A2HS overlay, Android
   `beforeinstallprompt` handling, `pwa.*` events, re-offer-once rule. Size: S–M.
-- **NT-3 — Product analytics emission + funnel dashboard [M-R].** The `events` table
+- **NT-3, Product analytics emission + funnel dashboard [M-R].** The `events` table
   exists (M1-02) but nothing ticketed emits the Part 6 schema or renders the funnel
   dashboard. Concierge-scale version can be a nightly SQL + one internal page.
   Size: M.
-- **NT-4 — Drip scheduler mechanics [M-R].** Dispatcher rows for the 3/day
+- **NT-4, Drip scheduler mechanics [M-R].** Dispatcher rows for the 3/day
   questionnaire: per-family send-hour (P5 timing), multi-child rotation, skip/pause
   rules (2 ignored days ⇒ pause), question-order engineering (early-yes bias, P3
   softening), voice-ramble auto-answer routing hook. Builds on M3-10 patterns but is
   needed before M3-10 ships; keep it minimal. Size: M.
-- **NT-5 — Out-of-range child handling [M-R, blocked on ❓ Sidney call #3].** The sage
+- **NT-5, Out-of-range child handling [M-R, blocked on ❓ Sidney call #3].** The sage
   card, hours/journal-only child mode, "materials on the way" states, the all-kids-
   out-of-range wow pivot, and the "tell you the moment it changes" promise mechanism
   (a flag flip when M5-06 ships). Size: S–M once the call resolves.
-- **NT-6 — Programmatic SEO pages [GA build, M-R start].** `/states/{state}/…` pages
+- **NT-6, Programmatic SEO pages [GA build, M-R start].** `/states/{state}/…` pages
   fed by the M3-05 ruleset (statute + last-verified rendered), `/materials/{age}/
   {topic}` with un-gated samples, brand one-pager (`homa homeschool` SERP defense,
   needed in M-R per A2 edge #1). SEO lead time justifies early skeleton. Size: L.
-- **NT-7 — Channel-variant landing bands [M-R].** One landing, four hero/proof
+- **NT-7, Channel-variant landing bands [M-R].** One landing, four hero/proof
   variants (conference continuity, "{friend} invited you", skeptic-ordered fold,
   state/age SEO bridge), `variant` in analytics. A slice of the M-R wk6 landing
   line item, made explicit so it's scoped. Size: S.
-- **NT-8 — Generation status streaming + retry/escalation [M-R].** Real pipeline
+- **NT-8, Generation status streaming + retry/escalation [M-R].** Real pipeline
   status lines to the waiting screen, >120s reassurance state, failure → retry queue
   → email delivery → Sidney alert (the "within the hour, I promise" machinery).
   Stretch: pre-generation from partial answers during Q3/Q4. Attach to M1-04/M2-05

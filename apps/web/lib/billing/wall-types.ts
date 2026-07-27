@@ -5,15 +5,27 @@
  * off, the family is exempt, or the trial already started.
  */
 
-export interface WallCheckout {
+export type PlanTier = "regular" | "plus" | "elite";
+
+/** Which price the tier picker's monthly/annual toggle currently shows. */
+export type BillingPeriod = "monthly" | "annual";
+
+export interface TierCheckout {
   /** Stripe Payment Link URLs with client_reference_id (the family id)
    *  and prefilled_email already appended. Annual is null when its link
-   *  is not configured: the founder ruled the flip starts monthly-only
-   *  ($19) while the $99 sticker's Homeschool Fox collision is open, so
-   *  a missing annual link narrows the offer instead of downing the
-   *  wall (2026-07-18). */
+   *  is not configured for this environment: a missing annual link
+   *  narrows that tier to monthly-only instead of hiding the tier. */
   monthlyUrl: string;
   annualUrl: string | null;
+}
+
+export interface WallCheckout {
+  regular: TierCheckout;
+  /** null when Plus's Payment Links aren't configured for this
+   *  environment: the tier just doesn't render, same narrowing rule as
+   *  a tier's missing annual link. */
+  plus: TierCheckout | null;
+  elite: TierCheckout | null;
 }
 
 /**

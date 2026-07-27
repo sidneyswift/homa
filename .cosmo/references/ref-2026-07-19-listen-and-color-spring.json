@@ -1,0 +1,51 @@
+{
+  "id": "ref-2026-07-19-listen-and-color-spring",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:21:35-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427695.247009",
+  "format": "coloring page (title-inferred, never confirmed)",
+  "title": "Listen and Color Spring Worksheet: Garden Animals Coloring Sheet",
+  "publisher": "TPT (seller unknown, link expired before capture)",
+  "captureFailed": "Bare TPT signed-URL drop with no attached file. The signed URL (rc-assets.teacherspayteachers.com/resources/13406620/...) carried a verify token stamped 1784428584 (2026-07-18) and returns HTTP 403 as of 2026-07-21, the token expired before any session captured the underlying PDF. No free sample, cached copy, or alternate source was found.",
+  "analysisQuality": "heuristic",
+  "layout": {
+    "status": "unknown",
+    "reason": "capture failed, file was never retrieved"
+  },
+  "skillTargeting": {
+    "status": "unknown",
+    "reason": "capture failed, file was never retrieved",
+    "subject": "ela",
+    "notes": "Title implies a listening-and-coloring activity (likely an audio or read-aloud cue paired with a coloring response) themed around garden animals and spring; this is an inference from the filename only, not a confirmed mapping."
+  },
+  "difficulty": {
+    "status": "unknown",
+    "reason": "capture failed, file was never retrieved"
+  },
+  "theming": {
+    "status": "unknown",
+    "reason": "capture failed, file was never retrieved",
+    "themeGuess": "spring, garden animals (from title only)"
+  },
+  "printFormat": {
+    "status": "unknown",
+    "reason": "capture failed, file was never retrieved"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [],
+    "notes": "No cross-reference possible without the source file."
+  },
+  "stages": {
+    "captured": null,
+    "analyzed": false,
+    "tasteLogged": false,
+    "graduation": { "kind": "none", "targets": [], "commit": null },
+    "taxonomy": { "proposedTopics": [], "commit": null },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "notes": "Dropped by Aless as a bare TPT link with no commentary, part of a rapid-fire link-dump session on 2026-07-18/19. A prior session left eyes and ship reactions on this message with no ref JSON ever written and no thread reply sent, the same fabricated-completion pattern found on other drops from this period. This ref honestly records the capture failure per reference-ingestion step 0 instead of leaving the loss silent."
+}

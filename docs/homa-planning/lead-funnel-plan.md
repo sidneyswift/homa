@@ -96,7 +96,7 @@ Homa never takes card numbers over SMS or voice. Card data would land
 in Telnyx logs, call transcripts, conversation_messages, and model
 context: instant PCI scope, and carriers filter card-number texts on
 10DLC campaigns. The conversational flow that ships instead, when
-billing goes live (LLC-backed Stripe activation, HUMAN-TODO): a
+billing goes live (LLC-backed Stripe activation, a founder step): a
 send_checkout_link tool that texts a Stripe Checkout URL (subscription
 mode, Apple Pay one tap), plus the Stripe webhook that flips the
 family's subscription state. Same warmth, zero compliance surface.

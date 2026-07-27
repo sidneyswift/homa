@@ -1,0 +1,75 @@
+{
+  "id": "ref-2026-07-18-homeschool-languages-spanish-level1",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:12:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427173.921849",
+  "format": "language-learning-picture-book",
+  "title": "Homeschool Languages — Spanish Level 1 Booklets Sample (¿Cómo estás? + Tengo un juguete rojo)",
+  "publisher": "Homeschool Languages",
+  "series": "Level 1 Books",
+  "gradeLevel": "Elementary (ages 4-8, beginner Spanish)",
+  "pageCount": 25,
+  "callouts": [],
+  "overview": {
+    "description": "A 25-page sample of two Level 1 Spanish mini-books from Homeschool Languages. Each book tells a simple story in Spanish using conversational phrases. Every page has: a full-color illustration (top), Spanish text in large font (middle), phonetic pronunciation guide in parentheses (below), and English translation (bottom). Supports both Latin American and European Spanish (green text marks European variants).",
+    "books": [
+      {"number": 1, "title": "¿Cómo estás?", "theme": "Greetings, feelings, sharing candies", "phrases": ["¡Hola!", "¿Cómo estás?", "¡Estoy bien!", "¿Por qué?", "¡Porque tengo tres dulces!", "¡Gracias!", "¡De nada!"]},
+      {"number": 2, "title": "Tengo un juguete rojo", "theme": "Colors, toys, counting", "phrases": ["Tengo un juguete rojo", "un juguete azul", "un juguete amarillo", "¡Ahora tengo cinco juguetes!"]}
+    ]
+  },
+  "designPatterns": {
+    "trilingualLayout": {
+      "description": "Every phrase shown in three layers: (1) Spanish in large bold font, (2) phonetic pronunciation in parentheses (e.g., 'KOH-moh es-TAHS'), (3) English translation. A parent who doesn't speak Spanish can still read the story aloud correctly using the phonetic guide.",
+      "value": "Zero-barrier language learning. No prior Spanish knowledge needed from the parent."
+    },
+    "storyBasedVocabulary": {
+      "description": "Vocabulary isn't taught in isolation (word lists). It's embedded in a simple narrative: two kids meeting, sharing, thanking each other. The child learns 'gracias' because Sofía says it to Rafael, not because it appears on a flashcard.",
+      "value": "Contextual learning. Words are remembered because they have a story context."
+    },
+    "inclusiveIllustrations": {
+      "description": "Rafael uses a wheelchair. This is not mentioned in the text — it's simply part of the illustration. Casual, normalized representation of disability. Consistent with the Kennedy Center's inclusive curriculum approach Aless dropped earlier.",
+      "value": "Representation without tokenization. A child in a wheelchair is just... a kid in the story."
+    },
+    "phoneticPronunciationGuide": {
+      "description": "Every Spanish phrase includes a phonetic guide using English sounds: '¡Gracias, Rafael!' = '(GRAH-syahs rah-fah-EL)'. Capitalized syllables show stress. Parent reads the phonetic version aloud.",
+      "value": "Solves the #1 barrier to foreign language homeschooling: 'I don't know how to pronounce it.' Now you do."
+    },
+    "dualDialectSupport": {
+      "description": "Green text marks European Spanish variants (e.g., 'th' pronunciation for 'c' before 'e/i'). Latin American Spanish learners ignore the green text. Clean solution for supporting both dialects without separate editions.",
+      "value": "One book works for both dialect preferences. No wasted content."
+    },
+    "colorAndCountingIntegration": {
+      "description": "Book 2 teaches colors (rojo, azul, amarillo) and counting (uno through cinco) through a toy collection story. Math + Spanish in one narrative.",
+      "value": "Cross-curricular: language learning + math concepts + color recognition."
+    }
+  },
+  "overallSkillTargeting": {
+    "subject": "world-languages",
+    "domain": "spanish",
+    "topics": [
+      {"id": "spanish.greetings", "kind": "procedural", "mapped": false},
+      {"id": "spanish.feelings", "kind": "conceptual", "mapped": false},
+      {"id": "spanish.colors", "kind": "conceptual", "mapped": false},
+      {"id": "spanish.counting-1-5", "kind": "procedural", "mapped": false},
+      {"id": "spanish.polite-phrases", "kind": "procedural", "mapped": false}
+    ],
+    "unmappedSkills": ["foreign-language-picture-book", "phonetic-pronunciation-guide", "bilingual-story"]
+  },
+  "difficulty": {
+    "ageBandMonths": [48, 96],
+    "complexity": "single-skill per page (one phrase at a time)",
+    "prerequisites": [],
+    "scaffolding": "very high — phonetic guide + English translation + illustration all supporting comprehension"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "bilingual-picture-book",
+        "description": "A short story (8-12 pages) told in a target language with three layers per page: (1) target language in large font, (2) phonetic pronunciation guide, (3) English translation. Full-color illustrations that show the meaning without reading. Designed for a parent who doesn't speak the target language. Could be generated for Spanish, French, Mandarin, etc."
+      }
+    ]
+  },
+  "notes": "Eleventh and final(?) Aless drop. First world languages / foreign language drop from either user. This signals that Aless wants Homa to support bilingual or foreign language learning — specifically Spanish (Aless is Aless Llanes, likely bilingual herself). The phonetic pronunciation guide is critical: it means a monolingual English-speaking parent can teach Spanish by reading the phonetics aloud. The inclusive representation (Rafael in a wheelchair) is consistent with her Kennedy Center drop. Aless is building a picture of Homa that covers: core academics + arts + music + foreign languages + field trips + progress tracking + inclusive design."
+}

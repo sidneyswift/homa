@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Process reference
+    url: https://github.com/sidneyswift/homa/blob/main/AGENTS.md
+    about: Label taxonomy and issue lifecycle live in AGENTS.md, section "Tickets and issue tracking".

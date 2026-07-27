@@ -7,16 +7,11 @@ import { defineDynamic, defineInstructions } from "eve/instructions";
  * per-topic message can stay a thin checklist (the macmini pattern:
  * thin trigger, fat procedure).
  */
-export default defineDynamic({
-  events: {
-    "turn.started": (_event, ctx) => {
-      const isResearch =
-        ctx.channel.metadata?.adapterName === "research" ||
-        ctx.channel.kind === "channel:research";
-      if (!isResearch) return null;
-
-      return defineInstructions({
-        markdown: `
+/**
+ * Pure named export so the context budget check can measure the block
+ * without a research session; the handler below is detection plus this.
+ */
+export const RESEARCH_MODE_MARKDOWN = `
 ## You are researching for the whole fleet (no family is loaded)
 
 This is one of Homa's own overnight research runs. Nothing you write here
@@ -74,8 +69,17 @@ children.
 - Budget: this is a nightly background pass, not a dissertation. When
   the cell is done, move on; when you run short, save what is solid and
   note what remains.
-        `.trim(),
-      });
+`.trim();
+
+export default defineDynamic({
+  events: {
+    "turn.started": (_event, ctx) => {
+      const isResearch =
+        ctx.channel.metadata?.adapterName === "research" ||
+        ctx.channel.kind === "channel:research";
+      if (!isResearch) return null;
+
+      return defineInstructions({ markdown: RESEARCH_MODE_MARKDOWN });
     },
   },
 });

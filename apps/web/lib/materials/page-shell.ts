@@ -39,6 +39,29 @@ export function hasPageBreakMarkup(html: string): boolean {
   return PAGE_BREAK_MARKUP.test(html);
 }
 
+export const SPRITE_SLICE_GATE_NOTE =
+  "The page HTML was rejected: it scales a background image past 100 percent, which is sprite slicing. PDF viewers disagree on scaled background positioning, so sliced cells can print blank for the parent even when the preview looks right. Give each picture its own <img> tag, or generate one image that already contains the whole arrangement and keep the title and instructions in HTML.";
+
+const BACKGROUND_SIZE_DECLARATION = /background-size\s*:\s*([^;{}]*)/gi;
+
+/**
+ * background-size above 100 percent is the sprite-slicing signature: one
+ * big image scaled up so each cell shows a slice through
+ * background-position. Image models do not draw exact grids, and PDF
+ * viewers disagree on the positioning the print engine emits for this
+ * construct (2026-07-19: Chromium and pdf.js drew the shipped page fine
+ * while Quartz rendered the same bytes with blank cells), so the tool
+ * refuses it outright instead of trusting any single review render.
+ */
+export function hasSpriteSliceMarkup(html: string): boolean {
+  for (const declaration of html.matchAll(BACKGROUND_SIZE_DECLARATION)) {
+    for (const token of declaration[1].matchAll(/(\d+(?:\.\d+)?)\s*%/g)) {
+      if (Number.parseFloat(token[1]) > 100) return true;
+    }
+  }
+  return false;
+}
+
 /**
  * Models sometimes deliver the page wrapped in an XML CDATA section
  * (`<![CDATA[ ... ]]>`). Browsers parse the opening marker as a bogus
@@ -66,13 +89,34 @@ function visibleText(html: string): string {
 /**
  * validatePrintableHtml(html, extraText): string | null
  * Returns a refusal reason for the model, or null when the sheet passes.
- * Two gates: no executable markup (the renderer draws pages, it never
- * runs the agent's code paths), and the brand laws on visible text.
+ * Three gates: no executable markup (the renderer draws pages, it never
+ * runs the agent's code paths), no sprite slicing (viewer-divergent in
+ * print), and the brand laws on visible text. Each refusal names the rule
+ * that fired and the exact matched text, and the voice-law gate checks the
+ * page body and the tool's own metadata (title, skill, subject, etc.)
+ * separately so a metadata hit is never reported as a page-HTML problem
+ * (a model that only edits the page can never clear a refusal caused by,
+ * say, its own requestSummary otherwise).
  */
 export function validatePrintableHtml(html: string, extraText: string): string | null {
-  if (BLOCKED_MARKUP.test(html)) return SHEET_GATE_NOTE;
-  const text = `${visibleText(html)} ${extraText}`;
-  if (EM_DASH.test(text) || BANNED_WORDS.test(text)) return SHEET_GATE_NOTE;
+  const blockedMatch = BLOCKED_MARKUP.exec(html);
+  if (blockedMatch) {
+    return `The page HTML was rejected: it contains "${blockedMatch[0]}", which is not allowed (no <script>, <iframe>, <object>, <embed> tag, and no javascript: URL). Remove it from the page and call the tool again.`;
+  }
+  if (hasSpriteSliceMarkup(html)) return SPRITE_SLICE_GATE_NOTE;
+
+  const bodyBannedMatch = BANNED_WORDS.exec(visibleText(html));
+  if (EM_DASH.test(visibleText(html)) || bodyBannedMatch) {
+    const token = bodyBannedMatch ? bodyBannedMatch[0] : "an em dash character";
+    return `The page HTML was rejected: the visible page text contains "${token}", which the house voice rules forbid (no em dashes, no deficit words: behind, delayed, disorder, diagnosis, screening, assessment, percentile). Remove it from the page text and call the tool again.`;
+  }
+
+  const metaBannedMatch = BANNED_WORDS.exec(extraText);
+  if (EM_DASH.test(extraText) || metaBannedMatch) {
+    const token = metaBannedMatch ? metaBannedMatch[0] : "an em dash character";
+    return `The page itself is fine; this was rejected because of its metadata, not the HTML. The title, skill, subject, curriculum, theme, a character name, the child's name, or the request summary contains "${token}", which the house voice rules forbid. Fix that field (not the page) and call the tool again.`;
+  }
+
   return null;
 }
 
@@ -136,6 +180,41 @@ export function splitPageBodies(storedHtml: string): string[] {
     .split(PAGE_HTML_DELIMITER)
     .map((body) => body.trim())
     .filter((body) => body.length > 0);
+}
+
+/**
+ * selectMaterialPages(storedHtml, pageIndex): the pages a
+ * create_printable `fromMaterialId` entry contributes.
+ *
+ * Undefined pageIndex takes the whole material, which is what reuse
+ * always meant. A pageIndex takes exactly one page, which is what makes
+ * revising one page of a packet cheap: before this existed the only way
+ * to change page 4 of twelve was to retype all twelve as arguments,
+ * about 45KB and 25-38k output tokens an attempt, and on 2026-07-27 the
+ * retry that cost stopped producing a parseable tool call at all while a
+ * parent asked four times for one image to be bigger
+ * (plans/2026-07-27-packet-page-revision-failure.md).
+ *
+ * Pages count from 1, because every other place a page gets named (the
+ * parent's request, the reviewer's verdict, the preview strip) counts
+ * from 1, and an off-by-one here silently ships the wrong page.
+ *
+ * Pure and split out from the tool so the numbering has tests that do
+ * not need a database, a blob store, or a headless browser.
+ */
+export type PageSelection =
+  | { ok: true; bodies: string[] }
+  | { ok: false; pageCount: number };
+
+export function selectMaterialPages(
+  storedHtml: string,
+  pageIndex: number | undefined,
+): PageSelection {
+  const bodies = splitPageBodies(storedHtml);
+  if (pageIndex === undefined) return { ok: true, bodies };
+  const body = bodies[pageIndex - 1];
+  if (body === undefined) return { ok: false, pageCount: bodies.length };
+  return { ok: true, bodies: [body] };
 }
 
 /** The class render-page.ts uses to find and screenshot each page box. */

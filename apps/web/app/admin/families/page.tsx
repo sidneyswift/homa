@@ -61,7 +61,7 @@ function chip(href: string, label: string, active: boolean) {
       className={
         active
           ? "rounded-pill border border-[var(--clay-400)] bg-brand-soft px-3.5 py-1.5 text-sm font-bold text-[var(--clay-700)]"
-          : "rounded-pill border border-border-default bg-card px-3.5 py-1.5 text-sm font-semibold text-body hover:border-[var(--clay-300)]"
+          : "rounded-pill border border-border bg-card px-3.5 py-1.5 text-sm font-semibold text-body hover:border-[var(--clay-300)]"
       }
     >
       {label}
@@ -86,7 +86,7 @@ export default async function AdminFamiliesPage({
   const snapshots = await getFamilySnapshots();
   const rows = applySort(applyFilter(snapshots, filter), sort);
   const totalKids = snapshots.reduce((sum, s) => sum + s.kidCount, 0);
-  const active = snapshots.filter((s) => s.userMessages7d > 0).length;
+  const active = snapshots.filter((s) => s.userMessagesInRange > 0).length;
   const issues = applyFilter(snapshots, "issues").length;
   const quiet = snapshots.filter((s) => s.stage === "quiet").length;
 

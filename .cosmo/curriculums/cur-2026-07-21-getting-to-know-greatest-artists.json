@@ -1,0 +1,219 @@
+{
+  "id": "cur-2026-07-21-getting-to-know-greatest-artists",
+  "name": "Getting to Know the World's Greatest Artists compilation (6 complete volumes by Mike Venezia: Henri Rousseau, Frida Kahlo, Da Vinci, Monet, Pierre Auguste Renoir, Michelangelo)",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-20T20:36:43-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784594203.167309",
+  "sourceFiles": [
+    {
+      "filename": "getting-to-know-greatest-artists.pdf",
+      "localPath": ".cosmo/inspo-files/getting-to-know-greatest-artists.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-21-getting-to-know-greatest-artists/getting-to-know-greatest-artists.pdf"
+    }
+  ],
+  "routing": {
+    "skillUsed": "curriculum-ingestion",
+    "ruling": "Curriculum, not reference. This drop is a coherent multi-book set (6 complete volumes of one series), and the curriculum skill's own routing rule says a multi-book wave is one curriculum analysis per book or coherent set, never a pile of reference analyses. Nothing in the drop is a printable page meant to be used directly; the value is the series' consistent, nameable teaching method (biography-driven art appreciation) and its fit to Homa's Art > Picture Study & Art Appreciation strand, which are Layer-1/Layer-2 concerns the reference skill's five per-page dimensions (layout, print format) mostly cannot express for a bound trade book. The closest precedent both ways was checked: Beast Academy volumes (bound books carrying a method) went curriculum; the toddler science activity book (a single idea-book with no method claim beyond its activities) went reference. This set is on the Beast Academy side of that line."
+  },
+  "layer1_philosophy": {
+    "methodology": "Biography-driven art appreciation: the 'Getting to Know the World's Greatest Artists' series, written AND illustrated by Mike Venezia, published by Children's Press (Chicago; later volumes by Children's Press / A Division of Grolier Publishing, Danbury, Connecticut). Identity verified directly from the pages, not assumed from the filename: every one of the 6 front covers carries the series badge 'GETTING TO KNOW THE WORLD'S GREATEST ARTISTS' and the credit 'WRITTEN AND ILLUSTRATED BY MIKE VENEZIA', and every title page repeats both. Consultants are credited on some title pages (Monet: consultant Sara Mollman Underhill; Renoir and Michelangelo: consultant Meg Moss). Each volume is a complete, standalone 32-page picture-book biography of one artist that alternates three ingredients on nearly every spread: full-color reproductions of the artist's real works with complete scholarly captions (title, date, medium, dimensions, museum), Venezia's own humorous cartoon gag panels with speech bubbles reacting to the artist's life, and 2 to 6 sentences of very simple, warm prose per page.",
+    "principles": [
+      "Humor is the on-ramp: nearly every volume opens and punctuates the artist's life with cartoon gag panels (a museum-goer nervous in front of Rousseau's jungle, schoolkids teasing young Monet, a figure on scaffolding painting the Sistine ceiling), so a 6-to-9-year-old meets a 'great master' through a joke before meeting the art history",
+      "Real artworks, treated seriously: each 32-page volume reproduces roughly 15 to 25 actual works in color with full museum captions (title, date, medium, size, collection), so the child is looking at the real Mona Lisa, The Sleeping Gypsy, Impression: Sunrise, or the Sistine ceiling, never a simplified redrawing",
+      "The life explains the work: every volume ties specific artworks to specific life events (Kahlo's bus accident and Without Hope, Rousseau's customs-office job and jungle daydreams, Monet's Giverny water garden, Michelangelo forced by Pope Julius II to paint instead of sculpt), teaching that art comes from a person's real circumstances",
+      "Hard things are told plainly and kindly: polio and a near-fatal accident (Kahlo), public ridicule and rejection from the Salon (Rousseau, Monet, Renoir), a month in jail (Rousseau), deep grief (Monet's wife Mary in the Edison volume's sibling series sense, and Camille's early death), all appear in age-appropriate, matter-of-fact language rather than being sanitized away",
+      "Art vocabulary arrives in context, italicized in the prose rather than in a glossary in this older series edition: impressionism, mural, fresco, Renaissance, patron, Salon, sculpture, each defined by the sentence around it at the moment the life story needs it",
+      "Every volume ends by sending the family to real art: a closing page lists every museum holding the works reproduced in that book ('The paintings in this book came from the museums listed below. If none of these museums is close to your home, maybe you can visit one when you are on vacation.'), making the book a bridge to real-world viewing, not a substitute for it"
+    ],
+    "learningTheory": "Exposure-and-affection model rather than skills instruction: the series assumes young children build lasting art appreciation by liking one artist at a time as a person, seeing many real works casually (no analysis protocol, no gaze-and-recall routine), and hearing the story of a life told simply. Volumes are fully standalone with no prescribed order, no progression, and no prerequisites; the 6 volumes here span naive/primitive (Rousseau), surrealist-adjacent Mexican modernism (Kahlo), High Renaissance (Da Vinci, Michelangelo), and Impressionism (Monet, Renoir), so a family can sequence by interest, by era, or to match a museum visit.",
+    "assessmentApproach": "None anywhere in any of the 6 volumes: no questions, no activities, no quizzes, no discussion prompts. The books are pure read-aloud or early-independent-read material; any narration, discussion, or portfolio work is supplied by the family's own method around the book.",
+    "parentRole": "Reader-aloud and museum companion. The prose is written directly to the child in second person at roughly a grade 2-3 independent reading level, so a 6-year-old is read to and an 8-to-9-year-old can read alone. The closing museum lists explicitly recruit the parent for a real-world follow-through visit.",
+    "knowledgeBankMatches": [],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "biography-driven-appreciation",
+        "topicType": "method_philosophy",
+        "title": "Biography-Driven Appreciation Study",
+        "summary": "An appreciation methodology for art, music, and science built on short, humorous, true biographies of one great figure at a time: real works reproduced with museum-grade captions, cartoon humor as the entry point, life events explicitly connected to the works, hard topics told plainly, and an explicit bridge to real-world viewing or listening. Distinct from Charlotte Mason picture study (no gaze-hide-recall protocol) and from elements-of-design skills programs (organized by person, not by formal element). The canonical example is Mike Venezia's 'Getting to Know...' series, a staple spine for homeschool artist and composer study rotations."
+      },
+      {
+        "suggestedKey": "venezia-getting-to-know-artists-format",
+        "topicType": "method_format",
+        "title": "Getting to Know the World's Greatest Artists Format (Mike Venezia)",
+        "summary": "32-page standalone picture-book biographies, one artist per volume, written and illustrated by Mike Venezia (Children's Press / Grolier). Per spread: real artwork reproductions with full captions (title, date, medium, size, museum), humorous cartoon gag panels with speech bubbles, and 2-6 simple sentences of prose. Art vocabulary italicized in context; no glossary, no index, no activities in this older series edition; every volume closes with a list of museums holding the reproduced works. This compilation: Henri Rousseau, Frida Kahlo, Da Vinci, Monet, Pierre Auguste Renoir, Michelangelo. Volumes are unordered and standalone; families typically use one volume per artist-study block."
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Whole series (all 6 volumes)",
+        "curriculumTopic": "Getting to know one artist at a time: who they were, when and where they lived, why they became famous, and which works are theirs",
+        "homaSubject": "art",
+        "homaDomain": "picture-study-appreciation",
+        "homaTopicId": "mt_Hq3vTz8Kd1",
+        "status": "mapped",
+        "suggested": {
+          "note": "Genuine gap filled this session. Checked the Art > Picture Study & Art Appreciation domain's 2 pre-existing topics before adding: mt_Xp1WkwWozD is the CM look-hide-recall observation routine and mt_2u99ybq83k is process-art response, and neither names knowing the artist as a person (life story, era, famous works) as the learning target, which is this entire series' point. Also checked 'biograph', 'famous', 'artist' across all 1654 pre-existing topics: the only other hit is the broad History > Cultural Studies 'Art Appreciation' (4-14) survey topic. Added mt_Hq3vTz8Kd1 'Getting to Know an Artist: Life and Famous Works' (Art > Picture Study & Art Appreciation, age 6-9, CONCEPTUAL) under the existing MARBLE_DOMAIN_MAP pair, no mapping.ts edit needed."
+        }
+      },
+      {
+        "curriculumSubject": "Whole series (all 6 volumes)",
+        "curriculumTopic": "Looking closely at real artworks reproduced with museum captions",
+        "homaSubject": "art",
+        "homaDomain": "picture-study-appreciation",
+        "homaTopicId": "mt_Xp1WkwWozD",
+        "status": "partial",
+        "suggested": {
+          "note": "Homa's 'Picture Study: Observing and Recalling Artwork' topic (4-7) covers the CM gaze-hide-recall routine. These books expose the child to many real artworks per volume but prescribe no observation protocol at all; the exposure half overlaps, the recall routine does not. Recorded as partial rather than forcing a match."
+        }
+      },
+      {
+        "curriculumSubject": "Monet and Renoir volumes",
+        "curriculumTopic": "Impressionism as a movement: painting outdoors, visible brush strokes, light and color over detail, the Salon's rejection and the independent exhibitions, the naming from Impression: Sunrise",
+        "homaSubject": "social_studies",
+        "homaDomain": "cultural-studies",
+        "homaTopicId": "mt_C6QxiXnbAP",
+        "status": "partial",
+        "suggested": {
+          "note": "History > Cultural Studies 'Art Appreciation' (4-14) is a single broad survey topic that can absorb movement-level content, but no topic names individual art movements. A real, moderate gap (two full volumes teach Impressionism by name here); not filled this session to keep taxonomy additions proportionate at one per drop. A future art-history ingestion could justify movement-level topics."
+        }
+      },
+      {
+        "curriculumSubject": "Da Vinci and Michelangelo volumes",
+        "curriculumTopic": "Renaissance context: Florence workshops, patrons (Medici, Pope Julius II), fresco technique, sculpture from marble, Leonardo's notebooks and inventions",
+        "homaSubject": "social_studies",
+        "homaDomain": "historical-thinking",
+        "homaTopicId": "mt_VXcua6-txq",
+        "status": "partial",
+        "suggested": {
+          "note": "History > Medieval Times already has 'Printing Press & Renaissance' (mt_rf23aL6KwH, 9-11) and Historical Thinking has a vocabulary topic (6-10); both partially cover the era framing at different age bands. The art-technique content (fresco, marble carving) has no content topic; art technique lives in the reserved assessment domain technique-observation (packages/taxonomy/src/domains.ts), which is deliberately not a topics.json home. Recorded, not added."
+        }
+      },
+      {
+        "curriculumSubject": "Frida Kahlo volume",
+        "curriculumTopic": "Mexican Revolution context, muralists (Rivera, Orozco, Siqueiros), Mexican folk art in Kahlo's painting, self-portraits as feelings made visible",
+        "homaSubject": "social_studies",
+        "homaDomain": "historical-thinking",
+        "homaTopicId": "mt_VXcua6-txq",
+        "status": "partial",
+        "suggested": {
+          "note": "No Homa topic covers Mexican history or muralism; Historical Thinking vocabulary (6-10) loosely covers the historical-context framing. The volume's emotional-literacy thread (painting feelings, pain, and identity) also brushes Personal & Social Development's Self-Awareness domain without matching a specific topic. Recorded honestly as partial."
+        }
+      },
+      {
+        "curriculumSubject": "Whole series (all 6 volumes)",
+        "curriculumTopic": "Responding to a studied artist by making art in their spirit (implicit: the books model no activity, but families use them this way in study rotations)",
+        "homaSubject": "art",
+        "homaDomain": "picture-study-appreciation",
+        "homaTopicId": "mt_2u99ybq83k",
+        "status": "mapped",
+        "suggested": {
+          "note": "Homa's 'Process Art Inspired by an Artist's Technique' (4-7) is a direct match for the standard follow-on activity these books anchor in artist-study rotations, even though the books themselves contain no activities."
+        }
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 6,
+      "mapped": 2,
+      "unmapped": 0,
+      "noSubject": 0,
+      "partial": 4
+    }
+  },
+  "layer3_structure": {
+    "cadence": "None stated anywhere in any volume: these are trade picture books with no lesson structure, no suggested schedule, and no activities. The natural unit is one volume per artist-study block, which matches the Charlotte Mason rotation Homa's curriculum-writer already describes (roughly 4-week artist blocks, 9 artists across a 36-week year for the kindergarten band): one Venezia volume read across a block, one spread or a few pages per sitting.",
+    "sessionLengthMinutes": {
+      "note": "Not stated. A full volume reads aloud in roughly 15-20 minutes; a per-spread pace fits CM-style 10-15 minute short lessons."
+    },
+    "weeklyTemplate": "None in the source. The series' own only structural rhythm is internal to each volume: birth and childhood, formative struggle, breakthrough works (each tied to a reproduced artwork), late life and legacy, closing museum list.",
+    "progressionModel": "None across volumes: every volume is standalone, the series has no numbering and no prescribed order, and the 6 volumes here span four different eras and movements. Within a volume the progression is strictly chronological biography.",
+    "reviewRhythm": "None in the source; no questions, activities, or assessments of any kind. Families supply narration or portfolio work from their own method.",
+    "totalWeeks": null,
+    "notes": "PDF structure verified page by page: 109 CamScanner spread-photo pages covering 6 complete 32-page volumes in sequence: Henri Rousseau (PDF pages 0-18), Frida Kahlo (19-36), Da Vinci (37-54), Monet (55-72), Pierre Auguste Renoir (73-90), Michelangelo (91-108). Every volume's cover, title page, and closing museum-list page was individually confirmed in the renders; most PDF pages photograph a two-page spread, which is why 6 x 32 physical pages compress to 109 scan pages."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "read-aloud-biography-spread",
+        "description": "The series' native activity: an adult reads a spread (real artwork plus gag panel plus a few sentences) aloud and the child looks and reacts. Not a printable at all.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Out of scope for materials-studio by nature (it is the book itself, and the originals are copyrighted). Recorded for census completeness, not as a buildable gap. No suggestedRecipe on purpose."
+      },
+      {
+        "type": "artist-study-portfolio-card",
+        "description": "The standard homeschool companion output for this series: one card per studied artist (name banner, artwork frame, where-they-were-from circle, favorite-work box, reflection box), collected into a binder across a rotation.",
+        "recipe": "artist-composer-study-card",
+        "status": "have_recipe",
+        "notes": "Direct, confirmed fit: the shipped artist-composer-study-card recipe was checked in full this session and covers exactly this use, including the collected-portfolio framing these books anchor."
+      },
+      {
+        "type": "artist-biography-timeline-page",
+        "description": "A one-page life timeline for the studied artist: 5-8 event boxes in birth-to-legacy order, each pairing a year, a one-line event, and a small drawing frame, letting the child rebuild the book's chronological arc after reading.",
+        "recipe": "biography-timeline-page",
+        "status": "have_recipe",
+        "suggestedRecipe": {
+          "name": "biography-timeline-page",
+          "creationPath": "html",
+          "description": "Horizontal or vertical timeline scaffold: name banner, 5-8 evenly spaced event boxes with a year line, a one-sentence event line, and a small sketch frame per box. Reusable for any studied person (artist, composer, inventor, historical figure).",
+          "complexity": "low"
+        },
+        "notes": "RESOLVED 2026-07-21: built as one shared recipe covering all three sibling gaps (this file's artist-biography-timeline-page, the composers drop's biography-timeline-page, and the inventors drop's invention-timeline-page), exactly as this note anticipated. New recipe file at apps/web/agent/skills/materials-studio/references/recipes/biography-timeline-page.md, a Format library row in materials-studio SKILL.md, and an activity-formats.md entry. This gap's own slug differs from the shared recipe filename, so a GAP_ALIASES entry ('artist-biography-timeline-page' -> 'biography-timeline-page') was added in apps/web/lib/materials/cosmo-funnel.ts in the same change."
+      },
+      {
+        "type": "in-the-style-of-art-project",
+        "description": "Process-art response in the studied artist's spirit (jungle scene like Rousseau, water-lily impressions like Monet, self-portrait with meaningful objects like Kahlo), the standard block-closing activity in artist-study rotations.",
+        "recipe": "art-project-instructions",
+        "status": "have_recipe",
+        "notes": "Direct fit for art-project-instructions (materials list plus numbered steps). Law 2 note: any Homa-generated page must be Homa-authored style-inspired work, never a reproduction of the copyrighted artwork or Venezia's illustrations."
+      },
+      {
+        "type": "artwork-recognition-matching",
+        "description": "Matching or bingo-style recognition of a studied artist's famous works after reading (which of these is by Monet?).",
+        "recipe": "picture-bingo-board",
+        "status": "have_recipe",
+        "notes": "Loose fit with a hard constraint recorded honestly: picture-bingo-board and matching-visual-discrimination cover the mechanics, but the cells cannot reproduce the actual copyrighted artwork photographs; Homa can only use its own original style-evoking imagery or public-domain reproductions sourced by the family. Flagged so a future session does not naively generate artwork-reproduction cards."
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 5,
+      "haveRecipe": 4,
+      "noRecipe": 1
+    }
+  },
+  "decisionsNeeded": [
+    {
+      "category": "taxonomy",
+      "item": "Added 1 new Art topic this session, append-only under the existing MARBLE_DOMAIN_MAP pair Art > Picture Study & Art Appreciation (no mapping.ts edit): mt_Hq3vTz8Kd1 'Getting to Know an Artist: Life and Famous Works' (age 6-9, CONCEPTUAL). This is one of exactly three topics added across the three same-day Venezia drops (one per drop; see the sibling inventors and composers analyses).",
+      "impact": "The artist-study strand added earlier this session had observation and process-art topics but nothing for knowing the artist as a person, which is the entire teaching target of the most widely used artist-biography series in homeschooling. Progress tracking for artist-study rotations can now record it.",
+      "urgency": "low"
+    },
+    {
+      "category": "knowledge_bank",
+      "item": "Two proposals recorded in layer1_philosophy.knowledgeBankGaps (biography-driven-appreciation as method_philosophy, shared conceptually across all three Venezia drops, and venezia-getting-to-know-artists-format as method_format). No live DB write attempted from this sandbox, per this session's instructions.",
+      "impact": "Lets the curriculum-writer and eve name and reuse the method when a family mentions Venezia books or asks for artist study; the philosophy row deliberately covers the artist, composer, and inventor variants in one entry to avoid three near-duplicate rows.",
+      "urgency": "medium"
+    },
+    {
+      "category": "method",
+      "item": "Added one new methodology section to apps/web/agent/curriculum-writer.md: 'Biography-Driven Appreciation Study (Getting to Know series, Mike Venezia)'. Checked first: the existing Charlotte Mason section covers the gaze-recall picture-study routine and the Elements/Principles section covers skills-based art textbooks, and each explicitly warns against cross-applying the other; neither describes a biography-spine appreciation study, and the CM section's own format-preferences line already routes to artist-composer-study-card, which the new section reuses rather than duplicating.",
+      "impact": "curriculum-writer can now plan an artist, composer, or inventor block around a biography spine (read the life, look at or listen to the real works, card plus timeline plus style-response activities) for both CM and non-CM families, without forcing the CM recall routine onto families who just have the Venezia books.",
+      "urgency": "low, recorded for traceability"
+    },
+    {
+      "category": "recipe",
+      "item": "RESOLVED 2026-07-21: biography-timeline-page.md built this session (html, low complexity), covering this drop's own artist-biography-timeline-page gap plus the sibling composers and inventors drops' timeline gaps as one shared recipe, with a life-events mode (used here) and an invention-progression mode (for the inventors drop). Format library row added to materials-studio SKILL.md, activity-formats.md entry added, and a GAP_ALIASES entry ('artist-biography-timeline-page' -> 'biography-timeline-page') added in apps/web/lib/materials/cosmo-funnel.ts since this drop's own gap slug differs from the shared filename.",
+      "impact": "Reusable for every studied person across all three Venezia drops and any biography-anchored study; layer4_activities.stats now reads haveRecipe 4 / noRecipe 1 (was 3 / 2).",
+      "urgency": "resolved"
+    },
+    {
+      "category": "process",
+      "item": "Aless re-dropped this same file at ts 1784598094.196819 (2026-07-20T21:41:34-04:00), about 65 minutes after the primary drop at ts 1784594203.167309. This analysis treats 1784594203.167309 as the canonical sourceMessageTs. Both Slack messages need the thread reply and reaction treatment so neither shows as unprocessed.",
+      "impact": "Prevents the re-drop from being mistaken for an uningested backlog item by a future drain pass.",
+      "urgency": "medium"
+    }
+  ],
+  "notes": "Identity fully verified from the pages themselves: all six volumes carry the series badge and 'WRITTEN AND ILLUSTRATED BY MIKE VENEZIA' on cover and title page, confirming the well-known Venezia series rather than assuming it. Real counts: 109 CamScanner spread-scan PDF pages covering six complete 32-page volumes (Henri Rousseau pages 0-18, Frida Kahlo 19-36, Da Vinci 37-54, Monet 55-72, Pierre Auguste Renoir 73-90, Michelangelo 91-108), every page rendered and reviewed via contact sheets across the full 0-108 range, with covers, title pages, copyright blocks, and closing museum-list pages individually confirmed. Publishers observed: Children's Press Chicago (Da Vinci, Monet, Michelangelo title pages) and Children's Press / A Division of Grolier Publishing, New York/Danbury (Rousseau, Renoir); Kahlo's copyright page shows Grolier Publishing with a pre-Mike-Venezia-photo credit block. Embedded PDF metadata is CamScanner boilerplate ('CamScanner 7-20-26 19.43', created 2026-07-21T00:06:32Z, about 30 minutes before the primary drop's Slack ts), consistent with Aless scanning the physical books shortly before posting. Date bookkeeping: the id uses the UTC date of the Slack ts (2026-07-21T00:36:43Z) while droppedAt is the same instant in America/New_York (2026-07-20T20:36:43-04:00); the calendar dates differ because the drop landed in the evening, the same pattern earlier ingests this session recorded explicitly. The blob path was uploaded under the cur- prefix at capture time and matches this analysis' routing. A stale, never-persisted Cosmo reply exists on the sibling inventors thread; nothing from it was used, and every claim here comes from this session's own renders. Copyright law honored: the artwork reproductions and Venezia's cartoon art were viewed only for analysis; nothing derived from them enters the product, and this analysis describes the books in Homa's own words."
+}

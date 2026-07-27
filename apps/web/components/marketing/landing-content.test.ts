@@ -12,8 +12,17 @@ import {
 
 test("the landing hero names Homa's category and primary action", () => {
   assert.equal(HERO_COPY.headline, "The homeschool assistant that does the prep.");
-  assert.equal(HERO_COPY.primaryAction, "Get your free report");
-  assert.equal(HERO_COPY.eyebrow, "Made for homeschool parents, kids never use a screen");
+  assert.equal(HERO_COPY.primaryAction, "Start your free trial");
+  assert.equal(HERO_COPY.eyebrow, "Made for homeschool parents");
+});
+
+test("the trial CTA states the card terms before the click", () => {
+  // The signup paywall (founder directive 2026-07-26) requires the trial
+  // length, the price, and the way out to be visible at the CTA, not
+  // discovered at the card screen.
+  assert.match(HERO_COPY.primaryActionNote, /7 free days/);
+  assert.match(HERO_COPY.primaryActionNote, /\$19 a month/);
+  assert.match(HERO_COPY.primaryActionNote, /cancel anytime/i);
 });
 
 test("the platform strip states only verified access modes", () => {
@@ -58,6 +67,16 @@ test("the new landing copy does not publish deferred or unsupported claims", () 
     /state academic standards/i,
     /app store/i,
     /parent community/i,
+    // The free-report era ended with the signup paywall (founder
+    // directive 2026-07-26): a card-upfront trial page that still says
+    // "free report" or "no card" is lying, so both are banned outright.
+    /free report/i,
+    /free progress report/i,
+    /no card/i,
+    // The trial is "7 free days", never "free month" (wall-copy.ts
+    // vocabulary law: "month" is reserved for the price unit and the
+    // child's month plan).
+    /free month/i,
   ]) {
     assert.doesNotMatch(copy, forbidden);
   }

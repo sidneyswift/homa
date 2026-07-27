@@ -1,0 +1,33 @@
+{
+  "id": "ref-2026-07-18-ab-pattern-worksheets",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:21:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428092.600859",
+  "format": "pattern-worksheet",
+  "title": "FREE AB Pattern Worksheets \u2014 No Prep, Designed for Special Education",
+  "publisher": "TPT (link expired)",
+  "gradeLevel": "PreK-1st (ages 3-7)",
+  "overview": {
+    "description": "Free no-prep AB pattern worksheets designed for special education. Children identify, continue, or create AB patterns (alternating two elements). The 'designed for special education' tag suggests larger visual elements, clearer instructions, and higher scaffolding than typical worksheets."
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "patterns-algebra",
+    "topics": [
+      {
+        "id": "math.pattern-recognition-ab",
+        "kind": "conceptual",
+        "mapped": false
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "cut-and-paste"
+    ],
+    "gaps": []
+  },
+  "notes": "TPT link expired. Interesting that it's designed for special ed \u2014 Aless may value accessibility and high-scaffolding approaches. Pairs with Winter Patterns Cut and Paste drop."
+}

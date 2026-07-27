@@ -11,12 +11,22 @@ import { normalizeMeaningfulTokens } from "../child-progress/journal-matcher";
  * gate that keeps invented claims from laundering through
  * normalization:
  *
- *   1. The excerpt must appear verbatim in the assembled transcript
+ *   1. The excerpt must appear verbatim in the segment it claims
  *      (whitespace-insensitive substring, nothing else forgiven).
- *   2. The clause must share enough meaningful tokens with its own
- *      excerpt, using the SAME tokenizer the journal matcher scores
- *      with. The child's name is exempt: the clause names the child,
- *      dialogue rarely does.
+ *      Checking the claimed segment, not the whole transcript, also
+ *      keeps a mislabeled segmentSeq from slipping through.
+ *   2. The clause must share enough meaningful tokens with that
+ *      segment's transcript, using the SAME tokenizer the journal
+ *      matcher scores with. The child's name is exempt: the clause
+ *      names the child, dialogue rarely does.
+ *
+ * Check 2 grounds the clause in the segment, not the excerpt alone,
+ * because lesson dialogue splits meaning across speakers: the child's
+ * audible utterance is a bare fragment ("four, five.") while the
+ * clause describes what it demonstrated. The 2026-07-21 replay of a
+ * real lesson showed excerpt-only overlap rejecting 100% of honest
+ * pairs (ratios 0.00 to 0.20); against their own segment the same
+ * clauses land 0.29 to 0.75 while invented claims still land at 0.
  *
  * Only pairs that survive both checks reach
  * recordJournalProgressEvidence, where the 0.85 matcher still decides
@@ -32,10 +42,17 @@ export interface LessonClausePair {
   segmentSeq: number;
 }
 
+/** The per-segment transcripts the gate verifies against. */
+export interface LessonSegmentText {
+  seq: number;
+  transcript: string | null;
+}
+
 export type LessonClauseRejection =
   | "empty"
-  | "excerpt_not_in_transcript"
-  | "clause_strays_from_excerpt";
+  | "unknown_segment"
+  | "excerpt_not_in_segment"
+  | "clause_strays_from_segment";
 
 export type LessonClauseVerdict =
   | { ok: true }
@@ -45,24 +62,40 @@ export type LessonClauseVerdict =
 export const MAX_LESSON_CLAUSES = 12;
 
 /**
- * The clause may rephrase the excerpt into parent-report grammar, but
- * at least this share of its meaningful tokens must come from the
- * excerpt itself. Pinned by tests; raising it rejects more paraphrase,
- * lowering it admits more invention.
+ * At least this share of the clause's meaningful tokens must appear in
+ * the claimed segment's transcript. Calibrated against the 2026-07-21
+ * real-lesson replay: honest descriptive clauses score 0.29 to 0.75
+ * against their segment; invented claims score 0. Raising it rejects
+ * honest description of fragmentary dialogue (numeric utterances share
+ * almost no tokens with the words that describe them); lowering it
+ * admits clauses the segment does not support.
  */
-export const CLAUSE_TOKEN_OVERLAP_FLOOR = 0.5;
+export const LESSON_SEGMENT_OVERLAP_FLOOR = 0.25;
+
+/**
+ * The ratio alone lets one incidental word carry a short clause
+ * ("pedaled a two wheeler" passing on a stray "two" in a counting
+ * segment), so a claim also needs at least this many shared meaningful
+ * tokens, unless at least one shared token comes from the excerpt
+ * itself: the excerpt is verbatim-verified provenance, so a token it
+ * anchors is evidence, not coincidence ("counted to forty" against the
+ * child's own "one, two, three... forty!"). The 2026-07-21 replay's
+ * honest clauses share 2 to 3 tokens; invented controls share 0 to 1,
+ * never excerpt-anchored.
+ */
+export const LESSON_SEGMENT_MIN_SHARED_TOKENS = 2;
 
 function collapseWhitespace(value: string): string {
   return value.replace(/\s+/gu, " ").trim();
 }
 
 /**
- * verifyLessonClausePair(pair, transcript, childName): the two-check
+ * verifyLessonClausePair(pair, segments, childName): the two-check
  * gate above. Pure and deterministic so the tests can pin it.
  */
 export function verifyLessonClausePair(
   pair: LessonClausePair,
-  transcript: string,
+  segments: readonly LessonSegmentText[],
   childName: string,
 ): LessonClauseVerdict {
   const clause = collapseWhitespace(pair.clause);
@@ -70,23 +103,38 @@ export function verifyLessonClausePair(
   if (clause.length === 0 || excerpt.length === 0) {
     return { ok: false, reason: "empty" };
   }
-  const haystack = collapseWhitespace(transcript).toLocaleLowerCase("en-US");
+  const segmentTranscript = segments.find(
+    (segment) => segment.seq === pair.segmentSeq,
+  )?.transcript;
+  if (!segmentTranscript || segmentTranscript.trim().length === 0) {
+    return { ok: false, reason: "unknown_segment" };
+  }
+  const haystack = collapseWhitespace(segmentTranscript)
+    .toLocaleLowerCase("en-US");
   if (!haystack.includes(excerpt.toLocaleLowerCase("en-US"))) {
-    return { ok: false, reason: "excerpt_not_in_transcript" };
+    return { ok: false, reason: "excerpt_not_in_segment" };
   }
   const childNameTokens = normalizeMeaningfulTokens(childName);
   const clauseTokens = [...normalizeMeaningfulTokens(clause)].filter(
     (token) => !childNameTokens.has(token),
   );
   if (clauseTokens.length === 0) {
-    return { ok: false, reason: "clause_strays_from_excerpt" };
+    return { ok: false, reason: "clause_strays_from_segment" };
   }
+  const segmentTokens = normalizeMeaningfulTokens(segmentTranscript);
   const excerptTokens = normalizeMeaningfulTokens(excerpt);
   const shared = clauseTokens.filter((token) =>
+    segmentTokens.has(token),
+  ).length;
+  const sharedWithExcerpt = clauseTokens.filter((token) =>
     excerptTokens.has(token),
   ).length;
-  if (shared / clauseTokens.length < CLAUSE_TOKEN_OVERLAP_FLOOR) {
-    return { ok: false, reason: "clause_strays_from_excerpt" };
+  if (
+    (shared < LESSON_SEGMENT_MIN_SHARED_TOKENS &&
+      sharedWithExcerpt === 0) ||
+    shared / clauseTokens.length < LESSON_SEGMENT_OVERLAP_FLOOR
+  ) {
+    return { ok: false, reason: "clause_strays_from_segment" };
   }
   return { ok: true };
 }

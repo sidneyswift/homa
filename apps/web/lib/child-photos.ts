@@ -32,6 +32,17 @@ export function isAllowedChildPhotoType(mediaType: string): boolean {
 }
 
 /**
+ * childPhotoPrefix(familyId, childId): everything stored for one
+ * child's photo. Exported so the write below and the delete-a-child
+ * purge (lib/map/child-blobs.ts) cannot drift: the purge finds bytes by
+ * this prefix, which is the only way to reach a photo whose row is
+ * already gone.
+ */
+export function childPhotoPrefix(familyId: string, childId: string): string {
+  return `families/${familyId}/children/${childId}/`;
+}
+
+/**
  * uploadChildPhotoBytes(...): stores one prepared photo, returns its
  * hosted URL for the children row. familyId comes from the caller's own
  * membership (never the form), childId is re-scoped by the caller
@@ -45,7 +56,7 @@ export async function uploadChildPhotoBytes(input: {
 }): Promise<string> {
   const extension = EXTENSION_BY_TYPE[input.mediaType] ?? "jpg";
   const blob = await put(
-    `families/${input.familyId}/children/${input.childId}/photo.${extension}`,
+    `${childPhotoPrefix(input.familyId, input.childId)}photo.${extension}`,
     input.bytes,
     { access: "public", contentType: input.mediaType, addRandomSuffix: true },
   );

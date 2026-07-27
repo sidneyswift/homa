@@ -1,4 +1,4 @@
-# 01 — Personas, Empathy Map, JTBD Jobs & Forces
+# 01: Personas, Empathy Map, JTBD Jobs & Forces
 
 > Historical proto-persona research, last updated 2026-07-02. P1 through P5
 > remain shorthand where the reconciled PRD cites them, but invented
@@ -71,7 +71,7 @@ table is why presentation law exists.
 
 ---
 
-### P1 — Alessa (the origin archetype)
+### P1: Alessa (the origin archetype)
 
 **Snapshot:** One preschooler (age 3). Urban, tech-adjacent household. Enrichment-driven;
 wants ahead-of-standards validation. Voice-notes-from-pocket habit. Comfortable money
@@ -205,7 +205,7 @@ but scrutinizes subscriptions. She is the archetype of design partner #0, genera
 
 ---
 
-### P2 — Rachel (the median)
+### P2: Rachel (the median)
 
 **Snapshot:** Three kids (4, 7, 10). Suburban/rural. Co-op member. Single income.
 Price-sensitive. Drowning in planning across three ages. Hours tracking is a legal
@@ -340,7 +340,7 @@ P2 must handle that honestly** (kickoff, `[COUNCIL]` open call 3).
 
 ---
 
-### P3 — Danielle (the newcomer)
+### P3: Danielle (the newcomer)
 
 **Snapshot:** Pulling her 6-year-old out of public school mid-year. Anxious,
 guilt-prone, doesn't know her state's law, second-guesses everything. Needs "you're
@@ -473,7 +473,7 @@ allowed, here's the path" energy. Highest support load, highest word-of-mouth up
 
 ---
 
-### P4 — Monica (compliance-heavy state)
+### P4: Monica (compliance-heavy state)
 
 **Snapshot:** New York (or PA). IHIPs, quarterly reports, portfolio evaluations.
 Records ARE the job. Will churn instantly over a wrong legal claim; will evangelize
@@ -602,7 +602,7 @@ over a generated quarterly report that works (kickoff).
 
 ---
 
-### P5 — Jess (the working homeschooler)
+### P5: Jess (the working homeschooler)
 
 **Snapshot:** Part-time WFH. Schools evenings/weekends. Time-starved, voice-first,
 efficiency over enrichment. Most sensitive to friction; most likely to convert on
@@ -737,7 +737,7 @@ efficiency over enrichment. Most sensitive to friction; most likely to convert o
 
 ---
 
-## 2. Empathy map — homeschool mothers × "an AI assistant that knows my child"
+## 2. Empathy map: homeschool mothers × "an AI assistant that knows my child"
 
 Audience: the composite core audience (P1–P5 weighted toward P2, the median). Topic:
 adopting and living with an AI assistant that maintains a persistent, compounding
@@ -1042,7 +1042,7 @@ the functional cluster; none touch the emotional ones `[MD]` `[UR-A]`.
 
 ---
 
-## 4. JTBD forces of progress — the switching decision
+## 4. JTBD forces of progress: the switching decision
 
 Force model per path: **Push** of the current situation · **Pull** of Homa ·
 **Anxiety** of the new solution · **Habit** of the present. Switching happens when
@@ -1068,7 +1068,7 @@ abstract force categories (cited below as F-codes):
 | F-H2 | Sunk data / migration weight | Habit | B |
 | F-H3 | Community embeddedness (the groups are also her social life) | Habit | A |
 
-### Path A — from a paper planner + Facebook groups (P2, P3, religious-leaning P2s)
+### Path A: from a paper planner + Facebook groups (P2, P3, religious-leaning P2s)
 
 **Push of the current situation**
 - The planner captures intentions, not evidence; nothing compiles into logs or
@@ -1113,7 +1113,7 @@ abstract force categories (cited below as F-codes):
   to crush. Copy example (brand-safe): "You do the teaching. Homa does the
   paperwork."
 
-### Path B — from an $8/mo tracker app (P2, P4)
+### Path B: from an $8/mo tracker app (P2, P4)
 
 **Push of the current situation**
 - The tracker records what she types and gives nothing back: no materials, no
@@ -1161,7 +1161,7 @@ abstract force categories (cited below as F-codes):
 - Marketing: the before/after chart is the ad. Show a real (consented) improvement
   attribution from cohort one; that artifact makes $29 legible `[UR-A]`.
 
-### Path C — from ChatGPT + Google Docs (P5, P1)
+### Path C: from ChatGPT + Google Docs (P5, P1)
 
 **Push of the current situation**
 - Amnesia tax: she re-pastes the child's context into every session; the "profile"
@@ -1222,7 +1222,7 @@ needs to be aimed per channel.
 
 ## 5. Secondary cast (S1–S4)
 
-### S1 — Marcus (the dad, secondary account user)
+### S1: Marcus (the dad, secondary account user)
 
 Who he is across the cast: P2's budget-approver and evening co-teacher; P5's
 tag-team partner; P1's technical due-diligence reviewer. Rarely the daily driver;
@@ -1242,7 +1242,7 @@ almost always in the buying loop above ~$15/mo `[A-M]`.
 - ❓ v1 scoping question: full second seat vs "household share link" (view + quick
   log). The cheap version may cover 90% of the need; see open questions.
 
-### S2 — Grandma Sue (the co-teaching grandparent)
+### S2: Grandma Sue (the co-teaching grandparent)
 
 Who she is: P5's Tuesday/Thursday coverage; P2's occasional relief. Warm, willing,
 possibly not tech-confident; large-print preference; her authority in the family
@@ -1262,7 +1262,7 @@ around the grandkids" `[A-M]`.
 - Emotional note: done right, Grandma becomes an evangelist to her own generation
   ("you should see what my daughter-in-law uses"), a trust channel money can't buy.
 
-### S3 — The skeptical co-op friend (buys nothing, influences everyone)
+### S3: The skeptical co-op friend (buys nothing, influences everyone)
 
 Who she is: veteran homeschooler, philosophy-confident, proudly analog or
 AI-suspicious, high status in the co-op/groups. She will never convert, and doesn't
@@ -1288,7 +1288,7 @@ dynamic applies to one "it got our state law wrong" post).
   Give the fair-minded skeptic something accurate to cite and she becomes an
   accidental distributor of the trust story.
 
-### S4 — The child (NEVER a user)
+### S4: The child (NEVER a user)
 
 > Current-policy correction. The parent remains the account holder and primary
 > operator. Global D4 permits consented child-likeness input under its retention,

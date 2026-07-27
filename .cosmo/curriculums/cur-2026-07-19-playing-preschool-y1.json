@@ -1,0 +1,420 @@
+{
+  "id": "cur-2026-07-19-playing-preschool-y1",
+  "name": "Playing Preschool Year 1 by Busy Toddler",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-19T09:05:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784466311.223929",
+
+  "layer1_philosophy": {
+    "methodology": "Play-Based / Experiential (Busy Toddler)",
+    "principles": [
+      "Play-based learning — hands-on activities over worksheets or drilling",
+      "Background knowledge over mastery — exposure and experience, not testing",
+      "Spiral skill development — revisit same 7 skills with increasing complexity across 19 units",
+      "Routine as scaffold — predictable weekly rotation (M: predicting+sorting, T: letter+numbers, W: predicting+measuring, Th: letter+numbers, F: recall+shapes/letter review) gives parent confidence",
+      "Rigid flexibility — strong routine but moldable to fit the family's day and child's pace",
+      "Read alouds as anchor — every day starts with a themed book; reading comprehension is built through questions, predictions, and retelling"
+    ],
+    "learningTheory": "developmental-stages-spiral",
+    "assessmentApproach": "none-observation-only",
+    "parentRole": "facilitator-co-learner",
+    "knowledgeBankMatches": [],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "play-based-preschool",
+        "topicType": "method_philosophy",
+        "title": "Play-Based Preschool (Busy Toddler model)",
+        "summary": "Hands-on, theme-driven preschool with no mastery expectations. Spiral skill development across 7 core skills (predicting, recall/retell, sorting, number sense, measuring, shapes, alphabet). Background knowledge and positive associations with learning are the goals. 45-60 minutes/day."
+      },
+      {
+        "suggestedKey": "playing-preschool-format",
+        "topicType": "method_format",
+        "title": "Playing Preschool Weekly Format",
+        "summary": "5 days/week, 2-week themed units. Fixed skill rotation: Mon=predicting+sorting, Tue=letter+numbers, Wed=predicting+measuring, Thu=letter+numbers, Fri=recall/retell+shapes (wk1) or letter review (wk2). 4 activities/day: opening, read aloud, learning activity, easy activity. Sensory bins, process art, STEM, gross/fine motor woven throughout."
+      }
+    ]
+  },
+
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Predicting",
+        "curriculumTopic": "Making predictions about stories (cover, during, after)",
+        "homaSubject": "English",
+        "homaDomain": "Reading Comprehension",
+        "homaTopicId": null,
+        "status": "partial",
+        "notes": "Homa has 'Predicting what happens next' — partial match. Playing Preschool treats predicting more broadly (also science/math predictions, not just story)"
+      },
+      {
+        "curriculumSubject": "Recall & Retell",
+        "curriculumTopic": "Retelling stories in sequence, recalling facts from themes",
+        "homaSubject": "English",
+        "homaDomain": "Reading Comprehension",
+        "homaTopicId": null,
+        "status": "partial",
+        "notes": "Homa has 'Characters, settings, and events' and comprehension topics but no dedicated 'retelling' topic for preschool"
+      },
+      {
+        "curriculumSubject": "Sorting",
+        "curriculumTopic": "Sort and classify by color, size, shape, texture, multiple attributes",
+        "homaSubject": "Mathematics",
+        "homaDomain": "Data & Statistics",
+        "homaTopicId": null,
+        "status": "mapped",
+        "notes": "Maps to 'Sorting into categories' in Data & Statistics"
+      },
+      {
+        "curriculumSubject": "Number Sense",
+        "curriculumTopic": "Counting 1-5 (five frames), growing to 1-10 (ten frames), numeral recognition, 1:1 correspondence, quantity, comparing, intro addition concepts",
+        "homaSubject": "Mathematics",
+        "homaDomain": "Counting & Cardinality",
+        "homaTopicId": null,
+        "status": "mapped",
+        "notes": "Strong overlap — 'One More Each Time', 'Comparing groups: more or fewer', 'How Many in Total?' all match"
+      },
+      {
+        "curriculumSubject": "Measuring",
+        "curriculumTopic": "Comparing size, length, height, weight, capacity (not units)",
+        "homaSubject": "Mathematics",
+        "homaDomain": "Measurement",
+        "homaTopicId": null,
+        "status": "mapped",
+        "notes": "Maps to 'Comparing Lengths & Heights', 'Comparing Capacity' in Measurement"
+      },
+      {
+        "curriculumSubject": "Shapes",
+        "curriculumTopic": "Circle, square, triangle identification; attributes (sides, points); shapes in the real world; spatial awareness",
+        "homaSubject": "Mathematics",
+        "homaDomain": "Geometry",
+        "homaTopicId": null,
+        "status": "mapped",
+        "notes": "Maps to '2-D shapes', 'Positional Language' in Geometry"
+      },
+      {
+        "curriculumSubject": "Alphabet Knowledge",
+        "curriculumTopic": "Letter recognition (upper + lower), letter sounds, letters not in alphabetical order, letter hunts, alphabet portfolio art",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": null,
+        "status": "mapped",
+        "notes": "Maps to 'Knowing all letters' and 'Blending Sounds to Read Words' (early). Non-alphabetical order is a pedagogical choice, not a taxonomy gap"
+      },
+      {
+        "curriculumSubject": "Art",
+        "curriculumTopic": "Process art, crafts, apple stamping, finger painting, construction paper projects",
+        "homaSubject": "English",
+        "homaDomain": "Fine Arts",
+        "homaTopicId": null,
+        "status": "partial",
+        "notes": "Homa has 'Art Appreciation' under English/Fine Arts but no process art or craft-making topics. Art is treated as a standalone subject in this curriculum"
+      },
+      {
+        "curriculumSubject": "Science/STEM",
+        "curriculumTopic": "Color mixing, dissolving/evaporating, sink/float, ramp rolling, plant growth, life cycles, weather observation",
+        "homaSubject": "Science",
+        "homaDomain": "Multiple",
+        "homaTopicId": null,
+        "status": "mapped",
+        "notes": "Broad coverage — maps across Matter & Materials, Organisms & Life Processes, Weather & Climate, Forces & Motion, Earth's Systems"
+      },
+      {
+        "curriculumSubject": "Sensory Play",
+        "curriculumTopic": "Sensory bins (rice, cornmeal, applesauce, water), tactile exploration",
+        "homaSubject": null,
+        "homaDomain": null,
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "sensory-exploration",
+          "domain": "Learning to Learn",
+          "kind": "conceptual",
+          "teachingWindowMonths": [24, 60]
+        }
+      },
+      {
+        "curriculumSubject": "Fine Motor",
+        "curriculumTopic": "Tongs transfer, toothpick poking, threading, dot sticker work, cutting",
+        "homaSubject": null,
+        "homaDomain": null,
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "fine-motor-development",
+          "domain": "Learning to Learn",
+          "kind": "procedural",
+          "teachingWindowMonths": [24, 72]
+        }
+      },
+      {
+        "curriculumSubject": "Gross Motor",
+        "curriculumTopic": "Running to colors, apple hunts, jumping, obstacle courses",
+        "homaSubject": null,
+        "homaDomain": null,
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "gross-motor-development",
+          "domain": "Learning to Learn",
+          "kind": "procedural",
+          "teachingWindowMonths": [24, 72]
+        }
+      },
+      {
+        "curriculumSubject": "Morning Calendar Routine",
+        "curriculumTopic": "Days of the week, months, weather, counting on, ordinal numbers",
+        "homaSubject": "Life Skills",
+        "homaDomain": "Daily Living",
+        "homaTopicId": null,
+        "status": "mapped",
+        "notes": "Maps to 'Time Concepts', 'Weather Recognition', 'Daily Routine Building' in Daily Living"
+      },
+      {
+        "curriculumSubject": "Dramatic Play",
+        "curriculumTopic": "Pretend play, acting out books, dress-up (community helpers unit)",
+        "homaSubject": null,
+        "homaDomain": null,
+        "homaTopicId": null,
+        "status": "unmapped",
+        "suggested": {
+          "topicSlug": "dramatic-play-pretend",
+          "domain": "Learning to Learn",
+          "kind": "conceptual",
+          "teachingWindowMonths": [24, 72]
+        }
+      },
+      {
+        "curriculumSubject": "Songs & Poems",
+        "curriculumTopic": "Unit-specific songs and poems for phonemic awareness and memory",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": null,
+        "status": "partial",
+        "notes": "Phonemic awareness is in Phonics & Word Reading. Poetry/music as a teaching modality is not explicitly captured"
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 15,
+      "mapped": 7,
+      "unmapped": 4,
+      "noSubject": 0,
+      "partial": 4
+    }
+  },
+
+  "layer3_structure": {
+    "cadence": "5 days/week (M-F), 2 weeks per unit",
+    "sessionLengthMinutes": {
+      "fullDay": 45,
+      "max": 60,
+      "notes": "Can be broken across the day — doesn't need to be one block"
+    },
+    "weeklyTemplate": "Monday: predicting + sorting. Tuesday: letter name + numbers. Wednesday: predicting + measuring. Thursday: letter name + numbers. Friday (wk1): recall/retell + shapes. Friday (wk2): recall/retell + letter review.",
+    "dailyRoutine": "Opening (morning calendar + song/poem) → Introduce/review topic → Read aloud → Things to talk about → Learning activity → Easy activity. Extensions sprinkled throughout.",
+    "progressionModel": "spiral",
+    "reviewRhythm": "Weekly Friday review (shapes wk1, letter review wk2). Skills spiral from Unit 1 through Unit 19 with increasing complexity.",
+    "totalWeeks": 38,
+    "totalUnits": 19,
+    "totalDays": 190,
+    "unitThemes": [
+      "Apples", "Colors", "Nursery Rhymes", "Clothing", "Food",
+      "Five Senses", "Teddy Bears", "Things That Go Together",
+      "Community Helpers", "Transportation", "On the Farm", "Weather",
+      "Eggs", "Plants", "Construction", "Pets", "Opposites",
+      "Fairy Tales & Folk Tales", "Water"
+    ],
+    "letterSequence": "Aa, Rr, Nn, Cc+Jj, Mm, Ss, Bb, Qq+Uu, Hh, Tt, Ff, Ww+Kk, Ee, Pp+Ll, Yy+Zz, Dd, Oo+Xx, Gg+Vv, Ii",
+    "letterOrderRationale": "Non-alphabetical by design. Easy letters (same upper/lower like Cc, Jj) doubled up. Tricky letters (different upper/lower like Ee, Aa) taught alone. Some letters match theme (Tt for Transportation)."
+  },
+
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "sorting-activity",
+        "description": "Sort real objects (apples, toys, household items) by color, size, shape, texture, or multiple attributes onto construction paper or into baskets",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "sorting-mat",
+          "creationPath": "html",
+          "description": "Printable sorting mat with labeled category zones (2-4 columns or T-chart) plus either cut-out images to sort OR blank space for physical objects. For play-based curricula, the mat defines the categories while the child uses real household items.",
+          "complexity": "low"
+        },
+        "notes": "Most sorting in this curriculum uses real objects, not printables. The recipe would be supplementary — a printable mat to organize the sort."
+      },
+      {
+        "type": "five-frame-ten-frame",
+        "description": "Tape or drawn frames for counting objects 1-5 (early) growing to 1-10 (later). Used with real objects placed in frames.",
+        "recipe": "html",
+        "status": "have_recipe",
+        "notes": "Could adapt counting-mat recipe. But PP uses physical frames taped on floor — the printable version would be a supplement."
+      },
+      {
+        "type": "sensory-bin",
+        "description": "Storage container filled with rice, cornmeal, water, applesauce, etc. Child explores with scoops, tongs, cups. Themed additions (food coloring, small objects to find).",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "sensory-bin-card",
+          "creationPath": "html",
+          "description": "Printable setup card with a title, materials list, suggested play prompts, and learning connections. Not the activity itself — the guide to setting it up. Could include vocabulary words to use during play.",
+          "complexity": "low"
+        },
+        "notes": "Sensory bins are inherently physical — no printable replaces them. But a setup/prompt card helps the parent run them well."
+      },
+      {
+        "type": "alphabet-art-portfolio",
+        "description": "One letter-themed art page per letter (26 total). Child decorates the letter shape, cuts it out, glues to construction paper. Builds into an alphabet book keepsake.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "alphabet-art-page",
+          "creationPath": "image-direct",
+          "description": "Large outlined letter (both upper and lower case) designed for decorating — big enough for dot stickers, paint, gluing materials. Bottom of page has a few themed images starting with that letter. Print-friendly B&W.",
+          "complexity": "low"
+        }
+      },
+      {
+        "type": "read-aloud-with-questions",
+        "description": "Themed book read daily with guided prediction questions, vocabulary discussion, and comprehension checks. Books read twice per week for deeper learning.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "read-aloud-companion",
+          "creationPath": "html",
+          "description": "Printable companion card for a read-aloud: book title, prediction prompts (before/during/after), vocabulary words to emphasize, discussion questions, and a retelling prompt. One page per book.",
+          "complexity": "low"
+        }
+      },
+      {
+        "type": "letter-hunt",
+        "description": "Find a specific letter in books, pantry items, around the house, with flashlights, on sticky notes. Varied environments for the same hunt.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "letter-hunt-card",
+          "creationPath": "html",
+          "description": "Printable hunt checklist: target letter (large, upper+lower), hunt locations (books, pantry, signs, etc.), tally marks for found letters, space to write/draw words starting with that letter.",
+          "complexity": "low"
+        }
+      },
+      {
+        "type": "process-art",
+        "description": "Open-ended art: finger painting, apple stamping, construction paper collages, painting sunshine, making freight trains from colored boxes. Product is secondary to the process.",
+        "recipe": "image-direct",
+        "status": "have_recipe",
+        "notes": "Coloring page recipe covers some of this. But process art is often freeform — no printable needed, just supplies."
+      },
+      {
+        "type": "gross-motor-activity",
+        "description": "Running to colors, apple hide-and-seek hunts, building obstacle courses, book dominoes, jumping activities.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "activity-card",
+          "creationPath": "html",
+          "description": "Simple activity instruction card: title, materials, setup steps, play variations, learning connections. For physical activities that need a parent guide, not a worksheet.",
+          "complexity": "low"
+        }
+      },
+      {
+        "type": "fine-motor-station",
+        "description": "Transfer with tongs/ladles/forks, poking with golf tees, threading, peeling/placing dot stickers, cutting.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Purely physical — no printable. An activity-card recipe would cover the guide aspect."
+      },
+      {
+        "type": "science-experiment",
+        "description": "Color mixing in bags/water, dissolving substances, rain cloud in a glass, rolling apples down ramps, freezing/melting ice. Hands-on with real materials.",
+        "recipe": null,
+        "status": "no_recipe",
+        "suggestedRecipe": {
+          "name": "experiment-card",
+          "creationPath": "html",
+          "description": "Printable experiment card: title, hypothesis prompt, materials, steps with illustrations, observation space, 'what happened?' recording area. Kid-friendly science method without the jargon.",
+          "complexity": "medium"
+        }
+      },
+      {
+        "type": "morning-calendar-routine",
+        "description": "Daily opening: discuss date, day of the week, month, weather. Sing calendar songs (days, months, weather song). 2-minute routine.",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Visual schedule / daily rhythm cards in taste model are related. A printable calendar routine board could work."
+      },
+      {
+        "type": "dramatic-play",
+        "description": "Acting out stories, pretend jobs (community helpers), building themed play environments (freight train from boxes).",
+        "recipe": null,
+        "status": "no_recipe",
+        "notes": "Inherently physical/imaginative. A prompt card or role-play scenario card could support it."
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 12,
+      "haveRecipe": 2,
+      "noRecipe": 10
+    }
+  },
+
+  "decisionsNeeded": [
+    {
+      "category": "taxonomy",
+      "item": "Add sensory-exploration topic to Learning to Learn",
+      "impact": "Enables sensory bin activities — core to play-based preschool curricula",
+      "urgency": "medium"
+    },
+    {
+      "category": "taxonomy",
+      "item": "Add fine-motor-development and gross-motor-development topics to Learning to Learn",
+      "impact": "Motor skills are a major component of preschool but unmapped in Homa taxonomy",
+      "urgency": "medium"
+    },
+    {
+      "category": "taxonomy",
+      "item": "Add dramatic-play-pretend topic to Learning to Learn",
+      "impact": "Dramatic play appears in many preschool curricula; currently no taxonomy coverage",
+      "urgency": "low"
+    },
+    {
+      "category": "recipe",
+      "item": "Build activity-card recipe (html) — a general-purpose parent guide card for physical/hands-on activities",
+      "impact": "Would cover sensory bins, gross motor, fine motor, dramatic play, experiments — most of what play-based curricula need from Homa",
+      "urgency": "high"
+    },
+    {
+      "category": "recipe",
+      "item": "Build read-aloud-companion recipe (html) — guided reading card with prediction/discussion prompts",
+      "impact": "Read alouds are the anchor of this curriculum and many others; no recipe exists",
+      "urgency": "high"
+    },
+    {
+      "category": "recipe",
+      "item": "Build alphabet-art-page recipe (image-direct) — decoratable letter outlines for alphabet portfolios",
+      "impact": "Letter art portfolio is a common preschool format; supplements tracing-guide recipe",
+      "urgency": "medium"
+    },
+    {
+      "category": "recipe",
+      "item": "Build experiment-card recipe (html) — kid-friendly science experiment guide",
+      "impact": "Hands-on STEM experiments are a major activity type with no current recipe",
+      "urgency": "medium"
+    },
+    {
+      "category": "method",
+      "item": "Add play-based-preschool and playing-preschool-format to knowledge_bank",
+      "impact": "Curriculum writer can generate play-based weekly plans with proper structure",
+      "urgency": "medium"
+    },
+    {
+      "category": "curriculum-writer",
+      "item": "Add play-based preschool methodology note to curriculum-writer.md",
+      "impact": "Writer currently has no play-based preschool pattern to draw from",
+      "urgency": "medium"
+    }
+  ],
+
+  "notes": "This is a full 38-week, 190-day preschool program targeting ages 2.5-5. It's fundamentally different from the worksheet/printable-heavy references we've ingested so far — it's almost entirely hands-on with real objects. The printable needs are minimal (alphabet portfolio pages, maybe setup cards). The biggest value for Homa is learning the STRUCTURE: the weekly rotation pattern, the spiral skill model, and the daily routine sequence. This teaches Homa's curriculum writer how to plan play-based preschool weeks. Very strong overlap with existing taxonomy in math and ELA. The unmapped areas (sensory, motor skills, dramatic play) are physical development domains that many preschool curricula share."
+}

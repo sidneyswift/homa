@@ -19,6 +19,7 @@ import { isFamilyAccountOwner } from "../../../../lib/subject-lessons/owner";
 import { listCurrentSubjectLessonSummaries } from "../../../../lib/subject-lessons/store";
 import { NarrativeBeat } from "../../../onboarding/r/[token]/narrative-beat";
 import { ReportView } from "../../../onboarding/r/[token]/report-view";
+import { CompleteProfilePrompt } from "./complete-profile-prompt";
 import { WelcomeChooser } from "./welcome-chooser";
 
 /**
@@ -36,16 +37,9 @@ export default async function AppReportPage({
   searchParams,
 }: {
   params: Promise<{ childId: string }>;
-  searchParams: Promise<{ welcome?: string }>;
+  searchParams: Promise<{ welcome?: string; fresh?: string }>;
 }) {
   const { childId } = await params;
-  const policy = progressRoutePolicy(
-    { surface: "child_report", childId },
-    liveProgressEnabled(),
-  );
-  if (policy.kind === "redirect") {
-    redirect(policy.href);
-  }
 
   const data = await getAppData();
   if (!data) redirect("/onboarding");
@@ -54,6 +48,27 @@ export default async function AppReportPage({
   if (!child) notFound();
 
   const token = data.reports.get(childId)?.token;
+
+  // The wall (plans/2026-07-11-the-wall.md): null while the flag is off
+  // (the instant no-query path), for exempt or trialing families, and
+  // for a child with no report yet (nothing to lock). Computed before
+  // the route-policy check below so a family currently owed the report
+  // lock is never redirected into the ungated Progress dashboard
+  // (route-policy stays a pure function; only this per-child caller's
+  // boolean is lock-aware). A report-less child keeps its original,
+  // lock-independent redirect to Progress (which tolerates a null
+  // report), since there is nothing yet to hold back.
+  const wall = token ? await familyWallCheckout(data.family.id) : null;
+  const lockApplies = Boolean(token) && Boolean(wall) && reportLockEnabled();
+
+  const policy = progressRoutePolicy(
+    { surface: "child_report", childId },
+    liveProgressEnabled() && !lockApplies,
+  );
+  if (policy.kind === "redirect") {
+    redirect(policy.href);
+  }
+
   if (!token) redirect("/onboarding");
   const report = await getReportByToken(token);
   if (!report) redirect("/onboarding");
@@ -98,9 +113,6 @@ export default async function AppReportPage({
       ? { narrative: report.narrative, rejectedPieces: meta?.rejectedPieces ?? [] }
       : null;
 
-  // The wall (plans/2026-07-11-the-wall.md): null while the flag is off
-  // (the instant no-query path), and for exempt or trialing families.
-  const wall = await familyWallCheckout(data.family.id);
   let viewerIsAccountOwner = false;
   if (lessonFlagOn) {
     try {
@@ -130,9 +142,9 @@ export default async function AppReportPage({
     : [];
 
   // The report lock (plans/2026-07-18-report-lock.md) rides the same
-  // wall decision: a walled family sees the free four in full and the
-  // rest held; an open family (flag off, exempt, trialing) sees
-  // everything, always.
+  // wall decision (the same `wall` computed above, before the route-policy
+  // check): a walled family sees the free four in full and the rest held;
+  // an open family (flag off, exempt, trialing) sees everything, always.
   const reportLock =
     wall && reportLockEnabled()
       ? { freeSubjects: freeReportSubjects(report.scores), checkout: wall }
@@ -141,7 +153,13 @@ export default async function AppReportPage({
   // The unlock's landing (?welcome=1, set by /api/billing/confirm):
   // the first-subject chooser, rendered only once the family is
   // actually open so a stale URL can never pair a wall with a welcome.
-  const { welcome } = await searchParams;
+  const { welcome, fresh } = await searchParams;
+  // The post-report profile card: only on the fresh-from-scoring landing
+  // (?fresh=1), and only when there is no mailing address yet, so it shows
+  // once, right after the report, and never nags a returning visitor
+  // (funnel work 2026-07-20). The billing welcome chooser takes the moment
+  // when both could apply.
+  const showProfilePrompt = fresh === "1" && !data.family.address_line;
   const scoreById = new Map(report.scores.subjects.map((score) => [score.subjectId, score]));
   const welcomeSubjects =
     welcome === "1" && !wall
@@ -186,6 +204,7 @@ export default async function AppReportPage({
           wall={wall}
         />
       ) : null}
+      {showProfilePrompt ? <CompleteProfilePrompt childName={report.childName} /> : null}
     </>
   );
 }

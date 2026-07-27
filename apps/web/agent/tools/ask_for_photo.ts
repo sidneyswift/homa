@@ -1,5 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
+
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 
 /**
  * The snap card (approved chat redesign 2026-07-13, frame B): when
@@ -12,9 +16,11 @@ import { z } from "zod";
  * No family data is read or written here: the tool is a structured ask,
  * pure UI contract, same pattern as manage_child_progress's cards.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Ask the parent to show you something (a worksheet page, a finished project, a book page) when seeing it would genuinely change your help: checking handwriting, reviewing completed work, or settling what a page looks like. In web chat this renders a card with a camera button. Ask for ONE thing, name exactly which page or thing you mean, and never ask when words already told you enough. Over SMS ask in plain words instead; the parent can text a photo back.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: true,
   inputSchema: z.object({
     question: z
       .string()

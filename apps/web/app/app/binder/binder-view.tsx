@@ -37,7 +37,7 @@ const MAX_SUBJECT_CHIPS = 10;
 const CHIP_ON =
   "min-h-9 rounded-pill border border-[var(--clay-200)] bg-brand-soft px-3.5 py-1.5 text-xs font-bold text-[var(--clay-700)]";
 const CHIP_OFF =
-  "min-h-9 rounded-pill border border-border-default bg-card px-3.5 py-1.5 text-xs font-bold text-muted transition-colors hover:border-[var(--clay-200)]";
+  "min-h-9 rounded-pill border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-muted transition-colors hover:border-[var(--clay-200)]";
 
 /**
  * The kinds a brand-new binder previews in its empty state, spelled by
@@ -116,7 +116,7 @@ export function BinderView({
               : "Everything your family keeps, in one place to browse and print."}
           </p>
         </div>
-        <label className="flex min-h-11 min-w-[220px] items-center gap-2 rounded-pill border border-border-default bg-card px-4 py-2 text-subtle">
+        <label className="flex min-h-11 min-w-[220px] items-center gap-2 rounded-pill border border-border bg-card px-4 py-2 text-subtle">
           <Search size={16} aria-hidden="true" />
           <input
             type="search"
@@ -186,7 +186,7 @@ export function BinderView({
       ) : null}
 
       {materials.length === 0 ? (
-        <div className="mt-8 rounded-[var(--radius-xl)] border border-dashed border-border-default bg-card p-8 text-center">
+        <div className="mt-8 rounded-[var(--radius-xl)] border border-dashed border-border bg-card p-8 text-center">
           <p className="font-display text-lg font-semibold text-strong">Nothing kept yet.</p>
           <p className="mx-auto mt-1.5 max-w-sm text-sm text-muted">
             {scopeChildName
@@ -200,7 +200,7 @@ export function BinderView({
             {EMPTY_STATE_PREVIEW.map((label) => (
               <span
                 key={label}
-                className="rounded-pill border border-dashed border-border-default px-3.5 py-1.5 text-xs font-bold text-subtle"
+                className="rounded-pill border border-dashed border-border px-3.5 py-1.5 text-xs font-bold text-subtle"
               >
                 {label}
               </span>
@@ -248,7 +248,7 @@ export function BinderView({
                 ))}
               </div>
             ) : (
-              <p className="mt-4 rounded-lg border border-dashed border-border-default bg-card p-6 text-center text-sm text-muted">
+              <p className="mt-4 rounded-lg border border-dashed border-border bg-card p-6 text-center text-sm text-muted">
                 {noResultsMessage(filter)}
               </p>
             )}

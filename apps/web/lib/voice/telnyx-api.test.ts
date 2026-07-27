@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { classifyTelnyxHttpFailure, submitHomaSms } from "./telnyx-api";
+import {
+  classifyTelnyxHttpFailure,
+  permanentTelnyxFailureCode,
+  submitHomaSms,
+} from "./telnyx-api";
 
 function restoreEnvironmentValue(
   name: string,
@@ -26,6 +30,46 @@ describe("Telnyx HTTP failure classification", () => {
     assert.equal(classifyTelnyxHttpFailure(429), "unknown");
     assert.equal(classifyTelnyxHttpFailure(500), "unknown");
     assert.equal(classifyTelnyxHttpFailure(503), "unknown");
+  });
+});
+
+describe("permanent destination failure codes", () => {
+  it("recognizes a STOP block as a permanent destination failure", () => {
+    assert.equal(
+      permanentTelnyxFailureCode(
+        JSON.stringify({
+          errors: [{ code: "40300", title: "Blocked due to STOP message" }],
+        }),
+      ),
+      "40300",
+    );
+  });
+
+  // 40309 used to be classified here too, on the assumption it meant a
+  // dead or invalid number. The 2026-07-23 Mani family case corrected
+  // that: it means this messaging profile cannot reach the destination's
+  // region, and the number works fine over email. It is no longer
+  // "permanent" in the suppress-forever sense; see unsupportedRegion in
+  // submitHomaSms below, which drives an email-only switch instead.
+  it("treats every other rejection, including an unsupported region, as not a blanket suppression", () => {
+    assert.equal(
+      permanentTelnyxFailureCode(
+        JSON.stringify({
+          errors: [{ code: 40309, title: "Invalid destination region" }],
+        }),
+      ),
+      null,
+    );
+    assert.equal(
+      permanentTelnyxFailureCode(
+        JSON.stringify({
+          errors: [{ code: "40302", title: "Too many message parts" }],
+        }),
+      ),
+      null,
+    );
+    assert.equal(permanentTelnyxFailureCode("not json"), null);
+    assert.equal(permanentTelnyxFailureCode("{}"), null);
   });
 });
 
@@ -222,5 +266,62 @@ describe("Telnyx SMS oversized-message handling", () => {
       result.status === "rejected" &&
         result.reason === "Telnyx rejected the send: 40302 Message too large",
     );
+  });
+
+  it("does not flag an ordinary rejection as an unsupported region", async (t) => {
+    stubSmsEnvironment(t);
+    globalThis.fetch = async () =>
+      new Response(
+        JSON.stringify({
+          errors: [{ code: "40302", title: "Message too large" }],
+        }),
+        { status: 400 },
+      );
+
+    const result = await submitHomaSms("+15555550100", "Short message");
+
+    assert.ok(
+      result.status === "rejected" && result.unsupportedRegion === undefined,
+    );
+  });
+
+  // The confirmed 2026-07-23 failure shape: a non-US +1 number (Canada)
+  // that our +1 normalization accepts, rejected by the US-only 10DLC
+  // profile with 40309. The flag lets the delivery path switch the family
+  // to email-only instead of retrying SMS every day.
+  it("flags a 40309 rejection as an unsupported destination region", async (t) => {
+    stubSmsEnvironment(t);
+    globalThis.fetch = async () =>
+      new Response(
+        JSON.stringify({
+          errors: [{ code: "40309", title: "Invalid destination region" }],
+        }),
+        { status: 400 },
+      );
+
+    const result = await submitHomaSms("+12368462036", "Morning brief");
+
+    assert.equal(result.status, "rejected");
+    assert.ok(result.status === "rejected" && result.unsupportedRegion === true);
+    assert.ok(
+      result.status === "rejected" &&
+        result.reason ===
+          "Telnyx rejected the send: 40309 Invalid destination region",
+    );
+  });
+
+  it("flags 40309 even when Telnyx sends the code as a number", async (t) => {
+    stubSmsEnvironment(t);
+    globalThis.fetch = async () =>
+      new Response(
+        JSON.stringify({
+          errors: [{ code: 40309, title: "Invalid destination region" }],
+        }),
+        { status: 400 },
+      );
+
+    const result = await submitHomaSms("+12368462036", "Morning brief");
+
+    assert.ok(result.status === "rejected" && result.unsupportedRegion === true);
   });
 });
