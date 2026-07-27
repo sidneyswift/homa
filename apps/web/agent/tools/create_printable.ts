@@ -357,6 +357,8 @@ const createPrintable = defineBoundedTool({
     // URLs and ids are re-scoped inside the authenticated family here;
     // nothing model-chosen crosses the tenancy wall unchecked.
     const resolvedPages: ResolvedPage[] = [];
+    /** Materials already read on this call, by id. See the fetch below. */
+    const materialCache = new Map<string, MaterialSummary | null>();
     if (typeof inputHtml === "string") {
       if (hasPageBreakMarkup(inputHtml)) {
         return { created: false, note: PAGE_BREAK_NOTE };
@@ -418,11 +420,21 @@ const createPrintable = defineBoundedTool({
           continue;
         }
         const materialId = page.fromMaterialId as string;
-        let material: MaterialSummary | null;
-        if (access.mode === "pinned") {
-          material = await getMaterialPinned(familyId, materialId);
-        } else {
-          material = await getMaterialCaller(access.db, familyId, materialId);
+        // Fetched once per material, not once per entry. The revision
+        // shape pageIndex exists for points every unchanged page at the
+        // SAME id, so a one-page edit to a twelve-page packet asks for
+        // it eleven times; without this that is eleven identical round
+        // trips to the pooler inside one deadline. Cache is per call, so
+        // it cannot serve a stale row across turns, and it sits after
+        // the tenancy-scoped read so every id is still re-scoped inside
+        // the authenticated family exactly once.
+        let material = materialCache.get(materialId) ?? null;
+        if (!materialCache.has(materialId)) {
+          material =
+            access.mode === "pinned"
+              ? await getMaterialPinned(familyId, materialId)
+              : await getMaterialCaller(access.db, familyId, materialId);
+          materialCache.set(materialId, material);
         }
         if (!material || !material.html) {
           return {
