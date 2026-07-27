@@ -2,6 +2,7 @@ import { MAP_KID_CAP, mapChildRemoveSchema, mapChildSchema } from "@homa/core";
 
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
+import { familyAccountCheckout } from "../../../../lib/billing/wall";
 import { requireFamily } from "../../../../lib/map/session";
 import { addChild, countChildren, removeChild } from "../../../../lib/map/store";
 
@@ -19,6 +20,12 @@ export async function POST(request: Request): Promise<Response> {
   const family = await requireFamily();
   if (!family) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
+  }
+  // The signup paywall gates the pipeline, not only the pages: a walled
+  // account must not keep building toward the report the gate exists to
+  // sell (the dc4ab64b bypass class). /onboarding/trial is the way on.
+  if ((await familyAccountCheckout(family.id)) !== null) {
+    return Response.json({ ok: false, reason: "walled" }, { status: 403 });
   }
 
   let raw: unknown;

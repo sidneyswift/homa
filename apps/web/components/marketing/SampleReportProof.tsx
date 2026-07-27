@@ -6,7 +6,9 @@ import { Squiggle } from "./ds/Squiggle";
 import { Eyebrow } from "./dividers";
 import { SAMPLE_REPORT_COPY } from "./landing-content";
 
-/** The free progress report is the page's primary proof and lowest-risk door. */
+/** The progress report is the page's primary proof: the sample is open
+ *  to read with no signup, and the real one arrives inside the trial's
+ *  first sitting. */
 export function SampleReportProof() {
   return (
     // Bottom padding 56, not 88: the report sheet, the wave, and the
@@ -47,7 +49,7 @@ export function SampleReportProof() {
               "report" landing alone on its own line at 320px. */}
           {/* No squiggle underline: the wavy mark is reserved for the page's
               three anchor moments (hero CTA, Stories heading, CTA band). The
-              gold pen stroke under "Free," below stays; that one is a
+              gold pen stroke under "Included" below stays; that one is a
               handwritten annotation, not a heading tic. */}
           <h2 className="lp-h2" style={{ maxWidth: 520, margin: "10px 0 14px", color: "var(--text-strong)" }}>
             {SAMPLE_REPORT_COPY.headline}
@@ -95,19 +97,19 @@ export function SampleReportProof() {
                 color: "var(--stone-700)",
               }}
             >
-              Free, and no card is needed.
+              Included in your 7 free days.
             </p>
             {/* The underline commits to a word boundary: it emphasizes
-                "Free," only, like a pen stroke under the key word. The
-                uniform scale pulls the stroke's right end back to the comma
-                while keeping the wave's hump proportions in step with the
-                brand squiggle above; the origin keeps its left edge anchored
-                under the F. */}
+                "Included" only, like a pen stroke under the key word. Three
+                segments at a slight shrink land the stroke's right end near
+                the word's final d while keeping the wave's hump proportions
+                in step with the brand squiggle above; the origin keeps its
+                left edge anchored under the I. */}
             <Squiggle
               line={false}
-              segments={2}
+              segments={3}
               color="var(--gold-400)"
-              style={{ width: "auto", marginTop: 3, transform: "scale(0.8)", transformOrigin: "left center" }}
+              style={{ width: "auto", marginTop: 3, transform: "scale(0.85)", transformOrigin: "left center" }}
             />
           </div>
         </div>

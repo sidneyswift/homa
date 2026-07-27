@@ -12,6 +12,10 @@ import {
   getMaterialCaller,
   getMaterialPinned,
 } from "../../lib/materials/library";
+import {
+  selectMaterialPages,
+  splitPageBodies,
+} from "../../lib/materials/page-shell";
 
 export function subjectLessonMaterialFinalOnly(
   attributes: unknown,
@@ -39,6 +43,11 @@ export default defineBoundedTool({
       .uuid()
       .optional()
       .describe("Fetch exactly this material WITH its html (the reuse path). All other filters are ignored."),
+    pageIndex: z
+      .int()
+      .min(1)
+      .optional()
+      .describe("With materialId on a multi-page packet, return only THIS page's html (1 is the first page) instead of all of them. Use it when you are revising one page: you need that page's html to rewrite it, and the others come back by reference through create_printable's fromMaterialId + pageIndex."),
     childId: z.uuid().optional().describe("Only materials made for this child."),
     kind: z.enum(MATERIAL_KINDS).optional(),
     subject: z.string().trim().max(80).optional().describe("Substring match, e.g. 'handwriting'."),
@@ -80,9 +89,34 @@ export default defineBoundedTool({
           note: "No material with that id in this family.",
         };
       }
+      // A multi-page packet's html is the whole document, and on a real
+      // twelve-page packet that is about 45KB. Handing all of it back so
+      // the model can rewrite one page is what pushed a live session to
+      // 276k input tokens on 2026-07-27, and re-emitting it is what
+      // stopped producing a parseable tool call
+      // (plans/2026-07-27-packet-page-revision-failure.md). So: one page
+      // when asked for one, and when not asked, say plainly that asking
+      // is cheaper.
+      const pages = splitPageBodies(material.html ?? "");
+      if (pages.length > 1 && input.pageIndex !== undefined) {
+        const selected = selectMaterialPages(material.html ?? "", input.pageIndex);
+        if (!selected.ok) {
+          return {
+            materials: [],
+            note: `"${material.title}" has ${selected.pageCount} pages, so there is no page ${input.pageIndex}. Pages count from 1.`,
+          };
+        }
+        return {
+          materials: [{ ...material, html: selected.bodies[0] }],
+          note: `Page ${input.pageIndex} of ${pages.length} of "${material.title}". Rewrite this page only; carry the other ${pages.length - 1} into create_printable as fromMaterialId ${material.id} entries with their own pageIndex, so you never retype them.`,
+        };
+      }
       return {
         materials: [material],
-        note: "Reuse the html with the theme or character swapped, or pass previewUrl to generate_image as a reference.",
+        note:
+          pages.length > 1
+            ? `This is all ${pages.length} pages of "${material.title}". Revising ONE page? Ask again with pageIndex for just that page and pass the rest to create_printable by reference (fromMaterialId + pageIndex); retyping a packet this size is slow enough to fail. Otherwise reuse the html with the theme or character swapped.`
+            : "Reuse the html with the theme or character swapped, or pass previewUrl to generate_image as a reference.",
       };
     }
 

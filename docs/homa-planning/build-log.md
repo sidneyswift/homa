@@ -3,6 +3,105 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-27 · Founder directive: shorten the signup-paywall trial to 7 days
+
+Founder: "make it a free 7 day trial instead of 30 day." Every parent-
+facing "30 free days" / "30-day trial" string became "7 free days" /
+"7-day trial" (landing, onboarding, the trial gate, chat, SMS, the
+phone line's pitch, drip email, `.env.example`). The gate is still
+flag-dark (`HOMA_SIGNUP_PAYWALL_ENABLED` unset), so nothing live
+changed; this only updates what ships once it flips.
+
+One decision made without a ruling: TRIAL_GATE_TIMELINE's reminder day
+recalculates to day 4 (three days before day 7), matching Stripe's
+`customer.subscription.trial_will_end` webhook cadence (always 3 days
+before trial end, any length) rather than day 23's old "a week before"
+framing, which was specific to the 30-day math. This creates a real gap
+flagged in `.env.example`'s `HOMA_SIGNUP_PAYWALL_ENABLED` comment: no
+code sends this reminder yet. Stripe's OWN dashboard-configured trial
+reminder (the founder checklist item this replaces) fires 7 days before
+trial end, which for a trial this short is day 0, the moment of
+signup, so it cannot keep the day-4 promise the copy now makes. Flagged
+to the founder rather than built, since it is a new capability (a
+webhook handler plus a transactional email) beyond the requested
+change, not a mechanical rename.
+
+**Addendum, same day:** the founder additionally authorized updating the
+LIVE Stripe Payment Links themselves (asked first, since
+`subscription_data.trial_period_days` turned out to be create-only on
+Payment Links, not updatable in place, confirmed via the Stripe CLI's
+own `update --help` vs `create --help` output, so this was never a
+one-line fix). Created 6 new live Payment Links (regular/plus/elite x
+monthly/annual) against the SAME existing Prices/Products, each with
+`trial_period_days=7`, `payment_method_collection=always`, and the same
+`/api/billing/confirm` redirect; verified every field on all 6 against
+the originals before proceeding; repointed the 6
+`NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_*_URL` Vercel production vars via
+`vercel env add --force --no-sensitive`; deactivated the 6 old 30-day
+links afterward. Found and fixed in passing: the regular tier's live
+monthly URL had been unset in production the whole time (a latent gap,
+never hit live because the wall was off). A fresh Vercel production
+build is still required before these values take effect (they are
+inlined at build time); merging PR #236 is the natural trigger and also
+ships the matching copy. Also found in passing: `HOMA_WALL_ENABLED` and
+`HOMA_SIGNUP_PAYWALL_ENABLED` both read empty in production right now,
+contradicting the 2026-07-18 "wall flipped on" record elsewhere in this
+log; nothing customer-facing was touched by today's Stripe change as a
+result, but the discrepancy itself is unresolved and worth a founder
+look.
+
+## 2026-07-26 · Founder directive: the signup paywall (card-upfront trial before the account opens)
+
+Founder: "paywall asap before the free report, just make them pay
+upfront to create an account (maybe a free trial for all subscription
+options). and then remove references to free report on the landing
+page... truly test the market to see if people are willing to pay."
+Built dark behind `HOMA_SIGNUP_PAYWALL_ENABLED` on branch
+`claude/paywall-subscription-onboarding-5e839f`. Supersessions this
+directive carries for NEW families while the flag is on, recorded here
+because three earlier placements said otherwise:
+
+- "The report stays free forever" (2026-07-11 wall placement): no report
+  exists before the card now. By default the gate applies to EVERY
+  non-exempt family at flag flip, existing free families included;
+  HOMA_SIGNUP_PAYWALL_SINCE (optional grandfather cutoff, set it to the
+  flip moment) scopes it to new signups only, and billing_exempt remains
+  the founder's per-family comp switch. The door wall's own rules are
+  unchanged for whoever the account gate does not reach.
+- Chat-first onboarding §7 "onboarding families never see the wall" and
+  the open §5 credit-lockout ruling: the account gate replaces both for
+  new signups; the conversation now starts after the card. LockoutCard
+  stays dark.
+- Landing claims pass T2 "no pricing on the page": inverted deliberately.
+  With a card-upfront trial as the only door, hiding the price until the
+  card screen reads as a trap; the trial terms are now stated at the CTA
+  (hero note), in the FAQ, and on the CTA band.
+
+Decisions made alone, from the 2026-07-26 research pass (opt-out trial
+benchmarks, paywall-placement data, Stripe trial mechanics, ROSCA and
+California ARL): account creation stays card-free and the gate lands
+immediately after it (research: value-first beats pay-before-anything
+for unknown brands; the founder's "pay to create an account" is honored
+as "the account is unusable until the card"); the gate is a full page
+(/onboarding/trial), Blinkist-style trial timeline over the existing
+three tier cards; entitlement now READS stripe_subscription_status
+(canceled/unpaid/paused/incomplete_expired end access; past_due keeps
+it while Stripe retries), closing the cancel-keeps-access-forever hole
+under the flag; text-message signup refuses deterministically while the
+flag is on (it would hand out the account and report the web gate
+holds); no schema change. A four-reviewer adversarial pass the same
+session hardened the gate beyond page render: the map pipeline routes
+(children/answer/score), the eve agent channel (which mobile mounts
+directly), and every door via familyWallCheckout now consult the same
+account decision, the confirm route and webhook stamp the subscription
+mirror by family id so a re-subscribing lapsed family is never walled
+on a stale "canceled" status, and pnpm check:billing wires the gate and
+copy-pin tests into CI. Scoring guidance from the research: judge the
+test on visitors-to-paid and first-rebill survival, not signups
+(expect roughly half to two-thirds fewer signups, 30-50% trial-to-paid
+healthy, below ~20% at $19/mo is a real negative willingness-to-pay
+read).
+
 ## 2026-07-25 · Founder directive: GitHub Issues is the live tracker; HUMAN-TODO retired
 
 Founder: "remove references to humantodo. then lets start using github

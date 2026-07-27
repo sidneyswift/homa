@@ -31,6 +31,12 @@ describe("isAppNavItemActive", () => {
     assert.equal(hoursItem?.href, "/app/hours");
   });
 
+  it("exposes the Calendar navigation item (CG-03, issue #176)", () => {
+    const calendarItem = APP_NAV_ITEMS.find((item) => item.label === "Calendar");
+
+    assert.equal(calendarItem?.href, "/app/calendar");
+  });
+
   it("lights Progress on live child and index routes", () => {
     assert.equal(
       isAppNavItemActive("/app/progress", "/app/progress"),
