@@ -34,7 +34,7 @@ import {
   imagePageBody,
   joinPageBodies,
   printableSlug,
-  splitPageBodies,
+  selectMaterialPages,
   stripCdataWrapper,
   validatePrintableHtml,
   wrapPrintableDocument,
@@ -107,7 +107,13 @@ const packetPageInput = z.object({
   fromMaterialId: z
     .uuid()
     .optional()
-    .describe("Reuse an existing material of this family as this page (id from find_materials or an earlier create result). Its stored page content is placed exactly as made; a multi-page material contributes all its pages."),
+    .describe("Reuse an existing material of this family as this page (id from find_materials or an earlier create result). Its stored page content is placed exactly as made; a multi-page material contributes all its pages unless pageIndex names one."),
+  pageIndex: z
+    .int()
+    .min(1)
+    .max(MAX_PACKET_PAGES)
+    .optional()
+    .describe("With fromMaterialId, reuse only THIS page of that material, numbered the way the parent counts (1 is the first page). This is how you revise one page of a packet: keep every unchanged page as its own fromMaterialId + pageIndex entry and write html for only the page she asked about. Omit to take all of the material's pages."),
 });
 
 export const createPrintableInputSchema = z.object({
@@ -180,7 +186,7 @@ export const createPrintableInputSchema = z.object({
     .max(MAX_PACKET_PAGES)
     .optional()
     .describe(
-      `PATH 3: a multi-page packet, one entry per page in print order (max ${MAX_PACKET_PAGES} pages; ship longer programs as volumes). Each entry carries exactly one of html, pageImageUrl, or fromMaterialId; mix freely (e.g. a fresh cover page + four existing lessons by id). Provide exactly one of html, pageImageUrl, or pages.`,
+      `PATH 3: a multi-page packet, one entry per page in print order (max ${MAX_PACKET_PAGES} pages; ship longer programs as volumes). Each entry carries exactly one of html, pageImageUrl, or fromMaterialId; mix freely (e.g. a fresh cover page + four existing lessons by id). To revise ONE page of a packet, do NOT retype the others: send an entry per page, each unchanged page as fromMaterialId + pageIndex pointing at the version you are revising, and html for only the page she asked about. Provide exactly one of html, pageImageUrl, or pages.`,
     ),
   revisesId: z
     .uuid()
@@ -381,6 +387,15 @@ const createPrintable = defineBoundedTool({
             note: `${position} needs exactly one of html, pageImageUrl, or fromMaterialId.`,
           };
         }
+        // pageIndex modifies fromMaterialId; it cannot select a page of
+        // html you are writing here. Rejected per entry rather than in
+        // the schema so the other pages still parse.
+        if (page.pageIndex !== undefined && typeof page.fromMaterialId !== "string") {
+          return {
+            created: false,
+            note: `${position}: pageIndex only works with fromMaterialId, to take one page of an existing material. Drop it.`,
+          };
+        }
         if (typeof page.html === "string") {
           const body = stripCdataWrapper(page.html);
           if (hasPageBreakMarkup(body)) {
@@ -421,7 +436,14 @@ const createPrintable = defineBoundedTool({
             note: `${position}: "${material.title}" was superseded when a later version was approved. Use the final instead; find_materials returns it.`,
           };
         }
-        for (const body of splitPageBodies(material.html)) {
+        const selected = selectMaterialPages(material.html, page.pageIndex);
+        if (!selected.ok) {
+          return {
+            created: false,
+            note: `${position}: "${material.title}" has ${selected.pageCount} page${selected.pageCount === 1 ? "" : "s"}, so there is no page ${page.pageIndex}. Pages count from 1.`,
+          };
+        }
+        for (const body of selected.bodies) {
           resolvedPages.push({ body, source: material.source });
         }
       }
