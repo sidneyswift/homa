@@ -11,6 +11,7 @@ import {
   layoutTimedItems,
   parseWeekOffset,
   minutesToTimeInput,
+  movedTimes,
   snapToHalfHour,
   timeToMinutes,
   timedWindow,
@@ -486,5 +487,47 @@ describe("minutesToTimeInput and snapToHalfHour", () => {
     assert.equal(snapToHalfHour(9 * 60 + 7), 9 * 60);
     assert.equal(snapToHalfHour(9 * 60 + 20), 9 * 60 + 30);
     assert.equal(snapToHalfHour(9 * 60 + 46), 10 * 60);
+  });
+});
+
+describe("movedTimes", () => {
+  const WINDOW = { windowStartHour: 8, windowEndHour: 17 };
+
+  it("moves an event by the dragged delta, snapped to the half hour", () => {
+    assert.deepEqual(
+      movedTimes({ startMin: 14 * 60, endMin: 15 * 60, deltaMinutes: 62, ...WINDOW }),
+      { startMin: 15 * 60, endMin: 16 * 60 },
+    );
+  });
+
+  it("preserves duration rather than resizing", () => {
+    const moved = movedTimes({
+      startMin: 9 * 60,
+      endMin: 11 * 60 + 30,
+      deltaMinutes: 90,
+      ...WINDOW,
+    });
+    assert.equal(moved.endMin - moved.startMin, 150);
+  });
+
+  it("moves backwards on a negative delta", () => {
+    assert.deepEqual(
+      movedTimes({ startMin: 14 * 60, endMin: 15 * 60, deltaMinutes: -120, ...WINDOW }),
+      { startMin: 12 * 60, endMin: 13 * 60 },
+    );
+  });
+
+  it("clamps at the top of the window instead of parking off-grid", () => {
+    assert.deepEqual(
+      movedTimes({ startMin: 9 * 60, endMin: 10 * 60, deltaMinutes: -600, ...WINDOW }),
+      { startMin: 8 * 60, endMin: 9 * 60 },
+    );
+  });
+
+  it("clamps so the whole block stays inside the window at the bottom", () => {
+    assert.deepEqual(
+      movedTimes({ startMin: 15 * 60, endMin: 16 * 60, deltaMinutes: 600, ...WINDOW }),
+      { startMin: 16 * 60, endMin: 17 * 60 },
+    );
   });
 });

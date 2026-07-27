@@ -123,6 +123,29 @@ export function snapToHalfHour(minutes: number): number {
   return Math.round(minutes / 30) * 30;
 }
 
+/**
+ * movedTimes(...): where a dragged event lands. The duration is
+ * preserved (dragging moves an appointment, it never resizes it), the
+ * new start snaps to the half hour a parent actually says out loud, and
+ * the whole block is clamped inside the visible window so a drag can
+ * never park an event off the grid it was dragged on.
+ */
+export function movedTimes(input: {
+  startMin: number;
+  endMin: number;
+  deltaMinutes: number;
+  windowStartHour: number;
+  windowEndHour: number;
+}): { startMin: number; endMin: number } {
+  const duration = input.endMin - input.startMin;
+  const windowStart = input.windowStartHour * 60;
+  const windowEnd = input.windowEndHour * 60;
+  const snapped = snapToHalfHour(input.startMin + input.deltaMinutes);
+  const latestStart = Math.max(windowStart, windowEnd - duration);
+  const startMin = Math.max(windowStart, Math.min(latestStart, snapped));
+  return { startMin, endMin: startMin + duration };
+}
+
 function clock(minutes: number, withMeridiem: boolean): string {
   const hours24 = Math.floor(minutes / 60) % 24;
   const hours12 = ((hours24 + 11) % 12) + 1;

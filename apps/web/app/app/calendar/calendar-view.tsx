@@ -14,6 +14,7 @@ import {
   formatTimeRange,
   layoutTimedItems,
   minutesToTimeInput,
+  movedTimes,
   snapToHalfHour,
   timeToMinutes,
   timedWindow,
@@ -102,6 +103,25 @@ interface EventDetails {
   endsOn: string;
   startTime: string | null;
   endTime: string | null;
+}
+
+/**
+ * A timed block mid-drag. `moved` stays false until the pointer clears
+ * the threshold, which is what keeps a plain tap (open the details) from
+ * being read as a zero-pixel drag.
+ */
+interface DragState {
+  id: string;
+  /** Where the block started, so a cancelled drag restores exactly. */
+  originDate: string;
+  originStartMin: number;
+  originEndMin: number;
+  pointerStartY: number;
+  moved: boolean;
+  /** Live target while dragging. */
+  date: string;
+  startMin: number;
+  endMin: number;
 }
 
 /** The add/edit form's working copy. eventId null means creating. */
@@ -334,6 +354,89 @@ export function CalendarView({
     router.refresh();
   }
 
+  /**
+   * Drag to reschedule (the judges' second "next wow", now that the
+   * update action from the touch-and-do round exists). Pointer events,
+   * not HTML5 drag-and-drop: they work the same under a finger on the
+   * kitchen tablet as under a mouse, and they give us the live preview.
+   * The window listeners read geometry through a ref so they subscribe
+   * once per drag instead of on every pointer move.
+   */
+  const [drag, setDrag] = useState<DragState | null>(null);
+  const dragRef = useRef<DragState | null>(null);
+  // A finished drag must not also open the details card on the click
+  // that follows pointerup.
+  const suppressClickRef = useRef(false);
+  const geometryRef = useRef({ startHour: 8, endHour: 17 });
+
+  useEffect(() => {
+    if (!drag) return;
+
+    function onPointerMove(moveEvent: PointerEvent) {
+      const state = dragRef.current;
+      if (!state) return;
+      const deltaY = moveEvent.clientY - state.pointerStartY;
+      // Whichever day column the pointer is over now, so a drag can move
+      // an appointment to Thursday, not just to a different hour.
+      const overDate =
+        (
+          document
+            .elementFromPoint(moveEvent.clientX, moveEvent.clientY)
+            ?.closest("[data-day-date]") as HTMLElement | null
+        )?.dataset.dayDate ?? state.date;
+      const moved = state.moved || Math.abs(deltaY) > 4 || overDate !== state.originDate;
+      if (!moved) return;
+      const times = movedTimes({
+        startMin: state.originStartMin,
+        endMin: state.originEndMin,
+        deltaMinutes: (deltaY / HOUR_PX) * 60,
+        windowStartHour: geometryRef.current.startHour,
+        windowEndHour: geometryRef.current.endHour,
+      });
+      const next: DragState = { ...state, moved: true, date: overDate, ...times };
+      dragRef.current = next;
+      setDrag(next);
+    }
+
+    async function onPointerUp() {
+      const state = dragRef.current;
+      dragRef.current = null;
+      setDrag(null);
+      if (!state?.moved) return;
+      suppressClickRef.current = true;
+      // Nothing actually changed (dragged and returned): skip the write.
+      if (
+        state.date === state.originDate &&
+        state.startMin === state.originStartMin &&
+        state.endMin === state.originEndMin
+      ) {
+        return;
+      }
+      const source = familyEvents.find((candidate) => candidate.id === state.id);
+      if (!source) return;
+      const result = await updateFamilyEventAction(state.id, {
+        title: source.title,
+        childId: source.childId,
+        startsOn: state.date,
+        endsOn: state.date,
+        startTime: minutesToTimeInput(state.startMin),
+        endTime: minutesToTimeInput(state.endMin),
+        note: source.note,
+      });
+      if (result.error) setComposerError(result.error);
+      router.refresh();
+    }
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
+    return () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
+    };
+  }, [drag, familyEvents, router]);
+
   async function deleteDetailsEvent() {
     if (!details || saving) return;
     setSaving(true);
@@ -443,8 +546,15 @@ export function CalendarView({
       rawEndTime: event.endTime,
     };
   });
-  const window = timedWindow(timedSpans);
-  const gridHeight = (window.endHour - window.startHour) * HOUR_PX;
+  const hourWindow = timedWindow(timedSpans);
+  const gridHeight = (hourWindow.endHour - hourWindow.startHour) * HOUR_PX;
+  // The drag listeners read the live window through a ref, so they never
+  // need to re-subscribe when the grid grows to fit a late event.
+  const windowStartHour = hourWindow.startHour;
+  const windowEndHour = hourWindow.endHour;
+  useEffect(() => {
+    geometryRef.current = { startHour: windowStartHour, endHour: windowEndHour };
+  }, [windowStartHour, windowEndHour]);
   const timedByDate = new Map(
     weekDates.map((date) => [
       date,
@@ -740,13 +850,13 @@ export function CalendarView({
             >
               <div className="relative" style={{ height: gridHeight }}>
                 {Array.from(
-                  { length: window.endHour - window.startHour },
-                  (_, index) => window.startHour + index,
+                  { length: hourWindow.endHour - hourWindow.startHour },
+                  (_, index) => hourWindow.startHour + index,
                 ).map((hour) => (
                   <span
                     key={hour}
                     className="absolute right-1.5 text-[0.6rem] font-semibold text-subtle"
-                    style={{ top: (hour - window.startHour) * HOUR_PX + 2 }}
+                    style={{ top: (hour - hourWindow.startHour) * HOUR_PX + 2 }}
                   >
                     {hourLabel(hour)}
                   </span>
@@ -761,9 +871,9 @@ export function CalendarView({
                 const nowLineTop =
                   days.some((cell) => cell.isToday) &&
                   nowMinutes !== null &&
-                  nowMinutes >= window.startHour * 60 &&
-                  nowMinutes <= window.endHour * 60
-                    ? ((nowMinutes - window.startHour * 60) / 60) * HOUR_PX
+                  nowMinutes >= hourWindow.startHour * 60 &&
+                  nowMinutes <= hourWindow.endHour * 60
+                    ? ((nowMinutes - hourWindow.startHour * 60) / 60) * HOUR_PX
                     : null;
                 return (
                   // Not a button on purpose: real buttons (the event
@@ -774,20 +884,27 @@ export function CalendarView({
                   // to add something", the veteran mom's next wow).
                   <div
                     key={day.date}
+                    data-day-date={day.date}
                     className="relative cursor-pointer border-l border-border-subtle"
                     style={{ height: gridHeight }}
                     onClick={(clickEvent) => {
                       const target = clickEvent.target as HTMLElement;
                       if (target.closest("button")) return;
+                      // A drag that ended over empty grid must not also
+                      // open the new-event composer.
+                      if (suppressClickRef.current) {
+                        suppressClickRef.current = false;
+                        return;
+                      }
                       const rect = clickEvent.currentTarget.getBoundingClientRect();
                       const minutes =
-                        window.startHour * 60 +
+                        hourWindow.startHour * 60 +
                         ((clickEvent.clientY - rect.top) / HOUR_PX) * 60;
                       openComposerForSlot(day.date, minutes);
                     }}
                   >
                     {Array.from(
-                      { length: window.endHour - window.startHour },
+                      { length: hourWindow.endHour - hourWindow.startHour },
                       (_, index) => index,
                     ).map((row) => (
                       <div
@@ -797,10 +914,14 @@ export function CalendarView({
                         aria-hidden="true"
                       />
                     ))}
-                    {blocks.map((block) => {
+                    {/* The block being dragged leaves its old slot and
+                        rides the pointer as a preview below. */}
+                    {blocks
+                      .filter((block) => !(drag?.moved && drag.id === block.id))
+                      .map((block) => {
                       const kid = block.kidIndex === null ? null : kids[block.kidIndex];
                       const tone = block.kidIndex === null ? null : avatarTone(block.kidIndex);
-                      const top = ((block.startMin - window.startHour * 60) / 60) * HOUR_PX;
+                      const top = ((block.startMin - hourWindow.startHour * 60) / 60) * HOUR_PX;
                       const height = Math.max(
                         24,
                         ((block.endMin - block.startMin) / 60) * HOUR_PX - 2,
@@ -812,7 +933,29 @@ export function CalendarView({
                           type="button"
                           aria-haspopup="dialog"
                           aria-label={`${block.title}, ${block.timeLabel}`}
+                          onPointerDown={(pointerEvent) => {
+                            if (pointerEvent.button !== 0) return;
+                            const state: DragState = {
+                              id: block.id,
+                              originDate: block.date,
+                              originStartMin: block.startMin,
+                              originEndMin: block.endMin,
+                              pointerStartY: pointerEvent.clientY,
+                              moved: false,
+                              date: block.date,
+                              startMin: block.startMin,
+                              endMin: block.endMin,
+                            };
+                            dragRef.current = state;
+                            setDrag(state);
+                          }}
                           onClick={() => {
+                            // A drag just ended on this block: that
+                            // gesture was a move, not a tap.
+                            if (suppressClickRef.current) {
+                              suppressClickRef.current = false;
+                              return;
+                            }
                             setConfirmDelete(false);
                             setDetails({
                               id: block.id,
@@ -928,6 +1071,52 @@ export function CalendarView({
                         </button>
                       );
                     })}
+                    {/* The live drag preview: the block under the
+                        pointer, in whatever column it is currently over,
+                        showing the time it would land on. */}
+                    {drag?.moved && drag.date === day.date
+                      ? (() => {
+                          const source = timedSpans.find((span) => span.id === drag.id);
+                          if (!source) return null;
+                          const tone =
+                            source.kidIndex === null ? null : avatarTone(source.kidIndex);
+                          const top =
+                            ((drag.startMin - hourWindow.startHour * 60) / 60) * HOUR_PX;
+                          const height = Math.max(
+                            24,
+                            ((drag.endMin - drag.startMin) / 60) * HOUR_PX - 2,
+                          );
+                          return (
+                            <div
+                              className="pointer-events-none absolute z-20 overflow-hidden rounded-lg px-2 py-0.5 opacity-95 shadow-lg ring-2"
+                              style={{
+                                top,
+                                height,
+                                left: 3,
+                                right: 3,
+                                background: tone ? tone[0] : stripeBackground,
+                                ...({ "--tw-ring-color": "var(--brand)" } as React.CSSProperties),
+                              }}
+                            >
+                              <p
+                                className="truncate pt-0.5 text-[0.7rem] font-bold leading-tight"
+                                style={{ color: tone ? tone[1] : "var(--ink, inherit)" }}
+                              >
+                                {source.title}
+                              </p>
+                              <p
+                                className="mt-0.5 text-[0.68rem] font-medium leading-tight"
+                                style={{ color: tone ? tone[1] : "var(--ink, inherit)" }}
+                              >
+                                {formatTimeRange(
+                                  minutesToTimeInput(drag.startMin),
+                                  minutesToTimeInput(drag.endMin),
+                                )}
+                              </p>
+                            </div>
+                          );
+                        })()
+                      : null}
                     {nowLineTop !== null ? (
                       day.isToday ? (
                         <div
