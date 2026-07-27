@@ -3,7 +3,7 @@
  * Enforces AGENTS.md's hard style law ("No em dash, ever, anywhere: code
  * comments, UI copy, docs, commit messages") across every git-tracked file.
  *
- * CR-51 (issue #207) found ~1,150 literal em dashes ("—") left over in
+ * CR-51 (issue #207) found ~1,150 literal em dashes (U+2014) left over in
  * tracked historical docs and local skill reference files after an earlier
  * pass cleaned apps/ and packages/. This script closes the gap: it scans the
  * whole repo so a new violation anywhere fails CI, not just in the
@@ -62,6 +62,10 @@ const EXCLUDED_FILES = new Set([
   // Defines and strips the EM_DASH constant: this file IS the runtime
   // enforcement mechanism for the no-em-dash law, not a violation of it.
   "apps/web/lib/copy-laws-runtime.ts",
+  // This checker necessarily names, defines, and quotes the character it
+  // detects (the EM_DASH constant, this comment block, the line allowlist
+  // below): self-exempt for the same reason copy-laws-runtime.ts is.
+  "scripts/em-dash-check.mjs",
 ]);
 
 // Test/spec files legitimately embed the character as fixture data while

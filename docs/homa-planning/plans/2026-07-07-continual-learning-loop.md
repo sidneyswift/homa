@@ -1,4 +1,4 @@
-# Continual Learning Loop — Foundation Design
+# Continual Learning Loop: Foundation Design
 
 > Status: PROPOSAL. Written 2026-07-07 after reviewing Replit's "Continual Learning
 > for Agents" (Michele Catasta, @pirroh). Maps the three-layer improvement framework
@@ -44,26 +44,26 @@ The compound effect for homa specifically:
 | **Recall past conversations (M2-15)** | ❌ Not built | Planned: FTS + pgvector over conversation history |
 
 **Assessment:** The storage and injection layers are solid. The gap is *systematic
-extraction* — right now the model must consciously decide to save something during the
+extraction*, right now the model must consciously decide to save something during the
 conversation. M2-13 (post-turn review) is the planned mechanism to close this gap.
 
 ### 2.2 Harness layer (fleet-wide improvements)
 
 | Component | Status | Where |
 |---|---|---|
-| **Agent instructions** | ✅ Built | `agent/instructions.md` — voice rules, memory protocol, skill protocol, worksheet spec |
-| **Typed event registry** | ✅ Built | `packages/core/src/events.ts` — `chat.turn_completed` with status, latency, tool_calls, model_tier |
+| **Agent instructions** | ✅ Built | `agent/instructions.md`, voice rules, memory protocol, skill protocol, worksheet spec |
+| **Typed event registry** | ✅ Built | `packages/core/src/events.ts`, `chat.turn_completed` with status, latency, tool_calls, model_tier |
 | **Skill bank** (founder-curated fleet skills) | ✅ Built | `skill_bank` table, published=true rows readable by all authenticated users |
-| **Benchmark data** | ✅ Built | `docs/homa-benchmarks/` — 16 docs covering early childhood through K-10, norms, crosswalks |
-| **Map scoring** | ✅ Built | `packages/core/src/map/` — deterministic benchmark scoring, band detection, content bank |
-| **Worksheet generation** | ✅ Built (basic) | `create_worksheet` tool — text exercises; reportlab/fal pipeline still pending (M0-03) |
+| **Benchmark data** | ✅ Built | `docs/homa-benchmarks/`, 16 docs covering early childhood through K-10, norms, crosswalks |
+| **Map scoring** | ✅ Built | `packages/core/src/map/`, deterministic benchmark scoring, band detection, content bank |
+| **Worksheet generation** | ✅ Built (basic) | `create_worksheet` tool, text exercises; reportlab/fal pipeline still pending (M0-03) |
 | **Production trace mining** | ❌ Not built | No mechanism to aggregate learnings across families' sessions |
 | **Harness improvement pipeline** | ❌ Not built | No automated path from "pattern observed in N families" → instruction/tool/skill update |
 | **A/B testing for instructions/skills** | ❌ Not built | Gateway model-mix experiments exist (T2) but not instruction/skill variants |
 | **Fleet-wide quality metrics** | ❌ Not built | `chat.turn_completed` captures latency + tool counts, but not outcome quality |
 
 **Assessment:** The harness itself is well-built. What's completely missing is the
-*feedback loop* — there is no mechanism to learn from production usage across families
+*feedback loop*, there is no mechanism to learn from production usage across families
 and feed improvements back into instructions, tools, or bank skills.
 
 ### 2.3 Model layer
@@ -71,8 +71,8 @@ and feed improvements back into instructions, tools, or bank skills.
 | Component | Status |
 |---|---|
 | Model selection | ✅ `anthropic/claude-sonnet-5` via AI Gateway |
-| Model-mix experiments | Planned (T2) — Gateway supports per-family routing |
-| Cost telemetry | Planned (FR-11) — `ai-reporting-user` = familyId per call |
+| Model-mix experiments | Planned (T2), Gateway supports per-family routing |
+| Cost telemetry | Planned (FR-11), `ai-reporting-user` = familyId per call |
 
 **Assessment:** Out of our direct control. The Gateway gives us the routing and
 telemetry infrastructure to experiment, which is correct. No action needed beyond
@@ -82,7 +82,7 @@ the existing T2 plan.
 
 ## 3. Gap analysis: two missing loops
 
-### Gap 1: Context-layer extraction (M2-13 — already planned)
+### Gap 1: Context-layer extraction (M2-13: already planned)
 
 **What:** After each meaningful conversation turn, a cheap model reviews the
 transcript and extracts durable learnings. This is Hermes's "background
@@ -91,7 +91,7 @@ hardened by council S4.
 
 **Why it matters:** Today, context enrichment depends entirely on the primary model
 choosing to call `remember` or `update_child_profile` during the conversation. This
-is unreliable — the model is focused on being helpful in the moment, not on extracting
+is unreliable, the model is focused on being helpful in the moment, not on extracting
 durable learnings. A post-turn reviewer has the full conversation as evidence and a
 single job: extract what's worth remembering.
 
@@ -102,14 +102,14 @@ single job: extract what's worth remembering.
 - Writes recorded in `profile_revisions` with undo
 - Injection defense per M2-14
 
-### Gap 2: Harness-layer learning (NEW — not in current backlog)
+### Gap 2: Harness-layer learning (NEW: not in current backlog)
 
 **What:** A periodic job that mines conversation traces and event data *across all
 families* to identify patterns worth codifying as fleet-wide improvements to
 instructions, tools, or bank skills.
 
 **Why it matters:** This is the moat mechanism. Individual families get better through
-context learning. But the harness getting better — that's what makes family #50's
+context learning. But the harness getting better, that's what makes family #50's
 experience qualitatively different from what family #1 saw on day one. Without this
 loop, harness improvements are manual and founder-driven only (Sidney notices
 something in the admin console and rewrites an instruction). With it, the product
@@ -170,8 +170,8 @@ turns/day across cohort one, that's ~$0.05-0.10/day.
 Review the conversation above with this family. Your ONLY job is to extract
 durable learnings worth remembering. You have two tools:
 
-1. remember(content, kind, childId?) — save a fact or what-works entry
-2. update_child_profile(childId, interests?, focus?) — update a child's
+1. remember(content, kind, childId?), save a fact or what-works entry
+2. update_child_profile(childId, interests?, focus?), update a child's
    profile when their interests or focus genuinely changed
 
 Extract ONLY:
@@ -380,7 +380,7 @@ Harness signals must NEVER contain family-specific content. The pipeline:
 2. Aggregates into anonymized signal summaries (counts, categories, age bands)
 3. Only the anonymized aggregate crosses the family boundary into `harness_signals`
 
-This is the same quarantine posture as M3-04 (benchmark research) — fleet-wide blast
+This is the same quarantine posture as M3-04 (benchmark research), fleet-wide blast
 radius demands structural anonymization, not policy-level promises.
 
 ---
@@ -457,7 +457,7 @@ event exists.
 **Size:** L (per existing backlog estimate for M2-13). This is the same ticket,
 with concrete implementation details now filled in.
 
-**Dependency:** M2-14 (injection scanning) should land first or simultaneously —
+**Dependency:** M2-14 (injection scanning) should land first or simultaneously,
 the review prompt's output re-enters the context layer, so it needs the same
 scanning defenses.
 
@@ -545,7 +545,7 @@ learning, Phases 2-4) that sequences naturally after M2-13 and before public GA.
 
 1. **Phase 1 model choice:** Haiku 3.5 for the post-turn review, or a different
    cheap model? The Hermes pattern uses the same model for cache hits on warm
-   transcripts — worth testing both approaches.
+   transcripts, worth testing both approaches.
 
 2. **Visibility level:** Should review-sourced memory writes be silent, or should
    the parent see "Homa noticed: Fridays are co-op days" with an undo option?

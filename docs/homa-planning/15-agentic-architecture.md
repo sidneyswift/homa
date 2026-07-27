@@ -90,7 +90,7 @@ means finishing the third one, not merging them back into files.
 both are live today and both are needed. The trigger loading works exactly as
 on the Mac mini: descriptions are advertised every turn and the model calls
 `load_skill` on match. (The rest of this sentence historically continued
-"...and save_skill grows the library, the skillify loop, cloud edition" —
+"...and save_skill grows the library, the skillify loop, cloud edition",
 superseded 2026-07-15 per the ruling above; there is no runtime skill-growing
 loop now, only repo packages.) Recall is now a typed, family-scoped tool over
 stored transcripts, conversations, and memories. The remaining distinction is

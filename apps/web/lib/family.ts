@@ -30,6 +30,10 @@ export interface FamilyRecord {
    * child's voice (ruling lesson-listen-child-audio); null means no
    * lesson can be recorded or uploaded yet. */
   lesson_audio_consent_at: string | null;
+  /** When this family signed up; feeds grandfather-cutoff gates (e.g.
+   * lib/lessons/route-auth.ts) that wall a feature for net-new
+   * signups only, never retroactively for existing families. */
+  created_at: string;
 }
 
 export interface ChildRecord {
@@ -63,7 +67,7 @@ export async function getMyFamily(): Promise<FamilyRecord | null> {
   const { data, error } = await supabase
     .from("families")
     .select(
-      "id, name, us_state, parent_display_name, profile_completed_at, parent_avatar_url, time_zone, address_line, address_city, address_zip, child_photo_consent_at, lesson_audio_consent_at",
+      "id, name, us_state, parent_display_name, profile_completed_at, parent_avatar_url, time_zone, address_line, address_city, address_zip, child_photo_consent_at, lesson_audio_consent_at, created_at",
     )
     .limit(1)
     .maybeSingle();
