@@ -91,10 +91,17 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # Same disposable-cluster pattern the ChildProgress E2E uses.
-      - name: Install PostgreSQL 16 for the eval sandbox
+      # pgvector is NOT optional here, unlike in the ChildProgress E2E:
+      # the eval sandbox applies every migration, and
+      # 20260709212000_semantic_recall.sql creates a vector column. Without
+      # the extension the cluster boots, the migration fails, and the run
+      # dies before a single eval starts. Found on the first real CI run,
+      # 2026-07-27; it passes locally because Homebrew's Postgres has
+      # pgvector alongside it.
+      - name: Install PostgreSQL 16 and pgvector for the eval sandbox
         run: |
           sudo apt-get update
-          sudo apt-get install --yes postgresql-16
+          sudo apt-get install --yes postgresql-16 postgresql-16-pgvector
           echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
 
       # `vercel env pull` needs the project identity, which comes from the
