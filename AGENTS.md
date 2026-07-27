@@ -321,6 +321,34 @@ status header, or session memory is a substitute for an issue.
 
 UI and copy work should use Homa's existing design system, never invent new colors, type, or components. Source of truth: `docs/homa-design/` (start at its `SKILL.md`, then `readme.md`). A spec-compliant token summary for design tooling lives at [`DESIGN.md`](DESIGN.md). Web currently hand-copies tokens, fonts, and the `Logo` component into `globals.css`, `layout.tsx`, and `apps/web/components/brand/Logo.tsx`. Mobile does the same in `apps/mobile/src/theme/tokens.ts` and `apps/mobile/src/components/brand/logo.tsx`. These copies remain temporary until `packages/design` lands under ticket M1-17. If `docs/homa-design/` tokens change, update those files and `DESIGN.md`'s front matter too, so nothing drifts.
 
+## Model gateway credentials
+
+Homa authenticates every model call with **Vercel OIDC**, never an AI
+Gateway API key (founder ruling 2026-07-27). There is no
+`AI_GATEWAY_API_KEY` in this project's environments, so do not add one,
+do not suggest creating one, and do not write a code path or workflow
+that falls back to one. Application code tolerates either variable, and
+that tolerance is not a reason to introduce the key.
+
+- **Locally:** `VERCEL_OIDC_TOKEN` in `apps/web/.env.local`, refreshed by
+  `pnpm dev:token` (`scripts/refresh-oidc-token.mjs`). It lives roughly
+  twelve hours, so an expired token is the first thing to check when
+  model calls start failing on a machine that worked yesterday. Never
+  refresh it with a bare `vercel env pull`: that rewrites `.env.local`
+  wholesale from the small development environment and takes the whole
+  fifty-plus-variable local file with it. The script exists for that.
+- **In CI:** long-lived `VERCEL_TOKEN` plus `VERCEL_ORG_ID` and
+  `VERCEL_PROJECT_ID` secrets, and the job mints a fresh OIDC token per
+  run (`.github/workflows/evals.yml`). Never store `VERCEL_OIDC_TOKEN`
+  itself as a CI secret: it works the day it is added and fails every
+  morning after, looking like a code problem rather than an expired
+  token.
+- **On Vercel:** OIDC is ambient, nothing to configure.
+
+Cause: re-litigated repeatedly, most recently 2026-07-27, when wiring
+evals into CI produced a workflow demanding a gateway key this project
+does not use plus a recommendation to go create one.
+
 ## Security & boundaries
 
 - Never read from or write to `homa-macmini/`, `homa-research/`, `homa-template/`: untracked, contain live secrets and family data, or are read-only reference. Product code ports FROM `homa-template/` deliberately, never edits it in place.
