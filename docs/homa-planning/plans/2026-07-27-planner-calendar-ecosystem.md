@@ -689,12 +689,12 @@ nav ruling, §1.1), and the deadline re-anchoring note (§5 Q-B).
 ## 8. Tracking
 
 GitHub issues are the live tracker (founder directive 2026-07-25); this doc
-is the spec they link. The issue set filed from this session: one P1
-production bug issue for §1.5 (the mobile honesty gap is the live half, the
-rest latent-at-zero-adoption), feature issues for PR A, B0, B1, C, D, E, F,
-G referencing their §4.6 scope, a founder-decision issue for §5, and a chore
-issue for the calendar ship's doc debt (build-log entry, journey-delta fold,
-ruling-register entries, retiring the superseded voice law). Issue numbers
-are recorded on each issue's cross-reference back to this file; #253, #244,
-#196, #181, #174, and #175 are cross-linked where this arc advances or
-touches them.
+is the spec they link. Filed from this session: gh#256 (PR A defect repair,
+bug/P1/production; the mobile honesty gap is the live half, the rest latent
+at zero adoption), gh#257 (B0 tool truth), gh#258 (B1 unified surface),
+gh#259 (C write parity), gh#260 (D views), gh#261 (E time and recurrence),
+gh#262 (F ecosystem bridges), gh#263 (G mobile native), gh#264 (calendar
+ship doc debt, chore), and gh#265 (the founder ruling package for §5).
+Cross-linked in the same session: #253 (metric and instrumentation), #244
+(ruling needed before the flip), #196 (silence code-confirmed, D1 on the
+critical path).
