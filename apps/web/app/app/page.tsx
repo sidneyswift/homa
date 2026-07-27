@@ -28,6 +28,14 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
+/** Sentinel to composer prefill. A closed set on purpose: a deep link
+ * may choose a prepared opening, never inject arbitrary text into her
+ * composer from a URL. */
+const DRAFT_PREFILLS: Record<string, string | undefined> = {
+  journal: "Here's how today went: ",
+  "schedule-week": "Put this week's school work on real days for me: ",
+};
+
 export default async function ChatPage({
   searchParams,
 }: {
@@ -85,9 +93,12 @@ export default async function ChatPage({
         avatarUrl: child.avatar_url,
       }))}
       slashSkills={slashSkills}
-      // The journal email's deep link (?draft=journal) lands with the
-      // composer already started; she edits and sends herself.
-      initialDraft={draft === "journal" ? "Here's how today went: " : undefined}
+      // Deep links land with the composer already started; she edits and
+      // sends herself. `journal` comes from the journal email;
+      // `schedule-week` comes from an empty /app/calendar, which is the
+      // one place a parent learns that school work needs real dates
+      // before the calendar (or a reshuffle) can do anything with it.
+      initialDraft={DRAFT_PREFILLS[draft ?? ""]}
     />
   );
 }

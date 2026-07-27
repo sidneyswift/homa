@@ -25,6 +25,8 @@ import {
   deleteFamilyEventAction,
   updateFamilyEventAction,
 } from "./actions";
+import { setViewContextAction } from "../view-context-actions";
+import { VIEW_CONTEXT_FAMILY } from "../../../lib/view-context";
 import { planChecksStorageKey, usePlanChecks } from "../../../lib/use-plan-checks";
 import { avatarTone, KidAvatar } from "../../../components/dashboard/kid-avatar";
 
@@ -261,6 +263,18 @@ export function CalendarView({
   // The chips filter is instant and local; the view-context switcher's
   // choice arrives as the initial selection.
   const [selectedKidId, setSelectedKidId] = useState<string | null>(focusChildId);
+
+  /**
+   * One "who am I viewing" answer, not two (issue #176): the chips write
+   * the same view-context the floating switcher reads, so the two can
+   * never disagree about whether this is the whole family or one kid.
+   * Local state moves first so filtering stays instant; the cookie write
+   * follows and re-renders the rest of /app behind it.
+   */
+  function selectKid(kidId: string | null) {
+    setSelectedKidId(kidId);
+    void setViewContextAction(kidId ?? VIEW_CONTEXT_FAMILY);
+  }
   // The event a parent tapped, shown in a small detail card ("the
   // calendar is look-but-do-not-touch" was the veteran-mom review's top
   // fix). Null when nothing is open.
@@ -369,8 +383,14 @@ export function CalendarView({
   const suppressClickRef = useRef(false);
   const geometryRef = useRef({ startHour: 8, endHour: 17 });
 
-  useEffect(() => {
-    if (!drag) return;
+  // Attached synchronously by the block's own pointerdown, never from an
+  // effect keyed on drag state: an effect subscribes only after React
+  // commits, which drops the first pointermove of every drag.
+  const detachDragRef = useRef<(() => void) | null>(null);
+
+  function beginDrag(state: DragState) {
+    dragRef.current = state;
+    setDrag(state);
 
     function onPointerMove(moveEvent: PointerEvent) {
       const state = dragRef.current;
@@ -399,6 +419,7 @@ export function CalendarView({
     }
 
     async function onPointerUp() {
+      detach();
       const state = dragRef.current;
       dragRef.current = null;
       setDrag(null);
@@ -427,15 +448,22 @@ export function CalendarView({
       router.refresh();
     }
 
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("pointercancel", onPointerUp);
-    return () => {
+    function detach() {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("pointercancel", onPointerUp);
-    };
-  }, [drag, familyEvents, router]);
+      detachDragRef.current = null;
+    }
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
+    detachDragRef.current = detach;
+  }
+
+  // Unmounting mid-drag (she navigates away holding the pointer) must not
+  // leave window listeners behind.
+  useEffect(() => () => detachDragRef.current?.(), []);
 
   async function deleteDetailsEvent() {
     if (!details || saving) return;
@@ -642,7 +670,7 @@ export function CalendarView({
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => setSelectedKidId(null)}
+            onClick={() => selectKid(null)}
             aria-pressed={selectedKidId === null}
             className={
               selectedKidId === null
@@ -660,7 +688,7 @@ export function CalendarView({
               <button
                 key={kid.id}
                 type="button"
-                onClick={() => setSelectedKidId(active ? null : kid.id)}
+                onClick={() => selectKid(active ? null : kid.id)}
                 aria-pressed={active}
                 className={
                   active
@@ -686,10 +714,30 @@ export function CalendarView({
       ) : (
         <>
         {weekIsEmpty ? (
-          <p className="mt-4 text-sm text-muted">
-            Nothing on the calendar this week yet. Ask Homa to add an
-            appointment or trip, or schedule a plan activity onto a real day.
-          </p>
+          // Two real doors, not just prose (issue #176's adoption gap:
+          // almost no family has put their week on real dates yet, and
+          // nothing on real dates means nothing for Homa to reshuffle).
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <p className="text-sm text-muted">
+              Nothing on the calendar this week yet.
+            </p>
+            <button
+              type="button"
+              aria-haspopup="dialog"
+              onClick={() =>
+                openComposerForSlot((days.find((day) => day.isToday) ?? days[0]).date, 9 * 60)
+              }
+              className="rounded-pill border border-brand px-4 py-1.5 text-sm font-semibold text-strong transition-colors hover:bg-[var(--clay-100)]"
+            >
+              Add an appointment
+            </button>
+            <Link
+              href="/app?draft=schedule-week"
+              className="rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-semibold text-body transition-colors hover:border-brand"
+            >
+              Put school on real days
+            </Link>
+          </div>
         ) : null}
         <section className="mt-4 overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
           <div className="min-w-[860px]">
@@ -935,7 +983,7 @@ export function CalendarView({
                           aria-label={`${block.title}, ${block.timeLabel}`}
                           onPointerDown={(pointerEvent) => {
                             if (pointerEvent.button !== 0) return;
-                            const state: DragState = {
+                            beginDrag({
                               id: block.id,
                               originDate: block.date,
                               originStartMin: block.startMin,
@@ -945,9 +993,7 @@ export function CalendarView({
                               date: block.date,
                               startMin: block.startMin,
                               endMin: block.endMin,
-                            };
-                            dragRef.current = state;
-                            setDrag(state);
+                            });
                           }}
                           onClick={() => {
                             // A drag just ended on this block: that
