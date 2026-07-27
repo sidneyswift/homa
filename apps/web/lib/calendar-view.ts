@@ -110,6 +110,19 @@ export function timeToMinutes(time: string | null): number | null {
   return hours * 60 + minutes;
 }
 
+/** minutesToTimeInput(510) -> "08:30": the HH:MM a native time input
+ * (and parseFamilyEventInput's TIME_RE) expects. Clamped to one day. */
+export function minutesToTimeInput(minutes: number): string {
+  const clamped = Math.max(0, Math.min(23 * 60 + 59, Math.round(minutes)));
+  return `${String(Math.floor(clamped / 60)).padStart(2, "0")}:${String(clamped % 60).padStart(2, "0")}`;
+}
+
+/** Snaps a tap on the time grid to the nearest half hour, the way a
+ * parent thinks about appointments ("3:30", never "3:23"). */
+export function snapToHalfHour(minutes: number): number {
+  return Math.round(minutes / 30) * 30;
+}
+
 function clock(minutes: number, withMeridiem: boolean): string {
   const hours24 = Math.floor(minutes / 60) % 24;
   const hours12 = ((hours24 + 11) % 12) + 1;

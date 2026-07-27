@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 import type { FamilyEventRow } from "../../../lib/family-events";
 import { formatMinutesAsHours } from "../../../lib/hours-view";
@@ -12,10 +13,17 @@ import {
   buildCalendarBoard,
   formatTimeRange,
   layoutTimedItems,
+  minutesToTimeInput,
+  snapToHalfHour,
   timeToMinutes,
   timedWindow,
   type CalendarActivityItem,
 } from "../../../lib/calendar-view";
+import {
+  createFamilyEventAction,
+  deleteFamilyEventAction,
+  updateFamilyEventAction,
+} from "./actions";
 import { planChecksStorageKey, usePlanChecks } from "../../../lib/use-plan-checks";
 import { avatarTone, KidAvatar } from "../../../components/dashboard/kid-avatar";
 
@@ -74,16 +82,40 @@ interface AllDayBanner {
   kidIndex: number | null;
   note: string | null;
   dateLabel: string;
+  startsOn: string;
+  endsOn: string;
+  startTime: string | null;
+  endTime: string | null;
 }
 
-/** What the tapped-event detail card shows. */
+/** What the tapped-event detail card shows, plus everything the Edit
+ * button needs to prefill the composer. */
 interface EventDetails {
+  id: string;
   title: string;
   /** "Thu 30, 2 to 3 PM" or "Sat 1 to Sun 2, all day". */
   whenLabel: string;
   /** The kid's roster index, or null for a whole-family event. */
   kidIndex: number | null;
   note: string | null;
+  startsOn: string;
+  endsOn: string;
+  startTime: string | null;
+  endTime: string | null;
+}
+
+/** The add/edit form's working copy. eventId null means creating. */
+interface ComposerState {
+  eventId: string | null;
+  title: string;
+  /** "" means the whole family. */
+  childId: string;
+  startsOn: string;
+  endsOn: string;
+  allDay: boolean;
+  startTime: string;
+  endTime: string;
+  note: string;
 }
 
 /** Greedy row assignment so overlapping all-day banners stack instead of
@@ -213,6 +245,7 @@ export function CalendarView({
   // calendar is look-but-do-not-touch" was the veteran-mom review's top
   // fix). Null when nothing is open.
   const [details, setDetails] = useState<EventDetails | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const detailsCloseRef = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {
     if (!details) return;
@@ -225,6 +258,95 @@ export function CalendarView({
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [details]);
+
+  // The add/edit composer (touch-and-do round: tap an empty slot, or
+  // Edit from the detail card). Saving goes through the server actions,
+  // then router.refresh() re-reads the week from the source of truth.
+  const router = useRouter();
+  const [composer, setComposer] = useState<ComposerState | null>(null);
+  const [composerError, setComposerError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const composerTitleRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    if (!composer) return;
+    composerTitleRef.current?.focus();
+    const onKeyDown = (keyEvent: KeyboardEvent) => {
+      if (keyEvent.key === "Escape") setComposer(null);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [composer]);
+
+  function openComposerForSlot(date: string, minutes: number) {
+    const start = snapToHalfHour(minutes);
+    setComposerError(null);
+    setComposer({
+      eventId: null,
+      title: "",
+      childId: selectedKidId ?? "",
+      startsOn: date,
+      endsOn: date,
+      allDay: false,
+      startTime: minutesToTimeInput(start),
+      endTime: minutesToTimeInput(Math.min(start + 60, 23 * 60 + 59)),
+      note: "",
+    });
+  }
+
+  function openComposerForEvent(event: EventDetails) {
+    setComposerError(null);
+    setDetails(null);
+    setComposer({
+      eventId: event.id,
+      title: event.title,
+      childId: event.kidIndex === null ? "" : (kids[event.kidIndex]?.id ?? ""),
+      startsOn: event.startsOn,
+      endsOn: event.endsOn,
+      allDay: event.startTime === null,
+      startTime: event.startTime ?? "09:00",
+      endTime: event.endTime ?? "10:00",
+      note: event.note ?? "",
+    });
+  }
+
+  async function saveComposer() {
+    if (!composer || saving) return;
+    setSaving(true);
+    setComposerError(null);
+    const payload = {
+      title: composer.title,
+      childId: composer.childId || null,
+      startsOn: composer.startsOn,
+      endsOn: composer.allDay ? composer.endsOn : composer.startsOn,
+      startTime: composer.allDay ? null : composer.startTime,
+      endTime: composer.allDay ? null : composer.endTime,
+      note: composer.note || null,
+    };
+    const result = composer.eventId
+      ? await updateFamilyEventAction(composer.eventId, payload)
+      : await createFamilyEventAction(payload);
+    setSaving(false);
+    if (result.error) {
+      setComposerError(result.error);
+      return;
+    }
+    setComposer(null);
+    router.refresh();
+  }
+
+  async function deleteDetailsEvent() {
+    if (!details || saving) return;
+    setSaving(true);
+    const result = await deleteFamilyEventAction(details.id);
+    setSaving(false);
+    if (result.error) {
+      setComposerError(result.error);
+      setConfirmDelete(false);
+      return;
+    }
+    setDetails(null);
+    router.refresh();
+  }
   // The clock line's minute is read on the client only (the server
   // render never disagrees with the browser about what time it is),
   // painted on the next frame, then kept honest all day by a one-minute
@@ -286,6 +408,10 @@ export function CalendarView({
       endIdx: event.endsOn >= lastDate ? 6 : weekDates.indexOf(event.endsOn),
       kidIndex: event.childId === null ? null : (kidIndexById.get(event.childId) ?? null),
       dateLabel: "",
+      startsOn: event.startsOn,
+      endsOn: event.endsOn,
+      startTime: event.startTime,
+      endTime: event.endTime,
     }))
     .filter((banner) => banner.startIdx !== -1 && banner.endIdx !== -1)
     .map((banner) => ({
@@ -313,6 +439,8 @@ export function CalendarView({
       kidIndex: event.childId === null ? null : (kidIndexById.get(event.childId) ?? null),
       startMin,
       endMin: Math.max(endMin, startMin + 20),
+      rawStartTime: event.startTime,
+      rawEndTime: event.endTime,
     };
   });
   const window = timedWindow(timedSpans);
@@ -377,6 +505,20 @@ export function CalendarView({
               Today
             </Link>
           ) : null}
+          <button
+            type="button"
+            aria-haspopup="dialog"
+            onClick={() =>
+              openComposerForSlot(
+                (days.find((day) => day.isToday) ?? days[0]).date,
+                9 * 60,
+              )
+            }
+            className="flex items-center gap-1.5 rounded-pill bg-brand px-4 py-1.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          >
+            <Plus size={15} aria-hidden="true" />
+            Add event
+          </button>
           <Link
             href="/app/planner"
             className="rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
@@ -488,14 +630,20 @@ export function CalendarView({
                       type="button"
                       aria-haspopup="dialog"
                       aria-label={`${banner.title}, ${banner.dateLabel}`}
-                      onClick={() =>
+                      onClick={() => {
+                        setConfirmDelete(false);
                         setDetails({
+                          id: banner.id,
                           title: banner.title,
                           whenLabel: banner.dateLabel,
                           kidIndex: banner.kidIndex,
                           note: banner.note,
-                        })
-                      }
+                          startsOn: banner.startsOn,
+                          endsOn: banner.endsOn,
+                          startTime: banner.startTime,
+                          endTime: banner.endTime,
+                        });
+                      }}
                       className="mx-1 flex cursor-pointer items-center justify-between gap-1.5 rounded-md px-2 py-1 text-left transition-shadow hover:shadow-sm"
                       style={{
                         gridColumn: `${banner.startIdx + 2} / ${banner.endIdx + 3}`,
@@ -618,10 +766,25 @@ export function CalendarView({
                     ? ((nowMinutes - window.startHour * 60) / 60) * HOUR_PX
                     : null;
                 return (
+                  // Not a button on purpose: real buttons (the event
+                  // blocks) live inside, and nested buttons are invalid.
+                  // Keyboard users get the header's Add event button for
+                  // the same action; this click is the mouse/touch
+                  // shortcut a wall calendar invites ("tap an empty slot
+                  // to add something", the veteran mom's next wow).
                   <div
                     key={day.date}
-                    className="relative border-l border-border-subtle"
+                    className="relative cursor-pointer border-l border-border-subtle"
                     style={{ height: gridHeight }}
+                    onClick={(clickEvent) => {
+                      const target = clickEvent.target as HTMLElement;
+                      if (target.closest("button")) return;
+                      const rect = clickEvent.currentTarget.getBoundingClientRect();
+                      const minutes =
+                        window.startHour * 60 +
+                        ((clickEvent.clientY - rect.top) / HOUR_PX) * 60;
+                      openComposerForSlot(day.date, minutes);
+                    }}
                   >
                     {Array.from(
                       { length: window.endHour - window.startHour },
@@ -649,16 +812,22 @@ export function CalendarView({
                           type="button"
                           aria-haspopup="dialog"
                           aria-label={`${block.title}, ${block.timeLabel}`}
-                          onClick={() =>
+                          onClick={() => {
+                            setConfirmDelete(false);
                             setDetails({
+                              id: block.id,
                               title: block.title,
                               whenLabel: dayCell
                                 ? `${dayCell.label} ${dayCell.dayOfMonth}, ${block.timeLabel}`
                                 : block.timeLabel,
                               kidIndex: block.kidIndex,
                               note: block.note,
-                            })
-                          }
+                              startsOn: block.date,
+                              endsOn: block.date,
+                              startTime: block.rawStartTime,
+                              endTime: block.rawEndTime,
+                            });
+                          }}
                           className="absolute cursor-pointer overflow-hidden rounded-lg px-2 py-0.5 text-left shadow-sm transition-shadow hover:shadow-md"
                           style={{
                             top,
@@ -838,21 +1007,201 @@ export function CalendarView({
                 : "For the whole family"}
             </p>
             {details.note ? <p className="mt-2 text-sm text-body">{details.note}</p> : null}
+            {composerError ? (
+              <p className="mt-2 text-sm" style={{ color: "var(--rose-600)" }}>
+                {composerError}
+              </p>
+            ) : null}
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => (confirmDelete ? void deleteDetailsEvent() : setConfirmDelete(true))}
+                className="rounded-pill border border-border bg-card px-4 py-2 text-sm font-semibold transition-colors hover:border-[var(--rose-500)] disabled:opacity-50"
+                style={{ color: "var(--rose-600)" }}
+              >
+                {confirmDelete ? "Really delete it" : "Delete"}
+              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  ref={detailsCloseRef}
+                  type="button"
+                  onClick={() => setDetails(null)}
+                  className="rounded-pill border border-border bg-card px-4 py-2 text-sm font-semibold text-body transition-colors hover:border-brand"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openComposerForEvent(details)}
+                  className="rounded-pill border border-brand px-4 py-2 text-sm font-semibold text-strong transition-colors hover:bg-[var(--clay-100)]"
+                >
+                  Edit
+                </button>
+                <Link
+                  href="/app"
+                  className="rounded-pill border border-brand px-4 py-2 text-sm font-semibold text-strong transition-colors hover:bg-[var(--clay-100)]"
+                >
+                  Ask Homa
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {composer ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={() => setComposer(null)}
+            className="absolute inset-0 bg-black/20"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={composer.eventId ? "Edit event" : "New event"}
+            className="relative w-full max-w-sm rounded-xl border border-border bg-card p-5 shadow-lg"
+          >
+            <p className="font-display text-lg font-semibold text-strong">
+              {composer.eventId ? "Edit event" : "New event"}
+            </p>
+            <label className="mt-3 block text-sm font-semibold text-body">
+              What is it?
+              <input
+                ref={composerTitleRef}
+                type="text"
+                value={composer.title}
+                maxLength={200}
+                onChange={(changeEvent) =>
+                  setComposer({ ...composer, title: changeEvent.target.value })
+                }
+                placeholder="Dentist, co-op, museum day…"
+                className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+              />
+            </label>
+            <label className="mt-3 block text-sm font-semibold text-body">
+              Who is it for?
+              <select
+                value={composer.childId}
+                onChange={(changeEvent) =>
+                  setComposer({ ...composer, childId: changeEvent.target.value })
+                }
+                className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+              >
+                <option value="">The whole family</option>
+                {kids.map((kid) => (
+                  <option key={kid.id} value={kid.id}>
+                    {kid.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="mt-3 flex items-end gap-3">
+              <label className="block flex-1 text-sm font-semibold text-body">
+                {composer.allDay ? "Starts" : "Day"}
+                <input
+                  type="date"
+                  value={composer.startsOn}
+                  onChange={(changeEvent) =>
+                    setComposer({
+                      ...composer,
+                      startsOn: changeEvent.target.value,
+                      endsOn:
+                        composer.endsOn < changeEvent.target.value
+                          ? changeEvent.target.value
+                          : composer.endsOn,
+                    })
+                  }
+                  className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                />
+              </label>
+              <label className="flex items-center gap-1.5 pb-2.5 text-sm font-semibold text-body">
+                <input
+                  type="checkbox"
+                  checked={composer.allDay}
+                  onChange={(changeEvent) =>
+                    setComposer({ ...composer, allDay: changeEvent.target.checked })
+                  }
+                  className="h-4 w-4 accent-[var(--sage-500)]"
+                />
+                All day
+              </label>
+            </div>
+            {composer.allDay ? (
+              <label className="mt-3 block text-sm font-semibold text-body">
+                Ends
+                <input
+                  type="date"
+                  value={composer.endsOn}
+                  min={composer.startsOn}
+                  onChange={(changeEvent) =>
+                    setComposer({ ...composer, endsOn: changeEvent.target.value })
+                  }
+                  className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                />
+              </label>
+            ) : (
+              <div className="mt-3 flex gap-3">
+                <label className="block flex-1 text-sm font-semibold text-body">
+                  From
+                  <input
+                    type="time"
+                    value={composer.startTime}
+                    onChange={(changeEvent) =>
+                      setComposer({ ...composer, startTime: changeEvent.target.value })
+                    }
+                    className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                  />
+                </label>
+                <label className="block flex-1 text-sm font-semibold text-body">
+                  To
+                  <input
+                    type="time"
+                    value={composer.endTime}
+                    onChange={(changeEvent) =>
+                      setComposer({ ...composer, endTime: changeEvent.target.value })
+                    }
+                    className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                  />
+                </label>
+              </div>
+            )}
+            <label className="mt-3 block text-sm font-semibold text-body">
+              Note (optional)
+              <input
+                type="text"
+                value={composer.note}
+                maxLength={500}
+                onChange={(changeEvent) =>
+                  setComposer({ ...composer, note: changeEvent.target.value })
+                }
+                placeholder="Bring the insurance card"
+                className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+              />
+            </label>
+            {composerError ? (
+              <p className="mt-2 text-sm" style={{ color: "var(--rose-600)" }}>
+                {composerError}
+              </p>
+            ) : null}
             <div className="mt-4 flex items-center justify-end gap-2">
               <button
-                ref={detailsCloseRef}
                 type="button"
-                onClick={() => setDetails(null)}
+                onClick={() => setComposer(null)}
                 className="rounded-pill border border-border bg-card px-4 py-2 text-sm font-semibold text-body transition-colors hover:border-brand"
               >
-                Close
+                Cancel
               </button>
-              <Link
-                href="/app"
-                className="rounded-pill border border-brand px-4 py-2 text-sm font-semibold text-strong transition-colors hover:bg-[var(--clay-100)]"
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => void saveComposer()}
+                className="rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
               >
-                Ask Homa to change it
-              </Link>
+                {saving ? "Saving…" : "Save"}
+              </button>
             </div>
           </div>
         </div>

@@ -10,6 +10,8 @@ import {
   formatTimeRange,
   layoutTimedItems,
   parseWeekOffset,
+  minutesToTimeInput,
+  snapToHalfHour,
   timeToMinutes,
   timedWindow,
   type BuildCalendarBoardInput,
@@ -465,5 +467,24 @@ describe("timedWindow", () => {
       ]),
       { startHour: 6, endHour: 19 },
     );
+  });
+});
+
+describe("minutesToTimeInput and snapToHalfHour", () => {
+  it("formats minutes as the HH:MM a time input expects", () => {
+    assert.equal(minutesToTimeInput(510), "08:30");
+    assert.equal(minutesToTimeInput(0), "00:00");
+    assert.equal(minutesToTimeInput(14 * 60), "14:00");
+  });
+
+  it("clamps out-of-day values instead of overflowing", () => {
+    assert.equal(minutesToTimeInput(-30), "00:00");
+    assert.equal(minutesToTimeInput(25 * 60), "23:59");
+  });
+
+  it("snaps a mid-cell tap to the nearest half hour", () => {
+    assert.equal(snapToHalfHour(9 * 60 + 7), 9 * 60);
+    assert.equal(snapToHalfHour(9 * 60 + 20), 9 * 60 + 30);
+    assert.equal(snapToHalfHour(9 * 60 + 46), 10 * 60);
   });
 });
