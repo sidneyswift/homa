@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getAppData } from "../../../lib/app-data";
-import { calendarWeekDates } from "../../../lib/calendar-view";
+import { calendarWeekDates, parseWeekOffset } from "../../../lib/calendar-view";
 import { getFamilyEventsForFamily } from "../../../lib/family-events-read";
 import { getHoursLogForFamily } from "../../../lib/hours";
 import { getScheduledActivitiesForFamily } from "../../../lib/plan-schedule-read";
@@ -17,10 +17,11 @@ import { CalendarView } from "./calendar-view";
  * one"). Same setup gates and view-context scoping as the rest of /app;
  * auth is enforced by proxy.ts, data access is enforced by RLS
  * regardless. This page only reads: family_events and
- * plan_activity_schedule are net-new tables from this same change (NOT
- * yet applied to production; see the PR body), so an unmigrated target
- * simply returns empty rows here rather than erroring, exactly like any
- * other family with nothing on the calendar yet.
+ * plan_activity_schedule are net-new tables from this same change,
+ * applied to production 2026-07-26 (see the PR thread). The reads below
+ * still fail closed to an empty week rather than erroring on any target
+ * where the migration is somehow missing, exactly like any other family
+ * with nothing on the calendar yet.
  */
 
 export const metadata: Metadata = {
@@ -28,7 +29,11 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-export default async function CalendarPage() {
+export default async function CalendarPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ week?: string }>;
+}) {
   const data = await getAppData();
   if (!data) redirect("/onboarding");
   const { family, children, reports, plans } = data;
@@ -39,9 +44,13 @@ export default async function CalendarPage() {
     children.map((child) => child.id),
   );
 
+  const { week } = await searchParams;
+  const weekOffset = parseWeekOffset(week);
+  const weekOffsetDays = weekOffset * 7;
+
   const timeZone = effectiveTimeZone(family.time_zone);
   const now = new Date();
-  const days = calendarWeekDates(now, timeZone);
+  const days = calendarWeekDates(now, timeZone, weekOffsetDays);
   const fromDate = days[0].date;
   const toDate = days[days.length - 1].date;
 
@@ -90,6 +99,7 @@ export default async function CalendarPage() {
         timeZone={timeZone}
         now={now}
         focusChildId={viewContext.kind === "child" ? viewContext.childId : null}
+        weekOffset={weekOffset}
       />
     </PageColumn>
   );

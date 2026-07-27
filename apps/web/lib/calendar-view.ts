@@ -35,6 +35,21 @@ export interface CalendarDayCell {
   isToday: boolean;
 }
 
+/** Deep-linking guardrail for the `?week=` search param, not a security
+ * boundary (this only shifts which week the caller's own data renders):
+ * clamp to two years either side so a malformed or wild value can't
+ * produce a pathological date computation. */
+export const MAX_WEEK_OFFSET = 104;
+
+/** parseWeekOffset(raw): the whole-week offset from the `?week=` search
+ * param (0 = this week), clamped to MAX_WEEK_OFFSET either way. Missing
+ * or non-numeric input is "this week", never a crash. */
+export function parseWeekOffset(raw: string | undefined): number {
+  const parsed = raw === undefined ? 0 : Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed)) return 0;
+  return Math.max(-MAX_WEEK_OFFSET, Math.min(MAX_WEEK_OFFSET, parsed));
+}
+
 const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 
 function pad(value: number): string {
@@ -47,23 +62,32 @@ function isoFromUtcParts(year: number, month: number, day: number): string {
 }
 
 /**
- * calendarWeekDates(now, timeZone): the seven Monday-to-Sunday cells of
- * the current week in `timeZone`, with real calendar dates. Weekend
- * visits mark no cell "today", same reasoning as the planner's
- * weekdayCells: the board shows the week just lived.
+ * calendarWeekDates(now, timeZone, weekOffsetDays): the seven
+ * Monday-to-Sunday cells of the week `weekOffsetDays` away from the
+ * current one (0 = this week, 7 = next week, -7 = last week; the
+ * navigation controls in calendar-view.tsx pass whole-week multiples).
+ * `isToday` always compares against the real, un-shifted today, so
+ * paging to another week correctly marks no cell "today" rather than
+ * re-deriving "today" from a shifted date.
  */
-export function calendarWeekDates(now: Date, timeZone: string): CalendarDayCell[] {
+export function calendarWeekDates(
+  now: Date,
+  timeZone: string,
+  weekOffsetDays = 0,
+): CalendarDayCell[] {
   const { year, month, day, weekday } = zonedDateParts(now, timeZone);
+  const todayIso = isoFromUtcParts(year, month, day);
   const sinceMonday = (weekday + 6) % 7;
   return WEEKDAY_LABELS.map((label, index) => {
-    const date = new Date(Date.UTC(year, month - 1, day - sinceMonday + index));
+    const date = new Date(Date.UTC(year, month - 1, day - sinceMonday + index + weekOffsetDays));
+    const iso = isoFromUtcParts(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
     return {
-      date: isoFromUtcParts(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate()),
+      date: iso,
       label,
       dayOfMonth: date.getUTCDate(),
       month: date.getUTCMonth() + 1,
       year: date.getUTCFullYear(),
-      isToday: index === sinceMonday,
+      isToday: iso === todayIso,
     };
   });
 }
@@ -155,6 +179,9 @@ export interface BuildCalendarBoardInput {
   timeZone: string;
   /** One kid selected in the context switcher, or null for everyone. */
   focusChildId: string | null;
+  /** Which week to show, in whole days from the current one (0 = this
+   * week). Same param calendarWeekDates takes; see its comment. */
+  weekOffsetDays?: number;
 }
 
 function emptyDayLane(date: string): CalendarDayLane {
@@ -173,7 +200,7 @@ function emptyDayLane(date: string): CalendarDayLane {
  * not yet cascade into this table).
  */
 export function buildCalendarBoard(input: BuildCalendarBoardInput): CalendarBoard {
-  const days = calendarWeekDates(input.now, input.timeZone);
+  const days = calendarWeekDates(input.now, input.timeZone, input.weekOffsetDays ?? 0);
   const dayDates = days.map((day) => day.date);
   const firstDate = dayDates[0];
   const lastDate = dayDates[dayDates.length - 1];

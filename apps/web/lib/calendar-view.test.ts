@@ -7,6 +7,7 @@ import type { DashboardPlan } from "./plan-week";
 import {
   buildCalendarBoard,
   calendarWeekDates,
+  parseWeekOffset,
   type BuildCalendarBoardInput,
 } from "./calendar-view";
 
@@ -112,6 +113,50 @@ describe("calendarWeekDates", () => {
     const todays = days.filter((day) => day.isToday);
     assert.equal(todays.length, 1);
     assert.equal(todays[0].date, "2026-08-08");
+  });
+
+  it("shifts a whole week forward when given a positive weekOffsetDays", () => {
+    const days = calendarWeekDates(NOW, TIME_ZONE, 7);
+    assert.deepEqual(
+      days.map((day) => day.date),
+      ["2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13", "2026-08-14", "2026-08-15", "2026-08-16"],
+    );
+  });
+
+  it("shifts a whole week back when given a negative weekOffsetDays", () => {
+    const days = calendarWeekDates(NOW, TIME_ZONE, -7);
+    assert.deepEqual(
+      days.map((day) => day.date),
+      ["2026-07-27", "2026-07-28", "2026-07-29", "2026-07-30", "2026-07-31", "2026-08-01", "2026-08-02"],
+    );
+  });
+
+  it("marks no day 'today' once paged away from the real current week", () => {
+    const nextWeek = calendarWeekDates(NOW, TIME_ZONE, 7);
+    const lastWeek = calendarWeekDates(NOW, TIME_ZONE, -7);
+    assert.equal(nextWeek.some((day) => day.isToday), false);
+    assert.equal(lastWeek.some((day) => day.isToday), false);
+  });
+});
+
+describe("parseWeekOffset", () => {
+  it("defaults to this week when the param is missing", () => {
+    assert.equal(parseWeekOffset(undefined), 0);
+  });
+
+  it("parses a plain integer either direction", () => {
+    assert.equal(parseWeekOffset("3"), 3);
+    assert.equal(parseWeekOffset("-5"), -5);
+  });
+
+  it("falls back to this week on garbage input rather than NaN propagating", () => {
+    assert.equal(parseWeekOffset("not-a-number"), 0);
+    assert.equal(parseWeekOffset(""), 0);
+  });
+
+  it("clamps a wildly large offset instead of computing a pathological date", () => {
+    assert.equal(parseWeekOffset("999999"), 104);
+    assert.equal(parseWeekOffset("-999999"), -104);
   });
 });
 
@@ -278,5 +323,48 @@ describe("buildCalendarBoard: hours indicator", () => {
     });
     const maya = result.kidLanes.find((lane) => lane.childId === "child-maya")!;
     assert.equal(maya.days.every((day) => day.hoursMinutes === 0), true);
+  });
+});
+
+describe("buildCalendarBoard: week navigation", () => {
+  it("hides an activity scheduled for next week while showing this week", () => {
+    const result = board({
+      plans: [mayaPlan()],
+      scheduledActivities: [schedule({ scheduledDate: "2026-08-11" })],
+    });
+    const maya = result.kidLanes.find((lane) => lane.childId === "child-maya")!;
+    assert.equal(
+      maya.days.every((day) => day.activities.length === 0),
+      true,
+    );
+  });
+
+  it("shows that same activity once paged forward to next week", () => {
+    const result = board({
+      plans: [mayaPlan()],
+      scheduledActivities: [schedule({ scheduledDate: "2026-08-11" })],
+      weekOffsetDays: 7,
+    });
+    const maya = result.kidLanes.find((lane) => lane.childId === "child-maya")!;
+    const tuesday = maya.days.find((day) => day.date === "2026-08-11")!;
+    assert.equal(tuesday.activities.length, 1);
+    assert.equal(tuesday.activities[0].text, "Count to 20 daily");
+  });
+
+  it("hides a family event scheduled for last week while showing this week", () => {
+    const result = board({ familyEvents: [event({ startsOn: "2026-07-28", endsOn: "2026-07-28" })] });
+    assert.equal(
+      result.familyDays.every((day) => day.events.length === 0),
+      true,
+    );
+  });
+
+  it("shows that same family event once paged back to last week", () => {
+    const result = board({
+      familyEvents: [event({ startsOn: "2026-07-28", endsOn: "2026-07-28" })],
+      weekOffsetDays: -7,
+    });
+    const tuesday = result.familyDays.find((day) => day.date === "2026-07-28")!;
+    assert.equal(tuesday.events.length, 1);
   });
 });

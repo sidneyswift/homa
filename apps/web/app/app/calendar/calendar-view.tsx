@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import type { FamilyEventRow } from "../../../lib/family-events";
 import { formatMinutesAsHours } from "../../../lib/hours-view";
@@ -108,6 +109,7 @@ export function CalendarView({
   timeZone,
   now,
   focusChildId,
+  weekOffset,
 }: {
   /** The FULL family roster, always (tone/avatar keys off list position). */
   kids: CalendarKid[];
@@ -119,6 +121,11 @@ export function CalendarView({
   timeZone: string;
   now: Date;
   focusChildId: string | null;
+  /** Which week is showing, in whole weeks from this one (0 = this
+   * week). Drives the Prev/Next/Today controls; page.tsx reads the
+   * matching `?week=` search param and threads the same number into
+   * buildCalendarBoard. */
+  weekOffset: number;
 }) {
   const board = buildCalendarBoard({
     kids: kids.map((kid) => ({ id: kid.id, name: kid.name, avatarUrl: kid.avatar_url })),
@@ -130,6 +137,7 @@ export function CalendarView({
     now,
     timeZone,
     focusChildId,
+    weekOffsetDays: weekOffset * 7,
   });
 
   const first = board.days[0];
@@ -146,9 +154,33 @@ export function CalendarView({
     <>
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
-            This week {"·"} {spanLabel}
-          </p>
+          <div className="flex items-center gap-2">
+            <Link
+              href={calendarWeekHref(weekOffset - 1)}
+              aria-label="Previous week"
+              className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border bg-card text-body transition-colors hover:border-[var(--clay-200)]"
+            >
+              <ChevronLeft size={16} aria-hidden="true" />
+            </Link>
+            <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
+              {weekLabel(weekOffset)} {"·"} {spanLabel}
+            </p>
+            <Link
+              href={calendarWeekHref(weekOffset + 1)}
+              aria-label="Next week"
+              className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border bg-card text-body transition-colors hover:border-[var(--clay-200)]"
+            >
+              <ChevronRight size={16} aria-hidden="true" />
+            </Link>
+            {weekOffset !== 0 ? (
+              <Link
+                href={calendarWeekHref(0)}
+                className="rounded-pill border border-border bg-card px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.1em] text-subtle transition-colors hover:border-brand"
+              >
+                Today
+              </Link>
+            ) : null}
+          </div>
           <h1 className="mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-strong">
             {focusKid ? `${focusKid.name}'s calendar` : "Your calendar"}
           </h1>
@@ -276,4 +308,17 @@ const MONTH_NAMES = [
 
 function monthName(month: number): string {
   return MONTH_NAMES[month - 1] ?? "";
+}
+
+/** The Prev/Today/Next controls' href: page.tsx's parseWeekOffset reads
+ * this same `week` param, so "Today" is simply the param omitted. */
+function calendarWeekHref(weekOffset: number): string {
+  return weekOffset === 0 ? "/app/calendar" : `/app/calendar?week=${weekOffset}`;
+}
+
+function weekLabel(weekOffset: number): string {
+  if (weekOffset === 0) return "This week";
+  if (weekOffset === 1) return "Next week";
+  if (weekOffset === -1) return "Last week";
+  return weekOffset > 0 ? `In ${weekOffset} weeks` : `${Math.abs(weekOffset)} weeks ago`;
 }

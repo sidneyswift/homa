@@ -93,6 +93,7 @@ function renderView(props: Partial<Parameters<typeof CalendarView>[0]> = {}): st
         timeZone="America/New_York"
         now={NOW}
         focusChildId={null}
+        weekOffset={0}
         {...props}
       />
     </AppRouterContext.Provider>,
@@ -172,5 +173,44 @@ describe("CalendarView", () => {
     const html = renderView();
     assert.match(html, /href="\/app\/planner"/);
     assert.match(html, />Open the week planner<\/a>/);
+  });
+});
+
+describe("week navigation", () => {
+  it("labels this week and omits a Today link when already on it", () => {
+    const html = renderView({ weekOffset: 0 });
+    assert.match(html, /This week/);
+    assert.doesNotMatch(html, />Today<\/a>/);
+  });
+
+  it("prev/next hrefs step exactly one week either way from this week", () => {
+    const html = renderView({ weekOffset: 0 });
+    assert.match(html, /href="\/app\/calendar\?week=-1"/);
+    assert.match(html, /href="\/app\/calendar\?week=1"/);
+  });
+
+  it("labels next week and shows a Today link back to the param-free URL", () => {
+    const html = renderView({ weekOffset: 1 });
+    assert.match(html, /Next week/);
+    assert.match(html, /href="\/app\/calendar">Today<\/a>/);
+  });
+
+  it("labels last week correctly", () => {
+    const html = renderView({ weekOffset: -1 });
+    assert.match(html, /Last week/);
+  });
+
+  it("labels a week further out by count rather than singular wording", () => {
+    const forward = renderView({ weekOffset: 3 });
+    assert.match(forward, /In 3 weeks/);
+
+    const backward = renderView({ weekOffset: -3 });
+    assert.match(backward, /3 weeks ago/);
+  });
+
+  it("prev/next hrefs keep stepping from a non-zero week, not resetting to it", () => {
+    const html = renderView({ weekOffset: 2 });
+    assert.match(html, /href="\/app\/calendar\?week=1"/);
+    assert.match(html, /href="\/app\/calendar\?week=3"/);
   });
 });
