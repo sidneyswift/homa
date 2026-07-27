@@ -54,43 +54,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Fail here rather than 20 minutes in with an opaque gateway error.
+      # Homa authenticates the model gateway with Vercel OIDC, never an
+      # AI Gateway API key (founder ruling 2026-07-27; see the root
+      # AGENTS.md, "Model gateway credentials"). There is no API-key
+      # branch here on purpose: an available fallback is a fallback
+      # somebody reaches for.
       #
-      # The model gateway takes either credential (lib/model-pricing-live.ts,
-      # lib/map/narrative-generate.ts). Locally this repo uses
-      # VERCEL_OIDC_TOKEN, refreshed by `pnpm dev:token`. That token is
-      # only good for twelve hours and is minted by an authenticated
-      # Vercel CLI, so it CANNOT be a stored CI secret: it would expire
-      # by the next morning and every run after that would fail looking
-      # like a code problem. CI therefore needs one of:
-      #
-      #   AI_GATEWAY_API_KEY  a long-lived key from the Vercel dashboard
-      #                       (AI Gateway, API keys). Preferred: it can
-      #                       only spend model credits.
-      #   VERCEL_TOKEN        a Vercel access token, used below to mint a
-      #                       fresh OIDC token per run. Works, but it is
-      #                       a much broader credential: anything holding
-      #                       it can read every production environment
-      #                       variable this project has.
-      - name: Resolve a model gateway credential
-        id: gateway
+      # VERCEL_OIDC_TOKEN cannot be a stored CI secret. It lives twelve
+      # hours and an authenticated Vercel CLI mints it, so a stored copy
+      # works today and fails every morning after, looking like a code
+      # problem. CI keeps a long-lived VERCEL_TOKEN and mints a fresh
+      # OIDC token per run, the same thing `pnpm dev:token` does locally.
+      - name: Require the Vercel token
         env:
-          AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          if [ -n "$AI_GATEWAY_API_KEY" ]; then
-            echo "mode=api-key" >> "$GITHUB_OUTPUT"
-            echo "Using AI_GATEWAY_API_KEY."
-          elif [ -n "$VERCEL_TOKEN" ]; then
-            echo "mode=oidc" >> "$GITHUB_OUTPUT"
-            echo "Using VERCEL_TOKEN to mint a short-lived OIDC token."
-          else
-            echo "::error::No model gateway credential is set, so the evals cannot reach the model."
-            echo "::error::Preferred, least privilege: gh secret set AI_GATEWAY_API_KEY --repo sidneyswift/homa"
-            echo "::error::  (Vercel dashboard, AI Gateway, API keys. Only spends model credits.)"
-            echo "::error::Alternative: gh secret set VERCEL_TOKEN --repo sidneyswift/homa"
-            echo "::error::  (Broader: it can read every production env var. This job mints an OIDC token from it.)"
-            echo "::error::VERCEL_OIDC_TOKEN itself is NOT usable here, it expires in twelve hours."
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::VERCEL_TOKEN is not set, so this job cannot mint an OIDC token and the evals cannot reach the model."
+            echo "::error::It is the ONLY secret this workflow needs. Create it at Vercel account settings, Tokens, scoped to the Homa team, then:"
+            echo "::error::  gh secret set VERCEL_TOKEN --repo sidneyswift/homa"
+            echo "::error::Do NOT store VERCEL_OIDC_TOKEN itself, it expires in twelve hours."
+            echo "::error::Homa does not use AI Gateway API keys (root AGENTS.md, Model gateway credentials)."
             exit 1
           fi
 
@@ -113,17 +97,29 @@ jobs:
           sudo apt-get install --yes postgresql-16
           echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
 
-      # Only runs when AI_GATEWAY_API_KEY is absent and VERCEL_TOKEN is
-      # present. `vercel env pull` needs the project identity, which comes
-      # from the two ID vars rather than a linked directory, and it must
-      # run inside apps/web because the CLI resolves the project from its
-      # own cwd (same constraint scripts/refresh-oidc-token.mjs documents).
+      # `vercel env pull` needs the project identity, which comes from the
+      # two ID vars rather than a linked directory, and it must run inside
+      # apps/web because the CLI resolves the project from its own cwd
+      # (the same constraint scripts/refresh-oidc-token.mjs documents: in
+      # a worktree the repo root is not linked).
+      #
+      # The pull writes to a scratch file, not .env.local, for the reason
+      # that script exists: `vercel env pull` rewrites the target
+      # wholesale from the development environment, and on this project
+      # that is a handful of variables against a local file carrying
+      # fifty-two.
       - name: Mint a Vercel OIDC token
-        if: steps.gateway.outputs.mode == 'oidc'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          # Not secrets, just the names of a project: they identify which
+          # Vercel project to pull from and grant nothing on their own.
+          # Inlined rather than stored because apps/web/.vercel is
+          # gitignored, so the checkout has no project.json to read, and
+          # because two more secrets to configure is two more ways for
+          # this workflow to sit broken. Same values as
+          # apps/web/.vercel/project.json on a linked machine.
+          VERCEL_ORG_ID: team_BEuVWnWjCmzv8aVLJp1HU6TC
+          VERCEL_PROJECT_ID: prj_pKBD87W4tmlT7lnYRgrs8WYociTz
         working-directory: apps/web
         run: |
           npx --yes vercel@latest env pull .env.ci \
@@ -141,7 +137,6 @@ jobs:
       # Without it the runner reports failures and exits 0, which would
       # make this workflow decorative in exactly the way issue #237's
       # first eval was.
+      # VERCEL_OIDC_TOKEN reaches this step through GITHUB_ENV, set above.
       - name: Behavioral evals (real model, disposable database)
-        env:
-          AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
         run: pnpm eval:sandbox --strict --max-concurrency 4
