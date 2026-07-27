@@ -1,5 +1,5 @@
 ---
-description: Use when the parent asks what is on the planner, the week, or the family calendar, wants the week or the month adjusted, asks to schedule an existing lesson, curriculum, or unit study onto the planner or onto a real day, asks to add an appointment, trip, or other family event, or wants to see the plan while you talk. Writing or designing a new lesson plan is materials work, not planner work. Contains the open-then-edit workflow (open_planner before every edit_plan), giving an activity a real calendar date (schedule_plan_activity), the family calendar tools (add/list/remove_family_event), the activity writing rules, and the honest limits (you cannot build a new month, and you cannot reshuffle the week around a new appointment).
+description: Use when the parent asks what is on the planner, the week, or the family calendar, wants the week or the month adjusted, asks to schedule an existing lesson, curriculum, or unit study onto the planner or onto a real day, asks to add an appointment, trip, or other family event, asks to move school work around an appointment or trip ("doctor's appt Tuesday, push things back"), or wants to see the plan while you talk. Writing or designing a new lesson plan is materials work, not planner work. Contains the open-then-edit workflow (open_planner before every edit_plan), giving an activity a real calendar date (schedule_plan_activity), the family calendar tools (add/list/remove_family_event), reshuffling the week around real life, the activity writing rules, and the honest limits (you cannot build a new month).
 metadata:
   homa-tools: open_planner, edit_plan, schedule_plan_activity, add_family_event, list_family_events, remove_family_event
   homa-related-skills: curriculum-studio, materials-studio
@@ -137,7 +137,64 @@ worse than no line.
   she is at a screen.
 - You edit activities, not history: check-offs, progress reports, and
   retest dates are never yours to touch from here.
-- You do not yet reshuffle the week around a new appointment ("doctor's
-  appt Tuesday, let's push things back"). If she asks for that, say
-  it's not something you can do automatically yet, and offer to move
-  the specific activities she names with schedule_plan_activity instead.
+
+## Reshuffling the week around real life
+
+"You have a doctor's appt on Tuesday, let's push things back." This is
+the ask the whole calendar exists for, and it is judgment, not
+arithmetic: you are moving a real family's real week, so move the least
+you can and say exactly what you moved.
+
+**Read before you move anything.** list_family_events for the week in
+question and open_planner for the affected child or children. You need
+the real appointments and the real scheduled activities with their
+indices; never reshuffle from memory or from what she said alone.
+
+**Then decide what actually collides.** An appointment blocks a piece
+of a day, not the day:
+
+- A timed appointment (dentist 2 to 3) collides with school work only
+  if the day is already full or she tells you the trip eats the
+  afternoon. A morning math lesson survives a 2pm dentist untouched.
+- An all-day or multi-day event (a trip, a co-op day) does take the
+  day. Everything scheduled on those dates needs a new home.
+- Travel and recovery are real. If she says the appointment is across
+  town, treat the surrounding hours as gone too, because she just told
+  you they are.
+
+**Move the minimum, to the nearest room.** For each activity that
+genuinely collides, call schedule_plan_activity with the next date in
+the same week that is lightest: fewest activities already scheduled, no
+all-day event, and not a day you have already loaded up in this same
+reshuffle. Keep each activity inside its own plan week; a week 2
+activity does not belong in week 3's dates.
+
+**Never move work she already did.** A checked-off activity happened.
+It stays on the day it happened, always.
+
+**Then say it in one line per move, and stop.** "Moved Tuesday's
+counting page to Wednesday and the read-aloud to Thursday; the rest of
+the week is untouched." She can see the calendar; do not narrate the
+whole week back to her.
+
+### When to stop and ask instead
+
+- **Nothing collides.** Say so plainly and leave the week alone. "The
+  dentist is at 2, and Tuesday's work is all morning, so nothing needs
+  to move" is the right answer, not a reshuffle performed to look busy.
+- **No room left in the week.** Do not cram four activities onto Friday
+  to make the numbers work. Say the week is genuinely full, name what is
+  homeless, and ask whether she wants it next week or dropped. A lighter
+  week is still a good week; never frame it as falling behind.
+- **More than about three activities would move.** That is not an
+  appointment nudging a day, that is her week changing shape. Say what
+  you see and ask what she wants protected before you touch anything.
+- **She has not scheduled the work onto real dates yet.** Then there is
+  nothing to reshuffle: the planner board's weekday spread is a display
+  guess, not saved dates. Offer to schedule the week onto real days
+  first (schedule_plan_activity), which is what makes the calendar, and
+  the reshuffle, real.
+
+You reshuffle school activities and nothing else. You never move,
+shorten, or delete her appointments to make school fit; the doctor's
+appointment is the fixed point and the schoolwork bends around it.
