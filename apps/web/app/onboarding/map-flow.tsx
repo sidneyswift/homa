@@ -123,11 +123,18 @@ const SELF_FOCUSING_PHASES: ReadonlySet<FlowPhase> = new Set<FlowPhase>(["parent
 export function MapFlow({
   onPhaseChange,
   chat = null,
+  paywallPending = false,
 }: {
   onPhaseChange?: (phase: FlowPhase) => void;
   /** Chat-first onboarding's server props, or null when the flag is off
    *  and every route below runs exactly as it always has. */
   chat?: OnboardingChatProps | null;
+  /** The signup paywall (founder directive 2026-07-26): true means the
+   *  flow ends at the account moment and hands off to /onboarding/trial,
+   *  where the server re-decides entitlement. A full navigation, not a
+   *  phase: the gate is a server-rendered page, so no client state can
+   *  route past it. */
+  paywallPending?: boolean;
 }) {
   const [phase, setPhase] = useState<FlowPhase>("loading");
   const [children, setChildren] = useState<FlowChild[]>([]);
@@ -157,6 +164,7 @@ export function MapFlow({
     firstName: string | null;
     familySetupDone: boolean;
     familyContextDone: boolean;
+    hasAccount: boolean;
   } | null> => {
     try {
       const response = await fetch("/api/map/state");
@@ -165,6 +173,7 @@ export function MapFlow({
         email?: string | null;
         firstName?: string | null;
         lastName?: string | null;
+        hasAccount?: boolean;
         familyContextDone?: boolean;
         familySetupDone?: boolean;
         children?: Array<{
@@ -201,6 +210,7 @@ export function MapFlow({
         firstName: resolvedFirstName,
         familySetupDone: Boolean(data.familySetupDone),
         familyContextDone: Boolean(data.familyContextDone),
+        hasAccount: Boolean(data.hasAccount),
       };
     } catch {
       return null;
@@ -325,6 +335,24 @@ export function MapFlow({
         return;
       }
 
+      // The signup paywall: the server flagged this family as not yet
+      // through the gate, so the trial page is the only next step, but
+      // ONLY once a real auth account exists. hasAccount, not email, is
+      // the predicate the trial page itself checks (has_account =
+      // family_members exists), and using email here would ping-pong an
+      // email-set account-less family (SMS text signups visiting via an
+      // emailed resume link, pre-2026-07-08 leads) between the two pages
+      // forever. Those families fall through to the account card, whose
+      // claim folds them by email and mints the membership row.
+      if (paywallPending) {
+        if (restored.hasAccount) {
+          window.location.assign("/onboarding/trial");
+          return;
+        }
+        setPhase("parent");
+        return;
+      }
+
       // Chat-first onboarding: past the account, there are no more
       // steps to route between. Where she is comes from the family
       // record, and Homa picks up from it. This sits directly under the
@@ -378,10 +406,10 @@ export function MapFlow({
 
       applyPostKidsRoute(decidePostKidsRoute(restored.children), restored.children);
     })();
-    // `chat` is a server-rendered prop that cannot change without a
-    // navigation, and adding it would re-run the resume decision on any
-    // re-render that reshapes it, routing a parent who is midway through
-    // answering back to the top of the flow.
+    // `chat` and `paywallPending` are server-rendered props that cannot
+    // change without a navigation, and adding them would re-run the
+    // resume decision on any re-render that reshapes them, routing a
+    // parent who is midway through answering back to the top of the flow.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshState, bootstrapSession, beginChecklist, applyPostKidsRoute]);
 
@@ -418,6 +446,13 @@ export function MapFlow({
         <ParentStep
           onDone={() => {
             void (async () => {
+              // The signup paywall: the account now exists, and the card
+              // comes out before anything else does. A full navigation
+              // so the server owns the decision.
+              if (paywallPending) {
+                window.location.assign("/onboarding/trial");
+                return;
+              }
               // Chat-first onboarding: the account was the last card.
               // Everything after it is a conversation, and going there
               // now, before another state round trip, is what puts the

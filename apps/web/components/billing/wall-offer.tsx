@@ -36,7 +36,7 @@ export function WallOffer({
       </h2>
       {/* Reassure before inform (and the reader gate's bridge): the
           report she already has is hers for good, then the thing she
-          just tapped, named, inside what the 30 free days include. */}
+          just tapped, named, inside what the 7 free days include. */}
       <p className="mt-3 text-body">{wallReportLine(childName)}</p>
       <p className="mt-2 text-body">{wallIncludedLine(door, childName)}</p>
       <p className="mt-2 text-body">{WALL_MECHANICS_LINE}</p>

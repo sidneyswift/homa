@@ -71,11 +71,20 @@ const FAQ_CSS = `
    0 so that row isn't doubled. */
 .lp-faq-item:not(:last-child)::after { content: ""; position: absolute; left: -48px; right: -48px; bottom: 0; height: 4px; background: var(--surface-card); }
 
-.lp-faq-toggle { display: flex; align-items: flex-start; width: 100%; gap: 12px; margin: 0; padding: 0; background: none; border: none; font: inherit; color: inherit; text-align: left; cursor: pointer; border-radius: var(--radius-sm); }
+/* padding-block 6 plus the matching negative margin-block grows the
+   button's own hit box to 44px (32px text line plus 12px) without
+   changing what the item contributes to the 32px rule grid: padding and
+   margin cancel out, so every sibling still lands on the same rule it did
+   before. Otherwise a one-line question (03-05) had only a 32px tap
+   target, an accident of copy length rather than a sized target. */
+.lp-faq-toggle { display: flex; align-items: flex-start; width: 100%; gap: 12px; margin: -6px 0; padding: 6px 0; background: none; border: none; font: inherit; color: inherit; text-align: left; cursor: pointer; border-radius: var(--radius-sm); }
 .lp-faq-toggle:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--brand), var(--shadow-focus); }
+.lp-faq-q-text { transition: color var(--dur-fast) var(--ease-out); }
+.lp-faq-toggle:hover .lp-faq-q-text, .lp-faq-toggle:focus-visible .lp-faq-q-text { color: var(--pop-cobalt-deep); }
 
-.lp-faq-chevron { transition: transform var(--dur-base) var(--ease-out); }
+.lp-faq-chevron { transition: transform var(--dur-base) var(--ease-out), color var(--dur-fast) var(--ease-out); }
 .lp-faq-item[data-open="true"] .lp-faq-chevron { transform: rotate(180deg); }
+.lp-faq-toggle:hover .lp-faq-chevron, .lp-faq-toggle:focus-visible .lp-faq-chevron { color: var(--pop-cobalt-deep); }
 
 /* grid-template-rows 0fr/1fr animates a height none of the fixed values
    (--32px multiples included) could, since answers vary in line count.
@@ -87,7 +96,7 @@ const FAQ_CSS = `
 .lp-faq-answer-inner { overflow: hidden; min-height: 0; }
 
 @media (prefers-reduced-motion: reduce) {
-  .lp-faq-chevron, .lp-faq-answer-wrap, .lp-faq-item[data-open="true"] > .lp-faq-answer-wrap { transition: none; }
+  .lp-faq-chevron, .lp-faq-q-text, .lp-faq-answer-wrap, .lp-faq-item[data-open="true"] > .lp-faq-answer-wrap { transition: none; }
 }
 
 @media (max-width: 880px) {
@@ -224,6 +233,7 @@ export function Faq() {
                         onClick={() => setOpenIndex(isOpen ? null : i)}
                       >
                         <span
+                          className="lp-faq-q-text"
                           style={{
                             display: "flex",
                             alignItems: "baseline",

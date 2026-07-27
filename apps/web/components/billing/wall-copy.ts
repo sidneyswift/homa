@@ -6,29 +6,32 @@ import type { BillingPeriod, PlanTier } from "../../lib/billing/wall-types";
  * Every parent-facing word on the wall, in one reviewable file
  * (plans/2026-07-11-the-wall.md; copy rulebook:
  * .agents/skills/homa-copy-writer/SKILL.md). The wall is an offer, never
- * a scold: the report stays free forever, and the wall only appears at
- * the first tap on an action door. Both copy gates ran 2026-07-11
- * (reader, then editor); the founder read-aloud is the last gate
- * (HUMAN-TODO) before the flag ever flips.
+ * a scold, and it only appears at the first tap on an action door. The
+ * original "report stays free forever" placement was superseded for new
+ * families by the report lock (2026-07-18) and then the signup paywall
+ * (founder directive 2026-07-26, TRIAL_GATE_* below); wallReportLine
+ * still renders true for the pre-gate families the door wall serves.
+ * Both copy gates ran 2026-07-11 (reader, then editor); the founder
+ * read-aloud is the last gate before any flag ever flips.
  *
  * Vocabulary laws for this surface:
- * - The trial is "your 30 free days", never "your free month": the
+ * - The trial is "your 7 free days", never "your free month": the
  *   reader gate tangled the trial month with the child's month plan
  *   the instant both were on screen. "month" appears only as the $19
  *   price unit.
- * - Included lines share ONE frame, "Your 30 free days include X",
+ * - Included lines share ONE frame, "Your 7 free days include X",
  *   where X is the thing she just tapped (the reader gate's bridge),
  *   named first in the list (editor gate: stacked "comes with...
  *   along with" was doing containment work twice).
  * - Price labels are the founder's v1 sticker prices (build-log
  *   2026-07-06) and must match the Stripe Payment Links the env vars
- *   point at; change them together, and keep the links' trial at 30
+ *   point at; change them together, and keep the links' trial at 7
  *   days so these words stay true.
  */
 
 export const WALL_EYEBROW = "Homa membership";
 
-export const WALL_HEADLINE = "Try Homa free for 30 days";
+export const WALL_HEADLINE = "Try Homa free for 7 days";
 
 /** The reassurance, first (reader gate: this landing first is what let
  *  her relax): the thing she already has is hers for good. */
@@ -43,19 +46,21 @@ export function wallIncludedLine(door: WallDoor, childName?: string | null): str
   const kid = childName ?? "your child";
   switch (door) {
     case "plan":
-      return `Your 30 free days include the four-week plan you tapped, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+      return `Your 7 free days include the four-week plan you tapped, worksheets made for ${kid}, phone calls with Homa, and chat.`;
     case "month":
       return childName
-        ? `Your 30 free days include ${childName}'s month, worksheets made for ${childName}, phone calls with Homa, and chat.`
-        : `Your 30 free days include the month you tapped, worksheets made for your child, phone calls with Homa, and chat.`;
+        ? `Your 7 free days include ${childName}'s month, worksheets made for ${childName}, phone calls with Homa, and chat.`
+        : `Your 7 free days include the month you tapped, worksheets made for your child, phone calls with Homa, and chat.`;
     case "lesson":
-      return `Your 30 free days include the lesson you tapped, its printable worksheet, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+      return `Your 7 free days include the lesson you tapped, its printable worksheet, worksheets made for ${kid}, phone calls with Homa, and chat.`;
     case "call":
-      return `Your 30 free days include the call you asked for, four-week plans, worksheets made for ${kid}, and chat.`;
+      return `Your 7 free days include the call you asked for, four-week plans, worksheets made for ${kid}, and chat.`;
     case "chat":
-      return `Your 30 free days include this chat, four-week plans, worksheets made for ${kid}, and phone calls.`;
+      return `Your 7 free days include this chat, four-week plans, worksheets made for ${kid}, and phone calls.`;
     case "report":
-      return `Your 30 free days include every subject in ${kid === "your child" ? "the" : `${kid}'s`} report, four-week plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+      return `Your 7 free days include every subject in ${kid === "your child" ? "the" : `${kid}'s`} report, four-week plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+    case "signup":
+      return `Your 7 free days include the questionnaire and ${kid === "your child" ? "your child's" : `${kid}'s`} full progress report, weekly plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
     default: {
       const exhaustive: never = door;
       throw new Error(`Unhandled wall door: ${exhaustive}`);
@@ -66,20 +71,12 @@ export function wallIncludedLine(door: WallDoor, childName?: string | null): str
 /** The ask, unmistakable on the first pass (reader gate: "card" alone
  *  read as the card on screen), then one fact per sentence. */
 export const WALL_MECHANICS_LINE =
-  "A credit card starts your 30 free days. Nothing is charged during them. You get an email before the first charge.";
+  "A credit card starts your 7 free days. Nothing is charged during them. You get an email before the first charge.";
 
-/** The buttons differ from the first words (editor gate: twin labels
- *  whose only difference sat after the mid-dot forced a compare-the-
- *  endings pause at the commitment point). */
-export const WALL_MONTHLY_BUTTON = "Start your 30 free days \u00b7 then $19 a month";
-
-export const WALL_ANNUAL_BUTTON = "Choose the year instead \u00b7 then $99 a year";
-
-/** The year's math done for her ($99 / 12, real division), and the
- *  children fact as a full sentence (editor gate: "Unlimited kids, one
- *  price" collided with the two prices right above it). */
+/** The children fact as a full sentence (editor gate: "Unlimited kids,
+ *  one price" collided with the two prices right above it). tierBullets
+ *  prepends the per-tier annual math when the toggle sits on annual. */
 export const WALL_BULLETS = [
-  "The year works out to $8.25 a month.",
   "Adding children never changes the price.",
   "Cancel anytime.",
 ] as const;
@@ -143,7 +140,7 @@ const TIER_PRICES: Record<PlanTier, { monthly: number; annual: number | null }> 
 };
 
 export function tierMonthlyButton(tier: PlanTier): string {
-  return `Start your 30 free days · then $${TIER_PRICES[tier].monthly} a month`;
+  return `Start your 7 free days · then $${TIER_PRICES[tier].monthly} a month`;
 }
 
 /** The tier picker's single CTA (2026-07-26: a monthly/annual toggle
@@ -155,7 +152,7 @@ export function tierButtonLabel(tier: PlanTier, period: BillingPeriod): string {
   if (period === "monthly") return tierMonthlyButton(tier);
   const annual = TIER_PRICES[tier].annual;
   if (annual === null) return tierMonthlyButton(tier);
-  return `Start your 30 free days · then $${annual.toLocaleString("en-US")} a year`;
+  return `Start your 7 free days · then $${annual.toLocaleString("en-US")} a year`;
 }
 
 /** The bare number for the pricing-card redesign's large price display
@@ -186,9 +183,9 @@ export function tierBullets(tier: PlanTier, period: BillingPeriod): readonly str
   const price = TIER_PRICES[tier];
   if (period === "annual" && price.annual !== null) {
     const perMonth = (price.annual / 12).toFixed(2).replace(/\.00$/, "");
-    return [`The year works out to $${perMonth} a month.`, ...WALL_BULLETS.slice(1)];
+    return [`The year works out to $${perMonth} a month.`, ...WALL_BULLETS];
   }
-  return WALL_BULLETS.slice(1);
+  return [...WALL_BULLETS];
 }
 
 /** One line per tier, reassurance-shaped (what it adds, in her words),
@@ -252,7 +249,7 @@ export function reportLockHeldLine(
   const kid = childName ?? "your child";
   const open = openCount === 1 ? "The subject above is" : `The ${NUMBER_WORDS[openCount] ?? openCount} above are`;
   const held = NUMBER_WORDS[lockedCount] ?? String(lockedCount);
-  return `${open} open in full. Your 30 free days open the other ${held}, plus four-week plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+  return `${open} open in full. Your 7 free days open the other ${held}, plus four-week plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
 }
 
 /** A held subject's whole row: her own answer count (the one honest
@@ -270,6 +267,70 @@ export function reportLockRowLine(subjectName: string, observations: number): st
 export const REPORT_LOCK_SIGNIN_HEADLINE = "The rest of the report is part of Homa membership.";
 
 export const REPORT_LOCK_SIGNIN_BODY = "Sign in to see the offer.";
+
+/**
+ * The signup trial gate (/onboarding/trial, founder directive
+ * 2026-07-26): the one full-page ask between the account card and the
+ * product. Same laws as every wall surface. The shape follows the
+ * best-documented card-upfront pattern (Blinkist's trial timeline,
+ * growth.design case study: leading with the reminder-before-charge
+ * promise raised trial starts 23% and cut complaints 55%): reassure
+ * first, then the plain mechanics as a three-beat timeline, then the
+ * tiers. The reminder promise is real: Stripe's trial reminder email is
+ * a launch requirement for this page (founder checklist on the PR), and
+ * WALL_MECHANICS_LINE already made the same promise at the doors.
+ */
+export const TRIAL_GATE_EYEBROW = "Homa membership";
+
+export const TRIAL_GATE_HEADLINE = "Try Homa free for 7 days";
+
+/** Reassurance first: the account is made and everything she does next
+ *  is kept. The gate is the next step, not a toll on what she has. */
+export const TRIAL_GATE_REASSURANCE =
+  "Your account is ready. Pick a plan to start your 7 free days. Everything below is open the whole time.";
+
+/** The Blinkist-style timeline: what happens today, before the charge,
+ *  and on day 7, each as one plain fact. Day 4 (three days before the
+ *  charge) matches Stripe's customer.subscription.trial_will_end
+ *  webhook, which always fires 3 days before trial end regardless of
+ *  trial length; it does NOT match Stripe's dashboard-configured trial
+ *  reminder email, which fires 7 days before end and would land on day
+ *  0 (the moment of signup) for a trial this short. See .env.example's
+ *  HOMA_SIGNUP_PAYWALL_ENABLED comment before promising this date in a
+ *  channel Stripe's dashboard email actually drives. */
+export const TRIAL_GATE_TIMELINE: ReadonlyArray<{ marker: string; line: string }> = [
+  {
+    marker: "Today",
+    line: "A credit card starts your 7 free days. Nothing is charged today.",
+  },
+  {
+    marker: "Day 4",
+    line: "We email you a reminder, three days before the first charge.",
+  },
+  {
+    marker: "Day 7",
+    line: "Your plan begins. Cancel before then and you pay nothing.",
+  },
+];
+
+/** Above the tiers: what the 7 free days hold, in household words. */
+export const TRIAL_GATE_INCLUDED_LINE =
+  "Your 7 free days include the questionnaire and your child's full progress report, weekly plans, worksheets made for your child, phone calls with Homa, and chat.";
+
+/** Under the tiers: nothing is lost by waiting, and the door out is
+ *  named (offers never commands). */
+export const TRIAL_GATE_SAVED_LINE =
+  "Not ready today? Everything you've entered is saved to your account, and this page will be here when you come back.";
+
+/** The lapsed variant: a family whose subscription ended sees the same
+ *  gate with its own first line, so it never reads as a bug. */
+export const TRIAL_GATE_LAPSED_REASSURANCE =
+  "Welcome back. Your family's records are all still here, exactly as you left them.";
+
+/** Shown with the lapsed line when a Stripe billing relationship
+ *  exists: the self-serve door for fixing a card or restarting the old
+ *  plan, so the gate never traps a former member. */
+export const TRIAL_GATE_MANAGE_BILLING = "Manage billing";
 
 const NUMBER_WORDS: Record<number, string> = {
   1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six",
