@@ -101,9 +101,16 @@ const conflictPayloadSchema = z.strictObject({
 export const ACTIVITY_ONLY_PROGRESS_NOTE =
   "This describes activity or time, so no score changed. The parent's message is saved as an observation on this child's record. Use log_hours when the parent named a school-time duration. Offer one concrete way to build on the activity this week.";
 export const NO_MATCH_PROGRESS_NOTE =
-  "Saved as an observation on this child's record. No score changed: the parent's message did not match a skill line yet. Tell the parent you noted it, and offer one concrete way to build on it this week.";
+  "Saved as an observation on this child's record. No score changed: the parent's message did not match a skill line yet. Tell the parent you noted it, and offer one concrete way to build on it this week. Use log_hours when the parent named a school-time duration.";
 export const AMBIGUOUS_PROGRESS_NOTE =
-  "More than one skill line could fit, so no score changed. The parent's message is saved as an observation. Ask one short clarifying question before recording progress.";
+  "More than one skill line could fit, so no score changed. The parent's message is saved as an observation. Ask one short clarifying question before recording progress. Use log_hours when the parent named a school-time duration.";
+// Appended by code to EVERY journal capture, never gated on detecting a
+// duration in the message: whether one was named is the model's
+// judgment, and a lexical gate here would be the exact silent-loss
+// pattern AGENTS.md bans (prose alone left log_hours uncalled on ~90%
+// of duration-bearing recaps, measured 2026-07-25).
+export const JOURNAL_HOURS_PROGRESS_NOTE =
+  "Before you reply: if this message named a school-time duration, call log_hours for it now. When the child is unclear, logging with no childId is correct; ask about the child in the same reply, after the row exists. Hours rows are the family's compliance evidence; the journal never records time.";
 export const OBSERVATION_USED_PROGRESS_NOTE =
   "Marked that observation as used. It will not be offered again. Do not mark it again.";
 export const OBSERVATION_ALREADY_USED_PROGRESS_NOTE =
@@ -119,6 +126,10 @@ export const manageChildProgressResultSchema = z.discriminatedUnion("kind", [
   z.strictObject({
     kind: z.literal("progress_update"),
     label: z.literal("Progress updated"),
+    // Present on journal captures only; undo and check-in updates
+    // carry no hours reminder. Declared early so it serializes near
+    // the top of the result the model reads.
+    note: z.optional(z.literal(JOURNAL_HOURS_PROGRESS_NOTE)),
     childName: displayNameSchema,
     affectedTopics: affectedTopicsSchema,
     undoAvailable: z.boolean(),

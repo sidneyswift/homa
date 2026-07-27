@@ -60,10 +60,15 @@ const CHROMELESS_PHASES: ReadonlySet<FlowPhase> = new Set<FlowPhase>(["chat"]);
 
 export function OnboardingShell({
   chat = null,
+  paywallPending = false,
 }: {
   /** Chat-first onboarding's server-assembled props, or null when the
    *  flag is off and the card flow runs exactly as it always has. */
   chat?: OnboardingChatProps | null;
+  /** The signup paywall's client-side handoff (founder directive
+   *  2026-07-26): true means whoever finishes the account card here is
+   *  forwarded to /onboarding/trial instead of the flow's next step. */
+  paywallPending?: boolean;
 }) {
   const [phase, setPhase] = useState<FlowPhase>("loading");
   const chromeless = CHROMELESS_PHASES.has(phase);
@@ -108,7 +113,7 @@ export function OnboardingShell({
         }
       >
         <div className={chromeless ? "contents" : `w-full ${topAnchored ? "" : "my-auto"}`}>
-          <MapFlow onPhaseChange={setPhase} chat={chat} />
+          <MapFlow onPhaseChange={setPhase} chat={chat} paywallPending={paywallPending} />
         </div>
       </main>
 

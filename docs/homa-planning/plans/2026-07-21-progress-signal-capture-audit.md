@@ -367,16 +367,16 @@ timestamp (`effective-evidence.ts:200-212`); source kind only changes a
 display sentence. There is no confidence field anywhere in the schema.
 Proposed ladder, strongest to weakest, matching the founder's own framing:
 
-1. **Explicit capability report / check-in answer** — a deliberate,
+1. **Explicit capability report / check-in answer**, a deliberate,
    attributed statement of ability. Scores fully, can supersede anything.
-2. **Lesson-listen verified clause** — model-proposed, deterministically
+2. **Lesson-listen verified clause**, model-proposed, deterministically
    verified against a transcript. Scores fully once the matcher is fixed.
 3. **Worksheet/lesson completion confirmed by parent** ("she finished it,
-   got them all right") — scores, capped below "easily" (should read as
+   got them all right"), scores, capped below "easily" (should read as
    `getting_there` at minimum until an explicit independence cue appears).
-4. **Day-recap / activity mention** ("we did a scavenger hunt") — writes as
+4. **Day-recap / activity mention** ("we did a scavenger hunt"), writes as
    a weighted observation with candidate item tags, never a score.
-5. **Worksheet created / planner activity assigned** — the weakest signal:
+5. **Worksheet created / planner activity assigned**, the weakest signal:
    "working on this," never scores, but should at minimum seed the
    `ask_next` follow-up target and the observation ledger's subject hints.
 
@@ -394,7 +394,7 @@ Full trace and design already complete (see the cross-cutting analysis);
 summary:
 
 - **Where the decision lives:** deciding who participated and what an
-  activity plausibly evidences at each age is judgment — it belongs in the
+  activity plausibly evidences at each age is judgment, it belongs in the
   fleet-skill/instruction layer, per this repo's own thin-harness/fat-skill
   placement rule, not in a new god tool.
 - **Transport:** repeated single-child calls already work and are already
@@ -403,7 +403,7 @@ summary:
 - **What's actually missing:** an optional, server-validated claim payload
   per call (proposed item + proposed strength), with the server enforcing
   item existence, age-plausibility against the bank's typical-age data, and
-  a strength cap (never "easily" from an activity inference) — plus one
+  a strength cap (never "easily" from an activity inference), plus one
   instruction sentence telling the model to fan out on a collective phrase
   ("we all," "the kids") and name every child it wrote to in its reply, so
   a parent can correct a mis-attribution.
@@ -479,7 +479,7 @@ repo so none of this is new infrastructure:
    the disposable-Postgres E2E harness
    (`scripts/child-progress-postgres-test.mts`) already spins up a real,
    throwaway Postgres cluster in CI and drives the real service classes
-   directly with explicit, scripted `observedAt` timestamps — it already
+   directly with explicit, scripted `observedAt` timestamps, it already
    supports multi-week, multi-adult sequences. It can host a scripted month
    of the **deterministic** layers (evidence writes, scoring, check-in
    state) for 2-3 mock families (single kid; three kids aged 3/6/9;
@@ -613,7 +613,7 @@ the artifact bridges (D8), and the taxonomy authoring track (D7).
 3. **Strength schema** (D4), expand-contract.
 4. **Model-proposes matcher** (D3 tier 2), shipped only once the baseline
    evals exist to measure it.
-5. **Backstop sweep** (D3b) — depends on the matcher.
+5. **Backstop sweep** (D3b), depends on the matcher.
 6. **Follow-up rail** (D5) + evening-prompt offer and targeting (D2).
 7. **Bridges** (D8) + fan-out (D7), feeding the capped follow-up queue.
 8. **Family simulator** (D9) grows alongside 5-7.

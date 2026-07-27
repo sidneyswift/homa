@@ -3,6 +3,7 @@ import { agentJobsEnabled } from "../lib/jobs/flag";
 import {
   claimNextRunnableJob,
   finalizeCooperativeCancel,
+  reapStaleJobStages,
   releaseStageClaim,
 } from "../lib/jobs/runner";
 import { buildStageBrief, loadJobPlan } from "../lib/jobs/session";
@@ -57,6 +58,19 @@ export async function runAgentJobsCycle(
   maxStages = 10,
 ): Promise<number> {
   if (!agentJobsEnabled()) return 0;
+
+  // Recover any stage whose serverless build was hard-killed (timeout,
+  // OOM, a deploy mid-run) before its turn could release the lease. The
+  // stage's in_progress status IS the lease, and claimNextRunnableJob
+  // excludes any job holding one, so without this a single hard kill
+  // wedges that job forever with nothing reporting it. runner.ts has
+  // described this reaper as "a follow-up" since the runner shipped;
+  // this is the follow-up.
+  //
+  // Before the claim loop on purpose, so a stage released back to
+  // pending here is re-claimed in this same cycle rather than waiting
+  // out another five minutes.
+  await reapStaleJobStages();
 
   let started = 0;
   for (let i = 0; i < maxStages; i++) {

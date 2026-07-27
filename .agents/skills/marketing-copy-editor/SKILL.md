@@ -11,12 +11,9 @@ are already fixed before style gets polished (the order law lives in
 
 ## How the orchestrator dispatches this gate
 
-Use the current environment's delegation mechanism to run a second
-fresh-context, read-only subagent. Give it only the house style and
-post-reviewer draft named below, with no file-editing task. If the environment
-cannot enforce a read-only mode, state the restriction in the dispatch and
-keep all file edits with the orchestrator. The dispatch prompt must contain,
-in this order, pasted verbatim:
+Dispatch mechanics, the delivery instruction, the order law, and the
+shared laws live in `.agents/copy-gate-protocol.md`; follow it exactly.
+This gate's dispatch prompt must contain, in this order, pasted verbatim:
 
 1. The full text of `marketing/voice/house-style.md`.
 2. This instruction block:
@@ -32,6 +29,8 @@ in this order, pasted verbatim:
 > reader gate's accepted changes on comprehension grounds.
 
 3. The full post-reviewer draft.
+4. The protocol's delivery instruction, with one addition for this gate:
+   notes come back grouped must-fix then suggestion.
 
 ## What comes back, and what to do with it
 
@@ -48,8 +47,9 @@ Pillars (article, video script, email) are edited one at a time. Micro-copy
 dispatch: same rulebook, notes keyed per file. One pass over the set is the
 deliberate cost/quality trade recorded in spec 14 §5.
 
-## Laws (marketing/AGENTS.md, restated)
+## Laws
 
-Never auto-publish. The editor subagent is read-only and cannot touch files.
-No family data. This skill never edits `voice/house-style.md` content rules on
-its own; banlist additions happen through the main agent as part of a fix.
+Shared laws (read-only subagent, no family data, order law,
+never-auto-publish) are in `.agents/copy-gate-protocol.md`. Specific to
+this gate: it never edits `voice/house-style.md` content rules on its own;
+banlist additions happen through the main agent as part of a fix.

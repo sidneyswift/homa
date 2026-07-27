@@ -47,6 +47,23 @@ describe("composeOnboardingModeMarkdown, positive routing", () => {
     assert.doesNotMatch(markdown, /^---/m);
     assert.doesNotMatch(markdown, /Use when the session belongs to a family/);
   });
+
+  it("keeps one voice-rule copy on each independently loadable surface", () => {
+    // The speak-to-her rule was consolidated from four copies to two
+    // (2026-07-25): the mode markdown is the pre-skill floor on web,
+    // and the skill body's What-not-to-do bullet is the only carrier
+    // when load_skill pulls the body into an SMS, email, or dispatch
+    // session where the mode markdown is deliberately absent. Deleting
+    // either remaining copy must fail here, loudly.
+    const markdown = composeOnboardingModeMarkdown(
+      { channel: "web", onboardingActive: "true" },
+      rawSkill,
+    );
+    assert.ok(markdown);
+    assert.match(markdown, /She is "you"/);
+    assert.match(rawSkill, /third person reach a reply/);
+    assert.match(rawSkill, /A name and a birthday carry no pronouns/);
+  });
 });
 
 describe("composeOnboardingModeMarkdown, adversarial negatives", () => {

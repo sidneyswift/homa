@@ -512,8 +512,9 @@ describe("subject lesson build policy", () => {
         familyWallCheckout: async () => {
           wallChecks += 1;
           return {
-            monthlyUrl: "https://stripe.example/monthly",
-            annualUrl: "https://stripe.example/annual",
+            regular: { monthlyUrl: "https://stripe.example/monthly", annualUrl: "https://stripe.example/annual" },
+            plus: null,
+            elite: null,
           };
         },
         startSession: async () => {
@@ -563,8 +564,9 @@ describe("subject lesson build policy", () => {
         familyWallCheckout: async () => {
           wallChecks += 1;
           return {
-            monthlyUrl: "https://stripe.example/monthly",
-            annualUrl: "https://stripe.example/annual",
+            regular: { monthlyUrl: "https://stripe.example/monthly", annualUrl: "https://stripe.example/annual" },
+            plus: null,
+            elite: null,
           };
         },
         claimOrReuseSubjectLesson: async () => {
@@ -584,8 +586,9 @@ describe("subject lesson build policy", () => {
     const handler = createSubjectLessonBuildHandler(
       buildDependencies({
         familyWallCheckout: async () => ({
-          monthlyUrl: "https://stripe.example/monthly",
-          annualUrl: "https://stripe.example/annual",
+          regular: { monthlyUrl: "https://stripe.example/monthly", annualUrl: "https://stripe.example/annual" },
+          plus: null,
+          elite: null,
         }),
         claimOrReuseSubjectLesson: async () => {
           claims += 1;

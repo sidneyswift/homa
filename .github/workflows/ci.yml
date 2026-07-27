@@ -49,6 +49,12 @@ jobs:
       - name: Agent context checks (chart parity, injection escaping)
         run: pnpm check:agent-context
 
+      - name: Agent context budget ratchet (always-on bytes per component)
+        run: pnpm check:agent-budget
+
+      - name: Instructions split and voice-mirror invariants (phone persona)
+        run: pnpm check:instructions-split
+
       - name: Eval-host isolation checks (no prod writes from local eval runs)
         run: pnpm check:eval-isolation
 
@@ -60,6 +66,9 @@ jobs:
 
       - name: Tool deadline guard (no unbounded tool can freeze a turn)
         run: pnpm check:tool-deadlines
+
+      - name: "No-em-dash style law (AGENTS.md: no em dash, ever, anywhere)"
+        run: pnpm check:em-dash
 
       - name: Fleet-skill package checks (frontmatter, size limits, slash-menu parity)
         run: pnpm check:fleet-skills
@@ -97,6 +106,12 @@ jobs:
       - name: Homa's tasks UI checks (cards, editor dialog)
         run: pnpm check:tasks-ui
 
+      - name: Hours page checks (day grouping, totals, filter, editor dialog)
+        run: pnpm check:hours-ui
+
+      - name: Calendar page checks (per-kid/family lanes, scheduling, voice digest)
+        run: pnpm check:calendar-ui
+
       - name: Dynamic prompt suggestion checks
         run: pnpm check:prompt-suggestions
 
@@ -125,6 +140,9 @@ jobs:
       - name: Drip checks (eligibility, priority, beat-keyed audiences)
         run: pnpm check:drip
 
+      - name: Billing gate checks (wall exemptions, account access, wall + landing copy pins)
+        run: pnpm check:billing
+
       # Fixture hygiene only, no model call. The paid routing eval is
       # pnpm eval:ask-user-questions, run by hand.
       - name: Choice-card routing fixtures
@@ -139,6 +157,12 @@ jobs:
       - name: ChildProgress disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm child-progress:e2e
+
+      # hours_log is compliance evidence: the unique index, the cleanup
+      # migration, and both writers' raced-insert handling (issue #215).
+      - name: hours_log dedupe disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm hours-log:e2e
 
       - name: Morning research brief v2 disposable acceptance
         timeout-minutes: 10

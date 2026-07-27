@@ -126,6 +126,9 @@ export function Button({
     onMouseUp: () => setActive(false),
     onTouchStart: () => setActive(true),
     onTouchEnd: () => setActive(false),
+    // A scroll that starts on the button fires touchcancel, not touchend;
+    // without this the press scale sticks mid-scroll.
+    onTouchCancel: () => setActive(false),
     onFocus: (event: FocusEvent<HTMLElement>) => setFocus(showsFocusRing(event.currentTarget)),
     onBlur: () => setFocus(false),
   };

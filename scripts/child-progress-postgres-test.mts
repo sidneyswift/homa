@@ -276,10 +276,24 @@ const prerequisiteSql = `
     content text,
     source text
   );
+  -- Mirrors migrations #37 + 20260725193000: the fold's guarded hours
+  -- move reads the block columns and relies on this unique index.
   create table public.hours_log (
     id uuid primary key default gen_random_uuid(),
-    family_id uuid
+    family_id uuid,
+    child_id uuid,
+    subject text not null default 'other',
+    minutes integer not null default 1,
+    happened_on date not null default current_date,
+    source text not null default 'chat',
+    note text,
+    created_at timestamptz not null default now()
   );
+  create unique index hours_log_block_unique_idx
+    on public.hours_log (
+      family_id, subject, minutes, happened_on,
+      coalesce(child_id, '00000000-0000-0000-0000-000000000000'::uuid)
+    );
   create table public.call_transcripts (
     id uuid primary key default gen_random_uuid(),
     family_id uuid
@@ -747,6 +761,16 @@ async function runFamilyFoldCompatibilityAssertions(
         and revision.child_id = live.child_id
         and revision.family_id = live.family_id
     `;
+    // Fold under hours_log_block_unique_idx (issue #215): a source
+    // block the destination already has is dropped, everything else
+    // moves, and nothing is left on the retiring family.
+    await tx`
+      insert into public.hours_log (family_id, subject, minutes, happened_on, note)
+      values
+        (${stubDestinationFamilyId}, 'math', 30, '2026-07-20', 'destination original'),
+        (${stubSourceFamilyId}, 'math', 30, '2026-07-20', 'source copy, dropped on fold'),
+        (${stubSourceFamilyId}, 'reading', 45, '2026-07-21', 'moves with the fold')
+    `;
     assert.equal(
       await foldStubFamilyIntoTx(
         tx,
@@ -760,6 +784,25 @@ async function runFamilyFoldCompatibilityAssertions(
       destinationFamilyId: stubDestinationFamilyId,
       fixture: stubFixture,
     });
+    const foldedHours = await tx<
+      { subject: string; minutes: number; note: string | null }[]
+    >`
+      select subject, minutes, note from public.hours_log
+      where family_id = ${stubDestinationFamilyId}
+      order by subject
+    `;
+    assert.deepEqual(
+      foldedHours.map((row) => ({ ...row })),
+      [
+        { subject: "math", minutes: 30, note: "destination original" },
+        { subject: "reading", minutes: 45, note: "moves with the fold" },
+      ],
+    );
+    const [sourceHours] = await tx<{ count: number }[]>`
+      select count(*)::integer as count from public.hours_log
+      where family_id = ${stubSourceFamilyId}
+    `;
+    assert.equal(sourceHours.count, 0);
   });
 
   const attachSourceFamilyId = randomUUID();

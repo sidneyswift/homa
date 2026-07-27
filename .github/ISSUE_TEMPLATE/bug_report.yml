@@ -1,0 +1,29 @@
+name: Bug report
+description: Something is broken or behaving wrongly.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If this bug is confirmed or strongly suspected live in production, the rule is fixed-not-stored: fix it in the session that found it, or escalate it plainly to the founder. This issue then records the fix or the escalation. Add the `production` label either way.
+  - type: textarea
+    id: symptom
+    attributes:
+      label: User-facing symptom
+      description: What a parent (or the founder) actually sees, in plain words.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Screenshots, transcript quotes, log lines, file:line references, or the doc that recorded it.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance
+      description: What must be true, and verified how, for this to close.
+    validations:
+      required: true

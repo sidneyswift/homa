@@ -1,8 +1,10 @@
 # Foldable / interactive notebook insert
 
-Golden anchor: pass `anchorIds: ["foldable"]` to generate_image so the
-output matches the Homa foldable bar (tri-fold layout, fold lines, glue
-tab, color-coded panels, embedded practice). Write your own prompt with
+Golden anchor: every generate_image call for a foldable carries
+`anchorIds: ["foldable"]`, whether the image is the whole panel or one
+small mnemonic character. The anchor leads the reference set and holds
+the Homa foldable bar (tri-fold layout, fold lines, glue tab,
+color-coded panels, embedded practice). Write your own prompt with
 your own content; the anchor sets the visual bar, not the specifics.
 
 A foldable is a tactile learning tool the child prints, cuts, folds,
@@ -48,8 +50,9 @@ Design patterns (all binding for foldables):
   wants them. Keep the same layout, with answers in a muted accent color or full
   color fills on each section.
 - **Mnemonic anchoring**: pair a verbal mnemonic with a small
-  illustration (use generate_image for one small character/icon on
-  white background, embed via hybrid path). Humor helps memory.
+  illustration (use generate_image with `anchorIds: ["foldable"]` for
+  one small character/icon on white background, embed via hybrid
+  path). Humor helps memory.
 
 ```html
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">

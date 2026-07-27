@@ -71,7 +71,7 @@ An AI homeschool assistant that keeps a family's context, helps create learning 
 | `docs/notes/` | Running implementation notes that record discoveries and plan deviations |
 | `docs/superpowers/` | Approved feature designs and executable implementation plans |
 | `docs/homa-planning/reconciliation/` | Exhaustive documentation manifest, claim ledger, and time-bounded evidence |
-| `HUMAN-TODO.md` | Current founder-only external actions, with external state rechecked before action |
+| GitHub Issues | Live tracker for all open work: bugs, features, chores, investigations, and founder actions/decisions (since 2026-07-25; replaced `HUMAN-TODO.md`). Process: `AGENTS.md` § Tickets and issue tracking |
 
 Never read from or write to the restricted local trees named in `AGENTS.md`. They are outside repository work even when present locally.
 

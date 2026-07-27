@@ -1,5 +1,12 @@
 # Fraction link puzzle
 
+Golden anchor: pass `anchorIds: ["fraction-link-puzzle"]` to
+generate_image so the output matches the Homa fraction-link bar (six
+small grids per page with shaded given cells and blanks, one
+plain-language rule line under the title, light food theming in the
+margins). Write your own prompt with your own content; the anchor
+sets the visual bar, not the specifics.
+
 Grid-based puzzle where cells contain fractions or whole numbers,
 and students must find relationships (simplification, equivalence)
 between adjacent cells to complete the grid. Derived from Beast

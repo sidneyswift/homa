@@ -306,6 +306,13 @@ h1, h2, h3, h4, h5, h6 {
      in step (a few px of drift is invisible; smaller-than-real breaks
      the landing hero's top edge). */
   --lp-nav-height: 80px;
+  /* Landing mid-page chapter ground: bg-page and bg-page-warm sit ~1% apart
+     in luminance, so at full-page scale the cream midsection read as one
+     flat run. One butter chapter (the Features band in page.tsx) breaks the
+     arc into cream, butter, cream, warm, blush, sunshine. Derived from
+     existing tokens only; it echoes the hero's gold-100 glow and the report
+     card's gold field so the chapter stays in the family. */
+  --lp-band-butter: color-mix(in oklab, var(--gold-100) 42%, var(--bg-page));
 }
 
 .lp-nav {
@@ -433,8 +440,15 @@ h1, h2, h3, h4, h5, h6 {
   .lp-3col { grid-template-columns: 1fr !important; }
   .lp-4col { grid-template-columns: 1fr 1fr !important; }
   .lp-pad { padding-left: 20px !important; padding-right: 20px !important; }
+  /* Vertical rhythm collapse: desktop-tuned section paddings otherwise
+     stack into 200px same-cream gaps on phones. Roughly 60% of the desktop
+     scale; sections that end at 0 (the thread) manage their own. */
+  .lp-section { padding-top: 64px !important; padding-bottom: 72px !important; }
+  /* The hand note hangs 44px below the visual here (absolute at 541-880px),
+     so bottom padding stays 48; the phone-only block below tightens it once
+     the note joins the flow. */
   .lp-hero-shell {
-    gap: 28px !important;
+    gap: 24px !important;
     padding-top: 56px !important;
     padding-bottom: 48px !important;
   }
@@ -476,7 +490,37 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* PainBridge index cards, desktop only: uniform four-up card rows are the
+   one template tell on a page that otherwise earns its hand-made feel with
+   tape, tilt, and stagger. Loose top offsets plus sub-degree tilts read as
+   cards laid on a desk. Tilt uses the standalone rotate property so the
+   reveal system's transform never resets it; offsets stay off phones where
+   the grid stacks. */
+@media (min-width: 881px) {
+  .lp-pain-grid > article:nth-child(1) { rotate: -0.6deg; }
+  .lp-pain-grid > article:nth-child(2) { margin-top: 20px; rotate: 0.45deg; }
+  .lp-pain-grid > article:nth-child(3) { margin-top: 6px; rotate: -0.4deg; }
+  .lp-pain-grid > article:nth-child(4) { margin-top: 24px; rotate: 0.55deg; }
+}
+
 @media (max-width: 540px) {
+  /* Phone-first pacing: crop the family photo tighter (the clipped strip is
+     desk clutter the phone demo overlaps anyway) and tuck the phone deeper
+     into it, so the cobalt ribbon lands inside the second screen instead of
+     opening the third. Width stays 300px: the chat demo is live text, and a
+     narrower column wraps taller, not shorter. !important because HERO_CSS
+     is an in-body style tag and wins the cascade otherwise. */
+  .lp-hero2-photo-crop {
+    max-height: 380px !important;
+  }
+  .lp-hero2-phone-float {
+    margin-top: -136px !important;
+  }
+  /* The note is static (in flow) below 540px, so the shell can shed the
+     clearance the absolute note needs at tablet widths. */
+  .lp-hero-shell {
+    padding-bottom: 36px !important;
+  }
   .lp-pain-grid {
     grid-template-columns: 1fr !important;
     gap: 30px !important;
@@ -495,6 +539,11 @@ h1, h2, h3, h4, h5, h6 {
 
 html.rv-armed [data-reveal], html.rv-armed [data-reveal-kids] > * { opacity: 0; transform: translateY(14px); transition: opacity 320ms var(--ease-out), transform 320ms var(--ease-out); }
 html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { opacity: 1; transform: none; }
+/* The catch-up sweep in RevealObserver.tsx reveals an element that was
+   already on screen before the intersection observer caught it; animating
+   that reveal is what read as the page "snapping" once a reader stopped
+   scrolling. rv-no-anim skips straight to the resting state. */
+html.rv-armed [data-reveal].rv-no-anim, html.rv-armed [data-reveal-kids].rv-no-anim > * { transition: none !important; }
 [data-reveal-kids] > *:nth-child(2) { transition-delay: 70ms; }
 [data-reveal-kids] > *:nth-child(3) { transition-delay: 140ms; }
 [data-reveal-kids] > *:nth-child(4) { transition-delay: 210ms; }
@@ -505,6 +554,36 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
 
 @media (prefers-reduced-motion: reduce), print {
   html.rv-armed [data-reveal], html.rv-armed [data-reveal-kids] > * { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
+
+/* Landing section heading ritual: every section h2 shares one display
+   style; the two closing moments (the thread and the CTA band) share one
+   larger finale step. Color stays per-section (ink on cream, gold ink on
+   sunshine); size, weight, leading, and tracking never vary. */
+.lp-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+.lp-h2-finale { font-size: clamp(2.2rem, 5.5vw, 3rem); }
+
+/* Landing only (.lp-root scopes it off app surfaces): selected text reads
+   like a highlighter pass on paper. The forced ink keeps selected clay
+   headings and the footer's white links readable on the gold sweep. */
+.lp-root ::selection { background: var(--gold-300); color: var(--stone-800); }
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+/* The nav and footer own their focus-visible treatments in their scoped
+   CSS; the popup close button is the one landing control without one. */
+.signup-popup-close:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--brand), var(--shadow-focus);
 }
 
 /* Landing-page signup popup (SignupPopupModal.tsx): reuses the onboarding
@@ -551,11 +630,13 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
 
 .signup-popup-close {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 10px;
+  right: 10px;
   z-index: 1;
-  width: 32px;
-  height: 32px;
+  /* 44px minimum touch target (WCAG 2.5.5); the 18px glyph stays, the
+     top/right inset shrinks so the icon keeps its optical position. */
+  width: 44px;
+  height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -579,6 +660,12 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
 }
 @media (max-width: 640px) {
   .signup-popup-card { padding: 68px 20px 32px; }
+}
+/* One step tighter than ParentStep's own 2.1rem so the headline holds to
+   three lines inside the narrow card; scoped to the popup, the real
+   /onboarding page keeps its size. */
+@media (max-width: 540px) {
+  .signup-popup-card h1 { font-size: 1.85rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .signup-popup-overlay, .signup-popup-card { transition: opacity var(--dur-base) ease; transform: none; }
@@ -627,6 +714,17 @@ html.rv-armed [data-reveal].rv-in, html.rv-armed [data-reveal-kids].rv-in > * { 
 
 @media (prefers-reduced-motion: reduce) {
   .wall-overlay, .wall-card { transition: opacity var(--dur-base) ease; transform: none; }
+}
+
+/* Widens the wall's dialog only, for the 3-tier pricing-card grid
+   (components/billing/tier-options.tsx, founder screenshots
+   2026-07-26). Applied as an ADDITIONAL class alongside .wall-card in
+   wall-modal.tsx ("wall-card wall-card--pricing"), never merged into
+   the base .wall-card rule: that class is shared with the unrelated,
+   intentionally narrow welcome-chooser sheet
+   (app/app/[childId]/report/welcome-chooser.tsx). */
+.wall-card--pricing {
+  max-width: 56rem;
 }
 
 /* ============================================================================

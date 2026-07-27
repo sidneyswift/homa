@@ -72,7 +72,7 @@ export function WallModal({
         role="dialog"
         aria-modal="true"
         aria-label={WALL_HEADLINE}
-        className="wall-card"
+        className="wall-card wall-card--pricing"
         onClick={(event) => event.stopPropagation()}
       >
         <WallOffer door={door} childName={childName} checkout={checkout} />

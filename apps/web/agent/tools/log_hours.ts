@@ -131,6 +131,16 @@ export default defineBoundedTool({
       note: input.note ?? null,
     });
     if (insertError) {
+      // 23505 from hours_log_block_unique_idx: a concurrent identical
+      // call won the insert after this one's guard SELECT ran; losing
+      // that race is the same outcome as the guard above.
+      if (insertError.code === "23505") {
+        return {
+          logged: true,
+          done: true,
+          note: "That block is already on the record for that day; nothing added twice.",
+        };
+      }
       return { logged: false, note: `Could not log it: ${insertError.message}` };
     }
 

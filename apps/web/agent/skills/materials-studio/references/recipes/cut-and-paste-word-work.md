@@ -1,5 +1,12 @@
 # Cut-and-paste word work
 
+Golden anchor: pass `anchorIds: ["cut-and-paste-word-work"]` to
+generate_image so the output matches the Homa word-work bar (framed
+picture cards with blank paste boxes, a labeled scissors cut line, a
+bottom strip of cut-out word tiles, warm hand-drawn illustration).
+Write your own prompt with your own content; the anchor sets the
+visual bar, not the specifics.
+
 A multi-sensory word work page where the child sees the model word,
 writes it on a practice line, then cuts out a tile and pastes it into
 a notebook or sorting activity. Four modalities for one concept: see,

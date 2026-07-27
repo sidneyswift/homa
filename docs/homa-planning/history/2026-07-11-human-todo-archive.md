@@ -3,7 +3,9 @@
 > Historical snapshot only. Do not execute these steps without re-verifying the
 > current provider, repository, migration, and production state. Completed and
 > superseded entries are preserved as dated history. Private contact and family
-> details are redacted. The current action queue is `/HUMAN-TODO.md`.
+> details are redacted. The action queue moved to GitHub Issues on
+> 2026-07-25 (founder directive; `HUMAN-TODO.md` no longer exists). See
+> `AGENTS.md` § Tickets and issue tracking.
 
 Atomic actions only YOU can do (browser logins, 2FA, payments). Check them off.
 Everything not on this list, agents handle. Est. total: ~45–60 minutes.

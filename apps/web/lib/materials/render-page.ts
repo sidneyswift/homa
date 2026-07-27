@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import chromium from "@sparticuz/chromium";
 import puppeteer, { type Browser, type Page } from "puppeteer-core";
 
+import { resolveEvalBlobStore } from "./eval-blob-store";
 import { isAllowedPrintableSubresourceUrl, SHEET_PAGE_CLASS } from "./page-shell";
 import { rasterizePdfToJpegs } from "./rasterize-pdf";
 
@@ -154,6 +155,14 @@ export function isPrintableRequestAllowed(
   }
   if (resourceType === "document") return true;
   if (policy?.blockImageResources && resourceType === "image") return false;
+  // Sandboxed eval runs only: this run's own generated images live in the
+  // loopback blob store, and without this branch the wall silently strips
+  // them from every sandbox PDF (found 2026-07-25, the first eval run in
+  // which family tools worked end to end). resolveEvalBlobStore is non-null
+  // only while eval isolation is active (never on Vercel), and only the
+  // exact sandbox origin passes, so the production wall is unchanged.
+  const evalBlobStore = resolveEvalBlobStore(process.env);
+  if (evalBlobStore && url.startsWith(`${evalBlobStore.baseUrl}/`)) return true;
   return isAllowedPrintableSubresourceUrl(url);
 }
 
