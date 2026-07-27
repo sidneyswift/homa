@@ -6,6 +6,7 @@ import {
   EVAL_DATABASE_URL_VAR,
 } from "./eval-isolation";
 import { type FamilyContextRows } from "./family-context";
+import { joinPageBodies } from "./materials/page-shell";
 
 /**
  * The eval host's stand-in family (2026-07-24 routing-eval investigation).
@@ -277,5 +278,110 @@ values (${sqlString(EVAL_FIXTURE_FAMILY_ID)}, ${sqlString(EVAL_FIXTURE_PARENT_US
 insert into public.children (id, family_id, name, birth_month, profile, created_at)
 values
 ${childValues};
+
+${evalFixturePacketSeedSql()}
+`.trim();
+}
+
+/**
+ * A finalized twelve-page packet for Maya, so the packet-revision eval
+ * has something real to revise.
+ *
+ * Twelve pages on purpose: that is the size at which the old
+ * re-emit-everything path stopped working, about 45KB of html that the
+ * model had to retype as tool arguments to change one page
+ * (plans/2026-07-27-packet-page-revision-failure.md). Each page here is
+ * deliberately bulky and individually identifiable, so an eval can prove
+ * two things a small fixture could not: that the cheap path was taken,
+ * and that the eleven untouched pages came back byte-identical rather
+ * than being quietly regenerated from the model's memory of them.
+ *
+ * status 'final' so find_materials returns it without status:"any".
+ */
+export const EVAL_FIXTURE_PACKET_ID = "00000000-0000-4000-8000-0000000000e1";
+export const EVAL_FIXTURE_PACKET_PAGES = 12;
+
+/**
+ * Artifact URLs for the seeded packet. pdf_url is NOT NULL, and the
+ * family-scoped shape matters: isFamilyArtifactUrl re-checks that a
+ * model-supplied URL belongs to the authenticated family, so a fixture
+ * URL outside the family prefix would exercise the wrong path.
+ * Never fetched by the revision eval; the sandbox blob store is
+ * loopback-only anyway.
+ */
+const EVAL_FIXTURE_ARTIFACT_PREFIX =
+  `https://eval.invalid/families/${EVAL_FIXTURE_FAMILY_ID}/materials`;
+
+/** The marker each seeded page carries, page numbers counting from 1. */
+export function evalFixturePacketPageMarker(page: number): string {
+  return `homa-eval-packet-page-${page}`;
+}
+
+/** The page the revision eval asks about, by its 1-based number. */
+export const EVAL_FIXTURE_PACKET_ILLUSTRATED_PAGE = 3;
+
+/**
+ * A woodland animal drawn as inline SVG, sized small on purpose.
+ *
+ * Inline rather than an <img>: no network fetch, deterministic bytes,
+ * and Chromium renders it in the real pipeline. Small on purpose because
+ * the eval asks for it to be made bigger, and a request to enlarge
+ * something must have something to enlarge. The first version of this
+ * fixture carried "woodland animals" only in the theme column while
+ * every page body was headings and filler, so the eval was asking Homa
+ * to enlarge art that did not exist; she correctly asked what was meant
+ * and the run scored 1/7. An eval that rewards answering anyway is an
+ * eval that rewards bluffing, which is the failure this whole change is
+ * about.
+ */
+function evalFixtureAnimal(name: string): string {
+  return [
+    `<figure class="animal" data-animal="${name}" style="width:64px;height:64px;">`,
+    `<svg viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="${name}">`,
+    `<circle cx="32" cy="36" r="18" fill="none" stroke="#4a3f35" stroke-width="2"/>`,
+    `<circle cx="24" cy="18" r="7" fill="none" stroke="#4a3f35" stroke-width="2"/>`,
+    `<circle cx="40" cy="18" r="7" fill="none" stroke="#4a3f35" stroke-width="2"/>`,
+    `</svg>`,
+    `<figcaption>${name}</figcaption>`,
+    `</figure>`,
+  ].join("");
+}
+
+function evalFixturePacketPageBodies(): string[] {
+  const animals = ["fox", "owl", "hedgehog", "deer", "rabbit", "badger"];
+  return Array.from({ length: EVAL_FIXTURE_PACKET_PAGES }, (_unused, index) => {
+    const page = index + 1;
+    // Padded so the whole document is packet-sized rather than a toy:
+    // the failure being guarded against is about volume.
+    const filler = `<p class="line">Practice line ${page}. ${"blend and read. ".repeat(40)}</p>`;
+    const art =
+      page === EVAL_FIXTURE_PACKET_ILLUSTRATED_PAGE
+        ? `<div class="animal-row">${animals.map(evalFixtureAnimal).join("")}</div>`
+        : "";
+    return [
+      `<div class="page" data-marker="${evalFixturePacketPageMarker(page)}">`,
+      `<h2>Page ${page}: Maya's letter sounds</h2>`,
+      art,
+      filler,
+      `</div>`,
+    ].join("\n");
+  });
+}
+
+export function evalFixturePacketSeedSql(): string {
+  const html = joinPageBodies(evalFixturePacketPageBodies());
+  return `
+insert into public.materials
+  (id, family_id, child_id, title, skill, pdf_url, preview_url, html,
+   channel, kind, subject, theme, source, status, approved_at, created_at)
+values
+  (${sqlString(EVAL_FIXTURE_PACKET_ID)}, ${sqlString(EVAL_FIXTURE_FAMILY_ID)},
+   ${sqlString(FIXTURE_CHILD_MAYA)},
+   'Maya''s Letter Sounds Workbook', 'letter sounds and early reading',
+   ${sqlString(`${EVAL_FIXTURE_ARTIFACT_PREFIX}/letter-sounds-workbook.pdf`)},
+   ${sqlString(`${EVAL_FIXTURE_ARTIFACT_PREFIX}/letter-sounds-workbook.jpg`)},
+   ${sqlString(html)}, 'web', 'packet', 'phonics',
+   'woodland animals', 'html', 'final', now(),
+   timestamptz '2026-07-02 12:00:00+00');
 `.trim();
 }
