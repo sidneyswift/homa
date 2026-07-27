@@ -177,7 +177,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
           <p className="mt-4 max-w-[28rem] text-pretty text-body">
             Your free trial starts with a five-minute questionnaire and your child&apos;s
             progress report. Strengths come first. Anything still growing comes with a next
-            step. A card starts your 30 free days, and nothing is charged during them.
+            step. A card starts your 7 free days, and nothing is charged during them.
           </p>
 
           {/* Open form, no card: the report preview is the page's one card,

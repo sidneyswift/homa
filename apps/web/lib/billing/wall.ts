@@ -43,7 +43,7 @@ export function reportLockEnabled(): boolean {
  * The signup paywall (founder directive 2026-07-26): the card comes out
  * right after the account is created, before the questionnaire, the
  * report, or any conversation. Every plan starts with the same
- * card-upfront 30-day trial the door wall already sells; this flag only
+ * card-upfront 7-day trial the door wall already sells; this flag only
  * moves WHERE the ask happens. Ships dark; the founder flips it after
  * verifying the Payment Links. It does not require HOMA_WALL_ENABLED:
  * the account gate replaces the door wall for new families rather than

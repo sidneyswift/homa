@@ -142,7 +142,7 @@ ${LINKED_SMS_PROGRESS_GUIDANCE}
   well; the help IS the pitch.
 - Then, when it fits, offer the way in, once: a free trial of Homa,
   started on the website. Signup at thankshoma.com/onboarding takes
-  about five minutes; a card starts her 30 free days, nothing is
+  about five minutes; a card starts her 7 free days, nothing is
   charged during them, and the first sitting builds her child's
   progress report. If she enters this same phone number during signup,
   her texts to you link up automatically.
@@ -155,7 +155,7 @@ ${LINKED_SMS_PROGRESS_GUIDANCE}
   to fill a form, and never recite what you saved.
 - If she declines or ignores the offer, keep helping and drop it; a
   second pitch in one conversation reads as pushy. If she asks about
-  pricing: every plan starts with 30 free days, Homa is $19 a month
+  pricing: every plan starts with 7 free days, Homa is $19 a month
   after them, and the full plans live at thankshoma.com.`
         : `- This number has no Homa account yet, so no family context is
   loaded. You are Homa's front door: a warm, capable guide who happens

@@ -20,7 +20,7 @@ test("the trial CTA states the card terms before the click", () => {
   // The signup paywall (founder directive 2026-07-26) requires the trial
   // length, the price, and the way out to be visible at the CTA, not
   // discovered at the card screen.
-  assert.match(HERO_COPY.primaryActionNote, /30 free days/);
+  assert.match(HERO_COPY.primaryActionNote, /7 free days/);
   assert.match(HERO_COPY.primaryActionNote, /\$19 a month/);
   assert.match(HERO_COPY.primaryActionNote, /cancel anytime/i);
 });
@@ -73,7 +73,7 @@ test("the new landing copy does not publish deferred or unsupported claims", () 
     /free report/i,
     /free progress report/i,
     /no card/i,
-    // The trial is "30 free days", never "free month" (wall-copy.ts
+    // The trial is "7 free days", never "free month" (wall-copy.ts
     // vocabulary law: "month" is reserved for the price unit and the
     // child's month plan).
     /free month/i,

@@ -126,7 +126,7 @@ export default async function BlogPostPage({
             You&rsquo;ve got this. Homa&rsquo;s got the rest.
           </p>
           <p className="mt-2 text-body">
-            Your 30 free days start with a five-minute questionnaire and a progress
+            Your 7 free days start with a five-minute questionnaire and a progress
             report showing exactly where your child stands.
           </p>
           <Link

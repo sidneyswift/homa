@@ -11,7 +11,7 @@ import { requireFamily } from "../../../lib/map/session";
 /**
  * /onboarding/trial: the signup trial gate (founder directive
  * 2026-07-26, HOMA_SIGNUP_PAYWALL_ENABLED). The one page between the
- * account card and the product: a card starts the 30 free days on any
+ * account card and the product: a card starts the 7 free days on any
  * tier, and nothing (questionnaire, report, conversation) exists for a
  * new family before it. Server-decided on every visit, so no client
  * state can route around it; /app admission (lib/app-data.ts) and

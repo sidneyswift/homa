@@ -197,13 +197,13 @@ export default eveChannel({
           [
             "## Account gate",
             "",
-            "This account's 30 free days have not started, or the",
+            "This account's 7 free days have not started, or the",
             "subscription that opened them has ended, so no family",
             "context is loaded and family tools are unavailable this",
             "turn. Answer warmly, and point the way in plainly: her",
             "trial starts at thankshoma.com/onboarding, everything",
             "she has saved is waiting there, and nothing is charged",
-            "during the 30 free days. Do not attempt family tools.",
+            "during the 7 free days. Do not attempt family tools.",
           ].join("\n"),
         ],
       };

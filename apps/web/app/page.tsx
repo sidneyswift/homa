@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   other: {
     "last-modified": new Date().toISOString(),
     "answer-capsule":
-      "Try Homa free for 30 days: weekly plans, practice pages made for your child, and a progress report showing exactly where your child stands. Then $19 a month, cancel anytime.",
+      "Try Homa free for 7 days: weekly plans, practice pages made for your child, and a progress report showing exactly where your child stands. Then $19 a month, cancel anytime.",
   },
 };
 
@@ -42,7 +42,7 @@ const webAppJsonLd = {
     "@type": "Offer",
     price: "19",
     priceCurrency: "USD",
-    description: "30-day free trial, then $19 per month. Cancel anytime.",
+    description: "7-day free trial, then $19 per month. Cancel anytime.",
   },
   // @id ties into the Organization node in the root layout's site-wide
   // graph; name stays inline for validators that don't resolve across

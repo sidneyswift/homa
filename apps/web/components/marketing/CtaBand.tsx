@@ -81,10 +81,10 @@ export function CtaBand() {
         >
           {/* The forced break lands the desktop split after "starts", never
               mid-number; phones drop it (see the style tag above) and keep
-              their balanced wrap. The nowrap span keeps "30 free days" one
+              their balanced wrap. The nowrap span keeps "7 free days" one
               unbreakable phrase at every width. */}
           Every plan starts
-          <br className="cta-h2-br" /> with <span style={{ whiteSpace: "nowrap" }}>30 free days.</span>
+          <br className="cta-h2-br" /> with <span style={{ whiteSpace: "nowrap" }}>7 free days.</span>
         </h2>
         <p
           data-reveal=""

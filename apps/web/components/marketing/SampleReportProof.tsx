@@ -97,7 +97,7 @@ export function SampleReportProof() {
                 color: "var(--stone-700)",
               }}
             >
-              Included in your 30 free days.
+              Included in your 7 free days.
             </p>
             {/* The underline commits to a word boundary: it emphasizes
                 "Included" only, like a pen stroke under the key word. Three
