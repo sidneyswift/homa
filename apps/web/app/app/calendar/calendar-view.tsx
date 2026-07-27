@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import type { FamilyEventRow } from "../../../lib/family-events";
@@ -213,8 +213,12 @@ export function CalendarView({
   // calendar is look-but-do-not-touch" was the veteran-mom review's top
   // fix). Null when nothing is open.
   const [details, setDetails] = useState<EventDetails | null>(null);
+  const detailsCloseRef = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {
     if (!details) return;
+    // Keyboard focus follows the dialog in (a designer-mom review catch:
+    // focus was staying on the tapped block behind the scrim).
+    detailsCloseRef.current?.focus();
     const onKeyDown = (keyEvent: KeyboardEvent) => {
       if (keyEvent.key === "Escape") setDetails(null);
     };
@@ -665,9 +669,18 @@ export function CalendarView({
                           }}
                         >
                           {/* The kid's disc rides every block (three kids
-                              make two pastels a memory quiz) */}
+                              make two pastels a memory quiz). In squeezed
+                              half-width overlap columns it drops to the
+                              bottom corner so the title keeps the whole
+                              first line. */}
                           {kid ? (
-                            <span className="absolute right-1 top-1">
+                            <span
+                              className={
+                                block.slotCount > 1
+                                  ? "absolute bottom-1 right-1"
+                                  : "absolute right-1 top-1"
+                              }
+                            >
                               <KidAvatar
                                 name={kid.name}
                                 index={block.kidIndex!}
@@ -676,7 +689,13 @@ export function CalendarView({
                               />
                             </span>
                           ) : (
-                            <span className="absolute right-1 top-1 flex">
+                            <span
+                              className={
+                                block.slotCount > 1
+                                  ? "absolute bottom-1 right-1 flex"
+                                  : "absolute right-1 top-1 flex"
+                              }
+                            >
                               {kids.slice(0, 3).map((familyKid, kidIndex) => (
                                 <span key={familyKid.id} className={kidIndex > 0 ? "-ml-1" : ""}>
                                   <KidAvatar
@@ -711,10 +730,18 @@ export function CalendarView({
                             <>
                               <p
                                 className={
-                                  height >= 44 || block.slotCount > 1
-                                    ? "line-clamp-2 pr-4 pt-0.5 text-[0.7rem] font-bold leading-tight"
-                                    : "truncate pr-4 pt-0.5 text-[0.7rem] font-bold leading-tight"
+                                  block.slotCount > 1
+                                    ? // Narrow shared columns: the disc moved to
+                                      // the bottom corner, so the title gets the
+                                      // full width at smaller type; hyphens are
+                                      // the backstop so a long word wraps with a
+                                      // hyphen instead of clipping mid-letter.
+                                      "line-clamp-2 hyphens-auto break-words pt-0.5 text-[0.62rem] font-bold leading-tight"
+                                    : height >= 44
+                                      ? "line-clamp-2 pr-4 pt-0.5 text-[0.7rem] font-bold leading-tight"
+                                      : "truncate pr-4 pt-0.5 text-[0.7rem] font-bold leading-tight"
                                 }
+                                lang="en"
                                 style={{ color: tone ? tone[1] : "var(--ink, inherit)" }}
                               >
                                 {block.title}
@@ -765,11 +792,15 @@ export function CalendarView({
         </>
       )}
 
-      <p className="mt-6 text-xs text-muted">
-        Ask Homa to schedule a plan activity onto a real day, or to add an
-        appointment or trip; both show up here right away. Hours shown here
-        are a quick indicator; edit them on the Hours page.
-      </p>
+      {/* One voice, once: the empty-week nudge above the grid already
+          says how to add things, so this caption yields to it. */}
+      {!weekIsEmpty ? (
+        <p className="mt-6 text-xs text-muted">
+          Ask Homa to schedule a plan activity onto a real day, or to add an
+          appointment or trip; both show up here right away. Hours shown here
+          are a quick indicator; edit them on the Hours page.
+        </p>
+      ) : null}
 
       {details ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -807,20 +838,21 @@ export function CalendarView({
                 : "For the whole family"}
             </p>
             {details.note ? <p className="mt-2 text-sm text-body">{details.note}</p> : null}
-            <div className="mt-4 flex items-center justify-between gap-2">
-              <Link
-                href="/app"
-                className="rounded-pill border border-brand px-4 py-2 text-sm font-semibold text-strong transition-colors hover:bg-[var(--clay-100)]"
-              >
-                Ask Homa to change it
-              </Link>
+            <div className="mt-4 flex items-center justify-end gap-2">
               <button
+                ref={detailsCloseRef}
                 type="button"
                 onClick={() => setDetails(null)}
                 className="rounded-pill border border-border bg-card px-4 py-2 text-sm font-semibold text-body transition-colors hover:border-brand"
               >
                 Close
               </button>
+              <Link
+                href="/app"
+                className="rounded-pill border border-brand px-4 py-2 text-sm font-semibold text-strong transition-colors hover:bg-[var(--clay-100)]"
+              >
+                Ask Homa to change it
+              </Link>
             </div>
           </div>
         </div>
