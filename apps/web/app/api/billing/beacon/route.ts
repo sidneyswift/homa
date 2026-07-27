@@ -23,6 +23,7 @@ const beaconSchema = z.object({
   door: z.enum(WALL_DOORS),
   childId: z.uuid().optional(),
   plan: z.enum(["monthly", "annual"]).optional(),
+  tier: z.enum(["regular", "plus", "elite"]).optional(),
 });
 
 export async function POST(request: Request): Promise<Response> {
@@ -85,6 +86,7 @@ export async function POST(request: Request): Promise<Response> {
         family_id: family.id,
         door: beacon.door,
         plan: beacon.plan,
+        tier: beacon.tier ?? "regular",
       });
       break;
     }

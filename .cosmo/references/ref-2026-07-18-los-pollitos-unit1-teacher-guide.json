@@ -1,0 +1,84 @@
+{
+  "id": "ref-2026-07-18-los-pollitos-unit1-teacher-guide",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:13:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427237.629949",
+  "format": "language-teacher-guide",
+  "title": "Los Pollitos Dicen — Unit 1 Teacher's Guide (Spanish Mama PreK-Elementary Curriculum)",
+  "publisher": "Spanish Mama (Elisabeth Alvarado)",
+  "series": "Los Pollitos Dicen",
+  "gradeLevel": "PreK to Early Elementary (ages 3-7)",
+  "relatedRefs": ["ref-2026-07-18-los-pollitos-unit1-home-supplements"],
+  "callouts": [],
+  "overview": {
+    "description": "Teacher's guide for Unit 1 of 'Los Pollitos Dicen' — a Spanish language curriculum for young children by Spanish Mama. Covers pacing guidance, teaching philosophy (comprehensible input), core vocabulary for 7 units, and activity/song/game lists. Designed for multiple settings: school, homeschool, private classes. One unit can last an entire semester at 1-2 meetings per week.",
+    "units": [
+      "Los Pollitos Unit 1 (Free): greetings, farm animals, action verbs",
+      "Los Pollitos Unit 2: food, colors, likes/dislikes",
+      "Los Pollitos Unit 3: weather, feelings, days of the week, size",
+      "Los Pollitos Unit 4: numbers 1-10, giving/receiving, sleep/wake",
+      "Orugas y Mariposas (Review Unit): caterpillars/butterflies, fruit, review",
+      "A Mi Burro Unit 1: body parts, senses, pain, doctor visits",
+      "A Mi Burro Unit 2: clothing, seasons, dressing",
+      "El Hombre de Jengibre (Holiday): gingerbread man story, farm animals, running"
+    ],
+    "totalVocabulary": "200+ words across all units, organized thematically"
+  },
+  "teachingPhilosophy": {
+    "comprehensibleInput": "Children acquire language through repeated exposure to comprehensible input. They need to hear new words spoken again and again, in context.",
+    "targetedSpeaking": "When I speak Spanish, it shouldn't be noise. I use phrases they know, and use lots of exaggerated gestures and visuals to convey meaning.",
+    "inputOverOutput": "Input is more important than output at this stage. Don't push students to speak if they're not ready. Songs and games are fun enough that they try naturally.",
+    "noForcing": "Pour on the praise when they do speak, and especially if they use what they're learning outside of class."
+  },
+  "designPatterns": {
+    "thematicVocabularyClusters": {
+      "description": "Vocabulary is organized in thematic clusters that mirror how children experience the world: farm animals → food → weather/feelings → numbers → body parts → clothing. Each unit builds on the previous, with recycling of earlier terms.",
+      "value": "Vocabulary learned in context, not alphabetical lists. The child learns 'el caballo' because they're singing about farm animals, not because H comes after G."
+    },
+    "songBasedAcquisition": {
+      "description": "Songs are the primary teaching vehicle. 'Los pollitos dicen' (nursery song), 'A Mi Burro' (donkey song), and other folk songs provide rhythm, repetition, and cultural authenticity. Each unit is NAMED after a song.",
+      "value": "Songs provide natural spaced repetition. Children sing favorite songs hundreds of times voluntarily."
+    },
+    "spiralCurriculum": {
+      "description": "Each unit recycles terms from previous units. The teacher is told: 'You might choose to have a specific warm-up routine that includes topics like numbers, days of the week, clothing, body parts for reviewing.' Nothing is taught once and dropped.",
+      "value": "Spiral review prevents forgetting. New vocabulary builds on old."
+    },
+    "adaptableToAnySetting": {
+      "description": "Explicit guidance for three settings: school (class), homeschool (parent-led), and private classes. Pacing adjusts: one unit can be a few weeks (daily classes) or an entire semester (1-2x weekly).",
+      "value": "One curriculum, multiple contexts. Homa could offer the same flexibility."
+    },
+    "parentLearnerSupport": {
+      "description": "For parents learning alongside kids: recommends Word Reference as an online dictionary with audio. Includes video and audio files. Acknowledges regional Spanish variations.",
+      "value": "The parent doesn't need to already know Spanish. The curriculum teaches them too."
+    }
+  },
+  "overallSkillTargeting": {
+    "subject": "world-languages",
+    "domain": "spanish",
+    "topics": [
+      {"id": "spanish.greetings-introductions", "kind": "procedural", "mapped": false},
+      {"id": "spanish.farm-animals", "kind": "conceptual", "mapped": false},
+      {"id": "spanish.action-verbs", "kind": "procedural", "mapped": false},
+      {"id": "spanish.food-colors", "kind": "conceptual", "mapped": false},
+      {"id": "spanish.body-parts", "kind": "conceptual", "mapped": false},
+      {"id": "spanish.numbers-1-10", "kind": "procedural", "mapped": false},
+      {"id": "spanish.days-of-week", "kind": "procedural", "mapped": false}
+    ],
+    "unmappedSkills": ["comprehensible-input-method", "song-based-language-curriculum", "spiral-vocabulary-review"]
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "spanish-lesson-plan",
+        "description": "A structured Spanish lesson for young children: warm-up (review previous vocabulary through song), new vocabulary introduction (with gestures and visuals), song/game-based practice, and take-home reinforcement activity. Based on comprehensible input theory — lots of listening before expecting speaking. Adaptable pacing for homeschool (1-2x/week) vs. daily class."
+      },
+      {
+        "name": "thematic-vocabulary-unit",
+        "description": "A multi-week vocabulary unit organized around a theme (farm animals, food, body parts, clothing). Core vocabulary list + songs + games + printables + home reinforcement. Each unit recycles terms from previous units. Could be generated for any theme in any target language."
+      }
+    ]
+  },
+  "notes": "This is the teacher-side companion to the home supplement Aless already dropped. Together they show the full Los Pollitos system: teacher guide (philosophy + pacing + vocabulary) + home supplement (parent guidance + weekly checklist). The teaching philosophy ('input is more important than output' / 'don't push students to speak') is significant — it's a comprehensible input approach (Krashen), which is the gold standard for young language learners. The 7-unit scope and sequence across 200+ vocabulary words is also valuable as a template for Homa's Spanish offering."
+}

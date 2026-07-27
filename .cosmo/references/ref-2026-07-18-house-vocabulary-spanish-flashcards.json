@@ -1,0 +1,33 @@
+{
+  "id": "ref-2026-07-18-house-vocabulary-spanish-flashcards",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:19:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427942.375999",
+  "format": "vocabulary-flashcards",
+  "title": "House Vocabulary Flashcards in Spanish \u2014 PreK & Kindergarten (Real Photos)",
+  "publisher": "TPT",
+  "gradeLevel": "PreK-K (ages 3-6)",
+  "overview": {
+    "description": "Spanish vocabulary flashcards featuring house/room-related words with real photographs. Companion to Bathroom Vocabulary set. Largest file in the batch at 89MB, suggesting many cards with high-resolution photos."
+  },
+  "skillTargeting": {
+    "subject": "world-languages",
+    "domain": "spanish",
+    "topics": [
+      {
+        "id": "spanish.house-vocabulary",
+        "kind": "conceptual",
+        "mapped": false
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "flash-cards"
+    ],
+    "gaps": []
+  },
+  "notes": "Companion to bathroom vocabulary cards. Part of Aless's Spanish learning cluster. Real photos = concrete vocabulary anchoring. 89MB file."
+}

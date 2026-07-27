@@ -124,12 +124,23 @@ export type AgentAccess =
   | { mode: "caller"; db: SupabaseClient; familyId: string }
   | { mode: "pinned"; familyId: string };
 
+/**
+ * The single source of truth for server-originated channels whose
+ * sessions run family-pinned. The family-context instruction hydrates
+ * through isPinnedAgentChannel below, so a channel added here gets
+ * tools AND the family block together. (Before that, the instruction
+ * kept its own hardcoded list and agent-job sessions hydrated the "not
+ * set up" fallback while their tools worked; found 2026-07-18 while
+ * adding materials-lab. lib/materials/studio-brief.test.ts pins the
+ * no-second-list rule.)
+ */
 export type PinnedAgentChannel =
   | "sms"
   | "email"
   | "dispatch"
   | "subject_lesson"
-  | "agent-job";
+  | "agent-job"
+  | "materials-lab";
 
 const PINNED_CHANNELS = new Set<PinnedAgentChannel>([
   "sms",
@@ -137,6 +148,7 @@ const PINNED_CHANNELS = new Set<PinnedAgentChannel>([
   "dispatch",
   "subject_lesson",
   "agent-job",
+  "materials-lab",
 ]);
 
 export function isPinnedAgentChannel(

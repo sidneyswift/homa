@@ -170,9 +170,59 @@ function isHttpsUrl(value: string): boolean {
 }
 
 /**
+ * Stock-photo agencies whose preview images routinely carry a visible
+ * watermark or sample-text overlay (a real family's printed page nearly
+ * shipped one, 2026-07-23: a butterfly photo with stock-site text across
+ * it). Google Images has no reliable "watermarked" signal, so this is a
+ * source-domain deny-list, matched against the publishing site and the
+ * image's own host (a stock agency's preview often serves off a CDN
+ * subdomain, e.g. media.gettyimages.com). Narrow and deterministic on
+ * purpose: it excludes known offenders without touching relevance
+ * ranking, unlike a hard usage-rights filter, which can starve a niche
+ * query of results entirely.
+ */
+const STOCK_AGENCY_HOSTS = [
+  "shutterstock.com",
+  "istockphoto.com",
+  "gettyimages.com",
+  "alamy.com",
+  "dreamstime.com",
+  "depositphotos.com",
+  "123rf.com",
+  // Not bare "adobe.com": that domain also serves help.adobe.com,
+  // blog.adobe.com, and general marketing pages, none of which are stock
+  // previews. Every other entry here is a single-purpose stock-photo
+  // domain, where blocking the whole thing costs nothing; this one stays
+  // scoped to the storefront so it does not starve an unrelated query.
+  "stock.adobe.com",
+  "bigstockphoto.com",
+  "canstockphoto.com",
+] as const;
+
+function matchesStockAgencyHost(host: string): boolean {
+  // A trailing root-label dot (a syntactically valid, DNS-equivalent
+  // form of the same host, e.g. "gettyimages.com.") would otherwise
+  // defeat both the equality and the endsWith check below.
+  const normalized = host.toLowerCase().replace(/\.+$/, "");
+  return STOCK_AGENCY_HOSTS.some(
+    (blocked) => normalized === blocked || normalized.endsWith(`.${blocked}`),
+  );
+}
+
+function isStockAgencyResult(url: string, source: string): boolean {
+  if (matchesStockAgencyHost(source)) return true;
+  try {
+    return matchesStockAgencyHost(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * normalizeImagesResponse(json, familyId, count): WebPhotoResult[]
  * Pure result shaping, exported for tests: drops unsafe-flagged,
- * non-https, and dimensionless entries, bounds titles, and signs one
+ * non-https, dimensionless, and stock-agency-sourced entries (their
+ * previews routinely carry a watermark), bounds titles, and signs one
  * family-bound token per kept result.
  */
 export function normalizeImagesResponse(
@@ -190,10 +240,11 @@ export function normalizeImagesResponse(
     const height =
       typeof entry.original_height === "number" ? entry.original_height : null;
     if (!url || !isHttpsUrl(url) || !width || !height) continue;
-    const token = signPhotoToken({ v: 1, f: familyId, u: url, w: width, h: height });
-    if (!token) continue;
     const title = typeof entry.title === "string" ? entry.title : "";
     const source = typeof entry.source === "string" ? entry.source : "";
+    if (isStockAgencyResult(url, source)) continue;
+    const token = signPhotoToken({ v: 1, f: familyId, u: url, w: width, h: height });
+    if (!token) continue;
     photos.push({
       photoNumber: photos.length + 1,
       title: title.slice(0, MAX_TITLE_CHARS),

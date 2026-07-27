@@ -36,7 +36,7 @@ export interface TaskRowView {
 
 export interface TaskRunView {
   id: string;
-  kind: "journal_prompt" | "morning_brief" | "custom" | "fleet_research";
+  kind: "journal_prompt" | "morning_brief" | "custom" | "fleet_research" | "agent_job";
   status:
     | "running"
     | "done"
@@ -91,8 +91,12 @@ function TaskIcon({ kind }: { kind: TaskRowView["kind"] | "fleet_research" }) {
     case "custom":
       return <Bell size={18} />;
     default: {
+      // Display-only switch: schedule kinds come from the database, so an
+      // additive kind from a newer deploy must render a generic icon, not
+      // throw and take the page down (the agent_job lesson, 2026-07-21).
       const exhaustive: never = kind;
-      throw new Error(`unhandled task icon kind: ${String(exhaustive)}`);
+      void exhaustive;
+      return <Bell size={18} />;
     }
   }
 }

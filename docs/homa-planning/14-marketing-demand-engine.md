@@ -411,7 +411,7 @@ met because no approved article is present in `apps/web/content/blog/`.
    pages render with design tokens, metadata, JSON-LD, sitemap entries; CI green.
 5. Distributor: blog publish works end to end; social and email paths stop with
    an exact, correct list of missing human steps; nothing auto-publishes.
-6. README repo map lists `marketing/`; HUMAN-TODO carries the Postiz + DM7 items;
+6. README repo map lists `marketing/`; GitHub Issues carry the Postiz (#183) + DM7 (#182) items;
    build-log entry records this spec's decisions.
 
 ## 17. Explicitly not day one
@@ -420,7 +420,7 @@ Growth-map folders (§4) until their first file · RSS feed · scheduled/unatten
 runs (built, disabled) · paid ads · influencer outreach · A/B testing machinery ·
 any second pillar format (e.g. long-form YouTube).
 
-## 18. Human dependencies (mirrored in HUMAN-TODO.md)
+## 18. Human dependencies (tracked as `founder-action`/`founder-decision` GitHub Issues since 2026-07-25)
 
 1. Register @thankshoma on Instagram, TikTok, Pinterest, Facebook, X (already
    listed) plus a YouTube channel.

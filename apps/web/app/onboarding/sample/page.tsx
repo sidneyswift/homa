@@ -22,7 +22,7 @@ import { SAMPLE_AGE_MONTHS, SAMPLE_ANSWERS, SAMPLE_PRIOR_ANSWERS } from "./sampl
 export const metadata: Metadata = {
   title: "Sample progress report",
   description:
-    "A sample of the free progress report: strengths first, national benchmarks for every subject, and a plan for whatever is growing.",
+    "A sample of Homa's progress report: strengths first, national benchmarks for every subject, and a plan for whatever is growing.",
   alternates: { canonical: "/onboarding/sample" },
 };
 

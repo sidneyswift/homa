@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node ../../scripts/dev-oidc-preflight.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -14,6 +15,7 @@
     "@homa/core": "workspace:*",
     "@homa/taxonomy": "workspace:*",
     "@huh-david/bmp-js": "^0.8.5",
+    "@napi-rs/canvas": "^1.0.2",
     "@sparticuz/chromium": "^149.0.0",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.110.0",
@@ -29,6 +31,7 @@
     "mammoth": "^1.12.0",
     "next": "16.2.10",
     "next-mdx-remote": "^6.0.0",
+    "pdfjs-dist": "^6.1.200",
     "postgres": "^3.4.9",
     "puppeteer-core": "^25.3.0",
     "react": "19.2.4",
@@ -41,7 +44,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
@@ -49,7 +52,7 @@
     "just-bash": "^3.1.0",
     "microsandbox": "^0.6.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "~6.0.3"
   },
   "engines": {
     "node": "24.x"

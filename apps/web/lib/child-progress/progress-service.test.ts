@@ -777,6 +777,100 @@ async function createThreeRowResolvedHistory() {
 }
 
 describe("child progress evidence service", () => {
+  it("writes evidence straight from validated claims, skipping the matcher", async () => {
+    // The claims path (AGENTS.md "Models judge, code verifies"): the
+    // judgment already happened outside the transaction, so the quote
+    // here is ordinary parent language the lexical matcher would have
+    // thrown away. It scores anyway, because the claim carries the
+    // decision.
+    const repository = new InMemoryChildProgressRepository();
+    repository.projectionInput = emptyProjectionInput();
+    const service = createService(repository);
+
+    const result = await service.recordJournalProgressEvidence({
+      ...JOURNAL_PROVENANCE,
+      familyId: FAMILY_ID,
+      childId: CHILD_ID,
+      memberUserId: "adult-1",
+      quote: "She finished the counting page and got them all right",
+      observedAt: "2026-07-11T17:30:00.000000Z",
+      idempotencyKey: "journal-claims",
+      claims: [
+        {
+          childId: CHILD_ID,
+          itemId: "math.how-many-5",
+          answer: "getting_there",
+          quote: "finished the counting page",
+          confidence: "high",
+          statement: "Counts 5 objects one at a time and tells you how many there are",
+          subjectId: "math",
+        },
+      ],
+    });
+
+    assert.equal(result.status, "recorded");
+    assert.equal(repository.appendCount, 1);
+    assert.equal(repository.observations.length, 0);
+    assert.equal(repository.savedDerivedProgress.length, 1);
+  });
+
+  it("keeps the parent's words as an observation when claims come back empty", async () => {
+    // The judgment step ran and found no ability reported. The message
+    // still lands on the record (observation-ledger ruling), and nothing
+    // scores.
+    const repository = new InMemoryChildProgressRepository();
+    repository.projectionInput = emptyProjectionInput();
+    const service = createService(repository);
+
+    const result = await service.recordJournalProgressEvidence({
+      ...JOURNAL_PROVENANCE,
+      familyId: FAMILY_ID,
+      childId: CHILD_ID,
+      memberUserId: "adult-1",
+      quote: "Can you make a paw patrol worksheet",
+      observedAt: "2026-07-11T17:31:00.000000Z",
+      idempotencyKey: "journal-claims-empty",
+      claims: [],
+    });
+
+    assert.equal(result.status, "no_match");
+    assert.equal(repository.appendCount, 0);
+    assert.equal(repository.observations.length, 1);
+  });
+
+  it("ignores claims belonging to a sibling when recording for one child", async () => {
+    // Fan-out writes one operation per child; each operation must take
+    // only its own claims, never the sibling's.
+    const repository = new InMemoryChildProgressRepository();
+    repository.projectionInput = emptyProjectionInput();
+    const service = createService(repository);
+
+    const result = await service.recordJournalProgressEvidence({
+      ...JOURNAL_PROVENANCE,
+      familyId: FAMILY_ID,
+      childId: CHILD_ID,
+      memberUserId: "adult-1",
+      quote: "June wrote her name and the little one counted to five",
+      observedAt: "2026-07-11T17:32:00.000000Z",
+      idempotencyKey: "journal-claims-sibling",
+      claims: [
+        {
+          childId: "some-other-child",
+          itemId: "writing.writes-name",
+          answer: "easily",
+          quote: "June wrote her name",
+          confidence: "high",
+          statement: "Writes their own first name",
+          subjectId: "writing",
+        },
+      ],
+    });
+
+    assert.equal(result.status, "no_match");
+    assert.equal(repository.appendCount, 0);
+    assert.equal(repository.observations.length, 1);
+  });
+
   it("records activity-only journal outcome after trusted child lookup", async () => {
     const repository = new InMemoryChildProgressRepository();
     repository.projectionInput = emptyProjectionInput();
@@ -949,7 +1043,10 @@ describe("child progress evidence service", () => {
         [
           {
             itemId: "literacy.emergent-reader",
-            answer: "easily",
+            // Unqualified "can read an early chapter book": the parent
+            // named no independence cue, so the conservative tier
+            // applies (founder ruling `progress-signal-capture-v2` D4).
+            answer: "getting_there",
           },
           {
             itemId: "literacy.retells-story",
@@ -1291,7 +1388,10 @@ describe("child progress evidence service", () => {
     );
   });
 
-  it("renders taxonomy walk evidence without changing MapScores", async () => {
+  it("scores taxonomy walk evidence, since abilities are one catalog", async () => {
+    // Reversed 2026-07-21 (founder ruling, "one abilities map"): a walk
+    // answer used to render as a topic and move nothing, so a 45-minute
+    // sitting could not shift a single number.
     const repository = new InMemoryChildProgressRepository();
     repository.projectionInput = emptyProjectionInput();
     const service = createService(repository);
@@ -1310,7 +1410,7 @@ describe("child progress evidence service", () => {
     });
 
     assert.equal(result.status, "recorded");
-    assert.equal(repository.liveView?.scores.observationCount, 0);
+    assert.equal(repository.liveView?.scores.observationCount, 1);
     assert.equal(
       repository.liveView?.subjects.some((subject) =>
         subject.domains.some((domain) =>

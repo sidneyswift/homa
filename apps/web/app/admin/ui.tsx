@@ -175,7 +175,7 @@ export function SectionHead({ eyebrow, title, sub }: { eyebrow: string; title: s
 
 export function EmptyNote({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-3 rounded-md border border-dashed border-border-default bg-card px-3.5 py-3 text-sm text-subtle">
+    <p className="mt-3 rounded-md border border-dashed border-border bg-card px-3.5 py-3 text-sm text-subtle">
       {children}
     </p>
   );

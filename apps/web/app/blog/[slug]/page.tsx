@@ -126,14 +126,14 @@ export default async function BlogPostPage({
             You&rsquo;ve got this. Homa&rsquo;s got the rest.
           </p>
           <p className="mt-2 text-body">
-            Answer a five-minute questionnaire and get a free progress report showing
-            exactly where your child stands.
+            Your 7 free days start with a five-minute questionnaire and a progress
+            report showing exactly where your child stands.
           </p>
           <Link
             href="/onboarding"
             className="mt-5 inline-block rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand transition-colors duration-(--dur-base) ease-out hover:bg-brand-hover"
           >
-            Get your free progress report
+            Start your free trial
           </Link>
         </aside>
       </main>

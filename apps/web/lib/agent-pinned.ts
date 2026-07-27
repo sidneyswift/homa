@@ -209,11 +209,19 @@ export async function recordHoursPinned(input: {
     return { logged: true, note: "That block is already on the record for that day; nothing added twice." };
   }
 
-  await sql`
+  const inserted = await sql<{ id: string }[]>`
     insert into public.hours_log (family_id, child_id, subject, minutes, happened_on, source, note)
     values (${input.familyId}, ${childId}, ${input.subject}, ${Math.round(input.minutes)},
             ${happenedOn}, ${input.source}, ${input.note?.trim().slice(0, 200) || null})
+    on conflict do nothing
+    returning id
   `;
+  if (inserted.length === 0) {
+    // A concurrent identical call won hours_log_block_unique_idx after
+    // this one's guard SELECT ran; same outcome as the guard, and no
+    // event for a row that never landed.
+    return { logged: true, note: "That block is already on the record for that day; nothing added twice." };
+  }
 
   if (input.source === "call") {
     await emitMapEvent("voice.hours_logged", {
@@ -274,7 +282,11 @@ function dayLabel(iso: string | null, timeZone: string): string {
  * explicit family_id predicate in every query IS the wall; familyId
  * arrives from channel auth only. The semantic arm queries the tables
  * directly for the same reason: the recall_semantic RPC leans on RLS,
- * which this connection does not have.
+ * which this connection does not have. Message visibility is part of the
+ * same wall: internal conversation rows (scheduler dispatch prompts,
+ * undelivered drafts) are server-only under the continuity RLS policy,
+ * so every conversation_messages read here repeats visibility = 'family'
+ * explicitly (found leaking on this path 2026-07-19).
  */
 export async function recallPinned(input: {
   familyId: string;
@@ -313,6 +325,7 @@ export async function recallPinned(input: {
       select role, content, channel, created_at::text as created_at
       from public.conversation_messages
       where family_id = ${input.familyId}
+        and visibility = 'family'
         and to_tsvector('english', content) @@ websearch_to_tsquery('english', ${input.query})
       order by created_at desc
       limit ${input.limit}
@@ -370,7 +383,8 @@ export async function recallPinned(input: {
                  c.content,
                  (c.embedding <=> ${queryEmbedding}::extensions.vector(1536))
           from public.conversation_messages c
-          where c.family_id = ${input.familyId} and c.embedding is not null
+          where c.family_id = ${input.familyId} and c.visibility = 'family'
+            and c.embedding is not null
           union all
           select 'calls', t.started_at::text,
                  case when t.line = 'curriculum' then 'phone call (report review)' else 'phone call' end,

@@ -1,4 +1,4 @@
-# M0-01 — Adversarial eve prototype: GO/NO-GO gate
+# M0-01: Adversarial eve prototype: GO/NO-GO gate
 
 > **RESOLVED: GO (2026-07-05, founder decision: staying on eve, not ejecting).**
 > The gate below is historical record; results and mitigations are in the body
@@ -7,7 +7,7 @@
 
 > Written before starting, per the council re-scope in `03-backlog.md` ("strict
 > timebox... GO/NO-GO criteria written BEFORE starting"). `13-mr-prd.md` line 3:
-> the PRD is "APPROVED FOR BUILD once M0-01 gate passes" — nothing in Phase B
+> the PRD is "APPROVED FOR BUILD once M0-01 gate passes", nothing in Phase B
 > starts until this gate resolves GO. Do not add scope to this spike beyond the
 > five tests below; that is what makes it throwaway.
 
@@ -38,7 +38,7 @@ Phase B verbatim.
   `thankshoma.com` / production.
 - Reuse the real **homa-prod** Supabase schema (families/family_members/
   children, deny-by-default RLS, already live per M0-05) rather than standing
-  up a throwaway project — the whole point is testing eve against the *real*
+  up a throwaway project, the whole point is testing eve against the *real*
   tenancy shape, not a toy one.
 - Every synthetic row this spike creates is tagged so it's unambiguous and
   disposable: family name prefix `spike-m0-01-`, a dedicated
@@ -58,7 +58,7 @@ as pass, with the workaround logged.** Silent data loss, cross-family
 leakage, or an unrecoverable stuck state is an automatic fail on that test,
 full stop, given the data involved.
 
-### (a) Eve upgrade drill — version bump with a session parked in HITL
+### (a) Eve upgrade drill: version bump with a session parked in HITL
 
 **Do:** Park a durable session in HITL (via `ask_question` or an
 approval-gated tool call). Bump the pinned `eve` version in
@@ -74,7 +74,7 @@ is fine, as long as it's a change we make deliberately, not a silent break.
 **Fail:** The parked session cannot resume, resumes into a corrupted or wrong
 state without surfacing an error, or the answer is lost.
 
-**Feeds:** `eve-churn-log.md` gets a real entry either way — this is the
+**Feeds:** `eve-churn-log.md` gets a real entry either way, this is the
 log's first data point beyond the zero-point.
 
 ### (b) Deploy + rollback with an in-flight workflow run
@@ -91,7 +91,7 @@ corrupted session state.
 **Fail:** The run enters a stuck/unrecoverable state, or any side-effecting
 tool call executes more than once across the deploy/rollback.
 
-### (c) Kill the dispatcher mid-fan-out — lease recovery
+### (c) Kill the dispatcher mid-fan-out: lease recovery
 
 **Do:** Seed 20 synthetic schedule rows all due at the same instant. Start the
 dispatcher's fan-out, then force-kill the dispatcher process partway through
@@ -110,7 +110,7 @@ M1-08 world).
 
 **Do:** Park a session in HITL, then attempt to force the session-rotation
 path while it's still parked (the architecture doc's law: "rotate only at
-idle, never while parked" — this test tries to break that law on purpose).
+idle, never while parked", this test tries to break that law on purpose).
 
 **Pass:** The rotation attempt is safely rejected or deferred; the parked
 state (the pending question, its context) survives untouched until it's
@@ -127,12 +127,12 @@ check, across all 100: does any family's synthetic data ever appear inside
 another family's session or response.
 
 **Pass:** All 100 rows get processed (at-least-once holds), fan-out completes
-in a reasonable window, and **zero cross-family leakage** — this is the
+in a reasonable window, and **zero cross-family leakage**, this is the
 cheapest, earliest point to catch a tenancy bug, well before M1-07's full
 adversarial suite exists.
 
 **Fail:** Any row is dropped with no recovery path, or any leakage occurs
-(automatic NO-GO regardless of the other four tests — this is the one
+(automatic NO-GO regardless of the other four tests, this is the one
 non-negotiable bar given the audience).
 
 ## Verdict rule
@@ -160,7 +160,7 @@ custom-harness spike (M0-02) or an eve fix wants the full five-test suite
 re-run.
 
 **What happened, precisely:** ran locally (not the Vercel preview originally
-planned — test (a) alone doesn't need Vercel-specific infra, and local is
+planned, test (a) alone doesn't need Vercel-specific infra, and local is
 cheaper/faster for a pure session-durability check; tests (c)/(e) genuinely
 need the dispatcher/fan-out environment described above and should use it).
 Started eve **0.18.2**, parked a session at `input.requested` via the
@@ -196,7 +196,7 @@ test (a)'s failure: every resume goes through the guard, every version bump
 goes through the script and runbook. Reporting the bug upstream is a
 parallel, non-blocking task. Since we're committing to eve rather than
 re-running these tests against a hypothetical custom harness, tests (b) and
-an adapted (e) were run against eve itself on 2026-07-05 — results below.
+an adapted (e) were run against eve itself on 2026-07-05, results below.
 Tests (c) and (d) remain deferred (see why below); Phase B is clear to start
 with the mitigations in place, the deploy/rollback finding logged as a
 tracked risk, and (c)/(d) revisited once the app-level code they actually
@@ -204,7 +204,7 @@ test exists.
 
 ## Results: (b) and adapted (e), run 2026-07-05
 
-### Adapted (e): concurrent-session tenancy isolation — PASS
+### Adapted (e): concurrent-session tenancy isolation: PASS
 
 The original test (e) assumed a schedule dispatcher (M3-10/M1-02 machinery)
 that doesn't exist yet; building it just to throw away would be a large
@@ -221,14 +221,14 @@ product (per the gate's own rationale: "this is the cheapest, earliest
 point to catch a tenancy bug"), and eve's core session handling passes it
 cleanly under concurrency.
 
-### (b) Deploy + rollback with an in-flight workflow run — FAIL, with an important caveat
+### (b) Deploy + rollback with an in-flight workflow run: FAIL, with an important caveat
 
 Started a turn, then stopped the server ~300ms later (before the model call
 likely completed) and restarted it, simulating a deploy mid-flight. Tried
 three variants: a hard `SIGKILL`, a graceful `SIGTERM` with a drain window,
 and an explicit follow-up "nudge" POST after restart. **All three produced
 the identical result**: the session stream shows `session.started →
-turn.started → message.received → step.started` and then nothing —
+turn.started → message.received → step.started` and then nothing,
 no completion, no failure event, no error in the server logs at all, for
 at least 60 seconds. The turn is permanently stuck, silently, with zero
 diagnostic trail (worse than test (a) in one respect: test (a) at least
@@ -238,12 +238,12 @@ server-side signal whatsoever).
 **Important caveat this needs before it's treated as equally serious as
 test (a):** this ran against eve's **local, disk-backed workflow world**
 (`eve dev`'s default), not real Vercel Workflow. The architecture docs
-describe these as different durability substrates — Vercel Workflow is a
+describe these as different durability substrates, Vercel Workflow is a
 managed service with its own commit protocol; the local world persists to
 disk under `.workflow-data` in a way that may simply not survive a kill this
 early in a step's lifecycle the same way. This finding may be a local-dev
 testing artifact rather than a production-relevant gap. **Do not treat this
-as resolved either way** — it needs a fourth attempt against an actual
+as resolved either way**, it needs a fourth attempt against an actual
 Vercel preview deployment (kill via `vercel` redeploy or a forced function
 restart, not a local process signal) before concluding whether this is real
 for production.
@@ -251,7 +251,7 @@ for production.
 **What this means for Phase B, right now:** the identical failure mode as
 test (a) applies as a mitigation: a resume-style guard that verifies real
 forward progress (not just a synchronous `ok: true`) rather than trusting
-eve's response — `apps/web/lib/harness/resume-session.ts` already does this
+eve's response, `apps/web/lib/harness/resume-session.ts` already does this
 for the resume path; the same pattern should extend to the initial
 session-start path once real chat UI work begins (M1-04), so a stuck
 first-turn is caught the same way a stuck resume already is.
@@ -259,7 +259,7 @@ first-turn is caught the same way a stuck resume already is.
 ### (b), retested against real Vercel Workflow (2026-07-05, later same day): the caveat resolved favorably
 
 Deployed two genuinely separate Vercel preview deployments (via `vercel deploy`
-from the repo root, after fixing a `.vercelignore` gap — the CLI's local
+from the repo root, after fixing a `.vercelignore` gap, the CLI's local
 upload path doesn't respect the dashboard's configured Root Directory, and
 without an ignore file it tried to upload `homa-research/`/`homa-macmini/`,
 multi-gigabyte folders that must never leave this machine). Accessed them
@@ -308,16 +308,16 @@ Vercel API's `GET /v9/projects/:id` `protectionBypass` field).
 Both tests need application-level code that doesn't exist yet:
 - **(c) kill the dispatcher mid-fan-out** needs a real `ScheduleStore`
   (atomic claim/lease/release) and CRUD tools per eve's dynamic-scheduling
-  pattern — that's M1-02/M3-10 scope, not written yet. Testing crash-recovery
+  pattern, that's M1-02/M3-10 scope, not written yet. Testing crash-recovery
   of a dispatcher we haven't designed would mean building throwaway
   scaffolding disproportionate to a spike.
 - **(d) rotate a session parked in HITL** needs our own session-rotation
-  state machine (M1-15) — eve has no built-in "rotate," we were always going
+  state machine (M1-15), eve has no built-in "rotate," we were always going
   to build that logic ourselves per `01-architecture.md`. There's nothing to
   test yet.
 
 Both get re-run the moment the code they test exists, using the same rigor
-as (a), (b), and adapted (e) above — not skipped, just sequenced correctly.
+as (a), (b), and adapted (e) above, not skipped, just sequenced correctly.
 
 ## After the gate
 

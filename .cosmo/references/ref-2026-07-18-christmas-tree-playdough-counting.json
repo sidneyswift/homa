@@ -1,0 +1,35 @@
+{
+  "id": "ref-2026-07-18-christmas-tree-playdough-counting",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:23:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428719.046419",
+  "format": "playdough-mat",
+  "title": "Christmas Tree Playdough Counting to 12 \u2014 Fine Motor Freebie",
+  "publisher": "TPT (link expired)",
+  "gradeLevel": "PreK-K (ages 3-6)",
+  "overview": {
+    "description": "Christmas-themed playdough counting mats for numbers 1-12. Children use playdough to create ornaments/decorations on Christmas tree illustrations, matching the target number. Combines fine motor (rolling, placing playdough) with counting practice. Seasonal theme."
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "counting-cardinality",
+    "topics": [
+      {
+        "id": "math.count-objects-1-12",
+        "kind": "procedural",
+        "mapped": false
+      }
+    ],
+    "unmappedSkills": [
+      "fine-motor.playdough-manipulation"
+    ]
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "playdough-mat"
+    ],
+    "gaps": []
+  },
+  "notes": "TPT link expired. Second playdough mat in the collection (pairs with compound words playdough mats). Aless values playdough as a multi-sensory learning tool \u2014 combines fine motor with academic content."
+}

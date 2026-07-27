@@ -1,6 +1,9 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { MEMORY_KINDS } from "../../lib/agent-memory";
 import { forgetMemoryPinned } from "../../lib/agent-pinned";
@@ -15,9 +18,11 @@ import { forgetMemoryPinned } from "../../lib/agent-pinned";
  * February?") survives corrections. The parent's Remove button on the
  * dashboard remains a hard delete (privacy decision vs history decision).
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Retire one saved memory that is wrong or stale, matched by a distinctive phrase from its content. If the parent corrects a fact, forget the old entry and remember the corrected one in the same turn. The old entry stays in searchable history; it just stops being current.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: z.object({
     match: z
       .string()

@@ -1,0 +1,37 @@
+{
+  "id": "ref-2026-07-18-phonics-letter-sounds-cvc",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:35:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784428559.047769",
+  "format": "phonics-worksheet",
+  "title": "Free Phonics Worksheets — Letter Sounds, CVC Words, Beginning/Initial Sounds",
+  "publisher": "TPT (link likely expired)",
+  "gradeLevel": "K-1st Grade",
+  "callouts": [],
+  "overview": {
+    "description": "Phonics worksheets covering letter sounds, CVC (consonant-vowel-consonant) words, and beginning/initial sounds. CVC words (cat, dog, sun, etc.) are the first real words children decode — the bridge from individual letter sounds to reading. From the filename this likely includes: letter-sound matching, CVC word building/reading, and initial sound identification. Third phonics/beginning sounds drop from Aless."
+  },
+  "overallSkillTargeting": {
+    "subject": "ela",
+    "domain": "phonics-word-reading",
+    "topics": [
+      {
+        "id": "ela.letter-sound-correspondence",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.cvc-word-reading",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.beginning-sounds",
+        "kind": "procedural",
+        "mapped": false
+      }
+    ]
+  },
+  "notes": "Link likely expired. Third phonics drop. CVC words are the critical bridge between phonological awareness (sounds) and actual reading (decoding words). Aless ELA progression is now: letter ID → beginning sounds → CVC words → rhyming → compound words → phoneme substitution. The full decoding pipeline."
+}

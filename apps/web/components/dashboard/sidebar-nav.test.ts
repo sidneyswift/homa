@@ -25,6 +25,18 @@ describe("isAppNavItemActive", () => {
     assert.equal(progressItem?.href, "/app/progress");
   });
 
+  it("exposes the Hours navigation item (CG-02, issue #174)", () => {
+    const hoursItem = APP_NAV_ITEMS.find((item) => item.label === "Hours");
+
+    assert.equal(hoursItem?.href, "/app/hours");
+  });
+
+  it("exposes the Calendar navigation item (CG-03, issue #176)", () => {
+    const calendarItem = APP_NAV_ITEMS.find((item) => item.label === "Calendar");
+
+    assert.equal(calendarItem?.href, "/app/calendar");
+  });
+
   it("lights Progress on live child and index routes", () => {
     assert.equal(
       isAppNavItemActive("/app/progress", "/app/progress"),

@@ -26,8 +26,10 @@ import { markTurnStarted, takeTurnLatencyMs } from "../../lib/turn-clock";
 import { recoverLostTurn } from "../../lib/turn-recovery";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, pressScale, radius, space } from "../../theme/tokens";
+import { isSendLineOccupied } from "./chat-send-policy";
 import { busyLabel, countLastTurnToolCalls } from "./message-utils";
 import { BusyBubble, MessageView } from "./message-view";
+import { latestQuestionRequest } from "./question-card-model";
 
 /**
  * The chat surface, the mobile twin of apps/web/app/app/chat-client.tsx:
@@ -52,10 +54,30 @@ import { BusyBubble, MessageView } from "./message-view";
  * watchdog covers streams that die without the app ever hiding. The
  * turn is durable server-side; missed events replay from streamIndex
  * on the next send.
+ *
+ * Never forked (GH #170, confirmed live on the web twin, ported here
+ * ahead of an incident since this app has the identical shape and a
+ * dropped signal mid-turn is if anything more likely on a phone): when
+ * a stream dies without a closing boundary event, eve's own client
+ * wipes its local session cursor rather than keeping the id
+ * (advanceSession in eve's session-utils, no fix available from here).
+ * The durable turn is usually still finishing server-side regardless,
+ * and lost-turn recovery below exists to find that out, but it can take
+ * up to RECOVERY_DEADLINE_MS to decide. A manual send used to see no
+ * session id and no "busy" status in that window and start a brand new
+ * eve session, forking the conversation in two: whichever session she
+ * was not looking at when its reply landed read as "my message
+ * vanished". isSendLineOccupied (chat-send-policy.ts) folds `recovering`
+ * into the same queue gate as `busy`, so a send during that undecided
+ * window queues instead of forking, and flushQueued delivers it the
+ * moment recovery settles either way.
  */
 
 // agent.ts pins the gateway model: the mid tier in journeys/06 terms.
 const MODEL_TIER = "mid" as const;
+
+/** Where a send came from. A card tap is not typing; see sendMessage. */
+type ChatSendSource = "composer" | "card";
 
 /** Stream reconnects per turn; matches the web twin (chat-client.tsx). */
 const STREAM_RECONNECT_ATTEMPTS = 8;
@@ -112,11 +134,20 @@ export function ChatSession({
   }));
   const reportedErrorRef = useRef<Error | null>(null);
   const scrollRef = useRef<ScrollView>(null);
+  const composerRef = useRef<TextInput>(null);
+  /** Choice card partKey -> the message her taps sent from that card. */
+  const [questionAnswers, setQuestionAnswers] = useState<
+    Record<string, string>
+  >({});
   /** Last moment the stream showed signs of life (0 = none yet). */
   const lastStreamActivityRef = useRef(0);
   /** Messages sent while a turn was running; flushed as one message the
    *  moment the line is free. */
   const [queued, setQueued] = useState<string[]>([]);
+  /** Mirrors `queued` for the recovery effect below, which can settle up
+   *  to RECOVERY_DEADLINE_MS after it started and would otherwise read
+   *  a stale queue captured at that effect's own last run. */
+  const queuedRef = useRef<string[]>(queued);
   /** The store's send, held by ref so onFinish can deliver the queue
    *  without capturing `agent` inside its own initializer. */
   const sendRef = useRef<((input: { message: string }) => Promise<void>) | null>(
@@ -131,6 +162,33 @@ export function ChatSession({
   const lastSendRef = useRef<{ text: string; atMs: number } | null>(null);
   const recoveryRef = useRef<AbortController | null>(null);
   const [recovering, setRecovering] = useState(false);
+
+  useEffect(() => {
+    queuedRef.current = queued;
+  }, [queued]);
+
+  /**
+   * flushQueued(): delivers the queue as the next turn, the one place
+   * besides the composer's own send that starts a turn. Shared by
+   * onFinish (a normal turn just ended) and lost-turn recovery's exits
+   * (recovered, failed, or timed out): whichever way the line becomes
+   * free again, whatever she typed while it was occupied goes out the
+   * moment it is. A stable useCallback (empty deps, refs only) so the
+   * recovery effect below can call it without re-running every render.
+   */
+  const flushQueued = useCallback(() => {
+    if (queuedRef.current.length === 0) return;
+    const message = queuedRef.current.join("\n\n");
+    setQueued([]);
+    // Next tick: this can run inside the previous send's own teardown
+    // (onFinish) or inside a recovery's async close-out, and eve rejects
+    // overlapping sends.
+    setTimeout(() => {
+      lastSendRef.current = { text: message, atMs: currentTimeMs() };
+      markTurnStarted();
+      void sendRef.current?.({ message });
+    }, 0);
+  }, []);
 
   const emitTurnCompleted = useCallback(
     async (
@@ -212,17 +270,7 @@ export function ChatSession({
       // out as ONE follow-up turn the moment the line is free (also
       // after Stop, which is often pressed exactly to jump the line).
       // A failed turn holds the queue; her next manual send carries it.
-      if (!snapshot.error && queued.length > 0) {
-        const message = queued.join("\n\n");
-        setQueued([]);
-        // Next tick: this callback runs inside the previous send's
-        // teardown, and eve rejects overlapping sends.
-        setTimeout(() => {
-          lastSendRef.current = { text: message, atMs: currentTimeMs() };
-          markTurnStarted();
-          void sendRef.current?.({ message });
-        }, 0);
-      }
+      if (!snapshot.error) flushQueued();
     },
   });
   const agentError = agent.error;
@@ -254,6 +302,17 @@ export function ChatSession({
     // stream, so before leaving her with the error banner, replay the
     // session server-side and fold the finished conversation, reply
     // included, back into the transcript (web twin has the full story).
+    //
+    // Session-fork fix (GH #170, confirmed live on web, ported here
+    // ahead of an incident): a manual send used to stand down a running
+    // recovery and send on whatever session state was left, which had
+    // no session id (eve wipes its cursor the moment the stream dies
+    // without a closing boundary event). That raced the durable old
+    // turn, still finishing server-side, into a second, unrelated eve
+    // session for the same family. sendMessage now queues instead of
+    // forking while this effect is undecided (isSendLineOccupied in
+    // chat-send-policy.ts), and flushQueued below delivers whatever she
+    // typed the moment recovery settles, on every exit.
     const lastSend = lastSendRef.current;
     if (!lastSend || recoveryRef.current) return;
     const controller = new AbortController();
@@ -277,6 +336,11 @@ export function ChatSession({
       if (recoveryRef.current === controller) recoveryRef.current = null;
       if (controller.signal.aborted) {
         setRecovering(false);
+        // Gave up without an answer: the same fresh-session fallback a
+        // failed recovery gets below, so whatever she typed while
+        // waiting still goes out instead of racing a fresh session on
+        // her next manual send.
+        flushQueued();
         return;
       }
       if (recovered) {
@@ -292,6 +356,7 @@ export function ChatSession({
         setArchived(nextArchived);
         archivedRef.current = nextArchived;
         setLiveTimes({});
+        setQuestionAnswers({});
         void saveChat(storageKey, {
           archived: nextArchived,
           events: [],
@@ -304,8 +369,13 @@ export function ChatSession({
         lastSendRef.current = null;
       }
       setRecovering(false);
+      // Whichever way it resolved, the line is free again: send anything
+      // she typed while it was undecided (a fresh session either way,
+      // since eve already wiped this one's session id when the stream
+      // died, or agentReset just did on a clean recovery above).
+      flushQueued();
     })();
-  }, [agentError, agentReset, emitTurnCompleted, liveTimes, storageKey]);
+  }, [agentError, agentReset, emitTurnCompleted, flushQueued, liveTimes, storageKey]);
 
   // Give up a running recovery when the chat unmounts.
   useEffect(() => {
@@ -346,20 +416,31 @@ export function ChatSession({
     };
   }, [agentStop, busy]);
 
-  function sendMessage(text: string) {
+  function sendMessage(text: string, source: ChatSendSource = "composer") {
     const message = text.trim();
     if (message.length === 0) return;
-    setDraft("");
+    // A tap on a card is not typing, so it leaves whatever she had
+    // half-written in the composer alone (the web twin's send policy,
+    // apps/web/app/app/chat-send-policy.ts).
+    if (source === "composer") setDraft("");
     // Sending mid-turn queues instead of refusing (texting model,
     // founder ruling 2026-07-10 night): the bubble waits by the
-    // composer and goes out the moment the line is free.
-    if (busy) {
+    // composer and goes out the moment the line is free. Occupied by an
+    // active stream OR by lost-turn recovery still deciding whether the
+    // previous, interrupted turn already finished (chat-send-policy.ts's
+    // isSendLineOccupied; GH #170). Either way a send here must queue,
+    // never start a second eve session racing the one that might still
+    // be finishing.
+    if (isSendLineOccupied({ busy, recovering })) {
       setQueued((current) => [...current, message]);
       return;
     }
-    // A manual send takes the composer back: a still-running recovery
-    // of the previous turn stands down (its reply would land into a
-    // conversation that has already moved on).
+    // Reaching here means the line reads as free (not busy, not
+    // recovering), so any recovery handle left over is already spent or
+    // is the vanishingly small same-tick race between an error landing
+    // and its `recovering` state committing; abort is a defensive no-op
+    // in the ordinary case, not the mechanism that keeps sends from
+    // forking a session anymore (see isSendLineOccupied above).
     recoveryRef.current?.abort();
     // A fresh session (first turn, or the reset after a failed one)
     // restarts the durable event cursor.
@@ -371,6 +452,40 @@ export function ChatSession({
     lastSendRef.current = { text: outgoing, atMs: currentTimeMs() };
     markTurnStarted();
     void agent.send({ message: outgoing });
+  }
+
+  function focusComposer() {
+    composerRef.current?.focus();
+  }
+
+  /**
+   * A finished choice card sends its answers as ONE ordinary message.
+   * The card then reads past tense, so a spent option never looks
+   * pressable.
+   */
+  function sendQuestionCardAnswers(partKey: string, text: string) {
+    if (text.trim().length === 0) {
+      // Nothing to say, so say nothing and give her the composer
+      // instead of sending an empty turn.
+      focusComposer();
+      return;
+    }
+    sendMessage(text, "card");
+    setQuestionAnswers((current) => ({ ...current, [partKey]: text }));
+  }
+
+  /**
+   * The retry affordance on a "Not sent" bubble (web twin's part 2 of
+   * GH #170: a dropped connection used to erase her words with nothing
+   * on screen to say so). Not a composer send, so it leaves whatever she
+   * is mid-typing untouched, and it resends the failed bubble's exact
+   * words. sendMessage's own isSendLineOccupied gate already keeps this
+   * from forking a session if a recovery for the earlier failure happens
+   * to still be running, and queues it instead, same as anything else
+   * typed in that window.
+   */
+  function retryFailedMessage(text: string): void {
+    sendMessage(text, "card");
   }
 
   /** The manual fresh start: archive what is on screen, rotate the
@@ -385,6 +500,9 @@ export function ChatSession({
     archivedRef.current = nextArchived;
     setLiveTimes({});
     setQueued([]);
+    // The answered-card summaries belong to the session that just went
+    // to the archive; the archived cards render settled on their own.
+    setQuestionAnswers({});
     void saveChat(storageKey, {
       archived: nextArchived,
       events: [],
@@ -402,6 +520,12 @@ export function ChatSession({
     liveTimes,
   });
   const hasAnyMessages = transcript.some((item) => item.kind === "message");
+  // The live choice card, if any: only the newest unanswered card takes
+  // taps, and only while the line is free. Identity, not message id,
+  // because eve ids restart with each session and the archive above can
+  // hold a card whose id matches this one's.
+  const liveMessageSet = new Set(messages);
+  const activeQuestion = busy ? null : latestQuestionRequest(messages);
   // The chips return whenever a session has no words in it yet: the
   // first run, a fresh morning over yesterday's scrollback, and right
   // after "Start a new chat".
@@ -466,7 +590,26 @@ export function ChatSession({
               item.kind === "separator" ? (
                 <DaySeparator key={item.key} label={item.label} />
               ) : (
-                <MessageView key={item.key} message={item.message} />
+                <MessageView
+                  key={item.key}
+                  message={item.message}
+                  onRetryFailedMessage={
+                    liveMessageSet.has(item.message)
+                      ? retryFailedMessage
+                      : undefined
+                  }
+                  questions={{
+                    activeQuestionPartKey: liveMessageSet.has(item.message)
+                      ? activeQuestion?.partKey
+                      : undefined,
+                    onSendQuestionAnswers: activeQuestion
+                      ? (text) =>
+                          sendQuestionCardAnswers(activeQuestion.partKey, text)
+                      : undefined,
+                    onQuestionTypeInstead: focusComposer,
+                    questionAnswers,
+                  }}
+                />
               ),
             )}
             {showSuggestions ? (
@@ -608,6 +751,7 @@ export function ChatSession({
         }}
       >
         <TextInput
+          ref={composerRef}
           value={draft}
           onChangeText={setDraft}
           placeholder={"Tell Homa about your day\u2026"}

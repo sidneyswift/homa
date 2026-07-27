@@ -1,0 +1,699 @@
+{
+  "comment": "Acknowledged-open ingestion gaps. verify-ingestion.py step 7/8 treats these as tracked, not failures. Remove an entry in the same PR that ships its recipe or registry entry.",
+  "gaps": [
+    {
+      "slug": "alphabet-art-page",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-19-alphabet-pages-y1"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "animal-study-nonfiction-page",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-habitat-schoolhouse-prek-workbook2"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "arts-integrated-lesson",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-kennedy-center-start-with-the-arts"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "averatile-puzzle",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-17-ba-5baveratilespuzzles"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "bilingual-picture-book",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-homeschool-languages-spanish-level1"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "character-themed-tracing",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-pawpatrol-prewriting"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "color-mixing-experiment-page",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-habitat-schoolhouse-prek-workbook1"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "cooking-recipe-card",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-19-treasury-year-round-pk-activities"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "cross-curricular-center-cards",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-harcourt-trophies-2nd-lesson-planner"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "daily-instruction-guide",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-harcourt-trophies-2nd-day-detail-pages"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "daily-morning-menu",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-morning-menu-starter"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "dot-grid-pattern",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-harcourt-math-2nd-grade-selection"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "draw-and-trace-word",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-habitat-schoolhouse-prek-workbook6"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "field-trip-planning-guide",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-twinkl-field-trip-tips"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "form-meaning-use-grammar-page",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-azar-basic-english-grammar"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "fragment-puzzle",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-17-ba-3dfragmentpuzzles"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "grammar-reference-chart",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-azar-basic-english-grammar"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "hexagonal-grid-puzzle",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-17-ba-4bhivepuzzles",
+        "ref-2026-07-17-ba-5ahivepuzzles"
+      ],
+      "refCount": 2,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "hexagonal-ordering-puzzle",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-17-ba-4ddecimalpathpuzzles"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "hole-punch-strip",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-hole-punch-fine-motor"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "i-have-who-has-game",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-i-have-who-has-compound-words"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "i-spy-letter-page",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-twinkl-i-spy-letter-l"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "inclusive-lesson-adaptations",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-kennedy-center-start-with-the-arts"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "interactive-read-aloud-script",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-ckla-preschool-all-about-me"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "language-home-supplement",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-los-pollitos-unit1-home-supplements"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "letter-section-bundle",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-habitat-schoolhouse-prek-workbook5"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "leveled-worksheet-set",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-harcourt-trophies-2nd-day-detail-pages"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "manipulative-building-mat",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-magna-tiles-numbers"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "manipulative-cutout",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-17-ba-5dpythagoreantheorem"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "math-story-log",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-harcourt-math-2nd-grade-selection"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "monthly-planning-calendar",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-19-treasury-year-round-pk-activities"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "movement-activity-card",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-19-treasury-year-round-pk-activities"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "multi-modal-activity-set",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-harcourt-trophies-2nd-alt-teaching-strategies"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "music-lesson-plan",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-ecme-music-right-from-start"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "number-stacking-mat",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-habitat-schoolhouse-prek-workbook6"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "parent-scribe-journal",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-ckla-preschool-animals-activity-pages"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "pattern-cut-and-paste",
+      "kind": "funnel-covered",
+      "refs": [
+        "ref-2026-07-18-winter-patterns-cut-paste"
+      ],
+      "refCount": 1,
+      "reason": "funnel counts this covered via alias/containment matching; the verifier is deliberately stricter, so it stays acknowledged here until a dedicated recipe or registry entry ships",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "phoneme-substitution-card",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-phoneme-substitution-cards"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "pre-writing-stroke-page",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-ckla-preschool-animals-activity-pages"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "preschool-domain-lesson",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-ckla-preschool-all-about-me"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "printable-game",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-harcourt-math-2nd-grade-selection"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "printable-manipulative-set",
+      "kind": "funnel-covered",
+      "refs": [
+        "ref-2026-07-18-harcourt-math-2nd-grade-selection"
+      ],
+      "refCount": 1,
+      "reason": "funnel counts this covered via alias/containment matching; the verifier is deliberately stricter, so it stays acknowledged here until a dedicated recipe or registry entry ships",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "product-path-hive",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-17-ba-5ahivepuzzles"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "real-photo-vocabulary-cards",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-bathroom-vocabulary-spanish-flashcards"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "reteach-activity-bank",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-harcourt-trophies-2nd-alt-teaching-strategies"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "school-home-connection-block",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-harcourt-trophies-2nd-practice-book"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "scope-sequence-chart",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-phonological-awareness-scope-sequence"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "self-teaching-math-worksheet",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-get-ahead-in-math-decimals"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "semester-scope-and-sequence",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-peaceful-press-playful-pioneers-coop"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "sentence-frame-minibook",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-spanish-minibook-numeros-colores"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "sentence-pyramid",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-sentence-pyramid-worksheets"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "spanish-lesson-plan",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-los-pollitos-unit1-teacher-guide"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "spatial-puzzle",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-17-ba-3dfragmentpuzzles"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "story-assessment",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-harcourt-trophies-2nd-assessments"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "tessellation-puzzle",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-17-ba-5baveratilespuzzles"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "thematic-vocabulary-unit",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-los-pollitos-unit1-teacher-guide"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "themed-scissor-cutting-page",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-hair-salon-scissor-cutting"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "varied-exercise-set",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-azar-basic-english-grammar"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "visual-progress-map",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-habitat-schoolhouse-record-keeping"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "vocabulary-study-set",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-volcanoes-vocab-cards-test"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "weekly-co-op-planner",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-peaceful-press-playful-pioneers-coop"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "weekly-lesson-planner",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-18-harcourt-trophies-2nd-lesson-planner"
+      ],
+      "refCount": 1,
+      "reason": "backlog, no shipped recipe or alias yet",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "maze-puzzle-practice",
+      "kind": "registry-missing",
+      "refs": [
+        "ref-2026-07-17-ba-3aanglemazes"
+      ],
+      "refCount": 1,
+      "reason": "recipe file shipped but activity-formats.md entry missing",
+      "recordedBy": "ingestion-audit",
+      "recordedOn": "2026-07-20"
+    }
+  ]
+}

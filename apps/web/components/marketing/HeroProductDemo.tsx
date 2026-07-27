@@ -15,11 +15,11 @@ function SentBubble({ children }: { children: ReactNode }) {
       style={{
         alignSelf: "flex-end",
         maxWidth: "86%",
-        padding: "8px 11px",
+        padding: "9px 13px",
         borderRadius: "18px 18px 4px 18px",
         background: "var(--clay-500)",
         color: "#fff",
-        fontSize: "0.84rem",
+        fontSize: "0.92rem",
         lineHeight: 1.35,
         boxShadow: "var(--shadow-sm)",
       }}
@@ -35,11 +35,11 @@ function ReceivedBubble({ children }: { children: ReactNode }) {
       style={{
         alignSelf: "flex-start",
         maxWidth: "88%",
-        padding: "8px 11px",
+        padding: "9px 13px",
         borderRadius: "18px 18px 18px 4px",
         background: "var(--surface-raised)",
         color: "var(--text-strong)",
-        fontSize: "0.84rem",
+        fontSize: "0.92rem",
         lineHeight: 1.35,
         boxShadow: "var(--shadow-sm)",
       }}
@@ -56,22 +56,24 @@ function ReceivedBubble({ children }: { children: ReactNode }) {
  * while still reading as Messages: slim inline contact row, left/right
  * bubbles, MMS attachment, and a slim composer. Keep it short: the hero
  * value is the quick exchange plus the worksheet, so every pixel of
- * chrome that is not a texting signifier gets cut or condensed.
+ * chrome that is not a texting signifier gets cut or condensed. Type sizes
+ * are set for the hero's 0.72 to 0.78 float scale: the bubbles must stay
+ * readable at 390px viewports, or the page's best proof is decoration.
  */
 export function HeroProductDemo() {
   return (
     <figure className="lp-product-demo" style={{ margin: 0 }}>
       <div
-        className="lp-product-demo-phone"
+        className="lp-demo-phone"
         role="img"
         aria-label="Text thread: a parent says Maya likes butterflies, and Homa replies with a butterfly math worksheet saved to the binder"
         style={{
           position: "relative",
           width: "100%",
-          maxWidth: 280,
+          maxWidth: 340,
           margin: "0 auto",
           padding: "10px",
-          borderRadius: 42,
+          borderRadius: 46,
           background:
             "linear-gradient(115deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0) 16%), linear-gradient(165deg, #4a4541 0%, #221f1c 45%, #0c0b0a 100%)",
           boxShadow: "var(--shadow-xl), inset 0 0 0 1px rgba(255,255,255,0.12)",
@@ -83,9 +85,9 @@ export function HeroProductDemo() {
           style={{
             position: "absolute",
             left: -2,
-            top: 88,
+            top: 96,
             width: 3,
-            height: 26,
+            height: 28,
             borderRadius: "2px 0 0 2px",
             background: "linear-gradient(90deg, #4a4540, #1a1815)",
           }}
@@ -95,9 +97,9 @@ export function HeroProductDemo() {
           style={{
             position: "absolute",
             left: -2,
-            top: 126,
+            top: 138,
             width: 3,
-            height: 46,
+            height: 50,
             borderRadius: "2px 0 0 2px",
             background: "linear-gradient(90deg, #4a4540, #1a1815)",
           }}
@@ -107,9 +109,9 @@ export function HeroProductDemo() {
           style={{
             position: "absolute",
             right: -2,
-            top: 140,
+            top: 152,
             width: 3,
-            height: 60,
+            height: 64,
             borderRadius: "0 2px 2px 0",
             background: "linear-gradient(270deg, #4a4540, #1a1815)",
           }}
@@ -121,7 +123,7 @@ export function HeroProductDemo() {
             overflow: "hidden",
             display: "flex",
             flexDirection: "column",
-            borderRadius: 32,
+            borderRadius: 37,
             background: "#f2ebe0",
             boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.4)",
           }}
@@ -131,11 +133,11 @@ export function HeroProductDemo() {
             aria-hidden="true"
             style={{
               position: "absolute",
-              top: 8,
+              top: 9,
               left: "50%",
               zIndex: 3,
-              width: 78,
-              height: 22,
+              width: 88,
+              height: 24,
               transform: "translateX(-50%)",
               borderRadius: 16,
               background: "var(--stone-900)",
@@ -152,17 +154,17 @@ export function HeroProductDemo() {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              minHeight: 28,
-              padding: "8px 15px 0 19px",
+              minHeight: 30,
+              padding: "9px 17px 0 21px",
               color: "var(--text-strong)",
-              fontSize: "0.68rem",
+              fontSize: "0.72rem",
               fontWeight: 700,
             }}
           >
             <span style={{ letterSpacing: "0.01em" }}>9:41</span>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-              <span style={{ display: "inline-flex", alignItems: "flex-end", gap: 1.5, height: 9 }}>
-                {[3.5, 5.5, 7.5, 9].map((h) => (
+              <span style={{ display: "inline-flex", alignItems: "flex-end", gap: 1.5, height: 10 }}>
+                {[4, 6, 8, 10].map((h) => (
                   <span
                     key={h}
                     style={{
@@ -174,17 +176,17 @@ export function HeroProductDemo() {
                   />
                 ))}
               </span>
-              <span style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.02em" }}>5G</span>
+              <span style={{ fontSize: "0.64rem", fontWeight: 700, letterSpacing: "0.02em" }}>5G</span>
               {/* Battery: faint outline, solid fill, faint nub, like iOS. */}
-              <span style={{ position: "relative", width: 21, height: 10, display: "inline-block" }}>
+              <span style={{ position: "relative", width: 22, height: 11, display: "inline-block" }}>
                 <span
                   aria-hidden="true"
                   style={{
                     position: "absolute",
                     left: 0,
                     top: 0,
-                    width: 18,
-                    height: 10,
+                    width: 19,
+                    height: 11,
                     border: "1px solid currentColor",
                     borderRadius: 3,
                     opacity: 0.4,
@@ -196,8 +198,8 @@ export function HeroProductDemo() {
                     position: "absolute",
                     left: 2,
                     top: 2,
-                    width: 11,
-                    height: 6,
+                    width: 12,
+                    height: 7,
                     borderRadius: 1.5,
                     background: "currentColor",
                   }}
@@ -207,7 +209,7 @@ export function HeroProductDemo() {
                   style={{
                     position: "absolute",
                     right: 0,
-                    top: 3.25,
+                    top: 3.75,
                     width: 1.5,
                     height: 3.5,
                     borderRadius: "0 2px 2px 0",
@@ -228,7 +230,7 @@ export function HeroProductDemo() {
               display: "grid",
               justifyItems: "center",
               gap: 2,
-              padding: "2px 12px 6px",
+              padding: "3px 12px 7px",
               borderBottom: "1px solid rgba(214,200,180,0.65)",
               background: "rgba(251,247,240,0.94)",
             }}
@@ -237,7 +239,7 @@ export function HeroProductDemo() {
               aria-hidden="true"
               style={{
                 position: "absolute",
-                left: 8,
+                left: 10,
                 top: "50%",
                 transform: "translateY(-50%)",
                 display: "inline-flex",
@@ -246,15 +248,15 @@ export function HeroProductDemo() {
                 color: "var(--clay-600)",
               }}
             >
-              <ChevronLeft size={17} strokeWidth={2.6} aria-hidden="true" />
+              <ChevronLeft size={18} strokeWidth={2.6} aria-hidden="true" />
               <span
                 style={{
-                  minWidth: 17,
-                  padding: "1px 5px",
+                  minWidth: 18,
+                  padding: "1px 6px",
                   borderRadius: "var(--radius-pill)",
                   background: "var(--clay-100)",
                   color: "var(--clay-600)",
-                  fontSize: "0.56rem",
+                  fontSize: "0.62rem",
                   fontWeight: 700,
                   textAlign: "center",
                   lineHeight: 1.5,
@@ -266,8 +268,8 @@ export function HeroProductDemo() {
             <span
               style={{
                 display: "inline-flex",
-                width: 30,
-                height: 30,
+                width: 32,
+                height: 32,
                 alignItems: "center",
                 justifyContent: "center",
                 borderRadius: "50%",
@@ -275,7 +277,7 @@ export function HeroProductDemo() {
                 boxShadow: "var(--shadow-sm)",
               }}
             >
-              <Logo size={18} variant="mark" />
+              <Logo size={19} variant="mark" />
             </span>
             <p
               style={{
@@ -285,13 +287,13 @@ export function HeroProductDemo() {
                 gap: 1,
                 color: "var(--text-strong)",
                 fontFamily: "var(--font-wordmark)",
-                fontSize: "0.7rem",
+                fontSize: "0.76rem",
                 fontWeight: 600,
                 letterSpacing: "-0.005em",
               }}
             >
               Homa
-              <ChevronRight size={9} color="var(--text-subtle)" strokeWidth={2.6} aria-hidden="true" />
+              <ChevronRight size={10} color="var(--text-subtle)" strokeWidth={2.6} aria-hidden="true" />
             </p>
           </div>
 
@@ -300,8 +302,8 @@ export function HeroProductDemo() {
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: 6,
-              padding: "8px 10px 8px",
+              gap: 7,
+              padding: "9px 11px 9px",
               background: "linear-gradient(180deg, #f4ede3 0%, #ebe2d4 55%, #f4ede3 100%)",
             }}
           >
@@ -314,7 +316,7 @@ export function HeroProductDemo() {
                 margin: "0 0 1px",
                 alignSelf: "center",
                 color: "var(--text-subtle)",
-                fontSize: "0.6rem",
+                fontSize: "0.66rem",
                 fontWeight: 500,
               }}
             >
@@ -328,7 +330,7 @@ export function HeroProductDemo() {
                 margin: "-3px 2px 0 0",
                 alignSelf: "flex-end",
                 color: "var(--text-subtle)",
-                fontSize: "0.58rem",
+                fontSize: "0.64rem",
                 fontWeight: 600,
               }}
             >
@@ -358,14 +360,16 @@ export function HeroProductDemo() {
                     display: "block",
                     width: "100%",
                     height: "auto",
-                    maxHeight: 118,
+                    maxHeight: 148,
                     objectFit: "cover",
                     objectPosition: "top center",
                     background: "#fff",
                   }}
                 />
                 {/* Fades the crop into the file row below so the worksheet
-                    reads as a deliberate preview peek, not a broken image. */}
+                    reads as a deliberate preview peek, not a broken image.
+                    Both stops use the same RGB as --surface-raised (only
+                    alpha changes) so the fade has no visible color seam. */}
                 <div
                   aria-hidden="true"
                   style={{
@@ -373,8 +377,8 @@ export function HeroProductDemo() {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    height: 34,
-                    background: "linear-gradient(to top, var(--surface-raised) 0%, rgba(255,255,255,0) 100%)",
+                    height: 58,
+                    background: "linear-gradient(to top, rgba(255,253,249,1) 0%, rgba(255,253,249,0) 100%)",
                   }}
                 />
               </div>
@@ -382,31 +386,31 @@ export function HeroProductDemo() {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 7,
-                  padding: "6px 9px",
+                  gap: 8,
+                  padding: "7px 10px",
                   borderTop: "1px solid var(--border-subtle)",
                 }}
               >
                 <span
                   style={{
                     display: "inline-flex",
-                    width: 24,
-                    height: 24,
+                    width: 26,
+                    height: 26,
                     alignItems: "center",
                     justifyContent: "center",
-                    borderRadius: 6,
+                    borderRadius: 7,
                     background: "var(--sky-100)",
                     flexShrink: 0,
                   }}
                 >
-                  <FileText size={13} color="var(--sky-600)" aria-hidden="true" />
+                  <FileText size={14} color="var(--sky-600)" aria-hidden="true" />
                 </span>
                 <div style={{ minWidth: 0 }}>
                   <p
                     style={{
                       margin: 0,
                       color: "var(--text-strong)",
-                      fontSize: "0.72rem",
+                      fontSize: "0.8rem",
                       fontWeight: 700,
                       whiteSpace: "nowrap",
                       overflow: "hidden",
@@ -422,11 +426,11 @@ export function HeroProductDemo() {
                       alignItems: "center",
                       gap: 3,
                       color: "var(--sage-700)",
-                      fontSize: "0.62rem",
+                      fontSize: "0.7rem",
                       fontWeight: 700,
                     }}
                   >
-                    <Check size={10} aria-hidden="true" />
+                    <Check size={11} aria-hidden="true" />
                     Saved to the binder
                   </p>
                 </div>
@@ -441,7 +445,7 @@ export function HeroProductDemo() {
               display: "flex",
               alignItems: "center",
               gap: 6,
-              padding: "6px 10px 4px",
+              padding: "7px 11px 4px",
               borderTop: "1px solid rgba(214,200,180,0.6)",
               background: "rgba(251,247,240,0.97)",
             }}
@@ -449,8 +453,8 @@ export function HeroProductDemo() {
             <span
               style={{
                 display: "inline-flex",
-                width: 24,
-                height: 24,
+                width: 26,
+                height: 26,
                 alignItems: "center",
                 justifyContent: "center",
                 borderRadius: "50%",
@@ -458,20 +462,22 @@ export function HeroProductDemo() {
                 color: "var(--stone-700)",
               }}
             >
-              <Plus size={14} strokeWidth={2.4} aria-hidden="true" />
+              <Plus size={15} strokeWidth={2.4} aria-hidden="true" />
             </span>
             <span
               style={{
                 flex: 1,
-                minHeight: 28,
+                minHeight: 31,
                 display: "flex",
                 alignItems: "center",
-                padding: "0 11px",
+                padding: "0 12px",
                 border: "1px solid var(--border-subtle)",
                 borderRadius: "var(--radius-pill)",
                 background: "var(--surface-raised)",
                 color: "var(--text-subtle)",
-                fontSize: "0.74rem",
+                fontSize: "0.8rem",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
               }}
             >
               Text Message · SMS
@@ -479,8 +485,8 @@ export function HeroProductDemo() {
             <span
               style={{
                 display: "inline-flex",
-                width: 28,
-                height: 28,
+                width: 30,
+                height: 30,
                 alignItems: "center",
                 justifyContent: "center",
                 borderRadius: "50%",
@@ -488,7 +494,7 @@ export function HeroProductDemo() {
                 color: "#fff",
               }}
             >
-              <ArrowUp size={15} strokeWidth={2.8} aria-hidden="true" />
+              <ArrowUp size={16} strokeWidth={2.8} aria-hidden="true" />
             </span>
           </div>
           <div
@@ -496,14 +502,14 @@ export function HeroProductDemo() {
             style={{
               display: "flex",
               justifyContent: "center",
-              padding: "2px 0 5px",
+              padding: "2px 0 6px",
               background: "rgba(251,247,240,0.97)",
             }}
           >
             <span
               style={{
-                width: 88,
-                height: 3,
+                width: 96,
+                height: 3.5,
                 borderRadius: 3,
                 background: "var(--stone-800)",
                 opacity: 0.32,

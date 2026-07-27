@@ -10,6 +10,7 @@ export {
   ACTIVITY_ONLY_PROGRESS_NOTE,
   AMBIGUOUS_PROGRESS_NOTE,
   DISABLED_PROGRESS_NOTE,
+  JOURNAL_HOURS_PROGRESS_NOTE,
   manageChildProgressResultSchema,
   NO_MATCH_PROGRESS_NOTE,
   REFUSED_PROGRESS_NOTE,
@@ -44,33 +45,48 @@ const progressResponseAnswerSchema = z.enum([
  */
 export const manageChildProgressToolInputSchema = z
   .object({
-    action: z.enum([
-      "start_check_in",
-      "respond_check_in",
-      "pause_check_in",
-      "resume_check_in",
-      "stop_check_in",
-      "takeover_check_in",
-      "record_journal_evidence",
-      "resolve_conflict",
-      "undo_progress_update",
-      "mark_observation_used",
-    ]),
-    childId: childIdSchema.optional(),
+    action: z
+      .enum([
+        "start_check_in",
+        "respond_check_in",
+        "pause_check_in",
+        "resume_check_in",
+        "stop_check_in",
+        "takeover_check_in",
+        "record_journal_evidence",
+        "resolve_conflict",
+        "undo_progress_update",
+        "mark_observation_used",
+      ])
+      .describe(
+        "start_check_in needs childId + purpose (+ subjectId for subject_deep_dive). respond_check_in needs checkInId + answer. pause_check_in needs checkInId + reason; resume_check_in, stop_check_in, and takeover_check_in need checkInId. record_journal_evidence needs childId. resolve_conflict needs conflictId. undo_progress_update needs operationId. mark_observation_used needs observationId.",
+      ),
+    childId: childIdSchema
+      .optional()
+      .describe("A child id from the family context block."),
     purpose: z
       .enum([
         "whole_map_refresh",
         "subject_deep_dive",
         "age_refresh",
       ])
-      .optional(),
+      .optional()
+      .describe("Why this check-in is starting; subject_deep_dive also takes subjectId."),
     subjectId: subjectIdSchema.optional(),
-    checkInId: uuidSchema.optional(),
-    answer: progressResponseAnswerSchema.optional(),
+    checkInId: uuidSchema
+      .optional()
+      .describe("A saved check-in UUID from trusted context or a prior tool result."),
+    answer: progressResponseAnswerSchema
+      .optional()
+      .describe("The parent's reply to the current check-in question, translated faithfully."),
     reason: z.enum(["topic_change", "explicit_stop"]).optional(),
     conflictId: uuidSchema.optional(),
-    operationId: uuidSchema.optional(),
-    observationId: uuidSchema.optional(),
+    operationId: uuidSchema
+      .optional()
+      .describe("The operation UUID to undo, from the tool result that reported it."),
+    observationId: uuidSchema
+      .optional()
+      .describe("A saved observation UUID that appears in trusted context."),
   })
   .strict();
 

@@ -1,0 +1,45 @@
+{
+  "id": "ref-2026-07-18-montessori-3part-houses-world",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:17:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427467.720559",
+  "format": "montessori-nomenclature-cards",
+  "title": "Montessori Geography — Houses Around the World 3-Part Cards (Uplands Media)",
+  "publisher": "Uplands Media LLC",
+  "gradeLevel": "PreK-Elementary (ages 4-8)",
+  "relatedRefs": ["ref-2026-07-18-montessori-nomenclature-solar-system", "ref-2026-07-18-montessori-3part-community-helpers"],
+  "callouts": [],
+  "overview": {
+    "description": "Montessori 3-part nomenclature cards + control cards for houses/dwellings from around the world. Includes: Celtic Round House (Wales), Bungalow (North America), and more. Two font options (D'Nealian and Century Gothic) plus tracing fonts for writing practice. Designed for cardstock, lamination, and dry-erase marker reuse.",
+    "houses": ["Celtic Round House (Wales)", "Bungalow (North America)"],
+    "features": ["3-part cards (image+label, image-only, label-only)", "control cards", "dual font options (D'Nealian / Century Gothic)", "tracing font version for writing practice", "geography connection (house type → world region)"]
+  },
+  "newDesignPatterns": {
+    "dualFontOptions": {
+      "description": "Same cards available in D'Nealian and Century Gothic fonts. D'Nealian is common in US schools (slanted for cursive transition). Century Gothic is clean sans-serif. Teacher/parent picks whichever matches their handwriting curriculum.",
+      "value": "Font choice is a real pain point for homeschoolers — different curricula use different handwriting styles. Offering both removes that friction."
+    },
+    "tracingFontVersion": {
+      "description": "A third font version: tracing letters (dotted/dashed) so children can practice writing the vocabulary words. The nomenclature card becomes a writing practice tool too.",
+      "value": "Vocabulary learning + handwriting practice in one material. Multi-skill without adding pages."
+    },
+    "geographyCulturalConnection": {
+      "description": "Each house type is labeled with both the house name AND the world region (Celtic Round House = Wales, Bungalow = North America). The child learns architecture + geography + cultural diversity simultaneously.",
+      "value": "Cross-curricular: architecture + geography + cultural awareness. 'Houses look different around the world' is an accessible entry to cultural diversity for young children."
+    }
+  },
+  "overallSkillTargeting": {
+    "subject": "social-studies",
+    "domain": "geography-culture",
+    "topics": [
+      {"id": "social-studies.houses-around-world", "kind": "conceptual", "mapped": false},
+      {"id": "social-studies.world-geography", "kind": "conceptual", "mapped": false}
+    ]
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": []
+  },
+  "notes": "Third Montessori 3-part card set from Aless. Now applied to geography/cultural studies. The triple-font feature (D'Nealian + Century Gothic + tracing) is a new detail that the solar system and community helpers sets didn't have. This adds a writing practice dimension to the nomenclature card format. Total Montessori 3-part drops: astronomy + social studies + geography = 3 subjects, same format. The recipe is thoroughly validated."
+}

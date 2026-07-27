@@ -1,12 +1,10 @@
-import {
-  getMapItem,
-  type FourWeekPlan,
-  type MapScores,
-  type PlanWeek,
-} from "@homa/core";
+import { getMapItem, type FourWeekPlan, type MapScores } from "@homa/core";
 
 import type { ArchivedScoring } from "./map/trajectory-eras";
+import { dashboardPlanFromRow, type DashboardPlan } from "./plan-week";
 import { createSupabaseServerClient } from "./supabase/server";
+
+export { currentWeekIndex, type DashboardPlan } from "./plan-week";
 
 /**
  * Server-side reads shared by the /app pages (the report tab, kid pages,
@@ -56,44 +54,6 @@ export async function getReportsForChildren(
   );
 }
 
-export interface DashboardPlan {
-  childId: string;
-  subjectId: string;
-  /** Check-offs done vs total activities, counted from the synced map. */
-  done: number;
-  total: number;
-  retestAt: string;
-  /** The four weeks themselves, for the planner's this-week board. */
-  weeks: PlanWeek[];
-  /** Server-synced check-offs, keyed "week.activityIndex". */
-  progress: Record<string, boolean>;
-}
-
-/** The plan's first day: the retest clock is armed 28 days out when the
- * plan is built, so the start is always retestAt minus four weeks. */
-function planStartMs(plan: DashboardPlan): number {
-  return new Date(plan.retestAt).getTime() - 28 * 24 * 60 * 60 * 1000;
-}
-
-/** Which of the four weeks the family is living right now (0-based,
- * clamped so a plan past its retest still shows week 4, never crashes). */
-export function currentWeekIndex(plan: DashboardPlan, nowMs: number): number {
-  if (plan.weeks.length === 0) return 0;
-  const elapsedWeeks = Math.floor((nowMs - planStartMs(plan)) / (7 * 24 * 60 * 60 * 1000));
-  return Math.min(Math.max(elapsedWeeks, 0), plan.weeks.length - 1);
-}
-
-function validPlanWeek(value: unknown): value is PlanWeek {
-  if (!value || typeof value !== "object") return false;
-  const week = value as Partial<PlanWeek>;
-  return (
-    typeof week.week === "number" &&
-    typeof week.focus === "string" &&
-    Array.isArray(week.activities) &&
-    week.activities.every((activity) => typeof activity === "string")
-  );
-}
-
 export async function getPlansForChildren(childIds: string[]): Promise<DashboardPlan[]> {
   if (childIds.length === 0) return [];
   const supabase = await createSupabaseServerClient();
@@ -103,19 +63,14 @@ export async function getPlansForChildren(childIds: string[]): Promise<Dashboard
     .in("child_id", childIds);
   if (error) throw new Error(`child_plans read failed: ${error.message}`);
   return (data ?? []).flatMap((row) => {
-    const plan = row.plan as FourWeekPlan;
-    const weeks = Array.isArray(plan.weeks) ? plan.weeks.filter(validPlanWeek) : [];
-    if (weeks.length === 0) return [];
-    const progress = (row.progress ?? {}) as Record<string, boolean>;
-    return [{
-      childId: row.child_id as string,
-      subjectId: row.subject_id as string,
-      done: Object.values(progress).filter(Boolean).length,
-      total: weeks.reduce((sum, week) => sum + week.activities.length, 0),
-      retestAt: row.retest_at as string,
-      weeks,
-      progress,
-    }];
+    const shaped = dashboardPlanFromRow({
+      child_id: row.child_id as string,
+      subject_id: row.subject_id as string,
+      plan: row.plan as FourWeekPlan,
+      progress: (row.progress ?? null) as Record<string, boolean> | null,
+      retest_at: row.retest_at as string,
+    });
+    return shaped ? [shaped] : [];
   });
 }
 

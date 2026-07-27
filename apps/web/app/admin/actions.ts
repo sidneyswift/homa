@@ -30,6 +30,13 @@ import {
   removeFamilyPhone,
 } from "../../lib/family-phone";
 import { mapDb } from "../../lib/map/db";
+import {
+  siteUrl,
+  submitDripAddKid,
+  submitDripLoopBack,
+  submitDripReportUnviewed,
+  submitDripSetupNudge,
+} from "../../lib/map/email";
 import { emitMapEvent } from "../../lib/map/events";
 import { narrativeEnabled } from "../../lib/map/narrative-flag";
 import { runReportNarrative } from "../../lib/map/narrative-runner";
@@ -395,4 +402,49 @@ export async function returnFounderPhoneAction(
   });
   revalidatePath(`/admin/families/${familyId}`);
   return { error: null };
+}
+
+/**
+ * The onboarding-drip preview (funnel work 2026-07-20): sends ONE nudge
+ * template to the founder's own address so the copy can be read in a real
+ * inbox before the drip is ever un-darkened. This does NOT read
+ * dripEnabled() and never touches a real family: the recipient is the
+ * founder (getFounderSession), the personalization is a sample, and the
+ * ledger row carries no family_id, so it can never collide with a real
+ * family's dedupe or 7-day cap.
+ */
+export interface DripPreviewState {
+  error: string | null;
+  sent?: string;
+}
+
+const DRIP_PREVIEW_KINDS = new Set(["setup", "report", "loop_back", "add_kid"]);
+
+export async function sendDripPreviewAction(
+  _prev: DripPreviewState,
+  formData: FormData,
+): Promise<DripPreviewState> {
+  const founder = await getFounderSession();
+  if (!founder) return { error: "Only the founder can do this." };
+
+  const kind = String(formData.get("kind") ?? "");
+  if (!DRIP_PREVIEW_KINDS.has(kind)) {
+    return { error: "Unknown preview. Reload and try again." };
+  }
+
+  const to = founder.email;
+  const site = siteUrl();
+  const submission =
+    kind === "setup"
+      ? await submitDripSetupNudge(to, null, `${site}/onboarding`)
+      : kind === "report"
+        ? await submitDripReportUnviewed(to, null, "Sam", `${site}/onboarding`)
+        : kind === "loop_back"
+          ? await submitDripLoopBack(to, "Sam", "the reading plan")
+          : await submitDripAddKid(to, null, "Sam", `${site}/app`);
+
+  if (submission.status !== "submitted") {
+    return { error: "That preview didn't send. Check RESEND_API_KEY, then try again." };
+  }
+  return { error: null, sent: kind };
 }

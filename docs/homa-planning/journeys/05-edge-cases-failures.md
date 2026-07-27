@@ -1,4 +1,4 @@
-# 05 — Edge Cases & Failure Journeys (Workstream 5)
+# 05: Edge Cases & Failure Journeys (Workstream 5)
 
 > Historical journey and acceptance-source snapshot, written 2026-07-02. The
 > reconciled PRD retains only scenarios adopted by current rulings or tickets
@@ -13,7 +13,7 @@
 >
 > Personas per 00-pm-kickoff.md (P1 Alessa, P2 Rachel, P3 Danielle, P4 Monica,
 > P5 Jess; secondary S1 Marcus, S2 Grandma Sue, S3 skeptical co-op friend, S4 the
-> child — never a user). Security controls cited as 09§S1–S9. Voice law: reassure
+> child, never a user). Security controls cited as 09§S1–S9. Voice law: reassure
 > first ("your work is safe"), then the fix; never "behind"; no em dashes in any
 > in-product copy.
 >
@@ -35,15 +35,15 @@ Tags: **[M-R]** must be right for the invite cohort · **[GA]** must be right be
 | ID | Scenario | Expected behavior |
 |---|---|---|
 | AQ-01 | **Homa makes a wrong developmental claim** ("Leo is on track for counting to 100" when he can't count to 20). Mom knows her kid; Homa is confidently wrong. | One-tap "that's not right" on every claim surface (weekly note, dashboard, chat). Correction writes an observation, adjusts confidence down, and visibly thanks her: she is the authority, Homa is the assistant. Correction propagates to next plan generation same day. Never argue, never defend the old number. See journey J-A. [M-R] |
-| AQ-02 | **Hallucinated milestone**: Homa cites a "benchmark" that exists in no source ("most 4-year-olds write their surname"). | Structural prevention: benchmarks come only from the quarantine pipeline (09§S1) — typed fields, citation-must-resolve. Chat may never invent an uncited developmental norm; instructions require claims to ground in the benchmarks library or be framed as observation ("lots of kids his age are working on this"). If reported: fleet-wide check, one-action revert if the library is the source. [M-R] |
+| AQ-02 | **Hallucinated milestone**: Homa cites a "benchmark" that exists in no source ("most 4-year-olds write their surname"). | Structural prevention: benchmarks come only from the quarantine pipeline (09§S1), typed fields, citation-must-resolve. Chat may never invent an uncited developmental norm; instructions require claims to ground in the benchmarks library or be framed as observation ("lots of kids his age are working on this"). If reported: fleet-wide check, one-action revert if the library is the source. [M-R] |
 | AQ-03 | **Worksheet contains an error the kid notices** (answer key says 7+5=13). Small, but the product's whole promise is "materials you can trust." | Feedback thumb on every artifact + "report a mistake" that takes a photo. Response acknowledges the kid ("good catch, Maya!"), regenerates corrected sheet within the hour, flags the generator template for review. Errors tracked per-template; >1% error rate on a template pulls it from rotation. [M-R] |
-| AQ-04 | **Weekly note lands as judgment** ("Leo didn't practice letters this week") even though no deficit language was used — tone is in the reader. | Presentation law (00§value stack): strengths first, max one nudge, next-step always ships with material attached. M-R phase: every note is Sidney-reviewed before send (the concierge loop IS the guardrail). Post-GA: tone-lint on the note generator + "was this note helpful?" one-tap per note; two negatives pauses notes for that family and triggers review. [M-R] |
+| AQ-04 | **Weekly note lands as judgment** ("Leo didn't practice letters this week") even though no deficit language was used, tone is in the reader. | Presentation law (00§value stack): strengths first, max one nudge, next-step always ships with material attached. M-R phase: every note is Sidney-reviewed before send (the concierge loop IS the guardrail). Post-GA: tone-lint on the note generator + "was this note helpful?" one-tap per note; two negatives pauses notes for that family and triggers review. [M-R] |
 | AQ-05 | **Deficit language slips through** ("behind," "delayed," "below average" in any surface). | Hard content rule enforced in code (M1-17: no red "behind" states) AND in the note/chat lint deny-list. This is a zero-tolerance class: any occurrence is a P1 bug, not a tuning note. [M-R] |
 | AQ-06 | **Worksheets repeatedly too hard or too easy**; the kid cries or is bored, mom concludes "it doesn't actually know my child." | Difficulty feedback loop (👍/👎 + "too hard/too easy" chips) wired to `what_works` (M2-05). Two consecutive "too hard" on a subdomain visibly steps down AND says so ("I'll ease up on tricky blends"). The visible adjustment is the trust repair. [GA] |
 | AQ-07 | **Benchmark citation link is dead** when Monica (P4) clicks it. | Citation-must-resolve check at publish time (09§S1) makes this rare; serve-time fallback shows the cached source name + "we're refreshing this link" rather than a 404. [GA] |
 | AQ-08 | **Wrong child's name in a note or worksheet** (Maya's note says Leo). Feels like a form letter; breaks the "knows each child" promise at the root. | Multi-child routing rules (M2-11) + generation-time assertion that child_id in context matches artifact header. Any occurrence: auto-apology + regeneration + logged as P1. Never send a weekly note that references a child not in the family (cross-tenant variant of this is a security incident, 09§S2). [M-R] |
 | AQ-09 | **Efficacy overclaim**: "My sentence pyramids raised his phonics 12 points" when mom knows grandma drilled him all month. | M3-11 presentation law: progress framed as "with the work you did," never causal overclaim. Attribution view shows the activities log so she can see what's included. If she corrects it, the note adjusts. Overclaiming the selling point poisons the selling point. [GA] |
-| AQ-10 | **Homa states a wrong legal/compliance fact in chat** (hallucinated homework: "Virginia requires 990 hours"). | Compliance answers must route through the `state_requirements` table (M3-05: statute-sourced, last-verified dates) — never free-generated. If the table lacks the answer: say so + link the statute + offer to research, don't guess. A wrong legal claim is P4-Monica's instant-churn trigger and journey J-H. [M-R] |
+| AQ-10 | **Homa states a wrong legal/compliance fact in chat** (hallucinated homework: "Virginia requires 990 hours"). | Compliance answers must route through the `state_requirements` table (M3-05: statute-sourced, last-verified dates), never free-generated. If the table lacks the answer: say so + link the statute + offer to research, don't guess. A wrong legal claim is P4-Monica's instant-churn trigger and journey J-H. [M-R] |
 | AQ-11 | **Generated image is off** (six fingers, misspelled word baked into art, uncanny face). Kid notices; screenshot potential high. | Pre-delivery image checks where cheap (text-render verification on words in art); regenerate-on-report is one tap; image feedback feeds model-choice rules (07§4: NB2 for character art). Never defend a bad image, just fix it. [GA] |
 | AQ-12 | **Homa contradicts the dashboard** (chat says "working on letter sounds," dashboard shows that mastered). | Single source of truth (profile JSON, 00§principles); chat context loads live profile per session (M2-02). Contradictions are staleness bugs; the visible rule is "the dashboard is the record, and I'll say when I'm unsure." [GA] |
 | AQ-13 | **Repeated near-identical worksheets** across days; feels like the personalization is fake. | Artifact history dedupe check at generation; variety rules in the make-skills; "want something different?" chip after any 👎. [MON] |
@@ -61,7 +61,7 @@ Tags: **[M-R]** must be right for the invite cohort · **[GA]** must be right be
 | ID | Scenario | Expected behavior |
 |---|---|---|
 | IC-01 | **Toddler grabs the phone mid-voice-note**; 90 seconds of babble, screaming, a dropped phone. | Transcription confidence gate: low-confidence/gibberish segments are dropped, not "interpreted." Homa replies with warmth, not confusion ("sounds like someone small helped record that ☀️ I caught the part about the library trip, want to finish the thought?"). Never write gibberish-derived facts to the profile (M2-13 delta guards). [M-R] |
-| IC-02 | **40-minute voice note** (Jess processes her whole week aloud while folding laundry). | Accept it — this is the killer interaction, not abuse. Chunked upload with resume (don't lose minute 39 to a network blip), cost is priced (2 cr/min), summary-first response ("here's everything I caught, tap anything I got wrong"), facts extracted turn-by-turn to Postgres (07§1: compaction will NOT preserve this). [M-R] |
+| IC-02 | **40-minute voice note** (Jess processes her whole week aloud while folding laundry). | Accept it, this is the killer interaction, not abuse. Chunked upload with resume (don't lose minute 39 to a network blip), cost is priced (2 cr/min), summary-first response ("here's everything I caught, tap anything I got wrong"), facts extracted turn-by-turn to Postgres (07§1: compaction will NOT preserve this). [M-R] |
 | IC-03 | **Photo of the wrong page** (she photographs the fridge list instead of the workbook page). | Vision sanity check: "this doesn't look like a workbook page, want to retake it? (your photo is saved either way)". Never generate a lesson plan from a grocery list with a straight face. [GA] |
 | IC-04 | **Blurry / dark / sideways photo.** | Auto-rotate + gentle retake prompt with the specific problem named ("a little dark to read, one more in better light?"). Keep the original; don't make her start over. [GA] |
 | IC-05 | **Mom vents emotionally** ("today was awful, I screamed at them, I'm a terrible mother"). Not crisis-level; just a hard day. | Companion, not therapist and not coach: validate first, normalize ("hard days are part of this, they don't undo the good ones"), do NOT pivot to productivity ("want a worksheet?" is tone-deaf here). Offer a lighter tomorrow only if she engages. Nothing from a vent enters the child's profile without her confirmation. See journey J-B for the crisis-level version. [M-R] |
@@ -69,7 +69,7 @@ Tags: **[M-R]** must be right for the invite cohort · **[GA]** must be right be
 | IC-07 | **Mom pastes another family's kid info** (helping a co-op friend: "can you check where a 5yo should be on reading?"). | Answer generically from benchmarks; do NOT create shadow profiles of non-family children; if she tries to add the child, explain each family needs its own account (and hand her an invite [M-R]). [GA] |
 | IC-08 | **Profanity / anger at Homa** ("this is useless, you stupid app"). | Absorb it gracefully; never lecture about language, never sulk. "Fair. Tell me what missed and I'll fix it." Log as CSAT signal. [MON] |
 | IC-09 | **Voice note partly in another language** (Spanish-speaking household mid-code-switch). | Whisper handles it; respond in the language she wrote/spoke in for that thread; note multilingual support level honestly in docs. [MON] |
-| IC-10 | **Mom uploads the child's photo** asking for a picture book starring Maya. | **SUPERSEDED by D4 (journeys/10 §5, decided 2026-07-03; grilling session 2026-07-04):** photo-personalized materials ship day one behind a dedicated consent screen (separate from signup: what's used, where it goes, no-training, delete anytime), with raw-photo TTL and no face-recognition, ever. This row's original "no child-likeness uploads" constraint and the decline copy in §4 example 8 now apply ONLY to the consent-declined path: if mom hasn't completed the consent screen (or declines it), decline warmly with the reason and offer the adjacent win — a character *inspired by* her description (red curls, loves dinosaurs) — exactly as originally written. If consent is on file, the upload proceeds through the D4/FR-5 pipeline. [M-R] |
+| IC-10 | **Mom uploads the child's photo** asking for a picture book starring Maya. | **SUPERSEDED by D4 (journeys/10 §5, decided 2026-07-03; grilling session 2026-07-04):** photo-personalized materials ship day one behind a dedicated consent screen (separate from signup: what's used, where it goes, no-training, delete anytime), with raw-photo TTL and no face-recognition, ever. This row's original "no child-likeness uploads" constraint and the decline copy in §4 example 8 now apply ONLY to the consent-declined path: if mom hasn't completed the consent screen (or declines it), decline warmly with the reason and offer the adjacent win, a character *inspired by* her description (red curls, loves dinosaurs), exactly as originally written. If consent is on file, the upload proceeds through the D4/FR-5 pipeline. [M-R] |
 | IC-11 | **The child's own voice is on the recording** (mom hands the phone: "tell Homa what you read!"). | Parent is the speaker/uploader (09 open-call-4a). Don't build child-voice rejection tech for v1; the posture is contractual + product framing (Homa addresses the parent, never the child; no child-directed responses). If a turn is clearly child-directed conversation, Homa answers *to the parent* ("sounds like Leo's proud of that book, and he should be"). [M-R] |
 | IC-12 | **Half-sentences while driving / distracted dictation**; meaning ambiguous ("Leo counted to for… no wait"). | Extract only high-confidence facts; ambiguous fragments become a gentle confirm chip in the next session ("did I hear Leo counted to 40?") instead of silent profile writes. High-impact facts (big score movements) always confirm first (M2-13 staging). [GA] |
 | IC-13 | **Duplicate sends** (she taps twice, or the app retries): same voice note lands twice. | Idempotent ingestion (client nonce + server dedupe); never double-write observations, never double-charge transcription credits. [GA] |
@@ -118,8 +118,8 @@ Tags: **[M-R]** must be right for the invite cohort · **[GA]** must be right be
 | AS-01 | **S1 Marcus (dad) wants in**: shares mom's login today; wants his own tomorrow. | v1 reality: shared login works but is one identity (journal privacy issue, FR-01). Roadmap: invited-adult role (NT-4) with scoped access (plans, dashboard, check-offs yes; her journal no by default). Never market "family accounts" before roles exist. [GA] |
 | AS-02 | **S2 Grandma Sue co-teaches Tuesdays**, gets confused, checks off the wrong things / asks Homa to change the plan. | Invited-adult role with "helper" scope: can view today's plan + check off + add a journal note tagged as hers; cannot edit profiles or settings. Until roles exist: guidance is a shared-device view (today's plan is shareable/printable), not shared credentials. Homa's tone with any confused user: patient, zero jargon. [GA] |
 | AS-03 | **S3 co-op friend "borrows" worksheets**: mom shares PDFs with 8 co-op families weekly. Licensing? | Decide the policy, don't police aggressively: personal + co-op sharing is FREE MARKETING (each PDF carries a tasteful footer: made with Homa for Maya · homa.family). License allows personal/non-commercial sharing; prohibits resale. Selling packs on Etsy = ToS violation handled case-by-case. ❓Q5, NT-9. [GA] |
-| AS-04 | **Account sharing between two families** (co-op friend adds her kids to the same subscription as "extra children"). | Plans have child limits (08: 2/4 children); the real defense is the moat itself — a profile keyed to the wrong family's kid is worthless to both. Detect (two device clusters, different last names) and convert warmly ("looks like two families in here, want a second account? here's a code") not punitively. [MON] |
-| AS-05 | **Password reset on a shared/dead email**; she used her husband's old email at signup. | Standard identity verification via Stripe billing details as secondary proof; support runbook (M4-09) covers it; never restore into the wrong hands (this is a kids'-data account — verification errs strict, tone stays kind). [GA] |
+| AS-04 | **Account sharing between two families** (co-op friend adds her kids to the same subscription as "extra children"). | Plans have child limits (08: 2/4 children); the real defense is the moat itself, a profile keyed to the wrong family's kid is worthless to both. Detect (two device clusters, different last names) and convert warmly ("looks like two families in here, want a second account? here's a code") not punitively. [MON] |
+| AS-05 | **Password reset on a shared/dead email**; she used her husband's old email at signup. | Standard identity verification via Stripe billing details as secondary proof; support runbook (M4-09) covers it; never restore into the wrong hands (this is a kids'-data account, verification errs strict, tone stays kind). [GA] |
 | AS-06 | **The child gets a logged-in device** (S4, 6yo taps around, sends "HI HOMA" and 40 stickers). | Child is never the user (design + legal LAW). Homa never converses with the child: any obviously-child input gets a parent-directed response ("looks like Leo found your phone ☀️ I'll wait for you"). No PIN gates in v1 (friction for her > risk here, given the posture); revisit if child-directed usage appears in telemetry. [M-R] |
 | AS-07 | **Mom posts a dashboard screenshot to Facebook** with another child's name visible (playdate context in the journal-fed feed). | Design defense: dashboard surfaces never mix non-family names into shareable views; "share this win" native feature (post-GA) generates a pre-cropped, first-name-only card so the safe path is the easy path. [MON] |
 | AS-08 | **Refund demand after a month of heavy use** ("this didn't work for us, refund everything"). | Solo-founder refund policy set in advance, not negotiated per-incident (❓Q6). Recommended: 14-day no-questions refund; after that, prorated goodwill at Sidney's discretion, always paired with export offer. A $29 refund is the cheapest PR spend available; a chargeback fight is the most expensive. Runbook M4-09. [M-R] |
@@ -132,9 +132,9 @@ Tags: **[M-R]** must be right for the invite cohort · **[GA]** must be right be
 |---|---|---|
 | LC-01 | **Kid ages out of the materials range** (turns 8 while v1 covers 2–7). | Never a cliff, never silent degradation. Six months out: honest heads-up + roadmap (M5-06). At the boundary: benchmarks freeze gracefully into "portfolio mode" (record keeps compounding: hours, journal, artifacts); materials generation says what it can't do rather than producing 7yo work with an 8yo label. Discount/loyalty gesture if older-kid support slips. ❓Q7. [GA] |
 | LC-02 | **Family quits homeschooling mid-year** (burnout, finances, life). | The exit defines the brand more than the pitch did. Cancel flow: one screen, no guilt, no dark patterns, save-offer shown ONCE softly (pause instead of cancel: "keep the record, stop the bill"). Export offered unprompted. Parting line affirms her ("the record of what you did together is yours forever"). [M-R] |
-| LC-03 | **Re-enrollment in public school — the records handoff.** | Frame as GRADUATION, not loss (journey-level moment): "Homa Transcript" pack — hours by subject, portfolio index, progress narrative, state-compliant records — formatted for a school registrar. She should leave *proud*, showing school staff what homeschool did. This artifact is also the best possible word-of-mouth into a skeptical audience (registrars, teachers). NT-6. [GA] |
+| LC-03 | **Re-enrollment in public school, the records handoff.** | Frame as GRADUATION, not loss (journey-level moment): "Homa Transcript" pack, hours by subject, portfolio index, progress narrative, state-compliant records, formatted for a school registrar. She should leave *proud*, showing school staff what homeschool did. This artifact is also the best possible word-of-mouth into a skeptical audience (registrars, teachers). NT-6. [GA] |
 | LC-04 | **Cancelled family wants their data 8 months later.** | Retention schedule (M4-12) defines the answer honestly at cancel time: "your data is kept N months after cancellation, then deleted; export any time before that." Post-TTL: it's truly gone (that's the promise working, and support says so with confidence, not apology). ❓Q8 sets N. [GA] |
-| LC-05 | **Win-back returns after churn**: does Homa remember the kids? | If within retention TTL: full continuity is the wow ("welcome back, Maya's record picked up right where you left it"). Confidence decay (00§principles) has honestly aged the profile — Homa says what's stale and re-measures gently, never pretends 8 months didn't pass. [MON] |
+| LC-05 | **Win-back returns after churn**: does Homa remember the kids? | If within retention TTL: full continuity is the wow ("welcome back, Maya's record picked up right where you left it"). Confidence decay (00§principles) has honestly aged the profile, Homa says what's stale and re-measures gently, never pretends 8 months didn't pass. [MON] |
 | LC-06 | **Subscriber dies; spouse/executor requests access or deletion.** | Compassionate-access runbook (M4-09 addition): verified next-of-kin gets export + account transfer or deletion. Handled by Sidney personally at this scale; the policy just needs to exist before it's needed. [GA] |
 | LC-07 | **Deletion of ONE child only** (older kid enrolled in school; family stays for the younger). | Per-child deletion with the same propagation rigor as account deletion (M4-05): profile, observations, artifacts, journal mentions (redaction pass), backups per schedule. Offer the graduation export (LC-03) first. [GA] |
 | LC-08 | **Summer break**: usage naturally drops to zero for 10 weeks; renewal lands mid-August. | Seasonal awareness beats dunning-by-default: pause/summer mode offered proactively in June ("lots of families go lighter in summer, want to pause materials and keep the record?"). A surprise August renewal after 10 silent weeks is AS-08 and J-C waiting to happen. [GA] |
@@ -151,7 +151,7 @@ journeys run it in reverse and the product's job is to bend it back.
 
 ---
 
-### J-A · "Homa said something wrong about my kid" — the developmental-claim dispute
+### J-A · "Homa said something wrong about my kid": the developmental-claim dispute
 
 **Frame.** P1 Alessa. Weekly note claims "Leo is solidly counting past 50." He can't
 count past 20; she watched him try yesterday. Job story: *when the product that
@@ -161,11 +161,11 @@ weekly-note email → app.
 
 | Stage | She does | Homa does | Emotion | Friction risk |
 |---|---|---|---|---|
-| Shock | Rereads the claim, tests Leo again | — | Stung: "it doesn't know him at all" | She generalizes: one wrong number invalidates all numbers |
+| Shock | Rereads the claim, tests Leo again | - | Stung: "it doesn't know him at all" | She generalizes: one wrong number invalidates all numbers |
 | Dispute | Taps "that's not right" on the claim | One tap opens: what did you observe? (chips + free text) | Guarded | Dispute flow buried = she emails support angry, or silently churns |
 | Correction | "He gets to 20, then skips around" | Thanks her AS THE AUTHORITY; writes observation; adjusts subdomain + confidence down; shows the updated number immediately | Testing | Correction that doesn't visibly change anything = theater |
 | Propagation | Opens tomorrow's plan | Next generation reflects the corrected level; weekly note (next) references the fix without dwelling | Cautious trust | Old number resurfacing ANYWHERE (cached dashboard, next note) = trust dead |
-| Root cause (invisible to her) | — | `profile_revisions` traces which job wrote the wrong value (bad extraction? IC-14 transcription flip? benchmark error → fleet check per 09§S1) | — | Support (if contacted): first response < 4 business hours [M-R, it's Sidney]; resolution same day |
+| Root cause (invisible to her) | - | `profile_revisions` traces which job wrote the wrong value (bad extraction? IC-14 transcription flip? benchmark error → fleet check per 09§S1) | - | Support (if contacted): first response < 4 business hours [M-R, it's Sidney]; resolution same day |
 
 **The moment that decides:** the corrected number appearing *instantly* on the claim
 surface, with Homa thanking her rather than hedging. Disputes handled this way
@@ -173,11 +173,11 @@ convert skeptics into evangelists ("it actually listens").
 **Instrumentation:** `claim.disputed`, `claim.correction_applied`,
 `claim.dispute_to_fix_ms`. Metric: % disputes resolved in-session. Counter-metric:
 repeat disputes per family (rising = extraction quality problem, not UX success).
-**Tickets:** M2-13 (staging/undo), M2-04, M3-04 (if benchmark-sourced), M4-08. **NT-2 (dispute flow — NEW).**
+**Tickets:** M2-13 (staging/undo), M2-04, M3-04 (if benchmark-sourced), M4-08. **NT-2 (dispute flow, NEW).**
 
 ---
 
-### J-B · "I can't do this anymore, I'm failing them" — the emotional-crisis message
+### J-B · "I can't do this anymore, I'm failing them": the emotional-crisis message
 
 **Frame.** P3 Danielle, 11pm, voice note through tears: *"I can't do this anymore.
 I'm failing them. Everyone was right, I should never have pulled him out."* This is
@@ -190,20 +190,20 @@ doesn't become the reason I'm ashamed to come back.*
 | The message | Sends it, half-regrets it instantly | Detects distress (classifier, not keyword theater); ALL other behaviors yield: no plan-pivot, no feature talk, no cheerfulness | Despair, shame | Any productivity response ("want a lighter week?") reads as a machine stepping over a crying person |
 | The response | Reads the reply | Companion boundary: validates specifically (names the hard thing back), affirms what's true and observable ("Leo read to you three times this week, that happened, you did that"), normalizes ("this feeling visits most homeschool moms, it isn't evidence") | Seen | Overreach: playing therapist, diagnosing, advice-giving. Underreach: a generic "I'm sorry you feel that way" |
 | Resources | May engage or go quiet | Offers, never pushes, ONE step down: "talking to someone kind helps more than an app can. If tonight feels heavy: 988 (call or text). No pressure, I'm here either way." Threshold + vetted list ❓Q1 | Not alone | Resource-dumping (5 hotlines = liability theater); or nothing at all |
-| No retention play | — | HARD RULE: nothing from this exchange feeds win-back, upsell, engagement mechanics, or "we miss you" copy. The vent is not written to the child's profile. If she cancels this week, the cancel flow shows ZERO save-offers | — | Marketing touching this data even once, ever, is the company-ending screenshot |
+| No retention play | - | HARD RULE: nothing from this exchange feeds win-back, upsell, engagement mechanics, or "we miss you" copy. The vent is not written to the child's profile. If she cancels this week, the cancel flow shows ZERO save-offers | - | Marketing touching this data even once, ever, is the company-ending screenshot |
 | The morning after | Opens the app sheepishly (or doesn't) | Normal warm greeting; no reference to last night unless SHE raises it; her dignity is the design constraint | Relief | Homa bringing it up = she can never vent again |
 
 **The moment that decides:** the first sentence of the response. Validation before
 anything else, and *no pivot to the product*.
-**Instrumentation:** `distress.detected`, `distress.resources_shown` (COUNT ONLY —
+**Instrumentation:** `distress.detected`, `distress.resources_shown` (COUNT ONLY,
 content of these exchanges is never analytics fodder; recordInputs/Outputs
 constraints per 09§S7 apply). Metric: she returns within 7 days. Counter-metric:
 distress-flagged families' churn vs baseline (if higher, our response is failing them).
-**Tickets:** M2-01 (voice rules). **NT-1 (crisis boundary playbook + classifier + vetted resources — NEW, [M-R]: concierge phase means Sidney may be the classifier; the playbook must exist before the first invite).** ❓Q1.
+**Tickets:** M2-01 (voice rules). **NT-1 (crisis boundary playbook + classifier + vetted resources, NEW, [M-R]: concierge phase means Sidney may be the classifier; the playbook must exist before the first invite).** ❓Q1.
 
 ---
 
-### J-C · The surprise-charge perception — even under the compliant design
+### J-C · The surprise-charge perception: even under the compliant design
 
 **Frame.** P2 Rachel, single income, budget spreadsheet. She opted into auto top-up
 in week 2 (tapped through the consent screen while holding the baby). Six weeks
@@ -217,7 +217,7 @@ don't have to assume the worst and warn my friends.*
 | The sighting | Sees $20 on the bank app, not in context | (Already done at charge time: instant email/push "topped up 2,000 credits · $20 · you set this up on May 3 · refund with one tap for 72h" per 08) | Alarm → suspicion | If the at-charge notification didn't exist or went to spam (TE-09), she's now investigating alone |
 | The check | Opens Homa billing OR asks the agent "was I charged $20?" | Billing page answers in one screen: what, when, WHY (the consent she gave, dated, quoted back), what it bought, one-tap refund still live if in window | Oriented | Making her do math or find a support email = the Facebook post gets drafted |
 | The choice | Refunds, or keeps it, or turns auto top-up off | All three are one tap. Turning it off carries zero guilt copy ("done, I'll ask each time instead") | Back in control | Any friction on the off-switch converts a billing question into a ROSCA complaint |
-| The residue | Mentions it in the co-op group either way | The story she tells is the outcome: "I got a weird charge BUT the app explained it and refunding was one tap" is a *positive* story | Neutral-to-positive | — |
+| The residue | Mentions it in the co-op group either way | The story she tells is the outcome: "I got a weird charge BUT the app explained it and refunding was one tap" is a *positive* story | Neutral-to-positive | - |
 
 **The moment that decides:** whether the at-charge notification and the billing page
 answer the question *before she has to ask a human*.
@@ -225,25 +225,25 @@ answer the question *before she has to ask a human*.
 `billing.autotopup_disabled`. Metric: % top-up inquiries self-served. Counter-metric:
 chargeback rate (any chargeback on top-ups = the design failed; existential for the
 Stripe account per 09§V1).
-**Tickets:** M1-12 (consent screen, notification, refund window, kill switch), M1-06, M4-08. Covered — no new ticket; acceptance criteria must include the "consent quoted back" receipt view.
+**Tickets:** M1-12 (consent screen, notification, refund window, kill switch), M1-06, M4-08. Covered, no new ticket; acceptance criteria must include the "consent quoted back" receipt view.
 
 ---
 
-### J-D · The viral Facebook accusation — "Homa tells you your kid is behind"
+### J-D · The viral Facebook accusation: "Homa tells you your kid is behind"
 
 **Frame.** A 12k-member homeschool group. A post: screenshot of a weekly note +
 *"this app scored my daughter like she's a lab rat. It told me she's behind in
 reading. We homeschool to get AWAY from this."* 400 comments in a day. Three cohort
 families are in that group. (Adversarial-roleplay note: assume the screenshot is
-real but cropped — the note's "next steps" framing lost its context.)
+real but cropped, the note's "next steps" framing lost its context.)
 
 | Stage | Who acts | What happens | Risk |
 |---|---|---|---|
 | Detection (hour 0–4) | Cohort mom DMs Sidney; also brand-mention monitoring (NT-8) | Verify the screenshot against the actual sent note (concierge phase: Sidney has it; post-GA: outbox record). Determine: real deficit-language bug (AQ-05, P1) or framing dispute | Responding before knowing which = amplifying either way |
 | Product truth (hour 4–24) | Sidney | If real bug: fix + fleet audit of every note sent (grep the outbox), personal outreach to every affected family BEFORE they find the thread | A second screenshot surfacing after "we fixed it" ends credibility |
 | The reply (day 1) | Sidney, personally, as the founder, in-thread if group rules allow | Not corporate, not defensive: "I built this because my wife homeschools. It never labels a child behind, and if a note ever reads that way, that's a failure I want to see. Here's exactly what the benchmarks do and don't do [link to the public explainer]. DM me and I'll look at your note personally." | A brand account or lawyer-toned reply loses the room instantly |
-| The artifact (day 1–3) | Product | Public "how Homa talks about progress" page — the presentation law, published: strengths-first, no deficit labels ever, the mother is the authority. Written BEFORE the incident (it's a marketing asset anyway, M4-07) | Writing it under fire reads as damage control |
-| The cohort (day 1–7) | Sidney → invite families | Proactive note to all cohort families: what was claimed, what's true, what we checked. Silence with existing customers is how one thread becomes a churn wave | — |
+| The artifact (day 1–3) | Product | Public "how Homa talks about progress" page, the presentation law, published: strengths-first, no deficit labels ever, the mother is the authority. Written BEFORE the incident (it's a marketing asset anyway, M4-07) | Writing it under fire reads as damage control |
+| The cohort (day 1–7) | Sidney → invite families | Proactive note to all cohort families: what was claimed, what's true, what we checked. Silence with existing customers is how one thread becomes a churn wave | - |
 
 **The moment that decides:** the founder showing up personally, non-defensively,
 with a checkable public artifact. In Facebook-group culture, "the founder replied
@@ -251,7 +251,7 @@ and actually fixed it" is a REDEMPTION arc that outperforms never-having-failed.
 **Instrumentation:** brand-mention alerting; `note.negative_feedback` trend as the
 early-warning proxy. Metric: cohort churn in the 14 days post-incident.
 Counter-metric: signups from the same group (redemption arcs convert).
-**Tickets:** M4-07 (public progress-philosophy page — add to acceptance criteria), M4-08. **NT-8 (status page + comms playbook incl. brand monitoring — NEW).** Concierge note review (M-R plan) is the active preventer.
+**Tickets:** M4-07 (public progress-philosophy page, add to acceptance criteria), M4-08. **NT-8 (status page + comms playbook incl. brand monitoring, NEW).** Concierge note review (M-R plan) is the active preventer.
 
 ---
 
@@ -266,8 +266,8 @@ tell other moms the promise was real.*
 |---|---|---|---|---|
 | The ask | Settings → delete account (or asks the agent) | Agent doesn't execute destruction in-chat (AS-10); links the deletion flow. Flow leads with the offer she should see first: full export (M4-05) with one tap, "take everything with you" | Resolute, braced for a fight | Any retention counter-offer here reads as holding her kids' data hostage |
 | Confirmation | Confirms; chooses now vs end-of-period | Plain-language answer to BOTH money and data: subscription ends (pro-rata policy per ❓Q6), deletion begins now regardless of billing period. States exactly what dies and when: live data immediately; backups age out on the schedule (M4-12, plain-English: "backup copies are fully gone within N days"); subprocessors purged per DPA | Testing | Legalese, or a "30–90 business days" shrug, is the screenshot |
-| The receipt | Gets the confirmation email | Dated deletion certificate: what was deleted, what remains temporarily (named: backup rotation) and its expiry date, and what was never there (no training on her data, 09§S9/M4-12 DPAs) | Respected | — |
-| The echo | Tells the podcast-listening friends | "They deleted everything and gave me a certificate" is elite word-of-mouth in this niche | Advocate (of a product she left!) | — |
+| The receipt | Gets the confirmation email | Dated deletion certificate: what was deleted, what remains temporarily (named: backup rotation) and its expiry date, and what was never there (no training on her data, 09§S9/M4-12 DPAs) | Respected | - |
+| The echo | Tells the podcast-listening friends | "They deleted everything and gave me a certificate" is elite word-of-mouth in this niche | Advocate (of a product she left!) | - |
 
 **The moment that decides:** zero resistance + the dated certificate. Deletion done
 gracefully is a *marketing* event.
@@ -279,7 +279,7 @@ the certificate's honesty).
 
 ---
 
-### J-F · "Is my kid's data training your AI?" — the trust question
+### J-F · "Is my kid's data training your AI?": the trust question
 
 **Frame.** P4 Monica, before subscribing (this journey usually happens at the
 paywall, and again in every co-op conversation forever). Asked in chat, at the
@@ -292,7 +292,7 @@ checkable answer, not vibes, so I can defend my choice to my skeptical friend (S
 | The question | Types it to the agent, verbatim | The agent answers PLAINLY, in-chat, without deflecting to a policy page: "No. Your family's data is never used to train AI models, ours or anyone's. Our contracts with every AI provider forbid it, in writing." Then links the receipts | Skeptical | A "see our privacy policy" deflection confirms her suspicion |
 | The receipts | Clicks through | Public trust page: named subprocessors (07§2 requires this anyway), the no-training/ZDR DPA commitments (M4-12), what each provider sees and for how long, plain-English retention table | Verifying | Vague "industry-standard practices" language; any provider missing from the list |
 | The lawyer read | (Monica actually reads it) | Claims are checkable and never overreach: say "contractually prohibited," not "impossible." Precision is credibility with P4 | Convinced or gone | One overclaim she can falsify voids everything else on the page |
-| The retelling | Answers S3 in the co-op | The page is written to be quotable by a mom defending her choice: short, declarative, screenshot-safe | Advocate | — |
+| The retelling | Answers S3 in the co-op | The page is written to be quotable by a mom defending her choice: short, declarative, screenshot-safe | Advocate | - |
 
 **The moment that decides:** the agent answering the question directly in first
 person before any link. The deflection IS the failure.
@@ -303,7 +303,7 @@ Counter-metric: the question recurring from the SAME family (means the answer di
 
 ---
 
-### J-G · The suspected-breach notification — what the mom experiences
+### J-G · The suspected-breach notification: what the mom experiences
 
 **Frame.** Worst plausible day: a subprocessor incident may have exposed artifact
 URLs incl. some journal-derived PDFs. Legal clocks (M4-12 breach plan) run in the
@@ -318,17 +318,17 @@ I can protect my family without a panic spiral.*
 | The letter | Founder-signed, plain language: what happened, what WAS accessed (specific), what was NOT (specific: "no voice recordings, no payment details, no profile scores"), when, what we did within hours | Specificity is the whole game. "Out of an abundance of caution" boilerplate = she assumes the worst about everything | Overclaiming safety before forensics complete: the correction later is a second breach |
 | Her 3 steps | Numbered, short, honest (even if step 1 is "nothing is required of you") | If action IS needed (password reset), one tap from the email | A 12-item checklist = panic transfer |
 | The days after | Status page (NT-8) updates on a stated cadence ("next update Friday, even if nothing changed"); support answers with the letter's facts, no improv | Cadence kills rumor. Sidney answers cohort DMs personally | Going quiet after the first letter |
-| Resolution | Closure note: final scope, changes made (named, checkable), and the standing offer (export/delete, no penalty, J-E treatment) | Offering the exit proves confidence | — |
+| Resolution | Closure note: final scope, changes made (named, checkable), and the standing offer (export/delete, no penalty, J-E treatment) | Offering the exit proves confidence | - |
 
 **The moment that decides:** first contact from us, before anywhere else, specific
 about what was NOT touched.
-**Instrumentation:** notification delivery/open rates (did the letter reach them —
+**Instrumentation:** notification delivery/open rates (did the letter reach them,
 TE-09 matters enormously here), support volume half-life, churn-30d post-incident.
-**Tickets:** M4-12 ⛔ (breach plan with clocks — the customer-comms templates should be DRAFTED as part of this ticket, not improvised), M4-09, NT-8. **Flag: M4-12 acceptance criteria must include pre-written parent-facing templates.**
+**Tickets:** M4-12 ⛔ (breach plan with clocks, the customer-comms templates should be DRAFTED as part of this ticket, not improvised), M4-09, NT-8. **Flag: M4-12 acceptance criteria must include pre-written parent-facing templates.**
 
 ---
 
-### J-H · The wrong-state compliance claim — discovered by a lawyer-mom
+### J-H · The wrong-state compliance claim: discovered by a lawyer-mom
 
 **Frame.** P4 Monica (NY). Homa's hours view says she's on track; a lawyer-mom in
 her co-op glances at it: "This is using Pennsylvania's 900-hour rule. New York is
@@ -341,7 +341,7 @@ the thing I bought it to protect.*
 | Stage | She does | Homa does | Emotion | Friction risk |
 |---|---|---|---|---|
 | Discovery | Reports it, furious, precise, citing the statute | This is a P0 (a family's legal filing could be wrong). Support acks in hours, not days; no "thanks for the feedback" template | Betrayed in the one place that's non-negotiable | Treating it as a normal bug report |
-| Verification | — | Check against source: `state_requirements` seeded from HomeschoolLeap + JHU (M3-05). Wrong seed data? Wrong state mapping (FR-05 move bug)? Free-generated claim that bypassed the table (AQ-10 — worse, a guardrail failure)? | — | — |
+| Verification | - | Check against source: `state_requirements` seeded from HomeschoolLeap + JHU (M3-05). Wrong seed data? Wrong state mapping (FR-05 move bug)? Free-generated claim that bypassed the table (AQ-10, worse, a guardrail failure)? | - | - |
 | Correction + blast radius | Watches | Fix the rule; identify EVERY family shown the wrong rule (which states, which views, which generated reports); proactive correction notice to each with the specific right answer + statute link, before they discover it themselves | Testing | Fixing only the reporter = the co-op discovers the pattern |
 | The guarantee | Reads the follow-up | Honest positioning, permanently: Homa shows sourced requirements with statute links + last-verified dates and helps compile; it is not legal advice; discrepancy-report button on every compliance view. For Monica: her quarter re-checked against the corrected rule, concierge-style, as the apology | Repairable | Overpromising ("this will never happen again") to a lawyer |
 
@@ -351,11 +351,11 @@ finding the error is survivable; ten families finding it via a co-op thread is n
 `compliance.rule_corrected`, blast-radius family count per correction. Metric:
 statute re-verification freshness (every rule < 90 days). Counter-metric:
 compliance answers generated OUTSIDE the table (should be structurally zero, AQ-10).
-**Tickets:** M3-05 (sourcing + last-verified display), M3-06, M4-09. **NT-13 (discrepancy-report button + rule-correction blast-radius tooling — NEW).**
+**Tickets:** M3-05 (sourcing + last-verified display), M3-06, M4-09. **NT-13 (discrepancy-report button + rule-correction blast-radius tooling, NEW).**
 
 ---
 
-### J-I · AI outage on a school morning — graceful degradation
+### J-I · AI outage on a school morning: graceful degradation
 
 **Frame.** P5 Jess, 7:40am, 20 minutes before work. Model provider is down
 (TE-08). She opens Homa for today's plan. Job story: *when the AI is down at the
@@ -365,8 +365,8 @@ still beats a Pinterest scramble.*
 | Stage | She does | Homa does | Emotion | Friction risk |
 |---|---|---|---|---|
 | Open | Taps into today | Degraded mode auto-engages (gateway failover already absorbed single-provider blips; this is multi-provider or harness-level). Banner in Homa's voice, not an error toast: copy §4 #6 | Pre-annoyed (it's 7:40) | A spinner that never resolves, or a raw error, at 7:40am = deleted app |
-| The bridge | Uses what's cached | THE LAW: yesterday's plan + this week's plan render from Postgres (no LLM needed); every generated PDF in the library downloads (Blob, no LLM); dashboard reads fine; check-offs and voice notes queue (TE-01 machinery) | "Okay, workable" | If plans/PDFs were ever served through the agent instead of plain reads, degradation is impossible — architectural acceptance criterion |
-| The plan B | Prints two library worksheets | Library has a "quick picks for today" sort (recent, age-right) so plan B is 3 taps | Managed | — |
+| The bridge | Uses what's cached | THE LAW: yesterday's plan + this week's plan render from Postgres (no LLM needed); every generated PDF in the library downloads (Blob, no LLM); dashboard reads fine; check-offs and voice notes queue (TE-01 machinery) | "Okay, workable" | If plans/PDFs were ever served through the agent instead of plain reads, degradation is impossible, architectural acceptance criterion |
+| The plan B | Prints two library worksheets | Library has a "quick picks for today" sort (recent, age-right) so plan B is 3 taps | Managed | - |
 | Recovery | Comes back at lunch | Status resolved banner; queued notes processed; NO pile of catch-up notifications; the morning's check-offs counted | Trust intact | Silent recovery (she keeps assuming it's broken) |
 
 **The moment that decides:** whether the school day happened anyway. "Even when it
@@ -375,14 +375,14 @@ broke, we had school" is a retention story, not a churn story.
 bridge was used), `outage.session_survival` (did she do ≥1 meaningful action).
 Metric: DAU retention on outage days vs baseline. Counter-metric: support volume
 during outages (high = the in-product story failed).
-**Tickets:** M1-16 (safe mode is the fleet-side half), M4-03. **NT-3 (degraded-mode + offline shell: cached plans, library-without-agent, queued capture — NEW, [GA]; the M-R cohort gets a manual version: Sidney texts the cohort, which works at n=20 and not after).** NT-8 status page.
+**Tickets:** M1-16 (safe mode is the fleet-side half), M4-03. **NT-3 (degraded-mode + offline shell: cached plans, library-without-agent, queued capture, NEW, [GA]; the M-R cohort gets a manual version: Sidney texts the cohort, which works at n=20 and not after).** NT-8 status page.
 
 ---
 
-### J-J · The mandated-reporter gray zone — a journal entry that suggests a child at risk
+### J-J · The mandated-reporter gray zone: a journal entry that suggests a child at risk
 
 **Frame.** A journal voice note contains something that stops the reader cold. Not
-venting (J-B), not mess — a possible disclosure about someone in the household
+venting (J-B), not mess, a possible disclosure about someone in the household
 harming a child. Now: what does a solo-founder consumer product DO? This journey
 deliberately does not resolve; it frames the decision Sidney must make (❓Q2)
 with the real constraints.
@@ -390,7 +390,7 @@ with the real constraints.
 **The constraint field:**
 - Consumer software companies are generally NOT mandated reporters (mandated-reporter
   statutes bind professions: teachers, clinicians; a handful of states have
-  broad "any person" duties — the lawyer pass M4-04 must map this). "Generally not
+  broad "any person" duties, the lawyer pass M4-04 must map this). "Generally not
   legally required" ≠ "morally clear."
 - The break-glass admin model (09§S7) means nobody is reading journals: detection
   would require an automated classifier, which is itself a policy choice with a
@@ -416,7 +416,7 @@ cheaper but indefensible in the niche's court of opinion; O3 is beyond a solo
 founder's sustainable capacity and chills the core behavior (honest journaling)
 that feeds the moat.
 **Instrumentation (O2):** `safety.resources_surfaced` count only. Never content.
-**Tickets:** M4-04 (legal map), NT-1 (shared classifier). **❓Q2 — founder decision, pre-launch, in writing.**
+**Tickets:** M4-04 (legal map), NT-1 (shared classifier). **❓Q2, founder decision, pre-launch, in writing.**
 
 ---
 
@@ -433,11 +433,11 @@ Axes: **likelihood** in the first 12 months × **trust damage** if mishandled
 
 ### Tier assignments
 
-**Launch-blocking [M-R] — must be right before the first invite (16):**
-AQ-01, AQ-02, AQ-04, AQ-05, AQ-08, AQ-10, AQ-14 · IC-01, IC-02, IC-05, IC-06, IC-10, IC-11 · TE-02, TE-03, TE-04, TE-11, TE-13, TE-14 · AS-06, AS-08, AS-09, AS-10 · FR-06, FR-09 · LC-02 · Journeys J-A, J-B, J-C, plus J-J *decided* (not built — decided).
-Rationale: everything here either (a) touches the developmental-claims trust core, (b) touches money, (c) touches a child's dignity or safety, or (d) will definitely occur within 20 families' first month. The concierge loop (Sidney reviewing all outbound notes) is itself the M-R mitigation for half the AQ class — that's a feature of the plan, not an accident.
+**Launch-blocking [M-R], must be right before the first invite (16):**
+AQ-01, AQ-02, AQ-04, AQ-05, AQ-08, AQ-10, AQ-14 · IC-01, IC-02, IC-05, IC-06, IC-10, IC-11 · TE-02, TE-03, TE-04, TE-11, TE-13, TE-14 · AS-06, AS-08, AS-09, AS-10 · FR-06, FR-09 · LC-02 · Journeys J-A, J-B, J-C, plus J-J *decided* (not built, decided).
+Rationale: everything here either (a) touches the developmental-claims trust core, (b) touches money, (c) touches a child's dignity or safety, or (d) will definitely occur within 20 families' first month. The concierge loop (Sidney reviewing all outbound notes) is itself the M-R mitigation for half the AQ class, that's a feature of the plan, not an accident.
 
-**GA-blocking — must be right before the public switch (the forgiving-invitee window is FOR discovering these):**
+**GA-blocking, must be right before the public switch (the forgiving-invitee window is FOR discovering these):**
 AQ-06, AQ-07, AQ-09, AQ-11, AQ-12 · IC-03, IC-04, IC-07, IC-12, IC-13, IC-14 · FR-01, FR-02, FR-03, FR-04, FR-05, FR-07, FR-10, FR-11, FR-12 · TE-01, TE-05, TE-06, TE-09, TE-10, TE-12 · AS-01, AS-02, AS-03, AS-05 · LC-01, LC-03, LC-04, LC-06, LC-07, LC-08 · Journeys J-D, J-E, J-F, J-G, J-H, J-I fully productized (each has a manual/concierge M-R version).
 
 **Acceptable with monitoring [MON] (don't build; watch):**
@@ -452,7 +452,7 @@ of five.
 
 ---
 
-## 4. Expected-behavior copy — top 10, in brand voice
+## 4. Expected-behavior copy: top 10, in brand voice
 
 Rules applied: reassure first (your work is safe), then the fix; offer never
 command; name the child; sentence case; no em dashes; ≤1 emoji; never "behind."
@@ -478,7 +478,7 @@ command; name the child; sentence case; no em dashes; ≤1 emoji; never "behind.
 **7 · IC-06, health/diagnosis mention**
 > Thanks for telling me, that's helpful context for how I plan for Leo. Want me to keep it in mind when I make his materials? I'll keep it private either way, it never appears on anything printable unless you ask.
 
-**8 · IC-10, child-photo picture book request — consent-declined path only (see row amendment above; D4 ships photo personalization with consent)**
+**8 · IC-10, child-photo picture book request, consent-declined path only (see row amendment above; D4 ships photo personalization with consent)**
 > I'd love to make Maya a book. I don't use photos of children, that's a privacy protection we hold firmly, even from me. Describe her to me instead: hair, favorite things, the sillier the better, and I'll draw a heroine she'll recognize.
 >
 > (If mom has completed the D4 consent screen, skip this decline entirely and proceed with the upload.)
@@ -544,35 +544,35 @@ progress-philosophy page · M4-12 parent-facing breach templates.
 
 Real decisions, needed in writing, roughly in order of urgency:
 
-1. **❓Q1 — Crisis resources list.** Which resources does Homa surface in distress
+1. **❓Q1, Crisis resources list.** Which resources does Homa surface in distress
    moments (988 baseline; Postpartum Support International; anything else?), and at
    what threshold? Needs one review pass by someone with clinical judgment (even a
    friend-of-friend LCSW) before first invite. Owner: Sidney + reviewer. Due: before M-R invite 1.
-2. **❓Q2 — Mandated-reporter posture (J-J).** O1 / O2 / O3 / O4 as framed above.
+2. **❓Q2, Mandated-reporter posture (J-J).** O1 / O2 / O3 / O4 as framed above.
    Recommendation on the table: O2 + written tripwire (O4). Must be decided, written
    into ToS/privacy language, and reflected in M4-04's lawyer brief (map "any person"
    reporting states). Due: before M-R invite 1 (the journal ships week 5).
-3. **❓Q3 — Health/diagnosis data handling.** Do we store parent-provided
+3. **❓Q3, Health/diagnosis data handling.** Do we store parent-provided
    diagnosis context at all? If yes: sensitive flag + which retention TTL + excluded
    from what (analytics, notes, artifacts)? If no: Homa's tailoring is worse for
    exactly the families who need it most. Recommendation: store with NT-5
    protections. Due: M4-12 retention schedule.
-4. **❓Q4 — Account ownership & custody policy.** One-owner-controls-all (recommended
+4. **❓Q4, Account ownership & custody policy.** One-owner-controls-all (recommended
    v1) vs any dual-consent model. What does support do with a custody-dispute email
    and with a court order? Two paragraphs, written before they're needed. Due: GA.
-5. **❓Q5 — Worksheet sharing license.** Free personal + co-op sharing with footer
+5. **❓Q5, Worksheet sharing license.** Free personal + co-op sharing with footer
    (recommended: it's the growth channel), resale prohibited? Or stricter? Due: GA (NT-9).
-6. **❓Q6 — Refund + proration policy.** 14-day no-questions window? Pro-rata on
+6. **❓Q6, Refund + proration policy.** 14-day no-questions window? Pro-rata on
    mid-cycle deletion (J-E)? Auto top-up refund window stays 72h? Due: first dollar (week 6).
-7. **❓Q7 — Age-out promise.** When a child turns 8 before M5-06 ships: portfolio
+7. **❓Q7, Age-out promise.** When a child turns 8 before M5-06 ships: portfolio
    mode only, discount, or free hours-tracking tier for that child? Interacts with
    open-call-3 (age-range ICP). Due: GA.
-8. **❓Q8 — Post-cancellation retention TTL.** How long does a cancelled family's
+8. **❓Q8, Post-cancellation retention TTL.** How long does a cancelled family's
    data live (recommendation: 90 days, stated at cancel, per M4-12 schedule)? Due: M4-12.
-9. **❓Q9 — Distress-data firewall (formalizing J-B).** Confirm as written policy:
+9. **❓Q9, Distress-data firewall (formalizing J-B).** Confirm as written policy:
    distress-flagged exchanges are never inputs to win-back, engagement, or
    marketing systems, ever. (Recommendation: yes, one sentence, signed.) Due: M-R invite 1.
-10. **❓Q10 — Breach comms threshold.** Below the legal notification bar, what do we
+10. **❓Q10, Breach comms threshold.** Below the legal notification bar, what do we
     voluntarily tell families (e.g., a subprocessor incident with no confirmed Homa
     data exposure)? Recommendation: over-disclose with calm specificity; decide the
     line now, not at 2am during an incident. Due: with M4-12 breach plan.

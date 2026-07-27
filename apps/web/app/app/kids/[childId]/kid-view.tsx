@@ -23,12 +23,6 @@ import { SubjectList } from "./subject-list";
  * sentences, running months, dated wins, and the curriculum.
  */
 
-export interface KidLessonListEntry {
-  id: string;
-  status: string;
-  startedAt: string;
-}
-
 export function KidView({
   kids,
   kidIndex,
@@ -39,7 +33,6 @@ export function KidView({
   wins,
   curriculum,
   curriculumPending,
-  lessonListen,
 }: {
   kids: ChildRecord[];
   /** Position of this kid within the family list (drives avatar tone). */
@@ -53,11 +46,6 @@ export function KidView({
   wins: RecentWin[];
   curriculum: ChildCurriculumRow | null;
   curriculumPending: boolean;
-  /** Lesson listen entry point (§7 Q5); null while the flag is off. */
-  lessonListen: {
-    recordHref: string;
-    lessons: KidLessonListEntry[];
-  } | null;
 }) {
   const child = kids[kidIndex];
   const months = ageInMonths(child.birth_month);
@@ -204,61 +192,6 @@ export function KidView({
         <p className="mt-4 text-sm text-muted">
           HOMA is building {child.name}&apos;s curriculum from your call.
         </p>
-      ) : null}
-
-      {/* Lesson listen (plan 2026-07-13-lesson-listen.md §4.6): the
-          recording door lives on the page that owns this kid, and the
-          latest reviews sit right under it. */}
-      {lessonListen ? (
-        <section
-          aria-label="Lessons"
-          className="mt-4 rounded-lg border border-border-subtle bg-card p-5 shadow-sm"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="font-display text-lg font-semibold text-strong">
-                Lessons
-              </p>
-              <p className="mt-0.5 text-sm text-muted">
-                Teach like always. Homa listens, then writes a review: how
-                it went and ideas for next time.
-              </p>
-            </div>
-            <Link
-              href={lessonListen.recordHref}
-              className="inline-flex min-h-10 items-center rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover"
-            >
-              Record a lesson
-            </Link>
-          </div>
-          {lessonListen.lessons.length > 0 ? (
-            <ul className="mt-4 space-y-1.5">
-              {lessonListen.lessons.map((lesson) => (
-                <li key={lesson.id}>
-                  <Link
-                    href={`/app/lessons/${lesson.id}`}
-                    className="flex items-center justify-between gap-3 rounded-md border border-border-subtle bg-bg-page px-3 py-2 text-sm transition-colors hover:border-brand"
-                  >
-                    <span className="text-body">
-                      Lesson from{" "}
-                      {new Date(lesson.startedAt).toLocaleDateString("en-US", {
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </span>
-                    <span className="text-xs font-medium text-muted">
-                      {lesson.status === "ready"
-                        ? "Review ready"
-                        : lesson.status === "failed"
-                          ? "Homa couldn't finish"
-                          : "Review on the way"}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </section>
       ) : null}
 
       <div className="mt-6 flex flex-wrap gap-2">

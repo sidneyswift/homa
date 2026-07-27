@@ -1,8 +1,11 @@
 import { randomUUID } from "node:crypto";
 
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import {
   acceptedOfferDeliveryIdFromAttributes,
@@ -19,9 +22,11 @@ import { refuseScheduleSpawnedSession } from "../../lib/tasks/guard";
  * from session auth only.
  */
 
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Create a recurring scheduled task for this family: a reminder or a small job Homa runs on chosen days at a chosen hour, delivered by text, email, or just saved to the Homa's tasks page. Use when the parent asks for a reminder or recurring help ('remind me Tuesdays at 3 to prep co-op'). Confirm the days, hour, and delivery before calling.",
+  deadlineMs: TOOL_DEADLINE.quick,
+  repeatable: false,
   inputSchema: z.object({
     label: z
       .string()

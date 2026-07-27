@@ -1,0 +1,190 @@
+/**
+ * Two things a model does when a tool call sits in the middle of its
+ * turn, both of which reach the parent as visible text.
+ *
+ * It repeats itself. Text before the tool call, the card, then the same
+ * paragraph again underneath, word for word. Seen live on the opening
+ * turn of chat-first onboarding: one message, one sentence, rendered
+ * twice with a form between the copies.
+ *
+ * And it narrates its own silence. Told to say nothing after a card, it
+ * writes `*(waits silently while the card is on her screen)*` and
+ * considers the instruction satisfied. That is a stage direction, and a
+ * parent reading it sees Homa describing herself in the third person.
+ * It does the same thing unwrapped ("I'll continue once she replies."),
+ * which is worse: there is no punctuation to tip her off that she is
+ * reading narration rather than being spoken to.
+ *
+ * Both are handled here rather than in a prompt, because a prompt is
+ * probabilistic and this is the kind of thing a parent notices
+ * immediately. The rules are narrow enough to be safe: no real reply
+ * repeats a whole paragraph verbatim inside one turn, and no real reply
+ * is nothing but a parenthetical about what Homa is doing.
+ */
+
+/** Wrapped in asterisks or parentheses, and nothing else. */
+const STAGE_DIRECTION = /^[*_(\s]*[^*_()]*[*_)\s]*$/;
+
+/**
+ * isStageDirection(text): a whole message that is only a description of
+ * what Homa is doing, rather than something said to the parent.
+ *
+ * Deliberately strict. It has to be wrapped AND read like narration, so
+ * an ordinary aside in parentheses ("(it saves as you go)") survives:
+ * that is Homa talking to her, which is allowed.
+ */
+export function isStageDirection(text: string): boolean {
+  const trimmed = text.trim();
+  if (trimmed.length === 0) return false;
+  const wrapped =
+    (trimmed.startsWith("*") && trimmed.endsWith("*")) ||
+    (trimmed.startsWith("_") && trimmed.endsWith("_")) ||
+    (trimmed.startsWith("(") && trimmed.endsWith(")"));
+  if (!wrapped) return false;
+  if (!STAGE_DIRECTION.test(trimmed)) return false;
+  const inner = trimmed.replace(/^[*_(\s]+|[*_)\s]+$/g, "").toLowerCase();
+  // Third-person narration about herself, which is the tell. A wrapped
+  // aside addressed to the parent ("you can change this later") is not
+  // one of these and stays.
+  //
+  // Gerunds included after "(waiting for her response)" reached a parent
+  // on the opening turn: the list read `waits?`, which matches "wait"
+  // and "waits" and not the form a model actually reaches for when it is
+  // describing something ongoing. Every verb here now carries its -ing.
+  if (
+    /^(wait(s|ing)?|await(s|ing)?|paus(e|es|ing)|say(s|ing)? nothing|stay(s|ing)? (quiet|silent)|remain(s|ing) (quiet|silent)|silent|no (reply|response)|listen(s|ing)|think(s|ing)|hold(s|ing)|standing by)\b/.test(
+      inner,
+    )
+  ) {
+    return true;
+  }
+  // Turn-taking narration that does not open on the verb: anything about
+  // whose turn it is, said about her rather than to her. Homa speaks to
+  // the parent as "you", so a wrapped aside calling her "her" or "she"
+  // is describing the conversation from outside it. Scoped to
+  // turn-taking words on purpose, because "her" inside an aside can
+  // legitimately mean a daughter ("(her reading is coming along)").
+  return /\b(her|she|the parent|the user)\b[^.]*\b(response|responds?|repl(y|ies|ied)|answer(s|ed)?|turn|input)\b/.test(
+    inner,
+  );
+}
+
+/**
+ * The same narration without the asterisks.
+ *
+ * Seen live on the opening turn: "I'll continue once she replies."
+ * Nothing wrapped it, so the rule above let it through, and it reached a
+ * parent as Homa discussing her in the third person to nobody. Its
+ * sibling, "I'll wait here while you fill that in", is addressed to her
+ * but is still only a description of Homa doing nothing.
+ *
+ * Narrow by construction. It has to be the WHOLE part, one short
+ * sentence, and it has to open by announcing that Homa is about to wait
+ * or carry on. A real reply never consists solely of that: when Homa has
+ * something to say she says it, and when she does not she should be
+ * silent rather than announcing the silence.
+ */
+const NARRATED_PAUSE =
+  /^i(?:'|\u2019)?(?:ll|m| will| am)?\s*(?:going to\s+)?(?:wait|continue|carry on|hold (?:on|off)|pause|stand by|stay (?:here|quiet|put)|be here|let her|leave (?:her|it))\b/;
+
+/**
+ * The same narration that does not open on "I".
+ *
+ * Seen live: "Noted, waiting for her to fill that in." Unwrapped, so the
+ * stage-direction rule does not apply, and it opens on "Noted", so the
+ * rule above does not either. What gives it away is not where it starts
+ * but who it is about: Homa speaks TO the parent as "you", so a sentence
+ * describing herself waiting on "her" is being said to nobody.
+ *
+ * Both orders, because the tell survives the word order: "waiting for
+ * her to answer" and "her reply is what I am waiting for".
+ */
+const THIRD_PERSON_WAIT =
+  /\b(?:wait(?:s|ing)?|await(?:s|ing)?|paus(?:e|es|ing)|hold(?:s|ing)|standing by|listening)\b[^.]{0,80}\b(?:her|him|them|she|he|they|the parent|the user)\b|\b(?:her|his|their|she|he|they|the parent|the user)\b[^.]{0,80}\b(?:wait(?:s|ing)?|await(?:s|ing)?|paus(?:e|es|ing)|standing by)\b/;
+
+/**
+ * The standing offer: "I'm here whenever you're ready."
+ *
+ * Addressed to her, so it is not third-person narration, and warm enough
+ * that it looks harmless. It is still a whole message about Homa doing
+ * nothing, which is what this rule has always been for: the doc above
+ * already counts "I'll wait here while you fill that in" as one, and the
+ * only difference is "I'm here" against "I'll be here". The card under
+ * it is already the invitation.
+ */
+// The optional prefix is what the fifth shipped variant taught: "Take
+// your time, I'm here whenever you're ready." defeats a ^ anchor with
+// three words of courtesy. The courtesy words are enumerated, not
+// wildcarded, so a sentence that says something real before offering to
+// exist ("Saved. I'm here if anything looks wrong") is not eaten by an
+// open-ended prefix.
+const STANDING_OFFER =
+  /^(?:(?:take your time|no rush|no hurry|whenever you(?:'|’)?re ready)[,.!]?\s+)?i(?:'|’)?(?:m| am|ll be| will be)\s+(?:right\s+)?here\b/;
+
+export function isNarratedPause(text: string): boolean {
+  const trimmed = text.trim();
+  if (trimmed.length === 0 || trimmed.length > 140) return false;
+  // One sentence. Two means she said something real alongside it.
+  if (trimmed.split(/[.!?]\s+\S/).length > 1) return false;
+  const lower = trimmed.toLowerCase();
+  // The whole-part and one-sentence guards above are what make these
+  // safe. Inside that frame, a message whose entire content is Homa
+  // waiting was never going to be worth reading, so the cost of
+  // over-reaching is one bland line dropped and the cost of
+  // under-reaching is narration on a parent's screen.
+  return (
+    NARRATED_PAUSE.test(lower) ||
+    THIRD_PERSON_WAIT.test(lower) ||
+    STANDING_OFFER.test(lower)
+  );
+}
+
+/**
+ * stripTrailingNarration(text): one text part with any TRAILING
+ * narrated-wait paragraphs removed.
+ *
+ * The fifth variant to reach a screen was "Take your time, I'm here
+ * whenever you're ready.", and it did not arrive alone: it rode as the
+ * second paragraph under a real sentence, inside one part. A filter
+ * that only judges whole parts can never touch that, however good its
+ * predicates get, so this judges the paragraphs.
+ *
+ * Trailing only, on purpose. A pause line at the END of a reply is the
+ * model signing off by describing its own idleness, and cutting it
+ * cannot change the meaning of what came before. A pause-shaped
+ * sentence in the MIDDLE has real content after it that might lean on
+ * it, so it stays: better one odd line than a reply with a hole in it.
+ */
+export function stripTrailingNarration(text: string): string {
+  const paragraphs = text.split(/\n{2,}/);
+  while (paragraphs.length > 1) {
+    const last = paragraphs[paragraphs.length - 1].trim();
+    if (!isStageDirection(last) && !isNarratedPause(last)) break;
+    paragraphs.pop();
+  }
+  return paragraphs.join("\n\n");
+}
+
+/**
+ * visibleAssistantTexts(texts): the text parts of one assistant message
+ * that should actually render, in order.
+ *
+ * Drops exact repeats of something already shown in the same message,
+ * drops stage directions outright, and trims narrated waiting off the
+ * end of a part that also says something real.
+ */
+export function visibleAssistantTexts(texts: readonly string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const text of texts) {
+    const trimmed = stripTrailingNarration(text).trim();
+    if (trimmed.length === 0) continue;
+    if (isStageDirection(trimmed)) continue;
+    if (isNarratedPause(trimmed)) continue;
+    const key = trimmed.replace(/\s+/g, " ");
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(trimmed);
+  }
+  return out;
+}

@@ -1,0 +1,89 @@
+{
+  "id": "ref-2026-07-18-phonological-awareness-scope-sequence",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:20:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784427805.361909",
+  "format": "scope-and-sequence-chart",
+  "title": "Phonological Awareness Skills \u2014 35-Lesson Scope & Sequence Chart",
+  "publisher": "Unknown",
+  "gradeLevel": "PreK-1st (ages 3-7)",
+  "overview": {
+    "description": "Single-page scope and sequence chart for a 35-lesson phonological awareness curriculum. Progression: Listening Games \u2192 What is a Sound \u2192 Name Game \u2192 Same or Different \u2192 Rhyme (Setting the Stage \u2192 Repetition \u2192 Recognition \u2192 Production) \u2192 Initial Phoneme Isolation \u2192 Name Work \u2192 Focus Sounds \u2192 Generating Words \u2192 Alliteration. Shows a carefully scaffolded progression from broad listening skills to precise phoneme manipulation."
+  },
+  "layout": {
+    "structure": "grid",
+    "spacing": "dense",
+    "visualHierarchy": "data-dominant",
+    "whiteSpaceRatio": 0.15,
+    "flowDirection": "left-right"
+  },
+  "skillTargeting": {
+    "subject": "ela",
+    "domain": "phonological-awareness",
+    "topics": [
+      {
+        "id": "ela.listening-discrimination",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "ela.rhyme-recognition",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "ela.rhyme-production",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.initial-phoneme-isolation",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.alliteration",
+        "kind": "conceptual",
+        "mapped": false
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBandMonths": [
+      36,
+      84
+    ],
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffolding": "high"
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "limited-palette",
+    "appealDrivers": [
+      "clear progression",
+      "teacher reference"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "landscape",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "prints well in B&W"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "scope-sequence-chart",
+        "description": "Visual chart showing skill progression across lessons/weeks. Grid layout with skills on Y-axis and lesson numbers on X-axis. Useful for parent planning."
+      }
+    ]
+  },
+  "notes": "Valuable for Homa's curriculum-writer \u2014 this shows the exact pedagogical progression for phonological awareness: listening \u2192 rhyme \u2192 phoneme isolation \u2192 alliteration. This is the teaching sequence Homa should follow when building PA curricula."
+}

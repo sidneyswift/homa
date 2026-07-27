@@ -20,6 +20,10 @@ import postgres from "postgres";
  *      client: run queries SEQUENTIALLY (await one at a time, never
  *      Promise.all), cast timestamps to ::text, counts to ::int, and
  *      aggregate lists with json_agg(...)::text, never array_agg.
+ *      Array parameters need type OIDs too, so a JS array (bare or via
+ *      sql.array) arrives as a braceless toString and Postgres rejects
+ *      it (22P02, /admin/funnels 2026-07-25). Pass list params as
+ *      any(string_to_array(${list.join(",")}, ',')) instead.
  *
  * Never import this from client code or from family-facing paths; the
  * product keeps using mapDb().

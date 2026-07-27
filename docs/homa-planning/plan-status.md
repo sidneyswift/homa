@@ -4,13 +4,13 @@ Verified 2026-07-16 against actual codebase (migrations, source files, tests, CI
 
 ## How to read
 
-- **SHIPPED** — code exists, tests pass, deployed or behind a feature flag in production
-- **BUILT DARK** — code exists and tests pass, but behind a flag that is off in production
-- **EXECUTED** — a one-time task that ran to completion (audit, research, generation)
-- **IN PROGRESS** — partially implemented, remaining work identified
-- **PLAN** — approved or proposed but no implementation yet
-- **RESEARCH** — investigation or analysis document, not an implementation plan
-- **SUPERSEDED** — replaced by later work
+- **SHIPPED**, code exists, tests pass, deployed or behind a feature flag in production
+- **BUILT DARK**, code exists and tests pass, but behind a flag that is off in production
+- **EXECUTED**, a one-time task that ran to completion (audit, research, generation)
+- **IN PROGRESS**, partially implemented, remaining work identified
+- **PLAN**, approved or proposed but no implementation yet
+- **RESEARCH**, investigation or analysis document, not an implementation plan
+- **SUPERSEDED**, replaced by later work
 
 ---
 
@@ -22,7 +22,7 @@ Verified 2026-07-16 against actual codebase (migrations, source files, tests, CI
 | `2026-07-06-codebase-cleanup-audit` | EXECUTED | Header says so |
 | `2026-07-06-family-workspace-at-report-implementation-prompt` | SHIPPED | Family workspace provisioning exists in codebase |
 | `2026-07-06-llm-report-depth-exploration-prompt` | EXECUTED | Header: "DONE, DO NOT RE-RUN" |
-| `2026-07-06-llm-report-depth-options` | EXECUTED | Header: "RULED" — decisions recorded |
+| `2026-07-06-llm-report-depth-options` | EXECUTED | Header: "RULED", decisions recorded |
 | `2026-07-06-llm-report-narrative-implementation-prompt` | SHIPPED | LLM narrative layer exists in production reports |
 | `2026-07-07-continual-learning-loop` | PLAN | Proposal only, no implementation found in codebase |
 | `2026-07-07-tester-feedback-tickets` | SHIPPED | Header: "T1-T4 SHIPPED" |
@@ -78,12 +78,12 @@ Verified 2026-07-16 against actual codebase (migrations, source files, tests, CI
 
 ### Not yet built
 
-1. **Continual learning loop** (07-07) — proposal, no code
-2. **Native media service** (superpowers, 07-11) — `packages/media/` and `apps/media-worker/` don't exist
-3. **Night manager** (07-12) — plan only
+1. **Continual learning loop** (07-07), proposal, no code
+2. **Native media service** (superpowers, 07-11), `packages/media/` and `apps/media-worker/` don't exist
+3. **Night manager** (07-12), plan only
 
 ### Remaining work on in-progress plans
 
-1. **Code review tickets** — CR-51 (partial), CR-56, CR-57, CR-69, CR-70, CR-71
-2. **Season simulation field study** — study ran, roadmap candidates need triage
-3. **Filesystem-first fleet skills** — Phase C dormant window observation (closes earliest 07-22), cutover not authorized
+1. **Code review tickets**, CR-51 (partial), CR-56, CR-57, CR-69, CR-70, CR-71
+2. **Season simulation field study**, study ran, roadmap candidates need triage
+3. **Filesystem-first fleet skills**, Phase C dormant window observation (closes earliest 07-22), cutover not authorized

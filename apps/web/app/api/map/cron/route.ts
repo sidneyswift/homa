@@ -6,6 +6,8 @@ import {
   sweepThankYouCards,
   type ThankYouCardSweepResult,
 } from "../../../../lib/cards/thank-you";
+import { dripEnabled } from "../../../../lib/drip/flag";
+import { runDripSweep, type DripSweepResult } from "../../../../lib/drip/sweep";
 import { sendBandReadyEmail, sendReminderEmail, sendRetestEmail } from "../../../../lib/map/email";
 import { emitMapEvent } from "../../../../lib/map/events";
 import {
@@ -27,6 +29,7 @@ import {
   sweepLessons,
   type LessonSweepResult,
 } from "../../../../lib/lessons/worker";
+import { reportStuckToolCalls } from "../../../../lib/observability/agent-trace";
 import { subjectLessonsEnabled } from "../../../../lib/subject-lessons/flag";
 import { staleSubjectLessonFailureEvent } from "../../../../lib/subject-lessons/stale-reaper";
 import { reapStaleSubjectLessons } from "../../../../lib/subject-lessons/store";
@@ -57,6 +60,12 @@ import { reapStaleSubjectLessons } from "../../../../lib/subject-lessons/store";
  *      unless HOMA_LESSON_LISTEN_ENABLED.
  *   9. Stale subject lesson runs fail after two hours without an automatic
  *      retry. DARK unless HOMA_SUBJECT_LESSONS_ENABLED is exactly true.
+ *  10. Stuck tool calls (lib/observability/agent-trace.ts): counts any
+ *      agent_tool_calls row still 'requested' 15 minutes on, which is
+ *      well past the longest deadline a tool may declare. Read-only, it
+ *      changes nothing; it exists so a frozen turn is visible within the
+ *      hour instead of only through the 2h task-run reaper, which could
+ *      say a run produced no output but never why.
  *
  * Every tick also writes one cron_runs heartbeat row (founder console
  * MJ-14), success or failure, so a dead cron is visible from /admin.
@@ -97,6 +106,19 @@ export async function GET(request: Request): Promise<Response> {
     audioDeleted: 0,
   };
   let staleSubjectLessons = 0;
+  let stuckToolCalls = 0;
+  let drip: DripSweepResult = {
+    skipped: true,
+    considered: 0,
+    setupSent: 0,
+    reportSent: 0,
+    loopBackSent: 0,
+    revealedNeverReturnedSent: 0,
+    kid2PendingSent: 0,
+    midChecklistSent: 0,
+    eligible: 0,
+    capped: false,
+  };
 
   try {
     for (const family of await familiesNeedingReminder()) {
@@ -149,6 +171,7 @@ export async function GET(request: Request): Promise<Response> {
       }
     }
     purged = await purgeEmptyAnonymousLeads();
+    stuckToolCalls = await reportStuckToolCalls();
     transcripts = await syncCallTranscripts();
     cards = await sweepThankYouCards();
     digest = await maybeSendAdminDigest();
@@ -164,6 +187,12 @@ export async function GET(request: Request): Promise<Response> {
           staleSubjectLessonFailureEvent(receipt),
         );
       }
+    }
+    // The onboarding drip (funnel work 2026-07-20). DARK by default: it runs
+    // only when HOMA_DRIP_ENABLED is exactly "true", so nothing reaches a
+    // real family until the copy clears review and compliance lands.
+    if (dripEnabled()) {
+      drip = await runDripSweep();
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown";
@@ -181,6 +210,8 @@ export async function GET(request: Request): Promise<Response> {
         digest,
         lessons,
         staleSubjectLessons,
+        stuckToolCalls,
+        drip,
       },
       message,
     );
@@ -196,6 +227,8 @@ export async function GET(request: Request): Promise<Response> {
         digest,
         lessons,
         staleSubjectLessons,
+        stuckToolCalls,
+        drip,
       },
       { status: 500 },
     );
@@ -211,6 +244,8 @@ export async function GET(request: Request): Promise<Response> {
     digest,
     lessons,
     staleSubjectLessons,
+    stuckToolCalls,
+    drip,
   });
   return Response.json({
     ok: true,
@@ -223,5 +258,7 @@ export async function GET(request: Request): Promise<Response> {
     digest,
     lessons,
     staleSubjectLessons,
+    stuckToolCalls,
+    drip,
   });
 }

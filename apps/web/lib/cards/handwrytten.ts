@@ -9,6 +9,9 @@ import { Handwrytten } from "handwrytten";
  *   HANDWRYTTEN_CARD_ID    the chosen stationery template id
  *   HANDWRYTTEN_FONT       the chosen handwriting font id/label
  *   HANDWRYTTEN_TEST_MODE  "false" = live orders; anything else stays test mode
+ *   HANDWRYTTEN_RETURN_ADDRESS_ID  saved sender address id (address book);
+ *                                  overrides the account default return address.
+ *                                  Create via: tsx scripts/handwrytten-smoke.mts --setup-sender
  *
  * We drive the two-step basket flow instead of orders.send() because only
  * basket.send() accepts testMode (orders.send() does not forward it), and
@@ -81,9 +84,13 @@ export async function sendHandwryttenCard(
   const hw = handwryttenClient();
   const testMode = process.env.HANDWRYTTEN_TEST_MODE !== "false";
   try {
+    const returnAddressId = process.env.HANDWRYTTEN_RETURN_ADDRESS_ID
+      ? Number(process.env.HANDWRYTTEN_RETURN_ADDRESS_ID)
+      : undefined;
     await hw.basket.addOrder({
       cardId: process.env.HANDWRYTTEN_CARD_ID as string,
       font: process.env.HANDWRYTTEN_FONT as string,
+      ...(returnAddressId ? { returnAddressId } : {}),
       addresses: [
         {
           firstName: request.firstName,

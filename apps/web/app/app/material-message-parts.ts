@@ -75,6 +75,10 @@ function parseMaterialMessagePart(
     order: sourcePartIndex,
     sourcePartIndex,
     material: {
+      // Same resolved id as the message part above (real id, or the
+      // legacy-part fallback); MaterialCard only uses it when it names a
+      // real material row.
+      id: id.startsWith("legacy-part:") ? undefined : id,
       title: material.title,
       ...(typeof material.kind === "string" ? { kind: material.kind } : {}),
       skill: typeof material.skill === "string" ? material.skill : null,

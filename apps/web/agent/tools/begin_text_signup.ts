@@ -1,12 +1,20 @@
-import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import {
+  defineBoundedTool,
+  TOOL_DEADLINE,
+} from "../../lib/agent-tool-deadline";
 import {
   ensureSignupFamily,
   nextChecklistItem,
   signupProgress,
 } from "../../lib/sms-onboarding";
-import { NOT_SMS_REFUSAL, resolveSignupSession } from "../../lib/signup-session";
+import {
+  NOT_SMS_REFUSAL,
+  TEXT_SIGNUP_PAYWALLED_REFUSAL,
+  resolveSignupSession,
+  textSignupPaywalled,
+} from "../../lib/signup-session";
 
 /**
  * Opens (or resumes) text-native signup for the texter's own number
@@ -15,11 +23,20 @@ import { NOT_SMS_REFUSAL, resolveSignupSession } from "../../lib/signup-session"
  * conversation always knows the next question. Safe to call again
  * mid-flow: it never duplicates, only reports progress.
  */
-export default defineTool({
+export default defineBoundedTool({
   description:
     "Start or resume signing this texter up for Homa. Call it when an unlinked texter says yes to getting set up, or when a mid-signup conversation needs to know what is still missing. Returns the checklist of what to collect next. Never call it for families that already have their report.",
+  deadlineMs: TOOL_DEADLINE.fetch,
+  repeatable: false,
   inputSchema: z.object({}),
   async execute(_input, ctx) {
+    // Named refusal first: the signup paywall closes text signup
+    // entirely (founder directive 2026-07-26), and this entry tool is
+    // where the model learns that in words that steer it to the web
+    // trial instead of the "wrong channel" note below.
+    if (textSignupPaywalled()) {
+      return { started: false, note: TEXT_SIGNUP_PAYWALLED_REFUSAL };
+    }
     const session = await resolveSignupSession(ctx.session.auth.current?.attributes);
     if (!session) return { started: false, note: NOT_SMS_REFUSAL };
 

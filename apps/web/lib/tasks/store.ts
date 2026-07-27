@@ -67,9 +67,28 @@ type SeedableKind = (typeof SEEDABLE_KINDS)[number];
 /** Eligibility SQL per built-in kind. Both require email + zone + kids +
  * a 20-hour-old family; the brief additionally requires a scored report,
  * because a brief with nothing real to say teaches families to ignore
- * it. Kept as one function so the two rules stay side by side. */
-async function seedKind(kind: SeedableKind, now: Date): Promise<void> {
-  const sql = mapDb();
+ * it. Kept as one function so the two rules stay side by side.
+ *
+ * PMF-201 (plans/2026-07-21-chat-first-onboarding.md §6.3/§9): the
+ * 20-hour wait exists so a text-signup family isn't seeded before she
+ * has even added a child. A chat-onboarding family adds a child and
+ * gets a scored report inside the first sitting, so the same wait plus
+ * nextTaskRunInstant's "strictly after now" walk pushes her first
+ * morning brief to day 3 instead of day 2. `context->'onboarding'` is
+ * only ever written by the chat-onboarding tools (lib/onboarding/
+ * store.ts), so its presence is durable DB truth that this family
+ * already cleared the fast path; the 20-hour floor is waived for her
+ * once the real eligibility columns (email, zone, kids, report) hold.
+ *
+ * Takes an injected connection (the file's established xWithDatabase
+ * pattern, see beginTaskRunWithDatabase etc.) so this eligibility rule
+ * is exercisable against the disposable Postgres harness instead of
+ * only ever running live against prod. */
+async function seedKindWithDatabase(
+  sql: Sql,
+  kind: SeedableKind,
+  now: Date,
+): Promise<void> {
   const config = TASK_KIND_CONFIG[kind];
 
   const requireReport = kind === "morning_brief";
@@ -86,7 +105,10 @@ async function seedKind(kind: SeedableKind, now: Date): Promise<void> {
     from public.families f
     where f.email is not null
       and f.time_zone is not null
-      and f.created_at < now() - interval '20 hours'
+      and (
+        f.created_at < now() - interval '20 hours'
+        or (f.context -> 'onboarding') is not null
+      )
       and (${!optOutFilter} or f.journal_opt_out_at is null)
       and exists (select 1 from public.children c where c.family_id = f.id)
       and (
@@ -176,12 +198,19 @@ async function seedKind(kind: SeedableKind, now: Date): Promise<void> {
 
 /** Idempotent seeding + hygiene for every enabled built-in kind, run
  * every dispatcher tick before claiming. */
-export async function seedFamilyTaskSchedules(now = new Date()): Promise<void> {
+export async function seedFamilyTaskSchedulesWithDatabase(
+  sql: Sql,
+  now = new Date(),
+): Promise<void> {
   const enabled = new Set(enabledFamilyTaskKinds());
   for (const kind of SEEDABLE_KINDS) {
     if (!enabled.has(kind)) continue;
-    await seedKind(kind, now);
+    await seedKindWithDatabase(sql, kind, now);
   }
+}
+
+export async function seedFamilyTaskSchedules(now = new Date()): Promise<void> {
+  return await seedFamilyTaskSchedulesWithDatabase(mapDb(), now);
 }
 
 /** Atomically leases due rows across enabled kinds and returns
@@ -1259,6 +1288,29 @@ export async function isFirstFailedRunForScheduleDay(
   return (rows[0]?.n ?? 0) === 1;
 }
 
+/**
+ * The retry bound for a reaped MANUAL run. A manual run carries no
+ * scheduled_for (it is not an outbox day), so the day-keyed guard above
+ * cannot see it. Exactly one failed manual run for this schedule inside the
+ * window means the failure has never been retried; a retried run that hangs
+ * again makes the count 2 and fails this check, so a task whose tool call
+ * reliably hangs can never loop.
+ */
+export async function isFirstFailedManualRun(
+  scheduleId: string,
+  withinHours = 24,
+): Promise<boolean> {
+  const sql = mapDb();
+  const rows = await sql<{ n: number }[]>`
+    select count(*)::int as n from public.homa_task_runs
+    where schedule_id = ${scheduleId}
+      and scheduled_for is null
+      and status = 'failed'
+      and started_at >= now() - ${`${withinHours} hours`}::interval
+  `;
+  return (rows[0]?.n ?? 0) === 1;
+}
+
 export async function advanceTaskSchedule(task: DueFamilyTask, now = new Date()): Promise<void> {
   const sql = mapDb();
   const nextRun = nextTaskRunInstant(task.timeZone, task.localHour, task.weekdays, now);
@@ -1274,6 +1326,40 @@ export async function releaseTaskSchedule(task: DueFamilyTask): Promise<void> {
   await sql`
     update public.agent_schedules set lease_until = null where id = ${task.scheduleId}
   `;
+}
+
+/**
+ * Switches a family's text-delivery schedules to email after the provider
+ * reports the destination region is unreachable (Telnyx 40309). Our sole-prop
+ * 10DLC profile is US-only, so a non-US +1 number (e.g. Canada) that our +1
+ * normalization accepts fails on every send; without this it is retried and
+ * re-logged daily (2026-07-23 founder-console cleanup, Mani Family +1 236).
+ *
+ * Only rows still set to 'text' move, so a repeat rejection in the same run
+ * (a second phone, a second recipient) updates nothing and stays quiet: the
+ * returned count and the event fire only on the transition. The message that
+ * triggered this already fell back to email in the same delivery pass; this
+ * only stops FUTURE runs from texting an un-textable number. Family-scoped,
+ * never touches another family's rows. Mirrors the founder's manual remedy.
+ */
+export async function markFamilyTextSchedulesEmailOnly(
+  familyId: string,
+): Promise<number> {
+  const sql = mapDb();
+  const rows = await sql<{ id: string }[]>`
+    update public.agent_schedules
+    set delivery_pref = 'email'
+    where family_id = ${familyId} and delivery_pref = 'text'
+    returning id
+  `;
+  const switched = rows.length;
+  if (switched > 0) {
+    await emitMapEvent("sms.delivery_region_unsupported", {
+      family_id: familyId,
+      schedules_switched: switched,
+    });
+  }
+  return switched;
 }
 
 /**

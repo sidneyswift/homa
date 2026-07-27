@@ -1,0 +1,137 @@
+{
+  "id": "ref-2026-07-18-peaceful-press-playful-pioneers-coop",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T21:55:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784426115.157809",
+  "format": "co-op-curriculum-guide",
+  "title": "The Playful Pioneers Co-Op Guide — Literature & Project-Based Curriculum (26 Weeks)",
+  "publisher": "The Peaceful Press",
+  "series": "The Playful Pioneers",
+  "gradeLevel": "elementary (multi-age)",
+  "sourceUrl": "https://www.thepeacefulpress.com",
+  "callouts": [],
+  "overview": {
+    "description": "A 26-week co-op guide designed for homeschool community groups. Each week maps 5 activity columns: Food, Practical Skill/Art, Science, History, and Field Trip. The entire curriculum is literature-based and project-based — anchored in American pioneer/colonial history with hands-on activities in every discipline. Designed for group learning settings (co-ops) but adaptable to single-family use.",
+    "weeks": 26,
+    "theme": "American history from Native Americans through Immigration/Westward Expansion, told through literature and hands-on projects",
+    "philosophy": "Charlotte Mason / literature-based / project-based / community-centered",
+    "targetAge": "elementary (roughly K-5, multi-age by design)"
+  },
+  "weeklyStructure": {
+    "columns": ["Food", "Practical Skill/Art", "Science", "History", "Field Trip"],
+    "description": "Every week has exactly 5 activity categories. The activities are thematically linked to the historical period being studied that week. Food is always period-appropriate cooking. Art/Practical Skill is always hands-on making. Science connects to the historical context. History includes timeline cards and map work. Field Trip extends learning into the real world.",
+    "pattern": "theme-driven integration across all 5 columns"
+  },
+  "weekByWeekSummary": [
+    {"week": 1, "food": "Popcorn", "art": "Dye Handkerchiefs", "science": "Draw/Diagram a Horse", "history": "Map Native American Tribes", "trip": "Farm"},
+    {"week": 2, "food": "Danish Pastries", "art": "Weaving", "science": "Ice Excavation", "history": "Start Timeline", "trip": "Ice Cream Shop"},
+    {"week": 3, "food": "Baked Potatoes", "art": "Paint 'The Sower'", "science": "Plant Potatoes", "history": "Map Potato Origins", "trip": "Petting Zoo or Pet Store"},
+    {"week": 4, "food": "Lemonade, Bread and Butter", "art": "Shake Butter", "science": "Plant Bean Seeds", "history": "Timeline Card-Pilgrims", "trip": "Go Berry Picking"},
+    {"week": 5, "food": "Pumpkin Pie", "art": "Carve Pumpkins", "science": "Sort/Dissect Pumpkin Seeds", "history": "Recite Declaration of Independence", "trip": "Pumpkin Patch"},
+    {"week": 6, "food": "Easy French Bread", "art": "Beeswax Candles", "science": "Potato/Lemon Juice Battery", "history": "Map Revolutionary War Sites", "trip": "Science or War Museum"},
+    {"week": 7, "food": "Pickle Tasting", "art": "Leaf Collage", "science": "Leaf Collection & Identifying", "history": "Family Tree", "trip": "Farmer Boy Party"},
+    {"week": 8, "food": "Pancakes", "art": "Play Keep It Up", "science": "Animal Tracks", "history": "Map 13 Colonies", "trip": "Pioneer Museum"},
+    {"week": 9, "food": "Maple Fudge", "art": "Clove Orange", "science": "Notebook/Classify Trees", "history": "Map Lewis and Clark Expedition", "trip": "National Forest"},
+    {"week": 10, "food": "Ricotta With Pasta", "art": "Braid Straw", "science": "Draw/Describe a Wild Animal", "history": "Map Your Town", "trip": "Picnic by a Creek or River"},
+    {"week": 11, "food": "Apples and Honey", "art": "First Aid", "science": "Toothpick/Marshmallow Constellations", "history": "Timeline Card-Native Americans", "trip": "Apple Orchard"},
+    {"week": 12, "food": "Roasted Drumsticks", "art": "Log Cabin Model", "science": "Phases of the Moon Banner", "history": "Timeline Card-Abraham Lincoln", "trip": "Visit a Log Cabin"},
+    {"week": 13, "food": "Thanksgiving Potluck", "art": "Feathered Headband", "science": "Bird Identification", "history": "Walnut Shell Mayflower", "trip": "Native American Museum"},
+    {"week": 14, "food": "Cowboy Cookies", "art": "Beaded Necklaces", "science": "Insect Repellant", "history": "Map Cowboy Trails", "trip": "Cowboy Museum or Fire Station"},
+    {"week": 15, "food": "Rolled Sugar Cookies", "art": "Homemade Christmas Gifts", "science": "Candy Cane Science", "history": "Recite 'Our Presidents'", "trip": "Christmas or Cultural Festival"},
+    {"week": 16, "food": "Hot Cocoa and Cookies", "art": "Draw/Paint Nativity Scene", "science": "Collect Supplies for Refugees", "history": "Map Modern Refugee Camps", "trip": "Attend a Live Musical Performance"},
+    {"week": 17, "food": "Dried 'Expedition' Food", "art": "Willow Broom", "science": "Diagram the Parts of a Cow", "history": "Map The Pony Express", "trip": "Visit a Horse Stable"},
+    {"week": 18, "food": "Bread and Butter", "art": "Sod House Diorama", "science": "Moss and Grass Collection", "history": "Map 1800's Slave States", "trip": "Civil War Museum"},
+    {"week": 19, "food": "Pudding Cups", "art": "Sew a Bandanna Apron", "science": "Look at Bacteria in a Microscope", "history": "Map Civil War Battles", "trip": "Red Cross Field Trip"},
+    {"week": 20, "food": "Fish Tacos", "art": "Paint Rainbows", "science": "Make Water Bodies Examples in Sand Table", "history": "Map Underground Railroad", "trip": "Forest/Stream Nature Walk"},
+    {"week": 21, "food": "Vanity Cakes or Doughnuts", "art": "Paint Statue of Liberty", "science": "Build Binder Clip/Popsicle Stick Towers", "history": "Map Ancestor Place of Origin", "trip": "Immigration Market"},
+    {"week": 22, "food": "Honey Tasting", "art": "Cloth Doll", "science": "Bee Plants", "history": "Dance to Fiddle Music", "trip": "Beekeeper"},
+    {"week": 23, "food": "Valentine Party", "art": "Heart Shaped Lavender Sachets", "science": "Identify Flowers", "history": "Timeline-St. Valentine", "trip": "Valentines Party"},
+    {"week": 24, "food": "Bread Pudding", "art": "Play Kitty Wants a Corner", "science": "Notebook Birds", "history": "Country Report", "trip": "Game Day"},
+    {"week": 25, "food": "Triple Berry Pie", "art": "Paint 'Railway Carriages'", "science": "Steam Engines", "history": "Map Transcontinental Railroad", "trip": "Science Museum"},
+    {"week": 26, "food": "Potluck", "art": "Tin Can Lanterns", "science": "Bridge Building", "history": "Inventions Century Chart", "trip": "States Report Presentations"}
+  ],
+  "designPatterns": {
+    "fiveColumnWeeklyGrid": {
+      "description": "Every week = one row in a 5-column grid (Food, Practical Skill/Art, Science, History, Field Trip). Dead simple format. A parent can look at one row and know exactly what the week involves. No ambiguity.",
+      "value": "Extreme clarity. The entire semester fits on 4 pages. Planning overhead = zero."
+    },
+    "thematicCoherence": {
+      "description": "All 5 columns in a given week connect to the same theme. Week 5 (pumpkins): Pumpkin Pie (food) + Carve Pumpkins (art) + Sort/Dissect Seeds (science) + Declaration of Independence (history) + Pumpkin Patch (trip). The history connection sometimes stretches, but the lived experience is cohesive.",
+      "value": "The child doesn't context-switch between unrelated subjects. Everything feels like one big project."
+    },
+    "foodAsLearning": {
+      "description": "Every week includes a cooking activity that's thematically linked. Period-appropriate recipes (popcorn for Native American week, Danish pastries for colonial era, dried expedition food for westward expansion). Cooking is a subject, not a reward.",
+      "value": "Math (measuring), science (chemistry), history (period food), reading (recipes), and practical life skills all in one activity."
+    },
+    "fieldTripIntegration": {
+      "description": "Every week has a field trip suggestion that extends the theme into the real world. Ranges from farms and museums to 'picnic by a creek' and the Immigration Market (a co-op event where families host booths representing their ancestry).",
+      "value": "Learning happens in the world, not just on paper. The field trips vary from zero-cost (nature walk) to special (museum) — accessible range."
+    },
+    "communityLearning": {
+      "description": "Designed for co-ops (homeschool community groups). The Immigration Market is a co-op event. Potluck weeks. Game Day. Farmer Boy Party. The curriculum assumes social context.",
+      "value": "Homeschooling doesn't have to be isolated. The curriculum builds community."
+    },
+    "timelineCards": {
+      "description": "History column regularly includes 'Timeline Card' entries — physical cards that build a timeline throughout the year. Pilgrims, Native Americans, Abraham Lincoln, St. Valentine. The child constructs a visual history as the weeks progress.",
+      "value": "The timeline is both a learning artifact and a reference tool. By week 26 the child has built their own American history timeline."
+    },
+    "mapWork": {
+      "description": "Geography appears throughout History: Map Native American Tribes, Map 13 Colonies, Map Lewis and Clark, Map Revolutionary War Sites, Map Underground Railroad, Map Transcontinental Railroad. Consistent geography strand.",
+      "value": "History isn't just events — it's places. The child builds geographical awareness alongside historical knowledge."
+    }
+  },
+  "overallLayout": {
+    "structure": "grid (week rows × 5 activity columns), one page per ~7 weeks",
+    "spacing": "dense — maximum information in minimum space",
+    "visualHierarchy": "column headers dominate, week labels on left, cells contain brief activity descriptions",
+    "whiteSpaceRatio": 0.15,
+    "flowDirection": "top-down (week 1 → 26), left-right (food → field trip)"
+  },
+  "overallSkillTargeting": {
+    "subject": "multidisciplinary",
+    "domain": "integrated-curriculum",
+    "topics": [
+      {"id": "social-studies.american-history", "kind": "conceptual", "mapped": false},
+      {"id": "science.nature-study", "kind": "conceptual", "mapped": false},
+      {"id": "art.practical-skills", "kind": "procedural", "mapped": false},
+      {"id": "life-skills.cooking", "kind": "procedural", "mapped": false},
+      {"id": "social-studies.geography-map-skills", "kind": "procedural", "mapped": false}
+    ],
+    "unmappedSkills": ["co-op-community-learning", "field-trip-planning", "timeline-building", "period-cooking"]
+  },
+  "difficulty": {
+    "ageBandMonths": [60, 132],
+    "complexity": "multi-skill (5 disciplines per week, 26 weeks)",
+    "prerequisites": [],
+    "scaffolding": "medium — guide provides activities but parents/leaders execute"
+  },
+  "theming": {
+    "themeType": "historical-narrative",
+    "characters": [],
+    "visualStyle": "minimal — text grid, no illustrations (it's a planning document, not a student-facing material)",
+    "colorPalette": "black-and-white text",
+    "appealDrivers": ["simplicity of the grid format", "cohesive historical narrative arc", "real-world activities"]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "landscape (table format)",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "B&W"
+  },
+  "recipeMatch": {
+    "matchedRecipes": [],
+    "gaps": [
+      {
+        "name": "weekly-co-op-planner",
+        "description": "A 5-column weekly grid planner for co-op groups: Food, Practical Skill/Art, Science, History, Field Trip. All activities themed around one topic/historical period. Generates an entire semester (26 weeks) at once. This is a PLANNING document, not a worksheet — it tells the parent what to do, not the child."
+      },
+      {
+        "name": "semester-scope-and-sequence",
+        "description": "A bird's-eye view of an entire semester: which topics when, which skills build on which. The Peaceful Press grid is effectively a scope-and-sequence presented as a weekly activity chart."
+      }
+    ]
+  },
+  "notes": "First drop from Aless in this session. She dropped the PDF without commentary — no explicit callouts, just the file. This is The Peaceful Press 'Playful Pioneers' co-op guide: a 26-week literature and project-based curriculum for elementary students. It's firmly Charlotte Mason / literature-based / community-centered. The 5-column weekly grid (Food, Art, Science, History, Field Trip) is the simplest curriculum format we've seen — the entire semester on 4 pages. This is the OPPOSITE of the Harcourt system's complexity: no teacher guide, no leveled worksheets, no assessments, no daily instruction. Just a grid of activities. Aless's drop of this (vs. Carolyng's Harcourt system) reveals a possible philosophical tension or complementarity: Aless may lean more toward open/project-based learning while Carolyng values structured/systematic curriculum. Or they may want both. Watch for signal."
+}
