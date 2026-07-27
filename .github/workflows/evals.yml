@@ -65,16 +65,14 @@ jobs:
       # works today and fails every morning after, looking like a code
       # problem. CI keeps a long-lived VERCEL_TOKEN and mints a fresh
       # OIDC token per run, the same thing `pnpm dev:token` does locally.
-      - name: Require the Vercel credentials
+      - name: Require the Vercel token
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           if [ -z "$VERCEL_TOKEN" ]; then
             echo "::error::VERCEL_TOKEN is not set, so this job cannot mint an OIDC token and the evals cannot reach the model."
-            echo "::error::A repo admin sets three secrets:"
+            echo "::error::It is the ONLY secret this workflow needs. Create it at Vercel account settings, Tokens, scoped to the Homa team, then:"
             echo "::error::  gh secret set VERCEL_TOKEN --repo sidneyswift/homa"
-            echo "::error::  gh secret set VERCEL_ORG_ID --repo sidneyswift/homa"
-            echo "::error::  gh secret set VERCEL_PROJECT_ID --repo sidneyswift/homa"
             echo "::error::Do NOT store VERCEL_OIDC_TOKEN itself, it expires in twelve hours."
             echo "::error::Homa does not use AI Gateway API keys (root AGENTS.md, Model gateway credentials)."
             exit 1
@@ -113,8 +111,15 @@ jobs:
       - name: Mint a Vercel OIDC token
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          # Not secrets, just the names of a project: they identify which
+          # Vercel project to pull from and grant nothing on their own.
+          # Inlined rather than stored because apps/web/.vercel is
+          # gitignored, so the checkout has no project.json to read, and
+          # because two more secrets to configure is two more ways for
+          # this workflow to sit broken. Same values as
+          # apps/web/.vercel/project.json on a linked machine.
+          VERCEL_ORG_ID: team_BEuVWnWjCmzv8aVLJp1HU6TC
+          VERCEL_PROJECT_ID: prj_pKBD87W4tmlT7lnYRgrs8WYociTz
         working-directory: apps/web
         run: |
           npx --yes vercel@latest env pull .env.ci \

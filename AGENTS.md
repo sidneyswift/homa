@@ -337,12 +337,13 @@ that tolerance is not a reason to introduce the key.
   refresh it with a bare `vercel env pull`: that rewrites `.env.local`
   wholesale from the small development environment and takes the whole
   fifty-plus-variable local file with it. The script exists for that.
-- **In CI:** long-lived `VERCEL_TOKEN` plus `VERCEL_ORG_ID` and
-  `VERCEL_PROJECT_ID` secrets, and the job mints a fresh OIDC token per
-  run (`.github/workflows/evals.yml`). Never store `VERCEL_OIDC_TOKEN`
-  itself as a CI secret: it works the day it is added and fails every
-  morning after, looking like a code problem rather than an expired
-  token.
+- **In CI:** one secret, a long-lived `VERCEL_TOKEN`, and the job mints a
+  fresh OIDC token per run (`.github/workflows/evals.yml`). The org and
+  project IDs are inlined in the workflow, not stored: they name a
+  project and grant nothing, and `apps/web/.vercel` is gitignored so a
+  checkout cannot read them. Never store `VERCEL_OIDC_TOKEN` itself as a
+  CI secret: it works the day it is added and fails every morning after,
+  looking like a code problem rather than an expired token.
 - **On Vercel:** OIDC is ambient, nothing to configure.
 
 Cause: re-litigated repeatedly, most recently 2026-07-27, when wiring
