@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState, useTransition } from "react";
+import { useActionState, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Play, X } from "lucide-react";
+import { Play } from "lucide-react";
 
 import {
   deleteTaskAction,
@@ -10,6 +10,7 @@ import {
   updateTaskScheduleAction,
   type TaskActionState,
 } from "./actions";
+import { DialogShell } from "./dialog-shell";
 import { BUILT_IN_COPY } from "./task-copy";
 import {
   DeliveryChoice,
@@ -182,116 +183,37 @@ export function TaskEditOverlay({
   textingLinked: boolean;
   onClose: () => void;
 }) {
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    const previouslyFocused =
-      document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    closeRef.current?.focus();
-
-    function focusableElements(): HTMLElement[] {
-      const dialog = dialogRef.current;
-      if (!dialog) return [];
-      return Array.from(
-        dialog.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        ),
-      ).filter((element) => element.tabIndex >= 0);
-    }
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onClose();
-        return;
-      }
-      if (event.key !== "Tab") return;
-      const focusable = focusableElements();
-      if (focusable.length === 0) {
-        event.preventDefault();
-        return;
-      }
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      const active = document.activeElement;
-      if (event.shiftKey && active === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && active === last) {
-        event.preventDefault();
-        first.focus();
-      } else if (!active || !dialogRef.current?.contains(active)) {
-        event.preventDefault();
-        first.focus();
-      }
-    }
-
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      previouslyFocused?.focus();
-    };
-  }, [onClose]);
-
   const builtIn = task && task.kind !== "custom" ? BUILT_IN_COPY[task.kind] : null;
   const heading = builtIn ? builtIn.label : task ? "Edit task" : "Add a task";
 
   return (
-    <div
-      ref={dialogRef}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="task-edit-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(51,42,33,0.42)] p-4"
-      onClick={onClose}
-    >
-      <div
-        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[var(--radius-xl)] border border-border-subtle bg-card p-5 shadow-[var(--shadow-xl)]"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="flex items-start justify-between gap-3">
-          <h2 id="task-edit-title" className="font-display text-xl font-semibold text-strong">
-            {heading}
-          </h2>
-          <button
-            ref={closeRef}
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="rounded-md p-1.5 text-subtle transition-colors duration-(--dur-fast) ease-out hover:bg-page hover:text-body"
-          >
-            <X size={18} aria-hidden="true" />
-          </button>
-        </div>
-
-        {builtIn && task ? (
-          <>
-            {/* One sentence on what the task does, the card's own
-                description (founder ruling 2026-07-12; it replaced a
-                three-sentence you-decide explainer). */}
-            <p className="mt-1 text-sm text-muted">{builtIn.description}</p>
-            <div className="mt-4">
-              <BuiltInScheduleForm
-                task={task}
-                textingLinked={textingLinked}
-                onDone={onClose}
-              />
-              <RunNowSection task={task} onDone={onClose} />
-            </div>
-          </>
-        ) : (
+    <DialogShell titleId="task-edit-title" heading={heading} onClose={onClose}>
+      {builtIn && task ? (
+        <>
+          {/* One sentence on what the task does, the card's own
+              description (founder ruling 2026-07-12; it replaced a
+              three-sentence you-decide explainer). */}
+          <p className="mt-1 text-sm text-muted">{builtIn.description}</p>
           <div className="mt-4">
-            <TaskForm
-              task={task ?? undefined}
+            <BuiltInScheduleForm
+              task={task}
               textingLinked={textingLinked}
               onDone={onClose}
             />
-            {task ? <RunNowSection task={task} onDone={onClose} /> : null}
-            {task ? <DeleteTaskButton task={task} onDone={onClose} /> : null}
+            <RunNowSection task={task} onDone={onClose} />
           </div>
-        )}
-      </div>
-    </div>
+        </>
+      ) : (
+        <div className="mt-4">
+          <TaskForm
+            task={task ?? undefined}
+            textingLinked={textingLinked}
+            onDone={onClose}
+          />
+          {task ? <RunNowSection task={task} onDone={onClose} /> : null}
+          {task ? <DeleteTaskButton task={task} onDone={onClose} /> : null}
+        </div>
+      )}
+    </DialogShell>
   );
 }

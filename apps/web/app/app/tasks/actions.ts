@@ -5,6 +5,8 @@ import { headers } from "next/headers";
 import { z } from "zod";
 
 import { getMyFamily } from "../../../lib/family";
+import { agentJobsEnabled } from "../../../lib/jobs/flag";
+import { cancelJob, respondToJob } from "../../../lib/jobs/store";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import {
   createCustomTask,
@@ -33,6 +35,12 @@ export interface TaskActionState {
 }
 
 const TASK_RUN_ID_SCHEMA = z.uuid();
+const JOB_ID_SCHEMA = z.uuid();
+const STAGE_NUMBER_SCHEMA = z.number().int().min(1);
+
+/** Shown when the agent-jobs flag is off. Matches the tool's own wording so
+ * the parent hears one voice whether she steers by button or by chat. */
+const JOBS_OFF_ERROR = "Long-running builds are not turned on yet.";
 
 async function requireFamilyId(): Promise<string | null> {
   const family = await getMyFamily();
@@ -249,4 +257,106 @@ export async function runTaskNowAction(taskId: string): Promise<TaskActionState>
   } catch {
     return { error: RUN_NOW_FALLBACK_ERROR };
   }
+}
+
+/**
+ * The parent-facing steering channel for a running agent job (the "Another
+ * Task" card overlay). These mirror the four-verb contract the eve tools
+ * expose (respond_to_agent_job, cancel_agent_job), but for the web button
+ * path: any signed-in adult may steer (council decision), and the acting
+ * adult is recorded. familyId and actorUserId come from the caller's OWN
+ * session, never from the client, and the deterministic store re-scopes the
+ * model-free jobId inside that family, so a forged id can only ever address
+ * this family's rows. The flag gate matches the tools' posture.
+ */
+async function jobActorContext(): Promise<
+  { familyId: string; actorUserId: string | null } | { error: string }
+> {
+  const familyId = await requireFamilyId();
+  if (!familyId) return { error: "Set up your family first." };
+  return { familyId, actorUserId: await callerUserId() };
+}
+
+/** Approve the volume waiting for review so the build keeps going. The
+ * store approves the row that is actually ready_for_review inside this
+ * family, so the client-supplied stageNumber only has to be a plausible
+ * positive integer; it never selects which stage is approved. */
+export async function approveAgentJobStageAction(
+  jobId: unknown,
+  stageNumber: unknown,
+): Promise<TaskActionState> {
+  if (!agentJobsEnabled()) return { error: JOBS_OFF_ERROR };
+  const parsedJobId = JOB_ID_SCHEMA.safeParse(jobId);
+  if (!parsedJobId.success) return { error: "That build isn't available." };
+  const parsedStage = STAGE_NUMBER_SCHEMA.safeParse(stageNumber);
+  if (!parsedStage.success) return { error: "That build isn't ready for approval." };
+
+  const ctx = await jobActorContext();
+  if ("error" in ctx) return { error: ctx.error };
+
+  const result = await respondToJob({
+    familyId: ctx.familyId,
+    actorUserId: ctx.actorUserId,
+    jobId: parsedJobId.data,
+    response: { action: "approve_stage", stageNumber: parsedStage.data },
+  });
+  if (!result.ok) return { error: result.note };
+  revalidatePath("/app/tasks");
+  return { error: null };
+}
+
+export async function pauseAgentJobAction(jobId: unknown): Promise<TaskActionState> {
+  if (!agentJobsEnabled()) return { error: JOBS_OFF_ERROR };
+  const parsedJobId = JOB_ID_SCHEMA.safeParse(jobId);
+  if (!parsedJobId.success) return { error: "That build isn't available." };
+
+  const ctx = await jobActorContext();
+  if ("error" in ctx) return { error: ctx.error };
+
+  const result = await respondToJob({
+    familyId: ctx.familyId,
+    actorUserId: ctx.actorUserId,
+    jobId: parsedJobId.data,
+    response: { action: "pause" },
+  });
+  if (!result.ok) return { error: result.note };
+  revalidatePath("/app/tasks");
+  return { error: null };
+}
+
+export async function resumeAgentJobAction(jobId: unknown): Promise<TaskActionState> {
+  if (!agentJobsEnabled()) return { error: JOBS_OFF_ERROR };
+  const parsedJobId = JOB_ID_SCHEMA.safeParse(jobId);
+  if (!parsedJobId.success) return { error: "That build isn't available." };
+
+  const ctx = await jobActorContext();
+  if ("error" in ctx) return { error: ctx.error };
+
+  const result = await respondToJob({
+    familyId: ctx.familyId,
+    actorUserId: ctx.actorUserId,
+    jobId: parsedJobId.data,
+    response: { action: "resume" },
+  });
+  if (!result.ok) return { error: result.note };
+  revalidatePath("/app/tasks");
+  return { error: null };
+}
+
+export async function cancelAgentJobAction(jobId: unknown): Promise<TaskActionState> {
+  if (!agentJobsEnabled()) return { error: JOBS_OFF_ERROR };
+  const parsedJobId = JOB_ID_SCHEMA.safeParse(jobId);
+  if (!parsedJobId.success) return { error: "That build isn't available." };
+
+  const ctx = await jobActorContext();
+  if ("error" in ctx) return { error: ctx.error };
+
+  const result = await cancelJob({
+    familyId: ctx.familyId,
+    actorUserId: ctx.actorUserId,
+    jobId: parsedJobId.data,
+  });
+  if (!result.ok) return { error: result.note };
+  revalidatePath("/app/tasks");
+  return { error: null };
 }
