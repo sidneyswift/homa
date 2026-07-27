@@ -1,6 +1,6 @@
 ---
 name: onboarding-paywall-playbook
-description: Growth-engineering playbook for Homa's signup-to-paid funnel, distilled from a Cal AI founder's onboarding/paywall essay and translated to Homa's actual live architecture (the wall + the four-open-subjects report lock, both ON in production since 2026-07-18 with an armed kill test). Use when designing or auditing anything on the path from landing to `billing.trial_started`: onboarding screen order or length, paywall placement or variants, wall/lock copy surfaces (`apps/web/components/billing/`), pricing stickers, trial structure, or reading `/admin/funnels` and prod events to diagnose where the funnel leaks. Also use when someone proposes "make onboarding shorter" or "remove a step" as a default without checking whether the step is actually the problem, and when specifying the NEXT paywall experiment (the kill-test pattern below is the house method). Not for writing the words themselves (see homa-copy-writer) or for statistical A/B test math (see the general ab-test-setup skill) — this skill is about funnel shape, sequencing, and experiment discipline.
+description: Growth-engineering playbook for Homa's signup-to-paid funnel, distilled from a Cal AI founder's onboarding/paywall essay and translated to Homa's actual live architecture (the wall + the four-open-subjects report lock, both ON in production since 2026-07-18 with an armed kill test). Use when designing or auditing anything on the path from landing to `billing.trial_started`: onboarding screen order or length, paywall placement or variants, wall/lock copy surfaces (`apps/web/components/billing/`), pricing stickers, trial structure, or reading `/admin/funnels` and prod events to diagnose where the funnel leaks. Also use when someone proposes "make onboarding shorter" or "remove a step" as a default without checking whether the step is actually the problem, and when specifying the NEXT paywall experiment (the kill-test pattern below is the house method). Not for writing the words themselves (see homa-copy-writer) or for statistical A/B test math (see the general ab-test-setup skill): this skill is about funnel shape, sequencing, and experiment discipline.
 ---
 
 # Onboarding + paywall playbook
@@ -101,7 +101,7 @@ checklist, by contrast, converts at ~95% per step: friction placed after
 the promise, doing personalization work, exactly where the essay says
 friction pays for itself.
 
-**The test for any new onboarding field or step** — it must do at least
+**The test for any new onboarding field or step**: it must do at least
 one of these:
 
 - Personalize what the parent is about to see (a checklist answer, a
@@ -121,7 +121,7 @@ high-pain apps (something the user has already failed at).
 Homa's parents are the high-pain case: "is my kid falling behind and is
 it my fault," usually after a prior curriculum or school attempt that
 didn't work. That argues for the longer, pain-agitating, personalizing
-onboarding — not a race to minimum viable signup. Reasoning, not
+onboarding, not a race to minimum viable signup. Reasoning, not
 assertion: cutting personalization steps trades away the exact mechanism
 (agitate the pain, connect it to the report) that converts high-pain
 users, in exchange for reducing a top-of-funnel loss the audit calls "an
