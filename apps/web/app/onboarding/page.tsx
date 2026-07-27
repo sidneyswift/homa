@@ -16,6 +16,7 @@ import { requireFamily } from "../../lib/map/session";
 import {
   beginOnboarding,
   loadOnboardingChatFamily,
+  resolveOnboardingCompletion,
 } from "../../lib/onboarding/store";
 import { getSlashMenuSkills } from "../../lib/slash-skills";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
@@ -81,6 +82,15 @@ async function loadChatProps(): Promise<OnboardingChatProps | null> {
   if (!session) return null;
   const family = await loadOnboardingChatFamily(session.id);
   if (!family) return null;
+  // Ask whether she is done BEFORE asking whether she is active, or a
+  // family who finished can never be told so: the active check below is
+  // the only exit from this page, and a record stuck on "active" makes
+  // it unreachable. That was live for 23 families from 2026-07-24
+  // (plans/2026-07-27-packet-page-revision-failure.md, latent bug).
+  // Idempotent and a no-op for a family with no record. Read through
+  // the return value, not through `family`, which was loaded before this
+  // write and would still say active for one more page load.
+  const justCompleted = await resolveOnboardingCompletion(session.id);
   // Onboarding that has finished has one home, and it is /app. Sending
   // her back into the flow she completed would give her two places the
   // same conversation lives.
@@ -94,6 +104,7 @@ async function loadChatProps(): Promise<OnboardingChatProps | null> {
   // an account and stopped before adding a child is sitting in it right
   // now, waiting for this flag to be turned on.
   if (
+    justCompleted ||
     !familyOnboardingActive({
       profileCompletedAt: family.profileCompletedAt,
       context: family.context,

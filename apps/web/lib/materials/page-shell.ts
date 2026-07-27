@@ -182,6 +182,41 @@ export function splitPageBodies(storedHtml: string): string[] {
     .filter((body) => body.length > 0);
 }
 
+/**
+ * selectMaterialPages(storedHtml, pageIndex): the pages a
+ * create_printable `fromMaterialId` entry contributes.
+ *
+ * Undefined pageIndex takes the whole material, which is what reuse
+ * always meant. A pageIndex takes exactly one page, which is what makes
+ * revising one page of a packet cheap: before this existed the only way
+ * to change page 4 of twelve was to retype all twelve as arguments,
+ * about 45KB and 25-38k output tokens an attempt, and on 2026-07-27 the
+ * retry that cost stopped producing a parseable tool call at all while a
+ * parent asked four times for one image to be bigger
+ * (plans/2026-07-27-packet-page-revision-failure.md).
+ *
+ * Pages count from 1, because every other place a page gets named (the
+ * parent's request, the reviewer's verdict, the preview strip) counts
+ * from 1, and an off-by-one here silently ships the wrong page.
+ *
+ * Pure and split out from the tool so the numbering has tests that do
+ * not need a database, a blob store, or a headless browser.
+ */
+export type PageSelection =
+  | { ok: true; bodies: string[] }
+  | { ok: false; pageCount: number };
+
+export function selectMaterialPages(
+  storedHtml: string,
+  pageIndex: number | undefined,
+): PageSelection {
+  const bodies = splitPageBodies(storedHtml);
+  if (pageIndex === undefined) return { ok: true, bodies };
+  const body = bodies[pageIndex - 1];
+  if (body === undefined) return { ok: false, pageCount: bodies.length };
+  return { ok: true, bodies: [body] };
+}
+
 /** The class render-page.ts uses to find and screenshot each page box. */
 export const SHEET_PAGE_CLASS = "homa-sheet-page";
 

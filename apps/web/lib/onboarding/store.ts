@@ -2,6 +2,7 @@ import { mapDb } from "../map/db";
 import {
   EMPTY_ONBOARDING_RECORD,
   familyOnboardingActive,
+  onboardingCompletionReached,
   readOnboardingRecord,
   type OnboardingFamilyRow,
   type OnboardingRecord,
@@ -151,6 +152,54 @@ export async function beginOnboarding(familyId: string): Promise<OnboardingRecor
  */
 export async function completeOnboarding(familyId: string): Promise<OnboardingRecord> {
   return writeOnboardingRecord(familyId, { state: "done" });
+}
+
+/**
+ * resolveOnboardingCompletion(familyId): ask whether this family has
+ * finished, and write it down if she has. Returns true when the family
+ * is done (whether this call ended it or an earlier one did).
+ *
+ * This exists because completeOnboarding shipped with no caller. The
+ * record outranks profile_completed_at, so a family who entered the chat
+ * flow could never leave it: her in-turn generation tools stayed
+ * suppressed and her door wall stayed down, permanently. Every surface
+ * that could release a family calls this, and it is cheap and idempotent
+ * so calling it on a page load is fine.
+ *
+ * Reads its own facts rather than trusting a caller's: the wall's state
+ * depends on the answer, so the inputs come from the database on the
+ * server-only connection, never from a page's props.
+ */
+export async function resolveOnboardingCompletion(familyId: string): Promise<boolean> {
+  const state = await loadOnboardingState(familyId);
+  if (!state?.record) return false;
+  if (state.record.state === "done") return true;
+
+  const sql = mapDb();
+  const rows = await sql<
+    { profile_completed_at: string | null; children: number; scored: number }[]
+  >`
+    select f.profile_completed_at::text as profile_completed_at,
+           (select count(*) from public.children c where c.family_id = f.id)
+             ::int as children,
+           (select count(distinct r.child_id) from public.child_reports r
+             where r.family_id = f.id)::int as scored
+      from public.families f
+     where f.id = ${familyId}
+  `;
+  const row = rows[0];
+  if (!row) return false;
+
+  const reached = onboardingCompletionReached({
+    profileCompletedAt: row.profile_completed_at,
+    childCount: row.children,
+    scoredReportCount: row.scored,
+    recordUpdatedAt: state.record.updatedAt,
+    now: new Date(),
+  });
+  if (!reached) return false;
+  await completeOnboarding(familyId);
+  return true;
 }
 
 export interface OnboardingChatFamily {
