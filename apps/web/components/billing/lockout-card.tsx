@@ -139,7 +139,7 @@ export function LockoutCard({
       ) : null}
 
       <p className="mt-4 text-body">
-        Your first 30 days are free. After that it is $19 a month. There is no weekly
+        Your first 7 days are free. After that it is $19 a month. There is no weekly
         limit on what I make.
       </p>
 
@@ -148,7 +148,7 @@ export function LockoutCard({
           href={monthlyUrl}
           className="flex min-h-12 w-full items-center justify-center rounded-md bg-brand px-4 py-3 text-base font-bold text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
         >
-          Start your 30 free days
+          Start your 7 free days
         </a>
         <button
           type="button"

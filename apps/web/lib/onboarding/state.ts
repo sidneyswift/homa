@@ -56,6 +56,16 @@ export const EMPTY_ONBOARDING_RECORD: OnboardingRecord = {
  * chatOnboardingEnabled(): the rollout flag. Off means the old card
  * flow runs untouched and nothing in this module changes any behavior,
  * including the wall bypass below.
+ *
+ * Found empty in prod on 2026-07-25 despite being flipped on 2026-07-24;
+ * a plain `vercel redeploy` reuses the env snapshot frozen at the
+ * original build rather than the current value, so restoring the var
+ * alone did not take effect. A second gotcha compounded it: `vercel env
+ * add` piped non-interactively defaults to the "Sensitive" type, and
+ * Sensitive vars are excluded from the Next.js build step entirely
+ * (Vercel only exposes them at runtime), so the flag read empty even
+ * in a genuinely fresh build. Use `--no-sensitive` when setting this
+ * var from the CLI.
  */
 export function chatOnboardingEnabled(): boolean {
   const value = (process.env.HOMA_CHAT_ONBOARDING ?? "").trim().toLowerCase();
@@ -179,4 +189,67 @@ export function appWouldAdmit(family: {
   childCount: number;
 }): boolean {
   return family.profileCompletedAt !== null && family.childCount > 0;
+}
+
+/**
+ * The far edge of the free period. A family that entered the chat flow
+ * this long ago is done whether or not she ever performed the keystone,
+ * because the alternative is the state this constant exists to end.
+ *
+ * Cause (2026-07-27): completeOnboarding() shipped with no callers, so
+ * nothing ever wrote state "done". The record outranks
+ * profile_completed_at, so 23 families latched onboarding-active
+ * permanently: create_printable and generate_image structurally absent
+ * from their web chat every turn, and the $19 door wall bypassed for
+ * good. A completion rule that only a happy path can satisfy always has
+ * a way to get stuck, so this backstop is not a nicety, it is the part
+ * that makes the bug unrepeatable.
+ */
+export const ONBOARDING_BACKSTOP_DAYS = 14;
+
+export interface OnboardingCompletionFacts {
+  /** families.profile_completed_at, null while setup is unfinished. */
+  profileCompletedAt: string | Date | null;
+  /** How many children the family has. */
+  childCount: number;
+  /** How many of them have a scored row in child_reports. The keystone:
+   *  the plan's §3.3 refuses to call a family complete with the
+   *  observable behavior never performed once. */
+  scoredReportCount: number;
+  /** The onboarding record's updatedAt, null on a record predating it. */
+  recordUpdatedAt: string | null;
+  /** Injected so the predicate stays pure and the backstop is testable. */
+  now: Date;
+}
+
+/**
+ * onboardingCompletionReached(facts): has this family finished the
+ * onboarding arc?
+ *
+ * The counterweight to onboardingActiveForRow. Answering true ends the
+ * free period: the door wall applies again, onboarding-mode stops
+ * loading, and the in-turn generation tools come back. Answering false
+ * keeps her inside it. Both directions cost real money in opposite
+ * ways, which is why this is one named predicate with tests rather than
+ * a condition inlined at a call site.
+ *
+ * Only ever consulted for a family whose record says "active"; a done
+ * family is never reopened.
+ */
+export function onboardingCompletionReached(
+  facts: OnboardingCompletionFacts,
+): boolean {
+  // The backstop, always. See ONBOARDING_BACKSTOP_DAYS.
+  if (facts.recordUpdatedAt !== null) {
+    const ageMs = facts.now.getTime() - new Date(facts.recordUpdatedAt).getTime();
+    if (ageMs >= ONBOARDING_BACKSTOP_DAYS * 24 * 60 * 60 * 1000) return true;
+  }
+
+  // TODO(founder): the happy-path clause. What marks a family finished
+  // on the day she actually finishes, rather than fourteen days later?
+  // The facts above are the ones we can trust; note that checklist
+  // statuses are NOT among them, because nothing in the codebase ever
+  // writes "done" to that map (only start_checklist's "started" and
+  // "resumed"), so a rule reading it would never fire.
+  return false;
 }

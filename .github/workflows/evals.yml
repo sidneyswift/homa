@@ -1,0 +1,149 @@
+name: Evals
+
+# Behavioral evals against the real model, in CI (founder directive
+# 2026-07-27).
+#
+# Why this is a separate workflow rather than a step in ci.yml: these
+# cost money and take minutes, and they are the only checks here that
+# can fail for a reason other than "the code is wrong". Keeping them
+# apart means a stochastic eval never obscures a real lint or typecheck
+# failure, and the fast free suite still reports in its usual time.
+#
+# What made this worth paying for: on 2026-07-27 a packet-revision eval
+# passed 4/4 against completely broken code because it graded the
+# model's tool ARGUMENTS instead of the artifact it produced (issue
+# #237). Deterministic tests below the judgment layer proved nothing.
+# The only thing that catches that class is running the real agent
+# against a real database and reading what it actually wrote.
+#
+# `pnpm eval:sandbox` boots a disposable Postgres with every migration
+# applied plus a throwaway blob store, seeds the Walker fixture family,
+# and stamps eval sessions family-pinned on it, so family-scoped tools
+# succeed for real instead of failing closed. Durable-write credentials
+# are stripped by evals.config.ts regardless; nothing here can reach
+# production.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      # Anything that can change what the agent decides or produces.
+      - "apps/web/agent/**"
+      - "apps/web/evals/**"
+      - "apps/web/lib/materials/**"
+      - "apps/web/lib/onboarding/**"
+      - "apps/web/lib/family-context**"
+      - "apps/web/lib/agent-db.ts"
+      - "apps/web/lib/eval-isolation.ts"
+      - "supabase/migrations/**"
+      - ".github/workflows/evals.yml"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A newer push supersedes an in-flight run: these cost real money, so
+# never pay twice for a branch nobody is looking at any more.
+concurrency:
+  group: evals-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evals:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      # Homa authenticates the model gateway with Vercel OIDC, never an
+      # AI Gateway API key (founder ruling 2026-07-27; see the root
+      # AGENTS.md, "Model gateway credentials"). There is no API-key
+      # branch here on purpose: an available fallback is a fallback
+      # somebody reaches for.
+      #
+      # VERCEL_OIDC_TOKEN cannot be a stored CI secret. It lives twelve
+      # hours and an authenticated Vercel CLI mints it, so a stored copy
+      # works today and fails every morning after, looking like a code
+      # problem. CI keeps a long-lived VERCEL_TOKEN and mints a fresh
+      # OIDC token per run, the same thing `pnpm dev:token` does locally.
+      - name: Require the Vercel token
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::VERCEL_TOKEN is not set, so this job cannot mint an OIDC token and the evals cannot reach the model."
+            echo "::error::It is the ONLY secret this workflow needs. Create it at Vercel account settings, Tokens, scoped to the Homa team, then:"
+            echo "::error::  gh secret set VERCEL_TOKEN --repo sidneyswift/homa"
+            echo "::error::Do NOT store VERCEL_OIDC_TOKEN itself, it expires in twelve hours."
+            echo "::error::Homa does not use AI Gateway API keys (root AGENTS.md, Model gateway credentials)."
+            exit 1
+          fi
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Same disposable-cluster pattern the ChildProgress E2E uses.
+      # pgvector is NOT optional here, unlike in the ChildProgress E2E:
+      # the eval sandbox applies every migration, and
+      # 20260709212000_semantic_recall.sql creates a vector column. Without
+      # the extension the cluster boots, the migration fails, and the run
+      # dies before a single eval starts. Found on the first real CI run,
+      # 2026-07-27; it passes locally because Homebrew's Postgres has
+      # pgvector alongside it.
+      - name: Install PostgreSQL 16 and pgvector for the eval sandbox
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-16 postgresql-16-pgvector
+          echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
+
+      # `vercel env pull` needs the project identity, which comes from the
+      # two ID vars rather than a linked directory, and it must run inside
+      # apps/web because the CLI resolves the project from its own cwd
+      # (the same constraint scripts/refresh-oidc-token.mjs documents: in
+      # a worktree the repo root is not linked).
+      #
+      # The pull writes to a scratch file, not .env.local, for the reason
+      # that script exists: `vercel env pull` rewrites the target
+      # wholesale from the development environment, and on this project
+      # that is a handful of variables against a local file carrying
+      # fifty-two.
+      - name: Mint a Vercel OIDC token
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          # Not secrets, just the names of a project: they identify which
+          # Vercel project to pull from and grant nothing on their own.
+          # Inlined rather than stored because apps/web/.vercel is
+          # gitignored, so the checkout has no project.json to read, and
+          # because two more secrets to configure is two more ways for
+          # this workflow to sit broken. Same values as
+          # apps/web/.vercel/project.json on a linked machine.
+          VERCEL_ORG_ID: team_BEuVWnWjCmzv8aVLJp1HU6TC
+          VERCEL_PROJECT_ID: prj_pKBD87W4tmlT7lnYRgrs8WYociTz
+        working-directory: apps/web
+        run: |
+          npx --yes vercel@latest env pull .env.ci \
+            --environment=development --yes --token="$VERCEL_TOKEN"
+          token="$(grep -m1 '^VERCEL_OIDC_TOKEN=' .env.ci | cut -d= -f2- | tr -d '"')"
+          rm -f .env.ci
+          if [ -z "$token" ]; then
+            echo "::error::vercel env pull returned no VERCEL_OIDC_TOKEN."
+            exit 1
+          fi
+          echo "::add-mask::$token"
+          echo "VERCEL_OIDC_TOKEN=$token" >> "$GITHUB_ENV"
+
+      # --strict turns a below-threshold score into a non-zero exit.
+      # Without it the runner reports failures and exits 0, which would
+      # make this workflow decorative in exactly the way issue #237's
+      # first eval was.
+      # VERCEL_OIDC_TOKEN reaches this step through GITHUB_ENV, set above.
+      - name: Behavioral evals (real model, disposable database)
+        run: pnpm eval:sandbox --strict --max-concurrency 4

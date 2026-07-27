@@ -1,7 +1,157 @@
-# Build log — decisions agents made alone
+# Build log: decisions agents made alone
 
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
+
+## 2026-07-27 · Founder directive: shorten the signup-paywall trial to 7 days
+
+Founder: "make it a free 7 day trial instead of 30 day." Every parent-
+facing "30 free days" / "30-day trial" string became "7 free days" /
+"7-day trial" (landing, onboarding, the trial gate, chat, SMS, the
+phone line's pitch, drip email, `.env.example`). The gate is still
+flag-dark (`HOMA_SIGNUP_PAYWALL_ENABLED` unset), so nothing live
+changed; this only updates what ships once it flips.
+
+One decision made without a ruling: TRIAL_GATE_TIMELINE's reminder day
+recalculates to day 4 (three days before day 7), matching Stripe's
+`customer.subscription.trial_will_end` webhook cadence (always 3 days
+before trial end, any length) rather than day 23's old "a week before"
+framing, which was specific to the 30-day math. This creates a real gap
+flagged in `.env.example`'s `HOMA_SIGNUP_PAYWALL_ENABLED` comment: no
+code sends this reminder yet. Stripe's OWN dashboard-configured trial
+reminder (the founder checklist item this replaces) fires 7 days before
+trial end, which for a trial this short is day 0, the moment of
+signup, so it cannot keep the day-4 promise the copy now makes. Flagged
+to the founder rather than built, since it is a new capability (a
+webhook handler plus a transactional email) beyond the requested
+change, not a mechanical rename.
+
+**Addendum, same day:** the founder additionally authorized updating the
+LIVE Stripe Payment Links themselves (asked first, since
+`subscription_data.trial_period_days` turned out to be create-only on
+Payment Links, not updatable in place, confirmed via the Stripe CLI's
+own `update --help` vs `create --help` output, so this was never a
+one-line fix). Created 6 new live Payment Links (regular/plus/elite x
+monthly/annual) against the SAME existing Prices/Products, each with
+`trial_period_days=7`, `payment_method_collection=always`, and the same
+`/api/billing/confirm` redirect; verified every field on all 6 against
+the originals before proceeding; repointed the 6
+`NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_*_URL` Vercel production vars via
+`vercel env add --force --no-sensitive`; deactivated the 6 old 30-day
+links afterward. Found and fixed in passing: the regular tier's live
+monthly URL had been unset in production the whole time (a latent gap,
+never hit live because the wall was off). A fresh Vercel production
+build is still required before these values take effect (they are
+inlined at build time); merging PR #236 is the natural trigger and also
+ships the matching copy. Also found in passing: `HOMA_WALL_ENABLED` and
+`HOMA_SIGNUP_PAYWALL_ENABLED` both read empty in production right now,
+contradicting the 2026-07-18 "wall flipped on" record elsewhere in this
+log; nothing customer-facing was touched by today's Stripe change as a
+result, but the discrepancy itself is unresolved and worth a founder
+look.
+
+## 2026-07-26 · Founder directive: the signup paywall (card-upfront trial before the account opens)
+
+Founder: "paywall asap before the free report, just make them pay
+upfront to create an account (maybe a free trial for all subscription
+options). and then remove references to free report on the landing
+page... truly test the market to see if people are willing to pay."
+Built dark behind `HOMA_SIGNUP_PAYWALL_ENABLED` on branch
+`claude/paywall-subscription-onboarding-5e839f`. Supersessions this
+directive carries for NEW families while the flag is on, recorded here
+because three earlier placements said otherwise:
+
+- "The report stays free forever" (2026-07-11 wall placement): no report
+  exists before the card now. By default the gate applies to EVERY
+  non-exempt family at flag flip, existing free families included;
+  HOMA_SIGNUP_PAYWALL_SINCE (optional grandfather cutoff, set it to the
+  flip moment) scopes it to new signups only, and billing_exempt remains
+  the founder's per-family comp switch. The door wall's own rules are
+  unchanged for whoever the account gate does not reach.
+- Chat-first onboarding §7 "onboarding families never see the wall" and
+  the open §5 credit-lockout ruling: the account gate replaces both for
+  new signups; the conversation now starts after the card. LockoutCard
+  stays dark.
+- Landing claims pass T2 "no pricing on the page": inverted deliberately.
+  With a card-upfront trial as the only door, hiding the price until the
+  card screen reads as a trap; the trial terms are now stated at the CTA
+  (hero note), in the FAQ, and on the CTA band.
+
+Decisions made alone, from the 2026-07-26 research pass (opt-out trial
+benchmarks, paywall-placement data, Stripe trial mechanics, ROSCA and
+California ARL): account creation stays card-free and the gate lands
+immediately after it (research: value-first beats pay-before-anything
+for unknown brands; the founder's "pay to create an account" is honored
+as "the account is unusable until the card"); the gate is a full page
+(/onboarding/trial), Blinkist-style trial timeline over the existing
+three tier cards; entitlement now READS stripe_subscription_status
+(canceled/unpaid/paused/incomplete_expired end access; past_due keeps
+it while Stripe retries), closing the cancel-keeps-access-forever hole
+under the flag; text-message signup refuses deterministically while the
+flag is on (it would hand out the account and report the web gate
+holds); no schema change. A four-reviewer adversarial pass the same
+session hardened the gate beyond page render: the map pipeline routes
+(children/answer/score), the eve agent channel (which mobile mounts
+directly), and every door via familyWallCheckout now consult the same
+account decision, the confirm route and webhook stamp the subscription
+mirror by family id so a re-subscribing lapsed family is never walled
+on a stale "canceled" status, and pnpm check:billing wires the gate and
+copy-pin tests into CI. Scoring guidance from the research: judge the
+test on visitors-to-paid and first-rebill survival, not signups
+(expect roughly half to two-thirds fewer signups, 30-50% trial-to-paid
+healthy, below ~20% at $19/mo is a real negative willingness-to-pay
+read).
+
+## 2026-07-25 · Founder directive: GitHub Issues is the live tracker; HUMAN-TODO retired
+
+Founder: "remove references to humantodo. then lets start using github
+issues. its a smarter way to manage tickets and features." Executed the
+same session:
+
+- Label taxonomy created (type: bug/feature/chore/investigation,
+  priority P0-P2, plus production, founder-decision, founder-action) and
+  the process written into `AGENTS.md` § Tickets and issue tracking.
+  Issue forms in `.github/ISSUE_TEMPLATE/`.
+- Everything verifiably open migrated as issues #170-#185 and #187-#212:
+  the CG series, T5-T9, open CRs (51/56/57/69/70/71), grouped
+  founder-decision issues per plan doc (voice-bridge D2/D4-D6, drip
+  D1-D8, materials FD-1..8, credit lockout, latency R1-R6, annual price,
+  island composer, mobile parity), verified build gaps (finalize gap,
+  offer-recovery flag, LL-5 spike, agent-jobs eval), the materials P0
+  bundle, season/portfolio/readthrough triage groups, and re-filed
+  HUMAN-TODO survivors (DM7 #182, Postiz #183, D10 #184, duplicate
+  family verify #185). Ruled decision sets (celebration D1-D7,
+  abilities-map D1-D5, fat-skill D1/D2, world-v2, signal-capture) were
+  deliberately NOT re-filed.
+- Live `HUMAN-TODO.md` pointers updated (README repo map, agentic
+  architecture doc, marketing-distributor skill, demand-engine spec,
+  gateway/lead-funnel plans, the 07-11 archive header); dated history
+  left untouched. The reconciliation manifest row moved to the
+  preserved-removal terminal state (lifecycle removed, disposition
+  deleted) and its 10 ledger claims resolved as removed with per-claim
+  notes; `docs-reconciliation-check.mjs` gained `gh#N` ticket tokens and
+  a narrow removed-with-policy-basis carve-out so a deleted doc's
+  production/external claims do not demand verification evidence they
+  never asserted. `check:docs -- --allow-open` now differs from main
+  only by pre-existing new-file drift.
+
+## 2026-07-25 · Carolyng WhatsApp feedback ingested: CG ticket series filed, two suspected prod failures escalated in-doc
+
+Ingestion record for the co-founder feedback thread of 2026-07-25
+(evidence:
+`journeys/evidence/raw/2026-07-25-carolyng-whatsapp-feedback.md`;
+tickets: `plans/2026-07-25-carolyng-feedback-tickets.md`, CG-01 to
+CG-06). Decisions made alone: (a) numbered a new CG series following the
+T-series precedent rather than extending MJ, because these are
+field-evidence tickets, not journey derivations; (b) per the prod-bugs
+ruling, CG-01 (phone-call amnesia, suspected planning-claim fabrication
+recurrence of the 2026-07-19 class) and CG-06 (web replies invisible in
+a live session) are escalations, not stored bugs: the finding session
+had no prod access (Supabase MCP unauthenticated, Vercel logs
+unreachable), so the doc names the failures plainly and the founder
+reply of 2026-07-25 carries them; (c) journey files were NOT edited
+mid-reconciliation, deltas for F2/F4/F5/05/07 are listed in the ticket
+doc for the next reconciliation pass.
 
 ## 2026-07-23 · Founder directive: background jobs start immediately; the cron becomes the sweeper
 
@@ -1849,7 +1999,7 @@ walk into `packages/core/src/map/lesson-target.ts`. The legacy
 `buildFourWeekPlan` now calls the shared selector, so its two targets, practice
 patterns, weeks, and month-plan consumers retain their existing behavior.
 
-Founder decision, 2026-07-18, on the merge into main: swap, not coexist —
+Founder decision, 2026-07-18, on the merge into main: swap, not coexist,
 `WelcomeChooser`'s post-payment per-subject links (report-lock,
 2026-07-18) replace "Homa builds the four-week plan" with the same lesson
 build/open action the report body uses, whenever subject lessons are on.
@@ -10771,8 +10921,8 @@ Decisions made, in the order asked:
    example 8).
 4. **CI added now**, before any Phase A code: `.github/workflows/ci.yml` runs
    typecheck + build + `check:isolation` on every push/PR to `main`. Required
-   secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-   — both public-safe publishable values) set on the GitHub repo. Satisfies
+   secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
+   both public-safe publishable values) set on the GitHub repo. Satisfies
    BUILD.md law #1 ("isolation tests green in CI always") for the first time;
    extend with the MJ-08 events-registry check once that registry covers more
    than `waitlist.joined`.
@@ -10785,8 +10935,8 @@ Decisions made, in the order asked:
    names **M1-08 minimal** (Resend transactional email: welcome, journal-prompt,
    weekly-note, receipt templates + the opens/clicks/unsubscribes webhook
    bridge that `journeys/06 §7` requires for the anti-guilt ratio law) and
-   **MJ-09** (waitlist read path + invite codes + invite email — today's
-   waitlist is write-only with no way to invite anyone off it) — previously
+   **MJ-09** (waitlist read path + invite codes + invite email, today's
+   waitlist is write-only with no way to invite anyone off it), previously
    both were only implicit under FR-1/FR-3.
 7. **Cost-telemetry timing (Gateway `ai-reporting-*` headers + per-key budget
    caps moved into Phase B vs staying in Phase C with FR-11): left open,
@@ -10797,7 +10947,7 @@ Decisions made, in the order asked:
 8. **Resend domain live:** `mail.thankshoma.com` verified in Resend (DKIM, SPF
    MX+TXT, DMARC, tracking CNAME all green; click+open tracking on per
    `journeys/06 §7`'s explicit opens/clicks webhook requirement; inbound
-   receiving deliberately left off — `journeys/02` line 890 defers
+   receiving deliberately left off, `journeys/02` line 890 defers
    reply-to-email to POST-GA, v1 is deep-link-to-chat only).
    `RESEND_API_KEY` is in `apps/web/.env.local` (gitignored) and in Vercel
    production env (added via CLI, type Sensitive).
@@ -10815,7 +10965,7 @@ v2 visual system, closing the loop the grilling session opened.
    trains AI" line. Waitlist band uses "Founding families" framing per
    BUILD.md's hard constraint (no pricing, T2). CTA stays functional ("Join
    the waitlist") rather than the kit's more evocative "Meet your child's
-   map" — no product exists yet for that CTA to honestly lead to.
+   map", no product exists yet for that CTA to honestly lead to.
 2. **Design**: homa-design v2 tokens (colors, radius, shadows, fonts) copied
    into `apps/web/app/globals.css` and wired through Tailwind v4's
    `@theme inline`, so classes like `bg-brand`, `text-strong`, `rounded-pill`
@@ -10827,7 +10977,7 @@ v2 visual system, closing the loop the grilling session opened.
    owns porting the full component library.
 3. **Verification**: typecheck + production build green; rendered and
    screenshotted at desktop and mobile (390px) widths via Playwright for
-   both `/` and `/waitlist` — readable, on-brand, touch-friendly. Founder
+   both `/` and `/waitlist`, readable, on-brand, touch-friendly. Founder
    phone test + Alessa read-aloud (build-log #10's two remaining DoD boxes)
    are next.
 4. Deleted `wireframe-slot.tsx` (no slots remain, per its own comment).
@@ -10844,14 +10994,14 @@ roadmap stance, a contained-blast-radius environment plan (Vercel preview
 branch, real homa-prod schema with tagged+cleaned-up synthetic rows, never
 production), and a verdict rule (any leakage/data-loss/stuck-state = NO-GO
 regardless of the other four; eject to M0-02 on failure). BUILD.md now links
-it. **The spike itself has not been run yet** — this session only produced
+it. **The spike itself has not been run yet**, this session only produced
 the criteria, per the gate's own requirement that they exist first.
 
 ## 2026-07-04 · M0-01 test (a) run: NO-GO
 
 Ran the eve upgrade drill (test a of `m0-01-adversarial-prototype-gate.md`)
 locally, isolated on a throwaway `spike/m0-01` branch (deleted after, no code
-diff to keep — this was a pure test, nothing to merge). Parked a session in
+diff to keep, this was a pure test, nothing to merge). Parked a session in
 HITL under eve 0.18.2, bumped to 0.19.0 (today's `latest`; no newer version
 exists to test a true forward upgrade), and tried to resume it.
 
@@ -10865,7 +11015,7 @@ results in the durable workflow log. Full evidence in `eve-churn-log.md`;
 gate writeup in `m0-01-adversarial-prototype-gate.md`.
 
 **Per the gate's own verdict rule, this single failure is enough: NO-GO.**
-Tests (b)–(e) were not run — the verdict doesn't change once (a) fails this
+Tests (b)–(e) were not run, the verdict doesn't change once (a) fails this
 decisively, and they remain available for a custom-harness retest later.
 **This is now an open decision for Sidney**, not resolved here: eject to
 M0-02 (custom harness) per the rule as written, treat it as a narrower
@@ -10879,23 +11029,23 @@ Asked "what would fix this without diverging too much" after the NO-GO.
 Built three things, all in our own code/process, none touching eve
 internals:
 
-1. `apps/web/lib/harness/resume-session.ts` — narrow seed of M1-14. Every
+1. `apps/web/lib/harness/resume-session.ts`, narrow seed of M1-14. Every
    resume of an eve session must go through this. It doesn't trust eve's
    synchronous `ok: true` alone (the finding showed that's not confirmation);
    it watches the event stream for a real new turn or an explicit failure
    before calling a resume successful, and throws a typed error otherwise.
    Verified against the live bug: 2/2 correctly caught the real corruption,
    1/1 correctly passed a healthy same-version control (no false positive).
-2. `scripts/eve-upgrade-check.mjs` — automates the exact repro against any
+2. `scripts/eve-upgrade-check.mjs`, automates the exact repro against any
    candidate version pair. Verified: correctly passes a same-version no-op,
    correctly fails the known-bad 0.18.2→0.19.0 pair (twice).
-3. `docs/homa-planning/runbooks/eve-version-bump.md` — the procedure: read
+3. `docs/homa-planning/runbooks/eve-version-bump.md`, the procedure: read
    the changelog for tool/replay/workflow language, run the script, check
    for live parked sessions (stubbed until M1-02), deploy, smoke-test, log
    the outcome in `eve-churn-log.md` either way.
 
 This does not resolve the open decision (eject to M0-02 vs. stay on eve with
-these mitigations vs. report upstream and wait) — that's still Sidney's call.
+these mitigations vs. report upstream and wait), that's still Sidney's call.
 It does mean Phase B is no longer flatly blocked: BUILD.md now says
 "mitigated, not resolved" instead of "blocked."
 
@@ -10904,7 +11054,7 @@ It does mean Phase B is no longer flatly blocked: BUILD.md now says
 Resolved the local-vs-production caveat on the deploy/rollback finding.
 Deployed two separate real Vercel previews (fixing a genuine gap along the
 way: no `.vercelignore` existed, so a local `vercel deploy` tried to upload
-the multi-gigabyte `homa-research/`/`homa-macmini/` folders and failed —
+the multi-gigabyte `homa-research/`/`homa-macmini/` folders and failed,
 added `.vercelignore` mirroring `.gitignore`'s exclusions). Started a
 session on the first deployment, let it complete, deployed the second, sent
 a follow-up to the second deployment's URL using the first's session and
@@ -10914,7 +11064,7 @@ token.
 session with real context intact (recalled a secret code from the first
 turn). This is strong evidence the earlier "stuck forever" finding was a
 limitation specific to `eve dev`'s local disk-backed workflow world, not a
-production-relevant risk — Vercel Workflow (the managed service actual
+production-relevant risk, Vercel Workflow (the managed service actual
 production uses) handles cross-deployment continuity correctly.
 
 Still open, narrower: this tests session portability across deployments,
@@ -10931,7 +11081,7 @@ Cleaned up both throwaway preview deployments and the test branch after.
 
 ## 2026-07-05 · Founder decision: stay on eve; spike continued
 
-Sidney: "stay and continue." Resolved the open M0-01 decision — not
+Sidney: "stay and continue." Resolved the open M0-01 decision, not
 ejecting to M0-02, staying on eve with the mitigations from 2026-07-04.
 Continued the spike since committing to eve means the other adversarial
 tests should actually be checked against it:
@@ -10941,18 +11091,18 @@ tests should actually be checked against it:
   sessions, zero cross-session leakage, confirmed twice. Clean pass on the
   single most safety-critical property.
 - **Test (b)** (deploy + rollback mid-turn): failed, reproducibly, across
-  three variants (hard kill, graceful stop, explicit nudge) — a step killed
+  three variants (hard kill, graceful stop, explicit nudge), a step killed
   between start and completion never resumes, with zero server-side error
   logged. **Important caveat**: this is against the local dev workflow
   world, not real Vercel Workflow, which the docs describe as a different,
   managed durability substrate. Needs a Vercel-preview retest before being
   trusted as production-relevant. Logged in full in `eve-churn-log.md` and
   `m0-01-adversarial-prototype-gate.md`.
-- Tests (c) and (d) stay deferred — they need a schedule dispatcher and a
+- Tests (c) and (d) stay deferred, they need a schedule dispatcher and a
   session-rotation state machine that don't exist yet (M3-10/M1-02, M1-15).
   Not skipped, just correctly sequenced.
 - Relocated `resume-session.ts` from `apps/web/agent/harness/` to
-  `apps/web/lib/harness/` — the old path is an eve-discovered directory
+  `apps/web/lib/harness/`, the old path is an eve-discovered directory
   convention and eve's discovery warned on it; the module is app code
   calling eve's API, not an eve capability.
 
@@ -10961,7 +11111,7 @@ rollback finding tracked as an open risk, not a blocker.
 
 ## 2026-07-05 · Playable MVP: auth → family → child → chat → worksheet
 
-Founder asked "can we get an mvp shipped so i can start playing with it" —
+Founder asked "can we get an mvp shipped so i can start playing with it",
 built the trimmed walking-skeleton slice end to end, real code not hacks:
 
 1. **Auth (minimal M1-01):** Supabase Auth email/password via @supabase/ssr.
@@ -10971,14 +11121,14 @@ built the trimmed walking-skeleton slice end to end, real code not hacks:
    founding-family gate: signup requires the invite code in
    `HOMA_SIGNUP_CODE` (set in Vercel prod env; unset locally = open signup
    for dev). MJ-09's real invite codes replace this.
-2. **Family creation (migration #6):** `create_my_family()` RPC — an
+2. **Family creation (migration #6):** `create_my_family()` RPC, an
    authenticated user with no membership creates exactly one family
    atomically; the one-family rule lives in the function body. RLS advisor
    warning is intentional (documented in the migration).
 3. **Child intake (minimal M2-03i):** /home shows create-family → add-child
    → children list; children write to `children.profile` jsonb (interests,
    focus) under the existing "members add children" RLS policy.
-4. **eve auth (FR-1 slice):** `agent/channels/eve.ts` custom AuthFn — chat
+4. **eve auth (FR-1 slice):** `agent/channels/eve.ts` custom AuthFn, chat
    sends the caller's Supabase access token as a bearer (resolved fresh per
    request by useEveAgent), the channel verifies it via `auth.getUser()`,
    resolves familyId under the caller's OWN RLS, and stamps
@@ -10986,7 +11136,7 @@ built the trimmed walking-skeleton slice end to end, real code not hacks:
    The raw token in attributes is server-custody state, never model-visible,
    refreshed per turn; M1-02's SET LOCAL pattern replaces it.
 5. **Agent tools (first two):** `get_children` (reads the family's kids +
-   profiles as the caller — RLS is the wall inside tools too, no service
+   profiles as the caller, RLS is the wall inside tools too, no service
    key exists in the app) and `create_worksheet` (schema-validates the
    worksheet the model composes; the UI renders it as a printable card).
    `lib/agent-db.ts` is the shared caller-scoped DB helper. Instructions
@@ -11006,9 +11156,9 @@ Dino Letter Sounds" card with 5 themed exercises. Test rows deleted from
 homa-prod after. Typecheck, production build, and isolation checks green.
 
 Known deferrals: voice, photo personalization, conversation persistence
-(chat history resets on reload — eve session is durable server-side but the
+(chat history resets on reload, eve session is durable server-side but the
 UI doesn't rehydrate it yet), real invite codes (MJ-09), the reportlab/fal
-worksheet pipeline (M0-03/M2-05 — current output is text-exercise layouts),
+worksheet pipeline (M0-03/M2-05, current output is text-exercise layouts),
 proper session-tracking table.
 
 ## 2026-07-05 · Fixes: signup dead-ended, chat history lost on reload
@@ -11030,7 +11180,7 @@ Two real defects in the MVP slice, both found and fixed:
 2. **Chat history vanished on reload.** The chat didn't persist the eve
    session cursor, so every reload silently started a fresh, memoryless
    conversation. **Fix:** wired eve's documented resumable-sessions pattern
-   into chat-client.tsx — initialEvents/initialSession from localStorage
+   into chat-client.tsx, initialEvents/initialSession from localStorage
    (keyed per user id), snapshot saved onFinish. Added a "New chat" button
    to deliberately start fresh. /chat is now a server component that resolves
    the user id for the storage key.
@@ -11040,7 +11190,7 @@ the code confirms and lands on /home (no email), wrong code shows the
 friendly error, family+child setup works, chat knows the child; a hard
 reload restores the transcript AND a follow-up resumes the SAME durable
 session (POSTs to /eve/v1/session/{id}, and Homa correctly recalled a
-secret word set before the reload — real continuity, not just restored
+secret word set before the reload, real continuity, not just restored
 pixels). All test users deleted from homa-prod after (0 users remain).
 Typecheck, build, lints green.
 
@@ -11052,7 +11202,7 @@ M1-02) is still the future proper version.
 
 Founder chose fully open signup over the invite-only gate. This reverses the
 PRD's "public signup (invite codes only)" non-goal and the founding-families
-framing — a deliberate founder call, logged here as the auditable override.
+framing, a deliberate founder call, logged here as the auditable override.
 
 - **Migration #8:** dropped the invite-enforcing trigger + `private.settings`
   code store from migration #7; replaced with a plain `autoconfirm_new_user`
@@ -11108,7 +11258,7 @@ Test users deleted from homa-prod (0 remain). Typecheck, build, lints green.
   for the M0-01 spike, written before the spike runs.
 - `apps/web/lib/harness/resume-session.ts`: resume-identity + forward-
   progress guard (M1-14 seed), mitigating the M0-01 finding. Lives in
-  `lib/`, not `agent/` — it calls eve's API, it isn't an eve capability.
+  `lib/`, not `agent/`, it calls eve's API, it isn't an eve capability.
 - `scripts/eve-upgrade-check.mjs`: automated pre-bump regression check for
   any eve version change.
 - `docs/homa-planning/runbooks/eve-version-bump.md`: the procedure for

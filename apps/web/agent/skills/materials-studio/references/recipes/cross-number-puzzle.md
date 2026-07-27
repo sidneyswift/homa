@@ -1,5 +1,13 @@
 # Cross-number puzzle
 
+Golden anchor: pass `anchorIds: ["cross-number-puzzle"]` to
+generate_image so the output matches the Homa cross-number bar (six
+grids per page where operator and equals cells interleave with given
+numbers and blank answer cells, every row and column reading as an
+equation, a short rule statement under the title). Write your own
+prompt with your own content; the anchor sets the visual bar, not the
+specifics.
+
 Grid-based puzzles with row + column sum constraints (Beast Academy
 style). Like a crossword but with numbers and mathematical operations.
 

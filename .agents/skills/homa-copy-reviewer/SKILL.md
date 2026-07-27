@@ -26,12 +26,9 @@ react in character instead of agreeing with the author.
 
 ## How to dispatch this gate
 
-Use the current environment's delegation mechanism to run a fresh-context,
-read-only subagent. Give it only the material named below, no prior drafting
-conversation and no file-editing task. If the environment cannot enforce a
-read-only mode, state the restriction in the dispatch and keep all file edits
-with the main agent. The dispatch prompt must contain, in this order, pasted
-verbatim, never summarized:
+Dispatch mechanics, the delivery instruction, the order law, and the
+shared laws live in `.agents/copy-gate-protocol.md`; follow it exactly.
+This gate's dispatch prompt must contain, in this order, pasted verbatim:
 
 1. The persona block above.
 2. This instruction block:
@@ -55,12 +52,7 @@ verbatim, never summarized:
    report: banner, header, note, offers, snapshot, chart captions,
    synthesis, subject cards with their drawers, activities, methodology,
    CTA; for an email: subject line first).
-4. This delivery instruction, verbatim (subagents' scratch work is not
-   visible to the dispatcher; only the final response comes back):
-
-> Return the complete thought log and critique INLINE in your final
-> response, as plain markdown. Never write "see above" or summarize;
-> paste the full text.
+4. The protocol's delivery instruction.
 
 ## What comes back, and what to do with it
 
@@ -75,15 +67,5 @@ touches files. Route every accepted fix through homa-copy-writer's table:
   block) is fixed in that component.
 - Landing and marketing page confusions are fixed on the page itself.
 
-## The order law
-
-Reader gate always runs before the editor gate (`homa-copy-editor`). An
-editor pass first can polish jargon into something stylish without ever
-asking whether the mom understands or cares. Reader first, editor second,
-every surface, no exceptions.
-
-## Laws
-
-The reviewer subagent is read-only and never touches files. Never paste
-real family data into a dispatch; use fixtures or the public sample. One
-read per dispatch: a second read biases the reactions.
+The order law (reader before editor, one read per dispatch), the read-only
+law, and the family-data law are in `.agents/copy-gate-protocol.md`.

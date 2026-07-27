@@ -28,6 +28,35 @@ export type ChatSendAcceptance = "rejected" | "queued" | "sent";
  */
 export type ChatSendLane = "parent" | "directive";
 
+/**
+ * isSendLineOccupied({busy, recovering}): whether a manual send right now
+ * would land on a turn that already has an unsettled outcome, and so must
+ * queue instead of starting a fresh eve session.
+ *
+ * `busy` alone used to be the whole answer, but that missed a real window:
+ * when a stream dies mid-turn without a closing boundary event, eve's own
+ * client wipes its local session cursor (advanceSession in eve's
+ * session-utils, no fix available from here), so `agent.session?.sessionId`
+ * goes back to undefined even though the durable turn is very likely still
+ * finishing server-side. `agent.status` flips to `"error"` in that same
+ * moment, so `busy` is already false. Lost-turn recovery
+ * (turn-recovery.ts) exists exactly to find out whether that old turn
+ * settled, but it can take up to RECOVERY_DEADLINE_MS (chat-client.tsx) to
+ * decide. A manual send in that window used to see no session id and no
+ * "busy" status, and started a brand new eve session while the old one was
+ * still very much alive: two sessions running for the same family,
+ * whichever one she is not looking at when its reply lands is the one that
+ * reads as "my message disappeared" (GH #170, the 2026-07-24 and
+ * 2026-07-25 co-founder incidents). Recovering is exactly that
+ * undecided window, so it occupies the line the same way busy does.
+ */
+export function isSendLineOccupied(input: {
+  busy: boolean;
+  recovering: boolean;
+}): boolean {
+  return input.busy || input.recovering;
+}
+
 export interface PreparedChatSend {
   message: string;
   destination: "queue" | "send";

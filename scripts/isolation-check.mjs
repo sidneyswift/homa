@@ -306,6 +306,42 @@ async function expectAuthenticatedDeleteDenied(
   report(label, ok, `HTTP ${response.status}`);
 }
 
+// The delete-policy counterpart to expectAuthenticatedUpdateFiltered: for
+// tables with a real member-scoped DELETE policy (USING against the
+// caller's own family, not a hard deny), a cross-family DELETE is not
+// rejected at the HTTP layer either. RLS silently filters the target row
+// out, so PostgREST returns 200 with zero rows deleted; this checks the
+// actual row count via Prefer: return=representation, the same shape as
+// the update check.
+async function expectAuthenticatedDeleteFiltered(
+  accessToken,
+  table,
+  keyColumn,
+  keyValue,
+  expectedCount,
+  label,
+) {
+  coveredTables.add(table);
+  const response = await restAs(accessToken, `${table}?${keyColumn}=eq.${keyValue}`, {
+    method: "DELETE",
+    headers: { Prefer: "return=representation" },
+  });
+  const raw = await response.text();
+  if (!response.ok) {
+    report(label, false, `HTTP ${response.status}, ${raw.slice(0, 100)}`);
+    return;
+  }
+  let body;
+  try {
+    body = JSON.parse(raw);
+  } catch {
+    report(label, false, `HTTP ${response.status}, non-JSON body ${raw.slice(0, 100)}`);
+    return;
+  }
+  const ok = Array.isArray(body) && body.length === expectedCount;
+  report(label, ok, `HTTP ${response.status}, ${JSON.stringify(body).slice(0, 100)}`);
+}
+
 async function expectAuthenticatedWritesDenied(
   accessToken,
   table,
@@ -445,6 +481,52 @@ async function childProgressSchemaExists() {
 async function subjectLessonSchemaExists() {
   const rows = await sql`
     select to_regclass('public.subject_lessons') is not null as present
+  `;
+  return rows[0]?.present === true;
+}
+
+/**
+ * hours_log shipped with no UPDATE policy (migration #37: select/insert/
+ * delete only) until the /app/hours page needed one (issue #174,
+ * CG-02). The additive migration may lead this code's own deploy, so
+ * this checks whether it has landed on the target yet, same expand/
+ * contract honesty as materialStatusWriteBoundaryEnforced above: the
+ * probe below asserts the real cross-family guarantee once the policy
+ * exists, and reports an honest "not yet enforced" pass during the
+ * safe window before it does, rather than failing.
+ */
+async function hoursLogUpdatePolicyEnforced() {
+  const rows = await sql`
+    select exists (
+      select 1 from pg_policies
+      where schemaname = 'public' and tablename = 'hours_log'
+        and policyname = 'members update their hours'
+    ) as present
+  `;
+  return rows[0]?.present === true;
+}
+
+/**
+ * family_events and plan_activity_schedule (issue #176, CG-03: calendar
+ * and homeschool planner in one) are brand-new tables from this same
+ * change, deliberately NOT applied to production by this session (the
+ * founder applies prod migrations personally, same posture as the
+ * hours_log update policy). These checks report the honest schema state
+ * so the isolation probe below can assert the real cross-family
+ * guarantee once the migration lands, and report an honest "not yet
+ * enforced" pass during the safe window before it does, rather than
+ * failing.
+ */
+async function familyEventsSchemaExists() {
+  const rows = await sql`
+    select to_regclass('public.family_events') is not null as present
+  `;
+  return rows[0]?.present === true;
+}
+
+async function planActivityScheduleSchemaExists() {
+  const rows = await sql`
+    select to_regclass('public.plan_activity_schedule') is not null as present
   `;
   return rows[0]?.present === true;
 }
@@ -2337,6 +2419,53 @@ async function expectAuthenticatedIsolation() {
       },
       "create Family B memory fixture",
     );
+    const hoursLogBId = await insertFixtureRow(
+      familyBUser,
+      "hours_log",
+      {
+        family_id: familyBId,
+        child_id: childBId,
+        subject: "math",
+        minutes: 45,
+        note: "Isolation check hours fixture.",
+      },
+      "create Family B hours_log fixture",
+    );
+    // family_events and plan_activity_schedule (issue #176, CG-03) are
+    // brand-new tables from this same change, deliberately not yet
+    // applied to production; the fixture rows only get created once the
+    // migration has actually landed on this target.
+    const familyEventsSchemaAvailable = await familyEventsSchemaExists();
+    const familyEventBId = familyEventsSchemaAvailable
+      ? await insertFixtureRow(
+          familyBUser,
+          "family_events",
+          {
+            family_id: familyBId,
+            child_id: childBId,
+            title: "Isolation check family event",
+            starts_on: "2026-01-01",
+            ends_on: "2026-01-01",
+          },
+          "create Family B family_events fixture",
+        )
+      : null;
+    const planActivityScheduleSchemaAvailable = await planActivityScheduleSchemaExists();
+    const planActivityScheduleBId = planActivityScheduleSchemaAvailable
+      ? await insertFixtureRow(
+          familyBUser,
+          "plan_activity_schedule",
+          {
+            family_id: familyBId,
+            child_id: childBId,
+            subject_id: "isolation-check",
+            week: 1,
+            activity_index: 0,
+            scheduled_date: "2026-01-01",
+          },
+          "create Family B plan_activity_schedule fixture",
+        )
+      : null;
     const materialBId = await insertFixtureRow(
       familyBUser,
       "materials",
@@ -2704,6 +2833,201 @@ async function expectAuthenticatedIsolation() {
       0,
       "auth member cannot update another family's child plan",
     );
+
+    // hours_log's update policy is a new additive migration for the
+    // /app/hours page (issue #174): expand/contract honesty, same as
+    // the materials status window above, so this target reports
+    // truthfully whether the migration has landed yet.
+    if (await hoursLogUpdatePolicyEnforced()) {
+      await expectAuthenticatedUpdateFiltered(
+        familyBUser.accessToken,
+        "hours_log",
+        "id",
+        hoursLogBId,
+        { minutes: 60, note: "Edited by its own family." },
+        1,
+        "auth member can edit their own hours_log row",
+      );
+      await expectAuthenticatedUpdateFiltered(
+        familyAUser.accessToken,
+        "hours_log",
+        "id",
+        hoursLogBId,
+        { minutes: 1, note: "Cross-family edit should not apply" },
+        0,
+        "auth member cannot edit another family's hours_log row",
+      );
+    } else {
+      report(
+        "auth member can edit their own hours_log row",
+        true,
+        "not yet enforced: the hours_log update policy migration (issue #174) is deliberately pending on this target",
+      );
+      report(
+        "auth member cannot edit another family's hours_log row",
+        true,
+        "not yet enforced: the hours_log update policy migration (issue #174) is deliberately pending on this target",
+      );
+    }
+
+    // family_events and plan_activity_schedule (issue #176, CG-03):
+    // same expand/contract honesty as hours_log's update policy above,
+    // since both tables are additive migrations from this same change
+    // that are deliberately NOT applied to production by this session.
+    if (familyEventsSchemaAvailable) {
+      await expectAuthenticatedRead(
+        familyBUser.accessToken,
+        "family_events",
+        familyEventBId,
+        1,
+        "auth member can read own family event",
+      );
+      await expectAuthenticatedRead(
+        familyAUser.accessToken,
+        "family_events",
+        familyEventBId,
+        0,
+        "auth member cannot read another family's family event",
+      );
+      await expectAuthenticatedInsertDenied(
+        familyAUser.accessToken,
+        "family_events",
+        {
+          family_id: familyBId,
+          title: "Client-forged family event",
+          starts_on: "2026-01-01",
+          ends_on: "2026-01-01",
+        },
+        "auth member cannot create another family's family event",
+      );
+      await expectAuthenticatedInsertDenied(
+        familyBUser.accessToken,
+        "family_events",
+        {
+          family_id: familyBId,
+          child_id: childAId,
+          title: "Forged child coherence",
+          starts_on: "2026-01-01",
+          ends_on: "2026-01-01",
+        },
+        "auth member cannot attach a family event to another family's child",
+      );
+      await expectAuthenticatedUpdateFiltered(
+        familyBUser.accessToken,
+        "family_events",
+        "id",
+        familyEventBId,
+        { title: "Edited by its own family" },
+        1,
+        "auth member can update own family event",
+      );
+      await expectAuthenticatedUpdateFiltered(
+        familyAUser.accessToken,
+        "family_events",
+        "id",
+        familyEventBId,
+        { title: "Cross-family edit should not apply" },
+        0,
+        "auth member cannot update another family's family event",
+      );
+      await expectAuthenticatedDeleteFiltered(
+        familyAUser.accessToken,
+        "family_events",
+        "id",
+        familyEventBId,
+        0,
+        "auth member cannot delete another family's family event",
+      );
+    } else {
+      coveredTables.add("family_events");
+      for (const label of [
+        "auth member can read own family event",
+        "auth member cannot read another family's family event",
+        "auth member cannot create another family's family event",
+        "auth member cannot attach a family event to another family's child",
+        "auth member can update own family event",
+        "auth member cannot update another family's family event",
+        "auth member cannot delete another family's family event",
+      ]) {
+        report(
+          label,
+          true,
+          "not yet enforced: the family_events migration (issue #176) is deliberately pending on this target",
+        );
+      }
+    }
+
+    if (planActivityScheduleSchemaAvailable) {
+      await expectAuthenticatedRead(
+        familyBUser.accessToken,
+        "plan_activity_schedule",
+        planActivityScheduleBId,
+        1,
+        "auth member can read own plan schedule entry",
+      );
+      await expectAuthenticatedRead(
+        familyAUser.accessToken,
+        "plan_activity_schedule",
+        planActivityScheduleBId,
+        0,
+        "auth member cannot read another family's plan schedule entry",
+      );
+      await expectAuthenticatedInsertDenied(
+        familyBUser.accessToken,
+        "plan_activity_schedule",
+        {
+          family_id: familyBId,
+          child_id: childAId,
+          subject_id: "isolation-check",
+          week: 1,
+          activity_index: 0,
+          scheduled_date: "2026-01-01",
+        },
+        "auth member cannot attach a plan schedule entry to another family's child",
+      );
+      await expectAuthenticatedUpdateFiltered(
+        familyBUser.accessToken,
+        "plan_activity_schedule",
+        "id",
+        planActivityScheduleBId,
+        { scheduled_date: "2026-01-02" },
+        1,
+        "auth member can update own plan schedule entry",
+      );
+      await expectAuthenticatedUpdateFiltered(
+        familyAUser.accessToken,
+        "plan_activity_schedule",
+        "id",
+        planActivityScheduleBId,
+        { scheduled_date: "2026-01-03" },
+        0,
+        "auth member cannot update another family's plan schedule entry",
+      );
+      await expectAuthenticatedDeleteFiltered(
+        familyAUser.accessToken,
+        "plan_activity_schedule",
+        "id",
+        planActivityScheduleBId,
+        0,
+        "auth member cannot delete another family's plan schedule entry",
+      );
+    } else {
+      coveredTables.add("plan_activity_schedule");
+      for (const label of [
+        "auth member can read own plan schedule entry",
+        "auth member cannot read another family's plan schedule entry",
+        "auth member cannot attach a plan schedule entry to another family's child",
+        "auth member can update own plan schedule entry",
+        "auth member cannot update another family's plan schedule entry",
+        "auth member cannot delete another family's plan schedule entry",
+      ]) {
+        report(
+          label,
+          true,
+          "not yet enforced: the plan_activity_schedule migration (issue #176) is deliberately pending on this target",
+        );
+      }
+    }
 
     const childProgressRows = [
       {
@@ -3191,6 +3515,53 @@ if (agentJobSchemaAvailable) {
   for (const table of AGENT_JOB_TABLES) coveredTables.add(table);
   report(
     "agent job tables absent from target (additive migration not applied yet); nothing exposed",
+    true,
+  );
+}
+// Device sync mailbox (migration 20260725150000, additive, lands via MCP
+// ahead of the repo replay): sync_devices holds hashed device tokens,
+// sync_events the append-only mailbox the mac-mini pushes into. Both are
+// revoked from every Data API role (the strict posture: permission error,
+// not empty 200); the token-gated /api/sync routes and the applier cron,
+// on the app's own server connection, are the only readers and writers.
+// Same present-or-arms-later guard as link_tokens above.
+const SYNC_TABLES = ["sync_devices", "sync_events"];
+async function syncTablesPresent() {
+  const response = await rest(`sync_devices?select=id&limit=1`, {
+    headers: { Prefer: "" },
+  });
+  if (response.status !== 404) return true;
+  const raw = await response.text();
+  return !raw.includes("PGRST205");
+}
+const syncSchemaAvailable = await syncTablesPresent();
+if (syncSchemaAvailable) {
+  for (const table of SYNC_TABLES) await expectReadDenied(table);
+  await expectInsertDenied(
+    "sync_events",
+    {
+      family_id: "00000000-0000-0000-0000-000000000000",
+      device_id: "00000000-0000-0000-0000-000000000000",
+      kind: "memory.fact",
+      dedupe_key: "intruder",
+      payload: {},
+      produced_at: new Date().toISOString(),
+    },
+    "anon cannot forge sync events",
+  );
+  await expectInsertDenied(
+    "sync_devices",
+    {
+      family_id: "00000000-0000-0000-0000-000000000000",
+      name: "intruder",
+      token_hash: "a".repeat(64),
+    },
+    "anon cannot mint sync devices",
+  );
+} else {
+  for (const table of SYNC_TABLES) coveredTables.add(table);
+  report(
+    "sync tables absent from target (additive migration not applied yet); nothing exposed",
     true,
   );
 }

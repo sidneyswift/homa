@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { ProgressUnavailable } from "../../../../components/progress/progress-unavailable";
 import { ProgressView } from "../../../../components/progress/progress-view";
 import { getAppData } from "../../../../lib/app-data";
+import { familyWallCheckout, reportLockEnabled } from "../../../../lib/billing/wall";
 import {
   getChildProgressLedger,
   getChildProgressView,
@@ -32,19 +33,32 @@ export default async function ChildProgressPage({
   params: Promise<{ childId: string }>;
 }) {
   const { childId } = await params;
-  const policy = progressRoutePolicy(
-    { surface: "child_progress", childId },
-    liveProgressEnabled(),
-  );
-  if (policy.kind === "redirect") {
-    redirect(policy.href);
-  }
 
   const data = await getAppData();
   if (!data) redirect("/onboarding");
 
   const child = data.children.find((entry) => entry.id === childId);
   if (!child) notFound();
+
+  // The wall (plans/2026-07-11-the-wall.md): used only for the route-policy
+  // decision below, never passed into ProgressView. A family currently
+  // owed the report lock is sent to /app/{childId}/report instead, which
+  // already renders the locked experience; this page stays out of scope
+  // for rendering the lock itself. A child with no report yet has
+  // nothing to lock, so this mirrors report/page.tsx's own no-report
+  // exception exactly (Boolean(token) gates both the wall read and
+  // lockApplies), keeping the two pages' redirect decisions identical.
+  const token = data.reports.get(childId)?.token;
+  const wall = token ? await familyWallCheckout(data.family.id) : null;
+  const lockApplies = Boolean(token) && Boolean(wall) && reportLockEnabled();
+
+  const policy = progressRoutePolicy(
+    { surface: "child_progress", childId },
+    liveProgressEnabled() && !lockApplies,
+  );
+  if (policy.kind === "redirect") {
+    redirect(policy.href);
+  }
 
   // Lessons and the firsts ledger load alongside the view: all three
   // need only the family and the child already re-scoped above, so none

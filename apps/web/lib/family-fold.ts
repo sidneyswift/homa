@@ -30,7 +30,6 @@ const SIMPLE_FAMILY_TABLES = [
   "conversation_offer_fulfillments",
   "conversation_inbound_receipts",
   "family_memories",
-  "hours_log",
   "call_transcripts",
   "learning_reviews",
   "materials",
@@ -130,6 +129,27 @@ async function moveLockedFamilyDataIntoTx(
 
   await tx`
     update public.events set family_id = ${destinationFamilyId}
+    where family_id = ${sourceFamilyId}
+  `;
+
+  // hours_log_block_unique_idx forbids two identical blocks in one
+  // family; a source row the destination already has is the same
+  // dedupe the writers enforce, so it is dropped, not moved.
+  await tx`
+    update public.hours_log source
+    set family_id = ${destinationFamilyId}
+    where source.family_id = ${sourceFamilyId}
+      and not exists (
+        select 1 from public.hours_log target
+        where target.family_id = ${destinationFamilyId}
+          and target.subject = source.subject
+          and target.minutes = source.minutes
+          and target.happened_on = source.happened_on
+          and target.child_id is not distinct from source.child_id
+      )
+  `;
+  await tx`
+    delete from public.hours_log
     where family_id = ${sourceFamilyId}
   `;
 

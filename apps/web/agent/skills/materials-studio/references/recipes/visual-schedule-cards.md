@@ -1,5 +1,12 @@
 # Visual schedule cards
 
+Golden anchor: pass `anchorIds: ["visual-schedule-cards"]` to
+generate_image so the output matches the Homa schedule-cards bar
+(tall cards with a soft full illustration above a plain activity
+label, dashed cut lines, one consistent art style across every card).
+Write your own prompt with your own content; the anchor sets the
+visual bar, not the specifics.
+
 Daily routine cards showing activity illustrations with time labels.
 Designed for cutting apart and sequencing on a board or wall.
 

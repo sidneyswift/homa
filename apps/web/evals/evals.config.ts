@@ -22,10 +22,13 @@ console.error(describeEvalIsolation(applyEvalIsolation(process.env)));
  * turn resolves the "no family set up, head to /app" fallback and the
  * agent (correctly) refuses to do family work; the 2026-07-24 routing
  * failures were exactly that. The flag gives eval sessions the synthetic
- * Walker family (lib/family-context-eval-fixture.ts). It is scoped to
- * the eval runner's process tree and is ignored on Vercel by the
- * fixture's own guard. An eval that needs the no-family state can unset
- * it in its own test body.
+ * Walker family (lib/family-context-eval-fixture.ts). Under
+ * `pnpm eval:sandbox` it goes further: the sandbox database is seeded
+ * with the Walker rows and the eve channel stamps eval sessions
+ * family-pinned on them, so family-scoped tools run for real instead of
+ * failing closed. It is scoped to the eval runner's process tree and is
+ * ignored on Vercel by the fixture's own guard. An eval that needs the
+ * no-family state can unset it in its own test body.
  */
 process.env[EVAL_FAMILY_FIXTURE_FLAG] ??= "1";
 

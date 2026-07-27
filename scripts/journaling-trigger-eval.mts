@@ -17,11 +17,21 @@
  * TOOL CALLS, never on the reply text: an agent that answers warmly
  * and records nothing is exactly the failure being measured.
  *
+ * The loop is result-fed: every tool returns a result and the model may
+ * take further steps after reading it, the way a production turn does.
+ * The journal result is built through the production schema, hours
+ * reminder included, because the hours law is enforced as a
+ * deterministic note ON the journal result rather than as instruction
+ * prose (prose left log_hours uncalled on ~90% of duration-bearing
+ * recaps, 2026-07-25). A single-completion harness could only ever
+ * observe same-step co-calls and would measure that note as zero by
+ * construction. Assertions therefore span the calls of ALL steps.
+ *
  * Modes:
  *   --check-fixtures   free, deterministic, CI-safe. Validates fixture
  *                      integrity (ids unique, children resolvable,
  *                      both outcomes represented, prod cases present).
- *   (default)          the paid run: one model call per fixture.
+ *   (default)          the paid run: one short agent loop per fixture.
  *
  * Usage:
  *   pnpm check:journaling-trigger   (fixtures only, runs in CI)
@@ -33,10 +43,19 @@ import { loadEnvFile } from "node:process";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
-import { generateText, tool } from "../apps/web/node_modules/ai/dist/index.js";
+import {
+  generateText,
+  stepCountIs,
+  tool,
+} from "../apps/web/node_modules/ai/dist/index.js";
 import { z } from "../apps/web/node_modules/zod/index.js";
 
 import { manageChildProgressToolInputSchema } from "../apps/web/lib/child-progress/tool-contract";
+import {
+  JOURNAL_HOURS_PROGRESS_NOTE,
+  manageChildProgressResultSchema,
+  REFUSED_PROGRESS_NOTE,
+} from "../apps/web/lib/child-progress/tool-result-contract";
 import { HOMA_MODEL } from "../apps/web/agent/model";
 import {
   JOURNALING_TRIGGER_FIXTURES,
@@ -46,6 +65,20 @@ import {
 
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const checkFixturesOnly = process.argv.includes("--check-fixtures");
+
+/**
+ * Which channel's real instruction stack to compose. The journal rule
+ * has one always-on home (instructions.md), but SMS and email turns
+ * ride mode blocks on top of it, and a dedup of those blocks is only
+ * gateable by an eval that actually renders them (2026-07-25; the web
+ * hardcode measured the mode files as zero by construction).
+ */
+const channelArg =
+  process.argv.find((arg) => arg.startsWith("--channel="))?.slice(10) ?? "web";
+if (!["web", "sms", "email"].includes(channelArg)) {
+  console.error(`Unknown --channel=${channelArg} (web, sms, email)`);
+  process.exit(1);
+}
 
 /**
  * Fixture integrity, free and deterministic. This is what CI runs on
@@ -124,6 +157,24 @@ const instructions = readFileSync(
   "utf8",
 );
 
+async function channelBlock(): Promise<string> {
+  if (channelArg === "sms") {
+    const { composeSmsModeMarkdown } = await import(
+      "../apps/web/agent/instructions/sms-mode"
+    );
+    // The linked-family branch: a real family texting Homa.
+    return composeSmsModeMarkdown({ familyId: "eval-family" });
+  }
+  if (channelArg === "email") {
+    const { EMAIL_MODE_MARKDOWN } = await import(
+      "../apps/web/agent/instructions/email-mode"
+    );
+    return EMAIL_MODE_MARKDOWN;
+  }
+  return "The current channel is web chat.";
+}
+const modeBlock = await channelBlock();
+
 /** The family block Homa reads every turn, in its real shape. */
 const familyContext = [
   "<family_context>",
@@ -142,36 +193,97 @@ const familyContext = [
   "</family_context>",
 ].join("\n");
 
+function childNameFor(childId: string | undefined): string | undefined {
+  return TRIGGER_FAMILY.find((child) => child.id === childId)?.name;
+}
+
+const JOURNAL_UNDO_TOKEN = "44444444-4444-4444-8444-444444444444";
+
+/**
+ * What record_journal_evidence hands back on a capture, built through
+ * the production schema so this harness cannot drift from the
+ * contract. The hours reminder rides every capture unconditionally;
+ * whether the model then calls log_hours is exactly the judgment under
+ * measurement.
+ */
+function journalToolResult(input: {
+  action?: string;
+  childId?: string;
+}): unknown {
+  const childName =
+    input.action === "record_journal_evidence"
+      ? childNameFor(input.childId)
+      : undefined;
+  if (!childName) {
+    return manageChildProgressResultSchema.parse({
+      kind: "refused",
+      note: REFUSED_PROGRESS_NOTE,
+    });
+  }
+  return manageChildProgressResultSchema.parse({
+    kind: "progress_update",
+    label: "Progress updated",
+    childName,
+    affectedTopics: ["Practices the skill the parent described"],
+    undoAvailable: true,
+    undoToken: JOURNAL_UNDO_TOKEN,
+    note: JOURNAL_HOURS_PROGRESS_NOTE,
+  });
+}
+
 /**
  * The real progress tool plus decoys. Without alternatives the model
  * has one lever and pulls it for everything, which would make the
- * silent cases meaningless.
+ * silent cases meaningless. Every tool executes: a call that returned
+ * nothing would end the loop and hide every follow-through behavior.
  */
 const tools = {
   manage_child_progress: tool({
     description:
       "Manage one family's durable child progress evidence and check-ins.",
     inputSchema: manageChildProgressToolInputSchema,
+    execute: async (input) =>
+      journalToolResult(input as { action?: string; childId?: string }),
   }),
   remember: tool({
     description: "Save one durable fact about the family.",
     inputSchema: z.object({ fact: z.string() }),
+    execute: async () => ({ saved: true }),
   }),
+  // This decoy carries the production tool's real description
+  // (agent/tools/log_hours.ts): a thinner one measurably changed the
+  // behavior under test, stalling the model on "which child?" when the
+  // real tool says hours may be family-wide and logged on mention.
   log_hours: tool({
-    description: "Record a block of school time.",
+    description:
+      "Log a block of school time to the family's hours record the moment the parent mentions one ('we did 45 minutes of math'). These rows are the family's compliance evidence, so log every real mention exactly once. School time only: movies, errands, and waiting rooms never count. When the duration is vague ('most of the morning'), ask one short 'about how long?' first.",
     inputSchema: z.object({
-      childId: z.string().optional(),
+      childId: z
+        .string()
+        .optional()
+        .describe(
+          "The child it was for. Omit for family-wide time like co-op.",
+        ),
       subject: z.string(),
       minutes: z.number(),
+    }),
+    execute: async (input) => ({
+      logged: true,
+      done: true,
+      subject: input.subject,
+      minutes: input.minutes,
+      note: "On the record. Mention it in one short natural aside; the running week total is there if it fits naturally.",
     }),
   }),
   create_printable: tool({
     description: "Build a worksheet or printable page for a child.",
     inputSchema: z.object({ childId: z.string(), skill: z.string() }),
+    execute: async () => ({ queued: true }),
   }),
   open_planner: tool({
     description: "Open the family's planner board.",
     inputSchema: z.object({ childId: z.string().optional() }),
+    execute: async () => ({ opened: true }),
   }),
 };
 
@@ -181,18 +293,15 @@ interface TriggerOutcome {
   detail: string;
 }
 
-function childNameFor(childId: string | undefined): string | undefined {
-  return TRIGGER_FAMILY.find((child) => child.id === childId)?.name;
-}
-
 async function runFixture(fixture: TriggerFixture): Promise<TriggerOutcome> {
   const result = await generateText({
     model: HOMA_MODEL,
-    system: [instructions, "The current channel is web chat.", familyContext].join(
-      "\n\n",
-    ),
+    system: [instructions, modeBlock, familyContext].join("\n\n"),
     prompt: fixture.message,
     tools,
+    // Enough steps for fan-out plus the follow-through the journal
+    // result's note asks for, then the closing reply.
+    stopWhen: stepCountIs(5),
     maxRetries: 1,
     providerOptions: {
       gateway: {
@@ -202,7 +311,10 @@ async function runFixture(fixture: TriggerFixture): Promise<TriggerOutcome> {
     },
   });
 
-  const journalCalls = (result.toolCalls ?? []).filter(
+  // A follow-through call prompted by a tool result lands in a later
+  // step, so every assertion reads the whole loop, not the final step.
+  const toolCalls = result.steps.flatMap((step) => step.toolCalls ?? []);
+  const journalCalls = toolCalls.filter(
     (call: { toolName: string; input?: { action?: string } }) =>
       call.toolName === "manage_child_progress" &&
       call.input?.action === "record_journal_evidence",
@@ -212,7 +324,7 @@ async function runFixture(fixture: TriggerFixture): Promise<TriggerOutcome> {
       childNameFor(call.input?.childId),
     )
     .filter((name): name is string => name !== undefined);
-  const otherTools = (result.toolCalls ?? [])
+  const otherTools = toolCalls
     .map((call: { toolName: string }) => call.toolName)
     .filter((name: string) => name !== "manage_child_progress");
 
@@ -232,15 +344,20 @@ async function runFixture(fixture: TriggerFixture): Promise<TriggerOutcome> {
   const missing = fixture.childNames.filter(
     (name) => !journaledNames.includes(name),
   );
-  const passed = missing.length === 0;
+  const missingCompanion =
+    fixture.alsoCallsTool !== undefined
+    && !otherTools.includes(fixture.alsoCallsTool);
+  const passed = missing.length === 0 && !missingCompanion;
   return {
     fixture,
     passed,
     detail: passed
-      ? `journaled ${journaledNames.join(", ")}`
+      ? `journaled ${journaledNames.join(", ")}${fixture.alsoCallsTool ? ` + ${fixture.alsoCallsTool}` : ""}`
       : journalCalls.length === 0
         ? `no journal call (used ${otherTools.join(", ") || "no tools"})`
-        : `journaled ${journaledNames.join(", ")}, missing ${missing.join(", ")}`,
+        : missing.length > 0
+          ? `journaled ${journaledNames.join(", ")}, missing ${missing.join(", ")}`
+          : `journaled ${journaledNames.join(", ")} but never called ${fixture.alsoCallsTool}`,
   };
 }
 
@@ -270,8 +387,9 @@ const silent = outcomes.filter((o) => o.fixture.expect === "silent");
 const capture = journaling.filter((o) => o.passed).length;
 const restraint = silent.filter((o) => o.passed).length;
 
+console.log(`\nchannel   ${channelArg}`);
 console.log(
-  `\ncapture   ${capture}/${journaling.length}` +
+  `capture   ${capture}/${journaling.length}` +
     ` (${Math.round((capture / journaling.length) * 100)}%)` +
     `  the mother told Homa something and it reached the record`,
 );

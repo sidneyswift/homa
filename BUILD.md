@@ -17,8 +17,8 @@ Current evidence lives in `docs/homa-planning/reconciliation/`:
 
 - `documentation-manifest.tsv`: disposition of every documentation file.
 - `claim-ledger.tsv`: material claims, authority, evidence, and resolution.
-- `evidence/repository-baseline.md`: time-bounded repository observations.
-- `evidence/production-baseline.md`: time-bounded deployment and production observations.
+- `docs/homa-planning/reconciliation/evidence/repository-baseline.md`: time-bounded repository observations.
+- `docs/homa-planning/reconciliation/evidence/production-baseline.md`: time-bounded deployment and production observations.
 
 The latest recorded production baseline is a snapshot, not a standing guarantee. Refresh it whenever a completion claim depends on current production state.
 
@@ -96,24 +96,18 @@ migration or reconciliation problem is handled by leaving the flag false.
 
 ## Verification before handoff
 
-Run the commands listed in `AGENTS.md` that match the change. The full repository handoff gate is:
+Run the commands listed in `AGENTS.md` that match the change. The
+authoritative full gate list is CI: `.github/workflows/ci.yml` runs every
+required check (typecheck, lint, both builds, and the whole `check:*`
+roster), and it is the one list kept current, so enumerate from it rather
+than from any hand-copied block. Four triggers still apply BEFORE a change
+or push, where CI is too late:
 
 ```sh
-pnpm typecheck
-pnpm lint
-pnpm check:child-progress
-pnpm check:progress-ui
-pnpm child-progress:e2e
-pnpm build
-pnpm --filter web exec eve build
-pnpm check:isolation
-pnpm check:map
-pnpm check:events
-pnpm check:fleet-skills
-pnpm check:fleet-skills-dormant
-pnpm check:skills-targeting
-pnpm check:taxonomy
-pnpm check:continuity
+pnpm check:isolation            # before any schema or query change
+node scripts/eve-upgrade-check.mjs   # before any eve version bump
+pnpm check:continuity           # when touching continuity or channel adapters
+VERCEL=1 pnpm --filter web exec eve build && VERCEL=1 pnpm check:eve-stream-duration   # before pushing apps/web/agent changes
 ```
 
 During the documentation reconciliation, also run `pnpm check:docs`. The `--allow-open` form is an interim structural check only and is not a completion signal.
