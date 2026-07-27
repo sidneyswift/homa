@@ -24,6 +24,8 @@ import {
   type MaterialSource,
 } from "../../lib/materials/artifact-store";
 import {
+  finalizeMaterialCaller,
+  finalizeMaterialPinned,
   getMaterialCaller,
   getMaterialPinned,
   type MaterialSummary,
@@ -745,6 +747,40 @@ const createPrintable = defineBoundedTool({
     // never lands on her phone; revise first. The number comes from
     // channel auth, never the model (anti-relay law).
     const reviewPassed = review === null || review.pass;
+
+    // A passing build becomes the parent-facing version here, in code,
+    // instead of waiting for a mark_material_final the model may never
+    // call. Until this was deterministic, every revision after the first
+    // kept version sat as a draft while
+    // selectParentVisibleMaterialRevisions kept serving the older final
+    // (a final wins its chain unconditionally), so Homa narrated edits
+    // the parent could not see anywhere: not in chat after a reload, and
+    // not in the binder, which is pinned to status 'final'. Found
+    // 2026-07-27 on the co-founder family, whose report was "i have asked
+    // her about things multiple times and it doesnt show up in our chat":
+    // six passing builds in one day, one mark_material_final call between
+    // them, and that one only because she said her binder was empty.
+    // Lesson-linked chains are excluded on purpose; they finalize only
+    // through the lesson Keep action, and planMaterialFinalization
+    // refuses them anyway.
+    let finalized = false;
+    let finalizeNote = "";
+    if (reviewPassed && !trustedLesson) {
+      try {
+        const finalizeResult =
+          access.mode === "pinned"
+            ? await finalizeMaterialPinned(familyId, materialId)
+            : await finalizeMaterialCaller(access.db, familyId, materialId);
+        finalized = finalizeResult.finalized;
+        if (!finalized) finalizeNote = ` ${finalizeResult.note}`;
+      } catch (error) {
+        console.error(
+          "create_printable auto-finalize failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      }
+    }
+
     if (reservedSourceDeliveryId) {
       try {
         await completeAcceptedOfferFulfillment({
@@ -807,7 +843,13 @@ const createPrintable = defineBoundedTool({
             : "The material is made and saved, but text delivery failed. Tell her it's ready in her Homa chat on the web, and offer to tweak anything."
           : "NOT texted to her yet: fix the issues below (call again with revisesId set to this id), then the passing version sends."
         : reviewPassed
-          ? `The card with the preview and print button is already visible in chat.${pagesNote} Tell her it's ready in one warm sentence (child + skill), and invite tweaks; never paste the links.`
+          ? finalized
+            ? `The card with the preview and print button is already visible in chat.${pagesNote} Tell her it's ready in one warm sentence (child + skill), and invite tweaks; never paste the links.`
+            // Passing but not promoted: an older kept version still wins
+            // the chain, so she is looking at that one. Saying "it's ready"
+            // here is the exact false claim that produced the 2026-07-27
+            // report, so the note refuses it in terms the model can act on.
+            : `This version is saved but is NOT the one she sees: promoting it failed, so an earlier kept version is still on her card and in her binder.${finalizeNote} Do NOT tell her it is updated or ready. Say you hit a snag saving this version, and offer to try again.`
           : "This version is NOT shown to her: a flagged draft never renders as a card, on any channel. Fix the issues below (call again with revisesId set to this id); only a passing version appears, and only then is there anything to tell her.";
     // The reviewer never sees pages past REVIEW_PAGE_CAP (input-token
     // ceiling), so a pass on a longer document is not a full-document
@@ -838,7 +880,10 @@ const createPrintable = defineBoundedTool({
         pdfUrl,
         pageCount: rendered.pageCount,
         ...(rendered.pageCount > 1 ? { pagePreviewUrls } : {}),
-        status: "draft",
+        // The real status, not an assumption. The renderer picks one card
+        // per chain from this field, so reporting 'draft' for a row that
+        // is now 'final' would hide the card it just built.
+        status: finalized ? "final" : "draft",
         revisesId: input.revisesId ?? null,
         reviewPassed: review === null ? null : review.pass,
       },
@@ -846,7 +891,11 @@ const createPrintable = defineBoundedTool({
       sentByText,
       note: trustedLesson
         ? `${deliveryNote}${reviewNote}`
-        : `${deliveryNote}${reviewNote} When the parent approves a version, call mark_material_final with this id.`,
+        : finalized
+          // Already promoted, so telling the model to go call
+          // mark_material_final would be a wasted call on a kept row.
+          ? `${deliveryNote}${reviewNote}`
+          : `${deliveryNote}${reviewNote} When the parent approves a version, call mark_material_final with this id.`,
     };
   },
 });
