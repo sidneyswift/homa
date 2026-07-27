@@ -5,7 +5,9 @@ import {
   chatOnboardingEnabled,
   familyOnboardingActive,
   appWouldAdmit,
+  ONBOARDING_BACKSTOP_DAYS,
   onboardingActiveForRow,
+  onboardingCompletionReached,
   onboardingRowFromMembership,
   readOnboardingRecord,
 } from "./state";
@@ -175,5 +177,50 @@ describe("appWouldAdmit", () => {
 
   it("refuses an unfinished profile however many children", () => {
     assert.equal(appWouldAdmit({ profileCompletedAt: null, childCount: 3 }), false);
+  });
+});
+
+describe("onboardingCompletionReached", () => {
+  const day = 24 * 60 * 60 * 1000;
+  const now = new Date("2026-08-01T00:00:00.000Z");
+  const base = {
+    profileCompletedAt: "2026-07-24T00:00:00.000Z",
+    childCount: 2,
+    scoredReportCount: 1,
+    recordUpdatedAt: "2026-07-24T00:00:00.000Z",
+    now,
+  };
+
+  it("releases a family stranded past the backstop", () => {
+    assert.equal(
+      onboardingCompletionReached({
+        ...base,
+        recordUpdatedAt: new Date(
+          now.getTime() - ONBOARDING_BACKSTOP_DAYS * day,
+        ).toISOString(),
+      }),
+      true,
+    );
+  });
+
+  it("holds a family one day short of the backstop", () => {
+    assert.equal(
+      onboardingCompletionReached({
+        ...base,
+        recordUpdatedAt: new Date(
+          now.getTime() - (ONBOARDING_BACKSTOP_DAYS - 1) * day,
+        ).toISOString(),
+      }),
+      false,
+    );
+  });
+
+  it("does not strand a record that predates updatedAt", () => {
+    // A null updatedAt must not read as age zero forever; it simply
+    // cannot be aged out, so the happy-path clause has to carry it.
+    assert.equal(
+      onboardingCompletionReached({ ...base, recordUpdatedAt: null }),
+      false,
+    );
   });
 });

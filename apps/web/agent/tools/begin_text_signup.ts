@@ -9,7 +9,12 @@ import {
   nextChecklistItem,
   signupProgress,
 } from "../../lib/sms-onboarding";
-import { NOT_SMS_REFUSAL, resolveSignupSession } from "../../lib/signup-session";
+import {
+  NOT_SMS_REFUSAL,
+  TEXT_SIGNUP_PAYWALLED_REFUSAL,
+  resolveSignupSession,
+  textSignupPaywalled,
+} from "../../lib/signup-session";
 
 /**
  * Opens (or resumes) text-native signup for the texter's own number
@@ -25,6 +30,13 @@ export default defineBoundedTool({
   repeatable: false,
   inputSchema: z.object({}),
   async execute(_input, ctx) {
+    // Named refusal first: the signup paywall closes text signup
+    // entirely (founder directive 2026-07-26), and this entry tool is
+    // where the model learns that in words that steer it to the web
+    // trial instead of the "wrong channel" note below.
+    if (textSignupPaywalled()) {
+      return { started: false, note: TEXT_SIGNUP_PAYWALLED_REFUSAL };
+    }
     const session = await resolveSignupSession(ctx.session.auth.current?.attributes);
     if (!session) return { started: false, note: NOT_SMS_REFUSAL };
 

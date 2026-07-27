@@ -1,9 +1,25 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { afterEach, describe, it } from "node:test";
 
 import { resolveSignupSession } from "./signup-session";
 
+const originalPaywallFlag = process.env.HOMA_SIGNUP_PAYWALL_ENABLED;
+
+afterEach(() => {
+  if (originalPaywallFlag === undefined) delete process.env.HOMA_SIGNUP_PAYWALL_ENABLED;
+  else process.env.HOMA_SIGNUP_PAYWALL_ENABLED = originalPaywallFlag;
+});
+
 describe("text signup session resolution", () => {
+  it("refuses every text signup while the signup paywall is on", async () => {
+    process.env.HOMA_SIGNUP_PAYWALL_ENABLED = "true";
+    const result = await resolveSignupSession({
+      channel: "sms",
+      phoneNumber: "+15551234567",
+    });
+
+    assert.equal(result, null);
+  });
   it("refuses a phone while it is handling a family invitation", async () => {
     const pending = await resolveSignupSession({
       channel: "sms",

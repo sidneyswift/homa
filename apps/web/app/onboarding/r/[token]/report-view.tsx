@@ -996,10 +996,11 @@ export function ReportView({
                         "mt-4 inline-flex items-center px-5 py-2.5 text-sm font-bold",
                       )}
                     >
-                      Get your child&apos;s free report
+                      Start your free trial
                     </Link>
                     <p className="mt-3 text-xs" style={{ color: "var(--stone-400)" }}>
-                      Five minutes of questions, benchmarked against national standards.
+                      Five minutes of questions, benchmarked against national standards. 30 free
+                      days, then $19 a month.
                     </p>
                   </>
                 ) : (

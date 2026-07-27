@@ -1517,7 +1517,20 @@ export function ChatClient({
     // planner canvas, when open, shares this row on desktop (the chat
     // column narrows) and overlays the phone.
     <div className="flex h-[calc(100dvh-3.5rem)] lg:h-dvh">
-    <div className="flex h-full min-w-0 flex-1 flex-col">
+    <div className="relative flex h-full min-w-0 flex-1 flex-col">
+      {/* The morning scrolls into everything above it: a soft fade at
+          the top edge whenever there is more past to scroll to. This
+          lives outside the scrollable <main> as a plain absolute
+          overlay pinned to the column, not a sticky child of the
+          scroll container: sticky plus a counteracting negative
+          margin (the previous approach) only lines up with the true
+          scroll edge when both move in lockstep, and WebKit drifted
+          the two apart, leaving the fade low with a hard cutoff edge
+          instead of flush at the top. */}
+      <div
+        aria-hidden="true"
+        className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-[54px] bg-gradient-to-b from-page to-transparent transition-opacity duration-(--dur-base) ${topFaded ? "opacity-100" : "opacity-0"}`}
+      />
       {/* 780px is the kit's transcript measure (ChatView.jsx). Turns get
           gap-6 so the flat replies and bubbles keep a clear rhythm. */}
       <main
@@ -1530,15 +1543,6 @@ export function ChatClient({
         // that should feel calm.
         className="mx-auto flex w-full max-w-[780px] flex-1 flex-col gap-6 overflow-y-auto px-4 pb-6 pt-10 sm:px-6"
       >
-        {/* The morning scrolls into everything above it: a soft fade at
-            the top edge whenever there is more past to scroll to. */}
-        <div
-          aria-hidden="true"
-          // -mt-10 tracks the container's pt-10: this pulls the fade back
-          // flush with the scroll edge, so the two have to move together
-          // or the gradient starts below the top and leaves a hard line.
-          className={`pointer-events-none sticky top-0 z-10 -mb-[54px] -mt-10 h-[54px] shrink-0 bg-gradient-to-b from-page to-transparent transition-opacity duration-(--dur-base) ${topFaded ? "opacity-100" : "opacity-0"}`}
-        />
         {!hasAnyMessages && !onboarding ? (
           <div className="my-auto text-center">
             <h1 className="font-display text-2xl font-semibold text-strong">

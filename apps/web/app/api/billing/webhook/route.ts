@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 
-import { startFamilyTrial } from "../../../../lib/billing/wall";
+import { recordFamilySubscription, startFamilyTrial } from "../../../../lib/billing/wall";
 import { mapDb } from "../../../../lib/map/db";
 import { emitMapEvent } from "../../../../lib/map/events";
 
@@ -64,6 +64,24 @@ export async function POST(request: Request): Promise<Response> {
         const fresh = await startFamilyTrial(familyId, customerId);
         if (fresh) {
           await emitMapEvent("billing.trial_started", { family_id: familyId });
+        }
+        // Stamp the mirror by FAMILY id too: the subscription.created
+        // event for this checkout matched zero rows whenever it arrived
+        // before this handler pinned the (possibly brand-new) customer
+        // id, which would leave a re-subscribing family walled on its
+        // stale "canceled" status (see recordFamilySubscription).
+        const subscriptionId =
+          typeof session.subscription === "string"
+            ? session.subscription
+            : session.subscription?.id ?? null;
+        if (subscriptionId) {
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          await recordFamilySubscription(familyId, {
+            id: subscription.id,
+            status: subscription.status,
+            priceId: subscription.items.data[0]?.price.id ?? null,
+            currentPeriodEndSec: subscription.items.data[0]?.current_period_end ?? null,
+          });
         }
         break;
       }

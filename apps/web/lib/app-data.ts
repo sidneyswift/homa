@@ -1,5 +1,6 @@
 import { cache } from "react";
 
+import { familyAccountCheckout } from "./billing/wall";
 import {
   getPlansForChildren,
   getReportsForChildren,
@@ -40,12 +41,19 @@ export interface AppData {
 
 /**
  * getAppData(): AppData | null
- * Null means setup is unfinished (no family, family card not done, or no
- * kids yet); callers redirect to /onboarding, the one setup flow.
+ * Null means this session doesn't belong in /app yet: setup is
+ * unfinished (no family, family card not done, or no kids yet), or the
+ * signup paywall holds the account (founder directive 2026-07-26).
+ * Callers redirect to /onboarding, the one setup flow, whose own router
+ * forwards walled accounts to /onboarding/trial. Because the layout AND
+ * every page under /app call this one cached function, the account gate
+ * covers every /app surface with a single decision instead of a
+ * per-route check that can drift (the Progress-bypass scar, dc4ab64b).
  */
 export const getAppData = cache(async (): Promise<AppData | null> => {
   const family = await getMyFamily();
   if (!family || !family.profile_completed_at) return null;
+  if ((await familyAccountCheckout(family.id)) !== null) return null;
   const children = await getMyChildren(family.id);
   if (children.length === 0) return null;
 

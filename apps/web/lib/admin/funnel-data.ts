@@ -163,6 +163,7 @@ const ACTIVATION_STAGES: {
  * visible for the first time (funnel work 2026-07-20). */
 const STEP_LABELS: Record<MapFlowStep, string> = {
   parent: "Account (email/password)",
+  paywall: "Trial gate (card ask)",
   chat: "The conversation (chat-first)",
   family: "Create your family",
   homeschool: "About your homeschool",
