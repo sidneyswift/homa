@@ -7,6 +7,7 @@ import {
   applyPlanEdits,
   describePlanEdits,
   MAX_ACTIVITIES_PER_WEEK,
+  scheduleRemapForEdits,
 } from "./plan-edits";
 
 /**
@@ -134,5 +135,60 @@ describe("describePlanEdits", () => {
       describePlanEdits([{ action: "add", week: 2, text: "a" }]),
       "added 1 activity in week 2",
     );
+  });
+});
+
+describe("scheduleRemapForEdits", () => {
+  it("returns nothing when no activity was removed", () => {
+    assert.deepEqual(
+      scheduleRemapForEdits(fixturePlan(), [
+        { action: "add", week: 1, text: "new one" },
+        { action: "replace", week: 1, index: 0, text: "reworded" },
+      ]),
+      [],
+    );
+  });
+
+  it("retires the removed index and slides later ones down", () => {
+    // Week 1 holds three activities; removing index 0 means the calendar
+    // row for index 1 must become index 0, or it would describe a
+    // different activity on the same day.
+    assert.deepEqual(scheduleRemapForEdits(fixturePlan(), [{ action: "remove", week: 1, index: 0 }]), [
+      { week: 1, moves: [{ from: 0, to: null }, { from: 1, to: 0 }, { from: 2, to: 1 }] },
+    ]);
+  });
+
+  it("leaves earlier indices alone when a later one is removed", () => {
+    assert.deepEqual(scheduleRemapForEdits(fixturePlan(), [{ action: "remove", week: 1, index: 2 }]), [
+      { week: 1, moves: [{ from: 2, to: null }] },
+    ]);
+  });
+
+  it("composes two removals, addressing the live shape like the plan does", () => {
+    // After removing index 0, the original index 1 sits at live index 0,
+    // so a second remove of index 0 retires the ORIGINAL index 1.
+    assert.deepEqual(
+      scheduleRemapForEdits(fixturePlan(), [
+        { action: "remove", week: 1, index: 0 },
+        { action: "remove", week: 1, index: 0 },
+      ]),
+      [{ week: 1, moves: [{ from: 0, to: null }, { from: 1, to: null }, { from: 2, to: 0 }] }],
+    );
+  });
+
+  it("keeps weeks independent", () => {
+    const remaps = scheduleRemapForEdits(fixturePlan(), [
+      { action: "remove", week: 1, index: 0 },
+      { action: "remove", week: 3, index: 0 },
+    ]);
+    assert.deepEqual(remaps.map((remap) => remap.week).sort(), [1, 3]);
+    assert.deepEqual(
+      remaps.find((remap) => remap.week === 3)!.moves,
+      [{ from: 0, to: null }, { from: 1, to: 0 }],
+    );
+  });
+
+  it("ignores a week the plan does not have", () => {
+    assert.deepEqual(scheduleRemapForEdits(fixturePlan(), [{ action: "remove", week: 9, index: 0 }]), []);
   });
 });

@@ -43,7 +43,12 @@ import {
 import type { SubjectLessonSummary } from "../subject-lessons/types";
 import { purgeChildBlobs } from "./child-blobs";
 import { mapDb, type DbJson } from "./db";
-import { applyPlanEdits, describePlanEdits, type PlanEdit } from "./plan-edits";
+import {
+  applyPlanEdits,
+  describePlanEdits,
+  scheduleRemapForEdits,
+  type PlanEdit,
+} from "./plan-edits";
 import {
   cleanProfileFocus,
   cleanProfileInterests,
@@ -870,6 +875,52 @@ export async function editPlanActivities(
         updated_at = now()
     where id = ${row.id}
   `;
+  // Cascade the index shift into the calendar (issue #176): a removal
+  // slides every later activity in that week down one, so a schedule row
+  // still holding the old index would put a DIFFERENT activity on that
+  // date. Read-side already drops rows that no longer resolve; this
+  // keeps the ones that do resolve pointing at the right activity.
+  // Delete-then-reinsert per week rather than in-place decrements: the
+  // table's natural key is unique, so shifting in place can collide with
+  // a row that has not moved yet.
+  const remaps = scheduleRemapForEdits(row.plan, edits);
+  for (const remap of remaps) {
+    const scheduled = await sql<{ activity_index: number; scheduled_date: string }[]>`
+      select activity_index, scheduled_date
+      from public.plan_activity_schedule
+      where family_id = ${familyId}
+        and child_id = ${childId}
+        and subject_id = ${subjectId}
+        and week = ${remap.week}
+    `;
+    if (scheduled.length === 0) continue;
+    const moveTo = new Map(remap.moves.map((move) => [move.from, move.to]));
+    const survivors = scheduled
+      .map((entry) => {
+        // An index with no move keeps its slot; an explicit null is gone.
+        const to = moveTo.has(entry.activity_index)
+          ? moveTo.get(entry.activity_index)!
+          : entry.activity_index;
+        return to === null ? null : { index: to, date: entry.scheduled_date };
+      })
+      .filter((entry): entry is { index: number; date: string } => entry !== null);
+    await sql`
+      delete from public.plan_activity_schedule
+      where family_id = ${familyId}
+        and child_id = ${childId}
+        and subject_id = ${subjectId}
+        and week = ${remap.week}
+    `;
+    for (const survivor of survivors) {
+      await sql`
+        insert into public.plan_activity_schedule
+          (family_id, child_id, subject_id, week, activity_index, scheduled_date)
+        values (${familyId}, ${childId}, ${subjectId}, ${remap.week}, ${survivor.index}, ${survivor.date})
+        on conflict (family_id, child_id, subject_id, week, activity_index)
+        do update set scheduled_date = excluded.scheduled_date, updated_at = now()
+      `;
+    }
+  }
   await touchFamily(familyId);
   return {
     status: "applied",
