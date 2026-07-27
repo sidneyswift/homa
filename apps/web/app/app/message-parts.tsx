@@ -393,6 +393,40 @@ export function messageSaysSomething(message: EveMessage): boolean {
   return assistantItems(message).length > 0;
 }
 
+/**
+ * userMessageSendState(message): where a user bubble sits between typed
+ * and delivered, straight from eve's own optimistic projection
+ * (`metadata.optimistic` + `metadata.status`, message-reducer.js) rather
+ * than a parallel tracker (BUILD.md M1-04: eve drives state).
+ *
+ *   "sending" - the client.message.submitted marker: posted, not yet
+ *               confirmed by the server's message.received event.
+ *   "failed"  - client.message.failed: the send errored (network down,
+ *               a stream that died before opening, or the server
+ *               declaring the session failed) or was auto-stopped by
+ *               the stall watchdog after a long silence. eve replaces
+ *               this same bubble's event in place, so it is never a
+ *               second copy of the message.
+ *   null      - anything else: a plain historical or confirmed message,
+ *               nothing to show beside it.
+ *
+ * Once the server's message.received event lands, eve retires the
+ * optimistic id entirely (it is replaced by the turn's own `${turnId}:
+ * user` message), so "sending" never lingers past real confirmation, and
+ * there is no separate "delivered" state to render: the bubble simply
+ * stops being optimistic.
+ */
+export function userMessageSendState(
+  message: EveMessage,
+): "sending" | "failed" | null {
+  if (message.role !== "user" || message.metadata?.optimistic !== true) {
+    return null;
+  }
+  if (message.metadata.status === "submitted") return "sending";
+  if (message.metadata.status === "failed") return "failed";
+  return null;
+}
+
 function AssistantItemView({
   item,
   onSendSuggestion,
@@ -623,6 +657,7 @@ export function MessageView({
   onDetailsSaved,
   dockedDetailPartKey,
   dockedChecklistPartKey,
+  onRetryFailedMessage,
 }: {
   message: EveMessage;
   onSendSuggestion?: (message: string) => void;
@@ -665,6 +700,11 @@ export function MessageView({
   dockedDetailPartKey?: string;
   /** Same contract for the checklist invite. */
   dockedChecklistPartKey?: string;
+  /** Resends this exact text (a plain composer send, so the existing
+   *  session-fork guard and queueing apply the same as any other send).
+   *  Undefined only hides the retry control, never the "Not sent" state
+   *  itself: a message that failed to send stays honest either way. */
+  onRetryFailedMessage?: (text: string) => void;
 }) {
   if (message.role === "user") {
     const text = message.parts
@@ -678,16 +718,46 @@ export function MessageView({
     if (isHiddenDirective(text)) return null;
     const { visibleText, markers } = parseAttachmentMarkers(text);
     if (visibleText.length === 0 && markers.length === 0) return null;
+    const sendState = userMessageSendState(message);
     return (
       <div className="flex flex-col gap-2">
         <UserAttachmentDisplay markers={markers} familyId={familyId} />
         {visibleText.length > 0 ? (
-          <div className="flex justify-end">
+          <div className="flex flex-col items-end gap-1">
             {/* The calmer coral bubble (founder pick): soft fill, dark
-                text, radius-lg with a tucked bottom-right corner. */}
-            <div className="max-w-[76%] rounded-lg rounded-br-sm bg-[var(--brand-soft-2)] px-[15px] py-2.5 text-[0.9rem] leading-normal text-strong">
+                text, radius-lg with a tucked bottom-right corner. A
+                message still finding out whether it landed, or one that
+                did not, dims the same way a spent card does elsewhere in
+                this file: quieter, never hidden (no pending/failed state
+                existed before GH #170; a dropped connection used to
+                erase her words with no sign anything was wrong). */}
+            <div
+              className={`max-w-[76%] rounded-lg rounded-br-sm px-[15px] py-2.5 text-[0.9rem] leading-normal text-strong ${
+                sendState === null
+                  ? "bg-[var(--brand-soft-2)]"
+                  : "bg-[var(--brand-soft-2)] opacity-70"
+              }`}
+            >
               <p className="whitespace-pre-wrap">{visibleText}</p>
             </div>
+            {sendState === "sending" ? (
+              <p className="text-xs text-subtle" role="status">
+                Sending&hellip;
+              </p>
+            ) : sendState === "failed" ? (
+              <p className="flex items-center gap-2 text-xs text-danger" role="alert">
+                Not sent.
+                {onRetryFailedMessage ? (
+                  <button
+                    type="button"
+                    onClick={() => onRetryFailedMessage(visibleText)}
+                    className="font-semibold underline underline-offset-2 transition-opacity hover:opacity-80"
+                  >
+                    Retry
+                  </button>
+                ) : null}
+              </p>
+            ) : null}
           </div>
         ) : null}
         {attachmentReceipts && attachmentReceipts.length > 0 ? (
