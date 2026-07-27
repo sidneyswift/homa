@@ -1,7 +1,49 @@
 # Packet page revision failure: Carolyng, 2026-07-27
 
-Status: DIAGNOSED, NOT FIXED. Live production failure, escalated to the
-founder in-session per the prod-bugs ruling. Nothing shipped yet.
+Status: FIXED and deployed (PR #239, merge bbed4a4b), backfill applied.
+See "Correction" below: the first diagnosis named the amplifier, not the
+trigger, and the parent recovered on her own before the fix shipped.
+
+## Correction (written after the fix merged)
+
+Two things in the original diagnosis below are wrong or incomplete, and
+the record should say so plainly.
+
+**She was not still blocked.** The original text was written while the
+failure looked ongoing. In fact Carolyng recovered at 13:54 UTC, about
+90 minutes before the fix deployed, in the SAME session that had been
+failing (`wrun_01KYHJDNS822AT36ANSS2R76X1`, turns 15 to 17). All three
+recovery builds still used the old path: 45KB of arguments, no
+pageIndex. So the failure was transient, not a hard ceiling, and the
+"try a new conversation" advice Homa gave was not what resolved it.
+
+**The trigger was retrieval, not emission.** The re-emission cost is
+real and measured, but it is the amplifier. What actually stopped turns
+5 to 7 was that the model could not GET the packet to rebuild it:
+
+| Turn | Time | Event |
+|---|---|---|
+| turn_4 | 13:03 | reviewer flags the draft, version suppressed |
+| turn_5-7 | 13:13-13:16 | find_materials returns "Nothing saved matches", three fabricated failures |
+| turn_14 | 13:39:32 | parent complains her packet is missing from the binder; `mark_material_final` runs |
+| turn_15 | 13:40:24 | find_materials returns the html; `create_printable` works again |
+
+140 of this family's 147 materials were `status = 'draft'`, and
+`find_materials` defaults to finals. So the packet was invisible to the
+search that needed it. Finalizing it is what restored the capability,
+40 seconds later. The draft-stranding gap is a known open item and this
+incident is evidence of how it actually bites.
+
+pageIndex still helps this exact case, and more than the original
+framing suggested: with it the model needs only the material ID for the
+eleven unchanged pages and html for the one it rewrites, so the
+retrieval it could not complete becomes much smaller. But pageIndex
+alone would not have prevented this. The draft-stranding trigger needs
+its own fix and has its own issue.
+
+Everything below is the original diagnosis, unedited.
+
+---
 
 Source: co-founder screenshot of Homa telling Carolyng "there's a
 technical issue on my end with creating printable materials in this
