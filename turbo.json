@@ -3,6 +3,26 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      // Turborepo 2 defaults to envMode "strict": a task only sees the
+      // variables declared here, so an UNDECLARED flag is silently absent
+      // during the build. That is not cosmetic. A page whose server
+      // component reads a flag BEFORE it touches cookies stays statically
+      // prerenderable while the flag reads false, so Next bakes the
+      // flag-off render into a static artifact and the per-request check
+      // never runs again. That is exactly how the signup paywall shipped
+      // inert on 2026-07-28: HOMA_SIGNUP_PAYWALL_ENABLED was set correctly
+      // in Vercel production, and /onboarding still built as a static page
+      // carrying paywallPending false. NEXT_PUBLIC_* survived on framework
+      // inference, which is why the Payment Links worked and hid it.
+      // These belong in env, not passThroughEnv: they must be part of the
+      // cache key, or flipping a flag reuses a build made under the old
+      // value.
+      "env": [
+        "HOMA_*",
+        "NEXT_PUBLIC_*",
+        "REPORT_NARRATIVE_ENABLED",
+        "TELNYX_SMS_ENABLED"
+      ],
       "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**", ".eve/**", "dist/**"]
     },
     "dev": {

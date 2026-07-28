@@ -1,5 +1,6 @@
 import { reportEmailPreview, reportEmailSubject } from "@homa/core";
 
+import { TRIAL_REMINDER_OUTER_NOTE } from "../billing/trial-reminder";
 import { emailHash } from "../email/hash";
 import { mintUnsubscribeToken } from "../email/unsubscribe-token";
 import { normalizeRfcMessageId } from "../conversation-continuity/rfc-message-id";
@@ -549,6 +550,10 @@ export async function submitTrialReminderEmail(
     bodyLines: content.bodyLines,
     cta: content.cta,
     footerNote: content.footerNote,
+    // Never the shell default: it ends "Every kind of email has an off
+    // switch", which is false for the one email that ships without
+    // unsubscribe headers on purpose.
+    outerNote: TRIAL_REMINDER_OUTER_NOTE,
   });
 }
 
