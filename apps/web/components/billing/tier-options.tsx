@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Check } from "lucide-react";
+import { useId, useState } from "react";
 
 import type { WallDoor } from "@homa/core";
 
@@ -10,14 +9,13 @@ import type { BillingPeriod, PlanTier, TierCheckout } from "../../lib/billing/wa
 import { sendWallBeacon } from "./wall-beacon";
 import {
   BILLING_TOGGLE_ANNUAL_BADGE,
-  BILLING_TOGGLE_ANNUAL_LABEL,
   BILLING_TOGGLE_MONTHLY_LABEL,
-  TIER_FEATURED,
-  TIER_MOST_POPULAR_BADGE,
   TIER_NAMES,
-  tierBullets,
-  tierButtonLabel,
-  tierDescription,
+  billingToggleAnnualLabel,
+  TRIAL_GATE_CTA,
+  TRIAL_GATE_FAMILY_PRICE,
+  tierChargeLine,
+  tierDelta,
   tierPriceAmount,
   tierPriceUnit,
 } from "./wall-copy";
@@ -25,18 +23,44 @@ import {
 const TIER_ORDER: PlanTier[] = ["regular", "plus", "elite"];
 
 /**
- * The three-tier picker (2026-07-26: a monthly/annual toggle replaced
- * the old layout of two stacked buttons per card). One toggle above
- * all three cards, since every tier's annual price is the same 20%
- * off monthly (founder ruling 2026-07-26): a single "Save 20%" badge
- * says that once instead of a per-card dollar figure, and switching it
- * changes all three cards' price and button together, the standard
- * SaaS pricing-page pattern. The toggle itself only renders when at
- * least one tier actually has an annual link configured; until then
- * every card just shows its monthly price, same as before annual
- * pricing existed. A tier with no checkout at all (Payment Links not
- * configured for this environment) doesn't render; regular is always
- * present or the wall itself would not have opened.
+ * The tier picker: three rows and one button (2026-07-28 redesign).
+ *
+ * It replaced three stacked cards that each carried a name, a 1 to 3
+ * sentence description, a price, a 40-character button, and two
+ * checkmark bullets. Measured on a 390px phone, that layout put its
+ * first price 1.1 screenfuls down behind 149 words, showed none of the
+ * three prices in the first screenful, and offered three competing
+ * primary actions. A teardown of 17 shipping pricing pages put the
+ * median distance from the top of a phone screen to the first price at
+ * 12 words.
+ *
+ * So the shape inverted. Each tier is one row: name, one line of what
+ * that tier ADDS, and the price, with the shared contents stated once
+ * above the picker instead of three times inside it. Selecting a row
+ * arms a single button. All three prices are legible in one glance and
+ * comparable without scrolling, and the page has exactly one primary
+ * action instead of three.
+ *
+ * Two deliberate ethics choices, both against the grain of the paywalls
+ * this pattern was taken from:
+ *
+ * 1. The default selection is the CHEAPEST tier. A pre-selected upsell
+ *    is the most common dark pattern in this pattern's own lineage
+ *    (Headspace pre-selects the plan WITHOUT the free trial), and Homa
+ *    offers, never commands.
+ * 2. No row carries an endorsement badge. "Most popular" was a
+ *    popularity claim with no customers to support it, and the
+ *    "Recommended" that replaced it was flagged by all ten parents in
+ *    the review panel, three as a reason to leave: an endorsement on
+ *    the pricier row turns a yes-or-no into a which-one. Plus routes on
+ *    its own line instead. Full reasoning in wall-copy.ts above
+ *    TIER_NAMES.
+ *
+ * A tier with no checkout at all (Payment Links not configured for this
+ * environment) doesn't render; regular is always present or the wall
+ * itself would not have opened. The billing toggle only renders when at
+ * least one tier actually has an annual link, so an environment with
+ * monthly-only links shows monthly prices with no dead control.
  */
 export function TierOptions({
   door,
@@ -45,98 +69,183 @@ export function TierOptions({
 }: {
   door: WallDoor;
   checkout: { regular: TierCheckout; plus: TierCheckout | null; elite: TierCheckout | null };
-  /** Fires before navigation on any tier's button, e.g. the report
-   *  lock's short-lived child cookie so checkout knows which child's
-   *  report the trial started from. */
+  /** Fires before navigation on the button, e.g. the report lock's
+   *  short-lived child cookie so checkout knows which child's report the
+   *  trial started from. */
   onBeforeCheckout?: () => void;
 }) {
   const [period, setPeriod] = useState<BillingPeriod>("monthly");
-  const anyAnnualAvailable = TIER_ORDER.some((tier) => checkout[tier]?.annualUrl);
+  const [selected, setSelected] = useState<PlanTier>("regular");
+  const groupId = useId();
+
+  const available = TIER_ORDER.filter((tier) => checkout[tier]);
+  const anyAnnualAvailable = available.some((tier) => checkout[tier]?.annualUrl);
+
+  // A selection can outlive the tier that carried it only if checkout
+  // changed under the component, which nothing here does; falling back
+  // to regular keeps the button armed rather than dead in that case.
+  const activeTier = available.includes(selected) ? selected : "regular";
+  const activeCheckout = checkout[activeTier] ?? checkout.regular;
+  const usingAnnual = period === "annual" && Boolean(activeCheckout.annualUrl);
+  const effectivePeriod: BillingPeriod = usingAnnual ? "annual" : "monthly";
+  const href = usingAnnual ? (activeCheckout.annualUrl as string) : activeCheckout.monthlyUrl;
 
   return (
-    <div className="mt-5 flex flex-col gap-4">
+    <div className="mt-6 flex flex-col gap-4">
       {anyAnnualAvailable ? (
-        <div
-          role="tablist"
-          aria-label="Billing period"
-          className="inline-flex w-fit items-center gap-1 self-center rounded-pill border border-border bg-card p-1"
-        >
-          {(["monthly", "annual"] as const).map((option) => (
-            <button
-              key={option}
-              type="button"
-              role="tab"
-              aria-selected={period === option}
-              onClick={() => setPeriod(option)}
-              className={`rounded-pill px-4 py-1.5 text-sm font-semibold transition duration-(--dur-fast) ease-out motion-safe:active:scale-[var(--press-scale)] ${
-                period === option ? "bg-brand text-on-brand" : "text-muted hover:text-strong"
+        // A tablist promises tab panels that do not exist here; this is
+        // one choice between two options, so it is a real radio group
+        // too, styled as a segmented control.
+        //
+        // self-start, not self-center: the page runs on one left
+        // reading axis (headline, rows, and every line under the
+        // button), and a centered control in the middle of it makes the
+        // eye jump sideways on the way to the prices.
+        <fieldset className="w-fit self-start rounded-pill border border-border bg-card p-1">
+          <legend className="sr-only">Billing period</legend>
+          <div className="flex items-center gap-1">
+            {(["monthly", "annual"] as const).map((option) => (
+              <label
+                key={option}
+                htmlFor={`${groupId}-period-${option}`}
+                // min-h-11 is the 44px touch minimum; the old pill was 32px.
+                className={`inline-flex min-h-11 cursor-pointer items-center rounded-pill px-4 text-sm font-semibold transition duration-(--dur-fast) ease-out focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--clay-600)] motion-safe:active:scale-[var(--press-scale)] ${
+                  period === option
+                    ? "bg-[var(--clay-700)] text-on-brand"
+                    : "text-muted hover:text-strong"
+                }`}
+              >
+                <input
+                  type="radio"
+                  id={`${groupId}-period-${option}`}
+                  name={`${groupId}-period`}
+                  value={option}
+                  checked={period === option}
+                  onChange={() => setPeriod(option)}
+                  className="sr-only"
+                />
+                {option === "monthly"
+                  ? BILLING_TOGGLE_MONTHLY_LABEL
+                  : // The dollar figure lives in the control, not behind
+                    // a tap. "Save 20%" with no number was named the
+                    // oldest trick there is by two of ten personas, and
+                    // four more declined to tap a toggle whose result
+                    // they could not see.
+                    billingToggleAnnualLabel(
+                      tierPriceAmount(activeTier, "annual"),
+                    )}
+                {option === "annual" ? (
+                  <span className="ml-1 text-xs font-normal opacity-90">
+                    {BILLING_TOGGLE_ANNUAL_BADGE}
+                  </span>
+                ) : null}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      ) : null}
+
+      {/* Native radios, not buttons with role="radio". An ARIA
+          radiogroup owes its user roving tabindex and arrow-key
+          movement between options, and hand-rolling that correctly is
+          strictly more code than using the element that already does
+          it. The input is visually hidden but focusable, so keyboard
+          and screen-reader behaviour is the platform's, and
+          focus-within paints the ring on the whole row. */}
+      <fieldset className="flex flex-col gap-2 border-0 p-0">
+        <legend className="sr-only">Plan</legend>
+        {available.map((tier) => {
+          const isSelected = tier === activeTier;
+          const rowPeriod: BillingPeriod =
+            period === "annual" && checkout[tier]?.annualUrl ? "annual" : "monthly";
+          return (
+            <label
+              key={tier}
+              htmlFor={`${groupId}-${tier}`}
+              // items-start, not items-center: the control reads as
+              // belonging to the tier NAME, and centering it against a
+              // row whose height varies with how the delta line wraps
+              // leaves it floating beside nothing.
+              className={`flex w-full cursor-pointer items-start gap-3 rounded-md border p-4 text-left transition duration-(--dur-fast) ease-out focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--clay-600)] motion-safe:active:scale-[var(--press-scale)] ${
+                isSelected
+                  ? "border-2 border-[var(--clay-600)] bg-[var(--brand-soft)]"
+                  : "border-border-subtle bg-card hover:border-border"
               }`}
             >
-              {option === "monthly" ? BILLING_TOGGLE_MONTHLY_LABEL : BILLING_TOGGLE_ANNUAL_LABEL}
-              {option === "annual" ? (
-                <span className="ml-1 text-xs font-normal opacity-80">{BILLING_TOGGLE_ANNUAL_BADGE}</span>
-              ) : null}
-            </button>
-          ))}
-        </div>
-      ) : null}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:items-start">
-        {TIER_ORDER.map((tier) => {
-          const tierCheckout = checkout[tier];
-          if (!tierCheckout) return null;
-          const usingAnnual = period === "annual" && Boolean(tierCheckout.annualUrl);
-          const effectivePeriod: BillingPeriod = usingAnnual ? "annual" : "monthly";
-          const url = usingAnnual ? (tierCheckout.annualUrl as string) : tierCheckout.monthlyUrl;
-          const isFeatured = tier === TIER_FEATURED;
-          return (
-            <div
-              key={tier}
-              className={
-                isFeatured
-                  ? "relative rounded-md border-2 border-[var(--border-brand)] bg-[var(--brand-soft)] p-5 shadow-md md:-mt-2 md:mb-2"
-                  : "relative rounded-md border border-border-subtle bg-card p-4"
-              }
-            >
-              {isFeatured ? (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-pill bg-brand px-3 py-1 text-xs font-semibold text-on-brand">
-                  {TIER_MOST_POPULAR_BADGE}
-                </span>
-              ) : null}
-              <h3 className="font-display text-lg font-bold text-strong">{TIER_NAMES[tier]}</h3>
-              <p className="mt-1 text-sm text-muted">{tierDescription(tier)}</p>
-              <p className="mt-3 font-display text-3xl font-bold text-strong">
-                ${tierPriceAmount(tier, effectivePeriod).toLocaleString("en-US")}
-                <span className="text-sm font-normal text-muted">/{tierPriceUnit(effectivePeriod)}</span>
-              </p>
-              <a
-                href={url}
-                onClick={() => {
-                  onBeforeCheckout?.();
-                  sendWallBeacon({
-                    kind: "checkout_started",
-                    door,
-                    plan: usingAnnual ? "annual" : "monthly",
-                    tier,
-                  });
-                }}
-                className={reportButtonClass(
-                  tier === "regular" ? "primary" : "secondary",
-                  "mt-3 inline-flex min-h-11 items-center justify-center px-5 py-2.5 text-sm font-semibold",
-                )}
+              <input
+                type="radio"
+                id={`${groupId}-${tier}`}
+                name={groupId}
+                value={tier}
+                checked={isSelected}
+                onChange={() => setSelected(tier)}
+                className="sr-only"
+              />
+              <span
+                aria-hidden="true"
+                className={`mt-1 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
+                  isSelected ? "border-[var(--clay-600)]" : "border-border"
+                }`}
               >
-                {tierButtonLabel(tier, usingAnnual ? "annual" : "monthly")}
-              </a>
-              <ul className="mt-3 flex flex-col gap-1">
-                {tierBullets(tier, usingAnnual ? "annual" : "monthly").map((line) => (
-                  <li key={line} className="flex items-start gap-2 text-sm text-muted">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--sage-600)]" aria-hidden="true" />
-                    {line}
-                  </li>
-                ))}
-              </ul>
-            </div>
+                {isSelected ? (
+                  <span className="h-2.5 w-2.5 rounded-full bg-[var(--clay-600)]" />
+                ) : null}
+              </span>
+
+              {/* Name and price share the top line so the three prices
+                  form one scannable right-hand column, and the delta
+                  line gets the full row width underneath instead of
+                  wrapping around the price. */}
+              <span className="min-w-0 flex-1">
+                <span className="flex items-baseline justify-between gap-3">
+                  <span className="min-w-0 font-display text-lg font-bold text-strong">
+                    {TIER_NAMES[tier]}
+                  </span>
+                  <span className="shrink-0 whitespace-nowrap">
+                    <span className="font-display text-xl font-bold text-strong">
+                      ${tierPriceAmount(tier, rowPeriod).toLocaleString("en-US")}
+                    </span>
+                    <span className="text-sm font-normal text-muted">
+                      /{tierPriceUnit(rowPeriod)}
+                    </span>
+                  </span>
+                </span>
+                <span className="mt-1 block text-sm text-muted">{tierDelta(tier)}</span>
+              </span>
+            </label>
           );
         })}
+      </fieldset>
+
+      <div>
+        <a
+          href={href}
+          onClick={() => {
+            onBeforeCheckout?.();
+            sendWallBeacon({
+              kind: "checkout_started",
+              door,
+              plan: usingAnnual ? "annual" : "monthly",
+              tier: activeTier,
+            });
+          }}
+          className={reportButtonClass(
+            "primary-strong",
+            "flex min-h-14 w-full items-center justify-center px-6 text-base font-semibold",
+          )}
+        >
+          {TRIAL_GATE_CTA}
+        </a>
+        {/* The two facts that decide the tap, in the order they are
+            asked: what this costs after the trial, then whether that
+            price covers every child. The second one is the panel's most
+            asked question and a would-leave for both multi-child
+            readers, so it sits at the button rather than below the
+            fold. */}
+        <p className="mt-2 text-sm font-semibold text-strong">
+          {tierChargeLine(activeTier, effectivePeriod)}
+        </p>
+        <p className="mt-1 text-sm text-body">{TRIAL_GATE_FAMILY_PRICE}</p>
       </div>
     </div>
   );

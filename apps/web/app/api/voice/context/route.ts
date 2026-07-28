@@ -6,6 +6,11 @@ import {
   loadFamilyContextPinned,
   renderFamilyContext,
 } from "../../../../lib/family-context";
+import {
+  CHANNEL_GATE_VOICE_LINE,
+  familyHasChannel,
+} from "../../../../lib/billing/channel-access";
+import { emitMapEvent } from "../../../../lib/map/events";
 import { recordLeadContact } from "../../../../lib/phone-leads";
 import { effectiveTimeZone, zonedDateString } from "../../../../lib/time-zone";
 import { loadRecentActivityDigest } from "../../../../lib/voice/recent-activity";
@@ -82,6 +87,35 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json(EMPTY_RESPONSE);
     }
     const familyId = identity.familyId;
+
+    // Calling is part of Homa Plus (gh#298, tier ruling 2026-07-28).
+    //
+    // Read the limit of this gate before trusting it. This webhook
+    // hands dynamic variables to a Telnyx-hosted assistant; it cannot
+    // decline the call, and the assistant's prompt lives in Telnyx's
+    // config, not here. So the strongest thing this route can do is
+    // withhold every piece of family context and hand back the one
+    // sentence she should hear. That bounds the blast radius (a
+    // non-entitled caller cannot be told anything about her children,
+    // because nothing about them is sent) but it does NOT deterministic
+    // -ally end the call, and a model may still improvise around it.
+    //
+    // The deterministic version is Telnyx-side call control, which is
+    // tracked on gh#298. Until that lands, SMS and email are genuinely
+    // gated and voice is bounded, and the issue says so rather than
+    // this route pretending otherwise.
+    if (!(await familyHasChannel(familyId))) {
+      await emitMapEvent("sms.channel_gated", { channel: "voice" }, { familyId });
+      return Response.json({
+        dynamic_variables: {
+          caller_known: "true",
+          parent_name: identity.memberDisplayName ?? "",
+          family_context: `This family's plan does not include phone calls. Say this, warmly, and then say goodbye and end the call: "${CHANNEL_GATE_VOICE_LINE}" Do not answer questions about her children, her plans, or her records on this call, and do not offer to do anything else. You have been given no information about them.`,
+          family_id: "",
+          child_id: "",
+        },
+      });
+    }
 
     const rows = await loadFamilyContextPinned(familyId);
     let continuityContext = "";

@@ -1,6 +1,10 @@
 import { defineChannel, POST } from "eve/channels";
 
 import { bindDeliveredProgressCheckIn } from "../../lib/child-progress/delivery-binding.server";
+import {
+  CHANNEL_GATE_SMS_LINE,
+  familyHasChannel,
+} from "../../lib/billing/channel-access";
 import { canonicalInboundAuthAttributes } from "../../lib/conversation-continuity/canonical-inbound";
 import {
   beginDeliveryAttempt,
@@ -252,6 +256,30 @@ export default defineChannel({
         }
         await completeInboundReceipt(inboundReceipt.id);
         return Response.json({ ok: true, note: "opt-out handled" });
+      }
+
+      // Email is part of Homa Plus (gh#298, tier ruling 2026-07-28). A
+      // known family on a web-only plan gets a real reply naming the
+      // door and the agent never runs.
+      //
+      // Placed after the opt-out branch so "stop" still works on any
+      // plan: a parent must always be able to turn something off,
+      // whatever she pays. Ships dark behind HOMA_CHANNEL_GATE_ENABLED
+      // and fails open on any error.
+      if (!(await familyHasChannel(familyId))) {
+        await emitMapEvent("sms.channel_gated", { channel: "email" }, { familyId });
+        const to = await getFamilyEmail(familyId);
+        if (to) {
+          await sendAgentComposedEmail(
+            to,
+            "Everything is waiting on the web",
+            [CHANNEL_GATE_SMS_LINE],
+            undefined,
+            familyId,
+          );
+        }
+        await completeInboundReceipt(inboundReceipt.id);
+        return Response.json({ ok: true, note: "channel not on plan" });
       }
 
       const continuationToken = emailContinuationToken(email.fromEmail);

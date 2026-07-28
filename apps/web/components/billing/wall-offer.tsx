@@ -25,8 +25,14 @@ export function WallOffer({
 }) {
   return (
     <div>
+      {/* No uppercase transform: WALL_EYEBROW is "Homa membership", and
+          rendering it uppercase puts "HOMA" on screen, which the
+          2026-07-28 brand correction (`brand-casing-homa`) retires. The
+          name is always written "Homa", and where the brand appears as
+          a mark it is the real Logo component, never a text imitation
+          of it. */}
       <p
-        className="font-mono text-[0.65rem] uppercase tracking-widest"
+        className="font-mono text-[0.7rem] tracking-wide"
         style={{ color: "var(--sage-700)" }}
       >
         {WALL_EYEBROW}
