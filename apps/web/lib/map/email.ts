@@ -62,7 +62,13 @@ export type EmailLedgerKind =
   // D9, the skeptic brief (plans/2026-07-21-chat-first-onboarding.md
   // §4.2): a parent-requested, on-demand send to her OWN inbox, never
   // a drip nudge, so it carries no unsubscribe framing.
-  | "skeptic_brief";
+  | "skeptic_brief"
+  // The trial reminder (2026-07-27): the Day 4 beat TRIAL_GATE_TIMELINE
+  // promises, driven by Stripe's customer.subscription.trial_will_end.
+  // A billing notice, not a nudge: no unsubscribe framing, and the kind
+  // deliberately carries no drip_ prefix so the sweep's kind like
+  // 'drip_%' cap can never throttle a legally-required reminder.
+  | "trial_reminder";
 
 interface EmailLedger {
   kind: EmailLedgerKind;
@@ -510,6 +516,72 @@ export async function submitAgentComposedEmail(
     agentComposedEmailArgs(to, subject, bodyLines, replyTo, options.familyId),
     options,
   );
+}
+
+/**
+ * The Day 4 trial reminder. Copy and the decision to send at all live in
+ * lib/billing/trial-reminder.ts; this is only the delivery.
+ *
+ * No unsubscribe headers on purpose. This is a billing notice sent once,
+ * before a charge the family agreed to at the gate, and ROSCA plus
+ * California's ARL treat that notice as a requirement rather than
+ * marketing. The drip templates above carry unsubscribeHeaders because
+ * they are nudges; this one is not.
+ */
+export async function submitTrialReminderEmail(
+  to: string,
+  content: {
+    subject: string;
+    preview: string;
+    heading: string;
+    bodyLines: string[];
+    cta: { label: string; url: string };
+    footerNote: string;
+  },
+  familyId: string,
+): Promise<HomaEmailSubmission> {
+  return submit({
+    ledger: { kind: "trial_reminder", familyId },
+    to,
+    subject: content.subject,
+    preview: content.preview,
+    heading: content.heading,
+    bodyLines: content.bodyLines,
+    cta: content.cta,
+    footerNote: content.footerNote,
+  });
+}
+
+/**
+ * Has this family already been sent her trial reminder?
+ *
+ * Stripe retries trial_will_end on any non-2xx, and email_sends carries
+ * no unique constraint, so this ledger read is the only thing standing
+ * between a retry and a second copy in her inbox. Counts "submitted" and
+ * "delivered" only: a "rejected" or "unknown" send is worth retrying.
+ * Fails CLOSED (reports "already sent") if the read itself throws, which
+ * is the opposite of the ledger's usual posture and deliberate here,
+ * because double-mailing a parent about money is worse than missing one
+ * reminder. Mirrors dripAlreadySent in lib/drip/sweep.ts.
+ */
+export async function trialReminderAlreadySent(familyId: string): Promise<boolean> {
+  try {
+    const sql = mapDb();
+    const rows = await sql<{ one: number }[]>`
+      select 1 as one from public.email_sends
+      where family_id = ${familyId}
+        and kind = 'trial_reminder'
+        and status in ('submitted', 'delivered')
+      limit 1
+    `;
+    return rows.length > 0;
+  } catch (error) {
+    console.error(
+      "trial reminder: ledger read failed, treating as already sent:",
+      error instanceof Error ? error.message : "unknown",
+    );
+    return true;
+  }
 }
 
 /** The family's own registered email, for the agent-composed send path

@@ -1,7 +1,23 @@
 import Stripe from "stripe";
 
-import { recordFamilySubscription, startFamilyTrial } from "../../../../lib/billing/wall";
+import { TIER_NAMES } from "../../../../components/billing/wall-copy";
+import {
+  formatTrialCharge,
+  formatTrialEndDate,
+  trialReminderContent,
+  trialReminderVerdict,
+} from "../../../../lib/billing/trial-reminder";
+import {
+  familyForStripeCustomer,
+  recordFamilySubscription,
+  startFamilyTrial,
+} from "../../../../lib/billing/wall";
 import { mapDb } from "../../../../lib/map/db";
+import {
+  siteUrl,
+  submitTrialReminderEmail,
+  trialReminderAlreadySent,
+} from "../../../../lib/map/email";
 import { emitMapEvent } from "../../../../lib/map/events";
 
 /**
@@ -82,6 +98,75 @@ export async function POST(request: Request): Promise<Response> {
             priceId: subscription.items.data[0]?.price.id ?? null,
             currentPeriodEndSec: subscription.items.data[0]?.current_period_end ?? null,
           });
+        }
+        break;
+      }
+      case "customer.subscription.trial_will_end": {
+        // The Day 4 promise in TRIAL_GATE_TIMELINE, kept. Stripe fires
+        // this 3 days before trial end at any trial length, which is
+        // why the copy names day 4 of 7 rather than the day-23 framing
+        // the old 30-day trial used.
+        const subscription = event.data.object;
+        const customerId =
+          typeof subscription.customer === "string" ? subscription.customer : null;
+        if (!customerId) break;
+        const family = await familyForStripeCustomer(customerId);
+        const item = subscription.items.data[0];
+        const verdict = trialReminderVerdict(
+          family
+            ? {
+                id: family.id,
+                email: family.email,
+                firstName: family.firstName,
+                planName: TIER_NAMES[family.planTier],
+                timeZone: family.timeZone,
+                billingExempt: family.billingExempt,
+              }
+            : null,
+          {
+            status: subscription.status,
+            cancelAtPeriodEnd: subscription.cancel_at_period_end === true,
+            trialEndSec: subscription.trial_end ?? null,
+            amountCents: item?.price.unit_amount ?? null,
+            currency: item?.price.currency ?? null,
+            interval: item?.price.recurring?.interval ?? null,
+          },
+          family ? await trialReminderAlreadySent(family.id) : false,
+        );
+        if (!verdict.send || !family) {
+          console.log(
+            `billing/webhook: trial reminder skipped (${verdict.send ? "no-family" : verdict.reason}) for customer ${customerId}`,
+          );
+          break;
+        }
+        const submission = await submitTrialReminderEmail(
+          verdict.to,
+          trialReminderContent({
+            firstName: family.firstName,
+            planName: TIER_NAMES[family.planTier],
+            endDate: formatTrialEndDate(subscription.trial_end ?? null, family.timeZone),
+            charge: formatTrialCharge(
+              item?.price.unit_amount ?? null,
+              item?.price.currency ?? null,
+              item?.price.recurring?.interval ?? null,
+            ),
+            manageUrl: `${siteUrl()}/api/billing/portal`,
+          }),
+          family.id,
+        );
+        if (submission.status === "submitted") {
+          await emitMapEvent("billing.trial_reminder_sent", { family_id: family.id });
+          break;
+        }
+        // "rejected" is Resend refusing this address for good: retrying
+        // cannot help, so acknowledge. "unknown" is a timeout or a 5xx,
+        // where the ledger row records no successful send, so a 500 here
+        // lets Stripe's retry try the send again.
+        console.error(
+          `billing/webhook: trial reminder ${submission.status} for family ${family.id}`,
+        );
+        if (submission.status === "unknown") {
+          return Response.json({ ok: false, reason: "reminder-retry" }, { status: 500 });
         }
         break;
       }

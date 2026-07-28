@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
 import { composeOnboardingModeMarkdown } from "./onboarding-mode";
+import { ONBOARDING_SKILL_MARKDOWN } from "./onboarding-skill-body.generated";
 
 /**
  * Routing fixtures for onboarding mode
@@ -11,8 +12,7 @@ import { composeOnboardingModeMarkdown } from "./onboarding-mode";
  * every other session does not, because a completed family being told
  * she is in her first days with Homa is a visible, embarrassing bug.
  *
- * The raw skill is the real file, read the way the eve module's ?raw
- * import inlines it at build time, so these fixtures exercise the same
+ * The raw skill is the real file, so these fixtures exercise the same
  * composition the deployed function ships.
  */
 
@@ -20,6 +20,25 @@ const rawSkill = readFileSync(
   new URL("../../agent/skills/onboarding/SKILL.md", import.meta.url),
   "utf8",
 );
+
+describe("the generated skill mirror the deployed bundle preloads", () => {
+  it("is byte for byte the SKILL.md a human edits", () => {
+    // The deployed eve function is a nitro bundle with no source tree, so
+    // the body has to travel as code (issue #246). That makes staleness
+    // the new silent failure: an edited SKILL.md with an unregenerated
+    // mirror would preload yesterday's onboarding arc and say nothing.
+    // This is the check that fails instead.
+    assert.equal(
+      ONBOARDING_SKILL_MARKDOWN,
+      rawSkill,
+      "onboarding-skill-body.generated.ts is stale. Run: pnpm build:onboarding-skill",
+    );
+  });
+
+  it("is never empty, because an empty body silently costs a load_skill round trip", () => {
+    assert.ok(ONBOARDING_SKILL_MARKDOWN.trim().length > 0);
+  });
+});
 
 describe("composeOnboardingModeMarkdown, positive routing", () => {
   it("loads for an authenticated web session with the stamped attribute", () => {
