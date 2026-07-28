@@ -305,6 +305,11 @@ and any Skylight-style hardware framing.
   coded); add the family-events constraint surface (its own calendar,
   not Google) and the optimize-around-life behaviors; add "calendar and
   homeschool planner in 1" as the stated user model.
+  **FOLDED 2026-07-27 (gh#264).** F5 now carries the field-evidence
+  block and the design flag's multi-child half is marked resolved
+  against the shipped grid; the flag's block-content half (tap block,
+  get the linked artifact) is still open there. The F4, F2, 05, and 07
+  deltas below remain unfolded.
 - **F2 Voice capture** (journeys/04 §F2): add voice-note-over-SMS as an
   explicit capture path with its three failure modes and honest-fallback
   copy.
