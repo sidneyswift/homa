@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { AiConsentGate } from "../../components/ai-consent-gate";
 import { Logo } from "../../components/brand/logo";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
@@ -98,13 +99,15 @@ export default function ChatScreen() {
             </Card>
           </View>
         ) : (
-          <ChatSession
-            key={userId}
-            storageKey={chatStorageKey(userId)}
-            prepared={prepared}
-            familyId={readyFamily.id}
-            parentName={memberDisplayName ?? readyFamily.parent_display_name ?? null}
-          />
+          <AiConsentGate>
+            <ChatSession
+              key={userId}
+              storageKey={chatStorageKey(userId)}
+              prepared={prepared}
+              familyId={readyFamily.id}
+              parentName={memberDisplayName ?? readyFamily.parent_display_name ?? null}
+            />
+          </AiConsentGate>
         )}
       </KeyboardAvoidingView>
     </SafeAreaView>

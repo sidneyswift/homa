@@ -13,6 +13,36 @@ on:
     branches: [main]
 
 jobs:
+  # Runs independently of build-and-check (no Supabase secrets needed) so
+  # mobile regressions surface fast. Until 2026-07-28 these tests existed
+  # (check:mobile-chat) but ran in no pipeline that ships to phones; the
+  # mobile-ota-update.yml workflow now runs the same suite before publish.
+  mobile-checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck mobile
+        run: pnpm --filter mobile typecheck
+
+      - name: Lint mobile
+        run: pnpm --filter mobile lint
+
+      - name: Mobile chat unit tests
+        run: pnpm check:mobile-chat
+
   build-and-check:
     runs-on: ubuntu-24.04
     steps:
