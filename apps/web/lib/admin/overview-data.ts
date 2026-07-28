@@ -1,4 +1,5 @@
 import { listHandledAlerts, type HandledAlert } from "./alert-acks";
+import { billingFreshness, type BillingFreshness } from "./billing-freshness";
 import { adminDb } from "./db";
 import { STOP_ERROR_PATTERNS } from "./delivery-errors";
 import { adminTimeZone, dayKey } from "./format";
@@ -129,6 +130,11 @@ export interface OptOutFamily {
 
 export interface FleetOverview {
   rangeDays: OverviewRange;
+  /** Whether Homa's copy of "who is paying" still agrees with Stripe.
+   *  Homa never asks Stripe directly (issue #274), so a quiet webhook
+   *  leaves the mirror frozen and a cancelled family keeps access. This
+   *  makes that drift visible instead of something to remember to suspect. */
+  billing: BillingFreshness;
   /** Whether test families are included in the counts (?families=all). */
   includeTests: boolean;
   snapshots: FamilySnapshot[];
@@ -578,9 +584,50 @@ export async function getFleetOverview(
   const toCounts = (rows: { status: string; n: number }[]) =>
     Object.fromEntries(rows.map((row) => [row.status, row.n]));
 
+  // Is Homa's billing mirror still in step with Stripe? Customers only,
+  // and never range-scoped: drift is a standing fact about the fleet, not
+  // something that happened in the last 7 days.
+  const billingRows = await sql<
+    {
+      status: string | null;
+      period_end_ms: number | null;
+      trial_started_ms: number | null;
+      has_subscription: boolean;
+      billing_exempt: boolean;
+    }[]
+  >`
+    select stripe_subscription_status as status,
+           extract(epoch from stripe_current_period_end) * 1000 as period_end_ms,
+           extract(epoch from trial_started_at) * 1000 as trial_started_ms,
+           stripe_subscription_id is not null as has_subscription,
+           billing_exempt
+    from public.families
+    where coalesce(status, 'open') <> 'deleted'
+      and sandbox is not true
+      and (stripe_subscription_status is not null
+           or stripe_subscription_id is not null
+           or trial_started_at is not null)
+  `;
+  const lastBillingUpdate = await sql<{ ms: number | null }[]>`
+    select extract(epoch from max(billing_updated_at)) * 1000 as ms
+    from public.families where sandbox is not true
+  `;
+  const billing = billingFreshness(
+    billingRows.map((r) => ({
+      status: r.status,
+      currentPeriodEndMs: r.period_end_ms,
+      trialStartedAtMs: r.trial_started_ms,
+      hasSubscriptionId: r.has_subscription,
+      billingExempt: r.billing_exempt,
+    })),
+    lastBillingUpdate[0]?.ms ?? null,
+    now.getTime(),
+  );
+
   return {
     rangeDays,
     includeTests,
+    billing,
     snapshots,
     sandboxCount,
     activeFamilies: activeIds.size,
