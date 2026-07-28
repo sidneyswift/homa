@@ -576,46 +576,51 @@ sustained two consecutive weeks, read two weeks post-flip; rail-only
 check-offs tracked as the paired diagnostic that would honestly say families
 want the checklist, not the calendar.
 
-## 5. Founder questions (adjudicated list; Q1 to Q5 as originally posed are settled, see §7)
+## 5. Founder rulings, 2026-07-27 (all seven ruled; Q1 to Q5 as originally posed were settled by council, see §7)
 
-- **Q-A, default landing register.** Council recommends the Today/This-week
-  checklist register as the default landing with the week grid one toggle
-  away (an empty time grid at first render is false and quietly shaming; most
-  families never date most school work). This reinterprets the Skylight grid
-  reference, so it is the founder's call, ideally after (a) pulling the
-  actual reference images from #homa-inspo (verify ingestion; Cosmo's
-  fabricated-ingest failure mode applies) and (b) showing Carolyng both
-  registers.
-- **Q-B, the gate on PRs D to G.** Name go and stop numbers for the adoption
-  metric above, and rule whether the gate is hard or advisory. Council
-  recommends hard, preserving growth's caution that two-week gates on a tiny
-  fleet can consume the runway proving the obvious. Related: the July 13
-  conference deadline in CLAUDE.md is in the past as of this doc's date; the
-  runway this arc is priced against needs re-anchoring before deadline-based
-  scope arguments are accepted.
-- **Q-C, the Carolyng canary.** Is one real school week on her phone (watched
-  via the founder console) a hard gate on the fleet-wide flip? Council
-  recommends hard: it is the cheapest validation of her own CG-03 ask, and
-  the flip swaps the only behavior with proven real usage (check-offs).
-- **Q-D, the PR D trade.** Keep Month view (behind the vocabulary sweep) or
-  trade its slot for magic import. Council recommends the trade: month view
-  serves families who already use a surface; magic import creates them.
-  Printable week ships in PR F either way.
-- **Q-E, the #244 ruling (needed before the flip).** Is bare open_planner
-  without the skill acceptable? Council recommends: yes for pure view intents
-  (assert on outcome), skill load required and asserted for reshuffle,
-  scheduling, and curriculum mapping. The fatter tool result makes
-  skill-skipping more attractive, so rule this before the surface changes.
-- **Q-F, the #196 D1 ruling and mobile capacity.** Rule the render-contract
-  at PR B time so the receipt descriptor ships server-side once; decide how
-  much mobile pulls forward (council recommends: descriptor in B1, generic
-  receipt card with PR C, mobile-web Today view before PR F links, native
-  screen in PR G).
-- **Q-G, family subjects.** Carolyng's ask names family-level school
-  activities the model cannot represent (per-child plans only). Rule whether
-  a family-level checkable activity is a v-next data-model extension or
-  out of scope; the council did not reach it (completeness finding), so it
-  arrives unrecommended.
+Ruled in session on 2026-07-27, recorded on gh#265 and to be folded into
+journeys/10-reconciliation.md §5 and the build-log by gh#264.
+
+- **Q-A, default landing register: checklist-first** (with the council). The
+  unified Planner lands on the Today/This-week checkable register, week grid
+  one toggle away on every width. Binding on gh#258.
+- **Q-B, the gate on arcs D to G: ship straight through** (against the
+  council's hard gate, adopting growth's preserved dissent). No measurement
+  gate between phases; instrumentation still ships in B0, the success metric
+  stays defined, and it reads as a scoreboard rather than a gate. Recorded
+  risk: with no gate and no canary, later phases can be built on a surface no
+  real family has adopted. The runway re-anchoring is still owed: CLAUDE.md
+  names the July 13 2026 conference as the fixed deadline and that date is
+  past, so no deadline-based scope argument should be accepted until a
+  current runway is named.
+- **Q-C, the Carolyng canary: skipped** (against the council's hard gate).
+  The fleet flip is gated on guards, tests, and evals only. Carrying the
+  risk instead: per-family flag targeting for revocable rollout, flag-off
+  keeping /app/calendar functional for the flag's lifetime, and check-off
+  parity as a named non-droppable test. Recorded risk: the flip swaps out
+  check-offs, the only planner behavior with proven real usage, and the
+  first co-founder reaction now arrives after the fleet has the surface.
+- **Q-D, month view versus magic import: both, month first** (beyond the
+  council's trade). Day view, then month view, then magic import as its own
+  phase (gh#266). The fleet-wide plan-object naming sweep (the plan, never
+  month plan) is now on gh#260's critical path rather than optional.
+- **Q-E, the #244 skill policy: split by intent** (with the council). Bare
+  open_planner is acceptable for pure view intents asserted on outcome; the
+  planner skill must load, and evals must assert it, for reshuffle,
+  scheduling, and curriculum mapping. #244's red assertion is re-scoped
+  accordingly rather than merely repaired.
+- **Q-F, mobile: full native parity inside this arc** (beyond the council's
+  staged plan). gh#263 is pulled forward and raised to P1. Unchanged
+  preconditions: gh#259's per-toggle check-off op lands before native
+  writes, the #196 D1 contract is ruled at arc B time so receipts ship
+  server-side once, and the stable-ID trigger review happens before native
+  writes, not after an incident.
+- **Q-G, family subjects: build it in this arc** (the council never reached
+  it). Filed as gh#267 at P1. It is the only phase touching the check-off
+  spine, so the scoring boundary (a family check-off must not silently enter
+  any child's scored progress report) is settled in that PR's body before
+  any schema lands, along with the ownership shape, the creation door, and
+  the four-week clock.
 
 ## 6. The delta table (world-class vs ours, post-arc)
 
@@ -695,6 +700,11 @@ at zero adoption), gh#257 (B0 tool truth), gh#258 (B1 unified surface),
 gh#259 (C write parity), gh#260 (D views), gh#261 (E time and recurrence),
 gh#262 (F ecosystem bridges), gh#263 (G mobile native), gh#264 (calendar
 ship doc debt, chore), and gh#265 (the founder ruling package for §5).
-Cross-linked in the same session: #253 (metric and instrumentation), #244
-(ruling needed before the flip), #196 (silence code-confirmed, D1 on the
-critical path).
+Added by the 2026-07-27 rulings: gh#266 (magic import, its own phase after
+the views) and gh#267 (family subjects, P1, in-arc). Cross-linked in the
+same session: #253 (metric and instrumentation), #244 (ruled split by
+intent), #196 (silence code-confirmed, D1 ruled at arc B time).
+
+Funded order after the rulings: gh#256 and gh#257 (in flight) to gh#258 to
+gh#259, then gh#267, gh#260, gh#261, gh#262, gh#263, gh#266, with gh#264
+carrying the doc debt including this section's rulings.
