@@ -16,7 +16,8 @@ import { accountAccessDecision } from "./wall";
 const walled = {
   billingExempt: false,
   trialStartedAt: null,
-  subscriptionStatus: null,
+  stripeSubscriptionStatus: null,
+  appleSubscriptionStatus: null,
   createdAtMs: Date.parse("2026-07-27T12:00:00Z"),
 };
 
@@ -31,7 +32,7 @@ describe("accountAccessDecision", () => {
   it("grants billing_exempt first, whatever else is true", () => {
     assert.equal(
       accountAccessDecision(
-        { ...walled, billingExempt: true, subscriptionStatus: "canceled" },
+        { ...walled, billingExempt: true, stripeSubscriptionStatus: "canceled" },
         NO_CUTOFF,
       ),
       "billing_exempt",
@@ -45,7 +46,7 @@ describe("accountAccessDecision", () => {
           ...walled,
           createdAtMs: Date.parse("2026-07-20T09:00:00Z"),
           trialStartedAt: "2026-07-20T10:00:00.000Z",
-          subscriptionStatus: "canceled",
+          stripeSubscriptionStatus: "canceled",
         },
         CUTOFF,
       ),
@@ -81,7 +82,7 @@ describe("accountAccessDecision", () => {
           {
             ...walled,
             trialStartedAt: "2026-07-20T10:00:00.000Z",
-            subscriptionStatus: status,
+            stripeSubscriptionStatus: status,
           },
           NO_CUTOFF,
         ),
@@ -96,7 +97,7 @@ describe("accountAccessDecision", () => {
         {
           ...walled,
           trialStartedAt: "2026-07-20T10:00:00.000Z",
-          subscriptionStatus: "past_due",
+          stripeSubscriptionStatus: "past_due",
         },
         NO_CUTOFF,
       ),
@@ -111,7 +112,7 @@ describe("accountAccessDecision", () => {
           {
             ...walled,
             trialStartedAt: "2026-07-20T10:00:00.000Z",
-            subscriptionStatus: status,
+            stripeSubscriptionStatus: status,
           },
           NO_CUTOFF,
         ),
@@ -123,8 +124,125 @@ describe("accountAccessDecision", () => {
 
   it("never grants on a subscription status alone, without the trial stamp", () => {
     assert.equal(
-      accountAccessDecision({ ...walled, subscriptionStatus: "active" }, NO_CUTOFF),
+      accountAccessDecision({ ...walled, stripeSubscriptionStatus: "active" }, NO_CUTOFF),
       null,
+    );
+  });
+});
+
+/**
+ * Two providers (ios-iap-priority, journeys/10-reconciliation.md §5): a
+ * family is open if EITHER provider currently reads active, or if
+ * NEITHER has ever recorded anything (the original single-provider
+ * "webhook dark reads as fine" tolerance, unchanged for every family that
+ * has never touched Apple billing, which today is all of them). Walled
+ * only when at least one provider has recorded something and none of the
+ * providers that have ever recorded anything currently reads active.
+ */
+describe("accountAccessDecision, two providers", () => {
+  const trialing = {
+    ...walled,
+    trialStartedAt: "2026-07-20T10:00:00.000Z",
+  };
+
+  it("grants when neither provider has ever recorded anything (unchanged Stripe-only behavior)", () => {
+    assert.equal(accountAccessDecision(trialing, NO_CUTOFF), "trial");
+  });
+
+  it("grants when Stripe is active and Apple has never been touched", () => {
+    assert.equal(
+      accountAccessDecision(
+        { ...trialing, stripeSubscriptionStatus: "active" },
+        NO_CUTOFF,
+      ),
+      "trial",
+    );
+  });
+
+  it("grants when Apple is active and Stripe has never been touched", () => {
+    assert.equal(
+      accountAccessDecision(
+        { ...trialing, appleSubscriptionStatus: "active" },
+        NO_CUTOFF,
+      ),
+      "trial",
+    );
+  });
+
+  it("walls when Stripe is lapsed and Apple has never been touched (matches single-provider behavior exactly)", () => {
+    assert.equal(
+      accountAccessDecision(
+        { ...trialing, stripeSubscriptionStatus: "canceled" },
+        NO_CUTOFF,
+      ),
+      null,
+    );
+  });
+
+  it("walls when Apple is lapsed and Stripe has never been touched", () => {
+    assert.equal(
+      accountAccessDecision(
+        { ...trialing, appleSubscriptionStatus: "canceled" },
+        NO_CUTOFF,
+      ),
+      null,
+    );
+  });
+
+  it("grants when Stripe lapsed but Apple re-subscribed (the recoup case: a re-subscribing family must never stay walled behind the other provider's stale mirror)", () => {
+    assert.equal(
+      accountAccessDecision(
+        {
+          ...trialing,
+          stripeSubscriptionStatus: "canceled",
+          appleSubscriptionStatus: "active",
+        },
+        NO_CUTOFF,
+      ),
+      "trial",
+    );
+  });
+
+  it("grants when Apple lapsed but Stripe re-subscribed (symmetric case)", () => {
+    assert.equal(
+      accountAccessDecision(
+        {
+          ...trialing,
+          stripeSubscriptionStatus: "active",
+          appleSubscriptionStatus: "canceled",
+        },
+        NO_CUTOFF,
+      ),
+      "trial",
+    );
+  });
+
+  it("walls when both providers are lapsed", () => {
+    assert.equal(
+      accountAccessDecision(
+        {
+          ...trialing,
+          stripeSubscriptionStatus: "canceled",
+          appleSubscriptionStatus: "canceled",
+        },
+        NO_CUTOFF,
+      ),
+      null,
+    );
+  });
+
+  it("keeps billing_exempt outranking both providers", () => {
+    assert.equal(
+      accountAccessDecision(
+        {
+          ...trialing,
+          billingExempt: true,
+          stripeSubscriptionStatus: "canceled",
+          appleSubscriptionStatus: "canceled",
+        },
+        NO_CUTOFF,
+      ),
+      "billing_exempt",
     );
   });
 });
