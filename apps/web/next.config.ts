@@ -15,7 +15,18 @@ const nextConfig: NextConfig = {
   // The materials studio's renderer (lib/materials/render-page.ts): the
   // Chromium binary and puppeteer must stay real node_modules, never
   // bundled, so the .br binaries survive to the deployed function.
-  serverExternalPackages: ["@sparticuz/chromium", "puppeteer-core"],
+  // pdfjs-dist and @napi-rs/canvas joined 2026-07-28 when the state pack
+  // route became the first NEXT lambda to import the raster stack (the
+  // eve build always kept them external via agent.ts
+  // build.externalDependencies): bundling pdf.mjs evaluates DOMMatrix at
+  // module load with no canvas polyfill and drops the native .node
+  // addon, which 500ed POST /api/compliance/pack on every request.
+  serverExternalPackages: [
+    "@sparticuz/chromium",
+    "puppeteer-core",
+    "pdfjs-dist",
+    "@napi-rs/canvas",
+  ],
   // AVIF first for the hero LCP image (roughly 20-30% smaller than webp),
   // webp as the fallback.
   images: {

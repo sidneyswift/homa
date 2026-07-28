@@ -13,7 +13,6 @@ import { requireFamilyWithActor } from "../../../../lib/map/session";
 import { getStateRequirementsDetail } from "../../../../lib/map/state-requirements";
 import { blobConfigured, uploadMaterialArtifacts } from "../../../../lib/materials/artifact-store";
 import { joinPageBodies, printableSlug } from "../../../../lib/materials/page-shell";
-import { renderPrintableHtml } from "../../../../lib/materials/render-page";
 import { effectiveTimeZone } from "../../../../lib/time-zone";
 
 /**
@@ -140,8 +139,16 @@ export async function POST(): Promise<Response> {
     return failure(500, "render", "The pack came out too large to save.");
   }
 
+  // The raster stack (puppeteer, pdfjs, native canvas) loads lazily so a
+  // load-time failure in those packages degrades to this route's JSON
+  // failure contract instead of a framework 500 on every request, which
+  // is exactly how this route broke on its first production deploy
+  // (2026-07-28: bundled pdf.mjs evaluated DOMMatrix at module load).
   let rendered;
   try {
+    const { renderPrintableHtml } = await import(
+      "../../../../lib/materials/render-page"
+    );
     rendered = await renderPrintableHtml(pack.html);
   } catch (error) {
     console.error(
