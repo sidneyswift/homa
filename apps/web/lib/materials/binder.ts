@@ -116,12 +116,23 @@ export function subjectKey(subject: string): string {
   return subject.trim().toLowerCase();
 }
 
+/** Machine marker subjects (the state pack's provenance tag) that must
+ * never surface as parent-facing filter chips or detail labels. */
+export const MACHINE_SUBJECTS = new Set(["state-pack"]);
+
+/** Parent-facing label for a material subject; machine markers get
+ * their human name instead of the raw token. */
+export function subjectLabel(subject: string): string {
+  return subjectKey(subject) === "state-pack" ? "State pack" : subject;
+}
+
 export function subjectOptions(materials: readonly BinderMaterial[]): SubjectOption[] {
   const byKey = new Map<string, string>();
   for (const material of materials) {
     const raw = material.subject?.trim();
     if (!raw) continue;
     const key = subjectKey(raw);
+    if (MACHINE_SUBJECTS.has(key)) continue;
     if (!byKey.has(key)) byKey.set(key, raw);
   }
   return [...byKey.entries()]

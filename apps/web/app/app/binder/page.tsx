@@ -3,6 +3,9 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getAppData } from "../../../lib/app-data";
+import { composeStatePack, verifiedMonthYear } from "../../../lib/compliance/pack";
+import { emitMapEvent } from "../../../lib/map/events";
+import { getStateRequirementsDetail } from "../../../lib/map/state-requirements";
 import { toBinderMaterials, scopedToViewContext } from "../../../lib/materials/binder";
 import { findMaterialsCaller } from "../../../lib/materials/library";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
@@ -10,6 +13,7 @@ import { effectiveTimeZone } from "../../../lib/time-zone";
 import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../../lib/view-context";
 import { PageColumn } from "../../../components/dashboard/page-column";
 import { BinderView } from "./binder-view";
+import { StatePackCard } from "./state-pack-card";
 
 /**
  * /app/binder (binder design directions, 2026-07-11): the family's
@@ -56,8 +60,63 @@ export default async function BinderPage() {
       ? children.find((child) => child.id === viewContext.childId) ?? null
       : null;
 
+  // The state pack card (plans/2026-07-28-state-pack.md D6): render-time
+  // join against the reviewed reference table, never a baked copy. A
+  // missing state or row degrades to calm copy, never an error.
+  const stateDetail = family.us_state
+    ? await getStateRequirementsDetail(family.us_state).catch(() => null)
+    : null;
+  const packReady =
+    stateDetail !== null && stateDetail.verificationStatus === "verified";
+  const expectedPages = packReady
+    ? composeStatePack({
+        detail: stateDetail,
+        family: {
+          familyName: family.name,
+          parentName: null,
+          children: children.map((child) => ({
+            name: child.name,
+            birthdate: child.birth_month ?? null,
+          })),
+        },
+        packId: "preview",
+        generatedOn: "",
+      }).pages.length
+    : 0;
+  if (packReady) {
+    await emitMapEvent("compliance.ruleset_viewed", {
+      family_id: family.id,
+      state: stateDetail.stateCode,
+      has_verified_date: Boolean(stateDetail.sourceLastVerified),
+    });
+  }
+
   return (
     <PageColumn>
+      <div className="mb-6">
+        {packReady ? (
+          <StatePackCard
+            stateName={stateDetail.stateName}
+            verifiedMonthYear={verifiedMonthYear(stateDetail.sourceLastVerified)}
+            expectedPages={expectedPages}
+          />
+        ) : (
+          <section className="rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
+            <h2 className="font-display text-xl font-semibold text-strong">
+              Your state pack
+            </h2>
+            <p className="mt-2 text-sm text-body">
+              I do not have your state&apos;s pack ready yet.
+              {family.us_state ? null : (
+                <>
+                  {" "}
+                  Add your state in settings and it will be waiting here.
+                </>
+              )}
+            </p>
+          </section>
+        )}
+      </div>
       <BinderView
         materials={binderMaterials}
         scopeChildName={focusChild?.name ?? null}

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
-import { KIND_LABELS, type BinderMaterial } from "../../../lib/materials/binder";
+import { KIND_LABELS, subjectLabel, type BinderMaterial } from "../../../lib/materials/binder";
 
 /**
  * The Binder item detail overlay: a bigger look at the real preview plus
@@ -187,7 +187,7 @@ export function MaterialDetailOverlay({
                 Subject
               </span>
               <span className="mt-0.5 block text-sm font-semibold text-strong">
-                {material.subject}
+                {subjectLabel(material.subject)}
               </span>
             </div>
           ) : null}
