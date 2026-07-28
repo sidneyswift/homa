@@ -680,6 +680,35 @@ export const EVENT_SCHEMAS = {
     material_id: z.uuid(),
     status: z.enum(["draft", "final", "superseded"]),
   }),
+  // The state pack (journeys/06 rows 47-50, J4; shipped 2026-07-28 per
+  // docs/homa-planning/plans/2026-07-28-state-pack.md). Deterministic
+  // web feature over the state_requirements table; no agent involved.
+  // Fired when the Binder's state pack card renders with a verified
+  // state row in view (the requirements screen, spec row 47).
+  "compliance.ruleset_viewed": z.object({
+    family_id: z.uuid(),
+    state: z.string().length(2),
+    has_verified_date: z.boolean(),
+  }),
+  // The parent pressed the one button (spec row 48; the period enum the
+  // spec once carried belonged to the retired evidence-report concept).
+  "compliance.report_requested": z.object({
+    family_id: z.uuid(),
+    state: z.string().length(2),
+  }),
+  // The pack PDF rendered, uploaded, and finalized (spec row 49).
+  "compliance.report_generated": z.object({
+    family_id: z.uuid(),
+    state: z.string().length(2),
+    latency_ms: z.number().int().min(0),
+    page_count: z.number().int().min(1),
+  }),
+  // The parent's own click opened the pack PDF (spec row 50, the J4
+  // terminal; emitted by the materials pdf route for state packs).
+  "compliance.report_downloaded": z.object({
+    family_id: z.uuid(),
+    state: z.string().length(2),
+  }),
   // "Call Homa" curriculum feature (founder decision 2026-07-07): an
   // outbound voice call reviews the report, then an LLM-authored
   // curriculum is generated from what was discussed. No phone number,

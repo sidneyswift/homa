@@ -154,6 +154,9 @@ jobs:
       - name: Materials preview raster E2E (previews must come from the PDF bytes)
         run: pnpm check:materials-preview
 
+      - name: State pack (derivation across all 51 reviewed snapshots)
+        run: pnpm check:state-pack
+
       - name: ChildProgress disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm child-progress:e2e
