@@ -169,7 +169,7 @@ export function TierOptions({
               className={`flex w-full cursor-pointer items-start gap-3 rounded-md border p-4 text-left transition duration-(--dur-fast) ease-out focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--clay-600)] motion-safe:active:scale-[var(--press-scale)] ${
                 isSelected
                   ? "border-2 border-[var(--clay-600)] bg-[var(--brand-soft)]"
-                  : "border-border-subtle bg-card hover:border-border-strong"
+                  : "border-border-subtle bg-card hover:border-border"
               }`}
             >
               <input
@@ -184,7 +184,7 @@ export function TierOptions({
               <span
                 aria-hidden="true"
                 className={`mt-1 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
-                  isSelected ? "border-[var(--clay-600)]" : "border-border-default"
+                  isSelected ? "border-[var(--clay-600)]" : "border-border"
                 }`}
               >
                 {isSelected ? (
