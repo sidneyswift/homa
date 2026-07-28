@@ -44,7 +44,7 @@ Every surface should express one feeling, **calm**, and one relationship, **a co
 
 - **Person:** Second person ("you," "your kids," "Maya"). Homa says "I" sparingly ("I'll draft that for you").
 - **Tone:** Encouraging, concrete, calm. Celebrates effort; normalizes lighter weeks. Never preachy, never guilt-inducing, never corporate.
-- **Casing:** Sentence case for headings, buttons, and labels. Write **Homa** in prose and conversation. Use **HOMA** in the wordmark and on UI surfaces, per global founder ruling D8. Overlines and eyebrows may also use an uppercase treatment with wide tracking.
+- **Casing:** Sentence case for headings, buttons, and labels. Write **Homa** every time the name is typed, and never type **HOMA**; the logo is the logo, so render the real `Logo` component instead of typing letters meant to stand in for it (founder correction 2026-07-28, `brand-casing-homa`, retiring global D8's old "HOMA on UI surfaces" wording). Overlines and eyebrows may still use an uppercase treatment with wide tracking, which is a type style applied to ordinary words, not a respelling of the brand name.
 - **Length:** Short, but clarity wins every tie. One idea per sentence; lead with the helpful thing. Fewer words is not the goal: cutting words that carry meaning makes copy harder to read, not easier.
 - **Clarity first:** simplicity and low cognitive load beat personality, every time. Plain names for things, no metaphor stacks, no meta-commentary ("here's the honest picture"), no comma splices standing in for the banned em dash. The full rulebook lives at `.agents/skills/homa-copy-writer/SKILL.md`.
 - **Emoji:** Rare and warm, at most one per message (a ☀️ on a morning greeting). Never as bullets or in dense UI.

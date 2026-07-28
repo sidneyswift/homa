@@ -25,7 +25,7 @@ function page(title: string, body: string, token?: string): Response {
     `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${safeTitle}</title></head>
 <body style="margin:0;background:#FBF7F0;font-family:'Hanken Grotesk',-apple-system,'Segoe UI',sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;">
   <div style="max-width:420px;background:#fff;border:1px solid #E7DDCE;border-radius:22px;padding:32px 30px;text-align:center;">
-    <div style="font-weight:600;font-size:20px;color:#E7602F;margin-bottom:14px;">homa</div>
+    <div style="font-weight:600;font-size:20px;color:#E7602F;margin-bottom:14px;">Homa</div>
     <h1 style="font-size:22px;color:#221E1A;margin:0 0 10px;">${safeTitle}</h1>
     <p style="font-size:16px;line-height:1.6;color:#332E29;margin:0;">${safeBody}</p>
     ${form}

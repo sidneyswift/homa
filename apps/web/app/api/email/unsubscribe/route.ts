@@ -29,7 +29,7 @@ function page(title: string, body: string, status = 200): Response {
 <title>${title}</title></head>
 <body style="margin:0;background:#FBF7F0;font-family:-apple-system,'Segoe UI',sans-serif;padding:48px 16px;">
   <div style="max-width:460px;margin:0 auto;background:#ffffff;border:1px solid #E7DDCE;border-radius:22px;padding:32px 30px;text-align:center;">
-    <div style="font-weight:600;font-size:20px;color:#E7602F;margin-bottom:18px;">homa</div>
+    <div style="font-weight:600;font-size:20px;color:#E7602F;margin-bottom:18px;">Homa</div>
     ${body}
   </div>
 </body></html>`;

@@ -7,6 +7,15 @@
 
 export type PlanTier = "regular" | "plus" | "elite";
 
+export const PLAN_TIERS: readonly PlanTier[] = ["regular", "plus", "elite"];
+
+/** Narrows a value read back out of Postgres. families.plan_tier is a
+ *  check-constrained text column, so anything else means the constraint
+ *  changed under us; callers fall back to "regular" rather than trust it. */
+export function isPlanTier(value: unknown): value is PlanTier {
+  return typeof value === "string" && (PLAN_TIERS as readonly string[]).includes(value);
+}
+
 /** Which price the tier picker's monthly/annual toggle currently shows. */
 export type BillingPeriod = "monthly" | "annual";
 
