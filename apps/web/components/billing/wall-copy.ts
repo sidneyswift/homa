@@ -295,9 +295,13 @@ export const TRIAL_GATE_REASSURANCE =
  *  webhook, which always fires 3 days before trial end regardless of
  *  trial length; it does NOT match Stripe's dashboard-configured trial
  *  reminder email, which fires 7 days before end and would land on day
- *  0 (the moment of signup) for a trial this short. See .env.example's
- *  HOMA_SIGNUP_PAYWALL_ENABLED comment before promising this date in a
- *  channel Stripe's dashboard email actually drives. */
+ *  0 (the moment of signup) for a trial this short.
+ *
+ *  The Day 4 promise below is kept by lib/billing/trial-reminder.ts and
+ *  the trial_will_end case in app/api/billing/webhook/route.ts, which is
+ *  the one home for that email's copy and its send rules. Do not point
+ *  this beat at Stripe's dashboard reminder: it fires on the wrong day
+ *  at this trial length. */
 export const TRIAL_GATE_TIMELINE: ReadonlyArray<{ marker: string; line: string }> = [
   {
     marker: "Today",

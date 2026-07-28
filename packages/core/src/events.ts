@@ -1083,6 +1083,13 @@ export const EVENT_SCHEMAS = {
   "billing.trial_started": z.object({
     family_id: z.uuid(),
   }),
+  // The Day 4 trial reminder actually reached Resend, for the family
+  // named. Emitted only on a submitted send, so counting these against
+  // billing.trial_started answers "did every trial get its reminder?"
+  // without reading the email ledger.
+  "billing.trial_reminder_sent": z.object({
+    family_id: z.uuid(),
+  }),
   // Agent jobs (the general finite-job primitive). Content-free fleet
   // analytics: family_id plus the skill and stage counts, never a title,
   // plan text, or any parent quote (that lives in the job rows). Emitted

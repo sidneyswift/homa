@@ -1,5 +1,6 @@
 import { mapDb } from "../map/db";
 import { familyOnboardingActive } from "../onboarding/state";
+import { isPlanTier } from "./wall-types";
 import type { PlanTier, TierCheckout, WallCheckout } from "./wall-types";
 
 /**
@@ -485,6 +486,56 @@ export async function recordFamilySubscription(
       error instanceof Error ? error.message : "unknown",
     );
   }
+}
+
+export interface StripeCustomerFamily {
+  id: string;
+  email: string | null;
+  firstName: string | null;
+  planTier: PlanTier;
+  timeZone: string | null;
+  billingExempt: boolean;
+}
+
+/**
+ * familyForStripeCustomer(customerId): the reverse lookup.
+ *
+ * Every other billing read goes family -> Stripe. A subscription webhook
+ * arrives the other way round, carrying only a customer id, so this is
+ * the one place that resolves it back. Returns null for an unknown
+ * customer rather than throwing: Stripe sends events for objects this
+ * database has never heard of (a dashboard-created subscription, a
+ * customer from before the mirror), and none of them are errors.
+ */
+export async function familyForStripeCustomer(
+  customerId: string,
+): Promise<StripeCustomerFamily | null> {
+  const sql = mapDb();
+  const rows = await sql<
+    {
+      id: string;
+      email: string | null;
+      first_name: string | null;
+      plan_tier: string | null;
+      time_zone: string | null;
+      billing_exempt: boolean;
+    }[]
+  >`
+    select id, email, first_name, plan_tier, time_zone, billing_exempt
+    from public.families
+    where stripe_customer_id = ${customerId}
+    limit 1
+  `;
+  const row = rows[0];
+  if (!row) return null;
+  return {
+    id: row.id,
+    email: row.email,
+    firstName: row.first_name,
+    planTier: isPlanTier(row.plan_tier) ? row.plan_tier : "regular",
+    timeZone: row.time_zone,
+    billingExempt: row.billing_exempt,
+  };
 }
 
 /**

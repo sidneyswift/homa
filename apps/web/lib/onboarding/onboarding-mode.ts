@@ -4,9 +4,10 @@
  *
  * The composition and the routing predicate live here, importable by
  * plain node (tsx --test) with no bundler in the room. The eve wiring,
- * including the build-time ?raw import that inlines the skill body,
- * stays in agent/instructions/onboarding-mode.ts, which only eve's own
- * bundler ever loads.
+ * including the import of the generated SKILL.md mirror that carries the
+ * skill body into the deployed bundle, stays in
+ * agent/instructions/onboarding-mode.ts, which only eve's own bundler
+ * ever loads.
  *
  * The predicate reads authenticated attributes only. onboardingActive is
  * stamped by the eve channel's auth walk from the family row, so it
@@ -134,21 +135,32 @@ const ONBOARDING_SKILL_FALLBACK_LINE =
 const FRONTMATTER_PATTERN = /^---\r?\n[\s\S]*?\r?\n---\r?\n?/;
 
 /**
+ * isOnboardingModeSession(attributes): whether this authenticated
+ * session is a web session for a family still in her first days. The
+ * composer's gate, exported so the eve module can tell an onboarding
+ * turn from every other turn when it reports a missing skill body.
+ */
+export function isOnboardingModeSession(
+  attributes: OnboardingModeAttributes,
+): boolean {
+  return attributes?.channel === "web" && attributes.onboardingActive === "true";
+}
+
+/**
  * composeOnboardingModeMarkdown(attributes, rawSkill): the mode's
  * guidance with the skill body inlined, when this authenticated session
  * is a web session for a family still in the free period; null
  * otherwise. rawSkill is the SKILL.md text exactly as it sits on disk;
- * the caller owns how it gets here (the eve module reads the source
- * tree, the test reads the same file). A null rawSkill degrades to the
- * pre-preload contract, one load_skill call, so an unreadable file can
+ * the caller owns how it gets here (the eve module imports the generated
+ * mirror, the test reads the file itself). A null rawSkill degrades to
+ * the pre-preload contract, one load_skill call, so a missing body can
  * never cost a session its onboarding arc.
  */
 export function composeOnboardingModeMarkdown(
   attributes: OnboardingModeAttributes,
   rawSkill: string | null,
 ): string | null {
-  if (attributes?.channel !== "web") return null;
-  if (attributes?.onboardingActive !== "true") return null;
+  if (!isOnboardingModeSession(attributes)) return null;
   if (rawSkill === null) {
     return `${ONBOARDING_MODE_MARKDOWN}\n\n${ONBOARDING_SKILL_FALLBACK_LINE}`;
   }

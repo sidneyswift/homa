@@ -1,12 +1,11 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
-
 import { defineDynamic, defineInstructions } from "eve/instructions";
 
 import {
   composeOnboardingModeMarkdown,
+  isOnboardingModeSession,
   type OnboardingModeAttributes,
 } from "../../lib/onboarding/onboarding-mode";
+import { ONBOARDING_SKILL_MARKDOWN } from "../../lib/onboarding/onboarding-skill-body.generated";
 
 /**
  * Chat-first onboarding, the routing layer's eve wiring
@@ -20,55 +19,40 @@ import {
  * sandbox session, and that provisioning cost is part of what the
  * preload removes.
  *
- * The read is a plain source-tree read, the same pattern
- * lib/map/narrative-generate.ts uses for report-writer.md. It covers
- * every runtime that has the source checked out (next dev, eve dev,
- * tsx). The deployed eve function bundle carries no source tree, so
- * there the composer falls back to the original load_skill line: same
- * behavior as before this change, never worse, and the error line below
- * makes the gap visible in runtime logs. Closing it for the deployed
- * bundle is a follow-up (single-source the body through defineSkill, or
- * an eve-side asset-import fix); eve 0.19's build rejects both the
- * static ?raw import (its extension resolver wins over the asset
- * plugin) and the dynamic one (authored modules must bundle to one
- * chunk).
+ * The body arrives as source, from the generated mirror of SKILL.md that
+ * scripts/build-onboarding-skill.mts writes. It used to arrive from a
+ * readFileSync of the source tree, which resolved in next dev, eve dev
+ * and tsx and threw in production, because the deployed eve function is
+ * a nitro bundle with no source tree in it: every production onboarding
+ * session from 2026-07-24 silently paid the load_skill round trip the
+ * preload exists to remove (issue #246). eve 0.19's build cannot inline
+ * the markdown itself, so the text travels as code and the mirror stays
+ * honest through the byte-exact check in
+ * lib/onboarding/onboarding-mode.test.ts.
  */
 
-/** Candidate roots, because process.cwd() differs by runtime: apps/web
- *  under next dev and eve dev, the repo root under tsx. */
-const SKILL_PATH_CANDIDATES = [
-  ["agent", "skills", "onboarding", "SKILL.md"],
-  ["apps", "web", "agent", "skills", "onboarding", "SKILL.md"],
-];
-
-let cachedRawSkill: string | null | undefined;
-
-function rawOnboardingSkill(): string | null {
-  if (cachedRawSkill !== undefined) return cachedRawSkill;
-  for (const segments of SKILL_PATH_CANDIDATES) {
-    try {
-      cachedRawSkill = readFileSync(
-        path.join(process.cwd(), ...segments),
-        "utf8",
-      );
-      return cachedRawSkill;
-    } catch {
-      // Try the next root.
-    }
-  }
-  console.error(
-    "onboarding-mode: SKILL.md not reachable from this runtime; onboarding turns fall back to load_skill",
-  );
-  cachedRawSkill = null;
-  return cachedRawSkill;
-}
+/** Null only if the generated mirror was emptied, which the byte-exact
+ *  check catches before a deploy; the null branch keeps the pre-preload
+ *  contract alive rather than costing a session its onboarding arc. */
+const preloadedSkill: string | null =
+  ONBOARDING_SKILL_MARKDOWN.trim().length > 0 ? ONBOARDING_SKILL_MARKDOWN : null;
 
 export default defineDynamic({
   events: {
     "turn.started": (_event, ctx) => {
+      const attributes = ctx.session.auth.current
+        ?.attributes as OnboardingModeAttributes;
+      if (preloadedSkill === null && isOnboardingModeSession(attributes)) {
+        // Logged per affected turn, not once per cold start, so the count
+        // in runtime logs is the number of parents who actually paid for
+        // it rather than the number of instances that booted.
+        console.error(
+          "onboarding-mode: the inlined onboarding skill body is empty, so this onboarding turn falls back to load_skill and the parent waits an extra model round trip. Run pnpm build:onboarding-skill and redeploy (issue #246).",
+        );
+      }
       const markdown = composeOnboardingModeMarkdown(
-        ctx.session.auth.current?.attributes as OnboardingModeAttributes,
-        rawOnboardingSkill(),
+        attributes,
+        preloadedSkill,
       );
       return markdown ? defineInstructions({ markdown }) : null;
     },
