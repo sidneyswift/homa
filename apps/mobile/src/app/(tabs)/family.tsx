@@ -1,22 +1,20 @@
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback } from "react";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ageInMonths, ageLabel } from "@homa/core";
 
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
-import { useSession } from "../../features/auth/session-provider";
 import { AddChildForm } from "../../features/family/add-child-form";
 import { useFamilyData } from "../../features/family/use-family-data";
-import { supabase } from "../../lib/supabase";
 import { openWebOnboarding } from "../../lib/web-links";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, space } from "../../theme/tokens";
 
-/** Family: who Homa knows, plus account actions. */
+/** Family: who Homa knows. Account actions live in Settings. */
 export default function FamilyScreen() {
-  const { session } = useSession();
+  const router = useRouter();
   const { family, children, memberDisplayName, loading, reload } = useFamilyData();
   const setupReady = Boolean(family?.profile_completed_at && children.length > 0);
 
@@ -147,25 +145,21 @@ export default function FamilyScreen() {
           </Text>
         )}
 
-        <View style={{ gap: space.sm }}>
-          {session?.user.email ? (
-            <Text
-              style={{
-                textAlign: "center",
-                fontFamily: fontFamilies.body,
-                fontSize: fontSize.sm,
-                color: colors.textMuted,
-              }}
-            >
-              Signed in as {session.user.email}
-            </Text>
-          ) : null}
-          <Button
-            label="Sign out"
-            variant="secondary"
-            onPress={() => void supabase.auth.signOut()}
-          />
-        </View>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push("/settings")}
+          style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, alignItems: "center" })}
+        >
+          <Text
+            style={{
+              fontFamily: fontFamilies.bodyMedium,
+              fontSize: fontSize.base,
+              color: colors.brand,
+            }}
+          >
+            Settings
+          </Text>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
