@@ -19,6 +19,12 @@ export const supabase = createClient(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false,
+      // supabase-js defaults to the implicit flow, which returns tokens in
+      // a URL fragment a deep link cannot hand back reliably. PKCE returns
+      // a code we exchange ourselves, and it stores the verifier in the
+      // AsyncStorage above so the exchange survives the browser hop. The
+      // web app gets this for free from @supabase/ssr; mobile must ask.
+      flowType: "pkce",
     },
   },
 );

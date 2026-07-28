@@ -1,4 +1,5 @@
-import { Pressable, Text, type StyleProp, type ViewStyle } from "react-native";
+import type { ReactNode } from "react";
+import { Pressable, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, pressScale, radius, space } from "../../theme/tokens";
@@ -38,6 +39,7 @@ export function Button({
   variant = "primary",
   size = "md",
   disabled = false,
+  icon,
   style,
 }: {
   label: string;
@@ -45,6 +47,8 @@ export function Button({
   variant?: ButtonVariant;
   size?: "sm" | "md" | "lg";
   disabled?: boolean;
+  /** Optional mark shown before the label, e.g. the Google glyph. */
+  icon?: ReactNode;
   style?: StyleProp<ViewStyle>;
 }) {
   const look = VARIANT_STYLES[variant];
@@ -73,15 +77,24 @@ export function Button({
         style,
       ]}
     >
-      <Text
+      <View
         style={{
-          fontFamily: fontFamilies.bodySemibold,
-          fontSize: textSize,
-          color: look.textColor,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: icon ? space.sm : 0,
         }}
       >
-        {label}
-      </Text>
+        {icon}
+        <Text
+          style={{
+            fontFamily: fontFamilies.bodySemibold,
+            fontSize: textSize,
+            color: look.textColor,
+          }}
+        >
+          {label}
+        </Text>
+      </View>
     </Pressable>
   );
 }

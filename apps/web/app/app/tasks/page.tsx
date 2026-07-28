@@ -3,9 +3,19 @@ import { redirect } from "next/navigation";
 
 import { getMyFamily } from "../../../lib/family";
 import { getFamilyPhones } from "../../../lib/family-phone";
+import { agentJobsEnabled } from "../../../lib/jobs/flag";
 import { effectiveTimeZone } from "../../../lib/time-zone";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import { PageColumn } from "../../../components/dashboard/page-column";
+import {
+  ACTIVE_JOB_STATUSES,
+  AGENT_JOB_SELECT,
+  AGENT_JOB_STAGE_SELECT,
+  mapAgentJobViews,
+  type AgentJobRow,
+  type AgentJobStageRow,
+  type AgentJobView,
+} from "./agent-job-view";
 import { HISTORY_RUN_LIMIT } from "./task-copy";
 import { TASK_RUN_HISTORY_SELECT, mapTaskRunViews } from "./task-run-view";
 import { TasksView, type TaskRowView, type TaskRunView } from "./tasks-view";
@@ -26,12 +36,50 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
+/**
+ * The family's active agent jobs, read under the caller's own RLS (the
+ * members-read policies on agent_jobs / agent_job_stages), the same posture
+ * as the homa_task_runs read below. Gated by the agent-jobs flag so the
+ * surface stays dark when the primitive is off, and short-circuited when no
+ * job is active so the stages read only runs when there is something to
+ * join. familyId is never supplied here: RLS scopes every row to the
+ * caller's own family in Postgres.
+ */
+async function loadActiveAgentJobs(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+): Promise<AgentJobView[]> {
+  if (!agentJobsEnabled()) return [];
+
+  const jobsResult = await supabase
+    .from("agent_jobs")
+    .select(AGENT_JOB_SELECT)
+    .in("status", [...ACTIVE_JOB_STATUSES])
+    .order("created_at", { ascending: false });
+  if (jobsResult.error) {
+    throw new Error(`agent jobs read failed: ${jobsResult.error.message}`);
+  }
+  const jobRows = (jobsResult.data ?? []) as AgentJobRow[];
+  if (jobRows.length === 0) return [];
+
+  const stagesResult = await supabase
+    .from("agent_job_stages")
+    .select(AGENT_JOB_STAGE_SELECT)
+    .in(
+      "job_id",
+      jobRows.map((row) => row.id),
+    );
+  if (stagesResult.error) {
+    throw new Error(`agent job stages read failed: ${stagesResult.error.message}`);
+  }
+  return mapAgentJobViews(jobRows, (stagesResult.data ?? []) as AgentJobStageRow[]);
+}
+
 export default async function TasksPage() {
   const family = await getMyFamily();
   if (!family?.profile_completed_at) redirect("/onboarding");
 
   const supabase = await createSupabaseServerClient();
-  const [scheduleResult, runsResult, phones, userResult] = await Promise.all([
+  const [scheduleResult, runsResult, phones, userResult, jobs] = await Promise.all([
     supabase
       .from("agent_schedules")
       .select(
@@ -45,6 +93,7 @@ export default async function TasksPage() {
       .limit(HISTORY_RUN_LIMIT),
     getFamilyPhones(family.id),
     supabase.auth.getUser(),
+    loadActiveAgentJobs(supabase),
   ]);
   if (scheduleResult.error) {
     throw new Error(`agent schedules read failed: ${scheduleResult.error.message}`);
@@ -95,6 +144,7 @@ export default async function TasksPage() {
     <PageColumn>
       <TasksView
         tasks={tasks}
+        jobs={jobs}
         runs={runs}
         timeZone={effectiveTimeZone(family.time_zone)}
         briefFlagOn={process.env.MORNING_BRIEF_ENABLED === "true"}
