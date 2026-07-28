@@ -62,6 +62,170 @@ The subscription mirror was proven the same way with a real cancel
 event, which is the path that ends access when a family cancels and had
 never run in production. Before this session, 0 of 206 families carried
 any Stripe data at all.
+## 2026-07-27 · One planner: the consolidation arc, seven founder rulings, and the first two PRs
+
+The calendar shipped the same day (entry below) and immediately sharpened the
+question CG-03 had been pointing at: Homa now had two week surfaces that
+disagreed about what day school work happens. The investigation ran as ten
+parallel deep-readers over the codebase (planner surface, calendar surface,
+data model, lessons and curriculum, chat tools, design system, docs and
+rulings history, mobile, customer journey, and external world-class
+research), then a six-expert council (product design, systems architecture, a
+veteran homeschool parent, agent architecture, growth, mobile platform) run
+as independent critique, cross-debate, and adjudication, plus a completeness
+critic over all twelve outputs. The spec is
+`plans/2026-07-27-planner-calendar-ecosystem.md` (PR #255); the rulings below
+were folded into its §5 by PR #268.
+
+What the readers found, in short: `/app/planner` spreads activities across
+weekdays by display math it calls a guess, while `/app/calendar` holds real
+dates; four database vocabularies answer "a thing happens Tuesday" and the
+weekly co-op day has no correct home in any of them; five product notions
+answer to "lesson" and none reaches the planner; four color systems draw on
+the same four tokens, so the same activity card is a different color on the
+two week surfaces. The load-bearing finding was that no tool read
+`plan_activity_schedule`: Homa wrote dates she could never read back, which
+made the reshuffle procedure that shipped hours earlier unexecutable as
+written. One defect was live rather than latent: mobile authenticates as
+channel "web", so every mobile turn told the model a planner panel was open
+beside the parent while the mobile renderer dropped planner parts entirely,
+the same fabricated-UI class as the 2026-07-19 voice binder incident.
+
+**Seven founder rulings, all made 2026-07-27**, recorded on gh#265 and
+indexed in `journeys/10-reconciliation.md` §5 as `one-planner-arc`. Q-A: the
+unified Planner lands on the Today and this-week checkable register, grid one
+toggle away. Q-B: no measurement gate between arc phases, ship straight
+through. Q-C: skip the Carolyng canary. Q-D: both month view and magic
+import, month first, nothing traded away. Q-E: #244's skill policy splits by
+intent, bare `open_planner` for pure view intents, skill load required and
+asserted for reshuffle, scheduling, and curriculum mapping. Q-F: full native
+mobile parity pulled into this arc. Q-G: family subjects built in-arc.
+
+Only Q-A and Q-E followed the council. Q-B and Q-C went against its
+recommendation, Q-D and Q-F went beyond it, and Q-G arrived unrecommended
+because the council never reached family subjects. The risks the founder is
+carrying are on the record rather than smoothed over. Q-B and Q-C together
+remove every gate: arcs D through G can be built on a surface no real family
+has adopted, the fleet flip swaps out check-offs (the only planner behavior
+with proven real usage) with no canary, and the first co-founder reaction now
+arrives after the fleet already has the surface. The mitigations that carry
+that risk instead are per-family flag targeting for a revocable rollout,
+flag-off keeping `/app/calendar` functional for the flag's lifetime, and
+check-off parity as a named non-droppable test. Q-F and Q-G add scope without
+removing preconditions: the per-toggle check-off write op lands before native
+writes, the #196 D1 render contract is ruled at arc B time, the stable-ID
+trigger review happens before native writes rather than after an incident,
+and family subjects settle the scoring boundary (a family check-off must not
+silently enter any child's scored report) in the PR body before schema lands.
+
+Owed and unrelated to any of the seven, recorded by Q-B: `AGENTS.md` still
+names the July 13 2026 conference as the fixed launch deadline, and that date
+is past. No deadline-based scope argument should be accepted until a current
+runway is named.
+
+Shipped and verified live the same day. PR #269 (merge `78f2499e`, arc A
+defect repair) makes the `edit_plan` schedule cascade transactional with the
+`child_plans` UPDATE, clears a plan's schedule rows in the same transaction
+as a rebuild with reassure-before-inform receipt copy, surfaces a failed drag
+instead of letting the block snap back silently, keeps a timed multi-day
+event's first-day window visible, and replaces the fabricated panel narration
+with an honest note that names the mobile gap. PR #270 (merge `e4644764`, arc
+B0 tool truth) gives `open_planner` four-week reads carrying each activity's
+`scheduledDate`, bounded and measured at roughly 6.7k tokens family-wide and
+4.3k narrowed with a ratchet test pinning it, adds `update_family_event`,
+gives `list_family_events` a from/to window with look-back, ships receipt
+chips and busy labels for the calendar tools, and registers six `planner.*`
+events with two emitting now. The reshuffle procedure became executable for
+the first time: five sandbox eval passes each ran `load_skill`,
+`list_family_events`, `open_planner`, and `schedule_plan_activity` end to
+end against seeded rows.
+
+## 2026-07-27 · Calendar and homeschool planner in one ships (CG-03)
+
+The co-founders' ask, in Carolyng's words on 2026-07-25: "Calendar and
+homeschool planner in 1" (L25), with "an option for each kid and then a
+family calendar" so she can check off "each kids lessons, added homa lessons,
+family subjects, related activities, appts etc." (L24). Shipped as PR #232
+(merge `0957eefb`), with the loose ends recorded at that merge closed the
+same day by PR #250 (merge `219fb0d9`). Both live in production 2026-07-27,
+verified after deploy: `/app/calendar` returns 200 and auth-gates to
+`/signin?next=%2Fapp%2Fcalendar`, and both new tables read cleanly in prod.
+
+**The surface.** `/app/calendar` is one Monday to Sunday grid for the whole
+family: per-kid filter chips with avatars, a real time axis where events sit
+at their hour and are sized by duration (side by side when they overlap),
+all-day banners spanning their real days, kid tone discs with stacked discs
+on whole-family items, a School strip carrying checkable scheduled activities
+and per-kid logged-hours pills, and a clock line that ticks. Direct
+manipulation throughout: tap an empty slot to create, tap a block for a
+detail card with edit and a two-step delete, drag to reschedule with
+half-hour snap and a live preview. Every color comes from `avatarTone` and
+existing tokens; no new palette was invented.
+
+**The substrate.** Two additive migrations, applied to production ahead of
+the deploy as the deploy law allows: `20260726130000_family_events.sql` and
+`20260726140000_plan_activity_schedule.sql`, both with the established RLS
+posture (`is_family_member` plus child-coherence re-checks on insert and
+update). `plan_activity_schedule` is the M2-10 substrate the codebase had
+named as unbuilt since the week board shipped: a plan activity can finally
+hold a real persisted date instead of a presentation-only weekday guess, and
+`FourWeekPlan`/`PlanWeek` are untouched.
+
+**One rulebook across chat and grid.** Four narrow agent tools shipped with
+the surface (`add_family_event`, `list_family_events`, `remove_family_event`,
+`schedule_plan_activity`), and the grid's server actions validate through the
+same `parseFamilyEventInput` the tools use, so a chat-created and a
+grid-created event cannot drift. Per the binding placement rule the
+reshuffle-the-week-around-real-life procedure went into the `planner` fleet
+skill with no new tools: read the real week first, work out what actually
+collides (a 2pm dentist does not displace a morning math lesson, an all-day
+trip takes the day), move the minimum to the nearest room inside the same
+plan week, never move checked-off work, name every move, and stop rather than
+cram Friday. The phone line gained a bounded 72-hour recent-activity digest
+at call start, read-only.
+
+**What PR #250 closed.** Three of the four recorded loose ends were code, and
+the fourth (adoption) never was. `edit_plan`'s index shifting now cascades into
+`plan_activity_schedule` through `scheduleRemapForEdits`, which lives beside
+`remapProgressAfterRemove` in `plan-edits.ts` deliberately so the check-off
+remap and the date remap cannot drift apart; the kid chips and the floating
+view-context switcher now route through one `selectKid()` so they can no
+longer disagree; drag listeners attach synchronously in the block's own
+`pointerdown` so the first `pointermove` is not dropped; and the empty week
+offers two real doors, adding an appointment and putting school on real days,
+the second through the existing `?draft=` sentinel rather than an invented
+`?ask=` param that would have shipped a button doing nothing.
+
+**Direction was adjudicated, not laid out.** CG-03 called for a direction lab
+first and a founder direction pick recorded as a ruling. On 2026-07-26 the
+founder authorized building the real thing instead, and direction was settled
+by a two-persona ICP judge loop against the live page: round one scored 7/10
+(soft yes) and 7.5/10 (no) with ranked pixel-specific fixes, round two after
+those fixes scored 9/10 and 8.5/10, both wowed, with every round-one fix
+independently confirmed. Registered as `cg-03-direction-adjudication` in
+`journeys/10-reconciliation.md` §5.
+
+**Adoption baseline, measured in prod the same day**: `family_events` 9 rows
+across 2 families, `plan_activity_schedule` 1 row across 1 family, every row
+belonging to a sandbox family and both of those families the founder's. No
+real family had created a calendar event or dated a plan activity yet. That
+is the baseline to measure from rather than a verdict, and it is tracked as
+gh#253.
+
+**Correction to an applied migration comment** (recorded 2026-07-27 by the
+doc-debt pass, gh#264). `20260726140000_plan_activity_schedule.sql` documents
+the `edit_plan` index cascade as a known limitation left for a follow-up.
+That follow-up shipped: PR #250 added the cascade, and PR #269 wrapped it in
+one transaction with the `child_plans` UPDATE. The migration file is applied,
+so it stays byte-stable per the precedent in this log (§ 2026-07-07 (small
+hours) · Cleanup audit executed: comment fixes on applied migrations are
+skipped on purpose), and this note is the correction of record.
+
+**One law retired by this ship.** The 2026-07-11 morning-brief entry's
+"Calendar writes are not available" premise is false as of these PRs. Retired
+in place at that entry with a pointer; what survives is narrower, and what
+the phone line and SMS should now say about the planner is still owed. See
+that entry for the exact scope.
 
 ## 2026-07-27 · Founder directive: shorten the signup-paywall trial to 7 days
 
@@ -4529,7 +4693,28 @@ Founder approved the Mac Mini-style morning brief as four exact blocks:
 one `Want me to` offer. Each content section is 1 to 2 sentences. The offer
 must name one action Homa can complete now, such as making a quick activity
 or printable. Calendar writes are not available, so Homa may collect timing
-details for a reminder or task but may not promise a calendar change. The
+details for a reminder or task but may not promise a calendar change.
+**[RETIRED 2026-07-27, superseded by the calendar ship (§ 2026-07-27 ·
+Calendar and homeschool planner in one ships): the capability premise is
+false. Calendar writes exist. `/app/calendar`, `family_events`, and
+`plan_activity_schedule` shipped in PRs #232 and #250, and
+`schedule_plan_activity` gives a plan activity a real date from chat. Two
+narrower rules survive and are current, not stale text. First, the morning
+brief's own offer line still may not promise a calendar change: the format
+validator rejects calendar references in the CTA
+(`apps/web/lib/tasks/research-brief-format.ts`), and the producing skill
+still says never promise a calendar write
+(`apps/web/agent/skills/research-brief/SKILL.md`). That is now a brief-format
+choice rather than a statement about what Homa can do. Second, the phone line
+still may not add, move, or remove anything on the family calendar or give a
+plan activity a real date (`apps/web/agent/general-call-instructions.md`),
+which matches its real tool surface: the voice webhook tool routes in this
+repo are `log-hours`, `remember`, `send-email`, and `send-signup-link`, none
+of them a calendar write. Nothing here authorizes voice calendar writes. What
+the phone line and SMS should now SAY about the planner has not been
+re-ruled; the spec
+(`plans/2026-07-27-planner-calendar-ecosystem.md` §4.5) puts that re-ruling
+in the arc, and gh#264 records it as owed rather than done.]** The
 saved-note URL is deferred until a dedicated research-note route exists.
 
 The generated-copy producer at

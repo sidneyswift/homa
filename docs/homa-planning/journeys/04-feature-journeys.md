@@ -910,6 +910,29 @@ is one tap and zero guilt ("a lighter day is still a good day", M2-01 voice law)
 **Consideration time**: minutes; the first drafted week either saves her Sunday or it
 doesn't.
 
+**FIELD EVIDENCE, 2026-07-25 (CG-03; folded into this journey 2026-07-27)**: the
+co-founder thread in `journeys/evidence/raw/2026-07-25-carolyng-whatsapp-feedback.md`
+(L19 to L27, ticketed in `plans/2026-07-25-carolyng-feedback-tickets.md` §CG-03) makes
+the stated user model explicit: **"Calendar and homeschool planner in 1"** (L25), one
+surface with "an option for each kid and then a family calendar. That way I can check
+off each kids lessons, added homa lessons, family subjects, related activities, appts
+etc." (L24). Three requirements this adds to the journey below:
+
+- **The constraint surface is Homa's own calendar, not Google** (L21: "No its own
+  calender where I can put everything so Homa can fit it in for me"). Appointments,
+  co-op days, and trips are family events Homa holds herself, so school work and life
+  sit on the same week. External calendar sync stays out of scope until ruled.
+- **Optimize around life, not only draft around it** (L21: "you have a doctor's appt on
+  Tuesday let's push things back", plus the same message's example of moving a subject
+  to the time of day that child does it best). This is the same repair job as the "we
+  did none of it" sub-journey below, triggered by an appointment rather than a
+  collapse, and it is the workflow the external planner market treats as its killer
+  feature.
+- **Family subjects have no home in the data model.** Morning basket and family
+  read-aloud are checkable school activities that belong to the family rather than one
+  child, and plans are strictly per child and subject. Ruled in-arc 2026-07-27
+  (journeys/10 §5 `one-planner-arc` Q-G).
+
 ## Job stories
 
 - When Sunday night arrives, I want next week drafted around my real commitments, so
@@ -929,6 +952,20 @@ per-child lanes or a child switcher within the week; the day-column structure ho
 but the multi-child arrangement is undesigned. Also the sketched blocks are
 subject-labeled; blocks should carry their linked artifact/activity (tap block → the
 worksheet) per the F1/F3 integration.
+
+**RESOLVED 2026-07-27 for the multi-child half** (journeys/10 §5
+`cg-03-direction-adjudication`): the shipped week grid answers it in the co-founder's
+own structure, per-kid lanes plus a family lane, each kid keeping their `avatarTone`
+color everywhere with a woven family stripe on whole-family items, and per-kid filter
+chips as the switcher (PR #232, `/app/calendar`, live 2026-07-27; loose ends closed in
+PR #250). Direction was adjudicated by a two-persona ICP judge loop rather than the
+direction lab CG-03 originally sequenced. The one-planner arc carries that same
+structure onto `/app/planner` as the single surface, with a checkable Today and
+this-week register as the default landing and the grid one toggle away
+(`plans/2026-07-27-planner-calendar-ecosystem.md`; journeys/10 §5 `one-planner-arc`
+Q-A). **Still open**: the block-content half of this flag. Shipped blocks carry subject
+and activity text, not the linked artifact, so "tap block → the worksheet" remains
+undesigned.
 
 | Stage | Touchpoints | What she does | What Homa does | Time | Emotion | Friction risks | Delight opportunities |
 |---|---|---|---|---|---|---|---|
