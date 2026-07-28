@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  TRIAL_REMINDER_OUTER_NOTE,
   formatTrialCharge,
   formatTrialEndDate,
   trialReminderContent,
@@ -164,9 +165,9 @@ describe("trialReminderContent", () => {
       charge: "$49 a month",
       manageUrl,
     });
-    assert.equal(content.subject, "Your Homa trial ends August 3");
+    assert.equal(content.subject, "Your free days with Homa end August 3");
     assert.match(content.bodyLines[0], /^Hi Dana, nothing has been charged yet\./);
-    assert.match(content.bodyLines[1], /Homa Plus plan starts that day, at \$49 a month\./);
+    assert.match(content.bodyLines[1], /Homa Plus plan starts that day\./);
     assert.equal(content.cta.url, manageUrl);
   });
 
@@ -178,7 +179,7 @@ describe("trialReminderContent", () => {
       charge: "$19 a month",
       manageUrl,
     });
-    assert.equal(dated.heading, "What happens on August 3");
+    assert.equal(dated.heading, "Your first charge is on August 3");
     const undated = trialReminderContent({
       firstName: "Dana",
       planName: "Homa",
@@ -186,7 +187,51 @@ describe("trialReminderContent", () => {
       charge: "$19 a month",
       manageUrl,
     });
-    assert.equal(undated.heading, "What happens when your free days end");
+    assert.equal(undated.heading, "Your first charge is in three days");
+  });
+
+  it("names the charge in the affirmative, not just as a thing not yet done", () => {
+    const content = trialReminderContent({
+      firstName: "Dana",
+      planName: "Homa",
+      endDate: "August 3",
+      charge: "$19 a month",
+      manageUrl,
+    });
+    // A required disclosure says money will leave the card. "Your plan
+    // starts" alone is a euphemism for the event the email exists for.
+    assert.match(content.bodyLines[1], /We will charge your card \$19 a month\./);
+    assert.match(content.heading, /charge/i);
+  });
+
+  it("never points at the deadline with a pronoun", () => {
+    for (const endDate of ["August 3", null]) {
+      const content = trialReminderContent({
+        firstName: "Dana",
+        planName: "Homa",
+        endDate,
+        charge: "$19 a month",
+        manageUrl,
+      });
+      const body = content.bodyLines.join(" ");
+      assert.match(body, /cancel before your first charge and pay nothing\./);
+      // The undated variant used to read "starts then... before then",
+      // two pronouns pointing at a moment nothing had named.
+      assert.doesNotMatch(body, /before then/);
+    }
+  });
+
+  it("calls them free days everywhere, the way the gate did", () => {
+    const content = trialReminderContent({
+      firstName: "Dana",
+      planName: "Homa",
+      endDate: "August 3",
+      charge: "$19 a month",
+      manageUrl,
+    });
+    const all = [content.subject, content.heading, content.footerNote, ...content.bodyLines].join(" ");
+    assert.match(all, /free days/);
+    assert.doesNotMatch(all, /trial/i);
   });
 
   it("says cancel on the button, not just in the paragraph", () => {
@@ -212,7 +257,7 @@ describe("trialReminderContent", () => {
       manageUrl,
     });
     const body = content.bodyLines.join(" ");
-    assert.match(body, /saved to your account, exactly as you left it\./);
+    assert.match(body, /Everything you and Homa have made is saved to your account\./);
     // accountAccessDecision walls a canceled family, so the email must
     // never imply she can keep opening what she made.
     assert.doesNotMatch(body, /either way|keep using|still use|always have access/i);
@@ -228,11 +273,11 @@ describe("trialReminderContent", () => {
     });
     assert.equal(
       content.bodyLines[1],
-      "Your Homa plan starts that day. You can see the amount on your billing page.",
+      "Your Homa plan starts that day. We will charge your card, and your billing page shows the amount.",
     );
   });
 
-  it("greets a family with no first name without an empty slot", () => {
+  it("drops the greeting rather than rendering a bare Hi", () => {
     const content = trialReminderContent({
       firstName: null,
       planName: null,
@@ -240,10 +285,13 @@ describe("trialReminderContent", () => {
       charge: null,
       manageUrl,
     });
-    assert.match(content.bodyLines[0], /^Hi, nothing has been charged yet\./);
+    // "Hi, nothing has been charged yet" reads as a merge field that
+    // failed to fill, in the one email where that costs the most.
+    assert.match(content.bodyLines[0], /^Nothing has been charged yet\./);
+    assert.doesNotMatch(content.bodyLines[0], /^Hi,/);
     assert.equal(
       content.bodyLines[1],
-      "Your Homa plan starts that day. You can see the amount on your billing page.",
+      "Your Homa plan starts that day. We will charge your card, and your billing page shows the amount.",
     );
   });
 
@@ -255,9 +303,9 @@ describe("trialReminderContent", () => {
       charge: "$19 a month",
       manageUrl,
     });
-    assert.equal(content.subject, "Your Homa trial ends in three days");
+    assert.equal(content.subject, "Your free days with Homa end in three days");
     assert.match(content.bodyLines[0], /end in three days\./);
-    assert.match(content.bodyLines[1], /^Your Homa plan starts then, at \$19 a month\.$/);
+    assert.match(content.bodyLines[1], /^Your Homa plan starts then\. We will charge your card \$19 a month\.$/);
     for (const line of content.bodyLines) {
       assert.doesNotMatch(line, /null|undefined|\{/);
     }
@@ -272,7 +320,7 @@ describe("trialReminderContent", () => {
       manageUrl,
     });
     const body = content.bodyLines.join(" ");
-    assert.match(body, /you can cancel before then and pay nothing/);
+    assert.match(body, /you can cancel before your first charge and pay nothing/);
     assert.doesNotMatch(body, /must|hurry|act now|don't miss/i);
   });
 
@@ -293,5 +341,26 @@ describe("trialReminderContent", () => {
       ...content.bodyLines,
     ].join(" ");
     assert.doesNotMatch(all, /—/);
+  });
+});
+
+describe("TRIAL_REMINDER_OUTER_NOTE", () => {
+  it("never promises an off switch this email does not have", () => {
+    // The shared shell default in lib/map/email.ts ends "Every kind of
+    // email has an off switch." This notice ships without unsubscribe
+    // headers on purpose, so inheriting that default would put a
+    // checkably false sentence in the one email that must not carry one.
+    assert.doesNotMatch(TRIAL_REMINDER_OUTER_NOTE, /off switch\.$/);
+    assert.match(TRIAL_REMINDER_OUTER_NOTE, /no off switch/i);
+  });
+
+  it("does not claim Homa never emails about money", () => {
+    // The default says "never promotions", which reads oddly on a charge
+    // notice; this override drops the claim rather than reframing it.
+    assert.doesNotMatch(TRIAL_REMINDER_OUTER_NOTE, /never promotions/i);
+  });
+
+  it("carries no em dash", () => {
+    assert.doesNotMatch(TRIAL_REMINDER_OUTER_NOTE, /—/);
   });
 });

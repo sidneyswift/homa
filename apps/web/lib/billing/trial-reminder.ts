@@ -196,7 +196,42 @@ export interface TrialReminderContent {
  * this function has no family data to give her one. An invented detail
  * would break the no-invented-numbers law, so the email stays honest
  * and thin rather than warm and made up.
+ *
+ * Then the editor gate, whose calls are also load-bearing:
+ *
+ * - The charge is stated in the affirmative. "Your plan starts" is a
+ *   euphemism for money leaving a card, and "charged" appeared in the
+ *   whole email exactly once, in the negative. A required disclosure
+ *   names the transaction plainly, so the heading and the body both do.
+ * - Nothing points at a moment by pronoun. "Cancel before then" made
+ *   the one deadline she would act on depend on a three-sentence
+ *   referent chain, and in the undated variant "starts then" and
+ *   "before then" landed back to back pointing at a moment nothing had
+ *   named. "Before your first charge" is self-contained in every
+ *   variant.
+ * - One name for one thing: these are "your 7 free days" here exactly
+ *   as they are at the gate (the wall-copy.ts vocabulary law), never
+ *   "your trial" in one line and "your free days" in the next.
+ * - A missing first name drops the greeting instead of rendering a bare
+ *   "Hi, ", which reads as an unfilled merge field in the one email
+ *   where looking automated is most expensive.
  */
+/**
+ * The line under the card, which every other email lets default.
+ *
+ * The shared default in lib/map/email.ts ends "Every kind of email has an
+ * off switch." That is true of the drip and false here: this notice
+ * deliberately ships without unsubscribe headers, because it is the
+ * warning before a charge she agreed to, and an off switch on it would
+ * be an off switch on being told about her own money. The default also
+ * says "never promotions", which is a strange thing to tell someone in
+ * an email about a payment. Overriding it is the same move
+ * sendFamilyInviteEmail makes for the same reason: the default describes
+ * a relationship this particular email is not in.
+ */
+export const TRIAL_REMINDER_OUTER_NOTE =
+  "You are getting this because you started 7 free days with Homa at thankshoma.com. It tells you about your own billing, so it has no off switch. Reply to this email and Homa answers.";
+
 export function trialReminderContent(input: {
   firstName: string | null;
   planName: string | null;
@@ -205,39 +240,43 @@ export function trialReminderContent(input: {
   manageUrl: string;
 }): TrialReminderContent {
   const { firstName, planName, endDate, charge, manageUrl } = input;
-  const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
   const plan = planName ?? "Homa";
 
   // "that day" only once a real date has been named; "then" still points
   // at the end of the free days when it has not.
   const when = endDate ? "that day" : "then";
 
+  // No name means no greeting at all: "Hi, nothing has been charged yet"
+  // reads as a merge field that failed to fill.
+  const opener = firstName ? `Hi ${firstName}, nothing` : "Nothing";
   const bodyLines: string[] = [
     endDate
-      ? `${hi}nothing has been charged yet. Your 7 free days with Homa end on ${endDate}.`
-      : `${hi}nothing has been charged yet. Your 7 free days with Homa end in three days.`,
+      ? `${opener} has been charged yet. Your 7 free days end on ${endDate}.`
+      : `${opener} has been charged yet. Your 7 free days end in three days.`,
   ];
   bodyLines.push(
     charge
-      ? `Your ${plan} plan starts ${when}, at ${charge}.`
-      : `Your ${plan} plan starts ${when}. You can see the amount on your billing page.`,
+      ? `Your ${plan} plan starts ${when}. We will charge your card ${charge}.`
+      : `Your ${plan} plan starts ${when}. We will charge your card, and your billing page shows the amount.`,
   );
   // The door out, then what it costs her, in that order: the old copy put
   // preservation first and had to carry it with a vague "either way".
+  // "Before your first charge" names the deadline without pointing back
+  // at a date three sentences up, and reads the same in every variant.
   bodyLines.push(
-    "If Homa is not the right fit for your family, you can cancel before then and pay nothing.",
+    "If Homa is not the right fit for your family, you can cancel before your first charge and pay nothing.",
   );
-  bodyLines.push(
-    "Everything you and Homa have made is saved to your account, exactly as you left it.",
-  );
+  bodyLines.push("Everything you and Homa have made is saved to your account.");
 
   return {
-    subject: endDate ? `Your Homa trial ends ${endDate}` : "Your Homa trial ends in three days",
+    subject: endDate
+      ? `Your free days with Homa end ${endDate}`
+      : "Your free days with Homa end in three days",
     preview: "Nothing has been charged yet.",
-    heading: endDate ? `What happens on ${endDate}` : "What happens when your free days end",
+    heading: endDate ? `Your first charge is on ${endDate}` : "Your first charge is in three days",
     bodyLines,
-    cta: { label: "Cancel or update your plan", url: manageUrl },
+    cta: { label: "Cancel or update your card", url: manageUrl },
     footerNote:
-      "You are getting this because you started a Homa trial. It is the only reminder we send about it.",
+      "You started your 7 free days with Homa. This is the only reminder we send about them.",
   };
 }
