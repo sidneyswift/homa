@@ -36,18 +36,13 @@ const nextConfig: NextConfig = {
   // runtime (founder-editable, versioned); every route that can generate a
   // narrative must ship it in its traced bundle.
   outputFileTracingIncludes: {
-    // The state pack route rasterizes its PDF previews (gh#335): the
-    // native canvas package and its platform binaries must ship with
-    // the function, spelled out because pdf.mjs reaches for the package
-    // through its own runtime require that no static trace can see.
-    "/api/compliance/pack": [
-      "./node_modules/@napi-rs/canvas/**",
-      // Both .pnpm shapes: the package itself and its per-platform
-      // binary siblings (linux-x64-gnu on Vercel), which are separate
-      // .pnpm entries the first glob cannot reach.
-      "../../node_modules/.pnpm/@napi-rs+canvas@*/**",
-      "../../node_modules/.pnpm/@napi-rs+canvas-*/**",
-    ],
+    // NOTE (gh#335): do NOT re-add node_modules globs here for
+    // @napi-rs/canvas. Tracing-include globs copy pnpm's symlinked
+    // directories verbatim and Vercel's packager rejects the function
+    // ("invalid deployment package... files in symlinked directories",
+    // 2026-07-28). The canvas ships correctly because
+    // lib/materials/rasterize-pdf.ts imports it with a plain literal
+    // specifier that nft can see and resolve to real files.
     "/api/chat/suggestions": ["./agent/prompt-suggestions.md"],
     "/api/map/score": ["./agent/report-writer.md"],
     "/api/map/narrative-status": ["./agent/report-writer.md"],
