@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { billingFreshnessLine } from "../../lib/admin/billing-freshness";
 import { requireFounder } from "../../lib/admin/gate";
 import { getFleetOverview, type OverviewRange } from "../../lib/admin/overview-data";
 import type { HandledAlert } from "../../lib/admin/alert-acks";
@@ -326,6 +327,27 @@ export default async function AdminOverviewPage({
                 }`
           }
           subTone={data.modelCost.unpricedModels.length > 0 ? "gold" : "muted"}
+        />
+        {/* Homa never asks Stripe directly (issue #274), so a quiet billing
+            webhook leaves its copy of "who is paying" frozen and a cancelled
+            family keeps access. This is that drift made visible. The
+            no-billing-yet value stays neutral on purpose: a zero because
+            nothing has happened must not read as a zero because all is well. */}
+        <Tile
+          label="Billing records"
+          value={
+            data.billing.verdict === "no-billing-yet"
+              ? "none yet"
+              : data.billing.verdict === "healthy"
+                ? "in step"
+                : `${data.billing.stalePayers + data.billing.trialsWithoutSubscription} to check`
+          }
+          sub={
+            data.billing.lastUpdateAtIso === null
+              ? billingFreshnessLine(data.billing)
+              : `${billingFreshnessLine(data.billing)} Last update from Stripe ${timeAgo(data.billing.lastUpdateAtIso)}.`
+          }
+          subTone={data.billing.verdict === "stale" ? "rose" : "muted"}
         />
       </div>
 
