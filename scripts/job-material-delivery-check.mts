@@ -3,9 +3,11 @@
  * (`voice-dispatch-sandbox-gate`, 2026-07-28), against real data, without
  * sending anything.
  *
- * Read-only by construction: it calls the same two functions
- * `deliverJobMilestone` calls (`mayAttachMaterials`, `jobMaterialMediaUrls`)
- * and never touches the SMS transport, so running it cannot text a parent.
+ * Read-only by construction: it never touches the SMS transport, so running
+ * it cannot text a parent, and it asks for the GATE media path rather than
+ * the completed one, because completed builds the pack and a pack render
+ * writes a PDF to Blob. It reports what the pack WOULD contain instead, from
+ * the same rows the pack reads.
  *
  * Run it in two places:
  *   1. Before flipping HOMA_JOB_MATERIAL_DELIVERY_ENABLED, to confirm a
@@ -32,6 +34,7 @@ import {
   jobMaterialMediaUrls,
   mayAttachMaterials,
 } from "../apps/web/lib/jobs/milestone";
+import { jobPackMaterials, packPageBodies } from "../apps/web/lib/jobs/pack";
 import { jobMaterialDeliveryEnabled } from "../apps/web/lib/jobs/flag";
 
 const REPO_ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
@@ -86,6 +89,23 @@ async function candidate(sandbox: boolean): Promise<Candidate | null> {
     : null;
 }
 
+/** What a completed milestone would send, without rendering it. Every
+ * worksheet the build made goes into one file, so this reports the whole
+ * set rather than checking a cap: capping is the thing this replaced. */
+async function reportPack(familyId: string, jobId: string): Promise<void> {
+  const materials = await jobPackMaterials(familyId, jobId);
+  const pages = packPageBodies(materials);
+  const chars = materials.reduce((n, m) => n + m.html.length, 0);
+  console.log(
+    `  pack on completion: ${materials.length} worksheet(s), ${pages.length} page(s), ${chars.toLocaleString()} chars of html`,
+  );
+  check(
+    "every worksheet the build made is in the pack",
+    materials.length === 0 || pages.length >= materials.length,
+    `${pages.length} page(s) from ${materials.length} worksheet(s)`,
+  );
+}
+
 async function main(): Promise<void> {
   const flagOn = jobMaterialDeliveryEnabled();
   console.log(`${FLAG} is ${flagOn ? 'set to "true": delivery is OPEN to real families' : "unset: delivery is SANDBOX ONLY"}\n`);
@@ -104,15 +124,15 @@ async function main(): Promise<void> {
     console.log(`sandbox family ${sandbox.familyId}`);
     console.log(`  job "${sandbox.title}" (${sandbox.artifacts} artifact(s))`);
     check("sandbox family is cleared regardless of the flag", await mayAttachMaterials(sandbox.familyId));
-    const urls = await jobMaterialMediaUrls(sandbox.familyId, sandbox.jobId);
+    const urls = await jobMaterialMediaUrls(sandbox.familyId, sandbox.jobId, "gate");
     for (const url of urls) console.log(`    ${url.slice(0, 48)} ... ${url.slice(-14)}`);
-    check("sandbox job resolves at least one media url", urls.length > 0, `${urls.length} url(s)`);
-    check("no more than two materials ride on one text", urls.length <= 4, `${urls.length} url(s)`);
+    check("sandbox job resolves media", urls.length > 0, `${urls.length} url(s)`);
     check(
       "a preview image leads, so the picture is what lands",
       urls.length === 0 || /\.(jpg|jpeg|png)$/i.test(urls[0] ?? ""),
       urls[0]?.slice(-4),
     );
+    await reportPack(sandbox.familyId, sandbox.jobId);
   } else {
     console.log("no sandbox family has produced a material yet; skipping that half");
   }
@@ -126,12 +146,13 @@ async function main(): Promise<void> {
       cleared === flagOn,
       `cleared=${cleared}`,
     );
-    const urls = await jobMaterialMediaUrls(real.familyId, real.jobId);
+    const urls = await jobMaterialMediaUrls(real.familyId, real.jobId, "gate");
     check(
       flagOn ? "real family resolves media" : "real family resolves nothing",
       flagOn ? urls.length > 0 : urls.length === 0,
       `${urls.length} url(s)`,
     );
+    await reportPack(real.familyId, real.jobId);
   } else {
     console.log("\nno real family has produced a material yet; skipping that half");
   }
@@ -146,7 +167,7 @@ async function main(): Promise<void> {
   if (flagOn) {
     check(
       "an unknown family resolves no media even with the flag on",
-      (await jobMaterialMediaUrls(unknown, sandbox?.jobId ?? real?.jobId ?? unknown)).length === 0,
+      (await jobMaterialMediaUrls(unknown, sandbox?.jobId ?? real?.jobId ?? unknown, "gate")).length === 0,
     );
   } else {
     check("an id that is not a family fails closed", (await mayAttachMaterials(unknown)) === false);

@@ -1,6 +1,7 @@
 import { listFamilyDeliveryRecipients } from "../conversation-continuity/delivery-ledger";
 import { mapDb } from "../map/db";
 import { jobMaterialDeliveryEnabled } from "./flag";
+import { buildJobMaterialPack } from "./pack";
 import { submitHomaSms } from "../voice/telnyx-api";
 
 /**
@@ -33,12 +34,11 @@ export interface JobMilestoneInput {
   jobId?: string;
 }
 
-/** How many of a job's finished materials ride on one milestone text. A
- * one-stage making (the materials-studio contract) has exactly one, which
- * is the case this exists for; a long multi-volume build sends its newest
- * rather than filling the parent's messages with the whole set, and the
- * copy already points at the Binder for the rest. */
-const MILESTONE_MEDIA_MATERIAL_LIMIT = 2;
+/** A gate milestone says one volume is ready to look over, so it carries
+ * that one volume. A completed milestone carries the pack instead: every
+ * worksheet the build made, in one file (pack.ts). Nothing is capped away
+ * from the parent, because she asked for all of it. */
+const GATE_MEDIA_MATERIAL_LIMIT = 1;
 
 /** One material's two deliverable URLs, as the artifacts join returns them. */
 export interface MaterialMediaRow {
@@ -85,8 +85,8 @@ export async function mayAttachMaterials(familyId: string): Promise<boolean> {
 }
 
 /**
- * The finished materials for a job, newest first, as media URLs, or nothing
- * when this family is not cleared for the attachment yet.
+ * What rides on the milestone text, or nothing when this family is not
+ * cleared for the attachment yet.
  *
  * Without this the parent got a text saying her worksheet was ready and no
  * worksheet: `create_printable` has attached preview + PDF since the MMS
@@ -94,14 +94,32 @@ export async function mayAttachMaterials(familyId: string): Promise<boolean> {
  * words only. `submitHomaSms` drops print PDFs out of the MMS payload and
  * keeps them as links in the text, so passing both is safe.
  *
+ * On a COMPLETED milestone this builds the pack (pack.ts): every worksheet
+ * the build made, in one file. She asked for the whole set, so she gets the
+ * whole set, and one link has no carrier size limit while twenty-two
+ * attachments have no chance of arriving. On a GATE milestone only one
+ * volume exists to look over, so it carries that one.
+ *
  * Family-scoped in the query itself, and the join rides the composite
  * (id, family_id) key the artifacts table was built around, so a material
  * from another family cannot attach even if a job row were wrong.
  *
  * Exported so the lookup can be exercised against real data without sending.
  */
-export async function jobMaterialMediaUrls(familyId: string, jobId: string): Promise<string[]> {
+export async function jobMaterialMediaUrls(
+  familyId: string,
+  jobId: string,
+  kind: JobMilestoneKind = "completed",
+): Promise<string[]> {
   if (!(await mayAttachMaterials(familyId))) return [];
+
+  if (kind === "completed") {
+    const pack = await buildJobMaterialPack(familyId, jobId);
+    if (pack) return [pack.previewUrl, pack.pdfUrl];
+    // No pack means the build made a single material, which is already one
+    // file. Fall through and send it directly.
+  }
+
   const sql = mapDb();
   const rows = await sql<MaterialMediaRow[]>`
     select m.preview_url, m.pdf_url
@@ -112,7 +130,7 @@ export async function jobMaterialMediaUrls(familyId: string, jobId: string): Pro
       and a.family_id = ${familyId}
       and a.kind = 'material'
     order by a.created_at desc
-    limit ${MILESTONE_MEDIA_MATERIAL_LIMIT}
+    limit ${GATE_MEDIA_MATERIAL_LIMIT}
   `;
   return materialMediaUrls(rows);
 }
@@ -200,7 +218,7 @@ export async function deliverJobMilestone(input: JobMilestoneInput): Promise<str
   // still reach the parent as words when the attachment cannot be resolved.
   const mediaUrls =
     input.jobId && input.kind !== "needs_attention"
-      ? await jobMaterialMediaUrls(input.familyId, input.jobId).catch((error) => {
+      ? await jobMaterialMediaUrls(input.familyId, input.jobId, input.kind).catch((error) => {
           console.error("deliverJobMilestone artifact lookup failed:", error);
           return [];
         })
