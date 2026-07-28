@@ -166,8 +166,70 @@ describe("trialReminderContent", () => {
     });
     assert.equal(content.subject, "Your Homa trial ends August 3");
     assert.match(content.bodyLines[0], /^Hi Dana, nothing has been charged yet\./);
-    assert.match(content.bodyLines[1], /Homa Plus plan starts then, at \$49 a month\./);
+    assert.match(content.bodyLines[1], /Homa Plus plan starts that day, at \$49 a month\./);
     assert.equal(content.cta.url, manageUrl);
+  });
+
+  it("heads the email with a fact, never vaguer than the subject line", () => {
+    const dated = trialReminderContent({
+      firstName: "Dana",
+      planName: "Homa",
+      endDate: "August 3",
+      charge: "$19 a month",
+      manageUrl,
+    });
+    assert.equal(dated.heading, "What happens on August 3");
+    const undated = trialReminderContent({
+      firstName: "Dana",
+      planName: "Homa",
+      endDate: null,
+      charge: "$19 a month",
+      manageUrl,
+    });
+    assert.equal(undated.heading, "What happens when your free days end");
+  });
+
+  it("says cancel on the button, not just in the paragraph", () => {
+    const content = trialReminderContent({
+      firstName: "Dana",
+      planName: "Homa",
+      endDate: "August 3",
+      charge: "$19 a month",
+      manageUrl,
+    });
+    // The reader gate stopped here: a paragraph that names cancelling
+    // over a button that will not reads as a buried cancel link. The
+    // portal really does cancel and change a card, so the label is true.
+    assert.match(content.cta.label, /cancel/i);
+  });
+
+  it("promises the work is saved without promising it stays open", () => {
+    const content = trialReminderContent({
+      firstName: "Dana",
+      planName: "Homa",
+      endDate: "August 3",
+      charge: "$19 a month",
+      manageUrl,
+    });
+    const body = content.bodyLines.join(" ");
+    assert.match(body, /saved to your account, exactly as you left it\./);
+    // accountAccessDecision walls a canceled family, so the email must
+    // never imply she can keep opening what she made.
+    assert.doesNotMatch(body, /either way|keep using|still use|always have access/i);
+  });
+
+  it("points at the billing page when Stripe sent no amount", () => {
+    const content = trialReminderContent({
+      firstName: "Dana",
+      planName: "Homa",
+      endDate: "August 3",
+      charge: null,
+      manageUrl,
+    });
+    assert.equal(
+      content.bodyLines[1],
+      "Your Homa plan starts that day. You can see the amount on your billing page.",
+    );
   });
 
   it("greets a family with no first name without an empty slot", () => {
@@ -179,7 +241,10 @@ describe("trialReminderContent", () => {
       manageUrl,
     });
     assert.match(content.bodyLines[0], /^Hi, nothing has been charged yet\./);
-    assert.equal(content.bodyLines[1], "Your Homa plan starts then.");
+    assert.equal(
+      content.bodyLines[1],
+      "Your Homa plan starts that day. You can see the amount on your billing page.",
+    );
   });
 
   it("drops the date rather than shipping a placeholder", () => {
@@ -192,6 +257,7 @@ describe("trialReminderContent", () => {
     });
     assert.equal(content.subject, "Your Homa trial ends in three days");
     assert.match(content.bodyLines[0], /end in three days\./);
+    assert.match(content.bodyLines[1], /^Your Homa plan starts then, at \$19 a month\.$/);
     for (const line of content.bodyLines) {
       assert.doesNotMatch(line, /null|undefined|\{/);
     }

@@ -167,6 +167,35 @@ export interface TrialReminderContent {
  * Every fact is conditional on being known. A missing amount or date
  * drops that sentence instead of shipping a placeholder, because the
  * only thing worse than a vague reminder is a confident wrong one.
+ *
+ * Both copy gates ran 2026-07-27 (reader, then editor). Three calls the
+ * reader gate made, each kept here because the reason outlives the
+ * session:
+ *
+ * - The CTA names cancelling. "Manage your plan" was the exact line the
+ *   reader put the phone down on: the paragraph above it says she can
+ *   cancel and then the button would not say the word, which reads as
+ *   the cancel link being buried. The portal really does cancel, change
+ *   a card, and show invoices (app/api/billing/portal/route.ts), so the
+ *   label promises nothing the tap does not do.
+ * - The saved-work line claims preservation, never continued access.
+ *   "Stays in your account either way" invited the reading "so I can
+ *   still open it", which accountAccessDecision (lib/billing/wall.ts)
+ *   does not grant: a canceled family is walled at the account gate and
+ *   meets TRIAL_GATE_LAPSED_REASSURANCE, whose words this line matches
+ *   on purpose. Overpromising access in the one legally required
+ *   billing notice is the worst place in the product to do it.
+ * - The heading carries a fact instead of an echo. "Your free days end
+ *   soon" was vaguer than the subject line that delivered her here, so
+ *   the first thing inside the email told her less than the thing that
+ *   got her to open it, and "ending" got said three times before any
+ *   new information arrived.
+ *
+ * Known gap, deliberately not papered over: the reader wanted one
+ * concrete thing from her own four days as evidence for the $19, and
+ * this function has no family data to give her one. An invented detail
+ * would break the no-invented-numbers law, so the email stays honest
+ * and thin rather than warm and made up.
  */
 export function trialReminderContent(input: {
   firstName: string | null;
@@ -179,6 +208,10 @@ export function trialReminderContent(input: {
   const hi = firstName ? `Hi ${firstName}, ` : "Hi, ";
   const plan = planName ?? "Homa";
 
+  // "that day" only once a real date has been named; "then" still points
+  // at the end of the free days when it has not.
+  const when = endDate ? "that day" : "then";
+
   const bodyLines: string[] = [
     endDate
       ? `${hi}nothing has been charged yet. Your 7 free days with Homa end on ${endDate}.`
@@ -186,22 +219,24 @@ export function trialReminderContent(input: {
   ];
   bodyLines.push(
     charge
-      ? `Your ${plan} plan starts then, at ${charge}.`
-      : `Your ${plan} plan starts then.`,
+      ? `Your ${plan} plan starts ${when}, at ${charge}.`
+      : `Your ${plan} plan starts ${when}. You can see the amount on your billing page.`,
   );
-  bodyLines.push(
-    "Everything you and Homa have made together stays in your account either way.",
-  );
+  // The door out, then what it costs her, in that order: the old copy put
+  // preservation first and had to carry it with a vague "either way".
   bodyLines.push(
     "If Homa is not the right fit for your family, you can cancel before then and pay nothing.",
+  );
+  bodyLines.push(
+    "Everything you and Homa have made is saved to your account, exactly as you left it.",
   );
 
   return {
     subject: endDate ? `Your Homa trial ends ${endDate}` : "Your Homa trial ends in three days",
     preview: "Nothing has been charged yet.",
-    heading: "Your free days end soon",
+    heading: endDate ? `What happens on ${endDate}` : "What happens when your free days end",
     bodyLines,
-    cta: { label: "Manage your plan", url: manageUrl },
+    cta: { label: "Cancel or update your plan", url: manageUrl },
     footerNote:
       "You are getting this because you started a Homa trial. It is the only reminder we send about it.",
   };
