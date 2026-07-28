@@ -31,11 +31,53 @@ import { ONBOARDING_SKILL_MARKDOWN } from "../../lib/onboarding/onboarding-skill
  * lib/onboarding/onboarding-mode.test.ts.
  */
 
-/** Null only if the generated mirror was emptied, which the byte-exact
- *  check catches before a deploy; the null branch keeps the pre-preload
- *  contract alive rather than costing a session its onboarding arc. */
+/**
+ * ROLLED BACK 2026-07-28, same day it first worked in production.
+ *
+ * The #246 fix made this preload actually reach the deployed bundle for
+ * the first time. The first real paid signup after it hit a dead end:
+ * the parent filled the family card, and the turn that should have
+ * reacted and put up the next card made ZERO tool calls and delivered
+ * nothing. She was left looking at her own answer.
+ *
+ * Sessions from the same hour tell the story cleanly. Where the skill
+ * still arrived via load_skill, that turn worked:
+ *
+ *   turn_0: load_skill, ask_for_details
+ *   turn_1: ask_for_details            <- advances
+ *
+ * On the preloaded path:
+ *
+ *   turn_0: ask_for_details
+ *   turn_1: (nothing)                  <- dead end
+ *
+ * Every real onboarding run on 2026-07-22 through 07-24 shows turn_1
+ * calling save_family_basics and/or ask_for_details. Not one shows an
+ * empty turn. The preload is the only thing that changed.
+ *
+ * Why the load_skill call was load-bearing, most likely: the tool result
+ * from ask_for_details tells the model to end that turn with exactly
+ * <eve-empty-delivery/>, and the guard against repeating it on the next
+ * turn is prose in that same result. A mandatory tool call on the next
+ * turn broke the pattern; without one, the model's most recent output is
+ * the sentinel and it appears to reach for it again. That is a prose
+ * guard on a judgment with exactly one correct answer, which is the
+ * failure class docs/homa-planning/models-judge-code-verifies.md is
+ * about, so the real repair is a deterministic no-silent-turn guard plus
+ * an eval that drives this exact two-turn sequence.
+ *
+ * Latency (#246) is the cost of this rollback and it is worth paying:
+ * an onboarding that is 4 seconds slower beats one that stops dead
+ * after the parent has already been charged. Re-land the preload only
+ * behind that guard and that eval, never on prose alone.
+ */
+const PRELOAD_ROLLED_BACK_PENDING_SILENT_TURN_GUARD = true;
+
 const preloadedSkill: string | null =
-  ONBOARDING_SKILL_MARKDOWN.trim().length > 0 ? ONBOARDING_SKILL_MARKDOWN : null;
+  PRELOAD_ROLLED_BACK_PENDING_SILENT_TURN_GUARD
+  || ONBOARDING_SKILL_MARKDOWN.trim().length === 0
+    ? null
+    : ONBOARDING_SKILL_MARKDOWN;
 
 export default defineDynamic({
   events: {
