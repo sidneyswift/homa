@@ -54,12 +54,12 @@ export default async function CalendarPage({
   const fromDate = days[0].date;
   const toDate = days[days.length - 1].date;
 
-  // family_events and plan_activity_schedule are net-new tables from
-  // this same change, NOT yet applied to production (the PR body says
-  // so explicitly). Until the founder applies the migration, these
-  // reads fail closed to an empty week rather than a broken page, the
-  // same honest "nothing here yet" a brand-new family would see.
-  // hours_log (migration #37) is long-since live, so its read is not
+  // family_events and plan_activity_schedule were applied to production
+  // 2026-07-26 (confirmed in PR #232). The wrappers stay for targets
+  // where the tables are missing (a fresh local database): those reads
+  // fail closed to an empty week rather than a broken page, the same
+  // honest "nothing here yet" a brand-new family would see. hours_log
+  // (migration #37) is long-since live everywhere, so its read is not
   // wrapped: a real failure there should surface normally.
   const [familyEvents, scheduledActivities, hoursRows] = await Promise.all([
     getFamilyEventsForFamily(family.id, fromDate, toDate).catch((error: unknown) => {

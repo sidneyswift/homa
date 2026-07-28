@@ -20,7 +20,10 @@ import { currentWeekIndex } from "../../lib/plan-week";
  * eyes. Web chat renders the output as a live planner panel plus a card
  * in the transcript (planner-canvas.tsx); on SMS or email no panel
  * exists, so the returned summary is the whole product and Homa speaks
- * it in words.
+ * it in words. The mobile app authenticates as channel "web" but drops
+ * planner parts (message-view.tsx renders them as nothing), so the
+ * panel-opens note below never asserts the parent can see a panel
+ * (issue #256; the real capability signal is a later ticket).
  *
  * Read-only: this tool never changes a plan. Edits go through edit_plan,
  * activity check-offs stay with the parent.
@@ -127,8 +130,12 @@ export default defineBoundedTool({
         : null,
       children,
       note: [
+        // Interim honesty wording (issue #256): the mobile app
+        // authenticates as channel "web" but renders no planner panel,
+        // so this note must never assert the parent is looking at one.
+        // A real per-client capability signal is a later ticket.
         panelOpens
-          ? "The planner is now open beside the chat; the parent is looking at it."
+          ? "In web chat a planner panel opens beside the conversation, but not every client shows it (the mobile app signs in as web and renders no panel). Never claim the parent is looking at the planner; if she says she cannot see it, tell the week in plain words."
           : "No planner panel opens on this channel: share the week in your own words.",
         hasPlans
           ? "Activity indices above are what edit_plan addresses."

@@ -169,6 +169,40 @@ export function formatTimeRange(start: string, end: string | null): string {
     : `${clock(startMin, true)} to ${clock(endMin, true)}`;
 }
 
+/**
+ * bannerWhenLabel(...): the all-day strip's "when" text. A multi-day
+ * event's start_time/end_time are a first-day-only window (migration
+ * 20260726130000), so a timed multi-day event must NOT read "all day"
+ * (issue #256): when its first day is in view, the label carries the
+ * first-day time range instead. When the visible slice starts after the
+ * event's own first day, the days on screen genuinely have no time
+ * window, so "all day" stays honest there.
+ */
+export function bannerWhenLabel(input: {
+  /** "Wed 5": the banner's first visible day. */
+  startDayLabel: string;
+  /** "Sun 9": the banner's last visible day. */
+  endDayLabel: string;
+  /** False when the banner occupies a single day cell this week. */
+  spansMultipleCells: boolean;
+  /** True when the event's own starts_on is one of the visible days. */
+  firstDayInView: boolean;
+  startTime: string | null;
+  endTime: string | null;
+}): string {
+  const span = input.spansMultipleCells
+    ? `${input.startDayLabel} to ${input.endDayLabel}`
+    : input.startDayLabel;
+  const range =
+    input.startTime !== null && input.firstDayInView
+      ? formatTimeRange(input.startTime, input.endTime)
+      : "";
+  if (range === "") return `${span}, all day`;
+  return input.spansMultipleCells
+    ? `${span}, ${range} on the first day`
+    : `${span}, ${range}`;
+}
+
 export interface TimedSpan {
   startMin: number;
   endMin: number;
