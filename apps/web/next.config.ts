@@ -43,6 +43,16 @@ const nextConfig: NextConfig = {
     // 2026-07-28). The canvas ships correctly because
     // lib/materials/rasterize-pdf.ts imports it with a plain literal
     // specifier that nft can see and resolve to real files.
+    //
+    // The chromium binaries are the one legitimate include (gh#335,
+    // same day): @sparticuz/chromium reads its .br archives via fs at
+    // runtime, which no static trace can see, so the pack route's
+    // lambda shipped without them. The glob points at the real .pnpm
+    // package directory and matches plain files only, never a
+    // symlinked directory, which is what broke packaging before.
+    "/api/compliance/pack": [
+      "../../node_modules/.pnpm/@sparticuz+chromium@*/node_modules/@sparticuz/chromium/bin/**",
+    ],
     "/api/chat/suggestions": ["./agent/prompt-suggestions.md"],
     "/api/map/score": ["./agent/report-writer.md"],
     "/api/map/narrative-status": ["./agent/report-writer.md"],
