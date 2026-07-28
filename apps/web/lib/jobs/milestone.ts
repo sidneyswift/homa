@@ -1,5 +1,6 @@
 import { listFamilyDeliveryRecipients } from "../conversation-continuity/delivery-ledger";
 import { mapDb } from "../map/db";
+import { jobMaterialDeliveryEnabled } from "./flag";
 import { submitHomaSms } from "../voice/telnyx-api";
 
 /**
@@ -39,19 +40,7 @@ export interface JobMilestoneInput {
  * copy already points at the Binder for the rest. */
 const MILESTONE_MEDIA_MATERIAL_LIMIT = 2;
 
-/**
- * The finished materials for a job, newest first, as media URLs.
- *
- * Without this the parent got a text saying her worksheet was ready and no
- * worksheet: `create_printable` has attached preview + PDF since the MMS
- * path shipped, but a background job delivers through here, and here sent
- * words only. `submitHomaSms` drops print PDFs out of the MMS payload and
- * keeps them as links in the text, so passing both is safe.
- *
- * Family-scoped in the query itself, and the join rides the composite
- * (id, family_id) key the artifacts table was built around, so a material
- * from another family cannot attach even if a job row were wrong.
- */
+/** One material's two deliverable URLs, as the artifacts join returns them. */
 export interface MaterialMediaRow {
   preview_url: string | null;
   pdf_url: string | null;
@@ -69,7 +58,46 @@ export function materialMediaUrls(rows: readonly MaterialMediaRow[]): string[] {
     .filter((url): url is string => typeof url === "string" && url.trim().length > 0);
 }
 
+/**
+ * Whether this family may receive the attachment yet
+ * (ruling `voice-dispatch-sandbox-gate`, 2026-07-28).
+ *
+ * Sandbox families always may, so the path is verifiable end to end on
+ * +homatest with the flag still off. Everyone else waits for the flag. The
+ * read is one column and fails CLOSED: an unreachable database or a missing
+ * row sends words only, which is the same message this function has been
+ * sending all along, rather than attaching on a guess.
+ */
+async function mayAttachMaterials(familyId: string): Promise<boolean> {
+  if (jobMaterialDeliveryEnabled()) return true;
+  try {
+    const sql = mapDb();
+    const rows = await sql<{ sandbox: boolean }[]>`
+      select sandbox from public.families where id = ${familyId}
+    `;
+    return rows[0]?.sandbox === true;
+  } catch (error) {
+    console.error("deliverJobMilestone sandbox check failed:", error);
+    return false;
+  }
+}
+
+/**
+ * The finished materials for a job, newest first, as media URLs, or nothing
+ * when this family is not cleared for the attachment yet.
+ *
+ * Without this the parent got a text saying her worksheet was ready and no
+ * worksheet: `create_printable` has attached preview + PDF since the MMS
+ * path shipped, but a background job delivers through here, and here sent
+ * words only. `submitHomaSms` drops print PDFs out of the MMS payload and
+ * keeps them as links in the text, so passing both is safe.
+ *
+ * Family-scoped in the query itself, and the join rides the composite
+ * (id, family_id) key the artifacts table was built around, so a material
+ * from another family cannot attach even if a job row were wrong.
+ */
 async function jobMaterialMediaUrls(familyId: string, jobId: string): Promise<string[]> {
+  if (!(await mayAttachMaterials(familyId))) return [];
   const sql = mapDb();
   const rows = await sql<MaterialMediaRow[]>`
     select m.preview_url, m.pdf_url

@@ -304,12 +304,16 @@ one-planner spec is treating. Additive only, so it may lead the deploy.
 family context makes it visible to chat within a minute of hangup. That is
 literally what #171's own work order step 3 asked for.
 
-**`UsageChannel` gaining `voice` belongs to Phase 1**
-(`lib/model-usage.ts:126-134`). It currently resolves an unknown channel to
-`"web"`, which not only loses spend attribution (#252's failure mode on a new
-surface) but **silently suppresses the SMS delivery branch** in
-`create_printable.ts:544,801`, which gates on `channel === "sms"`. That makes
-it a correctness bug, not telemetry.
+**`UsageChannel` gaining `voice` moved to Phase 3**, attempted in Phase 1 and
+reverted. Typecheck showed the type has three consumers with three different
+domains: the `model_usage` ledger, the `materials.channel` column (whose
+CHECK the founder ruled unchanged in voice-materials-bridge D3), and the
+typed event registry. Nothing sets `channel: "voice"` today, so widening now
+cascades across seven files plus a migration for a channel that does not
+exist. It belongs with #280, where the channel is actually created and all
+three consumers have to be resolved together. The failure it guards against,
+an unknown channel resolving to `"web"` and thereby suppressing the SMS
+branch in `create_printable.ts:544,801`, cannot fire before then.
 
 ## 5. Sequencing
 
@@ -329,8 +333,10 @@ here depends on any Phase 3 decision.
    recent-calls line in the per-turn family context. **Closes #171.**
 3. **#281, attach the file to the text.** Join `agent_job_stage_artifacts` to
    `materials.preview_url` and `pdf_url` and pass `mediaUrls` through
-   `lib/jobs/milestone.ts:112`. Add the `voice` case to
-   `usageChannelFromAttributes`. **Closes #187.**
+   `lib/jobs/milestone.ts`, behind the `voice-dispatch-sandbox-gate` ruling:
+   sandbox families always, everyone else behind
+   `HOMA_JOB_MATERIAL_DELIVERY_ENABLED`. The `voice` case in
+   `usageChannelFromAttributes` moved to Phase 3, see §4. **Closes #187.**
 4. **#276, the phone's rules become a file.** The ~85 lines of binding founder
    rulings living as a TypeScript array literal at
    `scripts/telnyx-provision.mts:368-445` move to `agent/phone-rules.md`, so a
@@ -394,7 +400,7 @@ three-phase split changes **when** each binds, not what was decided.
 | **D4** | `gpt-realtime-2.1` now, `-mini` after evals | **Phase 3.** |
 | **D5** | Show, never ask | **Parked** with in-app voice. |
 | **D6** | Voice casting, needs a listening session | **Phase 3**, blocks #282 only. |
-| **D7** | Auto-finalize on QC pass; SMS and MMS only | **Phase 1**, item 3. The sandbox-first gate was offered and not selected; still recorded as unconfirmed, still needs confirming before item 3 flips. |
+| **D7** | Auto-finalize on QC pass; SMS and MMS only | **Phase 1**, item 3. The sandbox gate it left unconfirmed was ruled 2026-07-28 as `voice-dispatch-sandbox-gate` and built rather than written down: sandbox families always receive the attachment, every other family waits for `HOMA_JOB_MATERIAL_DELIVERY_ENABLED`, and the sandbox check fails closed. |
 | **D8** | Call transcripts per adult, like chat | **Phase 1.** `recall.ts:121-136` enforces per-adult on chats and not calls today, with no ruling behind it. Independent of every architectural question here, and a behavior change worth a release note rather than a silent tightening. |
 
 ## 7. Cost and risk

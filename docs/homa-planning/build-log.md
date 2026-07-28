@@ -3,6 +3,46 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-28 · Founder ruling: the dispatched-material gate is code, not a habit
+
+Ruling `voice-dispatch-sandbox-gate`, registered in
+`journeys/10-reconciliation.md` §5.
+
+When `voice-dispatch-delivery` was ruled on 2026-07-27 it answered two of
+three offered items: auto-finalize to the binder once QC passes, and deliver
+by SMS and MMS only. The third, verifying on a `+homatest` sandbox family
+before real families see it, was offered and not selected, so it was recorded
+as unconfirmed rather than applied or dropped. The founder then ruled it, and
+asked for it to be fixed rather than only written down.
+
+So it is a line of code. A finished material rides along on the milestone
+text for a sandbox family always, and for every other family only when
+`HOMA_JOB_MATERIAL_DELIVERY_ENABLED` is exactly "true"
+(`apps/web/lib/jobs/flag.ts`, `lib/jobs/milestone.ts`). The whole path is
+therefore verifiable end to end on `+homatest` with the flag unset, and
+flipping the flag is the single deliberate step that opens delivery to real
+families. The sandbox read fails closed: an unreachable database sends words
+only, which is exactly the message that function has been sending all along,
+rather than attaching on a guess.
+
+Why gated at all, given the delivery half is a fix for a real gap: the same
+dispatch policy auto-finalizes to the binder once QC passes, and the
+2026-07-24 materials review found QC screenshotting the screen render while
+the print render is what ships. Auto-finalize plus unwatched delivery puts a
+wrong worksheet in a real parent's binder, and the gate holds until someone
+has watched a real send.
+
+One decision made without a ruling, recorded here: the plan also called for
+widening `UsageChannel` with `voice` in Phase 1. It was attempted and
+reverted. Typecheck showed that type has three consumers with three different
+domains (the `model_usage` ledger, the `materials.channel` column whose CHECK
+`voice-materials-bridge` D3 ruled unchanged, and the typed event registry),
+and nothing sets `channel: "voice"` today, so widening it now cascades across
+seven files plus a migration for a channel that does not exist. It moves to
+the phone rebuild (#280), where the channel is actually created and all three
+consumers must be resolved together. The failure it guards against cannot
+fire before then.
+
 ## 2026-07-28 · Founder correction: the logo is the logo, and the name is always "Homa"
 
 Founder, on being told an email rendered the wordmark lowercase and that

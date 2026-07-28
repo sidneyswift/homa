@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { compose, materialMediaUrls } from "./milestone";
+import { jobMaterialDeliveryEnabled } from "./flag";
 
 // Regression for the doubled possessive found live in homa_task_runs
 // (kind agent_job): start_agent_job's own tool description asks the model
@@ -114,4 +115,24 @@ test("materialMediaUrls drops missing and blank urls rather than sending them", 
 
 test("materialMediaUrls on a job with no finished materials sends words only", () => {
   assert.deepEqual(materialMediaUrls([]), []);
+});
+
+// The gate is code, not a habit (ruling voice-dispatch-sandbox-gate). Only
+// the exact documented value opens delivery to non-sandbox families; a
+// sandbox family is cleared regardless, so the path is verifiable on
+// +homatest with the flag unset.
+test("jobMaterialDeliveryEnabled is off unless the value is exactly true", () => {
+  const original = process.env.HOMA_JOB_MATERIAL_DELIVERY_ENABLED;
+  try {
+    for (const value of [undefined, "", "false", "1", "TRUE", "yes", " true"]) {
+      if (value === undefined) delete process.env.HOMA_JOB_MATERIAL_DELIVERY_ENABLED;
+      else process.env.HOMA_JOB_MATERIAL_DELIVERY_ENABLED = value;
+      assert.equal(jobMaterialDeliveryEnabled(), false, `expected off for ${JSON.stringify(value)}`);
+    }
+    process.env.HOMA_JOB_MATERIAL_DELIVERY_ENABLED = "true";
+    assert.equal(jobMaterialDeliveryEnabled(), true);
+  } finally {
+    if (original === undefined) delete process.env.HOMA_JOB_MATERIAL_DELIVERY_ENABLED;
+    else process.env.HOMA_JOB_MATERIAL_DELIVERY_ENABLED = original;
+  }
 });

@@ -9,3 +9,22 @@
 export function agentJobsEnabled(): boolean {
   return process.env.HOMA_AGENT_JOBS_ENABLED === "true";
 }
+
+/**
+ * Whether a finished material may ride along on the milestone text for a
+ * family that is NOT a sandbox family (founder ruling
+ * `voice-dispatch-sandbox-gate`, 2026-07-28).
+ *
+ * Off by default on purpose. Sandbox families always get the attachment, so
+ * the whole path is verifiable end to end on +homatest without this flag,
+ * and flipping it is the single deliberate step that opens delivery to real
+ * families. The pair it guards is the reason: dispatched work auto-finalizes
+ * to the binder once QC passes (ruling `voice-dispatch-delivery`), and the
+ * 2026-07-24 materials review found QC screenshotting the screen render
+ * while the print render is what ships. Auto-finalize plus untested delivery
+ * puts a wrong worksheet in a real parent's binder, so the gate stays until
+ * a real send has been watched.
+ */
+export function jobMaterialDeliveryEnabled(): boolean {
+  return process.env.HOMA_JOB_MATERIAL_DELIVERY_ENABLED === "true";
+}
