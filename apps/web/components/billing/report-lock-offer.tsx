@@ -68,7 +68,10 @@ export function ReportLockOffer({
     return (
       <div className="rounded-lg border border-border bg-[var(--clay-50)] p-5">
         <p
-          className="font-mono text-[0.65rem] uppercase tracking-widest"
+          // No uppercase transform: WALL_EYEBROW is "Homa membership",
+          // and rendering it uppercase puts "HOMA" on screen, retired by
+          // the 2026-07-28 brand correction (`brand-casing-homa`).
+          className="font-mono text-[0.7rem] tracking-wide"
           style={{ color: "var(--clay-700)" }}
         >
           {WALL_EYEBROW}
@@ -94,7 +97,8 @@ export function ReportLockOffer({
   return (
     <div className="rounded-lg border border-border bg-[var(--clay-50)] p-5">
       <p
-        className="font-mono text-[0.65rem] uppercase tracking-widest"
+        // No uppercase transform: see the sign-in branch above.
+        className="font-mono text-[0.7rem] tracking-wide"
         style={{ color: "var(--clay-700)" }}
       >
         {WALL_EYEBROW}
