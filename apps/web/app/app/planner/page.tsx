@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getAppData } from "../../../lib/app-data";
+import { emitMapEvent } from "../../../lib/map/events";
 import { effectiveTimeZone } from "../../../lib/time-zone";
 import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../../lib/view-context";
 import { PageColumn } from "../../../components/dashboard/page-column";
@@ -32,6 +33,15 @@ export default async function PlannerPage() {
     cookieStore.get(VIEW_CONTEXT_COOKIE)?.value,
     children.map((child) => child.id),
   );
+
+  // One planner arc instrumentation (issue #257 PR B0): both old week
+  // surfaces count views, so the B1 flip has a baseline. Server-side
+  // and best-effort, the same posture as map.plan_built's page emit.
+  await emitMapEvent("planner.viewed", {
+    family_id: family.id,
+    surface: "planner_page",
+    client: "web",
+  });
 
   return (
     <PageColumn>

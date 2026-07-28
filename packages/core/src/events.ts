@@ -75,6 +75,47 @@ const SUBJECT_LESSON_EVENT_FIELDS = {
   subject: z.string(),
 } as const;
 
+/**
+ * Where a planner interaction happened (the one-planner arc, issue
+ * #257 PR B0 and plans/2026-07-27-planner-calendar-ecosystem.md §4.6:
+ * instrument BOTH the old and the new surfaces). "chat" is a tool call
+ * in any chat channel; "planner_page" and "calendar_page" are the two
+ * pre-unification routes; "grid" is the unified surface's week grid
+ * (arrives with arc B1/C emitters).
+ */
+export const PLANNER_EVENT_SURFACES = [
+  "chat",
+  "planner_page",
+  "calendar_page",
+  "grid",
+] as const;
+export type PlannerEventSurface = (typeof PLANNER_EVENT_SURFACES)[number];
+
+/**
+ * Which client rendered the surface. Chat tools map their channel
+ * attribute here (apps/web/lib/planner-events.ts); anything the mapper
+ * does not recognize lands in "other" rather than being dropped.
+ */
+export const PLANNER_EVENT_CLIENTS = [
+  "web",
+  "mobile",
+  "sms",
+  "email",
+  "dispatch",
+  "agent_job",
+  "other",
+] as const;
+export type PlannerEventClient = (typeof PLANNER_EVENT_CLIENTS)[number];
+
+/** The three governed scheduling-offer venues (§4.3.8): the empty-grid
+ * card, the moment after the first plan is built, and the capped
+ * morning-brief offer. */
+export const PLANNER_OFFER_VENUES = [
+  "empty_grid",
+  "first_plan",
+  "morning_brief",
+] as const;
+
 const SUBJECT_LESSON_ATTEMPT_SCHEMA = z.number().int().min(1);
 const SUBJECT_LESSON_ERROR_CODE_SCHEMA = z.string().min(1).max(80);
 const MATERIAL_EVENT_CHANNEL_SCHEMA = z.enum([
@@ -412,6 +453,70 @@ export const EVENT_SCHEMAS = {
     subject: z.string(),
     done_count: z.number().int().min(0),
   }),
+  // The one-planner arc's own namespace (issue #257 PR B0; the plan
+  // doc's §4.6 instrumentation law: both old and new surfaces). Emitted
+  // server-side through emitMapEvent. Props carry ids, subject ids,
+  // week numbers, and enums only, never activity text or event titles.
+  // Someone opened the planner: the open_planner tool, or one of the
+  // week routes rendering server-side.
+  "planner.viewed": z
+    .object({
+      family_id: z.uuid(),
+      // Set when the view was narrowed to one child (tool calls only;
+      // the pages emit family-wide).
+      child_id: z.uuid().optional(),
+      surface: z.enum(PLANNER_EVENT_SURFACES),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
+  // One plan activity got (or moved to) a real persisted date.
+  "planner.activity_scheduled": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      subject: z.string().min(1).max(80),
+      week: z.number().int().min(1).max(4),
+      surface: z.enum(PLANNER_EVENT_SURFACES),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
+  // A reshuffle moved school work around real life; moves counts the
+  // batch. Staged until the arc-C reshuffle receipt lands (gh#259).
+  "planner.week_repaired": z
+    .object({
+      family_id: z.uuid(),
+      moves: z.number().int().min(1),
+      surface: z.enum(PLANNER_EVENT_SURFACES),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
+  // The governed scheduling offers (§4.3.8), shown vs accepted per
+  // venue. Staged until the arc-B1 offer cards land (gh#258).
+  "planner.offer_shown": z
+    .object({
+      family_id: z.uuid(),
+      venue: z.enum(PLANNER_OFFER_VENUES),
+    })
+    .strict(),
+  "planner.offer_accepted": z
+    .object({
+      family_id: z.uuid(),
+      venue: z.enum(PLANNER_OFFER_VENUES),
+    })
+    .strict(),
+  // One activity checked off, split by register (rail vs grid) so the
+  // success metric's paired diagnostic reads straight off events.
+  // Staged until the arc-B1 registers and per-toggle op land (gh#258).
+  "planner.checkoff": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      subject: z.string().min(1).max(80),
+      register: z.enum(["rail", "grid"]),
+      surface: z.enum(PLANNER_EVENT_SURFACES),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
   // Homa edited a plan's activities from chat (the edit_plan tool, one
   // event per applied batch). Counts only, no activity text: the funnel
   // reads how often the agent drives the planner without carrying PII.

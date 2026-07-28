@@ -14,12 +14,17 @@ export { ACTION_COSTS } from "./action-costs";
 export {
   EVENT_SCHEMAS,
   MAP_FLOW_STEPS,
+  PLANNER_EVENT_CLIENTS,
+  PLANNER_EVENT_SURFACES,
+  PLANNER_OFFER_VENUES,
   WALL_DOORS,
   emitEvent,
   type EventName,
   type EventProps,
   type EventSink,
   type MapFlowStep,
+  type PlannerEventClient,
+  type PlannerEventSurface,
   type WallDoor,
 } from "./events";
 

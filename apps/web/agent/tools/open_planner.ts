@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
-
 import {
   defineBoundedTool,
   TOOL_DEADLINE,
@@ -11,8 +9,14 @@ import {
   resolveAgentAccess,
   type CallerAuthAttributes,
 } from "../../lib/agent-db";
+import { emitMapEvent } from "../../lib/map/events";
 import { getPlanBoard } from "../../lib/map/store";
-import { currentWeekIndex } from "../../lib/plan-week";
+import { plannerEventClient } from "../../lib/planner-events";
+import { shapePlannerPlan } from "../../lib/planner-payload";
+import {
+  listScheduledDatesPinned,
+  scheduledDatesByActivity,
+} from "../../lib/plan-schedule";
 
 /**
  * Opens the week planner as a canvas beside the chat AND returns what is
@@ -25,12 +29,21 @@ import { currentWeekIndex } from "../../lib/plan-week";
  * panel-opens note below never asserts the parent can see a panel
  * (issue #256; the real capability signal is a later ticket).
  *
+ * The payload is model grounding, bounded on purpose (issue #257, arc
+ * PR B0; lib/planner-payload.ts owns the rule): a childId-narrowed call
+ * returns that child's plans with ALL FOUR weeks, each activity carrying
+ * its real scheduledDate from plan_activity_schedule; a family-wide call
+ * returns each plan's current week plus per-week summaries. Before this,
+ * no tool read plan_activity_schedule at all, so the reshuffle procedure
+ * was unexecutable as written.
+ *
  * Read-only: this tool never changes a plan. Edits go through edit_plan,
  * activity check-offs stay with the parent.
  *
  * Tenancy: familyId comes from session auth only; a model-supplied
  * childId is re-verified inside THAT family (getPlanBoard's explicit
- * family predicate), the same wall as every other tool.
+ * family predicate), the same wall as every other tool. The schedule
+ * read carries its own explicit family predicate too.
  */
 
 const WRONG_CHILD_NOTE =
@@ -39,33 +52,9 @@ const WRONG_CHILD_NOTE =
 /** Channels where no chat surface exists to host the panel. */
 const NO_PANEL_CHANNELS = new Set(["sms", "email", "dispatch", "agent-job"]);
 
-interface PlanActivitySummary {
-  index: number;
-  text: string;
-  done: boolean;
-}
-
-interface PlanSummary {
-  subjectId: string;
-  subjectName: string;
-  weekNumber: number;
-  weekFocus: string;
-  /** This week's activities with their exact indices: edit_plan
-   * addresses activities by these numbers. */
-  activities: PlanActivitySummary[];
-  doneCount: number;
-  totalCount: number;
-  retestDue: boolean;
-}
-
-function subjectDisplayName(subjectId: string): string {
-  if (subjectId === MONTH_PLAN_SUBJECT) return "The month";
-  return getMapSubject(subjectId)?.displayName ?? subjectId;
-}
-
 export default defineBoundedTool({
   description:
-    "Open the family's week planner beside the chat and see what is on it. Use when the parent asks what is planned, wants to see or adjust the week or the month, asks to schedule an existing lesson or curriculum onto the planner, asks how to input things into the planner, or when you are about to edit a plan and need the current activities with their indices. Returns every plan's current week: focus, activities, and check-offs. In web chat this also opens the planner panel next to the conversation; over SMS or email no panel opens, so tell the week in plain words instead. Read-only; make changes with edit_plan.",
+    "Open the family's week planner beside the chat and see what is on it. Use when the parent asks what is planned, wants to see or adjust the week or the month, asks to schedule an existing lesson or curriculum onto the planner, asks how to input things into the planner, or when you are about to edit or schedule a plan and need the current activities with their indices and real scheduled dates. Pass childId to get that child's plans with all four weeks in full; without it every plan returns its current week plus per-week summaries. Each activity in a full week carries scheduledDate, the real persisted calendar date from schedule_plan_activity, or null when it has never been put on a day. In web chat this also opens the planner panel next to the conversation; over SMS or email no panel opens, so tell the week in plain words instead. Read-only; make changes with edit_plan or schedule_plan_activity.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: true,
   inputSchema: z.object({
@@ -74,7 +63,7 @@ export default defineBoundedTool({
       .uuid()
       .optional()
       .describe(
-        "Narrow the board to one child. Leave out to open the whole family's week.",
+        "Narrow the board to one child and get their plans' full four weeks with dates. Leave out to open the whole family's week (current weeks plus summaries).",
       ),
   }),
   async execute(input, ctx) {
@@ -90,34 +79,32 @@ export default defineBoundedTool({
     }
     const attrs = (attributes ?? {}) as CallerAuthAttributes & { channel?: string };
 
-    const board = await getPlanBoard(familyId, input.childId ?? null);
+    const [board, scheduleRows] = await Promise.all([
+      getPlanBoard(familyId, input.childId ?? null),
+      listScheduledDatesPinned(familyId, input.childId ?? null),
+    ]);
     if (!board) {
       return { error: "unknown_child", note: WRONG_CHILD_NOTE };
     }
+    const scheduledDates = scheduledDatesByActivity(scheduleRows);
 
     const nowMs = Date.now();
-    const children = board.children.map((child) => {
-      const plans = board.plans
+    const fullWeeks = Boolean(input.childId);
+    const children = board.children.map((child) => ({
+      childId: child.id,
+      childName: child.name,
+      plans: board.plans
         .filter((plan) => plan.childId === child.id)
-        .map((plan): PlanSummary => {
-          const weekIdx = currentWeekIndex(plan, nowMs);
-          const week = plan.weeks[weekIdx];
-          return {
-            subjectId: plan.subjectId,
-            subjectName: subjectDisplayName(plan.subjectId),
-            weekNumber: weekIdx + 1,
-            weekFocus: week.focus,
-            activities: week.activities.map((text, index) => ({
-              index,
-              text,
-              done: Boolean(plan.progress[`${week.week}.${index}`]),
-            })),
-            doneCount: plan.done,
-            totalCount: plan.total,
-            retestDue: new Date(plan.retestAt).getTime() <= nowMs,
-          };
-        });
-      return { childId: child.id, childName: child.name, plans };
+        .map((plan) =>
+          shapePlannerPlan(plan, { nowMs, fullWeeks, scheduledDates }),
+        ),
+    }));
+
+    await emitMapEvent("planner.viewed", {
+      family_id: familyId,
+      ...(input.childId ? { child_id: input.childId } : {}),
+      surface: "chat",
+      client: plannerEventClient(attrs.channel),
     });
 
     const hasPlans = children.some((child) => child.plans.length > 0);
@@ -138,7 +125,15 @@ export default defineBoundedTool({
           ? "In web chat a planner panel opens beside the conversation, but not every client shows it (the mobile app signs in as web and renders no panel). Never claim the parent is looking at the planner; if she says she cannot see it, tell the week in plain words."
           : "No planner panel opens on this channel: share the week in your own words.",
         hasPlans
-          ? "Activity indices above are what edit_plan addresses."
+          ? [
+              "Activity indices above are what edit_plan and schedule_plan_activity address.",
+              "scheduledDate is the activity's real calendar date; null means the parent has not put it on a day.",
+              fullWeeks
+                ? ""
+                : "Only each plan's current week is shown in full; call again with childId for a child's full four weeks.",
+            ]
+              .filter(Boolean)
+              .join(" ")
           : "No month exists yet. A month is built with one tap in the child's progress report; offer that door, never invent activities here.",
       ].join(" "),
     };

@@ -1,7 +1,7 @@
 ---
-description: Use when the parent asks what is on the planner, the week, or the family calendar, wants the week or the month adjusted, asks to schedule an existing lesson, curriculum, or unit study onto the planner or onto a real day, asks to add an appointment, trip, or other family event, asks to move school work around an appointment or trip ("doctor's appt Tuesday, push things back"), or wants to see the plan while you talk. Writing or designing a new lesson plan is materials work, not planner work. Contains the open-then-edit workflow (open_planner before every edit_plan), giving an activity a real calendar date (schedule_plan_activity), the family calendar tools (add/list/remove_family_event), reshuffling the week around real life, the activity writing rules, and the honest limits (you cannot build a new month).
+description: Use when the parent asks what is on the planner, the week, or the family calendar, wants the week or the month adjusted, asks to schedule an existing lesson, curriculum, or unit study onto the planner or onto a real day, asks to add, change, move, or remove an appointment, trip, or other family event, asks to move school work around an appointment or trip ("doctor's appt Tuesday, push things back"), or wants to see the plan while you talk. Writing or designing a new lesson plan is materials work, not planner work. Contains the open-then-edit workflow (open_planner before every edit_plan), giving an activity a real calendar date (schedule_plan_activity), the family calendar tools (add/list/update/remove_family_event), reshuffling the week around real life, the activity writing rules, and the honest limits (you cannot build a new month).
 metadata:
-  homa-tools: open_planner, edit_plan, schedule_plan_activity, add_family_event, list_family_events, remove_family_event
+  homa-tools: open_planner, edit_plan, schedule_plan_activity, add_family_event, list_family_events, update_family_event, remove_family_event
   homa-related-skills: curriculum-studio, materials-studio
 ---
 
@@ -38,10 +38,14 @@ calendar, the answer is to do it with her, in front of her.
 ## The workflow, in order
 
 1. **open_planner first, always.** It returns every plan's current
-   week: focus, activities, and their indices. Pass childId when the
-   conversation is about one child. In web chat this also opens the
-   board beside the chat; over SMS or email nothing opens, so tell the
-   week in plain words instead.
+   week: focus, activities, their indices, and each activity's real
+   scheduled date (scheduledDate; null means it has never been put on
+   a day). Pass childId when the conversation is about one child: that
+   returns the child's plans with ALL FOUR weeks in full, which is
+   what you need for any non-current-week edit or any scheduling work.
+   Without childId the other weeks arrive as one-line summaries only.
+   In web chat this also opens the board beside the chat; over SMS or
+   email nothing opens, so tell the week in plain words instead.
 2. **Ground the edit in what came back.** edit_plan addresses
    activities by the indices open_planner returned. Never guess an
    index, and never edit a plan you have not read this conversation.
@@ -69,7 +73,8 @@ purpose: it only sets a date, it never changes an activity's wording
 scheduled around it.
 
 1. **open_planner first, same as any edit**, so you have the real week
-   and activity index. Never guess them.
+   and activity index, and can see which activities already sit on a
+   date (scheduledDate). Never guess them.
 2. **Call schedule_plan_activity** with the child, subjectId, week,
    activityIndex, and the real date (resolve "Tuesday" or "next week"
    against the family context block's date; never guess a date).
@@ -80,15 +85,22 @@ scheduled around it.
 
 ## The family calendar (appointments, trips, family events)
 
-add_family_event, list_family_events, and remove_family_event manage
-Homa's own calendar for everything that is not a school-plan activity:
-a doctor's appointment, a co-op day, a museum trip, a family vacation.
-This is never Google Calendar or any external sync.
+add_family_event, list_family_events, update_family_event, and
+remove_family_event manage Homa's own calendar for everything that is
+not a school-plan activity: a doctor's appointment, a co-op day, a
+museum trip, a family vacation. This is never Google Calendar or any
+external sync.
 
 - Give an event a whole family (leave off childId) or one child's own
   calendar, matching what the parent actually said.
 - list_family_events before adding, when it's plausible the parent
-  already mentioned this (avoid a duplicate).
+  already mentioned this (avoid a duplicate). It defaults to the next
+  30 days, and from/to set an exact window, INCLUDING past days: a
+  mid-week reshuffle reads the whole week, Monday included.
+- Changing an existing event (a new day, a new time, a rename) is ONE
+  update_family_event call, never remove plus re-add: if the re-add
+  fails, her appointment is gone. Moving startsOn alone moves the whole
+  event and keeps a trip's length.
 - One event per real thing; do not invent times or dates she did not
   give you. A single-day event needs only a start date; a range
   ("camping trip Wednesday to Sunday") needs both.
@@ -145,10 +157,13 @@ the ask the whole calendar exists for, and it is judgment, not
 arithmetic: you are moving a real family's real week, so move the least
 you can and say exactly what you moved.
 
-**Read before you move anything.** list_family_events for the week in
-question and open_planner for the affected child or children. You need
-the real appointments and the real scheduled activities with their
-indices; never reshuffle from memory or from what she said alone.
+**Read before you move anything.** list_family_events for the whole
+week in question (from/to, past days included, so a Tuesday reshuffle
+still sees Monday) and open_planner with childId for each affected
+child, which returns their plans' full four weeks with each activity's
+real scheduledDate. You need the real appointments and the real
+scheduled activities with their indices and dates; never reshuffle
+from memory or from what she said alone.
 
 **Then decide what actually collides.** An appointment blocks a piece
 of a day, not the day:

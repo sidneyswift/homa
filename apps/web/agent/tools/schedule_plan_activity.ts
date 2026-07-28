@@ -5,6 +5,8 @@ import {
   TOOL_DEADLINE,
 } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { emitMapEvent } from "../../lib/map/events";
+import { plannerEventClient } from "../../lib/planner-events";
 import {
   schedulePlanActivityCaller,
   schedulePlanActivityPinned,
@@ -70,6 +72,18 @@ export default defineBoundedTool({
         ? await schedulePlanActivityPinned(access.familyId, input)
         : await schedulePlanActivityCaller(access.db, access.familyId, input);
     if (!result.scheduled) return result;
+
+    // The write above already re-verified childId inside this family;
+    // props carry ids and the week number only, never activity text.
+    const channel = (attributes ?? {}) as { channel?: string };
+    await emitMapEvent("planner.activity_scheduled", {
+      family_id: access.familyId,
+      child_id: result.childId,
+      subject: result.subjectId,
+      week: result.week,
+      surface: "chat",
+      client: plannerEventClient(channel.channel),
+    });
 
     return {
       ...result,

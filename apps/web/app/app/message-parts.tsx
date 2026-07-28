@@ -77,7 +77,21 @@ function truncate(text: string, max = 90): string {
   return text.length > max ? `${text.slice(0, max - 1)}…` : text;
 }
 
-function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
+/** A YYYY-MM-DD as a parent reads it ("Tue, Jul 28"). Built from the
+ * date parts directly, never new Date(string): the ISO-string parse is
+ * UTC and would show the day before in any US timezone. */
+export function chipDate(dateOnly: string): string {
+  const [year, month, day] = dateOnly.split("-").map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+/** Exported for the chip tests only; rendering goes through
+ * assistantItems. */
+export function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
   if (part.type !== "dynamic-tool" || part.state !== "output-available") return null;
   const output = (part.output ?? {}) as Record<string, unknown>;
   if (part.toolName === "remember" && output.saved === true && typeof output.content === "string") {
@@ -135,6 +149,49 @@ function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
       label: "Hours saved",
       detail: `${output.subject}, ${output.minutes} min`,
     };
+  }
+  // The planner-family receipts (issue #257, arc PR B0): before these,
+  // nine of eleven planner tools rendered nothing in the transcript,
+  // so a scheduled Tuesday or an added appointment landed silently,
+  // breaking the MJ-02 visible-effect pattern the chips above carry.
+  if (
+    part.toolName === "schedule_plan_activity" &&
+    output.scheduled === true &&
+    typeof output.activityText === "string" &&
+    typeof output.scheduledDate === "string"
+  ) {
+    return {
+      label: "Scheduled",
+      detail: `${truncate(output.activityText, 60)}, ${chipDate(output.scheduledDate)}`,
+    };
+  }
+  if (
+    part.toolName === "add_family_event" &&
+    output.added === true &&
+    typeof output.title === "string" &&
+    typeof output.startsOn === "string"
+  ) {
+    return {
+      label: "On the calendar",
+      detail: `${truncate(output.title, 60)}, ${chipDate(output.startsOn)}`,
+    };
+  }
+  if (
+    part.toolName === "update_family_event" &&
+    output.updated === true &&
+    typeof (output.event as { title?: unknown } | undefined)?.title === "string"
+  ) {
+    return {
+      label: "Calendar updated",
+      detail: truncate((output.event as { title: string }).title, 60),
+    };
+  }
+  if (
+    part.toolName === "remove_family_event" &&
+    output.removed === true &&
+    typeof output.title === "string"
+  ) {
+    return { label: "Off the calendar", detail: truncate(output.title, 60) };
   }
   return null;
 }
@@ -858,6 +915,11 @@ const TOOL_STATUS_LABELS: Record<string, string> = {
   manage_child_progress: "updating progress…",
   open_planner: "opening the planner…",
   edit_plan: "updating the planner…",
+  schedule_plan_activity: "putting it on the calendar…",
+  add_family_event: "adding it to the calendar…",
+  update_family_event: "updating the calendar…",
+  list_family_events: "checking the calendar…",
+  remove_family_event: "taking it off the calendar…",
   add_child: "adding them…",
   save_family_basics: "saving what you told me…",
   save_homeschool_profile: "saving what you told me…",

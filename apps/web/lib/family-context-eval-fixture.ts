@@ -280,6 +280,82 @@ values
 ${childValues};
 
 ${evalFixturePacketSeedSql()}
+
+${evalFixturePlannerSeedSql()}
+`.trim();
+}
+
+/**
+ * A real four-week plan, scheduled dates, and family events for the
+ * Walker family (issue #257, arc PR B0), so scheduling and reshuffle
+ * evals can ground in rows instead of an empty board. House rule
+ * (memory: eval family fixture): new eval-visible data goes in the
+ * fixture AND its seed; these rows ARE database-only truth (the prompt
+ * fixture renders family context, never plans), so this seed is their
+ * one home and the constants below are the eval-side handles.
+ *
+ * Dates are relative to the sandbox's own clock on purpose:
+ *   - retest_at = now() + 18 days puts the plan in week 2 today
+ *     (currentWeekIndex: plan start is retest minus 28 days, so 10
+ *     elapsed days lands in the second week with a day's slack either
+ *     side), which keeps the scheduled rows below inside the CURRENT
+ *     week so even a family-wide open_planner call surfaces them.
+ *   - Scheduled dates and events sit within a few days of today, one
+ *     event deliberately in the past so look-back windows have
+ *     something real to find.
+ */
+export const EVAL_FIXTURE_PLAN_CHILD_ID = FIXTURE_CHILD_FINN;
+export const EVAL_FIXTURE_PLAN_SUBJECT = "math";
+export const EVAL_FIXTURE_SCHEDULED_WEEK = 2;
+export const EVAL_FIXTURE_PAST_EVENT_TITLE = "Library story time";
+
+function evalFixturePlanJson(): unknown {
+  return {
+    subjectId: EVAL_FIXTURE_PLAN_SUBJECT,
+    subjectName: "Math",
+    childAgeLabel: "4-year-old",
+    startingLine: "Counts to 10 with one-to-one pointing.",
+    targets: ["Counting to 20", "Comparing small groups"],
+    weeks: [1, 2, 3, 4].map((week) => ({
+      week,
+      focus: `Week ${week}: counting practice, played not taught.`,
+      activities: [
+        `Ten minutes of counting to 20 out loud, week ${week} rhythm.`,
+        `Let dinosaurs carry the math: count them, sort them, week ${week}.`,
+        `One real counting moment at the store or kitchen, week ${week}.`,
+      ],
+    })),
+    styleNote: null,
+    bankVersion: "eval-fixture",
+  };
+}
+
+export function evalFixturePlannerSeedSql(): string {
+  return `
+insert into public.child_plans (child_id, subject_id, plan, bank_version, progress, retest_at)
+values
+  (${sqlString(EVAL_FIXTURE_PLAN_CHILD_ID)}, ${sqlString(EVAL_FIXTURE_PLAN_SUBJECT)},
+   ${sqlJson(evalFixturePlanJson())}, 'eval-fixture',
+   ${sqlJson({ "1.0": true })}, now() + interval '18 days');
+
+insert into public.plan_activity_schedule
+  (family_id, child_id, subject_id, week, activity_index, scheduled_date)
+values
+  (${sqlString(EVAL_FIXTURE_FAMILY_ID)}, ${sqlString(EVAL_FIXTURE_PLAN_CHILD_ID)},
+   ${sqlString(EVAL_FIXTURE_PLAN_SUBJECT)}, ${EVAL_FIXTURE_SCHEDULED_WEEK}, 0, current_date + 1),
+  (${sqlString(EVAL_FIXTURE_FAMILY_ID)}, ${sqlString(EVAL_FIXTURE_PLAN_CHILD_ID)},
+   ${sqlString(EVAL_FIXTURE_PLAN_SUBJECT)}, ${EVAL_FIXTURE_SCHEDULED_WEEK}, 1, current_date + 2);
+
+insert into public.family_events
+  (family_id, child_id, title, starts_on, ends_on, start_time, end_time, note)
+values
+  (${sqlString(EVAL_FIXTURE_FAMILY_ID)}, ${sqlString(FIXTURE_CHILD_FINN)},
+   'Dentist appointment', current_date + 2, current_date + 2, '14:00', '15:00', null),
+  (${sqlString(EVAL_FIXTURE_FAMILY_ID)}, null,
+   'Co-op day', current_date + 4, current_date + 4, null, null, null),
+  (${sqlString(EVAL_FIXTURE_FAMILY_ID)}, null,
+   ${sqlString(EVAL_FIXTURE_PAST_EVENT_TITLE)}, current_date - 2, current_date - 2,
+   '10:00', '11:00', null);
 `.trim();
 }
 

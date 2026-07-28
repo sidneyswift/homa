@@ -221,6 +221,87 @@ export async function schedulePlanActivityPinned(
   };
 }
 
+/**
+ * One activity's persisted date, as open_planner reads it back (issue
+ * #257, arc PR B0): before this read existed, no tool read
+ * plan_activity_schedule at all, so Homa wrote dates she could never
+ * see again and the skill's reshuffle procedure was unexecutable. Same
+ * posture as getPlanBoard: server connection, explicit family_id
+ * predicate, works identically for caller-JWT web sessions and pinned
+ * channels. This file (never plan-schedule-read.ts, which pulls
+ * next/headers) is the only schedule module agent tools may import.
+ */
+export interface ScheduledDateRow {
+  childId: string;
+  subjectId: string;
+  week: number;
+  activityIndex: number;
+  /** YYYY-MM-DD. */
+  scheduledDate: string;
+}
+
+/** The lookup key open_planner joins schedule rows to activities by. */
+export function scheduleKey(
+  childId: string,
+  subjectId: string,
+  week: number,
+  activityIndex: number,
+): string {
+  return `${childId}:${subjectId}:${week}.${activityIndex}`;
+}
+
+/** Rows folded into a scheduleKey -> date map. Duplicate keys cannot
+ * happen (the table's natural key is unique), so last-write-wins here
+ * is only a formality. */
+export function scheduledDatesByActivity(
+  rows: readonly ScheduledDateRow[],
+): Map<string, string> {
+  const dates = new Map<string, string>();
+  for (const row of rows) {
+    dates.set(
+      scheduleKey(row.childId, row.subjectId, row.week, row.activityIndex),
+      row.scheduledDate,
+    );
+  }
+  return dates;
+}
+
+/**
+ * Every scheduled date for one family, optionally narrowed to one child
+ * (the childId arrives already re-scoped by the caller's board read;
+ * the family predicate here still stands on its own). Bounded by
+ * construction: a family has at most a handful of plans, each 4 weeks
+ * of at most 10 activities.
+ */
+export async function listScheduledDatesPinned(
+  familyId: string,
+  childId?: string | null,
+): Promise<ScheduledDateRow[]> {
+  const sql = mapDb();
+  const rows = await sql<
+    {
+      child_id: string;
+      subject_id: string;
+      week: number;
+      activity_index: number;
+      scheduled_date: string;
+    }[]
+  >`
+    select child_id, subject_id, week, activity_index,
+           to_char(scheduled_date, 'YYYY-MM-DD') as scheduled_date
+    from public.plan_activity_schedule
+    where family_id = ${familyId}
+      ${childId ? sql`and child_id = ${childId}` : sql``}
+  `;
+  return rows.map((row) => ({
+    childId: row.child_id,
+    subjectId: row.subject_id,
+    week: row.week,
+    activityIndex: row.activity_index,
+    scheduledDate: row.scheduled_date,
+  }));
+}
+
 /** Exported so plan-schedule-read.ts (the caller-page read) can shape
  * its own Data API rows without duplicating this mapping. */
 export interface RawScheduleRow {

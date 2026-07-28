@@ -606,3 +606,113 @@ test("delegated session event accepts only its PII-free lineage shape", () => {
     );
   }
 });
+
+// The one-planner arc namespace (issue #257, arc PR B0): ids, subject
+// ids, week numbers, and enums only, and strict shapes, so activity
+// text or event titles can never ride an emit into analytics.
+const validPlannerEvents = {
+  "planner.viewed": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    surface: "chat",
+    client: "web",
+  },
+  "planner.activity_scheduled": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subject: "math",
+    week: 2,
+    surface: "chat",
+    client: "sms",
+  },
+  "planner.week_repaired": {
+    family_id: FAMILY_ID,
+    moves: 2,
+    surface: "chat",
+    client: "web",
+  },
+  "planner.offer_shown": { family_id: FAMILY_ID, venue: "empty_grid" },
+  "planner.offer_accepted": { family_id: FAMILY_ID, venue: "morning_brief" },
+  "planner.checkoff": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subject: "math",
+    register: "rail",
+    surface: "grid",
+    client: "web",
+  },
+} as const;
+
+test("planner events accept every exact valid shape", () => {
+  for (const [name, props] of Object.entries(validPlannerEvents)) {
+    const schema = EVENT_SCHEMAS[name as keyof typeof EVENT_SCHEMAS];
+    assert.ok(schema, `${name} is missing from the event registry`);
+    assert.equal(schema.safeParse(props).success, true, name);
+  }
+});
+
+test("planner events reject extra properties and content-shaped props", () => {
+  for (const [name, props] of Object.entries(validPlannerEvents)) {
+    const schema = EVENT_SCHEMAS[name as keyof typeof EVENT_SCHEMAS];
+    assert.equal(
+      schema.safeParse({ ...props, extra: "not-allowed" }).success,
+      false,
+      `${name} accepted an extra property`,
+    );
+    assert.equal(
+      schema.safeParse({ ...props, title: "Dentist appointment" }).success,
+      false,
+      `${name} accepted an event title`,
+    );
+    assert.equal(
+      schema.safeParse({ ...props, family_id: "not-a-uuid" }).success,
+      false,
+      `${name} accepted a malformed family UUID`,
+    );
+  }
+});
+
+test("planner enums are closed sets", () => {
+  assert.equal(
+    EVENT_SCHEMAS["planner.viewed"].safeParse({
+      ...validPlannerEvents["planner.viewed"],
+      surface: "dashboard",
+    }).success,
+    false,
+  );
+  assert.equal(
+    EVENT_SCHEMAS["planner.viewed"].safeParse({
+      ...validPlannerEvents["planner.viewed"],
+      client: "carrier-pigeon",
+    }).success,
+    false,
+  );
+  assert.equal(
+    EVENT_SCHEMAS["planner.activity_scheduled"].safeParse({
+      ...validPlannerEvents["planner.activity_scheduled"],
+      week: 5,
+    }).success,
+    false,
+  );
+  assert.equal(
+    EVENT_SCHEMAS["planner.checkoff"].safeParse({
+      ...validPlannerEvents["planner.checkoff"],
+      register: "list",
+    }).success,
+    false,
+  );
+  assert.equal(
+    EVENT_SCHEMAS["planner.offer_shown"].safeParse({
+      family_id: FAMILY_ID,
+      venue: "push_notification",
+    }).success,
+    false,
+  );
+});
+
+test("planner.viewed child narrowing is optional, family id is not", () => {
+  const { child_id: _childId, ...familyWide } = validPlannerEvents["planner.viewed"];
+  assert.equal(EVENT_SCHEMAS["planner.viewed"].safeParse(familyWide).success, true);
+  const { family_id: _familyId, ...withoutFamily } = validPlannerEvents["planner.viewed"];
+  assert.equal(EVENT_SCHEMAS["planner.viewed"].safeParse(withoutFamily).success, false);
+});

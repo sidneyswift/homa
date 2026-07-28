@@ -17,7 +17,8 @@ import { PlannerView } from "./planner/planner-view";
  * small card stays in the transcript to reopen it later. The canvas is
  * chat-turn state, not a route: the tool's output part is the open
  * signal (the same tool-output-to-card seam as snap-card.tsx), a fetch
- * of /api/map/plan/board supplies the data, and each edit_plan result
+ * of /api/map/plan/board supplies the data, and each plan-writing tool
+ * result (PLAN_WRITE_TOOLS below: edit_plan, schedule_plan_activity)
  * refreshes it, so the parent watches Homa fill the week in place.
  *
  * Two geometries, chosen by variant (plans/2026-07-21-chat-first-onboarding.md
@@ -73,6 +74,15 @@ export function latestPlannerOpen(
   return latest;
 }
 
+/** Every tool whose success writes the plan board or its schedule, and
+ * the output flag that marks a real write (issue #257, arc PR B0: the
+ * canvas used to refresh only on edit_plan, so Homa could schedule math
+ * to Tuesday while the panel beside the parent never moved). */
+const PLAN_WRITE_TOOLS: Record<string, string> = {
+  edit_plan: "updated",
+  schedule_plan_activity: "scheduled",
+};
+
 /** How many plan writes the live session has streamed so far: the
  * canvas refetches whenever this number grows. Counting parts (not
  * diffing content) keeps the signal cheap and monotonic. */
@@ -81,11 +91,11 @@ export function planEditCount(messages: readonly EveMessage[]): number {
   for (const message of messages) {
     if (message.role !== "assistant") continue;
     for (const part of message.parts) {
+      if (part.type !== "dynamic-tool" || part.state !== "output-available") continue;
+      const successFlag = PLAN_WRITE_TOOLS[part.toolName];
       if (
-        part.type === "dynamic-tool" &&
-        part.toolName === "edit_plan" &&
-        part.state === "output-available" &&
-        ((part.output ?? {}) as Record<string, unknown>).updated === true
+        successFlag !== undefined &&
+        ((part.output ?? {}) as Record<string, unknown>)[successFlag] === true
       ) {
         count += 1;
       }

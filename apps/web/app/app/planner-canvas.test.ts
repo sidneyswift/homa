@@ -91,4 +91,33 @@ describe("planEditCount", () => {
     ];
     assert.equal(planEditCount(messages), 2);
   });
+
+  it("counts every plan-writing tool, not just edit_plan (issue #257)", () => {
+    // A scheduled date is a plan write the parent should watch land on
+    // the panel; before B0 the canvas refreshed only on edit_plan, so
+    // Homa could schedule math to Tuesday while the board sat still.
+    const messages = [
+      assistantMessage("m1", [
+        toolPart("edit_plan", { updated: true, summary: "a" }),
+        toolPart("schedule_plan_activity", {
+          scheduled: true,
+          scheduledDate: "2026-07-28",
+        }),
+        toolPart("schedule_plan_activity", { scheduled: false, note: "no plan" }),
+        toolPart("schedule_plan_activity", undefined, "input-available"),
+      ]),
+    ];
+    assert.equal(planEditCount(messages), 2);
+  });
+
+  it("never counts reads or other tools", () => {
+    const messages = [
+      assistantMessage("m1", [
+        toolPart("open_planner", { opened: true }),
+        toolPart("list_family_events", { events: [] }),
+        toolPart("add_family_event", { added: true }),
+      ]),
+    ];
+    assert.equal(planEditCount(messages), 0);
+  });
 });
