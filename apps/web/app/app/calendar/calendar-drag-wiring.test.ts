@@ -74,6 +74,64 @@ describe("calendar drag wiring (issue #176)", () => {
 });
 
 /**
+ * A failed drag write must be VISIBLE (issue #256): composerError only
+ * renders inside the details and composer dialogs, and both are closed
+ * by the time a drag ends, so an error parked there left the block
+ * snapping back with no explanation. The failure now lands in its own
+ * dragError state, rendered as a notice right above the grid.
+ */
+describe("drag failure visibility (issue #256)", () => {
+  it("parks a failed drag write in dragError, never the closed dialogs' composerError", () => {
+    const onPointerUp = source.slice(
+      source.indexOf("async function onPointerUp("),
+      source.indexOf("function detach()"),
+    );
+    assert.ok(onPointerUp.length > 0, "onPointerUp should exist");
+    assert.match(onPointerUp, /setDragError\(result\.error\)/u);
+    assert.doesNotMatch(onPointerUp, /setComposerError/u);
+  });
+
+  it("renders the drag error as a live notice near the grid", () => {
+    const notice = source.slice(
+      source.indexOf("{dragError ? ("),
+      source.indexOf("{dragError ? (") + 900,
+    );
+    assert.ok(notice.length > 0, "the dragError notice should exist");
+    assert.match(notice, /role="status"/u, "the notice must announce itself");
+    assert.match(notice, /\{dragError\}/u, "the notice must show the action's own error");
+    assert.match(notice, /Dismiss/u, "the notice must be dismissable");
+  });
+
+  it("clears the previous drag error when a new drag starts", () => {
+    const beginDrag = source.slice(
+      source.indexOf("function beginDrag("),
+      source.indexOf("function onPointerMove("),
+    );
+    assert.match(beginDrag, /setDragError\(null\)/u);
+  });
+
+  it("styles the notice from existing danger tokens, inventing no colors", () => {
+    const notice = source.slice(
+      source.indexOf("{dragError ? ("),
+      source.indexOf("{dragError ? (") + 900,
+    );
+    assert.match(notice, /var\(--danger\)/u);
+    assert.match(notice, /var\(--danger-soft\)/u);
+  });
+});
+
+/**
+ * calendar-view.tsx once styled tone-less text with `var(--ink,
+ * inherit)`, a token defined nowhere in the design system (issue #256).
+ * The real token for text on the pastel family stripe is --text-strong.
+ */
+describe("design tokens (issue #256)", () => {
+  it("never references the phantom --ink token", () => {
+    assert.doesNotMatch(source, /var\(--ink/u);
+  });
+});
+
+/**
  * The chips and the floating view-context switcher were two "who am I
  * viewing" systems that could disagree (the switcher said "whole family"
  * while a kid chip was active). One source of truth now.

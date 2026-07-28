@@ -127,13 +127,14 @@ interface RawHoursRow {
  * loadRecentActivityDigest(familyId, today): the call-start webhook's
  * read. `today` is the family's own YYYY-MM-DD (effectiveTimeZone +
  * zonedDateString), computed by the caller so this module stays free of
- * a time-zone dependency.
+ * a time-zone dependency. `sql` is an injection seam for the read-path
+ * regression test (same convention as lib/map/store.ts).
  */
 export async function loadRecentActivityDigest(
   familyId: string,
   today: string,
+  sql: ReturnType<typeof mapDb> = mapDb(),
 ): Promise<string> {
-  const sql = mapDb();
   const since = new Date(Date.now() - LOOKBACK_HOURS * 60 * 60 * 1000).toISOString();
 
   const [materials, hours, scheduled] = await Promise.all([

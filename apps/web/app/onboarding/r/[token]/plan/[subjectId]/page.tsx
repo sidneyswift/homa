@@ -59,10 +59,10 @@ export default async function PlanPage({
   searchParams,
 }: {
   params: Promise<{ token: string; subjectId: string }>;
-  searchParams: Promise<{ rebuilt?: string; built?: string }>;
+  searchParams: Promise<{ rebuilt?: string; built?: string; cleared?: string }>;
 }) {
   const { token, subjectId } = await params;
-  const { rebuilt, built } = await searchParams;
+  const { rebuilt, built, cleared } = await searchParams;
   const domain = getMapSubject(subjectId);
   const isMonth = subjectId === MONTH_PLAN_SUBJECT;
 
@@ -130,7 +130,11 @@ export default async function PlanPage({
   if ((domain || isMonth) && rebuilt === "1") {
     const rebuiltPlan = await getOrBuildPlan(token, subjectId, { rebuild: true });
     if (rebuiltPlan) {
-      redirect(`/onboarding/r/${token}/plan/${subjectId}?built=1`);
+      // ?cleared=1 carries the rebuild's calendar receipt across the
+      // redirect: the rebuild took the old month's placed days off the
+      // calendar (issue #256), and the banner below says so.
+      const clearedParam = rebuiltPlan.clearedScheduledDays > 0 ? "&cleared=1" : "";
+      redirect(`/onboarding/r/${token}/plan/${subjectId}?built=1${clearedParam}`);
     }
   }
 
@@ -262,6 +266,9 @@ export default async function PlanPage({
             {built === "1" ? (
               <p className="mb-4 rounded-md px-4 py-3 text-sm font-semibold" style={{ background: "var(--gold-100)", color: "var(--gold-ink)" }}>
                 Built from your deep dive: this month aims at exactly what you just pinned down.
+                {cleared === "1"
+                  ? " The new month starts fresh, so the calendar days placed for the old one came off with it. You can put the new weeks on real days whenever you like."
+                  : null}
               </p>
             ) : null}
             {introText ? (

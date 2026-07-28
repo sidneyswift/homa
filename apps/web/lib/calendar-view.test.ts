@@ -5,6 +5,7 @@ import type { FamilyEventRow } from "./family-events";
 import type { PlanActivityScheduleRow } from "./plan-schedule";
 import type { DashboardPlan } from "./plan-week";
 import {
+  bannerWhenLabel,
   buildCalendarBoard,
   calendarWeekDates,
   formatTimeRange,
@@ -403,6 +404,82 @@ describe("formatTimeRange", () => {
 
   it("falls back to just the start when the end is missing", () => {
     assert.equal(formatTimeRange("15:30", null), "3:30 PM");
+  });
+});
+
+describe("bannerWhenLabel", () => {
+  it("labels a truly all-day multi-day event as all day", () => {
+    assert.equal(
+      bannerWhenLabel({
+        startDayLabel: "Sat 8",
+        endDayLabel: "Sun 9",
+        spansMultipleCells: true,
+        firstDayInView: true,
+        startTime: null,
+        endTime: null,
+      }),
+      "Sat 8 to Sun 9, all day",
+    );
+  });
+
+  it("carries a timed multi-day event's first-day window instead of 'all day' (issue #256)", () => {
+    // Migration 20260726130000: start_time/end_time are a first-day-only
+    // window, so "all day" was a fabrication for this shape.
+    assert.equal(
+      bannerWhenLabel({
+        startDayLabel: "Wed 5",
+        endDayLabel: "Sun 9",
+        spansMultipleCells: true,
+        firstDayInView: true,
+        startTime: "14:00",
+        endTime: "15:00",
+      }),
+      "Wed 5 to Sun 9, 2 to 3 PM on the first day",
+    );
+  });
+
+  it("keeps 'all day' for a clipped week that no longer shows the first day", () => {
+    // The time window lives on the event's first day; when this week's
+    // visible slice starts later, the days on screen really are all day.
+    assert.equal(
+      bannerWhenLabel({
+        startDayLabel: "Mon 10",
+        endDayLabel: "Tue 11",
+        spansMultipleCells: true,
+        firstDayInView: false,
+        startTime: "14:00",
+        endTime: "15:00",
+      }),
+      "Mon 10 to Tue 11, all day",
+    );
+  });
+
+  it("shows the window plainly when only the first day is visible", () => {
+    assert.equal(
+      bannerWhenLabel({
+        startDayLabel: "Sun 9",
+        endDayLabel: "Sun 9",
+        spansMultipleCells: false,
+        firstDayInView: true,
+        startTime: "14:00",
+        endTime: null,
+      }),
+      "Sun 9, 2 PM",
+    );
+  });
+
+  it("labels a single-day all-day event as all day", () => {
+    assert.equal(
+      bannerWhenLabel({
+        startDayLabel: "Thu 6",
+        endDayLabel: "Thu 6",
+        spansMultipleCells: false,
+        firstDayInView: true,
+        startTime: null,
+        endTime: null,
+      }),
+      "Thu 6, all day",
+    );
   });
 });
 

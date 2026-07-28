@@ -174,6 +174,24 @@ describe("CalendarView", () => {
     assert.match(html, /grid-column:7\s*\/\s*9/);
   });
 
+  it("labels a timed multi-day event with its first-day window, never 'all day' (issue #256)", () => {
+    // Migration 20260726130000: a multi-day event's start_time/end_time
+    // are a time window on the FIRST day only. The banner must say so.
+    const html = renderView({
+      familyEvents: [
+        event({
+          title: "Camping trip",
+          startsOn: "2026-08-08",
+          endsOn: "2026-08-09",
+          startTime: "14:00",
+          endTime: "15:00",
+        }),
+      ],
+    });
+    assert.match(html, /Camping trip, Sat 8 to Sun 9, 2 to 3 PM on the first day/);
+    assert.doesNotMatch(html, /Camping trip, Sat 8 to Sun 9, all day/);
+  });
+
   it("filters another kid's event out when one kid is selected", () => {
     const html = renderView({
       focusChildId: "child-maya",

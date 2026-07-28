@@ -10,6 +10,7 @@ import { formatMinutesAsHours } from "../../../lib/hours-view";
 import type { PlanActivityScheduleRow } from "../../../lib/plan-schedule";
 import type { DashboardPlan } from "../../../lib/plan-week";
 import {
+  bannerWhenLabel,
   buildCalendarBoard,
   formatTimeRange,
   layoutTimedItems,
@@ -377,6 +378,12 @@ export function CalendarView({
    * once per drag instead of on every pointer move.
    */
   const [drag, setDrag] = useState<DragState | null>(null);
+  // A failed drag write's error. Its own state, never composerError:
+  // both dialogs that render composerError are closed by the time a
+  // drag ends, so an error parked there was invisible and the block
+  // just snapped back unexplained (issue #256). This one renders as a
+  // notice right above the grid.
+  const [dragError, setDragError] = useState<string | null>(null);
   const dragRef = useRef<DragState | null>(null);
   // A finished drag must not also open the details card on the click
   // that follows pointerup.
@@ -391,6 +398,7 @@ export function CalendarView({
   function beginDrag(state: DragState) {
     dragRef.current = state;
     setDrag(state);
+    setDragError(null);
 
     function onPointerMove(moveEvent: PointerEvent) {
       const state = dragRef.current;
@@ -444,7 +452,7 @@ export function CalendarView({
         endTime: minutesToTimeInput(state.endMin),
         note: source.note,
       });
-      if (result.error) setComposerError(result.error);
+      if (result.error) setDragError(result.error);
       router.refresh();
     }
 
@@ -547,10 +555,17 @@ export function CalendarView({
     .filter((banner) => banner.startIdx !== -1 && banner.endIdx !== -1)
     .map((banner) => ({
       ...banner,
-      dateLabel:
-        banner.startIdx === banner.endIdx
-          ? `${days[banner.startIdx].label} ${days[banner.startIdx].dayOfMonth}, all day`
-          : `${days[banner.startIdx].label} ${days[banner.startIdx].dayOfMonth} to ${days[banner.endIdx].label} ${days[banner.endIdx].dayOfMonth}, all day`,
+      // A timed multi-day event's window sits on its FIRST day only
+      // (migration 20260726130000), so the label carries that time range
+      // instead of an "all day" it never was (issue #256).
+      dateLabel: bannerWhenLabel({
+        startDayLabel: `${days[banner.startIdx].label} ${days[banner.startIdx].dayOfMonth}`,
+        endDayLabel: `${days[banner.endIdx].label} ${days[banner.endIdx].dayOfMonth}`,
+        spansMultipleCells: banner.startIdx !== banner.endIdx,
+        firstDayInView: banner.startsOn >= firstDate,
+        startTime: banner.startTime,
+        endTime: banner.endTime,
+      }),
     }));
   const bannerTracks = assignBannerTracks(allDayBanners);
 
@@ -739,6 +754,29 @@ export function CalendarView({
             </Link>
           </div>
         ) : null}
+        {dragError ? (
+          // The block already snapped back to where it was; this says
+          // why, in the grid's own line of sight (issue #256). Existing
+          // danger tokens only, no new colors.
+          <div
+            role="status"
+            className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border px-4 py-2.5 text-sm"
+            style={{
+              borderColor: "var(--danger)",
+              background: "var(--danger-soft)",
+              color: "var(--rose-600)",
+            }}
+          >
+            <span className="font-semibold">{dragError}</span>
+            <button
+              type="button"
+              onClick={() => setDragError(null)}
+              className="rounded-pill border border-border bg-card px-3 py-1 text-xs font-semibold text-body transition-colors hover:border-brand"
+            >
+              Dismiss
+            </button>
+          </div>
+        ) : null}
         <section className="mt-4 overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
           <div className="min-w-[860px]">
             {/* Day headers */}
@@ -811,7 +849,7 @@ export function CalendarView({
                     >
                       <span
                         className="truncate text-[0.7rem] font-bold"
-                        style={{ color: tone ? tone[1] : "var(--ink, inherit)" }}
+                        style={{ color: tone ? tone[1] : "var(--text-strong)" }}
                       >
                         {banner.title}
                       </span>
@@ -1077,7 +1115,7 @@ export function CalendarView({
                           {block.slotCount === 1 && height < 34 ? (
                             <p
                               className="flex items-baseline justify-between gap-1 pr-4 pt-0.5 text-[0.7rem] leading-tight"
-                              style={{ color: tone ? tone[1] : "var(--ink, inherit)" }}
+                              style={{ color: tone ? tone[1] : "var(--text-strong)" }}
                             >
                               <span className="truncate font-bold">{block.title}</span>
                               <span className="shrink-0 text-[0.62rem] font-medium">
@@ -1100,14 +1138,14 @@ export function CalendarView({
                                       : "truncate pr-4 pt-0.5 text-[0.7rem] font-bold leading-tight"
                                 }
                                 lang="en"
-                                style={{ color: tone ? tone[1] : "var(--ink, inherit)" }}
+                                style={{ color: tone ? tone[1] : "var(--text-strong)" }}
                               >
                                 {block.title}
                               </p>
                               {height >= 34 && block.slotCount === 1 ? (
                                 <p
                                   className="mt-0.5 text-[0.68rem] font-medium leading-tight"
-                                  style={{ color: tone ? tone[1] : "var(--ink, inherit)" }}
+                                  style={{ color: tone ? tone[1] : "var(--text-strong)" }}
                                 >
                                   {block.timeLabel}
                                 </p>
@@ -1146,13 +1184,13 @@ export function CalendarView({
                             >
                               <p
                                 className="truncate pt-0.5 text-[0.7rem] font-bold leading-tight"
-                                style={{ color: tone ? tone[1] : "var(--ink, inherit)" }}
+                                style={{ color: tone ? tone[1] : "var(--text-strong)" }}
                               >
                                 {source.title}
                               </p>
                               <p
                                 className="mt-0.5 text-[0.68rem] font-medium leading-tight"
-                                style={{ color: tone ? tone[1] : "var(--ink, inherit)" }}
+                                style={{ color: tone ? tone[1] : "var(--text-strong)" }}
                               >
                                 {formatTimeRange(
                                   minutesToTimeInput(drag.startMin),

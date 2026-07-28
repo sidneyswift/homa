@@ -499,8 +499,11 @@ export async function removeChild(
 }
 
 /** True when the child exists and belongs to this family. */
-export async function childBelongsToFamily(childId: string, familyId: string): Promise<boolean> {
-  const sql = mapDb();
+export async function childBelongsToFamily(
+  childId: string,
+  familyId: string,
+  sql: MapDatabase = mapDb(),
+): Promise<boolean> {
   const rows = await sql<{ id: string }[]>`
     select id from public.children where id = ${childId} and family_id = ${familyId}
   `;
@@ -840,20 +843,22 @@ export type EditPlanOutcome =
 /**
  * Applies activity edits to one stored plan (the edit_plan agent tool's
  * write). Atomic per batch: plan-edits.ts validates every edit against
- * the copy before anything is written, and the one UPDATE writes plan
- * and remapped progress together so checks can never point at moved
- * activities.
+ * the copy before anything is written, the one UPDATE writes plan and
+ * remapped progress together so checks can never point at moved
+ * activities, and that UPDATE plus the whole calendar cascade commit as
+ * one transaction (issue #256) so a crash mid-cascade can never strand
+ * schedule rows against shifted indices.
  */
 export async function editPlanActivities(
   familyId: string,
   childId: string,
   subjectId: string,
   edits: readonly PlanEdit[],
+  sql: MapDatabase = mapDb(),
 ): Promise<EditPlanOutcome> {
-  if (!(await childBelongsToFamily(childId, familyId))) {
+  if (!(await childBelongsToFamily(childId, familyId, sql))) {
     return { status: "unknown_child" };
   }
-  const sql = mapDb();
   const rows = await sql<
     { id: string; plan: FourWeekPlan; progress: Record<string, boolean> | null }[]
   >`
@@ -868,60 +873,70 @@ export async function editPlanActivities(
   if (!applied.ok) {
     return { status: "invalid_edit", note: applied.failure.note };
   }
-  await sql`
-    update public.child_plans
-    set plan = ${sql.json(applied.result.plan as unknown as DbJson)},
-        progress = ${sql.json(applied.result.progress as unknown as DbJson)},
-        updated_at = now()
-    where id = ${row.id}
-  `;
-  // Cascade the index shift into the calendar (issue #176): a removal
-  // slides every later activity in that week down one, so a schedule row
-  // still holding the old index would put a DIFFERENT activity on that
-  // date. Read-side already drops rows that no longer resolve; this
-  // keeps the ones that do resolve pointing at the right activity.
-  // Delete-then-reinsert per week rather than in-place decrements: the
-  // table's natural key is unique, so shifting in place can collide with
-  // a row that has not moved yet.
+  // One transaction for the plan write AND the whole schedule cascade
+  // (issue #256): a crash between the UPDATE and the reinserts below
+  // would strand schedule rows whose indices point at the wrong
+  // activity, and the calendar would present that wrong date as real.
+  // Through the Supabase transaction pooler this is safe: sql.begin
+  // pins every statement to one connection, and BEGIN..COMMIT is
+  // exactly the pooler's own pinning unit (removeChild's
+  // pg_advisory_xact_lock relies on the same guarantee in production).
   const remaps = scheduleRemapForEdits(row.plan, edits);
-  for (const remap of remaps) {
-    const scheduled = await sql<{ activity_index: number; scheduled_date: string }[]>`
-      select activity_index, scheduled_date
-      from public.plan_activity_schedule
-      where family_id = ${familyId}
-        and child_id = ${childId}
-        and subject_id = ${subjectId}
-        and week = ${remap.week}
+  await sql.begin(async (tx) => {
+    await tx`
+      update public.child_plans
+      set plan = ${sql.json(applied.result.plan as unknown as DbJson)},
+          progress = ${sql.json(applied.result.progress as unknown as DbJson)},
+          updated_at = now()
+      where id = ${row.id}
     `;
-    if (scheduled.length === 0) continue;
-    const moveTo = new Map(remap.moves.map((move) => [move.from, move.to]));
-    const survivors = scheduled
-      .map((entry) => {
-        // An index with no move keeps its slot; an explicit null is gone.
-        const to = moveTo.has(entry.activity_index)
-          ? moveTo.get(entry.activity_index)!
-          : entry.activity_index;
-        return to === null ? null : { index: to, date: entry.scheduled_date };
-      })
-      .filter((entry): entry is { index: number; date: string } => entry !== null);
-    await sql`
-      delete from public.plan_activity_schedule
-      where family_id = ${familyId}
-        and child_id = ${childId}
-        and subject_id = ${subjectId}
-        and week = ${remap.week}
-    `;
-    for (const survivor of survivors) {
-      await sql`
-        insert into public.plan_activity_schedule
-          (family_id, child_id, subject_id, week, activity_index, scheduled_date)
-        values (${familyId}, ${childId}, ${subjectId}, ${remap.week}, ${survivor.index}, ${survivor.date})
-        on conflict (family_id, child_id, subject_id, week, activity_index)
-        do update set scheduled_date = excluded.scheduled_date, updated_at = now()
+    // Cascade the index shift into the calendar (issue #176): a removal
+    // slides every later activity in that week down one, so a schedule row
+    // still holding the old index would put a DIFFERENT activity on that
+    // date. Read-side already drops rows that no longer resolve; this
+    // keeps the ones that do resolve pointing at the right activity.
+    // Delete-then-reinsert per week rather than in-place decrements: the
+    // table's natural key is unique, so shifting in place can collide with
+    // a row that has not moved yet.
+    for (const remap of remaps) {
+      const scheduled = await tx<{ activity_index: number; scheduled_date: string }[]>`
+        select activity_index, scheduled_date
+        from public.plan_activity_schedule
+        where family_id = ${familyId}
+          and child_id = ${childId}
+          and subject_id = ${subjectId}
+          and week = ${remap.week}
       `;
+      if (scheduled.length === 0) continue;
+      const moveTo = new Map(remap.moves.map((move) => [move.from, move.to]));
+      const survivors = scheduled
+        .map((entry) => {
+          // An index with no move keeps its slot; an explicit null is gone.
+          const to = moveTo.has(entry.activity_index)
+            ? moveTo.get(entry.activity_index)!
+            : entry.activity_index;
+          return to === null ? null : { index: to, date: entry.scheduled_date };
+        })
+        .filter((entry): entry is { index: number; date: string } => entry !== null);
+      await tx`
+        delete from public.plan_activity_schedule
+        where family_id = ${familyId}
+          and child_id = ${childId}
+          and subject_id = ${subjectId}
+          and week = ${remap.week}
+      `;
+      for (const survivor of survivors) {
+        await tx`
+          insert into public.plan_activity_schedule
+            (family_id, child_id, subject_id, week, activity_index, scheduled_date)
+          values (${familyId}, ${childId}, ${subjectId}, ${remap.week}, ${survivor.index}, ${survivor.date})
+          on conflict (family_id, child_id, subject_id, week, activity_index)
+          do update set scheduled_date = excluded.scheduled_date, updated_at = now()
+        `;
+      }
     }
-  }
-  await touchFamily(familyId);
+  });
+  await touchFamily(familyId, sql);
   return {
     status: "applied",
     summary: describePlanEdits(edits),
@@ -1222,6 +1237,48 @@ export async function releaseReportEmailClaim(familyId: string, childId: string)
 const RETEST_DAYS = 28;
 
 /**
+ * The plan upsert and the calendar clear as ONE transaction (issue
+ * #256): a rebuilt plan's activities are new, so a surviving
+ * plan_activity_schedule row would put a NEW activity on a date the
+ * parent chose for an OLD one and present it as real. Exported for the
+ * cascade test; getOrBuildPlan is the only product caller.
+ */
+export async function writeRebuiltPlan(
+  sql: MapDatabase,
+  input: {
+    familyId: string;
+    childId: string;
+    subjectId: string;
+    plan: FourWeekPlan;
+  },
+): Promise<{ retestAt: string; clearedScheduledDays: number }> {
+  return sql.begin(async (tx) => {
+    const inserted = await tx<{ retest_at: string }[]>`
+      insert into public.child_plans (child_id, subject_id, plan, bank_version, retest_at)
+      values (${input.childId}, ${input.subjectId}, ${sql.json(input.plan as unknown as DbJson)},
+              ${MAP_BANK_VERSION}, now() + make_interval(days => ${RETEST_DAYS}))
+      on conflict (child_id, subject_id) do update
+        set plan = excluded.plan,
+            bank_version = excluded.bank_version,
+            retest_at = excluded.retest_at,
+            retest_emailed_at = null,
+            narrative = null,
+            narrative_meta = null,
+            updated_at = now()
+      returning retest_at::text as retest_at
+    `;
+    const cleared = await tx<{ id: string }[]>`
+      delete from public.plan_activity_schedule
+      where family_id = ${input.familyId}
+        and child_id = ${input.childId}
+        and subject_id = ${input.subjectId}
+      returning id
+    `;
+    return { retestAt: inserted[0].retest_at, clearedScheduledDays: cleared.length };
+  });
+}
+
+/**
  * Returns the stored four-week plan for a subject, building and arming its
  * retest on first request. Access is via the report token, so the plan page
  * needs no cookie: the token IS the family's shareable artifact, and the
@@ -1246,6 +1303,10 @@ export async function getOrBuildPlan(
   narrativeMeta: NarrativeMeta | null;
   /** Synced check-offs ("week.activityIndex" to done), server truth. */
   progress: Record<string, boolean>;
+  /** How many placed calendar days a rebuild took off with the old
+   * month (always 0 when nothing was rebuilt); the plan page's receipt
+   * copy keys on this. */
+  clearedScheduledDays: number;
 } | null> {
   const sql = mapDb();
   const rows = await sql<
@@ -1295,6 +1356,7 @@ export async function getOrBuildPlan(
       narrative: existing[0].narrative,
       narrativeMeta: existing[0].narrative_meta,
       progress: existing[0].progress ?? {},
+      clearedScheduledDays: 0,
     };
   }
 
@@ -1325,21 +1387,15 @@ export async function getOrBuildPlan(
   // A rebuild restarts the month: fresh plan, fresh retest clock, the
   // retest email re-armed, and the plan narrative reset so the words get
   // rewritten next to the new month. Checks are the parent's own work
-  // (source data) and survive the rebuild.
-  const inserted = await sql<{ retest_at: string }[]>`
-    insert into public.child_plans (child_id, subject_id, plan, bank_version, retest_at)
-    values (${row.child_id}, ${subjectId}, ${sql.json(plan as unknown as DbJson)},
-            ${MAP_BANK_VERSION}, now() + make_interval(days => ${RETEST_DAYS}))
-    on conflict (child_id, subject_id) do update
-      set plan = excluded.plan,
-          bank_version = excluded.bank_version,
-          retest_at = excluded.retest_at,
-          retest_emailed_at = null,
-          narrative = null,
-          narrative_meta = null,
-          updated_at = now()
-    returning retest_at::text as retest_at
-  `;
+  // (source data) and survive the rebuild. The old month's placed
+  // calendar days do NOT survive it: writeRebuiltPlan clears them in
+  // the same transaction as the upsert (issue #256).
+  const written = await writeRebuiltPlan(sql, {
+    familyId: row.family_id,
+    childId: row.child_id,
+    subjectId,
+    plan,
+  });
   await touchFamily(row.family_id);
 
   return {
@@ -1348,10 +1404,11 @@ export async function getOrBuildPlan(
     familyId: row.family_id,
     childId: row.child_id,
     wasNew: existing.length === 0,
-    retestAt: inserted[0].retest_at,
+    retestAt: written.retestAt,
     narrative: null,
     narrativeMeta: null,
     progress: existing[0]?.progress ?? {},
+    clearedScheduledDays: written.clearedScheduledDays,
   };
 }
 
@@ -1660,8 +1717,7 @@ export async function getReportByToken(
   };
 }
 
-async function touchFamily(familyId: string): Promise<void> {
-  const sql = mapDb();
+async function touchFamily(familyId: string, sql: MapDatabase = mapDb()): Promise<void> {
   await sql`update public.families set updated_at = now() where id = ${familyId}`;
 }
 
