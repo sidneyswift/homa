@@ -57,6 +57,60 @@ export function isSendLineOccupied(input: {
   return input.busy || input.recovering;
 }
 
+/**
+ * What the client does when lost-turn recovery hits its deadline without
+ * an answer.
+ *
+ * - "flush": send what she typed now. This is today's behaviour
+ *   (chat-client.tsx, the aborted branch). It sends with no session id, so
+ *   if the old turn is still alive server-side it forks the session, and
+ *   the fork is what reads to her as "my message disappeared".
+ * - "hold": leave it queued. The queue UI already offers "Send now", so
+ *   nothing is lost, but nothing goes out until she taps or the line
+ *   settles.
+ * - "keep-waiting": the interrupted turn is probably still building, so
+ *   extend rather than give up.
+ */
+export type RecoveryTimeoutAction = "flush" | "hold" | "keep-waiting";
+
+/**
+ * actionOnRecoveryTimeout(...): the residual half of GH #170.
+ *
+ * isSendLineOccupied above closes the fork while `recovering` is true.
+ * This decides what happens the moment recovering goes false on a
+ * timeout, which is the window PR #227 did not cover.
+ *
+ * Measured on the co-founder family 2026-07-27, and the reason this is
+ * not theoretical: RECOVERY_DEADLINE_MS is 240_000, sized for "the
+ * longest normal turn with slack". Her real web turns ran to 780s, and
+ * every materials build took 3.5 to 13 minutes. Her 03:29:54Z message
+ * got no reply, she waited 390s (past the 240s deadline, so recovery had
+ * already given up and flushed), sent again at 03:36:24Z into a brand new
+ * session, and the reply to the first message landed at 03:38:26Z in the
+ * session she had abandoned. That is the literal shape of "i have asked
+ * her about things multiple times and it doesnt show up in our chat".
+ *
+ * TODO(founder call): implement the policy. The trade-off is whose time
+ * gets protected. "flush" keeps her message moving but can split the
+ * conversation in two. "hold" never forks but can leave her staring at an
+ * unsent bubble after a 4-minute wait. "keep-waiting" is honest about a
+ * build that really is still running, at the cost of a longer
+ * "Reconnecting..." banner. A build-aware answer is allowed to mix them.
+ */
+export function actionOnRecoveryTimeout(_input: {
+  /** Milliseconds since the interrupted turn started. */
+  elapsedMs: number;
+  /**
+   * Whether the last thing seen in flight was a long build (a printable
+   * or a plan). These are the turns that outlive the deadline.
+   */
+  longBuildInFlight: boolean;
+  /** How many of her messages are waiting to go out. */
+  queuedCount: number;
+}): RecoveryTimeoutAction {
+  throw new Error("actionOnRecoveryTimeout is not implemented yet");
+}
+
 export interface PreparedChatSend {
   message: string;
   destination: "queue" | "send";
