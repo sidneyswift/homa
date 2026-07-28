@@ -3,6 +3,66 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-28 · Signup paywall: the launch blockers cleared, and one correction to this log
+
+Founder: "the paywall does not show until after progress report is
+generated... I thought we implemented this." It was implemented (PR
+#234, #236) and never enabled: `HOMA_SIGNUP_PAYWALL_ENABLED` did not
+exist as a variable in Vercel production at all, so the gate was dark
+and the door wall met families at the report instead. PR #273 clears
+the two blockers that stood in the way of flipping it honestly.
+
+**Correction to the 2026-07-27 entry below.** That entry records
+`HOMA_WALL_ENABLED` and `HOMA_SIGNUP_PAYWALL_ENABLED` as both reading
+empty in production, and calls the contradiction with the 2026-07-18
+"wall flipped on" record unresolved. The contradiction was an artifact
+of the reading method: `vercel env pull` returns an empty string for
+every Sensitive-marked variable. `TELNYX_API_KEY` and
+`STRIPE_LIVE_SECRET_KEY` read empty by the same method and both
+demonstrably work. The door wall is on and firing (32 `wall.viewed`
+events on `door=report` between 2026-07-18 and 2026-07-27). Absence of
+the variable NAME from the pull is the reliable signal, and that is
+what is true of `HOMA_SIGNUP_PAYWALL_ENABLED`. Do not re-derive flag
+state from pulled values again; check for the name, or probe behavior.
+
+Decisions made without a ruling:
+
+- **The reminder does not send in four cases**, each because sending
+  would be a lie or a duplicate: a family who already set
+  `cancel_at_period_end` (no charge is coming), a `billing_exempt`
+  family (never charged), a subscription no longer `trialing`, and a
+  Stripe retry of an event already handled. The alternative, sending
+  whenever Stripe fires, would tell comped and cancelling families
+  about a charge that will not happen.
+- **`trialReminderAlreadySent` fails closed**, the opposite of every
+  other ledger read in this codebase, which fail open. Double-mailing a
+  parent about money is worse than missing one reminder.
+- **No unsubscribe headers on the reminder.** It is a billing notice
+  before an agreed charge (ROSCA, California ARL), not a nudge. Its
+  ledger kind deliberately carries no `drip_` prefix so the drip
+  sweep's `kind like 'drip_%'` cap can never throttle it.
+- **No time-based trial expiry**, despite the gap being real:
+  `accountAccessDecision` has no elapsed-time check, so a dark webhook
+  would grant access forever. A clock-based lockout was rejected
+  because the `trialing -> active` transition arrives only through
+  `customer.subscription.updated`, so a single missed event would wall
+  a family who is paying. Filed as issue #274 with a reconciliation
+  design instead. Locking out a paying parent is the worse failure.
+- **`HOMA_SIGNUP_PAYWALL_SINCE` set to the flip moment**, so the gate
+  reads new signups only and no existing family is surprised by a card
+  ask mid-relationship. This is the recommendation already recorded in
+  the 2026-07-26 entry and issue #235; it is logged here because it is
+  a live policy choice about existing families, not a mechanical step.
+  The door wall's own rules are unchanged for everyone it grandfathers.
+
+Verification worth keeping: the reminder was exercised against a real
+Stripe payload, not a hand-written one (test clock advanced to 3 days
+before trial end, the resulting event replayed at a running server).
+The subscription mirror was proven the same way with a real cancel
+event, which is the path that ends access when a family cancels and had
+never run in production. Before this session, 0 of 206 families carried
+any Stripe data at all.
+
 ## 2026-07-27 · Founder directive: shorten the signup-paywall trial to 7 days
 
 Founder: "make it a free 7 day trial instead of 30 day." Every parent-
