@@ -14,6 +14,7 @@
     "check:design-tokens": "tsx scripts/design-tokens-check.mts && tsx --test scripts/design-tokens-check.test.ts",
     "check:events": "tsx scripts/events-check.mts",
     "check:jobs": "tsx scripts/jobs-check.mts",
+    "check:job-material-delivery": "tsx scripts/job-material-delivery-check.mts",
     "check:onboarding": "node --experimental-strip-types scripts/build-onboarding-skill.mts --check && tsx --test apps/web/lib/onboarding/state.test.ts apps/web/lib/onboarding/directives.test.ts apps/web/lib/onboarding/context-line.test.ts apps/web/lib/onboarding/makings.test.ts apps/web/lib/onboarding/onboarding-mode.test.ts apps/web/lib/onboarding/making-status.test.ts apps/web/lib/onboarding/generation-gate.test.ts apps/web/lib/onboarding/sitting1-recap.test.ts apps/web/lib/onboarding/sitting1-recap-postgres.test.ts apps/web/lib/jobs/runner.test.ts apps/web/lib/jobs/milestone.test.ts apps/web/lib/jobs/kick.test.ts",
     "check:drip": "tsx --test apps/web/lib/drip/sweep.test.ts",
     "check:billing": "tsx --tsconfig apps/web/tsconfig.json --test apps/web/lib/billing/wall-exemption.test.ts apps/web/lib/billing/account-access.test.ts apps/web/lib/billing/trial-reminder.test.ts apps/web/components/billing/wall-copy.test.ts apps/web/components/marketing/landing-content.test.ts apps/web/lib/signup-session.test.ts",

@@ -67,8 +67,10 @@ export function materialMediaUrls(rows: readonly MaterialMediaRow[]): string[] {
  * read is one column and fails CLOSED: an unreachable database or a missing
  * row sends words only, which is the same message this function has been
  * sending all along, rather than attaching on a guess.
+ *
+ * Exported so the gate can be exercised against real data without sending.
  */
-async function mayAttachMaterials(familyId: string): Promise<boolean> {
+export async function mayAttachMaterials(familyId: string): Promise<boolean> {
   if (jobMaterialDeliveryEnabled()) return true;
   try {
     const sql = mapDb();
@@ -95,8 +97,10 @@ async function mayAttachMaterials(familyId: string): Promise<boolean> {
  * Family-scoped in the query itself, and the join rides the composite
  * (id, family_id) key the artifacts table was built around, so a material
  * from another family cannot attach even if a job row were wrong.
+ *
+ * Exported so the lookup can be exercised against real data without sending.
  */
-async function jobMaterialMediaUrls(familyId: string, jobId: string): Promise<string[]> {
+export async function jobMaterialMediaUrls(familyId: string, jobId: string): Promise<string[]> {
   if (!(await mayAttachMaterials(familyId))) return [];
   const sql = mapDb();
   const rows = await sql<MaterialMediaRow[]>`
@@ -190,6 +194,10 @@ export async function deliverJobMilestone(input: JobMilestoneInput): Promise<str
 
   // Nothing is finished on a needs_attention, so there is nothing to send;
   // the other two kinds both name a material the parent can already open.
+  // The catch is load-bearing, not defensive habit: a malformed job id
+  // rejects at the driver rather than returning no rows (verified against
+  // production, `invalid input syntax for type uuid`), and a milestone must
+  // still reach the parent as words when the attachment cannot be resolved.
   const mediaUrls =
     input.jobId && input.kind !== "needs_attention"
       ? await jobMaterialMediaUrls(input.familyId, input.jobId).catch((error) => {
