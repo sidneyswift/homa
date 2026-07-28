@@ -56,9 +56,13 @@ length cap; cut a whole idea instead, or split the sentence.
 ## Hard laws (never bend, from AGENTS.md and copy-laws.ts)
 
 - No em dash, ever. Comma, period, colon, or mid-dot.
-- "Homa" in prose and conversation; "HOMA" in the wordmark and on UI
-  surfaces, per global founder ruling D8. Sentence case still governs the
-  surrounding words.
+- The name is always written "Homa", everywhere, including UI surfaces.
+  Never type "HOMA". Where the brand appears as a mark, render the real
+  `Logo` component (`apps/web/components/brand/Logo.tsx`), never a
+  hand-typed imitation of it, and that includes a lowercase string put
+  through an uppercase text transform. Founder correction 2026-07-28
+  (`brand-casing-homa`), which retires the old D8 wording this line
+  used to carry. Sentence case still governs the surrounding words.
 - Never "behind" (in ANY sense), no deficit words, no diagnosis or testing
   vocabulary, no percentiles. Growth framing only.
 - Never compare siblings. Never a verdict on a child.

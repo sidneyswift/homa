@@ -1,3 +1,5 @@
+import { STATE_PACK_SUBJECT } from "../../../../../lib/compliance/pack-store";
+import { mapDb } from "../../../../../lib/map/db";
 import { emitMapEvent } from "../../../../../lib/map/events";
 import {
   getMaterialCaller,
@@ -23,6 +25,27 @@ import { createSupabaseServerClient } from "../../../../../lib/supabase/server";
  * population materials-studio serves) reads through getMaterialPinned
  * instead, same split as every agent-tool material read.
  */
+async function readStatePackState(
+  familyId: string,
+  materialId: string,
+): Promise<string | null> {
+  try {
+    const sql = mapDb();
+    const rows = await sql<{ state: string | null }[]>`
+      select generation->'statePack'->>'state' as state
+      from public.materials
+      where id = ${materialId} and family_id = ${familyId}
+    `;
+    return rows[0]?.state ?? null;
+  } catch (error) {
+    console.error(
+      "state pack state lookup failed:",
+      error instanceof Error ? error.message : "unknown",
+    );
+    return null;
+  }
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -64,6 +87,22 @@ export async function GET(
     material_id: material.id,
     status: material.status,
   });
+
+  // The state pack's J4 terminal (journeys/06 row 50): the parent's own
+  // click on the pack PDF, the only signal the pack reached her. The
+  // event carries the pack's OWN state (stamped at generation), not the
+  // family's current one, so a family that moved after generating still
+  // attributes the download to the state the pack describes.
+  if (material.subject === STATE_PACK_SUBJECT) {
+    const packState = await readStatePackState(family.id, material.id);
+    const state = packState ?? family.us_state;
+    if (state) {
+      await emitMapEvent("compliance.report_downloaded", {
+        family_id: family.id,
+        state,
+      });
+    }
+  }
 
   return Response.redirect(material.pdfUrl, 302);
 }

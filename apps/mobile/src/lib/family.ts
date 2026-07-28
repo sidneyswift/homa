@@ -58,6 +58,39 @@ export async function getMyMemberDisplayName(): Promise<string | null> {
   return data?.display_name ?? null;
 }
 
+/**
+ * App Review 5.1.2(i): explicit, affirmative consent that conversation
+ * content and family info are processed by third-party AI providers, kept
+ * as a durable record (ai_processing_consented_at), not a local flag. True
+ * only once the signed-in adult has consented; a signed-in adult with no
+ * family_members row yet (mid web onboarding) reads as not yet consented,
+ * which is correct: nothing has been sent to Homa for them either.
+ */
+export async function getMyConsentStatus(): Promise<boolean> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+  const { data, error } = await supabase
+    .from("family_members")
+    .select("ai_processing_consented_at")
+    .eq("user_id", user.id)
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(`consent read failed: ${error.message}`);
+  return Boolean(data?.ai_processing_consented_at);
+}
+
+/**
+ * Calls record_ai_processing_consent(), the SECURITY DEFINER function in
+ * supabase/migrations/20260728190000_ai_processing_consent.sql. Idempotent
+ * server-side; safe to call more than once.
+ */
+export async function recordAiProcessingConsent(): Promise<void> {
+  const { error } = await supabase.rpc("record_ai_processing_consent");
+  if (error) throw new Error(`consent write failed: ${error.message}`);
+}
+
 export async function getMyChildren(familyId: string): Promise<ChildRecord[]> {
   const { data, error } = await supabase
     .from("children")
