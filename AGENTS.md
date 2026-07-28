@@ -312,7 +312,7 @@ status header, or session memory is a substitute for an issue.
 ## Code style & voice
 
 - No em dash, ever, anywhere (code comments, UI copy, docs, commit messages). Use a comma, period, colon, or mid-dot instead.
-- "Homa" in prose and conversation; "HOMA" in the wordmark and on UI surfaces, per global founder ruling D8.
+- The name is always written "Homa". Never type "HOMA". The logo is the logo: where the brand appears as a mark, render the real `Logo` component (`apps/web/components/brand/Logo.tsx`, which spells "Homa"), never a hand-typed imitation of it. Founder correction 2026-07-28, `brand-casing-homa`, which retires global D8's old "HOMA on UI surfaces" wording.
 - Sentence case, reassure-before-inform, offers never commands, no red/"behind" framing, never compare siblings.
 - Clarity and low cognitive load beat personality (founder ruling 2026-07-08). One idea per sentence, plain names for things, no metaphor stacks, no meta-commentary. Fewer words is NOT the goal: cutting words that carry meaning makes copy harder, not easier. The full rulebook is `.agents/skills/homa-copy-writer/SKILL.md`; gate important copy with `homa-copy-reviewer` then `homa-copy-editor`.
 - Imports stay at the top of the file, no inline imports.

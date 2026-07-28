@@ -104,7 +104,7 @@ Full component catalog (Badge, Callout, Chip, Skeleton, EmptyState, Doodle, Squi
 
 ## Copy and usage rules
 
-- **Do** write "Homa" in prose and conversation; use "HOMA" for the wordmark and on UI surfaces, per global founder ruling D8.
+- **Do** write "Homa" every time the name is typed, in prose, headings, buttons, emails, and every UI surface. **Never** type "HOMA". The logo is the logo: render the real `Logo` component rather than typing letters meant to stand in for it. Founder correction 2026-07-28 (`brand-casing-homa`), retiring global D8's old "HOMA on UI surfaces" wording.
 - **Do** lead with growth, effort, and "on track" framing on any dashboard or report.
 - **Don't** use an em dash, anywhere, ever, use a comma, period, colon, or mid-dot instead.
 - **Don't** show a red "behind" label or compare siblings, this is a hard anti-guilt law, not a style preference.

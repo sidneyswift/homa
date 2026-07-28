@@ -266,7 +266,11 @@ async function submitToResend(
 <html><body style="margin:0;background:#FBF7F0;padding:24px 12px;font-family:'Hanken Grotesk',-apple-system,'Segoe UI',sans-serif;">
   <span style="display:none!important;visibility:hidden;opacity:0;height:0;width:0;">${escapeHtml(args.preview)}</span>
   <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:22px;padding:32px 30px;border:1px solid #E7DDCE;">
-    <div style="font-weight:600;font-size:20px;color:#E7602F;margin-bottom:18px;">homa</div>
+    <!-- The name, typed: "Homa", never "HOMA" and never lowercase (founder
+         correction 2026-07-28, brand-casing-homa). Email clients cannot run
+         the real Logo component, so this is the name as words rather than a
+         hand-typed imitation of the mark. -->
+    <div style="font-weight:600;font-size:20px;color:#E7602F;margin-bottom:18px;">Homa</div>
     <h1 style="font-size:24px;line-height:1.2;color:#221E1A;margin:0 0 16px;">${escapeHtml(args.heading)}</h1>
     ${paragraphs}
     ${cta}

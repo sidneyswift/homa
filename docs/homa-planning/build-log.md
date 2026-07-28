@@ -3,6 +3,36 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-28 · Founder correction: the logo is the logo, and the name is always "Homa"
+
+Founder, on being told an email rendered the wordmark lowercase and that
+ruling D8 called for "HOMA": "this is wrong. the logo should be the logo.
+and homa typed should read 'Homa'. fix this ruling."
+
+Global D8 had been recorded since the 2026-07-03 session as "split, HOMA
+in wordmark/UI surfaces, Homa in prose/conversation". That wording was
+wrong in a way that quietly produced the bug it was cited against: it
+told agents to TYPE an uppercase name on UI surfaces, when what it meant
+to protect was the rendered mark. Registered as `brand-casing-homa` in
+the later-ruling register, and D8's row now points at it.
+
+The policy, stated once: **the name is always written "Homa", and the
+logo is the logo.** Never type "HOMA". Where the brand appears as a mark,
+render the real `Logo` component; where it appears as words, it is
+"Homa", in prose, headings, buttons, emails, and every UI surface. An
+uppercase eyebrow or overline is a type style applied to ordinary words,
+not a respelling of the name.
+
+Worth recording that the product was already right and only the written
+rule was wrong. Both `Logo` components, web and mobile, spell the
+wordmark `["H","o","m","a"]` with `aria-label="Homa"`, and a sweep found
+zero typed "HOMA" anywhere in the app. What did exist was the opposite
+error in three places that could not run the real component and typed a
+lowercase "homa" instead: the shared email shell, the link-phone page,
+and the unsubscribe page. All three now read "Homa". The rule text was
+updated in its five homes (the reconciliation index, AGENTS.md,
+DESIGN.md, docs/homa-design/CLAUDE.md, docs/homa-design/readme.md).
+
 ## 2026-07-28 · Signup paywall: the launch blockers cleared, and one correction to this log
 
 Founder: "the paywall does not show until after progress report is
