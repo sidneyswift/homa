@@ -36,6 +36,50 @@ its `period` enum, which described the retired evidence-report concept;
 the row now describes the pack button. The evidence-report feature
 itself stays a non-goal pending gh#317.
 
+## 2026-07-28 · iOS launch epic: founder rules in-app purchase, not the companion-first plan
+
+This session investigated the iOS app end to end, filed epic gh#299 with
+arcs A through H, shipped and closed arc A (release truth: an OTA
+fingerprint-drift guard, verified live against production build 6) and
+arc B (compliance pack: real account deletion and AI-processing consent,
+both SECURITY DEFINER functions tested end to end against production with
+throwaway accounts). The session's own plan (`docs/homa-planning/plans/
+2026-07-28-ios-app-store-launch.md`) recommended a two-release strategy:
+a quiet web-subscription-only companion first (R1), Apple in-app purchase
+added later once the app had organic traction (R2). That recommendation
+was presented to the founder as FD-1 and overridden.
+
+**Founder ruling, verbatim: "we def need payment in app, and make it as
+easy as possible, with apple pay or w/e is used."** IAP is priority work,
+not deferred; registered as `ios-iap-priority`.
+
+Two more IAP decisions were asked and ruled in the same exchange:
+
+- **Pricing is weekly**, computed as the monthly sticker divided by four
+  ("make it weekly, but follow the same monthly prices... just whatever
+  divided by 4 is. keep the same annual options"): Homa $19/mo becomes
+  $4.75/wk for the iOS purchase; annual pricing is untouched. Registered
+  as `ios-iap-weekly-pricing`.
+- **Only the base $19 plan sells in the app for now.** The founder's
+  first instinct was that Plus and Max were already built ("We are
+  building everything now. in other agents"), which did not match this
+  session's own findings minutes earlier: gh#293 (closed, but its own
+  resolution states "nothing is gated by `plan_tier`" today), gh#295
+  (open, the tiers do not even align as one ladder), and gh#297 (open,
+  titled exactly "two paywall tiers are sold before they are built").
+  Asked to confirm which was current, the founder agreed: "Still being
+  worked on, not done yet." Registered as `ios-iap-base-tier-only`; the
+  iOS paywall shows only what can actually be delivered.
+
+All three registered in `docs/homa-planning/journeys/10-reconciliation.md`
+§5. Arc F (gh#305, StoreKit + two-provider entitlement) is re-scoped from
+"after R1 ships" to present priority; its ticket and the epic are updated
+to match. Worth naming plainly: the founder's stated belief about
+concurrent work did not survive a two-minute check against this repo's
+own tracker, and the ruling changed once shown the discrepancy rather
+than the discrepancy being smoothed over. That is the reconciliation this
+log exists to make possible.
+
 ## 2026-07-28 · Founder correction: the logo is the logo, and the name is always "Homa"
 
 Founder, on being told an email rendered the wordmark lowercase and that
