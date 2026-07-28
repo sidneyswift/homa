@@ -40,7 +40,7 @@ export function wallReportLine(childName?: string | null): string {
   return `${whose} progress report is free, forever.`;
 }
 
-/** The bridge: what she reached for, named first inside what the 30
+/** The bridge: what she reached for, named first inside what the 7
  *  free days include, in concrete household words. */
 export function wallIncludedLine(door: WallDoor, childName?: string | null): string {
   const kid = childName ?? "your child";
