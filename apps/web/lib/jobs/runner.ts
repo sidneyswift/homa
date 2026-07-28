@@ -273,6 +273,7 @@ export async function recordStageBuilt(input: StageBuiltInput): Promise<void> {
       title: job.title,
       kind: "gate",
       totalStages: job.totalStages,
+      jobId: job.jobId,
     });
     return;
   }
@@ -283,6 +284,7 @@ export async function recordStageBuilt(input: StageBuiltInput): Promise<void> {
       title: job.title,
       kind: "completed",
       totalStages: job.totalStages,
+      jobId: job.jobId,
     });
     await sql`
       update public.agent_jobs
@@ -510,6 +512,7 @@ export async function handleUnreportedStage(
     title: job.title,
     kind: "needs_attention",
     totalStages: job.totalStages,
+    jobId: job.jobId,
   });
 }
 

@@ -457,15 +457,29 @@ async function ensureVoiceAssistant(
     return undefined;
   }
   const instructions = await loadVoiceInstructions();
+  // Refuse to write rather than write an empty tool list. Every run of this
+  // function POSTs { instructions, tools } to the live assistant (PR #88, so
+  // a prompt edit can never drift), which means a shell missing this one
+  // variable used to silently strip every tool off the phone line and leave
+  // Homa answering calls unable to remember, log hours, or email. A command
+  // that reads like "check the status" must not be able to do that. Exit 2 is
+  // this script's missing-env code (see the header).
   const webhookSecret = process.env.TELNYX_WEBHOOK_SECRET;
-  const tools = webhookSecret
-    ? [
-        sendEmailToolConfig(webhookSecret),
-        rememberToolConfig(webhookSecret),
-        logHoursToolConfig(webhookSecret),
-        sendSignupLinkToolConfig(webhookSecret),
-      ]
-    : [];
+  if (!webhookSecret) {
+    console.error(
+      "TELNYX_WEBHOOK_SECRET is not set in this shell, so the voice tools and\n" +
+        "the dynamic-variables webhook cannot be built. Refusing to sync: writing\n" +
+        "an empty tool list would strip every tool off the live phone assistant.\n" +
+        "Load apps/web/.env.local (or export the variable) and re-run.",
+    );
+    process.exit(2);
+  }
+  const tools = [
+    sendEmailToolConfig(webhookSecret),
+    rememberToolConfig(webhookSecret),
+    logHoursToolConfig(webhookSecret),
+    sendSignupLinkToolConfig(webhookSecret),
+  ];
   if (!assistant) {
     assistant = await tx<{ data?: AssistantRow } & AssistantRow>(
       "POST",
@@ -490,19 +504,15 @@ async function ensureVoiceAssistant(
         telephony_settings: { noise_suppression: "krisp" },
         enabled_features: ["telephony"],
         tools,
-        ...(webhookSecret
-          ? {
-              dynamic_variables_webhook_url: `https://thankshoma.com/api/voice/context?key=${webhookSecret}`,
-              dynamic_variables_webhook_timeout_ms: 5000,
-              dynamic_variables: {
-                caller_known: "false",
-                parent_name: "",
-                family_context: "",
-                family_id: "",
-                child_id: "",
-              },
-            }
-          : {}),
+        dynamic_variables_webhook_url: `https://thankshoma.com/api/voice/context?key=${webhookSecret}`,
+        dynamic_variables_webhook_timeout_ms: 5000,
+        dynamic_variables: {
+          caller_known: "false",
+          parent_name: "",
+          family_context: "",
+          family_id: "",
+          child_id: "",
+        },
       },
     ).then((payload) => ("data" in payload && payload.data ? payload.data : payload));
     log("voice", `created assistant ${assistant.id}`);
