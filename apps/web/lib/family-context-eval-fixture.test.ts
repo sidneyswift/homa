@@ -5,6 +5,10 @@ import { resolveAgentAccess } from "./agent-db";
 import {
   EVAL_FIXTURE_FAMILY_ID,
   EVAL_FIXTURE_PARENT_USER_ID,
+  EVAL_FIXTURE_PAST_EVENT_TITLE,
+  EVAL_FIXTURE_PLAN_CHILD_ID,
+  EVAL_FIXTURE_PLAN_SUBJECT,
+  EVAL_FIXTURE_SCHEDULED_WEEK,
   EVAL_FIXTURE_SESSION_ATTRIBUTE,
   evalFamilyFixtureAuth,
   evalFamilyFixtureRows,
@@ -160,5 +164,30 @@ describe("evalFamilyFixtureSeedSql", () => {
   it("widens YYYY-MM birth months to real dates", () => {
     assert.ok(sql.includes("'2022-03-01'::date"));
     assert.ok(!sql.includes("'2022-03'::date"));
+  });
+
+  // The planner seed (issue #257, arc PR B0): scheduling and reshuffle
+  // evals ground in a real plan, real schedule rows, and real family
+  // events, per the house rule that new eval-visible data goes in the
+  // fixture and its seed together.
+  it("seeds a four-week plan for Finn with schedule rows in the current week", () => {
+    assert.ok(sql.includes("public.child_plans"));
+    assert.ok(sql.includes(EVAL_FIXTURE_PLAN_CHILD_ID));
+    assert.ok(sql.includes(`'${EVAL_FIXTURE_PLAN_SUBJECT}'`));
+    // retest 18 days out puts the plan in week 2 today, so the
+    // scheduled rows below sit in the CURRENT week and surface even on
+    // a family-wide open_planner call.
+    assert.ok(sql.includes("now() + interval '18 days'"));
+    assert.ok(sql.includes("public.plan_activity_schedule"));
+    assert.ok(sql.includes(`${EVAL_FIXTURE_SCHEDULED_WEEK}, 0, current_date + 1`));
+    assert.ok(sql.includes(`${EVAL_FIXTURE_SCHEDULED_WEEK}, 1, current_date + 2`));
+  });
+
+  it("seeds family events including one in the past for look-back windows", () => {
+    assert.ok(sql.includes("public.family_events"));
+    assert.ok(sql.includes("'Dentist appointment'"));
+    assert.ok(sql.includes("'Co-op day'"));
+    assert.ok(sql.includes(`'${EVAL_FIXTURE_PAST_EVENT_TITLE}'`));
+    assert.ok(sql.includes("current_date - 2"));
   });
 });

@@ -45,6 +45,7 @@ export default defineBoundedTool({
     return {
       removed: true,
       done: true,
+      title: result.title,
       note: "Removed from the family calendar. Confirm it back in one short natural aside.",
     };
   },

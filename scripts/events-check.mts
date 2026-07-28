@@ -16,7 +16,14 @@ import { join } from "node:path";
 import { EVENT_SCHEMAS } from "../packages/core/src/index";
 
 /** Registry entries allowed to have no emitter yet: [name, ticket]. */
-const STAGED_EVENTS: ReadonlyArray<readonly [string, string]> = [];
+const STAGED_EVENTS: ReadonlyArray<readonly [string, string]> = [
+  // The one-planner arc registers ahead of its emitters (gh#257 PR B0
+  // registers the namespace; later arc PRs bring the code paths).
+  ["planner.week_repaired", "gh#259 (arc C: reshuffle receipt with undo)"],
+  ["planner.offer_shown", "gh#258 (arc B1: governed scheduling offers)"],
+  ["planner.offer_accepted", "gh#258 (arc B1: governed scheduling offers)"],
+  ["planner.checkoff", "gh#258 (arc B1: rail/grid registers; per-toggle op is gh#259)"],
+];
 
 const failures: string[] = [];
 

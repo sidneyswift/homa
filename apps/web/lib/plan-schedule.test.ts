@@ -3,7 +3,12 @@ import { describe, it } from "node:test";
 
 import type { FourWeekPlan } from "@homa/core";
 
-import { activityTextAt, validateScheduleInput } from "./plan-schedule";
+import {
+  activityTextAt,
+  scheduleKey,
+  scheduledDatesByActivity,
+  validateScheduleInput,
+} from "./plan-schedule";
 
 /**
  * The pure guts of schedule_plan_activity (issue #176, CG-03): input
@@ -78,5 +83,35 @@ describe("validateScheduleInput", () => {
   it("rejects a negative or non-integer activity index", () => {
     assert.equal(validateScheduleInput({ ...base, activityIndex: -1 }).ok, false);
     assert.equal(validateScheduleInput({ ...base, activityIndex: 1.5 }).ok, false);
+  });
+});
+
+describe("scheduledDatesByActivity", () => {
+  it("keys each row by child, subject, week, and index", () => {
+    const dates = scheduledDatesByActivity([
+      {
+        childId: "child-1",
+        subjectId: "math",
+        week: 2,
+        activityIndex: 0,
+        scheduledDate: "2026-08-04",
+      },
+      {
+        childId: "child-1",
+        subjectId: "month",
+        week: 2,
+        activityIndex: 0,
+        scheduledDate: "2026-08-05",
+      },
+    ]);
+    assert.equal(dates.get(scheduleKey("child-1", "math", 2, 0)), "2026-08-04");
+    assert.equal(dates.get(scheduleKey("child-1", "month", 2, 0)), "2026-08-05");
+    assert.equal(dates.get(scheduleKey("child-1", "math", 2, 1)), undefined);
+    assert.equal(dates.get(scheduleKey("child-2", "math", 2, 0)), undefined);
+  });
+
+  it("keeps neighboring weeks and indices apart in the key", () => {
+    assert.notEqual(scheduleKey("c", "math", 1, 21), scheduleKey("c", "math", 12, 1));
+    assert.notEqual(scheduleKey("c", "math", 1, 2), scheduleKey("c", "math1", 1, 2));
   });
 });

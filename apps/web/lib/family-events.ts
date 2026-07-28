@@ -77,6 +77,65 @@ export type ParseFamilyEventResult =
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
+/** Date-only day arithmetic in UTC, so a YYYY-MM-DD can never shift a
+ * day through a local-timezone parse. */
+export function addDaysToDateOnly(dateOnly: string, days: number): string {
+  const [year, month, day] = dateOnly.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
+}
+
+function daysBetweenDateOnly(from: string, to: string): number {
+  const [fy, fm, fd] = from.split("-").map(Number);
+  const [ty, tm, td] = to.split("-").map(Number);
+  return Math.round(
+    (Date.UTC(ty, tm - 1, td) - Date.UTC(fy, fm - 1, fd)) / (24 * 60 * 60 * 1000),
+  );
+}
+
+/** The widest window one list_family_events call may cover. */
+export const MAX_EVENT_WINDOW_DAYS = 120;
+
+export type EventWindowResult =
+  | { ok: true; fromDate: string; toDate: string; clamped: boolean }
+  | { ok: false; error: string };
+
+/**
+ * Resolves the list_family_events read window (issue #257, arc PR B0:
+ * the tool used to be today-forward only, so a Tuesday reshuffle could
+ * never see Monday). from/to win over daysAhead when given; from may sit
+ * in the past. The span is clamped to MAX_EVENT_WINDOW_DAYS so a wild
+ * date can never turn one read into a whole-table scan of years.
+ */
+export function resolveEventWindow(args: {
+  /** The family's own today, YYYY-MM-DD (zonedDateString). */
+  today: string;
+  daysAhead?: number;
+  from?: string;
+  to?: string;
+}): EventWindowResult {
+  const daysAhead = args.daysAhead ?? 30;
+  if (args.from !== undefined && !DATE_RE.test(args.from)) {
+    return { ok: false, error: "from must be a real calendar date, YYYY-MM-DD." };
+  }
+  if (args.to !== undefined && !DATE_RE.test(args.to)) {
+    return { ok: false, error: "to must be a real calendar date, YYYY-MM-DD." };
+  }
+  const fromDate = args.from ?? args.today;
+  const toDate = args.to ?? addDaysToDateOnly(fromDate, daysAhead);
+  if (toDate < fromDate) {
+    return { ok: false, error: "The window's end (to) is before its start (from)." };
+  }
+  if (daysBetweenDateOnly(fromDate, toDate) > MAX_EVENT_WINDOW_DAYS) {
+    return {
+      ok: true,
+      fromDate,
+      toDate: addDaysToDateOnly(fromDate, MAX_EVENT_WINDOW_DAYS),
+      clamped: true,
+    };
+  }
+  return { ok: true, fromDate, toDate, clamped: false };
+}
+
 /**
  * parseFamilyEventInput(input): validates and normalizes one event
  * before it ever reaches a query, shared by the caller and pinned write
@@ -190,8 +249,82 @@ export async function listFamilyEventsPinned(
   return rows.map(toFamilyEventRow);
 }
 
+/**
+ * What update_family_event may change in one call: retitle, retime,
+ * move. Undefined means "keep what is there"; a null time means "make
+ * it all-day". childId and note stay out on purpose, the tool is a
+ * narrow retitle/retime/move leaf, not a full editor.
+ */
+export interface FamilyEventPatch {
+  title?: string;
+  /** YYYY-MM-DD. Moving startsOn without an explicit endsOn shifts
+   * endsOn by the same number of days, so a trip keeps its length. */
+  startsOn?: string;
+  endsOn?: string;
+  startTime?: string | null;
+  endTime?: string | null;
+}
+
+export function familyEventPatchIsEmpty(patch: FamilyEventPatch): boolean {
+  return (
+    patch.title === undefined &&
+    patch.startsOn === undefined &&
+    patch.endsOn === undefined &&
+    patch.startTime === undefined &&
+    patch.endTime === undefined
+  );
+}
+
+/**
+ * Merges a patch onto the stored event and re-validates the merged
+ * whole through parseFamilyEventInput, the exact same gate add uses, so
+ * an update can never produce a shape an add would have refused.
+ */
+export function applyFamilyEventPatch(
+  existing: Pick<
+    FamilyEventRow,
+    "title" | "startsOn" | "endsOn" | "startTime" | "endTime" | "note"
+  >,
+  patch: FamilyEventPatch,
+): ParseFamilyEventResult {
+  if (patch.startsOn !== undefined && !DATE_RE.test(patch.startsOn)) {
+    return { ok: false, error: "The start date must be a real calendar date, YYYY-MM-DD." };
+  }
+  const startsOn = patch.startsOn ?? existing.startsOn;
+  let endsOn: string;
+  if (patch.endsOn !== undefined) {
+    endsOn = patch.endsOn;
+  } else if (patch.startsOn !== undefined) {
+    // A move keeps the event's length: shift endsOn by the same delta
+    // (a single-day event stays single-day, a Wed-to-Sun trip stays
+    // five days).
+    endsOn = addDaysToDateOnly(
+      existing.endsOn,
+      daysBetweenDateOnly(existing.startsOn, patch.startsOn),
+    );
+  } else {
+    endsOn = existing.endsOn;
+  }
+  return parseFamilyEventInput({
+    title: patch.title ?? existing.title,
+    startsOn,
+    endsOn,
+    startTime: patch.startTime === undefined ? existing.startTime : patch.startTime,
+    endTime: patch.endTime === undefined ? existing.endTime : patch.endTime,
+    note: existing.note,
+  });
+}
+
 export type AddFamilyEventResult =
-  | { added: true; eventId: string }
+  | {
+      added: true;
+      eventId: string;
+      /** The parsed values actually written, so callers (and the
+       * transcript's receipt chip) can name the effect truthfully. */
+      title: string;
+      startsOn: string;
+      endsOn: string;
+    }
   | { added: false; note: string };
 
 export async function addFamilyEventCaller(
@@ -229,7 +362,13 @@ export async function addFamilyEventCaller(
   if (error || !data) {
     return { added: false, note: `Could not add it: ${error?.message ?? "unknown error"}` };
   }
-  return { added: true, eventId: data.id as string };
+  return {
+    added: true,
+    eventId: data.id as string,
+    title: parsed.value.title,
+    startsOn: parsed.value.startsOn,
+    endsOn: parsed.value.endsOn,
+  };
 }
 
 export async function addFamilyEventPinned(
@@ -258,10 +397,117 @@ export async function addFamilyEventPinned(
        ${parsed.value.note})
     returning id
   `;
-  return { added: true, eventId: inserted[0].id };
+  return {
+    added: true,
+    eventId: inserted[0].id,
+    title: parsed.value.title,
+    startsOn: parsed.value.startsOn,
+    endsOn: parsed.value.endsOn,
+  };
 }
 
-export type RemoveFamilyEventResult = { removed: true } | { removed: false; note: string };
+export type UpdateFamilyEventResult =
+  | { updated: true; event: FamilyEventRow }
+  | { updated: false; note: string };
+
+const UPDATE_NOTHING_NOTE =
+  "Nothing to change: pass at least one of title, startsOn, endsOn, startTime, or endTime.";
+
+export async function updateFamilyEventCaller(
+  db: SupabaseClient,
+  familyId: string,
+  eventId: string,
+  patch: FamilyEventPatch,
+): Promise<UpdateFamilyEventResult> {
+  if (familyEventPatchIsEmpty(patch)) return { updated: false, note: UPDATE_NOTHING_NOTE };
+
+  // The model-supplied eventId is re-scoped inside the caller's own
+  // family on the read AND the write; a foreign or invented id matches
+  // nothing on either.
+  const { data: existing, error: readError } = await db
+    .from("family_events")
+    .select(EVENT_COLUMNS)
+    .eq("id", eventId)
+    .eq("family_id", familyId)
+    .maybeSingle();
+  if (readError) {
+    return { updated: false, note: `Could not update it: ${readError.message}` };
+  }
+  if (!existing) return { updated: false, note: EVENT_NOT_FOUND_NOTE };
+
+  const current = toFamilyEventRow(existing as unknown as RawFamilyEventRow);
+  const parsed = applyFamilyEventPatch(current, patch);
+  if (!parsed.ok) return { updated: false, note: parsed.error };
+
+  const { data, error } = await db
+    .from("family_events")
+    .update({
+      title: parsed.value.title,
+      starts_on: parsed.value.startsOn,
+      ends_on: parsed.value.endsOn,
+      start_time: parsed.value.startTime,
+      end_time: parsed.value.endTime,
+    })
+    .eq("id", eventId)
+    .eq("family_id", familyId)
+    .select(EVENT_COLUMNS)
+    .maybeSingle();
+  if (error || !data) {
+    return { updated: false, note: `Could not update it: ${error?.message ?? "unknown error"}` };
+  }
+  return { updated: true, event: toFamilyEventRow(data as unknown as RawFamilyEventRow) };
+}
+
+export async function updateFamilyEventPinned(
+  familyId: string,
+  eventId: string,
+  patch: FamilyEventPatch,
+): Promise<UpdateFamilyEventResult> {
+  if (familyEventPatchIsEmpty(patch)) return { updated: false, note: UPDATE_NOTHING_NOTE };
+
+  const sql = mapDb();
+  const rows = await sql<RawFamilyEventRow[]>`
+    select id, family_id, child_id, title,
+           to_char(starts_on, 'YYYY-MM-DD') as starts_on,
+           to_char(ends_on, 'YYYY-MM-DD') as ends_on,
+           to_char(start_time, 'HH24:MI') as start_time,
+           to_char(end_time, 'HH24:MI') as end_time,
+           note, created_at::text as created_at
+    from public.family_events
+    where id = ${eventId} and family_id = ${familyId}
+  `;
+  const existing = rows[0];
+  if (!existing) return { updated: false, note: EVENT_NOT_FOUND_NOTE };
+
+  const parsed = applyFamilyEventPatch(toFamilyEventRow(existing), patch);
+  if (!parsed.ok) return { updated: false, note: parsed.error };
+
+  const updated = await sql<RawFamilyEventRow[]>`
+    update public.family_events
+    set title = ${parsed.value.title},
+        starts_on = ${parsed.value.startsOn},
+        ends_on = ${parsed.value.endsOn},
+        start_time = ${parsed.value.startTime},
+        end_time = ${parsed.value.endTime}
+    where id = ${eventId} and family_id = ${familyId}
+    returning id, family_id, child_id, title,
+              to_char(starts_on, 'YYYY-MM-DD') as starts_on,
+              to_char(ends_on, 'YYYY-MM-DD') as ends_on,
+              to_char(start_time, 'HH24:MI') as start_time,
+              to_char(end_time, 'HH24:MI') as end_time,
+              note, created_at::text as created_at
+  `;
+  if (!updated[0]) return { updated: false, note: EVENT_NOT_FOUND_NOTE };
+  return { updated: true, event: toFamilyEventRow(updated[0]) };
+}
+
+export type RemoveFamilyEventResult =
+  | {
+      removed: true;
+      /** The removed event's title, for the transcript's receipt chip. */
+      title: string;
+    }
+  | { removed: false; note: string };
 
 const EVENT_NOT_FOUND_NOTE =
   "That event wasn't found on this family's calendar. It may already be removed.";
@@ -276,10 +522,10 @@ export async function removeFamilyEventCaller(
     .delete()
     .eq("id", eventId)
     .eq("family_id", familyId)
-    .select("id");
+    .select("id, title");
   if (error) return { removed: false, note: `Could not remove it: ${error.message}` };
   if (!data || data.length === 0) return { removed: false, note: EVENT_NOT_FOUND_NOTE };
-  return { removed: true };
+  return { removed: true, title: (data[0] as { title: string }).title };
 }
 
 export async function removeFamilyEventPinned(
@@ -287,11 +533,11 @@ export async function removeFamilyEventPinned(
   eventId: string,
 ): Promise<RemoveFamilyEventResult> {
   const sql = mapDb();
-  const deleted = await sql<{ id: string }[]>`
+  const deleted = await sql<{ id: string; title: string }[]>`
     delete from public.family_events
     where id = ${eventId} and family_id = ${familyId}
-    returning id
+    returning id, title
   `;
   if (deleted.length === 0) return { removed: false, note: EVENT_NOT_FOUND_NOTE };
-  return { removed: true };
+  return { removed: true, title: deleted[0].title };
 }

@@ -6,6 +6,7 @@ import { getAppData } from "../../../lib/app-data";
 import { calendarWeekDates, parseWeekOffset } from "../../../lib/calendar-view";
 import { getFamilyEventsForFamily } from "../../../lib/family-events-read";
 import { getHoursLogForFamily } from "../../../lib/hours";
+import { emitMapEvent } from "../../../lib/map/events";
 import { getScheduledActivitiesForFamily } from "../../../lib/plan-schedule-read";
 import { effectiveTimeZone } from "../../../lib/time-zone";
 import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../../lib/view-context";
@@ -78,6 +79,15 @@ export default async function CalendarPage({
     }),
     getHoursLogForFamily(family.id),
   ]);
+
+  // One planner arc instrumentation (issue #257 PR B0): both old week
+  // surfaces count views, so the B1 flip has a baseline. Server-side
+  // and best-effort, the same posture as map.plan_built's page emit.
+  await emitMapEvent("planner.viewed", {
+    family_id: family.id,
+    surface: "calendar_page",
+    client: "web",
+  });
 
   return (
     <PageColumn>
