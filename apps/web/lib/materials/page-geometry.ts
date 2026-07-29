@@ -16,9 +16,17 @@
  * metric "Goodharts into padded, content-light pages". So fill is never
  * a target to maximize. Fill measures where content ENDS down the page
  * (whitespace between items counts as filled; only the trailing dead
- * band reads as empty), every underfill note conditions on the
- * age-density band in the materials-studio skill, and every note offers
- * spreading existing content as an alternative to adding more.
+ * band reads as empty), and no note ever asks for more items on its own
+ * authority.
+ *
+ * What a note asks for is set by founder ruling 2026-07-29
+ * (`worksheet-scale-to-fill`): the fix for a dead band is to SCALE the
+ * existing items up until they reach the bottom, and that needs no
+ * permission from the age-density band. Only ADDING items is gated on
+ * that band. The ruling came from the co-founder complaint these notes
+ * exist to prevent, and it named the misreading precisely: the problem
+ * was space where things could have been scaled to fit, never
+ * simplicity versus complexity.
  */
 
 /** CSS pixels per inch at the render viewport (LETTER_PX, render-page.ts). */
@@ -35,11 +43,14 @@ export const PRINTABLE_HEIGHT_IN = 9.5;
 const OVERFLOW_NOTE_MIN_IN = 0.05;
 
 /**
- * A trailing blank band this deep gets an actionable note. Three inches
- * is about two generous child-size exercise rows; smaller bands are
- * design air, not the F1 dead band.
+ * A trailing blank band this deep gets an actionable note. Two inches is
+ * roughly the quarter-page dead band a real parent complained about
+ * ("there is still 1/4 of the page open on bottom of page 1 and 2",
+ * 2026-07-29), which a 3in floor would have passed silently, and it is
+ * still deep enough that ordinary design air below the last item does
+ * not trip a note.
  */
-const UNDERFILL_NOTE_MIN_BLANK_IN = 3;
+const UNDERFILL_NOTE_MIN_BLANK_IN = 2;
 
 /**
  * One generous child-facing exercise row (big type plus writing space),
@@ -122,7 +133,7 @@ export function geometryToolNotes(pages: readonly PageGeometry[]): string[] {
     if (blankIn >= UNDERFILL_NOTE_MIN_BLANK_IN) {
       const rows = Math.max(1, Math.round(blankIn / EXERCISE_ROW_IN));
       notes.push(
-        `Page ${page.page} fill is ${page.fillPercent}%: content ends ${formatIn(page.contentHeightIn)}in down the ${PRINTABLE_HEIGHT_IN}in printable area, leaving about ${formatIn(blankIn)}in blank at the bottom (room for roughly ${rows} more exercise ${rows === 1 ? "row" : "rows"}). Weigh this against this child's age band in the page-density table (materials-studio skill): add rows or scale type and spacing up only when that band calls for more items, or spread the existing items down the page. Never pad with filler content to raise the number.`,
+        `Page ${page.page} fill is ${page.fillPercent}%: content ends ${formatIn(page.contentHeightIn)}in down the ${PRINTABLE_HEIGHT_IN}in printable area, leaving about ${formatIn(blankIn)}in blank at the bottom. Scale the items already on the page up until they reach the bottom (bigger type, taller answer blanks, larger pictures, more room per row); that is the fix, and it needs no permission from the age band. Add MORE items only when this child's age band in the page-density table (materials-studio skill) calls for more than the page shows, which would be about ${rows} further exercise ${rows === 1 ? "row" : "rows"} of room. Never pad with filler content to raise the number.`,
       );
     }
   }

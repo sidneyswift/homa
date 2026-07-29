@@ -87,9 +87,9 @@ loads:
   page, never on the child's page. Upside-down at the bottom was allowed
   here until 2026-07-28 and is not: it printed readable on the sheet the
   child works on, and a parent had to ask for it to be moved (gh#346).
-  After moving the key off the child's page, redistribute the band it
-  vacated into the remaining content (more rows, bigger practice items,
-  more generous spacing); never leave it empty (gh#349, the recurring
+  After moving the key off the child's page, scale the remaining content
+  up to reclaim the band it vacated (bigger practice items, taller answer
+  blanks, more room per row); never leave it empty (gh#349, the recurring
   blank-bottom page).
 - Open response, never bubble grids. No standardized-test answer boxes,
   no fill-in-the-bubble strips. The child writes the answer.
@@ -495,8 +495,20 @@ recipe is not a reason to force the wrong format.
   banner, no marketing. The footer credit is added by the platform.
 - Ink-light and grayscale-safe: white background, line art over filled
   art, color as accent only. Home printers are the target.
-- Big type, generous whitespace, one skill per page. Cluttered reads as
-  homework; spacious reads as play.
+- Big type, one skill per page, and content SCALED to fill the sheet. A
+  page is full because its items are big, never because there are many:
+  two giant items fill a page for a 3-year-old, and eight cramped rows
+  can leave a quarter of the sheet dead. Blank space at the bottom is
+  not design air, it is items that should have been scaled up (type,
+  answer blanks, pictures, the spacing between rows) until the content
+  reached the bottom of the printable area. Cluttered still reads as
+  homework, so the answer to a short page is bigger, never denser.
+  Founder ruling 2026-07-29 (`worksheet-scale-to-fill`) retires the old
+  "generous whitespace, spacious reads as play" wording here: it was
+  being read as license to leave a dead band at the bottom, and a
+  co-founder asked seven times across three days for pages that reach
+  the bottom of the sheet. Her complaint was never simplicity versus
+  complexity, it was space where things could have been scaled to fit.
 - Write instructions TO the child, one short line each. A name line up
   top or the child's name pre-printed, spelled exactly as the family
   spells it.
@@ -583,11 +595,13 @@ knows which she wants, and asking costs one message instead of minutes.
 create_printable's result also carries deterministic page-geometry notes
 (measured fill and overflow, gh#349) beside the quality check's verdict.
 Overflow is a hard problem either way: content past the page box is cut
-in print, fix it before anything else. Weigh a low-fill note against the
-page-density table above for this child's age: a spacious page for a
-4-year-old is correct, not underfilled. Only add content when the band
-calls for more items than the page shows; otherwise spread what is
-already there down the page rather than padding it with filler.
+in print, fix it before anything else. A low-fill note means scale the
+items you already have up (type, answer blanks, pictures, row spacing)
+until the content reaches the bottom; that fix needs no permission from
+the age band, and it is the fix nearly every time. The page-density
+table above governs only whether to add MORE items, so a 4-year-old's
+page still fills the sheet, with two or three giant items rather than
+eight small ones. Never pad with filler to raise the number.
 
 Two rules, both from the 2026-07-27 failure
 (`plans/2026-07-27-packet-page-revision-failure.md`):
