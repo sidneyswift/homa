@@ -97,6 +97,9 @@ jobs:
       - name: Tool deadline guard (no unbounded tool can freeze a turn)
         run: pnpm check:tool-deadlines
 
+      - name: Dynamic tool event guard (no tool vanishes on a cold isolate)
+        run: pnpm check:dynamic-tool-events
+
       - name: "No-em-dash style law (AGENTS.md: no em dash, ever, anywhere)"
         run: pnpm check:em-dash
 

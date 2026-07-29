@@ -856,8 +856,18 @@ const createPrintable = defineBoundedTool({
 // screen, and the background first making is the honest path. The
 // agent-job build session that renders that making keeps the tool.
 export default defineDynamic({
+  // step.started, never turn.started: a dynamic TOOL resolved on
+  // turn.started is persisted as durable metadata and replayed on later
+  // steps by looking its execute up in an in-memory step registry. These
+  // tools have no bundler-generated step function, so eve registers a
+  // fallback into `globalThis` at resolve time, and any later step that
+  // lands on a different lambda isolate finds nothing and drops the tool
+  // with only a log line. The model then simply does not have it, which
+  // reads to the parent as "my tool is not connected" (2026-07-26/27,
+  // gh#345). step.started re-resolves live every step and carries the
+  // real closure, which is what eve documents for framework tools.
   events: {
-    "turn.started": (_event, ctx) => {
+    "step.started": (_event, ctx) => {
       const attributes = ctx.session.auth.current?.attributes as
         | GenerationGateAttributes
         | undefined;
