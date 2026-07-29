@@ -3,6 +3,27 @@
 Filed 2026-07-28. Arc epic: gh#359. Docs are the spec layer; the issues are the
 tracking layer (founder directive 2026-07-25).
 
+## Founder rulings, 2026-07-28
+
+Five of the seven questions in gh#358 were answered the same day. Canonical
+text: `journeys/10-reconciliation.md` §5; context and the two the founder took
+against the council: `build-log.md` § 2026-07-28 Founder rulings on the
+Carolyng field study.
+
+| Ruling | What it settles | Effect here |
+|---|---|---|
+| `field-study-arc-order` | Materials first, but the library is NOT gated on fleet demand | #352 unblocked; #348 informs rather than gates |
+| `materials-review-coverage` | Changed pages always reviewed; full first-build coverage tracked separately | #346 scoped; new gh#368 |
+| `materials-version-retention` | Small preview kept forever per version, full file rebuilt on demand | #350 unblocked |
+| `family-originals-store-interim` | Public-by-URL store for now, migration tracked, no "private" claims until it ships | #352 unblocked; new gh#369 |
+| `materials-layout-bakeoff` | Three-arm bench authorized; no-templates ruling stands unless numbers beat it | #349 leg 3 authorized |
+| `four-week-volumes` | Four-week detail with adaptation, year outline allowed, no hard refusal | F9 settled; skill copy before any marketing use |
+| `family-library-tiering` | Capture base-tier, decomposition and planner mapping at Homa Plus | #352 scope set; answers #298's gap |
+
+Still open on gh#358: whether a provably cut-off page is a hard delivery block
+or a parent-overridable verdict, and the single data-ownership ruling covering
+export, cancellation, and retention for hours (gh#294) with the library.
+
 ## Displacement statement (the council's challenge 1, answered)
 
 This arc takes NO scope from the one-planner arc (#255-#267), the voice arc
@@ -39,6 +60,8 @@ investigation outranks feature work per the prod-bugs ruling.
 | #356 | Material ladder remainder: packet page roles, answer keys default-on, laminate cards | feature | P2 | | F3 |
 | #357 | Theming dial: themeLevel enum, age defaults, no-theme validator, one offer per batch | feature | P2 | | F4 |
 | #358 | Carolyng field-study founder decision package (Q1-Q7) | investigation | P1 | founder-decision | 06-council open questions |
+| #368 | Review every page of a first build, not just the first four | feature | P1 | | `materials-review-coverage` |
+| #369 | Move family-uploaded originals off public-link storage | chore | P1 | production | `family-originals-store-interim` |
 
 ## Evidence comments posted on existing issues (no new filings)
 
@@ -51,10 +74,15 @@ investigation outranks feature work per the prod-bugs ruling.
 
 ## Build order (from 06-council.md, binding for executing agents)
 
+Revised after the 2026-07-28 rulings (nothing is blocked on a founder answer
+any more except the two questions still open on #358):
+
 1. #345 (S, time-sensitive) 2. #346 (S) 3. #197/#241/#175 + #347 (M)
-4. #348 (S, parallel) 5. #349 (M-L, after #348) 6. #350 (M, after #358 ruling)
-7. #351 (S-M, parallel) 8. #352 (M-L, after #348 gate + #358 Q2/Q3)
+4. #348 (S, parallel, informational not gating) 5. #349 (M-L, after #348)
+6. #350 (M, retention ruled) 7. #351 (S-M, parallel)
+8. #352 (M-L, after the tagging eval bank; tier and store both ruled)
 9. #353 (M) 10. #355 (S-M) 11. #354 (S) 12. #356 (S-M) 13. #357 (S)
-14. specs onto #262/#267 (done as comments) 15. #358 prep (M).
+14. #368 (M, after #348 prices it) 15. #369 (M, before any privacy claim)
+16. specs onto #262/#267 (done as comments) 17. #358 remainder.
 
 Items 1-4 are the week that makes Carolyng herself say it got better.

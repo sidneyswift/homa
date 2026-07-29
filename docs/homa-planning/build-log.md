@@ -3,6 +3,37 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-28 · Founder rulings on the Carolyng field study (six of seven)
+
+The two-week field study of a co-founder's real family
+(`docs/homa-planning/plans/2026-07-28-carolyng-field-study/`, arc gh#359,
+decision package gh#358) went to the founder as seven plain-language
+questions. Six were answered the same day and are registered in
+`journeys/10-reconciliation.md` §5: `field-study-arc-order`,
+`materials-review-coverage`, `materials-version-retention`,
+`family-originals-store-interim`, `materials-layout-bakeoff`,
+`four-week-volumes`, and `family-library-tiering`. Two went against the
+expert council and are recorded that way rather than smoothed:
+
+1. **No adoption gate on the family library.** The council wanted fleet
+   demand counted before committing to the library; the founder kept the
+   sequencing (materials first) but refused the gate, so gh#348's demand
+   query informs the work instead of blocking it. If the library turns
+   out to serve one power user, that is a bet taken knowingly.
+2. **Family originals stay on the public-by-URL store for now.** The
+   council recommended private storage, consistent with the corpus
+   plan's own ruling for scanned books. The founder chose to ship on the
+   existing public store and track the migration as gh#369. The carried
+   risk: uploaded curriculum pages and in-home photos are link-reachable
+   without a login until that migration lands, and the migration must
+   re-home the backlog, not just new uploads. No product copy may call
+   these uploads private before then.
+
+Still unanswered from gh#358: whether a provably cut-off page is a hard
+delivery block or a verdict the parent may override, and the single
+data-ownership ruling covering export, cancellation, and retention for
+hours (gh#294) together with the library.
+
 ## 2026-07-28 · State pack v1: interim wording, footer scope, and the conservative zero-duty set
 
 The founder asked for the state pack ("one button, a family can download
