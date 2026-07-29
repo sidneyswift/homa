@@ -263,6 +263,30 @@ describe("the shipped anchor set", () => {
     }
   });
 
+  it("keeps multiple date-less rules distinct", () => {
+    // Sampling once dropped one of DC's two conditional rules, because
+    // the union dedupe keyed on calendar values and both rules carry
+    // none (caught by reading a production pack, 2026-07-29). Any state
+    // whose source names two timing rules must ship both.
+    const dc = DEADLINE_ANCHORS.DC;
+    assert.ok(dc, "DC has anchors");
+    assert.equal(dc.anchors.length, 2, "DC must keep both conditional rules");
+    const labels = dc.anchors.map((a) => a.label.toLowerCase());
+    assert.ok(labels.some((l) => l.includes("before instruction")));
+    assert.ok(labels.some((l) => l.includes("renew")));
+  });
+
+  it("never ships two anchors that say the same thing", () => {
+    for (const [code, entry] of Object.entries(DEADLINE_ANCHORS)) {
+      const labels = entry.anchors.map((a) => a.label.trim().toLowerCase());
+      assert.equal(
+        new Set(labels).size,
+        labels.length,
+        `${code} ships a duplicate label: ${labels.join(" | ")}`,
+      );
+    }
+  });
+
   it("states business and school days in the label, never as a bare count", () => {
     // NH and VT count business days; AR counts school days. The pack
     // renders labels precisely because withinDays cannot carry that.
