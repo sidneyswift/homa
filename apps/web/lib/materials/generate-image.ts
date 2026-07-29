@@ -193,7 +193,7 @@ export function classifyImageFailure(error: unknown): ImageFailureKind {
 export function imageFailureNote(kind: ImageFailureKind): string {
   switch (kind) {
     case "policy":
-      return "The image provider declined this prompt, likely character likeness or content policy. Rewording toward the same character will keep failing; tell the parent plainly and offer an inspired-original or a theme-object alternative (like the poke balls header that worked).";
+      return "The image provider declined this prompt as written, likely character likeness or content policy. Refusal is per-franchise, not a rule about all characters, so this is about this request. A reference image from the family's own library is the legitimate lever worth one try; simply re-wording toward a vaguer version of the same character is not, because that is how an off-brand lookalike ships. If it refuses again, tell the parent plainly which character you could not draw and offer what does work: a theme-object header (the poke balls one worked) or a close-but-not-canon original.";
     case "rejected":
       return "The image provider rejected this request as written, and it did not call the failure temporary, so an identical retry fails identically. Change the request itself: simplify the prompt, or drop a reference image that may be too large or an unreadable format.";
     case "transient":

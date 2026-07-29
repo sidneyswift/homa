@@ -111,12 +111,22 @@ test("a self-referencing cause chain terminates instead of hanging", () => {
   assert.equal(classifyImageFailure(looping), "transient");
 });
 
-test("the policy note tells Homa to stop rewording and to tell the parent", () => {
+test("the policy note keeps a real route open instead of declaring defeat", () => {
   const note = imageFailureNote("policy");
-  assert.match(note, /will keep failing/u);
+  // Founder correction 2026-07-29: refusal is per-franchise, and a
+  // reference image genuinely changes the outcome, so the note must not
+  // teach Homa that the character is simply unavailable.
+  assert.match(note, /per-franchise/u);
+  assert.match(note, /reference image/u);
+  assert.doesNotMatch(note, /never the real one|will keep failing/u);
+});
+
+test("the policy note still forbids the quiet-lookalike path and names the parent", () => {
+  const note = imageFailureNote("policy");
   assert.match(note, /tell the parent plainly/u);
-  assert.match(note, /inspired-original|theme-object/u);
-  // The bug was the generic advice. It must not appear on a policy block.
+  assert.match(note, /off-brand lookalike/u);
+  assert.match(note, /theme-object|close-but-not-canon/u);
+  // The original bug was the generic advice. Still banned on a policy block.
   assert.doesNotMatch(note, /Try a reworded prompt/u);
 });
 
