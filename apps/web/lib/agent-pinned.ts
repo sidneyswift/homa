@@ -361,7 +361,21 @@ export async function recallPinned(input: {
   }
 
   // Semantic fallback with the family predicate inline (see doc comment).
+  //
+  // The scope predicates below are load-bearing, not tidiness (gh#375).
+  // Until 2026-07-29 this union searched memories, chats, and calls
+  // regardless of the scope asked for, applied `limit` to that global
+  // ranking, and only then filtered by scope in TypeScript. A
+  // scope:"calls" search therefore spent its whole budget on memories
+  // and chats and threw them away. That is how Homa told a parent her
+  // phone call did not exist while the transcript sat in this table,
+  // embedded, from 49 minutes earlier: the lexical arm above cannot
+  // match a transcript that never says the parent's words, and the arm
+  // meant to catch exactly that was looking somewhere else.
   if (hits.length < input.limit) {
+    const wantMemories = input.scope === "memories" || input.scope === "all";
+    const wantChats = input.scope === "chats" || input.scope === "all";
+    const wantCalls = input.scope === "calls" || input.scope === "all";
     const queryEmbedding = await embedText(input.query, { familyId: input.familyId });
     if (queryEmbedding) {
       const rows = await sql<
@@ -376,6 +390,7 @@ export async function recallPinned(input: {
                  (m.embedding <=> ${queryEmbedding}::extensions.vector(1536)) as distance
           from public.family_memories m
           where m.family_id = ${input.familyId} and m.embedding is not null
+            and ${wantMemories}::boolean
           union all
           select 'chats', c.created_at::text,
                  (case when c.channel = 'sms' then 'text message' else 'chat' end)
@@ -385,6 +400,7 @@ export async function recallPinned(input: {
           from public.conversation_messages c
           where c.family_id = ${input.familyId} and c.visibility = 'family'
             and c.embedding is not null
+            and ${wantChats}::boolean
           union all
           select 'calls', t.started_at::text,
                  case when t.line = 'curriculum' then 'phone call (report review)' else 'phone call' end,
@@ -392,6 +408,7 @@ export async function recallPinned(input: {
                  (t.embedding <=> ${queryEmbedding}::extensions.vector(1536))
           from public.call_transcripts t
           where t.family_id = ${input.familyId} and t.embedding is not null
+            and ${wantCalls}::boolean
         ) ranked
         order by distance asc
         limit ${input.limit}
