@@ -45,9 +45,14 @@ function latestRecallSemanticMigration(): string {
   const files = readdirSync(dir)
     .filter((name) => name.endsWith(".sql"))
     .sort();
+  // Must match a DEFINITION, not any mention. A grant or revoke names the
+  // same signature, so a looser substring picked up the revoke migration
+  // and then failed for having no scopes argument in it (caught by CI on
+  // gh#382, which is exactly the kind of false alarm that gets a guard
+  // deleted rather than trusted).
   const defining = files.filter((name) =>
-    readFileSync(path.join(dir, name), "utf8").includes(
-      "function public.recall_semantic(",
+    /create (or replace )?function public\.recall_semantic\(/u.test(
+      readFileSync(path.join(dir, name), "utf8"),
     ),
   );
   assert.ok(defining.length > 0, "no migration defines recall_semantic");
