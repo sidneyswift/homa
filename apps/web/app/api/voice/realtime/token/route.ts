@@ -30,6 +30,17 @@ import { realtimeToolDefinitions } from "../../../../../lib/voice/realtime-tools
  * hook: `sessionConfig` on the client would put the honesty law in
  * editable browser code.
  *
+ * The tool DEFINITIONS do travel back through the browser, because the hook
+ * sends them in its own session update once the socket opens. That is not a
+ * hole: definitions only tell the model what it may ask for, and every ask
+ * is executed by /api/voice/realtime/tool, which refuses any name outside
+ * its allowlist. A tampered list buys a client nothing but a refusal.
+ *
+ * The success response is the bare setup shape the AI SDK expects
+ * ({ token, url, tools }). Failures answer non-2xx with a `reason` the
+ * composer can say out loud, which is why the component reads this route
+ * again on a failed connect rather than guessing.
+ *
  * familyId never comes from the request. It comes from the caller's own
  * membership row under their own RLS, exactly as /api/voice/call-me does.
  */
@@ -98,6 +109,7 @@ export async function POST(): Promise<Response> {
     );
   }
 
+  const tools = realtimeToolDefinitions();
   try {
     const { token, url } = await gateway.experimental_realtime.getToken({
       model: MODEL,
@@ -116,7 +128,7 @@ export async function POST(): Promise<Response> {
         // never meant to have. Derived from the same zod schemas eve
         // validates against, so the model's arguments and the tool's
         // expectations cannot drift apart.
-        tools: realtimeToolDefinitions(),
+        tools,
       },
     });
 
@@ -125,7 +137,7 @@ export async function POST(): Promise<Response> {
       { family_id: familyId, model: MODEL },
       { familyId },
     );
-    return Response.json({ ok: true, token, url, model: MODEL });
+    return Response.json({ token, url, tools });
   } catch (error) {
     console.error(
       "realtime token: mint failed:",

@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 import { getAppData } from "../../lib/app-data";
 import { familyWallCheckout } from "../../lib/billing/wall";
 import { fetchChatHistory } from "../../lib/chat-history";
-import { getFamilyPhones } from "../../lib/family-phone";
 import { getSlashMenuSkills } from "../../lib/slash-skills";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { effectiveTimeZone } from "../../lib/time-zone";
@@ -78,21 +77,8 @@ export default async function ChatPage({
       ? await fetchChatHistory({ familyId: app.family.id, userId })
       : null;
 
-  // The composer's voice button rings the number THIS adult linked, so it
-  // asks about this adult's own row rather than any number on the family
-  // (a co-parent's cell is not hers to be called on). Read here so the
-  // button can answer instantly instead of firing a request that can only
-  // fail; about half of families have one linked today.
-  const canBeCalled =
-    app && userId !== "anonymous"
-      ? (await getFamilyPhones(app.family.id).catch(() => [])).some(
-          (phone) => phone.member_user_id === userId,
-        )
-      : false;
-
   return (
     <ChatClient
-      canBeCalled={canBeCalled}
       wall={wall}
       serverHistory={serverHistory}
       storageKey={`homa-chat-${userId}`}
