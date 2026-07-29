@@ -136,6 +136,44 @@ describe("the researched table", () => {
     }
   });
 
+  it("pins the letter states, so a data change is visible in review", () => {
+    // Only these may put a signed document in a family's envelope. Any
+    // change here is a change to what real families mail to a government
+    // body, and should be argued for in a PR rather than slipped in.
+    const letters = Object.entries(FILING_METHODS_BY_STATE)
+      .filter(([, row]) => mayGenerateLetter(row, TODAY))
+      .map(([code]) => code)
+      .sort();
+    assert.deepEqual(letters, ["CO", "FL", "HI", "ME", "NH", "OH", "VA", "WV"]);
+  });
+
+  it("keeps the seven refuted states off the letter path", () => {
+    // Each of these read as a letter state on the statute and was
+    // downgraded by an independent challenge (2026-07-29). Arkansas is
+    // the clearest: a letter is legally permitted and still unsafe,
+    // because the state's own required fields exceed what the statute
+    // lists and a correction round can push a family past its deadline.
+    for (const code of ["AR", "KY", "MN", "NY", "OR", "PA", "UT"]) {
+      const row = FILING_METHODS_BY_STATE[code];
+      assert.ok(
+        !mayGenerateLetter(row, TODAY),
+        `${code} was refuted and must not generate a letter`,
+      );
+    }
+  });
+
+  it("leaves an unsettled state absent rather than guessing", () => {
+    // Absence is the safe answer: these get the copy-from sheet, which
+    // is correct everywhere.
+    for (const code of ["KY", "MA", "MT", "NY", "RI", "UT"]) {
+      assert.equal(
+        FILING_METHODS_BY_STATE[code],
+        undefined,
+        `${code} was unclear and must stay absent`,
+      );
+    }
+  });
+
   it("names where the filing goes wherever it is known", () => {
     for (const [code, row] of Object.entries(FILING_METHODS_BY_STATE)) {
       assert.ok(
