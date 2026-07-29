@@ -55,9 +55,14 @@ const DAY_MS = 24 * 60 * 60 * 1000;
  * anything without shortening a real conversation. */
 const TOKEN_TTL_SECONDS = 60 * 5;
 
-/** `marin` and `cedar` are OpenAI's recommended pair for gpt-realtime.
- * Casting is a live founder decision (#286), so this is a starting point
- * and deliberately one constant to change. */
+/** Ruled `voice-marin` (2026-07-29) after listening, not from a document.
+ * `marin` is OpenAI's female realtime voice; `cedar` is the male one.
+ *
+ * This rules the BROWSER voice only. The phone still speaks with Telnyx's
+ * "Callie - Encourager" and cannot use `marin`, because Telnyx hosts that
+ * voice and OpenAI hosts this one. So Homa has two voices today, and a
+ * parent who uses both hears two people. Known, accepted while in-app voice
+ * is new, and it resolves only if the phone moves to gpt-realtime (Phase 3). */
 const VOICE = "marin";
 
 const MODEL = "openai/gpt-realtime-2.1";
