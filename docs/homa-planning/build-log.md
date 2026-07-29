@@ -3,6 +3,51 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-29 · The voice ruling: clear AND memorable, boring is a failure state
+
+Founder ruling, not an agent decision. Registered as `copy-voice-memorable`
+in `journeys/10-reconciliation.md` §5, superseding `copy-clarity`
+(2026-07-08). Tracked as gh#413, filed from the superhoma delta review
+(`plans/2026-07-28-superhoma-delta.md` Part 2 §9).
+
+**What prompted it.** A comparison against the Mac mini Homa found the
+product's voice flat by construction, for three mechanical reasons rather
+than one stylistic one. First, our voice rules were **quotas** ("at most one
+metaphor per reply, usually none"), and a quota cannot distinguish a good
+instance from a bad one, so the risk-minimizing play is to spend nothing.
+Second, the **wrapper defeated the content**: "Have opinions" told Homa to
+say the unwelcome thing, and the section marked binding immediately told her
+to reassure first, offer rather than recommend, and make at most one gentle
+suggestion. Run an opinion through those and it arrives as mush, and the
+binding section wins. Third, the copy rulebook instructed blandness outright:
+"if a charming line and a plain line carry the same fact, ship the plain
+one."
+
+**The ruling.** Clarity is the floor, not the ceiling. Order when they
+conflict: true, then clear, then memorable, then short.
+
+**Changed:** the priority law in `homa-copy-writer/SKILL.md` and its
+restatement in `AGENTS.md`; the Voice sections in `agent/instructions.md`,
+`agent/report-writer.md`, and `agent/curriculum-writer.md`;
+`REPORT_PROMPT_VERSION` bumped to 2026.07.29. Quotas on metaphor, emoji, and
+suggestions retired in favor of standards. "Offers, never commands" became
+"you suggest, she decides", which keeps the deference and drops the hedging.
+"Reassure before you inform" narrowed to the case where something is
+actually broken. Explicit permission to be funny added, written as a
+standard.
+
+**Deliberately unchanged**, and stated here so a future pass does not read
+the ruling as blanket permission: never "behind" or deficit words **about a
+child**, never compare siblings, never a verdict on a child, no medical or
+developmental diagnoses, and never guess a child's gender from a name. Those
+are the product's promise, not caution. Bluntness about a curriculum, a
+schedule, a plan, or an idea is now explicitly encouraged.
+
+**One agent decision inside the founder ruling:** profanity ships OFF. The
+Mac mini version permits it because it addresses its two founders; the
+product addresses strangers, many in church-adjacent co-op communities. It
+is a single line and trivially reversed. Queued for founder confirmation in
+gh#413.
 ## 2026-07-28 · Founder rulings on the Carolyng field study (six of seven)
 
 The two-week field study of a co-founder's real family
