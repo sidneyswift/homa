@@ -11,6 +11,7 @@ import {
   type StateRequirementsSummary,
 } from "../map/state-requirements";
 import {
+  ageOn,
   birthdateLong,
   composeFilingLetter,
   type FilingLetterFamily,
@@ -125,6 +126,50 @@ describe("letter states get a real letter", () => {
     assert.match(wv.body, /assessed annually/i);
   });
 
+  it("supplies a required field rather than quoting the statute back", () => {
+    // Florida names the fields its notice must carry. The failure this
+    // guards is a letter that says "this notice confirms the full legal
+    // name, address and date of birth of each child" and then supplies
+    // none of them.
+    const fl = compose("FL");
+    assert.ok(
+      !/confirms.*(full legal name|date of birth of each child)/i.test(fl.body),
+      "a required field must be answered, never recited",
+    );
+    assert.match(fl.body, /Finn Walker/);
+    assert.match(fl.body, /March 9, 2018/);
+    assert.match(fl.body, /44 Mill Lane/);
+  });
+
+  it("computes age where the state asks for it, and only from a full birthdate", () => {
+    // Colorado wants each child's age. Finn was born 2018-03-09, so on
+    // 2026-07-29 he is 8, not 7: the birthday has passed this year.
+    const co = compose("CO");
+    assert.match(co.body, /<th>Age<\/th>/);
+    assert.match(co.body, /<td>8<\/td>/);
+    assert.match(co.body, /<td>5<\/td>/); // Maya, born 2020-11-21
+    assert.ok(!compose("FL").body.includes("<th>Age</th>"));
+  });
+
+  it("leaves the state's unanswerable field blank instead of guessing it", () => {
+    // Homa logs hours after they happen; Colorado's notice asks what the
+    // family plans before the year starts. Those are different numbers.
+    const co = compose("CO");
+    assert.ok(co.gaps.some((g) => /Hours of instruction/i.test(g)));
+    assert.match(co.body, /only you can answer it/);
+    assert.ok(!/\b\d+ hours\b/i.test(co.body), "no invented hour count");
+  });
+
+  it("does not put the planner's subject list in a legal filing", () => {
+    // Virginia wants the year's subjects and the parent's qualification.
+    // Homa's planner knows the first, but the parent signs this.
+    const va = compose("VA");
+    assert.ok(va.gaps.some((g) => /Subjects you plan to teach/i.test(g)));
+    assert.ok(
+      va.gaps.some((g) => /What qualifies you to teach under Virginia law/i.test(g)),
+    );
+  });
+
   it("tells the family what to enclose rather than omitting it", () => {
     const wv = compose("WV");
     assert.match(wv.body, /Enclose with this letter/);
@@ -205,6 +250,23 @@ describe("gaps are marked, never invented", () => {
 
   it("reports no gaps when the family is complete", () => {
     assert.deepEqual(compose("FL").gaps, []);
+  });
+});
+
+describe("ageOn", () => {
+  it("counts whole years, and knows whether the birthday has passed", () => {
+    assert.equal(ageOn("2018-03-09", "2026-07-29"), 8);
+    assert.equal(ageOn("2018-09-09", "2026-07-29"), 7);
+    assert.equal(ageOn("2018-07-29", "2026-07-29"), 8, "birthday today counts");
+    assert.equal(ageOn("2018-07-30", "2026-07-29"), 7, "tomorrow does not");
+  });
+
+  it("refuses a month-only birthdate rather than picking an answer", () => {
+    // Ambiguous by up to a month, which near a birthday is two different
+    // answers in a filing that can be age-gated.
+    assert.equal(ageOn("2018-03", "2026-07-29"), null);
+    assert.equal(ageOn(null, "2026-07-29"), null);
+    assert.equal(ageOn("not a date", "2026-07-29"), null);
   });
 });
 

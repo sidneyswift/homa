@@ -3,6 +3,7 @@ import type { StateRequirementsDetail } from "../map/state-requirements";
 import {
   mayGenerateLetter,
   type FilingMethodEntry,
+  type LetterField,
 } from "./filing-method";
 
 /**
@@ -29,6 +30,12 @@ import {
  * costs a family their deadline. Anything Homa does not know renders as
  * a labeled blank line to complete by hand, and is also returned in
  * `gaps` so the covering email can name it. Nothing is ever invented.
+ *
+ * On required data: a state that names the fields its notice must carry
+ * gets those fields SUPPLIED, not quoted back at it. Each one is either
+ * filled from what Homa holds or rendered as a labeled blank, decided
+ * field by field, so "we filled it in for you" is a checked claim rather
+ * than an asserted one.
  */
 
 export interface FilingLetterChild {
@@ -110,7 +117,47 @@ function addressBlock(family: FilingLetterFamily, gaps: string[]): string {
   return rows.join("\n");
 }
 
-function childRows(children: FilingLetterChild[], gaps: string[]): string {
+/**
+ * Whole years old on a given date, from a COMPLETE birthdate only.
+ *
+ * A month-only birthdate is ambiguous by up to a month, which near a
+ * birthday is the difference between two answers. In an age-gated legal
+ * filing that is not a rounding error, so this refuses rather than
+ * picking one.
+ */
+export function ageOn(birthdate: string | null, onIso: string): number | null {
+  if (!birthdate) return null;
+  const born = birthdate.split("-").map(Number);
+  const now = onIso.slice(0, 10).split("-").map(Number);
+  if (born.length !== 3 || now.length !== 3) return null;
+  const [by, bm, bd] = born;
+  const [ny, nm, nd] = now;
+  if (!by || !bm || !bd || !ny || !nm || !nd) return null;
+  let age = ny - by;
+  if (nm < bm || (nm === bm && nd < bd)) age -= 1;
+  return age >= 0 && age < 130 ? age : null;
+}
+
+/** Plain-language name for a field a state's notice must carry, used
+ *  both on the blank line and in the covering email's gap list. */
+function fieldLabel(field: LetterField, stateName: string): string {
+  switch (field) {
+    case "attendance_hours":
+      return "Hours of instruction you plan for the year";
+    case "curriculum_subjects":
+      return "Subjects you plan to teach this year";
+    case "parent_qualification":
+      return `What qualifies you to teach under ${stateName} law`;
+    default:
+      return field;
+  }
+}
+
+function childRows(
+  children: FilingLetterChild[],
+  gaps: string[],
+  options: { showAge: boolean; onIso: string },
+): string {
   if (children.length === 0) {
     gaps.push("The children this notice covers");
     return `<p class="fl-line"><span class="fl-label">Children</span>${BLANK}</p>`;
@@ -118,15 +165,16 @@ function childRows(children: FilingLetterChild[], gaps: string[]): string {
   return children
     .map((child) => {
       const born = birthdateLong(child.birthdate);
-      const cells = [
-        `<td>${escapeHtml(child.name)}</td>`,
-        born
-          ? `<td>${escapeHtml(born)}</td>`
-          : `<td>${BLANK}</td>`,
-        child.grade
-          ? `<td>${escapeHtml(child.grade)}</td>`
-          : `<td>${BLANK}</td>`,
-      ];
+      const cells = [`<td>${escapeHtml(child.name)}</td>`];
+      if (options.showAge) {
+        const age = ageOn(child.birthdate, options.onIso);
+        cells.push(age === null ? `<td>${BLANK}</td>` : `<td>${age}</td>`);
+        if (age === null) gaps.push(`Age for ${child.name}`);
+      }
+      cells.push(born ? `<td>${escapeHtml(born)}</td>` : `<td>${BLANK}</td>`);
+      cells.push(
+        child.grade ? `<td>${escapeHtml(child.grade)}</td>` : `<td>${BLANK}</td>`,
+      );
       if (!born) gaps.push(`Date of birth for ${child.name}`);
       // Grade is never derived from age: placement is the parent's call
       // in most states, and guessing it here would put a claim in a
@@ -135,6 +183,39 @@ function childRows(children: FilingLetterChild[], gaps: string[]): string {
       return `      <tr>${cells.join("")}</tr>`;
     })
     .join("\n");
+}
+
+/**
+ * The fields a state names that Homa cannot fill from what it holds.
+ *
+ * child_name, child_birthdate, child_age and child_address are already
+ * carried by the identity block and the child table above, so requiring
+ * them adds nothing here. The rest are things only the family can answer,
+ * and each becomes a labeled blank plus a named gap.
+ */
+function carriedFieldBlanks(
+  fields: readonly LetterField[],
+  stateName: string,
+  gaps: string[],
+): string {
+  const askable = fields.filter(
+    (field) =>
+      field === "attendance_hours" ||
+      field === "curriculum_subjects" ||
+      field === "parent_qualification",
+  );
+  if (askable.length === 0) return "";
+  const rows = askable
+    .map((field) => {
+      const label = fieldLabel(field, stateName);
+      gaps.push(label);
+      return `  <p class="fl-line"><span class="fl-label">${escapeHtml(label)}</span>${BLANK}</p>`;
+    })
+    .join("\n");
+  return `<div class="fl-carry">
+  <p class="fl-carry-head">${escapeHtml(stateName)} also asks for this, and only you can answer it</p>
+${rows}
+</div>`;
 }
 
 export function composeFilingLetter(input: FilingLetterInput): FilingLetter {
@@ -149,19 +230,25 @@ export function composeFilingLetter(input: FilingLetterInput): FilingLetter {
     addressBlock(family, gaps),
   ].join("\n");
 
+  const carry = method?.letterMustCarry ?? [];
+  const showAge = carry.includes("child_age");
+  const headers = ["Child", ...(showAge ? ["Age"] : []), "Date of birth", "Grade"];
+
   const table = `<table class="fl-children">
-  <thead><tr><th>Child</th><th>Date of birth</th><th>Grade</th></tr></thead>
+  <thead><tr>${headers.map((h) => `<th>${h}</th>`).join("")}</tr></thead>
   <tbody>
-${childRows(family.children, gaps)}
+${childRows(family.children, gaps, { showAge, onIso: todayIso })}
   </tbody>
 </table>`;
 
-  const assurances = (method?.letterMustContain ?? []).length
+  const carried = carriedFieldBlanks(carry, detail.stateName, gaps);
+
+  const assurances = (method?.letterMustState ?? []).length
     ? `<p class="fl-para">This notice also confirms ${
-        method!.letterMustContain!.length === 1 ? "the following" : "each of the following"
+        method!.letterMustState!.length === 1 ? "the following" : "each of the following"
       }, as ${stateName} requires:</p>
 <ul class="fl-assurances">
-${method!.letterMustContain!.map((item) => `  <li>${escapeHtml(item)}</li>`).join("\n")}
+${method!.letterMustState!.map((item) => `  <li>${escapeHtml(item)}</li>`).join("\n")}
 </ul>`
     : "";
 
@@ -193,6 +280,7 @@ ${method!.letterAttachments!.map((item) => `    <li>${escapeHtml(item)}</li>`).j
 <p class="fl-para">${where} Copy these details across. This sheet is not the filing and cannot be sent in place of it.</p>
 ${identity}
 ${table}
+${carried}
 ${assurances}
 ${attachments}
 <p class="fl-para">You send it to ${escapeHtml(recipient)}.${dueLong ? ` It is due ${escapeHtml(dueLong)}.` : ""}</p>`,
@@ -210,6 +298,7 @@ ${attachments}
     } named below, under ${stateName} law.</p>
 ${identity}
 ${table}
+${carried}
 ${assurances}
 <p class="fl-para">Please contact me at the address above if anything further is needed.</p>
 <div class="fl-sign">

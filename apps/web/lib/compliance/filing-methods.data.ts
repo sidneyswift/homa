@@ -54,9 +54,9 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     evidence:
       "Section 1002.41 requires written notice signed by the parent, carrying the full legal names, addresses and birthdates of the children, filed with the district school superintendent within 30 days. The district may not require any additional information or verification from the parent.",
     submitTo: "the district school superintendent of the county of residence",
-    letterMustContain: [
-      "the full legal name, address and date of birth of each child in the program",
-    ],
+    // 1002.41 names the fields rather than asking for an assurance, and
+    // Homa holds all three, so the letter carries them outright.
+    letterMustCarry: ["child_name", "child_address", "child_birthdate"],
   },
 
   VA: {
@@ -67,10 +67,11 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     evidence:
       "Section 22.1-254.1 requires annual notice to the division superintendent no later than August 15, carrying a description of the curriculum limited to a list of subjects for the coming year plus evidence of meeting one of the criteria to provide home instruction. The statute names no state form.",
     submitTo: "the division superintendent",
-    letterMustContain: [
-      "a description of the curriculum, limited to a list of subjects to be studied in the coming year",
-      "evidence that the parent meets one of the statutory criteria to provide home instruction",
-    ],
+    // Both are the parent's claims to make, not Homa's: the planner
+    // knows this year's subjects, but a curriculum list in a legal
+    // filing is a statement the parent signs, and only the parent knows
+    // which statutory criterion qualifies them.
+    letterMustCarry: ["curriculum_subjects", "parent_qualification"],
   },
 
   AL: {
@@ -104,8 +105,15 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     checkedOn: "2026-07-29",
     evidence: "C.R.S. 22-33-104.5(3)(e), in the General Assembly's official 2024 printout of Title 22 (content.leg.colorado.gov, page 862), says a parent \"shall provide written notification of the establishment of said program to a school district within the state fourteen days prior to the establishment of said program and each year thereafter if the program is maintained\" and \"shall certify, in writing, only a statement containing the name, age, place of residence, and number of hours of attendance of each child enrolled in said program.\" CDE calls this a letter and publishes no state form and no portal: \"A letter of intent must be submitted 14 days before beginning the homeschool program to a Colorado school district of a family's choosing. The family does not submit the letter of intent to CDE,\" and its FAQ adds \"Notification can be given to any Colorado public school district office.\" The...",
     submitTo: "A school district, specifically any Colorado public school district office of the family's choosing, and explicitly not the Colorado Department of Education",
-    letterMustContain: [
-      "the name, age, place of residence and number of hours of attendance of each child enrolled",
+    // Colorado is the reason letterMustCarry exists: its notice asks for
+    // planned hours of attendance, which Homa cannot know before the
+    // year starts (the hours log records hours after the fact). Three
+    // fields fill themselves, the fourth is an honest blank.
+    letterMustCarry: [
+      "child_name",
+      "child_age",
+      "child_address",
+      "attendance_hours",
     ],
   },
 
@@ -171,7 +179,7 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     checkedOn: "2026-07-29",
     evidence: "The statute, 20-A M.R.S. 5001-A(3)(A)(4)(a), prescribes no form: it says only that \"The student's parent or guardian shall provide a written notice of intent to provide home instruction simultaneously to the school officials of the administrative unit in which the student resides and to the commissioner within 10 calendar days of the beginning of home instruction,\" then lists the five items the notice \"must contain.\" The Maine DOE FAQ answers the form question outright under the heading \"Must I use the Home Instruction Portal or the official Notice of Intent form?\": \"Using the Home Instruction Portal is not mandatory. You may provide notice to the superintendent's office in a different format, provided it contains all required information,\" followed by the exact list of required content. The DOE's Requirements page routes paper filings locally: \"Complete the paper form and mail or...",
     submitTo: "The superintendent's office of the resident school administrative unit (SAU). The statute also names the commissioner, but Maine DOE instructs paper filers to send to the resident superintendent only and treats that single submission as notice to both the SAU and the Department.",
-    letterMustContain: [
+    letterMustState: [
       "an assurance of at least 175 days of instruction annually",
       "an assurance that instruction covers English and language arts, mathematics, science, social studies, physical education, health education, library skills, fine arts, and Maine studies",
       "an assurance that the program includes an annual assessment of the child's academic progress",
@@ -326,7 +334,7 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     checkedOn: "2026-07-29",
     evidence: "W. Va. Code 18-8-1(c)(2) says the parent \"shall present to the county superintendent or county board a notice of intent to provide home instruction\" that \"includes the name, address, and age of any child of compulsory school age to be instructed and assurance that the child shall receive instruction in reading, language, mathematics, science, and social studies\", with no form, no state-prescribed format, and no online portal named anywhere in the section. The state education department's own artifact confirms the letter path: a fill-in page titled \"HOMESCHOOL NOTICE OF INTENT\", published at wvde.us as Homeschool-Letter-of-Intent-v2.pdf and linked as \"Homeschool Letter of Intent\", which reads \"This letter is to inform you that I will homeschool my child(ren) under West Virginia Code 18-8-1, subsection (c), subdivision 2\" and ends with a parent signature line. Two cautions: paragraph...",
     submitTo: "the county superintendent or county board (the statute says \"the county superintendent or county board\"; the state education department page says \"the county superintendent or his/her designee\")",
-    letterMustContain: [
+    letterMustState: [
       "an assurance that the child will be instructed in reading, language, mathematics, science and social studies",
       "an assurance that the child will be assessed annually",
     ],

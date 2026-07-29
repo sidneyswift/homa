@@ -52,6 +52,44 @@ describe("verifyFilingMethod", () => {
     assert.match(verdict.reason, /too thin/);
   });
 
+  it("refuses a letter-only field on a form or portal state", () => {
+    // Silently dead data is the danger: the composer never reaches these
+    // on a non-letter state, so a real requirement recorded on the wrong
+    // row would look researched and render nowhere.
+    for (const method of ["state_form", "portal"] as const) {
+      const verdict = verifyFilingMethod(
+        "AZ",
+        entry({ method, letterMustCarry: ["child_name"] }),
+      );
+      assert.ok(!verdict.ok);
+      assert.match(verdict.reason, /can never render/);
+    }
+  });
+
+  it("refuses a field name recorded as an assurance", () => {
+    // The failure mode this catches is a letter that recites its own
+    // requirements: "this notice confirms: the date of birth".
+    const verdict = verifyFilingMethod(
+      "FL",
+      entry({ letterMustState: ["the date of birth"] }),
+    );
+    assert.ok(!verdict.ok);
+    assert.match(verdict.reason, /too short to be one/);
+  });
+
+  it("accepts a real assurance", () => {
+    assert.ok(
+      verifyFilingMethod(
+        "FL",
+        entry({
+          letterMustState: [
+            "an assurance that the child will be assessed annually",
+          ],
+        }),
+      ).ok,
+    );
+  });
+
   it("refuses an unknown method or a malformed check date", () => {
     const method = verifyFilingMethod(
       "FL",
