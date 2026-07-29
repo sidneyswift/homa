@@ -32,6 +32,15 @@ Substring, case-insensitive, deliberately dumb. This is a lookup over tags a
 model already judged, not a second judgment layer: fuzzy scoring here would
 quietly re-decide what an item is about, which is the model's job upstream
 and the verifier's to check.
+
+ROLES:
+A content search matches only claims whose role is `teaches` or `about`. The
+Fast Forward cover is a photograph of a swan: quotable, real, and recorded
+as `decoration`, because "books about swans for a six-year-old" returning a
+phonics workbook is how a parent learns to stop trusting search. Cast and
+identity claims answer their own narrower questions (--role cast for a
+character, --role identity for a series or level), and decoration answers
+none unless you ask for it by name.
 """
 
 import argparse
@@ -45,6 +54,10 @@ REFS_DIR = COSMO / "references"
 CURS_DIR = COSMO / "curriculums"
 
 FIELDS = ("subjects", "entities", "themes", "keyTerms", "works", "title", "units")
+
+# Only these roles may answer a content question. Mirrors CONTENT_ROLES in
+# verify-ingestion.py, which is what enforces the labelling upstream.
+CONTENT_ROLES = ("teaches", "about")
 
 
 def load(path):
@@ -75,7 +88,7 @@ def age_band(item):
     return None
 
 
-def hits_for(item, needle, field_filter):
+def hits_for(item, needle, field_filter, roles=None):
     """Every place the needle appears, as (field, display) pairs."""
     about = item.get("aboutness") or {}
     found = []
@@ -87,9 +100,18 @@ def hits_for(item, needle, field_filter):
             if value and needle in value.lower():
                 found.append((field, value))
 
-    scan("subjects", [s.get("name", "") for s in about.get("subjects") or []])
+    def in_scope(claim):
+        role = claim.get("role")
+        if roles is None:
+            # Default: content only. An unlabelled legacy claim is treated as
+            # content, because the pre-role corpus has no decoration in it.
+            return role is None or role in CONTENT_ROLES
+        return role in roles
+
+    scan("subjects", [s.get("name", "") for s in about.get("subjects") or [] if in_scope(s)])
     scan("entities", [
-        f"{e.get('name', '')} ({e.get('kind', '?')})" for e in about.get("entities") or []
+        f"{e.get('name', '')} ({e.get('kind', '?')})"
+        for e in about.get("entities") or [] if in_scope(e)
     ])
     scan("themes", [t.get("name", "") for t in about.get("themes") or []])
     scan("keyTerms", [k.get("term", "") for k in about.get("keyTerms") or []])
@@ -117,11 +139,11 @@ def hits_for(item, needle, field_filter):
     return found
 
 
-def search(needle, age=None, field_filter=None):
+def search(needle, age=None, field_filter=None, roles=None):
     needle = needle.lower().strip()
     results = []
     for item in items():
-        found = hits_for(item, needle, field_filter)
+        found = hits_for(item, needle, field_filter, roles)
         if not found:
             continue
         band = age_band(item)
@@ -174,6 +196,9 @@ def main():
     parser.add_argument("--age", type=int, metavar="MONTHS",
                         help="keep only items whose age band contains this age in months")
     parser.add_argument("--field", choices=FIELDS, help="narrow the search to one field")
+    parser.add_argument("--role", action="append",
+                        choices=("teaches", "about", "cast", "identity", "decoration"),
+                        help="match claims in this role instead of content roles; repeatable")
     parser.add_argument("--json", action="store_true", help="machine-readable output")
     parser.add_argument("--list-subjects", action="store_true",
                         help="every subject the corpus carries, by frequency")
@@ -194,7 +219,8 @@ def main():
         parser.print_help()
         return 2
 
-    results = search(args.query, age=args.age, field_filter=args.field)
+    roles = tuple(args.role) if args.role else None
+    results = search(args.query, age=args.age, field_filter=args.field, roles=roles)
 
     if args.json:
         print(json.dumps(results, indent=2))

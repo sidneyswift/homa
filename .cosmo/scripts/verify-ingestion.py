@@ -84,6 +84,14 @@ SLUG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)+$")
 CONTENT_RULES_FROM = "2026-07-28"
 
 ENTITY_KINDS = {"person", "character", "place", "organization", "animal", "event", "object"}
+
+# What part a claim plays, which is what decides whether it may answer a
+# content search. A span proves a thing is present; it cannot tell you the
+# item is about it. The scar: the Fast Forward cover is a photograph of a
+# swan, perfectly quotable and perfectly wrong to tag, because "books about
+# swans for a six-year-old" must never return a phonics workbook.
+CONTENT_ROLES = {"teaches", "about"}
+CLAIM_ROLES = CONTENT_ROLES | {"cast", "identity", "decoration"}
 WORK_KINDS = {"book", "poem", "song", "film", "artwork", "game", "website", "curriculum"}
 EXTRACTION_QUALITY = {"full", "partial", "unavailable"}
 DECOMPOSITION_QUALITY = {"full", "partial", "unavailable"}
@@ -657,7 +665,8 @@ def check_aboutness(item: dict) -> Tuple[bool, str]:
         return False, f"extractionQuality must be one of {sorted(EXTRACTION_QUALITY)}, got {quality!r}"
 
     problems = []
-    if not (about.get("subjects") or []):
+    subjects = about.get("subjects") or []
+    if not subjects:
         problems.append("subjects is empty (what is this item about?)")
     for e in about.get("entities") or []:
         if e.get("kind") not in ENTITY_KINDS:
@@ -665,6 +674,23 @@ def check_aboutness(item: dict) -> Tuple[bool, str]:
     for w in about.get("referencedWorks") or []:
         if w.get("kind") not in WORK_KINDS:
             problems.append(f"work {w.get('title', '?')!r} has kind {w.get('kind')!r}")
+
+    # Roles decide what may answer a content search, so a missing role is not
+    # a cosmetic omission: it is an unlabelled claim that search has to guess
+    # about, and guessing is how a swan on a cover ends up answering "books
+    # about swans".
+    for claim in subjects + (about.get("entities") or []):
+        role = claim.get("role")
+        label = claim.get("name", "?")
+        if role is None:
+            problems.append(f"claim {label!r} has no role (one of {sorted(CLAIM_ROLES)})")
+        elif role not in CLAIM_ROLES:
+            problems.append(f"claim {label!r} has role {role!r}, not one of {sorted(CLAIM_ROLES)}")
+    if subjects and not any(s.get("role") in CONTENT_ROLES for s in subjects):
+        problems.append(
+            "no subject carries a content role (teaches/about), so this item can never "
+            "answer a content question. If that is genuinely true, say why in aboutness.notes"
+        )
 
     if quality == "unavailable":
         if not about.get("reason"):
@@ -926,8 +952,10 @@ def self_test() -> int:
     def about(**over):
         base = {
             "extractionQuality": "full",
-            "subjects": [{"name": "christopher columbus", "quote": "Christopher Columbus was born"}],
-            "entities": [{"name": "Hispaniola", "kind": "place", "quote": "They landed on Hispaniola"}],
+            "subjects": [{"name": "christopher columbus", "role": "about",
+                          "quote": "Christopher Columbus was born"}],
+            "entities": [{"name": "Hispaniola", "kind": "place", "role": "about",
+                          "quote": "They landed on Hispaniola"}],
         }
         base.update(over)
         return base
@@ -949,10 +977,10 @@ def self_test() -> int:
          check_aboutness, ref(sidecar_id, new, aboutness=about()), True),
         ("a fabricated span fails",
          check_aboutness, ref(sidecar_id, new, aboutness=about(
-             entities=[{"name": "Atlantis", "kind": "place", "quote": "they sailed to Atlantis"}])), False),
+             entities=[{"name": "Atlantis", "kind": "place", "role": "about", "quote": "they sailed to Atlantis"}])), False),
         ("an unknown entity kind fails",
          check_aboutness, ref(sidecar_id, new, aboutness=about(
-             entities=[{"name": "Genoa", "kind": "city", "quote": "born in Genoa"}])), False),
+             entities=[{"name": "Genoa", "kind": "city", "role": "about", "quote": "born in Genoa"}])), False),
         ("a claim with no span fails",
          check_aboutness, ref(sidecar_id, new, aboutness=about(
              themes=[{"name": "exploration"}])), False),
@@ -964,6 +992,23 @@ def self_test() -> int:
         ("unavailable with a reason passes",
          check_aboutness, ref("ref-2026-08-01-x", new, aboutness=about(
              extractionQuality="unavailable", reason="wordless picture book")), True),
+        ("a claim with no role fails",
+         check_aboutness, ref(sidecar_id, new, aboutness=about(
+             subjects=[{"name": "columbus", "quote": "Christopher Columbus was born"}]))
+         , False),
+        ("an unknown role fails",
+         check_aboutness, ref(sidecar_id, new, aboutness=about(
+             subjects=[{"name": "columbus", "role": "vibes", "quote": "Christopher Columbus was born"}]))
+         , False),
+        ("decoration alone cannot answer a content question",
+         check_aboutness, ref(sidecar_id, new, aboutness=about(
+             subjects=[{"name": "swan", "role": "decoration", "quote": "Christopher Columbus was born"}]))
+         , False),
+        ("decoration beside a real subject is fine",
+         check_aboutness, ref(sidecar_id, new, aboutness=about(
+             subjects=[{"name": "columbus", "role": "about", "quote": "Christopher Columbus was born"},
+                       {"name": "swan", "role": "decoration", "quote": "They landed on Hispaniola"}]))
+         , True),
     ]
 
     def unit(ordinal=1, **over):

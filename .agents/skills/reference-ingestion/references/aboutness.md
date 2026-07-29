@@ -15,7 +15,32 @@ That makes four real questions unanswerable from the corpus:
 
 Form tells Homa what good looks like. Aboutness tells her what she **has**. Both ship on every drop. Founder meeting 2026-07-28, tracked as gh#366.
 
-## The law: every claim carries a verbatim span
+## The first law: present is not the same as about
+
+A span proves a thing is **there**. It says nothing about whether the item is **about** it, and those are different failure modes:
+
+- **Fabrication**: claiming what is not there. The span check handles this.
+- **Noise**: claiming everything that is there. The span check makes this *worse*, because anything visible is easy to quote.
+
+The scar is the Fast Forward cover: a photograph of a swan taking flight. Provable, vivid, and completely wrong to tag. If "swan" enters this book's subjects, then "books about swans for a six-year-old" returns a phonics workbook, and the parent who asked stops trusting the answer. One bad hit costs more than ten missing ones, because a search that returns junk gets abandoned.
+
+Recurrence is not the test either, and the same book proves it. "LEVEL E" appears on exactly one page and matters; the swan appears on exactly one page and does not. Ben and Nina appear on 21 and 15 pages and the book is still not about them; they are the cast the exercises are hung on.
+
+The test is **what part the thing plays**. Every entity and subject carries a `role`:
+
+| role | means | searchable as content |
+|---|---|---|
+| `teaches` | the skill or content the item exists to teach | yes |
+| `about` | the topic the content is about | yes |
+| `cast` | recurring characters or names carrying the content | no, only by character search |
+| `identity` | what the item IS: series, level, publisher, edition | no, only by identity search |
+| `decoration` | present, carries no content | never |
+
+The swan is `decoration`. Record it: an image model may one day want to know that this publisher put wildlife photography on a reading-program cover, and information you keep costs nothing while information you drop is gone. It simply never answers a content question.
+
+Ask yourself the parent's question before every claim: **if someone searched for this and got this book, would that be a good result?** If the honest answer is no, the claim is not `teaches` or `about`.
+
+## The second law: every claim carries a verbatim span
 
 A model proposes aboutness; code verifies it. Each claim carries a `quote` (or `evidence` for interpretive claims) copied character-exact from the source text, and `verify-ingestion.py` re-checks it against the text sidecar when one exists.
 
@@ -50,13 +75,14 @@ Add to the ref or cur JSON under `aboutness`:
   "textSidecar": ".cosmo/text/ref-2026-07-28-columbus-biography.txt",
   "textBlobUrl": null,
   "subjects": [
-    { "name": "christopher columbus", "quote": "The Life of Christopher Columbus" },
-    { "name": "age of exploration", "quote": "the great age of exploration" }
+    { "name": "christopher columbus", "role": "about", "quote": "The Life of Christopher Columbus" },
+    { "name": "age of exploration", "role": "about", "quote": "the great age of exploration" }
   ],
   "entities": [
-    { "name": "Christopher Columbus", "kind": "person", "quote": "Christopher Columbus was born in Genoa" },
-    { "name": "Santa Maria", "kind": "object", "quote": "the Santa Maria ran aground" },
-    { "name": "Hispaniola", "kind": "place", "quote": "they landed on Hispaniola" }
+    { "name": "Christopher Columbus", "kind": "person", "role": "about", "quote": "Christopher Columbus was born in Genoa" },
+    { "name": "Santa Maria", "kind": "object", "role": "about", "quote": "the Santa Maria ran aground" },
+    { "name": "Hispaniola", "kind": "place", "role": "about", "quote": "they landed on Hispaniola" },
+    { "name": "compass rose", "kind": "object", "role": "decoration", "quote": "compass rose" }
   ],
   "themes": [
     { "name": "exploration", "evidence": "sailed west across the unknown ocean" },
@@ -78,6 +104,7 @@ Field rules:
 |---|---|
 | `extractionQuality` | `full` (whole item read), `partial` (sampled, say what in `notes`), `unavailable` (plus `reason`) |
 | `subjects` | What the item is **about**, 1 to 5 entries, lowercase, 1 to 4 words. The answer to "what would a parent search for". |
+| `role` | Required on every subject and entity: `teaches`, `about`, `cast`, `identity`, `decoration`. See the first law. |
 | `entities.kind` | `person`, `character`, `place`, `organization`, `animal`, `event`, `object` |
 | `themes` | Interpretive, 0 to 6 entries, lowercase. Each carries `evidence`. |
 | `keyTerms` | Terms that recur and would make the item findable. `occurrences` is a real count, never an estimate. |

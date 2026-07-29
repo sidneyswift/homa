@@ -139,63 +139,82 @@
     "extractionQuality": "full",
     "textSidecar": ".cosmo/text/ref-2026-07-22-fast-forward-student-handbook-e.txt",
     "textBlobUrl": null,
-    "notes": "Spans verify against a sidecar built from BOTH readers. Tesseract alone rendered the stylised cover as 'MET | Pacis | RO READING | HANDBOOK', which is why the cover is re-read by a vision model; the title is now quotable from the text like any other claim, rather than being an identity fact the corpus could not support.",
+    "notes": "Spans verify against a sidecar built from BOTH readers. Tesseract alone rendered the stylised cover as 'MET | Pacis | RO READING | HANDBOOK', which is why the cover is re-read by a vision model; the title is now quotable from the text like any other claim, rather than being an identity fact the corpus could not support. Roles are assigned per the first law: the cover swan is recorded as decoration, and the five recurring children are cast rather than subjects, because the book is about phonics and they are the names its exercises hang on.",
     "subjects": [
       {
         "name": "phonics",
-        "quote": "Phonics/Vocabulary"
+        "quote": "Phonics/Vocabulary",
+        "role": "teaches"
       },
       {
         "name": "sight vocabulary",
-        "quote": "Vocabulary: great, learn, some, work"
+        "quote": "Vocabulary: great, learn, some, work",
+        "role": "teaches"
       },
       {
         "name": "reading comprehension",
-        "quote": "Story Comprehension"
+        "quote": "Story Comprehension",
+        "role": "teaches"
       },
       {
         "name": "reading fluency",
-        "quote": "Fluency: Expression"
+        "quote": "Fluency: Expression",
+        "role": "teaches"
       },
       {
         "name": "word building",
-        "quote": "Use letters from the letter pools to make words"
+        "quote": "Use letters from the letter pools to make words",
+        "role": "teaches"
       },
       {
         "name": "leveled reading program",
-        "quote": "METRO READING Fast Forward! STUDENT HANDBOOK LEVEL E"
+        "quote": "METRO READING Fast Forward! STUDENT HANDBOOK LEVEL E",
+        "role": "identity"
       }
     ],
     "entities": [
       {
         "name": "Patches",
         "kind": "character",
-        "quote": "Unit 6: A House for Patches"
+        "quote": "Unit 6: A House for Patches",
+        "role": "cast"
       },
       {
         "name": "Tasha",
         "kind": "character",
-        "quote": "Tasha"
+        "quote": "Tasha",
+        "role": "cast"
       },
       {
         "name": "Sara",
         "kind": "character",
-        "quote": "Sara wants to be a"
+        "quote": "Sara wants to be a",
+        "role": "cast"
       },
       {
         "name": "Ben",
         "kind": "character",
-        "quote": "Ben is going to sell lemonade"
+        "quote": "Ben is going to sell lemonade",
+        "role": "cast"
       },
       {
         "name": "Nina",
         "kind": "character",
-        "quote": "Nina likes to swim at the"
+        "quote": "Nina likes to swim at the",
+        "role": "cast"
       },
       {
         "name": "Metropolitan Teaching and Learning Company",
         "kind": "organization",
-        "quote": "METROPOLITAN Metro TEACHING and LEARNING"
+        "quote": "METROPOLITAN Metro TEACHING and LEARNING",
+        "role": "identity"
+      },
+      {
+        "name": "swan",
+        "kind": "animal",
+        "role": "decoration",
+        "quote": "METRO READING Fast Forward! STUDENT HANDBOOK LEVEL E",
+        "note": "Cover photograph, read by the vision pass: a white swan taking flight from dark water. Nothing in the book teaches or discusses swans. Recorded so the cover art is not lost to a future image-generation pass, and roled decoration so it can never answer 'books about swans'."
       }
     ],
     "themes": [
