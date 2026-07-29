@@ -605,3 +605,156 @@ Worth deciding rather than discovering: beat 5 is where
 `start_first_making` gets its theme, so skipping it means no making is
 underway when she reaches the reveal, and "One more thing" becomes the
 only chance at something she can keep.
+
+### Walk 004, 2026-07-29, Rachel, the first walk to the end of the arc
+
+Ohio, one child: Ellie, 7, horses and drawing. Same skip path, and
+deliberately the SAME five checklist answers as walk 003 ("getting
+there" on math, phonics and writing, "not yet" on reading aloud,
+"easily" on explaining) so the reveal could be compared word for word
+before and after the fix. First walk to reach beat 10.
+
+**The beat 7 fix, verified against a controlled repeat**
+
+Identical answers, one walk apart:
+
+| | Walk 003 | Walk 004 |
+|---|---|---|
+| The strengths | "Ellie is doing great in math, phonics, and writing" | "her math really stands out ... her phonics and writing look **right on track for her age**" |
+| Her worry | never mentioned | "The place she's actively growing is putting it all together: **reading a whole short book on her own and telling you about it after**. That's her real edge right now." |
+| The anchor | "the **reading** and science questions are still waiting" | "there are more waiting whenever you want to fill in the rest of her map, no rush at all" |
+
+All three failures gone. The copied example did not reappear, the
+middle answers are described as on track rather than as mastery, and
+the one question she answered "not yet" is now the sentence the reveal
+is built around. Beat 7 goes from `-1` back to `+1`.
+
+One residual, smaller and worth watching rather than fixing yet: "she's
+already adding and subtracting small numbers in her head, like 7 plus 2,
+**without needing to count on fingers**". The fingers are an
+embellishment; the question does not mention them and she answered
+"getting there". Same traceability rule, much milder breach.
+
+**Beat 8, the swap, verified and good**
+
+The rehearsal now follows the reveal in the same turn, and it is the
+best stretch of the whole arc. It logged "math, 60 min" and then
+"reading, 20 min" as two receipt chips, reacted specifically ("math in
+the morning, a whole afternoon of horse drawings, and Charlotte's Web
+together in the evening"), asked the wind-down question, and closed the
+loop on the hour she gave: "Since you usually wrap up around 3, want me
+to check in with you around then each day?" Accepted, and confirmed as
+weekdays around 3.
+
+That is the beat the free period rests on, and it now sits where a busy
+parent is still present.
+
+**Beat 9 never happened, and the swap is why**
+
+Homa went from the rehearsal straight to "That's a good place to leave
+it for today". `open_planner` was never called. The planner that was
+added to "One more thing" this session has still never been seen.
+
+The cause is in this file, not in the model. "When to stop" says:
+
+> She has a scored report and one rehearsed loop. That is a complete
+> first sitting; anything after it is a bonus, not a requirement.
+
+Before the swap the rehearsal was the LAST beat, so that condition only
+came true at the end of the arc and "One more thing" always ran ahead
+of it. After the swap the condition comes true one beat earlier, and it
+explicitly labels everything past it optional. The reorder moved the
+finish line without moving the rule.
+
+Fixed: the stop condition now requires the report, the rehearsed loop
+AND the single follow-on beat, and carries this walk as its reason plus
+an instruction to re-check it if these beats are ever reordered again.
+Not yet re-walked, so the planner remains **shipped and unseen**, now
+for the second walk running.
+
+The general shape, which is the same one this document keeps finding:
+a change that is right on its own terms broke a rule somewhere else
+that depended on the old order. Wave 1 item 3 was a good change and it
+silently disabled wave 1 item 2.
+
+**A new failure, and the worst-looking one yet**
+
+Homa's entire reply to the setup cards was:
+
+> React briefly and hand it straight to her kids since the app is
+> already handling the child card.
+
+That is her instruction to herself, delivered to Rachel as the message,
+on the first screen after payment. It names "the app" and "the child
+card", and calls Rachel's children "her kids" in the third person, all
+of which the voice rules forbid outright.
+
+What is known: the sentence is not in the codebase (grepped), so the
+model generated it rather than a hidden directive leaking through. The
+same beat produced correct warm lines in walks 002 and 003 ("Good to
+meet you, Rachel. Ohio it is." and "Good to meet you, Rachel! Ohio
+noted."), so this is intermittent, n=1, and NOT reproduced.
+
+What is not known: whether the beat 4 rewrite shipped earlier this
+session raised the odds. That rewrite added several "the APP already
+did X" sentences next to this beat, and the leaked line is a paraphrase
+of exactly that material. Plausible and unproven.
+
+Filed as gh#415. It belongs to the same family as the silent-turn
+failure documented in `onboarding-mode.ts`, whose stated repair is a
+deterministic guard plus an eval driving the exact sequence, not more
+prose.
+
+**Beat 5 fired this time, and still no making**
+
+With the same single child, Homa asked a real question about horses
+("Does she get to ride at all, or is it mostly drawing them and pretend
+play with horses right now?") and got a rich answer back: rides weekly,
+draws constantly, stacks of paper everywhere. She called `remember` and
+then `start_checklist`.
+
+She did NOT call `start_first_making`, though beat 5 says that answer
+"is your cue" and to start it "at this boundary, before the questions
+begin". So the sitting ended with a report and no object. Pass
+condition 5 is met by the report alone, but the strongest available
+version of it, a page made from her own words, has now not fired in any
+walk. Two beats in a row that name a live tool and do not reach it.
+
+Tracked as gh#416, which also names the thing to rule out first: a
+dynamic tool that resolves on `turn.started` vanishes on a cold isolate
+(see the `dynamic-tools-must-use-step-started` scar), and a tool that is
+absent from the turn looks exactly like a model declining to call one.
+Check presence before rewriting any prose about it.
+
+**Pass conditions, first full-arc scoring**
+
+| # | Condition | Result |
+|---|---|---|
+| 1 | No beat scores -1 | **FAIL**, the setup reply leaked an instruction |
+| 2 | No two consecutive 0 beats | pass |
+| 3 | No stretch over 90s without her acting | pass, longest turn 28s |
+| 4 | No single wait over 8s with nothing to do | **FAIL**, several 17 to 28s turns with an empty screen after the cards end |
+| 5 | Something she can keep before the paywall | pass, the scored report |
+| 6 | One capability she was not told about | **FAIL**, the planner never opened and no making started |
+| 7 | Last beat names something specific | pass, "around 3 on weekdays", "more of Ellie's questions" |
+
+**Beat scores, the whole arc**
+
+| # | Beat | Feels | Who acts | Need |
+|---|---|---|---|---|
+| 1 | Open | +1 | robot | need |
+| 2 | Setup cards | +1 | human | need |
+| 3 | React once | **-1** | robot | nice |
+| 4 | Meet the family | +1 | robot | need |
+| 5 | Go deep with one | +1 | human | need |
+| 6 | The questions | 0 | human | need |
+| 7 | The reveal | +1 | robot | need |
+| 8 | The rehearsal | +1 | human | need |
+| 9 | One more thing | did not run | robot | nice |
+| 10 | A place to stop | +1 | robot | nice |
+
+Net +5 with one beat missing entirely. The arc is in much better shape
+than walk 002 suggested: the two beats that were broken are fixed and
+the two beats that were 0 are now +1. What is left is not wording. It
+is that two live capabilities, the planner and the first making, are
+named in the skill and still never reached.
