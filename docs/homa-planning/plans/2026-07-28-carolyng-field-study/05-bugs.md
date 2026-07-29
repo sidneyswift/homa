@@ -127,3 +127,41 @@ the checker is testing the wrong artifact (screen vs print, the known scar) or
 the wrong assertions, the phrasing overclaims. F6 leg 1 and 2 own the fix; the
 honesty rule (claim success only against replayed complaints) can ship
 independently and quickly.
+
+## Post-council prod findings (2026-07-28, during implementation)
+
+Three diagnoses in this document were wrong, and the corrections matter
+more than the originals. All three came from prod data and the
+`agent_tool_calls` record, not from reading code.
+
+**FB-7 root cause found, and it is not a render failure (gh#345, PR #371).**
+`create_printable` was never slow or crashing: it was **absent from the
+model's tool list**. All six dynamic tools resolved on `turn.started`,
+which eve replays on later steps through a step registry that lives in
+one lambda isolate's memory. Any step served by a different isolate
+dropped the tool silently. It is chronic and fleet-wide, not a
+07-26/27 window: prod logs show it nightly across `create_printable`,
+`generate_image`, `ask_for_details`, `ask_user_questions`,
+`start_checklist`, `start_first_making`. Fixed with `step.started` plus
+a CI guard. **Consequence for the rest of this study:** an unknown share
+of the "where is it?" instances (FB-4) and the long revision loops (B2)
+may be this bug rather than layout quality.
+
+**FB-11 refuted as diagnosed (gh#375).** The 07-23 call was in
+`call_transcripts` with its embedding populated at 16:01:20Z; the SMS
+denial came at 16:50:37Z, 49 minutes later. Homa made five `recall`
+attempts and the transcript was returned by none. Recall over calls is
+lexical full-text search, and the 07-23 transcript is the one of her six
+that never says the word "call". The semantic fallback that should have
+caught it selects across all scopes and applies its limit before
+filtering to the requested scope. Faster syncing (gh#278) would not have
+prevented this.
+
+**B2's scale was mis-stated (gh#348).** Fleet convergence data says
+single worksheets are already good (143 chains, median 1 version, p90 3
+for worksheets). The pain is packets (p90 60), flashcards (p90 11), and
+games (max 20), and Carolyng authored 8 of the fleet's 9 packet chains.
+The genuinely fleet-wide number is different and larger: **only 41% of
+all revision chains ever reach `final`**, and the rest of the fleet
+(42%) is no better than she is (36%). Draft stranding, not layout, is
+the universal failure.
