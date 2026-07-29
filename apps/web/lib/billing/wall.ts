@@ -549,6 +549,63 @@ export async function familyAccountCheckout(familyId: string): Promise<WallCheck
   return (await familyAccountGate(familyId)).checkout;
 }
 
+/** What the settings plan card needs to tell the truth (gh#412). */
+export interface FamilyPlanState {
+  tier: PlanTier;
+  /** Checkout for the tier that adds Homa reaching her, or null when
+   *  the Plus payment links are not configured in this environment. */
+  plusCheckout: TierCheckout | null;
+  /** True once she has a Stripe customer, which is what the portal needs. */
+  hasBillingRelationship: boolean;
+}
+
+/**
+ * familyPlanState(familyId): her plan, and the way to change it.
+ *
+ * Deliberately NOT familyWallCheckout. That one answers "should a door
+ * be closed in front of her", so it returns null for an exempt family,
+ * a paying family, and a flags-off environment alike. Settings is not a
+ * door: a parent looking at her own account should see which plan she is
+ * on whether or not anything is currently being withheld.
+ *
+ * This exists because the channel gate's denial line tells her she can
+ * add Homa Plus "in your settings", and until now settings had no plan
+ * anything: the only billing control was a portal link shown to families
+ * with a Stripe customer, which is 1 of 82 (gh#412). Telling a parent to
+ * go somewhere that has nothing for her is worse than saying no.
+ */
+export async function familyPlanState(familyId: string): Promise<FamilyPlanState> {
+  const sql = mapDb();
+  try {
+    const rows = await sql<{ plan_tier: string | null; email: string | null; stripe_customer_id: string | null }[]>`
+      select plan_tier, email, stripe_customer_id
+      from public.families
+      where id = ${familyId}
+    `;
+    const row = rows[0];
+    const links = tierPaymentLinkBases("plus");
+    return {
+      tier: isPlanTier(row?.plan_tier) ? row.plan_tier : "regular",
+      plusCheckout: links
+        ? {
+            monthlyUrl: checkoutUrl(links.monthly, familyId, row?.email ?? null),
+            annualUrl: links.annual
+              ? checkoutUrl(links.annual, familyId, row?.email ?? null)
+              : null,
+          }
+        : null,
+      hasBillingRelationship: Boolean(row?.stripe_customer_id),
+    };
+  } catch (error) {
+    // Settings must never fail to render because billing had a bad day.
+    console.error(
+      "familyPlanState failed:",
+      error instanceof Error ? error.message : "unknown",
+    );
+    return { tier: "regular", plusCheckout: null, hasBillingRelationship: false };
+  }
+}
+
 /**
  * recordFamilySubscription(familyId, sub): mirrors a verified checkout's
  * subscription onto the families row BY FAMILY ID. The webhook's
