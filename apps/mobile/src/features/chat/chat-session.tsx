@@ -748,7 +748,7 @@ export function ChatSession({
           padding: space.md,
           borderTopWidth: 1,
           borderTopColor: colors.borderSubtle,
-          backgroundColor: colors.card,
+          backgroundColor: colors.page,
         }}
       >
         <TextInput
@@ -909,7 +909,7 @@ function NewChatRow({
   return (
     <View
       style={{
-        backgroundColor: colors.card,
+        backgroundColor: colors.page,
         paddingBottom: space.sm,
         alignItems: "center",
       }}
