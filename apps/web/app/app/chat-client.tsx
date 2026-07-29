@@ -25,6 +25,9 @@ import {
   latestChecklistRequest,
   latestReportReveal,
 } from "./onboarding-cards";
+import { VoiceMode } from "./voice-mode";
+import { VoiceModeButton } from "./voice-mode-button";
+import { transcriptAsChatMessage } from "./voice-transcript";
 import { DetailCard, latestDetailRequest, NO_STYLES_SUMMARY } from "./detail-card";
 import { ChecklistTakeover } from "./checklist-takeover";
 import { formatHiddenDirective } from "../../lib/onboarding/directives";
@@ -55,6 +58,7 @@ import {
   type ArchivedMessage,
 } from "./chat-storage";
 import {
+  composerPrimaryAction,
   appendPreparedChatSendToQueue,
   flushChatQueue,
   focusChatComposerInput,
@@ -817,6 +821,9 @@ export function ChatClient({
   // time the tag ever appears, then only on tap. After first paint on
   // purpose (no SSR mismatch, no setState-in-effect cascade).
   const [filingHintOpen, setFilingHintOpen] = useState(false);
+  /** The in-app voice conversation (#283). Mounted only while open so the
+   * socket and the microphone exist exactly as long as she is talking. */
+  const [voiceOpen, setVoiceOpen] = useState(false);
   useEffect(() => {
     if (!focusChildName) return;
     const frame = requestAnimationFrame(() => {
@@ -2097,6 +2104,24 @@ export function ChatClient({
             showComposer ? "" : "hidden"
           }`}
         >
+          {voiceOpen ? (
+            // Above the composer, not over it: she can still see the thread
+            // she is talking about, and the transcript reads in the same
+            // column the conversation will land in.
+            <div className="mb-2">
+              <VoiceMode
+                onClose={(transcript) => {
+                  setVoiceOpen(false);
+                  const message = transcriptAsChatMessage(transcript);
+                  // A session she opened and closed without speaking leaves
+                  // no trace, rather than an empty note to wonder about.
+                  if (message) {
+                    sendMessageRef.current?.(message, { kind: "card_answer" });
+                  }
+                }}
+              />
+            </div>
+          ) : null}
           {showPromptSuggestionRail ? (
             <PromptSuggestionRail
               phase={promptSuggestionPhase}
@@ -2160,7 +2185,7 @@ export function ChatClient({
               binder. Change kids at the top right.
             </p>
           ) : null}
-          <div className="mt-0.5 flex items-center gap-0.5">
+          <div className="relative mt-0.5 flex items-center gap-0.5">
             <AttachMenuButton
               onFiles={attachments.addFiles}
               disabled={!familyId}
@@ -2211,6 +2236,15 @@ export function ChatClient({
                   </button>
                 ) : null}
               </>
+            ) : composerPrimaryAction({
+                draft,
+                readyAttachments: attachments.readyCount,
+              }) === "voice" ? (
+              // Empty composer: the primary action is starting a voice
+              // conversation, not a Send with nothing to send (founder
+              // direction 2026-07-29). It swaps back to Send on the first
+              // character, so the two never compete for the same tap.
+              <VoiceModeButton onStart={() => setVoiceOpen(true)} />
             ) : (
               <button
                 type="submit"

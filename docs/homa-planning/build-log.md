@@ -67,6 +67,31 @@ its `period` enum, which described the retired evidence-report concept;
 the row now describes the pack button. The evidence-report feature
 itself stays a non-goal pending gh#317.
 
+## 2026-07-29 · Founder ruling: Homa's in-app voice is Marin
+
+Ruling `voice-marin`, registered in `journeys/10-reconciliation.md` §5. The
+founder listened and approved. It answers the last open decision blocking
+in-app voice (#286), which was deliberately refused from a document on
+2026-07-27 on the grounds that a voice is not a thing you pick by reading.
+
+`marin` is OpenAI's female realtime voice; `cedar` is the male one. The docs
+list the pair as recommended for gpt-realtime and describe them only as
+"professional and clear" and "natural and conversational", never by gender,
+so the choice was made on a listen rather than on the descriptor.
+
+One decision recorded without a ruling, because it is a consequence rather
+than a choice: **Homa now has two voices.** The browser speaks with Marin
+through OpenAI; the phone speaks with Telnyx's "Callie - Encourager"
+(`scripts/telnyx-provision.mts:488`) and cannot use Marin, because each
+vendor hosts its own. A parent who both calls and uses the app hears two
+people. That is accepted for now on the grounds that in-app voice is new and
+the phone is not, so the cheaper change is the one nobody is used to yet. It
+resolves on its own only if the phone moves to `gpt-realtime-2.1`, which is
+the plan's Phase 3 and still gated on the Phase 2 numbers. Until then it is
+a known inconsistency rather than an oversight, and it is worth re-reading
+before the phone rebuild is decided: "both voices should be one person" is a
+reason to do Phase 3 that the cost model alone does not capture.
+
 ## 2026-07-28 · Founder ruling: the dispatched-material gate is code, not a habit
 
 Ruling `voice-dispatch-sandbox-gate`, registered in
