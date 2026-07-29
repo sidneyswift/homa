@@ -67,10 +67,68 @@ lands. If a future gateway version passes 500 here instead, the classifier
 would silently start calling refusals transient and the retry decay would
 return. That is the regression to watch.
 
-## Not measured, and why
+## Does a reference image clear a refusal? No, not on gpt-image-2
 
-Whether a reference image clears a refused character. That needs a
-reference image of the character, which raises both a provider-ToS
-question (structuring a request so moderation does not recognize it) and
-an IP-exposure question that moves from the provider to Homa. Open for a
-founder ruling in gh#449 rather than settled here.
+Founder direction, same day: test the working recipe, a Google image of
+the character fed back as a reference with the franchise unnamed. Run as a
+2x2 so the active ingredient is isolated. All four cells refuse.
+
+| | names the franchise | does not name it |
+|---|---|---|
+| **no reference** | REFUSED | REFUSED (generic description) |
+| **with reference** | REFUSED (x2) | REFUSED (x2) |
+
+The reference was canonical Pikachu official artwork. SerpAPI was not used
+(`SERPAPI_API_KEY` is Sensitive in Vercel and absent locally); the
+provenance of the reference is irrelevant to the hypothesis, only that it
+is an accurate likeness. Two attempts per reference cell, consistent.
+
+**So the name omission does nothing, and neither does the reference.**
+gpt-image-2 moderates the input image and the output, not just the words.
+Where the recipe has worked in practice, it was on a different model or on
+a character (Kirby, Paw Patrol) that needs no tactic at all.
+
+## The lever that does work: a different model
+
+Same plainly-named Pikachu coloring-page prompt, no reference, across
+every image model on the gateway worth trying:
+
+| model | outcome |
+|---|---|
+| `prodia/flux-fast-schnell` | **accepted**, faithful, 1s |
+| `google/imagen-4.0-fast-generate-001` | **accepted**, faithful and cleaner line art |
+| `openai/gpt-image-2` | refused, safety system |
+| `bytedance/seedream-5.0-pro` | refused, "output image may be related to copyright restrictions" |
+| `xai/grok-imagine-image` | refused, content moderation |
+| `recraft/recraft-v4.1` | error, invalid JSON response from vendor |
+
+This is a per-vendor policy difference, reachable today through the
+existing `HOMA_IMAGE_MODEL` env swap. It is not a circumvention of
+anyone's control: each vendor is answering for itself.
+
+## Why NOT to swap the default model
+
+Measured, because a wholesale swap looks tempting and would break two
+shipped features:
+
+| | `size` / shape control | image references |
+|---|---|---|
+| `google/imagen-4.0-fast` | rejects Homa's ratios ("Invalid aspect ratio, 2:3") and does not accept `size` at all | **fails**: routed to an edit endpoint, "No uri or raw bytes are provided" |
+| `prodia/flux-fast-schnell` | `aspectRatio` works | accepted (whether it honors them needs a fidelity check) |
+
+Fleet anchors and the draw-the-child-from-their-photo feature both depend
+on image references, and `SHAPE_SIZE` passes `size` for all five shapes.
+Imagen cannot serve as the default without losing both.
+
+**Recommended shape: a policy-triggered fallback, not a swap.** The
+classifier from PR #450 is already the hook: on `policy`, retry once on a
+permissive model, and keep anchors, child photos, and shape control on
+gpt-image-2. Narrow, flag-gateable, and it leaves the default path alone.
+
+## The part a model swap does not solve
+
+The provider filter was never Homa's legal protection; it was OpenAI
+limiting OpenAI's exposure. A vendor that says yes changes the vendor's
+posture, not Homa's. Whether Homa may produce and sell faithful
+copyrighted-character pages is unchanged by any of the above and remains
+open in gh#449 for a founder ruling with counsel.
