@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 import { KIND_LABELS, subjectLabel, type BinderMaterial } from "../../../lib/materials/binder";
+import { VersionRail } from "./version-rail";
 
 /**
  * The Binder item detail overlay: a bigger look at the real preview plus
@@ -201,6 +202,8 @@ export function MaterialDetailOverlay({
         >
           {material.pageCount > 1 ? `Print all ${material.pageCount} pages` : "Print it"}
         </a>
+
+        <VersionRail materialId={material.id} />
       </div>
     </div>
   );
