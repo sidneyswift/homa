@@ -7,12 +7,16 @@ import { composeStatePack, verifiedMonthYear } from "../../../lib/compliance/pac
 import { emitMapEvent } from "../../../lib/map/events";
 import { getStateRequirementsDetail } from "../../../lib/map/state-requirements";
 import { toBinderMaterials, scopedToViewContext } from "../../../lib/materials/binder";
-import { findMaterialsCaller } from "../../../lib/materials/library";
+import {
+  findInProgressMaterialsCaller,
+  findMaterialsCaller,
+} from "../../../lib/materials/library";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import { effectiveTimeZone } from "../../../lib/time-zone";
 import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../../lib/view-context";
 import { PageColumn } from "../../../components/dashboard/page-column";
 import { BinderView } from "./binder-view";
+import { InProgressShelf } from "./in-progress-shelf";
 import { StatePackCard } from "./state-pack-card";
 
 /**
@@ -52,6 +56,19 @@ export default async function BinderPage() {
   });
   const binderMaterials = scopedToViewContext(
     toBinderMaterials(materials, children),
+    viewContext,
+  );
+
+  // Everything she started and never kept (gh#197). A failure to load
+  // this must never take the binder down with it: the finals are the
+  // page's job, this shelf is the recovery.
+  const inProgress = await findInProgressMaterialsCaller(
+    supabase,
+    family.id,
+    MAX_FINAL_MATERIALS,
+  ).catch(() => []);
+  const inProgressMaterials = scopedToViewContext(
+    toBinderMaterials(inProgress, children),
     viewContext,
   );
 
@@ -117,6 +134,7 @@ export default async function BinderPage() {
           </section>
         )}
       </div>
+      <InProgressShelf materials={inProgressMaterials} />
       <BinderView
         materials={binderMaterials}
         scopeChildName={focusChild?.name ?? null}
