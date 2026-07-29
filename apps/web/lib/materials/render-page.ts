@@ -130,6 +130,14 @@ export interface RenderedPrintable {
   pageJpegs: Buffer[];
   /** True page count of the pdf itself (uncapped). */
   pageCount: number;
+  /** Which path produced pageJpegs. "pdfjs-raster" rasterizes the shipped
+   * pdf, so the image and the pdf agree; "screenshot-fallback" re-renders
+   * the page in the browser and its own log warns the previews may not
+   * match. Recorded because a pair built from fallback previews is weaker
+   * evidence than one built from the pdf (gh#328 render-pair archiver). */
+  renderer: "pdfjs-raster" | "screenshot-fallback";
+  /** The browser that drew the pdf, when the driver reports one. */
+  rendererVersion: string | null;
 }
 
 export interface PrintableRenderPolicy {
@@ -289,6 +297,7 @@ export async function renderPrintableHtml(
     // it logs loudly because previews are no longer proof of the PDF.
     let pageJpegs: Buffer[];
     let pageCount: number;
+    let renderer: RenderedPrintable["renderer"] = "pdfjs-raster";
     try {
       ({ pageJpegs, pageCount } = await rasterizePdfToJpegs(
         pdf,
@@ -303,8 +312,10 @@ export async function renderPrintableHtml(
         error instanceof Error ? error.message : "unknown",
       );
       ({ pageJpegs, pageCount } = await screenshotPagesPrintEmulated(page));
+      renderer = "screenshot-fallback";
     }
-    return { pdf, previewJpeg: pageJpegs[0], pageJpegs, pageCount };
+    const rendererVersion = await browser.version().catch(() => null);
+    return { pdf, previewJpeg: pageJpegs[0], pageJpegs, pageCount, renderer, rendererVersion };
   } finally {
     await page.close().catch(() => {
       // A page that will not close is abandoned with its browser.

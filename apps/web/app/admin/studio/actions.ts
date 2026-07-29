@@ -44,8 +44,9 @@ export interface StudioFeedbackState {
   error: string | null;
 }
 
-/** Saves the founder's verdict on one test run (latest wins). The
- * improvement packet (Prompt for agent on the run page) carries it out. */
+/** Saves the founder's verdict on one test run. The run row keeps the
+ * latest for the improvement packet; every verdict is also appended to the
+ * history table, pinned to the material version it judged (D5, gh#328). */
 export async function saveStudioRunFeedbackAction(
   runId: string,
   tags: string[],
@@ -59,7 +60,11 @@ export async function saveStudioRunFeedbackAction(
   const problem = studioFeedbackProblem(feedback, tags);
   if (problem) return { error: problem };
 
-  const saved = await saveStudioRunFeedback(runId, { feedback, tags });
+  const saved = await saveStudioRunFeedback(runId, {
+    feedback,
+    tags,
+    leftBy: founder.email,
+  });
   if (!saved) return { error: "That run's row is gone. Reload the page." };
   revalidatePath("/admin/studio");
   revalidatePath(`/admin/studio/runs/${runId}`);
