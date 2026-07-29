@@ -895,3 +895,65 @@ calling it settled.
 | Walk 004 | yes |
 | Walk 005 | no |
 | Walk 006, after the fix | yes |
+| Walk 007, after the fix | yes |
+
+### Walk 007, 2026-07-29, Rachel, the week is real
+
+Same setup and the same five answers, run to verify the month now builds
+at scoring. Spec: `2026-07-29-onboarding-week-fills.md`. Founder ruling:
+`onboarding-lesson-per-subject`.
+
+**Beat 9 has something on it now**
+
+> I also went ahead and built Ellie's first month plan from her answers.
+> It's open beside our chat, four weeks of small daily pieces in reading,
+> math, and phonics, and **week two even leans on her love of horses for
+> the math and reading practice.**
+
+The panel showed a dated, checkable week: "THIS WEEK · JUL 27 TO 31",
+"Ellie's week", "week 1 of 4", Monday literacy, Wednesday math marked
+TODAY, Friday phonics, free days in between, and a line explaining that
+check-offs feed the next report. Walk 005 saw "There's no month set up
+for Ellie yet" in the same slot.
+
+The activities are built from her real answers: Monday's literacy piece
+aims at "reading a short book out loud", which is the exact question she
+answered "not yet".
+
+**And the wow screen was ungrammatical**
+
+Wednesday read: "Ten minutes a day of **adding and subtracts** small
+numbers in their head."
+
+The activity templates splice a bank statement in after "ten minutes a
+day of...", and the conjugator converted only the first word. Ten of the
+bank's 224 statements open with a verb series and every one of them was
+broken, plus "opens" shipped as "openning".
+
+Fixed, with nine tests in `packages/core/src/map/plan-grammar.test.ts`
+generating the real activities across every subject, age band and
+interest context, wired into `check:map`. Five statements are left in a
+shape no pattern can safely read, filed as gh#440 for rewording, and
+held in the test as a named allowlist so a new one fails loudly.
+
+**A correction worth keeping**
+
+The first probe of this bug used a hand-copied simplification of
+`gerundize` rather than the real one, and it reported five defects that
+do not exist ("uses" to "useing", "sees" to "seing", and others the real
+function already handles). Re-running against the actual implementation
+gave a different and much smaller list.
+
+Mirroring a function to test it tests the mirror. Probe through the
+public API, or export the real thing.
+
+**Beat scores, updated**
+
+| # | Beat | Feels | Who acts | Need |
+|---|---|---|---|---|
+| 9 | One more thing | **+1** | robot | nice |
+
+Beat 9 moves from "did not run" to +1. It is the first beat in the arc
+that shows her the product is a system holding her year rather than a
+conversation, and it now does that with a real, dated, personalized
+week rather than an empty grid.
