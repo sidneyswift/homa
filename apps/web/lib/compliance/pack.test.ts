@@ -13,6 +13,8 @@ import {
 import {
   composeStatePack,
   deriveDuties,
+  isOfficialSource,
+  officialUrl,
   derivePathwayDivergence,
   prefillBirthdate,
   verifiedMonthYear,
@@ -413,6 +415,45 @@ describe("per-pathway truth (the default pathway carries its own values)", () =>
       assert.ok(
         !/\ball pathways\b/i.test(pack.html),
         `${code} claims to cover all pathways`,
+      );
+    }
+  });
+});
+
+describe("source honesty (2026-07-29 citation audit)", () => {
+  it("classifies publishers by who published them", () => {
+    assert.ok(isOfficialSource("https://www.azleg.gov/ars/15/00802.htm"));
+    assert.ok(isOfficialSource("https://alison.legislature.state.al.us/x"));
+    assert.ok(!isOfficialSource("https://law.justia.com/codes/x"));
+    assert.ok(!isOfficialSource("https://hslda.org/post/x"));
+    assert.ok(!isOfficialSource("not a url"));
+  });
+
+  it("never dresses a legal publisher as the state's own law", () => {
+    // Mississippi's statutes are cited to Justia; the pack may show
+    // them, but not under the heading that means "the state published
+    // this".
+    const pack = compose("MS");
+    assert.ok(pack.html.includes("Where to read them elsewhere"));
+    assert.ok(
+      pack.html.includes("rather than the state"),
+      "secondary sources must be named as secondary",
+    );
+  });
+
+  it("keeps a state with only official sources free of the caveat", () => {
+    const pack = compose("NY");
+    assert.ok(!pack.html.includes("Where to read them elsewhere"));
+  });
+
+  it("only ever points the file-here line at an official destination", () => {
+    for (const code of ALL_CODES) {
+      const detail = loadDetail(code);
+      const url = officialUrl(detail);
+      if (url === null) continue;
+      assert.ok(
+        isOfficialSource(url),
+        `${code} sends families to a non-official channel: ${url}`,
       );
     }
   });

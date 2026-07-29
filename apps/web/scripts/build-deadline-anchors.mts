@@ -249,24 +249,21 @@ async function main(): Promise<void> {
       }
       continue;
     }
-    // Union the verified samples: each anchor already passed
-    // verification on its own, so more of them is strictly more
-    // complete. Identity is the calendar value, so two samples that
-    // found the same date with different wording count once.
-    const seen = new Set<string>();
-    const merged = [];
-    for (const entry of verdicts) {
-      for (const anchor of entry.anchors) {
-        const key = `${anchor.month}|${anchor.day}|${anchor.withinDays}`;
-        if (seen.has(key)) continue;
-        seen.add(key);
-        merged.push(anchor);
-      }
-    }
-    const verdict = {
-      ok: true as const,
-      entry: { ...verdicts[0], anchors: merged.slice(0, 4) },
-    };
+    // Keep the RICHEST verified sample rather than unioning anchors.
+    // Union needed an identity to dedupe on, and every identity built
+    // from calendar values collapses date-less anchors together: DC
+    // proposes "Before instruction begins" AND "renewed annually before
+    // each school year", both with no month, day, or count, so a
+    // null|null|null key silently dropped the second rule (caught by
+    // reading a production pack, 2026-07-29). Picking one whole verified
+    // sample keeps each sample internally coherent, needs no identity at
+    // all, and still buys the completeness the sampling exists for: the
+    // California run that found both ends of its October window beats
+    // the run that found only the opening date.
+    const richest = verdicts.reduce((best, entry) =>
+      entry.anchors.length > best.anchors.length ? entry : best,
+    );
+    const verdict = { ok: true as const, entry: richest };
     accepted.push(verdict.entry);
     console.log(
       `  ${state.code}: ${verdict.entry.kind}, ${verdict.entry.anchors.length} anchor(s): ${verdict.entry.anchors.map((a) => a.label).join(" | ")}`,

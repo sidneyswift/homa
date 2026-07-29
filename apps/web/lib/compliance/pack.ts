@@ -338,6 +338,32 @@ export function deriveDuties(detail: StateRequirementsDetail): Duties {
   };
 }
 
+/**
+ * Whether a citation destination is the state's own publication (or
+ * another government body's) rather than a legal publisher or an
+ * advocacy organization. Domain-based on purpose: it is a claim about
+ * WHO published the page, which a hostname answers honestly, and never
+ * a claim about whether the page is correct, which it cannot.
+ *
+ * Verified against all 355 shipped citations on 2026-07-29: 281
+ * official, 74 secondary (Justia 41, HSLDA 5, FindLaw 5, OSCN 4, and a
+ * tail of public.law mirrors, court aggregators, and state homeschool
+ * associations).
+ */
+export function isOfficialSource(url: string): boolean {
+  let host: string;
+  try {
+    host = new URL(url).hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return false;
+  }
+  if (host.endsWith(".gov") || host.includes(".gov.")) return true;
+  // State legislature and revisor hosts that predate .gov adoption.
+  if (/(^|\.)(leg|legis|legislature|revisor|ilga|oscn)\./.test(host)) return true;
+  if (host.endsWith(".state.al.us") || host.endsWith(".us")) return true;
+  return false;
+}
+
 /** DOE -> state page -> wizard: the link the pack prints wherever it
  * tells the parent to confirm or file (D3, D12). The state education
  * department leads because it is the only genuinely official channel;
@@ -346,7 +372,13 @@ export function deriveDuties(detail: StateRequirementsDetail): Duties {
  * third-party walkthrough must never wear that label. Every reviewed
  * snapshot carries doe_url today, so the fallbacks are defensive. */
 export function officialUrl(detail: StateRequirementsDetail): string | null {
-  return detail.doeUrl ?? detail.sourcePageUrl ?? detail.wizardUrl ?? null;
+  // Every candidate is filtered through isOfficialSource, so the line
+  // that tells a family where to confirm or file can never fall back to
+  // a third-party page. All 51 reviewed snapshots carry a doe_url on a
+  // state domain, which makes the fallbacks defensive rather than load
+  // bearing, and that is exactly how they should stay.
+  const candidates = [detail.doeUrl, detail.sourcePageUrl, detail.wizardUrl];
+  return candidates.find((url) => url !== null && isOfficialSource(url)) ?? null;
 }
 
 function variesLine(detail: StateRequirementsDetail): string {
@@ -678,14 +710,44 @@ function sourcesPage(detail: StateRequirementsDetail, duties: Duties): string {
   const citations = dedupeCitationsByUrl(
     detail.citations.filter((citation) => citation.sourceType !== "case_law"),
   );
-  const rows = citations
-    .map(
-      (citation) =>
-        `<li><span class="sp-cite-label">${escapeHtml(citation.label)}</span><span class="sp-mono sp-cite-url">${escapeHtml(citation.url)}</span></li>`,
-    )
-    .join("\n");
+  // Official first, secondary named as secondary: an audit of all 355
+  // shipped citations (2026-07-29) found 74 pointing at commercial or
+  // advocacy sites, Justia alone 41, every one of them printed under a
+  // statute label as though it were the state's own code. Both kinds
+  // are worth giving a parent; presenting them as the same thing is
+  // what a district reader would rightly object to.
+  const official = citations.filter((citation) => isOfficialSource(citation.url));
+  const secondary = citations.filter((citation) => !isOfficialSource(citation.url));
+  const citeList = (list: typeof citations) =>
+    list
+      .map(
+        (citation) =>
+          `<li><span class="sp-cite-label">${escapeHtml(citation.label)}</span><span class="sp-mono sp-cite-url">${escapeHtml(citation.url)}</span></li>`,
+      )
+      .join("\n");
+  const rows =
+    secondary.length === 0
+      ? citeList(official)
+      : `${official.length > 0 ? citeList(official) : ""}`;
+  const secondaryBlock =
+    secondary.length > 0
+      ? `<section class="sp-pathways">
+  <p class="sp-section-label">Where to read them elsewhere</p>
+  <p class="sp-row-sub">${escapeHtml(detail.stateName)}'s own site does not publish every one of these, so the source below is a legal publisher or a homeschool organization rather than the state. Useful, and not the official text.</p>
+  <ul class="sp-cites">
+${citeList(secondary)}
+  </ul>
+</section>`
+      : "";
+  // Six states publish their primary statute only through a legal
+  // publisher (AR, GA, MS, NM, TN, WY; MS's is a paywalled LexisNexis
+  // container URL). The statute is still named, and the link moves to
+  // the secondary block rather than standing beside "the primary
+  // statute is" as if the state had published it.
+  const primaryUrlOfficial =
+    detail.statuteUrl !== null && isOfficialSource(detail.statuteUrl);
   const primary = detail.primaryStatute
-    ? `<p class="sp-body">The primary statute is <strong>${escapeHtml(detail.primaryStatute)}</strong>${detail.statuteUrl ? ` (<span class="sp-mono">${escapeHtml(detail.statuteUrl)}</span>)` : ""}.</p>`
+    ? `<p class="sp-body">The primary statute is <strong>${escapeHtml(detail.primaryStatute)}</strong>${primaryUrlOfficial ? ` (<span class="sp-mono">${escapeHtml(detail.statuteUrl as string)}</span>)` : ""}.</p>`
     : "";
   const others = detail.pathways.filter((pathway) => !pathway.isDefault);
   const otherRows = others
@@ -702,7 +764,8 @@ function sourcesPage(detail: StateRequirementsDetail, duties: Duties): string {
     "Every rule in this pack traces to a published source you can read yourself.",
   )}
 ${primary}
-${rows ? `<ul class="sp-cites">\n${rows}\n</ul>` : ""}
+${rows ? `${secondary.length > 0 ? `<p class="sp-section-label">${escapeHtml(detail.stateName)}'s own published law</p>` : ""}<ul class="sp-cites">\n${rows}\n</ul>` : ""}
+${secondaryBlock}
 ${
   others.length > 0
     ? `<section class="sp-pathways">
