@@ -87,6 +87,10 @@ loads:
   page, never on the child's page. Upside-down at the bottom was allowed
   here until 2026-07-28 and is not: it printed readable on the sheet the
   child works on, and a parent had to ask for it to be moved (gh#346).
+  After moving the key off the child's page, redistribute the band it
+  vacated into the remaining content (more rows, bigger practice items,
+  more generous spacing); never leave it empty (gh#349, the recurring
+  blank-bottom page).
 - Open response, never bubble grids. No standardized-test answer boxes,
   no fill-in-the-bubble strips. The child writes the answer.
 - The page itself can be the interactive experience: color-by-answer
@@ -499,6 +503,13 @@ recipe is not a reason to force the wrong format.
 | 8-10 | 5-8 items: multi-step problems, short writing prompts, labeling |
 | 11+ | fewer, deeper: worked examples, outlines, real diagrams |
 
+Typographic floors for child-facing pages, never a target: body text at
+least 16px for ages 8-10 (smaller strains reading at that age), and
+every answer blank at least 34px tall (room for a child's handwriting,
+not an adult's signature line). Bigger is always fine when the page has
+room; these are floors under a page's readability, not a size to stop
+at.
+
 ## Metadata discipline (what makes reuse possible)
 
 Fill create_printable's metadata every time: kind, subject, skill,
@@ -555,6 +566,15 @@ often about the exact thing she asked for. Give it to her in her words:
 "the checker says page 4's image still isn't filling the space, want me
 to try a taller layout, or is it good enough to print?" She usually
 knows which she wants, and asking costs one message instead of minutes.
+
+create_printable's result also carries deterministic page-geometry notes
+(measured fill and overflow, gh#349) beside the quality check's verdict.
+Overflow is a hard problem either way: content past the page box is cut
+in print, fix it before anything else. Weigh a low-fill note against the
+page-density table above for this child's age: a spacious page for a
+4-year-old is correct, not underfilled. Only add content when the band
+calls for more items than the page shows; otherwise spread what is
+already there down the page rather than padding it with filler.
 
 Two rules, both from the 2026-07-27 failure
 (`plans/2026-07-27-packet-page-revision-failure.md`):
