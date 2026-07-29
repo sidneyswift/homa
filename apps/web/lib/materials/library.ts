@@ -8,6 +8,7 @@ import {
   SUBJECT_LESSON_MATERIAL_VALIDITY_SQL,
 } from "../subject-lessons/material-validity";
 import type { MaterialKind, MaterialSource } from "./artifact-store";
+import { selectInProgressMaterialRevisions } from "./parent-visible";
 
 /**
  * The family materials library (MS-3/MS-4): retrieval over finals and
@@ -491,6 +492,55 @@ export async function findMaterialsCaller(
     throw new Error("Could not search saved materials.");
   }
   return ((data ?? []) as unknown as MaterialDbRow[]).map(toSummary);
+}
+
+/**
+ * The materials a parent started and never kept, newest first.
+ *
+ * The binder shows finals only, chat scrollback rotates daily, and 59% of
+ * revision chains never reach final (gh#348), so today this set is
+ * invisible everywhere. Reads the whole family library and reduces it to
+ * one card per unkept chain, so an abandoned 12-round packet contributes
+ * one row rather than twelve.
+ *
+ * Subject-lesson drafts are excluded on purpose: pinnedMaterialVisible
+ * already treats a lesson-linked material as parent-visible only once it
+ * is final, and its Keep action belongs to the lesson surface.
+ */
+export async function findInProgressMaterialsCaller(
+  db: SupabaseClient,
+  familyId: string,
+  limit: number,
+): Promise<MaterialSummary[]> {
+  const { data, error } = await db
+    .from("materials")
+    .select(
+      `${SUMMARY_COLUMNS}, revises, subject_lesson_id, review_pass:generation->review->>pass`,
+    )
+    .eq("family_id", familyId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) {
+    console.error("in-progress materials search failed:", error.message);
+    throw new Error("Could not load materials in progress.");
+  }
+  const rows = (data ?? []) as unknown as (MaterialDbRow & {
+    revises: string | null;
+    review_pass: string | null;
+  })[];
+  const candidates = rows
+    .filter((row) => !row.subject_lesson_id)
+    .map((row) => ({
+      id: row.id,
+      revisesId: row.revises,
+      status: row.status,
+      reviewPass: row.review_pass === null ? null : row.review_pass !== "false",
+      order: Date.parse(row.created_at),
+      row,
+    }));
+  return selectInProgressMaterialRevisions(candidates)
+    .sort((left, right) => right.order - left.order)
+    .map((candidate) => toSummary(candidate.row));
 }
 
 interface ChainRow {
