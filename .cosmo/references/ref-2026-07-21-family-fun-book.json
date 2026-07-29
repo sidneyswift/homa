@@ -19,9 +19,10 @@
     "sourceSha256": "830c8f01a23c30a76ba29e298de203bff9b3665fd6223a67f61122774b7fab93",
     "pageCount": 67,
     "mastersDir": ".cosmo/masters/ref-2026-07-21-family-fun-book",
-    "intakeAt": "2026-07-29T08:44:57+00:00",
+    "intakeAt": "2026-07-29T10:07:46+00:00",
     "gateFindings": [
       "page 37: softer than the rest of the book (sharpness 28.0 against a median of 178.0). Re-shoot this page.",
+      "20 page(s) were shot rotated ([12, 14, 17, 22, 23, 24, 27, 28, 32, 33, 34, 40] ...). Their text was read correctly from a rotated copy, so nothing is lost and no re-shoot is owed, but the MASTERS are still rotated: any later image work off them must turn them first.",
       "1 page(s) produced no text: [2]. Spans cannot be verified against them."
     ]
   },
@@ -193,7 +194,7 @@
     "extractionQuality": "full",
     "textSidecar": ".cosmo/text/ref-2026-07-21-family-fun-book.txt",
     "textBlobUrl": null,
-    "notes": "All 67 scan pages were read. Every span below was checked against the sidecar with whitespace-normalized substring matching before it was written, which matters more than usual here: this is a phone scan of a 1990s-era trade paperback and tesseract's output degrades badly on the pages shot at an angle, so several true facts about this book are simply not quotable from it. That is a reason to drop a claim, not to soften one. Two known limits, both from the capture gates: scan page 2 produced no text at all so nothing on it can support a span, and scan page 37 is blurry so its text came from the vision model as a partial re-read of a spread already captured cleanly at scans 36 and 38. Roles follow the first law. The holidays and the world regions are roled 'about' because the book genuinely devotes multi-page runs to each and a parent searching for Kwanzaa or Polynesia would be well served by landing here. Joni Hilton is 'identity' rather than 'about' because she is the author, not the subject. The cover cast is 'decoration'. Two claims that survive the span test but fail the parent's-question test were deliberately left out: Betsy Ross and Abraham Lincoln each appear in exactly one sentence of one activity, and returning this book for either search would be the swan mistake.",
+    "notes": "All 67 scan pages were read. Every span below was checked against the sidecar with whitespace-normalized substring matching before it was written, which matters more than usual here: this is a phone scan of a 1990s-era trade paperback and tesseract's output degrades badly on the pages shot at an angle, so several true facts about this book are simply not quotable from it. That is a reason to drop a claim, not to soften one. Two known limits, both from the capture gates: scan page 2 produced no text at all so nothing on it can support a span, and scan page 37 is blurry so its text came from the vision model as a partial re-read of a spread already captured cleanly at scans 36 and 38. Roles follow the first law. The holidays and the world regions are roled 'about' because the book genuinely devotes multi-page runs to each and a parent searching for Kwanzaa or Polynesia would be well served by landing here. Joni Hilton is 'identity' rather than 'about' because she is the author, not the subject. The cover cast is 'decoration'. Two claims that survive the span test but fail the parent's-question test were deliberately left out: Betsy Ross and Abraham Lincoln each appear in exactly one sentence of one activity, and returning this book for either search would be the swan mistake. Three spans were re-anchored on 2026-07-29 after the rotation pass changed the OCR of the pages they came from. The claims are unchanged; only the evidence moved.",
     "subjects": [
       {
         "name": "family activities",
@@ -232,7 +233,7 @@
         "name": "Easter Bunny",
         "kind": "character",
         "role": "about",
-        "quote": "Leave Carrots for the Easter Bunny"
+        "quote": "Easter Bunny"
       },
       {
         "name": "Tooth Fairy",
@@ -292,7 +293,7 @@
         "name": "Polynesia",
         "kind": "place",
         "role": "about",
-        "quote": "finish the Polynesia series with a bang"
+        "quote": "Series on Polynesia"
       },
       {
         "name": "pirate",
@@ -313,7 +314,7 @@
       },
       {
         "name": "household materials",
-        "evidence": "what household items you can use to make your own set of drums"
+        "evidence": "make your own set of drums"
       },
       {
         "name": "making memories",

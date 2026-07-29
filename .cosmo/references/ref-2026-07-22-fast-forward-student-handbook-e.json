@@ -16,8 +16,13 @@
     "sourceSha256": "c8a908a83a0cd6144bbaf96a23e569a3f880bc75f285a4ed91ba56d8148cc367",
     "pageCount": 110,
     "mastersDir": ".cosmo/masters/ref-2026-07-22-fast-forward-student-handbook-e",
-    "intakeAt": "2026-07-29T07:32:11+00:00",
-    "gateFindings": []
+    "intakeAt": "2026-07-29T10:10:07+00:00",
+    "gateFindings": [
+      "105 page(s) were shot rotated ([5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] ...). Their text was read correctly from a rotated copy, so nothing is lost and no re-shoot is owed, but the MASTERS are still rotated: any later image work off them must turn them first."
+    ],
+    "sourceParts": [
+      "fast-forward-student-handbook-e.pdf"
+    ]
   },
   "sourceFiles": [
     {

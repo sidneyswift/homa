@@ -599,7 +599,7 @@
     "extractionQuality": "full",
     "textSidecar": ".cosmo/text/ref-2026-07-19-social-studies-all-together.txt",
     "textBlobUrl": null,
-    "notes": "Every span below was checked against the sidecar before it was written, whitespace-normalized. Two shapes of judgment drove the roles. First, this book is genuinely ABOUT its content in a way a phonics workbook is not: it does not teach reading through communities, it teaches communities, so 'about' and 'teaches' are both common here and that is correct rather than generous. Second, the six narrator children (Andrew, Kim, Ben, Debby, James, Kay) are the exact Fast Forward Ben-and-Nina case: one opens each unit, speaks in first person throughout it, and appears in every photograph, and the book is still not about them. They are cast. The entity list is long because the roster is long: the book runs 12 Meet-the-People biography spreads and 6 Citizen Heroes features, and 'which ingested material covers Sacagawea for a six-year-old' is exactly the question dimension F exists to answer, so cutting the roster to look tidy would have thrown away the answer. Nothing here is padding; every claim would be a good search hit for the parent who asked. The one decoration entity is the giveaway that the roles are doing work: an old Dick and Jane reader sits in a photograph of 1930s school supplies on the Then and Now spread, perfectly quotable and completely wrong to tag, because 'Dick and Jane books' must never return a social studies textbook. Seven subjects rather than the contract's five, one per unit plus the series identity: a six-unit survey textbook has six subjects and collapsing them would make the corpus lie about what it has.",
+    "notes": "Every span below was checked against the sidecar before it was written, whitespace-normalized. Two shapes of judgment drove the roles. First, this book is genuinely ABOUT its content in a way a phonics workbook is not: it does not teach reading through communities, it teaches communities, so 'about' and 'teaches' are both common here and that is correct rather than generous. Second, the six narrator children (Andrew, Kim, Ben, Debby, James, Kay) are the exact Fast Forward Ben-and-Nina case: one opens each unit, speaks in first person throughout it, and appears in every photograph, and the book is still not about them. They are cast. The entity list is long because the roster is long: the book runs 12 Meet-the-People biography spreads and 6 Citizen Heroes features, and 'which ingested material covers Sacagawea for a six-year-old' is exactly the question dimension F exists to answer, so cutting the roster to look tidy would have thrown away the answer. Nothing here is padding; every claim would be a good search hit for the parent who asked. The one decoration entity is the giveaway that the roles are doing work: an old Dick and Jane reader sits in a photograph of 1930s school supplies on the Then and Now spread, perfectly quotable and completely wrong to tag, because 'Dick and Jane books' must never return a social studies textbook. Seven subjects rather than the contract's five, one per unit plus the series identity: a six-unit survey textbook has six subjects and collapsing them would make the corpus lie about what it has. The cover subject's span was re-anchored on 2026-07-29 after the rotation pass reordered the cover text. 1 referenced work (Twinkle, Twinkle, Little Star) was DROPPED, not reworded: the corrected text does not contain it anywhere, so whatever supported it was an artefact of a mis-rotated page. A claim that loses its evidence loses its place.",
     "subjects": [
       {
         "name": "communities",
@@ -640,7 +640,7 @@
       {
         "name": "elementary social studies textbook",
         "role": "identity",
-        "quote": "SOCIAL STUDIES SCOTT FORESMAN SCOTT FORESMAN ALL TOGETHER",
+        "quote": "SOCIAL STUDIES SCOTT FORESMAN ALL TOGETHER",
         "note": "Cover, read by the vision pass. 'All Together' is this volume's own title inside the Scott Foresman Social Studies series."
       }
     ],
@@ -1003,12 +1003,6 @@
         "author": null,
         "kind": "song",
         "quote": "The Farmer in the Dell"
-      },
-      {
-        "title": "Twinkle, Twinkle, Little Star",
-        "author": null,
-        "kind": "song",
-        "quote": "Twinkle, Twinkle, Little Star"
       },
       {
         "title": "The Farmer's Little Girl",

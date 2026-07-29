@@ -792,8 +792,10 @@
     "sourceSha256": "16c5812acd444b7581ac9acd881c5b20611585487a1cc9dfcb90bc3327712ffc",
     "pageCount": 204,
     "mastersDir": ".cosmo/masters/cur-2026-07-19-harcourt-science",
-    "intakeAt": "2026-07-29T08:29:34+00:00",
-    "gateFindings": []
+    "intakeAt": "2026-07-29T09:56:33+00:00",
+    "gateFindings": [
+      "8 page(s) were shot rotated ([1, 7, 14, 112, 139, 189, 199, 204]). Their text was read correctly from a rotated copy, so nothing is lost and no re-shoot is owed, but the MASTERS are still rotated: any later image work off them must turn them first."
+    ]
   },
   "stages": {
     "aboutnessAddedAt": "2026-07-29"
