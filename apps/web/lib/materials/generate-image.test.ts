@@ -11,6 +11,8 @@ import { APICallError } from "ai";
 import {
   classifyImageFailure,
   imageFailureNote,
+  imageFallbackModelId,
+  shouldTryPolicyFallback,
   type ImageFailureKind,
 } from "./generate-image";
 
@@ -135,6 +137,67 @@ test("every kind gets its own note, so the classification changes what Homa read
   const notes = kinds.map(imageFailureNote);
   assert.equal(new Set(notes).size, kinds.length);
   for (const note of notes) assert.ok(note.length > 0);
+});
+
+/**
+ * The policy fallback (founder ruling 2026-07-29, gh#449): a refused
+ * character gets one retry on a vendor whose policy permits it.
+ */
+
+test("only a policy refusal earns the fallback retry", () => {
+  const base = { fallbackModel: "prodia/flux-fast-schnell", budgetLeftMs: 120_000 };
+  assert.equal(shouldTryPolicyFallback({ ...base, failure: "policy" }), true);
+  // A transient failure should retry the SAME model, and a rejected
+  // request is broken as written on any vendor. Neither is a policy case,
+  // so neither should burn a second vendor's money.
+  assert.equal(shouldTryPolicyFallback({ ...base, failure: "transient" }), false);
+  assert.equal(shouldTryPolicyFallback({ ...base, failure: "rejected" }), false);
+});
+
+test("no configured fallback means the refusal simply stands", () => {
+  assert.equal(
+    shouldTryPolicyFallback({
+      failure: "policy",
+      fallbackModel: null,
+      budgetLeftMs: 120_000,
+    }),
+    false,
+  );
+});
+
+test("a fallback is not started when it cannot plausibly finish", () => {
+  const base = { failure: "policy" as const, fallbackModel: "prodia/flux-fast-schnell" };
+  assert.equal(shouldTryPolicyFallback({ ...base, budgetLeftMs: 19_999 }), false);
+  assert.equal(shouldTryPolicyFallback({ ...base, budgetLeftMs: 20_000 }), true);
+  // A blown budget must never produce a negative-timeout attempt.
+  assert.equal(shouldTryPolicyFallback({ ...base, budgetLeftMs: -5_000 }), false);
+});
+
+test("the fallback model is opt-in, trimmed, and never the primary", () => {
+  const saved = {
+    primary: process.env.HOMA_IMAGE_MODEL,
+    fallback: process.env.HOMA_IMAGE_FALLBACK_MODEL,
+  };
+  try {
+    delete process.env.HOMA_IMAGE_FALLBACK_MODEL;
+    assert.equal(imageFallbackModelId(), null, "unset means the feature is off");
+
+    process.env.HOMA_IMAGE_FALLBACK_MODEL = "   ";
+    assert.equal(imageFallbackModelId(), null, "whitespace is not a model");
+
+    process.env.HOMA_IMAGE_FALLBACK_MODEL = "prodia/flux-fast-schnell";
+    assert.equal(imageFallbackModelId(), "prodia/flux-fast-schnell");
+
+    // Retrying the model that just refused would spend money to be
+    // refused again, so a matching value reads as off.
+    process.env.HOMA_IMAGE_MODEL = "prodia/flux-fast-schnell";
+    assert.equal(imageFallbackModelId(), null);
+  } finally {
+    if (saved.primary === undefined) delete process.env.HOMA_IMAGE_MODEL;
+    else process.env.HOMA_IMAGE_MODEL = saved.primary;
+    if (saved.fallback === undefined) delete process.env.HOMA_IMAGE_FALLBACK_MODEL;
+    else process.env.HOMA_IMAGE_FALLBACK_MODEL = saved.fallback;
+  }
 });
 
 test("no em dash in any parent-bound note (house law)", () => {
