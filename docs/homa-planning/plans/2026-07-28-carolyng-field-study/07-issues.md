@@ -20,9 +20,17 @@ Carolyng field study.
 | `four-week-volumes` | Four-week detail with adaptation, year outline allowed, no hard refusal | F9 settled; skill copy before any marketing use |
 | `family-library-tiering` | Capture base-tier, decomposition and planner mapping at Homa Plus | #352 scope set; answers #298's gap |
 
-Still open on gh#358: whether a provably cut-off page is a hard delivery block
-or a parent-overridable verdict, and the single data-ownership ruling covering
-export, cancellation, and retention for hours (gh#294) with the library.
+**Both remaining questions ruled 2026-07-29, so gh#358 is fully answered:**
+
+| Ruling | What it settles | Effect |
+|---|---|---|
+| `cutoff-page-is-a-block` | A provably cut-off page is never delivered; Homa rebuilds and sends the fixed one | gh#349 geometry checks gate delivery, not just warn |
+| `family-records-outlive-the-subscription` | Hours log and library stay readable and downloadable, free, after cancellation | gh#294 settled; gh#352 inherits the same policy |
+
+The cut-off ruling is deliberately narrow: it binds a PROOF, never a
+suspicion. Anything the checker merely doubts still ships with an honest
+note, because a wrong block means she asks for something and gets
+nothing, which is worse than getting something imperfect.
 
 ## Displacement statement (the council's challenge 1, answered)
 
