@@ -6,6 +6,7 @@ import {
   recordModelUsage,
   type UsageChannel,
 } from "../model-usage";
+import { geometryReviewBlock, type PageGeometry } from "./page-geometry";
 
 /**
  * The studio's own eyes (MS-5): before a rendered page reaches the
@@ -92,9 +93,11 @@ const reviewSchema = z.object({
 });
 
 const REVIEW_SYSTEM = `You quality-check printable pages for homeschooling
-families before a parent sees them. You receive the rendered page images
-(in page order) and the brief they were made from. Judge ONLY what a
-parent would notice on paper:
+families before a parent sees them. Each image is an 8.5x11in printed
+sheet: judge it as a page a parent holds in her hands and a child writes
+on, not as a screen layout. You receive the rendered page images (in page
+order) and the brief they were made from. Judge ONLY what a parent would
+notice on paper:
 
 - misspelled words, garbled or illegible text, wrong child name spelling
 - the requested character, theme, or subject missing or wrong
@@ -109,7 +112,16 @@ When told the document has more pages than you were shown, judge only
 the pages you can see; never report unshown pages as missing or broken.
 Do not nitpick style, art taste, or things the brief never asked for.
 A usable page passes. List issues concretely, each one fixable, naming
-the page number when there is more than one page.`;
+the page number when there is more than one page.
+
+You may be given measured page geometry (fill percent, where content
+ends, overflow past the page box). Trust those numbers over your own
+guess from the image. Overflow is always worth flagging: it prints cut
+off. A low fill number is NOT automatically a defect: a spacious,
+easy-to-read page for a young or beginning child is correct, not
+underfilled. Only flag underfill when the brief's stated age or skill
+level implies more should fit, or when the blank band reads as an
+unfinished page rather than a deliberately spacious one.`;
 
 /**
  * reviewArtifact(...): a verdict, or null when review is off or fails
@@ -124,6 +136,11 @@ export async function reviewArtifact(input: {
   pages: readonly ReviewablePage[];
   pageCount: number;
   brief: string;
+  /** Deterministic geometry for every rendered page (gh#349), including
+   * pages past REVIEW_PAGE_CAP that carry no image here: the reviewer
+   * still gets an objective fact about them even with nothing to look
+   * at. Optional so existing callers/tests are unaffected. */
+  pageGeometry?: readonly PageGeometry[];
 }): Promise<ArtifactReview | null> {
   if (!reviewEnabled()) return null;
   if (input.pages.length === 0) return null;
@@ -143,6 +160,8 @@ export async function reviewArtifact(input: {
             : `pages ${shownNumbers.join(", ")}`
         }, in that order. Number every issue by the page number given here, not by its position among the images.\n`
       : "";
+  const geometryBlock = geometryReviewBlock(input.pageGeometry ?? []);
+  const geometryContext = geometryBlock ? `${geometryBlock}\n` : "";
 
   try {
     const result = await generateObject({
@@ -158,7 +177,10 @@ export async function reviewArtifact(input: {
               mediaType: "image/jpeg" as const,
               data: page.data,
             })),
-            { type: "text", text: `${pageContext}The brief:\n${input.brief}` },
+            {
+              type: "text",
+              text: `${pageContext}${geometryContext}The brief:\n${input.brief}`,
+            },
           ],
         },
       ],

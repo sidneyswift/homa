@@ -28,6 +28,7 @@ import {
   getMaterialPinned,
   type MaterialSummary,
 } from "../../lib/materials/library";
+import { geometryToolNotes } from "../../lib/materials/page-geometry";
 import { reviewArtifact } from "../../lib/materials/review-artifact";
 import {
   hasPageBreakMarkup,
@@ -619,6 +620,7 @@ const createPrintable = defineBoundedTool({
       })),
       pageCount: rendered.pageCount,
       brief,
+      pageGeometry: rendered.pageGeometry,
     });
     const sourceOfferDeliveryId =
       review?.pass === true
@@ -690,6 +692,10 @@ const createPrintable = defineBoundedTool({
         rendererVersion: rendered.rendererVersion,
         previewPageCap: PREVIEW_PAGE_CAP,
       }),
+      // Deterministic geometry alongside the model review (gh#349): a
+      // small array of numbers per page, cheap to keep, and the durable
+      // counterpart to the QC verdict for later history and analysis.
+      pageGeometry: rendered.pageGeometry,
     };
 
     // The durable record (Postgres is truth; html is what a future
@@ -877,6 +883,13 @@ const createPrintable = defineBoundedTool({
         : review.pass
           ? ` Quality check passed on the pages it saw.${coverageNote}`
           : ` Quality check found issues: ${review.issues.join("; ")}.${coverageNote}`;
+    // Deterministic, from the renderer's own measurements, so it covers
+    // every page (including ones past PREVIEW_PAGE_CAP the reviewer never
+    // saw an image of) and never depends on the vision model noticing a
+    // blank band or a cut edge for itself (gh#349).
+    const geometryNotes = geometryToolNotes(rendered.pageGeometry);
+    const geometryNoteText =
+      geometryNotes.length > 0 ? ` ${geometryNotes.join(" ")}` : "";
 
     return {
       created: true,
@@ -894,12 +907,13 @@ const createPrintable = defineBoundedTool({
         status: "draft",
         revisesId: input.revisesId ?? null,
         reviewPassed: review === null ? null : review.pass,
+        pageGeometry: rendered.pageGeometry,
       },
       review,
       sentByText,
       note: trustedLesson
-        ? `${deliveryNote}${reviewNote}`
-        : `${deliveryNote}${reviewNote} When the parent approves a version, call mark_material_final with this id.`,
+        ? `${deliveryNote}${reviewNote}${geometryNoteText}`
+        : `${deliveryNote}${reviewNote}${geometryNoteText} When the parent approves a version, call mark_material_final with this id.`,
     };
   },
 });
