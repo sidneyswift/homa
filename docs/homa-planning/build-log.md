@@ -61,12 +61,32 @@ and the materials-studio skill (ask for the real character first).
 14.4s, the decision returned true with 185.6s left, the fallback rendered
 a faithful Pikachu at 1024x1536 with portrait shape preserved.
 
-**Deliberately still open.** Whether Homa may produce and sell faithful
-copyrighted-character pages. The provider's filter was never Homa's legal
-protection; it was OpenAI limiting OpenAI's exposure, so a vendor saying
-yes changes the vendor's posture and not Homa's. Counsel question, may
-travel with gh#318. This ruling turns the capability on; it does not
-answer that.
+**The IP posture was ruled the same session: ship it.** The question put
+to the founder was whether Homa may produce and sell faithful
+copyrighted-character pages, given that the provider's filter was never
+Homa's legal protection (it was OpenAI limiting OpenAI's exposure, so a
+permissive vendor changes the vendor's posture and not Homa's). The answer
+was "we are a startup, ship it until we can't."
+
+Recorded for what it is: an explicit acceptance of the exposure, not a
+finding that there is none, and not legal advice from anyone. The risk was
+put in front of the founder twice before the flag was built, in writing,
+including that Homa's whole product runs through one gateway path and that
+a vendor account action would stop everything rather than one feature.
+
+**Scope as ruled:** pages made for a family, which is every surface this
+capability touches today. **Not ruled, because it was not asked and no
+code does it:** franchise characters on a public surface (a marketing
+sample, the public landing, a shared artifact). Decide that when something
+actually proposes it; the narrow reading is the safe default until then.
+
+**What "until we can't" looks like operationally.** The stop signal is a
+rightsholder notice or a vendor account action, and both tend to arrive
+with a deadline. Wind-down is unsetting `HOMA_IMAGE_FALLBACK_MODEL`, but
+turbo lists `HOMA_*` in the build task's `env`, so the value is part of
+the build cache key and the change needs a redeploy to take effect. The
+kill switch is therefore minutes, not instant. Worth knowing before it is
+needed rather than during.
 ## 2026-07-29 · The worksheet ruling: scale content to fill the sheet, and the whitespace rule is gone
 
 Founder ruling, not an agent decision. Registered as
