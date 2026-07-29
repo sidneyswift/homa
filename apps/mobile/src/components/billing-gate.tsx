@@ -21,10 +21,10 @@ import { Card } from "./ui/card";
  * sees Today, Chat, or Family underneath it.
  */
 export function BillingGate({ children }: { children: ReactNode }) {
-  const { gate, refresh } = useBillingGate();
+  const { gate, checked, refresh } = useBillingGate();
   const { family } = useFamilyData();
 
-  if (gate === null) {
+  if (!checked) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <ActivityIndicator color={colors.brand} />
@@ -32,9 +32,51 @@ export function BillingGate({ children }: { children: ReactNode }) {
     );
   }
 
+  if (gate === null) {
+    return <GateCheckFailed onRetry={refresh} />;
+  }
+
   if (gate.open) return <>{children}</>;
 
   return <Paywall familyId={family?.id ?? null} everTrialed={gate.lapsed} onUnlocked={refresh} />;
+}
+
+/** checked is true but gate is still null: the check itself failed
+ *  (offline, signed out, server error, or the endpoint unreachable),
+ *  not "still loading". Distinct from the paywall on purpose: this
+ *  family's entitlement is simply unknown, never assumed walled. */
+function GateCheckFailed({ onRetry }: { onRetry: () => Promise<void> }) {
+  const [retrying, setRetrying] = useState(false);
+
+  async function handleRetry() {
+    setRetrying(true);
+    await onRetry();
+    setRetrying(false);
+  }
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }}>
+      <View style={{ flex: 1, padding: space.lg, justifyContent: "center", gap: space.lg }}>
+        <Card style={{ gap: space.md }}>
+          <Text
+            style={{ fontFamily: fontFamilies.display, fontSize: fontSize.xxl, color: colors.textStrong }}
+          >
+            {"Couldn't check your account"}
+          </Text>
+          <Text
+            style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textBody }}
+          >
+            {"That didn't load. Check your connection and try again."}
+          </Text>
+          <Button
+            label={retrying ? "Trying again…" : "Try again"}
+            onPress={() => void handleRetry()}
+            disabled={retrying}
+          />
+        </Card>
+      </View>
+    </SafeAreaView>
+  );
 }
 
 type PurchaseStep = "idle" | "purchasing" | "confirming" | "restoring";

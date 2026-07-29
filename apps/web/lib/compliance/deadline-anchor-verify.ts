@@ -237,3 +237,142 @@ export function anchorDateText(anchor: DeadlineAnchor): string {
   const month = MONTH_NAMES[anchor.month - 1];
   return anchor.day === null ? month : `${month} ${anchor.day}`;
 }
+
+/* ------------------------------------------------------------------ */
+/* Extra requirements trapped in pathway_varies_detail (gh#322)         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Council D3 bans rendering `pathway_varies_detail`, and the reason was
+ * sound: the field is malformed as a whole, carrying literal "undefined"
+ * and JSON fragments that would print as garbage in a legal document.
+ *
+ * But the field has an internal structure the ruling predates. It reads
+ * "PathwayName: value; OtherPathway: value", and the DEFAULT pathway's
+ * own segment is frequently a clean, quotable sentence stating a real
+ * filing requirement that appears nowhere else in the payload.
+ * Pennsylvania's is the one that matters most: "File notarized affidavit
+ * with superintendent prior to commencement". A Pennsylvania family
+ * following the pack without it files an un-notarized affidavit, which a
+ * district rejects, and the family believes it has filed when it has
+ * not. That is the exact harm the pack exists to prevent.
+ *
+ * So the pack still never renders the raw field. It renders a VERIFIED
+ * QUOTE from the default pathway's own segment, chosen by a model and
+ * checked here, which honors what D3 was protecting against (garbage and
+ * wrong claims) while recovering the requirement it was accidentally
+ * suppressing. Recorded for founder ratification alongside the other
+ * judgment calls.
+ */
+export interface ExtraRequirement {
+  /** Which glance row this belongs under. */
+  section: "notification" | "assessment" | "instructionalTime" | "recordkeeping" | "subjects";
+  /** Parent-facing sentence, sourced from the quote below. */
+  note: string;
+  /** Verbatim substring of the default pathway's own detail segment. */
+  quote: string;
+}
+
+export interface ExtraRequirementEntry {
+  stateCode: string;
+  /** The default pathway's segment, kept so CI can re-verify. */
+  source: string;
+  requirements: ExtraRequirement[];
+}
+
+/**
+ * The default pathway's own slice of a pathway_varies_detail string.
+ * Deterministic: the segment must start with the exact pathway name
+ * followed by a colon, and it ends where the next "PathwayName:" begins.
+ * Returns null when the field does not lead with the default pathway,
+ * which is the only shape this can read safely.
+ */
+export function defaultPathwaySegment(
+  detail: string | null,
+  defaultPathwayName: string,
+): string | null {
+  if (!detail) return null;
+  const prefix = `${defaultPathwayName}:`;
+  if (!detail.startsWith(prefix)) return null;
+  const rest = detail.slice(prefix.length);
+  const next = rest.search(/;\s+[A-Z][^;:]{2,60}:/);
+  const segment = (next === -1 ? rest : rest.slice(0, next)).trim();
+  const unquoted = segment.replace(/^"|"$/g, "").trim();
+  return unquoted.length > 0 ? unquoted : null;
+}
+
+const EXTRA_SECTIONS = [
+  "notification",
+  "assessment",
+  "instructionalTime",
+  "recordkeeping",
+  "subjects",
+] as const;
+
+export type ExtraVerifyVerdict =
+  | { ok: true; requirement: ExtraRequirement }
+  | { ok: false; reason: string };
+
+/**
+ * Verifies one proposed extra requirement against the segment it claims
+ * to come from. Same discipline as the deadline anchors: provenance is
+ * checked, phrasing is not, and a failure drops the proposal entirely.
+ */
+export function verifyExtraRequirement(
+  segment: string,
+  proposal: { section: string; note: string; quote: string },
+): ExtraVerifyVerdict {
+  if (!(EXTRA_SECTIONS as readonly string[]).includes(proposal.section)) {
+    return { ok: false, reason: `unknown section ${String(proposal.section)}` };
+  }
+  if (!quoteAppearsVerbatim(segment, proposal.quote)) {
+    return {
+      ok: false,
+      reason: `quote ${JSON.stringify(proposal.quote)} is not verbatim in the segment`,
+    };
+  }
+  const note = proposal.note.trim();
+  if (note.length < 10 || note.length > 160) {
+    return { ok: false, reason: `note length ${note.length} is out of range` };
+  }
+  if (note.includes("\u2014")) {
+    return { ok: false, reason: "note contains an em dash" };
+  }
+  // An enum token is not a requirement. These reach the field as bare
+  // values ("general_list", "three_times_per_year") and read as
+  // gibberish on a printed page.
+  const trimmed = segment.trim();
+  if (/^[a-z][a-z0-9]*(_[a-z0-9]+)+$/.test(trimmed)) {
+    return { ok: false, reason: `segment ${JSON.stringify(segment)} is an enum token` };
+  }
+  if (/^https?:\/\//i.test(trimmed)) {
+    return { ok: false, reason: "segment is a bare URL, not a requirement" };
+  }
+  // The segment must be PROSE, and this is the check that matters most.
+  // A quote can only prove that words appear in the source; it cannot
+  // prove the note stays inside their meaning. Georgia's segment is the
+  // two words "3 years", and a model given it wrote "Keep homeschool
+  // attendance and other required records for at least three years",
+  // inventing which records the state wants (caught in review before
+  // shipping, 2026-07-29). A fragment too thin to state a requirement on
+  // its own gives a note room to invent one, so anything JSON-shaped or
+  // shorter than a sentence is refused outright. Both checks are about
+  // FORM, which code can judge, never about meaning, which it cannot.
+  if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
+    return { ok: false, reason: "segment is a JSON fragment, not a sentence" };
+  }
+  if (trimmed.split(/\s+/).length < 6) {
+    return {
+      ok: false,
+      reason: `segment ${JSON.stringify(trimmed)} is too thin to state a requirement`,
+    };
+  }
+  return {
+    ok: true,
+    requirement: {
+      section: proposal.section as ExtraRequirement["section"],
+      note,
+      quote: proposal.quote,
+    },
+  };
+}

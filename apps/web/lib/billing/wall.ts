@@ -126,6 +126,33 @@ export function tierForStripeProduct(productId: string | null | undefined): Plan
 }
 
 /**
+ * tierForStripeProductRecognized(productId): the tier, or null when this
+ * map has never heard of the product (gh#298).
+ *
+ * tierForStripeProduct answers "regular" for an unknown id, which is the
+ * right default for a CONFIRM route: a buyer standing on the receipt
+ * page should get the base plan rather than an error. It is the wrong
+ * default for a writer that runs unattended, because plan_tier is
+ * written with coalesce, so "regular" overwrites and null leaves alone.
+ * A webhook that resolved an unmapped id to "regular" would silently
+ * downgrade a Plus family, which is the exact failure the checkout
+ * handler's own comment warns about.
+ *
+ * Rule of thumb: a caller that can show a human the result may use
+ * tierForStripeProduct; a caller that writes plan_tier on its own uses
+ * this one and passes the null straight through.
+ */
+export function tierForStripeProductRecognized(
+  productId: string | null | undefined,
+): PlanTier | null {
+  if (!productId) return null;
+  for (const tier of Object.keys(TIER_PRODUCT_IDS) as PlanTier[]) {
+    if (TIER_PRODUCT_IDS[tier].includes(productId)) return tier;
+  }
+  return null;
+}
+
+/**
  * Which App Store Connect in-app purchase product backs each tier.
  * ios-iap-base-tier-only (journeys/10-reconciliation.md §5): only
  * "regular" has a real product id today, because Plus and Max stay off

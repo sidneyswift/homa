@@ -58,9 +58,13 @@ import { z } from "zod";
 import { HOMA_MODEL } from "../agent/model";
 import {
   ANCHOR_KINDS,
+  defaultPathwaySegment,
   verifyDeadlineProposal,
+  verifyExtraRequirement,
   type DeadlineAnchorEntry,
   type DeadlineProposal,
+  type ExtraRequirement,
+  type ExtraRequirementEntry,
 } from "../lib/compliance/deadline-anchor-verify";
 
 // Paths resolve from this file, not the caller's cwd: the script runs
@@ -178,7 +182,102 @@ async function proposeFor(state: StateInput): Promise<DeadlineProposal | null> {
   }
 }
 
-function renderModule(entries: DeadlineAnchorEntry[]): string {
+const EXTRA_SYSTEM = [
+  "You read one fragment of a US state's homeschool requirement data and decide whether it states an ADDITIONAL requirement a family must satisfy, beyond what a summary already says.",
+  "",
+  "The fragment is the default pathway's own entry from a field that describes how requirements differ between pathways. Most fragments are useless: an enum token like general_list, a bare URL, a recipient's job title, or a restatement of a deadline the family already has.",
+  "",
+  "Return isRequirement true ONLY when the fragment states something a family must DO or PROVIDE that a plain summary would miss: a notarized document, a specific application system, a filing step with its own conditions.",
+  "",
+  "Rules:",
+  "- The quote must be an EXACT substring of the fragment, copied character for character.",
+  "- The note is one plain sentence telling a parent what the requirement is. Sentence case, but KEEP proper nouns capitalized exactly as the fragment writes them (EdAccess, August, September). No legal citations, no state name, no em dashes.",
+  "- The note may not add any fact the fragment does not state. If the fragment says only how long to keep records, the note says only that, and never invents which records.",
+  "- A recipient's name or title alone is not a requirement. A bare URL is not a requirement. An enum token is not a requirement.",
+  "- The family is ALREADY shown the state's deadline text, which is given to you below. Return isRequirement false when the fragment only restates that timing. Say true only when the fragment adds something the deadline does not: a notarized document, a named application system, a retention period, a condition of its own.",
+  "- When in doubt, return isRequirement false. A missing note costs nothing; a wrong one is printed in a legal document.",
+].join("\n");
+
+const extraSchema = z.object({
+  isRequirement: z.boolean().describe(
+    "True only when the fragment states an additional thing the family must do or provide.",
+  ),
+  note: z.string().describe(
+    "One plain sentence for a parent, sentence case. Empty string when isRequirement is false.",
+  ),
+  quote: z.string().describe(
+    "Exact substring of the fragment supporting the note. Empty string when isRequirement is false.",
+  ),
+});
+
+const EXTRA_FIELD_TO_SECTION: Record<string, ExtraRequirement["section"]> = {
+  notification: "notification",
+  assessment: "assessment",
+  instructional_time: "instructionalTime",
+  recordkeeping: "recordkeeping",
+  subjects: "subjects",
+};
+
+async function deriveExtraRequirements(
+  states: StateInput[],
+): Promise<ExtraRequirementEntry[]> {
+  const out: ExtraRequirementEntry[] = [];
+  for (const state of states) {
+    const payload = JSON.parse(
+      readFileSync(`${STATES_DIR}/${state.code}.json`, "utf8"),
+    ) as {
+      pathways?: (Record<string, { pathway_varies_detail?: string | null }> & {
+        is_default?: boolean;
+        name?: string;
+      })[];
+    };
+    const pathways = payload.pathways ?? [];
+    const dflt = pathways.find((p) => p.is_default) ?? pathways[0];
+    if (!dflt?.name) continue;
+    const requirements: ExtraRequirement[] = [];
+    const sources: string[] = [];
+    for (const [field, section] of Object.entries(EXTRA_FIELD_TO_SECTION)) {
+      const detail = dflt[field]?.pathway_varies_detail ?? null;
+      const segment = defaultPathwaySegment(detail, dflt.name);
+      if (!segment) continue;
+      let proposal;
+      try {
+        const result = await generateObject({
+          model: HOMA_MODEL,
+          schema: extraSchema,
+          system: EXTRA_SYSTEM,
+          prompt: `State: ${state.name}\nField: ${field}\nDeadline the family already sees: ${JSON.stringify(state.deadline)}\nFragment: ${JSON.stringify(segment)}`,
+          maxRetries: 2,
+          providerOptions: {
+            gateway: { disallowPromptTraining: true, tags: ["state_extra_requirements"] },
+          },
+        });
+        proposal = result.object;
+      } catch {
+        continue;
+      }
+      if (!proposal.isRequirement) continue;
+      const verdict = verifyExtraRequirement(segment, {
+        section,
+        note: proposal.note,
+        quote: proposal.quote,
+      });
+      if (!verdict.ok) {
+        console.log(`  ${state.code}/${field}: dropped (${verdict.reason})`);
+        continue;
+      }
+      requirements.push(verdict.requirement);
+      sources.push(segment);
+      console.log(`  ${state.code}/${field}: ${verdict.requirement.note}`);
+    }
+    if (requirements.length > 0) {
+      out.push({ stateCode: state.code, source: sources.join(" | "), requirements });
+    }
+  }
+  return out;
+}
+
+function renderModule(entries: DeadlineAnchorEntry[], extras: ExtraRequirementEntry[]): string {
   const rows = entries
     .map((entry) => {
       const anchors = entry.anchors
@@ -215,10 +314,35 @@ function renderModule(entries: DeadlineAnchorEntry[]): string {
 // Re-run after a state-requirements refresh: pnpm build:deadline-anchors
 // The verifier runs without model calls in CI: pnpm check:deadline-anchors
 
-import type { DeadlineAnchorEntry } from "./deadline-anchor-verify";
+import type {\n  DeadlineAnchorEntry,\n  ExtraRequirementEntry,\n} from "./deadline-anchor-verify";
 
 export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
 ${rows}
+};
+
+/**
+ * Additional requirements recovered from each default pathway's own slice
+ * of pathway_varies_detail (gh#322). Every note below is backed by a
+ * quote that appears verbatim in that slice; the raw field is never
+ * rendered. Pennsylvania's notarized affidavit is the motivating case.
+ */
+export const EXTRA_REQUIREMENTS: Record<string, ExtraRequirementEntry> = {
+${extras
+  .map(
+    (entry) =>
+      `  ${entry.stateCode}: {\n` +
+      `    stateCode: ${JSON.stringify(entry.stateCode)},\n` +
+      `    source: ${JSON.stringify(entry.source)},\n` +
+      `    requirements: [\n` +
+      entry.requirements
+        .map(
+          (r) =>
+            `      {\n        section: ${JSON.stringify(r.section)},\n        note: ${JSON.stringify(r.note)},\n        quote: ${JSON.stringify(r.quote)},\n      },`,
+        )
+        .join("\n") +
+      `\n    ],\n  },`,
+  )
+  .join("\n")}
 };
 `;
 }
@@ -271,7 +395,12 @@ async function main(): Promise<void> {
   }
 
   accepted.sort((a, b) => a.stateCode.localeCompare(b.stateCode));
-  writeFileSync(OUT, renderModule(accepted), "utf8");
+
+  console.log("\nDeriving extra requirements from default-pathway detail:");
+  const extras = await deriveExtraRequirements(states);
+  extras.sort((a, b) => a.stateCode.localeCompare(b.stateCode));
+
+  writeFileSync(OUT, renderModule(accepted, extras), "utf8");
   console.log(
     `\nWrote ${OUT}: ${accepted.length} verified, ${dropped.length} dropped.`,
   );
