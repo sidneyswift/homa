@@ -52,6 +52,8 @@ export function reportVoice(t: VoiceContext, label: string): void {
 
   t.check(reply.length > 0, equals(true));
   t.check(floorHits, equals([]));
-  t.check(reply.includes("—"), equals(false));
+  // The em dash is written as an escape sequence on purpose: a literal one
+  // here would itself trip scripts/em-dash-check.mjs, which scans tracked files.
+  t.check(reply.includes("\u2014"), equals(false));
   t.check(openerHits, equals([]));
 }
