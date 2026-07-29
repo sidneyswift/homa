@@ -2493,6 +2493,20 @@
       "ageBand": null
     },
     {
+      "id": "ref-2026-07-19-harcourt-science",
+      "title": null,
+      "droppedBy": null,
+      "droppedAt": null,
+      "subject": "",
+      "domain": "",
+      "format": null,
+      "about": [],
+      "entities": [],
+      "themes": [],
+      "works": [],
+      "ageBand": null
+    },
+    {
       "id": "ref-2026-07-19-listen-and-color-spring",
       "title": "Listen and Color Spring Worksheet: Garden Animals Coloring Sheet",
       "droppedBy": "aless",
@@ -2528,6 +2542,20 @@
       "subject": "history",
       "domain": "",
       "format": "coloring page (title-inferred, never confirmed)",
+      "about": [],
+      "entities": [],
+      "themes": [],
+      "works": [],
+      "ageBand": null
+    },
+    {
+      "id": "ref-2026-07-19-social-studies-all-together",
+      "title": null,
+      "droppedBy": null,
+      "droppedAt": null,
+      "subject": "",
+      "domain": "",
+      "format": null,
       "about": [],
       "entities": [],
       "themes": [],
@@ -2577,6 +2605,20 @@
       "ageBand": null
     },
     {
+      "id": "ref-2026-07-19-your-health",
+      "title": null,
+      "droppedBy": null,
+      "droppedAt": null,
+      "subject": "",
+      "domain": "",
+      "format": null,
+      "about": [],
+      "entities": [],
+      "themes": [],
+      "works": [],
+      "ageBand": null
+    },
+    {
       "id": "ref-2026-07-20-outdoor-toddler-activity-book",
       "title": "The Outdoor Toddler Activity Book: 100+ Fun Early Learning Activities for Outside Play",
       "droppedBy": "aless",
@@ -2612,6 +2654,20 @@
       "subject": "science",
       "domain": "scientific-inquiry",
       "format": "experiment-activity-book",
+      "about": [],
+      "entities": [],
+      "themes": [],
+      "works": [],
+      "ageBand": null
+    },
+    {
+      "id": "ref-2026-07-21-family-fun-book",
+      "title": null,
+      "droppedBy": null,
+      "droppedAt": null,
+      "subject": "",
+      "domain": "",
+      "format": null,
       "about": [],
       "entities": [],
       "themes": [],
@@ -2669,6 +2725,20 @@
         72,
         108
       ]
+    },
+    {
+      "id": "ref-2026-07-22-new-practice-readers-book-b",
+      "title": null,
+      "droppedBy": null,
+      "droppedAt": null,
+      "subject": "",
+      "domain": "",
+      "format": null,
+      "about": [],
+      "entities": [],
+      "themes": [],
+      "works": [],
+      "ageBand": null
     }
   ]
 }

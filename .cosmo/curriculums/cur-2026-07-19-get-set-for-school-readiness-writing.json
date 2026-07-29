@@ -1,0 +1,189 @@
+{
+  "id": "cur-2026-07-19-get-set-for-school-readiness-writing",
+  "name": "Get Set for School: Readiness & Writing, Pre-K Teacher's Guide",
+  "droppedBy": "carolyng",
+  "droppedAt": "2026-07-19T16:25:44-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784492744.978109",
+  "publisher": "Learning Without Tears, Cabin John MD. Eighth Edition, copyright 2021, ISBN 978-1-950578-14-6",
+  "authors": ["Jan Z. Olsen, OTR", "Emily F. Knapton, M.Ed., OTR/L"],
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "handwriting-without-tears-part1.pdf",
+    "sourceParts": ["handwriting-without-tears-part1.pdf", "handwriting-without-tears-part2.pdf"],
+    "sourceSha256": "61ada94a8452f2b00905bbdec886fb0c2518b8665a46500b493b7ef06ac5ce99",
+    "pageCount": 144,
+    "mastersDir": ".cosmo/masters/cur-2026-07-19-get-set-for-school-readiness-writing",
+    "gateFindings": [],
+    "note": "Dropped as two parts of one book. The filename said 'Handwriting w:o Tears', which is what a form-only pass would have recorded; the cover read says Get Set for School Readiness & Writing, Pre-K Teacher's Guide, which is what changed the routing."
+  },
+  "sourceFiles": [
+    { "filename": "Handwriting w:o Tears .pdf", "localPath": ".cosmo/inspo-files/handwriting-without-tears-part1.pdf", "blobUrl": null },
+    { "filename": "Handwriting w:o tears 2.pdf", "localPath": ".cosmo/inspo-files/handwriting-without-tears-part2.pdf", "blobUrl": null }
+  ],
+  "routing": {
+    "skillUsed": "curriculum-ingestion",
+    "ruling": "Curriculum, and it was originally mis-routed. The Slack filename says 'Handwriting w:o Tears', which reads as a handwriting workbook and would route reference; the book is the Pre-K TEACHER'S GUIDE for the Get Set for School Readiness & Writing program and passes the curriculum test on both halves. Philosophy: a named developmentally-based, multisensory approach with an explicit stance against Pre-K seat work. Sequence: a Scope & Sequence of Printing plus six ordered learning sections. It also carries the rest of the curriculum apparatus, teaching guidelines, benchmarks, a Check Readiness assessment, and school-to-home connections. The routing was only caught because the vision pass read the cover; OCR alone rendered it unusably and the filename would have decided it."
+  },
+  "layer1_philosophy": {
+    "methodology": "developmental-multisensory",
+    "principles": [
+      "Pre-K children learn through movement and participation, so instruction is built on manipulatives, music, and dramatic play rather than seat work.",
+      "Explicit modeled instruction sits beside playful exploration; the program claims both, not one instead of the other.",
+      "Skills develop in a predictable order but not at fixed ages, so the teacher follows the child's demonstrated ability rather than a calendar.",
+      "Capitals before lowercase, and pre-writing before pencil work, on the grounds that capitals are developmentally easier to form.",
+      "Formal paper and pencil work is held back until the child is ready for it, and Pre-K workbooks are treated as the wrong tool."
+    ],
+    "learningTheory": "Developmental stage theory applied to fine motor and letter formation. The guide cites research on the predictable order of skill development (Boyd, Barnett, Bodrova, Leong and Gomby 2005) and stages children pass through in writing, and explicitly declines to attach those stages to ages.",
+    "assessmentApproach": "Check Readiness plus benchmarks at the back of the guide. Observational and criterion-referenced rather than scored: the teacher checks whether a child can perform a skill, not how they rank.",
+    "parentRole": "Supporting rather than instructing. The guide provides school-to-home connections so a parent reinforces what the classroom teaches; this is a classroom program a homeschooling family would have to adapt, not a parent-led curriculum out of the box.",
+    "knowledgeBankMatches": [],
+    "knowledgeBankGaps": [
+      {
+        "topic_key": "get-set-for-school-readiness-writing",
+        "topic_type": "method_format",
+        "note": "A named Pre-K readiness format (multisensory manipulatives, capitals-first, no worksheets) that Homa's knowledge bank does not carry. Proposed, not written: the knowledge-bank gate is a product write path and belongs in its own change."
+      }
+    ],
+    "productRelevance": "This program's central claim contradicts Homa's central format. It states that seat work and worksheets can be detrimental to young children and that Pre-K children are not ready for kindergarten workbooks, and it is not a fringe source: it is the eighth edition of the Learning Without Tears Pre-K guide, by the author of Handwriting Without Tears. Homa's youngest families are exactly this age band. That is a founder-level question about what Homa should make for under-fives, not an analysis detail, and it is raised in decisionsNeeded rather than buried here."
+  },
+  "layer2_scope": {
+    "mappings": [
+      { "curriculumSubject": "Readiness", "curriculumTopic": "Crayon grip and hand skills", "homaSubject": "ela", "homaDomain": "handwriting-transcription", "homaTopicId": "mt_WBfj79OqXz", "status": "mapped", "note": "Sitting and holding a pencil (4-6) is the closest existing topic; this program works the same skill earlier and with crayons." },
+      { "curriculumSubject": "Readiness", "curriculumTopic": "Curves, circles, vertical, horizontal and diagonal positions with Wood Pieces", "homaSubject": "ela", "homaDomain": "handwriting-transcription", "homaTopicId": null, "status": "unmapped", "suggested": { "slug": "ela.pre-writing-strokes", "kind": "procedural", "teachingWindowMonths": [36, 60], "note": "Forming the stroke shapes letters are built from, before any letter is attempted. Homa has letter formation but nothing below it." } },
+      { "curriculumSubject": "Drawing", "curriculumTopic": "Build and draw Mat Man (a person from parts)", "homaSubject": "art", "homaDomain": null, "homaTopicId": null, "status": "no_subject", "suggested": { "slug": "art.draw-a-person-from-parts", "kind": "procedural", "teachingWindowMonths": [36, 60], "note": "Representational drawing of a human figure, a standard Pre-K developmental marker. Homa's Art subject has Picture Study but no drawing-production topics." } },
+      { "curriculumSubject": "Alphabet Knowledge", "curriculumTopic": "Knowing and naming capital letters", "homaSubject": "ela", "homaDomain": "phonics-word-reading", "homaTopicId": "mt_frDIaXzWbx", "status": "mapped", "note": "Knowing all letters (4-6)." },
+      { "curriculumSubject": "Alphabet Knowledge", "curriculumTopic": "Capital to lowercase matching", "homaSubject": "ela", "homaDomain": "phonics-word-reading", "homaTopicId": null, "status": "unmapped", "suggested": { "slug": "ela.capital-lowercase-matching", "kind": "procedural", "teachingWindowMonths": [42, 66], "note": "Pairing the two cases of one letter, taught here as its own skill across four lessons." } },
+      { "curriculumSubject": "Colors & Coloring", "curriculumTopic": "Naming and using colors", "homaSubject": "ela", "homaDomain": "speaking-listening", "homaTopicId": "mt_xYlY6CjGN4", "status": "mapped", "note": "Naming Colors by Sight (3-5)." },
+      { "curriculumSubject": "Colors & Coloring", "curriculumTopic": "Aim, scribble, trace and color within a boundary", "homaSubject": "ela", "homaDomain": "handwriting-transcription", "homaTopicId": null, "status": "unmapped", "suggested": { "slug": "ela.controlled-coloring-and-aim", "kind": "procedural", "teachingWindowMonths": [36, 60], "note": "Directing a crayon deliberately: aim at a target, then stay inside a boundary. Prerequisite to tracing and to letter formation." } },
+      { "curriculumSubject": "Pre-Writing", "curriculumTopic": "Building capitals from parts (Wood Pieces, dough, cards, Wet-Dry-Try)", "homaSubject": "ela", "homaDomain": "handwriting-transcription", "homaTopicId": "mt_DMvKfP4uGC", "status": "partial", "note": "Letter Formation Families (5-6) covers the grouping idea, but the multisensory build-before-write mechanic and its 3-6 age band are outside it." },
+      { "curriculumSubject": "Writing Capital Letters", "curriculumTopic": "Forming capitals in the taught order", "homaSubject": "ela", "homaDomain": "handwriting-transcription", "homaTopicId": "mt_H7DquwQi_F", "status": "mapped", "note": "Forming Capital Letters (5-6); this program starts it younger and orders letters by stroke family." },
+      { "curriculumSubject": "Readiness", "curriculumTopic": "Sorting and trading Wood Pieces by attribute", "homaSubject": "math", "homaDomain": "data-statistics", "homaTopicId": "mt_NJz7vT4Bhp", "status": "mapped", "note": "Sorting and Classifying Objects by One Attribute (3-5), reached here through a handwriting manipulative." },
+      { "curriculumSubject": "Drawing", "curriculumTopic": "Shapes: cross, square and their strokes", "homaSubject": "math", "homaDomain": "geometry", "homaTopicId": "mt_KJeEeTutJI", "status": "partial", "note": "2-D shapes (4-6) covers recognition; here the shapes are taught as the strokes letters are made of, which is a different purpose." }
+    ],
+    "stats": { "totalCurriculumTopics": 11, "mapped": 5, "unmapped": 3, "noSubject": 1, "partial": 2 }
+  },
+  "layer3_structure": {
+    "cadence": "Not date-driven. The guide is organised by skill area and explicitly tells the teacher to follow the child's readiness rather than a schedule, so there is no week grid to extract.",
+    "sessionLengthMinutes": null,
+    "weeklyTemplate": "The repeating unit is an activity, not a day. Each lesson page carries its objective, its materials, the modeled demonstration, and the child's turn, and the guide adds Favorite Activities the teacher can return to at any point in the year.",
+    "progressionModel": "developmental-sequential: six ordered learning areas, each a prerequisite for the next, with movement between them driven by observed readiness rather than elapsed time",
+    "reviewRhythm": "Check Readiness plus benchmarks at the back, used when the teacher wants to know whether to move on",
+    "totalWeeks": null,
+    "note": "Recorded as absent rather than invented. A curriculum writer looking for a week grid here will not find one, and that is the honest answer: pacing is the teacher's call by design."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      { "type": "manipulative-letter-building", "description": "Child builds a capital letter from a fixed set of physical wood pieces on a mat, before ever writing it", "recipe": null, "status": "no_recipe", "suggestedRecipe": { "name": "manipulative-building-mat", "creationPath": "html", "note": "Already an acknowledged open gap. A printable mat with the piece outlines and placement guides is the paper form of this." } },
+      { "type": "draw-a-person-from-parts", "description": "Adult builds a figure (Mat Man) from shape pieces while the class sings, then children draw it", "recipe": null, "status": "no_recipe", "suggestedRecipe": { "name": "draw-a-person-page", "creationPath": "hybrid", "note": "A page that shows the parts and gives the child the space and prompts to assemble a person. Distinct from a colouring page: the child produces the figure." } },
+      { "type": "aim-and-scribble", "description": "Child aims a crayon at a target (stars, fireworks) and scribbles within it, building control before tracing", "recipe": null, "status": "no_recipe", "suggestedRecipe": { "name": "aim-and-scribble-page", "creationPath": "image-direct", "note": "Targets on a dark ground, sized so a three-year-old can hit them. The pedagogical point is aim, so the target must be forgiving." } },
+      { "type": "wet-dry-try", "description": "Child writes a letter on a slate with a wet sponge, dries it, then chalks it: three passes over the same stroke", "recipe": null, "status": "no_recipe", "suggestedRecipe": { "name": "three-pass-letter-practice", "creationPath": "html", "note": "The paper analogue is one letter, three differently-cued passes, not a row of twenty identical traces." } },
+      { "type": "capital-lowercase-matching", "description": "Matching the two cases of a letter", "recipe": "matching-visual-discrimination", "status": "have_recipe" },
+      { "type": "letter-picture-match", "description": "Matching a letter to a picture that starts with it", "recipe": "clip-cards", "status": "have_recipe" },
+      { "type": "letter-formation-practice", "description": "Forming a capital in the taught stroke order", "recipe": "letter-number-formation-practice", "status": "have_recipe" },
+      { "type": "song-and-chant", "description": "Sung routines (Crayon Song, ABC Sing and Point, Alphabet Animals on Parade) that carry the instruction", "recipe": "chant-and-rhyme-card", "status": "have_recipe" }
+    ],
+    "stats": { "total": 8, "haveRecipe": 4, "noRecipe": 4 }
+  },
+  "layer5_lessons": {
+    "decompositionQuality": "partial",
+    "unitKind": "section",
+    "unitsFound": 7,
+    "unitsDecomposed": 6,
+    "units": [
+      {
+        "ordinal": 2, "unitLabel": "READINESS",
+        "topic": { "name": "hand skills and stroke positions", "quote": "READINESS" },
+        "activities": [
+          { "description": "Wood Piece play, sorting, trading and bagging", "quote": "Wood Pieces" },
+          { "description": "Teaching crayon grip with an accompanying song", "quote": "Crayon Grip" }
+        ],
+        "materials": [{ "name": "Wood Pieces set and mat", "quote": "Wood Pieces" }],
+        "homaTopicIds": ["mt_WBfj79OqXz", "mt_NJz7vT4Bhp"],
+        "ageRangeMonths": [36, 60]
+      },
+      {
+        "ordinal": 3, "unitLabel": "DRAWING",
+        "topic": { "name": "representational drawing", "quote": "DRAWING" },
+        "activities": [{ "description": "Build and sing Mat Man, then draw him", "quote": "Mat Man" }],
+        "materials": [{ "name": "Mat Man pieces and pattern", "quote": "Mat Man" }],
+        "homaTopicIds": [],
+        "ageRangeMonths": [36, 60]
+      },
+      {
+        "ordinal": 4, "unitLabel": "ALPHABET KNOWLEDGE",
+        "topic": { "name": "letter naming and matching", "quote": "ALPHABET KNOWLEDGE" },
+        "activities": [{ "description": "Sing and point along the alphabet; name that capital; match capital to lowercase", "quote": "Capital & Lowercase Letters" }],
+        "homaTopicIds": ["mt_frDIaXzWbx"],
+        "ageRangeMonths": [36, 66]
+      },
+      {
+        "ordinal": 5, "unitLabel": "COLORS & COLORING",
+        "topic": { "name": "crayon control and colour naming", "quote": "COLORS & COLORING" },
+        "activities": [{ "description": "Aim and scribble, then aim and colour, then trace", "quote": "Aim & Trace" }],
+        "homaTopicIds": ["mt_xYlY6CjGN4"],
+        "ageRangeMonths": [36, 60]
+      },
+      {
+        "ordinal": 6, "unitLabel": "PRE-WRITING",
+        "topic": { "name": "building letters before writing them", "quote": "PRE-WRITING" },
+        "activities": [
+          { "description": "Roll-A-Dough letters, Stamp and See screen, Line It Up, Wet-Dry-Try on the slate", "quote": "Roll-A-Dough" },
+          { "description": "Air writing and door tracing: whole-arm letter formation", "quote": "Air Writing" }
+        ],
+        "materials": [{ "name": "Slate Chalkboard", "quote": "Slate Chalkboard" }],
+        "homaTopicIds": ["mt_DMvKfP4uGC"],
+        "ageRangeMonths": [42, 66]
+      },
+      {
+        "ordinal": 7, "unitLabel": "WRITING CAPITAL LETTERS",
+        "topic": { "name": "capital letter formation", "quote": "WRITING CAPITAL LETTERS" },
+        "activities": [{ "description": "Capitals taught in stroke families, vertical and horizontal first (L F E H T I U)", "quote": "Capitals First" }],
+        "homaTopicIds": ["mt_H7DquwQi_F"],
+        "ageRangeMonths": [48, 72]
+      }
+    ],
+    "notes": "Six of the seven sections are decomposed. Section 1 (INTRODUCTION, pages 1 to 32) is front matter about how to use the guide and carries no teaching sequence, so it is counted in unitsFound and deliberately not decomposed. Per-lesson decomposition below section level is not attempted here: the guide holds roughly 90 named lesson pages, and a lesson-level pass is real work that should be its own session rather than a rushed tail on this one."
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/cur-2026-07-19-get-set-for-school-readiness-writing.txt",
+    "textBlobUrl": null,
+    "textExtraction": { "ocr": "tesseract", "visionModel": "google/gemini-3-flash", "visionPages": [1, 144] },
+    "subjects": [
+      { "name": "handwriting readiness", "role": "teaches", "quote": "Readiness & Writing" },
+      { "name": "capital letter formation", "role": "teaches", "quote": "WRITING CAPITAL LETTERS" },
+      { "name": "alphabet knowledge", "role": "teaches", "quote": "ALPHABET KNOWLEDGE" },
+      { "name": "fine motor skills", "role": "teaches", "quote": "Crayon Grip" },
+      { "name": "pre-k curriculum", "role": "identity", "quote": "Get Set for School" }
+    ],
+    "entities": [
+      { "name": "Mat Man", "kind": "character", "role": "teaches", "quote": "Mat Man", "note": "Roled teaches, not cast: Mat Man is not a story character who appears beside the content, he IS the drawing lesson. Building and drawing him is the activity." },
+      { "name": "Learning Without Tears", "kind": "organization", "role": "identity", "quote": "Learning Without Tears" },
+      { "name": "Jan Z. Olsen", "kind": "person", "role": "identity", "quote": "Jan Z. Olsen" }
+    ],
+    "themes": [
+      { "name": "developmental readiness over age", "evidence": "developmentally-based program" },
+      { "name": "multisensory learning", "evidence": "Multisensory Instruction" },
+      { "name": "play instead of seat work", "evidence": "seat work and worksheets can be detrimental to young children" }
+    ],
+    "keyTerms": [
+      { "term": "Wood Pieces", "occurrences": 30, "quote": "Wood Pieces" },
+      { "term": "Wet-Dry-Try", "occurrences": 6, "quote": "Wet-Dry-Try" },
+      { "term": "Roll-A-Dough", "occurrences": 4, "quote": "Roll-A-Dough" },
+      { "term": "Check Readiness", "occurrences": 3, "quote": "Check Readiness" },
+      { "term": "School-to-Home", "occurrences": 2, "quote": "School-to-Home" }
+    ],
+    "referencedWorks": [
+      { "title": "My First School Book", "author": null, "kind": "book", "quote": "My First School Book" }
+    ],
+    "notes": "The proprietary manipulative names (Wood Pieces, Roll-A-Dough, Wet-Dry-Try, Line It Up) are the highest-value retrieval terms here: a parent who owns this program will say them by name, and nothing else in the corpus uses them."
+  },
+  "decisionsNeeded": [
+    { "category": "product", "item": "This program says Pre-K children are not ready for workbooks and that seat work can be detrimental. Homa's core output for under-fives is a printable page. Do we change what we make for that age band, defend the current format, or offer both and let the parent choose?", "impact": "Decides what materials-studio should produce for ages 3 to 5, which is Homa's youngest and fastest-growing band.", "urgency": "high" },
+    { "category": "taxonomy", "item": "Add ela.pre-writing-strokes, ela.capital-lowercase-matching and ela.controlled-coloring-and-aim, and decide whether Art gains drawing-production topics (art.draw-a-person-from-parts) or stays appreciation-only.", "impact": "Four Pre-K readiness skills currently have nowhere to map, so any Pre-K material Homa makes is untrackable.", "urgency": "medium" },
+    { "category": "recipes", "item": "Four new formats proposed: manipulative-building-mat (already an open gap), draw-a-person-page, aim-and-scribble-page, three-pass-letter-practice.", "impact": "These are the paper forms of a manipulative program; they are how Homa could serve this pedagogy without the physical kit.", "urgency": "medium" },
+    { "category": "knowledge bank", "item": "Add get-set-for-school-readiness-writing as a method_format entry.", "impact": "Homa would recognise the program by name when a family says they use it.", "urgency": "low" }
+  ],
+  "notes": "The most valuable item in the 07-29 backfill batch, and it was hiding behind a filename. Dropped as two parts on 2026-07-19 and marked shipped without an analysis; the filename said 'Handwriting w:o Tears' and the vision cover read said Pre-K Teacher's Guide, which is what moved it from reference to curriculum. Layer 3 is honestly empty: this guide has no week grid by design, and recording that is more useful than inventing one. Layer 5 stops at section level with the reason stated. The finding that matters beyond ingestion is in layer1_philosophy.productRelevance and the first decision: a mainstream, current Pre-K program by the Handwriting Without Tears author argues that worksheets can harm the exact age band Homa serves youngest."
+}

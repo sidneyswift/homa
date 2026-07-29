@@ -121,6 +121,40 @@
       "works": []
     },
     {
+      "id": "cur-2026-07-19-get-set-for-school-readiness-writing",
+      "name": "Get Set for School: Readiness & Writing, Pre-K Teacher's Guide",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-19T16:25:44-04:00",
+      "methodology": "developmental-multisensory",
+      "mappedPct": 45,
+      "gapCount": 4,
+      "decisionsCount": 4,
+      "about": [
+        "handwriting readiness",
+        "capital letter formation",
+        "alphabet knowledge",
+        "fine motor skills",
+        "pre-k curriculum"
+      ],
+      "themes": [
+        "developmental readiness over age",
+        "multisensory learning",
+        "play instead of seat work"
+      ],
+      "unitsDecomposed": 6,
+      "unitTopics": [
+        "hand skills and stroke positions",
+        "representational drawing",
+        "letter naming and matching",
+        "crayon control and colour naming",
+        "building letters before writing them",
+        "capital letter formation"
+      ],
+      "works": [
+        "My First School Book"
+      ]
+    },
+    {
       "id": "cur-2026-07-19-handwriting-without-tears",
       "name": "Get Set for School: Readiness & Writing Pre-K Teacher's Guide (Learning Without Tears, 8th Edition)",
       "droppedBy": "aless",
