@@ -438,3 +438,143 @@ her child before Homa has said anything at all. Beat 4 is a -1 on this
 walk for the 215.6s wait and the redundant question, both now addressed;
 it needs a re-walk to re-score, and the wait is the half that is not
 proven fixed.
+
+### Walk 003, 2026-07-29, Rachel, re-walking wave 1
+
+Ohio, one child: Ellie, 7, horses and drawing. Same path as 001 and 002
+(the optional approach question skipped) so the timings compare.
+Reached the reveal.
+
+**What this walk was for, and what it found instead**
+
+Both things it set out to verify passed. It then failed at the beat the
+baseline scores `+1`, for a reason neither earlier walk could have seen.
+
+| Checked | Result |
+|---|---|
+| Beat 4 no longer asks for more children | **PASS.** "Ellie sounds like a joy, horses and drawing are a great combo to build on. Now let's get a real picture of where Ellie is." |
+| Her child's interests head the checklist, docked in chat | **PASS.** "Ellie horses, drawing" above the first question, verified on screen in the compact chat dock, not just the full-page flow. |
+
+**Latency: walk 002's 215.6s was an outlier, and partly self-inflicted**
+
+| Turn | Walk 002 | Walk 003 |
+|---|---|---|
+| Reaction to the setup | 42s (cold) | **28s** |
+| Reaction to the roster | **215.6s** | **22s** |
+| The reveal | not reached | **13s** |
+
+The dev log explains most of the gap and it is a local artifact:
+`[eve:dev] change detected (change agent/skills/onboarding/SKILL.md),
+rebuilding authored artifacts` followed by `eve: initializing 1 sandbox
+template ... (0 reused, 1 built)`. eve hot-reloads the skill on every
+save, each reload rebuilds the sandbox template, and a turn in flight
+waits on it. Editing the skill during a walk stretched one turn from
+47s to past 107s in this session, watched live.
+
+So: **do not edit anything under `apps/web/agent/` while a walk is in
+flight**, and treat any local turn measured just after a skill edit as
+uninformative. gh#404 has been updated with these numbers. The
+production question it was filed to answer is unchanged and still
+unanswered, but it is a smaller question than walk 002 made it look.
+
+The good news inside that: eve picks up a SKILL.md edit without an
+`eve build` and without a server restart, so skill iteration during a
+walk is cheap as long as it happens between turns.
+
+**The finding: this skill's example sentences are being said to parents**
+
+Rachel answered five questions about her seven year old: "getting
+there" on math, on phonics, and on writing, "easily" on explaining
+something step by step, and **"not yet" on reading a book aloud and
+telling you about it**. Reading is why she pulled Ellie out of school.
+
+The reveal said:
+
+> From what you've told me so far, Ellie is doing great in math,
+> phonics, and writing. Those five answers already paint a strong early
+> picture.
+>
+> There's still a lot of ground to cover. **The reading and science
+> questions are still waiting**, and answering a few more will sharpen
+> this picture even further.
+
+Three failures stacked in one beat, worst last:
+
+1. Three taps of "getting there" came back as "doing great". The card's
+   "strongest subjects right now" is a ranking among what she answered,
+   not a verdict, and the model promoted it into one.
+2. Her single worry is never mentioned. Beat 7 already says to "name
+   the worry she actually has and answer it plainly"; the reveal named
+   three strengths and skipped it.
+3. **"The reading and science questions are still waiting" is beat 7's
+   own worked example, copied out whole**, naming two subjects the file
+   cannot know anything about. One of them was the question she DID
+   answer, with the only negative answer she gave, about the thing she
+   is most afraid of.
+
+**The root cause, now three for three**
+
+Every walk so far has caught a quoted example from this file arriving
+in a real conversation with its stand-in content intact:
+
+| Walk | Sentence emitted verbatim | Why it was false |
+|---|---|---|
+| 001 | "Now let's talk about your kids" | landed 22s after the card it introduced |
+| 002 | "Any other kids I should know about?" | she had just clicked "That's everyone" |
+| 003 | "the reading and science questions are still waiting" | reading was the one question she answered |
+
+Each was a correct instruction delivered to a situation that was not
+hers. The two earlier fixes treated their sentence as the bug. It was
+not: the bug is that **a quoted example in this file is read as copy,
+not as a shape.**
+
+Fixed this session, in three places: beat 7's anchor no longer carries a
+quotable subject list and now says to read her real answers first; beat
+7 gains the "strongest subjects" trap and says naming her worry is the
+half most easily lost; and "What not to do" gains the general law with
+all three scars cited.
+
+**The rule this leaves for anyone editing this skill**
+
+An example that names content a parent could check (a subject, a count,
+a child, a date) will eventually be said to a parent for whom it is
+false. Write examples as shapes with obvious stand-ins, the way beat 6
+does with "something with the shape of ...", and never as a sentence
+that would read correctly if pasted straight into chat. Beat 6's form
+survived three walks intact: Homa substituted the real child's name into
+it every time.
+
+**Not reached**
+
+Beats 8 (the rehearsal, newly moved after the reveal) and 9 (the
+planner, newly introduced) are shipped and NOT walked. Both were added
+this session and neither has been seen on screen. That is the first
+thing walk 004 should do, and it needs only one reply past the reveal to
+get there.
+
+**Beat scores, 1 to 7**
+
+| # | Beat | Feels | Who acts | Need |
+|---|---|---|---|---|
+| 1 | Open | +1 | robot | need |
+| 2 | Setup cards | +1 | human | need |
+| 3 | React once | 0 | robot | nice |
+| 4 | Meet the family | +1 | robot | need |
+| 5 | Go deep with one | skipped | robot | need |
+| 6 | The questions | **0** | human | need |
+| 7 | The reveal | **-1** | robot | need |
+
+Beat 4 recovers to +1: the redundant question is gone and the turn was
+22s. Beat 6 moves from -1 to 0 on the interests header, which is a real
+improvement and not yet a +1, because the header is warmth around a beat
+whose substance is still a list of things her child cannot do. Beat 7
+drops from +1 to -1: it is the payoff beat, and on this walk it told a
+frightened mother that everything was great and that the question she
+had answered was still waiting.
+
+Beat 5 did not happen at all. With one child whose interests the card
+already collected, Homa went straight from the roster to the questions.
+Worth deciding rather than discovering: beat 5 is where
+`start_first_making` gets its theme, so skipping it means no making is
+underway when she reaches the reveal, and "One more thing" becomes the
+only chance at something she can keep.
