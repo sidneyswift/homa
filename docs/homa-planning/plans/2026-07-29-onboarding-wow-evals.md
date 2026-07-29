@@ -512,6 +512,33 @@ Three failures stacked in one beat, worst last:
    answer, with the only negative answer she gave, about the thing she
    is most afraid of.
 
+**The correction turn, which proves the data was never wrong**
+
+Rachel pushed back in character: "Wait, I did answer the reading one.
+She can't read a book on her own yet, that's the whole reason we pulled
+her out." Homa's reply was the best writing in the walk:
+
+> You're right, that's on me. Ellie's reading answer already came
+> through, and it's shown up in her report as literacy. Right now her
+> growing edge there is reading a short book on her own and telling you
+> about it afterward. [...] Math, phonics, and writing are the strong
+> spots your other answers showed. Science is still an open question if
+> you want to keep going.
+
+Owns it in four words, no grovelling, names the specific item, and
+corrects "reading and science" to just science, which is now true.
+
+The important part is what it reveals: **the answer was captured
+correctly all along**, binned as literacy. Nothing was wrong with the
+scorer, the ledger or the report. Only the sentence was wrong, and the
+sentence was wrong because it was copied. That is what makes this a
+skill fix rather than a data fix, and it is why the fix is worth
+trusting.
+
+One small thing to file separately if it recurs: the subject is
+"literacy" in the report and "Phonics" and "Reading" in the questions
+she just answered. She now has three words for roughly one thing.
+
 **The root cause, now three for three**
 
 Every walk so far has caught a quoted example from this file arriving
