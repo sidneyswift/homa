@@ -59,7 +59,7 @@ export default function ChatScreen() {
             paddingVertical: space.sm,
             borderBottomWidth: 1,
             borderBottomColor: colors.borderSubtle,
-            backgroundColor: colors.card,
+            backgroundColor: colors.page,
           }}
         >
           <Logo size={24} />
