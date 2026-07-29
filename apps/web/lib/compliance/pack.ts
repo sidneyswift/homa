@@ -150,6 +150,25 @@ function humanizeToken(token: string): string {
   return token.replace(/_/g, " ");
 }
 
+/** Assessment type tokens a parent should read: the bare upstream
+ * "other" carries no information and printed literally ("artifact:
+ * other.", 51-state vision QC 2026-07-28), so it is dropped from
+ * display; the requirement itself still renders. */
+function displayTypes(types: readonly string[]): string {
+  return types
+    .filter((token) => token !== "other")
+    .map(humanizeToken)
+    .join(", ");
+}
+
+/** Verbatim deadline prose keeps its own punctuation; when the template
+ * adds a separator or period right after it, a trailing period doubles
+ * ("vary by district.. How often", vision QC). Trimming one terminal
+ * period is punctuation normalization, never a content change. */
+function trimTrailingPeriod(text: string): string {
+  return text.replace(/\.$/, "");
+}
+
 interface Duties {
   pathway: StatePathwayDetail | null;
   /** Concrete = required on the default pathway AND varies-free, the
@@ -339,13 +358,13 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
           : "is part of the default path",
       ];
       const deadline = p.notification.deadline
-        ? `<strong>${escapeHtml(p.notification.deadline)}</strong>`
-        : "The source does not list a fixed date; confirm timing at the official source.";
+        ? `<strong>${escapeHtml(trimTrailingPeriod(p.notification.deadline))}</strong>`
+        : "The source does not list a fixed date; confirm timing at the official source";
       rows.push(
         definitionRow(
           "Telling the state",
           `${parts.join(" ")}.`,
-          `When: ${deadline}${p.notification.frequency ? ` · how often: ${escapeHtml(p.notification.frequency)}` : ""} ${cite(p.statute)}`,
+          `When: ${deadline}${p.notification.frequency ? ` · how often: ${escapeHtml(humanizeToken(p.notification.frequency))}` : ""}${p.statute ? ` · ${cite(p.statute)}` : ""}`,
         ),
       );
     } else {
@@ -361,7 +380,7 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
     if (p.assessment.varies) {
       rows.push(definitionRow("Year-end check", variesLine(detail)));
     } else if (p.assessment.required) {
-      const types = p.assessment.types.map(humanizeToken).join(", ");
+      const types = displayTypes(p.assessment.types);
       rows.push(
         definitionRow(
           "Year-end check",
@@ -403,19 +422,28 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
       );
     }
 
-    // Records to keep.
+    // Records to keep. The row must agree with the template pages that
+    // follow it: a state with a time minimum or a year-end check gets
+    // those templates, and page 2 saying "no specific records" while
+    // page 5 offers a record template read as a contradiction to a
+    // district reader (51-state vision QC, 2026-07-28: KS MA SD WI).
     if (p.recordkeeping.varies) {
       rows.push(definitionRow("Records to keep", variesLine(detail)));
     } else {
       const kept: string[] = [];
       if (p.recordkeeping.attendanceTracking) kept.push("an attendance record");
       if (p.recordkeeping.portfolioRequired) kept.push("a portfolio of work");
+      const practical: string[] = [];
+      if (duties.timeConcrete) practical.push("the instructional-time minimum");
+      if (duties.assessmentConcrete) practical.push("the year-end check");
       rows.push(
         definitionRow(
           "Records to keep",
           kept.length > 0
             ? `The default path asks families to keep ${escapeHtml(kept.join(" and "))}.`
-            : "No specific records are required on the default path.",
+            : practical.length > 0
+              ? `No record format is prescribed, and this pack includes templates because ${escapeHtml(practical.join(" and "))} ${practical.length > 1 ? "are" : "is"} easier to show with one.`
+              : "No specific records are required on the default path.",
         ),
       );
     }
@@ -464,7 +492,7 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
     p && !p.notification.varies && p.notification.required && p.notification.deadline
       ? `<aside class="sp-dates">
   <p class="sp-section-label">The filing deadline</p>
-  <p><strong>${escapeHtml(p.notification.deadline)}</strong>${p.notification.recipient ? ` · to ${escapeHtml(p.notification.recipient)}` : ""}${p.notification.frequency ? ` · ${escapeHtml(p.notification.frequency)}` : ""}</p>
+  <p><strong>${escapeHtml(trimTrailingPeriod(p.notification.deadline))}</strong>${p.notification.recipient ? ` · to ${escapeHtml(p.notification.recipient)}` : ""}${p.notification.frequency ? ` · ${escapeHtml(humanizeToken(p.notification.frequency))}` : ""}</p>
 </aside>`
       : "";
 
@@ -488,9 +516,26 @@ ${keyDates}
 ${highCallout}`;
 }
 
+/** One row per destination: upstream files the same statute under
+ * several label variants ("15-802" four ways in AZ, all pointing at one
+ * URL, 51-state vision QC), and the shortest label is the cleanest name
+ * for the shared destination. */
+function dedupeCitationsByUrl(
+  citations: readonly { label: string; url: string; sourceType: string | null }[],
+): { label: string; url: string; sourceType: string | null }[] {
+  const byUrl = new Map<string, { label: string; url: string; sourceType: string | null }>();
+  for (const citation of citations) {
+    const existing = byUrl.get(citation.url);
+    if (!existing || citation.label.length < existing.label.length) {
+      byUrl.set(citation.url, citation);
+    }
+  }
+  return [...byUrl.values()];
+}
+
 function sourcesPage(detail: StateRequirementsDetail, duties: Duties): string {
-  const citations = detail.citations.filter(
-    (citation) => citation.sourceType !== "case_law",
+  const citations = dedupeCitationsByUrl(
+    detail.citations.filter((citation) => citation.sourceType !== "case_law"),
   );
   const rows = citations
     .map(
@@ -553,13 +598,13 @@ export function deriveChecklistItems(
     // clause, never a splice ("file your notice, By July 1" reads as the
     // retired "by By" class).
     const deadline = p.notification.deadline
-      ? `When: <strong>${escapeHtml(p.notification.deadline)}</strong>.`
+      ? `When: <strong>${escapeHtml(trimTrailingPeriod(p.notification.deadline))}</strong>.`
       : "The source does not list a fixed date; confirm timing at the official source.";
     items.push({
       main: `${stateName} requires: file your notice${recipient}.`,
       sub: `${deadline}${
         p.notification.frequency
-          ? ` How often: ${escapeHtml(p.notification.frequency)}.`
+          ? ` How often: ${escapeHtml(humanizeToken(p.notification.frequency))}.`
           : ""
       }${cite}`,
     });
@@ -590,7 +635,7 @@ export function deriveChecklistItems(
     });
   }
   if (duties.assessmentConcrete && p) {
-    const types = p.assessment.types.map(humanizeToken).join(", ");
+    const types = displayTypes(p.assessment.types);
     items.push({
       main: `${stateName} requires: arrange the <strong>year-end check</strong>${types ? ` (${escapeHtml(types)})` : ""}.`,
       sub: `${p.assessment.frequency ? `How often: ${escapeHtml(humanizeToken(p.assessment.frequency))}. ` : ""}The year-end record page keeps what you arranged and when.${cite}`,
@@ -681,8 +726,8 @@ function legalityPage(detail: StateRequirementsDetail, duties: Duties): string {
     detail.compulsoryStartAge !== null && detail.compulsoryEndAge !== null
       ? `<p class="sp-body">School attendance is compulsory from age ${detail.compulsoryStartAge} to ${detail.compulsoryEndAge}${detail.compulsoryNotes ? `. ${escapeHtml(detail.compulsoryNotes)}` : "."}</p>`
       : "";
-  const citations = detail.citations.filter(
-    (citation) => citation.sourceType !== "case_law",
+  const citations = dedupeCitationsByUrl(
+    detail.citations.filter((citation) => citation.sourceType !== "case_law"),
   );
   const citeRows = citations
     .map(
@@ -772,7 +817,7 @@ function timeLogPage(detail: StateRequirementsDetail, duties: Duties): string {
     detail,
     `${detail.stateName} asks for ${bits.join(" and ") || "instructional time"} on the default path · rules verified ${verifiedMonthYear(detail.sourceLastVerified)}`,
     "Instructional time log",
-    TEMPLATE_INTRO(detail, "a record of instructional time", duties.pathway?.instructionalTime.varies ?? false),
+    `A record-keeping template, offered because ${detail.stateName}'s default pathway sets an instructional-time minimum. No record format is prescribed; a running log is one good way to show the year, not the only way.`,
   )}
 <table class="sp-log">
   <thead><tr><th class="sp-log-date">Date</th><th>What we worked on</th><th class="sp-log-time">Time</th></tr></thead>
@@ -811,7 +856,7 @@ function yearEndPage(
   children: StatePackChild[],
 ): string {
   const p = duties.pathway;
-  const types = p ? p.assessment.types.map(humanizeToken).join(", ") : "";
+  const types = p ? displayTypes(p.assessment.types) : "";
   const childRows = (children.length > 0 ? children : [{ name: "", birthdate: null }])
     .map(
       (child) =>
@@ -822,7 +867,7 @@ function yearEndPage(
     detail,
     `${detail.stateName} asks for a year-end check on the default path · rules verified ${verifiedMonthYear(detail.sourceLastVerified)}`,
     "Year-end check record",
-    `${TEMPLATE_INTRO(detail, "a record of the year-end check", duties.pathway?.assessment.varies ?? false)}${types ? ` The statute names: ${types}.` : ""}`,
+    `A place to keep what you arranged for the year-end check ${detail.stateName}'s default pathway asks for: what it was, when, and where you keep the result.${types ? ` The statute names: ${escapeHtml(types)}.` : ""} This format is one good way, not the only way.`,
   )}
 <table class="sp-log">
   <thead><tr><th class="sp-log-subject">Child</th><th>What we arranged</th><th class="sp-log-date">Date</th><th>Kept where</th></tr></thead>
@@ -870,7 +915,7 @@ function prepSheetPage(
     }
     if (notification.frequency) {
       asksRows.push(
-        `<p class="sp-body"><strong>How often:</strong> ${escapeHtml(notification.frequency)}.</p>`,
+        `<p class="sp-body"><strong>How often:</strong> ${escapeHtml(humanizeToken(notification.frequency))}.</p>`,
       );
     }
   }
@@ -900,12 +945,17 @@ function prepSheetPage(
   // never a "by" prefix ("by By July 1", caught on the render smoke).
   const sendLine =
     !varies && notification?.recipient && notification?.deadline
-      ? ` You send it to ${escapeHtml(notification.recipient)}. When: ${escapeHtml(notification.deadline)}.`
+      ? ` You send it to ${escapeHtml(notification.recipient)}. When: ${escapeHtml(trimTrailingPeriod(notification.deadline))}.`
       : "";
+  // "Telling {State}", never "{State}'s notice of intent": the filing
+  // instrument's real name varies (California files a Private School
+  // Affidavit, Arizona an Affidavit of Intent), and the typed payload
+  // does not carry it, so the neutral phrasing is the one that is true
+  // in every jurisdiction (51-state vision QC, 2026-07-28).
   return `${pageHeader(
     detail,
     `Your state · rules verified ${verifiedMonthYear(detail.sourceLastVerified)}`,
-    `Before you file: ${detail.stateName}'s notice of intent`,
+    `Before you file: telling ${detail.stateName}`,
     `What ${detail.stateName} asks for, next to the details you already have.`,
   )}
 <div class="sp-prep">
@@ -920,7 +970,7 @@ function prepSheetPage(
   </div>
 </div>
 <aside class="sp-notform">
-  <p>This worksheet helps you gather what ${escapeHtml(detail.stateName)} asks for in a notice of intent. It is not the official form and cannot be filed. When it is filled in, copy the details into the official form on your state education department's homeschool page${link ? `: <span class="sp-mono">${escapeHtml(link)}</span>` : ""}.${sendLine} Homa does not file it for you.</p>
+  <p>This worksheet helps you gather what ${escapeHtml(detail.stateName)} asks for when you tell the state. It is not the official form and cannot be filed. When it is filled in, copy the details into the official form on your state education department's homeschool page${link ? `: <span class="sp-mono">${escapeHtml(link)}</span>` : ""}.${sendLine} Homa does not file it for you.</p>
 </aside>`;
 }
 
@@ -1021,7 +1071,7 @@ export function wrapStatePackDocument(
   .sp-support { margin: 5px 0 0; font-size: 11px; color: ${MUTED}; max-width: 5.6in; }
   .sp-section-label { margin: 0 0 8px; font-family: "JetBrains Mono", monospace; font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.14em; color: ${SUBTLE}; }
   .sp-body { font-size: 10.5px; line-height: 1.55; color: ${BODY}; margin: 6px 0; }
-  .sp-mono { font-family: "JetBrains Mono", monospace; font-size: 8.5px; color: ${CLAY_DEEP}; word-break: break-all; }
+  .sp-mono { font-family: "JetBrains Mono", monospace; font-size: 8.5px; color: ${CLAY_DEEP}; overflow-wrap: break-word; }
   .sp-banner { border: 1px solid ${RULE}; border-radius: 6px; padding: 8px 12px; font-size: 10px; color: ${MUTED}; background: #ffffff; }
   .sp-contents { margin-top: 0.35in; }
   .sp-contents-list { list-style: none; margin: 0; padding: 0; }
@@ -1165,7 +1215,7 @@ export function composeStatePack(input: StatePackInput): StatePack {
     if (duties.notification) {
       contentPages.push({
         page: {
-          title: `Before you file: ${detail.stateName}'s notice of intent`,
+          title: `Before you file: telling ${detail.stateName}`,
           body: prepSheetPage(detail, duties, family),
         },
         legalLine: true,

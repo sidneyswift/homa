@@ -202,7 +202,7 @@ describe("New York (detailed plan, verbatim mid-year clause)", () => {
     const pack = compose("NY");
     const titles = pack.pages.map((page) => page.title);
     assert.ok(titles.some((title) => title.includes("checklist")));
-    assert.ok(titles.some((title) => title.includes("notice of intent")));
+    assert.ok(titles.some((title) => title.includes("Before you file")));
   });
   it("points every official-channel line at the state education department", () => {
     // The first shipped DC pack labeled HomeschoolLeap's wizard "the
@@ -284,7 +284,7 @@ describe("Texas (zero duty)", () => {
     const titles = pack.pages.map((page) => page.title);
     assert.ok(titles.some((title) => title === "You are legal in Texas"));
     assert.ok(!titles.some((title) => title.includes("checklist")));
-    assert.ok(!titles.some((title) => title.includes("notice of intent")));
+    assert.ok(!titles.some((title) => title.includes("Before you file")));
     assert.ok(!titles.some((title) => title.startsWith("Attendance")));
   });
   it("keeps the status citation on the legality page", () => {
