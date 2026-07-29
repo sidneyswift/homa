@@ -489,32 +489,6 @@ export function ChatSession({
     sendMessage(text, "card");
   }
 
-  /** The manual fresh start: archive what is on screen, rotate the
-   *  session, keep every word visible above. Nothing is erased. */
-  function startNewChat() {
-    recoveryRef.current?.abort();
-    const nextArchived = [
-      ...archivedRef.current,
-      ...archiveMessages(messages, stampMessageTimes(liveTimes, messages)),
-    ];
-    setArchived(nextArchived);
-    archivedRef.current = nextArchived;
-    setLiveTimes({});
-    setQueued([]);
-    // The answered-card summaries belong to the session that just went
-    // to the archive; the archived cards render settled on their own.
-    setQuestionAnswers({});
-    void saveChat(storageKey, {
-      archived: nextArchived,
-      events: [],
-      session: undefined,
-      messageTimes: {},
-      lastActivityAt: currentTimeMs(),
-    });
-    agent.reset();
-    durableCursorRef.current = 0;
-  }
-
   const transcript = buildTranscript({
     archived,
     live: messages,
@@ -528,8 +502,7 @@ export function ChatSession({
   const liveMessageSet = new Set(messages);
   const activeQuestion = busy ? null : latestQuestionRequest(messages);
   // The chips return whenever a session has no words in it yet: the
-  // first run, a fresh morning over yesterday's scrollback, and right
-  // after "Start a new chat".
+  // first run, or a fresh morning over yesterday's scrollback.
   const showSuggestions = messages.length === 0 && !busy;
 
   const statusLabel = busy ? busyLabel(messages) : null;
@@ -835,9 +808,6 @@ export function ChatSession({
           </Pressable>
         ) : null}
       </View>
-      {messages.length > 0 ? (
-        <NewChatRow disabled={busy} onPress={startNewChat} />
-      ) : null}
     </View>
   );
 }
@@ -899,32 +869,3 @@ function DaySeparator({ label }: { label: string }) {
   );
 }
 
-function NewChatRow({
-  disabled,
-  onPress,
-}: {
-  disabled: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <View
-      style={{
-        backgroundColor: colors.page,
-        paddingBottom: space.sm,
-        alignItems: "center",
-      }}
-    >
-      <Pressable accessibilityRole="button" onPress={onPress} disabled={disabled}>
-        <Text
-          style={{
-            fontFamily: fontFamilies.bodyMedium,
-            fontSize: fontSize.sm,
-            color: disabled ? colors.textSubtle : colors.textMuted,
-          }}
-        >
-          Start a new chat
-        </Text>
-      </Pressable>
-    </View>
-  );
-}
