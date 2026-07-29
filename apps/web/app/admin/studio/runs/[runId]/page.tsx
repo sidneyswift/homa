@@ -5,7 +5,10 @@ import { notFound } from "next/navigation";
 import { requireFounder } from "../../../../../lib/admin/gate";
 import { adminTimeZone, familyDisplayName, timeAgo } from "../../../../../lib/admin/format";
 import { getSessionDetail } from "../../../../../lib/admin/sessions-data";
-import { getStudioRunDetail } from "../../../../../lib/admin/studio-data";
+import {
+  getStudioRunDetail,
+  getStudioRunFeedbackHistory,
+} from "../../../../../lib/admin/studio-data";
 import {
   buildStudioBrief,
   STUDIO_RUN_UUID_PATTERN,
@@ -43,6 +46,7 @@ export default async function AdminStudioRunPage({
   const run = await getStudioRunDetail(runId);
   if (!run) notFound();
   // db.ts law: sequential reads on the console's single-connection pool.
+  const feedbackHistory = await getStudioRunFeedbackHistory(runId);
   const sessionDetail = run.sessionId ? await getSessionDetail(run.sessionId) : null;
   const timeZone = adminTimeZone();
   const brief = buildStudioBrief({ request: run.request, childName: run.childName });
@@ -153,6 +157,39 @@ export default async function AdminStudioRunPage({
             savedAt={run.feedbackAt ? timeAgo(run.feedbackAt) : null}
           />
         </div>
+        {feedbackHistory.length > 1 ? (
+          <div className="mt-3 rounded-[var(--radius-md)] border border-border-subtle bg-card p-4">
+            <p className="text-sm font-semibold text-strong">
+              Earlier verdicts on this run
+            </p>
+            <p className="mt-1 text-xs text-muted">
+              Every verdict is kept. What you changed your mind about is the most
+              useful thing here: the version you rejected, why, and the version
+              that followed.
+            </p>
+            <ol className="mt-3 flex flex-col gap-3">
+              {feedbackHistory.slice(1).map((entry) => (
+                <li
+                  key={entry.id}
+                  className="border-t border-border-subtle pt-3 text-sm text-body"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs text-muted">{timeAgo(entry.createdAt)}</span>
+                    {entry.tags.map((tag) => (
+                      <Pill key={tag} tone="outline">
+                        {tag}
+                      </Pill>
+                    ))}
+                  </div>
+                  {entry.feedback ? <p className="mt-1">{entry.feedback}</p> : null}
+                  {entry.materialTitle ? (
+                    <p className="mt-1 text-xs text-muted">on {entry.materialTitle}</p>
+                  ) : null}
+                </li>
+              ))}
+            </ol>
+          </div>
+        ) : null}
       </div>
 
       <div>

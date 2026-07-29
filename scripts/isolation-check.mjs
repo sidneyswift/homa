@@ -3632,6 +3632,26 @@ await expectReadDenied("admin_alert_acknowledgments");
     await expectReadDenied("materials_studio_runs");
   }
 }
+// Founder verdict history on those runs (materials_studio_run_feedback,
+// D5 of the training-corpus package): same deny-all, server-only posture
+// as its parent, and it holds the founder's own critique prose plus a
+// pointer at the material judged. Arms automatically once the additive
+// migration reaches this target.
+{
+  const response = await rest(`materials_studio_run_feedback?select=id&limit=1`, {
+    headers: { Prefer: "" },
+  });
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    coveredTables.add("materials_studio_run_feedback");
+    report(
+      "materials_studio_run_feedback absent from target (additive migration not applied yet); nothing exposed",
+      true,
+    );
+  } else {
+    await expectReadDenied("materials_studio_run_feedback");
+  }
+}
 // The agent flight recorder (migration #79): tool calls and injected
 // context snapshots hold family conversation material, deny-all,
 // server-only writes, founder-console reads only.
