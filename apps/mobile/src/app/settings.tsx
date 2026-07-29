@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
+import { useBillingGate } from "../features/billing/use-billing-gate";
 import { useSession } from "../features/auth/session-provider";
 import { supabase } from "../lib/supabase";
 import {
@@ -15,19 +16,44 @@ import {
 import { fontFamilies } from "../theme/fonts";
 import { colors, fontSize, space } from "../theme/tokens";
 
+const PLAN_TIER_LABELS: Record<string, string> = {
+  regular: "Homa",
+  plus: "Homa Plus",
+  elite: "Homa Max",
+};
+
 /**
- * Settings: the account's real home. Reached from the Today header and a
- * link at the bottom of Family. Subscription state here is deliberately
- * one neutral, non-merchandised line, never a price or a checkout button:
- * the web-subscription-only posture for the App Store companion release
- * (docs/homa-planning/plans/2026-07-28-ios-app-store-launch.md ARC B).
- * Once GET /api/billing/gate exists (ARC E), this can read real trial/
- * active/expired state instead of one static line.
+ * Settings: the account's real home. Reached from the Today header, a
+ * link at the bottom of Family, and BillingGate's own paywall (a walled
+ * family must still be able to sign out or delete their account).
+ * Subscription state reads GET /api/billing/gate (arc F), the same
+ * two-provider decision every tab is already gated by.
+ *
+ * Gap, tracked as the "Portal split" item on gh#305: this does not yet
+ * know WHICH provider (Stripe or Apple) is entitling the family, so it
+ * cannot correctly send an Apple subscriber to the App Store's own
+ * manage-subscription screen versus a Stripe subscriber to the web
+ * portal. Sending everyone to the web is the safe default today; an
+ * Apple-only subscriber finds nothing there, a real but narrower gap
+ * than guessing wrong and sending a Stripe subscriber to an empty
+ * App Store subscriptions list.
  */
 export default function SettingsScreen() {
   const router = useRouter();
   const { session } = useSession();
+  const { gate } = useBillingGate();
   const appVersion = Constants.expoConfig?.version;
+
+  const planLine = (() => {
+    if (!gate) return "Checking your plan…";
+    if (gate.open) {
+      const label = PLAN_TIER_LABELS[gate.planTier] ?? "Homa";
+      return `${label} is active. Manage or cancel anytime at thankshoma.com.`;
+    }
+    return gate.lapsed
+      ? "Your free days are up."
+      : "You haven't started your free 7 days yet.";
+  })();
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }} edges={["top"]}>
@@ -74,9 +100,7 @@ export default function SettingsScreen() {
               color: colors.textBody,
             }}
           >
-            {
-              "Your subscription is managed on the web at thankshoma.com. Sign in with the same email there to view or change your plan."
-            }
+            {planLine}
           </Text>
         </SettingsSection>
 

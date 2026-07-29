@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useEveAgent, type EveMessage } from "eve/react";
 
-import { env } from "../../lib/env";
+import { env, EVE_CHANNEL_HEADER } from "../../lib/env";
 import {
   archiveMessages,
   foldEventsToMessages,
@@ -231,6 +231,7 @@ export function ChatSession({
         return data.session?.access_token ?? "";
       },
     },
+    headers: EVE_CHANNEL_HEADER,
     // A phone that sleeps repeatedly through a long turn burns one
     // reconnect per wake; replay resumes from the last received event
     // (incident 2026-07-11, see web twin's header + patches/eve).

@@ -13,6 +13,16 @@ function requireEnv(name: string, value: string | undefined): string {
   return value;
 }
 
+/**
+ * Sent on every eve request so the shared web/mobile channel handler
+ * (apps/web/agent/channels/eve.ts) can tell the two callers apart. Web's
+ * own chat client never sends this, so its behavior is untouched by
+ * anything gated on this header; mobile is the only caller that needs
+ * to be distinguishable, for the mobile-only onboarding gate exemption
+ * (gh#305, "phone app only" founder ruling 2026-07-28).
+ */
+export const EVE_CHANNEL_HEADER = { "X-Homa-Channel": "mobile" } as const;
+
 export const env = {
   get supabaseUrl(): string {
     return requireEnv(

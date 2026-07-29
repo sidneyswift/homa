@@ -107,9 +107,17 @@ function supabaseAuth(): AuthFn<Request> {
       return null;
     }
 
+    // The mobile client sends this header on every eve request (never the
+    // web chat client), so it is a deliberate signal, not sniffed: never
+    // defaults to "mobile" on an absent or unrecognized value. Exists
+    // solely to scope the onboarding gate exemption below to mobile
+    // (gh#305, "phone app only" founder ruling 2026-07-28); every other
+    // reader of attributes.channel still only sees "web" today.
+    const channel = request.headers.get("x-homa-channel") === "mobile" ? "mobile" : "web";
+
     // attributes only admits string values; absent facts are omitted keys.
     const attributes: Record<string, string> = {
-      channel: "web",
+      channel,
       supabaseAccessToken: token,
     };
     if (membership?.family_id) attributes.familyId = membership.family_id;
@@ -182,7 +190,16 @@ export default eveChannel({
     // it. familyAccountGate fails open on read errors and is a no-op
     // while HOMA_SIGNUP_PAYWALL_ENABLED is dark.
     const accountGate = await familyAccountGate(familyId);
-    if (accountGate.checkout) {
+    // Mobile-only exemption (gh#305, founder ruling 2026-07-28, "phone
+    // app only"): a walled family still mid-onboarding on the iOS app
+    // keeps the conversation, so the paywall arrives after she has met
+    // Homa, not before. Web is deliberately untouched: attributes.channel
+    // only ever reads "mobile" when the request carried the header only
+    // the mobile client sends (supabaseAuth() above), so this branch is
+    // unreachable from the website regardless of onboardingActive.
+    const mobileOnboardingExempt =
+      auth.attributes.channel === "mobile" && auth.attributes.onboardingActive === "true";
+    if (accountGate.checkout && !mobileOnboardingExempt) {
       const attributes: Record<string, string> = {
         ...auth.attributes,
         accountWalled: "true",

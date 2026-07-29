@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@apple/app-store-server-library": "^3.1.0",
     "@chat-adapter/state-memory": "^4.32.0",
     "@homa/core": "workspace:*",
     "@homa/taxonomy": "workspace:*",

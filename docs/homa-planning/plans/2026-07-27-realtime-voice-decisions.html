@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Realtime voice: the eight calls</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Hanken+Grotesk:wght@400;500;600;700&family=Schibsted+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --clay:#E7602F; --clay-deep:#C44C22; --sage:#3D9A50; --gold:#F0BE00;
+    --aqua:#4FB4D6; --cream:#FBF7F0; --surface:#FFFFFF; --ink:#221E1A;
+    --ink-soft:#6B625A; --line:#E8DFD2; --line-soft:#F1E9DD;
+    --r-sm:10px; --r-md:16px; --r-lg:22px; --r-full:999px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--cream); color:var(--ink);
+    font-family:"Hanken Grotesk",system-ui,sans-serif; font-size:16px; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:820px; margin:0 auto; padding:32px 20px 120px;}
+  .brand{font-family:Fredoka,sans-serif; font-weight:600; color:var(--clay); letter-spacing:.01em;}
+  h1{
+    font-family:"Schibsted Grotesk",sans-serif; font-weight:700; letter-spacing:-.02em;
+    font-size:clamp(1.9rem,5vw,2.7rem); line-height:1.1; margin:.3em 0 .35em;
+  }
+  h2{font-family:"Schibsted Grotesk",sans-serif; font-weight:700; font-size:1.15rem; margin:0 0 6px; letter-spacing:-.01em;}
+  .lede{font-size:1.08rem; color:var(--ink-soft); margin:0 0 28px; max-width:64ch;}
+  .kicker{
+    font-size:.72rem; letter-spacing:.08em; text-transform:uppercase;
+    font-weight:700; color:var(--ink-soft);
+  }
+  .fake{
+    display:inline-block; background:var(--gold); color:#3D2E00; font-weight:700;
+    font-size:.68rem; letter-spacing:.06em; text-transform:uppercase;
+    padding:3px 9px; border-radius:var(--r-full); margin-bottom:14px;
+  }
+  .facts{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+    padding:18px 20px; margin:0 0 34px;
+  }
+  .facts ul{margin:10px 0 0; padding-left:18px;}
+  .facts li{margin-bottom:8px;}
+  .facts li:last-child{margin-bottom:0;}
+  code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.85em;
+    background:var(--line-soft); padding:1px 5px; border-radius:5px;
+  }
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+    padding:22px; margin-bottom:18px; position:relative; overflow:hidden;
+  }
+  .card::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--line);
+  }
+  .card[data-weight="block"]::before{background:var(--clay);}
+  .card[data-weight="arch"]::before{background:var(--aqua);}
+  .card[data-weight="scope"]::before{background:var(--sage);}
+  .card[data-weight="taste"]::before{background:var(--gold);}
+  .cardhead{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:2px;}
+  .tag{
+    font-size:.68rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    padding:3px 9px; border-radius:var(--r-full); white-space:nowrap;
+  }
+  .tag.block{background:#FCE7DE; color:var(--clay-deep);}
+  .tag.arch{background:#E1F1F7; color:#1F6B85;}
+  .tag.scope{background:#E3F2E5; color:#2A6B37;}
+  .tag.taste{background:#FBF0CC; color:#7A5F00;}
+  .ctx{color:var(--ink-soft); margin:8px 0 16px; font-size:.97rem;}
+  .opts{display:flex; flex-direction:column; gap:9px;}
+  .opt{
+    display:block; border:1.5px solid var(--line); border-radius:var(--r-md);
+    padding:12px 14px; cursor:pointer; transition:border-color .12s, background .12s;
+    background:var(--cream);
+  }
+  .opt:hover{border-color:#D6C7B2;}
+  .opt input{position:absolute; opacity:0; pointer-events:none;}
+  .opt.sel{border-color:var(--clay); background:#FEF6F2;}
+  .opt .lbl{font-weight:600; display:flex; align-items:center; gap:8px;}
+  .opt .dot{
+    width:15px; height:15px; border-radius:50%; border:2px solid #C9BBA8;
+    flex:0 0 15px; margin-top:1px; transition:border-color .12s, box-shadow .12s;
+  }
+  .opt.sel .dot{border-color:var(--clay); box-shadow:inset 0 0 0 3.5px var(--clay);}
+  .opt .sub{color:var(--ink-soft); font-size:.9rem; margin:4px 0 0 23px;}
+  .rec{
+    font-size:.66rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    background:var(--sage); color:#fff; padding:2px 7px; border-radius:var(--r-full);
+  }
+  .note{
+    margin-top:12px; width:100%; border:1.5px solid var(--line); border-radius:var(--r-md);
+    padding:10px 12px; font:inherit; font-size:.93rem; background:var(--cream);
+    resize:vertical; min-height:38px; color:var(--ink);
+  }
+  .note:focus{outline:none; border-color:var(--clay);}
+  .warn{
+    background:#FEF6F2; border:1px dashed var(--clay); border-radius:var(--r-md);
+    padding:11px 13px; font-size:.9rem; margin-top:14px; color:var(--clay-deep);
+  }
+  .assembler{
+    position:sticky; bottom:0; margin-top:34px;
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+    padding:20px; box-shadow:0 -6px 28px rgba(34,30,26,.09);
+  }
+  #reply{
+    width:100%; min-height:104px; max-height:30vh; border:1.5px solid var(--line); border-radius:var(--r-md);
+    padding:12px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:.83rem; line-height:1.5; background:var(--cream); color:var(--ink); resize:vertical;
+  }
+  .row{display:flex; gap:10px; align-items:center; margin-top:12px; flex-wrap:wrap;}
+  button{
+    font:inherit; font-weight:600; border:none; cursor:pointer;
+    background:var(--clay); color:#fff; padding:11px 22px; border-radius:var(--r-full);
+    transition:background .12s;
+  }
+  button:hover{background:var(--clay-deep);}
+  button.ghost{background:transparent; color:var(--ink-soft); border:1.5px solid var(--line);}
+  button.ghost:hover{background:var(--line-soft); color:var(--ink);}
+  .count{color:var(--ink-soft); font-size:.88rem;}
+  footer{margin-top:30px; color:var(--ink-soft); font-size:.85rem;}
+  @media (max-height:620px){
+    .assembler{padding:13px 16px;}
+    #reply{min-height:64px;}
+    .assembler .kicker{margin-bottom:5px; display:block;}
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --cream:#1B1815; --surface:#241F1B; --ink:#F4EDE4; --ink-soft:#A99C8E;
+      --line:#3B332C; --line-soft:#2E2822;
+    }
+    .tag.block{background:#4A231A; color:#F5A184;}
+    .tag.arch{background:#173845; color:#8FD3EA;}
+    .tag.scope{background:#1D3A24; color:#8FD3A0;}
+    .tag.taste{background:#40340B; color:#EBD07A;}
+    .opt.sel{background:#33241D;}
+    .warn{background:#33241D;}
+    .fake{background:var(--gold); color:#3D2E00;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker"><span class="brand">HOMA</span> &middot; 2026-07-27 &middot; decision package</div>
+  <h1>Realtime voice: the eight calls</h1>
+
+  <div class="facts" style="border-color:var(--clay); background:#FEF6F2;">
+    <span class="fake" style="background:var(--clay); color:#fff;">Answered and superseded</span>
+    <h2>All eight were ruled on 2026-07-27. Kept as a record.</h2>
+    <p style="margin:8px 0 0;">
+      Six became rulings in <code>journeys/10-reconciliation.md</code> §5.
+      <strong>D3 was later withdrawn rather than answered</strong>: the simpler design gives a
+      voice session one tool, so the mechanism question stopped gating anything.
+      <strong>D6 stays open</strong> and needs a listening session.
+      <strong>D7's sandbox gate was offered and not selected</strong>, so it is recorded as
+      unconfirmed rather than assumed.
+    </p>
+    <p style="margin:10px 0 0;">
+      A simplification pass later the same day overturned this document's premise: both live
+      defects turned out fixable on the existing phone line in about three days, so the rebuild
+      became a bet rather than a fix. The page that supersedes this one is
+      <code>2026-07-27-realtime-voice-simpler.html</code>; the current plan is
+      <code>2026-07-27-realtime-voice.md</code> §0.1.
+    </p>
+  </div>
+  <p class="lede">
+    The full spec is in <code>plans/2026-07-27-realtime-voice.md</code>. This page is just the
+    part that needs you. Tap through, add a note anywhere you want, and the box at the bottom
+    writes your reply for you.
+  </p>
+
+  <div class="facts">
+    <span class="fake">Read this first</span>
+    <h2>Three facts that decide most of it</h2>
+    <ul>
+      <li>
+        The phone line is not ours. Telnyx runs the whole conversation on
+        <code>Qwen/Qwen3-235B-A22B</code>, and the code comment next to it already names the
+        unlock: <em>"GPT-4o/5.x become available with an OpenAI key."</em>
+      </li>
+      <li>
+        Phone Homa has <strong>4 tools</strong>. Text Homa has <strong>62</strong>. That gap is
+        why she invented a worksheet on a call in July and why chat has no idea what a caller is
+        talking about (issue #171).
+      </li>
+      <li>
+        OpenAI can hold the phone audio itself over SIP, so we never have to run an audio server.
+        That removes the one piece of this that had no precedent anywhere in the codebase.
+      </li>
+    </ul>
+  </div>
+
+  <form id="f">
+
+    <!-- D1 -->
+    <div class="card" data-weight="block" data-id="D1" data-title="OpenAI project key">
+      <div class="cardhead"><span class="tag block">Blocks everything</span><h2>D1. May an OpenAI key exist in this project?</h2></div>
+      <p class="ctx">
+        On 2026-07-27 you ruled that Homa authenticates every model call with Vercel OIDC and
+        never a gateway key. The in-app voice path can honor that exactly. The phone path cannot:
+        answering a SIP call is an OpenAI endpoint the Vercel gateway does not proxy, and the
+        phone number has to be addressed to an OpenAI project id.
+      </p>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="D1" value="A scoped OPENAI_API_KEY is permitted for telephony only; in-app voice stays on OIDC through the gateway.">
+          <span class="lbl"><span class="dot"></span>Telephony only <span class="rec">Recommended</span></span>
+          <span class="sub">Keeps the OIDC law intact everywhere it can apply. One key, one purpose, easy to explain later.</span></label>
+        <label class="opt"><input type="radio" name="D1" value="Both voice paths use the OpenAI key directly; accept one provider credential for voice.">
+          <span class="lbl"><span class="dot"></span>Both paths, one key</span>
+          <span class="sub">Simpler: one credential, one tool mechanism, no canary AI SDK dependency. Costs the OIDC law on the in-app path.</span></label>
+        <label class="opt"><input type="radio" name="D1" value="No OpenAI key. The phone stays on Telnyx; only in-app voice gets built.">
+          <span class="lbl"><span class="dot"></span>No key at all</span>
+          <span class="sub">Phone stays as it is today, including the four-tool limit and the amnesia. Only the in-app conversation gets built.</span></label>
+      </div>
+      <div class="warn">If this is a no, stop reading at D5. Steps 1 to 3 of the plan still ship and still close #171.</div>
+      <textarea class="note" data-for="D1" placeholder="Anything else on this one"></textarea>
+    </div>
+
+    <!-- D2 -->
+    <div class="card" data-weight="arch" data-id="D2" data-title="Which brain answers the phone">
+      <div class="cardhead"><span class="tag arch">Architecture</span><h2>D2. Which brain answers the phone?</h2></div>
+      <p class="ctx">
+        The realtime model is fast enough to hold a conversation but it is not the same model as
+        text Homa, so there is a real risk of the two drifting apart again. The alternative
+        removes that risk and replaces it with silence on the line.
+      </p>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="D2" value="Hybrid: the realtime model converses and calls light tools; heavy work dispatches to an eve background session with a spoken heads-up.">
+          <span class="lbl"><span class="dot"></span>Hybrid <span class="rec">Recommended</span></span>
+          <span class="sub">Natural conversation, real tools, and anything slow gets an honest "let me start that, I will text it over."</span></label>
+        <label class="opt"><input type="radio" name="D2" value="Forward every turn to eve as text and speak the reply back; accept the latency.">
+          <span class="lbl"><span class="dot"></span>Forward everything to eve</span>
+          <span class="sub">Perfect parity with text Homa, zero drift. But eve turns run 6 to 12 seconds, and six seconds of silence is a dead call.</span></label>
+        <label class="opt"><input type="radio" name="D2" value="The realtime model owns everything, including slow work, with no eve dispatch.">
+          <span class="lbl"><span class="dot"></span>Realtime owns everything</span>
+          <span class="sub">Simplest to build. Means a parent waits on the line while a worksheet renders, or Homa keeps a limit she does not need.</span></label>
+      </div>
+      <textarea class="note" data-for="D2" placeholder="Anything else on this one"></textarea>
+    </div>
+
+    <!-- D3 -->
+    <div class="card" data-weight="arch" data-id="D3" data-title="How tools run during a call">
+      <div class="cardhead"><span class="tag arch">Architecture</span><h2>D3. How do tools actually run during a call?</h2></div>
+      <p class="ctx">
+        Two mechanisms exist. One needs us to hold a live connection open for the whole call,
+        which Vercel caps at about 13 minutes. The other lets OpenAI call our server over
+        ordinary HTTPS, so nothing long-lived exists on our side.
+      </p>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="D3" value="Remote MCP server, pending the step 0 spike. If the spike fails, fall back to function tools plus a control socket.">
+          <span class="lbl"><span class="dot"></span>MCP, pending the spike <span class="rec">Recommended</span></span>
+          <span class="sub">No call length cap, survives a redeploy mid-call. Half a day of spike work proves it before anything is built on it.</span></label>
+        <label class="opt"><input type="radio" name="D3" value="Function tools plus a control socket, so we can steer the live call.">
+          <span class="lbl"><span class="dot"></span>Function tools and a live socket</span>
+          <span class="sub">Lets Homa interject mid-call, for example a "still working" line. Costs a hard call length cap around 13 minutes.</span></label>
+        <label class="opt"><input type="radio" name="D3" value="Run the spike first and let the evidence decide; do not rule this in advance.">
+          <span class="lbl"><span class="dot"></span>Let the spike decide</span>
+          <span class="sub">Honest answer if you would rather not rule on something nobody has tested yet.</span></label>
+      </div>
+      <div class="warn">This is the weakest recommendation in the spec, and it is flagged as such there too. MCP on a phone call with per-call scoped auth is documented but unverified.</div>
+      <textarea class="note" data-for="D3" placeholder="Anything else on this one"></textarea>
+    </div>
+
+    <!-- D4 -->
+    <div class="card" data-weight="scope" data-id="D4" data-title="Model tier and cost">
+      <div class="cardhead"><span class="tag scope">Scope and cost</span><h2>D4. Which model tier?</h2></div>
+      <p class="ctx">
+        Rough order of magnitude for a ten minute call, to be replaced with a real metered number
+        from the spike. Today's Telnyx line is cheaper than both.
+      </p>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="D4" value="gpt-realtime-2.1, about $0.77 per ten minute call.">
+          <span class="lbl"><span class="dot"></span>gpt-realtime-2.1, about $0.77 per call <span class="rec">Recommended</span></span>
+          <span class="sub">The phone line's whole recent history is a model failing to respect a boundary. This is the one that follows instructions best.</span></label>
+        <label class="opt"><input type="radio" name="D4" value="gpt-realtime-2.1-mini, about $0.24 per ten minute call.">
+          <span class="lbl"><span class="dot"></span>mini, about $0.24 per call</span>
+          <span class="sub">Roughly a third of the cost. Its instruction-following on a 25 KB persona is unproven.</span></label>
+        <label class="opt"><input type="radio" name="D4" value="Start on the full model, measure, and try mini once the honesty evals are green.">
+          <span class="lbl"><span class="dot"></span>Full now, try mini once evals are green</span>
+          <span class="sub">Costs more for a few weeks and gives the eval suite something to prove itself against.</span></label>
+      </div>
+      <textarea class="note" data-for="D4" placeholder="Anything else on this one"></textarea>
+    </div>
+
+    <!-- D5 -->
+    <div class="card" data-weight="scope" data-id="D5" data-title="In-app voice and visuals">
+      <div class="cardhead"><span class="tag scope">Product</span><h2>D5. In the app, may Homa show things while she talks?</h2></div>
+      <p class="ctx">
+        On the phone she can only speak. In the app the planner panel, a worksheet card, or a
+        choice card could appear while she is talking. This is the one surface where voice and
+        visual can happen at once.
+      </p>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="D5" value="Yes, cards and panels may open during a voice conversation.">
+          <span class="lbl"><span class="dot"></span>Yes, let her show things</span>
+          <span class="sub">The most distinctive thing in this proposal. Also the easiest to overdo.</span></label>
+        <label class="opt"><input type="radio" name="D5" value="Voice only during the conversation; anything visual lands in the thread after it ends.">
+          <span class="lbl"><span class="dot"></span>Voice only, visuals land after</span>
+          <span class="sub">Calmer, and matches what the phone can do, so one set of rules covers both.</span></label>
+        <label class="opt"><input type="radio" name="D5" value="Read-only panels may open during voice; anything that asks the parent to tap waits until the end.">
+          <span class="lbl"><span class="dot"></span>Show, never ask <span class="rec">Recommended</span></span>
+          <span class="sub">The planner can appear while she talks about it. A card that needs a tap does not compete with her voice.</span></label>
+      </div>
+      <textarea class="note" data-for="D5" placeholder="Anything else on this one"></textarea>
+    </div>
+
+    <!-- D6 -->
+    <div class="card" data-weight="taste" data-id="D6" data-title="The voice">
+      <div class="cardhead"><span class="tag taste">Taste</span><h2>D6. What does Homa sound like now?</h2></div>
+      <p class="ctx">
+        Today she is Telnyx's "Callie - Encourager." Real families already know that voice.
+        OpenAI recommends <code>marin</code> and <code>cedar</code>; alloy, echo, sage, shimmer,
+        verse, ash, ballad, and coral are also available.
+      </p>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="D6" value="Book a listening session before choosing; do not pick a voice from a doc.">
+          <span class="lbl"><span class="dot"></span>Listen first, then choose <span class="rec">Recommended</span></span>
+          <span class="sub">Ten minutes with the co-founders and the actual audio beats any amount of reading.</span></label>
+        <label class="opt"><input type="radio" name="D6" value="Default to marin and adjust later if it lands wrong.">
+          <span class="lbl"><span class="dot"></span>Default to marin</span>
+          <span class="sub">Ship it, listen to a real call, change it if it is wrong.</span></label>
+        <label class="opt"><input type="radio" name="D6" value="Match the current Callie voice as closely as possible; continuity for existing families matters more than an upgrade.">
+          <span class="lbl"><span class="dot"></span>Stay as close to today as possible</span>
+          <span class="sub">Families who already call her do not experience a stranger picking up.</span></label>
+      </div>
+      <textarea class="note" data-for="D6" placeholder="Anything else on this one"></textarea>
+    </div>
+
+    <!-- D7 -->
+    <div class="card" data-weight="scope" data-id="D7" data-title="Delivery policy for dispatched work">
+      <div class="cardhead"><span class="tag scope">Carried over</span><h2>D7. When Homa makes something after a call, what happens to it?</h2></div>
+      <p class="ctx">
+        These three were already open as D4, D5, and D6 on the voice-materials bridge (#187).
+        They survive this proposal unchanged. Pick any combination.
+      </p>
+      <div class="opts">
+        <label class="opt"><input type="checkbox" name="D7" value="Auto-finalize to the binder once QC passes, rather than leaving a draft.">
+          <span class="lbl"><span class="dot"></span>Auto-finalize once QC passes</span>
+          <span class="sub">Parents do not say the magic phrase, which is why drafts strand today (#197).</span></label>
+        <label class="opt"><input type="checkbox" name="D7" value="Deliver by SMS and MMS only, not email.">
+          <span class="lbl"><span class="dot"></span>Text it, do not email it</span>
+          <span class="sub">She just hung up the phone. A text is the nearest surface.</span></label>
+        <label class="opt"><input type="checkbox" name="D7" value="Gate behind an env flag and verify on the +homatest sandbox family before any real family sees it.">
+          <span class="lbl"><span class="dot"></span>Flag it and sandbox it first</span>
+          <span class="sub">Standing practice. Worth saying out loud anyway.</span></label>
+      </div>
+      <textarea class="note" data-for="D7" placeholder="Anything else on this one"></textarea>
+    </div>
+
+    <!-- D8 -->
+    <div class="card" data-weight="block" data-id="D8" data-title="Call transcript visibility">
+      <div class="cardhead"><span class="tag block">Privacy, already open</span><h2>D8. Who in a family can read a call transcript?</h2></div>
+      <p class="ctx">
+        This has been open in the ruling register since July. It becomes urgent here because
+        moving calls into the main conversation table forces an answer: that table's rules
+        already decide it for chat. Today, one adult's phone call is readable by another adult in
+        the family, with no ruling behind it.
+      </p>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="D8" value="Calls follow chat-privacy-per-adult: your call is yours, like your chats.">
+          <span class="lbl"><span class="dot"></span>Per adult, same as chat <span class="rec">Recommended</span></span>
+          <span class="sub">One rule for everything a parent says to Homa privately. Nothing to explain twice.</span></label>
+        <label class="opt"><input type="radio" name="D8" value="Calls stay family-readable; a call is a household event, not a private one.">
+          <span class="lbl"><span class="dot"></span>Family-readable</span>
+          <span class="sub">Matches today's behavior. Needs a ruling to be legitimate rather than accidental.</span></label>
+        <label class="opt"><input type="radio" name="D8" value="Per adult by default, with an explicit share action.">
+          <span class="lbl"><span class="dot"></span>Private, with a share action</span>
+          <span class="sub">More build. Right if you expect one parent to want to forward a call to the other.</span></label>
+      </div>
+      <textarea class="note" data-for="D8" placeholder="Anything else on this one"></textarea>
+    </div>
+
+  </form>
+
+  <div class="assembler">
+    <div class="kicker">Your reply, written for you</div>
+    <textarea id="reply" readonly></textarea>
+    <div class="row">
+      <button type="button" id="copy">Copy reply</button>
+      <button type="button" class="ghost" id="reset">Clear</button>
+      <span class="count" id="count">0 of 8 answered</span>
+    </div>
+  </div>
+
+  <footer>
+    Spec: <code>docs/homa-planning/plans/2026-07-27-realtime-voice.md</code>.
+    Related issues: #171 phone-call amnesia, #187 voice-materials bridge, #264 voice-calendar law, #252 unattributed spend.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var form = document.getElementById('f');
+  var reply = document.getElementById('reply');
+  var count = document.getElementById('count');
+
+  function cards(){ return Array.prototype.slice.call(form.querySelectorAll('.card')); }
+
+  function paint(){
+    form.querySelectorAll('.opt').forEach(function(o){
+      var i = o.querySelector('input');
+      o.classList.toggle('sel', i.checked);
+    });
+  }
+
+  function build(){
+    var lines = ['Realtime voice decisions, 2026-07-27.', ''];
+    var answered = 0;
+    cards().forEach(function(card){
+      var id = card.dataset.id;
+      var title = card.dataset.title;
+      var picked = Array.prototype.slice
+        .call(card.querySelectorAll('input:checked'))
+        .map(function(i){ return i.value; });
+      var note = (card.querySelector('.note').value || '').trim();
+      if (!picked.length && !note) return;
+      answered++;
+      lines.push(id + ' (' + title + '):');
+      picked.forEach(function(v){ lines.push('  ' + v); });
+      if (note) lines.push('  Note: ' + note);
+      lines.push('');
+    });
+    if (answered === 0) {
+      reply.value = 'Tap an option above and your reply appears here.';
+    } else {
+      reply.value = lines.join('\n').trim();
+    }
+    count.textContent = answered + ' of 8 answered';
+  }
+
+  form.addEventListener('change', function(){ paint(); build(); });
+  form.addEventListener('input', build);
+
+  document.getElementById('copy').addEventListener('click', function(){
+    reply.select();
+    navigator.clipboard.writeText(reply.value).then(function(){
+      var b = document.getElementById('copy');
+      var t = b.textContent; b.textContent = 'Copied';
+      setTimeout(function(){ b.textContent = t; }, 1400);
+    });
+  });
+
+  document.getElementById('reset').addEventListener('click', function(){
+    form.reset();
+    form.querySelectorAll('.note').forEach(function(n){ n.value = ''; });
+    paint(); build();
+  });
+
+  build();
+})();
+</script>
+</body>
+</html>
