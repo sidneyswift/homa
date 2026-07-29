@@ -146,6 +146,9 @@ importers:
       '@ai-sdk/gateway':
         specifier: ^4.0.31
         version: 4.0.31(zod@4.4.3)
+      '@ai-sdk/openai':
+        specifier: ^4.0.23
+        version: 4.0.23(zod@4.4.3)
       '@ai-sdk/react':
         specifier: ^4.0.44
         version: 4.0.44(react@19.2.4)(zod@4.4.3)
@@ -322,6 +325,12 @@ packages:
 
   '@ai-sdk/mcp@2.0.18':
     resolution: {integrity: sha512-0NEiqoS3PzkITQFldRuuPyO+CckgUPb9wWkp2hQlcaGxKu9ebFJDyjxGYEySE7TQN7mYc8PUuaNEODvky51NaA==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/openai@4.0.23':
+    resolution: {integrity: sha512-J7ad/TxUVpPl+oXHZzvpg9Y7NsrimF26LpF91PLgLbpkfMijv3ze9V4CRP3XYWhHwo6Qda/yy4bHmRDhIa8WrQ==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -6940,6 +6949,12 @@ snapshots:
       pkce-challenge: 5.0.1
       zod: 4.4.3
 
+  '@ai-sdk/openai@4.0.23(zod@4.4.3)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.4
+      '@ai-sdk/provider-utils': 5.0.14(zod@4.4.3)
+      zod: 4.4.3
+
   '@ai-sdk/provider-utils@5.0.14(zod@4.4.3)':
     dependencies:
       '@ai-sdk/provider': 4.0.4
@@ -8840,9 +8855,7 @@ snapshots:
       metro-runtime: 0.84.4
     transitivePeerDependencies:
       - '@babel/core'
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@react-native/normalize-colors@0.74.89': {}
 
