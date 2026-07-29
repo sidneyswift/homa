@@ -39,6 +39,46 @@ export function reviewModelId(): string {
 export interface ArtifactReview {
   pass: boolean;
   issues: string[];
+  /**
+   * The 1-based page numbers the reviewer actually looked at. A pass is
+   * a statement about these pages and nothing else, so the caller can
+   * report coverage honestly instead of implying the whole document was
+   * checked (gh#346).
+   */
+  reviewedPages: number[];
+}
+
+/** One rendered page offered to the reviewer. */
+export interface ReviewablePage {
+  data: Buffer;
+  /** 1-based, the way the parent counts pages. */
+  pageNumber: number;
+  /**
+   * Authored on this call rather than carried over unchanged. On a
+   * revision these are the pages she asked about, and they are selected
+   * first: reviewing pages 1 to 4 of a packet whose changed page is
+   * page 5 checks precisely the pages nobody touched.
+   */
+  fresh: boolean;
+}
+
+/**
+ * Up to REVIEW_PAGE_CAP pages, changed pages first, then the rest in
+ * order. The selection is returned in reading order so page numbers in
+ * the reviewer's issues stay meaningful.
+ */
+export function selectPagesForReview(
+  pages: readonly ReviewablePage[],
+  cap: number = REVIEW_PAGE_CAP,
+): ReviewablePage[] {
+  const fresh = pages.filter((page) => page.fresh);
+  const carried = pages.filter((page) => !page.fresh);
+  // All-fresh (every first build, and any revision that retyped the
+  // whole packet) falls through to plain document order.
+  const ordered = fresh.length === pages.length ? [...pages] : [...fresh, ...carried];
+  return ordered
+    .slice(0, cap)
+    .sort((left, right) => left.pageNumber - right.pageNumber);
 }
 
 const reviewSchema = z.object({
@@ -81,22 +121,27 @@ the page number when there is more than one page.`;
 export async function reviewArtifact(input: {
   familyId: string;
   channel: UsageChannel;
-  previewJpegs: readonly Buffer[];
+  pages: readonly ReviewablePage[];
   pageCount: number;
   brief: string;
 }): Promise<ArtifactReview | null> {
   if (!reviewEnabled()) return null;
-  if (input.previewJpegs.length === 0) return null;
+  if (input.pages.length === 0) return null;
 
   const model = reviewModelId();
   const startedAt = Date.now();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REVIEW_TIMEOUT_MS);
 
-  const shownPages = input.previewJpegs.slice(0, REVIEW_PAGE_CAP);
+  const shownPages = selectPagesForReview(input.pages);
+  const shownNumbers = shownPages.map((page) => page.pageNumber);
   const pageContext =
     input.pageCount > 1
-      ? `The document has ${input.pageCount} pages; you are shown page 1 through page ${shownPages.length}.\n`
+      ? `The document has ${input.pageCount} pages; you are shown ${
+          shownNumbers.length === 1
+            ? `page ${shownNumbers[0]}`
+            : `pages ${shownNumbers.join(", ")}`
+        }, in that order. Number every issue by the page number given here, not by its position among the images.\n`
       : "";
 
   try {
@@ -108,10 +153,10 @@ export async function reviewArtifact(input: {
         {
           role: "user",
           content: [
-            ...shownPages.map((data) => ({
+            ...shownPages.map((page) => ({
               type: "file" as const,
               mediaType: "image/jpeg" as const,
-              data,
+              data: page.data,
             })),
             { type: "text", text: `${pageContext}The brief:\n${input.brief}` },
           ],
@@ -139,7 +184,11 @@ export async function reviewArtifact(input: {
       durationMs: Date.now() - startedAt,
     });
 
-    return { pass: result.object.pass, issues: result.object.issues };
+    return {
+      pass: result.object.pass,
+      issues: result.object.issues,
+      reviewedPages: shownNumbers,
+    };
   } catch (error) {
     if (controller.signal.aborted) return null;
     console.error(

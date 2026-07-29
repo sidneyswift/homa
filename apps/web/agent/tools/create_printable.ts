@@ -28,7 +28,7 @@ import {
   getMaterialPinned,
   type MaterialSummary,
 } from "../../lib/materials/library";
-import { REVIEW_PAGE_CAP, reviewArtifact } from "../../lib/materials/review-artifact";
+import { reviewArtifact } from "../../lib/materials/review-artifact";
 import {
   hasPageBreakMarkup,
   imagePageBody,
@@ -286,6 +286,14 @@ export function buildPrintableGenerationInput(
 interface ResolvedPage {
   body: string;
   source: MaterialSource;
+  /**
+   * True when this page was authored on THIS call (html or a fresh page
+   * image), false when it was carried over unchanged by fromMaterialId.
+   * On a packet revision the carried pages are the ones she did not
+   * complain about, so this is the signal for which pages the reviewer
+   * must actually look at (gh#346).
+   */
+  fresh: boolean;
 }
 
 /** The packet's stored source: one path's value when uniform, else hybrid. */
@@ -363,7 +371,11 @@ const createPrintable = defineBoundedTool({
       if (hasPageBreakMarkup(inputHtml)) {
         return { created: false, note: PAGE_BREAK_NOTE };
       }
-      resolvedPages.push({ body: inputHtml, source: htmlPageSource(inputHtml) });
+      resolvedPages.push({
+        body: inputHtml,
+        source: htmlPageSource(inputHtml),
+        fresh: true,
+      });
     } else if (typeof input.pageImageUrl === "string") {
       if (!isFamilyArtifactUrl(input.pageImageUrl, familyId)) {
         return {
@@ -374,6 +386,7 @@ const createPrintable = defineBoundedTool({
       resolvedPages.push({
         body: imagePageBody(new URL(input.pageImageUrl).toString()),
         source: "image",
+        fresh: true,
       });
     } else {
       for (const [index, page] of (input.pages ?? []).entries()) {
@@ -403,7 +416,7 @@ const createPrintable = defineBoundedTool({
           if (hasPageBreakMarkup(body)) {
             return { created: false, note: `${position}: ${PAGE_BREAK_NOTE}` };
           }
-          resolvedPages.push({ body, source: htmlPageSource(body) });
+          resolvedPages.push({ body, source: htmlPageSource(body), fresh: true });
           continue;
         }
         if (typeof page.pageImageUrl === "string") {
@@ -416,6 +429,7 @@ const createPrintable = defineBoundedTool({
           resolvedPages.push({
             body: imagePageBody(new URL(page.pageImageUrl).toString()),
             source: "image",
+            fresh: true,
           });
           continue;
         }
@@ -456,7 +470,7 @@ const createPrintable = defineBoundedTool({
           };
         }
         for (const body of selected.bodies) {
-          resolvedPages.push({ body, source: material.source });
+          resolvedPages.push({ body, source: material.source, fresh: false });
         }
       }
       if (resolvedPages.length > MAX_PACKET_PAGES) {
@@ -592,7 +606,15 @@ const createPrintable = defineBoundedTool({
     const review = await reviewArtifact({
       familyId,
       channel,
-      previewJpegs: rendered.pageJpegs,
+      // Changed pages first: on a packet revision the pages carried over
+      // by fromMaterialId are the ones she did not complain about, and
+      // reviewing those instead of the page she asked about is how a
+      // revision shipped "passed" with the fixed page unseen (gh#346).
+      pages: rendered.pageJpegs.map((data, index) => ({
+        data,
+        pageNumber: index + 1,
+        fresh: resolvedPages[index]?.fresh ?? true,
+      })),
       pageCount: rendered.pageCount,
       brief,
     });
@@ -809,20 +831,29 @@ const createPrintable = defineBoundedTool({
         : reviewPassed
           ? `The card with the preview and print button is already visible in chat.${pagesNote} Tell her it's ready in one warm sentence (child + skill), and invite tweaks; never paste the links.`
           : "This version is NOT shown to her: a flagged draft never renders as a card, on any channel. Fix the issues below (call again with revisesId set to this id); only a passing version appears, and only then is there anything to tell her.";
-    // The reviewer never sees pages past REVIEW_PAGE_CAP (input-token
-    // ceiling), so a pass on a longer document is not a full-document
-    // pass. Say so plainly rather than letting the agent claim more
-    // coverage than the reviewer actually had.
-    const reviewedPageCount = Math.min(rendered.pageCount, REVIEW_PAGE_CAP);
+    // The reviewer sees at most REVIEW_PAGE_CAP pages (input-token
+    // ceiling) and at most PREVIEW_PAGE_CAP are rendered at all, so a
+    // pass on a longer document is never a full-document pass. Name the
+    // exact pages rather than letting the agent claim more coverage than
+    // the reviewer had: "it passed the quality check" was said to a
+    // parent for four days about pages nobody had looked at (gh#346).
+    const reviewedNumbers = review?.reviewedPages ?? [];
+    const unreviewedCount = rendered.pageCount - reviewedNumbers.length;
     const coverageNote =
-      review !== null && rendered.pageCount > REVIEW_PAGE_CAP
-        ? ` The reviewer only saw pages 1 to ${reviewedPageCount} of ${rendered.pageCount}; the rest are unreviewed.`
+      review !== null && unreviewedCount > 0
+        ? ` Checked only ${
+            reviewedNumbers.length === 1
+              ? `page ${reviewedNumbers[0]}`
+              : `pages ${reviewedNumbers.join(", ")}`
+          } of ${rendered.pageCount}; the other ${unreviewedCount} ${
+            unreviewedCount === 1 ? "page is" : "pages are"
+          } unchecked, so do not tell her the whole document passed.`
         : "";
     const reviewNote =
       review === null
-        ? ""
+        ? " The quality check did not run for this version (it is off, timed out, or errored), so nothing has looked at these pages: say it is ready without claiming it was checked."
         : review.pass
-          ? ` Quality check passed.${coverageNote}`
+          ? ` Quality check passed on the pages it saw.${coverageNote}`
           : ` Quality check found issues: ${review.issues.join("; ")}.${coverageNote}`;
 
     return {

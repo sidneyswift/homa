@@ -675,26 +675,61 @@ async function deleteMaterialDraftUrls(urls: readonly string[]): Promise<void> {
   }
 }
 
+/**
+ * Locks exactly one revision chain, the connected component of the
+ * `revises` graph containing materialId, in the same shape collectChain
+ * walks in memory (up through revises, down through children).
+ *
+ * Until 2026-07-28 this locked `where family_id = ...` with no further
+ * predicate, so approving one worksheet took a row lock on every
+ * material the family had ever made. A parent with 166 of them
+ * approving four at once serialized four transactions behind each
+ * other, and the 45s tool deadline expired mid-save: her worksheets
+ * stayed draft and Homa could not tell her whether the save had landed
+ * (gh#346). Chains are small, so this is the same correctness with a
+ * lock that fits the work.
+ */
 async function loadPinnedMaterialRows(
   transaction: postgres.TransactionSql,
   familyId: string,
-  includeSubjectLessonProvenance: boolean
+  includeSubjectLessonProvenance: boolean,
+  materialId: string
 ): Promise<ChainRow[]> {
   if (!includeSubjectLessonProvenance) {
     return await transaction<ChainRow[]>`
+      with recursive chain as (
+        select id, revises
+        from public.materials
+        where family_id = ${familyId} and id = ${materialId}
+        union
+        select next.id, next.revises
+        from public.materials next
+        join chain on next.id = chain.revises or next.revises = chain.id
+        where next.family_id = ${familyId}
+      )
       select id, status, revises, pdf_url, preview_url, title,
              approved_at::text as approved_at
       from public.materials
-      where family_id = ${familyId}
+      where family_id = ${familyId} and id in (select id from chain)
       order by id
       for update
     `;
   }
   return await transaction<ChainRow[]>`
+    with recursive chain as (
+      select id, revises
+      from public.materials
+      where family_id = ${familyId} and id = ${materialId}
+      union
+      select next.id, next.revises
+      from public.materials next
+      join chain on next.id = chain.revises or next.revises = chain.id
+      where next.family_id = ${familyId}
+    )
     select id, status, revises, pdf_url, preview_url, title,
            approved_at::text as approved_at, subject_lesson_id
     from public.materials
-    where family_id = ${familyId}
+    where family_id = ${familyId} and id in (select id from chain)
     order by id
     for update
   `;
@@ -755,7 +790,8 @@ export async function finalizeMaterialPinned(
     const rows = await loadPinnedMaterialRows(
       transaction,
       familyId,
-      hasSubjectLessonProvenance
+      hasSubjectLessonProvenance,
+      materialId
     );
     const nextPlan = planMaterialFinalization(rows, materialId);
     await applyPinnedMaterialFinalization(transaction, familyId, nextPlan);
@@ -786,7 +822,6 @@ export async function finalizeSubjectLessonMaterialPinned(
 ): Promise<SubjectLessonMaterialFinalization | null> {
   const sql = mapDb();
   const execution = await sql.begin(async (transaction) => {
-    const rows = await loadPinnedMaterialRows(transaction, familyId, true);
     const lessonRows = await transaction<
       Array<{
         child_id: string;
@@ -814,6 +849,16 @@ export async function finalizeSubjectLessonMaterialPinned(
     `;
     const lesson = lessonRows[0];
     if (!lesson) return null;
+    // The lesson row names the material, so its chain can only be locked
+    // after this query. That makes this path lock the lesson before the
+    // materials; nothing else in the codebase takes those two locks in
+    // the other order, and the generic path takes no lesson lock at all.
+    const rows = await loadPinnedMaterialRows(
+      transaction,
+      familyId,
+      true,
+      lesson.material_id
+    );
     const plan = planSubjectLessonMaterialFinalization(
       rows,
       lesson.material_id,
