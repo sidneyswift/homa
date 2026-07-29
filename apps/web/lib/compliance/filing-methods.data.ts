@@ -51,6 +51,7 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     method: "letter",
     sourceUrl: "https://m.flsenate.gov/statutes/1002.41",
     checkedOn: "2026-07-29",
+    letterAddressee: "the district school superintendent",
     evidence:
       "Section 1002.41 requires written notice signed by the parent, carrying the full legal names, addresses and birthdates of the children, filed with the district school superintendent within 30 days. The district may not require any additional information or verification from the parent.",
     submitTo: "the district school superintendent of the county of residence",
@@ -64,6 +65,7 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     sourceUrl:
       "https://law.lis.virginia.gov/vacode/title22.1/chapter14/section22.1-254.1/",
     checkedOn: "2026-07-29",
+    letterAddressee: "the division superintendent",
     evidence:
       "Section 22.1-254.1 requires annual notice to the division superintendent no later than August 15, carrying a description of the curriculum limited to a list of subjects for the coming year plus evidence of meeting one of the criteria to provide home instruction. The statute names no state form.",
     submitTo: "the division superintendent",
@@ -103,6 +105,7 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     method: "letter",
     sourceUrl: "https://ed.cde.state.co.us/choice/homeschool",
     checkedOn: "2026-07-29",
+    letterAddressee: "the school district",
     evidence: "C.R.S. 22-33-104.5(3)(e), in the General Assembly's official 2024 printout of Title 22 (content.leg.colorado.gov, page 862), says a parent \"shall provide written notification of the establishment of said program to a school district within the state fourteen days prior to the establishment of said program and each year thereafter if the program is maintained\" and \"shall certify, in writing, only a statement containing the name, age, place of residence, and number of hours of attendance of each child enrolled in said program.\" CDE calls this a letter and publishes no state form and no portal: \"A letter of intent must be submitted 14 days before beginning the homeschool program to a Colorado school district of a family's choosing. The family does not submit the letter of intent to CDE,\" and its FAQ adds \"Notification can be given to any Colorado public school district office.\" The...",
     submitTo: "A school district, specifically any Colorado public school district office of the family's choosing, and explicitly not the Colorado Department of Education",
     // Colorado is the reason letterMustCarry exists: its notice asks for
@@ -137,6 +140,7 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     method: "letter",
     sourceUrl: "https://boe.hawaii.gov/wp-content/uploads/2024/07/12-Compulsory-Attendance-Exceptions.pdf",
     checkedOn: "2026-07-29",
+    letterAddressee: "the school principal",
     evidence: "Hawaii Administrative Rules Title 8 Chapter 12, §8-12-13(a) Notification of intent to home school: \"The parent shall provide the local public school principal with a notice of intent to home educate the child before initiating home schooling... The notice of intent may be submitted on a department developed form (Form 4140) or in a letter containing the following items: (1) Name, address, and telephone number of the child; (2) Birthdate and grade level of the child; and (3) Signature of the parent.\" The Department of Education's own Homeschooling FAQ (Revised 2/2026) repeats this, offering \"Submit the Exceptions to Compulsory Education Form (Form 4140); or A letter of intent to the school,\" and stating \"You do not need to enroll your child or provide: Birth certificate, Proof of residency, or Health records.\" §8-12-17 further provides that \"Reasonable cause for educational neglect...",
     submitTo: "the principal of the local public school the child would otherwise attend (the geographic school for the child's age-appropriate grade level)",
   },
@@ -177,6 +181,7 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     method: "letter",
     sourceUrl: "https://www.maine.gov/doe/schools/schoolops/homeinstruction/faq",
     checkedOn: "2026-07-29",
+    letterAddressee: "the superintendent of schools",
     evidence: "The statute, 20-A M.R.S. 5001-A(3)(A)(4)(a), prescribes no form: it says only that \"The student's parent or guardian shall provide a written notice of intent to provide home instruction simultaneously to the school officials of the administrative unit in which the student resides and to the commissioner within 10 calendar days of the beginning of home instruction,\" then lists the five items the notice \"must contain.\" The Maine DOE FAQ answers the form question outright under the heading \"Must I use the Home Instruction Portal or the official Notice of Intent form?\": \"Using the Home Instruction Portal is not mandatory. You may provide notice to the superintendent's office in a different format, provided it contains all required information,\" followed by the exact list of required content. The DOE's Requirements page routes paper filings locally: \"Complete the paper form and mail or...",
     submitTo: "The superintendent's office of the resident school administrative unit (SAU). The statute also names the commissioner, but Maine DOE instructs paper filers to send to the resident superintendent only and treats that single submission as notice to both the SAU and the Department.",
     letterMustState: [
@@ -230,8 +235,15 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     submitTo: "The Commissioner of Education, filed through the Exempt School Program Office at the Nebraska Department of Education (PO Box 94987, Lincoln, NE 68509-4987), by July 15 each year",
   },
 
+  // Not a letter state, despite the statute permitting a written
+  // declaration. Its own evidence says nothing is filed with any agency,
+  // so the letter path addressed a signed notice to nobody: "To Nothing
+  // is filed with any state agency..." (found by rendering it,
+  // 2026-07-29). New Hampshire repealed the requirement outright, and
+  // the honest product answer is to say so rather than to manufacture a
+  // filing. gh#436 tracks the stale snapshot underneath this.
   NH: {
-    method: "letter",
+    method: "not_required",
     sourceUrl: "https://gc.nh.gov/bill_status/legacy/bs2016/billText.aspx?id=1715&txtFormat=html&sy=2026",
     checkedOn: "2026-07-29",
     evidence: "RSA 193-A:1-5 was repealed and reenacted by 2026 Chapter 297 (HB 1268, the \"Home Education Freedom Act\", docket status \"SIGNED BY GOVERNOR\", approved July 10, 2026, home education sections effective July 1, 2026), and new RSA 193-A:3 reads \"A declaration of home education shall not be required, except to obtain access to public school programs pursuant to RSA 193:1-c or upon withdrawal from a public school,\" with that declaration defined at 193-A:1, III as \"an optional written statement that the student is home educated and meets the New Hampshire compulsory attendance requirements, signed by a parent which identifies a home educated student by name, date of birth, and current address.\" No form, format, or filing system is prescribed anywhere in the act, and new RSA 193-A:4, II provides that \"No superintendent, school board, school principal, other school district official, local...",
@@ -258,6 +270,7 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     method: "letter",
     sourceUrl: "https://education.ohio.gov/Topics/Ohio-Education-Options/Home-Schooling",
     checkedOn: "2026-07-29",
+    letterAddressee: "the superintendent of schools",
     evidence: "ORC 3321.042(C) requires only that the parent \"transmit a notice to the superintendent of the child's school district of residence,\" and that \"The notice shall provide the parent's name and address, the child's name, and an assurance that the child will receive education in the subject areas required under this section,\" prescribing no form. The state's own Ohio Home Education Notification Form settles it on its face: \"The use of this form is optional, and parents may choose another format so long as all required information is included,\" and the department's Home Schooling page calls it the \"Recommended Notification Form.\" The department's District Superintendent Responsibilities for Home-Educated Students document adds, \"Districts are prohibited from requesting or requiring information not listed in ORC 3321.042,\" though that bar sits in agency guidance rather than statutory text,...",
     submitTo: "the superintendent of the child's school district of residence",
   },
@@ -332,6 +345,7 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     method: "letter",
     sourceUrl: "https://code.wvlegislature.gov/18-8-1/",
     checkedOn: "2026-07-29",
+    letterAddressee: "the county superintendent",
     evidence: "W. Va. Code 18-8-1(c)(2) says the parent \"shall present to the county superintendent or county board a notice of intent to provide home instruction\" that \"includes the name, address, and age of any child of compulsory school age to be instructed and assurance that the child shall receive instruction in reading, language, mathematics, science, and social studies\", with no form, no state-prescribed format, and no online portal named anywhere in the section. The state education department's own artifact confirms the letter path: a fill-in page titled \"HOMESCHOOL NOTICE OF INTENT\", published at wvde.us as Homeschool-Letter-of-Intent-v2.pdf and linked as \"Homeschool Letter of Intent\", which reads \"This letter is to inform you that I will homeschool my child(ren) under West Virginia Code 18-8-1, subsection (c), subdivision 2\" and ends with a parent signature line. Two cautions: paragraph...",
     submitTo: "the county superintendent or county board (the statute says \"the county superintendent or county board\"; the state education department page says \"the county superintendent or his/her designee\")",
     letterMustState: [

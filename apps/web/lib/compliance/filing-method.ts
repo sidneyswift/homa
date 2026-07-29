@@ -16,7 +16,12 @@
  * from, which works everywhere.
  */
 
-export const FILING_METHODS = ["letter", "state_form", "portal"] as const;
+export const FILING_METHODS = [
+  "letter",
+  "state_form",
+  "portal",
+  "not_required",
+] as const;
 export type FilingMethod = (typeof FILING_METHODS)[number];
 
 /**
@@ -58,6 +63,15 @@ export interface FilingMethodEntry {
   /** The state's own page that says so. Never a third party: this is the
    *  claim that decides whether Homa hands someone a document to mail. */
   sourceUrl: string;
+  /** For a letter state only: the salutation, completing "To ___:".
+   *
+   * Separate from submitTo because they answer different questions.
+   * submitTo is research prose for a human ("the superintendent's office
+   * of the resident SAU. The statute also names the commissioner, but
+   * Maine DOE instructs paper filers to..."), which reads as nonsense in
+   * a letter's opening line and produced exactly that before this field
+   * existed. This one is short, and it is addressed to a person. */
+  letterAddressee?: string;
   /** When a human last read that page, "YYYY-MM-DD". */
   checkedOn: string;
   /** What the page actually said, in a sentence, so a later reviewer can
@@ -150,7 +164,12 @@ export function verifyFilingMethod(
   // composer never reaches them, so a real requirement recorded on the
   // wrong row would look researched and render nowhere.
   if (entry.method !== "letter") {
-    for (const field of ["letterMustState", "letterMustCarry", "letterAttachments"] as const) {
+    for (const field of [
+      "letterMustState",
+      "letterMustCarry",
+      "letterAttachments",
+      "letterAddressee",
+    ] as const) {
       if (entry[field] !== undefined) {
         return {
           ok: false,
@@ -174,6 +193,22 @@ export function verifyFilingMethod(
   for (const field of entry.letterMustCarry ?? []) {
     if (!(LETTER_FIELDS as readonly string[]).includes(field)) {
       return { ok: false, reason: `unknown required field ${String(field)}` };
+    }
+  }
+  if (entry.method === "letter") {
+    // A letter opens "To ___:", and before this was required the
+    // salutation fell back to submitTo, which is research prose. Maine's
+    // notice opened with a two-sentence footnote about the commissioner
+    // and ended ".:" (found by rendering it, 2026-07-29).
+    const addressee = entry.letterAddressee?.trim() ?? "";
+    if (addressee.length === 0) {
+      return { ok: false, reason: "a letter state needs a letterAddressee" };
+    }
+    if (addressee.length > 90 || addressee.includes(".")) {
+      return {
+        ok: false,
+        reason: `letterAddressee "${addressee}" reads as prose, not a salutation`,
+      };
     }
   }
   return { ok: true, entry };

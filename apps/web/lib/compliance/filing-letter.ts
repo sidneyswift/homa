@@ -243,10 +243,16 @@ ${childRows(family.children, gaps, { showAge, onIso: todayIso })}
 
   const carried = carriedFieldBlanks(carry, detail.stateName, gaps);
 
+  // The lead-in makes the state's own phrasing read as something the
+  // parent is saying. Maine records "an assurance of at least 175 days of
+  // instruction annually"; under "I give ... the following" that is a
+  // sentence, and the state's words are never rewritten.
   const assurances = (method?.letterMustState ?? []).length
-    ? `<p class="fl-para">This notice also confirms ${
-        method!.letterMustState!.length === 1 ? "the following" : "each of the following"
-      }, as ${stateName} requires:</p>
+    ? `<p class="fl-para">By signing below I give ${stateName} ${
+        method!.letterMustState!.length === 1
+          ? "the following assurance"
+          : "each of the following assurances"
+      }:</p>
 <ul class="fl-assurances">
 ${method!.letterMustState!.map((item) => `  <li>${escapeHtml(item)}</li>`).join("\n")}
 </ul>`
@@ -261,6 +267,21 @@ ${method!.letterAttachments!.map((item) => `    <li>${escapeHtml(item)}</li>`).j
   <p class="fl-attach-note">Homa cannot produce these for you. The filing is incomplete without them.</p>
 </div>`
     : "";
+
+  if (method?.method === "not_required") {
+    // A state that asks for nothing gets no manufactured filing. New
+    // Hampshire repealed its notification requirement outright, and
+    // producing a signed notice for it would invent an obligation.
+    return {
+      kind: "worksheet",
+      title: `${detail.stateName} does not ask you to file`,
+      gaps: [],
+      body: `<h1 class="fl-h1">${stateName} does not ask you to file</h1>
+<p class="fl-para">There is nothing to send. ${stateName} does not require you to notify anyone that you are homeschooling, so this is not the filing and there is no filing to make.</p>
+<p class="fl-para">Two situations are different: withdrawing a child from a public school, and asking to use public school programs. Either of those goes to your local school, not to the state.</p>
+<p class="fl-para">Keep this with your records so you can show what the rule was on ${escapeHtml(todayLong)}.</p>`,
+    };
+  }
 
   if (!canMail) {
     // Everywhere a mailed letter can be refused, the honest output is a
@@ -292,7 +313,7 @@ ${attachments}
     title: `Notice of intent to homeschool, ${detail.stateName}`,
     gaps,
     body: `<p class="fl-date">${escapeHtml(todayLong)}</p>
-<p class="fl-para">To ${escapeHtml(recipient)}:</p>
+<p class="fl-para">To ${escapeHtml(method?.letterAddressee ?? "the school district")}:</p>
 <p class="fl-para">I am giving notice that I intend to provide home instruction for the ${
       family.children.length === 1 ? "child" : "children"
     } named below, under ${stateName} law.</p>

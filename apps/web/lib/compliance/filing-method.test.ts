@@ -23,6 +23,7 @@ function entry(overrides: Partial<FilingMethodEntry> = {}): FilingMethodEntry {
     checkedOn: "2026-07-29",
     evidence:
       "Section 1002.41 requires written notice signed by the parent and filed with the district superintendent.",
+    letterAddressee: "the district school superintendent",
     ...overrides,
   };
 }
@@ -88,6 +89,28 @@ describe("verifyFilingMethod", () => {
         }),
       ).ok,
     );
+  });
+
+  it("refuses a letter state with no salutation, or one made of prose", () => {
+    // Found by rendering: with no letterAddressee the salutation fell
+    // back to submitTo, and Maine's letter opened with a two-sentence
+    // footnote about the commissioner, ending ".:".
+    const missing = verifyFilingMethod(
+      "FL",
+      entry({ letterAddressee: undefined }),
+    );
+    assert.ok(!missing.ok);
+    assert.match(missing.reason, /needs a letterAddressee/);
+
+    const prose = verifyFilingMethod(
+      "ME",
+      entry({
+        letterAddressee:
+          "The superintendent's office of the resident SAU. The statute also names the commissioner",
+      }),
+    );
+    assert.ok(!prose.ok);
+    assert.match(prose.reason, /reads as prose/);
   });
 
   it("refuses an unknown method or a malformed check date", () => {
@@ -182,7 +205,7 @@ describe("the researched table", () => {
       .filter(([, row]) => mayGenerateLetter(row, TODAY))
       .map(([code]) => code)
       .sort();
-    assert.deepEqual(letters, ["CO", "FL", "HI", "ME", "NH", "OH", "VA", "WV"]);
+    assert.deepEqual(letters, ["CO", "FL", "HI", "ME", "OH", "VA", "WV"]);
   });
 
   it("keeps the seven refuted states off the letter path", () => {

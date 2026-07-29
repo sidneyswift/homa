@@ -106,7 +106,7 @@ describe("birthdateLong", () => {
 });
 
 describe("letter states get a real letter", () => {
-  for (const code of ["CO", "FL", "HI", "ME", "NH", "OH", "VA", "WV"]) {
+  for (const code of ["CO", "FL", "HI", "ME", "OH", "VA", "WV"]) {
     it(`${code} composes a signable filing`, () => {
       const letter = compose(code);
       assert.equal(letter.kind, "letter");
@@ -180,6 +180,47 @@ describe("letter states get a real letter", () => {
   it("addresses it to the body the state named", () => {
     const oh = compose("OH");
     assert.match(oh.body, /superintendent/i);
+  });
+
+  it("opens with a salutation, not with the research note", () => {
+    // Before letterAddressee existed the salutation fell back to
+    // submitTo, which is prose for a human. Maine's notice opened with a
+    // two-sentence footnote about the commissioner and ended ".:", and
+    // Colorado's said "To A school district, specifically any Colorado
+    // public school district office of the family's choosing, and
+    // explicitly not the Colorado Department of Education:".
+    for (const code of ["CO", "FL", "HI", "ME", "OH", "VA", "WV"]) {
+      const opening = /<p class="fl-para">To ([^<]*):<\/p>/.exec(
+        compose(code).body,
+      );
+      assert.ok(opening, `${code} has an opening line`);
+      const addressee = opening[1];
+      assert.ok(
+        addressee.length <= 90,
+        `${code} salutation is prose: "${addressee}"`,
+      );
+      assert.ok(!addressee.includes("."), `${code} salutation has a sentence`);
+    }
+  });
+});
+
+describe("a state that asks for nothing", () => {
+  it("refuses to manufacture a filing for New Hampshire", () => {
+    // HB 1268 repealed the notification requirement outright (effective
+    // 2026-07-01). The letter path had been addressing a signed notice
+    // to "Nothing is filed with any state agency".
+    const nh = compose("NH");
+    assert.equal(nh.kind, "worksheet");
+    assert.match(nh.body, /does not ask you to file/);
+    assert.match(nh.body, /nothing to send/i);
+    assert.ok(!/Signature of parent or guardian/.test(nh.body));
+    assert.deepEqual(nh.gaps, [], "nothing to file means nothing missing");
+  });
+
+  it("still names the two cases that do go somewhere", () => {
+    const nh = compose("NH");
+    assert.match(nh.body, /withdrawing a child from a public school/i);
+    assert.match(nh.body, /public school programs/i);
   });
 });
 
@@ -285,7 +326,7 @@ describe("across every state", () => {
     }
     assert.deepEqual(
       mailed.sort(),
-      ["CO", "FL", "HI", "ME", "NH", "OH", "VA", "WV"],
+      ["CO", "FL", "HI", "ME", "OH", "VA", "WV"],
     );
   });
 });
