@@ -52,9 +52,19 @@ const repoRoot = path.resolve(
 /**
  * Budgets in bytes: measured on 2026-07-25 (post-compression) plus
  * about 3% slack. Raising one requires a reason in the same PR.
+ *
+ * instructions.md 22_400 -> 25_600 on 2026-07-29, founder ruling
+ * `copy-voice-memorable` (gh#413): the Voice section carries the register,
+ * five never-cross floors, and five anti-slop rules, each with the worked
+ * example that makes it executable at the moment of writing. It went from
+ * 1,466 to 3,704 bytes after a trim pass; the rest of the file is unchanged.
+ * The examples are the part that works (an ignored rule stated abstractly
+ * produced two em dashes and four "behind" leaks in testing), so they are not
+ * deletion candidates. Anything above 25,600 should shrink prose or split,
+ * not ratchet again.
  */
 export const CONTEXT_BUDGETS: Record<string, number> = {
-  "instructions.md": 22_400,
+  "instructions.md": 25_600,
   "family-context (eval fixture render)": 3_000,
   "sms-mode (largest branch)": 4_600,
   "email-mode": 450,
