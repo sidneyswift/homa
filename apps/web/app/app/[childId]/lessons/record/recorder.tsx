@@ -581,7 +581,21 @@ export function LessonRecorder({
               </div>
             </div>
           ) : null}
-          <div className="mt-6 flex flex-wrap items-center gap-3">
+          {/* Who this lesson is about, said in words, next to the button
+              that starts it (gh#353). The sibling switcher above already
+              marks the current kid, and on 2026-07-27 a parent still
+              recorded 28 minutes with her three-year-old while the page
+              was armed for her nine-year-old: a highlighted pill is
+              something you look at, and she was looking at her child.
+              The cost of the mistake is 28 minutes and a progress claim
+              landing on the wrong kid, so it earns a plain sentence. */}
+          {kids.length > 1 ? (
+            <p className="mt-6 text-sm text-body">
+              This lesson will be saved for{" "}
+              <span className="font-semibold text-strong">{childName}</span>.
+            </p>
+          ) : null}
+          <div className="mt-3 flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={() => void startRecording()}
