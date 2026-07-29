@@ -10,7 +10,10 @@
 // Re-run after a state-requirements refresh: pnpm build:deadline-anchors
 // The verifier runs without model calls in CI: pnpm check:deadline-anchors
 
-import type { DeadlineAnchorEntry } from "./deadline-anchor-verify";
+import type {
+  DeadlineAnchorEntry,
+  ExtraRequirementEntry,
+} from "./deadline-anchor-verify";
 
 export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
   AL: {
@@ -71,14 +74,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: 10,
         day: 1,
         withinDays: null,
-        label: "Window opens October 1",
-        quote: "October 1 through October 15 annually",
-      },
-      {
-        month: 10,
-        day: 15,
-        withinDays: null,
-        label: "Window closes October 15",
+        label: "File between October 1 and October 15",
         quote: "October 1 through October 15 annually",
       },
     ],
@@ -92,7 +88,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: null,
         day: null,
         withinDays: 14,
-        label: "At least 14 days before starting home instruction",
+        label: "At least 14 days before starting home education",
         quote: "14 calendar days before beginning home-based education program",
       },
     ],
@@ -134,7 +130,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: 10,
         day: 5,
         withinDays: null,
-        label: "Statutory filing deadline October 5",
+        label: "File by October 5",
         quote: "statutory filing deadline October 5",
       },
     ],
@@ -183,14 +179,14 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: null,
         day: null,
         withinDays: null,
-        label: "Before school attendance would otherwise be required",
+        label: "Before instruction is otherwise required",
         quote: "before the child's attendance at school would otherwise be required",
       },
       {
         month: null,
         day: null,
         withinDays: null,
-        label: "At the time of withdrawal from school",
+        label: "At the time of withdrawal",
         quote: "at the time of withdrawal",
       },
     ],
@@ -239,7 +235,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: null,
         day: null,
         withinDays: 14,
-        label: "Within two weeks of the start of the school year",
+        label: "Within two weeks of school year starting",
         quote: "Within the first two weeks of the school year",
       },
       {
@@ -288,7 +284,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: null,
         day: null,
         withinDays: 15,
-        label: "At least 15 days before starting instruction",
+        label: "At least 15 days before instruction begins",
         quote: "at least 15 days before the start of home instruction",
       },
     ],
@@ -323,7 +319,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: null,
         day: null,
         withinDays: 15,
-        label: "Within 15 days of withdrawal or moving to a new district",
+        label: "Within 15 days of withdrawing or moving districts",
         quote: "within 15 days of withdrawal from school or moving into a new district",
       },
     ],
@@ -337,7 +333,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: 9,
         day: 15,
         withinDays: null,
-        label: "File by September 15",
+        label: "File by September 15 each year",
         quote: "September 15 of each school year",
       },
     ],
@@ -358,7 +354,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: null,
         day: null,
         withinDays: null,
-        label: "When homeschooling begins if starting mid-year",
+        label: "When starting homeschooling mid-year",
         quote: "whenever homeschooling begins if starting mid-year",
       },
     ],
@@ -372,7 +368,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: null,
         day: null,
         withinDays: 5,
-        label: "At least 5 days before opening the home school",
+        label: "Notify at least 5 days before opening the home school",
         quote: "At least 5 days before opening the home school",
       },
       {
@@ -400,7 +396,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: null,
         day: null,
         withinDays: 14,
-        label: "Within 14 days of establishing residence",
+        label: "Within 14 days of establishing residence in a district",
         quote: "within 14 days of establishing residence in a school district",
       },
     ],
@@ -414,14 +410,14 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: 7,
         day: 15,
         withinDays: null,
-        label: "File by July 15 each year",
+        label: "File by July 15 each school year",
         quote: "July 15 of each school year",
       },
       {
         month: null,
         day: null,
         withinDays: null,
-        label: "Promptly if starting mid-year",
+        label: "File promptly if starting mid-year",
         quote: "promptly if starting mid-year",
       },
     ],
@@ -491,7 +487,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: null,
         day: null,
         withinDays: 14,
-        label: "Within 14 days of starting mid-year",
+        label: "Within 14 days if starting mid-year",
         quote: "within 14 days of commencing home instruction mid-year",
       },
     ],
@@ -512,7 +508,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: 8,
         day: 30,
         withinDays: null,
-        label: "By August 30 each year after that",
+        label: "File by August 30 each year after",
         quote: "by August 30 each year thereafter",
       },
     ],
@@ -526,7 +522,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: null,
         day: null,
         withinDays: 10,
-        label: "Within 10 days of starting home education",
+        label: "Within 10 days of withdrawing or starting home education",
         quote: "within 10 days of withdrawing from public school or beginning home education",
       },
     ],
@@ -561,7 +557,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: null,
         day: null,
         withinDays: null,
-        label: "Before start of school year, if required by municipality",
+        label: "Before the school year starts, if your municipality requires it",
         quote: "before start of school year",
       },
     ],
@@ -575,7 +571,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: null,
         day: null,
         withinDays: 30,
-        label: "Within 30 days of beginning home instruction",
+        label: "Within 30 days of starting instruction",
         quote: "within 30 days of beginning alternative instruction",
       },
     ],
@@ -589,7 +585,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: null,
         day: null,
         withinDays: null,
-        label: "Before the school year starts",
+        label: "Before the start of the school year",
         quote: "Before the start of each school year",
       },
       {
@@ -610,7 +606,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: null,
         day: null,
         withinDays: null,
-        label: "Before home schooling begins",
+        label: "Before instruction begins",
         quote: "before the child begins home schooling",
       },
     ],
@@ -631,7 +627,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: null,
         day: null,
         withinDays: 30,
-        label: "Within 30 days if moving mid-year",
+        label: "Within 30 days of moving mid-year",
         quote: "within 30 days if moving into a new school division mid-year",
       },
     ],
@@ -659,14 +655,14 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: 9,
         day: 15,
         withinDays: null,
-        label: "File by September 15",
-        quote: "September 15 of each school year",
+        label: "File by September 15 each year",
+        quote: "September 15",
       },
       {
         month: null,
         day: null,
         withinDays: 14,
-        label: "Within two weeks of starting mid-year quarter",
+        label: "Within two weeks of starting mid-year",
         quote: "within two weeks of the start of any public school quarter if beginning mid-year",
       },
     ],
@@ -680,7 +676,7 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: 10,
         day: 15,
         withinDays: null,
-        label: "File by October 15 each year",
+        label: "File by October 15 each school year",
         quote: "October 15 of each school year",
       },
     ],
@@ -694,8 +690,50 @@ export const DEADLINE_ANCHORS: Record<string, DeadlineAnchorEntry> = {
         month: null,
         day: null,
         withinDays: null,
-        label: "Before starting home instruction",
+        label: "Before instruction begins",
         quote: "before commencing home instruction",
+      },
+    ],
+  },
+};
+
+/**
+ * Additional requirements recovered from each default pathway's own slice
+ * of pathway_varies_detail (gh#322). Every note below is backed by a
+ * quote that appears verbatim in that slice; the raw field is never
+ * rendered. Pennsylvania's notarized affidavit is the motivating case.
+ */
+export const EXTRA_REQUIREMENTS: Record<string, ExtraRequirementEntry> = {
+  DE: {
+    stateCode: "DE",
+    source: "Register via EdAccess Nonpublic School Application (available after August 11). Enrollment due by September 30 (statutory deadline).",
+    requirements: [
+      {
+        section: "notification",
+        note: "Register through the EdAccess Nonpublic School Application.",
+        quote: "Register via EdAccess Nonpublic School Application",
+      },
+    ],
+  },
+  NC: {
+    stateCode: "NC",
+    source: "1 year (test results); attendance and immunization records maintained at home school",
+    requirements: [
+      {
+        section: "recordkeeping",
+        note: "Keep test results for 1 year, and maintain attendance and immunization records at the home school.",
+        quote: "1 year (test results); attendance and immunization records maintained at home school",
+      },
+    ],
+  },
+  PA: {
+    stateCode: "PA",
+    source: "File notarized affidavit with superintendent prior to commencement",
+    requirements: [
+      {
+        section: "notification",
+        note: "The affidavit filed with the superintendent must be notarized.",
+        quote: "notarized affidavit",
       },
     ],
   },
