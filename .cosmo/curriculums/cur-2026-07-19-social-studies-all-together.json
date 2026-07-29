@@ -1055,11 +1055,17 @@
     "sourceSha256": "b007ce6486ac000a5e166376deb340c5b6bb76b28e4734c4cbbdc93c720ed149",
     "pageCount": 163,
     "mastersDir": ".cosmo/masters/cur-2026-07-19-social-studies-all-together",
-    "intakeAt": "2026-07-29T08:35:59+00:00",
-    "gateFindings": []
+    "intakeAt": "2026-07-29T09:44:32+00:00",
+    "gateFindings": [
+      "5 page(s) were shot rotated ([35, 118, 130, 152, 153]). Their text was read correctly from a rotated copy, so nothing is lost and no re-shoot is owed, but the MASTERS are still rotated: any later image work off them must turn them first."
+    ]
   },
   "stages": {
     "aboutnessAddedAt": "2026-07-29"
   },
-  "mergeNote": "Aboutness (and Layer 5 where present) added 2026-07-29 from a re-analysis that was started as a duplicate record (ref-2026-07-19-social-studies-all-together.json). The duplicate was created because an audit matched drops by filename text instead of by Slack message ts, and missed this record. The duplicate is deleted; this record is canonical and keeps its original four-layer analysis. Capture artifacts (per-page masters and the text sidecar) are new and live under cur-2026-07-19-social-studies-all-together."
+  "mergeNote": "Aboutness (and Layer 5 where present) added 2026-07-29 from a re-analysis that was started as a duplicate record (ref-2026-07-19-social-studies-all-together.json). The duplicate was created because an audit matched drops by filename text instead of by Slack message ts, and missed this record. The duplicate is deleted; this record is canonical and keeps its original four-layer analysis. Capture artifacts (per-page masters and the text sidecar) are new and live under cur-2026-07-19-social-studies-all-together.",
+  "coversMessageTs": [
+    "1784505881.277529"
+  ],
+  "coversMessageNote": "This book arrived across two Slack messages. The second message's ts is declared here so the ingestion ledger joins it to this record instead of reporting the part-2 file as an un-ingested drop."
 }

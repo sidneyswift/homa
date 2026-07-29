@@ -634,5 +634,9 @@
   "stages": {
     "aboutnessAddedAt": "2026-07-29"
   },
-  "mergeNote": "Aboutness (and Layer 5 where present) added 2026-07-29 from a re-analysis that was started as a duplicate record (cur-2026-07-19-get-set-for-school-readiness-writing.json). The duplicate was created because an audit matched drops by filename text instead of by Slack message ts, and missed this record. The duplicate is deleted; this record is canonical and keeps its original four-layer analysis. Capture artifacts (per-page masters and the text sidecar) are new and live under cur-2026-07-19-handwriting-without-tears."
+  "mergeNote": "Aboutness (and Layer 5 where present) added 2026-07-29 from a re-analysis that was started as a duplicate record (cur-2026-07-19-get-set-for-school-readiness-writing.json). The duplicate was created because an audit matched drops by filename text instead of by Slack message ts, and missed this record. The duplicate is deleted; this record is canonical and keeps its original four-layer analysis. Capture artifacts (per-page masters and the text sidecar) are new and live under cur-2026-07-19-handwriting-without-tears.",
+  "coversMessageTs": [
+    "1784493367.506409"
+  ],
+  "coversMessageNote": "This book arrived across two Slack messages. The second message's ts is declared here so the ingestion ledger joins it to this record instead of reporting the part-2 file as an un-ingested drop."
 }

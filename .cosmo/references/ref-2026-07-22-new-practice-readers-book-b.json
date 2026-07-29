@@ -19,8 +19,10 @@
     "sourceSha256": "7c5893c67130d90aeaafd74b462ac642283fd87b66759bb344786d4f322b1e48",
     "pageCount": 158,
     "mastersDir": ".cosmo/masters/ref-2026-07-22-new-practice-readers-book-b",
-    "intakeAt": "2026-07-29T08:41:28+00:00",
-    "gateFindings": []
+    "intakeAt": "2026-07-29T09:47:49+00:00",
+    "gateFindings": [
+      "57 page(s) were shot rotated ([60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71] ...). Their text was read correctly from a rotated copy, so nothing is lost and no re-shoot is owed, but the MASTERS are still rotated: any later image work off them must turn them first."
+    ]
   },
   "sourceFiles": [
     {
@@ -200,7 +202,7 @@
         "name": "Anderson",
         "kind": "person",
         "role": "identity",
-        "quote": "• Anderson •",
+        "quote": "\u2022 Anderson \u2022",
         "note": "The only author credit anywhere in the capture, printed as the cover byline between two dots. No first name, no publisher imprint, and no copyright page was photographed."
       },
       {
