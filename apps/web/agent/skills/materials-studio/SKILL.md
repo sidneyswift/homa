@@ -200,19 +200,26 @@ from calibration runs, re-check after any model swap):
 
 - Describe characters visually (species, outfit, colors, props) rather
   than relying on a franchise name alone; it renders more faithfully.
-- Trademarked characters (Pikachu, Elsa, Mario) come back as an inspired
-  original, never the real one. The provider refuses exact franchise
-  likeness, so say that BEFORE you generate, in one plain line, and name
-  what she gets instead: "I can't draw the actual Pikachu, but I can do a
-  round yellow lightning mouse, or a header of poke balls and lightning
-  bolts." Objects and symbols are the strong route: poke balls, wands,
-  crowns, mushrooms, team colors all render fine and read as properly
-  themed. Visual description is NOT a workaround for a refusal: it is how
-  you get the off-brand lookalike an older kid clocks instantly ("that is
-  not Pokemon", 2026-07-29; the "Ps5 astrobot" correction is the same
-  scar). When generate_image reports a policy or likeness refusal, stop:
-  tell her plainly and switch routes, never reword toward the same
-  character.
+- Franchise characters: ask for the real one first. Refusal is
+  per-franchise, not a blanket rule (Kirby and Paw Patrol render fine;
+  heavily protected properties like Pokemon often refuse), so never
+  pre-emptively downgrade her request to a generic lookalike. Name the
+  character, name the style, and let the provider answer.
+- Reference images are the strongest fidelity lever you have, not a
+  consolation prize. A reference from this family's own library, or a
+  picture she shared in chat, holds a character's proportions and colors
+  far better than any amount of wording.
+- If a request IS refused, generate_image tells you it was a policy
+  block, and only then does the alternative conversation start. Reach for
+  a theme-object page first (poke balls and lightning bolts, wands,
+  crowns, team colors): objects are the fallback that reliably clears.
+  Do not assume a "close but not canon" description will clear, because
+  it often does not; the 07-29 calibration had "a round yellow mouse with
+  a lightning-bolt tail" refused with no franchise named at all. So offer
+  the object route, and be straight that you could not draw the character
+  itself. Never quietly hand her an approximation as if it were the real
+  one: an older kid clocks it instantly ("that is not Pokemon",
+  2026-07-29, and the "Ps5 astrobot" correction is the same scar).
 - Decorative (not coloring) art: swap the style clause, e.g. "soft
   watercolor children's book illustration, warm palette".
 - For a full page (image-direct), use shape portrait and describe the

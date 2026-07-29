@@ -3,6 +3,90 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-29 · Franchise characters: a policy refusal gets one retry on another vendor
+
+Founder ruling, not an agent decision. Registered as
+`franchise-character-fallback-model` in `journeys/10-reconciliation.md` §5.
+Tracked as gh#449; measurements in
+`materials/calibration/2026-07-29-franchise-refusal-boundary.md`.
+
+**What prompted it.** The "that is not pokemon" bug (PR #450): every
+Pikachu-faithful prompt was refused for trademark likeness, but
+`generateStudioImage` reported all provider errors as "try a reworded
+prompt", so Homa rewrote toward ever more generic prompts until an
+off-brand lookalike passed and shipped. The parent was never told exact
+likeness was blocked.
+
+**The first fix over-corrected, and the founder caught it the same day.**
+That PR told the skill trademarked characters "come back as an inspired
+original, never the real one." False. Measured: 4 of 8 named characters
+render fine on gpt-image-2 (Kirby, Chase from Paw Patrol, Sonic, Bluey);
+Pikachu, Mario, and Elsa refuse. Kirby and Mario are both Nintendo, so
+refusal is per-character, not per-publisher and not categorical. The
+wording had Homa pre-emptively downgrading requests she could have filled.
+
+**Two things measured, both negative, before anything was built.** The
+filter catches descriptive likeness, not just names: a control prompt
+naming no franchise ("a round yellow mouse with a lightning-bolt tail")
+was refused, so the inspired-original fallback is often unavailable for
+exactly the characters that refuse. And the reference-image recipe (a
+Google image of the character fed back with the franchise unnamed) fails:
+run as a 2x2, all four cells refuse, two attempts per reference cell. The
+name omission does nothing and neither does the reference, because
+gpt-image-2 moderates the input image and the output.
+
+**The ruling.** A parent asking for her kid's favorite character should
+get that character. On a content-policy refusal, retry once on
+`HOMA_IMAGE_FALLBACK_MODEL`. Vendors disagree about likeness and each
+answers for itself, so this is procurement through config rather than a
+route around anyone's control. Setting the variable is the flag; unset
+means the refusal stands and Homa offers the theme-object route.
+
+**Why a fallback and not a model swap**, measured rather than assumed:
+`imagen-4.0-fast` rejects Homa's aspect ratios and cannot accept image
+references at all, which would break fleet anchors and the
+draw-the-child-from-their-photo feature. `flux-fast-schnell` honors `size`
+exactly (1024x1536 in, 1024x1536 out) and takes references, so it is the
+sound value. A fallback model that ignores `size` would silently square a
+full-page build.
+
+**Changed:** `lib/materials/generate-image.ts` (one attempt extracted, a
+shared 200s budget under `TOOL_DEADLINE.generate`'s 240s, pure
+`shouldTryPolicyFallback`, spend attributed to the model that actually
+drew the bytes), the `generate_image` tool note (a fallback render is
+flagged for review because line weight and stray-lettering risk differ),
+and the materials-studio skill (ask for the real character first).
+
+**Verified end to end** against the live provider: primary refused in
+14.4s, the decision returned true with 185.6s left, the fallback rendered
+a faithful Pikachu at 1024x1536 with portrait shape preserved.
+
+**The IP posture was ruled the same session: ship it.** The question put
+to the founder was whether Homa may produce and sell faithful
+copyrighted-character pages, given that the provider's filter was never
+Homa's legal protection (it was OpenAI limiting OpenAI's exposure, so a
+permissive vendor changes the vendor's posture and not Homa's). The answer
+was "we are a startup, ship it until we can't."
+
+Recorded for what it is: an explicit acceptance of the exposure, not a
+finding that there is none, and not legal advice from anyone. The risk was
+put in front of the founder twice before the flag was built, in writing,
+including that Homa's whole product runs through one gateway path and that
+a vendor account action would stop everything rather than one feature.
+
+**Scope as ruled:** pages made for a family, which is every surface this
+capability touches today. **Not ruled, because it was not asked and no
+code does it:** franchise characters on a public surface (a marketing
+sample, the public landing, a shared artifact). Decide that when something
+actually proposes it; the narrow reading is the safe default until then.
+
+**What "until we can't" looks like operationally.** The stop signal is a
+rightsholder notice or a vendor account action, and both tend to arrive
+with a deadline. Wind-down is unsetting `HOMA_IMAGE_FALLBACK_MODEL`, but
+turbo lists `HOMA_*` in the build task's `env`, so the value is part of
+the build cache key and the change needs a redeploy to take effect. The
+kill switch is therefore minutes, not instant. Worth knowing before it is
+needed rather than during.
 ## 2026-07-29 · The worksheet ruling: scale content to fill the sheet, and the whitespace rule is gone
 
 Founder ruling, not an agent decision. Registered as

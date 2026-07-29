@@ -11,6 +11,8 @@ import { APICallError } from "ai";
 import {
   classifyImageFailure,
   imageFailureNote,
+  imageFallbackModelId,
+  shouldTryPolicyFallback,
   type ImageFailureKind,
 } from "./generate-image";
 
@@ -111,12 +113,22 @@ test("a self-referencing cause chain terminates instead of hanging", () => {
   assert.equal(classifyImageFailure(looping), "transient");
 });
 
-test("the policy note tells Homa to stop rewording and to tell the parent", () => {
+test("the policy note keeps a real route open instead of declaring defeat", () => {
   const note = imageFailureNote("policy");
-  assert.match(note, /will keep failing/u);
+  // Founder correction 2026-07-29: refusal is per-franchise, and a
+  // reference image genuinely changes the outcome, so the note must not
+  // teach Homa that the character is simply unavailable.
+  assert.match(note, /per-franchise/u);
+  assert.match(note, /reference image/u);
+  assert.doesNotMatch(note, /never the real one|will keep failing/u);
+});
+
+test("the policy note still forbids the quiet-lookalike path and names the parent", () => {
+  const note = imageFailureNote("policy");
   assert.match(note, /tell the parent plainly/u);
-  assert.match(note, /inspired-original|theme-object/u);
-  // The bug was the generic advice. It must not appear on a policy block.
+  assert.match(note, /off-brand lookalike/u);
+  assert.match(note, /theme-object|close-but-not-canon/u);
+  // The original bug was the generic advice. Still banned on a policy block.
   assert.doesNotMatch(note, /Try a reworded prompt/u);
 });
 
@@ -125,6 +137,67 @@ test("every kind gets its own note, so the classification changes what Homa read
   const notes = kinds.map(imageFailureNote);
   assert.equal(new Set(notes).size, kinds.length);
   for (const note of notes) assert.ok(note.length > 0);
+});
+
+/**
+ * The policy fallback (founder ruling 2026-07-29, gh#449): a refused
+ * character gets one retry on a vendor whose policy permits it.
+ */
+
+test("only a policy refusal earns the fallback retry", () => {
+  const base = { fallbackModel: "prodia/flux-fast-schnell", budgetLeftMs: 120_000 };
+  assert.equal(shouldTryPolicyFallback({ ...base, failure: "policy" }), true);
+  // A transient failure should retry the SAME model, and a rejected
+  // request is broken as written on any vendor. Neither is a policy case,
+  // so neither should burn a second vendor's money.
+  assert.equal(shouldTryPolicyFallback({ ...base, failure: "transient" }), false);
+  assert.equal(shouldTryPolicyFallback({ ...base, failure: "rejected" }), false);
+});
+
+test("no configured fallback means the refusal simply stands", () => {
+  assert.equal(
+    shouldTryPolicyFallback({
+      failure: "policy",
+      fallbackModel: null,
+      budgetLeftMs: 120_000,
+    }),
+    false,
+  );
+});
+
+test("a fallback is not started when it cannot plausibly finish", () => {
+  const base = { failure: "policy" as const, fallbackModel: "prodia/flux-fast-schnell" };
+  assert.equal(shouldTryPolicyFallback({ ...base, budgetLeftMs: 19_999 }), false);
+  assert.equal(shouldTryPolicyFallback({ ...base, budgetLeftMs: 20_000 }), true);
+  // A blown budget must never produce a negative-timeout attempt.
+  assert.equal(shouldTryPolicyFallback({ ...base, budgetLeftMs: -5_000 }), false);
+});
+
+test("the fallback model is opt-in, trimmed, and never the primary", () => {
+  const saved = {
+    primary: process.env.HOMA_IMAGE_MODEL,
+    fallback: process.env.HOMA_IMAGE_FALLBACK_MODEL,
+  };
+  try {
+    delete process.env.HOMA_IMAGE_FALLBACK_MODEL;
+    assert.equal(imageFallbackModelId(), null, "unset means the feature is off");
+
+    process.env.HOMA_IMAGE_FALLBACK_MODEL = "   ";
+    assert.equal(imageFallbackModelId(), null, "whitespace is not a model");
+
+    process.env.HOMA_IMAGE_FALLBACK_MODEL = "prodia/flux-fast-schnell";
+    assert.equal(imageFallbackModelId(), "prodia/flux-fast-schnell");
+
+    // Retrying the model that just refused would spend money to be
+    // refused again, so a matching value reads as off.
+    process.env.HOMA_IMAGE_MODEL = "prodia/flux-fast-schnell";
+    assert.equal(imageFallbackModelId(), null);
+  } finally {
+    if (saved.primary === undefined) delete process.env.HOMA_IMAGE_MODEL;
+    else process.env.HOMA_IMAGE_MODEL = saved.primary;
+    if (saved.fallback === undefined) delete process.env.HOMA_IMAGE_FALLBACK_MODEL;
+    else process.env.HOMA_IMAGE_FALLBACK_MODEL = saved.fallback;
+  }
 });
 
 test("no em dash in any parent-bound note (house law)", () => {

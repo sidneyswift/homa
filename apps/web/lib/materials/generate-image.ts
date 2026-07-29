@@ -30,6 +30,15 @@ import { isFamilyArtifactUrl, uploadStudioImageBytes } from "./artifact-store";
 
 const DEFAULT_IMAGE_MODEL = "openai/gpt-image-2";
 const GENERATION_TIMEOUT_MS = 150_000;
+/**
+ * Both attempts together, held under TOOL_DEADLINE.generate (240s) with
+ * margin. A policy refusal returns in seconds, not minutes, so in
+ * practice the fallback has nearly the whole budget; this exists so a
+ * slow primary cannot push the pair past the tool's own deadline.
+ */
+const TOTAL_GENERATION_BUDGET_MS = 200_000;
+/** Do not start a fallback that cannot plausibly finish. */
+const MIN_FALLBACK_BUDGET_MS = 20_000;
 const MAX_REFERENCE_IMAGES = 4;
 const MAX_REFERENCE_BYTES = 8 * 1024 * 1024;
 
@@ -50,8 +59,34 @@ export function imageModelId(): string {
   return process.env.HOMA_IMAGE_MODEL ?? DEFAULT_IMAGE_MODEL;
 }
 
+/**
+ * The model that gets one retry when the primary refuses on content
+ * policy, or null when the feature is off.
+ *
+ * Founder ruling 2026-07-29 (`franchise-character-fallback-model`, gh#449):
+ * a parent asking for her kid's favorite character should get that
+ * character. Vendors differ on character likeness and each answers for
+ * itself, so this is procurement through config, not a way around
+ * anyone's control: measured the same day, gpt-image-2 and seedream and
+ * grok refuse Pikachu while flux-fast-schnell and imagen-4.0-fast render
+ * it faithfully. Setting the variable IS the flag; unset means the
+ * refusal stands and Homa offers the theme-object route instead.
+ *
+ * A fallback model must honor `size`, because SHAPE_SIZE controls whether
+ * a full-page material comes out portrait. flux-fast-schnell does exactly
+ * (verified 1024x1536 in, 1024x1536 out); imagen-4.0 does not accept
+ * `size` at all and would silently square a full-page build, so it is a
+ * bad value here despite the cleaner line art. Evidence:
+ * docs/homa-planning/materials/calibration/2026-07-29-franchise-refusal-boundary.md
+ */
+export function imageFallbackModelId(): string | null {
+  const configured = process.env.HOMA_IMAGE_FALLBACK_MODEL?.trim();
+  if (!configured) return null;
+  return configured === imageModelId() ? null : configured;
+}
+
 export type StudioImageResult =
-  | { ok: true; url: string }
+  | { ok: true; url: string; viaFallbackModel?: string }
   | { ok: false; note: string };
 
 /**
@@ -193,7 +228,7 @@ export function classifyImageFailure(error: unknown): ImageFailureKind {
 export function imageFailureNote(kind: ImageFailureKind): string {
   switch (kind) {
     case "policy":
-      return "The image provider declined this prompt, likely character likeness or content policy. Rewording toward the same character will keep failing; tell the parent plainly and offer an inspired-original or a theme-object alternative (like the poke balls header that worked).";
+      return "The image provider declined this prompt as written, likely character likeness or content policy. Refusal is per-franchise, not a rule about all characters, so this is about this request. A reference image from the family's own library is the legitimate lever worth one try; simply re-wording toward a vaguer version of the same character is not, because that is how an off-brand lookalike ships. If it refuses again, tell the parent plainly which character you could not draw and offer what does work: a theme-object header (the poke balls one worked) or a close-but-not-canon original.";
     case "rejected":
       return "The image provider rejected this request as written, and it did not call the failure temporary, so an identical retry fails identically. Change the request itself: simplify the prompt, or drop a reference image that may be too large or an unreadable format.";
     case "transient":
@@ -215,9 +250,89 @@ async function fetchReferenceBytes(url: string): Promise<Uint8Array | null> {
 }
 
 /**
+ * Whether a failed attempt earns the one fallback retry. Pure so the rule
+ * is testable without a provider: only a content-policy refusal qualifies,
+ * because that is the only failure a different vendor's policy can
+ * actually change. A transient failure should retry on the SAME model, and
+ * a rejected request is broken as written on any model.
+ */
+export function shouldTryPolicyFallback(input: {
+  failure: ImageFailureKind;
+  fallbackModel: string | null;
+  budgetLeftMs: number;
+}): boolean {
+  if (input.failure !== "policy") return false;
+  if (!input.fallbackModel) return false;
+  return input.budgetLeftMs >= MIN_FALLBACK_BUDGET_MS;
+}
+
+type AttemptOutcome =
+  | { kind: "ok"; base64: string; mediaType?: string; usage: GeneratedUsage; imagesCount: number }
+  | { kind: "empty" }
+  | { kind: "timeout" }
+  | { kind: "failed"; failure: ImageFailureKind; error: unknown };
+
+interface GeneratedUsage {
+  inputTokens?: number;
+  outputTokens?: number;
+}
+
+/**
+ * One generation attempt against one model. Owns its own abort deadline so
+ * the caller can run a second attempt inside a shared wall-clock budget,
+ * and classifies its own failure so the caller only decides what to do.
+ */
+async function attemptGeneration(input: {
+  model: string;
+  familyId: string;
+  prompt: string | { images: Uint8Array[]; text: string };
+  size: `${number}x${number}`;
+  timeoutMs: number;
+}): Promise<AttemptOutcome> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), input.timeoutMs);
+  try {
+    const result = await generateImage({
+      model: input.model,
+      prompt: input.prompt,
+      size: input.size,
+      abortSignal: controller.signal,
+      providerOptions: {
+        gateway: gatewayAttribution(input.familyId, "materials_image"),
+      },
+    });
+    const image = result.image;
+    if (!image?.base64) return { kind: "empty" };
+    return {
+      kind: "ok",
+      base64: image.base64,
+      mediaType: image.mediaType,
+      usage: {
+        inputTokens: result.usage.inputTokens,
+        outputTokens: result.usage.outputTokens,
+      },
+      imagesCount: result.images.length,
+    };
+  } catch (error) {
+    if (controller.signal.aborted) return { kind: "timeout" };
+    return { kind: "failed", failure: classifyImageFailure(error), error };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+/**
  * generateStudioImage(...): one hosted image URL or a model-readable
  * failure note. Never throws: a generation hiccup should read as "try a
  * simpler prompt", not a broken turn.
+ *
+ * On a content-policy refusal it retries once on HOMA_IMAGE_FALLBACK_MODEL
+ * when one is configured (founder ruling 2026-07-29, gh#449), because
+ * vendors disagree about character likeness and a parent asking for her
+ * kid's favorite character should get that character. If the fallback
+ * also fails, for any reason, the honest policy note stands: a broken
+ * fallback must never turn into a vaguer message than the refusal it was
+ * trying to rescue.
  */
 export async function generateStudioImage(input: {
   familyId: string;
@@ -257,69 +372,108 @@ export async function generateStudioImage(input: {
     references.push(bytes);
   }
 
-  const model = imageModelId();
   const size = SHAPE_SIZE[input.shape ?? "square"];
+  const prompt =
+    references.length > 0
+      ? { images: references, text: input.prompt }
+      : input.prompt;
   const startedAt = Date.now();
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), GENERATION_TIMEOUT_MS);
+  const budgetLeft = () =>
+    TOTAL_GENERATION_BUDGET_MS - (Date.now() - startedAt);
 
-  try {
-    const result = await generateImage({
-      model,
-      prompt:
-        references.length > 0
-          ? { images: references, text: input.prompt }
-          : input.prompt,
-      size,
-      abortSignal: controller.signal,
-      providerOptions: {
-        gateway: gatewayAttribution(input.familyId, "materials_image"),
-      },
-    });
-    const image = result.image;
-    if (!image?.base64) {
-      return {
-        ok: false,
-        note: "The image provider returned nothing usable. Try a reworded prompt, or design the page without it.",
-      };
-    }
+  const primaryModel = imageModelId();
+  let attemptStartedAt = startedAt;
+  let outcome = await attemptGeneration({
+    model: primaryModel,
+    familyId: input.familyId,
+    prompt,
+    size,
+    timeoutMs: Math.min(GENERATION_TIMEOUT_MS, budgetLeft()),
+  });
+  let usedModel = primaryModel;
+  let fallbackModel: string | null = null;
 
-    await recordModelUsage({
-      familyId: input.familyId,
-      surface: "materials_image",
-      channel: input.channel,
-      model,
-      modality: "image",
-      inputTokens: result.usage.inputTokens,
-      outputTokens: result.usage.outputTokens,
-      imagesCount: result.images.length,
-      imageSize: size,
-      durationMs: Date.now() - startedAt,
-    });
-
-    const url = await uploadStudioImageBytes({
-      familyId: input.familyId,
-      bytes: Buffer.from(image.base64, "base64"),
-      mediaType: image.mediaType ?? "image/png",
-    });
-    return { ok: true, url };
-  } catch (error) {
-    if (controller.signal.aborted) {
-      return {
-        ok: false,
-        note: "The image is taking too long. Try once more with a simpler prompt, or design the page without it.",
-      };
-    }
-    const kind = classifyImageFailure(error);
+  if (outcome.kind === "failed") {
     // Runtime logs are the per-turn diagnostics surface for tool failures,
     // so the classification goes in the log line: "image_failure=policy"
     // is greppable, and a policy cluster is a product signal, not noise.
     console.error(
-      `generateStudioImage failed: image_failure=${kind}`,
-      error instanceof Error ? error.message : "unknown",
+      `generateStudioImage failed: image_failure=${outcome.failure} model=${primaryModel}`,
+      outcome.error instanceof Error ? outcome.error.message : "unknown",
     );
-    return { ok: false, note: imageFailureNote(kind) };
-  } finally {
-    clearTimeout(timeout);
+
+    const candidate = imageFallbackModelId();
+    if (
+      candidate &&
+      shouldTryPolicyFallback({
+        failure: outcome.failure,
+        fallbackModel: candidate,
+        budgetLeftMs: budgetLeft(),
+      })
+    ) {
+      const refusalNote = imageFailureNote(outcome.failure);
+      attemptStartedAt = Date.now();
+      const retried = await attemptGeneration({
+        model: candidate,
+        familyId: input.familyId,
+        prompt,
+        size,
+        timeoutMs: Math.min(GENERATION_TIMEOUT_MS, budgetLeft()),
+      });
+      if (retried.kind === "ok") {
+        console.log(
+          `generateStudioImage policy fallback succeeded: model=${candidate}`,
+        );
+        outcome = retried;
+        usedModel = candidate;
+        fallbackModel = candidate;
+      } else {
+        // The fallback is a bonus, never an excuse to report something
+        // vaguer than the refusal that triggered it.
+        console.error(
+          `generateStudioImage policy fallback failed: model=${candidate} outcome=${retried.kind}`,
+        );
+        return { ok: false, note: refusalNote };
+      }
+    } else {
+      return { ok: false, note: imageFailureNote(outcome.failure) };
+    }
   }
+
+  if (outcome.kind === "timeout") {
+    return {
+      ok: false,
+      note: "The image is taking too long. Try once more with a simpler prompt, or design the page without it.",
+    };
+  }
+  if (outcome.kind === "empty") {
+    return {
+      ok: false,
+      note: "The image provider returned nothing usable. Try a reworded prompt, or design the page without it.",
+    };
+  }
+
+  await recordModelUsage({
+    familyId: input.familyId,
+    surface: "materials_image",
+    channel: input.channel,
+    // The model that actually produced the bytes, so a fallback's spend is
+    // attributed to the fallback and not hidden under the primary.
+    model: usedModel,
+    modality: "image",
+    inputTokens: outcome.usage.inputTokens,
+    outputTokens: outcome.usage.outputTokens,
+    imagesCount: outcome.imagesCount,
+    imageSize: size,
+    durationMs: Date.now() - attemptStartedAt,
+  });
+
+  const url = await uploadStudioImageBytes({
+    familyId: input.familyId,
+    bytes: Buffer.from(outcome.base64, "base64"),
+    mediaType: outcome.mediaType ?? "image/png",
+  });
+  return fallbackModel
+    ? { ok: true, url, viaFallbackModel: fallbackModel }
+    : { ok: true, url };
 }

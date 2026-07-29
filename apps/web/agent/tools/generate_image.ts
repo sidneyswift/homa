@@ -199,10 +199,16 @@ const generateImage = defineBoundedTool({
       has_references: (input.referenceImageUrls?.length ?? 0) > 0,
     });
 
+    // A fallback render came from a different vendor with different line
+    // weight and text habits, so it earns a real look before it ships.
+    const fallbackNote = result.viaFallbackModel
+      ? " The first provider declined this prompt, so a second one drew it. Look at this image before you use it: a different model means different line weight and a different chance of stray lettering."
+      : "";
+
     return {
       generated: true,
       url: result.url,
-      note: `Embed it with <img src="..."> in page HTML, or pass it to create_printable as pageImageUrl when it IS the whole page. Reuse this exact URL for revisions. ${imageBudgetNote(usedToday + 1)}`,
+      note: `Embed it with <img src="..."> in page HTML, or pass it to create_printable as pageImageUrl when it IS the whole page. Reuse this exact URL for revisions.${fallbackNote} ${imageBudgetNote(usedToday + 1)}`,
     };
   },
 });
