@@ -3,7 +3,6 @@ import { ActivityIndicator, KeyboardAvoidingView, Platform, Text, View } from "r
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AiConsentGate } from "../../components/ai-consent-gate";
-import { Logo } from "../../components/brand/logo";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { useSession } from "../../features/auth/session-provider";
@@ -53,18 +52,6 @@ export default function ChatScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={0}
       >
-        <View
-          style={{
-            paddingHorizontal: space.md,
-            paddingVertical: space.sm,
-            borderBottomWidth: 1,
-            borderBottomColor: colors.borderSubtle,
-            backgroundColor: colors.card,
-          }}
-        >
-          <Logo size={24} />
-        </View>
-
         {loading || !userId || prepared === null ? (
           <ActivityIndicator
             color={colors.brand}

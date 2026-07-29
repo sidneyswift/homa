@@ -5,6 +5,14 @@ import type {
   StatePathwayDetail,
   StateRequirementsDetail,
 } from "../map/state-requirements";
+import {
+  anchorDateText,
+  type ExtraRequirement,
+} from "./deadline-anchor-verify";
+import {
+  DEADLINE_ANCHORS,
+  EXTRA_REQUIREMENTS,
+} from "./deadline-anchors.generated";
 
 /**
  * The state pack (plans/2026-07-28-state-pack.md): "Your {State} pack",
@@ -239,13 +247,27 @@ export function derivePathwayDivergence(
   };
 }
 
-/** The scope note beside a rendered value when sibling pathways carry a
- * different rule: the value stays (it is the default pathway's own),
- * and the parent learns what it covers. */
+/**
+ * The scope marker beside a rendered value when sibling pathways carry a
+ * different rule: the value stays (it is the default pathway's own) and
+ * the parent learns what it covers. A marker rather than a sentence,
+ * because California diverges on five of seven rows and the sentence
+ * repeated five times on one page (visual review, 2026-07-28); the
+ * sentence itself is printed once under the rows by divergenceFootnote.
+ */
+const DIVERGENCE_MARK = "°";
+
 function divergenceNote(differs: boolean): string {
-  return differs
-    ? " Other pathways carry a different rule; they are listed on the sources page."
-    : "";
+  return differs ? `<span class="sp-mark">${DIVERGENCE_MARK}</span>` : "";
+}
+
+function divergenceFootnote(
+  detail: StateRequirementsDetail,
+  duties: Duties,
+): string {
+  const any = Object.values(duties.divergence).some(Boolean);
+  if (!any) return "";
+  return `<p class="sp-mark-note"><span class="sp-mark">${DIVERGENCE_MARK}</span> This rule differs on ${escapeHtml(detail.stateName)}'s other pathways, which are listed on the sources page. This pack covers ${duties.pathway ? escapeHtml(duties.pathway.name) : "the default pathway"}.</p>`;
 }
 
 interface Duties {
@@ -322,6 +344,32 @@ export function deriveDuties(detail: StateRequirementsDetail): Duties {
   };
 }
 
+/**
+ * Whether a citation destination is the state's own publication (or
+ * another government body's) rather than a legal publisher or an
+ * advocacy organization. Domain-based on purpose: it is a claim about
+ * WHO published the page, which a hostname answers honestly, and never
+ * a claim about whether the page is correct, which it cannot.
+ *
+ * Verified against all 355 shipped citations on 2026-07-29: 281
+ * official, 74 secondary (Justia 41, HSLDA 5, FindLaw 5, OSCN 4, and a
+ * tail of public.law mirrors, court aggregators, and state homeschool
+ * associations).
+ */
+export function isOfficialSource(url: string): boolean {
+  let host: string;
+  try {
+    host = new URL(url).hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return false;
+  }
+  if (host.endsWith(".gov") || host.includes(".gov.")) return true;
+  // State legislature and revisor hosts that predate .gov adoption.
+  if (/(^|\.)(leg|legis|legislature|revisor|ilga|oscn)\./.test(host)) return true;
+  if (host.endsWith(".state.al.us") || host.endsWith(".us")) return true;
+  return false;
+}
+
 /** DOE -> state page -> wizard: the link the pack prints wherever it
  * tells the parent to confirm or file (D3, D12). The state education
  * department leads because it is the only genuinely official channel;
@@ -330,7 +378,13 @@ export function deriveDuties(detail: StateRequirementsDetail): Duties {
  * third-party walkthrough must never wear that label. Every reviewed
  * snapshot carries doe_url today, so the fallbacks are defensive. */
 export function officialUrl(detail: StateRequirementsDetail): string | null {
-  return detail.doeUrl ?? detail.sourcePageUrl ?? detail.wizardUrl ?? null;
+  // Every candidate is filtered through isOfficialSource, so the line
+  // that tells a family where to confirm or file can never fall back to
+  // a third-party page. All 51 reviewed snapshots carry a doe_url on a
+  // state domain, which makes the fallbacks defensive rather than load
+  // bearing, and that is exactly how they should stay.
+  const candidates = [detail.doeUrl, detail.sourcePageUrl, detail.wizardUrl];
+  return candidates.find((url) => url !== null && isOfficialSource(url)) ?? null;
 }
 
 function variesLine(detail: StateRequirementsDetail): string {
@@ -359,6 +413,27 @@ function pageHeader(
     ${support ? `<p class="sp-support">${escapeHtml(support)}</p>` : ""}
   </div>
 </header>`;
+}
+
+/**
+ * Requirements recovered from this state's default-pathway detail
+ * (gh#322), rendered under the row they belong to. Each note is backed
+ * by a verbatim quote checked at build time, and the derivation refuses
+ * anything that only restates the deadline the row already shows, so a
+ * note here is always something the summary would otherwise have
+ * missed. Pennsylvania's notarized affidavit is the reason this exists.
+ */
+function extraFor(
+  detail: StateRequirementsDetail,
+  section: ExtraRequirement["section"],
+): string {
+  const entry = EXTRA_REQUIREMENTS[detail.stateCode];
+  if (!entry) return "";
+  const notes = entry.requirements.filter((r) => r.section === section);
+  if (notes.length === 0) return "";
+  return notes
+    .map((note) => `<span class="sp-also">Also: ${escapeHtml(note.note)}</span>`)
+    .join("");
 }
 
 function definitionRow(label: string, valueHtml: string, subHtml?: string): string {
@@ -452,7 +527,7 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
         definitionRow(
           "Telling the state",
           `${parts.join(" ")}.${divergenceNote(d.notification)}`,
-          `When: ${deadline}${p.notification.frequency ? ` · how often: ${escapeHtml(humanizeToken(p.notification.frequency))}` : ""}${p.statute ? ` · ${cite(p.statute)}` : ""}`,
+          `When: ${deadline}${p.notification.frequency ? ` · how often: ${escapeHtml(humanizeToken(p.notification.frequency))}` : ""}${p.statute ? ` · ${cite(p.statute)}` : ""}${extraFor(detail, "notification")}`,
         ),
       );
     } else {
@@ -528,7 +603,8 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
           : practical.length > 0
             ? `No record format is prescribed, and this pack includes templates because ${escapeHtml(practical.join(" and "))} ${practical.length > 1 ? "are" : "is"} easier to show with one.`
             : "No specific records are required on this pathway.") +
-          divergenceNote(d.recordkeeping),
+          divergenceNote(d.recordkeeping) +
+          extraFor(detail, "recordkeeping"),
       ),
     );
 
@@ -570,13 +646,7 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
     );
   }
 
-  const keyDates =
-    p && !p.notification.varies && p.notification.required && p.notification.deadline
-      ? `<aside class="sp-dates">
-  <p class="sp-section-label">The filing deadline</p>
-  <p><strong>${escapeHtml(trimTrailingPeriod(p.notification.deadline))}</strong>${p.notification.recipient ? ` · to ${escapeHtml(p.notification.recipient)}` : ""}${p.notification.frequency ? ` · ${escapeHtml(humanizeToken(p.notification.frequency))}` : ""}</p>
-</aside>`
-      : "";
+  const keyDates = keyDatesBox(detail, duties);
 
   const highCallout =
     detail.regulationLevel === "high"
@@ -594,6 +664,7 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
 <section class="sp-rows">
 ${rows.join("\n")}
 </section>
+${divergenceFootnote(detail, duties)}
 ${keyDates}
 ${highCallout}`;
 }
@@ -615,18 +686,96 @@ function dedupeCitationsByUrl(
   return [...byUrl.values()];
 }
 
+/**
+ * "Key dates for your year" (gh#342): the calendar anchors derived from
+ * this state's own deadline prose, each one carrying a verbatim quote
+ * that was verified against the source at build time
+ * (deadline-anchor-verify.ts). A state whose proposal failed
+ * verification simply has no entry, and falls back to the verbatim
+ * string alone, which is what every state showed before this existed.
+ *
+ * The rendered date always comes from the anchor's LABEL, never from
+ * arithmetic on withinDays: several states count business days (New
+ * Hampshire, Vermont) or school days (Arkansas), and only the label
+ * carries that distinction. The verbatim source sits underneath as the
+ * authority, so a parent can always read the rule the way the statute
+ * states it.
+ */
+function keyDatesBox(
+  detail: StateRequirementsDetail,
+  duties: Duties,
+): string {
+  const p = duties.pathway;
+  if (!p || !p.notification.required || !p.notification.deadline) return "";
+  const entry = DEADLINE_ANCHORS[detail.stateCode];
+  const scope = duties.divergence.notification
+    ? ` <span class="sp-dates-scope">on the ${escapeHtml(p.name)} pathway</span>`
+    : "";
+  const anchorRows =
+    entry && entry.source === p.notification.deadline
+      ? entry.anchors
+          .map((anchor) => {
+            // An anchor with no calendar date (relative or conditional)
+            // leaves the stamp column empty rather than filling it with a
+            // word: its label already carries the whole rule, and the
+            // count is often in units a bare number would misstate
+            // (business days, school days).
+            const date = anchorDateText(anchor);
+            return `    <li><span class="sp-date-stamp">${date ? escapeHtml(date) : ""}</span><span>${escapeHtml(anchor.label)}</span></li>`;
+          })
+          .join("\n")
+      : "";
+  const heading = anchorRows
+    ? `Key dates for your year${scope}`
+    : `The filing deadline${scope}`;
+  return `<aside class="sp-dates">
+  <p class="sp-section-label">${heading}</p>
+${anchorRows ? `  <ul class="sp-date-list">\n${anchorRows}\n  </ul>\n` : ""}  <p class="sp-dates-source"><strong>${escapeHtml(trimTrailingPeriod(p.notification.deadline))}</strong>${p.notification.recipient ? ` · to ${escapeHtml(p.notification.recipient)}` : ""}${p.notification.frequency ? ` · ${escapeHtml(humanizeToken(p.notification.frequency))}` : ""}</p>
+</aside>`;
+}
+
 function sourcesPage(detail: StateRequirementsDetail, duties: Duties): string {
   const citations = dedupeCitationsByUrl(
     detail.citations.filter((citation) => citation.sourceType !== "case_law"),
   );
-  const rows = citations
-    .map(
-      (citation) =>
-        `<li><span class="sp-cite-label">${escapeHtml(citation.label)}</span><span class="sp-mono sp-cite-url">${escapeHtml(citation.url)}</span></li>`,
-    )
-    .join("\n");
+  // Official first, secondary named as secondary: an audit of all 355
+  // shipped citations (2026-07-29) found 74 pointing at commercial or
+  // advocacy sites, Justia alone 41, every one of them printed under a
+  // statute label as though it were the state's own code. Both kinds
+  // are worth giving a parent; presenting them as the same thing is
+  // what a district reader would rightly object to.
+  const official = citations.filter((citation) => isOfficialSource(citation.url));
+  const secondary = citations.filter((citation) => !isOfficialSource(citation.url));
+  const citeList = (list: typeof citations) =>
+    list
+      .map(
+        (citation) =>
+          `<li><span class="sp-cite-label">${escapeHtml(citation.label)}</span><span class="sp-mono sp-cite-url">${escapeHtml(citation.url)}</span></li>`,
+      )
+      .join("\n");
+  const rows =
+    secondary.length === 0
+      ? citeList(official)
+      : `${official.length > 0 ? citeList(official) : ""}`;
+  const secondaryBlock =
+    secondary.length > 0
+      ? `<section class="sp-pathways">
+  <p class="sp-section-label">Where to read them elsewhere</p>
+  <p class="sp-row-sub">${escapeHtml(detail.stateName)}'s own site does not publish every one of these, so the source below is a legal publisher or a homeschool organization rather than the state. Useful, and not the official text.</p>
+  <ul class="sp-cites">
+${citeList(secondary)}
+  </ul>
+</section>`
+      : "";
+  // Six states publish their primary statute only through a legal
+  // publisher (AR, GA, MS, NM, TN, WY; MS's is a paywalled LexisNexis
+  // container URL). The statute is still named, and the link moves to
+  // the secondary block rather than standing beside "the primary
+  // statute is" as if the state had published it.
+  const primaryUrlOfficial =
+    detail.statuteUrl !== null && isOfficialSource(detail.statuteUrl);
   const primary = detail.primaryStatute
-    ? `<p class="sp-body">The primary statute is <strong>${escapeHtml(detail.primaryStatute)}</strong>${detail.statuteUrl ? ` (<span class="sp-mono">${escapeHtml(detail.statuteUrl)}</span>)` : ""}.</p>`
+    ? `<p class="sp-body">The primary statute is <strong>${escapeHtml(detail.primaryStatute)}</strong>${primaryUrlOfficial ? ` (<span class="sp-mono">${escapeHtml(detail.statuteUrl as string)}</span>)` : ""}.</p>`
     : "";
   const others = detail.pathways.filter((pathway) => !pathway.isDefault);
   const otherRows = others
@@ -643,7 +792,8 @@ function sourcesPage(detail: StateRequirementsDetail, duties: Duties): string {
     "Every rule in this pack traces to a published source you can read yourself.",
   )}
 ${primary}
-${rows ? `<ul class="sp-cites">\n${rows}\n</ul>` : ""}
+${rows ? `${secondary.length > 0 ? `<p class="sp-section-label">${escapeHtml(detail.stateName)}'s own published law</p>` : ""}<ul class="sp-cites">\n${rows}\n</ul>` : ""}
+${secondaryBlock}
 ${
   others.length > 0
     ? `<section class="sp-pathways">
@@ -1170,6 +1320,15 @@ export function wrapStatePackDocument(
   .sp-row-sub { margin-top: 3px !important; font-size: 9px !important; color: ${MUTED} !important; }
   .sp-dates { margin-top: 0.16in; border: 1.5px solid ${RULE}; border-radius: 8px; padding: 10px 14px; }
   .sp-dates p { margin: 0; font-size: 11.5px; color: ${INK}; }
+  .sp-also { display: block; margin-top: 3px; font-size: 9.5px; line-height: 1.45; color: ${BODY}; }
+  .sp-mark { color: ${CLAY}; font-weight: 700; }
+  .sp-mark-note { margin: 7px 0 0; font-size: 8.6px; line-height: 1.45; color: ${MUTED}; }
+  .sp-dates-scope { font-family: "Hanken Grotesk", sans-serif; text-transform: none; letter-spacing: 0; font-size: 8.5px; color: ${SUBTLE}; }
+  .sp-date-list { list-style: none; margin: 2px 0 8px; padding: 0; }
+  .sp-date-list li { display: flex; align-items: baseline; gap: 9px; padding: 3px 0; font-size: 11.5px; color: ${INK}; }
+  .sp-date-stamp { flex: 0 0 auto; min-width: 1.05in; font-family: "JetBrains Mono", monospace; font-size: 10px; font-weight: 500; color: ${CLAY_DEEP}; }
+  .sp-date-stamp-soft { color: ${SUBTLE}; }
+  .sp-dates-source { padding-top: 6px; border-top: 1px solid ${HAIRLINE}; font-size: 9.5px !important; color: ${MUTED} !important; }
   .sp-callout { margin-top: 0.14in; border: 1px solid ${HAIRLINE}; border-left: 3px solid ${CLAY_SOFT}; border-radius: 6px; padding: 9px 12px; }
   .sp-callout p { margin: 0; font-size: 9.5px; line-height: 1.5; color: ${MUTED}; }
   .sp-cites { list-style: none; margin: 8px 0 0; padding: 0; }

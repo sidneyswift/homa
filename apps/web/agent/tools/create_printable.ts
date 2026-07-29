@@ -28,7 +28,7 @@ import {
   getMaterialPinned,
   type MaterialSummary,
 } from "../../lib/materials/library";
-import { REVIEW_PAGE_CAP, reviewArtifact } from "../../lib/materials/review-artifact";
+import { reviewArtifact } from "../../lib/materials/review-artifact";
 import {
   hasPageBreakMarkup,
   imagePageBody,
@@ -40,10 +40,12 @@ import {
   wrapPrintableDocument,
 } from "../../lib/materials/page-shell";
 import {
+  PREVIEW_PAGE_CAP,
   RendererUnavailableError,
   renderPrintableHtml,
   SUBJECT_LESSON_RENDER_POLICY,
 } from "../../lib/materials/render-page";
+import { buildRenderProvenance } from "../../lib/materials/render-provenance";
 import { materialSaveFailureNote } from "../../lib/materials/save-failure-note";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
 import {
@@ -286,6 +288,14 @@ export function buildPrintableGenerationInput(
 interface ResolvedPage {
   body: string;
   source: MaterialSource;
+  /**
+   * True when this page was authored on THIS call (html or a fresh page
+   * image), false when it was carried over unchanged by fromMaterialId.
+   * On a packet revision the carried pages are the ones she did not
+   * complain about, so this is the signal for which pages the reviewer
+   * must actually look at (gh#346).
+   */
+  fresh: boolean;
 }
 
 /** The packet's stored source: one path's value when uniform, else hybrid. */
@@ -363,7 +373,11 @@ const createPrintable = defineBoundedTool({
       if (hasPageBreakMarkup(inputHtml)) {
         return { created: false, note: PAGE_BREAK_NOTE };
       }
-      resolvedPages.push({ body: inputHtml, source: htmlPageSource(inputHtml) });
+      resolvedPages.push({
+        body: inputHtml,
+        source: htmlPageSource(inputHtml),
+        fresh: true,
+      });
     } else if (typeof input.pageImageUrl === "string") {
       if (!isFamilyArtifactUrl(input.pageImageUrl, familyId)) {
         return {
@@ -374,6 +388,7 @@ const createPrintable = defineBoundedTool({
       resolvedPages.push({
         body: imagePageBody(new URL(input.pageImageUrl).toString()),
         source: "image",
+        fresh: true,
       });
     } else {
       for (const [index, page] of (input.pages ?? []).entries()) {
@@ -403,7 +418,7 @@ const createPrintable = defineBoundedTool({
           if (hasPageBreakMarkup(body)) {
             return { created: false, note: `${position}: ${PAGE_BREAK_NOTE}` };
           }
-          resolvedPages.push({ body, source: htmlPageSource(body) });
+          resolvedPages.push({ body, source: htmlPageSource(body), fresh: true });
           continue;
         }
         if (typeof page.pageImageUrl === "string") {
@@ -416,6 +431,7 @@ const createPrintable = defineBoundedTool({
           resolvedPages.push({
             body: imagePageBody(new URL(page.pageImageUrl).toString()),
             source: "image",
+            fresh: true,
           });
           continue;
         }
@@ -456,7 +472,7 @@ const createPrintable = defineBoundedTool({
           };
         }
         for (const body of selected.bodies) {
-          resolvedPages.push({ body, source: material.source });
+          resolvedPages.push({ body, source: material.source, fresh: false });
         }
       }
       if (resolvedPages.length > MAX_PACKET_PAGES) {
@@ -592,7 +608,15 @@ const createPrintable = defineBoundedTool({
     const review = await reviewArtifact({
       familyId,
       channel,
-      previewJpegs: rendered.pageJpegs,
+      // Changed pages first: on a packet revision the pages carried over
+      // by fromMaterialId are the ones she did not complain about, and
+      // reviewing those instead of the page she asked about is how a
+      // revision shipped "passed" with the fixed page unseen (gh#346).
+      pages: rendered.pageJpegs.map((data, index) => ({
+        data,
+        pageNumber: index + 1,
+        fresh: resolvedPages[index]?.fresh ?? true,
+      })),
       pageCount: rendered.pageCount,
       brief,
     });
@@ -610,7 +634,18 @@ const createPrintable = defineBoundedTool({
           kind: "material",
           referenceId: materialId,
         });
-        if (reservation.referenceId) {
+        // `wrote` only when THIS call created the reservation. On any
+        // later call for the same accepted offer the insert above is a
+        // no-op and the query returns the EXISTING reference, which is
+        // the id of the material the first call already inserted.
+        // Adopting it made the insert below collide on the primary key,
+        // so once a family accepted a morning-brief offer and got one
+        // material, every further material in that session failed with
+        // `duplicate key value violates unique constraint
+        // "worksheets_pkey"` and she simply got nothing. Four in a row
+        // for one family on 2026-07-28, surfaced by the tool-failure
+        // alert the same day it was built (gh#372).
+        if (reservation.wrote && reservation.referenceId) {
           materialId = reservation.referenceId;
           reservedSourceDeliveryId = sourceOfferDeliveryId;
         }
@@ -646,6 +681,15 @@ const createPrintable = defineBoundedTool({
         attributes,
       ),
       review,
+      // What it took to turn the stored html into these page images. The
+      // html on the row is only the page bodies, so without the shell
+      // fingerprint a later re-render cannot be told apart from a
+      // different render (gh#328 render-pair archiver).
+      render: buildRenderProvenance({
+        renderer: rendered.renderer,
+        rendererVersion: rendered.rendererVersion,
+        previewPageCap: PREVIEW_PAGE_CAP,
+      }),
     };
 
     // The durable record (Postgres is truth; html is what a future
@@ -809,20 +853,29 @@ const createPrintable = defineBoundedTool({
         : reviewPassed
           ? `The card with the preview and print button is already visible in chat.${pagesNote} Tell her it's ready in one warm sentence (child + skill), and invite tweaks; never paste the links.`
           : "This version is NOT shown to her: a flagged draft never renders as a card, on any channel. Fix the issues below (call again with revisesId set to this id); only a passing version appears, and only then is there anything to tell her.";
-    // The reviewer never sees pages past REVIEW_PAGE_CAP (input-token
-    // ceiling), so a pass on a longer document is not a full-document
-    // pass. Say so plainly rather than letting the agent claim more
-    // coverage than the reviewer actually had.
-    const reviewedPageCount = Math.min(rendered.pageCount, REVIEW_PAGE_CAP);
+    // The reviewer sees at most REVIEW_PAGE_CAP pages (input-token
+    // ceiling) and at most PREVIEW_PAGE_CAP are rendered at all, so a
+    // pass on a longer document is never a full-document pass. Name the
+    // exact pages rather than letting the agent claim more coverage than
+    // the reviewer had: "it passed the quality check" was said to a
+    // parent for four days about pages nobody had looked at (gh#346).
+    const reviewedNumbers = review?.reviewedPages ?? [];
+    const unreviewedCount = rendered.pageCount - reviewedNumbers.length;
     const coverageNote =
-      review !== null && rendered.pageCount > REVIEW_PAGE_CAP
-        ? ` The reviewer only saw pages 1 to ${reviewedPageCount} of ${rendered.pageCount}; the rest are unreviewed.`
+      review !== null && unreviewedCount > 0
+        ? ` Checked only ${
+            reviewedNumbers.length === 1
+              ? `page ${reviewedNumbers[0]}`
+              : `pages ${reviewedNumbers.join(", ")}`
+          } of ${rendered.pageCount}; the other ${unreviewedCount} ${
+            unreviewedCount === 1 ? "page is" : "pages are"
+          } unchecked, so do not tell her the whole document passed.`
         : "";
     const reviewNote =
       review === null
-        ? ""
+        ? " The quality check did not run for this version (it is off, timed out, or errored), so nothing has looked at these pages: say it is ready without claiming it was checked."
         : review.pass
-          ? ` Quality check passed.${coverageNote}`
+          ? ` Quality check passed on the pages it saw.${coverageNote}`
           : ` Quality check found issues: ${review.issues.join("; ")}.${coverageNote}`;
 
     return {
@@ -856,8 +909,18 @@ const createPrintable = defineBoundedTool({
 // screen, and the background first making is the honest path. The
 // agent-job build session that renders that making keeps the tool.
 export default defineDynamic({
+  // step.started, never turn.started: a dynamic TOOL resolved on
+  // turn.started is persisted as durable metadata and replayed on later
+  // steps by looking its execute up in an in-memory step registry. These
+  // tools have no bundler-generated step function, so eve registers a
+  // fallback into `globalThis` at resolve time, and any later step that
+  // lands on a different lambda isolate finds nothing and drops the tool
+  // with only a log line. The model then simply does not have it, which
+  // reads to the parent as "my tool is not connected" (2026-07-26/27,
+  // gh#345). step.started re-resolves live every step and carries the
+  // real closure, which is what eve documents for framework tools.
   events: {
-    "turn.started": (_event, ctx) => {
+    "step.started": (_event, ctx) => {
       const attributes = ctx.session.auth.current?.attributes as
         | GenerationGateAttributes
         | undefined;

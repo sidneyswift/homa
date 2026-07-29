@@ -1,5 +1,6 @@
 import { Redirect, Tabs } from "expo-router";
 
+import { BillingGate } from "../../components/billing-gate";
 import {
   ChatTabIcon,
   FamilyTabIcon,
@@ -12,12 +13,24 @@ import { colors } from "../../theme/tokens";
 /**
  * The signed-in shell: Today, Chat, Family. The session guard here is
  * the mobile twin of proxy.ts route gating; RLS enforces data access
- * no matter what renders.
+ * no matter what renders. BillingGate is the mobile twin of every web
+ * route's familyAccountGate() check, arc F: it wraps only the tabs, not
+ * /settings, so a walled family can still sign out, restore purchases,
+ * or delete their account (Apple requires deletion stay reachable no
+ * matter the billing state).
  */
 export default function TabsLayout() {
   const { session } = useSession();
   if (!session) return <Redirect href="/signin" />;
 
+  return (
+    <BillingGate>
+      <TabsNavigator />
+    </BillingGate>
+  );
+}
+
+function TabsNavigator() {
   return (
     <Tabs
       screenOptions={{
@@ -27,7 +40,7 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: colors.textMuted,
         tabBarHideOnKeyboard: true,
         tabBarStyle: {
-          backgroundColor: colors.card,
+          backgroundColor: colors.page,
           borderTopColor: colors.borderSubtle,
         },
         tabBarLabelStyle: {

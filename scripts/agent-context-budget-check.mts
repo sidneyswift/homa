@@ -33,6 +33,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { EMAIL_MODE_MARKDOWN } from "../apps/web/agent/instructions/email-mode";
+import { IOS_MODE_MARKDOWN } from "../apps/web/agent/instructions/ios-mode";
 import { RESEARCH_MODE_MARKDOWN } from "../apps/web/agent/instructions/research-mode";
 import {
   composeSmsModeMarkdown,
@@ -58,6 +59,7 @@ export const CONTEXT_BUDGETS: Record<string, number> = {
   "sms-mode (largest branch)": 4_600,
   "email-mode": 450,
   "web-mode": 400,
+  "ios-mode": 700,
   "research-mode": 3_700,
   "onboarding-mode (preloaded skill body)": 28_000,
 };
@@ -91,6 +93,7 @@ const MEASURED_MODULES = new Set([
   "sms-mode.ts",
   "email-mode.ts",
   "web-mode.ts",
+  "ios-mode.ts",
   "research-mode.ts",
 ]);
 
@@ -126,6 +129,7 @@ export function measureComponents(): MeasuredComponent[] {
     { name: "sms-mode (largest branch)", bytes: smsLargest },
     { name: "email-mode", bytes: EMAIL_MODE_MARKDOWN.length },
     { name: "web-mode", bytes: WEB_MODE_MARKDOWN.length },
+    { name: "ios-mode", bytes: IOS_MODE_MARKDOWN.length },
     { name: "research-mode", bytes: RESEARCH_MODE_MARKDOWN.length },
     {
       name: "onboarding-mode (preloaded skill body)",

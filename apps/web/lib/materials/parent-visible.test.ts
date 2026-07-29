@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  selectInProgressMaterialRevisions,
   selectParentVisibleMaterialRevisions,
   type MaterialRevisionCandidate,
 } from "./parent-visible";
@@ -62,5 +63,48 @@ describe("selectParentVisibleMaterialRevisions", () => {
     ]);
 
     assert.deepEqual(selected, []);
+  });
+});
+
+describe("selectInProgressMaterialRevisions", () => {
+  const row = (
+    id: string,
+    revisesId: string | null,
+    status: "draft" | "final" | "superseded",
+    order: number,
+    reviewPass: boolean | null = true,
+  ) => ({ id, revisesId, status, reviewPass, order });
+
+  it("returns the newest draft of a chain that never reached final", () => {
+    const selected = selectInProgressMaterialRevisions([
+      row("a", null, "superseded", 1),
+      row("b", "a", "draft", 2),
+    ]);
+    assert.deepEqual(selected.map((entry) => entry.id), ["b"]);
+  });
+
+  it("omits a chain that reached final, because it is already in the binder", () => {
+    const selected = selectInProgressMaterialRevisions([
+      row("a", null, "superseded", 1),
+      row("b", "a", "final", 2),
+    ]);
+    assert.deepEqual(selected, []);
+  });
+
+  it("omits a draft that failed review, which was never shown to her", () => {
+    const selected = selectInProgressMaterialRevisions([
+      row("a", null, "draft", 1, false),
+    ]);
+    assert.deepEqual(selected, []);
+  });
+
+  it("returns one row per unkept chain, not one per attempt", () => {
+    const selected = selectInProgressMaterialRevisions([
+      row("a", null, "superseded", 1),
+      row("b", "a", "superseded", 2),
+      row("c", "b", "draft", 3),
+      row("x", null, "draft", 4),
+    ]);
+    assert.deepEqual(selected.map((entry) => entry.id), ["c", "x"]);
   });
 });

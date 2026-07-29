@@ -5,6 +5,9 @@ import { describe, it } from "node:test";
 
 import { EM_DASH } from "@homa/core";
 
+import { quoteAppearsVerbatim } from "./deadline-anchor-verify";
+import { EXTRA_REQUIREMENTS } from "./deadline-anchors.generated";
+
 import {
   parseStateRequirementsPayload,
   type StateRequirementsDetail,
@@ -13,6 +16,8 @@ import {
 import {
   composeStatePack,
   deriveDuties,
+  isOfficialSource,
+  officialUrl,
   derivePathwayDivergence,
   prefillBirthdate,
   verifiedMonthYear,
@@ -256,9 +261,16 @@ describe("California (pervasive pathway variance)", () => {
     const pack = compose("CA");
     assert.ok(pack.html.includes("October 1 through October 15 annually"));
     assert.ok(pack.html.includes("California Department of Education"));
+    // Divergent rows carry a marker and the page carries one footnote
+    // explaining it, rather than repeating a sentence per row (CA
+    // diverges on five of seven rows; visual review 2026-07-28).
     assert.ok(
-      pack.html.includes("Other pathways carry a different rule"),
-      "a genuinely divergent field must carry its scope note",
+      pack.html.includes("This rule differs on California's other pathways"),
+      "a divergent page must carry the scope footnote",
+    );
+    assert.ok(
+      pack.html.includes("sp-mark"),
+      "a genuinely divergent row must carry its marker",
     );
   });
   it("keeps case law out of the parent packet (D18)", () => {
@@ -342,7 +354,9 @@ describe("Pennsylvania (every duty on, high variance, six children)", () => {
     // instructional-time requirement at all.
     const pack = compose("PA", SIX_CHILD_FAMILY);
     assert.ok(pack.html.includes("900 hours per year"));
-    assert.ok(pack.html.includes("Other pathways carry a different rule"));
+    assert.ok(
+      pack.html.includes("This rule differs on Pennsylvania's other pathways"),
+    );
   });
 });
 
@@ -404,6 +418,79 @@ describe("per-pathway truth (the default pathway carries its own values)", () =>
       assert.ok(
         !/\ball pathways\b/i.test(pack.html),
         `${code} claims to cover all pathways`,
+      );
+    }
+  });
+});
+
+describe("requirements recovered from pathway detail (gh#322)", () => {
+  it("gives Pennsylvania its notarization requirement", () => {
+    // The motivating case: a PA family who files an un-notarized
+    // affidavit is rejected by the district and believes they filed.
+    // The requirement appears nowhere in the payload except the default
+    // pathway's own slice of pathway_varies_detail.
+    const pack = compose("PA", SIX_CHILD_FAMILY);
+    assert.match(pack.html, /notarized/i);
+  });
+
+  it("never renders the raw detail field, only verified notes", () => {
+    for (const code of ALL_CODES) {
+      const pack = compose(code);
+      assert.ok(!pack.html.includes("undefined"), `${code} leaks undefined`);
+      assert.ok(!pack.html.includes("general_list"), `${code} leaks an enum token`);
+      assert.ok(
+        !/\bPrivate Tutoring:/.test(pack.html),
+        `${code} leaks a raw pathway_varies_detail segment`,
+      );
+    }
+  });
+
+  it("keeps every shipped note backed by a verbatim quote", () => {
+    for (const [code, entry] of Object.entries(EXTRA_REQUIREMENTS)) {
+      for (const requirement of entry.requirements) {
+        assert.ok(
+          quoteAppearsVerbatim(entry.source, requirement.quote),
+          `${code}: ${JSON.stringify(requirement.quote)}`,
+        );
+      }
+    }
+  });
+});
+
+describe("source honesty (2026-07-29 citation audit)", () => {
+  it("classifies publishers by who published them", () => {
+    assert.ok(isOfficialSource("https://www.azleg.gov/ars/15/00802.htm"));
+    assert.ok(isOfficialSource("https://alison.legislature.state.al.us/x"));
+    assert.ok(!isOfficialSource("https://law.justia.com/codes/x"));
+    assert.ok(!isOfficialSource("https://hslda.org/post/x"));
+    assert.ok(!isOfficialSource("not a url"));
+  });
+
+  it("never dresses a legal publisher as the state's own law", () => {
+    // Mississippi's statutes are cited to Justia; the pack may show
+    // them, but not under the heading that means "the state published
+    // this".
+    const pack = compose("MS");
+    assert.ok(pack.html.includes("Where to read them elsewhere"));
+    assert.ok(
+      pack.html.includes("rather than the state"),
+      "secondary sources must be named as secondary",
+    );
+  });
+
+  it("keeps a state with only official sources free of the caveat", () => {
+    const pack = compose("NY");
+    assert.ok(!pack.html.includes("Where to read them elsewhere"));
+  });
+
+  it("only ever points the file-here line at an official destination", () => {
+    for (const code of ALL_CODES) {
+      const detail = loadDetail(code);
+      const url = officialUrl(detail);
+      if (url === null) continue;
+      assert.ok(
+        isOfficialSource(url),
+        `${code} sends families to a non-official channel: ${url}`,
       );
     }
   });

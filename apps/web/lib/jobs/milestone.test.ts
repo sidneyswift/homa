@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { compose } from "./milestone";
+import { compose, materialMediaUrls } from "./milestone";
+import { jobMaterialDeliveryEnabled } from "./flag";
 
 // Regression for the doubled possessive found live in homa_task_runs
 // (kind agent_job): start_agent_job's own tool description asks the model
@@ -75,4 +76,63 @@ test("compose titles are unaffected", () => {
   assert.equal(compose("completed", label, "Story").title, `${label} is all done`);
   assert.equal(compose("gate", label, "Story").title, `First part of ${label} is ready`);
   assert.equal(compose("needs_attention", label, "Story").title, `${label} needs a quick look`);
+});
+
+// The delivery half of the voice-materials bridge (#187): a background build
+// used to text the parent that her worksheet was ready and attach nothing,
+// because deliverJobMilestone sent words only while create_printable had
+// been attaching preview + PDF since the MMS path shipped.
+test("materialMediaUrls puts the preview before the print file", () => {
+  const urls = materialMediaUrls([
+    { preview_url: "https://blob/a.jpg", pdf_url: "https://blob/a.pdf" },
+  ]);
+  assert.deepEqual(urls, ["https://blob/a.jpg", "https://blob/a.pdf"]);
+});
+
+test("materialMediaUrls keeps newest-first order across materials", () => {
+  const urls = materialMediaUrls([
+    { preview_url: "https://blob/new.jpg", pdf_url: "https://blob/new.pdf" },
+    { preview_url: "https://blob/old.jpg", pdf_url: "https://blob/old.pdf" },
+  ]);
+  assert.deepEqual(urls, [
+    "https://blob/new.jpg",
+    "https://blob/new.pdf",
+    "https://blob/old.jpg",
+    "https://blob/old.pdf",
+  ]);
+});
+
+// A blank URL in the MMS payload gets the whole message rejected, which
+// would take the words down with the picture. Drop it instead.
+test("materialMediaUrls drops missing and blank urls rather than sending them", () => {
+  const urls = materialMediaUrls([
+    { preview_url: "https://blob/a.jpg", pdf_url: null },
+    { preview_url: "   ", pdf_url: "https://blob/b.pdf" },
+    { preview_url: null, pdf_url: null },
+  ]);
+  assert.deepEqual(urls, ["https://blob/a.jpg", "https://blob/b.pdf"]);
+});
+
+test("materialMediaUrls on a job with no finished materials sends words only", () => {
+  assert.deepEqual(materialMediaUrls([]), []);
+});
+
+// The gate is code, not a habit (ruling voice-dispatch-sandbox-gate). Only
+// the exact documented value opens delivery to non-sandbox families; a
+// sandbox family is cleared regardless, so the path is verifiable on
+// +homatest with the flag unset.
+test("jobMaterialDeliveryEnabled is off unless the value is exactly true", () => {
+  const original = process.env.HOMA_JOB_MATERIAL_DELIVERY_ENABLED;
+  try {
+    for (const value of [undefined, "", "false", "1", "TRUE", "yes", " true"]) {
+      if (value === undefined) delete process.env.HOMA_JOB_MATERIAL_DELIVERY_ENABLED;
+      else process.env.HOMA_JOB_MATERIAL_DELIVERY_ENABLED = value;
+      assert.equal(jobMaterialDeliveryEnabled(), false, `expected off for ${JSON.stringify(value)}`);
+    }
+    process.env.HOMA_JOB_MATERIAL_DELIVERY_ENABLED = "true";
+    assert.equal(jobMaterialDeliveryEnabled(), true);
+  } finally {
+    if (original === undefined) delete process.env.HOMA_JOB_MATERIAL_DELIVERY_ENABLED;
+    else process.env.HOMA_JOB_MATERIAL_DELIVERY_ENABLED = original;
+  }
 });
