@@ -42,7 +42,7 @@ incidents below.
 | "Amalia's Handwriting Practice: Mi Nombre y la Casa de Muñecas" (root `2a1336db`) | Amalia, 3 | 12 versions, 2026-07-28 16:13 to 2026-07-29 16:25 (over 24h), **never reached final**, abandoned mid-saga when the parent moved on to other materials | `fill-convergence-handwriting.eval.ts` | Maya (6) |
 
 Age note: the Walker fixture has no 9-year-old or 3-year-old (Finn 4,
-Maya 6, Story 5 — see `family-context-eval-fixture.ts`). Per house
+Maya 6, Story 5, see `family-context-eval-fixture.ts`). Per house
 convention, new fixture children are not invented inline; the closest
 existing fixture child hosts each scenario instead. The defect under
 test (scale existing content to fill the sheet, don't pad with more
@@ -114,7 +114,7 @@ ruling and its two implementation PRs (#451 and #453).
 | handwriting sheet (Maya / real: Amalia's name-tracing practice) | 12 versions over 24+ hours, **never reached final** | **converged at turn 3** |
 
 All three scenarios pass, across two runs. Run 1 (all three together):
-`Results: 2 passed, 1 failed (3 total)`, `Gates: 4 passed` — the
+`Results: 2 passed, 1 failed (3 total)`, `Gates: 4 passed`. The
 cut-and-paste scenario hit its 600s timeout sharing sandbox capacity with
 the other two evals' rendering and model calls, not a real defect. Its
 timeout was raised to 1,200,000ms and it was re-run alone: `Results: 1
