@@ -752,6 +752,15 @@ export const EVENT_SCHEMAS = {
     message_count: z.number().int().min(0),
     linked_family: z.boolean(),
   }),
+  // The general line's call-ended webhook (#171): fired when a finished
+  // call is synced within seconds instead of waiting for the hourly cron.
+  // Distinct from voice.transcript_synced, which fires on the row insert
+  // either way; this one measures whether the fast path is actually
+  // firing, which is the thing #171's acceptance criterion turns on.
+  "voice.call_ended_synced": z.object({
+    linked_family: z.boolean(),
+    message_count: z.number().int().min(0),
+  }),
   // The voice remember tool (item 6): a memory saved live on a call.
   "voice.memory_saved": z.object({
     family_id: z.uuid(),

@@ -40,8 +40,12 @@ import {
   TelnyxHttpError,
   VOICE_ASSISTANT_NAME,
   WEBHOOK_URL,
+  GENERAL_INSIGHT_GROUP_NAME,
+  GENERAL_INSIGHT_NAME,
   findBrand,
   findCampaign,
+  findInsightGroup,
+  findInsightTemplate,
   findMessagingProfile,
   findVoiceAssistant,
   listOf,
@@ -55,6 +59,8 @@ import {
   tx,
   type AssistantRow,
   type BrandRow,
+  type InsightGroupRow,
+  type InsightTemplateRow,
   type MessagingProfileRow,
   type PhoneNumberRow,
 } from "./telnyx-shared.mts";
@@ -378,6 +384,88 @@ async function loadVoiceInstructions(): Promise<string> {
   ].join("\n");
 }
 
+/**
+ * The general line's call-ended trigger (#171).
+ *
+ * The curriculum line has had one of these since it shipped; the general
+ * line, the one real parents call, never got one, which is why a call's
+ * content reached web chat only when the hourly cron next ran. The webhook
+ * this group posts to does NOT trust the summary for anything load-bearing:
+ * /api/voice/insights reads the conversation id and re-derives ownership
+ * from the caller's number. The summary fields exist so the payload is
+ * legible in Telnyx's own console, not because anything writes them.
+ */
+async function ensureGeneralInsight(): Promise<InsightTemplateRow | undefined> {
+  const existing = await findInsightTemplate(GENERAL_INSIGHT_NAME);
+  if (existing) {
+    log("insight", `already exists (${existing.id})`);
+    return existing;
+  }
+  if (statusOnly) {
+    log("insight", "not created yet");
+    return undefined;
+  }
+  const created = await tx<{ data: InsightTemplateRow }>(
+    "POST",
+    "/ai/conversations/insights",
+    {
+      name: GENERAL_INSIGHT_NAME,
+      instructions: [
+        "From this call between Homa and a homeschooling parent, extract:",
+        "- call_summary: 2-3 sentences summarizing what the call was about",
+        "- followups: anything the parent asked for that has not happened yet",
+      ].join("\n"),
+      json_schema: {
+        type: "object",
+        properties: {
+          call_summary: { type: "string" },
+          followups: { type: "array", items: { type: "string" } },
+        },
+        required: ["call_summary", "followups"],
+        additionalProperties: false,
+      },
+    },
+  ).then((payload) => ("data" in payload ? payload.data : (payload as InsightTemplateRow)));
+  log("insight", `created ${created.id}`);
+  return created;
+}
+
+async function ensureGeneralInsightGroup(
+  insight: InsightTemplateRow,
+  webhookSecret: string,
+): Promise<InsightGroupRow | undefined> {
+  const webhookUrl = `https://thankshoma.com/api/voice/insights?key=${webhookSecret}`;
+  const existing = await findInsightGroup(GENERAL_INSIGHT_GROUP_NAME);
+  if (existing) {
+    log("group", `already exists (${existing.id})`);
+    const assigned = (existing.insights ?? []).some((item) => item.id === insight.id);
+    if (!assigned && !statusOnly) {
+      await tx(
+        "POST",
+        `/ai/conversations/insight-groups/${existing.id}/insights/${insight.id}/assign`,
+      );
+      log("group", "insight assigned");
+    }
+    return existing;
+  }
+  if (statusOnly) {
+    log("group", "not created yet");
+    return undefined;
+  }
+  const created = await tx<{ data: InsightGroupRow }>(
+    "POST",
+    "/ai/conversations/insight-groups",
+    { name: GENERAL_INSIGHT_GROUP_NAME, webhook: webhookUrl },
+  ).then((payload) => ("data" in payload ? payload.data : (payload as InsightGroupRow)));
+  log("group", `created ${created.id} → ${webhookUrl.replace(/key=.*/, "key=***")}`);
+  await tx(
+    "POST",
+    `/ai/conversations/insight-groups/${created.id}/insights/${insight.id}/assign`,
+  );
+  log("group", "insight assigned");
+  return created;
+}
+
 async function ensureVoiceAssistant(
   number: PhoneNumberRow | undefined,
 ): Promise<AssistantRow | undefined> {
@@ -449,6 +537,26 @@ async function ensureVoiceAssistant(
   } else {
     await tx("POST", `/ai/assistants/${assistant.id}`, { instructions, tools });
     log("voice", `assistant already exists (${assistant.id}); instructions + tools synced`);
+  }
+
+  // The call-ended trigger (#171). Bound after the assistant exists and on
+  // every run, the same posture as instructions and tools, so an assistant
+  // that predates this step gains it on the next sync rather than needing a
+  // one-off. Without it a finished call waits for the hourly cron and web
+  // chat has never heard of it.
+  const insight = await ensureGeneralInsight();
+  if (insight) {
+    const group = await ensureGeneralInsightGroup(insight, webhookSecret);
+    if (group && assistant.insight_settings?.insight_group_id !== group.id) {
+      if (statusOnly) {
+        log("voice", `insight group ${group.id} not yet bound to the assistant`);
+      } else {
+        await tx("POST", `/ai/assistants/${assistant.id}`, {
+          insight_settings: { insight_group_id: group.id },
+        });
+        log("voice", `insight group bound (${group.id}); calls now report at hangup`);
+      }
+    }
   }
 
   // Voice attachment: point the number's voice connection at the

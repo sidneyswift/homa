@@ -27,6 +27,8 @@ export const BRAND_DISPLAY_NAME = "Homa";
 export const VOICE_ASSISTANT_NAME = "Homa voice (experiment)";
 export const WEBHOOK_URL = "https://thankshoma.com/eve/v1/chat/telnyx";
 export const CURRICULUM_ASSISTANT_NAME = "Homa curriculum call";
+export const GENERAL_INSIGHT_NAME = "General call summary";
+export const GENERAL_INSIGHT_GROUP_NAME = "General calls";
 export const CURRICULUM_INSIGHT_NAME = "Curriculum call extraction";
 export const CURRICULUM_INSIGHT_GROUP_NAME = "Curriculum calls";
 
@@ -144,6 +146,10 @@ export interface AssistantRow {
   id: string;
   name: string;
   telephony_settings?: { default_texml_app_id?: string | null };
+  /** Present once a call-ended Insight Group is bound. Absent on an
+   * assistant provisioned before that step existed, which is exactly the
+   * state the general line was in until 2026-07-28 (#171). */
+  insight_settings?: { insight_group_id?: string | null };
 }
 
 export async function findVoiceAssistant(): Promise<AssistantRow | undefined> {
