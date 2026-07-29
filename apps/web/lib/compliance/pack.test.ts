@@ -13,6 +13,7 @@ import {
 import {
   composeStatePack,
   deriveDuties,
+  derivePathwayDivergence,
   prefillBirthdate,
   verifiedMonthYear,
   type StatePackFamily,
@@ -247,9 +248,18 @@ describe("New York (detailed plan, verbatim mid-year clause)", () => {
 });
 
 describe("California (pervasive pathway variance)", () => {
-  it("renders the varies law instead of flattened rollups", () => {
+  it("renders the default pathway's own rule, with a scope note", () => {
+    // CA's notification section carries pathway_varies, but the default
+    // Home-Based Private School pathway has its OWN concrete rule and
+    // the pack must print it (per-pathway truth, 2026-07-28) rather
+    // than the boilerplate that used to replace it.
     const pack = compose("CA");
-    assert.ok(pack.html.includes("This varies by pathway in California"));
+    assert.ok(pack.html.includes("October 1 through October 15 annually"));
+    assert.ok(pack.html.includes("California Department of Education"));
+    assert.ok(
+      pack.html.includes("Other pathways carry a different rule"),
+      "a genuinely divergent field must carry its scope note",
+    );
   });
   it("keeps case law out of the parent packet (D18)", () => {
     const pack = compose("CA");
@@ -298,12 +308,13 @@ describe("South Carolina (notification without a published deadline)", () => {
     const detail = loadDetail("SC");
     const duties = deriveDuties(detail);
     assert.equal(duties.notification, true);
-    // SC's notification field varies by pathway, so the prep sheet's
-    // requirements column must show the confirm-at-source law, and no
-    // checklist imperative may carry an invented date.
+    // Every SC option requires notification and none publishes a fixed
+    // date, so the pack states the requirement and is honest about the
+    // missing date rather than inventing or suppressing either.
     const pack = compose("SC");
-    assert.ok(pack.html.includes("This varies by pathway in South Carolina"));
+    assert.ok(pack.html.includes("The source does not list a fixed date"));
     assert.ok(!pack.html.includes("null"));
+    assert.ok(!/\bundefined\b/.test(pack.html));
   });
 });
 
@@ -323,11 +334,78 @@ describe("Pennsylvania (every duty on, high variance, six children)", () => {
     const stored = pack.pages.map((page) => page.body).join("\n");
     assert.ok(stored.length < 118_000);
   });
-  it("suppresses the varies-flagged hours minimum from imperatives", () => {
-    // PA's instructional_time varies (900 elementary vs 990 secondary),
-    // so no checklist line may assert one number as the requirement.
+  it("states the default pathway's real hours minimum with its scope", () => {
+    // PA's Home Education Program carries 900 hours in its own pathway
+    // object (Private Tutoring carries the same; only the Religious Day
+    // School option differs), so the pack prints the number AND the
+    // scope note. Suppressing it left PA families without their
+    // instructional-time requirement at all.
     const pack = compose("PA", SIX_CHILD_FAMILY);
-    assert.ok(!pack.html.includes("900 hours per year"));
+    assert.ok(pack.html.includes("900 hours per year"));
+    assert.ok(pack.html.includes("Other pathways carry a different rule"));
+  });
+});
+
+describe("per-pathway truth (the default pathway carries its own values)", () => {
+  it("restores Arizona's affidavit filing step to the checklist", () => {
+    // The 51-state vision QC found AZ's checklist had no filing step at
+    // all: its notification flag fires over an attachments sub-field,
+    // and the old reading suppressed the whole section. A family
+    // following that checklist would have skipped a real legal filing.
+    const pack = compose("AZ");
+    const checklist = pack.pages.find((page) =>
+      page.title.includes("checklist"),
+    );
+    assert.ok(checklist, "AZ has a checklist page");
+    assert.ok(
+      /Arizona requires: file your notice/.test(checklist.body),
+      "AZ checklist must carry the affidavit filing step",
+    );
+  });
+
+  it("gives every notification-required state a filing step", () => {
+    // The whole point of the pack: a state that requires notification
+    // must tell the family to file, on the page that lists what to do.
+    const missing = ALL_CODES.filter((code) => {
+      const detail = loadDetail(code);
+      if (!detail.defaultPathwayDetail?.notification.required) return false;
+      const checklist = compose(code).pages.find((page) =>
+        page.title.includes("checklist"),
+      );
+      return !checklist || !/requires: file your notice/.test(checklist.body);
+    });
+    assert.deepEqual(missing, [], `states missing a filing step: ${missing}`);
+  });
+
+  it("keeps boilerplate off the at-a-glance page", () => {
+    // Before per-pathway truth, a quarter of states rendered mostly
+    // "This varies by pathway" rows on their core page.
+    const boilerplateHeavy = ALL_CODES.filter((code) => {
+      const glance = compose(code).pages.find((page) =>
+        page.title.includes("at a glance"),
+      );
+      if (!glance) return false;
+      const hits = glance.body.split("This varies by pathway").length - 1;
+      return hits > 0;
+    });
+    assert.deepEqual(boilerplateHeavy, []);
+  });
+
+  it("computes divergence from values, not from the section flag", () => {
+    const de = loadDetail("DE");
+    assert.equal(de.defaultPathwayDetail?.notification.varies, true);
+    assert.equal(derivePathwayDivergence(de).notification, false);
+    assert.equal(derivePathwayDivergence(loadDetail("CA")).notification, true);
+  });
+
+  it("never claims one pathway's rule covers the whole state", () => {
+    for (const code of ALL_CODES) {
+      const pack = compose(code);
+      assert.ok(
+        !/\ball pathways\b/i.test(pack.html),
+        `${code} claims to cover all pathways`,
+      );
+    }
   });
 });
 

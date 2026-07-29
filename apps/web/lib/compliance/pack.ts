@@ -15,9 +15,12 @@ import type {
  * unit-testable against the repository's own reviewed snapshots.
  *
  * The laws this module encodes (council decisions D1-D5, D12-D16, D18):
- * - Any payload field with pathway_varies=true renders fixed
- *   confirm-at-the-official-source copy and never feeds a derived
- *   checklist item. pathway_varies_detail is never rendered.
+ * - Every requirement renders the DEFAULT pathway's own typed value,
+ *   and a value that genuinely differs across sibling pathways carries
+ *   a scope note beside it (derivePathwayDivergence). The cover names
+ *   the pathway this pack covers, so no claim ever speaks for all of
+ *   them. pathway_varies_detail is never rendered, and the affirmative
+ *   zero-duty page still refuses on any varies flag.
  * - Free-text prose (deadline strings, compulsory notes) renders
  *   verbatim, never parsed into dates.
  * - Prefill only complete values; everything else is a labeled blank.
@@ -169,10 +172,87 @@ function trimTrailingPeriod(text: string): string {
   return text.replace(/\.$/, "");
 }
 
+/**
+ * Which fields genuinely differ between the default pathway and its
+ * siblings, computed from the values themselves rather than trusted
+ * from the payload's `pathway_varies` flag.
+ *
+ * The flag is section-level: it fires when ANY sub-field of a section
+ * differs across pathways, including sub-fields the pack never renders
+ * (Arizona's notification flag fires over an attachments list). Reading
+ * it as "this pathway's value is unknowable" was the pack's largest
+ * quality defect. Verified against the reviewed snapshots on
+ * 2026-07-28: every pathway object carries its OWN typed values (51
+ * sections where siblings genuinely disagree prove it, plus 49 more
+ * where the flag fired while every pathway agreed), so suppressing the
+ * default pathway's value threw away correct data and printed
+ * boilerplate in a quarter of the country. Arizona lost its affidavit
+ * filing step that way, which is the failure mode that matters: a
+ * family reading the checklist would have skipped a real legal filing.
+ *
+ * So the pack renders the default pathway's own value, and this
+ * comparison decides only whether to add a scope note beside it. D3's
+ * intent is preserved exactly: never present one pathway's rule as
+ * covering all of them (the cover names the covered pathway), and
+ * never render pathway_varies_detail.
+ */
+export interface PathwayDivergence {
+  notification: boolean;
+  assessment: boolean;
+  instructionalTime: boolean;
+  recordkeeping: boolean;
+  subjects: boolean;
+}
+
+function sameValue(a: unknown, b: unknown): boolean {
+  return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+}
+
+export function derivePathwayDivergence(
+  detail: StateRequirementsDetail,
+): PathwayDivergence {
+  const base = detail.defaultPathwayDetail;
+  const others = detail.pathways.filter((pathway) => pathway !== base);
+  const differs = (pick: (pathway: StatePathwayDetail) => unknown): boolean =>
+    base !== null && others.some((other) => !sameValue(pick(base), pick(other)));
+  return {
+    notification: differs((p) => [
+      p.notification.required,
+      p.notification.deadline,
+      p.notification.recipient,
+      p.notification.type,
+    ]),
+    assessment: differs((p) => [
+      p.assessment.required,
+      p.assessment.frequency,
+      p.assessment.types,
+    ]),
+    instructionalTime: differs((p) => [
+      p.instructionalTime.daysPerYear,
+      p.instructionalTime.hoursPerYear,
+    ]),
+    recordkeeping: differs((p) => [
+      p.recordkeeping.attendanceTracking,
+      p.recordkeeping.portfolioRequired,
+    ]),
+    subjects: differs((p) => p.subjects.required),
+  };
+}
+
+/** The scope note beside a rendered value when sibling pathways carry a
+ * different rule: the value stays (it is the default pathway's own),
+ * and the parent learns what it covers. */
+function divergenceNote(differs: boolean): string {
+  return differs
+    ? " Other pathways carry a different rule; they are listed on the sources page."
+    : "";
+}
+
 interface Duties {
   pathway: StatePathwayDetail | null;
-  /** Concrete = required on the default pathway AND varies-free, the
-   * only combination a checklist imperative may be derived from (D3). */
+  /** Concrete = required on the DEFAULT pathway, whose object carries
+   * its own typed values (see derivePathwayDivergence). Divergence adds
+   * a scope note; it never suppresses the value. */
   notification: boolean;
   notificationConcrete: boolean;
   assessmentConcrete: boolean;
@@ -180,6 +260,7 @@ interface Duties {
   portfolio: boolean;
   timeConcrete: boolean;
   subjectsConcrete: boolean;
+  divergence: PathwayDivergence;
   anyVaries: boolean;
   /** No duty asserted anywhere and nothing varies: the state pack can
    * affirmatively say "you are legal, nothing is required". */
@@ -188,6 +269,7 @@ interface Duties {
 
 export function deriveDuties(detail: StateRequirementsDetail): Duties {
   const p = detail.defaultPathwayDetail;
+  const divergence = derivePathwayDivergence(detail);
   if (!p) {
     return {
       pathway: null,
@@ -198,6 +280,7 @@ export function deriveDuties(detail: StateRequirementsDetail): Duties {
       portfolio: false,
       timeConcrete: false,
       subjectsConcrete: false,
+      divergence,
       anyVaries: false,
       zeroDuty: false,
     };
@@ -220,12 +303,13 @@ export function deriveDuties(detail: StateRequirementsDetail): Duties {
   return {
     pathway: p,
     notification: p.notification.required,
-    notificationConcrete: p.notification.required && !p.notification.varies,
-    assessmentConcrete: p.assessment.required && !p.assessment.varies,
+    notificationConcrete: p.notification.required,
+    assessmentConcrete: p.assessment.required,
     attendance: p.recordkeeping.attendanceTracking,
     portfolio: p.recordkeeping.portfolioRequired,
-    timeConcrete: hasTime && !p.instructionalTime.varies,
-    subjectsConcrete: p.subjects.required.length > 0 && !p.subjects.varies,
+    timeConcrete: hasTime,
+    subjectsConcrete: p.subjects.required.length > 0,
+    divergence,
     anyVaries,
     zeroDuty:
       summaryAgreesZero &&
@@ -341,10 +425,14 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
       ),
     );
   } else {
+    // Every row below renders the DEFAULT pathway's own typed value and
+    // appends a scope note where sibling pathways genuinely differ
+    // (derivePathwayDivergence). The cover names the pathway this pack
+    // covers, so no row ever claims to speak for all of them.
+    const d = duties.divergence;
+
     // Telling the state.
-    if (p.notification.varies) {
-      rows.push(definitionRow("Telling the state", variesLine(detail)));
-    } else if (p.notification.required) {
+    if (p.notification.required) {
       const parts = [
         p.notification.type === "simple_notice"
           ? "A simple notice"
@@ -355,7 +443,7 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
               : "A notification",
         p.notification.recipient
           ? `goes to ${escapeHtml(p.notification.recipient)}`
-          : "is part of the default path",
+          : "is part of this pathway",
       ];
       const deadline = p.notification.deadline
         ? `<strong>${escapeHtml(trimTrailingPeriod(p.notification.deadline))}</strong>`
@@ -363,7 +451,7 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
       rows.push(
         definitionRow(
           "Telling the state",
-          `${parts.join(" ")}.`,
+          `${parts.join(" ")}.${divergenceNote(d.notification)}`,
           `When: ${deadline}${p.notification.frequency ? ` · how often: ${escapeHtml(humanizeToken(p.notification.frequency))}` : ""}${p.statute ? ` · ${cite(p.statute)}` : ""}`,
         ),
       );
@@ -371,20 +459,18 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
       rows.push(
         definitionRow(
           "Telling the state",
-          "No notification is required on the default path.",
+          `No notification is required on this pathway.${divergenceNote(d.notification)}`,
         ),
       );
     }
 
     // Year-end check.
-    if (p.assessment.varies) {
-      rows.push(definitionRow("Year-end check", variesLine(detail)));
-    } else if (p.assessment.required) {
+    if (p.assessment.required) {
       const types = displayTypes(p.assessment.types);
       rows.push(
         definitionRow(
           "Year-end check",
-          `The default path asks for a year-end artifact${types ? `: ${escapeHtml(types)}` : ""}.`,
+          `This pathway asks for a year-end artifact${types ? `: ${escapeHtml(types)}` : ""}.${divergenceNote(d.assessment)}`,
           p.assessment.frequency
             ? `How often: ${escapeHtml(humanizeToken(p.assessment.frequency))}`
             : undefined,
@@ -394,15 +480,13 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
       rows.push(
         definitionRow(
           "Year-end check",
-          "The default path asks for no year-end artifact.",
+          `This pathway asks for no year-end artifact.${divergenceNote(d.assessment)}`,
         ),
       );
     }
 
     // Instructional time.
-    if (p.instructionalTime.varies) {
-      rows.push(definitionRow("Instructional time", variesLine(detail)));
-    } else if (duties.timeConcrete) {
+    if (duties.timeConcrete) {
       const bits: string[] = [];
       if (p.instructionalTime.daysPerYear) {
         bits.push(`${p.instructionalTime.daysPerYear} days per year`);
@@ -411,13 +495,16 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
         bits.push(`${p.instructionalTime.hoursPerYear} hours per year`);
       }
       rows.push(
-        definitionRow("Instructional time", `${escapeHtml(bits.join(" · "))}.`),
+        definitionRow(
+          "Instructional time",
+          `${escapeHtml(bits.join(" · "))}.${divergenceNote(d.instructionalTime)}`,
+        ),
       );
     } else {
       rows.push(
         definitionRow(
           "Instructional time",
-          "No minimum is set on the default path.",
+          `No minimum is set on this pathway.${divergenceNote(d.instructionalTime)}`,
         ),
       );
     }
@@ -427,42 +514,37 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
     // those templates, and page 2 saying "no specific records" while
     // page 5 offers a record template read as a contradiction to a
     // district reader (51-state vision QC, 2026-07-28: KS MA SD WI).
-    if (p.recordkeeping.varies) {
-      rows.push(definitionRow("Records to keep", variesLine(detail)));
-    } else {
-      const kept: string[] = [];
-      if (p.recordkeeping.attendanceTracking) kept.push("an attendance record");
-      if (p.recordkeeping.portfolioRequired) kept.push("a portfolio of work");
-      const practical: string[] = [];
-      if (duties.timeConcrete) practical.push("the instructional-time minimum");
-      if (duties.assessmentConcrete) practical.push("the year-end check");
-      rows.push(
-        definitionRow(
-          "Records to keep",
-          kept.length > 0
-            ? `The default path asks families to keep ${escapeHtml(kept.join(" and "))}.`
-            : practical.length > 0
-              ? `No record format is prescribed, and this pack includes templates because ${escapeHtml(practical.join(" and "))} ${practical.length > 1 ? "are" : "is"} easier to show with one.`
-              : "No specific records are required on the default path.",
-        ),
-      );
-    }
+    const kept: string[] = [];
+    if (p.recordkeeping.attendanceTracking) kept.push("an attendance record");
+    if (p.recordkeeping.portfolioRequired) kept.push("a portfolio of work");
+    const practical: string[] = [];
+    if (duties.timeConcrete) practical.push("the instructional-time minimum");
+    if (duties.assessmentConcrete) practical.push("the year-end check");
+    rows.push(
+      definitionRow(
+        "Records to keep",
+        (kept.length > 0
+          ? `This pathway asks families to keep ${escapeHtml(kept.join(" and "))}.`
+          : practical.length > 0
+            ? `No record format is prescribed, and this pack includes templates because ${escapeHtml(practical.join(" and "))} ${practical.length > 1 ? "are" : "is"} easier to show with one.`
+            : "No specific records are required on this pathway.") +
+          divergenceNote(d.recordkeeping),
+      ),
+    );
 
     // Subjects.
-    if (p.subjects.varies) {
-      rows.push(definitionRow("Subjects", variesLine(detail)));
-    } else if (p.subjects.required.length > 0) {
+    if (p.subjects.required.length > 0) {
       rows.push(
         definitionRow(
           "Subjects",
-          escapeHtml(p.subjects.required.join("; ")) + ".",
+          escapeHtml(p.subjects.required.join("; ")) + `.${divergenceNote(d.subjects)}`,
         ),
       );
     } else {
       rows.push(
         definitionRow(
           "Subjects",
-          "No subject list is set on the default path.",
+          `No subject list is set on this pathway.${divergenceNote(d.subjects)}`,
         ),
       );
     }
@@ -622,13 +704,13 @@ export function deriveChecklistItems(
       sub: `The instructional-time log in this pack is one easy way to keep the running total.${cite}`,
     });
   }
-  if (duties.attendance && p && !p.recordkeeping.varies) {
+  if (duties.attendance && p) {
     items.push({
       main: `${stateName} requires: keep an <strong>attendance record</strong> through the year.`,
       sub: `There is an attendance page in this pack for each of your children.${cite}`,
     });
   }
-  if (duties.portfolio && p && !p.recordkeeping.varies) {
+  if (duties.portfolio && p) {
     items.push({
       main: `${stateName} requires: keep a <strong>portfolio</strong> of work samples.`,
       sub: `The portfolio index in this pack keeps it organized as you go.${cite}`,
@@ -779,7 +861,7 @@ function attendancePage(
     (month) =>
       `<tr><th class="sp-att-month">${month}</th>${"<td></td>".repeat(31)}<td class="sp-att-tally"></td></tr>`,
   ).join("\n");
-  const varies = duties.pathway?.recordkeeping.varies ?? false;
+  const varies = duties.divergence.recordkeeping;
   return `${pageHeader(
     detail,
     varies
@@ -833,7 +915,7 @@ function portfolioPage(detail: StateRequirementsDetail, duties: Duties): string 
     { length: 16 },
     () => `<tr><td class="sp-log-date"></td><td></td><td class="sp-log-subject"></td><td></td></tr>`,
   ).join("\n");
-  const varies = duties.pathway?.recordkeeping.varies ?? false;
+  const varies = duties.divergence.recordkeeping;
   return `${pageHeader(
     detail,
     varies
@@ -893,9 +975,8 @@ function prepSheetPage(
 ): string {
   const p = duties.pathway;
   const notification = p?.notification ?? null;
-  const varies = notification?.varies ?? true;
   const asksRows: string[] = [];
-  if (varies || !notification) {
+  if (!notification) {
     asksRows.push(`<p class="sp-body">${variesLine(detail)}</p>`);
   } else {
     asksRows.push(
@@ -944,7 +1025,7 @@ function prepSheetPage(
   // preposition ("By July 1 annually..."), so it gets a labeled clause,
   // never a "by" prefix ("by By July 1", caught on the render smoke).
   const sendLine =
-    !varies && notification?.recipient && notification?.deadline
+    notification?.recipient && notification?.deadline
       ? ` You send it to ${escapeHtml(notification.recipient)}. When: ${escapeHtml(trimTrailingPeriod(notification.deadline))}.`
       : "";
   // "Telling {State}", never "{State}'s notice of intent": the filing
