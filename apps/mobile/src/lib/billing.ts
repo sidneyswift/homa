@@ -1,4 +1,4 @@
-import { env } from "./env";
+import { env, EVE_CHANNEL_HEADER } from "./env";
 import { supabase } from "./supabase";
 
 /**
@@ -35,7 +35,7 @@ export async function fetchBillingGate(): Promise<BillingGateState | null> {
     const token = await bearerToken();
     if (!token) return null;
     const response = await fetch(apiUrl("/api/billing/gate"), {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}`, ...EVE_CHANNEL_HEADER },
     });
     if (!response.ok) return null;
     const body = (await response.json()) as {
