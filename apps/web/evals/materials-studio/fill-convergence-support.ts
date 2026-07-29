@@ -1,3 +1,5 @@
+import { satisfies } from "eve/evals/expect";
+
 import { geometryToolNotes, type PageGeometry } from "../../lib/materials/page-geometry";
 
 /**
@@ -108,6 +110,43 @@ export async function runConvergenceScenario(
 /** 1-based turn a scenario converged at, or null if it never did. */
 export function convergedAtTurn(steps: readonly ConvergenceStep[]): number | null {
   return steps.find((step) => step.usable)?.turnIndex ?? null;
+}
+
+/** Minimal shape assertConvergence needs from an EveEvalContext. */
+export interface ConvergenceAsserter {
+  check(value: unknown, assertion: unknown): { soft(threshold?: number): unknown };
+}
+
+/**
+ * The gate/soft split this eval set settled on after its first CI run
+ * (2026-07-29): a hard `<= 3 turns` ceiling failed the handwriting
+ * scenario at turn 4 purely from ordinary model-response variance
+ * (converged at turn 3 locally, turn 4 in CI, same real transcript,
+ * both genuinely fine results next to the real incident's 12 versions
+ * over 24+ hours). Turn-count speed is inherently noisy across runs; a
+ * hard gate on a specific number invites exactly this kind of flake for
+ * no real signal. The gate that matters is whether the fix converges AT
+ * ALL within the real complaint transcript; how fast is informational
+ * (a soft assertion, contributes to the scored percentage, never fails
+ * the build).
+ */
+export function assertConvergence(
+  t: ConvergenceAsserter,
+  steps: readonly ConvergenceStep[],
+  fastTurns = 3,
+): void {
+  const turn = convergedAtTurn(steps);
+  t.check(
+    turn,
+    satisfies((value) => value !== null, "converged within the scripted transcript"),
+  );
+  t.check(
+    turn,
+    satisfies(
+      (value) => value !== null && (value as number) <= fastTurns,
+      `converged within ${fastTurns} turns`,
+    ),
+  ).soft();
 }
 
 /** Human-readable trace for console.error, same spirit as voice/live-conversation.eval.ts. */

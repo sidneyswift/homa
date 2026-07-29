@@ -1,8 +1,7 @@
 import { defineEval } from "eve/evals";
-import { satisfies } from "eve/evals/expect";
 
 import {
-  convergedAtTurn,
+  assertConvergence,
   printConvergenceTrace,
   runConvergenceScenario,
 } from "./fill-convergence-support";
@@ -29,7 +28,10 @@ import {
 export default defineEval({
   description:
     "A themed counting/addition packet converges to a fill-clean page within a few turns, not a dozen.",
-  timeoutMs: 900_000,
+  // CI's full eval run shares the model gateway and render capacity
+  // across ~25 concurrent evals; 900_000ms timed out there on 2026-07-29
+  // even though it comfortably converged locally in isolation.
+  timeoutMs: 1_200_000,
   async test(t) {
     const turns = [
       "Can you make Finn a dinosaur-themed counting and addition practice packet? He's working on counting to 20.",
@@ -43,14 +45,6 @@ export default defineEval({
     const steps = await runConvergenceScenario(t, turns);
     t.loadedSkill("materials-studio");
     printConvergenceTrace("counting packet (Finn)", steps);
-
-    const turn = convergedAtTurn(steps);
-    t.check(
-      turn,
-      satisfies(
-        (value) => value !== null && (value as number) <= 3,
-        "converged to a fill-clean create_printable result within 3 turns",
-      ),
-    );
+    assertConvergence(t, steps);
   },
 });

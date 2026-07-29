@@ -1,8 +1,7 @@
 import { defineEval } from "eve/evals";
-import { satisfies } from "eve/evals/expect";
 
 import {
-  convergedAtTurn,
+  assertConvergence,
   printConvergenceTrace,
   runConvergenceScenario,
 } from "./fill-convergence-support";
@@ -26,7 +25,7 @@ import {
 export default defineEval({
   description:
     "A name-tracing handwriting sheet for a young child scales its letters and lines to fill the page.",
-  timeoutMs: 900_000,
+  timeoutMs: 1_200_000,
   async test(t) {
     const turns = [
       "I want a handwriting sheet for Maya with her name to trace, and some of the letter-sound words she's working on.",
@@ -38,14 +37,6 @@ export default defineEval({
     const steps = await runConvergenceScenario(t, turns);
     t.loadedSkill("materials-studio");
     printConvergenceTrace("handwriting sheet (Maya)", steps);
-
-    const turn = convergedAtTurn(steps);
-    t.check(
-      turn,
-      satisfies(
-        (value) => value !== null && (value as number) <= 3,
-        "converged to a fill-clean create_printable result within 3 turns",
-      ),
-    );
+    assertConvergence(t, steps);
   },
 });

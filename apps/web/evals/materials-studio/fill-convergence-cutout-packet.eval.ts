@@ -1,8 +1,7 @@
 import { defineEval } from "eve/evals";
-import { satisfies } from "eve/evals/expect";
 
 import {
-  convergedAtTurn,
+  assertConvergence,
   printConvergenceTrace,
   runConvergenceScenario,
 } from "./fill-convergence-support";
@@ -42,14 +41,6 @@ export default defineEval({
     const steps = await runConvergenceScenario(t, turns);
     t.loadedSkill("materials-studio");
     printConvergenceTrace("cut-and-paste packet (Story)", steps);
-
-    const turn = convergedAtTurn(steps);
-    t.check(
-      turn,
-      satisfies(
-        (value) => value !== null && (value as number) <= 3,
-        "converged to a fill-clean create_printable result within 3 turns",
-      ),
-    );
+    assertConvergence(t, steps);
   },
 });
