@@ -694,6 +694,16 @@
       "reason": "recipe file shipped but activity-formats.md entry missing",
       "recordedBy": "ingestion-audit",
       "recordedOn": "2026-07-20"
+    },
+    {
+      "slug": "phonics-sound-spelling-page",
+      "firstSeen": "ref-2026-07-22-fast-forward-student-handbook-e",
+      "note": "One page naming a single sound-spelling, one plain instruction, numbered write-on items over a supplied word bank. The spine of every leveled phonics workbook and the format Fast Forward Level E repeats most."
+    },
+    {
+      "slug": "word-pool-building-page",
+      "firstSeen": "ref-2026-07-22-fast-forward-student-handbook-e",
+      "note": "Child assembles words from initial, middle and final letter pools rather than choosing from a word bank. Different mechanic from cut-and-paste-word-work: nothing is cut, and the pools constrain which words are makeable."
     }
   ]
 }

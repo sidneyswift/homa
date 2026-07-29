@@ -1,0 +1,279 @@
+{
+  "id": "ref-2026-07-22-fast-forward-student-handbook-e",
+  "droppedBy": "carolyng",
+  "droppedAt": "2026-07-22T21:49:57-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784771397.804719",
+  "format": "student-workbook",
+  "title": "Metro Reading Fast Forward! Student Handbook, Level E",
+  "publisher": "Metropolitan Teaching and Learning Company, copyright 2003",
+  "gradeLevel": "roughly a grade 2 to 3 reading level, usable ages 6 to 9; Level E of a leveled reading series",
+  "pdfScanPageCount": 110,
+  "analysisQuality": "full",
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "fast-forward-student-handbook-e.pdf",
+    "sourceSha256": "c8a908a83a0cd6144bbaf96a23e569a3f880bc75f285a4ed91ba56d8148cc367",
+    "pageCount": 110,
+    "mastersDir": ".cosmo/masters/ref-2026-07-22-fast-forward-student-handbook-e",
+    "intakeAt": "2026-07-29T05:28:14+00:00",
+    "gateFindings": []
+  },
+  "sourceFiles": [
+    {
+      "filename": "fast forward student handbook E.pdf",
+      "localPath": ".cosmo/inspo-files/fast-forward-student-handbook-e.pdf",
+      "blobUrl": null,
+      "blobNote": "Not uploaded: no BLOB_READ_WRITE_TOKEN resolved in this session. The local original and the 110 per-page masters are retained; the upload is owed."
+    }
+  ],
+  "routing": {
+    "skillUsed": "reference-ingestion",
+    "ruling": "Reference, on the skills' own test. This is the consumable STUDENT half of a leveled reading program: 110 pages of practice sheets with a repeating per-unit lesson cycle, but no stated philosophy, no parent or teacher guidance, no pacing advice, and no assessment design. The curriculum skill's decisive test is 'a philosophy AND a sequence'; this has the sequence and none of the philosophy, so it fails the test the same way the chant anthology (ref-2026-07-21-one-potato-two-potato) and the toddler science activity book (ref-2026-07-20-toddlers-science-activity-book) did. A teacher's guide for this series would route curriculum. The unit scope is captured in aboutness rather than discarded, which is what dimension F exists for."
+  },
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "airy",
+    "visualHierarchy": "banner-then-instruction-then-numbered-items",
+    "whiteSpaceRatio": 0.4,
+    "flowDirection": "top-down",
+    "notes": "One page per lesson, and the template is fixed across all ten units: a coloured banner naming the lesson type ('Phonics/Vocabulary: ch as in such', 'Story Comprehension', 'Vocabulary: great, learn, some, work'), one plain instruction line, then numbered items with write-on rules. Target words sit in a free-floating word bank between the instruction and the items rather than in a boxed panel. Small spot illustrations sit beside the items they belong to and never carry meaning the text does not also carry. Every page footers 'Unit N, Lesson N' plus the copyright line, which is what makes the book's whole structure recoverable from any single page. Verified across sampled pages from all ten units (scans 2, 3, 12, 30, 53, 85, 106) plus front matter."
+  },
+  "skillTargeting": {
+    "subject": "ela",
+    "domain": "phonics-word-reading",
+    "topics": [
+      {
+        "id": "mt_9-OHslmt1g",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Consonant Digraphs (4-7): the th, ch and ng lessons are exactly this."
+      },
+      {
+        "id": "mt_BtMbZibZUj",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Vowel Digraphs (4-7): the ai and ew/oo/ue lessons."
+      },
+      {
+        "id": "mt__KHQttMde3",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Blending Sounds to Read Words (4-7): the spr, spl, scr and skw blend lessons."
+      },
+      {
+        "id": "mt_YKkCM63fSC",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Reading High-Frequency Words by Sight (5-8): the per-unit four-word sight sets (does/next/people/picture, better/house/move/water, great/learn/some/work)."
+      },
+      {
+        "id": "mt_EqXlZfB4jp",
+        "kind": "language",
+        "mapped": true,
+        "note": "Phonics Vocabulary (4-7): the paired Phonics/Vocabulary sheets teach a sound-spelling and its words together."
+      },
+      {
+        "id": "mt_2HKTDKk0hL",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Reading Comprehension, Short Fiction (5-10): the Story Comprehension sheets that follow each unit story."
+      },
+      {
+        "id": "mt_V-ldQp56bF",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Reading with Expression and Accuracy (6-10): the per-unit Fluency lessons (Expression, End Punctuation)."
+      },
+      {
+        "id": "mt_f1k7y4p8v2",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Phonogram Word Families (5-8): the letter-pool word-building sheets."
+      }
+    ],
+    "unmappedSkills": [
+      {
+        "name": "drawing conclusions from a read text",
+        "suggestedSlug": "ela.drawing-conclusions-from-text",
+        "note": "Every unit carries a 'Comprehension: Drawing Conclusions' lesson. The taxonomy's only Drawing Conclusions topic (mt_Cc-QHVo747) is Speaking & Listening at ages 10-11 and is about discussion, not inference from a read text at 6 to 9, so this is recorded as a gap rather than mismapped onto it. Not appended in this session on purpose: taxonomy writes are append-only with their own guard sequence and belong in a change that is only about the taxonomy."
+      }
+    ]
+  },
+  "difficulty": {
+    "ageBand": [
+      72,
+      108
+    ],
+    "complexity": "single-skill",
+    "prerequisites": [
+      "mt_F978c32kDr",
+      "mt_Yw3cLdKa8n"
+    ],
+    "scaffoldingLevel": "medium",
+    "notes": "Each sheet practises one named sound-spelling or one comprehension move, which is why complexity is single-skill even though the book overall is a full program. The ramp lives across units rather than within a page: Unit 1 works /spr/ and /ng/, Unit 6 works ai and ew/oo/ue, and Units 5 and 10 are explicit review units ('Unit 5: The Best Book Talk (Review)', 'Unit 10: What Do You Know? (Review)'). Scaffolding is medium: the instruction is one plain line, the first item is often worked ('The first one is done for you'), and the target words are supplied rather than recalled."
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [
+      "Patches",
+      "Ben",
+      "Sara",
+      "Tasha",
+      "Nina"
+    ],
+    "visualStyle": "clip-art",
+    "colorPalette": "limited palette",
+    "appealDrivers": "Recurring named children and a dog carry across units, so the practice sheets read as belonging to a story the child already knows rather than as isolated drills. Unit titles are event-shaped ('Splish, Splash', 'Put Out the Fire!', 'A Trip to the Circus') rather than skill-shaped: the child sees a story name, the teacher sees a phonics scope. That naming move is the transferable idea here.",
+    "notes": "Neutral rather than interest-led: no licensed characters, no seasonal hooks. The art is small, functional 2003-era clip art in a limited palette, useful to Homa as a dated counter-example rather than as a visual bar to reach for."
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "prints well in B&W",
+    "notes": "Some sheets are bound sideways (captured page 85 is a landscape worksheet inside a portrait book). Colour carries only the lesson banner and the spot art, so every page survives a black and white print, which matters for a parent printing a workalike at home."
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/ref-2026-07-22-fast-forward-student-handbook-e.txt",
+    "textBlobUrl": null,
+    "notes": "The book's own title is deliberately absent from these claims. The cover is stylised art and OCR read it as 'MET | Pacis | RO READING | HANDBOOK', so no span supports it; the title in the identity fields above comes from reading the cover image. Aboutness claims only what the text can back.",
+    "subjects": [
+      {
+        "name": "phonics",
+        "quote": "Phonics/Vocabulary"
+      },
+      {
+        "name": "sight vocabulary",
+        "quote": "Vocabulary: great, learn, some, work"
+      },
+      {
+        "name": "reading comprehension",
+        "quote": "Story Comprehension"
+      },
+      {
+        "name": "reading fluency",
+        "quote": "Fluency: Expression"
+      },
+      {
+        "name": "word building",
+        "quote": "Use letters from the letter pools to make words"
+      }
+    ],
+    "entities": [
+      {
+        "name": "Patches",
+        "kind": "character",
+        "quote": "Unit 6: A House for Patches"
+      },
+      {
+        "name": "Tasha",
+        "kind": "character",
+        "quote": "Tasha"
+      },
+      {
+        "name": "Sara",
+        "kind": "character",
+        "quote": "Sara wants to be a"
+      },
+      {
+        "name": "Ben",
+        "kind": "character",
+        "quote": "Ben is going to sell lemonade"
+      },
+      {
+        "name": "Nina",
+        "kind": "character",
+        "quote": "Nina likes to swim at the"
+      },
+      {
+        "name": "Metropolitan Teaching and Learning Company",
+        "kind": "organization",
+        "quote": "Metropolitan Teaching"
+      }
+    ],
+    "themes": [
+      {
+        "name": "everyday neighbourhood life",
+        "evidence": "Only kids will work at the block party"
+      },
+      {
+        "name": "learning a skill",
+        "evidence": "how to mix paint"
+      },
+      {
+        "name": "pets and animals",
+        "evidence": "Unit 6: A House for Patches"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "Phonics/Vocabulary",
+        "occurrences": 30,
+        "quote": "Phonics/Vocabulary"
+      },
+      {
+        "term": "Drawing Conclusions",
+        "occurrences": 8,
+        "quote": "Drawing Conclusions"
+      },
+      {
+        "term": "letter pools",
+        "occurrences": 2,
+        "quote": "letter pools"
+      },
+      {
+        "term": "ch as in such",
+        "occurrences": 2,
+        "quote": "ch as in such"
+      },
+      {
+        "term": "as in rain",
+        "occurrences": 2,
+        "quote": "as in rain"
+      }
+    ],
+    "referencedWorks": [
+      {
+        "title": "The Spring Block Party",
+        "author": null,
+        "kind": "book",
+        "quote": "The Spring Block Party"
+      }
+    ]
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "cloze-story",
+      "lesson-comprehension-check",
+      "reading-comprehension-mini-unit",
+      "cut-and-paste-word-work"
+    ],
+    "gaps": [
+      "phonics-sound-spelling-page",
+      "word-pool-building-page"
+    ],
+    "notes": "Matched against the recipe files listed at analysis time, never a remembered list. The comprehension sheets sit close to lesson-comprehension-check and the sentence-completion sheets close to cloze-story, but neither covers this book's spine: one page that names a single sound-spelling, gives one plain instruction, and runs numbered write-on items over a supplied word bank. That is phonics-sound-spelling-page. word-pool-building-page is the letter-pool sheet, where the child assembles words from initial, middle and final pools instead of choosing from a bank; it is a genuinely different mechanic and the format this book repeats most across units."
+  },
+  "stages": {
+    "captured": "2026-07-29T05:28:14Z",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "pending",
+      "targets": [],
+      "commit": null
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "commit": null,
+      "note": "ela.drawing-conclusions-from-text is recorded in skillTargeting.unmappedSkills as a proposal, not here: proposedTopics means topics this change actually appended to topics.json, and no taxonomy write happened in this session."
+    },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "notes": "First real book through the new intake, so the run tested the engine as much as the book. Three things worth keeping. (1) The deterministic gates fired three findings on the first pass and every one was a false alarm: a sharp photographic cover and a sharp sideways worksheet were called blurry because a large flat dark or coloured area drags a whole-page average down, and two different units' reuse of one worksheet template was called the same page shot twice. Both signals were replaced (sharpness is now the 99.9th percentile of gradient magnitude; a duplicate now needs the words AND the picture to agree) and all three cases are fixtures now. (2) OCR cannot read a stylised cover, so identity has to come from looking at the cover image while aboutness stays span-backed; the title is deliberately not claimed in aboutness for exactly that reason. (3) The book's real value to Homa is its scope, a ten-unit sound-spelling sequence hung on named story units, which a form-only analysis would have discarded entirely. Taste is not logged: this is an archive drop, not a founder saying they love it, and the taste model takes founder choices only."
+}

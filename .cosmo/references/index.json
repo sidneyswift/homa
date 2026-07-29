@@ -2631,6 +2631,42 @@
       "themes": [],
       "works": [],
       "ageBand": null
+    },
+    {
+      "id": "ref-2026-07-22-fast-forward-student-handbook-e",
+      "title": "Metro Reading Fast Forward! Student Handbook, Level E",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-22T21:49:57-04:00",
+      "subject": "ela",
+      "domain": "phonics-word-reading",
+      "format": "student-workbook",
+      "about": [
+        "phonics",
+        "sight vocabulary",
+        "reading comprehension",
+        "reading fluency",
+        "word building"
+      ],
+      "entities": [
+        "Patches",
+        "Tasha",
+        "Sara",
+        "Ben",
+        "Nina",
+        "Metropolitan Teaching and Learning Company"
+      ],
+      "themes": [
+        "everyday neighbourhood life",
+        "learning a skill",
+        "pets and animals"
+      ],
+      "works": [
+        "The Spring Block Party"
+      ],
+      "ageBand": [
+        72,
+        108
+      ]
     }
   ]
 }

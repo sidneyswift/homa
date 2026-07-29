@@ -76,30 +76,45 @@ ID_RE = re.compile(r"^(ref|cur)-\d{4}-\d{2}-\d{2}-[a-z0-9][a-z0-9-]*$")
 # book is gone.
 BLANK_INK_COVERAGE = 0.005
 
-# Sharpness is judged RELATIVE to the book's own pages, never against a fixed
-# number. Edge energy scales with resolution, content density, and camera, so
-# an absolute threshold either cries wolf on a sparse page or sleeps through a
-# blurry one: measured on the fixture book, sharp pages ran 858 to 1114 and
-# the deliberately blurred page ran 261, so no single constant separates
-# "blurry" from "a page with less text on it". The median of this item is the
-# only honest yardstick.
-BLUR_RELATIVE_FLOOR = 0.45
-BLUR_ABSOLUTE_FLOOR = 25.0
+# Sharpness is the 99.9th percentile of gradient magnitude: how crisp the
+# sharpest edges on the page are, not how many edges it has.
+#
+# Average edge energy was tried first and failed on the first real book. On
+# the 110-page Fast Forward handbook it flagged the photographic cover and a
+# sideways worksheet with a blue background, both perfectly sharp, because a
+# large flat dark or coloured area drags a whole-page average down. Content
+# density and background colour move the average; they do not move the
+# sharpest edge. Measured: every real page scored 153 to 217 (the two false
+# alarms scored 165 and 153, mid-pack), while a genuinely blurred page scores
+# about 14, because blur leaves no crisp edge anywhere.
+#
+# Judged relative to the book's own median, with an absolute floor so a book
+# that is blurry cover to cover cannot normalise its own blur away.
+BLUR_RELATIVE_FLOOR = 0.40
+BLUR_ABSOLUTE_FLOOR = 60.0
 
 # Two pages are "the same page shot twice" when their text agrees this
 # closely. Byte equality only catches a PDF that duplicated a page; a parent
 # who photographs one page twice produces two different files, which is the
 # likelier phone-lane mistake.
 #
-# Text, not image similarity. An average-hash comparison was tried first and
-# flagged pages 2, 3, and 4 of the fixture workbook as duplicates of page 1:
-# at 8x8 every page of a workbook is the same white rectangle with a title
-# bar and a text block, so the whole book reads as duplicates. A gate that
-# cries wolf teaches the operator to ignore it, which is worse than no gate.
-# The aHash is still recorded per page for the corpus plan's later dedup
-# work; it is simply not what this gate fires on.
+# Two pages are the same page shot twice only when the words AND the picture
+# both agree. Either signal alone is wrong for workbooks:
+#
+# - Image alone: at 8x8 every page of a workbook is the same white rectangle
+#   with a title bar and a text block, so it called three different fixture
+#   pages duplicates of page 1.
+# - Text alone: workbooks reuse a worksheet template verbatim across units.
+#   On the real Fast Forward handbook, page 53 ("Phonics Review ... Unit 5")
+#   and page 106 (the same sheet, "Unit 10") share 95% of their text and are
+#   different pages of a real book.
+#
+# Requiring both is precise: a re-shoot of one page matches on both, a reused
+# template matches only on text (the real pair sat 7 bits apart, where a
+# genuine re-shoot sits at 0 to 2).
 NEAR_DUPLICATE_TEXT_RATIO = 0.95
 NEAR_DUPLICATE_MIN_CHARS = 40
+NEAR_DUPLICATE_HAMMING = 4
 
 RENDER_DPI = 300
 
@@ -124,11 +139,13 @@ def page_metrics(path: Path) -> dict:
             # "Ink" is anything meaningfully darker than paper.
             ink = float((arr < 200).mean())
 
-            # Edge energy: mean squared gradient. Sharp type produces hard
-            # transitions; blur smears them and the number collapses.
-            gx = np.diff(arr, axis=1)
-            gy = np.diff(arr, axis=0)
-            edge = float((gx ** 2).mean() + (gy ** 2).mean()) / 2.0
+            # Sharpness: how crisp the sharpest edges are (99.9th percentile
+            # of gradient magnitude), NOT how many edges the page has. A
+            # photo cover and a sparse worksheet have few edges and perfectly
+            # crisp ones; a blurred page has none anywhere.
+            gx = np.abs(np.diff(arr, axis=1))
+            gy = np.abs(np.diff(arr, axis=0))
+            sharpness = float(np.percentile(np.concatenate([gx.ravel(), gy.ravel()]), 99.9))
 
             # Average hash: 8x8 mean-threshold bits, for near-duplicate pages.
             tiny = np.asarray(gray.resize((8, 8)), dtype=np.float32)
@@ -138,7 +155,7 @@ def page_metrics(path: Path) -> dict:
             return {
                 "width": width, "height": height,
                 "inkCoverage": round(ink, 5),
-                "edgeEnergy": round(edge, 2),
+                "sharpness": round(sharpness, 2),
                 "aHash": f"{ahash:016x}",
             }
     except Exception as exc:  # a bad page must not kill the book
@@ -229,8 +246,8 @@ def run_gates(pages: list, expect_pages, texts: dict = None) -> list:
     # Sharpness is relative to this book. Ignore near-blank pages when taking
     # the median: a book padded with blank versos would otherwise drag the
     # yardstick down until nothing looks blurry.
-    inked = [p["edgeEnergy"] for p in readable
-             if p.get("inkCoverage", 0) >= BLANK_INK_COVERAGE and "edgeEnergy" in p]
+    inked = [p["sharpness"] for p in readable
+             if p.get("inkCoverage", 0) >= BLANK_INK_COVERAGE and "sharpness" in p]
     median = float(np.median(inked)) if inked else 0.0
 
     exact, near = {}, []
@@ -243,11 +260,11 @@ def run_gates(pages: list, expect_pages, texts: dict = None) -> list:
         if p.get("inkCoverage", 1) < BLANK_INK_COVERAGE:
             findings.append(f"page {n}: looks blank (ink {p['inkCoverage']}). Skip it or re-shoot it.")
         elif median > 0:
-            energy = p.get("edgeEnergy", median)
-            if energy < median * BLUR_RELATIVE_FLOOR or energy < BLUR_ABSOLUTE_FLOOR:
+            sharpness = p.get("sharpness", median)
+            if sharpness < median * BLUR_RELATIVE_FLOOR or sharpness < BLUR_ABSOLUTE_FLOOR:
                 findings.append(
                     f"page {n}: softer than the rest of the book "
-                    f"(edge energy {energy} against a median of {round(median, 2)}). Re-shoot this page."
+                    f"(sharpness {sharpness} against a median of {round(median, 2)}). Re-shoot this page."
                 )
 
         first = exact.setdefault(p["sha256"], n)
@@ -256,16 +273,24 @@ def run_gates(pages: list, expect_pages, texts: dict = None) -> list:
             continue
 
         text = _normalize_text(texts.get(n, "")) if texts else ""
-        if len(text) >= NEAR_DUPLICATE_MIN_CHARS:
-            for other_n, other_text in near:
+        if len(text) >= NEAR_DUPLICATE_MIN_CHARS and "aHash" in p:
+            value = int(p["aHash"], 16)
+            for other_n, other_text, other_hash in near:
                 ratio = SequenceMatcher(None, text, other_text).ratio()
-                if ratio >= NEAR_DUPLICATE_TEXT_RATIO:
-                    findings.append(
-                        f"page {n}: reads as the same page as page {other_n} shot again "
-                        f"({int(ratio * 100)}% identical text). Keep the sharper one and drop the other."
-                    )
-                    break
-            near.append((n, text))
+                if ratio < NEAR_DUPLICATE_TEXT_RATIO:
+                    continue
+                distance = bin(value ^ other_hash).count("1")
+                if distance > NEAR_DUPLICATE_HAMMING:
+                    # Same words, different picture: a reused worksheet
+                    # template, not the same page twice.
+                    continue
+                findings.append(
+                    f"page {n}: reads as the same page as page {other_n} shot again "
+                    f"({int(ratio * 100)}% identical text, images {distance} bits apart). "
+                    "Keep the sharper one and drop the other."
+                )
+                break
+            near.append((n, text, value))
     return findings
 
 
@@ -290,7 +315,25 @@ def stub_json(item_id: str, kind: str, manifest: dict, pdf_path: Path) -> Path:
     this file never guesses at anything a model should be judging."""
     target_dir = CURS_DIR if kind == "curriculum" else REFS_DIR
     target = target_dir / f"{item_id}.json"
+    capture = {
+        "lane": "phone",
+        "sourceFile": pdf_path.name,
+        "sourceSha256": manifest["source"]["sha256"],
+        "pageCount": manifest["pageCount"],
+        "mastersDir": manifest["mastersDir"],
+        "intakeAt": manifest["intakeAt"],
+        "gateFindings": manifest["gateFindings"],
+    }
     if target.exists():
+        # A re-run refreshes the capture block and touches nothing else. The
+        # analyst's work is theirs; stale gate findings beside a fresh
+        # manifest are a lie about what the capture looks like now.
+        try:
+            existing = json.loads(target.read_text())
+        except (json.JSONDecodeError, OSError):
+            return target
+        existing["capture"] = {**(existing.get("capture") or {}), **capture}
+        target.write_text(json.dumps(existing, indent=2) + "\n")
         return target
     stub = {
         "id": item_id,
@@ -298,15 +341,7 @@ def stub_json(item_id: str, kind: str, manifest: dict, pdf_path: Path) -> Path:
         "droppedAt": None,
         "sourceChannel": "homa-inspo",
         "sourceMessageTs": None,
-        "capture": {
-            "lane": "phone",
-            "sourceFile": pdf_path.name,
-            "sourceSha256": manifest["source"]["sha256"],
-            "pageCount": manifest["pageCount"],
-            "mastersDir": manifest["mastersDir"],
-            "intakeAt": manifest["intakeAt"],
-            "gateFindings": manifest["gateFindings"],
-        },
+        "capture": capture,
         "aboutness": {
             "extractionQuality": None,
             "textSidecar": manifest["text"]["path"],
@@ -513,6 +548,67 @@ def self_test() -> int:
                       build_pdf("blank", sharp + [Image.new("RGB", (1700, 2200), "white")]),
                       4, ["looks blank"]))
 
+        # The three false alarms the first real book produced (the 110-page
+        # Fast Forward handbook, 2026-07-29). Every one of them is a sharp
+        # page of a good capture, and the first version of these gates
+        # flagged all three. They are fixtures now.
+
+        # A dark photographic cover: few edges, all crisp.
+        cover = Image.new("RGB", (1700, 2200), (18, 20, 30))
+        cd = ImageDraw.Draw(cover)
+        try:
+            cf = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 120)
+        except OSError:
+            cf = ImageFont.load_default()
+        cd.ellipse((300, 700, 1400, 1500), fill=(210, 215, 225))
+        cd.text((200, 300), "READING", fill=(230, 40, 40), font=cf)
+        cases.append(("a dark photo cover is not called blurry",
+                      build_pdf("cover", [cover] + sharp), 4, []))
+
+        # A sideways worksheet on a coloured background: large flat areas.
+        sideways = Image.new("RGB", (2200, 1700), (120, 170, 220))
+        sd = ImageDraw.Draw(sideways)
+        sd.rectangle((150, 120, 2050, 1580), fill="white")
+        try:
+            sf = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 46)
+        except OSError:
+            sf = ImageFont.load_default()
+        sd.multiline_text((260, 300),
+                          "Vocabulary: great, learn, some, work\n\n"
+                          "1. Sara wants to be a ______ painter.\n"
+                          "2. She will ______ how to mix paint.",
+                          fill="black", font=sf, spacing=30)
+        cases.append(("a sparse page on a coloured background is not called blurry",
+                      build_pdf("sideways", sharp + [sideways]), 4, []))
+
+        # A reused worksheet template: the SAME instructions with different
+        # exercise content, which is how a workbook repeats a sheet across
+        # units. The real pair (Phonics Review at Unit 5 and Unit 10) read as
+        # 95% identical text while their pictures sat 7 bits apart, so the
+        # fixture isolates exactly that: identical words, different picture.
+        def template(fill_box):
+            im = Image.new("RGB", (1700, 2200), "white")
+            d = ImageDraw.Draw(im)
+            try:
+                f = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 46)
+            except OSError:
+                f = ImageFont.load_default()
+            d.multiline_text((140, 260),
+                             "Phonics Review\n\n"
+                             "Use letters from the letter pools to make words.\n"
+                             "You do not always have to use every pool.\n\n"
+                             "Initial   Middle   Final",
+                             fill="black", font=f, spacing=22)
+            # The exercise area: where a real reused sheet actually differs.
+            d.rectangle(fill_box, fill="black")
+            return im
+
+        cases.append(("a reused worksheet template is not called a duplicate",
+                      build_pdf("template", sharp + [
+                          template((200, 900, 1500, 1400)),
+                          template((200, 1500, 1500, 2000)),
+                      ]), 5, []))
+
         for label, pdf, page_count, expected in cases:
             out_dir = tmp / f"out-{pdf.stem}"
             out_dir.mkdir()
@@ -541,7 +637,7 @@ def self_test() -> int:
         print(f"  {'✅' if ok else '❌'} a short page count is caught")
         failures += 0 if ok else 1
 
-    print(f"\nself-test: {6 - failures} passed, {failures} failed")
+    print(f"\nself-test: {len(cases) + 1 - failures} passed, {failures} failed")
     return 1 if failures else 0
 
 
