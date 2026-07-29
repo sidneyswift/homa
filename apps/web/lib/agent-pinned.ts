@@ -288,6 +288,40 @@ function dayLabel(iso: string | null, timeZone: string): string {
  * so every conversation_messages read here repeats visibility = 'family'
  * explicitly (found leaking on this path 2026-07-19).
  */
+/**
+ * The family's hours rows on the pinned path (gh#354). Same wall as
+ * every other function here: the explicit family_id predicate IS the
+ * tenancy boundary, because this connection has no RLS.
+ *
+ * Reading, never writing. recordHoursPinned owns the write side.
+ */
+export async function readHoursPinned(
+  familyId: string,
+): Promise<{ rows: PinnedHoursRow[]; timeZone: string }> {
+  const sql = mapDb();
+  const familyRows = await sql<{ time_zone: string | null }[]>`
+    select time_zone from public.families where id = ${familyId}
+  `;
+  const rows = await sql<PinnedHoursRow[]>`
+    select child_id as "childId", subject, minutes,
+           happened_on::text as "happenedOn", source, note
+    from public.hours_log
+    where family_id = ${familyId}
+    order by happened_on desc, created_at desc
+    limit 3000
+  `;
+  return { rows, timeZone: effectiveTimeZone(familyRows[0]?.time_zone) };
+}
+
+export interface PinnedHoursRow {
+  childId: string | null;
+  subject: string;
+  minutes: number;
+  happenedOn: string;
+  source: string;
+  note: string | null;
+}
+
 export async function recallPinned(input: {
   familyId: string;
   query: string;
