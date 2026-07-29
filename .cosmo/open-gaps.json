@@ -704,6 +704,73 @@
       "slug": "word-pool-building-page",
       "firstSeen": "ref-2026-07-22-fast-forward-student-handbook-e",
       "note": "Child assembles words from initial, middle and final letter pools rather than choosing from a word bank. Different mechanic from cut-and-paste-word-work: nothing is cut, and the pools constrain which words are makeable."
+    },
+    {
+      "slug": "life-skill-step-story",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-19-your-health"
+      ],
+      "refCount": 1,
+      "reason": "A named four-step life skill (manage stress, make decisions, resolve conflicts, communicate, say no) taught by walking one child through one scenario a panel per step, then handing the child a different problem to solve with the same steps. social-narrative is the nearest shipped recipe and is first-person, emotion-normalizing, and carries no numbered transferable procedure or transfer problem.",
+      "recordedBy": "reference-ingestion",
+      "recordedOn": "2026-07-29"
+    },
+    {
+      "slug": "question-headline-lesson-page",
+      "kind": "recipe-missing",
+      "refs": [
+        "ref-2026-07-19-your-health"
+      ],
+      "refCount": 1,
+      "reason": "A short expository teaching page for a five to eight year old: the headline is the child's own question, three or four two-clause sentences answer it, an image carries half the meaning, and one check question closes it. Every shipped recipe produces a page the child works on; none produces a page that teaches.",
+      "recordedBy": "reference-ingestion",
+      "recordedOn": "2026-07-29"
+    },
+    {
+      "slug": "illustrated-vocabulary-scene",
+      "firstSeen": "ref-2026-07-19-social-studies-all-together",
+      "note": "One wide illustrated scene of a busy place (a town, a national park, a parade) with a unit's key words in inset photos around the border, each anchored to something findable in the scene. The child meets a whole unit's vocabulary as a picture before reading a word. Opens all six units of Scott Foresman Social Studies: All Together. Not nomenclature-cards (nothing is matched) and not picture-bingo-board (nothing is played)."
+    },
+    {
+      "slug": "map-skills-practice-page",
+      "firstSeen": "ref-2026-07-19-social-studies-all-together",
+      "note": "One simple map with a key and a compass rose, two or three questions answerable only from the map, then a make-your-own-map task. Repeats five times in one grade 1 textbook (Use a Map Key, Use Four Directions, Follow a Route, Locate Land and Water, Use a History Map). chart-and-graph-skill-practice deliberately excludes maps and labeled-anatomy-diagram mentions map labeling only in passing, so nothing owns it."
+    },
+    {
+      "slug": "picture-glossary-page",
+      "firstSeen": "ref-2026-07-19-social-studies-all-together",
+      "note": "Alphabetized back-matter glossary where each term gets a photograph, a one-sentence definition, a natural usage sentence, and the page number where it was taught. Twelve pages of it in Social Studies: All Together. A reusable end-of-unit artifact, not what a flash card or a nomenclature card does."
+    },
+    {
+      "slug": "vocabulary-readiness-page",
+      "firstSeen": "ref-2026-07-22-new-practice-readers-book-b",
+      "note": "A pre-reading panel that front-loads exactly the hard words the coming passage uses: a narrow left column lists them, a vertical rule separates it from numbered probes, and each probe attacks one listed word from a different angle (definition, rhyme, silent letter, base word, sound-spelling) so the child meets every hard word before the text. Opens all 64 lessons of New Practice Readers Book B. Not cloze-story (there is no passage to complete) and not vocabulary cards (nothing is cut or matched); the point is the order, vocabulary then text."
+    },
+    {
+      "slug": "diagnostic-progress-chart",
+      "firstSeen": "ref-2026-07-22-new-practice-readers-book-b",
+      "note": "Child-owned back-matter record: a score grid by unit, a second grid counting how often each question type was answered right, then one line graph per question type across every unit, so the child plots the line and sees which single skill is flat. The book calls it Diagnostic Progress Records. Different in kind from visual-progress-map, which is an illustrated keepsake path celebrating milestones; this one is a diagnosis, it is printed in plain black line work, and the child fills it in themselves."
+    },
+    {
+      "slug": "family-tradition-card",
+      "firstSeen": "ref-2026-07-21-family-fun-book",
+      "note": "One named family ritual on a card: a display title, two to four sentences of warm parent-facing prose telling the family what to do together, a season or holiday tag, and nothing at all to write on, cut, or fill in. The atomic unit of the Family FUN Book's 400-plus entries. Not daily-rhythm-cards or visual-schedule-cards, which are icon-plus-label-plus-time-slot schedule tiles carrying no prose, and not social-narrative, which teaches a child how to handle a situation."
+    },
+    {
+      "slug": "seasonal-activity-menu",
+      "firstSeen": "ref-2026-07-21-family-fun-book",
+      "note": "A one-page pick-from-this-list sheet for one season or one holiday, entries grouped by effort (five minutes versus an afternoon) so a tired parent can choose at a glance and stick it on the fridge. This is the workflow the Family FUN Book prescribes for itself, and it is why that book's contents are seasonal while its index is alphabetical. Distinct from monthly-planning-calendar (already on this backlog), which is a dated grid to fill in rather than a menu to choose from."
+    },
+    {
+      "slug": "career-spotlight-page",
+      "firstSeen": "ref-2026-07-19-harcourt-science",
+      "note": "One page introducing a named living person by their job: a photograph of them at work, three or four sentences naming which science idea the job actually uses, and a Think and Do that has the child try the same move. Recurs six times as a full Career Link in one grade 1 science textbook (A Doctor Observes People, A Geologist Observes Rocks, A Scientist Investigates the Ocean, A Photographer Observes the Seasons, A Hot Air Balloonist Explores, An Architect Plans Buildings) plus in-lesson boxes for a meteorologist, a mechanic and a magnet engineer. biography-timeline-page is the nearest shipped recipe and is a different artifact: it plots five to eight chronological life events, where this is a single present-tense portrait of what someone does at work today."
+    },
+    {
+      "slug": "cross-subject-link-page",
+      "firstSeen": "ref-2026-07-19-harcourt-science",
+      "note": "A one-paragraph bridge from the lesson's subject into another one, plus a five-minute Think and Do that makes the connection real. Harcourt Science closes every chapter with a Links spread of exactly these (Snacks Made from Plants for maths, Keeping a Custom for social studies, Weather Sayings for language arts, Find Symmetry for maths, Move Like a Frog for movement). Neighbours already on this backlog but not the same thing: arts-integrated-lesson is a full arts lesson, cross-curricular-center-cards are station cards for several children at once. This is one short paragraph and one small activity on half a spread, and it is the format Carolyng named when she said she values one theme carried through different disciplines."
     }
   ]
 }

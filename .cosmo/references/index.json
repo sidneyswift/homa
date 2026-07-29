@@ -2493,20 +2493,6 @@
       "ageBand": null
     },
     {
-      "id": "ref-2026-07-19-harcourt-science",
-      "title": null,
-      "droppedBy": null,
-      "droppedAt": null,
-      "subject": "",
-      "domain": "",
-      "format": null,
-      "about": [],
-      "entities": [],
-      "themes": [],
-      "works": [],
-      "ageBand": null
-    },
-    {
       "id": "ref-2026-07-19-listen-and-color-spring",
       "title": "Listen and Color Spring Worksheet: Garden Animals Coloring Sheet",
       "droppedBy": "aless",
@@ -2542,20 +2528,6 @@
       "subject": "history",
       "domain": "",
       "format": "coloring page (title-inferred, never confirmed)",
-      "about": [],
-      "entities": [],
-      "themes": [],
-      "works": [],
-      "ageBand": null
-    },
-    {
-      "id": "ref-2026-07-19-social-studies-all-together",
-      "title": null,
-      "droppedBy": null,
-      "droppedAt": null,
-      "subject": "",
-      "domain": "",
-      "format": null,
       "about": [],
       "entities": [],
       "themes": [],
@@ -2606,17 +2578,50 @@
     },
     {
       "id": "ref-2026-07-19-your-health",
-      "title": null,
-      "droppedBy": null,
-      "droppedAt": null,
-      "subject": "",
-      "domain": "",
-      "format": null,
-      "about": [],
-      "entities": [],
-      "themes": [],
-      "works": [],
-      "ageBand": null
+      "title": "Your Health (Harcourt Brace, 1999)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T16:56:23-04:00",
+      "subject": "science",
+      "domain": "the-human-body",
+      "format": "health-textbook",
+      "about": [
+        "human body systems",
+        "dental health",
+        "nutrition",
+        "personal safety",
+        "germs and illness",
+        "feelings and friendship"
+      ],
+      "entities": [
+        "Food Guide Pyramid",
+        "tobacco",
+        "alcohol",
+        "caffeine",
+        "911",
+        "Stop, Drop, and Roll",
+        "Stranger Danger",
+        "The President's Challenge",
+        "Harcourt Brace & Company",
+        "Molly",
+        "Tanya",
+        "Scott",
+        "Snellen eye chart"
+      ],
+      "themes": [
+        "taking care of your own body",
+        "everyday safety rules",
+        "saying no",
+        "getting along with others",
+        "asking a trusted adult",
+        "keeping a neighborhood clean"
+      ],
+      "works": [
+        "hbschool.com"
+      ],
+      "ageBand": [
+        72,
+        96
+      ]
     },
     {
       "id": "ref-2026-07-20-outdoor-toddler-activity-book",
@@ -2662,17 +2667,51 @@
     },
     {
       "id": "ref-2026-07-21-family-fun-book",
-      "title": null,
-      "droppedBy": null,
-      "droppedAt": null,
-      "subject": "",
-      "domain": "",
-      "format": null,
-      "about": [],
-      "entities": [],
-      "themes": [],
-      "works": [],
-      "ageBand": null
+      "title": "Family FUN Book: More than 400 Amazing, Amusing, and All-Around Awesome Activities for the Entire Family!",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-21T10:58:08-04:00",
+      "subject": "multi-subject",
+      "domain": "daily-living",
+      "format": "family-activity-book",
+      "about": [
+        "family activities",
+        "seasonal traditions",
+        "household crafts",
+        "holiday celebrations",
+        "family cooking"
+      ],
+      "entities": [
+        "Joni Hilton",
+        "Easter Bunny",
+        "Tooth Fairy",
+        "Christmas",
+        "Halloween",
+        "Thanksgiving",
+        "Chanukah",
+        "Kwanzaa",
+        "Latin America",
+        "Africa",
+        "Asia",
+        "Polynesia",
+        "pirate"
+      ],
+      "themes": [
+        "family closeness",
+        "seasonal rhythm",
+        "household materials",
+        "making memories",
+        "everyday science",
+        "secret giving"
+      ],
+      "works": [
+        "Five Minute Miracles: 373 Quick Daily Projects for You and Your Kids to Share",
+        "The Twelve Days of Christmas",
+        "Pin the Tail on the Donkey"
+      ],
+      "ageBand": [
+        24,
+        168
+      ]
     },
     {
       "id": "ref-2026-07-21-one-potato-two-potato",
@@ -2728,17 +2767,43 @@
     },
     {
       "id": "ref-2026-07-22-new-practice-readers-book-b",
-      "title": null,
-      "droppedBy": null,
-      "droppedAt": null,
-      "subject": "",
-      "domain": "",
-      "format": null,
-      "about": [],
-      "entities": [],
-      "themes": [],
-      "works": [],
-      "ageBand": null
+      "title": "New Practice Readers, Third Edition, Book B",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-22T18:32:58-04:00",
+      "subject": "ela",
+      "domain": "reading-comprehension",
+      "format": "graded-reading-practice-book",
+      "about": [
+        "reading comprehension",
+        "reading vocabulary",
+        "animals",
+        "weather",
+        "history of measurement",
+        "jobs and careers",
+        "hobbies and collecting",
+        "graded reading practice series"
+      ],
+      "entities": [
+        "Anderson",
+        "Shinob",
+        "foal"
+      ],
+      "themes": [
+        "how things came to be",
+        "animal survival and adaptation",
+        "standardising measurement",
+        "everyday work and the people who do it"
+      ],
+      "works": [
+        "Why the North Star Stands Still",
+        "Kootenai Why Stories",
+        "When Coyote Walked the Earth",
+        "The Young Folk's Book of Myths"
+      ],
+      "ageBand": [
+        84,
+        132
+      ]
     }
   ]
 }

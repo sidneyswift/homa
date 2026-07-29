@@ -507,5 +507,296 @@
       "urgency": "low"
     }
   ],
-  "notes": "Real page counts, verified directly with pypdf and PyMuPDF rather than assumed from filenames: harcourt-science-pt1.pdf is 120 PDF pages, harcourt-science-pt2.pdf is 84 PDF pages (204 PDF pages total), both CamScanner-style phone scans of the physical hardcover book with no embedded text layer at all (pypdf's extract_text returned zero characters of real content on every one of the 204 pages, confirming this is a pure image scan; all reading in this analysis was done visually from PyMuPDF-rendered page images, not from extracted text). pt1/pt2 relationship confirmed as a genuine, gapless continuation of the same physical book, not a duplicate or a distinct volume: pt1's final rendered spread (PDF page 120) shows the Unit D Chapter 2 Review at printed pages D44-D45, and pt2's first rendered spread (PDF page 1) shows the Unit D 'Activities for Home or School' spread at printed pages D46-D47, immediately followed by pt2 page 2 showing the Unit D Wrap Up (D48) and the Unit E 'Matter and Energy' title page, with no missing or repeated printed page numbers at the seam. Front cover (pt1 pages 1-2) reads 'HARCOURT SCIENCE, Harcourt School Publishers, Orlando Boston Dallas Chicago San Diego'; the copyright page (pt1 page 3) confirms 'Copyright (c) 2000 by Harcourt, Inc.', ISBN 0-15-317496-X. Full table of contents sampled directly (pt1 pages 4-6): 6 units (A: Plants and Animals All Around; B: Living Together; C: About Our Earth; D: Weather and the Seasons; E: Matter and Energy; F: Energy and Forces), each with 2 chapters, References (Science Handbook R2, Health Handbook R11, Glossary R28, Index R42). Grade level is Grade 1, determined from internal content evidence as instructed, not assumed from the drain order or the sibling Harcourt Art Everywhere volume's own Grade 1 finding: (1) every 'Learn About' reading passage sampled across all 6 units uses very short, simple declarative sentences ('A forest is a place where many trees grow. A forest floor is shady. The soil stays moist.'; 'Most plants grow from a seed. The seed may have a covering called a seed coat.'), consistent with an early-elementary independent or supported reader; (2) every chapter Review requires the child to complete full comprehension tasks (open 'Tell what you know' prompts, multi-item picture-to-word vocabulary matching, numbered skill-application tasks), a level of reading and writing demand well beyond a Kindergarten book, which in this same publisher's line is typically almost entirely picture-and-single-word based; (3) cross-referencing this curriculum's own lesson content against Homa's 564-topic Science taxonomy, the closest-matching existing Homa topics cluster tightly at ages 5-7 across every unit (The Five Senses 5-7, Seeds & Plant Growth 6-7, Caterpillar to butterfly 5-7, Local weather patterns 5-6, Seasonal changes 5-6, States of Matter Vocabulary 5-7, Pushes & Pulls 5-6, How Breathing Works 5-7), consistent with a 6-7-year-old reader. Unlike the Harcourt Art series (where 'Art Everywhere' vs 'Art Together' vs 'Art Is...' distinguishes grade level directly in the cover title), the Harcourt Science series front cover for this volume reads simply 'HARCOURT SCIENCE' with no grade-distinguishing subtitle anywhere in the sampled front matter or back matter, so the series-title-convention approach used for Art Everywhere does not apply here and grade level rests entirely on the internal content evidence above. Sampling covered the front cover, copyright page, full table of contents, and front-matter 'Using Science Skills' and 'Science Safety' spreads (pt1 PDF pages 1-16); the Unit A opening and Chapter 1-2 lessons and reviews (pt1 pages 17-30); Unit B's forest habitat lesson (pt1 page 65); Unit C's rocks-and-geologist-link spread (pt1 page 85); Unit D's winter lesson, Art Link, Math Link, and Chapter 2 Review (pt1 pages 118-120); the Unit D/Unit E seam (pt2 pages 1-2); Unit E's floaters-and-sinkers lesson (pt2 page 10); Unit F's pushes-and-pulls and magnet-making lessons (pt2 pages 35, 50, 55, 60); the References front matter and Health Handbook's Respiratory System page (pt2 pages 60, 70); and the back-matter Glossary, Photography Credits, and back cover (pt2 pages 78, 80, 84). This is representative sampling across the full breadth of both files as instructed, not a page-by-page read of all 204 PDF pages. Copyrighted page images and the publisher's specific passage wording were used only for this session's own analysis and are described here in Homa's own words, never reproduced verbatim into any product file; the new taxonomy topics and the art-project-instructions skill-tip-callout pattern describe generic elementary-science concepts and page-layout patterns in Homa's own voice, not a copy of this publisher's specific text, photos, or layout."
+  "notes": "Real page counts, verified directly with pypdf and PyMuPDF rather than assumed from filenames: harcourt-science-pt1.pdf is 120 PDF pages, harcourt-science-pt2.pdf is 84 PDF pages (204 PDF pages total), both CamScanner-style phone scans of the physical hardcover book with no embedded text layer at all (pypdf's extract_text returned zero characters of real content on every one of the 204 pages, confirming this is a pure image scan; all reading in this analysis was done visually from PyMuPDF-rendered page images, not from extracted text). pt1/pt2 relationship confirmed as a genuine, gapless continuation of the same physical book, not a duplicate or a distinct volume: pt1's final rendered spread (PDF page 120) shows the Unit D Chapter 2 Review at printed pages D44-D45, and pt2's first rendered spread (PDF page 1) shows the Unit D 'Activities for Home or School' spread at printed pages D46-D47, immediately followed by pt2 page 2 showing the Unit D Wrap Up (D48) and the Unit E 'Matter and Energy' title page, with no missing or repeated printed page numbers at the seam. Front cover (pt1 pages 1-2) reads 'HARCOURT SCIENCE, Harcourt School Publishers, Orlando Boston Dallas Chicago San Diego'; the copyright page (pt1 page 3) confirms 'Copyright (c) 2000 by Harcourt, Inc.', ISBN 0-15-317496-X. Full table of contents sampled directly (pt1 pages 4-6): 6 units (A: Plants and Animals All Around; B: Living Together; C: About Our Earth; D: Weather and the Seasons; E: Matter and Energy; F: Energy and Forces), each with 2 chapters, References (Science Handbook R2, Health Handbook R11, Glossary R28, Index R42). Grade level is Grade 1, determined from internal content evidence as instructed, not assumed from the drain order or the sibling Harcourt Art Everywhere volume's own Grade 1 finding: (1) every 'Learn About' reading passage sampled across all 6 units uses very short, simple declarative sentences ('A forest is a place where many trees grow. A forest floor is shady. The soil stays moist.'; 'Most plants grow from a seed. The seed may have a covering called a seed coat.'), consistent with an early-elementary independent or supported reader; (2) every chapter Review requires the child to complete full comprehension tasks (open 'Tell what you know' prompts, multi-item picture-to-word vocabulary matching, numbered skill-application tasks), a level of reading and writing demand well beyond a Kindergarten book, which in this same publisher's line is typically almost entirely picture-and-single-word based; (3) cross-referencing this curriculum's own lesson content against Homa's 564-topic Science taxonomy, the closest-matching existing Homa topics cluster tightly at ages 5-7 across every unit (The Five Senses 5-7, Seeds & Plant Growth 6-7, Caterpillar to butterfly 5-7, Local weather patterns 5-6, Seasonal changes 5-6, States of Matter Vocabulary 5-7, Pushes & Pulls 5-6, How Breathing Works 5-7), consistent with a 6-7-year-old reader. Unlike the Harcourt Art series (where 'Art Everywhere' vs 'Art Together' vs 'Art Is...' distinguishes grade level directly in the cover title), the Harcourt Science series front cover for this volume reads simply 'HARCOURT SCIENCE' with no grade-distinguishing subtitle anywhere in the sampled front matter or back matter, so the series-title-convention approach used for Art Everywhere does not apply here and grade level rests entirely on the internal content evidence above. Sampling covered the front cover, copyright page, full table of contents, and front-matter 'Using Science Skills' and 'Science Safety' spreads (pt1 PDF pages 1-16); the Unit A opening and Chapter 1-2 lessons and reviews (pt1 pages 17-30); Unit B's forest habitat lesson (pt1 page 65); Unit C's rocks-and-geologist-link spread (pt1 page 85); Unit D's winter lesson, Art Link, Math Link, and Chapter 2 Review (pt1 pages 118-120); the Unit D/Unit E seam (pt2 pages 1-2); Unit E's floaters-and-sinkers lesson (pt2 page 10); Unit F's pushes-and-pulls and magnet-making lessons (pt2 pages 35, 50, 55, 60); the References front matter and Health Handbook's Respiratory System page (pt2 pages 60, 70); and the back-matter Glossary, Photography Credits, and back cover (pt2 pages 78, 80, 84). This is representative sampling across the full breadth of both files as instructed, not a page-by-page read of all 204 PDF pages. Copyrighted page images and the publisher's specific passage wording were used only for this session's own analysis and are described here in Homa's own words, never reproduced verbatim into any product file; the new taxonomy topics and the art-project-instructions skill-tip-callout pattern describe generic elementary-science concepts and page-layout patterns in Homa's own voice, not a copy of this publisher's specific text, photos, or layout.",
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/ref-2026-07-19-harcourt-science.txt",
+    "textBlobUrl": null,
+    "notes": "Spans verify against a sidecar built from tesseract over all 204 scans plus a vision re-read of 6 pages. Two things shape the claims below. First, the roles: a survey textbook is full of quotable things it is not about, so the cover clownfish and the Pacific Ocean caption are roled decoration even though the clownfish also earns one trivia line at B3, and the seven named people are roled about because each anchors a Links spread built around their actual work. Second, the OCR: this book is set in two and three column spreads and tesseract interleaves the columns on some pages, so several true sentences exist in the sidecar only as fragments. Every quote below was chosen because it survives that interleaving intact, not because it was the best sentence on the page. One quote preserves an OCR error on purpose ('What Makes a Magnef?'); the real title is in the title field.",
+    "subjects": [
+      {
+        "name": "life science",
+        "role": "teaches",
+        "quote": "Life Science"
+      },
+      {
+        "name": "earth science",
+        "role": "teaches",
+        "quote": "Earth Science"
+      },
+      {
+        "name": "physical science",
+        "role": "teaches",
+        "quote": "Physical Science"
+      },
+      {
+        "name": "science process skills",
+        "role": "teaches",
+        "quote": "Using Science Skills"
+      },
+      {
+        "name": "elementary science textbook",
+        "role": "identity",
+        "quote": "HARCOURT Science"
+      }
+    ],
+    "entities": [
+      {
+        "name": "Harcourt School Publishers",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "Harcourt School Publishers"
+      },
+      {
+        "name": "Sylvia Earle",
+        "kind": "person",
+        "role": "about",
+        "quote": "Sylvia Earle is a marine biologist",
+        "note": "Marine biologist, Social Studies/Career Link at B43."
+      },
+      {
+        "name": "Florence Bascom",
+        "kind": "person",
+        "role": "about",
+        "quote": "Florence Bascom was the first American woman to become",
+        "note": "Geologist, Social Studies/Career Link at C16."
+      },
+      {
+        "name": "Vincent van Gogh",
+        "kind": "person",
+        "role": "about",
+        "quote": "Vincent van Gogh",
+        "note": "Art Link at A36, his flower painting used to find plant parts."
+      },
+      {
+        "name": "Pablo Picasso",
+        "kind": "person",
+        "role": "about",
+        "quote": "A Spanish artist named Pablo Picasso made this",
+        "note": "Art Link at E28, Bull's Head used to teach combining objects."
+      },
+      {
+        "name": "I. M. Pei",
+        "kind": "person",
+        "role": "about",
+        "quote": "I. M. Pei designs",
+        "note": "Architect, Social Studies/Career Link at F26, forces that push and pull."
+      },
+      {
+        "name": "Jetta Schantz",
+        "kind": "person",
+        "role": "about",
+        "quote": "Jetta Schantz flies hot air balloons",
+        "note": "Hot air balloonist, Social Studies/Career Link at E50, heated air spreading out."
+      },
+      {
+        "name": "Ansel Adams",
+        "kind": "person",
+        "role": "about",
+        "quote": "Ansel Adams was a photographer",
+        "note": "Art Link at D42, photographing one place in every season."
+      },
+      {
+        "name": "Maglev train",
+        "kind": "object",
+        "role": "about",
+        "quote": "The Maglev train is run by magnets",
+        "note": "Did You Know box on the Magnets chapter opener (scan 167), read by the vision pass; the photograph of the train spans the whole spread."
+      },
+      {
+        "name": "lodestone",
+        "kind": "object",
+        "role": "about",
+        "quote": "Lodestone is a kind of",
+        "note": "F35, the naturally occurring magnet."
+      },
+      {
+        "name": "butterfly",
+        "kind": "animal",
+        "role": "about",
+        "quote": "How Does a Butterfly Grow?",
+        "note": "Owns a whole lesson (A64 to A69) plus the wing-camouflage spread; the monarch metamorphosis is the strongest single diagram in the book."
+      },
+      {
+        "name": "frog",
+        "kind": "animal",
+        "role": "about",
+        "quote": "How Does a Frog Grow?",
+        "note": "Owns a whole lesson (A70 to A73), egg to tadpole to frog."
+      },
+      {
+        "name": "clownfish",
+        "kind": "animal",
+        "role": "decoration",
+        "quote": "The clownfish lives in tropical reefs of",
+        "note": "The cover photograph, captioned on the copyright page. It reappears once, in a Did You Know box at B3 about animals using other animals for shelter. One trivia line does not make a book about clownfish, so this is roled decoration: it must never answer 'books about clownfish'. Recorded rather than dropped so the cover art is not lost to a future image pass."
+      },
+      {
+        "name": "Pacific Ocean",
+        "kind": "place",
+        "role": "decoration",
+        "quote": "the Pacific Ocean",
+        "note": "Appears only in the cover-image caption. The book's own ocean lesson (B38) never names a specific ocean."
+      }
+    ],
+    "themes": [
+      {
+        "name": "observing the everyday world",
+        "evidence": "When you observe things, use more than your eyes to find out about them."
+      },
+      {
+        "name": "science as a job real people do",
+        "evidence": "A Geologist Observes Rocks"
+      },
+      {
+        "name": "growth and change over time",
+        "evidence": "These young animals will change as they get older."
+      },
+      {
+        "name": "hands-on investigation before explanation",
+        "evidence": "This plan will help you work like a scientist."
+      },
+      {
+        "name": "carrying the lesson home",
+        "evidence": "Activities for Home or School"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "Science Skill",
+        "occurrences": 26,
+        "quote": "Science Skill"
+      },
+      {
+        "term": "Think About It",
+        "occurrences": 23,
+        "quote": "Think About It"
+      },
+      {
+        "term": "Think and Do",
+        "occurrences": 23,
+        "quote": "Think and Do"
+      },
+      {
+        "term": "Investigate",
+        "occurrences": 21,
+        "quote": "Investigate"
+      },
+      {
+        "term": "Did You Know",
+        "occurrences": 15,
+        "quote": "Did You Know"
+      },
+      {
+        "term": "Using Science Skills",
+        "occurrences": 11,
+        "quote": "Using Science Skills"
+      },
+      {
+        "term": "water cycle",
+        "occurrences": 7,
+        "quote": "water cycle"
+      },
+      {
+        "term": "Activities for Home or School",
+        "occurrences": 6,
+        "quote": "Activities for Home or School"
+      }
+    ],
+    "referencedWorks": [
+      {
+        "title": "The Very Hungry Caterpillar",
+        "author": "Eric Carle",
+        "kind": "book",
+        "quote": "The Very Hungry Caterpillar by Eric Carle"
+      },
+      {
+        "title": "All Night Near the Water",
+        "author": "Jim Arnosky",
+        "kind": "book",
+        "quote": "All Night Near the Water by Jim Arnosky"
+      },
+      {
+        "title": "The Puddle",
+        "author": "David McPhail",
+        "kind": "book",
+        "quote": "The Puddle by David McPhail"
+      },
+      {
+        "title": "Water",
+        "author": "Frank Asch",
+        "kind": "book",
+        "quote": "Water by Frank Asch"
+      },
+      {
+        "title": "Animal Seasons",
+        "author": "Brian Wildsmith",
+        "kind": "book",
+        "quote": "Animal Seasons by Brian Wildsmith"
+      },
+      {
+        "title": "Day Light, Night Light",
+        "author": "Franklyn M. Branley",
+        "kind": "book",
+        "quote": "Day Light, Night Light by Franklyn M. Branley"
+      },
+      {
+        "title": "What Makes a Magnet?",
+        "author": "Franklyn M. Branley",
+        "kind": "book",
+        "quote": "What Makes a Magnef? by Franklyn M. Branley",
+        "note": "The span preserves the OCR's misread of the final letter; the title field carries the real title."
+      },
+      {
+        "title": "Bull's Head",
+        "author": "Pablo Picasso",
+        "kind": "artwork",
+        "quote": "Bull\u2019s Head by Pablo Picasso"
+      },
+      {
+        "title": "The Learning Site",
+        "author": "Harcourt School Publishers",
+        "kind": "website",
+        "quote": "Visit The Learning Site at",
+        "note": "www.harcourtschool.com, pointed at from every unit wrap up. Long dead, but it is what the book tells the child to do next."
+      },
+      {
+        "title": "Multimedia Science Glossary",
+        "author": "Harcourt School Publishers",
+        "kind": "website",
+        "quote": "Multimedia Science Glossary",
+        "note": "Pronunciation and picture companion to the printed glossary, linked on every glossary spread."
+      }
+    ],
+    "textExtraction": {
+      "ocr": "tesseract",
+      "visionModel": "google/gemini-3-flash",
+      "visionPages": [
+        1,
+        7,
+        8,
+        9,
+        167,
+        204
+      ],
+      "note": "Mixture by design. Tesseract read 198 of 204 scans; 6 escalated to a vision model and every one fits the contract's escalation set rather than being a random failure. Scan 1 is the cover, scan 204 is the last page, and scans 7, 8, 9 and 167 are ink-heavy spreads whose text is almost all photo labels, so OCR came back with too little to trust. Those four are also where the vision pass earned its keep: it is the reason this analysis knows the front matter is a photo essay of children performing each named process skill and that the Magnets opener is a full-spread Maglev train. Recorded honestly: the manifest's visual record for scan 204 is a stub (description 'placeholder', confidence 0, kind 'ad'), so that page has usable text and no usable visual description."
+    }
+  },
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "harcourt-science-part1.pdf",
+    "sourceParts": [
+      "harcourt-science-part1.pdf",
+      "harcourt-science-part2.pdf"
+    ],
+    "sourceSha256": "16c5812acd444b7581ac9acd881c5b20611585487a1cc9dfcb90bc3327712ffc",
+    "pageCount": 204,
+    "mastersDir": ".cosmo/masters/cur-2026-07-19-harcourt-science",
+    "intakeAt": "2026-07-29T08:29:34+00:00",
+    "gateFindings": []
+  },
+  "stages": {
+    "aboutnessAddedAt": "2026-07-29"
+  },
+  "mergeNote": "Aboutness (and Layer 5 where present) added 2026-07-29 from a re-analysis that was started as a duplicate record (ref-2026-07-19-harcourt-science.json). The duplicate was created because an audit matched drops by filename text instead of by Slack message ts, and missed this record. The duplicate is deleted; this record is canonical and keeps its original four-layer analysis. Capture artifacts (per-page masters and the text sidecar) are new and live under cur-2026-07-19-harcourt-science."
 }

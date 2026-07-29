@@ -1,9 +1,15 @@
 {
   "id": "ref-2026-07-22-new-practice-readers-book-b",
-  "droppedBy": null,
-  "droppedAt": null,
+  "droppedBy": "carolyng",
+  "droppedAt": "2026-07-22T18:32:58-04:00",
   "sourceChannel": "homa-inspo",
-  "sourceMessageTs": null,
+  "sourceMessageTs": "1784759578.427969",
+  "format": "graded-reading-practice-book",
+  "title": "New Practice Readers, Third Edition, Book B",
+  "publisher": "Anderson (author byline on the cover); publisher imprint is not printed on any captured page",
+  "gradeLevel": "Spache readability 2.4 to 3.5, the book's own front matter: comfortable for a reader at the start of third grade. Book B of a seven-book series assigned by reading comfort rather than by grade.",
+  "pdfScanPageCount": 158,
+  "analysisQuality": "full",
   "capture": {
     "lane": "phone",
     "sourceFile": "new-practice-readers-book-b.pdf",
@@ -16,16 +22,323 @@
     "intakeAt": "2026-07-29T08:41:28+00:00",
     "gateFindings": []
   },
+  "sourceFiles": [
+    {
+      "filename": "new-practice-readers-book-b.pdf",
+      "localPath": ".cosmo/inspo-files/new-practice-readers-book-b.pdf",
+      "blobUrl": null,
+      "blobNote": "Not uploaded: no BLOB_READ_WRITE_TOKEN resolved in this session. The local original and the 158 per-page masters are retained; the upload is owed."
+    }
+  ],
+  "routing": {
+    "skillUsed": "reference-ingestion",
+    "ruling": "Reference, on the curriculum skill's own test of a philosophy AND a sequence. The 'TO THE TEACHER' page (scan 6) is two columns of operating instructions, not a philosophy: it names the readability formula, the six question types, and how to run a timed reading, and it never argues for a way of teaching reading or says what reading is for. The sequence is thinner still: the eight units A to H are eight content areas (animals, animals, birds, weather, earth and landmarks, jobs, measurement, hobbies) at one fixed readability, not a difficulty ramp, and the book itself says difficulty is handled by moving the child to a different book in the series, not by moving through this one. So it is a consumable practice book: 64 identical three-part lessons plus 7 folktales plus a record-chart back matter. Same routing as the Fast Forward student handbook Carolyng dropped three hours later (ref-2026-07-22-fast-forward-student-handbook-e), and for the same reason. A teacher's edition or the scope-and-sequence for the seven-book series would route curriculum. The unit content is kept in aboutness rather than discarded, which is what dimension F exists for."
+  },
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "airy",
+    "visualHierarchy": "illustration-and-passage-dominate-then-a-ruled-question-block",
+    "whiteSpaceRatio": 0.4,
+    "flowDirection": "top-down",
+    "notes": "One two-page spread per lesson, and the template does not vary once across all 64 lessons. Left page: a 'Getting Ready for the Next Story' header, then a readiness panel whose target words run down a narrow left column under a small-caps SAY AND KNOW label, separated by a vertical rule from 4 to 7 numbered probe items on the right; then a full-width horizontal rule; then the article's code and title (bold 'A-1  Playing Tricks') and the passage. Right page: the passage finishes, then a rule, then the 'Testing Yourself' block whose header carries the lesson code on the left and 'NUMBER RIGHT' plus a solid filled score square on the right. Body text is a large serif, justified, with unusually generous leading and word spacing for a workbook; the median ink coverage across all 158 masters is 0.087, which is why this reads as airy despite being dense with items. Illustrations are unframed, full-text-width, hand-drawn, and sit below the text they belong to; on scans 12 and 13 the lizard art is decorative rather than load-bearing, and no test question depends on seeing it. Verified on scans 12, 13, 154 as images plus sampled text from every unit A through H and both back-matter chart pages."
+  },
+  "skillTargeting": {
+    "subject": "ela",
+    "domain": "reading-comprehension",
+    "topics": [
+      {
+        "id": "mt_QCWWmDMYZR",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Main Topic & Key Details (6-10): Question 1 on every one of the 64 tests, which the front matter defines as 'Finding specific answers and giving details' and which must be completed with particular words from the article."
+      },
+      {
+        "id": "mt_e8g2z5r9w3",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Main Idea and Key Details (6-9): Question 3, 'The story as a whole is about', 59 times. The distractors are deliberately true-but-too-narrow details from the same passage (A-1 offers 'walking upside down' and 'flying lizards' against the correct 'many kinds of lizards'), which is exactly this topic's distinguishing-central-message-from-supporting-information move."
+      },
+      {
+        "id": "mt_E5KC4AnRLW",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Reading between the lines (5-10): Question 2, 'From the story you can tell that', three inferences of which one is 'a reasonable conclusion (not one directly stated)'."
+      },
+      {
+        "id": "mt_lp3qyEujIv",
+        "kind": "meta",
+        "mapped": true,
+        "note": "Inference vs Explicit Meaning (7-9): Questions 4 and 5, the Yes / No / Does not say items, 131 of them. The answer key's own coaching line is 'Be sure to answer Yes only when you can find the answer in the story.' This is the closest thing in the taxonomy to the book's most distinctive move and the fit is exact."
+      },
+      {
+        "id": "mt_d5h3u1s6x0",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Story Vocabulary in Context (5-9): Question 6 asks for a word by its meaning and its line number ('What word in line six of the story means to play jokes on?'), and the readiness panel pre-teaches that same word list before the passage."
+      },
+      {
+        "id": "mt_f_dMmvzxwo",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Defining Words (6-9): the SAY AND KNOW definition items, which the front matter describes as words 'defined in multiple choice or completion situations' ('It means a wide smile. grin humor frown')."
+      },
+      {
+        "id": "mt_UEe3MC5RZc",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Root Words & Inflections (6-9): the 'Write the word that ___ comes from' item, 12 times (bluffer/bluff, largest/large, mostly/most, collector/collect, carried and carrying/carry)."
+      },
+      {
+        "id": "mt_H0ajATAlus",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Morals in Fables, Folktales and Myths (8-9): the 7 folktales that close units A through G, all pourquoi tales ('Why Rocks Cannot Travel', 'How the Skunk Got White on Its Fur'), each followed by 2 or 3 'Thinking It Over' discussion questions that ask the child to judge the characters rather than recall them."
+      }
+    ],
+    "unmappedSkills": [
+      {
+        "name": "timed silent reading rate",
+        "suggestedSlug": "ela.timed-reading-rate",
+        "note": "Seven 'MY READING TIME' write-on rules on the folktales, each tale stamped with its word count (400 words), plus a front-matter procedure for setting a standardized class time limit off the 90th percentile. The nearest taxonomy topic, mt_b7n4w8q2r5 Rereading for Fluency (5-9), is about repeated oral reading of familiar text for accuracy and expression; measuring and improving silent reading rate on first-read text is a different skill and is not in the taxonomy. Not appended in this session on purpose: taxonomy writes are append-only with their own guard sequence and belong in a change that is only about the taxonomy."
+      },
+      {
+        "name": "charting your own per-skill accuracy to find your weakest skill",
+        "suggestedSlug": "learning-to-learn.charting-own-skill-progress",
+        "note": "The back matter (scans 154 to 158) hands the diagnosis to the child: an 8 by 8 grid of test totals by unit, then a second grid counting how often each question type was right, then six line graphs, one per question type, plotted across units A to H. The child draws the line and reads which reading skill is flat. Learning to Learn has mt_TDUpy57QVM Learning from Mistakes (8-9) and mt_2uHYdoxD0H Finding Knowledge Gaps (10-11), but neither covers keeping a running self-record across a term to locate the weak skill."
+      },
+      {
+        "name": "identifying the silent letter in a spoken word",
+        "suggestedSlug": "ela.silent-letter-identification",
+        "note": "'Write the letter you do not hear in ceiling / salmon / croak / hail / solemn / knife', 12 times. The one taxonomy topic on silent letters, mt_XK7NYt61cO (9-10, Spelling & Word Study), is about producing spellings from etymology; this book asks a 7 to 9 year old to analyse a word they have just heard. Recorded as a gap rather than mismapped onto it."
+      }
+    ]
+  },
+  "difficulty": {
+    "ageBand": [
+      84,
+      132
+    ],
+    "complexity": "multi-skill",
+    "prerequisites": [
+      "mt_ZhvwM6LMBL",
+      "mt_YKkCM63fSC"
+    ],
+    "scaffoldingLevel": "medium",
+    "notes": "The band is wide on purpose and the book asks for it: readability is 2.4 to 3.5 and the front matter puts on-level use at the start of third grade (about 96 months), but the series exists for 'readers who need additional practice material to achieve mastery' and says to 'assign students to the text most suitable for individual reading comfort' across seven books, so the same volume serves an advanced 7 year old and an 11 year old reading below grade. Complexity is multi-skill, not single-skill: every test runs six different comprehension moves in one sitting (detail recall, inference, main idea, two stated-or-not-stated verifications, word in context), and every readiness panel runs 4 to 7 different word-study probes (rhyme, silent letter, base word, definition, sound-spelling). That is the sharpest contrast with the Fast Forward handbook Carolyng dropped the same evening, which practises exactly one named skill per page. Scaffolding is medium rather than low: the front matter carries a fully worked sample lesson with answers and an explanation of why each answer is right, and the readiness panel pre-teaches every hard word before the passage, but the 64 real lessons carry no hints, no worked first item, and no answer key."
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [
+      "Shinob",
+      "Old White Bear",
+      "Strongest-One",
+      "Softest-Walker",
+      "Farthest-Thrower"
+    ],
+    "visualStyle": "hand-drawn",
+    "colorPalette": "limited palette",
+    "appealDrivers": "The articles have no characters at all, so the pull has to come from the subject matter, and it does: 64 short factual pieces chosen for the thing a child wants to know (a lizard that drops its tail, hail the size of baseballs, the royal foot that changed when the king died, a wall 1500 miles long). Titles are curiosity-shaped rather than topic-shaped ('The House Eaters' for termites, 'Ice from a Summer Sky' for hail, 'Stories without Words' for rocks), so the child meets a small mystery and the answer is the passage. The other driver is ownership: the child scores their own test into a filled square on the page, then plots the score on their own chart at the back. Nobody hands the book back with a grade on it.",
+    "notes": "Neutral rather than character-driven: the only named figures in the whole book are inside the 7 folktales, and they are folktale figures (Shinob the god, Old White Bear, and the three animal helpers Strongest-One, Softest-Walker and Farthest-Thrower), not a recurring cast the practice is hung on. Interior art is warm hand-drawn line illustration printed black plus one terracotta spot colour, one or two per spread, generous in size and never carrying information the text does not. The cover is the only full-colour page. The art is genuinely good and does not read as dated clip art, which is worth noting against the 2003 Fast Forward clip art in the sibling drop."
+  },
+  "printFormat": {
+    "pageSize": "unknown",
+    "orientation": "portrait",
+    "margins": "generous",
+    "inkDensity": "light",
+    "colorRequirement": "prints well in B&W",
+    "notes": "Page size is not measurable from a phone capture of a bound book; the master aspect ratio is about 0.75, between A4 and letter, and the photo frame includes the table under the page. Orientation and margins are clear from the masters. Ink density is light and measured, not guessed: median ink coverage across the 158 masters is 0.087, and the heaviest interior page is far below the cover's 0.71. Interior colour is one spot colour on the illustrations, the SAY AND KNOW rule, and the NUMBER RIGHT score square, so every interior page survives a black and white print; the back-matter record charts are pure black line work. Capture note: 57 of the 158 masters were shot with the phone turned sideways in two contiguous runs (pages 60 to 87 and 130 to 158) and are rotated 90 degrees relative to the book. The deterministic gates passed and text extracted cleanly from all of them, so no re-shoot is owed, but any future image work off these masters must rotate that range first."
+  },
   "aboutness": {
-    "extractionQuality": null,
+    "extractionQuality": "full",
     "textSidecar": ".cosmo/text/ref-2026-07-22-new-practice-readers-book-b.txt",
     "textBlobUrl": null,
-    "subjects": [],
-    "entities": [],
-    "themes": [],
-    "keyTerms": [],
-    "referencedWorks": []
+    "notes": "Roles follow the first law. The book TEACHES reading comprehension and reading vocabulary; it is not about lizards because one of its 64 passages is. The five 'about' subjects are recorded at unit scale only: each one is a whole eight-article unit, roughly 16 pages, not an incidental mention, and each would be a genuinely good answer to a parent asking for graded reading passages on that topic. That is deliberately more than the usual 1-to-5 ceiling in the aboutness contract, and it is the one place this analysis exceeds it: a survey reader is eight content areas bound together, and collapsing them to 'factual articles' would make every one of them unfindable while adding nothing. Unit E was tested against the same bar and dropped: caves, volcanoes, the Sphinx, the moon, the ocean, the Great Wall and earthquakes share no honest label, so it gets no claim. Single-passage subjects get no claim either, which is why Thomas Jefferson and the dollar system (one passage, G-5) are not here. The cover foal is decoration, per the Fast Forward swan scar: it is real, photographed, and must never answer 'books about horses'. The foal is not quotable from the sidecar because it is artwork, so its claim carries the cover title as its span and the description sits in a note, taken from the intake manifest's vision read of scan 1.",
+    "subjects": [
+      {
+        "name": "reading comprehension",
+        "quote": "comprehension skill development",
+        "role": "teaches"
+      },
+      {
+        "name": "reading vocabulary",
+        "quote": "The words are defined in multiple choice or completion situations",
+        "role": "teaches"
+      },
+      {
+        "name": "animals",
+        "quote": "Some animals live only on land, and others live only in the water",
+        "role": "about"
+      },
+      {
+        "name": "weather",
+        "quote": "Sometimes, during summer storms, the sky rains balls of ice",
+        "role": "about"
+      },
+      {
+        "name": "history of measurement",
+        "quote": "early ways of measuring",
+        "role": "about"
+      },
+      {
+        "name": "jobs and careers",
+        "quote": "Today, women are police officers, engineers, and mechanics",
+        "role": "about"
+      },
+      {
+        "name": "hobbies and collecting",
+        "quote": "Coin collecting is a popular hobby all over the world",
+        "role": "about"
+      },
+      {
+        "name": "graded reading practice series",
+        "quote": "one of a seven-book series",
+        "role": "identity"
+      }
+    ],
+    "entities": [
+      {
+        "name": "Anderson",
+        "kind": "person",
+        "role": "identity",
+        "quote": "• Anderson •",
+        "note": "The only author credit anywhere in the capture, printed as the cover byline between two dots. No first name, no publisher imprint, and no copyright page was photographed."
+      },
+      {
+        "name": "Shinob",
+        "kind": "character",
+        "role": "cast",
+        "quote": "Shinob was saved but was very angry",
+        "note": "The god figure who appears in several of the closing folktales and hands out the change that explains the world (rocks that cannot travel, the porcupine that cannot shoot its quills). Cast rather than about: he carries the tales, and this book is not a book about Shinob."
+      },
+      {
+        "name": "foal",
+        "kind": "animal",
+        "role": "decoration",
+        "quote": "NEW PRACTICE READERS THIRD EDITION BOOK B",
+        "note": "Cover photograph, read by the vision pass on scan 1: a chestnut foal running through a green field, framed by a maroon border. No passage in the book is about horses. Recorded so the cover art is not lost to a future image-generation pass, and roled decoration so it can never answer 'books about horses'."
+      }
+    ],
+    "themes": [
+      {
+        "name": "how things came to be",
+        "evidence": "This is how it came about that rocks cannot travel"
+      },
+      {
+        "name": "animal survival and adaptation",
+        "evidence": "They can get themselves out of danger in many different ways"
+      },
+      {
+        "name": "standardising measurement",
+        "evidence": "A mile was not the same for people from different parts of the world"
+      },
+      {
+        "name": "everyday work and the people who do it",
+        "evidence": "The work of housewreckers may seem strange to you, but it is important work"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "Does not say",
+        "occurrences": 131,
+        "quote": "Does not say"
+      },
+      {
+        "term": "Testing Yourself",
+        "occurrences": 66,
+        "quote": "Testing Yourself"
+      },
+      {
+        "term": "Getting Ready for the Next Story",
+        "occurrences": 62,
+        "quote": "Getting Ready for the Next Story"
+      },
+      {
+        "term": "SAY AND KNOW",
+        "occurrences": 57,
+        "quote": "SAY AND KNOW"
+      },
+      {
+        "term": "Thinking It Over",
+        "occurrences": 8,
+        "quote": "Thinking It Over"
+      },
+      {
+        "term": "MY READING TIME",
+        "occurrences": 7,
+        "quote": "MY READING TIME"
+      },
+      {
+        "term": "Spache Readability Formula",
+        "occurrences": 1,
+        "quote": "consistent with the Spache Readability Formula"
+      }
+    ],
+    "referencedWorks": [
+      {
+        "title": "Why the North Star Stands Still",
+        "author": "William R. Palmer",
+        "kind": "book",
+        "quote": "from Why the North Star Stands Still"
+      },
+      {
+        "title": "Kootenai Why Stories",
+        "author": "Frank B. Linderman",
+        "kind": "book",
+        "quote": "from Kootenai Why Stories by Frank B. Linderman"
+      },
+      {
+        "title": "When Coyote Walked the Earth",
+        "author": "Corinne Running",
+        "kind": "book",
+        "quote": "When Coyote Walked the Earth"
+      },
+      {
+        "title": "The Young Folk's Book of Myths",
+        "author": "Amy Cruse",
+        "kind": "book",
+        "quote": "Adapted from Amy Cruse, The Young Folk's Book of Myths"
+      }
+    ],
+    "textExtraction": {
+      "ocr": "tesseract",
+      "visionModel": "google/gemini-3-flash",
+      "visionPages": [
+        1,
+        158
+      ],
+      "note": "Mixture by design: tesseract read the 156 dense body pages it is good at, and the two covers were re-read by a vision model (scan 1 by gemini-3-flash, scan 158 by claude-sonnet-5 per the intake manifest). Both cover reads matter here: scan 1 gives the title and the foal photograph, and scan 158 identified the rotated back-matter chart grid that no OCR pass could describe. Per-page textSource is in the intake manifest."
+    }
   },
-  "title": null,
-  "format": null
+  "recipeMatch": {
+    "matchedRecipes": [
+      "reading-comprehension-mini-unit",
+      "lesson-comprehension-check",
+      "cloze-story"
+    ],
+    "gaps": [
+      "vocabulary-readiness-page",
+      "diagnostic-progress-chart"
+    ],
+    "notes": "Matched against the recipe files listed at analysis time, never a remembered list. reading-comprehension-mini-unit is the closest whole-format match: pre-teach vocabulary, read a nonfiction passage, answer skill questions, and its own brief already names inference and main idea. lesson-comprehension-check covers the Testing Yourself block's job as a fixed lesson closer, though this book runs six questions where that recipe runs three. cloze-story covers Question 1 and the fill-in half of the readiness panel, where the word list acts as the word bank. Two things have no recipe. vocabulary-readiness-page is the SAY AND KNOW panel, which is not a vocabulary card set and not a cloze: a narrow left column lists the exact words the coming passage will use, a vertical rule separates it from numbered probes, and each probe attacks one of those words from a different angle (definition, rhyme, silent letter, base word, sound-spelling) so the child arrives at the passage having met every hard word. diagnostic-progress-chart is the back matter: a score grid by unit crossed with a second grid by question type, then one line graph per question type across all eight units, so the child can see which single reading skill is flat. That is different in kind from visual-progress-map (an illustrated keepsake path) because it is a diagnosis, not a celebration, and the book names it that way on scan 156. Two patterns worth pushing into existing recipes rather than new files: the Yes / No / Does not say item, which forces a child to separate 'the text said this' from 'the text denied this' from 'the text is silent' and is the single most transferable idea in the book, belongs in lesson-comprehension-check's design patterns; and the too-narrow-detail distractor design on the main-idea question belongs in reading-comprehension-mini-unit's."
+  },
+  "stages": {
+    "captured": "2026-07-29T08:41:28Z",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "pending",
+      "targets": [],
+      "commit": null,
+      "note": "Nothing shipped in this session. Intended targets when it graduates: apps/web/agent/skills/materials-studio/references/recipes/vocabulary-readiness-page.md and references/recipes/diagnostic-progress-chart.md as new files, plus design-pattern edits to references/recipes/lesson-comprehension-check.md (the Yes / No / Does not say item) and references/recipes/reading-comprehension-mini-unit.md (too-narrow-detail distractors). Both gaps are recorded in .cosmo/open-gaps.json in this change."
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "commit": null,
+      "note": "The three entries in skillTargeting.unmappedSkills are proposals, not appends. proposedTopics means topics this change actually wrote into topics.json, and no taxonomy write happened in this session."
+    },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "notes": "Second book through the new intake, and the first where the gates fired nothing at all: 158 pages, zero gate findings, and the only capture defect is cosmetic (two contiguous runs totalling 57 pages shot sideways, recorded in printFormat). Three things worth keeping. (1) The book's real value to Homa is one idea, and it is not a layout: Questions 4 and 5 make a child decide whether a statement was affirmed, denied, or simply never addressed, 131 times, with an answer key that coaches 'Be sure to answer Yes only when you can find the answer in the story.' That is a comprehension move Homa's own materials do not currently ask for anywhere, and it maps cleanly onto an existing taxonomy topic (mt_lp3qyEujIv, Inference vs Explicit Meaning). (2) The back matter is the second idea: the child, not the parent, keeps a per-skill record across the whole book and plots the line that shows which reading skill is flat. Homa has progress infrastructure on the parent side and nothing the child owns on paper. (3) The pairing is the finding, not the book. Carolyng dropped this at 18:32 and the Fast Forward Level E handbook at 21:49 the same evening, two leveled reading practice programs from a founder whose seven previous confirmed signals are all about cross-curricular unit studies and curriculum architecture. Neither message carried a word of commentary, so the intent is unread; the pattern is recorded in the taste file as weak evidence and flagged for a third drop rather than acted on."
 }

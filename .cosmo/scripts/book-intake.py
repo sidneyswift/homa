@@ -144,6 +144,18 @@ VISION_MIN_INK = 0.02
 VISION_QUALITY_FLOOR = 0.55    # garbled beyond usefulness
 PAGE_READ_SCRIPT = "scripts/page-read.mts"
 
+# Orientation. A page shot upside down is sharp, fully inked, and unique, so
+# EVERY other gate here passes it while its text comes out reversed. Three
+# independent analyses of three different books found rotated pages that this
+# script had reported clean (Your Health scans 40-42, Social Studies 118/129/
+# 130, New Practice Readers 60-87 and 130-158), which is exactly the shape of
+# a blind spot: not one loud failure, the same quiet one everywhere.
+#
+# tesseract ships orientation detection (--psm 0), so this is deterministic
+# and needs no model. Masters stay untouched; a rotated COPY is what gets
+# OCR'd, and the angle is recorded so later image work knows.
+ORIENTATION_CONFIDENCE_MIN = 1.0
+
 
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -250,6 +262,7 @@ def _extract_one(pdf_path: Path, out_dir: Path, part: int, start_number: int) ->
             record["part"] = part
             record["partPage"] = index + 1
         record.update(page_metrics(master_path))
+        record["rotation"] = page_orientation(master_path)
         pages.append(record)
     doc.close()
     return pages
@@ -268,17 +281,56 @@ def text_layer(pdf_paths) -> list:
     return out
 
 
-def ocr_page(image_path: Path) -> str:
+def page_orientation(image_path: Path) -> int:
+    """Degrees the page must be rotated to read upright, or 0. Best effort:
+    an unreadable OSD result means 0, because guessing a rotation is worse
+    than leaving a page alone."""
     if not shutil.which("tesseract"):
-        return ""
+        return 0
     try:
         done = subprocess.run(
-            ["tesseract", str(image_path), "stdout", "-l", "eng"],
+            ["tesseract", str(image_path), "stdout", "--psm", "0"],
+            capture_output=True, text=True, timeout=60, check=False,
+        )
+    except (subprocess.TimeoutExpired, OSError):
+        return 0
+    if done.returncode != 0:
+        return 0
+    rotate = re.search(r"^Rotate: (\d+)", done.stdout, re.M)
+    conf = re.search(r"^Orientation confidence: ([\d.]+)", done.stdout, re.M)
+    if not rotate:
+        return 0
+    if conf and float(conf.group(1)) < ORIENTATION_CONFIDENCE_MIN:
+        return 0
+    return int(rotate.group(1)) % 360
+
+
+def ocr_page(image_path: Path, rotate: int = 0) -> str:
+    if not shutil.which("tesseract"):
+        return ""
+    source = image_path
+    tmp = None
+    if rotate:
+        # Rotate a copy, never the master: the master is the capture, and a
+        # re-encoded master is a second lossy pass over the only copy.
+        try:
+            with Image.open(image_path) as im:
+                tmp = image_path.parent / f".rot-{image_path.name}"
+                im.rotate(-rotate, expand=True).save(tmp)
+            source = tmp
+        except Exception:
+            source = image_path
+    try:
+        done = subprocess.run(
+            ["tesseract", str(source), "stdout", "-l", "eng"],
             capture_output=True, text=True, timeout=180, check=False,
         )
         return done.stdout.strip() if done.returncode == 0 else ""
     except (subprocess.TimeoutExpired, OSError):
         return ""
+    finally:
+        if tmp is not None:
+            tmp.unlink(missing_ok=True)
 
 
 def _normalize_text(text: str) -> str:
@@ -421,7 +473,7 @@ def run_gates(pages: list, expect_pages, texts: dict = None) -> list:
              if p.get("inkCoverage", 0) >= BLANK_INK_COVERAGE and "sharpness" in p]
     median = float(np.median(inked)) if inked else 0.0
 
-    exact, near = {}, []
+    exact, near, rotated = {}, [], []
     for p in pages:
         n = p["page"]
         if "error" in p:
@@ -437,6 +489,9 @@ def run_gates(pages: list, expect_pages, texts: dict = None) -> list:
                     f"page {n}: softer than the rest of the book "
                     f"(sharpness {sharpness} against a median of {round(median, 2)}). Re-shoot this page."
                 )
+
+        if p.get("rotation"):
+            rotated.append(n)
 
         first = exact.setdefault(p["sha256"], n)
         if first != n:
@@ -462,6 +517,15 @@ def run_gates(pages: list, expect_pages, texts: dict = None) -> list:
                 )
                 break
             near.append((n, text, value))
+
+    if rotated:
+        findings.append(
+            f"{len(rotated)} page(s) were shot rotated ({rotated[:12]}"
+            + (" ..." if len(rotated) > 12 else "")
+            + "). Their text was read correctly from a rotated copy, so nothing is lost and no "
+              "re-shoot is owed, but the MASTERS are still rotated: any later image work off "
+              "them must turn them first."
+        )
     return findings
 
 
@@ -566,7 +630,8 @@ def intake(pdf_paths, item_id: str, kind: str, expect_pages, force: bool,
         else:
             print(f"  no usable text layer, running OCR on {len(pages)} page(s) ...")
             for p in pages:
-                texts.append(ocr_page(out_dir / p["master"]) if "master" in p else "")
+                texts.append(ocr_page(out_dir / p["master"], p.get("rotation", 0))
+                             if "master" in p else "")
                 if p["page"] % 10 == 0:
                     print(f"    ... page {p['page']}")
 

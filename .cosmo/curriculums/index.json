@@ -121,14 +121,14 @@
       "works": []
     },
     {
-      "id": "cur-2026-07-19-get-set-for-school-readiness-writing",
-      "name": "Get Set for School: Readiness & Writing, Pre-K Teacher's Guide",
-      "droppedBy": "carolyng",
+      "id": "cur-2026-07-19-handwriting-without-tears",
+      "name": "Get Set for School: Readiness & Writing Pre-K Teacher's Guide (Learning Without Tears, 8th Edition)",
+      "droppedBy": "aless",
       "droppedAt": "2026-07-19T16:25:44-04:00",
-      "methodology": "developmental-multisensory",
-      "mappedPct": 45,
-      "gapCount": 4,
-      "decisionsCount": 4,
+      "methodology": "Handwriting Without Tears / Learning Without Tears developmental, multisensory letter formation (the publisher rebranded from Handwriting Without Tears to Learning Without Tears years ago; every page footer in this PDF reads Learning Without Tears, and the specific book is the Get Set for School Pre-K line's Readiness & Writing Teacher's Guide, not a standalone book titled Handwriting Without Tears)",
+      "mappedPct": 80,
+      "gapCount": 5,
+      "decisionsCount": 6,
       "about": [
         "handwriting readiness",
         "capital letter formation",
@@ -155,21 +155,6 @@
       ]
     },
     {
-      "id": "cur-2026-07-19-handwriting-without-tears",
-      "name": "Get Set for School: Readiness & Writing Pre-K Teacher's Guide (Learning Without Tears, 8th Edition)",
-      "droppedBy": "aless",
-      "droppedAt": "2026-07-19T16:25:44-04:00",
-      "methodology": "Handwriting Without Tears / Learning Without Tears developmental, multisensory letter formation (the publisher rebranded from Handwriting Without Tears to Learning Without Tears years ago; every page footer in this PDF reads Learning Without Tears, and the specific book is the Get Set for School Pre-K line's Readiness & Writing Teacher's Guide, not a standalone book titled Handwriting Without Tears)",
-      "mappedPct": 80,
-      "gapCount": 5,
-      "decisionsCount": 6,
-      "about": [],
-      "themes": [],
-      "unitsDecomposed": 0,
-      "unitTopics": [],
-      "works": []
-    },
-    {
       "id": "cur-2026-07-19-harcourt-art-everywhere",
       "name": "Harcourt Art Everywhere (Harcourt School Publishers Art series pupil edition, Grade 1 by content evidence and series-title convention, 2006)",
       "droppedBy": "aless",
@@ -193,11 +178,34 @@
       "mappedPct": 89,
       "gapCount": 1,
       "decisionsCount": 6,
-      "about": [],
-      "themes": [],
+      "about": [
+        "life science",
+        "earth science",
+        "physical science",
+        "science process skills",
+        "elementary science textbook"
+      ],
+      "themes": [
+        "observing the everyday world",
+        "science as a job real people do",
+        "growth and change over time",
+        "hands-on investigation before explanation",
+        "carrying the lesson home"
+      ],
       "unitsDecomposed": 0,
       "unitTopics": [],
-      "works": []
+      "works": [
+        "All Night Near the Water",
+        "Animal Seasons",
+        "Bull's Head",
+        "Day Light, Night Light",
+        "Multimedia Science Glossary",
+        "The Learning Site",
+        "The Puddle",
+        "The Very Hungry Caterpillar",
+        "Water",
+        "What Makes a Magnet?"
+      ]
     },
     {
       "id": "cur-2026-07-19-playing-preschool-y1",
@@ -238,11 +246,34 @@
       "mappedPct": 59,
       "gapCount": 1,
       "decisionsCount": 8,
-      "about": [],
-      "themes": [],
+      "about": [
+        "communities",
+        "maps and globes",
+        "american history",
+        "jobs and money",
+        "natural resources",
+        "citizenship",
+        "elementary social studies textbook"
+      ],
+      "themes": [
+        "helping your community",
+        "how things change over time",
+        "courage and fairness",
+        "caring for the earth",
+        "alike and different",
+        "belonging to groups"
+      ],
       "unitsDecomposed": 0,
       "unitTopics": [],
-      "works": []
+      "works": [
+        "America, the Beautiful",
+        "Poor Richard's Almanack",
+        "The Farmer in the Dell",
+        "The Farmer's Little Girl",
+        "The Star-Spangled Banner",
+        "Twinkle, Twinkle, Little Star",
+        "www.sfsocialstudies.com"
+      ]
     },
     {
       "id": "cur-2026-07-19-teach-child-read-100-lessons",
