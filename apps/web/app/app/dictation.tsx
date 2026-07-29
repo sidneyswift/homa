@@ -3,7 +3,7 @@
 import { Check, Mic, X } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
-import { Logo } from "../../components/brand/Logo";
+import { ThinkingMark } from "../../components/brand/ThinkingMark";
 
 /**
  * Voice input for the chat composer (PRD FR-4, backlog M0-04/M1-05
@@ -291,9 +291,7 @@ export function DictationRow({
     >
       {transcribing ? (
         <>
-          <span className="chat-think-mark inline-flex" aria-hidden="true">
-            <Logo size={20} variant="mark" />
-          </span>
+          <ThinkingMark size={28} mood="working" />
           <span className="text-muted">Writing that down&hellip;</span>
         </>
       ) : (
