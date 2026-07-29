@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ageInMonths, ageLabel } from "@homa/core";
 
 import { AiConsentGate } from "../../components/ai-consent-gate";
 import { Button } from "../../components/ui/button";
@@ -8,6 +9,7 @@ import { Card } from "../../components/ui/card";
 import { useSession } from "../../features/auth/session-provider";
 import { ChatSession } from "../../features/chat/chat-session";
 import { useFamilyData } from "../../features/family/use-family-data";
+import { type ChildRecord } from "../../lib/family";
 import {
   chatStorageKey,
   prepareChat,
@@ -18,11 +20,12 @@ import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, space } from "../../theme/tokens";
 
 /**
- * The Chat tab: loads the persisted transcript and takes the
- * fresh-morning rotation decision before mounting the session
- * (useEveAgent seeds initialEvents at construction), then hands
- * everything to ChatSession. Keyed by user id so switching accounts
- * never bleeds transcripts across users.
+ * Chat is the app's front door (founder call 2026-07-29, matching web:
+ * /app IS chat, there is no separate landing screen). The former
+ * Today tab's greeting and kid cards fold in here as the welcome
+ * state, shown only on a truly fresh conversation (no archived
+ * messages, no in-flight session); once she has talked to Homa at
+ * all, this screen is just the transcript, same as it always was.
  */
 export default function ChatScreen() {
   const { session } = useSession();
@@ -42,11 +45,11 @@ export default function ChatScreen() {
     };
   }, [userId]);
 
+  const isFreshConversation =
+    prepared !== null && prepared.archived.length === 0 && prepared.initialEvents.length === 0;
+
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: colors.page }}
-      edges={["top"]}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }} edges={["bottom"]}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -87,6 +90,13 @@ export default function ChatScreen() {
           </View>
         ) : (
           <AiConsentGate>
+            {isFreshConversation ? (
+              <WelcomeHeader
+                greeting={memberDisplayName ?? readyFamily.parent_display_name}
+                familyName={readyFamily.name}
+                kids={children}
+              />
+            ) : null}
             <ChatSession
               key={userId}
               storageKey={chatStorageKey(userId)}
@@ -98,5 +108,70 @@ export default function ChatScreen() {
         )}
       </KeyboardAvoidingView>
     </SafeAreaView>
+  );
+}
+
+/** The former Today tab's greeting + kid cards, now Chat's own
+ *  welcome state instead of a separate screen a family had to leave
+ *  chat to reach. */
+function WelcomeHeader({
+  greeting,
+  familyName,
+  kids,
+}: {
+  greeting: string | null;
+  familyName: string;
+  kids: ChildRecord[];
+}) {
+  return (
+    <View style={{ padding: space.lg, paddingBottom: space.md, gap: space.md }}>
+      <Text
+        style={{
+          fontFamily: fontFamilies.display,
+          fontSize: fontSize.xxl,
+          lineHeight: fontSize.xxl * 1.1,
+          color: colors.textStrong,
+        }}
+      >
+        {greeting ? `Hi ${greeting}.` : familyName}
+      </Text>
+      {kids.map((child) => (
+        <Card key={child.id} style={{ gap: 4 }}>
+          <Text
+            style={{
+              fontFamily: fontFamilies.displaySemibold,
+              fontSize: fontSize.lg,
+              color: colors.textStrong,
+            }}
+          >
+            {child.name}
+            <Text
+              style={{
+                fontFamily: fontFamilies.body,
+                fontSize: fontSize.sm,
+                color: colors.textMuted,
+              }}
+            >
+              {"  "}
+              {ageLabel(ageInMonths(child.birth_month))}
+            </Text>
+          </Text>
+          {child.profile.interests?.length ? (
+            <Text
+              style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}
+            >
+              Into: {child.profile.interests.join(", ")}
+            </Text>
+          ) : null}
+          {child.profile.focus ? (
+            <Text
+              style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}
+            >
+              Working on: {child.profile.focus}
+            </Text>
+          ) : null}
+        </Card>
+      ))}
+    </View>
   );
 }
