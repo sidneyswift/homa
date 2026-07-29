@@ -292,6 +292,39 @@ describe("gaps are marked, never invented", () => {
   it("reports no gaps when the family is complete", () => {
     assert.deepEqual(compose("FL").gaps, []);
   });
+
+  it("never prints half an address as though it were a whole one", () => {
+    // Found in production 2026-07-29. A family with a state but no city
+    // printed "OH" as their address line, and because that string was
+    // non-empty it read as PRESENT, so the missing city and zip were
+    // never named as a gap. A partial address is not deliverable and
+    // looks filled in, which is worse than an honest blank.
+    for (const partial of [
+      { addressCity: "Columbus", addressZip: null },
+      { addressCity: null, addressZip: "43004" },
+      { addressCity: "OH", addressZip: null },
+    ]) {
+      const letter = compose("OH", {
+        ...COMPLETE,
+        addressLine: "44 Mill Lane",
+        ...partial,
+      });
+      assert.ok(
+        letter.gaps.includes("City and zip"),
+        `${JSON.stringify(partial)} must be named as a gap`,
+      );
+      assert.ok(
+        !/class="fl-address">(Columbus|OH|43004)</.test(letter.body),
+        `${JSON.stringify(partial)} must not render as an address line`,
+      );
+    }
+  });
+
+  it("prints the address line when city and zip are both there", () => {
+    const letter = compose("OH");
+    assert.match(letter.body, /class="fl-address">Gainesville, FL 32601</);
+    assert.ok(!letter.gaps.includes("City and zip"));
+  });
 });
 
 describe("ageOn", () => {

@@ -99,9 +99,14 @@ export function birthdateLong(birthdate: string | null): string | null {
 
 function addressBlock(family: FilingLetterFamily, gaps: string[]): string {
   const street = family.addressLine?.trim();
-  const cityZip = [family.addressCity?.trim(), family.addressZip?.trim()]
-    .filter(Boolean)
-    .join(" ");
+  const city = family.addressCity?.trim();
+  const zip = family.addressZip?.trim();
+  // Both or neither. A partial line looks filled in and is not
+  // deliverable, which is worse than an honest blank: found in
+  // production 2026-07-29, where a family with a state but no city
+  // printed "OH" as their address line and was never told the rest was
+  // missing, because a non-empty string read as present.
+  const cityZip = city && zip ? `${city} ${zip}` : "";
   if (!street && !cityZip) {
     gaps.push("Home address");
     return `<p class="fl-line"><span class="fl-label">Home address</span>${BLANK}</p>`;
