@@ -48,6 +48,26 @@ export const ONBOARDING_WELCOME =
   "Hey, I'm Homa. I'll be doing this school year with you! I keep track of where your kids are in each subject, and I make the worksheets and lesson plans they need. Let's start with a little about you, then your kids.";
 
 /**
+ * The welcome does not stream, and that is a decision rather than an
+ * omission (founder walk, 2026-07-28).
+ *
+ * A word-by-word reveal shipped here first, at the founder's ask, and
+ * came straight back out: "clunky and not premium". Two reasons, both
+ * worth keeping written down. Token-by-token reveal is what a model does
+ * when it CANNOT show you the whole answer yet, so imitating it on a
+ * string constant is a costume, and it reads as one. And forty-two
+ * independent fades across five wrapped lines is shimmer the eye tracks
+ * involuntarily, so she ends up reading through the animation.
+ *
+ * What replaced it is one gesture: the welcome and the card ride the
+ * same keyframe 140ms apart and the screen settles in 460ms
+ * (globals.css, "The onboarding opening"). Fewer, larger, overlapping
+ * moves. Nothing in this module needs to time any of it, which is the
+ * tell that it is the right shape: the whole sequence is four lines of
+ * CSS and no state.
+ */
+
+/**
  * kickoffKindFor(config): which machine message opens this visit.
  *
  * Silence is a real answer here. A parent who closed the tab for four
@@ -62,13 +82,44 @@ export function kickoffKindFor(config: OnboardingChatConfig): OnboardingKickoffK
 }
 
 /**
+ * appOpensWithBasics(config): does the app ask for her name itself,
+ * rather than spend a model turn being handed a card it could have
+ * drawn from a constant?
+ *
+ * The kickoff turn had exactly one job: call ask_for_details with kind
+ * family_basics, no words before or after it (onboarding-mode's "your
+ * very first turn"). Every input to that call is fixed. The fields are a
+ * static table (detail-card's FIELDS.family_basics), the card writes
+ * through its own authenticated endpoint (/api/onboarding/basics) rather
+ * than through the model, and the time zone rides on that same POST. So
+ * the turn produced a constant and charged 2 to 6 seconds of "working on
+ * it" for it, on the first screen after she paid, at the exact moment
+ * the product most needs to look alive. The welcome above learned this
+ * lesson already; this is the same wait one beat later.
+ *
+ * Only when her basics are genuinely unwritten. A parent who filled the
+ * card and closed the tab comes back with a name, and re-asking for it
+ * is worse than any wait.
+ */
+export function appOpensWithBasics(config: OnboardingChatConfig): boolean {
+  return kickoffKindFor(config) === "kickoff" && config.parentName === null;
+}
+
+/**
  * kickoffDirectiveFor(config): the exact message to send, or null when
  * this visit opens in silence.
+ *
+ * Silence now covers the opening too, not just the short pause: when the
+ * app draws the basics card itself there is nothing left for that turn to
+ * do, and sending it anyway would buy a second copy of the card she is
+ * already filling in. Homa's first turn becomes her first answer, which
+ * is also the first turn that has ever had anything to react to.
  *
  * The time zone rides along with the opening message rather than being
  * asked for. Asking a parent what time zone she is in reads as a form;
  * announcing that Homa detected it reads as surveillance. Homa confirms
- * it lightly inside the basics card instead.
+ * it lightly inside the basics card instead, which is also where it is
+ * captured when this returns null.
  */
 export function kickoffDirectiveFor(
   config: OnboardingChatConfig,
@@ -76,6 +127,7 @@ export function kickoffDirectiveFor(
 ): string | null {
   const kind = kickoffKindFor(config);
   if (kind === "none") return null;
+  if (appOpensWithBasics(config)) return null;
   return formatHiddenDirective(kind, { timeZone });
 }
 

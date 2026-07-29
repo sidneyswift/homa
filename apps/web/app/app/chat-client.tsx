@@ -11,6 +11,7 @@ import { sendWallBeacon } from "../../components/billing/wall-beacon";
 import { WallModal } from "../../components/billing/wall-modal";
 import type { WallCheckout } from "../../lib/billing/wall-types";
 import {
+  appOpensWithBasics,
   browserTimeZone,
   clearKickoffSent,
   kickoffAlreadySent,
@@ -25,7 +26,14 @@ import {
   latestChecklistRequest,
   latestReportReveal,
 } from "./onboarding-cards";
-import { DetailCard, latestDetailRequest, NO_STYLES_SUMMARY } from "./detail-card";
+import { AnotherKidCard } from "./another-kid-card";
+import {
+  cardWantsComposer,
+  DetailCard,
+  latestDetailRequest,
+  NO_STYLES_SUMMARY,
+  type DetailCardKind,
+} from "./detail-card";
 import { ChecklistTakeover } from "./checklist-takeover";
 import { formatHiddenDirective } from "../../lib/onboarding/directives";
 import {
@@ -75,6 +83,7 @@ import {
   busyLabel,
   countLastTurnToolCalls,
   messageSaysSomething,
+  messageSpeaksWords,
   MessageView,
 } from "./message-parts";
 import {
@@ -407,6 +416,37 @@ export function ChatClient({
    *  basics summary parked until the chained card settles. */
   const [chainedHomeschool, setChainedHomeschool] = useState(false);
   const chainedBasicsSummaryRef = useRef<string | null>(null);
+  /**
+   * The kid chain: the app asks "any other kids?" and draws the next
+   * child card itself, so a family of three costs one model turn instead
+   * of three (founder walk, 2026-07-28).
+   *
+   * "choice" is the between-children question; "card" is a fresh child
+   * card the app docked rather than the model. Their summaries collect
+   * here and go to Homa as ONE message once she says that is everyone,
+   * so Homa reacts to the family rather than to each child in turn.
+   */
+  const [kidChainStage, setKidChainStage] = useState<"choice" | "card" | null>(
+    null,
+  );
+  const kidSummariesRef = useRef<string[]>([]);
+  /** Whether the docked card's CURRENT question is open ended. Reported
+   *  by the card itself, since only it knows which step is showing. */
+  const [cardStepOpenEnded, setCardStepOpenEnded] = useState(false);
+  const lastKidNameRef = useRef<string>("");
+  /**
+   * True while the app's OWN basics card holds the slot, drawn on mount
+   * instead of waiting on a model turn for a constant (appOpensWithBasics).
+   *
+   * Initialised from the prop rather than set in an effect: an effect runs
+   * after paint, so the parent would get one frame of an empty footer
+   * under the welcome, which is the flicker this whole change exists to
+   * delete. Once the card saves it chains onward exactly as the model's
+   * card did, through the same parked-summary path.
+   */
+  const [appBasics, setAppBasics] = useState(() =>
+    onboarding ? appOpensWithBasics(onboarding) : false,
+  );
   const turnStartedAtRef = useRef<number | null>(null);
   const childNameById = useMemo(
     () => new Map((kids ?? []).map((kid) => [kid.id, kid.name])),
@@ -1099,6 +1139,37 @@ export function ChatClient({
   const hasVisibleMessages = transcript.some(
     (item) => item.kind === "message" && messageSaysSomething(item.message),
   );
+  /**
+   * The opening moment: onboarding, and she has not said anything yet.
+   *
+   * The transcript layout is right for turn fifty and wrong for turn one.
+   * With a single paragraph and a single card it stretches the two to
+   * opposite ends of the phone, leaving 600px of nothing between the
+   * sentence and the ask, and empty reads as unfinished rather than calm
+   * on the one screen that has to feel composed (founder note,
+   * 2026-07-28). So while this holds, the welcome and the docked card
+   * center as one group instead.
+   *
+   * It spans exactly the introduction: the welcome, the basics card, and
+   * the homeschool card chained behind it. Her combined answer is the
+   * first thing anybody says, so the layout hands over to the
+   * conversation at the moment she joins it, which is the seam that means
+   * something.
+   *
+   * Neither of the two cheaper predicates above can express that.
+   * hasAnyMessages goes true on mount, because the kickoff is a hidden
+   * directive: a real message that renders as nothing. hasVisibleMessages
+   * goes true the instant the first card lands, because a card counts as
+   * an assistant item, and the card is the one thing this layout exists
+   * to compose. Asking that question shipped a screen that centered while
+   * Homa was working and snapped apart as the ask arrived (founder walk,
+   * 2026-07-28).
+   */
+  const openingMoment =
+    onboarding !== null &&
+    !transcript.some(
+      (item) => item.kind === "message" && messageSpeaksWords(item.message),
+    );
   // The chips return whenever a session has no words in it yet: the
   // first run, and a fresh morning over yesterday's scrollback.
   const showSuggestions =
@@ -1262,18 +1333,83 @@ export function ChatClient({
   // is free, which is the honest split between "here is the ask" and
   // "you may answer it now".
   const dockedChecklist =
-    dockedDetail === null && !dockedChained ? latestChecklist : null;
-  // The composer appears when there is something to reply to. Before
-  // Homa has said anything there is not, and while a card is docked the
-  // card IS the input. Outside onboarding nothing changes: the box is
-  // always there, exactly as it has always been.
-  const showComposer =
     dockedDetail === null &&
     !dockedChained &&
+    !appBasics &&
+    kidChainStage === null
+      ? latestChecklist
+      : null;
+  /**
+   * True when the thing in the dock is one of onboarding's own cards, and
+   * therefore a bottom sheet on a phone rather than a floating card.
+   *
+   * Deliberately not "onboarding is active": the checklist invite shares
+   * this slot and is not a sheet, so a footer that dropped its padding
+   * for it would leave it touching the screen edges.
+   */
+  const sheetDock =
+    onboarding !== null &&
+    (appBasics ||
+      Boolean(dockedChained) ||
+      kidChainStage !== null ||
+      dockedDetail !== null);
+  /** Which card is in the dock, whoever put it there. */
+  const dockedCardKind: DetailCardKind | null = appBasics
+    ? "family_basics"
+    : dockedChained
+      ? "homeschool_profile"
+      : kidChainStage === "card"
+        ? "child"
+        : (dockedDetail?.card.kind ?? null);
+  /**
+   * The composer keeps the card company only when the card cannot say
+   * everything she might need to (cardWantsComposer).
+   *
+   * Read from the card KIND rather than the field on screen, so it does
+   * not appear and disappear as she steps through a card's questions.
+   */
+  /**
+   * The composer sits beside a card only on a question the card cannot
+   * enumerate, which is a fact about the STEP she is on rather than the
+   * card she is in.
+   *
+   * Keyed on the card kind, this put a text box under "What is your
+   * child's first name?" the moment the child card grew an interests
+   * step, so one question had two places to type it and two buttons to
+   * send it (founder walk, 2026-07-28). The card reports each step up as
+   * she moves, and the slot follows.
+   */
+  const composerBesideCard =
+    onboarding !== null && kidChainStage !== "choice" && cardStepOpenEnded;
+  /**
+   * The composer appears when there is something to reply to.
+   *
+   * Onboarding's cards no longer take the slot to themselves (founder
+   * call, 2026-07-28, against a reference where a card and a composer
+   * stack): the card asks, and the composer under it stays open for a
+   * parent who would rather just say it. That reverses the 2026-07-22
+   * docking ruling on purpose, and the thing that ruling killed is still
+   * dead. What it hit was THREE answers to "what do I do now" on one
+   * screen, the ask, an open composer and a suggestion chip. This is two,
+   * ordered, and the second one says in its own placeholder that it is
+   * the alternative rather than the point.
+   *
+   * The checklist invite keeps the old rule. It is a door into a
+   * full-screen takeover rather than a question with an answer, so a
+   * composer beside it is offering to reply to something nobody asked.
+   *
+   * Outside onboarding nothing changes at all.
+   */
+  const showComposer =
     dockedChecklist === null &&
     // While the questions are open the slot is theirs.
     checklistTakeover === null &&
-    (!onboarding || hasVisibleMessages);
+    (composerBesideCard ||
+      (dockedDetail === null &&
+        !dockedChained &&
+        !appBasics &&
+        kidChainStage === null &&
+        (!onboarding || hasVisibleMessages)));
   const planEditsSeen = planEditCount(agent.data.messages);
   useEffect(() => {
     const latest = latestPlannerOpen(agent.data.messages);
@@ -1422,10 +1558,42 @@ export function ChatClient({
     );
   }
 
+  /**
+   * A child card just saved: keep the summary and ask for the next one.
+   *
+   * The name is lifted off the front of the summary ("Story, born
+   * October 4, 2020") purely so the question can say it back. Nothing
+   * downstream reads it, and the child itself was already written by the
+   * card's own authenticated POST, so a bad split costs a nicety and
+   * never a record.
+   */
+  function enterKidChain(summary: string): void {
+    kidSummariesRef.current = [...kidSummariesRef.current, summary];
+    lastKidNameRef.current = summary.split(",")[0]?.trim() || "That one";
+    setKidChainStage("choice");
+  }
+
   function sendMessage(
     text: string,
     source: ChatSendSource = { kind: "composer" },
   ): ChatSendAcceptance {
+    // She answered in prose instead of filling the card in, so the card
+    // steps aside. Leaving it up would sit a form asking her name over a
+    // reply where she just gave it, which is the ambiguity the composer
+    // was kept out of this slot to avoid in the first place.
+    //
+    // Only her own typing retires it: a card_answer send IS the card, and
+    // a directive is the app talking to itself. Nothing is lost either
+    // way, because Homa can put the card back up with ask_for_details,
+    // and any basics she already saved are durable server-side and reach
+    // the next turn through family context rather than through this card.
+    if (source.kind === "composer" && onboarding) {
+      setAppBasics(false);
+      setChainedHomeschool(false);
+      chainedBasicsSummaryRef.current = null;
+      setKidChainStage(null);
+      kidSummariesRef.current = [];
+    }
     const plan = prepareChatSend({
       text,
       // Occupied by an active stream OR by lost-turn recovery still
@@ -1599,11 +1767,16 @@ export function ChatClient({
   }
 
   return (
-    // 3.5rem is the frame's phone top bar (h-14); on desktop the sidebar
-    // sits beside this column, so the full viewport height is ours. The
-    // planner canvas, when open, shares this row on desktop (the chat
-    // column narrows) and overlays the phone.
-    <div className="flex h-[calc(100dvh-3.5rem)] lg:h-dvh">
+    // 3.5rem is /app's phone top bar (h-14); on desktop the sidebar sits
+    // beside this column, so the full viewport height is ours. The planner
+    // canvas, when open, shares this row on desktop (the chat column
+    // narrows) and overlays the phone.
+    //
+    // Onboarding has no top bar to subtract: ChatStep mounts this inside
+    // its own fixed inset-0, so reserving the 56px left a strip of bare
+    // page under the dock, which a floating card hid and a flush bottom
+    // sheet cannot.
+    <div className={onboarding ? "flex h-dvh" : "flex h-[calc(100dvh-3.5rem)] lg:h-dvh"}>
     <div className="relative flex h-full min-w-0 flex-1 flex-col">
       {/* The morning scrolls into everything above it: a soft fade at
           the top edge whenever there is more past to scroll to. This
@@ -1628,7 +1801,13 @@ export function ChatClient({
         // nothing else above it, so at pt-6 Homa's hello started almost
         // against the top edge, which reads as cramped on the one screen
         // that should feel calm.
-        className="mx-auto flex w-full max-w-[780px] flex-1 flex-col gap-6 overflow-y-auto px-4 pb-6 pt-10 sm:px-6"
+        // justify-center during the opening: the sheet anchors the bottom
+        // of the screen by itself, so the welcome takes the middle of what
+        // is left rather than crowding down onto it. This column is
+        // flex-1, so "what is left" is exactly the space above the dock.
+        className={`mx-auto flex w-full max-w-[780px] flex-1 flex-col gap-6 overflow-y-auto px-4 pt-10 sm:px-6 ${
+          openingMoment ? "ob-open-column justify-center pb-4" : "pb-6"
+        }`}
       >
         {!hasAnyMessages && !onboarding ? (
           <div className="my-auto text-center">
@@ -1650,10 +1829,22 @@ export function ChatClient({
               // no longer writes one (onboarding-mode tells it this text
               // is already on screen). Deterministic, not a message row:
               // it costs nothing, needs no lock, and cannot double.
-              <div className="flex w-full items-start gap-2.5">
+              // The entrance rides the first arrival only. On a return
+              // visit this same welcome sits above real scrollback, where
+              // animating it would re-announce a hello she already had.
+              // The entrance rides the first arrival only. On a return
+              // visit this same welcome sits above real scrollback, where
+              // animating it would re-announce a hello she already had.
+              <div
+                className={`flex w-full items-start gap-2.5 ${
+                  openingMoment ? "ob-open-line" : ""
+                }`}
+              >
                 <span
                   aria-hidden="true"
-                  className="mt-0.5 inline-flex shrink-0 opacity-70"
+                  className={`mt-0.5 inline-flex shrink-0 opacity-70 ${
+                    openingMoment ? "ob-open-mark" : ""
+                  }`}
                 >
                   <Logo size={20} variant="mark" />
                 </span>
@@ -1950,7 +2141,11 @@ export function ChatClient({
             sending it again.
           </p>
         ) : null}
-        <div ref={bottomRef} />
+        {/* The scroll target, and the one empty box in this column that
+            has to keep its place: the opening layout collapses empty
+            children to kill their phantom gap, and a display:none anchor
+            is one scrollIntoView nobody can see. */}
+        <div ref={bottomRef} data-scroll-anchor="" />
       </main>
 
       {showBackToNow ? (
@@ -1982,8 +2177,14 @@ export function ChatClient({
         // shadow, so the line above it is a second edge a few pixels from
         // the first, and it cuts the card off from the sentence that
         // asked for it (founder note, 2026-07-22).
-        className={`bg-page px-4 pb-5 pt-3 sm:px-6 ${
-          showComposer ? "border-t border-border-subtle" : ""
+        // Onboarding's docked cards are bottom sheets on a phone, so the
+        // footer gives up its side and bottom padding at that size and
+        // the card reaches the edges itself. Everything from sm up, and
+        // everything outside onboarding, keeps the padded dock.
+        className={`pt-3 sm:bg-page sm:px-6 sm:pb-5 sm:pt-3 ${
+          sheetDock
+            ? "ob-dock-sheet px-0 pb-0 sm:rounded-none sm:border-t-0 sm:shadow-none"
+            : `bg-page px-4 pb-5 ${showComposer ? "border-t border-border-subtle" : ""}`
         }`}
       >
         {showSuggestions ? (
@@ -2029,16 +2230,49 @@ export function ChatClient({
               }}
             />
           </div>
+        ) : appBasics ? (
+          // The app's own basics card, laid out in the same frame as the
+          // welcome. No model turn was spent to be handed a constant, so
+          // there is no "working on it" between Homa saying hello and Homa
+          // asking the first question: she arrives to a finished screen
+          // with one thing on it to do.
+          //
+          // Mounted and focusable from the first frame, fading in on its
+          // own 140ms offset. Nothing is gated on the animation, so its
+          // height holds the centered group still rather than arriving
+          // late and re-centering it under the sentence she is reading.
+          <div
+            className={`ob-dock-card mx-auto w-full max-w-[780px] ${
+              openingMoment ? "ob-open-card" : ""
+            }`}
+          >
+            <DetailCard
+              key="app-basics"
+              card={{ kind: "family_basics", intro: null }}
+              active
+              docked
+              onStepOpenEnded={setCardStepOpenEnded}
+              onSaved={(summary) => {
+                // Straight into the chained homeschool card, the same
+                // hand-off the model's card made, so her answer still
+                // reaches Homa as one combined message once both settle.
+                chainedBasicsSummaryRef.current = summary;
+                setAppBasics(false);
+                setChainedHomeschool(true);
+              }}
+            />
+          </div>
         ) : dockedChained ? (
           // The app-chained homeschool card: docked by the client the
           // moment basics saved, no model turn in between. Keyed so its
           // step state can never inherit the basics card's.
-          <div className="mx-auto w-full max-w-[780px]">
+          <div className="ob-dock-card mx-auto w-full max-w-[780px]">
             <DetailCard
               key="chained-homeschool"
               card={{ kind: "homeschool_profile", intro: null }}
               active
               docked
+              onStepOpenEnded={setCardStepOpenEnded}
               onSaved={(summary) => {
                 const basics = chainedBasicsSummaryRef.current;
                 chainedBasicsSummaryRef.current = null;
@@ -2051,7 +2285,56 @@ export function ChatClient({
                     ? basics ?? summary
                     : `${basics} · ${summary}`;
                 sendMessage(combined, { kind: "card_answer" });
+                // And straight on to her kids, without waiting to be
+                // handed the card. Homa's reaction to the setup is a
+                // real model turn and a live walk clocked it at 20.7
+                // seconds (2026-07-29): twenty seconds of spinner
+                // between a parent skipping an optional question and
+                // anything asking her for something. Her reaction still
+                // arrives, above the card, while Rachel is already
+                // filling it in. The wait stops being a wall and
+                // becomes something that happens behind her work.
+                setKidChainStage("card");
               }}
+            />
+          </div>
+        ) : kidChainStage === "choice" ? (
+          <div className="ob-dock-card mx-auto w-full max-w-[780px]">
+            <AnotherKidCard
+              justAdded={lastKidNameRef.current}
+              onAddAnother={() => setKidChainStage("card")}
+              onDone={() => {
+                // Every child in one message, in the order she added
+                // them, so Homa meets the family at once.
+                const all = kidSummariesRef.current.join(" · ");
+                kidSummariesRef.current = [];
+                setKidChainStage(null);
+                sendMessage(all, { kind: "card_answer" });
+              }}
+            />
+          </div>
+        ) : kidChainStage === "card" ? (
+          <div className="ob-dock-card mx-auto w-full max-w-[780px]">
+            <DetailCard
+              // Keyed by how many are already in, so each new child card
+              // mounts fresh instead of inheriting the last one's answers.
+              key={`app-child-${kidSummariesRef.current.length}`}
+              // The card says who it is about itself. Homa's own handover
+              // sentence is a model turn behind it now, so relying on
+              // her for the introduction put "Now let's talk about your
+              // kids" on screen 22 seconds AFTER the card had already
+              // asked for a name (walk, 2026-07-29).
+              card={{
+                kind: "child",
+                intro:
+                  kidSummariesRef.current.length === 0
+                    ? "Now your kids."
+                    : null,
+              }}
+              active
+              docked
+              onStepOpenEnded={setCardStepOpenEnded}
+              onSaved={(summary) => enterKidChain(summary)}
             />
           </div>
         ) : dockedDetail ? (
@@ -2059,11 +2342,20 @@ export function ChatClient({
           // the same spot on screen the box occupied a second ago, so it
           // reads as one object changing shape rather than two objects
           // swapping.
-          <div className="mx-auto w-full max-w-[780px]">
+          //
+          // Except during onboarding's introduction, where the composer
+          // is below it rather than behind it, so there is nothing to
+          // morph from. It slides open there as the second beat instead.
+          <div
+            className={`ob-dock-card mx-auto w-full max-w-[780px] ${
+              openingMoment ? "ob-open-card" : ""
+            }`}
+          >
             <DetailCard
               card={dockedDetail.card}
               active
               docked
+              onStepOpenEnded={setCardStepOpenEnded}
               onSaved={(summary) => {
                 // Basics chains straight into the homeschool card during
                 // onboarding: her summary parks here and sends as one
@@ -2071,7 +2363,14 @@ export function ChatClient({
                 // deletes the dead-air model turn between the two.
                 if (dockedDetail.card.kind === "family_basics" && onboarding) {
                   chainedBasicsSummaryRef.current = summary;
-                  setChainedHomeschool(true);
+                    setChainedHomeschool(true);
+                  return;
+                }
+                // A child parks too, and the app asks for the next one
+                // itself rather than spending a turn on a question whose
+                // answer changes nothing about what Homa says.
+                if (dockedDetail.card.kind === "child" && onboarding) {
+                  enterKidChain(summary);
                   return;
                 }
                 sendMessage(summary, { kind: "card_answer" });
@@ -2092,9 +2391,15 @@ export function ChatClient({
           </div>
         ) : null}
         <div
-          className={`mx-auto w-full max-w-[780px] rounded-[22px] shadow-md ${
-            showComposer ? "" : "hidden"
-          }`}
+          className={`mx-auto w-full max-w-[780px] shadow-md ${
+            // Inside the phone sheet this is a zone, not a box: the CSS
+            // strips its chrome and gives it a hairline instead. From sm
+            // up it is the second of two floating boxes, so it takes a
+            // gap to sit in.
+            composerBesideCard
+              ? "ob-dock-composer rounded-[22px] sm:mt-2.5"
+              : "rounded-[22px]"
+          } ${showComposer ? "" : "hidden"}`}
         >
           {showPromptSuggestionRail ? (
             <PromptSuggestionRail
@@ -2148,7 +2453,14 @@ export function ChatClient({
                 placeholder={
                   attachments.staged.length > 0
                     ? "Add a caption…"
-                    : "Tell Homa about your day…"
+                    : composerBesideCard
+                      ? // Under a card it is the alternative, not the
+                        // point, and its own words are what say so. The
+                        // ruling this arrangement reversed was about
+                        // ambiguity, and an equally confident second box
+                        // is exactly how that comes back.
+                        "Or just tell me…"
+                      : "Tell Homa about your day…"
                 }
               />
             </div>

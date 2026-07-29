@@ -773,6 +773,122 @@ html.rv-armed [data-reveal].rv-no-anim, html.rv-armed [data-reveal-kids].rv-no-a
 }
 
 /* ============================================================================
+   The onboarding opening (/onboarding, chat-client's opening moment). Homa's
+   first screen is a composed introduction, not a transcript: the welcome and
+   the card under it are centered as one group until the parent says her first
+   thing and the conversation takes over.
+
+   ONE gesture, staggered, not a sequence of events (founder call, 2026-07-28:
+   the word-by-word version "feels clunky and not premium"). Both elements ride
+   the same keyframe and differ only in when they start, so the screen reads as
+   a single considered movement rather than a slideshow. Fewer, larger,
+   overlapping moves is the whole difference; forty-two independent word fades
+   across five wrapped lines was shimmer she had to read through, and it
+   imitated token streaming, which is what a model does when it CANNOT show you
+   the whole answer yet. This paragraph is a constant. Revealing it as though it
+   were being produced was a costume.
+
+   It is over in 460ms, and nothing is gated on it: the card is mounted, laid
+   out and focusable from the first frame, so a parent who arrives typing is
+   never waiting on choreography. That is also what keeps the centered group
+   from lurching, since a group that gains a card late re-centers under the
+   sentence she is reading.
+
+   `backwards`, never `both`, for the reason .flow-step-in documents above: a
+   transform still applied after the animation ends turns the element into the
+   containing block for every position:fixed descendant, and the checklist
+   takeover's fixed inset-0 overlay docks in this same footer slot.
+   ========================================================================= */
+/* The welcome fades, and only fades. It is a sentence arriving, not an
+   object moving, and a paragraph that slides shifts its own baselines
+   while she is starting to read it. */
+@keyframes ob-open-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+/* The card slides open from under the bottom edge. 100% is its own
+   height, so the sheet starts exactly off screen on a phone and the
+   floating card starts just below its resting place on desktop: one
+   rule, and it means the same thing at both sizes. */
+@keyframes ob-open-sheet {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: none; }
+}
+/* Scale starts at .82, never 0, per the rail-check rule: nothing real
+   appears out of nothing. */
+@keyframes ob-open-mark {
+  from { opacity: 0; transform: scale(0.82); }
+  to   { opacity: 1; transform: none; }
+}
+.ob-open-line { animation: ob-open-fade var(--dur-slow) var(--ease-out) backwards; }
+.ob-open-mark { animation: ob-open-mark var(--dur-slow) var(--ease-out) backwards; }
+/* 140ms is two of the house reveal steps (the 70ms of [data-reveal-kids]
+   above). One step reads as the same beat; two reads as the answer to it,
+   while still overlapping the sentence rather than following a gap. */
+.ob-open-card { animation: ob-open-sheet var(--dur-slow) var(--ease-out) 140ms backwards; }
+
+@media (prefers-reduced-motion: reduce), print {
+  .ob-open-line, .ob-open-mark, .ob-open-card { animation: none; }
+}
+
+/* ============================================================================
+   Onboarding's dock on a phone: ONE sheet, two zones (founder call,
+   2026-07-28, on a build that stacked two separate rounded boxes: "either
+   connect them as one, or fix the edges").
+
+   Two full-bleed surfaces cannot both keep their rounding. Their side
+   corners curve away from a screen edge they are already touching, so the
+   arcs read as clipping rather than as shape, and the page showing through
+   the gap between them turns one dock into two objects.
+
+   So the FOOTER becomes the surface: it owns the card colour, the top
+   rounding, the top edge and the shadow, and holds the safe-area inset
+   because it is the thing against the bottom of the phone. The card and
+   the composer inside it go bare and are separated by a hairline, which
+   is the only edge either of them needs.
+
+   Phone only. From sm up there is no screen edge to sit against, so the
+   card and the composer go back to floating as two rounded boxes with a
+   gap, which is the arrangement the reference actually shows.
+   ========================================================================= */
+@media (max-width: 639px) {
+  .ob-dock-sheet {
+    background: var(--surface-card);
+    border-top: 1px solid var(--border-subtle);
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
+    box-shadow: var(--shadow-lg);
+    padding: 0 0 env(safe-area-inset-bottom);
+  }
+  /* Bare inside the sheet: the surface above already drew every edge
+     these two would otherwise draw for themselves. */
+  .ob-dock-sheet .ob-dock-card > section,
+  .ob-dock-sheet .ob-dock-composer > form {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .ob-dock-sheet .ob-dock-composer {
+    margin-top: 0;
+    border-radius: 0;
+    box-shadow: none;
+    border-top: 1px solid var(--border-subtle);
+  }
+}
+
+/* A transcript row that renders nothing still claims the column's gap-6.
+   During the introduction there are three of them (the hidden kickoff
+   directive, the turn whose only output is the card now docked in the
+   footer, and the scroll anchor), so 72px of phantom air opened between
+   Homa's sentence and the ask and read as a layout that had not finished
+   loading. This collapses boxes that are genuinely :empty, never boxes
+   with content, so it cannot hide anything a parent was meant to see.
+   The anchor keeps its place: display:none is a scrollIntoView target
+   nobody can scroll to. */
+.ob-open-column > *:empty:not([data-scroll-anchor]) { display: none; }
+
+/* ============================================================================
    Narrative writing beat (/onboarding/r/[token], NarrativeBeat). The delight
    that holds the wait while the report's words are written. Three layers,
    transform/opacity only, all tokens: (1) each rotating status line rises in;

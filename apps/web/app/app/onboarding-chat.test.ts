@@ -5,6 +5,7 @@ import { describe, it } from "node:test";
 import { parseHiddenDirective } from "../../lib/onboarding/directives";
 import { visitShapeFromHistory } from "../onboarding/onboarding-chat-props";
 import {
+  appOpensWithBasics,
   kickoffDirectiveFor,
   kickoffKindFor,
   kickoffLockIsStale,
@@ -73,6 +74,57 @@ describe("kickoffDirectiveFor", () => {
         "America/Chicago",
       ),
       null,
+    );
+  });
+
+  it("sends nothing when the app is drawing the basics card itself", () => {
+    // The turn it would have bought does one thing: hand back a card the
+    // app already has. Spending it costs 2 to 6 seconds of "working on
+    // it" on the first screen after she paid, and risks a second copy of
+    // the card she is already filling in.
+    assert.equal(
+      kickoffDirectiveFor({ ...base, parentName: null }, "America/Chicago"),
+      null,
+    );
+  });
+});
+
+describe("appOpensWithBasics", () => {
+  const fresh: OnboardingChatConfig = { ...base, parentName: null };
+
+  it("opens with the card for a brand new family", () => {
+    assert.equal(appOpensWithBasics(fresh), true);
+  });
+
+  it("opens with the card when she has never said anything", () => {
+    assert.equal(
+      appOpensWithBasics({ ...fresh, firstVisit: false, gapMs: null }),
+      true,
+    );
+  });
+
+  it("leaves a parent who already gave her name alone", () => {
+    // She filled the card and closed the tab. Re-asking her name is
+    // worse than any wait, so this hands the opening back to Homa, who
+    // can see the name in family context and react to it.
+    assert.equal(appOpensWithBasics(base), false);
+  });
+
+  it("does not take over a real return visit", () => {
+    assert.equal(
+      appOpensWithBasics({
+        ...fresh,
+        firstVisit: false,
+        gapMs: RESUME_GAP_MS + 1,
+      }),
+      false,
+    );
+  });
+
+  it("stays out of a short pause, which opens in silence either way", () => {
+    assert.equal(
+      appOpensWithBasics({ ...fresh, firstVisit: false, gapMs: 60_000 }),
+      false,
     );
   });
 });
