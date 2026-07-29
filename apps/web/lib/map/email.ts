@@ -69,7 +69,13 @@ export type EmailLedgerKind =
   // A billing notice, not a nudge: no unsubscribe framing, and the kind
   // deliberately carries no drip_ prefix so the sweep's kind like
   // 'drip_%' cap can never throttle a legally-required reminder.
-  | "trial_reminder";
+  | "trial_reminder"
+  // The state filing reminder (gh#422). The only keyed kind: it carries
+  // the deadline it is about ("filing:2026-08-15") so "already sent"
+  // means "for this deadline" and the reminder is annual rather than
+  // once ever. Built by reminderLedgerKind, and the due date is an ISO
+  // day, so this stays inside the ledger's 40 character check.
+  | `filing:${string}`;
 
 interface EmailLedger {
   kind: EmailLedgerKind;
@@ -1054,5 +1060,74 @@ export async function sendAdminDigestEmail(
     cta: { label: "Open the founder console", url: `${siteUrl()}/admin` },
     footerNote: "Internal digest for the Homa founder console.",
     outerNote: "Sent by your own Homa deployment's hourly cron to its configured founder address.",
+  });
+}
+
+/**
+ * The filing reminder (gh#422): one email per family per deadline,
+ * roughly two weeks before their state's filing is due.
+ *
+ * The wording is deliberately flat. This email tells a parent about a
+ * legal obligation, so it names the state, the date, and what Homa has
+ * and has not filled in, and it makes no claim about consequences,
+ * because Homa does not know a given district's practice and a wrong
+ * warning is worse than none. Counsel reviews this text before it can
+ * be sent at all (founder ruling 6, 2026-07-29; gh#423), and the
+ * HOMA_FILING_REMINDERS_ENABLED flag is what holds it dark until then.
+ *
+ * `kind` carries the due date so the reminder is annual: "already sent"
+ * has to mean "for this deadline", never "ever".
+ */
+export async function submitFilingReminder(
+  to: string,
+  args: {
+    firstName: string | null;
+    stateName: string;
+    dueLabel: string;
+    daysAway: number;
+    /** What the family still has to write in themselves, named. */
+    gaps: readonly string[];
+    filingUrl: string;
+    ledgerKind: `filing:${string}`;
+    familyId?: string;
+  },
+): Promise<HomaEmailSubmission> {
+  const hi = args.firstName ? `Hi ${args.firstName}, ` : "Hi, ";
+  const when =
+    args.daysAway <= 0
+      ? "today"
+      : args.daysAway === 1
+        ? "tomorrow"
+        : `in ${args.daysAway} days`;
+  const bodyLines = [
+    `${hi}your ${args.stateName} homeschool filing is due ${args.dueLabel}, which is ${when}.`,
+    "It is ready. Homa filled it in from what you have already told me, so most of it is done.",
+  ];
+  if (args.gaps.length > 0) {
+    bodyLines.push(
+      args.gaps.length === 1
+        ? `One thing is left blank because I did not want to guess it: ${args.gaps[0]}. You can write it in by hand.`
+        : `A few things are left blank because I did not want to guess them: ${args.gaps.join(", ")}. You can write them in by hand.`,
+    );
+  }
+  bodyLines.push(
+    "Open it, check it reads right, sign it, and send it yourself. I do not file anything on your behalf.",
+  );
+  return submit({
+    ledger: {
+      kind: args.ledgerKind,
+      familyId: args.familyId,
+      meta: { state: args.stateName, dueLabel: args.dueLabel },
+    },
+    headers: unsubscribeHeaders(to),
+    to,
+    subject: `Your ${args.stateName} filing is due ${args.dueLabel}`,
+    preview: "It is filled in and ready to sign.",
+    heading: `Your ${args.stateName} filing is due ${args.dueLabel}`,
+    bodyLines,
+    cta: { label: "Open your filing", url: args.filingUrl },
+    footerNote:
+      "This is legal information, not legal advice. You can turn these reminders off anytime.",
+    outerNote: DRIP_OUTER_NOTE,
   });
 }
