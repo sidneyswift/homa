@@ -1,17 +1,17 @@
 ---
 name: curriculum-ingestion
-description: Use when a complete curriculum, curriculum guide, scope-and-sequence document, or methodology handbook is dropped in #homa-inspo. Breaks it into four layers (philosophy, scope & sequence, weekly structure, activity types), maps everything to Homa's taxonomy and knowledge_bank, flags gaps, and surfaces product decisions for Sid. For a single worksheet or printable, use reference-ingestion instead.
+description: Use when a complete curriculum, curriculum guide, scope-and-sequence document, or methodology handbook is dropped in #homa-inspo. Breaks it into five layers (philosophy, scope & sequence, weekly structure, activity types, and per-lesson decomposition of referenced books, questions, themes, and week topics), maps everything to Homa's taxonomy and knowledge_bank, flags gaps, and surfaces product decisions for Sid. For a single worksheet or printable, use reference-ingestion instead.
 ---
 
 # Curriculum Ingestion
 
 ## When to use
 
-A full curriculum, curriculum guide, scope-and-sequence document, or methodology handbook is dropped in **#homa-inspo**. This is bigger than a single reference: it represents a teaching philosophy and a structured plan. Your job: decompose it into four layers, map it to Homa's systems, flag every gap, and surface decisions Sid needs to make.
+A full curriculum, curriculum guide, scope-and-sequence document, or methodology handbook is dropped in **#homa-inspo**. This is bigger than a single reference: it represents a teaching philosophy and a structured plan. Your job: decompose it into five layers, map it to Homa's systems, flag every gap, and surface decisions Sid needs to make.
 
-**Shared laws:** the non-negotiable laws in `reference-ingestion` (capture files immediately before analysis, dates from the Slack `ts` never the machine clock, append-only taxonomy, fresh branch and PR only, no binaries under `apps/web/agent/skills/`, copyrighted originals and images derived from them never enter the product, no em dash anywhere) apply to this skill identically.
+**Shared laws:** the non-negotiable laws in `reference-ingestion` (capture files immediately before analysis, dates from the Slack `ts` never the machine clock, append-only taxonomy, fresh branch and PR only, no binaries under `apps/web/agent/skills/`, copyrighted originals and images derived from them never enter the product, no em dash anywhere) apply to this skill identically. So do its two 2026-07-28 additions: **explode the capture with `python3 .cosmo/scripts/book-intake.py <file.pdf> --id <cur-id>`**, which writes the per-page masters, the gitignored `.cosmo/text/<id>.txt` sidecar, a provenance manifest, and a stub for you to fill in, and **record whole-curriculum `aboutness`** per `../reference-ingestion/references/aboutness.md`. Curriculum drops are usually the longest books in the corpus, so run the intake's gate findings back to the dropper before analyzing: a blurry week is a week that decomposes into nothing.
 
-## The four layers
+## The five layers
 
 ### Layer 1: Philosophy & Method
 
@@ -109,6 +109,14 @@ Missing recipe: "cut-and-sort"
   Complexity: medium (needs dotted cut lines, category labels)
 ```
 
+### Layer 5: Lesson decomposition
+
+Layers 1 through 4 stop at the door of the actual lessons. Layer 5 walks in: per unit (the curriculum's own week, lesson, day, or chapter), the topic it teaches, the **books and works it tells the parent to use**, its comprehension questions, its themes, its activities, and its materials.
+
+This is what makes "Anna wants to read A Wrinkle in Time" answerable with the unit, the age, the questions, and the themes, instead of "there is a language-arts curriculum for that age". Founder meeting 2026-07-28, gh#367: ingest the whole curriculum, then run the same process on each lesson.
+
+Read **`references/lesson-decomposition.md`** for the schema, the counts contract, and the honesty rules on partial passes. Do not work from memory of it. Quotes obey the same verify-or-drop law as dimension F.
+
 ## Storage format
 
 Write to `.cosmo/curriculums/<id>.json`. For the full shape, open any recent shipped analysis in `.cosmo/curriculums/cur-*.json` and match it exactly; the shipped files are the shape, and `verify-ingestion.py` (below) is the gate that enforces it. Top-level keys, all required:
@@ -118,6 +126,10 @@ Write to `.cosmo/curriculums/<id>.json`. For the full shape, open any recent shi
 - `layer2_scope`: `mappings` (one row per curriculum topic, with the Homa subject/domain/topic ids and a `status`; unmapped rows carry a `suggested` topic block) and `stats` (mapped/unmapped/noSubject/partial counts).
 - `layer3_structure`: cadence, sessionLengthMinutes, weeklyTemplate, progressionModel, reviewRhythm, totalWeeks.
 - `layer4_activities`: `activityTypes` (each with type slug, description, recipe or null, status; `no_recipe` rows carry a `suggestedRecipe` block) and `stats`.
+- `layer5_lessons`: per-unit decomposition (`decompositionQuality`, `unitKind`, `unitsFound`, `unitsDecomposed`, `units[]`).
+- `aboutness`: whole-curriculum content tags.
+
+The last two are new as of 2026-07-28 and **no shipped `cur-*.json` carries them yet**, so take their shape from `references/lesson-decomposition.md` and `../reference-ingestion/references/aboutness.md` rather than from a neighbouring file. Match the shipped files for layers 1 to 4 as before.
 - `decisionsNeeded`: one entry per Sid decision, with category, item, impact, urgency.
 - `notes`: one-paragraph analyst summary.
 
@@ -215,6 +227,12 @@ When in doubt: if it has a philosophy and a sequence, it's a curriculum. If it's
 | What | Path |
 |---|---|
 | Individual analysis | `.cosmo/curriculums/<id>.json` |
+| Book intake (PDF to masters plus text) | `.cosmo/scripts/book-intake.py` |
+| Per-page masters (gitignored) | `.cosmo/masters/<id>/` |
+| Extracted text sidecar (gitignored) | `.cosmo/text/<id>.txt` |
+| Layer 5 contract | `references/lesson-decomposition.md` |
+| Aboutness contract (shared) | `../reference-ingestion/references/aboutness.md` |
+| Corpus search (the payoff) | `.cosmo/scripts/corpus-search.py` |
 | Curriculum manifest | `.cosmo/curriculums/index.json` |
 | Taste model | `.cosmo/homa-taste.md` |
 | Knowledge bank schema | `supabase/migrations/20260711031000_knowledge_bank.sql` |
@@ -229,7 +247,7 @@ When in doubt: if it has a philosophy and a sequence, it's a curriculum. If it's
 In order:
 
 1. Write or update the cur JSON, then regenerate the manifest: `python3 .cosmo/scripts/verify-ingestion.py --regen-index` (never hand-edit `index.json`; the indexed check below fails otherwise).
-2. Run the gate (curriculum mode checks: identity fields, the four layers nonempty, index membership, decisions recorded, and that Layer-4 suggested recipe names are multi-word slugs):
+2. Run the gate (curriculum mode checks: identity fields, the four core layers nonempty, index membership, decisions recorded, Layer-4 suggested recipe names as multi-word slugs, plus the Layer-5 decomposition and aboutness checks with their quote verification):
 
 ```
 python3 .cosmo/scripts/verify-ingestion.py <cur-id>

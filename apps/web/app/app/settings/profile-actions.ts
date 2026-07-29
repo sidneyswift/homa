@@ -27,6 +27,10 @@ import { addFamilyPhone, getFamilyPhones, removeFamilyPhone } from "../../../lib
 import { setFamilyTimeZone, timeZoneFromState } from "../../../lib/family-time-zone";
 import { getMyFamily } from "../../../lib/family";
 import { emitMapEvent } from "../../../lib/map/events";
+import {
+  parseSchoolYearStart,
+  setSchoolYearStart,
+} from "../../../lib/compliance/school-year";
 import { saveFamilyContext } from "../../../lib/map/store";
 import { blobConfigured } from "../../../lib/materials/artifact-store";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
@@ -359,9 +363,24 @@ export async function updateHomeschoolAction(
     .filter(Boolean)
     .slice(0, 12);
   const values = String(formData.get("values") ?? "").trim().slice(0, 500);
+  const schoolYearRaw = String(formData.get("school_year_start_on") ?? "").trim();
 
   const family = await getMyFamily();
   if (!family) return { error: "Set up your family first." };
+
+  // gh#418: the one fact that makes a filing deadline computable in the
+  // 25 states whose rule counts from the day the family started. Blank
+  // is a valid answer (never asked, or cleared); a malformed date is
+  // refused with its reason rather than silently dropped, because this
+  // becomes a legal deadline in someone's inbox.
+  if (schoolYearRaw.length > 0) {
+    const parsed = parseSchoolYearStart(
+      schoolYearRaw,
+      new Date().toISOString().slice(0, 10),
+    );
+    if (!parsed.ok) return { error: parsed.reason };
+    await setSchoolYearStart(family.id, parsed.value);
+  }
 
   // Empty selections clear their keys on purpose: this editor owns them.
   // saveFamilyContext merges into the same context bag onboarding's

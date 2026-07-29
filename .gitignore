@@ -37,6 +37,17 @@ homa-template/
 .cosmo/inspo-files/
 .cosmo/inspo-images/
 
+# Extracted text sidecars (.cosmo/text/<id>.txt) back aboutness quote
+# verification. The extracted text of a copyrighted book IS the copyrighted
+# work, so the same ruling applies: local working copy plus Blob, never git.
+.cosmo/text/
+
+# Per-page masters written by book-intake.py. Page images of a captured book
+# are the original in a different shape; same ruling, same treatment. The
+# manifest lives beside them, so it stays out of git too: its provenance is
+# copied into the item JSON's capture block, which is tracked.
+.cosmo/masters/
+
 # Python bytecode
 __pycache__/
 *.pyc

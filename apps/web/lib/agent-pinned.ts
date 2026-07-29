@@ -288,6 +288,40 @@ function dayLabel(iso: string | null, timeZone: string): string {
  * so every conversation_messages read here repeats visibility = 'family'
  * explicitly (found leaking on this path 2026-07-19).
  */
+/**
+ * The family's hours rows on the pinned path (gh#354). Same wall as
+ * every other function here: the explicit family_id predicate IS the
+ * tenancy boundary, because this connection has no RLS.
+ *
+ * Reading, never writing. recordHoursPinned owns the write side.
+ */
+export async function readHoursPinned(
+  familyId: string,
+): Promise<{ rows: PinnedHoursRow[]; timeZone: string }> {
+  const sql = mapDb();
+  const familyRows = await sql<{ time_zone: string | null }[]>`
+    select time_zone from public.families where id = ${familyId}
+  `;
+  const rows = await sql<PinnedHoursRow[]>`
+    select child_id as "childId", subject, minutes,
+           happened_on::text as "happenedOn", source, note
+    from public.hours_log
+    where family_id = ${familyId}
+    order by happened_on desc, created_at desc
+    limit 3000
+  `;
+  return { rows, timeZone: effectiveTimeZone(familyRows[0]?.time_zone) };
+}
+
+export interface PinnedHoursRow {
+  childId: string | null;
+  subject: string;
+  minutes: number;
+  happenedOn: string;
+  source: string;
+  note: string | null;
+}
+
 export async function recallPinned(input: {
   familyId: string;
   query: string;
@@ -361,7 +395,21 @@ export async function recallPinned(input: {
   }
 
   // Semantic fallback with the family predicate inline (see doc comment).
+  //
+  // The scope predicates below are load-bearing, not tidiness (gh#375).
+  // Until 2026-07-29 this union searched memories, chats, and calls
+  // regardless of the scope asked for, applied `limit` to that global
+  // ranking, and only then filtered by scope in TypeScript. A
+  // scope:"calls" search therefore spent its whole budget on memories
+  // and chats and threw them away. That is how Homa told a parent her
+  // phone call did not exist while the transcript sat in this table,
+  // embedded, from 49 minutes earlier: the lexical arm above cannot
+  // match a transcript that never says the parent's words, and the arm
+  // meant to catch exactly that was looking somewhere else.
   if (hits.length < input.limit) {
+    const wantMemories = input.scope === "memories" || input.scope === "all";
+    const wantChats = input.scope === "chats" || input.scope === "all";
+    const wantCalls = input.scope === "calls" || input.scope === "all";
     const queryEmbedding = await embedText(input.query, { familyId: input.familyId });
     if (queryEmbedding) {
       const rows = await sql<
@@ -376,6 +424,7 @@ export async function recallPinned(input: {
                  (m.embedding <=> ${queryEmbedding}::extensions.vector(1536)) as distance
           from public.family_memories m
           where m.family_id = ${input.familyId} and m.embedding is not null
+            and ${wantMemories}::boolean
           union all
           select 'chats', c.created_at::text,
                  (case when c.channel = 'sms' then 'text message' else 'chat' end)
@@ -385,6 +434,7 @@ export async function recallPinned(input: {
           from public.conversation_messages c
           where c.family_id = ${input.familyId} and c.visibility = 'family'
             and c.embedding is not null
+            and ${wantChats}::boolean
           union all
           select 'calls', t.started_at::text,
                  case when t.line = 'curriculum' then 'phone call (report review)' else 'phone call' end,
@@ -392,6 +442,7 @@ export async function recallPinned(input: {
                  (t.embedding <=> ${queryEmbedding}::extensions.vector(1536))
           from public.call_transcripts t
           where t.family_id = ${input.familyId} and t.embedding is not null
+            and ${wantCalls}::boolean
         ) ranked
         order by distance asc
         limit ${input.limit}

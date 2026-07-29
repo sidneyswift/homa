@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   checkInstructionsSplit,
   PERSONA_TAIL_HEADING,
+  PHONE_RULES_HEADING,
   SPLIT_HEADING,
   VOICE_HEADING,
 } from "./instructions-split-check.mts";
@@ -18,7 +19,14 @@ const GOOD_INSTRUCTIONS = [
   "Operations below.",
 ].join("\n\n");
 
-const GOOD_TELNYX = `const voiceSection = full.split("${SPLIT_HEADING}")[0];`;
+const GOOD_TELNYX =
+  `const voiceSection = full.split("${SPLIT_HEADING}")[0];\n`
+  + `const rulesPath = path.join(REPO_ROOT, "apps/web/agent/phone-rules.md");`;
+const GOOD_PHONE_RULES = [
+  "<!-- extracted from the provision script -->",
+  PHONE_RULES_HEADING,
+  "- Short turns, and pass the ball back.",
+].join("\n\n");
 const GOOD_MIRROR = `${VOICE_HEADING}\n\n- Be clear.`;
 
 function run(overrides: Partial<Parameters<typeof checkInstructionsSplit>[0]> = {}) {
@@ -27,6 +35,7 @@ function run(overrides: Partial<Parameters<typeof checkInstructionsSplit>[0]> = 
     telnyxSource: GOOD_TELNYX,
     reportWriter: GOOD_MIRROR,
     curriculumWriter: GOOD_MIRROR,
+    phoneRules: GOOD_PHONE_RULES,
     ...overrides,
   });
 }
@@ -84,4 +93,30 @@ test("a mirror missing its Voice section fires", () => {
   assert.ok(
     problems.some((p) => /curriculum-writer\.md is missing/.test(p)),
   );
+});
+
+// The phone call rules moved out of a TypeScript array literal in
+// telnyx-provision.mts on 2026-07-28 so a prompt change ships with code.
+// These are the three ways that move can silently take a parent's call
+// rules away.
+test("an empty phone-rules file fires", () => {
+  const problems = run({ phoneRules: "<!-- only a comment -->\n\n   " });
+  assert.equal(problems.length, 2);
+  assert.match(problems[0], /empty once its comment is stripped/);
+});
+
+test("a renamed phone-rules heading fires", () => {
+  const problems = run({
+    phoneRules: "## Some other heading\n\n- Short turns.",
+  });
+  assert.equal(problems.length, 1);
+  assert.match(problems[0], /must open with/);
+});
+
+test("a provision script that stopped reading the file fires", () => {
+  const problems = run({
+    telnyxSource: `const voiceSection = full.split("${SPLIT_HEADING}")[0];`,
+  });
+  assert.equal(problems.length, 1);
+  assert.match(problems[0], /no longer reads apps\/web\/agent\/phone-rules\.md/);
 });
