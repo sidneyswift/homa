@@ -14,10 +14,8 @@
     "sourceSha256": "b007ce6486ac000a5e166376deb340c5b6bb76b28e4734c4cbbdc93c720ed149",
     "pageCount": 163,
     "mastersDir": ".cosmo/masters/ref-2026-07-19-social-studies-all-together",
-    "intakeAt": "2026-07-29T08:13:28+00:00",
-    "gateFindings": [
-      "1 page(s) produced no text: [151]. Spans cannot be verified against them."
-    ]
+    "intakeAt": "2026-07-29T08:35:59+00:00",
+    "gateFindings": []
   },
   "aboutness": {
     "extractionQuality": null,

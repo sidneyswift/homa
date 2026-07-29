@@ -681,6 +681,71 @@ def sidecar_pages(item_id: str) -> dict:
     return out
 
 
+def revision(item_id: str) -> int:
+    """Redo only the vision pass, reusing the masters and the text already on
+    disk.
+
+    Iterating on the vision layer should not cost a re-OCR of the whole book:
+    fixing an output-token budget meant re-reading two pages, and a full
+    re-intake would have re-run tesseract over 317. Retries every page whose
+    model read previously failed, plus anything that now qualifies."""
+    item_dir = MASTERS_DIR / item_id
+    manifest_path = item_dir / "manifest.json"
+    if not manifest_path.exists():
+        print(f"No manifest for {item_id}. Run intake first.")
+        return 2
+    manifest = json.loads(manifest_path.read_text())
+    pages = manifest["pages"]
+    by_page = sidecar_pages(item_id)
+    if not by_page:
+        print(f"No text sidecar for {item_id}. Run a full intake first.")
+        return 2
+    texts = [by_page.get(p["page"], "") for p in pages]
+
+    previously_failed = [int(n) for n in (manifest.get("textExtraction", {})
+                                          .get("visionFailed") or {})]
+    wanted = sorted(set(pages_needing_vision(pages, texts)) | set(previously_failed))
+    if not wanted:
+        print(f"{item_id}: nothing needs a model read.")
+        return 0
+    print(f"{item_id}: re-reading {len(wanted)} page(s): {wanted[:12]}"
+          + (" ..." if len(wanted) > 12 else ""))
+    outcome = read_pages_with_vision(item_dir, pages, wanted)
+    vision, failed = outcome.get("read", {}), outcome.get("failed", {})
+
+    method = manifest.get("textExtraction", {}).get("method", "tesseract")
+    for i, p in enumerate(pages):
+        row = vision.get(p["page"])
+        if row and (row.get("text") or "").strip():
+            texts[i] = row["text"]
+            p["textSource"] = f"vision:{row.get('model', VISION_MODEL)}"
+            p["visual"] = {k: row[k] for k in ("description", "kind", "confidence") if k in row}
+        elif p["page"] in failed:
+            p["textSource"] = f"{method} (vision read failed)"
+
+    text_info = write_sidecar(item_id, pages, texts)
+    te = manifest.setdefault("textExtraction", {})
+    te["visionAttempted"] = sorted(set(te.get("visionAttempted") or []) | set(wanted))
+    te["visionPages"] = sorted({p["page"] for p in pages if "visual" in p})
+    te["visionFailed"] = {str(k): v[:200] for k, v in sorted(failed.items())}
+    te.update(text_info)
+    manifest["text"] = text_info
+    manifest["gateFindings"] = run_gates(
+        pages, manifest.get("pageCount"),
+        texts={p["page"]: t for p, t in zip(pages, texts)})
+    if failed:
+        manifest["gateFindings"].append(
+            f"{len(failed)} page(s) could not be read by the model ({sorted(failed)}), "
+            "so they keep their OCR text.")
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+    stub_json(item_id, manifest.get("kind", "reference"), manifest,
+              Path(manifest["source"]["file"]))
+    print(f"  {len(vision)} re-read, {len(failed)} still failing")
+    for f in manifest["gateFindings"]:
+        print(f"    - {f}")
+    return 1 if failed else 0
+
+
 def recheck(item_id: str) -> int:
     manifest_path = MASTERS_DIR / item_id / "manifest.json"
     if not manifest_path.exists():
@@ -882,6 +947,8 @@ def main():
                         help="page count the operator counted, asserted against the capture")
     parser.add_argument("--force", action="store_true", help="redo an already-ingested item")
     parser.add_argument("--check", metavar="ID", help="re-run the gates on an ingested item")
+    parser.add_argument("--revision", metavar="ID",
+                        help="redo only the model pass on an ingested item, reusing its masters and text")
     parser.add_argument("--no-vision", action="store_true",
                         help="tesseract only; skip the model pass over covers and unreadable pages")
     parser.add_argument("--self-test", action="store_true", help="run the gate fixtures")
@@ -889,6 +956,8 @@ def main():
 
     if args.self_test:
         return self_test()
+    if args.revision:
+        return revision(args.revision)
     if args.check:
         return recheck(args.check)
     if not args.pdf or not args.id:

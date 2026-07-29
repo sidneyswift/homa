@@ -147,7 +147,13 @@ async function main(): Promise<number> {
           ],
         },
       ],
-      maxOutputTokens: 3000,
+      // A dense page is the whole reason this call exists, so the budget has
+      // to fit the densest real one rather than a typical one. Measured: a
+      // photo-credits page (hundreds of two-column credit lines, Your Health
+      // p114) truncated its JSON mid-object at 3000 and surfaced as the
+      // opaque "No object generated: could not parse the response" on BOTH
+      // models, which reads like a model failure and is really a budget.
+      maxOutputTokens: 12000,
       maxRetries: 2,
       providerOptions: {
         gateway: { disallowPromptTraining: true },
