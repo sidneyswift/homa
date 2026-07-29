@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  composerPrimaryAction,
   appendPreparedChatSendToQueue,
   flushChatQueue,
   focusChatComposerInput,
@@ -270,5 +271,32 @@ describe("focusChatComposerInput", () => {
 
     assert.equal(selected, "input");
     assert.equal(focusCount, 1);
+  });
+});
+
+describe("composerPrimaryAction", () => {
+  // The ChatGPT composer shape (founder direction 2026-07-29): the empty
+  // box offers voice, the first character turns that same button into
+  // Send. Getting this wrong either dials a real phone when she meant to
+  // send, or hides Send when she has something to say.
+  it("offers voice on an empty composer", () => {
+    assert.equal(composerPrimaryAction({ draft: "", readyAttachments: 0 }), "voice");
+  });
+
+  it("treats whitespace alone as empty", () => {
+    assert.equal(composerPrimaryAction({ draft: "   \n ", readyAttachments: 0 }), "voice");
+  });
+
+  it("swaps to send on the first real character", () => {
+    assert.equal(composerPrimaryAction({ draft: "H", readyAttachments: 0 }), "send");
+  });
+
+  // A photo with no caption is still something to send.
+  it("counts a staged attachment as something to send", () => {
+    assert.equal(composerPrimaryAction({ draft: "", readyAttachments: 1 }), "send");
+  });
+
+  it("sends when words and an attachment are both present", () => {
+    assert.equal(composerPrimaryAction({ draft: "look", readyAttachments: 2 }), "send");
   });
 });

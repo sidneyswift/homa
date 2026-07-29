@@ -30,6 +30,10 @@ export const USAGE_SURFACES = [
   "materials_image",
   "materials_review",
   "media_caption",
+  /** Re-reading an image already sent, on demand (gh#351). Separate
+   *  from media_caption because a caption is one cheap sentence written
+   *  once, and this is a full read a parent is waiting on. */
+  "attachment_describe",
   "report_narrative",
   "plan_narrative",
   "curriculum",

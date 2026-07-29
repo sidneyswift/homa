@@ -19,7 +19,10 @@ export type AlertSource =
   | "task_run"
   | "delivery"
   | "email_send"
-  | "inbound_receipt";
+  | "inbound_receipt"
+  /** A family hitting the same tool failure repeatedly (gh#372). Keyed
+   *  to the most recent failing call, so a fresh burst resurfaces. */
+  | "tool_failure";
 
 export interface HandledAlert {
   source: AlertSource;
@@ -37,7 +40,8 @@ export function parseAlertSource(value: string): AlertSource | null {
   return value === "task_run" ||
     value === "delivery" ||
     value === "email_send" ||
-    value === "inbound_receipt"
+    value === "inbound_receipt" ||
+    value === "tool_failure"
     ? value
     : null;
 }
@@ -69,6 +73,12 @@ async function alertSourceRowExists(source: AlertSource, sourceId: string): Prom
       const rows = await sql<{ one: number }[]>`
         select 1 as one from public.conversation_inbound_receipts
         where id = ${sourceId} limit 1
+      `;
+      return rows.length > 0;
+    }
+    case "tool_failure": {
+      const rows = await sql<{ one: number }[]>`
+        select 1 as one from public.agent_tool_calls where id = ${sourceId} limit 1
       `;
       return rows.length > 0;
     }
@@ -180,6 +190,23 @@ export async function listHandledAlerts(rangeDays: number): Promise<HandledAlert
     limit 12
   `;
 
+  // A handled tool-failure burst stays hidden only while the ack is
+  // newer than the call it was keyed to, matching deliveries: a fresh
+  // burst mints a new most-recent call id and resurfaces on its own.
+  const toolRows = await sql<
+    { source_id: string; family_name: string | null; tool: string; at: string; handled_at: string }[]
+  >`
+    select t.id as source_id, f.name as family_name, t.tool,
+           t.created_at::text as at, a.created_at::text as handled_at
+    from public.admin_alert_acknowledgments a
+    join public.agent_tool_calls t on t.id = a.source_id
+    left join public.families f on f.id = t.family_id
+    where a.source = 'tool_failure'
+      and t.created_at >= now() - ${interval}::interval
+    order by a.created_at desc
+    limit 12
+  `;
+
   const handled: HandledAlert[] = [
     ...runRows.map((row) => ({
       source: "task_run" as const,
@@ -217,6 +244,16 @@ export async function listHandledAlerts(rangeDays: number): Promise<HandledAlert
       familyName: row.family_name,
       descriptor: row.channel,
       status: "stalled",
+      error: null,
+      at: row.at,
+      handledAt: row.handled_at,
+    })),
+    ...toolRows.map((row) => ({
+      source: "tool_failure" as const,
+      sourceId: row.source_id,
+      familyName: row.family_name,
+      descriptor: row.tool,
+      status: "failing",
       error: null,
       at: row.at,
       handledAt: row.handled_at,

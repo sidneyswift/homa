@@ -67,6 +67,73 @@ its `period` enum, which described the retired evidence-report concept;
 the row now describes the pack button. The evidence-report feature
 itself stays a non-goal pending gh#317.
 
+## 2026-07-29 · In-app voice moves to OpenAI direct, because the OIDC path does not exist
+
+Ruling `voice-openai-direct`, registered in `journeys/10-reconciliation.md` §5.
+
+In-app voice shipped on 2026-07-29 and failed at connect for every family.
+Vercel runtime logs, 09:07:
+
+```
+realtime token: mint failed: Client secrets can only be minted with a Gateway API key
+```
+
+The cause is a docs claim I took at face value. Vercel's realtime page says
+`getToken` "uses your Gateway credential (apiKey, `AI_GATEWAY_API_KEY`, or
+Vercel OIDC token)". For realtime client secrets that is not true. Ruling
+`voice-provider-key-telephony-only` chose "in-app stays on OIDC through the
+gateway" on the strength of that sentence, so the option the founder picked
+never existed. The telephony half of that ruling is unaffected.
+
+Fixed by minting against OpenAI directly with `OPENAI_API_KEY`, which the
+founder added to all three Vercel environments. Verified before shipping by
+calling the route's exact `getToken` with the real instructions and tool
+definitions: it returns an `ek_` secret and
+`wss://api.openai.com/v1/realtime?model=gpt-realtime-2.1`.
+
+`AI_GATEWAY_API_KEY` remains forbidden and uncreated. Every non-realtime
+model call still runs on Vercel OIDC through the gateway, so the
+model-gateway law is otherwise untouched; only realtime moves, and only
+because it has to.
+
+One correction made before it shipped rather than after: the first draft of
+the route's comment said going direct buys WebRTC. It does not. The AI SDK's
+OpenAI realtime path is WebSocket, the same transport the gateway used. What
+actually changes is that it works, the gateway's 25 minute session and 5
+minute idle caps stop applying, and image input becomes possible. WebRTC
+would be a further step and a different client.
+
+Process note worth keeping: this was found by reading production logs, which
+required the correct Vercel team id. The one in this agent's memory
+(`team_2FMPzbEkyNCzoBs2h8ozIUXo`) is wrong and returns 403 from the logs API;
+the real one is `team_BEuVWnWjCmzv8aVLJp1HU6TC`, from `list_teams` and from
+`apps/web/.vercel/project.json`.
+
+## 2026-07-29 · Founder ruling: Homa's in-app voice is Marin
+
+Ruling `voice-marin`, registered in `journeys/10-reconciliation.md` §5. The
+founder listened and approved. It answers the last open decision blocking
+in-app voice (#286), which was deliberately refused from a document on
+2026-07-27 on the grounds that a voice is not a thing you pick by reading.
+
+`marin` is OpenAI's female realtime voice; `cedar` is the male one. The docs
+list the pair as recommended for gpt-realtime and describe them only as
+"professional and clear" and "natural and conversational", never by gender,
+so the choice was made on a listen rather than on the descriptor.
+
+One decision recorded without a ruling, because it is a consequence rather
+than a choice: **Homa now has two voices.** The browser speaks with Marin
+through OpenAI; the phone speaks with Telnyx's "Callie - Encourager"
+(`scripts/telnyx-provision.mts:488`) and cannot use Marin, because each
+vendor hosts its own. A parent who both calls and uses the app hears two
+people. That is accepted for now on the grounds that in-app voice is new and
+the phone is not, so the cheaper change is the one nobody is used to yet. It
+resolves on its own only if the phone moves to `gpt-realtime-2.1`, which is
+the plan's Phase 3 and still gated on the Phase 2 numbers. Until then it is
+a known inconsistency rather than an oversight, and it is worth re-reading
+before the phone rebuild is decided: "both voices should be one person" is a
+reason to do Phase 3 that the cost model alone does not capture.
+
 ## 2026-07-28 · Founder ruling: the dispatched-material gate is code, not a habit
 
 Ruling `voice-dispatch-sandbox-gate`, registered in
