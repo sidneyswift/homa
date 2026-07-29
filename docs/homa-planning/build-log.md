@@ -67,6 +67,59 @@ protection; it was OpenAI limiting OpenAI's exposure, so a vendor saying
 yes changes the vendor's posture and not Homa's. Counsel question, may
 travel with gh#318. This ruling turns the capability on; it does not
 answer that.
+## 2026-07-29 · The worksheet ruling: scale content to fill the sheet, and the whitespace rule is gone
+
+Founder ruling, not an agent decision. Registered as
+`worksheet-scale-to-fill` in `journeys/10-reconciliation.md` §5. It answers
+FD-3 (gh#189) and it answers it differently than the question was posed.
+
+**What prompted it.** A co-founder complained about a finalized division
+worksheet with "too much space" (diagnosis and prod evidence:
+`plans/2026-07-29-materials-spacing-diagnosis.md`). The investigation put
+the binding design rule "Big type, generous whitespace, one skill per page.
+Cluttered reads as homework; spacious reads as play" third on the ranked
+cause list, and the open question was framed as a conflict: when a parent
+asks for denser pages, does her preference beat the whitespace rule, and
+does the override persist per family or per revision chain?
+
+**The ruling rejected the framing.** Asked to choose a winner, the founder
+removed the rule instead: "that's a dumb rule that is being interpreted
+incorrectly." And on whether little kids are an exception: "the issue
+Carolyn had was that there was empty space where things could have been
+scaled to fit. it was not an issue with simplicity vs complexity."
+
+**So there is no parent-versus-Homa conflict to arbitrate, and no override
+to persist.** A page is full because its items are big, not because there
+are many of them. Two giant items fill a sheet for a 3-year-old; eight
+cramped rows can leave a quarter of it dead. Blank space at the bottom is
+items that should have been scaled up (type, answer blanks, pictures, the
+room between rows) until the content reached the bottom of the printable
+area. The anti-clutter intent survives, which is why the answer to a short
+page is bigger and never denser, and why the age-density table still
+governs how many items a page asks for. What died is the phrase that was
+being read as license to leave a dead band.
+
+**What changed in the same session.**
+
+- `agent/skills/materials-studio/SKILL.md`: the "generous whitespace,
+  spacious reads as play" wording is replaced by the scale-to-fill rule,
+  carrying the ruling id and the scar. The geometry guidance and the
+  answer-key redistribution line now lead with scaling instead of adding.
+- `lib/materials/page-geometry.ts`: the underfill note shipped hours
+  earlier in gh#349 (#451) gated BOTH remedies on the age band ("add rows
+  or scale type and spacing up only when that band calls for more items"),
+  which would have reported a 4-year-old's half-empty page as correct,
+  since her band never calls for more items. Scaling is now unconditional
+  and only adding items is gated. Guarded by a test that fails on the old
+  wording.
+- Same file: the underfill threshold drops from a 3in blank band to 2in.
+  A quarter of a 9.5in printable area is about 2.4in, so the original
+  floor would have silently passed the exact complaint ("there is still
+  1/4 of the page open on bottom of page 1 and 2") that the instrument was
+  built to catch. Guarded by a test at that geometry.
+
+**Not decided here.** The family-facing franchise-character posture
+(gh#449) is a separate open ruling and is untouched by this one.
 
 ## 2026-07-29 · The voice ruling: clear AND memorable, boring is a failure state
 

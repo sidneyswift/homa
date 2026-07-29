@@ -125,8 +125,20 @@ family-facing franchise-character posture. Canon-fidelity home: gh#357.
   typographic floors for child-facing pages.
 - Image-refusal classification plus franchise expectation-setting
   (started 2026-07-29), routed with gh#357.
-- Founder rulings still owed: FD-3 density override (gh#189) and the
-  family-facing franchise-character IP posture.
+- FD-3 (gh#189) was **ruled the same day**, and the ruling rejected the
+  question's framing. Registered as `worksheet-scale-to-fill`
+  (`journeys/10-reconciliation.md` §5, build-log § 2026-07-29 the
+  worksheet ruling): the "generous whitespace, spacious reads as play"
+  rule is deleted rather than overridden, because a page is full when its
+  items are big, not when there are many. The parent's complaint was
+  space where things could have been scaled to fit, never simplicity
+  versus complexity. Cause 3 above is therefore retired at the source
+  instead of arbitrated, and the shipped geometry note was corrected in
+  the same session: it had gated scaling on the age band (which would
+  call a 4-year-old's half-empty page correct) and used a 3in dead-band
+  floor that silently passed this parent's own quarter-page complaint.
+- Founder ruling still owed: the family-facing franchise-character IP
+  posture (gh#449).
 
 ## The pattern lesson (product seat, worth keeping)
 
