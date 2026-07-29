@@ -67,6 +67,48 @@ its `period` enum, which described the retired evidence-report concept;
 the row now describes the pack button. The evidence-report feature
 itself stays a non-goal pending gh#317.
 
+## 2026-07-29 · In-app voice moves to OpenAI direct, because the OIDC path does not exist
+
+Ruling `voice-openai-direct`, registered in `journeys/10-reconciliation.md` §5.
+
+In-app voice shipped on 2026-07-29 and failed at connect for every family.
+Vercel runtime logs, 09:07:
+
+```
+realtime token: mint failed: Client secrets can only be minted with a Gateway API key
+```
+
+The cause is a docs claim I took at face value. Vercel's realtime page says
+`getToken` "uses your Gateway credential (apiKey, `AI_GATEWAY_API_KEY`, or
+Vercel OIDC token)". For realtime client secrets that is not true. Ruling
+`voice-provider-key-telephony-only` chose "in-app stays on OIDC through the
+gateway" on the strength of that sentence, so the option the founder picked
+never existed. The telephony half of that ruling is unaffected.
+
+Fixed by minting against OpenAI directly with `OPENAI_API_KEY`, which the
+founder added to all three Vercel environments. Verified before shipping by
+calling the route's exact `getToken` with the real instructions and tool
+definitions: it returns an `ek_` secret and
+`wss://api.openai.com/v1/realtime?model=gpt-realtime-2.1`.
+
+`AI_GATEWAY_API_KEY` remains forbidden and uncreated. Every non-realtime
+model call still runs on Vercel OIDC through the gateway, so the
+model-gateway law is otherwise untouched; only realtime moves, and only
+because it has to.
+
+One correction made before it shipped rather than after: the first draft of
+the route's comment said going direct buys WebRTC. It does not. The AI SDK's
+OpenAI realtime path is WebSocket, the same transport the gateway used. What
+actually changes is that it works, the gateway's 25 minute session and 5
+minute idle caps stop applying, and image input becomes possible. WebRTC
+would be a further step and a different client.
+
+Process note worth keeping: this was found by reading production logs, which
+required the correct Vercel team id. The one in this agent's memory
+(`team_2FMPzbEkyNCzoBs2h8ozIUXo`) is wrong and returns 403 from the logs API;
+the real one is `team_BEuVWnWjCmzv8aVLJp1HU6TC`, from `list_teams` and from
+`apps/web/.vercel/project.json`.
+
 ## 2026-07-29 · Founder ruling: Homa's in-app voice is Marin
 
 Ruling `voice-marin`, registered in `journeys/10-reconciliation.md` §5. The
