@@ -811,6 +811,12 @@ Beat 9 is rewritten to tell the truth: expect it empty, do not oversell
 it, and treat the beat as an offer (name what a month is, point at the
 one tap that builds it) rather than a reveal. Not re-walked.
 
+Whether that is the right answer is a founder call, filed as gh#426
+with the three options: leave it as an offer, give Homa a way to build
+the month (which moves a deliberate "the parent chooses" boundary), or
+move the planner out of sitting one and give the beat back to the first
+making.
+
 **What this says about the wow question, which is the point of the doc**
 
 The eval doc opened by finding that every capability the founder wanted
