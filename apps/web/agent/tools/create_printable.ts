@@ -40,10 +40,12 @@ import {
   wrapPrintableDocument,
 } from "../../lib/materials/page-shell";
 import {
+  PREVIEW_PAGE_CAP,
   RendererUnavailableError,
   renderPrintableHtml,
   SUBJECT_LESSON_RENDER_POLICY,
 } from "../../lib/materials/render-page";
+import { buildRenderProvenance } from "../../lib/materials/render-provenance";
 import { materialSaveFailureNote } from "../../lib/materials/save-failure-note";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
 import {
@@ -646,6 +648,15 @@ const createPrintable = defineBoundedTool({
         attributes,
       ),
       review,
+      // What it took to turn the stored html into these page images. The
+      // html on the row is only the page bodies, so without the shell
+      // fingerprint a later re-render cannot be told apart from a
+      // different render (gh#328 render-pair archiver).
+      render: buildRenderProvenance({
+        renderer: rendered.renderer,
+        rendererVersion: rendered.rendererVersion,
+        previewPageCap: PREVIEW_PAGE_CAP,
+      }),
     };
 
     // The durable record (Postgres is truth; html is what a future
