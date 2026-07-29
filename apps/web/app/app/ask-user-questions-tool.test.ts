@@ -28,7 +28,16 @@ function resolveForTurn(context: ResolveContext): ResolvedTool {
   const sentinel = askUserQuestionsDynamic as unknown as {
     events: Record<string, (event: unknown, ctx: ResolveContext) => ResolvedTool>;
   };
-  return sentinel.events["turn.started"](null, context);
+  // step.started, not turn.started: a turn-scoped dynamic tool is replayed
+  // on later steps through a globalThis step registry this repo's tools
+  // never populate, so it vanishes on any step served by a cold isolate
+  // (gh#345). scripts/dynamic-tool-events-check.mts is the fleet guard.
+  assert.equal(
+    typeof sentinel.events["turn.started"],
+    "undefined",
+    "resolving on turn.started makes this tool vanish mid-conversation",
+  );
+  return sentinel.events["step.started"](null, context);
 }
 
 function contextFor(
