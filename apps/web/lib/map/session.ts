@@ -1,4 +1,7 @@
+import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
+
+import { extractBearerToken } from "eve/channels/auth";
 
 import { createSupabaseServerClient } from "../supabase/server";
 import { classifyFamilyActorAuthLookup } from "./family-actor-auth";
@@ -32,6 +35,39 @@ export async function requireFamily(): Promise<FamilyRow | null> {
     // caller): the cookie path above was the only door.
   }
   return null;
+}
+
+/**
+ * Resolves the calling MOBILE app's family from a bearer token, the
+ * iOS/Android twin of requireFamily above. The mobile app holds its
+ * session in AsyncStorage, not cookies (apps/mobile/src/lib/supabase.ts),
+ * so requireFamily's cookie doors never open for it; every JSON API route
+ * a native client calls must use this instead. Same tenancy law either
+ * way: the family id is re-derived from the verified token, never taken
+ * from the request. Mirrors apps/web/agent/channels/eve.ts's
+ * supabaseAuth() exactly (fresh client scoped to the token, auth.getUser
+ * verifies it against Supabase, not just decoded locally), so a token
+ * this route accepts is a token eve's chat channel would also accept.
+ */
+export async function requireFamilyFromBearer(
+  request: Request,
+): Promise<FamilyRow | null> {
+  const token = extractBearerToken(request.headers.get("authorization"));
+  if (!token) return null;
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) return null;
+
+  const supabase = createClient(url, key, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data.user) return null;
+
+  return await getFamilyByAuthUser(data.user.id);
 }
 
 /**
