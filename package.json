@@ -6,6 +6,8 @@
     "build": "turbo run build",
     "build:material-anchors": "node --experimental-strip-types scripts/build-material-anchors.mts",
     "build:onboarding-skill": "node --experimental-strip-types scripts/build-onboarding-skill.mts",
+    "build:voice-persona": "node --experimental-strip-types scripts/build-voice-persona.mts",
+    "check:voice-persona": "node --experimental-strip-types scripts/build-voice-persona.mts --check && tsx --test apps/web/lib/voice/realtime-session.test.ts",
     "check:docs": "node scripts/docs-reconciliation-check.mjs",
     "check:eve-stream-duration": "node scripts/eve-stream-max-duration-check.mjs",
     "check:em-dash": "node scripts/em-dash-check.mjs",
