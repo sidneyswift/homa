@@ -80,6 +80,36 @@ describe("geometryToolNotes", () => {
     assert.match(notes[0], /never pad with filler/i);
   });
 
+  it("asks for scaling unconditionally and gates only adding items on the age band", () => {
+    // Founder ruling 2026-07-29 (worksheet-scale-to-fill): the fix for a
+    // dead band is scaling the existing items up, which needs no
+    // permission from the density band; only MORE items is gated on it.
+    // The shipped wording gated both remedies on the band, which would
+    // have called a 4-year-old's half-empty page correct.
+    const notes = geometryToolNotes([
+      { page: 1, contentHeightIn: 5, overflowIn: 0, fillPercent: 53 },
+    ]);
+    assert.match(notes[0], /needs no permission from the age band/i);
+    assert.match(notes[0], /add more items only when/i);
+    assert.match(notes[0], /bigger type, taller answer blanks/i);
+  });
+
+  it("flags the quarter-page dead band a real parent complained about", () => {
+    // "There is still 1/4 of the page open on bottom of page 1 and 2"
+    // (2026-07-29): a quarter of 9.5in is ~2.4in, which the original 3in
+    // floor passed silently on the very complaint it was built for.
+    const notes = geometryToolNotes([
+      {
+        page: 1,
+        contentHeightIn: PRINTABLE_HEIGHT_IN * 0.75,
+        overflowIn: 0,
+        fillPercent: 75,
+      },
+    ]);
+    assert.equal(notes.length, 1);
+    assert.match(notes[0], /blank at the bottom/);
+  });
+
   it("says nothing about a page that simply fits", () => {
     const notes = geometryToolNotes([
       { page: 1, contentHeightIn: 8.2, overflowIn: 0, fillPercent: 86 },
@@ -88,14 +118,14 @@ describe("geometryToolNotes", () => {
   });
 
   it("says nothing about a small, deliberate design margin", () => {
-    // PRINTABLE_HEIGHT_IN - 2 leaves a 2in band, under the 3in threshold:
-    // whitespace, not the F1 dead zone.
+    // A 1.2in band below the last item is ordinary design air, under the
+    // 2in threshold: not the F1 dead zone a parent reads as unfinished.
     const notes = geometryToolNotes([
       {
         page: 1,
-        contentHeightIn: PRINTABLE_HEIGHT_IN - 2,
+        contentHeightIn: PRINTABLE_HEIGHT_IN - 1.2,
         overflowIn: 0,
-        fillPercent: 79,
+        fillPercent: 87,
       },
     ]);
     assert.deepEqual(notes, []);
