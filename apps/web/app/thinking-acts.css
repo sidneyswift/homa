@@ -1,0 +1,1737 @@
+/* ============================================================================
+   Homa's acts: the shaping and timing for components/brand/thinking-acts.tsx.
+
+   Split out of globals.css because this is a character animation library,
+   not page styling, and because it breaks two of that file's house rules
+   on purpose:
+
+   1. brand-motion.card.html says bounce and spin do not belong in product
+      UI. That rule governs the INTERFACE. It cannot govern a character,
+      because a character that may not bounce cannot act. Founder directed,
+      2026-07-29. Nothing here applies outside the thinking mark.
+   2. The ambient loops are transform and opacity only, because they run for
+      the length of a wait. Acts run about a second, a few seconds apart, so
+      they may animate fill and stroke-dashoffset. Bounded on purpose.
+
+   REBUILT after a senior animator review (2026-07-29). The four notes that
+   drove the rewrite, because they are easy to undo by accident:
+
+   A. THE FACE MUST ACT. The stand-down rule below used to kill the body
+      loops and leave blink, wink and gaze running, so while she melted into
+      a puddle her pupils idled on an unrelated ten second loop and she could
+      wink. Every act now claims .tm-eye and .tm-pupil for its whole
+      duration. This was the single largest reason the first pass read as a
+      shape being transformed rather than a character doing something.
+   B. KEYFRAME DENSITY. A 1.5s act renders about ninety frames. At seven
+      authored stops the browser invents ninety percent of the animation
+      with one ease curve, which is why nothing had a sharp frame. The big
+      acts now carry twelve to twenty stops, and impacts carry three within
+      a few percent of each other.
+   C. ORIGINS ARE PER ACT. A squash belongs at the floor; a spin belongs at
+      the body centre. dust used to rotate 720 degrees about her feet, which
+      is a hinge, not a spin, and threw her across a 95 unit path in a 48
+      unit box.
+   D. FALLS EASE IN. One timing function for a whole act means gravity
+      behaves the same going up and coming down, which is why nothing had
+      weight. Falls now set animation-timing-function per keyframe.
+
+   Craft rules: ANTICIPATION before every big move, OVERSHOOT so nothing
+   arrives first try, SETTLE as a decaying counter move, FOLLOW so props lag
+   the body and stop after it, HOLD the funny frame rather than passing
+   through it, and REACT with the face on every beat.
+   ========================================================================= */
+
+.tm {
+  --ease-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-fall: cubic-bezier(0.55, 0, 1, 0.45);   /* accelerates into the ground */
+  --act-ink: var(--stone-700);
+}
+
+/* The act owns the whole character, so the body loops stand down: a breath
+   under a balloon inflating is two animations arguing about one transform.
+   The FACE stands down too, and each act drives it back (rule A above). An
+   act without an eye channel is a bug, and the test enumerates them. */
+.tm[data-act] .tm-bob,
+.tm[data-act] .tm-squish,
+.tm[data-act] .tm-lean,
+.tm[data-act] .tm-gesture,
+.tm[data-act] .tm-pop,
+.tm[data-act] .tm-eye,
+.tm[data-act] .tm-wink,
+.tm[data-act] .tm-pupil {
+  animation: none;
+}
+
+/* Default origin for an act: the floor. Rotating acts override it. */
+.tm-act { transform-box: view-box; transform-origin: 24px 44px; }
+.tm[data-act="dust"] .tm-act,
+.tm[data-act="split"] .tm-act { transform-origin: 24px 26px; }
+
+/* THE GEAR CHANGE ======================================================
+   The ambient loop is what a parent actually watches: in an eight second
+   wait it is roughly four fifths of what is on screen, and until now the
+   only thing that ever happened to it was that the dials silently swapped
+   when the wait crossed a stage. Now the crossing is a beat she performs.
+
+   Each one is a different reading of the same news. At five seconds she
+   sits up; at fifteen she settles in for real work; past forty five she
+   lets her shoulders down, which is the honest posture for a long wait and
+   the one least likely to read as panic. */
+@keyframes tm-gear-working {
+  0%   { transform: translateY(0) scale(1, 1); }
+  22%  { transform: translateY(2px) scale(1.06, 0.93); }   /* gathers */
+  46%  { transform: translateY(-4px) scale(0.93, 1.12); }  /* sits up */
+  64%  { transform: translateY(-1px) scale(1.04, 0.97); }
+  80%  { transform: translateY(-2px) scale(0.98, 1.03); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes tm-gear-digging {
+  0%   { transform: translateY(0) rotate(0deg) scale(1, 1); }
+  20%  { transform: translateY(-2px) rotate(3deg) scale(0.97, 1.05); }
+  44%  { transform: translateY(3px) rotate(-4deg) scale(1.09, 0.9); }   /* digs in */
+  62%  { transform: translateY(2px) rotate(-3deg) scale(1.06, 0.93); }  /* held */
+  80%  { transform: translateY(0) rotate(1deg) scale(0.99, 1.02); }
+  100% { transform: translateY(0) rotate(0deg) scale(1, 1); }
+}
+@keyframes tm-gear-long {
+  0%   { transform: translateY(0) rotate(0deg) scale(1, 1); }
+  26%  { transform: translateY(-2px) rotate(0deg) scale(0.97, 1.05); }  /* one deep breath */
+  54%  { transform: translateY(3px) rotate(-2deg) scale(1.07, 0.92); }  /* lets it out */
+  70%  { transform: translateY(2px) rotate(-3deg) scale(1.05, 0.94); }
+  86%  { transform: translateY(0.5px) rotate(-1deg) scale(1.01, 0.99); }
+  100% { transform: translateY(0) rotate(0deg) scale(1, 1); }
+}
+@keyframes tm-gear-eyes {
+  0%, 14% { transform: scaleY(1); }
+  26%     { transform: scaleY(0.12); }   /* a blink on the news */
+  40%     { transform: scaleY(1.3); }
+  70%     { transform: scaleY(1.12); }
+  100%    { transform: scaleY(1); }
+}
+.tm[data-shift] .tm-bob, .tm[data-shift] .tm-squish { animation: none; }
+.tm[data-shift="working"] .tm-act { animation: tm-gear-working 900ms var(--ease-out) 1; }
+.tm[data-shift="digging"] .tm-act { animation: tm-gear-digging 900ms var(--ease-in-out) 1; }
+.tm[data-shift="long"] .tm-act { animation: tm-gear-long 900ms var(--ease-in-out) 1; }
+.tm[data-shift] .tm-eye { animation: tm-gear-eyes 900ms var(--ease-out) 1; }
+
+/* Shared face channels ==================================================
+   Written once and assigned per act, so every act gets a performance
+   without twenty one bespoke eye keyframe sets. */
+@keyframes tm-eyes-strain {          /* effort: squeezed, then released wide */
+  0%      { transform: scaleY(1); }
+  30%     { transform: scaleY(0.72); }
+  52%     { transform: scaleY(0.34); }
+  58%     { transform: scaleY(1.5); }
+  74%     { transform: scaleY(0.9); }
+  100%    { transform: scaleY(1); }
+}
+@keyframes tm-eyes-wide {            /* surprise: a blink shut, then saucers */
+  0%, 22% { transform: scaleY(1); }
+  28%     { transform: scaleY(0.12); }
+  34%     { transform: scaleY(1.55); }
+  62%     { transform: scaleY(1.4); }
+  84%     { transform: scaleY(0.94); }
+  100%    { transform: scaleY(1); }
+}
+@keyframes tm-eyes-wide-late {   /* for acts whose beat lands past halfway */
+  0%, 40% { transform: scaleY(1); }
+  46%     { transform: scaleY(0.12); }
+  54%     { transform: scaleY(1.55); }
+  78%     { transform: scaleY(1.35); }
+  90%     { transform: scaleY(0.94); }
+  100%    { transform: scaleY(1); }
+}
+@keyframes tm-eyes-shut {
+  0%, 16% { transform: scaleY(1); }
+  30%     { transform: scaleY(0.08); }
+  70%     { transform: scaleY(0.08); }
+  82%     { transform: scaleY(1.2); }
+  100%    { transform: scaleY(1); }
+}
+@keyframes tm-eyes-brace {           /* screwed shut for an impact, then wide */
+  0%, 24% { transform: scaleY(1); }
+  40%     { transform: scaleY(0.1); }
+  56%     { transform: scaleY(0.1); }
+  62%     { transform: scaleY(1.6); }
+  76%     { transform: scaleY(0.88); }
+  100%    { transform: scaleY(1); }
+}
+/* tm-eyes-brace is tuned to jelly, whose impact is at 58%. rocket and
+   tumble crater at 77%, so with the shared channel they braced a quarter
+   second early and wore a neutral face on the landing. */
+@keyframes tm-eyes-brace-late {
+  0%, 46% { transform: scaleY(1); }
+  60%     { transform: scaleY(0.1); }
+  74%     { transform: scaleY(0.1); }
+  79%     { transform: scaleY(1.7); }   /* pops open ON the crater */
+  88%     { transform: scaleY(0.86); }
+  100%    { transform: scaleY(1); }
+}
+@keyframes tm-pupils-up {
+  0%, 14% { transform: translate(0, 0); }
+  32%     { transform: translate(0, -1.5px); }
+  70%     { transform: translate(0, -1.4px); }
+  88%     { transform: translate(0, 0.2px); }
+  100%    { transform: translate(0, 0); }
+}
+@keyframes tm-pupils-dizzy {         /* a circle, for anything that spins */
+  0%      { transform: translate(0, 0); }
+  20%     { transform: translate(1.4px, -0.9px); }
+  40%     { transform: translate(0, -1.6px); }
+  60%     { transform: translate(-1.4px, -0.9px); }
+  80%     { transform: translate(-0.6px, 0.6px); }
+  100%    { transform: translate(0, 0); }
+}
+@keyframes tm-pupils-track-right {   /* watching something leave */
+  0%, 20% { transform: translate(0, 0); }
+  38%     { transform: translate(1.6px, -1.1px); }
+  62%     { transform: translate(2px, -1.4px); }
+  86%     { transform: translate(1px, -0.4px); }
+  100%    { transform: translate(0, 0); }
+}
+@keyframes tm-pupils-pin {           /* shrink to pinpricks, then normal */
+  0%, 24% { transform: scale(1); }
+  30%     { transform: scale(0.45); }
+  38%     { transform: scale(1.25); }
+  62%     { transform: scale(1.1); }
+  100%    { transform: scale(1); }
+}
+@keyframes tm-pupils-down {
+  0%, 20% { transform: translate(0, 0); }
+  44%     { transform: translate(0, 1.3px); }
+  74%     { transform: translate(0, 1.2px); }
+  100%    { transform: translate(0, 0); }
+}
+/* fill-box, not view-box. With `transform-box: view-box` the keyword
+   `center` resolves to the centre of the 48x48 viewBox (24px 24px), so a
+   scale() on a pupil at (18.3, 26.7) dragged it toward the nose: shipped
+   cross-eyes on every act using tm-pupils-pin. Found on the third animation
+   review, 2026-07-29. Anything whose `center` should mean ITS OWN centre
+   belongs in this list. */
+.tm-pupil, .tm-puff, .tm-spark, .tm-zed, .tm-drip, .tm-drop,
+.tm-bub, .tm-bub-dot, .tm-ball, .tm-plane {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Shared prop primitives ================================================= */
+.tm-puff { fill: var(--stone-300); opacity: 0; }
+.tm-spark { fill: var(--gold-500); opacity: 0; }
+.tm-zed {
+  fill: none; stroke: var(--act-ink); stroke-width: 2.8;
+  stroke-linecap: round; stroke-linejoin: round; opacity: 0;
+}
+@keyframes tm-puff-bloom {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0.2); }
+  26%  { opacity: 0.95; transform: translate(calc(var(--dx) * 0.35), calc(var(--dy) * 0.35)) scale(1.05); }
+  58%  { opacity: 0.6; transform: translate(calc(var(--dx) * 0.7), calc(var(--dy) * 0.7)) scale(1.4); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.85); }
+}
+@keyframes tm-spark-twinkle {         /* travels outward on an arc, not in place */
+  0%   { opacity: 0; transform: scale(0) translate(0, 0) rotate(0deg); }
+  30%  { opacity: 1; transform: scale(1.2) translate(1px, -2px) rotate(35deg); }
+  56%  { opacity: 0.95; transform: scale(0.95) translate(2.4px, -4.6px) rotate(64deg); }
+  100% { opacity: 0; transform: scale(0.3) translate(4px, -8px) rotate(96deg); }
+}
+
+/* 1. BALLOON ============================================================= */
+/* Dips, LIFTS OFF THE GROUND as it swells, reddens, and is genuinely gone
+   for two frames before it rebounds. The gone frames are the pop; without
+   them the burst reads as a fade. */
+@keyframes tm-act-balloon {
+  0%    { transform: translateY(0) scale(1, 1); }
+  4%    { transform: translateY(1px) scale(1.04, 0.95); }
+  7%    { transform: translateY(2px) scale(0.9, 0.86); }        /* anticipation */
+  9%    { transform: translateY(1px) scale(0.94, 0.92); }
+  15%   { transform: translateY(-1px) scale(1.06, 1.22); }      /* bulges TALL first */
+  20%   { transform: translateY(-3px) scale(1.26, 1.24); }      /* then wide */
+  24%   { transform: translateY(-5px) scale(1.3, 1.42); }
+  29%   { transform: translateY(-7px) scale(1.46, 1.48); }
+  32%   { transform: translateY(-8px) scale(1.52, 1.6); }
+  34%   { transform: translateY(-8.5px) scale(1.66, 1.7); }     /* last strain */
+  35%   { transform: translateY(-8.5px) scale(0.16, 0.16); }
+  37%   { transform: translateY(-8.5px) scale(0, 0); }          /* GONE */
+  40%   { transform: translateY(-8.5px) scale(0, 0); }          /* still gone */
+  46%   { transform: translateY(-14px) rotate(150deg) scale(1.18, 1.1); }  /* drops back in */
+  50%   { transform: translateY(2px) rotate(182deg) scale(1.24, 0.82); }   /* lands on her head */
+  54%   { transform: translateY(1px) rotate(178deg) scale(0.94, 1.08); }
+  58%, 72% { transform: translateY(0) rotate(180deg) scale(1, 1); }        /* HELD, upside down */
+  78%   { transform: translateY(-3px) rotate(196deg) scale(0.92, 1.1); }   /* shudders */
+  84%   { transform: translateY(0) rotate(348deg) scale(1.14, 0.88); }     /* flips upright */
+  90%   { transform: translateY(-2px) rotate(366deg) scale(0.93, 1.07); }
+  95%   { transform: translateY(0) rotate(356deg) scale(1.05, 0.97); }
+  100%  { transform: translateY(0) rotate(360deg) scale(1, 1); }
+}
+@keyframes tm-act-balloon-pupils {
+  0%, 10% { transform: translate(0, 0); }
+  30%     { transform: translate(0, -1.5px); }
+  46%     { transform: translate(0, -1.5px); }
+  58%     { transform: translate(0, 1.6px); }   /* rolling to find level */
+  64%     { transform: translate(-1.4px, 1.6px); }
+  70%     { transform: translate(1.4px, 1.6px); }
+  80%     { transform: translate(0, 1px); }
+  100%    { transform: translate(0, 0); }
+}
+@keyframes tm-act-balloon-skin {
+  0%, 9%  { fill: var(--brand); }
+  24%     { fill: #E8734A; }
+  33%     { fill: #DE4B3C; }
+  35%     { fill: #F0645F; }
+  37%     { fill: var(--brand); }
+  100%    { fill: var(--brand); }
+}
+@keyframes tm-act-balloon-string {
+  0%, 7%  { opacity: 0; transform: rotate(0deg); }
+  12%     { opacity: 1; transform: rotate(-6deg); }
+  22%     { opacity: 1; transform: rotate(7deg); }    /* trails as she lifts */
+  30%     { opacity: 1; transform: rotate(-5deg); }
+  34%     { opacity: 1; transform: rotate(3deg); }
+  37%     { opacity: 0; transform: rotate(24deg); }   /* whips away on the pop */
+  100%    { opacity: 0; transform: rotate(24deg); }
+}
+@keyframes tm-act-burst {
+  0%, 35% { opacity: 0; transform: rotate(var(--a)) scaleY(0); }
+  38%     { opacity: 1; transform: rotate(var(--a)) scaleY(1); }
+  43%     { opacity: 0.9; transform: rotate(var(--a)) scaleY(1.3); }
+  52%     { opacity: 0; transform: rotate(var(--a)) scaleY(1.7); }
+  100%    { opacity: 0; transform: rotate(var(--a)) scaleY(1.7); }
+}
+.tm[data-act="balloon"] .tm-act { animation: tm-act-balloon 2400ms var(--ease-in-out) 1; }
+.tm[data-act="balloon"] .tm-house { animation: tm-act-balloon-skin 2400ms linear 1; }
+.tm[data-act="balloon"] .tm-eye { animation: tm-eyes-strain 2400ms var(--ease-in-out) 1; }
+.tm[data-act="balloon"] .tm-pupil { animation: tm-act-balloon-pupils 2400ms var(--ease-in-out) 1; }
+.tm-string {
+  stroke: var(--act-ink); stroke-width: 2.4; stroke-linecap: round; opacity: 0;
+  transform-box: view-box; transform-origin: 24px 43px;
+  animation: tm-act-balloon-string 2400ms var(--ease-in-out) 1;
+}
+.tm-burst-ray {
+  stroke: var(--gold-500); stroke-width: 3; stroke-linecap: round; opacity: 0;
+  transform-box: view-box; transform-origin: 24px 24px;
+  animation: tm-act-burst 2400ms var(--ease-out) 1;
+}
+
+/* 2. DUST =============================================================== */
+/* Three turns about her CENTRE, narrowing as she goes so the spin reads as
+   speed and never leaves the box, then slams past true and unwinds. */
+@keyframes tm-act-dust {
+  0%   { transform: rotate(0deg) scale(1, 1); }
+  8%   { transform: rotate(-30deg) scale(1.1, 0.9); }
+  14%  { transform: rotate(-42deg) scale(1.14, 0.86); }     /* held wind up */
+  22%  { transform: rotate(120deg) scale(0.78, 1.16); }
+  32%  { transform: rotate(340deg) scale(0.62, 1.22); }     /* narrow = fast */
+  42%  { transform: rotate(620deg) scale(0.56, 1.26); }
+  52%  { transform: rotate(900deg) scale(0.6, 1.24); }
+  60%  { transform: rotate(1080deg) scale(0.74, 1.14); }
+  66%  { transform: rotate(1096deg) scale(1.24, 0.84); }    /* slams past true */
+  72%  { transform: rotate(1074deg) scale(0.92, 1.1); }
+  78%  { transform: rotate(1086deg) scale(1.08, 0.95); }
+  84%  { transform: rotate(1076deg) scale(0.97, 1.03); }
+  90%  { transform: rotate(1082deg) scale(1.02, 0.99); }
+  100% { transform: rotate(1080deg) scale(1, 1); }
+}
+.tm[data-act="dust"] .tm-act { animation: tm-act-dust 1400ms var(--ease-in-out) 1; }
+.tm[data-act="dust"] .tm-eye { animation: tm-eyes-brace 1400ms var(--ease-in-out) 1; }
+.tm[data-act="dust"] .tm-pupil { animation: tm-pupils-dizzy 1400ms linear 1; }
+.tm[data-act="dust"] .tm-puff {
+  animation: tm-puff-bloom 820ms var(--ease-out) 1;
+  animation-delay: calc(430ms + var(--i) * 60ms);
+}
+
+/* 3. MELT =============================================================== */
+/* Non uniform collapse: the base spreads while the roof still holds, then
+   the roof gives. The eyes slide apart and down the spreading face, which
+   is the difference between melting and being vertically scaled. */
+@keyframes tm-act-melt {
+  0%   { transform: scale(1, 1) translateY(0); }
+  6%   { transform: scale(0.99, 1.02) translateY(-0.5px); }
+  10%  { transform: scale(0.96, 1.05) translateY(-1px); }    /* draws up first */
+  16%  { transform: scale(1.02, 1) translateY(0); }
+  24%  { transform: scale(1.12, 0.86) translateY(2.5px); }   /* base spreads */
+  32%  { transform: scale(1.2, 0.72) translateY(4.5px); }
+  40%  { transform: scale(1.3, 0.54) translateY(6.5px); }    /* roof gives */
+  48%  { transform: scale(1.4, 0.38) translateY(8px); }
+  40%  { transform: scale(1.42, 0.4) translateY(7.2px); }
+  46%  { transform: scale(1.44, 0.38) translateY(7.4px); }   /* puddle, still legible */
+  50%  { transform: scale(1.4, 0.4) translateY(7.1px); }     /* the hold, carried by the eyes */
+  53%  { transform: scale(1.3, 0.5) translateY(6px); }       /* hold ends earlier */
+  56%  { transform: scale(1.12, 0.74) translateY(3px); }     /* gathers up */
+  60%  { transform: scale(0.9, 1.16) translateY(-2px); }
+  66%, 78% { transform: scale(1, 1) translateY(0); }         /* held, not noticing */
+  84%  { transform: scale(1.04, 0.96) translateY(0.5px); }   /* the double take */
+  88%  { transform: scale(1.16, 0.84) translateY(2px); }     /* the jolt */
+  93%  { transform: scale(0.94, 1.07) translateY(-1px); }
+  97%  { transform: scale(1.03, 0.98) translateY(0); }
+  100% { transform: scale(1, 1) translateY(0); }
+}
+/* The eyes slide apart and sink as the surface spreads. */
+@keyframes tm-act-melt-eyes {
+  0%, 12% { transform: translate(0, 0) scaleY(1); }
+  32%     { transform: translate(0, 1.5px) scaleY(0.86); }
+  40%     { transform: translate(0, 2.2px) scaleY(1); }     /* body still tall */
+  48%     { transform: translate(0, 2.6px) scaleY(1.45); }  /* counter-scale STARTS here */
+  60%     { transform: translate(0, 3px) scaleY(1.5); }     /* puddle: eyes stay round */
+  70%     { transform: translate(0, 3.2px) scaleY(1.3); }
+  78%     { transform: translate(0, 2.4px) scaleY(1.2); }
+  86%     { transform: translate(0, -0.5px) scaleY(1.1); }
+  100%    { transform: translate(0, 0) scaleY(1); }
+}
+/* She comes back with her eyes at different heights and does not notice
+   for eight frames. The double take, and the jolt that knocks them level,
+   are the second beat. Costs nothing: each eye group already pivots on its
+   own centre. */
+@keyframes tm-act-melt-eye-l {
+  0%, 8%  { transform: translate(0, 0) scaleY(1); }
+  22%     { transform: translate(0, 1.5px) scaleY(0.86); }
+  32%     { transform: translate(0, 2.2px) scaleY(1); }
+  38%     { transform: translate(0, 2.6px) scaleY(1.45); }
+  46%     { transform: translate(0, 3px) scaleY(1.5); }
+  52%     { transform: translate(0, 3.2px) scaleY(1.3); }
+  60%     { transform: translate(-1px, -3.4px) scaleY(1.1); }   /* comes back HIGH */
+  66%, 78% { transform: translate(-1.2px, -3.8px) scaleY(1); }  /* held wrong */
+  82%     { transform: translate(-1.2px, -3.8px) scaleY(1.5); } /* the double take */
+  88%     { transform: translate(-0.4px, -0.6px) scaleY(0.7); } /* the jolt levels it */
+  94%     { transform: translate(0, 0.2px) scaleY(1.1); }
+  100%    { transform: translate(0, 0) scaleY(1); }
+}
+@keyframes tm-act-melt-eye-r {
+  0%, 8%  { transform: translate(0, 0) scaleY(1); }
+  22%     { transform: translate(0, 1.5px) scaleY(0.86); }
+  32%     { transform: translate(0, 2.2px) scaleY(1); }
+  38%     { transform: translate(0, 2.6px) scaleY(1.45); }
+  46%     { transform: translate(0, 3px) scaleY(1.5); }
+  52%     { transform: translate(0, 3.2px) scaleY(1.3); }
+  60%     { transform: translate(0.8px, 3.4px) scaleY(1.1); }   /* comes back LOW */
+  66%, 78% { transform: translate(1px, 3.8px) scaleY(1); }
+  82%     { transform: translate(1px, 3.8px) scaleY(1.5); }
+  88%     { transform: translate(0.3px, 0.6px) scaleY(0.7); }
+  94%     { transform: translate(0, -0.2px) scaleY(1.1); }
+  100%    { transform: translate(0, 0) scaleY(1); }
+}
+@keyframes tm-act-puddle {
+  0%, 26% { opacity: 0; transform: scaleX(0.3); }
+  56%     { opacity: 0.9; transform: scaleX(1); }
+  72%     { opacity: 0.75; transform: scaleX(1.06); }
+  100%    { opacity: 0; transform: scaleX(0.55); }
+}
+@keyframes tm-act-drip {
+  0%, 18% { opacity: 0; transform: translateY(0) scale(0.5); }
+  30%     { opacity: 1; transform: translateY(0) scale(1); }
+  62%     { opacity: 1; transform: translateY(8px) scale(0.92); }
+  100%    { opacity: 0; transform: translateY(12px) scale(0.4); }
+}
+.tm[data-act="melt"] .tm-act { animation: tm-act-melt 2400ms var(--ease-in-out) 1; }
+.tm[data-act="melt"] .tm-eye:first-of-type { animation: tm-act-melt-eye-l 2400ms var(--ease-in-out) 1; }
+.tm[data-act="melt"] .tm-eye:last-of-type { animation: tm-act-melt-eye-r 2400ms var(--ease-in-out) 1; }
+.tm[data-act="melt"] .tm-pupil { animation: tm-pupils-down 2400ms var(--ease-in-out) 1; }
+.tm-puddle {
+  /* Darker than her body, or it is invisible against her own colour. */
+  fill: var(--clay-700); opacity: 0;
+  transform-box: view-box; transform-origin: 24px 44px;
+  animation: tm-act-puddle 2400ms var(--ease-out) 1;
+}
+.tm-drip {
+  fill: var(--clay-600); opacity: 0;
+  animation: tm-act-drip 2400ms var(--ease-in-out) 1;
+  animation-delay: calc(var(--i) * 100ms);
+}
+
+/* 4. ROCKET ============================================================= */
+/* Crouch, ignite, leave. The smoke stays in frame so the row is never
+   empty, then she falls FASTER than she rose and punches a crater. */
+@keyframes tm-act-rocket {
+  0%   { transform: translateY(0) scale(1, 1); }
+  8%   { transform: translateY(1px) scale(1.05, 0.95); }
+  16%  { transform: translateY(4px) scale(1.16, 0.82); }    /* deep crouch */
+  22%  { transform: translateY(3px) scale(1.1, 0.88); }     /* held, coiled */
+  28%  { transform: translateY(-2px) scale(0.9, 1.16); }
+  38%  { transform: translateY(-30px) scale(0.78, 1.34);
+         animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1); }
+  44%  { transform: translateY(-44px) scale(0.84, 1.2); }   /* engine cuts */
+  49%  { transform: translateY(-47px) scale(0.92, 1.08); }  /* apex hang, shortened */
+  54%  { transform: translateY(-45px) scale(0.94, 1.06);
+         animation-timing-function: var(--ease-fall); }     /* tips over */
+  66%  { transform: translateY(-16px) scale(0.86, 1.24); }
+  75%  { transform: translateY(-2px) scale(0.9, 1.2);
+         animation-timing-function: linear; }               /* contact, stretched */
+  77%  { transform: translateY(4px) scale(1.62, 0.42); }    /* CRATER, one frame */
+  80%  { transform: translateY(3px) scale(1.42, 0.62); }
+  62%  { transform: translateY(-6px) scale(0.86, 1.18); }
+  68%  { transform: translateY(0) scale(1.08, 0.95); }
+  74%, 90% { transform: translateY(0) scale(1, 1); }        /* settled, unaware */
+  95%  { transform: translateY(2px) scale(1.1, 0.9); }      /* the flame lands on her */
+  98%  { transform: translateY(-1px) scale(0.96, 1.05); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes tm-act-flame {
+  0%, 10% { opacity: 0; transform: translate(0, 0) scaleY(0.2); }
+  15%     { opacity: 1; transform: translate(0, 0) scaleY(0.9); }
+  20%     { opacity: 1; transform: translate(0, 0) scaleY(1.5); }
+  24%     { opacity: 1; transform: translate(0, 0) scaleY(1.05); }
+  29%     { opacity: 1; transform: translate(0, 0) scaleY(1.7); }
+  34%     { opacity: 0.8; transform: translate(0, 0) scaleY(1.1); }
+  38%     { opacity: 0; transform: translate(0, 0) scaleY(0.3); }
+  /* A full beat after she has landed, and after the audience has moved on,
+     it falls out of the sky and lands on her roof. */
+  76%     { opacity: 0; transform: translate(0, -78px) scaleY(0.9); }
+  80%     { opacity: 1; transform: translate(0, -70px) scaleY(1.1); }
+  90%     { opacity: 1; transform: translate(0, -44px) scaleY(1.3); }
+  95%     { opacity: 1; transform: translate(0, -40px) scaleY(0.7); }
+  100%    { opacity: 0; transform: translate(0, -40px) scaleY(0.4); }
+}
+.tm[data-act="rocket"] .tm-act { animation: tm-act-rocket 2200ms var(--ease-in-out) 1; }
+.tm[data-act="rocket"] .tm-eye { animation: tm-eyes-brace-late 2200ms var(--ease-in-out) 1; }
+.tm[data-act="rocket"] .tm-pupil { animation: tm-pupils-up 2200ms var(--ease-in-out) 1; }
+.tm-flame {
+  fill: var(--gold-400); opacity: 0;
+  transform-box: view-box; transform-origin: 24px 44px;
+  animation: tm-act-flame 2200ms var(--ease-in-out) 1;
+}
+/* The trail stays behind so the frame is never empty while she is gone. */
+.tm[data-act="rocket"] .tm-puff {
+  animation: tm-puff-bloom 900ms var(--ease-out) 1;
+  animation-delay: calc(340ms + var(--i) * 120ms);
+}
+
+/* 5. PANCAKE ============================================================ */
+/* The hold is the joke, so the hold now performs: flat as a pancake, and
+   the eyes slide over to look at you. */
+@keyframes tm-act-pancake {
+  0%   { transform: scale(1, 1) translateY(0); }
+  8%   { transform: scale(0.96, 1.06) translateY(-1.5px); }
+  14%  { transform: scale(0.92, 1.14) translateY(-3px);
+         animation-timing-function: var(--ease-fall); }     /* pulled up */
+  19%  { transform: scale(1.02, 0.96) translateY(1px); }
+  21%  { transform: scale(1.3, 0.5) translateY(6px);
+         animation-timing-function: linear; }               /* contact */
+  24%  { transform: scale(1.74, 0.17) translateY(9px); }    /* SLAM, one frame */
+  28%  { transform: scale(1.58, 0.36) translateY(8px); }    /* settles UP to legible */
+  34%  { transform: scale(1.54, 0.38) translateY(7.8px); }  /* the hold, carried by the eyes */
+  40%  { transform: scale(1.56, 0.36) translateY(7.9px); }  /* hold ENDS here, not at 62% */
+  46%  { transform: scale(1.24, 0.66) translateY(4.5px); }  /* starts to peel */
+  54%  { transform: scale(0.92, 1.28) translateY(1px); }    /* stretching, base stuck */
+  62%  { transform: scale(0.74, 1.62) translateY(2px); }    /* taffy */
+  68%, 76% { transform: scale(0.7, 1.72) translateY(2.4px); }  /* HELD, straining */
+  79%  { transform: scale(0.66, 1.8) translateY(2.6px); }   /* one last pull */
+  83%  { transform: scale(1.02, 1.24) translateY(-7px); }   /* it lets go */
+  88%  { transform: scale(1.22, 0.84) translateY(1.5px); }
+  93%  { transform: scale(0.92, 1.1) translateY(-1.5px); }
+  97%  { transform: scale(1.04, 0.97) translateY(0); }
+  100% { transform: scale(1, 1) translateY(0); }
+}
+/* Squashed flat, then a slow deadpan look at the viewer. */
+@keyframes tm-act-pancake-eyes {
+  0%, 16% { transform: scaleY(1); }
+  24%     { transform: scaleY(1.9); }     /* squeezed sideways by the slam */
+  36%     { transform: scaleY(1.5); }
+  60%     { transform: scaleY(1.45); }
+  70%     { transform: scaleY(0.9); }
+  100%    { transform: scaleY(1); }
+}
+@keyframes tm-act-pancake-pupils {
+  0%, 26% { transform: translate(0, 0); }
+  40%     { transform: translate(-1.4px, 0); }
+  56%     { transform: translate(1.5px, 0.2px); }  /* the deadpan look across */
+  64%     { transform: translate(1.5px, 0.2px); }
+  84%     { transform: translate(0, 0); }
+  100%    { transform: translate(0, 0); }
+}
+.tm[data-act="pancake"] .tm-act { animation: tm-act-pancake 2000ms var(--ease-in-out) 1; }
+.tm[data-act="pancake"] .tm-eye { animation: tm-act-pancake-eyes 2000ms var(--ease-in-out) 1; }
+.tm[data-act="pancake"] .tm-pupil { animation: tm-act-pancake-pupils 2000ms var(--ease-in-out) 1; }
+.tm[data-act="pancake"] .tm-puff {
+  animation: tm-puff-bloom 640ms var(--ease-out) 1;
+  animation-delay: calc(440ms + var(--i) * 50ms);
+}
+
+/* 6. JELLY ============================================================== */
+@keyframes tm-act-jelly {
+  0%   { transform: translateY(0) scale(1, 1); }
+  8%   { transform: translateY(2px) scale(1.08, 0.9); }
+  14%  { transform: translateY(5px) scale(1.16, 0.82); }
+  20%  { transform: translate(-2px, -12px) rotate(-6deg) scale(0.84, 1.26); }
+  28%  { transform: translate(-5px, -17px) rotate(-12deg) scale(0.88, 1.18); }
+  34%  { transform: translate(-6px, -20px) rotate(-16deg) scale(0.94, 1.08); }  /* apex, in frame */
+  40%  { transform: translate(-6px, -21px) rotate(-15deg) scale(0.96, 1.05); }  /* the hang */
+  46%  { transform: translate(-5px, -18px) rotate(-9deg) scale(0.93, 1.09);
+         animation-timing-function: var(--ease-fall); }
+  53%  { transform: translate(-3px, -9px) rotate(-2deg) scale(0.86, 1.24); }
+  56%  { transform: translate(-2px, 1px) rotate(0deg) scale(0.9, 1.18);
+         animation-timing-function: linear; }               /* contact */
+  58%  { transform: translate(-2px, 5px) rotate(0deg) scale(1.6, 0.4); }   /* max squash */
+  62%  { transform: translate(-1.5px, 4px) rotate(2deg) scale(1.36, 0.62); }
+  70%  { transform: translate(-1px, -8px) rotate(5deg) scale(0.88, 1.18); }  /* overbalances */
+  78%  { transform: translate(0, 1px) rotate(-3deg) scale(1.14, 0.9); }
+  86%  { transform: translate(0, -3px) rotate(2deg) scale(0.95, 1.06); }
+  93%  { transform: translate(0, 0) rotate(-1deg) scale(1.03, 0.98); }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+}
+@keyframes tm-act-ring {
+  0%, 55% { opacity: 0; transform: scale(0.3); }
+  59%     { opacity: 0.8; transform: scale(1); }
+  88%     { opacity: 0; transform: scale(2.3); }
+  100%    { opacity: 0; transform: scale(2.3); }
+}
+.tm[data-act="jelly"] .tm-act { animation: tm-act-jelly 1400ms var(--ease-in-out) 1; }
+.tm[data-act="jelly"] .tm-eye { animation: tm-eyes-brace 1400ms var(--ease-in-out) 1; }
+.tm[data-act="jelly"] .tm-pupil { animation: tm-pupils-up 1400ms var(--ease-in-out) 1; }
+.tm-ring {
+  fill: none; stroke: var(--stone-400); stroke-width: 2.4; opacity: 0;
+  transform-box: view-box; transform-origin: 24px 44px;
+  animation: tm-act-ring 1400ms var(--ease-out) 1;
+}
+.tm-ring-2 { animation-delay: 110ms; }
+
+/* 7. DOOR =============================================================== */
+/* She is a house. Set up, reveal, and put away: the only act with a
+   second beat. Rebuilt after review: the door is in her SIDE WALL (a dark
+   hole revealed by a wall-coloured leaf, so the open reads as a contrast
+   change rather than two adjacent clay values), and the flag leaves
+   sideways instead of rising between her eyes. */
+@keyframes tm-act-door-body {
+  0%   { transform: scale(1, 1) translateX(0); }
+  10%  { transform: scale(1.04, 0.96) translateX(0.5px); }
+  18%  { transform: scale(0.97, 1.04) translateX(-0.5px); }  /* braces */
+  30%  { transform: scale(1.08, 0.93) translateX(2px); }     /* the shove out */
+  38%  { transform: scale(0.95, 1.07) translateX(-1px); }
+  48%  { transform: scale(1.02, 0.98) translateX(0.5px); }
+  60%  { transform: scale(1, 1) translateX(0); }
+  70%  { transform: scale(1.01, 0.99) translateX(0.4px); }
+  80%  { transform: scale(1.06, 0.94) translateX(1.4px); }   /* hauls it back */
+  88%  { transform: scale(0.97, 1.04) translateX(-0.8px); }
+  94%  { transform: scale(1.02, 0.98) translateX(0.3px); }
+  100% { transform: scale(1, 1) translateX(0); }
+}
+/* The hole is the dark interior. It opens and closes with the leaf, so
+   nothing pops into existence at frame zero. */
+@keyframes tm-act-door-hole {
+  0%, 12% { opacity: 0; }
+  20%     { opacity: 1; }
+  76%     { opacity: 1; }
+  86%     { opacity: 0; }
+  100%    { opacity: 0; }
+}
+/* The leaf is her own wall colour swinging off the dark hole, so the open
+   is a light-to-dark contrast step and reads at ship size. */
+@keyframes tm-act-door-leaf {
+  0%, 12% { transform: scaleX(1); }
+  22%     { transform: scaleX(0.08); }   /* swings open */
+  76%     { transform: scaleX(0.08); }
+  86%     { transform: scaleX(1.08); }   /* slams, overshoots */
+  92%     { transform: scaleX(0.96); }
+  100%    { transform: scaleX(1); }
+}
+/* No translate: the scaleX about the door edge retracts it into the wall
+   on its own. The first version added translateY(24px) as well, which left
+   an opaque black line hanging below the chat row for a quarter second. */
+@keyframes tm-act-flagpole {
+  0%, 20% { opacity: 0; transform: scaleX(0.04); }
+  32%     { opacity: 1; transform: scaleX(1.04); }   /* shoots out, overshoots */
+  40%     { opacity: 1; transform: scaleX(1); }
+  72%     { opacity: 1; transform: scaleX(1); }
+  84%     { opacity: 1; transform: scaleX(0.1); }    /* whips back in */
+  90%     { opacity: 0; transform: scaleX(0.04); }
+  100%    { opacity: 0; transform: scaleX(0.04); }
+}
+@keyframes tm-act-flag {
+  0%, 26% { opacity: 0; transform: scaleY(0.2) skewX(0deg); }
+  36%     { opacity: 1; transform: scaleY(1.1) skewX(-10deg) translateX(-4px); }  /* whips out */
+  46%     { opacity: 1; transform: scaleY(0.96) skewX(10deg); }
+  56%     { opacity: 1; transform: scaleY(1.03) skewX(-7deg); }
+  66%     { opacity: 1; transform: scaleY(0.99) skewX(4deg); }
+  78%     { opacity: 1; transform: scaleY(1) skewX(-2deg); }
+  86%     { opacity: 0; transform: scaleY(0.3) skewX(8deg); }
+  100%    { opacity: 0; transform: scaleY(0.2) skewX(0deg); }
+}
+.tm[data-act="door"] .tm-act { animation: tm-act-door-body 1450ms var(--ease-in-out) 1; }
+.tm[data-act="door"] .tm-eye { animation: tm-eyes-wide 1450ms var(--ease-out) 1; }
+/* She checks the wall, then snaps to the flag on her right. */
+@keyframes tm-act-door-pupils {
+  0%, 14% { transform: translate(0, 0); }
+  24%     { transform: translate(1.2px, 0.4px); }   /* what is that in my wall */
+  34%     { transform: translate(1.2px, 0.4px); }   /* held */
+  44%     { transform: translate(1.8px, 0.2px); }   /* snaps right to the flag */
+  74%     { transform: translate(1.7px, 0.1px); }
+  90%     { transform: translate(0.2px, 0); }
+  100%    { transform: translate(0, 0); }
+}
+.tm[data-act="door"] .tm-pupil { animation: tm-act-door-pupils 1450ms var(--ease-in-out) 1; }
+.tm-door-hole {
+  fill: #5E2410; opacity: 0;
+  animation: tm-act-door-hole 1450ms linear 1;
+}
+.tm-door-leaf {
+  fill: var(--brand); transform-box: view-box; transform-origin: 39px 36.5px;
+  animation: tm-act-door-leaf 1450ms var(--ease-in-out) 1;
+}
+.tm-flag-pole {
+  stroke: var(--act-ink); stroke-width: 2.4; stroke-linecap: round; opacity: 0;
+  transform-box: view-box; transform-origin: 39px 36.5px;
+  animation: tm-act-flagpole 1450ms var(--ease-back) 1;
+}
+.tm-flag {
+  fill: var(--gold-400); opacity: 0;
+  transform-box: view-box; transform-origin: 47px 36.5px;
+  animation: tm-act-flag 1450ms var(--ease-in-out) 1;
+}
+
+/* 9. CRAYON ============================================================= */
+/* The crayon now TRAVELS ALONG the line it is drawing, sampled at the same
+   percentages as the dashoffset. Before this it was bolted twenty units
+   away from its own scribble for the whole draw. */
+@keyframes tm-act-crayon-body {
+  0%   { transform: rotate(0deg) translateY(0); }
+  12%  { transform: rotate(-6deg) translateY(-1px); }
+  24%  { transform: rotate(4deg) translateY(1px); }
+  36%  { transform: rotate(-5deg) translateY(0.5px); }
+  46%  { transform: rotate(6deg) translateY(1.2px); }
+  56%  { transform: rotate(-4deg) translateY(0.4px); }
+  66%  { transform: rotate(5deg) translateY(1px); }
+  76%  { transform: rotate(-3deg) translateY(0.2px); }
+  86%  { transform: rotate(2deg) translateY(0.4px); }
+  100% { transform: rotate(0deg) translateY(0); }
+}
+/* Follows the scribble path: x 6 to 31, y 38 to 47, from a rest at 33,28. */
+@keyframes tm-act-crayon-in {
+  0%   { opacity: 0; transform: translate(8px, 12px) rotate(46deg); }
+  14%  { opacity: 1; transform: translate(-2px, 12px) rotate(24deg); }
+  20%  { opacity: 1; transform: translate(-27px, 15px) rotate(52deg); }  /* to the start */
+  32%  { opacity: 1; transform: translate(-23px, 9px) rotate(46deg); }
+  44%  { opacity: 1; transform: translate(-19px, 15px) rotate(54deg); }
+  56%  { opacity: 1; transform: translate(-15px, 10px) rotate(45deg); }
+  68%  { opacity: 1; transform: translate(-11px, 16px) rotate(55deg); }
+  76%  { opacity: 1; transform: translate(-4px, 9px) rotate(47deg); }   /* the last stroke */
+  86%  { opacity: 1; transform: translate(0, 8px) rotate(50deg); }
+  100% { opacity: 0; transform: translate(7px, 13px) rotate(44deg); }
+}
+@keyframes tm-act-scribble {
+  0%, 18% { opacity: 0; stroke-dashoffset: 62; }
+  20%     { opacity: 1; stroke-dashoffset: 62; }
+  32%     { opacity: 1; stroke-dashoffset: 50; }
+  44%     { opacity: 1; stroke-dashoffset: 38; }
+  56%     { opacity: 1; stroke-dashoffset: 26; }
+  68%     { opacity: 1; stroke-dashoffset: 14; }
+  62%     { opacity: 1; stroke-dashoffset: 0; }
+  92%     { opacity: 1; stroke-dashoffset: 0; }
+  100%    { opacity: 0; stroke-dashoffset: 0; }
+}
+.tm[data-act="crayon"] .tm-act { animation: tm-act-crayon-body 2100ms var(--ease-in-out) 1; }
+/* A squint of concentration, not sleep. The shared shut channel held
+   scaleY(0.08) for 800ms, so the act about looking at your work was the
+   act where she could not see. */
+@keyframes tm-act-crayon-eyes {
+  0%, 14% { transform: scaleY(1); }
+  26%     { transform: scaleY(0.66); }
+  40%     { transform: scaleY(0.58); }
+  56%     { transform: scaleY(0.74); }   /* checks the line */
+  62%     { transform: scaleY(0.55); }
+  78%     { transform: scaleY(1.3); }    /* pleased with it */
+  90%     { transform: scaleY(0.92); }
+  100%    { transform: scaleY(1); }
+}
+.tm[data-act="crayon"] .tm-eye { animation: tm-act-crayon-eyes 2100ms var(--ease-in-out) 1; }
+.tm[data-act="crayon"] .tm-pupil { animation: tm-pupils-down 2100ms var(--ease-in-out) 1; }
+.tm-hand {
+  opacity: 0; transform-box: view-box; transform-origin: 35px 34px;
+  animation: tm-act-crayon-in 2100ms linear 1;
+}
+.tm-crayon { fill: var(--pop-cobalt); }
+/* The two marks that turn a scribble into a picture, added last: a roofline
+   and two dots. It is a little house. It is her. */
+@keyframes tm-act-drawn-face {
+  0%, 66% { opacity: 0; transform: scale(0.5); }
+  74%     { opacity: 1; transform: scale(1.15); }
+  80%     { opacity: 1; transform: scale(1); }
+  92%     { opacity: 1; transform: scale(1); }
+  100%    { opacity: 0; transform: scale(1); }
+}
+.tm-drawn-face {
+  fill: var(--pop-cobalt); opacity: 0;
+  transform-box: fill-box; transform-origin: center;
+  animation: tm-act-drawn-face 2100ms var(--ease-back) 1;
+  animation-delay: calc(var(--i) * 90ms);
+}
+.tm-crayon-tip { fill: var(--stone-100); }
+.tm-scribble {
+  fill: none; stroke: var(--pop-cobalt); stroke-width: 2.8;
+  stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 62; stroke-dashoffset: 62; opacity: 0;
+  animation: tm-act-scribble 2100ms linear 1;
+}
+
+/* 10. BULB ============================================================== */
+/* The bulb FLICKERS on, and her whole body catches the light for three
+   frames, so the idea has a consequence. */
+@keyframes tm-act-bulb-body {
+  0%   { transform: translateY(0) scale(1, 1); }
+  12%  { transform: translateY(1.5px) scale(1.04, 0.95); }
+  20%  { transform: translateY(3px) scale(1.08, 0.9); }    /* gathers, the blank moment */
+  26%  { transform: translateY(2.5px) scale(1.06, 0.92); } /* held */
+  32%  { transform: translateY(-6px) scale(0.88, 1.16); }  /* THE MOMENT */
+  40%  { transform: translateY(-2px) scale(1.06, 0.96); }
+  50%  { transform: translateY(-4px) scale(0.96, 1.06); }
+  58%  { transform: translateY(1px) scale(1.05, 0.94); }   /* it dies, she deflates */
+  66%, 76% { transform: translateY(2px) scale(1.06, 0.92); }  /* looking up at it */
+  82%  { transform: translateY(-3px) scale(0.93, 1.1); }   /* the jolt */
+  88%  { transform: translateY(0) scale(1.05, 0.96); }
+  94%  { transform: translateY(-1px) scale(0.99, 1.02); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes tm-act-bulb-glow {
+  0%, 30% { fill: var(--brand); }
+  33%     { fill: #EE8A44; }
+  36%     { fill: #F5A64F; }   /* she catches the light */
+  44%     { fill: #EC7C3A; }
+  54%     { fill: var(--brand); }
+  100%    { fill: var(--brand); }
+}
+@keyframes tm-act-bulb-in {
+  0%, 18% { opacity: 0; transform: translateY(9px) scale(0.2); }
+  28%     { opacity: 1; transform: translateY(-1px) scale(1.2); }
+  31%     { opacity: 0.4; transform: translateY(0) scale(1.02); }  /* flicker */
+  34%     { opacity: 1; transform: translateY(0) scale(1.12); }
+  38%     { opacity: 1; transform: translateY(0) scale(1); }
+  46%     { opacity: 1; transform: translateY(0) scale(1); }
+  52%     { opacity: 1; transform: translateY(0) scale(1.04); }
+  56%     { opacity: 1; transform: translateY(0) scale(0.98); }   /* the filament goes */
+  62%     { opacity: 1; transform: translateY(0) scale(1); }
+  76%     { opacity: 1; transform: translateY(0.5px) scale(0.99); }
+  82%     { opacity: 1; transform: translateY(-1px) scale(1.06); } /* she jolts it back */
+  92%     { opacity: 1; transform: translateY(0) scale(1); }
+  100%    { opacity: 0; transform: translateY(-3px) scale(0.9); }
+}
+/* The glass itself dies and comes back dimmer. */
+/* Pinpricks on the idea, then up at the dead bulb, then back. */
+@keyframes tm-act-bulb-pupils {
+  0%, 24% { transform: scale(1) translate(0, 0); }
+  30%     { transform: scale(0.45) translate(0, 0); }
+  38%     { transform: scale(1.25) translate(0, -0.4px); }
+  56%     { transform: scale(1.1) translate(0, -1.5px); }   /* looks up at it */
+  76%     { transform: scale(1) translate(0, -1.6px); }
+  88%     { transform: scale(1.1) translate(0, -0.4px); }
+  100%    { transform: scale(1) translate(0, 0); }
+}
+@keyframes tm-act-bulb-die {
+  0%, 30% { fill: var(--gold-300); }
+  46%     { fill: var(--gold-300); }
+  52%     { fill: var(--gold-100); }
+  57%     { fill: var(--stone-300); }   /* dead grey */
+  78%     { fill: var(--stone-300); }
+  84%     { fill: var(--gold-100); }    /* back on, dimmer */
+  100%    { fill: var(--gold-100); }
+}
+@keyframes tm-act-bulb-ray {
+  0%, 30% { opacity: 0; transform: rotate(var(--a)) scaleY(0); }
+  36%     { opacity: 1; transform: rotate(var(--a)) scaleY(1.1); }
+  42%     { opacity: 0.4; transform: rotate(var(--a)) scaleY(0.7); }
+  47%     { opacity: 1; transform: rotate(var(--a)) scaleY(1.3); }  /* second pulse */
+  53%     { opacity: 0; transform: rotate(var(--a)) scaleY(0.4); }  /* out */
+  84%     { opacity: 0; transform: rotate(var(--a)) scaleY(0.4); }
+  88%     { opacity: 0.55; transform: rotate(var(--a)) scaleY(0.8); }  /* dimmer */
+  96%     { opacity: 0; transform: rotate(var(--a)) scaleY(0.9); }
+  100%    { opacity: 0; transform: rotate(var(--a)) scaleY(1.5); }
+}
+.tm[data-act="bulb"] .tm-act { animation: tm-act-bulb-body 2000ms var(--ease-out) 1; }
+.tm[data-act="bulb"] .tm-house { animation: tm-act-bulb-glow 2000ms linear 1; }
+.tm[data-act="bulb"] .tm-eye { animation: tm-eyes-wide 2000ms var(--ease-out) 1; }
+.tm[data-act="bulb"] .tm-pupil { animation: tm-act-bulb-pupils 2000ms var(--ease-out) 1; }
+.tm-bulb {
+  opacity: 0; transform-box: view-box; transform-origin: 24px 4px;
+  animation: tm-act-bulb-in 2000ms var(--ease-back) 1;
+}
+.tm-bulb-glass { fill: var(--gold-300); animation: tm-act-bulb-die 2000ms linear 1; }
+.tm-bulb-base { fill: var(--stone-500); }
+.tm-bulb-ray {
+  stroke: var(--gold-500); stroke-width: 2.6; stroke-linecap: round; opacity: 0;
+  transform-box: view-box; transform-origin: 24px -3px;
+  animation: tm-act-bulb-ray 2000ms var(--ease-out) 1;
+}
+
+/* 11. BUBBLE ============================================================ */
+/* Used to freeze her solid: no body keyframe at all, and the stand down
+   rule meant she did not even breathe. She now visibly concentrates. */
+@keyframes tm-act-bubble-body {
+  0%   { transform: scale(1, 1) rotate(0deg) translateY(0); }
+  10%  { transform: scale(1.03, 0.97) rotate(0deg) translateY(1px); }
+  22%  { transform: scale(1.07, 0.92) rotate(-3deg) translateY(2.5px); }  /* compresses */
+  34%  { transform: scale(1.08, 0.91) rotate(-4deg) translateY(3px); }    /* held, straining */
+  46%  { transform: scale(1.07, 0.92) rotate(-3.4deg) translateY(2.7px); }
+  58%  { transform: scale(1.06, 0.93) rotate(-4deg) translateY(2.9px); }
+  70%  { transform: scale(0.92, 1.12) rotate(2deg) translateY(-3px); }    /* got it */
+  78%  { transform: scale(1.08, 0.94) rotate(-1deg) translateY(1px); }
+  86%  { transform: scale(0.97, 1.05) rotate(1deg) translateY(-1px); }
+  93%  { transform: scale(1.02, 0.98) rotate(0deg) translateY(0); }
+  100% { transform: scale(1, 1) rotate(0deg) translateY(0); }
+}
+@keyframes tm-act-bub {
+  0%   { opacity: 0; transform: scale(0.1); }
+  20%  { opacity: 1; transform: scale(1.16); }
+  30%  { opacity: 1; transform: scale(1); }
+  72%  { opacity: 1; transform: scale(1); }
+  80%  { opacity: 1; transform: scale(1.26); }   /* swells before it goes */
+  86%  { opacity: 0; transform: scale(0.3); }
+  100% { opacity: 0; transform: scale(0.3); }
+}
+@keyframes tm-act-bub-dot {
+  0%, 30% { opacity: 0; transform: translateY(1.4px); }
+  42%     { opacity: 1; transform: translateY(-1.4px); }
+  54%     { opacity: 1; transform: translateY(0); }
+  70%     { opacity: 1; transform: translateY(0); }
+  84%     { opacity: 0; transform: translateY(0); }   /* clears before its bubble */
+  100%    { opacity: 0; transform: translateY(0); }
+}
+.tm[data-act="bubble"] .tm-act { animation: tm-act-bubble-body 1500ms var(--ease-in-out) 1; }
+.tm[data-act="bubble"] .tm-eye { animation: tm-eyes-strain 1500ms var(--ease-in-out) 1; }
+.tm[data-act="bubble"] .tm-pupil { animation: tm-pupils-up 1500ms var(--ease-in-out) 1; }
+.tm-bub {
+  fill: #FFFFFF; stroke: var(--stone-400); stroke-width: 2;
+  opacity: 0;
+  animation: tm-act-bub 1500ms var(--ease-back) 1;
+  animation-delay: calc(var(--i) * 80ms);
+}
+.tm-bub-dot {
+  fill: var(--act-ink); opacity: 0;
+  animation: tm-act-bub-dot 1200ms var(--ease-in-out) 1;
+  animation-delay: calc(var(--i) * 120ms);
+}
+
+/* 12. MUG =============================================================== */
+/* The mug comes to HER, occludes the bottom of her silhouette (she has no
+   mouth, so occlusion is the only way to sell a sip), and then the payoff
+   the act was missing: she has had the coffee. */
+@keyframes tm-act-mug-body {
+  0%   { transform: rotate(0deg) translateX(0) scale(1, 1); }
+  14%  { transform: rotate(4deg) translateX(1px) scale(1, 1); }
+  28%  { transform: rotate(11deg) translateX(2.5px) scale(0.98, 1.02); }
+  40%  { transform: rotate(15deg) translateX(3.5px) scale(0.97, 1.04); }  /* tipped in */
+  52%  { transform: rotate(15deg) translateX(3.5px) scale(0.97, 1.04); }  /* the sip */
+  62%  { transform: rotate(4deg) translateX(1px) scale(1.04, 0.96); }
+  70%  { transform: rotate(-4deg) translateX(-1px) scale(0.96, 1.08); }   /* it hits */
+  75%  { transform: rotate(0deg) translateX(1.6px) scale(1.02, 0.99); }
+  79%  { transform: rotate(0deg) translateX(-1.6px) scale(1.02, 0.99); }  /* caffeine */
+  83%  { transform: rotate(0deg) translateX(1.4px) scale(1.02, 0.99); }
+  87%  { transform: rotate(0deg) translateX(-1.2px) scale(1.01, 0.99); }
+  91%  { transform: rotate(0deg) translateX(0.7px) scale(1, 1); }
+  100% { transform: rotate(0deg) translateX(0) scale(1, 1); }
+}
+@keyframes tm-act-mug-in {
+  0%   { opacity: 0; transform: translate(16px, 4px) rotate(0deg); }
+  16%  { opacity: 1; transform: translate(2px, 0) rotate(0deg); }
+  30%  { opacity: 1; transform: translate(-3px, 1px) rotate(-14deg); }   /* tips to her */
+  44%  { opacity: 1; transform: translate(-5px, 2px) rotate(-32deg); }
+  56%  { opacity: 1; transform: translate(-5px, 2px) rotate(-34deg); }
+  66%  { opacity: 1; transform: translate(0, 0) rotate(-6deg); }
+  78%  { opacity: 1; transform: translate(3px, 1px) rotate(0deg); }
+  88%  { opacity: 0.5; transform: translate(5px, 2px) rotate(0deg); }
+  100% { opacity: 0; transform: translate(7px, 3px) rotate(0deg); }
+}
+@keyframes tm-act-steam {
+  0%, 16% { opacity: 0; transform: translateY(2px) scaleY(0.6); }
+  40%     { opacity: 0.8; transform: translateY(-2px) scaleY(1); }
+  100%    { opacity: 0; transform: translateY(-8px) scaleY(1.3); }
+}
+.tm[data-act="mug"] .tm-act { animation: tm-act-mug-body 1500ms var(--ease-in-out) 1; }
+/* Halved shut window: shut through the sip only, then happy arcs. */
+@keyframes tm-act-mug-eyes {
+  0%, 30% { transform: scaleY(1); }
+  40%     { transform: scaleY(0.1); }
+  58%     { transform: scaleY(0.1); }
+  66%     { transform: scaleY(1.4); }
+  76%     { transform: scaleY(0.55); }   /* satisfied squint */
+  88%     { transform: scaleY(1.1); }
+  100%    { transform: scaleY(1); }
+}
+.tm[data-act="mug"] .tm-eye { animation: tm-act-mug-eyes 1500ms var(--ease-in-out) 1; }
+.tm[data-act="mug"] .tm-pupil { animation: tm-pupils-pin 1500ms var(--ease-out) 1; }
+.tm-mug {
+  opacity: 0; transform-box: view-box; transform-origin: 37px 40px;
+  animation: tm-act-mug-in 1500ms var(--ease-in-out) 1;
+}
+.tm-mug-body { fill: var(--sky-500); }
+.tm-mug-handle { fill: none; stroke: var(--sky-500); stroke-width: 2.6; }
+.tm-steam {
+  fill: none; stroke: var(--stone-400); stroke-width: 2.4; stroke-linecap: round;
+  opacity: 0; transform-box: fill-box; transform-origin: center bottom;
+  animation: tm-act-steam 1500ms var(--ease-out) 1;
+  animation-delay: calc(var(--i) * 200ms);
+}
+
+/* 13. PLANE ============================================================= */
+/* The FOLD is the charm and it was missing: the plane used to materialise
+   fully formed on her face. It now folds, launches, and she watches it. */
+@keyframes tm-act-plane-body {
+  0%   { transform: rotate(0deg) translateX(0) scale(1, 1); }
+  16%  { transform: rotate(-4deg) translateX(-1px) scale(1, 1); }
+  26%  { transform: rotate(-13deg) translateX(-4px) scale(1.06, 0.94); }  /* wind up */
+  32%  { transform: rotate(-15deg) translateX(-5px) scale(1.08, 0.92); }  /* held */
+  40%  { transform: rotate(12deg) translateX(4px) scale(0.92, 1.1); }     /* throw */
+  48%  { transform: rotate(4deg) translateX(1.5px) scale(1.04, 0.97); }
+  58%  { transform: rotate(-3deg) translateX(-1px) scale(0.98, 1.03); }
+  72%  { transform: rotate(2deg) translateX(0.6px) scale(1.01, 0.99); }
+  86%  { transform: rotate(-1deg) translateX(0) scale(1, 1); }
+  100% { transform: rotate(0deg) translateX(0) scale(1, 1); }
+}
+/* Three silhouettes cross faded at the fold beats: sheet, half sheet,
+   dart. Scaling one dart shape only ever reads as a dart resizing. */
+@keyframes tm-paper-sheet {
+  0%, 14% { opacity: 1; }
+  16%     { opacity: 0; }
+  100%    { opacity: 0; }
+}
+@keyframes tm-paper-half {
+  0%, 15% { opacity: 0; }
+  17%     { opacity: 1; }
+  25%     { opacity: 1; }
+  27%     { opacity: 0; }
+  100%    { opacity: 0; }
+}
+@keyframes tm-paper-dart {
+  0%, 26% { opacity: 0; }
+  28%     { opacity: 1; }
+  100%    { opacity: 1; }
+}
+/* Spawns BESIDE her, not on her face, and the whole flight stays inside
+   the box: the first version put the plane over an eye for 40% of the act
+   and then flew it 34 units into the message text. */
+@keyframes tm-act-plane-fold {
+  0%   { opacity: 0; transform: translate(2px, 26px) scale(0.9) rotate(0deg); }
+  8%   { opacity: 1; transform: translate(2px, 26px) scale(0.9) rotate(0deg); }
+  16%  { opacity: 1; transform: translate(2px, 26px) scale(0.9) rotate(0deg); }  /* fold 1 */
+  26%  { opacity: 1; transform: translate(2px, 26px) scale(0.9) rotate(0deg); }  /* fold 2 */
+  32%  { opacity: 1; transform: translate(4px, 24px) scale(0.9) rotate(-8deg); }
+  38%  { opacity: 1; transform: translate(1px, 27px) scale(0.9) rotate(-16deg); }  /* cocked */
+  46%  { opacity: 1; transform: translate(14px, 17px) scale(0.9) rotate(-20deg); }
+  56%  { opacity: 1; transform: translate(26px, 7px) scale(0.9) rotate(-16deg); }
+  64%  { opacity: 1; transform: translate(33px, 2px) scale(0.88) rotate(-4deg); }   /* stall */
+  70%  { opacity: 1; transform: translate(35px, 1px) scale(0.88) rotate(6deg); }
+  78%  { opacity: 1; transform: translate(31px, 6px) scale(0.9) rotate(24deg); }    /* it turns */
+  86%  { opacity: 1; transform: translate(20px, 14px) scale(0.92) rotate(46deg); }  /* coming back */
+  93%  { opacity: 1; transform: translate(11px, 19px) scale(0.94) rotate(62deg); }  /* bonk */
+  96%  { opacity: 0.6; transform: translate(9px, 23px) scale(0.9) rotate(84deg); }
+  100% { opacity: 0; transform: translate(7px, 28px) scale(0.85) rotate(96deg); }
+}
+.tm[data-act="plane"] .tm-act { animation: tm-act-plane-body 1500ms var(--ease-in-out) 1; }
+.tm[data-act="plane"] .tm-eye { animation: tm-eyes-wide-late 1500ms var(--ease-out) 1; }
+.tm[data-act="plane"] .tm-pupil { animation: tm-pupils-track-right 1500ms var(--ease-in-out) 1; }
+.tm-plane {
+  opacity: 0;
+  animation: tm-act-plane-fold 1500ms var(--ease-in-out) 1;
+}
+.tm-plane-body { fill: #FFFFFF; stroke: var(--stone-500); stroke-width: 2; stroke-linejoin: round; }
+.tm-paper { fill: #FFFFFF; stroke: var(--stone-500); stroke-width: 2; }
+.tm-paper-1 { animation: tm-paper-sheet 1500ms linear 1; }
+.tm-paper-2 { animation: tm-paper-half 1500ms linear 1; }
+.tm-paper-3 { fill: none; stroke: none; animation: tm-paper-dart 1500ms linear 1; }
+.tm-plane-fold { fill: none; stroke: var(--stone-500); stroke-width: 2; }
+
+/* 14. MAGNIFY =========================================================== */
+/* Also used to freeze her solid. The lens now SWEEPS across, so each eye
+   magnifies in turn, and she presses up against the glass at the end. */
+@keyframes tm-act-magnify-body {
+  0%   { transform: translateX(0) rotate(0deg) scale(1, 1); }
+  14%  { transform: translateX(1px) rotate(1deg) scale(1, 1); }
+  30%  { transform: translateX(3px) rotate(3deg) scale(0.99, 1.01); }   /* leans into it */
+  46%  { transform: translateX(-2px) rotate(-2deg) scale(0.99, 1.01); }
+  62%  { transform: translateX(-4px) rotate(-4deg) scale(1.02, 1.03); } /* presses in */
+  70%  { transform: translateX(-4px) rotate(-4deg) scale(1.03, 1.04); } /* held */
+  82%  { transform: translateX(1px) rotate(2deg) scale(1.02, 0.98); }
+  92%  { transform: translateX(0) rotate(0deg) scale(0.99, 1.01); }
+  100% { transform: translateX(0) rotate(0deg) scale(1, 1); }
+}
+@keyframes tm-act-lens-in {
+  0%   { opacity: 0; transform: translate(18px, 16px) scale(0.5) rotate(22deg); }
+  16%  { opacity: 1; transform: translate(4px, 2px) scale(1) rotate(4deg); }
+  30%  { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }     /* right eye */
+  46%  { opacity: 1; transform: translate(-7px, 1px) scale(1) rotate(-3deg); }
+  60%  { opacity: 1; transform: translate(-13.2px, 0) scale(1) rotate(0deg); } /* left eye */
+  76%  { opacity: 1; transform: translate(-13.2px, 0) scale(1.06) rotate(0deg); }
+  88%  { opacity: 0.7; transform: translate(-4px, 6px) scale(0.9) rotate(8deg); }
+  100% { opacity: 0; transform: translate(14px, 14px) scale(0.5) rotate(18deg); }
+}
+/* Each eye swells only while the lens is over it. */
+@keyframes tm-act-lens-eye-r {
+  0%, 20% { transform: scale(1); }
+  30%     { transform: scale(1.6); }
+  42%     { transform: scale(1.6); }
+  52%     { transform: scale(1); }
+  100%    { transform: scale(1); }
+}
+@keyframes tm-act-lens-eye-l {
+  0%, 50% { transform: scale(1); }
+  60%     { transform: scale(1.6); }
+  78%     { transform: scale(1.72); }   /* pressed against the glass */
+  86%     { transform: scale(1); }
+  100%    { transform: scale(1); }
+}
+.tm[data-act="magnify"] .tm-act { animation: tm-act-magnify-body 1600ms var(--ease-in-out) 1; }
+/* The pupils follow the lens across her face, then cross slightly when
+   she presses her eye up against the glass. */
+@keyframes tm-act-lens-pupils {
+  0%, 16% { transform: translate(0, 0); }
+  30%     { transform: translate(1.4px, 0); }
+  46%     { transform: translate(0.2px, 0.2px); }
+  62%     { transform: translate(-1.5px, 0); }
+  78%     { transform: translate(-1.2px, -0.4px); }
+  90%     { transform: translate(0, 0); }
+  100%    { transform: translate(0, 0); }
+}
+.tm[data-act="magnify"] .tm-pupil { animation: tm-act-lens-pupils 1600ms var(--ease-in-out) 1; }
+.tm[data-act="magnify"] .tm-eye:first-of-type { animation: tm-act-lens-eye-l 1600ms var(--ease-out) 1; }
+.tm[data-act="magnify"] .tm-eye:last-of-type { animation: tm-act-lens-eye-r 1600ms var(--ease-out) 1; }
+.tm-magnify {
+  opacity: 0; transform-box: view-box; transform-origin: 31px 25px;
+  animation: tm-act-lens-in 1600ms var(--ease-in-out) 1;
+}
+.tm-lens { fill: rgba(255, 255, 255, 0.35); stroke: var(--act-ink); stroke-width: 2.6; }
+.tm-lens-handle { stroke: var(--act-ink); stroke-width: 3.4; stroke-linecap: round; }
+
+/* 15. SPARKLE =========================================================== */
+/* Proud: she puffs UP and holds it, then gets a bit embarrassed. */
+@keyframes tm-act-proud {
+  0%   { transform: translateY(0) scale(1, 1) rotate(0deg); }
+  12%  { transform: translateY(2px) scale(1.06, 0.93) rotate(0deg); }
+  20%  { transform: translateY(3px) scale(1.1, 0.9) rotate(0deg); }   /* gathers */
+  30%  { transform: translateY(-6px) scale(0.9, 1.2) rotate(-3deg); } /* puffs up */
+  38%  { transform: translateY(-7px) scale(0.94, 1.22) rotate(2deg); }
+  48%  { transform: translateY(-7px) scale(0.93, 1.23) rotate(-1deg); } /* HELD proud */
+  58%  { transform: translateY(-6.5px) scale(0.94, 1.21) rotate(1deg); }
+  70%  { transform: translateY(-1px) scale(1.08, 0.94) rotate(0deg); }  /* embarrassed */
+  80%  { transform: translateY(1px) scale(1.02, 0.97) rotate(-1deg); }
+  90%  { transform: translateY(0) scale(0.99, 1.02) rotate(0deg); }
+  100% { transform: translateY(0) scale(1, 1) rotate(0deg); }
+}
+@keyframes tm-act-proud-eyes {
+  0%, 18% { transform: scaleY(1); }
+  30%     { transform: scaleY(1.4); }
+  48%     { transform: scaleY(0.5); }    /* squeezed into happy arcs */
+  62%     { transform: scaleY(0.45); }
+  76%     { transform: scaleY(1.1); }
+  100%    { transform: scaleY(1); }
+}
+.tm[data-act="sparkle"] .tm-act { animation: tm-act-proud 1300ms var(--ease-in-out) 1; }
+.tm[data-act="sparkle"] .tm-eye { animation: tm-act-proud-eyes 1300ms var(--ease-in-out) 1; }
+.tm[data-act="sparkle"] .tm-pupil { animation: tm-pupils-up 1300ms var(--ease-in-out) 1; }
+.tm[data-act="sparkle"] .tm-spark {
+  animation: tm-spark-twinkle 820ms var(--ease-out) 1;
+  animation-delay: calc(var(--i) * 110ms);
+}
+
+/* 16. SNOOZE ============================================================ */
+/* Three nod and catch cycles, which is what dozing off actually looks
+   like, then a real snap awake. */
+@keyframes tm-act-snooze-body {
+  0%   { transform: rotate(0deg) translateY(0) scale(1, 1); }
+  10%  { transform: rotate(-4deg) translateY(2px) scale(1.03, 0.96); }
+  16%  { transform: rotate(1deg) translateY(-1px) scale(0.99, 1.02); }  /* catches herself */
+  28%  { transform: rotate(-7deg) translateY(3.5px) scale(1.06, 0.93); }
+  34%  { transform: rotate(-2deg) translateY(0.5px) scale(1, 1.01); }   /* catches again */
+  48%  { transform: rotate(-10deg) translateY(4.5px) scale(1.08, 0.91); }
+  56%  { transform: rotate(-11deg) translateY(5px) scale(1.09, 0.9); }  /* gone */
+  64%  { transform: rotate(-11deg) translateY(5px) scale(1.09, 0.9); }
+  56%  { transform: rotate(5deg) translateY(-4px) scale(0.9, 1.14); }   /* SNAP awake */
+  62%  { transform: rotate(-2deg) translateY(1px) scale(1.06, 0.96); }
+  70%  { transform: rotate(1deg) translateY(-1px) scale(0.98, 1.03); }
+  80%  { transform: rotate(-3deg) translateY(0) scale(1, 1); }          /* watches it fall */
+  90%  { transform: rotate(2deg) translateY(0) scale(1.02, 0.99); }
+  100% { transform: rotate(0deg) translateY(0) scale(1, 1); }
+}
+@keyframes tm-act-doze-eyes {
+  0%, 8% { transform: scaleY(1); }
+  14%    { transform: scaleY(0.25); }
+  18%    { transform: scaleY(0.9); }     /* fights it */
+  30%    { transform: scaleY(0.15); }
+  36%    { transform: scaleY(0.7); }
+  50%    { transform: scaleY(0.06); }    /* out */
+  66%    { transform: scaleY(0.06); }
+  72%    { transform: scaleY(1.5); }     /* snaps open */
+  84%    { transform: scaleY(0.94); }
+  100%   { transform: scaleY(1); }
+}
+@keyframes tm-act-zed {
+  0%   { opacity: 0; transform: translate(0, 4px) scale(0.5) rotate(-8deg); }
+  22%  { opacity: 1; transform: translate(1px, 0) scale(1) rotate(0deg); }
+  62%  { opacity: 1; transform: translate(2px, -4px) scale(1.05) rotate(6deg); }
+  88%  { opacity: 0; transform: translate(3px, -9px) scale(1.1) rotate(10deg); }
+  100% { opacity: 0; transform: translate(3px, -9px) scale(1.1) rotate(10deg); }
+}
+.tm[data-act="snooze"] .tm-act { animation: tm-act-snooze-body 2600ms var(--ease-in-out) 1; }
+.tm[data-act="snooze"] .tm-eye { animation: tm-act-doze-eyes 2600ms var(--ease-in-out) 1; }
+.tm[data-act="snooze"] .tm-pupil { animation: tm-pupils-down 2600ms var(--ease-in-out) 1; }
+/* Bounded so the last Z is not severed when the act ends: 1200 + 2*180 =
+   1560ms inside an 1800ms act. */
+.tm[data-act="snooze"] .tm-zed {
+  animation: tm-act-zed 1200ms var(--ease-out) 1;
+  animation-delay: calc(var(--i) * 180ms);
+}
+/* The last one does not leave. It hangs, and then falls back past her face
+   after she has woken, and she watches it go. The most elegant comment on a
+   long wait available, and it is one reversed animation. */
+@keyframes tm-act-zed-falls {
+  0%, 8%  { opacity: 0; transform: translate(0, 4px) scale(0.5) rotate(-8deg); }
+  22%     { opacity: 1; transform: translate(1px, 0) scale(1) rotate(0deg); }
+  44%     { opacity: 1; transform: translate(2px, -5px) scale(1.05) rotate(6deg); }
+  62%     { opacity: 1; transform: translate(2px, -6px) scale(1.05) rotate(4deg); }  /* hangs */
+  74%     { opacity: 1; transform: translate(1px, -2px) scale(1) rotate(-6deg); }    /* falls */
+  86%     { opacity: 1; transform: translate(-1px, 8px) scale(0.9) rotate(-18deg); }
+  100%    { opacity: 0; transform: translate(-2px, 16px) scale(0.8) rotate(-28deg); }
+}
+.tm[data-act="snooze"] .tm-zed:last-of-type {
+  animation: tm-act-zed-falls 2600ms var(--ease-in-out) 1;
+  animation-delay: 0ms;
+}
+
+/* 17. RAIN ============================================================== */
+/* Flinch, shiver, canopy lands on her roof, and the punchline: one last
+   drop finds the gap and hits her in the eye. */
+@keyframes tm-act-rain-body {
+  0%   { transform: translateY(0) rotate(0deg) scale(1, 1); }
+  9%   { transform: translateY(4px) rotate(0deg) scale(1.14, 0.84); }   /* first drop, flinch */
+  14%  { transform: translateY(4px) rotate(0deg) scale(1.14, 0.84); }   /* held */
+  24%  { transform: translateY(5px) rotate(-3deg) scale(1.12, 0.87); }  /* hunches */
+  30%  { transform: translateY(5px) rotate(-3deg) scale(1.12, 0.87) translateX(-3.5px); }
+  34%  { transform: translateY(5px) rotate(-3deg) scale(1.12, 0.87) translateX(3.5px); }
+  38%  { transform: translateY(5px) rotate(-3deg) scale(1.12, 0.87) translateX(-2.4px); }
+  42%  { transform: translateY(5px) rotate(-3deg) scale(1.12, 0.87) translateX(1.4px); }
+  54%  { transform: translateY(3px) rotate(0deg) scale(1.1, 0.88); }    /* canopy lands, weight */
+  60%  { transform: translateY(-3px) rotate(0deg) scale(0.94, 1.09); }  /* pops back, relief */
+  70%  { transform: translateY(0) rotate(0deg) scale(1.02, 0.99); }
+  80%  { transform: translateY(1px) rotate(0deg) scale(1.04, 0.96); }   /* the drop gets her */
+  88%  { transform: translateY(0) rotate(0deg) scale(0.99, 1.02); }
+  100% { transform: translateY(0) rotate(0deg) scale(1, 1); }
+}
+@keyframes tm-act-rain-eyes {
+  0%, 6%  { transform: scaleY(1); }
+  10%     { transform: scaleY(0.5); }    /* flinch */
+  20%     { transform: scaleY(0.8); }
+  46%     { transform: scaleY(0.75); }   /* miserable */
+  62%     { transform: scaleY(1.35); }   /* relief */
+  78%     { transform: scaleY(1.2); }
+  82%     { transform: scaleY(0.1); }    /* the punchline blink */
+  88%     { transform: scaleY(1.1); }
+  100%    { transform: scaleY(1); }
+}
+@keyframes tm-act-cloud-in {
+  0%   { opacity: 0; transform: translate(-16px, -5px); }
+  14%  { opacity: 1; transform: translate(0, 0); }
+  70%  { opacity: 1; transform: translate(2px, 0); }
+  100% { opacity: 0; transform: translate(14px, -4px); }
+}
+@keyframes tm-act-drop {
+  0%, 16% { opacity: 0; transform: translateY(0) scaleY(1); }
+  20%     { opacity: 1; transform: translateY(1px) scaleY(1.1);
+            animation-timing-function: linear; }
+  28%     { opacity: 1; transform: translateY(5px) scaleY(1.35);
+            animation-timing-function: linear; }
+  38%     { opacity: 1; transform: translateY(11px) scaleY(1.5);
+            animation-timing-function: linear; }
+  42%     { opacity: 1; transform: translateY(14px) scaleY(1.5); }
+  45%     { opacity: 0; transform: translateY(15px) scaleY(0.5); }   /* splash */
+  100%    { opacity: 0; transform: translateY(15px) scaleY(0.5); }
+}
+@keyframes tm-act-brolly {
+  0%, 44% { opacity: 0; transform: scale(0.1) translateY(10px); }
+  52%     { opacity: 1; transform: scale(1.16) translateY(-2px); }   /* pops open */
+  58%     { opacity: 1; transform: scale(0.96) translateY(1px); }    /* bounces on her roof */
+  64%     { opacity: 1; transform: scale(1.03) translateY(0); }
+  70%     { opacity: 1; transform: scale(1) translateY(0); }
+  88%     { opacity: 1; transform: scale(1) translateY(0); }
+  100%    { opacity: 0; transform: scale(0.85) translateY(4px); }
+}
+.tm[data-act="rain"] .tm-act { animation: tm-act-rain-body 1800ms var(--ease-in-out) 1; }
+.tm[data-act="rain"] .tm-eye { animation: tm-act-rain-eyes 1800ms var(--ease-in-out) 1; }
+.tm[data-act="rain"] .tm-pupil { animation: tm-pupils-up 1800ms var(--ease-in-out) 1; }
+.tm-cloud {
+  fill: var(--stone-400); opacity: 0;
+  animation: tm-act-cloud-in 1800ms var(--ease-out) 1;
+}
+.tm-drop {
+  fill: var(--sky-600); opacity: 0;
+  animation: tm-act-drop 1800ms var(--ease-fall) 1;
+  animation-delay: calc(var(--i) * 110ms);
+}
+/* The one that finds the gap. Its own timing, so it lands on the 82% blink
+   she is reacting to. */
+@keyframes tm-act-drop-last {
+  0%, 68% { opacity: 0; transform: translateY(0) scaleY(1); }
+  72%     { opacity: 1; transform: translateY(2px) scaleY(1.2);
+            animation-timing-function: linear; }
+  78%     { opacity: 1; transform: translateY(11px) scaleY(1.4);
+            animation-timing-function: linear; }
+  81%     { opacity: 1; transform: translateY(20px) scaleY(1.5); }
+  83%     { opacity: 0; transform: translateY(23px) scaleY(0.5); }   /* in her eye */
+  100%    { opacity: 0; transform: translateY(23px) scaleY(0.5); }
+}
+.tm-drop-last { animation: tm-act-drop-last 1800ms linear 1; animation-delay: 0ms; }
+.tm-brolly, .tm-brolly-rim {
+  opacity: 0; transform-box: view-box; transform-origin: 24px 17px;
+  animation: tm-act-brolly 1800ms var(--ease-back) 1;
+}
+.tm-brolly { fill: #E9776B; }
+.tm-brolly-rim { fill: none; stroke: #C9534A; stroke-width: 2.6; stroke-linecap: round; }
+
+/* 18. JUGGLE ============================================================ */
+/* The arc used to sit entirely inside her own silhouette, and a negative
+   delay with one iteration ended two of the three balls early, so the last
+   third of "three things in the air" was one lonely ball. Now the arc goes
+   ABOVE the roofline and the loop is bounded by the act instead. */
+@keyframes tm-act-juggle-body {
+  0%   { transform: translateX(0) rotate(0deg) scale(1, 1); }
+  12%  { transform: translateX(-2.5px) rotate(-4deg) scale(1.04, 0.96); }
+  26%  { transform: translateX(2.5px) rotate(4deg) scale(0.97, 1.03); }
+  40%  { transform: translateX(-2.5px) rotate(-4deg) scale(1.04, 0.96); }
+  54%  { transform: translateX(2.5px) rotate(4deg) scale(0.97, 1.03); }
+  68%  { transform: translateX(-2px) rotate(-3deg) scale(1.03, 0.97); }
+  76%  { transform: translateX(1px) rotate(6deg) scale(1.1, 0.88); }   /* the fumble */
+  84%  { transform: translateX(-1px) rotate(-2deg) scale(0.94, 1.08); }
+  92%  { transform: translateX(0.5px) rotate(1deg) scale(1.02, 0.98); }
+  100% { transform: translateX(0) rotate(0deg) scale(1, 1); }
+}
+/* A symmetric cascade: out and back take the same time and carry the same
+   number of stops. The first version spent 448ms going right and 304ms
+   coming back, forever. */
+@keyframes tm-act-ball {
+  0%   { transform: translate(-20px, 3px) scale(1, 1); }
+  6%   { transform: translate(-20px, 6px) scale(1.14, 0.86); }   /* dip before the throw */
+  14%  { transform: translate(-18px, -14px) scale(0.94, 1.08); }
+  24%  { transform: translate(-11px, -30px) scale(1, 1); }
+  32%  { transform: translate(-4px, -38px); }                    /* apex above the roof */
+  40%  { transform: translate(4px, -38px); }                     /* the hang */
+  46%  { transform: translate(11px, -30px); }
+  50%  { transform: translate(20px, 3px) scale(0.94, 1.08); }
+  54%  { transform: translate(20px, 6px) scale(1.16, 0.84); }    /* the catch */
+  62%  { transform: translate(18px, -14px) scale(0.94, 1.08); }
+  72%  { transform: translate(11px, -30px) scale(1, 1); }
+  80%  { transform: translate(4px, -38px); }
+  88%  { transform: translate(-4px, -38px); }
+  94%  { transform: translate(-11px, -30px); }
+  100% { transform: translate(-20px, 3px) scale(1, 1); }
+}
+/* The dropped one: same cascade until the fumble, then it bonks her roof
+   and rolls out of frame. This is what the body's stumble is reacting to. */
+@keyframes tm-act-ball-drop {
+  0%   { opacity: 0; transform: translate(-20px, 3px) scale(1, 1); }
+  6%   { opacity: 1; transform: translate(-20px, 6px) scale(1.14, 0.86); }
+  22%  { opacity: 1; transform: translate(-5px, -30px) scale(1, 1); }
+  32%  { opacity: 1; transform: translate(2px, -37px); }
+  44%  { opacity: 1; transform: translate(10px, -30px); }
+  56%  { opacity: 1; transform: translate(15px, -14px); }
+  64%  { opacity: 1; transform: translate(15px, -22px) scale(1.2, 0.8); }  /* bonks the roof */
+  72%  { opacity: 1; transform: translate(16px, -8px) scale(0.9, 1.1); }
+  82%  { opacity: 1; transform: translate(17px, 6px) scale(1.15, 0.85); }  /* hits the floor */
+  92%  { opacity: 1; transform: translate(19px, 4px) scale(1, 1); }        /* rolls to a stop */
+  100% { opacity: 0; transform: translate(20px, 4px) scale(1, 1); }
+}
+.tm[data-act="juggle"] .tm-act { animation: tm-act-juggle-body 1600ms var(--ease-in-out) 1; }
+.tm[data-act="juggle"] .tm-eye { animation: tm-eyes-wide-late 1600ms var(--ease-out) 1; }
+.tm[data-act="juggle"] .tm-pupil { animation: tm-pupils-up 1600ms var(--ease-in-out) 1; }
+@keyframes tm-ball-fade {
+  0%   { opacity: 0; }
+  6%   { opacity: 1; }
+  88%  { opacity: 1; }
+  96%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+.tm-ball {
+  fill: var(--pop-cobalt); opacity: 0;
+  animation: tm-act-ball 800ms var(--ease-in-out) infinite,
+             tm-ball-fade 1600ms linear 1;
+  animation-delay: calc(var(--i) * -400ms), 0ms;
+}
+.tm-ball:nth-of-type(2) { fill: var(--gold-500); }
+.tm-ball-drop {
+  fill: var(--pop-blush); opacity: 0;
+  animation: tm-act-ball-drop 1600ms var(--ease-in-out) 1;
+  animation-delay: 0ms;
+}
+
+/* 19. WINDUP ============================================================ */
+/* The key is now outside her silhouette and asymmetric, so its rotation is
+   visible, and she actually TRAVELS instead of oscillating about zero. */
+@keyframes tm-act-windup-body {
+  0%   { transform: translateX(0) rotate(0deg) scale(1, 1); }
+  8%   { transform: translateX(4px) rotate(1deg) scale(1.02, 0.98); }
+  16%  { transform: translateX(5px) rotate(2deg) scale(1.04, 0.96); }  /* tugged by the winding */
+  22%  { transform: translateX(4px) rotate(1deg) scale(1.03, 0.97); }
+  30%  { transform: translateX(-2px) rotate(-7deg) scale(0.96, 1.05); }
+  38%  { transform: translateX(-6px) rotate(6deg) scale(1.05, 0.95); }
+  46%  { transform: translateX(-10px) rotate(-6deg) scale(0.97, 1.04); }
+  54%  { transform: translateX(-13px) rotate(5deg) scale(1.04, 0.96); }
+  62%  { transform: translateX(-15px) rotate(-4deg) scale(0.98, 1.03); }
+  70%  { transform: translateX(-16px) rotate(3deg) scale(1.03, 0.97); }
+  78%  { transform: translateX(-16.5px) rotate(-2deg) scale(0.99, 1.02); }
+  84%  { transform: translateX(-16.5px) rotate(0deg) scale(1.05, 0.93); }  /* notices */
+  90%  { transform: translateX(-10px) rotate(5deg) scale(0.95, 1.07); }    /* hops back */
+  95%  { transform: translateX(-2px) rotate(-4deg) scale(1.06, 0.94); }
+  98%  { transform: translateX(2px) rotate(2deg) scale(0.97, 1.03); }
+  100% { transform: translateX(0) rotate(0deg) scale(1, 1); }
+}
+@keyframes tm-act-key {
+  0%   { opacity: 0; transform: rotate(0deg) scale(0.4); }
+  10%  { opacity: 1; transform: rotate(0deg) scale(1); }
+  24%  { opacity: 1; transform: rotate(-310deg) scale(1); }  /* wound tight */
+  32%  { opacity: 1; transform: rotate(-300deg) scale(1); }  /* it kicks back */
+  86%  { opacity: 1; transform: rotate(70deg) scale(1); }    /* unwinds the other way */
+  94%  { opacity: 0.6; transform: rotate(78deg) scale(0.9); }
+  100% { opacity: 0; transform: rotate(80deg) scale(0.6); }
+}
+.tm[data-act="windup"] .tm-act { animation: tm-act-windup-body 1700ms var(--ease-in-out) 1; }
+.tm[data-act="windup"] .tm-eye { animation: tm-eyes-wide 1450ms var(--ease-out) 1; }
+.tm[data-act="windup"] .tm-pupil { animation: tm-pupils-dizzy 1700ms linear 1; }
+.tm-key {
+  opacity: 0; transform-box: view-box; transform-origin: 3.4px 24px;
+  animation: tm-act-key 1700ms var(--ease-in-out) 1;
+}
+.tm-key-stem { stroke: var(--stone-500); stroke-width: 2.6; stroke-linecap: round; }
+.tm-key-bow { fill: none; stroke: var(--stone-500); stroke-width: 2.6; }
+
+/* 20. SNEEZE ============================================================ */
+@keyframes tm-act-sneeze-body {
+  0%   { transform: rotate(0deg) scale(1, 1) translateX(0); }
+  12%  { transform: rotate(-5deg) scale(0.98, 1.04) translateX(-2px); }
+  24%  { transform: rotate(-10deg) scale(0.95, 1.1) translateX(-4px); }
+  24%  { transform: rotate(-14deg) scale(0.92, 1.14) translateX(-5.5px); }
+  28%  { transform: rotate(-17deg) scale(0.89, 1.18) translateX(-6.5px); }  /* the hitch */
+  31%  { transform: rotate(-18deg) scale(0.88, 1.2) translateX(-7px); }
+  36%  { transform: rotate(-6deg) scale(1.02, 0.97) translateX(-2px); }     /* ...nothing */
+  42%, 50% { transform: rotate(-2deg) scale(1.01, 0.99) translateX(-0.5px); } /* deflated */
+  54%  { transform: rotate(24deg) scale(1.36, 0.72) translateX(11px);
+         animation-timing-function: linear; }                             /* ACHOO, no warning */
+  60%  { transform: rotate(14deg) scale(1.16, 0.88) translateX(9px); }
+  68%  { transform: rotate(-4deg) scale(0.94, 1.08) translateX(7.5px); }   /* off her mark */
+  76%  { transform: rotate(3deg) scale(1.08, 0.94) translateX(5px); }      /* hops back */
+  84%  { transform: rotate(-3deg) scale(0.96, 1.06) translateX(2.5px); }
+  91%  { transform: rotate(2deg) scale(1.03, 0.98) translateX(0.9px); }
+  100% { transform: rotate(0deg) scale(1, 1) translateX(0); }
+}
+@keyframes tm-act-sneeze-eyes {
+  0%, 10% { transform: scaleY(1); }
+  22%     { transform: scaleY(0.5); }
+  30%     { transform: scaleY(0.08); }   /* screwed shut */
+  36%     { transform: scaleY(0.62); }   /* opens on the false start */
+  44%, 50% { transform: scaleY(0.55); }  /* half lidded, disappointed */
+  53%     { transform: scaleY(0.08); }
+  58%     { transform: scaleY(1.55); }
+  72%     { transform: scaleY(0.85); }
+  100%    { transform: scaleY(1); }
+}
+.tm[data-act="sneeze"] .tm-act {
+  animation: tm-act-sneeze-body 2000ms var(--ease-in-out) 1;
+  transform-origin: 24px 42px;
+}
+.tm[data-act="sneeze"] .tm-eye { animation: tm-act-sneeze-eyes 2000ms var(--ease-in-out) 1; }
+.tm[data-act="sneeze"] .tm-pupil { animation: tm-pupils-pin 2000ms var(--ease-out) 1; }
+.tm[data-act="sneeze"] .tm-puff {
+  animation: tm-puff-bloom 560ms var(--ease-out) 1;
+  animation-delay: calc(1080ms + var(--i) * 55ms);
+}
+
+/* 22. SHE SEES YOU ======================================================
+   Ninety seconds in, once ever. The ambient loop has been running since the
+   turn began, so it STOPPING is the event. She turns, looks out, holds a
+   genuinely long beat, blinks once, nods, and goes back to work. No prop,
+   no gag, and deliberately no decoration: at two minutes of waiting this
+   beat is worth more than any trick in the library. */
+@keyframes tm-act-seesyou {
+  0%   { transform: rotate(0deg) scale(1, 1) translateY(0); }
+  8%   { transform: rotate(-3deg) scale(1.02, 0.98) translateY(0.5px); }
+  16%  { transform: rotate(6deg) scale(0.98, 1.03) translateY(-1px); }   /* turns to you */
+  22%  { transform: rotate(4deg) scale(1, 1) translateY(0); }
+  30%, 62% { transform: rotate(3deg) scale(1, 1) translateY(0); }        /* the long hold */
+  70%  { transform: rotate(3deg) scale(1.03, 0.96) translateY(1.5px); }  /* the nod */
+  76%  { transform: rotate(3deg) scale(0.98, 1.03) translateY(-1px); }
+  84%  { transform: rotate(-2deg) scale(1.01, 0.99) translateY(0); }     /* back to work */
+  92%  { transform: rotate(1deg) scale(1, 1) translateY(0); }
+  100% { transform: rotate(0deg) scale(1, 1) translateY(0); }
+}
+@keyframes tm-act-seesyou-eyes {
+  0%, 24% { transform: scaleY(1); }
+  30%     { transform: scaleY(1.15); }    /* opens a little wider on you */
+  44%     { transform: scaleY(1.15); }
+  48%     { transform: scaleY(0.08); }    /* the one slow blink */
+  54%     { transform: scaleY(1.15); }
+  70%     { transform: scaleY(0.72); }    /* the nod half closes them */
+  78%     { transform: scaleY(1.1); }
+  100%    { transform: scaleY(1); }
+}
+@keyframes tm-act-seesyou-pupils {
+  0%, 10% { transform: translate(0, 0); }
+  20%     { transform: translate(-0.6px, -0.2px); }
+  30%     { transform: translate(0, -0.3px); }   /* straight out, and held */
+  66%     { transform: translate(0, -0.3px); }
+  84%     { transform: translate(0.5px, 0.2px); }
+  100%    { transform: translate(0, 0); }
+}
+.tm[data-act="seesyou"] .tm-act { animation: tm-act-seesyou 3400ms var(--ease-in-out) 1; }
+.tm[data-act="seesyou"] .tm-eye { animation: tm-act-seesyou-eyes 3400ms var(--ease-in-out) 1; }
+.tm[data-act="seesyou"] .tm-pupil { animation: tm-act-seesyou-pupils 3400ms var(--ease-in-out) 1; }
+
+/* 23. THE LODGER =======================================================
+   She is a house, so someone lives in her. The door opens, a small creature
+   looks out, sees you, and goes back in. What makes it an act rather than a
+   gag is what it leaves behind: the `lodger-out` condition puts the
+   creature on her roof for the next sixty seconds, riding everything else
+   she does. */
+@keyframes tm-act-lodger-body {
+  0%   { transform: scale(1, 1) translate(0, 0) rotate(0deg); }
+  10%  { transform: scale(1.06, 0.93) translate(0, 1.5px) rotate(0deg); }   /* a knock inside */
+  16%  { transform: scale(0.95, 1.07) translate(0, -2px) rotate(-2deg); }
+  24%  { transform: scale(1.08, 0.9) translate(-1.5px, 2px) rotate(-4deg); } /* it shoves the door */
+  32%  { transform: scale(0.94, 1.08) translate(-2.5px, -2.5px) rotate(-6deg); }
+  42%  { transform: scale(1.02, 0.98) translate(-3px, 0) rotate(-7deg); }   /* leaning with it */
+  56%  { transform: scale(1.01, 0.99) translate(-3px, 0) rotate(-7deg); }   /* held */
+  68%  { transform: scale(1.04, 0.95) translate(-2px, 1.5px) rotate(-4deg); }
+  80%  { transform: scale(0.96, 1.06) translate(0, -2px) rotate(1deg); }    /* it drops back in */
+  90%  { transform: scale(1.05, 0.95) translate(0, 1.5px) rotate(0deg); }
+  96%  { transform: scale(0.98, 1.02) translate(0, -0.5px) rotate(0deg); }
+  100% { transform: scale(1, 1) translate(0, 0) rotate(0deg); }
+}
+@keyframes tm-act-lodge-leaf {
+  0%, 14% { transform: scaleX(1); }
+  26%     { transform: scaleX(0.08); }
+  74%     { transform: scaleX(0.08); }
+  86%     { transform: scaleX(1.06); }
+  100%    { transform: scaleX(1); }
+}
+@keyframes tm-act-lodger-out {
+  0%, 20% { opacity: 0; transform: translate(0, 10px) scale(0.4); }
+  30%     { opacity: 1; transform: translate(-1px, -3px) scale(1.14); }  /* pops out past the wall */
+  38%     { opacity: 1; transform: translate(-2px, -5px) scale(1); }
+  48%     { opacity: 1; transform: translate(-3.5px, -5.5px) rotate(-7deg) scale(1); }
+  58%     { opacity: 1; transform: translate(-3.5px, -5.5px) rotate(7deg) scale(1); }  /* looks about */
+  68%     { opacity: 1; transform: translate(-3.5px, -6px) rotate(0deg) scale(1); }    /* finds you */
+  76%     { opacity: 1; transform: translate(-3px, -5px) scale(1); }
+  86%     { opacity: 1; transform: translate(0, 9px) scale(0.55); }     /* back inside */
+  100%    { opacity: 0; transform: translate(0, 11px) scale(0.4); }
+}
+.tm[data-act="lodger"] .tm-act { animation: tm-act-lodger-body 2200ms var(--ease-in-out) 1; }
+.tm[data-act="lodger"] .tm-eye { animation: tm-eyes-wide-late 2200ms var(--ease-out) 1; }
+.tm[data-act="lodger"] .tm-pupil { animation: tm-pupils-down 2200ms var(--ease-in-out) 1; }
+.tm-lodge-hole { fill: #5E2410; }
+.tm-lodge-leaf {
+  fill: var(--brand); transform-box: view-box; transform-origin: 39px 36.5px;
+  animation: tm-act-lodge-leaf 2200ms var(--ease-in-out) 1;
+}
+.tm-lodger {
+  opacity: 0; transform-box: fill-box; transform-origin: center bottom;
+  animation: tm-act-lodger-out 2200ms var(--ease-back) 1;
+}
+.tm-lodger-body { fill: var(--gold-400); }
+.tm-lodger-eye { fill: var(--act-ink); }
+
+/* 24. THE SPLIT ========================================================
+   Silhouette count is the one thing that reads unambiguously at 28px, and
+   this is the only act that changes it. It is also a picture of what the
+   agent is actually doing behind the wait: two things at once. Kept fast,
+   because a house dividing slowly reads as body horror rather than as a
+   gag. */
+@keyframes tm-act-split-host {
+  0%   { opacity: 1; transform: scale(1, 1); }
+  14%  { opacity: 1; transform: scale(1.06, 0.92); }    /* strains */
+  24%  { opacity: 1; transform: scale(0.94, 1.1); }
+  30%  { opacity: 0; transform: scale(0.9, 1.12); }     /* hands over to the twins */
+  76%  { opacity: 0; transform: scale(0.9, 1.1); }
+  82%  { opacity: 1; transform: scale(1.28, 0.74); }    /* they slam back together */
+  88%  { opacity: 1; transform: scale(0.86, 1.16); }
+  94%  { opacity: 1; transform: scale(1.06, 0.96); }
+  100% { opacity: 1; transform: scale(1, 1); }
+}
+@keyframes tm-act-twin-l {
+  0%, 28% { opacity: 0; transform: translateX(0) scale(0.6); }
+  34%     { opacity: 1; transform: translateX(-6px) scale(0.62); }
+  44%     { opacity: 1; transform: translateX(-11px) scale(0.62); }
+  52%     { opacity: 1; transform: translateX(-11px) scale(0.62) rotate(7deg); }  /* glances over */
+  64%     { opacity: 1; transform: translateX(-11px) scale(0.62) rotate(0deg); }
+  76%     { opacity: 1; transform: translateX(-2px) scale(0.62); }
+  81%     { opacity: 0; transform: translateX(0) scale(0.7); }
+  100%    { opacity: 0; transform: translateX(0) scale(0.6); }
+}
+@keyframes tm-act-twin-r {
+  0%, 28% { opacity: 0; transform: translateX(0) scale(0.6); }
+  34%     { opacity: 1; transform: translateX(6px) scale(0.62); }
+  44%     { opacity: 1; transform: translateX(11px) scale(0.62); }
+  52%     { opacity: 1; transform: translateX(11px) scale(0.62) rotate(-7deg); }
+  64%     { opacity: 1; transform: translateX(11px) scale(0.62) rotate(0deg); }
+  76%     { opacity: 1; transform: translateX(2px) scale(0.62); }
+  81%     { opacity: 0; transform: translateX(0) scale(0.7); }
+  100%    { opacity: 0; transform: translateX(0) scale(0.6); }
+}
+.tm[data-act="split"] .tm-house { animation: tm-act-split-host 2400ms var(--ease-in-out) 1; }
+.tm[data-act="split"] .tm-eye { animation: tm-act-split-host 2400ms var(--ease-in-out) 1; }
+.tm[data-act="split"] .tm-act { animation: tm-act-split-host 2400ms var(--ease-in-out) 1; }
+.tm[data-act="split"] .tm-pupil { animation: tm-pupils-up 2400ms var(--ease-in-out) 1; }
+.tm-twin {
+  opacity: 0; transform-box: view-box; transform-origin: 24px 30px;
+}
+.tm-twin-l { animation: tm-act-twin-l 2400ms var(--ease-in-out) 1; }
+.tm-twin-r { animation: tm-act-twin-r 2400ms var(--ease-in-out) 1; }
+.tm[data-act="split"] .tm-puff {
+  animation: tm-puff-bloom 620ms var(--ease-out) 1;
+  animation-delay: calc(1950ms + var(--i) * 60ms);
+}
+
+/* 25. THE BUILD ========================================================
+   Four and a bit seconds, gated to a long wait, once ever. She studies a
+   plan, then stacks a second tiny house beside her with real weight, and
+   it STAYS. Every loading indicator anyone has seen returns to its start
+   state; this one leaves something behind. */
+@keyframes tm-act-build-body {
+  0%   { transform: translateX(0) rotate(0deg) scale(1, 1); }
+  8%   { transform: translateX(2px) rotate(3deg) scale(0.99, 1.01); }    /* turns to the plan */
+  16%, 26% { transform: translateX(3px) rotate(5deg) scale(1, 1); }      /* studying, still */
+  32%  { transform: translateX(2px) rotate(2deg) scale(1.03, 0.97); }
+  40%  { transform: translateX(-1px) rotate(-3deg) scale(1.05, 0.94); }  /* sets the first block */
+  46%  { transform: translateX(0) rotate(-1deg) scale(0.97, 1.04); }
+  54%  { transform: translateX(-1px) rotate(-3deg) scale(1.05, 0.94); }  /* the second */
+  60%  { transform: translateX(0) rotate(-1deg) scale(0.97, 1.04); }
+  68%  { transform: translateX(-2px) rotate(-4deg) scale(1.06, 0.93); }  /* the roof */
+  74%  { transform: translateX(-1px) rotate(-2deg) scale(0.96, 1.05); }
+  80%  { transform: translateX(-0.5px) rotate(-1deg) scale(1.02, 0.98); } /* nudges it square */
+  86%, 94% { transform: translateX(0) rotate(0deg) scale(1, 1); }        /* quiet admiration */
+  100% { transform: translateX(0) rotate(0deg) scale(1, 1); }
+}
+@keyframes tm-act-plan {
+  0%, 4%  { opacity: 0; transform: scaleX(0.1); }
+  12%     { opacity: 1; transform: scaleX(1.06); }   /* unrolls */
+  16%     { opacity: 1; transform: scaleX(1); }
+  30%     { opacity: 1; transform: scaleX(1); }
+  36%     { opacity: 0; transform: scaleX(0.1); }    /* rolls away */
+  100%    { opacity: 0; transform: scaleX(0.1); }
+}
+/* Each block is placed, drops, and settles. Weight is the whole read. */
+@keyframes tm-act-block-1 {
+  0%, 34% { opacity: 0; transform: translateY(-16px) scale(0.9); }
+  38%     { opacity: 1; transform: translateY(-9px) scale(0.95); }
+  42%     { opacity: 1; transform: translateY(0) scale(1.14, 0.84); }   /* lands */
+  46%     { opacity: 1; transform: translateY(0) scale(0.96, 1.06); }
+  50%     { opacity: 1; transform: translateY(0) scale(1, 1); }
+  100%    { opacity: 1; transform: translateY(0) scale(1, 1); }
+}
+@keyframes tm-act-block-2 {
+  0%, 48% { opacity: 0; transform: translateY(-16px) scale(0.9); }
+  52%     { opacity: 1; transform: translateY(-8px) scale(0.95); }
+  56%     { opacity: 1; transform: translateY(0) scale(1.14, 0.84); }
+  60%     { opacity: 1; transform: translateY(0) scale(0.96, 1.06); }
+  64%     { opacity: 1; transform: translateY(0) scale(1, 1); }
+  100%    { opacity: 1; transform: translateY(0) scale(1, 1); }
+}
+@keyframes tm-act-block-3 {
+  0%, 62% { opacity: 0; transform: translateY(-18px) rotate(-14deg) scale(0.9); }
+  68%     { opacity: 1; transform: translateY(-7px) rotate(-8deg) scale(0.95); }
+  72%     { opacity: 1; transform: translateY(0) rotate(-5deg) scale(1.1, 0.88); }  /* lands crooked */
+  78%     { opacity: 1; transform: translateY(0) rotate(-5deg) scale(1, 1); }
+  84%     { opacity: 1; transform: translateY(0) rotate(1deg) scale(1, 1); }        /* nudged square */
+  88%     { opacity: 1; transform: translateY(0) rotate(0deg) scale(1, 1); }
+  100%    { opacity: 1; transform: translateY(0) rotate(0deg) scale(1, 1); }
+}
+@keyframes tm-act-build-eyes {
+  0%, 10% { transform: scaleY(1); }
+  20%     { transform: scaleY(0.62); }    /* squints at the plan */
+  30%     { transform: scaleY(0.62); }
+  40%     { transform: scaleY(1.1); }
+  86%     { transform: scaleY(1.1); }
+  92%     { transform: scaleY(0.5); }     /* pleased */
+  100%    { transform: scaleY(1); }
+}
+@keyframes tm-act-build-pupils {
+  0%, 8%  { transform: translate(0, 0); }
+  20%     { transform: translate(-1.9px, 0.3px); }   /* on the plan */
+  32%     { transform: translate(-1.9px, 0.3px); }
+  44%     { transform: translate(-1.8px, 1.2px); }   /* down at the blocks */
+  70%     { transform: translate(-1.8px, 0.4px); }
+  86%     { transform: translate(-1.6px, -0.4px); }  /* up at what she made */
+  100%    { transform: translate(0, 0); }
+}
+.tm[data-act="build"] .tm-act { animation: tm-act-build-body 4200ms var(--ease-in-out) 1; }
+.tm[data-act="build"] .tm-eye { animation: tm-act-build-eyes 4200ms var(--ease-in-out) 1; }
+.tm[data-act="build"] .tm-pupil { animation: tm-act-build-pupils 4200ms var(--ease-in-out) 1; }
+.tm-plan {
+  fill: #FFFFFF; stroke: var(--stone-400); stroke-width: 2; opacity: 0;
+  transform-box: fill-box; transform-origin: right center;
+  animation: tm-act-plan 4200ms var(--ease-out) 1;
+}
+.tm-block { fill: var(--clay-400); opacity: 0; transform-box: fill-box; transform-origin: center bottom; }
+.tm-block-1 { animation: tm-act-block-1 4200ms var(--ease-in-out) 1; }
+.tm-block-2 { animation: tm-act-block-2 4200ms var(--ease-in-out) 1; }
+.tm-block-3 { fill: var(--clay-500); animation: tm-act-block-3 4200ms var(--ease-in-out) 1; }
+
+/* 26. THE TIMER ========================================================
+   She notices the seconds counter ticking beside her. Not that waiting
+   happens, which snooze and rain already say, but that it is now forty
+   seconds and she can see the number too. */
+@keyframes tm-act-timer-body {
+  0%   { transform: rotate(0deg) translateX(0); }
+  14%  { transform: rotate(6deg) translateX(1.5px); }    /* turns toward it */
+  24%, 44% { transform: rotate(9deg) translateX(2.5px); } /* watching the digits */
+  54%  { transform: rotate(7deg) translateX(2px); }
+  64%  { transform: rotate(-4deg) translateX(-1.5px); }  /* back to you, with an opinion */
+  74%  { transform: rotate(-5deg) translateX(-2px); }
+  86%  { transform: rotate(1deg) translateX(0.4px); }
+  100% { transform: rotate(0deg) translateX(0); }
+}
+@keyframes tm-act-timer-pupils {
+  0%, 8%  { transform: translate(0, 0); }
+  18%     { transform: translate(2.1px, 0.2px); }    /* over at the clock */
+  28%     { transform: translate(2.1px, 0.2px); }
+  34%     { transform: translate(2.1px, 0.5px); }    /* the digits tick */
+  40%     { transform: translate(2.1px, 0.2px); }
+  46%     { transform: translate(2.1px, 0.5px); }
+  58%     { transform: translate(0, -0.3px); }       /* back out to you */
+  78%     { transform: translate(0, -0.3px); }
+  100%    { transform: translate(0, 0); }
+}
+@keyframes tm-act-timer-eyes {
+  0%, 30% { transform: scaleY(1); }
+  40%     { transform: scaleY(0.55); }    /* narrows at the number */
+  56%     { transform: scaleY(0.5); }
+  64%     { transform: scaleY(1.25); }
+  80%     { transform: scaleY(1.1); }
+  100%    { transform: scaleY(1); }
+}
+.tm[data-act="timer"] .tm-act { animation: tm-act-timer-body 1900ms var(--ease-in-out) 1; }
+.tm[data-act="timer"] .tm-eye { animation: tm-act-timer-eyes 1900ms var(--ease-in-out) 1; }
+.tm[data-act="timer"] .tm-pupil { animation: tm-act-timer-pupils 1900ms var(--ease-in-out) 1; }
+
+/* CONDITIONS: what she is still carrying from an earlier act ===========
+   These animate on their own clock and are deliberately outside the act
+   group, because the stand-down rule freezes everything inside
+   `[data-act]` and a passenger that freezes mid act is worse than none. */
+@keyframes tm-cond-in {
+  0%   { opacity: 0; transform: scale(0.4) translateY(4px); }
+  60%  { opacity: 1; transform: scale(1.08) translateY(-1px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes tm-cond-ride {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-1.4px) rotate(-3deg); }
+}
+.tm-built { fill: var(--clay-400); animation: tm-cond-in 520ms var(--ease-back) both; }
+.tm-built path { fill: var(--clay-500); }
+.tm-grime { fill: var(--stone-500); opacity: 0.5; animation: tm-cond-in 500ms var(--ease-out) both; }
+.tm-passenger {
+  transform-box: view-box; transform-origin: 24px 6px;
+  animation: tm-cond-in 420ms var(--ease-back) both,
+             tm-cond-ride 2300ms var(--ease-in-out) 420ms infinite;
+}
+
+/* Reduced motion: no act runs. The scheduler never starts a timer either,
+   so this is a backstop rather than the mechanism. ===================== */
+@media (prefers-reduced-motion: reduce), print {
+  .tm[data-shift] .tm-act,
+  .tm[data-shift] .tm-eye,
+  .tm[data-act] .tm-act,
+  .tm[data-act] .tm-house,
+  .tm[data-act] .tm-eye,
+  .tm[data-act] .tm-eye:first-of-type,
+  .tm[data-act] .tm-eye:last-of-type,
+  .tm[data-act] .tm-pupil,
+  .tm-string, .tm-burst-ray, .tm-puff, .tm-spark, .tm-zed,
+  .tm-puddle, .tm-drip, .tm-flame, .tm-ring,
+  .tm-hand, .tm-scribble, .tm-bulb, .tm-bulb-ray,
+  .tm-bub, .tm-bub-dot, .tm-mug, .tm-steam, .tm-plane,
+  .tm-magnify, .tm-cloud, .tm-drop, .tm-brolly, .tm-brolly-rim,
+  .tm-ball, .tm-key, .tm-lodge-leaf, .tm-lodger, .tm-twin, .tm-grime, .tm-passenger,
+  .tm-plan, .tm-block, .tm-built,
+  .tm-door-leaf, .tm-flag-pole, .tm-flag {
+    animation: none !important;
+  }
+}
