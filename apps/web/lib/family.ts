@@ -18,6 +18,11 @@ export interface FamilyRecord {
   /** IANA time zone (migration #27); null until captured from the
    * parent's device or set on the settings card. */
   time_zone: string | null;
+  /** The day this family starts their school year, as they reported it
+   * (gh#418). Month and day recur; schoolYearStartFor resolves the year
+   * a deadline should count from. Null means never asked, and every
+   * caller must treat that as "ask" rather than guess a date. */
+  school_year_start_on: string | null;
   /** Onboarding's address (migration #29), editable on /app/settings. */
   address_line: string | null;
   address_city: string | null;
@@ -67,7 +72,7 @@ export async function getMyFamily(): Promise<FamilyRecord | null> {
   const { data, error } = await supabase
     .from("families")
     .select(
-      "id, name, us_state, parent_display_name, profile_completed_at, parent_avatar_url, time_zone, address_line, address_city, address_zip, child_photo_consent_at, lesson_audio_consent_at, created_at",
+      "id, name, us_state, parent_display_name, profile_completed_at, parent_avatar_url, time_zone, school_year_start_on, address_line, address_city, address_zip, child_photo_consent_at, lesson_audio_consent_at, created_at",
     )
     .limit(1)
     .maybeSingle();

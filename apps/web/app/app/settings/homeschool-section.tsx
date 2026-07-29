@@ -44,9 +44,11 @@ export interface HomeschoolValues {
 
 function HomeschoolEditor({
   current,
+  schoolYearStartOn,
   onClose,
 }: {
   current: HomeschoolValues;
+  schoolYearStartOn: string | null;
   onClose: () => void;
 }) {
   const [styles, setStyles] = useState<string[]>(current.styles);
@@ -132,6 +134,21 @@ function HomeschoolEditor({
         />
       </div>
 
+      <label className="mt-4 block font-medium text-strong" htmlFor="school-year-start">
+        When does your school year start?
+      </label>
+      <p className="mt-1 text-sm text-muted">
+        Most states that ask for a filing count the deadline from this day, so
+        it is how Homa knows when your paperwork is due.
+      </p>
+      <input
+        id="school-year-start"
+        name="school_year_start_on"
+        type="date"
+        defaultValue={schoolYearStartOn ?? ""}
+        className="mt-2 w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
+      />
+
       <label className="mt-4 block font-medium text-strong" htmlFor="homeschool-values">
         Anything that matters to your family?
       </label>
@@ -172,7 +189,15 @@ function HomeschoolEditor({
   );
 }
 
-export function HomeschoolSection({ current }: { current: HomeschoolValues }) {
+export function HomeschoolSection({
+  current,
+  schoolYearStartOn,
+}: {
+  current: HomeschoolValues;
+  /** gh#418: drives filing deadlines in the 25 states whose rule counts
+   * from the day the family started. Null means never asked. */
+  schoolYearStartOn: string | null;
+}) {
   const [editing, setEditing] = useState(false);
   const hasAnything =
     current.styles.length > 0 || current.curriculums.length > 0 || Boolean(current.values);
@@ -182,7 +207,11 @@ export function HomeschoolSection({ current }: { current: HomeschoolValues }) {
       <SectionHeading>How you homeschool</SectionHeading>
 
       {editing ? (
-        <HomeschoolEditor current={current} onClose={() => setEditing(false)} />
+        <HomeschoolEditor
+          current={current}
+          schoolYearStartOn={schoolYearStartOn}
+          onClose={() => setEditing(false)}
+        />
       ) : hasAnything ? (
         // Values left, one Edit pill trailing right: the same row grammar
         // as the kid and parent rows (2026-07-13 UX read: four section

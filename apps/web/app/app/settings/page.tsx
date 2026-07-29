@@ -175,7 +175,10 @@ export default async function SettingsPage({
               openSignedInAdultPhoneEditor={shouldOpenSignedInAdultPhoneEditor(edit)}
             />
 
-            <HomeschoolSection current={homeschool} />
+            <HomeschoolSection
+              current={homeschool}
+              schoolYearStartOn={family.school_year_start_on}
+            />
 
             <PlanSection plan={plan} />
 
