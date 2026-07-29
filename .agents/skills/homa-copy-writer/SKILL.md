@@ -12,10 +12,24 @@ and never feels judged.
 
 ## The priority law
 
-Clarity and low cognitive load beat personality, every time. Warmth is the
-tone of a clear sentence, never decoration added to one. If a charming line
-and a plain line carry the same fact, ship the plain one. (Founder ruling
-2026-07-08, logged in docs/homa-planning/build-log.md.)
+**Clear AND memorable. Boring is a failure state.** (Founder ruling
+2026-07-29, `copy-voice-memorable`, which overturns the 2026-07-08
+`copy-clarity` law that ranked clarity above personality. Both logged in
+docs/homa-planning/build-log.md.)
+
+She has a hundred tabs open and no reason to come back to something that
+reads like a form letter. Copy she understands and forgets did not do its
+job. Personality is not decoration added to a clear sentence; it is what
+makes her read the second sentence.
+
+Clarity is still the floor. It stopped being the ceiling. When a charming
+line and a plain line carry the same fact, ship the one she will still be
+able to quote tomorrow, and if the charming one costs her a re-read, it was
+not charming, it was showing off.
+
+The order when they genuinely conflict: **true, then clear, then
+memorable, then short.** Never buy memorable with accuracy, and never buy
+short with meaning.
 
 ## What cognitive load actually is
 
@@ -23,7 +37,9 @@ Load is measured in re-reads and pauses, never in word count. Cutting words
 that carry meaning RAISES load. Never trade clarity for brevity to fit a
 length cap; cut a whole idea instead, or split the sentence.
 
-- One idea per sentence. Two ideas get two sentences.
+- One idea per sentence, when the idea is load-bearing. This is a default
+  for facts and instructions, not a ban on rhythm: vary sentence length,
+  because a short one lands harder after a long one.
 - Front-load the point. The fact or action comes first, color after.
 - Subject, verb, object. No inverted syntax for flair ("Strengths, first").
 - No garden paths: a list inside a clause inside a list forces a re-read.
@@ -44,11 +60,23 @@ length cap; cut a whole idea instead, or split the sentence.
   for evaluators, not for her.
 - No meta-commentary about the copy itself: "here's the honest picture",
   "the part worth circling", "the real story is". Just say the thing.
-- Metaphors are a budget of one per surface, zero in a tie. Stacked images
-  ("a starting line, not a verdict, watch the numbers move") make her
-  translate instead of read.
-- Reassure before inform means ORDER, not padding: one reassurance up
-  front, then plain facts. Never wrap every fact in its own cushion.
+- Reach for an image when it makes the idea land faster than the plain
+  sentence would, and use the plain sentence when it does not. No quota.
+  What is still banned is the STACK ("a starting line, not a verdict, watch
+  the numbers move"), because three images in a row make her translate
+  instead of read. One good one is worth having.
+- Reassurance leads when something is actually wrong (a failure, a scary
+  number, a thing she thinks she broke). Everywhere else, lead with the
+  useful thing. Never wrap every fact in its own cushion: a cushion on a
+  fact that did not need one reads as bad news withheld.
+- Say the real thing, then be kind about it. Charm over cruelty, never
+  sugarcoating over charm. When warmth and honesty pull apart, honesty
+  wins and warmth carries it.
+- Be funny when it is actually funny: dry, specific, earned by knowing the
+  reader's real Tuesday. Never bits, never a quip bolted on at the end,
+  never exclamation marks doing a good sentence's work. A forced joke is
+  worse than no joke. Never at the parent's or a child's expense, and
+  never when she is struggling.
 - Plain words beat clever euphemisms. When a banned word forces a
   workaround, the replacement must still say something concrete ("growing
   right now" always arrives with the named next step).
@@ -66,8 +94,10 @@ length cap; cut a whole idea instead, or split the sentence.
 - Never "behind" (in ANY sense), no deficit words, no diagnosis or testing
   vocabulary, no percentiles. Growth framing only.
 - Never compare siblings. Never a verdict on a child.
-- Offers, never commands. Temporal never causal ("since June", never
-  "because you did X").
+- She decides, you suggest. That is respect, not timidity: recommend
+  plainly ("I'd start with the counting mat"), never hedge into mush
+  ("you might possibly want to consider maybe"), and never issue an order.
+  Temporal never causal ("since June", never "because you did X").
 - No invented numbers, testimonials, or social proof. Child pronouns follow
   the parent's own words or stay "they".
 

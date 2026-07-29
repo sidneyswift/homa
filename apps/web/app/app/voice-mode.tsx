@@ -1,6 +1,6 @@
 "use client";
 
-import { gateway } from "@ai-sdk/gateway";
+import { openai } from "@ai-sdk/openai";
 import { experimental_useRealtime as useRealtime } from "@ai-sdk/react";
 import { Mic, MicOff, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -28,7 +28,7 @@ import { transcriptFromRealtimeMessages, type VoiceTranscriptLine } from "./voic
  * The `model` below is only the codec that translates events on the wire.
  */
 
-const MODEL_ID = "openai/gpt-realtime-2.1";
+const MODEL_ID = "gpt-realtime-2.1";
 
 /** Reasons the token route can refuse, in the parent's words. */
 const REASONS: Record<string, string> = {
@@ -47,7 +47,7 @@ export function VoiceMode({
    * Called exactly once, on the way out, with whatever was said. */
   onClose: (transcript: VoiceTranscriptLine[]) => void;
 }) {
-  const model = useMemo(() => gateway.experimental_realtime(MODEL_ID), []);
+  const model = useMemo(() => openai.experimental_realtime(MODEL_ID), []);
   const [error, setError] = useState<string | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const closedRef = useRef(false);

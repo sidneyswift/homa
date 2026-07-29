@@ -2,11 +2,14 @@ import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ageInMonths, ageLabel } from "@homa/core";
 
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { useBillingGate } from "../features/billing/use-billing-gate";
 import { useSession } from "../features/auth/session-provider";
+import { AddChildForm } from "../features/family/add-child-form";
+import { useFamilyData } from "../features/family/use-family-data";
 import { supabase } from "../lib/supabase";
 import {
   openPrivacyPolicy,
@@ -23,11 +26,17 @@ const PLAN_TIER_LABELS: Record<string, string> = {
 };
 
 /**
- * Settings: the account's real home. Reached from the Today header, a
- * link at the bottom of Family, and BillingGate's own paywall (a walled
- * family must still be able to sign out or delete their account).
- * Subscription state reads GET /api/billing/gate (arc F), the same
- * two-provider decision every tab is already gated by.
+ * Settings: the account's real home. Reached from the sidebar drawer's
+ * account menu, and BillingGate's own paywall (a walled family must
+ * still be able to sign out or delete their account). Subscription
+ * state reads GET /api/billing/gate (arc F), the same two-provider
+ * decision every screen is already gated by.
+ *
+ * Children moved here from the retired Family tab (founder call
+ * 2026-07-29, folding Family into Chat's welcome state left "add a
+ * child" with nowhere to live; web has no nav-reachable add-child
+ * affordance either, kids are added during onboarding there, so this
+ * is the one place mobile still needs it).
  *
  * Gap, tracked as the "Portal split" item on gh#305: this does not yet
  * know WHICH provider (Stripe or Apple) is entitling the family, so it
@@ -42,6 +51,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { session } = useSession();
   const { gate } = useBillingGate();
+  const { family, children, reload } = useFamilyData();
   const appVersion = Constants.expoConfig?.version;
 
   const planLine = (() => {
@@ -103,6 +113,34 @@ export default function SettingsScreen() {
             {planLine}
           </Text>
         </SettingsSection>
+
+        {family ? (
+          <View style={{ gap: space.sm }}>
+            <Text
+              style={{
+                fontFamily: fontFamilies.bodySemibold,
+                fontSize: fontSize.sm,
+                color: colors.textMuted,
+                textTransform: "uppercase",
+                letterSpacing: 0.4,
+              }}
+            >
+              Children
+            </Text>
+            {children.length > 0 ? (
+              <Card style={{ gap: space.sm }}>
+                {children.map((child) => (
+                  <SettingsRow
+                    key={child.id}
+                    label={child.name}
+                    value={ageLabel(ageInMonths(child.birth_month))}
+                  />
+                ))}
+              </Card>
+            ) : null}
+            <AddChildForm familyId={family.id} onAdded={() => void reload()} />
+          </View>
+        ) : null}
 
         <SettingsSection title="Support">
           <SettingsLinkRow label="Contact us" onPress={() => void openSupportEmail()} />

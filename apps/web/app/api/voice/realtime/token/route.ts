@@ -1,4 +1,4 @@
-import { gateway } from "@ai-sdk/gateway";
+import { openai } from "@ai-sdk/openai";
 
 import { familyHasChannel } from "../../../../../lib/billing/channel-access";
 import { familyWallCheckout } from "../../../../../lib/billing/wall";
@@ -17,11 +17,28 @@ import { realtimeToolDefinitions } from "../../../../../lib/voice/realtime-tools
  * back, and the transcript streams into her chat. It is NOT the phone line.
  * Telnyx stays what it is, for someone who wants to dial a number.
  *
- * Credential posture, per ruling `voice-provider-key-telephony-only`
- * (2026-07-27): this path runs on **Vercel OIDC through the AI Gateway**,
- * so no OpenAI key is involved. `gateway.experimental_realtime.getToken()`
- * exchanges the server's OIDC credential for a single-use `vcst_` client
- * secret. The browser only ever sees that secret and the socket URL.
+ * Credential posture. This mints against OpenAI directly with
+ * `OPENAI_API_KEY`, not through the AI Gateway on Vercel OIDC.
+ *
+ * That is a correction, not a preference. The gateway route was built first
+ * because Vercel's docs say `getToken` accepts "apiKey,
+ * AI_GATEWAY_API_KEY, or Vercel OIDC token". It does not: in production it
+ * answered `Client secrets can only be minted with a Gateway API key`, so
+ * every session failed at connect. The OIDC path for realtime does not
+ * exist, and ruling `voice-provider-key-telephony-only` was made on that
+ * false premise (see `voice-openai-direct`, 2026-07-29).
+ *
+ * What going direct does and does not buy, stated honestly because the
+ * first version of this comment claimed WebRTC and was wrong. The AI SDK's
+ * OpenAI realtime path is WebSocket too (`wss://api.openai.com/v1/realtime`),
+ * so the transport is the same as the gateway's. What actually changes: it
+ * works at all, the gateway's 25 minute session and 5 minute idle caps do
+ * not apply, and image input becomes possible, which the gateway documents
+ * as unsupported. WebRTC would be a further step and a different client.
+ *
+ * The key never reaches the browser. `getToken` exchanges it for a
+ * single-use `ek_` client secret, and only that plus the socket URL are
+ * returned.
  *
  * The instructions are pinned HERE, server-side, and travel inside the
  * minted secret. A client cannot edit Homa's persona, her capability
@@ -65,7 +82,7 @@ const TOKEN_TTL_SECONDS = 60 * 5;
  * is new, and it resolves only if the phone moves to gpt-realtime (Phase 3). */
 const VOICE = "marin";
 
-const MODEL = "openai/gpt-realtime-2.1";
+const MODEL = "gpt-realtime-2.1";
 
 export async function POST(): Promise<Response> {
   const supabase = await createSupabaseServerClient();
@@ -116,7 +133,7 @@ export async function POST(): Promise<Response> {
 
   const tools = realtimeToolDefinitions();
   try {
-    const { token, url } = await gateway.experimental_realtime.getToken({
+    const { token, url } = await openai.experimental_realtime.getToken({
       model: MODEL,
       expiresAfterSeconds: TOKEN_TTL_SECONDS,
       sessionConfig: {

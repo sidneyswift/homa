@@ -313,8 +313,8 @@ status header, or session memory is a substitute for an issue.
 
 - No em dash, ever, anywhere (code comments, UI copy, docs, commit messages). Use a comma, period, colon, or mid-dot instead.
 - The name is always written "Homa". Never type "HOMA". The logo is the logo: where the brand appears as a mark, render the real `Logo` component (`apps/web/components/brand/Logo.tsx`, which spells "Homa"), never a hand-typed imitation of it. Founder correction 2026-07-28, `brand-casing-homa`, which retires global D8's old "HOMA on UI surfaces" wording.
-- Sentence case, reassure-before-inform, offers never commands, no red/"behind" framing, never compare siblings.
-- Clarity and low cognitive load beat personality (founder ruling 2026-07-08). One idea per sentence, plain names for things, no metaphor stacks, no meta-commentary. Fewer words is NOT the goal: cutting words that carry meaning makes copy harder, not easier. The full rulebook is `.agents/skills/homa-copy-writer/SKILL.md`; gate important copy with `homa-copy-reviewer` then `homa-copy-editor`.
+- Sentence case, no red/"behind" framing about a child, never compare siblings, never a verdict on a child. She decides and Homa suggests: recommend plainly, never issue an order, never hedge into mush.
+- **Clear AND memorable; boring is a failure state** (founder ruling 2026-07-29, `copy-voice-memorable`, which overturns the 2026-07-08 `copy-clarity` law that ranked clarity above personality). Clarity is the floor, not the ceiling. Order when they conflict: true, then clear, then memorable, then short. Be funny when it is actually funny, never as a bolted-on bit. Say the real thing, then be kind about it: charm over cruelty, never sugarcoating over charm. Images and emoji are judged on whether they beat the plain sentence, not rationed by quota. Still banned: metaphor stacks, meta-commentary, and cutting words that carry meaning just to be shorter. The full rulebook is `.agents/skills/homa-copy-writer/SKILL.md`; gate important copy with `homa-copy-reviewer` then `homa-copy-editor`.
 - Imports stay at the top of the file, no inline imports.
 
 ## Design system

@@ -3,6 +3,10 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getAppData } from "../../../lib/app-data";
+import { familyPlanState } from "../../../lib/billing/wall";
+import { filingDeadlines } from "../../../lib/compliance/deadlines";
+import { mayGenerateLetter } from "../../../lib/compliance/filing-method";
+import { FILING_METHODS_BY_STATE } from "../../../lib/compliance/filing-methods.data";
 import { composeStatePack, verifiedMonthYear } from "../../../lib/compliance/pack";
 import { emitMapEvent } from "../../../lib/map/events";
 import { getStateRequirementsDetail } from "../../../lib/map/state-requirements";
@@ -17,6 +21,7 @@ import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../../lib/view-context
 import { PageColumn } from "../../../components/dashboard/page-column";
 import { BinderView } from "./binder-view";
 import { InProgressShelf } from "./in-progress-shelf";
+import { StateFilingCard } from "./state-filing-card";
 import { StatePackCard } from "./state-pack-card";
 
 /**
@@ -108,6 +113,40 @@ export default async function BinderPage() {
     });
   }
 
+  // The filing card (gh#421). Distinct from the pack: the pack explains
+  // what the state asks for, this is the document that answers it. Shown
+  // only where the state actually asks for something, and only where the
+  // reviewed table says which shape that something takes.
+  const filingMethod = stateDetail
+    ? FILING_METHODS_BY_STATE[stateDetail.stateCode]
+    : undefined;
+  const filingTodayIso = new Intl.DateTimeFormat("en-CA", {
+    timeZone: effectiveTimeZone(family.time_zone),
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  const filingDue = stateDetail
+    ? filingDeadlines({
+        stateCode: stateDetail.stateCode,
+        schoolYearStartIso: family.school_year_start_on,
+        todayIso: filingTodayIso,
+      })
+    : null;
+  // familyPlanState already degrades to "regular" when billing has a bad
+  // day, which is the safe direction here: the card invites an upgrade
+  // instead of offering a button that would 402.
+  const planTier = packReady
+    ? (await familyPlanState(family.id)).tier
+    : "regular";
+  const filingKind: "letter" | "worksheet" | "not_required" | null = packReady
+    ? filingMethod?.method === "not_required"
+      ? "not_required"
+      : mayGenerateLetter(filingMethod, filingTodayIso)
+        ? "letter"
+        : "worksheet"
+    : null;
+
   return (
     <PageColumn>
       <div className="mb-6">
@@ -117,7 +156,31 @@ export default async function BinderPage() {
             verifiedMonthYear={verifiedMonthYear(stateDetail.sourceLastVerified)}
             expectedPages={expectedPages}
           />
-        ) : (
+        ) : null}
+        {filingKind && stateDetail ? (
+          <div className="mt-4">
+            <StateFilingCard
+              stateName={stateDetail.stateName}
+              entitled={planTier === "plus" || planTier === "elite"}
+              kind={filingKind}
+              dueLabel={
+                filingDue?.ok && filingDue.deadlines[0]
+                  ? new Intl.DateTimeFormat("en-US", {
+                      timeZone: "UTC",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    }).format(new Date(`${filingDue.deadlines[0].dueOn}T12:00:00Z`))
+                  : null
+              }
+              needsSchoolYearStart={
+                filingDue?.ok === false &&
+                filingDue.reason === "needs_school_year_start"
+              }
+            />
+          </div>
+        ) : null}
+        {packReady ? null : (
           <section className="rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
             <h2 className="font-display text-xl font-semibold text-strong">
               Your state pack

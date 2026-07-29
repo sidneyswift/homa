@@ -6,6 +6,10 @@ import {
   sweepThankYouCards,
   type ThankYouCardSweepResult,
 } from "../../../../lib/cards/thank-you";
+import {
+  runFilingReminderSweep,
+  type FilingReminderSweepResult,
+} from "../../../../lib/compliance/filing-reminder-sweep";
 import { dripEnabled } from "../../../../lib/drip/flag";
 import { runDripSweep, type DripSweepResult } from "../../../../lib/drip/sweep";
 import { sendBandReadyEmail, sendReminderEmail, sendRetestEmail } from "../../../../lib/map/email";
@@ -66,6 +70,14 @@ import { reapStaleSubjectLessons } from "../../../../lib/subject-lessons/store";
  *      changes nothing; it exists so a frozen turn is visible within the
  *      hour instead of only through the 2h task-run reaper, which could
  *      say a run produced no output but never why.
+ *  11. The state filing reminder (lib/compliance/filing-reminder-sweep.ts,
+ *      gh#422): one email per family per filing deadline, about two
+ *      weeks out. The sweep runs every tick and the FLAG GUARDS THE
+ *      SEND, not the pass, because while counsel review is open
+ *      (gh#423) the number that matters is how many families are near a
+ *      legal deadline and cannot be told. Its skip counts say why the
+ *      send count is zero. DARK unless HOMA_FILING_REMINDERS_ENABLED is
+ *      exactly "true".
  *
  * Every tick also writes one cron_runs heartbeat row (founder console
  * MJ-14), success or failure, so a dead cron is visible from /admin.
@@ -118,6 +130,21 @@ export async function GET(request: Request): Promise<Response> {
     midChecklistSent: 0,
     eligible: 0,
     capped: false,
+  };
+  let filings: FilingReminderSweepResult = {
+    sent: 0,
+    eligible: 0,
+    alreadySent: 0,
+    skipped: {
+      not_entitled: 0,
+      no_email: 0,
+      no_state: 0,
+      state_asks_nothing: 0,
+      needs_school_year_start: 0,
+      no_deadline: 0,
+      not_due_yet: 0,
+    },
+    sendingEnabled: false,
   };
 
   try {
@@ -194,6 +221,20 @@ export async function GET(request: Request): Promise<Response> {
     if (dripEnabled()) {
       drip = await runDripSweep();
     }
+    // The filing reminder (gh#422). Unlike the drip, this runs on every
+    // tick and the FLAG GUARDS THE SEND, not the sweep: while counsel
+    // review is open (gh#423) the useful number is how many families are
+    // near a legal deadline and cannot be told, and a sweep that does
+    // not run cannot report it. Sending stays dark until
+    // HOMA_FILING_REMINDERS_ENABLED is exactly "true".
+    filings = await runFilingReminderSweep(
+      new Intl.DateTimeFormat("en-CA", {
+        timeZone: "UTC",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date()),
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown";
     console.error("map/cron failed:", message);
@@ -229,6 +270,7 @@ export async function GET(request: Request): Promise<Response> {
         staleSubjectLessons,
         stuckToolCalls,
         drip,
+        filings,
       },
       { status: 500 },
     );
@@ -241,6 +283,7 @@ export async function GET(request: Request): Promise<Response> {
     purged,
     transcripts,
     cards,
+    filings,
     digest,
     lessons,
     staleSubjectLessons,
@@ -260,5 +303,6 @@ export async function GET(request: Request): Promise<Response> {
     staleSubjectLessons,
     stuckToolCalls,
     drip,
+    filings,
   });
 }

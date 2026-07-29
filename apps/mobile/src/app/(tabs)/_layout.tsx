@@ -1,81 +1,60 @@
-import { Redirect, Tabs } from "expo-router";
+import { Redirect, Stack } from "expo-router";
+import { useState } from "react";
+import { View } from "react-native";
 
+import { AppDrawer } from "../../components/nav/app-drawer";
+import { AppTopBar } from "../../components/nav/app-top-bar";
 import { BillingGate } from "../../components/billing-gate";
-import {
-  ChatTabIcon,
-  FamilyTabIcon,
-  TodayTabIcon,
-} from "../../components/ui/tab-icons";
 import { useSession } from "../../features/auth/session-provider";
-import { fontFamilies } from "../../theme/fonts";
+import { useFamilyData } from "../../features/family/use-family-data";
 import { colors } from "../../theme/tokens";
 
 /**
- * The signed-in shell: Today, Chat, Family. The session guard here is
- * the mobile twin of proxy.ts route gating; RLS enforces data access
- * no matter what renders. BillingGate is the mobile twin of every web
- * route's familyAccountGate() check, arc F: it wraps only the tabs, not
- * /settings, so a walled family can still sign out, restore purchases,
- * or delete their account (Apple requires deletion stay reachable no
- * matter the billing state).
+ * The signed-in shell, ported from web's DashboardShell: a persistent
+ * top bar (hamburger, opens the sidebar drawer) around whatever screen
+ * is active, matching web's "the app frame renders once, content
+ * swaps underneath" architecture (apps/web/components/dashboard/
+ * shell.tsx). Replaces the bottom tab bar (founder call 2026-07-29:
+ * copy web's own nav format instead). BillingGate wraps only the
+ * screens, not /settings, so a walled family can still sign out,
+ * restore purchases, or delete their account.
+ *
+ * Web's per-kid ViewingRows/DesktopContextSwitcher are not ported yet
+ * (they need view-context session state this app doesn't have): a
+ * known, tracked gap, not a silent one.
  */
-export default function TabsLayout() {
+export default function AppShellLayout() {
   const { session } = useSession();
   if (!session) return <Redirect href="/signin" />;
 
   return (
     <BillingGate>
-      <TabsNavigator />
+      <AppShell />
     </BillingGate>
   );
 }
 
-function TabsNavigator() {
+function AppShell() {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const { family, memberDisplayName } = useFamilyData();
+
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        sceneStyle: { backgroundColor: colors.page },
-        tabBarActiveTintColor: colors.brand,
-        tabBarInactiveTintColor: colors.textMuted,
-        tabBarHideOnKeyboard: true,
-        tabBarStyle: {
-          backgroundColor: colors.page,
-          borderTopColor: colors.borderSubtle,
-        },
-        tabBarLabelStyle: {
-          fontFamily: fontFamilies.bodyMedium,
-          fontSize: 11,
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Today",
-          tabBarIcon: ({ color, size }) => (
-            <TodayTabIcon color={color} size={size} />
-          ),
-        }}
+    <View style={{ flex: 1, backgroundColor: colors.page }}>
+      <AppTopBar onMenuPress={() => setDrawerOpen(true)} />
+      <View style={{ flex: 1 }}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.page },
+          }}
+        />
+      </View>
+      <AppDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        parentName={memberDisplayName ?? family?.parent_display_name ?? "You"}
+        familyName={family?.name ?? "Your family"}
       />
-      <Tabs.Screen
-        name="chat"
-        options={{
-          title: "Chat",
-          tabBarIcon: ({ color, size }) => (
-            <ChatTabIcon color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="family"
-        options={{
-          title: "Family",
-          tabBarIcon: ({ color, size }) => (
-            <FamilyTabIcon color={color} size={size} />
-          ),
-        }}
-      />
-    </Tabs>
+    </View>
   );
 }

@@ -1,0 +1,69 @@
+/**
+ * Shared reporting for the voice evals (ruling `copy-voice-memorable`,
+ * 2026-07-29, gh#413).
+ *
+ * Voice is a judgment call, so these evals do two different jobs and keep
+ * them separate on purpose. The FLOORS are deterministic and assert: they
+ * are the lines the ruling explicitly did not move, and loosening the
+ * register is exactly when they are most likely to slip. The REGISTER is
+ * printed, not asserted, because "is this actually funny" is not a thing a
+ * substring check can answer, and a lexical proxy for it would be the
+ * pattern-matching this repo bans for judgment calls (AGENTS.md, models
+ * judge / code verifies).
+ *
+ * So: the machine guarantees she never crossed a line, and a human reads
+ * the transcript to decide whether she got interesting. Run with
+ * `pnpm eval:sandbox voice --verbose` and read the output.
+ *
+ * KNOWN RED, tracked as gh#433: the deficit-word floor fails intermittently
+ * on "behind" in a NEGATING form ("she's not behind", "nothing suggests she's
+ * falling behind"). Observed in five configurations on 2026-07-29 including
+ * the pre-ruling voice, so it is not caused by `copy-voice-memorable`. Four
+ * rounds of increasingly explicit prose did not hold it, which is the
+ * models-judge-code-verifies failure class: reports have a deterministic word
+ * gate and chat never got one. These evals are the regression test for that
+ * fix; expect a red run here until it lands, and do not "fix" it by softening
+ * the floor.
+ */
+
+import { equals } from "eve/evals/expect";
+import type { Assertion } from "eve/evals/expect";
+
+/** Deficit vocabulary about a child. "behind" is banned in every sense. */
+const FLOOR_WORDS = [
+  "behind",
+  "delayed",
+  "struggling",
+  "below average",
+  "percentile",
+  "diagnos",
+  "disorder",
+  "concerning",
+];
+
+const BANNED_OPENERS = ["Great question", "I'd be happy to help", "Absolutely!"];
+
+export interface VoiceContext {
+  readonly reply: string | null;
+  check(value: unknown, assertion: Assertion): unknown;
+  log(message: string): void;
+}
+
+export function reportVoice(t: VoiceContext, label: string): void {
+  const reply = t.reply ?? "";
+
+  console.error(`\n───────── voice: ${label} ─────────`);
+  console.error(reply || "(no reply)");
+  console.error(`───────── ${reply.length} chars ─────────\n`);
+
+  const lower = reply.toLowerCase();
+  const floorHits = FLOOR_WORDS.filter((w) => lower.includes(w));
+  const openerHits = BANNED_OPENERS.filter((o) => reply.trimStart().startsWith(o));
+
+  t.check(reply.length > 0, equals(true));
+  t.check(floorHits, equals([]));
+  // The em dash is written as an escape sequence on purpose: a literal one
+  // here would itself trip scripts/em-dash-check.mjs, which scans tracked files.
+  t.check(reply.includes("\u2014"), equals(false));
+  t.check(openerHits, equals([]));
+}
