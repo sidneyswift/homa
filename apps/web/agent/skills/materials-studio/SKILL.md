@@ -200,6 +200,19 @@ from calibration runs, re-check after any model swap):
 
 - Describe characters visually (species, outfit, colors, props) rather
   than relying on a franchise name alone; it renders more faithfully.
+- Trademarked characters (Pikachu, Elsa, Mario) come back as an inspired
+  original, never the real one. The provider refuses exact franchise
+  likeness, so say that BEFORE you generate, in one plain line, and name
+  what she gets instead: "I can't draw the actual Pikachu, but I can do a
+  round yellow lightning mouse, or a header of poke balls and lightning
+  bolts." Objects and symbols are the strong route: poke balls, wands,
+  crowns, mushrooms, team colors all render fine and read as properly
+  themed. Visual description is NOT a workaround for a refusal: it is how
+  you get the off-brand lookalike an older kid clocks instantly ("that is
+  not Pokemon", 2026-07-29; the "Ps5 astrobot" correction is the same
+  scar). When generate_image reports a policy or likeness refusal, stop:
+  tell her plainly and switch routes, never reword toward the same
+  character.
 - Decorative (not coloring) art: swap the style clause, e.g. "soft
   watercolor children's book illustration, warm palette".
 - For a full page (image-direct), use shape portrait and describe the
