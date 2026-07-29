@@ -5,6 +5,8 @@ import type {
   StatePathwayDetail,
   StateRequirementsDetail,
 } from "../map/state-requirements";
+import { anchorDateText } from "./deadline-anchor-verify";
+import { DEADLINE_ANCHORS } from "./deadline-anchors.generated";
 
 /**
  * The state pack (plans/2026-07-28-state-pack.md): "Your {State} pack",
@@ -239,13 +241,27 @@ export function derivePathwayDivergence(
   };
 }
 
-/** The scope note beside a rendered value when sibling pathways carry a
- * different rule: the value stays (it is the default pathway's own),
- * and the parent learns what it covers. */
+/**
+ * The scope marker beside a rendered value when sibling pathways carry a
+ * different rule: the value stays (it is the default pathway's own) and
+ * the parent learns what it covers. A marker rather than a sentence,
+ * because California diverges on five of seven rows and the sentence
+ * repeated five times on one page (visual review, 2026-07-28); the
+ * sentence itself is printed once under the rows by divergenceFootnote.
+ */
+const DIVERGENCE_MARK = "°";
+
 function divergenceNote(differs: boolean): string {
-  return differs
-    ? " Other pathways carry a different rule; they are listed on the sources page."
-    : "";
+  return differs ? `<span class="sp-mark">${DIVERGENCE_MARK}</span>` : "";
+}
+
+function divergenceFootnote(
+  detail: StateRequirementsDetail,
+  duties: Duties,
+): string {
+  const any = Object.values(duties.divergence).some(Boolean);
+  if (!any) return "";
+  return `<p class="sp-mark-note"><span class="sp-mark">${DIVERGENCE_MARK}</span> This rule differs on ${escapeHtml(detail.stateName)}'s other pathways, which are listed on the sources page. This pack covers ${duties.pathway ? escapeHtml(duties.pathway.name) : "the default pathway"}.</p>`;
 }
 
 interface Duties {
@@ -570,13 +586,7 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
     );
   }
 
-  const keyDates =
-    p && !p.notification.varies && p.notification.required && p.notification.deadline
-      ? `<aside class="sp-dates">
-  <p class="sp-section-label">The filing deadline</p>
-  <p><strong>${escapeHtml(trimTrailingPeriod(p.notification.deadline))}</strong>${p.notification.recipient ? ` · to ${escapeHtml(p.notification.recipient)}` : ""}${p.notification.frequency ? ` · ${escapeHtml(humanizeToken(p.notification.frequency))}` : ""}</p>
-</aside>`
-      : "";
+  const keyDates = keyDatesBox(detail, duties);
 
   const highCallout =
     detail.regulationLevel === "high"
@@ -594,6 +604,7 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
 <section class="sp-rows">
 ${rows.join("\n")}
 </section>
+${divergenceFootnote(detail, duties)}
 ${keyDates}
 ${highCallout}`;
 }
@@ -613,6 +624,54 @@ function dedupeCitationsByUrl(
     }
   }
   return [...byUrl.values()];
+}
+
+/**
+ * "Key dates for your year" (gh#342): the calendar anchors derived from
+ * this state's own deadline prose, each one carrying a verbatim quote
+ * that was verified against the source at build time
+ * (deadline-anchor-verify.ts). A state whose proposal failed
+ * verification simply has no entry, and falls back to the verbatim
+ * string alone, which is what every state showed before this existed.
+ *
+ * The rendered date always comes from the anchor's LABEL, never from
+ * arithmetic on withinDays: several states count business days (New
+ * Hampshire, Vermont) or school days (Arkansas), and only the label
+ * carries that distinction. The verbatim source sits underneath as the
+ * authority, so a parent can always read the rule the way the statute
+ * states it.
+ */
+function keyDatesBox(
+  detail: StateRequirementsDetail,
+  duties: Duties,
+): string {
+  const p = duties.pathway;
+  if (!p || !p.notification.required || !p.notification.deadline) return "";
+  const entry = DEADLINE_ANCHORS[detail.stateCode];
+  const scope = duties.divergence.notification
+    ? ` <span class="sp-dates-scope">on the ${escapeHtml(p.name)} pathway</span>`
+    : "";
+  const anchorRows =
+    entry && entry.source === p.notification.deadline
+      ? entry.anchors
+          .map((anchor) => {
+            // An anchor with no calendar date (relative or conditional)
+            // leaves the stamp column empty rather than filling it with a
+            // word: its label already carries the whole rule, and the
+            // count is often in units a bare number would misstate
+            // (business days, school days).
+            const date = anchorDateText(anchor);
+            return `    <li><span class="sp-date-stamp">${date ? escapeHtml(date) : ""}</span><span>${escapeHtml(anchor.label)}</span></li>`;
+          })
+          .join("\n")
+      : "";
+  const heading = anchorRows
+    ? `Key dates for your year${scope}`
+    : `The filing deadline${scope}`;
+  return `<aside class="sp-dates">
+  <p class="sp-section-label">${heading}</p>
+${anchorRows ? `  <ul class="sp-date-list">\n${anchorRows}\n  </ul>\n` : ""}  <p class="sp-dates-source"><strong>${escapeHtml(trimTrailingPeriod(p.notification.deadline))}</strong>${p.notification.recipient ? ` · to ${escapeHtml(p.notification.recipient)}` : ""}${p.notification.frequency ? ` · ${escapeHtml(humanizeToken(p.notification.frequency))}` : ""}</p>
+</aside>`;
 }
 
 function sourcesPage(detail: StateRequirementsDetail, duties: Duties): string {
@@ -1170,6 +1229,14 @@ export function wrapStatePackDocument(
   .sp-row-sub { margin-top: 3px !important; font-size: 9px !important; color: ${MUTED} !important; }
   .sp-dates { margin-top: 0.16in; border: 1.5px solid ${RULE}; border-radius: 8px; padding: 10px 14px; }
   .sp-dates p { margin: 0; font-size: 11.5px; color: ${INK}; }
+  .sp-mark { color: ${CLAY}; font-weight: 700; }
+  .sp-mark-note { margin: 7px 0 0; font-size: 8.6px; line-height: 1.45; color: ${MUTED}; }
+  .sp-dates-scope { font-family: "Hanken Grotesk", sans-serif; text-transform: none; letter-spacing: 0; font-size: 8.5px; color: ${SUBTLE}; }
+  .sp-date-list { list-style: none; margin: 2px 0 8px; padding: 0; }
+  .sp-date-list li { display: flex; align-items: baseline; gap: 9px; padding: 3px 0; font-size: 11.5px; color: ${INK}; }
+  .sp-date-stamp { flex: 0 0 auto; min-width: 1.05in; font-family: "JetBrains Mono", monospace; font-size: 10px; font-weight: 500; color: ${CLAY_DEEP}; }
+  .sp-date-stamp-soft { color: ${SUBTLE}; }
+  .sp-dates-source { padding-top: 6px; border-top: 1px solid ${HAIRLINE}; font-size: 9.5px !important; color: ${MUTED} !important; }
   .sp-callout { margin-top: 0.14in; border: 1px solid ${HAIRLINE}; border-left: 3px solid ${CLAY_SOFT}; border-radius: 6px; padding: 9px 12px; }
   .sp-callout p { margin: 0; font-size: 9.5px; line-height: 1.5; color: ${MUTED}; }
   .sp-cites { list-style: none; margin: 8px 0 0; padding: 0; }

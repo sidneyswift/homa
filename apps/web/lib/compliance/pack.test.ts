@@ -256,9 +256,16 @@ describe("California (pervasive pathway variance)", () => {
     const pack = compose("CA");
     assert.ok(pack.html.includes("October 1 through October 15 annually"));
     assert.ok(pack.html.includes("California Department of Education"));
+    // Divergent rows carry a marker and the page carries one footnote
+    // explaining it, rather than repeating a sentence per row (CA
+    // diverges on five of seven rows; visual review 2026-07-28).
     assert.ok(
-      pack.html.includes("Other pathways carry a different rule"),
-      "a genuinely divergent field must carry its scope note",
+      pack.html.includes("This rule differs on California's other pathways"),
+      "a divergent page must carry the scope footnote",
+    );
+    assert.ok(
+      pack.html.includes("sp-mark"),
+      "a genuinely divergent row must carry its marker",
     );
   });
   it("keeps case law out of the parent packet (D18)", () => {
@@ -342,7 +349,9 @@ describe("Pennsylvania (every duty on, high variance, six children)", () => {
     // instructional-time requirement at all.
     const pack = compose("PA", SIX_CHILD_FAMILY);
     assert.ok(pack.html.includes("900 hours per year"));
-    assert.ok(pack.html.includes("Other pathways carry a different rule"));
+    assert.ok(
+      pack.html.includes("This rule differs on Pennsylvania's other pathways"),
+    );
   });
 });
 

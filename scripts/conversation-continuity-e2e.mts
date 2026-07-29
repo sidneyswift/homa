@@ -10,6 +10,7 @@
  * Usage: pnpm tsx scripts/conversation-continuity-e2e.mts
  */
 
+import { randomBytes } from "node:crypto";
 import { loadEnvFile } from "node:process";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -535,7 +536,12 @@ try {
     values (${stubFamilyId}, 'household')
     returning id
   `;
-  const bindingHash = "b".repeat(64);
+  // Unique per run, never a constant: the unique index on this table is
+  // (channel, thread_key_hash) across ALL families, so a hardcoded hash
+  // makes two concurrent runs collide on a duplicate key. That is a real
+  // failure mode rather than a hypothetical, and it took down an
+  // unrelated PR's CI on 2026-07-29 while several branches built at once.
+  const bindingHash = randomBytes(32).toString("hex");
   await sql`
     insert into public.conversation_thread_bindings
       (family_id, channel, thread_key_hash, episode_id)

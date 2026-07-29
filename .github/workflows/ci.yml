@@ -190,6 +190,9 @@ jobs:
       - name: State pack (derivation across all 51 reviewed snapshots)
         run: pnpm check:state-pack
 
+      - name: State pack deadline anchors still match their source text
+        run: pnpm check:deadline-anchors
+
       - name: ChildProgress disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm child-progress:e2e
