@@ -151,14 +151,96 @@ with a bound per family per sitting.
 Wave A is worth shipping alone. It is free, it cannot fabricate, and it
 turns the arc's weakest beat into its most legible one.
 
-## 8. Open
+## 8. Cost per family, measured
 
-- **Cost per family for wave C.** Five generated lessons per onboarding
-  family, against a trial that already treats token cost as CAC (T1). Needs
-  a number before C ships, not after.
+Answered 2026-07-29 from `public.model_usage` in production, priced with
+`MODEL_RATES` from `apps/web/lib/model-pricing.ts` applied exactly as
+`estimateUsageCostUsd` does (cache reads and writes subtracted from input
+and billed at their own rates). Zero unpriced calls in every query, so
+nothing is silently costing $0.
+
+**What a sitting costs today**
+
+| | Families | Avg | Median | Max |
+|---|---|---|---|---|
+| Chat-first sitting, all surfaces | 15 | **$0.498** | $0.337 | $1.31 |
+| of which the conversation itself | 15 | $0.411 | | |
+| Real families, any era, first 60 min | 40 | $0.432 | $0.216 | $5.04 |
+
+The chat-first row is measured on this session's sandbox walk families,
+because production has exactly ONE real chat-first family with chat
+usage. Same code path, same prompts, real tokens; it is the arc's cost,
+not a guess, but it is not yet a sample of real parents.
+
+The conversation is 83% of it. 6.2 model calls per sitting, averaging
+319,911 input tokens, of which 183,056 are cache reads at a tenth of the
+input rate. Cache hits are already doing most of the work of keeping
+this cheap.
+
+**What a made lesson costs**
+
+| | n | Avg | Median | p90 |
+|---|---|---|---|---|
+| One materials-studio job, all in | 4 | **$0.453** | $0.512 | $0.531 |
+| The artifact calls alone (image + review) | 450 materials | $0.023 | | |
+
+The gap between those two rows is the point: the image and review calls
+are 5% of a making. The other 95% is the skill's own orchestration,
+14.8 model calls per job. Anyone estimating this from the image cost
+would be twenty times low.
+
+**So, per family**
+
+| | Model cost | Note |
+|---|---|---|
+| Today | $0.50 | |
+| Wave A, the week fills | **$0.50** | `buildMonthPlan` is a pure function, so this is free |
+| Wave B, one lesson | **$0.95** | |
+| Wave C, a lesson per subject (5) | **$2.75** | |
+
+Against founder ruling T1, which treats trial token cost of roughly $25
+to $45 per family as CAC, wave C spends 6 to 11% of that budget on the
+single moment where she decides whether the product is real. That is
+affordable. The number is not the reason to hesitate.
+
+**The reason to hesitate is the clock, not the money**
+
+A materials-studio job takes a median of 6.3 minutes and has run as long
+as 26.6. The checklist she is meant to be busy behind takes about five.
+So a lesson started at the first subject boundary does NOT land before
+she comes out of the questions, and the tail lands long after she has
+closed the laptop.
+
+Wave C as described, five lessons appearing in her week while she
+answers, does not work with materials-studio as the generator. Three
+honest options:
+
+1. **Let them land later.** They arrive in the binder and the week after
+   she leaves, which is what `start_first_making` already promises and
+   what the "Coming back" beat is built for. Cheapest, and it moves the
+   wow to her second visit.
+2. **Use a lighter generator for onboarding lessons.** The existing
+   `subject_lesson` surface averages $0.035 and one model call, against
+   materials-studio's $0.45 and 14.8. A text lesson per subject could
+   plausibly land inside the checklist window. It is not a printable
+   worksheet.
+3. **Generate one making, not five.** Wave B, at $0.95 per family, with
+   the other four subjects filled by the deterministic plan activities
+   that wave A already puts there.
+
+All three are cheaper than wave C. The decision is about what she sees
+during those five minutes, not about spend.
+
+Caveats worth carrying: the job-cost sample is four jobs, and the
+window-join that produced it attributes every model call in the job's
+window to the job, so it may run slightly high. The materials count
+(450) spans the full studio, not just onboarding-shaped makings.
+
+## 9. Still open
+
 - **Day, week and month views.** The ask names all three. The plan is
-  four weeks of activities and the shipped grid is a week; a day view and a
-  month view are UI work not yet scoped here.
-- **What "inspect" means for an activity.** A plan activity is a sentence,
-  not a document. Clicking one should show something worth the tap, and what
-  that is has not been designed.
+  four weeks of activities and the shipped grid is a week; a day view and
+  a month view are UI work not yet scoped here.
+- **What "inspect" means for an activity.** A plan activity is a
+  sentence, not a document. Clicking one should show something worth the
+  tap, and what that is has not been designed.
