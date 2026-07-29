@@ -1,3 +1,4 @@
+import { applyRequirementOverride } from "../compliance/requirement-overrides";
 import { mapDb } from "./db";
 
 /**
@@ -301,5 +302,14 @@ export async function getStateRequirementsDetail(
   `;
   const row = rows[0];
   if (!row) return null;
-  return parseStateRequirementsPayload(toSummary(row), row.payload);
+  // The one seam every consumer reads through (the pack, the filing, the
+  // Binder cards, compliance answers), so a state whose law changed
+  // after the last upstream pull is corrected in exactly one place
+  // rather than in each surface separately (gh#436). Overrides only ever
+  // REMOVE a duty and carry the statute they rest on; see
+  // lib/compliance/requirement-overrides.ts.
+  return applyRequirementOverride(
+    parseStateRequirementsPayload(toSummary(row), row.payload),
+    new Date().toISOString().slice(0, 10),
+  );
 }
