@@ -83,8 +83,10 @@ loads:
 
 - Every math worksheet ships with an answer key unless the format is
   self-checking (maze, puzzle, constraint grid). Parents need to check
-  work without redoing the math themselves. Key on a separate page or
-  upside-down at the bottom, never beside the problems.
+  work without redoing the math themselves. The key goes on its own
+  page, never on the child's page. Upside-down at the bottom was allowed
+  here until 2026-07-28 and is not: it printed readable on the sheet the
+  child works on, and a parent had to ask for it to be moved (gh#346).
 - Open response, never bubble grids. No standardized-test answer boxes,
   no fill-in-the-bubble strips. The child writes the answer.
 - The page itself can be the interactive experience: color-by-answer
