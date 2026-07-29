@@ -848,8 +848,14 @@ export async function finalizeMaterialPinned(
     return nextPlan;
   });
   if (plan.result.transitioned) {
+  // Only the print file. The preview thumbnail of every superseded version
+  // is kept forever (founder ruling materials-version-retention,
+  // 2026-07-28) so a parent can see and compare what she had before.
+  // Deleting it is why "as soon as she redoes it I can't see the old
+  // version, I have to start screenshotting" was literally true: the rows
+  // survived finalize and their bytes did not (gh#350).
     await deleteMaterialDraftUrls(
-      plan.draftRowsToDelete.flatMap((row) => [row.pdf_url, row.preview_url])
+      plan.draftRowsToDelete.map((row) => row.pdf_url)
     );
   }
   return plan.result;
@@ -921,11 +927,14 @@ export async function finalizeSubjectLessonMaterialPinned(
   });
   if (!execution) return null;
   if (execution.plan.result.transitioned) {
+  // Only the print file. The preview thumbnail of every superseded version
+  // is kept forever (founder ruling materials-version-retention,
+  // 2026-07-28) so a parent can see and compare what she had before.
+  // Deleting it is why "as soon as she redoes it I can't see the old
+  // version, I have to start screenshotting" was literally true: the rows
+  // survived finalize and their bytes did not (gh#350).
     await deleteMaterialDraftUrls(
-      execution.plan.draftRowsToDelete.flatMap((row) => [
-        row.pdf_url,
-        row.preview_url,
-      ])
+      execution.plan.draftRowsToDelete.map((row) => row.pdf_url)
     );
   }
   return {
@@ -1086,8 +1095,14 @@ async function finalizeMaterialCallerLegacy(
         plan.supersededRows.map((row) => row.id)
       );
   }
+  // Only the print file. The preview thumbnail of every superseded version
+  // is kept forever (founder ruling materials-version-retention,
+  // 2026-07-28) so a parent can see and compare what she had before.
+  // Deleting it is why "as soon as she redoes it I can't see the old
+  // version, I have to start screenshotting" was literally true: the rows
+  // survived finalize and their bytes did not (gh#350).
   await deleteDraftUrls(
-    plan.draftRowsToDelete.flatMap((row) => [row.pdf_url, row.preview_url])
+    plan.draftRowsToDelete.map((row) => row.pdf_url)
   );
   return plan.result;
 }
