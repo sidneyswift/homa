@@ -188,13 +188,32 @@ def page_metrics(path: Path) -> dict:
         return {"error": f"{type(exc).__name__}: {exc}"}
 
 
-def extract_pages(pdf_path: Path, out_dir: Path) -> list:
-    """One master per page. Embedded photographs are copied out untouched;
-    anything else is rendered at RENDER_DPI. Returns page records."""
+def extract_pages(pdf_paths, out_dir: Path) -> list:
+    """One master per page, numbered continuously across parts.
+
+    A phone capture of a big book arrives in parts: CamScanner splits it and
+    Slack caps uploads, so "Handwriting w/o Tears" is a 110MB part 1 and a
+    20MB part 2 of ONE book. Treating those as two items would fragment the
+    book's scope across two analyses and double-count it in every search, so
+    the parts are concatenated in the order given and the page numbers run
+    straight through."""
+    if isinstance(pdf_paths, Path):
+        pdf_paths = [pdf_paths]
+    pages = []
+    number = 0
+    for part_index, pdf_path in enumerate(pdf_paths, 1):
+        for page in _extract_one(pdf_path, out_dir, len(pdf_paths) > 1 and part_index or 0,
+                                 start_number=number):
+            pages.append(page)
+            number = page["page"]
+    return pages
+
+
+def _extract_one(pdf_path: Path, out_dir: Path, part: int, start_number: int) -> list:
     doc = fitz.open(pdf_path)
     pages = []
     for index, page in enumerate(doc):
-        number = index + 1
+        number = start_number + index + 1
         images = page.get_images(full=True)
         record = {"page": number}
 
@@ -227,17 +246,25 @@ def extract_pages(pdf_path: Path, out_dir: Path) -> list:
         master_path = out_dir / record["master"]
         record["bytes"] = master_path.stat().st_size
         record["sha256"] = sha256_file(master_path)
+        if part:
+            record["part"] = part
+            record["partPage"] = index + 1
         record.update(page_metrics(master_path))
         pages.append(record)
     doc.close()
     return pages
 
 
-def text_layer(pdf_path: Path) -> list:
-    """Per-page text already in the PDF. Empty strings mean it needs OCR."""
-    doc = fitz.open(pdf_path)
-    out = [page.get_text().strip() for page in doc]
-    doc.close()
+def text_layer(pdf_paths) -> list:
+    """Per-page text already in the PDFs, concatenated across parts. Empty
+    strings mean the page needs OCR."""
+    if isinstance(pdf_paths, Path):
+        pdf_paths = [pdf_paths]
+    out = []
+    for pdf_path in pdf_paths:
+        doc = fitz.open(pdf_path)
+        out.extend(page.get_text().strip() for page in doc)
+        doc.close()
     return out
 
 
@@ -461,6 +488,7 @@ def stub_json(item_id: str, kind: str, manifest: dict, pdf_path: Path) -> Path:
     capture = {
         "lane": "phone",
         "sourceFile": pdf_path.name,
+        "sourceParts": [p["file"] for p in manifest["source"].get("parts", [])],
         "sourceSha256": manifest["source"]["sha256"],
         "pageCount": manifest["pageCount"],
         "mastersDir": manifest["mastersDir"],
@@ -506,7 +534,7 @@ def stub_json(item_id: str, kind: str, manifest: dict, pdf_path: Path) -> Path:
     return target
 
 
-def intake(pdf_path: Path, item_id: str, kind: str, expect_pages, force: bool,
+def intake(pdf_paths, item_id: str, kind: str, expect_pages, force: bool,
            use_vision: bool = True) -> int:
     out_dir = MASTERS_DIR / item_id
     manifest_path = out_dir / "manifest.json"
@@ -515,11 +543,13 @@ def intake(pdf_path: Path, item_id: str, kind: str, expect_pages, force: bool,
         return 0
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Reading {pdf_path.name} ...")
-    pages = extract_pages(pdf_path, out_dir)
+    names = ", ".join(p.name for p in pdf_paths)
+    print(f"Reading {names} ..." if len(pdf_paths) == 1
+          else f"Reading {len(pdf_paths)} parts as one book: {names} ...")
+    pages = extract_pages(pdf_paths, out_dir)
     print(f"  {len(pages)} page(s) written to {out_dir}")
 
-    layer = text_layer(pdf_path)
+    layer = text_layer(pdf_paths)
     have_layer = sum(1 for t in layer if t.strip())
     texts, method = [], "pdf-text-layer"
     if have_layer >= max(1, len(pages) // 2):
@@ -569,8 +599,15 @@ def intake(pdf_path: Path, item_id: str, kind: str, expect_pages, force: bool,
         "id": item_id,
         "kind": kind,
         "intakeAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "source": {"file": pdf_path.name, "sha256": sha256_file(pdf_path),
-                   "bytes": pdf_path.stat().st_size},
+        "source": {
+            "file": pdf_paths[0].name,
+            "sha256": sha256_file(pdf_paths[0]),
+            "bytes": pdf_paths[0].stat().st_size,
+            "parts": [
+                {"file": p.name, "sha256": sha256_file(p), "bytes": p.stat().st_size}
+                for p in pdf_paths
+            ],
+        },
         "pageCount": len(pages),
         "mastersDir": str(out_dir.relative_to(COSMO.parent)),
         "textExtraction": {
@@ -595,7 +632,7 @@ def intake(pdf_path: Path, item_id: str, kind: str, expect_pages, force: bool,
     }
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
 
-    stub = stub_json(item_id, kind, manifest, pdf_path)
+    stub = stub_json(item_id, kind, manifest, pdf_paths[0])
 
     print(f"\n  masters   {out_dir}")
     print(f"  text      {text_info['path']} ({text_info['chars']} chars, method {method})")
@@ -819,7 +856,8 @@ def self_test() -> int:
 
 def main():
     parser = argparse.ArgumentParser(description="Explode a captured book into masters plus text.")
-    parser.add_argument("pdf", nargs="?", help="the captured PDF, one book per file")
+    parser.add_argument("pdf", nargs="*",
+                        help="the captured PDF(s). Give several, in reading order, when a\nphone capture split ONE book across parts; they become one item.")
     parser.add_argument("--id", help="item id: ref-YYYY-MM-DD-slug or cur-YYYY-MM-DD-slug")
     parser.add_argument("--kind", choices=("reference", "curriculum"),
                         help="defaults to curriculum for a cur- id, reference otherwise")
@@ -842,12 +880,13 @@ def main():
     if not ID_RE.match(args.id):
         print(f"ERROR: id {args.id!r} must look like ref-2026-07-28-some-slug", file=sys.stderr)
         return 2
-    pdf_path = Path(args.pdf)
-    if not pdf_path.exists():
-        print(f"ERROR: no such file: {pdf_path}", file=sys.stderr)
+    pdf_paths = [Path(p) for p in args.pdf]
+    missing = [str(p) for p in pdf_paths if not p.exists()]
+    if missing:
+        print(f"ERROR: no such file: {', '.join(missing)}", file=sys.stderr)
         return 2
     kind = args.kind or ("curriculum" if args.id.startswith("cur-") else "reference")
-    return intake(pdf_path, args.id, kind, args.expect_pages, args.force,
+    return intake(pdf_paths, args.id, kind, args.expect_pages, args.force,
                   use_vision=not args.no_vision)
 
 
