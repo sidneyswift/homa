@@ -1,7 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import {
   Environment,
   SignedDataVerifier,
@@ -12,35 +8,49 @@ import {
 
 /**
  * Verifies Apple's own signatures using Apple's official server library
- * and Apple's public Root CA (apple-certs/AppleRootCA-G3.cer, downloaded
- * from https://www.apple.com/certificateauthority/ and checked against
- * its published SHA-256 fingerprint, 2026-07-28). This is verification
- * only: no App Store Server API calls, no private key, no founder-only
- * credential required. That is a separate, later capability (the
- * reconciliation cron, #274) needing an App Store Connect API key the
- * founder has not provisioned; do not conflate it with the Sign in with
- * Apple REST key #314 tracks, a different key for a different purpose.
+ * and Apple's public Root CA. This is verification only: no App Store
+ * Server API calls, no private key, no founder-only credential
+ * required. That is a separate, later capability (the reconciliation
+ * cron, #274) needing an App Store Connect API key the founder has not
+ * provisioned; do not conflate it with the Sign in with Apple REST key
+ * #314 tracks, a different key for a different purpose.
  *
  * Bundle id is fixed: this project has exactly one iOS app.
  */
 const BUNDLE_ID = "com.thankshoma.homa";
 
-// Resolved relative to this source file, never process.cwd(): the caller's
-// working directory varies (apps/web for Next.js and eas builds, the
-// monorepo root for `pnpm check:billing` from the top level), and a
-// cwd-relative path silently resolves to the wrong place and throws
-// ENOENT under at least one of those callers. Caught exactly that way in
-// this session: `pnpm check:billing` from repo root passed anyway,
-// because the test's assert.rejects() did not check WHICH error it
-// threw; the transaction was "rejected" for the wrong reason.
-const CERT_PATH = join(
-  fileURLToPath(new URL(".", import.meta.url)),
-  "apple-certs/AppleRootCA-G3.cer",
-);
+/**
+ * Apple's public root CA (downloaded from
+ * https://www.apple.com/certificateauthority/, checked against its
+ * published SHA-256 fingerprint, 2026-07-28), embedded directly rather
+ * than read from a sibling file. Caught twice in this session before
+ * landing here: a process.cwd()-relative path threw ENOENT depending
+ * on the caller's working directory, and the fix for that,
+ * fileURLToPath(new URL(".", import.meta.url)), builds cleanly under
+ * Node's test runner and eve's own bundler but fails Next.js's
+ * Turbopack production build ("Module not found: Can't resolve '.'"),
+ * which statically analyzes new URL(_, import.meta.url) calls as asset
+ * references and cannot resolve a bare directory. A base64 constant
+ * has no filesystem dependency at all, so it is identical across every
+ * runtime this file loads in: tsx --test, eve build, next build, and
+ * the deployed Vercel function.
+ */
+const APPLE_ROOT_CA_G3_BASE64 =
+  "MIICQzCCAcmgAwIBAgIILcX8iNLFS5UwCgYIKoZIzj0EAwMwZzEbMBkGA1UEAwwSQXBwbGUgUm9v" +
+  "dCBDQSAtIEczMSYwJAYDVQQLDB1BcHBsZSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTETMBEGA1UE" +
+  "CgwKQXBwbGUgSW5jLjELMAkGA1UEBhMCVVMwHhcNMTQwNDMwMTgxOTA2WhcNMzkwNDMwMTgxOTA2" +
+  "WjBnMRswGQYDVQQDDBJBcHBsZSBSb290IENBIC0gRzMxJjAkBgNVBAsMHUFwcGxlIENlcnRpZmlj" +
+  "YXRpb24gQXV0aG9yaXR5MRMwEQYDVQQKDApBcHBsZSBJbmMuMQswCQYDVQQGEwJVUzB2MBAGByqG" +
+  "SM49AgEGBSuBBAAiA2IABJjpLz1AcqTtkyJygRMc3RCV8cWjTnHcFBbZDuWmBSp3ZHtfTjjTuxxE" +
+  "tX/1H7YyYl3J6YRbTzBPEVoA/VhYDKX1DyxNB0cTddqXl5dvMVztK517IDvYuVTZXpmkOlEKMaNC" +
+  "MEAwHQYDVR0OBBYEFLuw3qFYM4iapIqZ3r6966/ayySrMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0P" +
+  "AQH/BAQDAgEGMAoGCCqGSM49BAMDA2gAMGUCMQCD6cHEFl4aXTQY2e3v9GwOAEZLuN+yRhHFD/3m" +
+  "eoyhpmvOwgPUnPWTxnS4at+qIxUCMG1mihDK1A3UT82NQz60imOlM27jbdoXt2QfyFMm+YhidDkL" +
+  "F1vLUagM6BgD56KyKA==";
 
 let rootCertificate: Buffer | null = null;
 function appleRootCertificates(): Buffer[] {
-  rootCertificate ??= readFileSync(CERT_PATH);
+  rootCertificate ??= Buffer.from(APPLE_ROOT_CA_G3_BASE64, "base64");
   return [rootCertificate];
 }
 

@@ -16,30 +16,35 @@ import {
  * and matters: the verifier actually performs cryptographic checks
  * rather than silently accepting anything (a verifier that no-ops on
  * bad input is worse than no verifier, since it would look tested and
- * grant entitlement to garbage), the root certificate loads without
- * throwing, and the status vocabulary mapping (a pure function) is
- * exhaustively covered.
+ * grant entitlement to garbage), the embedded root certificate decodes
+ * to something the verifier can construct from, and the status
+ * vocabulary mapping (a pure function) is exhaustively covered.
+ *
+ * The root cert used to be a sibling file, resolved at runtime. Caught
+ * twice before landing as the base64 constant apple-verify.ts embeds
+ * now: a process.cwd()-relative path threw ENOENT depending on the
+ * caller's working directory, and the fix for that broke Next.js's
+ * Turbopack production build outright ("Module not found: Can't
+ * resolve '.'", since Turbopack statically analyzes
+ * `new URL(_, import.meta.url)` as an asset reference). Both failure
+ * modes are now structurally impossible: there is no file read, so the
+ * only way this rejects is a real cryptographic failure, exactly what
+ * the assertion below checks for.
  */
 
 describe("verifyAppleTransaction", () => {
-  it("loads the bundled root certificate regardless of the caller's cwd (caught once: process.cwd()-relative resolution passed this exact test for the wrong reason, ENOENT, when run from the repo root)", async () => {
-    const originalCwd = process.cwd();
-    process.chdir("/");
-    try {
-      await assert.rejects(
-        () => verifyAppleTransaction("not-a-real-jws"),
-        (error: unknown) => {
-          const message = error instanceof Error ? error.message : String(error);
-          assert.ok(
-            !/ENOENT|no such file/i.test(message),
-            `expected a verification failure, got a file-loading error: ${message}`,
-          );
-          return true;
-        },
-      );
-    } finally {
-      process.chdir(originalCwd);
-    }
+  it("rejects a garbage string for a real verification reason, not a construction error", async () => {
+    await assert.rejects(
+      () => verifyAppleTransaction("not-a-real-jws"),
+      (error: unknown) => {
+        const message = error instanceof Error ? error.message : String(error);
+        assert.ok(
+          !/ENOENT|no such file|base64|cannot resolve/i.test(message),
+          `expected a verification failure, got a construction/loading error: ${message}`,
+        );
+        return true;
+      },
+    );
   });
 
   it("rejects a garbage string, never treating it as valid", async () => {
