@@ -9,7 +9,7 @@ description: Use when a complete curriculum, curriculum guide, scope-and-sequenc
 
 A full curriculum, curriculum guide, scope-and-sequence document, or methodology handbook is dropped in **#homa-inspo**. This is bigger than a single reference: it represents a teaching philosophy and a structured plan. Your job: decompose it into five layers, map it to Homa's systems, flag every gap, and surface decisions Sid needs to make.
 
-**Shared laws:** the non-negotiable laws in `reference-ingestion` (capture files immediately before analysis, dates from the Slack `ts` never the machine clock, append-only taxonomy, fresh branch and PR only, no binaries under `apps/web/agent/skills/`, copyrighted originals and images derived from them never enter the product, no em dash anywhere) apply to this skill identically. So do its two 2026-07-28 additions: **extract the text to the gitignored `.cosmo/text/<id>.txt` sidecar during capture**, and **record whole-curriculum `aboutness`** per `../reference-ingestion/references/aboutness.md`.
+**Shared laws:** the non-negotiable laws in `reference-ingestion` (capture files immediately before analysis, dates from the Slack `ts` never the machine clock, append-only taxonomy, fresh branch and PR only, no binaries under `apps/web/agent/skills/`, copyrighted originals and images derived from them never enter the product, no em dash anywhere) apply to this skill identically. So do its two 2026-07-28 additions: **explode the capture with `python3 .cosmo/scripts/book-intake.py <file.pdf> --id <cur-id>`**, which writes the per-page masters, the gitignored `.cosmo/text/<id>.txt` sidecar, a provenance manifest, and a stub for you to fill in, and **record whole-curriculum `aboutness`** per `../reference-ingestion/references/aboutness.md`. Curriculum drops are usually the longest books in the corpus, so run the intake's gate findings back to the dropper before analyzing: a blurry week is a week that decomposes into nothing.
 
 ## The five layers
 
@@ -227,6 +227,8 @@ When in doubt: if it has a philosophy and a sequence, it's a curriculum. If it's
 | What | Path |
 |---|---|
 | Individual analysis | `.cosmo/curriculums/<id>.json` |
+| Book intake (PDF to masters plus text) | `.cosmo/scripts/book-intake.py` |
+| Per-page masters (gitignored) | `.cosmo/masters/<id>/` |
 | Extracted text sidecar (gitignored) | `.cosmo/text/<id>.txt` |
 | Layer 5 contract | `references/lesson-decomposition.md` |
 | Aboutness contract (shared) | `../reference-ingestion/references/aboutness.md` |

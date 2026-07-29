@@ -41,7 +41,14 @@ Links expire in hours and files leave Slack. Capture first, think later.
 - Upload each downloaded original to Blob for durability and record the returned URL in the ref JSON as `blobUrl`. Use only `bash .cosmo/scripts/blob-upload.sh <ref-id> <file> [content-type]`: it pins Homa's production store id and refuses a token from any other project's store, so uploads cannot land in the wrong Blob. Token source: `vercel env pull` inside `apps/web` (you already have the Vercel CLI), or the `.env.example` 1Password fallback. If no token resolves, keep the local copy, set `"blobUrl": null`, and note it; do not skip the download.
 - For a bare link: fetch the target page and any free sample file now. If the fetch fails, record the failure in the ref JSON (`"captureFailed": "<reason>"`) so the loss is visible instead of silent. Fourteen TPT links from July are permanently lost because capture waited.
 - Write the stub ref JSON at `.cosmo/references/<id>.json` right away with at least `id`, `sourceChannel`, `sourceMessageTs`, `droppedBy`, `droppedAt` (from Slack `ts`), and the local file paths.
-- **Extract the text and keep it.** Write the drop's text to `.cosmo/text/<id>.txt` (gitignored; extracted text of a copyrighted book is the copyrighted work, same ruling as the originals). Born-digital PDFs: take the text layer. Scans and photos: read the pages. This sidecar is what makes dimension F's quotes verifiable, and it is the one thing the pre-2026-07-28 corpus lost on every drop. Full contract: `references/aboutness.md`.
+- **Explode the capture and keep the text.** For a whole-book PDF (the phone lane: one CamScanner PDF per book, founder ruling 2026-07-28), run the intake instead of doing this by hand:
+
+  ```
+  python3 .cosmo/scripts/book-intake.py <file.pdf> --id <ref-id> [--expect-pages N]
+  ```
+
+  It writes per-page masters to `.cosmo/masters/<id>/`, the text sidecar to `.cosmo/text/<id>.txt`, a provenance manifest, and a stub JSON for you to fill in. It also runs the deterministic gates (page count, blank, blurry, page shot twice) and prints what the dropper should re-shoot. Report those findings in your Slack reply: one re-shot page now beats a permanent hole in the archive. For a single-page drop, write the sidecar by hand.
+- The sidecar is gitignored (extracted text of a copyrighted book is the copyrighted work, same ruling as the originals), and it is what makes dimension F's quotes verifiable. It is the one thing the pre-2026-07-28 corpus lost on every drop. Full contract: `references/aboutness.md`.
 
 ### 1. Identify the reference
 
@@ -261,6 +268,8 @@ React to the original Slack drop with :ship: **only on exit 0**, and only after 
 | What | Path |
 |---|---|
 | Ref JSON (canonical per-drop truth) | `.cosmo/references/<id>.json` |
+| Book intake (PDF to masters plus text) | `.cosmo/scripts/book-intake.py` |
+| Per-page masters (gitignored) | `.cosmo/masters/<id>/` |
 | Extracted text sidecar (gitignored) | `.cosmo/text/<id>.txt` |
 | Aboutness contract (dimension F) | `references/aboutness.md` |
 | Corpus search (the payoff) | `.cosmo/scripts/corpus-search.py` |
