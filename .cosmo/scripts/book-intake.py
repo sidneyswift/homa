@@ -27,12 +27,19 @@ edge variance, and exact duplicate detection by content hash. A page that
 fails a gate is reported, never silently dropped: the operator can re-shoot
 one page instead of the book.
 
-OCR:
+TEXT, A MIXTURE ON PURPOSE:
 Text layer if the PDF has one (born-digital, free and perfect). Otherwise
-tesseract, whose output is honest-but-rough and marked as such in the
-manifest. The corpus plan's model-grade OCR replaces this stage later
-without changing anything downstream, because the sidecar path and format
-are the contract.
+tesseract over every page, because it is fast and genuinely good at dense
+body text, and then a vision model over the pages tesseract cannot do
+honestly: the covers, anything with ink but no text read off it, and
+anything garbled past use. Per-page provenance is recorded as textSource.
+
+Neither reader alone is enough. OCR turned this pipeline's first real cover
+into "MET | Pacis | RO READING | HANDBOOK", and a vision model over 110
+pages of ordinary worksheets would be slow and pointless. The escalation set
+on that book was 2 pages out of 110. The model also returns what the page
+SHOWS, which no character-recognition pass can produce, and that lands in
+the manifest as `visual` for the theming and aboutness dimensions.
 
 USAGE:
     book-intake.py <pdf> --id ref-2026-07-28-some-book
@@ -40,11 +47,13 @@ USAGE:
     book-intake.py <pdf> --id <id> --expect-pages 84   # assert the count
     book-intake.py <pdf> --id <id> --force             # redo a finished item
     book-intake.py --check <id>                        # re-run gates only
+    book-intake.py <pdf> --id <id> --no-vision         # tesseract only
 """
 
 import argparse
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -52,6 +61,7 @@ import sys
 from datetime import datetime, timezone
 from difflib import SequenceMatcher
 from pathlib import Path
+from typing import Optional
 
 try:
     import fitz  # PyMuPDF
@@ -117,6 +127,22 @@ NEAR_DUPLICATE_MIN_CHARS = 40
 NEAR_DUPLICATE_HAMMING = 4
 
 RENDER_DPI = 300
+
+# Vision escalation. OCR and a vision model are complementary, so the
+# pipeline runs both and keeps the better answer per page (founder direction
+# 2026-07-29, after the first real book turned "METRO READING / Fast Forward!
+# / STUDENT HANDBOOK" into "MET | Pacis | RO READING | HANDBOOK").
+#
+# Escalation is deliberately narrow, because tesseract is genuinely good at
+# the dense body text that is most of a workbook. Measured on that book:
+# every page scored 0.83+ on the gibberish check, so a quality threshold
+# alone would have escalated nothing and missed the cover. What caught it
+# was text yield: ink on the page and almost nothing read off it.
+VISION_MODEL = "google/gemini-3-flash"
+VISION_MIN_CHARS = 40          # below this, with ink present, OCR gave up
+VISION_MIN_INK = 0.02
+VISION_QUALITY_FLOOR = 0.55    # garbled beyond usefulness
+PAGE_READ_SCRIPT = "scripts/page-read.mts"
 
 
 def sha256_file(path: Path) -> str:
@@ -230,6 +256,123 @@ def ocr_page(image_path: Path) -> str:
 
 def _normalize_text(text: str) -> str:
     return re.sub(r"\s+", " ", (text or "").lower()).strip()
+
+
+def ocr_quality(text: str) -> float:
+    """0 to 1 on whether this reads like language at all. Catches a garbled
+    scan; does NOT catch a confident misreading, which is why text yield is
+    the other half of the escalation rule."""
+    body = re.sub(r"\s+", " ", text or "").strip()
+    if not body:
+        return 0.0
+    tokens = [w for w in re.findall(r"[A-Za-z']+", body) if len(w) >= 3]
+    vowel = (sum(1 for w in tokens if re.search(r"[aeiouAEIOU]", w)) / len(tokens)) if tokens else 0.0
+    alpha = sum(c.isalnum() or c.isspace() for c in body) / len(body)
+    return min(vowel, alpha)
+
+
+def pages_needing_vision(pages: list, texts: list) -> list:
+    """Page numbers whose text OCR cannot be trusted to have got right."""
+    if not pages:
+        return []
+    last = pages[-1]["page"]
+    out = []
+    for p, text in zip(pages, texts):
+        n = p["page"]
+        if "error" in p:
+            continue
+        # Covers always. They carry the book's identity, they are the most
+        # likely page to be display type over artwork, and they are two
+        # pages out of a hundred.
+        if n == 1 or n == last:
+            out.append(n)
+            continue
+        if p.get("inkCoverage", 0) < BLANK_INK_COVERAGE:
+            continue
+        chars = len(re.sub(r"\s+", " ", text or "").strip())
+        if chars < VISION_MIN_CHARS and p.get("inkCoverage", 0) > VISION_MIN_INK:
+            out.append(n)
+        elif chars >= VISION_MIN_CHARS and ocr_quality(text) < VISION_QUALITY_FLOOR:
+            out.append(n)
+    return out
+
+
+def oidc_token() -> Optional[str]:
+    """Vercel OIDC, never a gateway API key (founder ruling 2026-07-27).
+
+    .env.local is gitignored, so a git worktree does not have one: an
+    ingestion session run from a worktree has to reach the main checkout for
+    it, or every cover silently falls back to OCR."""
+    token = os.environ.get("VERCEL_OIDC_TOKEN")
+    if token:
+        return token
+    candidates = [COSMO.parent / "apps" / "web" / ".env.local"]
+    try:
+        common = subprocess.run(
+            ["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+            cwd=COSMO.parent, capture_output=True, text=True, timeout=10, check=False,
+        )
+        if common.returncode == 0 and common.stdout.strip():
+            candidates.append(Path(common.stdout.strip()).parent / "apps" / "web" / ".env.local")
+    except (subprocess.TimeoutExpired, OSError):
+        pass
+    for env_local in candidates:
+        if not env_local.exists():
+            continue
+        for line in env_local.read_text().splitlines():
+            if line.startswith("VERCEL_OIDC_TOKEN="):
+                value = line.split("=", 1)[1].strip().strip('"')
+                if value:
+                    return value
+    return None
+
+
+def read_pages_with_vision(item_dir: Path, pages: list, wanted: list) -> dict:
+    """Page number -> {text, description, kind, confidence} from the vision
+    model. Returns {} on any failure: a page keeps its tesseract text and the
+    caller reports the degradation rather than silently shipping less."""
+    if not wanted:
+        return {}
+    token = oidc_token()
+    if not token:
+        print("  WARNING: no VERCEL_OIDC_TOKEN, so the vision pass is skipped. "
+              "Run `pnpm dev:token` and re-run with --force to read covers properly.")
+        return {}
+    by_number = {p["page"]: p for p in pages}
+    payload = {
+        "model": VISION_MODEL,
+        "pages": [
+            {"page": n, "path": str((item_dir / by_number[n]["master"]).resolve())}
+            for n in wanted if "master" in by_number.get(n, {})
+        ],
+    }
+    env = {**os.environ, "VERCEL_OIDC_TOKEN": token}
+    try:
+        done = subprocess.run(
+            ["corepack", "pnpm", "--filter", "web", "exec", "tsx", PAGE_READ_SCRIPT],
+            input=json.dumps(payload), capture_output=True, text=True,
+            cwd=COSMO.parent, env=env, timeout=120 + 60 * len(wanted), check=False,
+        )
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        print(f"  WARNING: vision pass failed ({type(exc).__name__}); keeping OCR text.")
+        return {}
+    line = next((l for l in reversed(done.stdout.splitlines()) if l.startswith("{")), "")
+    if not line:
+        print(f"  WARNING: vision pass produced no result; keeping OCR text. "
+              f"{(done.stderr or '').strip().splitlines()[-1][:160] if done.stderr else ''}")
+        return {}
+    try:
+        parsed = json.loads(line)
+    except json.JSONDecodeError:
+        print("  WARNING: vision pass returned unparseable output; keeping OCR text.")
+        return {}
+    out = {}
+    for row in parsed.get("pages", []):
+        if "error" in row:
+            print(f"  WARNING: page {row.get('page')} vision read failed ({row['error'][:80]}); keeping OCR text.")
+            continue
+        out[row["page"]] = row
+    return out
 
 
 def run_gates(pages: list, expect_pages, texts: dict = None) -> list:
@@ -363,7 +506,8 @@ def stub_json(item_id: str, kind: str, manifest: dict, pdf_path: Path) -> Path:
     return target
 
 
-def intake(pdf_path: Path, item_id: str, kind: str, expect_pages, force: bool) -> int:
+def intake(pdf_path: Path, item_id: str, kind: str, expect_pages, force: bool,
+           use_vision: bool = True) -> int:
     out_dir = MASTERS_DIR / item_id
     manifest_path = out_dir / "manifest.json"
     if manifest_path.exists() and not force:
@@ -395,6 +539,23 @@ def intake(pdf_path: Path, item_id: str, kind: str, expect_pages, force: bool) -
                 if p["page"] % 10 == 0:
                     print(f"    ... page {p['page']}")
 
+    # The mixture: keep OCR where it is good, escalate where it is not.
+    vision = {}
+    text_sources = {p["page"]: method for p in pages}
+    if use_vision:
+        wanted = pages_needing_vision(pages, texts)
+        if wanted:
+            print(f"  escalating {len(wanted)} page(s) to {VISION_MODEL}: {wanted[:12]}"
+                  + (" ..." if len(wanted) > 12 else ""))
+            vision = read_pages_with_vision(out_dir, pages, wanted)
+            for i, p in enumerate(pages):
+                row = vision.get(p["page"])
+                if row and (row.get("text") or "").strip():
+                    texts[i] = row["text"]
+                    text_sources[p["page"]] = f"vision:{VISION_MODEL}"
+            if vision:
+                print(f"  {len(vision)} page(s) re-read by the model")
+
     text_info = write_sidecar(item_id, pages, texts)
     findings = run_gates(pages, expect_pages,
                          texts={p["page"]: t for p, t in zip(pages, texts)})
@@ -412,10 +573,25 @@ def intake(pdf_path: Path, item_id: str, kind: str, expect_pages, force: bool) -
                    "bytes": pdf_path.stat().st_size},
         "pageCount": len(pages),
         "mastersDir": str(out_dir.relative_to(COSMO.parent)),
-        "textExtraction": {"method": method, **text_info},
+        "textExtraction": {
+            "method": method,
+            "visionModel": VISION_MODEL if vision else None,
+            "visionPages": sorted(vision) or [],
+            **text_info,
+        },
         "text": text_info,
         "gateFindings": findings,
-        "pages": pages,
+        "pages": [
+            {
+                **p,
+                "textSource": text_sources.get(p["page"], method),
+                **({"visual": {k: vision[p["page"]][k]
+                               for k in ("description", "kind", "confidence")
+                               if k in vision[p["page"]]}}
+                   if p["page"] in vision else {}),
+            }
+            for p in pages
+        ],
     }
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
 
@@ -651,6 +827,8 @@ def main():
                         help="page count the operator counted, asserted against the capture")
     parser.add_argument("--force", action="store_true", help="redo an already-ingested item")
     parser.add_argument("--check", metavar="ID", help="re-run the gates on an ingested item")
+    parser.add_argument("--no-vision", action="store_true",
+                        help="tesseract only; skip the model pass over covers and unreadable pages")
     parser.add_argument("--self-test", action="store_true", help="run the gate fixtures")
     args = parser.parse_args()
 
@@ -669,7 +847,8 @@ def main():
         print(f"ERROR: no such file: {pdf_path}", file=sys.stderr)
         return 2
     kind = args.kind or ("curriculum" if args.id.startswith("cur-") else "reference")
-    return intake(pdf_path, args.id, kind, args.expect_pages, args.force)
+    return intake(pdf_path, args.id, kind, args.expect_pages, args.force,
+                  use_vision=not args.no_vision)
 
 
 if __name__ == "__main__":

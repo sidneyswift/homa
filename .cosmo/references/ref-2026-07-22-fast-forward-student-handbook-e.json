@@ -16,7 +16,7 @@
     "sourceSha256": "c8a908a83a0cd6144bbaf96a23e569a3f880bc75f285a4ed91ba56d8148cc367",
     "pageCount": 110,
     "mastersDir": ".cosmo/masters/ref-2026-07-22-fast-forward-student-handbook-e",
-    "intakeAt": "2026-07-29T05:28:14+00:00",
+    "intakeAt": "2026-07-29T07:32:11+00:00",
     "gateFindings": []
   },
   "sourceFiles": [
@@ -139,7 +139,7 @@
     "extractionQuality": "full",
     "textSidecar": ".cosmo/text/ref-2026-07-22-fast-forward-student-handbook-e.txt",
     "textBlobUrl": null,
-    "notes": "The book's own title is deliberately absent from these claims. The cover is stylised art and OCR read it as 'MET | Pacis | RO READING | HANDBOOK', so no span supports it; the title in the identity fields above comes from reading the cover image. Aboutness claims only what the text can back.",
+    "notes": "Spans verify against a sidecar built from BOTH readers. Tesseract alone rendered the stylised cover as 'MET | Pacis | RO READING | HANDBOOK', which is why the cover is re-read by a vision model; the title is now quotable from the text like any other claim, rather than being an identity fact the corpus could not support.",
     "subjects": [
       {
         "name": "phonics",
@@ -160,6 +160,10 @@
       {
         "name": "word building",
         "quote": "Use letters from the letter pools to make words"
+      },
+      {
+        "name": "leveled reading program",
+        "quote": "METRO READING Fast Forward! STUDENT HANDBOOK LEVEL E"
       }
     ],
     "entities": [
@@ -191,7 +195,7 @@
       {
         "name": "Metropolitan Teaching and Learning Company",
         "kind": "organization",
-        "quote": "Metropolitan Teaching"
+        "quote": "METROPOLITAN Metro TEACHING and LEARNING"
       }
     ],
     "themes": [
@@ -233,6 +237,11 @@
         "term": "as in rain",
         "occurrences": 2,
         "quote": "as in rain"
+      },
+      {
+        "term": "LEVEL E",
+        "occurrences": 1,
+        "quote": "LEVEL E"
       }
     ],
     "referencedWorks": [
@@ -242,7 +251,16 @@
         "kind": "book",
         "quote": "The Spring Block Party"
       }
-    ]
+    ],
+    "textExtraction": {
+      "ocr": "tesseract",
+      "visionModel": "google/gemini-3-flash",
+      "visionPages": [
+        1,
+        110
+      ],
+      "note": "Mixture by design: tesseract reads the dense body text it is good at, and the two covers are re-read by a vision model. Per-page textSource is in the intake manifest."
+    }
   },
   "recipeMatch": {
     "matchedRecipes": [
@@ -275,5 +293,5 @@
     "slackReplyTs": null,
     "shipReaction": false
   },
-  "notes": "First real book through the new intake, so the run tested the engine as much as the book. Three things worth keeping. (1) The deterministic gates fired three findings on the first pass and every one was a false alarm: a sharp photographic cover and a sharp sideways worksheet were called blurry because a large flat dark or coloured area drags a whole-page average down, and two different units' reuse of one worksheet template was called the same page shot twice. Both signals were replaced (sharpness is now the 99.9th percentile of gradient magnitude; a duplicate now needs the words AND the picture to agree) and all three cases are fixtures now. (2) OCR cannot read a stylised cover, so identity has to come from looking at the cover image while aboutness stays span-backed; the title is deliberately not claimed in aboutness for exactly that reason. (3) The book's real value to Homa is its scope, a ten-unit sound-spelling sequence hung on named story units, which a form-only analysis would have discarded entirely. Taste is not logged: this is an archive drop, not a founder saying they love it, and the taste model takes founder choices only."
+  "notes": "First real book through the new intake, so the run tested the engine as much as the book. Three things worth keeping. (1) The deterministic gates fired three findings on the first pass and every one was a false alarm: a sharp photographic cover and a sharp sideways worksheet were called blurry because a large flat dark or coloured area drags a whole-page average down, and two different units' reuse of one worksheet template was called the same page shot twice. Both signals were replaced (sharpness is now the 99.9th percentile of gradient magnitude; a duplicate now needs the words AND the picture to agree) and all three cases are fixtures now. (2) OCR alone could not read the stylised cover ('MET | Pacis | RO READING'), which was first written up as a limitation and then correctly rejected as one: the intake now escalates covers and low-yield pages to a vision model, so the title is span-backed like any other claim and the model also returns what the page SHOWS, which no OCR pass can produce. (3) The book's real value to Homa is its scope, a ten-unit sound-spelling sequence hung on named story units, which a form-only analysis would have discarded entirely. Taste is not logged: this is an archive drop, not a founder saying they love it, and the taste model takes founder choices only."
 }

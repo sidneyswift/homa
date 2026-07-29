@@ -47,7 +47,8 @@ Links expire in hours and files leave Slack. Capture first, think later.
   python3 .cosmo/scripts/book-intake.py <file.pdf> --id <ref-id> [--expect-pages N]
   ```
 
-  It writes per-page masters to `.cosmo/masters/<id>/`, the text sidecar to `.cosmo/text/<id>.txt`, a provenance manifest, and a stub JSON for you to fill in. It also runs the deterministic gates (page count, blank, blurry, page shot twice) and prints what the dropper should re-shoot. Report those findings in your Slack reply: one re-shot page now beats a permanent hole in the archive. For a single-page drop, write the sidecar by hand.
+  It writes per-page masters to `.cosmo/masters/<id>/`, the text sidecar to `.cosmo/text/<id>.txt`, a provenance manifest, and a stub JSON for you to fill in. Text comes from a **mixture**: tesseract over every page, then a vision model over the covers and any page OCR could not read honestly (see `references/aboutness.md`). It also runs the deterministic gates (page count, blank, blurry, page shot twice) and prints what the dropper should re-shoot. Report those findings in your Slack reply: one re-shot page now beats a permanent hole in the archive. For a single-page drop, write the sidecar by hand.
+- The vision pass needs a fresh `VERCEL_OIDC_TOKEN` (`pnpm dev:token`, roughly twelve hours; never a gateway API key). If it is missing the intake keeps the OCR text and says so; refresh and re-run with `--force` rather than analysing a book whose cover was never actually read.
 - The sidecar is gitignored (extracted text of a copyrighted book is the copyrighted work, same ruling as the originals), and it is what makes dimension F's quotes verifiable. It is the one thing the pre-2026-07-28 corpus lost on every drop. Full contract: `references/aboutness.md`.
 
 ### 1. Identify the reference

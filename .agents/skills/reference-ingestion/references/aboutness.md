@@ -33,7 +33,9 @@ Aboutness cannot be verified against text that was never kept. During step 0 cap
 - The directory is **gitignored**. Extracted text of a copyrighted book is the copyrighted work (founder ruling `inspo-originals-offrepo`, 2026-07-20, applies to text as much as to the PDF).
 - Record the path as `aboutness.textSidecar` and, once uploaded, `aboutness.textBlobUrl` (same `blob-upload.sh` path as the original).
 - Born-digital PDFs with a text layer: extract it, do not re-read the pages by eye.
-- Scans and photos: read the pages. Skip nothing but genuinely blank pages.
+- Scans and photos: `book-intake.py` runs a **mixture** and you should let it. Tesseract reads every page, because it is free and genuinely good at dense body text; a vision model re-reads the pages OCR cannot do honestly. Never accept an OCR limitation as a fact about the page: the first real book rendered "METRO READING / Fast Forward! / STUDENT HANDBOOK" as "MET | Pacis | RO READING | HANDBOOK", and the fix is another reader, not a smaller claim.
+- The escalation set is covers (first and last page, which carry identity and are usually display type over artwork) plus any page with ink but almost no text read, plus any page whose text is garbled past use. The model also returns what the page **shows**, which is theming and aboutness evidence no character-recognition pass can produce; it lands in the intake manifest as `visual`.
+- If the vision pass cannot run (no `VERCEL_OIDC_TOKEN`, expired token, gateway failure) the intake says so loudly and keeps the OCR text. Fix the token and re-run with `--force` before analysing a book whose cover was never read; do not write the title as an unsupported claim.
 - If the item has no text at all (a wordless picture book, a shape-sorting card set), set `extractionQuality: "unavailable"` with the reason, and take entity and subject claims from the illustrations, quoting the title or any printed label instead.
 
 Never commit the sidecar. Never paste the full text into the ref JSON.
