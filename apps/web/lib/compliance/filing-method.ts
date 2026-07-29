@@ -37,6 +37,18 @@ export interface FilingMethodEntry {
   evidence: string;
   /** Where the family sends or enters it, when the page names it. */
   submitTo?: string;
+  /** For a letter state only: what the notice must SAY beyond the usual
+   * identity block, in the state's own terms. Maine wants assurances
+   * about days and subjects; West Virginia wants assurances about
+   * subjects and annual assessment. Rendered as sentences in the letter,
+   * because a notice missing a required assurance is incomplete on its
+   * face however well addressed it is. */
+  letterMustContain?: string[];
+  /** For a letter state only: what the family must ENCLOSE. West
+   * Virginia wants evidence of the instructing parent's diploma. Homa
+   * cannot produce these, so they are listed for the parent to attach
+   * rather than silently omitted. */
+  letterAttachments?: string[];
 }
 
 export type FilingMethodVerdict =
