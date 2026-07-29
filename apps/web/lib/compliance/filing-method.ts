@@ -94,7 +94,7 @@ export function verifyFilingMethod(
       reason: "evidence is too thin to tell a finding from a guess",
     };
   }
-  if (evidence.includes("—")) {
+  if (evidence.includes("\u2014")) {
     return { ok: false, reason: "evidence contains an em dash" };
   }
   return { ok: true, entry };
