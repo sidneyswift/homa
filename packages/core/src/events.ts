@@ -730,6 +730,15 @@ export const EVENT_SCHEMAS = {
     child_id: z.uuid(),
     reason: z.enum(["no-phone", "telnyx-error", "not-found"]),
   }),
+  // The general line's "have Homa call me" button (#283). Distinct from
+  // voice.call_started, which is the curriculum line and always carries a
+  // child; a general call is about the family, not one kid. One event
+  // covers both outcomes so the tap and its result stay comparable.
+  "voice.call_requested": z.object({
+    family_id: z.uuid(),
+    line: z.literal("general"),
+    outcome: z.enum(["placed", "telnyx-error"]),
+  }),
   "voice.curriculum_generated": z.object({
     family_id: z.uuid(),
     child_id: z.uuid(),
