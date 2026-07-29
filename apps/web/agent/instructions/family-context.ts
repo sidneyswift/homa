@@ -14,6 +14,8 @@ import {
   loadEnabledChildProgressAgentContext,
 } from "../../lib/child-progress/agent-context";
 import { loadContinuityContext } from "../../lib/conversation-continuity/ledger";
+import { effectiveTimeZone } from "../../lib/time-zone";
+import { loadRecentCallsContext } from "../../lib/voice/recent-calls";
 import {
   loadFamilyContextPinned,
   renderFamilyContext,
@@ -126,6 +128,11 @@ interface FamilyContextInstructionAttributes {
    *  actually focused on the right child. */
   childId?: string;
   memberName?: string;
+  /** The authenticated adult, stamped by the eve channel's auth walk from
+   *  the caller's own membership row, never by the client. Recent calls are
+   *  per-adult by ruling (voice-transcript-per-adult), so without this the
+   *  recent-calls line renders nothing. */
+  memberUserId?: string;
   /** Stamped by the eve channel's auth walk from the family row, never
    *  by the client (plans/2026-07-21-chat-first-onboarding.md §2.2). */
   onboardingActive?: string;
@@ -149,6 +156,7 @@ export interface FamilyContextInstructionDependencies {
   renderFamilyContext: typeof renderFamilyContext;
   loadProgressContext(input: ProgressContextInput): Promise<string>;
   loadContinuityContext: typeof loadContinuityContext;
+  loadRecentCallsContext: typeof loadRecentCallsContext;
   recordContextSnapshot: typeof recordContextSnapshot;
 }
 
@@ -184,6 +192,7 @@ const FAMILY_CONTEXT_INSTRUCTION_DEPENDENCIES: FamilyContextInstructionDependenc
         },
       ),
     loadContinuityContext,
+    loadRecentCallsContext,
     recordContextSnapshot,
   };
 
@@ -325,10 +334,33 @@ export async function resolveFamilyContextInstructionMarkdown(
         );
       }
     }
+    // #171: a parent finished a phone call, opened chat, and Homa had
+    // never heard of it. The call-ended webhook puts the transcript in
+    // call_transcripts within seconds; this is what makes her aware
+    // without being asked. Per-adult by ruling
+    // (voice-transcript-per-adult), bounded to a few recent calls, and
+    // fail-soft like every other block here: losing it costs Homa some
+    // memory, it must never cost her the family.
+    let recentCallsContext = "";
+    if (attributes?.familyId) {
+      try {
+        recentCallsContext = await dependencies.loadRecentCallsContext({
+          familyId: attributes.familyId,
+          memberUserId: attributes.memberUserId ?? null,
+          timeZone: effectiveTimeZone(rows.family?.time_zone),
+        });
+      } catch (error) {
+        console.error(
+          "family context: recent calls load failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      }
+    }
     const markdown = [
       familyContext,
       progressContext,
       onboardingContext,
+      recentCallsContext,
       continuityContext,
     ]
       .filter((block) => block.length > 0)

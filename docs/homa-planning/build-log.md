@@ -36,6 +36,46 @@ its `period` enum, which described the retired evidence-report concept;
 the row now describes the pack button. The evidence-report feature
 itself stays a non-goal pending gh#317.
 
+## 2026-07-28 · Founder ruling: the dispatched-material gate is code, not a habit
+
+Ruling `voice-dispatch-sandbox-gate`, registered in
+`journeys/10-reconciliation.md` §5.
+
+When `voice-dispatch-delivery` was ruled on 2026-07-27 it answered two of
+three offered items: auto-finalize to the binder once QC passes, and deliver
+by SMS and MMS only. The third, verifying on a `+homatest` sandbox family
+before real families see it, was offered and not selected, so it was recorded
+as unconfirmed rather than applied or dropped. The founder then ruled it, and
+asked for it to be fixed rather than only written down.
+
+So it is a line of code. A finished material rides along on the milestone
+text for a sandbox family always, and for every other family only when
+`HOMA_JOB_MATERIAL_DELIVERY_ENABLED` is exactly "true"
+(`apps/web/lib/jobs/flag.ts`, `lib/jobs/milestone.ts`). The whole path is
+therefore verifiable end to end on `+homatest` with the flag unset, and
+flipping the flag is the single deliberate step that opens delivery to real
+families. The sandbox read fails closed: an unreachable database sends words
+only, which is exactly the message that function has been sending all along,
+rather than attaching on a guess.
+
+Why gated at all, given the delivery half is a fix for a real gap: the same
+dispatch policy auto-finalizes to the binder once QC passes, and the
+2026-07-24 materials review found QC screenshotting the screen render while
+the print render is what ships. Auto-finalize plus unwatched delivery puts a
+wrong worksheet in a real parent's binder, and the gate holds until someone
+has watched a real send.
+
+One decision made without a ruling, recorded here: the plan also called for
+widening `UsageChannel` with `voice` in Phase 1. It was attempted and
+reverted. Typecheck showed that type has three consumers with three different
+domains (the `model_usage` ledger, the `materials.channel` column whose CHECK
+`voice-materials-bridge` D3 ruled unchanged, and the typed event registry),
+and nothing sets `channel: "voice"` today, so widening it now cascades across
+seven files plus a migration for a channel that does not exist. It moves to
+the phone rebuild (#280), where the channel is actually created and all three
+consumers must be resolved together. The failure it guards against cannot
+fire before then.
+
 ## 2026-07-28 · Founder correction: the logo is the logo, and the name is always "Homa"
 
 Founder, on being told an email rendered the wordmark lowercase and that
@@ -125,6 +165,86 @@ The subscription mirror was proven the same way with a real cancel
 event, which is the path that ends access when a family cancels and had
 never run in production. Before this session, 0 of 206 families carried
 any Stripe data at all.
+
+## 2026-07-27 · Founder rulings: voice moves to the OpenAI Realtime API
+
+Spec: `docs/homa-planning/plans/2026-07-27-realtime-voice.md`, written after
+two parallel deep-readers over the voice stack and the eve harness plus a
+literal read of the OpenAI Realtime, Vercel AI Gateway realtime, and Vercel
+Functions WebSocket docs. Decision artifact:
+`2026-07-27-realtime-voice-decisions.html`.
+
+The finding that motivated it: the phone line is not Homa's. Telnyx's hosted
+assistant runs the whole conversation on `Qwen/Qwen3-235B-A22B`
+(`scripts/telnyx-provision.mts:485`), a model chosen in July only because it
+needed no provider key, with 4 tools against eve's 62 and no path into the
+continuity ledger. Zero audio bytes touch Homa's infrastructure during a call.
+That architecture is the direct cause of #171 (phone-call amnesia) and of the
+2026-07-19 fabricated-worksheet call.
+
+The finding that made it feasible: OpenAI's SIP transport means OpenAI holds
+the media, so Homa never runs an audio server. The codebase map had correctly
+flagged a Homa-owned audio socket as the one seam with no precedent in the
+repo and Vercel as the wrong host for it. SIP deletes that seam.
+
+Six rulings registered in `journeys/10-reconciliation.md` §5:
+`voice-provider-key-telephony-only`, `voice-brain-hybrid`, `voice-model-tier`,
+`voice-show-never-ask`, `voice-dispatch-delivery`, and
+`voice-transcript-per-adult`. The last one closes the "Voice transcript
+visibility" question open since 2026-07-09.
+
+Three things deliberately NOT ruled, and recorded as open rather than assumed:
+the tool mechanism (remote MCP versus function tools plus a control socket)
+waits on the step 0 spike, because MCP on a SIP-accepted call with per-call
+scoped auth is documented but unverified; voice casting waits on a listening
+session, because real families already know the current voice; and the
+sandbox-first gate on dispatched-material delivery was not selected when D7
+was ruled, so it is recorded as unconfirmed rather than inferred from standing
+practice.
+
+**Revised the same day after an adversarial simplification pass**, recorded as
+ruling `voice-rebuild-is-a-bet-not-a-fix`. The pass overturned this spec's own
+central conclusion, and the corrections are kept visible in §0.1 rather than
+edited away.
+
+Both defects used to justify the rebuild are fixable on the existing
+architecture in about three days. Amnesia is a provisioning omission: the
+curriculum line already receives a call-ended Insight Group webhook in
+production (`telnyx-curriculum-provision.mts:196`) and the general line was
+simply never given one. The materials bridge is about 90% shipped: `lib/jobs/`
+is 1,789 lines of live, migrated background-job machinery with a single-stage
+`materials-studio` contract, and the only gap is that
+`lib/jobs/milestone.ts:112` sends the completion text without `mediaUrls`
+while the MMS-with-PDF path is fully built at `create_printable.ts:801`. The
+bridge plan was written 2026-07-20 and agent-jobs landed after it.
+
+Two design errors also corrected. The "light tools live, heavy tools
+dispatched" split had no measured basis: `lib/agent-tool-deadline.ts:96-121`,
+derived from n=3155 production calls, shows the `quick` tier's slowest run at
+13.9s and `fetch` at 41.4s, covering 58 of 60 tools, so the plan rejected
+forwarding to eve at 6 to 12 seconds and then proposed something slower. And
+the "one brain" box sat outside the seam that actually unifies Homa:
+`isPinnedAgentChannel` (`lib/agent-db.ts:137-161`) is a six-member union off
+which context, tools, hooks, continuity, and usage all hang, and its own
+comment at `:129-136` records the 2026-07-18 defect caused by keeping a second
+list. If the rebuild happens, the realtime model gets ONE tool that opens an
+eve turn, backed by the already-written but deliberately dormant
+`lib/harness/resume-session.ts`, whose header says it is the intended path for
+exactly this. That deletes `check:voice-parity` (half of which already runs in
+CI as `scripts/instructions-split-check.mts`), the generated capability
+boundary, the per-call scoped bearer, a new deadline tier, and D3 itself.
+
+The new serious risk, named because it replaces the old one rather than
+removing it: the realtime model restating eve's answer is a fresh fabrication
+surface on the product whose defining scar is fabrication. Mitigation is the
+verbatim-read pattern already used by `send-email`'s `SENT_NOTE`.
+
+One live footgun found during the investigation and filed separately:
+`pnpm telnyx:provision --status` is not read-only. It POSTs instructions and
+tools (`telnyx-provision.mts:510`), and with `TELNYX_WEBHOOK_SECRET` absent
+from the shell it sends `tools: []` (`:461-468`), stripping every tool off the
+live phone assistant.
+
 ## 2026-07-27 · One planner: the consolidation arc, seven founder rulings, and the first two PRs
 
 The calendar shipped the same day (entry below) and immediately sharpened the

@@ -171,6 +171,7 @@ describe("subject lesson pinned family context", () => {
         },
         loadProgressContext: async () => "",
         loadContinuityContext: async () => "",
+        loadRecentCallsContext: async () => "",
         recordContextSnapshot: async () => {},
       },
     );
@@ -291,6 +292,7 @@ describe("slim morning brief dynamic context", () => {
           });
           return "Established continuity context";
         },
+        loadRecentCallsContext: async () => "",
         recordContextSnapshot: async () => {},
       },
     );
@@ -347,6 +349,7 @@ describe("slim morning brief dynamic context", () => {
           loadContinuityContext: async () => {
             throw new Error("continuity unavailable");
           },
+          loadRecentCallsContext: async () => "",
           recordContextSnapshot: async () => {},
         },
       );
@@ -381,6 +384,7 @@ describe("eval family fixture", () => {
     loadContinuityContext: async () => {
       throw new Error("continuity context must not load");
     },
+    loadRecentCallsContext: async () => "",
     recordContextSnapshot: async () => {},
   };
 
