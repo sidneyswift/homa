@@ -204,6 +204,23 @@ describe("New York (detailed plan, verbatim mid-year clause)", () => {
     assert.ok(titles.some((title) => title.includes("checklist")));
     assert.ok(titles.some((title) => title.includes("notice of intent")));
   });
+  it("points every official-channel line at the state education department", () => {
+    // The first shipped DC pack labeled HomeschoolLeap's wizard "the
+    // official form" (founder catch, 2026-07-28). The DOE page leads
+    // wherever the pack says official, for every jurisdiction.
+    for (const code of ALL_CODES) {
+      const detail = loadDetail(code);
+      if (!detail.doeUrl) continue;
+      const pack = compose(code);
+      assert.ok(
+        !pack.html.includes("official form on your state education department's homeschool page: <span class=\"sp-mono\">https://homeschoolleap.com"),
+        `${code} labels a third-party page as the official channel`,
+      );
+    }
+    const dc = compose("DC");
+    assert.ok(dc.html.includes("osse.dc.gov"));
+    assert.ok(!dc.html.includes("homeschoolleap.com/states/DC/wizard"));
+  });
   it("never stacks a preposition onto the verbatim deadline string", () => {
     // "You send it to {recipient} by {deadline}" produced "by By July 1"
     // (render smoke, 2026-07-28); the deadline is verbatim prose and
