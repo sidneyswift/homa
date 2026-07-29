@@ -219,10 +219,15 @@ export function deriveDuties(detail: StateRequirementsDetail): Duties {
   };
 }
 
-/** wizard -> state page -> DOE: the official-channel link the pack
- * prints wherever it tells the parent to confirm or file (D3, D12). */
+/** DOE -> state page -> wizard: the link the pack prints wherever it
+ * tells the parent to confirm or file (D3, D12). The state education
+ * department leads because it is the only genuinely official channel;
+ * the first shipped DC pack sent parents to HomeschoolLeap's wizard
+ * labeled "the official form" (founder catch, 2026-07-28), and a
+ * third-party walkthrough must never wear that label. Every reviewed
+ * snapshot carries doe_url today, so the fallbacks are defensive. */
 export function officialUrl(detail: StateRequirementsDetail): string | null {
-  return detail.wizardUrl ?? detail.sourcePageUrl ?? detail.doeUrl ?? null;
+  return detail.doeUrl ?? detail.sourcePageUrl ?? detail.wizardUrl ?? null;
 }
 
 function variesLine(detail: StateRequirementsDetail): string {
@@ -458,7 +463,7 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
   const keyDates =
     p && !p.notification.varies && p.notification.required && p.notification.deadline
       ? `<aside class="sp-dates">
-  <p class="sp-section-label">Key dates for your year</p>
+  <p class="sp-section-label">The filing deadline</p>
   <p><strong>${escapeHtml(p.notification.deadline)}</strong>${p.notification.recipient ? ` · to ${escapeHtml(p.notification.recipient)}` : ""}${p.notification.frequency ? ` · ${escapeHtml(p.notification.frequency)}` : ""}</p>
 </aside>`
       : "";
@@ -915,7 +920,7 @@ function prepSheetPage(
   </div>
 </div>
 <aside class="sp-notform">
-  <p>This worksheet helps you gather what ${escapeHtml(detail.stateName)} asks for in a notice of intent. It is not the official form and cannot be filed. When it is filled in, copy the details into the official form here: ${link ? `<span class="sp-mono">${escapeHtml(link)}</span>` : "your state education department's homeschool page"}.${sendLine} Homa does not file it for you.</p>
+  <p>This worksheet helps you gather what ${escapeHtml(detail.stateName)} asks for in a notice of intent. It is not the official form and cannot be filed. When it is filled in, copy the details into the official form on your state education department's homeschool page${link ? `: <span class="sp-mono">${escapeHtml(link)}</span>` : ""}.${sendLine} Homa does not file it for you.</p>
 </aside>`;
 }
 
