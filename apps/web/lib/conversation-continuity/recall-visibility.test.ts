@@ -61,9 +61,14 @@ describe("recall visibility wall", () => {
     const defining = readdirSync(migrationsDir)
       .filter((file) => file.endsWith(".sql"))
       .sort()
+      // A DEFINITION, not any mention: a grant or revoke names the same
+      // function, and selecting one of those as "the latest definition"
+      // made this guard fail for having no visibility predicate in it
+      // (2026-07-29, gh#382). A guard that cries wolf gets deleted, and
+      // this one stands between internal rows and a parent's recall.
       .filter((file) =>
-        readFileSync(path.join(migrationsDir, file), "utf8").includes(
-          "function public.recall_semantic",
+        /create (or replace )?function public\.recall_semantic/u.test(
+          readFileSync(path.join(migrationsDir, file), "utf8"),
         ),
       );
     assert.ok(defining.length >= 1, "expected a recall_semantic migration");
