@@ -167,13 +167,21 @@ already collected.**
   the arc has never once mentioned it. Showing her a week with her own
   child's name in it is the difference between "an AI chat" and "a
   homeschool system."
-  **SHIPPED 2026-07-29** into "One more thing", which now sits after
-  the rehearsal so a real four-week plan exists to open. The beat
-  carries two honest limits taken from the tool's own contract: do not
-  narrate the week when a board is already showing it, and never
-  promise a panel, because mobile drops planner parts entirely
-  (issue #256) and the tool result is what says what opened.
-  Not yet walked; a walk has to get past beat 7 to see it.
+  **SHIPPED 2026-07-29 and VERIFIED in walk 005**, into "One more
+  thing". The beat carries two honest limits taken from the tool's own
+  contract: do not narrate the week when a board is already showing it,
+  and never promise a panel, because mobile drops planner parts
+  entirely (issue #256) and the tool result is what says what opened.
+  It took three walks to see, because the beat reorder below let the
+  stop condition preempt it; see walk 004.
+  **The premise was wrong, though.** Scoring a report does not build a
+  month, and no tool can: `edit_plan` says it "cannot create a new
+  month from nothing: when no plan exists, the parent builds one with
+  one tap in the child's progress report". So in sitting one the board
+  always reads "There's no month set up for Ellie yet", and "a week
+  with her own child's name in it" is not achievable during onboarding
+  as things stand. The beat now says to expect it empty and to make the
+  moment an offer rather than a reveal.
 - **Swap beats 8 and 9**, so a beat she participates in follows the
   reveal rather than a beat she watches.
   **SHIPPED 2026-07-29.** The rehearsal is now beat 8, "One more thing"
@@ -758,3 +766,75 @@ than walk 002 suggested: the two beats that were broken are fixed and
 the two beats that were 0 are now +1. What is left is not wording. It
 is that two live capabilities, the planner and the first making, are
 named in the skill and still never reached.
+
+### Walk 005, 2026-07-29, Rachel, does the planner finally open
+
+Same setup, run immediately after the stop-condition fix, for one
+question: does beat 9 run now. It does.
+
+**The stop-condition fix works**
+
+> Done, I'll check in with you around 3 each day. **Let me show you
+> what's on Ellie's plan for this week.**
+
+`open_planner` fired and the board opened beside the conversation.
+Beat 10 followed in the same turn with real specifics. So wave 1 item 2
+is finally verified end to end, three walks after it shipped, and the
+diagnosis in walk 004 was correct: the reorder had moved the finish
+line, nothing else was wrong.
+
+**And it immediately falsified the beat I wrote**
+
+The board says, in large type: **"There's no month set up for Ellie
+yet."**
+
+The beat 9 text written earlier today claimed "the report just gave
+this child a real four-week plan, so there is something true on the
+board to look at rather than an empty grid." That is false, and
+`edit_plan`'s own description says so outright:
+
+> This tool cannot create a new month from nothing: when no plan
+> exists, the parent builds one with one tap in the child's progress
+> report.
+
+There is no tool in `apps/web/agent/tools/` that can build a month. So
+in sitting one the planner is ALWAYS empty, and the founder's framing
+for this moment, "showing her a week with her own child's name in it",
+is not currently achievable during onboarding at all.
+
+The moment survived only because Homa read the empty board and said so:
+"There's no month plan started for Ellie yet. When you're on her
+progress report, there's a one-tap button to build one." Honest, useful,
+and entirely down to the tool-honesty rules rather than to this beat.
+
+Beat 9 is rewritten to tell the truth: expect it empty, do not oversell
+it, and treat the beat as an offer (name what a month is, point at the
+one tap that builds it) rather than a reveal. Not re-walked.
+
+**What this says about the wow question, which is the point of the doc**
+
+The eval doc opened by finding that every capability the founder wanted
+already ships, so the gap was routing. Two walks have now qualified
+that. `open_planner` ships and routes fine once the stop rule lets it,
+but the thing worth showing does not exist yet for a new family.
+`start_first_making` ships and has not fired in five walks. So the
+honest version of §1 is:
+
+**The capability shipping is not the same as the capability having
+anything to show on day one.** Before advertising a tool in the arc,
+walk it against a family that is twelve minutes old and look at what it
+actually renders for them.
+
+**Reveal quality is now inconsistent rather than wrong**
+
+Same five answers as walks 003 and 004. The reveal was honest and
+carried no invented subjects ("her brightest spots right now", "the
+other twelve are just sitting there"), which is the fix holding. But it
+never named the reading answer, where walk 004 built the whole reveal
+around it. So the "name the worry she actually has" half is landing
+about half the time. Worth an eval rather than more prose.
+
+**Latency, warm, third data point**
+
+25s, 37s, 20s, 27s per turn. Consistent with walk 003 and nothing like
+walk 002's 215s. gh#404 stands as written.
