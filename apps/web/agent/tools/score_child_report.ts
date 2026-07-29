@@ -110,8 +110,16 @@ export default defineBoundedTool({
       // Strongest first, from her own answers. Say these in your own
       // words; never read the list back as a list.
       strengths,
+      // What she answered "not yet", in her question's exact words, so
+      // the beat that must name her worry is handed the worry instead
+      // of having to remember it. Empty is a real answer: she said that
+      // about nothing, and there is no concern to name.
+      growingEdges: state.growingEdges,
       alreadyScored: report.duplicate,
-      note: "SPEAK AFTER THIS ONE: the report is drawing on her screen and it wants your voice over it. Say one true thing about what it shows for this child, in your own words. Do not list subjects, do not read numbers back, and never tell her to check her email.",
+      note:
+        state.growingEdges.length > 0
+          ? `SPEAK AFTER THIS ONE: the report is drawing on her screen and it wants your voice over it. Say one true thing about what it shows for this child, in your own words. Then name ONE growingEdge above, in her own question's words, as the thing this child is working on next: that is the answer she was most afraid to give and a reveal that skips it reads as flattery. Frame it as where they are growing, never as behind. Do not list subjects, do not read numbers back, do not name more than one edge, and never tell her to check her email.`
+          : "SPEAK AFTER THIS ONE: the report is drawing on her screen and it wants your voice over it. Say one true thing about what it shows for this child, in your own words. She answered \"not yet\" to nothing, so there is no growing edge to name and you must not invent one. Do not list subjects, do not read numbers back, and never tell her to check her email.",
     };
   },
 });

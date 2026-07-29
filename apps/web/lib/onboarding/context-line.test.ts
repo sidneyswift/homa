@@ -16,6 +16,9 @@ function child(overrides: Partial<ChecklistState> & { childName: string }): Chec
     minutesLeft: 5,
     complete: false,
     reported: false,
+    // The context line does not read these; the reveal does. Defaulted
+    // so a test about the context line never has to care.
+    growingEdges: [],
     ...overrides,
   };
 }

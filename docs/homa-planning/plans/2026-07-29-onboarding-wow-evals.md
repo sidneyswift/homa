@@ -844,3 +844,54 @@ about half the time. Worth an eval rather than more prose.
 
 25s, 37s, 20s, 27s per turn. Consistent with walk 003 and nothing like
 walk 002's 215s. gh#404 stands as written.
+
+### Walk 006, 2026-07-29, Rachel, the worry now arrives as data
+
+Same five answers again, fourth time, so the reveal is comparable
+across the whole series.
+
+**The 50/50 beat was a missing tool field, not a wording problem**
+
+score_child_report returned `strengths` and nothing else about her
+answers. So the half of beat 7 that lists what is going well arrived as
+data, and the half that must name her worry had to be remembered out of
+the conversation. The remembered half landed about half the time, which
+is exactly what an unaided recall of one item among five looks like.
+
+Fixed at the layer the house rule points at: the model judges how to
+say it, code supplies which item it is. `ChecklistState` now carries
+`growingEdges`, the things she answered "not yet", each with the
+personalized statement she actually read, ordered by the bank's own
+subject order and capped at three. score_child_report returns them and
+its result note requires naming exactly one, framed as where the child
+is growing. Only "not yet" qualifies: "getting there" is a middle
+answer and dressing it as a concern is the behind-framing this house
+does not do, "not sure" is an unknown rather than a worry, and a skip
+is not an answer. Empty is a real state and the note then forbids
+inventing one. Seven unit tests in `checklist-state.test.ts`, wired
+into `check:onboarding`.
+
+**The result, same answers as walks 003 to 005**
+
+> Ellie's math, phonics, and writing all look solid for her age. **She's
+> working on reading a short book out loud and telling you about it
+> after**, which is such a natural next step from where she is. There's
+> a lot of ground still open, since we've only touched 5 of the areas
+> the map covers.
+
+The named edge is `growingEdges[0].statement` word for word, so the
+claim is traceable to the tap she remembers making. Strengths are
+hedged ("look solid for her age") rather than promoted to mastery, and
+the anchor counts areas instead of naming subjects it cannot know.
+
+One walk is not a reliability claim, and this is recorded as a
+mechanism change rather than a proven rate: the beat went from
+depending on recall to depending on a field. Worth an eval before
+calling it settled.
+
+| Reveal, same five answers | Named her worry |
+|---|---|
+| Walk 003 | no |
+| Walk 004 | yes |
+| Walk 005 | no |
+| Walk 006, after the fix | yes |

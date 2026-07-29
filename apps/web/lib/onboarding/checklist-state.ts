@@ -1,6 +1,9 @@
 import {
   ageInMonths,
   buildMapQuestionQueue,
+  getMapItem,
+  MAP_SUBJECTS,
+  personalizeStatement,
   planQuestions,
   type MapAnswer,
 } from "@homa/core";
@@ -37,6 +40,72 @@ export interface ChecklistState {
   complete: boolean;
   /** True once this child has a scored report. */
   reported: boolean;
+  /**
+   * The things she said are not happening yet, in the exact words of the
+   * question she answered. Empty when she said that about nothing.
+   *
+   * This exists because the reveal is required to "name the worry she
+   * actually has and answer it plainly", and until now the only thing
+   * code handed the model was the child's STRENGTHS. So half the beat
+   * arrived as data and the other half had to be remembered out of the
+   * conversation, and the remembered half landed about half the time:
+   * walk 004 built the whole reveal around a mother's one "not yet",
+   * walk 005 never mentioned it (2026-07-29). Naming it warmly is a
+   * judgment; which item she actually answered lowest is a lookup, and
+   * a lookup belongs here.
+   */
+  growingEdges: GrowingEdge[];
+}
+
+export interface GrowingEdge {
+  /** Bank item id, so a caller can trace the claim back to her answer. */
+  itemId: string;
+  /** The subject's parent-facing name, for example "Reading". */
+  subject: string;
+  /** Her question, personalized exactly as she read it on the card. */
+  statement: string;
+}
+
+/**
+ * growingEdgesFrom(childName, answers): only "not yet", in the order the
+ * questions are asked.
+ *
+ * Deliberately not the other bands. "Getting there" is a middle answer
+ * and dressing it as a concern is the red/behind framing this house
+ * does not do; "not sure" is an unknown rather than a worry, and she
+ * would rightly ask how it became one; a skip is not an answer at all.
+ * If she said "not yet" about nothing, this is empty and the reveal has
+ * nothing of this kind to name, which is a real state and not a gap to
+ * paper over.
+ *
+ * Capped at three because the beat names ONE. A longer list invites the
+ * reveal to read a list of what her child cannot do, at the exact
+ * moment she is braced to be judged as a teacher.
+ */
+export function growingEdgesFrom(
+  childName: string,
+  answers: { question_id: string; answer: MapAnswer }[],
+): GrowingEdge[] {
+  const subjectRank = new Map(MAP_SUBJECTS.map((subject, index) => [subject.id, index]));
+  return answers
+    .filter((row) => row.answer === "not_yet")
+    .flatMap((row) => {
+      const found = getMapItem(row.question_id);
+      if (!found) return [];
+      return [
+        {
+          rank: subjectRank.get(found.subject.id) ?? Number.MAX_SAFE_INTEGER,
+          edge: {
+            itemId: row.question_id,
+            subject: found.subject.displayName,
+            statement: personalizeStatement(childName, found.item),
+          },
+        },
+      ];
+    })
+    .sort((a, b) => a.rank - b.rank)
+    .slice(0, 3)
+    .map((entry) => entry.edge);
 }
 
 /** The checklist screen's own constant, so the two never disagree. */
@@ -77,6 +146,7 @@ function stateFromRows(
     // isMapChecklistComplete applies.
     complete: answered > 0 && remaining === 0,
     reported,
+    growingEdges: growingEdgesFrom(child.name, answers),
   };
 }
 
