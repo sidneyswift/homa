@@ -54,6 +54,153 @@ export type StudioImageResult =
   | { ok: true; url: string }
   | { ok: false; note: string };
 
+/**
+ * Why a generation failed, in the only three flavors that change what
+ * Homa should do next.
+ *
+ * - policy: the provider refused the prompt (moderation, character
+ *   likeness, content filter). Retrying the same subject is futile.
+ * - rejected: the provider refused the request as written for a
+ *   non-policy reason (an oversized or unreadable reference image, a
+ *   malformed field). An identical retry fails identically.
+ * - transient: rate limit, provider outage, network. Retrying works.
+ *
+ * Cause (2026-07-29, the "that is not pokemon" failure): every
+ * Pikachu-faithful prompt was refused for trademark likeness, and this
+ * module reported all three flavors as "try a reworded prompt", so Homa
+ * rewrote toward ever more generic prompts until an off-brand lookalike
+ * passed and shipped. The parent was never told exact franchise likeness
+ * is unavailable. Same shape as the "Ps5 astrobot" correction in the
+ * 07-28 field study (J6).
+ */
+export type ImageFailureKind = "policy" | "rejected" | "transient";
+
+/**
+ * Provider error taxonomy, not natural language: these are machine
+ * codes and provider-authored templates ("moderation_blocked",
+ * "rejected as a result of our safety system"), so matching them is
+ * verification, not the interpretation that models-judge-code-verifies
+ * reserves for a model. The structured signals (status code,
+ * retryability) lead; this list is the net that catches the code
+ * wherever in the error chain the provider left it.
+ *
+ * Among request failures this errs toward "policy" on purpose: a false
+ * positive costs one honest note that names a real alternative, while a
+ * miss costs retry decay and an off-brand character on a printed page,
+ * which is the bug. Retryable failures are exempt from that lean (see
+ * classifyImageFailure).
+ */
+const POLICY_MARKERS = [
+  "moderation_blocked",
+  "moderation",
+  "content_policy",
+  "content policy",
+  "content_filter",
+  "content filter",
+  "safety system",
+  "safety_violation",
+  "prohibited_content",
+  "trademark",
+  "copyright",
+  "public figure",
+] as const;
+
+/**
+ * Read only what the PROVIDER said. Never add `requestBodyValues`: it
+ * carries our own prompt, so a legitimate page about copyright or
+ * trademarks would classify its own unrelated failure as a refusal.
+ */
+const SIGNAL_KEYS = ["name", "message", "type", "code", "responseBody"] as const;
+const MAX_CAUSE_DEPTH = 5;
+
+function stringifySignal(value: unknown): string {
+  try {
+    return JSON.stringify(value) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Flatten an error and its cause chain into one lowercased haystack plus
+ * the first status code and retryability found. The gateway re-types an
+ * upstream refusal by `error.type` and drops `error.code` on the floor,
+ * so the raw "moderation_blocked" survives only on the nested
+ * APICallError's responseBody and data. Read the whole chain or miss it.
+ */
+function errorSignals(error: unknown): {
+  text: string;
+  statusCode?: number;
+  retryable?: boolean;
+} {
+  const parts: string[] = [];
+  let statusCode: number | undefined;
+  let retryable: boolean | undefined;
+  let node: unknown = error;
+
+  for (let depth = 0; node != null && depth < MAX_CAUSE_DEPTH; depth += 1) {
+    if (typeof node === "string") {
+      parts.push(node);
+      break;
+    }
+    if (typeof node !== "object") break;
+    const record = node as Record<string, unknown>;
+    for (const key of SIGNAL_KEYS) {
+      const value = record[key];
+      if (typeof value === "string") parts.push(value);
+    }
+    if (record.data !== undefined) parts.push(stringifySignal(record.data));
+    if (statusCode === undefined && typeof record.statusCode === "number") {
+      statusCode = record.statusCode;
+    }
+    if (retryable === undefined && typeof record.isRetryable === "boolean") {
+      retryable = record.isRetryable;
+    }
+    node = record.cause;
+  }
+
+  return { text: parts.join("\n").toLowerCase(), statusCode, retryable };
+}
+
+/** Which of the three flavors this provider error is. Exported for tests. */
+export function classifyImageFailure(error: unknown): ImageFailureKind {
+  const { text, statusCode, retryable } = errorSignals(error);
+  // Retryability is the provider's own verdict, and it outranks body text.
+  // A 502's HTML error page can carry a "Copyright" footer, and no
+  // refusal is ever marked retryable, so reading markers first would let
+  // an outage tell a parent her character is blocked. That is a confident
+  // lie, which is worse than the generic note this fix replaced.
+  if (retryable === true) return "transient";
+  if (POLICY_MARKERS.some((marker) => text.includes(marker))) return "policy";
+  // A client error the provider marked non-retryable is a request problem:
+  // 408 and 429 are the two 4xx codes that mean "come back later".
+  if (
+    statusCode !== undefined &&
+    statusCode >= 400 &&
+    statusCode < 500 &&
+    statusCode !== 408 &&
+    statusCode !== 429
+  ) {
+    return "rejected";
+  }
+  return "transient";
+}
+
+/**
+ * The note Homa reads. Each one has to answer "so what do I do now?"
+ * differently, because that is the whole point of classifying.
+ */
+export function imageFailureNote(kind: ImageFailureKind): string {
+  switch (kind) {
+    case "policy":
+      return "The image provider declined this prompt, likely character likeness or content policy. Rewording toward the same character will keep failing; tell the parent plainly and offer an inspired-original or a theme-object alternative (like the poke balls header that worked).";
+    case "rejected":
+      return "The image provider rejected this request as written, and it did not call the failure temporary, so an identical retry fails identically. Change the request itself: simplify the prompt, or drop a reference image that may be too large or an unreadable format.";
+    case "transient":
+      return "Image generation failed this time. Try a reworded prompt, or design the page without it.";
+  }
+}
+
 async function fetchReferenceBytes(url: string): Promise<Uint8Array | null> {
   try {
     const response = await fetch(url);
@@ -163,14 +310,15 @@ export async function generateStudioImage(input: {
         note: "The image is taking too long. Try once more with a simpler prompt, or design the page without it.",
       };
     }
+    const kind = classifyImageFailure(error);
+    // Runtime logs are the per-turn diagnostics surface for tool failures,
+    // so the classification goes in the log line: "image_failure=policy"
+    // is greppable, and a policy cluster is a product signal, not noise.
     console.error(
-      "generateStudioImage failed:",
+      `generateStudioImage failed: image_failure=${kind}`,
       error instanceof Error ? error.message : "unknown",
     );
-    return {
-      ok: false,
-      note: "Image generation failed this time. Try a reworded prompt, or design the page without it.",
-    };
+    return { ok: false, note: imageFailureNote(kind) };
   } finally {
     clearTimeout(timeout);
   }
