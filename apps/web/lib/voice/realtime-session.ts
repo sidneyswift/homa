@@ -1,4 +1,8 @@
 import { VOICE_PERSONA_MARKDOWN } from "./persona.generated";
+import {
+  VOICE_TOOL_BOUNDARY_LINES,
+  type VoiceToolName,
+} from "./realtime-tools";
 
 /**
  * The instructions a browser voice session runs on (issue #283, founder
@@ -32,10 +36,29 @@ import { VOICE_PERSONA_MARKDOWN } from "./persona.generated";
  * straight after.
  */
 
-/** Everything the model may not claim, stated before it can be tempted.
- * Mirrors the shape of `agent/general-call-instructions.md` rather than its
- * content: that file names four phone tools, this session has none. */
-export const VOICE_MODE_RULES = `
+/**
+ * The capability boundary, GENERATED from the tool allowlist.
+ *
+ * Not hand-written, on purpose. `agent/general-call-instructions.md` opens
+ * with "You have exactly four tools", and the moment the phone's tool set
+ * changes that sentence becomes false in the one file whose entire job is
+ * preventing false statements. Deriving the can-do list from
+ * VOICE_TOOL_BOUNDARY_LINES means adding a tool updates what Homa says
+ * about herself in the same commit, and a tool without a line fails a test
+ * rather than shipping unmentioned.
+ *
+ * The cannot-do list stays hand-written, because it is not the complement
+ * of the allowlist. It names the specific things a parent is most likely to
+ * ask for mid-conversation and the 2026-07-19 call falsely claimed, and
+ * those deserve naming even as the allowlist grows.
+ */
+export function buildVoiceModeRules(
+  toolNames: readonly VoiceToolName[] = Object.keys(
+    VOICE_TOOL_BOUNDARY_LINES,
+  ) as VoiceToolName[],
+): string {
+  const canDo = toolNames.map((name) => `- ${VOICE_TOOL_BOUNDARY_LINES[name]}`);
+  return `
 ## You are talking out loud, in the app (binding: this beats every rule above)
 
 She tapped the voice button in her chat with you. She can hear you, and she
@@ -52,18 +75,25 @@ How to talk here:
 - No lists, no headings, no markdown. She is hearing this.
 - If she goes quiet, it is fine to wait. Silence is her thinking, not a
   cue to fill.
+- Before anything that takes a moment to look up, say so in a few words and
+  then do it. "Let me look" is a real sentence; silence is not.
 
 ## What you can actually do right now (binding)
 
-In this voice conversation you can talk with her and nothing else. You have
-no tools here. You cannot:
+${canDo.join("\n")}
+
+That is the whole list. Anything else has to wait for chat.
+
+## What you cannot do in this conversation (binding)
+
+You cannot:
 
 - make, fill in, or send a worksheet, printable, or any material,
-- add anything to her binder, or read her binder back to her,
+- add anything to her binder, or reorganize her binder,
 - add, move, or remove anything on the calendar or the planner,
-- log hours, save a memory, or send an email or a text.
+- send an email or a text.
 
-These are not slow, they are simply not available in this conversation.
+These are not slow, they are simply not available while you are talking.
 
 ## When she asks for one of those (binding)
 
@@ -77,12 +107,15 @@ waiting until you hang up.
 
 ## Honesty law (binding, overrides helpfulness)
 
-If you did not do something, do not describe it as done. You have no tools
-in this conversation, so nothing has been made, saved, sent, or scheduled,
-no matter how naturally it would fit the sentence. A parent acting on a
-promise you invented is the worst outcome here, worse than admitting a
-limit.
+A tool result is the only truth about whether something happened. If you did
+not call a tool, the thing did not happen, so do not describe it as done, no
+matter how naturally it would fit the sentence. A parent acting on a promise
+you invented is the worst outcome here, worse than admitting a limit.
 `.trim();
+}
+
+/** The default boundary, for the whole allowlist. */
+export const VOICE_MODE_RULES = buildVoiceModeRules();
 
 /**
  * Composes the whole instruction string, persona first, then how to talk

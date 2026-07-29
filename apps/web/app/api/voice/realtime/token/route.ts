@@ -7,6 +7,7 @@ import { emitMapEvent } from "../../../../../lib/map/events";
 import { rateLimited } from "../../../../../lib/map/ratelimit";
 import { createSupabaseServerClient } from "../../../../../lib/supabase/server";
 import { buildRealtimeInstructions } from "../../../../../lib/voice/realtime-session";
+import { realtimeToolDefinitions } from "../../../../../lib/voice/realtime-tools";
 
 /**
  * POST /api/voice/realtime/token: mints a short-lived credential for one
@@ -111,9 +112,11 @@ export async function POST(): Promise<Response> {
         // The transcript is the product here, not a byproduct: she reads it
         // while Homa talks, and it lands in her chat afterwards.
         inputAudioTranscription: {},
-        // No tools in v1, stated in code as well as in the instructions so
-        // the boundary is not prose alone.
-        tools: [],
+        // Pinned server-side, so the browser cannot add a tool Homa was
+        // never meant to have. Derived from the same zod schemas eve
+        // validates against, so the model's arguments and the tool's
+        // expectations cannot drift apart.
+        tools: realtimeToolDefinitions(),
       },
     });
 

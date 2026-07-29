@@ -7,6 +7,13 @@ import {
   VOICE_MODE_RULES,
 } from "./realtime-session";
 import { VOICE_PERSONA_MARKDOWN } from "./persona.generated";
+import {
+  realtimeToolDefinitions,
+  runVoiceTool,
+  VOICE_TOOL_BOUNDARY_LINES,
+  VOICE_TOOLS,
+  type VoiceToolName,
+} from "./realtime-tools";
 
 describe("realtime voice instructions", () => {
   it("puts the persona first, then how to talk, then the family", () => {
@@ -44,11 +51,44 @@ describe("realtime voice instructions", () => {
 });
 
 describe("the voice capability boundary", () => {
-  // The 2026-07-19 phone call claimed a worksheet was emailed and filed in
-  // the binder. This session has no tools at all, so every one of those
-  // has to be named as impossible before the model can be tempted.
-  for (const forbidden of ["worksheet", "binder", "calendar", "planner", "log hours", "memory"]) {
-    it(`names ${forbidden} as something it cannot do`, () => {
+  // The mechanism, not the wording. general-call-instructions.md opens with
+  // "You have exactly four tools" as hand-written prose, so the moment the
+  // phone's tool set changed that sentence became a lie in the one file
+  // whose job was preventing lies. Here the can-do list is derived, so a
+  // tool added without a line fails right here instead of shipping
+  // unmentioned.
+  it("has a spoken line for every allowlisted tool", () => {
+    for (const name of Object.keys(VOICE_TOOLS) as VoiceToolName[]) {
+      assert.ok(
+        VOICE_TOOL_BOUNDARY_LINES[name],
+        `${name} is callable but Homa is never told she can do it`,
+      );
+    }
+  });
+
+  it("has no line for a tool that is not allowlisted", () => {
+    for (const name of Object.keys(VOICE_TOOL_BOUNDARY_LINES)) {
+      assert.ok(
+        Object.hasOwn(VOICE_TOOLS, name),
+        `${name} is described to Homa but she cannot call it`,
+      );
+    }
+  });
+
+  it("says out loud what it can do", () => {
+    for (const line of Object.values(VOICE_TOOL_BOUNDARY_LINES)) {
+      assert.ok(VOICE_MODE_RULES.includes(line), `boundary is missing: ${line}`);
+    }
+  });
+
+  it("closes the can-do list so nothing is assumed beyond it", () => {
+    assert.match(VOICE_MODE_RULES, /That is the whole list/);
+  });
+
+  // The 2026-07-19 call claimed a worksheet was emailed and filed in the
+  // binder. None of those is on the allowlist, so each is named.
+  for (const forbidden of ["worksheet", "binder", "calendar", "planner", "send an email"]) {
+    it(`still names ${forbidden} as something it cannot do`, () => {
       assert.ok(
         VOICE_MODE_RULES.toLowerCase().includes(forbidden.toLowerCase()),
         `boundary must mention ${forbidden}`,
@@ -56,19 +96,72 @@ describe("the voice capability boundary", () => {
     });
   }
 
-  it("states the honesty law, not just the list", () => {
-    assert.match(VOICE_MODE_RULES, /If you did not do something, do not describe it as done/);
+  it("states the honesty law in terms of tool results, now that tools exist", () => {
+    assert.match(VOICE_MODE_RULES, /A tool result is the only truth/);
+  });
+
+  it("asks for a spoken preamble, since a lookup is silence otherwise", () => {
+    assert.match(VOICE_MODE_RULES, /"Let me look" is a real sentence/);
   });
 
   it("gives a real path out rather than only a refusal", () => {
     assert.match(VOICE_MODE_RULES, /this whole conversation is in\s+> your chat/);
   });
+});
 
-  it("tells her the transcript is readable, which is what makes waiting fair", () => {
-    assert.match(VOICE_MODE_RULES, /read the transcript/);
+describe("the voice tool surface", () => {
+  it("derives definitions from the tools' own zod schemas", () => {
+    const defs = realtimeToolDefinitions();
+    assert.equal(defs.length, Object.keys(VOICE_TOOLS).length);
+    for (const def of defs) {
+      assert.equal(def.type, "function");
+      assert.ok(def.description.length > 0, `${def.name} has no description`);
+      assert.equal(typeof def.parameters, "object");
+    }
   });
 
-  it("asks for spoken numbers, since she is hearing this", () => {
-    assert.match(VOICE_MODE_RULES, /the way a person says them out loud/);
+  it("carries no tool that can make or send anything", () => {
+    const names = Object.keys(VOICE_TOOLS);
+    for (const forbidden of [
+      "create_printable",
+      "generate_image",
+      "send_followup_email",
+      "mark_material_final",
+      "edit_plan",
+    ]) {
+      assert.ok(!names.includes(forbidden), `${forbidden} must not be callable by voice`);
+    }
+  });
+
+  // Dispatch is a lookup in the allowlist and nothing else, so a model
+  // asking for a real eve tool that is not on the list gets refused rather
+  // than executed.
+  it("refuses a tool that exists in eve but is not allowlisted", async () => {
+    const outcome = await runVoiceTool({
+      name: "create_printable",
+      args: {},
+      identity: {
+        familyId: "11111111-1111-1111-1111-111111111111",
+        memberUserId: "22222222-2222-2222-2222-222222222222",
+        supabaseAccessToken: "unused",
+        sessionId: "test",
+      },
+    });
+    assert.equal(outcome.ok, false);
+    assert.match(JSON.stringify(outcome.output), /not something I can do/);
+  });
+
+  it("refuses a name that is not a tool at all", async () => {
+    const outcome = await runVoiceTool({
+      name: "__proto__",
+      args: {},
+      identity: {
+        familyId: "11111111-1111-1111-1111-111111111111",
+        memberUserId: "22222222-2222-2222-2222-222222222222",
+        supabaseAccessToken: "unused",
+        sessionId: "test",
+      },
+    });
+    assert.equal(outcome.ok, false);
   });
 });
