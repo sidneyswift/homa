@@ -5,8 +5,14 @@ import type {
   StatePathwayDetail,
   StateRequirementsDetail,
 } from "../map/state-requirements";
-import { anchorDateText } from "./deadline-anchor-verify";
-import { DEADLINE_ANCHORS } from "./deadline-anchors.generated";
+import {
+  anchorDateText,
+  type ExtraRequirement,
+} from "./deadline-anchor-verify";
+import {
+  DEADLINE_ANCHORS,
+  EXTRA_REQUIREMENTS,
+} from "./deadline-anchors.generated";
 
 /**
  * The state pack (plans/2026-07-28-state-pack.md): "Your {State} pack",
@@ -409,6 +415,27 @@ function pageHeader(
 </header>`;
 }
 
+/**
+ * Requirements recovered from this state's default-pathway detail
+ * (gh#322), rendered under the row they belong to. Each note is backed
+ * by a verbatim quote checked at build time, and the derivation refuses
+ * anything that only restates the deadline the row already shows, so a
+ * note here is always something the summary would otherwise have
+ * missed. Pennsylvania's notarized affidavit is the reason this exists.
+ */
+function extraFor(
+  detail: StateRequirementsDetail,
+  section: ExtraRequirement["section"],
+): string {
+  const entry = EXTRA_REQUIREMENTS[detail.stateCode];
+  if (!entry) return "";
+  const notes = entry.requirements.filter((r) => r.section === section);
+  if (notes.length === 0) return "";
+  return notes
+    .map((note) => `<span class="sp-also">Also: ${escapeHtml(note.note)}</span>`)
+    .join("");
+}
+
 function definitionRow(label: string, valueHtml: string, subHtml?: string): string {
   return `<div class="sp-row">
   <p class="sp-row-label">${escapeHtml(label)}</p>
@@ -500,7 +527,7 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
         definitionRow(
           "Telling the state",
           `${parts.join(" ")}.${divergenceNote(d.notification)}`,
-          `When: ${deadline}${p.notification.frequency ? ` · how often: ${escapeHtml(humanizeToken(p.notification.frequency))}` : ""}${p.statute ? ` · ${cite(p.statute)}` : ""}`,
+          `When: ${deadline}${p.notification.frequency ? ` · how often: ${escapeHtml(humanizeToken(p.notification.frequency))}` : ""}${p.statute ? ` · ${cite(p.statute)}` : ""}${extraFor(detail, "notification")}`,
         ),
       );
     } else {
@@ -576,7 +603,8 @@ function glancePage(detail: StateRequirementsDetail, duties: Duties): string {
           : practical.length > 0
             ? `No record format is prescribed, and this pack includes templates because ${escapeHtml(practical.join(" and "))} ${practical.length > 1 ? "are" : "is"} easier to show with one.`
             : "No specific records are required on this pathway.") +
-          divergenceNote(d.recordkeeping),
+          divergenceNote(d.recordkeeping) +
+          extraFor(detail, "recordkeeping"),
       ),
     );
 
@@ -1292,6 +1320,7 @@ export function wrapStatePackDocument(
   .sp-row-sub { margin-top: 3px !important; font-size: 9px !important; color: ${MUTED} !important; }
   .sp-dates { margin-top: 0.16in; border: 1.5px solid ${RULE}; border-radius: 8px; padding: 10px 14px; }
   .sp-dates p { margin: 0; font-size: 11.5px; color: ${INK}; }
+  .sp-also { display: block; margin-top: 3px; font-size: 9.5px; line-height: 1.45; color: ${BODY}; }
   .sp-mark { color: ${CLAY}; font-weight: 700; }
   .sp-mark-note { margin: 7px 0 0; font-size: 8.6px; line-height: 1.45; color: ${MUTED}; }
   .sp-dates-scope { font-family: "Hanken Grotesk", sans-serif; text-transform: none; letter-spacing: 0; font-size: 8.5px; color: ${SUBTLE}; }

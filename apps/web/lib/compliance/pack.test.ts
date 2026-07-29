@@ -5,6 +5,9 @@ import { describe, it } from "node:test";
 
 import { EM_DASH } from "@homa/core";
 
+import { quoteAppearsVerbatim } from "./deadline-anchor-verify";
+import { EXTRA_REQUIREMENTS } from "./deadline-anchors.generated";
+
 import {
   parseStateRequirementsPayload,
   type StateRequirementsDetail,
@@ -416,6 +419,40 @@ describe("per-pathway truth (the default pathway carries its own values)", () =>
         !/\ball pathways\b/i.test(pack.html),
         `${code} claims to cover all pathways`,
       );
+    }
+  });
+});
+
+describe("requirements recovered from pathway detail (gh#322)", () => {
+  it("gives Pennsylvania its notarization requirement", () => {
+    // The motivating case: a PA family who files an un-notarized
+    // affidavit is rejected by the district and believes they filed.
+    // The requirement appears nowhere in the payload except the default
+    // pathway's own slice of pathway_varies_detail.
+    const pack = compose("PA", SIX_CHILD_FAMILY);
+    assert.match(pack.html, /notarized/i);
+  });
+
+  it("never renders the raw detail field, only verified notes", () => {
+    for (const code of ALL_CODES) {
+      const pack = compose(code);
+      assert.ok(!pack.html.includes("undefined"), `${code} leaks undefined`);
+      assert.ok(!pack.html.includes("general_list"), `${code} leaks an enum token`);
+      assert.ok(
+        !/\bPrivate Tutoring:/.test(pack.html),
+        `${code} leaks a raw pathway_varies_detail segment`,
+      );
+    }
+  });
+
+  it("keeps every shipped note backed by a verbatim quote", () => {
+    for (const [code, entry] of Object.entries(EXTRA_REQUIREMENTS)) {
+      for (const requirement of entry.requirements) {
+        assert.ok(
+          quoteAppearsVerbatim(entry.source, requirement.quote),
+          `${code}: ${JSON.stringify(requirement.quote)}`,
+        );
+      }
     }
   });
 });
