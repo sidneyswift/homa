@@ -37,6 +37,11 @@ homa-template/
 .cosmo/inspo-files/
 .cosmo/inspo-images/
 
+# Extracted text sidecars (.cosmo/text/<id>.txt) back aboutness quote
+# verification. The extracted text of a copyrighted book IS the copyrighted
+# work, so the same ruling applies: local working copy plus Blob, never git.
+.cosmo/text/
+
 # Python bytecode
 __pycache__/
 *.pyc

@@ -1,6 +1,6 @@
 ---
 name: reference-ingestion
-description: Use when a reference material (worksheet image, activity PDF, printable, screenshot, photo of a physical page, or a bare product link) lands in #homa-inspo, or when draining the ingestion backlog. Captures the drop durably, analyzes it along five dimensions, stores JSON, logs taste, hands off or performs product graduation in the post-Jul-20 fat-skill shape (recipe files, anchors, append-only taxonomy), and replies with a teach-me explainer. For a full curriculum with a philosophy and a sequence, use curriculum-ingestion instead.
+description: Use when a reference material (worksheet image, activity PDF, printable, screenshot, photo of a physical page, or a bare product link) lands in #homa-inspo, or when draining the ingestion backlog. Captures the drop durably (original plus extracted text), analyzes it along six dimensions including what it is about, stores JSON, logs taste, hands off or performs product graduation in the post-Jul-20 fat-skill shape (recipe files, anchors, append-only taxonomy), and replies with a teach-me explainer. For a full curriculum with a philosophy and a sequence, use curriculum-ingestion instead.
 ---
 
 # Reference Ingestion
@@ -41,13 +41,14 @@ Links expire in hours and files leave Slack. Capture first, think later.
 - Upload each downloaded original to Blob for durability and record the returned URL in the ref JSON as `blobUrl`. Use only `bash .cosmo/scripts/blob-upload.sh <ref-id> <file> [content-type]`: it pins Homa's production store id and refuses a token from any other project's store, so uploads cannot land in the wrong Blob. Token source: `vercel env pull` inside `apps/web` (you already have the Vercel CLI), or the `.env.example` 1Password fallback. If no token resolves, keep the local copy, set `"blobUrl": null`, and note it; do not skip the download.
 - For a bare link: fetch the target page and any free sample file now. If the fetch fails, record the failure in the ref JSON (`"captureFailed": "<reason>"`) so the loss is visible instead of silent. Fourteen TPT links from July are permanently lost because capture waited.
 - Write the stub ref JSON at `.cosmo/references/<id>.json` right away with at least `id`, `sourceChannel`, `sourceMessageTs`, `droppedBy`, `droppedAt` (from Slack `ts`), and the local file paths.
+- **Extract the text and keep it.** Write the drop's text to `.cosmo/text/<id>.txt` (gitignored; extracted text of a copyrighted book is the copyrighted work, same ruling as the originals). Born-digital PDFs: take the text layer. Scans and photos: read the pages. This sidecar is what makes dimension F's quotes verifiable, and it is the one thing the pre-2026-07-28 corpus lost on every drop. Full contract: `references/aboutness.md`.
 
 ### 1. Identify the reference
 
 - Assign the id: `ref-<YYYY-MM-DD>-<short-slug>`, date from the Slack `ts`.
 - Note who dropped it and the format: worksheet, coloring page, flash card, activity page, poster, game board, photo, other.
 
-### 2. Analyze along five dimensions
+### 2. Analyze along six dimensions
 
 #### A. Layout
 
@@ -102,10 +103,17 @@ Map to the three-level taxonomy: **subject, then domain, then topic**.
 
 For a photo drop, mark `printFormat` fields `"unknown"` where the photo cannot show them.
 
+#### F. Aboutness (what the item is about, not what shape it takes)
+
+Dimensions A through E describe **form**. This one describes **content**: subjects, named entities and characters, themes, recurring key terms, and referenced works. Without it the corpus cannot answer "what do we have about insects for a three-year-old" or "which ingested material covers A Wrinkle in Time", which is the question the founders actually ask (meeting 2026-07-28, gh#366).
+
+Every claim carries a verbatim quote that code re-checks against the text sidecar; a claim whose quote does not appear is dropped, never softened. Read **`references/aboutness.md`** for the schema, the enums, the per-drop-type guidance, and the quality bar. Do not work from memory of it.
+
 ### 3. Store the analysis
 
-Write the full ref JSON at `.cosmo/references/<id>.json`. Keep the existing five-dimension schema (see any recent `ref-*.json` for the shape) and include:
+Write the full ref JSON at `.cosmo/references/<id>.json`. Keep the existing schema (see any recent `ref-*.json` for dimensions A to E) and include:
 
+- `aboutness` (dimension F). No shipped ref carries it yet, so take the shape from `references/aboutness.md`, not from a neighbouring file. You are writing the first one.
 - `recipeMatch` (step 4 output)
 - `analysisQuality`: `"full"` for a real per-item analysis, `"heuristic"` for template-filled bulk entries
 - `stages`: the single source of truth for this drop's pipeline position:
@@ -253,6 +261,9 @@ React to the original Slack drop with :ship: **only on exit 0**, and only after 
 | What | Path |
 |---|---|
 | Ref JSON (canonical per-drop truth) | `.cosmo/references/<id>.json` |
+| Extracted text sidecar (gitignored) | `.cosmo/text/<id>.txt` |
+| Aboutness contract (dimension F) | `references/aboutness.md` |
+| Corpus search (the payoff) | `.cosmo/scripts/corpus-search.py` |
 | Manifest (generated, never hand-edited) | `.cosmo/references/index.json` |
 | Open gap backlog (machine-readable) | `.cosmo/open-gaps.json` |
 | Taste model | `.cosmo/homa-taste.md` |

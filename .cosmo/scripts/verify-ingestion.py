@@ -55,6 +55,7 @@ OPEN_GAPS = COSMO / "open-gaps.json"
 TASTE_MD = COSMO / "homa-taste.md"
 INDEX_JSON = REFS_DIR / "index.json"
 CUR_INDEX_JSON = CURS_DIR / "index.json"
+TEXT_DIR = COSMO / "text"
 
 MATERIALS_STUDIO = REPO_ROOT / "apps" / "web" / "agent" / "skills" / "materials-studio"
 RECIPES_DIR = MATERIALS_STUDIO / "references" / "recipes"
@@ -74,6 +75,18 @@ NON_FORMAT_GAPS = {"curriculum-sample"}
 # Same slug shape the funnel's extractGapSlugs enforces. Anything else is
 # silently invisible to coverage tracking, so we flag it here instead.
 SLUG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)+$")
+
+# Aboutness (dimension F, gh#366) and lesson decomposition (Layer 5, gh#367)
+# are required for drops from this date on. Earlier drops predate the rule and
+# soften, per the legacy policy below: their backfill is blocked on originals
+# that live only on Cosmo's laptop, and the --all matrix is where that debt
+# stays visible. Do not move this date to turn a red run green.
+CONTENT_RULES_FROM = "2026-07-28"
+
+ENTITY_KINDS = {"person", "character", "place", "organization", "animal", "event", "object"}
+WORK_KINDS = {"book", "poem", "song", "film", "artwork", "game", "website", "curriculum"}
+EXTRACTION_QUALITY = {"full", "partial", "unavailable"}
+DECOMPOSITION_QUALITY = {"full", "partial", "unavailable"}
 
 
 # ---------------------------------------------------------------------------
@@ -530,6 +543,229 @@ def check_cur_gap_slugs(cur: dict) -> Tuple[bool, str]:
 
 
 # ---------------------------------------------------------------------------
+# Content checks: aboutness (dimension F, gh#366) and lesson decomposition
+# (Layer 5, gh#367).
+#
+# Dimensions A-E describe form. These describe content, and they exist because
+# the corpus could not answer "what do we have about insects for a
+# three-year-old". The enforcement idea is the models-judge-code-verifies law:
+# the model proposes claims, each claim carries a verbatim span, and this gate
+# re-checks the span against the extracted-text sidecar. A claim the source
+# does not support is dropped, never softened.
+#
+# Legacy: pre-CONTENT_RULES_FROM drops soften (new-rule policy above). Their
+# backfill is blocked on originals that exist only on Cosmo's laptop, so the
+# --all matrix is the honest place for that debt to sit.
+# ---------------------------------------------------------------------------
+
+def _dropped_on(item: dict) -> str:
+    """YYYY-MM-DD for the drop, from droppedAt, falling back to the id."""
+    raw = (item.get("droppedAt") or "")[:10]
+    if re.match(r"^\d{4}-\d{2}-\d{2}$", raw):
+        return raw
+    m = re.search(r"(\d{4}-\d{2}-\d{2})", item.get("id", "") or "")
+    return m.group(1) if m else ""
+
+
+def _predates_content_rules(item: dict) -> bool:
+    dropped = _dropped_on(item)
+    return bool(dropped) and dropped < CONTENT_RULES_FROM
+
+
+def _normalize(text: str) -> str:
+    """Whitespace-normalized comparison form. Verbatim means the words, not
+    the line wrapping a PDF happened to use."""
+    return re.sub(r"\s+", " ", text or "").strip()
+
+
+def text_sidecar(item_id: str) -> Optional[str]:
+    """Normalized extracted text for an item, or None when it was not kept.
+    The directory is gitignored: extracted text of a copyrighted book is the
+    copyrighted work (founder ruling inspo-originals-offrepo)."""
+    path = TEXT_DIR / f"{item_id}.txt"
+    if not path.exists():
+        return None
+    try:
+        return _normalize(path.read_text(errors="replace"))
+    except OSError:
+        return None
+
+
+def _aboutness_claims(about: dict) -> list:
+    """(label, name, span) for every aboutness claim that must carry a span."""
+    out = []
+    for s in about.get("subjects") or []:
+        out.append(("subject", s.get("name", ""), s.get("quote", "")))
+    for e in about.get("entities") or []:
+        out.append(("entity", e.get("name", ""), e.get("quote", "")))
+    for t in about.get("themes") or []:
+        out.append(("theme", t.get("name", ""), t.get("evidence", "")))
+    for k in about.get("keyTerms") or []:
+        out.append(("key term", k.get("term", ""), k.get("quote", "")))
+    for w in about.get("referencedWorks") or []:
+        out.append(("work", w.get("title", ""), w.get("quote", "")))
+    return out
+
+
+def _unit_claims(unit: dict) -> list:
+    """(label, name, span) for every claim inside one decomposed unit."""
+    out = []
+    topic = unit.get("topic")
+    if isinstance(topic, dict):
+        out.append(("topic", topic.get("name", ""), topic.get("quote", "")))
+    for w in unit.get("referencedWorks") or []:
+        out.append(("work", w.get("title", ""), w.get("quote", "")))
+    for q in unit.get("questions") or []:
+        out.append(("question", (q.get("text") or "")[:40], q.get("quote", "")))
+    for t in unit.get("themes") or []:
+        out.append(("theme", t.get("name", ""), t.get("evidence", "")))
+    for a in unit.get("activities") or []:
+        out.append(("activity", (a.get("description") or "")[:40], a.get("quote", "")))
+    for m in unit.get("materials") or []:
+        out.append(("material", m.get("name", ""), m.get("quote", "")))
+    return out
+
+
+def _verify_spans(claims: list, source: Optional[str]) -> Tuple[list, list]:
+    """Splits claims into (spanless, unsupported). A None source means the
+    text was never kept, so nothing can be verified and that is reported
+    rather than assumed fine."""
+    spanless = [f"{label} {name!r}" for label, name, span in claims if not (span or "").strip()]
+    if source is None:
+        return spanless, []
+    unsupported = [
+        f"{label} {name!r}"
+        for label, name, span in claims
+        if (span or "").strip() and _normalize(span) not in source
+    ]
+    return spanless, unsupported
+
+
+def check_aboutness(item: dict) -> Tuple[bool, str]:
+    """Dimension F. Applies to references and curriculums alike."""
+    about = item.get("aboutness")
+    if not about:
+        if _predates_content_rules(item):
+            return True, f"legacy drop (pre-{CONTENT_RULES_FROM}), backfill tracked in gh#366"
+        return False, ("aboutness missing; dimension F is required "
+                       "(.agents/skills/reference-ingestion/references/aboutness.md)")
+    if not isinstance(about, dict):
+        return False, "aboutness must be an object"
+
+    quality = about.get("extractionQuality")
+    if quality not in EXTRACTION_QUALITY:
+        return False, f"extractionQuality must be one of {sorted(EXTRACTION_QUALITY)}, got {quality!r}"
+
+    problems = []
+    if not (about.get("subjects") or []):
+        problems.append("subjects is empty (what is this item about?)")
+    for e in about.get("entities") or []:
+        if e.get("kind") not in ENTITY_KINDS:
+            problems.append(f"entity {e.get('name', '?')!r} has kind {e.get('kind')!r}")
+    for w in about.get("referencedWorks") or []:
+        if w.get("kind") not in WORK_KINDS:
+            problems.append(f"work {w.get('title', '?')!r} has kind {w.get('kind')!r}")
+
+    if quality == "unavailable":
+        if not about.get("reason"):
+            problems.append("extractionQuality 'unavailable' requires a reason")
+        if problems:
+            return False, "; ".join(problems)
+        return True, "OK (no readable text; subjects recorded, spans not required)"
+
+    claims = _aboutness_claims(about)
+    source = text_sidecar(item.get("id", ""))
+    spanless, unsupported = _verify_spans(claims, source)
+    if spanless:
+        problems.append(f"claims with no verbatim span: {', '.join(spanless[:5])}")
+    if unsupported:
+        problems.append(
+            f"{len(unsupported)} span(s) absent from the text sidecar, drop those claims: "
+            + ", ".join(unsupported[:5])
+        )
+    if problems:
+        return False, "; ".join(problems)
+
+    if source is None:
+        return True, (f"OK shape, {len(claims)} claim(s); spans UNVERIFIED, no text sidecar at "
+                      f".cosmo/text/{item.get('id', '')}.txt")
+    return True, f"OK ({len(claims)} claim(s), every span verified against the text sidecar)"
+
+
+def check_cur_lesson_decomposition(cur: dict) -> Tuple[bool, str]:
+    """Layer 5. The counts are load-bearing: a padded 'full' over a sampled
+    pass is a lie the index cannot detect later."""
+    layer5 = cur.get("layer5_lessons")
+    if not layer5:
+        if _predates_content_rules(cur):
+            return True, f"legacy curriculum (pre-{CONTENT_RULES_FROM}), backfill tracked in gh#367"
+        return False, ("layer5_lessons missing "
+                       "(.agents/skills/curriculum-ingestion/references/lesson-decomposition.md)")
+    if not isinstance(layer5, dict):
+        return False, "layer5_lessons must be an object"
+
+    quality = layer5.get("decompositionQuality")
+    if quality not in DECOMPOSITION_QUALITY:
+        return False, (f"decompositionQuality must be one of {sorted(DECOMPOSITION_QUALITY)}, "
+                       f"got {quality!r}")
+    if quality == "unavailable":
+        if not layer5.get("reason"):
+            return False, "decompositionQuality 'unavailable' requires a reason"
+        return True, "OK (curriculum declares no unit structure, reason recorded)"
+
+    units = layer5.get("units")
+    if not isinstance(units, list) or not units:
+        return False, "units must be a nonempty list when decomposition is full or partial"
+
+    found, done = layer5.get("unitsFound"), layer5.get("unitsDecomposed")
+    problems = []
+    if not isinstance(found, int) or not isinstance(done, int):
+        problems.append("unitsFound and unitsDecomposed must both be integers")
+    else:
+        if done > found:
+            problems.append(f"unitsDecomposed ({done}) exceeds unitsFound ({found})")
+        if len(units) != done:
+            problems.append(f"unitsDecomposed says {done} but units carries {len(units)} row(s)")
+        if quality == "full" and done != found:
+            problems.append(f"'full' requires every unit decomposed ({done} of {found}); use 'partial'")
+
+    ordinals = []
+    for i, unit in enumerate(units):
+        if not isinstance(unit, dict):
+            problems.append(f"unit {i} is not an object")
+            continue
+        if not isinstance(unit.get("ordinal"), int):
+            problems.append(f"unit {i} has no integer ordinal")
+        else:
+            ordinals.append(unit["ordinal"])
+        if not unit.get("unitLabel"):
+            problems.append(f"unit {i} has no unitLabel")
+        topic = unit.get("topic")
+        if not isinstance(topic, dict) or not topic.get("name"):
+            problems.append(f"unit {i} has no topic.name")
+    dupes = {o for o in ordinals if ordinals.count(o) > 1}
+    if dupes:
+        problems.append(f"duplicate ordinals: {sorted(dupes)}")
+
+    claims = [c for unit in units if isinstance(unit, dict) for c in _unit_claims(unit)]
+    source = text_sidecar(cur.get("id", ""))
+    spanless, unsupported = _verify_spans(claims, source)
+    if spanless:
+        problems.append(f"claims with no verbatim span: {', '.join(spanless[:5])}")
+    if unsupported:
+        problems.append(
+            f"{len(unsupported)} span(s) absent from the text sidecar, drop those claims: "
+            + ", ".join(unsupported[:5])
+        )
+    if problems:
+        return False, "; ".join(problems)
+
+    works = sum(len(u.get("referencedWorks") or []) for u in units if isinstance(u, dict))
+    verified = "spans UNVERIFIED (no text sidecar)" if source is None else "every span verified"
+    return True, f"OK ({len(units)} unit(s), {works} referenced work(s), {verified})"
+
+
+# ---------------------------------------------------------------------------
 # Index regeneration. index.json files are generated views of the individual
 # JSONs. Hand-editing them is how 37 refs silently vanished from the manifest.
 # ---------------------------------------------------------------------------
@@ -541,6 +777,7 @@ def regen_index() -> None:
         if not ref:
             continue
         st = ref.get("skillTargeting") or {}
+        about = ref.get("aboutness") or {}
         refs.append({
             "id": ref.get("id", path.stem),
             "title": ref.get("title", ""),
@@ -549,6 +786,13 @@ def regen_index() -> None:
             "subject": st.get("subject", ""),
             "domain": st.get("domain", ""),
             "format": ref.get("format", ""),
+            # Aboutness projection (gh#366): what the item is about, so the
+            # manifest answers content questions without opening 188 files.
+            "about": [s.get("name", "") for s in about.get("subjects") or []],
+            "entities": [e.get("name", "") for e in about.get("entities") or []],
+            "themes": [t.get("name", "") for t in about.get("themes") or []],
+            "works": [w.get("title", "") for w in about.get("referencedWorks") or []],
+            "ageBand": (ref.get("difficulty") or {}).get("ageBand"),
         })
     INDEX_JSON.write_text(json.dumps({"references": refs}, indent=2) + "\n")
     print(f"index.json regenerated: {len(refs)} references")
@@ -563,6 +807,9 @@ def regen_index() -> None:
             total = stats.get("totalCurriculumTopics") or 0
             mapped = stats.get("mapped") or 0
             layer4 = (cur.get("layer4_activities") or {}).get("stats") or {}
+            about = cur.get("aboutness") or {}
+            layer5 = cur.get("layer5_lessons") or {}
+            units = layer5.get("units") or []
             curs.append({
                 "id": cur.get("id", path.stem),
                 "name": cur.get("name", ""),
@@ -572,6 +819,19 @@ def regen_index() -> None:
                 "mappedPct": round(100 * mapped / total) if total else None,
                 "gapCount": layer4.get("noRecipe", 0),
                 "decisionsCount": len(cur.get("decisionsNeeded") or []),
+                # Aboutness (gh#366) and decomposition reach (gh#367).
+                "about": [s.get("name", "") for s in about.get("subjects") or []],
+                "themes": [t.get("name", "") for t in about.get("themes") or []],
+                "unitsDecomposed": layer5.get("unitsDecomposed", 0),
+                "unitTopics": [
+                    (u.get("topic") or {}).get("name", "")
+                    for u in units if isinstance(u, dict)
+                ],
+                "works": sorted({
+                    w.get("title", "")
+                    for u in units if isinstance(u, dict)
+                    for w in u.get("referencedWorks") or []
+                } | {w.get("title", "") for w in about.get("referencedWorks") or []}),
             })
         CUR_INDEX_JSON.write_text(json.dumps({"curriculums": curs}, indent=2) + "\n")
         print(f"curriculums/index.json regenerated: {len(curs)} curriculums")
@@ -593,6 +853,7 @@ REF_CHECKS = [
     ("Step 9: Taxonomy", check_step9_taxonomy),
     ("Step 10: Teaching rules", check_step10_teaching_rules),
     ("Step 11: Reply sent", check_step11_reply),
+    ("Step 12: Aboutness", check_aboutness),
 ]
 
 CUR_CHECKS = [
@@ -601,6 +862,8 @@ CUR_CHECKS = [
     ("Cur 3: Indexed", check_cur_indexed),
     ("Cur 4: Decisions recorded", check_cur_decisions),
     ("Cur 5: Gap slug shape", check_cur_gap_slugs),
+    ("Cur 6: Aboutness", check_aboutness),
+    ("Cur 7: Lesson decomposition", check_cur_lesson_decomposition),
 ]
 
 
@@ -645,16 +908,140 @@ def all_ids() -> list:
     return ids
 
 
+def self_test() -> int:
+    """
+    Regression net for the content checks (gh#366, gh#367). CI runs no Python,
+    so the gate carries its own fixtures: a check that silently stops catching
+    fabricated spans is worse than no check, because it reads as green.
+
+    Run: python3 .cosmo/scripts/verify-ingestion.py --self-test
+    """
+    sidecar_id = "ref-9999-01-01-selftest"
+    sidecar = TEXT_DIR / f"{sidecar_id}.txt"
+    TEXT_DIR.mkdir(parents=True, exist_ok=True)
+    sidecar.write_text(
+        "Christopher Columbus was born in Genoa.\nThey landed on Hispaniola in 1492.\n"
+    )
+
+    def about(**over):
+        base = {
+            "extractionQuality": "full",
+            "subjects": [{"name": "christopher columbus", "quote": "Christopher Columbus was born"}],
+            "entities": [{"name": "Hispaniola", "kind": "place", "quote": "They landed on Hispaniola"}],
+        }
+        base.update(over)
+        return base
+
+    def ref(rid, dropped, **over):
+        item = {"id": rid, "droppedAt": dropped}
+        item.update(over)
+        return item
+
+    new, old = "2026-08-01", "2026-07-01"
+    cases = [
+        ("legacy ref without aboutness softens",
+         check_aboutness, ref("ref-2026-07-01-x", old), True),
+        ("new ref without aboutness fails",
+         check_aboutness, ref("ref-2026-08-01-x", new), False),
+        ("aboutness without a sidecar passes but says UNVERIFIED",
+         check_aboutness, ref("ref-2026-08-01-x", new, aboutness=about()), True),
+        ("every span present in the sidecar verifies",
+         check_aboutness, ref(sidecar_id, new, aboutness=about()), True),
+        ("a fabricated span fails",
+         check_aboutness, ref(sidecar_id, new, aboutness=about(
+             entities=[{"name": "Atlantis", "kind": "place", "quote": "they sailed to Atlantis"}])), False),
+        ("an unknown entity kind fails",
+         check_aboutness, ref(sidecar_id, new, aboutness=about(
+             entities=[{"name": "Genoa", "kind": "city", "quote": "born in Genoa"}])), False),
+        ("a claim with no span fails",
+         check_aboutness, ref(sidecar_id, new, aboutness=about(
+             themes=[{"name": "exploration"}])), False),
+        ("empty subjects fails",
+         check_aboutness, ref(sidecar_id, new, aboutness=about(subjects=[])), False),
+        ("unavailable without a reason fails",
+         check_aboutness, ref("ref-2026-08-01-x", new, aboutness=about(
+             extractionQuality="unavailable")), False),
+        ("unavailable with a reason passes",
+         check_aboutness, ref("ref-2026-08-01-x", new, aboutness=about(
+             extractionQuality="unavailable", reason="wordless picture book")), True),
+    ]
+
+    def unit(ordinal=1, **over):
+        base = {
+            "ordinal": ordinal,
+            "unitLabel": f"Week {ordinal}",
+            "topic": {"name": "columbus", "quote": "Christopher Columbus was born"},
+        }
+        base.update(over)
+        return base
+
+    def cur(cid, dropped, **over):
+        item = {"id": cid, "droppedAt": dropped}
+        item.update(over)
+        return item
+
+    cases += [
+        ("legacy curriculum without Layer 5 softens",
+         check_cur_lesson_decomposition, cur("cur-2026-07-01-x", old), True),
+        ("new curriculum without Layer 5 fails",
+         check_cur_lesson_decomposition, cur("cur-2026-08-01-x", new), False),
+        ("a valid decomposition passes",
+         check_cur_lesson_decomposition, cur("cur-2026-08-01-x", new, layer5_lessons={
+             "decompositionQuality": "full", "unitKind": "week",
+             "unitsFound": 1, "unitsDecomposed": 1, "units": [unit()]}), True),
+        ("'full' over a sampled pass fails",
+         check_cur_lesson_decomposition, cur("cur-2026-08-01-x", new, layer5_lessons={
+             "decompositionQuality": "full", "unitKind": "week",
+             "unitsFound": 36, "unitsDecomposed": 1, "units": [unit()]}), False),
+        ("the same numbers as 'partial' pass",
+         check_cur_lesson_decomposition, cur("cur-2026-08-01-x", new, layer5_lessons={
+             "decompositionQuality": "partial", "unitKind": "week",
+             "unitsFound": 36, "unitsDecomposed": 1, "units": [unit()]}), True),
+        ("a count that disagrees with the rows fails",
+         check_cur_lesson_decomposition, cur("cur-2026-08-01-x", new, layer5_lessons={
+             "decompositionQuality": "partial", "unitKind": "week",
+             "unitsFound": 36, "unitsDecomposed": 2, "units": [unit()]}), False),
+        ("duplicate ordinals fail",
+         check_cur_lesson_decomposition, cur("cur-2026-08-01-x", new, layer5_lessons={
+             "decompositionQuality": "full", "unitKind": "week",
+             "unitsFound": 2, "unitsDecomposed": 2, "units": [unit(1), unit(1)]}), False),
+        ("a unit span absent from the sidecar fails",
+         check_cur_lesson_decomposition, cur(sidecar_id, new, layer5_lessons={
+             "decompositionQuality": "full", "unitKind": "week",
+             "unitsFound": 1, "unitsDecomposed": 1,
+             "units": [unit(topic={"name": "mars", "quote": "Week 8: The Red Planet"})]}), False),
+    ]
+
+    failures = 0
+    try:
+        for label, fn, item, expected in cases:
+            got, msg = fn(item)
+            ok = got is expected
+            print(f"  {'✅' if ok else '❌'} {label}"
+                  + ("" if ok else f"\n       expected {expected}, got {got}: {msg}"))
+            if not ok:
+                failures += 1
+    finally:
+        sidecar.unlink(missing_ok=True)
+
+    print(f"\nself-test: {len(cases) - failures} passed, {failures} failed")
+    return 1 if failures else 0
+
+
 def main():
     args = [a for a in sys.argv[1:] if a != "--no-fetch"]
     no_fetch = "--no-fetch" in sys.argv
     if not args:
-        print("Usage: verify-ingestion.py <ref-id|cur-id> | --all | --recent <days> | --regen-index [--no-fetch]")
+        print("Usage: verify-ingestion.py <ref-id|cur-id> | --all | --recent <days> "
+              "| --regen-index | --self-test [--no-fetch]")
         sys.exit(1)
 
     if args[0] == "--regen-index":
         regen_index()
         sys.exit(0)
+
+    if args[0] == "--self-test":
+        sys.exit(self_test())
 
     ok, msg = preflight(no_fetch=no_fetch)
     if not ok:
