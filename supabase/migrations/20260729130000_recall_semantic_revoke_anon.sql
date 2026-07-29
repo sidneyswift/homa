@@ -1,0 +1,20 @@
+-- recall_semantic is for signed-in family sessions only (gh#375).
+--
+-- The 2026-07-27 migration wrote `revoke all from public` then `grant
+-- execute to authenticated`, which states the intent plainly. It did not
+-- achieve it: PUBLIC and the `anon` role are different grantees, and
+-- Supabase's default privileges grant EXECUTE on new public-schema
+-- functions to anon as well. Every version of this function since it was
+-- created has therefore been callable by an unauthenticated request.
+--
+-- No rows ever leaked. The function is SECURITY INVOKER and every table
+-- it reads is behind RLS, so an anon caller gets an empty set. This
+-- closes the gap between the stated intent and the actual grant rather
+-- than fixing a live exposure.
+--
+-- Ordering note: this file is deliberately stamped later than
+-- 20260729120000_recall_semantic_scope.sql. `create function` re-applies
+-- the default privileges, so any replay of that file re-grants anon;
+-- keeping this revoke last in migration order means the intended posture
+-- wins whatever order a fresh environment replays them in.
+revoke execute on function public.recall_semantic(text, int, text[]) from anon;
