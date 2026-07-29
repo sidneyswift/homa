@@ -68,6 +68,7 @@ import {
 import {
   DictationRow,
   MicButton,
+  DICTATION_CUTOFF_MESSAGE,
   RECORDING_HINT_MESSAGE,
   useDictation,
 } from "./dictation";
@@ -2243,6 +2244,13 @@ export function ChatClient({
           // ends the take, and sending stays hers.
           <p className="mx-auto mt-2 w-full max-w-[780px] text-sm text-subtle" role="status">
             {RECORDING_HINT_MESSAGE}
+          </p>
+        ) : dictation.autoStopped && dictation.phase === "idle" ? (
+          // The cap ended her take (gh#351). It used to end it silently,
+          // and a one-line composer hides a mid-word cut, so a parent
+          // lost a long dictated list without ever being told why.
+          <p className="mx-auto mt-2 w-full max-w-[780px] text-sm text-muted" role="status">
+            {DICTATION_CUTOFF_MESSAGE}
           </p>
         ) : dictation.error ? (
           // Fail-soft (M1-05's law): a blocked mic or an unclear take
