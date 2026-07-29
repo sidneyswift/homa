@@ -7,6 +7,7 @@ import { ArrowDown, ArrowUp, ChevronDown, Square, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Logo } from "../../components/brand/Logo";
+import { ThinkingMark } from "../../components/brand/ThinkingMark";
 import { sendWallBeacon } from "../../components/billing/wall-beacon";
 import { WallModal } from "../../components/billing/wall-modal";
 import type { WallCheckout } from "../../lib/billing/wall-types";
@@ -72,7 +73,9 @@ import {
   useDictation,
 } from "./dictation";
 import {
+  activeToolName,
   busyLabel,
+  busyMood,
   countLastTurnToolCalls,
   messageSaysSomething,
   MessageView,
@@ -1826,19 +1829,27 @@ export function ChatClient({
           </>
         )}
         {busy && busyLabel(agent.data.messages, busySeconds) ? (
-          // The mark bobs while Homa thinks, so the wait is never a blank
-          // page (tester ask, evidence memo 1; MJ-06). Goes still under
-          // reduced motion; the label still reads what is happening.
+          // The mark is awake while Homa thinks, so the wait is never a
+          // blank page (tester ask, evidence memo 1; MJ-06). Goes still
+          // under reduced motion; the label still reads what is happening.
           //
           // The clock leads. It is the part that actually moves every
           // second, so it anchors the row and the words become the thing
           // that changes occasionally rather than the thing being stared
           // at. The label shimmers and escalates with the same clock, so
           // twenty five seconds reads as work rather than as a hang.
+          //
+          // The character escalates on that same clock too, and this is
+          // the only place all three meet: seconds, mood and words are
+          // one reading of one wait, never three opinions about it.
           <div className="flex items-baseline gap-2.5 text-muted">
-            <span className="chat-think-mark inline-flex self-center" aria-hidden="true">
-              <Logo size={20} variant="mark" />
-            </span>
+            <ThinkingMark
+              size={28}
+              mood={busyMood(busySeconds)}
+              seconds={busySeconds}
+              tool={activeToolName(agent.data.messages)}
+              className="self-center"
+            />
             {busySeconds > 0 ? (
               <span className="font-mono text-sm tabular-nums text-subtle">
                 {busySeconds}s
@@ -1898,9 +1909,7 @@ export function ChatClient({
           // The stream died but the turn is durable server-side; while
           // the replay runs, the wait reads as work, not as a failure.
           <div className="flex items-center gap-2.5 text-muted" role="status">
-            <span className="chat-think-mark inline-flex" aria-hidden="true">
-              <Logo size={20} variant="mark" />
-            </span>
+            <ThinkingMark size={28} mood="digging" />
             <span>Reconnecting&hellip;</span>
           </div>
         ) : agent.error && staleOidcAt !== null ? (
