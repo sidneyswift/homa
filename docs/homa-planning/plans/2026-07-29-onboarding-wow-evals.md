@@ -354,6 +354,12 @@ separated from local-machine cost:
   two turns has not been measured. Measure it before optimising
   anything.
 
+Tracked as gh#404, deliberately filed as an investigation rather than a
+bug: these are local numbers, and the first deliverable is the
+production measurement, not a fix. The walk also left a React hydration
+mismatch on every `/onboarding` load, which regenerates the chat
+transcript tree on the client, filed as gh#405.
+
 **A third instance of the app-takes-the-words law, found live**
 
 Homa's reply to the finished roster was:
