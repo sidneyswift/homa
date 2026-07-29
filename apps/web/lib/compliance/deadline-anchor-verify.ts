@@ -192,7 +192,7 @@ export function verifyDeadlineProposal(
     if (label.length < 3 || label.length > 80) {
       return { ok: false, reason: `label ${JSON.stringify(label)} is out of range` };
     }
-    if (label.includes("—")) {
+    if (label.includes("\u2014")) {
       return { ok: false, reason: "label contains an em dash" };
     }
   }

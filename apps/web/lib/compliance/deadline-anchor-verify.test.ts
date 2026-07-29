@@ -207,7 +207,7 @@ describe("verifyDeadlineProposal", () => {
             month: 7,
             day: 1,
             withinDays: null,
-            label: "File by July 1 — every year",
+            label: "File by July 1 \u2014 every year",
             quote: "By July 1 annually",
           },
         ],
