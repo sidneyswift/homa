@@ -634,7 +634,18 @@ const createPrintable = defineBoundedTool({
           kind: "material",
           referenceId: materialId,
         });
-        if (reservation.referenceId) {
+        // `wrote` only when THIS call created the reservation. On any
+        // later call for the same accepted offer the insert above is a
+        // no-op and the query returns the EXISTING reference, which is
+        // the id of the material the first call already inserted.
+        // Adopting it made the insert below collide on the primary key,
+        // so once a family accepted a morning-brief offer and got one
+        // material, every further material in that session failed with
+        // `duplicate key value violates unique constraint
+        // "worksheets_pkey"` and she simply got nothing. Four in a row
+        // for one family on 2026-07-28, surfaced by the tool-failure
+        // alert the same day it was built (gh#372).
+        if (reservation.wrote && reservation.referenceId) {
           materialId = reservation.referenceId;
           reservedSourceDeliveryId = sourceOfferDeliveryId;
         }
