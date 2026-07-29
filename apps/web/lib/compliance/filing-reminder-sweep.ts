@@ -117,9 +117,13 @@ async function gapsFor(reminder: PlannedReminder): Promise<string[]> {
     where family_id = ${reminder.familyId}
     order by birth_month asc nulls last, created_at asc
   `;
-  const cityState = [family.address_city, family.us_state]
-    .filter((part) => part && part.trim().length > 0)
-    .join(", ");
+  // Only ever a real city. Joining us_state in unconditionally made a
+  // family with no city print "OH" as their address line, and a
+  // non-empty string reads as present, so the missing city and zip were
+  // never named as a gap (production, 2026-07-29).
+  const city = family.address_city?.trim()
+    ? `${family.address_city.trim()}${family.us_state ? `, ${family.us_state}` : ""}`
+    : null;
   return composeFilingLetter({
     detail,
     method: FILING_METHODS_BY_STATE[reminder.stateCode],
@@ -129,7 +133,7 @@ async function gapsFor(reminder: PlannedReminder): Promise<string[]> {
           ? `${family.first_name} ${family.last_name}`
           : (family.first_name ?? null),
       addressLine: family.address_line,
-      addressCity: cityState.length > 0 ? cityState : null,
+      addressCity: city,
       addressZip: family.address_zip,
       children: children.map((child) => ({
         name: child.name,
