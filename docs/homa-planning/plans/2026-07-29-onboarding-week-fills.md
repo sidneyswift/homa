@@ -236,7 +236,91 @@ window-join that produced it attributes every model call in the job's
 window to the job, so it may run slightly high. The materials count
 (450) spans the full studio, not just onboarding-shaped makings.
 
-## 9. Still open
+## 9. The template question, measured
+
+Founder ask, 2026-07-29: should a template week live in the DB and get
+copied to a family at signup, then close the delta to the real plan over
+time? And is the baseline just the kid's name and age?
+
+The instinct is right and the implementation should not be a table.
+
+**The baseline really is age, and it is already in the bank.** Every one
+of the 224 items carries `typicalMonths`. Synthesising "what a typical
+child of this age would answer" from that field and feeding it to the
+same `buildMonthPlan` gives a real plan with no questions answered at
+all. It is not a template of the plan, it IS the plan, produced by the
+one builder, so it cannot drift from the thing it previews and there is
+no seed data to maintain.
+
+**The delta is already zero for a typical child.** Target overlap and
+activity overlap between the age-derived plan and the plan built from
+real answers, measured across ten ages:
+
+| Child profile | Targets | Activities |
+|---|---|---|
+| Typical for age | **100%** at every age | **100%** at every age |
+| Rachel's real 5-answer mix | 100% at 8 of 10 ages | 100% at 8 of 10 ages |
+| Only 3 answers | 100% at 8 of 10 ages | 100% at 8 of 10 ages |
+| Well behind age | 100% at 7 of 10 ages | 83 to 100% |
+| Well ahead of age | 0% at most ages | **67 to 75%** |
+
+So for most families the age plan is the final plan and there is no
+delta to close. It diverges only for a child clearly ahead of their age,
+and even then two thirds of the activities survive, because activities
+are practice patterns attached to a subject and an interest rather than
+to one exact skill.
+
+That is a better story than a template anyway: what she sees during
+onboarding is usually *confirmed* by her answers rather than replaced,
+and being right about her kid before she has told you anything is its
+own kind of proof.
+
+**The plan needs exactly ONE answer, not a full checklist.** Zero
+answers returns null; one answer produces a complete four-week plan.
+So even without the age synthesis, the board can fill on her first tap.
+
+**And this is what makes lessons nearly free.** Because the plan is
+shared across families of the same age, the LESSONS for those plan
+targets are shared too. The whole population of children aged 2 to 14
+produces:
+
+- **25 distinct age-template plans**
+- built from **40 distinct target skills**
+
+Forty lessons, generated once for the fleet, cover every child's opening
+plan. At the measured $0.453 per making that is **about $18 one time**,
+against $2.75 per family for wave C. It pays for itself at roughly seven
+families, and there are already 196 in the usage ledger.
+
+It also removes the clock problem entirely: a pre-generated lesson is
+already there when she arrives, so nothing has to finish inside a
+five-minute checklist. Personalising it is a cheap overlay rather than a
+fresh 6.3-minute job, and the interest weaving in the activity text is
+already a pure function ("Build the game around horses").
+
+**Recommended shape, replacing wave C**
+
+1. Derive the age-template plan from `typicalMonths` and put it on her
+   planner the moment she enters a birthday, roughly ninety seconds in.
+   Free, instant, real, and labelled honestly as a starting point.
+2. Refine it on every checklist answer. Usually this confirms; when it
+   changes, say what she told you that changed it.
+3. Persist the real month at scoring, which already ships.
+4. Pre-generate the 40 target lessons at fleet level, once, and attach
+   them to plan activities. Per-family lesson generation becomes the
+   exception rather than the rule.
+
+**A day or a week?** A week, because the shipped grid already renders
+one activity per weekday with free days between, so a "day" is already
+the unit she reads. There is nothing smaller to start with.
+
+**What still needs deciding.** Whether a pre-generated fleet lesson is
+allowed to carry another family's flavour, and how the personalisation
+overlay works without regenerating. Also whether the 40-lesson library
+lives in the materials tables or somewhere new. Neither is a cost
+question.
+
+## 10. Still open
 
 - **Day, week and month views.** The ask names all three. The plan is
   four weeks of activities and the shipped grid is a week; a day view and
