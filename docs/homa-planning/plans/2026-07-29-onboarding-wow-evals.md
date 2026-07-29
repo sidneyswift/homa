@@ -146,15 +146,39 @@ already collected.**
   `-1`). She has just said Story loves dinosaurs and drawing; that data
   is now captured by the child card. Putting `Story · dinosaurs,
   drawing` in the checklist header frames twenty minutes of "can he do
-  this yet" with the warmest thing she said. Needs a three file data
-  plumb: the store query, `OnboardingChatProps.kids`, the takeover
-  header.
+  this yet" with the warmest thing she said.
+  **SHIPPED 2026-07-29, and it needed one file, not three.** The three
+  file plumb this entry called for (store query,
+  `OnboardingChatProps.kids`, takeover header) was not needed at all:
+  `ChecklistTakeover` already fetches `/api/map/state` itself, and that
+  payload has carried `interests` per child all along, read straight
+  from `children.profile.interests` through `profileInterestList`. The
+  change is one derived line and one span in `checklist-step.tsx`.
+  Verified on screen at 1280px and at 375px, and the span truncates
+  rather than pushing the time estimate off the row.
+  This is the third time §1's corollary has paid: the data, like the
+  tools, was already there. Grep before plumbing, not just before
+  building.
+  (Note while you are in there: `children.profile.interests` is the
+  real column. `child_profile` is a query ALIAS in `lib/map/store.ts`,
+  not a table, and writing SQL against it would 500 the way gh#333
+  describes.)
 - **Introduce the planner** (beat 8, a `0`). `open_planner` is live and
   the arc has never once mentioned it. Showing her a week with her own
   child's name in it is the difference between "an AI chat" and "a
   homeschool system."
+  **SHIPPED 2026-07-29** into "One more thing", which now sits after
+  the rehearsal so a real four-week plan exists to open. The beat
+  carries two honest limits taken from the tool's own contract: do not
+  narrate the week when a board is already showing it, and never
+  promise a panel, because mobile drops planner parts entirely
+  (issue #256) and the tool result is what says what opened.
+  Not yet walked; a walk has to get past beat 7 to see it.
 - **Swap beats 8 and 9**, so a beat she participates in follows the
   reveal rather than a beat she watches.
+  **SHIPPED 2026-07-29.** The rehearsal is now beat 8, "One more thing"
+  is beat 9, and beat 5's forward reference was repointed to name the
+  beat rather than its position. Not yet walked.
 
 **Wave 2, uses live capability the arc ignores.**
 
@@ -275,3 +299,136 @@ The intro fix and the react-only instruction are typechecked and the
 skill mirror is regenerated, but no walk has run since. Walk 002 starts
 by confirming Homa no longer announces the kids and that "Now your
 kids." reads correctly above the card.
+
+### Walk 002, 2026-07-29, Rachel, verifying walk 001's two fixes
+
+Ohio. Two children: Ellie, 7, horses and drawing; Sam, 4, trucks.
+Reached beat 4 and stopped there, because beat 4 is where the walk
+found something. Both of walk 001's fixes hold. The arc's binding
+problem turned out not to be wording at all.
+
+**The two fixes, both confirmed**
+
+| Fix | Result |
+|---|---|
+| "Now your kids." leads the app-drawn child card | PASS. Reads correctly above "What is your child's first name?", and correctly absent on the second child's card. |
+| Homa reacts to the setup only | PASS. Her whole turn was "Good to meet you, Rachel. Ohio it is." Nothing about kids. |
+
+**Measured, from her click, with a clock in the page**
+
+| Moment | Walk 001 | Walk 002 |
+|---|---|---|
+| Skipping the optional question to the next thing asking her for something | 108ms | **4,518ms** |
+| Skipping the optional question to Homa's answer arriving | 22s | **45.5s** (first turn, cold server) |
+| Roster finished to Homa's answer arriving | not reached | **215.6s** |
+
+The 4,518ms corrects walk 001's 108ms rather than contradicting it.
+Both timed the same beat: 108ms was the card mounting after its own
+save had already resolved, and she experiences the whole chain from her
+click, which includes the homeschool card's POST. The chaining fix is
+still right and still the difference between 4.5s and 20.7s. The claim
+was one step too generous, which is the same measurement error walk 001
+wrote its own lesson about.
+
+**Verdict: FAIL, conditions 3 and 4, by a wide margin, and not on wording.**
+
+215.6 seconds between "That's everyone" and Homa's reply, with the card
+chain finished and nothing on screen to read or do. Rachel has about
+twelve minutes; this single wait is a third of them. The spinner copy
+escalates honestly through four stages ("thinking", "working on it",
+"still working", "this one is taking a while") and a completed turn
+prints "Worked for 42 seconds". That is the right behaviour and it does
+not make a 3.5 minute silence survivable.
+
+Two contributors, both visible in the dev server log, neither yet
+separated from local-machine cost:
+
+- Every onboarding turn pays an extra `load_skill` round trip, because
+  the skill preload is deliberately rolled back (PR #313). That cost is
+  accepted on purpose and `onboarding-mode.ts` estimates it at four
+  seconds. This walk measured 45.5s and 215.6s.
+- The turn opens an eve sandbox (`opening sandbox session "root" on
+  backend "just-bash"`) and sits there. **Whether production pays this
+  too is the single most valuable unknown in this document.** A local
+  sandbox boot is not evidence about prod, and prod latency for these
+  two turns has not been measured. Measure it before optimising
+  anything.
+
+**A third instance of the app-takes-the-words law, found live**
+
+Homa's reply to the finished roster was:
+
+> Ellie and Sam, lovely to meet them both. Horses and drawing for Ellie,
+> trucks for Sam already tells me a lot about where to start.
+> **Any other kids I should know about, or is that your whole crew?**
+
+She asked for more children immediately after the app had asked and
+Rachel had clicked "That's everyone". The cause was exactly the law
+walk 001 wrote down, one beat further on: beat 2's addendum said the
+app owns the roster and forbids the question, while beat 4 still opened
+"Turn to her kids in ONE sentence, THEN the facts card" and still
+carried the worked example "Any other kids I should know about?". Homa
+followed the more specific instruction and quoted it verbatim.
+
+FIXED this session: beat 4 is now "Meet the family", it reacts to the
+whole roster at once, it forbids asking for more and cites this walk,
+and it keeps the two rules that were genuinely still its own (call
+add_child when she types several kids into the composer, and never
+imply a number when pointing at one child).
+
+The general lesson, now three for three: **when a beat moves from Homa
+to the app, grep the whole skill for the beat, not just the paragraph
+that introduced it.** Every one of these three bugs was a second copy
+of the instruction living somewhere the fix did not look.
+
+**Two things this harness cannot answer**
+
+Recorded so a future walk does not spend time rediscovering them.
+
+- **Autofocus.** The browser pane reports `visibilityState: hidden` and
+  `document.hasFocus() === false` permanently, which is precisely the
+  condition under which browsers skip the autofocus algorithm. Typing
+  without an explicit focus call goes nowhere and `activeElement` stays
+  BODY. The `autoFocus` prop IS present on both the text input and the
+  state select (detail-card.tsx). So the implementation is there and
+  this harness cannot observe it. Settle it in a real focused tab.
+- **Enter to advance.** `computer{action:"key"}` delivers no keydown at
+  all to the page here (a listener on the focused input recorded zero
+  events), while `type` works. The handler exists and is correct
+  (`onKeyDown`, `event.key === "Enter"`, `advance()`). Not testable
+  here; not evidence of a defect.
+
+**Environment hazards, both cost real time this session**
+
+- **`eve build` kills a running dev server on the same worktree.** It
+  rewrites `.eve/`, and the live server holds a pinned path into
+  `.eve/dev-runtime/snapshots/<id>/`, which is then gone. Every
+  subsequent turn 500s with `[UNLOADABLE_DEPENDENCY] Could not load
+  .eve/dev-runtime/snapshots/.../compiled-artifacts-bootstrap.mjs`, and
+  the UI shows "Not sent. Retry", which looks exactly like the Supabase
+  pooler hazard already recorded in §5 and is not it. Restart the dev
+  server after any `eve build`. This is also what a server inherited
+  from an earlier session was already suffering from at the start of
+  this one.
+- **A misleading log line, now fixed.** Every onboarding turn printed
+  "the inlined onboarding skill body is empty ... Run pnpm
+  build:onboarding-skill and redeploy". The generated file was a
+  correct 28KB; the preload was off because the rollback constant says
+  so. The diagnostic could report two causes and named the one that was
+  not firing. It now fires only for the real build mistake.
+
+**Beat scores, 1 to 4**
+
+| # | Beat | Feels | Who acts | Need |
+|---|---|---|---|---|
+| 1 | Open | +1 | robot | need |
+| 2 | Setup cards | +1 | human | need |
+| 3 | React once | 0 | robot | nice |
+| 4 | Meet the family | **-1** | robot | need |
+
+Beat 2 moves up from 0: two cards, no model turn anywhere in the run,
+and the interests step means she has already said something warm about
+her child before Homa has said anything at all. Beat 4 is a -1 on this
+walk for the 215.6s wait and the redundant question, both now addressed;
+it needs a re-walk to re-score, and the wait is the half that is not
+proven fixed.

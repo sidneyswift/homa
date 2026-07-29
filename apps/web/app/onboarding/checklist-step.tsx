@@ -469,6 +469,19 @@ export function ChecklistStep({
         ? { text: domain.intro, tone: "muted" as const }
         : null;
 
+  // What she just told us this child loves, carried into the one beat
+  // that asks her to enumerate what they cannot do yet (walk 002,
+  // 2026-07-29: the questions are the arc's only -1, and this is the
+  // most exposed moment in the product). She picked these on the child
+  // card minutes ago, so the header answers "does it know my kid?" at
+  // the exact moment she is bracing to be judged as a teacher.
+  //
+  // Nothing needed plumbing: /api/map/state already carries
+  // child.interests, read straight from children.profile.interests.
+  // Three at most, because this line shares a row with the time
+  // estimate on a phone; the rest stay in the profile.
+  const headerInterests = child.interests.slice(0, 3).join(", ");
+
   return (
     <div
       className={
@@ -483,9 +496,16 @@ export function ChecklistStep({
             Tier 2: the subject as a prominent section title, the thing
             they're actually answering about right now. */}
         <div className="flex items-center justify-between gap-2">
-          <span className="shrink-0 rounded-pill bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand">
-            {child.name}
-          </span>
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="shrink-0 rounded-pill bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand">
+              {child.name}
+            </span>
+            {headerInterests ? (
+              <span className="truncate text-xs text-subtle">
+                {headerInterests}
+              </span>
+            ) : null}
+          </div>
           <p className="shrink-0 font-mono text-xs text-subtle">{timeLabel}</p>
         </div>
         <p className="mt-2 truncate font-display text-lg font-bold text-strong">

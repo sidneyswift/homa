@@ -73,9 +73,19 @@ import { ONBOARDING_SKILL_MARKDOWN } from "../../lib/onboarding/onboarding-skill
  */
 const PRELOAD_ROLLED_BACK_PENDING_SILENT_TURN_GUARD = true;
 
+/**
+ * The generated mirror really being empty, which is a build mistake, as
+ * opposed to the rollback above, which is a decision. Walk 002
+ * (2026-07-29) spent real time chasing "run pnpm build:onboarding-skill
+ * and redeploy" on a machine whose generated file was a correct 28KB:
+ * the preload was off because the constant above says so, and the log
+ * line named the one cause that was not firing. A diagnostic that can
+ * report two causes has to know which one it saw.
+ */
+const skillBodyMissing = ONBOARDING_SKILL_MARKDOWN.trim().length === 0;
+
 const preloadedSkill: string | null =
-  PRELOAD_ROLLED_BACK_PENDING_SILENT_TURN_GUARD
-  || ONBOARDING_SKILL_MARKDOWN.trim().length === 0
+  PRELOAD_ROLLED_BACK_PENDING_SILENT_TURN_GUARD || skillBodyMissing
     ? null
     : ONBOARDING_SKILL_MARKDOWN;
 
@@ -84,10 +94,16 @@ export default defineDynamic({
     "turn.started": (_event, ctx) => {
       const attributes = ctx.session.auth.current
         ?.attributes as OnboardingModeAttributes;
-      if (preloadedSkill === null && isOnboardingModeSession(attributes)) {
+      if (skillBodyMissing && isOnboardingModeSession(attributes)) {
         // Logged per affected turn, not once per cold start, so the count
         // in runtime logs is the number of parents who actually paid for
         // it rather than the number of instances that booted.
+        //
+        // Only for the build mistake. While the rollback constant above
+        // is the reason the preload is off, that is a deliberate state
+        // with its own long explanation in source, and shouting it once
+        // per onboarding turn in production logged noise under a
+        // remediation that does not apply (walk 002, 2026-07-29).
         console.error(
           "onboarding-mode: the inlined onboarding skill body is empty, so this onboarding turn falls back to load_skill and the parent waits an extra model round trip. Run pnpm build:onboarding-skill and redeploy (issue #246).",
         );
