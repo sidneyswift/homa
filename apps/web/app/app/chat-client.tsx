@@ -25,6 +25,7 @@ import {
   latestChecklistRequest,
   latestReportReveal,
 } from "./onboarding-cards";
+import { CallMeComposerButton } from "./call-me-composer-button";
 import { DetailCard, latestDetailRequest, NO_STYLES_SUMMARY } from "./detail-card";
 import { ChecklistTakeover } from "./checklist-takeover";
 import { formatHiddenDirective } from "../../lib/onboarding/directives";
@@ -55,6 +56,7 @@ import {
   type ArchivedMessage,
 } from "./chat-storage";
 import {
+  composerPrimaryAction,
   appendPreparedChatSendToQueue,
   flushChatQueue,
   focusChatComposerInput,
@@ -243,8 +245,13 @@ export function ChatClient({
   serverHistory = null,
   wall = null,
   onboarding = null,
+  canBeCalled = false,
 }: {
   storageKey: string;
+  /** Whether this adult has a cell number linked, so the composer's voice
+   * button can answer instantly instead of firing a request that can only
+   * fail. About half of families have one today. */
+  canBeCalled?: boolean;
   familyId: string | null;
   timeZone: string;
   parentName: string | null;
@@ -2159,7 +2166,7 @@ export function ChatClient({
               binder. Change kids at the top right.
             </p>
           ) : null}
-          <div className="mt-0.5 flex items-center gap-0.5">
+          <div className="relative mt-0.5 flex items-center gap-0.5">
             <AttachMenuButton
               onFiles={attachments.addFiles}
               disabled={!familyId}
@@ -2210,6 +2217,15 @@ export function ChatClient({
                   </button>
                 ) : null}
               </>
+            ) : composerPrimaryAction({
+                draft,
+                readyAttachments: attachments.readyCount,
+              }) === "voice" ? (
+              // Empty composer: the primary action is starting a voice
+              // conversation, not a Send with nothing to send (founder
+              // direction 2026-07-29). It swaps back to Send on the first
+              // character, so the two never compete for the same tap.
+              <CallMeComposerButton canBeCalled={canBeCalled} />
             ) : (
               <button
                 type="submit"
