@@ -40,7 +40,7 @@ function TabsNavigator() {
         tabBarInactiveTintColor: colors.textMuted,
         tabBarHideOnKeyboard: true,
         tabBarStyle: {
-          backgroundColor: colors.card,
+          backgroundColor: colors.page,
           borderTopColor: colors.borderSubtle,
         },
         tabBarLabelStyle: {

@@ -149,7 +149,20 @@ export function MarkdownText({ text }: { text: string }) {
                   key={itemIndex}
                   style={{ flexDirection: "row", gap: space.sm }}
                 >
-                  <Text style={[bodyStyle, { color: colors.brand }]}>{"\u2022"}</Text>
+                  {/* A drawn dot, not a "\u2022" glyph: Homa's body font
+                   *  has no bullet glyph, so the character fell back to
+                   *  a notdef box (the "amateur" look a founder flagged
+                   *  2026-07-29). A shape renders identically regardless
+                   *  of font coverage. */}
+                  <View
+                    style={{
+                      width: 5,
+                      height: 5,
+                      borderRadius: 2.5,
+                      backgroundColor: colors.brand,
+                      marginTop: bodyStyle.lineHeight / 2 - 2.5,
+                    }}
+                  />
                   <Text style={[bodyStyle, { flex: 1 }]}>
                     <InlineText text={item} />
                   </Text>
