@@ -368,10 +368,10 @@ in 72h, last event = the drop step, not a separate event.)
 | # | Event | Trigger | Props | PII | Source | Feeds |
 |---|---|---|---|---|---|---|
 | 46 | `hours.logged` | hours captured from any ambient source | `child_id`, `minutes:int`, `subject?:enum`, `origin:enum(journal,chat,voice,activity)` | ✅ | agent | **North Star**, hours-vs-target |
-| 47 | `compliance.ruleset_viewed` | state requirements screen opened | `state:enum`, `has_verified_date:bool` | ✅ | web | trust signal (P4 Monica checks the statute) |
-| 48 | `compliance.report_requested` | "generate my state report" | `state:enum`, `period:enum(quarter,semester,year)` | ✅ | agent | compliance demand (per-state template prioritization, M5-03) |
-| 49 | `compliance.report_generated` | report PDF built | `state:enum`, `latency_ms:int`, `concierge:bool` [M-R: "ask Homa"] | ✅ | agent/job | compliance delivery |
-| 50 | `compliance.report_downloaded` | report PDF downloaded | `state:enum` | ✅ | web | completion of the J4 job |
+| 47 | `compliance.ruleset_viewed` | Binder state pack card rendered with a verified state row | `state:enum`, `has_verified_date:bool` | ✅ | web | trust signal (P4 Monica checks the statute) |
+| 48 | `compliance.report_requested` | "Get your {State} pack" pressed (the 2026-07-28 state pack; the old `period` enum belonged to the retired evidence-report concept) | `state:enum` | ✅ | web | compliance demand (per-state template prioritization, M5-03) |
+| 49 | `compliance.report_generated` | state pack PDF rendered, uploaded, finalized | `state:enum`, `latency_ms:int`, `page_count:int` | ✅ | web | compliance delivery, trial-value metric (D17) |
+| 50 | `compliance.report_downloaded` | state pack PDF opened by the parent | `state:enum` | ✅ | web | completion of the J4 job |
 
 ### 4.11 Weekly note (J5: the retention artifact) (4)
 

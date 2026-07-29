@@ -1,10 +1,11 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback } from "react";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ageInMonths, ageLabel } from "@homa/core";
 
 import { Logo } from "../../components/brand/logo";
+import { SettingsGlyph } from "../../components/ui/tab-icons";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { useFamilyData } from "../../features/family/use-family-data";
@@ -35,7 +36,17 @@ export default function TodayScreen() {
       <ScrollView
         contentContainerStyle={{ padding: space.lg, gap: space.lg }}
       >
-        <Logo size={28} />
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <Logo size={28} />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Settings"
+            onPress={() => router.push("/settings")}
+            hitSlop={12}
+          >
+            <SettingsGlyph color={colors.textMuted} size={24} />
+          </Pressable>
+        </View>
 
         {loading ? (
           <ActivityIndicator color={colors.brand} style={{ marginTop: space.xl }} />

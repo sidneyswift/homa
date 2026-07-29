@@ -1,15 +1,19 @@
 name: Mobile OTA update
 
-# Keeps installed phone apps in sync with main. When mobile code (or the
-# shared core package it imports) changes, this publishes an EAS Update:
+# Keeps installed phone apps in sync with main, IF a production build with
+# a matching native fingerprint exists. When mobile code (or the shared
+# core package it imports) changes, this publishes an EAS Update: matching
 # installed builds download the new JavaScript on next launch, no App
 # Store release needed. Native changes (a new package with native code,
 # an Expo SDK upgrade) do NOT ship this way; they need a new store build:
 #   cd apps/mobile
 #   eas build --platform ios --profile production
 #   eas submit --platform ios --latest
-# The update only applies to builds with a matching native fingerprint,
-# so an out-of-date binary can never receive incompatible JavaScript.
+# The update only applies to builds with a matching native fingerprint, so
+# an out-of-date binary can never receive incompatible JavaScript, and (the
+# failure mode this workflow silently had for weeks) an up-to-date checkout
+# with no matching binary at all publishes into a void. The fingerprint
+# guard step below makes that failure loud instead of silent.
 
 on:
   push:
@@ -44,12 +48,31 @@ jobs:
       - name: Typecheck mobile
         run: pnpm --filter mobile typecheck
 
+      - name: Mobile chat unit tests
+        run: pnpm check:mobile-chat
+
+      # A red mobile test suite must never reach an installed phone: this
+      # runs before publish, not just in CI, since CI and this workflow
+      # fire on the same push independently.
+
       # EXPO_PUBLIC_ values are inlined into the JavaScript bundle at
       # publish time. Read them from eas.json so OTA updates and store
       # builds always ship the exact same public config.
       - name: Load public app config from eas.json
         working-directory: apps/mobile
         run: jq -r '.build.production.env | to_entries[] | "\(.key)=\(.value)"' eas.json >> "$GITHUB_ENV"
+
+      # expo-updates matches an OTA update to an installed binary by exact
+      # native fingerprint. A mismatch is not a warning, it is silence: the
+      # 2026-07-27 to 2026-07-28 window published updates for weeks that no
+      # installed phone could receive. This must run on a clean checkout
+      # (no apps/mobile/ios directory) or it computes a wrong result; see
+      # the script's own comment and .agents/skills/ios-release.
+      - name: OTA fingerprint guard (refuse to publish into a void)
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: node scripts/check-ota-fingerprint.mjs
 
       - name: Publish EAS Update to the production channel
         working-directory: apps/mobile
@@ -58,4 +81,4 @@ jobs:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           MSG="$(printf '%s\n' "${COMMIT_MESSAGE:-Manual OTA update}" | head -n 1 | cut -c 1-200)"
-          npx eas-cli@latest update --channel production --environment production --platform ios --non-interactive --message "$MSG"
+          npx eas-cli@21.4.0 update --channel production --environment production --platform ios --non-interactive --message "$MSG"

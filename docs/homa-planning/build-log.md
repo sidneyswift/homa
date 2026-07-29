@@ -3,6 +3,39 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-28 · State pack v1: interim wording, footer scope, and the conservative zero-duty set
+
+The founder asked for the state pack ("one button, a family can download
+and print all of their state's requirements") and to ship it the same
+day. The design ran through a five-expert council plus adjudicator; the
+settled spec is `docs/homa-planning/plans/2026-07-28-state-pack.md` and
+the tracker is gh#316. Three judgment calls were made without a founder
+ruling and are queued for ratification in gh#319:
+
+1. **Interim boundary and attribution wording.** The pack's cover ships
+   boundary copy adapted from the founder-vetted StateCard sentences,
+   with two precision fixes ("does not notify {State}", and filled
+   templates DO become the family's own records), plus a CC BY-SA 4.0
+   attribution block. The M4-04 lawyer pass has not happened; nothing
+   labels this wording lawyer-reviewed, and gh#318 carries it to
+   counsel. Exact shipped text: the plan's §Wording.
+2. **D7 footer scope reading.** The D7 ruling reads "made with Homa for
+   {child}". The pack's every-page footer instead reads "Prepared with
+   Homa for the {family} family", on the reading that D7 governs
+   child-addressed materials and this family-level artifact (child_id
+   null) sits outside its scope. The materials footer is untouched.
+3. **Zero-duty set derived conservatively from data.** The council named
+   nine affirmative "you are legal" states; the typed payload supports
+   only seven (CT ID IL NJ OK TX WY). AK and MI carry pathway_varies
+   flags on their default rows, and a varies field may hide a duty, so
+   the pack refuses to print an affirmative "nothing is required" it
+   cannot back and gives those two the standard informational layout.
+
+Also recorded: `compliance.report_requested` (journeys/06 row 48) lost
+its `period` enum, which described the retired evidence-report concept;
+the row now describes the pack button. The evidence-report feature
+itself stays a non-goal pending gh#317.
+
 ## 2026-07-28 · Founder correction: the logo is the logo, and the name is always "Homa"
 
 Founder, on being told an email rendered the wordmark lowercase and that

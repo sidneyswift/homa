@@ -51,7 +51,10 @@ first; never ask it to imagine the UI from code.
   If motion can only be described, say so in the dispatch; a described
   motion gets softer conclusions than a shown one.
 - Capture from the dev server (usually localhost:3000) with Playwright
-  or a simulator. Use the public sample page, fixtures, or seeded demo
+  or a simulator. For the native iOS app, capture through the
+  mobile-simulator skill (build, launch, drive, `xcrun simctl io booted
+  screenshot`); the demo family there is the sandboxed App Review
+  Family. Use the public sample page, fixtures, or seeded demo
   data only. Never a real family's data in any capture.
 
 ## How to dispatch this gate

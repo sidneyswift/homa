@@ -1,5 +1,5 @@
 import type { ColorValue } from "react-native";
-import Svg, { Circle, Path } from "react-native-svg";
+import Svg, { Circle, Line, Path } from "react-native-svg";
 
 /**
  * Line-treatment tab icons drawn from the brand geometry (the home icon
@@ -81,6 +81,34 @@ export function FamilyTabIcon({ color, size }: TabIconProps) {
         strokeWidth={3.2}
         strokeLinecap="round"
       />
+    </Svg>
+  );
+}
+
+/** Settings entry point: the classic three-slider glyph, same line weight as the tab icons. */
+export function SettingsGlyph({ color, size }: TabIconProps) {
+  const rows: { y: number; knobX: number }[] = [
+    { y: 14, knobX: 30 },
+    { y: 24, knobX: 18 },
+    { y: 34, knobX: 33 },
+  ];
+  return (
+    <Svg width={size} height={size} viewBox="0 0 48 48">
+      {rows.map((row) => (
+        <Line
+          key={row.y}
+          x1={8}
+          y1={row.y}
+          x2={40}
+          y2={row.y}
+          stroke={color}
+          strokeWidth={3.2}
+          strokeLinecap="round"
+        />
+      ))}
+      {rows.map((row) => (
+        <Circle key={`knob-${row.y}`} cx={row.knobX} cy={row.y} r={4} fill={color} />
+      ))}
     </Svg>
   );
 }

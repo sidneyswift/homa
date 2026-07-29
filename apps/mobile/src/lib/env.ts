@@ -30,4 +30,8 @@ export const env = {
   get apiUrl(): string {
     return requireEnv("EXPO_PUBLIC_API_URL", process.env.EXPO_PUBLIC_API_URL);
   },
+  /** Optional. Unset until a founder creates the Sentry project. */
+  get sentryDsn(): string | undefined {
+    return process.env.EXPO_PUBLIC_SENTRY_DSN || undefined;
+  },
 } as const;

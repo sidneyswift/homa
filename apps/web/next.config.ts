@@ -15,7 +15,18 @@ const nextConfig: NextConfig = {
   // The materials studio's renderer (lib/materials/render-page.ts): the
   // Chromium binary and puppeteer must stay real node_modules, never
   // bundled, so the .br binaries survive to the deployed function.
-  serverExternalPackages: ["@sparticuz/chromium", "puppeteer-core"],
+  // pdfjs-dist and @napi-rs/canvas joined 2026-07-28 when the state pack
+  // route became the first NEXT lambda to import the raster stack (the
+  // eve build always kept them external via agent.ts
+  // build.externalDependencies): bundling pdf.mjs evaluates DOMMatrix at
+  // module load with no canvas polyfill and drops the native .node
+  // addon, which 500ed POST /api/compliance/pack on every request.
+  serverExternalPackages: [
+    "@sparticuz/chromium",
+    "puppeteer-core",
+    "pdfjs-dist",
+    "@napi-rs/canvas",
+  ],
   // AVIF first for the hero LCP image (roughly 20-30% smaller than webp),
   // webp as the fallback.
   images: {
@@ -25,6 +36,23 @@ const nextConfig: NextConfig = {
   // runtime (founder-editable, versioned); every route that can generate a
   // narrative must ship it in its traced bundle.
   outputFileTracingIncludes: {
+    // NOTE (gh#335): do NOT re-add node_modules globs here for
+    // @napi-rs/canvas. Tracing-include globs copy pnpm's symlinked
+    // directories verbatim and Vercel's packager rejects the function
+    // ("invalid deployment package... files in symlinked directories",
+    // 2026-07-28). The canvas ships correctly because
+    // lib/materials/rasterize-pdf.ts imports it with a plain literal
+    // specifier that nft can see and resolve to real files.
+    //
+    // The chromium binaries are the one legitimate include (gh#335,
+    // same day): @sparticuz/chromium reads its .br archives via fs at
+    // runtime, which no static trace can see, so the pack route's
+    // lambda shipped without them. The glob points at the real .pnpm
+    // package directory and matches plain files only, never a
+    // symlinked directory, which is what broke packaging before.
+    "/api/compliance/pack": [
+      "../../node_modules/.pnpm/@sparticuz+chromium@*/node_modules/@sparticuz/chromium/bin/**",
+    ],
     "/api/chat/suggestions": ["./agent/prompt-suggestions.md"],
     "/api/map/score": ["./agent/report-writer.md"],
     "/api/map/narrative-status": ["./agent/report-writer.md"],

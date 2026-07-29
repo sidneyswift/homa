@@ -62,6 +62,10 @@ import {
 import { signupProgress } from "../../lib/sms-onboarding";
 import { trustedSmsInboundIdentityAttributes } from "../../lib/sms-inbound-auth";
 import {
+  CHANNEL_GATE_SMS_LINE,
+  familyHasChannel,
+} from "../../lib/billing/channel-access";
+import {
   buildSmsSessionThreadId,
   stripSmsSessionEpoch,
 } from "../../lib/sms-session-epoch";
@@ -454,6 +458,34 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
       await completeInboundReceipt(inboundReceipt.id);
       return;
     }
+  }
+
+  // Texting is part of Homa Plus (gh#298, tier ruling 2026-07-28). A
+  // known family on a web-only plan is answered here and the agent
+  // never wakes: she gets a real reply naming where the door is, which
+  // is the whole point, because a number that used to answer and now
+  // says nothing reads as Homa being broken rather than as a plan
+  // boundary.
+  //
+  // Placed after the opt-out block so STOP still wins, and before the
+  // lead path so a STRANGER is untouched: familyHasChannel(null) admits,
+  // and an unknown number is a lead, not a downgrade. Ships dark behind
+  // HOMA_CHANNEL_GATE_ENABLED and fails open on any error.
+  if (familyId && !(await familyHasChannel(familyId))) {
+    const sent = await sendHomaSms(
+      normalizedSender ?? senderNumber,
+      CHANNEL_GATE_SMS_LINE,
+    );
+    await emitMapEvent("sms.channel_gated", { channel: "sms" }, { familyId });
+    if (sent) {
+      await completeInboundReceipt(inboundReceipt.id);
+    } else {
+      await failInboundReceipt(
+        inboundReceipt.id,
+        new Error("channel-gate reply did not send"),
+      );
+    }
+    return;
   }
 
   // A stranger texting IS a lead (lead-funnel-plan LF-2): save the

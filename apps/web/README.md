@@ -86,6 +86,16 @@ pnpm --filter web dev   # http://localhost:3000
   boundary. The lesson page's `lesson-keep-button.tsx` shows the Binder and
   daily-loop handoff only after an explicit kept response. `lib/family-phone.ts`
   supplies the server-only boolean used for the optional Parents settings link.
+- The state pack (plans/2026-07-28-state-pack.md): `app/app/binder/` hosts
+  the one-button card, `POST app/api/compliance/pack/route.ts` composes and
+  renders "Your {State} pack" fresh from `state_requirements` payload via
+  `lib/compliance/pack.ts` (pure derivation, all 51 jurisdictions covered by
+  `lib/compliance/pack.test.ts`) and `lib/compliance/pack-store.ts` (each
+  generation a new finalized materials row, subject `state-pack`, prior pack
+  superseded but its bytes kept as a receipt). Downloads ride the existing
+  `/api/materials/[id]/pdf` route, which emits the compliance download event
+  for state packs. `scripts/state-pack-render-smoke.mts` is the local
+  Chromium proof.
 - `lib/materials/library.ts` shares one first-transition receipt contract
   between agent approval and subject lesson Keep. Caller-JWT approval uses the
   atomic `finalize_family_material` RPC from the subject lesson migration;

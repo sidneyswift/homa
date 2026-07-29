@@ -123,3 +123,31 @@ describe("composeOnboardingModeMarkdown, adversarial negatives", () => {
     }
   });
 });
+
+describe("the preload rollback (2026-07-28 incident)", () => {
+  const source = readFileSync(
+    new URL("../../agent/instructions/onboarding-mode.ts", import.meta.url),
+    "utf8",
+  );
+
+  it("still routes onboarding turns through the load_skill fallback", () => {
+    // The first real paid signup dead-ended on the preloaded path: the
+    // turn after the family card made zero tool calls and delivered
+    // nothing. Sessions that still reached the skill via load_skill
+    // advanced correctly in the same hour. Until a deterministic
+    // no-silent-turn guard and an eval covering that two-turn sequence
+    // exist, this stays rolled back, and flipping it back on without
+    // them should fail here rather than on a paying parent's screen.
+    assert.match(
+      source,
+      /const PRELOAD_ROLLED_BACK_PENDING_SILENT_TURN_GUARD = true;/u,
+    );
+  });
+
+  it("keeps the generated mirror wired up for the re-land", () => {
+    // The rollback is one constant, not a revert: the mirror, its
+    // build script, and the byte-exact check above all stay live so
+    // re-landing is a one-line change once the guard exists.
+    assert.match(source, /ONBOARDING_SKILL_MARKDOWN/u);
+  });
+});

@@ -182,8 +182,20 @@ export async function resolveOnboardingCompletion(familyId: string): Promise<boo
     select f.profile_completed_at::text as profile_completed_at,
            (select count(*) from public.children c where c.family_id = f.id)
              ::int as children,
-           (select count(distinct r.child_id) from public.child_reports r
-             where r.family_id = f.id)::int as scored
+           -- child_reports is keyed by child_id and has no family_id
+           -- column, so this reaches the family through children. The
+           -- original went straight at r.family_id, which threw 42703
+           -- (undefined_column) on every call and turned /onboarding
+           -- into the error page for any family whose onboarding record
+           -- existed and was not already "done". The two guards above
+           -- are the only reason it did not fire for everyone. Live from
+           -- bbed4a4b (#239) until 2026-07-28, found when a family who
+           -- had just paid refreshed and got "Something didn't load
+           -- right".
+           (select count(distinct r.child_id)
+              from public.child_reports r
+              join public.children rc on rc.id = r.child_id
+             where rc.family_id = f.id)::int as scored
       from public.families f
      where f.id = ${familyId}
   `;
