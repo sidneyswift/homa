@@ -176,10 +176,55 @@ function gerundize(word: string): string {
   if (stem.endsWith("ie")) return `${stem.slice(0, -2)}ying`;
   if (stem.endsWith("e") && !stem.endsWith("ee")) return `${stem.slice(0, -1)}ing`;
   // Short consonant-vowel-consonant verbs double the last letter (run, cut).
-  if (stem.length <= 4 && /[^aeiou][aeiou][^aeiouwxy]$/.test(stem)) {
+  //
+  // Only ONE-syllable ones. English doubles for a stressed final
+  // syllable, and a two-syllable verb ending the same way does not:
+  // "open" matched the letter pattern and shipped "openning" into a
+  // parent's week plan (walk 007, 2026-07-29). Counting vowel groups is
+  // a good enough stand-in for counting syllables on this bank's verbs.
+  const vowelGroups = stem.match(/[aeiou]+/g) ?? [];
+  if (
+    stem.length <= 4 &&
+    vowelGroups.length === 1 &&
+    /[^aeiou][aeiou][^aeiouwxy]$/.test(stem)
+  ) {
     return `${stem}${stem.slice(-1)}ing`;
   }
   return `${stem}ing`;
+}
+
+/** A verb token, hyphens included, as the bank writes them (skip-counts). */
+const LEADING_VERB = /^[a-z]+(?:-[a-z]+)*s\b/;
+/** The next verb in a coordination: ", verb", " and verb", ", or verb". */
+const COORDINATED_VERB = /^(,?\s+(?:and|or)\s+|,\s+)([a-z]+(?:-[a-z]+)*s)\b/;
+
+/**
+ * Every verb in a leading coordination becomes a gerund, not just the
+ * first, so a plan activity reads as one sentence.
+ *
+ * Ten of the bank's 224 statements open with a verb series, and each of
+ * them shipped broken after "ten minutes a day of..." (walk 007,
+ * 2026-07-29): "adding and subtracts small numbers", "getting and uses
+ * figurative language", and, where a comma blocked conversion outright,
+ * "adds, subtracts, and compares fractions".
+ *
+ * Only a comma or an explicit and/or continues the run. That is what
+ * keeps a plural noun from being conjugated: "knows letters and sounds"
+ * is separated by a plain space, so it converts "knows" alone and
+ * "sounds" stays a noun.
+ */
+function gerundizeLeadingVerbs(phrase: string): string {
+  const first = phrase.match(LEADING_VERB);
+  if (!first) return phrase;
+  let out = gerundize(first[0]);
+  let rest = phrase.slice(first[0].length);
+  for (;;) {
+    const next = rest.match(COORDINATED_VERB);
+    if (!next) break;
+    out += `${next[1]}${gerundize(next[2])}`;
+    rest = rest.slice(next[0].length);
+  }
+  return out + rest;
 }
 
 /**
@@ -192,7 +237,7 @@ function gerundize(word: string): string {
  *      multiplication facts" reads as "knowing multiplication facts"
  *      after "ten minutes a day of...").
  */
-function skillPhrase(statement: string): string {
+export function skillPhrase(statement: string): string {
   let phrase = lowerFirst(statement);
 
   if (phrase.length > 45) {
@@ -208,9 +253,7 @@ function skillPhrase(statement: string): string {
     if (cutAt > 20) phrase = phrase.slice(0, cutAt);
   }
 
-  const spaceIndex = phrase.indexOf(" ");
-  if (spaceIndex === -1) return phrase;
-  return `${gerundize(phrase.slice(0, spaceIndex))}${phrase.slice(spaceIndex)}`;
+  return gerundizeLeadingVerbs(phrase);
 }
 
 /** The pseudo-domain id the unified month plan stores under. */

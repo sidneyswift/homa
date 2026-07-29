@@ -3,6 +3,52 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-29 · Founder ruling: the sitting builds a lesson per subject, and the week fills while she answers
+
+Not an agent decision. Recorded here because it OVERTURNS a standing
+rule in `apps/web/agent/skills/onboarding/SKILL.md`, and the rule cites
+its own reasoning, so the reversal needs to be findable from both ends.
+
+**What was ruled.** Asked where the "system moment" belongs and how much
+should be real, the founder chose, in the same breath: a lesson per
+subject rather than one making per sitting, and the planner visibly
+filling *during* the checklist rather than after it.
+
+**What it overturns.** The skill's "The first making" section says "One
+making per sitting. The tool holds this line too, but do not test it:
+one thing being made is a gift, two is a machine warming up." That
+sentence no longer governs the onboarding sitting. It was written about
+makings PROMISED one at a time in conversation, where a second promise
+reads as a machine. A planner whose activities are already there, some
+of them clickable, is a filled board rather than a queue of gifts, and
+the founder's judgment is that the board is what makes the product
+legible.
+
+**What was NOT overturned.** Everything about honesty. Nothing clickable
+may be a placeholder. `start_first_making`'s rule that the promise comes
+after the tool result stands. The tool still refuses a second build for
+the same skill and child, so any per-subject fan-out has to be real
+parallel work, not the same job renamed.
+
+**The finding that made the choice cheap.** `buildMonthPlan(ageMonths,
+answers, { interests, style })` is a pure exported function in
+`@homa/core`: no model, no cost, milliseconds, and it already takes the
+interests she tapped on the child card. The checklist client holds every
+one of those inputs in React state as she answers. So the "fills as she
+answers" half needs no server call, no report, and no token, and it uses
+the SAME function that later persists the real month through
+`getOrBuildPlan`, so the preview and the saved plan cannot diverge. The
+expensive half is only the generated worksheets.
+
+**Consequences to carry.** This makes gh#426 much smaller than filed:
+the question was never "can Homa build a month", it is "should
+onboarding call a function that already ships". It also gives the
+20 to 45 second model turns somewhere useful to hide, because the
+checklist takeover occupies her for about five minutes while Homa is
+otherwise idle.
+
+Spec: `docs/homa-planning/plans/2026-07-29-onboarding-week-fills.md`.
+
 ## 2026-07-28 · State pack v1: interim wording, footer scope, and the conservative zero-duty set
 
 The founder asked for the state pack ("one button, a family can download
