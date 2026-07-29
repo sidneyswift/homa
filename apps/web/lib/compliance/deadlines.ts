@@ -134,6 +134,38 @@ function countedDueDate(
   return addDays(schoolYearStartIso, anchor.withinDays);
 }
 
+/**
+ * The start date to reckon this year's deadlines from (gh#418).
+ *
+ * A family reports a real date once ("we started August 17, 2026"), and
+ * its month and day are the pattern that recurs. Reading the stored
+ * value literally would quietly go stale: in 2027 a family would be
+ * measured from a start two school years back, and every counted
+ * deadline would land in the past.
+ *
+ * So the answer is the most recent anniversary on or before today, which
+ * is the start of the school year the family is actually in. Returns
+ * null when never asked, which is the signal to ask rather than assume.
+ */
+export function schoolYearStartFor(
+  storedIso: string | null,
+  todayIso: string,
+): string | null {
+  if (!storedIso) return null;
+  const stored = /^(\d{4})-(\d{2})-(\d{2})$/.exec(storedIso.trim());
+  const today = /^(\d{4})-(\d{2})-(\d{2})$/.exec(todayIso.trim());
+  if (!stored || !today) return null;
+  const month = Number(stored[2]);
+  const day = Number(stored[3]);
+  const thisYear = Number(today[1]);
+  for (const year of [thisYear, thisYear - 1]) {
+    if (day > daysInMonth(year, month)) continue;
+    const candidate = toIso(year, month, day);
+    if (candidate <= todayIso) return candidate;
+  }
+  return storedIso;
+}
+
 export interface DeadlineInput {
   stateCode: string;
   /** "YYYY-MM-DD" in the family's timezone; the caller owns the clock. */

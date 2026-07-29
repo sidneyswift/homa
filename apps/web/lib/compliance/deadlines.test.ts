@@ -9,6 +9,7 @@ import {
   filingDeadlines,
   nextOccurrence,
   REMINDER_LEAD_DAYS,
+  schoolYearStartFor,
 } from "./deadlines";
 
 /**
@@ -50,6 +51,33 @@ describe("calendar helpers", () => {
 
   it("skips a February 29 in a non-leap year", () => {
     assert.equal(nextOccurrence(2, 29, "2027-01-01"), "2028-02-29");
+  });
+});
+
+describe("which school year a family is actually in", () => {
+  it("uses this year's anniversary once it has arrived", () => {
+    assert.equal(schoolYearStartFor("2026-08-17", "2026-09-01"), "2026-08-17");
+  });
+
+  it("keeps working in later years without the family re-entering it", () => {
+    // Read literally, a 2026 start would measure a 2027 family from two
+    // school years back and land every counted deadline in the past.
+    assert.equal(schoolYearStartFor("2026-08-17", "2027-09-01"), "2027-08-17");
+  });
+
+  it("stays on last year's start when this year's has not arrived", () => {
+    // June 2027: the family is still inside the year that began in
+    // August 2026, so that is the start their deadlines count from.
+    assert.equal(schoolYearStartFor("2026-08-17", "2027-06-01"), "2026-08-17");
+  });
+
+  it("asks rather than assumes when never answered", () => {
+    assert.equal(schoolYearStartFor(null, "2026-09-01"), null);
+    assert.equal(schoolYearStartFor("not a date", "2026-09-01"), null);
+  });
+
+  it("handles a February 29 start in a non-leap year", () => {
+    assert.equal(schoolYearStartFor("2028-02-29", "2029-06-01"), "2028-02-29");
   });
 });
 
