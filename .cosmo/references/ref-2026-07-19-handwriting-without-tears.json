@@ -1,0 +1,32 @@
+{
+  "id": "ref-2026-07-19-handwriting-without-tears",
+  "droppedBy": null,
+  "droppedAt": null,
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": null,
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "handwriting-without-tears-part1.pdf",
+    "sourceParts": [
+      "handwriting-without-tears-part1.pdf",
+      "handwriting-without-tears-part2.pdf"
+    ],
+    "sourceSha256": "61ada94a8452f2b00905bbdec886fb0c2518b8665a46500b493b7ef06ac5ce99",
+    "pageCount": 144,
+    "mastersDir": ".cosmo/masters/ref-2026-07-19-handwriting-without-tears",
+    "intakeAt": "2026-07-29T08:04:01+00:00",
+    "gateFindings": []
+  },
+  "aboutness": {
+    "extractionQuality": null,
+    "textSidecar": ".cosmo/text/ref-2026-07-19-handwriting-without-tears.txt",
+    "textBlobUrl": null,
+    "subjects": [],
+    "entities": [],
+    "themes": [],
+    "keyTerms": [],
+    "referencedWorks": []
+  },
+  "title": null,
+  "format": null
+}

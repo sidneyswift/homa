@@ -393,13 +393,14 @@ def read_pages_with_vision(item_dir: Path, pages: list, wanted: list) -> dict:
     except json.JSONDecodeError:
         print("  WARNING: vision pass returned unparseable output; keeping OCR text.")
         return {}
-    out = {}
+    out, failed = {}, {}
     for row in parsed.get("pages", []):
         if "error" in row:
-            print(f"  WARNING: page {row.get('page')} vision read failed ({row['error'][:80]}); keeping OCR text.")
+            print(f"  WARNING: page {row.get('page')} vision read failed ({row['error'][:110]}); keeping OCR text.")
+            failed[row["page"]] = row["error"]
             continue
         out[row["page"]] = row
-    return out
+    return {"read": out, "failed": failed}
 
 
 def run_gates(pages: list, expect_pages, texts: dict = None) -> list:
@@ -570,25 +571,35 @@ def intake(pdf_paths, item_id: str, kind: str, expect_pages, force: bool,
                     print(f"    ... page {p['page']}")
 
     # The mixture: keep OCR where it is good, escalate where it is not.
-    vision = {}
+    vision, vision_failed, vision_attempted = {}, {}, []
     text_sources = {p["page"]: method for p in pages}
     if use_vision:
         wanted = pages_needing_vision(pages, texts)
         if wanted:
+            vision_attempted = wanted
             print(f"  escalating {len(wanted)} page(s) to {VISION_MODEL}: {wanted[:12]}"
                   + (" ..." if len(wanted) > 12 else ""))
-            vision = read_pages_with_vision(out_dir, pages, wanted)
+            outcome = read_pages_with_vision(out_dir, pages, wanted)
+            vision, vision_failed = outcome.get("read", {}), outcome.get("failed", {})
             for i, p in enumerate(pages):
                 row = vision.get(p["page"])
                 if row and (row.get("text") or "").strip():
                     texts[i] = row["text"]
-                    text_sources[p["page"]] = f"vision:{VISION_MODEL}"
+                    text_sources[p["page"]] = f"vision:{row.get('model', VISION_MODEL)}"
+                elif p["page"] in vision_failed:
+                    text_sources[p["page"]] = f"{method} (vision read failed)"
             if vision:
                 print(f"  {len(vision)} page(s) re-read by the model")
 
     text_info = write_sidecar(item_id, pages, texts)
     findings = run_gates(pages, expect_pages,
                          texts={p["page"]: t for p, t in zip(pages, texts)})
+    if vision_failed:
+        findings.append(
+            f"{len(vision_failed)} page(s) could not be read by the model "
+            f"({sorted(vision_failed)}), so they keep their OCR text; that text is the "
+            "least trustworthy in the book, because these are the pages OCR did worst on."
+        )
     if text_info["emptyPages"]:
         findings.append(
             f"{len(text_info['emptyPages'])} page(s) produced no text: "
@@ -612,8 +623,14 @@ def intake(pdf_paths, item_id: str, kind: str, expect_pages, force: bool,
         "mastersDir": str(out_dir.relative_to(COSMO.parent)),
         "textExtraction": {
             "method": method,
-            "visionModel": VISION_MODEL if vision else None,
-            "visionPages": sorted(vision) or [],
+            "visionModel": VISION_MODEL if vision_attempted else None,
+            "visionAttempted": sorted(vision_attempted),
+            "visionPages": sorted(vision),
+            # A failed read must never look like a page that was simply never
+            # escalated: the pages sent to the model are the ones whose OCR
+            # text is worst, so a silent fallback hides the worst text in the
+            # book behind a clean-looking manifest.
+            "visionFailed": {str(k): v[:200] for k, v in sorted(vision_failed.items())},
             **text_info,
         },
         "text": text_info,

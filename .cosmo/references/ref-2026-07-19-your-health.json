@@ -1,0 +1,31 @@
+{
+  "id": "ref-2026-07-19-your-health",
+  "droppedBy": null,
+  "droppedAt": null,
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": null,
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "your-health.pdf",
+    "sourceParts": [
+      "your-health.pdf"
+    ],
+    "sourceSha256": "cb83512adf06d088bbfb4ae8985b6f37395d52ff7b8a3ffaab0124c1f664b6d5",
+    "pageCount": 114,
+    "mastersDir": ".cosmo/masters/ref-2026-07-19-your-health",
+    "intakeAt": "2026-07-29T08:15:57+00:00",
+    "gateFindings": []
+  },
+  "aboutness": {
+    "extractionQuality": null,
+    "textSidecar": ".cosmo/text/ref-2026-07-19-your-health.txt",
+    "textBlobUrl": null,
+    "subjects": [],
+    "entities": [],
+    "themes": [],
+    "keyTerms": [],
+    "referencedWorks": []
+  },
+  "title": null,
+  "format": null
+}

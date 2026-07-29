@@ -38,6 +38,19 @@ import { z } from "zod";
 
 const DEFAULT_MODEL = "google/gemini-3-flash";
 
+/**
+ * A page the cheap model cannot return as structured output is retried once
+ * on a stronger tier, which is the escalation the corpus plan describes.
+ *
+ * This is not hypothetical. Across the first 850 real pages, six escalated
+ * pages came back "No object generated: could not parse the response" from
+ * gemini-3-flash, and this repo has hit the same model's structured-output
+ * weakness before (the lesson-listen tone model, 2026-07-21). Without the
+ * retry those six pages silently kept their OCR text, and the pages that get
+ * escalated are exactly the ones whose OCR text is worst.
+ */
+const FALLBACK_MODEL = "anthropic/claude-sonnet-5";
+
 const pageSchema = z.object({
   text: z
     .string()
@@ -116,43 +129,57 @@ async function main(): Promise<number> {
   // laptop, escalation is a small fraction of any book, and a burst of
   // parallel vision calls is how a rate limit turns one slow batch into a
   // failed one.
-  for (const page of pages) {
-    try {
-      const data = await readFile(page.path);
-      const result = await generateObject({
-        model,
-        schema: pageSchema,
-        system: SYSTEM,
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "file" as const, mediaType: "image/jpeg" as const, data },
-              {
-                type: "text" as const,
-                text: "Transcribe this page and describe what it shows.",
-              },
-            ],
-          },
-        ],
-        maxOutputTokens: 3000,
-        maxRetries: 2,
-        providerOptions: {
-          gateway: { disallowPromptTraining: true },
+  const readOne = async (path: string, useModel: string) => {
+    const data = await readFile(path);
+    return generateObject({
+      model: useModel,
+      schema: pageSchema,
+      system: SYSTEM,
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "file" as const, mediaType: "image/jpeg" as const, data },
+            {
+              type: "text" as const,
+              text: "Transcribe this page and describe what it shows.",
+            },
+          ],
         },
-      });
-      results.push({ page: page.page, ...result.object });
-    } catch (error) {
+      ],
+      maxOutputTokens: 3000,
+      maxRetries: 2,
+      providerOptions: {
+        gateway: { disallowPromptTraining: true },
+      },
+    });
+  };
+
+  for (const page of pages) {
+    let firstError = "";
+    for (const useModel of [model, FALLBACK_MODEL]) {
+      if (useModel === FALLBACK_MODEL && !firstError) break;
+      try {
+        const result = await readOne(page.path, useModel);
+        results.push({ page: page.page, model: useModel, ...result.object });
+        firstError = "";
+        break;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "unknown error";
+        if (!firstError) firstError = message;
+        else firstError = `${firstError}; fallback also failed: ${message}`;
+      }
+    }
+    if (firstError) {
       // One unreadable page must not lose the rest of the batch. The caller
-      // keeps the tesseract text for a page reported here.
-      results.push({
-        page: page.page,
-        error: error instanceof Error ? error.message : "unknown error",
-      });
+      // keeps the tesseract text for a page reported here, and records that
+      // the page was attempted so a failed read never looks like a page that
+      // was simply never escalated.
+      results.push({ page: page.page, error: firstError });
     }
   }
 
-  process.stdout.write(JSON.stringify({ model, pages: results }) + "\n");
+  process.stdout.write(JSON.stringify({ model, fallbackModel: FALLBACK_MODEL, pages: results }) + "\n");
   return 0;
 }
 

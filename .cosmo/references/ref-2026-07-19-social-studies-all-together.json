@@ -1,0 +1,34 @@
+{
+  "id": "ref-2026-07-19-social-studies-all-together",
+  "droppedBy": null,
+  "droppedAt": null,
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": null,
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "social-studies-all-together-part1.pdf",
+    "sourceParts": [
+      "social-studies-all-together-part1.pdf",
+      "social-studies-all-together-part2.pdf"
+    ],
+    "sourceSha256": "b007ce6486ac000a5e166376deb340c5b6bb76b28e4734c4cbbdc93c720ed149",
+    "pageCount": 163,
+    "mastersDir": ".cosmo/masters/ref-2026-07-19-social-studies-all-together",
+    "intakeAt": "2026-07-29T08:13:28+00:00",
+    "gateFindings": [
+      "1 page(s) produced no text: [151]. Spans cannot be verified against them."
+    ]
+  },
+  "aboutness": {
+    "extractionQuality": null,
+    "textSidecar": ".cosmo/text/ref-2026-07-19-social-studies-all-together.txt",
+    "textBlobUrl": null,
+    "subjects": [],
+    "entities": [],
+    "themes": [],
+    "keyTerms": [],
+    "referencedWorks": []
+  },
+  "title": null,
+  "format": null
+}
