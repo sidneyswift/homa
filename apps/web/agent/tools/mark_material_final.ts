@@ -34,7 +34,13 @@ export default defineBoundedTool({
   description:
     "Mark a material as the approved final version after the parent clearly approves it ('great', 'print it', 'she loves it'). Earlier drafts in its revision chain are superseded and cleaned up; the final becomes reusable as a reference for future materials. Use the id from the create_printable result.",
   deadlineMs: TOOL_DEADLINE.quick,
-  repeatable: false,
+  // Repeatable: finalization is idempotent by construction. The plan
+  // reports `transitioned: false` for a material that is already final,
+  // supersedes nothing twice, and deletes no bytes on the replay. Marked
+  // false until 2026-07-28, which meant a deadline overrun told the model
+  // not to retry, and a parent's four approved worksheets stayed draft
+  // with Homa unable to say whether the save had landed (gh#346).
+  repeatable: true,
   inputSchema: z.object({
     materialId: z.uuid().describe("The approved version's id from the create_printable result."),
   }),

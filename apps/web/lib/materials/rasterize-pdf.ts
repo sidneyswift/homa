@@ -61,8 +61,15 @@ let napiCanvasModule: NapiCanvasModule | null | undefined;
 async function loadNapiCanvas(): Promise<NapiCanvasModule> {
   if (napiCanvasModule === undefined) {
     try {
+      // A plain literal specifier on purpose (2026-07-28, gh#335): the
+      // old webpackIgnore comment hid this dependency from Next's file
+      // tracer too, so the package never shipped into the first Next
+      // lambda to import this module and pdf.mjs's own DOMMatrix
+      // polyfill require failed at runtime. serverExternalPackages now
+      // keeps every bundler's hands off it, and the visible specifier
+      // is what gets it traced into the deployed function.
       const loaded = (await import(
-        /* webpackIgnore: true */ "@napi-rs/canvas"
+        "@napi-rs/canvas"
       )) as NapiCanvasModule & { default?: NapiCanvasModule };
       const resolved = loaded.default?.createCanvas ? loaded.default : loaded;
       const polyfillTarget = globalThis as Record<string, unknown>;

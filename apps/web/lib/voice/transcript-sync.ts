@@ -221,6 +221,71 @@ async function storedStates(
   );
 }
 
+export interface SingleCallSyncResult {
+  stored: boolean;
+  linkedFamily: boolean;
+  messageCount: number;
+  skipped: boolean;
+}
+
+/**
+ * Syncs ONE conversation immediately, for the call-ended webhook.
+ *
+ * The hourly cron above is a floor, not a delivery guarantee: a call that
+ * ends at 10:01 is invisible to web chat until 11:00, which is the whole of
+ * #171 (a parent asked chat about the call she had just finished and Homa
+ * had never heard of it). The general line now has an Insight Group, so
+ * Telnyx tells us the moment a call ends and this closes the gap to seconds.
+ *
+ * Deliberately NOT a new trust path. Ownership is re-derived exactly as the
+ * cron does it, from the caller's number via `family_phones`
+ * (`resolveOwner`), so the webhook body tells us only WHICH conversation
+ * ended. Nothing it echoes about whose call it was is believed, which
+ * matters because the general line has no server-placed call row to
+ * correlate against the way the curriculum line does.
+ *
+ * Memory extraction is left to the cron on purpose: it wants a call that has
+ * settled, and "the webhook fired" is not the same as "no more messages are
+ * coming".
+ */
+export async function syncOneCallTranscript(
+  conversationId: string,
+): Promise<SingleCallSyncResult> {
+  if (!telnyxConfigured() || !UUID_RE.test(conversationId)) {
+    return { stored: false, linkedFamily: false, messageCount: 0, skipped: true };
+  }
+
+  const payload = await telnyxGet(`/ai/conversations/${conversationId}`);
+  const conversation = (
+    payload && typeof payload === "object" && "data" in payload
+      ? (payload as { data: ConversationMeta }).data
+      : (payload as ConversationMeta)
+  );
+  if (!conversation?.id || !isCall(conversation)) {
+    return { stored: false, linkedFamily: false, messageCount: 0, skipped: true };
+  }
+
+  const messages = await fetchAllMessages(conversation.id);
+  const owner = await resolveOwner(conversation.metadata);
+  const row = await upsertTranscript(conversation, messages, owner);
+  const linkedFamily = owner.familyId !== null;
+
+  if (row.inserted) {
+    await emitMapEvent("voice.transcript_synced", {
+      line: lineOf(conversation.metadata),
+      message_count: messages.length,
+      linked_family: linkedFamily,
+    });
+  }
+
+  return {
+    stored: true,
+    linkedFamily,
+    messageCount: messages.length,
+    skipped: false,
+  };
+}
+
 export async function syncCallTranscripts(limit = 40): Promise<TranscriptSyncResult> {
   if (!telnyxConfigured()) {
     return { scanned: 0, stored: 0, linked: 0, extracted: 0, skipped: true };

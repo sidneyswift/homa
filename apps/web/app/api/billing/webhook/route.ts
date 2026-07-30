@@ -11,6 +11,7 @@ import {
   familyForStripeCustomer,
   recordFamilySubscription,
   startFamilyTrial,
+  tierForStripeProductRecognized,
 } from "../../../../lib/billing/wall";
 import { mapDb } from "../../../../lib/map/db";
 import {
@@ -77,10 +78,6 @@ export async function POST(request: Request): Promise<Response> {
           break;
         }
         const customerId = typeof session.customer === "string" ? session.customer : null;
-        const fresh = await startFamilyTrial(familyId, customerId);
-        if (fresh) {
-          await emitMapEvent("billing.trial_started", { family_id: familyId });
-        }
         // Stamp the mirror by FAMILY id too: the subscription.created
         // event for this checkout matched zero rows whenever it arrived
         // before this handler pinned the (possibly brand-new) customer
@@ -90,8 +87,38 @@ export async function POST(request: Request): Promise<Response> {
           typeof session.subscription === "string"
             ? session.subscription
             : session.subscription?.id ?? null;
+
+        // Resolve the tier BEFORE stamping the trial (gh#298). This
+        // handler used to pass no tier at all, on the reasoning that a
+        // checkout session carries no expanded line items, and leave
+        // plan_tier to the confirm route the buyer lands on afterwards.
+        // That is a promise the buyer does not have to keep: close the
+        // tab on the Stripe receipt and the confirm route never runs, so
+        // a family who paid for Plus keeps whatever tier she had. Harmless
+        // while nothing reads plan_tier, and the moment the channel gate
+        // turns on it means denying text, phone, and email to someone who
+        // just bought exactly those. The subscription this handler
+        // already retrieves names its own product, so the tier is here
+        // for the asking.
+        let subscription: Stripe.Subscription | null = null;
         if (subscriptionId) {
-          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        }
+        const purchasedProduct = subscription?.items.data[0]?.price.product ?? null;
+        // Recognized-only: an unmapped product must leave plan_tier
+        // untouched, never resolve to "regular", because plan_tier is
+        // written with coalesce and "regular" would downgrade a Plus
+        // family whose confirm route already ran.
+        const purchasedTier =
+          typeof purchasedProduct === "string"
+            ? tierForStripeProductRecognized(purchasedProduct)
+            : null;
+
+        const fresh = await startFamilyTrial(familyId, customerId, purchasedTier);
+        if (fresh) {
+          await emitMapEvent("billing.trial_started", { family_id: familyId });
+        }
+        if (subscription) {
           await recordFamilySubscription(familyId, {
             id: subscription.id,
             status: subscription.status,

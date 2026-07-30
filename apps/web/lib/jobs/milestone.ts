@@ -1,5 +1,7 @@
 import { listFamilyDeliveryRecipients } from "../conversation-continuity/delivery-ledger";
 import { mapDb } from "../map/db";
+import { jobMaterialDeliveryEnabled } from "./flag";
+import { buildJobMaterialPack } from "./pack";
 import { submitHomaSms } from "../voice/telnyx-api";
 
 /**
@@ -27,6 +29,110 @@ export interface JobMilestoneInput {
   /** The job's stage count; a one-stage making words its milestones as
    * one thing, never "every part". */
   totalStages?: number;
+  /** The job whose finished materials ride along with the text. Omit to
+   * send words only. */
+  jobId?: string;
+}
+
+/** A gate milestone says one volume is ready to look over, so it carries
+ * that one volume. A completed milestone carries the pack instead: every
+ * worksheet the build made, in one file (pack.ts). Nothing is capped away
+ * from the parent, because she asked for all of it. */
+const GATE_MEDIA_MATERIAL_LIMIT = 1;
+
+/** One material's two deliverable URLs, as the artifacts join returns them. */
+export interface MaterialMediaRow {
+  preview_url: string | null;
+  pdf_url: string | null;
+}
+
+/** Flattens material rows to media URLs, preview before PDF so the picture
+ * is what lands in the message and the print file becomes the link after it.
+ * Blank and missing URLs are dropped rather than sent: `materials` declares
+ * both columns NOT NULL, but a half-written row would otherwise put an empty
+ * string in the MMS payload and get the whole message rejected, taking the
+ * words down with the picture. Exported for tests. */
+export function materialMediaUrls(rows: readonly MaterialMediaRow[]): string[] {
+  return rows
+    .flatMap((row) => [row.preview_url, row.pdf_url])
+    .filter((url): url is string => typeof url === "string" && url.trim().length > 0);
+}
+
+/**
+ * Whether this family may receive the attachment yet
+ * (ruling `voice-dispatch-sandbox-gate`, 2026-07-28).
+ *
+ * Sandbox families always may, so the path is verifiable end to end on
+ * +homatest with the flag still off. Everyone else waits for the flag. The
+ * read is one column and fails CLOSED: an unreachable database or a missing
+ * row sends words only, which is the same message this function has been
+ * sending all along, rather than attaching on a guess.
+ *
+ * Exported so the gate can be exercised against real data without sending.
+ */
+export async function mayAttachMaterials(familyId: string): Promise<boolean> {
+  if (jobMaterialDeliveryEnabled()) return true;
+  try {
+    const sql = mapDb();
+    const rows = await sql<{ sandbox: boolean }[]>`
+      select sandbox from public.families where id = ${familyId}
+    `;
+    return rows[0]?.sandbox === true;
+  } catch (error) {
+    console.error("deliverJobMilestone sandbox check failed:", error);
+    return false;
+  }
+}
+
+/**
+ * What rides on the milestone text, or nothing when this family is not
+ * cleared for the attachment yet.
+ *
+ * Without this the parent got a text saying her worksheet was ready and no
+ * worksheet: `create_printable` has attached preview + PDF since the MMS
+ * path shipped, but a background job delivers through here, and here sent
+ * words only. `submitHomaSms` drops print PDFs out of the MMS payload and
+ * keeps them as links in the text, so passing both is safe.
+ *
+ * On a COMPLETED milestone this builds the pack (pack.ts): every worksheet
+ * the build made, in one file. She asked for the whole set, so she gets the
+ * whole set, and one link has no carrier size limit while twenty-two
+ * attachments have no chance of arriving. On a GATE milestone only one
+ * volume exists to look over, so it carries that one.
+ *
+ * Family-scoped in the query itself, and the join rides the composite
+ * (id, family_id) key the artifacts table was built around, so a material
+ * from another family cannot attach even if a job row were wrong.
+ *
+ * Exported so the lookup can be exercised against real data without sending.
+ */
+export async function jobMaterialMediaUrls(
+  familyId: string,
+  jobId: string,
+  kind: JobMilestoneKind = "completed",
+): Promise<string[]> {
+  if (!(await mayAttachMaterials(familyId))) return [];
+
+  if (kind === "completed") {
+    const pack = await buildJobMaterialPack(familyId, jobId);
+    if (pack) return [pack.previewUrl, pack.pdfUrl];
+    // No pack means the build made a single material, which is already one
+    // file. Fall through and send it directly.
+  }
+
+  const sql = mapDb();
+  const rows = await sql<MaterialMediaRow[]>`
+    select m.preview_url, m.pdf_url
+    from public.agent_job_stage_artifacts a
+    join public.materials m
+      on m.id = a.material_id and m.family_id = a.family_id
+    where a.job_id = ${jobId}
+      and a.family_id = ${familyId}
+      and a.kind = 'material'
+    order by a.created_at desc
+    limit ${GATE_MEDIA_MATERIAL_LIMIT}
+  `;
+  return materialMediaUrls(rows);
 }
 
 async function childFirstName(familyId: string, childId: string | null): Promise<string | null> {
@@ -104,13 +210,39 @@ export async function deliverJobMilestone(input: JobMilestoneInput): Promise<str
     input.totalStages ?? 2,
   );
 
+  // Nothing is finished on a needs_attention, so there is nothing to send;
+  // the other two kinds both name a material the parent can already open.
+  // The catch is load-bearing, not defensive habit: a malformed job id
+  // rejects at the driver rather than returning no rows (verified against
+  // production, `invalid input syntax for type uuid`), and a milestone must
+  // still reach the parent as words when the attachment cannot be resolved.
+  const mediaUrls =
+    input.jobId && input.kind !== "needs_attention"
+      ? await jobMaterialMediaUrls(input.familyId, input.jobId, input.kind).catch((error) => {
+          console.error("deliverJobMilestone artifact lookup failed:", error);
+          return [];
+        })
+      : [];
+
   let deliveredChannel: "sms" | "none" = "none";
   try {
     const recipients = await listFamilyDeliveryRecipients(input.familyId);
     const phone = recipients.flatMap((r) => r.phoneNumbers).find(Boolean);
     if (phone) {
-      const result = await submitHomaSms(phone, body);
-      if (result.status !== "rejected") deliveredChannel = "sms";
+      const result = await submitHomaSms(
+        phone,
+        body,
+        mediaUrls.length > 0 ? mediaUrls : undefined,
+      );
+      // A carrier can refuse the media and accept the words. Retry without
+      // it rather than leaving her with nothing: the body already names the
+      // Binder, so a text-only fallback is still a useful message.
+      if (result.status === "rejected" && mediaUrls.length > 0) {
+        const retry = await submitHomaSms(phone, body);
+        if (retry.status !== "rejected") deliveredChannel = "sms";
+      } else if (result.status !== "rejected") {
+        deliveredChannel = "sms";
+      }
     }
   } catch (error) {
     console.error("deliverJobMilestone SMS failed:", error);

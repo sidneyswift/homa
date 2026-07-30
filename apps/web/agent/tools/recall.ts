@@ -57,6 +57,13 @@ function dayOf(iso: string | null, timeZone: string): string {
   });
 }
 
+/** recall's scope names to the RPC's per-row source names. */
+const SEMANTIC_SOURCE_BY_SCOPE = {
+  calls: "call",
+  chats: "chat",
+  memories: "memory",
+} as const;
+
 export default defineBoundedTool({
   description:
     "Search this family's own history with Homa: past phone calls, past chat messages, and saved memories. Use whenever the parent refers to something you do not see in the current context ('like we talked about', 'that plan from last week', 'what did I say about...') before ever saying you do not know or remember.",
@@ -200,10 +207,30 @@ export default defineBoundedTool({
     if (hits.length < input.limit) {
       const queryEmbedding = await embedText(input.query, { familyId });
       if (queryEmbedding) {
-        const { data: semantic } = await db.rpc("recall_semantic", {
-          query_embedding: queryEmbedding,
-          match_limit: input.limit,
-        });
+        // Ask only for the scope requested (gh#375). The RPC used to rank
+        // memories, chats, and calls together and apply match_limit to
+        // that global ranking, so a scope:"calls" search burned its whole
+        // budget on rows the filter below then discarded. That is why a
+        // parent was told her phone call did not exist while its
+        // transcript sat embedded in the table from 49 minutes earlier.
+        const scopes =
+          input.scope === "all" ? null : [SEMANTIC_SOURCE_BY_SCOPE[input.scope]];
+        let semantic = await db
+          .rpc("recall_semantic", {
+            query_embedding: queryEmbedding,
+            match_limit: input.limit,
+            scopes,
+          })
+          .then((response) => response.data, () => null);
+        if (semantic === null) {
+          // The scoped signature lands with its migration. If code is
+          // ahead of schema for a deploy, fall back rather than lose
+          // recall entirely; the old shape still answers, just wider.
+          ({ data: semantic } = await db.rpc("recall_semantic", {
+            query_embedding: queryEmbedding,
+            match_limit: input.limit,
+          }));
+        }
         const scopeOf: Record<string, "calls" | "chats" | "memories"> = {
           call: "calls",
           chat: "chats",

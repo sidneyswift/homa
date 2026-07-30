@@ -2,6 +2,8 @@ import { Client } from "eve/client";
 import type { HandleMessageStreamEvent } from "eve/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { EVE_CHANNEL_HEADER } from "./env";
+
 /**
  * Lost-turn recovery, the mobile twin of
  * apps/web/app/app/turn-recovery.ts (keep behavior aligned until a
@@ -105,6 +107,7 @@ async function replaySessionToBoundary(input: {
   const client = new Client({
     auth: { bearer: input.bearer },
     host: input.host,
+    headers: EVE_CHANNEL_HEADER,
     maxReconnectAttempts: REPLAY_RECONNECT_ATTEMPTS,
   });
   const session = client.session({

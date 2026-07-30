@@ -125,6 +125,63 @@ export function tierForStripeProduct(productId: string | null | undefined): Plan
   return "regular";
 }
 
+/**
+ * tierForStripeProductRecognized(productId): the tier, or null when this
+ * map has never heard of the product (gh#298).
+ *
+ * tierForStripeProduct answers "regular" for an unknown id, which is the
+ * right default for a CONFIRM route: a buyer standing on the receipt
+ * page should get the base plan rather than an error. It is the wrong
+ * default for a writer that runs unattended, because plan_tier is
+ * written with coalesce, so "regular" overwrites and null leaves alone.
+ * A webhook that resolved an unmapped id to "regular" would silently
+ * downgrade a Plus family, which is the exact failure the checkout
+ * handler's own comment warns about.
+ *
+ * Rule of thumb: a caller that can show a human the result may use
+ * tierForStripeProduct; a caller that writes plan_tier on its own uses
+ * this one and passes the null straight through.
+ */
+export function tierForStripeProductRecognized(
+  productId: string | null | undefined,
+): PlanTier | null {
+  if (!productId) return null;
+  for (const tier of Object.keys(TIER_PRODUCT_IDS) as PlanTier[]) {
+    if (TIER_PRODUCT_IDS[tier].includes(productId)) return tier;
+  }
+  return null;
+}
+
+/**
+ * Which App Store Connect in-app purchase product backs each tier.
+ * ios-iap-base-tier-only (journeys/10-reconciliation.md §5): only
+ * "regular" has a real product id today, because Plus and Max stay off
+ * the iOS paywall until gh#293/#295/#297 close. The two commented ids
+ * are the naming convention for when that day comes, not live products;
+ * do not create them in App Store Connect ahead of that ruling.
+ *
+ * Product id naming: reverse-DNS bundle id, then tier, then period, per
+ * ios-iap-weekly-pricing ($19/mo -> $4.75/wk, monthly sticker / 4).
+ */
+const APPLE_PRODUCT_TIER_IDS: Partial<Record<PlanTier, readonly string[]>> = {
+  regular: ["com.thankshoma.homa.regular.weekly"],
+  // plus: ["com.thankshoma.homa.plus.weekly"],   // not yet sold, #297
+  // elite: ["com.thankshoma.homa.elite.weekly"], // not yet sold, #297
+};
+
+/** tierForAppleProduct(productId): the never-over-grant twin of
+ *  tierForStripeProduct. An Apple product id this map does not
+ *  recognize, including a future Plus/Max id created before this map is
+ *  updated, resolves to "regular" rather than granting a tier nothing
+ *  has ruled sellable on iOS yet. */
+export function tierForAppleProduct(productId: string | null | undefined): PlanTier {
+  if (!productId) return "regular";
+  for (const tier of Object.keys(APPLE_PRODUCT_TIER_IDS) as PlanTier[]) {
+    if (APPLE_PRODUCT_TIER_IDS[tier]?.includes(productId)) return tier;
+  }
+  return "regular";
+}
+
 function checkoutUrl(base: string, familyId: string, email: string | null): string {
   const url = new URL(base);
   // Stripe carries this through to the checkout session; the confirm
@@ -220,6 +277,7 @@ export async function familyWallCheckout(familyId: string): Promise<WallCheckout
         trial_started_at: string | null;
         billing_exempt: boolean;
         stripe_subscription_status: string | null;
+        apple_subscription_status: string | null;
         created_at_ms: number | null;
         email: string | null;
         profile_completed_at: string | null;
@@ -227,7 +285,7 @@ export async function familyWallCheckout(familyId: string): Promise<WallCheckout
       }[]
     >`
       select trial_started_at::text as trial_started_at, billing_exempt,
-             stripe_subscription_status,
+             stripe_subscription_status, apple_subscription_status,
              extract(epoch from created_at) * 1000 as created_at_ms, email,
              profile_completed_at::text as profile_completed_at, context
       from public.families
@@ -248,7 +306,8 @@ export async function familyWallCheckout(familyId: string): Promise<WallCheckout
         {
           billingExempt: row.billing_exempt,
           trialStartedAt: row.trial_started_at,
-          subscriptionStatus: row.stripe_subscription_status,
+          stripeSubscriptionStatus: row.stripe_subscription_status,
+          appleSubscriptionStatus: row.apple_subscription_status,
           createdAtMs: row.created_at_ms,
         },
         signupPaywallSince(),
@@ -297,6 +356,14 @@ export async function familyWallCheckout(familyId: string): Promise<WallCheckout
  * these four mean the relationship ended or never completed. Mirrored
  * onto families by the billing webhook; null (webhook dark, or a family
  * from before the mirror) reads as fine, never as lapsed.
+ *
+ * Shared across both providers on purpose: Apple's App Store Server
+ * status vocabulary is different from Stripe's, so the Apple webhook
+ * (POST /api/billing/apple/webhook) normalizes it into these same four
+ * strings when it writes apple_subscription_status, rather than this set
+ * growing a second, parallel Apple vocabulary that providerState below
+ * would have to know about. A revoked or expired Apple subscription is
+ * written here as "canceled".
  */
 const LAPSED_SUBSCRIPTION_STATUSES = new Set([
   "canceled",
@@ -308,7 +375,13 @@ const LAPSED_SUBSCRIPTION_STATUSES = new Set([
 export interface AccountAccessRow {
   billingExempt: boolean;
   trialStartedAt: string | null;
-  subscriptionStatus: string | null;
+  stripeSubscriptionStatus: string | null;
+  /** Apple's mirrored App Store Server status (20260728200000_apple_billing.sql).
+   *  Null for every family that has never touched the iOS purchase, which
+   *  today is all of them; this field exists so a family who lapses on one
+   *  provider and re-subscribes on the other is never walled while paying
+   *  (see accountAccessDecision's provider-state note). */
+  appleSubscriptionStatus: string | null;
   /** families.created_at as epoch milliseconds (extracted in SQL so no
    *  Postgres-text-timestamp parsing happens in JS), for the grandfather
    *  cutoff below. */
@@ -336,6 +409,19 @@ export function signupPaywallSince(): number | null {
   return parsed;
 }
 
+/** A provider's mirrored status, reduced to what accountAccessDecision
+ *  needs: "absent" (never recorded, the mirror has nothing to say and
+ *  reads as fine, matching the original single-provider null-is-fine
+ *  behavior), "lapsed" (recorded and in the lapsed set), or "active"
+ *  (recorded and not lapsed: trialing, active, past_due, or any other
+ *  live status). */
+type ProviderState = "absent" | "lapsed" | "active";
+
+function providerState(status: string | null): ProviderState {
+  if (status === null) return "absent";
+  return LAPSED_SUBSCRIPTION_STATUSES.has(status) ? "lapsed" : "active";
+}
+
 /**
  * accountAccessDecision(row, sinceMs): the account-level entitlement,
  * with no I/O (callers pass signupPaywallSince()).
@@ -344,10 +430,20 @@ export function signupPaywallSince(): number | null {
  * paywall exists precisely to meet the family before the product does.
  * billing_exempt still wins first (the founder's comp switch outranks
  * everything), then the grandfather cutoff, then a started trial counts
- * as long as the mirrored subscription status has not lapsed. This is
- * the first reader of stripe_subscription_status: under the account
- * gate, canceling really ends access at the period boundary instead of
- * leaving the old permanent trial_started_at unlock in place.
+ * as long as it has not lapsed on every provider that has ever recorded
+ * one for this family.
+ *
+ * Two providers (Stripe and Apple, ios-iap-priority): a family is open
+ * if EITHER provider currently reads active, or if NEITHER provider has
+ * ever recorded anything (the original single-provider "webhook dark
+ * reads as fine" tolerance, unchanged for the 100% of families who have
+ * never touched Apple billing). A family is walled only when at least
+ * one provider has recorded something and none of the providers that
+ * have ever recorded anything currently reads active. This is what lets
+ * a family who lapses on one provider and re-subscribes on the other
+ * unlock immediately, the same bug class recordFamilySubscription exists
+ * to prevent within Stripe alone (a re-subscribing family's fresh
+ * checkout must never stay walled behind a stale lapsed mirror).
  */
 export function accountAccessDecision(
   row: AccountAccessRow,
@@ -358,9 +454,13 @@ export function accountAccessDecision(
     return "grandfathered";
   }
   if (!row.trialStartedAt) return null;
-  if (row.subscriptionStatus && LAPSED_SUBSCRIPTION_STATUSES.has(row.subscriptionStatus)) {
-    return null;
-  }
+
+  const stripeState = providerState(row.stripeSubscriptionStatus);
+  const appleState = providerState(row.appleSubscriptionStatus);
+  const anyActive = stripeState === "active" || appleState === "active";
+  const anyRecorded = stripeState !== "absent" || appleState !== "absent";
+  if (!anyActive && anyRecorded) return null;
+
   return "trial";
 }
 
@@ -400,12 +500,13 @@ export async function familyAccountGate(familyId: string): Promise<AccountGateSt
         trial_started_at: string | null;
         billing_exempt: boolean;
         stripe_subscription_status: string | null;
+        apple_subscription_status: string | null;
         created_at_ms: number | null;
         email: string | null;
       }[]
     >`
       select trial_started_at::text as trial_started_at, billing_exempt,
-             stripe_subscription_status,
+             stripe_subscription_status, apple_subscription_status,
              extract(epoch from created_at) * 1000 as created_at_ms, email
       from public.families
       where id = ${familyId}
@@ -417,7 +518,8 @@ export async function familyAccountGate(familyId: string): Promise<AccountGateSt
         {
           billingExempt: row.billing_exempt,
           trialStartedAt: row.trial_started_at,
-          subscriptionStatus: row.stripe_subscription_status,
+          stripeSubscriptionStatus: row.stripe_subscription_status,
+          appleSubscriptionStatus: row.apple_subscription_status,
           createdAtMs: row.created_at_ms,
         },
         signupPaywallSince(),
@@ -488,6 +590,66 @@ export async function recordFamilySubscription(
   }
 }
 
+/** Postgres unique_violation, matching families_apple_original_transaction_id_key
+ *  (20260728200000_apple_billing.sql): another family already claimed this
+ *  Apple subscription's original transaction id. */
+export class AppleTransactionClaimedError extends Error {
+  constructor(originalTransactionId: string) {
+    super(`Apple original_transaction_id ${originalTransactionId} already belongs to another family`);
+    this.name = "AppleTransactionClaimedError";
+  }
+}
+
+/**
+ * recordFamilyAppleSubscription(familyId, sub): the Apple twin of
+ * recordFamilySubscription, called from the confirm route (the
+ * authenticated purchaser, verified via appAccountToken) and the App
+ * Store Server Notifications webhook (matched by original_transaction_id
+ * instead), so a re-subscribing family's fresh mirror is never left
+ * waiting on whichever one arrives second, the same race
+ * recordFamilySubscription exists to close for Stripe.
+ *
+ * Unlike recordFamilySubscription this DOES throw, deliberately: a
+ * unique_violation here means original_transaction_id already belongs
+ * to a different family (families_apple_original_transaction_id_key),
+ * which is not a transient failure to swallow, it is a caller that must
+ * not be granted entitlement on this write. Every other error is
+ * still just logged and rethrown so the caller decides the response,
+ * rather than silently trusting a write that may not have happened.
+ */
+export async function recordFamilyAppleSubscription(
+  familyId: string,
+  sub: {
+    originalTransactionId: string;
+    status: string;
+    productId: string | null;
+    expiresAtMs: number | null;
+  },
+): Promise<void> {
+  const sql = mapDb();
+  try {
+    await sql`
+      update public.families
+      set apple_original_transaction_id = ${sub.originalTransactionId},
+          apple_subscription_status = ${sub.status},
+          apple_product_id = ${sub.productId},
+          apple_expires_at = ${sub.expiresAtMs ? new Date(sub.expiresAtMs) : null},
+          billing_updated_at = now()
+      where id = ${familyId}
+    `;
+  } catch (error) {
+    const code = (error as { code?: string } | null)?.code;
+    if (code === "23505") {
+      throw new AppleTransactionClaimedError(sub.originalTransactionId);
+    }
+    console.error(
+      "wall: apple subscription mirror stamp failed:",
+      error instanceof Error ? error.message : "unknown",
+    );
+    throw error;
+  }
+}
+
 export interface StripeCustomerFamily {
   id: string;
   email: string | null;
@@ -536,6 +698,27 @@ export async function familyForStripeCustomer(
     timeZone: row.time_zone,
     billingExempt: row.billing_exempt,
   };
+}
+
+/**
+ * familyIdForAppleOriginalTransaction(originalTransactionId): the Apple
+ * twin of familyForStripeCustomer, narrower because the webhook only
+ * needs the id to call recordFamilyAppleSubscription. A notification for
+ * a transaction id this database has never recorded (a sandbox test
+ * notification, a transaction whose confirm call has not landed yet) is
+ * not an error; the caller acknowledges it and moves on, the same
+ * posture the Stripe webhook takes for an unknown customer.
+ */
+export async function familyIdForAppleOriginalTransaction(
+  originalTransactionId: string,
+): Promise<string | null> {
+  const sql = mapDb();
+  const rows = await sql<{ id: string }[]>`
+    select id from public.families
+    where apple_original_transaction_id = ${originalTransactionId}
+    limit 1
+  `;
+  return rows[0]?.id ?? null;
 }
 
 /**

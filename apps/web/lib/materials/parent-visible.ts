@@ -70,3 +70,27 @@ export function selectParentVisibleMaterialRevisions<
       left.order - right.order || left.id.localeCompare(right.id),
   );
 }
+
+/**
+ * The chains a parent started and never kept: chain heads whose chain
+ * has no final. These are invisible everywhere today, because the binder
+ * shows finals only and chat scrollback rotates daily, so a worksheet
+ * she liked but never said the magic word about is simply gone.
+ *
+ * Fleet measurement 2026-07-28 (gh#348): only 41% of revision chains ever
+ * reach final, and the rate is the same across families. This is the
+ * fleet's largest materials failure, not a power-user problem.
+ *
+ * Superseded rows and review-failed rows are already excluded upstream by
+ * selectParentVisibleMaterialRevisions, which matters for a reason beyond
+ * tidiness: finalize deletes the Blob bytes of superseded drafts, so a
+ * card for one would render a broken image (gh#350 owns that retention
+ * decision).
+ */
+export function selectInProgressMaterialRevisions<
+  T extends MaterialRevisionCandidate,
+>(candidates: readonly T[]): T[] {
+  return selectParentVisibleMaterialRevisions(candidates).filter(
+    (candidate) => candidate.status === "draft",
+  );
+}

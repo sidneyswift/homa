@@ -30,6 +30,8 @@ import { fileURLToPath } from "node:url";
 export const SPLIT_HEADING = "## What you know each turn";
 export const PERSONA_TAIL_HEADING = "## Have opinions";
 export const VOICE_HEADING = "## Voice (binding)";
+export const PHONE_RULES_HEADING =
+  "## Phone call rules (binding: these beat every rule above)";
 // Mirrors telnyx-provision.mts exactly: non-global on purpose, so this
 // check sees the persona slice the way the provision script does.
 const COMMENT_STRIP = /<!--[\s\S]*?-->/u;
@@ -39,11 +41,47 @@ export interface SplitCheckInputs {
   telnyxSource: string;
   reportWriter: string;
   curriculumWriter: string;
+  /** apps/web/agent/phone-rules.md, the phone call rules the provision
+   * script appends between the persona and the call boundary. */
+  phoneRules: string;
 }
 
 export function checkInstructionsSplit(inputs: SplitCheckInputs): string[] {
   const problems: string[] = [];
-  const { instructions, telnyxSource, reportWriter, curriculumWriter } = inputs;
+  const {
+    instructions,
+    telnyxSource,
+    reportWriter,
+    curriculumWriter,
+    phoneRules,
+  } = inputs;
+
+  // The phone call rules carry founder rulings from 2026-07-08 (the
+  // tennis-match rule, the bounded greeting) and lived as a TypeScript array
+  // literal inside the provision script until 2026-07-28, which meant a
+  // prompt change could not ship without editing a CLI script. They are a
+  // file now, so guard the three ways that can silently break: the file goes
+  // missing or empty, its binding heading is renamed, or the script stops
+  // reading it and the rules vanish from what a parent hears.
+  const rulesBody = phoneRules.replace(COMMENT_STRIP, "").trim();
+  if (rulesBody.length === 0) {
+    problems.push(
+      "apps/web/agent/phone-rules.md is empty once its comment is stripped. "
+        + "The phone assistant would be provisioned with no call rules at all.",
+    );
+  }
+  if (!rulesBody.startsWith(PHONE_RULES_HEADING)) {
+    problems.push(
+      `apps/web/agent/phone-rules.md must open with "${PHONE_RULES_HEADING}". `
+        + "That heading is what tells the model these rules outrank the persona above them.",
+    );
+  }
+  if (!telnyxSource.includes("apps/web/agent/phone-rules.md")) {
+    problems.push(
+      "telnyx-provision.mts no longer reads apps/web/agent/phone-rules.md, "
+        + "so the phone call rules are not in the provisioned prompt.",
+    );
+  }
 
   const occurrences = instructions.split(SPLIT_HEADING).length - 1;
   if (occurrences !== 1) {
@@ -115,6 +153,7 @@ if (isMain()) {
     telnyxSource: read("scripts/telnyx-provision.mts"),
     reportWriter: read("apps/web/agent/report-writer.md"),
     curriculumWriter: read("apps/web/agent/curriculum-writer.md"),
+    phoneRules: read("apps/web/agent/phone-rules.md"),
   });
   for (const problem of problems) console.error(`FAIL  ${problem}`);
   if (problems.length > 0) process.exit(1);

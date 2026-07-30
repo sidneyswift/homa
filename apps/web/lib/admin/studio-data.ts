@@ -85,6 +85,18 @@ export interface StudioRunMaterial {
   createdAt: string;
 }
 
+/** One founder verdict, kept forever (D5, gh#328). The material it judged
+ * is what turns a sequence of these into training pairs. */
+export interface StudioRunFeedbackEntry {
+  id: string;
+  feedback: string | null;
+  tags: string[];
+  materialId: string | null;
+  materialTitle: string | null;
+  leftBy: string | null;
+  createdAt: string;
+}
+
 export interface StudioRunRow {
   id: string;
   familyId: string;
@@ -264,6 +276,49 @@ export async function getStudioRunDetail(runId: string): Promise<StudioRunRow | 
     run.session_id ? [run.session_id] : [],
   );
   return toStudioRunRow(run, materialsBySession);
+}
+
+/** Every verdict ever left on a run, newest first (D5, gh#328). Empty when
+ * the history table has not been migrated yet, so the page renders the
+ * latest verdict alone rather than failing (additive-may-lead law). */
+export async function getStudioRunFeedbackHistory(
+  runId: string,
+): Promise<StudioRunFeedbackEntry[]> {
+  const sql = adminDb();
+  try {
+    const rows = await sql<
+      {
+        id: string;
+        feedback: string | null;
+        feedback_tags: string | null;
+        material_id: string | null;
+        material_title: string | null;
+        left_by: string | null;
+        created_at: string;
+      }[]
+    >`
+      select h.id, h.feedback,
+             to_json(h.feedback_tags)::text as feedback_tags,
+             h.material_id, m.title as material_title, h.left_by,
+             h.created_at::text as created_at
+      from public.materials_studio_run_feedback h
+      left join public.materials m on m.id = h.material_id
+      where h.run_id = ${runId}
+      order by h.created_at desc
+    `;
+    return rows.map((row) => ({
+      id: row.id,
+      feedback: row.feedback,
+      tags: row.feedback_tags ? (JSON.parse(row.feedback_tags) as string[]) : [],
+      materialId: row.material_id,
+      materialTitle: row.material_title,
+      leftBy: row.left_by,
+      createdAt: row.created_at,
+    }));
+  } catch (error) {
+    if ((error as { code?: string }).code === "42P01") return [];
+    throw error;
+  }
 }
 
 export type StudioLedgerEntry =

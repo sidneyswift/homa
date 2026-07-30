@@ -730,6 +730,15 @@ export const EVENT_SCHEMAS = {
     child_id: z.uuid(),
     reason: z.enum(["no-phone", "telnyx-error", "not-found"]),
   }),
+  // The general line's "have Homa call me" button (#283). Distinct from
+  // voice.call_started, which is the curriculum line and always carries a
+  // child; a general call is about the family, not one kid. One event
+  // covers both outcomes so the tap and its result stay comparable.
+  "voice.call_requested": z.object({
+    family_id: z.uuid(),
+    line: z.literal("general"),
+    outcome: z.enum(["placed", "telnyx-error"]),
+  }),
   "voice.curriculum_generated": z.object({
     family_id: z.uuid(),
     child_id: z.uuid(),
@@ -751,6 +760,15 @@ export const EVENT_SCHEMAS = {
     line: z.enum(["general", "curriculum"]),
     message_count: z.number().int().min(0),
     linked_family: z.boolean(),
+  }),
+  // The general line's call-ended webhook (#171): fired when a finished
+  // call is synced within seconds instead of waiting for the hourly cron.
+  // Distinct from voice.transcript_synced, which fires on the row insert
+  // either way; this one measures whether the fast path is actually
+  // firing, which is the thing #171's acceptance criterion turns on.
+  "voice.call_ended_synced": z.object({
+    linked_family: z.boolean(),
+    message_count: z.number().int().min(0),
   }),
   // The voice remember tool (item 6): a memory saved live on a call.
   "voice.memory_saved": z.object({

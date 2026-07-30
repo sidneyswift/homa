@@ -71,8 +71,15 @@ const family = {
 
 // The council's deep-fixture states: NY (detailed plan, mid-year
 // clause), TX (zero duty), PA (every duty, high variance), CA (pervasive
-// varies), SC (notification without a published deadline).
-const CODES = process.argv[2] ? [process.argv[2]] : ["NY", "TX", "PA", "CA", "SC"];
+// varies), SC (notification without a published deadline). Pass a state
+// code to render one, or "all" to render every reviewed jurisdiction
+// (the full 51-state sweep, roughly five minutes on a warm Chrome).
+const CODES =
+  process.argv[2] === "all"
+    ? index.states.map((state) => state.state_code).sort()
+    : process.argv[2]
+      ? [process.argv[2]]
+      : ["NY", "TX", "PA", "CA", "SC"];
 
 let failed = false;
 for (const code of CODES) {

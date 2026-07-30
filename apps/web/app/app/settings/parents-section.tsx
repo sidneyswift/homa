@@ -13,6 +13,7 @@ import {
   removeFamilyPhoneAction,
   type SetupFormState,
 } from "./actions";
+import { CallMeButton } from "./call-me-button";
 import { updateMyProfileAction } from "./profile-actions";
 import { SectionHeading } from "./section-heading";
 
@@ -172,6 +173,15 @@ function MyAdultItem({
           </button>
         )}
       </div>
+
+      {/* #283: the tap that measures whether anyone wants to talk rather
+          than type. It sits under this adult's own row because the number
+          it dials is the one shown above it. */}
+      {editing ? null : (
+        <div className="mt-2 pl-[52px]">
+          <CallMeButton hasPhone={adult.phoneDisplay !== null} />
+        </div>
+      )}
 
       {editing ? (
         <form action={action} className="mt-3 rounded-md bg-page p-4">

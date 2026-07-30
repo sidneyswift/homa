@@ -97,6 +97,9 @@ jobs:
       - name: Tool deadline guard (no unbounded tool can freeze a turn)
         run: pnpm check:tool-deadlines
 
+      - name: Dynamic tool event guard (no tool vanishes on a cold isolate)
+        run: pnpm check:dynamic-tool-events
+
       - name: "No-em-dash style law (AGENTS.md: no em dash, ever, anywhere)"
         run: pnpm check:em-dash
 
@@ -186,6 +189,9 @@ jobs:
 
       - name: State pack (derivation across all 51 reviewed snapshots)
         run: pnpm check:state-pack
+
+      - name: State pack deadline anchors still match their source text
+        run: pnpm check:deadline-anchors
 
       - name: ChildProgress disposable PostgreSQL E2E
         timeout-minutes: 10
