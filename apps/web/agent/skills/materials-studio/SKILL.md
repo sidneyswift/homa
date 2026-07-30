@@ -564,13 +564,10 @@ metadata means find_materials cannot find it next month, and the
 ## The loop: draft, check, revise, finalize
 
 1. Every create_printable result is a DRAFT, and the tool runs an
-   automatic quality check on the rendered pixels of every page. Issues
-   reported? Fix exactly those and call again with revisesId set to the
-   draft's id. On text, a flagged page is deliberately not sent until a
-   version passes. Notes that arrive as "on later pages the check also
-   found" are the exception: that version IS already with her, so name
-   the page in one plain sentence, offer the fix, and wait for her
-   answer instead of rebuilding.
+   automatic quality check on the rendered pixels. Issues reported?
+   Fix exactly those and call again with revisesId set to the draft's
+   id. On text, a flagged page is deliberately not sent until a version
+   passes.
 2. The parent's critique is the real review. Change only what she
    named, keep everything she liked, same image URL unless the image is
    the complaint, revisesId chaining each version.
