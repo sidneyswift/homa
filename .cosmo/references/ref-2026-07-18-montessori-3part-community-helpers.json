@@ -5,15 +5,22 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784427409.109339",
   "format": "montessori-nomenclature-cards",
-  "title": "Montessori 3-Part Cards — Community Helpers (Carrots Are Orange)",
+  "title": "Montessori 3-Part Cards \u2014 Community Helpers (Carrots Are Orange)",
   "publisher": "Carrots Are Orange",
   "gradeLevel": "PreK-K (ages 3-6)",
-  "relatedRefs": ["ref-2026-07-18-montessori-nomenclature-solar-system"],
+  "relatedRefs": [
+    "ref-2026-07-18-montessori-nomenclature-solar-system"
+  ],
   "callouts": [],
   "overview": {
     "description": "Montessori 3-part nomenclature cards for community helpers: Fireperson, Construction Worker, Veterinarian, Mail Person (and likely more). Each helper appears in three forms: (1) image + label card (control), (2) image-only card, (3) label-only card. Child matches unlabeled images to labels, then self-checks against the control card. Classic Montessori three-period lesson format.",
-    "helpers": ["Fireperson", "Construction Worker", "Veterinarian", "Mail Person"],
-    "format": "Two cards per page (helper name appears twice — once for the control card with image+label, once for the label-only card to cut separately)"
+    "helpers": [
+      "Fireperson",
+      "Construction Worker",
+      "Veterinarian",
+      "Mail Person"
+    ],
+    "format": "Two cards per page (helper name appears twice \u2014 once for the control card with image+label, once for the label-only card to cut separately)"
   },
   "designPatterns": {
     "inclusiveLanguage": {
@@ -21,7 +28,7 @@
       "value": "Modern, inclusive vocabulary. All children can see themselves in any role."
     },
     "sameFormatDifferentTopic": {
-      "description": "Identical Montessori 3-part card format as the Solar System nomenclature cards but applied to social studies (community helpers). The FORMAT is topic-agnostic — it works for any subject that has visual items + labels.",
+      "description": "Identical Montessori 3-part card format as the Solar System nomenclature cards but applied to social studies (community helpers). The FORMAT is topic-agnostic \u2014 it works for any subject that has visual items + labels.",
       "value": "Confirms the Montessori nomenclature card is a UNIVERSAL format, not subject-specific. Homa should be able to generate these for ANY topic."
     }
   },
@@ -29,12 +36,25 @@
     "subject": "social-studies",
     "domain": "community-helpers",
     "topics": [
-      {"id": "social-studies.community-helpers", "kind": "conceptual", "mapped": false}
+      {
+        "id": "social-studies.community-helpers",
+        "kind": "conceptual",
+        "mapped": false
+      }
     ]
   },
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": []
   },
-  "notes": "Second Montessori 3-part card set from Aless (first was Solar System). Confirms the format is a priority — she's showing it applied to two different subjects to demonstrate its versatility. The inclusive language (Fireperson, Mail Person) is a consistent signal with her Kennedy Center inclusive curriculum drop. This reinforces the earlier gap identified: montessori-nomenclature-cards recipe should be topic-agnostic and generatable for any subject."
+  "notes": "Second Montessori 3-part card set from Aless (first was Solar System). Confirms the format is a priority \u2014 she's showing it applied to two different subjects to demonstrate its versatility. The inclusive language (Fireperson, Mail Person) is a consistent signal with her Kennedy Center inclusive curriculum drop. This reinforces the earlier gap identified: montessori-nomenclature-cards recipe should be topic-agnostic and generatable for any subject.",
+  "sourceFiles": [
+    {
+      "filename": "[FREE] 3 Part Cards - Community Helpers.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-montessori-3part-community-helpers/%5BFREE%5D%203%20Part%20Cards%20-%20Community%20Helpers.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

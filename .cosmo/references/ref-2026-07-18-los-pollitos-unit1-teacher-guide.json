@@ -5,14 +5,16 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784427237.629949",
   "format": "language-teacher-guide",
-  "title": "Los Pollitos Dicen — Unit 1 Teacher's Guide (Spanish Mama PreK-Elementary Curriculum)",
+  "title": "Los Pollitos Dicen \u2014 Unit 1 Teacher's Guide (Spanish Mama PreK-Elementary Curriculum)",
   "publisher": "Spanish Mama (Elisabeth Alvarado)",
   "series": "Los Pollitos Dicen",
   "gradeLevel": "PreK to Early Elementary (ages 3-7)",
-  "relatedRefs": ["ref-2026-07-18-los-pollitos-unit1-home-supplements"],
+  "relatedRefs": [
+    "ref-2026-07-18-los-pollitos-unit1-home-supplements"
+  ],
   "callouts": [],
   "overview": {
-    "description": "Teacher's guide for Unit 1 of 'Los Pollitos Dicen' — a Spanish language curriculum for young children by Spanish Mama. Covers pacing guidance, teaching philosophy (comprehensible input), core vocabulary for 7 units, and activity/song/game lists. Designed for multiple settings: school, homeschool, private classes. One unit can last an entire semester at 1-2 meetings per week.",
+    "description": "Teacher's guide for Unit 1 of 'Los Pollitos Dicen' \u2014 a Spanish language curriculum for young children by Spanish Mama. Covers pacing guidance, teaching philosophy (comprehensible input), core vocabulary for 7 units, and activity/song/game lists. Designed for multiple settings: school, homeschool, private classes. One unit can last an entire semester at 1-2 meetings per week.",
     "units": [
       "Los Pollitos Unit 1 (Free): greetings, farm animals, action verbs",
       "Los Pollitos Unit 2: food, colors, likes/dislikes",
@@ -33,7 +35,7 @@
   },
   "designPatterns": {
     "thematicVocabularyClusters": {
-      "description": "Vocabulary is organized in thematic clusters that mirror how children experience the world: farm animals → food → weather/feelings → numbers → body parts → clothing. Each unit builds on the previous, with recycling of earlier terms.",
+      "description": "Vocabulary is organized in thematic clusters that mirror how children experience the world: farm animals \u2192 food \u2192 weather/feelings \u2192 numbers \u2192 body parts \u2192 clothing. Each unit builds on the previous, with recycling of earlier terms.",
       "value": "Vocabulary learned in context, not alphabetical lists. The child learns 'el caballo' because they're singing about farm animals, not because H comes after G."
     },
     "songBasedAcquisition": {
@@ -57,22 +59,54 @@
     "subject": "world-languages",
     "domain": "spanish",
     "topics": [
-      {"id": "spanish.greetings-introductions", "kind": "procedural", "mapped": false},
-      {"id": "spanish.farm-animals", "kind": "conceptual", "mapped": false},
-      {"id": "spanish.action-verbs", "kind": "procedural", "mapped": false},
-      {"id": "spanish.food-colors", "kind": "conceptual", "mapped": false},
-      {"id": "spanish.body-parts", "kind": "conceptual", "mapped": false},
-      {"id": "spanish.numbers-1-10", "kind": "procedural", "mapped": false},
-      {"id": "spanish.days-of-week", "kind": "procedural", "mapped": false}
+      {
+        "id": "spanish.greetings-introductions",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "spanish.farm-animals",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "spanish.action-verbs",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "spanish.food-colors",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "spanish.body-parts",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "spanish.numbers-1-10",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "spanish.days-of-week",
+        "kind": "procedural",
+        "mapped": false
+      }
     ],
-    "unmappedSkills": ["comprehensible-input-method", "song-based-language-curriculum", "spiral-vocabulary-review"]
+    "unmappedSkills": [
+      "comprehensible-input-method",
+      "song-based-language-curriculum",
+      "spiral-vocabulary-review"
+    ]
   },
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
       {
         "name": "spanish-lesson-plan",
-        "description": "A structured Spanish lesson for young children: warm-up (review previous vocabulary through song), new vocabulary introduction (with gestures and visuals), song/game-based practice, and take-home reinforcement activity. Based on comprehensible input theory — lots of listening before expecting speaking. Adaptable pacing for homeschool (1-2x/week) vs. daily class."
+        "description": "A structured Spanish lesson for young children: warm-up (review previous vocabulary through song), new vocabulary introduction (with gestures and visuals), song/game-based practice, and take-home reinforcement activity. Based on comprehensible input theory \u2014 lots of listening before expecting speaking. Adaptable pacing for homeschool (1-2x/week) vs. daily class."
       },
       {
         "name": "thematic-vocabulary-unit",
@@ -80,5 +114,14 @@
       }
     ]
   },
-  "notes": "This is the teacher-side companion to the home supplement Aless already dropped. Together they show the full Los Pollitos system: teacher guide (philosophy + pacing + vocabulary) + home supplement (parent guidance + weekly checklist). The teaching philosophy ('input is more important than output' / 'don't push students to speak') is significant — it's a comprehensible input approach (Krashen), which is the gold standard for young language learners. The 7-unit scope and sequence across 200+ vocabulary words is also valuable as a template for Homa's Spanish offering."
+  "notes": "This is the teacher-side companion to the home supplement Aless already dropped. Together they show the full Los Pollitos system: teacher guide (philosophy + pacing + vocabulary) + home supplement (parent guidance + weekly checklist). The teaching philosophy ('input is more important than output' / 'don't push students to speak') is significant \u2014 it's a comprehensible input approach (Krashen), which is the gold standard for young language learners. The 7-unit scope and sequence across 200+ vocabulary words is also valuable as a template for Homa's Spanish offering.",
+  "sourceFiles": [
+    {
+      "filename": "TEACHER GUIDE FOR Unit 1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-los-pollitos-unit1-teacher-guide/TEACHER%20GUIDE%20FOR%20Unit%201.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

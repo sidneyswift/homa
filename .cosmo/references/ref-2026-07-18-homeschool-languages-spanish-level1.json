@@ -5,7 +5,7 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784427173.921849",
   "format": "language-learning-picture-book",
-  "title": "Homeschool Languages — Spanish Level 1 Booklets Sample (¿Cómo estás? + Tengo un juguete rojo)",
+  "title": "Homeschool Languages \u2014 Spanish Level 1 Booklets Sample (\u00bfC\u00f3mo est\u00e1s? + Tengo un juguete rojo)",
   "publisher": "Homeschool Languages",
   "series": "Level 1 Books",
   "gradeLevel": "Elementary (ages 4-8, beginner Spanish)",
@@ -14,8 +14,31 @@
   "overview": {
     "description": "A 25-page sample of two Level 1 Spanish mini-books from Homeschool Languages. Each book tells a simple story in Spanish using conversational phrases. Every page has: a full-color illustration (top), Spanish text in large font (middle), phonetic pronunciation guide in parentheses (below), and English translation (bottom). Supports both Latin American and European Spanish (green text marks European variants).",
     "books": [
-      {"number": 1, "title": "¿Cómo estás?", "theme": "Greetings, feelings, sharing candies", "phrases": ["¡Hola!", "¿Cómo estás?", "¡Estoy bien!", "¿Por qué?", "¡Porque tengo tres dulces!", "¡Gracias!", "¡De nada!"]},
-      {"number": 2, "title": "Tengo un juguete rojo", "theme": "Colors, toys, counting", "phrases": ["Tengo un juguete rojo", "un juguete azul", "un juguete amarillo", "¡Ahora tengo cinco juguetes!"]}
+      {
+        "number": 1,
+        "title": "\u00bfC\u00f3mo est\u00e1s?",
+        "theme": "Greetings, feelings, sharing candies",
+        "phrases": [
+          "\u00a1Hola!",
+          "\u00bfC\u00f3mo est\u00e1s?",
+          "\u00a1Estoy bien!",
+          "\u00bfPor qu\u00e9?",
+          "\u00a1Porque tengo tres dulces!",
+          "\u00a1Gracias!",
+          "\u00a1De nada!"
+        ]
+      },
+      {
+        "number": 2,
+        "title": "Tengo un juguete rojo",
+        "theme": "Colors, toys, counting",
+        "phrases": [
+          "Tengo un juguete rojo",
+          "un juguete azul",
+          "un juguete amarillo",
+          "\u00a1Ahora tengo cinco juguetes!"
+        ]
+      }
     ]
   },
   "designPatterns": {
@@ -24,15 +47,15 @@
       "value": "Zero-barrier language learning. No prior Spanish knowledge needed from the parent."
     },
     "storyBasedVocabulary": {
-      "description": "Vocabulary isn't taught in isolation (word lists). It's embedded in a simple narrative: two kids meeting, sharing, thanking each other. The child learns 'gracias' because Sofía says it to Rafael, not because it appears on a flashcard.",
+      "description": "Vocabulary isn't taught in isolation (word lists). It's embedded in a simple narrative: two kids meeting, sharing, thanking each other. The child learns 'gracias' because Sof\u00eda says it to Rafael, not because it appears on a flashcard.",
       "value": "Contextual learning. Words are remembered because they have a story context."
     },
     "inclusiveIllustrations": {
-      "description": "Rafael uses a wheelchair. This is not mentioned in the text — it's simply part of the illustration. Casual, normalized representation of disability. Consistent with the Kennedy Center's inclusive curriculum approach Aless dropped earlier.",
+      "description": "Rafael uses a wheelchair. This is not mentioned in the text \u2014 it's simply part of the illustration. Casual, normalized representation of disability. Consistent with the Kennedy Center's inclusive curriculum approach Aless dropped earlier.",
       "value": "Representation without tokenization. A child in a wheelchair is just... a kid in the story."
     },
     "phoneticPronunciationGuide": {
-      "description": "Every Spanish phrase includes a phonetic guide using English sounds: '¡Gracias, Rafael!' = '(GRAH-syahs rah-fah-EL)'. Capitalized syllables show stress. Parent reads the phonetic version aloud.",
+      "description": "Every Spanish phrase includes a phonetic guide using English sounds: '\u00a1Gracias, Rafael!' = '(GRAH-syahs rah-fah-EL)'. Capitalized syllables show stress. Parent reads the phonetic version aloud.",
       "value": "Solves the #1 barrier to foreign language homeschooling: 'I don't know how to pronounce it.' Now you do."
     },
     "dualDialectSupport": {
@@ -48,19 +71,46 @@
     "subject": "world-languages",
     "domain": "spanish",
     "topics": [
-      {"id": "spanish.greetings", "kind": "procedural", "mapped": false},
-      {"id": "spanish.feelings", "kind": "conceptual", "mapped": false},
-      {"id": "spanish.colors", "kind": "conceptual", "mapped": false},
-      {"id": "spanish.counting-1-5", "kind": "procedural", "mapped": false},
-      {"id": "spanish.polite-phrases", "kind": "procedural", "mapped": false}
+      {
+        "id": "spanish.greetings",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "spanish.feelings",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "spanish.colors",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "spanish.counting-1-5",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "spanish.polite-phrases",
+        "kind": "procedural",
+        "mapped": false
+      }
     ],
-    "unmappedSkills": ["foreign-language-picture-book", "phonetic-pronunciation-guide", "bilingual-story"]
+    "unmappedSkills": [
+      "foreign-language-picture-book",
+      "phonetic-pronunciation-guide",
+      "bilingual-story"
+    ]
   },
   "difficulty": {
-    "ageBandMonths": [48, 96],
+    "ageBandMonths": [
+      48,
+      96
+    ],
     "complexity": "single-skill per page (one phrase at a time)",
     "prerequisites": [],
-    "scaffolding": "very high — phonetic guide + English translation + illustration all supporting comprehension"
+    "scaffolding": "very high \u2014 phonetic guide + English translation + illustration all supporting comprehension"
   },
   "recipeMatch": {
     "matchedRecipes": [],
@@ -71,5 +121,14 @@
       }
     ]
   },
-  "notes": "Eleventh and final(?) Aless drop. First world languages / foreign language drop from either user. This signals that Aless wants Homa to support bilingual or foreign language learning — specifically Spanish (Aless is Aless Llanes, likely bilingual herself). The phonetic pronunciation guide is critical: it means a monolingual English-speaking parent can teach Spanish by reading the phonetics aloud. The inclusive representation (Rafael in a wheelchair) is consistent with her Kennedy Center drop. Aless is building a picture of Homa that covers: core academics + arts + music + foreign languages + field trips + progress tracking + inclusive design."
+  "notes": "Eleventh and final(?) Aless drop. First world languages / foreign language drop from either user. This signals that Aless wants Homa to support bilingual or foreign language learning \u2014 specifically Spanish (Aless is Aless Llanes, likely bilingual herself). The phonetic pronunciation guide is critical: it means a monolingual English-speaking parent can teach Spanish by reading the phonetics aloud. The inclusive representation (Rafael in a wheelchair) is consistent with her Kennedy Center drop. Aless is building a picture of Homa that covers: core academics + arts + music + foreign languages + field trips + progress tracking + inclusive design.",
+  "sourceFiles": [
+    {
+      "filename": "Booklets (Screen Version) Sample- Spanish Homeschool Languages Level 1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-homeschool-languages-spanish-level1/Booklets%20%28Screen%20Version%29%20Sample-%20Spanish%20Homeschool%20Languages%20Level%201.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

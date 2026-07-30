@@ -82,5 +82,14 @@
       "value": "Routine-building tool that teaches through repetition. Calendar, weather, and name-writing skills develop through daily practice, not isolated worksheets."
     }
   },
-  "notes": "Pairs with the Daily Rhythm Cards drop. Aless clearly values structured daily routines as a learning framework. Both drops are about making the day predictable and embedding skills into the routine itself."
+  "notes": "Pairs with the Daily Rhythm Cards drop. Aless clearly values structured daily routines as a learning framework. Both drops are about making the day predictable and embedding skills into the routine itself.",
+  "sourceFiles": [
+    {
+      "filename": "Morning Menu Starter A (2).pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-morning-menu-starter/Morning%20Menu%20Starter%20A%20%282%29.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

@@ -5,7 +5,7 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784413127.552489",
   "format": "reading-comprehension-workbook",
-  "title": "Reading Options for Achievement: Let's Read! (Level C) — Options Publishing Inc.",
+  "title": "Reading Options for Achievement: Let's Read! (Level C) \u2014 Options Publishing Inc.",
   "publisher": "Options Publishing Inc.",
   "series": "Reading Options for Achievement",
   "level": "C",
@@ -20,22 +20,27 @@
   "pagesShown": [
     {
       "page": "cover",
-      "title": "Book Cover — Reading Options for Achievement: Let's Read!",
+      "title": "Book Cover \u2014 Reading Options for Achievement: Let's Read!",
       "type": "cover",
-      "description": "Blue cover with yellow 'Let's Read!' text. '30 Can't Stop Reading Stories and Articles.' Level C (red 'C' badge in upper right). Options Publishing Inc. This is a leveled reading comprehension series — Level C suggests roughly grades 2-3."
+      "description": "Blue cover with yellow 'Let's Read!' text. '30 Can't Stop Reading Stories and Articles.' Level C (red 'C' badge in upper right). Options Publishing Inc. This is a leveled reading comprehension series \u2014 Level C suggests roughly grades 2-3."
     },
     {
       "page": "toc",
       "title": "Table of Contents",
       "type": "table-of-contents",
-      "description": "11 thematic units, each with a consistent structure: 'Let's Read' (passage) → 'Focus on Reading Skills' → 'Apply Your Skills' → 'Build Your Vocabulary'. Units include: 1) Let's Go Shopping (party, vacation), 2) Life Cycles (butterfly, rabbit), 3) Leap into the Past (Titanic), 4) Review, 5) Switching Stations (TV remote, microwave), 6) Rock Hounds (crystal geode), 7) Places of the Past (Troy, Fortress in the Sky), 8) Review (Frog's Life Cycle, Golden Lion Tamarins), 9) Magnet Attraction, 10) Turtles and Birds (California Was Made, How Birds Got Their Feathers), 11) Hidden Riches + Review. Topics span science, history, technology, nature — cross-curricular by design."
+      "description": "11 thematic units, each with a consistent structure: 'Let's Read' (passage) \u2192 'Focus on Reading Skills' \u2192 'Apply Your Skills' \u2192 'Build Your Vocabulary'. Units include: 1) Let's Go Shopping (party, vacation), 2) Life Cycles (butterfly, rabbit), 3) Leap into the Past (Titanic), 4) Review, 5) Switching Stations (TV remote, microwave), 6) Rock Hounds (crystal geode), 7) Places of the Past (Troy, Fortress in the Sky), 8) Review (Frog's Life Cycle, Golden Lion Tamarins), 9) Magnet Attraction, 10) Turtles and Birds (California Was Made, How Birds Got Their Feathers), 11) Hidden Riches + Review. Topics span science, history, technology, nature \u2014 cross-curricular by design."
     },
     {
       "page": "10-11",
       "title": "Let's Read: A Butterfly's Life (Unit 2: Life Cycles)",
       "type": "reading-passage-plus-vocab",
-      "description": "A two-page spread: 'Let's Read' section. Left page header: Unit 2 'Life Cycles' with purple accent bar. 'Let's Read!' badge in corner. Title: 'A Butterfly's Life' in decorative hand-lettered style. HUGE real photograph of a monarch butterfly dominates the page — vivid, high-quality nature photography. Text wraps around the images, describing the monarch lifecycle from egg to caterpillar to chrysalis to butterfly. TWO vocabulary sidebars: one at top (monarch, flits, larva — with brief definitions) and one at bottom (molting, chrysalis — with definitions). 'Do This' prompts embedded in the text: comprehension questions AND a writing prompt ('Write a sentence telling what happens to the caterpillar's skin when it molts'). Large chrysalis photo at bottom. The page feels like a MAGAZINE, not a textbook — visually rich, engaging, real images.",
-      "skills": ["reading comprehension", "science vocabulary", "sequence", "writing from reading"],
+      "description": "A two-page spread: 'Let's Read' section. Left page header: Unit 2 'Life Cycles' with purple accent bar. 'Let's Read!' badge in corner. Title: 'A Butterfly's Life' in decorative hand-lettered style. HUGE real photograph of a monarch butterfly dominates the page \u2014 vivid, high-quality nature photography. Text wraps around the images, describing the monarch lifecycle from egg to caterpillar to chrysalis to butterfly. TWO vocabulary sidebars: one at top (monarch, flits, larva \u2014 with brief definitions) and one at bottom (molting, chrysalis \u2014 with definitions). 'Do This' prompts embedded in the text: comprehension questions AND a writing prompt ('Write a sentence telling what happens to the caterpillar's skin when it molts'). Large chrysalis photo at bottom. The page feels like a MAGAZINE, not a textbook \u2014 visually rich, engaging, real images.",
+      "skills": [
+        "reading comprehension",
+        "science vocabulary",
+        "sequence",
+        "writing from reading"
+      ],
       "designFeatures": [
         "magazine-style layout with real photographs",
         "vocabulary sidebars (colored boxes) alongside the reading",
@@ -49,8 +54,13 @@
       "page": "12-13",
       "title": "Focus on Reading Skills: Sequence + Facts and Details (Butterfly's Life)",
       "type": "skills-practice-page",
-      "description": "Two-page spread: 'Focus on Reading Skills' section. Left page: teaches SEQUENCE as a reading skill. Defines the concept ('When you read, it is important to remember the order, or sequence, in which things happen'). Exercise 1: read a paragraph about metamorphosis, then complete a SEQUENCE CHART (4 boxes with arrows: egg → caterpillar → chrysalis → butterfly) — labeled 'A Butterfly's Life Cycle'. Exercise 2: define 'sequence' in own words. Right page: teaches FACTS AND DETAILS. Exercise 3: select descriptive words about the butterfly lifecycle from a word bank (tiny, hard, molts, hungry, beautiful, fly, can, sticky, green). Exercise 4: 'You can find out interesting things by looking for facts and...' Real caterpillar photo across top. Butterfly photo across bottom. Background is softly blurred nature scene.",
-      "skills": ["sequence identification", "sequence charting", "facts vs details", "descriptive word selection"],
+      "description": "Two-page spread: 'Focus on Reading Skills' section. Left page: teaches SEQUENCE as a reading skill. Defines the concept ('When you read, it is important to remember the order, or sequence, in which things happen'). Exercise 1: read a paragraph about metamorphosis, then complete a SEQUENCE CHART (4 boxes with arrows: egg \u2192 caterpillar \u2192 chrysalis \u2192 butterfly) \u2014 labeled 'A Butterfly's Life Cycle'. Exercise 2: define 'sequence' in own words. Right page: teaches FACTS AND DETAILS. Exercise 3: select descriptive words about the butterfly lifecycle from a word bank (tiny, hard, molts, hungry, beautiful, fly, can, sticky, green). Exercise 4: 'You can find out interesting things by looking for facts and...' Real caterpillar photo across top. Butterfly photo across bottom. Background is softly blurred nature scene.",
+      "skills": [
+        "sequence identification",
+        "sequence charting",
+        "facts vs details",
+        "descriptive word selection"
+      ],
       "designFeatures": [
         "named reading skill taught explicitly (Sequence, Facts and Details)",
         "graphic organizer (sequence chart with directional arrows)",
@@ -63,8 +73,13 @@
       "page": "14-15",
       "title": "Apply Your Skills + Build Your Vocabulary (Rabbit's Life Cycle)",
       "type": "application-and-vocab-page",
-      "description": "Two-page spread completing the unit. Left page: 'Apply Your Skills' section with green header bar. NEW reading passage: 'A Rabbit's Life Cycle' — not the same text as the Let's Read section. The student applies the same skills (sequence, facts/details) to a DIFFERENT topic. Vocabulary sidebar (burrow, protect — with definitions). Exercise 1: 'Write 1, 2, and 3 to show the sequence of a rabbit's life cycle' with 3 blank numbered lines beside statements about baby rabbits. Exercise 2: 'At what stage do rabbits grow up and start a family?' Right page: 'Build Your Vocabulary' section. Word bank (monarch, molting, larva, chrysalis) — vocab from BOTH readings. Exercise 1-3: multiple choice using context. Exercise 4: GRAPHIC ORGANIZER — a detail web (circle in center: 'Butterfly Wings', radiating boxes for details). Butterfly illustration at bottom.",
-      "skills": ["skill transfer to new text", "sequence application", "vocabulary in context", "graphic organizer (detail web)"],
+      "description": "Two-page spread completing the unit. Left page: 'Apply Your Skills' section with green header bar. NEW reading passage: 'A Rabbit's Life Cycle' \u2014 not the same text as the Let's Read section. The student applies the same skills (sequence, facts/details) to a DIFFERENT topic. Vocabulary sidebar (burrow, protect \u2014 with definitions). Exercise 1: 'Write 1, 2, and 3 to show the sequence of a rabbit's life cycle' with 3 blank numbered lines beside statements about baby rabbits. Exercise 2: 'At what stage do rabbits grow up and start a family?' Right page: 'Build Your Vocabulary' section. Word bank (monarch, molting, larva, chrysalis) \u2014 vocab from BOTH readings. Exercise 1-3: multiple choice using context. Exercise 4: GRAPHIC ORGANIZER \u2014 a detail web (circle in center: 'Butterfly Wings', radiating boxes for details). Butterfly illustration at bottom.",
+      "skills": [
+        "skill transfer to new text",
+        "sequence application",
+        "vocabulary in context",
+        "graphic organizer (detail web)"
+      ],
       "designFeatures": [
         "skill transfer (same skill, different topic)",
         "new passage for application (not re-reading the first article)",
@@ -76,31 +91,31 @@
     }
   ],
   "pedagogicalArchitecture": {
-    "corePattern": "Let's Read → Focus on Reading Skills → Apply Your Skills → Build Your Vocabulary (4-section repeating unit)",
+    "corePattern": "Let's Read \u2192 Focus on Reading Skills \u2192 Apply Your Skills \u2192 Build Your Vocabulary (4-section repeating unit)",
     "letsRead": {
-      "description": "Magazine-style reading passage with real photographs, vocabulary sidebars, and embedded 'Do This' prompts. The passage is science, history, or culture content — cross-curricular by nature.",
+      "description": "Magazine-style reading passage with real photographs, vocabulary sidebars, and embedded 'Do This' prompts. The passage is science, history, or culture content \u2014 cross-curricular by nature.",
       "function": "Engagement + content exposure + in-context vocabulary acquisition"
     },
     "focusOnReadingSkills": {
       "description": "Explicit reading skill instruction (sequence, facts/details, main idea, cause/effect). Defines the skill, then practices it with graphic organizers applied to the passage just read.",
-      "function": "Metacognitive skill building — the child learns to NAME what they're doing as a reader"
+      "function": "Metacognitive skill building \u2014 the child learns to NAME what they're doing as a reader"
     },
     "applyYourSkills": {
-      "description": "A SECOND, shorter passage on a RELATED topic (butterfly → rabbit, both life cycles). The student applies the same reading skill to new content.",
-      "function": "Skill transfer — proves the child can use the skill independently, not just with the taught text"
+      "description": "A SECOND, shorter passage on a RELATED topic (butterfly \u2192 rabbit, both life cycles). The student applies the same reading skill to new content.",
+      "function": "Skill transfer \u2014 proves the child can use the skill independently, not just with the taught text"
     },
     "buildYourVocabulary": {
       "description": "Vocabulary review pulling words from BOTH unit passages. Multiple choice in context + graphic organizers (detail webs, word webs).",
       "function": "Vocabulary consolidation + graphic organizer literacy"
     },
     "spiralApproach": {
-      "description": "Carolyng explicitly called out 'a spiral approach that can be expressed across subject matter to reinforce an array of skills with one activity.' The unit structure spirals: read → learn the skill → apply the skill to new text → consolidate vocabulary. Then the next unit introduces the NEXT skill while reviewing previous ones through the content. Skills compound across units.",
+      "description": "Carolyng explicitly called out 'a spiral approach that can be expressed across subject matter to reinforce an array of skills with one activity.' The unit structure spirals: read \u2192 learn the skill \u2192 apply the skill to new text \u2192 consolidate vocabulary. Then the next unit introduces the NEXT skill while reviewing previous ones through the content. Skills compound across units.",
       "implication": "Homa's reading comprehension system should spiral: each new reading passage practices both a NEW skill and reinforces previous skills. The content changes but the skills accumulate."
     }
   },
   "layout": {
     "structure": "magazine-style with full-bleed photographs, overlaid text, and colored section sidebars",
-    "spacing": "mixed — reading pages are dense (magazine feel), skill pages are airier with graphic organizers",
+    "spacing": "mixed \u2014 reading pages are dense (magazine feel), skill pages are airier with graphic organizers",
     "visualHierarchy": "photography-dominant with colored section headers/sidebars as wayfinding",
     "whiteSpaceRatio": 0.2,
     "flowDirection": "top-down within each section, left-to-right across spreads"
@@ -130,27 +145,43 @@
         "mapped": false
       }
     ],
-    "unmappedSkills": ["skill-transfer-to-new-text", "spiral-reading-comprehension", "magazine-style-informational-text"]
+    "unmappedSkills": [
+      "skill-transfer-to-new-text",
+      "spiral-reading-comprehension",
+      "magazine-style-informational-text"
+    ]
   },
   "difficulty": {
-    "ageBandMonths": [72, 108],
+    "ageBandMonths": [
+      72,
+      108
+    ],
     "complexity": "multi-skill per unit (reading + skill identification + application + vocabulary)",
-    "prerequisites": ["ela.basic-reading-fluency", "ela.simple-sentence-comprehension"],
-    "scaffolding": "high — skill is named and defined, graphic organizers scaffold responses, model texts precede application, vocab has definitions inline"
+    "prerequisites": [
+      "ela.basic-reading-fluency",
+      "ela.simple-sentence-comprehension"
+    ],
+    "scaffolding": "high \u2014 skill is named and defined, graphic organizers scaffold responses, model texts precede application, vocab has definitions inline"
   },
   "theming": {
     "themeType": "interest-led (science, nature, history, technology)",
-    "characters": ["no recurring characters — real-world subjects (butterflies, rabbits, Titanic, magnets)"],
-    "visualStyle": "magazine / photojournalism — real photographs, not illustrations. Full-bleed imagery, text overlaid on softly blurred photo backgrounds.",
+    "characters": [
+      "no recurring characters \u2014 real-world subjects (butterflies, rabbits, Titanic, magnets)"
+    ],
+    "visualStyle": "magazine / photojournalism \u2014 real photographs, not illustrations. Full-bleed imagery, text overlaid on softly blurred photo backgrounds.",
     "colorPalette": "full-color with section-specific accent colors (purple for Life Cycles, green for Apply, gold for Vocabulary)",
-    "appealDrivers": ["real photography makes it feel like a 'real book' not a workbook", "magazine layout is visually exciting", "cross-curricular content (science in a reading book) maintains interest"]
+    "appealDrivers": [
+      "real photography makes it feel like a 'real book' not a workbook",
+      "magazine layout is visually exciting",
+      "cross-curricular content (science in a reading book) maintains interest"
+    ]
   },
   "printFormat": {
     "pageSize": "approximately 8.5x11 (magazine format)",
     "orientation": "portrait",
     "margins": "tight (full-bleed photos)",
     "inkDensity": "heavy (full-color photographs on every page)",
-    "colorRequirement": "needs color — photographs and colored section headers are functional, not decorative"
+    "colorRequirement": "needs color \u2014 photographs and colored section headers are functional, not decorative"
   },
   "recipeMatch": {
     "matchedRecipes": [],
@@ -161,7 +192,7 @@
       },
       {
         "name": "vocabulary-sidebar",
-        "description": "A colored sidebar box that sits alongside a reading passage, defining key vocabulary words IN CONTEXT as the child encounters them. Not a separate vocab page — embedded in the reading itself. Bold term + brief definition."
+        "description": "A colored sidebar box that sits alongside a reading passage, defining key vocabulary words IN CONTEXT as the child encounters them. Not a separate vocab page \u2014 embedded in the reading itself. Bold term + brief definition."
       },
       {
         "name": "skill-transfer-passage",
@@ -169,5 +200,6 @@
       }
     ]
   },
-  "notes": "This is Carolyng's highest praise yet — she called this an 'amazing example of reading comprehension.' What she's responding to is the COMPLETE SYSTEM: not just pretty pages, but a pedagogical architecture that spirals skill building across topics. The 4-section unit structure (Read → Learn Skill → Apply Skill to New Text → Build Vocabulary) is the reading comprehension equivalent of the Trophies' 5-layer curriculum architecture. Key insight: 'a spiral approach that can be expressed across subject matter to reinforce an array of skills with one activity.' She's describing SPIRAL CURRICULUM — skills build on each other across units, with each new topic reinforcing previous skills while introducing new ones. The magazine-style presentation (real photographs, vocabulary sidebars, colored section headers) makes what is essentially a workbook feel like a 'real' publication — which she called 'visually captivating.' This is the first reference that's PRIMARILY about reading comprehension as a skill (vs. the Trophies which teach reading through literature). The related-passage pattern for skill transfer is new and important."
+  "notes": "This is Carolyng's highest praise yet \u2014 she called this an 'amazing example of reading comprehension.' What she's responding to is the COMPLETE SYSTEM: not just pretty pages, but a pedagogical architecture that spirals skill building across topics. The 4-section unit structure (Read \u2192 Learn Skill \u2192 Apply Skill to New Text \u2192 Build Vocabulary) is the reading comprehension equivalent of the Trophies' 5-layer curriculum architecture. Key insight: 'a spiral approach that can be expressed across subject matter to reinforce an array of skills with one activity.' She's describing SPIRAL CURRICULUM \u2014 skills build on each other across units, with each new topic reinforcing previous skills while introducing new ones. The magazine-style presentation (real photographs, vocabulary sidebars, colored section headers) makes what is essentially a workbook feel like a 'real' publication \u2014 which she called 'visually captivating.' This is the first reference that's PRIMARILY about reading comprehension as a skill (vs. the Trophies which teach reading through literature). The related-passage pattern for skill transfer is new and important.",
+  "rescueNote": "Original NOT rescued on 2026-07-30. Its Slack message is a thread reply, and conversations.history does not return those, so rescue-originals.py could not reach the files. Recovering it needs a conversations.replies call against the parent message. Recorded rather than left implicit: this is the only drop-shaped hole left in the corpus's durability, and it is a tooling limit, not a lost file."
 }

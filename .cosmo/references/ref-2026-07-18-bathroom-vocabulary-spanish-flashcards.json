@@ -34,5 +34,14 @@
       }
     ]
   },
-  "notes": "Part of Aless's Spanish language learning cluster (with Homeschool Languages, Los Pollitos, Spanish minibook). The use of real photos (not cartoon) is noteworthy \u2014 may indicate a preference for concrete/realistic visual style for vocabulary. 60MB file."
+  "notes": "Part of Aless's Spanish language learning cluster (with Homeschool Languages, Los Pollitos, Spanish minibook). The use of real photos (not cartoon) is noteworthy \u2014 may indicate a preference for concrete/realistic visual style for vocabulary. 60MB file.",
+  "sourceFiles": [
+    {
+      "filename": "1 - Bathroom Vocabulary Flashcards in Spanish For Pre-k & Kindergarten - Real photos.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-bathroom-vocabulary-spanish-flashcards/1%20-%20Bathroom%20Vocabulary%20Flashcards%20in%20Spanish%20For%20Pre-k%20%26%20Kindergarten%20-%20Real%20photos.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

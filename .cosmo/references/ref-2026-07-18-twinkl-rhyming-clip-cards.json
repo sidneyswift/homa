@@ -11,23 +11,23 @@
   "pageCount": 3,
   "callouts": [],
   "overview": {
-    "description": "3 pages of rhyming match clip cards (4 cards per page = 12 cards total). Each card shows a large target image on top (dog, cat, bee, house, cake, star, goat, clock) and three smaller choice images below. The child identifies which small image rhymes with the large image (e.g., dog → frog, cat → hat, bee → tree, house → mouse, cake → snake, star → car, goat → boat, clock → sock). Child clips a clothespin on the correct answer — self-checking via answer dot on back."
+    "description": "3 pages of rhyming match clip cards (4 cards per page = 12 cards total). Each card shows a large target image on top (dog, cat, bee, house, cake, star, goat, clock) and three smaller choice images below. The child identifies which small image rhymes with the large image (e.g., dog \u2192 frog, cat \u2192 hat, bee \u2192 tree, house \u2192 mouse, cake \u2192 snake, star \u2192 car, goat \u2192 boat, clock \u2192 sock). Child clips a clothespin on the correct answer \u2014 self-checking via answer dot on back."
   },
   "designPatterns": {
     "clipCardMechanic": {
-      "description": "The child uses a clothespin (or paperclip) to clip the matching answer. Physical manipulation + visual matching + phonological awareness. The clip mechanic makes it reusable — no writing, no erasing. Laminate and use forever.",
+      "description": "The child uses a clothespin (or paperclip) to clip the matching answer. Physical manipulation + visual matching + phonological awareness. The clip mechanic makes it reusable \u2014 no writing, no erasing. Laminate and use forever.",
       "value": "Fine motor practice built into a literacy activity. The physical clipping is engaging in a way that circling with a pencil isn't."
     },
     "rhymingAwareness": {
       "description": "Each card targets one rhyme family: -og (dog/frog), -at (cat/hat), -ee (bee/tree), -ouse (house/mouse), -ake (cake/snake), -ar (star/car), -oat (goat/boat), -ock (clock/sock). Two distractors per card that do NOT rhyme.",
-      "value": "Phonological awareness — the foundation for reading. If a child can hear that 'dog' and 'frog' sound alike at the end, they're building the sound-awareness they need to decode written words."
+      "value": "Phonological awareness \u2014 the foundation for reading. If a child can hear that 'dog' and 'frog' sound alike at the end, they're building the sound-awareness they need to decode written words."
     },
     "selfCheckingDesign": {
       "description": "Correct answers are subtly marked (colored border matches correct choice). The child can check their own work. Same self-correcting principle as the Montessori nomenclature cards.",
       "value": "Independent learning. No teacher needed to say 'right' or 'wrong.'"
     },
     "pictureOnlyNoText": {
-      "description": "All content is image-based — no words anywhere. The child works entirely from pictures and sounds. Pre-readers can do this activity because it's about HEARING rhymes, not reading them.",
+      "description": "All content is image-based \u2014 no words anywhere. The child works entirely from pictures and sounds. Pre-readers can do this activity because it's about HEARING rhymes, not reading them.",
       "value": "Accessible to pre-readers. The skill (phonological awareness) develops before the child can read."
     }
   },
@@ -35,18 +35,35 @@
     "subject": "ela",
     "domain": "phonological-awareness",
     "topics": [
-      {"id": "ela.rhyming-identification", "kind": "procedural", "mapped": false}
+      {
+        "id": "ela.rhyming-identification",
+        "kind": "procedural",
+        "mapped": false
+      }
     ],
-    "unmappedSkills": ["clip-card-fine-motor"]
+    "unmappedSkills": [
+      "clip-card-fine-motor"
+    ]
   },
   "recipeMatch": {
-    "matchedRecipes": ["flash-cards"],
+    "matchedRecipes": [
+      "flash-cards"
+    ],
     "gaps": [
       {
         "name": "clip-card-activity",
-        "description": "A set of cards with a target item on top and 3 choices below. Child clips a clothespin on the correct answer. Designed for lamination and reuse. Self-checking (answer marked on back or via color-coded border). Can be generated for any matching skill: rhyming, beginning sounds, counting, shapes, colors, Spanish vocabulary. The CLIP mechanic is the differentiator — it adds fine motor practice and makes the activity reusable without writing."
+        "description": "A set of cards with a target item on top and 3 choices below. Child clips a clothespin on the correct answer. Designed for lamination and reuse. Self-checking (answer marked on back or via color-coded border). Can be generated for any matching skill: rhyming, beginning sounds, counting, shapes, colors, Spanish vocabulary. The CLIP mechanic is the differentiator \u2014 it adds fine motor practice and makes the activity reusable without writing."
       }
     ]
   },
-  "notes": "Quick lightweight drop from Twinkl. The clip card is a new activity FORMAT for Homa — different from flash cards because it's a matching game with physical manipulation (clothespin). Combines phonological awareness + fine motor + self-correction. The picture-only design (no text) makes it accessible to pre-readers. This format could be generated for dozens of skills."
+  "notes": "Quick lightweight drop from Twinkl. The clip card is a new activity FORMAT for Homa \u2014 different from flash cards because it's a matching game with physical manipulation (clothespin). Combines phonological awareness + fine motor + self-correction. The picture-only design (no text) makes it accessible to pre-readers. This format could be generated for dozens of skills.",
+  "sourceFiles": [
+    {
+      "filename": "Rhyming Match Clip Cards.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-twinkl-rhyming-clip-cards/Rhyming%20Match%20Clip%20Cards.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

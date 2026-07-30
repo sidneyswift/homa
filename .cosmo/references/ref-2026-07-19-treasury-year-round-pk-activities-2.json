@@ -53,5 +53,14 @@
     "matchedRecipes": [],
     "gaps": []
   },
-  "notes": "Part 2 of previously ingested collection. Image-based (scan), so detailed analysis limited. Companion to ref-2026-07-19-treasury-year-round-pk-activities."
+  "notes": "Part 2 of previously ingested collection. Image-based (scan), so detailed analysis limited. Companion to ref-2026-07-19-treasury-year-round-pk-activities.",
+  "sourceFiles": [
+    {
+      "filename": "Treasury of Year Round PK Activities 2.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-19-treasury-year-round-pk-activities-2/Treasury%20of%20Year%20Round%20PK%20Activities%202.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

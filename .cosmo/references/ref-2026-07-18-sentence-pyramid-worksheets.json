@@ -105,5 +105,14 @@
       "value": "Built-in differentiation and confidence building. Struggling readers can stop at shorter lines; advanced readers complete the full pyramid."
     }
   },
-  "notes": "Comprehensive phonics scope from CVC through diphthongs. The pyramid format is clever for fluency \u2014 unlike isolated word lists, it builds towards real sentences. AUS-UK spelling version suggests Aless is sourcing internationally."
+  "notes": "Comprehensive phonics scope from CVC through diphthongs. The pyramid format is clever for fluency \u2014 unlike isolated word lists, it builds towards real sentences. AUS-UK spelling version suggests Aless is sourcing internationally.",
+  "sourceFiles": [
+    {
+      "filename": "AUS-UK Version - Sentence Pyramid Worksheets.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-sentence-pyramid-worksheets/AUS-UK%20Version%20-%20Sentence%20Pyramid%20Worksheets.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }
