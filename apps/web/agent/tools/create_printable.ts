@@ -663,7 +663,11 @@ const createPrintable = defineBoundedTool({
       familyId,
       slug: printableSlug(input.title),
       pdf: rendered.pdf,
-      pageJpegs: rendered.pageJpegs,
+      // Rendering now rasterizes every page so the reviewer can see them
+      // all (gh#368), but what the parent keeps is still capped. Without
+      // this slice a 12-page packet would quietly start storing twice
+      // the previews it did yesterday.
+      pageJpegs: rendered.pageJpegs.slice(0, PREVIEW_PAGE_CAP),
     });
 
     // Provenance for the founder deep view: the tool's input metadata
@@ -859,12 +863,12 @@ const createPrintable = defineBoundedTool({
         : reviewPassed
           ? `The card with the preview and print button is already visible in chat.${pagesNote} Tell her it's ready in one warm sentence (child + skill), and invite tweaks; never paste the links.`
           : "This version is NOT shown to her: a flagged draft never renders as a card, on any channel. Fix the issues below (call again with revisesId set to this id); only a passing version appears, and only then is there anything to tell her.";
-    // The reviewer sees at most REVIEW_PAGE_CAP pages (input-token
-    // ceiling) and at most PREVIEW_PAGE_CAP are rendered at all, so a
-    // pass on a longer document is never a full-document pass. Name the
-    // exact pages rather than letting the agent claim more coverage than
-    // the reviewer had: "it passed the quality check" was said to a
-    // parent for four days about pages nobody had looked at (gh#346).
+    // Every page is reviewed now (gh#368), but a chunk that times out
+    // still leaves its pages unseen, and a document past REVIEW_MAX_PAGES
+    // outruns coverage entirely. Name the exact pages rather than letting
+    // the agent claim more coverage than the reviewer had: "it passed the
+    // quality check" was said to a parent for four days about pages
+    // nobody had looked at (gh#346).
     const reviewedNumbers = review?.reviewedPages ?? [];
     const unreviewedCount = rendered.pageCount - reviewedNumbers.length;
     const coverageNote =
@@ -877,16 +881,30 @@ const createPrintable = defineBoundedTool({
             unreviewedCount === 1 ? "page is" : "pages are"
           } unchecked, so do not tell her the whole document passed.`
         : "";
+    // Problems on pages that had no reviewer at all before gh#368. They
+    // never hold the document back (founder ruling 2026-07-30): she sees
+    // it, hears which page, and decides. Naming the page is the whole
+    // value, so these are passed through verbatim and never collapsed
+    // into "there were some issues".
+    const advisoryIssues = review?.advisoryIssues ?? [];
+    const advisoryNote =
+      advisoryIssues.length > 0
+        ? ` On later pages the check also found: ${advisoryIssues.join(
+            "; ",
+          )}. This version IS shown to her. Tell her which page in one plain sentence and offer to fix it; do not rebuild until she says yes, and do not call it a technical problem.`
+        : "";
     const reviewNote =
       review === null
         ? " The quality check did not run for this version (it is off, timed out, or errored), so nothing has looked at these pages: say it is ready without claiming it was checked."
         : review.pass
-          ? ` Quality check passed on the pages it saw.${coverageNote}`
-          : ` Quality check found issues: ${review.issues.join("; ")}.${coverageNote}`;
-    // Deterministic, from the renderer's own measurements, so it covers
-    // every page (including ones past PREVIEW_PAGE_CAP the reviewer never
-    // saw an image of) and never depends on the vision model noticing a
-    // blank band or a cut edge for itself (gh#349).
+          ? ` Quality check passed on the pages it saw.${coverageNote}${advisoryNote}`
+          : ` Quality check found issues: ${review.issues.join("; ")}.${coverageNote}${advisoryNote}`;
+    // Deterministic, from the renderer's own measurements, so a blank
+    // band or a cut edge never depends on the vision model noticing it
+    // (gh#349). It used to be the ONLY fact available about pages past
+    // the preview cap; since gh#368 every page is also rendered and
+    // reviewed, so these numbers now corroborate an image rather than
+    // stand in for one.
     const geometryNotes = geometryToolNotes(rendered.pageGeometry);
     const geometryNoteText =
       geometryNotes.length > 0 ? ` ${geometryNotes.join(" ")}` : "";

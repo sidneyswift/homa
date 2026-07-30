@@ -32,6 +32,7 @@ export async function getFilingFamily(
       name: string;
       first_name: string | null;
       last_name: string | null;
+      filing_parent_name: string | null;
       address_line: string | null;
       address_city: string | null;
       address_zip: string | null;
@@ -41,7 +42,7 @@ export async function getFilingFamily(
       plan_tier: string | null;
     }[]
   >`
-    select name, first_name, last_name, address_line, address_city,
+    select name, first_name, last_name, filing_parent_name, address_line, address_city,
            address_zip, us_state, time_zone,
            school_year_start_on::text as school_year_start_on, plan_tier
     from public.families

@@ -372,7 +372,13 @@ export interface FamilyMaterialRow {
     turnId?: string;
     channel?: string;
     input?: Record<string, unknown>;
-    review?: { pass: boolean; issues: string[] } | null;
+    // advisoryIssues is optional because it did not exist before
+    // gh#368 and every row written until 2026-07-30 lacks it.
+    review?: {
+      pass: boolean;
+      issues: string[];
+      advisoryIssues?: string[];
+    } | null;
   } | null;
   createdAt: string;
 }

@@ -89,3 +89,27 @@ export async function setSchoolYearStart(
     where id = ${familyId}
   `;
 }
+
+/**
+ * Saves the parent's name for state filings (gh#424).
+ *
+ * Deliberately NOT families.first_name or the member display name.
+ * Those are how Homa greets someone, they are written only by the
+ * signup and waitlist paths, and 48 of 90 real families had no way to
+ * set them at all. Null clears it, and the filing then prints a labeled
+ * blank rather than putting a greeting name on a government notice.
+ *
+ * familyId always comes from session auth; this never accepts one from a
+ * client or a model.
+ */
+export async function setFilingParentName(
+  familyId: string,
+  name: string | null,
+): Promise<void> {
+  const sql = mapDb();
+  await sql`
+    update public.families
+    set filing_parent_name = ${name}, updated_at = now()
+    where id = ${familyId}
+  `;
+}

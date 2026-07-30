@@ -96,6 +96,17 @@ export default async function AdminFamilyMaterialsPage({
                               review issues: {material.generation.review.issues.join("; ")}
                             </p>
                           ) : null}
+                          {/* Problems on later pages ship with the material
+                              rather than holding it back (gh#368), so the
+                              flagged pill never shows them. Without this line
+                              they would be invisible to the console that is
+                              supposed to be how quality gets watched. */}
+                          {material.generation.review?.advisoryIssues?.length ? (
+                            <p className="mt-1.5 text-[var(--gold-ink)]">
+                              later-page notes (shipped, not held):{" "}
+                              {material.generation.review.advisoryIssues.join("; ")}
+                            </p>
+                          ) : null}
                           {material.generation.sessionId ? (
                             <p className="mt-1.5">
                               <Link
