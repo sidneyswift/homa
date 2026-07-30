@@ -30,7 +30,7 @@ Plain-language restatement: make it so nothing dropped in Slack can ever again b
 ### Constraints / non-negotiables
 
 - Identity is the Slack message timestamp, never the filename or title. A prior hand-audit that joined on filename text caused three duplicate records and four taste signals credited to the wrong founder. This is the load-bearing lesson of the whole effort, see Gotchas.
-- No em dash anywhere, in code, docs, commit messages, or this file. `pnpm check:em-dash` enforces it repo-wide on every git-tracked file; the previous handoff doc at this repo's root (`HANDOFF-state-filing.md`) is tracked and complies, so treat any doc you write here the same way.
+- No em dash anywhere, in code, docs, commit messages, or this file. `pnpm check:em-dash` enforces it repo-wide on every git-tracked file; the sibling handoff doc in this directory (`docs/handoffs/HANDOFF-state-filing.md`) is tracked and complies, so treat any doc you write here the same way.
 - Fresh branch, PR only, never push directly to `main`.
 - Tenant-isolation rules (familyId scoping) do not apply to this work, it is founder-facing internal tooling, not family-facing product code. But `check:isolation` still applies to anything you touch under `apps/web/agent/` or Postgres.
 - Changes under `apps/web/agent/` require `VERCEL=1 pnpm --filter web exec eve build` locally before pushing, because Vercel runs `eve build` outside Next's bundler and a green `pnpm build` alone is not sufficient. This was already done for `apps/web/agent/tools/create_printable.ts` and `apps/web/lib/materials/render-page.ts` earlier in this branch's history. Re-run it if you touch those files again.
