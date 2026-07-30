@@ -4,7 +4,7 @@
  * dates this way with no time zone, so this deliberately never routes
  * through a JS Date's local-time interpretation (new Date("2026-07-29")
  * parses as UTC midnight, which shifts to the previous day once
- * formatted through a negative-UTC-offset local clock) — every value
+ * formatted through a negative-UTC-offset local clock), so every value
  * here is a "day number since the epoch," immune to that entire class
  * of off-by-one bug.
  */

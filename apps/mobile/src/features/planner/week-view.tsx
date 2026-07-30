@@ -9,7 +9,7 @@ import type { PlanActivityView, ScheduledActivityView } from "./planner-model";
 import { UnscheduledTray } from "./unscheduled-tray";
 
 /** A vertical 7-day agenda (Mon–Sun), the mobile-native shape of web's
- * pixel-positioned hour grid — a real time grid doesn't fit a phone's
+ * pixel-positioned hour grid: a real time grid doesn't fit a phone's
  * width, and a scrolling day-by-day list is the pattern every mobile
  * calendar app already uses. */
 export function WeekView({

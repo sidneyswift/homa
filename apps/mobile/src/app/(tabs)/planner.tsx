@@ -48,7 +48,7 @@ type PlannerViewMode = "day" | "week" | "month";
  * grid with family events), per founder direction 2026-07-29. Day/week/
  * month views over family_events + plan_activity_schedule, both
  * genuinely writable tables (full RLS insert/update/delete for
- * authenticated family members — confirmed, not assumed). Check-offs use
+ * authenticated family members, confirmed, not assumed). Check-offs use
  * toggle_plan_activity_check, a new atomic single-key RPC
  * (supabase/migrations/20260729160000_toggle_plan_activity_check.sql):
  * web's own check-off sync replaces the whole progress map per write,

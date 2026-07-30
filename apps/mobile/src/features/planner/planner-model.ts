@@ -85,7 +85,7 @@ export function buildScheduledActivities(
 }
 
 /** The current week's activities that have no scheduled_date yet: the
- * "put this on a day" tray. Mobile's own addition — web has no direct
+ * "put this on a day" tray. Mobile's own addition: web has no direct
  * scheduling UI today, only the schedule_plan_activity chat tool. */
 export function buildUnscheduledActivities(
   childPlans: ChildPlanRecord[],
