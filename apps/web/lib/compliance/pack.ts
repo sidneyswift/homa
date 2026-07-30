@@ -1,6 +1,7 @@
 import { HOUSE_PATH } from "../../components/brand/Logo";
 import { escapeHtml } from "../html-escape";
 import { SHEET_PAGE_CLASS } from "../materials/page-shell";
+import { overrideNoteFor } from "./requirement-overrides";
 import type {
   StatePathwayDetail,
   StateRequirementsDetail,
@@ -289,6 +290,24 @@ interface Duties {
   zeroDuty: boolean;
 }
 
+/**
+ * A line naming a law change too recent for the upstream snapshot
+ * (gh#436), or nothing.
+ *
+ * A family whose state repealed its rules last month is the one most
+ * likely to have read the old rules somewhere else, so saying which way
+ * it changed and when is what makes the rest of the page believable.
+ * Some of the surrounding citations may still point at sections the act
+ * repealed, which is exactly why this line tells them the date to
+ * measure everything else against.
+ */
+function recentChangeNote(detail: StateRequirementsDetail): string {
+  const note = overrideNoteFor(detail.stateCode, detail.sourceLastVerified);
+  return note
+    ? `<p class="sp-change-note">${escapeHtml(note)} Anything you read that is older than this may describe the rules that were replaced.</p>`
+    : "";
+}
+
 export function deriveDuties(detail: StateRequirementsDetail): Duties {
   const p = detail.defaultPathwayDetail;
   const divergence = derivePathwayDivergence(detail);
@@ -455,6 +474,16 @@ function coverPage(
   const pathwayName = duties.pathway
     ? escapeHtml(duties.pathway.name)
     : "default";
+  // Only say a state has several routes when it does. Fifteen states
+  // publish exactly one (CT DC ID IL KS KY MA NJ NY OK RI TX UT WY, and
+  // NH since its 2026 repeal collapsed three into one), and telling
+  // those families "different pathways can carry different rules, this
+  // pack covers the X pathway" invites them to go hunting for an
+  // alternative that does not exist.
+  const pathwayScope =
+    detail.pathways.length > 1
+      ? ` Different pathways in ${stateName} can carry different rules; this pack covers the ${pathwayName} pathway, the one most families use.`
+      : ` ${stateName} publishes one route for homeschooling families, and this pack covers it.`;
   const contentsRows = contents
     .map(
       (title, index) =>
@@ -481,7 +510,7 @@ ${contentsRows}
 </section>
 <section class="sp-colophon">
   <p><strong>State rules last verified ${escapeHtml(verified)}</strong> · source: HomeschoolLeap (CC BY-SA 4.0) · pack made ${escapeHtml(generatedOn)}</p>
-  <p>Homeschooling is legal in all 50 states, including ${stateName}. This pack organizes ${stateName}'s published homeschool rules so you can see them in one place. It is legal information, not legal advice, and Homa is not a law firm. Downloading or filling out this pack does not notify ${stateName} and does not by itself satisfy any state requirement of any kind; the record templates become part of your own records once you fill them in, and where a filing is required, this pack links to the official channel. Different pathways in ${stateName} can carry different rules; this pack covers the ${pathwayName} pathway, the one most families use. Every rule here comes from the sources cited in this pack, last verified ${escapeHtml(verified)}. Laws change, so the current statute is always worth a look before you act on a deadline. Make a fresh pack from Homa before each school year and before filing anything. If your situation is unusual, or a district ever questions your homeschooling, a homeschool-friendly attorney or a legal defense organization can advise you; this pack cannot.</p>
+  <p>Homeschooling is legal in all 50 states, including ${stateName}. This pack organizes ${stateName}'s published homeschool rules so you can see them in one place. It is legal information, not legal advice, and Homa is not a law firm. Downloading or filling out this pack does not notify ${stateName} and does not by itself satisfy any state requirement of any kind; the record templates become part of your own records once you fill them in, and where a filing is required, this pack links to the official channel.${pathwayScope} Every rule here comes from the sources cited in this pack, last verified ${escapeHtml(verified)}. Laws change, so the current statute is always worth a look before you act on a deadline. Make a fresh pack from Homa before each school year and before filing anything. If your situation is unusual, or a district ever questions your homeschooling, a homeschool-friendly attorney or a legal defense organization can advise you; this pack cannot.</p>
   <p>State requirement data by HomeschoolLeap (<span class="sp-mono">${escapeHtml(attributionUrl)}</span>), used under CC BY-SA 4.0 (<span class="sp-mono">creativecommons.org/licenses/by-sa/4.0</span>). Homa reformatted and summarized this data for your pack, and the requirement summary sections are available under that same license. The data is provided as is by its source. Your family's information and the Homa name and logo are not part of that license.</p>
 </section>`;
 }
@@ -974,6 +1003,7 @@ function legalityPage(detail: StateRequirementsDetail, duties: Duties): string {
     `${detail.stateName} asks almost nothing of homeschooling families, and that is written into its law.`,
   )}
 <section class="sp-legal-affirm">
+  ${recentChangeNote(detail)}
   <ul class="sp-affirm-list">
     <li>No notice or filing is required on the default path.</li>
     <li>No year-end artifact is required on the default path.</li>
@@ -1346,6 +1376,7 @@ export function wrapStatePackDocument(
   .sp-check-done { flex: 0 0 auto; font-family: "JetBrains Mono", monospace; font-size: 8px; color: ${SUBTLE}; margin-top: 2px; }
   .sp-hand { font-family: "Caveat", cursive; font-weight: 600; font-size: 19px; color: ${SAGE}; transform: rotate(-2deg); margin: 0.24in 0 0 0.1in; }
   .sp-legal-affirm { margin-top: 0.1in; }
+  .sp-change-note { margin: 0 0 12px; padding: 9px 11px; border-left: 2px solid ${CLAY_SOFT}; background: #FFF8F4; font-size: 11.5px; line-height: 1.5; color: ${BODY}; }
   .sp-affirm-list { list-style: none; margin: 0 0 10px; padding: 0; }
   .sp-affirm-list li { font-size: 12.5px; font-weight: 600; color: ${INK}; padding: 7px 0; border-bottom: 1px solid ${HAIRLINE}; }
   .sp-att { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 6px; }

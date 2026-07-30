@@ -15,6 +15,9 @@ const { parseStateRequirementsPayload } = await import(
   "../apps/web/lib/map/state-requirements"
 );
 const { composeStatePack } = await import("../apps/web/lib/compliance/pack");
+const { applyRequirementOverride } = await import(
+  "../apps/web/lib/compliance/requirement-overrides"
+);
 const { closePrintableRenderer, renderPrintableHtml } = await import(
   "../apps/web/lib/materials/render-page"
 );
@@ -43,20 +46,25 @@ function loadDetail(code: string) {
   const payload = JSON.parse(
     readFileSync(`data/state-requirements/states/${code}.json`, "utf8"),
   ) as { page_url?: string };
-  return parseStateRequirementsPayload(
-    {
-      stateCode: entry.state_code,
-      stateName: entry.state_name,
-      regulationLevel: entry.regulation_level,
-      compulsoryStartAge: entry.compulsory_education?.start_age ?? null,
-      compulsoryEndAge: entry.compulsory_education?.end_age ?? null,
-      notificationRequired: entry.notification_required,
-      assessmentRequired: entry.assessment_required,
-      defaultPathway: entry.default_pathway,
-      sourcePageUrl: payload.page_url ?? null,
-      sourceLastVerified: entry.last_verified,
-    },
-    payload,
+  // Same seam the live loader applies, so this smoke renders what a
+  // family actually receives rather than the raw snapshot (gh#436).
+  return applyRequirementOverride(
+    parseStateRequirementsPayload(
+      {
+        stateCode: entry.state_code,
+        stateName: entry.state_name,
+        regulationLevel: entry.regulation_level,
+        compulsoryStartAge: entry.compulsory_education?.start_age ?? null,
+        compulsoryEndAge: entry.compulsory_education?.end_age ?? null,
+        notificationRequired: entry.notification_required,
+        assessmentRequired: entry.assessment_required,
+        defaultPathway: entry.default_pathway,
+        sourcePageUrl: payload.page_url ?? null,
+        sourceLastVerified: entry.last_verified,
+      },
+      payload,
+    ),
+    new Date().toISOString().slice(0, 10),
   );
 }
 
@@ -71,14 +79,15 @@ const family = {
 
 // The council's deep-fixture states: NY (detailed plan, mid-year
 // clause), TX (zero duty), PA (every duty, high variance), CA (pervasive
-// varies), SC (notification without a published deadline). Pass a state
-// code to render one, or "all" to render every reviewed jurisdiction
-// (the full 51-state sweep, roughly five minutes on a warm Chrome).
+// varies), SC (notification without a published deadline). Pass one or
+// more state codes to render those, or "all" to render every reviewed
+// jurisdiction (the full 51-state sweep, roughly five minutes on a warm
+// Chrome).
 const CODES =
   process.argv[2] === "all"
     ? index.states.map((state) => state.state_code).sort()
-    : process.argv[2]
-      ? [process.argv[2]]
+    : process.argv.length > 2
+      ? process.argv.slice(2).map((code) => code.toUpperCase())
       : ["NY", "TX", "PA", "CA", "SC"];
 
 let failed = false;
