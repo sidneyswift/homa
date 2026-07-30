@@ -16,6 +16,7 @@ export interface FamilyRecord {
   us_state: string | null;
   parent_display_name: string | null;
   profile_completed_at: string | null;
+  time_zone: string | null;
 }
 
 export interface ChildProfile {
@@ -35,7 +36,7 @@ export interface ChildRecord {
 export async function getMyFamily(): Promise<FamilyRecord | null> {
   const { data, error } = await supabase
     .from("families")
-    .select("id, name, us_state, parent_display_name, profile_completed_at")
+    .select("id, name, us_state, parent_display_name, profile_completed_at, time_zone")
     .limit(1)
     .maybeSingle();
   if (error) throw new Error(`families read failed: ${error.message}`);

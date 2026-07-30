@@ -1,5 +1,199 @@
-import { ComingSoonScreen } from "../../features/nav/coming-soon-screen";
+import { useMemo, useState } from "react";
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useFamilyData } from "../../features/family/use-family-data";
+import { EntryEditor } from "../../features/hours/entry-editor";
+import { EntryRow } from "../../features/hours/entry-row";
+import { TotalsCard } from "../../features/hours/totals-card";
+import { useHoursData } from "../../features/hours/use-hours-data";
+import {
+  computeChildTotals,
+  effectiveTimeZone,
+  filterEntriesBySubject,
+  formatMinutesAsHours,
+  groupEntriesByDay,
+  subjectOptions,
+  SUBJECT_LABELS,
+  toHoursEntries,
+} from "../../features/hours/hours-view";
+import { deleteHoursEntry, updateHoursEntry, type HoursSubject } from "../../lib/hours";
+import { fontFamilies } from "../../theme/fonts";
+import { colors, fontSize, radius, space } from "../../theme/tokens";
+
+/**
+ * Hours: the compliance record, ported from apps/web/app/app/hours/
+ * page.tsx + hours-view.tsx. Creating a new entry stays agent-only
+ * (log_hours via chat/SMS/voice) on both platforms; editing and
+ * deleting an existing one is a real parent-facing feature here too,
+ * via direct RLS-scoped writes (hours_log has full insert/update/
+ * delete policies for authenticated family members).
+ *
+ * No state minimum-hours comparison: state_requirements has no hours
+ * field yet (web's own issue #174 deferral), so totals render plainly,
+ * never a red "behind" state.
+ */
 export default function HoursScreen() {
-  return <ComingSoonScreen title="Hours" />;
+  const { family, children, loading: familyLoading } = useFamilyData();
+  const { rows, loading: hoursLoading, error, reload } = useHoursData(family?.id ?? null);
+  const [subjectFilter, setSubjectFilter] = useState<HoursSubject | null>(null);
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+
+  const timeZone = effectiveTimeZone(family?.time_zone);
+  const now = new Date();
+  const entries = useMemo(() => toHoursEntries(rows, children), [rows, children]);
+  const subjects = useMemo(() => subjectOptions(entries), [entries]);
+  const filtered = useMemo(() => filterEntriesBySubject(entries, subjectFilter), [entries, subjectFilter]);
+  const groups = groupEntriesByDay(filtered, timeZone, now);
+  const totals = computeChildTotals(filtered, children, now, timeZone);
+  const editingEntry = entries.find((entry) => entry.id === editingEntryId) ?? null;
+  const loading = familyLoading || hoursLoading;
+
+  async function handleSaveEdit(edit: { subject: HoursSubject; minutes: number; note: string | null }) {
+    if (!editingEntryId) return;
+    await updateHoursEntry(editingEntryId, edit);
+    setEditingEntryId(null);
+    void reload();
+  }
+
+  async function handleDelete() {
+    if (!editingEntryId) return;
+    await deleteHoursEntry(editingEntryId);
+    setEditingEntryId(null);
+    void reload();
+  }
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }} edges={["bottom"]}>
+      <ScrollView
+        contentContainerStyle={{ padding: space.md, gap: space.md }}
+        refreshControl={<RefreshControl refreshing={hoursLoading} onRefresh={() => void reload()} />}
+      >
+        <View style={{ gap: 2 }}>
+          <Text
+            style={{
+              fontFamily: fontFamilies.bodyBold,
+              fontSize: 11,
+              letterSpacing: 0.4,
+              color: colors.textSubtle,
+              textTransform: "uppercase",
+            }}
+          >
+            The compliance record
+          </Text>
+          <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.xxl, color: colors.textStrong }}>
+            Hours
+          </Text>
+          <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted }}>
+            Every school-time block Homa has heard about, by day.
+          </Text>
+        </View>
+
+        {loading && rows.length === 0 ? (
+          <View style={{ paddingVertical: space.xl, alignItems: "center" }}>
+            <ActivityIndicator color={colors.brand} />
+          </View>
+        ) : null}
+
+        {error ? (
+          <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.danger }}>
+            {"That didn't load. Pull down to try again."}
+          </Text>
+        ) : null}
+
+        {totals.length > 0 ? (
+          <View style={{ gap: space.sm }}>
+            {totals.map((total) => {
+              const kidIndex = children.findIndex((child) => child.id === total.childId);
+              return <TotalsCard key={total.childId} total={total} kidIndex={Math.max(0, kidIndex)} />;
+            })}
+          </View>
+        ) : null}
+
+        {subjects.length > 1 ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.xs }}>
+            <SubjectChip label="All" active={subjectFilter === null} onPress={() => setSubjectFilter(null)} />
+            {subjects.map((subject) => (
+              <SubjectChip
+                key={subject}
+                label={SUBJECT_LABELS[subject]}
+                active={subjectFilter === subject}
+                onPress={() => setSubjectFilter(subject)}
+              />
+            ))}
+          </ScrollView>
+        ) : null}
+
+        {!loading && groups.length === 0 ? (
+          <View style={{ paddingVertical: space.xl, alignItems: "center", gap: space.xs }}>
+            <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }}>
+              Nothing logged yet.
+            </Text>
+            <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted, textAlign: "center" }}>
+              {subjectFilter
+                ? `Nothing logged for ${SUBJECT_LABELS[subjectFilter].toLowerCase()} yet.`
+                : "Tell Homa about school time and it shows up here."}
+            </Text>
+          </View>
+        ) : null}
+
+        {groups.map((group) => (
+          <View key={group.key} style={{ gap: space.xs }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
+              <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textBody }}>
+                {group.label}
+              </Text>
+              <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
+                {formatMinutesAsHours(group.totalMinutes)}
+              </Text>
+            </View>
+            <View style={{ gap: space.xs }}>
+              {group.entries.map((entry) => (
+                <EntryRow
+                  key={entry.id}
+                  entry={entry}
+                  showChild={children.length > 1}
+                  onEdit={() => setEditingEntryId(entry.id)}
+                />
+              ))}
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+
+      <EntryEditor
+        key={editingEntry?.id ?? "editor"}
+        entry={editingEntry}
+        onSave={(edit) => void handleSaveEdit(edit)}
+        onDelete={() => void handleDelete()}
+        onClose={() => setEditingEntryId(null)}
+      />
+    </SafeAreaView>
+  );
+}
+
+function SubjectChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={{
+        paddingHorizontal: space.md,
+        paddingVertical: space.xs,
+        borderRadius: radius.pill,
+        backgroundColor: active ? colors.brandSoft : colors.card,
+        borderWidth: 1,
+        borderColor: active ? colors.brand : colors.borderSubtle,
+      }}
+    >
+      <Text
+        style={{
+          fontFamily: fontFamilies.bodyBold,
+          fontSize: fontSize.xs,
+          color: active ? colors.brandHover : colors.textMuted,
+        }}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
 }
