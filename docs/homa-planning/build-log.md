@@ -3,6 +3,60 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-30 · The stranded-chain ruling: one quiet message, per family, ever
+
+Founder ruling, not an agent decision. Registered as
+`stranded-chain-followup` in `journeys/10-reconciliation.md` §5. Unblocks
+gh#197; answers FD-2(c) from gh#189, whose ruling was closed without ever
+being written down anywhere.
+
+**What prompted it.** A production read on 2026-07-30, non-sandbox
+families only:
+
+| | |
+|---|---|
+| materials in `draft` | 190 across 15 families |
+| in `final` | 67 across 5 families |
+| drafts older than 7 days | 129 |
+| **families with materials and ZERO finals** | **10 of 15** |
+
+Ten of fifteen families asked Homa to make something, she made it, and
+they have nothing finished in their binder. The in-progress shelf
+(gh#377, shipped 2026-07-29) gave that work a home, but a shelf only
+helps a parent who opens the Binder.
+
+**What the ruling had to avoid.** The council's 2026-07-24 take rejected
+the obvious version in advance: "a chatty 'want me to lock in last
+night's version?' message reads as nagging, which your own skill forbids.
+What I would accept: a one-tap 'Keep this one' on the card itself, and at
+most one quiet email carrying the PDF link."
+
+**The binding decision is the bound, and it is per FAMILY.** A dry run
+against production the same day: 86 stranded chain heads across 14
+families. Per-chain would have mailed The Swift family 27 times, The
+Cherry Gomes family 18 times, and one family 12 times. Per family it is
+13 emails covering 72 chains. One family, one message, ever, is the
+ruling; the ledger kind carries no key so a second one cannot be
+composed.
+
+**Also settled, because each one is a way this becomes nagging:** it
+waits 18 hours so an evening's work arrives the next morning and a parent
+still revising at 11pm is never told about the thing she is working on;
+it never surfaces a chain the quality check FAILED, because telling a
+parent about work Homa itself judged not good enough is worse than
+silence; and it asks for nothing, sets no deadline, and never uses the
+word unfinished.
+
+**Shipped dark.** `HOMA_STRANDED_FOLLOWUP_ENABLED` must be exactly
+"true". This is the first proactive message Homa has ever sent about a
+parent's own unfinished work, and the backlog is two weeks deep, so the
+first run would reach people about things they may barely remember
+asking for. The sweep runs while dark so the eligible count stays
+visible.
+
+**Not ruled:** FD-2(b), whether the agent may state the approval
+mechanism once per chain. Neither ruled nor built.
+
 ## 2026-07-29 · Franchise characters: a policy refusal gets one retry on another vendor
 
 Founder ruling, not an agent decision. Registered as
