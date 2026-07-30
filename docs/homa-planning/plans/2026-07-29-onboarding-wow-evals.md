@@ -957,3 +957,48 @@ Beat 9 moves from "did not run" to +1. It is the first beat in the arc
 that shows her the product is a system holding her year rather than a
 conversation, and it now does that with a real, dated, personalized
 week rather than an empty grid.
+
+### Walk 008, 2026-07-30, Rachel, a message vanished
+
+Full chat-first walk to verify the age-template planner and the
+filling-week feature (both shipped 2026-07-29) hold together in the real
+path rather than the isolated card-flow test they were built against.
+
+The kickoff turn (reacting to "Rachel, Ohio") called
+`save_family_basics` and `ask_for_details(homeschool_profile)`, both
+forbidden for this arc. Fixed in the skill: both are now named
+explicitly, matching the treatment the kids section already gets.
+Committed separately (`b0f13c7f`).
+
+That was not the interesting part. `ask_for_details` told the model the
+turn was over and to reply with the empty-delivery sentinel, and
+`model_usage` shows it did, within 3 seconds. But the client kept the
+turn open: the spinner counted through 84s, 124s, 182s, with zero
+`agent_tool_calls` or `model_usage` rows in that whole window. At 236
+seconds, just under `RECOVERY_DEADLINE_MS` (240s in `chat-client.tsx`),
+the stream failed with `net::ERR_ABORTED` and a fresh eve session
+opened. The queued next message correctly did not fork a session while
+recovery was undecided (`#227`'s fix, working as designed) and flushed
+once recovery gave up.
+
+But the original exchange did not survive. A server refetch (a new day
+divider appeared, so this is not a client cache issue) showed "Rachel,
+Ohio" and any reply to it gone entirely, replaced by a "Worked for 236
+seconds" disclosure that renders in the wrong position and holds nothing
+useful. Her own message, and Homa's turn, erased with no error and no
+retry affordance, after a turn that had actually finished computing in
+about three seconds.
+
+Filed as gh#466, P0, production, distinguished explicitly from `#203`
+(open, about long turns merely looking silent) and from `#227`
+(merged, fixed the fork, not this). Not fixed here: the recovery/stream
+machinery is deep, already the subject of one non-trivial incident and
+fix, and an unmerged branch (`claude/carolyng-lag-diagnosis`) already
+flags a related, still-open founder decision on the send side of this
+same gap. A blind patch risks making the `#170` incident class worse.
+
+Everything else in the walk held: beat 4's fix (no request for more
+kids), the interests header, the reveal naming her real worry, the
+filling-week line, and the full planner opening with a real month all
+worked exactly as the last several walks left them. The only new defect
+is this one, and it is more severe than anything wave 1 found.
