@@ -113,6 +113,7 @@ function serverAssistantMessage(input: {
     sessionId: "server-session",
     role: "assistant",
     channel: "web",
+    modality: "text",
     content: input.content,
     atMs: input.atMs,
   };

@@ -5,22 +5,37 @@ import { experimental_useRealtime as useRealtime } from "@ai-sdk/react";
 import { Mic, MicOff, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { transcriptFromRealtimeMessages, type VoiceTranscriptLine } from "./voice-transcript";
+import {
+  settledTurns,
+  voiceTurns,
+  type VoiceTranscriptLine,
+  type VoiceTurn,
+} from "./voice-transcript";
 
 /**
  * The in-app voice conversation (issue #283, founder direction 2026-07-29).
  *
- * She taps the composer's voice button, Homa talks, and the transcript
- * appears as it is spoken so she can read along. When it ends, the whole
- * conversation goes into her chat like any other. Chat with voice
- * activation, not a phone call: Telnyx stays for someone who wants to dial
- * a number.
+ * She taps the composer's voice button and talks. Each turn appears in the
+ * THREAD as it is spoken, hers as her message and Homa's as Homa's, exactly
+ * like a typed exchange. Chat with voice activation, not a phone call:
+ * Telnyx stays for someone who wants to dial a number.
  *
- * The transcript is written as it streams, never assembled at the end. The
- * gateway does not resume a session on reconnect, so a dropped socket after
- * a ten-minute conversation would otherwise lose all ten minutes. Every
- * line is already in state by the time it is spoken, and `onClose` hands
- * whatever exists to the chat.
+ * This component no longer produces a transcript. The first version bundled
+ * the whole conversation into one "here is what we said out loud" message,
+ * sent it through eve as if she had typed it, and text Homa replied to it,
+ * which is how you get Homa answering a transcript with "that's a very
+ * short call!". A spoken turn is not a message ABOUT a conversation, it is
+ * a turn IN one, so each one is handed up the moment it settles (`onTurn`)
+ * and written to the same table typed turns live in.
+ *
+ * Turn by turn rather than all at the end, deliberately. A dropped socket
+ * after ten minutes would otherwise lose all ten, and the realtime session
+ * does not resume on reconnect.
+ *
+ * No eve turn is ever run from here. Text Homa must not answer what voice
+ * Homa just said, which would be Homa replying to herself in front of the
+ * parent. The turns reach her as context for the next thing the parent
+ * TYPES, through the per-turn context block.
  *
  * Nothing about Homa's persona, her limits, or which family she is talking
  * about is decided here. All of it is pinned into the minted credential by
@@ -29,6 +44,12 @@ import { transcriptFromRealtimeMessages, type VoiceTranscriptLine } from "./voic
  */
 
 const MODEL_ID = "gpt-realtime-2.1";
+
+/** A session id for one spoken conversation. Called from an effect, never
+ * during render: both reads are impure. */
+function newVoiceSessionId(): string {
+  return `voice-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
 
 /** Reasons the token route can refuse, in the parent's words. */
 const REASONS: Record<string, string> = {
@@ -41,11 +62,15 @@ const REASONS: Record<string, string> = {
 };
 
 export function VoiceMode({
+  onTurn,
   onClose,
 }: {
-  /** Handed the transcript so the conversation lands in the chat thread.
-   * Called exactly once, on the way out, with whatever was said. */
-  onClose: (transcript: VoiceTranscriptLine[]) => void;
+  /** Called once per settled turn, in order, so the thread can render it
+   * live. The component also persists it; this is the render path. */
+  onTurn: (line: VoiceTranscriptLine) => void;
+  /** The conversation is over. The panel closes; the turns already handed
+   * over stay in the thread. */
+  onClose: () => void;
 }) {
   const model = useMemo(() => openai.experimental_realtime(MODEL_ID), []);
   const [error, setError] = useState<string | null>(null);
@@ -86,13 +111,60 @@ export function VoiceMode({
     },
   });
 
-  const transcript = useMemo(
-    () => transcriptFromRealtimeMessages(messages),
-    [messages],
+  const turns = useMemo(() => voiceTurns(messages), [messages]);
+
+  /** The realtime session these turns belong to, so they group as one
+   * exchange and (sessionId, sequence) can carry the write's idempotency.
+   *
+   * Minted on the first settled turn, not during render: a clock read and a
+   * random draw are impure, and React may render this component more than
+   * once per open. Once set it never changes, so every turn of one
+   * conversation shares it. */
+  const sessionIdRef = useRef<string | null>(null);
+  /** Position after the last turn handed to the thread. */
+  const cursorRef = useRef(0);
+
+  /** Hand up and persist every turn that has settled since last time.
+   * Fire-and-forget on the write: she is mid-conversation, so a failed row
+   * is worth a log and never an interruption. */
+  const flushTurns = useCallback(
+    (available: readonly VoiceTurn[], finished: boolean) => {
+      const { cursor, lines } = settledTurns(
+        available,
+        cursorRef.current,
+        finished,
+      );
+      cursorRef.current = cursor;
+      if (lines.length === 0) return;
+      sessionIdRef.current ??= newVoiceSessionId();
+      const sessionId = sessionIdRef.current;
+      for (const { sequence, line } of lines) {
+        onTurn(line);
+        void fetch("/api/voice/realtime/turn", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionId,
+            sequence,
+            role: line.role,
+            content: line.text,
+          }),
+        }).catch(() => {
+          // Logged server-side; nothing useful to say to her mid-sentence.
+        });
+      }
+    },
+    [onTurn],
   );
 
-  /** One way out, whatever caused it, so the transcript is never dropped
-   * on a path somebody forgot to handle. */
+  // Turns settle as the conversation moves on, so this runs on every change
+  // to the store rather than at the end.
+  useEffect(() => {
+    flushTurns(turns, false);
+  }, [flushTurns, turns]);
+
+  /** One way out, whatever caused it, so the last turn is never dropped on
+   * a path somebody forgot to handle. */
   const leave = useCallback(() => {
     if (closedRef.current) return;
     closedRef.current = true;
@@ -100,8 +172,11 @@ export function VoiceMode({
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
     disconnect();
-    onClose(transcriptFromRealtimeMessages(messages));
-  }, [disconnect, messages, onClose, stopAudioCapture]);
+    // Nothing more is coming, so the turn that was still arriving is now
+    // settled and belongs in the thread.
+    flushTurns(voiceTurns(messages), true);
+    onClose();
+  }, [disconnect, flushTurns, messages, onClose, stopAudioCapture]);
 
   // Open the session and the microphone together: she tapped a button that
   // says talk, so being connected but deaf is a state with no purpose.
@@ -188,7 +263,7 @@ export function VoiceMode({
                   : "Listening"}
           </span>
           <span className="block text-sm text-muted">
-            {error ?? "Talk normally. Everything you say lands in this chat."}
+            {error ?? "Talk normally. Every turn appears in your chat as you go."}
           </span>
         </span>
         <button
@@ -200,19 +275,6 @@ export function VoiceMode({
           <X size={16} aria-hidden="true" />
         </button>
       </div>
-
-      {transcript.length > 0 ? (
-        <ol className="mt-3 max-h-56 space-y-2 overflow-y-auto border-t border-border pt-3">
-          {transcript.map((line, index) => (
-            <li key={`${line.role}-${index}`} className="text-sm">
-              <span className="font-semibold text-strong">
-                {line.role === "assistant" ? "Homa" : "You"}
-              </span>{" "}
-              <span className="text-body">{line.text}</span>
-            </li>
-          ))}
-        </ol>
-      ) : null}
     </section>
   );
 }

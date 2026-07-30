@@ -40,7 +40,7 @@ const SESSION_CAP = 60;
 const DELIVERY_CAP = 150;
 const MATERIAL_CAP = 80;
 
-const ROW_COLUMNS = "id, session_id, role, channel, content, created_at";
+const ROW_COLUMNS = "id, session_id, role, channel, content, created_at, modality";
 
 /** materials columns for scrollback cards; the creating session, the
  *  child's display name, and the packet page data live inside the

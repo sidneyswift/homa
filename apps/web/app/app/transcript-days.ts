@@ -65,12 +65,32 @@ export function dayLabelFor(at: number, now: number = Date.now()): string {
 export function sourceLabelFor(
   role: string,
   channel: string | undefined,
+  modality?: "text" | "voice",
 ): string | null {
+  // Spoken turns are the one case that tags BOTH roles. A voice
+  // conversation is a stretch of the thread that happened out loud, and
+  // the run-change rule below means the stretch gets one pill on
+  // whichever turn opened it. Tagging only the parent's side would leave
+  // the whole stretch bare whenever Homa spoke first, which she usually
+  // does.
+  if (modality === "voice") return "Spoken";
   if (!channel) return null;
   if (role === "user" && channel === "sms") return "Texted";
   if (role === "user" && channel === "email") return "By email";
   if (role === "assistant" && channel === "dispatch") return "From Homa's tasks";
   return null;
+}
+
+/** What a run of same-surface messages is keyed on, so a change of
+ * surface (and only a change) earns a pill. Spoken-ness counts as a
+ * surface here even though it is not a channel: it is what the reader
+ * sees change. */
+function surfaceKeyOf(
+  channel: string | undefined,
+  modality: "text" | "voice" | undefined,
+): string | undefined {
+  if (modality === "voice") return "voice";
+  return channel;
 }
 
 /**
@@ -87,6 +107,11 @@ export function buildTranscript(input: {
   archived: readonly ArchivedMessage[];
   live: readonly EveMessage[];
   liveTimes: Record<string, number>;
+  /** Turns said out loud in this visit's voice conversation. They are
+   * real turns in this thread, but they are not in eve's store (no eve
+   * turn runs for them, on purpose), so they arrive alongside `live`
+   * rather than inside it and merge by clock. */
+  spoken?: readonly ArchivedMessage[];
   now?: number;
 }): TranscriptItem[] {
   const now = input.now ?? Date.now();
@@ -103,6 +128,7 @@ export function buildTranscript(input: {
     message: EveMessage,
     at: number | null,
     channel?: string,
+    modality?: "text" | "voice",
   ) => {
     if (at === null) {
       if (!earlierShown && items.length === 0) {
@@ -120,11 +146,12 @@ export function buildTranscript(input: {
         });
       }
     }
+    const surface = surfaceKeyOf(channel, modality);
     const label =
-      channel && channel !== previousChannel
-        ? sourceLabelFor(message.role, channel)
+      surface && surface !== previousChannel
+        ? sourceLabelFor(message.role, channel, modality)
         : null;
-    if (channel) previousChannel = channel;
+    if (surface) previousChannel = surface;
     items.push({
       kind: "message",
       key,
@@ -134,11 +161,48 @@ export function buildTranscript(input: {
   };
 
   input.archived.forEach((entry, index) => {
-    push(`a${index}:${entry.message.id}`, entry.message, entry.at, entry.channel);
+    push(
+      `a${index}:${entry.message.id}`,
+      entry.message,
+      entry.at,
+      entry.channel,
+      entry.modality,
+    );
   });
   previousChannel = "web";
-  for (const message of input.live) {
-    push(`m:${message.id}`, message, input.liveTimes[message.id] ?? now);
+
+  // Typed and spoken turns interleave by clock: she can type, talk, then
+  // type again, and the thread has to read in the order it happened. The
+  // live store and the spoken list each stay in their own order, so a
+  // stable sort on time is enough. Live messages declare "web"
+  // explicitly (rather than leaving the surface unknown) so that going
+  // back to typing after a voice stretch ends the run: without it, a
+  // second conversation later in the visit would never earn its pill.
+  const current: {
+    key: string;
+    message: EveMessage;
+    at: number;
+    channel: string;
+    modality: "text" | "voice";
+  }[] = [
+    ...input.live.map((message) => ({
+      key: `m:${message.id}`,
+      message,
+      at: input.liveTimes[message.id] ?? now,
+      channel: "web",
+      modality: "text" as const,
+    })),
+    ...(input.spoken ?? []).map((entry, index) => ({
+      key: `v${index}:${entry.message.id}`,
+      message: entry.message,
+      at: entry.at ?? now,
+      channel: entry.channel ?? "web",
+      modality: entry.modality ?? "voice",
+    })),
+  ];
+  current.sort((a, b) => a.at - b.at);
+  for (const entry of current) {
+    push(entry.key, entry.message, entry.at, entry.channel, entry.modality);
   }
   return items;
 }
