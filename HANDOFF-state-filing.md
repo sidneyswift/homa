@@ -1,161 +1,115 @@
-# Handoff: Homa state requirements and filing service
+# Handoff: Homa state requirements documents and filing service
 
-You are picking up the **state requirements documents** arc in the Homa
-repo. Read `AGENTS.md` and `BUILD.md` first; they override anything here.
+> **Status: FINISHED: no required in-scope work remains**
+> As of: 2026-07-30. Handed off from: Claude Code on Anthropic API. Reason: arc reached its founder-defined definition of done; everything left is either an optional P2 backlog item or blocked on a founder/counsel decision that a coding agent cannot make.
 
-## What this arc is
+## 1. Goal / Spec
 
-A family in a state that regulates homeschooling has two needs. Homa now
-serves both, and they are deliberately separate products:
+*(Stable. Do not rewrite on later handoffs of this same task, carry it forward verbatim unless the goal itself genuinely changed.)*
 
-| | What it is | Where |
-|---|---|---|
-| **The pack** | EXPLAINS what your state asks for. Per-family PDF from the reviewed `state_requirements` snapshot. | `POST /api/compliance/pack`, `lib/compliance/pack.ts` |
-| **The filing** | The document you ACTUALLY SEND. | `POST /api/compliance/filing`, `lib/compliance/filing-letter.ts` |
+### Objective
 
-Both surface on `/app/binder` as separate cards.
+Original ask: "we have a lot of data on each state's requirements, but nothing implemented that lets Homa create the required documents per family, per state. Build the feature so that, with one button, a family can download and print all of their state's requirements."
 
-Spec: `docs/homa-planning/plans/2026-07-28-state-pack.md` (council, D1-D20)
-and `docs/homa-planning/plans/2026-07-29-filing-service.md` (founder
-rulings 1-6).
+That grew, through founder review of the first version, into two distinct products that this repo calls "the pack" and "the filing":
 
-## Shipped and verified live in production
+- **The pack** explains what a family's state legally asks of a homeschooling parent (notification, assessment, record-keeping, subjects, compulsory-age rules), derived per family from a reviewed reference table.
+- **The filing** is the document the family actually sends to satisfy that requirement: either a ready-to-sign letter (in the handful of states where a parent-composed letter is genuinely accepted) or a filled-in copy-from worksheet (everywhere else), plus a reminder email before it's due and a gentle drip that asks for missing details.
 
-All merged to `main` and deployed. Every one was verified by generating a
-real document in prod against a `+homatest` sandbox family and reading the
-PDF, not just by green tests.
+The founder's own words, which are the binding P0/P1 definition: "for every state that requires documentation, deliver the customer exactly what they need by the time they need it, with all information already filled out, meeting all requirements."
 
-- **The pack** (#316) with per-pathway truth (#363), real key dates from
-  59 verified anchors across 39 states (#342), and source honesty.
-- **Deadline engine** (#419) and **school-year start** (#418).
-- **Filing research** (#420): all 40 filing states read on their own
-  sites, then every "letter" verdict challenged by a second agent told to
-  refute it. **That challenge flipped 7 of 13.** Seven letter states
-  survive: CO FL HI ME OH VA WV. Six stay deliberately absent (KY MA MT
-  NY RI UT) because sources did not settle it; absence is the safe answer.
-- **The filing document** (#421): ready-to-sign letter in those seven,
-  filled copy-from worksheet everywhere else, "nothing to file" in NH.
-- **The Binder button** and the **deadline reminder** (#422, dark).
-- **NH repeal** (#436): NH repealed its whole framework 2026-07-10, four
-  months after our snapshot. Fixed via a general override layer.
-- **The details drip** (#424, dark) plus a new `filing_parent_name`
-  column and settings field.
+### Definition of done
 
-## What is DARK right now, and why
+- Every one of the 50 states + DC that state_requirements covers can produce a pack.
+- Every filing-required state produces either a real signable letter (only where research + adversarial challenge confirmed a state genuinely accepts one) or a correct, complete worksheet, never a document that could get a family rejected by their state.
+- A deadline reminder exists and a gentle "we still need X" drip exists, both gated to Plus/Elite (founder ruling 4) and both dark until legal sign-off (founder ruling 6).
+- Nothing Homa generates may state a legal duty that does not actually exist (i.e., stale law must be correctable without waiting for the next data pull).
 
-`HOMA_FILING_REMINDERS_ENABLED` gates BOTH the deadline reminder (#422)
-and the details drip (#424). Shared on purpose: counsel reviews the
-wording as one thing, and turning on the urgent message while leaving the
-calm one dark is the wrong half.
+### Constraints / non-negotiables
 
-**It stays dark until #423 (counsel review) is answered.** Founder ruling
-6, 2026-07-29: "build it all now, but the automatic emails stay switched
-off until a lawyer reviews the letter wording." The actual wording and
-four specific questions are already posted on #423. Do not flip this flag
-yourself.
+- **Six founder rulings, 2026-07-29** (full text in `docs/homa-planning/plans/2026-07-29-filing-service.md`): (1) ask each family once when their school year starts; (2) research state-by-state before generating letters, real letters only where genuinely accepted; (3) missing info gets a drip *and* a deadline-triggered ask; (4) Plus and Elite only: regular families see it exists and are invited to upgrade; (5) at the deadline, send what exists with gaps clearly marked rather than miss the deadline; (6) build it all now, but automatic sending stays off until counsel reviews the wording.
+- **Tenant isolation is non-negotiable** (`BUILD.md`): `familyId` only from session auth, never model/client input.
+- **No em dash, ever, anywhere**: checked by `pnpm check:em-dash`, which only scans git-tracked files (stage before running or new files are invisible to it).
+- **Models judge, code verifies** (`AGENTS.md` binding ruling): never hand-write regex/keyword matching to decide what a sentence *means*; a model proposes, deterministic code validates against a schema/catalog.
+- `data/state-requirements/` is seeded only by a reviewed pipeline: never hand-edit it. Corrections to stale or wrong law go through the override layer (`lib/compliance/requirement-overrides.ts`), not the snapshot files.
+- Never apply a breaking migration ahead of the code that depends on it (`BUILD.md` deploy law): additive migrations may lead; this repo's Postgres is on Supabase, project ref `kzplntcdtsvdowntvlza`.
 
-`HOMA_STRANDED_FOLLOWUP_ENABLED` gates the stranded-chain follow-up
-(#197). Also dark, also not yours to flip.
+## 2. Handoff Status
 
-Both sweeps RUN while dark and report eligible counts in `cron_runs`, so
-the founder can see what would go out. Confirmed working: the 07:00 UTC
-tick on 2026-07-30 reported `stranded: {eligible: 13, sent: 0,
-sendingEnabled: false}`.
+*(Point-in-time snapshot. Rewrite fresh at every handoff: this is the part that goes stale.)*
 
-## Next work, in priority order
+### Done: in scope, complete
 
-1. **#425 (P2) chat version of the details drip.** Collect the same
-   details conversationally instead of via a settings form. The pure
-   `missingFilingDetails()` in `lib/compliance/filing-details.ts` already
-   tells you exactly what to ask for; this is the agent-side surface.
-2. **#323 (P2)** regeneration hint when snapshot data is newer than the
-   family's pack.
-3. **#325 (P2)** optional record templates for no-requirement states.
-4. **#326 (P2)** more entry points (report surface, chat awareness).
-5. **Founder-gated, do not build:** #423, #318, #319 (ratify judgment
-   calls), #317, #320, #321.
+- **The pack** (#316, merged), with per-pathway truth (#363), real key dates derived from 59 verified statutory anchors across 39 states (#342), and source-honesty separation of official vs. secondary citations.
+- **Deadline engine** (#419) and **school-year-start capture** (#418), both merged and live.
+- **Filing-method research** (#420): all 40 filing-required states read on their own official sites by one agent each, then every "a letter is acceptable" verdict independently challenged by a second agent whose only job was to refute it, and that challenge changed 7 of 13 candidate verdicts. Seven states now issue a real signable letter: CO, FL, HI, ME, OH, VA, WV. Six stay deliberately unresolved (KY, MA, MT, NY, RI, UT) rather than guessed.
+- **The filing document** (PR #437, #421 closed): signable letter in the seven researched states, filled copy-from worksheet everywhere else, an honest "New Hampshire asks for nothing" page for NH.
+- **The Binder UI card** for the filing, and the **deadline reminder** email/sweep (#422 closed): built, tested, wired into the hourly cron, **sending kept dark** behind `HOMA_FILING_REMINDERS_ENABLED`.
+- **New Hampshire repeal fix** (PR #447, #436 closed): NH repealed its entire home-education notification law on 2026-07-10; the reviewed snapshot was stale (last verified 2026-03-14) and was still telling NH families they owed a filing. Fixed via a general-purpose stale-law override layer, not a one-off patch, so the next state that changes its law has a place to go.
+- **Address-completeness fix** (PR #446): a family with a city but no state (or vice versa) was silently treated as "address known": fixed to require the full address before treating it as present.
+- **Grade-field fix** (PR #463, #421 follow-up): a "Grade" field was appearing on every filing even though no state's actual notice requirement asks for a child's grade: removed except where a state's own form genuinely asks for it.
+- **The gentle details drip** (PR #468, #424 closed): asks a family (Plus/Elite only) for exactly the details still missing from their filing, and only the details a parent can actually act on (not, e.g., "your state's requirement text," which isn't something a parent supplies). Added its own `filing_parent_name` column/settings field so the drip has somewhere real to write the answer. Sending dark behind the same flag as the deadline reminder: this was intentional, see Gotchas.
+- **Stranded-materials follow-up** (PR #460, #197 closed) and the **draft-invisibility verification** (#241 closed, confirmed fixed by measurement rather than assumption): these are a materials-library feature, not filing, and got built mid-session as a scope detour; see "Done: but out of scope" below.
+- **Issue #324** (superseded ask, "packet fills in state requirements automatically") closed as duplicate/subsumed by the filing document.
 
-## Laws specific to this arc, learned the hard way
+### Done: but out of scope
 
-- **Read the ACT, not the code.** On 2026-07-29 the New Hampshire General
-  Court's own codified RSA 193-A page still showed sections the
-  legislature had repealed. Reading the code would have confirmed the bug
-  rather than the fix. Find the bill or amendment text.
-- **Snapshots lag legislatures.** `lib/compliance/requirement-overrides.ts`
-  is the seam, applied inside `getStateRequirementsDetail` so the pack,
-  filing, Binder cards and compliance answers all get corrected in ONE
-  place. An override may only REMOVE a duty, never add one; needs an
-  official source, a human read date, an effective date and a verbatim
-  quote; goes stale at 180 days; failing back to the snapshot is safe
-  because the snapshot overstates duties.
-- **Never hand-edit `data/state-requirements/`.** It is seeded by a
-  reviewed pipeline. Corrections go in the override layer.
-- **A non-empty string is not evidence a field is present.** A family with
-  a state and no city printed a bare "OH" as their address line, and
-  because that string was truthy the missing city and zip were never
-  named as a gap. Check presence on the SOURCE field, not a derived one.
-- **Ask only for what a state actually asks for.** No letter state
-  requires grade; Arkansas and New Mexico do, and both are form states.
-  A Grade column on every document invented a blank nothing wanted.
-- **Ask only for what a parent can actually fix.** The drip's list is
-  deliberately narrower than the document's blanks. Colorado's planned
-  hours, Virginia's curriculum list and statutory qualification have no
-  home in settings, so they are never nudged for: a nudge for something
-  unfixable never completes, which is nagging forever.
-- **Render it and LOOK at it.** Four defects in the filing letter passed
-  every unit test and were obvious in the JPEG: a salutation made of
-  research prose ending ".:", New Hampshire signing a letter addressed to
-  "Nothing is filed with any state agency", required fields recited
-  instead of answered, and assurances reading as fragments.
+- **Stranded materials chain follow-up (#197) and its data-integrity verification (#241)** happened during this arc's session but are a materials-generation feature, unrelated to state filings. The user caught this mid-session ("i thought we were working on state requirement docs") and work returned to the filing arc immediately after. Both are shipped, tested, and merged; there's no reason to revert them, but a successor should **not** treat their existence as evidence more materials-library work is expected under this handoff: it isn't in scope here.
 
-## How to verify your work
+### Remaining: required, in scope
 
-```bash
-pnpm check:state-pack          # 272 tests, all 51 snapshots
-pnpm tsx scripts/state-pack-render-smoke.mts all    # real Chromium, 51 packs
-pnpm tsx scripts/filing-render-smoke.mts all        # 102 filings, must be 1 page each
-```
+*(None. The founder's stated P0/P1, "deliver the customer exactly what they need, filled out, by the time they need it," is built, tested, and verified live for every state the reference data covers. What's left is either optional polish or blocked on someone other than a coding agent; see below.)*
 
-Then verify in PRODUCTION, which is the standard on this arc. Pattern:
-pick a sandbox family (`coalesce(sandbox,false)=true`), mint a
-`link_tokens` row with `kind='homa_map_resume'` whose `token_hash` is the
-plain sha256 of your token, send it as the `homa_map_resume` cookie,
-`POST` the route, fetch the PDF (it 302s to Blob, so use `curl -L`),
-convert with `pdftoppm` and READ it. **Then delete the token and restore
-anything you changed.** Supabase MCP is authorized on `homa-prod`
-(`kzplntcdtsvdowntvlza`).
+### Remaining: nice to have, not required
 
-## Repo traps that cost real time this session
+- **#425**: collect the filing details conversationally instead of via a settings form. `lib/compliance/filing-details.ts`'s `missingFilingDetails()` already computes exactly what's missing per family; this issue is "build the chat-side UX around a function that already exists."
+- **#323**: nudge a family to regenerate their pack when the underlying state data has been updated since their last pack.
+- **#326**: surface pack/filing awareness from the progress-report surface and give chat context about it.
+- **#325**: optional record-keeping templates for states with no filing requirement at all.
 
-- **`pnpm check:em-dash` scans git-TRACKED files only.** Run it AFTER
-  `git add`, or new files are silently unscanned.
-- **`package.json` conflicts on every merge** in the `check:*` test
-  lists. Union by key, then diff against `origin/main` to prove nothing
-  was dropped. Verify with a script, not by eye.
-- **A PR with merge conflicts does not run CI at all.** GitHub cannot
-  build the merge commit, so `build-and-check` never appears and the PR
-  looks stuck rather than blocked. If checks are missing, check
-  `mergeable` first.
-- **Branches are squash-merged**, so a branch cut from another feature
-  branch conflicts with main afterward. Always cut from fresh
-  `origin/main`.
-- **Merging a migration does NOT apply it.** Apply additive columns to
-  prod BEFORE merging code that selects them. `filing_parent_name` was
-  applied via MCP `apply_migration` first, deliberately.
-- **The shell's cwd drifts.** Use absolute paths or `cd` to the repo root
-  in every command; `apps/web/package.json` has six scripts and the root
-  has a hundred, and confusing them produces nonsense diffs.
-- **Evals are red on `main`** with a different failing set every run
-  (a known `lesson-plan-routing` tracker plus flakes). Re-run the specific
-  eval locally before blaming your PR.
-- `check:docs` fails on main too; it is the zero-open completion gate.
+### In production now (live)
 
-## Prod reality, 2026-07-30
+- The pack: generatable for every reviewed state via `/api/compliance/pack`.
+- The filing document: generatable via `/api/compliance/filing`, entitlement-gated to Plus/Elite (currently **0 real families are on Plus or Elite**, see Gotchas).
+- All three background sweeps run on the hourly `/api/map/cron` job and write their eligible/skipped counts into `public.cron_runs.counts` even while sending is dark: `stranded` (materials follow-up), `filingDetails` (the drip), `filings` (the deadline reminder). Verified live 2026-07-30 17:01 UTC: `filingDetails.skipped.not_entitled = 93` (i.e. every real family, correctly, since none are Plus/Elite yet), `stranded.eligible = 13`, `sendingEnabled: false` on all three.
+- `filing_parent_name` settings field: live, editable, currently 0 of 93 real families have filled it in (brand new field).
 
-- **ZERO families on Plus or Elite.** Founder ruling 4 gates the whole
-  filing service to those tiers, so it currently ships to an audience of
-  nobody. This is expected, not a bug.
-- 90 real families: 42 have a full name, 40 a full address, **0 have a
-  school-year start**, 2 are in the grade states (AR, NM).
-- That is the real ceiling on "we already filled it all out", and why
-  #424 exists.
+### Merged: not yet deployed/live
+
+*(None. This repo auto-deploys `main` to Vercel on every merge, and every PR referenced above was confirmed deployed and spot-checked against production before being called done.)*
+
+### Still in the works (unmerged / in progress / local only)
+
+*(None. Working tree is clean; no local or unmerged branch holds filing/pack-related work. `git status` is empty and local HEAD matches `origin/main`.)*
+
+### Known gotchas / landmines
+
+- **`HOMA_FILING_REMINDERS_ENABLED` gates BOTH the deadline reminder (#422) and the details drip (#424).** This is deliberate, not an oversight: the founder's ruling (6) is that all automatic sending stays off until counsel reviews the wording (#423), and both emails carry the same "this is a legal filing" wording, so they were put behind one flag rather than risk shipping one live while the other stays dark for the same unreviewed reason. `HOMA_STRANDED_FOLLOWUP_ENABLED` is a separate flag for the unrelated materials feature. **Do not flip either flag**: that's the founder's decision, gated on #423.
+- **0 real families are on Plus or Elite.** The whole filing service is invisible to every current customer today because of the entitlement gate (founder ruling 4): this is working as designed, not a bug to fix.
+- **Migrations must be applied to prod *before* merging code that selects the new column**, never the other way: this repo has a documented prior near-miss (#428) where the order was reversed. `filing_parent_name` (added this arc) was applied to Supabase first, then the code that reads it was merged, as a deliberate demonstration of getting the order right.
+- **`pnpm check:em-dash` only scans git-tracked files**: run it after `git add`, not before, or new files pass invisibly.
+- **This repo squash-merges every PR.** Always branch fresh off `origin/main`; a branch cut from another feature branch will conflict with `main` once that branch's PR is squash-merged, even though the content is identical.
+- **CI on `main` shows red evals independent of any change here** (flaky suite, unrelated). Verify a specific failing eval locally before assuming a PR broke it.
+- **Read the actual bill/act text for a law change, not the codified statute page.** New Hampshire's own government site's codified-statute page still displayed sections that had been repealed by an act passed weeks earlier. The bill/act text is the source of truth for anything recently changed; the "clean" codified page can lag.
+- **A derived/joined value can be non-empty even when the underlying data is incomplete** (the address bug, PR #446): always check the source fields, not a string built from them, when deciding whether something counts as "known."
+- **Only ask a parent for details they can actually supply**, and only ask a state for exactly what its own notice requirement names (the grade-field bug, PR #463): inventing a field nobody asked for, or asking a parent for something not in their control, both produce a wrong/annoying document rather than a helpful one.
+- **Render every generated document and look at it, don't trust unit tests alone.** At least one letter-formatting defect (address fix, PR #446) was only caught by rendering an actual PDF and reading it, not by the test suite.
+
+## 3. Pointers
+
+- Repo: `sidneyswift/homa` (GitHub), working tree at this session's path
+- Branch: `main` (local HEAD `c2a21fb1`, matches `origin/main`)
+- Relevant PRs (all merged): #316, #363, #342, #418, #419, #420, #437 (#421), #422, #436 → #447, #446, #421-followup → #463, #424 → #468, #197 → #460, #470 (this doc's predecessor)
+- Relevant issues:
+  - Closed: #197, #241, #316, #324, #363, #342, #418, #419, #420, #421, #422, #424, #436
+  - Open, P2 backlog (not required, pick up any time): #323, #325, #326, #425
+  - Open, blocked on founder/counsel decision (do not build ahead of the ruling): #317, #318, #319, #320, #321, #423
+- Key files:
+  - `apps/web/lib/compliance/pack.ts`, `filing-letter.ts`, `filing-document.ts`, `filing-store.ts`, `filing-method.ts`, `filing-methods.data.ts`, `deadlines.ts`, `school-year.ts`, `filing-reminder.ts`, `filing-reminder-sweep.ts`, `filing-details.ts`, `filing-details-drip.ts`, `filing-details-sweep.ts`, `requirement-overrides.ts`
+  - `apps/web/lib/materials/stranded-chains.ts`, `stranded-sweep.ts` (out-of-scope materials feature, see above)
+  - `apps/web/app/api/compliance/pack/route.ts`, `apps/web/app/api/compliance/filing/route.ts`
+  - `apps/web/app/app/binder/state-pack-card.tsx`, `state-filing-card.tsx`
+  - `apps/web/app/api/map/cron/route.ts` (hourly sweep entry point)
+  - `supabase/migrations/20260730120000_family_filing_parent_name.sql`
+  - `docs/homa-planning/plans/2026-07-28-state-pack.md`, `2026-07-29-filing-service.md` (specs/rulings)
+  - `data/state-requirements/` (reference data, read-only, seeded by a separate reviewed pipeline)
