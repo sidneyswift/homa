@@ -1002,3 +1002,46 @@ kids), the interests header, the reveal naming her real worry, the
 filling-week line, and the full planner opening with a real month all
 worked exactly as the last several walks left them. The only new defect
 is this one, and it is more severe than anything wave 1 found.
+
+### Walk 009, 2026-07-30, Rachel, this branch was 27 commits stale
+
+Before walking, checked why gh#416 (`start_first_making` never fires)
+kept failing: this branch predated PR #371 (`d9d9591f`, merged to main),
+the fix that moved all six dynamic tools from `turn.started` to
+`step.started`. Merged main in (two conflicts, `package.json` and
+`build-log.md`, both union-by-entry per the known hotspot), reinstalled,
+and reran the full check roster: tsc, lint, onboarding (103), map (92),
+fleet-skills, `check:dynamic-tool-events` ("6 dynamic tool(s) of 63
+scanned resolve on step.started"), `check:deadline-anchors`,
+`check:job-material-delivery`, isolation, events, taxonomy, eve build,
+eve-stream-duration. All green.
+
+**gh#416 is resolved on the tool-presence question, and stays open on
+model compliance.** Walked beat 5 fresh: one child, no interests
+pre-filled, asked what she loves, answered "She's completely obsessed
+with dinosaurs right now, draws them constantly." `agent_tool_calls` for
+that turn: `load_skill`, `update_child_profile`, `start_checklist`.
+`start_first_making` was not called, despite a textbook trigger and a
+now-confirmed-present tool. Homa's own line hinted at it: "I'll keep
+that in mind for what we make her," future tense, no tool backing it.
+Nine walks, zero calls, tool presence no longer a candidate explanation.
+
+**The gh#415/gh#466 kickoff pattern recurred exactly**, disproving the
+prose fix from walk 008. Same family shape, same two tool calls
+(`save_family_basics`, `ask_for_details(homeschool_profile)`), byte for
+byte. The ordering sharpens the diagnosis: `save_family_basics` fired
+BEFORE `load_skill` returned, meaning the model acted before the skill's
+new prohibition (or any of its content) was in context, and
+`onboarding-mode.ts`'s own fallback line ("Load the onboarding skill
+before you plan anything beyond your opening line") went unfollowed
+independently of anything in SKILL.md. The same turn, this time, did NOT
+lose its transcript to gh#466's abort (turn completed slowly, ~200s+,
+delivered normally) — one data point that the tool-call pattern
+correlates with gh#466 without deterministically causing it.
+
+All three issues updated with this evidence (gh#416, gh#415, gh#466)
+rather than filing new ones; no code changes attempted for either
+compliance gap, per the same reasoning as walk 008: this is the
+prose-insufficiency class `models-judge-code-verifies.md` describes, and
+gh#315 (onboarding mode unreachable from the eval harness) is the actual
+prerequisite blocking a real fix, not another wording pass.
