@@ -6,6 +6,7 @@ import puppeteer, { type Browser, type Page } from "puppeteer-core";
 import { resolveEvalBlobStore } from "./eval-blob-store";
 import { isAllowedPrintableSubresourceUrl, SHEET_PAGE_CLASS } from "./page-shell";
 import { rasterizePdfToJpegs } from "./rasterize-pdf";
+import { REVIEW_MAX_PAGES } from "./review-artifact";
 
 /**
  * HTML to print artifacts, in the app runtime (the materials studio's
@@ -47,8 +48,20 @@ import { rasterizePdfToJpegs } from "./rasterize-pdf";
 const LETTER_PX = { width: 816, height: 1056 } as const;
 const RENDER_TIMEOUT_MS = 60_000;
 
-/** Per-page previews are capped; the PDF always carries every page. */
+/** Per-page previews stored for the parent are capped; the PDF always
+ * carries every page. */
 export const PREVIEW_PAGE_CAP = 6;
+
+/**
+ * How many pages are rasterized at all. Higher than PREVIEW_PAGE_CAP on
+ * purpose: the reviewer needs pixels for every page, and until gh#368
+ * pages 7 and later were never drawn, so nothing (not the reviewer, not
+ * the parent, not a screenshot) had ever seen them. Rasterizing is
+ * in-process pdf.js work, so the extra pages cost render time rather
+ * than storage or model spend, and only the first PREVIEW_PAGE_CAP are
+ * uploaded and kept.
+ */
+export const RASTER_PAGE_CAP = REVIEW_MAX_PAGES;
 
 const LOCAL_CHROME_PATHS = [
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
@@ -126,7 +139,9 @@ export interface RenderedPrintable {
   /** Page one, what MMS and the chat card lead with. */
   previewJpeg: Buffer;
   /** One JPEG per page rasterized from the pdf bytes, in order, capped
-   * at PREVIEW_PAGE_CAP. */
+   * at RASTER_PAGE_CAP. Every one of these reaches the reviewer; only
+   * the first PREVIEW_PAGE_CAP are uploaded and shown to the parent, so
+   * a caller that persists these must slice. */
   pageJpegs: Buffer[];
   /** True page count of the pdf itself (uncapped). */
   pageCount: number;
@@ -194,7 +209,7 @@ async function screenshotPagesPrintEmulated(
     ),
   );
   const pageJpegs: Buffer[] = [];
-  for (let index = 0; index < Math.min(pageCount, PREVIEW_PAGE_CAP); index += 1) {
+  for (let index = 0; index < Math.min(pageCount, RASTER_PAGE_CAP); index += 1) {
     pageJpegs.push(
       Buffer.from(
         await page.screenshot({
@@ -301,7 +316,7 @@ export async function renderPrintableHtml(
     try {
       ({ pageJpegs, pageCount } = await rasterizePdfToJpegs(
         pdf,
-        PREVIEW_PAGE_CAP,
+        RASTER_PAGE_CAP,
       ));
       if (pageJpegs.length === 0) {
         throw new Error("PDF rasterization produced zero pages");

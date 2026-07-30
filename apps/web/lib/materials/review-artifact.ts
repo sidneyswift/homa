@@ -28,8 +28,28 @@ const REVIEW_TIMEOUT_MS = 45_000;
 /** Pages shown to the reviewer per call (input-token ceiling). */
 export const REVIEW_PAGE_CAP = 4;
 
+/**
+ * Hard ceiling on pages reviewed for one creation, across all calls.
+ * The longest material production has ever produced is 12 pages
+ * (2026-07-30), so this bounds a pathological document rather than
+ * describing a real one. Chunks run concurrently, so the ceiling costs
+ * calls, not wall-clock, and create_printable's render deadline tier
+ * has room: p95 37.5s, max 105s against 210s.
+ */
+export const REVIEW_MAX_PAGES = 16;
+
 export function reviewEnabled(): boolean {
   return process.env.HOMA_MATERIALS_REVIEW !== "off";
+}
+
+/**
+ * Full coverage (gh#368) is on unless switched off. Measured before
+ * enabling rather than estimated: 1.45x reviewer calls and 1.71x page
+ * images fleet-wide, against the roughly 3x the ticket feared, because
+ * 155 of 227 materials are already four pages or shorter.
+ */
+export function reviewFullCoverageEnabled(): boolean {
+  return process.env.HOMA_MATERIALS_REVIEW_FULL !== "off";
 }
 
 export function reviewModelId(): string {
@@ -37,8 +57,23 @@ export function reviewModelId(): string {
 }
 
 export interface ArtifactReview {
+  /**
+   * The blocking verdict, and only ever a statement about the pages in
+   * the blocking chunk (see planReviewChunks). A problem found by the
+   * coverage gh#368 added never flips this to false: founder ruling
+   * 2026-07-30, full coverage tells her about a later page rather than
+   * withholding the document over it.
+   */
   pass: boolean;
   issues: string[];
+  /**
+   * Problems on pages that had no reviewer at all before gh#368. Real
+   * and named, carried to the parent beside the material instead of
+   * held back. Each entry already names its page: the reviewer is told
+   * the page numbers it is looking at, and the chunk boundaries are
+   * deterministic, so attribution never depends on parsing the text.
+   */
+  advisoryIssues: string[];
   /**
    * The 1-based page numbers the reviewer actually looked at. A pass is
    * a statement about these pages and nothing else, so the caller can
@@ -81,6 +116,41 @@ export function selectPagesForReview(
     .sort((left, right) => left.pageNumber - right.pageNumber);
 }
 
+/** One creation's reviewer calls, split by what their verdict may do. */
+export interface ReviewChunkPlan {
+  /**
+   * Exactly the pages the single-call reviewer saw before full
+   * coverage, so its verdict keeps its old power to hold a document
+   * back. Defined by calling selectPagesForReview rather than by
+   * restating its rule, which is what makes "no page becomes newly
+   * blocking" true by construction instead of by inspection. It matters
+   * on a revision, where the old selection was changed-pages-first and
+   * not pages one to four.
+   */
+  blocking: ReviewablePage[];
+  /** Everything else, in reading order, in reviewer-sized batches. */
+  advisory: ReviewablePage[][];
+}
+
+export function planReviewChunks(
+  pages: readonly ReviewablePage[],
+): ReviewChunkPlan {
+  const blocking = selectPagesForReview(pages);
+  if (!reviewFullCoverageEnabled()) return { blocking, advisory: [] };
+
+  const alreadyShown = new Set(blocking.map((page) => page.pageNumber));
+  const rest = pages
+    .filter((page) => !alreadyShown.has(page.pageNumber))
+    .sort((left, right) => left.pageNumber - right.pageNumber)
+    .slice(0, Math.max(0, REVIEW_MAX_PAGES - blocking.length));
+
+  const advisory: ReviewablePage[][] = [];
+  for (let start = 0; start < rest.length; start += REVIEW_PAGE_CAP) {
+    advisory.push(rest.slice(start, start + REVIEW_PAGE_CAP));
+  }
+  return { blocking, advisory };
+}
+
 const reviewSchema = z.object({
   pass: z
     .boolean()
@@ -111,21 +181,24 @@ Do not nitpick style, art taste, or things the brief never asked for.
 A usable page passes. List issues concretely, each one fixable, naming
 the page number when there is more than one page.`;
 
+interface ChunkVerdict {
+  pass: boolean;
+  issues: string[];
+  reviewedPages: number[];
+}
+
 /**
- * reviewArtifact(...): a verdict, or null when review is off or fails
- * (null never blocks delivery). Multi-page materials pass every rendered
- * page preview (REVIEW_PAGE_CAP applies) plus the true pageCount, so the
- * reviewer never mistakes "I was shown one page" for "the document has
- * one page" (the Llanes packet incident, 2026-07-17).
+ * One reviewer call over one batch of pages, or null when it cannot
+ * run. Every page handed in is shown: the batching decision belongs to
+ * planReviewChunks, so a caller cannot silently drop a page here.
  */
-export async function reviewArtifact(input: {
+async function reviewChunk(input: {
   familyId: string;
   channel: UsageChannel;
   pages: readonly ReviewablePage[];
   pageCount: number;
   brief: string;
-}): Promise<ArtifactReview | null> {
-  if (!reviewEnabled()) return null;
+}): Promise<ChunkVerdict | null> {
   if (input.pages.length === 0) return null;
 
   const model = reviewModelId();
@@ -133,7 +206,7 @@ export async function reviewArtifact(input: {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REVIEW_TIMEOUT_MS);
 
-  const shownPages = selectPagesForReview(input.pages);
+  const shownPages = input.pages;
   const shownNumbers = shownPages.map((page) => page.pageNumber);
   const pageContext =
     input.pageCount > 1
@@ -192,11 +265,63 @@ export async function reviewArtifact(input: {
   } catch (error) {
     if (controller.signal.aborted) return null;
     console.error(
-      "reviewArtifact failed (creation proceeds unreviewed):",
+      "reviewArtifact chunk failed (those pages go unreviewed):",
       error instanceof Error ? error.message : "unknown",
     );
     return null;
   } finally {
     clearTimeout(timeout);
   }
+}
+
+/**
+ * reviewArtifact(...): a verdict, or null when review is off or the
+ * blocking chunk could not run (null never blocks delivery). Multi-page
+ * materials pass every rendered page plus the true pageCount, so the
+ * reviewer never mistakes "I was shown one page" for "the document has
+ * one page" (the Llanes packet incident, 2026-07-17).
+ *
+ * Chunks run concurrently. Sequentially they would not fit: the review
+ * call's own ceiling is 45s and production has seen a single call take
+ * 15.6s, so three sequential chunks could outlast the ceiling on their
+ * own before create_printable's render work is counted at all.
+ *
+ * Null when the BLOCKING chunk fails, even if advisory chunks came
+ * back. It is the one honest answer: the caller turns null into "nothing
+ * has looked at these pages", and reporting a page-nine problem while
+ * silent about pages one to four would make that sentence a lie in the
+ * direction that matters.
+ */
+export async function reviewArtifact(input: {
+  familyId: string;
+  channel: UsageChannel;
+  pages: readonly ReviewablePage[];
+  pageCount: number;
+  brief: string;
+}): Promise<ArtifactReview | null> {
+  if (!reviewEnabled()) return null;
+  if (input.pages.length === 0) return null;
+
+  const { blocking, advisory } = planReviewChunks(input.pages);
+  const [blockingVerdict, ...advisoryVerdicts] = await Promise.all([
+    reviewChunk({ ...input, pages: blocking }),
+    ...advisory.map((pages) => reviewChunk({ ...input, pages })),
+  ]);
+
+  if (!blockingVerdict) return null;
+
+  const landed = advisoryVerdicts.filter(
+    (verdict): verdict is ChunkVerdict => verdict !== null,
+  );
+  return {
+    pass: blockingVerdict.pass,
+    issues: blockingVerdict.issues,
+    advisoryIssues: landed.flatMap((verdict) => verdict.issues),
+    // Only pages a reviewer actually returned on. A chunk that timed
+    // out leaves its pages out, so the coverage sentence stays true.
+    reviewedPages: [
+      ...blockingVerdict.reviewedPages,
+      ...landed.flatMap((verdict) => verdict.reviewedPages),
+    ].sort((left, right) => left - right),
+  };
 }
