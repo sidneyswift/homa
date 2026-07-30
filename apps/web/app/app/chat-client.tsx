@@ -2435,14 +2435,12 @@ export function ChatClient({
           </div>
         ) : null}
         <div
-          className={`mx-auto w-full max-w-[780px] shadow-md ${
+          className={`mx-auto w-full max-w-[780px] rounded-[22px] shadow-md ${
             // Inside the phone sheet this is a zone, not a box: the CSS
             // strips its chrome and gives it a hairline instead. From sm
             // up it is the second of two floating boxes, so it takes a
             // gap to sit in.
-            composerBesideCard
-              ? "ob-dock-composer rounded-[22px] sm:mt-2.5"
-              : "rounded-[22px]"
+            composerBesideCard ? "ob-dock-composer sm:mt-2.5" : ""
           } ${showComposer ? "" : "hidden"}`}
         >
           {voiceOpen ? (
