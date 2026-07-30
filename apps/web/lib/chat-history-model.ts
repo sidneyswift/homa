@@ -27,6 +27,10 @@ export interface ChatHistoryMessage {
   sessionId: string;
   role: "user" | "assistant";
   channel: ChatHistoryChannel;
+  /** How the turn arrived. In-app voice is channel "web" (that is where
+   * it happened) and modality "voice", so the transcript can mark a
+   * spoken stretch without lying about the surface it came from. */
+  modality: "text" | "voice";
   content: string;
   /** created_at as epoch ms, the transcript's day-separator clock. */
   atMs: number;
@@ -87,6 +91,9 @@ export interface ChatHistoryRow {
   session_id: string;
   role: string;
   channel: string;
+  /** Null for every row written before the column existed, which is all
+   * of them at migration time; those are text. */
+  modality?: string | null;
   content: string | null;
   created_at: string;
 }
@@ -120,6 +127,9 @@ export function toChatHistoryMessage(
     sessionId: row.session_id,
     role: row.role,
     channel: row.channel as ChatHistoryChannel,
+    // Anything but the one known spoken value is text: an unrecognized
+    // modality should render as an ordinary message, never vanish.
+    modality: row.modality === "voice" ? "voice" : "text",
     content,
     atMs,
   };
@@ -241,7 +251,12 @@ function materialToolPart(material: ChatHistoryMaterial) {
 export function archiveFromServerHistory(
   payload: ChatHistoryPayload,
   excludeSessionId: string | undefined,
-): { at: number; channel: ChatHistoryChannel; message: EveMessage }[] {
+): {
+  at: number;
+  channel: ChatHistoryChannel;
+  modality: "text" | "voice";
+  message: EveMessage;
+}[] {
   const history = payload.messages.filter(
     (entry) => entry.sessionId !== excludeSessionId,
   );
@@ -272,6 +287,7 @@ export function archiveFromServerHistory(
   const archive = history.map((entry) => ({
     at: entry.atMs,
     channel: entry.channel,
+    modality: entry.modality,
     message: {
       id: `hist:${entry.id}`,
       role: entry.role,
@@ -286,6 +302,7 @@ export function archiveFromServerHistory(
     archive.push({
       at: material.atMs,
       channel: "web",
+      modality: "text",
       message: {
         id: `mat:${material.id}`,
         role: "assistant",

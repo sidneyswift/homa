@@ -6,6 +6,7 @@ import { ageInMonths, ageLabel, formatUsPhone } from "@homa/core";
 
 import { getAppData } from "../../../lib/app-data";
 import { familyHasBillingRelationship } from "../../../lib/billing/portal";
+import { familyPlanState } from "../../../lib/billing/wall";
 import { getFamilyMemberEmails } from "../../../lib/family-profile";
 import { listPendingInvites } from "../../../lib/family-invites";
 import { getFamilyPhones } from "../../../lib/family-phone";
@@ -17,6 +18,7 @@ import { MemoriesCard } from "../../../components/dashboard/memories-card";
 import { PageColumn } from "../../../components/dashboard/page-column";
 import { FamilyDetailsSection } from "./family-details-section";
 import { HomeschoolSection } from "./homeschool-section";
+import { PlanSection } from "./plan-section";
 import { KidsSection } from "./kids-section";
 import { ParentsSection } from "./parents-section";
 
@@ -74,7 +76,7 @@ export default async function SettingsPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [familyPhones, memoriesResult, members, pendingInvites, memberEmails, homeschool, hasBilling] =
+  const [familyPhones, memoriesResult, members, pendingInvites, memberEmails, homeschool, hasBilling, plan] =
     await Promise.all([
       getFamilyPhones(family.id),
       getMyMemories(family.id),
@@ -83,6 +85,7 @@ export default async function SettingsPage({
       getFamilyMemberEmails(family.id),
       getMyFamilyHomeschool(family.id),
       familyHasBillingRelationship(family.id),
+      familyPlanState(family.id),
     ]);
   const childNames = new Map(children.map((child) => [child.id, child.name]));
   const memberIds = new Set(members.map((member) => member.user_id));
@@ -172,7 +175,13 @@ export default async function SettingsPage({
               openSignedInAdultPhoneEditor={shouldOpenSignedInAdultPhoneEditor(edit)}
             />
 
-            <HomeschoolSection current={homeschool} />
+            <HomeschoolSection
+              current={homeschool}
+              schoolYearStartOn={family.school_year_start_on}
+          filingParentName={family.filing_parent_name}
+            />
+
+            <PlanSection plan={plan} />
 
             <FamilyDetailsSection
               details={{

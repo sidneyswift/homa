@@ -104,3 +104,108 @@ describe("buildTranscript source labels", () => {
     assert.equal(items.filter((item) => item.kind === "separator").length, 2);
   });
 });
+
+describe("spoken turns in the thread", () => {
+  const spokenLine = (id: string, role: "user" | "assistant", at: number) => ({
+    at,
+    channel: "web",
+    modality: "voice" as const,
+    message: {
+      id,
+      role,
+      parts: [{ type: "text", text: `${role} said something` }],
+    } as EveMessage,
+  });
+
+  it("renders a spoken turn as an ordinary message in the thread", () => {
+    const now = Date.UTC(2026, 6, 29, 15, 0);
+    const items = buildTranscript({
+      archived: [],
+      live: [],
+      liveTimes: {},
+      spoken: [spokenLine("v0", "user", now)],
+      now,
+    });
+    const messages = items.filter((item) => item.kind === "message");
+    assert.equal(messages.length, 1);
+    assert.equal(messages[0].kind === "message" && messages[0].message.role, "user");
+  });
+
+  it("interleaves typed and spoken turns by the clock", () => {
+    // She typed, then talked, then typed again. The thread has to read in
+    // the order it happened, not archived-then-live-then-voice.
+    const now = Date.UTC(2026, 6, 29, 15, 0);
+    const typedFirst = { id: "t1", role: "user", parts: [{ type: "text", text: "before" }] } as EveMessage;
+    const typedLast = { id: "t2", role: "user", parts: [{ type: "text", text: "after" }] } as EveMessage;
+    const items = buildTranscript({
+      archived: [],
+      live: [typedFirst, typedLast],
+      liveTimes: { t1: now, t2: now + 60_000 },
+      spoken: [spokenLine("v0", "user", now + 30_000)],
+      now,
+    });
+    const ids = items
+      .filter((item) => item.kind === "message")
+      .map((item) => (item.kind === "message" ? item.message.id : ""));
+    assert.deepEqual(ids, ["t1", "v0", "t2"]);
+  });
+
+  it("tags a spoken stretch once, on the turn that opened it", () => {
+    // The pill marks a surface CHANGE. Four spoken turns are one stretch.
+    const now = Date.UTC(2026, 6, 29, 15, 0);
+    const items = buildTranscript({
+      archived: [],
+      live: [],
+      liveTimes: {},
+      spoken: [
+        spokenLine("v0", "assistant", now),
+        spokenLine("v1", "user", now + 1000),
+        spokenLine("v2", "assistant", now + 2000),
+      ],
+      now,
+    });
+    const labels = items
+      .filter((item) => item.kind === "message")
+      .map((item) => (item.kind === "message" ? (item.sourceLabel ?? null) : null));
+    assert.deepEqual(labels, ["Spoken", null, null]);
+  });
+
+  it("tags a second conversation later in the same visit", () => {
+    // Typing between the two stretches ends the run, so the second one
+    // earns its own pill instead of inheriting the first one's silence.
+    const now = Date.UTC(2026, 6, 29, 15, 0);
+    const typed = { id: "t1", role: "user", parts: [{ type: "text", text: "typed" }] } as EveMessage;
+    const items = buildTranscript({
+      archived: [],
+      live: [typed],
+      liveTimes: { t1: now + 10_000 },
+      spoken: [spokenLine("v0", "user", now), spokenLine("v1", "user", now + 20_000)],
+      now,
+    });
+    const labelled = items
+      .filter((item) => item.kind === "message")
+      .map((item) =>
+        item.kind === "message"
+          ? [item.message.id, item.sourceLabel ?? null]
+          : [],
+      );
+    assert.deepEqual(labelled, [
+      ["v0", "Spoken"],
+      ["t1", null],
+      ["v1", "Spoken"],
+    ]);
+  });
+
+  it("marks Homa's spoken turn too, so a stretch she opened is not bare", () => {
+    // Voice mode almost always starts with Homa greeting her. The
+    // assistant-tags-are-noise rule that applies to device channels would
+    // leave the whole conversation unmarked here.
+    assert.equal(sourceLabelFor("assistant", "web", "voice"), "Spoken");
+    assert.equal(sourceLabelFor("user", "web", "voice"), "Spoken");
+  });
+
+  it("does not tag a typed web message", () => {
+    assert.equal(sourceLabelFor("user", "web", "text"), null);
+    assert.equal(sourceLabelFor("assistant", "web", undefined), null);
+  });
+});

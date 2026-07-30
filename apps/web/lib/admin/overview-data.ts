@@ -53,6 +53,34 @@ export interface RunTrouble {
   at: string;
 }
 
+/**
+ * A family hitting the same tool failure again and again (gh#372).
+ *
+ * The customer was the pager. During the 2026-07-26/27 incident a
+ * co-founder hit repeated create_printable failures for hours and the
+ * only escalation that fired was Homa telling her to report the bug to
+ * the Homa team herself.
+ *
+ * Threshold calibrated against 30 days of real non-sandbox traffic:
+ * three errors for one family and one tool inside one hour fires twice
+ * in that window (a find_materials burst on 07-17, a create_printable
+ * burst on 07-28) and never otherwise. One-off errors, which are the
+ * common case, stay quiet.
+ *
+ * Honest limit: this cannot see a tool that was never OFFERED to the
+ * model. The gh#345 outage produced no rows here at all, because the
+ * tool was missing from the turn rather than failing in it.
+ */
+export interface ToolTrouble {
+  /** The most recent failing call, which is what an ack is keyed to. */
+  id: string;
+  familyName: string | null;
+  tool: string;
+  failures: number;
+  error: string | null;
+  at: string;
+}
+
 export interface EmailTrouble {
   id: string;
   familyName: string | null;
@@ -182,6 +210,8 @@ export interface FleetOverview {
   /** Which prices did the math: live gateway or pinned fallback. */
   priceBook: PriceBookStatus;
   /** Alerts marked handled that would otherwise show in this range. */
+  /** Repeated same-tool failures per family (gh#372). */
+  toolTroubles: ToolTrouble[];
   handledAlerts: HandledAlert[];
 }
 
@@ -288,6 +318,43 @@ export async function getFleetOverview(
         where a.source = 'task_run' and a.source_id = r.id
       )
     order by r.started_at desc
+    limit 12
+  `;
+  // Repeated same-tool failures (gh#372). Three inside one hour for one
+  // family and one tool: calibrated on 30 days of real traffic, where
+  // that fires twice and one-off errors never do.
+  const toolTroubleRows = await sql<
+    { id: string; family_name: string | null; tool: string; failures: number; error: string | null; at: string }[]
+  >`
+    with bursts as (
+      select t.family_id, t.tool, date_trunc('hour', t.created_at) as hour,
+             count(*)::int as failures,
+             max(t.created_at) as last_at
+      from public.agent_tool_calls t
+      join public.families f on f.id = t.family_id
+      where t.is_error
+        and t.created_at >= now() - ${interval}::interval
+        and f.sandbox is not true
+      group by t.family_id, t.tool, date_trunc('hour', t.created_at)
+      having count(*) >= 3
+    )
+    select latest.id, f.name as family_name, bursts.tool, bursts.failures,
+           left(coalesce(latest.result::text, ''), 200) as error,
+           bursts.last_at::text as at
+    from bursts
+    join public.families f on f.id = bursts.family_id
+    join lateral (
+      select t.id, t.result
+      from public.agent_tool_calls t
+      where t.family_id = bursts.family_id and t.tool = bursts.tool
+        and t.is_error and t.created_at = bursts.last_at
+      limit 1
+    ) latest on true
+    where not exists (
+      select 1 from public.admin_alert_acknowledgments a
+      where a.source = 'tool_failure' and a.source_id = latest.id
+    )
+    order by bursts.last_at desc
     limit 12
   `;
   const deliveryRows = await sql<{ status: string; n: number }[]>`
@@ -716,6 +783,14 @@ export async function getFleetOverview(
       { rates: priceBook.rates },
     ),
     priceBook: { source: priceBook.source, fetchedAt: priceBook.fetchedAt },
+    toolTroubles: toolTroubleRows.map((row) => ({
+      id: row.id,
+      familyName: row.family_name,
+      tool: row.tool,
+      failures: row.failures,
+      error: row.error && row.error.length > 0 ? row.error : null,
+      at: row.at,
+    })),
     handledAlerts,
   };
 }

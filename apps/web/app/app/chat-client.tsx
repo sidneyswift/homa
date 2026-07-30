@@ -7,6 +7,7 @@ import { ArrowDown, ArrowUp, ChevronDown, Square, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Logo } from "../../components/brand/Logo";
+import { ThinkingMark } from "../../components/brand/ThinkingMark";
 import { sendWallBeacon } from "../../components/billing/wall-beacon";
 import { WallModal } from "../../components/billing/wall-modal";
 import type { WallCheckout } from "../../lib/billing/wall-types";
@@ -34,6 +35,9 @@ import {
   NO_STYLES_SUMMARY,
   type DetailCardKind,
 } from "./detail-card";
+import { VoiceMode } from "./voice-mode";
+import { VoiceModeButton } from "./voice-mode-button";
+import { spokenTurnMessage, type VoiceTranscriptLine } from "./voice-transcript";
 import { ChecklistTakeover } from "./checklist-takeover";
 import { formatHiddenDirective } from "../../lib/onboarding/directives";
 import {
@@ -63,6 +67,7 @@ import {
   type ArchivedMessage,
 } from "./chat-storage";
 import {
+  composerPrimaryAction,
   appendPreparedChatSendToQueue,
   flushChatQueue,
   focusChatComposerInput,
@@ -76,11 +81,14 @@ import {
 import {
   DictationRow,
   MicButton,
+  DICTATION_CUTOFF_MESSAGE,
   RECORDING_HINT_MESSAGE,
   useDictation,
 } from "./dictation";
 import {
+  activeToolName,
   busyLabel,
+  busyMood,
   countLastTurnToolCalls,
   messageSaysSomething,
   messageSpeaksWords,
@@ -856,6 +864,35 @@ export function ChatClient({
   // time the tag ever appears, then only on tap. After first paint on
   // purpose (no SSR mismatch, no setState-in-effect cascade).
   const [filingHintOpen, setFilingHintOpen] = useState(false);
+  /** The in-app voice conversation (#283). Mounted only while open so the
+   * socket and the microphone exist exactly as long as she is talking. */
+  const [voiceOpen, setVoiceOpen] = useState(false);
+  /** Turns said out loud this visit, in the order they were said.
+   *
+   * They render as ordinary bubbles in the thread, because that is what
+   * they are. They deliberately do NOT go through eve: text Homa must not
+   * answer what voice Homa just said (founder direction 2026-07-29). The
+   * voice route writes each one to conversation_messages, so a refresh
+   * brings them back through server history like any other message, and
+   * the next thing the parent TYPES sees them as context.
+   */
+  const [spoken, setSpoken] = useState<ArchivedMessage[]>([]);
+  const appendSpokenTurn = useCallback((line: VoiceTranscriptLine) => {
+    setSpoken((previous) => [
+      ...previous,
+      {
+        at: currentTimeMs(),
+        // Numbered by how many turns this VISIT has heard, which is not the
+        // same as the turn's sequence in its conversation. She can talk,
+        // stop, and talk again, and each conversation numbers itself from
+        // zero; this id has to stay unique across all of them, because it is
+        // what React renders the thread by.
+        message: spokenTurnMessage(line, previous.length) as EveMessage,
+        channel: "web",
+        modality: "voice",
+      },
+    ]);
+  }, []);
   useEffect(() => {
     if (!focusChildName) return;
     const frame = requestAnimationFrame(() => {
@@ -1118,6 +1155,7 @@ export function ChatClient({
     archived,
     live: agent.data.messages,
     liveTimes,
+    spoken,
   });
   const liveMessageSet = new Set<EveMessage>(agent.data.messages);
   const progressSessionKey =
@@ -2017,19 +2055,27 @@ export function ChatClient({
           </>
         )}
         {busy && busyLabel(agent.data.messages, busySeconds) ? (
-          // The mark bobs while Homa thinks, so the wait is never a blank
-          // page (tester ask, evidence memo 1; MJ-06). Goes still under
-          // reduced motion; the label still reads what is happening.
+          // The mark is awake while Homa thinks, so the wait is never a
+          // blank page (tester ask, evidence memo 1; MJ-06). Goes still
+          // under reduced motion; the label still reads what is happening.
           //
           // The clock leads. It is the part that actually moves every
           // second, so it anchors the row and the words become the thing
           // that changes occasionally rather than the thing being stared
           // at. The label shimmers and escalates with the same clock, so
           // twenty five seconds reads as work rather than as a hang.
+          //
+          // The character escalates on that same clock too, and this is
+          // the only place all three meet: seconds, mood and words are
+          // one reading of one wait, never three opinions about it.
           <div className="flex items-baseline gap-2.5 text-muted">
-            <span className="chat-think-mark inline-flex self-center" aria-hidden="true">
-              <Logo size={20} variant="mark" />
-            </span>
+            <ThinkingMark
+              size={28}
+              mood={busyMood(busySeconds)}
+              seconds={busySeconds}
+              tool={activeToolName(agent.data.messages)}
+              className="self-center"
+            />
             {busySeconds > 0 ? (
               <span className="font-mono text-sm tabular-nums text-subtle">
                 {busySeconds}s
@@ -2089,9 +2135,7 @@ export function ChatClient({
           // The stream died but the turn is durable server-side; while
           // the replay runs, the wait reads as work, not as a failure.
           <div className="flex items-center gap-2.5 text-muted" role="status">
-            <span className="chat-think-mark inline-flex" aria-hidden="true">
-              <Logo size={20} variant="mark" />
-            </span>
+            <ThinkingMark size={28} mood="digging" />
             <span>Reconnecting&hellip;</span>
           </div>
         ) : agent.error && staleOidcAt !== null ? (
@@ -2401,6 +2445,17 @@ export function ChatClient({
               : "rounded-[22px]"
           } ${showComposer ? "" : "hidden"}`}
         >
+          {voiceOpen ? (
+            // Above the composer, not over it: the thread is where the
+            // conversation is appearing, turn by turn, so it has to stay
+            // visible while she talks. The panel is just the microphone.
+            <div className="mb-2">
+              <VoiceMode
+                onTurn={appendSpokenTurn}
+                onClose={() => setVoiceOpen(false)}
+              />
+            </div>
+          ) : null}
           {showPromptSuggestionRail ? (
             <PromptSuggestionRail
               phase={promptSuggestionPhase}
@@ -2471,7 +2526,7 @@ export function ChatClient({
               binder. Change kids at the top right.
             </p>
           ) : null}
-          <div className="mt-0.5 flex items-center gap-0.5">
+          <div className="relative mt-0.5 flex items-center gap-0.5">
             <AttachMenuButton
               onFiles={attachments.addFiles}
               disabled={!familyId}
@@ -2522,6 +2577,15 @@ export function ChatClient({
                   </button>
                 ) : null}
               </>
+            ) : composerPrimaryAction({
+                draft,
+                readyAttachments: attachments.readyCount,
+              }) === "voice" ? (
+              // Empty composer: the primary action is starting a voice
+              // conversation, not a Send with nothing to send (founder
+              // direction 2026-07-29). It swaps back to Send on the first
+              // character, so the two never compete for the same tap.
+              <VoiceModeButton onStart={() => setVoiceOpen(true)} />
             ) : (
               <button
                 type="submit"
@@ -2555,6 +2619,13 @@ export function ChatClient({
           // ends the take, and sending stays hers.
           <p className="mx-auto mt-2 w-full max-w-[780px] text-sm text-subtle" role="status">
             {RECORDING_HINT_MESSAGE}
+          </p>
+        ) : dictation.autoStopped && dictation.phase === "idle" ? (
+          // The cap ended her take (gh#351). It used to end it silently,
+          // and a one-line composer hides a mid-word cut, so a parent
+          // lost a long dictated list without ever being told why.
+          <p className="mx-auto mt-2 w-full max-w-[780px] text-sm text-muted" role="status">
+            {DICTATION_CUTOFF_MESSAGE}
           </p>
         ) : dictation.error ? (
           // Fail-soft (M1-05's law): a blocked mic or an unclear take

@@ -44,9 +44,13 @@ export interface HomeschoolValues {
 
 function HomeschoolEditor({
   current,
+  schoolYearStartOn,
+  filingParentName,
   onClose,
 }: {
   current: HomeschoolValues;
+  schoolYearStartOn: string | null;
+  filingParentName: string | null;
   onClose: () => void;
 }) {
   const [styles, setStyles] = useState<string[]>(current.styles);
@@ -132,6 +136,39 @@ function HomeschoolEditor({
         />
       </div>
 
+      <label className="mt-4 block font-medium text-strong" htmlFor="filing-parent-name">
+        Your name, as it should appear on an official filing
+      </label>
+      <p className="mt-1 text-sm text-muted">
+        Kept separate from what Homa calls you, because a notice to your
+        school district wants the name on your paperwork. Homa leaves this
+        blank on the filing rather than guessing it (gh#424).
+      </p>
+      <input
+        id="filing-parent-name"
+        name="filing_parent_name"
+        type="text"
+        maxLength={120}
+        autoComplete="name"
+        defaultValue={filingParentName ?? ""}
+        className="mt-2 w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
+      />
+
+      <label className="mt-4 block font-medium text-strong" htmlFor="school-year-start">
+        When does your school year start?
+      </label>
+      <p className="mt-1 text-sm text-muted">
+        Most states that ask for a filing count the deadline from this day, so
+        it is how Homa knows when your paperwork is due.
+      </p>
+      <input
+        id="school-year-start"
+        name="school_year_start_on"
+        type="date"
+        defaultValue={schoolYearStartOn ?? ""}
+        className="mt-2 w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
+      />
+
       <label className="mt-4 block font-medium text-strong" htmlFor="homeschool-values">
         Anything that matters to your family?
       </label>
@@ -172,7 +209,18 @@ function HomeschoolEditor({
   );
 }
 
-export function HomeschoolSection({ current }: { current: HomeschoolValues }) {
+export function HomeschoolSection({
+  current,
+  schoolYearStartOn,
+  filingParentName,
+}: {
+  current: HomeschoolValues;
+  /** gh#418: drives filing deadlines in the 25 states whose rule counts
+   * from the day the family started. Null means never asked. */
+  schoolYearStartOn: string | null;
+  /** gh#424: the name a filing carries, never the greeting name. */
+  filingParentName: string | null;
+}) {
   const [editing, setEditing] = useState(false);
   const hasAnything =
     current.styles.length > 0 || current.curriculums.length > 0 || Boolean(current.values);
@@ -182,7 +230,12 @@ export function HomeschoolSection({ current }: { current: HomeschoolValues }) {
       <SectionHeading>How you homeschool</SectionHeading>
 
       {editing ? (
-        <HomeschoolEditor current={current} onClose={() => setEditing(false)} />
+        <HomeschoolEditor
+          current={current}
+          schoolYearStartOn={schoolYearStartOn}
+          filingParentName={filingParentName}
+          onClose={() => setEditing(false)}
+        />
       ) : hasAnything ? (
         // Values left, one Edit pill trailing right: the same row grammar
         // as the kid and parent rows (2026-07-13 UX read: four section

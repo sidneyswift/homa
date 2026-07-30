@@ -211,3 +211,26 @@ export function focusChatComposerInput(
 ): void {
   form?.querySelector("input")?.focus();
 }
+
+/**
+ * composerPrimaryAction({draft, readyAttachments}): which action owns the
+ * composer's primary button right now.
+ *
+ * The ChatGPT composer shape (founder direction 2026-07-29): an empty box
+ * offers voice, and the first character turns that same button into Send.
+ * Before this, an empty box showed a disabled Send, which is a button whose
+ * only job is to look unavailable.
+ *
+ * Extracted and tested rather than left inline because it decides which
+ * action a tap in the primary slot actually performs, and getting it wrong
+ * either dials a real phone when she meant to send, or hides Send when she
+ * has something to say. A staged attachment counts as something to send
+ * even with no words, which is how a photo with no caption goes out.
+ */
+export function composerPrimaryAction(input: {
+  draft: string;
+  readyAttachments: number;
+}): "voice" | "send" {
+  const hasWords = input.draft.trim().length > 0;
+  return hasWords || input.readyAttachments > 0 ? "send" : "voice";
+}

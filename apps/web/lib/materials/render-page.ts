@@ -4,8 +4,18 @@ import chromium from "@sparticuz/chromium";
 import puppeteer, { type Browser, type Page } from "puppeteer-core";
 
 import { resolveEvalBlobStore } from "./eval-blob-store";
-import { isAllowedPrintableSubresourceUrl, SHEET_PAGE_CLASS } from "./page-shell";
+import {
+  isAllowedPrintableSubresourceUrl,
+  SHEET_BODY_CLASS,
+  SHEET_PAGE_CLASS,
+} from "./page-shell";
+import {
+  type PageGeometry,
+  summarizePageGeometry,
+  type SheetBodyMeasurement,
+} from "./page-geometry";
 import { rasterizePdfToJpegs } from "./rasterize-pdf";
+import { REVIEW_MAX_PAGES } from "./review-artifact";
 
 /**
  * HTML to print artifacts, in the app runtime (the materials studio's
@@ -47,8 +57,20 @@ import { rasterizePdfToJpegs } from "./rasterize-pdf";
 const LETTER_PX = { width: 816, height: 1056 } as const;
 const RENDER_TIMEOUT_MS = 60_000;
 
-/** Per-page previews are capped; the PDF always carries every page. */
+/** Per-page previews stored for the parent are capped; the PDF always
+ * carries every page. */
 export const PREVIEW_PAGE_CAP = 6;
+
+/**
+ * How many pages are rasterized at all. Higher than PREVIEW_PAGE_CAP on
+ * purpose: the reviewer needs pixels for every page, and until gh#368
+ * pages 7 and later were never drawn, so nothing (not the reviewer, not
+ * the parent, not a screenshot) had ever seen them. Rasterizing is
+ * in-process pdf.js work, so the extra pages cost render time rather
+ * than storage or model spend, and only the first PREVIEW_PAGE_CAP are
+ * uploaded and kept.
+ */
+export const RASTER_PAGE_CAP = REVIEW_MAX_PAGES;
 
 const LOCAL_CHROME_PATHS = [
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
@@ -126,7 +148,9 @@ export interface RenderedPrintable {
   /** Page one, what MMS and the chat card lead with. */
   previewJpeg: Buffer;
   /** One JPEG per page rasterized from the pdf bytes, in order, capped
-   * at PREVIEW_PAGE_CAP. */
+   * at RASTER_PAGE_CAP. Every one of these reaches the reviewer; only
+   * the first PREVIEW_PAGE_CAP are uploaded and shown to the parent, so
+   * a caller that persists these must slice. */
   pageJpegs: Buffer[];
   /** True page count of the pdf itself (uncapped). */
   pageCount: number;
@@ -138,6 +162,10 @@ export interface RenderedPrintable {
   renderer: "pdfjs-raster" | "screenshot-fallback";
   /** The browser that drew the pdf, when the driver reports one. */
   rendererVersion: string | null;
+  /** Deterministic per-page fill/overflow facts (gh#349), one entry per
+   * .homa-sheet-body, covering every page regardless of PREVIEW_PAGE_CAP
+   * (this is DOM measurement, not rasterization, so it is never capped). */
+  pageGeometry: PageGeometry[];
 }
 
 export interface PrintableRenderPolicy {
@@ -194,7 +222,7 @@ async function screenshotPagesPrintEmulated(
     ),
   );
   const pageJpegs: Buffer[] = [];
-  for (let index = 0; index < Math.min(pageCount, PREVIEW_PAGE_CAP); index += 1) {
+  for (let index = 0; index < Math.min(pageCount, RASTER_PAGE_CAP); index += 1) {
     pageJpegs.push(
       Buffer.from(
         await page.screenshot({
@@ -206,6 +234,59 @@ async function screenshotPagesPrintEmulated(
     );
   }
   return { pageJpegs, pageCount };
+}
+
+/**
+ * measureSheetGeometry(page): one raw measurement per .homa-sheet-body,
+ * taken while Chromium still holds the laid-out document (gh#349, the
+ * composer authoring blind into an exact-height box is the F1 root
+ * cause). Deliberately not scrollHeight/clientHeight: with box-sizing:
+ * border-box and an explicit height, both report the BORDER-BOX height
+ * (padding included) whether or not the content fills it, so neither can
+ * tell a full page from an empty one. Walking descendants for the
+ * lowest rendered bottom edge measures the actual ink extent instead.
+ * Runs under whatever media type the page is currently painting (screen,
+ * same as setContent left it): a known limit shared with the rest of
+ * this module's screen-vs-print divergence, named rather than hidden.
+ */
+async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]> {
+  return page.evaluate(
+    (bodyClass: string, pageClass: string): SheetBodyMeasurement[] => {
+      const bodies = Array.from(document.querySelectorAll(`.${bodyClass}`));
+      return bodies.map((body) => {
+        const bodyRect = body.getBoundingClientRect();
+        const style = getComputedStyle(body);
+        const paddingTop = Number.parseFloat(style.paddingTop) || 0;
+        const paddingBottom = Number.parseFloat(style.paddingBottom) || 0;
+        const usablePx = bodyRect.height - paddingTop - paddingBottom;
+        const contentTop = bodyRect.top + paddingTop;
+        let maxBottom = contentTop;
+        const walker = document.createTreeWalker(body, NodeFilter.SHOW_ELEMENT);
+        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+          const rect = (node as Element).getBoundingClientRect();
+          if (rect.width > 0 || rect.height > 0) {
+            maxBottom = Math.max(maxBottom, rect.bottom);
+          }
+        }
+        // Overflow is measured against the PAGE box's bottom edge (the
+        // 11in box that actually clips in print via overflow: hidden),
+        // never against this element's own padded interior: content can
+        // legitimately run into the body's bottom padding band without
+        // being cut, so comparing there would false-flag a fitting page.
+        const pageEl = body.closest(`.${pageClass}`);
+        const pageBottom = pageEl
+          ? pageEl.getBoundingClientRect().bottom
+          : bodyRect.bottom;
+        return {
+          contentPx: maxBottom - contentTop,
+          usablePx,
+          overflowPx: Math.max(0, maxBottom - pageBottom),
+        };
+      });
+    },
+    SHEET_BODY_CLASS,
+    SHEET_PAGE_CLASS,
+  );
 }
 
 /**
@@ -278,6 +359,11 @@ export async function renderPrintableHtml(
       ),
     );
 
+    // Measured while the document is laid out and settled, same moment
+    // the fallback screenshots would capture it: geometry facts about
+    // pages the model composed blind, fed back so it stops guessing.
+    const pageGeometry = summarizePageGeometry(await measureSheetGeometry(page));
+
     const pdf = Buffer.from(
       await page.pdf({
         format: "letter",
@@ -301,7 +387,7 @@ export async function renderPrintableHtml(
     try {
       ({ pageJpegs, pageCount } = await rasterizePdfToJpegs(
         pdf,
-        PREVIEW_PAGE_CAP,
+        RASTER_PAGE_CAP,
       ));
       if (pageJpegs.length === 0) {
         throw new Error("PDF rasterization produced zero pages");
@@ -315,7 +401,15 @@ export async function renderPrintableHtml(
       renderer = "screenshot-fallback";
     }
     const rendererVersion = await browser.version().catch(() => null);
-    return { pdf, previewJpeg: pageJpegs[0], pageJpegs, pageCount, renderer, rendererVersion };
+    return {
+      pdf,
+      previewJpeg: pageJpegs[0],
+      pageJpegs,
+      pageCount,
+      renderer,
+      rendererVersion,
+      pageGeometry,
+    };
   } finally {
     await page.close().catch(() => {
       // A page that will not close is abandoned with its browser.

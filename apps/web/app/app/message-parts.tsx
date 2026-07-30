@@ -3,6 +3,7 @@
 import type { EveMessage, EveMessagePart } from "eve/react";
 
 import { Logo } from "../../components/brand/Logo";
+import type { ThinkMood } from "../../components/brand/ThinkingMark";
 import { parseAttachmentMarkers } from "../../lib/attachments/markers";
 import {
   isNarratedPause,
@@ -1087,20 +1088,193 @@ function gapLabel(message: EveMessage, generic: string): string {
  * "thinking…" held for twenty five seconds stops reading as thought and
  * starts reading as a hang. Each of these is true of any turn at the
  * moment it appears, which is the constraint: a wait label may never
- * claim work that is not happening, so none of them names a step.
+ * claim work that is not happening, so none of them names a step. That
+ * is why the pools below are all about her and never about the work:
+ * "figuring this out" is honest on every turn, "putting this together"
+ * would be a guess about a turn that might only be reading a date.
+ *
+ * Four stages, one per stretch of the clock. Within a stage the line is
+ * picked by a per-turn seed, so the same four strings do not grind on a
+ * parent who waits fifty times a day, and it is picked ONCE per stage
+ * rather than per second: words that reshuffle while she reads them are
+ * a slot machine, not a status. Seed zero is the original wording, which
+ * keeps every existing caller and test on the line it was written for.
+ *
+ * Whimsical on purpose (founder call 2026-07-28, correcting a first pass
+ * that was flat status text). The 2026-07-08 clarity ruling is not in
+ * tension with this and never was: what it bans is copy a parent has to
+ * DECODE, and "noodling…" costs nobody a second thought. Every line here
+ * is a plain English word about thinking, which is the one thing that is
+ * always literally happening.
+ *
+ * The flavour is Homa's, not a dev tool's: kettles, cogs, pottering,
+ * sleeves. She is a little house, so the register is domestic and warm
+ * rather than technical and clever. Nothing arch, nothing that winks at
+ * the machinery, nothing a tired parent has to be in the mood for.
+ *
+ * Roughly forty five per stage, because the whole point is that she
+ * almost never repeats herself.
  */
-export function genericBusyLabel(seconds: number): string {
-  if (seconds < 5) return "thinking…";
-  if (seconds < 15) return "working on it…";
-  if (seconds < 45) return "still working…";
-  return "this one is taking a while…";
+const BUSY_LINES: readonly (readonly string[])[] = [
+  // Under five seconds. She has it, that is the whole message. Most turns
+  // end inside this stage, so these are the lines a parent sees most often
+  // in a day and they must never grate.
+  [
+    "thinking…",
+    "one moment…",
+    "hmm…",
+    "on it…",
+    "mulling…",
+    "pondering…",
+    "noodling…",
+    "wondering…",
+    "let me think…",
+    "cogs turning…",
+    "sharpening pencils…",
+    "thinking cap on…",
+    "turning it over…",
+    "getting my bearings…",
+    "warming up…",
+    "here we go…",
+  ],
+  // Five to fifteen. Long enough that silence would start to itch, so
+  // these say she is properly into it without claiming a step.
+  [
+    "working on it…",
+    "percolating…",
+    "simmering…",
+    "marinating…",
+    "brewing…",
+    "tinkering…",
+    "whirring away…",
+    "puzzling this out…",
+    "chewing this over…",
+    "circling this…",
+    "chasing a thought…",
+    "deep in thought…",
+    "sleeves rolled up…",
+    "still thinking…",
+    "thinking it through…",
+    "figuring this out…",
+  ],
+  // Fifteen to forty five. Name the length before she has to wonder, and
+  // make the slowness sound chosen rather than broken.
+  [
+    "still working…",
+    "a knotty one…",
+    "untangling this…",
+    "unknotting this…",
+    "this one has layers…",
+    "measuring twice…",
+    "taking the scenic route…",
+    "this one is a puzzle…",
+    "this one wants care…",
+    "worth taking time over…",
+    "giving this its due…",
+    "slow and steady…",
+    "not a quick one…",
+    "still noodling…",
+    "still puzzling…",
+    "still turning it over…",
+  ],
+  // Past forty five. Reassure first, then admit it is slow: at this point
+  // the honest worry is that Homa has died, so every line here says she
+  // has not. Whimsy goes quiet here on purpose, because a joke lands badly
+  // on someone who has been waiting a minute.
+  [
+    "this one is taking a while…",
+    "still here, still working…",
+    "not stuck, just slow…",
+    "still with you…",
+    "a real head scratcher…",
+    "longer than usual, still going…",
+    "still here, promise…",
+    "this one is stubborn…",
+    "slow, but still moving…",
+    "hanging in there…",
+    "still here, not stuck…",
+    "taking its time…",
+    "a marathon, this one…",
+    "still going, bear with me…",
+    "still on it, thanks for waiting…",
+  ],
+];
+
+/** Which stretch of the clock the wait is in. The one place these
+ *  thresholds are written down: the label and the character's mood are
+ *  the same escalation and must never disagree on screen. */
+function busyStage(seconds: number): 0 | 1 | 2 | 3 {
+  if (seconds < 5) return 0;
+  if (seconds < 15) return 1;
+  if (seconds < 45) return 2;
+  return 3;
+}
+
+/** How the thinking mark carries itself at this point in the wait. */
+export function busyMood(seconds: number): ThinkMood {
+  return (["settling", "working", "digging", "long"] as const)[
+    busyStage(seconds)
+  ];
+}
+
+export function genericBusyLabel(seconds: number, seed = 0): string {
+  const pool = BUSY_LINES[busyStage(seconds)];
+  // Non-negative and integral whatever the caller passes, so a derived seed
+  // can never index off the end of a pool.
+  const pick = Math.abs(Math.trunc(seed)) % pool.length;
+  return pool[pick];
+}
+
+/**
+ * Which line this turn gets, derived rather than stored: the id of the
+ * message Homa is answering.
+ *
+ * That id is fixed for exactly one turn, which is the whole requirement.
+ * A clock would reword the wait underneath a parent mid-sentence, and a
+ * counter would need state that the tick already re-renders past. No
+ * message to answer (the opening turn) falls to seed zero, which is the
+ * original wording.
+ */
+function waitSeed(messages: readonly EveMessage[]): number {
+  let id = "";
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    if (messages[index].role === "user") {
+      id = messages[index].id ?? "";
+      break;
+    }
+  }
+  let hash = 0;
+  for (let index = 0; index < id.length; index += 1) {
+    hash = (hash * 31 + id.charCodeAt(index)) | 0;
+  }
+  return hash;
+}
+
+/**
+ * The tool running right now, or null. Exported so the thinking mark can
+ * match a couple of its acts to what is genuinely happening.
+ *
+ * The law on the wait LABEL is that it may never claim work that is not
+ * happening, and the same law binds the character: an act may be BIASED by
+ * a running tool, never used to assert one. She draws while a page is being
+ * made because a page is genuinely being made; she never draws to imply it.
+ */
+export function activeToolName(messages: readonly EveMessage[]): string | null {
+  const last = messages.at(-1);
+  if (last?.role !== "assistant") return null;
+  const part = last.parts.at(-1);
+  if (!part || part.type !== "dynamic-tool") return null;
+  if (part.state !== "input-streaming" && part.state !== "input-available") {
+    return null;
+  }
+  return part.toolName ?? null;
 }
 
 export function busyLabel(
   messages: readonly EveMessage[],
   seconds = 0,
 ): string | null {
-  const generic = genericBusyLabel(seconds);
+  const generic = genericBusyLabel(seconds, waitSeed(messages));
   const last = messages.at(-1);
   if (!last || last.role !== "assistant") return generic;
   const part = last.parts.at(-1);

@@ -3,7 +3,7 @@
 import { Check, Mic, X } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
-import { Logo } from "../../components/brand/Logo";
+import { ThinkingMark } from "../../components/brand/ThinkingMark";
 
 /**
  * Voice input for the chat composer (PRD FR-4, backlog M0-04/M1-05
@@ -47,6 +47,23 @@ export const RECORDING_HINT_MESSAGE =
  *  honor the 32kbps hint below and sit far under it). */
 const MAX_RECORDING_SECONDS = 180;
 
+/**
+ * Said when the cap ends a take, because until 2026-07-29 it ended it in
+ * silence (gh#351).
+ *
+ * A parent dictated a long list of page-by-page edits, the cap stopped
+ * her at three minutes, and the transcript was accepted mid-word: 1502
+ * characters ending "...for Amalia to count. Fo". Nothing told her, and
+ * the composer is one line, so the truncation was invisible until Homa
+ * replied that the message had cut off. She then spent twenty minutes
+ * trying to recover it with a screen recording and a screenshot.
+ *
+ * Names the limit, keeps her words, and points at the fix she can act on
+ * rather than apologising.
+ */
+export const DICTATION_CUTOFF_MESSAGE =
+  "Three minutes is the longest I can listen at once, so this take stopped there. Your words are in the box; tap the mic again to add more.";
+
 /** Chrome and Firefox record webm/opus; iOS Safari records mp4 (AAC).
  *  Both map onto the transcriber's extension allowlist. Returning
  *  undefined lets the browser pick its own default. */
@@ -75,6 +92,8 @@ export function useDictation(onTranscript: (transcript: string) => void) {
   const [phase, setPhase] = useState<DictationPhase>("idle");
   const [seconds, setSeconds] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  /** True when the 3-minute cap ended the take rather than the parent. */
+  const [autoStopped, setAutoStopped] = useState(false);
 
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -151,6 +170,8 @@ export function useDictation(onTranscript: (transcript: string) => void) {
     if (phase !== "idle" || startingRef.current) return;
     startingRef.current = true;
     setError(null);
+    // A new take is not still cut off; the notice must not outlive it.
+    setAutoStopped(false);
 
     let stream: MediaStream;
     try {
@@ -218,11 +239,12 @@ export function useDictation(onTranscript: (transcript: string) => void) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
+    setAutoStopped(true);
     setPhase("transcribing");
     recorder.stop();
   }, [phase, seconds]);
 
-  return { supported, phase, seconds, error, start, accept, cancel };
+  return { supported, phase, seconds, error, autoStopped, start, accept, cancel };
 }
 
 export function MicButton({ onStart }: { onStart: () => void }) {
@@ -269,9 +291,7 @@ export function DictationRow({
     >
       {transcribing ? (
         <>
-          <span className="chat-think-mark inline-flex" aria-hidden="true">
-            <Logo size={20} variant="mark" />
-          </span>
+          <ThinkingMark size={28} mood="working" />
           <span className="text-muted">Writing that down&hellip;</span>
         </>
       ) : (

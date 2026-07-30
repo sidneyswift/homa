@@ -1,4 +1,9 @@
 @import "tailwindcss";
+/* Homa's acts (the thinking mark's character animation). Its own file
+   because it is a character library rather than page styling, and because
+   it breaks this file's transform-only rule on purpose; the reasons are
+   written at the top of it. */
+@import "./thinking-acts.css";
 
 /* The signed-in desktop rail uses one explicit display contract. Keeping
    this outside the hidden/lg:flex utility pair prevents browser content
@@ -932,19 +937,329 @@ html.rv-armed [data-reveal].rv-no-anim, html.rv-armed [data-reveal-kids].rv-no-a
 }
 
 /* ============================================================================
-   Chat thinking mark (/chat, ChatClient busy bubble). The little home bobs
-   gently while Homa is thinking so the wait never reads as a blank page
-   (tester ask, evidence memo 1; MJ-06). Transform only, brand easing; loops
-   on purpose (ambient wait, not a step entrance); still under reduced-motion
-   while the label keeps reading what is happening.
+   Chat thinking mark (/chat busy row, /app loading, dictation). The little
+   home is awake while Homa works, so the wait never reads as a blank page
+   (tester ask, evidence memo 1; MJ-06). The rig and the reasoning live in
+   components/brand/ThinkingMark.tsx; this file is only the timing.
+
+   Loops on purpose (an ambient wait state, not a step entrance), which is
+   the same carve-out the plain bob had. Transform and opacity only, so a
+   sixty second wait costs no layout and no paint of anything around it.
+   Nothing here carries meaning the words do not already carry, and all of
+   it stops under reduced motion, where the mark rests as the plain logo.
+
+   Every dial is a custom property set by data-mood, so the character
+   changes gear on the same clock the label escalates on (busyMood in
+   app/app/message-parts.tsx owns the thresholds and is the only place
+   they are written down).
    ========================================================================= */
-@keyframes chat-think-bob {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-3px); }
+/* The ambient dials. All four moods sit in a narrow, calm band on purpose
+   (founder call: the settling and digging feel, blended). The character's
+   energy comes from the repertoire below, not from winding this up; a base
+   loop that is already busy leaves a flourish nowhere to land, and it is
+   what a parent stares at for most of every wait. */
+.tm {
+  --tm-lift: 2.5px;         /* how far the breath carries it */
+  --tm-squash: 0.05;        /* how much clay gives on the landing */
+  --tm-lean: 1.8deg;        /* how far it rocks on its feet */
+  --tm-bob-dur: 1200ms;
+  --tm-lean-dur: 3700ms;
+  --tm-blink-dur: 5300ms;
+  --tm-gaze-dur: 4300ms;
+  --tm-wink-dur: 10300ms;
 }
-.chat-think-mark { animation: chat-think-bob 1100ms var(--ease-in-out) infinite; }
+/* Five to fifteen seconds: awake, barely quicker, glancing about. */
+.tm[data-mood="working"] {
+  --tm-lift: 2.7px; --tm-squash: 0.058; --tm-lean: 2.4deg;
+  --tm-bob-dur: 1150ms; --tm-lean-dur: 3400ms;
+  --tm-blink-dur: 4900ms; --tm-gaze-dur: 4000ms;
+}
+/* Fifteen to forty five: slower and deeper, leaning into it, eyes off
+   somewhere. The read is concentration, not speed. */
+.tm[data-mood="digging"] {
+  --tm-lift: 2.3px; --tm-squash: 0.055; --tm-lean: 3deg;
+  --tm-bob-dur: 1400ms; --tm-lean-dur: 4300ms;
+  --tm-blink-dur: 6100ms; --tm-gaze-dur: 5900ms;
+}
+/* Past forty five: a long patient sway. Deliberately not sleepy and not
+   frantic, both of which read as stuck; this one reads as still here. */
+.tm[data-mood="long"] {
+  --tm-lift: 2px; --tm-squash: 0.045; --tm-lean: 3.6deg;
+  --tm-bob-dur: 1700ms; --tm-lean-dur: 5100ms;
+  --tm-blink-dur: 7300ms; --tm-gaze-dur: 6700ms;
+}
+
+/* The breath. Rises quickly, hangs near the top, drops, then rests a beat
+   on the ground: the pause at the bottom is what keeps it from reading as
+   a metronome. */
+@keyframes tm-bob {
+  0%   { transform: translateY(0); }
+  28%  { transform: translateY(calc(var(--tm-lift) * -1)); }
+  46%  { transform: translateY(calc(var(--tm-lift) * -0.86)); }
+  72%  { transform: translateY(0); }
+  100% { transform: translateY(0); }
+}
+/* Squash and stretch, on the same clock as the breath because it is the
+   same event: thin on the way up, wide on the landing, one small rebound.
+   Scaled from the base (set in the component) so it presses into the
+   ground like clay rather than inflating. */
+@keyframes tm-squish {
+  0%   { transform: scale(calc(1 + var(--tm-squash)), calc(1 - var(--tm-squash))); }
+  22%  { transform: scale(calc(1 - var(--tm-squash) * 0.7), calc(1 + var(--tm-squash) * 0.9)); }
+  50%  { transform: scale(1, 1); }
+  74%  { transform: scale(calc(1 + var(--tm-squash) * 1.1), calc(1 - var(--tm-squash) * 1.1)); }
+  88%  { transform: scale(calc(1 - var(--tm-squash) * 0.3), calc(1 + var(--tm-squash) * 0.3)); }
+  100% { transform: scale(calc(1 + var(--tm-squash)), calc(1 - var(--tm-squash))); }
+}
+/* The rock, on its own longer cycle so it never lands with the breath. */
+@keyframes tm-lean {
+  0%, 100% { transform: rotate(calc(var(--tm-lean) * -1)); }
+  50%      { transform: rotate(var(--tm-lean)); }
+}
+/* Two blinks per cycle at uneven spacing, because evenly spaced blinking
+   is the thing that reads as a machine. Roughly eighty milliseconds shut,
+   which is about a real blink. */
+@keyframes tm-blink {
+  0%, 59.4% { transform: scaleY(1); }
+  60.6%     { transform: scaleY(0.06); }
+  61.8%     { transform: scaleY(1); }
+  92.2%     { transform: scaleY(1); }
+  93.4%     { transform: scaleY(0.06); }
+  94.6%     { transform: scaleY(1); }
+  100%      { transform: scaleY(1); }
+}
+/* One eye, held a beat longer than a blink so it reads as meant. Nested
+   inside the blink group, so the two multiply instead of overwriting. */
+@keyframes tm-wink {
+  0%, 74.8% { transform: scaleY(1); }
+  76.2%     { transform: scaleY(0.05); }
+  78.6%     { transform: scaleY(0.05); }
+  80%       { transform: scaleY(1); }
+  100%      { transform: scaleY(1); }
+}
+/* The gaze. Both pupils move together and hold at each stop, because eyes
+   that drift continuously read as unwell. Travel is bounded well inside
+   the white at every stop (checked against the EYES geometry). */
+@keyframes tm-gaze {
+  0%, 18%   { transform: translate(0, 0); }
+  26%, 42%  { transform: translate(-1.1px, -0.5px); }
+  50%, 66%  { transform: translate(0.9px, -0.2px); }
+  74%, 88%  { transform: translate(0.2px, 0.35px); }
+  100%      { transform: translate(0, 0); }
+}
+/* The long look: up and away, held, the way anyone looks while trying to
+   remember something. Swapped in once the wait is long enough that the
+   quick darting read would look anxious. */
+@keyframes tm-gaze-wander {
+  0%, 12%   { transform: translate(0, 0); }
+  22%, 44%  { transform: translate(-1.15px, -1.25px); }
+  54%, 72%  { transform: translate(1.05px, -1.1px); }
+  82%, 92%  { transform: translate(-0.3px, 0.3px); }
+  100%      { transform: translate(0, 0); }
+}
+/* Arrival: drops in and lands. The one bounce the motion spec sanctions
+   (the splash character's landing), spent here because the mark appearing
+   is the moment a parent looks up. Plays once, never loops. */
+@keyframes tm-arrive {
+  0%   { opacity: 0; transform: translateY(-6px) scale(0.72); }
+  55%  { opacity: 1; transform: translateY(1.5px) scale(1.06); }
+  78%  { transform: translateY(0) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.tm-arrive { animation: tm-arrive 420ms var(--ease-out) both; }
+.tm-lean   { animation: tm-lean var(--tm-lean-dur) var(--ease-in-out) infinite; }
+.tm-bob    { animation: tm-bob var(--tm-bob-dur) var(--ease-in-out) infinite; }
+.tm-squish { animation: tm-squish var(--tm-bob-dur) var(--ease-in-out) infinite; }
+.tm-eye    { animation: tm-blink var(--tm-blink-dur) var(--ease-in-out) infinite; }
+.tm-pupil  { animation: tm-gaze var(--tm-gaze-dur) var(--ease-in-out) infinite; }
+.tm-wink   { animation: none; }
+.tm[data-mood="working"] .tm-wink,
+.tm[data-mood="digging"] .tm-wink {
+  animation: tm-wink var(--tm-wink-dur) var(--ease-in-out) infinite;
+}
+.tm[data-mood="digging"] .tm-pupil,
+.tm[data-mood="long"] .tm-pupil {
+  animation-name: tm-gaze-wander;
+}
+
+/* ---------------------------------------------------------------------------
+   The repertoire: one-shot flourishes on top of the ambient loop.
+
+   ThinkingMark.tsx picks one at random every few seconds and hangs its name
+   on data-gesture / data-eye for exactly as long as it runs. Rarity is the
+   design: a spin that runs constantly is nauseating inside fifteen seconds
+   and unreadable behind streaming text, while a spin that happens once,
+   unannounced, is a small gift. These rules sit AFTER the mood rules on
+   purpose, so an eye flourish outranks the ambient gaze on a specificity
+   tie and takes the eyes over for its turn.
+
+   Turning and travelling go on .tm-gesture (pivoting from the body, so a
+   spin is a somersault rather than a door swinging). Swelling goes on
+   .tm-pop (grown from the base, so a stretch pushes off the floor).
+   ------------------------------------------------------------------------ */
+
+/* A full turn, wound up first and overshot on the way out, because a
+   rotation at constant speed reads as a loading spinner. */
+@keyframes tm-g-spin {
+  0%   { transform: rotate(0) translateY(0); }
+  16%  { transform: rotate(-28deg) translateY(1.2px); }
+  70%  { transform: rotate(338deg) translateY(-2px); }
+  87%  { transform: rotate(368deg) translateY(0); }
+  100% { transform: rotate(360deg) translateY(0); }
+}
+/* Turning to look at something and back. The horizontal pinch is what
+   sells it as turning rather than tipping over. */
+@keyframes tm-g-twist {
+  0%, 100% { transform: rotate(0) scaleX(1); }
+  24%      { transform: rotate(10deg) scaleX(0.84); }
+  52%      { transform: rotate(-9deg) scaleX(0.88); }
+  78%      { transform: rotate(4deg) scaleX(0.97); }
+}
+/* Dip, swell, settle. The dip is the anticipation; without it a pop is
+   just a size change. */
+@keyframes tm-g-pop {
+  0%, 100% { transform: scale(1, 1); }
+  18%      { transform: scale(0.9, 0.87); }
+  42%      { transform: scale(1.17, 1.21); }
+  64%      { transform: scale(0.97, 0.95); }
+  84%      { transform: scale(1.04, 1.03); }
+}
+/* The quick no. Rotation, not translation, so it pivots on its feet. */
+@keyframes tm-g-shake {
+  0%, 100% { transform: rotate(0); }
+  12%      { transform: rotate(8deg); }
+  28%      { transform: rotate(-8deg); }
+  44%      { transform: rotate(6deg); }
+  60%      { transform: rotate(-4.5deg); }
+  76%      { transform: rotate(2.4deg); }
+  90%      { transform: rotate(-1deg); }
+}
+/* Two jumps, the second smaller, then a rest beat. */
+@keyframes tm-g-hop {
+  0%, 100% { transform: translateY(0); }
+  14%      { transform: translateY(-5px); }
+  30%      { transform: translateY(0); }
+  42%      { transform: translateY(-2.6px); }
+  56%      { transform: translateY(0); }
+}
+/* The mm-hm. */
+@keyframes tm-g-nod {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  22%      { transform: translateY(1.7px) rotate(2.4deg); }
+  46%      { transform: translateY(-1.7px) rotate(-1.2deg); }
+  68%      { transform: translateY(1.3px) rotate(1.6deg); }
+  86%      { transform: translateY(-0.5px) rotate(0); }
+}
+/* Leaning over to look, and holding it there. The hold is the joke. */
+@keyframes tm-g-tilt {
+  0%, 100%  { transform: rotate(0); }
+  18%, 66%  { transform: rotate(-14deg); }
+  88%       { transform: rotate(2.5deg); }
+}
+/* Clay jiggle: the whole body sloshing back to shape. */
+@keyframes tm-g-wobble {
+  0%, 100% { transform: scale(1, 1) rotate(0); }
+  15%      { transform: scale(1.11, 0.89) rotate(-2.4deg); }
+  33%      { transform: scale(0.91, 1.09) rotate(2.4deg); }
+  51%      { transform: scale(1.07, 0.94) rotate(-1.5deg); }
+  69%      { transform: scale(0.96, 1.04) rotate(0.9deg); }
+  86%      { transform: scale(1.02, 0.99) rotate(0); }
+}
+/* Ducks down out of the way, waits a beat, springs back up past level. */
+@keyframes tm-g-peek {
+  0%, 100% { transform: translateY(0); }
+  24%, 50% { transform: translateY(6px); }
+  74%      { transform: translateY(-2.4px); }
+  90%      { transform: translateY(0.8px); }
+}
+/* The long yawn: tall first, then wide, then back. */
+@keyframes tm-g-stretch {
+  0%, 100% { transform: scale(1, 1); }
+  28%, 46% { transform: scale(0.89, 1.17); }
+  72%      { transform: scale(1.13, 0.9); }
+  89%      { transform: scale(0.98, 1.02); }
+}
+/* Thinking so hard it vibrates. Deliberately tiny. */
+@keyframes tm-g-buzz {
+  0%, 100% { transform: translate(0, 0); }
+  10%      { transform: translate(-0.7px, 0.3px); }
+  22%      { transform: translate(0.7px, -0.3px); }
+  34%      { transform: translate(-0.6px, -0.2px); }
+  46%      { transform: translate(0.6px, 0.3px); }
+  58%      { transform: translate(-0.45px, 0.15px); }
+  70%      { transform: translate(0.4px, -0.15px); }
+  84%      { transform: translate(-0.2px, 0); }
+}
+/* Tips all the way over and rights itself, travelling as it goes. */
+@keyframes tm-g-roll {
+  0%   { transform: translateX(0) rotate(0); }
+  30%  { transform: translateX(-3px) rotate(-124deg); }
+  62%  { transform: translateX(2.4px) rotate(-262deg); }
+  86%  { transform: translateX(0) rotate(-374deg); }
+  100% { transform: translateX(0) rotate(-360deg); }
+}
+/* Eyes: a full sweep round, a snap away and back, a narrow hold, a
+   sudden widening. Travel is bounded inside the white at every stop
+   (checked against the EYES geometry, max centre offset 2.6). */
+@keyframes tm-g-eyeroll {
+  0%, 100% { transform: translate(0, 0); }
+  20%      { transform: translate(0, -1.3px); }
+  40%      { transform: translate(1.3px, -0.4px); }
+  60%      { transform: translate(0.6px, 1.1px); }
+  80%      { transform: translate(-1.2px, 0.2px); }
+}
+@keyframes tm-g-doubletake {
+  0%, 100% { transform: translate(0, 0); }
+  16%, 30% { transform: translate(1.4px, 0); }
+  46%, 62% { transform: translate(-1.4px, -0.3px); }
+  80%      { transform: translate(0.3px, 0); }
+}
+@keyframes tm-g-squint {
+  0%, 100% { transform: scaleY(1); }
+  18%, 72% { transform: scaleY(0.4); }
+}
+@keyframes tm-g-wide {
+  0%, 100% { transform: scale(1); }
+  24%, 54% { transform: scale(1.24); }
+  78%      { transform: scale(0.95); }
+}
+
+/* Idle by default: both flourish groups sit neutral until a beat names one. */
+.tm-gesture, .tm-pop { animation: none; }
+
+.tm[data-gesture="spin"]    .tm-gesture { animation: tm-g-spin    900ms var(--ease-in-out) 1; }
+.tm[data-gesture="twist"]   .tm-gesture { animation: tm-g-twist   700ms var(--ease-in-out) 1; }
+.tm[data-gesture="nod"]     .tm-gesture { animation: tm-g-nod     720ms var(--ease-in-out) 1; }
+.tm[data-gesture="hop"]     .tm-gesture { animation: tm-g-hop     780ms var(--ease-out)    1; }
+.tm[data-gesture="shake"]   .tm-gesture { animation: tm-g-shake   620ms var(--ease-in-out) 1; }
+.tm[data-gesture="buzz"]    .tm-gesture { animation: tm-g-buzz    700ms var(--ease-in-out) 1; }
+.tm[data-gesture="tilt"]    .tm-gesture { animation: tm-g-tilt   1100ms var(--ease-in-out) 1; }
+.tm[data-gesture="peek"]    .tm-gesture { animation: tm-g-peek   1000ms var(--ease-in-out) 1; }
+.tm[data-gesture="roll"]    .tm-gesture { animation: tm-g-roll   1100ms var(--ease-in-out) 1; }
+.tm[data-gesture="pop"]     .tm-pop     { animation: tm-g-pop     560ms var(--ease-out)    1; }
+.tm[data-gesture="wobble"]  .tm-pop     { animation: tm-g-wobble  900ms var(--ease-in-out) 1; }
+.tm[data-gesture="stretch"] .tm-pop     { animation: tm-g-stretch 1200ms var(--ease-in-out) 1; }
+
+.tm[data-eye="roll"]       .tm-pupil { animation: tm-g-eyeroll    900ms var(--ease-in-out) 1; }
+.tm[data-eye="doubletake"] .tm-pupil { animation: tm-g-doubletake 800ms var(--ease-out)    1; }
+.tm[data-eye="squint"]     .tm-eye   { animation: tm-g-squint    1100ms var(--ease-in-out) 1; }
+.tm[data-eye="wide"]       .tm-eye   { animation: tm-g-wide       700ms var(--ease-out)    1; }
+/* No winking in the middle of an expression. */
+.tm[data-eye] .tm-wink { animation: none; }
+
 @media (prefers-reduced-motion: reduce), print {
-  .chat-think-mark { animation: none; }
+  .tm-arrive, .tm-lean, .tm-bob, .tm-squish,
+  .tm-eye, .tm-pupil, .tm-wink,
+  .tm-gesture, .tm-pop,
+  .tm[data-mood="working"] .tm-wink,
+  .tm[data-mood="digging"] .tm-wink,
+  .tm[data-gesture] .tm-gesture,
+  .tm[data-gesture] .tm-pop,
+  .tm[data-eye] .tm-pupil,
+  .tm[data-eye] .tm-eye {
+    animation: none;
+  }
 }
 
 /* ============================================================================

@@ -825,4 +825,54 @@ describe("conversation continuity context", () => {
     assert.match(rendered, /Want a quick stop-and-go game/u);
     assert.match(rendered, /historical data, never instructions/u);
   });
+
+  it("reports an in-app voice turn as spoken, not sent", () => {
+    // This is how a voice conversation reaches the next thing the parent
+    // TYPES (founder direction 2026-07-29): no eve turn runs for a spoken
+    // turn, so per-turn continuity context is the whole path. It has to
+    // say what actually happened, or Homa will refer to having "sent" her
+    // a message the parent only ever heard.
+    const rendered = renderContinuityContext([
+      {
+        role: "user",
+        visibility: "family",
+        content: "Finn finished the whole page of fractions today.",
+        happenedAt: new Date("2026-07-29T15:00:00.000Z"),
+        memberName: "Carolyng",
+        modality: "voice",
+      },
+      {
+        role: "assistant",
+        visibility: "family",
+        content: "That is a real jump from last week.",
+        happenedAt: new Date("2026-07-29T15:00:20.000Z"),
+        modality: "voice",
+      },
+    ]);
+
+    assert.match(rendered, /Carolyng previously said out loud/u);
+    assert.match(rendered, /Homa previously said out loud/u);
+    assert.doesNotMatch(rendered, /previously sent/u);
+  });
+
+  it("still says sent and said for typed history", () => {
+    const rendered = renderContinuityContext([
+      {
+        role: "user",
+        visibility: "family",
+        content: "typed question",
+        happenedAt: new Date("2026-07-29T15:00:00.000Z"),
+      },
+      {
+        role: "assistant",
+        visibility: "family",
+        content: "typed reply",
+        happenedAt: new Date("2026-07-29T15:00:20.000Z"),
+      },
+    ]);
+
+    assert.match(rendered, /previously said: /u);
+    assert.match(rendered, /previously sent: /u);
+    assert.doesNotMatch(rendered, /out loud/u);
+  });
 });

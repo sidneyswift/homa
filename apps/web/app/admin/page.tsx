@@ -44,6 +44,8 @@ function handledAlertText(item: HandledAlert): string {
       return `Email ${status} · ${descriptor}`;
     case "inbound_receipt":
       return `${descriptor} turn never answered · ${item.familyName ?? "unlinked"}`;
+    case "tool_failure":
+      return `${descriptor} failing repeatedly · ${item.familyName ?? "unlinked"}`;
     default: {
       const exhausted: never = item.source;
       return String(exhausted);
@@ -117,6 +119,7 @@ export default async function AdminOverviewPage({
 
   const rangeLabel = rangeDays === 7 ? "this week" : "last 4 weeks";
   const waitingOnUs =
+    data.toolTroubles.length > 0 ||
     data.offerTrouble.length > 0 ||
     data.inboundTrouble.length > 0 ||
     data.deliveryTrouble.length > 0 ||
@@ -185,6 +188,23 @@ export default async function AdminOverviewPage({
               <AlertRow key={`o-${t.id}`} tone="rose">
                 <b>{t.familyName} said yes and never got their material</b> · accepted{" "}
                 {timeAgo(t.at)}, nothing was made
+              </AlertRow>
+            ))}
+            {data.toolTroubles.slice(0, 3).map((t) => (
+              <AlertRow
+                key={`tf-${t.id}`}
+                tone="rose"
+                action={
+                  <span className="inline-flex flex-wrap items-center justify-end gap-1.5">
+                    <AlertAckButton source="tool_failure" sourceId={t.id} />
+                  </span>
+                }
+              >
+                <b>
+                  {t.familyName ?? "A family"} hit {t.tool} failing {t.failures} times
+                </b>{" "}
+                · last {timeAgo(t.at)}
+                {t.error ? ` · ${t.error}` : null}
               </AlertRow>
             ))}
             {data.inboundTrouble.slice(0, 3).map((t) => (
@@ -280,7 +300,7 @@ export default async function AdminOverviewPage({
                   {timeAgo(item.handledAt)}
                 </span>
                 <span className="ml-auto inline-flex flex-wrap items-center justify-end gap-1.5">
-                  {item.source !== "inbound_receipt" ? (
+                  {item.source !== "inbound_receipt" && item.source !== "tool_failure" ? (
                     <AgentPromptButton source={item.source} sourceId={item.sourceId} />
                   ) : null}
                   <AlertAckButton source={item.source} sourceId={item.sourceId} mode="undo" />

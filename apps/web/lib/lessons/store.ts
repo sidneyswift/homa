@@ -180,6 +180,103 @@ export async function getLessonForFamily(
   return rows[0] === undefined ? null : toLessonRow(rows[0]);
 }
 
+/**
+ * The family's recorded lessons, newest first (gh#353).
+ *
+ * Homa could not see these at all. On 2026-07-27 a parent asked three
+ * times to move a recording filed under the wrong child, and Homa
+ * answered "I don't see any recording anywhere" while the row sat in
+ * this table, 28 minutes of audio, already analysed. She was not
+ * refusing; no tool had ever been able to look.
+ */
+export async function listLessonRecordingsForFamily(
+  familyId: string,
+  limit = 20,
+): Promise<LessonRecordingRow[]> {
+  const sql = mapDb();
+  const rows = await sql<LessonRecordingSqlRow[]>`
+    select id, family_id, child_id, created_by, status, source,
+           started_at::text, finished_at::text, duration_seconds,
+           attempts, audio_deleted_at::text, audio_kept_at::text, error
+    from public.lesson_recordings
+    where family_id = ${familyId}
+    order by started_at desc
+    limit ${limit}
+  `;
+  return rows.map(toLessonRow);
+}
+
+export type ReassignLessonResult =
+  | { status: "reassigned"; movedReviews: number; movedEvidence: number }
+  | { status: "unknown_lesson" }
+  | { status: "unknown_child" }
+  | { status: "already_there" };
+
+/**
+ * Move a recording to the child it was actually about (gh#353).
+ *
+ * Atomic across all three tables on purpose. The recording is the least
+ * of it: the review a parent reads names the child, and the progress
+ * evidence the lesson produced SCORES that child. Carolyng's 07-27
+ * recording had put a preschool phonics claim on her nine-year-old, so
+ * moving only the recording would leave the wrong child's record
+ * quietly wrong, which is worse than the original mistake because it
+ * looks fixed.
+ *
+ * Both ids are re-scoped inside the family before anything moves. The
+ * evidence update deliberately fires the row-revision trigger, so the
+ * progress projection recomputes for both children.
+ */
+export async function reassignLessonRecording(input: {
+  familyId: string;
+  lessonId: string;
+  childId: string;
+}): Promise<ReassignLessonResult> {
+  const sql = mapDb();
+  return await sql.begin(async (transaction) => {
+    const lessonRows = await transaction<{ child_id: string }[]>`
+      select child_id from public.lesson_recordings
+      where id = ${input.lessonId} and family_id = ${input.familyId}
+      for update
+    `;
+    if (lessonRows[0] === undefined) return { status: "unknown_lesson" };
+    if (lessonRows[0].child_id === input.childId) return { status: "already_there" };
+
+    const childRows = await transaction<{ id: string }[]>`
+      select id from public.children
+      where id = ${input.childId} and family_id = ${input.familyId}
+    `;
+    if (childRows[0] === undefined) return { status: "unknown_child" };
+
+    await transaction`
+      update public.lesson_recordings set child_id = ${input.childId}
+      where id = ${input.lessonId} and family_id = ${input.familyId}
+    `;
+    const reviews = await transaction<{ lesson_id: string }[]>`
+      update public.lesson_reviews set child_id = ${input.childId}
+      where lesson_id = ${input.lessonId} and family_id = ${input.familyId}
+      returning lesson_id
+    `;
+    // The link is the idempotency key, shaped `lesson:<id>:<hash>`, not
+    // message_id: lesson evidence carries no message. Verified against a
+    // real row, because the first version of this matched on message_id,
+    // which is null for every lesson_listen row, so it would have moved
+    // the recording and silently left the scoring on the wrong child.
+    const evidence = await transaction<{ id: string }[]>`
+      update public.child_progress_evidence set child_id = ${input.childId}
+      where family_id = ${input.familyId}
+        and source = 'lesson_listen'
+        and idempotency_key like ${`lesson:${input.lessonId}:%`}
+      returning id
+    `;
+    return {
+      status: "reassigned",
+      movedReviews: reviews.length,
+      movedEvidence: evidence.length,
+    };
+  });
+}
+
 export type RegisterSegmentResult =
   | { status: "registered"; segmentId: string }
   | { status: "duplicate"; segmentId: string }
