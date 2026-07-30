@@ -13,7 +13,9 @@
   "capture": {
     "lane": "phone",
     "sourceFile": "primary-level-workbook-sample.pdf",
-    "sourceParts": ["primary-level-workbook-sample.pdf"],
+    "sourceParts": [
+      "primary-level-workbook-sample.pdf"
+    ],
     "sourceSha256": "290ab11eea35e397f8c7bf51e7ec40f0e06a5eefa6419afe0ee80221757a2239",
     "pageCount": 57,
     "mastersDir": ".cosmo/masters/ref-2026-07-18-primary-level-workbook-sample",
@@ -30,8 +32,8 @@
     {
       "filename": "Primary Level Workbook Sample.pdf",
       "localPath": ".cosmo/inspo-files/primary-level-workbook-sample.pdf",
-      "blobUrl": null,
-      "blobNote": "Not uploaded: no BLOB_READ_WRITE_TOKEN resolved in this session. Local original and the 57 per-page masters retained; upload owed."
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-primary-level-workbook-sample/primary-level-workbook-sample.pdf",
+      "blobUploadedAt": "2026-07-30"
     }
   ],
   "routing": {
@@ -50,11 +52,36 @@
     "subject": "multi-subject",
     "domain": "cross-curricular",
     "topics": [
-      { "id": "mt_Xp1WkwWozD", "kind": "conceptual", "mapped": true, "note": "Picture Study: Observing and Recalling Artwork (4-7): the Visual Arts module asks the child to choose a famous painting and recreate it in their own style, which is picture study with a making step attached." },
-      { "id": "mt_bKlnc7dyVK", "kind": "conceptual", "mapped": true, "note": "Fossils & Palaeontologists (5-7): the Paleontology module's vocabulary card defines the field and its amber-specimen page asks the child to draw a preserved organism." },
-      { "id": "mt_1VSFoM44JU", "kind": "conceptual", "mapped": true, "note": "Types of Fossils (7-9): the amber pages are one preservation type presented as its own study." },
-      { "id": "mt_qixeaiswFP", "kind": "conceptual", "mapped": true, "note": "How Organisms Shape Habitats (5-6): the Forestry module's ecosystem card and leaf-collection pages work the same idea from the forest side." },
-      { "id": "mt_hi8cVycbwn", "kind": "procedural", "mapped": true, "note": "Modelling with Sketches (5-8): drawing is the answer format across all three subjects, not a decoration on it." }
+      {
+        "id": "mt_Xp1WkwWozD",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Picture Study: Observing and Recalling Artwork (4-7): the Visual Arts module asks the child to choose a famous painting and recreate it in their own style, which is picture study with a making step attached."
+      },
+      {
+        "id": "mt_bKlnc7dyVK",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Fossils & Palaeontologists (5-7): the Paleontology module's vocabulary card defines the field and its amber-specimen page asks the child to draw a preserved organism."
+      },
+      {
+        "id": "mt_1VSFoM44JU",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Types of Fossils (7-9): the amber pages are one preservation type presented as its own study."
+      },
+      {
+        "id": "mt_qixeaiswFP",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "How Organisms Shape Habitats (5-6): the Forestry module's ecosystem card and leaf-collection pages work the same idea from the forest side."
+      },
+      {
+        "id": "mt_hi8cVycbwn",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Modelling with Sketches (5-8): drawing is the answer format across all three subjects, not a decoration on it."
+      }
     ],
     "unmappedSkills": [
       {
@@ -75,7 +102,10 @@
     ]
   },
   "difficulty": {
-    "ageBand": [72, 120],
+    "ageBand": [
+      72,
+      120
+    ],
     "complexity": "single-skill",
     "prerequisites": [],
     "scaffoldingLevel": "low",
@@ -108,32 +138,90 @@
       "note": "Born-digital with a genuinely thin text layer, because most of each page is deliberately empty. 39 of 57 pages were re-read by a vision model, and much of what is known about this book comes from those descriptions rather than from its words."
     },
     "subjects": [
-      { "name": "visual arts", "role": "teaches", "quote": "Visual Arts" },
-      { "name": "forestry", "role": "teaches", "quote": "Forestry" },
-      { "name": "paleontology", "role": "teaches", "quote": "Paleontology" },
-      { "name": "unit study companion workbook", "role": "identity", "quote": "PRIMARY LEVEL WORKBOOK" }
+      {
+        "name": "visual arts",
+        "role": "teaches",
+        "quote": "Visual Arts"
+      },
+      {
+        "name": "forestry",
+        "role": "teaches",
+        "quote": "Forestry"
+      },
+      {
+        "name": "paleontology",
+        "role": "teaches",
+        "quote": "Paleontology"
+      },
+      {
+        "name": "unit study companion workbook",
+        "role": "identity",
+        "quote": "PRIMARY LEVEL WORKBOOK"
+      }
     ],
     "entities": [
-      { "name": "Harbor + Sprout", "kind": "organization", "role": "identity", "quote": "HARBOR + SPROUT" },
-      { "name": "Henri Matisse", "kind": "person", "role": "about", "quote": "Henri Matisse" }
+      {
+        "name": "Harbor + Sprout",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "HARBOR + SPROUT"
+      },
+      {
+        "name": "Henri Matisse",
+        "kind": "person",
+        "role": "about",
+        "quote": "Henri Matisse"
+      }
     ],
     "themes": [
-      { "name": "learning by making", "evidence": "Creativity takes courage" },
-      { "name": "outdoor observation", "evidence": "press and preserve leaves" },
-      { "name": "defining ideas in your own words", "evidence": "ecosystem noun" }
+      {
+        "name": "learning by making",
+        "evidence": "Creativity takes courage"
+      },
+      {
+        "name": "outdoor observation",
+        "evidence": "press and preserve leaves"
+      },
+      {
+        "name": "defining ideas in your own words",
+        "evidence": "ecosystem noun"
+      }
     ],
     "keyTerms": [
-      { "term": "unit study", "occurrences": 3, "quote": "unit study" },
-      { "term": "notebooking", "occurrences": 1, "quote": "notebooking" },
-      { "term": "color scavenger", "occurrences": 1, "quote": "color scavenger" },
-      { "term": "AMBER SPECIMENS", "occurrences": 1, "quote": "AMBER SPECIMENS" }
+      {
+        "term": "unit study",
+        "occurrences": 3,
+        "quote": "unit study"
+      },
+      {
+        "term": "notebooking",
+        "occurrences": 1,
+        "quote": "notebooking"
+      },
+      {
+        "term": "color scavenger",
+        "occurrences": 1,
+        "quote": "color scavenger"
+      },
+      {
+        "term": "AMBER SPECIMENS",
+        "occurrences": 1,
+        "quote": "AMBER SPECIMENS"
+      }
     ],
     "referencedWorks": [],
     "notes": "extractionQuality is 'partial', not 'full', and the distinction is real rather than modest. Most pages are an instruction over blank space, so the text layer holds a fraction of what the book contains, and the vision descriptions hold the rest. Those descriptions are NOT span-verifiable against the sidecar, so they inform the prose fields above and are deliberately not turned into aboutness claims. Henri Matisse is roled 'about' rather than 'identity' because the quote is used as teaching content on the page, not as branding; he is quoted, not credited. A thin honest dimension F is the right answer for a book that is mostly empty paper on purpose."
   },
   "recipeMatch": {
-    "matchedRecipes": ["nature-observation-journal", "narration-page", "nomenclature-cards", "unit-study-packet"],
-    "gaps": ["prompt-and-blank-space-page"],
+    "matchedRecipes": [
+      "nature-observation-journal",
+      "narration-page",
+      "nomenclature-cards",
+      "unit-study-packet"
+    ],
+    "gaps": [
+      "prompt-and-blank-space-page"
+    ],
     "notes": "Matched against the recipe files listed at analysis time. nature-observation-journal and narration-page are close neighbours and nomenclature-cards matches the define-then-redefine vocabulary card almost exactly. The gap is the book's most common page and the one nothing covers: a single instruction line over a large deliberately empty area, where the emptiness is the design rather than a layout that ran short. Homa's generator fills space by default, so this format needs a recipe that tells it not to."
   },
   "captureProblems": [
@@ -159,8 +247,17 @@
     "captured": "2026-07-30T06:27:26Z",
     "analyzed": true,
     "tasteLogged": true,
-    "graduation": { "kind": "recipe", "targets": ["apps/web/agent/skills/materials-studio/references/recipes/prompt-and-blank-space-page.md"], "commit": null },
-    "taxonomy": { "proposedTopics": [], "note": "Three proposals live in skillTargeting.unmappedSkills. proposedTopics means topics actually appended to topics.json; no taxonomy write happened here." },
+    "graduation": {
+      "kind": "recipe",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/prompt-and-blank-space-page.md"
+      ],
+      "commit": null
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "note": "Three proposals live in skillTargeting.unmappedSkills. proposedTopics means topics actually appended to topics.json; no taxonomy write happened here."
+    },
     "shippedPr": null,
     "slackReplyTs": null,
     "shipReaction": false

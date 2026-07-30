@@ -28,8 +28,8 @@
     {
       "filename": "your-health.pdf",
       "localPath": ".cosmo/inspo-files/your-health.pdf",
-      "blobUrl": null,
-      "blobNote": "Not uploaded in this session: this run was analysis only and no BLOB_READ_WRITE_TOKEN was resolved. The 120MB local original and the 114 per-page masters are retained; the upload is owed."
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-19-your-health/your-health.pdf",
+      "blobUploadedAt": "2026-07-30"
     }
   ],
   "routing": {

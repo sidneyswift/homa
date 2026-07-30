@@ -42,7 +42,10 @@
     ]
   },
   "difficulty": {
-    "ageBandMonths": [48, 72],
+    "ageBandMonths": [
+      48,
+      72
+    ],
     "ageBandGrades": "Pre-K to 1",
     "complexity": "multi-skill",
     "prerequisites": [
@@ -56,7 +59,11 @@
     "characters": [],
     "visualStyle": "clean-minimal",
     "colorPalette": "black-and-white",
-    "appealDrivers": ["coloring activity embedded", "star counting (kid-friendly icon)", "multiple activity types per page"]
+    "appealDrivers": [
+      "coloring activity embedded",
+      "star counting (kid-friendly icon)",
+      "multiple activity types per page"
+    ]
   },
   "printFormat": {
     "pageSize": "letter",
@@ -68,23 +75,32 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "number-practice-page: single-number focus page with 4-5 activities on one sheet — tracing/writing, ten frame fill-in, number word coloring, object counting (color N stars). Repeatable template across numbers 1-10 (or 1-20)."
+      "number-practice-page: single-number focus page with 4-5 activities on one sheet \u2014 tracing/writing, ten frame fill-in, number word coloring, object counting (color N stars). Repeatable template across numbers 1-10 (or 1-20)."
     ]
   },
   "components": [
     {
       "name": "Number Practice Page (one per number, 1-10)",
-      "description": "Each page focuses on a single number and includes 4 activities: (1) Trace and write — large dotted number to trace plus a writing line with repeated practice, (2) Show on ten frame — empty 2x5 grid where student fills in the correct number of circles, (3) Color the number word — the word (e.g. 'one', 'two') printed in outline/bubble letters for coloring, (4) Color N stars — row of stars where student colors the correct quantity. Header: 'Numbers Practice' with Name/Date fields.",
+      "description": "Each page focuses on a single number and includes 4 activities: (1) Trace and write \u2014 large dotted number to trace plus a writing line with repeated practice, (2) Show on ten frame \u2014 empty 2x5 grid where student fills in the correct number of circles, (3) Color the number word \u2014 the word (e.g. 'one', 'two') printed in outline/bubble letters for coloring, (4) Color N stars \u2014 row of stars where student colors the correct quantity. Header: 'Numbers Practice' with Name/Date fields.",
       "designPatterns": [
         "Single-number focus: one page per number prevents overwhelm. Deep practice on one concept.",
         "Multi-activity page: 4 different activities for one number = 4 representations (digit, word, ten frame, quantity). Builds number sense from multiple angles.",
         "Tracing as scaffolding: dotted numbers provide the motor path before independent writing.",
         "Ten frame as representation tool: builds toward mental math fluency later.",
         "Coloring as engagement: the number word coloring and star coloring are low-pressure activities that keep attention.",
-        "Consistent template: same layout for every number. Reduces cognitive load — kid knows what to do by page 3.",
+        "Consistent template: same layout for every number. Reduces cognitive load \u2014 kid knows what to do by page 3.",
         "B&W, light ink, generous spacing: perfect for home printers and developing fine motor skills."
       ]
     }
   ],
-  "notes": "Clean, no-frills number practice pages. The strength is the multi-representational approach: same number shown as digit (writing), word (coloring), quantity (stars), and structured model (ten frame). This is how number sense is built — not just rote writing. The consistent template across 1-10 means a child learns the format once and can work independently. Very young learner focused (Pre-K to K). This is the youngest-targeted drop so far."
+  "notes": "Clean, no-frills number practice pages. The strength is the multi-representational approach: same number shown as digit (writing), word (coloring), quantity (stars), and structured model (ten frame). This is how number sense is built \u2014 not just rote writing. The consistent template across 1-10 means a child learns the format once and can work independently. Very young learner focused (Pre-K to K). This is the youngest-targeted drop so far.",
+  "sourceFiles": [
+    {
+      "filename": "Numbers110-1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-numbers-1-10-practice/Numbers110-1.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

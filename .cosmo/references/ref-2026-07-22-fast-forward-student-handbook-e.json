@@ -28,8 +28,8 @@
     {
       "filename": "fast forward student handbook E.pdf",
       "localPath": ".cosmo/inspo-files/fast-forward-student-handbook-e.pdf",
-      "blobUrl": null,
-      "blobNote": "Not uploaded: no BLOB_READ_WRITE_TOKEN resolved in this session. The local original and the 110 per-page masters are retained; the upload is owed."
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-22-fast-forward-student-handbook-e/fast-forward-student-handbook-e.pdf",
+      "blobUploadedAt": "2026-07-30"
     }
   ],
   "routing": {

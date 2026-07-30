@@ -48,8 +48,8 @@
     {
       "filename": "family-fun-book.pdf",
       "localPath": ".cosmo/inspo-files/family-fun-book.pdf",
-      "blobUrl": null,
-      "blobNote": "Not uploaded in this session: no BLOB_READ_WRITE_TOKEN resolved. The 49MB local original and all 67 per-page masters are retained; the upload is owed."
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-21-family-fun-book/family-fun-book.pdf",
+      "blobUploadedAt": "2026-07-30"
     }
   ],
   "routing": {

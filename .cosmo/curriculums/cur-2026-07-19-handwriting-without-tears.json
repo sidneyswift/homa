@@ -8,13 +8,15 @@
   "sourceFiles": [
     {
       "filename": "hwt-pt1.pdf",
-      "localPath": ".cosmo/inspo-files/hwt-pt1.pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-hwt-pt1/hwt-pt1.pdf"
+      "localPath": ".cosmo/inspo-files/handwriting-without-tears-part1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-hwt-pt1/hwt-pt1.pdf",
+      "redundantSecondCopy": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-handwriting-without-tears/handwriting-without-tears-part1.pdf"
     },
     {
       "filename": "hwt-pt2.pdf",
-      "localPath": ".cosmo/inspo-files/hwt-pt2.pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-hwt-pt2/hwt-pt2.pdf"
+      "localPath": ".cosmo/inspo-files/handwriting-without-tears-part2.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-hwt-pt2/hwt-pt2.pdf",
+      "redundantSecondCopy": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-handwriting-without-tears/handwriting-without-tears-part2.pdf"
     }
   ],
   "layer1_philosophy": {
@@ -641,5 +643,6 @@
   "coversMessageTs": [
     "1784493367.506409"
   ],
-  "coversMessageNote": "This book arrived across two Slack messages. The second message's ts is declared here so the ingestion ledger joins it to this record instead of reporting the part-2 file as an un-ingested drop."
+  "coversMessageNote": "This book arrived across two Slack messages. The second message's ts is declared here so the ingestion ledger joins it to this record instead of reporting the part-2 file as an un-ingested drop.",
+  "sourceFilesNote": "Each part already had a durable Blob copy from the original ingest; those URLs are canonical here. A 2026-07-30 sweep re-uploaded the same bytes under a second path before checking, and that redundant copy is recorded per file rather than deleted. localPath now names the file actually on disk, which uses a different local naming convention from the original run."
 }

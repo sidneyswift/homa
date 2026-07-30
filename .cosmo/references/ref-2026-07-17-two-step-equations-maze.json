@@ -27,7 +27,10 @@
     "unmappedSkills": []
   },
   "difficulty": {
-    "ageBandMonths": [132, 168],
+    "ageBandMonths": [
+      132,
+      168
+    ],
     "ageBandGrades": "6-8",
     "complexity": "multi-skill",
     "prerequisites": [
@@ -42,7 +45,11 @@
     "characters": [],
     "visualStyle": "clean-textbook",
     "colorPalette": "black-and-white",
-    "appealDrivers": ["maze gamification", "progressive difficulty", "structured note-taking"]
+    "appealDrivers": [
+      "maze gamification",
+      "progressive difficulty",
+      "structured note-taking"
+    ]
   },
   "printFormat": {
     "pageSize": "letter",
@@ -54,14 +61,14 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "maze-activity: navigational puzzle where correct answers determine the path — requires procedural maze generation tied to problem solutions",
+      "maze-activity: navigational puzzle where correct answers determine the path \u2014 requires procedural maze generation tied to problem solutions",
       "guided-notes: two-column notes page with main-ideas/questions column on left and notes/examples column on right, progressive scaffolding from review to new concept"
     ]
   },
   "components": [
     {
       "name": "Guided Notes (pages 1-2)",
-      "description": "Cornell-style two-column layout. Left column: topic labels (One-Step Equations, Fractions, Two-Step Equations, Watch Out!). Right column: worked examples with blank spaces for student work. Progressive difficulty: one-step → fractions → two-step → special cases (coefficient before variable). 22 problems total.",
+      "description": "Cornell-style two-column layout. Left column: topic labels (One-Step Equations, Fractions, Two-Step Equations, Watch Out!). Right column: worked examples with blank spaces for student work. Progressive difficulty: one-step \u2192 fractions \u2192 two-step \u2192 special cases (coefficient before variable). 22 problems total.",
       "designPatterns": [
         "Progressive scaffolding: starts with review (one-step) before introducing new concept (two-step)",
         "Fill-in-the-blank strategy cues: 'To get rid of a fraction, multiply by the ___'",
@@ -80,5 +87,14 @@
       ]
     }
   ],
-  "notes": "Three-page bundle from All Things Algebra (Gina Wilson). Strong pedagogical structure — the notes page teaches the concept with graduated difficulty, then the maze provides gamified practice. The maze format is the standout: it's essentially self-checking drill practice disguised as a puzzle. This is a new format type for Homa — neither pure worksheet nor pure game."
+  "notes": "Three-page bundle from All Things Algebra (Gina Wilson). Strong pedagogical structure \u2014 the notes page teaches the concept with graduated difficulty, then the maze provides gamified practice. The maze format is the standout: it's essentially self-checking drill practice disguised as a puzzle. This is a new format type for Homa \u2014 neither pure worksheet nor pure game.",
+  "sourceFiles": [
+    {
+      "filename": "TwoStepEquationsNotesMazeActivity-1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-two-step-equations-maze/TwoStepEquationsNotesMazeActivity-1.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

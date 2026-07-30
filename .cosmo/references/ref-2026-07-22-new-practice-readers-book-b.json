@@ -28,8 +28,8 @@
     {
       "filename": "new-practice-readers-book-b.pdf",
       "localPath": ".cosmo/inspo-files/new-practice-readers-book-b.pdf",
-      "blobUrl": null,
-      "blobNote": "Not uploaded: no BLOB_READ_WRITE_TOKEN resolved in this session. The local original and the 158 per-page masters are retained; the upload is owed."
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-22-new-practice-readers-book-b/new-practice-readers-book-b.pdf",
+      "blobUploadedAt": "2026-07-30"
     }
   ],
   "routing": {

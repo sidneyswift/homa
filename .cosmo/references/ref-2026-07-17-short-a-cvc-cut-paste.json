@@ -5,7 +5,7 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784321541.802239",
   "format": "worksheet",
-  "title": "Short A CVC Words — Write, Cut & Paste Activity (Adapting for Autism)",
+  "title": "Short A CVC Words \u2014 Write, Cut & Paste Activity (Adapting for Autism)",
   "layout": {
     "structure": "grid",
     "spacing": "airy",
@@ -38,7 +38,10 @@
     ]
   },
   "difficulty": {
-    "ageBandMonths": [48, 84],
+    "ageBandMonths": [
+      48,
+      84
+    ],
     "ageBandGrades": "K-2",
     "complexity": "single-skill",
     "prerequisites": [
@@ -53,7 +56,11 @@
     "characters": [],
     "visualStyle": "clean-minimal",
     "colorPalette": "black-and-white",
-    "appealDrivers": ["tactile interaction (cutting/pasting)", "multi-sensory reinforcement", "leveled difficulty"]
+    "appealDrivers": [
+      "tactile interaction (cutting/pasting)",
+      "multi-sensory reinforcement",
+      "leveled difficulty"
+    ]
   },
   "printFormat": {
     "pageSize": "letter",
@@ -72,16 +79,25 @@
   "components": [
     {
       "name": "Write & Cut-Paste Grid",
-      "description": "6 CVC words with short 'a' (cab, mad, bag, ham, pan, map). Each word appears in a cell with: the printed word as reference, a writing line for the student to copy/write the word, and a cut-out tile at the bottom with the word to cut and paste. Labeled 'Level 1' — implies a progression system across the full product.",
+      "description": "6 CVC words with short 'a' (cab, mad, bag, ham, pan, map). Each word appears in a cell with: the printed word as reference, a writing line for the student to copy/write the word, and a cut-out tile at the bottom with the word to cut and paste. Labeled 'Level 1' \u2014 implies a progression system across the full product.",
       "designPatterns": [
-        "Multi-sensory reinforcement: see word → write word → cut tile → paste tile. Four modalities for one word.",
+        "Multi-sensory reinforcement: see word \u2192 write word \u2192 cut tile \u2192 paste tile. Four modalities for one word.",
         "Model-then-do: printed word is the model, writing line is the do",
         "Tactile manipulation: physical cutting and pasting adds kinesthetic memory",
         "Level system: 'Level 1' label implies graduated difficulty across the product line",
         "Generous spacing: large cells with plenty of room for developing handwriting",
-        "Part of a larger word-work bundle: CVC → Long Vowels → Blends → Digraphs → Trigraphs → Diphthongs"
+        "Part of a larger word-work bundle: CVC \u2192 Long Vowels \u2192 Blends \u2192 Digraphs \u2192 Trigraphs \u2192 Diphthongs"
       ]
     }
   ],
-  "notes": "From 'Adapting for Autism' — designed for special education but the multi-sensory approach (see-write-cut-paste) is excellent for any early learner. The cut-and-paste mechanic is a format Homa doesn't have yet. The level system and bundle structure (short a → short e → short i → etc., then long vowels, blends, digraphs) shows a systematic phonics progression. Only the 'short a Level 1' page was visible in the PDF extract — the full product likely contains multiple vowels and levels."
+  "notes": "From 'Adapting for Autism' \u2014 designed for special education but the multi-sensory approach (see-write-cut-paste) is excellent for any early learner. The cut-and-paste mechanic is a format Homa doesn't have yet. The level system and bundle structure (short a \u2192 short e \u2192 short i \u2192 etc., then long vowels, blends, digraphs) shows a systematic phonics progression. Only the 'short a Level 1' page was visible in the PDF extract \u2014 the full product likely contains multiple vowels and levels.",
+  "sourceFiles": [
+    {
+      "filename": "ShortACVCWordsWorksheetsWriteCutandPasteActivityforWordWorkCenters-1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-short-a-cvc-cut-paste/ShortACVCWordsWorksheetsWriteCutandPasteActivityforWordWorkCenters-1.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }
