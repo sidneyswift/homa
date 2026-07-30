@@ -71,11 +71,9 @@ three other families worth naming:
   handling of a real constraint, not a bug. The card-density/ink-economy
   half is a real, live, currently-unaddressed guidance gap (the skill's
   "Flash cards / cut-outs" section is two lines: a grid shape and a cell
-  border, nothing about print economy or standard sizing). **Not fixed
-  in this session**: this needs its own diagnosis (what does "print
-  economy" mean as a concrete guidance rule, what card size is actually
-  right) before a fix or an eval can be written honestly, not a policy
-  invented on the spot. Flagged as a follow-up task rather than rushed.
+  border, nothing about print economy or standard sizing). **Fixed as a
+  same-day follow-up** (PR #456) once given its own diagnosis rather than
+  a policy invented on the spot: see "Flashcard follow-up: fixed" below.
 - "Leo's Time Lord Equations" (7 versions in 6 minutes, a Doctor Who
   themed equation-decoder page): the same defect, opposite direction.
   "Please fit on 1 page" is an overflow complaint, not underfill, and
@@ -104,6 +102,7 @@ page-geometry measurement).
 | "Amalia's Handwriting Practice: Mi Nombre y la Casa de Muñecas" (root `2a1336db`) | Amalia, 3 | 12 versions, 2026-07-28 16:13 to 2026-07-29 16:25 (over 24h), **never reached final**, abandoned mid-saga when the parent moved on to other materials | `fill-convergence-handwriting.eval.ts` | Maya (6) |
 | "Leo's Time Lord Equations" (root `e7749138`, different family) | Leo, unspecified | 7 versions in 6 minutes, reached final; "Please fit on 1 page" is the overflow direction of the same defect | `fill-convergence-overflow-equations.eval.ts` | Maya (6) |
 | Alma's Pokemon Division Trainer image trail (material `a07d0ffe`, the incident this whole arc started from) | Alma, 9 | 3 faithful Pikachu prompts refused at the provider; the fourth, watered down to "cute round yellow creature," shipped and drew "that is not pokemon" | `franchise-character-fallback.eval.ts` | Finn (4) |
+| "Catechism Flash Cards" (six chains, one per child, different family; family record not looked up, initials only: M, TJ, J, E) | four children, 2026-07-15 | 8-12 versions per child across six chains in a ~13-hour window; print economy, not spacing (see "Flashcard follow-up: fixed" below) | `fill-convergence-flashcard-density.eval.ts` | Maya (6) |
 
 Age note: the Walker fixture has no 9-year-old or 3-year-old (Finn 4,
 Maya 6, Story 5, see `family-context-eval-fixture.ts`). Per house
@@ -176,10 +175,24 @@ provider block (tested an unrelated image, confirmed it was
 character-specific) and the family landed on a poke balls and lightning
 bolts header instead.
 
+**Catechism Flash Cards** (2026-07-15, a different family, four
+children, six chains): "Take out the shading in the flashcards" ->
+"Resize each flashcard to baseball card size" -> "Reformat four cards
+per page to print and cut out cards" -> "Can we reformat the paper to
+fit the most flashcards per page; keep the size of the cards" -> "Please
+take off the page heading and 'made with' border as this is wasted ink
+to print" -> "add 'Lesson 1' to all of the flashcards; take the
+watermark off of the page" -> "I do not want the 'made with Homa' footer
+on the flashcard. Please move the flashcard with the footer to another
+page". Only the first four complaints (shading, size, density) are a
+defect; the last three are the footer, a permanent constraint, correctly
+worked around by the parent rather than fixed. See "Flashcard follow-up:
+fixed" below.
+
 ## Running the suite
 
 ```
-pnpm eval:sandbox materials-studio/fill-convergence-counting-packet materials-studio/fill-convergence-cutout-packet materials-studio/fill-convergence-handwriting materials-studio/fill-convergence-overflow-equations materials-studio/franchise-character-fallback
+pnpm eval:sandbox materials-studio/fill-convergence-counting-packet materials-studio/fill-convergence-cutout-packet materials-studio/fill-convergence-handwriting materials-studio/fill-convergence-overflow-equations materials-studio/franchise-character-fallback materials-studio/fill-convergence-flashcard-density
 ```
 
 ## Results
@@ -195,11 +208,14 @@ fallback fix (#452), and the fleet-wide sweep above.
 | handwriting sheet (Maya / real: Amalia's name-tracing practice) | 12 versions over 24+ hours, **never reached final** | converged turn 3 | converged turn 4 |
 | overflow-direction equations (Maya / real: Leo's Time Lord Equations) | 7 versions in 6 minutes | converged turn 1 (after an evidence fix, see below) | not yet re-run concurrently after that fix |
 | franchise-character fallback (Finn / real: Alma's Pikachu image trail) | 3 faithful prompts refused, 4th shipped a lookalike | 4/4 hard gates pass | timed out (infra, transient network errors in that run, see below) |
+| flashcard density (Maya / real: Catechism Flash Cards, print economy not fill/overflow) | 8-12 versions per child, six chains | pre-fix: converged turn 3; post-fix: converged turn 1 (x2 runs) | not yet run concurrently with the rest of this set |
 
 Every convergence, at every turn count observed, is a large improvement
 over the real incidents: single-digit turns, most on the very first or
 second try, against sagas that ran to dozens of versions and, in three
-of five cases, were never resolved at all.
+of six cases, were never resolved at all. (The flashcard chains did
+eventually land, just after 8-12 rounds each; they belong in the "large
+improvement" count, not the "never resolved" one.)
 
 **Several rounds of tuning were needed to get a stable signal, all
 recorded here so a future reader does not mistake any of them for a
@@ -258,5 +274,73 @@ product regression:**
 
 Re-run this suite after any future change to `page-geometry.ts`,
 `review-artifact.ts`, `generate-image.ts`, or the materials-studio
-SKILL.md density/scaling/franchise-character guidance to confirm
-convergence has not regressed.
+SKILL.md density/scaling/franchise-character/card-density guidance to
+confirm convergence has not regressed.
+
+## Flashcard follow-up: fixed (same day)
+
+The "Catechism Flash Cards" chains flagged above under Fleet-wide sweep
+were, at the time that section was written, an open follow-up: a
+different defect class (print economy, not spacing), correctly left
+unfixed until it had its own diagnosis rather than a policy invented on
+the spot. That diagnosis happened later the same day, and shipped as
+PR #456.
+
+Two things were tangled in the real complaint sequence, and only one of
+them was a defect. The footer half ("I do not want the 'made with Homa'
+footer on the flashcard...") is confirmed NOT a bug: `page-shell.ts`
+stamps the footer into every page box in code, the binding D7 founder
+ruling, and the parent's own workaround (isolating that card onto its
+own page) was already correct handling of a permanent constraint. Untouched.
+
+The print-economy half (shading, card size, cards-per-page density) WAS
+real and reproducible: the "Flash cards / cut-outs" recipe in the
+materials-studio SKILL.md was two lines, a grid shape and a cell border,
+with no stated card size, no density target, and no ink-economy default
+for a format that gets printed and cut in volume.
+
+This is also a different MEASURE from the rest of this doc. The other
+scenarios check gh#349's fill/overflow signal (`geometryToolNotes`),
+which has nothing to say about card size, density, or shading; a page
+can report 0% fill or overflow issues and still be undersized, crowded
+onto one sheet, and shaded. `fill-convergence-flashcard-density.eval.ts`
+instead reads the produced material's own HTML directly
+(`getMaterialPinned` + `splitPageBodies`, the `packet-page-revision.eval.ts`
+pattern) and checks card count per page, page count, and background
+shading. The footer-removal turns from the real transcript are
+deliberately NOT scripted: a "converged" result should never mean "made
+the footer removable."
+
+**Reproduced against current code before any fix**, using a paraphrased
+scenario (Maya, 12 sight words, a count that divides evenly by four so
+page count is unambiguous): turn 1 crammed all 12 words onto one shaded
+page in a 3-column grid, far from baseball-card size; turn 2 (remove
+shading) fixed the ink complaint but kept the same crowded single page;
+turn 3 (resize to baseball card size) landed on 3 pages of 4 cards each,
+matching the real complaint order. Convergence: **turn 3**, not turn 1,
+and only after the parent supplied the size and density Homa should have
+defaulted to.
+
+**Fix shipped**: the "Flash cards / cut-outs" recipe now states the
+concrete defaults implied by the real complaints and nothing further:
+2.5in x 3.5in ("baseball card" size) as the default card, the largest
+whole grid that size fits in the 7.3in x 9.5in content box (2x2, four per
+page; three columns need 7.5in and three rows need 10.5in, both past the
+box), more pages rather than smaller cards for a bigger deck, a
+cut-line-only cell with no background (ink economy), and skipping a
+decorative page title on a pure card-grid page. No founder ruling needed:
+these are the same kind of engineering default other card recipes in
+this skill already state (nomenclature cards already fix "~3x4 inches").
+
+**Post-fix, run twice for confidence**: both runs converged at **turn 1**
+(3 pages, 4 cards per page, no shading, built correctly from the plain
+opening ask, no correction rounds needed). Turn 1 against a
+corrected-code baseline of turn 3, and against the real incident's 8-12
+rounds per chain, the same order of improvement the other scenarios in
+this doc show.
+
+Run it alone with:
+
+```
+pnpm eval:sandbox materials-studio/fill-convergence-flashcard-density
+```
