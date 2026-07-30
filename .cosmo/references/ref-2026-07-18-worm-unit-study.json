@@ -148,5 +148,14 @@
       "description": "Guided outdoor activity: dig in garden, find worms, measure with ruler. Observation report template: date, size, description, comparison ('was it bigger than the one before?')."
     }
   ],
-  "notes": "44 pages. Different creator than Stephanie Hathaway (no watercolor style \u2014 more digital/graphic illustration). Carolyng explicitly called out: art, reading comprehension, report, math, multiple disciplines, adaptable to multiple ages. The 'Morning Basket' section (18 pages!) is distinctive \u2014 it's a dedicated block of Pre-K activities themed to the same topic, so youngest children participate in the unit study alongside older siblings. The outdoor observation report is the first field-study activity we've seen \u2014 takes learning outside with measurement tools. The taxonomy card (Kingdom through Species) is surprisingly advanced content presented in a simple fill-in format. The blank question worksheet for parent customization is a UX insight \u2014 parents want to write their own questions tailored to their child."
+  "notes": "44 pages. Different creator than Stephanie Hathaway (no watercolor style \u2014 more digital/graphic illustration). Carolyng explicitly called out: art, reading comprehension, report, math, multiple disciplines, adaptable to multiple ages. The 'Morning Basket' section (18 pages!) is distinctive \u2014 it's a dedicated block of Pre-K activities themed to the same topic, so youngest children participate in the unit study alongside older siblings. The outdoor observation report is the first field-study activity we've seen \u2014 takes learning outside with measurement tools. The taxonomy card (Kingdom through Species) is surprisingly advanced content presented in a simple fill-in format. The blank question worksheet for parent customization is a UX insight \u2014 parents want to write their own questions tailored to their child.",
+  "sourceFiles": [
+    {
+      "filename": "wormunitstudy.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-worm-unit-study/wormunitstudy.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

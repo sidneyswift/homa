@@ -5,7 +5,7 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784426138.536949",
   "format": "curriculum-teacher-guide",
-  "title": "Core Knowledge Language Arts (CKLA) Preschool — Domain 1: All About Me — Teacher Guide",
+  "title": "Core Knowledge Language Arts (CKLA) Preschool \u2014 Domain 1: All About Me \u2014 Teacher Guide",
   "publisher": "Core Knowledge Foundation",
   "series": "Core Knowledge Language Arts (CKLA) Preschool",
   "gradeLevel": "Preschool (ages 3-5)",
@@ -13,11 +13,24 @@
   "pageCount": 310,
   "callouts": [],
   "overview": {
-    "description": "A 20-day preschool teacher guide for the 'All About Me' domain — covering body parts, five senses, growth/development, and self-awareness. This is ONE domain out of many in the CKLA Preschool program. 310 pages of detailed instruction for 20 days (13 instruction days + 6 Pausing Point days + 1 Assessment day). Each day requires ~45 min (20 min small-group + 25 min whole-group). Aligned to NY Common Core State Standards for Preschool.",
+    "description": "A 20-day preschool teacher guide for the 'All About Me' domain \u2014 covering body parts, five senses, growth/development, and self-awareness. This is ONE domain out of many in the CKLA Preschool program. 310 pages of detailed instruction for 20 days (13 instruction days + 6 Pausing Point days + 1 Assessment day). Each day requires ~45 min (20 min small-group + 25 min whole-group). Aligned to NY Common Core State Standards for Preschool.",
     "days": 20,
     "dailyMinutes": 45,
-    "coreContent": ["body parts", "five senses (eyes/sight, ears/hearing, nose/smell, tongue/taste, skin/touch)", "growth stages (baby → child → adult)", "self-awareness", "individual differences"],
-    "languageArts": ["phonological awareness", "emergent writing", "vocabulary development", "print awareness", "nursery rhymes", "interactive read-alouds"]
+    "coreContent": [
+      "body parts",
+      "five senses (eyes/sight, ears/hearing, nose/smell, tongue/taste, skin/touch)",
+      "growth stages (baby \u2192 child \u2192 adult)",
+      "self-awareness",
+      "individual differences"
+    ],
+    "languageArts": [
+      "phonological awareness",
+      "emergent writing",
+      "vocabulary development",
+      "print awareness",
+      "nursery rhymes",
+      "interactive read-alouds"
+    ]
   },
   "domainStructure": {
     "dailyComponents": {
@@ -31,12 +44,12 @@
         "groupSize": "small group (simultaneous rotation)"
       },
       "listeningAndLearning": {
-        "description": "Whole-group interactive read-aloud with discussion, vocabulary development, and Picture Talks (next-day review of read-aloud images). Read-alouds are specifically written for this domain — not trade books.",
+        "description": "Whole-group interactive read-aloud with discussion, vocabulary development, and Picture Talks (next-day review of read-aloud images). Read-alouds are specifically written for this domain \u2014 not trade books.",
         "timing": "25 minutes",
         "groupSize": "whole group"
       },
       "learningCenters": {
-        "description": "Domain-specific learning center (Doctor's Office for 'All About Me') + supplemental centers (writing, library, sensory table, etc.). The Doctor's Office center runs all 20 days — children role-play patient/doctor, use medical vocabulary, practice writing prescriptions.",
+        "description": "Domain-specific learning center (Doctor's Office for 'All About Me') + supplemental centers (writing, library, sensory table, etc.). The Doctor's Office center runs all 20 days \u2014 children role-play patient/doctor, use medical vocabulary, practice writing prescriptions.",
         "timing": "During existing center time (not counted in 45 min)"
       },
       "takeHomeMaterial": {
@@ -46,18 +59,18 @@
     },
     "domainCalendar": {
       "description": "A 20-day grid showing every component for every day. Rows: Starting the Day (Routines, Learning Center labels/sign-in, Nursery Rhyme), Skills (Small Group 1, Small Group 2), Listening & Learning (Interactive Read-Aloud or Picture Talk, Extension Activity). Pausing Point days (6-8, 17-19) are built-in flexible review days.",
-      "pausingPoints": "Days 6-8 and 17-19 — flexible days for review, re-teaching, or extension. Not scripted — teacher decides based on student needs."
+      "pausingPoints": "Days 6-8 and 17-19 \u2014 flexible days for review, re-teaching, or extension. Not scripted \u2014 teacher decides based on student needs."
     },
     "progressionDesign": {
-      "attendance": "Progresses from 'One at a Time' (simplest) → 'Cubbies' → 'Two Piles' (child sorts own card into present/absent) across 20 days",
+      "attendance": "Progresses from 'One at a Time' (simplest) \u2192 'Cubbies' \u2192 'Two Piles' (child sorts own card into present/absent) across 20 days",
       "nurseryRhymes": "New rhyme introduced every 3-5 days. Repetition builds fluency. Rhymes chosen to complement content (body parts songs during body parts unit).",
       "vocabulary": "Vocabulary Words to Know list per day. Words defined during read-aloud, encountered in Picture Talk, reinforced in centers. Cumulative vocabulary growth across days."
     }
   },
   "pedagogicalApproach": {
-    "interactiveReadAloud": "Teacher reads from scripted text with embedded discussion prompts, vocabulary definitions, and comprehension checks. Not a 'just read the book' approach — highly interactive.",
+    "interactiveReadAloud": "Teacher reads from scripted text with embedded discussion prompts, vocabulary definitions, and comprehension checks. Not a 'just read the book' approach \u2014 highly interactive.",
     "pictureTalk": "Day-after review: teacher shows subset of images from yesterday's read-aloud. Students use vocabulary to describe what they see. Builds recall + verbal fluency.",
-    "deepeningUnderstanding": "After read-aloud, expand vocabulary with related words (e.g., learned 'inside' → now learn 'outside'). Connects new words to known concepts.",
+    "deepeningUnderstanding": "After read-aloud, expand vocabulary with related words (e.g., learned 'inside' \u2192 now learn 'outside'). Connects new words to known concepts.",
     "extensionActivities": "Multi-day projects during center time. Child-led after teacher models. Examples: drawing body parts, sorting sense-related objects, creating 'All About Me' books.",
     "emergentWriting": "Writing facilitated in centers. Accept ALL forms: scribbling, letter-like shapes, actual letters. The goal is understanding that writing communicates, not correct spelling.",
     "domainSpecificLearningCenter": "Doctor's Office center: medical vocabulary, patient/doctor role play, 'prescriptions' (emergent writing), body part identification. Active all 20 days."
@@ -77,7 +90,7 @@
     },
     "domainBasedCurriculum": {
       "description": "Content organized by DOMAINS (All About Me, Plants, Animals, etc.) rather than by skill strands. Skills (phonics, vocabulary, etc.) are taught THROUGH the domain content, not separately. You learn letter sounds while learning about body parts.",
-      "value": "Content-rich instruction. Skills aren't isolated drills — they're embedded in meaningful content."
+      "value": "Content-rich instruction. Skills aren't isolated drills \u2014 they're embedded in meaningful content."
     },
     "scriptedTeacherLanguage": {
       "description": "Teacher guide provides EXACT language to use: 'Say to students: Point to your nose. Your nose helps you smell. Can you smell something right now?' This level of scripting means even a novice teacher (or parent) can deliver effective instruction.",
@@ -85,8 +98,8 @@
     }
   },
   "overallLayout": {
-    "structure": "linear daily lessons with consistent section headers (Starting the Day → Skills → Listening & Learning)",
-    "spacing": "dense — 310 pages for 20 days of instruction",
+    "structure": "linear daily lessons with consistent section headers (Starting the Day \u2192 Skills \u2192 Listening & Learning)",
+    "spacing": "dense \u2014 310 pages for 20 days of instruction",
     "visualHierarchy": "section headers with icons (whole group, small group, learning center, take-home)",
     "whiteSpaceRatio": 0.25,
     "flowDirection": "day-by-day linear"
@@ -95,27 +108,61 @@
     "subject": "ela",
     "domain": "emergent-literacy",
     "topics": [
-      {"id": "ela.phonological-awareness", "kind": "procedural", "mapped": false},
-      {"id": "ela.print-awareness", "kind": "conceptual", "mapped": false},
-      {"id": "ela.vocabulary-development", "kind": "conceptual", "mapped": false},
-      {"id": "ela.emergent-writing", "kind": "procedural", "mapped": false},
-      {"id": "ela.interactive-read-aloud", "kind": "conceptual", "mapped": false},
-      {"id": "science.body-parts-five-senses", "kind": "conceptual", "mapped": false}
+      {
+        "id": "ela.phonological-awareness",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.print-awareness",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "ela.vocabulary-development",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "ela.emergent-writing",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.interactive-read-aloud",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "science.body-parts-five-senses",
+        "kind": "conceptual",
+        "mapped": false
+      }
     ],
-    "unmappedSkills": ["domain-based-preschool-instruction", "scripted-teacher-language", "learning-center-design"]
+    "unmappedSkills": [
+      "domain-based-preschool-instruction",
+      "scripted-teacher-language",
+      "learning-center-design"
+    ]
   },
   "difficulty": {
-    "ageBandMonths": [36, 60],
+    "ageBandMonths": [
+      36,
+      60
+    ],
     "complexity": "multi-skill embedded in domain content",
     "prerequisites": [],
-    "scaffolding": "very high — fully scripted, small-group + whole-group, built-in pausing points"
+    "scaffolding": "very high \u2014 fully scripted, small-group + whole-group, built-in pausing points"
   },
   "theming": {
     "themeType": "domain-driven",
     "characters": [],
     "visualStyle": "text-heavy teacher guide with flip book images for students",
     "colorPalette": "B&W text (flip book images separate)",
-    "appealDrivers": ["content-rich domain approach", "scripted confidence for new teachers/parents"]
+    "appealDrivers": [
+      "content-rich domain approach",
+      "scripted confidence for new teachers/parents"
+    ]
   },
   "printFormat": {
     "pageSize": "letter",
@@ -137,5 +184,14 @@
       }
     ]
   },
-  "notes": "Second Aless drop in rapid succession (same minute as Peaceful Press drop). This is a MASSIVE document — 310 pages for a single 20-day preschool domain. It represents the opposite end of the complexity spectrum from the Peaceful Press co-op guide. The Peaceful Press was 4 pages for 26 weeks. CKLA is 310 pages for 20 days. Aless may be showing both extremes deliberately — or she may be dumping everything she has for analysis. The CKLA guide is interesting because it's Creative Commons licensed (free to use and adapt), content-rich (skills taught through domain knowledge, not isolated), and fully scripted (zero guesswork for parents). The standards alignment chart and scripted teacher language are particularly relevant for Homa — we could generate standards-aligned, scripted lessons."
+  "notes": "Second Aless drop in rapid succession (same minute as Peaceful Press drop). This is a MASSIVE document \u2014 310 pages for a single 20-day preschool domain. It represents the opposite end of the complexity spectrum from the Peaceful Press co-op guide. The Peaceful Press was 4 pages for 26 weeks. CKLA is 310 pages for 20 days. Aless may be showing both extremes deliberately \u2014 or she may be dumping everything she has for analysis. The CKLA guide is interesting because it's Creative Commons licensed (free to use and adapt), content-rich (skills taught through domain knowledge, not isolated), and fully scripted (zero guesswork for parents). The standards alignment chart and scripted teacher language are particularly relevant for Homa \u2014 we could generate standards-aligned, scripted lessons.",
+  "sourceFiles": [
+    {
+      "filename": "PK_D1_AAM_2014_TG_Web.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-ckla-preschool-all-about-me/PK_D1_AAM_2014_TG_Web.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

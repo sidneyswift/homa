@@ -80,5 +80,14 @@
       }
     ]
   },
-  "notes": "At 195 pages, this is substantial. The dot marker format is specifically designed for toddlers \u2014 the fine motor demand is minimal (just stamping), making it accessible to very young children. Signals that Aless is thinking about her youngest learner's needs."
+  "notes": "At 195 pages, this is substantial. The dot marker format is specifically designed for toddlers \u2014 the fine motor demand is minimal (just stamping), making it accessible to very young children. Signals that Aless is thinking about her youngest learner's needs.",
+  "sourceFiles": [
+    {
+      "filename": "toddler+a-z.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-toddler-alphabet-dot-book/toddler%2Ba-z.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

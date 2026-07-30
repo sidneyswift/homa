@@ -5,23 +5,34 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784403967.996759",
   "format": "practice-book-selection",
-  "title": "Harcourt Trophies Grade 2 Practice Book — Selected Pages",
+  "title": "Harcourt Trophies Grade 2 Practice Book \u2014 Selected Pages",
   "publisher": "Harcourt",
   "series": "Trophies",
   "gradeLevel": "2nd grade",
-  "pagesShown": [1, 11, 16, 18, 19, 34],
-  "callouts": ["school-home connection", "try this sections", "general use of space"],
+  "pagesShown": [
+    1,
+    11,
+    16,
+    18,
+    19,
+    34
+  ],
+  "callouts": [
+    "school-home connection",
+    "try this sections",
+    "general use of space"
+  ],
   "worksheets": [
     {
       "page": 1,
-      "title": "A Day at the Zoo — Phonograms: -id, -ide",
+      "title": "A Day at the Zoo \u2014 Phonograms: -id, -ide",
       "linkedStory": "The Mixed-Up Chameleon",
       "type": "cloze-story",
       "layout": {
         "structure": "sectioned",
         "spacing": "airy",
         "visualHierarchy": "exercise-dominant with illustration support",
-        "whiteSpaceRatio": 0.30,
+        "whiteSpaceRatio": 0.3,
         "flowDirection": "top-down"
       },
       "skillTargeting": {
@@ -35,7 +46,9 @@
             "suggestedSlug": "ela.phonogram-word-families"
           }
         ],
-        "unmappedSkills": ["word-family-application-in-context"]
+        "unmappedSkills": [
+          "word-family-application-in-context"
+        ]
       },
       "features": {
         "wordBox": true,
@@ -47,14 +60,14 @@
     },
     {
       "page": 11,
-      "title": "Spelling Words Sort — Words with ame / ake",
+      "title": "Spelling Words Sort \u2014 Words with ame / ake",
       "linkedStory": "Get Up and Go!",
       "type": "spelling-sort",
       "layout": {
         "structure": "grid",
         "spacing": "airy",
-        "visualHierarchy": "balanced — word bank and sort grid equal weight",
-        "whiteSpaceRatio": 0.40,
+        "visualHierarchy": "balanced \u2014 word bank and sort grid equal weight",
+        "whiteSpaceRatio": 0.4,
         "flowDirection": "top-down, then left-right"
       },
       "skillTargeting": {
@@ -68,19 +81,44 @@
             "suggestedSlug": "ela.spelling-word-patterns"
           }
         ],
-        "unmappedSkills": ["syllable-sorting"]
+        "unmappedSkills": [
+          "syllable-sorting"
+        ]
       },
       "features": {
-        "wordBank": ["games", "make", "take", "name", "flame", "same", "became", "brake", "snake", "eyelid", "slide", "line", "more", "mistake", "together"],
-        "sortCategories": ["Words with ame", "Words with ake"],
-        "secondarySort": ["One-Syllable Words", "Two-Syllable Words", "Three-Syllable Words"],
+        "wordBank": [
+          "games",
+          "make",
+          "take",
+          "name",
+          "flame",
+          "same",
+          "became",
+          "brake",
+          "snake",
+          "eyelid",
+          "slide",
+          "line",
+          "more",
+          "mistake",
+          "together"
+        ],
+        "sortCategories": [
+          "Words with ame",
+          "Words with ake"
+        ],
+        "secondarySort": [
+          "One-Syllable Words",
+          "Two-Syllable Words",
+          "Three-Syllable Words"
+        ],
         "pencilGraphic": true,
         "numberedSlots": true
       }
     },
     {
       "page": 16,
-      "title": "Author's Purpose — Read signs and identify purpose",
+      "title": "Author's Purpose \u2014 Read signs and identify purpose",
       "linkedStory": "Get Up and Go!",
       "type": "reading-comprehension",
       "layout": {
@@ -104,7 +142,10 @@
         "unmappedSkills": []
       },
       "features": {
-        "realWorldTextExamples": ["BE ON TIME FOR SCHOOL! (informational sign)", "SCOTT FOR BEST CLOWN! (persuasive poster)"],
+        "realWorldTextExamples": [
+          "BE ON TIME FOR SCHOOL! (informational sign)",
+          "SCOTT FOR BEST CLOWN! (persuasive poster)"
+        ],
         "framedTextBlocks": true,
         "decorativeBorders": true,
         "illustration": "boy at bus stop, circus clown poster with stars",
@@ -114,7 +155,7 @@
     },
     {
       "page": 18,
-      "title": "Picture Labels — Inflections: -ed",
+      "title": "Picture Labels \u2014 Inflections: -ed",
       "linkedStory": "Henry and Mudge Under the Yellow Moon",
       "type": "picture-label-cloze",
       "layout": {
@@ -138,7 +179,16 @@
         "unmappedSkills": []
       },
       "features": {
-        "wordBox": ["mailed", "painted", "barked", "checked", "finished", "thanked", "licked", "opened"],
+        "wordBox": [
+          "mailed",
+          "painted",
+          "barked",
+          "checked",
+          "finished",
+          "thanked",
+          "licked",
+          "opened"
+        ],
         "pictureScenes": 4,
         "sentenceFrames": true,
         "illustration": "4 distinct scene illustrations (dog barking, mailbox, test-taking, house-painting)",
@@ -147,14 +197,14 @@
     },
     {
       "page": 19,
-      "title": "Spelling Words Sort — Words with ed",
+      "title": "Spelling Words Sort \u2014 Words with ed",
       "linkedStory": "Henry and Mudge Under the Yellow Moon",
       "type": "spelling-sort",
       "layout": {
         "structure": "grid",
         "spacing": "airy",
-        "visualHierarchy": "balanced — word bank and sort grid equal weight",
-        "whiteSpaceRatio": 0.40,
+        "visualHierarchy": "balanced \u2014 word bank and sort grid equal weight",
+        "whiteSpaceRatio": 0.4,
         "flowDirection": "top-down, then left-right"
       },
       "skillTargeting": {
@@ -171,16 +221,37 @@
         "unmappedSkills": []
       },
       "features": {
-        "wordBank": ["barked", "licked", "backed", "thanked", "painted", "opened", "mailed", "checked", "remarked", "finished", "mistake", "became", "about", "few", "same"],
-        "sortCategories": ["Words with ed"],
-        "secondarySort": ["One-Syllable Words", "Two-Syllable Words"],
+        "wordBank": [
+          "barked",
+          "licked",
+          "backed",
+          "thanked",
+          "painted",
+          "opened",
+          "mailed",
+          "checked",
+          "remarked",
+          "finished",
+          "mistake",
+          "became",
+          "about",
+          "few",
+          "same"
+        ],
+        "sortCategories": [
+          "Words with ed"
+        ],
+        "secondarySort": [
+          "One-Syllable Words",
+          "Two-Syllable Words"
+        ],
         "pencilGraphic": true,
         "numberedSlots": true
       }
     },
     {
       "page": 34,
-      "title": "Phonograms: -at, -ate — Word Sort Chart",
+      "title": "Phonograms: -at, -ate \u2014 Word Sort Chart",
       "linkedStory": "Wilson Sat Alone",
       "type": "word-sort-chart",
       "layout": {
@@ -204,10 +275,27 @@
         "unmappedSkills": []
       },
       "features": {
-        "wordBank": ["acrobat", "gate", "ate", "create", "flat", "that", "appreciate", "state", "fat", "sat"],
+        "wordBank": [
+          "acrobat",
+          "gate",
+          "ate",
+          "create",
+          "flat",
+          "that",
+          "appreciate",
+          "state",
+          "fat",
+          "sat"
+        ],
         "twoColumnChart": true,
-        "headerWords": ["sat", "gate"],
-        "headerIllustrations": ["B&W bear sitting", "B&W gate"],
+        "headerWords": [
+          "sat",
+          "gate"
+        ],
+        "headerIllustrations": [
+          "B&W bear sitting",
+          "B&W gate"
+        ],
         "writingLines": true,
         "schoolHomeConnection": "Encourage your child to think of a story that uses many of the phonics words. Write down sentences as your child says them. Ask your child to underline the phonics words."
       }
@@ -216,7 +304,7 @@
   "overallLayout": {
     "structure": "sectioned",
     "spacing": "airy",
-    "visualHierarchy": "balanced — illustration and exercise share space without crowding",
+    "visualHierarchy": "balanced \u2014 illustration and exercise share space without crowding",
     "whiteSpaceRatio": 0.32,
     "flowDirection": "top-down"
   },
@@ -224,25 +312,56 @@
     "subject": "ela",
     "domain": "phonics-word-reading",
     "topics": [
-      {"id": "ela.phonogram-word-families", "kind": "procedural", "mapped": false},
-      {"id": "ela.spelling-word-patterns", "kind": "procedural", "mapped": false},
-      {"id": "ela.inflectional-endings", "kind": "procedural", "mapped": false},
-      {"id": "ela.identify-authors-purpose", "kind": "conceptual", "mapped": false}
+      {
+        "id": "ela.phonogram-word-families",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.spelling-word-patterns",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.inflectional-endings",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.identify-authors-purpose",
+        "kind": "conceptual",
+        "mapped": false
+      }
     ],
-    "unmappedSkills": ["word-family-application-in-context", "syllable-sorting"]
+    "unmappedSkills": [
+      "word-family-application-in-context",
+      "syllable-sorting"
+    ]
   },
   "difficulty": {
-    "ageBandMonths": [72, 96],
+    "ageBandMonths": [
+      72,
+      96
+    ],
     "complexity": "single-skill per page",
-    "prerequisites": ["ela.letter-recognition", "ela.basic-phonics-cvc"],
+    "prerequisites": [
+      "ela.letter-recognition",
+      "ela.basic-phonics-cvc"
+    ],
     "scaffolding": "high"
   },
   "theming": {
     "themeType": "character-driven",
-    "characters": ["story characters from Trophies reading series (chameleon, Henry & Mudge, Wilson)"],
+    "characters": [
+      "story characters from Trophies reading series (chameleon, Henry & Mudge, Wilson)"
+    ],
     "visualStyle": "hand-drawn line art (B&W)",
     "colorPalette": "black-and-white",
-    "appealDrivers": ["story connection gives context to practice", "recognizable characters from reading lessons", "large friendly illustrations"]
+    "appealDrivers": [
+      "story connection gives context to practice",
+      "recognizable characters from reading lessons",
+      "large friendly illustrations"
+    ]
   },
   "printFormat": {
     "pageSize": "letter",
@@ -253,7 +372,7 @@
   },
   "designPatterns": {
     "schoolHomeConnection": {
-      "description": "Small boxed section at bottom-left of every worksheet with a house icon. Gives the parent a specific, playful activity to extend the skill at home. Not homework — it's a bonding activity suggestion.",
+      "description": "Small boxed section at bottom-left of every worksheet with a house icon. Gives the parent a specific, playful activity to extend the skill at home. Not homework \u2014 it's a bonding activity suggestion.",
       "frequency": "every page (at least on the pages shown)",
       "placement": "bottom-left, small font, boxed",
       "examples": [
@@ -266,7 +385,7 @@
     "tryThis": {
       "description": "Secondary exercise or extension on some pages (the syllable sort under the word-pattern sort). A bonus challenge that doesn't overwhelm the main task.",
       "placement": "below the main exercise, visually separated",
-      "purpose": "differentiation — gives faster students something extra without making the main task feel incomplete"
+      "purpose": "differentiation \u2014 gives faster students something extra without making the main task feel incomplete"
     },
     "storyIntegration": {
       "description": "Every worksheet is tied to a specific story from the Trophies reading program. The practice reinforces skills encountered during reading, so the child applies phonics/vocab/comprehension in a connected context rather than isolation.",
@@ -282,7 +401,10 @@
     }
   },
   "recipeMatch": {
-    "matchedRecipes": ["themed-worksheet", "spelling-sort"],
+    "matchedRecipes": [
+      "themed-worksheet",
+      "spelling-sort"
+    ],
     "gaps": [
       {
         "name": "cloze-story",
@@ -298,5 +420,68 @@
       }
     ]
   },
-  "notes": "This is a published practice book selection, not a standalone worksheet. Carolyng specifically called out three design features: (1) the School-Home Connection sections on every page, (2) the 'Try This' extension sections, and (3) the general use of space. The practice book is literature-connected — each worksheet reinforces a skill from a specific reading selection. The airy spacing and generous white space are notable for a publisher workbook. Light ink density makes it very parent-friendly for printing."
+  "notes": "This is a published practice book selection, not a standalone worksheet. Carolyng specifically called out three design features: (1) the School-Home Connection sections on every page, (2) the 'Try This' extension sections, and (3) the general use of space. The practice book is literature-connected \u2014 each worksheet reinforces a skill from a specific reading selection. The airy spacing and generous white space are notable for a publisher workbook. Light ink density makes it very parent-friendly for printing.",
+  "sourceFiles": [
+    {
+      "filename": "1000197341.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-practice-book/1000197341.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197343.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-practice-book/1000197343.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197344.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-practice-book/1000197344.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197345.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-practice-book/1000197345.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197346.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-practice-book/1000197346.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197347.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-practice-book/1000197347.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197348.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-practice-book/1000197348.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197349.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-practice-book/1000197349.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197350.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-practice-book/1000197350.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197351.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-practice-book/1000197351.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

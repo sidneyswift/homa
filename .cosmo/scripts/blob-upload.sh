@@ -52,7 +52,14 @@ if [ "$(printf '%s' "$TOKEN_STORE" | tr '[:upper:]' '[:lower:]')" != "$EXPECTED_
 fi
 
 BASENAME=$(basename "$FILE")
-PATHNAME="inspo/${REF_ID}/${BASENAME}"
+# The basename goes into a URL, so it has to be percent-encoded. Slack
+# filenames routinely carry spaces and brackets ("good and the beautiful .pdf",
+# "[FREE] Geography - Houses Around the World.pdf"), and an unencoded space
+# produces a malformed request that fails with no useful message. This bit
+# 23 of 58 uploads in the 2026-07-30 rescue sweep, and every failure was a
+# filename with a space in it.
+ENCODED=$(printf '%s' "$BASENAME" | python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.stdin.read(), safe='.-_~'))")
+PATHNAME="inspo/${REF_ID}/${ENCODED}"
 
 # Deterministic path, idempotent re-upload: no random suffix, overwrite ok.
 RESPONSE=$(curl -sf -X PUT "https://blob.vercel-storage.com/${PATHNAME}" \

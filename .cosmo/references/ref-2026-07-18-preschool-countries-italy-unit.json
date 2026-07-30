@@ -37,5 +37,14 @@
       }
     ]
   },
-  "notes": "ZIP file (49MB). Interesting drop \u2014 first geography/culture unit study from Aless. Combined with the Spanish language drops and Houses Around the World Montessori cards, suggests Aless values cultural exposure and global awareness for young learners."
+  "notes": "ZIP file (49MB). Interesting drop \u2014 first geography/culture unit study from Aless. Combined with the Spanish language drops and Houses Around the World Montessori cards, suggests Aless values cultural exposure and global awareness for young learners.",
+  "sourceFiles": [
+    {
+      "filename": "PreschoolCountriesItalyUnitWeek10-1.zip",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-preschool-countries-italy-unit/PreschoolCountriesItalyUnitWeek10-1.zip",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

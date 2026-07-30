@@ -5,7 +5,7 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784408546.666259",
   "format": "teacher-guide-day-detail",
-  "title": "Harcourt Trophies Grade 2 Teacher Guide — Day 1 Detail Pages (Phonics, Spelling, Writer's Craft, Grammar)",
+  "title": "Harcourt Trophies Grade 2 Teacher Guide \u2014 Day 1 Detail Pages (Phonics, Spelling, Writer's Craft, Grammar)",
   "publisher": "Harcourt",
   "series": "Trophies",
   "gradeLevel": "2nd grade",
@@ -14,29 +14,32 @@
     "ref-2026-07-18-harcourt-trophies-2nd-assessments",
     "ref-2026-07-18-harcourt-trophies-2nd-lesson-planner"
   ],
-  "callouts": ["different supplements based on level - below, on level and advanced", "writers craft has writing everyday section to the left that shows what will be explored by day"],
+  "callouts": [
+    "different supplements based on level - below, on level and advanced",
+    "writers craft has writing everyday section to the left that shows what will be explored by day"
+  ],
   "pagesShown": [
     {
       "page": "14K",
-      "section": "Word Work — Apply Phonics",
+      "section": "Word Work \u2014 Apply Phonics",
       "skill": "Phonograms -id, -ide",
       "dayLabel": "Day 1"
     },
     {
       "page": "14L",
-      "section": "Word Work — Spelling",
+      "section": "Word Work \u2014 Spelling",
       "skill": "Pretest, Word Sort",
       "dayLabel": "Day 1"
     },
     {
       "page": "14M",
-      "section": "Language Arts — Writer's Craft",
+      "section": "Language Arts \u2014 Writer's Craft",
       "skill": "Focus/Ideas: Developing Topics and Ideas",
       "dayLabel": "Day 1"
     },
     {
       "page": "14N",
-      "section": "Language Arts — Grammar",
+      "section": "Language Arts \u2014 Grammar",
       "skill": "Sentences (Introduce)",
       "dayLabel": "Day 1"
     }
@@ -44,48 +47,58 @@
   "designPatterns": {
     "leveledSupplements": {
       "description": "At the bottom of the phonics page, four leveled worksheet thumbnails appear side by side: Below-Level ('Extra Support, p. 1'), On-Level ('Practice Book, p. 1' + 'Homework Option'), Advanced ('Challenge, p. 1'), and English-Language Learners ('ELL, p. 1'). Each targets the SAME phonics skill (-id, -ide) but at a different complexity level. The parent/teacher picks the appropriate worksheet for their child's level.",
-      "levels": ["Below-Level (Extra Support)", "On-Level (Practice Book)", "Advanced (Challenge)", "ELL"],
+      "levels": [
+        "Below-Level (Extra Support)",
+        "On-Level (Practice Book)",
+        "Advanced (Challenge)",
+        "ELL"
+      ],
       "pattern": "Same skill, different scaffolding. Below-Level has more support/cloze; On-Level is the standard practice; Advanced adds rhymes/riddles/creative extension; ELL focuses on visual/contextual support.",
       "thumbnails": true,
       "pageReferences": true,
       "value": "Built-in differentiation without creating separate curricula. One week plan, four difficulty levels of worksheets."
     },
     "fiveDayProgressionBadge": {
-      "description": "Both Spelling and Grammar pages have a color-coded 5-day progression badge in the top-left corner. Spelling: Day 1 Pretest/Word Sort → Day 2 Word Building → Day 3 State the Generalization → Day 4 Review → Day 5 Posttest/Writing Application. Grammar: Day 1 Introduce Sentences → Day 2 Review/Generate → Day 3 Review → Day 4 Review → Day 5 Cumulative Review/Identify. Current day is highlighted in red.",
+      "description": "Both Spelling and Grammar pages have a color-coded 5-day progression badge in the top-left corner. Spelling: Day 1 Pretest/Word Sort \u2192 Day 2 Word Building \u2192 Day 3 State the Generalization \u2192 Day 4 Review \u2192 Day 5 Posttest/Writing Application. Grammar: Day 1 Introduce Sentences \u2192 Day 2 Review/Generate \u2192 Day 3 Review \u2192 Day 4 Review \u2192 Day 5 Cumulative Review/Identify. Current day is highlighted in red.",
       "value": "Parent always knows where they are in the weekly arc AND where they're heading. No 'are we done yet?' anxiety."
     },
     "writingEveryDay": {
-      "description": "The Writer's Craft page has a 'Writing Every Day' sidebar on the left showing the 5-day writing progression: Day 1 Analyze Topics and Ideas → Day 2 Focus on Topics → Day 3 Focus on Ideas → Day 4 Prewrite and Draft → Day 5 Revise, Edit, and Share Sentences. Below that, 'Traits of Good Writing' lists the four quality indicators (Focus/Ideas, Organization, Word Choice, Conventions).",
+      "description": "The Writer's Craft page has a 'Writing Every Day' sidebar on the left showing the 5-day writing progression: Day 1 Analyze Topics and Ideas \u2192 Day 2 Focus on Topics \u2192 Day 3 Focus on Ideas \u2192 Day 4 Prewrite and Draft \u2192 Day 5 Revise, Edit, and Share Sentences. Below that, 'Traits of Good Writing' lists the four quality indicators (Focus/Ideas, Organization, Word Choice, Conventions).",
       "days": {
-        "day1": "Analyze Topics and Ideas — discuss a topic and idea list",
-        "day2": "Focus on Topics — examine choosing a topic",
-        "day3": "Focus on Ideas — use a topic to communicate an idea",
+        "day1": "Analyze Topics and Ideas \u2014 discuss a topic and idea list",
+        "day2": "Focus on Topics \u2014 examine choosing a topic",
+        "day3": "Focus on Ideas \u2014 use a topic to communicate an idea",
         "day4": "Prewrite and Draft",
         "day5": "Revise, Edit, and Share Sentences"
       },
-      "traitsOfGoodWriting": ["Focus/Ideas", "Organization", "Word Choice", "Conventions"],
-      "value": "Writing isn't a one-day exercise — it's a week-long process with a clear pipeline: analyze → focus → draft → revise. The child sees writing as iterative, not one-shot."
+      "traitsOfGoodWriting": [
+        "Focus/Ideas",
+        "Organization",
+        "Word Choice",
+        "Conventions"
+      ],
+      "value": "Writing isn't a one-day exercise \u2014 it's a week-long process with a clear pipeline: analyze \u2192 focus \u2192 draft \u2192 revise. The child sees writing as iterative, not one-shot."
     },
     "diagnosticCheckSidebar": {
-      "description": "The phonics page has a 'Reaching All Learners' sidebar with a diagnostic check: 'If... children need additional support... Then... have children read the Decodable Books.' This is an IF/THEN remediation branch — if the child struggles with the main lesson, here's exactly what to do.",
+      "description": "The phonics page has a 'Reaching All Learners' sidebar with a diagnostic check: 'If... children need additional support... Then... have children read the Decodable Books.' This is an IF/THEN remediation branch \u2014 if the child struggles with the main lesson, here's exactly what to do.",
       "value": "The parent doesn't have to figure out what to do when a child is stuck. The decision tree is built in."
     },
     "teachModelApply": {
-      "description": "Grammar follows a Teach/Model → Practice/Apply structure. Teach introduces the concept ('What makes a sentence?'). Practice/Apply uses a transparency with real examples. The pattern is consistent across all skill pages.",
-      "value": "Every lesson has the same rhythm: concept → model → practice. Predictable for both parent and child."
+      "description": "Grammar follows a Teach/Model \u2192 Practice/Apply structure. Teach introduces the concept ('What makes a sentence?'). Practice/Apply uses a transparency with real examples. The pattern is consistent across all skill pages.",
+      "value": "Every lesson has the same rhythm: concept \u2192 model \u2192 practice. Predictable for both parent and child."
     },
     "skillTrace": {
       "description": "The Grammar page has a 'Skill Trace' box showing page references for Introduce, Reteach, Review (across multiple pages), and Test. This is a cross-reference map showing EVERYWHERE this grammar skill appears in the system.",
       "value": "Parent can find related practice pages instantly. No hunting through the book."
     },
     "wrapUpReadAloud": {
-      "description": "The Grammar page ends with a 'Wrap Up: Read a Story Aloud' section — read 'The Thing That Bothered Farmer Brown,' assign animal sounds to groups, and have children imitate sounds during re-reading. Ends with SSR (Self-Selected Reading). The day doesn't end on grammar drill — it ends on joy.",
+      "description": "The Grammar page ends with a 'Wrap Up: Read a Story Aloud' section \u2014 read 'The Thing That Bothered Farmer Brown,' assign animal sounds to groups, and have children imitate sounds during re-reading. Ends with SSR (Self-Selected Reading). The day doesn't end on grammar drill \u2014 it ends on joy.",
       "value": "Day closure is story-based and playful, not more worksheets."
     }
   },
   "overallLayout": {
-    "structure": "sectioned — main content area + left sidebar (diagnostic/daily progression) + right sidebar (objectives/skill trace) + bottom row (leveled worksheets)",
-    "spacing": "dense but well-organized — color-coded sections prevent overwhelm",
+    "structure": "sectioned \u2014 main content area + left sidebar (diagnostic/daily progression) + right sidebar (objectives/skill trace) + bottom row (leveled worksheets)",
+    "spacing": "dense but well-organized \u2014 color-coded sections prevent overwhelm",
     "visualHierarchy": "main instruction body dominates, sidebars provide context/navigation, bottom thumbnails show differentiation options",
     "whiteSpaceRatio": 0.15,
     "flowDirection": "top-down within page, sidebars provide lateral context"
@@ -94,25 +107,54 @@
     "subject": "ela",
     "domain": "phonics-word-reading",
     "topics": [
-      {"id": "ela.phonogram-word-families", "kind": "procedural", "mapped": false},
-      {"id": "ela.spelling-word-patterns", "kind": "procedural", "mapped": false},
-      {"id": "ela.writing-ideas-topics", "kind": "procedural", "mapped": false},
-      {"id": "ela.sentence-structure", "kind": "conceptual", "mapped": false}
+      {
+        "id": "ela.phonogram-word-families",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.spelling-word-patterns",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.writing-ideas-topics",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.sentence-structure",
+        "kind": "conceptual",
+        "mapped": false
+      }
     ],
-    "unmappedSkills": ["leveled-differentiation", "diagnostic-branching", "writing-process-weekly-arc"]
+    "unmappedSkills": [
+      "leveled-differentiation",
+      "diagnostic-branching",
+      "writing-process-weekly-arc"
+    ]
   },
   "difficulty": {
-    "ageBandMonths": [72, 96],
+    "ageBandMonths": [
+      72,
+      96
+    ],
     "complexity": "multi-skill (phonics + spelling + writing + grammar, all Day 1)",
-    "prerequisites": ["basic reading readiness"],
-    "scaffolding": "high — multiple scaffold levels available per skill"
+    "prerequisites": [
+      "basic reading readiness"
+    ],
+    "scaffolding": "high \u2014 multiple scaffold levels available per skill"
   },
   "theming": {
     "themeType": "neutral",
     "characters": [],
     "visualStyle": "information design (teacher reference, not student-facing)",
-    "colorPalette": "full-color — day badges, section headers, diagnostic sidebars all color-coded",
-    "appealDrivers": ["structured daily instruction", "built-in differentiation", "clear progression arcs"]
+    "colorPalette": "full-color \u2014 day badges, section headers, diagnostic sidebars all color-coded",
+    "appealDrivers": [
+      "structured daily instruction",
+      "built-in differentiation",
+      "clear progression arcs"
+    ]
   },
   "printFormat": {
     "pageSize": "letter (teacher edition spiral-bound)",
@@ -130,9 +172,36 @@
       },
       {
         "name": "daily-instruction-guide",
-        "description": "A parent-facing daily instruction page that includes: objective, teach/model steps, practice/apply activities, diagnostic IF/THEN branch for struggling learners, and leveled worksheet options. Not a worksheet — a teaching guide."
+        "description": "A parent-facing daily instruction page that includes: objective, teach/model steps, practice/apply activities, diagnostic IF/THEN branch for struggling learners, and leveled worksheet options. Not a worksheet \u2014 a teaching guide."
       }
     ]
   },
-  "notes": "Fourth drop from the same Trophies book. This is the 'zoom in' layer — the detailed Day 1 instruction that the lesson planner summarized in one column. Carolyng specifically called out: (1) leveled supplements (below/on/advanced), and (2) the 'Writing Every Day' sidebar showing the week's writing progression. This adds a FOURTH layer to the curriculum architecture: Lesson Planner (weekly overview) → Daily Instruction Guide (detailed teaching steps) → Practice Worksheets (student pages) → Assessments (verification). The leveled differentiation is a major new signal — she wants materials that adapt to the child's level, not one-size-fits-all."
+  "notes": "Fourth drop from the same Trophies book. This is the 'zoom in' layer \u2014 the detailed Day 1 instruction that the lesson planner summarized in one column. Carolyng specifically called out: (1) leveled supplements (below/on/advanced), and (2) the 'Writing Every Day' sidebar showing the week's writing progression. This adds a FOURTH layer to the curriculum architecture: Lesson Planner (weekly overview) \u2192 Daily Instruction Guide (detailed teaching steps) \u2192 Practice Worksheets (student pages) \u2192 Assessments (verification). The leveled differentiation is a major new signal \u2014 she wants materials that adapt to the child's level, not one-size-fits-all.",
+  "sourceFiles": [
+    {
+      "filename": "1000197376.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-day-detail-pages/1000197376.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197377.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-day-detail-pages/1000197377.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197378.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-day-detail-pages/1000197378.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197379.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-day-detail-pages/1000197379.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

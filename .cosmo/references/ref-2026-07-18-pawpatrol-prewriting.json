@@ -5,31 +5,66 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784427301.626899",
   "format": "character-themed-worksheet",
-  "title": "Paw Patrol Pre-Writing Worksheets — Character-Driven Stroke Practice",
+  "title": "Paw Patrol Pre-Writing Worksheets \u2014 Character-Driven Stroke Practice",
   "publisher": "Unknown (fan-made/TPT-style printable using Nickelodeon IP)",
   "series": null,
   "gradeLevel": "Preschool (ages 2-5)",
   "pageCount": 7,
   "callouts": [],
   "overview": {
-    "description": "7 landscape-oriented pre-writing stroke worksheets using Paw Patrol characters as motivation. Each page: character on the left, stroke tracing lines in the middle, character(s) on the right as the 'destination.' Narrative framing: 'Help Ryder find his rescue dogs!' The child traces waves, straight lines, vertical lines, zigzags, etc. to 'connect' characters to each other or to bones. Progressive difficulty: solid guide lines → dotted guide lines → dot-to-dot (fade scaffolding)."
+    "description": "7 landscape-oriented pre-writing stroke worksheets using Paw Patrol characters as motivation. Each page: character on the left, stroke tracing lines in the middle, character(s) on the right as the 'destination.' Narrative framing: 'Help Ryder find his rescue dogs!' The child traces waves, straight lines, vertical lines, zigzags, etc. to 'connect' characters to each other or to bones. Progressive difficulty: solid guide lines \u2192 dotted guide lines \u2192 dot-to-dot (fade scaffolding)."
   },
   "strokeProgression": [
-    {"page": 1, "stroke": "wavy horizontal lines", "framing": "Help Ryder find his rescue dogs!", "scaffolding": "solid grey guide lines with directional arrows"},
-    {"page": 2, "stroke": "zigzag lines", "framing": "Character connection", "scaffolding": "solid guides"},
-    {"page": 3, "stroke": "straight horizontal lines (dot-to-dot with characters)", "framing": "Get the rescue dogs to their bones!", "scaffolding": "solid → fading (first row solid, last rows dotted)"},
-    {"page": 4, "stroke": "diagonal lines", "framing": "Character paths", "scaffolding": "mixed solid/dotted"},
-    {"page": 5, "stroke": "vertical lines (dot-to-dot)", "framing": "Get the rescue dogs to their bones!", "scaffolding": "solid → fading to dots"},
-    {"page": 6, "stroke": "circles/curved strokes", "framing": "Character connection", "scaffolding": "dotted guides"},
-    {"page": 7, "stroke": "mixed strokes review", "framing": "Free practice", "scaffolding": "minimal guides"}
+    {
+      "page": 1,
+      "stroke": "wavy horizontal lines",
+      "framing": "Help Ryder find his rescue dogs!",
+      "scaffolding": "solid grey guide lines with directional arrows"
+    },
+    {
+      "page": 2,
+      "stroke": "zigzag lines",
+      "framing": "Character connection",
+      "scaffolding": "solid guides"
+    },
+    {
+      "page": 3,
+      "stroke": "straight horizontal lines (dot-to-dot with characters)",
+      "framing": "Get the rescue dogs to their bones!",
+      "scaffolding": "solid \u2192 fading (first row solid, last rows dotted)"
+    },
+    {
+      "page": 4,
+      "stroke": "diagonal lines",
+      "framing": "Character paths",
+      "scaffolding": "mixed solid/dotted"
+    },
+    {
+      "page": 5,
+      "stroke": "vertical lines (dot-to-dot)",
+      "framing": "Get the rescue dogs to their bones!",
+      "scaffolding": "solid \u2192 fading to dots"
+    },
+    {
+      "page": 6,
+      "stroke": "circles/curved strokes",
+      "framing": "Character connection",
+      "scaffolding": "dotted guides"
+    },
+    {
+      "page": 7,
+      "stroke": "mixed strokes review",
+      "framing": "Free practice",
+      "scaffolding": "minimal guides"
+    }
   ],
   "designPatterns": {
     "characterMotivation": {
-      "description": "Paw Patrol characters (Ryder, Marshall, Rubble, Chase, Skye) serve as the START and END points of tracing lines. The child isn't 'practicing strokes' — they're 'helping Ryder find his dogs' or 'getting the dogs to their bones.' The beloved character IS the motivation.",
+      "description": "Paw Patrol characters (Ryder, Marshall, Rubble, Chase, Skye) serve as the START and END points of tracing lines. The child isn't 'practicing strokes' \u2014 they're 'helping Ryder find his dogs' or 'getting the dogs to their bones.' The beloved character IS the motivation.",
       "value": "Engagement through familiarity. A reluctant writer will trace a line to get to Chase when they won't trace a line because the teacher said so."
     },
     "fadingScaffolding": {
-      "description": "Within a single page, guide lines progress from solid (fully supported) → dotted (partially supported) → dot-to-dot (minimal support). The child experiences increasing independence on the same page. Row 1 has solid guides; row 3 has only dots to connect.",
+      "description": "Within a single page, guide lines progress from solid (fully supported) \u2192 dotted (partially supported) \u2192 dot-to-dot (minimal support). The child experiences increasing independence on the same page. Row 1 has solid guides; row 3 has only dots to connect.",
       "value": "Gradual release of responsibility within a single activity. The child builds confidence before the scaffolding disappears."
     },
     "narrativeFraming": {
@@ -37,7 +72,7 @@
       "value": "Pre-writing practice disguised as play. The child doesn't know they're 'doing school.'"
     },
     "landscapeOrientation": {
-      "description": "Pages are landscape, not portrait. This gives more horizontal room for stroke practice — the child's arm moves across the full width of the page.",
+      "description": "Pages are landscape, not portrait. This gives more horizontal room for stroke practice \u2014 the child's arm moves across the full width of the page.",
       "value": "Ergonomically correct for left-to-right stroke development."
     }
   },
@@ -45,27 +80,62 @@
     "subject": "ela",
     "domain": "pre-writing",
     "topics": [
-      {"id": "ela.pre-writing-wavy-lines", "kind": "procedural", "mapped": false},
-      {"id": "ela.pre-writing-straight-lines", "kind": "procedural", "mapped": false},
-      {"id": "ela.pre-writing-zigzag", "kind": "procedural", "mapped": false},
-      {"id": "ela.pre-writing-vertical-lines", "kind": "procedural", "mapped": false}
+      {
+        "id": "ela.pre-writing-wavy-lines",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.pre-writing-straight-lines",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.pre-writing-zigzag",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.pre-writing-vertical-lines",
+        "kind": "procedural",
+        "mapped": false
+      }
     ],
-    "unmappedSkills": ["character-motivated-tracing", "fading-scaffolding"]
+    "unmappedSkills": [
+      "character-motivated-tracing",
+      "fading-scaffolding"
+    ]
   },
   "difficulty": {
-    "ageBandMonths": [24, 60],
+    "ageBandMonths": [
+      24,
+      60
+    ],
     "complexity": "single-skill per page with progressive scaffolding fade",
-    "prerequisites": ["can hold a crayon"],
-    "scaffolding": "very high → medium (fades within each page)"
+    "prerequisites": [
+      "can hold a crayon"
+    ],
+    "scaffolding": "very high \u2192 medium (fades within each page)"
   },
   "recipeMatch": {
-    "matchedRecipes": ["tracing-guide"],
+    "matchedRecipes": [
+      "tracing-guide"
+    ],
     "gaps": [
       {
         "name": "character-themed-tracing",
-        "description": "Pre-writing stroke pages where the child's favorite character is at the START and a destination (another character, treat, or goal) is at the END of each tracing line. Narrative framing turns tracing into a quest. Fading scaffolding (solid → dotted → dots) within a single page. Landscape orientation for full arm movement. Homa's version would use original characters (not copyrighted IP) but the PATTERN is what matters."
+        "description": "Pre-writing stroke pages where the child's favorite character is at the START and a destination (another character, treat, or goal) is at the END of each tracing line. Narrative framing turns tracing into a quest. Fading scaffolding (solid \u2192 dotted \u2192 dots) within a single page. Landscape orientation for full arm movement. Homa's version would use original characters (not copyrighted IP) but the PATTERN is what matters."
       }
     ]
   },
-  "notes": "This drop is interesting because it's the ONLY one from either user that uses licensed/commercial characters (Paw Patrol = Nickelodeon IP). Everything else has been original art or nature-themed. The signal isn't 'use Paw Patrol' — it's 'character-driven motivation works for reluctant pre-writers.' Homa could generate character-themed tracing pages using original Homa characters. The fading scaffolding pattern (solid → dotted → dots within one page) is also new and valuable. Compare to CKLA pre-writing (poem-as-instruction with themed illustrations) — two different approaches to the same skill, both valid."
+  "notes": "This drop is interesting because it's the ONLY one from either user that uses licensed/commercial characters (Paw Patrol = Nickelodeon IP). Everything else has been original art or nature-themed. The signal isn't 'use Paw Patrol' \u2014 it's 'character-driven motivation works for reluctant pre-writers.' Homa could generate character-themed tracing pages using original Homa characters. The fading scaffolding pattern (solid \u2192 dotted \u2192 dots within one page) is also new and valuable. Compare to CKLA pre-writing (poem-as-instruction with themed illustrations) \u2014 two different approaches to the same skill, both valid.",
+  "sourceFiles": [
+    {
+      "filename": "PawPatrolPreWritingWorksheets-1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-pawpatrol-prewriting/PawPatrolPreWritingWorksheets-1.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

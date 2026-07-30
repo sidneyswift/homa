@@ -5,36 +5,42 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784427297.644059",
   "format": "preschool-workbook",
-  "title": "Habitat Schoolhouse Preschool Workbook 6 — Part 1 (Letters V, W + Number Stacking + Word Tracing)",
+  "title": "Habitat Schoolhouse Preschool Workbook 6 \u2014 Part 1 (Letters V, W + Number Stacking + Word Tracing)",
   "publisher": "The Habitat Schoolhouse Inc / Gumboot Kid",
   "series": "Preschool with Habitat Schoolhouse",
   "gradeLevel": "Preschool (ages 4-5, end of sequence)",
   "workbookNumber": "6 Part 1",
-  "lettersCovered": ["V", "W"],
+  "lettersCovered": [
+    "V",
+    "W"
+  ],
   "pageCount": 28,
   "callouts": [],
   "newActivityTypes": [
     {
       "type": "number-stacking",
-      "description": "Vv themed: 'Number Stacking — Stack blocks, rocks, cups, legos or other stackable objects you have on the following numbers.' 3x3 grid of pastel-colored number cards (1-9, scrambled order) against a watercolor sky/meadow background. Child reads the number, then stacks that many physical objects on the card.",
+      "description": "Vv themed: 'Number Stacking \u2014 Stack blocks, rocks, cups, legos or other stackable objects you have on the following numbers.' 3x3 grid of pastel-colored number cards (1-9, scrambled order) against a watercolor sky/meadow background. Child reads the number, then stacks that many physical objects on the card.",
       "skill": "number recognition (1-9), counting, one-to-one correspondence, fine motor",
-      "recipeNote": "NEW manipulative activity — the page is a SURFACE for stacking objects. Lamination-ready. Numbers scrambled (not sequential) to test recognition, not just counting up."
+      "recipeNote": "NEW manipulative activity \u2014 the page is a SURFACE for stacking objects. Lamination-ready. Numbers scrambled (not sequential) to test recognition, not just counting up."
     },
     {
       "type": "draw-and-trace-color-word",
-      "description": "Ww themed: 'White — Draw something that is white.' Large blank drawing area on top half. Bottom: 'Trace the word white.' with dotted-line word on three-line guide. Combines creative drawing + color concept + word tracing.",
+      "description": "Ww themed: 'White \u2014 Draw something that is white.' Large blank drawing area on top half. Bottom: 'Trace the word white.' with dotted-line word on three-line guide. Combines creative drawing + color concept + word tracing.",
       "skill": "creative expression, color concepts, word tracing, early writing",
-      "recipeNote": "NEW — the child DRAWS a concept (something white) then WRITES the word for it. Drawing before writing = concrete before abstract."
+      "recipeNote": "NEW \u2014 the child DRAWS a concept (something white) then WRITES the word for it. Drawing before writing = concrete before abstract."
     }
   ],
   "seriesProgression": {
     "WB1": "sensory/kinesthetic (paint, playdough, placing objects, counting to 5)",
     "WB2": "nonfiction reading + science diagrams + geographic vocabulary",
     "WB5": "anatomy labels, uppercase/lowercase sorting, comprehension questions",
-    "WB6": "number stacking (1-9), word tracing, draw-concept prompts — the MOST abstract/advanced"
+    "WB6": "number stacking (1-9), word tracing, draw-concept prompts \u2014 the MOST abstract/advanced"
   },
   "recipeMatch": {
-    "matchedRecipes": ["counting-mat", "tracing-guide"],
+    "matchedRecipes": [
+      "counting-mat",
+      "tracing-guide"
+    ],
     "gaps": [
       {
         "name": "number-stacking-mat",
@@ -46,5 +52,14 @@
       }
     ]
   },
-  "notes": "Fourth Habitat Schoolhouse workbook (WB1, WB2, WB5, WB6 now in collection). WB6 is the FINAL workbook — the Pond Map record-keeping set says WB6 → 'Register in: Kindergarten.' New activity types: number stacking mats (manipulative surface for 1-9) and draw-and-trace-word pages (drawing + word writing). The full series progression is now mapped: WB1 (hands-on) → WB2 (nonfiction + diagrams) → WB5 (sorting + comprehension) → WB6 (word tracing + number recognition). The arc goes from concrete/sensory to abstract/symbolic — exactly the Montessori concrete-to-abstract principle."
+  "notes": "Fourth Habitat Schoolhouse workbook (WB1, WB2, WB5, WB6 now in collection). WB6 is the FINAL workbook \u2014 the Pond Map record-keeping set says WB6 \u2192 'Register in: Kindergarten.' New activity types: number stacking mats (manipulative surface for 1-9) and draw-and-trace-word pages (drawing + word writing). The full series progression is now mapped: WB1 (hands-on) \u2192 WB2 (nonfiction + diagrams) \u2192 WB5 (sorting + comprehension) \u2192 WB6 (word tracing + number recognition). The arc goes from concrete/sensory to abstract/symbolic \u2014 exactly the Montessori concrete-to-abstract principle.",
+  "sourceFiles": [
+    {
+      "filename": "P011%20-%202022%20PreK%20Workbook%206%20-%20Part%201.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-habitat-schoolhouse-prek-workbook6/P011%20-%202022%20PreK%20Workbook%206%20-%20Part%201.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

@@ -5,7 +5,7 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784410924.341989",
   "format": "math-workbook-selection",
-  "title": "Harcourt Math Grade 2 — Selected Pages (Puzzles, Games, Manipulatives, Story Problems)",
+  "title": "Harcourt Math Grade 2 \u2014 Selected Pages (Puzzles, Games, Manipulatives, Story Problems)",
   "publisher": "Harcourt",
   "series": "Harcourt Math",
   "gradeLevel": "2nd grade",
@@ -27,53 +27,108 @@
   "pagesShown": [
     {
       "page": 39,
-      "title": "Using Facts for 10 — Color Puzzle + Challenge",
+      "title": "Using Facts for 10 \u2014 Color Puzzle + Challenge",
       "type": "puzzle-worksheet",
-      "description": "Top: an interlocking puzzle where children solve addition facts and color the pieces that sum to 10. The puzzle shape makes it self-checking — if they color correctly, a pattern emerges. Bottom: a 'Challenge: Number Patterns' section that teaches a mental math strategy (use facts for 10 to derive nearby sums: 7+5 = (5+5)+2 = 12). Extension problems follow the pattern.",
-      "skills": ["addition-facts-to-10", "mental-math-strategies", "pattern-recognition"],
-      "designFeatures": ["puzzle-as-practice", "challenge-extension", "strategy-teaching-via-thought-bubble"],
-      "manipulatives": ["crayon"]
+      "description": "Top: an interlocking puzzle where children solve addition facts and color the pieces that sum to 10. The puzzle shape makes it self-checking \u2014 if they color correctly, a pattern emerges. Bottom: a 'Challenge: Number Patterns' section that teaches a mental math strategy (use facts for 10 to derive nearby sums: 7+5 = (5+5)+2 = 12). Extension problems follow the pattern.",
+      "skills": [
+        "addition-facts-to-10",
+        "mental-math-strategies",
+        "pattern-recognition"
+      ],
+      "designFeatures": [
+        "puzzle-as-practice",
+        "challenge-extension",
+        "strategy-teaching-via-thought-bubble"
+      ],
+      "manipulatives": [
+        "crayon"
+      ]
     },
     {
       "page": 175,
-      "title": "Spin 50 — Addition Practice Cooperative Learning Game",
+      "title": "Spin 50 \u2014 Addition Practice Cooperative Learning Game",
       "type": "spinner-game",
       "description": "A printable spinner with numbers (9, 11, 13, 15, 0/Sorry!, 16, 10, 18) and a score table. Players spin, add their numbers cumulatively, and try to get closest to 50 without going over. Needs a paper clip and pencil as spinner. Cooperative Learning badge.",
-      "skills": ["addition-practice", "mental-addition", "number-sense-estimation"],
-      "designFeatures": ["printable-spinner", "score-table", "cooperative-learning", "paper-clip-pencil-spinner"],
-      "manipulatives": ["paper clip", "pencil (as spinner)"]
+      "skills": [
+        "addition-practice",
+        "mental-addition",
+        "number-sense-estimation"
+      ],
+      "designFeatures": [
+        "printable-spinner",
+        "score-table",
+        "cooperative-learning",
+        "paper-clip-pencil-spinner"
+      ],
+      "manipulatives": [
+        "paper clip",
+        "pencil (as spinner)"
+      ]
     },
     {
       "page": "~230s",
-      "title": "Slides, Flips, and Turns — Geometric Pattern Continuation",
+      "title": "Slides, Flips, and Turns \u2014 Geometric Pattern Continuation",
       "type": "dot-grid-pattern-worksheet",
-      "description": "A character ('Paul') shows geometric patterns made by sliding, flipping, and turning a triangle shape. 5 rows of dot grids — each row has a started pattern of triangles drawn on dots, and the child continues the pattern by drawing more figures on the blank dot grid. Critical Thinking prompt at bottom: 'Can you think of some words that tell how Paul made each pattern?'",
-      "skills": ["geometric-transformations", "pattern-continuation", "spatial-reasoning", "mathematical-vocabulary"],
-      "designFeatures": ["dot-grid-drawing", "character-driven-framing", "critical-thinking-prompt", "visual-spatial-reasoning"],
-      "manipulatives": ["pencil"]
+      "description": "A character ('Paul') shows geometric patterns made by sliding, flipping, and turning a triangle shape. 5 rows of dot grids \u2014 each row has a started pattern of triangles drawn on dots, and the child continues the pattern by drawing more figures on the blank dot grid. Critical Thinking prompt at bottom: 'Can you think of some words that tell how Paul made each pattern?'",
+      "skills": [
+        "geometric-transformations",
+        "pattern-continuation",
+        "spatial-reasoning",
+        "mathematical-vocabulary"
+      ],
+      "designFeatures": [
+        "dot-grid-drawing",
+        "character-driven-framing",
+        "critical-thinking-prompt",
+        "visual-spatial-reasoning"
+      ],
+      "manipulatives": [
+        "pencil"
+      ]
     },
     {
       "page": 238,
-      "title": "Pattern Block Points — Cooperative Learning",
+      "title": "Pattern Block Points \u2014 Cooperative Learning",
       "type": "manipulative-worksheet",
       "description": "Pattern blocks assigned point values (trapezoid=45, triangle=15, diamond/rhombus=30). Four characters (Alex, Brandon, Cathy, Dawn) built composite shapes. Child uses actual pattern blocks to recreate each shape, calculate total points, then answer comparison word problems (who got 15 more than Alex? who got 30 fewer than Dawn?). Requires physical manipulatives.",
-      "skills": ["geometry-shape-composition", "addition", "comparison-word-problems", "spatial-reasoning"],
-      "designFeatures": ["manipulative-required", "named-characters", "point-value-system", "comparison-questions"],
-      "manipulatives": ["pattern blocks (trapezoid, triangle, rhombus)"]
+      "skills": [
+        "geometry-shape-composition",
+        "addition",
+        "comparison-word-problems",
+        "spatial-reasoning"
+      ],
+      "designFeatures": [
+        "manipulative-required",
+        "named-characters",
+        "point-value-system",
+        "comparison-questions"
+      ],
+      "manipulatives": [
+        "pattern blocks (trapezoid, triangle, rhombus)"
+      ]
     },
     {
       "page": 106,
-      "title": "Problem Solving + Math Log — Beach Story Problems",
+      "title": "Problem Solving + Math Log \u2014 Beach Story Problems",
       "type": "story-problem-page",
-      "description": "Top: 5 story problems set at a beach (shells, pails, oranges, swimming children). Full-color beach scene illustration. Bottom: Math Log section — 'Make up a story about children who start with 18 shells. Make 2 funny things happen so they end up with 8 shells. Share your story with a friend.' This is the ELA crossover: children CREATE math stories, not just solve them.",
-      "skills": ["addition-subtraction-word-problems", "mathematical-storytelling", "creative-writing-math-crossover"],
-      "designFeatures": ["themed-illustration", "math-log-creative-writing", "story-creation-prompt", "ela-math-crossover"],
+      "description": "Top: 5 story problems set at a beach (shells, pails, oranges, swimming children). Full-color beach scene illustration. Bottom: Math Log section \u2014 'Make up a story about children who start with 18 shells. Make 2 funny things happen so they end up with 8 shells. Share your story with a friend.' This is the ELA crossover: children CREATE math stories, not just solve them.",
+      "skills": [
+        "addition-subtraction-word-problems",
+        "mathematical-storytelling",
+        "creative-writing-math-crossover"
+      ],
+      "designFeatures": [
+        "themed-illustration",
+        "math-log-creative-writing",
+        "story-creation-prompt",
+        "ela-math-crossover"
+      ],
       "manipulatives": []
     }
   ],
   "overallLayout": {
-    "structure": "varies by page type — puzzles use interlocking shapes, games use spinner+table, dot grids use spatial layout, story problems use illustration+text",
-    "spacing": "mixed — puzzles are dense, story problems are airy",
+    "structure": "varies by page type \u2014 puzzles use interlocking shapes, games use spinner+table, dot grids use spatial layout, story problems use illustration+text",
+    "spacing": "mixed \u2014 puzzles are dense, story problems are airy",
     "visualHierarchy": "activity-dominant with clear instruction headers",
     "whiteSpaceRatio": 0.25,
     "flowDirection": "varies"
@@ -82,26 +137,64 @@
     "subject": "math",
     "domain": "operations-algebraic-thinking",
     "topics": [
-      {"id": "math.addition-facts-to-20", "kind": "procedural", "mapped": false},
-      {"id": "math.geometric-transformations", "kind": "conceptual", "mapped": false},
-      {"id": "math.shape-composition", "kind": "conceptual", "mapped": false},
-      {"id": "math.word-problems-addition-subtraction", "kind": "procedural", "mapped": false},
-      {"id": "math.pattern-recognition", "kind": "conceptual", "mapped": false}
+      {
+        "id": "math.addition-facts-to-20",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "math.geometric-transformations",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "math.shape-composition",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "math.word-problems-addition-subtraction",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "math.pattern-recognition",
+        "kind": "conceptual",
+        "mapped": false
+      }
     ],
-    "unmappedSkills": ["mathematical-storytelling", "cooperative-math-games", "manipulative-based-learning"]
+    "unmappedSkills": [
+      "mathematical-storytelling",
+      "cooperative-math-games",
+      "manipulative-based-learning"
+    ]
   },
   "difficulty": {
-    "ageBandMonths": [72, 96],
+    "ageBandMonths": [
+      72,
+      96
+    ],
     "complexity": "multi-skill per page (math operations embedded in puzzles, games, stories)",
-    "prerequisites": ["math.count-to-100", "math.basic-addition"],
-    "scaffolding": "medium — activities provide structure but expect independent problem-solving"
+    "prerequisites": [
+      "math.count-to-100",
+      "math.basic-addition"
+    ],
+    "scaffolding": "medium \u2014 activities provide structure but expect independent problem-solving"
   },
   "theming": {
-    "themeType": "mixed — named characters, beach theme, gift-wrapping theme",
-    "characters": ["Paul (pattern maker)", "Alex/Brandon/Cathy/Dawn (block game)", "Carl/Tasha/Jimmy (beach problems)"],
+    "themeType": "mixed \u2014 named characters, beach theme, gift-wrapping theme",
+    "characters": [
+      "Paul (pattern maker)",
+      "Alex/Brandon/Cathy/Dawn (block game)",
+      "Carl/Tasha/Jimmy (beach problems)"
+    ],
     "visualStyle": "cartoon illustration (full color for story problems, B&W for puzzles)",
-    "colorPalette": "mixed — color for themed pages, B&W for practice",
-    "appealDrivers": ["puzzle/game framing makes drill feel like play", "named characters create investment", "beach theme for story problems"]
+    "colorPalette": "mixed \u2014 color for themed pages, B&W for practice",
+    "appealDrivers": [
+      "puzzle/game framing makes drill feel like play",
+      "named characters create investment",
+      "beach theme for story problems"
+    ]
   },
   "printFormat": {
     "pageSize": "letter",
@@ -113,29 +206,29 @@
   "carolyngProductDirectives": {
     "manipulableSuggestions": {
       "directive": "When manipulatives are needed, Homa should suggest household items",
-      "examples": "Pattern blocks → use cut-out paper shapes. Spinner → paper clip + pencil. Counters → beans, buttons, coins.",
+      "examples": "Pattern blocks \u2192 use cut-out paper shapes. Spinner \u2192 paper clip + pencil. Counters \u2192 beans, buttons, coins.",
       "implication": "Homa needs a household-item substitution guide for every manipulative type. Parents shouldn't need to buy specialty items."
     },
     "printAndLaminate": {
       "directive": "Have a printable that parents can print and laminate for consistency and future use",
-      "implication": "Reusable manipulative printables (pattern block sets, number cards, spinner templates) should be generated as durable-use pages — designed for lamination with clear cut lines, adequate spacing, and sturdy visual weight."
+      "implication": "Reusable manipulative printables (pattern block sets, number cards, spinner templates) should be generated as durable-use pages \u2014 designed for lamination with clear cut lines, adequate spacing, and sturdy visual weight."
     },
     "elaMathCrossover": {
-      "directive": "Take note the cross over with English for writing and storytelling — creating a story to help the math problems become relatable",
+      "directive": "Take note the cross over with English for writing and storytelling \u2014 creating a story to help the math problems become relatable",
       "implication": "Math materials should include a creative writing component: 'Make up a story where...' This is the Math Log pattern from page 106. Story creation makes math personal and practices writing simultaneously."
     }
   },
   "designPatterns": {
     "puzzleAsPractice": {
-      "description": "The 'Using Facts for 10' page wraps addition drill inside a color-puzzle format. Child solves addition facts, then colors pieces that sum to 10. The puzzle is self-checking — the colored pattern reveals whether answers are correct. Drill that doesn't feel like drill.",
+      "description": "The 'Using Facts for 10' page wraps addition drill inside a color-puzzle format. Child solves addition facts, then colors pieces that sum to 10. The puzzle is self-checking \u2014 the colored pattern reveals whether answers are correct. Drill that doesn't feel like drill.",
       "value": "Engagement through puzzle mechanics. Self-checking reduces parent oversight needed."
     },
     "challengeExtension": {
-      "description": "Below the main exercise, a 'Challenge' section teaches a mental math STRATEGY (use known facts to derive unknown: 7+5 via 5+5+2). This isn't more practice — it's a new thinking tool. Consistently placed at the bottom of pages.",
+      "description": "Below the main exercise, a 'Challenge' section teaches a mental math STRATEGY (use known facts to derive unknown: 7+5 via 5+5+2). This isn't more practice \u2014 it's a new thinking tool. Consistently placed at the bottom of pages.",
       "value": "Differentiation for advanced students. Also teaches mathematical thinking, not just arithmetic."
     },
     "cooperativeLearningGames": {
-      "description": "Multiple pages have 'Cooperative Learning' badges — printable games (spinners, score tables) designed for 2+ players. The game mechanic drives repeated practice without worksheets.",
+      "description": "Multiple pages have 'Cooperative Learning' badges \u2014 printable games (spinners, score tables) designed for 2+ players. The game mechanic drives repeated practice without worksheets.",
       "value": "Social learning. Also solves the 'math is boring' problem through game mechanics."
     },
     "dotGridPatterns": {
@@ -147,12 +240,14 @@
       "value": "Mathematical storytelling develops number sense AND writing skills simultaneously. Makes math personal."
     },
     "manipulativeIntegration": {
-      "description": "The pattern block page requires physical manipulatives (trapezoids, triangles, rhombuses) to complete. The worksheet isn't abstract — the child physically builds composite shapes, then reasons about point values.",
-      "value": "Concrete → representational → abstract learning pathway. The physical objects bridge to numerical reasoning."
+      "description": "The pattern block page requires physical manipulatives (trapezoids, triangles, rhombuses) to complete. The worksheet isn't abstract \u2014 the child physically builds composite shapes, then reasons about point values.",
+      "value": "Concrete \u2192 representational \u2192 abstract learning pathway. The physical objects bridge to numerical reasoning."
     }
   },
   "recipeMatch": {
-    "matchedRecipes": ["themed-worksheet"],
+    "matchedRecipes": [
+      "themed-worksheet"
+    ],
     "gaps": [
       {
         "name": "math-puzzle-worksheet",
@@ -190,8 +285,41 @@
       {
         "directive": "challenge-as-diagnostic",
         "quote": "the challenge section at the bottom of a worksheet is great to stretch skills and gain more understanding of where the child is at",
-        "implication": "Challenge sections serve dual purpose: (a) enrichment for fast finishers, (b) embedded assessment — reveals the child's actual understanding level. Every math activity should include a Challenge extension at bottom."
+        "implication": "Challenge sections serve dual purpose: (a) enrichment for fast finishers, (b) embedded assessment \u2014 reveals the child's actual understanding level. Every math activity should include a Challenge extension at bottom."
       }
     ]
-  }
+  },
+  "sourceFiles": [
+    {
+      "filename": "1000197484.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-math-2nd-grade-selection/1000197484.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197483.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-math-2nd-grade-selection/1000197483.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197481.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-math-2nd-grade-selection/1000197481.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197482.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-math-2nd-grade-selection/1000197482.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197480.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-math-2nd-grade-selection/1000197480.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

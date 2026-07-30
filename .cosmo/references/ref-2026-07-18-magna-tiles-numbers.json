@@ -79,5 +79,14 @@
       "value": "Multi-sensory number learning anchors recognition through multiple pathways."
     }
   },
-  "notes": "Interesting bridge between physical manipulatives and worksheets. Aless's interest suggests she values activities that connect hands-on play to academic skills."
+  "notes": "Interesting bridge between physical manipulatives and worksheets. Aless's interest suggests she values activities that connect hands-on play to academic skills.",
+  "sourceFiles": [
+    {
+      "filename": "MAGNA-TILES_MM_Numbers_SinglePage.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-magna-tiles-numbers/MAGNA-TILES_MM_Numbers_SinglePage.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

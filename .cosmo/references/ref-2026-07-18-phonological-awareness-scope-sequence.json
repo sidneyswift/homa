@@ -85,5 +85,14 @@
       }
     ]
   },
-  "notes": "Valuable for Homa's curriculum-writer \u2014 this shows the exact pedagogical progression for phonological awareness: listening \u2192 rhyme \u2192 phoneme isolation \u2192 alliteration. This is the teaching sequence Homa should follow when building PA curricula."
+  "notes": "Valuable for Homa's curriculum-writer \u2014 this shows the exact pedagogical progression for phonological awareness: listening \u2192 rhyme \u2192 phoneme isolation \u2192 alliteration. This is the teaching sequence Homa should follow when building PA curricula.",
+  "sourceFiles": [
+    {
+      "filename": "9a5f7f33-67f3-4918-9f20-2cdb5bc21e07_1727801008400.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-phonological-awareness-scope-sequence/9a5f7f33-67f3-4918-9f20-2cdb5bc21e07_1727801008400.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

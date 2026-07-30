@@ -5,41 +5,55 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784427150.982429",
   "format": "montessori-nomenclature-cards",
-  "title": "Solar System Montessori Nomenclature Cards — 3-Part Cards + Definition Cards",
+  "title": "Solar System Montessori Nomenclature Cards \u2014 3-Part Cards + Definition Cards",
   "publisher": "Unknown (homeschool printable)",
   "series": null,
   "gradeLevel": "Elementary (ages 5-10)",
   "pageCount": 18,
-  "callouts": ["great example of flash cards that are Montessori inspired"],
+  "callouts": [
+    "great example of flash cards that are Montessori inspired"
+  ],
   "overview": {
     "description": "An 18-page Montessori 3-part nomenclature card set covering the solar system (Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune, Moon + system overview). The set follows the classic Montessori nomenclature card format with FOUR card types per subject, used in a specific pedagogical sequence.",
-    "subjects": ["Sun", "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Moon", "Our Solar System"],
-    "philosophy": "Montessori nomenclature cards — a systematic method for building vocabulary and knowledge through image-word association, self-correction, and reading comprehension"
+    "subjects": [
+      "Sun",
+      "Mercury",
+      "Venus",
+      "Earth",
+      "Mars",
+      "Jupiter",
+      "Saturn",
+      "Uranus",
+      "Neptune",
+      "Moon",
+      "Our Solar System"
+    ],
+    "philosophy": "Montessori nomenclature cards \u2014 a systematic method for building vocabulary and knowledge through image-word association, self-correction, and reading comprehension"
   },
   "cardTypes": {
     "type1_labeledImageCards": {
       "description": "Pages 1-5: Two cards per page, each with a realistic photo of the celestial body (NASA-quality imagery) + its name label at the bottom. 2x2 grid per page = two subjects, each printed TWICE (one to keep as reference, one to cut for matching).",
       "layout": "2x2 grid, dashed cut lines, large realistic photo, name in clear serif font below",
-      "use": "STEP 1 — Child learns to associate the image with the name. The labeled card is the 'control' (answer key)."
+      "use": "STEP 1 \u2014 Child learns to associate the image with the name. The labeled card is the 'control' (answer key)."
     },
     "type2_definitionCards": {
       "description": "Pages 6-9: Two cards per page. Each card has: large image on the left + paragraph of factual description on the right. Definition includes: position in solar system, physical characteristics, orbital facts, number of moons, etymology (Roman god/goddess origin). Name in bold within the text. Latin/mythological origin in parentheses at the end.",
       "layout": "Image-left, text-right within a dashed-border card. Two cards per page.",
-      "use": "STEP 2 — Child reads the description to deepen knowledge. Image stays associated with the information."
+      "use": "STEP 2 \u2014 Child reads the description to deepen knowledge. Image stays associated with the information."
     },
     "type3_solarSystemOverview": {
       "description": "Page 11: A full solar system diagram card (labeled) in large format at top, plus two smaller versions below. Shows all planets in orbital position around the Sun with labels.",
       "layout": "1 large control card (blue border) + 2 smaller matching cards",
-      "use": "Context card — shows where each individual planet fits in the whole system."
+      "use": "Context card \u2014 shows where each individual planet fits in the whole system."
     },
     "type4_definitionWithBlank": {
       "description": "Pages 12-18: Same definition paragraphs as type 2, but with the planet NAME replaced by a blank line ('The sixth planet from the Sun is _______. It is the second largest planet...'). Two columns per page: left = complete definition (control), right = definition with blank (test).",
       "layout": "Two-column: control (left) with name in bold vs. test (right) with blank",
-      "use": "STEP 3 — Child reads the description and fills in (or places) the correct name card. Self-correcting: compare to the control column."
+      "use": "STEP 3 \u2014 Child reads the description and fills in (or places) the correct name card. Self-correcting: compare to the control column."
     }
   },
   "pedagogicalSequence": {
-    "step1": "Present labeled image cards. Three-period lesson: 'This is the Sun' → 'Show me the Sun' → 'What is this?' Build image-name association.",
+    "step1": "Present labeled image cards. Three-period lesson: 'This is the Sun' \u2192 'Show me the Sun' \u2192 'What is this?' Build image-name association.",
     "step2": "Match unlabeled image cards to name labels. Child places name label under the correct image. Self-correct against the control (labeled) card.",
     "step3": "Read definition cards (image + description). Build knowledge beyond just the name.",
     "step4": "Fill-in-the-blank definition cards. Child reads the description and identifies which planet it describes. Self-correct against the complete definition."
@@ -47,11 +61,11 @@
   "designPatterns": {
     "threePartCardSystem": {
       "description": "Classic Montessori nomenclature format: (1) Image + Label (control), (2) Image only (unlabeled), (3) Label only (text). The child matches image to label, then self-corrects. This set extends to a fourth part: definition + blank for reading comprehension.",
-      "value": "Self-correcting by design. The child doesn't need a teacher to check their work — the control card IS the answer key."
+      "value": "Self-correcting by design. The child doesn't need a teacher to check their work \u2014 the control card IS the answer key."
     },
     "realisticImagery": {
       "description": "NASA-quality photographs of each planet, not cartoon illustrations. The Sun has solar flares. Mercury shows crater details. Saturn's rings are visible. These are REAL images, not simplified drawings.",
-      "value": "Scientific accuracy. The child learns what planets actually look like, not an artist's cartoon. Respect for the child's intelligence — a core Montessori principle."
+      "value": "Scientific accuracy. The child learns what planets actually look like, not an artist's cartoon. Respect for the child's intelligence \u2014 a core Montessori principle."
     },
     "etymologyInclusion": {
       "description": "Every definition card includes the Roman mythology origin of the planet name: '(Mercury: the winged messenger of the Roman gods)', '(Venus: the Roman goddess of love and beauty).' This weaves history/mythology into a science lesson.",
@@ -70,20 +84,43 @@
     "subject": "science",
     "domain": "astronomy",
     "topics": [
-      {"id": "science.solar-system-planets", "kind": "conceptual", "mapped": false},
-      {"id": "ela.vocabulary-nomenclature", "kind": "conceptual", "mapped": false},
-      {"id": "ela.reading-comprehension-nonfiction", "kind": "conceptual", "mapped": false}
+      {
+        "id": "science.solar-system-planets",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "ela.vocabulary-nomenclature",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "ela.reading-comprehension-nonfiction",
+        "kind": "conceptual",
+        "mapped": false
+      }
     ],
-    "unmappedSkills": ["montessori-three-part-lesson", "self-correcting-card-matching", "etymology"]
+    "unmappedSkills": [
+      "montessori-three-part-lesson",
+      "self-correcting-card-matching",
+      "etymology"
+    ]
   },
   "difficulty": {
-    "ageBandMonths": [60, 120],
-    "complexity": "multi-skill (image recognition → name matching → reading comprehension → fill-in-the-blank)",
-    "prerequisites": ["basic reading for definition cards"],
-    "scaffolding": "high — self-correcting, progresses from simple matching to reading comprehension"
+    "ageBandMonths": [
+      60,
+      120
+    ],
+    "complexity": "multi-skill (image recognition \u2192 name matching \u2192 reading comprehension \u2192 fill-in-the-blank)",
+    "prerequisites": [
+      "basic reading for definition cards"
+    ],
+    "scaffolding": "high \u2014 self-correcting, progresses from simple matching to reading comprehension"
   },
   "recipeMatch": {
-    "matchedRecipes": ["flash-cards"],
+    "matchedRecipes": [
+      "flash-cards"
+    ],
     "gaps": [
       {
         "name": "montessori-nomenclature-cards",
@@ -91,5 +128,14 @@
       }
     ]
   },
-  "notes": "Tenth Aless drop and FIRST with explicit commentary: 'great example of flash cards that are Montessori inspired.' This is the first time Aless has named a specific pedagogical philosophy by name (Montessori). Combined with Charlotte Mason signals from both users, this confirms the eclectic homeschool approach: Montessori materials + Charlotte Mason philosophy + structured curriculum when needed. The 3-part card system is a specific Montessori method that Homa should support as a recipe — it's fundamentally different from regular flash cards because of the self-correcting design and pedagogical sequence."
+  "notes": "Tenth Aless drop and FIRST with explicit commentary: 'great example of flash cards that are Montessori inspired.' This is the first time Aless has named a specific pedagogical philosophy by name (Montessori). Combined with Charlotte Mason signals from both users, this confirms the eclectic homeschool approach: Montessori materials + Charlotte Mason philosophy + structured curriculum when needed. The 3-part card system is a specific Montessori method that Homa should support as a recipe \u2014 it's fundamentally different from regular flash cards because of the self-correcting design and pedagogical sequence.",
+  "sourceFiles": [
+    {
+      "filename": "SolarsystemMontessoriNomenclature-1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-montessori-nomenclature-solar-system/SolarsystemMontessoriNomenclature-1.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

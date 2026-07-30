@@ -6,17 +6,16 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784466452.142079",
   "companionTo": "cur-2026-07-19-playing-preschool-y1",
-
   "layer1_philosophy": {
-    "methodology": "Play-Based / Experiential (Busy Toddler) — Year 2 continuation",
+    "methodology": "Play-Based / Experiential (Busy Toddler) \u2014 Year 2 continuation",
     "principles": [
-      "Same play-based foundation as Year 1 — still no worksheets, still hands-on, still routine-driven",
-      "Spiral skill development continues — skills from Y1 grow in complexity (predicting → reading comprehension, letter naming → letter sounds)",
-      "Abstract concepts introduced — Y1 had concrete themes (Apples, Colors), Y2 introduces abstract topics (Systems, Patterns, Environment, Maps & Directions)",
-      "School readiness framed as thinking skills — resilience, reasoning, questioning, problem solving, cooperation, communication",
-      "New focus: letter SOUNDS over letter names — phonemic awareness deepens with letter poems and word banks",
+      "Same play-based foundation as Year 1 \u2014 still no worksheets, still hands-on, still routine-driven",
+      "Spiral skill development continues \u2014 skills from Y1 grow in complexity (predicting \u2192 reading comprehension, letter naming \u2192 letter sounds)",
+      "Abstract concepts introduced \u2014 Y1 had concrete themes (Apples, Colors), Y2 introduces abstract topics (Systems, Patterns, Environment, Maps & Directions)",
+      "School readiness framed as thinking skills \u2014 resilience, reasoning, questioning, problem solving, cooperation, communication",
+      "New focus: letter SOUNDS over letter names \u2014 phonemic awareness deepens with letter poems and word banks",
       "New features: School Skills (cutting, gluing, folding), graphing as a math skill, word banks with picture clues for early 'reading'",
-      "Background knowledge remains the core goal — exposure and experience, not mastery or testing"
+      "Background knowledge remains the core goal \u2014 exposure and experience, not mastery or testing"
     ],
     "learningTheory": "developmental-stages-spiral",
     "assessmentApproach": "none-observation-only",
@@ -37,7 +36,6 @@
       }
     ]
   },
-
   "layer2_scope": {
     "mappings": [
       {
@@ -50,7 +48,7 @@
         "notes": "Strong overlap with existing Reading Comprehension domain (73 topics). Y2 deepens Y1's predicting into full comprehension."
       },
       {
-        "curriculumSubject": "Math Skills — Sorting",
+        "curriculumSubject": "Math Skills \u2014 Sorting",
         "curriculumTopic": "Classifying information, organizing data, multi-attribute sorting (continued from Y1)",
         "homaSubject": "Mathematics",
         "homaDomain": "Data & Statistics",
@@ -58,7 +56,7 @@
         "status": "mapped"
       },
       {
-        "curriculumSubject": "Math Skills — Graphing",
+        "curriculumSubject": "Math Skills \u2014 Graphing",
         "curriculumTopic": "Organizing data into graphs, comparing via graphs (NEW in Y2)",
         "homaSubject": "Mathematics",
         "homaDomain": "Data & Statistics",
@@ -67,7 +65,7 @@
         "notes": "Maps to 'Pictograms and tally charts' in Data & Statistics"
       },
       {
-        "curriculumSubject": "Math Skills — Shapes",
+        "curriculumSubject": "Math Skills \u2014 Shapes",
         "curriculumTopic": "2D shape recognition continued, more shapes introduced, shapes in environment",
         "homaSubject": "Mathematics",
         "homaDomain": "Geometry",
@@ -75,7 +73,7 @@
         "status": "mapped"
       },
       {
-        "curriculumSubject": "Math Skills — Measuring",
+        "curriculumSubject": "Math Skills \u2014 Measuring",
         "curriculumTopic": "Length, weight, volume, value comparisons. Uses balance scales, rulers (continued from Y1 but deeper)",
         "homaSubject": "Mathematics",
         "homaDomain": "Measurement",
@@ -83,7 +81,7 @@
         "status": "mapped"
       },
       {
-        "curriculumSubject": "Math Skills — Patterning",
+        "curriculumSubject": "Math Skills \u2014 Patterning",
         "curriculumTopic": "AB, AAB, ABC patterns. Patterns with sounds, objects, movements. 'What comes next?' (NEW in Y2)",
         "homaSubject": "Mathematics",
         "homaDomain": "Algebra",
@@ -101,7 +99,7 @@
         "notes": "Deepens Y1's counting. Conservation and joining/separating concepts bridge into Addition & Subtraction domain."
       },
       {
-        "curriculumSubject": "Alphabet Knowledge — Letter Sounds",
+        "curriculumSubject": "Alphabet Knowledge \u2014 Letter Sounds",
         "curriculumTopic": "Phonemic awareness: hearing letter sounds, word banks, letter poems. Shift from Y1's letter naming to letter sounds.",
         "homaSubject": "English",
         "homaDomain": "Phonics & Word Reading",
@@ -128,12 +126,15 @@
           "topicSlug": "school-readiness-skills",
           "domain": "Learning to Learn",
           "kind": "procedural",
-          "teachingWindowMonths": [36, 72]
+          "teachingWindowMonths": [
+            36,
+            72
+          ]
         },
-        "notes": "Cutting, gluing, and folding are pre-academic skills. Currently unmapped — closest is fine motor from Y1 analysis."
+        "notes": "Cutting, gluing, and folding are pre-academic skills. Currently unmapped \u2014 closest is fine motor from Y1 analysis."
       },
       {
-        "curriculumSubject": "Science — States of Matter",
+        "curriculumSubject": "Science \u2014 States of Matter",
         "curriculumTopic": "Solids vs liquids, properties of each, solids as particles, state changes (freezing, melting). Unit 9.",
         "homaSubject": "Science",
         "homaDomain": "Matter & Materials",
@@ -142,7 +143,7 @@
         "notes": "Maps to 'Describing Material Properties', 'Grouping Materials' in Matter & Materials"
       },
       {
-        "curriculumSubject": "Science — Magnets",
+        "curriculumSubject": "Science \u2014 Magnets",
         "curriculumTopic": "Magnetic properties, magnetic vs non-magnetic objects, exploring with magnets. Unit 14.",
         "homaSubject": "Science",
         "homaDomain": "Energy",
@@ -151,7 +152,7 @@
         "notes": "Magnets fall under Energy or Forces & Motion. Homa has 'Naming types of energy' but no dedicated magnets topic."
       },
       {
-        "curriculumSubject": "Science — Experiments",
+        "curriculumSubject": "Science \u2014 Experiments",
         "curriculumTopic": "Introduction to scientific method: predictions, testing, observing results. Unit 16.",
         "homaSubject": "Science",
         "homaDomain": "Scientific Inquiry",
@@ -160,7 +161,7 @@
         "notes": "Maps to 'Asking scientific questions', 'Comparing Design Solutions' in Scientific Inquiry"
       },
       {
-        "curriculumSubject": "Social Studies — Environment",
+        "curriculumSubject": "Social Studies \u2014 Environment",
         "curriculumTopic": "Planet Earth, recycling, environmental care. Unit 5.",
         "homaSubject": "Science",
         "homaDomain": "Ecosystems & Habitats",
@@ -169,7 +170,7 @@
         "notes": "Maps to 'Reducing Human Impact' in Ecosystems & Habitats"
       },
       {
-        "curriculumSubject": "Social Studies — Maps & Directions",
+        "curriculumSubject": "Social Studies \u2014 Maps & Directions",
         "curriculumTopic": "Map reading, giving and following directions, spatial orientation. Unit 10.",
         "homaSubject": null,
         "homaDomain": null,
@@ -179,12 +180,15 @@
           "topicSlug": "maps-and-directions",
           "domain": "Geography",
           "kind": "conceptual",
-          "teachingWindowMonths": [42, 84]
+          "teachingWindowMonths": [
+            42,
+            84
+          ]
         },
         "notes": "Homa has History > Geography with 'Beaches Around the World' but no general maps/directions topic."
       },
       {
-        "curriculumSubject": "Social-Emotional — All About Me",
+        "curriculumSubject": "Social-Emotional \u2014 All About Me",
         "curriculumTopic": "Self-awareness, emotions, naming feelings, uniqueness. Unit 1.",
         "homaSubject": "Personal & Social Development",
         "homaDomain": "Self-Awareness",
@@ -202,7 +206,7 @@
         "notes": "Maps to 'Basic Body Needs', 'Bones & Muscles' in The Human Body"
       },
       {
-        "curriculumSubject": "ELA — Rhyming Words",
+        "curriculumSubject": "ELA \u2014 Rhyming Words",
         "curriculumTopic": "Rhyming awareness, rhyming word families, phonemic awareness through rhyme. Unit 18.",
         "homaSubject": "English",
         "homaDomain": "Phonics & Word Reading",
@@ -210,7 +214,7 @@
         "status": "mapped"
       },
       {
-        "curriculumSubject": "Science — Rocks",
+        "curriculumSubject": "Science \u2014 Rocks",
         "curriculumTopic": "Rock properties, vocabulary (pebble, boulder, gravel, stone), inquiry-based investigation. Unit 19.",
         "homaSubject": "Science",
         "homaDomain": "Earth Science",
@@ -219,13 +223,13 @@
         "notes": "Homa has Earth Science with 'Sand Composition and Erosion' and 'Wave Anatomy' but no dedicated rocks/geology topic for young learners."
       },
       {
-        "curriculumSubject": "Science — Systems",
+        "curriculumSubject": "Science \u2014 Systems",
         "curriculumTopic": "Simple systems, parts that make up a whole object. Unit 7.",
         "homaSubject": "Science",
         "homaDomain": "Scientific Inquiry",
         "homaTopicId": null,
         "status": "partial",
-        "notes": "Conceptual topic — closest match is Scientific Inquiry but 'systems thinking' isn't an explicit topic."
+        "notes": "Conceptual topic \u2014 closest match is Scientific Inquiry but 'systems thinking' isn't an explicit topic."
       }
     ],
     "stats": {
@@ -236,38 +240,51 @@
       "partial": 5
     }
   },
-
   "layer3_structure": {
     "cadence": "5 days/week (M-F), 2 weeks per unit",
     "sessionLengthMinutes": {
       "fullDay": 45,
       "max": 60,
-      "notes": "Same as Y1 — flexible, can be broken across the day"
+      "notes": "Same as Y1 \u2014 flexible, can be broken across the day"
     },
     "weeklyTemplate": "Monday: reading comprehension + math skills. Tuesday: letter sounds + number sense. Wednesday: reading comprehension + math skills. Thursday: letter sounds + number sense. Friday (wk1): recall/retell + school skills. Friday (wk2): recall/retell + school skills + letter review.",
-    "dailyRoutine": "Opening (morning calendar + song/poem + letter poem) → Introduce/review topic → Read aloud → Things to talk about → Learning activity → Easy activity. Options & extensions throughout.",
+    "dailyRoutine": "Opening (morning calendar + song/poem + letter poem) \u2192 Introduce/review topic \u2192 Read aloud \u2192 Things to talk about \u2192 Learning activity \u2192 Easy activity. Options & extensions throughout.",
     "progressionModel": "spiral",
     "reviewRhythm": "Weekly Friday review. Letter review every wk2 Friday. Skills spiral from Unit 1 through Unit 19.",
     "totalWeeks": 38,
     "totalUnits": 19,
     "totalDays": 190,
     "unitThemes": [
-      "All About Me", "Animals", "Alphabet", "Blocks", "Environment",
-      "Numbers", "Systems", "Shapes", "Solids and Liquids",
-      "Maps and Directions", "Balls", "Size", "Patterns",
-      "Magnets", "Texture", "Science Experiments", "Health",
-      "Rhyming Words", "Rocks"
+      "All About Me",
+      "Animals",
+      "Alphabet",
+      "Blocks",
+      "Environment",
+      "Numbers",
+      "Systems",
+      "Shapes",
+      "Solids and Liquids",
+      "Maps and Directions",
+      "Balls",
+      "Size",
+      "Patterns",
+      "Magnets",
+      "Texture",
+      "Science Experiments",
+      "Health",
+      "Rhyming Words",
+      "Rocks"
     ],
     "letterSequence": "Aa, Hh, Ee, Bb, Rr+Ll, Nn, Oo+Ff, Gg, Dd, Cc, Ss, Jj+Vv, Qq+Uu, Mm+Yy, Ii, Xx+Zz, Kk+Pp, Tt, Ww",
-    "letterOrderRationale": "Same rationale as Y1 — non-alphabetical, easy letters doubled up, tricky letters solo. Y2 shifts focus to letter SOUNDS rather than letter names.",
+    "letterOrderRationale": "Same rationale as Y1 \u2014 non-alphabetical, easy letters doubled up, tricky letters solo. Y2 shifts focus to letter SOUNDS rather than letter names.",
     "evolutionFromY1": {
       "skillEvolution": {
-        "predicting": "→ reading comprehension (broader)",
-        "sorting": "→ math skills (sorting + graphing + shapes + measuring + patterning)",
-        "letterNaming": "→ letter sounds (phonemic awareness)",
-        "numberSense": "→ deeper number sense (conservation, joining/separating, counting to 20)",
-        "shapes": "→ still shapes but within broader math skills rotation",
-        "measuring": "→ still measuring but deeper (balance scales, rulers, value)"
+        "predicting": "\u2192 reading comprehension (broader)",
+        "sorting": "\u2192 math skills (sorting + graphing + shapes + measuring + patterning)",
+        "letterNaming": "\u2192 letter sounds (phonemic awareness)",
+        "numberSense": "\u2192 deeper number sense (conservation, joining/separating, counting to 20)",
+        "shapes": "\u2192 still shapes but within broader math skills rotation",
+        "measuring": "\u2192 still measuring but deeper (balance scales, rulers, value)"
       },
       "newFeatures": [
         "Letter poems (one per letter, reinforces sounds)",
@@ -276,10 +293,9 @@
         "Graphing as a math skill",
         "More abstract unit themes (Systems, Patterns, Magnets)"
       ],
-      "themeEvolution": "Y1 themes were concrete and familiar (Apples, Colors, Food, Pets). Y2 themes are more abstract and concept-driven (Systems, Patterns, Solids & Liquids, Maps & Directions). This mirrors developmental progression — children need concrete before abstract."
+      "themeEvolution": "Y1 themes were concrete and familiar (Apples, Colors, Food, Pets). Y2 themes are more abstract and concept-driven (Systems, Patterns, Solids & Liquids, Maps & Directions). This mirrors developmental progression \u2014 children need concrete before abstract."
     }
   },
-
   "layer4_activities": {
     "activityTypes": [
       {
@@ -321,13 +337,13 @@
         "suggestedRecipe": {
           "name": "cutting-practice",
           "creationPath": "html",
-          "description": "Page with various line types (straight, wavy, zigzag, spiral) for cutting practice. Thick dashed lines on simple shapes. Could be themed — cut out themed shapes along the lines.",
+          "description": "Page with various line types (straight, wavy, zigzag, spiral) for cutting practice. Thick dashed lines on simple shapes. Could be themed \u2014 cut out themed shapes along the lines.",
           "complexity": "low"
         }
       },
       {
         "type": "compare-the-cards",
-        "description": "Card game using playing cards — compare numbers, identify more/less/equal. Y2's version of the 'War' card game adapted for learning.",
+        "description": "Card game using playing cards \u2014 compare numbers, identify more/less/equal. Y2's version of the 'War' card game adapted for learning.",
         "recipe": null,
         "status": "no_recipe",
         "notes": "Game-based, not printable. An activity-card recipe would cover the rules/guide."
@@ -340,13 +356,13 @@
         "suggestedRecipe": {
           "name": "pattern-strip",
           "creationPath": "html",
-          "description": "Printable strip with pattern started (colored shapes or images), blank spaces for child to continue the pattern. Multiple strips per page with increasing complexity (AB → AAB → ABC). Also a blank create-your-own-pattern strip.",
+          "description": "Printable strip with pattern started (colored shapes or images), blank spaces for child to continue the pattern. Multiple strips per page with increasing complexity (AB \u2192 AAB \u2192 ABC). Also a blank create-your-own-pattern strip.",
           "complexity": "low"
         }
       },
       {
         "type": "sensory-bin",
-        "description": "Continued from Y1 — themed sensory exploration with rice, cornmeal, water, etc.",
+        "description": "Continued from Y1 \u2014 themed sensory exploration with rice, cornmeal, water, etc.",
         "recipe": null,
         "status": "no_recipe",
         "notes": "Same as Y1. Sensory-bin-card recipe from Y1 analysis applies."
@@ -360,7 +376,7 @@
       },
       {
         "type": "science-experiment",
-        "description": "Continued from Y1 but more structured — predictions, observations, conclusions. Includes states of matter (Unit 9), magnets (Unit 14), dedicated experiments unit (Unit 16).",
+        "description": "Continued from Y1 but more structured \u2014 predictions, observations, conclusions. Includes states of matter (Unit 9), magnets (Unit 14), dedicated experiments unit (Unit 16).",
         "recipe": null,
         "status": "no_recipe",
         "notes": "Experiment-card recipe from Y1 analysis applies."
@@ -385,7 +401,6 @@
       "noRecipe": 10
     }
   },
-
   "decisionsNeeded": [
     {
       "category": "taxonomy",
@@ -401,25 +416,25 @@
     },
     {
       "category": "recipe",
-      "item": "Build word-bank-page recipe (html) — letter + illustrated word list for early reading",
+      "item": "Build word-bank-page recipe (html) \u2014 letter + illustrated word list for early reading",
       "impact": "Word banks are a Y2 staple; also useful for any phonics-focused curriculum",
       "urgency": "medium"
     },
     {
       "category": "recipe",
-      "item": "Build graphing-page recipe (html) — simple bar/picture graph template",
+      "item": "Build graphing-page recipe (html) \u2014 simple bar/picture graph template",
       "impact": "Graphing is introduced in Y2 and grows through elementary. A reusable template serves many curricula.",
       "urgency": "medium"
     },
     {
       "category": "recipe",
-      "item": "Build pattern-strip recipe (html) — AB/AAB/ABC pattern continuation strips",
+      "item": "Build pattern-strip recipe (html) \u2014 AB/AAB/ABC pattern continuation strips",
       "impact": "Patterning is a core math skill from preschool through elementary",
       "urgency": "medium"
     },
     {
       "category": "recipe",
-      "item": "Build cutting-practice recipe (html) — line-following cutting pages",
+      "item": "Build cutting-practice recipe (html) \u2014 line-following cutting pages",
       "impact": "School skills (cutting) are a Y2 focus. Common TPT product type.",
       "urgency": "low"
     },
@@ -431,11 +446,19 @@
     },
     {
       "category": "curriculum-writer",
-      "item": "Add Y1→Y2 progression pattern to curriculum-writer.md: how play-based preschool evolves skill focus while keeping the same framework",
+      "item": "Add Y1\u2192Y2 progression pattern to curriculum-writer.md: how play-based preschool evolves skill focus while keeping the same framework",
       "impact": "Teaches Homa how to differentiate younger vs older preschool plans",
       "urgency": "medium"
     }
   ],
-
-  "notes": "Year 2 is a masterclass in spiral curriculum design. Same 38-week/190-day/19-unit framework as Y1, but every skill has evolved: predicting → reading comprehension, letter naming → letter sounds, basic sorting → sorting + graphing + patterning, and themes shift from concrete (Apples) to abstract (Systems, Patterns, Maps). The biggest product insight for Homa: play-based curricula need a PROGRESSION model, not just a single year. If a family starts with play-based preschool in Homa, we should be able to generate a Year 1 AND a Year 2 that builds naturally. The skill evolution pattern (concrete → abstract, naming → sounds, single-skill → multi-skill) is the blueprint."
+  "notes": "Year 2 is a masterclass in spiral curriculum design. Same 38-week/190-day/19-unit framework as Y1, but every skill has evolved: predicting \u2192 reading comprehension, letter naming \u2192 letter sounds, basic sorting \u2192 sorting + graphing + patterning, and themes shift from concrete (Apples) to abstract (Systems, Patterns, Maps). The biggest product insight for Homa: play-based curricula need a PROGRESSION model, not just a single year. If a family starts with play-based preschool in Homa, we should be able to generate a Year 1 AND a Year 2 that builds naturally. The skill evolution pattern (concrete \u2192 abstract, naming \u2192 sounds, single-skill \u2192 multi-skill) is the blueprint.",
+  "sourceFiles": [
+    {
+      "filename": "Playing-Preschool-Year-2.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-playing-preschool-y2/Playing-Preschool-Year-2.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

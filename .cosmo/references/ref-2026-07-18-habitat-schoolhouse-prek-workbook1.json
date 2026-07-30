@@ -5,12 +5,15 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784426417.360349",
   "format": "preschool-workbook",
-  "title": "Habitat Schoolhouse Preschool Workbook 1 — Part 2 (Letters C, D + Count to 5)",
+  "title": "Habitat Schoolhouse Preschool Workbook 1 \u2014 Part 2 (Letters C, D + Count to 5)",
   "publisher": "The Habitat Schoolhouse Inc / Gumboot Kid",
   "series": "Preschool with Habitat Schoolhouse",
   "gradeLevel": "Preschool (ages 3-4, early in sequence)",
   "workbookNumber": "1 Part 2",
-  "lettersCovered": ["C", "D"],
+  "lettersCovered": [
+    "C",
+    "D"
+  ],
   "numberRange": "count to 5",
   "callouts": [],
   "pages": 32,
@@ -25,49 +28,84 @@
       "type": "caterpillar-counting",
       "description": "Letter Cc themed: caterpillar bodies made of circles with dot-trace numbers (1-6, then 1-5, then 1-7). Three caterpillars of increasing length. Child traces numbers while counting. Watercolor caterpillar illustrations around the margins.",
       "skill": "number tracing, counting sequence, fine motor",
-      "recipeNote": "Themed counting-trace hybrid — the caterpillar body segments = number line"
+      "recipeNote": "Themed counting-trace hybrid \u2014 the caterpillar body segments = number line"
     },
     {
       "type": "nature-counting-mat",
-      "description": "Letter Cc themed: 'Cloud Count — Count the clouds. It may help to place items on the clouds as they count them.' Watercolor clouds scattered across the page + frog asking 'How many clouds are there?' with dot-trace answer box.",
+      "description": "Letter Cc themed: 'Cloud Count \u2014 Count the clouds. It may help to place items on the clouds as they count them.' Watercolor clouds scattered across the page + frog asking 'How many clouds are there?' with dot-trace answer box.",
       "skill": "counting objects, one-to-one correspondence, manipulative use",
       "recipeNote": "Variant of counting mat using nature objects (clouds) instead of themed containers"
     },
     {
       "type": "color-mixing-experiment",
-      "description": "Letter Cc themed: 'Color Mix Up — Mix yellow and blue to make green.' Watercolor Venn diagram showing two overlapping color circles. Blank box below for the child to mix actual paint and see the result.",
+      "description": "Letter Cc themed: 'Color Mix Up \u2014 Mix yellow and blue to make green.' Watercolor Venn diagram showing two overlapping color circles. Blank box below for the child to mix actual paint and see the result.",
       "skill": "color theory (science), fine motor, cause-and-effect observation",
-      "recipeNote": "Hands-on science experiment page — the workbook IS the experiment surface"
+      "recipeNote": "Hands-on science experiment page \u2014 the workbook IS the experiment surface"
     },
     {
       "type": "playdough-shape-mats",
-      "description": "Letter Dd themed: 'Playdough Shapes — Create the following shapes out of playdough.' Three large outline shapes (wavy rectangle, circle, triangle) serving as playdough mats. Designed for lamination.",
+      "description": "Letter Dd themed: 'Playdough Shapes \u2014 Create the following shapes out of playdough.' Three large outline shapes (wavy rectangle, circle, triangle) serving as playdough mats. Designed for lamination.",
       "skill": "fine motor, shape recognition, kinesthetic learning",
-      "recipeNote": "Lamination-ready manipulation page — the page is a SURFACE, not a writing exercise"
+      "recipeNote": "Lamination-ready manipulation page \u2014 the page is a SURFACE, not a writing exercise"
     }
   ],
   "comparisonToWorkbook5": {
-    "samePatterns": ["letter-of-the-week structure", "watercolor naturalist art", "frog mascot speech bubbles", "one concept per page", "manipulative integration"],
-    "simplifications": ["counts to 5 (vs. higher in WB5)", "2 letters per part (vs. 3 in WB5)", "more hands-on activities (playdough, paint mixing)", "no animal anatomy diagrams yet", "no uppercase/lowercase discrimination yet"],
+    "samePatterns": [
+      "letter-of-the-week structure",
+      "watercolor naturalist art",
+      "frog mascot speech bubbles",
+      "one concept per page",
+      "manipulative integration"
+    ],
+    "simplifications": [
+      "counts to 5 (vs. higher in WB5)",
+      "2 letters per part (vs. 3 in WB5)",
+      "more hands-on activities (playdough, paint mixing)",
+      "no animal anatomy diagrams yet",
+      "no uppercase/lowercase discrimination yet"
+    ],
     "progression": "Workbook 1 is more sensory/kinesthetic (paint, playdough, placing objects). Workbook 5 adds more cognitive demands (anatomy labels, upper/lowercase sorting, comprehension questions). The series gradually shifts from concrete/tactile to abstract/analytical."
   },
   "overallSkillTargeting": {
     "subject": "multidisciplinary",
     "domain": "early-childhood",
     "topics": [
-      {"id": "ela.letter-recognition-C-D", "kind": "procedural", "mapped": false},
-      {"id": "math.counting-1-5", "kind": "procedural", "mapped": false},
-      {"id": "math.shape-recognition", "kind": "conceptual", "mapped": false},
-      {"id": "science.color-mixing", "kind": "conceptual", "mapped": false}
+      {
+        "id": "ela.letter-recognition-C-D",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "math.counting-1-5",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "math.shape-recognition",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "science.color-mixing",
+        "kind": "conceptual",
+        "mapped": false
+      }
     ],
-    "unmappedSkills": ["playdough-mat-activities", "color-mixing-experiment", "caterpillar-counting-trace"]
+    "unmappedSkills": [
+      "playdough-mat-activities",
+      "color-mixing-experiment",
+      "caterpillar-counting-trace"
+    ]
   },
   "recipeMatch": {
-    "matchedRecipes": ["counting-mat", "coloring-page"],
+    "matchedRecipes": [
+      "counting-mat",
+      "coloring-page"
+    ],
     "gaps": [
       {
         "name": "playdough-mat",
-        "description": "A page with large outline shapes or letters designed as a SURFACE for playdough. The child places playdough on the shapes to form them. Must be designed for lamination — thick lines, generous sizing. The page is a tool, not a writing exercise."
+        "description": "A page with large outline shapes or letters designed as a SURFACE for playdough. The child places playdough on the shapes to form them. Must be designed for lamination \u2014 thick lines, generous sizing. The page is a tool, not a writing exercise."
       },
       {
         "name": "color-mixing-experiment-page",
@@ -75,5 +113,14 @@
       }
     ]
   },
-  "notes": "Fifth Aless drop. Same Habitat Schoolhouse series as the previous two drops. This is Workbook 1 (beginning of sequence) which shows how the series starts simpler and more sensory/kinesthetic before building to more cognitive tasks in later workbooks. Key new patterns: personal prompt page ('Draw your family'), color mixing experiment page, and playdough shape mats. The progression from WB1 to WB5 demonstrates a concrete-to-abstract developmental arc."
+  "notes": "Fifth Aless drop. Same Habitat Schoolhouse series as the previous two drops. This is Workbook 1 (beginning of sequence) which shows how the series starts simpler and more sensory/kinesthetic before building to more cognitive tasks in later workbooks. Key new patterns: personal prompt page ('Draw your family'), color mixing experiment page, and playdough shape mats. The progression from WB1 to WB5 demonstrates a concrete-to-abstract developmental arc.",
+  "sourceFiles": [
+    {
+      "filename": "P002%20-%202022%20PreK%20Workbook%201pt%202.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-habitat-schoolhouse-prek-workbook1/P002%20-%202022%20PreK%20Workbook%201pt%202.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }
