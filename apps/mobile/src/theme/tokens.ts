@@ -34,6 +34,7 @@ export const palette = {
   sage300: "#7CC689",
   sage500: "#3D9A50",
   sage600: "#2F7C40",
+  sage700: "#275F34",
 
   gold100: "#FFF3C2",
   gold500: "#F0BE00",
@@ -41,6 +42,7 @@ export const palette = {
 
   sky100: "#DDF3F9",
   sky500: "#4FB4D6",
+  sky600: "#3A8FA9",
 
   rose100: "#FDE1D8",
   rose500: "#E2593B",

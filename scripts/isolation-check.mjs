@@ -2717,6 +2717,22 @@ async function expectAuthenticatedIsolation() {
       0,
       "auth member cannot read another family's child plan",
     );
+    // toggle_plan_activity_check (migration 20260729160000) is the atomic
+    // single-key alternative to the whole-map-replace check-off sync;
+    // its authorization check must deny a cross-family child the same
+    // way is_child_family_member denies every other child-scoped write.
+    await expectAuthenticatedRpcDenied(
+      familyAUser.accessToken,
+      "toggle_plan_activity_check",
+      {
+        target_child_id: childBId,
+        target_subject_id: "isolation-check",
+        target_week: 1,
+        target_activity_index: 0,
+        target_done: true,
+      },
+      "auth member cannot toggle another family's plan activity check",
+    );
     await expectAuthenticatedRead(
       familyBUser.accessToken,
       "chat_attachments",
