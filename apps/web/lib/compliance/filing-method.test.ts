@@ -60,7 +60,7 @@ describe("verifyFilingMethod", () => {
     for (const method of ["state_form", "portal"] as const) {
       const verdict = verifyFilingMethod(
         "AZ",
-        entry({ method, letterMustCarry: ["child_name"] }),
+        entry({ method, noticeMustCarry: ["child_name"] }),
       );
       assert.ok(!verdict.ok);
       assert.match(verdict.reason, /can never render/);

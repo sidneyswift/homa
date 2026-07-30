@@ -284,6 +284,11 @@ export interface PersistCanonicalMessageInput {
   turnId: string | undefined;
   providerMessageId?: string | null;
   terminal?: boolean;
+  /** How the turn arrived. Defaults to text; in-app voice writes "voice" so
+   * the thread can render it as spoken and the per-turn context can tell
+   * Homa what was said aloud without claiming she read it. The channel stays
+   * "web" for in-app voice, because that is where it happened. */
+  modality?: "text" | "voice";
 }
 
 export function providerMessageIdForRole(
@@ -376,12 +381,13 @@ export async function persistCanonicalMessage(
           insert into public.conversation_messages
             (family_id, session_id, sequence, channel, role, content, turn_id,
              episode_id, member_user_id, visibility, task_run_id,
-             provider_message_id, thread_key_hash)
+             provider_message_id, thread_key_hash, modality)
           values
             (${familyId}, ${input.sessionId}, ${input.sequence}, ${input.channel},
              ${input.role}, ${content}, ${input.turnId ?? null}, ${episodeId},
              ${memberUserId}, ${visibility}, ${attrs.taskRunId ?? null},
-             ${providerMessageId}, ${attrs.continuityThreadHash ?? null})
+             ${providerMessageId}, ${attrs.continuityThreadHash ?? null},
+             ${input.modality ?? "text"})
           on conflict
             (session_id, (coalesce(turn_id, '')), role, sequence)
           do update set

@@ -3,7 +3,7 @@ import type { StateRequirementsDetail } from "../map/state-requirements";
 import {
   mayGenerateLetter,
   type FilingMethodEntry,
-  type LetterField,
+  type NoticeField,
 } from "./filing-method";
 
 /**
@@ -145,7 +145,7 @@ export function ageOn(birthdate: string | null, onIso: string): number | null {
 
 /** Plain-language name for a field a state's notice must carry, used
  *  both on the blank line and in the covering email's gap list. */
-function fieldLabel(field: LetterField, stateName: string): string {
+function fieldLabel(field: NoticeField, stateName: string): string {
   switch (field) {
     case "attendance_hours":
       return "Hours of instruction you plan for the year";
@@ -161,7 +161,7 @@ function fieldLabel(field: LetterField, stateName: string): string {
 function childRows(
   children: FilingLetterChild[],
   gaps: string[],
-  options: { showAge: boolean; onIso: string },
+  options: { showAge: boolean; showGrade: boolean; onIso: string },
 ): string {
   if (children.length === 0) {
     gaps.push("The children this notice covers");
@@ -177,14 +177,16 @@ function childRows(
         if (age === null) gaps.push(`Age for ${child.name}`);
       }
       cells.push(born ? `<td>${escapeHtml(born)}</td>` : `<td>${BLANK}</td>`);
-      cells.push(
-        child.grade ? `<td>${escapeHtml(child.grade)}</td>` : `<td>${BLANK}</td>`,
-      );
+      if (options.showGrade) {
+        cells.push(
+          child.grade ? `<td>${escapeHtml(child.grade)}</td>` : `<td>${BLANK}</td>`,
+        );
+        // Grade is never derived from age: placement is the parent's call
+        // in most states, and guessing it here would put a claim in a
+        // government filing that the family never made.
+        if (!child.grade) gaps.push(`Grade level for ${child.name}`);
+      }
       if (!born) gaps.push(`Date of birth for ${child.name}`);
-      // Grade is never derived from age: placement is the parent's call
-      // in most states, and guessing it here would put a claim in a
-      // government filing that the family never made.
-      if (!child.grade) gaps.push(`Grade level for ${child.name}`);
       return `      <tr>${cells.join("")}</tr>`;
     })
     .join("\n");
@@ -199,7 +201,7 @@ function childRows(
  * and each becomes a labeled blank plus a named gap.
  */
 function carriedFieldBlanks(
-  fields: readonly LetterField[],
+  fields: readonly NoticeField[],
   stateName: string,
   gaps: string[],
 ): string {
@@ -235,14 +237,24 @@ export function composeFilingLetter(input: FilingLetterInput): FilingLetter {
     addressBlock(family, gaps),
   ].join("\n");
 
-  const carry = method?.letterMustCarry ?? [];
+  const carry = method?.noticeMustCarry ?? [];
   const showAge = carry.includes("child_age");
-  const headers = ["Child", ...(showAge ? ["Age"] : []), "Date of birth", "Grade"];
+  // Only where the state's own notice asks for it. No state that accepts
+  // a letter does; Arkansas and New Mexico ask on their forms. A Grade
+  // column on every document invented a blank nothing wanted, and fed
+  // that phantom gap to the drip that asks families to fill gaps in.
+  const showGrade = carry.includes("child_grade");
+  const headers = [
+    "Child",
+    ...(showAge ? ["Age"] : []),
+    "Date of birth",
+    ...(showGrade ? ["Grade"] : []),
+  ];
 
   const table = `<table class="fl-children">
   <thead><tr>${headers.map((h) => `<th>${h}</th>`).join("")}</tr></thead>
   <tbody>
-${childRows(family.children, gaps, { showAge, onIso: todayIso })}
+${childRows(family.children, gaps, { showAge, showGrade, onIso: todayIso })}
   </tbody>
 </table>`;
 
