@@ -151,6 +151,18 @@ BOILERPLATE_FAMILY_MIN = 1
 
 RENDER_DPI = 300
 
+# An embedded image is only the page when it actually COVERS the page.
+#
+# The rule used to be "exactly one image means this is a photograph of a
+# page", which is true for a CamScanner scan and false for a born-digital
+# PDF. On the Harbor + Sprout workbook it extracted a 53x53 point decorative
+# glyph covering 0.6% of the page AS the page: the master was 386x384 pixels
+# where real pages are 2550x3300, and the page's actual text and layout were
+# thrown away. Those pages then read as "featureless" to the blur gate, so
+# the damage surfaced as a bogus re-shoot request rather than as the data
+# loss it was.
+EMBEDDED_PAGE_COVERAGE = 0.85
+
 # Vision escalation. OCR and a vision model are complementary, so the
 # pipeline runs both and keeps the better answer per page (founder direction
 # 2026-07-29, after the first real book turned "METRO READING / Fast Forward!
@@ -252,10 +264,21 @@ def _extract_one(pdf_path: Path, out_dir: Path, part: int, start_number: int) ->
         images = page.get_images(full=True)
         record = {"page": number}
 
-        # The CamScanner shape: exactly one full-page photograph. Copy the
-        # original bytes rather than re-encoding a photo that is already the
-        # only surviving copy of a physical page.
+        # The CamScanner shape: exactly one photograph that COVERS the page.
+        # Copy the original bytes rather than re-encoding a photo that is
+        # already the only surviving copy of a physical page. Anything that
+        # merely sits on the page is an illustration, and the page around it
+        # is what we actually want.
+        covers_page = False
         if len(images) == 1:
+            try:
+                page_area = page.rect.width * page.rect.height
+                placed = page.get_image_rects(images[0][0])
+                covered = max((r.width * r.height) for r in placed) if placed else 0
+                covers_page = page_area > 0 and (covered / page_area) >= EMBEDDED_PAGE_COVERAGE
+            except Exception:
+                covers_page = False
+        if covers_page:
             xref = images[0][0]
             try:
                 raw = doc.extract_image(xref)

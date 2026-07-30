@@ -1,46 +1,169 @@
 {
   "id": "ref-2026-07-18-primary-level-workbook-sample",
-  "droppedBy": null,
-  "droppedAt": null,
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-18T22:03:39-04:00",
   "sourceChannel": "homa-inspo",
-  "sourceMessageTs": null,
+  "sourceMessageTs": "1784426619.838639",
+  "format": "unit-study-companion-workbook",
+  "title": "Primary Level Workbook Sample (Visual Arts, Forestry, Paleontology)",
+  "publisher": "Harbor + Sprout",
+  "gradeLevel": "primary, the publisher's own level name. The activities read roughly ages 6 to 10: complete-sentence answers and independent drawing, but no essay writing",
+  "pdfScanPageCount": 57,
+  "analysisQuality": "full",
   "capture": {
     "lane": "phone",
     "sourceFile": "primary-level-workbook-sample.pdf",
-    "sourceParts": [
-      "primary-level-workbook-sample.pdf"
-    ],
+    "sourceParts": ["primary-level-workbook-sample.pdf"],
     "sourceSha256": "290ab11eea35e397f8c7bf51e7ec40f0e06a5eefa6419afe0ee80221757a2239",
     "pageCount": 57,
     "mastersDir": ".cosmo/masters/ref-2026-07-18-primary-level-workbook-sample",
-    "intakeAt": "2026-07-30T05:11:58+00:00",
+    "intakeAt": "2026-07-30T06:27:26+00:00",
     "gateFindings": [
-      "page 11: looks blank (ink 0.0). Skip it or re-shoot it.",
-      "page 14: softer than the rest of the book (sharpness 0.0 against a median of 209.0). Re-shoot this page.",
-      "page 22: reads as the same page as page 3 shot again (99% identical text, images 0 bits apart). Keep the sharper one and drop the other.",
-      "page 23: reads as the same page as page 4 shot again (99% identical text, images 0 bits apart). Keep the sharper one and drop the other.",
-      "page 29: softer than the rest of the book (sharpness 79.0 against a median of 209.0). Re-shoot this page.",
-      "page 31: softer than the rest of the book (sharpness 0.0 against a median of 209.0). Re-shoot this page.",
-      "page 38: reads as the same page as page 3 shot again (99% identical text, images 0 bits apart). Keep the sharper one and drop the other.",
-      "page 39: byte-identical to page 23. The same page was captured twice.",
-      "page 41: softer than the rest of the book (sharpness 0.0 against a median of 209.0). Re-shoot this page.",
-      "page 41: byte-identical to page 31. The same page was captured twice.",
-      "page 48: softer than the rest of the book (sharpness 79.0 against a median of 209.0). Re-shoot this page.",
-      "page 57: softer than the rest of the book (sharpness 79.0 against a median of 209.0). Re-shoot this page.",
-      "page 57: byte-identical to page 48. The same page was captured twice.",
-      "4 page(s) were shot rotated ([2, 30, 36, 52]). Their text was read correctly from a rotated copy, so nothing is lost and no re-shoot is owed, but the MASTERS are still rotated: any later image work off them must turn them first."
+      "page 29: softer than the rest of the book (sharpness 79.0 against a median of 210.0)",
+      "page 39: byte-identical to page 23",
+      "page 48 and page 57: soft, and 57 is byte-identical to 48",
+      "3 page(s) shot rotated ([2, 30, 52])",
+      "1 page(s) produced no text: [29]"
     ]
   },
+  "sourceFiles": [
+    {
+      "filename": "Primary Level Workbook Sample.pdf",
+      "localPath": ".cosmo/inspo-files/primary-level-workbook-sample.pdf",
+      "blobUrl": null,
+      "blobNote": "Not uploaded: no BLOB_READ_WRITE_TOKEN resolved in this session. Local original and the 57 per-page masters retained; upload owed."
+    }
+  ],
+  "routing": {
+    "skillUsed": "reference-ingestion",
+    "ruling": "Reference, and the call is closer than most. This is a SAMPLER: three separate subject workbooks (Visual Arts, Forestry, Paleontology) bound into one PDF, each with its own title page, disclaimer, and how-to-use page. It has a how-to-use statement, which is the closest thing here to a philosophy, and it references modules in a sequence. But the sequence is not IN this file: the workbook is explicitly the companion to a unit study sold separately ('intended to help tether and enhance your experience as you work through the modules in this unit study'). What is here is loose activity pages for modules that live elsewhere, so the philosophy-and-sequence test fails on the sequence half. If the unit studies themselves are ever dropped, THEY route curriculum and this becomes their layer-4 evidence."
+  },
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "airy",
+    "visualHierarchy": "prompt-then-open-space",
+    "whiteSpaceRatio": 0.6,
+    "flowDirection": "top-down",
+    "notes": "The dominant page is one instruction line over a large empty area the child fills with drawing or writing, which is why the white-space ratio is the highest in the corpus. Three recurring page types carry the whole book: an activity prompt ('Choose a famous painting from history and recreate it with your own artistic style', scan 6), a vocabulary card that defines a term and then asks the child to redefine it in their own words or pictures ('ecosystem noun', scan 31; 'paleontology noun', scan 41), and a plain lined 'notes' page. Each of the three subject workbooks repeats the same front matter, which is why scans 22, 23 and 38 read as near-copies of scans 3 and 4: that repetition is the publisher's structure, not a capture fault."
+  },
+  "skillTargeting": {
+    "subject": "multi-subject",
+    "domain": "cross-curricular",
+    "topics": [
+      { "id": "mt_Xp1WkwWozD", "kind": "conceptual", "mapped": true, "note": "Picture Study: Observing and Recalling Artwork (4-7): the Visual Arts module asks the child to choose a famous painting and recreate it in their own style, which is picture study with a making step attached." },
+      { "id": "mt_bKlnc7dyVK", "kind": "conceptual", "mapped": true, "note": "Fossils & Palaeontologists (5-7): the Paleontology module's vocabulary card defines the field and its amber-specimen page asks the child to draw a preserved organism." },
+      { "id": "mt_1VSFoM44JU", "kind": "conceptual", "mapped": true, "note": "Types of Fossils (7-9): the amber pages are one preservation type presented as its own study." },
+      { "id": "mt_qixeaiswFP", "kind": "conceptual", "mapped": true, "note": "How Organisms Shape Habitats (5-6): the Forestry module's ecosystem card and leaf-collection pages work the same idea from the forest side." },
+      { "id": "mt_hi8cVycbwn", "kind": "procedural", "mapped": true, "note": "Modelling with Sketches (5-8): drawing is the answer format across all three subjects, not a decoration on it." }
+    ],
+    "unmappedSkills": [
+      {
+        "name": "colour mixing and the colour wheel",
+        "suggestedSlug": "art.colour-mixing",
+        "note": "Scan 13 asks the child to experiment with colour mixing using watercolours and fill a colour chart, and scan 14 pairs a colour wheel with an outdoor colour scavenger hunt. Homa's Art subject carries Picture Study but nothing on making or mixing colour, which is the same Art-is-appreciation-only gap the Get Set for School curriculum surfaced from the drawing side."
+      },
+      {
+        "name": "pressing and identifying leaves",
+        "suggestedSlug": "science.leaf-identification",
+        "note": "Scan 25 asks the child to collect, press, label and describe leaves from different tree species. Nature study with a specimen is a distinct skill from habitat science and has no topic."
+      },
+      {
+        "name": "defining a term in your own words",
+        "suggestedSlug": "ela.define-in-own-words",
+        "note": "The vocabulary card format across all three subjects gives a formal definition and then asks the child to restate it in words or pictures. That restatement is the actual skill being practised and it is subject-independent. Not appended here: taxonomy writes are append-only with their own guard sequence and belong in a change that is only about the taxonomy."
+      }
+    ]
+  },
+  "difficulty": {
+    "ageBand": [72, 120],
+    "complexity": "single-skill",
+    "prerequisites": [],
+    "scaffoldingLevel": "low",
+    "notes": "Low scaffolding on purpose, and it is the defining property of the book: a prompt and an empty space. Nothing is worked for the child, there are no examples to copy, and most pages cannot be marked right or wrong. That makes it easy for a confident child and genuinely hard for a child who needs a starting point, which is the opposite trade from the Fast Forward workbook in this same corpus."
+  },
+  "theming": {
+    "themeType": "interest-led",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "limited palette",
+    "appealDrivers": "The subjects themselves are the hook. Forestry and Paleontology are not standard primary-school subject headings, they are the things a particular child is obsessed with, and the workbook is built to follow that obsession rather than cover a curriculum. Quotes carry personality where art does not ('Creativity takes courage', Henri Matisse, scan 7).",
+    "notes": "Almost no illustration, which for a book about drawing is deliberate: the empty space is where the child's work goes, so decorating it would be taking their room."
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "generous",
+    "inkDensity": "light",
+    "colorRequirement": "prints well in B&W",
+    "notes": "Very light ink because most of each page is intentionally blank, which makes this the cheapest book in the corpus to print at home. Worth noting against the PEMDAS foldable, where heavy colour and exact scaling are load-bearing."
+  },
   "aboutness": {
-    "extractionQuality": null,
+    "extractionQuality": "partial",
     "textSidecar": ".cosmo/text/ref-2026-07-18-primary-level-workbook-sample.txt",
     "textBlobUrl": null,
-    "subjects": [],
-    "entities": [],
-    "themes": [],
-    "keyTerms": [],
-    "referencedWorks": []
+    "textExtraction": {
+      "ocr": "pdf-text-layer",
+      "visionModel": "google/gemini-3-flash",
+      "visionPages": 39,
+      "note": "Born-digital with a genuinely thin text layer, because most of each page is deliberately empty. 39 of 57 pages were re-read by a vision model, and much of what is known about this book comes from those descriptions rather than from its words."
+    },
+    "subjects": [
+      { "name": "visual arts", "role": "teaches", "quote": "Visual Arts" },
+      { "name": "forestry", "role": "teaches", "quote": "Forestry" },
+      { "name": "paleontology", "role": "teaches", "quote": "Paleontology" },
+      { "name": "unit study companion workbook", "role": "identity", "quote": "PRIMARY LEVEL WORKBOOK" }
+    ],
+    "entities": [
+      { "name": "Harbor + Sprout", "kind": "organization", "role": "identity", "quote": "HARBOR + SPROUT" },
+      { "name": "Henri Matisse", "kind": "person", "role": "about", "quote": "Henri Matisse" }
+    ],
+    "themes": [
+      { "name": "learning by making", "evidence": "Creativity takes courage" },
+      { "name": "outdoor observation", "evidence": "press and preserve leaves" },
+      { "name": "defining ideas in your own words", "evidence": "ecosystem noun" }
+    ],
+    "keyTerms": [
+      { "term": "unit study", "occurrences": 3, "quote": "unit study" },
+      { "term": "notebooking", "occurrences": 1, "quote": "notebooking" },
+      { "term": "color scavenger", "occurrences": 1, "quote": "color scavenger" },
+      { "term": "AMBER SPECIMENS", "occurrences": 1, "quote": "AMBER SPECIMENS" }
+    ],
+    "referencedWorks": [],
+    "notes": "extractionQuality is 'partial', not 'full', and the distinction is real rather than modest. Most pages are an instruction over blank space, so the text layer holds a fraction of what the book contains, and the vision descriptions hold the rest. Those descriptions are NOT span-verifiable against the sidecar, so they inform the prose fields above and are deliberately not turned into aboutness claims. Henri Matisse is roled 'about' rather than 'identity' because the quote is used as teaching content on the page, not as branding; he is quoted, not credited. A thin honest dimension F is the right answer for a book that is mostly empty paper on purpose."
   },
-  "title": null,
-  "format": null
+  "recipeMatch": {
+    "matchedRecipes": ["nature-observation-journal", "narration-page", "nomenclature-cards", "unit-study-packet"],
+    "gaps": ["prompt-and-blank-space-page"],
+    "notes": "Matched against the recipe files listed at analysis time. nature-observation-journal and narration-page are close neighbours and nomenclature-cards matches the define-then-redefine vocabulary card almost exactly. The gap is the book's most common page and the one nothing covers: a single instruction line over a large deliberately empty area, where the emptiness is the design rather than a layout that ran short. Homa's generator fills space by default, so this format needs a recipe that tells it not to."
+  },
+  "captureProblems": [
+    {
+      "issue": "scan 39 is byte-identical to scan 23, and scan 57 to scan 48",
+      "reshoot": false,
+      "verdict": "the source PDF, not the capture",
+      "note": "This is a born-digital file, so identical bytes mean the publisher's own PDF repeats those pages. It is a sampler stitching three workbooks together, and each one carries its own copy of the same disclaimer, how-to-use page, and blank notes pages. Nothing to re-export."
+    },
+    {
+      "issue": "scans 29, 48 and 57 read as softer than the book's median",
+      "reshoot": false,
+      "verdict": "featureless, not blurry",
+      "note": "These are near-empty notes pages. Sharpness measures the crispness of the sharpest edge, and a page with almost nothing on it has almost no edges. The gate is measuring correctly and the conclusion 'blurry' does not follow for a born-digital page, which cannot be blurry at all. Worth a future refinement: a rendered page should be exempt from the blur gate, since only a photograph can be out of focus."
+    },
+    {
+      "issue": "3 pages shot rotated (2, 30, 52)",
+      "reshoot": false,
+      "note": "Landscape pages inside a portrait document. Text was read from rotated copies; any later image work off those masters must turn them first."
+    }
+  ],
+  "stages": {
+    "captured": "2026-07-30T06:27:26Z",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": { "kind": "recipe", "targets": ["apps/web/agent/skills/materials-studio/references/recipes/prompt-and-blank-space-page.md"], "commit": null },
+    "taxonomy": { "proposedTopics": [], "note": "Three proposals live in skillTargeting.unmappedSkills. proposedTopics means topics actually appended to topics.json; no taxonomy write happened here." },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "notes": "A sampler of three Harbor + Sprout companion workbooks, and the most useful thing in it is what it refuses to do. Almost every page is one prompt over a large empty space: no worked example, no answer, usually nothing markable. That is the opposite of every other item in this corpus and a direct challenge to Homa's generator, which fills a page by default and treats white space as something to use up. It also carries a capture lesson worth more than the book: this drop is what exposed the intake extracting a 53x53 point decorative glyph AS a page, because the old rule assumed one embedded image meant a photograph of a page. Fixing that nearly doubled the extracted text, from 7,693 characters to 14,389, which is the measure of how much of this book the corpus was silently missing."
 }

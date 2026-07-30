@@ -771,6 +771,11 @@
       "slug": "cross-subject-link-page",
       "firstSeen": "ref-2026-07-19-harcourt-science",
       "note": "A one-paragraph bridge from the lesson's subject into another one, plus a five-minute Think and Do that makes the connection real. Harcourt Science closes every chapter with a Links spread of exactly these (Snacks Made from Plants for maths, Keeping a Custom for social studies, Weather Sayings for language arts, Find Symmetry for maths, Move Like a Frog for movement). Neighbours already on this backlog but not the same thing: arts-integrated-lesson is a full arts lesson, cross-curricular-center-cards are station cards for several children at once. This is one short paragraph and one small activity on half a spread, and it is the format Carolyng named when she said she values one theme carried through different disciplines."
+    },
+    {
+      "slug": "prompt-and-blank-space-page",
+      "firstSeen": "ref-2026-07-18-primary-level-workbook-sample",
+      "note": "One instruction line over a large, deliberately empty area the child fills with drawing or writing. The emptiness is the design, not a layout that ran short. Homa's generator fills space by default, so this format needs a recipe that tells it not to."
     }
   ]
 }

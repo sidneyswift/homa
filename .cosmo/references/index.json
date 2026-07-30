@@ -85,6 +85,64 @@
       "ageBand": null
     },
     {
+      "id": "ref-2026-07-16-five-paragraph-essay-outline",
+      "title": "Five Paragraph Essay Outline",
+      "droppedBy": "sid",
+      "droppedAt": "2026-07-16T14:37:55-04:00",
+      "subject": "ela",
+      "domain": "writing-composition",
+      "format": "essay-outline-printable",
+      "about": [
+        "essay writing",
+        "essay planning",
+        "thesis statements",
+        "paragraph structure",
+        "secondary ela printable"
+      ],
+      "entities": [
+        "Christina Schneider"
+      ],
+      "themes": [
+        "writing as a process",
+        "structure taught by filling it in"
+      ],
+      "works": [
+        "Building Strong Writers"
+      ],
+      "ageBand": [
+        132,
+        192
+      ]
+    },
+    {
+      "id": "ref-2026-07-16-pemdas-foldable",
+      "title": "Order of Operations PEMDAS Math Doodles Foldable",
+      "droppedBy": "sid",
+      "droppedAt": "2026-07-16T14:34:09-04:00",
+      "subject": "math",
+      "domain": "multiplication-division",
+      "format": "foldable",
+      "about": [
+        "order of operations",
+        "grouping symbols",
+        "interactive notebook foldable",
+        "grade 5 math"
+      ],
+      "entities": [
+        "Melanie Ellsworth",
+        "Science and Math Doodles"
+      ],
+      "themes": [
+        "learning by making an object",
+        "mnemonics as memory aids"
+      ],
+      "works": [],
+      "ageBand": [
+        120,
+        144
+      ]
+    },
+    {
       "id": "ref-2026-07-17-aal-reading-readiness",
       "title": "Reading Readiness Checklist",
       "droppedBy": "atlas-scrape",
@@ -2239,6 +2297,35 @@
       "themes": [],
       "works": [],
       "ageBand": null
+    },
+    {
+      "id": "ref-2026-07-18-primary-level-workbook-sample",
+      "title": "Primary Level Workbook Sample (Visual Arts, Forestry, Paleontology)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:03:39-04:00",
+      "subject": "multi-subject",
+      "domain": "cross-curricular",
+      "format": "unit-study-companion-workbook",
+      "about": [
+        "visual arts",
+        "forestry",
+        "paleontology",
+        "unit study companion workbook"
+      ],
+      "entities": [
+        "Harbor + Sprout",
+        "Henri Matisse"
+      ],
+      "themes": [
+        "learning by making",
+        "outdoor observation",
+        "defining ideas in your own words"
+      ],
+      "works": [],
+      "ageBand": [
+        72,
+        120
+      ]
     },
     {
       "id": "ref-2026-07-18-reading-options-achievement",
