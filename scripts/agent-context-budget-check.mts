@@ -71,7 +71,16 @@ export const CONTEXT_BUDGETS: Record<string, number> = {
   "web-mode": 400,
   "ios-mode": 700,
   "research-mode": 3_700,
-  "onboarding-mode (preloaded skill body)": 28_000,
+  // Raised from 28,000 on 2026-07-30 (PR #469). Nine measured walks in
+  // one session added real, load-bearing content the ratchet is meant to
+  // let through: the age-template planner's honesty rules, growingEdges
+  // reveal guidance, and three separate verbatim-example production bugs
+  // each fixed with its own dated citation. A compression pass first cut
+  // ~2,970 bytes of genuine duplication (see git history same date); the
+  // remainder is one fact or one scar per sentence, not padding. Next
+  // pass that touches this file should look for split-worthy sections
+  // before raising this further.
+  "onboarding-mode (preloaded skill body)": 32_000,
 };
 
 /**
