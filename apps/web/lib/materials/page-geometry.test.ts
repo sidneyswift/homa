@@ -212,6 +212,17 @@ describe("content in the bottom margin band", () => {
     ]);
     assert.match(note ?? "", /cut in print/);
   });
+
+  it("stays silent on sub-pixel margin noise instead of saying a page runs 0in past itself", () => {
+    // formatIn(0.02) prints "0", so an unguarded threshold produced the
+    // nonsensical "content runs 0in past the printable area" (observed
+    // 2026-07-30, fill-convergence-overflow-equations eval).
+    const pages = [
+      { page: 1, contentHeightIn: 9.52, overflowIn: 0, fillPercent: 100 },
+    ];
+    assert.deepEqual(geometryToolNotes(pages), []);
+    assert.match(geometryReviewBlock(pages) ?? "", /fits the page/);
+  });
 });
 
 describe("fixed-dimension formats", () => {

@@ -605,9 +605,18 @@ const createPrintable = defineBoundedTool({
     // uploaded or inserted yet it leaves no orphan blob and no stranded
     // draft. The skill's two-strike rule is the escape hatch: after two
     // failed rebuilds of the same page, stop and ask her.
-    const cutoffPages = provenCutoffPages(rendered.pageGeometry);
+    //
+    // Scoped to FRESH pages only, the same distinction selectPagesForReview
+    // already draws: a packet revision carries the untouched pages forward
+    // via fromMaterialId, and those were already final once. Blocking on
+    // one of them would refuse a one-page fix over a page nobody touched
+    // and nobody asked about, on a document that was already shipped.
+    const freshGeometry = rendered.pageGeometry.filter(
+      (page) => resolvedPages[page.page - 1]?.fresh ?? true,
+    );
+    const cutoffPages = provenCutoffPages(freshGeometry);
     if (cutoffPages.length > 0) {
-      const overflowNotes = geometryToolNotes(rendered.pageGeometry).join(" ");
+      const overflowNotes = geometryToolNotes(freshGeometry).join(" ");
       return {
         created: false,
         note: `Not sent: the renderer measured ${

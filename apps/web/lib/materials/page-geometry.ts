@@ -169,7 +169,7 @@ export function geometryToolNotes(
     // other page keeps, and invisible to both other branches (its blank
     // band is zero and its overflow is zero).
     const marginIn = marginBandIn(page);
-    if (marginIn > 0) {
+    if (marginIn >= OVERFLOW_NOTE_MIN_IN) {
       notes.push(
         `Page ${page.page} fill is ${page.fillPercent}%: content runs ${formatIn(marginIn)}in past the ${PRINTABLE_HEIGHT_IN}in printable area into the bottom margin band. It is not cut off, but it crowds the paper edge; pull the last items up or move them to their own page.`,
       );
@@ -203,7 +203,7 @@ export function geometryReviewBlock(
       return `- page ${page.page}: content overflows the page box by ${formatIn(page.overflowIn)}in; anything past 11in is cut in print`;
     }
     const marginIn = marginBandIn(page);
-    if (marginIn > 0) {
+    if (marginIn >= OVERFLOW_NOTE_MIN_IN) {
       return `- page ${page.page}: content runs ${formatIn(marginIn)}in past the ${PRINTABLE_HEIGHT_IN}in printable area into the bottom margin band (${page.fillPercent}% fill); not cut, but crowding the paper edge`;
     }
     const blankIn = blankBandIn(page);

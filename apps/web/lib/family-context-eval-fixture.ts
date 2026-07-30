@@ -436,9 +436,18 @@ function evalFixturePacketPageBodies(): string[] {
     // that is the right SHAPE but the wrong SCALE cannot reproduce a
     // failure whose cause is volume.
     const filler = `<p class="line">Practice line ${page}. ${"blend and read. ".repeat(216)}</p>`;
+    // display:flex is load-bearing, not decoration: the fixture has no
+    // stylesheet, and six block-level <figure> elements with no layout
+    // rule stack VERTICALLY (~5.6in), pushing this page 2.19in past the
+    // physical edge before Homa ever touches it (found 2026-07-30, once
+    // gh#349's cutoff-page-is-a-block finally measured what this page
+    // actually renders to instead of only noting it). A page whose own
+    // seeded content secretly overflows makes "revising it produced a
+    // cut-off page" untestable: the eval cannot tell Homa's mistake from
+    // the fixture's own.
     const art =
       page === EVAL_FIXTURE_PACKET_ILLUSTRATED_PAGE
-        ? `<div class="animal-row">${animals.map(evalFixtureAnimal).join("")}</div>`
+        ? `<div class="animal-row" style="display:flex;flex-wrap:wrap;gap:8px;">${animals.map(evalFixtureAnimal).join("")}</div>`
         : "";
     return [
       `<div class="page" data-marker="${evalFixturePacketPageMarker(page)}">`,
