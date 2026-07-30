@@ -9,7 +9,7 @@
   "layout": {
     "structure": "single-element-per-page",
     "spacing": "maximally airy",
-    "visualHierarchy": "letter-only — one giant uppercase bubble letter fills the entire page",
+    "visualHierarchy": "letter-only \u2014 one giant uppercase bubble letter fills the entire page",
     "whiteSpaceRatio": 0.65,
     "flowDirection": "center-out"
   },
@@ -27,23 +27,30 @@
     "notes": "Also targets fine motor (decorating, cutting, gluing) and art (process art on letter shapes). The letter is a canvas, not a tracing exercise."
   },
   "difficulty": {
-    "ageBandMonths": [30, 60],
+    "ageBandMonths": [
+      30,
+      60
+    ],
     "complexity": "single-skill",
     "prerequisites": [],
-    "scaffolding": "low — completely open-ended, child decides how to decorate"
+    "scaffolding": "low \u2014 completely open-ended, child decides how to decorate"
   },
   "theming": {
     "themeType": "neutral",
     "characters": [],
-    "visualStyle": "bold outline bubble letters — thick black outlines, rounded, hand-drawn feel",
+    "visualStyle": "bold outline bubble letters \u2014 thick black outlines, rounded, hand-drawn feel",
     "colorPalette": "black-and-white",
-    "appealDrivers": ["giant size fills page — satisfying to decorate", "thick outlines easy for young hands", "open canvas for any medium (paint, stickers, collage, crayons)"]
+    "appealDrivers": [
+      "giant size fills page \u2014 satisfying to decorate",
+      "thick outlines easy for young hands",
+      "open canvas for any medium (paint, stickers, collage, crayons)"
+    ]
   },
   "printFormat": {
     "pageSize": "letter",
     "orientation": "portrait",
-    "margins": "minimal — letter fills most of the page",
-    "inkDensity": "light — just outlines",
+    "margins": "minimal \u2014 letter fills most of the page",
+    "inkDensity": "light \u2014 just outlines",
     "colorRequirement": "B&W only (designed to be decorated, not pre-colored)"
   },
   "recipeMatch": {
@@ -51,7 +58,7 @@
     "gaps": [
       {
         "name": "alphabet-art-page",
-        "description": "One giant bubble letter per page (uppercase only for preschool, both cases for older). Thick outline, designed as a craft canvas — child decorates with paint, dot stickers, collage materials, etc. Then cuts out and collects into an alphabet portfolio. Different from tracing-guide (which is about motor memory and formation). This is about letter recognition through creative art.",
+        "description": "One giant bubble letter per page (uppercase only for preschool, both cases for older). Thick outline, designed as a craft canvas \u2014 child decorates with paint, dot stickers, collage materials, etc. Then cuts out and collects into an alphabet portfolio. Different from tracing-guide (which is about motor memory and formation). This is about letter recognition through creative art.",
         "creationPath": "image-direct",
         "complexity": "low"
       }
@@ -59,9 +66,18 @@
   },
   "coverPage": {
     "title": "ALPHABET CRAFT BOOK",
-    "style": "Patterned border with colorful learning icons (blocks, beakers, flowers, lightbulbs, shapes) — childlike but polished. Center white panel with bold block title.",
+    "style": "Patterned border with colorful learning icons (blocks, beakers, flowers, lightbulbs, shapes) \u2014 childlike but polished. Center white panel with bold block title.",
     "notes": "Cover page doubles as a portfolio title page. Child writes their name in the blank space."
   },
   "companionTo": "cur-2026-07-19-playing-preschool-y1",
-  "notes": "This is the printable companion to Playing Preschool Year 1 (dropped in the previous message). 26 uppercase bubble letters (A-Z) + intro page + cover page = 29 pages. Each letter is introduced during its unit in the main curriculum (e.g., Aa in Unit 1 Apples, Rr in Unit 2 Colors). The child decorates one letter per unit, building a keepsake alphabet book over the school year. Design is intentionally minimal — the letter IS the page, leaving maximum creative freedom."
+  "notes": "This is the printable companion to Playing Preschool Year 1 (dropped in the previous message). 26 uppercase bubble letters (A-Z) + intro page + cover page = 29 pages. Each letter is introduced during its unit in the main curriculum (e.g., Aa in Unit 1 Apples, Rr in Unit 2 Colors). The child decorates one letter per unit, building a keepsake alphabet book over the school year. Design is intentionally minimal \u2014 the letter IS the page, leaving maximum creative freedom.",
+  "sourceFiles": [
+    {
+      "filename": "Alphabet-Pages-Year-1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-19-alphabet-pages-y1/Alphabet-Pages-Year-1.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

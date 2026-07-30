@@ -61,5 +61,14 @@
     ],
     "gaps": []
   },
-  "notes": "Image-based PDF \u2014 could not extract text. Likely phonics visual cards. Pairs well with Aless's other phonics drops (rhyming clip cards, I Spy letter, beginning sounds)."
+  "notes": "Image-based PDF \u2014 could not extract text. Likely phonics visual cards. Pairs well with Aless's other phonics drops (rhyming clip cards, I Spy letter, beginning sounds).",
+  "sourceFiles": [
+    {
+      "filename": "Learning Sounds Handouts.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-learning-sounds-handouts/Learning%20Sounds%20Handouts.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

@@ -5,23 +5,34 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784427105.253579",
   "format": "preschool-activity-pages",
-  "title": "CKLA Preschool — Domain 3: Animals — Activity Pages (Pre-Writing Strokes + Phonics)",
+  "title": "CKLA Preschool \u2014 Domain 3: Animals \u2014 Activity Pages (Pre-Writing Strokes + Phonics)",
   "publisher": "Core Knowledge Foundation",
   "series": "Core Knowledge Language Arts (CKLA) Preschool",
   "gradeLevel": "Preschool (ages 3-5)",
   "license": "Creative Commons BY-NC-SA 3.0",
   "pageCount": 56,
-  "relatedRefs": ["ref-2026-07-18-ckla-preschool-all-about-me"],
+  "relatedRefs": [
+    "ref-2026-07-18-ckla-preschool-all-about-me"
+  ],
   "callouts": [],
   "overview": {
-    "description": "56 activity pages for the CKLA Preschool 'Animals' domain. These are the STUDENT-FACING pages that accompany the teacher guide. Two main categories: (1) Pre-writing stroke practice pages (~35 pages) — each stroke type themed around farm/animal imagery, with a rhyming poem providing verbal instruction. (2) Phonics/letter identification pages — circle the sound picture, letter recognition. Plus take-home science journal prompts and family letter."
+    "description": "56 activity pages for the CKLA Preschool 'Animals' domain. These are the STUDENT-FACING pages that accompany the teacher guide. Two main categories: (1) Pre-writing stroke practice pages (~35 pages) \u2014 each stroke type themed around farm/animal imagery, with a rhyming poem providing verbal instruction. (2) Phonics/letter identification pages \u2014 circle the sound picture, letter recognition. Plus take-home science journal prompts and family letter."
   },
   "activityTypes": [
     {
       "type": "pre-writing-strokes",
       "description": "Each page targets ONE specific stroke: zigzag, dots, cross (+), bridge (curved top), X, bowl (curved bottom), circle, vertical line, horizontal line, diagonal, wavy line. Every page has: (1) a rhyming poem that verbally instructs the stroke ('The big barn doors are closed up tight / Slide down from the left; slide down from the right'), (2) a themed illustration (barn doors, chicken coops, beehives, bales of hay, ducks), (3) large practice area with guide marks.",
-      "strokeProgression": ["zigzag", "dots", "cross", "bridge", "X", "bowl", "circle", "lines (various directions)"],
-      "designPattern": "poem-as-instruction — the rhyming couplet IS the teaching. The child (or parent reading aloud) learns the motor movement through rhythm and rhyme."
+      "strokeProgression": [
+        "zigzag",
+        "dots",
+        "cross",
+        "bridge",
+        "X",
+        "bowl",
+        "circle",
+        "lines (various directions)"
+      ],
+      "designPattern": "poem-as-instruction \u2014 the rhyming couplet IS the teaching. The child (or parent reading aloud) learns the motor movement through rhythm and rhyme."
     },
     {
       "type": "phonics-sound-picture",
@@ -40,8 +51,8 @@
       "value": "Multi-sensory instruction: auditory (rhythm/rhyme) + visual (themed illustration) + kinesthetic (drawing the stroke). The poem makes the instruction stick."
     },
     "themedStrokePractice": {
-      "description": "Pre-writing strokes are embedded in farm/animal themes: barn doors (X), chicken coops (cross), bales of hay (bridge), duck bellies (bowl), beehive counting (dots). The practice isn't abstract lines — it's drawing things the child can picture.",
-      "value": "Meaningful practice. The child isn't 'doing strokes' — they're 'drawing barn doors' or 'tracing duck bellies.'"
+      "description": "Pre-writing strokes are embedded in farm/animal themes: barn doors (X), chicken coops (cross), bales of hay (bridge), duck bellies (bowl), beehive counting (dots). The practice isn't abstract lines \u2014 it's drawing things the child can picture.",
+      "value": "Meaningful practice. The child isn't 'doing strokes' \u2014 they're 'drawing barn doors' or 'tracing duck bellies.'"
     },
     "parentAsScribe": {
       "description": "Take-home journal pages have the parent read questions aloud, listen to the child's oral answer, then write it down while reading it back. 'Listen to her answer, then write it down, repeating the words aloud as you write.' The child sees their spoken words become written words.",
@@ -49,11 +60,14 @@
     }
   },
   "recipeMatch": {
-    "matchedRecipes": ["tracing-guide", "handwriting-practice"],
+    "matchedRecipes": [
+      "tracing-guide",
+      "handwriting-practice"
+    ],
     "gaps": [
       {
         "name": "pre-writing-stroke-page",
-        "description": "A themed pre-writing practice page: rhyming poem instruction + themed illustration (the stroke embedded in an image, e.g., barn doors = X shape) + large practice area with guide marks. One stroke type per page. The poem IS the instruction — no separate 'directions' section needed."
+        "description": "A themed pre-writing practice page: rhyming poem instruction + themed illustration (the stroke embedded in an image, e.g., barn doors = X shape) + large practice area with guide marks. One stroke type per page. The poem IS the instruction \u2014 no separate 'directions' section needed."
       },
       {
         "name": "parent-scribe-journal",
@@ -61,5 +75,14 @@
       }
     ]
   },
-  "notes": "Eighth Aless drop. This is the student activity pages companion to the CKLA teacher guide she dropped earlier. Together they show the full CKLA system: teacher guide (instruction) + activity pages (student work) + take-home pages (family engagement). The pre-writing stroke pages are a new recipe type for Homa — they use rhyming poems as embedded instruction, which is more engaging than plain 'trace the line' worksheets. The themed strokes (barn doors = X, duck bellies = curves) make abstract motor practice meaningful."
+  "notes": "Eighth Aless drop. This is the student activity pages companion to the CKLA teacher guide she dropped earlier. Together they show the full CKLA system: teacher guide (instruction) + activity pages (student work) + take-home pages (family engagement). The pre-writing stroke pages are a new recipe type for Homa \u2014 they use rhyming poems as embedded instruction, which is more engaging than plain 'trace the line' worksheets. The themed strokes (barn doors = X, duck bellies = curves) make abstract motor practice meaningful.",
+  "sourceFiles": [
+    {
+      "filename": "PK_D3_AP_Web.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-ckla-preschool-animals-activity-pages/PK_D3_AP_Web.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

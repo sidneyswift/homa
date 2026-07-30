@@ -5,7 +5,7 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784426397.266299",
   "format": "record-keeping-system",
-  "title": "Habitat Schoolhouse Preschool — Record Keeping Set (Pond Map + Progress Cards)",
+  "title": "Habitat Schoolhouse Preschool \u2014 Record Keeping Set (Pond Map + Progress Cards)",
   "publisher": "The Habitat Schoolhouse / Gumboot Kid",
   "series": "Preschool with Habitat Schoolhouse",
   "gradeLevel": "Preschool (ages 3-5)",
@@ -14,11 +14,17 @@
   "components": {
     "pondMap": {
       "description": "A beautiful watercolor pond scene (frogs, snail, turtle, otter, salamander, duck) with the full alphabet (Aa through Zz) as circles following a winding path from START to END. Six larger circles mark Units 1-6, each featuring a different pond animal. The child marks off each letter circle as they complete it in the workbook. 'Mark off a circle after you complete each letter in Preschool.'",
-      "designFeatures": ["watercolor naturalist art (pond habitat)", "gamified alphabet progression path (board-game style)", "6 unit milestones with animal illustrations", "name field at bottom", "START→END arc across full alphabet"],
-      "value": "Turns the abstract concept of 'learning the alphabet' into a visual journey the child can SEE their progress on. The pond map becomes a keepsake — a visual record of their preschool year."
+      "designFeatures": [
+        "watercolor naturalist art (pond habitat)",
+        "gamified alphabet progression path (board-game style)",
+        "6 unit milestones with animal illustrations",
+        "name field at bottom",
+        "START\u2192END arc across full alphabet"
+      ],
+      "value": "Turns the abstract concept of 'learning the alphabet' into a visual journey the child can SEE their progress on. The pond map becomes a keepsake \u2014 a visual record of their preschool year."
     },
     "progressCards": {
-      "description": "Six Personal Record cards (Workbook 1 through 6), each with the same 12 developmental skill areas. Each card is filled out at the end of the corresponding workbook. Evaluation key: ✓ Developing Skills, X Needs Development, plus a 'Completed' column.",
+      "description": "Six Personal Record cards (Workbook 1 through 6), each with the same 12 developmental skill areas. Each card is filled out at the end of the corresponding workbook. Evaluation key: \u2713 Developing Skills, X Needs Development, plus a 'Completed' column.",
       "skillAreas": [
         "Shares and Takes Turns",
         "Works Well with Others",
@@ -33,18 +39,23 @@
         "Counts Multiple Objects",
         "Shows Interest in Learning"
       ],
-      "progression": "Workbooks 1→5 end with 'Move on to: Preschool Workbook [N+1]'. Workbook 6 ends with 'Register in: Kindergarten with Habitat Schoolhouse'. Clear pathway.",
-      "eachCardHas": ["watercolor animal illustration at top (frog, snail, turtle, otter, salamander, duck)", "color-coded background (green, blue, coral, mint, tan, yellow)", "child's name field", "publisher logos (Habitat Schoolhouse + Gumboot Kid)"],
+      "progression": "Workbooks 1\u21925 end with 'Move on to: Preschool Workbook [N+1]'. Workbook 6 ends with 'Register in: Kindergarten with Habitat Schoolhouse'. Clear pathway.",
+      "eachCardHas": [
+        "watercolor animal illustration at top (frog, snail, turtle, otter, salamander, duck)",
+        "color-coded background (green, blue, coral, mint, tan, yellow)",
+        "child's name field",
+        "publisher logos (Habitat Schoolhouse + Gumboot Kid)"
+      ],
       "value": "The SAME 12 skills are assessed 6 times across the preschool year. Parent can see growth over time by comparing cards. The mix of academic skills (letter recognition, counting) and life skills (shares, cleans up, seeks help) reflects a whole-child philosophy."
     }
   },
   "designPatterns": {
     "visualProgressTracking": {
-      "description": "The Pond Map turns alphabet learning into a visual journey — a board-game-style path the child colors in as they go. Progress is VISIBLE and TANGIBLE. The child can point to where they are and see how far they've come.",
+      "description": "The Pond Map turns alphabet learning into a visual journey \u2014 a board-game-style path the child colors in as they go. Progress is VISIBLE and TANGIBLE. The child can point to where they are and see how far they've come.",
       "value": "Motivation through visual progress. Same psychology as a sticker chart but more beautiful and keepsake-worthy."
     },
     "repeatedAssessmentAcrossTime": {
-      "description": "The same 12 skill areas assessed 6 times across the year. This isn't 'did they pass/fail' — it's 'are they developing?' The ✓/X key says 'Developing Skills' not 'Mastered.' The framing is growth-oriented, not binary.",
+      "description": "The same 12 skill areas assessed 6 times across the year. This isn't 'did they pass/fail' \u2014 it's 'are they developing?' The \u2713/X key says 'Developing Skills' not 'Mastered.' The framing is growth-oriented, not binary.",
       "value": "Longitudinal development tracking. A parent can see the ARC of their child's growth, not just a snapshot."
     },
     "wholeChildAssessment": {
@@ -52,7 +63,7 @@
       "value": "Reflects Charlotte Mason / Reggio / Montessori philosophy: the child's character development matters as much as their academic progress."
     },
     "watercolorNaturalistAesthetic": {
-      "description": "Every element uses watercolor naturalist illustrations — pond animals (frog, snail, turtle, otter, salamander, duck), watercolor background scenes, botanical elements. Consistent with Carolyng's confirmed preference for this art style.",
+      "description": "Every element uses watercolor naturalist illustrations \u2014 pond animals (frog, snail, turtle, otter, salamander, duck), watercolor background scenes, botanical elements. Consistent with Carolyng's confirmed preference for this art style.",
       "value": "Beautiful enough to be a keepsake. Parents frame these or put them in memory books."
     },
     "clearPathwayProgression": {
@@ -62,7 +73,7 @@
   },
   "overallLayout": {
     "structure": "Pond Map = landscape poster; Progress Cards = 2-up per page, portrait",
-    "spacing": "airy — the pond map has generous space; cards have clean line spacing",
+    "spacing": "airy \u2014 the pond map has generous space; cards have clean line spacing",
     "visualHierarchy": "art-dominant (pond map) / text-dominant (cards)",
     "whiteSpaceRatio": 0.25,
     "flowDirection": "pond map: left-right path; cards: top-down checklist"
@@ -71,31 +82,56 @@
     "subject": "multidisciplinary",
     "domain": "early-childhood",
     "topics": [
-      {"id": "ela.letter-recognition", "kind": "procedural", "mapped": false},
-      {"id": "math.counting-objects", "kind": "procedural", "mapped": false},
-      {"id": "personal-social.sharing-cooperation", "kind": "conceptual", "mapped": false}
+      {
+        "id": "ela.letter-recognition",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "math.counting-objects",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "personal-social.sharing-cooperation",
+        "kind": "conceptual",
+        "mapped": false
+      }
     ],
-    "unmappedSkills": ["progress-tracking", "whole-child-assessment", "visual-journey-mapping"]
+    "unmappedSkills": [
+      "progress-tracking",
+      "whole-child-assessment",
+      "visual-journey-mapping"
+    ]
   },
   "difficulty": {
-    "ageBandMonths": [36, 60],
-    "complexity": "N/A — this is a tracking/assessment tool, not instruction",
+    "ageBandMonths": [
+      36,
+      60
+    ],
+    "complexity": "N/A \u2014 this is a tracking/assessment tool, not instruction",
     "prerequisites": [],
     "scaffolding": "N/A"
   },
   "theming": {
     "themeType": "nature-habitat",
-    "characters": ["pond animals: frog, snail, turtle, otter, salamander, duck"],
+    "characters": [
+      "pond animals: frog, snail, turtle, otter, salamander, duck"
+    ],
     "visualStyle": "watercolor naturalist",
     "colorPalette": "soft pastels + nature greens/blues/tans",
-    "appealDrivers": ["keepsake quality", "nature theme", "gamified alphabet path"]
+    "appealDrivers": [
+      "keepsake quality",
+      "nature theme",
+      "gamified alphabet path"
+    ]
   },
   "printFormat": {
     "pageSize": "letter",
     "orientation": "landscape (pond map), portrait (cards)",
     "margins": "standard",
     "inkDensity": "medium-heavy (watercolor backgrounds)",
-    "colorRequirement": "needs color — the art is the point"
+    "colorRequirement": "needs color \u2014 the art is the point"
   },
   "recipeMatch": {
     "matchedRecipes": [],
@@ -106,9 +142,18 @@
       },
       {
         "name": "developmental-progress-card",
-        "description": "A periodic assessment card tracking 10-15 whole-child skills (academic + social-emotional + executive function). Same skills assessed repeatedly across the year to show growth. ✓/X evaluation with Completed column. Designed to be filled out at the end of each unit or month."
+        "description": "A periodic assessment card tracking 10-15 whole-child skills (academic + social-emotional + executive function). Same skills assessed repeatedly across the year to show growth. \u2713/X evaluation with Completed column. Designed to be filled out at the end of each unit or month."
       }
     ]
   },
-  "notes": "Third Aless drop. This is a TRACKING and ASSESSMENT system, not instruction. It's the record-keeping layer that sits alongside the workbooks. The Pond Map is particularly interesting for Homa — it's a visual progress tracker that gamifies alphabet learning. The progress cards assess whole-child development (academic + social-emotional + executive function) longitudinally. Combined with Carolyng's earlier directive about uploading completed worksheets to build the learner profile, this suggests BOTH parents value tracking progress over time. Homa could generate both the learning materials AND the progress tracking tools."
+  "notes": "Third Aless drop. This is a TRACKING and ASSESSMENT system, not instruction. It's the record-keeping layer that sits alongside the workbooks. The Pond Map is particularly interesting for Homa \u2014 it's a visual progress tracker that gamifies alphabet learning. The progress cards assess whole-child development (academic + social-emotional + executive function) longitudinally. Combined with Carolyng's earlier directive about uploading completed worksheets to build the learner profile, this suggests BOTH parents value tracking progress over time. Homa could generate both the learning materials AND the progress tracking tools.",
+  "sourceFiles": [
+    {
+      "filename": "Preschool%20with%20Habitat%20Schoolhouse%20-%20Record%20Keeping%20Set.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-habitat-schoolhouse-record-keeping/Preschool%20with%20Habitat%20Schoolhouse%20-%20Record%20Keeping%20Set.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

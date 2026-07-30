@@ -5,7 +5,7 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784426528.056819",
   "format": "comprehensive-arts-curriculum",
-  "title": "Start with the Arts — Kennedy Center/VSA Arts Inclusive Early Childhood Curriculum",
+  "title": "Start with the Arts \u2014 Kennedy Center/VSA Arts Inclusive Early Childhood Curriculum",
   "publisher": "John F. Kennedy Center for the Performing Arts / VSA arts",
   "series": "Start with the Arts",
   "gradeLevel": "Early childhood (PreK-K, ages 3-6)",
@@ -13,22 +13,62 @@
   "pageCount": 552,
   "callouts": [],
   "overview": {
-    "description": "A 552-page comprehensive arts-inclusive curriculum designed to combine literacy, family involvement, and inclusive strategies for teaching arts to young children — ESPECIALLY children with disabilities. Four thematic units, each containing lessons in four art forms (Visual Arts, Drama, Dance & Movement, Music). Built on Universal Design for Learning (UDL) principles. Every lesson includes disability-specific adaptations.",
+    "description": "A 552-page comprehensive arts-inclusive curriculum designed to combine literacy, family involvement, and inclusive strategies for teaching arts to young children \u2014 ESPECIALLY children with disabilities. Four thematic units, each containing lessons in four art forms (Visual Arts, Drama, Dance & Movement, Music). Built on Universal Design for Learning (UDL) principles. Every lesson includes disability-specific adaptations.",
     "units": [
-      {"name": "All About Me", "pages": "59-190", "lessons": 18},
-      {"name": "How I Go From Here to There", "pages": "191-280"},
-      {"name": "Feeling Hot, Cold and Wet", "pages": "281-358"},
-      {"name": "The World Around Me", "pages": "359-438"}
+      {
+        "name": "All About Me",
+        "pages": "59-190",
+        "lessons": 18
+      },
+      {
+        "name": "How I Go From Here to There",
+        "pages": "191-280"
+      },
+      {
+        "name": "Feeling Hot, Cold and Wet",
+        "pages": "281-358"
+      },
+      {
+        "name": "The World Around Me",
+        "pages": "359-438"
+      }
     ],
-    "artForms": ["Visual Arts", "Drama", "Dance and Movement", "Music"],
-    "philosophy": "Universal Design for Learning (UDL) — every lesson designed for ALL children including those with cognitive, behavioral, emotional, physical, sensory, and speech disabilities"
+    "artForms": [
+      "Visual Arts",
+      "Drama",
+      "Dance and Movement",
+      "Music"
+    ],
+    "philosophy": "Universal Design for Learning (UDL) \u2014 every lesson designed for ALL children including those with cognitive, behavioral, emotional, physical, sensory, and speech disabilities"
   },
   "unitStructure": {
     "allAboutMeLessons": {
-      "visualArts": ["My Portrait (life-size self-portrait)", "Printing Patterns (stamping techniques)", "Getting to Know Me", "An Appreciation (clay medals)"],
-      "drama": ["Puppet Families", "My Feelings", "Friends are Special", "When I Grow Up"],
-      "danceMovement": ["My Body is Me", "Breathing and Balloons", "Being Moved by Feelings", "My Pet Friends", "Now We are Cooking"],
-      "music": ["Name Song", "Moods and Feelings", "Music from Many Places", "Playing Our Own Instruments", "Yummy in My Tummy"]
+      "visualArts": [
+        "My Portrait (life-size self-portrait)",
+        "Printing Patterns (stamping techniques)",
+        "Getting to Know Me",
+        "An Appreciation (clay medals)"
+      ],
+      "drama": [
+        "Puppet Families",
+        "My Feelings",
+        "Friends are Special",
+        "When I Grow Up"
+      ],
+      "danceMovement": [
+        "My Body is Me",
+        "Breathing and Balloons",
+        "Being Moved by Feelings",
+        "My Pet Friends",
+        "Now We are Cooking"
+      ],
+      "music": [
+        "Name Song",
+        "Moods and Feelings",
+        "Music from Many Places",
+        "Playing Our Own Instruments",
+        "Yummy in My Tummy"
+      ]
     }
   },
   "lessonStructure": {
@@ -38,7 +78,7 @@
       "Vocabulary (key terms defined)",
       "Getting Ready (setup instructions)",
       "Introducing the lesson (warm-up, read-aloud connection)",
-      "Creating (hands-on activity — the core art experience)",
+      "Creating (hands-on activity \u2014 the core art experience)",
       "Talking About Art (reflection/discussion prompts)",
       "Extending the Experience (follow-up activities)",
       "Disability-specific adaptations (cognitive, behavioral, physical, sensory, speech)"
@@ -54,7 +94,7 @@
       "value": "A parent of a child with special needs doesn't have to figure out adaptations themselves. The curriculum does the thinking."
     },
     "artsAsLearningVehicle": {
-      "description": "Arts aren't taught as a separate subject — they're the VEHICLE for teaching literacy, self-expression, social skills, cognitive development, and motor skills. Research chart shows: music training → cognitive development, drama → story comprehension, dance → spatial reasoning, visual arts → reading readiness.",
+      "description": "Arts aren't taught as a separate subject \u2014 they're the VEHICLE for teaching literacy, self-expression, social skills, cognitive development, and motor skills. Research chart shows: music training \u2192 cognitive development, drama \u2192 story comprehension, dance \u2192 spatial reasoning, visual arts \u2192 reading readiness.",
       "value": "The arts are the curriculum, not a reward or add-on. This aligns with Charlotte Mason's emphasis on living education."
     },
     "familyLettersAndArtsBoxes": {
@@ -66,29 +106,64 @@
       "value": "Literature-based instruction. Every art lesson connects to a story."
     },
     "talkingAboutArt": {
-      "description": "Every lesson ends with a 'Talking About Art' section — specific prompts to help children reflect on and articulate their creative experience. Example: 'Tell us about your medal. Who is it for and why? How did you create a pattern? What is the texture?'",
-      "value": "Metacognition + vocabulary building. The child doesn't just create — they reflect and communicate."
+      "description": "Every lesson ends with a 'Talking About Art' section \u2014 specific prompts to help children reflect on and articulate their creative experience. Example: 'Tell us about your medal. Who is it for and why? How did you create a pattern? What is the texture?'",
+      "value": "Metacognition + vocabulary building. The child doesn't just create \u2014 they reflect and communicate."
     }
   },
   "overallSkillTargeting": {
     "subject": "multidisciplinary",
     "domain": "arts-integrated-early-childhood",
     "topics": [
-      {"id": "art.visual-arts-self-portrait", "kind": "procedural", "mapped": false},
-      {"id": "art.printmaking-patterns", "kind": "procedural", "mapped": false},
-      {"id": "art.drama-puppetry", "kind": "procedural", "mapped": false},
-      {"id": "art.creative-movement", "kind": "procedural", "mapped": false},
-      {"id": "music.rhythm-instruments", "kind": "procedural", "mapped": false},
-      {"id": "ela.vocabulary-development", "kind": "conceptual", "mapped": false},
-      {"id": "personal-social.self-expression", "kind": "conceptual", "mapped": false}
+      {
+        "id": "art.visual-arts-self-portrait",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "art.printmaking-patterns",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "art.drama-puppetry",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "art.creative-movement",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "music.rhythm-instruments",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.vocabulary-development",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "personal-social.self-expression",
+        "kind": "conceptual",
+        "mapped": false
+      }
     ],
-    "unmappedSkills": ["inclusive-arts-education", "udl-adapted-lessons", "multi-sensory-art-making"]
+    "unmappedSkills": [
+      "inclusive-arts-education",
+      "udl-adapted-lessons",
+      "multi-sensory-art-making"
+    ]
   },
   "difficulty": {
-    "ageBandMonths": [36, 72],
-    "complexity": "varied — from simple sensory exploration to multi-step art projects",
+    "ageBandMonths": [
+      36,
+      72
+    ],
+    "complexity": "varied \u2014 from simple sensory exploration to multi-step art projects",
     "prerequisites": [],
-    "scaffolding": "very high — scripted instruction, disability adaptations, multiple entry points"
+    "scaffolding": "very high \u2014 scripted instruction, disability adaptations, multiple entry points"
   },
   "recipeMatch": {
     "matchedRecipes": [],
@@ -99,9 +174,18 @@
       },
       {
         "name": "inclusive-lesson-adaptations",
-        "description": "A companion layer for any lesson that provides specific adaptations for different disability types (cognitive, behavioral, physical, visual, hearing, speech). Not generic 'differentiation' — specific, practical modifications per disability category."
+        "description": "A companion layer for any lesson that provides specific adaptations for different disability types (cognitive, behavioral, physical, visual, hearing, speech). Not generic 'differentiation' \u2014 specific, practical modifications per disability category."
       }
     ]
   },
-  "notes": "Sixth Aless drop. This is by far the largest and most comprehensive document dropped by either user — 552 pages. It's from the Kennedy Center (a nationally recognized institution) and specifically designed for INCLUSIVE education — children with and without disabilities learning together. This signals that inclusivity is important to Aless. The UDL framework and disability-specific adaptations are a major product signal: Homa should generate materials that work for ALL children, including those with cognitive, physical, or sensory disabilities. The arts-as-vehicle approach (not arts as add-on) aligns with both users' Charlotte Mason leanings. Also: free to reproduce for educational purposes."
+  "notes": "Sixth Aless drop. This is by far the largest and most comprehensive document dropped by either user \u2014 552 pages. It's from the Kennedy Center (a nationally recognized institution) and specifically designed for INCLUSIVE education \u2014 children with and without disabilities learning together. This signals that inclusivity is important to Aless. The UDL framework and disability-specific adaptations are a major product signal: Homa should generate materials that work for ALL children, including those with cognitive, physical, or sensory disabilities. The arts-as-vehicle approach (not arts as add-on) aligns with both users' Charlotte Mason leanings. Also: free to reproduce for educational purposes.",
+  "sourceFiles": [
+    {
+      "filename": "accessible-kc-swta-book_rvsd-6_12.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-kennedy-center-start-with-the-arts/accessible-kc-swta-book_rvsd-6_12.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

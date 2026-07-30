@@ -5,68 +5,150 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784404077.357359",
   "format": "assessment-selection",
-  "title": "Harcourt Trophies Grade 2-1 End-of-Selection Tests — Vocab, Comprehension & Writing",
+  "title": "Harcourt Trophies Grade 2-1 End-of-Selection Tests \u2014 Vocab, Comprehension & Writing",
   "publisher": "Harcourt",
   "series": "Trophies",
   "gradeLevel": "2nd grade, first half (2-1)",
   "relatedRef": "ref-2026-07-18-harcourt-trophies-2nd-practice-book",
-  "callouts": ["assessments broken up into vocab, comprehension and writing sections"],
+  "callouts": [
+    "assessments broken up into vocab, comprehension and writing sections"
+  ],
   "assessments": [
     {
       "story": "Days With Frog and Toad",
-      "pages": ["A13", "A14", "A15", "A16"],
+      "pages": [
+        "A13",
+        "A14",
+        "A15",
+        "A16"
+      ],
       "sections": {
         "vocabulary": {
-          "pages": ["A13"],
+          "pages": [
+            "A13"
+          ],
           "format": "multiple-choice + cloze",
           "itemCount": 6,
-          "structure": "Sentence with blank → pick from 4 options (A/B/C/D). Items 1-6 are multiple choice, items 19-20 are written response.",
-          "skillsTested": ["word meaning in context", "vocabulary application"],
-          "vocabularyWords": ["alone", "cheer", "fine", "meadow", "reason", "spoiled"]
+          "structure": "Sentence with blank \u2192 pick from 4 options (A/B/C/D). Items 1-6 are multiple choice, items 19-20 are written response.",
+          "skillsTested": [
+            "word meaning in context",
+            "vocabulary application"
+          ],
+          "vocabularyWords": [
+            "alone",
+            "cheer",
+            "fine",
+            "meadow",
+            "reason",
+            "spoiled"
+          ]
         },
         "comprehension": {
-          "pages": ["A14", "A15", "A16"],
+          "pages": [
+            "A14",
+            "A15",
+            "A16"
+          ],
           "format": "multiple-choice + short-answer",
           "itemCount": 14,
           "structure": "Questions 7-18 are multiple choice (4 options). Questions 19-20 are open-response (write the answer on lines).",
-          "questionTypes": ["main idea", "setting", "character feelings", "plot sequence", "cause/effect", "inference", "figurative language"],
-          "skillsTested": ["literal comprehension", "inferential comprehension", "character analysis", "figurative language interpretation"]
+          "questionTypes": [
+            "main idea",
+            "setting",
+            "character feelings",
+            "plot sequence",
+            "cause/effect",
+            "inference",
+            "figurative language"
+          ],
+          "skillsTested": [
+            "literal comprehension",
+            "inferential comprehension",
+            "character analysis",
+            "figurative language interpretation"
+          ]
         },
         "writing": {
-          "pages": ["A16"],
+          "pages": [
+            "A16"
+          ],
           "format": "short-answer",
           "itemCount": 2,
           "structure": "Questions 19-20: open-ended prompts with 2-3 lines for response. Requires recall + personal connection.",
-          "skillsTested": ["written expression", "text-based evidence", "personal connection to text"]
+          "skillsTested": [
+            "written expression",
+            "text-based evidence",
+            "personal connection to text"
+          ]
         }
       }
     },
     {
       "story": "Johnny Appleseed",
-      "pages": ["A41", "A42", "A43", "A44"],
+      "pages": [
+        "A41",
+        "A42",
+        "A43",
+        "A44"
+      ],
       "sections": {
         "vocabulary": {
-          "pages": ["A41"],
+          "pages": [
+            "A41"
+          ],
           "format": "multiple-choice + cloze",
           "itemCount": 6,
-          "structure": "Same format as Frog and Toad — sentence context + 4 options",
-          "skillsTested": ["word meaning in context", "vocabulary application"],
-          "vocabularyWords": ["frontier", "orchards", "nearby", "survive", "tame", "wild"]
+          "structure": "Same format as Frog and Toad \u2014 sentence context + 4 options",
+          "skillsTested": [
+            "word meaning in context",
+            "vocabulary application"
+          ],
+          "vocabularyWords": [
+            "frontier",
+            "orchards",
+            "nearby",
+            "survive",
+            "tame",
+            "wild"
+          ]
         },
         "comprehension": {
-          "pages": ["A42", "A43", "A44"],
+          "pages": [
+            "A42",
+            "A43",
+            "A44"
+          ],
           "format": "multiple-choice + short-answer",
           "itemCount": 14,
           "structure": "Questions 7-18 multiple choice. Questions 19-20 open-response.",
-          "questionTypes": ["genre identification", "narrator/character understanding", "factual recall", "sequence", "inference", "figurative language", "compare/contrast"],
-          "skillsTested": ["literal comprehension", "inferential comprehension", "genre awareness", "figurative language interpretation"]
+          "questionTypes": [
+            "genre identification",
+            "narrator/character understanding",
+            "factual recall",
+            "sequence",
+            "inference",
+            "figurative language",
+            "compare/contrast"
+          ],
+          "skillsTested": [
+            "literal comprehension",
+            "inferential comprehension",
+            "genre awareness",
+            "figurative language interpretation"
+          ]
         },
         "writing": {
-          "pages": ["A44"],
+          "pages": [
+            "A44"
+          ],
           "format": "short-answer",
           "itemCount": 2,
           "structure": "Questions 19-20 open-ended with 2-3 lines. Example: 'Name two foods that you can make with apples.'",
-          "skillsTested": ["written expression", "text-based evidence", "creative thinking"]
+          "skillsTested": [
+            "written expression",
+            "text-based evidence",
+            "creative thinking"
+          ]
         }
       }
     }
@@ -74,32 +156,57 @@
   "overallLayout": {
     "structure": "linear-top-to-bottom",
     "spacing": "standard",
-    "visualHierarchy": "text-only — clean section headers (Vocabulary / Comprehension bold), no illustrations",
-    "whiteSpaceRatio": 0.30,
+    "visualHierarchy": "text-only \u2014 clean section headers (Vocabulary / Comprehension bold), no illustrations",
+    "whiteSpaceRatio": 0.3,
     "flowDirection": "top-down"
   },
   "overallSkillTargeting": {
     "subject": "ela",
     "domain": "comprehension-analysis",
     "topics": [
-      {"id": "ela.vocabulary-in-context", "kind": "conceptual", "mapped": false},
-      {"id": "ela.reading-comprehension-fiction", "kind": "conceptual", "mapped": false},
-      {"id": "ela.written-response", "kind": "procedural", "mapped": false}
+      {
+        "id": "ela.vocabulary-in-context",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "ela.reading-comprehension-fiction",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "ela.written-response",
+        "kind": "procedural",
+        "mapped": false
+      }
     ],
-    "unmappedSkills": ["story-based-assessment", "figurative-language-interpretation"]
+    "unmappedSkills": [
+      "story-based-assessment",
+      "figurative-language-interpretation"
+    ]
   },
   "difficulty": {
-    "ageBandMonths": [72, 96],
+    "ageBandMonths": [
+      72,
+      96
+    ],
     "complexity": "multi-skill (3 sections per assessment)",
-    "prerequisites": ["ela.decode-grade-level-text", "ela.basic-reading-comprehension"],
-    "scaffolding": "low (assessment — independent work)"
+    "prerequisites": [
+      "ela.decode-grade-level-text",
+      "ela.basic-reading-comprehension"
+    ],
+    "scaffolding": "low (assessment \u2014 independent work)"
   },
   "theming": {
     "themeType": "neutral",
-    "characters": ["none — text-only assessment format"],
+    "characters": [
+      "none \u2014 text-only assessment format"
+    ],
     "visualStyle": "minimalist",
     "colorPalette": "black-and-white",
-    "appealDrivers": ["clean uncluttered layout keeps focus on comprehension, not decoration"]
+    "appealDrivers": [
+      "clean uncluttered layout keeps focus on comprehension, not decoration"
+    ]
   },
   "printFormat": {
     "pageSize": "letter",
@@ -110,8 +217,12 @@
   },
   "designPatterns": {
     "threePartAssessmentStructure": {
-      "description": "Every end-of-selection test follows the same three-part structure: Vocabulary → Comprehension → Writing. This creates a predictable ritual — kids know what to expect, parents know what each section measures.",
-      "sections": ["Vocabulary (6 items, MC + cloze)", "Comprehension (12 items, MC + inference)", "Writing (2 items, open response)"],
+      "description": "Every end-of-selection test follows the same three-part structure: Vocabulary \u2192 Comprehension \u2192 Writing. This creates a predictable ritual \u2014 kids know what to expect, parents know what each section measures.",
+      "sections": [
+        "Vocabulary (6 items, MC + cloze)",
+        "Comprehension (12 items, MC + inference)",
+        "Writing (2 items, open response)"
+      ],
       "consistency": "Identical structure across all stories in the book. Same item count, same format, same layout."
     },
     "mixedResponseTypes": {
@@ -136,5 +247,68 @@
       }
     ]
   },
-  "notes": "This is the assessment companion to the practice book pages (ref-2026-07-18-harcourt-trophies-2nd-practice-book). Carolyng specifically called out the three-section structure (vocab, comprehension, writing). The pages shown are from the Appendix section (A13-A44), covering two different stories. The consistent structure across stories is a key design pattern — it means the child learns the test format once and can focus on content rather than figuring out what to do."
+  "notes": "This is the assessment companion to the practice book pages (ref-2026-07-18-harcourt-trophies-2nd-practice-book). Carolyng specifically called out the three-section structure (vocab, comprehension, writing). The pages shown are from the Appendix section (A13-A44), covering two different stories. The consistent structure across stories is a key design pattern \u2014 it means the child learns the test format once and can focus on content rather than figuring out what to do.",
+  "sourceFiles": [
+    {
+      "filename": "1000197356.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-assessments/1000197356.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197357.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-assessments/1000197357.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197358.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-assessments/1000197358.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197359.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-assessments/1000197359.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197360.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-assessments/1000197360.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197361.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-assessments/1000197361.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197362.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-assessments/1000197362.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197363.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-assessments/1000197363.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197364.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-assessments/1000197364.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197365.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-assessments/1000197365.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

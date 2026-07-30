@@ -5,7 +5,7 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784414130.633249",
   "format": "math-practice-workbook",
-  "title": "Get Ahead in Math (Level C) — Addition & Subtraction of Decimals",
+  "title": "Get Ahead in Math (Level C) \u2014 Addition & Subtraction of Decimals",
   "publisher": "Continental Press",
   "series": "Get Ahead in Math",
   "level": "C",
@@ -18,16 +18,16 @@
   "pagesShown": [
     {
       "page": 43,
-      "title": "Addition and Subtraction of Decimals — Learn + Practice",
+      "title": "Addition and Subtraction of Decimals \u2014 Learn + Practice",
       "type": "self-contained-lesson-worksheet",
       "sections": {
         "topicHeader": "TOPIC: ADDITION AND SUBTRACTION OF DECIMALS",
         "miniLesson": {
-          "description": "Boxed section at top-left. Shows the algorithm step-by-step: '17 + 8.53 = □. To add or subtract decimals and whole numbers, rewrite the whole number in decimal form. 17 = 17.00. Then write the problem vertically and line up the decimal points. Add or subtract from right to left.' With a worked example showing 17.00 + 8.53 = 25.53.",
-          "value": "The child doesn't need a teacher to explain the concept — the mini lesson IS the teacher. Self-contained instruction."
+          "description": "Boxed section at top-left. Shows the algorithm step-by-step: '17 + 8.53 = \u25a1. To add or subtract decimals and whole numbers, rewrite the whole number in decimal form. 17 = 17.00. Then write the problem vertically and line up the decimal points. Add or subtract from right to left.' With a worked example showing 17.00 + 8.53 = 25.53.",
+          "value": "The child doesn't need a teacher to explain the concept \u2014 the mini lesson IS the teacher. Self-contained instruction."
         },
         "sample": {
-          "description": "Boxed section at top-right. A fully worked sample problem with answer: '12 - 4.47 = □ = 7.53' with multiple-choice showing the MISSING STEP (which operation was used). Answer box shows the correct bubble filled in.",
+          "description": "Boxed section at top-right. A fully worked sample problem with answer: '12 - 4.47 = \u25a1 = 7.53' with multiple-choice showing the MISSING STEP (which operation was used). Answer box shows the correct bubble filled in.",
           "value": "Shows not just what the answer is, but HOW to get there. The student can self-check by comparing their process to the sample."
         },
         "vocabulary": {
@@ -36,7 +36,7 @@
         },
         "memoryTrigger": {
           "description": "Bold-labeled row: 'MEMORY TRIGGER: To estimate a sum or difference, first round the numbers. For example, 5.8 is about 6.'",
-          "value": "A one-sentence mnemonic/heuristic the child can remember. Not the full lesson — just the hook that recalls the strategy."
+          "value": "A one-sentence mnemonic/heuristic the child can remember. Not the full lesson \u2014 just the hook that recalls the strategy."
         },
         "practice": {
           "description": "4 word problems (multiple choice, A-D or F-J lettering). Real-world contexts: relay race times, walnut weights, soda bottle volumes, missing-number equations.",
@@ -60,8 +60,8 @@
           "format": "multiple-choice word problems"
         },
         "superStarSpecial": {
-          "description": "Starred challenge section at bottom: 'Find the rule for this pattern. Then find the next two numbers in the sequence: 2.25, 1.75, 1.25, □, □. Explain your answer on another sheet of paper.' This extends beyond calculation into pattern recognition and mathematical explanation.",
-          "value": "Differentiation. Enrichment for kids who finish fast or need more challenge. The 'explain your answer' part requires mathematical reasoning in words — another ELA crossover."
+          "description": "Starred challenge section at bottom: 'Find the rule for this pattern. Then find the next two numbers in the sequence: 2.25, 1.75, 1.25, \u25a1, \u25a1. Explain your answer on another sheet of paper.' This extends beyond calculation into pattern recognition and mathematical explanation.",
+          "value": "Differentiation. Enrichment for kids who finish fast or need more challenge. The 'explain your answer' part requires mathematical reasoning in words \u2014 another ELA crossover."
         },
         "answerBox": {
           "description": "Same bubble grid format.",
@@ -71,10 +71,20 @@
     }
   ],
   "pageArchitecture": {
-    "description": "The two-page spread follows a 6-section architecture that Carolyng explicitly named and endorsed: (1) Mini Lesson → (2) Sample → (3) Vocabulary → (4) Memory Trigger → (5) Practice → (6) Super Star Special (challenge). This is a SELF-CONTAINED lesson: the page teaches the concept, provides vocabulary, gives a memory hook, walks through a sample, provides practice, and offers extension. No teacher guide required.",
-    "sections": ["Mini Lesson", "Sample", "Vocabulary", "Memory Trigger", "Practice", "Test Yourself", "Super Star Special"],
-    "whatToRemove": ["Answer Box (bubble grid)"],
-    "flow": "top-to-bottom: teach → vocab → memorize → practice → assess → extend"
+    "description": "The two-page spread follows a 6-section architecture that Carolyng explicitly named and endorsed: (1) Mini Lesson \u2192 (2) Sample \u2192 (3) Vocabulary \u2192 (4) Memory Trigger \u2192 (5) Practice \u2192 (6) Super Star Special (challenge). This is a SELF-CONTAINED lesson: the page teaches the concept, provides vocabulary, gives a memory hook, walks through a sample, provides practice, and offers extension. No teacher guide required.",
+    "sections": [
+      "Mini Lesson",
+      "Sample",
+      "Vocabulary",
+      "Memory Trigger",
+      "Practice",
+      "Test Yourself",
+      "Super Star Special"
+    ],
+    "whatToRemove": [
+      "Answer Box (bubble grid)"
+    ],
+    "flow": "top-to-bottom: teach \u2192 vocab \u2192 memorize \u2192 practice \u2192 assess \u2192 extend"
   },
   "designPatterns": {
     "selfContainedLesson": {
@@ -82,48 +92,79 @@
       "value": "A parent who doesn't know how to do decimal addition can sit down with the child and BOTH learn from the page. Zero prep time."
     },
     "memoryTrigger": {
-      "description": "A one-sentence mnemonic or heuristic: 'To estimate a sum or difference, first round the numbers. For example, 5.8 is about 6.' Not the full lesson — just the hook that helps recall the strategy later.",
+      "description": "A one-sentence mnemonic or heuristic: 'To estimate a sum or difference, first round the numbers. For example, 5.8 is about 6.' Not the full lesson \u2014 just the hook that helps recall the strategy later.",
       "value": "Retention tool. When the child sees a decimal problem next week, the memory trigger fires: 'round first, then add.' This is spaced-repetition-compatible."
     },
     "superStarSpecial": {
-      "description": "A challenge problem that extends beyond the topic into pattern recognition, mathematical reasoning, or explanation. Always requires 'explain your answer' — the child has to articulate their thinking.",
-      "value": "Built-in differentiation + metacognition. The 'explain' requirement ensures the child isn't just getting the right number — they understand WHY."
+      "description": "A challenge problem that extends beyond the topic into pattern recognition, mathematical reasoning, or explanation. Always requires 'explain your answer' \u2014 the child has to articulate their thinking.",
+      "value": "Built-in differentiation + metacognition. The 'explain' requirement ensures the child isn't just getting the right number \u2014 they understand WHY."
     },
     "realWorldWordProblems": {
       "description": "Every practice problem uses a real-world context: relay races, walnut harvesting, soda bottles, tape purchases. Not abstract arithmetic.",
-      "value": "The child sees math as relevant. The word problems also practice reading comprehension — you have to understand the story to find the math."
+      "value": "The child sees math as relevant. The word problems also practice reading comprehension \u2014 you have to understand the story to find the math."
     }
   },
   "overallLayout": {
-    "structure": "sectioned — clear boxes for Mini Lesson and Sample at top, Vocabulary and Memory Trigger as horizontal bars, Practice problems in a 2-column grid, Answer Box at bottom",
-    "spacing": "standard — clean and efficient but not cramped",
+    "structure": "sectioned \u2014 clear boxes for Mini Lesson and Sample at top, Vocabulary and Memory Trigger as horizontal bars, Practice problems in a 2-column grid, Answer Box at bottom",
+    "spacing": "standard \u2014 clean and efficient but not cramped",
     "visualHierarchy": "section labels in bold caps dominate, content text is regular weight",
-    "whiteSpaceRatio": 0.20,
+    "whiteSpaceRatio": 0.2,
     "flowDirection": "top-down"
   },
   "overallSkillTargeting": {
     "subject": "math",
     "domain": "number-operations",
     "topics": [
-      {"id": "math.decimal-addition", "kind": "procedural", "mapped": false},
-      {"id": "math.decimal-subtraction", "kind": "procedural", "mapped": false},
-      {"id": "math.estimation-rounding", "kind": "procedural", "mapped": false},
-      {"id": "math.number-patterns", "kind": "conceptual", "mapped": false}
+      {
+        "id": "math.decimal-addition",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "math.decimal-subtraction",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "math.estimation-rounding",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "math.number-patterns",
+        "kind": "conceptual",
+        "mapped": false
+      }
     ],
-    "unmappedSkills": ["self-contained-lesson-format", "memory-trigger-mnemonics"]
+    "unmappedSkills": [
+      "self-contained-lesson-format",
+      "memory-trigger-mnemonics"
+    ]
   },
   "difficulty": {
-    "ageBandMonths": [108, 132],
+    "ageBandMonths": [
+      108,
+      132
+    ],
     "complexity": "single-topic, multi-skill (computation + estimation + word problems + pattern recognition)",
-    "prerequisites": ["math.place-value-decimals", "math.addition-subtraction-whole-numbers"],
+    "prerequisites": [
+      "math.place-value-decimals",
+      "math.addition-subtraction-whole-numbers"
+    ],
     "scaffolding": "high (mini lesson + sample + memory trigger before any practice)"
   },
   "theming": {
     "themeType": "neutral",
-    "characters": ["named characters in word problems only (Fidel, Raj, Daria, Keiko, Jim)"],
-    "visualStyle": "minimalist — text-only, no illustrations",
+    "characters": [
+      "named characters in word problems only (Fidel, Raj, Daria, Keiko, Jim)"
+    ],
+    "visualStyle": "minimalist \u2014 text-only, no illustrations",
     "colorPalette": "black-and-white",
-    "appealDrivers": ["clean structure", "self-teaching format", "no visual distractions from math content"]
+    "appealDrivers": [
+      "clean structure",
+      "self-teaching format",
+      "no visual distractions from math content"
+    ]
   },
   "printFormat": {
     "pageSize": "letter",
@@ -137,9 +178,30 @@
     "gaps": [
       {
         "name": "self-teaching-math-worksheet",
-        "description": "A single-page (or two-page) math worksheet that includes ALL of: topic header, mini lesson (worked algorithm), sample problem (worked with explanation), vocabulary row, memory trigger (one-sentence mnemonic), practice problems (word-problem format, multiple choice), and a Super Star Special challenge extension. The page teaches AND assesses — no separate teacher guide needed. Remove bubble answer boxes; use open-response lines instead."
+        "description": "A single-page (or two-page) math worksheet that includes ALL of: topic header, mini lesson (worked algorithm), sample problem (worked with explanation), vocabulary row, memory trigger (one-sentence mnemonic), practice problems (word-problem format, multiple choice), and a Super Star Special challenge extension. The page teaches AND assesses \u2014 no separate teacher guide needed. Remove bubble answer boxes; use open-response lines instead."
       }
     ]
   },
-  "notes": "New source — Continental Press 'Get Ahead in Math' Level C, not Harcourt. Carolyng is now pulling from a SECOND publisher, which means she's comparing approaches. She explicitly named the 6-section architecture (mini lesson, sample, vocab, memory trigger, practice, super star special) as what she likes. She also gave a REMOVAL directive: get rid of the answer box (bubble grid). This is the first time she's told us to SUBTRACT a feature rather than add one. The self-contained-lesson pattern is a new product direction for Homa: materials that don't need a teacher guide because the instruction is ON the page."
+  "notes": "New source \u2014 Continental Press 'Get Ahead in Math' Level C, not Harcourt. Carolyng is now pulling from a SECOND publisher, which means she's comparing approaches. She explicitly named the 6-section architecture (mini lesson, sample, vocab, memory trigger, practice, super star special) as what she likes. She also gave a REMOVAL directive: get rid of the answer box (bubble grid). This is the first time she's told us to SUBTRACT a feature rather than add one. The self-contained-lesson pattern is a new product direction for Homa: materials that don't need a teacher guide because the instruction is ON the page.",
+  "sourceFiles": [
+    {
+      "filename": "1000197515.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-get-ahead-in-math-decimals/1000197515.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197514.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-get-ahead-in-math-decimals/1000197514.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197513.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-get-ahead-in-math-decimals/1000197513.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

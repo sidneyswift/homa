@@ -277,6 +277,9 @@ jobs:
       - name: Eve stream maxDuration guard
         run: VERCEL=1 pnpm check:eve-stream-duration
 
+      - name: Ingestion ledger (every #homa-inspo drop has exactly one record)
+        run: pnpm check:ingestion
+
       - name: Tenancy isolation smoke check (M1-07 seed)
         run: pnpm check:isolation
         env:

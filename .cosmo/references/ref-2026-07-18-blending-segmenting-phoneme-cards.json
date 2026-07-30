@@ -94,5 +94,14 @@
       }
     ]
   },
-  "notes": "Science of Reading aligned. Labeled as 'early reading curriculum' by Aless. The tap-swipe-clip mechanic is specifically designed for phoneme awareness \u2014 making the abstract concept of 'sounds in words' physical. Pairs with Aless's other phonics drops (rhyming, I Spy, beginning sounds, sentence pyramids)."
+  "notes": "Science of Reading aligned. Labeled as 'early reading curriculum' by Aless. The tap-swipe-clip mechanic is specifically designed for phoneme awareness \u2014 making the abstract concept of 'sounds in words' physical. Pairs with Aless's other phonics drops (rhyming, I Spy, beginning sounds, sentence pyramids).",
+  "sourceFiles": [
+    {
+      "filename": "BlendingSegmentingPhonemeCardsReadingDecodableWordsSoR-1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-blending-segmenting-phoneme-cards/BlendingSegmentingPhonemeCardsReadingDecodableWordsSoR-1.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

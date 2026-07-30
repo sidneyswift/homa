@@ -84,5 +84,14 @@
       "urgency": "low"
     }
   ],
-  "notes": "64MB scan. Full textbook version of the Homeschool Languages Spanish Level 1 booklet sample (already ingested). This is the complete textbook with dictionary-margin format. Aless dropped both the sample AND the full textbook \u2014 strong signal that this is a curriculum she's considering."
+  "notes": "64MB scan. Full textbook version of the Homeschool Languages Spanish Level 1 booklet sample (already ingested). This is the complete textbook with dictionary-margin format. Aless dropped both the sample AND the full textbook \u2014 strong signal that this is a curriculum she's considering.",
+  "sourceFiles": [
+    {
+      "filename": "Textbook (11x11 Dictionary Margin) - Spanish Homeschool Languages Level 1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-18-spanish-homeschool-languages-textbook/Textbook%20%2811x11%20Dictionary%20Margin%29%20-%20Spanish%20Homeschool%20Languages%20Level%201.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

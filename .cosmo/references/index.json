@@ -85,6 +85,64 @@
       "ageBand": null
     },
     {
+      "id": "ref-2026-07-16-five-paragraph-essay-outline",
+      "title": "Five Paragraph Essay Outline",
+      "droppedBy": "sid",
+      "droppedAt": "2026-07-16T14:37:55-04:00",
+      "subject": "ela",
+      "domain": "writing-composition",
+      "format": "essay-outline-printable",
+      "about": [
+        "essay writing",
+        "essay planning",
+        "thesis statements",
+        "paragraph structure",
+        "secondary ela printable"
+      ],
+      "entities": [
+        "Christina Schneider"
+      ],
+      "themes": [
+        "writing as a process",
+        "structure taught by filling it in"
+      ],
+      "works": [
+        "Building Strong Writers"
+      ],
+      "ageBand": [
+        132,
+        192
+      ]
+    },
+    {
+      "id": "ref-2026-07-16-pemdas-foldable",
+      "title": "Order of Operations PEMDAS Math Doodles Foldable",
+      "droppedBy": "sid",
+      "droppedAt": "2026-07-16T14:34:09-04:00",
+      "subject": "math",
+      "domain": "multiplication-division",
+      "format": "foldable",
+      "about": [
+        "order of operations",
+        "grouping symbols",
+        "interactive notebook foldable",
+        "grade 5 math"
+      ],
+      "entities": [
+        "Melanie Ellsworth",
+        "Science and Math Doodles"
+      ],
+      "themes": [
+        "learning by making an object",
+        "mnemonics as memory aids"
+      ],
+      "works": [],
+      "ageBand": [
+        120,
+        144
+      ]
+    },
+    {
       "id": "ref-2026-07-17-aal-reading-readiness",
       "title": "Reading Readiness Checklist",
       "droppedBy": "atlas-scrape",
@@ -2241,6 +2299,35 @@
       "ageBand": null
     },
     {
+      "id": "ref-2026-07-18-primary-level-workbook-sample",
+      "title": "Primary Level Workbook Sample (Visual Arts, Forestry, Paleontology)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-18T22:03:39-04:00",
+      "subject": "multi-subject",
+      "domain": "cross-curricular",
+      "format": "unit-study-companion-workbook",
+      "about": [
+        "visual arts",
+        "forestry",
+        "paleontology",
+        "unit study companion workbook"
+      ],
+      "entities": [
+        "Harbor + Sprout",
+        "Henri Matisse"
+      ],
+      "themes": [
+        "learning by making",
+        "outdoor observation",
+        "defining ideas in your own words"
+      ],
+      "works": [],
+      "ageBand": [
+        72,
+        120
+      ]
+    },
+    {
       "id": "ref-2026-07-18-reading-options-achievement",
       "title": "Reading Options for Achievement: Let's Read! (Level C) \u2014 Options Publishing Inc.",
       "droppedBy": "carolyng",
@@ -2577,6 +2664,53 @@
       "ageBand": null
     },
     {
+      "id": "ref-2026-07-19-your-health",
+      "title": "Your Health (Harcourt Brace, 1999)",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-19T16:56:23-04:00",
+      "subject": "science",
+      "domain": "the-human-body",
+      "format": "health-textbook",
+      "about": [
+        "human body systems",
+        "dental health",
+        "nutrition",
+        "personal safety",
+        "germs and illness",
+        "feelings and friendship"
+      ],
+      "entities": [
+        "Food Guide Pyramid",
+        "tobacco",
+        "alcohol",
+        "caffeine",
+        "911",
+        "Stop, Drop, and Roll",
+        "Stranger Danger",
+        "The President's Challenge",
+        "Harcourt Brace & Company",
+        "Molly",
+        "Tanya",
+        "Scott",
+        "Snellen eye chart"
+      ],
+      "themes": [
+        "taking care of your own body",
+        "everyday safety rules",
+        "saying no",
+        "getting along with others",
+        "asking a trusted adult",
+        "keeping a neighborhood clean"
+      ],
+      "works": [
+        "hbschool.com"
+      ],
+      "ageBand": [
+        72,
+        96
+      ]
+    },
+    {
       "id": "ref-2026-07-20-outdoor-toddler-activity-book",
       "title": "The Outdoor Toddler Activity Book: 100+ Fun Early Learning Activities for Outside Play",
       "droppedBy": "aless",
@@ -2619,6 +2753,54 @@
       "ageBand": null
     },
     {
+      "id": "ref-2026-07-21-family-fun-book",
+      "title": "Family FUN Book: More than 400 Amazing, Amusing, and All-Around Awesome Activities for the Entire Family!",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-21T10:58:08-04:00",
+      "subject": "multi-subject",
+      "domain": "daily-living",
+      "format": "family-activity-book",
+      "about": [
+        "family activities",
+        "seasonal traditions",
+        "household crafts",
+        "holiday celebrations",
+        "family cooking"
+      ],
+      "entities": [
+        "Joni Hilton",
+        "Easter Bunny",
+        "Tooth Fairy",
+        "Christmas",
+        "Halloween",
+        "Thanksgiving",
+        "Chanukah",
+        "Kwanzaa",
+        "Latin America",
+        "Africa",
+        "Asia",
+        "Polynesia",
+        "pirate"
+      ],
+      "themes": [
+        "family closeness",
+        "seasonal rhythm",
+        "household materials",
+        "making memories",
+        "everyday science",
+        "secret giving"
+      ],
+      "works": [
+        "Five Minute Miracles: 373 Quick Daily Projects for You and Your Kids to Share",
+        "The Twelve Days of Christmas",
+        "Pin the Tail on the Donkey"
+      ],
+      "ageBand": [
+        24,
+        168
+      ]
+    },
+    {
       "id": "ref-2026-07-21-one-potato-two-potato",
       "title": "One Potato, Two Potato, Three Potato, Four: 165 Chants for Children",
       "droppedBy": "aless",
@@ -2631,6 +2813,84 @@
       "themes": [],
       "works": [],
       "ageBand": null
+    },
+    {
+      "id": "ref-2026-07-22-fast-forward-student-handbook-e",
+      "title": "Metro Reading Fast Forward! Student Handbook, Level E",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-22T21:49:57-04:00",
+      "subject": "ela",
+      "domain": "phonics-word-reading",
+      "format": "student-workbook",
+      "about": [
+        "phonics",
+        "sight vocabulary",
+        "reading comprehension",
+        "reading fluency",
+        "word building",
+        "leveled reading program"
+      ],
+      "entities": [
+        "Patches",
+        "Tasha",
+        "Sara",
+        "Ben",
+        "Nina",
+        "Metropolitan Teaching and Learning Company",
+        "swan"
+      ],
+      "themes": [
+        "everyday neighbourhood life",
+        "learning a skill",
+        "pets and animals"
+      ],
+      "works": [
+        "The Spring Block Party"
+      ],
+      "ageBand": [
+        72,
+        108
+      ]
+    },
+    {
+      "id": "ref-2026-07-22-new-practice-readers-book-b",
+      "title": "New Practice Readers, Third Edition, Book B",
+      "droppedBy": "carolyng",
+      "droppedAt": "2026-07-22T18:32:58-04:00",
+      "subject": "ela",
+      "domain": "reading-comprehension",
+      "format": "graded-reading-practice-book",
+      "about": [
+        "reading comprehension",
+        "reading vocabulary",
+        "animals",
+        "weather",
+        "history of measurement",
+        "jobs and careers",
+        "hobbies and collecting",
+        "graded reading practice series"
+      ],
+      "entities": [
+        "Anderson",
+        "Shinob",
+        "foal"
+      ],
+      "themes": [
+        "how things came to be",
+        "animal survival and adaptation",
+        "standardising measurement",
+        "everyday work and the people who do it"
+      ],
+      "works": [
+        "Why the North Star Stands Still",
+        "Kootenai Why Stories",
+        "When Coyote Walked the Earth",
+        "The Young Folk's Book of Myths"
+      ],
+      "ageBand": [
+        84,
+        132
+      ]
     }
   ]
 }

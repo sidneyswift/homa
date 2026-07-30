@@ -8,13 +8,15 @@
   "sourceFiles": [
     {
       "filename": "social-studies-all-together-pt1.pdf",
-      "localPath": ".cosmo/inspo-files/social-studies-all-together-pt1.pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-social-studies-pt1/social-studies-all-together-pt1.pdf"
+      "localPath": ".cosmo/inspo-files/social-studies-all-together-part1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-social-studies-pt1/social-studies-all-together-pt1.pdf",
+      "redundantSecondCopy": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-social-studies-all-together/social-studies-all-together-part1.pdf"
     },
     {
       "filename": "social-studies-all-together-pt2.pdf",
-      "localPath": ".cosmo/inspo-files/social-studies-all-together-pt2.pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-social-studies-pt2/social-studies-all-together-pt2.pdf"
+      "localPath": ".cosmo/inspo-files/social-studies-all-together-part2.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-social-studies-pt2/social-studies-all-together-pt2.pdf",
+      "redundantSecondCopy": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-social-studies-all-together/social-studies-all-together-part2.pdf"
     }
   ],
   "layer1_philosophy": {
@@ -594,5 +596,473 @@
       "urgency": "resolved"
     }
   ],
-  "notes": "Real page counts, verified directly with pypdf and PyMuPDF rather than assumed from filenames: social-studies-all-together-pt1.pdf is 120 PDF pages, social-studies-all-together-pt2.pdf is 43 PDF pages (163 PDF pages total), both CamScanner-style phone scans of the physical hardcover book with no embedded text layer at all (pypdf's extract_text returned zero characters of real content on every one of the 163 pages, confirming this is a pure image scan; all reading in this analysis was done visually from PyMuPDF-rendered page images, not from extracted text). pt1/pt2 relationship confirmed as a genuine, gapless continuation of the same physical book, not a duplicate or a distinct volume: pt1's final rendered spread (PDF page 120) shows printed pages 214-215 (the end of Unit 5 Lesson 5, 'We Celebrate Holidays,' Martin Luther King Jr. Day and Presidents' Day content), and pt2's first rendered spread (PDF page 1) shows printed page 216 ('Meet Abraham Lincoln,' the very next content), with no missing or repeated printed page numbers at the seam. Front cover (pt1 page 1) reads 'SOCIAL STUDIES, Scott Foresman, All Together' with three puppet characters (a firefighter, a chef, and a third community-helper figure); the title page (pt1 page 2) confirms 'All Together' as this specific volume's own title within the Scott Foresman Social Studies series (program authors including Dr. Candy Dawson Boyd and Dr. Geneva Gay), not a Harcourt-branded book despite two sibling Grade 1 Harcourt volumes (Harcourt Art Everywhere, Harcourt Science) arriving in the same drop wave; the copyright page (pt1 page 3) confirms 'Copyright (c) 2003 by Pearson Education, Inc.,' ISBN 0-328-01759-0. Full table of contents sampled directly (pt1 pages 3-6): 6 units (Unit 1 Time for School; Unit 2 In My Community; Unit 3 Work! Work! Work!; Unit 4 Our Earth, Our Resources; Unit 5 This Is Our Country; Unit 6 Our Country, Our World), Reference Guide (Atlas R2, Geography Terms R10, Picture Glossary R12, Index R24). Grade level is Grade 1, determined from internal content evidence as instructed, not assumed from the drain order or the two sibling Harcourt Grade 1 volumes' own findings: (1) the 'Citizen Heroes: Ruby Bridges Hall' biography states directly 'Ruby was six years old when she began first grade,' presented as a same-age peer figure for the reader; (2) every lesson's reading passage uses very short, simple declarative sentences ('My neighborhood is part of a community. A community is a group of people and the place where they live.'; 'I have jobs at school. My big job is to learn.'), consistent with an early-elementary supported reader, the same reading level the sibling Harcourt Science and Harcourt Art Everywhere Grade 1 volumes show; (3) every lesson's 'What Did You Learn?' box requires full sentence-level comprehension responses (recall questions plus an open Think-and-Share or Write-and-Share question), a demand level well beyond a Kindergarten book; (4) cross-referencing this curriculum's own content against Homa's taxonomy, the closest-matching existing Homa topics cluster tightly at ages 5-7 across every unit (Rules and agreements exist 5-7, Needs & Wants 5-7, Goods & Services 5-7, Buyers & Sellers 5-7, Local weather patterns 5-6), consistent with a 6-7-year-old reader, the same age cluster the sibling volumes' own Grade 1 findings showed. Unlike the Harcourt Art series (where 'Art Everywhere' vs other subtitles distinguishes grade level directly in the cover title), this book's cover reads only 'Social Studies, All Together' with no explicit numeral, so grade level rests entirely on the internal content evidence above, the same situation the sibling Harcourt Science volume was in. Sampling covered the front cover, title page, copyright page, full table of contents, and front-matter Social Studies Handbook (pt1 PDF pages 1-16); Unit 1's full lesson set and Citizen Heroes: Ruby Bridges Hall (pt1 pages 17-40); Unit 2's Vocabulary Preview, Different Kinds of Communities, Chinese New Year DK insert, and End with a Poem (pt1 pages 46-53, 66, 74, 80-81); Unit 3's Welcome to Job Day, Interview with a Farmer, and From Place to Place (pt1 pages 108-109, 116-117, 124-125); Unit 4's Begin with a Song and Our Earth's Resources (pt1 pages 90, 144-145, 156-157); Unit 5's Meet Benjamin Franklin, We Celebrate Holidays, Symbols in Our Country, and Choosing Our Country's Leaders (pt1 pages 110, 115-119); the Unit 5/pt2 seam and Meet Abraham Lincoln (pt2 pages 0-1); Choosing Our Country's Leaders continuation (pt2 page 1); Unit 6's Begin with a Song, Eleanor Roosevelt, How Things Have Changed, and Telephones DK insert (pt2 pages 3-4, 8, 13, 17); Kay's Grandparents Reading Social Studies feature and Meet Mae Jemison (pt2 pages 20, 22); and the back-matter Atlas, Picture Glossary, Index, and Credits (pt2 pages 30, 35, 40, 42). This is representative sampling across the full breadth of both files as instructed, not a page-by-page read of all 163 PDF pages. Copyrighted page images and the publisher's specific passage wording were used only for this session's own analysis and are described here in Homa's own words, never reproduced verbatim into any product file; the new taxonomy topics, the then-and-now-comparison recipe, and the curriculum-writer methodology section describe generic elementary-social-studies concepts and page-layout patterns in Homa's own voice, not a copy of this publisher's specific text, photos, or layout."
+  "notes": "Real page counts, verified directly with pypdf and PyMuPDF rather than assumed from filenames: social-studies-all-together-pt1.pdf is 120 PDF pages, social-studies-all-together-pt2.pdf is 43 PDF pages (163 PDF pages total), both CamScanner-style phone scans of the physical hardcover book with no embedded text layer at all (pypdf's extract_text returned zero characters of real content on every one of the 163 pages, confirming this is a pure image scan; all reading in this analysis was done visually from PyMuPDF-rendered page images, not from extracted text). pt1/pt2 relationship confirmed as a genuine, gapless continuation of the same physical book, not a duplicate or a distinct volume: pt1's final rendered spread (PDF page 120) shows printed pages 214-215 (the end of Unit 5 Lesson 5, 'We Celebrate Holidays,' Martin Luther King Jr. Day and Presidents' Day content), and pt2's first rendered spread (PDF page 1) shows printed page 216 ('Meet Abraham Lincoln,' the very next content), with no missing or repeated printed page numbers at the seam. Front cover (pt1 page 1) reads 'SOCIAL STUDIES, Scott Foresman, All Together' with three puppet characters (a firefighter, a chef, and a third community-helper figure); the title page (pt1 page 2) confirms 'All Together' as this specific volume's own title within the Scott Foresman Social Studies series (program authors including Dr. Candy Dawson Boyd and Dr. Geneva Gay), not a Harcourt-branded book despite two sibling Grade 1 Harcourt volumes (Harcourt Art Everywhere, Harcourt Science) arriving in the same drop wave; the copyright page (pt1 page 3) confirms 'Copyright (c) 2003 by Pearson Education, Inc.,' ISBN 0-328-01759-0. Full table of contents sampled directly (pt1 pages 3-6): 6 units (Unit 1 Time for School; Unit 2 In My Community; Unit 3 Work! Work! Work!; Unit 4 Our Earth, Our Resources; Unit 5 This Is Our Country; Unit 6 Our Country, Our World), Reference Guide (Atlas R2, Geography Terms R10, Picture Glossary R12, Index R24). Grade level is Grade 1, determined from internal content evidence as instructed, not assumed from the drain order or the two sibling Harcourt Grade 1 volumes' own findings: (1) the 'Citizen Heroes: Ruby Bridges Hall' biography states directly 'Ruby was six years old when she began first grade,' presented as a same-age peer figure for the reader; (2) every lesson's reading passage uses very short, simple declarative sentences ('My neighborhood is part of a community. A community is a group of people and the place where they live.'; 'I have jobs at school. My big job is to learn.'), consistent with an early-elementary supported reader, the same reading level the sibling Harcourt Science and Harcourt Art Everywhere Grade 1 volumes show; (3) every lesson's 'What Did You Learn?' box requires full sentence-level comprehension responses (recall questions plus an open Think-and-Share or Write-and-Share question), a demand level well beyond a Kindergarten book; (4) cross-referencing this curriculum's own content against Homa's taxonomy, the closest-matching existing Homa topics cluster tightly at ages 5-7 across every unit (Rules and agreements exist 5-7, Needs & Wants 5-7, Goods & Services 5-7, Buyers & Sellers 5-7, Local weather patterns 5-6), consistent with a 6-7-year-old reader, the same age cluster the sibling volumes' own Grade 1 findings showed. Unlike the Harcourt Art series (where 'Art Everywhere' vs other subtitles distinguishes grade level directly in the cover title), this book's cover reads only 'Social Studies, All Together' with no explicit numeral, so grade level rests entirely on the internal content evidence above, the same situation the sibling Harcourt Science volume was in. Sampling covered the front cover, title page, copyright page, full table of contents, and front-matter Social Studies Handbook (pt1 PDF pages 1-16); Unit 1's full lesson set and Citizen Heroes: Ruby Bridges Hall (pt1 pages 17-40); Unit 2's Vocabulary Preview, Different Kinds of Communities, Chinese New Year DK insert, and End with a Poem (pt1 pages 46-53, 66, 74, 80-81); Unit 3's Welcome to Job Day, Interview with a Farmer, and From Place to Place (pt1 pages 108-109, 116-117, 124-125); Unit 4's Begin with a Song and Our Earth's Resources (pt1 pages 90, 144-145, 156-157); Unit 5's Meet Benjamin Franklin, We Celebrate Holidays, Symbols in Our Country, and Choosing Our Country's Leaders (pt1 pages 110, 115-119); the Unit 5/pt2 seam and Meet Abraham Lincoln (pt2 pages 0-1); Choosing Our Country's Leaders continuation (pt2 page 1); Unit 6's Begin with a Song, Eleanor Roosevelt, How Things Have Changed, and Telephones DK insert (pt2 pages 3-4, 8, 13, 17); Kay's Grandparents Reading Social Studies feature and Meet Mae Jemison (pt2 pages 20, 22); and the back-matter Atlas, Picture Glossary, Index, and Credits (pt2 pages 30, 35, 40, 42). This is representative sampling across the full breadth of both files as instructed, not a page-by-page read of all 163 PDF pages. Copyrighted page images and the publisher's specific passage wording were used only for this session's own analysis and are described here in Homa's own words, never reproduced verbatim into any product file; the new taxonomy topics, the then-and-now-comparison recipe, and the curriculum-writer methodology section describe generic elementary-social-studies concepts and page-layout patterns in Homa's own voice, not a copy of this publisher's specific text, photos, or layout.",
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/ref-2026-07-19-social-studies-all-together.txt",
+    "textBlobUrl": null,
+    "notes": "Every span below was checked against the sidecar before it was written, whitespace-normalized. Two shapes of judgment drove the roles. First, this book is genuinely ABOUT its content in a way a phonics workbook is not: it does not teach reading through communities, it teaches communities, so 'about' and 'teaches' are both common here and that is correct rather than generous. Second, the six narrator children (Andrew, Kim, Ben, Debby, James, Kay) are the exact Fast Forward Ben-and-Nina case: one opens each unit, speaks in first person throughout it, and appears in every photograph, and the book is still not about them. They are cast. The entity list is long because the roster is long: the book runs 12 Meet-the-People biography spreads and 6 Citizen Heroes features, and 'which ingested material covers Sacagawea for a six-year-old' is exactly the question dimension F exists to answer, so cutting the roster to look tidy would have thrown away the answer. Nothing here is padding; every claim would be a good search hit for the parent who asked. The one decoration entity is the giveaway that the roles are doing work: an old Dick and Jane reader sits in a photograph of 1930s school supplies on the Then and Now spread, perfectly quotable and completely wrong to tag, because 'Dick and Jane books' must never return a social studies textbook. Seven subjects rather than the contract's five, one per unit plus the series identity: a six-unit survey textbook has six subjects and collapsing them would make the corpus lie about what it has. The cover subject's span was re-anchored on 2026-07-29 after the rotation pass reordered the cover text. 1 referenced work (Twinkle, Twinkle, Little Star) was DROPPED, not reworded: the corrected text does not contain it anywhere, so whatever supported it was an artefact of a mis-rotated page. A claim that loses its evidence loses its place.",
+    "subjects": [
+      {
+        "name": "communities",
+        "role": "teaches",
+        "quote": "Different Kinds of Communities",
+        "note": "Units 1 and 2. Home, school, neighborhood, then city, town, and farm communities, then state, country, continent, world."
+      },
+      {
+        "name": "maps and globes",
+        "role": "teaches",
+        "quote": "Map and Globe Skills",
+        "note": "The front-matter Building Geography Skills handbook, five named map lessons across the units, and an eight-page Atlas."
+      },
+      {
+        "name": "american history",
+        "role": "about",
+        "quote": "to learn more about American history.",
+        "note": "Unit 5 end to end: Native Americans, Columbus, the Pilgrims, the 13 colonies, the Declaration of Independence, national symbols, and the holiday calendar."
+      },
+      {
+        "name": "jobs and money",
+        "role": "teaches",
+        "quote": "There are many kinds of jobs.",
+        "note": "Unit 3: jobs at home and school, needs and wants, spending and saving, goods and services, volunteers, farm to factory to store, and transportation."
+      },
+      {
+        "name": "natural resources",
+        "role": "teaches",
+        "quote": "A natural resource is a useful thing",
+        "note": "Unit 4: weather, land and water, resources, and reduce, reuse, recycle."
+      },
+      {
+        "name": "citizenship",
+        "role": "teaches",
+        "quote": "Building Citizenship Skills",
+        "note": "The front-matter Building Citizenship Skills spread names six traits (respect, caring, responsibility, fairness, honesty, courage) and the six Citizen Heroes features each carry that same trait strip down the margin."
+      },
+      {
+        "name": "elementary social studies textbook",
+        "role": "identity",
+        "quote": "SOCIAL STUDIES SCOTT FORESMAN ALL TOGETHER",
+        "note": "Cover, read by the vision pass. 'All Together' is this volume's own title inside the Scott Foresman Social Studies series."
+      }
+    ],
+    "entities": [
+      {
+        "name": "Ruby Bridges Hall",
+        "kind": "person",
+        "role": "about",
+        "quote": "Ruby was six years old when she began"
+      },
+      {
+        "name": "Mary McLeod Bethune",
+        "kind": "person",
+        "role": "about",
+        "quote": "When Mary McLeod Bethune"
+      },
+      {
+        "name": "Carl Stotz",
+        "kind": "person",
+        "role": "about",
+        "quote": "Later, Carl Stotz made a baseball"
+      },
+      {
+        "name": "Jane Addams",
+        "kind": "person",
+        "role": "about",
+        "quote": "Jane Addams was a famous"
+      },
+      {
+        "name": "Sam Houston",
+        "kind": "person",
+        "role": "about",
+        "quote": "Sam Houston helped Texas become a"
+      },
+      {
+        "name": "Clara Barton",
+        "kind": "person",
+        "role": "about",
+        "quote": "Clara Barton worked hard to help"
+      },
+      {
+        "name": "George Washington Carver",
+        "kind": "person",
+        "role": "about",
+        "quote": "George Washington Carver taught"
+      },
+      {
+        "name": "Elvia Niebla",
+        "kind": "person",
+        "role": "about",
+        "quote": "Elvia Niebla has helped write rules"
+      },
+      {
+        "name": "Sacagawea",
+        "kind": "person",
+        "role": "about",
+        "quote": "Sacagawea helped Lewis and Clark"
+      },
+      {
+        "name": "Benjamin Franklin",
+        "kind": "person",
+        "role": "about",
+        "quote": "Benjamin Franklin also wrote"
+      },
+      {
+        "name": "Abraham Lincoln",
+        "kind": "person",
+        "role": "about",
+        "quote": "Abraham Lincoln was known"
+      },
+      {
+        "name": "Eleanor Roosevelt",
+        "kind": "person",
+        "role": "about",
+        "quote": "Eleanor Roosevelt saw that there were"
+      },
+      {
+        "name": "Joseph Bruchac",
+        "kind": "person",
+        "role": "about",
+        "quote": "Joseph Bruchac respects Native"
+      },
+      {
+        "name": "Mae Jemison",
+        "kind": "person",
+        "role": "about",
+        "quote": "Mae Jemison was the first"
+      },
+      {
+        "name": "Laurence Yep",
+        "kind": "person",
+        "role": "about",
+        "quote": "Laurence Yep started writing"
+      },
+      {
+        "name": "Christopher Columbus",
+        "kind": "person",
+        "role": "about",
+        "quote": "Columbus did not find gold."
+      },
+      {
+        "name": "George Washington",
+        "kind": "person",
+        "role": "about",
+        "quote": "General George Washington and his"
+      },
+      {
+        "name": "Martin Luther King, Jr.",
+        "kind": "person",
+        "role": "about",
+        "quote": "Martin Luther King, Jr. Day is in"
+      },
+      {
+        "name": "Thomas Edison",
+        "kind": "person",
+        "role": "about",
+        "quote": "Thomas Edison made"
+      },
+      {
+        "name": "Alexander Graham Bell",
+        "kind": "person",
+        "role": "about",
+        "quote": "Alexander Graham Bell"
+      },
+      {
+        "name": "Johannes Gutenberg",
+        "kind": "person",
+        "role": "about",
+        "quote": "Johannes Gutenberg was the inventor of"
+      },
+      {
+        "name": "Johnny Appleseed",
+        "kind": "character",
+        "role": "about",
+        "quote": "the legend of Johnny Appleseed",
+        "note": "Kind is character, not person: the book presents John Chapman through the legend that grew around him and closes Unit 4 with it as a told tale."
+      },
+      {
+        "name": "Native Americans",
+        "kind": "organization",
+        "role": "about",
+        "quote": "The first people to live in North America were Native Americans.",
+        "note": "Kind is organization because the schema has no kind for a people or a nation, and organization is the least wrong of the seven. The book names the Cherokee, Shoshone, Wampanoag, Taino, Ioway, Pueblo, Lakota, Hopi, Abenaki, and Cheyenne, and returns to Native American life in four separate features."
+      },
+      {
+        "name": "Pilgrims",
+        "kind": "organization",
+        "role": "about",
+        "quote": "a group of people we call Pilgrims left England",
+        "note": "Same kind caveat as Native Americans."
+      },
+      {
+        "name": "Mayflower",
+        "kind": "object",
+        "role": "about",
+        "quote": "They sailed on a ship called the Mayflower."
+      },
+      {
+        "name": "Liberty Bell",
+        "kind": "object",
+        "role": "about",
+        "quote": "Diagram of the Liberty Bell"
+      },
+      {
+        "name": "Statue of Liberty",
+        "kind": "object",
+        "role": "about",
+        "quote": "the Statue of Liberty"
+      },
+      {
+        "name": "Independence Day",
+        "kind": "event",
+        "role": "about",
+        "quote": "We have a picnic on Independence Day."
+      },
+      {
+        "name": "Thanksgiving",
+        "kind": "event",
+        "role": "about",
+        "quote": "We call the day Thanksgiving."
+      },
+      {
+        "name": "American Red Cross",
+        "kind": "organization",
+        "role": "about",
+        "quote": "She started the American Red Cross."
+      },
+      {
+        "name": "Tree Musketeers",
+        "kind": "organization",
+        "role": "about",
+        "quote": "Tara helped start a group called Tree",
+        "note": "A real children's tree-planting group, one of the six Citizen Heroes features and one of the few that is about kids rather than adults."
+      },
+      {
+        "name": "Washington, D.C.",
+        "kind": "place",
+        "role": "about",
+        "quote": "Washington, D.C., is"
+      },
+      {
+        "name": "Scott Foresman",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "Permissions Department, Scott Foresman"
+      },
+      {
+        "name": "Pearson Education",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "Pearson Education, Inc."
+      },
+      {
+        "name": "Dorling Kindersley",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "Dorling Kindersley",
+        "note": "Co-branded photo inserts appear once per unit (Chinese New Year, Big Wheels, Telephones). Identity rather than about: it names who made part of the book, not what the book teaches."
+      },
+      {
+        "name": "Smithsonian Institution",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "Smithsonian Institution",
+        "note": "Same shape as the Dorling Kindersley inserts, three artifact spreads (Play Ball, Weather and Fun, Native American Objects)."
+      },
+      {
+        "name": "Andrew",
+        "kind": "character",
+        "role": "cast",
+        "quote": "Hi. My name is Andrew.",
+        "note": "Unit 1 narrator."
+      },
+      {
+        "name": "Kim",
+        "kind": "character",
+        "role": "cast",
+        "quote": "Where Kim Lives",
+        "note": "Unit 2 narrator."
+      },
+      {
+        "name": "Ben",
+        "kind": "character",
+        "role": "cast",
+        "quote": "Ben at Work",
+        "note": "Unit 3 narrator."
+      },
+      {
+        "name": "Debby",
+        "kind": "character",
+        "role": "cast",
+        "quote": "Hi! My name is Debby.",
+        "note": "Unit 4 narrator."
+      },
+      {
+        "name": "James",
+        "kind": "character",
+        "role": "cast",
+        "quote": "Hi! My name is James.",
+        "note": "Unit 5 narrator."
+      },
+      {
+        "name": "Kay",
+        "kind": "character",
+        "role": "cast",
+        "quote": "Hi. My name is Kay.",
+        "note": "Unit 6 narrator."
+      },
+      {
+        "name": "More Dick and Jane Stories",
+        "kind": "object",
+        "role": "decoration",
+        "quote": "MORE DICK and JANE STORIES ELSON-GRAY",
+        "note": "An old Elson-Gray reader lying on a wooden desk in the photograph of 1930s school supplies on the Then and Now spread (scan 30). The book neither teaches nor discusses it. Recorded so the artifact is not lost to a future image pass, and roled decoration so it can never answer 'do we have a Dick and Jane book'."
+      }
+    ],
+    "themes": [
+      {
+        "name": "helping your community",
+        "evidence": "Volunteers help others."
+      },
+      {
+        "name": "how things change over time",
+        "evidence": "Some things children use at school have changed."
+      },
+      {
+        "name": "courage and fairness",
+        "evidence": "Being brave means having courage."
+      },
+      {
+        "name": "caring for the earth",
+        "evidence": "Save a lake or forest."
+      },
+      {
+        "name": "alike and different",
+        "evidence": "alike and different in many ways."
+      },
+      {
+        "name": "belonging to groups",
+        "evidence": "I belong to many groups."
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "Think and Share",
+        "occurrences": 17,
+        "quote": "Think and Share"
+      },
+      {
+        "term": "natural resource",
+        "occurrences": 21,
+        "quote": "natural resource"
+      },
+      {
+        "term": "Map and Globe Skills",
+        "occurrences": 9,
+        "quote": "Map and Globe Skills"
+      },
+      {
+        "term": "Chart and Graph Skills",
+        "occurrences": 9,
+        "quote": "Chart and Graph Skills"
+      },
+      {
+        "term": "Vocabulary Preview",
+        "occurrences": 8,
+        "quote": "Vocabulary Preview"
+      },
+      {
+        "term": "Citizen Heroes",
+        "occurrences": 8,
+        "quote": "Citizen Heroes"
+      },
+      {
+        "term": "Then and Now",
+        "occurrences": 7,
+        "quote": "Then and Now"
+      },
+      {
+        "term": "Reading Social Studies",
+        "occurrences": 6,
+        "quote": "Reading Social Studies"
+      }
+    ],
+    "referencedWorks": [
+      {
+        "title": "America, the Beautiful",
+        "author": "Katharine Lee Bates and Samuel A. Ward",
+        "kind": "song",
+        "quote": "by Katharine Lee Bates and Samuel A. Ward"
+      },
+      {
+        "title": "The Star-Spangled Banner",
+        "author": null,
+        "kind": "song",
+        "quote": "The Star-Spangled Banner"
+      },
+      {
+        "title": "The Farmer in the Dell",
+        "author": null,
+        "kind": "song",
+        "quote": "The Farmer in the Dell"
+      },
+      {
+        "title": "The Farmer's Little Girl",
+        "author": null,
+        "kind": "book",
+        "quote": "The Farmer's Little Girl"
+      },
+      {
+        "title": "Poor Richard's Almanack",
+        "author": "Benjamin Franklin",
+        "kind": "book",
+        "quote": "Poor Richard's Almanack"
+      },
+      {
+        "title": "www.sfsocialstudies.com",
+        "author": null,
+        "kind": "website",
+        "quote": "www.sfsocialstudies.com"
+      }
+    ],
+    "textExtraction": {
+      "ocr": "tesseract",
+      "visionModel": "google/gemini-3-flash",
+      "visionPages": [
+        1,
+        30,
+        58,
+        82,
+        106,
+        150,
+        151,
+        163
+      ],
+      "note": "Mixture by design. Tesseract read the dense lesson text it is good at; the vision model re-read the covers and six low-yield picture spreads that OCR could not do honestly, and its descriptions of what those pages SHOW are what made the Vocabulary Preview format legible as a format at all. Known limit, stated rather than hidden: three scans (118, 129, 130) were photographed upside down and were not escalated to the vision pass, so their text is reversed in the sidecar. No claim in this analysis rests on them; their content is recoverable from the table of contents and the index and is reported as a capture finding instead."
+    }
+  },
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "social-studies-all-together-part1.pdf",
+    "sourceParts": [
+      "social-studies-all-together-part1.pdf",
+      "social-studies-all-together-part2.pdf"
+    ],
+    "sourceSha256": "b007ce6486ac000a5e166376deb340c5b6bb76b28e4734c4cbbdc93c720ed149",
+    "pageCount": 163,
+    "mastersDir": ".cosmo/masters/cur-2026-07-19-social-studies-all-together",
+    "intakeAt": "2026-07-29T09:44:32+00:00",
+    "gateFindings": [
+      "5 page(s) were shot rotated ([35, 118, 130, 152, 153]). Their text was read correctly from a rotated copy, so nothing is lost and no re-shoot is owed, but the MASTERS are still rotated: any later image work off them must turn them first."
+    ]
+  },
+  "stages": {
+    "aboutnessAddedAt": "2026-07-29"
+  },
+  "mergeNote": "Aboutness (and Layer 5 where present) added 2026-07-29 from a re-analysis that was started as a duplicate record (ref-2026-07-19-social-studies-all-together.json). The duplicate was created because an audit matched drops by filename text instead of by Slack message ts, and missed this record. The duplicate is deleted; this record is canonical and keeps its original four-layer analysis. Capture artifacts (per-page masters and the text sidecar) are new and live under cur-2026-07-19-social-studies-all-together.",
+  "coversMessageTs": [
+    "1784505881.277529"
+  ],
+  "coversMessageNote": "This book arrived across two Slack messages. The second message's ts is declared here so the ingestion ledger joins it to this record instead of reporting the part-2 file as an un-ingested drop.",
+  "sourceFilesNote": "Each part already had a durable Blob copy from the original ingest; those URLs are canonical here. A 2026-07-30 sweep re-uploaded the same bytes under a second path before checking, and that redundant copy is recorded per file rather than deleted. localPath now names the file actually on disk, which uses a different local naming convention from the original run."
 }

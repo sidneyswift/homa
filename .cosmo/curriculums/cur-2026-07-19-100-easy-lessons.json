@@ -459,8 +459,51 @@
       "item": "Build recommended-reading-card recipe (html) \u2014 graded book cards with pre-teach vocabulary",
       "impact": "Enables Homa to generate reading list cards for post-program transition",
       "urgency": "low"
+    },
+    {
+      "category": "method",
+      "item": "Add Direct Instruction reading methodology to knowledge_bank",
+      "impact": "One of the most research-backed reading programs. Understanding it is critical for reading instruction.",
+      "urgency": "high",
+      "portedFrom": "cur-2026-07-19-teach-child-read-100-lessons"
+    },
+    {
+      "category": "taxonomy",
+      "item": "Ensure phonics scope covers the full DI progression (sounds \u2192 blending \u2192 connected text)",
+      "impact": "Maps the gold-standard reading instruction sequence",
+      "urgency": "high",
+      "portedFrom": "cur-2026-07-19-teach-child-read-100-lessons"
     }
   ],
   "notes": "This is a heavyweight curriculum ingestion. 'Teach Your Child to Read in 100 Easy Lessons' is one of the most popular homeschool phonics programs ever published \u2014 over 500K copies sold. Its DISTAR method is research-backed (Project Follow Through) and uniquely structured among phonics programs. The key differentiator is the scripted, sequential, mastery-based approach with modified orthography. Every single topic in the curriculum maps to existing Homa taxonomy \u2014 the gap is entirely in activity formats/recipes (the arrow-and-ball notation, the decodable story format) and methodology knowledge, not in subject matter coverage. The 120-page PDF is a scan (all images, no extractable text). The program targets ages 4-5 (bright 3s through struggling older readers). 22 taxonomy topics mapped with 100% coverage. Part 2 PDF (lessons 62-100) dropped separately by Aless on 2026-07-19 10:44 EDT, ingested to verify later-program features.",
-  "sourceMessageTs_part2": "1784472280.990279"
+  "sourceMessageTs_part2": "1784472280.990279",
+  "coversMessageTs": [
+    "1784472280.990279"
+  ],
+  "coversMessageNote": "This book arrived across two Slack messages; the part-2 file (ts 1784472280.990279) is covered by this analysis. Declared on this record and not on its duplicate sibling, because which of the two survives is the open question in gh#443 and coverage should move with the survivor.",
+  "sourceFiles": [
+    {
+      "filename": "Teach your child to read in 100 easy lessons .pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-100-easy-lessons/Teach%20your%20child%20to%20read%20in%20100%20easy%20lessons%20.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "Teach your child to read in 100 easy lessons 2.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-100-easy-lessons/Teach%20your%20child%20to%20read%20in%20100%20easy%20lessons%202.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not.",
+  "mergedFrom": {
+    "record": "cur-2026-07-19-teach-child-read-100-lessons",
+    "mergedAt": "2026-07-30",
+    "why": "Two records analysed the same single-file drop (Slack ts 1784471821.086149), so every coverage number counted this book twice. This record survives because it is materially richer: 27 of 27 curriculum topics mapped against 5 mostly-partial, 9 activity types against 2, plus sourceFiles and multi-message coverage the other never had.",
+    "ported": [
+      "Add Direct Instruction reading methodology to knowledge_bank",
+      "Ensure phonics scope covers the full DI progression (sounds "
+    ],
+    "notPorted": "The other record's layer2 mappings, which were 5 topics at partial status and are fully subsumed by this record's 27 mapped ones. Its methodology label 'Direct Instruction (DISTAR/SRA)' matches this record's own layer1."
+  }
 }

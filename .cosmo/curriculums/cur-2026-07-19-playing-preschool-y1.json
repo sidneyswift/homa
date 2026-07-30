@@ -5,16 +5,15 @@
   "droppedAt": "2026-07-19T09:05:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784466311.223929",
-
   "layer1_philosophy": {
     "methodology": "Play-Based / Experiential (Busy Toddler)",
     "principles": [
-      "Play-based learning — hands-on activities over worksheets or drilling",
-      "Background knowledge over mastery — exposure and experience, not testing",
-      "Spiral skill development — revisit same 7 skills with increasing complexity across 19 units",
-      "Routine as scaffold — predictable weekly rotation (M: predicting+sorting, T: letter+numbers, W: predicting+measuring, Th: letter+numbers, F: recall+shapes/letter review) gives parent confidence",
-      "Rigid flexibility — strong routine but moldable to fit the family's day and child's pace",
-      "Read alouds as anchor — every day starts with a themed book; reading comprehension is built through questions, predictions, and retelling"
+      "Play-based learning \u2014 hands-on activities over worksheets or drilling",
+      "Background knowledge over mastery \u2014 exposure and experience, not testing",
+      "Spiral skill development \u2014 revisit same 7 skills with increasing complexity across 19 units",
+      "Routine as scaffold \u2014 predictable weekly rotation (M: predicting+sorting, T: letter+numbers, W: predicting+measuring, Th: letter+numbers, F: recall+shapes/letter review) gives parent confidence",
+      "Rigid flexibility \u2014 strong routine but moldable to fit the family's day and child's pace",
+      "Read alouds as anchor \u2014 every day starts with a themed book; reading comprehension is built through questions, predictions, and retelling"
     ],
     "learningTheory": "developmental-stages-spiral",
     "assessmentApproach": "none-observation-only",
@@ -35,7 +34,6 @@
       }
     ]
   },
-
   "layer2_scope": {
     "mappings": [
       {
@@ -45,7 +43,7 @@
         "homaDomain": "Reading Comprehension",
         "homaTopicId": null,
         "status": "partial",
-        "notes": "Homa has 'Predicting what happens next' — partial match. Playing Preschool treats predicting more broadly (also science/math predictions, not just story)"
+        "notes": "Homa has 'Predicting what happens next' \u2014 partial match. Playing Preschool treats predicting more broadly (also science/math predictions, not just story)"
       },
       {
         "curriculumSubject": "Recall & Retell",
@@ -72,7 +70,7 @@
         "homaDomain": "Counting & Cardinality",
         "homaTopicId": null,
         "status": "mapped",
-        "notes": "Strong overlap — 'One More Each Time', 'Comparing groups: more or fewer', 'How Many in Total?' all match"
+        "notes": "Strong overlap \u2014 'One More Each Time', 'Comparing groups: more or fewer', 'How Many in Total?' all match"
       },
       {
         "curriculumSubject": "Measuring",
@@ -117,7 +115,7 @@
         "homaDomain": "Multiple",
         "homaTopicId": null,
         "status": "mapped",
-        "notes": "Broad coverage — maps across Matter & Materials, Organisms & Life Processes, Weather & Climate, Forces & Motion, Earth's Systems"
+        "notes": "Broad coverage \u2014 maps across Matter & Materials, Organisms & Life Processes, Weather & Climate, Forces & Motion, Earth's Systems"
       },
       {
         "curriculumSubject": "Sensory Play",
@@ -130,7 +128,10 @@
           "topicSlug": "sensory-exploration",
           "domain": "Learning to Learn",
           "kind": "conceptual",
-          "teachingWindowMonths": [24, 60]
+          "teachingWindowMonths": [
+            24,
+            60
+          ]
         }
       },
       {
@@ -144,7 +145,10 @@
           "topicSlug": "fine-motor-development",
           "domain": "Learning to Learn",
           "kind": "procedural",
-          "teachingWindowMonths": [24, 72]
+          "teachingWindowMonths": [
+            24,
+            72
+          ]
         }
       },
       {
@@ -158,7 +162,10 @@
           "topicSlug": "gross-motor-development",
           "domain": "Learning to Learn",
           "kind": "procedural",
-          "teachingWindowMonths": [24, 72]
+          "teachingWindowMonths": [
+            24,
+            72
+          ]
         }
       },
       {
@@ -181,7 +188,10 @@
           "topicSlug": "dramatic-play-pretend",
           "domain": "Learning to Learn",
           "kind": "conceptual",
-          "teachingWindowMonths": [24, 72]
+          "teachingWindowMonths": [
+            24,
+            72
+          ]
         }
       },
       {
@@ -202,32 +212,44 @@
       "partial": 4
     }
   },
-
   "layer3_structure": {
     "cadence": "5 days/week (M-F), 2 weeks per unit",
     "sessionLengthMinutes": {
       "fullDay": 45,
       "max": 60,
-      "notes": "Can be broken across the day — doesn't need to be one block"
+      "notes": "Can be broken across the day \u2014 doesn't need to be one block"
     },
     "weeklyTemplate": "Monday: predicting + sorting. Tuesday: letter name + numbers. Wednesday: predicting + measuring. Thursday: letter name + numbers. Friday (wk1): recall/retell + shapes. Friday (wk2): recall/retell + letter review.",
-    "dailyRoutine": "Opening (morning calendar + song/poem) → Introduce/review topic → Read aloud → Things to talk about → Learning activity → Easy activity. Extensions sprinkled throughout.",
+    "dailyRoutine": "Opening (morning calendar + song/poem) \u2192 Introduce/review topic \u2192 Read aloud \u2192 Things to talk about \u2192 Learning activity \u2192 Easy activity. Extensions sprinkled throughout.",
     "progressionModel": "spiral",
     "reviewRhythm": "Weekly Friday review (shapes wk1, letter review wk2). Skills spiral from Unit 1 through Unit 19 with increasing complexity.",
     "totalWeeks": 38,
     "totalUnits": 19,
     "totalDays": 190,
     "unitThemes": [
-      "Apples", "Colors", "Nursery Rhymes", "Clothing", "Food",
-      "Five Senses", "Teddy Bears", "Things That Go Together",
-      "Community Helpers", "Transportation", "On the Farm", "Weather",
-      "Eggs", "Plants", "Construction", "Pets", "Opposites",
-      "Fairy Tales & Folk Tales", "Water"
+      "Apples",
+      "Colors",
+      "Nursery Rhymes",
+      "Clothing",
+      "Food",
+      "Five Senses",
+      "Teddy Bears",
+      "Things That Go Together",
+      "Community Helpers",
+      "Transportation",
+      "On the Farm",
+      "Weather",
+      "Eggs",
+      "Plants",
+      "Construction",
+      "Pets",
+      "Opposites",
+      "Fairy Tales & Folk Tales",
+      "Water"
     ],
     "letterSequence": "Aa, Rr, Nn, Cc+Jj, Mm, Ss, Bb, Qq+Uu, Hh, Tt, Ff, Ww+Kk, Ee, Pp+Ll, Yy+Zz, Dd, Oo+Xx, Gg+Vv, Ii",
     "letterOrderRationale": "Non-alphabetical by design. Easy letters (same upper/lower like Cc, Jj) doubled up. Tricky letters (different upper/lower like Ee, Aa) taught alone. Some letters match theme (Tt for Transportation)."
   },
-
   "layer4_activities": {
     "activityTypes": [
       {
@@ -241,14 +263,14 @@
           "description": "Printable sorting mat with labeled category zones (2-4 columns or T-chart) plus either cut-out images to sort OR blank space for physical objects. For play-based curricula, the mat defines the categories while the child uses real household items.",
           "complexity": "low"
         },
-        "notes": "Most sorting in this curriculum uses real objects, not printables. The recipe would be supplementary — a printable mat to organize the sort."
+        "notes": "Most sorting in this curriculum uses real objects, not printables. The recipe would be supplementary \u2014 a printable mat to organize the sort."
       },
       {
         "type": "five-frame-ten-frame",
         "description": "Tape or drawn frames for counting objects 1-5 (early) growing to 1-10 (later). Used with real objects placed in frames.",
         "recipe": "html",
         "status": "have_recipe",
-        "notes": "Could adapt counting-mat recipe. But PP uses physical frames taped on floor — the printable version would be a supplement."
+        "notes": "Could adapt counting-mat recipe. But PP uses physical frames taped on floor \u2014 the printable version would be a supplement."
       },
       {
         "type": "sensory-bin",
@@ -258,10 +280,10 @@
         "suggestedRecipe": {
           "name": "sensory-bin-card",
           "creationPath": "html",
-          "description": "Printable setup card with a title, materials list, suggested play prompts, and learning connections. Not the activity itself — the guide to setting it up. Could include vocabulary words to use during play.",
+          "description": "Printable setup card with a title, materials list, suggested play prompts, and learning connections. Not the activity itself \u2014 the guide to setting it up. Could include vocabulary words to use during play.",
           "complexity": "low"
         },
-        "notes": "Sensory bins are inherently physical — no printable replaces them. But a setup/prompt card helps the parent run them well."
+        "notes": "Sensory bins are inherently physical \u2014 no printable replaces them. But a setup/prompt card helps the parent run them well."
       },
       {
         "type": "alphabet-art-portfolio",
@@ -271,7 +293,7 @@
         "suggestedRecipe": {
           "name": "alphabet-art-page",
           "creationPath": "image-direct",
-          "description": "Large outlined letter (both upper and lower case) designed for decorating — big enough for dot stickers, paint, gluing materials. Bottom of page has a few themed images starting with that letter. Print-friendly B&W.",
+          "description": "Large outlined letter (both upper and lower case) designed for decorating \u2014 big enough for dot stickers, paint, gluing materials. Bottom of page has a few themed images starting with that letter. Print-friendly B&W.",
           "complexity": "low"
         }
       },
@@ -304,7 +326,7 @@
         "description": "Open-ended art: finger painting, apple stamping, construction paper collages, painting sunshine, making freight trains from colored boxes. Product is secondary to the process.",
         "recipe": "image-direct",
         "status": "have_recipe",
-        "notes": "Coloring page recipe covers some of this. But process art is often freeform — no printable needed, just supplies."
+        "notes": "Coloring page recipe covers some of this. But process art is often freeform \u2014 no printable needed, just supplies."
       },
       {
         "type": "gross-motor-activity",
@@ -323,7 +345,7 @@
         "description": "Transfer with tongs/ladles/forks, poking with golf tees, threading, peeling/placing dot stickers, cutting.",
         "recipe": null,
         "status": "no_recipe",
-        "notes": "Purely physical — no printable. An activity-card recipe would cover the guide aspect."
+        "notes": "Purely physical \u2014 no printable. An activity-card recipe would cover the guide aspect."
       },
       {
         "type": "science-experiment",
@@ -358,12 +380,11 @@
       "noRecipe": 10
     }
   },
-
   "decisionsNeeded": [
     {
       "category": "taxonomy",
       "item": "Add sensory-exploration topic to Learning to Learn",
-      "impact": "Enables sensory bin activities — core to play-based preschool curricula",
+      "impact": "Enables sensory bin activities \u2014 core to play-based preschool curricula",
       "urgency": "medium"
     },
     {
@@ -380,25 +401,25 @@
     },
     {
       "category": "recipe",
-      "item": "Build activity-card recipe (html) — a general-purpose parent guide card for physical/hands-on activities",
-      "impact": "Would cover sensory bins, gross motor, fine motor, dramatic play, experiments — most of what play-based curricula need from Homa",
+      "item": "Build activity-card recipe (html) \u2014 a general-purpose parent guide card for physical/hands-on activities",
+      "impact": "Would cover sensory bins, gross motor, fine motor, dramatic play, experiments \u2014 most of what play-based curricula need from Homa",
       "urgency": "high"
     },
     {
       "category": "recipe",
-      "item": "Build read-aloud-companion recipe (html) — guided reading card with prediction/discussion prompts",
+      "item": "Build read-aloud-companion recipe (html) \u2014 guided reading card with prediction/discussion prompts",
       "impact": "Read alouds are the anchor of this curriculum and many others; no recipe exists",
       "urgency": "high"
     },
     {
       "category": "recipe",
-      "item": "Build alphabet-art-page recipe (image-direct) — decoratable letter outlines for alphabet portfolios",
+      "item": "Build alphabet-art-page recipe (image-direct) \u2014 decoratable letter outlines for alphabet portfolios",
       "impact": "Letter art portfolio is a common preschool format; supplements tracing-guide recipe",
       "urgency": "medium"
     },
     {
       "category": "recipe",
-      "item": "Build experiment-card recipe (html) — kid-friendly science experiment guide",
+      "item": "Build experiment-card recipe (html) \u2014 kid-friendly science experiment guide",
       "impact": "Hands-on STEM experiments are a major activity type with no current recipe",
       "urgency": "medium"
     },
@@ -415,6 +436,14 @@
       "urgency": "medium"
     }
   ],
-
-  "notes": "This is a full 38-week, 190-day preschool program targeting ages 2.5-5. It's fundamentally different from the worksheet/printable-heavy references we've ingested so far — it's almost entirely hands-on with real objects. The printable needs are minimal (alphabet portfolio pages, maybe setup cards). The biggest value for Homa is learning the STRUCTURE: the weekly rotation pattern, the spiral skill model, and the daily routine sequence. This teaches Homa's curriculum writer how to plan play-based preschool weeks. Very strong overlap with existing taxonomy in math and ELA. The unmapped areas (sensory, motor skills, dramatic play) are physical development domains that many preschool curricula share."
+  "notes": "This is a full 38-week, 190-day preschool program targeting ages 2.5-5. It's fundamentally different from the worksheet/printable-heavy references we've ingested so far \u2014 it's almost entirely hands-on with real objects. The printable needs are minimal (alphabet portfolio pages, maybe setup cards). The biggest value for Homa is learning the STRUCTURE: the weekly rotation pattern, the spiral skill model, and the daily routine sequence. This teaches Homa's curriculum writer how to plan play-based preschool weeks. Very strong overlap with existing taxonomy in math and ELA. The unmapped areas (sensory, motor skills, dramatic play) are physical development domains that many preschool curricula share.",
+  "sourceFiles": [
+    {
+      "filename": "Playing-Preschool-Year-1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-playing-preschool-y1/Playing-Preschool-Year-1.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

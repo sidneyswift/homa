@@ -51,3 +51,7 @@ homa-template/
 # Python bytecode
 __pycache__/
 *.pyc
+
+# The ingestion spreadsheet is generated from ingestion-ledger.json on demand
+# (.cosmo/scripts/ingestion-spreadsheet.py). The ledger is the tracked truth.
+.cosmo/ingestion-ledger.xlsx

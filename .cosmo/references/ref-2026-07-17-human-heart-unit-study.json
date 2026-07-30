@@ -34,7 +34,10 @@
     ]
   },
   "difficulty": {
-    "ageBandMonths": [48, 120],
+    "ageBandMonths": [
+      48,
+      120
+    ],
     "ageBandGrades": "Pre-K to 5",
     "complexity": "multi-skill",
     "prerequisites": [],
@@ -47,22 +50,30 @@
     "characters": [],
     "visualStyle": "watercolor-illustration",
     "colorPalette": "dual-version",
-    "colorVersions": ["full-color-watercolor", "black-and-white-line-art"],
-    "appealDrivers": ["beautiful watercolor anatomical art", "museum-quality poster aesthetic", "dual art styles (realistic watercolor + simplified cross-section)", "craft/hands-on assembly activity"]
+    "colorVersions": [
+      "full-color-watercolor",
+      "black-and-white-line-art"
+    ],
+    "appealDrivers": [
+      "beautiful watercolor anatomical art",
+      "museum-quality poster aesthetic",
+      "dual art styles (realistic watercolor + simplified cross-section)",
+      "craft/hands-on assembly activity"
+    ]
   },
   "printFormat": {
     "pageSize": "letter",
     "orientation": "mixed",
     "margins": "generous",
     "inkDensity": "varies",
-    "colorRequirement": "color optional — many pages work in B&W",
+    "colorRequirement": "color optional \u2014 many pages work in B&W",
     "mixedOrientationNotes": "Most pages portrait, info card is landscape (5x7 printable)"
   },
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "unit-study-packet: multi-page themed study bundle containing 8-12 different activity types all centered on one topic. Template structure: cover → teacher guide → reference posters (labeled/unlabeled/B&W) → info card → vocabulary list → letter tracing → labeled diagram → blank labeling activity → cross-section diagram (labeled/unlabeled) → flow diagram with arrows → coloring page → cut-and-assemble craft → word search.",
-      "labeled-anatomy-diagram: scientific illustration with numbered leader lines pointing to parts, word bank at bottom. Scaffolded versions: fully labeled → numbered with word bank → completely blank for testing.",
+      "unit-study-packet: multi-page themed study bundle containing 8-12 different activity types all centered on one topic. Template structure: cover \u2192 teacher guide \u2192 reference posters (labeled/unlabeled/B&W) \u2192 info card \u2192 vocabulary list \u2192 letter tracing \u2192 labeled diagram \u2192 blank labeling activity \u2192 cross-section diagram (labeled/unlabeled) \u2192 flow diagram with arrows \u2192 coloring page \u2192 cut-and-assemble craft \u2192 word search.",
+      "labeled-anatomy-diagram: scientific illustration with numbered leader lines pointing to parts, word bank at bottom. Scaffolded versions: fully labeled \u2192 numbered with word bank \u2192 completely blank for testing.",
       "cut-and-assemble-craft: page of labeled cutout pieces that student colors, cuts, and assembles into a 3D model or layered diagram. Combines art + motor skills + spatial reasoning + content knowledge."
     ]
   },
@@ -70,45 +81,64 @@
     {
       "name": "Cover Page",
       "description": "Title page with beautiful watercolor anatomical heart illustration. 'Human Heart Mini Unit Study' title in script font.",
-      "designPatterns": ["Gallery-quality cover sets tone: this is beautiful, not clinical"]
+      "designPatterns": [
+        "Gallery-quality cover sets tone: this is beautiful, not clinical"
+      ]
     },
     {
       "name": "Teacher/Parent Guide (p2-3)",
       "description": "Two-page written guide explaining all included materials and how to use them across age ranges. Suggests adaptations: read-aloud for younger, copy work for older, artwork inspiration for all.",
-      "designPatterns": ["Parent-as-teacher guidance", "Multi-age adaptation suggestions", "Material inventory"]
+      "designPatterns": [
+        "Parent-as-teacher guidance",
+        "Multi-age adaptation suggestions",
+        "Material inventory"
+      ]
     },
     {
-      "name": "Anatomical Posters — Watercolor Style (p4-8)",
+      "name": "Anatomical Posters \u2014 Watercolor Style (p4-8)",
       "description": "5 versions of the same watercolor heart illustration: (1) numbered with word bank, (2) fully labeled inline, (3) unlabeled color poster, (4) numbered B&W with word bank, (5) unlabeled B&W (coloring page). Frameable quality.",
       "designPatterns": [
-        "Scaffolded versions: labeled → numbered → blank = teach → practice → test",
+        "Scaffolded versions: labeled \u2192 numbered \u2192 blank = teach \u2192 practice \u2192 test",
         "B&W doubles as coloring page",
         "Watercolor art style: pen-and-ink linework with watercolor washes in anatomical reds/blues/purples",
-        "Poster-quality: 'pretty enough to frame' — designed to hang on wall as reference"
+        "Poster-quality: 'pretty enough to frame' \u2014 designed to hang on wall as reference"
       ]
     },
     {
       "name": "5x7 Info Card (p11)",
       "description": "Landscape info card with heart illustration on left, key facts on right. Simple language for read-aloud. Covers: heart as muscle, circulatory system, heartbeats per day, blood composition, blood functions.",
-      "designPatterns": ["Compact reference card", "Read-aloud friendly language", "Dual-purpose: reference + copy work for older students"]
+      "designPatterns": [
+        "Compact reference card",
+        "Read-aloud friendly language",
+        "Dual-purpose: reference + copy work for older students"
+      ]
     },
     {
       "name": "Vocabulary Page (p12)",
       "description": "Glossary of heart-related terms: aorta, artery, blood pressure, capillaries, cardiologist, cardiology, circulatory system, etc. Simple definitions.",
-      "designPatterns": ["Domain vocabulary building", "Copy work source for older students"]
+      "designPatterns": [
+        "Domain vocabulary building",
+        "Copy work source for older students"
+      ]
     },
     {
-      "name": "Letter Pages — H for Heart (p13-14)",
+      "name": "Letter Pages \u2014 H for Heart (p13-14)",
       "description": "Full-page uppercase H and lowercase h outlines with small heart illustration. For letter recognition, tracing, or coloring.",
-      "designPatterns": ["Cross-curricular: science topic + letter recognition", "Pre-K inclusion via letter pages"]
+      "designPatterns": [
+        "Cross-curricular: science topic + letter recognition",
+        "Pre-K inclusion via letter pages"
+      ]
     },
     {
       "name": "Vocabulary Tracing (p15)",
       "description": "Dotted-line tracing words: heart, artery, vein, blood, heartbeat, pump, cells. Three-line handwriting guide (top, middle, baseline).",
-      "designPatterns": ["Cross-curricular: science vocabulary + handwriting practice", "Dotted letter tracing on three-line guide"]
+      "designPatterns": [
+        "Cross-curricular: science vocabulary + handwriting practice",
+        "Dotted letter tracing on three-line guide"
+      ]
     },
     {
-      "name": "Cross-Section Diagrams — Simplified Style (p16-19)",
+      "name": "Cross-Section Diagrams \u2014 Simplified Style (p16-19)",
       "description": "Simplified, color-coded cross-section of heart (different art style from watercolor posters). 4 versions: (1) labeled, (2) labeled with blood flow arrows, (3) blank B&W coloring page, (4) unlabeled with blank lines for labeling. Color-coded: reds/pinks for oxygenated, blues for deoxygenated, oranges for veins.",
       "designPatterns": [
         "Second art style: simplified/graphic vs. realistic watercolor",
@@ -119,9 +149,9 @@
     },
     {
       "name": "Cut-and-Assemble Heart Craft (p20-21)",
-      "description": "Two pages: (1) labeled cutout pieces for each heart part (left ventricle, right ventricle, left atrium, right atrium, aorta, valves, pulmonary artery/vein, vena cava), (2) blank heart outline with word bank and arrow stickers — student colors/cuts pieces and assembles them into the correct positions on the outline.",
+      "description": "Two pages: (1) labeled cutout pieces for each heart part (left ventricle, right ventricle, left atrium, right atrium, aorta, valves, pulmonary artery/vein, vena cava), (2) blank heart outline with word bank and arrow stickers \u2014 student colors/cuts pieces and assembles them into the correct positions on the outline.",
       "designPatterns": [
-        "Hands-on assembly: color → cut → arrange → glue = kinesthetic learning",
+        "Hands-on assembly: color \u2192 cut \u2192 arrange \u2192 glue = kinesthetic learning",
         "Spatial reasoning: which piece goes where?",
         "Word bank + arrows for labeling after assembly",
         "Same anatomy, completely different modality from the posters and diagrams"
@@ -130,8 +160,20 @@
     {
       "name": "Word Search (p22-23)",
       "description": "Two word search puzzles (different difficulty levels) with heart vocabulary: aorta, artery, atrium, blood, heart, valve, veins.",
-      "designPatterns": ["Vocabulary reinforcement through puzzle format", "Two difficulty levels"]
+      "designPatterns": [
+        "Vocabulary reinforcement through puzzle format",
+        "Two difficulty levels"
+      ]
     }
   ],
-  "notes": "This is the richest reference yet — a complete mini-curriculum in 24 pages. Carolyng explicitly called out the 'art styles' (plural — the watercolor realistic AND the simplified cross-section) and the 'array of activities' as what she loves. The multi-age design is key: same topic, 12+ activity types, each targeting a different age band and learning modality. The watercolor art is genuinely museum-quality — this isn't clipart, it's hand-painted illustration. Two distinct art styles serve different purposes: watercolor for beauty/reference, simplified for understanding/labeling. The cut-and-assemble craft is the most tactile activity we've seen — it requires the student to physically reconstruct the heart from parts, which is a different kind of understanding than labeling a diagram. This is Carolyng's first drop and it's a unit study, not a single worksheet — she's thinking in curricula, not pages."
+  "notes": "This is the richest reference yet \u2014 a complete mini-curriculum in 24 pages. Carolyng explicitly called out the 'art styles' (plural \u2014 the watercolor realistic AND the simplified cross-section) and the 'array of activities' as what she loves. The multi-age design is key: same topic, 12+ activity types, each targeting a different age band and learning modality. The watercolor art is genuinely museum-quality \u2014 this isn't clipart, it's hand-painted illustration. Two distinct art styles serve different purposes: watercolor for beauty/reference, simplified for understanding/labeling. The cut-and-assemble craft is the most tactile activity we've seen \u2014 it requires the student to physically reconstruct the heart from parts, which is a different kind of understanding than labeling a diagram. This is Carolyng's first drop and it's a unit study, not a single worksheet \u2014 she's thinking in curricula, not pages.",
+  "sourceFiles": [
+    {
+      "filename": "HumanHeartUnitStudy.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-human-heart-unit-study/HumanHeartUnitStudy.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

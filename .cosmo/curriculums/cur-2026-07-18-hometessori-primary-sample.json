@@ -184,5 +184,14 @@
       "urgency": "medium"
     }
   ],
-  "notes": "First full Montessori curriculum drop. 208-page sample of a commercial product (Hometessori by MindSprout). Key insight: Montessori homeschool requires print-and-make alternatives to expensive classroom materials. The curriculum includes both teacher manuals (lesson presentations) and print kits (materials). This is a significant methodology addition for Homa."
+  "notes": "First full Montessori curriculum drop. 208-page sample of a commercial product (Hometessori by MindSprout). Key insight: Montessori homeschool requires print-and-make alternatives to expensive classroom materials. The curriculum includes both teacher manuals (lesson presentations) and print kits (materials). This is a significant methodology addition for Homa.",
+  "sourceFiles": [
+    {
+      "filename": "Hometessori (3-6) SAMPLE by MindSprout.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-18-hometessori-primary-sample/Hometessori%20%283-6%29%20SAMPLE%20by%20MindSprout.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

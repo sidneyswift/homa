@@ -5,18 +5,18 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784427346.203599",
   "format": "letter-identification-worksheet",
-  "title": "I Spy the Letter Ll — Visual Scanning Activity (Twinkl)",
+  "title": "I Spy the Letter Ll \u2014 Visual Scanning Activity (Twinkl)",
   "publisher": "Twinkl",
   "gradeLevel": "PreK-K (ages 3-6)",
   "pageCount": 1,
   "callouts": [],
   "overview": {
-    "description": "Single-page 'I Spy' letter identification worksheet. Top: large Ll model (bold L + grey traceable L on writing lines). Center: lion illustration. Scattered across the page: ~30 circled letters in various fonts/cases — uppercase L, lowercase l, and similar-looking distractors (I, i, E, F, g). Child finds and marks all instances of L and l among the look-alike distractors."
+    "description": "Single-page 'I Spy' letter identification worksheet. Top: large Ll model (bold L + grey traceable L on writing lines). Center: lion illustration. Scattered across the page: ~30 circled letters in various fonts/cases \u2014 uppercase L, lowercase l, and similar-looking distractors (I, i, E, F, g). Child finds and marks all instances of L and l among the look-alike distractors."
   },
   "designPatterns": {
     "visualScanningGame": {
       "description": "'I Spy' framing turns letter identification into a search game. The child hunts for target letters among visually similar distractors. The distractors are carefully chosen: I/i (vertical line confusion), E/F (similar shapes), g (lowercase curve confusion).",
-      "value": "Letter discrimination — the child must distinguish L from I (both have vertical lines), which is one of the most common early reading confusions."
+      "value": "Letter discrimination \u2014 the child must distinguish L from I (both have vertical lines), which is one of the most common early reading confusions."
     },
     "themedCenterImage": {
       "description": "A lion (L word) illustration in the center of the page. The letter-themed animal provides: (1) a visual anchor, (2) an initial-sound connection (L = lion), (3) a coloring opportunity.",
@@ -31,8 +31,16 @@
     "subject": "ela",
     "domain": "letter-knowledge",
     "topics": [
-      {"id": "ela.letter-identification-Ll", "kind": "procedural", "mapped": false},
-      {"id": "ela.visual-discrimination", "kind": "procedural", "mapped": false}
+      {
+        "id": "ela.letter-identification-Ll",
+        "kind": "procedural",
+        "mapped": false
+      },
+      {
+        "id": "ela.visual-discrimination",
+        "kind": "procedural",
+        "mapped": false
+      }
     ]
   },
   "recipeMatch": {
@@ -44,5 +52,14 @@
       }
     ]
   },
-  "notes": "Lightweight single-page drop. The 'I Spy' format is a new game mechanic for letter identification — different from the Habitat Schoolhouse approach (color/circle all uppercase letters on a page) because it specifically includes VISUALLY SIMILAR distractors. The chosen distractors for L (I, i, E, F, g) are pedagogically intentional — they test the specific confusions that matter for this letter."
+  "notes": "Lightweight single-page drop. The 'I Spy' format is a new game mechanic for letter identification \u2014 different from the Habitat Schoolhouse approach (color/circle all uppercase letters on a page) because it specifically includes VISUALLY SIMILAR distractors. The chosen distractors for L (I, i, E, F, g) are pedagogically intentional \u2014 they test the specific confusions that matter for this letter.",
+  "sourceFiles": [
+    {
+      "filename": "I Spy the Letter L Activity.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-twinkl-i-spy-letter-l/I%20Spy%20the%20Letter%20L%20Activity.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

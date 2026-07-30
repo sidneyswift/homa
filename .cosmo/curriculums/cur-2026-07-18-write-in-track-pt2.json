@@ -43,5 +43,14 @@
     }
   },
   "decisionsNeeded": [],
-  "notes": "62MB scan. Part 2 of Write on Track writing handbook. See Part 1 for full analysis."
+  "notes": "62MB scan. Part 2 of Write on Track writing handbook. See Part 1 for full analysis.",
+  "sourceFiles": [
+    {
+      "filename": "Write in Track Part 2.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-18-write-in-track-pt2/Write%20in%20Track%20Part%202.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

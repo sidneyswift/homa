@@ -1,0 +1,426 @@
+{
+  "id": "ref-2026-07-21-family-fun-book",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-21T10:58:08-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784645888.540859",
+  "format": "family-activity-book",
+  "title": "Family FUN Book: More than 400 Amazing, Amusing, and All-Around Awesome Activities for the Entire Family!",
+  "publisher": "unknown. The copyright page was never captured: scan page 2 produced no text at all and scan page 4 is a near-blank leaf (ink coverage 0.013) whose OCR is noise. Publisher and copyright year are therefore unrecoverable from this capture and are not guessed here.",
+  "gradeLevel": "no grade level at all. The book addresses the parent, and the child participates at whatever level fits, which is why the ranging happens inside individual entries ('Older kids can make a cloud chart', 'Toddlers can guess how many steps from here to there') rather than on a cover.",
+  "pdfScanPageCount": 67,
+  "analysisQuality": "full",
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "family-fun-book.pdf",
+    "sourceParts": [
+      "family-fun-book.pdf"
+    ],
+    "sourceSha256": "830c8f01a23c30a76ba29e298de203bff9b3665fd6223a67f61122774b7fab93",
+    "pageCount": 67,
+    "mastersDir": ".cosmo/masters/ref-2026-07-21-family-fun-book",
+    "intakeAt": "2026-07-29T10:07:46+00:00",
+    "gateFindings": [
+      "page 37: softer than the rest of the book (sharpness 28.0 against a median of 178.0). Re-shoot this page.",
+      "20 page(s) were shot rotated ([12, 14, 17, 22, 23, 24, 27, 28, 32, 33, 34, 40] ...). Their text was read correctly from a rotated copy, so nothing is lost and no re-shoot is owed, but the MASTERS are still rotated: any later image work off them must turn them first.",
+      "1 page(s) produced no text: [2]. Spans cannot be verified against them."
+    ]
+  },
+  "captureProblems": [
+    {
+      "page": 37,
+      "problem": "genuinely blurry, confirmed twice and independently",
+      "evidence": "Measured sharpness 28.0 against a book median of 178.0, the lowest of all 67 scans and roughly a sixth of typical. The vision model, which never saw the sharpness number, described the same page on its own as 'a blurry photograph, making some of the text at the bottom edge difficult to discern' and returned confidence 0.80, the lowest of the six vision pages (the other five are 0.95 and 1.0). Two independent readers agreeing is what makes this a real finding rather than a threshold artifact.",
+      "impact": "Low on content, real on archive integrity. Page 37 is a sideways shot of printed page 71 ('* A U T U M N * 71'), and the same six entries were captured cleanly twice more, at scans 36 and 38 (both portrait, sharpness 189 and 190, identical entry lists: Back to School Huddle, Earn TV Time by Reading, Grow Your Own Socks, Stump Mom, Make a Video Tour, Give School Supplies Some Pizzazz). Nothing is lost from the text sidecar. The duplicate gate did not fire because the three shots are framed differently enough for their perceptual hashes to diverge.",
+      "reshoot": true,
+      "whatToReshoot": "Printed page 71, held flat and still. If the phone lane wants a smaller ask: scans 36 and 38 already cover it, so this one can be dropped from the masters instead of re-shot, provided someone records that decision here."
+    },
+    {
+      "page": 2,
+      "problem": "produced no text at all",
+      "evidence": "Zero characters from tesseract, and the page was never escalated to the vision pass. Ink coverage is 0.0138, about a seventh of the interior median of 0.100, so the page really is close to blank rather than a failed read of a dense page.",
+      "impact": "This is the one place the capture actually costs the corpus something. Page 2 sits exactly where a copyright page belongs, between the cover (scan 1) and the half title (scan 3), and no publisher, imprint, ISBN, or copyright year appears anywhere else in 67 pages. That is why this ref's publisher field is honestly unknown rather than inferred. Nothing on page 2 can carry an aboutness span either.",
+      "reshoot": true,
+      "whatToReshoot": "Scan page 2, plus whatever leaf actually carries the copyright block if it is not page 2 (scan page 4 is the other near-blank candidate, ink coverage 0.0126). One good shot of the copyright page closes the only real hole in this capture."
+    }
+  ],
+  "sourceFiles": [
+    {
+      "filename": "family-fun-book.pdf",
+      "localPath": ".cosmo/inspo-files/family-fun-book.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-21-family-fun-book/family-fun-book.pdf",
+      "blobUploadedAt": "2026-07-30"
+    }
+  ],
+  "routing": {
+    "skillUsed": "reference-ingestion",
+    "ruling": "Reference, and it is the exact mirror image of the previous book through this intake. The curriculum skill's decisive test is a philosophy AND a sequence. Fast Forward Level E (ref-2026-07-22-fast-forward-student-handbook-e) had the sequence and no philosophy. This book has a real, stated philosophy and no sequence whatsoever. The philosophy is on scan pages 5 and 6: a purpose ('It's filled with hundreds of ideas that will bring your family closer, knit your hearts together'), an explicit exclusion list ('What You Won't Find in This Book': dissecting, excursions and field trips, magic, songs, sports, and board games, each with a reason), and a usage method ('The Best Way to Use This Book'). What it has no trace of is order: no unit numbering, no prerequisites, no pacing, no assessment, no skill progression, and an alphabetical index rather than a scope and sequence. The four season sections are a browsing convenience, not a route; a family can start anywhere on any page in any year. That is an anthology to draw from, which is a reference. It sits in the same bucket as the chant anthology (ref-2026-07-21-one-potato-two-potato) and 365 Science Experiments (ref-2026-07-21-365-science-experiments), the two nearest neighbours in Aless's own corpus."
+  },
+  "layout": {
+    "structure": "linear-top-to-bottom",
+    "spacing": "dense",
+    "visualHierarchy": "title-then-prose",
+    "whiteSpaceRatio": 0.3,
+    "flowDirection": "top-down",
+    "notes": "Two columns of running prose per page, read down the left then down the right. The atomic unit is an entry: a star glyph, a title in a display face ('*Plant a Garden', '*Watch for the First Crocus', '*Make Snail Art'), then one to five short paragraphs of warm second-person instruction. Entries run from one line ('Freeze Plastic Spiders in Ice Cubes / Then invite Aunt Edna over.') to two full columns. There is no materials list, no numbered step list, no time estimate, no age tag, and no supervision symbol anywhere in the book, which is a genuine and slightly surprising absence given what else Aless has been dropping. Three recurring sub-shapes break the prose: an indented recipe block set as an ingredient list plus a method paragraph (s'mores on scan 8, taffy on 22, Poppin' Jack on 44, spice cake on 55, red velvet on 63), a numbered variant list when one idea has many forms (1 through 15 for gift-giving themes on scan 55, 1 through 16 for ribbon ideas on 57), and an asterisked safety or tip line set off from the paragraph ('*Hint: Start small.', '*Be sure that you have a home for the hatched chicks!', '*Coated fruit should not be eaten!'). Small pen-line spot drawings float between entries and never carry meaning the text does not already carry. Measured ink coverage on the 65 interior pages runs 0.013 to 0.164 with a median of 0.100, which is a text page's number; the 0.3 white-space figure above is a layout estimate of margins, gutters, and interlinear space, not that measurement."
+  },
+  "skillTargeting": {
+    "subject": "multi-subject",
+    "domain": "daily-living",
+    "topics": [
+      {
+        "id": "mt_IhWzO4sQPg",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Cloud Types (Science > Weather & Climate, 7-9). The cleanest map in the book. 'Keep Your Eye on the Sky' (scan 11) names cirrus, cumulus, stratus, and nimbus, explains that clouds form 'from tiny droplets of water or ice crystals', says many clouds combine the four types, and closes with a repeated observation task: 'Older kids can make a cloud chart and record the kinds of clouds they see in the sky each day.' That is the taxonomy topic almost line for line."
+      },
+      {
+        "id": "mt_0B64gfJf7j",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Seeds & Plant Growth (Science > Organisms & Life Processes, 6-7). Three entries build the same observation: 'Plant a Garden' with an egg-carton starter, 'Grow Sprouts' in a jar of damp towels where the child watches roots and stems appear, and the follow-on where the jar is tipped on its side and 'the process is called geotropism'. The germination-to-growth arc the topic describes is exactly what the jar shows."
+      },
+      {
+        "id": "mt_Wr6DDgr_kH",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Caterpillar to butterfly (Science > Insects & Minibeasts, 5-7). 'Hatch Eggs or Butterflies' (scan 9): 'There are several ways for children to watch a metamorphosis. You can mail order a butterfly kit.' The taxonomy topic's own description names classroom butterfly kits, so this is the same activity from the other side."
+      },
+      {
+        "id": "mt_S9SKah-yi_",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "What Is a Volcano (Science > Volcanoes & Earthquakes, 5-7). Day seven of the Polynesia series (scan 33) builds a clay or newspaper cone with 'a little indentation in the top, as this is where your lava will erupt' and teaches that 'the islands were formed by volcanoes and that many volcanoes around the world are still active'. Honest caveat: this is a model plus one explanation, not instruction, so it is a strong hook for the topic rather than coverage of it."
+      },
+      {
+        "id": "mt_AN2kJE6I0s",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Acids, Alkalis & pH (Science > Matter & Materials, 12-13). 'Make Liquid Rainbows' (scan 12) boils red cabbage, splits the water between glasses, adds baking soda to one and vinegar to another, asks what happens when the two are combined, and states the mechanism: 'Teach your kids that acids and bases account for the excitement.' That is a genuine indicator experiment. Recorded with its age offset stated rather than hidden: the taxonomy places the formal concept at 12-13 and the book presents it as an any-age kitchen activity, so this ref answers 'is there a hands-on way in' for an older child, not 'does this teach pH'."
+      },
+      {
+        "id": "mt_6wG4q6R4kn",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Voting to decide together (History > Civics & Government, 5-8). The '*Vote' entry (scan 48) is the topic's description acted out: 'create a family ballot to vote for some fun things: best bedtime story, favorite restaurant, best zoo animal', then 'Tally the votes and teach the meaning of majority rule'. It even anticipates the sore loser: 'those who voted for ice cream may demand a recount!'"
+      },
+      {
+        "id": "mt_zrCyqhngYm",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Saving Money (Life Skills > Money & Finance, 5-7). 'Make Banks' (scans 48 and 49): 'Start the new year off right by learning to save money', a shoebox divided into compartments with one slot per savings purpose (college, spending), and a papier-mache piggy bank as the alternative. The topic's description names piggy banks and saving jars specifically."
+      },
+      {
+        "id": "mt_OWl0pyMgMJ",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Celebrations and Traditions Around the World (History > Cultural Studies, 5-7). The single best fit for the book's largest deliberate structure. Five multi-day culture series (Native Americans, Latin America, Asia, Africa, Polynesia) each teach food, art, craft, and geography from one region, and the December run puts Chanukah, Christmas, and Kwanzaa beside each other with the Kwanzaa entry explaining all seven principles by name. The topic asks a child to 'describe at least one custom from a country other than their own', which this book supplies several times over."
+      },
+      {
+        "id": "mt_fJNgOr_ike",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Chore Responsibility (Life Skills > Daily Living, 4-10). A real recurring thread, not one entry: 'Kid Cleaning Kits' with child-sized tools so 'Kids will feel like important members of the cleaning crew', colour-coded towels and cups so responsibility is traceable, coins hidden in the dust to make dusting a game, a laundry-hamper fee, and a chore-coupon chart redeemable for outings. The book's own index lists a chore chart on three page ranges."
+      },
+      {
+        "id": "mt_0XxyaQLRhn",
+        "kind": "representational",
+        "mapped": true,
+        "note": "Telling Time: Hours and Half Hours (Mathematics > Measurement, 5-6). Two of the six 'Math Maniacs' ideas (scan 39) are clock-face work: a stick-and-twelve-stones sun dial where 'Make the 12:00 stone straight north', and 'draw a giant chalk circle outside to make a clock face. Use sticks for the hands and have your child jump to various numbers.' Honest caveat: the book builds and reads a clock face physically and never asks the child to draw hands on paper, so it covers the representational half of the topic and not the recording half."
+      },
+      {
+        "id": "mt_OzRZ89GrQW",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Estimating Lengths (Mathematics > Measurement, 7-8). Also from 'Math Maniacs': wrap a small toy and have the child 'guess the box's circumference, length, and volume. Now in metrics', plus 'Guess how many miles to your destination every time you get in the car' with the toddler variant counting steps. The estimate-then-check loop is the topic; the metric-and-imperial pass is a bonus the topic names."
+      }
+    ],
+    "unmappedSkills": [
+      {
+        "name": "building family traditions and rituals",
+        "suggestedSlug": "life_skills.family-traditions",
+        "note": "The book's actual spine, and the taxonomy has no home for it. Establishing a first-snow tradition, a goodbye ceremony in the old house and a welcome ceremony in the new one, a Walk of Fame in the garden, a family flag with a motto, a family time capsule, a family carnival, a family cookbook, and a family newsletter are all one skill: deliberately inventing a repeatable ritual for your own household. Life Skills > Daily Living covers routines, self-care, and chores, which is the maintenance half of family life, not the ritual half. Checked 'tradition', 'ritual', and 'custom' across all 1721 topics: the only hits are Celebrations and Traditions Around the World (already mapped above, and it is about other people's customs) and reading-comprehension topics about themes. Not appended in this session on purpose: taxonomy writes are append-only with their own guard sequence and belong in a change that is only about the taxonomy."
+      },
+      {
+        "name": "craft technique with household materials",
+        "suggestedSlug": "art.household-craft-technique",
+        "note": "By volume this is the largest single thing the book teaches and there is nowhere to put it. Papier-mache over a balloon, weaving paper strips over and under, plaster casting in a pie tin, dipping string in liquid starch to hold a shape, sponge painting, crayon-crumb melting between waxed paper, silhouette tracing from a lamp shadow, wax-strip forming, and decoupage are all transferable techniques rather than one-off projects, and the book cross-references them between entries ('cover an empty can with papier-mache (see pg. 45)'). The taxonomy's entire Art subject is three topics, all appreciation or picture study; the nearest thing to making is Process Art Inspired by an Artist's Technique (mt_2u99ybq83k, 4-7), which is about imitating a named artist, not about learning a craft method."
+      },
+      {
+        "name": "cooking and baking with children",
+        "suggestedSlug": "life_skills.cooking-with-children",
+        "note": "Sixteen full recipes with measured ingredients and oven temperatures, plus an indexed Recipe(s) entry with eleven sub-headings, and cooking is repeatedly the shared activity rather than a means to something else (taffy pull, s'mores, butter shaken in a jar, tortillas, a spice cake baked in a mason jar as a gift). Searched 'cook', 'recipe', 'baking', and 'kitchen' across the taxonomy: three incidental hits, none about cooking as a skill. This is the same gap the Treasury of Year-Round Preschool Activities drop hit from the other end, which is worth noting since two independent sources now want it."
+      },
+      {
+        "name": "occupying yourself quietly without materials",
+        "suggestedSlug": "executive_function.quiet-self-directed-play",
+        "note": "'Have Some Quiet Fun' (scans 50 and 51) is an explicit twelve-item skill list for children who 'have to know how to entertain themselves quietly, in churches, in hospitals, in airplanes, and in office meetings': knot tying, clay, hand-made jigsaws, stickers, hangman and dots-and-boxes, twist-tie building, origami, a ten-second time-estimation game, a surprise paperback, a felt board in a bag, muted video games, and sock puppets. That is self-regulation in a public setting plus self-directed play, and the closest taxonomy topic is Simple Calming Strategies (mt_Iwg2diBSyW, 5-7), which is about managing an emotion, not about filling forty minutes without disturbing anyone."
+      }
+    ],
+    "notes": "Subject and domain are honest compromises and should be read as such. 'multi-subject' follows the precedent of the toddler science book and the PK activity treasury; 'daily-living' is chosen over the runner-up 'cultural-studies' because family routine, chores, seasonal rhythm, cooking, and tradition are the connective tissue and the culture series are episodes inside it. Eleven mapped topics out of more than four hundred activities is the real headline here, and it is not a failure of effort: this book is only incidentally about teaching. It teaches on the pages where it happens to explain something (clouds, geotropism, acids and bases, majority rule, volcanoes), and everywhere else it is proposing a thing to do together. Mappings were not manufactured for the other three hundred and ninety. Every id above was resolved fresh from packages/taxonomy/data/topics.json this session and each carries the page evidence that justifies it."
+  },
+  "difficulty": {
+    "ageBand": [
+      24,
+      168
+    ],
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffoldingLevel": "high",
+    "notes": "The band is wide because the book genuinely is, and it is drawn from the book's own internal ranging rather than a cover claim. The book states 'activities for all ages' and then does the differentiating inside individual entries: 'Toddlers can guess how many steps from here to there' sets the floor, and 'Older kids' appears eight times marking the harder version of an activity (make a cloud chart, use real hemp for a basket, time themselves untying knots, assemble a many-piece puzzle, study Egyptian art). The upper bound of 168 months (14) is where the child-participant activities stop being plausible; a handful of entries deliberately sit outside the band in both directions and are excluded from it rather than allowed to stretch it, namely 'Rock Babies Awake' at the infant end and the twelve-item college departure care package plus 'Teens might like nail polish' at the other. The dense middle, where most entries actually land, is roughly 48 to 132 months. Scaffolding is high and non-negotiable: the book addresses the parent throughout, the child never reads it, and many entries require an adult for heat, knives, a sledgehammer, or a lit match. Complexity is multi-skill because a single entry routinely braids a craft, a science idea, and a conversation, as when the Polynesia beach picture teaches gluing, that shells are animal homes, and that starfish are echinoderms that regenerate arms."
+  },
+  "theming": {
+    "themeType": "seasonal",
+    "characters": [
+      "Easter Bunny",
+      "Tooth Fairy",
+      "Santa Claus",
+      "Good Witch"
+    ],
+    "visualStyle": "hand-drawn",
+    "colorPalette": "limited palette",
+    "appealDrivers": "The voice does the work, not the art. Every entry is written in the first person by a mother of four who admits her failures ('our experiment didn't work very well, but the kids roared with laughter'), disqualifies herself cheerfully ('MAGIC / Maybe I'm just a klutz'), and keeps promising a moment rather than an outcome. Jokes are load-bearing: the entire 'Freeze Plastic Spiders in Ice Cubes' entry reads 'Then invite Aunt Edna over.' A parent skimming this book is being offered permission and a laugh, not a lesson plan, and that is the transferable idea for Homa: the reason a tired parent turns the page is that the next entry might be funny.",
+    "notes": "Seasonal rather than character-driven or interest-led. The four season dividers are the only full-page art in the interior, and the vision pass read all three captured ones: Spring is hand-drawn line art in dark blue and red with a crocus, an Easter basket, and a rabbit's head; Summer is dark-blue line drawings with pink accents of a boy eating watermelon and a girl with a baseball bat, with 'Summer' in large red looping cursive; Autumn is a navy line drawing with red accents of a witch lying across a branch and a dog in a hot dog costume. Interior spot art follows the same two-colour pen convention throughout. The cover breaks style completely: a full-colour folk-art diamond grid of whimsical characters (a pirate, a queen, a snowman, a snail, a green dog in a hat) around a white text box, at 0.72 ink coverage against an interior median of 0.100. The named characters listed above are holiday figures the book stages traditions around, never a recurring cast: none of them appears in more than a handful of entries and none carries content across the book."
+  },
+  "printFormat": {
+    "pageSize": "unknown",
+    "orientation": "portrait",
+    "margins": "generous",
+    "inkDensity": "light",
+    "colorRequirement": "color optional",
+    "notes": "A photo drop of a physical trade paperback, so trim size cannot be established from the scans and is marked unknown per the skill's photo rule; the printed page numbers reach at least 123, so the book is roughly twice the length of the 67-scan capture because most landscape shots cover a two-page spread. Orientation is portrait for the book itself even though 30 of the 67 scans are landscape, which is the phone lane turning sideways to catch a spread. Ink density is light on measurement, not impression: interior ink coverage runs 0.013 to 0.164 with a median of 0.100. Colour is optional in the strict sense: the interior is a two-colour job, navy line art with red or pink accents, and nothing load-bearing is carried by the colour, so a black and white reproduction of any interior page loses warmth and no information. The cover is the only page that needs colour."
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/ref-2026-07-21-family-fun-book.txt",
+    "textBlobUrl": null,
+    "notes": "All 67 scan pages were read. Every span below was checked against the sidecar with whitespace-normalized substring matching before it was written, which matters more than usual here: this is a phone scan of a 1990s-era trade paperback and tesseract's output degrades badly on the pages shot at an angle, so several true facts about this book are simply not quotable from it. That is a reason to drop a claim, not to soften one. Two known limits, both from the capture gates: scan page 2 produced no text at all so nothing on it can support a span, and scan page 37 is blurry so its text came from the vision model as a partial re-read of a spread already captured cleanly at scans 36 and 38. Roles follow the first law. The holidays and the world regions are roled 'about' because the book genuinely devotes multi-page runs to each and a parent searching for Kwanzaa or Polynesia would be well served by landing here. Joni Hilton is 'identity' rather than 'about' because she is the author, not the subject. The cover cast is 'decoration'. Two claims that survive the span test but fail the parent's-question test were deliberately left out: Betsy Ross and Abraham Lincoln each appear in exactly one sentence of one activity, and returning this book for either search would be the swan mistake. Three spans were re-anchored on 2026-07-29 after the rotation pass changed the OCR of the pages they came from. The claims are unchanged; only the evidence moved.",
+    "subjects": [
+      {
+        "name": "family activities",
+        "role": "teaches",
+        "quote": "Awesome Activities for the Entire Family"
+      },
+      {
+        "name": "seasonal traditions",
+        "role": "teaches",
+        "quote": "Establish a tradition, such as popping corn or making homemade chili"
+      },
+      {
+        "name": "household crafts",
+        "role": "teaches",
+        "quote": "There are lots of hats you can design"
+      },
+      {
+        "name": "holiday celebrations",
+        "role": "about",
+        "quote": "Really celebrate Independence Day."
+      },
+      {
+        "name": "family cooking",
+        "role": "teaches",
+        "quote": "Bake a spice cake in a mason jar."
+      }
+    ],
+    "entities": [
+      {
+        "name": "Joni Hilton",
+        "kind": "person",
+        "role": "identity",
+        "quote": "Joni Hilton earned a Master of Fine Arts degree"
+      },
+      {
+        "name": "Easter Bunny",
+        "kind": "character",
+        "role": "about",
+        "quote": "Easter Bunny"
+      },
+      {
+        "name": "Tooth Fairy",
+        "kind": "character",
+        "role": "about",
+        "quote": "At our house, the Tooth Fairy leaves coins"
+      },
+      {
+        "name": "Christmas",
+        "kind": "event",
+        "role": "about",
+        "quote": "Christmas is the ideal time to be an elf"
+      },
+      {
+        "name": "Halloween",
+        "kind": "event",
+        "role": "about",
+        "quote": "Paint a Halloween Sweatshirt"
+      },
+      {
+        "name": "Thanksgiving",
+        "kind": "event",
+        "role": "about",
+        "quote": "Thanksgiving, 97-99"
+      },
+      {
+        "name": "Chanukah",
+        "kind": "event",
+        "role": "about",
+        "quote": "Chanukah, 99-100"
+      },
+      {
+        "name": "Kwanzaa",
+        "kind": "event",
+        "role": "about",
+        "quote": "represent the seven Kwanzaa values"
+      },
+      {
+        "name": "Latin America",
+        "kind": "place",
+        "role": "about",
+        "quote": "Latin America, 45-47"
+      },
+      {
+        "name": "Africa",
+        "kind": "place",
+        "role": "about",
+        "quote": "Africa, 59-60"
+      },
+      {
+        "name": "Asia",
+        "kind": "place",
+        "role": "about",
+        "quote": "Asia, 54-55"
+      },
+      {
+        "name": "Polynesia",
+        "kind": "place",
+        "role": "about",
+        "quote": "Series on Polynesia"
+      },
+      {
+        "name": "pirate",
+        "kind": "character",
+        "role": "decoration",
+        "quote": "Family FUN Book More than 400 Amazing, Amusing",
+        "note": "Cover art, read by the vision pass on scan 1: a folk-art diamond grid of unrelated whimsical figures around the title box, including a pirate, a queen, a snowman, a snail, and a green dog in a hat. None of them appears anywhere in the book's content. Recorded so a future image pass knows what this publisher put on a family-activity cover, and roled decoration so it can never answer 'books about pirates'. The three seasonal divider illustrations (a rabbit and crocus for Spring, a watermelon-eating boy for Summer, a witch on a branch and a dog in a hot dog costume for Autumn) are decoration on the same grounds and are described in theming rather than duplicated here."
+      }
+    ],
+    "themes": [
+      {
+        "name": "family closeness",
+        "evidence": "bring your family closer, knit your hearts together"
+      },
+      {
+        "name": "seasonal rhythm",
+        "evidence": "Let spring waltz in with some fanfare!"
+      },
+      {
+        "name": "household materials",
+        "evidence": "make your own set of drums"
+      },
+      {
+        "name": "making memories",
+        "evidence": "Save them for posterity"
+      },
+      {
+        "name": "everyday science",
+        "evidence": "Teach your kids that acids and bases account for the excitement"
+      },
+      {
+        "name": "secret giving",
+        "evidence": "doing secret good deeds"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "Six-Day Series",
+        "occurrences": 2,
+        "quote": "Six-Day Series"
+      },
+      {
+        "term": "Native Americans",
+        "occurrences": 4,
+        "quote": "Native Americans, 18-20"
+      },
+      {
+        "term": "Older kids",
+        "occurrences": 8,
+        "quote": "Older kids can make a cloud chart"
+      },
+      {
+        "term": "Kwanzaa",
+        "occurrences": 9,
+        "quote": "represent the seven Kwanzaa values"
+      },
+      {
+        "term": "jack-o'-lantern",
+        "occurrences": 4,
+        "quote": "Draw a jack-o'-lantern face on oranges"
+      }
+    ],
+    "referencedWorks": [
+      {
+        "title": "Five Minute Miracles: 373 Quick Daily Projects for You and Your Kids to Share",
+        "author": "Joni Hilton",
+        "kind": "book",
+        "quote": "Five Minute Miracles: 373 Quick Daily Projects for You and Your Kids to Share"
+      },
+      {
+        "title": "The Twelve Days of Christmas",
+        "author": null,
+        "kind": "song",
+        "quote": "The Twelve Days of Christmas"
+      },
+      {
+        "title": "Pin the Tail on the Donkey",
+        "author": null,
+        "kind": "game",
+        "quote": "Pin the Tail on the Donkey"
+      }
+    ],
+    "textExtraction": {
+      "ocr": "tesseract",
+      "visionModel": "google/gemini-3-flash",
+      "visionPages": [
+        1,
+        7,
+        20,
+        35,
+        37,
+        67
+      ],
+      "note": "Mixture by design: tesseract read the 61 dense prose pages, and six pages went to the vision model. Five were escalated for the right reason (the cover, the three season dividers, and the About the Author page are display type over artwork that OCR cannot do honestly) and one, page 37, was escalated because it is blurry. The vision pass also returned what each page SHOWS, which is where this ref's seasonal-divider art descriptions come from. Per-page textSource is in the intake manifest."
+    }
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "art-project-instructions",
+      "nature-observation-journal",
+      "unit-study-packet"
+    ],
+    "gaps": [
+      "family-tradition-card",
+      "seasonal-activity-menu",
+      "cooking-recipe-card"
+    ],
+    "notes": "Matched against the recipe files listed with ls at analysis time, never a remembered list. art-project-instructions is the workhorse, as it was for the two neighbouring Aless activity books: any single make (papier-mache bowl, sun catcher, silhouette, rain stick, Kwanzaa hat, tumbleweed snowman) fits its materials-plus-numbered-steps shell, though this book supplies neither list nor numbers and Homa would be adding both. nature-observation-journal covers the repeated observe-over-days entries, which is a real fit and not a stretch: the cloud chart the book asks older children to keep, the sprout jar, the evaporation race, and the buried-materials decomposition test are all weekly-log shaped. unit-study-packet covers the five culture series, each of which is one region taught across six or seven days through food, art, craft, animals, and geography, which is what that recipe assembles. Nothing in the library produces the book's own atomic unit, hence the gaps. family-tradition-card is one named family ritual in two to four sentences of warm parent-facing prose with a season or holiday tag and nothing to write on; it is not daily-rhythm-cards or visual-schedule-cards, which are icon-plus-label-plus-time-slot schedule cards carrying no prose, and it is not social-narrative, which teaches a child how to handle a situation. seasonal-activity-menu is the page above it: a pick-from-this-list sheet for one season or holiday grouped by effort, meant for a fridge, which is exactly the workflow the book prescribes for itself and the reason its own contents are seasonal while its index is alphabetical. cooking-recipe-card is not new; it is already on the acknowledged backlog from the Treasury of Year-Round Preschool Activities drop, and this book is the second independent source to want it, with sixteen measured recipes and an eleven-entry Recipe(s) index heading."
+  },
+  "stages": {
+    "captured": "2026-07-29T08:44:57Z",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "pending",
+      "targets": [],
+      "commit": null,
+      "note": "No product write happened in this session. The two new format proposals are recorded in recipeMatch.gaps and appended to .cosmo/open-gaps.json so they are owned rather than merely observed; whether either becomes a recipe file is a graduation session's call, and family-tradition-card in particular should wait for a second source, since a single book's house style is not yet a repeatable procedure."
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "commit": null,
+      "note": "The four gaps in skillTargeting.unmappedSkills are proposals, not appends. proposedTopics means topics this change actually wrote into topics.json, and no taxonomy write happened here."
+    },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "notes": "Four things from this run are worth keeping. (1) The capture needs two pages redone and they are not equally important, which the deterministic gates could not know. Page 37 is genuinely blurry (sharpness 28 against a median of 178, and the vision model independently called it blurry with text illegible at the bottom edge), but it duplicates a spread already captured cleanly at scans 36 and 38, so the archive loses nothing; page 2 produced no text at all and sits exactly where the copyright page belongs, which is why this ref cannot name a publisher or a copyright year. The low-drama finding is the expensive one. Both are recorded in captureProblems with what to re-shoot. (2) The book maps to eleven taxonomy topics out of more than four hundred activities, and that ratio is the finding, not a shortfall. It is only incidentally an educational book: it teaches on the pages where it stops to explain something and proposes a shared activity everywhere else. Forcing the other three hundred and ninety into topic ids would have made the corpus worse, so the four things it really teaches that the taxonomy has no home for (family tradition building, craft technique with household materials, cooking with children, and occupying yourself quietly) are recorded as honest gaps instead. (3) The book has no design system at all: no materials list, no numbered steps, no age tag, no time estimate, no supervision symbol. That is worth flagging because Aless's three previous drops were all praised in this taste model precisely for having one, and she kept this one anyway. What it has instead is a voice, and that is the transferable idea for Homa's own activity prose: the reason a tired parent turns the page is that the next entry might be funny. (4) It is the exact structural inverse of the previous book through this intake. Fast Forward Level E is all sequence and no philosophy; this is all philosophy and no sequence. Both route to reference for opposite reasons, which is a useful pair to keep in mind the next time the curriculum test is close."
+}

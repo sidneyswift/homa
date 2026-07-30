@@ -1,0 +1,247 @@
+{
+  "id": "ref-2026-07-16-pemdas-foldable",
+  "droppedBy": "sid",
+  "droppedAt": "2026-07-16T14:34:09-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784260449.909939",
+  "format": "foldable",
+  "title": "Order of Operations PEMDAS Math Doodles Foldable",
+  "publisher": "Melanie Ellsworth, Science and Math Doodles, copyright 2016 and 2017. A free sample from the Grade 5 Math bundle 8.1, Algebraic Reasoning",
+  "gradeLevel": "grade 5 by the publisher's own label, roughly ages 10 to 12; the alignment table maps it to TEKS 5.x and Common Core 5.OA",
+  "pdfScanPageCount": 25,
+  "analysisQuality": "full",
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "pemdas-foldable.pdf",
+    "sourceParts": [
+      "pemdas-foldable.pdf"
+    ],
+    "sourceSha256": "59126dadf5574038797744c4cb4bc453b71347e1b837e64f75355c836466c8aa",
+    "pageCount": 25,
+    "mastersDir": ".cosmo/masters/ref-2026-07-16-pemdas-foldable",
+    "intakeAt": "2026-07-30T06:28:32+00:00",
+    "gateFindings": [
+      "page 16: byte-identical to page 15. The same page was captured twice.",
+      "7 page(s) were shot rotated ([5, 6, 7, 8, 9, 11, 12]). Their text was read correctly from a rotated copy, so nothing is lost and no re-shoot is owed, but the MASTERS are still rotated: any later image work off them must turn them first."
+    ]
+  },
+  "sourceFiles": [
+    {
+      "filename": "FREE PEMDAS Foldable PDF.pdf",
+      "localPath": ".cosmo/inspo-files/pemdas-foldable.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-16-pemdas-foldable/pemdas-foldable.pdf",
+      "blobUploadedAt": "2026-07-30"
+    }
+  ],
+  "routing": {
+    "skillUsed": "reference-ingestion",
+    "ruling": "Reference. One printable format in a handful of variants, plus the seller's front and back matter. No philosophy, no sequence, no pacing, no assessment. The alignment table on scan 15 lists a whole year of the publisher's bundles, which is a catalogue of what else is for sale rather than a scope and sequence this file teaches."
+  },
+  "graduationAlreadyShipped": {
+    "recipe": "apps/web/agent/skills/materials-studio/references/recipes/foldable.md",
+    "anchorId": "foldable",
+    "anchorRegistry": "apps/web/lib/materials/anchors.ts:51",
+    "anchorSource": "apps/web/lib/materials/anchor-sources/foldable.jpg",
+    "verified": "2026-07-30, all four paths read on disk",
+    "whatItTook": "The shipped recipe cites PEMDAS by name and holds the Homa foldable bar: tri-fold layout, fold lines, glue tab. Those are exactly this product's mechanics.",
+    "note": "Shipped BEFORE any analysis record existed, the same as its sibling drop ref-2026-07-16-five-paragraph-essay-outline. Both were found by the ingestion ledger on 2026-07-29, having been read as never-ingested while the product generated against them for two weeks."
+  },
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "dense",
+    "visualHierarchy": "mnemonic-letter-then-worked-example",
+    "whiteSpaceRatio": 0.25,
+    "flowDirection": "top-down",
+    "notes": "The teaching pages are foldable panels, not worksheets: each panel takes one letter of the mnemonic and pairs it with a hand-drawn doodle and a worked example, so the finished, folded object is a reference the child keeps in a notebook rather than a page they hand in. Only about eight of the twenty-five scans are the foldable itself. Scans 2 and 3 are printing and folding instructions, which is unusual and load-bearing: a foldable that prints at the wrong scale or on the wrong side is ruined, so the product ships its own printing guide. Scan 15 is a TEKS and Common Core alignment table for the publisher's entire year. Scans 18 to 25 are the seller's catalogue."
+  },
+  "skillTargeting": {
+    "subject": "math",
+    "domain": "multiplication-division",
+    "topics": [
+      {
+        "id": "mt_jHgRQ4hR0g",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Order of operations (10-11): the exact skill, and the age matches the publisher's grade 5 label."
+      },
+      {
+        "id": "mt_hImiKNiaNh",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Order of operations, age 10+ (Mathematical Thinking): the same skill from the reasoning side, which is what the mnemonic is for."
+      },
+      {
+        "id": "mt_8jFSnXxqQD",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Brackets in Expressions (10-11): the P and the G of PEMDAS and GEMDAS."
+      },
+      {
+        "id": "mt_3rTIyJDw7-",
+        "kind": "language",
+        "mapped": true,
+        "note": "Advanced Maths Vocabulary (10-11): the foldable is in large part a vocabulary object, naming exponent, grouping, and operation."
+      }
+    ],
+    "unmappedSkills": [
+      {
+        "name": "reading an exponent",
+        "suggestedSlug": "math.exponents-introduction",
+        "note": "The E of PEMDAS assumes the child can read a power, and the taxonomy's exponent topics all sit in Algebra at 11 or older. A grade 5 order-of-operations sheet needs an introductory exponent topic below that. Not appended here: taxonomy writes are append-only with their own guard sequence and belong in a change that is only about the taxonomy."
+      }
+    ]
+  },
+  "difficulty": {
+    "ageBand": [
+      120,
+      144
+    ],
+    "complexity": "single-skill",
+    "prerequisites": [
+      "mt_8jFSnXxqQD"
+    ],
+    "scaffoldingLevel": "medium",
+    "notes": "One skill, one mnemonic, and the finished object is a permanent reference rather than a test, which is why scaffolding sits at medium rather than low: the child keeps the answer beside them by design. The product ships PEMDAS and GEMDAS variants (scans 5 and 7), which is a real pedagogical choice rather than a duplicate, since GEMDAS says Grouping instead of Parentheses and avoids teaching that only round brackets count."
+  },
+  "theming": {
+    "themeType": "character-driven",
+    "characters": [],
+    "visualStyle": "hand-drawn",
+    "colorPalette": "full-color",
+    "appealDrivers": "Doodles are the whole brand and the whole mechanism. Each mnemonic letter gets a hand-drawn character-ish glyph, so the child is not memorising a word list, they are colouring and folding an object they then own. The dual-version approach (a colour set and a blackline set) lets the child do the colouring rather than receive it, which is the difference between a decorated worksheet and a made thing.",
+    "notes": "Character-driven without licensed characters, which is the interesting part for Homa: personality carried by drawing style rather than by IP, and therefore reproducible without a rights problem."
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "tight",
+    "inkDensity": "heavy",
+    "colorRequirement": "color optional",
+    "notes": "The one item in this corpus where printing is part of the pedagogy, and it says so: the instructions require Adobe Reader at actual size, duplex front and back, then glue. That is a real constraint on anything Homa generates in this format, because a foldable that scales to fit does not fold. Heavy ink on the colour pages, which is why the blackline variants exist."
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/ref-2026-07-16-pemdas-foldable.txt",
+    "textBlobUrl": null,
+    "textExtraction": {
+      "ocr": "pdf-text-layer",
+      "visionModel": "google/gemini-3-flash",
+      "visionPages": [
+        1,
+        25
+      ],
+      "note": "Born-digital, so the text layer is exact. The panels are mostly drawing, so the text layer is thin on the teaching pages and the vision reads identify what the front and back matter actually are."
+    },
+    "subjects": [
+      {
+        "name": "order of operations",
+        "role": "teaches",
+        "quote": "Order of Operations PEMDAS"
+      },
+      {
+        "name": "grouping symbols",
+        "role": "teaches",
+        "quote": "Order of Operations GEMDAS"
+      },
+      {
+        "name": "interactive notebook foldable",
+        "role": "identity",
+        "quote": "Math Doodles Foldable"
+      },
+      {
+        "name": "grade 5 math",
+        "role": "identity",
+        "quote": "5th Grade"
+      }
+    ],
+    "entities": [
+      {
+        "name": "Melanie Ellsworth",
+        "kind": "person",
+        "role": "identity",
+        "quote": "Melanie Ellsworth"
+      },
+      {
+        "name": "Science and Math Doodles",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "Science and Math Doodles"
+      }
+    ],
+    "themes": [
+      {
+        "name": "learning by making an object",
+        "evidence": "glue them together"
+      },
+      {
+        "name": "mnemonics as memory aids",
+        "evidence": "Order of Operations PEMDAS"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "PEMDAS",
+        "occurrences": 4,
+        "quote": "Order of Operations PEMDAS"
+      },
+      {
+        "term": "GEMDAS",
+        "occurrences": 4,
+        "quote": "Order of Operations GEMDAS"
+      },
+      {
+        "term": "printing orientation guide",
+        "occurrences": 1,
+        "quote": "printing orientation guide"
+      },
+      {
+        "term": "TEKS/Common Core Alignment",
+        "occurrences": 1,
+        "quote": "TEKS/Common Core Alignment"
+      }
+    ],
+    "referencedWorks": [],
+    "notes": "No claim is drawn from the eight catalogue pages (scans 18 to 25) or the alignment table, which list the publisher's other products. Those pages mention dozens of maths topics this file does not teach, and tagging any of them would make the corpus answer 'what do we have on place value' with an order-of-operations foldable. Same call as the Fast Forward cover swan."
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "foldable",
+      "guided-notes"
+    ],
+    "gaps": [],
+    "notes": "foldable was DERIVED from this drop and carries the golden anchor of the same name (see graduationAlreadyShipped). guided-notes is the neighbour: both put the reference in the child's hands, but a foldable is cut, folded and glued into a three-dimensional object while guided notes stay flat. No gap recorded, which is the honest outcome for a drop whose format already shipped."
+  },
+  "captureProblems": [
+    {
+      "issue": "scan 16 is byte-identical to scan 15",
+      "reshoot": false,
+      "note": "Both are the alignment table. This is a born-digital PDF, so the duplication is in the source file the seller published, not in any capture. Nothing to re-shoot."
+    },
+    {
+      "issue": "7 pages report as rotated (5, 6, 7, 8, 9, 11, 12)",
+      "reshoot": false,
+      "note": "These are the foldable panels, which are laid out sideways on purpose so the folded object reads upright. Text was read from rotated copies and nothing was lost. Any future image work off these masters must turn them first."
+    }
+  ],
+  "stages": {
+    "captured": "2026-07-30T05:11:12Z",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "recipe",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/foldable.md"
+      ],
+      "commit": null,
+      "note": "Already shipped before this record existed; the target resolves on disk today. commit is left null because the shipping commit is unknown to this session, and inventing one would be exactly the false claim the ledger now checks for."
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "note": "math.exponents-introduction is proposed in skillTargeting.unmappedSkills. proposedTopics means topics actually appended to topics.json; no taxonomy write happened here."
+    },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "notes": "The oldest drop in the channel and, with its sibling four minutes later, the clearest evidence for why the ingestion ledger was built: this page produced a shipped materials-studio recipe and the golden anchor named foldable, and had no analysis record for two weeks. Two things this book teaches beyond its maths. First, printing is part of the pedagogy here and the product ships its own printing guide, which is a constraint Homa inherits the moment it generates a foldable: a page that silently scales to fit will not fold. Second, only about eight of twenty-five pages are the resource; the rest are printing instructions, an alignment table, and eight pages of seller catalogue. That ratio is normal for a free TPT product and is a real cost to plan for when the web lane opens: most of what a scrape returns is not teaching material."
+}

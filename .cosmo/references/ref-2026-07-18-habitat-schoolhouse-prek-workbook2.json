@@ -5,12 +5,15 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784427280.926519",
   "format": "preschool-workbook",
-  "title": "Habitat Schoolhouse Preschool Workbook 2 — Part 1 (Letters E, F + Earth/Ocean Theme)",
+  "title": "Habitat Schoolhouse Preschool Workbook 2 \u2014 Part 1 (Letters E, F + Earth/Ocean Theme)",
   "publisher": "The Habitat Schoolhouse Inc / Gumboot Kid",
   "series": "Preschool with Habitat Schoolhouse",
   "gradeLevel": "Preschool (ages 3-5)",
   "workbookNumber": "2 Part 1",
-  "lettersCovered": ["E", "F"],
+  "lettersCovered": [
+    "E",
+    "F"
+  ],
   "pageCount": 28,
   "callouts": [],
   "newActivityTypes": [
@@ -18,22 +21,24 @@
       "type": "labeled-diagram",
       "description": "Full-page watercolor Earth illustration with labeled parts: North Pole, South Pole, Equator, Northern Hemisphere, Southern Hemisphere, Ocean, Land, Clouds. Below: 'How many poles does the earth have?' (dot-trace number 2) + 'The Earth is the ___ planet from the Sun' (multiple choice: First/Third/Tenth).",
       "skill": "science (geography, astronomy), counting, reading comprehension",
-      "recipeNote": "NEW — a labeled diagram page combining science vocabulary, counting, and comprehension questions. More advanced than the WB5 animal anatomy pages because it introduces geographic/scientific terminology."
+      "recipeNote": "NEW \u2014 a labeled diagram page combining science vocabulary, counting, and comprehension questions. More advanced than the WB5 animal anatomy pages because it introduces geographic/scientific terminology."
     },
     {
       "type": "animal-study-nonfiction",
-      "description": "Letter Ff themed: 'Fish — Animal Study on Tuna Fish.' Full Q&A format: What does a tuna fish look like? What do they like to eat? What is a tuna's habitat? What are tuna fish good at? Watercolor illustrations of two tuna species. This is a READ-ALOUD nonfiction page — the parent reads the questions and answers to the child.",
+      "description": "Letter Ff themed: 'Fish \u2014 Animal Study on Tuna Fish.' Full Q&A format: What does a tuna fish look like? What do they like to eat? What is a tuna's habitat? What are tuna fish good at? Watercolor illustrations of two tuna species. This is a READ-ALOUD nonfiction page \u2014 the parent reads the questions and answers to the child.",
       "skill": "science (marine biology), reading comprehension, vocabulary, scientific questioning",
-      "recipeNote": "NEW — a structured nonfiction read-aloud page with Q&A format. Teaches scientific questioning patterns (What does it look like? What does it eat? Where does it live? What is it good at?)."
+      "recipeNote": "NEW \u2014 a structured nonfiction read-aloud page with Q&A format. Teaches scientific questioning patterns (What does it look like? What does it eat? Where does it live? What is it good at?)."
     }
   ],
   "comparisonToOtherWorkbooks": {
     "vsWB1": "WB1 was all sensory/kinesthetic (playdough, paint, placing objects). WB2 adds nonfiction reading and scientific diagrams. Cognitive demands are increasing.",
     "vsWB5": "WB5 had simple animal anatomy diagrams (labeled body parts). WB2 has both anatomy AND geographic/astronomical diagrams (labeled Earth). WB2 also has full nonfiction read-aloud pages (animal studies) that WB5 didn't have.",
-    "progression": "WB1 (hands-on) → WB2 (hands-on + early nonfiction reading + diagrams) → WB5 (all activity types + more complex sorting). The series builds a reading-for-information habit very early."
+    "progression": "WB1 (hands-on) \u2192 WB2 (hands-on + early nonfiction reading + diagrams) \u2192 WB5 (all activity types + more complex sorting). The series builds a reading-for-information habit very early."
   },
   "recipeMatch": {
-    "matchedRecipes": ["counting-mat"],
+    "matchedRecipes": [
+      "counting-mat"
+    ],
     "gaps": [
       {
         "name": "labeled-science-diagram",
@@ -41,9 +46,18 @@
       },
       {
         "name": "animal-study-nonfiction-page",
-        "description": "A structured Q&A nonfiction page about an animal: What does it look like? What does it eat? What is its habitat? What is it good at? Watercolor illustrations. Designed as a read-aloud — parent reads to child. Teaches scientific questioning patterns."
+        "description": "A structured Q&A nonfiction page about an animal: What does it look like? What does it eat? What is its habitat? What is it good at? Watercolor illustrations. Designed as a read-aloud \u2014 parent reads to child. Teaches scientific questioning patterns."
       }
     ]
   },
-  "notes": "Thirteenth Aless drop. Third Habitat Schoolhouse workbook (WB1, WB2, WB5 now in the collection). WB2 introduces two significant new activity types: labeled science diagrams (Earth with geographic terms) and nonfiction animal study pages (Q&A format). This shows the series isn't just letter-of-the-week — it integrates science, geography, and nonfiction reading from Workbook 2 onward. The watercolor art quality is consistently museum-grade."
+  "notes": "Thirteenth Aless drop. Third Habitat Schoolhouse workbook (WB1, WB2, WB5 now in the collection). WB2 introduces two significant new activity types: labeled science diagrams (Earth with geographic terms) and nonfiction animal study pages (Q&A format). This shows the series isn't just letter-of-the-week \u2014 it integrates science, geography, and nonfiction reading from Workbook 2 onward. The watercolor art quality is consistently museum-grade.",
+  "sourceFiles": [
+    {
+      "filename": "P003%20-%202022%20PreK%20Workbook%202%20-%20Part%201.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-habitat-schoolhouse-prek-workbook2/P003%20-%202022%20PreK%20Workbook%202%20-%20Part%201.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

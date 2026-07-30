@@ -5,7 +5,7 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784339551.032979",
   "format": "mini-book",
-  "title": "When I Get Frustrated — Social Story (Allison Fors)",
+  "title": "When I Get Frustrated \u2014 Social Story (Allison Fors)",
   "layout": {
     "structure": "panel-grid-foldable",
     "spacing": "airy",
@@ -48,7 +48,10 @@
     ]
   },
   "difficulty": {
-    "ageBandMonths": [48, 96],
+    "ageBandMonths": [
+      48,
+      96
+    ],
     "ageBandGrades": "Pre-K to 3",
     "complexity": "single-skill",
     "prerequisites": [],
@@ -56,25 +59,35 @@
   },
   "theming": {
     "themeType": "character-driven",
-    "characters": ["diverse cartoon children (multiple skin tones, hair types)"],
+    "characters": [
+      "diverse cartoon children (multiple skin tones, hair types)"
+    ],
     "visualStyle": "cartoon-round-friendly",
     "colorPalette": "dual-version",
-    "colorVersions": ["full-color", "black-and-white-coloring"],
-    "appealDrivers": ["diverse representation", "child-relatable scenarios", "friendly round art style", "coloring option"]
+    "colorVersions": [
+      "full-color",
+      "black-and-white-coloring"
+    ],
+    "appealDrivers": [
+      "diverse representation",
+      "child-relatable scenarios",
+      "friendly round art style",
+      "coloring option"
+    ]
   },
   "printFormat": {
     "pageSize": "letter",
     "orientation": "portrait",
     "margins": "standard",
     "inkDensity": "medium",
-    "colorRequirement": "color optional — B&W version included for coloring",
-    "foldInstructions": "included — single page folds into 8-page mini book"
+    "colorRequirement": "color optional \u2014 B&W version included for coloring",
+    "foldInstructions": "included \u2014 single page folds into 8-page mini book"
   },
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "one-page-mini-book: single letter-size page with 8-panel grid that folds (fold all lines → fold in half → cut center dotted line → fold lengthwise → push in ends → fold closed) into an 8-page mini book. Requires precise panel placement so pages read in correct order after folding.",
-      "social-narrative: first-person story format with illustration + text per page, following a pattern: normalize the emotion → describe body signals → state the goal → list coping strategies → end with positive affirmation + open-ended question"
+      "one-page-mini-book: single letter-size page with 8-panel grid that folds (fold all lines \u2192 fold in half \u2192 cut center dotted line \u2192 fold lengthwise \u2192 push in ends \u2192 fold closed) into an 8-page mini book. Requires precise panel placement so pages read in correct order after folding.",
+      "social-narrative: first-person story format with illustration + text per page, following a pattern: normalize the emotion \u2192 describe body signals \u2192 state the goal \u2192 list coping strategies \u2192 end with positive affirmation + open-ended question"
     ]
   },
   "components": [
@@ -87,10 +100,10 @@
       ]
     },
     {
-      "name": "Mini Book — Color Version (8 panels on one page)",
-      "description": "Single page, 4x2 grid. When folded, creates an 8-page story: Cover ('When I Get Frustrated... Social Story') → Page 2 (frustration is normal, body signals: tight body, hot face, fast heart) → Page 3 (I want to make safe choices, here are things I can do) → Page 4 (count to 10 slowly with fingers) → Page 5 (walk away, ask for a break, say 'I need space') → Page 6 (squeeze something soft — pillow, stuffed animal, stress ball) → Page 7 (take deep breaths to calm down) → Page 8 (positive affirmation + open question: 'What else helps me when I get frustrated?'). Full color with diverse cartoon children.",
+      "name": "Mini Book \u2014 Color Version (8 panels on one page)",
+      "description": "Single page, 4x2 grid. When folded, creates an 8-page story: Cover ('When I Get Frustrated... Social Story') \u2192 Page 2 (frustration is normal, body signals: tight body, hot face, fast heart) \u2192 Page 3 (I want to make safe choices, here are things I can do) \u2192 Page 4 (count to 10 slowly with fingers) \u2192 Page 5 (walk away, ask for a break, say 'I need space') \u2192 Page 6 (squeeze something soft \u2014 pillow, stuffed animal, stress ball) \u2192 Page 7 (take deep breaths to calm down) \u2192 Page 8 (positive affirmation + open question: 'What else helps me when I get frustrated?'). Full color with diverse cartoon children.",
       "designPatterns": [
-        "Social narrative structure: normalize → describe → model strategies → affirm",
+        "Social narrative structure: normalize \u2192 describe \u2192 model strategies \u2192 affirm",
         "First-person voice: 'I can...' statements empower the child",
         "One strategy per page: no overwhelm",
         "Diverse representation: different children on each page (skin tones, hair, clothing)",
@@ -99,7 +112,7 @@
       ]
     },
     {
-      "name": "Mini Book — B&W Version",
+      "name": "Mini Book \u2014 B&W Version",
       "description": "Same content and layout as color version but in black and white line art. Doubles as a coloring activity.",
       "designPatterns": [
         "Dual-version approach: color for quick use, B&W for engagement (coloring while reading)",
@@ -115,5 +128,14 @@
       ]
     }
   ],
-  "notes": "First non-academic reference. This is SEL (social-emotional learning) — a subject Homa's taxonomy has some coverage on (Emotional Literacy domain) but no material recipes for. The mini-book format is fascinating: one page becomes an 8-page book via folding. That's a printable format Homa could own — generate personalized social stories as single-page foldable mini books. The social narrative structure (normalize → body signals → coping strategies → affirmation) is a therapeutic format used widely in special ed and early childhood. Sid dropping this alongside the Adapting for Autism CVC worksheets suggests interest in inclusive/therapeutic educational formats, not just academic drill."
+  "notes": "First non-academic reference. This is SEL (social-emotional learning) \u2014 a subject Homa's taxonomy has some coverage on (Emotional Literacy domain) but no material recipes for. The mini-book format is fascinating: one page becomes an 8-page book via folding. That's a printable format Homa could own \u2014 generate personalized social stories as single-page foldable mini books. The social narrative structure (normalize \u2192 body signals \u2192 coping strategies \u2192 affirmation) is a therapeutic format used widely in special ed and early childhood. Sid dropping this alongside the Adapting for Autism CVC worksheets suggests interest in inclusive/therapeutic educational formats, not just academic drill.",
+  "sourceFiles": [
+    {
+      "filename": "FREEBehaviorEmotionalRegulationSocialNarrativeBacktoSchool-1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-social-story-frustrated/FREEBehaviorEmotionalRegulationSocialNarrativeBacktoSchool-1.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

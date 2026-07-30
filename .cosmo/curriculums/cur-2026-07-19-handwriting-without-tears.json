@@ -8,13 +8,15 @@
   "sourceFiles": [
     {
       "filename": "hwt-pt1.pdf",
-      "localPath": ".cosmo/inspo-files/hwt-pt1.pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-hwt-pt1/hwt-pt1.pdf"
+      "localPath": ".cosmo/inspo-files/handwriting-without-tears-part1.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-hwt-pt1/hwt-pt1.pdf",
+      "redundantSecondCopy": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-handwriting-without-tears/handwriting-without-tears-part1.pdf"
     },
     {
       "filename": "hwt-pt2.pdf",
-      "localPath": ".cosmo/inspo-files/hwt-pt2.pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-hwt-pt2/hwt-pt2.pdf"
+      "localPath": ".cosmo/inspo-files/handwriting-without-tears-part2.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-hwt-pt2/hwt-pt2.pdf",
+      "redundantSecondCopy": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-19-handwriting-without-tears/handwriting-without-tears-part2.pdf"
     }
   ],
   "layer1_philosophy": {
@@ -346,5 +348,301 @@
       "urgency": "resolved"
     }
   ],
-  "notes": "Real page counts, verified directly rather than assumed from the filenames: hwt-pt1.pdf is 120 PDF pages (a CamScanner phone scan of physical book spreads, some early pages scanned two or three times by accident) covering physical book pages 1 through 229; hwt-pt2.pdf is 24 PDF pages covering physical book pages 230 through the end of the book (roughly page 276, including the blank Notes pages at the very back). The two PDFs are confirmed to be ONE continuous book split across two Slack uploads, not two different books, grade levels, or editions: pt2's very first lesson page (capital/lowercase E) picks up exactly where pt1's last lesson page (capital/lowercase I) leaves off, mid-way through the same 'Transition Group' of the guide's own Lowercase Teaching Order, and every page in both files carries the identical footer ('Readiness & Writing PreK Teacher's Guide' / '(c) 2021 Learning Without Tears'). The book itself is titled 'Get Set for School (r) by Learning Without Tears: Readiness & Writing Pre-K Teacher's Guide', 8th edition, copyright 2021 Learning Without Tears, the modern rebrand of the company Aless knows as Handwriting Without Tears; this is that company's current Pre-K handwriting-and-readiness volume, not a book with 'Handwriting Without Tears' literally on its cover. It is a school-market teacher's guide (references classroom routines and circle time throughout) rather than a homeschool-authored curriculum, which is worth keeping in mind anywhere Homa adapts its activities for a single child at home. Sampling covered the front matter and table of contents (pt1 pages 1-10), the Readiness section including Wood Piece Play, Mat Man, and pencil-grip guidance (pt1 pages 21-30), the Pre-Writing-to-Capital-Letters transition and the Developmental Teaching stroke-family order (pt1 pages 61-70), the Counting & Numbers section (pt1 pages 91-100), the end of Writing Capital Letters into the start of Writing Lowercase Letters (pt1 pages 111-120), the remainder of Writing Lowercase Letters through the alphabet's end (pt2 pages 1-8), and the Resources section: Help Me Write My Name, the full index, the References bibliography, and the Capital/Lowercase/Number Formation Charts (pt2 pages 17-24). This is representative sampling across the full breadth of both files as instructed, not a page-by-page read of all 144 combined PDF pages. Copyrighted page images and exact proprietary wording (letter mnemonics, Number Stories text, trademarked terms like Mat Man and Wet-Dry-Try) were used only for this session's own analysis and are described here in Homa's own words, never reproduced verbatim into any product file; the new letter-number-formation-practice recipe describes a generic box-and-stroke-cue pedagogy pattern in Homa's own voice, not a copy of this publisher's specific letters, mnemonics, or illustrations."
+  "notes": "Real page counts, verified directly rather than assumed from the filenames: hwt-pt1.pdf is 120 PDF pages (a CamScanner phone scan of physical book spreads, some early pages scanned two or three times by accident) covering physical book pages 1 through 229; hwt-pt2.pdf is 24 PDF pages covering physical book pages 230 through the end of the book (roughly page 276, including the blank Notes pages at the very back). The two PDFs are confirmed to be ONE continuous book split across two Slack uploads, not two different books, grade levels, or editions: pt2's very first lesson page (capital/lowercase E) picks up exactly where pt1's last lesson page (capital/lowercase I) leaves off, mid-way through the same 'Transition Group' of the guide's own Lowercase Teaching Order, and every page in both files carries the identical footer ('Readiness & Writing PreK Teacher's Guide' / '(c) 2021 Learning Without Tears'). The book itself is titled 'Get Set for School (r) by Learning Without Tears: Readiness & Writing Pre-K Teacher's Guide', 8th edition, copyright 2021 Learning Without Tears, the modern rebrand of the company Aless knows as Handwriting Without Tears; this is that company's current Pre-K handwriting-and-readiness volume, not a book with 'Handwriting Without Tears' literally on its cover. It is a school-market teacher's guide (references classroom routines and circle time throughout) rather than a homeschool-authored curriculum, which is worth keeping in mind anywhere Homa adapts its activities for a single child at home. Sampling covered the front matter and table of contents (pt1 pages 1-10), the Readiness section including Wood Piece Play, Mat Man, and pencil-grip guidance (pt1 pages 21-30), the Pre-Writing-to-Capital-Letters transition and the Developmental Teaching stroke-family order (pt1 pages 61-70), the Counting & Numbers section (pt1 pages 91-100), the end of Writing Capital Letters into the start of Writing Lowercase Letters (pt1 pages 111-120), the remainder of Writing Lowercase Letters through the alphabet's end (pt2 pages 1-8), and the Resources section: Help Me Write My Name, the full index, the References bibliography, and the Capital/Lowercase/Number Formation Charts (pt2 pages 17-24). This is representative sampling across the full breadth of both files as instructed, not a page-by-page read of all 144 combined PDF pages. Copyrighted page images and exact proprietary wording (letter mnemonics, Number Stories text, trademarked terms like Mat Man and Wet-Dry-Try) were used only for this session's own analysis and are described here in Homa's own words, never reproduced verbatim into any product file; the new letter-number-formation-practice recipe describes a generic box-and-stroke-cue pedagogy pattern in Homa's own voice, not a copy of this publisher's specific letters, mnemonics, or illustrations.",
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/cur-2026-07-19-get-set-for-school-readiness-writing.txt",
+    "textBlobUrl": null,
+    "textExtraction": {
+      "ocr": "tesseract",
+      "visionModel": "google/gemini-3-flash",
+      "visionPages": [
+        1,
+        144
+      ]
+    },
+    "subjects": [
+      {
+        "name": "handwriting readiness",
+        "role": "teaches",
+        "quote": "Readiness & Writing"
+      },
+      {
+        "name": "capital letter formation",
+        "role": "teaches",
+        "quote": "WRITING CAPITAL LETTERS"
+      },
+      {
+        "name": "alphabet knowledge",
+        "role": "teaches",
+        "quote": "ALPHABET KNOWLEDGE"
+      },
+      {
+        "name": "fine motor skills",
+        "role": "teaches",
+        "quote": "Crayon Grip"
+      },
+      {
+        "name": "pre-k curriculum",
+        "role": "identity",
+        "quote": "Get Set for School"
+      }
+    ],
+    "entities": [
+      {
+        "name": "Mat Man",
+        "kind": "character",
+        "role": "teaches",
+        "quote": "Mat Man",
+        "note": "Roled teaches, not cast: Mat Man is not a story character who appears beside the content, he IS the drawing lesson. Building and drawing him is the activity."
+      },
+      {
+        "name": "Learning Without Tears",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "Learning Without Tears"
+      },
+      {
+        "name": "Jan Z. Olsen",
+        "kind": "person",
+        "role": "identity",
+        "quote": "Jan Z. Olsen"
+      }
+    ],
+    "themes": [
+      {
+        "name": "developmental readiness over age",
+        "evidence": "developmentally-based program"
+      },
+      {
+        "name": "multisensory learning",
+        "evidence": "Multisensory Instruction"
+      },
+      {
+        "name": "play instead of seat work",
+        "evidence": "seat work and worksheets can be detrimental to young children"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "Wood Pieces",
+        "occurrences": 30,
+        "quote": "Wood Pieces"
+      },
+      {
+        "term": "Wet-Dry-Try",
+        "occurrences": 6,
+        "quote": "Wet-Dry-Try"
+      },
+      {
+        "term": "Roll-A-Dough",
+        "occurrences": 4,
+        "quote": "Roll-A-Dough"
+      },
+      {
+        "term": "Check Readiness",
+        "occurrences": 3,
+        "quote": "Check Readiness"
+      },
+      {
+        "term": "School-to-Home",
+        "occurrences": 2,
+        "quote": "School-to-Home"
+      }
+    ],
+    "referencedWorks": [
+      {
+        "title": "My First School Book",
+        "author": null,
+        "kind": "book",
+        "quote": "My First School Book"
+      }
+    ],
+    "notes": "The proprietary manipulative names (Wood Pieces, Roll-A-Dough, Wet-Dry-Try, Line It Up) are the highest-value retrieval terms here: a parent who owns this program will say them by name, and nothing else in the corpus uses them."
+  },
+  "layer5_lessons": {
+    "decompositionQuality": "partial",
+    "unitKind": "section",
+    "unitsFound": 7,
+    "unitsDecomposed": 6,
+    "units": [
+      {
+        "ordinal": 2,
+        "unitLabel": "READINESS",
+        "topic": {
+          "name": "hand skills and stroke positions",
+          "quote": "READINESS"
+        },
+        "activities": [
+          {
+            "description": "Wood Piece play, sorting, trading and bagging",
+            "quote": "Wood Pieces"
+          },
+          {
+            "description": "Teaching crayon grip with an accompanying song",
+            "quote": "Crayon Grip"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Wood Pieces set and mat",
+            "quote": "Wood Pieces"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_WBfj79OqXz",
+          "mt_NJz7vT4Bhp"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 3,
+        "unitLabel": "DRAWING",
+        "topic": {
+          "name": "representational drawing",
+          "quote": "DRAWING"
+        },
+        "activities": [
+          {
+            "description": "Build and sing Mat Man, then draw him",
+            "quote": "Mat Man"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Mat Man pieces and pattern",
+            "quote": "Mat Man"
+          }
+        ],
+        "homaTopicIds": [],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 4,
+        "unitLabel": "ALPHABET KNOWLEDGE",
+        "topic": {
+          "name": "letter naming and matching",
+          "quote": "ALPHABET KNOWLEDGE"
+        },
+        "activities": [
+          {
+            "description": "Sing and point along the alphabet; name that capital; match capital to lowercase",
+            "quote": "Capital & Lowercase Letters"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_frDIaXzWbx"
+        ],
+        "ageRangeMonths": [
+          36,
+          66
+        ]
+      },
+      {
+        "ordinal": 5,
+        "unitLabel": "COLORS & COLORING",
+        "topic": {
+          "name": "crayon control and colour naming",
+          "quote": "COLORS & COLORING"
+        },
+        "activities": [
+          {
+            "description": "Aim and scribble, then aim and colour, then trace",
+            "quote": "Aim & Trace"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_xYlY6CjGN4"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 6,
+        "unitLabel": "PRE-WRITING",
+        "topic": {
+          "name": "building letters before writing them",
+          "quote": "PRE-WRITING"
+        },
+        "activities": [
+          {
+            "description": "Roll-A-Dough letters, Stamp and See screen, Line It Up, Wet-Dry-Try on the slate",
+            "quote": "Roll-A-Dough"
+          },
+          {
+            "description": "Air writing and door tracing: whole-arm letter formation",
+            "quote": "Air Writing"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Slate Chalkboard",
+            "quote": "Slate Chalkboard"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_DMvKfP4uGC"
+        ],
+        "ageRangeMonths": [
+          42,
+          66
+        ]
+      },
+      {
+        "ordinal": 7,
+        "unitLabel": "WRITING CAPITAL LETTERS",
+        "topic": {
+          "name": "capital letter formation",
+          "quote": "WRITING CAPITAL LETTERS"
+        },
+        "activities": [
+          {
+            "description": "Capitals taught in stroke families, vertical and horizontal first (L F E H T I U)",
+            "quote": "Capitals First"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_H7DquwQi_F"
+        ],
+        "ageRangeMonths": [
+          48,
+          72
+        ]
+      }
+    ],
+    "notes": "Six of the seven sections are decomposed. Section 1 (INTRODUCTION, pages 1 to 32) is front matter about how to use the guide and carries no teaching sequence, so it is counted in unitsFound and deliberately not decomposed. Per-lesson decomposition below section level is not attempted here: the guide holds roughly 90 named lesson pages, and a lesson-level pass is real work that should be its own session rather than a rushed tail on this one."
+  },
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "handwriting-without-tears-part1.pdf",
+    "sourceParts": [
+      "handwriting-without-tears-part1.pdf",
+      "handwriting-without-tears-part2.pdf"
+    ],
+    "sourceSha256": "61ada94a8452f2b00905bbdec886fb0c2518b8665a46500b493b7ef06ac5ce99",
+    "pageCount": 144,
+    "mastersDir": ".cosmo/masters/cur-2026-07-19-handwriting-without-tears",
+    "gateFindings": [
+      "15 page(s) were shot rotated ([14, 23, 24, 26, 41, 57, 78, 97, 106, 107, 110, 121] ...). Their text was read correctly from a rotated copy, so nothing is lost and no re-shoot is owed, but the MASTERS are still rotated: any later image work off them must turn them first."
+    ],
+    "note": "Dropped as two parts of one book. The filename said 'Handwriting w:o Tears', which is what a form-only pass would have recorded; the cover read says Get Set for School Readiness & Writing, Pre-K Teacher's Guide, which is what changed the routing.",
+    "intakeAt": "2026-07-29T10:03:28+00:00"
+  },
+  "stages": {
+    "aboutnessAddedAt": "2026-07-29"
+  },
+  "mergeNote": "Aboutness (and Layer 5 where present) added 2026-07-29 from a re-analysis that was started as a duplicate record (cur-2026-07-19-get-set-for-school-readiness-writing.json). The duplicate was created because an audit matched drops by filename text instead of by Slack message ts, and missed this record. The duplicate is deleted; this record is canonical and keeps its original four-layer analysis. Capture artifacts (per-page masters and the text sidecar) are new and live under cur-2026-07-19-handwriting-without-tears.",
+  "coversMessageTs": [
+    "1784493367.506409"
+  ],
+  "coversMessageNote": "This book arrived across two Slack messages. The second message's ts is declared here so the ingestion ledger joins it to this record instead of reporting the part-2 file as an un-ingested drop.",
+  "sourceFilesNote": "Each part already had a durable Blob copy from the original ingest; those URLs are canonical here. A 2026-07-30 sweep re-uploaded the same bytes under a second path before checking, and that redundant copy is recorded per file rather than deleted. localPath now names the file actually on disk, which uses a different local naming convention from the original run."
 }

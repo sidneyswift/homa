@@ -1,0 +1,441 @@
+{
+  "id": "ref-2026-07-19-your-health",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-19T16:56:23-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784494583.030969",
+  "format": "health-textbook",
+  "title": "Your Health (Harcourt Brace, 1999)",
+  "publisher": "Harcourt Brace & Company, copyright 1999, ISBN 0-15-310139-3",
+  "gradeLevel": "roughly grade 1, usable ages 6 to 8. The printed grade number did not survive OCR (a stray 'CRADE' tab fragment beside the glossary is the only trace), so the level is inferred from content: the child is losing baby teeth, meeting the five senses, sorting living from nonliving, and reading one-clause sentences.",
+  "pdfScanPageCount": 114,
+  "analysisQuality": "full",
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "your-health.pdf",
+    "sourceParts": [
+      "your-health.pdf"
+    ],
+    "sourceSha256": "cb83512adf06d088bbfb4ae8985b6f37395d52ff7b8a3ffaab0124c1f664b6d5",
+    "pageCount": 114,
+    "mastersDir": ".cosmo/masters/ref-2026-07-19-your-health",
+    "intakeAt": "2026-07-29T09:35:55+00:00",
+    "gateFindings": [
+      "9 page(s) were shot rotated ([7, 40, 41, 42, 56, 61, 70, 90, 91]). Their text was read correctly from a rotated copy, so nothing is lost and no re-shoot is owed, but the MASTERS are still rotated: any later image work off them must turn them first."
+    ]
+  },
+  "sourceFiles": [
+    {
+      "filename": "your-health.pdf",
+      "localPath": ".cosmo/inspo-files/your-health.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-19-your-health/your-health.pdf",
+      "blobUploadedAt": "2026-07-30"
+    }
+  ],
+  "routing": {
+    "skillUsed": "reference-ingestion",
+    "ruling": "Reference, on the skills' own test. The curriculum skill's decisive test is a philosophy AND a sequence. This book has the sequence and none of the philosophy: nine chapters with a fixed per-lesson template, a Life Skills strand that recurs nine times, and a Health Handbook, but no stated method, no pacing advice, no parent or teacher guidance, and no assessment design beyond chapter reviews the child fills in himself. The front matter (scans 2 and 3) lists consulting authors, health specialists, and field-test teachers, which names the scholarship behind the program without stating how to teach it. This is the pupil edition; the teacher's edition of the same series would route curriculum, exactly as Carolyng's Harcourt Trophies teacher guide did. Same call as ref-2026-07-22-fast-forward-student-handbook-e and ref-2026-07-20-toddlers-science-activity-book. The nine-chapter scope is captured in aboutness rather than discarded, which is what dimension F exists for."
+  },
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "airy",
+    "visualHierarchy": "photograph-dominant, with a question headline and a short text column laid over or beside it",
+    "whiteSpaceRatio": 0.2,
+    "flowDirection": "top-down",
+    "notes": "One printed page per lesson, and the template holds across all nine chapters: a 'Lesson' tab, a headline written as the child's own question ('Why should I keep clean?', 'What makes me special?', 'How can I stay safe around strangers?'), two to four short paragraphs of two-clause sentences, full-bleed photographs of real children doing the thing, and a boxed CHECK question at the foot of the page (35 CHECK boxes across the book). Three other page shapes repeat. The chapter opener is a full-bleed photo with one hands-on project and the line 'For more things to do, visit the Internet.' The Life Skills spread runs 'Learn This Skill' as four numbered photo panels, then 'Practice This Skill' with a fresh problem (both phrases appear nine times). The Chapter Review is a fixed four-part page: 'Use Health Words' (word bank plus numbered fill-in sentences), 'Use Health Ideas', 'Use Life Skills', and an Activities rail tagged On Your Own, With a Partner, With a Team, and At Home. The 13-page Body Atlas that opens the book is its own shape: a labeled system diagram, a 'Caring for Your ...' bullet list, and two numbered ACTIVITIES the child performs on their own body. Verified across the front matter and sampled scans from every chapter (scans 6, 7, 10, 13, 18, 33, 40, 50, 57, 63, 78, 85, 91, 99, 100) plus the glossary and index.",
+    "captureNote": "107 of the 114 captures are landscape and 7 are portrait, and the printed pagination runs past 208 (the index) to a final 214. The phone lane therefore shot most of this book as two-page spreads, one capture per spread, which is why 114 captures cover a roughly 214-page book. Nothing was lost, but per-page cropping would have to precede any anchor or exemplar work."
+  },
+  "skillTargeting": {
+    "subject": "science",
+    "domain": "the-human-body",
+    "topics": [
+      {
+        "id": "mt_nwSWPTENmv",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "The Five Senses (5-7): the atlas Eyes and Ears page (printed 2 and 3) plus chapter 2 lessons 2 and 3, 'What are my senses?' and 'Why are my senses important?' (printed 36 to 39)."
+      },
+      {
+        "id": "mt_SdIWVjzopp",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Bones & Muscles (5-7): the skeletal atlas page (printed 4, skull and spine labeled) and the muscular page (printed 12)."
+      },
+      {
+        "id": "mt_lp1eTsQen7",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "The Heart & Blood (5-7): the circulatory atlas page (printed 8 and 9), heart and blood vessels labeled, with the fist-size comparison."
+      },
+      {
+        "id": "mt_tiPyEkm4cU",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "How Breathing Works (5-7): the respiratory atlas page (printed 10 and 11), lungs, mouth, and nose labeled."
+      },
+      {
+        "id": "mt_pJ5zsocdNx",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "The Brain Controls the Body (5-7): the nervous system atlas page (printed 13)."
+      },
+      {
+        "id": "mt_cxJRc15osy",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Basic Body Needs (5-7): 'Why do I need food?' (printed 90), 'Why should I exercise?' (printed 78), and 'Why do I need sleep?' (printed 84) are this topic's three halves stated almost verbatim."
+      },
+      {
+        "id": "mt_I047mKeeaq",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Types of Teeth (7-9): 'What do teeth do?' (printed 54) teaches shape-to-function, sharp front teeth for biting and wide back teeth for chewing, at a simpler grain than the taxonomy topic's four named types."
+      },
+      {
+        "id": "mt_QhLAeAlHI0",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Balanced Diet & Food Groups (7-9): chapter 5 lessons 2 and 3 (printed 92 to 95) work the Food Guide Pyramid group by group. The topic is written for 7 to 9 and this book teaches it a year earlier, which is a real age offset rather than a mismatch."
+      },
+      {
+        "id": "mt_k1u-rddlMM",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Self-Care Routines (3-7): brushing (printed 58), flossing (printed 60), and handwashing (printed 72) taught as sequenced procedures, including when and for how long."
+      },
+      {
+        "id": "mt_q3vRl4dddK",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Everyday Safety Awareness (5-7): the whole Injury Prevention chapter (printed 148 to 164) plus the Handbook's Fire Safety and Stranger Danger pages (printed 192 and 193). The topic description names roads, strangers, and trusted adults, all three of which are chapters here."
+      },
+      {
+        "id": "mt_LhkP_KKIRS",
+        "kind": "language",
+        "mapped": true,
+        "note": "Naming Basic Emotions (5-7): 'What are feelings?' (printed 18) names happy, sad, afraid, and excited, and the chapter review asks the child to name feelings from photographs."
+      },
+      {
+        "id": "mt_kvrvpQris4",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Expressing Feelings with Words (5-7): 'How can I show my feelings?' (printed 20) and 'What should I do when I feel angry?' (printed 22)."
+      },
+      {
+        "id": "mt_Iwg2diBSyW",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Simple Calming Strategies (5-7): the two Manage Stress spreads (printed 24 and 80). Molly takes a deep breath and talks to a parent; Chen exercises with friends. Both model the topic's named strategies."
+      },
+      {
+        "id": "mt_HBcvu0UxYe",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Makes someone a good friend (5-7): 'How can I be a friend?' (printed 28)."
+      },
+      {
+        "id": "mt_lAvS72LOUO",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Everyday Kindness and Care (5-7): 'How can I respect others?' (printed 26) and 'Why should I be polite?' (printed 44)."
+      },
+      {
+        "id": "mt_UHQfb-n-w3",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Actions and Their Consequences (5-7): the four Make Decisions spreads (printed 64, 100, 178) whose second step is literally 'Imagine what could happen with each choice'."
+      }
+    ],
+    "unmappedSkills": [
+      {
+        "name": "how germs spread illness, and everyday prevention",
+        "suggestedSlug": "science.germs-and-how-illness-spreads",
+        "note": "Chapter 6 (printed 110 to 124) teaches how illness spreads, the signs of a cold, what vaccines do, and what an allergy is, for a six-year-old. The taxonomy's only immunity topic (mt_LkOMijDvL7, Immunity & Vaccines) is ages 11 to 13 and is about B cells, antibodies, and the microbiome, so mapping this onto it would be wrong by five years and by grain. Recorded as a gap rather than mismapped. Not appended in this session on purpose: taxonomy writes are append-only with their own guard sequence and belong in a change that is only about the taxonomy."
+      },
+      {
+        "name": "refusing tobacco, alcohol, and other drugs at primary age",
+        "suggestedSlug": "social_emotional.refusing-unsafe-substances",
+        "note": "Chapter 7 (printed 128 to 144) is a full drug-prevention strand for six-year-olds: what medicines are for, who may give them, what caffeine, tobacco, and alcohol do to the body, and a scripted four-step refusal. The nearest taxonomy topics are mt_2R3xRpYhMa (Effects of Drugs & Alcohol, ages 13 to 14) and mt_JivEBTD_KV (Peer Pressure and Resisting It, ages 9 to 11). Nothing sits below age 9."
+      },
+      {
+        "name": "community health workers and neighborhood cleanliness",
+        "suggestedSlug": "social_studies.community-health-workers",
+        "note": "Chapter 9 (printed 168 to 182) covers nurses, doctors, clinics, sanitation workers, litter, and reuse. mt_0Mc3ItywUx (Community Laws and Local Leaders, 5-7) is about laws and mayors, not health workers; mt_0e5rZxbAeR (Finite Resources & Recycling) is ages 12 to 14."
+      }
+    ],
+    "coverageNote": "Honest statement of the shape of the miss: Homa's taxonomy has no health strand. Body anatomy is well covered under Science > The Human Body, and the social and emotional chapters map cleanly onto Personal & Social Development, but hygiene, dental care, nutrition below age 7, disease prevention, substance refusal, and community health have no home at primary age. Sixteen of this book's strands mapped; the three above did not, and they are three of its nine chapters. A future health domain would need roughly eight to twelve topics, which is a taxonomy change of its own and not something to smuggle in through an ingest."
+  },
+  "difficulty": {
+    "ageBand": [
+      72,
+      96
+    ],
+    "complexity": "multi-skill",
+    "prerequisites": [
+      "mt_YKkCM63fSC",
+      "mt_aFvsj35QzC"
+    ],
+    "scaffoldingLevel": "high",
+    "notes": "Complexity is multi-skill because the book is a survey: nine strands run in parallel, and the Life Skills spreads deliberately reuse one chapter's content to practise another chapter's skill (Tanya refuses a friend's cold medicine using the drug chapter's steps while the illness chapter supplies the sneezing). A single page is single-skill; the book is not. Scaffolding is high and adult-dependent by design: activities say 'Ask an adult to blow up a hotdog shaped balloon', the Activities rail is tagged With a Partner and At Home, and the prose assumes a reader who is still decoding, so a parent is reading alongside. Prerequisites are reading prerequisites rather than health ones, which is the point: nothing in the book assumes prior health knowledge, only the ability to read a short informational sentence."
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [
+      "Molly",
+      "Chen",
+      "Tanya",
+      "Scott",
+      "Kenny",
+      "Bo",
+      "Cal",
+      "Al"
+    ],
+    "visualStyle": "realistic",
+    "colorPalette": "full-color",
+    "appealDrivers": "Two moves carry this book, and both are transferable. First, every lesson is titled as the child's own question rather than as a skill: 'What makes me special?', 'Why do I lose teeth?', 'How can I stay safe on the bus?'. The child sees their own curiosity on the page; the teaching parent sees a health scope. Second, the teaching is photographic and specific: real children of visibly mixed backgrounds doing the actual thing, plus commissioned medical illustration for the body atlas (the credits page names Barbara Cousins for medical illustrations and Digital Imaging Group for most photography, shot partly at Blue Ash Elementary School in Ohio). The one invented artifact in the book is the best page in it: a fake snack advertisement for 'SUPERSWEETS' that the child is then asked to see through.",
+    "notes": "Neutral rather than character-driven: no mascots, no licensed characters, no seasonal hooks. The named children (Molly, Chen, Tanya, Scott and the rest) each appear in exactly one Life Skills spread and never return, so they are scenario carriers rather than a cast the child follows. Visually this is 1999 educational photography, warm and slightly dated, useful to Homa as evidence that photographic realism is a legitimate register for health content rather than as a style to imitate."
+  },
+  "printFormat": {
+    "pageSize": "unknown",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "heavy",
+    "colorRequirement": "needs color",
+    "notes": "A photo drop, so trim size cannot be measured: the captures are mostly two-page spreads shot with a phone and the physical book was never squared to a scanner. Orientation is portrait for the printed page, though 107 of 114 captures are landscape because they hold a spread. Ink density is heavy and non-negotiable: mean ink coverage across the 114 masters is 0.45 and full-bleed photography runs to the page edge, so this is a bound textbook rather than anything a parent prints. Colour is load-bearing, not decorative: the food-group pages, the cold-symptom page, and the caffeine sorting picture all ask the child to identify things by appearance, and a black and white print would break them."
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/ref-2026-07-19-your-health.txt",
+    "textBlobUrl": null,
+    "notes": "All 114 pages read, 87,847 characters. Two provenance points worth keeping. (1) The cover carries a yellow Half Price Books resale sticker, and tesseract read it as the first line of the book ('HALF PRICE BOOKS Our Price 5.99'). It is deliberately recorded nowhere in this block, not even as decoration: decoration means present in the item and carrying no content, and a shop's price label is not part of the work at all. It is provenance of one used copy and belongs in the taste log, which is where it went. (2) The cover collage also contains a Snellen eye chart, which OCR read as loose capitals ('E FP TOZ LPED PECFD EDFCZP FELOPZD DEFPOTEC'); that block is the only reason those letters are in the sidecar, and it is recorded as decoration so it can never answer a content question. Roles otherwise follow the first law: subjects are the nine chapter strands the book exists to teach, the Life Skills children are cast because each appears in exactly one scenario, and the publisher is identity. Two-column pages interleave in the OCR (the medicine-safety spread reads 'Never take medicines by Medicines are drugs. When children yourself'), so every quote below was chosen from a run that survives the interleaving intact.",
+    "subjects": [
+      {
+        "name": "human body systems",
+        "role": "teaches",
+        "quote": "Your muscular system helps your body move."
+      },
+      {
+        "name": "dental health",
+        "role": "teaches",
+        "quote": "You should floss once a day."
+      },
+      {
+        "name": "nutrition",
+        "role": "teaches",
+        "quote": "This Food Guide Pyramid helps people choose what to eat."
+      },
+      {
+        "name": "personal safety",
+        "role": "teaches",
+        "quote": "How can I stay safe around strangers?"
+      },
+      {
+        "name": "germs and illness",
+        "role": "teaches",
+        "quote": "Soap and water kill germs that can make you ill."
+      },
+      {
+        "name": "feelings and friendship",
+        "role": "teaches",
+        "quote": "Feelings are what you feel inside when you are happy, sad,"
+      }
+    ],
+    "entities": [
+      {
+        "name": "Food Guide Pyramid",
+        "kind": "object",
+        "role": "about",
+        "quote": "You need to eat food from all the groups in the Food Guide Pyramid."
+      },
+      {
+        "name": "tobacco",
+        "kind": "object",
+        "role": "about",
+        "quote": "There are drugs in tobacco. There are drugs in tobacco smoke."
+      },
+      {
+        "name": "alcohol",
+        "kind": "object",
+        "role": "about",
+        "quote": "Alcohol is a common drug. It is in beer and wine."
+      },
+      {
+        "name": "caffeine",
+        "kind": "object",
+        "role": "about",
+        "quote": "Caffeine is a common drug. It is in coffee, tea, and soft drinks."
+      },
+      {
+        "name": "911",
+        "kind": "object",
+        "role": "about",
+        "quote": "Use the phone to call 911."
+      },
+      {
+        "name": "Stop, Drop, and Roll",
+        "kind": "object",
+        "role": "about",
+        "quote": "Stop, Drop, and Roll right away to put out the flames.",
+        "note": "Taught in the Handbook's Fire Safety page (printed 192) as three captioned panels, and named again in the chapter 8 lesson on fires."
+      },
+      {
+        "name": "Stranger Danger",
+        "kind": "object",
+        "role": "about",
+        "quote": "Stranger Danger",
+        "note": "The book's own name for its stranger-safety rule set, carried both as a chapter 8 lesson (printed 162) and as a Handbook reference page (printed 193)."
+      },
+      {
+        "name": "The President's Challenge",
+        "kind": "event",
+        "role": "about",
+        "quote": "The President's Challenge is a physical fitness program for children"
+      },
+      {
+        "name": "Harcourt Brace & Company",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "Copyright \u00a9 1999 by Harcourt Brace & Company"
+      },
+      {
+        "name": "Molly",
+        "kind": "character",
+        "role": "cast",
+        "quote": "Molly is going to sleep over at Hannah's"
+      },
+      {
+        "name": "Tanya",
+        "kind": "character",
+        "role": "cast",
+        "quote": "Tanya says no to Nancy."
+      },
+      {
+        "name": "Scott",
+        "kind": "character",
+        "role": "cast",
+        "quote": "Scott is at Kirk\u2019s house. Kirk finds matches"
+      },
+      {
+        "name": "Snellen eye chart",
+        "kind": "object",
+        "role": "decoration",
+        "quote": "FELOPZD",
+        "note": "Cover collage art, read by the vision pass as part of a photo border of healthy foods, sports equipment, a brain model, and an eye chart around a green toothbrush. OCR transcribed the chart's letters as text, which is the only reason a block of capitals sits at the top of the sidecar. The book does teach eyes (the iris and pupil, printed page 2), but the chart itself teaches nothing, so it is roled decoration and can never answer a content question."
+      }
+    ],
+    "themes": [
+      {
+        "name": "taking care of your own body",
+        "evidence": "You can do many things that will help you stay well."
+      },
+      {
+        "name": "everyday safety rules",
+        "evidence": "Follow the steps to cross safely."
+      },
+      {
+        "name": "saying no",
+        "evidence": "To refuse means to say no to something."
+      },
+      {
+        "name": "getting along with others",
+        "evidence": "Treating others nicely is called respect."
+      },
+      {
+        "name": "asking a trusted adult",
+        "evidence": "Tell a trusted adult, such as a family member, a teacher, or a police officer."
+      },
+      {
+        "name": "keeping a neighborhood clean",
+        "evidence": "Community workers help keep your neighborhood clean and safe."
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "CHECK",
+        "occurrences": 35,
+        "quote": "CHECK"
+      },
+      {
+        "term": "germs",
+        "occurrences": 18,
+        "quote": "Germs are too tiny to see."
+      },
+      {
+        "term": "stress",
+        "occurrences": 17,
+        "quote": "Molly feels stress."
+      },
+      {
+        "term": "healthful",
+        "occurrences": 15,
+        "quote": "What makes a healthful snack?"
+      },
+      {
+        "term": "responsibility",
+        "occurrences": 10,
+        "quote": "A responsibility is something you need to do on your own."
+      },
+      {
+        "term": "Learn This Skill",
+        "occurrences": 9,
+        "quote": "Learn This Skill"
+      }
+    ],
+    "referencedWorks": [
+      {
+        "title": "hbschool.com",
+        "author": "Harcourt Brace & Company",
+        "kind": "website",
+        "quote": "http://www.hbschool.com",
+        "note": "The publisher's companion site, printed on every chapter opener under 'For more things to do, visit the Internet.' A 1999 URL, so almost certainly dead; recorded because it shows the program already assumed a second, off-page activity layer."
+      }
+    ],
+    "textExtraction": {
+      "ocr": "tesseract",
+      "visionModel": "google/gemini-3-flash",
+      "visionPages": [
+        1,
+        114
+      ],
+      "note": "Mixture by design: tesseract read the 112 interior pages, and the two covers went to a vision model. That is what made the cover legible at all, since the title sits as display type over photography. Per-page textSource is in the intake manifest. Two known sidecar legibility problems, neither a gap in the capture: several two-column pages interleave their columns in the OCR, and six pages (scans 40, 41, 42, 51, 56, 61) were shot upside down and read out mirrored. Scan 97 carries rotated vertical text for the same reason. The deterministic gates fired nothing on any of them, because a mirrored page is sharp, inked, and unique, which is a real blind spot in the intake worth a rotation check. Every quote in this analysis was chosen from a run that avoids all three."
+    }
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "labeled-anatomy-diagram",
+      "lesson-comprehension-check",
+      "classification-sorting-mat",
+      "narration-page",
+      "unit-study-packet"
+    ],
+    "gaps": [
+      "life-skill-step-story",
+      "question-headline-lesson-page"
+    ],
+    "notes": "Matched against the recipe files listed at analysis time, never a remembered list. labeled-anatomy-diagram is the bullseye: the 13-page Body Atlas is seven labeled system diagrams (eye and ear, skeleton, digestive, circulatory, respiratory, muscular, nervous) with exactly the leader-line-and-word-bank shape that recipe describes. lesson-comprehension-check covers the 35 boxed CHECK closers and the Chapter Review's Use Health Ideas block. classification-sorting-mat covers 'What foods are in each food group?', which is a five-zone sort. narration-page covers the chapter-opener projects, which are draw-then-tell prompts ('Draw a picture of a time when you were very happy.'). unit-study-packet is the closest whole-chapter analogue: opener project, several lesson pages, a skill feature, a review, and a take-home rail, all on one theme. Two shapes have no recipe. life-skill-step-story is the Life Skills spread: a named four-step procedure (Manage Stress, Make Decisions, Resolve Conflicts, Communicate, Say No) taught by walking one child through one scenario a panel per step, then handing the child a different problem to solve with the same steps. social-narrative is the nearest shipped recipe and is genuinely different: it is first-person, it normalizes an emotion, and it has no numbered transferable procedure and no transfer problem. question-headline-lesson-page is the book's spine: a short expository teaching page for a six-year-old, headlined as the child's own question, three or four two-clause sentences, a photograph that carries half the meaning, and one closing check question. Every shipped recipe produces a page the child works on; nothing produces a page that teaches, which is a real hole in the library rather than a variant of one of these."
+  },
+  "stages": {
+    "captured": "2026-07-29T08:39:01Z",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "recipe",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/life-skill-step-story.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/question-headline-lesson-page.md"
+      ],
+      "commit": null,
+      "note": "Intended paths only. This session was scoped to the analysis, so neither recipe file was written and neither guard (check:fleet-skills, check:materials) was run. Both gaps are recorded in .cosmo/open-gaps.json so the backlog stays explicit rather than looking handled."
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "commit": null,
+      "note": "The three health gaps are recorded in skillTargeting.unmappedSkills as proposals, not here: proposedTopics means topics this change actually appended to topics.json, and no taxonomy write happened in this session."
+    },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "notes": "Three things worth carrying out of this drop. (1) The corpus now has a health textbook and the taxonomy has nowhere to put half of it. Sixteen strands mapped cleanly, mostly onto Science > The Human Body and Personal & Social Development, and three whole chapters (disease prevention, drug refusal, community health) had no home at primary age at all. The nearest existing topics miss by four to seven years, which is the honest finding rather than a mapping problem to solve by stretching an id. (2) The book's most reusable idea costs nothing to copy: every lesson is headlined as the child's own question. 'Why do I lose teeth?' is the same lesson as 'Primary and permanent dentition' and it is the version a six-year-old will read voluntarily. Homa already writes warm copy; this is a structural version of the same instinct, and it is the single thing from this book most worth putting into a recipe. (3) The Life Skills spread is a format Homa cannot currently make. Nine times the book stops teaching content and teaches a four-step procedure instead, models it on one child's real situation panel by panel, then hands the child a fresh problem. That is closer to how a parent actually wants a hard skill taught (manage stress, refuse something, resolve a fight) than any activity page in the recipe library, and it is recorded as the life-skill-step-story gap. Capture caveat for whoever works this next: the phone lane shot spreads, not pages, so any anchor or exemplar work needs per-page crops first.",
+  "attributionNote": "Corrected 2026-07-29: recorded as carolyng during analysis, but the Slack message author for ts 1784494583.030969 is Alessa Llanes. Taste signals credited to the wrong founder are worse than none, because the taste model is per-person."
+}

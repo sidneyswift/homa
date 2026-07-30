@@ -98,7 +98,7 @@
       "methodology": "Direct Instruction (DISTAR)",
       "mappedPct": 100,
       "gapCount": 7,
-      "decisionsCount": 9,
+      "decisionsCount": 11,
       "about": [],
       "themes": [],
       "unitsDecomposed": 0,
@@ -129,11 +129,30 @@
       "mappedPct": 80,
       "gapCount": 5,
       "decisionsCount": 6,
-      "about": [],
-      "themes": [],
-      "unitsDecomposed": 0,
-      "unitTopics": [],
-      "works": []
+      "about": [
+        "handwriting readiness",
+        "capital letter formation",
+        "alphabet knowledge",
+        "fine motor skills",
+        "pre-k curriculum"
+      ],
+      "themes": [
+        "developmental readiness over age",
+        "multisensory learning",
+        "play instead of seat work"
+      ],
+      "unitsDecomposed": 6,
+      "unitTopics": [
+        "hand skills and stroke positions",
+        "representational drawing",
+        "letter naming and matching",
+        "crayon control and colour naming",
+        "building letters before writing them",
+        "capital letter formation"
+      ],
+      "works": [
+        "My First School Book"
+      ]
     },
     {
       "id": "cur-2026-07-19-harcourt-art-everywhere",
@@ -159,11 +178,34 @@
       "mappedPct": 89,
       "gapCount": 1,
       "decisionsCount": 6,
-      "about": [],
-      "themes": [],
+      "about": [
+        "life science",
+        "earth science",
+        "physical science",
+        "science process skills",
+        "elementary science textbook"
+      ],
+      "themes": [
+        "observing the everyday world",
+        "science as a job real people do",
+        "growth and change over time",
+        "hands-on investigation before explanation",
+        "carrying the lesson home"
+      ],
       "unitsDecomposed": 0,
       "unitTopics": [],
-      "works": []
+      "works": [
+        "All Night Near the Water",
+        "Animal Seasons",
+        "Bull's Head",
+        "Day Light, Night Light",
+        "Multimedia Science Glossary",
+        "The Learning Site",
+        "The Puddle",
+        "The Very Hungry Caterpillar",
+        "Water",
+        "What Makes a Magnet?"
+      ]
     },
     {
       "id": "cur-2026-07-19-playing-preschool-y1",
@@ -204,26 +246,33 @@
       "mappedPct": 59,
       "gapCount": 1,
       "decisionsCount": 8,
-      "about": [],
-      "themes": [],
+      "about": [
+        "communities",
+        "maps and globes",
+        "american history",
+        "jobs and money",
+        "natural resources",
+        "citizenship",
+        "elementary social studies textbook"
+      ],
+      "themes": [
+        "helping your community",
+        "how things change over time",
+        "courage and fairness",
+        "caring for the earth",
+        "alike and different",
+        "belonging to groups"
+      ],
       "unitsDecomposed": 0,
       "unitTopics": [],
-      "works": []
-    },
-    {
-      "id": "cur-2026-07-19-teach-child-read-100-lessons",
-      "name": "Teach Your Child to Read in 100 Easy Lessons (Siegfried Engelmann) \u2014 Parts 1 & 2",
-      "droppedBy": "aless",
-      "droppedAt": "2026-07-19T10:43:00-04:00",
-      "methodology": "Direct Instruction (DISTAR/SRA)",
-      "mappedPct": 0,
-      "gapCount": 2,
-      "decisionsCount": 2,
-      "about": [],
-      "themes": [],
-      "unitsDecomposed": 0,
-      "unitTopics": [],
-      "works": []
+      "works": [
+        "America, the Beautiful",
+        "Poor Richard's Almanack",
+        "The Farmer in the Dell",
+        "The Farmer's Little Girl",
+        "The Star-Spangled Banner",
+        "www.sfsocialstudies.com"
+      ]
     },
     {
       "id": "cur-2026-07-20-beast-academy-1a",

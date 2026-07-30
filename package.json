@@ -22,6 +22,7 @@
     "check:drip": "tsx --test apps/web/lib/drip/sweep.test.ts",
     "check:billing": "tsx --tsconfig apps/web/tsconfig.json --test apps/web/lib/billing/wall-exemption.test.ts apps/web/lib/billing/channel-access.test.ts apps/web/lib/billing/purchased-tier.test.ts apps/web/app/app/settings/plan-section.test.tsx apps/web/app/app/settings/parents-section.test.tsx apps/web/lib/billing/account-access.test.ts apps/web/lib/billing/trial-reminder.test.ts apps/web/lib/billing/apple-verify.test.ts apps/web/components/billing/wall-copy.test.ts apps/web/components/marketing/landing-content.test.ts apps/web/lib/signup-session.test.ts",
     "check:isolation": "node scripts/isolation-check.mjs",
+    "check:ingestion": "python3 .cosmo/scripts/ingestion-ledger.py --check",
     "check:eval-isolation": "tsx --tsconfig apps/web/tsconfig.json --test apps/web/lib/eval-isolation.test.ts apps/web/lib/map/db-target.test.ts apps/web/lib/materials/eval-blob-store.test.ts",
     "eval:sandbox": "tsx scripts/eval-sandbox.mts",
     "check:morning-research-brief-v2": "pnpm morning-research-brief-v2:e2e && tsx --test scripts/morning-research-brief-v2-report.test.ts",

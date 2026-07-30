@@ -5,24 +5,28 @@
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784427273.437599",
   "format": "parent-home-supplement",
-  "title": "Los Pollitos Dicen — Unit 1 Home Supplements (Spanish Language Class Companion)",
+  "title": "Los Pollitos Dicen \u2014 Unit 1 Home Supplements (Spanish Language Class Companion)",
   "publisher": "Los Pollitos Dicen (Spanish class program)",
   "series": "Los Pollitos Dicen",
   "gradeLevel": "Early childhood / Elementary (ages 3-8, beginner Spanish)",
   "pageCount": 7,
   "callouts": [],
   "overview": {
-    "description": "A 7-slide PowerPoint parent companion for Unit 1 of a 'Los pollitos dicen' Spanish language program. Provides parents with: what to do at home to reinforce class lessons, unit vocabulary, and weekly practice guidance. The program uses 'living language' — students hear entire sentences in context instead of isolated words. Song-based learning is the primary method.",
+    "description": "A 7-slide PowerPoint parent companion for Unit 1 of a 'Los pollitos dicen' Spanish language program. Provides parents with: what to do at home to reinforce class lessons, unit vocabulary, and weekly practice guidance. The program uses 'living language' \u2014 students hear entire sentences in context instead of isolated words. Song-based learning is the primary method.",
     "philosophy": "Living language acquisition through song and context. Young children acquire language by hearing words many times in different contexts. Most at-home practice is done through song.",
-    "components": ["Parent guidance slide (what to do at home)", "Weekly checklist mention", "Unit 1 vocabulary reference (slides 3-7)"]
+    "components": [
+      "Parent guidance slide (what to do at home)",
+      "Weekly checklist mention",
+      "Unit 1 vocabulary reference (slides 3-7)"
+    ]
   },
   "designPatterns": {
     "parentGuidanceForLanguage": {
       "description": "Slide 2 tells parents: 'Young children best acquire language by hearing words many times, in different contexts.' Then provides specific instructions: spend time several times a week, use the weekly checklist, reinforce through song. This is parenting coaching for language learning.",
-      "value": "Parents know WHAT to do and WHY. Not just 'practice Spanish' — specific methods backed by acquisition theory."
+      "value": "Parents know WHAT to do and WHY. Not just 'practice Spanish' \u2014 specific methods backed by acquisition theory."
     },
     "songBasedLanguageLearning": {
-      "description": "The program centers language learning around songs ('Los pollitos dicen' = 'The little chicks say'). Songs provide rhythm, repetition, and melody — all of which aid memory and pronunciation. This is the same principle as the ECME music education guidebook.",
+      "description": "The program centers language learning around songs ('Los pollitos dicen' = 'The little chicks say'). Songs provide rhythm, repetition, and melody \u2014 all of which aid memory and pronunciation. This is the same principle as the ECME music education guidebook.",
       "value": "Music + language = natural pairing. Children learn songs without effort; vocabulary comes along for the ride."
     },
     "weeklyChecklist": {
@@ -30,7 +34,7 @@
       "value": "Accountability without micromanagement. The parent knows exactly what to do each week."
     },
     "livingLanguage": {
-      "description": "Students hear entire sentences, not isolated words. 'Los pollitos dicen' teaches phrases in context: '¿Cómo estás?' not 'how = cómo, are = estás, you = tú.' Whole-phrase learning mirrors how children naturally acquire their first language.",
+      "description": "Students hear entire sentences, not isolated words. 'Los pollitos dicen' teaches phrases in context: '\u00bfC\u00f3mo est\u00e1s?' not 'how = c\u00f3mo, are = est\u00e1s, you = t\u00fa.' Whole-phrase learning mirrors how children naturally acquire their first language.",
       "value": "Natural acquisition over grammar drilling. Sentences before vocabulary lists."
     }
   },
@@ -38,10 +42,21 @@
     "subject": "world-languages",
     "domain": "spanish",
     "topics": [
-      {"id": "spanish.unit-1-vocabulary", "kind": "conceptual", "mapped": false},
-      {"id": "spanish.song-based-learning", "kind": "procedural", "mapped": false}
+      {
+        "id": "spanish.unit-1-vocabulary",
+        "kind": "conceptual",
+        "mapped": false
+      },
+      {
+        "id": "spanish.song-based-learning",
+        "kind": "procedural",
+        "mapped": false
+      }
     ],
-    "unmappedSkills": ["parent-language-coaching", "song-based-language-acquisition"]
+    "unmappedSkills": [
+      "parent-language-coaching",
+      "song-based-language-acquisition"
+    ]
   },
   "recipeMatch": {
     "matchedRecipes": [],
@@ -52,5 +67,14 @@
       }
     ]
   },
-  "notes": "Twelfth Aless drop. Second Spanish/language drop in a row — confirms foreign language is a priority for her. This is a CLASS companion (suggesting Aless may be taking or teaching a Spanish co-op class — 'Los pollitos dicen' is a popular Spanish immersion program for young children). The parent guidance approach (telling parents HOW to reinforce at home) mirrors the Harcourt School-Home Connection pattern Carolyng loved. Both parents want materials that bridge school/lesson time and home time."
+  "notes": "Twelfth Aless drop. Second Spanish/language drop in a row \u2014 confirms foreign language is a priority for her. This is a CLASS companion (suggesting Aless may be taking or teaching a Spanish co-op class \u2014 'Los pollitos dicen' is a popular Spanish immersion program for young children). The parent guidance approach (telling parents HOW to reinforce at home) mirrors the Harcourt School-Home Connection pattern Carolyng loved. Both parents want materials that bridge school/lesson time and home time.",
+  "sourceFiles": [
+    {
+      "filename": "Unit 1 Home Supplements.pptx",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-los-pollitos-unit1-home-supplements/Unit%201%20Home%20Supplements.pptx",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
 }

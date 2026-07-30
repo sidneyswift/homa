@@ -1,0 +1,230 @@
+{
+  "id": "ref-2026-07-16-five-paragraph-essay-outline",
+  "droppedBy": "sid",
+  "droppedAt": "2026-07-16T14:37:55-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1784260675.014229",
+  "format": "essay-outline-printable",
+  "title": "Five Paragraph Essay Outline",
+  "publisher": "Christina Schneider, a Teachers Pay Teachers seller; author of Building Strong Writers (Amazon, 2024)",
+  "gradeLevel": "secondary, roughly ages 11 to 16. The sheet carries a class-period field and asks for a thesis statement, which places it well above the primary band most of this corpus sits in",
+  "pdfScanPageCount": 8,
+  "analysisQuality": "full",
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "five-paragraph-essay-outline.pdf",
+    "sourceParts": [
+      "five-paragraph-essay-outline.pdf"
+    ],
+    "sourceSha256": "82e34c20da2a5746d59a305372d92d8719fb64ef4fbf72527f07896f268986c5",
+    "pageCount": 8,
+    "mastersDir": ".cosmo/masters/ref-2026-07-16-five-paragraph-essay-outline",
+    "intakeAt": "2026-07-30T06:28:40+00:00",
+    "gateFindings": []
+  },
+  "sourceFiles": [
+    {
+      "filename": "FiveParagraphEssayOutlineStructuredEssayOutlineEssayWritingFree-1.pdf",
+      "localPath": ".cosmo/inspo-files/five-paragraph-essay-outline.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-16-five-paragraph-essay-outline/five-paragraph-essay-outline.pdf",
+      "blobUploadedAt": "2026-07-30"
+    }
+  ],
+  "routing": {
+    "skillUsed": "reference-ingestion",
+    "ruling": "Reference. A single printable in two near-identical variants, with no philosophy, no sequence, no pacing, and no assessment. It fails the curriculum test on both halves rather than one, which is the clearest case in the corpus."
+  },
+  "graduationAlreadyShipped": {
+    "recipe": "apps/web/agent/skills/materials-studio/references/recipes/structured-outline.md",
+    "anchorId": "five-paragraph-essay-outline",
+    "anchorRegistry": "apps/web/lib/materials/anchors.ts:43",
+    "anchorSource": "apps/web/lib/materials/anchor-sources/five-paragraph-essay-outline.jpg",
+    "verified": "2026-07-30, all four paths read on disk",
+    "whatItTook": "The recipe's binding design patterns are this sheet's structure: a two-column instruction-and-work layout, numbered roman-numeral section headers, labeled sub-fields, and blank writing lines under each. The golden anchor is named after this drop.",
+    "note": "This shipped BEFORE any analysis record existed. The anchor id is literally this drop's slug, so the product has been generating against this page for weeks while the corpus held no record that the page was ever ingested. Found by the ingestion ledger on 2026-07-29."
+  },
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "dense",
+    "visualHierarchy": "roman-numeral-section-then-labeled-blanks",
+    "whiteSpaceRatio": 0.3,
+    "flowDirection": "top-down",
+    "notes": "Two pages per variant, split at the same seam: page one runs the directions, the introduction, and body paragraph one; page two picks up at 'III. BODY PARAGRAPH 2' and runs to the conclusion. Every section is a roman numeral with lettered sub-parts that state the RULE ('b. information, examples, quotes and explanations that support the topic sentence', 'c. transition to the next paragraph'), and directly under each rule sit labeled blanks the student fills. That pairing is the whole design: the instruction and the work share a line of sight, so the child never has to remember what a topic sentence is while writing one. The two variants (scans 3-4 and 5-6) differ only in how much writing space each blank gets, which is a differentiation move, not two different sheets."
+  },
+  "skillTargeting": {
+    "subject": "ela",
+    "domain": "writing-composition",
+    "topics": [
+      {
+        "id": "mt_Rk7vPnEsWq",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Structured Essay Planning (9-14): an exact match. The topic's own description names the thesis statement and supporting body paragraphs this sheet scaffolds."
+      },
+      {
+        "id": "mt_hjtbA3g-Nn",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Paragraph Cohesion (10-11): the sheet asks for a transition out of every body paragraph, which is cohesion taught as a required field rather than as advice."
+      }
+    ],
+    "unmappedSkills": [
+      {
+        "name": "writing a thesis statement",
+        "suggestedSlug": "ela.thesis-statement",
+        "note": "The sheet's pivot is the thesis: everything else hangs off it. Structured Essay Planning covers the plan as a whole, but the taxonomy has no topic for composing the claim itself, which is the part students actually get stuck on. Not appended in this session: taxonomy writes are append-only with their own guard sequence and belong in a change that is only about the taxonomy."
+      }
+    ]
+  },
+  "difficulty": {
+    "ageBand": [
+      132,
+      192
+    ],
+    "complexity": "multi-skill",
+    "prerequisites": [
+      "mt_4-vfMgmCVB"
+    ],
+    "scaffoldingLevel": "high",
+    "notes": "Multi-skill because one sheet asks for a thesis, three topic sentences, supporting evidence, transitions, and a conclusion, and the student holds all of them at once. Scaffolding is high anyway: the rule for each part is printed directly above the blank for it, so the sheet does the remembering. This is the oldest-targeted item in the corpus and the age band is deliberately wide at the top, because the same scaffold serves a struggling sixteen-year-old as well as a confident eleven-year-old."
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist",
+    "colorPalette": "black-and-white",
+    "appealDrivers": "Nothing decorative at all, and for this age that is the point: a fourteen-year-old handed a page with clip art on it reads it as babyish. The seriousness IS the appeal driver, which makes this a useful counter-example inside a corpus dominated by illustrated primary material.",
+    "notes": "No characters, no colour, no theming hooks. Worth keeping in mind whenever Homa generates for older children: the house style that works at five actively works against you at fourteen."
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "prints well in B&W",
+    "notes": "Designed to be photocopied by a classroom teacher, so it is pure line work with no fills. Four of the eight pages are not the resource at all: scan 1 is terms of use, scan 2 asks for a five-star review, scan 7 is seller links, and scan 8 advertises the author's book. A parent printing this without looking wastes half the ink on the seller's marketing, which is a real and repeatable property of free TPT products, not a quirk of this one."
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/ref-2026-07-16-five-paragraph-essay-outline.txt",
+    "textBlobUrl": null,
+    "textExtraction": {
+      "ocr": "pdf-text-layer",
+      "visionModel": "google/gemini-3-flash",
+      "visionPages": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        8
+      ],
+      "note": "Born-digital, so the text layer is exact and no OCR was needed. The vision pass ran on the pages whose meaning is layout rather than words, and it is what identified scan 8 as an advertisement rather than content."
+    },
+    "subjects": [
+      {
+        "name": "essay writing",
+        "role": "teaches",
+        "quote": "FIVE PARAGRAPH ESSAY OUTLINE"
+      },
+      {
+        "name": "essay planning",
+        "role": "teaches",
+        "quote": "Great writers follow the writing process"
+      },
+      {
+        "name": "thesis statements",
+        "role": "teaches",
+        "quote": "thesis statement"
+      },
+      {
+        "name": "paragraph structure",
+        "role": "teaches",
+        "quote": "topic sentence"
+      },
+      {
+        "name": "secondary ela printable",
+        "role": "identity",
+        "quote": "Secondary ELA"
+      }
+    ],
+    "entities": [
+      {
+        "name": "Christina Schneider",
+        "kind": "person",
+        "role": "identity",
+        "quote": "Christina Schneider"
+      }
+    ],
+    "themes": [
+      {
+        "name": "writing as a process",
+        "evidence": "Great writers follow the writing process"
+      },
+      {
+        "name": "structure taught by filling it in",
+        "evidence": "transition to the next paragraph"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "thesis statement",
+        "occurrences": 6,
+        "quote": "thesis statement"
+      },
+      {
+        "term": "topic sentence",
+        "occurrences": 14,
+        "quote": "topic sentence"
+      },
+      {
+        "term": "BODY PARAGRAPH 2",
+        "occurrences": 2,
+        "quote": "BODY PARAGRAPH 2"
+      },
+      {
+        "term": "CONCLUSION",
+        "occurrences": 2,
+        "quote": "CONCLUSION"
+      }
+    ],
+    "referencedWorks": [
+      {
+        "title": "Building Strong Writers",
+        "author": "Christina Schneider",
+        "kind": "book",
+        "quote": "Building Strong Writers"
+      }
+    ],
+    "notes": "Building Strong Writers is roled a referenced work rather than a subject: it is the seller's own book advertised on the last page, so it is present in the file and is not what the resource is about. Same call as the Fast Forward cover swan. No claim is drawn from scans 1, 2 or 7 (terms, review request, seller links), which are the seller's business and not the material."
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "structured-outline",
+      "guided-notes"
+    ],
+    "gaps": [],
+    "notes": "structured-outline is not merely a match, it was DERIVED from this drop and carries the golden anchor named after it (see graduationAlreadyShipped). guided-notes is the near neighbour: it shares the rule-beside-the-blank idea but is for capturing a lesson as it happens, where this plans a piece of writing before it exists. No gap recorded. That is the honest outcome for a drop whose format already shipped, and it is worth noting that a zero-gap analysis is a sign the pipeline worked, not a sign the analysis was thin."
+  },
+  "stages": {
+    "captured": "2026-07-30T05:11:19Z",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "recipe",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/structured-outline.md"
+      ],
+      "commit": null,
+      "note": "Already shipped before this record existed; the target path resolves on disk today. commit is left null because the shipping commit is not known to this session, and inventing one would make a false claim the ledger now checks for."
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "note": "ela.thesis-statement is proposed in skillTargeting.unmappedSkills. proposedTopics means topics actually appended to topics.json, and no taxonomy write happened here."
+    },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "notes": "One of the two oldest drops in the channel, dropped by Sid four minutes after the PEMDAS foldable on 2026-07-16, and the sharpest illustration of why the ingestion ledger exists. This page produced a shipped materials-studio recipe AND a golden anchor named after it, and carried no analysis record until 2026-07-29. The corpus reported it as never ingested while the product had been generating against it for two weeks. Two other things worth keeping: half the file is the seller's marketing rather than the resource, which is a repeatable property of free TPT products and something Homa should expect on every scraped item; and this is the oldest-targeted material in the corpus, deliberately plain, which is the reminder that Homa's illustrated primary house style would actively hurt a page like this."
+}
