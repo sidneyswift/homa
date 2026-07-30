@@ -98,13 +98,14 @@ async function gapsFor(reminder: PlannedReminder): Promise<string[]> {
     {
       first_name: string | null;
       last_name: string | null;
+      filing_parent_name: string | null;
       address_line: string | null;
       address_city: string | null;
       address_zip: string | null;
       us_state: string | null;
     }[]
   >`
-    select first_name, last_name, address_line, address_city, address_zip,
+    select first_name, last_name, filing_parent_name, address_line, address_city, address_zip,
            us_state
     from public.families
     where id = ${reminder.familyId}
@@ -129,9 +130,11 @@ async function gapsFor(reminder: PlannedReminder): Promise<string[]> {
     method: FILING_METHODS_BY_STATE[reminder.stateCode],
     family: {
       parentName:
-        family.first_name && family.last_name
-          ? `${family.first_name} ${family.last_name}`
-          : (family.first_name ?? null),
+        family.filing_parent_name?.trim()
+          ? family.filing_parent_name.trim()
+          : family.first_name && family.last_name
+            ? `${family.first_name} ${family.last_name}`
+            : null,
       addressLine: family.address_line,
       addressCity: city,
       addressZip: family.address_zip,

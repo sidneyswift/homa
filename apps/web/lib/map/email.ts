@@ -74,6 +74,12 @@ export type EmailLedgerKind =
   // which is why the kind carries no key: "already told" is a single
   // lookup, and a second one can never be composed.
   | "materials_stranded"
+  // The filing-details drip (gh#424, founder ruling 3). One kind per
+  // step so "already sent step N" is a single lookup and the sequence
+  // can never repeat a step.
+  | "filing_details_1"
+  | "filing_details_2"
+  | "filing_details_3"
   // The state filing reminder (gh#422). The only keyed kind: it carries
   // the deadline it is about ("filing:2026-08-15") so "already sent"
   // means "for this deadline" and the reminder is annual rather than
@@ -1192,6 +1198,75 @@ export async function submitStrandedFollowup(
     bodyLines,
     cta: { label: "Open your binder", url: args.binderUrl },
     footerNote: "One note about this, not a series. You can turn these off anytime.",
+    outerNote: DRIP_OUTER_NOTE,
+  });
+}
+
+/**
+ * The filing-details drip (gh#424, founder ruling 3, 2026-07-29):
+ * "a couple days into it, by the way, we need this information, X, Y,
+ * and Z, to do your filing. Add it here. It's not due until X or Y."
+ *
+ * Every clause of that is load-bearing and all three appear here: WHAT
+ * is needed, WHERE to put it, and WHEN it is actually due. The last one
+ * is what keeps this from reading as urgent, and Homa omits it rather
+ * than inventing a date when she cannot compute one honestly.
+ *
+ * The step number changes nothing about the tone. A third ask that
+ * sounds more urgent than the first is how a gentle nudge turns into
+ * nagging, so the only thing that changes is that this one is the last.
+ */
+export async function submitFilingDetailsNudge(
+  to: string,
+  args: {
+    firstName: string | null;
+    stateName: string;
+    /** Plain phrases, already ordered: "your home address", etc. */
+    asks: readonly string[];
+    settingsUrl: string;
+    /** "August 15, 2026", or null when Homa cannot date it honestly. */
+    dueLabel: string | null;
+    /** 1, 2 or 3. Only the last one says it is the last one. */
+    step: 1 | 2 | 3;
+    ledgerKind: "filing_details_1" | "filing_details_2" | "filing_details_3";
+    familyId?: string;
+  },
+): Promise<HomaEmailSubmission> {
+  const hi = args.firstName ? `Hi ${args.firstName}, ` : "Hi, ";
+  const list =
+    args.asks.length === 1
+      ? args.asks[0]
+      : `${args.asks.slice(0, -1).join(", ")} and ${args.asks[args.asks.length - 1]}`;
+  const bodyLines = [
+    `${hi}to fill in your ${args.stateName} filing for you, I need ${list}.`,
+    args.dueLabel
+      ? `Nothing is urgent: your filing is not due until ${args.dueLabel}. I would just rather have it ready early than scramble.`
+      : "Nothing is urgent. I would just rather have it ready early than scramble.",
+  ];
+  if (args.step === 3) {
+    bodyLines.push(
+      "This is the last time I will bring it up. If you add it later, I will pick it up from there, and your filing works either way, with those parts left blank for you to write in.",
+    );
+  } else {
+    bodyLines.push(
+      "If you would rather not, that is fine. Your filing still works with those parts left blank for you to write in by hand.",
+    );
+  }
+  return submit({
+    ledger: {
+      kind: args.ledgerKind,
+      familyId: args.familyId,
+      meta: { state: args.stateName, asks: args.asks, step: args.step },
+    },
+    headers: unsubscribeHeaders(to),
+    to,
+    subject: `A few details for your ${args.stateName} filing`,
+    preview: "Nothing urgent, just so it is ready when you need it.",
+    heading: `What I still need for your ${args.stateName} filing`,
+    bodyLines,
+    cta: { label: "Add them in settings", url: args.settingsUrl },
+    footerNote:
+      "I ask about this at most three times, then stop. You can turn these off anytime.",
     outerNote: DRIP_OUTER_NOTE,
   });
 }
