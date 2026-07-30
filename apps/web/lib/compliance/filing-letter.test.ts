@@ -258,7 +258,6 @@ describe("gaps are marked, never invented", () => {
     const letter = compose("FL", SPARSE);
     assert.ok(letter.gaps.includes("Parent or guardian"));
     assert.ok(letter.gaps.includes("Home address"));
-    assert.ok(letter.gaps.some((g) => g.includes("Grade level for Finn")));
     assert.match(letter.body, /fl-blank/);
   });
 
@@ -268,16 +267,42 @@ describe("gaps are marked, never invented", () => {
     assert.match(letter.body, /Signature of parent or guardian/);
   });
 
-  it("never derives a grade from a birthdate", () => {
-    const letter = compose("FL", {
+  it("never derives a grade from a birthdate, where grade is asked for", () => {
+    // Arkansas names grade on its own form ("name, date of birth, and
+    // grade level of each child"), so this is where the temptation to
+    // compute it from a birthdate actually arises.
+    const sheet = compose("AR", {
       ...COMPLETE,
       children: [{ name: "Finn Walker", birthdate: "2018-03-09", grade: null }],
     });
-    assert.ok(letter.gaps.some((g) => g.includes("Grade level")));
+    assert.ok(sheet.gaps.some((g) => g.includes("Grade level for Finn Walker")));
     assert.ok(
-      !/3rd|third|grade 3/i.test(letter.body),
+      !/3rd|third|grade 3/i.test(sheet.body),
       "grade placement is the parent's call, never Homa's arithmetic",
     );
+  });
+
+  it("asks for grade only where the state's own notice does", () => {
+    // The bug this pins: a Grade column rendered on every document, so
+    // every letter-state family carried a blank nothing asked for, and
+    // that phantom gap fed the drip that asks families to fill gaps in.
+    // No state that accepts a LETTER asks for grade.
+    for (const code of ["CO", "FL", "HI", "ME", "OH", "VA", "WV"]) {
+      const letter = compose(code);
+      assert.ok(
+        !/<th>Grade<\/th>/.test(letter.body),
+        `${code} accepts a letter and does not ask for grade`,
+      );
+      assert.ok(
+        !letter.gaps.some((g) => /Grade level/.test(g)),
+        `${code} must not invent a grade gap`,
+      );
+    }
+    // The two that do ask, both form states, both get the column.
+    for (const code of ["AR", "NM"]) {
+      const sheet = compose(code);
+      assert.match(sheet.body, /<th>Grade<\/th>/, `${code} asks for grade`);
+    }
   });
 
   it("prints a month-only birthdate without a fabricated day", () => {

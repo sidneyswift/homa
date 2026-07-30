@@ -57,7 +57,7 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     submitTo: "the district school superintendent of the county of residence",
     // 1002.41 names the fields rather than asking for an assurance, and
     // Homa holds all three, so the letter carries them outright.
-    letterMustCarry: ["child_name", "child_address", "child_birthdate"],
+    noticeMustCarry: ["child_name", "child_address", "child_birthdate"],
   },
 
   VA: {
@@ -73,7 +73,7 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     // knows this year's subjects, but a curriculum list in a legal
     // filing is a statement the parent signs, and only the parent knows
     // which statutory criterion qualifies them.
-    letterMustCarry: ["curriculum_subjects", "parent_qualification"],
+    noticeMustCarry: ["curriculum_subjects", "parent_qualification"],
   },
 
   AL: {
@@ -91,6 +91,10 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     checkedOn: "2026-07-29",
     evidence: "Ark. Code 6-15-503(a)(1) (text as amended by HB1429, arkleg.state.ar.us) requires that parents \"shall give written notice to the superintendent of their local school district of their intent to provide a home school for their children,\" and the currently codified agency rule 6 CAR 33-104(a)(2) says the notice \"may be completed: (A) Through the Division of Elementary and Secondary Education's online process; or (B) By submitting a written notice of intent to the superintendent of the student's resident school district,\" which may be sent \"Electronically, including without limitation... By email; (2) By mail; (3) By fax; or (4) In person.\" That same rule states at (g), \"No additional criteria or information shall be required for a student to attend a home school beyond what the law requires.\" Caveat worth carrying into the product: DESE's own parent-facing page offers only two routes,...",
     submitTo: "the superintendent of the student's resident school district (the local district superintendent, not a state agency)",
+    // 6 CAR 33-104 names the fields: "name, date of birth, and grade
+    // level of each child". Arkansas gets the copy-from sheet, and this
+    // is what that sheet exists to stage.
+    noticeMustCarry: ["child_name", "child_birthdate", "child_grade"],
   },
 
   CA: {
@@ -108,11 +112,11 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     letterAddressee: "the school district",
     evidence: "C.R.S. 22-33-104.5(3)(e), in the General Assembly's official 2024 printout of Title 22 (content.leg.colorado.gov, page 862), says a parent \"shall provide written notification of the establishment of said program to a school district within the state fourteen days prior to the establishment of said program and each year thereafter if the program is maintained\" and \"shall certify, in writing, only a statement containing the name, age, place of residence, and number of hours of attendance of each child enrolled in said program.\" CDE calls this a letter and publishes no state form and no portal: \"A letter of intent must be submitted 14 days before beginning the homeschool program to a Colorado school district of a family's choosing. The family does not submit the letter of intent to CDE,\" and its FAQ adds \"Notification can be given to any Colorado public school district office.\" The...",
     submitTo: "A school district, specifically any Colorado public school district office of the family's choosing, and explicitly not the Colorado Department of Education",
-    // Colorado is the reason letterMustCarry exists: its notice asks for
+    // Colorado is the reason noticeMustCarry exists: its notice asks for
     // planned hours of attendance, which Homa cannot know before the
     // year starts (the hours log records hours after the fact). Three
     // fields fill themselves, the fourth is an honest blank.
-    letterMustCarry: [
+    noticeMustCarry: [
       "child_name",
       "child_age",
       "child_address",
@@ -256,6 +260,15 @@ export const FILING_METHODS_BY_STATE: Record<string, FilingMethodEntry> = {
     checkedOn: "2026-07-29",
     evidence: "NMSA 1978 Section 22-1-2.1(A), reprinted verbatim on NMPED's own \"Notification of a Home School\" form (https://web.ped.nm.gov/wp-content/uploads/2025/01/Homeschool-Notification-Form-with-Statutes-2024-1.pdf), requires a parent to \"submit a home school registration form made available by the department and posted on the department's web site to notify the department within thirty days of the establishment of the home school and to notify the department on or before August 1 of each subsequent year of operation of the home school.\" The NMPED Home Schooling page offers exactly two routes, \"Register through our online database, the NMPED Home School System\" or \"Send a paper Notification of a Home School form to the NMPED,\" and nowhere treats a parent-composed letter as acceptable. The paper form itself instructs, \"Use this form only if you are unable or if you choose not to register...",
     submitTo: "the New Mexico Public Education Department (the form is submitted to the Secretary of Public Education, Attention: Home School Notification, 300 Don Gaspar Avenue, Santa Fe, NM 87501, or filed in the NMPED Home School System online)",
+    // NMPED's own Notification of a Home School form asks for the
+    // child names, the address, grade levels, the instructing parent,
+    // and that parent's qualification.
+    noticeMustCarry: [
+      "child_name",
+      "child_address",
+      "child_grade",
+      "parent_qualification",
+    ],
   },
 
   NV: {
