@@ -1,15 +1,24 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { REVIEW_PAGE_CAP, selectPagesForReview } from "./review-artifact";
+import {
+  planReviewChunks,
+  REVIEW_MAX_PAGES,
+  REVIEW_PAGE_CAP,
+  selectPagesForReview,
+} from "./review-artifact";
 
 /**
- * Which pages the reviewer looks at (gh#346).
+ * Which pages the reviewer looks at (gh#346), and which of their
+ * verdicts may hold a document back (gh#368).
  *
- * The reviewer sees at most REVIEW_PAGE_CAP pages. Until 2026-07-28 it
- * always saw the first N in document order, so revising page 5 of a
- * 12-page packet checked pages 1 to 4: precisely the pages nobody had
- * asked about. A parent spent four days being told her packet passed.
+ * The reviewer sees at most REVIEW_PAGE_CAP pages per call. Until
+ * 2026-07-28 it always saw the first N in document order, so revising
+ * page 5 of a 12-page packet checked pages 1 to 4: precisely the pages
+ * nobody had asked about. A parent spent four days being told her
+ * packet passed. Until 2026-07-30 there was only ever one call, so
+ * 41.4% of every page Homa had shipped went out with nothing having
+ * looked at it.
  */
 
 function page(pageNumber: number, fresh: boolean) {
@@ -66,5 +75,119 @@ describe("selectPagesForReview", () => {
   it("never returns more than the cap, whatever the packet length", () => {
     const pages = Array.from({ length: 12 }, (_, index) => page(index + 1, true));
     assert.equal(selectPagesForReview(pages).length, REVIEW_PAGE_CAP);
+  });
+});
+
+describe("planReviewChunks", () => {
+  const shapes: Array<{ name: string; pages: ReturnType<typeof page>[] }> = [
+    { name: "one page", pages: [page(1, true)] },
+    {
+      name: "a four-page first build",
+      pages: [1, 2, 3, 4].map((n) => page(n, true)),
+    },
+    {
+      name: "a twelve-page first build",
+      pages: Array.from({ length: 12 }, (_, i) => page(i + 1, true)),
+    },
+    {
+      name: "a twelve-page revision touching page 9 only",
+      pages: Array.from({ length: 12 }, (_, i) => page(i + 1, i + 1 === 9)),
+    },
+    {
+      name: "a seven-page revision touching pages 2, 5 and 7",
+      pages: Array.from({ length: 7 }, (_, i) =>
+        page(i + 1, [2, 5, 7].includes(i + 1)),
+      ),
+    },
+  ];
+
+  /**
+   * The guarantee that made full coverage safe to turn on: coverage adds
+   * calls, it never promotes a page into the set whose verdict can
+   * withhold the document. Asserted against selectPagesForReview itself
+   * rather than against a restatement of its rule, because the rule is
+   * "changed pages first" and a hand-written expectation of it would
+   * drift the first time that changes.
+   */
+  for (const shape of shapes) {
+    it(`blocks on exactly the old selection: ${shape.name}`, () => {
+      const { blocking } = planReviewChunks(shape.pages);
+      assert.deepEqual(blocking, selectPagesForReview(shape.pages));
+    });
+
+    it(`reviews every page exactly once: ${shape.name}`, () => {
+      const { blocking, advisory } = planReviewChunks(shape.pages);
+      const seen = [...blocking, ...advisory.flat()].map((p) => p.pageNumber);
+      assert.deepEqual(
+        [...seen].sort((a, b) => a - b),
+        shape.pages.map((p) => p.pageNumber),
+        "every page reaches a reviewer",
+      );
+      assert.equal(new Set(seen).size, seen.length, "and none is paid for twice");
+    });
+
+    it(`keeps every call inside the input-token ceiling: ${shape.name}`, () => {
+      const { blocking, advisory } = planReviewChunks(shape.pages);
+      assert.ok(blocking.length <= REVIEW_PAGE_CAP);
+      for (const chunk of advisory) {
+        assert.ok(chunk.length > 0 && chunk.length <= REVIEW_PAGE_CAP);
+      }
+    });
+  }
+
+  it("spends nothing extra on the common case, a material of four pages or fewer", () => {
+    // 155 of 227 real materials are this shape (2026-07-30), which is
+    // why full coverage costs 1.45x calls and not the 3x it was feared
+    // to cost. If this ever fails, the cost projection on gh#368 is void.
+    for (const length of [1, 2, 3, 4]) {
+      const pages = Array.from({ length }, (_, i) => page(i + 1, true));
+      assert.deepEqual(planReviewChunks(pages).advisory, [], `${length} pages`);
+    }
+  });
+
+  it("splits a twelve-page packet into one blocking call and two advisory ones", () => {
+    const pages = Array.from({ length: 12 }, (_, i) => page(i + 1, true));
+    const { blocking, advisory } = planReviewChunks(pages);
+    assert.deepEqual(blocking.map((p) => p.pageNumber), [1, 2, 3, 4]);
+    assert.deepEqual(
+      advisory.map((chunk) => chunk.map((p) => p.pageNumber)),
+      [
+        [5, 6, 7, 8],
+        [9, 10, 11, 12],
+      ],
+    );
+  });
+
+  it("puts the changed page in the blocking call and the rest in advisory ones", () => {
+    const pages = Array.from({ length: 12 }, (_, i) => page(i + 1, i + 1 === 9));
+    const { blocking, advisory } = planReviewChunks(pages);
+    assert.ok(
+      blocking.map((p) => p.pageNumber).includes(9),
+      "the page she asked about still gates delivery",
+    );
+    assert.ok(
+      advisory.flat().every((p) => p.pageNumber !== 9),
+      "and is not paid for twice",
+    );
+  });
+
+  it("stops at the ceiling instead of letting one document spawn unbounded calls", () => {
+    const pages = Array.from({ length: 40 }, (_, i) => page(i + 1, true));
+    const { blocking, advisory } = planReviewChunks(pages);
+    assert.equal(blocking.length + advisory.flat().length, REVIEW_MAX_PAGES);
+  });
+
+  it("falls back to exactly the old single call when full coverage is switched off", () => {
+    const previous = process.env.HOMA_MATERIALS_REVIEW_FULL;
+    process.env.HOMA_MATERIALS_REVIEW_FULL = "off";
+    try {
+      const pages = Array.from({ length: 12 }, (_, i) => page(i + 1, true));
+      const { blocking, advisory } = planReviewChunks(pages);
+      assert.deepEqual(advisory, [], "no extra calls");
+      assert.deepEqual(blocking, selectPagesForReview(pages), "old behavior");
+    } finally {
+      if (previous === undefined) delete process.env.HOMA_MATERIALS_REVIEW_FULL;
+      else process.env.HOMA_MATERIALS_REVIEW_FULL = previous;
+    }
   });
 });
