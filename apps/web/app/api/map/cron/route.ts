@@ -11,6 +11,10 @@ import {
   type FilingReminderSweepResult,
 } from "../../../../lib/compliance/filing-reminder-sweep";
 import { dripEnabled } from "../../../../lib/drip/flag";
+import {
+  runStrandedSweep,
+  type StrandedSweepResult,
+} from "../../../../lib/materials/stranded-sweep";
 import { runDripSweep, type DripSweepResult } from "../../../../lib/drip/sweep";
 import { sendBandReadyEmail, sendReminderEmail, sendRetestEmail } from "../../../../lib/map/email";
 import { emitMapEvent } from "../../../../lib/map/events";
@@ -78,6 +82,12 @@ import { reapStaleSubjectLessons } from "../../../../lib/subject-lessons/store";
  *      legal deadline and cannot be told. Its skip counts say why the
  *      send count is zero. DARK unless HOMA_FILING_REMINDERS_ENABLED is
  *      exactly "true".
+ *  12. The stranded-chain follow-up (lib/materials/stranded-sweep.ts,
+ *      gh#197, FD-2(c), founder ruling 2026-07-30): ONE quiet message
+ *      per family, ever, about work that never reached final. Not one
+ *      per draft: on 2026-07-30 one family had nine stranded drafts, and
+ *      nine emails is exactly the nagging the ruling forbids. DARK
+ *      unless HOMA_STRANDED_FOLLOWUP_ENABLED is exactly "true".
  *
  * Every tick also writes one cron_runs heartbeat row (founder console
  * MJ-14), success or failure, so a dead cron is visible from /admin.
@@ -130,6 +140,17 @@ export async function GET(request: Request): Promise<Response> {
     midChecklistSent: 0,
     eligible: 0,
     capped: false,
+  };
+  let stranded: StrandedSweepResult = {
+    sent: 0,
+    eligible: 0,
+    skipped: {
+      no_email: 0,
+      too_recent: 0,
+      review_failed: 0,
+      family_already_told: 0,
+    },
+    sendingEnabled: false,
   };
   let filings: FilingReminderSweepResult = {
     sent: 0,
@@ -227,6 +248,13 @@ export async function GET(request: Request): Promise<Response> {
     // near a legal deadline and cannot be told, and a sweep that does
     // not run cannot report it. Sending stays dark until
     // HOMA_FILING_REMINDERS_ENABLED is exactly "true".
+    // The stranded-chain follow-up (gh#197, FD-2(c), founder ruling
+    // 2026-07-30). One quiet message per family, EVER, about work that
+    // never reached final. Same posture as the filing reminder: the pass
+    // runs every tick so the eligible count is visible, and the flag
+    // guards only the send. DARK unless HOMA_STRANDED_FOLLOWUP_ENABLED
+    // is exactly "true".
+    stranded = await runStrandedSweep(new Date().toISOString());
     filings = await runFilingReminderSweep(
       new Intl.DateTimeFormat("en-CA", {
         timeZone: "UTC",
@@ -271,6 +299,7 @@ export async function GET(request: Request): Promise<Response> {
         stuckToolCalls,
         drip,
         filings,
+        stranded,
       },
       { status: 500 },
     );
@@ -284,6 +313,7 @@ export async function GET(request: Request): Promise<Response> {
     transcripts,
     cards,
     filings,
+    stranded,
     digest,
     lessons,
     staleSubjectLessons,
@@ -304,5 +334,6 @@ export async function GET(request: Request): Promise<Response> {
     stuckToolCalls,
     drip,
     filings,
+    stranded,
   });
 }

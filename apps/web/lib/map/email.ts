@@ -70,6 +70,10 @@ export type EmailLedgerKind =
   // deliberately carries no drip_ prefix so the sweep's kind like
   // 'drip_%' cap can never throttle a legally-required reminder.
   | "trial_reminder"
+  // The stranded-chain follow-up (gh#197, FD-2(c)). One per family EVER,
+  // which is why the kind carries no key: "already told" is a single
+  // lookup, and a second one can never be composed.
+  | "materials_stranded"
   // The state filing reminder (gh#422). The only keyed kind: it carries
   // the deadline it is about ("filing:2026-08-15") so "already sent"
   // means "for this deadline" and the reminder is annual rather than
@@ -1128,6 +1132,66 @@ export async function submitFilingReminder(
     cta: { label: "Open your filing", url: args.filingUrl },
     footerNote:
       "This is legal information, not legal advice. You can turn these reminders off anytime.",
+    outerNote: DRIP_OUTER_NOTE,
+  });
+}
+
+/**
+ * The stranded-chain follow-up (gh#197, founder ruling 2026-07-30).
+ *
+ * The hardest thing about this email is what it must NOT be. The council
+ * rejected "want me to lock in last night's version?" as nagging. So it
+ * asks for nothing, sets no deadline, implies no failure on her part,
+ * and never uses the word unfinished. It tells her the work exists and
+ * where it lives, once.
+ *
+ * Voice check: the thing she made is the subject of the first sentence,
+ * not her inaction.
+ */
+export async function submitStrandedFollowup(
+  to: string,
+  args: {
+    firstName: string | null;
+    /** The newest thing she made. */
+    title: string;
+    /** How many are waiting, including that one. */
+    strandedCount: number;
+    binderUrl: string;
+    familyId?: string;
+  },
+): Promise<HomaEmailSubmission> {
+  const hi = args.firstName ? `Hi ${args.firstName}, ` : "Hi, ";
+  const others = args.strandedCount - 1;
+  const bodyLines = [
+    `${hi}"${args.title}" is sitting in your binder, ready to print.`,
+  ];
+  bodyLines.push(
+    others === 0
+      ? "You never told me whether to keep it, so I kept it anyway. It is yours either way."
+      : others === 1
+        ? "One more is waiting there too. You never told me whether to keep them, so I kept them anyway. They are yours either way."
+        : `${others} more are waiting there too. You never told me whether to keep them, so I kept them anyway. They are yours either way.`,
+  );
+  bodyLines.push(
+    "Print what you want, tap keep on the ones worth holding on to, and ignore the rest. Nothing expires.",
+  );
+  return submit({
+    ledger: {
+      kind: "materials_stranded",
+      familyId: args.familyId,
+      meta: { title: args.title, strandedCount: args.strandedCount },
+    },
+    headers: unsubscribeHeaders(to),
+    to,
+    subject:
+      others === 0
+        ? `"${args.title}" is in your binder`
+        : `"${args.title}" and ${others} more are in your binder`,
+    preview: "Ready to print whenever you want them.",
+    heading: "Your binder has work waiting",
+    bodyLines,
+    cta: { label: "Open your binder", url: args.binderUrl },
+    footerNote: "One note about this, not a series. You can turn these off anytime.",
     outerNote: DRIP_OUTER_NOTE,
   });
 }
