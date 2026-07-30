@@ -114,13 +114,48 @@ function blankBandIn(page: PageGeometry): number {
   return Math.max(0, PRINTABLE_HEIGHT_IN - page.contentHeightIn);
 }
 
+/** Inches of content sitting below the printable area but above the page
+ * edge: it prints inside the bottom margin band rather than being cut. */
+function marginBandIn(page: PageGeometry): number {
+  return Math.max(0, page.contentHeightIn - PRINTABLE_HEIGHT_IN);
+}
+
+/**
+ * Formats whose page is a grid of real-world-dimension pieces, where the
+ * dead band at the bottom is the correct leftover of a fixed card size
+ * and scaling to fill would destroy the thing the parent asked for.
+ * Following the skill's own flash-card rule (2.5x3.5in cards, four per
+ * page, gh#356 / PR #456) lands at about 77% fill, so without this the
+ * instrument tells Homa to undo the parent's own correction.
+ */
+export function underfillNotesApplyTo(kind: string): boolean {
+  return kind !== "flashcards";
+}
+
+/**
+ * provenCutoffPages(pages): the pages a deterministic measurement PROVES
+ * print cut off, for founder ruling `cutoff-page-is-a-block`
+ * (2026-07-29): a proof is never delivered, it is rebuilt. Suspicion is
+ * explicitly not covered, so this reads geometry only and never the
+ * vision reviewer's doubts.
+ */
+export function provenCutoffPages(pages: readonly PageGeometry[]): number[] {
+  return pages
+    .filter((page) => page.overflowIn >= OVERFLOW_NOTE_MIN_IN)
+    .map((page) => page.page);
+}
+
 /**
  * geometryToolNotes(pages): actionable wording for the create_printable
  * result, one note per problem page, nothing for pages that fit. An
  * overflowing page gets only the overflow note (its fill number is a
  * side effect of the same defect).
  */
-export function geometryToolNotes(pages: readonly PageGeometry[]): string[] {
+export function geometryToolNotes(
+  pages: readonly PageGeometry[],
+  options: { underfillNotes?: boolean } = {},
+): string[] {
+  const underfillNotes = options.underfillNotes ?? true;
   const notes: string[] = [];
   for (const page of pages) {
     if (page.overflowIn >= OVERFLOW_NOTE_MIN_IN) {
@@ -129,6 +164,18 @@ export function geometryToolNotes(pages: readonly PageGeometry[]): string[] {
       );
       continue;
     }
+    // Content below the printable area but above the paper edge prints
+    // inside the bottom margin band: not cut, but past the margin every
+    // other page keeps, and invisible to both other branches (its blank
+    // band is zero and its overflow is zero).
+    const marginIn = marginBandIn(page);
+    if (marginIn > 0) {
+      notes.push(
+        `Page ${page.page} fill is ${page.fillPercent}%: content runs ${formatIn(marginIn)}in past the ${PRINTABLE_HEIGHT_IN}in printable area into the bottom margin band. It is not cut off, but it crowds the paper edge; pull the last items up or move them to their own page.`,
+      );
+      continue;
+    }
+    if (!underfillNotes) continue;
     const blankIn = blankBandIn(page);
     if (blankIn >= UNDERFILL_NOTE_MIN_BLANK_IN) {
       const rows = Math.max(1, Math.round(blankIn / EXERCISE_ROW_IN));
@@ -147,17 +194,23 @@ export function geometryToolNotes(pages: readonly PageGeometry[]): string[] {
  */
 export function geometryReviewBlock(
   pages: readonly PageGeometry[],
+  options: { underfillNotes?: boolean } = {},
 ): string | null {
   if (pages.length === 0) return null;
+  const underfillNotes = options.underfillNotes ?? true;
   const lines = pages.map((page) => {
     if (page.overflowIn >= OVERFLOW_NOTE_MIN_IN) {
       return `- page ${page.page}: content overflows the page box by ${formatIn(page.overflowIn)}in; anything past 11in is cut in print`;
     }
+    const marginIn = marginBandIn(page);
+    if (marginIn > 0) {
+      return `- page ${page.page}: content runs ${formatIn(marginIn)}in past the ${PRINTABLE_HEIGHT_IN}in printable area into the bottom margin band (${page.fillPercent}% fill); not cut, but crowding the paper edge`;
+    }
     const blankIn = blankBandIn(page);
-    if (blankIn >= UNDERFILL_NOTE_MIN_BLANK_IN) {
+    if (underfillNotes && blankIn >= UNDERFILL_NOTE_MIN_BLANK_IN) {
       return `- page ${page.page}: content ends ${formatIn(page.contentHeightIn)}in down the ${PRINTABLE_HEIGHT_IN}in printable area (${page.fillPercent}% fill, about ${formatIn(blankIn)}in blank at the bottom)`;
     }
     return `- page ${page.page}: ${page.fillPercent}% fill, fits the page`;
   });
-  return `Measured page geometry, deterministic from the renderer (trust these numbers over your own estimate of the image):\n${lines.join("\n")}`;
+  return `Measured page geometry, deterministic from the renderer (trust these numbers over your own estimate of sizes and positions in a shrunken image; they say nothing about whether the page is any good):\n${lines.join("\n")}`;
 }

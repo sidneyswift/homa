@@ -243,8 +243,26 @@ async function screenshotPagesPrintEmulated(
  * cause). Deliberately not scrollHeight/clientHeight: with box-sizing:
  * border-box and an explicit height, both report the BORDER-BOX height
  * (padding included) whether or not the content fills it, so neither can
- * tell a full page from an empty one. Walking descendants for the
- * lowest rendered bottom edge measures the actual ink extent instead.
+ * tell a full page from an empty one.
+ *
+ * It measures INK, not boxes, and that distinction is the whole point.
+ * The first version walked every descendant and took the lowest bottom
+ * edge, which any full-height layout wrapper defeats: one
+ * `height: 100%` flex column around eight division problems reported
+ * 100% fill on a three-quarters-empty page, and because the reviewer is
+ * told to trust these numbers over the image (review-artifact.ts), the
+ * instrument suppressed a correct vision read of exactly the defect it
+ * exists to catch. Path 2 was worse: `.homa-image-page` is itself 9.5in
+ * tall (page-shell.ts), so every whole-page image measured 100% by
+ * construction no matter how letterboxed the art was.
+ *
+ * So a box counts only where it actually puts something on the paper:
+ * text runs measured through a Range, replaced elements (art, rules,
+ * form fields), and boxes that paint a background, a border, or a
+ * shadow. A bare layout container paints nothing and is skipped, while
+ * a bordered card that genuinely stretches still counts, because its
+ * bottom border really does print there.
+ *
  * Runs under whatever media type the page is currently painting (screen,
  * same as setContent left it): a known limit shared with the rest of
  * this module's screen-vs-print divergence, named rather than hidden.
@@ -252,6 +270,25 @@ async function screenshotPagesPrintEmulated(
 async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]> {
   return page.evaluate(
     (bodyClass: string, pageClass: string): SheetBodyMeasurement[] => {
+      // Everything below is written without inner helper functions on
+      // purpose: this callback is serialized into the browser, and any
+      // bundler running with keepNames (esbuild under tsx, which the
+      // eval and preview scripts use) rewrites a named inner function
+      // into a `__name(...)` call that does not exist in page scope.
+      // The renderer then throws "__name is not defined" for every
+      // material, which is a whole-capability outage on those paths.
+      const REPLACED_TAGS = [
+        "IMG",
+        "SVG",
+        "CANVAS",
+        "VIDEO",
+        "HR",
+        "INPUT",
+        "TEXTAREA",
+        "SELECT",
+      ];
+      const TRANSPARENT = /^rgba\([^)]*,\s*0(\.0+)?\)$/;
+      const SIDES = ["top", "right", "bottom", "left"];
       const bodies = Array.from(document.querySelectorAll(`.${bodyClass}`));
       return bodies.map((body) => {
         const bodyRect = body.getBoundingClientRect();
@@ -261,12 +298,56 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
         const usablePx = bodyRect.height - paddingTop - paddingBottom;
         const contentTop = bodyRect.top + paddingTop;
         let maxBottom = contentTop;
+        const textWalker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+        for (let node = textWalker.nextNode(); node; node = textWalker.nextNode()) {
+          if (!node.nodeValue || node.nodeValue.trim() === "") continue;
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          for (const rect of Array.from(range.getClientRects())) {
+            if (rect.width > 0 || rect.height > 0) {
+              maxBottom = Math.max(maxBottom, rect.bottom);
+            }
+          }
+        }
         const walker = document.createTreeWalker(body, NodeFilter.SHOW_ELEMENT);
         for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-          const rect = (node as Element).getBoundingClientRect();
-          if (rect.width > 0 || rect.height > 0) {
-            maxBottom = Math.max(maxBottom, rect.bottom);
+          const element = node as Element;
+          const rect = element.getBoundingClientRect();
+          if (rect.width <= 0 && rect.height <= 0) continue;
+          let paints = REPLACED_TAGS.indexOf(element.tagName) !== -1;
+          if (!paints) {
+            const elementStyle = getComputedStyle(element);
+            if (elementStyle.visibility !== "hidden") {
+              const background = elementStyle.backgroundColor;
+              paints =
+                elementStyle.backgroundImage !== "none" ||
+                elementStyle.boxShadow !== "none" ||
+                (background !== "" &&
+                  background !== "transparent" &&
+                  !TRANSPARENT.test(background));
+              for (let index = 0; !paints && index < SIDES.length; index += 1) {
+                const side = SIDES[index];
+                const width =
+                  Number.parseFloat(
+                    elementStyle.getPropertyValue(`border-${side}-width`),
+                  ) || 0;
+                const lineStyle = elementStyle.getPropertyValue(
+                  `border-${side}-style`,
+                );
+                const color = elementStyle.getPropertyValue(
+                  `border-${side}-color`,
+                );
+                paints =
+                  width > 0 &&
+                  lineStyle !== "none" &&
+                  lineStyle !== "hidden" &&
+                  color !== "transparent" &&
+                  !TRANSPARENT.test(color);
+              }
+            }
           }
+          if (!paints) continue;
+          maxBottom = Math.max(maxBottom, rect.bottom);
         }
         // Overflow is measured against the PAGE box's bottom edge (the
         // 11in box that actually clips in print via overflow: hidden),
