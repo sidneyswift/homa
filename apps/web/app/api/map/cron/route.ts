@@ -10,6 +10,10 @@ import {
   runFilingReminderSweep,
   type FilingReminderSweepResult,
 } from "../../../../lib/compliance/filing-reminder-sweep";
+import {
+  runFilingDetailsSweep,
+  type FilingDetailsSweepResult,
+} from "../../../../lib/compliance/filing-details-sweep";
 import { dripEnabled } from "../../../../lib/drip/flag";
 import {
   runStrandedSweep,
@@ -81,7 +85,7 @@ import { reapStaleSubjectLessons } from "../../../../lib/subject-lessons/store";
  *      (gh#423) the number that matters is how many families are near a
  *      legal deadline and cannot be told. Its skip counts say why the
  *      send count is zero. DARK unless HOMA_FILING_REMINDERS_ENABLED is
- *      exactly "true".
+ *      exactly "true". The gh#424 details drip rides the same flag.
  *  12. The stranded-chain follow-up (lib/materials/stranded-sweep.ts,
  *      gh#197, FD-2(c), founder ruling 2026-07-30): ONE quiet message
  *      per family, ever, about work that never reached final. Not one
@@ -149,6 +153,18 @@ export async function GET(request: Request): Promise<Response> {
       too_recent: 0,
       review_failed: 0,
       family_already_told: 0,
+    },
+    sendingEnabled: false,
+  };
+  let filingDetails: FilingDetailsSweepResult = {
+    sent: 0,
+    eligible: 0,
+    skipped: {
+      not_entitled: 0,
+      no_email: 0,
+      nothing_missing: 0,
+      too_soon: 0,
+      sequence_finished: 0,
     },
     sendingEnabled: false,
   };
@@ -255,6 +271,16 @@ export async function GET(request: Request): Promise<Response> {
     // guards only the send. DARK unless HOMA_STRANDED_FOLLOWUP_ENABLED
     // is exactly "true".
     stranded = await runStrandedSweep(new Date().toISOString());
+    // The filing-details drip (gh#424, founder ruling 3). At most three
+    // nudges ever, widening 2/9/30 days, stopping the moment she fills
+    // everything in. Shares the filing reminder's flag: counsel reviews
+    // both as one thing, and turning on the urgent message while leaving
+    // the calm one dark would be the wrong half.
+    filingDetails = await runFilingDetailsSweep(
+      new Intl.DateTimeFormat("en-CA", {
+        timeZone: "UTC", year: "numeric", month: "2-digit", day: "2-digit",
+      }).format(new Date()),
+    );
     filings = await runFilingReminderSweep(
       new Intl.DateTimeFormat("en-CA", {
         timeZone: "UTC",
@@ -299,6 +325,7 @@ export async function GET(request: Request): Promise<Response> {
         stuckToolCalls,
         drip,
         filings,
+        filingDetails,
         stranded,
       },
       { status: 500 },
@@ -313,6 +340,7 @@ export async function GET(request: Request): Promise<Response> {
     transcripts,
     cards,
     filings,
+    filingDetails,
     stranded,
     digest,
     lessons,
@@ -334,6 +362,7 @@ export async function GET(request: Request): Promise<Response> {
     stuckToolCalls,
     drip,
     filings,
+    filingDetails,
     stranded,
   });
 }

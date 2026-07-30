@@ -30,6 +30,7 @@ import { emitMapEvent } from "../../../lib/map/events";
 import {
   parseSchoolYearStart,
   setSchoolYearStart,
+  setFilingParentName,
 } from "../../../lib/compliance/school-year";
 import { saveFamilyContext } from "../../../lib/map/store";
 import { blobConfigured } from "../../../lib/materials/artifact-store";
@@ -364,6 +365,10 @@ export async function updateHomeschoolAction(
     .slice(0, 12);
   const values = String(formData.get("values") ?? "").trim().slice(0, 500);
   const schoolYearRaw = String(formData.get("school_year_start_on") ?? "").trim();
+  const filingName = String(formData.get("filing_parent_name") ?? "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .slice(0, 120);
 
   const family = await getMyFamily();
   if (!family) return { error: "Set up your family first." };
@@ -381,6 +386,12 @@ export async function updateHomeschoolAction(
     if (!parsed.ok) return { error: parsed.reason };
     await setSchoolYearStart(family.id, parsed.value);
   }
+
+  // gh#424: the name a superintendent reads, which is not the name Homa
+  // greets her with. Blank clears it, and a cleared value means the
+  // filing prints a labeled blank rather than falling back to a
+  // greeting name that may be "Mom".
+  await setFilingParentName(family.id, filingName.length > 0 ? filingName : null);
 
   // Empty selections clear their keys on purpose: this editor owns them.
   // saveFamilyContext merges into the same context bag onboarding's

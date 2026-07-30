@@ -45,10 +45,12 @@ export interface HomeschoolValues {
 function HomeschoolEditor({
   current,
   schoolYearStartOn,
+  filingParentName,
   onClose,
 }: {
   current: HomeschoolValues;
   schoolYearStartOn: string | null;
+  filingParentName: string | null;
   onClose: () => void;
 }) {
   const [styles, setStyles] = useState<string[]>(current.styles);
@@ -134,6 +136,24 @@ function HomeschoolEditor({
         />
       </div>
 
+      <label className="mt-4 block font-medium text-strong" htmlFor="filing-parent-name">
+        Your name, as it should appear on an official filing
+      </label>
+      <p className="mt-1 text-sm text-muted">
+        Kept separate from what Homa calls you, because a notice to your
+        school district wants the name on your paperwork. Homa leaves this
+        blank on the filing rather than guessing it (gh#424).
+      </p>
+      <input
+        id="filing-parent-name"
+        name="filing_parent_name"
+        type="text"
+        maxLength={120}
+        autoComplete="name"
+        defaultValue={filingParentName ?? ""}
+        className="mt-2 w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
+      />
+
       <label className="mt-4 block font-medium text-strong" htmlFor="school-year-start">
         When does your school year start?
       </label>
@@ -192,11 +212,14 @@ function HomeschoolEditor({
 export function HomeschoolSection({
   current,
   schoolYearStartOn,
+  filingParentName,
 }: {
   current: HomeschoolValues;
   /** gh#418: drives filing deadlines in the 25 states whose rule counts
    * from the day the family started. Null means never asked. */
   schoolYearStartOn: string | null;
+  /** gh#424: the name a filing carries, never the greeting name. */
+  filingParentName: string | null;
 }) {
   const [editing, setEditing] = useState(false);
   const hasAnything =
@@ -210,6 +233,7 @@ export function HomeschoolSection({
         <HomeschoolEditor
           current={current}
           schoolYearStartOn={schoolYearStartOn}
+          filingParentName={filingParentName}
           onClose={() => setEditing(false)}
         />
       ) : hasAnything ? (
