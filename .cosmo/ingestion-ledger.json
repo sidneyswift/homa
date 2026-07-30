@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-30T07:28:57+00:00",
+  "generatedAt": "2026-07-30T09:23:22+00:00",
   "rows": [
     {
       "slack_ts": "1784260449.909939",
@@ -3478,7 +3478,7 @@
       "file_type": "pdf",
       "message_note": "",
       "ship_reaction": "yes",
-      "status": "partial",
+      "status": "legacy",
       "record_id": "cur-2026-07-19-100-easy-lessons",
       "record_kind": "curriculum",
       "what_is_it": "curriculum",
@@ -3518,7 +3518,7 @@
       "graduation_kind": "",
       "graduation_shipped": "",
       "verifier": "",
-      "problems": "DUPLICATE: 2 records claim this single-file drop (cur-2026-07-19-100-easy-lessons, cur-2026-07-19-teach-child-read-100-lessons); no aboutness (legacy); no book-intake run (legacy)"
+      "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
     {
       "slack_ts": "1784472280.990279",

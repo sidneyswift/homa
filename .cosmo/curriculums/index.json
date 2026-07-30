@@ -98,7 +98,7 @@
       "methodology": "Direct Instruction (DISTAR)",
       "mappedPct": 100,
       "gapCount": 7,
-      "decisionsCount": 9,
+      "decisionsCount": 11,
       "about": [],
       "themes": [],
       "unitsDecomposed": 0,
@@ -273,21 +273,6 @@
         "The Star-Spangled Banner",
         "www.sfsocialstudies.com"
       ]
-    },
-    {
-      "id": "cur-2026-07-19-teach-child-read-100-lessons",
-      "name": "Teach Your Child to Read in 100 Easy Lessons (Siegfried Engelmann) \u2014 Parts 1 & 2",
-      "droppedBy": "aless",
-      "droppedAt": "2026-07-19T10:43:00-04:00",
-      "methodology": "Direct Instruction (DISTAR/SRA)",
-      "mappedPct": 0,
-      "gapCount": 2,
-      "decisionsCount": 2,
-      "about": [],
-      "themes": [],
-      "unitsDecomposed": 0,
-      "unitTopics": [],
-      "works": []
     },
     {
       "id": "cur-2026-07-20-beast-academy-1a",
