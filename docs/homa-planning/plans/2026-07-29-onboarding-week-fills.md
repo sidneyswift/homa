@@ -320,7 +320,60 @@ overlay works without regenerating. Also whether the 40-lesson library
 lives in the materials tables or somewhere new. Neither is a cost
 question.
 
-## 10. Still open
+## 10. Wave A, shipped and walked
+
+**The planner.** `withAgeTemplates` adds a provisional month for any
+child with a birthday and no stored one. Verified live: a family with a
+name, a birthday and zero answers opens the planner onto math Monday,
+literacy Wednesday, phonics Friday, week 1 of 4.
+
+**Honesty carried the whole way.** `provisional` flows through the
+payload; `open_planner`'s note tells Homa to present it as a starting
+point, never as built from her answers, and refuses edit and schedule
+against it; the board says "this is a typical week for this age";
+activities render a dot rather than a checkbox, because a greyed box
+invites a tap and then refuses it; and the footer's check-off promise is
+replaced rather than left contradicting the page.
+
+**Two mistakes worth keeping**
+
+1. **Wiring one reader.** The first pass wired `getPlanBoard`, the
+   agent's reader. The /app pages read through `app-data`, so Homa could
+   describe a week the planner would not show. There are two plan
+   readers; the helper now lives in `plan-week.ts` and both call it.
+2. **The month shrank when she helped.** Showing the template until she
+   answers and the raw answered plan afterwards took the month from
+   three focus subjects to one the moment she finished her first
+   subject:
+
+   | | Focus subjects |
+   |---|---|
+   | before answering | math, literacy, phonics |
+   | after math | **math** |
+   | after literacy | math, literacy |
+   | after phonics | math, literacy, phonics |
+
+   She watches her month get smaller immediately after helping. No test
+   would have caught it; the walk did. `blendTypicalWithAnswers` fixes
+   it and is the founder's framing made literal: start typical for the
+   age, let each real answer write over one typical one. A skip never
+   overrides, because declining to say is not saying no. Held as a
+   property test across three ages and five answer counts.
+
+**What this does NOT deliver, honestly**
+
+The line during the checklist is now stable and truthful, and that is
+the fix. It is also undramatic: a handful of answers among 224 rarely
+move the month's focus subjects, so what she mostly sees is a line
+renaming itself from "A month for Ellie" to "Ellie's month so far".
+
+The vivid version of this moment is the one already shipped at beat 9,
+where the full board opens after the report. If the during-the-checklist
+line does not earn its place on a scored walk, cut it rather than making
+it louder: a strip competing for attention at the most exposed beat in
+the product is a worse trade than a quiet one that does not.
+
+## 11. Still open
 
 - **Day, week and month views.** The ask names all three. The plan is
   four weeks of activities and the shipped grid is a week; a day view and
