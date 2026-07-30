@@ -126,6 +126,29 @@ NEAR_DUPLICATE_TEXT_RATIO = 0.95
 NEAR_DUPLICATE_MIN_CHARS = 40
 NEAR_DUPLICATE_HAMMING = 4
 
+# Boilerplate cannot be duplicate evidence. A graphic page whose only text is
+# a running header carries almost no words, so two such pages match on text
+# trivially and on an 8x8 hash easily. The PEMDAS foldable is the case: its
+# text layer holds just "5th Grade / Bundle 8.1 / Order of Operations PEMDAS"
+# on every page, which cleared the 40-character floor and produced seven false
+# duplicate findings on a 25-page product.
+#
+# The discriminator: A DUPLICATE IS A PAIR, A FAMILY IS STRUCTURE. Text that
+# is near-identical across three or more pages is a header, a template, or a
+# product catalogue, never one page shot twice. Those pages fall back to
+# byte-identity alone.
+#
+# Exact matching was tried first and was not enough. The same PEMDAS product
+# ends with three seller catalogue pages whose 169 characters differ by one
+# word ("5th GRADE", "4th GRADE", "3rd GRADE Math Doodles"), so they are 98%
+# similar and not exactly equal, and they slipped straight through an
+# equality-based check. Family detection uses the same similarity measure the
+# gate itself fires on.
+# A real re-shoot pair gives each page exactly ONE similar sibling, so one is
+# the highest kin count a genuine duplicate can have. Two or more siblings is
+# a family.
+BOILERPLATE_FAMILY_MIN = 1
+
 RENDER_DPI = 300
 
 # Vision escalation. OCR and a vision model are complementary, so the
@@ -474,6 +497,22 @@ def run_gates(pages: list, expect_pages, texts: dict = None) -> list:
     median = float(np.median(inked)) if inked else 0.0
 
     exact, near, rotated = {}, [], []
+
+    # For each page, how many OTHER pages read near-identically. More than one
+    # means this text is structure (header, template, catalogue), so it cannot
+    # be evidence that one page was captured twice.
+    family_size = {}
+    if texts:
+        usable = {n: _normalize_text(v) for n, v in texts.items()
+                  if len(_normalize_text(v)) >= NEAR_DUPLICATE_MIN_CHARS}
+        for n, a_text in usable.items():
+            kin = 0
+            for m, b_text in usable.items():
+                if m == n:
+                    continue
+                if SequenceMatcher(None, a_text, b_text).ratio() >= NEAR_DUPLICATE_TEXT_RATIO:
+                    kin += 1
+            family_size[n] = kin
     for p in pages:
         n = p["page"]
         if "error" in p:
@@ -499,6 +538,8 @@ def run_gates(pages: list, expect_pages, texts: dict = None) -> list:
             continue
 
         text = _normalize_text(texts.get(n, "")) if texts else ""
+        if family_size.get(n, 0) > BOILERPLATE_FAMILY_MIN:
+            text = ""  # structure, not this page's own content
         if len(text) >= NEAR_DUPLICATE_MIN_CHARS and "aHash" in p:
             value = int(p["aHash"], 16)
             for other_n, other_text, other_hash in near:
@@ -962,6 +1003,29 @@ def self_test() -> int:
             # The exercise area: where a real reused sheet actually differs.
             d.rectangle(fill_box, fill="black")
             return im
+
+        # The PEMDAS catalogue: three pages of 169 characters differing by one
+        # word. Near-identical, and three DIFFERENT pages of a real product.
+        def catalogue(grade):
+            im = Image.new("RGB", (1700, 2200), "white")
+            d = ImageDraw.Draw(im)
+            try:
+                f = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 44)
+            except OSError:
+                f = ImageFont.load_default()
+            d.multiline_text((140, 300),
+                             "Copyright 2016 Science Doodles\n"
+                             f"{grade} GRADE Math Doodles\n"
+                             "All pictures hyperlinked, click a picture to go to product\n"
+                             "Also some foldables",
+                             fill="black", font=f, spacing=26)
+            d.rectangle((200, 900 + 40 * len(grade), 1500, 1600), outline="black", width=6)
+            return im
+
+        cases.append(("a three-page catalogue family is not called duplicates",
+                      build_pdf("catalogue", sharp + [catalogue("5th"), catalogue("4th"),
+                                                      catalogue("3rd")]),
+                      6, []))
 
         cases.append(("a reused worksheet template is not called a duplicate",
                       build_pdf("template", sharp + [
