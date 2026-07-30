@@ -90,6 +90,7 @@ COLUMNS = [
     # product graduation
     "subject", "domain", "topics_mapped", "topics_unmapped", "age_band_months",
     "recipes_matched", "gap_slugs", "gaps_recorded", "taste_logged",
+    "graduation_kind", "graduation_shipped",
     # validation
     "verifier", "problems",
 ]
@@ -361,6 +362,28 @@ def build_rows(verify: bool) -> list:
         if untracked:
             problems.append(f"gap(s) not in open-gaps.json: {untracked}")
 
+        # Graduation, checked against the filesystem rather than believed.
+        # A record can claim it shipped a recipe and be wrong in either
+        # direction: the PEMDAS foldable and the essay outline had BOTH a
+        # shipped recipe and a golden anchor and no analysis record at all,
+        # while a record that names a target file proves nothing until the
+        # file exists.
+        grad = (rec.get("stages") or {}).get("graduation") or {}
+        grad_kind = grad.get("kind", "")
+        targets = [t for t in (grad.get("targets") or []) if isinstance(t, str)]
+        shipped = [t for t in targets if (REPO / t).exists()]
+        missing_targets = [t for t in targets if not (REPO / t).exists()]
+        # An INTENDED target that does not exist yet is correct, not a defect:
+        # the skill's `kind: "recipe"` means a recipe is NEEDED, and `commit`
+        # is what records shipping. A first version of this check flagged every
+        # honest proposal, which is precisely the cry-wolf failure the gates in
+        # book-intake.py were rewritten twice to avoid. Only a record that
+        # claims it SHIPPED (a non-null commit) while its target is absent is
+        # making a false claim.
+        if grad.get("commit") and missing_targets:
+            problems.append(f"graduation records commit {grad['commit']} but "
+                            f"{len(missing_targets)} target(s) are absent: {missing_targets[:2]}")
+
         layers = [k for k in rec if k.startswith("layer")]
         units = ((rec.get("layer5_lessons") or {}).get("units") or [])
 
@@ -426,6 +449,9 @@ def build_rows(verify: bool) -> list:
             "gap_slugs": "; ".join(gaps)[:100],
             "gaps_recorded": len(gaps),
             "taste_logged": "yes" if tasted else "",
+            "graduation_kind": grad_kind,
+            "graduation_shipped": (f"{len(shipped)}/{len(targets)}" if targets else
+                                   ("already shipped" if rec.get("graduationAlreadyShipped") else "")),
         })
         row.update({k: ("yes" if v else "") for k, v in dims.items()})
 

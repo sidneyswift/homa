@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-30T05:09:29+00:00",
+  "generatedAt": "2026-07-30T05:45:10+00:00",
   "rows": [
     {
       "slack_ts": "1784260449.909939",
@@ -47,6 +47,8 @@
       "gap_slugs": "",
       "gaps_recorded": "",
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no analysis record for this drop"
     },
@@ -96,6 +98,8 @@
       "gap_slugs": "",
       "gaps_recorded": "",
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no analysis record for this drop"
     },
@@ -145,6 +149,8 @@
       "gap_slugs": "maze-activity: navigational puzzle where correct answers determine the path \u2014 requires procedural ma",
       "gaps_recorded": 2,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['maze-activity: navigational puzzle where correct answers determine the path \u2014 requires procedural maze generation tied to problem solutions', 'guided-notes: two-column notes page with main-ideas/questions column on left and notes/examples column on right, progressive scaffolding from review to new concept']; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -194,6 +200,8 @@
       "gap_slugs": "cut-and-paste-word-work: grid of CVC words with dotted-line cut strips at bottom, student writes the",
       "gaps_recorded": 2,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['cut-and-paste-word-work: grid of CVC words with dotted-line cut strips at bottom, student writes the word then cuts and pastes a matching tile. Combines handwriting + tactile manipulation + reading in one activity.', \"leveled-word-work: same format but multiple difficulty tiers (Level 1 = 6 words, Level 2 = more words or blends, etc.) with a 'short [vowel]' header label\"]; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -243,6 +251,8 @@
       "gap_slugs": "number-practice-page: single-number focus page with 4-5 activities on one sheet \u2014 tracing/writing, t",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['number-practice-page: single-number focus page with 4-5 activities on one sheet \u2014 tracing/writing, ten frame fill-in, number word coloring, object counting (color N stars). Repeatable template across numbers 1-10 (or 1-20).']; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -292,6 +302,8 @@
       "gap_slugs": "one-page-mini-book: single letter-size page with 8-panel grid that folds (fold all lines \u2192 fold in h",
       "gaps_recorded": 2,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['one-page-mini-book: single letter-size page with 8-panel grid that folds (fold all lines \u2192 fold in half \u2192 cut center dotted line \u2192 fold lengthwise \u2192 push in ends \u2192 fold closed) into an 8-page mini book. Requires precise panel placement so pages read in correct order after folding.', 'social-narrative: first-person story format with illustration + text per page, following a pattern: normalize the emotion \u2192 describe body signals \u2192 state the goal \u2192 list coping strategies \u2192 end with positive affirmation + open-ended question']; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -341,6 +353,8 @@
       "gap_slugs": "unit-study-packet: multi-page themed study bundle containing 8-12 different activity types all cente",
       "gaps_recorded": 3,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['unit-study-packet: multi-page themed study bundle containing 8-12 different activity types all centered on one topic. Template structure: cover \u2192 teacher guide \u2192 reference posters (labeled/unlabeled/B&W) \u2192 info card \u2192 vocabulary list \u2192 letter tracing \u2192 labeled diagram \u2192 blank labeling activity \u2192 cross-section diagram (labeled/unlabeled) \u2192 flow diagram with arrows \u2192 coloring page \u2192 cut-and-assemble craft \u2192 word search.', 'labeled-anatomy-diagram: scientific illustration with numbered leader lines pointing to parts, word bank at bottom. Scaffolded versions: fully labeled \u2192 numbered with word bank \u2192 completely blank for testing.', 'cut-and-assemble-craft: page of labeled cutout pieces that student colors, cuts, and assembles into a 3D model or layered diagram. Combines art + motor skills + spatial reasoning + content knowledge.']; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -390,6 +404,8 @@
       "gap_slugs": "cross-curricular-unit-study: theme-based study spanning 5+ disciplines (science, math, social studie",
       "gaps_recorded": 6,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['cross-curricular-unit-study: theme-based study spanning 5+ disciplines (science, math, social studies, language arts, art) with teacher guide, reading list, video list, supply list, and 30+ activity pages', 'naturalist-identification-poster: watercolor illustration of 15+ species with numbered labels and word bank', '3-part-nomenclature-cards: Montessori-style matching cards (image + label, image only, label only) for vocabulary building', 'art-appreciation-cards: classic artwork reproduction with artist bio, dates, style label \u2014 for art history integration', 'copy-work-pages: handwriting practice using curated quotes/poems with illustration \u2014 print and cursive versions', 'nature-journal-prompts: guided observation and recording templates for field work']; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -439,6 +455,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -488,6 +506,8 @@
       "gap_slugs": "nature-identification-poster: watercolor grid of 12+ species with labels \u2014 simpler than Stephanie Ha",
       "gaps_recorded": 5,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: [\"nature-identification-poster: watercolor grid of 12+ species with labels \u2014 simpler than Stephanie Hathaway's numbered style, just illustration + common name\", 'cut-out-counters: circular watercolor illustrations for cutting out and using as math manipulatives (counting, sorting, adding). Blank circles included for child to draw their own', 'classification-sorting-mat: T-chart or two-column sorting activity (insect vs non-insect, garden vs not-garden) where child places cut-out pieces', \"nature-journal-page: watercolor corner illustration with mostly blank page for child's own drawing/writing\", 'spider-web-drawing-template: watercolor branch with web outline for child to draw spider or add to']; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -537,6 +557,8 @@
       "gap_slugs": "weather-cards: subset of visual-schedule-cards \u2014 weather-specific card grid; time-period-cards: subs",
       "gaps_recorded": 2,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['weather-cards: subset of visual-schedule-cards \u2014 weather-specific card grid', 'time-period-cards: subset of visual-schedule-cards \u2014 calendar/time-of-day specific card grid']; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -586,6 +608,8 @@
       "gap_slugs": "cloze-story; picture-label-cloze; school-home-connection-block",
       "gaps_recorded": 3,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['cloze-story', 'picture-label-cloze']; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -635,6 +659,8 @@
       "gap_slugs": "story-assessment",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -684,6 +710,8 @@
       "gap_slugs": "weekly-lesson-planner; cross-curricular-center-cards",
       "gaps_recorded": 2,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "shared-drop: 2 records split this multi-file drop (ref-2026-07-18-harcourt-trophies-2nd-lesson-planner, cur-2026-07-18-harcourt-trophies-2nd); no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -733,6 +761,8 @@
       "gap_slugs": "leveled-worksheet-set; daily-instruction-guide",
       "gaps_recorded": 2,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -782,6 +812,8 @@
       "gap_slugs": "multi-modal-activity-set; reteach-activity-bank",
       "gaps_recorded": 2,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -831,6 +863,8 @@
       "gap_slugs": "math-puzzle-worksheet; printable-game; dot-grid-pattern; math-story-log; printable-manipulative-set",
       "gaps_recorded": 5,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['math-puzzle-worksheet']; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -880,6 +914,8 @@
       "gap_slugs": "",
       "gaps_recorded": "",
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "posted by the bot itself: its own generated output, not a drop"
     },
@@ -929,6 +965,8 @@
       "gap_slugs": "",
       "gaps_recorded": "",
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "posted by the bot itself: its own generated output, not a drop"
     },
@@ -978,6 +1016,8 @@
       "gap_slugs": "",
       "gaps_recorded": "",
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "posted by the bot itself: its own generated output, not a drop"
     },
@@ -1027,6 +1067,8 @@
       "gap_slugs": "grammar-reference-chart; varied-exercise-set; form-meaning-use-grammar-page",
       "gaps_recorded": 3,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -1076,6 +1118,8 @@
       "gap_slugs": "magazine-reading-comprehension; vocabulary-sidebar; skill-transfer-passage",
       "gaps_recorded": 3,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['magazine-reading-comprehension', 'vocabulary-sidebar', 'skill-transfer-passage']; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -1125,6 +1169,8 @@
       "gap_slugs": "",
       "gaps_recorded": "",
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "posted by the bot itself: its own generated output, not a drop"
     },
@@ -1174,6 +1220,8 @@
       "gap_slugs": "",
       "gaps_recorded": "",
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "posted by the bot itself: its own generated output, not a drop"
     },
@@ -1223,6 +1271,8 @@
       "gap_slugs": "self-teaching-math-worksheet",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -1272,6 +1322,8 @@
       "gap_slugs": "",
       "gaps_recorded": "",
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "posted by the bot itself: its own generated output, not a drop"
     },
@@ -1321,6 +1373,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -1370,6 +1424,8 @@
       "gap_slugs": "sentence-pyramid",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -1419,6 +1475,8 @@
       "gap_slugs": "phoneme-segmenting-card",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['phoneme-segmenting-card']; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -1468,6 +1526,8 @@
       "gap_slugs": "preschool-domain-lesson; interactive-read-aloud-script",
       "gaps_recorded": 2,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -1517,6 +1577,8 @@
       "gap_slugs": "animal-anatomy-diagram-page; letter-section-bundle",
       "gaps_recorded": 2,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['animal-anatomy-diagram-page']; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -1566,6 +1628,8 @@
       "gap_slugs": "visual-progress-map; developmental-progress-card",
       "gaps_recorded": 2,
       "taste_logged": "yes",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['developmental-progress-card']; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -1615,6 +1679,8 @@
       "gap_slugs": "playdough-mat; color-mixing-experiment-page",
       "gaps_recorded": 2,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['playdough-mat']; missing dimension(s): layout, difficulty, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -1664,6 +1730,8 @@
       "gap_slugs": "arts-integrated-lesson; inclusive-lesson-adaptations",
       "gaps_recorded": 2,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "missing dimension(s): layout, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -1713,6 +1781,8 @@
       "gap_slugs": "",
       "gaps_recorded": "",
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no analysis record for this drop"
     },
@@ -1762,6 +1832,8 @@
       "gap_slugs": "dot-marker-activity",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['dot-marker-activity']; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -1811,6 +1883,8 @@
       "gap_slugs": "daily-morning-menu",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -1860,6 +1934,8 @@
       "gap_slugs": "music-lesson-plan",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "missing dimension(s): layout, difficulty, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -1909,6 +1985,8 @@
       "gap_slugs": "pre-writing-stroke-page; parent-scribe-journal",
       "gaps_recorded": 2,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "missing dimension(s): layout, skills, difficulty, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -1958,6 +2036,8 @@
       "gap_slugs": "field-trip-planning-guide",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "missing dimension(s): layout, skills, difficulty, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2007,6 +2087,8 @@
       "gap_slugs": "montessori-nomenclature-cards",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['montessori-nomenclature-cards']; missing dimension(s): layout, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2056,6 +2138,8 @@
       "gap_slugs": "bilingual-picture-book",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "missing dimension(s): layout, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2105,6 +2189,8 @@
       "gap_slugs": "spanish-lesson-plan; thematic-vocabulary-unit",
       "gaps_recorded": 2,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "missing dimension(s): layout, difficulty, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2154,6 +2240,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "recipe",
+      "graduation_shipped": "3/3",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2203,6 +2291,8 @@
       "gap_slugs": "language-home-supplement",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "missing dimension(s): layout, difficulty, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2252,6 +2342,8 @@
       "gap_slugs": "labeled-science-diagram; animal-study-nonfiction-page",
       "gaps_recorded": 2,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['labeled-science-diagram']; missing dimension(s): layout, skills, difficulty, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2301,6 +2393,8 @@
       "gap_slugs": "number-stacking-mat; draw-and-trace-word",
       "gaps_recorded": 2,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "missing dimension(s): layout, skills, difficulty, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2350,6 +2444,8 @@
       "gap_slugs": "character-themed-tracing",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "missing dimension(s): layout, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2399,6 +2495,8 @@
       "gap_slugs": "clip-card-activity",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['clip-card-activity']; missing dimension(s): layout, difficulty, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2448,6 +2546,8 @@
       "gap_slugs": "i-spy-letter-page",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "missing dimension(s): layout, difficulty, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2497,6 +2597,8 @@
       "gap_slugs": "manipulative-building-mat",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2546,6 +2648,8 @@
       "gap_slugs": "country-study-pack",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['country-study-pack']; missing dimension(s): layout, difficulty, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2595,6 +2699,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "missing dimension(s): layout, difficulty, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2644,6 +2750,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2693,6 +2801,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2742,6 +2852,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "missing dimension(s): layout, difficulty, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2791,6 +2903,8 @@
       "gap_slugs": "scope-sequence-chart",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2840,6 +2954,8 @@
       "gap_slugs": "real-photo-vocabulary-cards",
       "gaps_recorded": 1,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "missing dimension(s): layout, difficulty, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2889,6 +3005,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "missing dimension(s): layout, difficulty, theming, print; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2938,6 +3056,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -2987,6 +3107,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -3036,6 +3158,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -3085,6 +3209,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -3134,6 +3260,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -3183,6 +3311,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -3232,6 +3362,8 @@
       "gap_slugs": "alphabet-art-page",
       "gaps_recorded": 1,
       "taste_logged": "yes",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -3281,6 +3413,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -3330,6 +3464,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -3379,6 +3515,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "DUPLICATE: 2 records claim this single-file drop (cur-2026-07-19-100-easy-lessons, cur-2026-07-19-teach-child-read-100-lessons); no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -3428,6 +3566,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -3477,6 +3617,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": ""
     },
@@ -3526,6 +3668,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": ""
     },
@@ -3575,6 +3719,8 @@
       "gap_slugs": "life-skill-step-story; question-headline-lesson-page",
       "gaps_recorded": 2,
       "taste_logged": "yes",
+      "graduation_kind": "recipe",
+      "graduation_shipped": "0/2",
       "verifier": "",
       "problems": ""
     },
@@ -3624,6 +3770,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -3673,6 +3821,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": ""
     },
@@ -3722,6 +3872,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": ""
     },
@@ -3771,6 +3923,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": ""
     },
@@ -3820,6 +3974,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": ""
     },
@@ -3869,6 +4025,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -3918,6 +4076,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -3967,6 +4127,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -4016,6 +4178,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -4065,6 +4229,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -4114,6 +4280,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "none",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -4163,6 +4331,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "pattern",
+      "graduation_shipped": "1/1",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -4212,6 +4382,8 @@
       "gap_slugs": "chant-and-rhyme-card",
       "gaps_recorded": 1,
       "taste_logged": "yes",
+      "graduation_kind": "recipe",
+      "graduation_shipped": "3/3",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['chant-and-rhyme-card']; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -4261,6 +4433,8 @@
       "gap_slugs": "chant-and-rhyme-card",
       "gaps_recorded": 1,
       "taste_logged": "yes",
+      "graduation_kind": "recipe",
+      "graduation_shipped": "3/3",
       "verifier": "",
       "problems": "gap(s) not in open-gaps.json: ['chant-and-rhyme-card']; no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -4310,6 +4484,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -4359,6 +4535,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -4408,6 +4586,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -4457,6 +4637,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -4506,6 +4688,8 @@
       "gap_slugs": "",
       "gaps_recorded": 0,
       "taste_logged": "yes",
+      "graduation_kind": "pattern",
+      "graduation_shipped": "1/1",
       "verifier": "",
       "problems": "no aboutness (legacy); no book-intake run (legacy)"
     },
@@ -4555,6 +4739,8 @@
       "gap_slugs": "family-tradition-card; seasonal-activity-menu; cooking-recipe-card",
       "gaps_recorded": 3,
       "taste_logged": "yes",
+      "graduation_kind": "pending",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": ""
     },
@@ -4604,6 +4790,8 @@
       "gap_slugs": "vocabulary-readiness-page; diagnostic-progress-chart",
       "gaps_recorded": 2,
       "taste_logged": "yes",
+      "graduation_kind": "pending",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": ""
     },
@@ -4653,6 +4841,8 @@
       "gap_slugs": "phonics-sound-spelling-page; word-pool-building-page",
       "gaps_recorded": 2,
       "taste_logged": "yes",
+      "graduation_kind": "pending",
+      "graduation_shipped": "",
       "verifier": "",
       "problems": ""
     }
