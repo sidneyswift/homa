@@ -151,3 +151,85 @@ dominant cost, not the fix's speed.
 Re-run this suite after any future change to `page-geometry.ts`,
 `review-artifact.ts`, or the materials-studio SKILL.md density/scaling
 guidance to confirm convergence has not regressed.
+
+## Flashcard entry: a different defect class (print economy, not fill/overflow)
+
+A 2026-07-29 fleet-wide eval sweep surfaced a fourth revision saga that
+does not belong in the table above: a family of four children (initials
+M, TJ, J, E only; the full family record was not looked up in this pass,
+so no id is recorded here) generated Baltimore Catechism flashcards on
+2026-07-15 and needed 8-12 revision rounds per child, across six separate
+revision chains, before any of them landed. Real complaint sequence
+(paraphrased onto the Walker fixture family in the eval, never quoted
+there): "Take out the shading in the flashcards" -> "Resize each
+flashcard to baseball card size" -> "Reformat four cards per page to
+print and cut out cards" -> "Can we reformat the paper to fit the most
+flashcards per page; keep the size of the cards" -> "Please take off the
+page heading and 'made with' border as this is wasted ink to print" ->
+"add 'Lesson 1' to all of the flashcards; take the watermark off of the
+page" -> "I do not want the 'made with Homa' footer on the flashcard.
+Please move the flashcard with the footer to another page".
+
+Two things were tangled in that sequence, and only one of them was a
+defect:
+
+- The footer half (the last three complaints) is NOT a bug.
+  `page-shell.ts` stamps the "made with Homa" footer into every page box
+  in code, the binding D7 founder ruling; the parent's own workaround
+  (isolating the footer's card onto its own page) was already the correct
+  handling of a permanent constraint. Nothing here touches that, and
+  nothing should.
+- The print-economy half (the first four complaints) WAS a real,
+  reproducible gap: the "Flash cards / cut-outs" recipe in the
+  materials-studio SKILL.md was two lines, a CSS grid shape and a cell
+  border, with no stated card size, no cards-per-page density target, and
+  no ink-economy default for a format that gets printed and cut in
+  volume.
+
+This is also a different MEASURE from the rest of this doc. The other
+three scenarios check gh#349's fill/overflow signal (`geometryToolNotes`),
+which has nothing to say about card size, density, or shading; a page can
+report 0% fill or overflow issues and still be undersized, crowded onto
+one sheet, and shaded. `fill-convergence-flashcard-density.eval.ts`
+instead reads the produced material's own HTML (`getMaterialPinned` +
+`splitPageBodies`, the `packet-page-revision.eval.ts` pattern) and checks
+card count per page, page count, and background shading directly. The
+footer-removal turns are deliberately NOT scripted: a "converged" result
+should never mean "made the footer removable."
+
+**Reproduced against current code before any fix**, using a paraphrased
+scenario (Maya, 12 sight words, a count that divides evenly by four so
+page count is unambiguous): turn 1 crammed all 12 words onto one shaded
+page in a 3-column grid, far from baseball-card size; turn 2 (remove
+shading) fixed the ink complaint but kept the same crowded single page;
+turn 3 (resize to baseball card size) landed on 3 pages of 4 cards each,
+matching the real complaint order (ink first, size and density only after
+she named them explicitly). Convergence: **turn 3**, not turn 1, and
+only after the parent supplied the size and density Homa should have
+defaulted to.
+
+**Fix shipped**: the "Flash cards / cut-outs" recipe
+(materials-studio SKILL.md) now states the concrete defaults implied by
+the real complaints and nothing further: 2.5in x 3.5in ("baseball card"
+size) as the default card, the largest whole grid that size fits in the
+7.3in x 9.5in content box (2x2, four per page; three columns need 7.5in
+and three rows need 10.5in, both past the box), more pages rather than
+smaller cards for a bigger deck, a cut-line-only cell with no background
+(ink economy), and skipping a decorative page title on a pure card-grid
+page. No founder ruling was needed: these are the same kind of engineering
+default other card recipes in this skill already state (nomenclature
+cards already fix "~3x4 inches" as a concrete size), not new product
+policy.
+
+**Post-fix, run twice for confidence**: both runs converged at **turn 1**
+(3 pages, 4 cards per page, no shading, built correctly from the plain
+opening ask, no correction rounds needed). That is turn 1 against a
+corrected-code baseline of turn 3, and against the real incident's 8-12
+rounds per chain, the same order of improvement the other three scenarios
+in this doc show.
+
+Run it alone with:
+
+```
+pnpm eval:sandbox materials-studio/fill-convergence-flashcard-density
+```

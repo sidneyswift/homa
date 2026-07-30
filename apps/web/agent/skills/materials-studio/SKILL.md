@@ -341,8 +341,19 @@ astronaut, a poster of the child beside their favorite character.
 ~70px) in groups; the child writes each count in an empty box
 (`border: 2.5px solid; width/height: 64px`).
 
-**Flash cards / cut-outs**: a 2x2 or 2x3 CSS grid, each cell
-`border: 2px dashed #b3a492; padding: 24px; text-align: center;`.
+**Flash cards / cut-outs**: default a card to 2.5in x 3.5in (the
+"baseball card" size families recognize and ask for), and grid the
+largest whole count that exact size fits in the 7.3in x 9.5in content
+box: 2x2, four cards, since three columns need 7.5in and three rows need
+10.5in, both past the box. A deck bigger than four cards is more pages of
+the same four-per-page grid (`create_printable`'s `pages` input), never
+smaller cards to squeeze more onto one sheet; a family naming a different
+size still grids by this rule, whatever whole count that size's own rows
+and columns fit. Each cell is a cut line only, no fill:
+`border: 2px dashed #b3a492;` and no `background` declaration; a shaded
+cell multiplies the ink cost across the whole printed deck. A card-grid
+page's only job is to hold cards, so skip a decorative page title that
+would eat into that space.
 
 **Letter boxes**: some handwriting curricula (Handwriting Without
 Tears, for one) teach letters inside a box, not on a three-line guide.
