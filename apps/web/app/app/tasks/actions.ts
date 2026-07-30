@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { z } from "zod";
 
 import { getMyFamily } from "../../../lib/family";
@@ -21,6 +20,7 @@ import {
   isResearchBriefFeedbackSignal,
 } from "../../../lib/tasks/research-brief-feedback";
 import { recordResearchBriefFeedback } from "../../../lib/tasks/research-brief-feedback-server";
+import { runTaskNow } from "../../../lib/tasks/run-now";
 
 /**
  * /app/tasks server actions (HT-5/HT-6). Same posture as the settings
@@ -206,57 +206,21 @@ export async function deleteTaskAction(taskId: string): Promise<TaskActionState>
   return { error: null };
 }
 
-/** This deployment's own origin, from the request that invoked the
- * action. Vercel routes by Host, so the header names one of our own
- * domains (preview included); dev is plain-http localhost. */
-async function requestOrigin(): Promise<string> {
-  const requestHeaders = await headers();
-  const host =
-    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "";
-  const proto =
-    requestHeaders.get("x-forwarded-proto") ??
-    (host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https");
-  return `${proto}://${host}`;
-}
-
-const RUN_NOW_FALLBACK_ERROR = "Homa couldn't start this run. Try again in a bit.";
-
 /**
  * Run now (the task editor's button): one immediate run of one task.
- * eve's send() only exists inside the agent runtime, so this action
- * calls the dispatch channel's own run-now route over HTTP, on the same
- * deployment, authenticated with CRON_SECRET. familyId comes from the
- * caller's OWN membership (tenancy law), never from the browser; the
- * route re-scopes taskId by it.
+ * familyId comes from the caller's OWN membership (tenancy law), never
+ * from the browser; runTaskNow's route re-scopes taskId by it.
  */
 export async function runTaskNowAction(taskId: string): Promise<TaskActionState> {
   const familyId = await requireFamilyId();
   if (!familyId) return { error: "Set up your family first." };
 
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return { error: RUN_NOW_FALLBACK_ERROR };
-
-  try {
-    const response = await fetch(`${await requestOrigin()}/eve/v1/dispatch/run-now`, {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${secret}`,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({ taskId, familyId }),
-      cache: "no-store",
-    });
-    const body = (await response.json().catch(() => null)) as
-      | { ok?: boolean; note?: string }
-      | null;
-    if (body?.ok === true) {
-      revalidatePath("/app/tasks");
-      return { error: null };
-    }
-    return { error: body?.note ?? RUN_NOW_FALLBACK_ERROR };
-  } catch {
-    return { error: RUN_NOW_FALLBACK_ERROR };
+  const result = await runTaskNow(taskId, familyId);
+  if (result.ok) {
+    revalidatePath("/app/tasks");
+    return { error: null };
   }
+  return { error: result.note };
 }
 
 /**
