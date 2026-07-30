@@ -384,3 +384,41 @@ export async function insertMaterialRowPinned(
   `;
   return { ok: true, id: rows[0].id };
 }
+
+/**
+ * childAgeYearsForFamily(familyId, childId): the child's whole-year age,
+ * or null when there is no child, no usable birth date, or the id does
+ * not belong to this family.
+ *
+ * Read server-side from the child row rather than taken from the model,
+ * because it steers a quality judgement and a hallucinated age would
+ * quietly license the wrong page. The tenancy predicate is the same one
+ * the insert path uses; an id from another family simply resolves to
+ * null here rather than leaking that the row exists.
+ *
+ * `birth_month` is a full date despite its name (migration #55), and
+ * rows from the 2026-07-08 to 07-11 month-only window carry day 01,
+ * which is close enough for an age in years.
+ */
+export async function childAgeYearsForFamily(
+  familyId: string,
+  childId: string | null | undefined,
+): Promise<number | null> {
+  if (!childId) return null;
+  const sql = mapDb();
+  const rows = await sql<{ birth_month: string | null }[]>`
+    select birth_month from public.children
+    where id = ${childId} and family_id = ${familyId}
+  `;
+  const birthMonth = rows[0]?.birth_month;
+  if (!birthMonth) return null;
+  const born = new Date(birthMonth);
+  if (Number.isNaN(born.getTime())) return null;
+  const now = new Date();
+  let age = now.getUTCFullYear() - born.getUTCFullYear();
+  const monthDelta = now.getUTCMonth() - born.getUTCMonth();
+  if (monthDelta < 0 || (monthDelta === 0 && now.getUTCDate() < born.getUTCDate())) {
+    age -= 1;
+  }
+  return age >= 0 && age < 25 ? age : null;
+}

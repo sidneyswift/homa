@@ -16,6 +16,7 @@ import {
 import { emitMapEvent } from "../../lib/map/events";
 import {
   blobConfigured,
+  childAgeYearsForFamily,
   insertMaterialRowPinned,
   isFamilyArtifactUrl,
   MATERIAL_KINDS,
@@ -28,7 +29,11 @@ import {
   getMaterialPinned,
   type MaterialSummary,
 } from "../../lib/materials/library";
-import { geometryToolNotes } from "../../lib/materials/page-geometry";
+import {
+  geometryToolNotes,
+  provenCutoffPages,
+  underfillNotesApplyTo,
+} from "../../lib/materials/page-geometry";
 import { reviewArtifact } from "../../lib/materials/review-artifact";
 import {
   hasPageBreakMarkup,
@@ -591,10 +596,47 @@ const createPrintable = defineBoundedTool({
       };
     }
 
+    // Founder ruling `cutoff-page-is-a-block` (2026-07-29): when Homa's
+    // own check can PROVE a page is physically cut off, she does not
+    // deliver it, she rebuilds and says she caught a problem. A proof is
+    // exactly this measurement, never the vision reviewer's doubts,
+    // which still ship with an honest note. Returning here costs one
+    // render and skips the review call, and because nothing has been
+    // uploaded or inserted yet it leaves no orphan blob and no stranded
+    // draft. The skill's two-strike rule is the escape hatch: after two
+    // failed rebuilds of the same page, stop and ask her.
+    //
+    // Scoped to FRESH pages only, the same distinction selectPagesForReview
+    // already draws: a packet revision carries the untouched pages forward
+    // via fromMaterialId, and those were already final once. Blocking on
+    // one of them would refuse a one-page fix over a page nobody touched
+    // and nobody asked about, on a document that was already shipped.
+    const freshGeometry = rendered.pageGeometry.filter(
+      (page) => resolvedPages[page.page - 1]?.fresh ?? true,
+    );
+    const cutoffPages = provenCutoffPages(freshGeometry);
+    if (cutoffPages.length > 0) {
+      const overflowNotes = geometryToolNotes(freshGeometry).join(" ");
+      return {
+        created: false,
+        note: `Not sent: the renderer measured ${
+          cutoffPages.length === 1
+            ? `page ${cutoffPages[0]}`
+            : `pages ${cutoffPages.join(", ")}`
+        } running off the paper, so this version would print cut off. ${overflowNotes} Fix that and call this again; tell her you caught a problem with the page and are fixing it, never that the tool failed.`,
+      };
+    }
+
     // The studio's own eyes: the reviewer sees the actual pixels of
     // every page against the brief; the agent decides what to do with
     // the verdict. A null review (disabled or unavailable) never blocks
     // anything.
+    //
+    // The age comes from the child row, not the model: two reviewer
+    // criteria ("wrong difficulty for the stated age", and judging a
+    // page against what this child can physically do) were unsatisfiable
+    // while the brief carried no age at all.
+    const childAgeYears = await childAgeYearsForFamily(familyId, input.childId);
     const brief = [
       `Title: ${input.title}`,
       `Kind: ${kind}`,
@@ -602,6 +644,7 @@ const createPrintable = defineBoundedTool({
       input.theme ? `Theme: ${input.theme}` : null,
       input.characters?.length ? `Characters: ${input.characters.join(", ")}` : null,
       input.childName ? `Child's name as spelled: ${input.childName}` : null,
+      childAgeYears !== null ? `The child is ${childAgeYears}` : null,
       input.requestSummary ? `The parent asked for: ${input.requestSummary}` : null,
     ]
       .filter(Boolean)
@@ -621,6 +664,7 @@ const createPrintable = defineBoundedTool({
       pageCount: rendered.pageCount,
       brief,
       pageGeometry: rendered.pageGeometry,
+      underfillNotes: underfillNotesApplyTo(kind),
     });
     const sourceOfferDeliveryId =
       review?.pass === true
@@ -905,7 +949,9 @@ const createPrintable = defineBoundedTool({
     // the preview cap; since gh#368 every page is also rendered and
     // reviewed, so these numbers now corroborate an image rather than
     // stand in for one.
-    const geometryNotes = geometryToolNotes(rendered.pageGeometry);
+    const geometryNotes = geometryToolNotes(rendered.pageGeometry, {
+      underfillNotes: underfillNotesApplyTo(kind),
+    });
     const geometryNoteText =
       geometryNotes.length > 0 ? ` ${geometryNotes.join(" ")}` : "";
 

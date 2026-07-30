@@ -185,13 +185,16 @@ A usable page passes. List issues concretely, each one fixable, naming
 the page number when there is more than one page.
 
 You may be given measured page geometry (fill percent, where content
-ends, overflow past the page box). Trust those numbers over your own
-guess from the image. Overflow is always worth flagging: it prints cut
-off. A low fill number is NOT automatically a defect: a spacious,
-easy-to-read page for a young or beginning child is correct, not
-underfilled. Only flag underfill when the brief's stated age or skill
-level implies more should fit, or when the blank band reads as an
-unfinished page rather than a deliberately spacious one.`;
+ends, overflow past the page box). Those numbers come from the renderer,
+so trust them over your own guess about SIZES AND POSITIONS from a
+shrunken image. They say nothing about whether the page is any good:
+judge that from what you can see. Overflow is always worth flagging: it
+prints cut off. A deep blank band at the bottom is a real defect, not
+design air, and it is a defect at every age (founder ruling
+\`worksheet-scale-to-fill\`, 2026-07-29): the page should have been
+scaled up to reach the bottom. Say so when you see one. The fix is
+bigger type, taller answer blanks and larger pictures, never more
+exercises crammed in, so do not ask for extra content.`;
 
 interface ChunkVerdict {
   pass: boolean;
@@ -220,6 +223,10 @@ async function reviewChunk(input: {
    * 1 to 4 invites an issue filed against a page that call never saw.
    */
   pageGeometry?: readonly PageGeometry[];
+  /** False for fixed-dimension formats (flash cards), whose leftover
+   * band is the correct remainder of a real-world card size rather than
+   * a page that failed to scale up. */
+  underfillNotes?: boolean;
 }): Promise<ChunkVerdict | null> {
   if (input.pages.length === 0) return null;
 
@@ -238,7 +245,9 @@ async function reviewChunk(input: {
             : `pages ${shownNumbers.join(", ")}`
         }, in that order. Number every issue by the page number given here, not by its position among the images.\n`
       : "";
-  const geometryBlock = geometryReviewBlock(input.pageGeometry ?? []);
+  const geometryBlock = geometryReviewBlock(input.pageGeometry ?? [], {
+    underfillNotes: input.underfillNotes,
+  });
   const geometryContext = geometryBlock ? `${geometryBlock}\n` : "";
 
   try {
@@ -328,6 +337,9 @@ export async function reviewArtifact(input: {
   /** Measured geometry for every rendered page (gh#349). Handed to each
    * chunk sliced to that chunk's own pages. */
   pageGeometry?: readonly PageGeometry[];
+  /** False for fixed-dimension formats (flash cards); spread into every
+   * chunk call below. */
+  underfillNotes?: boolean;
 }): Promise<ArtifactReview | null> {
   if (!reviewEnabled()) return null;
   if (input.pages.length === 0) return null;

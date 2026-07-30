@@ -7,7 +7,9 @@ import {
   geometryReviewBlock,
   geometryToolNotes,
   PRINTABLE_HEIGHT_IN,
+  provenCutoffPages,
   summarizePageGeometry,
+  underfillNotesApplyTo,
 } from "./page-geometry";
 
 /**
@@ -175,6 +177,114 @@ describe("geometryReviewBlock", () => {
       { page: 1, contentHeightIn: 8, overflowIn: 0, fillPercent: 84 },
     ]);
     assert.match(block ?? "", /trust these numbers/i);
+  });
+
+  it("scopes that trust to sizes and positions, never to page quality", () => {
+    // An unqualified "trust these numbers" let a measurement override a
+    // correct visual read: while fill counted any full-height wrapper as
+    // content, the reviewer was told to believe 100% over its own view
+    // of a three-quarters-empty page (2026-07-30).
+    const block = geometryReviewBlock([
+      { page: 1, contentHeightIn: 8, overflowIn: 0, fillPercent: 84 },
+    ]);
+    assert.match(block ?? "", /sizes and positions/i);
+    assert.match(block ?? "", /say nothing about whether the page is any good/i);
+  });
+});
+
+describe("content in the bottom margin band", () => {
+  // Content past the 9.5in printable area but inside the 11in page box
+  // is neither cut nor blank, so both other branches stayed silent and
+  // the crowded page was reported as fitting.
+  it("gets its own note instead of falling through both branches", () => {
+    const pages = [
+      { page: 1, contentHeightIn: 10.2, overflowIn: 0, fillPercent: 107 },
+    ];
+    const [note] = geometryToolNotes(pages);
+    assert.match(note ?? "", /past the 9.5in printable area into the bottom margin band/);
+    assert.match(note ?? "", /not cut off/);
+    assert.match(geometryReviewBlock(pages) ?? "", /bottom margin band/);
+  });
+
+  it("still reports a real cut as a cut, not as margin crowding", () => {
+    const [note] = geometryToolNotes([
+      { page: 1, contentHeightIn: 11.4, overflowIn: 0.9, fillPercent: 120 },
+    ]);
+    assert.match(note ?? "", /cut in print/);
+  });
+
+  it("stays silent on sub-pixel margin noise instead of saying a page runs 0in past itself", () => {
+    // formatIn(0.02) prints "0", so an unguarded threshold produced the
+    // nonsensical "content runs 0in past the printable area" (observed
+    // 2026-07-30, fill-convergence-overflow-equations eval).
+    const pages = [
+      { page: 1, contentHeightIn: 9.52, overflowIn: 0, fillPercent: 100 },
+    ];
+    assert.deepEqual(geometryToolNotes(pages), []);
+    assert.match(geometryReviewBlock(pages) ?? "", /fits the page/);
+  });
+});
+
+describe("fixed-dimension formats", () => {
+  // Following the skill's own flash-card rule (2.5x3.5in cards, four per
+  // page, gh#356) lands near 77% fill, so an underfill note would tell
+  // Homa to scale the cards up and undo the parent's own correction.
+  it("skips underfill notes when the format's dimensions are the point", () => {
+    const pages = [
+      { page: 1, contentHeightIn: 7.3, overflowIn: 0, fillPercent: 77 },
+    ];
+    assert.equal(geometryToolNotes(pages, { underfillNotes: false }).length, 0);
+    assert.doesNotMatch(
+      geometryReviewBlock(pages, { underfillNotes: false }) ?? "",
+      /blank at the bottom/,
+    );
+  });
+
+  it("still blocks a card sheet that runs off the paper", () => {
+    const [note] = geometryToolNotes(
+      [{ page: 1, contentHeightIn: 11.6, overflowIn: 1.1, fillPercent: 122 }],
+      { underfillNotes: false },
+    );
+    assert.match(note ?? "", /cut in print/);
+  });
+
+  it("exempts flash cards and nothing else", () => {
+    assert.equal(underfillNotesApplyTo("flashcards"), false);
+    assert.equal(underfillNotesApplyTo("worksheet"), true);
+    assert.equal(underfillNotesApplyTo("packet"), true);
+  });
+});
+
+describe("provenCutoffPages", () => {
+  // Founder ruling `cutoff-page-is-a-block` (2026-07-29) applies to a
+  // proof and never to a suspicion, so this reads geometry only.
+  it("names every page measured off the paper", () => {
+    assert.deepEqual(
+      provenCutoffPages([
+        { page: 1, contentHeightIn: 9, overflowIn: 0, fillPercent: 95 },
+        { page: 2, contentHeightIn: 11.5, overflowIn: 0.6, fillPercent: 121 },
+        { page: 3, contentHeightIn: 12, overflowIn: 1.4, fillPercent: 126 },
+      ]),
+      [2, 3],
+    );
+  });
+
+  it("ignores sub-pixel rounding noise, which is not a proof", () => {
+    assert.deepEqual(
+      provenCutoffPages([
+        { page: 1, contentHeightIn: 9.5, overflowIn: 0.01, fillPercent: 100 },
+      ]),
+      [],
+    );
+  });
+
+  it("says nothing about a page that merely crowds the margin band", () => {
+    assert.deepEqual(
+      provenCutoffPages([
+        { page: 1, contentHeightIn: 10.2, overflowIn: 0, fillPercent: 107 },
+      ]),
+      [],
+    );
   });
 });
 
