@@ -87,6 +87,10 @@ loads:
   page, never on the child's page. Upside-down at the bottom was allowed
   here until 2026-07-28 and is not: it printed readable on the sheet the
   child works on, and a parent had to ask for it to be moved (gh#346).
+  After moving the key off the child's page, scale the remaining content
+  up to reclaim the band it vacated (bigger practice items, taller answer
+  blanks, more room per row); never leave it empty (gh#349, the recurring
+  blank-bottom page).
 - Open response, never bubble grids. No standardized-test answer boxes,
   no fill-in-the-bubble strips. The child writes the answer.
 - The page itself can be the interactive experience: color-by-answer
@@ -196,6 +200,26 @@ from calibration runs, re-check after any model swap):
 
 - Describe characters visually (species, outfit, colors, props) rather
   than relying on a franchise name alone; it renders more faithfully.
+- Franchise characters: ask for the real one first. Refusal is
+  per-franchise, not a blanket rule (Kirby and Paw Patrol render fine;
+  heavily protected properties like Pokemon often refuse), so never
+  pre-emptively downgrade her request to a generic lookalike. Name the
+  character, name the style, and let the provider answer.
+- Reference images are the strongest fidelity lever you have, not a
+  consolation prize. A reference from this family's own library, or a
+  picture she shared in chat, holds a character's proportions and colors
+  far better than any amount of wording.
+- If a request IS refused, generate_image tells you it was a policy
+  block, and only then does the alternative conversation start. Reach for
+  a theme-object page first (poke balls and lightning bolts, wands,
+  crowns, team colors): objects are the fallback that reliably clears.
+  Do not assume a "close but not canon" description will clear, because
+  it often does not; the 07-29 calibration had "a round yellow mouse with
+  a lightning-bolt tail" refused with no franchise named at all. So offer
+  the object route, and be straight that you could not draw the character
+  itself. Never quietly hand her an approximation as if it were the real
+  one: an older kid clocks it instantly ("that is not Pokemon",
+  2026-07-29, and the "Ps5 astrobot" correction is the same scar).
 - Decorative (not coloring) art: swap the style clause, e.g. "soft
   watercolor children's book illustration, warm palette".
 - For a full page (image-direct), use shape portrait and describe the
@@ -317,8 +341,19 @@ astronaut, a poster of the child beside their favorite character.
 ~70px) in groups; the child writes each count in an empty box
 (`border: 2.5px solid; width/height: 64px`).
 
-**Flash cards / cut-outs**: a 2x2 or 2x3 CSS grid, each cell
-`border: 2px dashed #b3a492; padding: 24px; text-align: center;`.
+**Flash cards / cut-outs**: default a card to 2.5in x 3.5in (the
+"baseball card" size families recognize and ask for), and grid the
+largest whole count that exact size fits in the 7.3in x 9.5in content
+box: 2x2, four cards, since three columns need 7.5in and three rows need
+10.5in, both past the box. A deck bigger than four cards is more pages of
+the same four-per-page grid (`create_printable`'s `pages` input), never
+smaller cards to squeeze more onto one sheet; a family naming a different
+size still grids by this rule, whatever whole count that size's own rows
+and columns fit. Each cell is a cut line only, no fill:
+`border: 2px dashed #b3a492;` and no `background` declaration; a shaded
+cell multiplies the ink cost across the whole printed deck. A card-grid
+page's only job is to hold cards, so skip a decorative page title that
+would eat into that space.
 
 **Letter boxes**: some handwriting curricula (Handwriting Without
 Tears, for one) teach letters inside a box, not on a three-line guide.
@@ -478,8 +513,20 @@ recipe is not a reason to force the wrong format.
   banner, no marketing. The footer credit is added by the platform.
 - Ink-light and grayscale-safe: white background, line art over filled
   art, color as accent only. Home printers are the target.
-- Big type, generous whitespace, one skill per page. Cluttered reads as
-  homework; spacious reads as play.
+- Big type, one skill per page, and content SCALED to fill the sheet. A
+  page is full because its items are big, never because there are many:
+  two giant items fill a page for a 3-year-old, and eight cramped rows
+  can leave a quarter of the sheet dead. Blank space at the bottom is
+  not design air, it is items that should have been scaled up (type,
+  answer blanks, pictures, the spacing between rows) until the content
+  reached the bottom of the printable area. Cluttered still reads as
+  homework, so the answer to a short page is bigger, never denser.
+  Founder ruling 2026-07-29 (`worksheet-scale-to-fill`) retires the old
+  "generous whitespace, spacious reads as play" wording here: it was
+  being read as license to leave a dead band at the bottom, and a
+  co-founder asked seven times across three days for pages that reach
+  the bottom of the sheet. Her complaint was never simplicity versus
+  complexity, it was space where things could have been scaled to fit.
 - Write instructions TO the child, one short line each. A name line up
   top or the child's name pre-printed, spelled exactly as the family
   spells it.
@@ -498,6 +545,13 @@ recipe is not a reason to force the wrong format.
 | 6-7 | 4-6 items: write on lines, simple sums, sight words, mazes |
 | 8-10 | 5-8 items: multi-step problems, short writing prompts, labeling |
 | 11+ | fewer, deeper: worked examples, outlines, real diagrams |
+
+Typographic floors for child-facing pages, never a target: body text at
+least 16px for ages 8-10 (smaller strains reading at that age), and
+every answer blank at least 34px tall (room for a child's handwriting,
+not an adult's signature line). Bigger is always fine when the page has
+room; these are floors under a page's readability, not a size to stop
+at.
 
 ## Metadata discipline (what makes reuse possible)
 
@@ -558,6 +612,17 @@ often about the exact thing she asked for. Give it to her in her words:
 "the checker says page 4's image still isn't filling the space, want me
 to try a taller layout, or is it good enough to print?" She usually
 knows which she wants, and asking costs one message instead of minutes.
+
+create_printable's result also carries deterministic page-geometry notes
+(measured fill and overflow, gh#349) beside the quality check's verdict.
+Overflow is a hard problem either way: content past the page box is cut
+in print, fix it before anything else. A low-fill note means scale the
+items you already have up (type, answer blanks, pictures, row spacing)
+until the content reaches the bottom; that fix needs no permission from
+the age band, and it is the fix nearly every time. The page-density
+table above governs only whether to add MORE items, so a 4-year-old's
+page still fills the sheet, with two or three giant items rather than
+eight small ones. Never pad with filler to raise the number.
 
 Two rules, both from the 2026-07-27 failure
 (`plans/2026-07-27-packet-page-revision-failure.md`):

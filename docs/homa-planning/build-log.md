@@ -3,6 +3,189 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-29 · Franchise characters: a policy refusal gets one retry on another vendor
+
+Founder ruling, not an agent decision. Registered as
+`franchise-character-fallback-model` in `journeys/10-reconciliation.md` §5.
+Tracked as gh#449; measurements in
+`materials/calibration/2026-07-29-franchise-refusal-boundary.md`.
+
+**What prompted it.** The "that is not pokemon" bug (PR #450): every
+Pikachu-faithful prompt was refused for trademark likeness, but
+`generateStudioImage` reported all provider errors as "try a reworded
+prompt", so Homa rewrote toward ever more generic prompts until an
+off-brand lookalike passed and shipped. The parent was never told exact
+likeness was blocked.
+
+**The first fix over-corrected, and the founder caught it the same day.**
+That PR told the skill trademarked characters "come back as an inspired
+original, never the real one." False. Measured: 4 of 8 named characters
+render fine on gpt-image-2 (Kirby, Chase from Paw Patrol, Sonic, Bluey);
+Pikachu, Mario, and Elsa refuse. Kirby and Mario are both Nintendo, so
+refusal is per-character, not per-publisher and not categorical. The
+wording had Homa pre-emptively downgrading requests she could have filled.
+
+**Two things measured, both negative, before anything was built.** The
+filter catches descriptive likeness, not just names: a control prompt
+naming no franchise ("a round yellow mouse with a lightning-bolt tail")
+was refused, so the inspired-original fallback is often unavailable for
+exactly the characters that refuse. And the reference-image recipe (a
+Google image of the character fed back with the franchise unnamed) fails:
+run as a 2x2, all four cells refuse, two attempts per reference cell. The
+name omission does nothing and neither does the reference, because
+gpt-image-2 moderates the input image and the output.
+
+**The ruling.** A parent asking for her kid's favorite character should
+get that character. On a content-policy refusal, retry once on
+`HOMA_IMAGE_FALLBACK_MODEL`. Vendors disagree about likeness and each
+answers for itself, so this is procurement through config rather than a
+route around anyone's control. Setting the variable is the flag; unset
+means the refusal stands and Homa offers the theme-object route.
+
+**Why a fallback and not a model swap**, measured rather than assumed:
+`imagen-4.0-fast` rejects Homa's aspect ratios and cannot accept image
+references at all, which would break fleet anchors and the
+draw-the-child-from-their-photo feature. `flux-fast-schnell` honors `size`
+exactly (1024x1536 in, 1024x1536 out) and takes references, so it is the
+sound value. A fallback model that ignores `size` would silently square a
+full-page build.
+
+**Changed:** `lib/materials/generate-image.ts` (one attempt extracted, a
+shared 200s budget under `TOOL_DEADLINE.generate`'s 240s, pure
+`shouldTryPolicyFallback`, spend attributed to the model that actually
+drew the bytes), the `generate_image` tool note (a fallback render is
+flagged for review because line weight and stray-lettering risk differ),
+and the materials-studio skill (ask for the real character first).
+
+**Verified end to end** against the live provider: primary refused in
+14.4s, the decision returned true with 185.6s left, the fallback rendered
+a faithful Pikachu at 1024x1536 with portrait shape preserved.
+
+**The IP posture was ruled the same session: ship it.** The question put
+to the founder was whether Homa may produce and sell faithful
+copyrighted-character pages, given that the provider's filter was never
+Homa's legal protection (it was OpenAI limiting OpenAI's exposure, so a
+permissive vendor changes the vendor's posture and not Homa's). The answer
+was "we are a startup, ship it until we can't."
+
+Recorded for what it is: an explicit acceptance of the exposure, not a
+finding that there is none, and not legal advice from anyone. The risk was
+put in front of the founder twice before the flag was built, in writing,
+including that Homa's whole product runs through one gateway path and that
+a vendor account action would stop everything rather than one feature.
+
+**Scope as ruled:** pages made for a family, which is every surface this
+capability touches today. **Not ruled, because it was not asked and no
+code does it:** franchise characters on a public surface (a marketing
+sample, the public landing, a shared artifact). Decide that when something
+actually proposes it; the narrow reading is the safe default until then.
+
+**What "until we can't" looks like operationally.** The stop signal is a
+rightsholder notice or a vendor account action, and both tend to arrive
+with a deadline. Wind-down is unsetting `HOMA_IMAGE_FALLBACK_MODEL`, but
+turbo lists `HOMA_*` in the build task's `env`, so the value is part of
+the build cache key and the change needs a redeploy to take effect. The
+kill switch is therefore minutes, not instant. Worth knowing before it is
+needed rather than during.
+## 2026-07-29 · The worksheet ruling: scale content to fill the sheet, and the whitespace rule is gone
+
+Founder ruling, not an agent decision. Registered as
+`worksheet-scale-to-fill` in `journeys/10-reconciliation.md` §5. It answers
+FD-3 (gh#189) and it answers it differently than the question was posed.
+
+**What prompted it.** A co-founder complained about a finalized division
+worksheet with "too much space" (diagnosis and prod evidence:
+`plans/2026-07-29-materials-spacing-diagnosis.md`). The investigation put
+the binding design rule "Big type, generous whitespace, one skill per page.
+Cluttered reads as homework; spacious reads as play" third on the ranked
+cause list, and the open question was framed as a conflict: when a parent
+asks for denser pages, does her preference beat the whitespace rule, and
+does the override persist per family or per revision chain?
+
+**The ruling rejected the framing.** Asked to choose a winner, the founder
+removed the rule instead: "that's a dumb rule that is being interpreted
+incorrectly." And on whether little kids are an exception: "the issue
+Carolyn had was that there was empty space where things could have been
+scaled to fit. it was not an issue with simplicity vs complexity."
+
+**So there is no parent-versus-Homa conflict to arbitrate, and no override
+to persist.** A page is full because its items are big, not because there
+are many of them. Two giant items fill a sheet for a 3-year-old; eight
+cramped rows can leave a quarter of it dead. Blank space at the bottom is
+items that should have been scaled up (type, answer blanks, pictures, the
+room between rows) until the content reached the bottom of the printable
+area. The anti-clutter intent survives, which is why the answer to a short
+page is bigger and never denser, and why the age-density table still
+governs how many items a page asks for. What died is the phrase that was
+being read as license to leave a dead band.
+
+**What changed in the same session.**
+
+- `agent/skills/materials-studio/SKILL.md`: the "generous whitespace,
+  spacious reads as play" wording is replaced by the scale-to-fill rule,
+  carrying the ruling id and the scar. The geometry guidance and the
+  answer-key redistribution line now lead with scaling instead of adding.
+- `lib/materials/page-geometry.ts`: the underfill note shipped hours
+  earlier in gh#349 (#451) gated BOTH remedies on the age band ("add rows
+  or scale type and spacing up only when that band calls for more items"),
+  which would have reported a 4-year-old's half-empty page as correct,
+  since her band never calls for more items. Scaling is now unconditional
+  and only adding items is gated. Guarded by a test that fails on the old
+  wording.
+- Same file: the underfill threshold drops from a 3in blank band to 2in.
+  A quarter of a 9.5in printable area is about 2.4in, so the original
+  floor would have silently passed the exact complaint ("there is still
+  1/4 of the page open on bottom of page 1 and 2") that the instrument was
+  built to catch. Guarded by a test at that geometry.
+
+**Not decided here.** The family-facing franchise-character posture
+(gh#449) is a separate open ruling and is untouched by this one.
+
+## 2026-07-29 · The voice ruling: clear AND memorable, boring is a failure state
+
+Founder ruling, not an agent decision. Registered as `copy-voice-memorable`
+in `journeys/10-reconciliation.md` §5, superseding `copy-clarity`
+(2026-07-08). Tracked as gh#413, filed from the superhoma delta review
+(`plans/2026-07-28-superhoma-delta.md` Part 2 §9).
+
+**What prompted it.** A comparison against the Mac mini Homa found the
+product's voice flat by construction, for three mechanical reasons rather
+than one stylistic one. First, our voice rules were **quotas** ("at most one
+metaphor per reply, usually none"), and a quota cannot distinguish a good
+instance from a bad one, so the risk-minimizing play is to spend nothing.
+Second, the **wrapper defeated the content**: "Have opinions" told Homa to
+say the unwelcome thing, and the section marked binding immediately told her
+to reassure first, offer rather than recommend, and make at most one gentle
+suggestion. Run an opinion through those and it arrives as mush, and the
+binding section wins. Third, the copy rulebook instructed blandness outright:
+"if a charming line and a plain line carry the same fact, ship the plain
+one."
+
+**The ruling.** Clarity is the floor, not the ceiling. Order when they
+conflict: true, then clear, then memorable, then short.
+
+**Changed:** the priority law in `homa-copy-writer/SKILL.md` and its
+restatement in `AGENTS.md`; the Voice sections in `agent/instructions.md`,
+`agent/report-writer.md`, and `agent/curriculum-writer.md`;
+`REPORT_PROMPT_VERSION` bumped to 2026.07.29. Quotas on metaphor, emoji, and
+suggestions retired in favor of standards. "Offers, never commands" became
+"you suggest, she decides", which keeps the deference and drops the hedging.
+"Reassure before you inform" narrowed to the case where something is
+actually broken. Explicit permission to be funny added, written as a
+standard.
+
+**Deliberately unchanged**, and stated here so a future pass does not read
+the ruling as blanket permission: never "behind" or deficit words **about a
+child**, never compare siblings, never a verdict on a child, no medical or
+developmental diagnoses, and never guess a child's gender from a name. Those
+are the product's promise, not caution. Bluntness about a curriculum, a
+schedule, a plan, or an idea is now explicitly encouraged.
+
+**One agent decision inside the founder ruling:** profanity ships OFF. The
+Mac mini version permits it because it addresses its two founders; the
+product addresses strangers, many in church-adjacent co-op communities. It
+is a single line and trivially reversed. Queued for founder confirmation in
+gh#413.
 ## 2026-07-28 · Founder rulings on the Carolyng field study (six of seven)
 
 The two-week field study of a co-founder's real family
@@ -66,6 +249,48 @@ Also recorded: `compliance.report_requested` (journeys/06 row 48) lost
 its `period` enum, which described the retired evidence-report concept;
 the row now describes the pack button. The evidence-report feature
 itself stays a non-goal pending gh#317.
+
+## 2026-07-29 · In-app voice moves to OpenAI direct, because the OIDC path does not exist
+
+Ruling `voice-openai-direct`, registered in `journeys/10-reconciliation.md` §5.
+
+In-app voice shipped on 2026-07-29 and failed at connect for every family.
+Vercel runtime logs, 09:07:
+
+```
+realtime token: mint failed: Client secrets can only be minted with a Gateway API key
+```
+
+The cause is a docs claim I took at face value. Vercel's realtime page says
+`getToken` "uses your Gateway credential (apiKey, `AI_GATEWAY_API_KEY`, or
+Vercel OIDC token)". For realtime client secrets that is not true. Ruling
+`voice-provider-key-telephony-only` chose "in-app stays on OIDC through the
+gateway" on the strength of that sentence, so the option the founder picked
+never existed. The telephony half of that ruling is unaffected.
+
+Fixed by minting against OpenAI directly with `OPENAI_API_KEY`, which the
+founder added to all three Vercel environments. Verified before shipping by
+calling the route's exact `getToken` with the real instructions and tool
+definitions: it returns an `ek_` secret and
+`wss://api.openai.com/v1/realtime?model=gpt-realtime-2.1`.
+
+`AI_GATEWAY_API_KEY` remains forbidden and uncreated. Every non-realtime
+model call still runs on Vercel OIDC through the gateway, so the
+model-gateway law is otherwise untouched; only realtime moves, and only
+because it has to.
+
+One correction made before it shipped rather than after: the first draft of
+the route's comment said going direct buys WebRTC. It does not. The AI SDK's
+OpenAI realtime path is WebSocket, the same transport the gateway used. What
+actually changes is that it works, the gateway's 25 minute session and 5
+minute idle caps stop applying, and image input becomes possible. WebRTC
+would be a further step and a different client.
+
+Process note worth keeping: this was found by reading production logs, which
+required the correct Vercel team id. The one in this agent's memory
+(`team_2FMPzbEkyNCzoBs2h8ozIUXo`) is wrong and returns 403 from the logs API;
+the real one is `team_BEuVWnWjCmzv8aVLJp1HU6TC`, from `list_teams` and from
+`apps/web/.vercel/project.json`.
 
 ## 2026-07-29 · Founder ruling: Homa's in-app voice is Marin
 

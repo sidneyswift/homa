@@ -220,6 +220,11 @@ export function selectMaterialPages(
 /** The class render-page.ts uses to find and screenshot each page box. */
 export const SHEET_PAGE_CLASS = "homa-sheet-page";
 
+/** The class render-page.ts measures for page-geometry feedback (gh#349):
+ * the interior box the agent's HTML actually lays out inside, one level
+ * below the page box itself (which never overflows, by CSS). */
+export const SHEET_BODY_CLASS = "homa-sheet-body";
+
 /**
  * wrapPrintableDocument(pageBodies, footerFor): string
  * Full HTML document for one letter-size printable of one or more pages.
@@ -239,7 +244,7 @@ export function wrapPrintableDocument(
   const pages = pageBodies
     .map(
       (body) =>
-        `<div class="${SHEET_PAGE_CLASS}"><div class="homa-sheet-body">${body}</div>${footer}</div>`,
+        `<div class="${SHEET_PAGE_CLASS}"><div class="${SHEET_BODY_CLASS}">${body}</div>${footer}</div>`,
     )
     .join("\n");
   return `<!doctype html>
