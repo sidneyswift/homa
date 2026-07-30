@@ -8,6 +8,7 @@ import {
   type DashboardReport,
 } from "./dashboard";
 import { getPendingCurriculumChildIds } from "./curriculum";
+import { withAgeTemplates } from "./plan-week";
 import {
   getMyChildren,
   getMyFamily,
@@ -69,7 +70,12 @@ export const getAppData = cache(async (): Promise<AppData | null> => {
     family,
     children,
     reports,
-    plans,
+    // A child with a birthday and no stored month still gets a week to
+    // look at, marked provisional (founder ruling
+    // onboarding-lesson-per-subject). Applied here rather than inside
+    // getPlansForChildren because this is where the children rows, with
+    // their ages and interests, are already in hand.
+    plans: withAgeTemplates(children, plans),
     pendingCurriculumChildIds,
     memberDisplayName: memberProfile?.display_name ?? null,
     memberAvatarUrl: memberProfile?.avatar_url ?? null,

@@ -108,6 +108,14 @@ export default defineBoundedTool({
     });
 
     const hasPlans = children.some((child) => child.plans.length > 0);
+    // A provisional week is derived from the child's age and has no row
+    // behind it, so it is real to look at and impossible to write to.
+    const hasProvisional = children.some((child) =>
+      child.plans.some((plan) => plan.provisional),
+    );
+    const hasStored = children.some((child) =>
+      child.plans.some((plan) => !plan.provisional),
+    );
     const panelOpens = !NO_PANEL_CHANNELS.has(attrs.channel ?? "");
     return {
       opened: true,
@@ -124,7 +132,7 @@ export default defineBoundedTool({
         panelOpens
           ? "In web chat a planner panel opens beside the conversation, but not every client shows it (the mobile app signs in as web and renders no panel). Never claim the parent is looking at the planner; if she says she cannot see it, tell the week in plain words."
           : "No planner panel opens on this channel: share the week in your own words.",
-        hasPlans
+        hasStored
           ? [
               "Activity indices above are what edit_plan and schedule_plan_activity address.",
               "scheduledDate is the activity's real calendar date; null means the parent has not put it on a day.",
@@ -134,8 +142,16 @@ export default defineBoundedTool({
             ]
               .filter(Boolean)
               .join(" ")
-          : "No month exists yet. A month is built with one tap in the child's progress report; offer that door, never invent activities here.",
-      ].join(" "),
+          : "",
+        hasProvisional
+          ? "A plan marked provisional is NOT this child's plan. It is the month a typical child of their age gets, built from their birthday alone because they have no answers yet, and it is not saved. Say that plainly in your own words, as a starting point rather than as something you made for them, and never as built from what she told you. Do not edit or schedule a provisional week: there is no row behind it and both tools will fail. Her answers replace it with the real month, which is the honest reason to offer the questions."
+          : "",
+        hasPlans
+          ? ""
+          : "No month exists and none could be derived. A month is built with one tap in the child's progress report; offer that door, never invent activities here.",
+      ]
+        .filter(Boolean)
+        .join(" "),
     };
   },
 });

@@ -1,6 +1,12 @@
 import Link from "next/link";
 
-import { ageInMonths, getMapSubject, isInScoredRange, MONTH_PLAN_SUBJECT } from "@homa/core";
+import {
+  ageInMonths,
+  ageLabel,
+  getMapSubject,
+  isInScoredRange,
+  MONTH_PLAN_SUBJECT,
+} from "@homa/core";
 
 import { childTurnsAgeOn, currentWeekIndex, type DashboardPlan } from "../../../lib/plan-week";
 import { weekdayCells, weekSpanLabel } from "../../../lib/time-zone";
@@ -60,7 +66,7 @@ interface FocusRow {
   focus: string;
   weekNumber: number;
   tone: BlockTone;
-  planHref: string;
+  planHref: string | null;
   retestDue: boolean;
 }
 
@@ -131,12 +137,23 @@ export function PlannerView({
   }));
   const dayPlans: PlannerDayPlan[] = [];
   const focusRows: FocusRow[] = [];
+  /** Every week on the board came from age rather than from answers. */
+  const showsProvisional =
+    plans.length > 0 &&
+    visibleKids.every((kid) =>
+      (plansByKid.get(kid.id) ?? []).every((plan) => plan.provisional),
+    ) &&
+    visibleKids.some((kid) => (plansByKid.get(kid.id) ?? []).length > 0);
 
   kids.forEach((child, kidIndex) => {
     if (focusKid && child.id !== focusKid.id) return;
     const token = reports.get(child.id)?.token;
-    if (!token) return;
     const kidPlans = plansByKid.get(child.id) ?? [];
+    // A child with no report still has an age, and an age is enough for
+    // a provisional week (founder ruling onboarding-lesson-per-subject).
+    // Without this the token gate below hid exactly the families this
+    // was built for: the ones who have not answered anything yet.
+    if (!token && !kidPlans.some((plan) => plan.provisional)) return;
 
     // Gather the kid's whole week first, then spread it over the five
     // days, so one kid's activities pace the week instead of piling up.
@@ -153,8 +170,12 @@ export function PlannerView({
         key: planKey,
         childId: plan.childId,
         subjectId: plan.subjectId,
-        token,
+        // A provisional week has no report behind it. The key still has
+        // to be unique per child so two children's local check state
+        // cannot collide, even though nothing writes to it.
+        token: token ?? `provisional:${plan.childId}`,
         initialChecks: plan.progress,
+        ...(plan.provisional ? { readOnly: true as const } : {}),
       });
       focusRows.push({
         key: planKey,
@@ -166,8 +187,10 @@ export function PlannerView({
         focus: week.focus,
         weekNumber: weekIdx + 1,
         tone,
-        planHref: `/onboarding/r/${token}/plan/${plan.subjectId}`,
-        retestDue: new Date(plan.retestAt).getTime() <= nowMs,
+        // No plan page for a provisional week: there is no report to
+        // hang it on, and a link to nothing is worse than no link.
+        planHref: token ? `/onboarding/r/${token}/plan/${plan.subjectId}` : null,
+        retestDue: !plan.provisional && new Date(plan.retestAt).getTime() <= nowMs,
       });
       week.activities.forEach((text, index) => {
         gathered.push({
@@ -208,6 +231,21 @@ export function PlannerView({
           >
             {focusKid ? `${focusKid.name}'s week` : "Your week"}
           </h1>
+          {/* A week derived from the child's age, shown before she has
+              answered anything, so the planner is never an empty grid
+              (founder ruling onboarding-lesson-per-subject, 2026-07-29).
+              The activities are real; the claim about THIS child is not
+              made, and saying so is the whole reason this line exists.
+              Reassure before inform: what it is, then what changes it. */}
+          {showsProvisional ? (
+            <p className="mt-2 max-w-xl text-sm text-muted">
+              This is a typical week for
+              {focusKid ? ` a ${ageLabel(ageInMonths(focusKid.birth_month))}` : " this age"}
+              , so you have something to look at. Answer
+              {focusKid ? ` ${focusKid.name}'s` : " the"} questions and it
+              becomes their own, and you can change any of it.
+            </p>
+          ) : null}
         </div>
         {canvas ? null : (
           <Link
@@ -314,13 +352,15 @@ export function PlannerView({
                 {/* "month", never "plan": one name per concept, and this
                     page's empty state defines the month (copy-editor
                     gate 2026-07-11). */}
-                <Link
-                  href={row.planHref}
-                  target={canvas ? "_blank" : undefined}
-                  className="text-[0.72rem] font-semibold text-brand hover:underline"
-                >
-                  full month
-                </Link>
+                {row.planHref ? (
+                  <Link
+                    href={row.planHref}
+                    target={canvas ? "_blank" : undefined}
+                    className="text-[0.72rem] font-semibold text-brand hover:underline"
+                  >
+                    full month
+                  </Link>
+                ) : null}
               </div>
             ))}
           </div>
@@ -335,9 +375,14 @@ export function PlannerView({
               one unparseable line on the page). Kept metaphor-free so
               the templates' "quiet goal" stays the surface's one image
               (copy-editor gate, same night). */}
+          {/* A provisional week has no boxes to tick, so the check-off
+              promise would contradict what she is looking at (caught on
+              the first walk of the age template, 2026-07-29). She gets
+              the door to a real one instead. */}
           <p className="mt-3 text-xs text-muted">
-            Any day counts: do the activities whenever they fit, and check them off as they
-            happen. At the month&apos;s re-check, these check-offs go into the progress report.
+            {showsProvisional
+              ? "Nothing to check off yet: this week is an example. Answering the questions turns it into a real month you can tick off and change."
+              : "Any day counts: do the activities whenever they fit, and check them off as they happen. At the month's re-check, these check-offs go into the progress report."}
           </p>
         </>
       )}

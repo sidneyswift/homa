@@ -31,7 +31,7 @@ import {
   CHILD_PROGRESS_RECONCILIATION_ADVISORY_LOCK_KEY,
 } from "../child-progress/postgres-repository-helpers";
 import { foldFamilyDataIntoTx } from "../family-fold";
-import { dashboardPlanFromRow, type DashboardPlan } from "../plan-week";
+import { dashboardPlanFromRow, withAgeTemplates, type DashboardPlan } from "../plan-week";
 import { subjectLessonsEnabled } from "../subject-lessons/flag";
 import {
   SUBJECT_LESSON_MATERIAL_VALIDITY_SQL,
@@ -789,9 +789,17 @@ export async function getPlanBoard(
 ): Promise<{ children: PlanBoardChild[]; plans: DashboardPlan[] } | null> {
   const sql = mapDb();
   const children = await sql<
-    { id: string; name: string; avatar_url: string | null; token: string | null }[]
+    {
+      id: string;
+      name: string;
+      avatar_url: string | null;
+      token: string | null;
+      birth_month: string;
+      profile: Record<string, unknown> | null;
+    }[]
   >`
-    select c.id, c.name, c.avatar_url, r.token
+    select c.id, c.name, c.avatar_url, r.token,
+           to_char(c.birth_month, 'YYYY-MM-DD') as birth_month, c.profile
     from public.children c
     left join public.child_reports r on r.child_id = c.id and r.revoked_at is null
     where c.family_id = ${familyId}
@@ -827,12 +835,13 @@ export async function getPlanBoard(
       avatarUrl: child.avatar_url,
       reportToken: child.token,
     })),
-    plans: planRows.flatMap((row) => {
+    plans: withAgeTemplates(scoped, planRows.flatMap((row) => {
       const shaped = dashboardPlanFromRow(row);
       return shaped ? [shaped] : [];
-    }),
+    })),
   };
 }
+
 
 export type EditPlanOutcome =
   | { status: "applied"; summary: string; plan: FourWeekPlan; added: number; replaced: number; removed: number }

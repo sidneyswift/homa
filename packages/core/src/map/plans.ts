@@ -1,5 +1,10 @@
 import { ageLabel } from "./bands";
-import { getMapSubject, growingActivityFor, MAP_BANK_VERSION } from "./bank";
+import {
+  getMapSubject,
+  growingActivityFor,
+  MAP_BANK_VERSION,
+  MAP_SUBJECTS,
+} from "./bank";
 import { selectSubjectPlanTargets } from "./lesson-target";
 import { scoreMap, type MapAnswerInput } from "./scoring";
 
@@ -258,6 +263,69 @@ export function skillPhrase(statement: string): string {
 
 /** The pseudo-domain id the unified month plan stores under. */
 export const MONTH_PLAN_SUBJECT = "month";
+
+/**
+ * How far ahead of a skill's typical age a child is assumed to have it
+ * comfortably rather than to be working on it.
+ *
+ * A year, because the bank's typicalMonths is when a skill usually
+ * ARRIVES, and a child a year past that is not still practising it.
+ */
+const TYPICAL_MASTERY_LEAD_MONTHS = 12;
+
+/**
+ * typicalAnswersForAge(ageMonths): what a child of exactly this age
+ * would most likely answer, derived from the bank's own typicalMonths.
+ *
+ * The point is a real plan from a name and a birthday alone, before a
+ * parent has answered anything (founder ask, 2026-07-29: "the baseline
+ * is the kid's name and the kid's age"). buildMonthPlan returns null on
+ * zero answers, so without this there is nothing to show her until she
+ * has tapped at least once.
+ *
+ * Deliberately a derivation and not a stored template. A seeded table
+ * would be a second copy of the bank that goes stale the first time an
+ * item's typicalMonths moves, and it would let the preview drift from
+ * the plan it is previewing. Same function, same output shape, no drift
+ * possible.
+ *
+ * Measured against real answer profiles across ten ages: for a child
+ * typical for their age this reproduces the answered plan exactly, 100%
+ * of targets and 100% of activities. It diverges only for a child well
+ * ahead of their age, where about two thirds of activities still hold.
+ * See docs/homa-planning/plans/2026-07-29-onboarding-week-fills.md §9.
+ */
+export function typicalAnswersForAge(ageMonths: number): MapAnswerInput[] {
+  return MAP_SUBJECTS.flatMap((subject) =>
+    subject.items.map((item) => ({
+      itemId: item.id,
+      answer:
+        item.typicalMonths <= ageMonths - TYPICAL_MASTERY_LEAD_MONTHS
+          ? ("easily" as const)
+          : item.typicalMonths <= ageMonths
+            ? ("getting_there" as const)
+            : ("not_yet" as const),
+    })),
+  );
+}
+
+/**
+ * buildAgeTemplatePlan(ageMonths, context): the month a typical child of
+ * this age would get, from age alone.
+ *
+ * Real in every sense that matters: the same builder, the same activity
+ * text, the same shape, and her child's interests already woven in. What
+ * it is NOT is a claim about her child, because nobody has said anything
+ * about her child yet. Whatever renders this owes her that distinction
+ * in words; the honesty rules do not bend just because the activities
+ * are genuine.
+ */
+export function buildAgeTemplatePlan(
+  ageMonths: number,
+  context: PlanContext = {},
+): FourWeekPlan | null {
+  return buildMonthPlan(ageMonths, typicalAnswersForAge(ageMonths), context);
+}
 
 /** Core subjects always keep presence in a month (the read-through
  * ruling: "a kid can't not do math and literacy for an entire month");
