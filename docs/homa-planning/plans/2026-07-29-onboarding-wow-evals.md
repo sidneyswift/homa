@@ -1036,7 +1036,7 @@ new prohibition (or any of its content) was in context, and
 before you plan anything beyond your opening line") went unfollowed
 independently of anything in SKILL.md. The same turn, this time, did NOT
 lose its transcript to gh#466's abort (turn completed slowly, ~200s+,
-delivered normally) — one data point that the tool-call pattern
+delivered normally), one data point that the tool-call pattern
 correlates with gh#466 without deterministically causing it.
 
 All three issues updated with this evidence (gh#416, gh#415, gh#466)
