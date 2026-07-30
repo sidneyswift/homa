@@ -84,6 +84,7 @@ export {
 } from "./map/lesson-target";
 
 export {
+  blendTypicalWithAnswers,
   buildAgeTemplatePlan,
   buildFourWeekPlan,
   buildMonthPlan,

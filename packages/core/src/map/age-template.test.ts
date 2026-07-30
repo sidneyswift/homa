@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import { MAP_SUBJECTS, planQuestions } from "./bank";
 import { buildMapQuestionQueue } from "./question-queue";
 import {
+  blendTypicalWithAnswers,
   buildAgeTemplatePlan,
   buildMonthPlan,
   typicalAnswersForAge,
@@ -140,6 +141,60 @@ describe("buildAgeTemplatePlan", () => {
       ahead.some((pct) => pct < 100),
       "a well-ahead child should get different targets at some age",
     );
+  });
+
+  it("never lets the month shrink as she answers", () => {
+    // The defect a walk caught (2026-07-29): showing the template until
+    // she answers and the raw answered plan afterwards took the month
+    // from three focus subjects to ONE the moment she finished her
+    // first subject. She watches her month get smaller right after
+    // helping. Blending is what keeps it whole, so this asserts the
+    // property rather than the implementation.
+    for (const ageMonths of [72, 90, 120]) {
+      const queue = buildMapQuestionQueue(planQuestions(ageMonths), {});
+      const context = { interests: ["horses"] };
+      const start = buildMonthPlan(
+        ageMonths,
+        blendTypicalWithAnswers(ageMonths, []),
+        context,
+      );
+      assert.ok(start, `age ${ageMonths}: a starting month should exist`);
+      const floor = start.weeks[0].focus.split(",").length;
+
+      for (const answered of [1, 3, 6, 10, 16]) {
+        const given = queue
+          .slice(0, answered)
+          .map((entry) => ({ itemId: entry.item.id, answer: "getting_there" as const }));
+        const plan = buildMonthPlan(
+          ageMonths,
+          blendTypicalWithAnswers(ageMonths, given),
+          context,
+        );
+        assert.ok(plan, `age ${ageMonths}: month should survive ${answered} answers`);
+        assert.ok(
+          plan.weeks[0].focus.split(",").length >= floor,
+          `age ${ageMonths}: month narrowed from ${floor} to ${plan.weeks[0].focus} after ${answered} answers`,
+        );
+        assert.equal(plan.weeks.length, 4, "still four weeks");
+      }
+    }
+  });
+
+  it("lets a real answer override the typical one, and never a skip", () => {
+    const ageMonths = 90;
+    const item = buildMapQuestionQueue(planQuestions(ageMonths), {})[0].item;
+    const typical = typicalAnswersForAge(ageMonths).find((a) => a.itemId === item.id)!.answer;
+    const opposite = typical === "easily" ? ("not_yet" as const) : ("easily" as const);
+
+    const overridden = blendTypicalWithAnswers(ageMonths, [
+      { itemId: item.id, answer: opposite },
+    ]).find((a) => a.itemId === item.id)!.answer;
+    assert.equal(overridden, opposite, "what she said should win");
+
+    const skipped = blendTypicalWithAnswers(ageMonths, [
+      { itemId: item.id, answer: "skip" },
+    ]).find((a) => a.itemId === item.id)!.answer;
+    assert.equal(skipped, typical, "a skip is not an answer and must not override");
   });
 
   it("covers every age the questions cover, so no child sees an empty week", () => {

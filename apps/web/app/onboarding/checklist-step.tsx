@@ -2,7 +2,15 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { getMapSubject, personalizeStatement, planQuestions, type MapAnswer } from "@homa/core";
+import {
+  blendTypicalWithAnswers,
+  buildMonthPlan,
+  getMapSubject,
+  personalizeStatement,
+  planQuestions,
+  type FourWeekPlan,
+  type MapAnswer,
+} from "@homa/core";
 
 import type { FlowChild } from "./flow-types";
 import {
@@ -145,6 +153,38 @@ export function ChecklistStep({
   const domain = current ? getMapSubject(current.subjectId) : null;
   const isNewSubject = current ? lastSubjectId !== current.subjectId : false;
   const isFirstLadderRung = current ? current.isLadder && !lastWasLadder : false;
+
+  /**
+   * The month her answers have built so far, refreshed only when a
+   * SUBJECT completes.
+   *
+   * Founder ask, 2026-07-29: she should watch her week fill in while she
+   * answers. It costs nothing to do honestly, because buildMonthPlan is
+   * a pure function of age, answers and interests, and this component
+   * already holds all three. No request, no model, no persistence.
+   *
+   * Snapshotted at the subject boundary rather than per answer on
+   * purpose. Recomputing under her thumb would make the line twitch
+   * while she is mid-subject, at the beat where she is already most
+   * exposed; between subjects it reads as progress instead. Before her
+   * first answer it is the age template, so the line never starts empty
+   * and never jumps from nothing to something.
+   */
+  const [monthSoFar, setMonthSoFar] = useState<FourWeekPlan | null>(null);
+  const lastSnapshotAt = useRef(-1);
+  useEffect(() => {
+    // The gate, not the dependency list, is what makes this per-subject:
+    // `answers` has to stay a real dependency so the effect always sees
+    // the current ones, and the counter is what decides to act on them.
+    if (lastSnapshotAt.current === subjectsDone) return;
+    lastSnapshotAt.current = subjectsDone;
+    const given = Object.entries(answers).map(([itemId, answer]) => ({ itemId, answer }));
+    setMonthSoFar(
+      buildMonthPlan(child.ageMonths, blendTypicalWithAnswers(child.ageMonths, given), {
+        interests: child.interests,
+      }),
+    );
+  }, [subjectsDone, answers, child.ageMonths, child.interests]);
 
   const minutesLeft = Math.max(1, Math.ceil((queue.length * SECONDS_PER_SUBJECT) / 60));
   const timeLabel = queue.length <= 1 ? "almost done" : `about ${minutesLeft} min left`;
@@ -522,6 +562,20 @@ export function ChecklistStep({
             style={{ width: `${Math.round((subjectsDone / plans.length) * 100)}%` }}
           />
         </div>
+
+        {/* Her month, forming as she answers (founder ask 2026-07-29).
+            Under the hairline, never between her and the question: this
+            is the most exposed beat in the product and nothing here may
+            compete with the thing she is actually being asked.
+            One quiet line, no animation, no count that ticks. */}
+        {monthSoFar ? (
+          <p className="mt-2 truncate text-xs text-subtle">
+            <span className="font-semibold text-muted">
+              {subjectsDone > 0 ? `${child.name}'s month so far: ` : `A month for ${child.name}: `}
+            </span>
+            {monthSoFar.weeks[0]?.focus ?? ""}
+          </p>
+        ) : null}
 
         {/* Fixed minimum height so the card never jumps as question length
             changes; the question centers in the leftover space so the

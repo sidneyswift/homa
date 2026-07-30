@@ -327,6 +327,40 @@ export function buildAgeTemplatePlan(
   return buildMonthPlan(ageMonths, typicalAnswersForAge(ageMonths), context);
 }
 
+/**
+ * blendTypicalWithAnswers(ageMonths, given): the typical answers for
+ * this age, with everything she has actually said written over the top.
+ *
+ * This is the delta closing, one answer at a time, and it exists
+ * because the obvious approach looked wrong on a walk. Showing the
+ * template until she answers and the answered plan afterwards means the
+ * month goes from three focus subjects to ONE the moment she finishes
+ * her first subject, then climbs back: she watches her month shrink
+ * immediately after helping, which reads as having made it worse
+ * (2026-07-29).
+ *
+ * Blending keeps the month whole the whole way through. Every subject
+ * always has an answer behind it, hers where she has given one and the
+ * typical one where she has not, so the plan converges on her child
+ * instead of collapsing and refilling.
+ *
+ * A skip is not an answer and never overrides: she declined to say,
+ * which is different from saying no, and the typical answer remains the
+ * better guess.
+ */
+export function blendTypicalWithAnswers(
+  ageMonths: number,
+  given: readonly MapAnswerInput[],
+): MapAnswerInput[] {
+  const said = new Map(
+    given.filter((entry) => entry.answer !== "skip").map((entry) => [entry.itemId, entry.answer]),
+  );
+  return typicalAnswersForAge(ageMonths).map((typical) => ({
+    itemId: typical.itemId,
+    answer: said.get(typical.itemId) ?? typical.answer,
+  }));
+}
+
 /** Core subjects always keep presence in a month (the read-through
  * ruling: "a kid can't not do math and literacy for an entire month");
  * everything else is an elective that sprinkles in as joy. */
