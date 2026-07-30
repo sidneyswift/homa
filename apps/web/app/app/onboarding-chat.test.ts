@@ -84,6 +84,7 @@ describe("visitShapeFromHistory", () => {
     sessionId: "s",
     role,
     channel: "web" as const,
+    modality: "text" as const,
     content: "text",
     atMs,
   });

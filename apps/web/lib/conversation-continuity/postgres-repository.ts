@@ -222,12 +222,14 @@ export class PostgresContinuityRepository implements ContinuityRepository {
         content: string;
         created_at: string;
         session_id: string;
+        modality: string | null;
         display_name: string | null;
         recipient_names: string[];
       }[]
     >`
       select recent.role, recent.visibility, recent.content,
              recent.created_at::text as created_at, recent.session_id,
+             recent.modality,
              member.display_name,
              coalesce(
                (
@@ -246,7 +248,7 @@ export class PostgresContinuityRepository implements ContinuityRepository {
              ) as recipient_names
       from (
         select id, role, visibility, content, created_at, session_id,
-               member_user_id
+               member_user_id, modality
         from public.conversation_messages
         where family_id = ${familyId}
           and episode_id = ${episodeId}
@@ -270,6 +272,7 @@ export class PostgresContinuityRepository implements ContinuityRepository {
       runtimeSessionId: row.session_id,
       memberName: row.display_name,
       recipientNames: row.recipient_names,
+      modality: row.modality === "voice" ? "voice" : "text",
     }));
   }
 }

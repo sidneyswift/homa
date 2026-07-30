@@ -27,14 +27,20 @@ export type FilingMethod = (typeof FILING_METHODS)[number];
 /**
  * Data a state's notice must carry, as a closed set.
  *
+ * NOT letter-only, despite where this started. A copy-from worksheet is
+ * exactly where a form's required fields matter most: it exists to stage
+ * them. Arkansas asks for "name, date of birth, and grade level of each
+ * child" and New Mexico for "Grade level(s) of the child(ren)", and both
+ * are form states, so gating this to letters left the two states that
+ * most need a field list without one.
+ *
  * A closed set rather than free text because composition has to decide,
  * per field, whether Homa can actually supply it. Three of these Homa
  * knows (name, birthdate, address), one it can compute from a known
- * birthdate (age, which is arithmetic on a given fact, unlike grade
- * placement which is a judgment the parent makes). The rest Homa does
- * not hold, so they render as labeled blanks rather than as a claim.
+ * birthdate (age, which is arithmetic on a given fact). The rest Homa
+ * does not hold, so they render as labeled blanks rather than as a claim.
  */
-export const LETTER_FIELDS = [
+export const NOTICE_FIELDS = [
   "child_name",
   "child_birthdate",
   /** Computed from a known birthdate, never guessed from one. */
@@ -49,8 +55,13 @@ export const LETTER_FIELDS = [
   /** Which statutory criterion qualifies the parent to teach. Only the
    *  parent knows which one they meet. */
   "parent_qualification",
+  /** School grade. NEVER derived from age: placement is the parent's
+   *  call, and no state that accepts a letter asks for it, so this
+   *  renders only where a state's own form does (AR, NM). Showing it
+   *  everywhere invented a blank on every letter that nothing wanted. */
+  "child_grade",
 ] as const;
-export type LetterField = (typeof LETTER_FIELDS)[number];
+export type NoticeField = (typeof NOTICE_FIELDS)[number];
 
 export interface FilingMethodEntry {
   /** letter: the family composes and sends their own written notice, so
@@ -85,16 +96,17 @@ export interface FilingMethodEntry {
    * Rendered verbatim as confirmations, because a notice missing a
    * required assurance is incomplete on its face however well addressed
    * it is. Only ever an assurance: a list of required data fields goes in
-   * letterMustCarry, and rendering one as the other produces a letter
+   * noticeMustCarry, and rendering one as the other produces a letter
    * that recites a statute instead of answering it. */
   letterMustState?: string[];
-  /** For a letter state only: DATA the notice must carry. Kept as a
-   * closed set rather than prose so composition can check the letter
-   * actually supplies each one and mark the rest as gaps, instead of
-   * asserting completeness it never verified. Florida wants each child's
-   * name, address and date of birth; Colorado also wants age and planned
-   * hours of attendance. */
-  letterMustCarry?: LetterField[];
+  /** DATA the notice must carry, whatever shape the notice takes. Kept
+   * as a closed set rather than prose so composition can check the
+   * document actually supplies each one and mark the rest as gaps,
+   * instead of asserting completeness it never verified. Florida wants
+   * each child's name, address and date of birth; Colorado also wants
+   * age and planned hours; Arkansas and New Mexico want grade level on
+   * their own forms. Valid on every method except not_required. */
+  noticeMustCarry?: NoticeField[];
   /** For a letter state only: what the family must ENCLOSE. West
    * Virginia wants evidence of the instructing parent's diploma. Homa
    * cannot produce these, so they are listed for the parent to attach
@@ -160,13 +172,20 @@ export function verifyFilingMethod(
   if (evidence.includes("\u2014")) {
     return { ok: false, reason: "evidence contains an em dash" };
   }
+  // A state that asks for nothing has no notice to carry anything.
+  if (entry.method === "not_required" && entry.noticeMustCarry !== undefined) {
+    return {
+      ok: false,
+      reason: "noticeMustCarry is set on a state that requires no filing",
+    };
+  }
   // Letter-only fields on a form or portal state are silently dead: the
   // composer never reaches them, so a real requirement recorded on the
-  // wrong row would look researched and render nowhere.
+  // wrong row would look researched and render nowhere. noticeMustCarry
+  // is deliberately NOT in this list: the worksheet renders it too.
   if (entry.method !== "letter") {
     for (const field of [
       "letterMustState",
-      "letterMustCarry",
       "letterAttachments",
       "letterAddressee",
     ] as const) {
@@ -190,8 +209,8 @@ export function verifyFilingMethod(
       return { ok: false, reason: "an assurance contains an em dash" };
     }
   }
-  for (const field of entry.letterMustCarry ?? []) {
-    if (!(LETTER_FIELDS as readonly string[]).includes(field)) {
+  for (const field of entry.noticeMustCarry ?? []) {
+    if (!(NOTICE_FIELDS as readonly string[]).includes(field)) {
       return { ok: false, reason: `unknown required field ${String(field)}` };
     }
   }

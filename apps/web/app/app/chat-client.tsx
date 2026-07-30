@@ -28,7 +28,7 @@ import {
 } from "./onboarding-cards";
 import { VoiceMode } from "./voice-mode";
 import { VoiceModeButton } from "./voice-mode-button";
-import { transcriptAsChatMessage } from "./voice-transcript";
+import { spokenTurnMessage, type VoiceTranscriptLine } from "./voice-transcript";
 import { DetailCard, latestDetailRequest, NO_STYLES_SUMMARY } from "./detail-card";
 import { ChecklistTakeover } from "./checklist-takeover";
 import { formatHiddenDirective } from "../../lib/onboarding/directives";
@@ -827,6 +827,32 @@ export function ChatClient({
   /** The in-app voice conversation (#283). Mounted only while open so the
    * socket and the microphone exist exactly as long as she is talking. */
   const [voiceOpen, setVoiceOpen] = useState(false);
+  /** Turns said out loud this visit, in the order they were said.
+   *
+   * They render as ordinary bubbles in the thread, because that is what
+   * they are. They deliberately do NOT go through eve: text Homa must not
+   * answer what voice Homa just said (founder direction 2026-07-29). The
+   * voice route writes each one to conversation_messages, so a refresh
+   * brings them back through server history like any other message, and
+   * the next thing the parent TYPES sees them as context.
+   */
+  const [spoken, setSpoken] = useState<ArchivedMessage[]>([]);
+  const appendSpokenTurn = useCallback((line: VoiceTranscriptLine) => {
+    setSpoken((previous) => [
+      ...previous,
+      {
+        at: currentTimeMs(),
+        // Numbered by how many turns this VISIT has heard, which is not the
+        // same as the turn's sequence in its conversation. She can talk,
+        // stop, and talk again, and each conversation numbers itself from
+        // zero; this id has to stay unique across all of them, because it is
+        // what React renders the thread by.
+        message: spokenTurnMessage(line, previous.length) as EveMessage,
+        channel: "web",
+        modality: "voice",
+      },
+    ]);
+  }, []);
   useEffect(() => {
     if (!focusChildName) return;
     const frame = requestAnimationFrame(() => {
@@ -1089,6 +1115,7 @@ export function ChatClient({
     archived,
     live: agent.data.messages,
     liveTimes,
+    spoken,
   });
   const liveMessageSet = new Set<EveMessage>(agent.data.messages);
   const progressSessionKey =
@@ -2114,20 +2141,13 @@ export function ChatClient({
           }`}
         >
           {voiceOpen ? (
-            // Above the composer, not over it: she can still see the thread
-            // she is talking about, and the transcript reads in the same
-            // column the conversation will land in.
+            // Above the composer, not over it: the thread is where the
+            // conversation is appearing, turn by turn, so it has to stay
+            // visible while she talks. The panel is just the microphone.
             <div className="mb-2">
               <VoiceMode
-                onClose={(transcript) => {
-                  setVoiceOpen(false);
-                  const message = transcriptAsChatMessage(transcript);
-                  // A session she opened and closed without speaking leaves
-                  // no trace, rather than an empty note to wonder about.
-                  if (message) {
-                    sendMessageRef.current?.(message, { kind: "card_answer" });
-                  }
-                }}
+                onTurn={appendSpokenTurn}
+                onClose={() => setVoiceOpen(false)}
               />
             </div>
           ) : null}

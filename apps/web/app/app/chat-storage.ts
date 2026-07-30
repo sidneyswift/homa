@@ -55,6 +55,10 @@ export interface ArchivedMessage {
   /** Which surface the message arrived from, when the archive came from
    * the server record (sms, email, dispatch...). Local saves omit it. */
   channel?: string;
+  /** Whether the turn was typed or said out loud. In-app voice is
+   * channel "web" and modality "voice": it happened in the web app, it
+   * just was not typed. Absent means text. */
+  modality?: "text" | "voice";
 }
 
 export interface SavedChat {

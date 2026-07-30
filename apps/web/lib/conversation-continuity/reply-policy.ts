@@ -346,6 +346,8 @@ export interface ContinuityContextMessage {
   happenedAt: Date;
   memberName?: string | null;
   recipientNames?: string[];
+  /** Typed or said out loud. Absent means typed. */
+  modality?: "text" | "voice";
 }
 
 const CONTEXT_MESSAGE_MAX_CHARS = 1200;
@@ -368,7 +370,19 @@ export function renderContinuityContext(
         message.role === "assistant" && message.recipientNames?.length
           ? ` to ${message.recipientNames.join(" and ")}`
           : "";
-      return `${speaker} previously ${message.role === "assistant" ? `sent${recipient}` : "said"}: ${JSON.stringify(
+      // A spoken turn is reported as spoken. Homa did not "send" what she
+      // said out loud in a voice conversation, and knowing the difference
+      // is the whole reason modality reaches this block: she can refer
+      // back to "when we were talking" without claiming she read it.
+      const verb =
+        message.modality === "voice"
+          ? message.role === "assistant"
+            ? `said out loud${recipient}`
+            : "said out loud"
+          : message.role === "assistant"
+            ? `sent${recipient}`
+            : "said";
+      return `${speaker} previously ${verb}: ${JSON.stringify(
         message.content.slice(0, CONTEXT_MESSAGE_MAX_CHARS),
       )}`;
     })
