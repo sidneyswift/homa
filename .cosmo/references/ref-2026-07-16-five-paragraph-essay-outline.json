@@ -1,0 +1,31 @@
+{
+  "id": "ref-2026-07-16-five-paragraph-essay-outline",
+  "droppedBy": null,
+  "droppedAt": null,
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": null,
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "five-paragraph-essay-outline.pdf",
+    "sourceParts": [
+      "five-paragraph-essay-outline.pdf"
+    ],
+    "sourceSha256": "82e34c20da2a5746d59a305372d92d8719fb64ef4fbf72527f07896f268986c5",
+    "pageCount": 8,
+    "mastersDir": ".cosmo/masters/ref-2026-07-16-five-paragraph-essay-outline",
+    "intakeAt": "2026-07-30T05:11:19+00:00",
+    "gateFindings": []
+  },
+  "aboutness": {
+    "extractionQuality": null,
+    "textSidecar": ".cosmo/text/ref-2026-07-16-five-paragraph-essay-outline.txt",
+    "textBlobUrl": null,
+    "subjects": [],
+    "entities": [],
+    "themes": [],
+    "keyTerms": [],
+    "referencedWorks": []
+  },
+  "title": null,
+  "format": null
+}

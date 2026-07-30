@@ -129,8 +129,30 @@ async function main(): Promise<number> {
   // laptop, escalation is a small fraction of any book, and a burst of
   // parallel vision calls is how a rate limit turns one slow batch into a
   // failed one.
+  /**
+   * The media type has to come from the file, not from a guess.
+   *
+   * It was hardcoded to image/jpeg, which worked for scanned books because
+   * their masters are embedded JPEGs copied out of the PDF. Born-digital
+   * PDFs are RENDERED instead, to PNG, and every one of those pages was sent
+   * mislabelled: the whole vision pass failed on the first three born-digital
+   * drops (2 of 2, 6 of 6, and 38 of 38 pages) and surfaced as the same
+   * opaque "could not parse the response" a model failure produces. That lane
+   * is most of what is coming from TPT, so the bug was aimed squarely at the
+   * highest-volume source.
+   */
+  const mediaTypeFor = (path: string): string => {
+    const ext = path.slice(path.lastIndexOf(".") + 1).toLowerCase();
+    if (ext === "png") return "image/png";
+    if (ext === "webp") return "image/webp";
+    if (ext === "gif") return "image/gif";
+    if (ext === "jxl") return "image/jxl";
+    return "image/jpeg";
+  };
+
   const readOne = async (path: string, useModel: string) => {
     const data = await readFile(path);
+    const mediaType = mediaTypeFor(path);
     return generateObject({
       model: useModel,
       schema: pageSchema,
@@ -139,7 +161,7 @@ async function main(): Promise<number> {
         {
           role: "user",
           content: [
-            { type: "file" as const, mediaType: "image/jpeg" as const, data },
+            { type: "file" as const, mediaType, data },
             {
               type: "text" as const,
               text: "Transcribe this page and describe what it shows.",

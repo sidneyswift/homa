@@ -462,5 +462,9 @@
     }
   ],
   "notes": "This is a heavyweight curriculum ingestion. 'Teach Your Child to Read in 100 Easy Lessons' is one of the most popular homeschool phonics programs ever published \u2014 over 500K copies sold. Its DISTAR method is research-backed (Project Follow Through) and uniquely structured among phonics programs. The key differentiator is the scripted, sequential, mastery-based approach with modified orthography. Every single topic in the curriculum maps to existing Homa taxonomy \u2014 the gap is entirely in activity formats/recipes (the arrow-and-ball notation, the decodable story format) and methodology knowledge, not in subject matter coverage. The 120-page PDF is a scan (all images, no extractable text). The program targets ages 4-5 (bright 3s through struggling older readers). 22 taxonomy topics mapped with 100% coverage. Part 2 PDF (lessons 62-100) dropped separately by Aless on 2026-07-19 10:44 EDT, ingested to verify later-program features.",
-  "sourceMessageTs_part2": "1784472280.990279"
+  "sourceMessageTs_part2": "1784472280.990279",
+  "coversMessageTs": [
+    "1784472280.990279"
+  ],
+  "coversMessageNote": "This book arrived across two Slack messages; the part-2 file (ts 1784472280.990279) is covered by this analysis. Declared on this record and not on its duplicate sibling, because which of the two survives is the open question in gh#443 and coverage should move with the survivor."
 }
