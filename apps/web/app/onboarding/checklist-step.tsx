@@ -2,7 +2,15 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { getMapSubject, personalizeStatement, planQuestions, type MapAnswer } from "@homa/core";
+import {
+  blendTypicalWithAnswers,
+  buildMonthPlan,
+  getMapSubject,
+  personalizeStatement,
+  planQuestions,
+  type FourWeekPlan,
+  type MapAnswer,
+} from "@homa/core";
 
 import type { FlowChild } from "./flow-types";
 import {
@@ -145,6 +153,38 @@ export function ChecklistStep({
   const domain = current ? getMapSubject(current.subjectId) : null;
   const isNewSubject = current ? lastSubjectId !== current.subjectId : false;
   const isFirstLadderRung = current ? current.isLadder && !lastWasLadder : false;
+
+  /**
+   * The month her answers have built so far, refreshed only when a
+   * SUBJECT completes.
+   *
+   * Founder ask, 2026-07-29: she should watch her week fill in while she
+   * answers. It costs nothing to do honestly, because buildMonthPlan is
+   * a pure function of age, answers and interests, and this component
+   * already holds all three. No request, no model, no persistence.
+   *
+   * Snapshotted at the subject boundary rather than per answer on
+   * purpose. Recomputing under her thumb would make the line twitch
+   * while she is mid-subject, at the beat where she is already most
+   * exposed; between subjects it reads as progress instead. Before her
+   * first answer it is the age template, so the line never starts empty
+   * and never jumps from nothing to something.
+   */
+  const [monthSoFar, setMonthSoFar] = useState<FourWeekPlan | null>(null);
+  const lastSnapshotAt = useRef(-1);
+  useEffect(() => {
+    // The gate, not the dependency list, is what makes this per-subject:
+    // `answers` has to stay a real dependency so the effect always sees
+    // the current ones, and the counter is what decides to act on them.
+    if (lastSnapshotAt.current === subjectsDone) return;
+    lastSnapshotAt.current = subjectsDone;
+    const given = Object.entries(answers).map(([itemId, answer]) => ({ itemId, answer }));
+    setMonthSoFar(
+      buildMonthPlan(child.ageMonths, blendTypicalWithAnswers(child.ageMonths, given), {
+        interests: child.interests,
+      }),
+    );
+  }, [subjectsDone, answers, child.ageMonths, child.interests]);
 
   const minutesLeft = Math.max(1, Math.ceil((queue.length * SECONDS_PER_SUBJECT) / 60));
   const timeLabel = queue.length <= 1 ? "almost done" : `about ${minutesLeft} min left`;
@@ -469,6 +509,19 @@ export function ChecklistStep({
         ? { text: domain.intro, tone: "muted" as const }
         : null;
 
+  // What she just told us this child loves, carried into the one beat
+  // that asks her to enumerate what they cannot do yet (walk 002,
+  // 2026-07-29: the questions are the arc's only -1, and this is the
+  // most exposed moment in the product). She picked these on the child
+  // card minutes ago, so the header answers "does it know my kid?" at
+  // the exact moment she is bracing to be judged as a teacher.
+  //
+  // Nothing needed plumbing: /api/map/state already carries
+  // child.interests, read straight from children.profile.interests.
+  // Three at most, because this line shares a row with the time
+  // estimate on a phone; the rest stay in the profile.
+  const headerInterests = child.interests.slice(0, 3).join(", ");
+
   return (
     <div
       className={
@@ -483,9 +536,16 @@ export function ChecklistStep({
             Tier 2: the subject as a prominent section title, the thing
             they're actually answering about right now. */}
         <div className="flex items-center justify-between gap-2">
-          <span className="shrink-0 rounded-pill bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand">
-            {child.name}
-          </span>
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="shrink-0 rounded-pill bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand">
+              {child.name}
+            </span>
+            {headerInterests ? (
+              <span className="truncate text-xs text-subtle">
+                {headerInterests}
+              </span>
+            ) : null}
+          </div>
           <p className="shrink-0 font-mono text-xs text-subtle">{timeLabel}</p>
         </div>
         <p className="mt-2 truncate font-display text-lg font-bold text-strong">
@@ -502,6 +562,20 @@ export function ChecklistStep({
             style={{ width: `${Math.round((subjectsDone / plans.length) * 100)}%` }}
           />
         </div>
+
+        {/* Her month, forming as she answers (founder ask 2026-07-29).
+            Under the hairline, never between her and the question: this
+            is the most exposed beat in the product and nothing here may
+            compete with the thing she is actually being asked.
+            One quiet line, no animation, no count that ticks. */}
+        {monthSoFar ? (
+          <p className="mt-2 truncate text-xs text-subtle">
+            <span className="font-semibold text-muted">
+              {subjectsDone > 0 ? `${child.name}'s month so far: ` : `A month for ${child.name}: `}
+            </span>
+            {monthSoFar.weeks[0]?.focus ?? ""}
+          </p>
+        ) : null}
 
         {/* Fixed minimum height so the card never jumps as question length
             changes; the question centers in the leftover space so the

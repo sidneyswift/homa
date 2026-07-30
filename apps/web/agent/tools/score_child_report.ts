@@ -4,11 +4,11 @@ import {
 } from "../../lib/agent-tool-deadline";
 import { z } from "zod";
 
-import { MAP_BANK_VERSION, getMapSubject } from "@homa/core";
+import { MAP_BANK_VERSION, MONTH_PLAN_SUBJECT, getMapSubject } from "@homa/core";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { emitMapEvent } from "../../lib/map/events";
-import { createReport } from "../../lib/map/store";
+import { createReport, getOrBuildPlan } from "../../lib/map/store";
 import { loadChecklistState } from "../../lib/onboarding/checklist-state";
 
 /**
@@ -97,6 +97,31 @@ export default defineBoundedTool({
       .slice(0, 3)
       .map((subjectId) => getMapSubject(subjectId)?.displayName ?? subjectId);
 
+    // Build her month here, so the planner has something on it.
+    //
+    // Walk 005 (2026-07-29) opened the planner during onboarding for the
+    // first time and it read "There's no month set up for Ellie yet",
+    // because scoring a report never built one and no tool could: the
+    // month waited on a one-tap button in the report page that a parent
+    // twelve minutes old has not found. So the arc's "this is a system,
+    // not a chat" beat showed her an empty grid (gh#426, founder ruling
+    // onboarding-lesson-per-subject).
+    //
+    // It is deterministic and cheap: buildMonthPlan is a pure function of
+    // her age, her answers, and the interests she tapped on the child
+    // card, and this call is one upsert on top of it. It is also
+    // idempotent, returning the existing month rather than rebuilding,
+    // so a second scoring does not restart her four weeks.
+    //
+    // Never fatal. A month that failed to build is a smaller loss than a
+    // report that failed to appear, and she is watching the report.
+    let monthReady = false;
+    try {
+      monthReady = (await getOrBuildPlan(report.token, MONTH_PLAN_SUBJECT)) !== null;
+    } catch {
+      monthReady = false;
+    }
+
     return {
       scored: true,
       done: true,
@@ -110,8 +135,20 @@ export default defineBoundedTool({
       // Strongest first, from her own answers. Say these in your own
       // words; never read the list back as a list.
       strengths,
+      // What she answered "not yet", in her question's exact words, so
+      // the beat that must name her worry is handed the worry instead
+      // of having to remember it. Empty is a real answer: she said that
+      // about nothing, and there is no concern to name.
+      growingEdges: state.growingEdges,
+      // True when her four weeks now exist, so open_planner has a real
+      // board to show. False means the month did not build and you must
+      // not tell her a plan is waiting.
+      monthReady,
       alreadyScored: report.duplicate,
-      note: "SPEAK AFTER THIS ONE: the report is drawing on her screen and it wants your voice over it. Say one true thing about what it shows for this child, in your own words. Do not list subjects, do not read numbers back, and never tell her to check her email.",
+      note:
+        state.growingEdges.length > 0
+          ? `SPEAK AFTER THIS ONE: the report is drawing on her screen and it wants your voice over it. Say one true thing about what it shows for this child, in your own words. Then name ONE growingEdge above, in her own question's words, as the thing this child is working on next: that is the answer she was most afraid to give and a reveal that skips it reads as flattery. Frame it as where they are growing, never as behind. Do not list subjects, do not read numbers back, do not name more than one edge, and never tell her to check her email.`
+          : "SPEAK AFTER THIS ONE: the report is drawing on her screen and it wants your voice over it. Say one true thing about what it shows for this child, in your own words. She answered \"not yet\" to nothing, so there is no growing edge to name and you must not invent one. Do not list subjects, do not read numbers back, and never tell her to check her email.",
     };
   },
 });

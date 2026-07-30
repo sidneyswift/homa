@@ -1,13 +1,15 @@
 "use client";
 
 import type { EveMessage, EveMessagePart } from "eve/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { HOMESCHOOL_STYLES, US_STATES } from "@homa/core";
 
 import { Logo } from "../../components/brand/Logo";
 import { uploadAvatarPhoto } from "../../lib/avatar-upload";
 import { HOMESCHOOL_STYLE_LABELS } from "../../lib/homeschool-styles";
+import { interestSuggestions } from "../../lib/kid-suggestions";
+import { TagInput } from "../onboarding/tag-input";
 
 /**
  * The facts card (plans/2026-07-21-chat-first-onboarding.md §2.3).
@@ -116,12 +118,31 @@ export function spokenDate(iso: string | undefined): string {
   });
 }
 
+/**
+ * Age in months from the birthday she just typed, for suggestion lists.
+ *
+ * Built from the string's own parts for the same reason spokenDate is:
+ * `new Date(iso)` reads a bare date as UTC midnight and lands a day
+ * early west of Greenwich. Zero for a missing or malformed date, which
+ * interestSuggestions treats as its youngest band.
+ */
+export function ageMonthsOf(iso: string | undefined): number {
+  if (!iso) return 0;
+  const [year, month, day] = iso.split("-").map(Number);
+  if (!year || !month || !day) return 0;
+  const now = new Date();
+  const months =
+    (now.getFullYear() - year) * 12 + (now.getMonth() + 1 - month) -
+    (now.getDate() < day ? 1 : 0);
+  return Math.max(0, months);
+}
+
 /** One question, one input. Order is the order she is asked. */
 export interface DetailField {
   key: string;
   label: string;
   hint?: string;
-  kind: "text" | "state" | "date" | "chips-optional" | "photo-optional";
+  kind: "text" | "state" | "date" | "chips-optional" | "tags-optional" | "photo-optional";
   autoComplete?: string;
   /** chips-optional only: the fixed list she picks any number from. */
   options?: { value: string; label: string }[];
@@ -238,14 +259,49 @@ export const FIELDS: Record<DetailCardKind, DetailField[]> = {
       hint: "The real date. Their age in months decides which questions I ask.",
       kind: "date",
     },
+    {
+      key: "childInterests",
+      // Named, because by this step the name input is long gone and
+      // "they" would be pointing at nobody.
+      label: `What does ${NAME_TOKEN} love right now?`,
+      hint: "Tap any that fit, or add your own. Skip if you would rather talk about it.",
+      kind: "tags-optional",
+    },
   ],
 };
+
+/**
+ * cardWantsComposer(kind): does a free-text box belong BESIDE this card?
+ *
+ * The test is whether the card's own inputs can express every answer she
+ * might reasonably give (founder call, 2026-07-28).
+ *
+ * A card of text fields already IS a text box, so a second one under it
+ * is two places to type the same answer and two buttons to send it,
+ * which reads as a puzzle rather than a choice. A closed set that
+ * genuinely covers the ground (all fifty states, a date) leaves nothing
+ * to say either. Only a closed set that CANNOT cover the ground needs
+ * somewhere else to go: the homeschool styles are a list of the common
+ * approaches, not of every approach, so a parent who follows one that is
+ * not on it has no way to say so from inside the card.
+ *
+ * Derived from FIELDS rather than set per card kind, so a new kind gets
+ * the right answer from the shape of what it asks instead of from
+ * somebody remembering this rule at the call site.
+ */
+export function cardWantsComposer(kind: DetailCardKind): boolean {
+  return FIELDS[kind].some(
+    (field) => field.kind === "chips-optional" || field.kind === "tags-optional",
+  );
+}
+
 
 export function DetailCard({
   card,
   active,
   docked = false,
   onSaved,
+  onStepOpenEnded,
 }: {
   card: DetailCardData;
   active: boolean;
@@ -255,6 +311,13 @@ export function DetailCard({
    *  is a transcript affordance and pure noise at the bottom of the
    *  screen where she is already looking. */
   docked?: boolean;
+  /** Fires whenever the step changes, saying whether THIS question is
+   *  one the card can enumerate. The dock uses it to decide whether a
+   *  composer belongs beside the card: on a name or a birthday it would
+   *  be a second text box asking the same thing (founder walk,
+   *  2026-07-28: "it does not need 2 inputs"), and on an open list it is
+   *  the only way to answer something the chips do not cover. */
+  onStepOpenEnded?: (openEnded: boolean) => void;
   /** Hands the conversation back, with what she actually entered. */
   onSaved?: (summary: string) => void;
 }) {
@@ -271,9 +334,22 @@ export function DetailCard({
   const fields = FIELDS[card.kind];
   const field = fields[Math.min(stepIndex, fields.length - 1)];
   const value = values[field.key] ?? "";
+  /** Choice lists read question, permission, options. Everything else
+   *  reads question, input, footnote. */
+  const stepIsOpenEnded =
+    field.kind === "chips-optional" || field.kind === "tags-optional";
   const isLast = stepIndex === fields.length - 1;
+  useEffect(() => {
+    onStepOpenEnded?.(stepIsOpenEnded);
+    // Unmounting hands the slot back: a card that is gone is not asking
+    // anything, so the composer stops being its neighbour.
+    return () => onStepOpenEnded?.(false);
+  }, [stepIsOpenEnded, onStepOpenEnded]);
   const ready =
-    field.kind === "chips-optional" || field.kind === "photo-optional" || field.optional
+    field.kind === "chips-optional" ||
+    field.kind === "tags-optional" ||
+    field.kind === "photo-optional" ||
+    field.optional
       ? true
       : field.kind === "state"
         ? value.length === 2
@@ -328,7 +404,7 @@ export function DetailCard({
               body: JSON.stringify({
                 name: all.childName?.trim(),
                 birthDate: all.birthDate,
-                interests: [],
+                interests: parseChipsValue(all.childInterests ?? ""),
               }),
             });
       const data = (await response.json()) as { ok?: boolean };
@@ -349,7 +425,14 @@ export function DetailCard({
           ? pickedStyles.length > 0
             ? pickedStyles.join(", ")
             : NO_STYLES_SUMMARY
-          : `${all.childName?.trim()}, born ${spokenDate(all.birthDate)}`;
+          : (() => {
+              // Interests ride the child's own bubble when she gave any,
+              // so Homa hears them in the same breath as the birthday and
+              // never has to ask for them again.
+              const loves = parseChipsValue(all.childInterests ?? "");
+              const base = `${all.childName?.trim()}, born ${spokenDate(all.birthDate)}`;
+              return loves.length > 0 ? `${base}, loves ${loves.join(", ")}` : base;
+            })();
       setSaved(summary);
       onSaved?.(summary);
     } catch {
@@ -423,6 +506,7 @@ export function DetailCard({
       }
       aria-label={cardTitle}
     >
+      <div className={docked ? "mx-auto w-full max-w-[30rem]" : ""}>
       {docked ? null : (
         <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-subtle">
           <Logo size={15} variant="mark" />
@@ -445,6 +529,15 @@ export function DetailCard({
           <span className="text-sm font-medium text-strong">
             {withChildName(field.label, values)}
           </span>
+          {/* On a list of choices the hint is permission ("or skip"), and
+              permission granted after she has already chosen is not
+              permission. Under an input it is still a footnote, so only
+              the list kinds lead with it. */}
+          {field.hint && stepIsOpenEnded ? (
+            <span className="mb-2 mt-1 block text-xs text-subtle">
+              {withChildName(field.hint, values)}
+            </span>
+          ) : null}
           {field.kind === "photo-optional" ? (
             <div className="mt-1.5 flex items-center gap-3">
               {photoPreview ? (
@@ -471,6 +564,17 @@ export function DetailCard({
                 </button>
               ) : null}
             </div>
+          ) : field.kind === "tags-optional" ? (
+            // Suggestions are tuned to the age she just gave on the step
+            // before, which is the whole reason this question comes last.
+            <TagInput
+              label=""
+              suggestions={interestSuggestions(ageMonthsOf(values.birthDate))}
+              tags={parseChipsValue(value)}
+              setTags={(next) => setValue(next.join(","))}
+              max={8}
+              className="mt-1.5"
+            />
           ) : field.kind === "chips-optional" ? (
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {(field.options ?? []).map((option) => {
@@ -481,9 +585,12 @@ export function DetailCard({
                     type="button"
                     onClick={() => toggleChip(option.value)}
                     aria-pressed={selected}
-                    className={`min-h-9 rounded-pill border px-3 py-1.5 text-sm transition-colors ${
+                    // Tighter than the default chip so nine of them wrap
+                    // into a calm block instead of a 3/3/2/1 stagger, and
+                    // min-h-9 stays for the thumb.
+                    className={`min-h-9 rounded-pill border px-2.5 py-1 text-[0.8125rem] transition-colors ${
                       selected
-                        ? "border-brand bg-brand-soft text-[var(--clay-700)]"
+                        ? "border-brand bg-brand-soft font-semibold text-[var(--clay-700)]"
                         : "border-border bg-card text-strong hover:border-brand"
                     }`}
                   >
@@ -523,7 +630,7 @@ export function DetailCard({
               }}
             />
           )}
-          {field.hint ? (
+          {field.hint && !stepIsOpenEnded ? (
             <span className="mt-1 block text-xs text-subtle">
               {withChildName(field.hint, values)}
             </span>
@@ -575,6 +682,7 @@ export function DetailCard({
           ))}
         </div>
       ) : null}
+      </div>
     </section>
   );
 }

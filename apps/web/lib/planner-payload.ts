@@ -73,6 +73,17 @@ export interface PlannerPlanPayload {
   weeks: PlannerWeekDetail[];
   /** The weeks not shown in full (family-wide calls only). */
   weekSummaries?: PlannerWeekSummary[];
+  /**
+   * True when this week came from the child's AGE, not from anything
+   * the parent has told us, and is not stored.
+   *
+   * The activities are real and built by the same builder as any other
+   * plan, but the child has no answers yet, so it describes children of
+   * this age rather than this child. Say so. Never call a provisional
+   * week something you built from her answers, and never edit or
+   * schedule against one: it has no row to write to.
+   */
+  provisional?: boolean;
 }
 
 export function subjectDisplayName(subjectId: string): string {
@@ -137,7 +148,11 @@ export function shapePlannerPlan(
     currentWeekNumber: plan.weeks[currentIdx]?.week ?? 1,
     doneCount: plan.done,
     totalCount: plan.total,
-    retestDue: new Date(plan.retestAt).getTime() <= options.nowMs,
+    // A provisional week has a synthetic clock 28 days out, so it can
+    // never be due; guarded anyway, because "your retest is due" about a
+    // week she has never seen would be nonsense.
+    retestDue: !plan.provisional && new Date(plan.retestAt).getTime() <= options.nowMs,
+    ...(plan.provisional ? { provisional: true as const } : {}),
   };
   if (options.fullWeeks) {
     return {

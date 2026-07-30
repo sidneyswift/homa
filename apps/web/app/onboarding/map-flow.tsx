@@ -118,7 +118,15 @@ function decidePostKidsRoute(children: FlowChild[]): PostKidsRoute {
 /** Phases whose first input autofocuses itself; every other phase change
  * moves focus to the step wrapper so keyboard and screen-reader users
  * land on the new content instead of a stale position. */
-const SELF_FOCUSING_PHASES: ReadonlySet<FlowPhase> = new Set<FlowPhase>(["parent", "family", "kids"]);
+const SELF_FOCUSING_PHASES: ReadonlySet<FlowPhase> = new Set<FlowPhase>([
+  "parent",
+  "family",
+  "kids",
+  // The conversation focuses its own field, the docked card's or the
+  // composer's. Moving focus to the wrapper here would take it straight
+  // back off whichever one just claimed it.
+  "chat",
+]);
 
 export function MapFlow({
   onPhaseChange,
@@ -136,7 +144,28 @@ export function MapFlow({
    *  route past it. */
   paywallPending?: boolean;
 }) {
-  const [phase, setPhase] = useState<FlowPhase>("loading");
+  /**
+   * "loading" is a phase for a flow that does not yet know where it is.
+   * Chat-first onboarding already does: the server resolved it while
+   * rendering this page, and `chat` is its answer.
+   *
+   * Opening on it deletes a flash of the wrong product. The skeleton
+   * below plus the marketing Nav and Footer (the shell gives "loading"
+   * full chrome) painted on every arrival, then vanished a moment later
+   * when the state call came back and routed here anyway. On the first
+   * screen after she paid she watched a page assemble itself and then
+   * throw itself away (founder walk, 2026-07-28).
+   *
+   * Safe because non-null `chat` carries two proofs from the page: it is
+   * null without an authenticated user, and null whenever the paywall is
+   * pending (page.tsx). So the only routes out of here are an error and a
+   * genuine redirect, both of which are real state changes rather than a
+   * flicker. The paywall check is belt and braces for a future caller
+   * that hands this component both props.
+   */
+  const [phase, setPhase] = useState<FlowPhase>(
+    chat && !paywallPending ? "chat" : "loading",
+  );
   const [children, setChildren] = useState<FlowChild[]>([]);
   const [email, setEmail] = useState<string | null>(null);
   const [welcomeBack, setWelcomeBack] = useState(false);

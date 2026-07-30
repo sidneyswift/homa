@@ -1,5 +1,10 @@
 import { ageLabel } from "./bands";
-import { getMapSubject, growingActivityFor, MAP_BANK_VERSION } from "./bank";
+import {
+  getMapSubject,
+  growingActivityFor,
+  MAP_BANK_VERSION,
+  MAP_SUBJECTS,
+} from "./bank";
 import { selectSubjectPlanTargets } from "./lesson-target";
 import { scoreMap, type MapAnswerInput } from "./scoring";
 
@@ -176,10 +181,55 @@ function gerundize(word: string): string {
   if (stem.endsWith("ie")) return `${stem.slice(0, -2)}ying`;
   if (stem.endsWith("e") && !stem.endsWith("ee")) return `${stem.slice(0, -1)}ing`;
   // Short consonant-vowel-consonant verbs double the last letter (run, cut).
-  if (stem.length <= 4 && /[^aeiou][aeiou][^aeiouwxy]$/.test(stem)) {
+  //
+  // Only ONE-syllable ones. English doubles for a stressed final
+  // syllable, and a two-syllable verb ending the same way does not:
+  // "open" matched the letter pattern and shipped "openning" into a
+  // parent's week plan (walk 007, 2026-07-29). Counting vowel groups is
+  // a good enough stand-in for counting syllables on this bank's verbs.
+  const vowelGroups = stem.match(/[aeiou]+/g) ?? [];
+  if (
+    stem.length <= 4 &&
+    vowelGroups.length === 1 &&
+    /[^aeiou][aeiou][^aeiouwxy]$/.test(stem)
+  ) {
     return `${stem}${stem.slice(-1)}ing`;
   }
   return `${stem}ing`;
+}
+
+/** A verb token, hyphens included, as the bank writes them (skip-counts). */
+const LEADING_VERB = /^[a-z]+(?:-[a-z]+)*s\b/;
+/** The next verb in a coordination: ", verb", " and verb", ", or verb". */
+const COORDINATED_VERB = /^(,?\s+(?:and|or)\s+|,\s+)([a-z]+(?:-[a-z]+)*s)\b/;
+
+/**
+ * Every verb in a leading coordination becomes a gerund, not just the
+ * first, so a plan activity reads as one sentence.
+ *
+ * Ten of the bank's 224 statements open with a verb series, and each of
+ * them shipped broken after "ten minutes a day of..." (walk 007,
+ * 2026-07-29): "adding and subtracts small numbers", "getting and uses
+ * figurative language", and, where a comma blocked conversion outright,
+ * "adds, subtracts, and compares fractions".
+ *
+ * Only a comma or an explicit and/or continues the run. That is what
+ * keeps a plural noun from being conjugated: "knows letters and sounds"
+ * is separated by a plain space, so it converts "knows" alone and
+ * "sounds" stays a noun.
+ */
+function gerundizeLeadingVerbs(phrase: string): string {
+  const first = phrase.match(LEADING_VERB);
+  if (!first) return phrase;
+  let out = gerundize(first[0]);
+  let rest = phrase.slice(first[0].length);
+  for (;;) {
+    const next = rest.match(COORDINATED_VERB);
+    if (!next) break;
+    out += `${next[1]}${gerundize(next[2])}`;
+    rest = rest.slice(next[0].length);
+  }
+  return out + rest;
 }
 
 /**
@@ -192,7 +242,7 @@ function gerundize(word: string): string {
  *      multiplication facts" reads as "knowing multiplication facts"
  *      after "ten minutes a day of...").
  */
-function skillPhrase(statement: string): string {
+export function skillPhrase(statement: string): string {
   let phrase = lowerFirst(statement);
 
   if (phrase.length > 45) {
@@ -208,13 +258,108 @@ function skillPhrase(statement: string): string {
     if (cutAt > 20) phrase = phrase.slice(0, cutAt);
   }
 
-  const spaceIndex = phrase.indexOf(" ");
-  if (spaceIndex === -1) return phrase;
-  return `${gerundize(phrase.slice(0, spaceIndex))}${phrase.slice(spaceIndex)}`;
+  return gerundizeLeadingVerbs(phrase);
 }
 
 /** The pseudo-domain id the unified month plan stores under. */
 export const MONTH_PLAN_SUBJECT = "month";
+
+/**
+ * How far ahead of a skill's typical age a child is assumed to have it
+ * comfortably rather than to be working on it.
+ *
+ * A year, because the bank's typicalMonths is when a skill usually
+ * ARRIVES, and a child a year past that is not still practising it.
+ */
+const TYPICAL_MASTERY_LEAD_MONTHS = 12;
+
+/**
+ * typicalAnswersForAge(ageMonths): what a child of exactly this age
+ * would most likely answer, derived from the bank's own typicalMonths.
+ *
+ * The point is a real plan from a name and a birthday alone, before a
+ * parent has answered anything (founder ask, 2026-07-29: "the baseline
+ * is the kid's name and the kid's age"). buildMonthPlan returns null on
+ * zero answers, so without this there is nothing to show her until she
+ * has tapped at least once.
+ *
+ * Deliberately a derivation and not a stored template. A seeded table
+ * would be a second copy of the bank that goes stale the first time an
+ * item's typicalMonths moves, and it would let the preview drift from
+ * the plan it is previewing. Same function, same output shape, no drift
+ * possible.
+ *
+ * Measured against real answer profiles across ten ages: for a child
+ * typical for their age this reproduces the answered plan exactly, 100%
+ * of targets and 100% of activities. It diverges only for a child well
+ * ahead of their age, where about two thirds of activities still hold.
+ * See docs/homa-planning/plans/2026-07-29-onboarding-week-fills.md §9.
+ */
+export function typicalAnswersForAge(ageMonths: number): MapAnswerInput[] {
+  return MAP_SUBJECTS.flatMap((subject) =>
+    subject.items.map((item) => ({
+      itemId: item.id,
+      answer:
+        item.typicalMonths <= ageMonths - TYPICAL_MASTERY_LEAD_MONTHS
+          ? ("easily" as const)
+          : item.typicalMonths <= ageMonths
+            ? ("getting_there" as const)
+            : ("not_yet" as const),
+    })),
+  );
+}
+
+/**
+ * buildAgeTemplatePlan(ageMonths, context): the month a typical child of
+ * this age would get, from age alone.
+ *
+ * Real in every sense that matters: the same builder, the same activity
+ * text, the same shape, and her child's interests already woven in. What
+ * it is NOT is a claim about her child, because nobody has said anything
+ * about her child yet. Whatever renders this owes her that distinction
+ * in words; the honesty rules do not bend just because the activities
+ * are genuine.
+ */
+export function buildAgeTemplatePlan(
+  ageMonths: number,
+  context: PlanContext = {},
+): FourWeekPlan | null {
+  return buildMonthPlan(ageMonths, typicalAnswersForAge(ageMonths), context);
+}
+
+/**
+ * blendTypicalWithAnswers(ageMonths, given): the typical answers for
+ * this age, with everything she has actually said written over the top.
+ *
+ * This is the delta closing, one answer at a time, and it exists
+ * because the obvious approach looked wrong on a walk. Showing the
+ * template until she answers and the answered plan afterwards means the
+ * month goes from three focus subjects to ONE the moment she finishes
+ * her first subject, then climbs back: she watches her month shrink
+ * immediately after helping, which reads as having made it worse
+ * (2026-07-29).
+ *
+ * Blending keeps the month whole the whole way through. Every subject
+ * always has an answer behind it, hers where she has given one and the
+ * typical one where she has not, so the plan converges on her child
+ * instead of collapsing and refilling.
+ *
+ * A skip is not an answer and never overrides: she declined to say,
+ * which is different from saying no, and the typical answer remains the
+ * better guess.
+ */
+export function blendTypicalWithAnswers(
+  ageMonths: number,
+  given: readonly MapAnswerInput[],
+): MapAnswerInput[] {
+  const said = new Map(
+    given.filter((entry) => entry.answer !== "skip").map((entry) => [entry.itemId, entry.answer]),
+  );
+  return typicalAnswersForAge(ageMonths).map((typical) => ({
+    itemId: typical.itemId,
+    answer: said.get(typical.itemId) ?? typical.answer,
+  }));
+}
 
 /** Core subjects always keep presence in a month (the read-through
  * ruling: "a kid can't not do math and literacy for an entire month");

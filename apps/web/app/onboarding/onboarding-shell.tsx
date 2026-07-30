@@ -70,7 +70,14 @@ export function OnboardingShell({
    *  forwarded to /onboarding/trial instead of the flow's next step. */
   paywallPending?: boolean;
 }) {
-  const [phase, setPhase] = useState<FlowPhase>("loading");
+  // Opened on the same answer MapFlow opens on, and for the same reason:
+  // "loading" takes full chrome, so a shell that starts there paints the
+  // marketing Nav and Footer around a skeleton before the conversation
+  // replaces the lot. Both have to start in the right place or the flash
+  // just moves from one of them to the other.
+  const [phase, setPhase] = useState<FlowPhase>(
+    chat && !paywallPending ? "chat" : "loading",
+  );
   const chromeless = CHROMELESS_PHASES.has(phase);
   const fullChrome = FULL_CHROME_PHASES.has(phase) && !chromeless;
   const topAnchored = TOP_ANCHORED_PHASES.has(phase);

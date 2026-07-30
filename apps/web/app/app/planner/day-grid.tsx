@@ -26,6 +26,14 @@ export interface PlannerDayPlan {
   /** The report token (storage key + sync identity). */
   token: string;
   initialChecks: Record<string, boolean>;
+  /**
+   * True for a week derived from the child's age, which has no stored
+   * plan row behind it (founder ruling onboarding-lesson-per-subject).
+   * Its activities are real and worth reading; there is simply nowhere
+   * to record a check-off, so the box is not offered rather than
+   * offered and silently dropped.
+   */
+  readOnly?: boolean;
 }
 
 export interface PlannerDayItem {
@@ -80,13 +88,25 @@ function ActivityCard({ item, plan }: { item: PlannerDayItem; plan: PlannerDayPl
           />
         ) : null}
       </div>
-      <label className="mt-1.5 flex cursor-pointer items-start gap-2">
-        <input
-          type="checkbox"
-          checked={checked}
-          onChange={() => toggle(item.checkId)}
-          className="mt-0.5 h-4 w-4 flex-shrink-0 accent-[var(--sage-500)]"
-        />
+      <label
+        className={`mt-1.5 flex items-start gap-2 ${plan.readOnly ? "" : "cursor-pointer"}`}
+      >
+        {plan.readOnly ? (
+          // A dot, not a disabled checkbox: a greyed box invites a tap
+          // and then refuses it, which reads as broken rather than as
+          // not-yet-hers.
+          <span
+            aria-hidden="true"
+            className="mt-[0.4rem] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-border"
+          />
+        ) : (
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={() => toggle(item.checkId)}
+            className="mt-0.5 h-4 w-4 flex-shrink-0 accent-[var(--sage-500)]"
+          />
+        )}
         {/* Done = sage check + faded text, no strikethrough: these are
             multi-sentence activities, and a line through a paragraph
             made the week's anchor unreadable (reader gate 2026-07-11). */}

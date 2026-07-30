@@ -452,6 +452,30 @@ export function messageSaysSomething(message: EveMessage): boolean {
 }
 
 /**
+ * messageSpeaksWords(message): has anybody put WORDS on screen?
+ *
+ * The strictest of the three, and the difference from messageSaysSomething
+ * is a card. A docked ask is not speech: onboarding hoists the live card
+ * out of the transcript and into the footer, so a turn that produced only
+ * a card leaves the transcript exactly as empty as it found it, while
+ * messageSaysSomething reports it as said.
+ *
+ * That gap is load-bearing for onboarding's opening layout, which holds
+ * until the introduction turns into a conversation. Asked the looser
+ * question, the layout broke at the precise moment the first card landed
+ * (founder walk, 2026-07-28): centered while Homa was still working, then
+ * snapped to opposite ends of the phone as the ask appeared.
+ *
+ * Text suppressed by the turn-ended rule above does not count, because it
+ * is not on screen either. Reusing assistantItems rather than re-reading
+ * the parts is what keeps that true if the rule ever changes.
+ */
+export function messageSpeaksWords(message: EveMessage): boolean {
+  if (message.role === "user") return messageRendersSomething(message);
+  return assistantItems(message).some((item) => item.kind === "text");
+}
+
+/**
  * userMessageSendState(message): where a user bubble sits between typed
  * and delivered, straight from eve's own optimistic projection
  * (`metadata.optimistic` + `metadata.status`, message-reducer.js) rather

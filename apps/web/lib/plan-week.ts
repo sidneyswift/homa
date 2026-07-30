@@ -1,4 +1,12 @@
-import type { FourWeekPlan, PlanWeek } from "@homa/core";
+import {
+  ageInMonths,
+  buildAgeTemplatePlan,
+  MONTH_PLAN_SUBJECT,
+  type FourWeekPlan,
+  type PlanWeek,
+} from "@homa/core";
+
+import { profileInterestList } from "./map/profile-context";
 
 /**
  * Pure plan-week helpers, split out of dashboard.ts so client surfaces
@@ -18,6 +26,79 @@ export interface DashboardPlan {
   weeks: PlanWeek[];
   /** Server-synced check-offs, keyed "week.activityIndex". */
   progress: Record<string, boolean>;
+  /**
+   * True when this week was derived from the child's AGE rather than
+   * from anything the parent has told us, and is not stored.
+   *
+   * It exists so a parent ninety seconds into onboarding sees a real
+   * week instead of an empty grid (founder ask 2026-07-29). The
+   * activities are genuine, built by the same builder as any other
+   * plan, but nobody has said anything about this child yet and every
+   * surface that renders one owes her that distinction in words. Never
+   * describe a provisional week as built from her answers, and never
+   * write check-offs against one.
+   */
+  provisional?: boolean;
+}
+
+/**
+ * withAgeTemplates(children, stored): adds a provisional month for any
+ * child who has no stored one, derived from their age.
+ *
+ * Before this, a family had an empty planner until someone scored a
+ * report AND a month got built, which walk 005 watched land as "There's
+ * no month set up for Ellie yet" at the exact beat meant to show her
+ * that Homa holds her year (founder ruling
+ * onboarding-lesson-per-subject, 2026-07-29). A birthday is enough to
+ * do better: buildAgeTemplatePlan produces the month a typical child of
+ * that age would get, with this child's own interests already in the
+ * activity text, and for a typical child it is the same month her
+ * answers would have produced.
+ *
+ * Not stored, and flagged provisional the whole way out, because it
+ * describes children of this age rather than her child. The retest
+ * clock is synthetic so the week grid can place week one; it is not a
+ * promise about a date, and nothing writes check-offs against it.
+ *
+ * Lives here, beside DashboardPlan, because BOTH plan readers need it:
+ * getPlanBoard for the agent's planner tool and the /app pages through
+ * app-data. Wiring only one of them is how the first attempt shipped a
+ * week Homa could describe and the page would not show.
+ */
+export function withAgeTemplates(
+  // `profile` stays unknown so both callers fit: the agent path reads a
+  // raw jsonb column, the /app path reads a typed ChildProfile, and
+  // profileInterestList validates either one.
+  children: readonly { id: string; birth_month: string; profile?: unknown }[],
+  stored: readonly DashboardPlan[],
+  nowMs: number = Date.now(),
+): DashboardPlan[] {
+  const hasMonth = new Set(
+    stored.filter((plan) => plan.subjectId === MONTH_PLAN_SUBJECT).map((plan) => plan.childId),
+  );
+  const provisional = children.flatMap((child) => {
+    if (hasMonth.has(child.id)) return [];
+    const profile = (child.profile ?? {}) as { interests?: unknown };
+    const template = buildAgeTemplatePlan(ageInMonths(child.birth_month), {
+      interests: profileInterestList(profile.interests),
+    });
+    if (!template) return [];
+    return [
+      {
+        childId: child.id,
+        subjectId: MONTH_PLAN_SUBJECT,
+        done: 0,
+        total: template.weeks.reduce((sum, week) => sum + week.activities.length, 0),
+        // Week one starts today: retestAt minus 28 days is read as the
+        // plan's first day everywhere, so this lands her in week 1.
+        retestAt: new Date(nowMs + 28 * 24 * 60 * 60 * 1000).toISOString(),
+        weeks: template.weeks,
+        progress: {},
+        provisional: true,
+      } satisfies DashboardPlan,
+    ];
+  });
+  return [...stored, ...provisional];
 }
 
 /** The plan's first day: the retest clock is armed 28 days out when the
