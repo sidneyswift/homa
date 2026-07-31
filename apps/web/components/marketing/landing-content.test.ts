@@ -23,7 +23,7 @@ const LANDING_PAGE_SOURCE = readFileSync(new URL("../../app/page.tsx", import.me
 test("the landing hero names Homa's category and primary action", () => {
   assert.equal(HERO_COPY.headline, "Less admin. More teaching.");
   assert.equal(HERO_COPY.primaryAction, "Start your 7 free days");
-  assert.equal(HERO_COPY.eyebrow, "Homeschool, handled");
+  assert.equal(HERO_COPY.eyebrow, "A new way to homeschool");
   assert.match(HERO_COPY.body, /plans your week/i);
   assert.match(HERO_COPY.body, /tailored materials/i);
   assert.match(HERO_COPY.body, /adapts to growth/i);

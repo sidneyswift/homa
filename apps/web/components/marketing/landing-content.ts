@@ -17,7 +17,7 @@ const monthlyMembershipPriceList = (() => {
 })();
 
 export const HERO_COPY = {
-  eyebrow: "Homeschool, handled",
+  eyebrow: "A new way to homeschool",
   headline: "Less admin. More teaching.",
   body:
     "Homa plans your week, builds tailored materials for each kid, and adapts to growth. Meet your kid where they are. Every day.",
