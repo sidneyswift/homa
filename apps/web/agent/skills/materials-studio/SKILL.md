@@ -527,6 +527,12 @@ recipe is not a reason to force the wrong format.
   co-founder asked seven times across three days for pages that reach
   the bottom of the sheet. Her complaint was never simplicity versus
   complexity, it was space where things could have been scaled to fit.
+  And scaling means the ITEMS get bigger, never the gaps: spreading
+  three objects across the full sheet width is the same dead space
+  turned sideways (a real page shipped three trucks with six inches of
+  air between them, 2026-07-30). Things that belong together stay
+  together, close enough to read as one group, and an answer box sits
+  at the end of the row it answers, never floating on its own.
 - Write instructions TO the child, one short line each. A name line up
   top or the child's name pre-printed, spelled exactly as the family
   spells it.

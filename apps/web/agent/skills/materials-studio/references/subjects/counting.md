@@ -11,6 +11,12 @@
   recognize at a glance without counting.
 - Mix count-and-circle, count-and-write-the-number, and "circle the group
   that has more" for comparison.
+- Objects to count sit in a tight left-aligned row (or a small grid) with
+  even gaps, close enough that the eye sweeps the group without losing its
+  place. Never spread a handful of objects across the whole page width:
+  big gaps are exactly how a young counter skips one or counts one twice.
+- The "how many?" box sits at the end of its own group's row, sized for a
+  young child's numeral, never floating between rows on its own line.
 - Keep number formation practice separate unless writing numerals IS the
   focus.
 - End with something guaranteed: counting something they can always count.
