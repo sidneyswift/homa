@@ -3,6 +3,42 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-31 · CI and preview performance canary
+
+Tracked by gh#503 and PR #499. No validation coverage was removed.
+
+The GitHub workflow now classifies a pull request's complete diff into three
+fail-closed scopes. Documentation-only changes run the classifier tests and
+style guard. Mobile-only changes add the complete mobile check job. Every
+other change runs the complete web, database, end-to-end, and mobile suite.
+Pushes to main always run the complete suite, and the required
+`build-and-check` gate verifies the exact success and skipped-job pattern for
+the selected scope.
+
+Preview deployments leave the complete TypeScript check to the required
+GitHub job, while local and production Next builds remain strict. Preview
+builds also use Next's filesystem cache. A separate Vercel ignored-build
+classifier skips documentation, mobile, and workflow-only preview commits;
+missing history or an unknown path always builds. `.git` must not appear in
+`.vercelignore`, because Vercel's ignored-build command needs the shallow
+clone history before the application build begins.
+
+Measured canaries on PR #499:
+
+- GitHub's full required gate completed in about three minutes with every
+  existing check green.
+- The first optimized preview reached Ready in 2m52s from an empty Next cache.
+- The warm preview reached Ready in 2m03s. Next compilation fell from 55
+  seconds on the cold run to 11.4 seconds with the filesystem cache.
+- The earlier preview baseline was about 3m47s, so the warm path saved about
+  1m44s without changing the produced Eve deployment artifact.
+
+The paid eval workflow keeps the founder-directed pull-request path filter,
+applies the same filter to main pushes, and runs the complete suite daily so
+unrelated changes do not spend model budget while periodic coverage remains.
+Its default per-eval timeout is five minutes; the explicitly slower materials
+evals keep their existing twenty-minute overrides.
+
 ## 2026-07-31 · Founder ruling: PR builds are carried by Vercel's preview check
 
 Founder ruling, not an agent decision. Registered as
