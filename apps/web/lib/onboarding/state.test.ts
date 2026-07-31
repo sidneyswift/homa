@@ -191,10 +191,27 @@ describe("onboardingCompletionReached", () => {
     now,
   };
 
+  it("finishes when setup, one child, and one scored report are complete", () => {
+    assert.equal(onboardingCompletionReached(base), true);
+  });
+
+  it("keeps onboarding active until every happy-path milestone exists", () => {
+    assert.equal(
+      onboardingCompletionReached({ ...base, profileCompletedAt: null }),
+      false,
+    );
+    assert.equal(onboardingCompletionReached({ ...base, childCount: 0 }), false);
+    assert.equal(
+      onboardingCompletionReached({ ...base, scoredReportCount: 0 }),
+      false,
+    );
+  });
+
   it("releases a family stranded past the backstop", () => {
     assert.equal(
       onboardingCompletionReached({
         ...base,
+        scoredReportCount: 0,
         recordUpdatedAt: new Date(
           now.getTime() - ONBOARDING_BACKSTOP_DAYS * day,
         ).toISOString(),
@@ -207,6 +224,7 @@ describe("onboardingCompletionReached", () => {
     assert.equal(
       onboardingCompletionReached({
         ...base,
+        scoredReportCount: 0,
         recordUpdatedAt: new Date(
           now.getTime() - (ONBOARDING_BACKSTOP_DAYS - 1) * day,
         ).toISOString(),
@@ -217,10 +235,11 @@ describe("onboardingCompletionReached", () => {
 
   it("does not strand a record that predates updatedAt", () => {
     // A null updatedAt must not read as age zero forever; it simply
-    // cannot be aged out, so the happy-path clause has to carry it.
-    assert.equal(
-      onboardingCompletionReached({ ...base, recordUpdatedAt: null }),
-      false,
-    );
+    // cannot be aged out, so an incomplete family stays active.
+    assert.equal(onboardingCompletionReached({
+      ...base,
+      scoredReportCount: 0,
+      recordUpdatedAt: null,
+    }), false);
   });
 });

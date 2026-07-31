@@ -3,6 +3,33 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-31 · Founder ruling: a scored report completes onboarding
+
+Founder ruling, not an agent decision. Registered as
+`onboarding-completion-milestones` in
+`journeys/10-reconciliation.md` §5 and resolves the remaining decision in
+gh#238.
+
+**What was ruled.** A family finishes onboarding when family setup is
+complete, at least one child exists, and at least one child has a scored
+report. The report is the durable core promise the onboarding arc exists
+to deliver. Checklist status strings do not count because the product
+does not write a trustworthy completed value there.
+
+**What prompted it.** The first two real trial families completed family
+setup, added a child, received a scored report, started their first
+personalized making, and received the first-sitting recap. Both still
+carried `context.onboarding.state = "active"`. The completion predicate's
+happy path was an unresolved founder TODO that always returned false, and
+the only caller ran when `/onboarding` loaded even though chat kept both
+families on `/app` after scoring.
+
+**Implementation consequence.** The predicate now recognizes the three
+durable milestones. `createReport()` invokes the resolver after any
+successful first score, rescore, or duplicate retry, so web, chat, and SMS
+all apply the same rule at the same product boundary. The 14-day backstop
+remains as protection against any future incomplete path.
+
 ## 2026-07-31 · CI and preview performance canary
 
 Tracked by gh#503 and PR #499. No validation coverage was removed.
