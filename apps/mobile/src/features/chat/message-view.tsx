@@ -11,6 +11,7 @@ import {
   type MemoryChipContent,
 } from "./message-utils";
 import { MaterialCard, type MaterialArtifact } from "./material-card";
+import { PlannerCard } from "./planner-card";
 import { QuestionCard } from "./question-card";
 import { parseQuestionCardPart } from "./question-card-model";
 
@@ -115,6 +116,19 @@ function MessagePartView({
           />
         </View>
       );
+    }
+    if (part.toolName === "open_planner") {
+      const output = part.output as
+        | { opened?: boolean; childName?: string | null }
+        | undefined;
+      if (output?.opened) {
+        return (
+          <View style={{ marginTop: space.sm }}>
+            <PlannerCard childName={output.childName ?? null} />
+          </View>
+        );
+      }
+      return null;
     }
     if (
       part.toolName === "create_printable" ||

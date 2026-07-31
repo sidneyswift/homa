@@ -47,6 +47,33 @@ const material = {
   pdfUrl: "https://blob.example/page.pdf",
 };
 
+/** The raw questions payload as ask_user_questions carries it, on both
+ * its input and (echoed) its output. */
+const askQuestions = [
+  {
+    header: "Subject",
+    question: "Where should we start with Maya?",
+    multiSelect: false,
+    options: [
+      { label: "Phonics", description: "Short daily sound drills." },
+      { label: "Handwriting" },
+    ],
+  },
+];
+
+const askOutput = { asked: true, questions: askQuestions };
+
+/** The eve fact: a turn can end with the ask still at input-available,
+ * waiting on the parent; the complete input already carries the card. */
+function pendingAskPart(): Record<string, unknown> {
+  return {
+    type: "dynamic-tool",
+    toolName: "ask_user_questions",
+    state: "input-available",
+    input: { questions: askQuestions },
+  };
+}
+
 describe("deriveOverlaySignals: mapping", () => {
   const cases: {
     name: string;
@@ -191,6 +218,36 @@ describe("deriveOverlaySignals: mapping", () => {
       expected: null,
     },
     {
+      name: "a live ask_user_questions card is a question sheet",
+      part: toolPart("ask_user_questions", askOutput),
+      expected: { kind: "question" },
+    },
+    {
+      name: "a pending ask still at input-available already carries its card",
+      part: pendingAskPart(),
+      expected: { kind: "question" },
+    },
+    {
+      name: "an ask still streaming its input is nothing yet",
+      part: {
+        type: "dynamic-tool",
+        toolName: "ask_user_questions",
+        state: "input-streaming",
+        input: { questions: askQuestions },
+      },
+      expected: null,
+    },
+    {
+      name: "a pending ask whose input never carried questions is nothing",
+      part: {
+        type: "dynamic-tool",
+        toolName: "ask_user_questions",
+        state: "input-available",
+        input: {},
+      },
+      expected: null,
+    },
+    {
       name: "a still-running tool part is nothing yet",
       part: toolPart("log_hours", undefined, "input-available"),
       expected: null,
@@ -229,6 +286,101 @@ describe("deriveOverlaySignals: mapping", () => {
     assert.equal(signals[0].kind, "material");
     assert.ok(signals[0].kind === "material");
     assert.deepEqual(signals[0].material, material);
+  });
+});
+
+describe("deriveOverlaySignals: question sheets", () => {
+  const ask = () => toolPart("ask_user_questions", askOutput);
+
+  it("parses the card through chat's own parser (missing description reads null)", () => {
+    const { signals } = deriveOverlaySignals(
+      [assistantMessage("a1", [ask()])],
+      NONE,
+    );
+    assert.equal(signals.length, 1);
+    const signal = signals[0];
+    assert.ok(signal.kind === "question");
+    assert.equal(
+      signal.card.questions[0].question,
+      "Where should we start with Maya?",
+    );
+    assert.equal(signal.card.questions[0].options.length, 2);
+    assert.equal(signal.card.questions[0].options[1].description, null);
+  });
+
+  it("an answered card (a user message after it) never emits and owns no key", () => {
+    const { signals, keys } = deriveOverlaySignals(
+      [assistantMessage("a1", [ask()]), userMessage("u1", "Phonics")],
+      NONE,
+    );
+    assert.equal(signals.length, 0);
+    assert.deepEqual(keys, []);
+  });
+
+  it("only the newest unanswered card is live", () => {
+    const { signals, keys } = deriveOverlaySignals(
+      [
+        assistantMessage("a1", [ask()]),
+        userMessage("u1", "Phonics"),
+        assistantMessage("a2", [ask()]),
+      ],
+      NONE,
+    );
+    assert.deepEqual(keys, ["a2:0"]);
+    assert.equal(signals.length, 1);
+    assert.equal(signals[0].key, "a2:0");
+    assert.equal(signals[0].kind, "question");
+  });
+
+  it("a card that settles from input-available to output-available keeps its key, so it never fires twice", () => {
+    const pending = deriveOverlaySignals(
+      [assistantMessage("a1", [pendingAskPart()])],
+      NONE,
+    );
+    assert.deepEqual(pending.keys, ["a1:0"]);
+    const { signals, keys } = deriveOverlaySignals(
+      [assistantMessage("a1", [ask()])],
+      new Set(pending.keys),
+    );
+    assert.deepEqual(keys, ["a1:0"]);
+    assert.equal(signals.length, 0);
+  });
+
+  it("keeps its place in message-then-part order among other signals", () => {
+    const { signals } = deriveOverlaySignals(
+      [
+        assistantMessage("a1", [
+          toolPart("log_hours", { logged: true, subject: "math", minutes: 45 }),
+          toolPart("open_planner", { opened: true }),
+          toolPart("create_printable", { material }),
+          ask(),
+        ]),
+      ],
+      NONE,
+    );
+    assert.deepEqual(
+      signals.map((signal) => signal.kind),
+      ["receipt", "planner", "material", "question"],
+    );
+  });
+});
+
+describe("deriveOverlaySignals: hours stay screen-opened", () => {
+  it("no walk ever derives an hours sheet, even from hours tools", () => {
+    const { signals } = deriveOverlaySignals(
+      [
+        assistantMessage("a1", [
+          toolPart("log_hours", { logged: true, subject: "math", minutes: 45 }),
+          toolPart("find_hours", { done: true }),
+          toolPart("open_planner", { opened: true }),
+          toolPart("create_printable", { material }),
+          toolPart("ask_user_questions", askOutput),
+        ]),
+      ],
+      NONE,
+    );
+    assert.ok(signals.length > 0);
+    assert.ok(signals.every((signal) => signal.kind !== "hours"));
   });
 });
 
@@ -398,5 +550,35 @@ describe("applyOverlaySignal and dismissActiveOverlay", () => {
     assert.ok(state.active?.kind === "planner");
     assert.equal(state.active.refreshCount, 1);
     assert.deepEqual(state.receipts, []);
+  });
+
+  const question: OverlaySignal = {
+    kind: "question",
+    key: "a2:0",
+    card: {
+      questions: [
+        {
+          header: "Subject",
+          question: "Where should we start with Maya?",
+          multiSelect: false,
+          options: [{ label: "Phonics", description: null }],
+        },
+      ],
+    },
+  };
+  const hours: OverlaySignal = { kind: "hours", key: "hours:a1:2" };
+
+  it("a question replaces the active sheet and keeps queued receipts", () => {
+    let state = applyOverlaySignal(EMPTY_OVERLAY_MODEL, planner);
+    state = applyOverlaySignal(state, receiptA);
+    state = applyOverlaySignal(state, question);
+    assert.deepEqual(state.active, question);
+    assert.deepEqual(state.receipts, [receiptA]);
+  });
+
+  it("an hours sheet the screen opens from a receipt tap replaces the toast", () => {
+    let state = applyOverlaySignal(EMPTY_OVERLAY_MODEL, receiptA);
+    state = applyOverlaySignal(state, hours);
+    assert.deepEqual(state, { active: hours, receipts: [] });
   });
 });

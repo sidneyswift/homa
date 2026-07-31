@@ -22,12 +22,12 @@ import {
  * Opens the week planner as a canvas beside the chat AND returns what is
  * on it, so the same call gives the parent the board and gives Homa
  * eyes. Web chat renders the output as a live planner panel plus a card
- * in the transcript (planner-canvas.tsx); on SMS or email no panel
- * exists, so the returned summary is the whole product and Homa speaks
- * it in words. The mobile app authenticates as channel "web" but drops
- * planner parts (message-view.tsx renders them as nothing), so the
- * panel-opens note below never asserts the parent can see a panel
- * (issue #256; the real capability signal is a later ticket).
+ * in the transcript (planner-canvas.tsx); the phone app slides the week
+ * up over the voice surface (features/voice/overlay-host.tsx) and shows
+ * a planner card in chat (features/chat/planner-card.tsx); on SMS or
+ * email no panel exists, so the returned summary is the whole product
+ * and Homa speaks it in words. This closes the issue #256 interim
+ * posture where mobile dropped planner parts and the note had to hedge.
  *
  * The payload is model grounding, bounded on purpose (issue #257, arc
  * PR B0; lib/planner-payload.ts owns the rule): a childId-narrowed call
@@ -54,7 +54,7 @@ const NO_PANEL_CHANNELS = new Set(["sms", "email", "dispatch", "agent-job"]);
 
 export default defineBoundedTool({
   description:
-    "Open the family's week planner beside the chat and see what is on it. Use when the parent asks what is planned, wants to see or adjust the week or the month, asks to schedule an existing lesson or curriculum onto the planner, asks how to input things into the planner, or when you are about to edit or schedule a plan and need the current activities with their indices and real scheduled dates. Pass childId to get that child's plans with all four weeks in full; without it every plan returns its current week plus per-week summaries. Each activity in a full week carries scheduledDate, the real persisted calendar date from schedule_plan_activity, or null when it has never been put on a day. In web chat this also opens the planner panel next to the conversation; over SMS or email no panel opens, so tell the week in plain words instead. Read-only; make changes with edit_plan or schedule_plan_activity.",
+    "Open the family's week planner beside the chat and see what is on it. Use when the parent asks what is planned, wants to see or adjust the week or the month, asks to schedule an existing lesson or curriculum onto the planner, asks how to input things into the planner, or when you are about to edit or schedule a plan and need the current activities with their indices and real scheduled dates. Pass childId to get that child's plans with all four weeks in full; without it every plan returns its current week plus per-week summaries. Each activity in a full week carries scheduledDate, the real persisted calendar date from schedule_plan_activity, or null when it has never been put on a day. In web chat this opens the planner panel next to the conversation, and in the phone app the week slides up in place; over SMS or email no panel opens, so tell the week in plain words instead. Read-only; make changes with edit_plan or schedule_plan_activity.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: true,
   inputSchema: z.object({
@@ -125,12 +125,14 @@ export default defineBoundedTool({
         : null,
       children,
       note: [
-        // Interim honesty wording (issue #256): the mobile app
-        // authenticates as channel "web" but renders no planner panel,
-        // so this note must never assert the parent is looking at one.
-        // A real per-client capability signal is a later ticket.
+        // Honesty wording, updated with the phone app's voice surface
+        // and chat planner card (2026-07-31, supersedes the interim
+        // issue #256 wording): every panel-capable client now renders
+        // something real from this output. Web chat opens the planner
+        // panel beside the conversation; the phone app slides the week
+        // up over the voice surface and shows a planner card in chat.
         panelOpens
-          ? "In web chat a planner panel opens beside the conversation, but not every client shows it (the mobile app signs in as web and renders no panel). Never claim the parent is looking at the planner; if she says she cannot see it, tell the week in plain words."
+          ? "A planner view opens on this client: web chat shows a panel beside the conversation, and the phone app slides the week up in place (voice) or shows a planner card (chat). Do not narrate the whole week in text; a short pointer is enough. If the parent says she cannot see it, tell the week in plain words."
           : "No planner panel opens on this channel: share the week in your own words.",
         hasStored
           ? [

@@ -2,6 +2,10 @@ import type { EveMessagePart } from "eve/react";
 
 import type { MaterialArtifact } from "../chat/material-card";
 import { memoryChipFor } from "../chat/message-utils";
+import {
+  parseQuestionCardPart,
+  type QuestionCardData,
+} from "../chat/question-card-model";
 
 /**
  * Overlay signals for the voice-first screen: pure derivation from the
@@ -25,7 +29,13 @@ export type MaterialCardPayload = MaterialArtifact;
 export type OverlaySignal =
   | { kind: "planner"; key: string; refreshCount: number }
   | { kind: "material"; key: string; material: MaterialCardPayload }
+  | { kind: "question"; key: string; card: QuestionCardData }
+  | { kind: "hours"; key: string }
   | { kind: "receipt"; key: string; toolName: string; summary: string };
+
+/** A receipt toast's signal, the shape OverlayHost's onReceiptPress
+ * hands back to the screen. */
+export type ReceiptSignal = Extract<OverlaySignal, { kind: "receipt" }>;
 
 export interface OverlayModelState {
   active: OverlaySignal | null;
@@ -78,7 +88,10 @@ const IGNORED_TOOLS = new Set([
   "describe_attachment",
   "web_fetch",
   "get_agent_job_status",
-  // Conversation furniture the transcript owns.
+  // Conversation furniture the transcript owns. ask_user_questions is
+  // only here as a backstop: a LIVE ask becomes the question sheet
+  // (liveQuestionIn below); this entry keeps spent and malformed asks
+  // from falling through to a "Done: ask user questions" receipt.
   "ask_user_questions",
   "ask_for_details",
   "start_checklist",
@@ -198,6 +211,68 @@ function receiptSummaryFor(part: CompletedToolPart): string | null {
   return `Done: ${toolName.replace(/_/g, " ")}`;
 }
 
+/**
+ * An ask_user_questions part as a card, whatever state the part sits
+ * in. eve fact: the turn can END with the part still at
+ * "input-available" (Homa stops there and waits for the answer), and
+ * the tool's execute is a pure echo of its input, so a complete input
+ * already carries the whole card. Both states route through chat's own
+ * parser (question-card-model.ts), never a second implementation: an
+ * input-available part is reshaped to the output parseQuestionCardPart
+ * expects, so option and question validation stay single-homed.
+ */
+function questionCardFromPart(raw: unknown): QuestionCardData | null {
+  if (!isRecord(raw)) return null;
+  if (raw.type !== "dynamic-tool" || raw.toolName !== "ask_user_questions") {
+    return null;
+  }
+  if (raw.state === "output-available") {
+    return parseQuestionCardPart(raw as unknown as EveMessagePart);
+  }
+  if (raw.state !== "input-available") return null;
+  const input = isRecord(raw.input) ? raw.input : {};
+  return parseQuestionCardPart({
+    type: "dynamic-tool",
+    toolName: "ask_user_questions",
+    state: "output-available",
+    output: { asked: true, questions: input.questions },
+  } as unknown as EveMessagePart);
+}
+
+interface LiveQuestion {
+  key: string;
+  card: QuestionCardData;
+}
+
+/**
+ * The one card that may still be answered, chat's latestQuestionRequest
+ * rule verbatim (question-card-model.ts): the newest question with no
+ * user message after it. Anything older or already answered never
+ * becomes a sheet, so a spent card cannot invite a second tap from the
+ * voice surface either.
+ */
+function liveQuestionIn(messages: unknown[]): LiveQuestion | null {
+  let latest: LiveQuestion | null = null;
+  messages.forEach((message, messageIndex) => {
+    if (!isRecord(message)) return;
+    if (message.role === "user") {
+      latest = null;
+      return;
+    }
+    if (message.role !== "assistant") return;
+    if (!Array.isArray(message.parts)) return;
+    const messageId =
+      typeof message.id === "string" ? message.id : `m${messageIndex}`;
+    message.parts.forEach((rawPart, partIndex) => {
+      const card = questionCardFromPart(rawPart);
+      if (card !== null) {
+        latest = { key: `${messageId}:${partIndex}`, card };
+      }
+    });
+  });
+  return latest;
+}
+
 function buildSignal(
   part: CompletedToolPart,
   key: string,
@@ -241,6 +316,14 @@ function buildSignal(
  * message-then-part order. Plan-write counting spans the whole walk,
  * handled parts included, so refreshCount stays monotonic across the
  * session.
+ *
+ * ask_user_questions parts are special two ways: only the LIVE card
+ * can signal (liveQuestionIn's newest-unanswered rule, so an answered
+ * card never re-opens), and the part may still sit at "input-available"
+ * when the turn ends waiting on the parent. "hours" never derives from
+ * messages at all: no tool opens it, the screen does (a receipt tap),
+ * so this walk only ever yields planner, material, question, and
+ * receipt.
  */
 export function deriveOverlaySignals(
   messages: unknown[],
@@ -249,6 +332,7 @@ export function deriveOverlaySignals(
   const signals: OverlaySignal[] = [];
   const keys: string[] = [];
   let planWrites = 0;
+  const liveQuestion = liveQuestionIn(messages);
   messages.forEach((message, messageIndex) => {
     if (!isRecord(message)) return;
     if (message.role !== "assistant") return;
@@ -256,9 +340,16 @@ export function deriveOverlaySignals(
     const messageId =
       typeof message.id === "string" ? message.id : `m${messageIndex}`;
     message.parts.forEach((rawPart, partIndex) => {
+      const key = `${messageId}:${partIndex}`;
+      if (liveQuestion !== null && key === liveQuestion.key) {
+        keys.push(key);
+        if (!handledKeys.has(key)) {
+          signals.push({ kind: "question", key, card: liveQuestion.card });
+        }
+        return;
+      }
       const part = completedToolPart(rawPart);
       if (part === null) return;
-      const key = `${messageId}:${partIndex}`;
       const built = buildSignal(part, key, planWrites);
       if (built === null) return;
       planWrites = built.planWrites;
@@ -270,12 +361,13 @@ export function deriveOverlaySignals(
 }
 
 /**
- * One overlay at a time. Sheets (planner, material) take the stage
- * immediately; receipts wait their turn in FIFO order while anything
- * else is up, so a toast never tears down the sheet the parent is
- * looking at. A planner signal landing while the planner is active
- * simply becomes the new active signal: same kind, higher refreshCount,
- * so the mounted sheet refetches instead of reanimating open.
+ * One overlay at a time. Sheets (planner, material, question, hours)
+ * take the stage immediately, so a question replaces whatever sheet is
+ * up; receipts wait their turn in FIFO order while anything else is up,
+ * so a toast never tears down the sheet the parent is looking at. A
+ * planner signal landing while the planner is active simply becomes the
+ * new active signal: same kind, higher refreshCount, so the mounted
+ * sheet refetches instead of reanimating open.
  */
 export function applyOverlaySignal(
   state: OverlayModelState,

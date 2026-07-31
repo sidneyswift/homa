@@ -4,6 +4,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  StyleSheet,
   Text,
   TextInput,
   useColorScheme,
@@ -19,7 +20,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
-import { ArrowUp, X } from "lucide-react-native";
+import { ArrowUp, Mic, X } from "lucide-react-native";
 
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, palette, radius, space } from "../../theme/tokens";
@@ -33,6 +34,9 @@ import {
   type OverlayModelState,
 } from "./overlay-model";
 import { OverlayHost } from "./overlay-host";
+import { ReplySheet } from "./reply-sheet";
+import { SuggestionChips } from "./suggestion-chips";
+import { suggestionChipsVisible } from "./suggestion-chips-model";
 import { TranscriptRibbon } from "./transcript-ribbon";
 import { useVoiceSession } from "./use-voice-session";
 
@@ -59,6 +63,15 @@ const AURA_SIZE = CHARACTER_SIZE * 2.4;
 /** Dark-mode surface, the night navy from the voice-first design bar
  *  (docs reference: scratchpad voice-first-bar.md; splash twin). */
 const NIGHT_NAVY = "#151B27";
+
+/** Translucent bottom-row fills: the composer and close button float on
+ *  the gradient field instead of sitting on it as opaque chrome, which
+ *  read as chat-first (critics round 1). Warm alphas over the tokens'
+ *  opaque hex, the NIGHT_NAVY and scrim idiom. */
+const COMPOSER_FILL_LIGHT = "rgba(255,255,255,0.72)";
+const COMPOSER_FILL_DARK = "rgba(51,46,41,0.72)";
+const CLOSE_FILL_LIGHT = "rgba(51,42,33,0.08)";
+const CLOSE_FILL_DARK = "rgba(251,247,240,0.12)";
 
 /** The soft gold radial glow behind the character: gold100 fading to
  *  transparent by 70%, whole field at ~0.4 opacity, per the splash's
@@ -94,6 +107,15 @@ export function VoiceScreen() {
   const [composerFocused, setComposerFocused] = useState(false);
   const [overlayModel, setOverlayModel] =
     useState<OverlayModelState>(EMPTY_OVERLAY_MODEL);
+  /** Once a turn has started this visit, the idle chips never return
+   *  until the screen remounts (suggestion-chips-model.ts). */
+  const [chipsRetired, setChipsRetired] = useState(false);
+  /** The full-reply sheet is screen-local state, not an overlay signal:
+   *  a tool overlay arriving while it is open wins (effect below). */
+  const [replyOpen, setReplyOpen] = useState(false);
+  /** Monotonic key source for synthetic hours signals (a receipt tap),
+   *  a ref so no key is ever minted during render. */
+  const hoursKeyRef = useRef(0);
   /** Signals already on the wire at mount never open a sheet; only what
    *  arrives during this visit does (overlay-model.ts's dedup idiom). */
   const handledKeysRef = useRef<Set<string> | null>(null);
@@ -121,6 +143,25 @@ export function VoiceScreen() {
   // Receipts are toasts, not sheets; the character only shrinks to the
   // puck when a sheet actually covers the field.
   const overlayActive = activeSignal !== null && activeSignal.kind !== "receipt";
+
+  // A turn starting retires the idle chips for the rest of the visit.
+  // Guarded render-phase adjustment (the React "adjusting state when a
+  // prop changes" idiom; the hooks lint bans setState inside effects).
+  if (session.turnActive && !chipsRetired) setChipsRetired(true);
+
+  // Overlay wins: a sheet-kind overlay activating closes the reply
+  // sheet (both are Modals; the render guard below keeps them from ever
+  // presenting together, this keeps the state honest so dismissing the
+  // overlay does not resurrect the reply).
+  if (overlayActive && replyOpen) setReplyOpen(false);
+
+  const chipsVisible = suggestionChipsVisible({
+    retired: chipsRetired,
+    turnActive: session.turnActive,
+    composerEmpty: draft.length === 0,
+    overlayOpen: activeSignal !== null,
+    assistantHasReplied: session.lastAssistantText !== null,
+  });
 
   const characterState = deriveCharacterState({
     composerFocused,
@@ -177,12 +218,13 @@ export function VoiceScreen() {
   });
 
   const surface = dark ? NIGHT_NAVY : colors.page;
-  const inputBackground = dark ? palette.stone800 : colors.card;
+  const inputBackground = dark ? COMPOSER_FILL_DARK : COMPOSER_FILL_LIGHT;
   const inputBorder = dark ? palette.stone700 : colors.borderSubtle;
   const inputText = dark ? palette.stone50 : colors.textStrong;
   const inputPlaceholder = dark ? palette.stone400 : colors.textSubtle;
-  const controlBackground = dark ? palette.stone800 : palette.stone100;
-  const controlIcon = dark ? palette.stone100 : colors.textBody;
+  const closeBackground = dark ? CLOSE_FILL_DARK : CLOSE_FILL_LIGHT;
+  const closeIcon = dark ? palette.stone300 : colors.textMuted;
+  const micTint = dark ? palette.stone400 : colors.textSubtle;
 
   function sendDraft() {
     const text = draft.trim();
@@ -232,6 +274,15 @@ export function VoiceScreen() {
           </Animated.View>
 
           <View style={{ flex: 1, justifyContent: "flex-end" }}>
+            {/* The idle whisper: chat's opening prompts floating just
+                above the ribbon while nothing else is happening. They
+                fade the moment a turn starts and stay gone (the retire
+                latch above) until the screen remounts. */}
+            <SuggestionChips
+              visible={chipsVisible}
+              tone={dark ? "dark" : "light"}
+              onPick={session.send}
+            />
             {/* One voice at a time: while a turn is in flight only the
                 parent's quote shows (the old answer fading with it would
                 read as answering the new question); once the reply
@@ -249,6 +300,7 @@ export function VoiceScreen() {
               }
               failed={session.failed}
               onRetry={session.retry}
+              onPressReply={() => setReplyOpen(true)}
               tone={dark ? "dark" : "light"}
             />
           </View>
@@ -275,37 +327,61 @@ export function VoiceScreen() {
               borderRadius: radius.pill,
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor: controlBackground,
+              backgroundColor: closeBackground,
               opacity: pressed ? 0.7 : 1,
             })}
           >
-            <X size={18} color={controlIcon} />
+            <X size={18} color={closeIcon} />
           </Pressable>
-          <TextInput
-            value={draft}
-            onChangeText={setDraft}
-            placeholder="Talk to Homa"
-            placeholderTextColor={inputPlaceholder}
-            autoFocus
-            returnKeyType="send"
-            submitBehavior="submit"
-            selectionColor={colors.brand}
-            onSubmitEditing={sendDraft}
-            onFocus={() => setComposerFocused(true)}
-            onBlur={() => setComposerFocused(false)}
+          {/* The pill stays a real TextInput because iOS only reaches
+              dictation through the keyboard mic; the small muted glyph
+              inside is a quiet promise of voice, decorative on purpose
+              (taps pass through to the input beneath it). */}
+          <View
             style={{
               flex: 1,
               minHeight: 48,
+              justifyContent: "center",
               borderRadius: radius.pill,
-              borderWidth: 1,
+              borderWidth: StyleSheet.hairlineWidth,
               borderColor: inputBorder,
               backgroundColor: inputBackground,
-              paddingHorizontal: 20,
-              fontFamily: fontFamilies.body,
-              fontSize: fontSize.base,
-              color: inputText,
             }}
-          />
+          >
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                left: space.md,
+                top: 0,
+                bottom: 0,
+                justifyContent: "center",
+              }}
+            >
+              <Mic size={16} color={micTint} />
+            </View>
+            <TextInput
+              value={draft}
+              onChangeText={setDraft}
+              placeholder="Talk to Homa"
+              placeholderTextColor={inputPlaceholder}
+              autoFocus
+              returnKeyType="send"
+              submitBehavior="submit"
+              selectionColor={colors.brand}
+              onSubmitEditing={sendDraft}
+              onFocus={() => setComposerFocused(true)}
+              onBlur={() => setComposerFocused(false)}
+              style={{
+                minHeight: 48,
+                paddingLeft: space.md + 16 + space.sm,
+                paddingRight: 20,
+                fontFamily: fontFamilies.body,
+                fontSize: fontSize.base,
+                color: inputText,
+              }}
+            />
+          </View>
           {draft.trim().length > 0 ? (
             <Pressable
               accessibilityRole="button"
@@ -326,9 +402,38 @@ export function VoiceScreen() {
           ) : null}
         </View>
       </KeyboardAvoidingView>
+      {/* Screen-local, never an overlay signal: the render guard plus
+          the overlay-wins effect above keep this Modal and the overlay
+          sheet's from ever presenting together. */}
+      {replyOpen && !overlayActive && session.lastAssistantText ? (
+        <ReplySheet
+          text={session.lastAssistantText}
+          onDismiss={() => setReplyOpen(false)}
+        />
+      ) : null}
       <OverlayHost
         signal={activeSignal}
         onDismiss={() => setOverlayModel((current) => dismissActiveOverlay(current))}
+        onAnswer={(message) => {
+          // Dismiss first, then send: the answer becomes a real user
+          // turn and the character passes through thinking naturally.
+          setOverlayModel((current) => dismissActiveOverlay(current));
+          session.send(message);
+        }}
+        onReceiptPress={(signal) => {
+          // An hours receipt opens the hours sheet in its place; any
+          // other receipt tap just dismisses the toast. The synthetic
+          // key comes from a counter ref, never minted during render.
+          if (signal.toolName === "log_hours") {
+            hoursKeyRef.current += 1;
+            const key = `voice-hours-${hoursKeyRef.current}`;
+            setOverlayModel((current) =>
+              applyOverlaySignal(current, { kind: "hours", key }),
+            );
+            return;
+          }
+          setOverlayModel((current) => dismissActiveOverlay(current));
+        }}
         float={<HomaCharacter state={characterState} size={PUCK_SIZE} />}
       />
     </View>

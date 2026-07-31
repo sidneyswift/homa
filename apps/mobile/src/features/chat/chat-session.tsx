@@ -82,7 +82,11 @@ type ChatSendSource = "composer" | "card";
 /** Stream reconnects per turn; matches the web twin (chat-client.tsx). */
 const STREAM_RECONNECT_ATTEMPTS = 8;
 
-const SUGGESTIONS = [
+/** The opening prompts every quiet surface offers. Exported so the
+ *  voice screen's idle chips (features/voice/suggestion-chips.tsx) say
+ *  exactly what chat says instead of drifting a second copy, the same
+ *  single-source rule as buildEveTransport below. */
+export const SUGGESTIONS = [
   "What should we work on this week?",
   "Make a worksheet for today",
   "We had a rough morning, help me reset",

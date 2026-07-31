@@ -15,6 +15,10 @@ import { whisperText } from "./whisper-text";
  * On a failed send it carries chat's plain retry affordance ("Not
  * sent." + Retry, see chat/message-view.tsx) so the two surfaces speak
  * the same language about the same failure.
+ *
+ * The whisper is three lines at most, so the assistant line doubles as
+ * the door to the whole answer: tapping it asks the screen to open the
+ * reply sheet (reply-sheet.tsx) with the full markdown-rendered reply.
  */
 
 export function TranscriptRibbon({
@@ -22,12 +26,15 @@ export function TranscriptRibbon({
   assistantText,
   failed,
   onRetry,
+  onPressReply,
   tone,
 }: {
   userText: string | null;
   assistantText: string | null;
   failed: boolean;
   onRetry: () => void;
+  /** Present makes the assistant line pressable (the full-reply door). */
+  onPressReply?: () => void;
   tone: "light" | "dark";
 }) {
   if (!userText && !assistantText && !failed) return null;
@@ -61,19 +68,43 @@ export function TranscriptRibbon({
         </Text>
       ) : null}
       {assistantWhisper ? (
-        <Text
-          numberOfLines={3}
-          style={{
-            fontFamily: fontFamilies.body,
-            fontSize: fontSize.base,
-            lineHeight: fontSize.base * 1.5,
-            color: assistantColor,
-            opacity: 0.92,
-            textAlign: "center",
-          }}
-        >
-          {assistantWhisper}
-        </Text>
+        onPressReply ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Read the full reply"
+            onPress={onPressReply}
+            hitSlop={8}
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+          >
+            <Text
+              numberOfLines={3}
+              style={{
+                fontFamily: fontFamilies.body,
+                fontSize: fontSize.base,
+                lineHeight: fontSize.base * 1.5,
+                color: assistantColor,
+                opacity: 0.92,
+                textAlign: "center",
+              }}
+            >
+              {assistantWhisper}
+            </Text>
+          </Pressable>
+        ) : (
+          <Text
+            numberOfLines={3}
+            style={{
+              fontFamily: fontFamilies.body,
+              fontSize: fontSize.base,
+              lineHeight: fontSize.base * 1.5,
+              color: assistantColor,
+              opacity: 0.92,
+              textAlign: "center",
+            }}
+          >
+            {assistantWhisper}
+          </Text>
+        )
       ) : null}
       {failed ? (
         <View

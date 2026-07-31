@@ -15,7 +15,17 @@ import { scheduleActivity } from "../../lib/plan-schedule";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
 import { MaterialCard } from "../chat/material-card";
+import { QuestionCard } from "../chat/question-card";
+import type { QuestionCardData } from "../chat/question-card-model";
 import { useFamilyData } from "../family/use-family-data";
+import { EntryRow } from "../hours/entry-row";
+import {
+  computeChildTotals,
+  effectiveTimeZone,
+  toHoursEntries,
+} from "../hours/hours-view";
+import { TotalsCard } from "../hours/totals-card";
+import { useHoursData } from "../hours/use-hours-data";
 import {
   addDays,
   formatWeekRangeLabel,
@@ -32,37 +42,57 @@ import {
 import { ScheduleActivitySheet } from "../planner/schedule-activity-sheet";
 import { usePlannerData } from "../planner/use-planner-data";
 import { WeekView } from "../planner/week-view";
-import type { MaterialCardPayload, OverlaySignal } from "./overlay-model";
+import type {
+  MaterialCardPayload,
+  OverlaySignal,
+  ReceiptSignal,
+} from "./overlay-model";
 
 /**
- * The voice screen's overlay layer: one signal at a time. Planner and
- * material signals slide up as a transparent-Modal sheet (the
- * schedule-activity-sheet chassis: warm scrim, rounded top, slide-up),
- * covering about 65% of the screen so the character stays visible above
- * it. Receipts are not sheets: they render as a small top toast strip
- * that dismisses itself after about four seconds.
+ * The voice screen's overlay layer: one signal at a time. Planner,
+ * material, question, and hours signals slide up as a transparent-Modal
+ * sheet (the schedule-activity-sheet chassis: warm scrim, rounded top,
+ * slide-up), covering about 65% of the screen so the character stays
+ * visible above it. Receipts are not sheets: they render as a small top
+ * toast strip that dismisses itself after about four seconds, or hands
+ * itself to the screen on tap (onReceiptPress).
  *
  * The law from the bar doc holds here: a tool output is an open/refresh
  * signal, never the data source. The planner body mounts the real week
  * view driven by usePlannerData (the parent's own RLS reads) and
  * refetches when refreshCount increments; the material sheet shows the
- * same MaterialCard chat renders, from the same payload.
+ * same MaterialCard chat renders, from the same payload; the question
+ * sheet is chat's own QuestionCard, whose answer goes back out through
+ * onAnswer as the one composed message; the hours sheet reads the real
+ * record through useHoursData.
  */
-
-type ReceiptSignal = Extract<OverlaySignal, { kind: "receipt" }>;
 
 const SCRIM_COLOR = "rgba(51,42,33,0.42)";
 const RECEIPT_DISMISS_MS = 4000;
 /** Swipe-down travel on the grab handle that reads as "close". */
 const DISMISS_DRAG_PX = 48;
+/** The hours sheet is a quick look, not the record: the freshest few
+ *  entries under the totals, everything else on the Hours tab. */
+const RECENT_HOURS_ENTRIES = 10;
 
 export function OverlayHost({
   signal,
   onDismiss,
+  onAnswer,
+  onReceiptPress,
   float,
 }: {
   signal: OverlaySignal | null;
   onDismiss: () => void;
+  /** Receives the composed answer message when the parent finishes a
+   *  question sheet (QuestionCard composes it via composeAnswerMessage,
+   *  the same one message chat sends); the screen sends it as her turn. */
+  onAnswer?: (message: string) => void;
+  /** A tap on a receipt toast hands the signal to the screen and stops
+   *  the toast's self-dismiss timer; the screen's response (opening a
+   *  sheet replaces the toast, or dismissing it) is the exit. Absent,
+   *  a tap simply dismisses, as before. */
+  onReceiptPress?: (signal: ReceiptSignal) => void;
   /** A live element (the character puck) rendered ABOVE the scrim,
    *  centered in the strip over the sheet, at full vibrancy. Under the
    *  scrim it would dim to background chrome and read as switched off. */
@@ -70,7 +100,13 @@ export function OverlayHost({
 }) {
   if (signal === null) return null;
   if (signal.kind === "receipt") {
-    return <ReceiptToast signal={signal} onDismiss={onDismiss} />;
+    return (
+      <ReceiptToast
+        signal={signal}
+        onDismiss={onDismiss}
+        onPress={onReceiptPress}
+      />
+    );
   }
   if (signal.kind === "material") {
     return (
@@ -80,6 +116,36 @@ export function OverlayHost({
         float={float}
       >
         <MaterialOverlayBody material={signal.material} />
+      </OverlaySheet>
+    );
+  }
+  if (signal.kind === "question") {
+    return (
+      <OverlaySheet
+        onDismiss={onDismiss}
+        accessibilityLabel="Homa has a question"
+        // Scrim tap still closes (never a gate), but the handle says
+        // what closing costs so a half-answered card is never lost to
+        // an accidental reach for a generic "close".
+        handleLabel="Close without answering"
+        float={float}
+      >
+        <QuestionOverlayBody
+          card={signal.card}
+          onAnswer={onAnswer}
+          onDismiss={onDismiss}
+        />
+      </OverlaySheet>
+    );
+  }
+  if (signal.kind === "hours") {
+    return (
+      <OverlaySheet
+        onDismiss={onDismiss}
+        accessibilityLabel="Hours logged"
+        float={float}
+      >
+        <HoursOverlayBody />
       </OverlaySheet>
     );
   }
@@ -100,11 +166,15 @@ export function OverlayHost({
 function OverlaySheet({
   onDismiss,
   accessibilityLabel,
+  handleLabel = "Swipe down to close",
   float,
   children,
 }: {
   onDismiss: () => void;
   accessibilityLabel: string;
+  /** The grab handle's spoken label. The question sheet names the cost
+   *  of leaving ("Close without answering"). */
+  handleLabel?: string;
   float?: ReactNode;
   children: ReactNode;
 }) {
@@ -171,7 +241,7 @@ function OverlaySheet({
               }
             }}
             accessibilityRole="button"
-            accessibilityLabel="Swipe down to close"
+            accessibilityLabel={handleLabel}
             style={{ alignItems: "center", paddingTop: space.sm, paddingBottom: space.xs }}
           >
             <View
@@ -313,26 +383,190 @@ function MaterialOverlayBody({ material }: { material: MaterialCardPayload }) {
   );
 }
 
+/** The same stepped card chat renders (question-card.tsx). Its taps
+ * compose the one answer message through composeAnswerMessage inside
+ * the card, so voice sends the identical message chat would; answering
+ * closes the sheet, and "Type something else" closes it too, dropping
+ * her at the composer that is always under the sheet. */
+function QuestionOverlayBody({
+  card,
+  onAnswer,
+  onDismiss,
+}: {
+  card: QuestionCardData;
+  onAnswer?: (message: string) => void;
+  onDismiss: () => void;
+}) {
+  return (
+    <ScrollView
+      contentContainerStyle={{ padding: space.md, paddingBottom: space.xl }}
+      keyboardShouldPersistTaps="handled"
+    >
+      <QuestionCard
+        card={card}
+        active
+        onSendAnswers={(message) => {
+          // Chat's own empty-answer guard (chat-session.tsx): nothing
+          // to say means no turn, just back to the composer.
+          if (message.trim().length > 0) onAnswer?.(message);
+          onDismiss();
+        }}
+        onTypeInstead={onDismiss}
+      />
+    </ScrollView>
+  );
+}
+
+/** A quick look at the compliance record, through the same components
+ * and RLS reads the Hours tab uses (use-hours-data.ts): every child's
+ * totals up top, then the freshest entries. Read-only on purpose. */
+function HoursOverlayBody() {
+  const { family, children, loading: familyLoading } = useFamilyData();
+  const { rows, loading: hoursLoading, error } = useHoursData(family?.id ?? null);
+  const timeZone = effectiveTimeZone(family?.time_zone);
+  const entries = useMemo(() => toHoursEntries(rows, children), [rows, children]);
+  const totals = useMemo(
+    () => computeChildTotals(entries, children, new Date(), timeZone),
+    [entries, children, timeZone],
+  );
+  // Rows already arrive newest-happened_on-first (the query's order).
+  const recent = entries.slice(0, RECENT_HOURS_ENTRIES);
+  const loading = familyLoading || (hoursLoading && rows.length === 0);
+
+  return (
+    <View style={{ flex: 1 }}>
+      <View style={{ paddingHorizontal: space.md, paddingBottom: space.xs, gap: 2 }}>
+        <Text
+          style={{
+            fontFamily: fontFamilies.display,
+            fontSize: fontSize.lg,
+            color: colors.textStrong,
+          }}
+        >
+          Hours
+        </Text>
+        <Text
+          style={{
+            fontFamily: fontFamilies.body,
+            fontSize: fontSize.sm,
+            color: colors.textMuted,
+          }}
+        >
+          School time Homa has on the record.
+        </Text>
+      </View>
+      <ScrollView
+        contentContainerStyle={{ padding: space.md, paddingTop: space.xs, gap: space.sm }}
+      >
+        {loading ? (
+          <View style={{ paddingVertical: space.xl, alignItems: "center" }}>
+            <ActivityIndicator color={colors.brand} />
+          </View>
+        ) : error ? (
+          <Text
+            style={{
+              fontFamily: fontFamilies.body,
+              fontSize: fontSize.sm,
+              color: colors.textMuted,
+            }}
+          >
+            {"That didn't load. The Hours tab has the full record."}
+          </Text>
+        ) : recent.length === 0 ? (
+          <Text
+            style={{
+              fontFamily: fontFamilies.body,
+              fontSize: fontSize.sm,
+              color: colors.textMuted,
+            }}
+          >
+            Nothing logged yet. Tell Homa about school time and it shows
+            up here.
+          </Text>
+        ) : (
+          <>
+            {totals.map((total) => {
+              const kidIndex = children.findIndex(
+                (child) => child.id === total.childId,
+              );
+              return (
+                <TotalsCard
+                  key={total.childId}
+                  total={total}
+                  kidIndex={Math.max(0, kidIndex)}
+                />
+              );
+            })}
+            <Text
+              style={{
+                marginTop: space.xs,
+                fontFamily: fontFamilies.bodyBold,
+                fontSize: 11,
+                letterSpacing: 0.4,
+                color: colors.textSubtle,
+                textTransform: "uppercase",
+              }}
+            >
+              Recent
+            </Text>
+            {recent.map((entry) => (
+              <EntryRow
+                key={entry.id}
+                entry={entry}
+                showChild={children.length > 1}
+                // Editing lives on the Hours tab; this sheet is a quick
+                // look while she keeps talking (the planner body's own
+                // onPressEvent idiom).
+                onEdit={() => undefined}
+              />
+            ))}
+          </>
+        )}
+      </ScrollView>
+    </View>
+  );
+}
+
 /** A small top toast, not a sheet: it never covers the character and
- * lets itself out after a few seconds. Tap to dismiss it sooner. */
+ * lets itself out after a few seconds. A tap dismisses it sooner, or,
+ * when the screen listens (onPress), hands it the receipt instead: the
+ * timer stops so the toast holds still while the screen responds. */
 function ReceiptToast({
   signal,
   onDismiss,
+  onPress,
 }: {
   signal: ReceiptSignal;
   onDismiss: () => void;
+  onPress?: (signal: ReceiptSignal) => void;
 }) {
   const insets = useSafeAreaInsets();
   // The timer keys on the signal, not the callback: a parent re-render
   // mid-stream must not restart the four seconds.
   const onDismissRef = useRef(onDismiss);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     onDismissRef.current = onDismiss;
   }, [onDismiss]);
   useEffect(() => {
-    const timer = setTimeout(() => onDismissRef.current(), RECEIPT_DISMISS_MS);
-    return () => clearTimeout(timer);
+    timerRef.current = setTimeout(
+      () => onDismissRef.current(),
+      RECEIPT_DISMISS_MS,
+    );
+    return () => {
+      if (timerRef.current !== null) clearTimeout(timerRef.current);
+      timerRef.current = null;
+    };
   }, [signal.key]);
+
+  function handlePress() {
+    if (timerRef.current !== null) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    if (onPress) onPress(signal);
+    else onDismiss();
+  }
 
   return (
     <View
@@ -347,7 +581,7 @@ function ReceiptToast({
       }}
     >
       <Pressable
-        onPress={onDismiss}
+        onPress={handlePress}
         accessibilityRole="button"
         accessibilityLabel={signal.summary}
         style={{
