@@ -17,7 +17,9 @@ Design patterns (all binding for copy-work-pages):
   border-radius: 6px; background: #faf9f7;`). Source attribution below
   in smaller italic text.
 - **Practice lines**: 3-line guide rows (top, mid, baseline) for the
-  child to copy. Match handwriting-practice baseline style.
+  child to copy, built as the name-tracing-page recipe's SVG guide row
+  (exact centered midline, pinned baseline); empty rows here, since the
+  child copies rather than traces.
 - **Age-appropriate sizing**: younger children (5-7) get one short
   sentence per page with large guides (`line-height: 48px;`). Older
   children (8-12) get a full paragraph with standard-size lines
