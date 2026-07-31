@@ -1030,9 +1030,40 @@ export function ChatClient({
           promptSuggestionLifecycleHandlers,
         );
         setRecovering(false);
-        // Gave up without an answer: the same fresh-session fallback a
-        // failed recovery gets below, so whatever she typed while
-        // waiting still goes out.
+        // Gave up without a server answer, but the client still knows
+        // what it saw before the stream died (GH #466: this branch used
+        // to return here with no archive and no reset, so the stale live
+        // messages sat in agent.data.messages forever, un-cleared, while
+        // a fresh send below appended straight past them. A message with
+        // no stamped time renders as "now" every render, and eve's own
+        // session-cursor wipe on the dead stream meant a later page load
+        // asked the server for the wrong session, so both the ordering
+        // and the disappearance traced back to this same gap.) Fold
+        // whatever is still live into the archive, same shape as the
+        // recovered branch below, just sourced from local state since
+        // the server never confirmed one way or the other.
+        const stillLive = messagesRef.current;
+        if (stillLive.length > 0) {
+          const stamped = stampMessageTimes(liveTimes, stillLive);
+          const nextArchived = [
+            ...archivedRef.current,
+            ...archiveMessages(stillLive, stamped),
+          ];
+          setArchived(nextArchived);
+          archivedRef.current = nextArchived;
+          setLiveTimes({});
+          saveChat(storageKey, {
+            archived: nextArchived,
+            events: [],
+            session: undefined,
+            messageTimes: {},
+            lastActivityAt: currentTimeMs(),
+          });
+          agentReset();
+          durableCursorRef.current = 0;
+        }
+        // Same fresh-session fallback a failed recovery gets below, so
+        // whatever she typed while waiting still goes out.
         flushQueuedMessages();
         return;
       }

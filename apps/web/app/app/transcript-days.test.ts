@@ -209,3 +209,24 @@ describe("spoken turns in the thread", () => {
     assert.equal(sourceLabelFor("assistant", "web", undefined), null);
   });
 });
+
+describe("buildTranscript archived-before-live ordering (GH #466)", () => {
+  it("renders an archived message before a live one even when the archived entry's own clock time is later", () => {
+    // The guarantee chat-client.tsx's startLostTurnRecovery now relies on
+    // for its abort branch: once a stale, timed-out turn is folded into
+    // the archive, it renders before anything still live no matter what
+    // either side's timestamp says. Before that fix, a timed-out turn
+    // stayed live forever with no reset, so its position depended purely
+    // on a timestamp comparison against whatever sent next.
+    const items = buildTranscript({
+      archived: [entry("a1", "user", undefined, "2026-07-30T06:24:40.000Z")],
+      live: [fakeMessage("m1", "user")],
+      liveTimes: { m1: Date.parse("2026-07-30T06:20:00.000Z") },
+      now: Date.parse("2026-07-30T06:30:00.000Z"),
+    });
+    const order = items
+      .filter((item) => item.kind === "message")
+      .map((item) => (item.kind === "message" ? item.message.id : ""));
+    assert.deepEqual(order, ["a1", "m1"]);
+  });
+});
