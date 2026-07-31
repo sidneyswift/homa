@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 16 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 16 pages"
     ]
   },
-  "notes": "16-page curriculum-sample from atlas-scrape. Content preview: \u00a92022 by BookShark, LLC. All rights reserved. Do not copy without written permission from BookShark, LLC. Intro to the World: Cultures\u2002 |\u2002 Section One\u2002 |\u2002 3\u2002 The BookShark\u2122 Instructor\u2019s Guide (IG) is ..."
+  "notes": "16-page curriculum-sample from atlas-scrape. Content preview: ©2022 by BookShark, LLC. All rights reserved. Do not copy without written permission from BookShark, LLC. Intro to the World: Cultures  |  Section One  |  3  The BookShark™ Instructor’s Guide (IG) is ...",
+  "sourceUrl": "https://www.bookshark.com/media/headless/cms/pdfs/3-Week-Samples/AHB-2022-sample.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-bs-ahb-2022-sample/AHB-2022-sample.pdf",
+  "resourcedAt": "2026-07-31"
 }

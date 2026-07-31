@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 17 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 17 pages"
     ]
   },
-  "notes": "17-page curriculum-sample from atlas-scrape. Content preview: \u00a92026 by BookShark, LLC. All rights reserved. Do not copy without written permission from BookShark, LLC. Table of Contents Intro to World History, Year 1 of 2\u2002 |\u2002 Section One\u2002 |\u2002 3\u2002 The BookShark\u2122 In..."
+  "notes": "17-page curriculum-sample from atlas-scrape. Content preview: ©2026 by BookShark, LLC. All rights reserved. Do not copy without written permission from BookShark, LLC. Table of Contents Intro to World History, Year 1 of 2  |  Section One  |  3  The BookShark™ In...",
+  "sourceUrl": "https://www.bookshark.com/media/headless/cms/pdfs/3-Week-Samples/BHB_2026_3-week_sample.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-bs-bhb-2026-3-week-sample/BHB_2026_3-week_sample.pdf",
+  "resourcedAt": "2026-07-31"
 }

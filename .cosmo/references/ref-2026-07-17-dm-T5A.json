@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 15 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 15 pages"
     ]
   },
-  "notes": "15-page textbook-sample from atlas-scrape. Content preview: 23 Writing and Evaluating Expressions Chapter 2 To find the total number of shaded dots without counting one by one,  we can make groups and calculate the number of dots in each group. 2 groups of 9 p..."
+  "notes": "15-page textbook-sample from atlas-scrape. Content preview: 23 Writing and Evaluating Expressions Chapter 2 To find the total number of shaded dots without counting one by one,  we can make groups and calculate the number of dots in each group. 2 groups of 9 p...",
+  "sourceUrl": "https://singapore-math.s3.us-west-2.amazonaws.com/Samples/sp_dmT5A.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-dm-T5A/sp_dmT5A.pdf",
+  "resourcedAt": "2026-07-31"
 }

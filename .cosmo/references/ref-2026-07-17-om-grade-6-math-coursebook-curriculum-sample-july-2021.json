@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 37 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 37 pages"
     ]
   },
-  "notes": "37-page curriculum-sample from atlas-scrape. Content preview: Sixth  Grade  Math  Overview Math First  Semester Second  Semester Two-digit  divisors Reducing  fractions  to  lowest  terms Lowest  common  denominator Multiplying  and  dividing  fractions  and    ..."
+  "notes": "37-page curriculum-sample from atlas-scrape. Content preview: Sixth  Grade  Math  Overview Math First  Semester Second  Semester Two-digit  divisors Reducing  fractions  to  lowest  terms Lowest  common  denominator Multiplying  and  dividing  fractions  and    ...",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2021/07/Grade-6-Math-Coursebook-Curriculum-Sample-July-2021.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-grade-6-math-coursebook-curriculum-sample-july-2021/Grade-6-Math-Coursebook-Curriculum-Sample-July-2021.pdf",
+  "resourcedAt": "2026-07-31"
 }

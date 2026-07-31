@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 40 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 40 pages"
     ]
   },
-  "notes": "40-page curriculum-sample from atlas-scrape. Content preview: Language  Arts  Science Math Art Crafts Health The book Healthy Living from the Start provides the basis for a yearlong health course. Families explore topics relevant to their child\u2019s growth  and dev..."
+  "notes": "40-page curriculum-sample from atlas-scrape. Content preview: Language  Arts  Science Math Art Crafts Health The book Healthy Living from the Start provides the basis for a yearlong health course. Families explore topics relevant to their child’s growth  and dev...",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2023/07/Grade-2-Resource-Book-Curriculum-Sample.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-grade-2-resource-book-curriculum-sample/Grade-2-Resource-Book-Curriculum-Sample.pdf",
+  "resourcedAt": "2026-07-31"
 }

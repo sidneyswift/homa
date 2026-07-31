@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 54 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 54 pages"
     ]
   },
-  "notes": "54-page curriculum-sample from atlas-scrape. Content preview: Sixth  Grade  Science  Overview Science First  Semester Second  Semester Scienti\ufb01c  method Experimentation Cell  structure Cell  division Plant  structure  and  reproduction Photosynthesis Soil  and  ..."
+  "notes": "54-page curriculum-sample from atlas-scrape. Content preview: Sixth  Grade  Science  Overview Science First  Semester Second  Semester Scientiﬁc  method Experimentation Cell  structure Cell  division Plant  structure  and  reproduction Photosynthesis Soil  and  ...",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2022/12/Grade-6-Basic-Life-Science-Coursebook-Curriculum-Sample.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-grade-6-basic-life-science-coursebook-curriculum-sample/Grade-6-Basic-Life-Science-Coursebook-Curriculum-Sample.pdf",
+  "resourcedAt": "2026-07-31"
 }

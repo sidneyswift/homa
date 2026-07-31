@@ -16,13 +16,34 @@
   "skillTargeting": {
     "subject": "Art",
     "domain": "integrated drawing",
-    "topics": ["perceptual skills", "lines", "brain research (left-right brain)", "contour drawing", "negative space", "perspective", "proportion", "portrait drawing", "self-portrait", "cross-hatching", "color basics", "landscape", "creative problem-solving"],
-    "unmappedSkills": ["Art (not in taxonomy: Computing, English, History, Learning to Learn, Life Skills, Mathematics, Personal & Social Development, Science)"]
+    "topics": [
+      "perceptual skills",
+      "lines",
+      "brain research (left-right brain)",
+      "contour drawing",
+      "negative space",
+      "perspective",
+      "proportion",
+      "portrait drawing",
+      "self-portrait",
+      "cross-hatching",
+      "color basics",
+      "landscape",
+      "creative problem-solving"
+    ],
+    "unmappedSkills": [
+      "Art (not in taxonomy: Computing, English, History, Learning to Learn, Life Skills, Mathematics, Personal & Social Development, Science)"
+    ]
   },
   "difficulty": {
-    "ageBandMonths": [168, 216],
+    "ageBandMonths": [
+      168,
+      216
+    ],
     "complexity": "high - 36 sequential lessons integrating cognitive science with drawing practice",
-    "prerequisites": ["none explicitly stated - includes left-right brain survey"],
+    "prerequisites": [
+      "none explicitly stated - includes left-right brain survey"
+    ],
     "scaffolding": "perception → technique → portrait → color → self-reflection"
   },
   "theming": {
@@ -30,7 +51,11 @@
     "characters": [],
     "visualStyle": "minimalist, text-heavy, professional coursebook with Oak Meadow tree logo",
     "colorPalette": "dark red, brown, green, white",
-    "appealDrivers": ["brain science integration", "self-discovery through art", "progressive skill building"]
+    "appealDrivers": [
+      "brain science integration",
+      "self-discovery through art",
+      "progressive skill building"
+    ]
   },
   "printFormat": {
     "pageSize": "letter",
@@ -40,8 +65,16 @@
     "colorRequirement": "minimal"
   },
   "recipeMatch": {
-    "matchedRecipes": ["structured-outline", "notes-and-practice-bundle"],
-    "gaps": ["No 'art-lesson' or 'cognitive-drawing' recipe; brain-research integration is unique"]
+    "matchedRecipes": [
+      "structured-outline",
+      "notes-and-practice-bundle"
+    ],
+    "gaps": [
+      "No 'art-lesson' or 'cognitive-drawing' recipe; brain-research integration is unique"
+    ]
   },
-  "notes": "36-lesson coursebook incorporating cognitive science (left-right brain research). Unique blend of perceptual training and drawing technique. Includes left-right brain survey + answer key. Flat lesson structure (no units) unlike Drawing & Design."
+  "notes": "36-lesson coursebook incorporating cognitive science (left-right brain research). Unique blend of perceptual training and drawing technique. Includes left-right brain survey + answer key. Flat lesson structure (no units) unlike Drawing & Design.",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2022/07/Integrated-Drawing-Coursebook-Curriculum-Sample-HS.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-integrated-drawing/Integrated-Drawing-Coursebook-Curriculum-Sample-HS.pdf",
+  "resourcedAt": "2026-07-31"
 }

@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 60 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 60 pages"
     ]
   },
-  "notes": "60-page curriculum-sample from atlas-scrape. Content preview: Grade 4 Math Coursebook Oak Meadow, Inc. Post Office Box 615 Putney, Vermont 05346 oakmeadow.com  Oak Meadow\t iii Table of Contents Introduction..........................................................."
+  "notes": "60-page curriculum-sample from atlas-scrape. Content preview: Grade 4 Math Coursebook Oak Meadow, Inc. Post Office Box 615 Putney, Vermont 05346 oakmeadow.com  Oak Meadow\t iii Table of Contents Introduction...........................................................",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2023/07/Grade-4-Math-Coursebook-Curriculum-Sample.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-grade-4-math-coursebook-curriculum-sample/Grade-4-Math-Coursebook-Curriculum-Sample.pdf",
+  "resourcedAt": "2026-07-31"
 }

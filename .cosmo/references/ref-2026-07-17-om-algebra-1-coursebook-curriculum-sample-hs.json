@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 32 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 32 pages"
     ]
   },
-  "notes": "32-page curriculum-sample from atlas-scrape. Content preview: Oak Meadow, Inc. Post Office Box 615 Putney, Vermont 05346 oakmeadow.com Algebra 1 Coursebook  Oak Meadow\t iii Table of Contents Introduction.............................................................."
+  "notes": "32-page curriculum-sample from atlas-scrape. Content preview: Oak Meadow, Inc. Post Office Box 615 Putney, Vermont 05346 oakmeadow.com Algebra 1 Coursebook  Oak Meadow\t iii Table of Contents Introduction..............................................................",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2021/04/Algebra-1-Coursebook-Curriculum-Sample-HS.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-algebra-1-coursebook-curriculum-sample-hs/Algebra-1-Coursebook-Curriculum-Sample-HS.pdf",
+  "resourcedAt": "2026-07-31"
 }

@@ -4,7 +4,7 @@
   "droppedAt": "2026-07-17T00:00:00-04:00",
   "sourceChannel": "atlas-bulk-ingest",
   "format": "workbook",
-  "title": "Dimensions Math Grade 1A Workbook \u2014 Numbers to 20, Addition to 20",
+  "title": "Dimensions Math Grade 1A Workbook — Numbers to 20, Addition to 20",
   "publisher": "Dimensions Math (Singapore Math Inc.)",
   "layout": {
     "structure": "sectioned",
@@ -35,7 +35,7 @@
       "counting to 10",
       "numeral recognition"
     ],
-    "scaffolding": "moderate \u2014 visual counters (objects to circle), fill-in boxes, Basics>Practice>Challenge progression"
+    "scaffolding": "moderate — visual counters (objects to circle), fill-in boxes, Basics>Practice>Challenge progression"
   },
   "theming": {
     "themeType": "minimal-illustration",
@@ -65,5 +65,8 @@
       "no maze"
     ]
   },
-  "notes": "Grade 1A workbook. Grayscale. Clear 3-tier scaffolding: Basics (guided) > Practice (independent) > Challenge. Object illustrations support counting but are not decorative."
+  "notes": "Grade 1A workbook. Grayscale. Clear 3-tier scaffolding: Basics (guided) > Practice (independent) > Challenge. Object illustrations support counting but are not decorative.",
+  "sourceUrl": "https://cdn.shopify.com/s/files/1/0603/7487/6349/files/sp_dmW1A.pdf?v=1738761111",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-dm-W1A/sp_dmW1A.pdf",
+  "resourcedAt": "2026-07-31"
 }

@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 21 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 21 pages"
     ]
   },
-  "notes": "21-page curriculum-sample from atlas-scrape. Content preview: American Literature:  The Westward  Journey Coursebook Oak Meadow, Inc. Post Of\u0161ce Box 615 Putney, Vermont 05346 oakmeadow.com  Oak Meadow\t iii Table of Contents Introduction............................."
+  "notes": "21-page curriculum-sample from atlas-scrape. Content preview: American Literature:  The Westward  Journey Coursebook Oak Meadow, Inc. Post Ofšce Box 615 Putney, Vermont 05346 oakmeadow.com  Oak Meadow\t iii Table of Contents Introduction.............................",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2022/07/American-Literature-The-Westward-Journey-Coursebook-Curriculum-Sample-HS.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-american-literature-the-westward-journey-coursebook-curriculum-sample-hs/American-Literature-The-Westward-Journey-Coursebook-Curriculum-Sample-HS.pdf",
+  "resourcedAt": "2026-07-31"
 }

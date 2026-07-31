@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 28 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 28 pages"
     ]
   },
-  "notes": "28-page curriculum-sample from atlas-scrape. Content preview: Oak Meadow, Inc. Post Office Box 615 Putney, Vermont 05346 oakmeadow.com Economics Coursebook  Oak Meadow\t \t iii Table of Contents Introduction............................................................"
+  "notes": "28-page curriculum-sample from atlas-scrape. Content preview: Oak Meadow, Inc. Post Office Box 615 Putney, Vermont 05346 oakmeadow.com Economics Coursebook  Oak Meadow\t \t iii Table of Contents Introduction............................................................",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2023/06/Economics-Coursebook-Curriculum-Sample-HS.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-economics-coursebook-curriculum-sample-hs/Economics-Coursebook-Curriculum-Sample-HS.pdf",
+  "resourcedAt": "2026-07-31"
 }

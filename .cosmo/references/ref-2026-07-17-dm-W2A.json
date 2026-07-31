@@ -4,7 +4,7 @@
   "droppedAt": "2026-07-17T00:00:00-04:00",
   "sourceChannel": "atlas-bulk-ingest",
   "format": "workbook",
-  "title": "Dimensions Math Grade 2A Workbook \u2014 Numbers to 1000, Addition & Subtraction Strategies",
+  "title": "Dimensions Math Grade 2A Workbook — Numbers to 1000, Addition & Subtraction Strategies",
   "publisher": "Dimensions Math (Singapore Math Inc.)",
   "layout": {
     "structure": "sectioned",
@@ -34,7 +34,7 @@
       "place value to 100",
       "addition to 40"
     ],
-    "scaffolding": "moderate \u2014 visual circle-to-make-10, number bond diagrams"
+    "scaffolding": "moderate — visual circle-to-make-10, number bond diagrams"
   },
   "theming": {
     "themeType": "minimal-illustration",
@@ -62,5 +62,8 @@
       "no visual/creative activities"
     ]
   },
-  "notes": "Grade 2A. Grayscale. Extends place value to 1000 and continues Singapore Math mental math strategies."
+  "notes": "Grade 2A. Grayscale. Extends place value to 1000 and continues Singapore Math mental math strategies.",
+  "sourceUrl": "https://singapore-math.s3.us-west-2.amazonaws.com/Samples/sp_dmW2A.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-dm-W2A/sp_dmW2A.pdf",
+  "resourcedAt": "2026-07-31"
 }

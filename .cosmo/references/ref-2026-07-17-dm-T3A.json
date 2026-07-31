@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 15 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 15 pages"
     ]
   },
-  "notes": "15-page textbook-sample from atlas-scrape. Content preview: 8 2 1-2\u2002 Place Value \u2014 Part 1 Place Value \u2014 Part 1 Lesson 2 Think How many beads do I have altogether? 10 10 10 10 10 10 1,000 100 100 100 1,000  9 1-2\u2002 Place Value \u2014 Part 1 Learn The digit 2 in 2,368..."
+  "notes": "15-page textbook-sample from atlas-scrape. Content preview: 8 2 1-2  Place Value — Part 1 Place Value — Part 1 Lesson 2 Think How many beads do I have altogether? 10 10 10 10 10 10 1,000 100 100 100 1,000  9 1-2  Place Value — Part 1 Learn The digit 2 in 2,368...",
+  "sourceUrl": "https://singapore-math.s3.us-west-2.amazonaws.com/Samples/sp_dmT3A.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-dm-T3A/sp_dmT3A.pdf",
+  "resourcedAt": "2026-07-31"
 }

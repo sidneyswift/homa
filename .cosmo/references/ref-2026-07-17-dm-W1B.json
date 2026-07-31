@@ -4,7 +4,7 @@
   "droppedAt": "2026-07-17T00:00:00-04:00",
   "sourceChannel": "atlas-bulk-ingest",
   "format": "workbook",
-  "title": "Dimensions Math Grade 1B Workbook \u2014 Addition & Subtraction to 40, Making Next Ten",
+  "title": "Dimensions Math Grade 1B Workbook — Addition & Subtraction to 40, Making Next Ten",
   "publisher": "Dimensions Math (Singapore Math Inc.)",
   "layout": {
     "structure": "sectioned",
@@ -34,7 +34,7 @@
       "addition to 20",
       "making 10"
     ],
-    "scaffolding": "moderate \u2014 number bond diagrams, step-by-step decomposition shown"
+    "scaffolding": "moderate — number bond diagrams, step-by-step decomposition shown"
   },
   "theming": {
     "themeType": "minimal-illustration",
@@ -63,5 +63,8 @@
       "no visual/hands-on activities"
     ]
   },
-  "notes": "Grade 1B. Grayscale. Heavier on computation than 1A. Number bond diagrams are a signature Singapore Math scaffold."
+  "notes": "Grade 1B. Grayscale. Heavier on computation than 1A. Number bond diagrams are a signature Singapore Math scaffold.",
+  "sourceUrl": "https://singapore-math.s3.us-west-2.amazonaws.com/Samples/sp_dmW1B.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-dm-W1B/sp_dmW1B.pdf",
+  "resourcedAt": "2026-07-31"
 }

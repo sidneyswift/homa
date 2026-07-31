@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 16 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 16 pages"
     ]
   },
-  "notes": "16-page textbook-sample from atlas-scrape. Content preview: 65 3-3\u2002 Factors 3 Factors Lesson 3 Think How many different rectangles can you form using all 12 squares? How many  squares are along each side of each rectangle? 1 12 Learn 2 3 12 = 1 \u00d7 12 12 = 2 \u00d7 6..."
+  "notes": "16-page textbook-sample from atlas-scrape. Content preview: 65 3-3  Factors 3 Factors Lesson 3 Think How many different rectangles can you form using all 12 squares? How many  squares are along each side of each rectangle? 1 12 Learn 2 3 12 = 1 × 12 12 = 2 × 6...",
+  "sourceUrl": "https://singapore-math.s3.us-west-2.amazonaws.com/Samples/sp_dmT4A.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-dm-T4A/sp_dmT4A.pdf",
+  "resourcedAt": "2026-07-31"
 }

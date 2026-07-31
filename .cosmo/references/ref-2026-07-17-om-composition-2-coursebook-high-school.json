@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 42 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 42 pages"
     ]
   },
-  "notes": "42-page curriculum-sample from atlas-scrape. Content preview: Composition 2:  Creative Writing  and Nonfiction Coursebook Oak Meadow, Inc. Post Office Box 615 Putney, Vermont 05346 oakmeadow.com  Oak Meadow\t \t iii Table of Contents Introduction....................."
+  "notes": "42-page curriculum-sample from atlas-scrape. Content preview: Composition 2:  Creative Writing  and Nonfiction Coursebook Oak Meadow, Inc. Post Office Box 615 Putney, Vermont 05346 oakmeadow.com  Oak Meadow\t \t iii Table of Contents Introduction.....................",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2022/07/Composition-2-Coursebook-High-School.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-composition-2-coursebook-high-school/Composition-2-Coursebook-High-School.pdf",
+  "resourcedAt": "2026-07-31"
 }

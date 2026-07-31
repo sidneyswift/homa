@@ -16,13 +16,37 @@
   "skillTargeting": {
     "subject": "Art",
     "domain": "photography",
-    "topics": ["light", "composition", "framing", "color", "complementary colors", "black and white", "natural vs artificial light", "portraits", "patterns and textures", "motion", "documentary", "mood", "depth of field", "focus", "landscape", "narrative"],
-    "unmappedSkills": ["Art (not in taxonomy: Computing, English, History, Learning to Learn, Life Skills, Mathematics, Personal & Social Development, Science)"]
+    "topics": [
+      "light",
+      "composition",
+      "framing",
+      "color",
+      "complementary colors",
+      "black and white",
+      "natural vs artificial light",
+      "portraits",
+      "patterns and textures",
+      "motion",
+      "documentary",
+      "mood",
+      "depth of field",
+      "focus",
+      "landscape",
+      "narrative"
+    ],
+    "unmappedSkills": [
+      "Art (not in taxonomy: Computing, English, History, Learning to Learn, Life Skills, Mathematics, Personal & Social Development, Science)"
+    ]
   },
   "difficulty": {
-    "ageBandMonths": [168, 216],
+    "ageBandMonths": [
+      168,
+      216
+    ],
     "complexity": "moderate - 18 lessons (shorter than other Oak Meadow art courses)",
-    "prerequisites": ["access to camera (digital or film)"],
+    "prerequisites": [
+      "access to camera (digital or film)"
+    ],
     "scaffolding": "technical fundamentals → genres → advanced techniques"
   },
   "theming": {
@@ -30,7 +54,11 @@
     "characters": [],
     "visualStyle": "minimalist, text-heavy, professional coursebook with Oak Meadow tree logo",
     "colorPalette": "dark red, brown, green, white",
-    "appealDrivers": ["creative expression through technology", "visual literacy", "real-world application"]
+    "appealDrivers": [
+      "creative expression through technology",
+      "visual literacy",
+      "real-world application"
+    ]
   },
   "printFormat": {
     "pageSize": "letter",
@@ -40,8 +68,15 @@
     "colorRequirement": "minimal (instruction text; actual photography is hands-on)"
   },
   "recipeMatch": {
-    "matchedRecipes": ["structured-outline"],
-    "gaps": ["No 'photography-lesson' or 'digital-art' recipe; technology-dependent art form not covered"]
+    "matchedRecipes": [
+      "structured-outline"
+    ],
+    "gaps": [
+      "No 'photography-lesson' or 'digital-art' recipe; technology-dependent art form not covered"
+    ]
   },
-  "notes": "18-lesson photography course - notably shorter than other Oak Meadow art coursebooks (36 lessons). Poetic title. Includes journal-based learning and 'shooting' assignments. Technology troubleshooting section included. Covers both technical (depth of field, focus) and artistic (mood, narrative) aspects."
+  "notes": "18-lesson photography course - notably shorter than other Oak Meadow art coursebooks (36 lessons). Poetic title. Includes journal-based learning and 'shooting' assignments. Technology troubleshooting section included. Covers both technical (depth of field, focus) and artistic (mood, narrative) aspects.",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2022/07/Photography-Coursebook-Curriculum-Sample-HS.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-photography/Photography-Coursebook-Curriculum-Sample-HS.pdf",
+  "resourcedAt": "2026-07-31"
 }
