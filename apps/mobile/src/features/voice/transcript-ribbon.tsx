@@ -2,6 +2,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, palette, space } from "../../theme/tokens";
+import { whisperText } from "./whisper-text";
 
 /**
  * The voice screen's whisper of a transcript: the last user utterance
@@ -15,6 +16,7 @@ import { colors, fontSize, palette, space } from "../../theme/tokens";
  * sent." + Retry, see chat/message-view.tsx) so the two surfaces speak
  * the same language about the same failure.
  */
+
 export function TranscriptRibbon({
   userText,
   assistantText,
@@ -30,6 +32,8 @@ export function TranscriptRibbon({
 }) {
   if (!userText && !assistantText && !failed) return null;
 
+  const userWhisper = userText ? whisperText(userText) : null;
+  const assistantWhisper = assistantText ? whisperText(assistantText) : null;
   const assistantColor = tone === "dark" ? palette.stone50 : colors.textBody;
   const userColor = tone === "dark" ? palette.stone300 : colors.textSubtle;
 
@@ -41,7 +45,7 @@ export function TranscriptRibbon({
         gap: space.sm,
       }}
     >
-      {userText ? (
+      {userWhisper ? (
         <Text
           numberOfLines={3}
           style={{
@@ -53,10 +57,10 @@ export function TranscriptRibbon({
             textAlign: "center",
           }}
         >
-          {userText}
+          {userWhisper}
         </Text>
       ) : null}
-      {assistantText ? (
+      {assistantWhisper ? (
         <Text
           numberOfLines={3}
           style={{
@@ -68,7 +72,7 @@ export function TranscriptRibbon({
             textAlign: "center",
           }}
         >
-          {assistantText}
+          {assistantWhisper}
         </Text>
       ) : null}
       {failed ? (

@@ -53,8 +53,9 @@ import { useVoiceSession } from "./use-voice-session";
 
 const CHARACTER_SIZE = 240;
 const PUCK_SIZE = 72;
-/** The gold aura field sits at ~1.6x the character. */
-const AURA_SIZE = CHARACTER_SIZE * 1.6;
+/** The gold aura field radiates well past the mark (~2.4x) so the glow
+ *  blends into the field instead of dying at the silhouette. */
+const AURA_SIZE = CHARACTER_SIZE * 2.4;
 /** Dark-mode surface, the night navy from the voice-first design bar
  *  (docs reference: scratchpad voice-first-bar.md; splash twin). */
 const NIGHT_NAVY = "#151B27";
@@ -74,11 +75,11 @@ function GoldAuraField({ size }: { size: number }) {
       <Defs>
         <RadialGradient id="voiceAuraField" cx="50%" cy="50%" r="50%">
           <Stop offset="0%" stopColor={palette.gold100} stopOpacity={1} />
-          <Stop offset="42%" stopColor={palette.gold100} stopOpacity={0.35} />
-          <Stop offset="70%" stopColor={palette.gold100} stopOpacity={0} />
+          <Stop offset="45%" stopColor={palette.gold100} stopOpacity={0.5} />
+          <Stop offset="100%" stopColor={palette.gold100} stopOpacity={0} />
         </RadialGradient>
       </Defs>
-      <Circle cx="50" cy="50" r="50" fill="url(#voiceAuraField)" opacity={0.4} />
+      <Circle cx="50" cy="50" r="50" fill="url(#voiceAuraField)" opacity={0.5} />
     </Svg>
   );
 }
@@ -137,14 +138,13 @@ export function VoiceScreen() {
         ? "speaking"
         : null;
 
-  // Character placement: centered at ~55% of the visible field, and a
-  // ~72px puck pinned top-center while a sheet is up. The field height
-  // rides a shared value (updated on layout, so the keyboard opening
-  // recenters the character smoothly) and the puck transition is a
-  // single timed value; both respect the system reduce-motion setting.
+  // Character placement: locked at ~43% of the visible field so text
+  // length never pushes her around. While a sheet is up, this layer
+  // fades out and the OverlayHost renders its own live puck ABOVE the
+  // scrim (a fade handoff, not a shrink: the Modal is a separate native
+  // layer, and a dimmed puck under the scrim reads as switched off).
   const fieldHeight = useSharedValue(0);
   const puck = useSharedValue(0);
-  const topInset = insets.top;
 
   useEffect(() => {
     puck.value = withTiming(overlayActive ? 1 : 0, {
@@ -169,16 +169,10 @@ export function VoiceScreen() {
 
   const characterLayerStyle = useAnimatedStyle(() => {
     if (fieldHeight.value === 0) return { opacity: 0 };
-    const normalCenter = fieldHeight.value * 0.55;
-    const puckCenter = topInset + PUCK_SIZE / 2 + space.md;
-    const scale = 1 + puck.value * (PUCK_SIZE / CHARACTER_SIZE - 1);
+    const normalCenter = fieldHeight.value * 0.43;
     return {
-      opacity: 1,
+      opacity: 1 - puck.value,
       top: normalCenter - AURA_SIZE / 2,
-      transform: [
-        { translateY: puck.value * (puckCenter - normalCenter) },
-        { scale },
-      ],
     };
   });
 
@@ -238,9 +232,21 @@ export function VoiceScreen() {
           </Animated.View>
 
           <View style={{ flex: 1, justifyContent: "flex-end" }}>
+            {/* One voice at a time: while a turn is in flight only the
+                parent's quote shows (the old answer fading with it would
+                read as answering the new question); once the reply
+                streams, it takes the ribbon alone. */}
             <TranscriptRibbon
-              userText={session.lastUserText}
-              assistantText={session.lastAssistantText}
+              userText={
+                session.turnActive && !session.assistantTextStreaming
+                  ? session.lastUserText
+                  : null
+              }
+              assistantText={
+                session.turnActive && !session.assistantTextStreaming
+                  ? null
+                  : session.lastAssistantText
+              }
               failed={session.failed}
               onRetry={session.retry}
               tone={dark ? "dark" : "light"}
@@ -283,6 +289,7 @@ export function VoiceScreen() {
             autoFocus
             returnKeyType="send"
             submitBehavior="submit"
+            selectionColor={colors.brand}
             onSubmitEditing={sendDraft}
             onFocus={() => setComposerFocused(true)}
             onBlur={() => setComposerFocused(false)}
@@ -322,6 +329,7 @@ export function VoiceScreen() {
       <OverlayHost
         signal={activeSignal}
         onDismiss={() => setOverlayModel((current) => dismissActiveOverlay(current))}
+        float={<HomaCharacter state={characterState} size={PUCK_SIZE} />}
       />
     </View>
   );

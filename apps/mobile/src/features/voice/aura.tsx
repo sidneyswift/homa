@@ -48,14 +48,14 @@ interface Breath {
 const INNER: Record<CharacterState, Breath> = {
   idle: { scaleMin: 1, scaleMax: 1.05, opacityMin: 0.3, opacityMax: 0.43, period: 2740 },
   listening: { scaleMin: 1.06, scaleMax: 1.12, opacityMin: 0.4, opacityMax: 0.52, period: 2320 },
-  thinking: { scaleMin: 0.98, scaleMax: 1.03, opacityMin: 0.2, opacityMax: 0.3, period: 3660 },
+  thinking: { scaleMin: 0.98, scaleMax: 1.03, opacityMin: 0.1, opacityMax: 0.18, period: 3660 },
   speaking: { scaleMin: 1.02, scaleMax: 1.1, opacityMin: 0.34, opacityMax: 0.52, period: 760 },
 };
 
 const OUTER: Record<CharacterState, Breath> = {
   idle: { scaleMin: 1, scaleMax: 1.06, opacityMin: 0.28, opacityMax: 0.4, period: 3460 },
   listening: { scaleMin: 1.05, scaleMax: 1.12, opacityMin: 0.36, opacityMax: 0.48, period: 2980 },
-  thinking: { scaleMin: 0.98, scaleMax: 1.04, opacityMin: 0.18, opacityMax: 0.28, period: 4480 },
+  thinking: { scaleMin: 0.98, scaleMax: 1.04, opacityMin: 0.08, opacityMax: 0.16, period: 4480 },
   speaking: { scaleMin: 1.02, scaleMax: 1.09, opacityMin: 0.3, opacityMax: 0.48, period: 840 },
 };
 
@@ -155,9 +155,13 @@ function AuraRing({
 }
 
 export function Aura({ state, size }: { state: CharacterState; size: number }) {
-  const canvas = size * 2;
-  const innerDiameter = size * 1.25;
-  const outerDiameter = size * 1.9;
+  // Wide and slow: best-in-class orbs radiate into their field. The
+  // outer wash reaches ~2.4x the mark so the glow blends into the
+  // screen's own gold field instead of dying at the silhouette
+  // (gauntlet critic round 1: "glow sticker on a blank page").
+  const canvas = size * 2.6;
+  const innerDiameter = size * 1.4;
+  const outerDiameter = size * 2.4;
 
   return (
     <View
@@ -175,8 +179,8 @@ export function Aura({ state, size }: { state: CharacterState; size: number }) {
         bands={OUTER}
         stillOpacity={0.3}
         coreStop={0.7}
-        midStop={0.35}
-        midOffset={0.6}
+        midStop={0.4}
+        midOffset={0.68}
       />
       <AuraRing
         state={state}

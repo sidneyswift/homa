@@ -59,9 +59,14 @@ const DISMISS_DRAG_PX = 48;
 export function OverlayHost({
   signal,
   onDismiss,
+  float,
 }: {
   signal: OverlaySignal | null;
   onDismiss: () => void;
+  /** A live element (the character puck) rendered ABOVE the scrim,
+   *  centered in the strip over the sheet, at full vibrancy. Under the
+   *  scrim it would dim to background chrome and read as switched off. */
+  float?: ReactNode;
 }) {
   if (signal === null) return null;
   if (signal.kind === "receipt") {
@@ -69,13 +74,21 @@ export function OverlayHost({
   }
   if (signal.kind === "material") {
     return (
-      <OverlaySheet onDismiss={onDismiss} accessibilityLabel="Your new material">
+      <OverlaySheet
+        onDismiss={onDismiss}
+        accessibilityLabel="Your new material"
+        float={float}
+      >
         <MaterialOverlayBody material={signal.material} />
       </OverlaySheet>
     );
   }
   return (
-    <OverlaySheet onDismiss={onDismiss} accessibilityLabel="The week planner">
+    <OverlaySheet
+      onDismiss={onDismiss}
+      accessibilityLabel="The week planner"
+      float={float}
+    >
       <PlannerOverlayBody refreshCount={signal.refreshCount} />
     </OverlaySheet>
   );
@@ -87,10 +100,12 @@ export function OverlayHost({
 function OverlaySheet({
   onDismiss,
   accessibilityLabel,
+  float,
   children,
 }: {
   onDismiss: () => void;
   accessibilityLabel: string;
+  float?: ReactNode;
   children: ReactNode;
 }) {
   const reducedMotion = useReducedMotion();
@@ -114,7 +129,24 @@ function OverlaySheet({
           onPress={onDismiss}
           accessibilityRole="button"
           accessibilityLabel="Close"
-        />
+        >
+          {float ? (
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                top: insets.top + space.md,
+                bottom: space.md,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {float}
+            </View>
+          ) : null}
+        </Pressable>
         <View
           accessibilityLabel={accessibilityLabel}
           style={{

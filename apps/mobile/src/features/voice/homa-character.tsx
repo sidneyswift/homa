@@ -13,7 +13,17 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from "react-native-reanimated";
-import Svg, { Circle, ClipPath, Defs, G, Path, Rect } from "react-native-svg";
+import Svg, {
+  Circle,
+  ClipPath,
+  Defs,
+  Ellipse,
+  G,
+  Path,
+  RadialGradient,
+  Rect,
+  Stop,
+} from "react-native-svg";
 
 import {
   EYES,
@@ -21,7 +31,7 @@ import {
   HOUSE_PATH,
   PUPIL_FILL,
 } from "../../components/brand/logo";
-import { colors, shadows } from "../../theme/tokens";
+import { colors } from "../../theme/tokens";
 import { Aura } from "./aura";
 import type { CharacterState } from "./character-state";
 
@@ -63,6 +73,11 @@ const SETTLE = Easing.bezier(0.22, 0.8, 0.28, 1);
 const BREATHE = Easing.inOut(Easing.sin);
 const SETTLE_MS = 280;
 
+/** The float's ground note: a soft warm-brown gradient ellipse with a
+ *  visible air gap under the house, never a hard-edged pill flush
+ *  against it (gauntlet critic round 1: "a doormat kills the float"). */
+const GROUND_SHADOW_BROWN = "#6B5442";
+
 /** Everything scales from where the house meets the ground, like clay
  *  pressed down rather than a balloon. Pixel values, not a percentage
  *  string: percentage transformOrigin on an Animated.View silently
@@ -101,7 +116,9 @@ const POSTURE: Record<
 > = {
   idle: { pupilScale: 1, gazeBiasX: 0, gazeBiasY: 0, dip: 0 },
   listening: { pupilScale: 1.18, gazeBiasX: 0, gazeBiasY: 0.3, dip: 0.5 },
-  thinking: { pupilScale: 1, gazeBiasX: 0, gazeBiasY: -0.8, dip: 0 },
+  // Thinking must read in a still frame with the label covered
+  // (gauntlet critic round 1): a real look-up, slightly narrowed.
+  thinking: { pupilScale: 0.94, gazeBiasX: 0.3, gazeBiasY: -1.5, dip: 0 },
   speaking: { pupilScale: 1.06, gazeBiasX: 0, gazeBiasY: 0, dip: 0 },
 };
 
@@ -338,12 +355,12 @@ export function HomaCharacter({
     transform: [{ scaleX: 1 + squish.value }, { scaleY: 1 - squish.value }],
   }));
   // The warm ground shadow shrinks and fades as she rises, the one cue
-  // that sells the float. Warm brown (the shadows token ink), never black.
+  // that sells the float. Warm brown, never black.
   const shadowStyle = useAnimatedStyle(() => {
     const lift = unit > 0 ? Math.min(1, -bob.value / (unit * 2)) : 0;
     return {
-      opacity: 0.14 - 0.05 * lift,
-      transform: [{ scaleX: 1 - 0.08 * lift }],
+      opacity: 0.2 - 0.08 * lift,
+      transform: [{ scaleX: 1 - 0.1 * lift }],
     };
   });
 
@@ -355,24 +372,40 @@ export function HomaCharacter({
     >
       <View
         pointerEvents="none"
-        style={{ position: "absolute", left: -size / 2, top: -size / 2 }}
+        style={{ position: "absolute", left: -size * 0.8, top: -size * 0.8 }}
       >
         <Aura state={state} size={size} />
       </View>
       <Animated.View
+        pointerEvents="none"
         style={[
           {
             position: "absolute",
-            left: size * 0.27,
-            top: size * 0.9,
-            width: size * 0.46,
-            height: size * 0.06,
-            borderRadius: size * 0.03,
-            backgroundColor: shadows.sm.shadowColor,
+            left: size * 0.22,
+            top: size * 0.965,
+            width: size * 0.56,
+            height: size * 0.07,
           },
           shadowStyle,
         ]}
-      />
+      >
+        <Svg width={size * 0.56} height={size * 0.07}>
+          <Defs>
+            <RadialGradient id="voice-ground-shadow" cx="50%" cy="50%" rx="50%" ry="50%">
+              <Stop offset="0" stopColor={GROUND_SHADOW_BROWN} stopOpacity={0.8} />
+              <Stop offset="0.6" stopColor={GROUND_SHADOW_BROWN} stopOpacity={0.35} />
+              <Stop offset="1" stopColor={GROUND_SHADOW_BROWN} stopOpacity={0} />
+            </RadialGradient>
+          </Defs>
+          <Ellipse
+            cx={size * 0.28}
+            cy={size * 0.035}
+            rx={size * 0.28}
+            ry={size * 0.035}
+            fill="url(#voice-ground-shadow)"
+          />
+        </Svg>
+      </Animated.View>
       <Animated.View
         style={[
           { width: size, height: size, transformOrigin: baseOrigin(size) },
