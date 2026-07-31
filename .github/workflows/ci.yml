@@ -8,11 +8,13 @@ name: CI
 #
 # Layout (2026-07-31 restructure, no coverage removed): the old single
 # build-and-check job ran ~45 steps serially and took ~9.5 minutes. The
-# same steps now run as two parallel jobs, "build" (compile chain plus the
-# checks that need Supabase secrets) and "checks" (every fast guard plus
-# the disposable-Postgres E2Es), with Turborepo and Next build caches, so
-# a run is bounded by the slower of the two (~4-5 minutes cold, less on a
-# cache hit). Every step that existed before still exists below.
+# same steps now run as parallel jobs: "build" (compile chain), two
+# balanced guard shards ("checks" and "db-checks", split by measured step
+# time; both export HOMA_POSTGRES_BIN so a suite can move between them
+# freely), and "mobile-checks". Turborepo and Next build caches make
+# unchanged packages replay instantly. Mobile typecheck/lint run ONLY in
+# mobile-checks; the build job filters mobile out of its turbo run
+# because running them twice per commit bought nothing.
 
 on:
   push:
@@ -33,7 +35,7 @@ jobs:
   # keeps meaning "everything green" without touching repo settings. If a
   # job is added below, add it to `needs` here or it stops gating merges.
   build-and-check:
-    needs: [mobile-checks, build, checks]
+    needs: [mobile-checks, build, checks, db-checks]
     if: always()
     runs-on: ubuntu-24.04
     steps:
@@ -125,8 +127,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Mobile is excluded on purpose: mobile-checks already typechecks and
+      # lints it, and doing it twice per commit is pure waste.
       - name: Typecheck, lint, build
-        run: pnpm exec turbo run typecheck lint build
+        run: pnpm exec turbo run typecheck lint build --filter=!mobile
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
@@ -186,18 +190,11 @@ jobs:
       - name: Eve stream maxDuration guard
         run: VERCEL=1 pnpm check:eve-stream-duration
 
-      - name: Tenancy isolation smoke check (M1-07 seed)
-        run: pnpm check:isolation
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-
-  # Every guard and unit/E2E check that does not need the compile chain.
-  # These all ran before the Build step in the old single job, so none of
-  # them depend on build outputs. Postgres is installed up front because
-  # several suites (research-brief, onboarding, the disposable E2Es, the
-  # morning-brief acceptance) boot throwaway local clusters.
+  # Guard shard 1 of 2. The guards never depended on the compile chain
+  # (they all ran before the Build step in the old single job), so they
+  # run in parallel with it. The two shards are balanced by measured step
+  # time, not by theme; both export HOMA_POSTGRES_BIN, so moving a suite
+  # between shards is always safe.
   checks:
     runs-on: ubuntu-24.04
     steps:
@@ -215,10 +212,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install PostgreSQL 16 for disposable E2E
+      # The ubuntu-24.04 runner image ships PostgreSQL 16 preinstalled, so
+      # the apt path is only a fallback for image changes.
+      - name: Ensure PostgreSQL 16 for disposable clusters
         run: |
-          sudo apt-get update
-          sudo apt-get install --yes postgresql-16
+          if [ ! -x /usr/lib/postgresql/16/bin/initdb ]; then
+            sudo apt-get update
+            sudo apt-get install --yes postgresql-16
+          fi
           echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
 
       - name: ChildProgress unit and compatibility checks
@@ -272,18 +273,6 @@ jobs:
       - name: Conversation continuity checks (episodes, replies, deliveries)
         run: pnpm check:continuity
 
-      - name: Morning research brief format
-        run: pnpm check:research-brief
-
-      - name: Fleet research controls (dedup, manual request, runner)
-        run: pnpm check:research
-
-      - name: Photo search (token signing, result normalization)
-        run: pnpm check:photo-search
-
-      - name: Web page reading (scrape normalization, url hygiene)
-        run: pnpm check:web-fetch
-
       - name: Homa's tasks UI checks (cards, editor dialog)
         run: pnpm check:tasks-ui
 
@@ -315,9 +304,6 @@ jobs:
       - name: Job contract registry (schemas parse, skills resolve)
         run: pnpm check:jobs
 
-      - name: Onboarding checks (state, directives, first-making status, job gating)
-        run: pnpm check:onboarding
-
       - name: Drip checks (eligibility, priority, beat-keyed audiences)
         run: pnpm check:drip
 
@@ -331,6 +317,54 @@ jobs:
 
       - name: Materials checks (page shell pagination, packet bodies, binder model)
         run: pnpm check:materials
+
+      - name: Ingestion ledger (every #homa-inspo drop has exactly one record)
+        run: pnpm check:ingestion
+
+  # Guard shard 2 of 2: the Postgres-backed suites, the disposable E2Es,
+  # and the two secret-needing database checks. See the shard-1 comment
+  # for the balancing rule.
+  db-checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The ubuntu-24.04 runner image ships PostgreSQL 16 preinstalled, so
+      # the apt path is only a fallback for image changes.
+      - name: Ensure PostgreSQL 16 for disposable clusters
+        run: |
+          if [ ! -x /usr/lib/postgresql/16/bin/initdb ]; then
+            sudo apt-get update
+            sudo apt-get install --yes postgresql-16
+          fi
+          echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
+
+      - name: Morning research brief format
+        run: pnpm check:research-brief
+
+      - name: Fleet research controls (dedup, manual request, runner)
+        run: pnpm check:research
+
+      - name: Photo search (token signing, result normalization)
+        run: pnpm check:photo-search
+
+      - name: Web page reading (scrape normalization, url hygiene)
+        run: pnpm check:web-fetch
+
+      - name: Onboarding checks (state, directives, first-making status, job gating)
+        run: pnpm check:onboarding
 
       - name: Materials preview raster E2E (previews must come from the PDF bytes)
         run: pnpm check:materials-preview
@@ -364,5 +398,9 @@ jobs:
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
-      - name: Ingestion ledger (every #homa-inspo drop has exactly one record)
-        run: pnpm check:ingestion
+      - name: Tenancy isolation smoke check (M1-07 seed)
+        run: pnpm check:isolation
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
