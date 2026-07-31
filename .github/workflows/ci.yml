@@ -5,6 +5,16 @@ name: CI
 # schema migration. Also runs the MJ-08 events-registry parity check, the
 # map content + scorer checks, the fleet-skill package checks, the
 # (now-retired-system) skills-targeting checks, and lint.
+#
+# Layout (2026-07-31 restructure, no coverage removed): the old single
+# build-and-check job ran ~45 steps serially and took ~9.5 minutes. The
+# same steps now run as parallel jobs: "build" (compile chain), two
+# balanced guard shards ("checks" and "db-checks", split by measured step
+# time; both export HOMA_POSTGRES_BIN so a suite can move between them
+# freely), and "mobile-checks". Turborepo and Next build caches make
+# unchanged packages replay instantly. Mobile typecheck/lint run ONLY in
+# mobile-checks; the build job filters mobile out of its turbo run
+# because running them twice per commit bought nothing.
 
 on:
   push:
@@ -12,8 +22,35 @@ on:
   pull_request:
     branches: [main]
 
+# A newer push to the same PR supersedes the in-flight run. Pushes to main
+# are never cancelled: each one maps to a deploy we want evidence for.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
-  # Runs independently of build-and-check (no Supabase secrets needed) so
+  # Branch protection on main requires a status context named exactly
+  # "build-and-check" (the old single job's name). This gate carries that
+  # name and fails unless every real job succeeded, so the protection rule
+  # keeps meaning "everything green" without touching repo settings. If a
+  # job is added below, add it to `needs` here or it stops gating merges.
+  build-and-check:
+    needs: [mobile-checks, build, checks, db-checks]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: All jobs green
+        run: |
+          results='${{ join(needs.*.result, ' ') }}'
+          echo "job results: $results"
+          for r in $results; do
+            if [ "$r" != "success" ]; then
+              echo "::error::A required job finished with result '$r'."
+              exit 1
+            fi
+          done
+
+  # Runs independently of the web jobs (no Supabase secrets needed) so
   # mobile regressions surface fast. Until 2026-07-28 these tests existed
   # (check:mobile-chat) but ran in no pipeline that ships to phones; the
   # mobile-ota-update.yml workflow now runs the same suite before publish.
@@ -46,7 +83,11 @@ jobs:
       - name: Mobile voice unit tests
         run: pnpm check:mobile-voice
 
-  build-and-check:
+  # The compile chain plus the checks that need real Supabase secrets.
+  # Typecheck, lint, and build go through one turbo invocation so turbo
+  # can schedule them across the runner's cores and reuse the shared
+  # ^build package outputs instead of computing them twice.
+  build:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -61,167 +102,43 @@ jobs:
           node-version: 24
           cache: pnpm
 
+      # Turborepo's local cache: an unchanged package replays its cached
+      # typecheck/lint/build instantly. Keyed on the commit with a prefix
+      # fallback so every run reuses the newest prior cache.
+      - name: Turborepo cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
+      # Next's incremental compiler cache. Turbo's outputs exclude
+      # .next/cache on purpose (it is machine state, not an artifact), so
+      # it needs its own cache entry to speed up cache-miss builds.
+      - name: Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: apps/web/.next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: ChildProgress unit and compatibility checks
-        run: pnpm check:child-progress
-
-      - name: Progress UI checks
-        run: pnpm check:progress-ui
-
-      - name: Map content + scorer checks (claims law, citations, golden kids)
-        run: pnpm check:map
-
-      - name: Agent context checks (chart parity, injection escaping)
-        run: pnpm check:agent-context
-
-      - name: Agent context budget ratchet (always-on bytes per component)
-        run: pnpm check:agent-budget
-
-      - name: Instructions split and voice-mirror invariants (phone persona)
-        run: pnpm check:instructions-split
-
-      - name: Eval-host isolation checks (no prod writes from local eval runs)
-        run: pnpm check:eval-isolation
-
-      - name: Events-registry parity check (MJ-08)
-        run: pnpm check:events
-
-      - name: Design-token check (colour utilities name a declared token)
-        run: pnpm check:design-tokens
-
-      - name: Tool deadline guard (no unbounded tool can freeze a turn)
-        run: pnpm check:tool-deadlines
-
-      - name: Dynamic tool event guard (no tool vanishes on a cold isolate)
-        run: pnpm check:dynamic-tool-events
-
-      - name: "No-em-dash style law (AGENTS.md: no em dash, ever, anywhere)"
-        run: pnpm check:em-dash
-
-      - name: Fleet-skill package checks (frontmatter, size limits, slash-menu parity)
-        run: pnpm check:fleet-skills
-
-      - name: Fleet-skill dormant-window guard (retired files, no live queries)
-        run: pnpm check:fleet-skills-dormant
-
-      - name: Skills-bank targeting checks (retired-system regression guard)
-        run: pnpm check:skills-targeting
-
-      - name: Taxonomy checks (skill graph integrity, id law, DAG)
-        run: pnpm check:taxonomy
-
-      - name: Conversation continuity checks (episodes, replies, deliveries)
-        run: pnpm check:continuity
-
-      - name: Install PostgreSQL 16 for disposable E2E
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes postgresql-16
-          echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
-
-      - name: Morning research brief format
-        run: pnpm check:research-brief
-
-      - name: Fleet research controls (dedup, manual request, runner)
-        run: pnpm check:research
-
-      - name: Photo search (token signing, result normalization)
-        run: pnpm check:photo-search
-
-      - name: Web page reading (scrape normalization, url hygiene)
-        run: pnpm check:web-fetch
-
-      - name: Homa's tasks UI checks (cards, editor dialog)
-        run: pnpm check:tasks-ui
-
-      - name: Hours page checks (day grouping, totals, filter, editor dialog)
-        run: pnpm check:hours-ui
-
-      - name: Calendar page checks (per-kid/family lanes, scheduling, voice digest)
-        run: pnpm check:calendar-ui
-
-      - name: Dynamic prompt suggestion checks
-        run: pnpm check:prompt-suggestions
-
-      # Fixture integrity only, no model calls: free and deterministic.
-      # The paid run (pnpm eval:journaling-trigger) measures whether Homa
-      # actually journals a mother's report, the stage that failed
-      # silently in production until 2026-07-21.
-      # The lesson-listen pipeline went fleet-wide 2026-07-21 with its
-      # tests never running in CI: the trust gate, the timestamp
-      # normalizer, and the pronoun law all guard parent-facing output.
-      - name: Lesson pipeline checks
-        run: pnpm check:lessons
-
-      - name: Journaling trigger fixtures
-        run: pnpm check:journaling-trigger
-
-      - name: Chat UI checks (attachment markers, transcript, worked-for, snap card)
-        run: pnpm check:chat-ui
-
-      - name: Job contract registry (schemas parse, skills resolve)
-        run: pnpm check:jobs
-
-      - name: Onboarding checks (state, directives, first-making status, job gating)
-        run: pnpm check:onboarding
-
-      - name: Drip checks (eligibility, priority, beat-keyed audiences)
-        run: pnpm check:drip
-
-      - name: Billing gate checks (wall exemptions, account access, wall + landing copy pins)
-        run: pnpm check:billing
-
-      # Fixture hygiene only, no model call. The paid routing eval is
-      # pnpm eval:ask-user-questions, run by hand.
-      - name: Choice-card routing fixtures
-        run: pnpm check:ask-user-questions
-
-      - name: Materials checks (page shell pagination, packet bodies, binder model)
-        run: pnpm check:materials
-
-      - name: Materials preview raster E2E (previews must come from the PDF bytes)
-        run: pnpm check:materials-preview
-
-      - name: State pack (derivation across all 51 reviewed snapshots)
-        run: pnpm check:state-pack
-
-      - name: State pack deadline anchors still match their source text
-        run: pnpm check:deadline-anchors
-
-      - name: ChildProgress disposable PostgreSQL E2E
-        timeout-minutes: 10
-        run: pnpm child-progress:e2e
-
-      # hours_log is compliance evidence: the unique index, the cleanup
-      # migration, and both writers' raced-insert handling (issue #215).
-      - name: hours_log dedupe disposable PostgreSQL E2E
-        timeout-minutes: 10
-        run: pnpm hours-log:e2e
-
-      - name: Morning research brief v2 disposable acceptance
-        timeout-minutes: 10
-        run: |
-          pnpm check:morning-research-brief-v2
-          pnpm check:admin
-
-      - name: Conversation continuity database E2E (multi-parent causality)
-        run: pnpm continuity:e2e
+      # Mobile is excluded on purpose: mobile-checks already typechecks and
+      # lints it, and doing it twice per commit is pure waste.
+      #
+      # TURBO_CACHE_DIR pins the local cache to the .turbo path the cache
+      # step above saves. Without it turbo 2 writes to
+      # node_modules/.cache/turbo and the actions/cache entry silently
+      # carries nothing (observed on this workflow's second run: web tasks
+      # cache-missed despite unchanged inputs).
+      - name: Typecheck, lint, build
+        run: pnpm exec turbo run typecheck lint build --filter=!mobile
         env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-
-      - name: Build
-        run: pnpm build
-        env:
+          TURBO_CACHE_DIR: .turbo/cache
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
@@ -280,8 +197,213 @@ jobs:
       - name: Eve stream maxDuration guard
         run: VERCEL=1 pnpm check:eve-stream-duration
 
+  # Guard shard 1 of 2. The guards never depended on the compile chain
+  # (they all ran before the Build step in the old single job), so they
+  # run in parallel with it. The two shards are balanced by measured step
+  # time, not by theme; both export HOMA_POSTGRES_BIN, so moving a suite
+  # between shards is always safe.
+  checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The ubuntu-24.04 runner image ships PostgreSQL 16 preinstalled, so
+      # the apt path is only a fallback for image changes.
+      - name: Ensure PostgreSQL 16 for disposable clusters
+        run: |
+          if [ ! -x /usr/lib/postgresql/16/bin/initdb ]; then
+            sudo apt-get update
+            sudo apt-get install --yes postgresql-16
+          fi
+          echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
+
+      - name: ChildProgress unit and compatibility checks
+        run: pnpm check:child-progress
+
+      - name: Progress UI checks
+        run: pnpm check:progress-ui
+
+      - name: Map content + scorer checks (claims law, citations, golden kids)
+        run: pnpm check:map
+
+      - name: Agent context checks (chart parity, injection escaping)
+        run: pnpm check:agent-context
+
+      - name: Agent context budget ratchet (always-on bytes per component)
+        run: pnpm check:agent-budget
+
+      - name: Instructions split and voice-mirror invariants (phone persona)
+        run: pnpm check:instructions-split
+
+      - name: Eval-host isolation checks (no prod writes from local eval runs)
+        run: pnpm check:eval-isolation
+
+      - name: Events-registry parity check (MJ-08)
+        run: pnpm check:events
+
+      - name: Design-token check (colour utilities name a declared token)
+        run: pnpm check:design-tokens
+
+      - name: Tool deadline guard (no unbounded tool can freeze a turn)
+        run: pnpm check:tool-deadlines
+
+      - name: Dynamic tool event guard (no tool vanishes on a cold isolate)
+        run: pnpm check:dynamic-tool-events
+
+      - name: "No-em-dash style law (AGENTS.md: no em dash, ever, anywhere)"
+        run: pnpm check:em-dash
+
+      - name: Fleet-skill package checks (frontmatter, size limits, slash-menu parity)
+        run: pnpm check:fleet-skills
+
+      - name: Fleet-skill dormant-window guard (retired files, no live queries)
+        run: pnpm check:fleet-skills-dormant
+
+      - name: Skills-bank targeting checks (retired-system regression guard)
+        run: pnpm check:skills-targeting
+
+      - name: Taxonomy checks (skill graph integrity, id law, DAG)
+        run: pnpm check:taxonomy
+
+      - name: Conversation continuity checks (episodes, replies, deliveries)
+        run: pnpm check:continuity
+
+      - name: Homa's tasks UI checks (cards, editor dialog)
+        run: pnpm check:tasks-ui
+
+      - name: Hours page checks (day grouping, totals, filter, editor dialog)
+        run: pnpm check:hours-ui
+
+      - name: Calendar page checks (per-kid/family lanes, scheduling, voice digest)
+        run: pnpm check:calendar-ui
+
+      - name: Dynamic prompt suggestion checks
+        run: pnpm check:prompt-suggestions
+
+      # Fixture integrity only, no model calls: free and deterministic.
+      # The paid run (pnpm eval:journaling-trigger) measures whether Homa
+      # actually journals a mother's report, the stage that failed
+      # silently in production until 2026-07-21.
+      # The lesson-listen pipeline went fleet-wide 2026-07-21 with its
+      # tests never running in CI: the trust gate, the timestamp
+      # normalizer, and the pronoun law all guard parent-facing output.
+      - name: Lesson pipeline checks
+        run: pnpm check:lessons
+
+      - name: Journaling trigger fixtures
+        run: pnpm check:journaling-trigger
+
+      - name: Chat UI checks (attachment markers, transcript, worked-for, snap card)
+        run: pnpm check:chat-ui
+
+      - name: Job contract registry (schemas parse, skills resolve)
+        run: pnpm check:jobs
+
+      - name: Drip checks (eligibility, priority, beat-keyed audiences)
+        run: pnpm check:drip
+
+      - name: Billing gate checks (wall exemptions, account access, wall + landing copy pins)
+        run: pnpm check:billing
+
+      # Fixture hygiene only, no model call. The paid routing eval is
+      # pnpm eval:ask-user-questions, run by hand.
+      - name: Choice-card routing fixtures
+        run: pnpm check:ask-user-questions
+
+      - name: Materials checks (page shell pagination, packet bodies, binder model)
+        run: pnpm check:materials
+
       - name: Ingestion ledger (every #homa-inspo drop has exactly one record)
         run: pnpm check:ingestion
+
+  # Guard shard 2 of 2: the Postgres-backed suites, the disposable E2Es,
+  # and the two secret-needing database checks. See the shard-1 comment
+  # for the balancing rule.
+  db-checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The ubuntu-24.04 runner image ships PostgreSQL 16 preinstalled, so
+      # the apt path is only a fallback for image changes.
+      - name: Ensure PostgreSQL 16 for disposable clusters
+        run: |
+          if [ ! -x /usr/lib/postgresql/16/bin/initdb ]; then
+            sudo apt-get update
+            sudo apt-get install --yes postgresql-16
+          fi
+          echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
+
+      - name: Morning research brief format
+        run: pnpm check:research-brief
+
+      - name: Fleet research controls (dedup, manual request, runner)
+        run: pnpm check:research
+
+      - name: Photo search (token signing, result normalization)
+        run: pnpm check:photo-search
+
+      - name: Web page reading (scrape normalization, url hygiene)
+        run: pnpm check:web-fetch
+
+      - name: Onboarding checks (state, directives, first-making status, job gating)
+        run: pnpm check:onboarding
+
+      - name: Materials preview raster E2E (previews must come from the PDF bytes)
+        run: pnpm check:materials-preview
+
+      - name: State pack (derivation across all 51 reviewed snapshots)
+        run: pnpm check:state-pack
+
+      - name: State pack deadline anchors still match their source text
+        run: pnpm check:deadline-anchors
+
+      - name: ChildProgress disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm child-progress:e2e
+
+      # hours_log is compliance evidence: the unique index, the cleanup
+      # migration, and both writers' raced-insert handling (issue #215).
+      - name: hours_log dedupe disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm hours-log:e2e
+
+      - name: Morning research brief v2 disposable acceptance
+        timeout-minutes: 10
+        run: |
+          pnpm check:morning-research-brief-v2
+          pnpm check:admin
+
+      - name: Conversation continuity database E2E (multi-parent causality)
+        run: pnpm continuity:e2e
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
       - name: Tenancy isolation smoke check (M1-07 seed)
         run: pnpm check:isolation
