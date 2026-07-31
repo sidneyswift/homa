@@ -4,7 +4,7 @@
   "droppedAt": "2026-07-17T00:00:00-04:00",
   "sourceChannel": "atlas-bulk-ingest",
   "format": "workbook",
-  "title": "Dimensions Math Kindergarten B Workbook \u2014 Number Bonds & Putting Together",
+  "title": "Dimensions Math Kindergarten B Workbook — Number Bonds & Putting Together",
   "publisher": "Dimensions Math (Singapore Math Inc.)",
   "layout": {
     "structure": "sectioned",
@@ -34,13 +34,13 @@
       "counting to 10",
       "numeral writing"
     ],
-    "scaffolding": "heavy \u2014 linking cube manipulatives, teacher directions, color-coded parts"
+    "scaffolding": "heavy — linking cube manipulatives, teacher directions, color-coded parts"
   },
   "theming": {
     "themeType": "manipulative-based",
     "characters": [],
     "visualStyle": "clean flat illustration, full color, linking cube diagrams",
-    "colorPalette": "bright \u2014 teal, pink, yellow header",
+    "colorPalette": "bright — teal, pink, yellow header",
     "appealDrivers": [
       "hands-on cube matching",
       "color coding",
@@ -65,5 +65,8 @@
       "no maze"
     ]
   },
-  "notes": "Kindergarten B workbook introducing number bonds via linking cubes. Full color. Teacher notes specify physical manipulatives to distribute before each page."
+  "notes": "Kindergarten B workbook introducing number bonds via linking cubes. Full color. Teacher notes specify physical manipulatives to distribute before each page.",
+  "sourceUrl": "https://cdn.shopify.com/s/files/1/0603/7487/6349/files/sp_dmWKB6.pdf?v=1679587619",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-dm-WKB6/sp_dmWKB6.pdf",
+  "resourcedAt": "2026-07-31"
 }

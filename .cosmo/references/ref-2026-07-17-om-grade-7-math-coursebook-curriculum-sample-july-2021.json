@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 50 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 50 pages"
     ]
   },
-  "notes": "50-page curriculum-sample from atlas-scrape. Content preview: Seventh  Grade  Math  Overview Math First  Semester Second  Semester Order  of  operations Factors  and  prime  numbers Simple  and  compound  interest Equations  with  missing  numbers Metric  units ..."
+  "notes": "50-page curriculum-sample from atlas-scrape. Content preview: Seventh  Grade  Math  Overview Math First  Semester Second  Semester Order  of  operations Factors  and  prime  numbers Simple  and  compound  interest Equations  with  missing  numbers Metric  units ...",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2021/07/Grade-7-Math-Coursebook-Curriculum-Sample-July-2021.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-grade-7-math-coursebook-curriculum-sample-july-2021/Grade-7-Math-Coursebook-Curriculum-Sample-July-2021.pdf",
+  "resourcedAt": "2026-07-31"
 }

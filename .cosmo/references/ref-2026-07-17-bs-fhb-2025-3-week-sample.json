@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 22 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 22 pages"
     ]
   },
-  "notes": "22-page curriculum-sample from atlas-scrape. Content preview: \u00a92025 by BookShark, LLC. All rights reserved. Do not copy without written permission from BookShark, LLC. Eastern Hemisphere\u2002 |\u2002 Section One\u2002 |\u2002 3\u2002 The BookShark\u2122 Instructor\u2019s Guide (IG) is designed t..."
+  "notes": "22-page curriculum-sample from atlas-scrape. Content preview: ©2025 by BookShark, LLC. All rights reserved. Do not copy without written permission from BookShark, LLC. Eastern Hemisphere  |  Section One  |  3  The BookShark™ Instructor’s Guide (IG) is designed t...",
+  "sourceUrl": "https://www.bookshark.com/media/headless/cms/pdfs/3-Week-Samples/fhb_2025_3-week_sample.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-bs-fhb-2025-3-week-sample/fhb_2025_3-week_sample.pdf",
+  "resourcedAt": "2026-07-31"
 }

@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 25 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 25 pages"
     ]
   },
-  "notes": "25-page curriculum-sample from atlas-scrape. Content preview: Oak Meadow, Inc. Post Office Box 615 Putney, Vermont 05346 oakmeadow.com World Literature: Africa and Beyond Coursebook  Oak Meadow\t \t iii Table of Contents Introduction.................................."
+  "notes": "25-page curriculum-sample from atlas-scrape. Content preview: Oak Meadow, Inc. Post Office Box 615 Putney, Vermont 05346 oakmeadow.com World Literature: Africa and Beyond Coursebook  Oak Meadow\t \t iii Table of Contents Introduction..................................",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2022/11/World-Literature-Africa-and-Beyond-Coursebook-Curriculum-Sample-HS.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-world-literature-africa-and-beyond-coursebook-curriculum-sample-hs/World-Literature-Africa-and-Beyond-Coursebook-Curriculum-Sample-HS.pdf",
+  "resourcedAt": "2026-07-31"
 }

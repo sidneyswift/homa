@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 14 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 14 pages"
     ]
   },
-  "notes": "14-page curriculum-sample from atlas-scrape. Content preview: The Nsymbol provides you with a heads-up  about diffi  cult content. We tell you what to  expect and often suggest how to talk about it  with your kids. Additional space for  your record keeping. We o..."
+  "notes": "14-page curriculum-sample from atlas-scrape. Content preview: The Nsymbol provides you with a heads-up  about diffi  cult content. We tell you what to  expect and often suggest how to talk about it  with your kids. Additional space for  your record keeping. We o...",
+  "sourceUrl": "https://www.bookshark.com/media/headless/cms/pdfs/3-Week-Samples/PHB_2026_3-week_sample.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-bs-phb-2026-3-week-sample/PHB_2026_3-week_sample.pdf",
+  "resourcedAt": "2026-07-31"
 }

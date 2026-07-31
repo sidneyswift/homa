@@ -4,7 +4,7 @@
   "droppedAt": "2026-07-17T00:00:00-04:00",
   "sourceChannel": "atlas-bulk-ingest",
   "format": "workbook",
-  "title": "Dimensions Math Grade 3A Workbook \u2014 Place Value to 10,000",
+  "title": "Dimensions Math Grade 3A Workbook — Place Value to 10,000",
   "publisher": "Dimensions Math (Singapore Math Inc.)",
   "layout": {
     "structure": "sectioned",
@@ -35,7 +35,7 @@
       "place value to 1000",
       "addition/subtraction within 1000"
     ],
-    "scaffolding": "moderate \u2014 base-10 block illustrations, place-value charts, arrow diagrams"
+    "scaffolding": "moderate — base-10 block illustrations, place-value charts, arrow diagrams"
   },
   "theming": {
     "themeType": "minimal-illustration",
@@ -63,5 +63,8 @@
       "no hands-on activities"
     ]
   },
-  "notes": "Grade 3A. Grayscale. Uses base-10 block illustrations extensively. Challenge section includes logic/mystery-number puzzles."
+  "notes": "Grade 3A. Grayscale. Uses base-10 block illustrations extensively. Challenge section includes logic/mystery-number puzzles.",
+  "sourceUrl": "https://singapore-math.s3.us-west-2.amazonaws.com/Samples/sp_dmW3A.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-dm-W3A/sp_dmW3A.pdf",
+  "resourcedAt": "2026-07-31"
 }

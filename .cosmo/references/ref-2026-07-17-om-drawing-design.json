@@ -16,13 +16,31 @@
   "skillTargeting": {
     "subject": "Art",
     "domain": "drawing and design",
-    "topics": ["gestural drawing", "contour line", "form and value", "cross-hatching", "charcoal", "colored pencils", "pastels", "self-portrait", "perspective", "mosaics"],
-    "unmappedSkills": ["Art (not in taxonomy: Computing, English, History, Learning to Learn, Life Skills, Mathematics, Personal & Social Development, Science)"]
+    "topics": [
+      "gestural drawing",
+      "contour line",
+      "form and value",
+      "cross-hatching",
+      "charcoal",
+      "colored pencils",
+      "pastels",
+      "self-portrait",
+      "perspective",
+      "mosaics"
+    ],
+    "unmappedSkills": [
+      "Art (not in taxonomy: Computing, English, History, Learning to Learn, Life Skills, Mathematics, Personal & Social Development, Science)"
+    ]
   },
   "difficulty": {
-    "ageBandMonths": [168, 216],
+    "ageBandMonths": [
+      168,
+      216
+    ],
     "complexity": "high - sequential skill-building across 30+ lessons with midterm/final projects",
-    "prerequisites": ["basic drawing experience helpful but not required"],
+    "prerequisites": [
+      "basic drawing experience helpful but not required"
+    ],
     "scaffolding": "progressive unit structure: gestural → contour → form → advanced media"
   },
   "theming": {
@@ -30,7 +48,11 @@
     "characters": [],
     "visualStyle": "minimalist, text-heavy, professional coursebook with Oak Meadow tree logo",
     "colorPalette": "dark red, brown, green, white",
-    "appealDrivers": ["self-directed learning", "progressive mastery", "portfolio development"]
+    "appealDrivers": [
+      "self-directed learning",
+      "progressive mastery",
+      "portfolio development"
+    ]
   },
   "printFormat": {
     "pageSize": "letter",
@@ -40,8 +62,16 @@
     "colorRequirement": "minimal (mostly text, color not essential)"
   },
   "recipeMatch": {
-    "matchedRecipes": ["structured-outline", "notes-and-practice-bundle"],
-    "gaps": ["No 'studio-project' or 'art-lesson' recipe; coursebook format with progressive lessons not covered by existing recipes"]
+    "matchedRecipes": [
+      "structured-outline",
+      "notes-and-practice-bundle"
+    ],
+    "gaps": [
+      "No 'studio-project' or 'art-lesson' recipe; coursebook format with progressive lessons not covered by existing recipes"
+    ]
   },
-  "notes": "Two-part coursebook (Part I: Lessons 1-18 with midterm, Part II: Lessons 19-30+). Covers drawing fundamentals through advanced techniques. Strong sequential scaffolding. Sample pages are mostly TOC/title - content pages would be text-instruction heavy."
+  "notes": "Two-part coursebook (Part I: Lessons 1-18 with midterm, Part II: Lessons 19-30+). Covers drawing fundamentals through advanced techniques. Strong sequential scaffolding. Sample pages are mostly TOC/title - content pages would be text-instruction heavy.",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2022/07/Drawing-and-Design-Coursebook-Curriculum-Sample-HS.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-drawing-design/Drawing-and-Design-Coursebook-Curriculum-Sample-HS.pdf",
+  "resourcedAt": "2026-07-31"
 }

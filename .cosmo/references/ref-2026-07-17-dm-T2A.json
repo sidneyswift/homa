@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 12 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 12 pages"
     ]
   },
-  "notes": "12-page textbook-sample from atlas-scrape. Content preview: 37 2-1\u2002 Strategies for Addition 1 Strategies for Addition Lesson 1 Mei has 8 guitar picks.  She buys 7 more guitar picks. How many guitar picks does she have now? Think Learn 8 + 7 =  She has   guitar..."
+  "notes": "12-page textbook-sample from atlas-scrape. Content preview: 37 2-1  Strategies for Addition 1 Strategies for Addition Lesson 1 Mei has 8 guitar picks.  She buys 7 more guitar picks. How many guitar picks does she have now? Think Learn 8 + 7 =  She has   guitar...",
+  "sourceUrl": "https://singapore-math.s3.us-west-2.amazonaws.com/Samples/sp_dmT2A.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-dm-T2A/sp_dmT2A.pdf",
+  "resourcedAt": "2026-07-31"
 }

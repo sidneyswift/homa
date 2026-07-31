@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 49 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 49 pages"
     ]
   },
-  "notes": "49-page curriculum-sample from atlas-scrape. Content preview: Seventh  Grade  Science  Overview Science First  Semester Second  Semester Variables  and  controlled  experiments Movement  of  Earth  and  moon Astronomy Geology Weathering  and  erosion Plate  tect..."
+  "notes": "49-page curriculum-sample from atlas-scrape. Content preview: Seventh  Grade  Science  Overview Science First  Semester Second  Semester Variables  and  controlled  experiments Movement  of  Earth  and  moon Astronomy Geology Weathering  and  erosion Plate  tect...",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2021/08/Grade-7-Earth-Science-Coursebook-Curriculum-Sample.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-grade-7-earth-science-coursebook-curriculum-sample/Grade-7-Earth-Science-Coursebook-Curriculum-Sample.pdf",
+  "resourcedAt": "2026-07-31"
 }

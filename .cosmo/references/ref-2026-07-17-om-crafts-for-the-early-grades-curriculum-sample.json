@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 18 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 18 pages"
     ]
   },
-  "notes": "18-page curriculum-sample from atlas-scrape. Content preview: Crafts for the  Early Grades Oak Meadow, Inc. Post Office Box 1346 Brattleboro, Vermont 05302-1346 oakmeadow.com  Oak Meadow\t iii Oak Meadow\t iii Table of Contents Craft Projects........................."
+  "notes": "18-page curriculum-sample from atlas-scrape. Content preview: Crafts for the  Early Grades Oak Meadow, Inc. Post Office Box 1346 Brattleboro, Vermont 05302-1346 oakmeadow.com  Oak Meadow\t iii Oak Meadow\t iii Table of Contents Craft Projects.........................",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2022/01/Crafts-for-the-Early-Grades-Curriculum-Sample.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-crafts-for-the-early-grades-curriculum-sample/Crafts-for-the-Early-Grades-Curriculum-Sample.pdf",
+  "resourcedAt": "2026-07-31"
 }

@@ -4,7 +4,7 @@
   "droppedAt": "2026-07-17T00:00:00-04:00",
   "sourceChannel": "atlas-bulk-ingest",
   "format": "workbook",
-  "title": "Dimensions Math Kindergarten A Workbook \u2014 Counting & Cardinality to 10",
+  "title": "Dimensions Math Kindergarten A Workbook — Counting & Cardinality to 10",
   "publisher": "Dimensions Math (Singapore Math Inc.)",
   "layout": {
     "structure": "sectioned",
@@ -32,7 +32,7 @@
     ],
     "complexity": "introductory",
     "prerequisites": [],
-    "scaffolding": "heavy \u2014 teacher directions, five-frame visual scaffolds, cross-out counting strategy"
+    "scaffolding": "heavy — teacher directions, five-frame visual scaffolds, cross-out counting strategy"
   },
   "theming": {
     "themeType": "everyday-objects",
@@ -40,7 +40,7 @@
       "snails (incidental)"
     ],
     "visualStyle": "clean flat illustration, full color, object groups for counting",
-    "colorPalette": "bright \u2014 yellow header, teal, red, orange",
+    "colorPalette": "bright — yellow header, teal, red, orange",
     "appealDrivers": [
       "colorful objects",
       "matching activities",
@@ -65,5 +65,8 @@
       "no maze"
     ]
   },
-  "notes": "Kindergarten counting workbook. Full color with teacher notes. Uses five-frames as key manipulative representation. Matching and circling are primary interaction modes."
+  "notes": "Kindergarten counting workbook. Full color with teacher notes. Uses five-frames as key manipulative representation. Matching and circling are primary interaction modes.",
+  "sourceUrl": "https://cdn.shopify.com/s/files/1/0603/7487/6349/files/sp_dmWKA2.pdf?v=1679587619",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-dm-WKA2/sp_dmWKA2.pdf",
+  "resourcedAt": "2026-07-31"
 }

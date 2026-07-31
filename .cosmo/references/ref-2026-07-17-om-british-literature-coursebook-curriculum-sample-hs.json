@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 24 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 24 pages"
     ]
   },
-  "notes": "24-page curriculum-sample from atlas-scrape. Content preview: British Literature Second Edition Coursebook Oak Meadow, Inc. Post Office Box 615 Putney, Vermont 05346 oakmeadow.com  Oak Meadow\t iii Table of Contents Introduction......................................"
+  "notes": "24-page curriculum-sample from atlas-scrape. Content preview: British Literature Second Edition Coursebook Oak Meadow, Inc. Post Office Box 615 Putney, Vermont 05346 oakmeadow.com  Oak Meadow\t iii Table of Contents Introduction......................................",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2022/07/British-Literature-Coursebook-Curriculum-Sample-HS.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-british-literature-coursebook-curriculum-sample-hs/British-Literature-Coursebook-Curriculum-Sample-HS.pdf",
+  "resourcedAt": "2026-07-31"
 }

@@ -4,7 +4,7 @@
   "droppedAt": "2026-07-17T00:00:00-04:00",
   "sourceChannel": "atlas-bulk-ingest",
   "format": "workbook",
-  "title": "Dimensions Math Grade 3B Workbook \u2014 Division by 8-9, Fractions on Number Lines",
+  "title": "Dimensions Math Grade 3B Workbook — Division by 8-9, Fractions on Number Lines",
   "publisher": "Dimensions Math (Singapore Math Inc.)",
   "layout": {
     "structure": "sectioned",
@@ -35,7 +35,7 @@
       "multiplication facts to 10",
       "basic fraction concepts"
     ],
-    "scaffolding": "moderate \u2014 step-by-step long division, number line scaffolds, check-your-work prompts"
+    "scaffolding": "moderate — step-by-step long division, number line scaffolds, check-your-work prompts"
   },
   "theming": {
     "themeType": "minimal-illustration",
@@ -64,5 +64,8 @@
       "no visual/creative activities"
     ]
   },
-  "notes": "Grade 3B. Grayscale. Combines division mastery with fraction introduction via number lines \u2014 CPA approach."
+  "notes": "Grade 3B. Grayscale. Combines division mastery with fraction introduction via number lines — CPA approach.",
+  "sourceUrl": "https://singapore-math.s3.us-west-2.amazonaws.com/Samples/sp_dmW3B.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-dm-W3B/sp_dmW3B.pdf",
+  "resourcedAt": "2026-07-31"
 }

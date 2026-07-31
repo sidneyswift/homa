@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 70 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 70 pages"
     ]
   },
-  "notes": "70-page curriculum-sample from atlas-scrape. Content preview: Eighth  Grade  Science  Overview Science First  Semester Second  Semester Controlled  experiments Periodic  table  of  the  elements Mixtures  and  compounds Force  vectors Mass,  weight,  and  gravit..."
+  "notes": "70-page curriculum-sample from atlas-scrape. Content preview: Eighth  Grade  Science  Overview Science First  Semester Second  Semester Controlled  experiments Periodic  table  of  the  elements Mixtures  and  compounds Force  vectors Mass,  weight,  and  gravit...",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2022/01/Grade-8-Physical-Science-Coursebook-Curriculum-Sample.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-grade-8-physical-science-coursebook-curriculum-sample/Grade-8-Physical-Science-Coursebook-Curriculum-Sample.pdf",
+  "resourcedAt": "2026-07-31"
 }

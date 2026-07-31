@@ -4,7 +4,7 @@
   "droppedAt": "2026-07-17T00:00:00-04:00",
   "sourceChannel": "atlas-bulk-ingest",
   "format": "workbook",
-  "title": "Dimensions Math Grade 4A Workbook \u2014 Factors, Multiples, Prime Numbers",
+  "title": "Dimensions Math Grade 4A Workbook — Factors, Multiples, Prime Numbers",
   "publisher": "Dimensions Math (Singapore Math Inc.)",
   "layout": {
     "structure": "sectioned",
@@ -35,7 +35,7 @@
       "multiplication facts",
       "division with remainders"
     ],
-    "scaffolding": "light \u2014 minimal visual aids, more text-based, yes/no classification tasks"
+    "scaffolding": "light — minimal visual aids, more text-based, yes/no classification tasks"
   },
   "theming": {
     "themeType": "abstract-mathematical",
@@ -64,5 +64,8 @@
       "no visual/creative activities"
     ]
   },
-  "notes": "Grade 4A. Grayscale. More abstract and text-heavy. Systematic factor-finding exercises."
+  "notes": "Grade 4A. Grayscale. More abstract and text-heavy. Systematic factor-finding exercises.",
+  "sourceUrl": "https://singapore-math.s3.us-west-2.amazonaws.com/Samples/sp_dmW4A.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-dm-W4A/sp_dmW4A.pdf",
+  "resourcedAt": "2026-07-31"
 }

@@ -4,7 +4,7 @@
   "droppedAt": "2026-07-17T00:00:00-04:00",
   "sourceChannel": "atlas-bulk-ingest",
   "format": "workbook",
-  "title": "Dimensions Math Grade 5A Workbook \u2014 Expressions with Parentheses, Order of Operations",
+  "title": "Dimensions Math Grade 5A Workbook — Expressions with Parentheses, Order of Operations",
   "publisher": "Dimensions Math (Singapore Math Inc.)",
   "layout": {
     "structure": "sectioned",
@@ -35,7 +35,7 @@
       "four operations fluency",
       "multi-step word problems"
     ],
-    "scaffolding": "light \u2014 rule statement then practice, Challenge section with open-ended puzzles"
+    "scaffolding": "light — rule statement then practice, Challenge section with open-ended puzzles"
   },
   "theming": {
     "themeType": "abstract-mathematical",
@@ -65,5 +65,8 @@
       "no visual/creative activities"
     ]
   },
-  "notes": "Grade 5A. Grayscale. Pre-algebra focus. Challenge problems use number puzzles. Most abstract of the series."
+  "notes": "Grade 5A. Grayscale. Pre-algebra focus. Challenge problems use number puzzles. Most abstract of the series.",
+  "sourceUrl": "https://singapore-math.s3.us-west-2.amazonaws.com/Samples/sp_dmW5A.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-dm-W5A/sp_dmW5A.pdf",
+  "resourcedAt": "2026-07-31"
 }

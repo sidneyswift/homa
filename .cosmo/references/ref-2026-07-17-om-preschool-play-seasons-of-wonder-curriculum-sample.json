@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 62 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 62 pages"
     ]
   },
-  "notes": "62-page curriculum-sample from atlas-scrape. Content preview: Oak Meadow, Inc. Post Office Box 615 Putney, Vermont 05346 oakmeadow.com  TABLE OF CONTENTS Beginnings Introduction to Wonder\b 3 Teaching and Learning: Rhythm\b 11 Teaching and Learning: Stories and St..."
+  "notes": "62-page curriculum-sample from atlas-scrape. Content preview: Oak Meadow, Inc. Post Office Box 615 Putney, Vermont 05346 oakmeadow.com  TABLE OF CONTENTS Beginnings Introduction to Wonder\b 3 Teaching and Learning: Rhythm\b 11 Teaching and Learning: Stories and St...",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2022/02/Preschool-Play-Seasons-of-Wonder-Curriculum-Sample.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-preschool-play-seasons-of-wonder-curriculum-sample/Preschool-Play-Seasons-of-Wonder-Curriculum-Sample.pdf",
+  "resourcedAt": "2026-07-31"
 }

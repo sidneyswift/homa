@@ -4,7 +4,7 @@
   "droppedAt": "2026-07-17T00:00:00-04:00",
   "sourceChannel": "atlas-bulk-ingest",
   "format": "workbook",
-  "title": "Dimensions Math PreK A Workbook \u2014 Compare Objects, Sorting, Patterns",
+  "title": "Dimensions Math PreK A Workbook — Compare Objects, Sorting, Patterns",
   "publisher": "Dimensions Math (Singapore Math Inc.)",
   "layout": {
     "structure": "sectioned",
@@ -34,13 +34,13 @@
     ],
     "complexity": "introductory",
     "prerequisites": [],
-    "scaffolding": "heavy \u2014 teacher directions on every page, visual-only tasks, no reading required"
+    "scaffolding": "heavy — teacher directions on every page, visual-only tasks, no reading required"
   },
   "theming": {
     "themeType": "everyday-objects",
     "characters": [],
     "visualStyle": "clean flat illustration, full color, large simple objects",
-    "colorPalette": "bright primary \u2014 yellow, blue, red, green, orange",
+    "colorPalette": "bright primary — yellow, blue, red, green, orange",
     "appealDrivers": [
       "large colorful images",
       "familiar objects",
@@ -65,5 +65,8 @@
       "no coloring-page style"
     ]
   },
-  "notes": "PreK workbook focused on pre-math concepts (comparison, sorting). Full color with teacher instructions at bottom of each page. No numerals or equations \u2014 purely visual/conceptual."
+  "notes": "PreK workbook focused on pre-math concepts (comparison, sorting). Full color with teacher instructions at bottom of each page. No numerals or equations — purely visual/conceptual.",
+  "sourceUrl": "https://singapore-math.s3.us-west-2.amazonaws.com/Samples/sp_dmWPKA.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-dm-WPKA/sp_dmWPKA.pdf",
+  "resourcedAt": "2026-07-31"
 }

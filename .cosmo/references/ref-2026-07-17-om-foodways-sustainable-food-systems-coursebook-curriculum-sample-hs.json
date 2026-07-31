@@ -49,8 +49,11 @@
   "recipeMatch": {
     "matchedRecipes": [],
     "gaps": [
-      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes \u2014 21 pages"
+      "curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — 21 pages"
     ]
   },
-  "notes": "21-page curriculum-sample from atlas-scrape. Content preview: Foodways:  Sustainable  Food Systems Coursebook Oak Meadow, Inc. Post Office Box 615 Putney, Vermont 05346 oakmeadow.com  Oak Meadow\t iii Table of Contents Introduction..................................."
+  "notes": "21-page curriculum-sample from atlas-scrape. Content preview: Foodways:  Sustainable  Food Systems Coursebook Oak Meadow, Inc. Post Office Box 615 Putney, Vermont 05346 oakmeadow.com  Oak Meadow\t iii Table of Contents Introduction...................................",
+  "sourceUrl": "https://www.oakmeadow.com/wp-content/uploads/2022/07/Foodways-Sustainable-Food-Systems-Coursebook-Curriculum-Sample-HS.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-om-foodways-sustainable-food-systems-coursebook-curriculum-sample-hs/Foodways-Sustainable-Food-Systems-Coursebook-Curriculum-Sample-HS.pdf",
+  "resourcedAt": "2026-07-31"
 }
