@@ -321,21 +321,12 @@ astronaut, a poster of the child beside their favorite character.
 - No `<script>`, no iframes; content must avoid em dashes and any
   deficit words (the tool refuses the page otherwise, and tells you why).
 
-**Tracing letters** (pale letters over a 3-line guide, starting dot):
-
-```html
-<style>
-  .trace { font-family: 'Fredoka', sans-serif; font-weight: 400;
-    font-size: 110px; color: #d9d2c7; letter-spacing: 0.35em;
-    line-height: 1.25; }
-  .guide { border-top: 2.5px solid #6b6259; border-bottom: 2.5px solid #6b6259;
-    height: 76px; position: relative; margin: 18px 0 30px; }
-  .guide::after { content: ""; position: absolute; left: 0; right: 0;
-    top: 50%; border-top: 2px dashed #b3a492; }
-  .dot { color: #6b6259; font-size: 22px; vertical-align: super; }
-</style>
-<p class="trace"><span class="dot">&#9679;</span>O O O O</p>
-```
+**Tracing on writing guides**: read the name-tracing-page recipe and
+use its SVG guide row for ANY letters-on-guides work. Never float HTML
+text near CSS-border "guides": the two cannot be pinned together, the
+letters drift off the lines, and a real family corrected that exact
+failure for three days (2026-07-28 to 07-31) before the SVG row
+replaced the old sketch that lived here.
 
 **Counting**: repeat one themed `<img>` (one generation, many tags at
 ~70px) in groups; the child writes each count in an empty box
@@ -463,6 +454,7 @@ recipe is not a reason to force the wrong format.
 | Notes-and-practice bundle | pair a guided-notes page with a practice page (teach, then do) | notes-and-practice-bundle |
 | Matching / visual discrimination | build early visual matching and sorting on one preschool page | matching-visual-discrimination |
 | Number practice page | focus one numeral with trace, ten-frame, count, and color activities | number-practice-page |
+| Name tracing page | put the child's name on real three-line writing guides, dotted trace fading to empty lines | name-tracing-page |
 | One-page mini book | fold one sheet into an 8-page book (needs exact panel order) | one-page-mini-book |
 | Unit study packet | bundle 8 to 12 activities on one theme into a multi-page packet | unit-study-packet |
 | Labeled anatomy diagram | label parts of a scientific illustration with a word bank | labeled-anatomy-diagram |
