@@ -78,6 +78,17 @@ const nextConfig: NextConfig = {
       "../../.cosmo/curriculums/*.json",
     ],
     "/admin/studio/reference/[file]": ["./agent/skills/materials-studio/**"],
+    // The library shelf reads the same analysis corpus as the funnel
+    // above, and nothing else: original bytes and cover thumbnails come
+    // from Blob at runtime, never from the bundle.
+    "/admin/library": [
+      "../../.cosmo/references/*.json",
+      "../../.cosmo/curriculums/*.json",
+    ],
+    "/admin/library/[id]": [
+      "../../.cosmo/references/*.json",
+      "../../.cosmo/curriculums/*.json",
+    ],
   },
   // The funnel's fs reads make Next's tracer emit the whole .cosmo
   // directory into the studio functions; the source PDFs and page
@@ -95,6 +106,8 @@ const nextConfig: NextConfig = {
       "../../.cosmo/inspo-images/**",
       "../../.cosmo/inspo-files/**",
     ],
+    "/admin/library": ["../../.cosmo/inspo-images/**", "../../.cosmo/inspo-files/**"],
+    "/admin/library/[id]": ["../../.cosmo/inspo-images/**", "../../.cosmo/inspo-files/**"],
   },
   async redirects() {
     return [
