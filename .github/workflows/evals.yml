@@ -39,6 +39,20 @@ on:
       - ".github/workflows/evals.yml"
   push:
     branches: [main]
+    paths:
+      - "apps/web/agent/**"
+      - "apps/web/evals/**"
+      - "apps/web/lib/materials/**"
+      - "apps/web/lib/onboarding/**"
+      - "apps/web/lib/family-context**"
+      - "apps/web/lib/agent-db.ts"
+      - "apps/web/lib/eval-isolation.ts"
+      - "supabase/migrations/**"
+      - ".github/workflows/evals.yml"
+  # The full suite still gets a clean periodic read, including capabilities
+  # that have not changed recently. Minute 17 avoids the top-of-hour queue.
+  schedule:
+    - cron: "17 9 * * *"
   workflow_dispatch:
 
 # A newer push supersedes an in-flight run: these cost real money, so

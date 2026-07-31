@@ -21,7 +21,8 @@
         "HOMA_*",
         "NEXT_PUBLIC_*",
         "REPORT_NARRATIVE_ENABLED",
-        "TELNYX_SMS_ENABLED"
+        "TELNYX_SMS_ENABLED",
+        "VERCEL_ENV"
       ],
       "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**", ".eve/**", "dist/**"]
     },

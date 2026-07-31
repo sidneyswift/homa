@@ -36,6 +36,8 @@ process.env[EVAL_FAMILY_FIXTURE_FLAG] ??= "1";
  * No shared judge or reporter yet. Routing evals use deterministic tool
  * assertions. The subject lesson workflow eval calls Homa's real model
  * directly with local tool stubs and grades the recorded workflow in code,
- * so it also needs no separate judge model.
+ * so it also needs no separate judge model. Five minutes bounds an eval
+ * that forgot its own timeout; explicitly slow material evals keep their
+ * reviewed per-eval limits because those override this default.
  */
-export default defineEvalConfig({});
+export default defineEvalConfig({ timeoutMs: 300_000 });
