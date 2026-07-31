@@ -39,7 +39,11 @@ function RootNavigator() {
         headerShown: false,
         contentStyle: { backgroundColor: colors.page },
       }}
-    />
+    >
+      {/* The voice-first surface covers the whole app; its own close
+          button is the way back (features/voice/voice-screen.tsx). */}
+      <Stack.Screen name="voice" options={{ presentation: "fullScreenModal" }} />
+    </Stack>
   );
 }
 
