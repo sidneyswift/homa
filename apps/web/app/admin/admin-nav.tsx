@@ -5,6 +5,7 @@ import {
   ChartNoAxesColumn,
   Filter,
   Gauge,
+  Library,
   ListTree,
   Mail,
   MessagesSquare,
@@ -31,6 +32,7 @@ const ITEMS = [
   { href: "/admin/drip", label: "Drip", icon: Mail },
   { href: "/admin/makings", label: "Makings", icon: Gauge },
   { href: "/admin/studio", label: "Studio", icon: Palette },
+  { href: "/admin/library", label: "Library", icon: Library },
 ] as const;
 
 export function AdminNav() {
