@@ -129,9 +129,16 @@ jobs:
 
       # Mobile is excluded on purpose: mobile-checks already typechecks and
       # lints it, and doing it twice per commit is pure waste.
+      #
+      # TURBO_CACHE_DIR pins the local cache to the .turbo path the cache
+      # step above saves. Without it turbo 2 writes to
+      # node_modules/.cache/turbo and the actions/cache entry silently
+      # carries nothing (observed on this workflow's second run: web tasks
+      # cache-missed despite unchanged inputs).
       - name: Typecheck, lint, build
         run: pnpm exec turbo run typecheck lint build --filter=!mobile
         env:
+          TURBO_CACHE_DIR: .turbo/cache
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
