@@ -5,6 +5,14 @@ name: CI
 # schema migration. Also runs the MJ-08 events-registry parity check, the
 # map content + scorer checks, the fleet-skill package checks, the
 # (now-retired-system) skills-targeting checks, and lint.
+#
+# Layout (2026-07-31 restructure, no coverage removed): the old single
+# build-and-check job ran ~45 steps serially and took ~9.5 minutes. The
+# same steps now run as two parallel jobs, "build" (compile chain plus the
+# checks that need Supabase secrets) and "checks" (every fast guard plus
+# the disposable-Postgres E2Es), with Turborepo and Next build caches, so
+# a run is bounded by the slower of the two (~4-5 minutes cold, less on a
+# cache hit). Every step that existed before still exists below.
 
 on:
   push:
@@ -12,8 +20,35 @@ on:
   pull_request:
     branches: [main]
 
+# A newer push to the same PR supersedes the in-flight run. Pushes to main
+# are never cancelled: each one maps to a deploy we want evidence for.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
-  # Runs independently of build-and-check (no Supabase secrets needed) so
+  # Branch protection on main requires a status context named exactly
+  # "build-and-check" (the old single job's name). This gate carries that
+  # name and fails unless every real job succeeded, so the protection rule
+  # keeps meaning "everything green" without touching repo settings. If a
+  # job is added below, add it to `needs` here or it stops gating merges.
+  build-and-check:
+    needs: [mobile-checks, build, checks]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: All jobs green
+        run: |
+          results='${{ join(needs.*.result, ' ') }}'
+          echo "job results: $results"
+          for r in $results; do
+            if [ "$r" != "success" ]; then
+              echo "::error::A required job finished with result '$r'."
+              exit 1
+            fi
+          done
+
+  # Runs independently of the web jobs (no Supabase secrets needed) so
   # mobile regressions surface fast. Until 2026-07-28 these tests existed
   # (check:mobile-chat) but ran in no pipeline that ships to phones; the
   # mobile-ota-update.yml workflow now runs the same suite before publish.
@@ -46,7 +81,11 @@ jobs:
       - name: Mobile voice unit tests
         run: pnpm check:mobile-voice
 
-  build-and-check:
+  # The compile chain plus the checks that need real Supabase secrets.
+  # Typecheck, lint, and build go through one turbo invocation so turbo
+  # can schedule them across the runner's cores and reuse the shared
+  # ^build package outputs instead of computing them twice.
+  build:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -61,14 +100,126 @@ jobs:
           node-version: 24
           cache: pnpm
 
+      # Turborepo's local cache: an unchanged package replays its cached
+      # typecheck/lint/build instantly. Keyed on the commit with a prefix
+      # fallback so every run reuses the newest prior cache.
+      - name: Turborepo cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
+      # Next's incremental compiler cache. Turbo's outputs exclude
+      # .next/cache on purpose (it is machine state, not an artifact), so
+      # it needs its own cache entry to speed up cache-miss builds.
+      - name: Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: apps/web/.next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck
-        run: pnpm typecheck
+      - name: Typecheck, lint, build
+        run: pnpm exec turbo run typecheck lint build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
-      - name: Lint
-        run: pnpm lint
+      # Vercel's pipeline runs eve build after next build; it compiles agent
+      # tool modules outside Next's bundler, so imports that Next tolerates
+      # can still sink the deploy (2026-07-10 incident: next/server + a JSON
+      # corpus loader in a tool module). Run it here so CI fails first.
+      #
+      # Standalone `eve build` skips normalizeEveVercelFunctionOutput unless it
+      # sees a co-deployed Next+Eve experimentalServices config (the shape
+      # Vercel production writes). Seed that signal so CI exercises the same
+      # eve/__server.func + maxDuration path production ships.
+      - name: Eve channel build (agent tool modules)
+        run: |
+          mkdir -p apps/web/.vercel/output
+          node <<'NODE'
+          const fs = require("node:fs");
+          const path = require("node:path");
+          const configPath = path.join(
+            "apps",
+            "web",
+            ".vercel",
+            "output",
+            "config.json",
+          );
+          fs.writeFileSync(
+            configPath,
+            `${JSON.stringify(
+              {
+                version: 3,
+                experimentalServices: {
+                  next: { framework: "nextjs", entrypoint: "." },
+                  eve: {
+                    framework: "eve",
+                    entrypoint: ".",
+                    routePrefix: "/eve",
+                  },
+                },
+              },
+              null,
+              2,
+            )}\n`,
+          );
+          NODE
+          VERCEL=1 pnpm --filter web exec eve build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      # Eve's shared /eve/__server.func hosts the long-lived NDJSON stream.
+      # Without maxDuration it inherits Fluid Compute's 300s default and
+      # production kills in-progress chat streams (2026-07-11 through 2026-07-16).
+      # Must run after a VERCEL=1 eve build so the shared function config is rewritten.
+      - name: Eve stream maxDuration guard
+        run: VERCEL=1 pnpm check:eve-stream-duration
+
+      - name: Tenancy isolation smoke check (M1-07 seed)
+        run: pnpm check:isolation
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+  # Every guard and unit/E2E check that does not need the compile chain.
+  # These all ran before the Build step in the old single job, so none of
+  # them depend on build outputs. Postgres is installed up front because
+  # several suites (research-brief, onboarding, the disposable E2Es, the
+  # morning-brief acceptance) boot throwaway local clusters.
+  checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install PostgreSQL 16 for disposable E2E
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-16
+          echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
 
       - name: ChildProgress unit and compatibility checks
         run: pnpm check:child-progress
@@ -120,12 +271,6 @@ jobs:
 
       - name: Conversation continuity checks (episodes, replies, deliveries)
         run: pnpm check:continuity
-
-      - name: Install PostgreSQL 16 for disposable E2E
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes postgresql-16
-          echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
 
       - name: Morning research brief format
         run: pnpm check:research-brief
@@ -219,73 +364,5 @@ jobs:
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
-      - name: Build
-        run: pnpm build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-
-      # Vercel's pipeline runs eve build after next build; it compiles agent
-      # tool modules outside Next's bundler, so imports that Next tolerates
-      # can still sink the deploy (2026-07-10 incident: next/server + a JSON
-      # corpus loader in a tool module). Run it here so CI fails first.
-      #
-      # Standalone `eve build` skips normalizeEveVercelFunctionOutput unless it
-      # sees a co-deployed Next+Eve experimentalServices config (the shape
-      # Vercel production writes). Seed that signal so CI exercises the same
-      # eve/__server.func + maxDuration path production ships.
-      - name: Eve channel build (agent tool modules)
-        run: |
-          mkdir -p apps/web/.vercel/output
-          node <<'NODE'
-          const fs = require("node:fs");
-          const path = require("node:path");
-          const configPath = path.join(
-            "apps",
-            "web",
-            ".vercel",
-            "output",
-            "config.json",
-          );
-          fs.writeFileSync(
-            configPath,
-            `${JSON.stringify(
-              {
-                version: 3,
-                experimentalServices: {
-                  next: { framework: "nextjs", entrypoint: "." },
-                  eve: {
-                    framework: "eve",
-                    entrypoint: ".",
-                    routePrefix: "/eve",
-                  },
-                },
-              },
-              null,
-              2,
-            )}\n`,
-          );
-          NODE
-          VERCEL=1 pnpm --filter web exec eve build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-
-      # Eve's shared /eve/__server.func hosts the long-lived NDJSON stream.
-      # Without maxDuration it inherits Fluid Compute's 300s default and
-      # production kills in-progress chat streams (2026-07-11 through 2026-07-16).
-      # Must run after a VERCEL=1 eve build so the shared function config is rewritten.
-      - name: Eve stream maxDuration guard
-        run: VERCEL=1 pnpm check:eve-stream-duration
-
       - name: Ingestion ledger (every #homa-inspo drop has exactly one record)
         run: pnpm check:ingestion
-
-      - name: Tenancy isolation smoke check (M1-07 seed)
-        run: pnpm check:isolation
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
