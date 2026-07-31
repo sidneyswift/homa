@@ -8,10 +8,10 @@ name: CI
 #
 # Layout (2026-07-31 restructure, no coverage removed): the old single
 # build-and-check job ran ~45 steps serially and took ~9.5 minutes. The
-# same steps now run as parallel jobs: "build" (compile chain), two
-# balanced guard shards ("checks" and "db-checks", split by measured step
-# time; both export HOMA_POSTGRES_BIN so a suite can move between them
-# freely), and "mobile-checks". Turborepo and Next build caches make
+# same steps now run as parallel jobs: "build" (compile chain), three
+# balanced guard shards ("checks", "db-checks", "e2e-checks", split by
+# measured step time; all export HOMA_POSTGRES_BIN so a suite can move
+# between them freely), and "mobile-checks". Turborepo and Next build caches make
 # unchanged packages replay instantly. Mobile typecheck/lint run ONLY in
 # mobile-checks; the build job filters mobile out of its turbo run
 # because running them twice per commit bought nothing.
@@ -35,7 +35,7 @@ jobs:
   # keeps meaning "everything green" without touching repo settings. If a
   # job is added below, add it to `needs` here or it stops gating merges.
   build-and-check:
-    needs: [mobile-checks, build, checks, db-checks]
+    needs: [mobile-checks, build, checks, db-checks, e2e-checks]
     if: always()
     runs-on: ubuntu-24.04
     steps:
@@ -197,7 +197,7 @@ jobs:
       - name: Eve stream maxDuration guard
         run: VERCEL=1 pnpm check:eve-stream-duration
 
-  # Guard shard 1 of 2. The guards never depended on the compile chain
+  # Guard shard 1 of 3. The guards never depended on the compile chain
   # (they all ran before the Build step in the old single job), so they
   # run in parallel with it. The two shards are balanced by measured step
   # time, not by theme; both export HOMA_POSTGRES_BIN, so moving a suite
@@ -328,9 +328,8 @@ jobs:
       - name: Ingestion ledger (every #homa-inspo drop has exactly one record)
         run: pnpm check:ingestion
 
-  # Guard shard 2 of 2: the Postgres-backed suites, the disposable E2Es,
-  # and the two secret-needing database checks. See the shard-1 comment
-  # for the balancing rule.
+  # Guard shard 2 of 3: the Postgres-backed suites and the two fast
+  # disposable E2Es. See the shard-1 comment for the balancing rule.
   db-checks:
     runs-on: ubuntu-24.04
     steps:
@@ -391,6 +390,36 @@ jobs:
       - name: hours_log dedupe disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm hours-log:e2e
+
+  # Guard shard 3 of 3: the acceptance E2Es and the two secret-needing
+  # database checks, the three longest steps in the roster (each 24-50s),
+  # so they share a runner instead of tailing another shard.
+  e2e-checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The ubuntu-24.04 runner image ships PostgreSQL 16 preinstalled, so
+      # the apt path is only a fallback for image changes.
+      - name: Ensure PostgreSQL 16 for disposable clusters
+        run: |
+          if [ ! -x /usr/lib/postgresql/16/bin/initdb ]; then
+            sudo apt-get update
+            sudo apt-get install --yes postgresql-16
+          fi
+          echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
 
       - name: Morning research brief v2 disposable acceptance
         timeout-minutes: 10
