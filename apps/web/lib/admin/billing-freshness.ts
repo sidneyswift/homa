@@ -29,11 +29,21 @@ const TRIAL_WINDOW_MS = 8 * 24 * 60 * 60 * 1000;
  *  by accountAccessDecision and is not drift. */
 const PAYING_STATUSES = new Set(["active", "trialing"]);
 
+/** Postgres numeric expressions arrive as strings when adminDb keeps type
+ * fetching off, so normalize them before comparing or rendering dates. */
+type EpochMilliseconds = number | string;
+
+function finiteEpochMilliseconds(value: EpochMilliseconds | null): number | null {
+  if (value === null) return null;
+  const milliseconds = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(milliseconds) ? milliseconds : null;
+}
+
 export interface BillingMirrorRow {
   status: string | null;
   /** families.stripe_current_period_end, the date they are paid through. */
-  currentPeriodEndMs: number | null;
-  trialStartedAtMs: number | null;
+  currentPeriodEndMs: EpochMilliseconds | null;
+  trialStartedAtMs: EpochMilliseconds | null;
   hasSubscriptionId: boolean;
   billingExempt: boolean;
 }
@@ -69,7 +79,7 @@ export interface BillingFreshness {
  */
 export function billingFreshness(
   rows: readonly BillingMirrorRow[],
-  lastUpdateMs: number | null,
+  lastUpdateMs: EpochMilliseconds | null,
   nowMs: number,
 ): BillingFreshness {
   let stalePayers = 0;
@@ -78,14 +88,16 @@ export function billingFreshness(
 
   for (const row of rows) {
     if (row.billingExempt) continue;
+    const currentPeriodEndMs = finiteEpochMilliseconds(row.currentPeriodEndMs);
+    const trialStartedAtMs = finiteEpochMilliseconds(row.trialStartedAtMs);
     const hasAnyBilling = row.status !== null || row.hasSubscriptionId;
     if (hasAnyBilling) familiesWithBilling += 1;
 
     if (
       row.status !== null &&
       PAYING_STATUSES.has(row.status) &&
-      row.currentPeriodEndMs !== null &&
-      row.currentPeriodEndMs < nowMs - STALE_GRACE_MS
+      currentPeriodEndMs !== null &&
+      currentPeriodEndMs < nowMs - STALE_GRACE_MS
     ) {
       stalePayers += 1;
       continue;
@@ -93,8 +105,8 @@ export function billingFreshness(
 
     if (
       !row.hasSubscriptionId &&
-      row.trialStartedAtMs !== null &&
-      row.trialStartedAtMs < nowMs - TRIAL_WINDOW_MS
+      trialStartedAtMs !== null &&
+      trialStartedAtMs < nowMs - TRIAL_WINDOW_MS
     ) {
       trialsWithoutSubscription += 1;
     }
@@ -106,13 +118,14 @@ export function billingFreshness(
       : stalePayers > 0 || trialsWithoutSubscription > 0
         ? "stale"
         : "healthy";
+  const lastUpdate = finiteEpochMilliseconds(lastUpdateMs);
 
   return {
     verdict,
     stalePayers,
     trialsWithoutSubscription,
-    lastUpdateAgeMs: lastUpdateMs === null ? null : Math.max(0, nowMs - lastUpdateMs),
-    lastUpdateAtIso: lastUpdateMs === null ? null : new Date(lastUpdateMs).toISOString(),
+    lastUpdateAgeMs: lastUpdate === null ? null : Math.max(0, nowMs - lastUpdate),
+    lastUpdateAtIso: lastUpdate === null ? null : new Date(lastUpdate).toISOString(),
     familiesWithBilling,
   };
 }
