@@ -31,6 +31,7 @@ import {
   CHILD_PROGRESS_RECONCILIATION_ADVISORY_LOCK_KEY,
 } from "../child-progress/postgres-repository-helpers";
 import { foldFamilyDataIntoTx } from "../family-fold";
+import { resolveOnboardingCompletion } from "../onboarding/store";
 import { dashboardPlanFromRow, withAgeTemplates, type DashboardPlan } from "../plan-week";
 import { subjectLessonsEnabled } from "../subject-lessons/flag";
 import {
@@ -1202,6 +1203,14 @@ export async function createReport(familyId: string, childId: string): Promise<S
     select email from public.families where id = ${familyId}
   `;
   await touchFamily(familyId);
+
+  // A scored report is the last deterministic milestone in chat-first
+  // onboarding. The completion resolver used to run only when
+  // /onboarding rendered again, but chat keeps the family on /app after
+  // scoring, so two live trial families completed every milestone while
+  // their durable state remained "active". Run it at the shared report
+  // boundary instead, covering chat, web, SMS, and duplicate retries.
+  await resolveOnboardingCompletion(familyId);
 
   return { ...report, email: familyRows[0].email };
 }

@@ -245,11 +245,14 @@ export function onboardingCompletionReached(
     if (ageMs >= ONBOARDING_BACKSTOP_DAYS * 24 * 60 * 60 * 1000) return true;
   }
 
-  // TODO(founder): the happy-path clause. What marks a family finished
-  // on the day she actually finishes, rather than fourteen days later?
-  // The facts above are the ones we can trust; note that checklist
-  // statuses are NOT among them, because nothing in the codebase ever
-  // writes "done" to that map (only start_checklist's "started" and
-  // "resumed"), so a rule reading it would never fire.
-  return false;
+  // Founder ruling 2026-07-31, onboarding-completion-milestones: the
+  // first scored report is the end of onboarding once family setup and
+  // at least one child are real. These are durable product facts, unlike
+  // checklist status strings, and they match the moment the parent has
+  // received the core promise she came through onboarding to reach.
+  return (
+    facts.profileCompletedAt !== null &&
+    facts.childCount > 0 &&
+    facts.scoredReportCount > 0
+  );
 }
