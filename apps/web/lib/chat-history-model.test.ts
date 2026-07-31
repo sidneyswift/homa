@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import type { EveMessage } from "eve/client";
+
 import {
   archiveFromServerHistory,
   mergeChatHistoryRows,
@@ -16,12 +18,25 @@ function row(overrides: Partial<ChatHistoryRow>): ChatHistoryRow {
   return {
     id: "00000000-0000-0000-0000-000000000001",
     session_id: "wrun_a",
+    turn_id: null,
     role: "user",
     channel: "web",
     content: "hello",
     created_at: "2026-07-10T12:00:00.000Z",
     ...overrides,
   };
+}
+
+function liveMessage(
+  turnId: string,
+  role: "user" | "assistant",
+  parts: EveMessage["parts"] = [{ type: "text", text: "hello" }],
+): EveMessage {
+  return {
+    id: `${turnId}:${role}`,
+    role,
+    parts,
+  } as EveMessage;
 }
 
 function materialRow(
@@ -136,15 +151,22 @@ describe("recentSessionIds", () => {
 });
 
 describe("archiveFromServerHistory", () => {
-  it("excludes the live session and builds renderable messages", () => {
+  it("keeps persisted current-session work unless the live reducer has that exact turn", () => {
     const history = mergeChatHistoryRows(
       [
         [
           row({ id: "past", session_id: "wrun_past" }),
           row({
-            id: "live",
+            id: "represented",
             session_id: "wrun_live",
+            turn_id: "turn-represented",
             created_at: "2026-07-10T13:00:00.000Z",
+          }),
+          row({
+            id: "missing",
+            session_id: "wrun_live",
+            turn_id: "turn-missing",
+            created_at: "2026-07-10T13:01:00.000Z",
           }),
         ],
       ],
@@ -152,10 +174,12 @@ describe("archiveFromServerHistory", () => {
     );
     const archive = archiveFromServerHistory(
       { messages: history, materials: [] },
-      "wrun_live",
+      [liveMessage("turn-represented", "user")],
     );
-    assert.equal(archive.length, 1);
-    assert.equal(archive[0].message.id, "hist:past");
+    assert.deepEqual(
+      archive.map((entry) => entry.message.id),
+      ["hist:past", "hist:missing"],
+    );
     assert.equal(archive[0].channel, "web");
     assert.equal(archive[0].at, Date.parse("2026-07-10T12:00:00.000Z"));
     const part = archive[0].message.parts[0];
@@ -192,7 +216,7 @@ describe("archiveFromServerHistory", () => {
           }),
         ],
       },
-      undefined,
+      [],
     );
 
     assert.deepEqual(
@@ -231,7 +255,7 @@ describe("archiveFromServerHistory", () => {
     const messages = mergeChatHistoryRows([[row({ id: "ask" })]], 10);
     const archive = archiveFromServerHistory(
       { messages, materials: [material({})] },
-      undefined,
+      [],
     );
     assert.deepEqual(
       archive.map((entry) => entry.message.id),
@@ -242,15 +266,36 @@ describe("archiveFromServerHistory", () => {
     assert.equal(materialParts(archive[1].message).length, 1);
   });
 
-  it("keeps the live session's materials out of the archive", () => {
+  it("keeps current-session materials unless the live reducer has that exact card", () => {
     const messages = mergeChatHistoryRows([[row({ id: "ask" })]], 10);
+    const represented = material({
+      id: "10000000-0000-0000-0000-000000000002",
+      session_id: "wrun_live",
+      created_at: "2026-07-10T12:05:00.000Z",
+    });
+    const missing = material({
+      id: "10000000-0000-0000-0000-000000000003",
+      session_id: "wrun_live",
+      created_at: "2026-07-10T12:06:00.000Z",
+    });
     const archive = archiveFromServerHistory(
-      { messages, materials: [material({ session_id: "wrun_live" })] },
-      "wrun_live",
+      { messages, materials: [represented, missing] },
+      [
+        liveMessage("turn-card", "assistant", [
+          {
+            type: "dynamic-tool",
+            state: "output-available",
+            toolCallId: "tool-represented",
+            toolName: "create_printable",
+            input: {},
+            output: { material: { id: represented.id } },
+          },
+        ] as EveMessage["parts"]),
+      ],
     );
     assert.deepEqual(
       archive.map((entry) => entry.message.id),
-      ["hist:ask"],
+      ["hist:ask", `mat:${missing.id}`],
     );
   });
 });
@@ -319,7 +364,7 @@ describe("packet cards in scrollback", () => {
           }),
         ],
       },
-      undefined,
+      [],
     );
     const part = archive[1].message.parts[0] as {
       output: { material: { pageCount?: number; pagePreviewUrls?: string[] } };

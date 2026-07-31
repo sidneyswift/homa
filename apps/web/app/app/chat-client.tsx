@@ -44,6 +44,7 @@ import {
   archiveFromServerHistory,
   type ChatHistoryPayload,
 } from "../../lib/chat-history-model";
+import { messageModalityHeaders } from "../../lib/web-message-modality";
 import type { PromptSuggestionSet } from "../../lib/chat-suggestions/contract";
 import type { SlashSkillItem } from "../../lib/slash-skills";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
@@ -315,25 +316,23 @@ export function ChatClient({
     Boolean(serverHistory) &&
     !prepared.initialSession?.sessionId &&
     prepared.initialEvents.length > 0;
+  const initialLiveMessages = staleSessionlessEvents
+    ? []
+    : foldEventsToMessages(prepared.initialEvents);
   // Scrollback: the server record when the page load carried it (one
   // thread, same on every device), the localStorage cache otherwise.
-  // The live session's own rows are excluded server-side of the seam:
-  // the eve store replays them from its event log.
+  // Server rows stay unless the live reducer has the exact same turn.
+  // A partial local replay can therefore never hide durable work.
   const [archived, setArchived] = useState<ArchivedMessage[]>(() =>
     serverHistory
-      ? archiveFromServerHistory(
-          serverHistory,
-          prepared.initialSession?.sessionId,
-        )
+      ? archiveFromServerHistory(serverHistory, initialLiveMessages)
       : prepared.archived,
   );
   const [restoredPromptSuggestionSet] =
     useState<PromptSuggestionSet | null>(() =>
       restorePromptSuggestionSetForVisibleMessages({
         archivedMessages: archived.map(({ message }) => message),
-        currentMessages: staleSessionlessEvents
-          ? []
-          : foldEventsToMessages(prepared.initialEvents),
+        currentMessages: initialLiveMessages,
         promptSuggestionSet: prepared.promptSuggestions,
         staleSessionlessEvents,
       }),
@@ -365,12 +364,14 @@ export function ChatClient({
   /** Mirrors `queued` for the recovery callback below, which is memoized
    *  independently of render and would otherwise read a stale queue. */
   const queuedRef = useRef<QueuedChatMessage[]>(queued);
-  const queuedTurnModalityRef = useRef<ChatTurnModality>("text");
   /** The store's send, held by ref so onFinish can deliver the queue
    *  without capturing `agent` inside its own initializer (the React
    *  Compiler rejects that self-capture on mobile; twins stay alike). */
   const sendRef = useRef<
-    ((input: { message: string | UserContent }) => Promise<void>) | null
+    ((input: {
+      message: string | UserContent;
+      headers?: Readonly<Record<string, string>>;
+    }) => Promise<void>) | null
   >(null);
   /** Lost-turn recovery, held by ref for onFinish (same reason). */
   const startRecoveryRef = useRef<(() => void) | null>(null);
@@ -961,12 +962,14 @@ export function ChatClient({
     // overlapping sends.
     setTimeout(() => {
       setBusySeconds(0);
-      turnModalityRef.current =
-        flush.lane === "directive" ? "text" : queuedTurnModalityRef.current;
+      turnModalityRef.current = flush.modality;
       lastSendRef.current = { text: message, atMs: currentTimeMs() };
       turnStartedAtRef.current = currentTimeMs();
       markTurnStarted();
-      void sendRef.current?.({ message });
+      void sendRef.current?.({
+        message,
+        headers: messageModalityHeaders(turnModalityRef.current),
+      });
     }, 0);
   }, []);
 
@@ -1688,13 +1691,13 @@ export function ChatClient({
       return "rejected";
     }
     clearPromptSuggestionState();
+    if (plan.clearDraft) dictation.clearCutoffNotice();
     if (plan.resetDraftFromVoice) draftFromVoiceRef.current = false;
     if (plan.clearDraft) setDraft("");
     // Sending mid-turn queues instead of refusing (texting model,
     // founder ruling 2026-07-10 night): the bubble waits by the
     // composer and goes out the moment the line is free.
     if (plan.destination === "queue") {
-      queuedTurnModalityRef.current = plan.modality;
       setQueued((current) =>
         appendPreparedChatSendToQueue(current, plan),
       );
@@ -1717,6 +1720,7 @@ export function ChatClient({
     const flush = flushChatQueue(queued, {
       text: plan.message,
       lane: plan.lane,
+      modality: plan.modality,
       progressActionKey: plan.progressActionKey,
     });
     const outgoing = flush.outgoing;
@@ -1724,11 +1728,14 @@ export function ChatClient({
     setQueued(flush.remaining);
     setBusySeconds(0);
     autoStoppedRef.current = false;
-    turnModalityRef.current = flush.lane === "directive" ? "text" : plan.modality;
+    turnModalityRef.current = flush.modality;
     lastSendRef.current = { text: outgoing, atMs: currentTimeMs() };
     turnStartedAtRef.current = currentTimeMs();
     markTurnStarted();
-    void agent.send({ message: outgoing });
+    void agent.send({
+      message: outgoing,
+      headers: messageModalityHeaders(turnModalityRef.current),
+    });
     return "sent";
   }
 
@@ -1802,6 +1809,7 @@ export function ChatClient({
         }));
       }
       clearPromptSuggestionState();
+      dictation.clearCutoffNotice();
       setDraft("");
       draftFromVoiceRef.current = false;
       attachments.clear();
@@ -1813,7 +1821,10 @@ export function ChatClient({
       lastSendRef.current = { text: summary, atMs: currentTimeMs() };
       turnStartedAtRef.current = currentTimeMs();
       markTurnStarted();
-      void agent.send({ message: parts });
+      void agent.send({
+        message: parts,
+        headers: messageModalityHeaders("text"),
+      });
     } catch {
       // Files stay staged; her words stay in the composer. One quiet
       // line under the composer says to try again.

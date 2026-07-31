@@ -71,6 +71,7 @@ export interface QueuedChatMessage {
   text: string;
   progressActionKey: string | null;
   lane: ChatSendLane;
+  modality: ChatTurnModality;
 }
 
 export function prepareChatSend(input: {
@@ -142,6 +143,7 @@ export function appendPreparedChatSendToQueue(
       text: plan.message,
       progressActionKey: plan.progressActionKey,
       lane: plan.lane,
+      modality: plan.modality,
     },
   ];
 }
@@ -152,6 +154,7 @@ export interface ChatQueueFlush {
   /** What stays queued for the next idle line. */
   remaining: QueuedChatMessage[];
   lane: ChatSendLane;
+  modality: ChatTurnModality;
 }
 
 /**
@@ -171,7 +174,12 @@ export interface ChatQueueFlush {
  */
 export function flushChatQueue(
   queue: QueuedChatMessage[],
-  appended?: { text: string; lane: ChatSendLane; progressActionKey?: string | null },
+  appended?: {
+    text: string;
+    lane: ChatSendLane;
+    modality: ChatTurnModality;
+    progressActionKey?: string | null;
+  },
 ): ChatQueueFlush {
   const all: QueuedChatMessage[] = appended
     ? [
@@ -180,23 +188,39 @@ export function flushChatQueue(
           text: appended.text,
           progressActionKey: appended.progressActionKey ?? null,
           lane: appended.lane,
+          modality: appended.modality,
         },
       ]
     : [...queue];
-  if (all.length === 0) return { outgoing: null, remaining: [], lane: "parent" };
+  if (all.length === 0) {
+    return {
+      outgoing: null,
+      remaining: [],
+      lane: "parent",
+      modality: "text",
+    };
+  }
 
   if (all[0].lane === "directive") {
-    return { outgoing: all[0].text, remaining: all.slice(1), lane: "directive" };
+    return {
+      outgoing: all[0].text,
+      remaining: all.slice(1),
+      lane: "directive",
+      modality: "text",
+    };
   }
   let end = 0;
   while (end < all.length && all[end].lane === "parent") end += 1;
+  const sending = all.slice(0, end);
   return {
-    outgoing: all
-      .slice(0, end)
+    outgoing: sending
       .map((entry) => entry.text)
       .join("\n\n"),
     remaining: all.slice(end),
     lane: "parent",
+    modality: sending.some((entry) => entry.modality === "voice")
+      ? "voice"
+      : "text",
   };
 }
 

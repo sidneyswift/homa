@@ -134,6 +134,7 @@ describe("visitShapeFromHistory", () => {
   const message = (role: "user" | "assistant", atMs: number) => ({
     id: `m-${role}-${atMs}`,
     sessionId: "s",
+    turnId: null,
     role,
     channel: "web" as const,
     modality: "text" as const,

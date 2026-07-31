@@ -138,16 +138,22 @@ describe("prepareChatSend", () => {
 });
 
 describe("flushChatQueue", () => {
-  const parent = (text: string) =>
-    ({ text, progressActionKey: null, lane: "parent" }) as const;
+  const parent = (text: string, modality: "text" | "voice" = "text") =>
+    ({ text, progressActionKey: null, lane: "parent", modality }) as const;
   const directive = (text: string) =>
-    ({ text, progressActionKey: null, lane: "directive" }) as const;
+    ({
+      text,
+      progressActionKey: null,
+      lane: "directive",
+      modality: "text",
+    }) as const;
 
   it("says nothing when there is nothing queued", () => {
     assert.deepEqual(flushChatQueue([]), {
       outgoing: null,
       remaining: [],
       lane: "parent",
+      modality: "text",
     });
   });
 
@@ -156,13 +162,24 @@ describe("flushChatQueue", () => {
       flushChatQueue([parent("Mia is six"), parent("Leo is four")], {
         text: "and we start Monday",
         lane: "parent",
+        modality: "text",
       }),
       {
         outgoing: "Mia is six\n\nLeo is four\n\nand we start Monday",
         remaining: [],
         lane: "parent",
+        modality: "text",
       },
     );
+  });
+
+  it("keeps voice provenance when a dictated message waits beside typed words", () => {
+    const flush = flushChatQueue(
+      [parent("Mia finished the chapter", "voice")],
+      { text: "and Leo drew the map", lane: "parent", modality: "text" },
+    );
+
+    assert.equal(flush.modality, "voice");
   });
 
   it("sends a queued directive alone and holds her words for the next line", () => {
@@ -171,11 +188,16 @@ describe("flushChatQueue", () => {
       answered: 41,
     });
     assert.deepEqual(
-      flushChatQueue([directive(marker)], { text: "that was quick", lane: "parent" }),
+      flushChatQueue([directive(marker)], {
+        text: "that was quick",
+        lane: "parent",
+        modality: "text",
+      }),
       {
         outgoing: marker,
         remaining: [parent("that was quick")],
         lane: "directive",
+        modality: "text",
       },
     );
   });
@@ -183,11 +205,16 @@ describe("flushChatQueue", () => {
   it("never joins a directive onto the end of her words either", () => {
     const marker = formatHiddenDirective("resume");
     assert.deepEqual(
-      flushChatQueue([parent("hi again")], { text: marker, lane: "directive" }),
+      flushChatQueue([parent("hi again")], {
+        text: marker,
+        lane: "directive",
+        modality: "text",
+      }),
       {
         outgoing: "hi again",
         remaining: [directive(marker)],
         lane: "parent",
+        modality: "text",
       },
     );
   });
