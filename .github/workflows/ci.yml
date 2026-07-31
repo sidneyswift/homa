@@ -43,6 +43,9 @@ jobs:
       - name: Mobile chat unit tests
         run: pnpm check:mobile-chat
 
+      - name: Mobile voice unit tests
+        run: pnpm check:mobile-voice
+
   build-and-check:
     runs-on: ubuntu-24.04
     steps:

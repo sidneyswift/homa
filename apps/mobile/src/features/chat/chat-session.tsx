@@ -82,28 +82,34 @@ type ChatSendSource = "composer" | "card";
 /** Stream reconnects per turn; matches the web twin (chat-client.tsx). */
 const STREAM_RECONNECT_ATTEMPTS = 8;
 
-const SUGGESTIONS = [
+/** The opening prompts every quiet surface offers. Exported so the
+ *  voice screen's idle chips (features/voice/suggestion-chips.tsx) say
+ *  exactly what chat says instead of drifting a second copy, the same
+ *  single-source rule as buildEveTransport below. */
+export const SUGGESTIONS = [
   "What should we work on this week?",
   "Make a worksheet for today",
   "We had a rough morning, help me reset",
 ] as const;
 
 /** A backgrounded app kills the stream within seconds; a stream this
- *  quiet when the app comes back is dead, not thinking. */
-const VISIBLE_STALL_MS = 20_000;
+ *  quiet when the app comes back is dead, not thinking. Exported (with
+ *  the other stall constants) so the voice surface's watchdogs stay in
+ *  lockstep with this file, the source of truth for the values. */
+export const VISIBLE_STALL_MS = 20_000;
 
 /** How long a just-woken app waits for the reconnecting stream to show
  *  life before giving up and aborting (the reconnect replays from
  *  streamIndex, but that round trip needs a moment). */
-const WAKE_GRACE_MS = 5_000;
+export const WAKE_GRACE_MS = 5_000;
 
 /** Foreground watchdog: past the longest normal tool run (image-heavy
  *  printables stream nothing while the render runs, ~60-90s). */
-const WATCHDOG_STALL_MS = 180_000;
+export const WATCHDOG_STALL_MS = 180_000;
 
 /** How long lost-turn recovery may keep trying before the plain error
  *  banner wins; matches the web twin. */
-const RECOVERY_DEADLINE_MS = 240_000;
+export const RECOVERY_DEADLINE_MS = 240_000;
 
 function currentTimeMs(): number {
   return Date.now();
@@ -111,6 +117,31 @@ function currentTimeMs(): number {
 
 function apiPath(path: string): string {
   return `${env.apiUrl.replace(/\/+$/, "")}${path}`;
+}
+
+/**
+ * The transport half of this surface's useEveAgent config: host, fresh
+ * per-request bearer auth, the mobile channel header, and the reconnect
+ * budget. Exported so the voice surface (features/voice/
+ * use-voice-session.ts) rides the exact same authenticated channel
+ * instead of drifting a second copy. Everything conversational
+ * (storage, queueing, recovery bookkeeping) stays with each surface.
+ */
+export function buildEveTransport() {
+  return {
+    host: env.apiUrl,
+    auth: {
+      bearer: async () => {
+        const { data } = await supabase.auth.getSession();
+        return data.session?.access_token ?? "";
+      },
+    },
+    headers: EVE_CHANNEL_HEADER,
+    // A phone that sleeps repeatedly through a long turn burns one
+    // reconnect per wake; replay resumes from the last received event
+    // (incident 2026-07-11, see web twin's header + patches/eve).
+    maxReconnectAttempts: STREAM_RECONNECT_ATTEMPTS,
+  };
 }
 
 export function ChatSession({
@@ -224,18 +255,7 @@ export function ChatSession({
   }
 
   const agent = useEveAgent({
-    host: env.apiUrl,
-    auth: {
-      bearer: async () => {
-        const { data } = await supabase.auth.getSession();
-        return data.session?.access_token ?? "";
-      },
-    },
-    headers: EVE_CHANNEL_HEADER,
-    // A phone that sleeps repeatedly through a long turn burns one
-    // reconnect per wake; replay resumes from the last received event
-    // (incident 2026-07-11, see web twin's header + patches/eve).
-    maxReconnectAttempts: STREAM_RECONNECT_ATTEMPTS,
+    ...buildEveTransport(),
     initialEvents: prepared.initialEvents,
     initialSession: prepared.initialSession,
     onEvent() {
