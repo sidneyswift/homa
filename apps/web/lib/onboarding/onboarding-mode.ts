@@ -12,13 +12,16 @@
  * The predicate reads authenticated attributes only. onboardingActive is
  * stamped by the eve channel's auth walk from the family row, so it
  * survives refreshes, devices, and the 4am session rotation, and a
- * client can neither set it nor clear it.
+ * client can neither set it nor clear it. The one non-web branch is an
+ * exact pair of attributes stamped by the local sandbox eval auth wrapper.
  */
 
 export type OnboardingModeAttributes =
   | {
       channel?: string;
       onboardingActive?: string;
+      evalFamilyFixture?: string;
+      evalOnboardingMode?: string;
     }
   | undefined;
 
@@ -146,21 +149,28 @@ const FRONTMATTER_PATTERN = /^---\r?\n[\s\S]*?\r?\n---\r?\n?/;
 
 /**
  * isOnboardingModeSession(attributes): whether this authenticated
- * session is a web session for a family still in her first days. The
- * composer's gate, exported so the eve module can tell an onboarding
+ * session belongs to a family still in her first days. Production accepts
+ * only web; the eval-only branch also requires both synthetic auth markers.
+ * The composer's gate is exported so the eve module can tell an onboarding
  * turn from every other turn when it reports a missing skill body.
  */
 export function isOnboardingModeSession(
   attributes: OnboardingModeAttributes,
 ): boolean {
-  return attributes?.channel === "web" && attributes.onboardingActive === "true";
+  if (attributes?.onboardingActive !== "true") return false;
+  if (attributes.channel === "web") return true;
+  return (
+    attributes.channel === "materials-lab" &&
+    attributes.evalFamilyFixture === "true" &&
+    attributes.evalOnboardingMode === "true"
+  );
 }
 
 /**
  * composeOnboardingModeMarkdown(attributes, rawSkill): the mode's
  * guidance with the skill body inlined, when this authenticated session
- * is a web session for a family still in the free period; null
- * otherwise. rawSkill is the SKILL.md text exactly as it sits on disk;
+ * is a production web session or the explicit sandbox eval for a family
+ * still in the free period; null otherwise. rawSkill is the SKILL.md text exactly as it sits on disk;
  * the caller owns how it gets here (the eve module imports the generated
  * mirror, the test reads the file itself). A null rawSkill degrades to
  * the pre-preload contract, one load_skill call, so a missing body can

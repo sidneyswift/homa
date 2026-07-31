@@ -71,10 +71,13 @@ const FIXTURE_CHILD_STORY = "00000000-0000-4000-8000-000000000003";
 
 /** The Walker family and Rachel's membership user, same synthetic scheme. */
 export const EVAL_FIXTURE_FAMILY_ID = "00000000-0000-4000-8000-0000000000f0";
+export const EVAL_ONBOARDING_FIXTURE_FAMILY_ID =
+  "00000000-0000-4000-8000-0000000000f1";
 export const EVAL_FIXTURE_PARENT_USER_ID =
   "00000000-0000-4000-8000-0000000000a0";
 
 const EVAL_FIXTURE_PARENT_NAME = "Rachel";
+const EVAL_ONBOARDING_FIXTURE_PARENT_NAME = "Sidney";
 
 /**
  * Ages drift as the calendar advances (birth months are fixed strings);
@@ -164,6 +167,15 @@ export function isEvalFamilyFixtureDbBacked(
 export const EVAL_FIXTURE_SESSION_ATTRIBUTE = "evalFamilyFixture";
 
 /**
+ * A request-scoped opt-in for the one eval family that is deliberately
+ * mid-onboarding. Headers avoid a process-global toggle, which would race when
+ * the eval runner executes unrelated cases concurrently.
+ */
+export const EVAL_ONBOARDING_MODE_HEADER = "x-homa-eval-onboarding-mode";
+export const EVAL_ONBOARDING_MODE_HEADER_VALUE = "1";
+export const EVAL_ONBOARDING_SESSION_ATTRIBUTE = "evalOnboardingMode";
+
+/**
  * The channel is typed against the pinned set on purpose: the whole
  * stamp only works because resolveAgentAccess and the family-context
  * instruction treat this channel as server-authenticated family-pinned.
@@ -197,13 +209,26 @@ export function evalFamilyFixtureAuth(
     if (!auth || !isEvalFamilyFixtureDbBacked(environment ?? process.env)) {
       return auth;
     }
+    const onboardingModeRequested =
+      request.headers.get(EVAL_ONBOARDING_MODE_HEADER) ===
+      EVAL_ONBOARDING_MODE_HEADER_VALUE;
     return {
       ...auth,
       attributes: {
         ...auth.attributes,
         channel: EVAL_FIXTURE_CHANNEL,
-        familyId: EVAL_FIXTURE_FAMILY_ID,
-        memberName: EVAL_FIXTURE_PARENT_NAME,
+        familyId: onboardingModeRequested
+          ? EVAL_ONBOARDING_FIXTURE_FAMILY_ID
+          : EVAL_FIXTURE_FAMILY_ID,
+        memberName: onboardingModeRequested
+          ? EVAL_ONBOARDING_FIXTURE_PARENT_NAME
+          : EVAL_FIXTURE_PARENT_NAME,
+        ...(onboardingModeRequested
+          ? {
+              onboardingActive: "true",
+              [EVAL_ONBOARDING_SESSION_ATTRIBUTE]: "true",
+            }
+          : {}),
         [EVAL_FIXTURE_SESSION_ATTRIBUTE]: "true",
       },
     };
@@ -278,6 +303,20 @@ values (${sqlString(EVAL_FIXTURE_FAMILY_ID)}, ${sqlString(EVAL_FIXTURE_PARENT_US
 insert into public.children (id, family_id, name, birth_month, profile, created_at)
 values
 ${childValues};
+
+insert into public.families
+  (id, name, us_state, parent_display_name, time_zone, status,
+   profile_completed_at, context, sandbox)
+values
+  (${sqlString(EVAL_ONBOARDING_FIXTURE_FAMILY_ID)}, 'Onboarding fixture',
+   'DC', ${sqlString(EVAL_ONBOARDING_FIXTURE_PARENT_NAME)},
+   'America/New_York', 'claimed', now(),
+   ${sqlJson({ onboarding: { state: "active" } })}, true);
+
+insert into public.family_members (family_id, user_id, role, display_name)
+values (${sqlString(EVAL_ONBOARDING_FIXTURE_FAMILY_ID)},
+        ${sqlString(EVAL_FIXTURE_PARENT_USER_ID)}, 'parent',
+        ${sqlString(EVAL_ONBOARDING_FIXTURE_PARENT_NAME)});
 
 ${evalFixturePacketSeedSql()}
 

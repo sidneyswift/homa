@@ -32,7 +32,8 @@ import { ONBOARDING_SKILL_MARKDOWN } from "../../lib/onboarding/onboarding-skill
  */
 
 /**
- * ROLLED BACK 2026-07-28, same day it first worked in production.
+ * ROLLED BACK 2026-07-28, then re-landed behind a harness guard and the
+ * two-turn sandbox eval in issue #315 on 2026-07-31.
  *
  * The #246 fix made this preload actually reach the deployed bundle for
  * the first time. The first real paid signup after it hit a dead end:
@@ -78,7 +79,7 @@ import { ONBOARDING_SKILL_MARKDOWN } from "../../lib/onboarding/onboarding-skill
  * after the parent has already been charged. Re-land the preload only
  * behind that guard and that eval, never on prose alone.
  */
-const PRELOAD_ROLLED_BACK_PENDING_SILENT_TURN_GUARD = true;
+const PRELOAD_ROLLED_BACK_PENDING_SILENT_TURN_GUARD = false;
 
 /**
  * The generated mirror really being empty, which is a build mistake, as
