@@ -362,6 +362,7 @@ export async function persistCanonicalMessage(
     terminal: input.terminal,
     content,
   });
+  const modality = input.modality === "voice" ? "voice" : "text";
   const persisted = await sql.begin(async (tx) => {
     const duplicate = providerMessageId
       ? (
@@ -387,7 +388,7 @@ export async function persistCanonicalMessage(
              ${input.role}, ${content}, ${input.turnId ?? null}, ${episodeId},
              ${memberUserId}, ${visibility}, ${attrs.taskRunId ?? null},
              ${providerMessageId}, ${attrs.continuityThreadHash ?? null},
-             ${input.modality ?? "text"})
+             ${modality})
           on conflict
             (session_id, (coalesce(turn_id, '')), role, sequence)
           do update set
@@ -432,7 +433,11 @@ export async function persistCanonicalMessage(
             thread_key_hash = coalesce(
               public.conversation_messages.thread_key_hash,
               excluded.thread_key_hash
-            )
+            ),
+            modality = case
+              when excluded.modality = 'voice' then 'voice'
+              else public.conversation_messages.modality
+            end
           returning id
         `
       )[0].id;
@@ -444,6 +449,10 @@ export async function persistCanonicalMessage(
             turn_id = ${input.turnId ?? null},
             episode_id = coalesce(episode_id, ${episodeId}),
             member_user_id = coalesce(member_user_id, ${memberUserId}),
+            modality = case
+              when ${modality} = 'voice' then 'voice'
+              else modality
+            end,
             thread_key_hash = coalesce(
               thread_key_hash,
               ${attrs.continuityThreadHash ?? null}

@@ -3,7 +3,11 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, it } from "node:test";
 
-import { DICTATION_CUTOFF_MESSAGE } from "./dictation";
+import {
+  DICTATION_CUTOFF_MESSAGE,
+  MAX_RECORDING_SECONDS,
+  recordingLimitNotice,
+} from "./dictation";
 
 /**
  * A take that the clock ended says so (gh#351).
@@ -28,27 +32,42 @@ const chatClient = readFileSync(
 
 describe("dictation cutoff notice", () => {
   it("names the limit, so she knows what happened rather than guessing", () => {
-    assert.match(DICTATION_CUTOFF_MESSAGE, /three minutes/iu);
+    assert.equal(MAX_RECORDING_SECONDS, 180);
+    assert.match(DICTATION_CUTOFF_MESSAGE, /first 3 minutes/iu);
+    assert.match(DICTATION_CUTOFF_MESSAGE, /3-minute limit/iu);
   });
 
   it("tells her the words are kept, because losing them is the fear", () => {
-    assert.match(DICTATION_CUTOFF_MESSAGE, /in the box/iu);
+    assert.match(DICTATION_CUTOFF_MESSAGE, /safe in this message/iu);
   });
 
   it("offers the next move instead of apologising for a limit", () => {
-    assert.match(DICTATION_CUTOFF_MESSAGE, /tap the mic again/iu);
+    assert.match(DICTATION_CUTOFF_MESSAGE, /start a new recording/iu);
     for (const banned of [/sorry/iu, /error/iu, /failed/iu, /too long/iu]) {
       assert.ok(!banned.test(DICTATION_CUTOFF_MESSAGE), `avoid ${banned}`);
     }
   });
 
-  it("is raised by the cap, not by a parent tapping the check", () => {
+  it("is raised only when the cap ended a take that produced words", () => {
+    assert.equal(
+      recordingLimitNotice({ autoStopped: true, hasTranscript: true }),
+      DICTATION_CUTOFF_MESSAGE,
+    );
+    assert.equal(
+      recordingLimitNotice({ autoStopped: false, hasTranscript: true }),
+      null,
+    );
+    assert.equal(
+      recordingLimitNotice({ autoStopped: true, hasTranscript: false }),
+      null,
+    );
     const capEffect = dictation.slice(dictation.indexOf("seconds < MAX_RECORDING_SECONDS"));
-    assert.match(capEffect.slice(0, 400), /setAutoStopped\(true\)/u);
+    assert.match(capEffect.slice(0, 400), /autoStoppedRef\.current = true/u);
   });
 
   it("clears when she starts a new take, so it never outlives its take", () => {
     assert.match(dictation, /setAutoStopped\(false\)/u);
+    assert.match(chatClient, /dictation\.clearCutoffNotice\(\)/u);
   });
 
   it("is shown by the composer once the take has settled", () => {

@@ -45,7 +45,7 @@ export const RECORDING_HINT_MESSAGE =
  *  minutes, and the route caps uploads at 4MB. Three minutes stays
  *  under that cap even at iOS Safari's AAC bitrates (Opus browsers
  *  honor the 32kbps hint below and sit far under it). */
-const MAX_RECORDING_SECONDS = 180;
+export const MAX_RECORDING_SECONDS = 180;
 
 /**
  * Said when the cap ends a take, because until 2026-07-29 it ended it in
@@ -62,7 +62,16 @@ const MAX_RECORDING_SECONDS = 180;
  * rather than apologising.
  */
 export const DICTATION_CUTOFF_MESSAGE =
-  "Three minutes is the longest I can listen at once, so this take stopped there. Your words are in the box; tap the mic again to add more.";
+  "Your first 3 minutes are safe in this message. Recording stopped at the 3-minute limit. You can send this message now. To add more, tap the microphone and start a new recording.";
+
+export function recordingLimitNotice(input: {
+  autoStopped: boolean;
+  hasTranscript: boolean;
+}): string | null {
+  return input.autoStopped && input.hasTranscript
+    ? DICTATION_CUTOFF_MESSAGE
+    : null;
+}
 
 /** Chrome and Firefox record webm/opus; iOS Safari records mp4 (AAC).
  *  Both map onto the transcriber's extension allowlist. Returning
@@ -103,6 +112,7 @@ export function useDictation(onTranscript: (transcript: string) => void) {
   // Synchronous double-tap guard: phase state lags a tap behind, and
   // two concurrent getUserMedia calls would leak a live mic stream.
   const startingRef = useRef(false);
+  const autoStoppedRef = useRef(false);
   // Recorder callbacks outlive renders; the ref keeps them on the
   // freshest insert-into-draft closure.
   const onTranscriptRef = useRef(onTranscript);
@@ -158,11 +168,20 @@ export function useDictation(onTranscript: (transcript: string) => void) {
         ? ((await response.json()) as { transcript?: string | null })
         : null;
       const transcript = payload?.transcript?.trim() ?? "";
-      if (transcript.length > 0) onTranscriptRef.current(transcript);
+      const hasTranscript = transcript.length > 0;
+      if (hasTranscript) onTranscriptRef.current(transcript);
       else setError(TRANSCRIBE_FAILED_MESSAGE);
+      setAutoStopped(
+        recordingLimitNotice({
+          autoStopped: autoStoppedRef.current,
+          hasTranscript,
+        }) !== null,
+      );
     } catch {
       setError(TRANSCRIBE_FAILED_MESSAGE);
+      setAutoStopped(false);
     }
+    autoStoppedRef.current = false;
     setPhase("idle");
   }
 
@@ -172,6 +191,7 @@ export function useDictation(onTranscript: (transcript: string) => void) {
     setError(null);
     // A new take is not still cut off; the notice must not outlive it.
     setAutoStopped(false);
+    autoStoppedRef.current = false;
 
     let stream: MediaStream;
     try {
@@ -220,10 +240,17 @@ export function useDictation(onTranscript: (transcript: string) => void) {
     recorder.stop();
   }
 
+  function clearCutoffNotice() {
+    autoStoppedRef.current = false;
+    setAutoStopped(false);
+  }
+
   function cancel() {
     const recorder = recorderRef.current;
     stopTimer();
     discardRef.current = true;
+    autoStoppedRef.current = false;
+    setAutoStopped(false);
     if (recorder && recorder.state !== "inactive") recorder.stop();
     else releaseHardware();
     setPhase("idle");
@@ -239,12 +266,22 @@ export function useDictation(onTranscript: (transcript: string) => void) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-    setAutoStopped(true);
+    autoStoppedRef.current = true;
     setPhase("transcribing");
     recorder.stop();
   }, [phase, seconds]);
 
-  return { supported, phase, seconds, error, autoStopped, start, accept, cancel };
+  return {
+    supported,
+    phase,
+    seconds,
+    error,
+    autoStopped,
+    start,
+    accept,
+    cancel,
+    clearCutoffNotice,
+  };
 }
 
 export function MicButton({ onStart }: { onStart: () => void }) {

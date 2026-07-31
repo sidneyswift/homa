@@ -111,6 +111,7 @@ function serverAssistantMessage(input: {
   return {
     id: input.id,
     sessionId: "server-session",
+    turnId: null,
     role: "assistant",
     channel: "web",
     modality: "text",
@@ -280,7 +281,7 @@ describe("prompt suggestion policy", () => {
     });
     const projectedOnce = archiveFromServerHistory(
       { messages: [firstReply], materials: [] },
-      undefined,
+      [],
     );
 
     assert.equal(projectedOnce[0]?.message.id, "hist:database-reply-1");
@@ -306,7 +307,7 @@ describe("prompt suggestion policy", () => {
         ],
         materials: [],
       },
-      undefined,
+      [],
     );
     assert.deepEqual(
       restorePromptSuggestionSetForVisibleMessages({
@@ -330,7 +331,7 @@ describe("prompt suggestion policy", () => {
         ],
         materials: [],
       },
-      undefined,
+      [],
     );
     assert.equal(
       restorePromptSuggestionSetForVisibleMessages({

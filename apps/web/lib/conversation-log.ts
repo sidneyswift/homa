@@ -136,6 +136,7 @@ async function persistConversationMessageWithDependencies(
     providerReplyTo?: string;
     phoneNumber?: string;
     email?: string;
+    messageModality?: string;
   };
   const familyId = attrs.familyId;
   if (!familyId) return null;
@@ -196,6 +197,10 @@ async function persistConversationMessageWithDependencies(
     content,
     turnId: input.turnId,
     providerMessageId: attrs.providerMessageId ?? null,
+    modality:
+      input.role === "user" && attrs.messageModality === "voice"
+        ? "voice"
+        : "text",
     terminal:
       input.role === "assistant"
         ? isTerminalAssistantStop

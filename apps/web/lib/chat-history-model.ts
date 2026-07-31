@@ -25,6 +25,7 @@ export type ChatHistoryChannel = "web" | "sms" | "email" | "dispatch";
 export interface ChatHistoryMessage {
   id: string;
   sessionId: string;
+  turnId: string | null;
   role: "user" | "assistant";
   channel: ChatHistoryChannel;
   /** How the turn arrived. In-app voice is channel "web" (that is where
@@ -89,6 +90,7 @@ export interface ChatHistoryPayload {
 export interface ChatHistoryRow {
   id: string;
   session_id: string;
+  turn_id: string | null;
   role: string;
   channel: string;
   /** Null for every row written before the column existed, which is all
@@ -125,6 +127,7 @@ export function toChatHistoryMessage(
   return {
     id: row.id,
     sessionId: row.session_id,
+    turnId: row.turn_id,
     role: row.role,
     channel: row.channel as ChatHistoryChannel,
     // Anything but the one known spoken value is text: an unrecognized
@@ -236,11 +239,12 @@ function materialToolPart(material: ChatHistoryMaterial) {
 }
 
 /**
- * archiveFromServerHistory(payload, excludeSessionId): server rows in
- * the render archive's shape. The current live eve session's rows are
- * excluded: the live store replays those from its own event log, and
- * rendering both would double every message. The `hist:` id prefix
- * keeps server ids from ever colliding with eve's per-session turn ids.
+ * archiveFromServerHistory(payload, liveMessages): server rows in the
+ * render archive's shape. A server row is excluded only when the live
+ * reducer proves that it has the same turn and role. This keeps a
+ * partially replayed current session from hiding durable work while
+ * still preventing duplicate bubbles. The `hist:` id prefix keeps
+ * server ids from ever colliding with eve's turn ids.
  *
  * Materials render as cards in scrollback, same as a live turn: each
  * one becomes a create_printable part on the first assistant message
@@ -250,19 +254,34 @@ function materialToolPart(material: ChatHistoryMaterial) {
  */
 export function archiveFromServerHistory(
   payload: ChatHistoryPayload,
-  excludeSessionId: string | undefined,
+  liveMessages: readonly EveMessage[],
 ): {
   at: number;
   channel: ChatHistoryChannel;
   modality: "text" | "voice";
   message: EveMessage;
 }[] {
+  const liveMessageIds = new Set(liveMessages.map((message) => message.id));
   const history = payload.messages.filter(
-    (entry) => entry.sessionId !== excludeSessionId,
+    (entry) =>
+      entry.turnId === null ||
+      !liveMessageIds.has(`${entry.turnId}:${entry.role}`),
   );
+  const liveMaterialIds = new Set<string>();
+  for (const message of liveMessages) {
+    for (const part of message.parts) {
+      if (part.type !== "dynamic-tool" || part.state !== "output-available") {
+        continue;
+      }
+      const materialId = (
+        part.output as { material?: { id?: unknown } } | undefined
+      )?.material?.id;
+      if (typeof materialId === "string") liveMaterialIds.add(materialId);
+    }
+  }
   const materials = selectParentVisibleMaterialRevisions(
     payload.materials.filter(
-      (material) => material.sessionId !== excludeSessionId,
+      (material) => !liveMaterialIds.has(material.id),
     ),
   );
 

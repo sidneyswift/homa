@@ -12,6 +12,53 @@ const MESSAGE_ID = "22222222-2222-4222-8222-222222222222";
 const EPISODE_ID = "33333333-3333-4333-8333-333333333333";
 
 describe("conversation log continuity integration", () => {
+  it("carries validated web dictation provenance into the canonical user row", async () => {
+    let canonicalModality: unknown = null;
+
+    await persistConversationMessage(
+      {
+        attributes: {
+          familyId: FAMILY_ID,
+          memberUserId: "member-1",
+          messageModality: "voice",
+        },
+        sessionId: "session-voice",
+        channelKind: "web",
+        sequence: 1,
+        role: "user",
+        content: "We worked for twenty minutes.",
+        turnId: "turn-voice",
+      },
+      {
+        resolveInbound: async () => ({
+          episodeId: "episode-voice",
+          replyToMessageId: null,
+          repliedDeliveryId: null,
+          resolution: "none",
+          resolvedOutcome: null,
+          acceptedOfferDeliveryId: null,
+          resolutionMethod: null,
+          replyClassifierVersion: null,
+          replySourceChannel: null,
+          contextMarkdown: "",
+          threadKeyHash: "thread-voice",
+        }),
+        persistCanonical: async (input) => {
+          canonicalModality = input.modality;
+          return {
+            id: MESSAGE_ID,
+            episodeId: "episode-voice",
+            replyClaimed: false,
+          };
+        },
+        embed: async () => null,
+        saveEmbedding: async () => undefined,
+      },
+    );
+
+    assert.equal(canonicalModality, "voice");
+  });
+
   it("carries authenticated provider reply metadata into canonical persistence", async () => {
     const resolvedInputs: InboundContinuityInput[] = [];
     const canonicalAttributes: Array<Record<string, unknown>> = [];

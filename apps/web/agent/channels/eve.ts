@@ -16,6 +16,10 @@ import {
   onboardingRowFromMembership,
 } from "../../lib/onboarding/state";
 import { readViewContextCookie, VIEW_CONTEXT_FAMILY } from "../../lib/view-context";
+import {
+  messageModalityFromRequest,
+  voiceTranscriptionContext,
+} from "../../lib/web-message-modality";
 
 /**
  * Route auth for the eve channel (minimal M1-01 slice of FR-1).
@@ -118,6 +122,7 @@ function supabaseAuth(): AuthFn<Request> {
     // attributes only admits string values; absent facts are omitted keys.
     const attributes: Record<string, string> = {
       channel,
+      messageModality: messageModalityFromRequest(request),
       supabaseAccessToken: token,
     };
     if (membership?.family_id) attributes.familyId = membership.family_id;
@@ -169,6 +174,9 @@ export default eveChannel({
 
     const familyId = auth.attributes.familyId;
     const memberUserId = auth.attributes.memberUserId;
+    const modalityContext = voiceTranscriptionContext(
+      auth.attributes.messageModality === "voice" ? "voice" : "text",
+    );
     const text =
       typeof message === "string"
         ? message
@@ -211,6 +219,7 @@ export default eveChannel({
           attributes,
         },
         context: [
+          ...modalityContext,
           [
             "## Account gate",
             "",
@@ -254,16 +263,19 @@ export default eveChannel({
             ...continuityAttributes,
           },
         },
-        context: continuity.contextMarkdown
-          ? [continuity.contextMarkdown]
-          : [],
+        context: [
+          ...modalityContext,
+          ...(continuity.contextMarkdown
+            ? [continuity.contextMarkdown]
+            : []),
+        ],
       };
     } catch (error) {
       console.error(
         "eve channel: continuity resolution failed:",
         error instanceof Error ? error.message : "unknown",
       );
-      return { auth };
+      return { auth, context: modalityContext };
     }
   },
 });
