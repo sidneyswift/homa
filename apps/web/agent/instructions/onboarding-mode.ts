@@ -66,8 +66,15 @@ import { ONBOARDING_SKILL_MARKDOWN } from "../../lib/onboarding/onboarding-skill
  * about, so the real repair is a deterministic no-silent-turn guard plus
  * an eval that drives this exact two-turn sequence.
  *
- * Latency (#246) is the cost of this rollback and it is worth paying:
- * an onboarding that is 4 seconds slower beats one that stops dead
+ * Latency (#246): the "4 seconds" this rollback was estimated to cost
+ * turned out to be too pessimistic about load_skill itself and too
+ * optimistic about everything else. Measured against production
+ * (gh#404, 2026-07-31): 97 real onboarding load_skill calls over 14
+ * days average 0.28s (median 0.09s, worst 3.77s), nowhere near 4s. But
+ * roughly 1 in 17 to 20 onboarding turns pays a real 20 to 85 second
+ * delay that load_skill's own timing rules out as the cause; the
+ * mechanism is unconfirmed and tracked separately as gh#485. Either
+ * way, a real but small guaranteed cost beats a turn that stops dead
  * after the parent has already been charged. Re-land the preload only
  * behind that guard and that eval, never on prose alone.
  */
