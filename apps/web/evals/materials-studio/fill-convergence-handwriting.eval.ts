@@ -36,6 +36,9 @@ export default defineEval({
 
     const steps = await runConvergenceScenario(t, turns);
     t.loadedSkill("materials-studio");
+    t.calledTool("read_file", {
+      input: { filePath: /\/recipes\/name-tracing-page\.md$/u },
+    });
     printConvergenceTrace("handwriting sheet (Maya)", steps);
     assertConvergence(t, steps);
   },

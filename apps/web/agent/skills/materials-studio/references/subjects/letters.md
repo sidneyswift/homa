@@ -15,6 +15,9 @@
 - Solid on single letter sounds? Step up gently: word families (at, an) and
   blending two sounds, not sight-word drills.
 - Keep it winnable: end with the child's name to trace, a guaranteed success.
+- Any name or word traced on three-line writing guides uses the
+  name-tracing-page recipe's SVG guide row (exact midline, pinned baseline,
+  dotted fill-in letters); never improvise guide geometry.
 - A family whose curriculum boxes letters instead of using a three-line
   guide (Handwriting Without Tears / Learning Without Tears, for one) still
   gets these same rules; read the letter-number-formation-practice recipe
