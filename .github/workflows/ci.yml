@@ -116,7 +116,9 @@ jobs:
       # Next's incremental compiler cache. Turbo's outputs exclude
       # .next/cache on purpose (it is machine state, not an artifact), so
       # it needs its own cache entry to speed up cache-miss builds.
+      # Main pushes only: PRs do not run the Next build (see below).
       - name: Next.js build cache
+        if: github.event_name == 'push'
         uses: actions/cache@v4
         with:
           path: apps/web/.next/cache
@@ -135,8 +137,24 @@ jobs:
       # node_modules/.cache/turbo and the actions/cache entry silently
       # carries nothing (observed on this workflow's second run: web tasks
       # cache-missed despite unchanged inputs).
-      - name: Typecheck, lint, build
-        run: pnpm exec turbo run typecheck lint build --filter=!mobile
+      #
+      # Typecheck and lint run on every event: Vercel's build does not run
+      # eslint, and next build only type-checks app code, not packages or
+      # scripts.
+      - name: Typecheck, lint
+        run: pnpm exec turbo run typecheck lint --filter=!mobile
+        env:
+          TURBO_CACHE_DIR: .turbo/cache
+
+      # Founder ruling 2026-07-31 (`ci-pr-build-via-vercel`): on pull
+      # requests the Next and eve builds are carried by Vercel's preview
+      # deployment, which runs the same pipeline and reports on the PR as
+      # the REQUIRED "Vercel" status check. CI runs the build only on main
+      # pushes, as the belt for direct-to-main pushes that get no preview
+      # deployment gate.
+      - name: Build (main pushes only; PRs are gated by Vercel's preview build)
+        if: github.event_name == 'push'
+        run: pnpm exec turbo run build --filter=!mobile
         env:
           TURBO_CACHE_DIR: .turbo/cache
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
@@ -153,6 +171,7 @@ jobs:
       # Vercel production writes). Seed that signal so CI exercises the same
       # eve/__server.func + maxDuration path production ships.
       - name: Eve channel build (agent tool modules)
+        if: github.event_name == 'push'
         run: |
           mkdir -p apps/web/.vercel/output
           node <<'NODE'
@@ -195,6 +214,7 @@ jobs:
       # production kills in-progress chat streams (2026-07-11 through 2026-07-16).
       # Must run after a VERCEL=1 eve build so the shared function config is rewritten.
       - name: Eve stream maxDuration guard
+        if: github.event_name == 'push'
         run: VERCEL=1 pnpm check:eve-stream-duration
 
   # Guard shard 1 of 3. The guards never depended on the compile chain

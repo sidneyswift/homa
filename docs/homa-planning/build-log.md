@@ -3,6 +3,28 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-31 · Founder ruling: PR builds are carried by Vercel's preview check
+
+Founder ruling, not an agent decision. Registered as
+`ci-pr-build-via-vercel` in `journeys/10-reconciliation.md` §5.
+
+Context: the CI restructure (PR #488, PR #497, same day) took the pipeline
+from ~9.5 minutes to ~2.7-4.2 minutes, leaving the build job (Next build
+plus eve build, ~2.5 minutes) as the bound for any PR touching web code.
+Vercel's preview deployment runs that same pipeline on every PR and
+reports the "Vercel" status check. The founder ruled: drop the CI build
+for PRs in favor of Vercel's check.
+
+As shipped: on pull requests, CI runs typecheck and lint only (Vercel
+does not run eslint, and next build only type-checks app code, not
+packages or scripts); the Next build, eve build, and stream-duration
+guard run in CI on main pushes only, as the belt for direct-to-main
+pushes that get no preview gate. The "Vercel" status check joins
+`build-and-check` as a REQUIRED context on main, so a failing preview
+build blocks merge exactly as the CI build used to. The 2026-07-10
+incident class (eve build failures Next tolerates) is now caught by the
+required Vercel check on PRs and by CI on main pushes.
+
 ## 2026-07-30 · The stranded-chain ruling: one quiet message, per family, ever
 
 Founder ruling, not an agent decision. Registered as

@@ -254,7 +254,7 @@ files, fleet skills, `.agents/skills/`, tool descriptions, and
 - Documentation reconciliation: `pnpm check:docs -- --allow-open` during the audit and `pnpm check:docs` for the zero-open completion gate
 - Conversation continuity tests: `pnpm check:continuity` when changing the continuity module or a channel adapter
 - Before ANY eve version bump, no exceptions: `node scripts/eve-upgrade-check.mjs` (procedure: `docs/homa-planning/runbooks/eve-version-bump.md`)
-- CI (`.github/workflows/ci.yml`) is configured for pushes to `main` and pull requests targeting `main`. It runs typecheck, lint, the required guards above (including the temporary dormant-window guard while Phase C is open), the Next build, and the eve build. It also runs ChildProgress, Progress UI, and the disposable ChildProgress PostgreSQL E2E. Confirm the actual workflow result before describing CI as green.
+- CI (`.github/workflows/ci.yml`) is configured for pushes to `main` and pull requests targeting `main`. It runs typecheck, lint, and the required guards above (including the temporary dormant-window guard while Phase C is open), plus ChildProgress, Progress UI, and the disposable ChildProgress PostgreSQL E2E. The Next and eve builds run in CI on main pushes only; on pull requests they are carried by Vercel's preview deployment, whose "Vercel" status check is REQUIRED on main alongside `build-and-check` (founder ruling 2026-07-31, `ci-pr-build-via-vercel`). Confirm the actual workflow result before describing CI as green.
 
 ## Deploys & migrations
 
