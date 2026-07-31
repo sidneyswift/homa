@@ -17,10 +17,10 @@ const monthlyMembershipPriceList = (() => {
 })();
 
 export const HERO_COPY = {
-  eyebrow: "Your homeschool assistant",
-  headline: "Homeschool, handled.",
+  eyebrow: "Homeschool, handled",
+  headline: "Less admin. More teaching.",
   body:
-    "Homa is an AI assistant for homeschool parents. She plans the week, records the teaching hours you report, and keeps finished work together. She also suggests what to try next and makes practice pages from the lesson for children ages 2 to 7.",
+    "Homa plans your week, builds tailored materials for each kid, and adapts to growth. Meet your kid where they are. Every day.",
   primaryAction: "Start your 7 free days",
   /** Under the primary CTA, everywhere it appears: the card ask must be
    *  visible BEFORE the click (trial-transparency research 2026-07-26:
