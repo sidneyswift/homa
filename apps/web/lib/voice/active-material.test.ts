@@ -46,7 +46,9 @@ describe("voice active material adapter", () => {
     ];
     assert.equal(selectActiveMaterial(rows, V1), null);
     assert.equal(selectActiveMaterial(rows, V2)?.revisesId, V1);
-    assert.match(activeMaterialContext(selectActiveMaterial(rows, V2)!), /2:answer_key/u);
+    const selected = selectActiveMaterial(rows, V2);
+    assert.equal(selected?.createdAt, "2026-08-01T11:00:00Z");
+    assert.match(activeMaterialContext(selected!), /2:answer_key/u);
   });
 
   it("rejects page-role metadata unless every page has a closed role", () => {
