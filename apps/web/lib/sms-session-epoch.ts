@@ -9,6 +9,10 @@ import { createHash } from "node:crypto";
 
 const SMS_SESSION_SUFFIX = ":homa-session:";
 const SMS_SESSION_SUFFIX_PATTERN = /:homa-session:[A-Za-z0-9_-]{16}$/u;
+// A deliberate migration boundary: existing Eve SMS sessions may already be
+// irrecoverable after a token-limit fault, so the deployed daily-session
+// format must not resume them.
+const SMS_SESSION_KEY_VERSION = "daily-v1";
 
 export function buildSmsSessionThreadId(
   telnyxThreadId: string,
@@ -16,7 +20,7 @@ export function buildSmsSessionThreadId(
   sessionDay?: string,
 ): string {
   const epochHash = createHash("sha256")
-    .update(`${accessEpoch}:${sessionDay ?? ""}`)
+    .update(`${SMS_SESSION_KEY_VERSION}:${accessEpoch}:${sessionDay ?? ""}`)
     .digest("base64url")
     .slice(0, 16);
   return `${stripSmsSessionEpoch(telnyxThreadId)}${SMS_SESSION_SUFFIX}${epochHash}`;
