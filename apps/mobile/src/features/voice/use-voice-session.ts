@@ -1,269 +1,289 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AppState } from "react-native";
-import { useEveAgent, type EveMessage } from "eve/react";
-
-import { foldEventsToMessages } from "../../lib/chat-storage";
-import { env } from "../../lib/env";
-import { supabase } from "../../lib/supabase";
-import { recoverLostTurn } from "../../lib/turn-recovery";
-import { isSendLineOccupied } from "../chat/chat-send-policy";
+import type { EveMessage } from "eve/react";
 import {
-  buildEveTransport,
-  RECOVERY_DEADLINE_MS,
-  VISIBLE_STALL_MS,
-  WAKE_GRACE_MS,
-  WATCHDOG_STALL_MS,
-} from "../chat/chat-session";
-import { busyLabel } from "../chat/message-utils";
+  mediaDevices,
+  RTCPeerConnection,
+  RTCSessionDescription,
+  type MediaStream,
+} from "react-native-webrtc";
 
-/**
- * The voice screen's eve session: the same authenticated streaming
- * channel, watchdogs, and lost-turn recovery as chat (chat-session.tsx
- * is the source of truth for that pattern; the transport config and
- * stall constants are imported from it, never re-declared), minus the
- * transcript machinery. A voice session is ephemeral by design in this
- * phase: it starts fresh on mount, is never folded into the chat
- * transcript, and persists nothing locally. The durable record still
- * exists server-side (conversation_messages), so nothing is lost, and
- * Homa's per-family context is injected server-side on every turn, so
- * a brand-new session already knows the family.
- */
+import { env, EVE_CHANNEL_HEADER } from "../../lib/env";
+import { supabase } from "../../lib/supabase";
+import {
+  applyRealtimeTranscriptEvent,
+} from "./realtime-transcript";
+import { settledTurns, type VoiceTurn } from "./voice-transcript";
+
+/** The client secret is scoped and short lived. It is safe to use only for
+ * the OpenAI WebRTC offer, never as a general OpenAI credential. */
+interface RealtimeTokenResponse {
+  token?: unknown;
+  tools?: unknown;
+  reason?: unknown;
+}
+
+type VoiceStatus = "idle" | "connecting" | "listening" | "speaking" | "failed";
 
 export interface VoiceSession {
-  /** The live eve messages, for overlay-signal derivation upstream. */
   messages: readonly EveMessage[];
-  /** A turn is running, or lost-turn recovery is still deciding. */
   turnActive: boolean;
-  /** Assistant text is visibly streaming right now (speaking). */
   assistantTextStreaming: boolean;
-  /** What Homa is doing, for the thinking status line ("putting the
-   *  page together...", "reconnecting..."), or null when idle. */
   busyDetail: string | null;
-  /** The newest non-empty user utterance, for the ribbon. */
   lastUserText: string | null;
-  /** The newest non-empty assistant reply, live-updating as it streams. */
   lastAssistantText: string | null;
-  /** The last send failed and recovery gave up; retry() resends it. */
   failed: boolean;
-  /** Lost-turn recovery is replaying the durable session server-side. */
   recovering: boolean;
-  send: (text: string) => void;
+  start: () => void;
+  end: () => void;
   retry: () => void;
 }
 
-function messageText(message: EveMessage): string {
-  return message.parts
-    .map((part) => (part.type === "text" ? part.text : ""))
-    .filter((text) => text.length > 0)
-    .join("\n")
-    .trim();
+const REASONS: Record<string, string> = {
+  "no-session": "Your session expired. Sign in again and we can talk.",
+  "no-family": "I could not find your family account.",
+  walled: "Talking out loud comes with a paid plan.",
+  "not-included": "Voice is not part of your plan yet.",
+  "rate-limited": "We have talked a lot today. Let's pick this up tomorrow.",
+  "not-configured": "My voice is not set up right now.",
+};
+
+function apiUrl(path: string): string {
+  return `${env.apiUrl.replace(/\/+$/, "")}${path}`;
 }
 
-function lastTextByRole(
-  messages: readonly EveMessage[],
-  role: "user" | "assistant",
-): string | null {
-  for (let index = messages.length - 1; index >= 0; index -= 1) {
-    const message = messages[index];
-    if (message.role !== role) continue;
-    const text = messageText(message);
-    if (text.length > 0) return text;
+function sessionId(): string {
+  return `voice-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function messagesFromTurns(turns: readonly VoiceTurn[]): readonly EveMessage[] {
+  return turns
+    .filter((turn) => turn.text.length > 0)
+    .map(
+      (turn) =>
+        ({
+          id: turn.id,
+          role: turn.role,
+          parts: [{ type: "text", text: turn.text }],
+        }) as EveMessage,
+    );
+}
+
+function lastText(turns: readonly VoiceTurn[], role: "user" | "assistant"): string | null {
+  for (let index = turns.length - 1; index >= 0; index -= 1) {
+    const turn = turns[index];
+    if (turn.role === role && turn.text.length > 0) return turn.text;
   }
   return null;
 }
 
+/**
+ * Native gpt-realtime-2.1 session. WebRTC owns microphone capture and remote
+ * audio playback. The data channel carries only model events and guarded tool
+ * calls, while every transcript line is persisted through Homa's server.
+ */
 export function useVoiceSession(): VoiceSession {
-  /** Last moment the stream showed signs of life (0 = none yet). */
-  const lastStreamActivityRef = useRef(0);
-  /** Durable event cursor for lost-turn recovery (fresh session = 0). */
-  const durableCursorRef = useRef(0);
-  const lastSendRef = useRef<{ text: string; atMs: number } | null>(null);
-  const recoveryRef = useRef<AbortController | null>(null);
-  const reportedErrorRef = useRef<Error | null>(null);
-  const [recovering, setRecovering] = useState(false);
-  /** After a successful recovery the store restarts clean; the ribbon
-   *  keeps the recovered conversation's tail from here instead. */
-  const [recoveredTail, setRecoveredTail] = useState<{
-    userText: string | null;
-    assistantText: string | null;
-  } | null>(null);
-  /** Messages sent while the line was occupied; flushed as one turn. */
-  const queuedRef = useRef<string[]>([]);
-  const sendRef = useRef<((input: { message: string }) => Promise<void>) | null>(
-    null,
+  const [status, setStatus] = useState<VoiceStatus>("idle");
+  const [error, setError] = useState<string | null>(null);
+  const [turns, setTurns] = useState<readonly VoiceTurn[]>([]);
+  const peerRef = useRef<RTCPeerConnection | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const channelRef = useRef<ReturnType<RTCPeerConnection["createDataChannel"]> | null>(null);
+  const turnsRef = useRef<readonly VoiceTurn[]>([]);
+  const cursorRef = useRef(0);
+  const sessionIdRef = useRef<string | null>(null);
+  const closedRef = useRef(false);
+
+  const authenticatedFetch = useCallback(async (path: string, init: RequestInit = {}) => {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) throw new Error("no-session");
+    return fetch(apiUrl(path), {
+      ...init,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        ...EVE_CHANNEL_HEADER,
+        ...(init.headers ?? {}),
+      },
+    });
+  }, []);
+
+  const persistSettledTurns = useCallback(
+    (finished: boolean) => {
+      const { cursor, lines } = settledTurns(turnsRef.current, cursorRef.current, finished);
+      cursorRef.current = cursor;
+      if (lines.length === 0) return;
+      sessionIdRef.current ??= sessionId();
+      for (const { sequence, line } of lines) {
+        void authenticatedFetch("/api/voice/realtime/turn", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionId: sessionIdRef.current,
+            sequence,
+            role: line.role,
+            content: line.text,
+          }),
+        }).catch(() => {
+          // The live audio conversation remains useful if one ledger write
+          // is lost. The server records the failure without interrupting her.
+        });
+      }
+    },
+    [authenticatedFetch],
   );
 
-  const flushQueued = useCallback(() => {
-    if (queuedRef.current.length === 0) return;
-    const message = queuedRef.current.join("\n\n");
-    queuedRef.current = [];
-    // Next tick: this can run inside the previous send's own teardown,
-    // and eve rejects overlapping sends (same move as chat-session).
-    setTimeout(() => {
-      lastSendRef.current = { text: message, atMs: Date.now() };
-      void sendRef.current?.({ message });
-    }, 0);
-  }, []);
-
-  const agent = useEveAgent({
-    ...buildEveTransport(),
-    onEvent() {
-      lastStreamActivityRef.current = Date.now();
-      durableCursorRef.current += 1;
-    },
-    onFinish(snapshot) {
-      // Nothing is persisted here on purpose (ephemeral session, see
-      // the module header). A failed turn holds the queue; her next
-      // manual send carries it, same as chat.
-      if (!snapshot.error) flushQueued();
-    },
-  });
-  const agentError = agent.error;
-  const agentReset = agent.reset;
-  const agentSend = agent.send;
-  const agentStop = agent.stop;
-
-  useEffect(() => {
-    sendRef.current = agentSend;
-  }, [agentSend]);
-
-  const busy = agent.status === "submitted" || agent.status === "streaming";
-  const messages = agent.data.messages;
-
-  // Lost-turn recovery: the durable run usually outlives a dead stream,
-  // so before settling on the retry affordance, replay the session
-  // server-side and keep the finished reply for the ribbon. The shape
-  // mirrors chat-session.tsx (the source of truth); only the fold
-  // target differs, a ribbon tail instead of the archived transcript.
-  useEffect(() => {
-    if (!agentError || agentError === reportedErrorRef.current) return;
-    reportedErrorRef.current = agentError;
-    const lastSend = lastSendRef.current;
-    if (!lastSend || recoveryRef.current) return;
-    const controller = new AbortController();
-    recoveryRef.current = controller;
-    const deadline = setTimeout(() => controller.abort(), RECOVERY_DEADLINE_MS);
-    setRecovering(true);
-    void (async () => {
-      const recovered = await recoverLostTurn({
-        supabase,
-        sentText: lastSend.text,
-        sentAtMs: lastSend.atMs,
-        minBoundaryIndex: durableCursorRef.current,
-        host: env.apiUrl,
-        bearer: async () => {
-          const { data } = await supabase.auth.getSession();
-          return data.session?.access_token ?? "";
-        },
-        signal: controller.signal,
-      });
-      clearTimeout(deadline);
-      if (recoveryRef.current === controller) recoveryRef.current = null;
-      if (!controller.signal.aborted && recovered) {
-        // The reply exists after all: keep its tail for the ribbon and
-        // start the store clean (fresh session, same family context).
-        const recoveredMessages = foldEventsToMessages(recovered.events);
-        setRecoveredTail({
-          userText: lastTextByRole(recoveredMessages, "user"),
-          assistantText: lastTextByRole(recoveredMessages, "assistant"),
-        });
-        agentReset();
-        durableCursorRef.current = 0;
-        lastSendRef.current = null;
+  const acceptEvent = useCallback(
+    (event: unknown) => {
+      const next = applyRealtimeTranscriptEvent(turnsRef.current, event);
+      if (next !== turnsRef.current) {
+        turnsRef.current = next;
+        setTurns(next);
+        persistSettledTurns(false);
       }
-      setRecovering(false);
-      // Whichever way it resolved, the line is free again: deliver
-      // anything she said while it was undecided.
-      flushQueued();
+      if (typeof event !== "object" || event === null) return;
+      const type = (event as { type?: unknown }).type;
+      if (type === "output_audio_buffer.started") setStatus("speaking");
+      if (type === "output_audio_buffer.stopped") setStatus("listening");
+    },
+    [persistSettledTurns],
+  );
+
+  const end = useCallback(() => {
+    if (closedRef.current) return;
+    closedRef.current = true;
+    persistSettledTurns(true);
+    channelRef.current?.close();
+    channelRef.current = null;
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    peerRef.current?.close();
+    peerRef.current = null;
+    setStatus("idle");
+  }, [persistSettledTurns]);
+
+  const executeTool = useCallback(
+    async (event: { name?: unknown; arguments?: unknown; call_id?: unknown }) => {
+      const channel = channelRef.current;
+      if (!channel || typeof event.name !== "string" || typeof event.call_id !== "string") return;
+      let args: unknown = {};
+      try {
+        args = typeof event.arguments === "string" ? JSON.parse(event.arguments) : {};
+      } catch {
+        args = {};
+      }
+      const response = await authenticatedFetch("/api/voice/realtime/tool", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: event.name, args, sessionId: sessionIdRef.current ?? "voice" }),
+      });
+      const body = (await response.json().catch(() => null)) as { output?: unknown } | null;
+      channel.send(
+        JSON.stringify({
+          type: "conversation.item.create",
+          item: {
+            type: "function_call_output",
+            call_id: event.call_id,
+            output: JSON.stringify(body?.output ?? { note: "That did not go through just now." }),
+          },
+        }),
+      );
+      channel.send(JSON.stringify({ type: "response.create" }));
+    },
+    [authenticatedFetch],
+  );
+
+  const start = useCallback(() => {
+    if (status === "connecting" || status === "listening" || status === "speaking") return;
+    closedRef.current = false;
+    cursorRef.current = 0;
+    sessionIdRef.current = null;
+    turnsRef.current = [];
+    setTurns([]);
+    setError(null);
+    setStatus("connecting");
+
+    void (async () => {
+      try {
+        const tokenResponse = await authenticatedFetch("/api/voice/realtime/token", {
+          method: "POST",
+        });
+        const tokenBody = (await tokenResponse.json().catch(() => null)) as RealtimeTokenResponse | null;
+        if (!tokenResponse.ok || typeof tokenBody?.token !== "string") {
+          const reason = typeof tokenBody?.reason === "string" ? tokenBody.reason : "";
+          throw new Error(REASONS[reason] ?? "I could not start listening just now.");
+        }
+
+        const stream = await mediaDevices.getUserMedia({ audio: true, video: false });
+        if (closedRef.current) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+        streamRef.current = stream;
+        const peer = new RTCPeerConnection();
+        peerRef.current = peer;
+        stream.getTracks().forEach((track) => peer.addTrack(track, stream));
+        const channel = peer.createDataChannel("oai-events");
+        channelRef.current = channel;
+        channel.onopen = () => {
+          channel.send(JSON.stringify({ type: "session.update", session: { tools: tokenBody.tools ?? [] } }));
+          setStatus("listening");
+        };
+        channel.onmessage = ({ data }: { data: string }) => {
+          try {
+            const event = JSON.parse(data as string) as { type?: string; name?: unknown; arguments?: unknown; call_id?: unknown };
+            acceptEvent(event);
+            if (event.type === "response.function_call_arguments.done") {
+              void executeTool(event);
+            }
+          } catch {
+            // A malformed model event cannot become a client crash.
+          }
+        };
+        peer.onconnectionstatechange = () => {
+          if (peer.connectionState === "failed" || peer.connectionState === "disconnected") {
+            setError("Something interrupted us. Worth trying again.");
+            setStatus("failed");
+          }
+        };
+        const offer = await peer.createOffer({ offerToReceiveAudio: true });
+        await peer.setLocalDescription(offer);
+        const answer = await fetch("https://api.openai.com/v1/realtime/calls", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${tokenBody.token}`,
+            "Content-Type": "application/sdp",
+          },
+          body: offer.sdp ?? "",
+        });
+        if (!answer.ok) throw new Error("I could not connect our call just now.");
+        await peer.setRemoteDescription(new RTCSessionDescription({ type: "answer", sdp: await answer.text() }));
+      } catch (caught) {
+        if (closedRef.current) return;
+        const message = caught instanceof Error ? caught.message : "I could not start listening just now.";
+        setError(message === "no-session" ? REASONS[message] : message);
+        setStatus("failed");
+        streamRef.current?.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+        peerRef.current?.close();
+        peerRef.current = null;
+      }
     })();
-  }, [agentError, agentReset, flushQueued]);
+  }, [acceptEvent, authenticatedFetch, executeTool, status]);
 
-  // Give up a running recovery when the screen unmounts.
-  useEffect(() => {
-    return () => recoveryRef.current?.abort();
-  }, []);
+  useEffect(() => end, [end]);
 
-  // Dead-stream watchdogs, same constants as chat-session.tsx: a
-  // backgrounded phone kills the stream, and a half-open connection can
-  // hang without erroring. stop() flips status back to ready; the
-  // durable turn continues server-side.
-  useEffect(() => {
-    if (!busy) return;
-    lastStreamActivityRef.current = Date.now();
-    let wakeGraceTimer: ReturnType<typeof setTimeout> | null = null;
-    const isStale = (stallMs: number) =>
-      Date.now() - lastStreamActivityRef.current > stallMs;
-    const subscription = AppState.addEventListener("change", (state) => {
-      if (state !== "active") return;
-      if (!isStale(VISIBLE_STALL_MS) || wakeGraceTimer !== null) return;
-      wakeGraceTimer = setTimeout(() => {
-        wakeGraceTimer = null;
-        // Still nothing after the grace: the stream really is dead.
-        if (isStale(VISIBLE_STALL_MS)) agentStop();
-      }, WAKE_GRACE_MS);
-    });
-    const watchdog = setInterval(() => {
-      if (isStale(WATCHDOG_STALL_MS)) agentStop();
-    }, 15_000);
-    return () => {
-      subscription.remove();
-      clearInterval(watchdog);
-      if (wakeGraceTimer !== null) clearTimeout(wakeGraceTimer);
-    };
-  }, [agentStop, busy]);
-
-  function send(text: string) {
-    const message = text.trim();
-    if (message.length === 0) return;
-    // Occupied by an active stream OR by recovery still deciding: queue
-    // instead of forking a second eve session (GH #170's lesson, via
-    // chat-send-policy.ts).
-    if (isSendLineOccupied({ busy, recovering })) {
-      queuedRef.current = [...queuedRef.current, message];
-      return;
-    }
-    recoveryRef.current?.abort();
-    if (!agent.session?.sessionId) durableCursorRef.current = 0;
-    const outgoing = [...queuedRef.current, message].join("\n\n");
-    queuedRef.current = [];
-    lastSendRef.current = { text: outgoing, atMs: Date.now() };
-    void agent.send({ message: outgoing });
-  }
-
-  function retry() {
-    const lastSend = lastSendRef.current;
-    if (!lastSend) return;
-    send(lastSend.text);
-  }
-
-  const last = messages.at(-1);
-  const rawBusyLabel = busy ? busyLabel(messages) : null;
-  const assistantTextStreaming =
-    busy &&
-    last !== undefined &&
-    last.role === "assistant" &&
-    rawBusyLabel === null &&
-    messageText(last).length > 0;
-  const busyDetail = recovering
-    ? "reconnecting…"
-    : rawBusyLabel === "thinking…"
-      ? "thinking about that"
-      : rawBusyLabel;
-
+  const turnActive = status === "connecting" || status === "listening" || status === "speaking";
   return {
-    messages,
-    turnActive: busy || recovering,
-    assistantTextStreaming,
-    busyDetail,
-    lastUserText:
-      lastTextByRole(messages, "user") ?? recoveredTail?.userText ?? null,
-    lastAssistantText:
-      lastTextByRole(messages, "assistant") ??
-      recoveredTail?.assistantText ??
-      null,
-    failed: Boolean(agentError) && !recovering,
-    recovering,
-    send,
-    retry,
+    messages: messagesFromTurns(turns),
+    turnActive,
+    assistantTextStreaming: status === "speaking",
+    busyDetail: status === "connecting" ? "getting ready" : error,
+    lastUserText: lastText(turns, "user"),
+    lastAssistantText: lastText(turns, "assistant"),
+    failed: status === "failed",
+    recovering: false,
+    start,
+    end,
+    retry: start,
   };
 }

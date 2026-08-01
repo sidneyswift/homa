@@ -1,8 +1,7 @@
 import { Redirect } from "expo-router";
 
-/** Chat is the app's front door now (founder call 2026-07-29, matching
- *  web: /app IS chat). The former Today tab's content lives in
- *  chat.tsx's own welcome state; this route just hands off to it. */
+/** Voice is Homa's front door. Text remains one tap away in chat, but a
+ * parent should never have to find a separate mode to talk with Homa. */
 export default function IndexRedirect() {
-  return <Redirect href="/chat" />;
+  return <Redirect href="/voice" />;
 }

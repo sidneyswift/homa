@@ -5,7 +5,7 @@ import { familyWallCheckout } from "../../../../../lib/billing/wall";
 import { loadFamilyContextPinned, renderFamilyContext } from "../../../../../lib/family-context";
 import { emitMapEvent } from "../../../../../lib/map/events";
 import { rateLimited } from "../../../../../lib/map/ratelimit";
-import { createSupabaseServerClient } from "../../../../../lib/supabase/server";
+import { resolveApiFamily } from "../../../../../lib/api-auth";
 import { buildRealtimeInstructions } from "../../../../../lib/voice/realtime-session";
 import { realtimeToolDefinitions } from "../../../../../lib/voice/realtime-tools";
 
@@ -84,25 +84,12 @@ const VOICE = "marin";
 
 const MODEL = "gpt-realtime-2.1";
 
-export async function POST(): Promise<Response> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+export async function POST(request: Request): Promise<Response> {
+  const auth = await resolveApiFamily(request);
+  if (!auth) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
-
-  const { data: membership, error: membershipError } = await supabase
-    .from("family_members")
-    .select("family_id")
-    .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle();
-  if (membershipError || !membership) {
-    return Response.json({ ok: false, reason: "no-family" }, { status: 404 });
-  }
-  const familyId = membership.family_id as string;
+  const familyId = auth.familyId;
 
   // The wall: starting a voice conversation is an action, not existing
   // content, so there is no exemption. The button shows the offer on 403.

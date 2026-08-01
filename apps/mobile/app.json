@@ -18,7 +18,8 @@
       "bundleIdentifier": "com.thankshoma.homa",
       "usesAppleSignIn": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSMicrophoneUsageDescription": "Homa uses your microphone so you can talk together."
       }
     },
     "android": {

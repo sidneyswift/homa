@@ -1,6 +1,6 @@
 import { persistCanonicalMessage } from "../../../../../lib/conversation-continuity/ledger";
 import { rateLimited } from "../../../../../lib/map/ratelimit";
-import { createSupabaseServerClient } from "../../../../../lib/supabase/server";
+import { resolveApiFamily } from "../../../../../lib/api-auth";
 
 /**
  * POST /api/voice/realtime/turn: records ONE spoken turn in the thread
@@ -46,26 +46,13 @@ interface TurnBody {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  const auth = await resolveApiFamily(request);
+  if (!auth) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
+  const { familyId, userId } = auth;
 
-  const { data: membership, error: membershipError } = await supabase
-    .from("family_members")
-    .select("family_id")
-    .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle();
-  if (membershipError || !membership) {
-    return Response.json({ ok: false, reason: "no-family" }, { status: 404 });
-  }
-  const familyId = membership.family_id as string;
-
-  if (rateLimited(`realtime-turn:${user.id}`, MAX_TURNS_PER_USER_PER_HOUR, HOUR_MS)) {
+  if (rateLimited(`realtime-turn:${userId}`, MAX_TURNS_PER_USER_PER_HOUR, HOUR_MS)) {
     return Response.json({ ok: false, reason: "rate-limited" }, { status: 429 });
   }
 
@@ -89,7 +76,7 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     await persistCanonicalMessage({
-      attributes: { familyId, memberUserId: user.id },
+      attributes: { familyId, memberUserId: userId },
       sessionId,
       // Web, because that is where this happened. Spoken-ness is modality,
       // not channel: calling it something else would quietly change how the

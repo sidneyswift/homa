@@ -1,5 +1,5 @@
 import { rateLimited } from "../../../../../lib/map/ratelimit";
-import { createSupabaseServerClient } from "../../../../../lib/supabase/server";
+import { resolveApiFamily } from "../../../../../lib/api-auth";
 import { runVoiceTool } from "../../../../../lib/voice/realtime-tools";
 
 /**
@@ -40,34 +40,18 @@ interface ToolCallBody {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  const auth = await resolveApiFamily(request);
+  if (!auth) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  const accessToken = session?.access_token;
+  const accessToken = /^Bearer\s+(.+)$/i.exec(request.headers.get("authorization") ?? "")?.[1]
+    ?? (await auth.supabase.auth.getSession()).data.session?.access_token;
   if (!accessToken) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
+  const { familyId, userId } = auth;
 
-  const { data: membership, error: membershipError } = await supabase
-    .from("family_members")
-    .select("family_id")
-    .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle();
-  if (membershipError || !membership) {
-    return Response.json({ ok: false, reason: "no-family" }, { status: 404 });
-  }
-  const familyId = membership.family_id as string;
-
-  if (rateLimited(`realtime-tool:${user.id}`, MAX_TOOL_CALLS_PER_SESSION_PER_HOUR, HOUR_MS)) {
+  if (rateLimited(`realtime-tool:${userId}`, MAX_TOOL_CALLS_PER_SESSION_PER_HOUR, HOUR_MS)) {
     return Response.json({ ok: false, reason: "rate-limited" }, { status: 429 });
   }
 
@@ -83,7 +67,7 @@ export async function POST(request: Request): Promise<Response> {
     args: body.args,
     identity: {
       familyId,
-      memberUserId: user.id,
+      memberUserId: userId,
       supabaseAccessToken: accessToken,
       sessionId:
         typeof body.sessionId === "string" && body.sessionId.length > 0
