@@ -1,4 +1,4 @@
-import type { ActiveObjectReference } from "@homa/core";
+import { activeObjectKey, type ActiveObjectReference } from "@homa/core";
 import {
   createContext,
   useCallback,
@@ -51,9 +51,20 @@ export function VoiceWorkbenchProvider({ children }: { children: ReactNode }) {
   const showActiveObject = useCallback((reference: ActiveObjectReference) => {
     setVisibleActiveObject({ pathname, reference });
   }, [pathname]);
-  const clearActiveObject = useCallback((_reference?: ActiveObjectReference) => {
-    setVisibleActiveObject(null);
+  const clearActiveObject = useCallback((reference?: ActiveObjectReference) => {
+    setVisibleActiveObject((current) => {
+      if (!current || !reference) return null;
+      return activeObjectKey(current.reference) === activeObjectKey(reference)
+        ? null
+        : current;
+    });
   }, []);
+
+  useEffect(() => {
+    setVisibleActiveObject((current) =>
+      current && current.pathname !== pathname ? null : current,
+    );
+  }, [pathname]);
 
   const value = useMemo(
     () => ({

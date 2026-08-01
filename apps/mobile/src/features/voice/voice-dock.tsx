@@ -1,67 +1,115 @@
 import { usePathname, useRouter } from "expo-router";
-import { Mic, MicOff, PhoneOff, Sparkles } from "lucide-react-native";
+import { ChevronDown, Mic, MicOff, PhoneOff, Sparkles } from "lucide-react-native";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
+import { deriveCharacterState } from "./character-state";
+import { HomaCharacter } from "./homa-character";
+import {
+  voiceDockPresentation,
+  voiceDockStatusLabel,
+} from "./voice-dock-model";
 import { useVoiceWorkbench } from "./voice-workbench-provider";
 
-/** Compact persistent control for safe visual surfaces in the signed-in shell. */
+const PUCK_SIZE = 48;
+
+/**
+ * The one bottom safe lane owned by the signed-in shell. PR #552's combined
+ * direction keeps routine listening and speaking to a compact Homa puck,
+ * then expands into named controls whenever the parent needs to act.
+ */
 export function VoiceDock() {
   const pathname = usePathname();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { session } = useVoiceWorkbench();
-  const visible = pathname !== "/voice" && session.status !== "idle";
+  const [manuallyExpanded, setManuallyExpanded] = useState(false);
+  const presentation = voiceDockPresentation({
+    pathname,
+    status: session.status,
+    muted: session.muted,
+    manuallyExpanded,
+  });
 
-  if (!visible) return null;
+  useEffect(() => {
+    if (presentation === "hidden") setManuallyExpanded(false);
+  }, [presentation]);
 
-  const paused = session.status === "paused";
-  const statusLabel = paused
-    ? session.pauseReason ?? "Voice paused"
-    : session.failed
-      ? "Voice was interrupted"
-      : session.muted
-        ? "Muted"
-        : session.status === "speaking"
-          ? "Homa is speaking"
-          : session.status === "working"
-            ? "Homa is working"
-            : "Listening";
+  if (presentation === "hidden") return null;
 
-  return (
-    <View
-      pointerEvents="box-none"
-      style={[
-        styles.host,
-        { bottom: Math.max(insets.bottom, space.sm) },
-      ]}
-    >
-      <View style={styles.dock} accessibilityLiveRegion="polite">
+  const statusLabel = voiceDockStatusLabel({
+    status: session.status,
+    muted: session.muted,
+    pauseReason: session.pauseReason,
+  });
+  const characterState = deriveCharacterState({
+    composerFocused: false,
+    turnActive: session.turnActive,
+    assistantTextStreaming: session.assistantTextStreaming,
+  });
+
+  if (presentation === "compact") {
+    return (
+      <View style={styles.safeLane} pointerEvents="box-none">
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={
-            paused
-              ? "Resume voice conversation"
-              : session.muted
-                ? "Unmute voice conversation"
-                : "Mute voice conversation"
-          }
-          onPress={paused ? session.resume : session.toggleMute}
+          accessibilityLabel={`Homa Voice. ${statusLabel}. Show controls`}
+          onPress={() => setManuallyExpanded(true)}
+          style={({ pressed }) => [styles.puck, pressed && styles.pressed]}
+        >
+          <HomaCharacter state={characterState} size={PUCK_SIZE} />
+        </Pressable>
+      </View>
+    );
+  }
+
+  const paused = session.status === "paused";
+  const failed = session.status === "failed";
+  const connecting = session.status === "connecting";
+  const primaryLabel = paused
+    ? "Resume"
+    : failed
+      ? "Try again"
+      : session.muted
+        ? "Unmute"
+        : connecting
+          ? "Getting ready"
+          : "Mute";
+  const primaryAction = paused
+    ? session.resume
+    : failed
+      ? session.retry
+      : connecting
+        ? session.end
+        : session.toggleMute;
+
+  return (
+    <View style={styles.safeLane} pointerEvents="box-none">
+      <View style={styles.dock} accessibilityLiveRegion="polite">
+        <View style={styles.puckInset} accessibilityElementsHidden>
+          <HomaCharacter state={characterState} size={40} />
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={connecting ? "Cancel voice connection" : primaryLabel}
+          onPress={primaryAction}
           style={({ pressed }) => [styles.statusControl, pressed && styles.pressed]}
         >
           {paused || session.muted ? (
             <MicOff size={17} color={colors.brand} />
           ) : (
-            <Mic size={17} color={colors.success} />
+            <Mic size={17} color={failed ? colors.brand : colors.success} />
           )}
-          <Text style={styles.statusText} numberOfLines={1}>{statusLabel}</Text>
+          <View style={styles.statusCopy}>
+            <Text style={styles.statusText} numberOfLines={1}>{statusLabel}</Text>
+            <Text style={styles.actionText} numberOfLines={1}>{primaryLabel}</Text>
+          </View>
         </Pressable>
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Return to Homa voice"
+          accessibilityLabel="Return to Homa Voice"
           onPress={() => router.navigate("/voice")}
           hitSlop={8}
           style={({ pressed }) => [styles.iconControl, pressed && styles.pressed]}
@@ -78,21 +126,46 @@ export function VoiceDock() {
         >
           <PhoneOff size={18} color={colors.textMuted} />
         </Pressable>
+
+        {!paused && !failed && !session.muted && !connecting ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Collapse Homa Voice controls"
+            onPress={() => setManuallyExpanded(false)}
+            hitSlop={8}
+            style={({ pressed }) => [styles.iconControl, pressed && styles.pressed]}
+          >
+            <ChevronDown size={18} color={colors.textMuted} />
+          </Pressable>
+        ) : null}
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  host: {
-    position: "absolute",
-    left: space.md,
-    right: space.md,
+  safeLane: {
+    flexShrink: 0,
     alignItems: "center",
+    paddingHorizontal: space.md,
+    paddingTop: space.xs,
+    paddingBottom: space.sm,
+    backgroundColor: colors.page,
+  },
+  puck: {
+    width: 56,
+    height: 56,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: radius.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.borderSubtle,
+    backgroundColor: colors.card,
+    ...shadows.md,
   },
   dock: {
-    minHeight: 52,
-    maxWidth: 420,
+    minHeight: 56,
+    maxWidth: 440,
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
@@ -104,9 +177,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     ...shadows.md,
   },
+  puckInset: {
+    width: 42,
+    height: 42,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    borderRadius: radius.pill,
+  },
   statusControl: {
     flex: 1,
-    minHeight: 40,
+    minHeight: 44,
     flexDirection: "row",
     alignItems: "center",
     gap: space.xs,
@@ -114,15 +195,20 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     backgroundColor: colors.surfaceSunken,
   },
+  statusCopy: { flex: 1 },
   statusText: {
-    flex: 1,
     fontFamily: fontFamilies.bodySemibold,
     fontSize: fontSize.sm,
     color: colors.textBody,
   },
+  actionText: {
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: fontSize.xs,
+    color: colors.textMuted,
+  },
   iconControl: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.pill,

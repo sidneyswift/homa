@@ -5,11 +5,11 @@ import { useEffect } from "react";
 
 import { ErrorBoundary } from "../components/error-boundary";
 import { SessionProvider, useSession } from "../features/auth/session-provider";
+import { VoiceWorkbenchProvider } from "../features/voice/voice-workbench-provider";
 import { initCrashReporting } from "../lib/crash-reporting";
 import { installStreamingFetch } from "../lib/streaming-fetch";
 import { useHomaFonts } from "../theme/fonts";
 import { colors } from "../theme/tokens";
-import { VoiceWorkbenchProvider } from "../features/voice/voice-workbench-provider";
 
 // Must run before any module sends a request: eve streams NDJSON over
 // fetch and React Native's built-in fetch cannot read response streams.
@@ -40,8 +40,7 @@ function RootNavigator() {
         headerShown: false,
         contentStyle: { backgroundColor: colors.page },
       }}
-    >
-    </Stack>
+    />
   );
 }
 
