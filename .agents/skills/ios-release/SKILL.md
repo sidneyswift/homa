@@ -55,10 +55,10 @@ npx eas-cli submit --platform ios --latest
   branch that was closed unmerged; main could not reproduce the app that
   sat in App Store Connect. Never again: the submitted commit must be an
   ancestor of `main` at submit time.
-- `eas.json` `submit.production` has no `ascAppId`, so `eas submit` is
-  interactive (founder's Apple login) until someone saves the ASC app id
-  into `eas.json` and commits it. If you hit the interactive wall, that is
-  a founder-action item, not something to work around.
+- `eas.json` `submit.production.ios.ascAppId` pins submissions to Homa's App
+  Store Connect record, so the configured EAS credentials can submit
+  non-interactively. If Apple authentication still expires or challenges the
+  account, that is a founder-action item, not something to work around.
 - SIWA is a provisioning-profile capability. Build 4 (fb45d812) failed
   exactly there; if an EAS build errors with a missing
   `com.apple.developer.applesignin` entitlement, the profile must be
@@ -77,17 +77,17 @@ rating questionnaire, review notes and demo account entry, Supabase Apple
 provider Client IDs, Apple capability/profile regeneration.
 
 The App Review demo account is the sandbox family
-`sswift+homatest@swiftdrtv.com` ("App Review Family"). Keep it working:
+`sidney+homatestappreview@recoupable.com` ("App Review Family"). Keep it working:
 never delete it, never let entitlement changes wall it, and verify sign-in
 on device before every submit.
 
 ## Review-sensitive invariants (why the app is shaped this way)
 
-- The app sells nothing and links to no checkout. Subscription is
-  web-managed (guideline 3.1.3(b) posture); lapsed accounts see a neutral
-  informational state, never a merchandised paywall or a Stripe link.
-  Changing this posture is a founder decision with review consequences,
-  not a code cleanup.
+- The app sells the monthly Homa, Homa Plus, and Homa Max plans through
+  StoreKit. It never opens or links to Stripe checkout. Existing Stripe-paid
+  families receive the same provider-neutral entitlement after signing in and
+  are never asked to subscribe twice. Changing this posture is a founder
+  decision with review consequences, not a code cleanup.
 - Account deletion in-app is required (5.1.1(v)) because Apple/Google/email
   sign-in creates accounts in-app. Do not ship a build that removes or
   hides it.
