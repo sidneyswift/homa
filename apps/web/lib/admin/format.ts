@@ -63,6 +63,22 @@ export function familyDisplayName(name: string): string {
   return name === DEFAULT_FAMILY_NAME ? "Family not set up" : name;
 }
 
+/**
+ * Founder-roster identity must remain useful before a parent chooses a family
+ * name. The parent name is easier to scan than a placeholder, while the row's
+ * visible email provides the unique identifier for duplicate names.
+ */
+export function familyRosterDisplayName(
+  name: string,
+  parentName: string | null,
+  email: string | null,
+): string {
+  if (name !== DEFAULT_FAMILY_NAME) return name;
+  const parent = parentName?.trim();
+  if (parent) return `${parent}'s family`;
+  return email?.trim() || "Family not set up";
+}
+
 export function formatInt(value: number): string {
   return value.toLocaleString("en-US");
 }

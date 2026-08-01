@@ -148,4 +148,24 @@ describe("FamiliesTable", () => {
     // A bare "Messages" header would leave direction to the reader.
     assert.doesNotMatch(html, />Messages</u);
   });
+
+  it("makes unnamed families identifiable by parent and email", () => {
+    const html = renderToStaticMarkup(
+      <FamiliesTable
+        snapshots={[
+          snapshot(1, {
+            name: "My family",
+            parentName: "Karla",
+            email: "karla@example.com",
+          }),
+        ]}
+        state={defaultState}
+        rangeDays={7}
+        includeTests={false}
+      />,
+    );
+    assert.match(html, /Karla&#x27;s family/u);
+    assert.match(html, /karla@example\.com/u);
+    assert.doesNotMatch(html, /Family not set up/u);
+  });
 });
