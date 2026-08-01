@@ -484,3 +484,10 @@ Plus Montessori materials/methods as supplemental activities across subjects.
 - Signal: continues the pedagogical-scaffolding thread. Third teacher resource guide drop in a single day (paired with ref-2026-07-31-taller-k-escritores and ref-2026-07-31-todo-historia-personajes from the same Benchmark Taller series). Aless is systematically studying the Taller del Lector methodology across units.
 - Signal: cross-curricular integration is a confirmed interest. She is not separating "reading time" from "science time" -- she values materials where literacy skills and content knowledge develop in the same activity.
 - Promotion candidate: poetry-and-story-as-concept-gateway. Aless has now explicitly named this technique across two drops in one day (poetry introducing personalized questions in Unit 2, poems and stories introducing science in Unit 1). Combined with the earlier daily-life grounding and family narrative signals, this is a confirmed preference: the child enters through something engaging and personal, the curriculum content rides alongside.
+
+### Aless, 2026-07-31
+- Dropped: Taller K Las Reglas en la casa y en la escuela (ref-2026-07-31-reglas-casa-escuela)
+- Signal: values fun, approachable framing for social-emotional and civics content
+- Signal: gravitates toward Spanish-language workbooks for kindergarten
+- Signal: appreciates when rules/behavior concepts are introduced in easy, playful ways rather than didactic instruction
+- Signal: 79-page comprehensive workbook format -- willing to invest in a full unit on a single social concept
