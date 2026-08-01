@@ -4,7 +4,6 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  Share,
   Text,
   View,
 } from "react-native";
@@ -16,6 +15,7 @@ import { scheduleActivity } from "../../lib/plan-schedule";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
 import { MaterialCard } from "../chat/material-card";
+import { MaterialShareComposer } from "../materials/material-share-composer";
 import { QuestionCard } from "../chat/question-card";
 import type { QuestionCardData } from "../chat/question-card-model";
 import { useFamilyData } from "../family/use-family-data";
@@ -105,7 +105,9 @@ export function OverlayHost({
    *  centered in the strip over the sheet, at full vibrancy. Under the
    *  scrim it would dim to background chrome and read as switched off. */
   float?: ReactNode;
-  onMaterialAction?: (action: "print" | "keep" | "change" | "earlier") => void;
+  onMaterialAction?: (
+    action: "print" | "share" | "keep" | "change" | "earlier"
+  ) => void;
   onStateRecordOpen?: (document: StateRecordDocument) => void;
   onStateRecordReady?: (message: string) => void;
   printNotice?: string | null;
@@ -129,6 +131,7 @@ export function OverlayHost({
       >
         <MaterialOverlayBody
           material={signal.material}
+          shareRequest={signal.shareRequest}
           onAction={onMaterialAction}
           printNotice={printNotice}
         />
@@ -659,18 +662,24 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
 /** The same card chat renders, from the same payload. */
 function MaterialOverlayBody({
   material,
+  shareRequest,
   onAction,
   printNotice,
 }: {
   material: MaterialCardPayload;
-  onAction?: (action: "print" | "keep" | "change" | "earlier") => void;
+  shareRequest?: Extract<OverlaySignal, { kind: "material" }>["shareRequest"];
+  onAction?: (action: "print" | "share" | "keep" | "change" | "earlier") => void;
   printNotice?: string | null;
 }) {
+  const { family } = useFamilyData();
   return (
     <ScrollView
       contentContainerStyle={{ padding: space.md, paddingBottom: space.xl, gap: space.sm }}
     >
       <MaterialCard material={material} />
+      {shareRequest ? (
+        <MaterialShareComposer key={shareRequest.materialId} request={shareRequest} familyId={family?.id} />
+      ) : null}
       {printNotice ? (
         <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}>
           {printNotice}
@@ -679,8 +688,8 @@ function MaterialOverlayBody({
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space.xs }}>
         <MaterialAction label="Print" onPress={() => onAction?.("print")} primary />
         <MaterialAction
-          label="Share"
-          onPress={() => void Share.share({ title: material.title, url: material.pdfUrl })}
+          label="Share through an app"
+          onPress={() => onAction?.("share")}
         />
         {material.status !== "final" ? (
           <MaterialAction label="Keep" onPress={() => onAction?.("keep")} />
