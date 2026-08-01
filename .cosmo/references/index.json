@@ -2908,6 +2908,67 @@
         54,
         78
       ]
+    },
+    {
+      "id": "ref-2026-07-31-necesidades-plantas-animales",
+      "title": "Las necesidades de las plantas y los animales",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-31T21:29:00-04:00",
+      "subject": "science",
+      "domain": "organisms-life-processes",
+      "format": "other",
+      "about": [
+        "plant needs",
+        "animal needs",
+        "habitats",
+        "parent animals and offspring",
+        "spanish language literacy"
+      ],
+      "entities": [
+        "Benchmark Education Company",
+        "Taller del Lector",
+        "Marisol",
+        "zebra",
+        "giraffe"
+      ],
+      "themes": [
+        "survival needs of living things",
+        "literacy as science vehicle",
+        "desert habitats",
+        "parent-offspring relationships"
+      ],
+      "works": [
+        "Que necesitan los animales?",
+        "Mi casa en el desierto",
+        "Los padres y sus crias"
+      ],
+      "ageBand": [
+        60,
+        72
+      ]
+    },
+    {
+      "id": "ref-2026-07-31-reglas-casa-escuela",
+      "title": "Taller K Las Reglas en la casa y en la escuela",
+      "droppedBy": "aless",
+      "droppedAt": "2026-07-31T21:37:59-04:00",
+      "subject": "history",
+      "domain": "civics-government",
+      "format": "workbook",
+      "about": [
+        "rules at home and school",
+        "civics for young children"
+      ],
+      "entities": [],
+      "themes": [
+        "rules and expectations",
+        "home and school as communities"
+      ],
+      "works": [],
+      "ageBand": [
+        60,
+        72
+      ]
     }
   ]
 }

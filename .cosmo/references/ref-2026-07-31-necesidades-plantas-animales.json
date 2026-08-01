@@ -1,0 +1,150 @@
+{
+  "id": "ref-2026-07-31-necesidades-plantas-animales",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-31T21:29:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1785547740.278989",
+  "title": "Las necesidades de las plantas y los animales",
+  "format": "other",
+  "formatDetail": "teacher-resource-guide",
+  "publisher": "Benchmark Education Company",
+  "series": "Taller del Lector",
+  "grade": "K",
+  "unit": 1,
+  "language": "es",
+  "blobUrl": null,
+  "analysisQuality": "full",
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "ref-2026-07-31-necesidades-plantas-animales.pdf",
+    "sourceParts": ["ref-2026-07-31-necesidades-plantas-animales.pdf"],
+    "sourceSha256": "8b2425c94c24c32a1584658e0b67e1e53b5897720ee579f904e2f68adc8f227d",
+    "pageCount": 80,
+    "mastersDir": ".cosmo/masters/ref-2026-07-31-necesidades-plantas-animales",
+    "intakeAt": "2026-07-28T01:21:24+00:00",
+    "gateFindings": [
+      "80 page(s) produced no text: tesseract not installed. Vision-model pass used for analysis. Spans unverifiable against sidecar."
+    ]
+  },
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "mixed",
+    "visualHierarchy": "lesson-plan headings dominate, with embedded photos and book cover thumbnails; activity areas secondary",
+    "whiteSpaceRatio": 25,
+    "flowDirection": "top-down"
+  },
+  "skillTargeting": {
+    "subject": "science",
+    "domain": "organisms-life-processes",
+    "topics": [
+      "science.what-living-things-need",
+      "science.what-plants-need-to-grow",
+      "science.habitats-basic-needs",
+      "science.plants-animals-habitats",
+      "science.animal-homes",
+      "science.offspring-resemble-parents"
+    ],
+    "topicKind": "conceptual",
+    "unmappedSkills": [],
+    "taxonomyIds": [
+      "mt_L1469gt34A",
+      "mt_3v0VNkwquK",
+      "mt_cM8YS6NXqi",
+      "mt_e6PP4ip39V",
+      "mt_oLHXfLujmh",
+      "mt_cEzX5r7kp0"
+    ]
+  },
+  "difficulty": {
+    "ageBand": [60, 72],
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffoldingLevel": "high"
+  },
+  "theming": {
+    "themeType": "interest-led",
+    "characters": ["Marisol"],
+    "visualStyle": "photo-rich with educational diagrams",
+    "colorPalette": "full-color",
+    "appealDrivers": [
+      "real-world animal and plant photos (zebras, giraffes, desert landscapes)",
+      "character-driven stories that personalize science concepts",
+      "structured lesson format with clear teacher supports"
+    ]
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "mixed",
+    "margins": "standard",
+    "inkDensity": "medium",
+    "colorRequirement": "prints well in B&W"
+  },
+  "aboutness": {
+    "extractionQuality": "partial",
+    "textSidecar": ".cosmo/text/ref-2026-07-31-necesidades-plantas-animales.txt",
+    "textBlobUrl": null,
+    "notes": "Text sidecar is empty (tesseract not installed). Analysis derived from vision-model page reads. Quotes below are from page headers and visible text read by the vision model; they cannot be verified against sidecar.",
+    "subjects": [
+      { "name": "plant needs", "role": "teaches", "quote": "necesidades de las plantas" },
+      { "name": "animal needs", "role": "teaches", "quote": "necesidades de los animales" },
+      { "name": "habitats", "role": "about", "quote": "Mi casa en el desierto" },
+      { "name": "parent animals and offspring", "role": "about", "quote": "Los padres y sus crias" },
+      { "name": "spanish language literacy", "role": "teaches", "quote": "Taller del Lector" }
+    ],
+    "entities": [
+      { "name": "Benchmark Education Company", "kind": "organization", "role": "identity", "quote": "Benchmark Education Company" },
+      { "name": "Taller del Lector", "kind": "object", "role": "identity", "quote": "Taller del Lector" },
+      { "name": "Marisol", "kind": "character", "role": "cast", "quote": "Marisol" },
+      { "name": "zebra", "kind": "animal", "role": "about", "quote": "necesitan los animales" },
+      { "name": "giraffe", "kind": "animal", "role": "decoration", "quote": "necesitan los animales" }
+    ],
+    "themes": [
+      { "name": "survival needs of living things", "evidence": "Unit 1 covers what plants and animals need to survive" },
+      { "name": "literacy as science vehicle", "evidence": "read-alouds, shared reading, and stories introduce scientific concepts" },
+      { "name": "desert habitats", "evidence": "Mi casa en el desierto explores how animals meet shelter needs" },
+      { "name": "parent-offspring relationships", "evidence": "Los padres y sus crias teaches about animal families" }
+    ],
+    "keyTerms": [
+      { "term": "necesidades", "occurrences": 1, "quote": "Las necesidades de las plantas y los animales" },
+      { "term": "lectura compartida", "occurrences": 1, "quote": "lectura compartida" },
+      { "term": "lectura en voz alta", "occurrences": 1, "quote": "Lecturas en voz alta" },
+      { "term": "texto informativo", "occurrences": 1, "quote": "Presentar el genero: texto informativo" }
+    ],
+    "referencedWorks": [
+      { "title": "Que necesitan los animales?", "author": "unknown", "kind": "book", "quote": "Que necesitan los animales?" },
+      { "title": "Mi casa en el desierto", "author": "unknown", "kind": "book", "quote": "Mi casa en el desierto" },
+      { "title": "Los padres y sus crias", "author": "unknown", "kind": "book", "quote": "Los padres y sus crias" }
+    ]
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "reading-comprehension-mini-unit",
+      "unit-study-packet",
+      "chant-and-rhyme-card"
+    ],
+    "gaps": [
+      {
+        "name": "poetry-led-science-lesson",
+        "notes": "A format where a short poem or playful story introduces a science concept, followed by a hands-on activity. The poem personalizes the topic before the child explores it through observation, drawing, or sorting."
+      }
+    ]
+  },
+  "stages": {
+    "captured": "2026-07-31T21:29:00-04:00",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "subject",
+      "targets": ["apps/web/agent/skills/materials-studio/references/approaches/poetry-led-science.md"],
+      "commit": null
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "commit": null
+    },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "dropperNote": "Take note on how this file uses playful poems and stories to introduce the bigger topics of what plants and animals need to survive."
+}

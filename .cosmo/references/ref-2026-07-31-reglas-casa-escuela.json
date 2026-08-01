@@ -134,11 +134,10 @@
     "analyzed": true,
     "tasteLogged": true,
     "graduation": {
-      "kind": "subject",
-      "targets": [
-        "references/subjects/civics-for-young-children.md"
-      ],
-      "commit": null
+      "kind": "pending",
+      "targets": [],
+      "commit": null,
+      "notes": "Cannot graduate without text extraction. Tesseract not installed, vision token expired. Re-run book-intake.py with --force after installing tesseract or refreshing VERCEL_OIDC_TOKEN to unlock graduation."
     },
     "taxonomy": {
       "proposedTopics": [],
