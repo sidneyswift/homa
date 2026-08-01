@@ -12,6 +12,16 @@ export {
 export { ACTION_COSTS } from "./action-costs";
 
 export {
+  ACTIVE_OBJECT_CURRENT_VERSION,
+  ACTIVE_OBJECT_KINDS,
+  activeObjectKey,
+  activeObjectReferenceSchema,
+  parseActiveObjectReference,
+  type ActiveObjectKind,
+  type ActiveObjectReference,
+} from "./active-object";
+
+export {
   APPLE_PRODUCT_IDS,
   APPLE_PROVIDER_PRODUCTS,
   BILLING_PERIODS,

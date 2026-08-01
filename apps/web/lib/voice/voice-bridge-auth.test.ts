@@ -16,6 +16,7 @@ describe("voice bridge authentication", () => {
       accessToken: "caller-token",
       message: "Make Maya a maze",
       messageId: MESSAGE_ID,
+      activeObjectContext: "## Visible object\nMaterial 123",
       secret: "deployment-secret",
       now: NOW,
     });
@@ -30,6 +31,7 @@ describe("voice bridge authentication", () => {
     assert.deepEqual(trusted, {
       messageId: MESSAGE_ID,
       messageSha256: headers["x-homa-voice-bridge-message-sha256"],
+      activeObjectContext: "## Visible object\nMaterial 123",
     });
     assert.equal(
       voiceBridgeMessageMatches(
@@ -44,6 +46,27 @@ describe("voice bridge authentication", () => {
         trusted?.messageSha256 ?? "",
       ),
       false,
+    );
+  });
+
+  it("rejects visible-object context changed after signing", () => {
+    const headers = {
+      ...voiceBridgeAuthHeaders({
+        accessToken: "caller-token",
+        message: "What do you think about this?",
+        messageId: MESSAGE_ID,
+        activeObjectContext: "material-a",
+        secret: "deployment-secret",
+        now: NOW,
+      }),
+      "x-homa-voice-active-object": Buffer.from("material-b").toString("base64url"),
+    };
+    assert.equal(
+      trustedVoiceBridgeRequest(
+        new Request("https://example.test/eve", { headers }),
+        { accessToken: "caller-token", secret: "deployment-secret", now: NOW },
+      ),
+      null,
     );
   });
 
