@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import type { FamilySnapshot } from "../../lib/admin/roster-data";
-import { adminTimeZone, dayKey, familyDisplayName, timeAgo } from "../../lib/admin/format";
+import { adminTimeZone, dayKey, familyRosterDisplayName, timeAgo } from "../../lib/admin/format";
 import { STAGE_COPY, STAGE_ORDER, type FamilyStage } from "../../lib/admin/stage";
 import { Pill } from "./ui";
 
@@ -178,12 +178,15 @@ export function FamiliesTable({
                       href={`/admin/families/${s.id}`}
                       className="font-bold text-strong hover:underline"
                     >
-                      {familyDisplayName(s.name)}
+                      {familyRosterDisplayName(s.name, s.parentName, s.email)}
                     </Link>
                     {s.sandbox ? (
                       <span className="ml-2">
                         <Pill tone="outline">test</Pill>
                       </span>
+                    ) : null}
+                    {s.email ? (
+                      <span className="block text-xs font-normal text-subtle">{s.email}</span>
                     ) : null}
                   </td>
                   <td className="px-3 py-2">

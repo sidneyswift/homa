@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { requireFounder } from "../../../lib/admin/gate";
-import { familyDisplayName, timeAgo } from "../../../lib/admin/format";
+import { familyRosterDisplayName, timeAgo } from "../../../lib/admin/format";
 import { getFamilySnapshots, type FamilySnapshot } from "../../../lib/admin/roster-data";
 import { accountStatusCopy } from "../../../lib/admin/account-status-copy";
 import { STAGE_COPY, STAGE_ORDER } from "../../../lib/admin/stage";
@@ -164,9 +164,11 @@ export default async function AdminFamiliesPage({
                     className="grid grid-cols-2 items-center gap-x-3 gap-y-1.5 px-4 py-3 text-sm hover:bg-page md:grid-cols-[minmax(160px,1.5fr)_140px_60px_minmax(100px,1fr)_110px_110px]"
                   >
                     <span className="col-span-2 md:col-span-1">
-                      <span className="font-bold text-strong">{familyDisplayName(s.name)}</span>
+                      <span className="font-bold text-strong">
+                        {familyRosterDisplayName(s.name, s.parentName, s.email)}
+                      </span>
                       <span className="block text-xs text-subtle">
-                        {s.parentName ?? "no display name"} · {s.usState ?? "state unknown"} · joined{" "}
+                        {s.email ?? "no email"} · {s.usState ?? "state unknown"} · joined{" "}
                         {timeAgo(s.createdAt)}
                       </span>
                     </span>
