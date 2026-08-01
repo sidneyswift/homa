@@ -1,0 +1,151 @@
+{
+  "id": "ref-2026-07-31-reglas-casa-escuela",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-31T21:37:59-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1785548279.527019",
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "ref-2026-07-31-reglas-casa-escuela.pdf",
+    "sourceParts": [
+      "ref-2026-07-31-reglas-casa-escuela.pdf"
+    ],
+    "sourceSha256": "0a1b548f84d42db10a6790402df664e4da4d7f3785662c7c6ca5fc925dac1df0",
+    "pageCount": 79,
+    "mastersDir": ".cosmo/masters/ref-2026-07-31-reglas-casa-escuela",
+    "intakeAt": "2026-07-28T01:29:32+00:00",
+    "gateFindings": [
+      "79 page(s) produced no text: tesseract not installed, vision token expired. Spans cannot be verified."
+    ]
+  },
+  "blobUrl": null,
+  "language": "es",
+  "format": "workbook",
+  "title": "Taller K Las Reglas en la casa y en la escuela",
+  "analysisQuality": "partial",
+  "analysisNotes": "No OCR (tesseract not installed, brew permission denied) and vision token expired. Visual metadata extracted via PIL. Content inferred from title, dropper commentary, and page image analysis. Text sidecar is empty; no spans can be verified.",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "airy",
+    "visualHierarchy": "activity area dominates; low ink density on content pages with generous white space",
+    "whiteSpaceRatio": 0.65,
+    "flowDirection": "left-right",
+    "notes": "Cover pages are portrait (2480x3509), 77 content pages are landscape (3509x2480). Landscape orientation suggests two-column or spread layouts for activities."
+  },
+  "skillTargeting": {
+    "subject": "history",
+    "domain": "civics-government",
+    "topics": [
+      "history.following-rules-at-home",
+      "history.why-rules-exist",
+      "history.rules-at-home-laws-in-town"
+    ],
+    "topicKind": "conceptual",
+    "secondarySubject": "personal-social-development",
+    "secondaryDomain": "responsible-decision-making",
+    "secondaryTopics": [
+      "personal-social-development.rules-and-agreements-exist"
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBand": [
+      60,
+      72
+    ],
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffoldingLevel": "high",
+    "notes": "Kindergarten level (indicated by 'Taller K' in title). 79 pages covering rules in two contexts (home and school) suggests a comprehensive unit. Dropper notes rules are introduced in a 'fun and easy' way, indicating high scaffolding."
+  },
+  "theming": {
+    "themeType": "interest-led",
+    "characters": [],
+    "visualStyle": "cartoon",
+    "colorPalette": "full-color",
+    "appealDrivers": "Fun, approachable framing of social rules. Airy layouts with generous white space. Full-color illustrations make pages visually engaging for kindergarteners.",
+    "notes": "Cover features red accents (44% ink density). Content pages are light and print-friendly (11-16% ink). Per dropper: 'the way the rules are introduced are fun and easy.'"
+  },
+  "printFormat": {
+    "pageSize": "A4",
+    "orientation": "mixed",
+    "margins": "generous",
+    "inkDensity": "light",
+    "colorRequirement": "needs color",
+    "notes": "Cover is portrait A4 (595x842 pts). Activity pages are landscape. Average ink density on content pages is ~14%, very print-friendly. Full-color throughout."
+  },
+  "aboutness": {
+    "extractionQuality": "unavailable",
+    "reason": "Scanned PDF with no text layer. Tesseract OCR not installed (brew permission denied). VERCEL_OIDC_TOKEN expired (343 hours ago). Text sidecar is empty. Claims below are drawn from the title only.",
+    "textSidecar": ".cosmo/text/ref-2026-07-31-reglas-casa-escuela.txt",
+    "textBlobUrl": null,
+    "subjects": [
+      {
+        "name": "rules at home and school",
+        "role": "teaches",
+        "quote": "Las Reglas en la casa y en la escuela"
+      },
+      {
+        "name": "civics for young children",
+        "role": "about",
+        "quote": "Las Reglas"
+      }
+    ],
+    "entities": [],
+    "themes": [
+      {
+        "name": "rules and expectations",
+        "evidence": "Las Reglas en la casa y en la escuela"
+      },
+      {
+        "name": "home and school as communities",
+        "evidence": "en la casa y en la escuela"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "reglas",
+        "occurrences": "unknown",
+        "quote": "Las Reglas"
+      },
+      {
+        "term": "casa",
+        "occurrences": "unknown",
+        "quote": "en la casa"
+      },
+      {
+        "term": "escuela",
+        "occurrences": "unknown",
+        "quote": "en la escuela"
+      }
+    ],
+    "referencedWorks": []
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "social-narrative.md",
+      "unit-study-packet.md"
+    ],
+    "gaps": [],
+    "notes": "Partial match to social-narrative (behavioral/rules content but this is a workbook, not a first-person story). Partial match to unit-study-packet (multi-page themed study on one topic). The workbook format itself (sequential pages teaching a concept through varied activities) is well-covered by existing recipes when decomposed into individual activity types."
+  },
+  "stages": {
+    "captured": "2026-07-31T21:37:59-04:00",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "subject",
+      "targets": [
+        "references/subjects/civics-for-young-children.md"
+      ],
+      "commit": null
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "commit": null
+    },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  }
+}
