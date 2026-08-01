@@ -1,3 +1,4 @@
+import { ACTIVE_OBJECT_CURRENT_VERSION } from "@homa/core";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, useColorScheme, View, type LayoutChangeEvent } from "react-native";
@@ -91,7 +92,7 @@ export function VoiceScreen() {
     const reference = {
       kind: "material" as const,
       objectId: activeMaterialId,
-      version: "current-parent-visible",
+      version: ACTIVE_OBJECT_CURRENT_VERSION,
     };
     showActiveObject(reference);
     return () => clearActiveObject(reference);

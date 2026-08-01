@@ -1,10 +1,12 @@
 import {
+  ACTIVE_OBJECT_CURRENT_VERSION,
   parseActiveObjectReference,
   type ActiveObjectKind,
   type ActiveObjectReference,
 } from "@homa/core";
 
 import { mapDb } from "../map/db";
+import { resolveActiveMaterialPinned } from "./active-material";
 
 const MAX_CONTEXT_CHARS = 3_200;
 
@@ -67,8 +69,28 @@ async function readFromPostgres(
   familyId: string,
   reference: ActiveObjectReference,
 ): Promise<ActiveObjectRecord | null> {
+  if (reference.kind === "material") {
+    const material = await resolveActiveMaterialPinned(familyId, reference.objectId);
+    if (!material?.createdAt) return null;
+    return {
+      kind: reference.kind,
+      objectId: material.id,
+      version:
+        reference.version === ACTIVE_OBJECT_CURRENT_VERSION
+          ? ACTIVE_OBJECT_CURRENT_VERSION
+          : material.createdAt,
+      summary: {
+        title: material.title,
+        status: material.status,
+        revisesId: material.revisesId,
+        pageCount: material.pageCount,
+        pageRoles: material.pageRoles,
+      },
+    };
+  }
+
   const sql = mapDb();
-  if (reference.kind === "material" || reference.kind === "state_packet") {
+  if (reference.kind === "state_packet") {
     const rows = await sql<
       {
         id: string;
@@ -86,10 +108,7 @@ async function readFromPostgres(
              subject, skill, theme, child_id
       from public.materials
       where id = ${reference.objectId} and family_id = ${familyId}
-        and (
-          ${reference.kind === "material"}
-          or subject in ('state-pack', 'state-filing')
-        )
+        and subject in ('state-pack', 'state-filing')
       limit 1
     `;
     const row = rows[0];

@@ -60,12 +60,6 @@ export function VoiceWorkbenchProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  useEffect(() => {
-    setVisibleActiveObject((current) =>
-      current && current.pathname !== pathname ? null : current,
-    );
-  }, [pathname]);
-
   const value = useMemo(
     () => ({
       session: voiceSession,

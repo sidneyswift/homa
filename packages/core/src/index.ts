@@ -12,6 +12,7 @@ export {
 export { ACTION_COSTS } from "./action-costs";
 
 export {
+  ACTIVE_OBJECT_CURRENT_VERSION,
   ACTIVE_OBJECT_KINDS,
   activeObjectKey,
   activeObjectReferenceSchema,

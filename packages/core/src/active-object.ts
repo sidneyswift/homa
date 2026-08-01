@@ -15,6 +15,10 @@ export const ACTIVE_OBJECT_KINDS = [
   "task",
 ] as const;
 
+/** A material card can identify the exact current parent-visible revision by
+ * id before its database creation timestamp is present in the tool payload. */
+export const ACTIVE_OBJECT_CURRENT_VERSION = "current-parent-visible";
+
 export const activeObjectReferenceSchema = z.object({
   kind: z.enum(ACTIVE_OBJECT_KINDS),
   objectId: z.uuid(),

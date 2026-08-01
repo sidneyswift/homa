@@ -1,6 +1,6 @@
 import { usePathname, useRouter } from "expo-router";
 import { ChevronDown, Mic, MicOff, PhoneOff, Sparkles } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { fontFamilies } from "../../theme/fonts";
@@ -24,19 +24,20 @@ export function VoiceDock() {
   const pathname = usePathname();
   const router = useRouter();
   const { session } = useVoiceWorkbench();
-  const [manuallyExpanded, setManuallyExpanded] = useState(false);
+  const [expandedPathname, setExpandedPathname] = useState<string | null>(null);
   const presentation = voiceDockPresentation({
     pathname,
     status: session.status,
     muted: session.muted,
-    manuallyExpanded,
+    manuallyExpanded: expandedPathname === pathname,
   });
 
-  useEffect(() => {
-    if (presentation === "hidden") setManuallyExpanded(false);
-  }, [presentation]);
-
   if (presentation === "hidden") return null;
+
+  function endVoice() {
+    setExpandedPathname(null);
+    session.end();
+  }
 
   const statusLabel = voiceDockStatusLabel({
     status: session.status,
@@ -55,7 +56,7 @@ export function VoiceDock() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Homa Voice. ${statusLabel}. Show controls`}
-          onPress={() => setManuallyExpanded(true)}
+          onPress={() => setExpandedPathname(pathname)}
           style={({ pressed }) => [styles.puck, pressed && styles.pressed]}
         >
           <HomaCharacter state={characterState} size={PUCK_SIZE} />
@@ -81,7 +82,7 @@ export function VoiceDock() {
     : failed
       ? session.retry
       : connecting
-        ? session.end
+        ? endVoice
         : session.toggleMute;
 
   return (
@@ -120,7 +121,7 @@ export function VoiceDock() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="End voice conversation"
-          onPress={session.end}
+          onPress={endVoice}
           hitSlop={8}
           style={({ pressed }) => [styles.iconControl, pressed && styles.pressed]}
         >
@@ -131,7 +132,7 @@ export function VoiceDock() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Collapse Homa Voice controls"
-            onPress={() => setManuallyExpanded(false)}
+            onPress={() => setExpandedPathname(null)}
             hitSlop={8}
             style={({ pressed }) => [styles.iconControl, pressed && styles.pressed]}
           >

@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -69,6 +69,16 @@ export default function BinderScreen() {
   const showCover = isDefaultFilter(filter) && materials.length > COVER_COUNT;
   const cover = showCover ? binderCover(materials, nowMs, COVER_COUNT) : null;
   const gridMaterials = cover ? filtered.filter((material) => !cover.items.some((item) => item.id === material.id)) : filtered;
+
+  useEffect(() => {
+    if (!openMaterial) return;
+    const reference = {
+      kind: "material" as const,
+      objectId: openMaterial.id,
+      version: openMaterial.createdAt,
+    };
+    return () => clearActiveObject(reference);
+  }, [clearActiveObject, openMaterial]);
 
   async function handleKeep(materialId: string) {
     if (!family) return;
