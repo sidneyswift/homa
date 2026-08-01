@@ -47,6 +47,36 @@ const material = {
   pdfUrl: "https://blob.example/page.pdf",
 };
 
+const monthPlanPreview = {
+  draftId: "00000000-0000-4000-8000-000000000010",
+  revision: 1,
+  monthStart: "2026-09-01",
+  title: "September",
+  children: [
+    {
+      childId: "00000000-0000-4000-8000-000000000011",
+      childName: "Maya",
+      targets: ["Keep reading moving"],
+      weeks: [1, 2, 3, 4].map((week) => ({
+        week,
+        focus: "reading",
+        activities: [
+          {
+            text: "Read together for fifteen minutes.",
+            scheduledDate: week === 1 ? "2026-09-01" : null,
+            reusedMaterialId: null,
+          },
+        ],
+      })),
+      unresolvedChoices: [],
+    },
+  ],
+  conflicts: [],
+  unscheduledItems: [],
+  unresolvedChoices: [],
+  restoredFrom: null,
+};
+
 /** The raw questions payload as ask_user_questions carries it, on both
  * its input and (echoed) its output. */
 const askQuestions = [
@@ -118,6 +148,22 @@ describe("deriveOverlaySignals: mapping", () => {
         scheduledDate: "2026-07-30",
       }),
       expected: { kind: "planner", refreshCount: 1 },
+    },
+    {
+      name: "a verified month preview opens the month plan sheet",
+      part: toolPart("preview_month_plan", {
+        previewed: true,
+        preview: monthPlanPreview,
+      }),
+      expected: { kind: "monthPlan" },
+    },
+    {
+      name: "a malformed month preview stays off the screen",
+      part: toolPart("preview_month_plan", {
+        previewed: true,
+        preview: { ...monthPlanPreview, children: "not-an-array" },
+      }),
+      expected: null,
     },
     {
       name: "edit_plan updated:false is nothing",
