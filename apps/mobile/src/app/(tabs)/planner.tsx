@@ -121,13 +121,14 @@ export default function PlannerScreen() {
   }, [anchorDate, viewMode]);
   const calendarExportItems = useMemo(() => {
     const timeZone = family?.time_zone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const eventItems = filteredEvents
+    const eventItems = [...new Map(filteredEvents
       .filter((event) => event.starts_on <= visibleRange.end && event.ends_on >= visibleRange.start)
+      .map((event) => [event.id, event])).values()]
       .map((event) => {
         const childName = event.child_id
           ? children.find((child) => child.id === event.child_id)?.name ?? "Child"
           : null;
-        return familyEventExportItem(event, childName, timeZone);
+        return familyEventExportItem(event, childName, timeZone, event.recurrence_rule);
       });
     const activityItems = filteredActivities
       .filter((activity) => activity.scheduledDate >= visibleRange.start && activity.scheduledDate <= visibleRange.end)

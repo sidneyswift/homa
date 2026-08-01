@@ -1,5 +1,12 @@
 import { supabase } from "./supabase";
 
+export interface FamilyEventRecurrence {
+  frequency: "weekly";
+  interval: number;
+  weekdays: number[];
+  until: string | null;
+}
+
 /**
  * Homa's own family calendar (appointments, trips), never an external
  * sync. Ported from supabase/migrations/20260726130000_family_events.sql:
@@ -22,6 +29,7 @@ export interface FamilyEventRecord {
   start_time: string | null;
   end_time: string | null;
   note: string | null;
+  recurrence_rule?: FamilyEventRecurrence | null;
   created_at: string;
 }
 
@@ -33,6 +41,7 @@ export interface FamilyEventInput {
   startTime: string | null;
   endTime: string | null;
   note: string | null;
+  recurrence?: FamilyEventRecurrence | null;
 }
 
 export async function getFamilyEvents(
@@ -42,10 +51,10 @@ export async function getFamilyEvents(
 ): Promise<FamilyEventRecord[]> {
   const { data, error } = await supabase
     .from("family_events")
-    .select("id, family_id, child_id, title, starts_on, ends_on, start_time, end_time, note, created_at")
+    .select("id, family_id, child_id, title, starts_on, ends_on, start_time, end_time, note, recurrence_rule, created_at")
     .eq("family_id", familyId)
     .lte("starts_on", toDate)
-    .gte("ends_on", fromDate)
+    .or(`ends_on.gte.${fromDate},recurrence_rule.not.is.null`)
     .order("starts_on", { ascending: true });
   if (error) throw new Error(`family events read failed: ${error.message}`);
   return (data ?? []) as FamilyEventRecord[];
@@ -64,6 +73,7 @@ export async function createFamilyEvent(
     start_time: input.startTime,
     end_time: input.endTime,
     note: input.note?.trim() || null,
+    recurrence_rule: input.recurrence ?? null,
   });
   return { error: error ? error.message : null };
 }
@@ -82,6 +92,7 @@ export async function updateFamilyEvent(
       start_time: input.startTime,
       end_time: input.endTime,
       note: input.note?.trim() || null,
+      recurrence_rule: input.recurrence ?? null,
     })
     .eq("id", eventId);
   return { error: error ? error.message : null };

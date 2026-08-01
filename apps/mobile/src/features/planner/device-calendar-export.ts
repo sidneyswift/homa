@@ -119,7 +119,7 @@ export function familyEventExportItem(
   event: FamilyEventRecord,
   childName: string | null,
   timeZone: string,
-  recurrence: CalendarExportRecurrence | null = null,
+  recurrence: CalendarExportRecurrence | null = event.recurrence_rule ?? null,
 ): CalendarExportItem {
   return {
     sourceKey: `family-event/${event.id}`,
