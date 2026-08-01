@@ -31,18 +31,20 @@ import { useBinderData } from "../../features/binder/use-binder-data";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { useVoiceWorkbench } from "../../features/voice/voice-workbench-provider";
 import { keepMaterial } from "../../lib/materials";
+import type { StateRecordDocument } from "../../lib/state-records";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { StateRecordsCard } from "../../features/state-records/state-records-card";
 
 const COVER_COUNT = 3;
 
 /**
  * Binder: every worksheet, coloring page, or other material Homa has
  * made, ported from apps/web/app/app/binder/{page,binder-view}.tsx.
- * Scoped out of this v1, each a tracked gap, not a silent one: the
- * StatePackCard/StateFilingCard compliance cards (a separate feature
- * bolted onto the top of web's page, not part of materials proper),
- * the VersionRail ("earlier tries" on a detail card), and per-child
+ * The state-record card above the material grid is a separate legal-record
+ * surface, backed by the server's reviewed requirements and append-only
+ * packet history. Still scoped out of this v1: the general materials
+ * VersionRail ("earlier tries" on a detail card), and per-child
  * view-context scoping (mobile has no equivalent session state yet;
  * the whole family's binder shows, same precedent Hours already set).
  *
@@ -86,6 +88,24 @@ export default function BinderScreen() {
     await keepMaterial(family.id, materialId);
     setKeepingId(null);
     void reload();
+  }
+
+  function openStateRecord(document: StateRecordDocument) {
+    openMaterialDetail({
+      id: document.id,
+      title: document.title,
+      kind: "packet",
+      subject: document.type === "pack" ? "State pack" : "State filing",
+      theme: null,
+      skill: null,
+      childId: null,
+      childName: null,
+      previewUrl: document.previewUrl,
+      pdfUrl: document.pdfUrl,
+      createdAt: document.createdAt,
+      pageCount: document.pageCount,
+      pagePreviewUrls: null,
+    });
   }
 
   function openMaterialDetail(material: BinderMaterial) {
@@ -133,6 +153,10 @@ export default function BinderScreen() {
           <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.danger }}>
             {"That didn't load. Pull down to try again."}
           </Text>
+        ) : null}
+
+        {!familyLoading && family ? (
+          <StateRecordsCard onOpenDocument={openStateRecord} />
         ) : null}
 
         {inProgress.length > 0 ? (

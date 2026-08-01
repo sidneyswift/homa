@@ -121,6 +121,21 @@ describe("deriveOverlaySignals: mapping", () => {
       expected: null,
     },
     {
+      name: "open_state_records carries the requested native action",
+      part: toolPart("open_state_records", { opened: true, action: "generate_pack" }),
+      expected: { kind: "state_records", action: "generate_pack" },
+    },
+    {
+      name: "open_state_records refuses unknown actions",
+      part: toolPart("open_state_records", { opened: true, action: "submit_to_state" }),
+      expected: null,
+    },
+    {
+      name: "open_state_records with no authenticated state does not open",
+      part: toolPart("open_state_records", { opened: false, error: "no_state" }),
+      expected: null,
+    },
+    {
       name: "edit_plan updated:true is a planner signal with a write counted",
       part: toolPart("edit_plan", { updated: true, summary: "Swapped Tuesday" }),
       expected: { kind: "planner", refreshCount: 1 },
