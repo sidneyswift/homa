@@ -104,21 +104,17 @@ function AuraRing({
     scale.value = withSequence(
       withTiming(band.scaleMin, { duration: SETTLE_MS, easing: SETTLE }),
       withRepeat(
-        withSequence(
-          withTiming(band.scaleMax, { duration: half, easing: BREATHE }),
-          withTiming(band.scaleMin, { duration: half, easing: BREATHE }),
-        ),
+        withTiming(band.scaleMax, { duration: half, easing: BREATHE }),
         -1,
+        true,
       ),
     );
     opacity.value = withSequence(
       withTiming(band.opacityMin, { duration: SETTLE_MS, easing: SETTLE }),
       withRepeat(
-        withSequence(
-          withTiming(band.opacityMax, { duration: half, easing: BREATHE }),
-          withTiming(band.opacityMin, { duration: half, easing: BREATHE }),
-        ),
+        withTiming(band.opacityMax, { duration: half, easing: BREATHE }),
         -1,
+        true,
       ),
     );
     return () => {

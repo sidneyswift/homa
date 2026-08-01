@@ -290,7 +290,9 @@ export function HomaCharacter({
 
   // The stateful layer: the breath changes gear, the posture settles
   // over SETTLE_MS with the shared settle curve, and speaking adds the
-  // gentle pop pulse (~720ms, in step with the aura's rhythm).
+  // gentle pop pulse (~720ms, in step with the aura's rhythm). One
+  // reversed timing owns both halves so no sequence boundary can show
+  // up as a reset when the pulse loops.
   useEffect(() => {
     if (reduced) {
       bob.value = 0;
@@ -308,7 +310,7 @@ export function HomaCharacter({
       withTiming(0, { duration: 260, easing: SETTLE }),
       withRepeat(
         withSequence(
-          withTiming(-amp, { duration: breath.rise, easing: Easing.out(Easing.cubic) }),
+          withTiming(-amp, { duration: breath.rise, easing: BREATHE }),
           withTiming(-amp * 0.82, { duration: breath.hang, easing: BREATHE }),
           withTiming(0, { duration: breath.rest, easing: Easing.inOut(Easing.quad) }),
         ),
@@ -320,11 +322,9 @@ export function HomaCharacter({
         ? withSequence(
             withTiming(1, { duration: 240, easing: SETTLE }),
             withRepeat(
-              withSequence(
-                withTiming(1.03, { duration: 390, easing: BREATHE }),
-                withTiming(1, { duration: 330, easing: BREATHE }),
-              ),
+              withTiming(1.03, { duration: 360, easing: BREATHE }),
               -1,
+              true,
             ),
           )
         : withTiming(1, { duration: 260, easing: SETTLE });
