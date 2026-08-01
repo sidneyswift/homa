@@ -5,11 +5,20 @@ import {
   parsePreparedPrintRequest,
   type PreparedPrintRequest,
 } from "../materials/material-print-contract";
+import {
+  parsePreparedMaterialShareRequest,
+  type PreparedMaterialShareRequest,
+} from "../materials/material-share-contract";
 import { memoryChipFor } from "../chat/message-utils";
 import {
   parseQuestionCardPart,
   type QuestionCardData,
 } from "../chat/question-card-model";
+import type { StateRecordAction } from "../../lib/state-records";
+import {
+  parseMonthPlanPreview,
+  type MonthPlanPreview,
+} from "../planner/month-plan-preview-model";
 
 /**
  * Overlay signals for the voice-first screen: pure derivation from the
@@ -37,9 +46,12 @@ export type OverlaySignal =
       key: string;
       material: MaterialCardPayload;
       printRequest?: PreparedPrintRequest;
+      shareRequest?: PreparedMaterialShareRequest;
     }
   | { kind: "question"; key: string; card: QuestionCardData }
   | { kind: "hours"; key: string }
+  | { kind: "state_records"; key: string; action: StateRecordAction }
+  | { kind: "monthPlan"; key: string; preview: MonthPlanPreview }
   | {
       kind: "receipt";
       key: string;
@@ -77,6 +89,7 @@ const MATERIAL_TOOLS = new Set([
   "show_material",
   "create_worksheet",
   "prepare_material_print",
+  "prepare_material_share",
 ]);
 
 /**
@@ -303,6 +316,26 @@ function buildSignal(
       planWrites,
     };
   }
+  if (toolName === "open_state_records") {
+    if (output.opened !== true) return null;
+    const action = output.action;
+    if (action !== "view" && action !== "generate_pack" && action !== "generate_filing") {
+      return null;
+    }
+    return {
+      signal: { kind: "state_records", key, action },
+      planWrites,
+    };
+  }
+  if (toolName === "preview_month_plan") {
+    if (output.previewed !== true) return null;
+    const preview = parseMonthPlanPreview(output.preview);
+    if (preview === null) return null;
+    return {
+      signal: { kind: "monthPlan", key, preview },
+      planWrites,
+    };
+  }
   const planWriteFlag = PLAN_WRITE_TOOLS[toolName];
   if (planWriteFlag !== undefined) {
     if (output[planWriteFlag] !== true) return null;
@@ -318,13 +351,19 @@ function buildSignal(
     const printRequest = toolName === "prepare_material_print"
       ? parsePreparedPrintRequest(output.printRequest)
       : null;
+    const shareRequest = toolName === "prepare_material_share"
+      ? parsePreparedMaterialShareRequest(output.shareRequest)
+      : null;
     if (toolName === "prepare_material_print" && !printRequest) return null;
+    if (toolName === "prepare_material_share" && !shareRequest) return null;
+    if (shareRequest && material.id !== shareRequest.materialId) return null;
     return {
       signal: {
         kind: "material",
         key,
         material,
         ...(printRequest ? { printRequest } : {}),
+        ...(shareRequest ? { shareRequest } : {}),
       },
       planWrites,
     };

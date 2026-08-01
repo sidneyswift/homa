@@ -46,9 +46,9 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
   },
-  // The report writer's system prompt is a markdown file read from disk at
-  // runtime (founder-editable, versioned); every route that can generate a
-  // narrative must ship it in its traced bundle.
+  // Markdown prompt files still read from disk at runtime must be included
+  // explicitly. Report writing and memory compaction use generated mirrors
+  // instead because Eve-hosted code can reach those modules too.
   outputFileTracingIncludes: {
     // NOTE (gh#335): do NOT re-add node_modules globs here for
     // @napi-rs/canvas. Tracing-include globs copy pnpm's symlinked
@@ -68,9 +68,6 @@ const nextConfig: NextConfig = {
       "../../node_modules/.pnpm/@sparticuz+chromium@*/node_modules/@sparticuz/chromium/bin/**",
     ],
     "/api/chat/suggestions": ["./agent/prompt-suggestions.md"],
-    "/api/map/score": ["./agent/report-writer.md"],
-    "/api/map/narrative-status": ["./agent/report-writer.md"],
-    "/onboarding/r/[token]/plan/[subjectId]": ["./agent/report-writer.md"],
     "/api/voice/curriculum/insights": ["./agent/curriculum-writer.md"],
     // The learning loops' extraction prompt: the cron route runs the
     // post-call memory turn, the review route runs the post-turn review.

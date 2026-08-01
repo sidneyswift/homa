@@ -278,6 +278,18 @@ test("native print results carry bounded operational facts only", () => {
   );
 });
 
+test("native share results record handoff state without destination or message", () => {
+  const event = {
+    family_id: "11111111-1111-4111-8111-111111111111",
+    material_id: "22222222-2222-4222-8222-222222222222",
+    outcome: "handed_off",
+  };
+  assert.equal(EVENT_SCHEMAS["materials.share_result"].safeParse(event).success, true);
+  const parsed = EVENT_SCHEMAS["materials.share_result"].parse({ ...event, destination: "mail" });
+  assert.equal("destination" in parsed, false);
+  assert.equal(EVENT_SCHEMAS["materials.share_result"].safeParse({ ...event, outcome: "delivered" }).success, false);
+});
+
 test("progress event registry contains all eleven exact names", () => {
   assert.deepEqual(
     Object.keys(EVENT_SCHEMAS)
@@ -669,6 +681,46 @@ const validPlannerEvents = {
     saved_count: 1,
     duplicate_count: 1,
     failed_count: 1,
+  },
+  "planner.month_draft_requested": {
+    family_id: FAMILY_ID,
+    draft_id: TASK_RUN_ID,
+    child_count: 2,
+    client: "mobile",
+  },
+  "planner.month_preview_ready": {
+    family_id: FAMILY_ID,
+    draft_id: TASK_RUN_ID,
+    revision: 1,
+    conflict_count: 1,
+    unresolved_count: 2,
+    client: "mobile",
+  },
+  "planner.month_approved": {
+    family_id: FAMILY_ID,
+    draft_id: TASK_RUN_ID,
+    revision: 2,
+    child_count: 2,
+    client: "mobile",
+  },
+  "planner.month_revised": {
+    family_id: FAMILY_ID,
+    draft_id: TASK_RUN_ID,
+    revision: 2,
+    client: "mobile",
+  },
+  "planner.month_abandoned": {
+    family_id: FAMILY_ID,
+    draft_id: TASK_RUN_ID,
+    revision: 2,
+    client: "mobile",
+  },
+  "planner.month_restored": {
+    family_id: FAMILY_ID,
+    draft_id: TASK_RUN_ID,
+    revision: 3,
+    restored_from: 1,
+    client: "mobile",
   },
 } as const;
 

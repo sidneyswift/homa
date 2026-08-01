@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
 import {
@@ -7,6 +8,7 @@ import {
   validateSplit,
   type ActiveRow,
 } from "./compact-memories";
+import { MEMORY_COMPACTOR_PROMPT } from "./memory-compactor-prompt.generated";
 
 /**
  * Compaction is the one place where a model's output causes durable rows
@@ -21,6 +23,22 @@ import {
 
 const ALMA = "11111111-1111-4111-8111-111111111111";
 const ARA = "22222222-2222-4222-8222-222222222222";
+
+const rawPrompt = readFileSync(new URL("../../agent/memory-compactor.md", import.meta.url), "utf8");
+
+describe("the generated memory compactor prompt", () => {
+  it("is byte for byte the markdown prompt a human edits", () => {
+    assert.equal(
+      MEMORY_COMPACTOR_PROMPT,
+      rawPrompt,
+      "memory-compactor-prompt.generated.ts is stale. Run: pnpm build:memory-compactor-prompt",
+    );
+  });
+
+  it("is never empty, because the nightly sweep depends on it", () => {
+    assert.ok(MEMORY_COMPACTOR_PROMPT.trim().length > 0);
+  });
+});
 
 let seq = 0;
 function row(overrides: Partial<ActiveRow> & { content: string }): ActiveRow {
