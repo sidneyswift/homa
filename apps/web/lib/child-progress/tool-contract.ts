@@ -231,6 +231,11 @@ function progressChannelFromAttributes(
     case "dispatch":
     case "voice":
       return value;
+    // The native app is an authenticated screen surface. Progress evidence
+    // stores it as web, matching the canonical conversation row and every
+    // existing screen-origin provenance rule.
+    case "mobile":
+      return "web";
     default:
       throw new TypeError("Unsupported progress tool channel");
   }

@@ -196,14 +196,28 @@ describe("subject lesson task-spawn guard", () => {
   });
 });
 
-describe("subject lesson conversation persistence", () => {
-  it("skips only the exact internal lesson channel", () => {
+describe("internal conversation persistence", () => {
+  it("skips lesson builders and hidden voice bridge turns", () => {
     assert.equal(
       shouldSkipConversationPersistence({ channel: "subject_lesson" }),
       true,
     );
     assert.equal(
       shouldSkipConversationPersistence({ channel: "subject-lesson" }),
+      false,
+    );
+    assert.equal(
+      shouldSkipConversationPersistence({
+        channel: "mobile",
+        voiceBridge: "true",
+      }),
+      true,
+    );
+    assert.equal(
+      shouldSkipConversationPersistence({
+        channel: "mobile",
+        voiceBridge: "false",
+      }),
       false,
     );
     assert.equal(shouldSkipConversationPersistence(undefined), false);

@@ -4,6 +4,10 @@ import { createClient } from "@supabase/supabase-js";
 
 import { familyAccountGate } from "../../lib/billing/wall";
 import {
+  canonicalInboundAuthAttributes,
+} from "../../lib/conversation-continuity/canonical-inbound";
+import {
+  loadRecentContinuityForMember,
   resolveInboundContinuity,
   resolvedContinuityAttributes,
 } from "../../lib/conversation-continuity/ledger";
@@ -20,6 +24,10 @@ import {
   messageModalityFromRequest,
   voiceTranscriptionContext,
 } from "../../lib/web-message-modality";
+import {
+  trustedVoiceBridgeRequest,
+  voiceBridgeMessageMatches,
+} from "../../lib/voice/voice-bridge-auth";
 
 /**
  * Route auth for the eve channel (minimal M1-01 slice of FR-1).
@@ -125,6 +133,14 @@ function supabaseAuth(): AuthFn<Request> {
       messageModality: messageModalityFromRequest(request),
       supabaseAccessToken: token,
     };
+    const voiceBridge = trustedVoiceBridgeRequest(request, {
+      accessToken: token,
+    });
+    if (voiceBridge) {
+      attributes.voiceBridge = "true";
+      attributes.voiceBridgeMessageId = voiceBridge.messageId;
+      attributes.voiceBridgeMessageSha256 = voiceBridge.messageSha256;
+    }
     if (membership?.family_id) attributes.familyId = membership.family_id;
     attributes.memberUserId = userData.user.id;
     // Chat-first onboarding is a state of the FAMILY, not of a page
@@ -184,6 +200,25 @@ export default eveChannel({
             .filter((part) => part.type === "text")
             .map((part) => part.text)
             .join("\n");
+    if (auth.attributes.voiceBridge === "true") {
+      const messageId = auth.attributes.voiceBridgeMessageId;
+      const expectedSha256 = auth.attributes.voiceBridgeMessageSha256;
+      if (
+        typeof messageId === "string" &&
+        typeof expectedSha256 === "string" &&
+        voiceBridgeMessageMatches(text, expectedSha256)
+      ) {
+        Object.assign(
+          auth.attributes,
+          canonicalInboundAuthAttributes({ text, messageId }),
+        );
+      } else {
+        const mutableAttributes = auth.attributes as Record<string, unknown>;
+        delete mutableAttributes.voiceBridge;
+        delete mutableAttributes.voiceBridgeMessageId;
+        delete mutableAttributes.voiceBridgeMessageSha256;
+      }
+    }
     if (typeof familyId !== "string" || text.trim().length === 0) {
       return { auth };
     }
@@ -235,6 +270,33 @@ export default eveChannel({
           ].join("\n"),
         ],
       };
+    }
+
+    // The native realtime transcript already owns canonical persistence and
+    // reply resolution. This inner agent turn is a private execution detail,
+    // so it may read recent continuity but must never bind a second thread,
+    // claim the same reply twice, or create a duplicate episode.
+    if (auth.attributes.voiceBridge === "true") {
+      try {
+        const continuityContext = await loadRecentContinuityForMember({
+          familyId,
+          memberUserId:
+            typeof memberUserId === "string" ? memberUserId : null,
+        });
+        return {
+          auth,
+          context: [
+            ...modalityContext,
+            ...(continuityContext ? [continuityContext] : []),
+          ],
+        };
+      } catch (error) {
+        console.error(
+          "eve channel: voice bridge continuity read failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+        return { auth, context: modalityContext };
+      }
     }
 
     try {

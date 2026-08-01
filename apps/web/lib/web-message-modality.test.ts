@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   HOMA_MESSAGE_MODALITY_HEADER,
+  HOMA_VOICE_BRIDGE_HEADER,
   messageModalityFromRequest,
   messageModalityHeaders,
   voiceTranscriptionContext,
@@ -28,12 +29,13 @@ describe("web message modality", () => {
     assert.deepEqual(messageModalityHeaders("voice"), {
       [HOMA_MESSAGE_MODALITY_HEADER]: "voice",
     });
+    assert.equal(HOMA_VOICE_BRIDGE_HEADER, "x-homa-voice-bridge");
   });
 
   it("tells Homa that dictated words arrived without claiming saved audio", () => {
     assert.deepEqual(voiceTranscriptionContext("text"), []);
     const context = voiceTranscriptionContext("voice").join("\n");
-    assert.match(context, /parent dictated/iu);
+    assert.match(context, /parent spoke/iu);
     assert.match(context, /transcribed words arrived/iu);
     assert.match(context, /audio is not retained/iu);
     assert.match(context, /do not claim that an audio file was saved/iu);

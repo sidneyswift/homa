@@ -1,8 +1,4 @@
 import { VOICE_PERSONA_MARKDOWN } from "./persona.generated";
-import {
-  VOICE_TOOL_BOUNDARY_LINES,
-  type VoiceToolName,
-} from "./realtime-tools";
 
 /**
  * The instructions a browser voice session runs on (issue #283, founder
@@ -27,37 +23,13 @@ import {
  * transcript while Homa talks, so the turn shape is different and the tool
  * boundary is different.
  *
- * The capability boundary is the important part. This session has NO tools
- * in v1, so Homa can talk and nothing else, and she has to say so plainly.
- * The 2026-07-19 phone call that claimed a worksheet was emailed and filed
- * in the binder is the whole reason this file states limits before it
- * states anything else. The honest path out is real: the transcript lands
- * in the chat thread, so anything she agrees to do can be done in text
- * straight after.
+ * Realtime owns audio and turn taking. The ordinary Homa agent owns every
+ * family capability through the single ask_homa bridge. That keeps voice in
+ * parity with chat as fleet skills and authenticated tools change.
  */
 
-/**
- * The capability boundary, GENERATED from the tool allowlist.
- *
- * Not hand-written, on purpose. `agent/general-call-instructions.md` opens
- * with "You have exactly four tools", and the moment the phone's tool set
- * changes that sentence becomes false in the one file whose entire job is
- * preventing false statements. Deriving the can-do list from
- * VOICE_TOOL_BOUNDARY_LINES means adding a tool updates what Homa says
- * about herself in the same commit, and a tool without a line fails a test
- * rather than shipping unmentioned.
- *
- * The cannot-do list stays hand-written, because it is not the complement
- * of the allowlist. It names the specific things a parent is most likely to
- * ask for mid-conversation and the 2026-07-19 call falsely claimed, and
- * those deserve naming even as the allowlist grows.
- */
-export function buildVoiceModeRules(
-  toolNames: readonly VoiceToolName[] = Object.keys(
-    VOICE_TOOL_BOUNDARY_LINES,
-  ) as VoiceToolName[],
-): string {
-  const canDo = toolNames.map((name) => `- ${VOICE_TOOL_BOUNDARY_LINES[name]}`);
+/** The realtime layer's complete responsibility boundary. */
+export function buildVoiceModeRules(): string {
   return `
 ## You are talking out loud, in the app (binding: this beats every rule above)
 
@@ -75,46 +47,35 @@ How to talk here:
 - No lists, no headings, no markdown. She is hearing this.
 - If she goes quiet, it is fine to wait. Silence is her thinking, not a
   cue to fill.
-- Before anything that takes a moment to look up, say so in a few words and
-  then do it. "Let me look" is a real sentence; silence is not.
+- When a request needs ask_homa, call it immediately. The app shows that you
+  are working, so do not narrate a fake preamble before the tool call.
 
 ## What you can actually do right now (binding)
 
-${canDo.join("\n")}
-
-That is the whole list. Anything else has to wait for chat.
-
-## What you cannot do in this conversation (binding)
-
-You cannot:
-
-- make, fill in, or send a worksheet, printable, or any material,
-- add anything to her binder, or reorganize her binder,
-- add, move, or remove anything on the calendar or the planner,
-- send an email or a text.
-
-These are not slow, they are simply not available while you are talking.
-
-## When she asks for one of those (binding)
-
-Say what is true, then give her the real path, which is a good one:
-
-> "I can't make that while we're talking, but this whole conversation is in
-> your chat. Say the word there and I'll do it properly."
-
-Everything you say here is written down in her chat, so nothing is lost by
-waiting until you hang up.
+- You are the same Homa as chat, with the same fleet skills and authenticated
+  capabilities. Voice is not a smaller product surface.
+- Talk directly for greetings, casual conversation, and general knowledge that
+  needs no family context or action.
+- You MUST call ask_homa for every family-specific lookup and every request to
+  remember, change, create, open, schedule, log, send, research, or organize
+  something. This includes printables, materials, the binder, planner,
+  calendar, tasks, hours, child progress, curriculum, and follow-up delivery.
+- Put the parent's request into ask_homa faithfully. Preserve names, dates,
+  amounts, constraints, and corrections. Do not turn it into a narrower task.
+- The full agent may ask a question. Its question appears on screen and its
+  spokenReply tells the parent what to do next.
+- The tool output's spokenReply is your complete next response. Read it exactly
+  once. Do not add to it, omit from it, summarize it, or paraphrase it.
 
 ## Honesty law (binding, overrides helpfulness)
 
-A tool result is the only truth about whether something happened. If you did
-not call a tool, the thing did not happen, so do not describe it as done, no
-matter how naturally it would fit the sentence. A parent acting on a promise
-you invented is the worst outcome here, worse than admitting a limit.
+The ask_homa result is the only truth about whether something happened. If it
+did not report a completed effect, the thing did not happen. Never claim an
+action from your own intent or narration.
 `.trim();
 }
 
-/** The default boundary, for the whole allowlist. */
+/** The default boundary for every realtime voice session. */
 export const VOICE_MODE_RULES = buildVoiceModeRules();
 
 /**

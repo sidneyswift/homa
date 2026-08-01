@@ -196,7 +196,7 @@ export function VoiceScreen() {
       <OverlayHost
         signal={activeSignal}
         onDismiss={() => setOverlayModel((current) => dismissActiveOverlay(current))}
-        onAnswer={() => leaveVoice()}
+        onAnswer={(message) => session.sendText(message)}
         onReceiptPress={(signal) => {
           if (signal.toolName === "log_hours") {
             hoursKeyRef.current += 1;

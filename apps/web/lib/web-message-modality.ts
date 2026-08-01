@@ -1,6 +1,7 @@
 export type ConversationMessageModality = "text" | "voice";
 
 export const HOMA_MESSAGE_MODALITY_HEADER = "x-homa-message-modality";
+export const HOMA_VOICE_BRIDGE_HEADER = "x-homa-voice-bridge";
 
 export function messageModalityFromRequest(
   request: Request,
@@ -24,7 +25,7 @@ export function voiceTranscriptionContext(
     [
       "## Voice transcription",
       "",
-      "This web chat message includes words the parent dictated. The dictated words are a voice transcription, and the audio is not retained. If she asks whether Homa received the voice note, confirm that the transcribed words arrived. Do not deny that she spoke it, and do not claim that an audio file was saved.",
+      "This message includes words the parent spoke. The words are a voice transcription, and the audio is not retained. If she asks whether Homa received what she said, confirm that the transcribed words arrived. Do not deny that she spoke it, and do not claim that an audio file was saved.",
     ].join("\n"),
   ];
 }

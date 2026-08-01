@@ -15,8 +15,9 @@ export default defineHook({
     async "message.completed"(event, ctx) {
       try {
         const attributes = ctx.session.auth.current?.attributes as
-          | { familyId?: string }
+          | { familyId?: string; voiceBridge?: string }
           | undefined;
+        if (attributes?.voiceBridge === "true") return;
         const familyId = attributes?.familyId;
         if (!familyId) return;
 

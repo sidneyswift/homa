@@ -1,10 +1,18 @@
 import { rateLimited } from "../../../../../lib/map/ratelimit";
 import { resolveApiFamily } from "../../../../../lib/api-auth";
-import { runVoiceTool } from "../../../../../lib/voice/realtime-tools";
+import { persistCanonicalMessage } from "../../../../../lib/conversation-continuity/ledger";
+import {
+  askHomaFromVoice,
+  parseVoiceHomaSessionState,
+} from "../../../../../lib/voice/homa-bridge";
+import {
+  ASK_HOMA_TOOL_NAME,
+  parseAskHomaInput,
+} from "../../../../../lib/voice/realtime-tools";
 
 /**
- * POST /api/voice/realtime/tool: runs one allowlisted tool for a browser
- * voice conversation (issue #283).
+ * POST /api/voice/realtime/tool: hands one spoken request to the full Homa
+ * agent, then returns her exact reply and authored tool effects.
  *
  * The realtime model emits a tool call over its own socket; the client
  * hands it here and returns the result to the model. That hop exists so
@@ -12,19 +20,16 @@ import { runVoiceTool } from "../../../../../lib/voice/realtime-tools";
  * its arguments are model output, so the only place they can be trusted is
  * behind this route's own authentication.
  *
- * On the AI SDK's warning against generic "execute tool by name" routes.
- * The concern is a dispatcher that skips the checks a purpose-built
- * endpoint would apply. This one applies all of them: the caller's cookie
- * session is verified here, familyId is read from their own membership row
- * rather than the request, the name must be present in a fixed allowlist,
- * the arguments are parsed by the tool's own zod schema, and the tool then
- * runs under the caller's JWT with RLS enforcing tenancy a second time.
- * The alternative, one route per tool, would be six copies of exactly this
- * and six chances to forget one of the five checks.
+ * The realtime model receives one fixed function, never a generic tool
+ * dispatcher. The ordinary Eve channel verifies the same caller JWT again,
+ * resolves the family under caller RLS, loads fleet skills, and re-scopes
+ * every model-supplied record id inside the authenticated family.
  *
  * The model never supplies familyId. It cannot: the field is not read from
  * the body at all.
  */
+
+export const maxDuration = 300;
 
 /** Generous for a conversation, tight enough that a model stuck in a loop
  * cannot spend the family's afternoon. */
@@ -34,9 +39,12 @@ const HOUR_MS = 60 * 60 * 1000;
 interface ToolCallBody {
   name?: unknown;
   args?: unknown;
-  /** The realtime session this call belongs to, for the tool context's
-   * session id. Untrusted, so it is only ever used as a label. */
   sessionId?: unknown;
+  /** The native transcript is preferred over the model-reconstructed tool
+   * argument. Older app builds omit it and safely fall back to args.request. */
+  sourceText?: unknown;
+  sourceSequence?: unknown;
+  homaSessionState?: unknown;
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -62,22 +70,87 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false, reason: "bad-json" }, { status: 400 });
   }
 
-  const outcome = await runVoiceTool({
-    name: body.name,
-    args: body.args,
-    identity: {
-      familyId,
-      memberUserId: userId,
-      supabaseAccessToken: accessToken,
-      sessionId:
-        typeof body.sessionId === "string" && body.sessionId.length > 0
-          ? body.sessionId.slice(0, 64)
-          : "voice",
-    },
+  if (body.name !== ASK_HOMA_TOOL_NAME) {
+    return Response.json({
+      ok: false,
+      output: {
+        ok: false,
+        spokenReply: "That did not go through just now. Nothing changed.",
+        effects: [],
+      },
+    });
+  }
+  const parsed = parseAskHomaInput(body.args);
+  if (!parsed) {
+    return Response.json({
+      ok: false,
+      output: {
+        ok: false,
+        spokenReply: "I missed that. Would you say it once more?",
+        effects: [],
+      },
+    });
+  }
+  const sourceText =
+    typeof body.sourceText === "string" && body.sourceText.trim().length > 0
+      ? body.sourceText
+      : parsed.request;
+  const sessionId =
+    typeof body.sessionId === "string" && body.sessionId.length > 0
+      ? body.sessionId.slice(0, 120)
+      : null;
+  const sourceSequence =
+    typeof body.sourceSequence === "number"
+      ? Math.trunc(body.sourceSequence)
+      : null;
+  if (!sessionId || sourceSequence === null || sourceSequence < 0) {
+    return Response.json({
+      ok: false,
+      output: {
+        ok: false,
+        spokenReply: "I missed that. Would you say it once more?",
+        effects: [],
+      },
+    });
+  }
+  let sourceMessageId: string;
+  try {
+    const persisted = await persistCanonicalMessage({
+      attributes: { familyId, memberUserId: userId },
+      sessionId,
+      channel: "web",
+      sequence: sourceSequence,
+      role: "user",
+      content: sourceText,
+      turnId: `${sessionId}:${sourceSequence}`,
+      modality: "voice",
+    });
+    if (!persisted) throw new Error("voice source turn was not saved");
+    sourceMessageId = persisted.id;
+  } catch (error) {
+    console.error(
+      "voice bridge source persist failed:",
+      error instanceof Error ? error.message : "unknown",
+    );
+    return Response.json({
+      ok: false,
+      output: {
+        ok: false,
+        spokenReply: "I could not safely finish that just now. Nothing changed.",
+        effects: [],
+      },
+    });
+  }
+  const outcome = await askHomaFromVoice({
+    host: new URL(request.url).origin,
+    accessToken,
+    message: sourceText,
+    sourceMessageId,
+    sessionState: parseVoiceHomaSessionState(body.homaSessionState),
   });
 
   // Always 200 with a result the model can read aloud. A non-2xx here would
   // surface to a talking parent as a dropped sentence; the tool's own note
   // is the honest thing to say instead.
-  return Response.json({ ok: outcome.ok, output: outcome.output });
+  return Response.json({ ok: outcome.ok, output: outcome });
 }
