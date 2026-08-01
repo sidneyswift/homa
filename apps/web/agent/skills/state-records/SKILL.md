@@ -7,7 +7,7 @@ metadata:
 
 # State records
 
-Help the parent reach the reviewed state pack and filing document without
+Help the parent reach the reviewed state packet and filing document without
 turning Homa into a lawyer or a filing service.
 
 ## First decide what she means
@@ -18,13 +18,13 @@ turning Homa into a lawyer or a filing service.
 - "Notice," "letter," "filing," "form," or "paperwork I send" means
   `generate_filing` when she asks to make or refresh it.
 - "Print it" or "share it" means open the state records first if no current
-  state pack or filing document is already on screen. The native view hands the selected
+  state packet or filing document is already on screen. The native view hands the selected
   document to the normal material print and share surfaces.
 
 Parents will not say internal names. Treat "Can you get my paperwork ready?"
 as state records when the surrounding conversation is about reporting to the
 state. If the target is genuinely ambiguous, ask one short question: "Do you
-mean the pack for your records, or the document you send?"
+mean the packet for your records, or the document you send?"
 
 ## Workflow
 
@@ -48,28 +48,28 @@ mean the pack for your records, or the document you send?"
 
 ## The legal and records boundary
 
-- The requirements pack uses Homa's reviewed state snapshot. Do not answer
+- The requirements packet uses Homa's reviewed state snapshot. Do not answer
   from model memory when the reviewed record is missing.
-- Logged school-time coverage is shown beside the pack. Do not claim those
+- Logged school-time coverage is shown beside the packet. Do not claim those
   entries were compiled into the PDF unless a later tool result explicitly
   says they were.
 - Missing family details print as blanks. Never fill a blank with a guess.
 - Homa never submits state paperwork. The parent reviews every page, fills any
   blanks, signs when needed, and files it herself.
-- Earlier packs and filings are receipts. Regeneration creates a new current
+- Earlier packets and filings are receipts. Regeneration creates a new current
   copy and preserves the older ones.
 
 ## Voice response examples
 
 After opening:
 
-> I pulled up your Ohio state records. Your current pack, sources, and any
+> I pulled up your Ohio state records. Your current packet, sources, and any
 > blanks are on screen, and we can keep talking while you look.
 
 After generation:
 
-> Your pack is ready to review. I showed the school time you have logged so far.
-> Those totals stay beside the pack because its record pages are blank.
+> Your packet is ready to review. I showed the school time you have logged so far.
+> Those totals stay beside the packet because its record pages are blank.
 
 For a notice Homa can prepare:
 

@@ -125,7 +125,7 @@ export function StateRecordsCard({
           State records
         </Text>
         <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted }}>
-          The pack explains your state’s rules and includes blank record pages. The school time you logged stays separate beside it.
+          The packet explains your state’s rules and includes blank record pages. The school time you logged stays separate beside it.
         </Text>
       </View>
 
@@ -158,19 +158,19 @@ export function StateRecordsCard({
               {summary.recordCoverage.daysWithLoggedTime} days with logged school time · {summary.recordCoverage.loggedEntries} time entries · {Math.round(summary.recordCoverage.minutesLogged / 60)} hours
             </Text>
             <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
-              These totals come from the school time you logged with Homa. The pack PDF keeps its attendance and time pages blank for you to review and complete.
+              These totals come from the school time you logged with Homa. The packet PDF keeps its attendance and time pages blank for you to review and complete.
             </Text>
           </View>
 
-          <Section label="Included in the pack" items={summary.includedRecords} />
+          <Section label="Included in the packet" items={summary.includedRecords} />
           <Section
-            label="Missing details"
-            items={summary.missingInformation.length > 0 ? summary.missingInformation : ["No missing details"]}
+            label="Missing information"
+            items={summary.missingInformation.length > 0 ? summary.missingInformation : ["No missing information"]}
             calm={summary.missingInformation.length === 0}
           />
           {summary.missingInformation.length > 0 ? (
             <Button
-              label="Finish missing details"
+              label="Add missing information"
               variant="secondary"
               onPress={() => router.push("/settings")}
             />
@@ -181,14 +181,14 @@ export function StateRecordsCard({
             {currentPack ? (
               <DocumentRow document={currentPack} onOpen={() => onOpenDocument(currentPack)} />
             ) : (
-              <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted }}>No pack yet. Make one when you’re ready.</Text>
+              <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted }}>No packet yet. Make one when you’re ready.</Text>
             )}
             {currentFiling ? <DocumentRow document={currentFiling} onOpen={() => onOpenDocument(currentFiling)} /> : null}
           </View>
 
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space.sm }}>
             <Button
-              label={working === "generate_pack" ? "Making pack…" : currentPack ? "Make a fresh pack" : "Make my pack"}
+              label={working === "generate_pack" ? "Making packet…" : currentPack ? "Make a fresh packet" : "Make my packet"}
               disabled={working !== null}
               onPress={() => void make("generate_pack")}
             />
