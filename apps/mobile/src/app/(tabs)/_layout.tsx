@@ -7,6 +7,7 @@ import { AppTopBar } from "../../components/nav/app-top-bar";
 import { BillingGate } from "../../components/billing-gate";
 import { useSession } from "../../features/auth/session-provider";
 import { useFamilyData } from "../../features/family/use-family-data";
+import { VoiceDock } from "../../features/voice/voice-dock";
 import { colors } from "../../theme/tokens";
 
 /**
@@ -49,6 +50,7 @@ function AppShell() {
           }}
         />
       </View>
+      <VoiceDock />
       <AppDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}

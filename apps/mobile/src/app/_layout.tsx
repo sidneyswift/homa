@@ -5,6 +5,7 @@ import { useEffect } from "react";
 
 import { ErrorBoundary } from "../components/error-boundary";
 import { SessionProvider, useSession } from "../features/auth/session-provider";
+import { VoiceWorkbenchProvider } from "../features/voice/voice-workbench-provider";
 import { initCrashReporting } from "../lib/crash-reporting";
 import { installStreamingFetch } from "../lib/streaming-fetch";
 import { useHomaFonts } from "../theme/fonts";
@@ -39,11 +40,7 @@ function RootNavigator() {
         headerShown: false,
         contentStyle: { backgroundColor: colors.page },
       }}
-    >
-      {/* The voice-first surface covers the whole app; its own close
-          button is the way back (features/voice/voice-screen.tsx). */}
-      <Stack.Screen name="voice" options={{ presentation: "fullScreenModal" }} />
-    </Stack>
+    />
   );
 }
 
@@ -51,7 +48,9 @@ export default function RootLayout() {
   return (
     <ErrorBoundary>
       <SessionProvider>
-        <RootNavigator />
+        <VoiceWorkbenchProvider>
+          <RootNavigator />
+        </VoiceWorkbenchProvider>
         <StatusBar style="dark" />
       </SessionProvider>
     </ErrorBoundary>
