@@ -499,6 +499,7 @@ function agentComposedEmailArgs(
   bodyLines: string[],
   replyTo?: string,
   familyId?: string | null,
+  cta?: { label: string; url: string },
 ): SendArgs {
   return {
     to,
@@ -507,6 +508,7 @@ function agentComposedEmailArgs(
     heading: subject,
     bodyLines,
     replyTo,
+    ...(cta ? { cta } : {}),
     footerNote: "Homa sent this because you asked, or it followed naturally from a conversation.",
     ...(familyId !== undefined
       ? { ledger: { kind: "agent_composed", familyId } }
@@ -523,6 +525,21 @@ export async function sendAgentComposedEmail(
 ): Promise<boolean> {
   return send(
     agentComposedEmailArgs(to, subject, bodyLines, replyTo, familyId),
+  );
+}
+
+export async function sendAgentMaterialEmail(
+  to: string,
+  subject: string,
+  bodyLines: string[],
+  material: { title: string; pdfUrl: string },
+  familyId: string,
+): Promise<boolean> {
+  return send(
+    agentComposedEmailArgs(to, subject, bodyLines, undefined, familyId, {
+      label: `Open ${material.title}`,
+      url: material.pdfUrl,
+    }),
   );
 }
 

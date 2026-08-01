@@ -366,6 +366,39 @@ describe("deriveOverlaySignals: mapping", () => {
     assert.deepEqual(signals[0].printRequest, printRequest);
   });
 
+  it("accepts only a same-material native share request", () => {
+    const materialId = "11111111-1111-4111-8111-111111111111";
+    const shareRequest = {
+      materialId,
+      title: "Counting cards",
+      authorizedPdfPath: `/api/materials/${materialId}/pdf`,
+      suggestedMessage: "I thought you'd want a copy of Counting cards.",
+    };
+    const { signals } = deriveOverlaySignals(
+      [assistantMessage("msg-share", [
+        toolPart("prepare_material_share", {
+          material: { ...material, id: materialId, status: "final" },
+          shareRequest,
+        }),
+      ])],
+      new Set(),
+    );
+    assert.equal(signals[0]?.kind, "material");
+    if (signals[0]?.kind !== "material") throw new Error("expected material signal");
+    assert.deepEqual(signals[0].shareRequest, shareRequest);
+
+    const mismatched = deriveOverlaySignals(
+      [assistantMessage("msg-share-wrong", [
+        toolPart("prepare_material_share", {
+          material: { ...material, id: "22222222-2222-4222-8222-222222222222", status: "final" },
+          shareRequest,
+        }),
+      ])],
+      new Set(),
+    );
+    assert.deepEqual(mismatched.signals, []);
+  });
+
   it("drops a print effect when its authorized route does not match the material", () => {
     const { signals } = deriveOverlaySignals(
       [
