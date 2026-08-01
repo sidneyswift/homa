@@ -19,7 +19,8 @@
       "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSMicrophoneUsageDescription": "Homa uses your microphone so you can talk together."
+        "NSMicrophoneUsageDescription": "Homa uses your microphone so you can talk together.",
+        "NSCameraUsageDescription": "Homa may use your camera during a live conversation when you choose to share what you are seeing."
       }
     },
     "android": {
