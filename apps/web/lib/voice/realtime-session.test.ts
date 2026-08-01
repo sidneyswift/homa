@@ -40,7 +40,7 @@ describe("realtime voice instructions", () => {
 });
 
 describe("realtime voice interruption policy", () => {
-  it("does not let ambient input cancel Homa while she is speaking", () => {
+  it("lets the parent interrupt through filtered, thresholded speech detection", () => {
     const mapped = openai.experimental_realtime("gpt-realtime-2.1").buildSessionConfig({
       providerOptions: buildRealtimeAudioProviderOptions("marin"),
     }) as { audio?: unknown };
@@ -48,10 +48,14 @@ describe("realtime voice interruption policy", () => {
     assert.deepEqual(mapped.audio, {
       input: {
         transcription: { model: "gpt-realtime-whisper" },
+        noise_reduction: { type: "far_field" },
         turn_detection: {
-          type: "semantic_vad",
+          type: "server_vad",
+          threshold: 0.65,
+          prefix_padding_ms: 300,
+          silence_duration_ms: 650,
           create_response: true,
-          interrupt_response: false,
+          interrupt_response: true,
         },
       },
       output: { voice: "marin" },
