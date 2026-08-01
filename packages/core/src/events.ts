@@ -517,6 +517,60 @@ export const EVENT_SCHEMAS = {
       client: z.enum(PLANNER_EVENT_CLIENTS),
     })
     .strict(),
+  // Voice-built month plans (gh#539). Drafts remain session-bound until
+  // approval, so these events carry only ids and counts, never plan copy.
+  "planner.month_draft_requested": z
+    .object({
+      family_id: z.uuid(),
+      draft_id: z.uuid(),
+      child_count: z.number().int().min(1).max(8),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
+  "planner.month_preview_ready": z
+    .object({
+      family_id: z.uuid(),
+      draft_id: z.uuid(),
+      revision: z.number().int().min(1),
+      conflict_count: z.number().int().min(0),
+      unresolved_count: z.number().int().min(0),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
+  "planner.month_approved": z
+    .object({
+      family_id: z.uuid(),
+      draft_id: z.uuid(),
+      revision: z.number().int().min(1),
+      child_count: z.number().int().min(1).max(8),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
+  "planner.month_revised": z
+    .object({
+      family_id: z.uuid(),
+      draft_id: z.uuid(),
+      revision: z.number().int().min(2),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
+  "planner.month_abandoned": z
+    .object({
+      family_id: z.uuid(),
+      draft_id: z.uuid(),
+      revision: z.number().int().min(1),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
+  "planner.month_restored": z
+    .object({
+      family_id: z.uuid(),
+      draft_id: z.uuid(),
+      revision: z.number().int().min(2),
+      restored_from: z.number().int().min(1),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
   // Homa edited a plan's activities from chat (the edit_plan tool, one
   // event per applied batch). Counts only, no activity text: the funnel
   // reads how often the agent drives the planner without carrying PII.
