@@ -4,16 +4,9 @@ import { z } from "zod";
 import { selectParentVisibleMaterialRevisions } from "../materials/parent-visible";
 import { mapDb } from "../map/db";
 
-/**
- * Temporary material-only seam for gh#537/gh#538 while the general active
- * object contract in gh#536 is still open. The native client identifies the
- * material card it is showing. This module turns that hint into bounded agent
- * context only after an RLS read and a family predicate agree that the exact
- * revision is still the parent-visible node of its chain.
- *
- * Replace this adapter with gh#536's general resolver, never grow it into a
- * second active-object system.
- */
+/** Material-specific validation shared by printing and the general active
+ * object resolver. An id is usable only while it is the exact parent-visible
+ * node of its revision chain inside the authenticated family. */
 
 export const VOICE_ACTIVE_MATERIAL_HEADER = "x-homa-active-material-id";
 
@@ -41,6 +34,7 @@ export interface ResolvedActiveMaterial {
   title: string;
   status: "draft" | "final";
   revisesId: string | null;
+  createdAt?: string;
   pageCount: number;
   pageRoles: MaterialPageRole[] | null;
 }
@@ -98,6 +92,7 @@ export function selectActiveMaterial(
     title: selected.title,
     status: selected.status,
     revisesId: selected.revises,
+    createdAt: selected.created_at,
     pageCount: count,
     pageRoles: parseMaterialPageRoles(selected.page_roles, count),
   };
