@@ -29,6 +29,7 @@ import { MaterialDetailModal } from "../../features/binder/material-detail-modal
 import { MaterialGridCard } from "../../features/binder/material-grid-card";
 import { useBinderData } from "../../features/binder/use-binder-data";
 import { useFamilyData } from "../../features/family/use-family-data";
+import { useVoiceWorkbench } from "../../features/voice/voice-workbench-provider";
 import { keepMaterial } from "../../lib/materials";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
@@ -58,6 +59,7 @@ export default function BinderScreen() {
   const [openMaterial, setOpenMaterial] = useState<BinderMaterial | null>(null);
   const [keepingId, setKeepingId] = useState<string | null>(null);
   const [nowMs] = useState(() => Date.now());
+  const { showActiveObject, clearActiveObject } = useVoiceWorkbench();
 
   const materials = useMemo(() => toBinderMaterials(finalMaterials, children), [finalMaterials, children]);
   const inProgress = useMemo(() => toBinderMaterials(inProgressMaterials, children), [inProgressMaterials, children]);
@@ -74,6 +76,26 @@ export default function BinderScreen() {
     await keepMaterial(family.id, materialId);
     setKeepingId(null);
     void reload();
+  }
+
+  function openMaterialDetail(material: BinderMaterial) {
+    showActiveObject({
+      kind: "material",
+      objectId: material.id,
+      version: material.createdAt,
+    });
+    setOpenMaterial(material);
+  }
+
+  function closeMaterialDetail() {
+    if (openMaterial) {
+      clearActiveObject({
+        kind: "material",
+        objectId: openMaterial.id,
+        version: openMaterial.createdAt,
+      });
+    }
+    setOpenMaterial(null);
   }
 
   return (
@@ -201,14 +223,14 @@ export default function BinderScreen() {
             <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textBody }}>
               {cover.heading}
             </Text>
-            <MaterialGrid materials={cover.items} onSelect={setOpenMaterial} />
+            <MaterialGrid materials={cover.items} onSelect={openMaterialDetail} />
           </View>
         ) : null}
 
-        {gridMaterials.length > 0 ? <MaterialGrid materials={gridMaterials} onSelect={setOpenMaterial} /> : null}
+        {gridMaterials.length > 0 ? <MaterialGrid materials={gridMaterials} onSelect={openMaterialDetail} /> : null}
       </ScrollView>
 
-      <MaterialDetailModal material={openMaterial} onClose={() => setOpenMaterial(null)} />
+      <MaterialDetailModal material={openMaterial} onClose={closeMaterialDetail} />
     </SafeAreaView>
   );
 }

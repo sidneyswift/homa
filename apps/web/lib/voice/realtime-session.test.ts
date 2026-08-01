@@ -84,4 +84,9 @@ describe("the full Homa voice bridge", () => {
   it("keeps completion claims behind real results", () => {
     assert.match(VOICE_MODE_RULES, /only truth about whether something happened/u);
   });
+
+  it("routes references to the visible object through the authenticated agent", () => {
+    assert.match(VOICE_MODE_RULES, /this, that, the visible/u);
+    assert.match(VOICE_MODE_RULES, /exact object is still visible and safe/u);
+  });
 });

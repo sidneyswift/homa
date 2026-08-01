@@ -15,6 +15,7 @@ import {
   readyPrintMessage,
   runPreparedMaterialPrint,
 } from "../materials/material-print";
+import { VoiceDock } from "../voice/voice-dock";
 
 function formatKeptOn(dateOnly: string): string {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(
@@ -122,6 +123,7 @@ export function MaterialDetailModal({ material, onClose }: { material: BinderMat
             ) : null}
           </ScrollView>
         ) : null}
+        <VoiceDock />
       </SafeAreaView>
     </Modal>
   );

@@ -8,10 +8,6 @@ import {
   HOMA_MESSAGE_MODALITY_HEADER,
 } from "../web-message-modality";
 import { voiceBridgeAuthHeaders } from "./voice-bridge-auth";
-import {
-  type ActiveMaterialReference,
-  VOICE_ACTIVE_MATERIAL_HEADER,
-} from "./active-material";
 
 /**
  * The realtime model owns audio and turn taking. The ordinary Eve agent owns
@@ -53,8 +49,8 @@ export interface VoiceHomaTurnRunner {
     accessToken: string;
     message: string;
     sourceMessageId: string;
+    activeObjectContext?: string;
     sessionState?: SessionState;
-    activeMaterial?: ActiveMaterialReference;
     signal: AbortSignal;
   }): Promise<VoiceHomaTurnResult>;
 }
@@ -72,10 +68,8 @@ function defaultRunner(): VoiceHomaTurnRunner {
             accessToken: input.accessToken,
             message: input.message,
             messageId: input.sourceMessageId,
+            activeObjectContext: input.activeObjectContext,
           }),
-          ...(input.activeMaterial
-            ? { [VOICE_ACTIVE_MATERIAL_HEADER]: input.activeMaterial.id }
-            : {}),
         },
         maxReconnectAttempts: 4,
         preserveCompletedSessions: true,
@@ -139,8 +133,8 @@ export async function askHomaFromVoice(
     accessToken: string;
     message: string;
     sourceMessageId: string;
+    activeObjectContext?: string;
     sessionState?: SessionState;
-    activeMaterial?: ActiveMaterialReference;
   },
   runner: VoiceHomaTurnRunner = defaultRunner(),
 ): Promise<VoiceHomaBridgeOutput> {
@@ -161,8 +155,8 @@ export async function askHomaFromVoice(
       accessToken: input.accessToken,
       message,
       sourceMessageId: input.sourceMessageId,
+      activeObjectContext: input.activeObjectContext,
       sessionState: input.sessionState,
-      activeMaterial: input.activeMaterial,
       signal: controller.signal,
     });
     const effects = voiceHomaEffects(result.events);
