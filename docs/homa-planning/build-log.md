@@ -3,6 +3,32 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-31 · Founder ruling: evals run nightly or manually, never per merge
+
+Founder ruling, not an agent decision. Registered as
+`evals-nightly-manual` in `journeys/10-reconciliation.md` §5.
+
+**What was ruled.** The complete real-model behavioral suite runs on its
+daily schedule and by manual dispatch only. Pull requests, pushes, and merges
+never start it automatically. The eval definitions, strict grading,
+disposable database and artifact store, real Vercel OIDC model access, and
+45-minute workflow bound remain unchanged.
+
+**Why.** Every completed, non-canceled run among the latest twelve workflow
+runs was red. The two most recent completed reads passed 25 of 33 and 28 of
+33 evals, with different failure sets: valid clarifying questions graded as
+parked, variable skill routing, exact workflow-result mismatches, and one
+slow materials timeout. The eval workflow is optional, its failures were not
+being fixed before merge, and every triggered run executed all 33 evals even
+when one small capability changed. That made automatic red runs expensive
+noise rather than useful merge feedback.
+
+**What protects merges.** The required deterministic `build-and-check` gate
+and the required Vercel deployment stay unchanged. A person investigating
+agent behavior can start the complete eval suite from GitHub at any time;
+the daily run preserves a regular product-health read without charging every
+merge for it.
+
 ## 2026-07-31 · Founder ruling: a scored report completes onboarding
 
 Founder ruling, not an agent decision. Registered as
@@ -60,11 +86,12 @@ Measured canaries on PR #499:
 - The earlier preview baseline was about 3m47s, so the warm path saved about
   1m44s without changing the produced Eve deployment artifact.
 
-The paid eval workflow keeps the founder-directed pull-request path filter,
-applies the same filter to main pushes, and runs the complete suite daily so
-unrelated changes do not spend model budget while periodic coverage remains.
-Its default per-eval timeout is five minutes; the explicitly slower materials
-evals keep their existing twenty-minute overrides.
+The paid eval workflow originally kept pull-request and main-push path
+filters plus a daily sweep. That cadence was superseded the same day by
+`evals-nightly-manual`: the complete suite now runs only on its daily schedule
+or by manual dispatch. Its default per-eval timeout remains five minutes; the
+explicitly slower materials evals keep their existing twenty-minute
+overrides.
 
 ## 2026-07-31 · Founder ruling: PR builds are carried by Vercel's preview check
 

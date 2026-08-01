@@ -1,7 +1,9 @@
 name: Evals
 
 # Behavioral evals against the real model, in CI (founder directive
-# 2026-07-27).
+# 2026-07-27). The 2026-07-31 `evals-nightly-manual` ruling narrowed the
+# cadence to scheduled and manual runs only. PRs and pushes never launch
+# this paid, stochastic suite automatically.
 #
 # Why this is a separate workflow rather than a step in ci.yml: these
 # cost money and take minutes, and they are the only checks here that
@@ -24,39 +26,14 @@ name: Evals
 # production.
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      # Anything that can change what the agent decides or produces.
-      - "apps/web/agent/**"
-      - "apps/web/evals/**"
-      - "apps/web/lib/materials/**"
-      - "apps/web/lib/onboarding/**"
-      - "apps/web/lib/family-context**"
-      - "apps/web/lib/agent-db.ts"
-      - "apps/web/lib/eval-isolation.ts"
-      - "supabase/migrations/**"
-      - ".github/workflows/evals.yml"
-  push:
-    branches: [main]
-    paths:
-      - "apps/web/agent/**"
-      - "apps/web/evals/**"
-      - "apps/web/lib/materials/**"
-      - "apps/web/lib/onboarding/**"
-      - "apps/web/lib/family-context**"
-      - "apps/web/lib/agent-db.ts"
-      - "apps/web/lib/eval-isolation.ts"
-      - "supabase/migrations/**"
-      - ".github/workflows/evals.yml"
   # The full suite still gets a clean periodic read, including capabilities
   # that have not changed recently. Minute 17 avoids the top-of-hour queue.
   schedule:
     - cron: "17 9 * * *"
   workflow_dispatch:
 
-# A newer push supersedes an in-flight run: these cost real money, so
-# never pay twice for a branch nobody is looking at any more.
+# A newer run on the same ref supersedes an in-flight run: these cost real
+# money, so never pay twice for the same scheduled or manual read.
 concurrency:
   group: evals-${{ github.ref }}
   cancel-in-progress: true
