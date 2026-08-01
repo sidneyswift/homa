@@ -8,6 +8,7 @@ import {
   CalendarDays,
   ChartLine,
   Clock,
+  LibraryBig,
   ListChecks,
   Sparkles,
 } from "lucide-react";
@@ -30,6 +31,7 @@ export const APP_NAV_ITEMS = [
   { href: "/app/planner", label: "Planner", icon: Calendar },
   { href: "/app/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/app/hours", label: "Hours", icon: Clock },
+  { href: "/app/library", label: "Library", icon: LibraryBig },
   { href: "/app/binder", label: "Binder", icon: BookOpen },
   { href: "/app/tasks", label: "Tasks", icon: ListChecks },
 ] as const;

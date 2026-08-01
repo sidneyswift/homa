@@ -1,0 +1,170 @@
+export const FAMILY_ASSET_FILE_KINDS = [
+  "document",
+  "image",
+  "audio",
+  "video",
+  "archive",
+  "link",
+  "other",
+] as const;
+
+export type FamilyAssetFileKind = (typeof FAMILY_ASSET_FILE_KINDS)[number];
+
+export const FAMILY_ASSET_RESOURCE_KINDS = [
+  "worksheet",
+  "book",
+  "curriculum",
+  "answer_key",
+  "activity",
+  "reference",
+  "other",
+] as const;
+
+export type FamilyAssetResourceKind =
+  (typeof FAMILY_ASSET_RESOURCE_KINDS)[number];
+
+export const FAMILY_ASSET_STATUSES = [
+  "ready",
+  "processing",
+  "needs_attention",
+  "failed",
+] as const;
+
+export type FamilyAssetStatus = (typeof FAMILY_ASSET_STATUSES)[number];
+
+export interface FamilyAssetView {
+  id: string;
+  title: string;
+  originalName: string;
+  url: string;
+  downloadUrl: string;
+  mediaType: string;
+  byteSize: number;
+  fileKind: FamilyAssetFileKind;
+  resourceKind: FamilyAssetResourceKind | null;
+  status: FamilyAssetStatus;
+  processingNote: string | null;
+  createdAt: string;
+}
+
+export const MAX_LIBRARY_UPLOAD_BYTES = 500 * 1024 * 1024;
+
+const ARCHIVE_MEDIA_TYPES = new Set([
+  "application/epub+zip",
+  "application/vnd.rar",
+  "application/x-7z-compressed",
+  "application/x-rar-compressed",
+  "application/zip",
+]);
+
+const DOCUMENT_MEDIA_TYPES = new Set([
+  "application/msword",
+  "application/pdf",
+  "application/rtf",
+  "application/vnd.apple.keynote",
+  "application/vnd.apple.numbers",
+  "application/vnd.apple.pages",
+  "application/vnd.ms-excel",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.oasis.opendocument.presentation",
+  "application/vnd.oasis.opendocument.spreadsheet",
+  "application/vnd.oasis.opendocument.text",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+]);
+
+const LIBRARY_EXTENSION_MEDIA_TYPES: Readonly<Record<string, string>> = {
+  ".azw": "application/vnd.amazon.ebook",
+  ".azw3": "application/vnd.amazon.ebook",
+  ".csv": "text/csv",
+  ".doc": "application/msword",
+  ".docx":
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".epub": "application/epub+zip",
+  ".jpeg": "image/jpeg",
+  ".jpg": "image/jpeg",
+  ".md": "text/markdown",
+  ".mobi": "application/x-mobipocket-ebook",
+  ".numbers": "application/vnd.apple.numbers",
+  ".odp": "application/vnd.oasis.opendocument.presentation",
+  ".ods": "application/vnd.oasis.opendocument.spreadsheet",
+  ".odt": "application/vnd.oasis.opendocument.text",
+  ".pages": "application/vnd.apple.pages",
+  ".pdf": "application/pdf",
+  ".png": "image/png",
+  ".ppt": "application/vnd.ms-powerpoint",
+  ".pptx":
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  ".rtf": "application/rtf",
+  ".txt": "text/plain",
+  ".xls": "application/vnd.ms-excel",
+  ".xlsx":
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ".zip": "application/zip",
+};
+
+/** Exact file-container classification only. Resource meaning such as
+ * "curriculum" or "worksheet" belongs to the model judgment layer. */
+export function familyAssetFileKind(mediaType: string): FamilyAssetFileKind {
+  const normalized = mediaType.trim().toLowerCase().split(";", 1)[0] ?? "";
+  if (normalized.startsWith("image/")) return "image";
+  if (normalized.startsWith("audio/")) return "audio";
+  if (normalized.startsWith("video/")) return "video";
+  if (normalized.startsWith("text/") || DOCUMENT_MEDIA_TYPES.has(normalized)) {
+    return "document";
+  }
+  if (ARCHIVE_MEDIA_TYPES.has(normalized)) return "archive";
+  return "other";
+}
+
+/** Browsers sometimes omit the MIME type for known educational files.
+ * Keep the server allowlist meaningful by filling only exact, unambiguous
+ * container extensions. Notably, `.key` is not inferred because it can be a
+ * Keynote deck or a secret key; the browser must identify that type itself. */
+export function libraryUploadMediaType(
+  name: string,
+  browserMediaType: string,
+): string {
+  const normalized = browserMediaType.trim().toLowerCase().split(";", 1)[0];
+  if (normalized && normalized !== "application/octet-stream") return normalized;
+  const extension = /\.[^.]+$/u.exec(name.normalize("NFKC").toLowerCase())?.[0];
+  return extension ? LIBRARY_EXTENSION_MEDIA_TYPES[extension] ?? "" : "";
+}
+
+export function safeLibraryPathName(name: string): string {
+  const cleaned = name
+    .normalize("NFKC")
+    .replace(/[^\p{L}\p{N}._-]+/gu, "-")
+    .replace(/-+/gu, "-")
+    .replace(/^[-.]+|[-.]+$/gu, "");
+  return cleaned.length > 0 ? cleaned.slice(-120) : "resource";
+}
+
+export function titleFromLibraryFileName(name: string): string {
+  const normalized = name.normalize("NFKC").trim().slice(0, 180);
+  const withoutExtension = normalized.replace(/\.[^.]{1,12}$/u, "").trim();
+  return withoutExtension || normalized || "Untitled resource";
+}
+
+/** A client-supplied URL is only a candidate when it is in this exact
+ * family's Library prefix on Homa's configured artifact store. */
+export function isFamilyLibraryUrl(url: string, familyId: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return (
+      parsed.protocol === "https:" &&
+      parsed.hostname.endsWith(".public.blob.vercel-storage.com") &&
+      parsed.pathname.startsWith(`/families/${familyId}/library/`)
+    );
+  } catch {
+    return false;
+  }
+}
+
+export function formatFamilyAssetBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  const megabytes = bytes / (1024 * 1024);
+  return `${megabytes >= 10 ? Math.round(megabytes) : megabytes.toFixed(1)} MB`;
+}
