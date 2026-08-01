@@ -40,6 +40,7 @@ import {
   type PlanActivityView,
   type ScheduledActivityView,
 } from "../planner/planner-model";
+import type { MonthPlanPreview } from "../planner/month-plan-preview-model";
 import { ScheduleActivitySheet } from "../planner/schedule-activity-sheet";
 import { usePlannerData } from "../planner/use-planner-data";
 import { WeekView } from "../planner/week-view";
@@ -148,6 +149,25 @@ export function OverlayHost({
       </OverlaySheet>
     );
   }
+  if (signal.kind === "monthPlan") {
+    return (
+      <OverlaySheet
+        onDismiss={onDismiss}
+        accessibilityLabel="Month plan preview"
+        handleLabel="Close preview"
+        float={float}
+      >
+        <MonthPlanPreviewBody
+          preview={signal.preview}
+          onApprove={() => {
+            onAnswer?.("Approve this month plan exactly as shown.");
+            onDismiss();
+          }}
+          onChange={onDismiss}
+        />
+      </OverlaySheet>
+    );
+  }
   if (signal.kind === "hours") {
     return (
       <OverlaySheet
@@ -167,6 +187,238 @@ export function OverlayHost({
     >
       <PlannerOverlayBody refreshCount={signal.refreshCount} />
     </OverlaySheet>
+  );
+}
+
+function shortDate(value: string): string {
+  return new Date(`${value}T12:00:00.000Z`).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function MonthPlanPreviewBody({
+  preview,
+  onApprove,
+  onChange,
+}: {
+  preview: MonthPlanPreview;
+  onApprove: () => void;
+  onChange: () => void;
+}) {
+  const hasUnresolvedChoices = preview.unresolvedChoices.length > 0;
+  const hasOpenItems =
+    preview.conflicts.length > 0
+    || preview.unscheduledItems.length > 0
+    || hasUnresolvedChoices;
+  return (
+    <View style={{ flex: 1 }}>
+      <View style={{ paddingHorizontal: space.md, paddingBottom: space.sm, gap: 3 }}>
+        <Text
+          style={{
+            fontFamily: fontFamilies.display,
+            fontSize: fontSize.xl,
+            color: colors.textStrong,
+          }}
+        >
+          {preview.title}
+        </Text>
+        <Text
+          style={{
+            fontFamily: fontFamilies.body,
+            fontSize: fontSize.sm,
+            color: colors.textMuted,
+          }}
+        >
+          {`${preview.revision === 1 ? "New month preview" : "Updated month preview"} · Nothing is on the Planner yet`}
+        </Text>
+      </View>
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: space.md,
+          paddingBottom: space.xl,
+          gap: space.md,
+        }}
+      >
+        {preview.restoredFrom ? (
+          <PreviewNotice
+            title="Showing your earlier plan"
+            body="Your later changes are still available. Ask Homa to bring them back."
+            tone="sage"
+          />
+        ) : null}
+        {preview.children.map((child) => (
+          <View key={child.childId} style={{ gap: space.sm }}>
+            <Text
+              style={{
+                fontFamily: fontFamilies.displaySemibold,
+                fontSize: fontSize.lg,
+                color: colors.textStrong,
+              }}
+            >
+              {child.childName}
+            </Text>
+            {child.weeks.map((week) => (
+              <View
+                key={week.week}
+                style={{
+                  borderRadius: radius.lg,
+                  borderWidth: 1,
+                  borderColor: colors.borderSubtle,
+                  backgroundColor: colors.card,
+                  padding: space.md,
+                  gap: space.sm,
+                }}
+              >
+                <View style={{ flexDirection: "row", justifyContent: "space-between", gap: space.sm }}>
+                  <Text
+                    style={{
+                      fontFamily: fontFamilies.bodyBold,
+                      fontSize: fontSize.sm,
+                      color: colors.textStrong,
+                    }}
+                  >
+                    {`Week ${week.week}`}
+                  </Text>
+                  <Text
+                    numberOfLines={1}
+                    style={{
+                      flexShrink: 1,
+                      fontFamily: fontFamilies.bodyMedium,
+                      fontSize: fontSize.xs,
+                      color: colors.textMuted,
+                    }}
+                  >
+                    {week.focus}
+                  </Text>
+                </View>
+                {week.activities.map((activity, index) => (
+                  <View key={`${week.week}.${index}`} style={{ flexDirection: "row", gap: space.sm }}>
+                    <View
+                      style={{
+                        marginTop: 7,
+                        width: 6,
+                        height: 6,
+                        borderRadius: radius.pill,
+                        backgroundColor: activity.scheduledDate ? colors.sage : colors.gold,
+                      }}
+                    />
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text
+                        style={{
+                          fontFamily: fontFamilies.body,
+                          fontSize: fontSize.sm,
+                          lineHeight: fontSize.sm * 1.45,
+                          color: colors.textBody,
+                        }}
+                      >
+                        {activity.text}
+                      </Text>
+                      <Text
+                        style={{
+                          fontFamily: fontFamilies.bodyMedium,
+                          fontSize: fontSize.xs,
+                          color: colors.textSubtle,
+                        }}
+                      >
+                        {[
+                          activity.scheduledDate ? shortDate(activity.scheduledDate) : "Pick a day",
+                          activity.reusedMaterialId ? "From your Binder" : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            ))}
+          </View>
+        ))}
+        {preview.conflicts.length > 0 ? (
+          <PreviewNotice
+            title="Dates that overlap"
+            body={preview.conflicts
+              .map(
+                (conflict) =>
+                  `${shortDate(conflict.scheduledDate)}: ${conflict.childName}'s ${conflict.activity} overlaps ${conflict.commitment}.`,
+              )
+              .join("\n")}
+            tone="gold"
+          />
+        ) : null}
+        {preview.unscheduledItems.length > 0 ? (
+          <PreviewNotice
+            title="Still needs a day"
+            body={preview.unscheduledItems.join("\n")}
+            tone="gold"
+          />
+        ) : null}
+        {preview.unresolvedChoices.length > 0 ? (
+          <PreviewNotice
+            title="Choices for you"
+            body={preview.unresolvedChoices.join("\n")}
+            tone="gold"
+          />
+        ) : null}
+        {!hasOpenItems ? (
+          <PreviewNotice
+            title="Ready to approve"
+            body="You can approve this month or keep talking to change it."
+            tone="sage"
+          />
+        ) : null}
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space.sm }}>
+          {hasUnresolvedChoices ? (
+            <MaterialAction label="Tell Homa your choices" onPress={onChange} primary />
+          ) : (
+            <MaterialAction label="Approve this month" onPress={onApprove} primary />
+          )}
+          <MaterialAction label="Tell Homa what to change" onPress={onChange} />
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
+function PreviewNotice({
+  title,
+  body,
+  tone,
+}: {
+  title: string;
+  body: string;
+  tone: "sage" | "gold";
+}) {
+  return (
+    <View
+      style={{
+        borderRadius: radius.md,
+        padding: space.md,
+        gap: space.xs,
+        backgroundColor: tone === "sage" ? colors.sageSoft : colors.goldSoft,
+      }}
+    >
+      <Text
+        style={{
+          fontFamily: fontFamilies.bodyBold,
+          fontSize: fontSize.sm,
+          color: colors.textStrong,
+        }}
+      >
+        {title}
+      </Text>
+      <Text
+        style={{
+          fontFamily: fontFamilies.body,
+          fontSize: fontSize.sm,
+          lineHeight: fontSize.sm * 1.45,
+          color: colors.textBody,
+        }}
+      >
+        {body}
+      </Text>
+    </View>
   );
 }
 

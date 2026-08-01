@@ -669,6 +669,46 @@ const validPlannerEvents = {
     surface: "grid",
     client: "web",
   },
+  "planner.month_draft_requested": {
+    family_id: FAMILY_ID,
+    draft_id: TASK_RUN_ID,
+    child_count: 2,
+    client: "mobile",
+  },
+  "planner.month_preview_ready": {
+    family_id: FAMILY_ID,
+    draft_id: TASK_RUN_ID,
+    revision: 1,
+    conflict_count: 1,
+    unresolved_count: 2,
+    client: "mobile",
+  },
+  "planner.month_approved": {
+    family_id: FAMILY_ID,
+    draft_id: TASK_RUN_ID,
+    revision: 2,
+    child_count: 2,
+    client: "mobile",
+  },
+  "planner.month_revised": {
+    family_id: FAMILY_ID,
+    draft_id: TASK_RUN_ID,
+    revision: 2,
+    client: "mobile",
+  },
+  "planner.month_abandoned": {
+    family_id: FAMILY_ID,
+    draft_id: TASK_RUN_ID,
+    revision: 2,
+    client: "mobile",
+  },
+  "planner.month_restored": {
+    family_id: FAMILY_ID,
+    draft_id: TASK_RUN_ID,
+    revision: 3,
+    restored_from: 1,
+    client: "mobile",
+  },
 } as const;
 
 test("planner events accept every exact valid shape", () => {

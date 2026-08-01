@@ -14,6 +14,10 @@ import {
   parseQuestionCardPart,
   type QuestionCardData,
 } from "../chat/question-card-model";
+import {
+  parseMonthPlanPreview,
+  type MonthPlanPreview,
+} from "../planner/month-plan-preview-model";
 
 /**
  * Overlay signals for the voice-first screen: pure derivation from the
@@ -45,6 +49,7 @@ export type OverlaySignal =
     }
   | { kind: "question"; key: string; card: QuestionCardData }
   | { kind: "hours"; key: string }
+  | { kind: "monthPlan"; key: string; preview: MonthPlanPreview }
   | {
       kind: "receipt";
       key: string;
@@ -306,6 +311,15 @@ function buildSignal(
     if (output.opened !== true) return null;
     return {
       signal: { kind: "planner", key, refreshCount: planWrites },
+      planWrites,
+    };
+  }
+  if (toolName === "preview_month_plan") {
+    if (output.previewed !== true) return null;
+    const preview = parseMonthPlanPreview(output.preview);
+    if (preview === null) return null;
+    return {
+      signal: { kind: "monthPlan", key, preview },
       planWrites,
     };
   }
