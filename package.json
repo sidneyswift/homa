@@ -5,8 +5,13 @@
   "scripts": {
     "build": "turbo run build",
     "build:material-anchors": "node --experimental-strip-types scripts/build-material-anchors.mts",
+    "build:memory-compactor-prompt": "node --experimental-strip-types scripts/build-memory-compactor-prompt.mts",
     "build:onboarding-skill": "node --experimental-strip-types scripts/build-onboarding-skill.mts",
+    "build:report-writer-prompt": "node --experimental-strip-types scripts/build-report-writer-prompt.mts",
     "build:voice-persona": "node --experimental-strip-types scripts/build-voice-persona.mts",
+    "check:memory-compactor-prompt": "node --experimental-strip-types scripts/build-memory-compactor-prompt.mts --check && tsx --tsconfig apps/web/tsconfig.json --test apps/web/lib/learning/compact-memories.test.ts",
+    "check:report-writer-prompt": "node --experimental-strip-types scripts/build-report-writer-prompt.mts --check && tsx --tsconfig apps/web/tsconfig.json --test apps/web/lib/map/narrative-generate.test.ts",
+    "check:runtime-prompts": "pnpm check:memory-compactor-prompt && pnpm check:report-writer-prompt && node --experimental-strip-types scripts/runtime-prompt-tracing-check.mts",
     "check:voice-persona": "node --experimental-strip-types scripts/build-voice-persona.mts --check && tsx --test apps/web/lib/voice/realtime-session.test.ts apps/web/lib/voice/homa-bridge.test.ts apps/web/lib/voice/voice-bridge-auth.test.ts apps/web/lib/voice/ios-mode.test.ts apps/web/app/app/voice-transcript.test.ts apps/web/app/app/chat-send-policy.test.ts",
     "check:docs": "node scripts/docs-reconciliation-check.mjs",
     "check:eve-stream-duration": "node scripts/eve-stream-max-duration-check.mjs",

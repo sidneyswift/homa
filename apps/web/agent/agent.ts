@@ -5,9 +5,14 @@ import { HOMA_MODEL } from "./model";
 export default defineAgent({
   // Gateway-routed model id (shared with the report writer via model.ts);
   // swapped per model-mix experiments (T2).
-  // Compaction runs on a cheaper model and triggers earlier than the 0.9 default
-  // per docs/homa-planning/01-architecture.md (session-rotation design).
+  // Eve session compaction runs on the active turn model and triggers
+  // earlier than the 0.9 default per docs/homa-planning/01-architecture.md
+  // (session-rotation design).
   model: HOMA_MODEL,
+  // Claude Sonnet 5 exposes a 1M-token context window. Pin it here so
+  // eve build does not depend on a live Gateway model-catalog fetch to
+  // compile the compaction trigger.
+  modelContextWindowTokens: 1_000_000,
   compaction: {
     thresholdPercent: 0.75,
   },
