@@ -284,14 +284,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # The ubuntu-24.04 runner image ships PostgreSQL 16 preinstalled, so
-      # the apt path is only a fallback for image changes.
-      - name: Ensure PostgreSQL 16 for disposable clusters
+      # Voice action receipts run through the full eval sandbox so their
+      # compensators are exercised against the complete migration graph.
+      # That graph includes semantic recall's vector column.
+      - name: Ensure PostgreSQL 16 and pgvector for disposable clusters
         run: |
-          if [ ! -x /usr/lib/postgresql/16/bin/initdb ]; then
-            sudo apt-get update
-            sudo apt-get install --yes postgresql-16
-          fi
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-16 postgresql-16-pgvector
           echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
 
       - name: ChildProgress unit and compatibility checks

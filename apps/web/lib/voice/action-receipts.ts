@@ -125,6 +125,11 @@ export interface RecordVoiceActionInput {
   now?: Date;
 }
 
+export interface VoiceActionArming {
+  receipt: VoiceActionReceipt;
+  disposition: "acquired" | "existing";
+}
+
 export interface VoiceToolReceiptContext {
   familyId: string;
   actorUserId: string;
@@ -164,7 +169,7 @@ export function voiceToolReceiptContext(input: {
 
 export async function recordVoiceAction(
   input: RecordVoiceActionInput,
-): Promise<VoiceActionReceipt> {
+): Promise<VoiceActionArming> {
   const sql = mapDb();
   const now = input.now ?? new Date();
   const expiresAt = new Date(now.getTime() + VOICE_ACTION_UNDO_WINDOW_MS);
@@ -172,52 +177,54 @@ export async function recordVoiceAction(
   if (payload.effect !== input.effect) {
     throw new TypeError("Voice action receipt effect and compensator do not match");
   }
-  const rows = await sql<RawReceiptRow[]>`
-    insert into public.voice_action_receipts
-      (family_id, actor_user_id, runtime_session_id, turn_id, object_kind,
-       object_id, effect, named_effect, undo_capability,
-       compensator_payload, created_at, expires_at)
-    values
-      (${input.familyId}, ${input.actorUserId}, ${input.runtimeSessionId},
-       ${input.turnId}, ${input.objectKind}, ${input.objectId}, ${input.effect},
-       ${input.namedEffect.slice(0, 240)}, ${input.undoCapability},
-       ${sql.json(payload as DbJson)}, ${now.toISOString()}, ${expiresAt.toISOString()})
-    on conflict (family_id, runtime_session_id, turn_id, effect, object_id)
-    do update set
-      named_effect = case
-        when voice_action_receipts.status in ('pending', 'cancelled')
-          and voice_action_receipts.undone_at is null
-        then excluded.named_effect else voice_action_receipts.named_effect end,
-      undo_capability = case
-        when voice_action_receipts.status in ('pending', 'cancelled')
-          and voice_action_receipts.undone_at is null
-        then excluded.undo_capability else voice_action_receipts.undo_capability end,
-      compensator_payload = case
-        when voice_action_receipts.status in ('pending', 'cancelled')
-          and voice_action_receipts.undone_at is null
-        then excluded.compensator_payload else voice_action_receipts.compensator_payload end,
-      status = case
-        when voice_action_receipts.status = 'cancelled'
-          and voice_action_receipts.undone_at is null
-        then 'pending' else voice_action_receipts.status end,
-      created_at = case
-        when voice_action_receipts.status in ('pending', 'cancelled')
-          and voice_action_receipts.undone_at is null
-        then excluded.created_at else voice_action_receipts.created_at end,
-      expires_at = case
-        when voice_action_receipts.status in ('pending', 'cancelled')
-          and voice_action_receipts.undone_at is null
-        then excluded.expires_at else voice_action_receipts.expires_at end
-    where voice_action_receipts.actor_user_id = excluded.actor_user_id
-    returning id, family_id, actor_user_id, runtime_session_id, turn_id,
-              object_kind, object_id, effect, named_effect, undo_capability,
-              compensator_payload, status, created_at::text, expires_at::text,
-              undone_at::text
-  `;
-  if (!rows[0]) {
-    throw new Error("Voice action receipt could not be armed for this actor");
-  }
-  return publicReceipt(rows[0]);
+  const lockKey = JSON.stringify([
+    input.familyId,
+    input.runtimeSessionId,
+    input.turnId,
+    input.effect,
+    input.objectId,
+  ]);
+  return await sql.begin(async (tx): Promise<VoiceActionArming> => {
+    await tx`select pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))`;
+    const existing = await tx<RawReceiptRow[]>`
+      select id, family_id, actor_user_id, runtime_session_id, turn_id,
+             object_kind, object_id, effect, named_effect, undo_capability,
+             compensator_payload, status, created_at::text, expires_at::text,
+             undone_at::text
+      from public.voice_action_receipts
+      where family_id = ${input.familyId}
+        and runtime_session_id = ${input.runtimeSessionId}
+        and turn_id = ${input.turnId}
+        and effect = ${input.effect}
+        and object_id = ${input.objectId}
+      limit 1
+    `;
+    if (existing[0]) {
+      if (existing[0].actor_user_id !== input.actorUserId) {
+        throw new Error("Voice action receipt could not be armed for this actor");
+      }
+      return { receipt: publicReceipt(existing[0]), disposition: "existing" };
+    }
+    const rows = await tx<RawReceiptRow[]>`
+      insert into public.voice_action_receipts
+        (family_id, actor_user_id, runtime_session_id, turn_id, object_kind,
+         object_id, effect, named_effect, undo_capability,
+         compensator_payload, created_at, expires_at)
+      values
+        (${input.familyId}, ${input.actorUserId}, ${input.runtimeSessionId},
+         ${input.turnId}, ${input.objectKind}, ${input.objectId}, ${input.effect},
+         ${input.namedEffect.slice(0, 240)}, ${input.undoCapability},
+         ${tx.json(payload as DbJson)}, ${now.toISOString()}, ${expiresAt.toISOString()})
+      returning id, family_id, actor_user_id, runtime_session_id, turn_id,
+                object_kind, object_id, effect, named_effect, undo_capability,
+                compensator_payload, status, created_at::text, expires_at::text,
+                undone_at::text
+    `;
+    if (!rows[0]) {
+      throw new Error("Voice action receipt could not be armed for this actor");
+    }
+    return { receipt: publicReceipt(rows[0]), disposition: "acquired" };
+  });
 }
 
 export async function commitVoiceAction(input: {
@@ -254,25 +261,29 @@ export async function cancelVoiceAction(input: {
   `;
 }
 
-/** Arm the server receipt before the domain write. Only committed receipts
- * are selectable by undo. Failed or interrupted mutations leave a pending or
- * cancelled row that Voice cannot choose. */
+/** Arm the server receipt before the domain write. Only the caller that
+ * acquired the durable lease may mutate. Only committed receipts are
+ * selectable by undo; failed or interrupted rows cannot be chosen. */
 export async function armVoiceActionThenMutate<T>(input: {
   familyId: string;
-  record: () => Promise<VoiceActionReceipt>;
+  record: () => Promise<VoiceActionArming>;
   mutate: () => Promise<T>;
   replay: (receipt: VoiceActionReceipt) => Promise<T>;
   succeeded: (result: T) => boolean;
   commit?: (receipt: VoiceActionReceipt) => Promise<VoiceActionReceipt>;
   cancel?: (receipt: VoiceActionReceipt) => Promise<void>;
 }): Promise<{ actionReceipt: VoiceActionReceipt; result: T; replayed: boolean }> {
-  const actionReceipt = await input.record();
+  const arming = await input.record();
+  const actionReceipt = arming.receipt;
   if (actionReceipt.lifecycleStatus === "committed") {
     return {
       actionReceipt,
       result: await input.replay(actionReceipt),
       replayed: true,
     };
+  }
+  if (arming.disposition !== "acquired") {
+    throw new Error("Voice action is already in progress or did not complete");
   }
   if (actionReceipt.lifecycleStatus !== "pending") {
     throw new Error("Voice action receipt is not armed");

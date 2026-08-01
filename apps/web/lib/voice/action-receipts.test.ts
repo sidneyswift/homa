@@ -60,20 +60,23 @@ describe("Voice action receipt contract", () => {
     const result = await armVoiceActionThenMutate({
       familyId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
       record: async () => ({
-        id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
-        familyId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-        actorUserId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
-        runtimeSessionId: "voice-test",
-        turnId: "turn-test",
-        objectKind: "hours_entry",
-        objectId: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
-        effect: "hours.logged",
-        namedEffect: "logging math time",
-        undoCapability: "exact_delete",
-        lifecycleStatus: "pending",
-        createdAt: "2026-08-01T12:00:00.000Z",
-        expiresAt: "2026-08-01T12:10:00.000Z",
-        undoneAt: null,
+        disposition: "acquired",
+        receipt: {
+          id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+          familyId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          actorUserId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+          runtimeSessionId: "voice-test",
+          turnId: "turn-test",
+          objectKind: "hours_entry",
+          objectId: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+          effect: "hours.logged",
+          namedEffect: "logging math time",
+          undoCapability: "exact_delete",
+          lifecycleStatus: "pending",
+          createdAt: "2026-08-01T12:00:00.000Z",
+          expiresAt: "2026-08-01T12:10:00.000Z",
+          undoneAt: null,
+        },
       }),
       mutate: async () => ({ ok: false }),
       replay: async () => ({ ok: true }),
@@ -90,5 +93,40 @@ describe("Voice action receipt contract", () => {
     assert.equal(result.result.ok, false);
     assert.equal(committed, false);
     assert.equal(cancelled, true);
+  });
+
+  it("does not mutate through an existing pending lease", async () => {
+    let mutated = false;
+    await assert.rejects(
+      armVoiceActionThenMutate({
+        familyId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        record: async () => ({
+          disposition: "existing",
+          receipt: {
+            id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+            familyId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+            actorUserId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+            runtimeSessionId: "voice-test",
+            turnId: "turn-test",
+            objectKind: "hours_entry",
+            objectId: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+            effect: "hours.logged",
+            namedEffect: "logging math time",
+            undoCapability: "exact_delete",
+            lifecycleStatus: "pending",
+            createdAt: "2026-08-01T12:00:00.000Z",
+            expiresAt: "2026-08-01T12:10:00.000Z",
+            undoneAt: null,
+          },
+        }),
+        mutate: async () => {
+          mutated = true;
+        },
+        replay: async () => undefined,
+        succeeded: () => true,
+      }),
+      /already in progress or did not complete/u,
+    );
+    assert.equal(mutated, false);
   });
 });

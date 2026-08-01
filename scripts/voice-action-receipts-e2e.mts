@@ -80,7 +80,10 @@ try {
   };
   const committedReceipt = async (input: RecordVoiceActionInput) => {
     const pending = await recordVoiceAction(input);
-    return await commitVoiceAction({ familyId: input.familyId, receiptId: pending.id });
+    return await commitVoiceAction({
+      familyId: input.familyId,
+      receiptId: pending.receipt.id,
+    });
   };
   const insertEvent = async (input: {
     id: string;
@@ -304,6 +307,73 @@ try {
   assert.ok(retryAfterUndo.actionReceipt.undoneAt);
   assert.equal(retryAfterUndo.result.present, false);
   assert.equal(retryMutationCount, 1);
+
+  const concurrentObjectId = randomUUID();
+  const concurrentRecord = () => recordVoiceAction({
+    familyId: family.id,
+    actorUserId: actor,
+    runtimeSessionId: "voice-concurrent",
+    turnId: "turn-concurrent",
+    objectKind: "hours_entry",
+    objectId: concurrentObjectId,
+    effect: "hours.logged",
+    namedEffect: "the concurrent math entry in Hours",
+    undoCapability: "exact_delete",
+    payload: {
+      effect: "hours.logged",
+      after: {
+        childId: null,
+        subject: "math",
+        minutes: 25,
+        happenedOn: "2026-08-01",
+        source: "chat",
+        note: "concurrent lease e2e",
+      },
+    },
+    now,
+  });
+  let concurrentMutationCount = 0;
+  let signalMutationStarted = () => {};
+  const mutationStarted = new Promise<void>((resolve) => {
+    signalMutationStarted = resolve;
+  });
+  let releaseFirstMutation = () => {};
+  const firstMutationMayFinish = new Promise<void>((resolve) => {
+    releaseFirstMutation = resolve;
+  });
+  const concurrentMutation = async () => {
+    concurrentMutationCount += 1;
+    if (concurrentMutationCount === 1) {
+      signalMutationStarted();
+      await firstMutationMayFinish;
+    }
+    return { ok: true };
+  };
+  const firstConcurrentAttempt = armVoiceActionThenMutate({
+    familyId: family.id,
+    record: concurrentRecord,
+    mutate: concurrentMutation,
+    replay: async () => ({ ok: true }),
+    succeeded: (result) => result.ok,
+  });
+  await mutationStarted;
+  try {
+    await assert.rejects(
+      armVoiceActionThenMutate({
+        familyId: family.id,
+        record: concurrentRecord,
+        mutate: concurrentMutation,
+        replay: async () => ({ ok: true }),
+        succeeded: (result) => result.ok,
+      }),
+      /already in progress or did not complete/u,
+    );
+  } finally {
+    releaseFirstMutation();
+  }
+  const firstConcurrentResult = await firstConcurrentAttempt;
+  assert.equal(firstConcurrentResult.replayed, false);
+  assert.equal(concurrentMutationCount, 1);
 
   const laterHours = await insertHours(family.id);
   const laterHoursReceipt = await committedReceipt({
