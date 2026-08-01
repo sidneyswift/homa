@@ -8,12 +8,12 @@ import {
   trialReminderVerdict,
 } from "../../../../lib/billing/trial-reminder";
 import {
+  billingPeriodForStripeInterval,
   familyForStripeCustomer,
   recordFamilySubscription,
   startFamilyTrial,
   tierForStripeProductRecognized,
 } from "../../../../lib/billing/wall";
-import { mapDb } from "../../../../lib/map/db";
 import {
   siteUrl,
   submitTrialReminderEmail,
@@ -123,6 +123,12 @@ export async function POST(request: Request): Promise<Response> {
             id: subscription.id,
             status: subscription.status,
             priceId: subscription.items.data[0]?.price.id ?? null,
+            productId: typeof purchasedProduct === "string" ? purchasedProduct : null,
+            customerId,
+            tier: purchasedTier,
+            period: billingPeriodForStripeInterval(
+              subscription.items.data[0]?.price.recurring?.interval ?? null,
+            ),
             currentPeriodEndSec: subscription.items.data[0]?.current_period_end ?? null,
           });
         }
@@ -204,17 +210,22 @@ export async function POST(request: Request): Promise<Response> {
         const customerId =
           typeof subscription.customer === "string" ? subscription.customer : null;
         if (!customerId) break;
-        const periodEnd = subscription.items.data[0]?.current_period_end ?? null;
-        const sql = mapDb();
-        await sql`
-          update public.families
-          set stripe_subscription_id = ${subscription.id},
-              stripe_subscription_status = ${subscription.status},
-              stripe_price_id = ${subscription.items.data[0]?.price.id ?? null},
-              stripe_current_period_end = ${periodEnd ? new Date(periodEnd * 1000) : null},
-              billing_updated_at = now()
-          where stripe_customer_id = ${customerId}
-        `;
+        const family = await familyForStripeCustomer(customerId);
+        if (!family) break;
+        const product = subscription.items.data[0]?.price.product ?? null;
+        const tier = typeof product === "string" ? tierForStripeProductRecognized(product) : null;
+        await recordFamilySubscription(family.id, {
+          id: subscription.id,
+          status: subscription.status,
+          priceId: subscription.items.data[0]?.price.id ?? null,
+          productId: typeof product === "string" ? product : null,
+          customerId,
+          tier,
+          period: billingPeriodForStripeInterval(
+            subscription.items.data[0]?.price.recurring?.interval ?? null,
+          ),
+          currentPeriodEndSec: subscription.items.data[0]?.current_period_end ?? null,
+        });
         break;
       }
       default:

@@ -1,8 +1,9 @@
+import { providerProduct } from "@homa/core";
+
 import {
   AppleTransactionClaimedError,
   recordFamilyAppleSubscription,
   startFamilyTrial,
-  tierForAppleProduct,
 } from "../../../../../lib/billing/wall";
 import { emitMapEvent } from "../../../../../lib/map/events";
 import { requireFamily, requireFamilyFromBearer } from "../../../../../lib/map/session";
@@ -68,7 +69,15 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false, reason: "malformed" }, { status: 400 });
   }
 
-  const tier = tierForAppleProduct(decoded.productId);
+  const product = providerProduct("apple", decoded.productId);
+  if (!product) {
+    console.error(
+      `billing/apple/confirm: verified transaction used an unconfigured product ${decoded.productId ?? "unset"}`,
+    );
+    return Response.json({ ok: false, reason: "unconfigured-product" }, { status: 400 });
+  }
+
+  const tier = product.tier;
   const fresh = await startFamilyTrial(family.id, null, tier);
   if (fresh) {
     await emitMapEvent("billing.trial_started", { family_id: family.id });
@@ -84,7 +93,9 @@ export async function POST(request: Request): Promise<Response> {
     await recordFamilyAppleSubscription(family.id, {
       originalTransactionId,
       status: decoded.revocationDate ? "canceled" : "active",
-      productId: decoded.productId ?? null,
+      productId: product.productId,
+      tier: product.tier,
+      period: product.period,
       expiresAtMs: decoded.expiresDate ?? null,
     });
   } catch (error) {

@@ -8,8 +8,8 @@ description: Growth-engineering playbook for Homa's signup-to-paid funnel, disti
 Source: a Cal AI founder's essay on why they lengthened onboarding and ran
 100+ paywall tests. The essay is written for a consumer iOS app with an
 app-store hard paywall; every law below is restated for Homa's shape (a
-chat-first web product, Stripe Payment Links, no app store between Homa
-and the customer). Where the essay's advice does not transfer, this file
+chat-first web product with Stripe on web and StoreKit on iOS). Where the
+essay's advice does not transfer, this file
 says so explicitly rather than leaving you to guess.
 
 Paywall placement at Homa is **experimental, not settled**. Variants are
@@ -28,9 +28,11 @@ in production"):
   social-emotional, `packages/core/src/map/report-lock.ts`); every other
   mapped subject is held (name + the parent's own answer count, no blur)
   behind one inline $19/mo offer card.
-- Pricing live: **$19 monthly only.** The annual link is deliberately
-  withheld (the $99 sticker collides exactly with Homeschool Fox's
-  annual price; needs a founder read before it ships).
+- Pricing policy: the current Homa catalog is Homa ($19 monthly, $182
+  annual), Homa Plus ($49 monthly, $470 annual), and Homa Max ($199
+  monthly, $1,910 annual). Annual is 20% below twelve monthly payments.
+  Confirm Stripe's currently active Payment Links before claiming that a
+  particular web term is live.
 - Existing pre-flip families were grandfathered via `billing_exempt`
   backfill (47 families, 2026-07-18T14:25:44Z). New signups meet the
   lock.
@@ -154,17 +156,18 @@ Essay: don't lean on trials until people pay outright; long trials
 pollute paid-acquisition attribution; most trial cancellations decide on
 day one.
 
-Homa's live trial is **card-upfront, 30 days, via the Stripe Payment
-Link** (`trial_period_days=30` on the live monthly link, verified via
-Stripe API 2026-07-18). Card-upfront matches the essay's preference. Two
-standing cautions:
+Homa's current product copy and trial reminder use a **card-upfront,
+seven-day trial**. Web collection uses Stripe Payment Links, while native iOS
+collection uses StoreKit introductory offers. Confirm the live provider
+configuration before describing an offer as active. Card-upfront matches the
+essay's preference. Two standing cautions:
 
 - A no-card trial is a different experiment, not a tweak. If proposed,
   it needs its own kill-test spec; never bundle it with a placement test
   (two variables, unreadable result).
-- The trial length interacts with the week-4 retest email (proof lands
-  right before the first charge). Resizing the trial silently breaks
-  that sequencing; treat trial length as coupled to the retention arc.
+- Trial length interacts with trial reminders and the retained product
+  sequence. Resizing it silently breaks that sequencing; treat trial length
+  as coupled to the retention arc.
 
 ## Funnel benchmarks, translated to Homa's stages
 
@@ -184,14 +187,13 @@ non-sandbox families only, grandfathered cohort excluded.
 
 ## Pricing
 
-- "Price for mindshare over margin": live sticker is $19/mo, no lifetime
-  SKU, no annual yet. The $99/yr sticker is parked on the Homeschool Fox
-  collision until a founder read; don't ship the annual link as a side
-  effect of other work.
-- "Anchor the annual, 2-3 options max": applies the day annual ships.
-  The wall/lock offer components (`wall-offer.tsx`,
-  `report-lock-offer.tsx`) already treat annual as optional; keep 2-3
-  options and annual visually primary when it lands.
+- The catalog is one cross-platform Homa membership: Homa, Homa Plus, and
+  Homa Max, with monthly and annual terms. A parent paying on one rail uses
+  every Homa surface, so a mobile weekly display must never become a separate
+  lower-priced SKU.
+- Annual is 20% below twelve monthly payments. Keep a single monthly/annual
+  toggle across tiers, and verify the configured provider product before
+  saying any individual payment option is available.
 - "Mind the cash-flow gap" (CAC paid today, subscription collected over
   months) is founder/finance territory. Flag it in the plan doc when a
   pricing or trial-length change moves the CAC-to-first-charge gap;
@@ -201,12 +203,12 @@ non-sandbox families only, grandfathered cohort excluded.
 
 ## What does not transfer, and why
 
-- **App-store cuts / web2app.** Homa is already a web product on Stripe;
-  the essay's "own your channel" state is Homa's default. Only relevant
-  if the mobile app ships its own IAP path later.
-- **Apple/Google paywall rules** (trial toggles, rating-prompt timing)
-  don't govern a web wall. Ignore for the web funnel; they matter only
-  for a native mobile purchase flow.
+- **App-store cuts / web2app.** Homa has a real native StoreKit purchase
+  path. This does not change the web Stripe path, but it does mean the
+  entitlement and catalog must be provider-neutral.
+- **Apple/Google paywall rules** govern native purchase flows. Apple owns
+  iOS purchase and subscription management, while web pricing experiments
+  remain Stripe-specific.
 - **"Never bring up payment over text."** SMS is unwalled by standing
   ruling; a walled family can still text Homa. Paywall experiments never
   extend onto SMS.
@@ -259,8 +261,8 @@ non-sandbox families only, grandfathered cohort excluded.
   investment (working, keep it).
 - Scoring paywall metrics on a denominator that includes sandbox or
   grandfathered families.
-- Extending any paywall experiment onto SMS, or shipping the annual link
-  before the Homeschool Fox collision gets its founder read.
+- Extending any paywall experiment onto SMS, or creating a provider-specific
+  SKU that is not in the shared catalog.
 
 ## Done looks like
 

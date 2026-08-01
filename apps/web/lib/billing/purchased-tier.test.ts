@@ -4,6 +4,7 @@ import path from "node:path";
 import { describe, it } from "node:test";
 
 import {
+  billingPeriodForStripeInterval,
   tierForStripeProduct,
   tierForStripeProductRecognized,
 } from "./wall";
@@ -51,6 +52,14 @@ describe("tierForStripeProductRecognized", () => {
     // right in front of a human and wrong in a writer.
     assert.equal(tierForStripeProduct("prod_not_in_the_map"), "regular");
     assert.equal(tierForStripeProductRecognized("prod_not_in_the_map"), null);
+  });
+});
+
+describe("billingPeriodForStripeInterval", () => {
+  it("only records verified monthly and annual Stripe terms", () => {
+    assert.equal(billingPeriodForStripeInterval("month"), "monthly");
+    assert.equal(billingPeriodForStripeInterval("year"), "annual");
+    assert.equal(billingPeriodForStripeInterval("week"), null);
   });
 });
 

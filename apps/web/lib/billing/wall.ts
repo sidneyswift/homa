@@ -1,3 +1,11 @@
+import { type BillingPeriod, type BillingProvider } from "@homa/core";
+
+import {
+  familyBillingEntitlement,
+  LAPSED_BILLING_STATUSES,
+  recordBillingSubscription,
+  type FamilyBillingEntitlement,
+} from "./entitlements";
 import { mapDb } from "../map/db";
 import { familyOnboardingActive } from "../onboarding/state";
 import { isPlanTier } from "./wall-types";
@@ -152,34 +160,13 @@ export function tierForStripeProductRecognized(
   return null;
 }
 
-/**
- * Which App Store Connect in-app purchase product backs each tier.
- * ios-iap-base-tier-only (journeys/10-reconciliation.md §5): only
- * "regular" has a real product id today, because Plus and Max stay off
- * the iOS paywall until gh#293/#295/#297 close. The two commented ids
- * are the naming convention for when that day comes, not live products;
- * do not create them in App Store Connect ahead of that ruling.
- *
- * Product id naming: reverse-DNS bundle id, then tier, then period, per
- * ios-iap-weekly-pricing ($19/mo -> $4.75/wk, monthly sticker / 4).
- */
-const APPLE_PRODUCT_TIER_IDS: Partial<Record<PlanTier, readonly string[]>> = {
-  regular: ["com.thankshoma.homa.regular.weekly"],
-  // plus: ["com.thankshoma.homa.plus.weekly"],   // not yet sold, #297
-  // elite: ["com.thankshoma.homa.elite.weekly"], // not yet sold, #297
-};
-
-/** tierForAppleProduct(productId): the never-over-grant twin of
- *  tierForStripeProduct. An Apple product id this map does not
- *  recognize, including a future Plus/Max id created before this map is
- *  updated, resolves to "regular" rather than granting a tier nothing
- *  has ruled sellable on iOS yet. */
-export function tierForAppleProduct(productId: string | null | undefined): PlanTier {
-  if (!productId) return "regular";
-  for (const tier of Object.keys(APPLE_PRODUCT_TIER_IDS) as PlanTier[]) {
-    if (APPLE_PRODUCT_TIER_IDS[tier]?.includes(productId)) return tier;
-  }
-  return "regular";
+/** Convert Stripe's verified recurring interval into Homa's term vocabulary. */
+export function billingPeriodForStripeInterval(
+  interval: string | null | undefined,
+): BillingPeriod | null {
+  if (interval === "month") return "monthly";
+  if (interval === "year") return "annual";
+  return null;
 }
 
 function checkoutUrl(base: string, familyId: string, email: string | null): string {
@@ -293,6 +280,7 @@ export async function familyWallCheckout(familyId: string): Promise<WallCheckout
     `;
     const row = rows[0];
     if (!row) return null;
+    const entitlement = accountGateOn ? await familyBillingEntitlementOrNull(familyId) : null;
 
     // The account gate outranks every door exemption: an account-walled
     // family has no standing at any door, whatever the door wall's own
@@ -302,7 +290,7 @@ export async function familyWallCheckout(familyId: string): Promise<WallCheckout
     // subscription ends it).
     if (
       accountGateOn &&
-      accountAccessDecision(
+      accountAccessDecisionWithEntitlement(
         {
           billingExempt: row.billing_exempt,
           trialStartedAt: row.trial_started_at,
@@ -311,6 +299,7 @@ export async function familyWallCheckout(familyId: string): Promise<WallCheckout
           createdAtMs: row.created_at_ms,
         },
         signupPaywallSince(),
+        entitlement,
       ) === null
     ) {
       return buildWallCheckout(familyId, row.email);
@@ -365,13 +354,6 @@ export async function familyWallCheckout(familyId: string): Promise<WallCheckout
  * would have to know about. A revoked or expired Apple subscription is
  * written here as "canceled".
  */
-const LAPSED_SUBSCRIPTION_STATUSES = new Set([
-  "canceled",
-  "unpaid",
-  "incomplete_expired",
-  "paused",
-]);
-
 export interface AccountAccessRow {
   billingExempt: boolean;
   trialStartedAt: string | null;
@@ -419,7 +401,7 @@ type ProviderState = "absent" | "lapsed" | "active";
 
 function providerState(status: string | null): ProviderState {
   if (status === null) return "absent";
-  return LAPSED_SUBSCRIPTION_STATUSES.has(status) ? "lapsed" : "active";
+  return LAPSED_BILLING_STATUSES.has(status) ? "lapsed" : "active";
 }
 
 /**
@@ -462,6 +444,43 @@ export function accountAccessDecision(
   if (!anyActive && anyRecorded) return null;
 
   return "trial";
+}
+
+/**
+ * New billing writes live in the provider-neutral ledger. Until its additive
+ * migration is present everywhere, a failed ledger read falls back to the
+ * old Stripe-and-Apple mirror decision below. That makes rollout safe while
+ * preserving the same fail-open posture for an unavailable billing read.
+ */
+function accountAccessDecisionWithEntitlement(
+  row: AccountAccessRow,
+  sinceMs: number | null,
+  entitlement: FamilyBillingEntitlement | null,
+): AccountAccessGrant | null {
+  if (entitlement === null) return accountAccessDecision(row, sinceMs);
+  if (row.billingExempt) return "billing_exempt";
+  if (sinceMs !== null && row.createdAtMs !== null && row.createdAtMs < sinceMs) {
+    return "grandfathered";
+  }
+  if (!row.trialStartedAt || !entitlement.active) return null;
+  return "trial";
+}
+
+async function familyBillingEntitlementOrNull(
+  familyId: string,
+): Promise<FamilyBillingEntitlement | null> {
+  try {
+    return await familyBillingEntitlement(familyId);
+  } catch (error) {
+    // The ledger migration is additive and leads this deploy. Falling back
+    // here keeps preview environments and a temporarily unavailable ledger
+    // on the proven legacy access path instead of changing access by error.
+    console.error(
+      "wall: canonical entitlement read failed, using compatibility mirror:",
+      error instanceof Error ? error.message : "unknown",
+    );
+    return null;
+  }
 }
 
 export interface AccountGateState {
@@ -513,8 +532,9 @@ export async function familyAccountGate(familyId: string): Promise<AccountGateSt
     `;
     const row = rows[0];
     if (!row) return ACCOUNT_OPEN;
+    const entitlement = await familyBillingEntitlementOrNull(familyId);
     if (
-      accountAccessDecision(
+      accountAccessDecisionWithEntitlement(
         {
           billingExempt: row.billing_exempt,
           trialStartedAt: row.trial_started_at,
@@ -523,6 +543,7 @@ export async function familyAccountGate(familyId: string): Promise<AccountGateSt
           createdAtMs: row.created_at_ms,
         },
         signupPaywallSince(),
+        entitlement,
       )
     ) {
       return ACCOUNT_OPEN;
@@ -552,6 +573,8 @@ export async function familyAccountCheckout(familyId: string): Promise<WallCheck
 /** What the settings plan card needs to tell the truth (gh#412). */
 export interface FamilyPlanState {
   tier: PlanTier;
+  /** The active purchase rail, when the canonical ledger is available. */
+  billingProvider: BillingProvider | null;
   /** Checkout for the tier that adds Homa reaching her, or null when
    *  the Plus payment links are not configured in this environment. */
   plusCheckout: TierCheckout | null;
@@ -584,8 +607,23 @@ export async function familyPlanState(familyId: string): Promise<FamilyPlanState
     `;
     const row = rows[0];
     const links = tierPaymentLinkBases("plus");
+    let tier: PlanTier = isPlanTier(row?.plan_tier) ? row.plan_tier : "regular";
+    let billingProvider: BillingProvider | null = null;
+    try {
+      const entitlement = await familyBillingEntitlement(familyId);
+      if (entitlement?.active) {
+        tier = entitlement.tier;
+        billingProvider = entitlement.provider;
+      }
+    } catch (error) {
+      console.error(
+        "familyPlanState: canonical entitlement read failed, using compatibility mirror:",
+        error instanceof Error ? error.message : "unknown",
+      );
+    }
     return {
-      tier: isPlanTier(row?.plan_tier) ? row.plan_tier : "regular",
+      tier,
+      billingProvider,
       plusCheckout: links
         ? {
             monthlyUrl: checkoutUrl(links.monthly, familyId, row?.email ?? null),
@@ -602,7 +640,12 @@ export async function familyPlanState(familyId: string): Promise<FamilyPlanState
       "familyPlanState failed:",
       error instanceof Error ? error.message : "unknown",
     );
-    return { tier: "regular", plusCheckout: null, hasBillingRelationship: false };
+    return {
+      tier: "regular",
+      billingProvider: null,
+      plusCheckout: null,
+      hasBillingRelationship: false,
+    };
   }
 }
 
@@ -625,11 +668,15 @@ export async function recordFamilySubscription(
     id: string;
     status: string;
     priceId: string | null;
+    productId: string | null;
+    customerId: string | null;
+    tier: PlanTier | null;
+    period: BillingPeriod | null;
     currentPeriodEndSec: number | null;
   },
 ): Promise<void> {
+  const sql = mapDb();
   try {
-    const sql = mapDb();
     await sql`
       update public.families
       set stripe_subscription_id = ${sub.id},
@@ -641,9 +688,36 @@ export async function recordFamilySubscription(
     `;
   } catch (error) {
     console.error(
-      "wall: subscription mirror stamp failed:",
+      "wall: subscription compatibility mirror stamp failed:",
       error instanceof Error ? error.message : "unknown",
     );
+  }
+
+  // An unknown Stripe product still refreshes the old mirror but does not
+  // enter the canonical ledger. That prevents an unattended webhook from
+  // silently replacing a paid Plus or Max entitlement with regular. Keep the
+  // ledger write separate so an additive migration can trail the code deploy
+  // without turning a successful Stripe purchase into a failed confirmation.
+  if (sub.tier) {
+    try {
+      await recordBillingSubscription(familyId, {
+        provider: "stripe",
+        providerSubscriptionId: sub.id,
+        providerCustomerId: sub.customerId,
+        providerProductId: sub.productId,
+        tier: sub.tier,
+        period: sub.period,
+        status: sub.status,
+        currentPeriodEnd: sub.currentPeriodEndSec
+          ? new Date(sub.currentPeriodEndSec * 1000).toISOString()
+          : null,
+      });
+    } catch (error) {
+      console.error(
+        "wall: canonical Stripe subscription stamp failed:",
+        error instanceof Error ? error.message : "unknown",
+      );
+    }
   }
 }
 
@@ -679,7 +753,9 @@ export async function recordFamilyAppleSubscription(
   sub: {
     originalTransactionId: string;
     status: string;
-    productId: string | null;
+    productId: string;
+    tier: PlanTier;
+    period: BillingPeriod;
     expiresAtMs: number | null;
   },
 ): Promise<void> {
@@ -704,6 +780,28 @@ export async function recordFamilyAppleSubscription(
       error instanceof Error ? error.message : "unknown",
     );
     throw error;
+  }
+
+  // The family-row write above owns the cross-family transaction claim and
+  // therefore remains authoritative during rollout. A canonical ledger write
+  // is best-effort until its additive migration has landed; once present, the
+  // webhook will keep retrying it on future lifecycle notifications.
+  try {
+    await recordBillingSubscription(familyId, {
+      provider: "apple",
+      providerSubscriptionId: sub.originalTransactionId,
+      providerCustomerId: null,
+      providerProductId: sub.productId,
+      tier: sub.tier,
+      period: sub.period,
+      status: sub.status,
+      currentPeriodEnd: sub.expiresAtMs ? new Date(sub.expiresAtMs).toISOString() : null,
+    });
+  } catch (error) {
+    console.error(
+      "wall: canonical Apple subscription stamp failed:",
+      error instanceof Error ? error.message : "unknown",
+    );
   }
 }
 

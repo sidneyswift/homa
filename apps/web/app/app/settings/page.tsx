@@ -209,7 +209,15 @@ export default async function SettingsPage({
         <footer className="mt-6 flex flex-wrap items-center justify-between gap-3 px-1">
           <p className="text-sm text-muted">Signed in as {user?.email ?? "your account"}</p>
           <div className="flex flex-wrap items-center gap-3">
-            {hasBilling ? (
+            {plan.billingProvider === "apple" ? (
+              <a
+                href="https://apps.apple.com/account/subscriptions"
+                className="inline-flex min-h-10 items-center gap-2 rounded-pill border border-border bg-card px-5 py-2 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong"
+              >
+                <CreditCard size={15} aria-hidden="true" />
+                Manage App Store subscription
+              </a>
+            ) : hasBilling ? (
               <a
                 href="/api/billing/portal"
                 className="inline-flex min-h-10 items-center gap-2 rounded-pill border border-border bg-card px-5 py-2 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong"

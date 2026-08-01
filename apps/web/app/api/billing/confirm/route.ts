@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import { cookies } from "next/headers";
 
 import {
+  billingPeriodForStripeInterval,
   recordFamilySubscription,
   startFamilyTrial,
   tierForStripeProduct,
@@ -98,7 +99,8 @@ export async function GET(request: Request): Promise<Response> {
 
     const customerId = typeof session.customer === "string" ? session.customer : null;
     const purchasedProduct = session.line_items?.data[0]?.price?.product;
-    const productId = typeof purchasedProduct === "string" ? purchasedProduct : purchasedProduct?.id;
+    const productId =
+      typeof purchasedProduct === "string" ? purchasedProduct : purchasedProduct?.id ?? null;
     const tier = tierForStripeProduct(productId);
     const fresh = await startFamilyTrial(family.id, customerId, tier);
     if (fresh) {
@@ -116,6 +118,12 @@ export async function GET(request: Request): Promise<Response> {
         id: subscription.id,
         status: subscription.status,
         priceId: subscription.items.data[0]?.price.id ?? null,
+        productId,
+        customerId,
+        tier,
+        period: billingPeriodForStripeInterval(
+          subscription.items.data[0]?.price.recurring?.interval ?? null,
+        ),
         currentPeriodEndSec: subscription.items.data[0]?.current_period_end ?? null,
       });
     }

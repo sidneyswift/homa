@@ -3,6 +3,33 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-08-01 · Founder ruling: one Homa membership across web and native
+
+Founder ruling, not an agent decision. Registered as
+`unified-cross-platform-billing` in `journeys/10-reconciliation.md` §5.
+
+**What was ruled.** Homa has one commercial catalog: Homa, Homa Plus, and
+Homa Max, each available monthly and annually. Annual is 20% below twelve
+monthly payments. A family who pays on the web with Stripe or in native iOS
+with Apple uses every Homa product surface with the same account, without a
+second subscription. Future Android will use the same Homa catalog through
+Google Play Billing.
+
+**What is not a product.** Weekly copy is an honest mobile presentation of a
+monthly or annual price. It is not a weekly subscription, a separate feature
+tier, or a second entitlement. The temporary weekly product id is retired
+before it sells to anyone.
+
+**Implementation consequence.** Payment rails verify their own purchases,
+then write a provider-neutral family entitlement ledger containing provider,
+immutable provider product id, Homa tier, term, status, and observation time.
+Stripe and Apple mirrors remain during the safe migration, and no provider can
+transfer an existing subscription identity to a different family. Native iOS
+uses StoreKit and opens Apple's management surface for Apple-paid families;
+Stripe-paid families manage through Homa's web account. Full configuration,
+rollout order, and App Store product ids live in
+`docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md`.
+
 ## 2026-07-31 · Founder ruling: ordinary materials finish in under five minutes
 
 Founder ruling, not an agent decision. Registered as

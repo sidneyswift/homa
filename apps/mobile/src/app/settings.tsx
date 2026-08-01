@@ -12,9 +12,11 @@ import { AddChildForm } from "../features/family/add-child-form";
 import { useFamilyData } from "../features/family/use-family-data";
 import { supabase } from "../lib/supabase";
 import {
+  openAppleSubscriptions,
   openPrivacyPolicy,
   openSupportEmail,
   openTermsOfUse,
+  openWebAccount,
 } from "../lib/web-links";
 import { fontFamilies } from "../theme/fonts";
 import { colors, fontSize, space } from "../theme/tokens";
@@ -29,8 +31,8 @@ const PLAN_TIER_LABELS: Record<string, string> = {
  * Settings: the account's real home. Reached from the sidebar drawer's
  * account menu, and BillingGate's own paywall (a walled family must
  * still be able to sign out or delete their account). Subscription
- * state reads GET /api/billing/gate (arc F), the same two-provider
- * decision every screen is already gated by.
+ * state reads GET /api/billing/gate, the same provider-neutral decision
+ * every screen is already gated by.
  *
  * Children moved here from the retired Family tab (founder call
  * 2026-07-29, folding Family into Chat's welcome state left "add a
@@ -38,14 +40,10 @@ const PLAN_TIER_LABELS: Record<string, string> = {
  * affordance either, kids are added during onboarding there, so this
  * is the one place mobile still needs it).
  *
- * Gap, tracked as the "Portal split" item on gh#305: this does not yet
- * know WHICH provider (Stripe or Apple) is entitling the family, so it
- * cannot correctly send an Apple subscriber to the App Store's own
- * manage-subscription screen versus a Stripe subscriber to the web
- * portal. Sending everyone to the web is the safe default today; an
- * Apple-only subscriber finds nothing there, a real but narrower gap
- * than guessing wrong and sending a Stripe subscriber to an empty
- * App Store subscriptions list.
+ * The canonical billing ledger tells this screen which provider is active.
+ * Apple subscriptions are managed with Apple, and Stripe subscriptions are
+ * managed on the Homa website. A provider never sends a parent to the
+ * other provider's empty management surface.
  */
 export default function SettingsScreen() {
   const router = useRouter();
@@ -58,7 +56,13 @@ export default function SettingsScreen() {
     if (!gate) return "Checking your plan…";
     if (gate.open) {
       const label = PLAN_TIER_LABELS[gate.planTier] ?? "Homa";
-      return `${label} is active. Manage or cancel anytime at thankshoma.com.`;
+      if (gate.billingProvider === "apple") {
+        return `${label} is active. Billed through your Apple Account.`;
+      }
+      if (gate.billingProvider === "stripe") {
+        return `${label} is active. Billed through the Homa website.`;
+      }
+      return `${label} is active.`;
     }
     return gate.lapsed
       ? "Your free days are up."
@@ -112,6 +116,18 @@ export default function SettingsScreen() {
           >
             {planLine}
           </Text>
+          {gate?.open && gate.billingProvider === "apple" ? (
+            <SettingsLinkRow
+              label="Manage Apple subscription"
+              onPress={() => void openAppleSubscriptions()}
+            />
+          ) : null}
+          {gate?.open && gate.billingProvider === "stripe" ? (
+            <SettingsLinkRow
+              label="Manage subscription on the web"
+              onPress={() => void openWebAccount()}
+            />
+          ) : null}
         </SettingsSection>
 
         {family ? (
