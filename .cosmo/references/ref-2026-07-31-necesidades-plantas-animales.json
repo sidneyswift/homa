@@ -17,7 +17,9 @@
   "capture": {
     "lane": "phone",
     "sourceFile": "ref-2026-07-31-necesidades-plantas-animales.pdf",
-    "sourceParts": ["ref-2026-07-31-necesidades-plantas-animales.pdf"],
+    "sourceParts": [
+      "ref-2026-07-31-necesidades-plantas-animales.pdf"
+    ],
     "sourceSha256": "8b2425c94c24c32a1584658e0b67e1e53b5897720ee579f904e2f68adc8f227d",
     "pageCount": 80,
     "mastersDir": ".cosmo/masters/ref-2026-07-31-necesidades-plantas-animales",
@@ -56,14 +58,19 @@
     ]
   },
   "difficulty": {
-    "ageBand": [60, 72],
+    "ageBand": [
+      60,
+      72
+    ],
     "complexity": "multi-skill",
     "prerequisites": [],
     "scaffoldingLevel": "high"
   },
   "theming": {
     "themeType": "interest-led",
-    "characters": ["Marisol"],
+    "characters": [
+      "Marisol"
+    ],
     "visualStyle": "photo-rich with educational diagrams",
     "colorPalette": "full-color",
     "appealDrivers": [
@@ -80,41 +87,130 @@
     "colorRequirement": "prints well in B&W"
   },
   "aboutness": {
-    "extractionQuality": "partial",
-    "textSidecar": ".cosmo/text/ref-2026-07-31-necesidades-plantas-animales.txt",
+    "extractionQuality": "unavailable",
+    "textSidecar": null,
     "textBlobUrl": null,
-    "notes": "Text sidecar is empty (tesseract not installed). Analysis derived from vision-model page reads. Quotes below are from page headers and visible text read by the vision model; they cannot be verified against sidecar.",
+    "notes": "Tesseract not installed on ingest machine. No text sidecar exists. Analysis derived from vision-model page reads. Quotes are from visible page text read by the vision model and cannot be verified against a sidecar.",
     "subjects": [
-      { "name": "plant needs", "role": "teaches", "quote": "necesidades de las plantas" },
-      { "name": "animal needs", "role": "teaches", "quote": "necesidades de los animales" },
-      { "name": "habitats", "role": "about", "quote": "Mi casa en el desierto" },
-      { "name": "parent animals and offspring", "role": "about", "quote": "Los padres y sus crias" },
-      { "name": "spanish language literacy", "role": "teaches", "quote": "Taller del Lector" }
+      {
+        "name": "plant needs",
+        "role": "teaches",
+        "quote": "necesidades de las plantas"
+      },
+      {
+        "name": "animal needs",
+        "role": "teaches",
+        "quote": "necesidades de los animales"
+      },
+      {
+        "name": "habitats",
+        "role": "about",
+        "quote": "Mi casa en el desierto"
+      },
+      {
+        "name": "parent animals and offspring",
+        "role": "about",
+        "quote": "Los padres y sus crias"
+      },
+      {
+        "name": "spanish language literacy",
+        "role": "teaches",
+        "quote": "Taller del Lector"
+      }
     ],
     "entities": [
-      { "name": "Benchmark Education Company", "kind": "organization", "role": "identity", "quote": "Benchmark Education Company" },
-      { "name": "Taller del Lector", "kind": "object", "role": "identity", "quote": "Taller del Lector" },
-      { "name": "Marisol", "kind": "character", "role": "cast", "quote": "Marisol" },
-      { "name": "zebra", "kind": "animal", "role": "about", "quote": "necesitan los animales" },
-      { "name": "giraffe", "kind": "animal", "role": "decoration", "quote": "necesitan los animales" }
+      {
+        "name": "Benchmark Education Company",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "Benchmark Education Company"
+      },
+      {
+        "name": "Taller del Lector",
+        "kind": "object",
+        "role": "identity",
+        "quote": "Taller del Lector"
+      },
+      {
+        "name": "Marisol",
+        "kind": "character",
+        "role": "cast",
+        "quote": "Marisol"
+      },
+      {
+        "name": "zebra",
+        "kind": "animal",
+        "role": "about",
+        "quote": "necesitan los animales"
+      },
+      {
+        "name": "giraffe",
+        "kind": "animal",
+        "role": "decoration",
+        "quote": "necesitan los animales"
+      }
     ],
     "themes": [
-      { "name": "survival needs of living things", "evidence": "Unit 1 covers what plants and animals need to survive" },
-      { "name": "literacy as science vehicle", "evidence": "read-alouds, shared reading, and stories introduce scientific concepts" },
-      { "name": "desert habitats", "evidence": "Mi casa en el desierto explores how animals meet shelter needs" },
-      { "name": "parent-offspring relationships", "evidence": "Los padres y sus crias teaches about animal families" }
+      {
+        "name": "survival needs of living things",
+        "evidence": "Unit 1 covers what plants and animals need to survive"
+      },
+      {
+        "name": "literacy as science vehicle",
+        "evidence": "read-alouds, shared reading, and stories introduce scientific concepts"
+      },
+      {
+        "name": "desert habitats",
+        "evidence": "Mi casa en el desierto explores how animals meet shelter needs"
+      },
+      {
+        "name": "parent-offspring relationships",
+        "evidence": "Los padres y sus crias teaches about animal families"
+      }
     ],
     "keyTerms": [
-      { "term": "necesidades", "occurrences": 1, "quote": "Las necesidades de las plantas y los animales" },
-      { "term": "lectura compartida", "occurrences": 1, "quote": "lectura compartida" },
-      { "term": "lectura en voz alta", "occurrences": 1, "quote": "Lecturas en voz alta" },
-      { "term": "texto informativo", "occurrences": 1, "quote": "Presentar el genero: texto informativo" }
+      {
+        "term": "necesidades",
+        "occurrences": 1,
+        "quote": "Las necesidades de las plantas y los animales"
+      },
+      {
+        "term": "lectura compartida",
+        "occurrences": 1,
+        "quote": "lectura compartida"
+      },
+      {
+        "term": "lectura en voz alta",
+        "occurrences": 1,
+        "quote": "Lecturas en voz alta"
+      },
+      {
+        "term": "texto informativo",
+        "occurrences": 1,
+        "quote": "Presentar el genero: texto informativo"
+      }
     ],
     "referencedWorks": [
-      { "title": "Que necesitan los animales?", "author": "unknown", "kind": "book", "quote": "Que necesitan los animales?" },
-      { "title": "Mi casa en el desierto", "author": "unknown", "kind": "book", "quote": "Mi casa en el desierto" },
-      { "title": "Los padres y sus crias", "author": "unknown", "kind": "book", "quote": "Los padres y sus crias" }
-    ]
+      {
+        "title": "Que necesitan los animales?",
+        "author": "unknown",
+        "kind": "book",
+        "quote": "Que necesitan los animales?"
+      },
+      {
+        "title": "Mi casa en el desierto",
+        "author": "unknown",
+        "kind": "book",
+        "quote": "Mi casa en el desierto"
+      },
+      {
+        "title": "Los padres y sus crias",
+        "author": "unknown",
+        "kind": "book",
+        "quote": "Los padres y sus crias"
+      }
+    ],
+    "reason": "Tesseract not installed on ingest machine. No OCR text could be extracted from the 80-page CamScanner scan. Vision-model page reads provided the analysis but no character-exact text sidecar exists for span verification."
   },
   "recipeMatch": {
     "matchedRecipes": [
@@ -135,7 +231,9 @@
     "tasteLogged": true,
     "graduation": {
       "kind": "subject",
-      "targets": ["apps/web/agent/skills/materials-studio/references/approaches/poetry-led-science.md"],
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/approaches/poetry-led-science.md"
+      ],
       "commit": null
     },
     "taxonomy": {
