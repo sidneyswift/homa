@@ -229,7 +229,7 @@ function MonthPlanPreviewBody({
             color: colors.textMuted,
           }}
         >
-          {`Preview ${preview.revision} · Nothing is saved yet`}
+          {`${preview.revision === 1 ? "New month preview" : "Updated month preview"} · Nothing is on the Planner yet`}
         </Text>
       </View>
       <ScrollView
@@ -241,7 +241,7 @@ function MonthPlanPreviewBody({
       >
         {preview.restoredFrom ? (
           <PreviewNotice
-            title={`You are seeing preview ${preview.restoredFrom}`}
+            title="Showing your earlier plan"
             body="Your later changes are still available. Ask Homa to bring them back."
             tone="sage"
           />
@@ -322,7 +322,7 @@ function MonthPlanPreviewBody({
                       >
                         {[
                           activity.scheduledDate ? shortDate(activity.scheduledDate) : "Pick a day",
-                          activity.reusedMaterialId ? "Saved material" : null,
+                          activity.reusedMaterialId ? "From your Binder" : null,
                         ]
                           .filter(Boolean)
                           .join(" · ")}
@@ -336,7 +336,7 @@ function MonthPlanPreviewBody({
         ))}
         {preview.conflicts.length > 0 ? (
           <PreviewNotice
-            title="Dates to look at"
+            title="Dates that overlap"
             body={preview.conflicts
               .map(
                 (conflict) =>
@@ -362,18 +362,18 @@ function MonthPlanPreviewBody({
         ) : null}
         {!hasOpenItems ? (
           <PreviewNotice
-            title="Ready when you are"
+            title="Ready to approve"
             body="You can approve this month or keep talking to change it."
             tone="sage"
           />
         ) : null}
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space.sm }}>
           {hasUnresolvedChoices ? (
-            <MaterialAction label="Make these choices" onPress={onChange} primary />
+            <MaterialAction label="Tell Homa your choices" onPress={onChange} primary />
           ) : (
             <MaterialAction label="Approve this month" onPress={onApprove} primary />
           )}
-          <MaterialAction label="Tell Homa a change" onPress={onChange} />
+          <MaterialAction label="Tell Homa what to change" onPress={onChange} />
         </View>
       </ScrollView>
     </View>

@@ -49,12 +49,12 @@ verify identities, dates, conflicts, revision lineage, and the final write.
 ## Show, revise, approve
 
 1. Call `preview_month_plan` with `action:"create"` and the complete proposed
-   month. This opens the native visual preview. Nothing is saved yet.
+   month. This opens the native visual preview. Nothing is on the Planner yet.
 2. Read the returned conflicts, unscheduled items, and unresolved choices.
    If a conflict is intentional, say why in one sentence. If it is not, fix
    it before asking for approval. Conflicts and unscheduled activities may
    remain when the parent knowingly accepts them. Unresolved choices may not.
-3. Say: "I drafted the month. Nothing is saved yet. Want to use this, or
+3. Say: "I drafted the month. Nothing is on the Planner yet. Want to use this, or
    change anything?" Then stop and keep listening.
 4. A requested change such as "move science earlier" or "make Friday
    lighter" is `action:"revise"` with the latest draft token and the whole
@@ -66,7 +66,7 @@ verify identities, dates, conflicts, revision lineage, and the final write.
    use this," and the visible Approve action count. Silence, "looks
    interesting," or your own opinion do not. If a choice remains, resolve it
    in a revised preview first.
-7. After approval say: "Your month is saved on the Planner." Do not narrate the
+7. After approval say: "Your month plan is saved on the Planner." Do not narrate the
    whole month again. The screen already shows it.
 
 ## Honest stops

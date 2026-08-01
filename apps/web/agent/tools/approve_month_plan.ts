@@ -52,7 +52,7 @@ export default defineBoundedTool({
       return {
         approved: false,
         error: "invalid_draft",
-        note: "This preview is closed. Your Planner did not change.",
+        note: "This preview was not saved. Your Planner did not change. Ask Homa to rebuild it if you want it back.",
       };
     }
     const outcome = await approveMonthPlanDraft({
@@ -104,8 +104,8 @@ export default defineBoundedTool({
       childCount: outcome.childCount,
       note:
         outcome.status === "already_approved"
-          ? "This preview is already on the Planner. Nothing was saved twice."
-          : "Your month is saved on the Planner.",
+          ? "This month plan is already on the Planner. Nothing was saved twice."
+          : "Your month plan is saved on the Planner.",
     };
   },
 });

@@ -98,7 +98,7 @@ export default defineBoundedTool({
       return {
         previewed: false,
         error: "invalid_draft",
-        note: "This preview is closed. Your Planner did not change.",
+        note: "This preview was not saved. Your Planner did not change. Ask Homa to rebuild it if you want it back.",
       };
     }
 
@@ -108,7 +108,7 @@ export default defineBoundedTool({
         return {
           previewed: false,
           error: "invalid_draft",
-          note: "This preview is closed. Your Planner did not change.",
+          note: "This preview was not saved. Your Planner did not change. Ask Homa to rebuild it if you want it back.",
         };
       }
       const revision = payload.history[payload.history.length - 1].revision;
@@ -126,7 +126,7 @@ export default defineBoundedTool({
         abandoned: true,
         draftId: payload.draftId,
         revision,
-        note: "This preview is closed. Your Planner did not change.",
+        note: "This preview was not saved. Your Planner did not change. Ask Homa to rebuild it if you want it back.",
       };
     }
 
@@ -158,7 +158,7 @@ export default defineBoundedTool({
       return {
         previewed: false,
         error: "invalid_draft",
-        note: "This preview is closed. Your Planner did not change.",
+        note: "This preview was not saved. Your Planner did not change. Ask Homa to rebuild it if you want it back.",
       };
     }
     monthPlanSessionState.update((state) =>
