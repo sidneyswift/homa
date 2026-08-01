@@ -16,8 +16,10 @@ import { preparedResearchBriefOwnsCanonicalPersistence } from "../../lib/tasks/r
 export function shouldSkipConversationPersistence(
   attributes: unknown,
 ): boolean {
-  const channel = (attributes as { channel?: unknown } | undefined)?.channel;
-  return channel === "subject_lesson";
+  const values = attributes as
+    | { channel?: unknown; voiceBridge?: unknown }
+    | undefined;
+  return values?.channel === "subject_lesson" || values?.voiceBridge === "true";
 }
 
 /**

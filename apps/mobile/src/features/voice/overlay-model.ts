@@ -93,6 +93,7 @@ const IGNORED_TOOLS = new Set([
   // (liveQuestionIn below); this entry keeps spent and malformed asks
   // from falling through to a "Done: ask user questions" receipt.
   "ask_user_questions",
+  "ask_for_photo",
   "ask_for_details",
   "start_checklist",
   "start_first_making",

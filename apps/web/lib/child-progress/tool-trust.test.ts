@@ -208,6 +208,25 @@ describe("trusted progress runtime context", () => {
     });
   });
 
+  it("maps the authenticated mobile screen to web progress provenance", () => {
+    const context = createProgressToolContext({
+      access: { familyId: FAMILY_ID },
+      attributes: {
+        memberUserId: MEMBER_ID,
+        channel: "mobile",
+        canonicalInboundText: "Maya read the whole book by herself.",
+        canonicalInboundMessageId: MESSAGE_ID,
+      },
+      sessionId: "mobile-session-1",
+      turnId: "mobile-turn-1",
+      now: NOW,
+    });
+
+    assert.equal(context.channel, "web");
+    assert.equal(context.canonicalInboundText, "Maya read the whole book by herself.");
+    assert.equal(context.inboundMessageId, MESSAGE_ID);
+  });
+
   it("uses the active SMS progress pair instead of a clarification delivery", () => {
     const context = createProgressToolContext({
       access: { familyId: FAMILY_ID },

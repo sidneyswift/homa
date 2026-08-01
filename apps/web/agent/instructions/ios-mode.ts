@@ -3,6 +3,7 @@ import { defineDynamic, defineInstructions } from "eve/instructions";
 type IosModeAttributes =
   | {
       channel?: string;
+      voiceBridge?: string;
     }
   | undefined;
 
@@ -30,6 +31,26 @@ export const IOS_MODE_MARKDOWN = `
   the account chrome differs from web.
 `.trim();
 
+export const IOS_VOICE_BRIDGE_MARKDOWN = `
+## You are fulfilling a live voice request
+
+- The realtime layer handles audio only. You are the full Homa agent with the
+  same fleet skills and authenticated tools as mobile chat. Use them normally.
+- Your final reply will be spoken aloud exactly as written. Keep it to one to
+  three short sentences, with no markdown, headings, or lists.
+- Tool results are the only truth about completed actions. Name a result as
+  complete only when its tool output says it succeeded.
+- Native iOS renders your authored tool results as planner, printable,
+  question, hours, or receipt overlays. If you open or make something, point
+  to what is now on screen in one short phrase.
+- Live voice has no photo picker, details form, or checklist screen. Do not
+  call ask_for_photo, ask_for_details, or start_checklist here. Ask one short
+  spoken question, use ask_user_questions, or ask her to switch to chat and
+  attach a photo when the photo itself is essential.
+- Never refuse a capability because this is voice. If a tool or skill is
+  unavailable for its own real reason, say that reason plainly.
+`.trim();
+
 /**
  * Returns reply guidance only when authenticated channel attributes
  * identify the current session as the iOS app (x-homa-channel: mobile,
@@ -38,7 +59,10 @@ export const IOS_MODE_MARKDOWN = `
 export function iosModeMarkdown(
   attributes: IosModeAttributes,
 ): string | null {
-  return attributes?.channel === "mobile" ? IOS_MODE_MARKDOWN : null;
+  if (attributes?.channel !== "mobile") return null;
+  return attributes.voiceBridge === "true"
+    ? `${IOS_MODE_MARKDOWN}\n\n${IOS_VOICE_BRIDGE_MARKDOWN}`
+    : IOS_MODE_MARKDOWN;
 }
 
 export default defineDynamic({

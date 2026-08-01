@@ -218,6 +218,11 @@ describe("deriveOverlaySignals: mapping", () => {
       expected: null,
     },
     {
+      name: "ask_for_photo (unsupported voice UI) stays hidden",
+      part: toolPart("ask_for_photo", { asked: true }),
+      expected: null,
+    },
+    {
       name: "a live ask_user_questions card is a question sheet",
       part: toolPart("ask_user_questions", askOutput),
       expected: { kind: "question" },

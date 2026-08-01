@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Native voice capability parity · Merge readiness</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #27231f;
+        --muted: #6d655d;
+        --paper: #fbf7f0;
+        --card: #fffdf9;
+        --line: #ddd3c7;
+        --plum: #6f4b70;
+        --plum-soft: #eee4ef;
+        --green: #286348;
+        --green-soft: #e5f3ea;
+        --amber: #8a5b18;
+        --amber-soft: #fff0d4;
+        --red: #8d3535;
+        --red-soft: #f8e4e2;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.55;
+      }
+      main { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 48px 0 80px; }
+      h1, h2, h3, p { margin-top: 0; }
+      h1 { max-width: 820px; font-size: clamp(2.2rem, 6vw, 4.5rem); line-height: .98; letter-spacing: -.055em; }
+      h2 { margin: 56px 0 20px; font-size: 1.7rem; letter-spacing: -.025em; }
+      h3 { font-size: 1.05rem; }
+      code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em; }
+      .eyebrow { color: var(--plum); font-size: .78rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+      .lede { max-width: 760px; color: var(--muted); font-size: 1.15rem; }
+      .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 30px 0 16px; }
+      .stat, .card, .flow-panel, .question, .dependency, .gate {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--card);
+        box-shadow: 0 10px 30px rgba(73, 56, 42, .05);
+      }
+      .stat { padding: 18px; }
+      .stat strong { display: block; font-size: 1.35rem; }
+      .stat span { color: var(--muted); font-size: .85rem; }
+      .status-line { display: flex; flex-wrap: wrap; gap: 8px; }
+      .pill { display: inline-flex; padding: 6px 10px; border-radius: 999px; background: var(--green-soft); color: var(--green); font-size: .78rem; font-weight: 750; }
+      .pill.warn { background: var(--amber-soft); color: var(--amber); }
+      .flow { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+      .flow-panel { padding: 22px; }
+      .flow-panel.after { border-color: #bda7be; box-shadow: 0 12px 35px rgba(111, 75, 112, .11); }
+      .flow-panel ol { margin: 16px 0 0; padding-left: 22px; }
+      .flow-panel li { margin: 10px 0; }
+      .new { color: var(--plum); font-weight: 750; }
+      .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      .card { padding: 22px; }
+      .field { margin-top: 16px; }
+      .field b { display: block; margin-bottom: 3px; color: var(--plum); font-size: .76rem; letter-spacing: .09em; text-transform: uppercase; }
+      .where { overflow-wrap: anywhere; color: var(--muted); }
+      .dependency { padding: 22px; margin: 12px 0; }
+      .dependency b { color: var(--plum); }
+      .verification { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 16px; background: var(--card); }
+      .verification th, .verification td { padding: 12px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+      .verification th { color: var(--muted); font-size: .76rem; letter-spacing: .07em; text-transform: uppercase; }
+      .ok { color: var(--green); font-weight: 800; }
+      .bounded { color: var(--amber); font-weight: 800; }
+      .quiz-intro { max-width: 760px; }
+      .question { margin: 14px 0; padding: 22px; }
+      .question legend { padding: 0 6px; font-weight: 800; }
+      label { display: block; margin: 9px 0; padding: 10px 12px; border-radius: 10px; cursor: pointer; }
+      label:hover { background: var(--plum-soft); }
+      input { margin-right: 8px; }
+      button { border: 0; border-radius: 999px; padding: 13px 20px; background: var(--plum); color: white; font: inherit; font-weight: 800; cursor: pointer; }
+      .gate { display: none; margin-top: 18px; padding: 22px; }
+      .gate.pass { display: block; background: var(--green-soft); border-color: #afd1bd; }
+      .gate.fail { display: block; background: var(--red-soft); border-color: #dfb4b0; }
+      .gate ul { margin-bottom: 0; }
+      .small { color: var(--muted); font-size: .88rem; }
+      @media (max-width: 760px) {
+        .stats, .flow, .cards { grid-template-columns: 1fr; }
+        main { padding-top: 28px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Merge readiness · Production bug gh#521</p>
+      <h1>Native voice is now the full Homa, not a six-tool demo.</h1>
+      <p class="lede">
+        This change replaces the mobile realtime voice allowlist with one authenticated
+        door into Homa's ordinary Eve agent. Voice can now use the same fleet skills and
+        tenant-scoped tools as mobile chat, then render the real tool effects in native UI.
+      </p>
+
+      <section class="stats" aria-label="Diff statistics">
+        <div class="stat"><strong>codex/native-voice-capability-parity</strong><span>Branch</span></div>
+        <div class="stat"><strong>28</strong><span>Files changed</span></div>
+        <div class="stat"><strong>+1,717 / -444</strong><span>Lines added / removed</span></div>
+        <div class="stat"><strong>1</strong><span>Commit in PR</span></div>
+      </section>
+      <div class="status-line">
+        <span class="pill">P0 fix implemented</span>
+        <span class="pill">Unit and integration guards green</span>
+        <span class="pill">EAS fingerprint matched</span>
+        <span class="pill warn">Merge waits on 6/6 quiz</span>
+      </div>
+
+      <h2>1. The mental model</h2>
+      <div class="flow">
+        <article class="flow-panel">
+          <p class="eyebrow">Before</p>
+          <h3>Realtime voice was its own smaller product</h3>
+          <ol>
+            <li>The realtime model received six copied tool definitions.</li>
+            <li>A custom route called those six tool modules directly.</li>
+            <li>Instructions explicitly refused printables, binder, planner writes, calendar writes, and delivery.</li>
+            <li>Tool results never entered the native overlay message stream.</li>
+            <li>Question-card answers exited voice instead of continuing the conversation.</li>
+          </ol>
+        </article>
+        <article class="flow-panel after">
+          <p class="eyebrow">After</p>
+          <h3>Realtime voice is an audio front door to normal Homa</h3>
+          <ol>
+            <li>The realtime model receives one function: <code>ask_homa</code>.</li>
+            <li class="new">The API persists the exact spoken source turn before any action.</li>
+            <li class="new">A short-lived signed bridge enters the authenticated mobile Eve channel.</li>
+            <li>Eve loads family context, fleet skills, and the ordinary 64 bounded tools.</li>
+            <li class="new">Completed authored tool results return as native overlay events.</li>
+            <li class="new">The audio model reads Eve's exact short reply with tools disabled for that response.</li>
+            <li class="new">Question-card taps continue the same Eve session.</li>
+          </ol>
+        </article>
+      </div>
+
+      <h2>2. Non-obvious behaviors</h2>
+      <div class="cards">
+        <article class="card" id="behavior-auth">
+          <h3>The bridge has proof, not privilege</h3>
+          <div class="field"><b>What</b>The bridge request is HMAC-bound to the caller access token, canonical source-message UUID, SHA-256 of the exact spoken text, and a 60-second timestamp.</div>
+          <div class="field"><b>Why</b>The inner Eve turn may reuse the already-persisted source message only when code proves it is the same authenticated turn. The model never supplies <code>familyId</code>.</div>
+          <div class="field where"><b>Where</b><code>apps/web/lib/voice/voice-bridge-auth.ts:39</code>, <code>apps/web/agent/channels/eve.ts:136</code>, <code>apps/web/agent/channels/eve.ts:203</code></div>
+        </article>
+
+        <article class="card" id="behavior-persistence">
+          <h3>One spoken turn, one canonical history row</h3>
+          <div class="field"><b>What</b>The route persists the current voice turn before delegation. The private bridge turn can read recent continuity, but skips normal continuity mutation, assistant classification, and duplicate conversation persistence.</div>
+          <div class="field"><b>Why</b>Journal evidence needs real parent provenance, while an internal execution turn must not create a second episode or claim the same reply twice.</div>
+          <div class="field where"><b>Where</b><code>apps/web/app/api/voice/realtime/tool/route.ts:94</code>, <code>apps/web/agent/channels/eve.ts:275</code>, <code>apps/web/agent/hooks/persist-conversation.ts:16</code></div>
+        </article>
+
+        <article class="card" id="behavior-effects">
+          <h3>The phone renders results, not promises</h3>
+          <div class="field"><b>What</b>Only completed, non-error Eve tool results become effects. Mobile validates the response, deduplicates call IDs, and converts effects into the same dynamic-tool message shape its overlays already understand.</div>
+          <div class="field"><b>Why</b>This reuses planner, material, question, hours, and receipt UI without inventing a parallel voice protocol or showing failed actions as successful.</div>
+          <div class="field where"><b>Where</b><code>apps/web/lib/voice/homa-bridge.ts:86</code>, <code>apps/mobile/src/features/voice/realtime-tool-effects.ts:26</code>, <code>apps/mobile/src/features/voice/use-voice-session.ts:208</code></div>
+        </article>
+
+        <article class="card" id="behavior-spoken">
+          <h3>Eve owns the answer after an action</h3>
+          <div class="field"><b>What</b>After <code>ask_homa</code>, realtime receives a response override that disables every tool and instructs it to read only <code>spokenReply</code>, exactly once.</div>
+          <div class="field"><b>Why</b>The audio model should handle turn-taking, but it must not paraphrase a verified result into a stronger claim or recursively call another tool.</div>
+          <div class="field where"><b>Where</b><code>apps/mobile/src/features/voice/realtime-tool-effects.ts:123</code>, <code>apps/mobile/src/features/voice/use-voice-session.ts:218</code></div>
+        </article>
+      </div>
+
+      <h2>3. Existing behavior this leans on</h2>
+      <article class="dependency" id="dependency-agent">
+        <b>Eve remains the capability and policy authority.</b>
+        The bridge does not bypass billing gates, family context, fleet-skill routing,
+        tool schemas, tool deadlines, or per-tool tenant re-scoping. If a normal mobile
+        chat tool is unavailable for a real reason, voice is unavailable for that same reason.
+      </article>
+      <article class="dependency" id="dependency-native">
+        <b>This is an OTA change, not a native capability addition.</b>
+        The current fingerprint <code>c074fbd55ccfed66decc1c3b7ab4b656506690a9</code>
+        matches finished EAS production build 16. The main workflow still has to publish a
+        production update with that runtime after merge. App Store Connect must separately
+        confirm that build 16 is the binary families actually install.
+      </article>
+      <article class="dependency" id="dependency-exclusion">
+        <b>Live voice deliberately has no photo picker, details form, or checklist screen.</b>
+        Homa asks a short spoken question, uses the native question card, or asks the parent
+        to switch to chat when a photo itself is essential. The app hides
+        <code>ask_for_photo</code> as a backstop so it cannot become a fake “done” receipt.
+      </article>
+      <article class="dependency" id="dependency-local">
+        <b>Local simulator launch is not part of the green evidence.</b>
+        Hermes export succeeds, and EAS compiled a finished store binary at the matching
+        fingerprint. The ignored regenerated local workspace fails inside React Native 0.85.3
+        codegen under local Xcode 26.6 because Folly headers are absent before Homa links.
+        That environment failure is not presented as an app launch.
+      </article>
+
+      <h2>4. Verification evidence</h2>
+      <table class="verification">
+        <thead><tr><th>Layer</th><th>Evidence</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Voice contract</td><td><code>check:voice-persona</code>, 65 tests</td><td class="ok">Pass</td></tr>
+          <tr><td>Native effects</td><td><code>check:mobile-voice</code>, 77 tests</td><td class="ok">Pass</td></tr>
+          <tr><td>Continuity</td><td><code>check:continuity</code>, 225 tests</td><td class="ok">Pass</td></tr>
+          <tr><td>Child progress</td><td><code>check:child-progress</code>, complete suite</td><td class="ok">Pass</td></tr>
+          <tr><td>Security</td><td><code>check:isolation</code>, all public tables and cross-family fixtures</td><td class="ok">Pass</td></tr>
+          <tr><td>Agent packaging</td><td>Eve production build, stream duration, fleet-skill, dormant-skill, context, deadline, taxonomy, and event guards</td><td class="ok">Pass</td></tr>
+          <tr><td>Behavioral routing</td><td>Sandboxed planner and materials-studio Eve evals, 2/2 evals and 4/4 gates</td><td class="ok">Pass</td></tr>
+          <tr><td>Production builds</td><td>Next build, 112 pages; iOS Hermes export, 4,224 modules</td><td class="ok">Pass</td></tr>
+          <tr><td>Release compatibility</td><td>HEAD fingerprint equals EAS production build 16 fingerprint</td><td class="ok">Pass</td></tr>
+          <tr><td>Local simulator</td><td>Clean generated workspace reaches React Native codegen, then local Xcode 26.6 cannot resolve Folly headers</td><td class="bounded">Not achieved, recorded</td></tr>
+        </tbody>
+      </table>
+
+      <h2>5. Merge quiz</h2>
+      <p class="quiz-intro">
+        These are incident and review decisions, not file-name trivia. Select every answer,
+        then score the quiz. The merge gate is absolute: 6/6.
+      </p>
+      <form id="quiz">
+        <fieldset class="question" data-section="The mental model">
+          <legend>1. A new authenticated Eve tool ships next week. What must be added to realtime voice for basic access?</legend>
+          <label><input type="radio" name="q1" value="a" /> Copy the tool schema into <code>realtime-tools.ts</code>.</label>
+          <label><input type="radio" name="q1" value="b" /> Nothing voice-specific, if the ordinary agent and skill can already use it.</label>
+          <label><input type="radio" name="q1" value="c" /> A second mobile API route for that tool.</label>
+        </fieldset>
+
+        <fieldset class="question" data-section="The bridge has proof, not privilege">
+          <legend>2. Where does the family identity for a spoken action come from?</legend>
+          <label><input type="radio" name="q2" value="a" /> The realtime model includes <code>familyId</code> in <code>ask_homa</code>.</label>
+          <label><input type="radio" name="q2" value="b" /> The mobile client stores a trusted family ID beside the microphone.</label>
+          <label><input type="radio" name="q2" value="c" /> Eve verifies the bearer token and resolves membership server-side.</label>
+        </fieldset>
+
+        <fieldset class="question" data-section="One spoken turn, one canonical history row">
+          <legend>3. Why is the spoken source turn saved before Eve performs the action?</legend>
+          <label><input type="radio" name="q3" value="a" /> To give evidence tools canonical parent provenance and fail closed before side effects.</label>
+          <label><input type="radio" name="q3" value="b" /> To make the realtime transcript render faster.</label>
+          <label><input type="radio" name="q3" value="c" /> To let the model edit the transcript later.</label>
+        </fieldset>
+
+        <fieldset class="question" data-section="Eve owns the answer after an action">
+          <legend>4. Eve says “Your printable is on the screen.” What may the realtime model do next?</legend>
+          <label><input type="radio" name="q4" value="a" /> Read that exact reply once, with tools disabled for the response.</label>
+          <label><input type="radio" name="q4" value="b" /> Summarize it warmly and add what else Homa can do.</label>
+          <label><input type="radio" name="q4" value="c" /> Call <code>ask_homa</code> again to verify the printable.</label>
+        </fieldset>
+
+        <fieldset class="question" data-section="The phone renders results, not promises">
+          <legend>5. A planner tool returns an error event. What should native voice render?</legend>
+          <label><input type="radio" name="q5" value="a" /> A planner overlay, because the tool was attempted.</label>
+          <label><input type="radio" name="q5" value="b" /> No success effect; Homa's honest spoken failure is the parent-facing result.</label>
+          <label><input type="radio" name="q5" value="c" /> A generic “Done” receipt.</label>
+        </fieldset>
+
+        <fieldset class="question" data-section="Existing behavior this leans on">
+          <legend>6. A parent asks live voice to inspect a new photo. What does this change guarantee?</legend>
+          <label><input type="radio" name="q6" value="a" /> Voice silently opens a native photo picker.</label>
+          <label><input type="radio" name="q6" value="b" /> The model may claim it saw the camera because microphone permission is present.</label>
+          <label><input type="radio" name="q6" value="c" /> Homa routes to a spoken question or chat attachment, and does not fake a photo UI effect.</label>
+        </fieldset>
+
+        <button type="submit">Score the merge quiz</button>
+      </form>
+
+      <section id="pass" class="gate" aria-live="polite">
+        <h3>6/6 · Cleared to merge</h3>
+        <ul>
+          <li>Understanding verified</li>
+          <li>CI green on the exact PR commit</li>
+          <li>No migrations in this change</li>
+          <li>Squash-merge with the report summary in the commit body</li>
+          <li>Watch Vercel readiness and the production OTA workflow</li>
+          <li>Merge comment notes the build 16 App Store Connect dependency</li>
+        </ul>
+      </section>
+      <section id="fail" class="gate" aria-live="polite">
+        <h3 id="fail-title">Not cleared yet</h3>
+        <p id="fail-copy"></p>
+        <button type="button" id="reset">Reset quiz</button>
+      </section>
+      <p class="small">Generated from the full branch diff on 2026-08-01. Production issue: gh#521.</p>
+    </main>
+
+    <script>
+      const answers = { q1: "b", q2: "c", q3: "a", q4: "a", q5: "b", q6: "c" };
+      const form = document.querySelector("#quiz");
+      const pass = document.querySelector("#pass");
+      const fail = document.querySelector("#fail");
+      const failTitle = document.querySelector("#fail-title");
+      const failCopy = document.querySelector("#fail-copy");
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const data = new FormData(form);
+        const missed = [];
+        Object.entries(answers).forEach(([name, answer], index) => {
+          if (data.get(name) !== answer) {
+            const fieldset = form.querySelector(`[name="${name}"]`).closest("fieldset");
+            missed.push(`Question ${index + 1}: re-read “${fieldset.dataset.section}”.`);
+          }
+        });
+        pass.className = "gate";
+        fail.className = "gate";
+        if (missed.length === 0) {
+          pass.className = "gate pass";
+          pass.scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
+        failTitle.textContent = `${6 - missed.length}/6 · Not cleared yet`;
+        failCopy.textContent = missed.join(" ");
+        fail.className = "gate fail";
+        fail.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+
+      document.querySelector("#reset").addEventListener("click", () => {
+        form.reset();
+        pass.className = "gate";
+        fail.className = "gate";
+        form.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    </script>
+  </body>
+</html>

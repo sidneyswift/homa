@@ -11,7 +11,16 @@ import { env, EVE_CHANNEL_HEADER } from "../../lib/env";
 import { supabase } from "../../lib/supabase";
 import {
   applyRealtimeTranscriptEvent,
+  sourceTurnFromRealtimeEvent,
 } from "./realtime-transcript";
+import {
+  appendUniqueVoiceToolEffects,
+  messagesFromVoiceToolEffects,
+  parseVoiceToolBridgeOutput,
+  spokenReplyResponseCreateEvent,
+  type VoiceHomaSessionState,
+  type VoiceToolEffect,
+} from "./realtime-tool-effects";
 import { settledTurns, type VoiceTurn } from "./voice-transcript";
 
 /** The client secret is scoped and short lived. It is safe to use only for
@@ -22,7 +31,13 @@ interface RealtimeTokenResponse {
   reason?: unknown;
 }
 
-type VoiceStatus = "idle" | "connecting" | "listening" | "speaking" | "failed";
+type VoiceStatus =
+  | "idle"
+  | "connecting"
+  | "listening"
+  | "working"
+  | "speaking"
+  | "failed";
 
 export interface VoiceSession {
   messages: readonly EveMessage[];
@@ -36,6 +51,7 @@ export interface VoiceSession {
   start: () => void;
   end: () => void;
   retry: () => void;
+  sendText: (message: string) => void;
 }
 
 const REASONS: Record<string, string> = {
@@ -55,19 +71,6 @@ function sessionId(): string {
   return `voice-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function messagesFromTurns(turns: readonly VoiceTurn[]): readonly EveMessage[] {
-  return turns
-    .filter((turn) => turn.text.length > 0)
-    .map(
-      (turn) =>
-        ({
-          id: turn.id,
-          role: turn.role,
-          parts: [{ type: "text", text: turn.text }],
-        }) as EveMessage,
-    );
-}
-
 function lastText(turns: readonly VoiceTurn[], role: "user" | "assistant"): string | null {
   for (let index = turns.length - 1; index >= 0; index -= 1) {
     const turn = turns[index];
@@ -85,6 +88,7 @@ export function useVoiceSession(): VoiceSession {
   const [status, setStatus] = useState<VoiceStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [turns, setTurns] = useState<readonly VoiceTurn[]>([]);
+  const [toolEffects, setToolEffects] = useState<readonly VoiceToolEffect[]>([]);
   const peerRef = useRef<RTCPeerConnection | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const channelRef = useRef<ReturnType<RTCPeerConnection["createDataChannel"]> | null>(null);
@@ -92,6 +96,8 @@ export function useVoiceSession(): VoiceSession {
   const cursorRef = useRef(0);
   const sessionIdRef = useRef<string | null>(null);
   const closedRef = useRef(false);
+  const homaSessionStateRef = useRef<VoiceHomaSessionState | undefined>(undefined);
+  const pendingTextRef = useRef<{ text: string; sequence: number } | null>(null);
 
   const authenticatedFetch = useCallback(async (path: string, init: RequestInit = {}) => {
     const { data } = await supabase.auth.getSession();
@@ -140,6 +146,11 @@ export function useVoiceSession(): VoiceSession {
         setTurns(next);
         persistSettledTurns(false);
       }
+      pendingTextRef.current = sourceTurnFromRealtimeEvent(
+        next,
+        event,
+        pendingTextRef.current,
+      );
       if (typeof event !== "object" || event === null) return;
       const type = (event as { type?: unknown }).type;
       if (type === "output_audio_buffer.started") setStatus("speaking");
@@ -171,34 +182,82 @@ export function useVoiceSession(): VoiceSession {
       } catch {
         args = {};
       }
-      const response = await authenticatedFetch("/api/voice/realtime/tool", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: event.name, args, sessionId: sessionIdRef.current ?? "voice" }),
-      });
-      const body = (await response.json().catch(() => null)) as { output?: unknown } | null;
-      channel.send(
-        JSON.stringify({
-          type: "conversation.item.create",
-          item: {
-            type: "function_call_output",
-            call_id: event.call_id,
-            output: JSON.stringify(body?.output ?? { note: "That did not go through just now." }),
-          },
-        }),
-      );
-      channel.send(JSON.stringify({ type: "response.create" }));
+      setStatus("working");
+      try {
+        const pendingText = pendingTextRef.current;
+        const response = await authenticatedFetch("/api/voice/realtime/tool", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: event.name,
+            args,
+            sessionId: sessionIdRef.current ?? "voice",
+            sourceText: pendingText?.text ?? null,
+            sourceSequence: pendingText?.sequence ?? null,
+            homaSessionState: homaSessionStateRef.current,
+          }),
+        });
+        const body = (await response.json().catch(() => null)) as
+          | { output?: unknown }
+          | null;
+        const output = parseVoiceToolBridgeOutput(body?.output) ?? {
+          ok: false,
+          spokenReply: "That did not go through just now. Nothing changed.",
+          effects: [],
+        };
+        setToolEffects((current) =>
+          appendUniqueVoiceToolEffects(current, output.effects),
+        );
+        homaSessionStateRef.current = output.sessionState;
+        pendingTextRef.current = null;
+        channel.send(
+          JSON.stringify({
+            type: "conversation.item.create",
+            item: {
+              type: "function_call_output",
+              call_id: event.call_id,
+              output: JSON.stringify(output),
+            },
+          }),
+        );
+        channel.send(JSON.stringify(spokenReplyResponseCreateEvent()));
+      } catch {
+        pendingTextRef.current = null;
+        channel.send(
+          JSON.stringify({
+            type: "conversation.item.create",
+            item: {
+              type: "function_call_output",
+              call_id: event.call_id,
+              output: JSON.stringify({
+                ok: false,
+                spokenReply: "That did not go through just now. Nothing changed.",
+                effects: [],
+              }),
+            },
+          }),
+        );
+        channel.send(JSON.stringify(spokenReplyResponseCreateEvent()));
+      }
     },
     [authenticatedFetch],
   );
 
   const start = useCallback(() => {
-    if (status === "connecting" || status === "listening" || status === "speaking") return;
+    if (
+      status === "connecting" ||
+      status === "listening" ||
+      status === "working" ||
+      status === "speaking"
+    ) return;
     closedRef.current = false;
     cursorRef.current = 0;
-    sessionIdRef.current = null;
+    sessionIdRef.current = sessionId();
     turnsRef.current = [];
     setTurns([]);
+    setToolEffects([]);
+    homaSessionStateRef.current = undefined;
+    pendingTextRef.current = null;
     setError(null);
     setStatus("connecting");
 
@@ -272,12 +331,40 @@ export function useVoiceSession(): VoiceSession {
 
   useEffect(() => end, [end]);
 
-  const turnActive = status === "connecting" || status === "listening" || status === "speaking";
+  const sendText = useCallback((message: string) => {
+    const text = message.trim();
+    const channel = channelRef.current;
+    if (!channel || text.length === 0) return;
+    pendingTextRef.current = { text, sequence: turnsRef.current.length };
+    setStatus("working");
+    channel.send(
+      JSON.stringify({
+        type: "conversation.item.create",
+        item: {
+          type: "message",
+          role: "user",
+          content: [{ type: "input_text", text }],
+        },
+      }),
+    );
+    channel.send(JSON.stringify({ type: "response.create" }));
+  }, []);
+
+  const turnActive =
+    status === "connecting" ||
+    status === "listening" ||
+    status === "working" ||
+    status === "speaking";
   return {
-    messages: messagesFromTurns(turns),
+    messages: messagesFromVoiceToolEffects(toolEffects),
     turnActive,
     assistantTextStreaming: status === "speaking",
-    busyDetail: status === "connecting" ? "getting ready" : error,
+    busyDetail:
+      status === "connecting"
+        ? "getting ready"
+        : status === "working"
+          ? "working on that"
+          : error,
     lastUserText: lastText(turns, "user"),
     lastAssistantText: lastText(turns, "assistant"),
     failed: status === "failed",
@@ -285,5 +372,6 @@ export function useVoiceSession(): VoiceSession {
     start,
     end,
     retry: start,
+    sendText,
   };
 }
