@@ -60,9 +60,8 @@ function GoldAuraField({ size }: { size: number }) {
 }
 
 /**
- * Homa's primary native conversation. A single purposeful tap starts the
- * microphone, then the session stays hands-free until the parent ends it.
- * Text is still available, just not placed ahead of the spoken relationship.
+ * Homa's primary native conversation. Opening the app starts the microphone
+ * and Homa takes the first turn. Text stays available as a quiet fallback.
  */
 export function VoiceScreen() {
   useKeepAwake("homa-voice-conversation");
@@ -70,6 +69,8 @@ export function VoiceScreen() {
   const insets = useSafeAreaInsets();
   const dark = useColorScheme() === "dark";
   const { session, showActiveObject, clearActiveObject } = useVoiceWorkbench();
+  const startVoice = session.start;
+  const autoStartedRef = useRef(false);
   const [overlayModel, setOverlayModel] = useState<OverlayModelState>(EMPTY_OVERLAY_MODEL);
   const activeMaterialId = overlayModel.active?.kind === "material"
     && overlayModel.active.material.id
@@ -85,6 +86,12 @@ export function VoiceScreen() {
   const fieldHeight = useSharedValue(0);
   const puck = useSharedValue(0);
   const messages = session.messages;
+
+  useEffect(() => {
+    if (autoStartedRef.current) return;
+    autoStartedRef.current = true;
+    startVoice();
+  }, [startVoice]);
 
   if (handledKeysRef.current === null) {
     handledKeysRef.current = new Set(deriveOverlaySignals([...messages], new Set()).keys);

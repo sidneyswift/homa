@@ -59,6 +59,9 @@ export interface ChildAnswerRow {
 }
 
 export interface MemberRow {
+  /** Server-side identity only, used to identify the authenticated adult.
+   * It is never rendered into the family context JSON. */
+  user_id?: string;
   /** The adult's own display name (family_members.display_name,
    * multi-parent v0 plan 2026-07-11); null until they set one. */
   display_name: string | null;
@@ -249,7 +252,7 @@ export async function loadFamilyContextPinned(
       where c.family_id = ${familyId}
     `,
     sql<MemberRow[]>`
-      select display_name from public.family_members
+      select user_id, display_name from public.family_members
       where family_id = ${familyId}
       order by created_at
     `,

@@ -19,6 +19,7 @@ import {
 import {
   appendUniqueVoiceToolEffects,
   messagesFromVoiceToolEffects,
+  openingResponseCreateEvent,
   parseVoiceToolBridgeOutput,
   spokenReplyResponseCreateEvent,
   type VoiceHomaSessionState,
@@ -118,6 +119,7 @@ export function useVoiceSession(
   const connectingRef = useRef(false);
   const connectionAttemptRef = useRef(0);
   const resumeOnForegroundRef = useRef(false);
+  const openingResponseRequestedRef = useRef(false);
 
   useEffect(() => {
     activeObjectRef.current = activeObject;
@@ -298,6 +300,7 @@ export function useVoiceSession(
       setToolEffects([]);
       homaSessionStateRef.current = undefined;
       pendingTextRef.current = null;
+      openingResponseRequestedRef.current = false;
     }
     setError(null);
     setPauseReason(null);
@@ -330,6 +333,10 @@ export function useVoiceSession(
         channel.onopen = () => {
           if (connectionAttemptRef.current !== attempt) return;
           channel.send(JSON.stringify({ type: "session.update", session: { tools: tokenBody.tools ?? [] } }));
+          if (!openingResponseRequestedRef.current) {
+            openingResponseRequestedRef.current = true;
+            channel.send(JSON.stringify(openingResponseCreateEvent()));
+          }
           setStatus("listening");
         };
         channel.onmessage = ({ data }: { data: string }) => {
