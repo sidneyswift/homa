@@ -657,6 +657,19 @@ const validPlannerEvents = {
     surface: "grid",
     client: "web",
   },
+  "planner.device_calendar_previewed": {
+    family_id: FAMILY_ID,
+    selected_count: 3,
+    duplicate_count: 1,
+  },
+  "planner.device_calendar_export_finished": {
+    family_id: FAMILY_ID,
+    outcome: "mixed",
+    selected_count: 3,
+    saved_count: 1,
+    duplicate_count: 1,
+    failed_count: 1,
+  },
 } as const;
 
 test("planner events accept every exact valid shape", () => {
