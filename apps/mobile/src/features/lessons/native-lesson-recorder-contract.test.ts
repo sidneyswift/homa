@@ -53,6 +53,12 @@ describe("native lesson recorder safety contract", () => {
     assert.ok(deleteIndex < resumeIndex);
   });
 
+  it("releases the recorder and local audio on an unexpected unmount", () => {
+    assert.match(recorderSource, /return \(\) => \{[\s\S]*?recorder\.stop\(\)/u);
+    assert.match(recorderSource, /localUriRef\.current \?\? recorder\.uri/u);
+    assert.match(recorderSource, /setAudioModeAsync\(\{ allowsRecording: false \}\)/u);
+  });
+
   it("resumes the existing Voice context instead of starting a new conversation", () => {
     assert.match(voiceSessionSource, /const resume = useCallback\(\(\) => connect\(false\)/u);
     assert.match(voiceSessionSource, /if \(resetConversation\) \{/u);

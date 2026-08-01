@@ -85,11 +85,32 @@ export function NativeLessonRecorder({
   const recorderState = useAudioRecorderState(recorder, 250);
   const player = useAudioPlayer(localUri);
   const phaseRef = useRef<LessonRecorderPhase>(phase);
+  const localUriRef = useRef<string | null>(localUri);
   const captureObservedRef = useRef(false);
 
   useEffect(() => {
     phaseRef.current = phase;
   }, [phase]);
+
+  useEffect(() => {
+    localUriRef.current = localUri;
+  }, [localUri]);
+
+  useEffect(() => {
+    return () => {
+      void (async () => {
+        if (["starting", "recording", "paused", "interrupted"].includes(phaseRef.current)) {
+          await recorder.stop().catch(() => undefined);
+        }
+        const uri = localUriRef.current ?? recorder.uri;
+        if (uri) {
+          const file = new File(uri);
+          if (file.exists) file.delete();
+        }
+        await setAudioModeAsync({ allowsRecording: false }).catch(() => undefined);
+      })();
+    };
+  }, [recorder]);
 
   useEffect(() => {
     if (phase !== "recording") return;
