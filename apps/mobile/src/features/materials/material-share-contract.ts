@@ -20,6 +20,22 @@ export type MaterialShareResult =
   | { status: "canceled" }
   | { status: "failed"; reason: MaterialShareFailureReason };
 
+export interface MaterialShareRuntime {
+  accessToken(): Promise<string | null>;
+  appState(): string;
+  networkState(): Promise<{ isConnected?: boolean | null; isInternetReachable?: boolean | null } | null>;
+  download(input: {
+    authorizedPdfPath: string;
+    materialId: string;
+    token: string;
+  }): Promise<{ uri: string }>;
+  share(input: {
+    fileUri: string;
+    message: string;
+    title: string;
+  }): Promise<{ dismissed: boolean }>;
+}
+
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -69,5 +85,61 @@ export function materialShareResultMessage(result: MaterialShareResult): string 
       return "The printable could not reach the phone. Check the connection and try again.";
     default:
       return "Sharing did not finish. Nothing was handed off.";
+  }
+}
+
+export function materialShareFailureFromDownload(error: unknown): MaterialShareFailureReason {
+  const message = error instanceof Error ? error.message : "";
+  if (/\b401\b|\b403\b/u.test(message)) return "no-session";
+  if (/\b404\b/u.test(message)) return "missing-material";
+  if (/\b410\b/u.test(message)) return "expired-material";
+  return "download-failed";
+}
+
+function withMessage(result: MaterialShareResult): MaterialShareResult & { message: string } {
+  return { ...result, message: materialShareResultMessage(result) };
+}
+
+export async function runMaterialShareWithRuntime(
+  request: PreparedMaterialShareRequest,
+  message: string,
+  runtime: MaterialShareRuntime,
+): Promise<MaterialShareResult & { message: string }> {
+  const token = await runtime.accessToken();
+  if (!token) return withMessage({ status: "failed", reason: "no-session" });
+  if (runtime.appState() !== "active") {
+    return withMessage({ status: "failed", reason: "app-backgrounded" });
+  }
+  const network = await runtime.networkState().catch(() => null);
+  if (network?.isConnected === false || network?.isInternetReachable === false) {
+    return withMessage({ status: "failed", reason: "offline" });
+  }
+
+  let file: { uri: string };
+  try {
+    file = await runtime.download({
+      authorizedPdfPath: request.authorizedPdfPath,
+      materialId: request.materialId,
+      token,
+    });
+  } catch (error) {
+    return withMessage({ status: "failed", reason: materialShareFailureFromDownload(error) });
+  }
+  if (runtime.appState() !== "active") {
+    return withMessage({ status: "failed", reason: "app-backgrounded" });
+  }
+
+  try {
+    const outcome = await runtime.share({
+      fileUri: file.uri,
+      message: message.trim(),
+      title: request.title,
+    });
+    return withMessage(outcome.dismissed ? { status: "canceled" } : { status: "handed-off" });
+  } catch (error) {
+    const reason: MaterialShareFailureReason = error instanceof Error && /not available|unsupported|no activity/iu.test(error.message)
+      ? "unsupported-destination"
+      : "share-failed";
+    return withMessage({ status: "failed", reason });
   }
 }

@@ -5,10 +5,10 @@ import { AppState, Share } from "react-native";
 import { env, EVE_CHANNEL_HEADER } from "../../lib/env";
 import { supabase } from "../../lib/supabase";
 import {
-  materialShareResultMessage,
   parsePreparedMaterialShareRequest,
+  runMaterialShareWithRuntime,
   type MaterialShareResult,
-  type MaterialShareFailureReason,
+  type MaterialShareRuntime,
   type PreparedMaterialShareRequest,
 } from "./material-share-contract";
 
@@ -26,39 +26,17 @@ export async function prepareMaterialShareFromApp(materialId: string): Promise<P
   return response.ok ? parsePreparedMaterialShareRequest(body?.shareRequest) : null;
 }
 
-function failureFromDownload(error: unknown): MaterialShareResult {
-  const message = error instanceof Error ? error.message : "";
-  if (/\b401\b|\b403\b/u.test(message)) return { status: "failed", reason: "no-session" };
-  if (/\b404\b/u.test(message)) return { status: "failed", reason: "missing-material" };
-  if (/\b410\b/u.test(message)) return { status: "failed", reason: "expired-material" };
-  return { status: "failed", reason: "download-failed" };
-}
-
-export async function runPreparedMaterialShare(
-  request: PreparedMaterialShareRequest,
-  message: string,
-): Promise<MaterialShareResult & { message: string }> {
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
-  if (!token) {
-    const result = { status: "failed" as const, reason: "no-session" as const };
-    return { ...result, message: materialShareResultMessage(result) };
-  }
-  if (AppState.currentState !== "active") {
-    const result = { status: "failed" as const, reason: "app-backgrounded" as const };
-    return { ...result, message: materialShareResultMessage(result) };
-  }
-  const network = await Network.getNetworkStateAsync().catch(() => null);
-  if (network?.isConnected === false || network?.isInternetReachable === false) {
-    const result = { status: "failed" as const, reason: "offline" as const };
-    return { ...result, message: materialShareResultMessage(result) };
-  }
-
-  const destination = new File(Paths.cache, `homa-share-${request.materialId}.pdf`);
-  let file: File;
-  try {
-    file = await File.downloadFileAsync(
-      `${env.apiUrl.replace(/\/+$/, "")}${request.authorizedPdfPath}`,
+const nativeShareRuntime: MaterialShareRuntime = {
+  async accessToken() {
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token ?? null;
+  },
+  appState: () => AppState.currentState,
+  networkState: () => Network.getNetworkStateAsync(),
+  async download({ authorizedPdfPath, materialId, token }) {
+    const destination = new File(Paths.cache, `homa-share-${materialId}.pdf`);
+    return File.downloadFileAsync(
+      `${env.apiUrl.replace(/\/+$/, "")}${authorizedPdfPath}`,
       destination,
       {
         headers: {
@@ -69,29 +47,19 @@ export async function runPreparedMaterialShare(
         idempotent: true,
       },
     );
-  } catch (error) {
-    const result = failureFromDownload(error);
-    return { ...result, message: materialShareResultMessage(result) };
-  }
-  if (AppState.currentState !== "active") {
-    const result = { status: "failed" as const, reason: "app-backgrounded" as const };
-    return { ...result, message: materialShareResultMessage(result) };
-  }
-
-  try {
+  },
+  async share({ fileUri, message, title }) {
     const outcome = await Share.share(
-      { title: request.title, message: message.trim(), url: file.uri },
-      { subject: `${request.title} from Homa`, dialogTitle: `Share ${request.title}` },
+      { title, message, url: fileUri },
+      { subject: `${title} from Homa`, dialogTitle: `Share ${title}` },
     );
-    const result: MaterialShareResult = outcome.action === Share.dismissedAction
-      ? { status: "canceled" }
-      : { status: "handed-off" };
-    return { ...result, message: materialShareResultMessage(result) };
-  } catch (error) {
-    const reason: MaterialShareFailureReason = error instanceof Error && /not available|unsupported|no activity/iu.test(error.message)
-      ? "unsupported-destination"
-      : "share-failed";
-    const result = { status: "failed" as const, reason };
-    return { ...result, message: materialShareResultMessage(result) };
-  }
+    return { dismissed: outcome.action === Share.dismissedAction };
+  },
+};
+
+export async function runPreparedMaterialShare(
+  request: PreparedMaterialShareRequest,
+  message: string,
+): Promise<MaterialShareResult & { message: string }> {
+  return runMaterialShareWithRuntime(request, message, nativeShareRuntime);
 }
