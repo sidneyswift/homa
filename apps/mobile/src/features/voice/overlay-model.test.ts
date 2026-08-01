@@ -292,6 +292,56 @@ describe("deriveOverlaySignals: mapping", () => {
     assert.ok(signals[0].kind === "material");
     assert.deepEqual(signals[0].material, material);
   });
+
+  it("accepts only a fully verified print request beside the material card", () => {
+    const id = "11111111-1111-4111-8111-111111111111";
+    const printRequest = {
+      materialId: id,
+      title: material.title,
+      authorizedPdfPath: `/api/materials/${id}/pdf`,
+      pageIndexes: [0],
+      pageCount: 2,
+      copies: 2,
+      answerKeyExcluded: true,
+    };
+    const { signals } = deriveOverlaySignals(
+      [
+        assistantMessage("msg-print", [
+          toolPart("prepare_material_print", {
+            material: { ...material, id, status: "final" },
+            printRequest,
+          }),
+        ]),
+      ],
+      NONE,
+    );
+    assert.equal(signals.length, 1);
+    assert.ok(signals[0].kind === "material");
+    assert.deepEqual(signals[0].printRequest, printRequest);
+  });
+
+  it("drops a print effect when its authorized route does not match the material", () => {
+    const { signals } = deriveOverlaySignals(
+      [
+        assistantMessage("msg-print", [
+          toolPart("prepare_material_print", {
+            material,
+            printRequest: {
+              materialId: "11111111-1111-4111-8111-111111111111",
+              title: material.title,
+              authorizedPdfPath: "/api/materials/wrong/pdf",
+              pageIndexes: [0],
+              pageCount: 1,
+              copies: 1,
+              answerKeyExcluded: false,
+            },
+          }),
+        ]),
+      ],
+      NONE,
+    );
+    assert.deepEqual(signals, []);
+  });
 });
 
 describe("deriveOverlaySignals: question sheets", () => {
@@ -585,5 +635,27 @@ describe("applyOverlaySignal and dismissActiveOverlay", () => {
     let state = applyOverlaySignal(EMPTY_OVERLAY_MODEL, receiptA);
     state = applyOverlaySignal(state, hours);
     assert.deepEqual(state, { active: hours, receipts: [] });
+  });
+
+  it("a keep receipt updates only the matching visible material", () => {
+    const materialId = "11111111-1111-4111-8111-111111111111";
+    const visible: OverlaySignal = {
+      kind: "material",
+      key: "a3:0",
+      material: { ...material, id: materialId, status: "draft" },
+    };
+    const kept: OverlaySignal = {
+      kind: "receipt",
+      key: "a3:1",
+      toolName: "mark_material_final",
+      summary: "Final kept",
+      materialId,
+    };
+    const state = applyOverlaySignal(
+      applyOverlaySignal(EMPTY_OVERLAY_MODEL, visible),
+      kept,
+    );
+    assert.ok(state.active?.kind === "material");
+    assert.equal(state.active.material.status, "final");
   });
 });

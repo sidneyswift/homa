@@ -688,6 +688,17 @@ export const EVENT_SCHEMAS = {
     material_id: z.uuid(),
     status: z.enum(["draft", "final", "superseded"]),
   }),
+  // Native iOS owns the only trustworthy print terminal. Ready is not an
+  // outcome here: the app emits after UIPrintInteractionController's
+  // completion handler reports completed, canceled, or failed.
+  "materials.print_result": z.object({
+    family_id: z.uuid(),
+    material_id: z.uuid(),
+    outcome: z.enum(["completed", "canceled", "failed"]),
+    requested_copies: z.number().int().min(1).max(20),
+    pages_selected: z.number().int().min(1),
+    answer_key_excluded: z.boolean(),
+  }),
   // The state pack (journeys/06 rows 47-50, J4; shipped 2026-07-28 per
   // docs/homa-planning/plans/2026-07-28-state-pack.md). Deterministic
   // web feature over the state_requirements table; no agent involved.

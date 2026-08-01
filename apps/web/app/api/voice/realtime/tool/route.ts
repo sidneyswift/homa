@@ -9,6 +9,7 @@ import {
   ASK_HOMA_TOOL_NAME,
   parseAskHomaInput,
 } from "../../../../../lib/voice/realtime-tools";
+import { parseActiveMaterialReference } from "../../../../../lib/voice/active-material";
 
 /**
  * POST /api/voice/realtime/tool: hands one spoken request to the full Homa
@@ -45,6 +46,7 @@ interface ToolCallBody {
   sourceText?: unknown;
   sourceSequence?: unknown;
   homaSessionState?: unknown;
+  activeObject?: unknown;
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -147,6 +149,7 @@ export async function POST(request: Request): Promise<Response> {
     message: sourceText,
     sourceMessageId,
     sessionState: parseVoiceHomaSessionState(body.homaSessionState),
+    activeMaterial: parseActiveMaterialReference(body.activeObject) ?? undefined,
   });
 
   // Always 200 with a result the model can read aloud. A non-2xx here would

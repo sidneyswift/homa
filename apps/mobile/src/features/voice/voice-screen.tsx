@@ -14,6 +14,12 @@ import { Mic, MicOff, X } from "lucide-react-native";
 
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, palette, radius, space } from "../../theme/tokens";
+import { emitFamilyEvent } from "../../lib/events";
+import { useFamilyData } from "../family/use-family-data";
+import {
+  readyPrintMessage,
+  runPreparedMaterialPrint,
+} from "../materials/material-print";
 import { deriveCharacterState } from "./character-state";
 import { HomaCharacter } from "./homa-character";
 import {
@@ -59,11 +65,19 @@ export function VoiceScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const dark = useColorScheme() === "dark";
-  const session = useVoiceSession();
   const [overlayModel, setOverlayModel] = useState<OverlayModelState>(EMPTY_OVERLAY_MODEL);
+  const activeMaterial = overlayModel.active?.kind === "material"
+    && overlayModel.active.material.id
+    ? { kind: "material" as const, id: overlayModel.active.material.id }
+    : null;
+  const session = useVoiceSession(activeMaterial);
+  const announceResult = session.announceResult;
+  const { family } = useFamilyData();
   const [replyOpen, setReplyOpen] = useState(false);
+  const [printNotice, setPrintNotice] = useState<string | null>(null);
   const hoursKeyRef = useRef(0);
   const handledKeysRef = useRef<Set<string> | null>(null);
+  const handledPrintKeysRef = useRef(new Set<string>());
   const fieldHeight = useSharedValue(0);
   const puck = useSharedValue(0);
   const messages = session.messages;
@@ -80,6 +94,28 @@ export function VoiceScreen() {
     for (const signal of signals) handled.add(signal.key);
     setOverlayModel((current) => signals.reduce(applyOverlaySignal, current));
   }, [messages]);
+
+  useEffect(() => {
+    const signal = overlayModel.active;
+    if (signal?.kind !== "material" || !signal.printRequest) return;
+    if (handledPrintKeysRef.current.has(signal.key)) return;
+    handledPrintKeysRef.current.add(signal.key);
+    setPrintNotice(readyPrintMessage(signal.printRequest));
+    void runPreparedMaterialPrint(signal.printRequest).then((result) => {
+      setPrintNotice(result.message);
+      announceResult(result.message);
+      if (family?.id) {
+        void emitFamilyEvent(family.id, "materials.print_result", {
+          family_id: family.id,
+          material_id: signal.printRequest!.materialId,
+          outcome: result.status,
+          requested_copies: signal.printRequest!.copies,
+          pages_selected: signal.printRequest!.pageIndexes.length,
+          answer_key_excluded: signal.printRequest!.answerKeyExcluded,
+        });
+      }
+    });
+  }, [announceResult, family?.id, overlayModel.active]);
 
   const activeSignal = overlayModel.active;
   const overlayActive = activeSignal !== null && activeSignal.kind !== "receipt";
@@ -197,6 +233,13 @@ export function VoiceScreen() {
         signal={activeSignal}
         onDismiss={() => setOverlayModel((current) => dismissActiveOverlay(current))}
         onAnswer={(message) => session.sendText(message)}
+        onMaterialAction={(action) => {
+          if (action === "print") session.sendText("Print this.");
+          if (action === "keep") session.sendText("I love it. Keep this one.");
+          if (action === "change") session.sendText("I want to change this material.");
+          if (action === "earlier") session.sendText("Show me the earlier version of this material.");
+        }}
+        printNotice={printNotice}
         onReceiptPress={(signal) => {
           if (signal.toolName === "log_hours") {
             hoursKeyRef.current += 1;

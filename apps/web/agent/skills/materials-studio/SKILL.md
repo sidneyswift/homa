@@ -1,5 +1,5 @@
 ---
-description: Use when designing any printable or visual material for a child, worksheets, lesson plans, tracing or coloring pages, flash cards, counting mats, posters, infographics, foldables (interactive notebook inserts), structured outlines and essay scaffolds, and multi-page packets ("make it one PDF", weekly lesson bundles, mini books). Contains the creation-path guide (image model vs HTML vs both), the packet recipe, reference-image discipline, metadata and finalize discipline, and proven recipes.
+description: Use when a parent wants to create, review, revise, approve, finalize, combine, or print a child material, including natural reactions to the material currently visible. Covers worksheets, lesson plans, cards, posters, scaffolds, and multi-page packets. Not for designing a whole curriculum; curriculum-studio owns that.
 ---
 
 # The materials studio
@@ -408,6 +408,11 @@ Rules that make packets work:
   from the content so find_materials can find the whole unit later. The
   packet is a material like any other: revisions chain with revisesId,
   and approval means mark_material_final.
+- Page roles: whenever a PDF includes an answer key or parent-only page,
+  pass `pageRoles` to create_printable with exactly one closed role per
+  rendered page (`child`, `answer_key`, `parent_guide`, or `other`). This
+  is print control data, not prose: native "skip the answer key" uses it
+  to select pages without guessing what a page means.
 
 ## Manipulatives: think past the page (early math especially)
 
@@ -581,11 +586,34 @@ metadata means find_materials cannot find it next month, and the
 2. The parent's critique is the real review. Change only what she
    named, keep everything she liked, same image URL unless the image is
    the complaint, revisesId chaining each version.
-3. When she approves ("great", "print it", "she'll love this"), call
+3. Judge the parent's whole reaction before acting. A positive clause plus
+   any requested change is revision intent, not approval of the old node:
+   "I like it, but shorten the directions" creates a revision with
+   revisesId and does not call mark_material_final first. A plain positive
+   reaction ("I love it", "she'll love this") approves the visible node.
+   A negative reaction revises only what she named. If more than one
+   material could be meant and there is no server-verified visible material,
+   ask one direct question with no explanation before it, then change nothing.
+4. When she approves ("great", "print it", "she'll love this"), call
    mark_material_final with that version's id. The final joins the
    library; drafts are tidied away. Never finalize on your own judgment,
    and never nag her to approve.
-3a. Right after finalizing, if she named a day for when they'll use it
+   A print request is approval too. Call prepare_material_print with the
+   server-verified visible material id, the requested copy count, and
+   includeAnswerKey set from what she actually said. The tool finalizes a
+   draft, follows revision lineage to the current node, and selects only
+   verified page roles. Its result opens the native system print sheet.
+   Say that the sheet is ready, including the requested copy count when it
+   is more than one. Never claim paper printed from the tool result. Wait
+   for the native completion result, which is the only printing outcome
+   Homa may report.
+   If the same message asks for a change and printing ("Love it, make the
+   title bigger and print two"), revise first and do not print the old
+   node. Let the parent see or approve the revision before preparing it.
+   If the PDF has no verified page roles, never guess which page is an
+   answer key. Explain that the whole packet can print, or offer to make a
+   labeled revision.
+4a. Right after finalizing, if she named a day for when they'll use it
    ("we'll do this Tuesday") AND the material was built for a specific
    plan activity you both discussed this conversation (a real child,
    subjectId, week, and activityIndex from open_planner), call
@@ -594,11 +622,11 @@ metadata means find_materials cannot find it next month, and the
    never a required step: skip it silently when there is no day named,
    or no specific plan activity this material maps to. Never invent a
    plan activity to attach a date to.
-4. When a style clearly lands and she agrees, remember the how-to as a
+5. When a style clearly lands and she agrees, remember the how-to as a
    durable preference (what made it work, the prompt pattern, the layout),
    e.g. "Maya's worksheets use Paw Patrol characters, soft watercolor
    style."
-5. "Can you send it again?" is show_material with that version's id:
+6. "Can you send it again?" is show_material with that version's id:
    the card or picture message comes back exactly as made. Never
    re-render a page just to re-show it.
 

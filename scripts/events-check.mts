@@ -1,6 +1,6 @@
 /**
  * Events-registry parity check (MJ-08). Two jobs, one exit code:
- *   1. Every event name emitted in apps/web exists in the typed registry
+ *   1. Every event name emitted in apps/web or apps/mobile exists in the typed registry
  *      (packages/core/src/events.ts EVENT_SCHEMAS): emitters cannot invent
  *      names or shapes.
  *   2. Every registry event has an emitter somewhere in apps/web, so the
@@ -37,6 +37,7 @@ const ROOTS = [
   "apps/web/components",
   "apps/web/lib",
   "apps/web/agent",
+  "apps/mobile/src",
 ];
 const SKIP_DIRS = new Set(["node_modules", ".next", ".eve"]);
 
@@ -53,9 +54,9 @@ function* walkSourceFiles(dir: string): Generator<string> {
 
 // The first quoted dotted name after an emit call is the event name; sink
 // object literals never contain dotted string literals, so a 200-char
-// window after the call open is safe for emitEvent, emitMapEvent, and
-// emitMapEventOnce (the windowed-dedupe variant, same name-first shape).
-const EMIT_CALL = /emit(?:Map)?Event(?:Once)?\s*(?:<[^>]*>)?\(\s*[\s\S]{0,200}?"([a-z_]+\.[a-z_]+)"/g;
+// window after the call open is safe for emitEvent, emitMapEvent,
+// emitFamilyEvent, and the Once variants (same name-first shape).
+const EMIT_CALL = /emit(?:Map|Family)?Event(?:Once)?\s*(?:<[^>]*>)?\(\s*[\s\S]{0,200}?"([a-z_]+\.[a-z_]+)"/g;
 
 const emittedEventSites = new Map<string, string[]>();
 for (const root of ROOTS) {

@@ -262,6 +262,22 @@ test("only HTML material creation accepts the subject lesson channel", () => {
   }
 });
 
+test("native print results carry bounded operational facts only", () => {
+  const event = {
+    family_id: FAMILY_ID,
+    material_id: "11111111-1111-4111-8111-111111111111",
+    outcome: "completed",
+    requested_copies: 2,
+    pages_selected: 1,
+    answer_key_excluded: true,
+  } as const;
+  assert.equal(EVENT_SCHEMAS["materials.print_result"].safeParse(event).success, true);
+  assert.equal(
+    EVENT_SCHEMAS["materials.print_result"].safeParse({ ...event, requested_copies: 0 }).success,
+    false,
+  );
+});
+
 test("progress event registry contains all eleven exact names", () => {
   assert.deepEqual(
     Object.keys(EVENT_SCHEMAS)

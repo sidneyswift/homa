@@ -52,6 +52,12 @@ export interface VoiceSession {
   end: () => void;
   retry: () => void;
   sendText: (message: string) => void;
+  announceResult: (message: string) => void;
+}
+
+export interface VoiceActiveObject {
+  kind: "material";
+  id: string;
 }
 
 const REASONS: Record<string, string> = {
@@ -84,7 +90,7 @@ function lastText(turns: readonly VoiceTurn[], role: "user" | "assistant"): stri
  * audio playback. The data channel carries only model events and guarded tool
  * calls, while every transcript line is persisted through Homa's server.
  */
-export function useVoiceSession(): VoiceSession {
+export function useVoiceSession(activeObject: VoiceActiveObject | null = null): VoiceSession {
   const [status, setStatus] = useState<VoiceStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [turns, setTurns] = useState<readonly VoiceTurn[]>([]);
@@ -98,6 +104,11 @@ export function useVoiceSession(): VoiceSession {
   const closedRef = useRef(false);
   const homaSessionStateRef = useRef<VoiceHomaSessionState | undefined>(undefined);
   const pendingTextRef = useRef<{ text: string; sequence: number } | null>(null);
+  const activeObjectRef = useRef<VoiceActiveObject | null>(activeObject);
+
+  useEffect(() => {
+    activeObjectRef.current = activeObject;
+  }, [activeObject]);
 
   const authenticatedFetch = useCallback(async (path: string, init: RequestInit = {}) => {
     const { data } = await supabase.auth.getSession();
@@ -195,6 +206,7 @@ export function useVoiceSession(): VoiceSession {
             sourceText: pendingText?.text ?? null,
             sourceSequence: pendingText?.sequence ?? null,
             homaSessionState: homaSessionStateRef.current,
+            activeObject: activeObjectRef.current,
           }),
         });
         const body = (await response.json().catch(() => null)) as
@@ -350,6 +362,22 @@ export function useVoiceSession(): VoiceSession {
     channel.send(JSON.stringify({ type: "response.create" }));
   }, []);
 
+  const announceResult = useCallback((message: string) => {
+    const text = message.trim();
+    const channel = channelRef.current;
+    if (!channel || text.length === 0) return;
+    channel.send(
+      JSON.stringify({
+        type: "response.create",
+        response: {
+          instructions: `Say exactly this sentence and nothing else: ${JSON.stringify(text)}`,
+          tools: [],
+          tool_choice: "none",
+        },
+      }),
+    );
+  }, []);
+
   const turnActive =
     status === "connecting" ||
     status === "listening" ||
@@ -373,5 +401,6 @@ export function useVoiceSession(): VoiceSession {
     end,
     retry: start,
     sendText,
+    announceResult,
   };
 }

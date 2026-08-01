@@ -414,6 +414,11 @@ values
  * status 'final' so find_materials returns it without status:"any".
  */
 export const EVAL_FIXTURE_PACKET_ID = "00000000-0000-4000-8000-0000000000e1";
+export const EVAL_FIXTURE_MATERIAL_DRAFT_ID = "00000000-0000-4000-8000-0000000000e2";
+export const EVAL_FIXTURE_MATERIAL_NEGATIVE_ID = "00000000-0000-4000-8000-0000000000e3";
+export const EVAL_FIXTURE_MATERIAL_MIXED_ID = "00000000-0000-4000-8000-0000000000e4";
+export const EVAL_FIXTURE_MATERIAL_INTERRUPTED_ID = "00000000-0000-4000-8000-0000000000e5";
+export const EVAL_FIXTURE_MATERIAL_CROSS_OBJECT_ID = "00000000-0000-4000-8000-0000000000e6";
 export const EVAL_FIXTURE_PACKET_PAGES = 12;
 
 /**
@@ -513,5 +518,60 @@ values
    ${sqlString(html)}, 'web', 'packet', 'phonics',
    'woodland animals', 'html', 'final', now(),
    timestamptz '2026-07-02 12:00:00+00');
+
+insert into public.materials
+  (id, family_id, child_id, title, skill, pdf_url, preview_url, html,
+   channel, kind, subject, theme, source, status, generation, created_at)
+values
+  (${sqlString(EVAL_FIXTURE_MATERIAL_DRAFT_ID)}, ${sqlString(EVAL_FIXTURE_FAMILY_ID)},
+   ${sqlString(FIXTURE_CHILD_MAYA)},
+   'Maya''s Fresh Letter Sounds Page', 'letter sounds and early reading',
+   ${sqlString(`${EVAL_FIXTURE_ARTIFACT_PREFIX}/fresh-letter-sounds.pdf`)},
+   ${sqlString(`${EVAL_FIXTURE_ARTIFACT_PREFIX}/fresh-letter-sounds.jpg`)},
+   '<div class="page"><h2>Maya''s fresh letter sounds</h2></div>',
+   'web', 'worksheet', 'phonics', 'simple practice', 'html', 'draft',
+   '{"review":{"pass":true},"pageCount":1,"pageRoles":["child"]}'::jsonb,
+   timestamptz '2026-08-01 12:00:00+00');
+
+insert into public.materials
+  (id, family_id, child_id, title, skill, pdf_url, preview_url, html,
+   channel, kind, subject, theme, source, status, approved_at, generation, created_at)
+values
+  (${sqlString(EVAL_FIXTURE_MATERIAL_NEGATIVE_ID)}, ${sqlString(EVAL_FIXTURE_FAMILY_ID)},
+   ${sqlString(FIXTURE_CHILD_MAYA)}, 'Maya''s Crowded Letter Page',
+   'letter sounds and early reading',
+   ${sqlString(`${EVAL_FIXTURE_ARTIFACT_PREFIX}/negative-letter-sounds.pdf`)},
+   ${sqlString(`${EVAL_FIXTURE_ARTIFACT_PREFIX}/negative-letter-sounds.jpg`)},
+   '<div class="page"><h2>Letter sounds</h2><p>Circle every sound.</p></div>',
+   'web', 'worksheet', 'phonics', 'simple practice', 'html', 'final', now(),
+   '{"review":{"pass":true},"pageCount":1,"pageRoles":["child"]}'::jsonb,
+   timestamptz '2026-08-01 12:01:00+00'),
+  (${sqlString(EVAL_FIXTURE_MATERIAL_MIXED_ID)}, ${sqlString(EVAL_FIXTURE_FAMILY_ID)},
+   ${sqlString(FIXTURE_CHILD_MAYA)}, 'Maya''s Directions Letter Page',
+   'letter sounds and early reading',
+   ${sqlString(`${EVAL_FIXTURE_ARTIFACT_PREFIX}/mixed-letter-sounds.pdf`)},
+   ${sqlString(`${EVAL_FIXTURE_ARTIFACT_PREFIX}/mixed-letter-sounds.jpg`)},
+   '<div class="page"><h2>Letter sounds</h2><p>Read these long directions before you begin the page.</p></div>',
+   'web', 'worksheet', 'phonics', 'simple practice', 'html', 'final', now(),
+   '{"review":{"pass":true},"pageCount":1,"pageRoles":["child"]}'::jsonb,
+   timestamptz '2026-08-01 12:02:00+00'),
+  (${sqlString(EVAL_FIXTURE_MATERIAL_INTERRUPTED_ID)}, ${sqlString(EVAL_FIXTURE_FAMILY_ID)},
+   ${sqlString(FIXTURE_CHILD_MAYA)}, 'Maya''s Practice Letter Page',
+   'letter sounds and early reading',
+   ${sqlString(`${EVAL_FIXTURE_ARTIFACT_PREFIX}/interrupted-letter-sounds.pdf`)},
+   ${sqlString(`${EVAL_FIXTURE_ARTIFACT_PREFIX}/interrupted-letter-sounds.jpg`)},
+   '<div class="page"><h2>Letter sounds</h2><p>Read all the directions, then begin.</p></div>',
+   'web', 'worksheet', 'phonics', 'simple practice', 'html', 'final', now(),
+   '{"review":{"pass":true},"pageCount":1,"pageRoles":["child"]}'::jsonb,
+   timestamptz '2026-08-01 12:03:00+00'),
+  (${sqlString(EVAL_FIXTURE_MATERIAL_CROSS_OBJECT_ID)}, ${sqlString(EVAL_FIXTURE_FAMILY_ID)},
+   ${sqlString(FIXTURE_CHILD_MAYA)}, 'Maya''s Cross-object Letter Page',
+   'letter sounds and early reading',
+   ${sqlString(`${EVAL_FIXTURE_ARTIFACT_PREFIX}/cross-letter-sounds.pdf`)},
+   ${sqlString(`${EVAL_FIXTURE_ARTIFACT_PREFIX}/cross-letter-sounds.jpg`)},
+   '<div class="page"><h2>Maya''s letter sounds</h2></div>',
+   'web', 'worksheet', 'phonics', 'simple practice', 'html', 'final', now(),
+   '{"review":{"pass":true},"pageCount":1,"pageRoles":["child"]}'::jsonb,
+   timestamptz '2026-08-01 12:04:00+00');
 `.trim();
 }
