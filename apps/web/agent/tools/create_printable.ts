@@ -196,6 +196,14 @@ export const createPrintableInputSchema = z.object({
     .describe(
       `PATH 3: a multi-page packet, one entry per page in print order (max ${MAX_PACKET_PAGES} pages; ship longer programs as volumes). Each entry carries exactly one of html, pageImageUrl, or fromMaterialId; mix freely (e.g. a fresh cover page + four existing lessons by id). To revise ONE page of a packet, do NOT retype the others: send an entry per page, each unchanged page as fromMaterialId + pageIndex pointing at the version you are revising, and html for only the page she asked about. Provide exactly one of html, pageImageUrl, or pages.`,
     ),
+  pageRoles: z
+    .array(z.enum(["child", "answer_key", "parent_guide", "other"]))
+    .min(1)
+    .max(MAX_PACKET_PAGES)
+    .optional()
+    .describe(
+      "One deterministic role per rendered PDF page, in print order. Include this whenever a packet has an answer key or parent-only page so native printing can exclude it without guessing from page text.",
+    ),
   revisesId: z
     .uuid()
     .optional()
@@ -719,12 +727,19 @@ const createPrintable = defineBoundedTool({
     // made it, and the review verdict beside the output. pageCount and
     // the per-page previews ride here too (no schema change; the card,
     // scrollback, and Binder read them from generation).
+    if (input.pageRoles && input.pageRoles.length !== rendered.pageCount) {
+      return {
+        created: false,
+        note: `pageRoles has ${input.pageRoles.length} entries, but the rendered PDF has ${rendered.pageCount} pages. Send exactly one closed role per page.`,
+      };
+    }
     const generation = {
       sessionId: ctx.session.id,
       turnId: ctx.session.turn.id,
       channel,
       pageCount: rendered.pageCount,
       ...(rendered.pageCount > 1 ? { pagePreviewUrls } : {}),
+      ...(input.pageRoles ? { pageRoles: input.pageRoles } : {}),
       input: buildPrintableGenerationInput(
         input,
         input.pages ? "pages" : input.pageImageUrl ? "pageImageUrl" : "html",
@@ -968,6 +983,7 @@ const createPrintable = defineBoundedTool({
         pdfUrl,
         pageCount: rendered.pageCount,
         ...(rendered.pageCount > 1 ? { pagePreviewUrls } : {}),
+        ...(input.pageRoles ? { pageRoles: input.pageRoles } : {}),
         status: "draft",
         revisesId: input.revisesId ?? null,
         reviewPassed: review === null ? null : review.pass,

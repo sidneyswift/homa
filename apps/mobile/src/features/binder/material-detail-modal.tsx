@@ -1,12 +1,20 @@
 import { X } from "lucide-react-native";
-import { Image, Linking, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Image, Modal, Pressable, ScrollView, Share, Text, View } from "react-native";
+import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "../../components/ui/button";
+import { emitFamilyEvent } from "../../lib/events";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { useFamilyData } from "../family/use-family-data";
 import type { BinderMaterial } from "./binder-model";
 import { KIND_LABELS } from "./binder-model";
+import {
+  prepareMaterialPrintFromApp,
+  readyPrintMessage,
+  runPreparedMaterialPrint,
+} from "../materials/material-print";
 
 function formatKeptOn(dateOnly: string): string {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(
@@ -21,9 +29,36 @@ function formatKeptOn(dateOnly: string): string {
  * ("earlier tries") yet, a tracked gap, not a silent one.
  */
 export function MaterialDetailModal({ material, onClose }: { material: BinderMaterial | null; onClose: () => void }) {
-  function openPdf() {
+  const { family } = useFamilyData();
+  const [printing, setPrinting] = useState(false);
+  const [printNotice, setPrintNotice] = useState<string | null>(null);
+
+  async function printMaterial() {
     if (!material) return;
-    Linking.openURL(material.pdfUrl).catch(() => {});
+    setPrinting(true);
+    const prepared = await prepareMaterialPrintFromApp(material.id, {
+      copies: 1,
+      includeAnswerKey: true,
+    });
+    if (!prepared) {
+      setPrintNotice("That could not be prepared for printing. Pull down to refresh the Binder, then try again.");
+      setPrinting(false);
+      return;
+    }
+    setPrintNotice(readyPrintMessage(prepared));
+    const result = await runPreparedMaterialPrint(prepared);
+    setPrintNotice(result.message);
+    if (family?.id) {
+      void emitFamilyEvent(family.id, "materials.print_result", {
+        family_id: family.id,
+        material_id: prepared.materialId,
+        outcome: result.status,
+        requested_copies: prepared.copies,
+        pages_selected: prepared.pageIndexes.length,
+        answer_key_excluded: prepared.answerKeyExcluded,
+      });
+    }
+    setPrinting(false);
   }
 
   return (
@@ -71,9 +106,20 @@ export function MaterialDetailModal({ material, onClose }: { material: BinderMat
             </View>
 
             <Button
-              label={material.pageCount > 1 ? `Print all ${material.pageCount} pages` : "Print it"}
-              onPress={openPdf}
+              label={printing ? "Opening print sheet…" : material.pageCount > 1 ? `Print all ${material.pageCount} pages` : "Print it"}
+              disabled={printing}
+              onPress={() => void printMaterial()}
             />
+            <Button
+              label="Share"
+              variant="secondary"
+              onPress={() => void Share.share({ title: material.title, url: material.pdfUrl })}
+            />
+            {printNotice ? (
+              <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}>
+                {printNotice}
+              </Text>
+            ) : null}
           </ScrollView>
         ) : null}
       </SafeAreaView>

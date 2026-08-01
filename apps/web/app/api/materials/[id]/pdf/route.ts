@@ -7,6 +7,7 @@ import {
 } from "../../../../../lib/materials/library";
 import { requireFamilyWithActor } from "../../../../../lib/map/session";
 import { createSupabaseServerClient } from "../../../../../lib/supabase/server";
+import { resolveApiFamily } from "../../../../../lib/api-auth";
 
 /**
  * GET /api/materials/[id]/pdf: the only link the material card gives out
@@ -53,37 +54,53 @@ export async function GET(
   const { id } = await params;
   const requestUrl = new URL(request.url);
 
-  let access;
-  try {
-    access = await requireFamilyWithActor();
-  } catch (error) {
-    console.error(
-      "materials/pdf auth lookup failed:",
-      error instanceof Error ? error.message : "unknown",
-    );
-    return new Response("Could not verify your session.", { status: 502 });
-  }
-  if (!access) {
-    const signin = new URL("/signin", requestUrl);
-    signin.searchParams.set("next", requestUrl.pathname + requestUrl.search);
-    return Response.redirect(signin, 302);
-  }
-  const { family, memberUserId } = access;
-
-  const material =
-    memberUserId === null
-      ? await getMaterialPinned(family.id, id)
+  const bearer = request.headers.get("authorization");
+  let familyId: string;
+  let familyState: string | null = null;
+  let material;
+  if (bearer) {
+    const auth = await resolveApiFamily(request);
+    if (!auth) return new Response("Could not verify your session.", { status: 401 });
+    familyId = auth.familyId;
+    material = await getMaterialCaller(auth.supabase, auth.familyId, id);
+    const { data: family } = await auth.supabase
+      .from("families")
+      .select("us_state")
+      .eq("id", auth.familyId)
+      .maybeSingle();
+    familyState = typeof family?.us_state === "string" ? family.us_state : null;
+  } else {
+    let access;
+    try {
+      access = await requireFamilyWithActor();
+    } catch (error) {
+      console.error(
+        "materials/pdf auth lookup failed:",
+        error instanceof Error ? error.message : "unknown",
+      );
+      return new Response("Could not verify your session.", { status: 502 });
+    }
+    if (!access) {
+      const signin = new URL("/signin", requestUrl);
+      signin.searchParams.set("next", requestUrl.pathname + requestUrl.search);
+      return Response.redirect(signin, 302);
+    }
+    familyId = access.family.id;
+    familyState = access.family.us_state;
+    material = access.memberUserId === null
+      ? await getMaterialPinned(access.family.id, id)
       : await getMaterialCaller(
           await createSupabaseServerClient(),
-          family.id,
+          access.family.id,
           id,
         );
+  }
   if (!material) {
     return new Response("Material not found.", { status: 404 });
   }
 
   await emitMapEvent("materials.pdf_opened", {
-    family_id: family.id,
+    family_id: familyId,
     material_id: material.id,
     status: material.status,
   });
@@ -94,15 +111,28 @@ export async function GET(
   // family's current one, so a family that moved after generating still
   // attributes the download to the state the pack describes.
   if (material.subject === STATE_PACK_SUBJECT) {
-    const packState = await readStatePackState(family.id, material.id);
-    const state = packState ?? family.us_state;
+    const packState = await readStatePackState(familyId, material.id);
+    const state = packState ?? familyState;
     if (state) {
       await emitMapEvent("compliance.report_downloaded", {
-        family_id: family.id,
+        family_id: familyId,
         state,
       });
     }
   }
 
+  const accept = request.headers.get("accept") ?? "";
+  if (bearer && accept.includes("application/pdf")) {
+    const upstream = await fetch(material.pdfUrl);
+    if (!upstream.ok || !upstream.body) {
+      return new Response("Printable file unavailable.", { status: 502 });
+    }
+    return new Response(upstream.body, {
+      headers: {
+        "content-type": "application/pdf",
+        "cache-control": "private, no-store",
+      },
+    });
+  }
   return Response.redirect(material.pdfUrl, 302);
 }

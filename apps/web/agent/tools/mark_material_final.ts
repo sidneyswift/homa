@@ -85,6 +85,7 @@ export default defineBoundedTool({
 
     return {
       ...result,
+      materialId: input.materialId,
       done: true,
       note: result.transitioned
         ? "Kept as the final version; earlier drafts tidied away. Mention it in one short natural aside at most."

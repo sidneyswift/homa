@@ -1,6 +1,10 @@
 import type { EveMessagePart } from "eve/react";
 
 import type { MaterialArtifact } from "../chat/material-card";
+import {
+  parsePreparedPrintRequest,
+  type PreparedPrintRequest,
+} from "../materials/material-print-contract";
 import { memoryChipFor } from "../chat/message-utils";
 import {
   parseQuestionCardPart,
@@ -28,10 +32,21 @@ export type MaterialCardPayload = MaterialArtifact;
 
 export type OverlaySignal =
   | { kind: "planner"; key: string; refreshCount: number }
-  | { kind: "material"; key: string; material: MaterialCardPayload }
+  | {
+      kind: "material";
+      key: string;
+      material: MaterialCardPayload;
+      printRequest?: PreparedPrintRequest;
+    }
   | { kind: "question"; key: string; card: QuestionCardData }
   | { kind: "hours"; key: string }
-  | { kind: "receipt"; key: string; toolName: string; summary: string };
+  | {
+      kind: "receipt";
+      key: string;
+      toolName: string;
+      summary: string;
+      materialId?: string;
+    };
 
 /** A receipt toast's signal, the shape OverlayHost's onReceiptPress
  * hands back to the screen. */
@@ -61,6 +76,7 @@ const MATERIAL_TOOLS = new Set([
   "create_printable",
   "show_material",
   "create_worksheet",
+  "prepare_material_print",
 ]);
 
 /**
@@ -299,12 +315,35 @@ function buildSignal(
   if (MATERIAL_TOOLS.has(toolName)) {
     const material = materialPayload(output);
     if (material === null) return null;
-    return { signal: { kind: "material", key, material }, planWrites };
+    const printRequest = toolName === "prepare_material_print"
+      ? parsePreparedPrintRequest(output.printRequest)
+      : null;
+    if (toolName === "prepare_material_print" && !printRequest) return null;
+    return {
+      signal: {
+        kind: "material",
+        key,
+        material,
+        ...(printRequest ? { printRequest } : {}),
+      },
+      planWrites,
+    };
   }
   if (IGNORED_TOOLS.has(toolName)) return null;
   const summary = receiptSummaryFor(part);
   if (summary === null) return null;
-  return { signal: { kind: "receipt", key, toolName, summary }, planWrites };
+  return {
+    signal: {
+      kind: "receipt",
+      key,
+      toolName,
+      summary,
+      ...(toolName === "mark_material_final" && typeof output.materialId === "string"
+        ? { materialId: output.materialId }
+        : {}),
+    },
+    planWrites,
+  };
 }
 
 /**
@@ -375,8 +414,17 @@ export function applyOverlaySignal(
   signal: OverlaySignal,
 ): OverlayModelState {
   if (signal.kind === "receipt") {
-    if (state.active === null) return { active: signal, receipts: state.receipts };
-    return { active: state.active, receipts: [...state.receipts, signal] };
+    const active = signal.toolName === "mark_material_final"
+      && signal.materialId
+      && state.active?.kind === "material"
+      && state.active.material.id === signal.materialId
+      ? {
+          ...state.active,
+          material: { ...state.active.material, status: "final" as const },
+        }
+      : state.active;
+    if (active === null) return { active: signal, receipts: state.receipts };
+    return { active, receipts: [...state.receipts, signal] };
   }
   return { active: signal, receipts: state.receipts };
 }

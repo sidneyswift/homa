@@ -4,6 +4,7 @@ import {
   Modal,
   Pressable,
   ScrollView,
+  Share,
   Text,
   View,
 } from "react-native";
@@ -81,6 +82,8 @@ export function OverlayHost({
   onAnswer,
   onReceiptPress,
   float,
+  onMaterialAction,
+  printNotice,
 }: {
   signal: OverlaySignal | null;
   onDismiss: () => void;
@@ -97,6 +100,8 @@ export function OverlayHost({
    *  centered in the strip over the sheet, at full vibrancy. Under the
    *  scrim it would dim to background chrome and read as switched off. */
   float?: ReactNode;
+  onMaterialAction?: (action: "print" | "keep" | "change" | "earlier") => void;
+  printNotice?: string | null;
 }) {
   if (signal === null) return null;
   if (signal.kind === "receipt") {
@@ -115,7 +120,11 @@ export function OverlayHost({
         accessibilityLabel="Your new material"
         float={float}
       >
-        <MaterialOverlayBody material={signal.material} />
+        <MaterialOverlayBody
+          material={signal.material}
+          onAction={onMaterialAction}
+          printNotice={printNotice}
+        />
       </OverlaySheet>
     );
   }
@@ -373,13 +382,76 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
 }
 
 /** The same card chat renders, from the same payload. */
-function MaterialOverlayBody({ material }: { material: MaterialCardPayload }) {
+function MaterialOverlayBody({
+  material,
+  onAction,
+  printNotice,
+}: {
+  material: MaterialCardPayload;
+  onAction?: (action: "print" | "keep" | "change" | "earlier") => void;
+  printNotice?: string | null;
+}) {
   return (
     <ScrollView
-      contentContainerStyle={{ padding: space.md, paddingBottom: space.xl }}
+      contentContainerStyle={{ padding: space.md, paddingBottom: space.xl, gap: space.sm }}
     >
       <MaterialCard material={material} />
+      {printNotice ? (
+        <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}>
+          {printNotice}
+        </Text>
+      ) : null}
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space.xs }}>
+        <MaterialAction label="Print" onPress={() => onAction?.("print")} primary />
+        <MaterialAction
+          label="Share"
+          onPress={() => void Share.share({ title: material.title, url: material.pdfUrl })}
+        />
+        {material.status !== "final" ? (
+          <MaterialAction label="Keep" onPress={() => onAction?.("keep")} />
+        ) : null}
+        <MaterialAction label="Change" onPress={() => onAction?.("change")} />
+        {material.revisesId ? (
+          <MaterialAction label="Earlier" onPress={() => onAction?.("earlier")} />
+        ) : null}
+      </View>
     </ScrollView>
+  );
+}
+
+function MaterialAction({
+  label,
+  onPress,
+  primary = false,
+}: {
+  label: string;
+  onPress: () => void;
+  primary?: boolean;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={{
+        minHeight: 44,
+        justifyContent: "center",
+        borderRadius: radius.pill,
+        paddingHorizontal: space.md,
+        backgroundColor: primary ? colors.brand : colors.card,
+        borderWidth: 1,
+        borderColor: primary ? colors.brand : colors.border,
+      }}
+    >
+      <Text
+        style={{
+          fontFamily: fontFamilies.bodySemibold,
+          fontSize: fontSize.sm,
+          color: primary ? colors.onBrand : colors.textBody,
+        }}
+      >
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 

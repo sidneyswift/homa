@@ -12,6 +12,7 @@ import { colors, fontSize, radius, space } from "../../theme/tokens";
  */
 
 export interface MaterialArtifact {
+  id?: string;
   title: string;
   kind?: string;
   skill: string | null;
@@ -22,6 +23,9 @@ export interface MaterialArtifact {
   pageCount?: number;
   /** Per-page previews (page 1 first) when more than one page exists. */
   pagePreviewUrls?: string[];
+  status?: "draft" | "final" | "superseded";
+  revisesId?: string | null;
+  pageRoles?: ("child" | "answer_key" | "parent_guide" | "other")[];
 }
 
 const KIND_HEADLINES: Record<string, string> = {
