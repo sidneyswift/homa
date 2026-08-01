@@ -82,6 +82,36 @@ action from your own intent or narration.
 export const VOICE_MODE_RULES = buildVoiceModeRules();
 
 /**
+ * The AI SDK's typed realtime config does not yet expose OpenAI's
+ * `interrupt_response` field. Its provider pass-through replaces the whole
+ * top-level audio object, so keep every audio setting together here.
+ *
+ * WebRTC suppresses the known speaker signal on-device. OpenAI's far-field
+ * filter then reduces remaining room noise before VAD. A threshold modestly
+ * above the provider default keeps hands-free barge-in available without
+ * letting ordinary speaker leakage cancel Homa's response.
+ */
+export function buildRealtimeAudioProviderOptions(voice: string): Record<string, unknown> {
+  return {
+    audio: {
+      input: {
+        transcription: { model: "gpt-realtime-whisper" },
+        noise_reduction: { type: "far_field" },
+        turn_detection: {
+          type: "server_vad",
+          threshold: 0.65,
+          prefix_padding_ms: 300,
+          silence_duration_ms: 650,
+          create_response: true,
+          interrupt_response: true,
+        },
+      },
+      output: { voice },
+    },
+  };
+}
+
+/**
  * Composes the whole instruction string, persona first, then how to talk
  * out loud, then what she actually knows about this family.
  *

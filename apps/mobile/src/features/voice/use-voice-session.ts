@@ -9,6 +9,7 @@ import {
   type MediaStream,
 } from "react-native-webrtc";
 
+import { prepareVoiceAudioForConversation } from "../../../modules/homa-voice-audio";
 import { env, EVE_CHANNEL_HEADER } from "../../lib/env";
 import { supabase } from "../../lib/supabase";
 import {
@@ -314,6 +315,7 @@ export function useVoiceSession(
           throw new Error(REASONS[reason] ?? "I could not start listening just now.");
         }
 
+        await prepareVoiceAudioForConversation();
         const stream = await mediaDevices.getUserMedia({ audio: true, video: false });
         if (closedRef.current || connectionAttemptRef.current !== attempt) {
           stream.getTracks().forEach((track) => track.stop());

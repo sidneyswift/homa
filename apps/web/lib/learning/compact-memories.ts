@@ -1,6 +1,3 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
-
 import { generateObject } from "ai";
 import { z } from "zod";
 
@@ -16,6 +13,7 @@ import { mapDb } from "../map/db";
 import { emitMapEvent } from "../map/events";
 import { gatewayAttribution, recordModelUsage } from "../model-usage";
 import { embedText } from "./embeddings";
+import { MEMORY_COMPACTOR_PROMPT } from "./memory-compactor-prompt.generated";
 
 /**
  * Memory compaction: the background pass that keeps a family's saved
@@ -199,13 +197,8 @@ const compactionSchema = z.object({
     ),
 });
 
-let cachedPrompt: string | null = null;
-
-/** agent/memory-compactor.md; cwd is apps/web under the Next server. */
 function compactorPrompt(): string {
-  if (cachedPrompt) return cachedPrompt;
-  cachedPrompt = readFileSync(path.join(process.cwd(), "agent", "memory-compactor.md"), "utf8");
-  return cachedPrompt;
+  return MEMORY_COMPACTOR_PROMPT;
 }
 
 export function compactionModel(): string {
