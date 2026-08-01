@@ -65,7 +65,7 @@ export default defineBoundedTool({
         status: result.material.status,
       },
       shareRequest: result.request,
-      note: "The parent can edit the note and choose the app and account. Say that Homa is opening the share choices, not that the file was sent or delivered.",
+      note: "The parent can edit the optional note and choose the app and account. Say that Homa is getting the PDF ready, then showing her apps. Never say that the file was sent or delivered.",
     };
   },
 });

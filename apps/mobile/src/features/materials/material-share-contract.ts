@@ -65,26 +65,26 @@ export function parsePreparedMaterialShareRequest(value: unknown): PreparedMater
 
 export function materialShareResultMessage(result: MaterialShareResult): string {
   if (result.status === "handed-off") {
-    return "Handed to your chosen app. That app handles sending and delivery.";
+    return "The PDF is in your chosen app. Check that app to finish or confirm sending.";
   }
   if (result.status === "canceled") return "Sharing canceled. Nothing was handed off.";
   switch (result.reason) {
     case "no-session":
-      return "Your session expired. Sign in again before sharing.";
+      return "Your session expired. Nothing was sent. Sign in again before sharing.";
     case "app-backgrounded":
-      return "Sharing did not start while Homa was in the background. Bring Homa forward and try again.";
+      return "Sharing did not start while Homa was in the background. Nothing was sent. Open Homa and try again.";
     case "offline":
       return "You're offline. The printable is still safe in your Binder, so try again when you're connected.";
     case "missing-material":
-      return "That version is no longer available. Open the current version in your Binder and try again.";
+      return "That version is no longer available. Nothing was sent. Open the current version in your Binder and try again.";
     case "expired-material":
-      return "That printable link expired. Open the material again and Homa will make a fresh handoff.";
+      return "This share expired. Nothing was sent. Open the printable again and try once more.";
     case "unsupported-destination":
-      return "This device cannot open a share destination for the PDF. You can still open it from your Binder.";
+      return "No app on this phone could open the PDF. It is still safe in your Binder, or you can email it from Homa.";
     case "download-failed":
-      return "The printable could not reach the phone. Check the connection and try again.";
+      return "The PDF did not download. Nothing was sent. Check your connection and try again.";
     default:
-      return "Sharing did not finish. Nothing was handed off.";
+      return "Homa could not tell whether the PDF opened in the other app. Check that app before trying again.";
   }
 }
 

@@ -97,7 +97,7 @@ export default defineBoundedTool({
     if (input.materialId && (!material || material.status !== "final")) {
       return {
         sent: false,
-        note: "That is not the current final material. Keep the visible version first, then email that exact id.",
+        note: "That version is not ready to email. Open the copy you want and tap Keep. Then ask Homa to email it again.",
       };
     }
     const sent = material

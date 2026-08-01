@@ -41,10 +41,10 @@ export function MaterialShareComposer({
   return (
     <View style={{ gap: space.sm }}>
       <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textStrong }}>
-        Add a note
+        Add a note (optional)
       </Text>
       <TextInput
-        accessibilityLabel="Message to share with the printable"
+        accessibilityLabel="Optional note for the recipient"
         value={message}
         onChangeText={setMessage}
         multiline
@@ -63,11 +63,11 @@ export function MaterialShareComposer({
         }}
       />
       <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted }}>
-        Your chosen app and account will send this. Homa only hands over the PDF and note.
+        Choose the app and account you want to use. Homa passes along the PDF and note. That app handles sending.
       </Text>
       <Button
-        label={sharing ? "Opening share choices…" : "Choose an app"}
-        disabled={sharing || message.trim().length === 0}
+        label={sharing ? "Opening your apps…" : "Choose an app"}
+        disabled={sharing}
         onPress={() => void share()}
       />
       {notice ? (

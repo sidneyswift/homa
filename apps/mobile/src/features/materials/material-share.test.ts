@@ -25,7 +25,7 @@ describe("native material share contract", () => {
 
   it("calls OS completion a handoff, never delivery", () => {
     const message = materialShareResultMessage({ status: "handed-off" });
-    assert.match(message, /Handed to your chosen app/u);
+    assert.match(message, /PDF is in your chosen app/u);
     assert.doesNotMatch(message, /delivered|sent successfully/u);
     assert.match(materialShareResultMessage({ status: "canceled" }), /Nothing was handed off/u);
   });

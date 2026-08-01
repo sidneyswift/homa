@@ -411,7 +411,7 @@ function MaterialOverlayBody({
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space.xs }}>
         <MaterialAction label="Print" onPress={() => onAction?.("print")} primary />
         <MaterialAction
-          label="Share"
+          label="Share through an app"
           onPress={() => onAction?.("share")}
         />
         {material.status !== "final" ? (

@@ -80,7 +80,7 @@ export function MaterialDetailModal({ material, onClose }: { material: BinderMat
     if (!prepared) {
       setPrintNotice({
         materialId: material.id,
-        message: "That could not be prepared for sharing. Pull down to refresh the Binder, then try again.",
+        message: "Homa could not prepare the PDF. Nothing was sent. Pull down to refresh the Binder, then try again.",
       });
     }
   }
