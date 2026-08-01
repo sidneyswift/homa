@@ -240,6 +240,7 @@ export function VoiceScreen() {
         onAnswer={(message) => session.sendText(message)}
         onMaterialAction={(action) => {
           if (action === "print") session.sendText("Print this.");
+          if (action === "share") session.sendText("Share this through an app I choose.");
           if (action === "keep") session.sendText("I love it. Keep this one.");
           if (action === "change") session.sendText("I want to change this material.");
           if (action === "earlier") session.sendText("Show me the earlier version of this material.");
