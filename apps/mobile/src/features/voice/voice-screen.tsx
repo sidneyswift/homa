@@ -1,3 +1,4 @@
+import { ACTIVE_OBJECT_CURRENT_VERSION } from "@homa/core";
 import { useRouter } from "expo-router";
 import { useKeepAwake } from "expo-keep-awake";
 import { useEffect, useRef, useState } from "react";
@@ -34,7 +35,7 @@ import { OverlayHost } from "./overlay-host";
 import type { StateRecordDocument } from "../../lib/state-records";
 import { ReplySheet } from "./reply-sheet";
 import { TranscriptRibbon } from "./transcript-ribbon";
-import { useVoiceSession } from "./use-voice-session";
+import { useVoiceWorkbench } from "./voice-workbench-provider";
 
 const CHARACTER_SIZE = 240;
 const PUCK_SIZE = 72;
@@ -68,12 +69,12 @@ export function VoiceScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const dark = useColorScheme() === "dark";
+  const { session, showActiveObject, clearActiveObject } = useVoiceWorkbench();
   const [overlayModel, setOverlayModel] = useState<OverlayModelState>(EMPTY_OVERLAY_MODEL);
-  const activeMaterial = overlayModel.active?.kind === "material"
+  const activeMaterialId = overlayModel.active?.kind === "material"
     && overlayModel.active.material.id
-    ? { kind: "material" as const, id: overlayModel.active.material.id }
+    ? overlayModel.active.material.id
     : null;
-  const session = useVoiceSession(activeMaterial);
   const announceResult = session.announceResult;
   const { family } = useFamilyData();
   const [replyOpen, setReplyOpen] = useState(false);
@@ -90,13 +91,29 @@ export function VoiceScreen() {
   }
 
   useEffect(() => {
+    if (!activeMaterialId) return;
+    const reference = {
+      kind: "material" as const,
+      objectId: activeMaterialId,
+      version: ACTIVE_OBJECT_CURRENT_VERSION,
+    };
+    showActiveObject(reference);
+    return () => clearActiveObject(reference);
+  }, [activeMaterialId, clearActiveObject, showActiveObject]);
+
+  useEffect(() => {
     const handled = handledKeysRef.current;
     if (!handled) return;
     const { signals } = deriveOverlaySignals([...messages], handled);
     if (signals.length === 0) return;
     for (const signal of signals) handled.add(signal.key);
-    setOverlayModel((current) => signals.reduce(applyOverlaySignal, current));
-  }, [messages]);
+    const plannerRequested = signals.some((signal) => signal.kind === "planner");
+    const overlaySignals = signals.filter((signal) => signal.kind !== "planner");
+    if (overlaySignals.length > 0) {
+      setOverlayModel((current) => overlaySignals.reduce(applyOverlaySignal, current));
+    }
+    if (plannerRequested) router.navigate("/planner");
+  }, [messages, router]);
 
   useEffect(() => {
     const signal = overlayModel.active;
@@ -148,9 +165,15 @@ export function VoiceScreen() {
       ? (session.busyDetail ?? "getting ready")
       : characterState === "speaking"
         ? "speaking"
-        : session.failed
-          ? (session.busyDetail ?? "We got cut off")
-          : "Tap Homa to start talking";
+        : session.status === "paused"
+          ? (session.pauseReason ?? "Voice paused")
+          : session.muted
+            ? "muted"
+            : session.failed
+              ? (session.busyDetail ?? "We got cut off")
+              : session.turnActive
+                ? "listening"
+                : "Tap Homa to start talking";
   const characterLayerStyle = useAnimatedStyle(() => {
     if (fieldHeight.value === 0) return { opacity: 0 };
     return { opacity: 1 - puck.value, top: fieldHeight.value * 0.43 - AURA_SIZE / 2 };
@@ -168,7 +191,7 @@ export function VoiceScreen() {
   }
 
   function leaveVoice() {
-    session.end();
+    if (session.turnActive && !session.muted) session.toggleMute();
     router.replace("/chat");
   }
 
@@ -191,6 +214,23 @@ export function VoiceScreen() {
     }));
   }
 
+  const primaryAction = session.turnActive
+    ? session.toggleMute
+    : session.status === "paused"
+      ? session.resume
+      : session.failed
+        ? session.retry
+        : session.start;
+  const primaryLabel = session.turnActive
+    ? session.muted
+      ? "Unmute"
+      : "Mute"
+    : session.status === "paused"
+      ? "Resume conversation"
+      : session.failed
+        ? "Try again"
+        : "Talk to Homa";
+
   return (
     <View style={{ flex: 1, backgroundColor: surface }}>
       <View style={{ flex: 1 }} onLayout={handleFieldLayout}>
@@ -202,8 +242,20 @@ export function VoiceScreen() {
             <GoldAuraField size={AURA_SIZE} />
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={session.turnActive ? "End voice conversation" : "Start talking with Homa"}
-              onPress={session.turnActive ? session.end : session.start}
+              accessibilityLabel={
+                session.turnActive
+                  ? "End voice conversation"
+                  : session.status === "paused"
+                    ? "Resume voice conversation"
+                    : "Start talking with Homa"
+              }
+              onPress={
+                session.turnActive
+                  ? session.end
+                  : session.status === "paused"
+                    ? session.resume
+                    : session.start
+              }
               hitSlop={20}
             >
               <HomaCharacter state={characterState} size={CHARACTER_SIZE} />
@@ -240,14 +292,14 @@ export function VoiceScreen() {
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={session.turnActive ? "End conversation" : "Start talking"}
-          onPress={session.turnActive ? session.end : session.start}
+          accessibilityLabel={primaryLabel}
+          onPress={primaryAction}
           style={{ flex: 1, minHeight: 48, alignItems: "center", justifyContent: "center", borderRadius: radius.pill, borderWidth: StyleSheet.hairlineWidth, borderColor: controlBorder, backgroundColor: controlFill }}
         >
           <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}>
-            {session.turnActive ? <MicOff size={16} color={controlText} /> : <Mic size={16} color={controlText} />}
+            {session.muted || session.status === "paused" ? <MicOff size={16} color={controlText} /> : <Mic size={16} color={controlText} />}
             <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: controlText }}>
-              {session.turnActive ? "End conversation" : "Talk to Homa"}
+              {primaryLabel}
             </Text>
           </View>
         </Pressable>

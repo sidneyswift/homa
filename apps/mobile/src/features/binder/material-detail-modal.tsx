@@ -15,6 +15,7 @@ import {
   readyPrintMessage,
   runPreparedMaterialPrint,
 } from "../materials/material-print";
+import { VoiceDock } from "../voice/voice-dock";
 import { MaterialShareComposer } from "../materials/material-share-composer";
 import {
   prepareMaterialShareFromApp,
@@ -150,6 +151,7 @@ export function MaterialDetailModal({ material, onClose }: { material: BinderMat
             ) : null}
           </ScrollView>
         ) : null}
+        <VoiceDock />
       </SafeAreaView>
     </Modal>
   );
