@@ -75,6 +75,8 @@ Read either with:
 | Montessori | montessori |
 | Singapore Math (CPA progression) | singapore-math |
 | balanced literacy | balanced-literacy |
+| daily-life grounding (objects from the child's own world) | daily-life-grounding |
+| poetry-led science (poem/story opens every science lesson, ages ~4 to 7) | poetry-led-science |
 
 ### Math practice laws (binding, every math page; field directives 2026-07-18)
 
@@ -498,6 +500,7 @@ recipe is not a reason to force the wrong format.
 | Chart and graph skill practice | teach one concrete data-reading skill (calendar, timeline, bar graph, diagram) with a worked example plus practice questions | chart-and-graph-skill-practice |
 | Lesson comprehension check | close a taught lesson with 2 recall questions plus 1 open think-and-share question | lesson-comprehension-check |
 | Magic square puzzle | drill addition fluency in a self-checking grid where every row, column, and diagonal sums to the same target | magic-square-puzzle |
+| Reader theater script | build oral reading fluency through a multi-character performance script with assigned roles, choral refrains, and repeated reading across sessions | reader-theater-script |
 
 ## Design rules (binding)
 
