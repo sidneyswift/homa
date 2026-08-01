@@ -34,6 +34,17 @@ describe("SMS session access epochs", () => {
     );
   });
 
+  it("starts a fresh session after a continuation-key format migration", () => {
+    const beforeMigration = buildSmsSessionThreadId(TELNYX_THREAD, "family:one");
+    const afterMigration = buildSmsSessionThreadId(
+      TELNYX_THREAD,
+      "family:one",
+      "2026-08-01",
+    );
+
+    assert.notEqual(beforeMigration, afterMigration);
+  });
+
   it("rotates the Eve session when the phone's access boundary changes", () => {
     assert.notEqual(
       buildSmsSessionThreadId(TELNYX_THREAD, "family:one"),
