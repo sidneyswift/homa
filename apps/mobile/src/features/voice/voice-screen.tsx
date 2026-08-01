@@ -1,4 +1,5 @@
 import { useRouter } from "expo-router";
+import { useKeepAwake } from "expo-keep-awake";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, useColorScheme, View, type LayoutChangeEvent } from "react-native";
 import Animated, {
@@ -62,6 +63,7 @@ function GoldAuraField({ size }: { size: number }) {
  * Text is still available, just not placed ahead of the spoken relationship.
  */
 export function VoiceScreen() {
+  useKeepAwake("homa-voice-conversation");
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const dark = useColorScheme() === "dark";
