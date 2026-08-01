@@ -1,6 +1,10 @@
 "use client";
 
-import { upload } from "@vercel/blob/client";
+import {
+  completeMultipartUpload,
+  createMultipartUpload,
+  uploadPart,
+} from "@vercel/blob/client";
 import {
   AlertCircle,
   Download,
@@ -14,23 +18,52 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 
+import {
+  familyAssetUploadFingerprint,
+  familyAssetUploadPartByteSize,
+  familyAssetUploadPartCount,
+  familyAssetUploadProgress,
+  familyAssetUploadPartSha256,
+  LIBRARY_MULTIPART_CHUNK_BYTES,
+  mergeFamilyAssetUploadParts,
+  type FamilyAssetUploadPart,
+  type FamilyAssetUploadView,
+} from "../../../lib/library/family-asset-uploads";
 import {
   formatFamilyAssetBytes,
   libraryUploadMediaType,
   MAX_LIBRARY_UPLOAD_BYTES,
-  safeLibraryPathName,
   type FamilyAssetFileKind,
   type FamilyAssetView,
 } from "../../../lib/library/family-assets";
 
 interface UploadRow {
   id: string;
+  reservation: FamilyAssetUploadView | null;
   name: string;
   progress: number;
-  state: "uploading" | "added" | "failed";
+  state:
+    | "preparing"
+    | "uploading"
+    | "paused"
+    | "remove_failed"
+    | "added"
+    | "failed";
   message: string | null;
+}
+
+interface UploadMutationResponse {
+  ok: boolean;
+  reason?: string;
+  upload?: FamilyAssetUploadView;
+}
+
+interface AssetFinalizationResponse {
+  ok: boolean;
+  reason?: string;
+  asset?: FamilyAssetView;
 }
 
 const FILE_ACCEPT = [
@@ -59,13 +92,13 @@ const FILE_ACCEPT = [
 ].join(",");
 
 const FILE_KIND_LABELS: Record<FamilyAssetFileKind, string> = {
-  document: "Document",
-  image: "Image",
-  audio: "Audio",
-  video: "Video",
-  archive: "Archive",
-  link: "Link",
-  other: "File",
+  document: "Document file",
+  image: "Image file",
+  audio: "Audio file",
+  video: "Video file",
+  archive: "Archive file",
+  link: "Saved link",
+  other: "Other file",
 };
 
 function fileKindLabel(asset: FamilyAssetView): string {
@@ -75,10 +108,10 @@ function fileKindLabel(asset: FamilyAssetView): string {
     asset.mediaType === "application/vnd.amazon.ebook" ||
     asset.mediaType === "application/x-mobipocket-ebook"
   ) {
-    return "Ebook";
+    return "Ebook file";
   }
-  if (asset.mediaType === "application/zip") return "ZIP";
-  return "Archive";
+  if (asset.mediaType === "application/zip") return "ZIP archive";
+  return "Archive file";
 }
 
 const FILE_KIND_ICONS = {
@@ -100,28 +133,79 @@ function stableDateLabel(iso: string): string {
   }).format(new Date(iso));
 }
 
-function uploadFailureMessage(error: unknown): string {
+function uploadFailureMessage(error: unknown, resumable: boolean): string {
   if (error instanceof Error && error.message === "unsupported-file") {
-    return "Homa cannot save that file type yet. Try a PDF, photo, ebook, ZIP, Word, Excel, or PowerPoint file.";
+    return "Homa cannot save that file type yet. Try a PDF, photo, audio, video, ebook, ZIP, Word, Excel, or PowerPoint file.";
+  }
+  if (error instanceof Error && error.message === "resume-file-mismatch") {
+    return "That is not the file this upload started with.";
+  }
+  if (resumable) {
+    return "Upload paused. Your upload progress is still here.";
   }
   return "That file did not save. Nothing was added. Try again.";
 }
 
+function rowFromPersistedUpload(upload: FamilyAssetUploadView): UploadRow {
+  const removeFailed = upload.errorCode === "blob_delete_failed";
+  return {
+    id: upload.id,
+    reservation: upload,
+    name: upload.originalName,
+    progress: familyAssetUploadProgress(upload.byteSize, upload.completedParts),
+    state: removeFailed ? "remove_failed" : "paused",
+    message: upload.statusNote ?? "Upload paused. Your upload progress is still here.",
+  };
+}
+
+function uploadStatusMessage(upload: UploadRow): string | null {
+  if (upload.state === "uploading") {
+    return upload.message ?? `Uploading ${upload.progress}%`;
+  }
+  if (upload.state === "paused" && upload.progress > 0) {
+    return `${upload.progress}% uploaded. ${upload.message ?? "Upload paused."}`;
+  }
+  return upload.message;
+}
+
+async function readJson<T>(response: Response): Promise<T> {
+  const body = (await response.json()) as T;
+  if (!response.ok) {
+    const reason =
+      body && typeof body === "object" && "reason" in body
+        ? String((body as { reason?: unknown }).reason ?? "request-failed")
+        : "request-failed";
+    throw new Error(reason);
+  }
+  return body;
+}
+
 export function LibraryView({
-  familyId,
   initialAssets,
+  initialUploads,
 }: {
-  familyId: string;
   initialAssets: FamilyAssetView[];
+  initialUploads: FamilyAssetUploadView[];
 }) {
   const pickerRef = useRef<HTMLInputElement>(null);
+  const resumePickerRef = useRef<HTMLInputElement>(null);
+  const resumeUploadIdRef = useRef<string | null>(null);
   const [assets, setAssets] = useState(initialAssets);
-  const [uploads, setUploads] = useState<UploadRow[]>([]);
+  const [uploads, setUploads] = useState<UploadRow[]>(() =>
+    initialUploads.map(rowFromPersistedUpload),
+  );
   const [query, setQuery] = useState("");
   const [pageError, setPageError] = useState<string | null>(null);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [privacyPromptOpen, setPrivacyPromptOpen] = useState(false);
   const [deleting, setDeleting] = useState<Set<string>>(() => new Set());
+  const hasRecoverableUpload = uploads.some(
+    (upload) =>
+      upload.state === "preparing" ||
+      upload.state === "uploading" ||
+      upload.state === "paused" ||
+      upload.state === "remove_failed",
+  );
 
   const visibleAssets = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase();
@@ -137,16 +221,281 @@ export function LibraryView({
     );
   }
 
+  async function reserveUpload(
+    clientRequestId: string,
+    file: File,
+    mediaType: string,
+    fingerprintSha256: string,
+  ): Promise<FamilyAssetUploadView> {
+    const response = await fetch("/api/library/uploads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        clientRequestId,
+        originalName: file.name,
+        mediaType,
+        byteSize: file.size,
+        lastModified: file.lastModified,
+        fingerprintSha256,
+      }),
+    });
+    const result = await readJson<UploadMutationResponse>(response);
+    if (!result.ok || !result.upload) throw new Error(result.reason ?? "reserve-failed");
+    return result.upload;
+  }
+
+  async function patchUpload(
+    body: Record<string, unknown>,
+  ): Promise<FamilyAssetUploadView> {
+    const response = await fetch("/api/library/uploads", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const result = await readJson<UploadMutationResponse>(response);
+    if (!result.ok || !result.upload) throw new Error(result.reason ?? "update-failed");
+    return result.upload;
+  }
+
+  async function clientUploadToken(upload: FamilyAssetUploadView): Promise<string> {
+    const response = await fetch("/api/library/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "blob.generate-client-token",
+        payload: {
+          pathname: upload.pathname,
+          multipart: true,
+          clientPayload: JSON.stringify({ reservationId: upload.id }),
+        },
+      }),
+    });
+    const result = await readJson<{ clientToken?: string }>(response);
+    if (!result.clientToken) throw new Error("token-missing");
+    return result.clientToken;
+  }
+
+  async function markUploadInterrupted(
+    uploadId: string,
+    errorCode: "network_interrupted" | "completion_failed",
+  ): Promise<void> {
+    try {
+      await patchUpload({
+        operation: "attention",
+        id: uploadId,
+        errorCode,
+      });
+    } catch {
+      console.error("family Library upload interruption could not be recorded");
+    }
+  }
+
+  async function performUpload(
+    file: File,
+    rowId: string,
+    reservation: FamilyAssetUploadView,
+  ): Promise<void> {
+    updateUpload(rowId, {
+      reservation,
+      progress: familyAssetUploadProgress(
+        reservation.byteSize,
+        reservation.completedParts,
+      ),
+      state: "uploading",
+      message: null,
+    });
+
+    let active = reservation;
+    let completionStarted = false;
+    try {
+      const token = await clientUploadToken(reservation);
+      if (!active.blobUploadId || !active.blobKey) {
+        const multipart = await createMultipartUpload(active.pathname, {
+          access: "public",
+          contentType: active.mediaType,
+          token,
+        });
+        active = await patchUpload({
+          operation: "start",
+          id: active.id,
+          blobUploadId: multipart.uploadId,
+          blobKey: multipart.key,
+        });
+        updateUpload(rowId, { reservation: active });
+      }
+      if (!active.blobUploadId || !active.blobKey) {
+        throw new Error("multipart-identity-missing");
+      }
+      const blobUploadId = active.blobUploadId;
+      const blobKey = active.blobKey;
+      const pathname = active.pathname;
+      const mediaType = active.mediaType;
+
+      const parts = new Map<number, FamilyAssetUploadPart>(
+        active.completedParts.map((part) => [part.partNumber, part]),
+      );
+      for (const persistedPart of parts.values()) {
+        const start =
+          (persistedPart.partNumber - 1) * LIBRARY_MULTIPART_CHUNK_BYTES;
+        const candidateSha256 = await familyAssetUploadPartSha256(
+          file.slice(start, start + persistedPart.byteSize),
+        );
+        if (candidateSha256 !== persistedPart.sha256) {
+          throw new Error("resume-file-mismatch");
+        }
+      }
+      const missingPartNumbers: number[] = [];
+      for (
+        let partNumber = 1;
+        partNumber <= familyAssetUploadPartCount(file.size);
+        partNumber += 1
+      ) {
+        if (!parts.has(partNumber)) missingPartNumbers.push(partNumber);
+      }
+
+      let completedBytes = [...parts.values()].reduce(
+        (total, part) => total + part.byteSize,
+        0,
+      );
+      const inFlightBytes = new Map<number, number>();
+      let nextMissingIndex = 0;
+      const updateProgress = () => {
+        const loadedBytes = [...inFlightBytes.values()].reduce(
+          (total, loaded) => total + loaded,
+          completedBytes,
+        );
+        updateUpload(rowId, {
+          progress: Math.min(99, Math.floor((loadedBytes / file.size) * 100)),
+        });
+      };
+      const uploadWorker = async () => {
+        while (nextMissingIndex < missingPartNumbers.length) {
+          const partNumber = missingPartNumbers[nextMissingIndex];
+          nextMissingIndex += 1;
+          if (!partNumber) return;
+          const byteSize = familyAssetUploadPartByteSize(file.size, partNumber);
+          if (!byteSize) throw new Error("invalid-part");
+          const start = (partNumber - 1) * LIBRARY_MULTIPART_CHUNK_BYTES;
+          const chunk = file.slice(start, start + byteSize);
+          const sha256 = await familyAssetUploadPartSha256(chunk);
+          const uploaded = await uploadPart(
+            pathname,
+            chunk,
+            {
+              access: "public",
+              contentType: mediaType,
+              token,
+              uploadId: blobUploadId,
+              key: blobKey,
+              partNumber,
+              onUploadProgress: ({ loaded }) => {
+                inFlightBytes.set(partNumber, loaded);
+                updateProgress();
+              },
+            },
+          );
+          const persisted = await patchUpload({
+            operation: "part",
+            id: active.id,
+            partNumber: uploaded.partNumber,
+            etag: uploaded.etag,
+            byteSize,
+            sha256,
+          });
+          active = {
+            ...persisted,
+            completedParts: mergeFamilyAssetUploadParts(
+              active.completedParts,
+              persisted.completedParts,
+            ),
+          };
+          updateUpload(rowId, { reservation: active });
+          inFlightBytes.delete(partNumber);
+          completedBytes += byteSize;
+          parts.set(partNumber, { ...uploaded, byteSize, sha256 });
+          updateProgress();
+        }
+      };
+      await Promise.all(
+        Array.from(
+          { length: Math.min(4, Math.max(1, missingPartNumbers.length)) },
+          uploadWorker,
+        ),
+      );
+
+      completionStarted = true;
+      active = await patchUpload({ operation: "completing", id: active.id });
+      if (!active.blobUploadId || !active.blobKey) {
+        throw new Error("multipart-identity-missing");
+      }
+      updateUpload(rowId, { progress: 100, message: "Finishing your upload…" });
+      const blob = await completeMultipartUpload(
+        active.pathname,
+        [...parts.values()].sort(
+          (first, second) => first.partNumber - second.partNumber,
+        ),
+        {
+          access: "public",
+          contentType: active.mediaType,
+          token,
+          uploadId: active.blobUploadId,
+          key: active.blobKey,
+        },
+      );
+      const response = await fetch("/api/library/assets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reservationId: active.id, url: blob.url }),
+      });
+      const result = await readJson<AssetFinalizationResponse>(response);
+      if (!result.ok || !result.asset) {
+        throw new Error(result.reason ?? "asset-record-missing");
+      }
+      setAssets((current) => [
+        result.asset as FamilyAssetView,
+        ...current.filter((asset) => asset.id !== result.asset?.id),
+      ]);
+      updateUpload(rowId, {
+        reservation: active,
+        state: "added",
+        progress: 100,
+        message: "Saved to your Library. You can download it anytime.",
+      });
+    } catch (error) {
+      if (!(error instanceof Error && error.message === "resume-file-mismatch")) {
+        await markUploadInterrupted(
+          reservation.id,
+          completionStarted ? "completion_failed" : "network_interrupted",
+        );
+      }
+      updateUpload(rowId, {
+        reservation: active,
+        state: "paused",
+        message: uploadFailureMessage(error, true),
+      });
+    }
+  }
+
   async function addFile(file: File) {
     const id = crypto.randomUUID();
     setUploads((current) => [
       ...current,
-      { id, name: file.name || "Untitled file", progress: 0, state: "uploading", message: null },
+      {
+        id,
+        reservation: null,
+        name: file.name || "Untitled file",
+        progress: 0,
+        state: "preparing",
+        message: "Getting your upload ready…",
+      },
     ]);
-    if (file.size > MAX_LIBRARY_UPLOAD_BYTES) {
+    if (file.size < 1 || file.size > MAX_LIBRARY_UPLOAD_BYTES) {
       updateUpload(id, {
         state: "failed",
-        message: "That file is over 500 MB. Choose a smaller file.",
+        message:
+          file.size > MAX_LIBRARY_UPLOAD_BYTES
+            ? "That file is over 500 MB. Choose a smaller file."
+            : "There is nothing in that file to upload. Choose a copy that opens on your device.",
       });
       return;
     }
@@ -154,42 +503,19 @@ export function LibraryView({
     try {
       const mediaType = libraryUploadMediaType(file.name, file.type);
       if (!mediaType) throw new Error("unsupported-file");
-      const blob = await upload(
-        `families/${familyId}/library/${safeLibraryPathName(file.name)}`,
+      const fingerprint = await familyAssetUploadFingerprint(file);
+      const reservation = await reserveUpload(
+        id,
         file,
-        {
-          access: "public",
-          handleUploadUrl: "/api/library/upload",
-          clientPayload: JSON.stringify({ fileSize: file.size }),
-          contentType: mediaType,
-          multipart: true,
-          onUploadProgress: ({ percentage }) => {
-            updateUpload(id, { progress: Math.round(percentage) });
-          },
-        },
+        mediaType,
+        fingerprint,
       );
-      const response = await fetch("/api/library/assets", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: blob.url, originalName: file.name }),
-      });
-      if (!response.ok) {
-        if (response.status === 400) throw new Error("unsupported-file");
-        throw new Error(`asset record failed: ${response.status}`);
-      }
-      const result = (await response.json()) as { ok: boolean; asset?: FamilyAssetView };
-      if (!result.ok || !result.asset) throw new Error("asset record missing");
-      setAssets((current) => [
-        result.asset as FamilyAssetView,
-        ...current.filter((asset) => asset.id !== result.asset?.id),
-      ]);
-      updateUpload(id, {
-        state: "added",
-        progress: 100,
-        message: "Saved to your Library and ready to download.",
-      });
+      await performUpload(file, id, reservation);
     } catch (error) {
-      updateUpload(id, { state: "failed", message: uploadFailureMessage(error) });
+      updateUpload(id, {
+        state: "failed",
+        message: uploadFailureMessage(error, false),
+      });
     }
   }
 
@@ -197,6 +523,83 @@ export function LibraryView({
     const files = Array.from(event.target.files ?? []);
     event.target.value = "";
     for (const file of files.slice(0, 10)) void addFile(file);
+  }
+
+  async function resumeUpload(file: File, row: UploadRow): Promise<void> {
+    const reservation = row.reservation;
+    if (!reservation) return;
+    updateUpload(row.id, { state: "preparing", message: "Checking that file…" });
+    try {
+      const fingerprint = await familyAssetUploadFingerprint(file);
+      if (fingerprint !== reservation.fingerprintSha256) {
+        updateUpload(row.id, {
+          state: "paused",
+          message: "That is not the file this upload started with.",
+        });
+        return;
+      }
+      await performUpload(file, row.id, reservation);
+    } catch (error) {
+      updateUpload(row.id, {
+        state: "paused",
+        message: uploadFailureMessage(error, true),
+      });
+    }
+  }
+
+  function beginResumeUpload(id: string) {
+    resumeUploadIdRef.current = id;
+    resumePickerRef.current?.click();
+  }
+
+  async function restartUpload(row: UploadRow) {
+    if (!row.reservation) return;
+    try {
+      const reservation = await patchUpload({
+        operation: "restart",
+        id: row.reservation.id,
+      });
+      updateUpload(row.id, {
+        reservation,
+        progress: 0,
+        state: "paused",
+        message: "Upload progress cleared. Choose the same file again to restart.",
+      });
+      resumeUploadIdRef.current = row.id;
+      resumePickerRef.current?.click();
+    } catch {
+      setPageError("The upload could not restart. Your upload progress is still here. Try again.");
+    }
+  }
+
+  function onResumeFilePicked(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    const id = resumeUploadIdRef.current;
+    event.target.value = "";
+    resumeUploadIdRef.current = null;
+    if (!file || !id) return;
+    const row = uploads.find((item) => item.id === id);
+    if (row) void resumeUpload(file, row);
+  }
+
+  async function dismissUpload(row: UploadRow) {
+    if (row.reservation && row.state !== "added") {
+      try {
+        const response = await fetch(
+          `/api/library/uploads?id=${encodeURIComponent(row.reservation.id)}`,
+          { method: "DELETE" },
+        );
+        if (!response.ok) throw new Error("abandon-failed");
+      } catch {
+        updateUpload(row.id, {
+          state: "remove_failed",
+          message: "Homa did not remove this unfinished upload. Try again.",
+        });
+        setPageError("Homa did not remove this unfinished upload. Try again.");
+        return;
+      }
+    }
+    setUploads((current) => current.filter((item) => item.id !== row.id));
   }
 
   function beginAddingResources() {
@@ -256,7 +659,14 @@ export function LibraryView({
           hidden
           onChange={onFilesPicked}
         />
-        {assets.length > 0 ? (
+        <input
+          ref={resumePickerRef}
+          type="file"
+          accept={FILE_ACCEPT}
+          hidden
+          onChange={onResumeFilePicked}
+        />
+        {assets.length > 0 && !hasRecoverableUpload ? (
           <button
             type="button"
             onClick={beginAddingResources}
@@ -268,7 +678,7 @@ export function LibraryView({
         ) : null}
       </header>
 
-      {privacyPromptOpen && assets.length > 0 ? (
+      {privacyPromptOpen && (assets.length > 0 || hasRecoverableUpload) ? (
         <section
           aria-labelledby="library-privacy-heading"
           className="mt-5 rounded-md border border-[var(--gold-300)] bg-[var(--warning-soft)] px-4 py-4"
@@ -307,36 +717,99 @@ export function LibraryView({
               key={item.id}
               className="rounded-md border border-border-subtle bg-card px-4 py-3 shadow-sm"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-strong">{item.name}</p>
-                  <p className={item.state === "failed" ? "mt-1 text-sm text-danger" : "mt-1 text-sm text-muted"}>
-                    {item.state === "uploading"
-                      ? `Uploading ${item.progress}%`
-                      : item.message}
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0 sm:flex-1">
+                  <p className="break-words text-sm font-semibold text-strong">
+                    {item.name}
+                  </p>
+                  <p
+                    className={
+                      item.state === "failed" || item.state === "remove_failed"
+                        ? "mt-1 text-sm text-danger"
+                        : "mt-1 text-sm text-muted"
+                    }
+                  >
+                    {uploadStatusMessage(item)}
                   </p>
                 </div>
-                {item.state !== "uploading" ? (
-                  <button
-                    type="button"
-                    onClick={() => setUploads((current) => current.filter((row) => row.id !== item.id))}
-                    className="text-sm font-semibold text-muted hover:text-strong"
-                  >
-                    Dismiss
-                  </button>
-                ) : null}
+                <div className="grid w-full grid-cols-1 gap-1 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap sm:justify-end">
+                  {item.state === "paused" ? (
+                    <button
+                      type="button"
+                      onClick={() => beginResumeUpload(item.id)}
+                      className="inline-flex min-h-11 w-full items-center justify-center rounded-md px-3 text-sm font-bold text-brand hover:bg-brand-soft sm:w-auto"
+                    >
+                      Choose file to resume
+                    </button>
+                  ) : null}
+                  {item.state === "paused" && item.progress > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => void restartUpload(item)}
+                      className="inline-flex min-h-11 w-full items-center justify-center rounded-md px-3 text-sm font-semibold text-muted hover:bg-page hover:text-strong sm:w-auto"
+                    >
+                      Restart upload
+                    </button>
+                  ) : null}
+                  {item.state === "paused" ||
+                  item.state === "remove_failed" ||
+                  item.state === "added" ||
+                  item.state === "failed" ? (
+                    <button
+                      type="button"
+                      onClick={() => void dismissUpload(item)}
+                      className="inline-flex min-h-11 w-full items-center justify-center rounded-md px-3 text-sm font-semibold text-muted hover:bg-page hover:text-strong sm:w-auto"
+                    >
+                      {item.state === "paused"
+                        ? "Remove upload"
+                        : item.state === "remove_failed"
+                          ? "Try remove again"
+                          : "Dismiss"}
+                    </button>
+                  ) : null}
+                </div>
               </div>
-              {item.state === "uploading" ? (
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-page">
+              {item.state === "uploading" ||
+              (item.state === "paused" && item.progress > 0) ? (
+                <div
+                  role="progressbar"
+                  aria-label={`Upload progress for ${item.name}`}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={item.progress}
+                  className="mt-3 h-1.5 overflow-hidden rounded-full bg-page"
+                >
                   <div
                     className="h-full rounded-full bg-brand transition-[width] duration-(--dur-fast)"
                     style={{ width: `${item.progress}%` }}
                   />
                 </div>
               ) : null}
+              {item.state === "paused" ? (
+                <p className="mt-3 text-xs leading-5 text-subtle">
+                  Restarting clears upload progress. Removing clears this unfinished
+                  upload from Homa. Neither changes the file on your device.
+                </p>
+              ) : null}
+              {item.state === "remove_failed" ? (
+                <p className="mt-3 text-xs leading-5 text-subtle">
+                  The file on your device was not changed.
+                </p>
+              ) : null}
             </div>
           ))}
         </section>
+      ) : null}
+
+      {hasRecoverableUpload ? (
+        <button
+          type="button"
+          onClick={beginAddingResources}
+          className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-border-subtle bg-card px-4 py-2.5 text-sm font-semibold text-strong shadow-sm hover:bg-page"
+        >
+          <Upload size={18} aria-hidden="true" />
+          Add another resource
+        </button>
       ) : null}
 
       {pageError ? (
@@ -346,7 +819,7 @@ export function LibraryView({
         </div>
       ) : null}
 
-      {assets.length === 0 ? (
+      {assets.length === 0 && !hasRecoverableUpload ? (
         <section className="mt-8 rounded-lg border border-border-subtle bg-card px-6 py-12 text-center shadow-sm">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-soft text-brand">
             <Upload size={22} aria-hidden="true" />

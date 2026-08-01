@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   familyAssetFileKind,
   formatFamilyAssetBytes,
+  isLibraryUploadMediaTypeAllowed,
   isFamilyLibraryUrl,
   libraryUploadMediaType,
   safeLibraryPathName,
@@ -54,5 +55,12 @@ describe("family asset exact metadata helpers", () => {
     );
     assert.equal(libraryUploadMediaType("slides.key", ""), "");
     assert.equal(libraryUploadMediaType("photo.jpg", "image/custom"), "image/custom");
+  });
+
+  it("allows only the upload route's educational file containers", () => {
+    assert.equal(isLibraryUploadMediaTypeAllowed("image/heic"), true);
+    assert.equal(isLibraryUploadMediaTypeAllowed("text/markdown; charset=utf-8"), true);
+    assert.equal(isLibraryUploadMediaTypeAllowed("application/pdf"), true);
+    assert.equal(isLibraryUploadMediaTypeAllowed("application/x-msdownload"), false);
   });
 });

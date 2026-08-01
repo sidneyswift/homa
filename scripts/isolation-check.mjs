@@ -2663,17 +2663,45 @@ async function expectAuthenticatedIsolation() {
       returning id
     `;
 
+    let familyAssetUploadB = null;
     let familyAssetB = null;
     let familyAssetChildB = null;
     let familyAssetTagB = null;
     if (familyLibrarySchemaAvailable) {
+      const [familyAssetUploadA] = await sql`
+        insert into public.family_asset_uploads (
+          family_id, initiated_by_user_id, client_request_id, original_name,
+          pathname, media_type, byte_size, last_modified, fingerprint_sha256
+        )
+        values (
+          ${familyAId}, ${familyAUser.userId}, ${crypto.randomUUID()},
+          'family-a.pdf',
+          'families/isolation-a/library/upload-a/family-a.pdf',
+          'application/pdf', 100, 1, ${"a".repeat(64)}
+        )
+        returning id
+      `;
+      [familyAssetUploadB] = await sql`
+        insert into public.family_asset_uploads (
+          family_id, initiated_by_user_id, client_request_id, original_name,
+          pathname, media_type, byte_size, last_modified, fingerprint_sha256
+        )
+        values (
+          ${familyBId}, ${familyBUser.userId}, ${crypto.randomUUID()},
+          'family-b.pdf',
+          'families/isolation-b/library/upload-b/family-b.pdf',
+          'application/pdf', 200, 2, ${"b".repeat(64)}
+        )
+        returning id
+      `;
       const [familyAssetA] = await sql`
         insert into public.family_assets (
-          family_id, uploaded_by_user_id, title, original_name, url,
+          family_id, uploaded_by_user_id, source_upload_id, title, original_name, url,
           download_url, media_type, byte_size, file_kind
         )
         values (
-          ${familyAId}, ${familyAUser.userId}, 'Family A curriculum',
+          ${familyAId}, ${familyAUser.userId}, ${familyAssetUploadA.id},
+          'Family A curriculum',
           'family-a.pdf',
           'https://example.public.blob.vercel-storage.com/families/isolation-a/library/family-a.pdf',
           'https://example.public.blob.vercel-storage.com/families/isolation-a/library/family-a.pdf?download=1',
@@ -2683,11 +2711,12 @@ async function expectAuthenticatedIsolation() {
       `;
       [familyAssetB] = await sql`
         insert into public.family_assets (
-          family_id, uploaded_by_user_id, source_attachment_id, title,
+          family_id, uploaded_by_user_id, source_upload_id, source_attachment_id, title,
           original_name, url, download_url, media_type, byte_size, file_kind
         )
         values (
-          ${familyBId}, ${familyBUser.userId}, ${chatAttachmentB.id},
+          ${familyBId}, ${familyBUser.userId}, ${familyAssetUploadB.id},
+          ${chatAttachmentB.id},
           'Family B curriculum', 'family-b.pdf',
           'https://example.public.blob.vercel-storage.com/families/isolation-b/library/family-b.pdf',
           'https://example.public.blob.vercel-storage.com/families/isolation-b/library/family-b.pdf?download=1',
@@ -2736,6 +2765,29 @@ async function expectAuthenticatedIsolation() {
         "constraint rejects a cross-family family asset parent link",
         crossFamilyParentRejected,
         "cross-family parent insert unexpectedly succeeded",
+      );
+      let crossFamilyUploadRejected = false;
+      try {
+        await sql`
+          insert into public.family_assets (
+            family_id, uploaded_by_user_id, source_upload_id,
+            title, original_name, url, download_url, media_type, byte_size, file_kind
+          )
+          values (
+            ${familyBId}, ${familyBUser.userId}, ${familyAssetUploadA.id},
+            'Cross-family upload', 'cross-family-upload.pdf',
+            'https://example.public.blob.vercel-storage.com/families/isolation-b/library/cross-family-upload.pdf',
+            'https://example.public.blob.vercel-storage.com/families/isolation-b/library/cross-family-upload.pdf?download=1',
+            'application/pdf', 80, 'document'
+          )
+        `;
+      } catch {
+        crossFamilyUploadRejected = true;
+      }
+      report(
+        "constraint rejects a cross-family family asset upload link",
+        crossFamilyUploadRejected,
+        "cross-family source upload insert unexpectedly succeeded",
       );
       [familyAssetChildB] = await sql`
         insert into public.family_asset_children (family_id, asset_id, child_id)
@@ -2863,8 +2915,14 @@ async function expectAuthenticatedIsolation() {
       chatAttachmentWriteFixture,
       "cross-family token cannot mutate Family B chat attachment",
     );
-    if (familyAssetB && familyAssetChildB && familyAssetTagB) {
+    if (familyAssetUploadB && familyAssetB && familyAssetChildB && familyAssetTagB) {
       for (const fixture of [
+        {
+          table: "family_asset_uploads",
+          id: familyAssetUploadB.id,
+          ownLabel: "auth member can read own family asset upload",
+          foreignLabel: "auth member cannot read another family's family asset upload",
+        },
         {
           table: "family_assets",
           id: familyAssetB.id,
@@ -2899,6 +2957,34 @@ async function expectAuthenticatedIsolation() {
           fixture.foreignLabel,
         );
       }
+
+      const familyAssetUploadWriteFixture = {
+        keyColumn: "id",
+        keyValue: familyAssetUploadB.id,
+        insertRow: {
+          family_id: familyBId,
+          client_request_id: crypto.randomUUID(),
+          original_name: "client-forged.pdf",
+          pathname: "families/isolation-b/library/forged/client-forged.pdf",
+          media_type: "application/pdf",
+          byte_size: 100,
+          last_modified: 1,
+          fingerprint_sha256: "c".repeat(64),
+        },
+        updateRow: { status_note: "Clients must never alter upload state." },
+      };
+      await expectAuthenticatedWritesDenied(
+        familyBUser.accessToken,
+        "family_asset_uploads",
+        familyAssetUploadWriteFixture,
+        "auth member cannot mutate own family asset upload",
+      );
+      await expectAuthenticatedWritesDenied(
+        familyAUser.accessToken,
+        "family_asset_uploads",
+        familyAssetUploadWriteFixture,
+        "cross-family token cannot mutate Family B family asset upload",
+      );
 
       await expectAuthenticatedWritesDenied(
         familyBUser.accessToken,
@@ -3868,10 +3954,11 @@ await expectReadDenied("session_context_snapshots");
 // rows; anon has explicit revokes; only the server-side attachment
 // routes write.
 await expectReadDenied("chat_attachments");
-// Family Library rows are family-readable and server-write-only. The three
-// tables land additively, so absence is safe before migration and the checks
+// Family Library rows are family-readable and server-write-only. The tables
+// land additively, so absence is safe before migration and the checks
 // arm automatically as soon as the schema reaches the target.
 const FAMILY_LIBRARY_TABLES = [
+  "family_asset_uploads",
   "family_assets",
   "family_asset_children",
   "family_asset_tags",
@@ -4460,6 +4547,20 @@ await expectInsertDenied(
   "anon cannot forge chat attachments",
 );
 if (familyLibrarySchemaAvailable) {
+  await expectInsertDenied(
+    "family_asset_uploads",
+    {
+      family_id: "00000000-0000-0000-0000-000000000000",
+      client_request_id: "11111111-1111-4111-8111-111111111111",
+      original_name: "intruder.pdf",
+      pathname: "families/intruder/library/intruder.pdf",
+      media_type: "application/pdf",
+      byte_size: 100,
+      last_modified: 1,
+      fingerprint_sha256: "d".repeat(64),
+    },
+    "anon cannot forge family asset uploads",
+  );
   await expectInsertDenied(
     "family_assets",
     {

@@ -49,6 +49,31 @@ export interface FamilyAssetView {
 
 export const MAX_LIBRARY_UPLOAD_BYTES = 500 * 1024 * 1024;
 
+export const LIBRARY_UPLOAD_CONTENT_TYPES = [
+  "image/*",
+  "video/*",
+  "audio/*",
+  "text/*",
+  "application/pdf",
+  "application/epub+zip",
+  "application/zip",
+  "application/vnd.amazon.ebook",
+  "application/x-mobipocket-ebook",
+  "application/msword",
+  "application/rtf",
+  "application/vnd.ms-excel",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.oasis.opendocument.presentation",
+  "application/vnd.oasis.opendocument.spreadsheet",
+  "application/vnd.oasis.opendocument.text",
+  "application/vnd.apple.keynote",
+  "application/vnd.apple.numbers",
+  "application/vnd.apple.pages",
+] as const;
+
 const ARCHIVE_MEDIA_TYPES = new Set([
   "application/epub+zip",
   "application/vnd.rar",
@@ -130,6 +155,15 @@ export function libraryUploadMediaType(
   if (normalized && normalized !== "application/octet-stream") return normalized;
   const extension = /\.[^.]+$/u.exec(name.normalize("NFKC").toLowerCase())?.[0];
   return extension ? LIBRARY_EXTENSION_MEDIA_TYPES[extension] ?? "" : "";
+}
+
+export function isLibraryUploadMediaTypeAllowed(mediaType: string): boolean {
+  const normalized = mediaType.trim().toLowerCase().split(";", 1)[0] ?? "";
+  return LIBRARY_UPLOAD_CONTENT_TYPES.some((allowed) =>
+    allowed.endsWith("/*")
+      ? normalized.startsWith(allowed.slice(0, -1))
+      : normalized === allowed,
+  );
 }
 
 export function safeLibraryPathName(name: string): string {

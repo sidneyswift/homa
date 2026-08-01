@@ -1,46 +1,44 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 
 import { resolveApiFamily } from "../../../../lib/api-auth";
-import { MAX_LIBRARY_UPLOAD_BYTES } from "../../../../lib/library/family-assets";
+import { finalizeFamilyAssetUpload } from "../../../../lib/library/family-asset-upload-store";
+import { mapDb } from "../../../../lib/map/db";
 import { blobConfigured } from "../../../../lib/materials/artifact-store";
 
-const LIBRARY_UPLOAD_CONTENT_TYPES = [
-  "image/*",
-  "video/*",
-  "audio/*",
-  "text/*",
-  "application/pdf",
-  "application/epub+zip",
-  "application/zip",
-  "application/vnd.amazon.ebook",
-  "application/x-mobipocket-ebook",
-  "application/msword",
-  "application/rtf",
-  "application/vnd.ms-excel",
-  "application/vnd.ms-powerpoint",
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/vnd.oasis.opendocument.presentation",
-  "application/vnd.oasis.opendocument.spreadsheet",
-  "application/vnd.oasis.opendocument.text",
-  "application/vnd.apple.keynote",
-  "application/vnd.apple.numbers",
-  "application/vnd.apple.pages",
-];
+interface UploadTokenPayload {
+  reservationId?: unknown;
+}
 
-interface LibraryUploadPayload {
-  fileSize?: unknown;
+interface UploadTokenRow {
+  id: string;
+  pathname: string;
+  media_type: string;
+  byte_size: number | string;
+  status: string;
+  error_code: string | null;
+}
+
+function parseTokenPayload(value: string | null | undefined): UploadTokenPayload {
+  if (!value) return {};
+  try {
+    return JSON.parse(value) as UploadTokenPayload;
+  } catch {
+    return {};
+  }
+}
+
+function isUuid(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(
+      value,
+    )
+  );
 }
 
 export async function POST(request: Request): Promise<Response> {
   if (!blobConfigured()) {
     return Response.json({ ok: false, reason: "not-configured" }, { status: 503 });
-  }
-
-  const auth = await resolveApiFamily(request);
-  if (!auth) {
-    return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
 
   let body: HandleUploadBody;
@@ -50,42 +48,68 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false, reason: "bad-json" }, { status: 400 });
   }
 
-  const libraryPrefix = `families/${auth.familyId}/library/`;
+  const auth =
+    body.type === "blob.generate-client-token"
+      ? await resolveApiFamily(request)
+      : null;
+  if (body.type === "blob.generate-client-token" && !auth) {
+    return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
+  }
+
   try {
     const result = await handleUpload({
       request,
       body,
-      onBeforeGenerateToken: async (pathname, clientPayload) => {
-        if (!pathname.startsWith(libraryPrefix)) {
-          throw new Error("pathname must stay inside this family's Library space");
+      onBeforeGenerateToken: async (pathname, clientPayload, multipart) => {
+        if (!auth || !multipart) throw new Error("multipart session required");
+        const payload = parseTokenPayload(clientPayload);
+        if (!isUuid(payload.reservationId)) {
+          throw new Error("valid reservation required");
         }
-        let payload: LibraryUploadPayload = {};
-        try {
-          payload = clientPayload
-            ? (JSON.parse(clientPayload) as LibraryUploadPayload)
-            : {};
-        } catch {
-          throw new Error("client payload must be valid JSON");
-        }
+        const sql = mapDb();
+        const rows = await sql<UploadTokenRow[]>`
+          select id, pathname, media_type, byte_size, status, error_code
+          from public.family_asset_uploads
+          where id = ${payload.reservationId}
+            and family_id = ${auth.familyId}
+        `;
+        const upload = rows[0];
         if (
-          typeof payload.fileSize !== "number" ||
-          !Number.isSafeInteger(payload.fileSize) ||
-          payload.fileSize < 1 ||
-          payload.fileSize > MAX_LIBRARY_UPLOAD_BYTES
+          !upload ||
+          upload.pathname !== pathname ||
+          upload.status === "ready" ||
+          upload.status === "abandoned" ||
+          upload.error_code === "blob_delete_failed"
         ) {
-          throw new Error("file size is outside the Library upload limit");
+          throw new Error("reservation is not uploadable");
         }
         return {
-          allowedContentTypes: LIBRARY_UPLOAD_CONTENT_TYPES,
-          maximumSizeInBytes: MAX_LIBRARY_UPLOAD_BYTES,
-          addRandomSuffix: true,
+          allowedContentTypes: [upload.media_type],
+          maximumSizeInBytes: Number(upload.byte_size),
+          validUntil: Date.now() + 6 * 60 * 60 * 1000,
+          addRandomSuffix: false,
+          allowOverwrite: false,
+          tokenPayload: JSON.stringify({ reservationId: upload.id }),
         };
+      },
+      onUploadCompleted: async ({ blob, tokenPayload }) => {
+        const payload = parseTokenPayload(tokenPayload);
+        if (!isUuid(payload.reservationId)) {
+          throw new Error("upload callback has no valid reservation");
+        }
+        const finalized = await finalizeFamilyAssetUpload({
+          reservationId: payload.reservationId,
+          blobUrl: blob.url,
+        });
+        if (!finalized.ok && finalized.reason === "blob-not-found") {
+          throw new Error("completed Blob was not readable yet");
+        }
       },
     });
     return Response.json(result);
   } catch (error) {
     console.error(
-      "library upload token failed:",
+      "library upload handling failed:",
       error instanceof Error ? error.message : "unknown",
     );
     return Response.json({ ok: false, reason: "rejected" }, { status: 400 });
