@@ -2900,9 +2900,28 @@
       "subject": "ela",
       "domain": "phonics-word-reading",
       "format": "teacher-guide",
-      "about": [],
-      "entities": [],
-      "themes": [],
+      "about": [
+        "reader's theater",
+        "oral reading fluency",
+        "daily life and surroundings",
+        "technology in daily life",
+        "clothing and needs"
+      ],
+      "entities": [
+        "Benchmark Education Company",
+        "Oscar Berto",
+        "Mary's lamb",
+        "three bears",
+        "three pigs and wolf",
+        "ant and grasshopper",
+        "Old King Cole"
+      ],
+      "themes": [
+        "grounding academics in daily life",
+        "performance-based literacy",
+        "choral reading for emergent readers",
+        "folk tales as moral vehicles"
+      ],
       "works": [],
       "ageBand": [
         54,

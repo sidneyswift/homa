@@ -17,10 +17,13 @@
       "ref-2026-07-31-benchmark-teatro-del-lector.pdf"
     ],
     "pageCount": 36,
-    "intakeAt": "2026-07-28T01:10:00+00:00",
+    "intakeAt": "2026-07-28T01:39:59+00:00",
     "gateFindings": [
-      "36 pages are image-only (CamScanner). Text extracted via Vercel AI Gateway vision model (anthropic/claude-sonnet-4-20250514) in 3 batches covering all 36 pages."
-    ]
+      "36 page(s) could not be read by the model ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]), so they keep their OCR text; that text is the least trustworthy in the book, because these are the pages OCR did worst on.",
+      "36 page(s) produced no text: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]. Spans cannot be verified against them."
+    ],
+    "sourceSha256": "be5a6f06f47de5eebb0a344f0cf0ddbda5945ea4901fb9fa8e5dbe042aa61bcc",
+    "mastersDir": ".cosmo/masters/ref-2026-07-31-benchmark-teatro-del-lector"
   },
   "sourceFiles": [
     {
@@ -175,5 +178,123 @@
     "slackReplyTs": null,
     "shipReaction": false
   },
-  "notes": "Aless dropped this with a specific pedagogical note: 'Take note on how this teaching manual focuses on day to day life for the students. Discussing technology they use and see as well as clothing. It educates students on their day to day surroundings.' She is not asking Homa to build reader's theater scripts. She is pointing at a teaching philosophy: ground every academic skill in the child's actual world. Unit 5 teaches reading fluency through a story about Mary's lamb encountering school technology (computers, audiophones). Unit 9 teaches needs-vs-wants through a story about getting new clothes. Unit 8 teaches weather vocabulary through a script about weather changes the child can look out the window and see. Unit 10 teaches force-and-motion through vehicles the child rides and objects the child pushes. This is the pedagogical insight to graduate: when Homa generates a counting worksheet, the objects being counted should be things the child touched today (their shoes, the remote control, cups in the dishwasher), not abstract circles or random clip art. The manual itself is a professional Benchmark Education product: ISBN 978-1-5827-3387-9, printed in China, authored by editor Oscar Berto with designers Laurie Berger, Farde Mereb, Joseph Rutt, and Holly Koppelman. 36 CamScanner pages, 37MB, image-only PDF with no extractable text. Spanish language throughout."
+  "notes": "Aless dropped this with a specific pedagogical note: 'Take note on how this teaching manual focuses on day to day life for the students. Discussing technology they use and see as well as clothing. It educates students on their day to day surroundings.' She is not asking Homa to build reader's theater scripts. She is pointing at a teaching philosophy: ground every academic skill in the child's actual world. Unit 5 teaches reading fluency through a story about Mary's lamb encountering school technology (computers, audiophones). Unit 9 teaches needs-vs-wants through a story about getting new clothes. Unit 8 teaches weather vocabulary through a script about weather changes the child can look out the window and see. Unit 10 teaches force-and-motion through vehicles the child rides and objects the child pushes. This is the pedagogical insight to graduate: when Homa generates a counting worksheet, the objects being counted should be things the child touched today (their shoes, the remote control, cups in the dishwasher), not abstract circles or random clip art. The manual itself is a professional Benchmark Education product: ISBN 978-1-5827-3387-9, printed in China, authored by editor Oscar Berto with designers Laurie Berger, Farde Mereb, Joseph Rutt, and Holly Koppelman. 36 CamScanner pages, 37MB, image-only PDF with no extractable text. Spanish language throughout.",
+  "aboutness": {
+    "extractionQuality": "partial",
+    "reason": "CamScanner image-only PDF. OCR produced 0 chars. VERCEL_OIDC_TOKEN expired 2026-07-13; vision pass could not authenticate. Content knowledge sourced from prior session vision analysis (3 batches, all 36 pages read via anthropic/claude-sonnet-4-20250514). Quotes below are from the ref JSON analysis and cover/title text, not from a verified text sidecar.",
+    "textSidecar": ".cosmo/text/ref-2026-07-31-benchmark-teatro-del-lector.txt",
+    "textBlobUrl": null,
+    "subjects": [
+      {
+        "name": "reader's theater",
+        "role": "teaches",
+        "quote": "Teatro del Lector"
+      },
+      {
+        "name": "oral reading fluency",
+        "role": "teaches",
+        "quote": "Guia del Maestro"
+      },
+      {
+        "name": "daily life and surroundings",
+        "role": "about",
+        "quote": "focuses on day to day life for the students"
+      },
+      {
+        "name": "technology in daily life",
+        "role": "about",
+        "quote": "technology they use and see"
+      },
+      {
+        "name": "clothing and needs",
+        "role": "about",
+        "quote": "clothing"
+      }
+    ],
+    "entities": [
+      {
+        "name": "Benchmark Education Company",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "Benchmark Education Company, New Rochelle, NY"
+      },
+      {
+        "name": "Oscar Berto",
+        "kind": "person",
+        "role": "identity",
+        "quote": "editor Oscar Berto"
+      },
+      {
+        "name": "Mary's lamb",
+        "kind": "character",
+        "role": "cast",
+        "quote": "Mary's lamb encountering school technology"
+      },
+      {
+        "name": "three bears",
+        "kind": "character",
+        "role": "cast",
+        "quote": "three bears"
+      },
+      {
+        "name": "three pigs and wolf",
+        "kind": "character",
+        "role": "cast",
+        "quote": "three pigs and wolf"
+      },
+      {
+        "name": "ant and grasshopper",
+        "kind": "character",
+        "role": "cast",
+        "quote": "ant and grasshopper"
+      },
+      {
+        "name": "Old King Cole",
+        "kind": "character",
+        "role": "cast",
+        "quote": "Old King Cole"
+      }
+    ],
+    "themes": [
+      {
+        "name": "grounding academics in daily life",
+        "evidence": "Each unit ties literacy skills to things a kindergartner encounters daily: plants they grow, rules they follow, technology at home and school, weather they see, clothes they wear"
+      },
+      {
+        "name": "performance-based literacy",
+        "evidence": "The 5-day cycle builds from shared reading to independent reader's theater performance with assigned character roles"
+      },
+      {
+        "name": "choral reading for emergent readers",
+        "evidence": "Choral reading (lectura a coro) as primary performance mode so non-readers can participate"
+      },
+      {
+        "name": "folk tales as moral vehicles",
+        "evidence": "Units 2, 4, and 6 retell folk tales (three bears, three pigs, ant and grasshopper) delivering moral messages through performance"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "teatro del lector",
+        "occurrences": 10,
+        "quote": "Teatro del Lector"
+      },
+      {
+        "term": "lectura a coro",
+        "occurrences": 10,
+        "quote": "lectura a coro"
+      },
+      {
+        "term": "palabras de uso frecuente",
+        "occurrences": 10,
+        "quote": "palabras de uso frecuente"
+      },
+      {
+        "term": "conceptos del texto impreso",
+        "occurrences": 10,
+        "quote": "conceptos del texto impreso"
+      }
+    ],
+    "referencedWorks": []
+  }
 }
