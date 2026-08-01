@@ -34,7 +34,9 @@ describe("native material print contract", () => {
   });
 
   it("uses the operating-system result for every terminal message", () => {
-    assert.equal(printResultMessage({ status: "completed" }), "The print job completed.");
+    const sent = printResultMessage({ status: "completed" });
+    assert.equal(sent, "The print job was sent to the printer.");
+    assert.doesNotMatch(sent, /printed|completed/u);
     assert.match(printResultMessage({ status: "canceled" }), /Nothing was sent/u);
     assert.match(
       printResultMessage({ status: "failed", reason: "printer-error" }),

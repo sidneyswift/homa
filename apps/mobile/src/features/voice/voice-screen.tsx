@@ -74,7 +74,7 @@ export function VoiceScreen() {
   const announceResult = session.announceResult;
   const { family } = useFamilyData();
   const [replyOpen, setReplyOpen] = useState(false);
-  const [printNotice, setPrintNotice] = useState<string | null>(null);
+  const [printNotice, setPrintNotice] = useState<{ key: string; message: string } | null>(null);
   const hoursKeyRef = useRef(0);
   const handledKeysRef = useRef<Set<string> | null>(null);
   const handledPrintKeysRef = useRef(new Set<string>());
@@ -100,9 +100,9 @@ export function VoiceScreen() {
     if (signal?.kind !== "material" || !signal.printRequest) return;
     if (handledPrintKeysRef.current.has(signal.key)) return;
     handledPrintKeysRef.current.add(signal.key);
-    setPrintNotice(readyPrintMessage(signal.printRequest));
+    setPrintNotice({ key: signal.key, message: readyPrintMessage(signal.printRequest) });
     void runPreparedMaterialPrint(signal.printRequest).then((result) => {
-      setPrintNotice(result.message);
+      setPrintNotice({ key: signal.key, message: result.message });
       announceResult(result.message);
       if (family?.id) {
         void emitFamilyEvent(family.id, "materials.print_result", {
@@ -119,6 +119,11 @@ export function VoiceScreen() {
 
   const activeSignal = overlayModel.active;
   const overlayActive = activeSignal !== null && activeSignal.kind !== "receipt";
+  const visiblePrintNotice = printNotice
+    && activeSignal?.kind === "material"
+    && printNotice.key === activeSignal.key
+    ? printNotice.message
+    : null;
   if (overlayActive && replyOpen) setReplyOpen(false);
 
   useEffect(() => {
@@ -239,7 +244,7 @@ export function VoiceScreen() {
           if (action === "change") session.sendText("I want to change this material.");
           if (action === "earlier") session.sendText("Show me the earlier version of this material.");
         }}
-        printNotice={printNotice}
+        printNotice={visiblePrintNotice}
         onReceiptPress={(signal) => {
           if (signal.toolName === "log_hours") {
             hoursKeyRef.current += 1;

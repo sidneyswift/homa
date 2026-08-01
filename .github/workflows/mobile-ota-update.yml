@@ -51,6 +51,9 @@ jobs:
       - name: Mobile chat unit tests
         run: pnpm check:mobile-chat
 
+      - name: Mobile voice unit tests
+        run: pnpm check:mobile-voice
+
       # A red mobile test suite must never reach an installed phone: this
       # runs before publish, not just in CI, since CI and this workflow
       # fire on the same push independently.
