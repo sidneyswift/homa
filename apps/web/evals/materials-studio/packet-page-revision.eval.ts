@@ -77,6 +77,14 @@ export default defineEval({
       output: (value) => (value as { created?: unknown } | null)?.created === true,
     });
 
+    t.check(
+      turn.toolCalls.filter((call) => call.name === "generate_image").length,
+      satisfies(
+        (count) => count === 0,
+        "a size-only revision reused the existing art instead of generating replacement pixels",
+      ),
+    );
+
     const built = turn.toolCalls
       .filter((call) => call.name === "create_printable")
       .map((call) => call.output as { created?: boolean; material?: { id?: string } } | null)

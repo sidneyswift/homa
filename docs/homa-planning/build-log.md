@@ -3,6 +3,33 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-31 · Founder ruling: ordinary materials finish in under five minutes
+
+Founder ruling, not an agent decision. Registered as
+`ordinary-material-under-five` in `journeys/10-reconciliation.md` §5.
+
+**What was ruled.** An ordinary single-page material should be ready in under
+five minutes with quality review enabled. A parent does not assign a time,
+token, or image budget. A budget does not fix latency because it only stops a
+run after the workflow has already done too much work. Large curricula and
+multi-page worksheet collections remain staged workloads.
+
+**What prompted it.** Production telemetry showed a roughly 40-second median
+image call, but one ordinary worksheet made 11 image calls and another made
+five image rerolls for repeated crop feedback. Separately, a finished artifact
+could stay presented as "making" while milestone delivery ran for many more
+minutes.
+
+**Implementation consequence.** A normal single page plans zero or one image
+by default. Distinct objects on one page become one coherent composition;
+exact repeated objects reuse one URL in HTML. Crop, scale, whitespace, and
+placement feedback changes HTML/CSS with the existing URL, while regeneration
+is reserved for defects in the image pixels. The job runner marks a linked
+artifact completed before starting best-effort notification delivery. The
+existing abuse and cost backstop remains separate and is not accepted as speed
+verification. The regression and acceptance evidence ships beside the runner
+and materials-studio evals. Tracked by gh#512.
+
 ## 2026-07-31 · Founder ruling: evals run nightly or manually, never per merge
 
 Founder ruling, not an agent decision. Registered as

@@ -12,10 +12,10 @@ independently across three Getting to Know biography drops this session
 (artists, composers, inventors and scientists), each wanting the same
 event-box-and-connecting-line shape with different subject matter.
 
-Hybrid path preferred: generate_image for the small per-event
-illustrations, HTML for the boxes, connecting line, and labels. html-only
-works when the events are text-and-caption only with no illustration
-budget left.
+Hybrid path preferred: generate one continuous strip containing all
+event vignettes in chronological order, with no words or dates. HTML owns
+the boxes, connecting line, dates, and labels. Never make a separate image
+call per event. Html-only works when the events are text-and-caption only.
 
 Design patterns (all binding for biography-timeline-page):
 

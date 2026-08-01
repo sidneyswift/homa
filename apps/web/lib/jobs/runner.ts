@@ -202,6 +202,26 @@ export interface StageBuiltInput {
   metering?: { sandboxCpuSeconds?: number; pageFetchCount?: number; modelTokens?: number };
 }
 
+interface CompletionDeliverySteps {
+  markCompleted: () => Promise<void>;
+  deliver: () => Promise<string | null>;
+  attachDelivery: (runId: string | null) => Promise<void>;
+}
+
+/**
+ * Persist the parent-visible completion boundary before starting any
+ * best-effort notification work. Delivery may include recipient lookup,
+ * media packing, and an external SMS request, none of which determines
+ * whether the material itself is ready.
+ */
+export async function completeBeforeMilestoneDelivery(
+  steps: CompletionDeliverySteps,
+): Promise<void> {
+  await steps.markCompleted();
+  const runId = await steps.deliver();
+  await steps.attachDelivery(runId);
+}
+
 /**
  * Record a finished stage: mark it (gated for review on the first stage,
  * else approved), link its material, meter it, advance the job, and either
@@ -278,33 +298,43 @@ export async function recordStageBuilt(input: StageBuiltInput): Promise<void> {
     return;
   }
   if (job.stageNumber >= job.totalStages) {
-    const runId = await deliverJobMilestone({
-      familyId: job.familyId,
-      childId: job.childId,
-      title: job.title,
-      kind: "completed",
-      totalStages: job.totalStages,
-      jobId: job.jobId,
+    await completeBeforeMilestoneDelivery({
+      markCompleted: async () => {
+        await sql`
+          update public.agent_jobs
+          set status = 'completed', completed_at = now(), updated_at = now()
+          where id = ${job.jobId} and family_id = ${job.familyId}
+        `;
+        await sql`
+          insert into public.agent_job_events (job_id, family_id, stage_number, kind, payload)
+          values (${job.jobId}, ${job.familyId}, null, 'milestone',
+                  ${sql.json({ event: "completed" } as unknown as DbJson)})
+        `;
+        await emitMapEvent(
+          "job.completed",
+          { family_id: job.familyId, skill: job.skill, total_stages: job.totalStages },
+          { familyId: job.familyId },
+        );
+      },
+      deliver: () => deliverJobMilestone({
+        familyId: job.familyId,
+        childId: job.childId,
+        title: job.title,
+        kind: "completed",
+        totalStages: job.totalStages,
+        jobId: job.jobId,
+      }),
+      attachDelivery: async (runId) => {
+        await sql`
+          update public.agent_jobs
+          set completion_task_run_id = ${runId},
+              delivered_channel = ${runId ? "none" : null},
+              delivered_at = now(),
+              updated_at = now()
+          where id = ${job.jobId} and family_id = ${job.familyId}
+        `;
+      },
     });
-    await sql`
-      update public.agent_jobs
-      set status = 'completed', completed_at = now(),
-          completion_task_run_id = ${runId},
-          delivered_channel = ${runId ? "none" : null},
-          delivered_at = now(),
-          updated_at = now()
-      where id = ${job.jobId} and family_id = ${job.familyId}
-    `;
-    await sql`
-      insert into public.agent_job_events (job_id, family_id, stage_number, kind, payload)
-      values (${job.jobId}, ${job.familyId}, null, 'milestone',
-              ${sql.json({ event: "completed" } as unknown as DbJson)})
-    `;
-    await emitMapEvent(
-      "job.completed",
-      { family_id: job.familyId, skill: job.skill, total_stages: job.totalStages },
-      { familyId: job.familyId },
-    );
   }
   // Otherwise leave status 'running'; the next tick claims the next stage.
 }

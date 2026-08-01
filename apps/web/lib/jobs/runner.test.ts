@@ -2,10 +2,43 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  completeBeforeMilestoneDelivery,
   STALE_STAGE_TIMEOUT_MS,
   shouldGateStage,
   staleStageLeaseCutoff,
 } from "./runner";
+
+test("a completed artifact becomes ready before milestone delivery returns", async () => {
+  const calls: string[] = [];
+  let releaseDelivery!: (runId: string) => void;
+  const delivery = new Promise<string>((resolve) => {
+    releaseDelivery = resolve;
+  });
+
+  const completion = completeBeforeMilestoneDelivery({
+    markCompleted: async () => {
+      calls.push("completed");
+    },
+    deliver: async () => {
+      calls.push("delivery-started");
+      return delivery;
+    },
+    attachDelivery: async (runId) => {
+      calls.push(`delivery-attached:${runId}`);
+    },
+  });
+
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(calls, ["completed", "delivery-started"]);
+
+  releaseDelivery("task-run-1");
+  await completion;
+  assert.deepEqual(calls, [
+    "completed",
+    "delivery-started",
+    "delivery-attached:task-run-1",
+  ]);
+});
 
 // Gating is the contract's decision (agent-jobs plan §A2, council
 // recommendation): curriculum-studio gates its first volume as the

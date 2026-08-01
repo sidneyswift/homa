@@ -13,10 +13,11 @@ measurement is introduced), Singapore-style Pre-K/K comparison lessons
 early-science curriculum that teaches comparative adjectives through
 paired objects rather than rulers or scales.
 
-Hybrid path preferred: generate_image for the compared items (their
-relative size must read clearly at a glance, which favors illustration
-over CSS shapes), HTML for the instruction line, circle/color prompts, and
-the optional balance-scale frame. Html-only works for a simple two-shape
+Hybrid path preferred: generate every compared item together in one
+composition so their shared baseline and relative scale are intrinsic to
+the art. Never make a separate call per item. HTML owns the instruction
+line, circle/color prompts, and the optional balance-scale frame. Html-only
+works for a simple two-shape
 version (e.g. two rectangles of different length) where precise geometry
 matters more than illustration appeal.
 

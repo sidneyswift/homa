@@ -16,10 +16,11 @@ comparing an early version of a tool or invention to its modern form,
 any curriculum with a recurring "then and now," "long ago and today," or
 "first and now" feature box.
 
-Hybrid path preferred: generate_image for the two small illustrations
-(or reuse family photos when the family supplies them), HTML for the
-panel frames, labels, and reflection box. html-only works when the
-comparison is text-and-caption only with no illustration.
+Hybrid path preferred: generate both time periods as one split
+illustration in a single generate_image call (or reuse family photos when
+the family supplies them). HTML owns the panel frames, labels, captions,
+and reflection box. Never make a separate image call per panel. Html-only
+works when the comparison is text-and-caption only with no illustration.
 
 Design patterns (all binding for then-and-now-comparison):
 
