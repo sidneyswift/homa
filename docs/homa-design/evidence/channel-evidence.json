@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "channel-evidence-v1",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "47f93d96f47de41dc1f3ff5ae8e1e2244d8bf3085e5ffd07f71bb888de9f9079",
+  "ownedInputFingerprint": "c0abed529b1bf5226139e9332460c234ff81e11dabddfddcbdb1261c6ef9c9d2",
   "records": [
     {
       "id": "channel:email",
@@ -21,7 +21,7 @@
       "contractVersion": "@homa/design:quiet-authority-v1",
       "harnessVersion": "channel-evidence-v1",
       "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-      "ownedInputFingerprint": "47f93d96f47de41dc1f3ff5ae8e1e2244d8bf3085e5ffd07f71bb888de9f9079",
+      "ownedInputFingerprint": "c0abed529b1bf5226139e9332460c234ff81e11dabddfddcbdb1261c6ef9c9d2",
       "observedAt": null,
       "environment": "synthetic-contract-fixture",
       "browserOrOperatingSystem": null,
@@ -36,19 +36,71 @@
       "automatedOutput": null,
       "timings": null,
       "hardGates": {
-        "delivery-readback": { "passed": false, "evidencePath": null, "note": "Real client delivery evidence is still required." },
-        "client-apple-mail": { "passed": false, "evidencePath": null, "note": "Apple Mail evidence is still required." },
-        "client-gmail": { "passed": false, "evidencePath": null, "note": "Gmail evidence is still required." },
-        "client-outlook": { "passed": false, "evidencePath": null, "note": "Outlook family evidence is still required." },
-        "state-light": { "passed": false, "evidencePath": null, "note": "Light-mode evidence is still required." },
-        "state-dark": { "passed": false, "evidencePath": null, "note": "Dark-mode evidence is still required." },
-        "state-image-blocked": { "passed": false, "evidencePath": null, "note": "Image-blocked evidence is still required." },
-        "state-forwarded": { "passed": false, "evidencePath": null, "note": "Forwarded-message evidence is still required." },
-        "state-replied": { "passed": false, "evidencePath": null, "note": "Replied-message evidence is still required." },
-        "state-plain-text": { "passed": false, "evidencePath": null, "note": "Plain-text evidence is still required." },
-        "state-unsubscribe": { "passed": false, "evidencePath": null, "note": "Unsubscribe evidence is still required." },
-        "state-zoom": { "passed": false, "evidencePath": null, "note": "Zoom evidence is still required." },
-        "state-screen-reader": { "passed": false, "evidencePath": null, "note": "Screen-reader evidence is still required." }
+        "delivery-readback": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Real client delivery evidence is still required."
+        },
+        "client-apple-mail": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Apple Mail evidence is still required."
+        },
+        "client-gmail": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Gmail evidence is still required."
+        },
+        "client-outlook": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Outlook family evidence is still required."
+        },
+        "state-light": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Light-mode evidence is still required."
+        },
+        "state-dark": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Dark-mode evidence is still required."
+        },
+        "state-image-blocked": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Image-blocked evidence is still required."
+        },
+        "state-forwarded": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Forwarded-message evidence is still required."
+        },
+        "state-replied": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Replied-message evidence is still required."
+        },
+        "state-plain-text": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Plain-text evidence is still required."
+        },
+        "state-unsubscribe": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Unsubscribe evidence is still required."
+        },
+        "state-zoom": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Zoom evidence is still required."
+        },
+        "state-screen-reader": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Screen-reader evidence is still required."
+        }
       },
       "builderIdentity": null,
       "criticIdentity": null,
@@ -75,7 +127,7 @@
       "contractVersion": "@homa/design:quiet-authority-v1",
       "harnessVersion": "channel-evidence-v1",
       "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-      "ownedInputFingerprint": "47f93d96f47de41dc1f3ff5ae8e1e2244d8bf3085e5ffd07f71bb888de9f9079",
+      "ownedInputFingerprint": "c0abed529b1bf5226139e9332460c234ff81e11dabddfddcbdb1261c6ef9c9d2",
       "observedAt": null,
       "environment": "synthetic-contract-fixture",
       "browserOrOperatingSystem": null,
@@ -90,17 +142,61 @@
       "automatedOutput": null,
       "timings": null,
       "hardGates": {
-        "language-metadata": { "passed": false, "evidencePath": null, "note": "Tagged parent PDF evidence is still required." },
-        "tagged-structure": { "passed": false, "evidencePath": null, "note": "Tagged structure evidence is still required." },
-        "headings-reading-order": { "passed": false, "evidencePath": null, "note": "Heading and reading-order evidence is still required." },
-        "links-selectable-text": { "passed": false, "evidencePath": null, "note": "Link and selectable-text evidence is still required." },
-        "embedded-fonts": { "passed": false, "evidencePath": null, "note": "Embedded-font evidence is still required." },
-        "browser-parity": { "passed": false, "evidencePath": null, "note": "Browser parity evidence is still required." },
-        "letter": { "passed": false, "evidencePath": null, "note": "Letter-size evidence is still required." },
-        "a4": { "passed": false, "evidencePath": null, "note": "A4 evidence is still required." },
-        "grayscale": { "passed": false, "evidencePath": null, "note": "Grayscale evidence is still required." },
-        "page-breaks": { "passed": false, "evidencePath": null, "note": "Page-break evidence is still required." },
-        "screen-reader": { "passed": false, "evidencePath": null, "note": "Manual screen-reader evidence is still required." }
+        "language-metadata": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Tagged parent PDF evidence is still required."
+        },
+        "tagged-structure": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Tagged structure evidence is still required."
+        },
+        "headings-reading-order": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Heading and reading-order evidence is still required."
+        },
+        "links-selectable-text": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Link and selectable-text evidence is still required."
+        },
+        "embedded-fonts": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Embedded-font evidence is still required."
+        },
+        "browser-parity": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Browser parity evidence is still required."
+        },
+        "letter": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Letter-size evidence is still required."
+        },
+        "a4": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "A4 evidence is still required."
+        },
+        "grayscale": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Grayscale evidence is still required."
+        },
+        "page-breaks": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Page-break evidence is still required."
+        },
+        "screen-reader": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Manual screen-reader evidence is still required."
+        }
       },
       "builderIdentity": null,
       "criticIdentity": null,
@@ -127,7 +223,7 @@
       "contractVersion": "@homa/design:quiet-authority-v1",
       "harnessVersion": "channel-evidence-v1",
       "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-      "ownedInputFingerprint": "47f93d96f47de41dc1f3ff5ae8e1e2244d8bf3085e5ffd07f71bb888de9f9079",
+      "ownedInputFingerprint": "c0abed529b1bf5226139e9332460c234ff81e11dabddfddcbdb1261c6ef9c9d2",
       "observedAt": null,
       "environment": "synthetic-contract-fixture",
       "browserOrOperatingSystem": null,
@@ -142,13 +238,41 @@
       "automatedOutput": null,
       "timings": null,
       "hardGates": {
-        "printer-model": { "passed": false, "evidencePath": null, "note": "Named printer evidence is still required." },
-        "settings-paper": { "passed": false, "evidencePath": null, "note": "Printer settings and paper evidence is still required." },
-        "page-count": { "passed": false, "evidencePath": null, "note": "Page-count evidence is still required." },
-        "crop-margins": { "passed": false, "evidencePath": null, "note": "Crop and margin evidence is still required." },
-        "grayscale": { "passed": false, "evidencePath": null, "note": "Grayscale print evidence is still required." },
-        "color-readability": { "passed": false, "evidencePath": null, "note": "Color-readability evidence is still required." },
-        "scan-or-photo": { "passed": false, "evidencePath": null, "note": "A scan or photograph of output is still required." }
+        "printer-model": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Named printer evidence is still required."
+        },
+        "settings-paper": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Printer settings and paper evidence is still required."
+        },
+        "page-count": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Page-count evidence is still required."
+        },
+        "crop-margins": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Crop and margin evidence is still required."
+        },
+        "grayscale": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Grayscale print evidence is still required."
+        },
+        "color-readability": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Color-readability evidence is still required."
+        },
+        "scan-or-photo": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "A scan or photograph of output is still required."
+        }
       },
       "builderIdentity": null,
       "criticIdentity": null,
@@ -175,7 +299,7 @@
       "contractVersion": "@homa/design:quiet-authority-v1",
       "harnessVersion": "channel-evidence-v1",
       "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-      "ownedInputFingerprint": "47f93d96f47de41dc1f3ff5ae8e1e2244d8bf3085e5ffd07f71bb888de9f9079",
+      "ownedInputFingerprint": "c0abed529b1bf5226139e9332460c234ff81e11dabddfddcbdb1261c6ef9c9d2",
       "observedAt": null,
       "environment": "synthetic-contract-fixture",
       "browserOrOperatingSystem": null,
@@ -190,14 +314,46 @@
       "automatedOutput": null,
       "timings": null,
       "hardGates": {
-        "capability-inventory": { "passed": false, "evidencePath": null, "note": "Provider capability inventory is still required." },
-        "account-owner": { "passed": false, "evidencePath": null, "note": "Account ownership evidence is still required." },
-        "update-readback": { "passed": false, "evidencePath": null, "note": "Provider update and read-back evidence is still required." },
-        "cache-behavior": { "passed": false, "evidencePath": null, "note": "Cache behavior evidence is still required." },
-        "expiry-fallback": { "passed": false, "evidencePath": null, "note": "Expiry and fallback evidence is still required." },
-        "rollback-restore": { "passed": false, "evidencePath": null, "note": "Rollback and restore evidence is still required." },
-        "restore-time": { "passed": false, "evidencePath": null, "note": "Measured restore-time evidence is still required." },
-        "no-simulated-capability": { "passed": false, "evidencePath": null, "note": "Real provider capability proof is still required." }
+        "capability-inventory": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Provider capability inventory is still required."
+        },
+        "account-owner": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Account ownership evidence is still required."
+        },
+        "update-readback": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Provider update and read-back evidence is still required."
+        },
+        "cache-behavior": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Cache behavior evidence is still required."
+        },
+        "expiry-fallback": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Expiry and fallback evidence is still required."
+        },
+        "rollback-restore": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Rollback and restore evidence is still required."
+        },
+        "restore-time": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Measured restore-time evidence is still required."
+        },
+        "no-simulated-capability": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Real provider capability proof is still required."
+        }
       },
       "builderIdentity": null,
       "criticIdentity": null,
@@ -224,7 +380,7 @@
       "contractVersion": "@homa/design:quiet-authority-v1",
       "harnessVersion": "channel-evidence-v1",
       "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-      "ownedInputFingerprint": "47f93d96f47de41dc1f3ff5ae8e1e2244d8bf3085e5ffd07f71bb888de9f9079",
+      "ownedInputFingerprint": "c0abed529b1bf5226139e9332460c234ff81e11dabddfddcbdb1261c6ef9c9d2",
       "observedAt": null,
       "environment": "synthetic-contract-fixture",
       "browserOrOperatingSystem": null,
@@ -239,15 +395,51 @@
       "automatedOutput": null,
       "timings": null,
       "hardGates": {
-        "contact-sheet": { "passed": false, "evidencePath": null, "note": "Contact-sheet evidence is still required." },
-        "icon-sizes": { "passed": false, "evidencePath": null, "note": "Icon-size evidence is still required." },
-        "splash-sizes": { "passed": false, "evidencePath": null, "note": "Splash-size evidence is still required." },
-        "store-sizes": { "passed": false, "evidencePath": null, "note": "Store-size evidence is still required." },
-        "search-social-metadata": { "passed": false, "evidencePath": null, "note": "Search and social metadata evidence is still required." },
-        "notification-metadata": { "passed": false, "evidencePath": null, "note": "Notification metadata evidence is still required." },
-        "vcard-link-preview": { "passed": false, "evidencePath": null, "note": "vCard and link-preview evidence is still required." },
-        "carrier-media-protocol": { "passed": false, "evidencePath": null, "note": "Carrier media and protocol evidence is still required." },
-        "public-url-readback": { "passed": false, "evidencePath": null, "note": "Public URL read-back evidence is still required." }
+        "contact-sheet": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Contact-sheet evidence is still required."
+        },
+        "icon-sizes": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Icon-size evidence is still required."
+        },
+        "splash-sizes": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Splash-size evidence is still required."
+        },
+        "store-sizes": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Store-size evidence is still required."
+        },
+        "search-social-metadata": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Search and social metadata evidence is still required."
+        },
+        "notification-metadata": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Notification metadata evidence is still required."
+        },
+        "vcard-link-preview": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "vCard and link-preview evidence is still required."
+        },
+        "carrier-media-protocol": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Carrier media and protocol evidence is still required."
+        },
+        "public-url-readback": {
+          "passed": false,
+          "evidencePath": null,
+          "note": "Public URL read-back evidence is still required."
+        }
       },
       "builderIdentity": null,
       "criticIdentity": null,
