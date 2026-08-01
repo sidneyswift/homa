@@ -1,4 +1,4 @@
-import type { WallDoor } from "@homa/core";
+import { planDefinition, type WallDoor } from "@homa/core";
 
 import type { BillingPeriod, PlanTier } from "../../lib/billing/wall-types";
 
@@ -117,9 +117,9 @@ export const WALL_DISMISS = "Not now";
  * (4 of 5 personas independently flagged the comparative framing).
  */
 export const TIER_NAMES: Record<PlanTier, string> = {
-  regular: "Homa",
-  plus: "Homa Plus",
-  elite: "Homa Max",
+  regular: planDefinition("regular").name,
+  plus: planDefinition("plus").name,
+  elite: planDefinition("elite").name,
 };
 
 /**
@@ -147,17 +147,14 @@ export const TIER_NAMES: Record<PlanTier, string> = {
  * Self-selection routes as well as an endorsement and costs no trust.
  */
 
-/** Every annual price is 20% off the monthly price times twelve, rounded
- *  to the nearest dollar (founder ruling 2026-07-26): $19, $49, and $199
- *  a month become $182, $470, and $1,910 a year. */
-const TIER_PRICES: Record<PlanTier, { monthly: number; annual: number | null }> = {
-  regular: { monthly: 19, annual: 182 },
-  plus: { monthly: 49, annual: 470 },
-  elite: { monthly: 199, annual: 1910 },
-};
+/** The public price source is shared with the native StoreKit catalog. */
+function tierPrice(tier: PlanTier, period: BillingPeriod): number {
+  const plan = planDefinition(tier);
+  return period === "annual" ? plan.annualUsd : plan.monthlyUsd;
+}
 
 export function tierMonthlyButton(tier: PlanTier): string {
-  return `Start your 7 free days · then $${TIER_PRICES[tier].monthly} a month`;
+  return `Start your 7 free days · then $${tierPrice(tier, "monthly")} a month`;
 }
 
 /**
@@ -179,11 +176,11 @@ export const TRIAL_GATE_CTA = "Start your 7 free days";
  *  as a full sentence, so the commitment is stated in the same glance
  *  as the button that makes it. */
 export function tierChargeLine(tier: PlanTier, period: BillingPeriod): string {
-  const price = TIER_PRICES[tier];
-  if (period === "annual" && price.annual !== null) {
-    return `Then $${price.annual.toLocaleString("en-US")} a year.`;
+  const price = tierPrice(tier, period);
+  if (period === "annual") {
+    return `Then $${price.toLocaleString("en-US")} a year.`;
   }
-  return `Then $${price.monthly} a month.`;
+  return `Then $${price} a month.`;
 }
 
 /** The tier picker's single CTA (2026-07-26: a monthly/annual toggle
@@ -193,9 +190,7 @@ export function tierChargeLine(tier: PlanTier, period: BillingPeriod): string {
  *  a tier that only ships monthly. */
 export function tierButtonLabel(tier: PlanTier, period: BillingPeriod): string {
   if (period === "monthly") return tierMonthlyButton(tier);
-  const annual = TIER_PRICES[tier].annual;
-  if (annual === null) return tierMonthlyButton(tier);
-  return `Start your 7 free days · then $${annual.toLocaleString("en-US")} a year`;
+  return `Start your 7 free days · then $${tierPrice(tier, "annual").toLocaleString("en-US")} a year`;
 }
 
 /** The bare number for the pricing-card redesign's large price display
@@ -204,9 +199,7 @@ export function tierButtonLabel(tier: PlanTier, period: BillingPeriod): string {
  *  unchanged. Falls back to the monthly price if this tier's annual
  *  price is somehow null, matching tierButtonLabel's own fallback. */
 export function tierPriceAmount(tier: PlanTier, period: BillingPeriod): number {
-  if (period === "monthly") return TIER_PRICES[tier].monthly;
-  const annual = TIER_PRICES[tier].annual;
-  return annual === null ? TIER_PRICES[tier].monthly : annual;
+  return tierPrice(tier, period);
 }
 
 /** The small unit label beside the large price number. */
@@ -223,9 +216,8 @@ export const BILLING_TOGGLE_ANNUAL_LABEL = "Annual";
 export const BILLING_TOGGLE_ANNUAL_BADGE = "Save 20%";
 
 export function tierBullets(tier: PlanTier, period: BillingPeriod): readonly string[] {
-  const price = TIER_PRICES[tier];
-  if (period === "annual" && price.annual !== null) {
-    const perMonth = (price.annual / 12).toFixed(2).replace(/\.00$/, "");
+  if (period === "annual") {
+    const perMonth = (tierPrice(tier, period) / 12).toFixed(2).replace(/\.00$/, "");
     return [`The year works out to $${perMonth} a month.`, ...WALL_BULLETS];
   }
   return [...WALL_BULLETS];

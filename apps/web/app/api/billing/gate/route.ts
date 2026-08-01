@@ -1,4 +1,5 @@
 import { familyAccountGate } from "../../../../lib/billing/wall";
+import { familyBillingEntitlement } from "../../../../lib/billing/entitlements";
 import { isPlanTier } from "../../../../lib/billing/wall-types";
 import { mapDb } from "../../../../lib/map/db";
 import { requireFamily, requireFamilyFromBearer } from "../../../../lib/map/session";
@@ -40,6 +41,8 @@ export async function GET(request: Request): Promise<Response> {
   const isMobile = request.headers.get("x-homa-channel") === "mobile";
 
   let planTier = "regular";
+  let billingProvider: string | null = null;
+  let billingPeriod: string | null = null;
   let onboardingActive = false;
   try {
     const sql = mapDb();
@@ -68,10 +71,30 @@ export async function GET(request: Request): Promise<Response> {
     );
   }
 
+  // The ledger is additive and may not exist for the few minutes between a
+  // compatible code deploy and its migration. Keep that failure isolated
+  // from the family-row read above so it cannot erase the mobile onboarding
+  // exemption or the legacy tier mirror during rollout.
+  try {
+    const entitlement = await familyBillingEntitlement(family.id);
+    if (entitlement?.active) {
+      planTier = entitlement.tier;
+      billingProvider = entitlement.provider;
+      billingPeriod = entitlement.period;
+    }
+  } catch (error) {
+    console.error(
+      "billing/gate: canonical entitlement read failed, using compatibility mirror:",
+      error instanceof Error ? error.message : "unknown",
+    );
+  }
+
   return Response.json({
     ok: true,
     open: gate.checkout === null || onboardingActive,
     lapsed: gate.lapsed,
     planTier,
+    billingProvider,
+    billingPeriod,
   });
 }

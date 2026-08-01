@@ -15,6 +15,8 @@ export interface BillingGateState {
   open: boolean;
   lapsed: boolean;
   planTier: string;
+  billingProvider: "stripe" | "apple" | "google" | null;
+  billingPeriod: "monthly" | "annual" | null;
 }
 
 async function bearerToken(): Promise<string> {
@@ -43,12 +45,16 @@ export async function fetchBillingGate(): Promise<BillingGateState | null> {
       open?: boolean;
       lapsed?: boolean;
       planTier?: string;
+      billingProvider?: "stripe" | "apple" | "google" | null;
+      billingPeriod?: "monthly" | "annual" | null;
     };
     if (!body.ok) return null;
     return {
       open: body.open === true,
       lapsed: body.lapsed === true,
       planTier: body.planTier ?? "regular",
+      billingProvider: body.billingProvider ?? null,
+      billingPeriod: body.billingPeriod ?? null,
     };
   } catch {
     return null;

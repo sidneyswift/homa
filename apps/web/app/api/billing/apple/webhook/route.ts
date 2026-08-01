@@ -1,3 +1,5 @@
+import { providerProduct } from "@homa/core";
+
 import {
   appleStatusToSharedVocabulary,
   verifyAppleNotification,
@@ -92,10 +94,20 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: true, handled: false });
   }
 
+  const product = providerProduct("apple", transaction.productId);
+  if (!product) {
+    console.error(
+      `billing/apple/webhook: ignored unconfigured product ${transaction.productId ?? "unset"}`,
+    );
+    return Response.json({ ok: true, handled: false });
+  }
+
   await recordFamilyAppleSubscription(familyId, {
     originalTransactionId,
     status: appleStatusToSharedVocabulary(status),
-    productId: transaction.productId ?? null,
+    productId: product.productId,
+    tier: product.tier,
+    period: product.period,
     expiresAtMs: transaction.expiresDate ?? null,
   });
 

@@ -12,6 +12,27 @@ export {
 export { ACTION_COSTS } from "./action-costs";
 
 export {
+  APPLE_PRODUCT_IDS,
+  APPLE_PROVIDER_PRODUCTS,
+  BILLING_PERIODS,
+  BILLING_PROVIDERS,
+  GOOGLE_PROVIDER_PRODUCTS,
+  HOMA_PLANS,
+  PLAN_TIERS,
+  isBillingPeriod,
+  isBillingProvider,
+  isPlanTier,
+  planDefinition,
+  providerProduct,
+  weeklyEquivalentUsd,
+  type BillingPeriod,
+  type BillingProvider,
+  type PlanDefinition,
+  type PlanTier,
+  type ProviderProduct,
+} from "./billing-catalog";
+
+export {
   EVENT_SCHEMAS,
   MAP_FLOW_STEPS,
   PLANNER_EVENT_CLIENTS,

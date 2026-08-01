@@ -1,3 +1,10 @@
+import {
+  PLAN_TIERS as CORE_PLAN_TIERS,
+  isPlanTier as coreIsPlanTier,
+  type BillingPeriod as CoreBillingPeriod,
+  type PlanTier as CorePlanTier,
+} from "@homa/core";
+
 /**
  * Client-safe wall types (no server imports; the server module wall.ts
  * pulls the Postgres client, which has no browser build). A null
@@ -5,19 +12,19 @@
  * off, the family is exempt, or the trial already started.
  */
 
-export type PlanTier = "regular" | "plus" | "elite";
+export type PlanTier = CorePlanTier;
 
-export const PLAN_TIERS: readonly PlanTier[] = ["regular", "plus", "elite"];
+export const PLAN_TIERS: readonly PlanTier[] = CORE_PLAN_TIERS;
 
 /** Narrows a value read back out of Postgres. families.plan_tier is a
  *  check-constrained text column, so anything else means the constraint
  *  changed under us; callers fall back to "regular" rather than trust it. */
 export function isPlanTier(value: unknown): value is PlanTier {
-  return typeof value === "string" && (PLAN_TIERS as readonly string[]).includes(value);
+  return coreIsPlanTier(value);
 }
 
 /** Which price the tier picker's monthly/annual toggle currently shows. */
-export type BillingPeriod = "monthly" | "annual";
+export type BillingPeriod = CoreBillingPeriod;
 
 export interface TierCheckout {
   /** Stripe Payment Link URLs with client_reference_id (the family id)

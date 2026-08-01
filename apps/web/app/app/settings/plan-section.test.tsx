@@ -20,6 +20,7 @@ import { PlanSection } from "./plan-section";
 function state(overrides: Partial<FamilyPlanState> = {}): FamilyPlanState {
   return {
     tier: "regular",
+    billingProvider: null,
     plusCheckout: {
       monthlyUrl: "https://buy.stripe.test/plus-monthly?client_reference_id=fam",
       annualUrl: null,
@@ -105,5 +106,12 @@ describe("the denial line and the door it names", () => {
       /<PlanSection/u,
       "the section must actually be rendered on the settings page",
     );
+  });
+
+  it("routes App Store customers to Apple's subscription manager", () => {
+    const page = readFileSync(path.join(import.meta.dirname, "page.tsx"), "utf8");
+    assert.match(page, /plan\.billingProvider === "apple"/u);
+    assert.match(page, /https:\/\/apps\.apple\.com\/account\/subscriptions/u);
+    assert.match(page, /Manage App Store subscription/u);
   });
 });

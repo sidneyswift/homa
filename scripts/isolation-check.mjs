@@ -46,6 +46,7 @@ const fixtureKnowledgeIds = [];
 const fixtureUserIds = [];
 let morningResearchBriefV2SchemaAvailable = false;
 let morningOfferFunnelSchemaAvailable = false;
+let familyBillingSubscriptionsSchemaAvailable = false;
 
 const projectRef = new URL(url).hostname.split(".")[0];
 const sql = dbPassword
@@ -3629,6 +3630,26 @@ await expectReadDenied("cron_runs");
 // Founder alert acks (migration #81): deny-all, server-only; only the
 // founder-gated /admin action writes.
 await expectReadDenied("admin_alert_acknowledgments");
+// Provider-neutral family subscriptions are server-only billing state. The
+// migration is additive and code falls back to the old mirrors before it
+// lands, so an absent table is an honest pre-deploy pass. Once present, both
+// anonymous reads and writes must be denied.
+{
+  const response = await rest(`family_billing_subscriptions?select=id&limit=1`, {
+    headers: { Prefer: "" },
+  });
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    coveredTables.add("family_billing_subscriptions");
+    report(
+      "family_billing_subscriptions absent from target (additive migration not applied yet); nothing exposed",
+      true,
+    );
+  } else {
+    familyBillingSubscriptionsSchemaAvailable = true;
+    await expectReadDenied("family_billing_subscriptions");
+  }
+}
 // The material studio's run ledger (materials_studio_runs migration):
 // deny-all, server-only, written by the materials-lab channel route and
 // read by the founder console. Arms automatically once the additive
@@ -4211,6 +4232,19 @@ await expectInsertDenied(
   },
   "anon cannot forge alert acknowledgments",
 );
+if (familyBillingSubscriptionsSchemaAvailable) {
+  await expectInsertDenied(
+    "family_billing_subscriptions",
+    {
+      family_id: "00000000-0000-0000-0000-000000000000",
+      provider: "stripe",
+      provider_subscription_id: "sub_intruder",
+      plan_tier: "regular",
+      status: "active",
+    },
+    "anon cannot forge family billing subscriptions",
+  );
+}
 await expectInsertDenied(
   "agent_tool_calls",
   {
