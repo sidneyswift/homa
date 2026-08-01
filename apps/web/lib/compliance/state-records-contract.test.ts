@@ -12,6 +12,14 @@ describe("native state-record boundaries", () => {
     assert.doesNotMatch(source, /delete from public\.materials/u);
   });
 
+  it("reads packet attendance and hours only through the authenticated family", async () => {
+    const source = await readFile(new URL("pack-store.ts", here), "utf8");
+    assert.match(source, /from public\.hours_log h/u);
+    assert.match(source, /where h\.family_id = \$\{familyId\}/u);
+    assert.match(source, /c\.id = h\.child_id and c\.family_id = h\.family_id/u);
+    assert.match(source, /schoolYearStartOn/u);
+  });
+
   it("uses the existing compliance composers and reviewed requirements", async () => {
     const source = await readFile(new URL("state-records.ts", here), "utf8");
     assert.match(source, /getStateRequirementsDetail/u);

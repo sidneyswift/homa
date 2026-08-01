@@ -159,7 +159,7 @@ export async function getStateRecordsSummary(
   // The pack composer remains the only place that decides which pages a
   // reviewed state pathway earns. The native preview simply names the exact
   // pages that same composer would render.
-  const includedRecords = composeStatePack({
+  const stateGuidancePages = composeStatePack({
     detail,
     family: {
       familyName: family.familyName,
@@ -185,6 +185,11 @@ export async function getStateRecordsSummary(
       and happened_on <= ${todayIso}::date
   `;
   const row = coverage[0] ?? { logged_entries: 0, logged_days: 0, minutes_logged: 0 };
+  const includedRecords = [
+    ...stateGuidancePages,
+    "Recorded attendance and hours",
+    ...(row.logged_entries > 0 ? ["Logged learning days"] : []),
+  ];
   const documents = await listStateRecordDocuments(familyId);
   const sources = [
     ...(detail.sourcePageUrl ? [{ label: `${detail.stateName} requirements`, url: detail.sourcePageUrl }] : []),

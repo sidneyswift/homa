@@ -15,6 +15,7 @@ import {
 } from "../map/state-requirements";
 import {
   composeStatePack,
+  deriveStatePackDailyRecords,
   deriveDuties,
   isOfficialSource,
   officialUrl,
@@ -22,6 +23,7 @@ import {
   prefillBirthdate,
   verifiedMonthYear,
   type StatePackFamily,
+  type StatePackRecords,
 } from "./pack";
 
 /**
@@ -83,8 +85,8 @@ const WALKERS: StatePackFamily = {
   familyName: "Walker",
   parentName: "Robin Walker",
   children: [
-    { name: "Finn", birthdate: "2018-03-09" },
-    { name: "Maya", birthdate: "2020-11-21" },
+    { id: "11111111-1111-4111-8111-111111111111", name: "Finn", birthdate: "2018-03-09" },
+    { id: "22222222-2222-4222-8222-222222222222", name: "Maya", birthdate: "2020-11-21" },
   ],
 };
 
@@ -109,6 +111,108 @@ function compose(stateCode: string, family: StatePackFamily = WALKERS) {
     generatedOn: "July 28, 2026",
   });
 }
+
+const SAVED_RECORDS: StatePackRecords = {
+  schoolYearStartOn: "2026-08-18",
+  entries: [
+    {
+      childId: "11111111-1111-4111-8111-111111111111",
+      childName: "Finn",
+      happenedOn: "2026-08-19",
+      subject: "math",
+      minutes: 45,
+    },
+    {
+      childId: null,
+      childName: null,
+      happenedOn: "2026-08-19",
+      subject: "co-op",
+      minutes: 120,
+    },
+    {
+      childId: "22222222-2222-4222-8222-222222222222",
+      childName: "Maya",
+      happenedOn: "2026-08-20",
+      subject: "reading",
+      minutes: 30,
+    },
+  ],
+};
+
+describe("actual attendance and hours records", () => {
+  it("counts family-wide time for every child and keeps child-specific rows exact", () => {
+    assert.deepEqual(deriveStatePackDailyRecords(WALKERS, SAVED_RECORDS), [
+      {
+        childName: "Finn",
+        happenedOn: "2026-08-19",
+        subjects: ["math", "co-op"],
+        minutes: 165,
+      },
+      {
+        childName: "Maya",
+        happenedOn: "2026-08-19",
+        subjects: ["co-op"],
+        minutes: 120,
+      },
+      {
+        childName: "Maya",
+        happenedOn: "2026-08-20",
+        subjects: ["reading"],
+        minutes: 30,
+      },
+    ]);
+  });
+
+  it("embeds saved dates, subjects, time, and the reported school-year start", () => {
+    const pack = composeStatePack({
+      detail: loadDetail("NY"),
+      family: WALKERS,
+      packId: "12345678-abcd-4ef0-8123-456789abcdef",
+      generatedOn: "August 21, 2026",
+      records: SAVED_RECORDS,
+    });
+    assert.ok(pack.pages.some((page) => page.title === "Recorded attendance and hours"));
+    assert.ok(pack.pages.some((page) => page.title === "Logged learning days"));
+    assert.match(pack.html, /Aug 18, 2026/u);
+    assert.match(pack.html, /Aug 19, 2026/u);
+    assert.match(pack.html, /Finn: math, 45m/u);
+    assert.match(pack.html, /Whole family: co-op, 2h/u);
+  });
+
+  it("prints an explicit blank instead of estimating missing records", () => {
+    const pack = composeStatePack({
+      detail: loadDetail("TX"),
+      family: WALKERS,
+      packId: "12345678-abcd-4ef0-8123-456789abcdef",
+      generatedOn: "August 21, 2026",
+      records: { schoolYearStartOn: null, entries: [] },
+    });
+    assert.match(pack.html, /Not set in Homa/u);
+    assert.match(pack.html, /no saved learning-time entries/u);
+    assert.match(pack.html, /not an estimate/u);
+    assert.ok(!pack.pages.some((page) => page.title === "Logged learning days"));
+  });
+
+  it("keeps a full year of daily family records inside the stored HTML cap", () => {
+    const entries = Array.from({ length: 365 }, (_, offset) => ({
+      childId: null,
+      childName: null,
+      happenedOn: new Date(Date.UTC(2026, 7, 18 + offset)).toISOString().slice(0, 10),
+      subject: offset % 2 === 0 ? "math" : "reading",
+      minutes: 90,
+    }));
+    const pack = composeStatePack({
+      detail: loadDetail("PA"),
+      family: WALKERS,
+      packId: "12345678-abcd-4ef0-8123-456789abcdef",
+      generatedOn: "August 17, 2027",
+      records: { schoolYearStartOn: "2026-08-18", entries },
+    });
+    const stored = pack.pages.map((page) => page.body).join("\n");
+    assert.ok(stored.length < 118_000, `stored record packet is ${stored.length} chars`);
+    assert.equal(pack.pages.filter((page) => page.title.startsWith("Logged learning days")).length, 22);
+  });
+});
 
 describe("verifiedMonthYear", () => {
   it("formats the upstream date as month and year", () => {

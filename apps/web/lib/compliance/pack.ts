@@ -43,9 +43,26 @@ import {
  */
 
 export interface StatePackChild {
+  /** Durable child id, used only to attach saved records exactly. */
+  id?: string;
   name: string;
   /** "YYYY-MM-DD" or null; printed on the prep sheet only when present. */
   birthdate: string | null;
+}
+
+export interface StatePackRecordEntry {
+  childId: string | null;
+  childName: string | null;
+  happenedOn: string;
+  subject: string;
+  minutes: number;
+}
+
+export interface StatePackRecords {
+  /** The family's reported start date for this school year, or null. */
+  schoolYearStartOn: string | null;
+  /** Exact rows read from the family's durable Hours record. */
+  entries: readonly StatePackRecordEntry[];
 }
 
 export interface StatePackFamily {
@@ -63,6 +80,8 @@ export interface StatePackInput {
   /** Family-local generation moment, preformatted by the caller
    * ("July 28, 2026"): pure module, no clock access. */
   generatedOn: string;
+  /** Present when the caller read the family's durable Hours record. */
+  records?: StatePackRecords;
 }
 
 export interface StatePackPage {
@@ -1090,6 +1109,167 @@ ${rows}
 <p class="sp-body sp-att-total">Total this page: __________</p>`;
 }
 
+export interface StatePackDailyRecord {
+  childName: string;
+  happenedOn: string;
+  subjects: string[];
+  minutes: number;
+}
+
+function recordMatchesChild(
+  entry: StatePackRecordEntry,
+  child: StatePackChild,
+): boolean {
+  if (entry.childId === null) return true;
+  return child.id
+    ? entry.childId === child.id
+    : entry.childName === child.name;
+}
+
+/**
+ * One deterministic row per child and saved learning day. Family-wide
+ * entries count for every child, matching the hours_log schema and Hours
+ * screen. No date, subject, or minute value is inferred.
+ */
+export function deriveStatePackDailyRecords(
+  family: StatePackFamily,
+  records: StatePackRecords,
+): StatePackDailyRecord[] {
+  const rows = new Map<string, StatePackDailyRecord>();
+  const add = (childName: string, entry: StatePackRecordEntry) => {
+    const key = `${childName}\u0000${entry.happenedOn}`;
+    const current = rows.get(key);
+    if (current) {
+      current.minutes += entry.minutes;
+      if (!current.subjects.includes(entry.subject)) current.subjects.push(entry.subject);
+      return;
+    }
+    rows.set(key, {
+      childName,
+      happenedOn: entry.happenedOn,
+      subjects: [entry.subject],
+      minutes: entry.minutes,
+    });
+  };
+
+  if (family.children.length > 0) {
+    for (const child of family.children) {
+      for (const entry of records.entries) {
+        if (recordMatchesChild(entry, child)) add(child.name, entry);
+      }
+    }
+  } else {
+    for (const entry of records.entries) {
+      add(entry.childName ?? "Whole family", entry);
+    }
+  }
+
+  return [...rows.values()].sort((left, right) =>
+    left.happenedOn.localeCompare(right.happenedOn) ||
+    left.childName.localeCompare(right.childName),
+  );
+}
+
+function recordDateText(dateOnly: string): string {
+  const [year, month, day] = dateOnly.split("-").map(Number);
+  if (!year || !month || !day) return dateOnly;
+  return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+function recordTimeText(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+  if (hours === 0) return `${remainder}m`;
+  if (remainder === 0) return `${hours}h`;
+  return `${hours}h ${remainder}m`;
+}
+
+function recordedSummaryPage(
+  detail: StateRequirementsDetail,
+  family: StatePackFamily,
+  records: StatePackRecords,
+  daily: readonly StatePackDailyRecord[],
+): string {
+  const childNames = family.children.length > 0
+    ? family.children.map((child) => child.name)
+    : [...new Set(daily.map((row) => row.childName))];
+  const summaryRows = childNames.map((childName) => {
+    const childRows = daily.filter((row) => row.childName === childName);
+    const minutes = childRows.reduce((total, row) => total + row.minutes, 0);
+    return `<tr><td>${escapeHtml(childName)}</td><td>${childRows.length}</td><td>${escapeHtml(recordTimeText(minutes))}</td></tr>`;
+  }).join("\n");
+  const start = records.schoolYearStartOn
+    ? recordDateText(records.schoolYearStartOn)
+    : "Not set in Homa";
+  const empty = records.entries.length === 0
+    ? `<div class="sp-callout"><p>Homa has no saved learning-time entries to place in this packet yet. That is a blank record, not an estimate. Add or correct time in Hours, then make a fresh packet.</p></div>`
+    : "";
+  return `${pageHeader(
+    detail,
+    `Your saved family records · state guidance verified ${verifiedMonthYear(detail.sourceLastVerified)}`,
+    "Recorded attendance and hours",
+    "A snapshot of the learning time saved in Homa when this packet was made. Review every row before relying on it.",
+  )}
+<p class="sp-body"><strong>School year starts:</strong> ${escapeHtml(start)}. A recorded day means at least one saved time entry for that child on that date. Family-wide time counts for every child.</p>
+${summaryRows ? `<table class="sp-log sp-record-summary"><thead><tr><th>Child</th><th>Recorded days</th><th>Saved time</th></tr></thead><tbody>${summaryRows}</tbody></table>` : ""}
+${empty}
+<p class="sp-body">Source: your family's Homa Hours record. Homa does not file or submit this record. You review, sign, and file anything your state requires.</p>`;
+}
+
+function recordedDetailPages(
+  detail: StateRequirementsDetail,
+  records: StatePackRecords,
+): StatePackPage[] {
+  const rowsPerPage = 17;
+  const pages: StatePackPage[] = [];
+  const byDate = new Map<string, Map<string, StatePackDailyRecord>>();
+  for (const entry of records.entries) {
+    const scope = entry.childName ?? "Whole family";
+    const scopes = byDate.get(entry.happenedOn) ?? new Map<string, StatePackDailyRecord>();
+    const current = scopes.get(scope);
+    if (current) {
+      current.minutes += entry.minutes;
+      if (!current.subjects.includes(entry.subject)) current.subjects.push(entry.subject);
+    } else {
+      scopes.set(scope, {
+        childName: scope,
+        happenedOn: entry.happenedOn,
+        subjects: [entry.subject],
+        minutes: entry.minutes,
+      });
+    }
+    byDate.set(entry.happenedOn, scopes);
+  }
+  const dates = [...byDate.entries()].sort(([left], [right]) => left.localeCompare(right));
+  for (let start = 0; start < dates.length; start += rowsPerPage) {
+    const chunk = dates.slice(start, start + rowsPerPage);
+    const pageNumber = Math.floor(start / rowsPerPage) + 1;
+    const pageCount = Math.ceil(dates.length / rowsPerPage);
+    const bodyRows = chunk.map(([date, scopes]) => {
+      const details = [...scopes.values()].map((row) =>
+        `${row.childName}: ${row.subjects.map(humanizeToken).join(", ")}, ${recordTimeText(row.minutes)}`,
+      ).join(" · ");
+      return `<tr><td class="sp-record-date">${escapeHtml(recordDateText(date))}</td><td>${escapeHtml(details)}</td></tr>`;
+    }).join("\n");
+    pages.push({
+      title: pageNumber === 1 ? "Logged learning days" : "Logged learning days, continued",
+      body: `${pageHeader(
+        detail,
+        `Your saved family records · page ${pageNumber} of ${pageCount}`,
+        pageNumber === 1 ? "Logged learning days" : "Logged learning days, continued",
+        "Dates, child scope, subjects, and time come from your saved Homa Hours record.",
+      )}
+<table class="sp-log sp-records"><thead><tr><th class="sp-record-date">Date</th><th>Saved record</th></tr></thead><tbody>${bodyRows}</tbody></table>`,
+    });
+  }
+  return pages;
+}
+
 function portfolioPage(detail: StateRequirementsDetail, duties: Duties): string {
   const rows = Array.from(
     { length: 16 },
@@ -1391,6 +1571,9 @@ export function wrapStatePackDocument(
   .sp-log-date { width: 0.9in; }
   .sp-log-time { width: 0.8in; }
   .sp-log-subject { width: 1.2in; }
+  .sp-record-summary td { height: 0.32in; }
+  .sp-records td { height: 0.31in; font-size: 9px; }
+  .sp-record-date { width: 1.15in; }
   .sp-prep { display: flex; gap: 0.3in; margin-top: 0.1in; }
   .sp-prep-col { flex: 1; }
   .sp-blank { display: flex; align-items: baseline; gap: 8px; margin: 0 0 14px; }
@@ -1491,6 +1674,20 @@ export function composeStatePack(input: StatePackInput): StatePack {
         },
         legalLine: true,
       });
+    }
+  }
+
+  if (input.records) {
+    const daily = deriveStatePackDailyRecords(family, input.records);
+    contentPages.push({
+      page: {
+        title: "Recorded attendance and hours",
+        body: recordedSummaryPage(detail, family, input.records, daily),
+      },
+      legalLine: false,
+    });
+    for (const page of recordedDetailPages(detail, input.records)) {
+      contentPages.push({ page, legalLine: false });
     }
   }
 
