@@ -108,6 +108,29 @@ describe("billingFreshness", () => {
     assert.equal(never.lastUpdateAtIso, null);
   });
 
+  it("normalizes Postgres numeric strings before rendering a billing timestamp", () => {
+    const lastUpdate = String(NOW - 5 * DAY);
+    const f = billingFreshness(
+      [row({ currentPeriodEndMs: String(NOW + 20 * DAY) })],
+      lastUpdate,
+      NOW,
+    );
+
+    assert.equal(f.lastUpdateAgeMs, 5 * DAY);
+    assert.equal(f.lastUpdateAtIso, new Date(NOW - 5 * DAY).toISOString());
+  });
+
+  it("does not let an invalid database numeric crash the console", () => {
+    const f = billingFreshness(
+      [row({ currentPeriodEndMs: "not-a-number" })],
+      "not-a-number",
+      NOW,
+    );
+
+    assert.equal(f.lastUpdateAgeMs, null);
+    assert.equal(f.lastUpdateAtIso, null);
+  });
+
   it("names both problems in one line when both apply", () => {
     const f = billingFreshness(
       [
