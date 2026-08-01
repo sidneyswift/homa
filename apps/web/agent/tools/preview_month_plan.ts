@@ -24,38 +24,72 @@ import {
   monthPlanSessionState,
 } from "../month-plan-session-state";
 
-const inputSchema = z.discriminatedUnion("action", [
-  z.object({
-    action: z.literal("create"),
-    plan: proposedMonthPlanSchema.describe(
-      "The complete four-week proposal for every child in the family.",
-    ),
-  }),
-  z.object({
-    action: z.literal("revise"),
-    draftToken: z.string().min(40).max(200_000).describe(
-      "The latest draftToken from preview_month_plan, verbatim.",
-    ),
-    plan: proposedMonthPlanSchema.describe(
-      "The complete revised proposal. Preserve everything the parent did not ask to change.",
-    ),
-  }),
-  z.object({
-    action: z.literal("restore"),
-    draftToken: z.string().min(40).max(200_000).describe(
-      "The latest draftToken from preview_month_plan, verbatim.",
-    ),
-    restoreRevision: z.number().int().min(1).max(100).describe(
-      "The earlier revision number to restore, from the visible preview history.",
-    ),
-  }),
-  z.object({
-    action: z.literal("abandon"),
-    draftToken: z.string().min(40).max(200_000).describe(
-      "The latest draftToken from preview_month_plan, verbatim.",
-    ),
-  }),
-]);
+export const previewMonthPlanInputSchema = z
+  .object({
+    action: z
+      .enum(["create", "revise", "restore", "abandon"])
+      .describe("Create a preview, revise it, restore an earlier revision, or abandon it."),
+    plan: proposedMonthPlanSchema
+      .optional()
+      .describe(
+        "The complete four-week proposal. Required for create and revise; omit for restore and abandon.",
+      ),
+    draftToken: z
+      .string()
+      .min(40)
+      .max(200_000)
+      .optional()
+      .describe(
+        "The latest draftToken from preview_month_plan, verbatim. Required except when creating the first preview.",
+      ),
+    restoreRevision: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe(
+        "The earlier visible revision number. Required only when action is restore.",
+      ),
+  })
+  .superRefine((input, context) => {
+    const requireField = (field: "plan" | "draftToken" | "restoreRevision") => {
+      if (input[field] === undefined) {
+        context.addIssue({
+          code: "custom",
+          path: [field],
+          message: `${field} is required when action is ${input.action}`,
+        });
+      }
+    };
+    const omitField = (field: "plan" | "draftToken" | "restoreRevision") => {
+      if (input[field] !== undefined) {
+        context.addIssue({
+          code: "custom",
+          path: [field],
+          message: `${field} is not allowed when action is ${input.action}`,
+        });
+      }
+    };
+
+    if (input.action === "create") {
+      requireField("plan");
+      omitField("draftToken");
+      omitField("restoreRevision");
+    } else if (input.action === "revise") {
+      requireField("plan");
+      requireField("draftToken");
+      omitField("restoreRevision");
+    } else if (input.action === "restore") {
+      requireField("draftToken");
+      requireField("restoreRevision");
+      omitField("plan");
+    } else {
+      requireField("draftToken");
+      omitField("plan");
+      omitField("restoreRevision");
+    }
+  });
 
 /**
  * Preview-only month planning. The token is authenticated, session-bound
@@ -67,7 +101,7 @@ export default defineBoundedTool({
   deadlineMs: TOOL_DEADLINE.quick,
   // A retry would mint a second draft id and duplicate preview telemetry.
   repeatable: false,
-  inputSchema,
+  inputSchema: previewMonthPlanInputSchema,
   async execute(input, ctx) {
     let access;
     try {
@@ -85,7 +119,7 @@ export default defineBoundedTool({
     const existingPayload = input.action === "create"
       ? null
       : verifyMonthPlanDraft(
-        input.draftToken,
+        input.draftToken!,
         ctx.session.id,
         access.familyId,
         { secret: process.env.CRON_SECRET },
@@ -136,22 +170,22 @@ export default defineBoundedTool({
             familyId: access.familyId,
             sessionId: ctx.session.id,
             secret: process.env.CRON_SECRET,
-            plan: input.plan,
+            plan: input.plan!,
           })
         : input.action === "revise"
           ? await reviseMonthPlanDraft({
               familyId: access.familyId,
               sessionId: ctx.session.id,
               secret: process.env.CRON_SECRET,
-              draftToken: input.draftToken,
-              plan: input.plan,
+              draftToken: input.draftToken!,
+              plan: input.plan!,
             })
           : restoreMonthPlanDraft({
               familyId: access.familyId,
               sessionId: ctx.session.id,
               secret: process.env.CRON_SECRET,
-              draftToken: input.draftToken,
-              restoreRevision: input.restoreRevision,
+              draftToken: input.draftToken!,
+              restoreRevision: input.restoreRevision!,
             });
 
     if (!result) {
@@ -184,7 +218,7 @@ export default defineBoundedTool({
         family_id: access.familyId,
         draft_id: result.preview.draftId,
         revision: result.preview.revision,
-        restored_from: result.preview.restoredFrom ?? input.restoreRevision,
+        restored_from: result.preview.restoredFrom ?? input.restoreRevision!,
         client,
       });
     }

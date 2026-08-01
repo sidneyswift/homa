@@ -9,10 +9,10 @@ import { defineEval } from "eve/evals";
  */
 export default defineEval({
   description:
-    "A new family month request loads planner, reads family reality, and produces a non-persisted preview.",
+    "A whole-family month request loads planner, reads family reality, and produces a non-persisted preview.",
   async test(t) {
     await t.send(
-      "Build our September plan around co-op Thursdays and keep Fridays light. Draft it for both kids, show it to me, and do not save anything yet.",
+      "Build our September plan around co-op Thursdays and keep Fridays light. Draft it for all three kids, show it to me, and do not save anything yet.",
     );
     t.succeeded();
     t.loadedSkill("planner");
