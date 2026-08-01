@@ -10,6 +10,10 @@ import {
   EVAL_FIXTURE_PLAN_SUBJECT,
   EVAL_FIXTURE_SCHEDULED_WEEK,
   EVAL_FIXTURE_SESSION_ATTRIBUTE,
+  EVAL_ONBOARDING_FIXTURE_FAMILY_ID,
+  EVAL_ONBOARDING_MODE_HEADER,
+  EVAL_ONBOARDING_MODE_HEADER_VALUE,
+  EVAL_ONBOARDING_SESSION_ATTRIBUTE,
   evalFamilyFixtureAuth,
   evalFamilyFixtureRows,
   evalFamilyFixtureSeedSql,
@@ -34,6 +38,11 @@ function localDevAuth() {
 }
 
 const REQUEST = new Request("http://localhost/eve/v1/session");
+const ONBOARDING_REQUEST = new Request("http://localhost/eve/v1/session", {
+  headers: {
+    [EVAL_ONBOARDING_MODE_HEADER]: EVAL_ONBOARDING_MODE_HEADER_VALUE,
+  },
+});
 
 describe("isEvalFamilyFixtureDbBacked", () => {
   it("is off without the fixture flag, even with a sandbox database", () => {
@@ -134,6 +143,43 @@ describe("evalFamilyFixtureAuth", () => {
       familyId: EVAL_FIXTURE_FAMILY_ID,
     });
   });
+
+  it("opts one request into the dedicated active onboarding family", async () => {
+    const auth = evalFamilyFixtureAuth(() => localDevAuth(), SANDBOX_ENV);
+    const stamped = await auth(ONBOARDING_REQUEST);
+
+    assert.ok(stamped);
+    assert.equal(
+      stamped.attributes.familyId,
+      EVAL_ONBOARDING_FIXTURE_FAMILY_ID,
+    );
+    assert.equal(stamped.attributes.channel, "materials-lab");
+    assert.equal(stamped.attributes.memberName, "Sidney");
+    assert.equal(stamped.attributes.onboardingActive, "true");
+    assert.equal(
+      stamped.attributes[EVAL_ONBOARDING_SESSION_ATTRIBUTE],
+      "true",
+    );
+    assert.equal(stamped.attributes[EVAL_FIXTURE_SESSION_ATTRIBUTE], "true");
+    assert.deepEqual(await resolveAgentAccess(stamped.attributes), {
+      mode: "pinned",
+      familyId: EVAL_ONBOARDING_FIXTURE_FAMILY_ID,
+    });
+  });
+
+  it("does not opt in for a truthy-looking header value", async () => {
+    const auth = evalFamilyFixtureAuth(() => localDevAuth(), SANDBOX_ENV);
+    const request = new Request("http://localhost/eve/v1/session", {
+      headers: { [EVAL_ONBOARDING_MODE_HEADER]: "true" },
+    });
+    const stamped = await auth(request);
+
+    assert.equal(stamped?.attributes.familyId, EVAL_FIXTURE_FAMILY_ID);
+    assert.equal(
+      stamped?.attributes[EVAL_ONBOARDING_SESSION_ATTRIBUTE],
+      undefined,
+    );
+  });
 });
 
 describe("evalFamilyFixtureSeedSql", () => {
@@ -153,6 +199,12 @@ describe("evalFamilyFixtureSeedSql", () => {
     assert.ok(sql.includes("true"));
     assert.match(sql, /"onboarding":\s*\{"state":"done"\}/u);
     assert.ok(sql.includes("profile_completed_at"));
+  });
+
+  it("seeds a separate active, childless family for onboarding evals", () => {
+    assert.ok(sql.includes(EVAL_ONBOARDING_FIXTURE_FAMILY_ID));
+    assert.ok(sql.includes("'Onboarding fixture'"));
+    assert.match(sql, /"onboarding":\s*\{"state":"active"\}/u);
   });
 
   it("staggers child created_at so pinned load order is deterministic", () => {

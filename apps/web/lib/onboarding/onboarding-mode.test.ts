@@ -50,6 +50,20 @@ describe("composeOnboardingModeMarkdown, positive routing", () => {
     assert.match(markdown, /first days with Homa/);
   });
 
+  it("loads for the explicit sandboxed onboarding eval session", () => {
+    const markdown = composeOnboardingModeMarkdown(
+      {
+        channel: "materials-lab",
+        onboardingActive: "true",
+        evalFamilyFixture: "true",
+        evalOnboardingMode: "true",
+      },
+      rawSkill,
+    );
+    assert.ok(markdown);
+    assert.match(markdown, /first days with Homa/);
+  });
+
   it("carries the whole onboarding skill body, so no turn spends a model round trip on load_skill", () => {
     const markdown = composeOnboardingModeMarkdown(
       { channel: "web", onboardingActive: "true" },
@@ -100,6 +114,22 @@ describe("composeOnboardingModeMarkdown, adversarial negatives", () => {
     ],
     ["a session with no attributes at all", undefined],
     ["a session with no channel", { onboardingActive: "true" }],
+    [
+      "an ordinary materials-lab fixture session",
+      {
+        channel: "materials-lab",
+        onboardingActive: "true",
+        evalFamilyFixture: "true",
+      },
+    ],
+    [
+      "an untrusted materials-lab onboarding marker",
+      {
+        channel: "materials-lab",
+        onboardingActive: "true",
+        evalOnboardingMode: "true",
+      },
+    ],
   ];
 
   for (const [label, attributes] of negatives) {
@@ -124,30 +154,44 @@ describe("composeOnboardingModeMarkdown, adversarial negatives", () => {
   });
 });
 
-describe("the preload rollback (2026-07-28 incident)", () => {
+describe("the preload re-land after the 2026-07-28 incident", () => {
   const source = readFileSync(
     new URL("../../agent/instructions/onboarding-mode.ts", import.meta.url),
     "utf8",
   );
 
-  it("still routes onboarding turns through the load_skill fallback", () => {
+  it("preloads only after the deterministic guard and two-turn eval exist", () => {
     // The first real paid signup dead-ended on the preloaded path: the
     // turn after the family card made zero tool calls and delivered
     // nothing. Sessions that still reached the skill via load_skill
-    // advanced correctly in the same hour. Until a deterministic
-    // no-silent-turn guard and an eval covering that two-turn sequence
-    // exist, this stays rolled back, and flipping it back on without
-    // them should fail here rather than on a paying parent's screen.
+    // advanced correctly in the same hour. The preload is safe to re-land
+    // only because the harness now retries sentinel-only silence without an
+    // action, and the behavioral eval drives the exact card then answer path.
     assert.match(
       source,
-      /const PRELOAD_ROLLED_BACK_PENDING_SILENT_TURN_GUARD = true;/u,
+      /const PRELOAD_ROLLED_BACK_PENDING_SILENT_TURN_GUARD = false;/u,
     );
+    const guard = readFileSync(
+      new URL(
+        "../../../../scripts/eve-empty-delivery-guard-check.mjs",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    const evalSource = readFileSync(
+      new URL(
+        "../../evals/onboarding/card-answer-never-silent.eval.ts",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    assert.match(guard, /isUnbackedEmptyDelivery/u);
+    assert.match(evalSource, /the turn after the details card completed/u);
   });
 
   it("keeps the generated mirror wired up for the re-land", () => {
-    // The rollback is one constant, not a revert: the mirror, its
-    // build script, and the byte-exact check above all stay live so
-    // re-landing is a one-line change once the guard exists.
+    // The rollback was one constant, not a revert: the mirror, its build
+    // script, and the byte-exact check above stayed live through the re-land.
     assert.match(source, /ONBOARDING_SKILL_MARKDOWN/u);
   });
 });

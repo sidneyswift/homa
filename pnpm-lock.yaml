@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   eve@0.19.0:
-    hash: 04f8e0d4fa3de43e52929b90ba2c597e5fb08c6ea1d063dae06e984501a87711
+    hash: ca8d2bc1e2fc5efca1348608ebe7fbc9914bc68047f7e5dc202b76127d586f6c
     path: patches/eve@0.19.0.patch
 
 importers:
@@ -57,7 +57,7 @@ importers:
         version: 7.0.14(zod@4.4.3)
       eve:
         specifier: 0.19.0
-        version: 0.19.0(patch_hash=04f8e0d4fa3de43e52929b90ba2c597e5fb08c6ea1d063dae06e984501a87711)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4)
+        version: 0.19.0(patch_hash=ca8d2bc1e2fc5efca1348608ebe7fbc9914bc68047f7e5dc202b76127d586f6c)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4)
       expo:
         specifier: ~56.0.15
         version: 56.0.15(@babel/core@7.29.7)(@expo/dom-webview@56.0.6)(@expo/metro-runtime@56.0.16)(expo-router@56.2.14)(react-dom@19.2.3(react@19.2.3))(react-native-web@0.21.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native-worklets@0.8.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
@@ -199,7 +199,7 @@ importers:
         version: 4.32.0(ai@7.0.14(zod@4.4.3))(zod@4.4.3)
       eve:
         specifier: 0.19.0
-        version: 0.19.0(patch_hash=04f8e0d4fa3de43e52929b90ba2c597e5fb08c6ea1d063dae06e984501a87711)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4)
+        version: 0.19.0(patch_hash=ca8d2bc1e2fc5efca1348608ebe7fbc9914bc68047f7e5dc202b76127d586f6c)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4)
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
@@ -10766,7 +10766,7 @@ snapshots:
 
   etag@1.8.1: {}
 
-  eve@0.19.0(patch_hash=04f8e0d4fa3de43e52929b90ba2c597e5fb08c6ea1d063dae06e984501a87711)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4):
+  eve@0.19.0(patch_hash=ca8d2bc1e2fc5efca1348608ebe7fbc9914bc68047f7e5dc202b76127d586f6c)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4):
     dependencies:
       ai: 7.0.14(zod@4.4.3)
       nitro: 3.0.260610-beta(@vercel/blob@2.6.1)(jiti@2.7.0)(lru-cache@11.5.1)
