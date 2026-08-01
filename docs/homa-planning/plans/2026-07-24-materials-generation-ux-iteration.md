@@ -1,6 +1,7 @@
 # Materials generation: the 48-hour field review and the iteration system it demands
 
-Date: 2026-07-24. Status: AWAITING FOUNDER RULINGS (§6). Evidence: direct
+Date: 2026-07-24. Status: HISTORICAL FIELD REVIEW, RECONCILED 2026-08-01.
+Evidence: direct
 read-only production Supabase queries run 2026-07-24 (project
 kzplntcdtsvdowntvlza) covering 2026-07-22 to 2026-07-24, full conversation
 forensics on the one family that used materials in the window, code-mechanism
@@ -8,6 +9,24 @@ tracing in this worktree, a six-seat expert council with three adversarial
 fact-check passes (subagent transcripts in the session workflow directory),
 and the finding-unknowns discipline: every claim below is labeled Verified,
 Inference, or Question.
+
+> **2026-08-01 reconciliation.** T1 was run on 2026-07-25 across 266
+> production materials and 578 rendered pages. Its aggregate result supported
+> adding deterministic geometry to the render loop: repeated low-fill pages
+> stayed unchanged across revisions, and the old box-based measurement found
+> apparent clipping in 25 of 252 materials that vision review had passed.
+> That measurement method and its zero-pixel cutoff recommendation are now
+> superseded. PR #451 added per-page geometry to the renderer, tool result,
+> durable generation record, and review brief. PR #471 corrected the measure
+> to count printed ink instead of empty layout boxes, ignores sub-pixel noise,
+> and blocks only a proven cutoff on pages newly composed in the revision,
+> under founder ruling `cutoff-page-is-a-block`. The old branch's raw export
+> and production-query script were intentionally retired rather than merged:
+> they contained family identifiers, material identifiers, titles, verbatim
+> complaints, and hard-coded production-family references. Current remaining
+> work lives in gh#349 (activity/item count and complaint ledger) and gh#362
+> (outcome measurement). The rest of this document remains dated evidence, not
+> a statement of current implementation status.
 
 **Short answer: in the last 48 hours the materials product had exactly one
 real customer, and it failed her.** A mother of three asked for a week of
@@ -546,7 +565,7 @@ reliably, with less feedback" a set of ratcheted numbers reviewed weekly.
 
 | # | Test | Settles |
 |---|---|---|
-| T1 | Measurement backfill: re-render all 219 stored materials, correlate fillPct/clippedPx with her 7 complaints and the 36 QC fails | Whether the metric reproduces her judgment; the band thresholds; F1 quantitatively |
+| T1 | DONE 2026-07-25, HISTORICAL: re-rendered 266 materials and 578 pages. Repeated low-fill pages remained unchanged across revisions, and the old descendant-box metric reported apparent clipping in 25 of 252 materials passed by vision review. The raw family-data export and hard-coded production query were retired. PRs #451 and #471 supersede the method with printed-ink geometry, a noise floor, fresh-page cutoff blocking, durable measurements, and reviewer feedback. | The broad geometry signal reproduced the parent's complaints. The old thresholds and zero-pixel rule are not current evidence. |
 | T2 | QC calibration run (above) | Gate vs advisory (FD-1); page-cap vs criteria as the recall limiter |
 | T3 | Convergence replay: skill vs skill+numbers vs skill+numbers+ledger | Measured freeform vs slot templates (FD-4); D3 vs D1 priority |
 | T4 | Splice benchmark: 5 real revisions both ways; tokens, wall time, byte-identity | F6's payoff size before the schema change ships |
