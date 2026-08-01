@@ -5,6 +5,10 @@ import {
   parsePreparedPrintRequest,
   type PreparedPrintRequest,
 } from "../materials/material-print-contract";
+import {
+  parsePreparedMaterialShareRequest,
+  type PreparedMaterialShareRequest,
+} from "../materials/material-share-contract";
 import { memoryChipFor } from "../chat/message-utils";
 import {
   parseQuestionCardPart,
@@ -41,6 +45,7 @@ export type OverlaySignal =
       key: string;
       material: MaterialCardPayload;
       printRequest?: PreparedPrintRequest;
+      shareRequest?: PreparedMaterialShareRequest;
     }
   | { kind: "question"; key: string; card: QuestionCardData }
   | { kind: "hours"; key: string }
@@ -82,6 +87,7 @@ const MATERIAL_TOOLS = new Set([
   "show_material",
   "create_worksheet",
   "prepare_material_print",
+  "prepare_material_share",
 ]);
 
 /**
@@ -332,13 +338,19 @@ function buildSignal(
     const printRequest = toolName === "prepare_material_print"
       ? parsePreparedPrintRequest(output.printRequest)
       : null;
+    const shareRequest = toolName === "prepare_material_share"
+      ? parsePreparedMaterialShareRequest(output.shareRequest)
+      : null;
     if (toolName === "prepare_material_print" && !printRequest) return null;
+    if (toolName === "prepare_material_share" && !shareRequest) return null;
+    if (shareRequest && material.id !== shareRequest.materialId) return null;
     return {
       signal: {
         kind: "material",
         key,
         material,
         ...(printRequest ? { printRequest } : {}),
+        ...(shareRequest ? { shareRequest } : {}),
       },
       planWrites,
     };

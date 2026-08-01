@@ -1,5 +1,6 @@
 import { ACTIVE_OBJECT_CURRENT_VERSION } from "@homa/core";
 import { useRouter } from "expo-router";
+import { useKeepAwake } from "expo-keep-awake";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, useColorScheme, View, type LayoutChangeEvent } from "react-native";
 import Animated, {
@@ -63,6 +64,7 @@ function GoldAuraField({ size }: { size: number }) {
  * Text is still available, just not placed ahead of the spoken relationship.
  */
 export function VoiceScreen() {
+  useKeepAwake("homa-voice-conversation");
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const dark = useColorScheme() === "dark";
@@ -292,6 +294,7 @@ export function VoiceScreen() {
         onAnswer={(message) => session.sendText(message)}
         onMaterialAction={(action) => {
           if (action === "print") session.sendText("Print this.");
+          if (action === "share") session.sendText("Share this through an app I choose.");
           if (action === "keep") session.sendText("I love it. Keep this one.");
           if (action === "change") session.sendText("I want to change this material.");
           if (action === "earlier") session.sendText("Show me the earlier version of this material.");
