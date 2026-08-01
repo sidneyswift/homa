@@ -121,7 +121,7 @@ describe("ChatClient prompt suggestion wiring", () => {
     // or the report reveal.
     assert.match(
       source,
-      /!busy[\s\S]{0,320}promptSuggestionPhase !== "idle"[\s\S]{0,320}progressInteraction === null[\s\S]{0,320}activeSnap === null[\s\S]{0,320}activeQuestion === null[\s\S]{0,900}onboarding === null[\s\S]{0,900}activeChecklist === null[\s\S]{0,320}activeReport === null[\s\S]{0,320}draft\.trim\(\)\.length === 0[\s\S]{0,320}attachments\.staged\.length === 0[\s\S]{0,320}dictation\.phase === "idle"/u,
+      /!renderBusy[\s\S]{0,320}promptSuggestionPhase !== "idle"[\s\S]{0,320}progressInteraction === null[\s\S]{0,320}activeSnap === null[\s\S]{0,320}activeQuestion === null[\s\S]{0,900}onboarding === null[\s\S]{0,900}activeChecklist === null[\s\S]{0,320}activeReport === null[\s\S]{0,320}draft\.trim\(\)\.length === 0[\s\S]{0,320}attachments\.staged\.length === 0[\s\S]{0,320}dictation\.phase === "idle"/u,
     );
     assert.match(source, /!recovering[\s\S]{0,120}promptSuggestionPhase/u);
   });

@@ -40,6 +40,53 @@ describe("dayLabelFor", () => {
     );
     assert.equal(dayLabelFor(Date.parse("2025-07-03T09:00:00"), now), "July 3 · 2025");
   });
+
+  it("uses the family's explicit time zone on both server and client", () => {
+    const now = Date.parse("2026-07-14T08:00:00.000Z");
+    assert.equal(
+      dayLabelFor(
+        Date.parse("2026-07-14T06:30:00.000Z"),
+        now,
+        "America/Los_Angeles",
+      ),
+      "Yesterday · July 13",
+    );
+  });
+
+  it("recognizes yesterday across a 23-hour daylight-saving day", () => {
+    const now = Date.parse("2026-03-09T07:30:00.000Z");
+    assert.equal(
+      dayLabelFor(
+        Date.parse("2026-03-08T08:30:00.000Z"),
+        now,
+        "America/Los_Angeles",
+      ),
+      "Yesterday · March 8",
+    );
+  });
+});
+
+describe("buildTranscript time-zone grouping (GH #405)", () => {
+  it("separates family calendar days even when UTC sees one day", () => {
+    const archived = [
+      entry("late-13", "user", "web", "2026-07-14T06:30:00.000Z"),
+      entry("early-14", "assistant", "web", "2026-07-14T08:00:00.000Z"),
+    ];
+    const items = buildTranscript({
+      archived,
+      live: [],
+      liveTimes: {},
+      now: Date.parse("2026-07-14T08:00:00.000Z"),
+      timeZone: "America/Los_Angeles",
+    });
+
+    assert.deepEqual(
+      items
+        .filter((item) => item.kind === "separator")
+        .map((item) => (item.kind === "separator" ? item.label : "")),
+      ["Yesterday · July 13", "Today · July 14"],
+    );
+  });
 });
 
 describe("sourceLabelFor", () => {
