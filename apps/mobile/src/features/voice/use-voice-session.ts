@@ -49,8 +49,12 @@ export interface VoiceSession {
   lastAssistantText: string | null;
   failed: boolean;
   recovering: boolean;
+  speaking: boolean;
+  handoffReady: boolean;
   start: () => void;
   end: () => void;
+  suspend: () => void;
+  resume: () => void;
   retry: () => void;
   sendText: (message: string) => void;
   announceResult: (message: string) => void;
@@ -171,10 +175,10 @@ export function useVoiceSession(activeObject: VoiceActiveObject | null = null): 
     [persistSettledTurns],
   );
 
-  const end = useCallback(() => {
+  const disconnect = useCallback((finishTranscript: boolean) => {
     if (closedRef.current) return;
     closedRef.current = true;
-    persistSettledTurns(true);
+    persistSettledTurns(finishTranscript);
     channelRef.current?.close();
     channelRef.current = null;
     streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -183,6 +187,12 @@ export function useVoiceSession(activeObject: VoiceActiveObject | null = null): 
     peerRef.current = null;
     setStatus("idle");
   }, [persistSettledTurns]);
+
+  const end = useCallback(() => disconnect(true), [disconnect]);
+
+  /** Releases WebRTC's microphone before another native audio owner starts,
+   * while preserving Eve's session state and transcript for resume. */
+  const suspend = useCallback(() => disconnect(true), [disconnect]);
 
   const executeTool = useCallback(
     async (event: { name?: unknown; arguments?: unknown; call_id?: unknown }) => {
@@ -256,7 +266,7 @@ export function useVoiceSession(activeObject: VoiceActiveObject | null = null): 
     [authenticatedFetch],
   );
 
-  const start = useCallback(() => {
+  const connect = useCallback((resetConversation: boolean) => {
     if (
       status === "connecting" ||
       status === "listening" ||
@@ -264,12 +274,14 @@ export function useVoiceSession(activeObject: VoiceActiveObject | null = null): 
       status === "speaking"
     ) return;
     closedRef.current = false;
-    cursorRef.current = 0;
-    sessionIdRef.current = sessionId();
-    turnsRef.current = [];
-    setTurns([]);
-    setToolEffects([]);
-    homaSessionStateRef.current = undefined;
+    if (resetConversation) {
+      cursorRef.current = 0;
+      sessionIdRef.current = sessionId();
+      turnsRef.current = [];
+      setTurns([]);
+      setToolEffects([]);
+      homaSessionStateRef.current = undefined;
+    }
     pendingTextRef.current = null;
     setError(null);
     setStatus("connecting");
@@ -343,6 +355,9 @@ export function useVoiceSession(activeObject: VoiceActiveObject | null = null): 
     })();
   }, [acceptEvent, authenticatedFetch, executeTool, status]);
 
+  const start = useCallback(() => connect(true), [connect]);
+  const resume = useCallback(() => connect(false), [connect]);
+
   useEffect(() => end, [end]);
 
   const sendText = useCallback((message: string) => {
@@ -399,8 +414,12 @@ export function useVoiceSession(activeObject: VoiceActiveObject | null = null): 
     lastAssistantText: lastText(turns, "assistant"),
     failed: status === "failed",
     recovering: false,
+    speaking: status === "speaking",
+    handoffReady: status === "listening",
     start,
     end,
+    suspend,
+    resume,
     retry: start,
     sendText,
     announceResult,
