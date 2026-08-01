@@ -5,7 +5,7 @@ import { QuietLanding } from "../components/marketing/QuietLanding";
 
 /* ── Answer capsules & freshness signals ────────────────────────── */
 export const metadata: Metadata = {
-  title: "Homeschool, handled.",
+  title: "A new way to homeschool.",
   description:
     "Homa is an AI assistant for homeschool parents. Plan the week, make practice pages for ages 2 to 7, record teaching hours, and keep finished work together.",
   // Self-referencing canonical: crawlers treat fragment URLs (/#how,
