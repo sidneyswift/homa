@@ -18,20 +18,21 @@ the same call-list. Especially strong for foreign-language vocabulary
 sets, where the caller says the word aloud and the child matches it to
 the picture rather than reading it.
 
-Creation path: hybrid. generate_image produces each pool item's
-illustration once; the same set of item images is then placed into
-however many boards are needed, each board using a different shuffled
-subset and order so no two boards match. HTML handles the grid, the free
-space, and the per-board border/frame styling. A pool of 8-9 items is
+Creation path: hybrid, with one complete picture-grid composition per
+page and one generate_image call per board. Ask for the requested objects
+already arranged in that board's cells with no text, embed the complete
+image unchanged, then align one HTML grid over it for exact labels, the
+free space, and the border/frame. Never generate one image per pool item
+and never crop the composed image into sprites. A pool of 8-9 items is
 enough to fill a 3x3 board (8 cells plus one free space) with room to
 reshuffle into several distinct boards; a larger pool (12-16 items)
 supports a 4x4 board the same way.
 
 Design patterns (all binding for picture-bingo-board):
 
-- **One shared item pool, many shuffled boards**: generate every pool
-  item's illustration once, then reuse those same images across all
-  boards. Each board gets its own random arrangement (and, for a pool
+- **One shared item pool, many shuffled boards**: describe the same pool
+  consistently in every complete-board prompt. Each board gets its own
+  random arrangement (and, for a pool
   bigger than the grid, its own random subset) so families printing
   multiple boards can run a real multi-player round without duplicate
   cards.
@@ -85,8 +86,7 @@ Design patterns (all binding for picture-bingo-board):
 </div>
 ```
 
-Never regenerate a fresh illustration per board for the same item: reuse
-the one generated image for "cow" (or "7", or "cat") on every board that
-includes it. Regenerating per board wastes the image budget and risks the
-same item looking subtly different from board to board, which breaks the
-game for a child matching by sight.
+Never generate a fresh illustration per item. For multiple boards, keep
+one board to one page and one composed image call. Repeat the same full
+visual descriptions so a cow, cat, or numeral remains recognizable across
+boards, and let HTML own the exact caller list.

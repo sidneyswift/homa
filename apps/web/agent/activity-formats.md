@@ -492,7 +492,7 @@ The curriculum writer loads this to recommend buildable activities.
 - **Best for:** Elementary social studies units on communities, chores, toys, transportation, or national symbols across time; science units comparing an early tool or invention to its modern form; any curriculum with a recurring "then and now" or "long ago and today" feature box.
 - **Subjects:** Social studies (communities and change over time), Science (tools and inventions over time)
 - **Ages:** 5-9. A single clear comparison for younger; a comparison plus a written reflection sentence for older.
-- **Creation path:** hybrid (generate_image for the two small illustrations, HTML for the panel frames, labels, and reflection box), or html-only for a text-and-caption-only comparison
+- **Creation path:** hybrid (one generate_image call for the complete split illustration, HTML for the panel frames, labels, and reflection box), or html-only for a text-and-caption-only comparison
 - **Example activity:** `[then-and-now-comparison] How toys have changed: a wooden top labeled "Then" beside a remote-control car labeled "Now," with a reflection question about what stayed the same`
 
 ### size-attribute-comparison-page
@@ -502,7 +502,7 @@ The curriculum writer loads this to recommend buildable activities.
 - **Best for:** Pre-number measurement readiness before any unit of measurement is introduced; Singapore-style Pre-K/K comparison lessons (big/small, long/short, tall/short, heavy/light); any early-math curriculum teaching comparative adjectives through paired objects.
 - **Subjects:** Math (measurement readiness, pre-number comparison)
 - **Ages:** 3-6. Two items and one clear attribute for younger; a three-item "circle the biggest" row once the two-item version is solid.
-- **Creation path:** hybrid (generate_image for the compared items, HTML for the instruction line and circle/color prompts), or html-only for a simple two-shape version.
+- **Creation path:** hybrid (one generate_image call containing all compared items, HTML for the instruction line and circle/color prompts), or html-only for a simple two-shape version.
 - **Example activity:** `[size-attribute-comparison-page] Three ribbons of different lengths lined up on a shared baseline; "Circle the longest ribbon."`
 
 ### pattern-extension-practice
@@ -522,7 +522,7 @@ The curriculum writer loads this to recommend buildable activities.
 - **Best for:** Any curriculum or family request that wants a concept taught through character and story rather than direct instruction; re-engaging a child who skims past a bare instruction line; making an abstract idea concrete through a relatable everyday scene.
 - **Subjects:** Math and any other subject; the panel-plus-dialogue-plus-question shape is not math-specific.
 - **Ages:** 4-8.
-- **Creation path:** hybrid (generate_image per panel for the characters and scene, HTML for panel frames, speech bubbles, and the closing question box).
+- **Creation path:** hybrid (one generate_image call for the complete panel sequence, HTML for panel frames, speech bubbles, and the closing question box).
 - **Example activity:** `[comic-narrative-math-page] Two kids comparing two curly noodles on a lunch tray, one straight and one curved, arguing about which is longer, ending in a "Which path is shorter: the straight one or the wiggly one?" box.`
 
 ### circle-diagram-two-set-sort
@@ -542,7 +542,7 @@ The curriculum writer loads this to recommend buildable activities.
 - **Best for:** Vocabulary recall and listening practice in any subject or language, a lower-pressure alternative to flash-card drill, group or co-op play, and foreign-language vocabulary where the caller says the word aloud and the child matches it to the picture.
 - **Subjects:** Any subject or language with a discrete, nameable item pool (animals, sight words, math facts, vocabulary sets)
 - **Ages:** 3-8. A 3x3 grid (8 items plus free space) for ages 3-6 or 8-9 item pools; a 4x4 grid for ages 7+ or larger pools.
-- **Creation path:** hybrid (generate_image once per pool item, reused across every board; HTML for the grid, free space, and per-board frame styling).
+- **Creation path:** hybrid (one complete-board image call per page, embedded unchanged), with an aligned HTML grid for exact labels, the free space, and per-board frame styling.
 - **Example activity:** `[picture-bingo-board] Four shuffled 3x3 boards of Spanish farm-animal vocabulary (el gato, la vaca, el pollito, el cerdo, el caballo, la gallina, el pato, el perro) with a "¡Gratis!" free space, for a caller-led round.`
 
 ### chant-and-rhyme-card
@@ -562,7 +562,7 @@ The curriculum writer loads this to recommend buildable activities.
 - **Best for:** Biography study of an artist, composer, inventor, or scientist; any curriculum wanting the progression of a technology or invention shown rather than told. Recurred independently across three Getting to Know biography drops (artists, composers, inventors and scientists) this session.
 - **Subjects:** Art, music, science, history (biography and invention history)
 - **Ages:** 6-10.
-- **Creation path:** hybrid (generate_image per event for the small illustrations, HTML for the boxes, connecting line, and labels), or html-only for a text-and-caption-only timeline.
+- **Creation path:** hybrid (one generate_image call for the complete event strip, HTML for the boxes, connecting line, and labels), or html-only for a text-and-caption-only timeline.
 - **Example activity:** `[biography-timeline-page] Alexander Graham Bell's life: born 1847, taught deaf students and invented visible speech in the 1870s, patented the telephone in 1876, founded a school for the deaf, died 1922.`
 
 ### chart-and-graph-skill-practice

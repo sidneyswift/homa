@@ -135,6 +135,12 @@ Three ways to make a page, all ending in create_printable:
 | html | you compose HTML/CSS -> html | tracing guides with exact proportions, text-dense pages, math layouts, tables, flash cards, anything the parent will nitpick line by line | organic art (CSS art reads as clip-art) |
 | hybrid | generate_image for the art, your HTML for structure | themed worksheets: precise exercises + one strong image | nothing in particular; costs one image |
 
+Before the first generate_image call in every build, read
+`references/image-call-strategy.md` and follow its page-level art plan and
+QA defect classification. This is binding: one ordinary single page uses
+zero or one generated image by default, and crop, scale, whitespace, or
+placement feedback revises HTML/CSS with the same image URL.
+
 Judgment rules (calibrated 2026-07-10 against gpt-image-2, report in
 docs/homa-planning/materials/calibration/2026-07-10/; this table updates
 from calibration runs, re-check after any model swap):
@@ -161,12 +167,13 @@ from calibration runs, re-check after any model swap):
   objects on an exact pixel grid, and the print engine renders
   background-image positioning differently from the screen, so a sliced
   page can look right in the on-screen check and still ship broken.
-- Many distinct scattered objects on one page (a search-and-find ring,
-  an I-spy mat, a sorting mat): hybrid, with the scatter as ONE
+- Many distinct objects on one page (a search-and-find ring, an I-spy
+  mat, a sorting mat, a card sheet, a timeline, a comic): hybrid, with
+  the complete composition as ONE
   generate_image call. Ask for a single image that already contains
-  every object arranged the way the page needs (in a ring, scattered
-  across the sheet), with no text or letters in the image. Your HTML
-  owns the title, the instructions, and any center letter or label.
+  every object arranged the way the page needs, with no text or letters
+  in the image. Your HTML owns the title, instructions, labels, and
+  exact exercise geometry.
   Never go image-direct with the title baked into the art here; a wrong
   title means re-rolling the whole page. Never build the scatter from
   many separately positioned pieces or a sliced sheet.
@@ -179,6 +186,11 @@ from calibration runs, re-check after any model swap):
   no organic art needed. Structure IS the design.
 
 ## Working with generate_image
+
+Follow `references/image-call-strategy.md` before this section. In
+particular, do not regenerate for crop, scale, whitespace, placement, or
+page-fill feedback. Those are layout defects: reuse the exact image URL
+and revise HTML/CSS.
 
 - Fleet anchor first: before you write any prompt, match the MATERIAL
   you are building (never the single image) against the anchor menu on

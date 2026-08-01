@@ -112,4 +112,19 @@ describe("the real materials-studio package", () => {
     );
     assert.deepEqual(parsed.uncitedFiles, [], "references/ holds files SKILL.md never cites");
   });
+
+  it("routes every image build through the page-level call strategy", async () => {
+    const dir = new URL("../../agent/skills/materials-studio/", import.meta.url);
+    const skill = await readFile(new URL("SKILL.md", dir), "utf8");
+    const strategy = await readFile(
+      new URL("references/image-call-strategy.md", dir),
+      "utf8",
+    );
+
+    assert.match(skill, /read\s+`references\/image-call-strategy\.md`/u);
+    assert.match(strategy, /zero or one generated image by\s+default/u);
+    assert.match(strategy, /A layout complaint never[\s\S]*generate_image/u);
+    assert.match(strategy, /Pixel defects: regeneration may be appropriate/u);
+    assert.match(strategy, /wrong subject/u);
+  });
 });

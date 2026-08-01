@@ -14,8 +14,11 @@ Great for: ages 2-7, daily routines, transition support, special
 needs, toddler independence. Designed for lamination and Velcro
 attachment to a board.
 
-Always hybrid path. generate_image for activity illustrations; HTML
-for card grid layout and labels.
+Always hybrid path. Generate the complete sheet of activity illustrations
+in one call, already arranged in the page's 2x3 or 2x4 composition with
+blank label bands. Place that one image behind the HTML card grid; HTML
+owns every activity label, time, and dashed cut line. Never generate one
+image per card.
 
 Design patterns (all binding for visual-schedule-cards):
 

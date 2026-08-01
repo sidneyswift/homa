@@ -17,11 +17,12 @@ instruction line easy to skim past. Works across subjects, not just math:
 the same shape teaches a science observation or a social-emotional beat
 through the same two-characters-talking-it-through structure.
 
-Hybrid path: generate_image for each panel's illustration (the characters
-and scene), HTML for the panel frame, speech bubbles, and the closing
-question box. Precise bubble placement and tail direction need HTML
-control; the characters and setting need illustration quality a CSS shape
-cannot deliver.
+Hybrid path: generate the complete 2-4 panel visual sequence in one image,
+with consistent characters, empty speech-bubble areas, and no text. HTML
+owns the panel frame, speech bubbles, dialogue, and closing question box.
+Never make a separate image call per panel. Precise bubble placement and
+tail direction need HTML control; the characters and setting need
+illustration quality a CSS shape cannot deliver.
 
 Design patterns (all binding for comic-narrative-math-page):
 
@@ -34,10 +35,9 @@ Design patterns (all binding for comic-narrative-math-page):
   character using their `photoUrl` per "Drawing the child from their
   photo" above, which reads as a stronger personalization than an
   invented character when a photo is available.
-- **Keep characters visually consistent panel to panel**: reuse the same
-  described colors, outfit, and props in every panel's prompt (or pass an
-  earlier panel's image as a `referenceImageUrls` reference for the next
-  one) so the child recognizes the same character across the strip.
+- **Keep characters visually consistent panel to panel**: describe the
+  colors, outfit, and props once for the complete strip so the same call
+  renders the same character across every panel.
 - **2-4 panels**, bordered (`border: 2px solid #221e1a; border-radius:
   8px;`), read left-to-right then top-to-bottom (a 2x2 grid) or as a
   single top-to-bottom column on a narrow layout. Never more than 4: this
