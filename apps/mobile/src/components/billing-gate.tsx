@@ -5,12 +5,12 @@ import { useRouter } from "expo-router";
 import { ErrorCode, useIAP, type Purchase } from "expo-iap";
 
 import {
+  APPLE_NATIVE_PRODUCT_IDS,
+  APPLE_NATIVE_PROVIDER_PRODUCTS,
   APPLE_PRODUCT_IDS,
-  APPLE_PROVIDER_PRODUCTS,
   HOMA_PLANS,
   planDefinition,
   weeklyEquivalentUsd,
-  type BillingPeriod,
   type PlanTier,
 } from "../features/billing/constants";
 import { useBillingGate } from "../features/billing/use-billing-gate";
@@ -111,7 +111,6 @@ function Paywall({
   const [lastCheckedNonce, setLastCheckedNonce] = useState(-1);
   const [retryNonce, setRetryNonce] = useState(0);
   const [tier, setTier] = useState<PlanTier>("regular");
-  const [period, setPeriod] = useState<BillingPeriod>("monthly");
   const restoredTokens = useRef(new Set<string>());
   const router = useRouter();
 
@@ -174,7 +173,7 @@ function Paywall({
   useEffect(() => {
     if (!connected) return;
     let cancelled = false;
-    void fetchProducts({ skus: APPLE_PRODUCT_IDS, type: "subs" }).finally(() => {
+    void fetchProducts({ skus: APPLE_NATIVE_PRODUCT_IDS, type: "subs" }).finally(() => {
       if (!cancelled) setLastCheckedNonce(retryNonce);
     });
     return () => {
@@ -191,13 +190,13 @@ function Paywall({
     void handlePurchase(owned);
   }, [availablePurchases, handlePurchase]);
 
-  const selectedProviderProduct = APPLE_PROVIDER_PRODUCTS.find(
-    (product) => product.tier === tier && product.period === period,
+  const selectedProviderProduct = APPLE_NATIVE_PROVIDER_PRODUCTS.find(
+    (product) => product.tier === tier,
   );
   const product = subscriptions.find((item) => item.id === selectedProviderProduct?.productId);
   const selectedPlan = planDefinition(tier);
   const displayPrice = product?.displayPrice ?? null;
-  const weeklyEquivalent = weeklyEquivalentUsd(tier, period).toFixed(2);
+  const weeklyEquivalent = weeklyEquivalentUsd(tier, "monthly").toFixed(2);
 
   async function handleBuy() {
     if (!familyId) return;
@@ -287,13 +286,11 @@ function Paywall({
           ) : !product ? (
             <View style={{ gap: space.md }}>
               <PlanPicker tier={tier} onChange={setTier} />
-              <PeriodPicker period={period} onChange={setPeriod} />
               <ActivityIndicator color={colors.brand} style={{ marginVertical: space.sm }} />
             </View>
           ) : (
             <View style={{ gap: space.sm }}>
               <PlanPicker tier={tier} onChange={setTier} />
-              <PeriodPicker period={period} onChange={setPeriod} />
               <View
                 style={{
                   gap: space.xs,
@@ -311,12 +308,12 @@ function Paywall({
                 <Text
                   style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textBody }}
                 >
-                  {`${displayPrice} ${period === "annual" ? "a year" : "a month"}`}
+                  {`${displayPrice} a month`}
                 </Text>
                 <Text
                   style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted }}
                 >
-                  {`About $${weeklyEquivalent} a week, billed ${period === "annual" ? "yearly" : "monthly"}.`}
+                  {`About $${weeklyEquivalent} a week, billed monthly.`}
                 </Text>
               </View>
               <Button
@@ -335,7 +332,7 @@ function Paywall({
               >
                 {everTrialed
                   ? "Billed through your Apple Account. Cancel anytime in Settings."
-                  : `Then ${displayPrice} ${period === "annual" ? "a year" : "a month"}, billed through your Apple Account. Cancel anytime in Settings.`}
+                  : `Then ${displayPrice} a month, billed through your Apple Account. Cancel anytime in Settings.`}
               </Text>
             </View>
           )}
@@ -388,49 +385,6 @@ function PlanPicker({ tier, onChange }: { tier: PlanTier; onChange: (tier: PlanT
               }}
             >
               {plan.name}
-            </Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
-
-function PeriodPicker({
-  period,
-  onChange,
-}: {
-  period: BillingPeriod;
-  onChange: (period: BillingPeriod) => void;
-}) {
-  return (
-    <View style={{ flexDirection: "row", gap: space.xs }}>
-      {(["monthly", "annual"] as const).map((option) => {
-        const selected = option === period;
-        return (
-          <Pressable
-            key={option}
-            accessibilityRole="button"
-            accessibilityState={{ selected }}
-            onPress={() => onChange(option)}
-            style={{
-              flex: 1,
-              borderRadius: 999,
-              paddingVertical: space.sm,
-              alignItems: "center",
-              backgroundColor: selected ? colors.textStrong : colors.page,
-              borderWidth: selected ? 0 : 1,
-              borderColor: colors.border,
-            }}
-          >
-            <Text
-              style={{
-                fontFamily: fontFamilies.bodySemibold,
-                fontSize: fontSize.sm,
-                color: selected ? colors.page : colors.textStrong,
-              }}
-            >
-              {option === "annual" ? "Yearly, save 20%" : "Monthly"}
             </Text>
           </Pressable>
         );

@@ -10,7 +10,7 @@ Google Play subscription unlock the same Homa surfaces for that family. The
 payment provider owns collection and cancellation for its own purchase, while
 Homa owns access, plan tier, and product telemetry across every surface.
 
-The public catalog is one set of six offers:
+The provider-neutral catalog recognizes these six offers:
 
 | Homa plan | Monthly | Annual, 20% off twelve monthly payments |
 | --- | ---: | ---: |
@@ -22,6 +22,15 @@ Weekly language is presentation math only. For example, $19 monthly can read
 as about $4.38 a week, billed monthly. There is no weekly SKU, no weekly
 receipt, and no weekly entitlement. This prevents a web customer and an iOS
 customer from buying apparently different products for the same plan.
+
+### Initial iOS offer
+
+The initial native iOS paywall sells the three monthly products only. Annual
+plans remain available on the web through Stripe. The three annual Apple
+product ids stay in the provider catalog for permanent receipt recognition,
+but are not fetched or merchandised by mobile and remain unavailable for sale
+in App Store Connect. This is a reversible offer decision, not a second
+entitlement model.
 
 ## Collection rails
 
@@ -61,8 +70,8 @@ product ids map through `packages/core/src/billing-catalog.ts`.
 ## App Store Connect configuration required before sale
 
 The existing subscription group can remain. Do not create the temporary
-`com.thankshoma.homa.regular.weekly` product. Create these six products in the
-group instead:
+`com.thankshoma.homa.regular.weekly` product. Preserve these six product ids in
+the group:
 
 | App Store product id | Homa plan | Term |
 | --- | --- | --- |
@@ -75,9 +84,10 @@ group instead:
 
 Monthly and annual products for the same plan share an App Store subscription
 level. Homa Plus sits above Homa, and Homa Max sits above Homa Plus. Configure
-the seven-day introductory offer and the intended prices in App Store Connect.
-The first group must be submitted with the new app version that contains this
-paywall.
+the seven-day introductory offer and intended prices on the three monthly
+products. Keep all annual products unavailable for sale until the founder
+reopens the native annual offer. The first group must be submitted with the new
+app version that contains this paywall.
 
 ## Release order and acceptance
 
@@ -85,12 +95,13 @@ paywall.
    it.
 2. Deploy the server and shared catalog. Verify a legacy Stripe subscriber
    appears in the backfilled ledger and continues to open web and mobile.
-3. Build a new iOS archive containing the six-product StoreKit paywall. OTA
+3. Build a new iOS archive containing the monthly-only StoreKit paywall. OTA
    delivery alone is not sufficient for the first App Review submission.
-4. Configure the six App Store products, App Store Server Notifications V2,
-   and Sandbox Testers.
-5. In Sandbox, buy one monthly and one annual test subscription on separate
-   families, restore each, and verify the same Homa plan on native and web.
+4. Configure the three monthly App Store products, preserve the unavailable
+   annual records, configure App Store Server Notifications V2, and add Sandbox
+   Testers.
+5. In Sandbox, buy one monthly subscription at each tier on separate families,
+   restore each, and verify the same Homa plan on native and web.
 6. Cancel and renew each case. Confirm iOS settings opens Apple's management
    screen, while a Stripe family is sent to Homa's web account page.
 7. Before Android ships, register the same six ids and add a Google Play
@@ -102,5 +113,5 @@ paywall.
 - Shared catalog: `packages/core/src/billing-catalog.ts`
 - Canonical ledger: `apps/web/lib/billing/entitlements.ts`
 - Additive backfill: `supabase/migrations/20260801110000_family_billing_subscriptions.sql`
-- Native StoreKit plan and term selection: `apps/mobile/src/components/billing-gate.tsx`
+- Native StoreKit monthly plan selection: `apps/mobile/src/components/billing-gate.tsx`
 - Provider-appropriate management routing: `apps/mobile/src/app/settings.tsx`
