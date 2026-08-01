@@ -3,6 +3,32 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-07-31 · Founder ruling: evals run nightly or manually, never per merge
+
+Founder ruling, not an agent decision. Registered as
+`evals-nightly-manual` in `journeys/10-reconciliation.md` §5.
+
+**What was ruled.** The complete real-model behavioral suite runs on its
+daily schedule and by manual dispatch only. Pull requests, pushes, and merges
+never start it automatically. The eval definitions, strict grading,
+disposable database and artifact store, real Vercel OIDC model access, and
+45-minute workflow bound remain unchanged.
+
+**Why.** Every completed, non-canceled run among the latest twelve workflow
+runs was red. The two most recent completed reads passed 25 of 33 and 28 of
+33 evals, with different failure sets: valid clarifying questions graded as
+parked, variable skill routing, exact workflow-result mismatches, and one
+slow materials timeout. The eval workflow is optional, its failures were not
+being fixed before merge, and every triggered run executed all 33 evals even
+when one small capability changed. That made automatic red runs expensive
+noise rather than useful merge feedback.
+
+**What protects merges.** The required deterministic `build-and-check` gate
+and the required Vercel deployment stay unchanged. A person investigating
+agent behavior can start the complete eval suite from GitHub at any time;
+the daily run preserves a regular product-health read without charging every
+merge for it.
+
 ## 2026-07-31 · Founder ruling: a scored report completes onboarding
 
 Founder ruling, not an agent decision. Registered as
@@ -29,6 +55,65 @@ durable milestones. `createReport()` invokes the resolver after any
 successful first score, rescore, or duplicate retry, so web, chat, and SMS
 all apply the same rule at the same product boundary. The 14-day backstop
 remains as protection against any future incomplete path.
+
+## 2026-07-31 · CI and preview performance canary
+
+Tracked by gh#503 and PR #499. No validation coverage was removed.
+
+The GitHub workflow now classifies a pull request's complete diff into three
+fail-closed scopes. Documentation-only changes run the classifier tests and
+style guard. Mobile-only changes add the complete mobile check job. Every
+other change runs the complete web, database, end-to-end, and mobile suite.
+Pushes to main always run the complete suite, and the required
+`build-and-check` gate verifies the exact success and skipped-job pattern for
+the selected scope.
+
+Preview deployments leave the complete TypeScript check to the required
+GitHub job, while local and production Next builds remain strict. Preview
+builds also use Next's filesystem cache. A separate Vercel ignored-build
+classifier skips documentation, mobile, and workflow-only preview commits;
+missing history or an unknown path always builds. `.git` must not appear in
+`.vercelignore`, because Vercel's ignored-build command needs the shallow
+clone history before the application build begins.
+
+Measured canaries on PR #499:
+
+- GitHub's full required gate completed in about three minutes with every
+  existing check green.
+- The first optimized preview reached Ready in 2m52s from an empty Next cache.
+- The warm preview reached Ready in 2m03s. Next compilation fell from 55
+  seconds on the cold run to 11.4 seconds with the filesystem cache.
+- The earlier preview baseline was about 3m47s, so the warm path saved about
+  1m44s without changing the produced Eve deployment artifact.
+
+The paid eval workflow originally kept pull-request and main-push path
+filters plus a daily sweep. That cadence was superseded the same day by
+`evals-nightly-manual`: the complete suite now runs only on its daily schedule
+or by manual dispatch. Its default per-eval timeout remains five minutes; the
+explicitly slower materials evals keep their existing twenty-minute
+overrides.
+
+## 2026-07-31 · Founder ruling: PR builds are carried by Vercel's preview check
+
+Founder ruling, not an agent decision. Registered as
+`ci-pr-build-via-vercel` in `journeys/10-reconciliation.md` §5.
+
+Context: the CI restructure (PR #488, PR #497, same day) took the pipeline
+from ~9.5 minutes to ~2.7-4.2 minutes, leaving the build job (Next build
+plus eve build, ~2.5 minutes) as the bound for any PR touching web code.
+Vercel's preview deployment runs that same pipeline on every PR and
+reports the "Vercel" status check. The founder ruled: drop the CI build
+for PRs in favor of Vercel's check.
+
+As shipped: on pull requests, CI runs typecheck and lint only (Vercel
+does not run eslint, and next build only type-checks app code, not
+packages or scripts); the Next build, eve build, and stream-duration
+guard run in CI on main pushes only, as the belt for direct-to-main
+pushes that get no preview gate. The "Vercel" status check joins
+`build-and-check` as a REQUIRED context on main, so a failing preview
+build blocks merge exactly as the CI build used to. The 2026-07-10
+incident class (eve build failures Next tolerates) is now caught by the
+required Vercel check on PRs and by CI on main pushes.
 
 ## 2026-07-30 · The stranded-chain ruling: one quiet message, per family, ever
 

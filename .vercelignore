@@ -11,7 +11,6 @@ homa-template/
 
 # ── Never upload ─────────────────────────────────────────────────────────
 node_modules/
-.git/
 .turbo/
 .eve/
 .workflow-data/

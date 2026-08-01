@@ -29,32 +29,74 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # Pull requests that only change documentation or the mobile app do not
+  # need five web runners. The classifier recognizes a deliberately tiny
+  # safe set; empty, mixed, unknown, workflow, dependency, database, and
+  # runtime changes all fall back to the full suite. Main always runs full.
+  classify-changes:
+    runs-on: ubuntu-24.04
+    outputs:
+      scope: ${{ steps.scope.outputs.scope }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # PR checkouts are synthetic merge commits. Depth two retains the
+          # base parent, so HEAD^..HEAD is the complete pull-request diff.
+          fetch-depth: 2
+
+      - name: Classify pull-request changes
+        id: scope
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            node scripts/ci-change-scope.mjs github >> "$GITHUB_OUTPUT"
+          else
+            echo "scope=full" >> "$GITHUB_OUTPUT"
+          fi
+
+  # Fast paths still enforce the repository-wide style law and test the
+  # classifier that decides which expensive jobs may skip.
+  light-checks:
+    needs: classify-changes
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Change classifier tests
+        run: node --test scripts/ci-change-scope.test.mjs
+
+      - name: "No-em-dash style law (AGENTS.md: no em dash, ever, anywhere)"
+        run: node scripts/em-dash-check.mjs
+
   # Branch protection on main requires a status context named exactly
   # "build-and-check" (the old single job's name). This gate carries that
-  # name and fails unless every real job succeeded, so the protection rule
-  # keeps meaning "everything green" without touching repo settings. If a
-  # job is added below, add it to `needs` here or it stops gating merges.
+  # name and verifies the exact job set required by the classified scope.
+  # If a job is added below, add it to `needs` here or it stops gating merges.
   build-and-check:
-    needs: [mobile-checks, build, checks, db-checks, e2e-checks]
+    needs: [classify-changes, light-checks, mobile-checks, build, checks, db-checks, e2e-checks]
     if: always()
     runs-on: ubuntu-24.04
     steps:
+      - uses: actions/checkout@v4
+
       - name: All jobs green
-        run: |
-          results='${{ join(needs.*.result, ' ') }}'
-          echo "job results: $results"
-          for r in $results; do
-            if [ "$r" != "success" ]; then
-              echo "::error::A required job finished with result '$r'."
-              exit 1
-            fi
-          done
+        run: node scripts/ci-change-scope.mjs gate
+        env:
+          CI_SCOPE: ${{ needs.classify-changes.outputs.scope }}
+          CI_CLASSIFY: ${{ needs.classify-changes.result }}
+          CI_LIGHT: ${{ needs.light-checks.result }}
+          CI_MOBILE: ${{ needs.mobile-checks.result }}
+          CI_BUILD: ${{ needs.build.result }}
+          CI_CHECKS: ${{ needs.checks.result }}
+          CI_DB: ${{ needs.db-checks.result }}
+          CI_E2E: ${{ needs.e2e-checks.result }}
 
   # Runs independently of the web jobs (no Supabase secrets needed) so
   # mobile regressions surface fast. Until 2026-07-28 these tests existed
   # (check:mobile-chat) but ran in no pipeline that ships to phones; the
   # mobile-ota-update.yml workflow now runs the same suite before publish.
   mobile-checks:
+    needs: classify-changes
+    if: needs.classify-changes.outputs.scope == 'full' || needs.classify-changes.outputs.scope == 'mobile-only'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -88,6 +130,8 @@ jobs:
   # can schedule them across the runner's cores and reuse the shared
   # ^build package outputs instead of computing them twice.
   build:
+    needs: classify-changes
+    if: needs.classify-changes.outputs.scope == 'full'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -113,10 +157,11 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
 
-      # Next's incremental compiler cache. Turbo's outputs exclude
-      # .next/cache on purpose (it is machine state, not an artifact), so
-      # it needs its own cache entry to speed up cache-miss builds.
-      - name: Next.js build cache
+      # Next, TypeScript, and ESLint share this incremental cache. Turbo's
+      # outputs exclude .next/cache on purpose because it is machine state,
+      # not a replayable build artifact. Persist it on both PRs and main so
+      # cache-miss typechecks and lint runs do not start from zero.
+      - name: Next.js and static analysis cache
         uses: actions/cache@v4
         with:
           path: apps/web/.next/cache
@@ -135,8 +180,24 @@ jobs:
       # node_modules/.cache/turbo and the actions/cache entry silently
       # carries nothing (observed on this workflow's second run: web tasks
       # cache-missed despite unchanged inputs).
-      - name: Typecheck, lint, build
-        run: pnpm exec turbo run typecheck lint build --filter=!mobile
+      #
+      # Typecheck and lint run on every event: Vercel's build does not run
+      # eslint, and next build only type-checks app code, not packages or
+      # scripts.
+      - name: Typecheck, lint
+        run: pnpm exec turbo run typecheck lint --filter=!mobile
+        env:
+          TURBO_CACHE_DIR: .turbo/cache
+
+      # Founder ruling 2026-07-31 (`ci-pr-build-via-vercel`): on pull
+      # requests the Next and eve builds are carried by Vercel's preview
+      # deployment, which runs the same pipeline and reports on the PR as
+      # the REQUIRED "Vercel" status check. CI runs the build only on main
+      # pushes, as the belt for direct-to-main pushes that get no preview
+      # deployment gate.
+      - name: Build (main pushes only; PRs are gated by Vercel's preview build)
+        if: github.event_name == 'push'
+        run: pnpm exec turbo run build --filter=!mobile
         env:
           TURBO_CACHE_DIR: .turbo/cache
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
@@ -153,6 +214,7 @@ jobs:
       # Vercel production writes). Seed that signal so CI exercises the same
       # eve/__server.func + maxDuration path production ships.
       - name: Eve channel build (agent tool modules)
+        if: github.event_name == 'push'
         run: |
           mkdir -p apps/web/.vercel/output
           node <<'NODE'
@@ -195,6 +257,7 @@ jobs:
       # production kills in-progress chat streams (2026-07-11 through 2026-07-16).
       # Must run after a VERCEL=1 eve build so the shared function config is rewritten.
       - name: Eve stream maxDuration guard
+        if: github.event_name == 'push'
         run: VERCEL=1 pnpm check:eve-stream-duration
 
   # Guard shard 1 of 3. The guards never depended on the compile chain
@@ -203,6 +266,8 @@ jobs:
   # time, not by theme; both export HOMA_POSTGRES_BIN, so moving a suite
   # between shards is always safe.
   checks:
+    needs: classify-changes
+    if: needs.classify-changes.outputs.scope == 'full'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -331,6 +396,8 @@ jobs:
   # Guard shard 2 of 3: the Postgres-backed suites and the two fast
   # disposable E2Es. See the shard-1 comment for the balancing rule.
   db-checks:
+    needs: classify-changes
+    if: needs.classify-changes.outputs.scope == 'full'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -395,6 +462,8 @@ jobs:
   # database checks, the three longest steps in the roster (each 24-50s),
   # so they share a runner instead of tailing another shard.
   e2e-checks:
+    needs: classify-changes
+    if: needs.classify-changes.outputs.scope == 'full'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4

@@ -20,6 +20,7 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "tsBuildInfoFile": ".next/cache/typescript/tsconfig.tsbuildinfo",
     "plugins": [
       {
         "name": "next"

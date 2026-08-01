@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint --cache --cache-location .next/cache/eslint/.eslintcache --cache-strategy content",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

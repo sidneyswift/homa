@@ -2,7 +2,21 @@ import path from "node:path";
 import type { NextConfig } from "next";
 import { withEve } from "eve/next";
 
+const isVercelPreview = process.env.VERCEL_ENV === "preview";
+
 const nextConfig: NextConfig = {
+  // Pull requests are already required to pass the repository-wide tsc
+  // job before merge. Skipping Next's duplicate preview check removes the
+  // measured 41-second repeat; production and local builds still fail on
+  // type errors because this is false outside Vercel previews.
+  typescript: {
+    ignoreBuildErrors: isVercelPreview,
+  },
+  experimental: {
+    // Next 16.2 considers build caching experimental, so canary it only on
+    // disposable previews. Production keeps the default compiler path.
+    turbopackFileSystemCacheForBuild: isVercelPreview,
+  },
   // Trace from the monorepo root (matches Next's own lockfile-based
   // detection; stated explicitly because /admin/studio's funnel traces
   // the repo-root .cosmo corpus, which lives outside apps/web).
