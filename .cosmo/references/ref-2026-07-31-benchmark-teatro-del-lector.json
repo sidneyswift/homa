@@ -1,0 +1,179 @@
+{
+  "id": "ref-2026-07-31-benchmark-teatro-del-lector",
+  "droppedBy": "aless",
+  "droppedAt": "2026-07-31T00:00:00-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1785547589.308279",
+  "format": "teacher-guide",
+  "title": "Teatro del Lector: Guia del Maestro, Grado K",
+  "publisher": "Benchmark Education Company, New Rochelle, NY",
+  "gradeLevel": "Kindergarten (Grado K), ages 5-6",
+  "pdfScanPageCount": 36,
+  "analysisQuality": "full",
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "ref-2026-07-31-benchmark-teatro-del-lector.pdf",
+    "sourceParts": [
+      "ref-2026-07-31-benchmark-teatro-del-lector.pdf"
+    ],
+    "pageCount": 36,
+    "intakeAt": "2026-07-28T01:10:00+00:00",
+    "gateFindings": [
+      "36 pages are image-only (CamScanner). Text extracted via Vercel AI Gateway vision model (anthropic/claude-sonnet-4-20250514) in 3 batches covering all 36 pages."
+    ]
+  },
+  "sourceFiles": [
+    {
+      "filename": "K Benchmark Education Teatro del lector .pdf",
+      "localPath": ".cosmo/inspo-files/ref-2026-07-31-benchmark-teatro-del-lector.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-31-benchmark-teatro-del-lector/ref-2026-07-31-benchmark-teatro-del-lector.pdf",
+      "blobUploadedAt": "2026-07-28"
+    }
+  ],
+  "routing": {
+    "skillUsed": "reference-ingestion",
+    "ruling": "Reference, not curriculum. The manual provides 10 reader's theater scripts with 5-day lesson plans each, but it has no developmental philosophy beyond 'reader's theater builds fluency and comprehension', no scope-and-sequence that ramps difficulty across the 10 units, and no systematic skill progression. The 10 units are themed around content areas (plants, characters, rules, technology, fables, holidays, weather, needs-vs-wants, forces) but do not form a learning arc. It is a consumable activity guide: 10 identical five-day cycles whose pedagogical template repeats without variation (introduce, shared reading, fluency practice, rehearse, perform). Dropped by Aless with a specific note about how the manual grounds academic content in children's day-to-day surroundings (technology, clothing, daily life), which makes it a taste signal about pedagogy rather than a curriculum to map."
+  },
+  "dropperNotes": "Take note on how this teaching manual focuses on day to day life for the students. Discussing technology they use and see as well as clothing. It educates students on their day to day surroundings.",
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "dense",
+    "visualHierarchy": "instructions-dominant",
+    "whiteSpaceRatio": 0.15,
+    "flowDirection": "top-down",
+    "notes": "Teacher guide layout, not student-facing. Two printed pages per scanned landscape page (the book was scanned open-face on a CamScanner). Each unit occupies 6 printed pages (3 scanned spreads): a synopsis-and-vocabulary page, then 5 daily lesson plans with objectives, materials, activities, and teacher scripts. Headers are bold with lesson numbers. Small thumbnail images of the student scripts appear at the start of each unit but are not the visual focus. The design is functional and information-dense, meant for teacher use, not child engagement. Color is minimal: a red accent on the cover, otherwise black text on white. The 5-day lesson template is absolutely rigid across all 10 units."
+  },
+  "skillTargeting": {
+    "subject": "ela",
+    "domain": "phonics-word-reading",
+    "topics": [
+      {
+        "id": "mt_ZhvwM6LMBL",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Reading fluently (5-7): The central purpose of every unit. The 5-day cycle exists to build oral reading fluency through repeated practice and performance of the reader's theater scripts."
+      },
+      {
+        "id": "mt_V-ldQp56bF",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Reading with Expression and Accuracy (6-10): Days 3-5 of every unit focus on dramatic expression, character voices, and expressive reading. Students learn to use exclamation marks, question marks, and punctuation as cues for vocal performance."
+      },
+      {
+        "id": "mt_YKkCM63fSC",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Reading High-Frequency Words by Sight (5-8): Every unit explicitly teaches 2 high-frequency words (e.g., 'veo', 'nosotros', 'juego', 'mi') through magnetic letter formation and oral sentence practice."
+      },
+      {
+        "id": "mt_1KCwbGvm1F",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Understanding print (4-6): Lesson 1 of every unit has students identify the cover, hold the book, turn pages, and track text. Lesson 2 explicitly develops 'conceptos del texto impreso' (print concepts)."
+      },
+      {
+        "id": "mt_mLPEMpYb_R",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Listening to Texts Read Aloud (5-10): Day 1 always includes a teacher read-aloud to demonstrate fluency, and audience members practice following along during Days 4-5 performances."
+      },
+      {
+        "id": "mt_b7n4w8q2r5",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Rereading for Fluency (5-9): The entire 5-day arc is built on repeated reading. Students read the same script across Days 2-5, building from shared reading to independent performance."
+      },
+      {
+        "id": "mt_6VIt9iNslV",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Joining In with Rhymes and Chants (3-6): The Kindergarten scripts use choral reading (lectura a coro) as the primary performance mode, designed for non-readers and emergent readers to participate together."
+      },
+      {
+        "id": "mt_5n-O41lUgn",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "Connecting reading to experience (5-7): Aless's primary signal. Every unit grounds literacy in content children know: plants they grow, rules they follow, technology they use at home and school, weather they see, clothes they wear, forces in their play."
+      }
+    ],
+    "unmappedSkills": [
+      {
+        "name": "reader's theater performance as a literacy format",
+        "suggestedSlug": "ela.readers-theater-performance",
+        "note": "The format itself -- assigning character roles, rehearsing scripts across multiple days, performing for an audience without costumes or staging -- is a distinct literacy activity type not captured by any single taxonomy topic. It combines fluency, expression, comprehension, and social-collaborative skills in a specific pedagogical shape. Not appended: taxonomy writes are append-only with their own guard sequence."
+      }
+    ]
+  },
+  "difficulty": {
+    "ageBand": [
+      54,
+      78
+    ],
+    "ageBandGrades": "K",
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffoldingLevel": "high",
+    "notes": "Kindergarten level with high scaffolding throughout. The scripts use pictograms alongside high-frequency words to support non-readers and emergent readers. Choral reading format means children who cannot read independently can still participate by following the group. The 5-day gradual release model provides maximum teacher support on Day 1 and decreases through Day 5. No prerequisite reading level is assumed."
+  },
+  "theming": {
+    "themeType": "interest-led",
+    "characters": [
+      "plants in a garden (Unit 1)",
+      "three bears (Unit 2)",
+      "school staff (Unit 3)",
+      "three pigs and wolf (Unit 4)",
+      "Mary's lamb (Unit 5)",
+      "ant and grasshopper (Unit 6)",
+      "Old King Cole (Unit 7)",
+      "weather characters (Unit 8)",
+      "child getting new clothes (Unit 9)",
+      "vehicles and objects in motion (Unit 10)"
+    ],
+    "visualStyle": "cartoon",
+    "colorPalette": "full-color",
+    "appealDrivers": "Each of the 10 scripts is themed around something a kindergartner encounters in daily life, which is the quality Aless specifically flagged. Unit 5 grounds literacy in technology the child uses at home and school. Unit 9 discusses clothing as something the child needs and wants. Units 1, 8, and 10 teach science concepts (plants, weather, forces) through dramatic play. Units 2, 4, and 6 retell folk tales that deliver moral messages. The cover features a friendly cartoon girl with pigtails, warm and approachable. Student script covers are colorful with age-appropriate illustrations.",
+    "notes": "The daily-life grounding is the dropper signal. Aless did not drop this for the reader's theater format or the Spanish language; she dropped it because it shows how a commercial publisher makes academic content feel like the child's own world. The theming is not decorative: each unit's content area IS the script's plot, so learning about technology happens through performing a story about Mary's lamb encountering school technology, not through a tech-themed worksheet."
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "landscape",
+    "margins": "standard",
+    "inkDensity": "medium",
+    "colorRequirement": "prints well in B&W",
+    "notes": "Scanned as landscape spreads via CamScanner. The original book is portrait-oriented, standard letter size. The teacher guide interior is black text with minimal color accents. Student script pages (shown as thumbnails) appear to be in color. Teacher guide pages would print cleanly in B&W since color is not load-bearing. Ink density is medium: dense text blocks but generous use of bold headers and white space between lesson sections."
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "chant-and-rhyme-card",
+      "social-narrative",
+      "reader-theater-script"
+    ],
+    "gaps": [
+      "five-day-lesson-arc"
+    ],
+    "notes": "reader-theater-script was created as a new recipe from this drop. chant-and-rhyme-card is the closest existing format (performance card for choral reading). social-narrative covers the daily-life storytelling aspect. five-day-lesson-arc remains a gap: a parent-facing multi-day instructional guide is not a format Homa currently generates."
+  },
+  "stages": {
+    "captured": "2026-07-28T01:10:00Z",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "recipe",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/reader-theater-script.md",
+        "apps/web/agent/skills/materials-studio/references/approaches/daily-life-grounding.md"
+      ],
+      "commit": null,
+      "note": "Two graduation targets. (1) New recipe: reader-theater-script.md for the performance script format. (2) New approach doc: daily-life-grounding.md capturing the pedagogical insight Aless flagged -- grounding academic content in technology, clothing, and surroundings children encounter daily. The five-day-lesson-arc gap is recorded but not graduated in this session because Homa does not currently generate teacher/parent guides; it generates student-facing materials."
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "commit": null,
+      "note": "No taxonomy writes. The unmapped skill 'readers-theater-performance' is proposed but not appended. All other skills map to existing topics."
+    },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "notes": "Aless dropped this with a specific pedagogical note: 'Take note on how this teaching manual focuses on day to day life for the students. Discussing technology they use and see as well as clothing. It educates students on their day to day surroundings.' She is not asking Homa to build reader's theater scripts. She is pointing at a teaching philosophy: ground every academic skill in the child's actual world. Unit 5 teaches reading fluency through a story about Mary's lamb encountering school technology (computers, audiophones). Unit 9 teaches needs-vs-wants through a story about getting new clothes. Unit 8 teaches weather vocabulary through a script about weather changes the child can look out the window and see. Unit 10 teaches force-and-motion through vehicles the child rides and objects the child pushes. This is the pedagogical insight to graduate: when Homa generates a counting worksheet, the objects being counted should be things the child touched today (their shoes, the remote control, cups in the dishwasher), not abstract circles or random clip art. The manual itself is a professional Benchmark Education product: ISBN 978-1-5827-3387-9, printed in China, authored by editor Oscar Berto with designers Laurie Berger, Farde Mereb, Joseph Rutt, and Holly Koppelman. 36 CamScanner pages, 37MB, image-only PDF with no extractable text. Spanish language throughout."
+}

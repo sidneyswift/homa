@@ -594,3 +594,13 @@ The curriculum writer loads this to recommend buildable activities.
 - **Ages:** 7-11. A 3x3 with more given cells for younger; a 3x3 with fewer givens or a 4x4 for older.
 - **Creation path:** html (precise grid layout and borders, matching cross-number-puzzle's cell geometry).
 - **Example activity:** `[magic-square-puzzle] A 3x3 grid where every row, column, and diagonal must sum to 15, with 5 of the 9 cells already filled in.`
+
+### reader-theater-script
+- **Slug:** `[reader-theater-script]`
+- **Name:** Reader theater script
+- **What it is:** A multi-character performance script where children read assigned roles aloud, building oral reading fluency through dramatic rehearsal and repeated reading. Not a worksheet: nothing to fill in, cut, or paste. The child reads, re-reads across multiple sessions, and performs. Includes character-name labels before each line, choral/group lines marked distinctly, stage directions in brackets, and a parent note on how to use it.
+- **Best for:** Oral reading fluency, reading with expression, high-frequency word practice, comprehension through performance, collaborative family learning, reluctant readers who respond to drama, emergent readers who can join choral refrains.
+- **Subjects:** ELA (reading fluency, comprehension, vocabulary), cross-curricular when the script content covers science, social studies, or life skills.
+- **Ages:** 5-10. K-1 scripts use choral reading and pictograms for non-readers; grades 2-4 scripts add individual narrator roles and longer lines.
+- **Creation path:** html (precise typographic control for character labels, stage directions, and choral vs. individual line styling).
+- **Example activity:** `[reader-theater-script] "The Garden Helpers": a 4-character script about children planting a garden, with choral refrains about what plants need (sun, water, soil), grounding science vocabulary in a daily-life activity. 12 lines for K-1.`
