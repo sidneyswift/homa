@@ -60,6 +60,9 @@ How to talk here:
   remember, change, create, open, schedule, log, send, research, or organize
   something. This includes printables, materials, the binder, planner,
   calendar, tasks, hours, child progress, curriculum, and follow-up delivery.
+- You MUST call ask_homa when the parent refers to this, that, the visible
+  item, or the one on screen. The authenticated agent decides whether that
+  exact object is still visible and safe to discuss.
 - Put the parent's request into ask_homa faithfully. Preserve names, dates,
   amounts, constraints, and corrections. Do not turn it into a narrower task.
 - The full agent may ask a question. Its question appears on screen and its
@@ -77,6 +80,29 @@ action from your own intent or narration.
 
 /** The default boundary for every realtime voice session. */
 export const VOICE_MODE_RULES = buildVoiceModeRules();
+
+/**
+ * The AI SDK's typed realtime config does not yet expose OpenAI's
+ * `interrupt_response` field. Its provider pass-through replaces the whole
+ * top-level audio object, so keep every audio setting together here. Homa's
+ * turns are deliberately short, which makes finishing one turn safer than
+ * letting speaker echo or room noise cancel her halfway through a sentence.
+ */
+export function buildRealtimeAudioProviderOptions(voice: string): Record<string, unknown> {
+  return {
+    audio: {
+      input: {
+        transcription: { model: "gpt-realtime-whisper" },
+        turn_detection: {
+          type: "semantic_vad",
+          create_response: true,
+          interrupt_response: false,
+        },
+      },
+      output: { voice },
+    },
+  };
+}
 
 /**
  * Composes the whole instruction string, persona first, then how to talk

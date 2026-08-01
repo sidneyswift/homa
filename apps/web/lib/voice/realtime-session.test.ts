@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { openai } from "@ai-sdk/openai";
 
 import {
+  buildRealtimeAudioProviderOptions,
   buildRealtimeInstructions,
   composeRealtimeInstructions,
   VOICE_MODE_RULES,
@@ -34,6 +36,26 @@ describe("realtime voice instructions", () => {
     assert.ok(out.includes("You are Homa"));
     assert.ok(VOICE_PERSONA_MARKDOWN.length > 500);
     assert.ok(!VOICE_PERSONA_MARKDOWN.includes("## What you know each turn"));
+  });
+});
+
+describe("realtime voice interruption policy", () => {
+  it("does not let ambient input cancel Homa while she is speaking", () => {
+    const mapped = openai.experimental_realtime("gpt-realtime-2.1").buildSessionConfig({
+      providerOptions: buildRealtimeAudioProviderOptions("marin"),
+    }) as { audio?: unknown };
+
+    assert.deepEqual(mapped.audio, {
+      input: {
+        transcription: { model: "gpt-realtime-whisper" },
+        turn_detection: {
+          type: "semantic_vad",
+          create_response: true,
+          interrupt_response: false,
+        },
+      },
+      output: { voice: "marin" },
+    });
   });
 });
 
@@ -83,5 +105,10 @@ describe("the full Homa voice bridge", () => {
 
   it("keeps completion claims behind real results", () => {
     assert.match(VOICE_MODE_RULES, /only truth about whether something happened/u);
+  });
+
+  it("routes references to the visible object through the authenticated agent", () => {
+    assert.match(VOICE_MODE_RULES, /this, that, the visible/u);
+    assert.match(VOICE_MODE_RULES, /exact object is still visible and safe/u);
   });
 });

@@ -1,6 +1,3 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
-
 import { generateObject } from "ai";
 import { z } from "zod";
 
@@ -10,6 +7,7 @@ import { HOMA_MODEL } from "../../agent/model";
 import { REPORT_PROMPT_VERSION } from "../../agent/report-writer-version";
 import { gatewayAttribution, recordModelUsage } from "../model-usage";
 import type { PlanFacts, ReportFacts } from "./narrative-facts";
+import { REPORT_WRITER_PROMPT } from "./report-writer-prompt.generated";
 
 /**
  * The model call that writes the report's words (D8 overturn). One
@@ -34,16 +32,8 @@ export interface GenerationResult<T> {
   model: string;
 }
 
-let cachedSystemPrompt: string | null = null;
-
-/** agent/report-writer.md, the versioned system prompt (hand-kept mirror
- * of instructions.md's voice block). Read from disk so the founder edits
- * markdown, not code; next.config's outputFileTracingIncludes ships it.
- * cwd is apps/web under the Next server and fixture script. */
 function systemPrompt(): string {
-  if (cachedSystemPrompt) return cachedSystemPrompt;
-  cachedSystemPrompt = readFileSync(path.join(process.cwd(), "agent", "report-writer.md"), "utf8");
-  return cachedSystemPrompt;
+  return REPORT_WRITER_PROMPT;
 }
 
 function requiredStrings(ids: string[]): z.ZodObject<Record<string, z.ZodString>> {
