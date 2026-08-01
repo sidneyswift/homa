@@ -251,7 +251,7 @@ export async function getFleetOverview(
   const tz = adminTimeZone();
   // Null-safe: on a left join a fleet-level row (no family) passes too.
   const customersOnly = includeTests ? sql`` : sql`and f.sandbox is not true`;
-  const [stopPattern40300, stopPatternText] = STOP_ERROR_PATTERNS;
+  const [stopPattern40300, stopPatternText, stopPatternInbound] = STOP_ERROR_PATTERNS;
 
   // Sequential on purpose, never Promise.all: see lib/admin/db.ts.
   const allSnapshots = await getFamilySnapshots(new Date(), rangeDays);
@@ -304,6 +304,22 @@ export async function getFleetOverview(
     left join public.families f on f.id = r.family_id
     where r.started_at >= now() - ${interval}::interval
       ${customersOnly}
+      and not (
+        r.error = 'delivery failed for every intended recipient'
+        and exists (
+          select 1 from public.conversation_deliveries d
+          where d.task_run_id = r.id
+        )
+        and not exists (
+          select 1 from public.conversation_deliveries d
+          where d.task_run_id = r.id
+            and not (
+              coalesce(d.error, '') ilike ${stopPattern40300}
+              or coalesce(d.error, '') ilike ${stopPatternText}
+              or coalesce(d.error, '') ilike ${stopPatternInbound}
+            )
+        )
+      )
     group by r.status
   `;
   const runTroubleRows = await sql<{ id: string; family_name: string | null; kind: string; status: string; error: string | null; at: string }[]>`
@@ -313,6 +329,22 @@ export async function getFleetOverview(
     where r.status in ('failed', 'uncertain', 'partial', 'partial_uncertain')
       and r.started_at >= now() - ${interval}::interval
       and f.sandbox is not true
+      and not (
+        r.error = 'delivery failed for every intended recipient'
+        and exists (
+          select 1 from public.conversation_deliveries d
+          where d.task_run_id = r.id
+        )
+        and not exists (
+          select 1 from public.conversation_deliveries d
+          where d.task_run_id = r.id
+            and not (
+              coalesce(d.error, '') ilike ${stopPattern40300}
+              or coalesce(d.error, '') ilike ${stopPatternText}
+              or coalesce(d.error, '') ilike ${stopPatternInbound}
+            )
+        )
+      )
       and not exists (
         select 1 from public.admin_alert_acknowledgments a
         where a.source = 'task_run' and a.source_id = r.id
@@ -378,6 +410,7 @@ export async function getFleetOverview(
       and not (
         coalesce(d.error, '') ilike ${stopPattern40300}
         or coalesce(d.error, '') ilike ${stopPatternText}
+        or coalesce(d.error, '') ilike ${stopPatternInbound}
       )
       and not exists (
         select 1 from public.admin_alert_acknowledgments a
@@ -397,6 +430,7 @@ export async function getFleetOverview(
       and not (
         coalesce(d.error, '') ilike ${stopPattern40300}
         or coalesce(d.error, '') ilike ${stopPatternText}
+        or coalesce(d.error, '') ilike ${stopPatternInbound}
       )
   `;
   const stopRows = await sql<{ family_id: string; family_name: string; at: string }[]>`
@@ -409,6 +443,7 @@ export async function getFleetOverview(
       and (
         coalesce(d.error, '') ilike ${stopPattern40300}
         or coalesce(d.error, '') ilike ${stopPatternText}
+        or coalesce(d.error, '') ilike ${stopPatternInbound}
       )
     order by d.updated_at desc
   `;

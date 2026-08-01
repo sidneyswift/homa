@@ -1,5 +1,6 @@
 import { sendAdminDigestEmail } from "../map/email";
 import { adminDb } from "./db";
+import { STOP_ERROR_PATTERNS } from "./delivery-errors";
 import { formatHandledLine, formatSignupsLine, formatTroubleHeadline } from "./digest-format";
 import { familyDisplayName } from "./format";
 
@@ -36,6 +37,7 @@ export async function maybeSendAdminDigest(now: Date = new Date()): Promise<Dige
   if (!to || now.getUTCHours() !== digestHourUtc()) return { skipped: true, sent: false };
 
   const sql = adminDb();
+  const [stopPattern40300, stopPatternText, stopPatternInbound] = STOP_ERROR_PATTERNS;
   const already = await sql<{ n: string }[]>`
     select count(*)::text as n from public.email_sends
     where kind = 'admin_digest' and created_at >= date_trunc('day', now())
@@ -55,6 +57,11 @@ export async function maybeSendAdminDigest(now: Date = new Date()): Promise<Dige
     from public.conversation_deliveries d
     join public.families f on f.id = d.family_id
     where d.status = 'failed' and d.updated_at >= now() - interval '24 hours'
+      and not (
+        coalesce(d.error, '') ilike ${stopPattern40300}
+        or coalesce(d.error, '') ilike ${stopPatternText}
+        or coalesce(d.error, '') ilike ${stopPatternInbound}
+      )
       and not exists (
         select 1 from public.admin_alert_acknowledgments a
         where a.source = 'delivery' and a.source_id = d.id
@@ -89,6 +96,22 @@ export async function maybeSendAdminDigest(now: Date = new Date()): Promise<Dige
     select r.kind, r.status, r.error from public.homa_task_runs r
     where r.status in ('failed', 'uncertain', 'partial_uncertain')
       and r.created_at >= now() - interval '24 hours'
+      and not (
+        r.error = 'delivery failed for every intended recipient'
+        and exists (
+          select 1 from public.conversation_deliveries d
+          where d.task_run_id = r.id
+        )
+        and not exists (
+          select 1 from public.conversation_deliveries d
+          where d.task_run_id = r.id
+            and not (
+              coalesce(d.error, '') ilike ${stopPattern40300}
+              or coalesce(d.error, '') ilike ${stopPatternText}
+              or coalesce(d.error, '') ilike ${stopPatternInbound}
+            )
+        )
+      )
       and not exists (
         select 1 from public.admin_alert_acknowledgments a
         where a.source = 'task_run' and a.source_id = r.id
@@ -103,6 +126,11 @@ export async function maybeSendAdminDigest(now: Date = new Date()): Promise<Dige
         select count(*) from public.conversation_deliveries d
         where d.status in ('failed', 'uncertain')
           and d.updated_at >= now() - interval '24 hours'
+          and not (
+            coalesce(d.error, '') ilike ${stopPattern40300}
+            or coalesce(d.error, '') ilike ${stopPatternText}
+            or coalesce(d.error, '') ilike ${stopPatternInbound}
+          )
           and exists (
             select 1 from public.admin_alert_acknowledgments a
             where a.source = 'delivery' and a.source_id = d.id

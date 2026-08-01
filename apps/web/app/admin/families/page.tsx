@@ -19,6 +19,7 @@ export const metadata: Metadata = { title: "Families" };
 
 type Filter = "all" | "new" | "quiet" | "issues";
 type Sort = "stage" | "recent" | "newest";
+type TestFilter = "exclude" | "only";
 
 function applyFilter(snapshots: FamilySnapshot[], filter: Filter): FamilySnapshot[] {
   switch (filter) {
@@ -72,7 +73,7 @@ function chip(href: string, label: string, active: boolean) {
 export default async function AdminFamiliesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string; sort?: string }>;
+  searchParams: Promise<{ filter?: string; sort?: string; tests?: string }>;
 }) {
   await requireFounder();
   const params = await searchParams;
@@ -82,18 +83,21 @@ export default async function AdminFamiliesPage({
   const sort: Sort = (["stage", "recent", "newest"] as const).includes(params.sort as Sort)
     ? (params.sort as Sort)
     : "stage";
+  const testFilter: TestFilter = params.tests === "only" ? "only" : "exclude";
 
   const snapshots = await getFamilySnapshots();
-  const rows = applySort(applyFilter(snapshots, filter), sort);
-  const totalKids = snapshots.reduce((sum, s) => sum + s.kidCount, 0);
-  const active = snapshots.filter((s) => s.userMessagesInRange > 0).length;
-  const issues = applyFilter(snapshots, "issues").length;
-  const quiet = snapshots.filter((s) => s.stage === "quiet").length;
+  const visibleSnapshots = snapshots.filter((s) => (testFilter === "only" ? s.sandbox : !s.sandbox));
+  const rows = applySort(applyFilter(visibleSnapshots, filter), sort);
+  const totalKids = visibleSnapshots.reduce((sum, s) => sum + s.kidCount, 0);
+  const active = visibleSnapshots.filter((s) => s.userMessagesInRange > 0).length;
+  const issues = applyFilter(visibleSnapshots, "issues").length;
+  const quiet = visibleSnapshots.filter((s) => s.stage === "quiet").length;
 
-  const query = (nextFilter: Filter, nextSort: Sort) => {
+  const query = (nextFilter: Filter, nextSort: Sort, nextTestFilter = testFilter) => {
     const parts: string[] = [];
     if (nextFilter !== "all") parts.push(`filter=${nextFilter}`);
     if (nextSort !== "stage") parts.push(`sort=${nextSort}`);
+    if (nextTestFilter === "only") parts.push("tests=only");
     return parts.length ? `/admin/families?${parts.join("&")}` : "/admin/families";
   };
 
@@ -127,6 +131,7 @@ export default async function AdminFamiliesPage({
         {chip(query("new", sort), "New + onboarding", filter === "new")}
         {chip(query("quiet", sort), "Quiet", filter === "quiet")}
         {chip(query("issues", sort), "Delivery issues", filter === "issues")}
+        {chip(query(filter, sort, "only"), "Test families", testFilter === "only")}
         <span className="flex-1" />
         {chip(query(filter, "stage"), "By stage", sort === "stage")}
         {chip(query(filter, "recent"), "Last active", sort === "recent")}

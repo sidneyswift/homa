@@ -25,6 +25,13 @@ const overview = readFileSync(
   "utf8",
 );
 const acks = readFileSync(path.join(import.meta.dirname, "alert-acks.ts"), "utf8");
+const acknowledgementSourceMigration = readFileSync(
+  path.join(
+    path.resolve(import.meta.dirname, "..", "..", "..", "..", "supabase", "migrations"),
+    "20260731223000_admin_alert_acknowledgment_sources.sql",
+  ),
+  "utf8",
+);
 const adminPage = readFileSync(
   path.join(path.resolve(import.meta.dirname, "..", "..", "app", "admin"), "page.tsx"),
   "utf8",
@@ -52,6 +59,13 @@ describe("tool failure alert", () => {
   it("is a real alert source, so the ack button works", () => {
     assert.equal(parseAlertSource("tool_failure"), "tool_failure");
     assert.match(acks, /from public\.agent_tool_calls where id = \$\{sourceId\}/u);
+  });
+
+  it("allows every newer alert source in the acknowledgement table", () => {
+    assert.match(
+      acknowledgementSourceMigration,
+      /check \(source in \('task_run', 'delivery', 'email_send', 'inbound_receipt', 'tool_failure'\)\)/u,
+    );
   });
 
   it("shows on the console with the family, the tool, and how many times", () => {

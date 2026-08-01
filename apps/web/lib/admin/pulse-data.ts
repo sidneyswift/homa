@@ -1,4 +1,5 @@
 import { adminDb } from "./db";
+import { isStopBlockedError, STOP_ERROR_PATTERNS } from "./delivery-errors";
 import { adminTimeZone, dayKey, dayLabel } from "./format";
 
 /**
@@ -46,6 +47,7 @@ export async function getPulseDays(days = 14): Promise<PulseDay[]> {
   const sql = adminDb();
   const interval = `${days} days`;
   const timeZone = adminTimeZone();
+  const [stopPattern40300, stopPatternText, stopPatternInbound] = STOP_ERROR_PATTERNS;
 
   // Sequential on purpose, never Promise.all: see lib/admin/db.ts.
   const events = await sql<{ name: string; created_at: string; family: string | null }[]>`
@@ -64,6 +66,22 @@ export async function getPulseDays(days = 14): Promise<PulseDay[]> {
     from public.homa_task_runs r
     left join public.families f on f.id = r.family_id
     where r.created_at >= now() - ${interval}::interval
+      and not (
+        r.error = 'delivery failed for every intended recipient'
+        and exists (
+          select 1 from public.conversation_deliveries d
+          where d.task_run_id = r.id
+        )
+        and not exists (
+          select 1 from public.conversation_deliveries d
+          where d.task_run_id = r.id
+            and not (
+              coalesce(d.error, '') ilike ${stopPattern40300}
+              or coalesce(d.error, '') ilike ${stopPatternText}
+              or coalesce(d.error, '') ilike ${stopPatternInbound}
+            )
+        )
+      )
     order by r.created_at desc
     limit 400
   `;
@@ -73,6 +91,11 @@ export async function getPulseDays(days = 14): Promise<PulseDay[]> {
     join public.families f on f.id = d.family_id
     where d.status in ('failed', 'uncertain')
       and d.updated_at >= now() - ${interval}::interval
+      and not (
+        coalesce(d.error, '') ilike ${stopPattern40300}
+        or coalesce(d.error, '') ilike ${stopPatternText}
+        or coalesce(d.error, '') ilike ${stopPatternInbound}
+      )
     order by d.updated_at desc
     limit 100
   `;
@@ -128,6 +151,7 @@ export async function getPulseDays(days = 14): Promise<PulseDay[]> {
     });
   }
   for (const row of deliveries) {
+    if (isStopBlockedError(row.error)) continue;
     items.push({
       at: row.updated_at,
       category: "fail",
