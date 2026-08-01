@@ -1,5 +1,5 @@
 import { X } from "lucide-react-native";
-import { Image, Modal, Pressable, ScrollView, Share, Text, View } from "react-native";
+import { Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -15,6 +15,11 @@ import {
   readyPrintMessage,
   runPreparedMaterialPrint,
 } from "../materials/material-print";
+import { MaterialShareComposer } from "../materials/material-share-composer";
+import {
+  prepareMaterialShareFromApp,
+  type PreparedMaterialShareRequest,
+} from "../materials/material-share";
 
 function formatKeptOn(dateOnly: string): string {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(
@@ -31,7 +36,9 @@ function formatKeptOn(dateOnly: string): string {
 export function MaterialDetailModal({ material, onClose }: { material: BinderMaterial | null; onClose: () => void }) {
   const { family } = useFamilyData();
   const [printing, setPrinting] = useState(false);
-  const [printNotice, setPrintNotice] = useState<string | null>(null);
+  const [printNotice, setPrintNotice] = useState<{ materialId: string; message: string } | null>(null);
+  const [shareRequest, setShareRequest] = useState<PreparedMaterialShareRequest | null>(null);
+  const [preparingShare, setPreparingShare] = useState(false);
 
   async function printMaterial() {
     if (!material) return;
@@ -41,13 +48,16 @@ export function MaterialDetailModal({ material, onClose }: { material: BinderMat
       includeAnswerKey: true,
     });
     if (!prepared) {
-      setPrintNotice("That could not be prepared for printing. Pull down to refresh the Binder, then try again.");
+      setPrintNotice({
+        materialId: material.id,
+        message: "That could not be prepared for printing. Pull down to refresh the Binder, then try again.",
+      });
       setPrinting(false);
       return;
     }
-    setPrintNotice(readyPrintMessage(prepared));
+    setPrintNotice({ materialId: material.id, message: readyPrintMessage(prepared) });
     const result = await runPreparedMaterialPrint(prepared);
-    setPrintNotice(result.message);
+    setPrintNotice({ materialId: material.id, message: result.message });
     if (family?.id) {
       void emitFamilyEvent(family.id, "materials.print_result", {
         family_id: family.id,
@@ -59,6 +69,20 @@ export function MaterialDetailModal({ material, onClose }: { material: BinderMat
       });
     }
     setPrinting(false);
+  }
+
+  async function prepareShare() {
+    if (!material) return;
+    setPreparingShare(true);
+    const prepared = await prepareMaterialShareFromApp(material.id);
+    setPreparingShare(false);
+    setShareRequest(prepared);
+    if (!prepared) {
+      setPrintNotice({
+        materialId: material.id,
+        message: "Homa could not prepare the PDF. Nothing was sent. Pull down to refresh the Binder, then try again.",
+      });
+    }
   }
 
   return (
@@ -111,13 +135,17 @@ export function MaterialDetailModal({ material, onClose }: { material: BinderMat
               onPress={() => void printMaterial()}
             />
             <Button
-              label="Share"
+              label={preparingShare ? "Getting the PDF ready…" : "Share through another app"}
               variant="secondary"
-              onPress={() => void Share.share({ title: material.title, url: material.pdfUrl })}
+              disabled={preparingShare}
+              onPress={() => void prepareShare()}
             />
-            {printNotice ? (
+            {shareRequest?.materialId === material.id ? (
+              <MaterialShareComposer key={shareRequest.materialId} request={shareRequest} familyId={family?.id} />
+            ) : null}
+            {printNotice?.materialId === material.id ? (
               <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}>
-                {printNotice}
+                {printNotice.message}
               </Text>
             ) : null}
           </ScrollView>
