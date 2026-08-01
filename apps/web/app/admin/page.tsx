@@ -315,7 +315,7 @@ export default async function AdminOverviewPage({
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <p className="text-[0.72rem] font-bold text-muted">Families over time</p>
           <p className="text-xs text-subtle">
-            Every real signup, who opened an account, and who finished setup by adding a kid.
+            Who shared an email, created an account, added a child, and started a trial.
             The gaps are the funnel leaks.
           </p>
         </div>

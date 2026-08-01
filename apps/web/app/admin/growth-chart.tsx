@@ -2,11 +2,10 @@ import type { FamiliesByDayPoint, GrowthSeries } from "../../lib/admin/overview-
 import { EmptyNote } from "./ui";
 
 /**
- * The founder's growth lines: cumulative real signups (demand, husks
- * included), accounts opened (the population the headline and roster
- * count), and setup-done families, per day, full product history
- * (founder rulings 2026-07-23: "a graph, not a number", "count all
- * real", then "all three numbers in one picture"). The vertical gaps
+ * The founder's growth lines: cumulative onboarding starts (demand, husks
+ * included), accounts created (the population the headline and roster
+ * count), families that added a child, and verified trial starts, per day,
+ * across full product history. The vertical gaps
  * between the lines are the funnel leaks, so this stays fixed lines,
  * never a filter. Hand-rolled server-rendered SVG like ui.tsx's Spark;
  * no hover. The numbers that matter are printed at the line ends and
@@ -16,7 +15,7 @@ import { EmptyNote } from "./ui";
 const WIDTH = 720;
 const HEIGHT = 240;
 const INSET_LEFT = 40;
-const INSET_RIGHT = 108;
+const INSET_RIGHT = 124;
 const INSET_TOP = 16;
 const INSET_BOTTOM = 28;
 
@@ -46,31 +45,37 @@ interface Line {
 }
 
 export function GrowthChart({ series }: { series: GrowthSeries }) {
-  const { signups } = series;
-  if (signups.length < 2) {
-    return <EmptyNote>The growth line starts once two days of signups exist.</EmptyNote>;
+  const { startedOnboarding } = series;
+  if (startedOnboarding.length < 2) {
+    return <EmptyNote>The growth line starts after two days of email collection.</EmptyNote>;
   }
 
   // Top of the funnel first: later lines draw on top, and endpoint
   // labels stack in this order when they crowd.
   const lines: Line[] = [
     {
-      points: signups,
-      label: "signed up",
+      points: startedOnboarding,
+      label: "email collected",
       stroke: "var(--clay-500)",
       labelFill: "var(--text-strong)",
     },
     {
       points: series.accounts,
-      label: "accounts",
+      label: "created account",
       stroke: "var(--sky-600)",
       labelFill: "var(--sky-600)",
     },
     {
       points: series.setupDone,
-      label: "set up",
+      label: "added a child",
       stroke: "var(--sage-500)",
       labelFill: "var(--sage-600)",
+    },
+    {
+      points: series.trialStarted,
+      label: "trial started",
+      stroke: "var(--gold-500)",
+      labelFill: "var(--gold-ink)",
     },
   ].filter((line) => line.points.length > 1);
 
@@ -79,12 +84,12 @@ export function GrowthChart({ series }: { series: GrowthSeries }) {
   const plotTop = INSET_TOP;
   const plotBottom = HEIGHT - INSET_BOTTOM;
 
-  const max = Math.max(...signups.map((p) => p.total), 1);
+  const max = Math.max(...startedOnboarding.map((p) => p.total), 1);
   const step = max <= 40 ? 10 : 20;
   const domainTop = Math.max(step, Math.ceil(max / step) * step);
 
   const x = (index: number, length: number) =>
-    plotLeft + (index / (Math.max(length, signups.length) - 1)) * (plotRight - plotLeft);
+    plotLeft + (index / (Math.max(length, startedOnboarding.length) - 1)) * (plotRight - plotLeft);
   const y = (value: number) =>
     plotBottom - (value / domainTop) * (plotBottom - plotTop);
 
@@ -96,10 +101,10 @@ export function GrowthChart({ series }: { series: GrowthSeries }) {
       .map((p, i) => `${x(i, points.length).toFixed(1)},${y(p.total).toFixed(1)}`)
       .join(" ");
 
-  const weekTicks = signups
+  const weekTicks = startedOnboarding
     .map((p, i) => ({ day: p.day, i }))
     .filter(({ day }) => isSunday(day));
-  const launchIndex = signups.findIndex((p) => p.day === LAUNCH_DAY);
+  const launchIndex = startedOnboarding.findIndex((p) => p.day === LAUNCH_DAY);
 
   // Endpoint labels, nudged apart top-down so they never overlap.
   let previousLabelY = -Infinity;
@@ -154,7 +159,7 @@ export function GrowthChart({ series }: { series: GrowthSeries }) {
       {weekTicks.map(({ day, i }) => (
         <text
           key={day}
-          x={x(i, signups.length)}
+          x={x(i, startedOnboarding.length)}
           y={plotBottom + 18}
           textAnchor="middle"
           className="font-mono"
@@ -167,8 +172,8 @@ export function GrowthChart({ series }: { series: GrowthSeries }) {
       {launchIndex >= 0 ? (
         <g>
           <line
-            x1={x(launchIndex, signups.length)}
-            x2={x(launchIndex, signups.length)}
+            x1={x(launchIndex, startedOnboarding.length)}
+            x2={x(launchIndex, startedOnboarding.length)}
             y1={plotTop}
             y2={plotBottom}
             stroke="var(--stone-300)"
@@ -176,7 +181,7 @@ export function GrowthChart({ series }: { series: GrowthSeries }) {
             strokeDasharray="3 3"
           />
           <text
-            x={x(launchIndex, signups.length) + 5}
+            x={x(launchIndex, startedOnboarding.length) + 5}
             y={plotTop + 8}
             className="font-mono"
             fontSize="10"

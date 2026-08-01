@@ -135,17 +135,18 @@ export interface FamiliesByDayPoint {
   total: number;
 }
 
-/** The three growth lines (founder rulings 2026-07-23): signups counts
- * every real signup including families that never finished the account
- * step, so it is top-of-funnel demand; accounts counts families whose
- * first member row landed (the population the page headline and roster
- * count); setupDone counts families that finished setup and added a kid.
- * The vertical gaps between the lines ARE the funnel leaks, which is why
- * this is three fixed lines and not a filter. */
+/** The four growth lines: startedOnboarding counts every real family record,
+ * including families that never finished account creation; accounts counts
+ * families whose first member row landed (the population the page headline
+ * and roster count); setupDone counts families that finished setup and
+ * added a kid; trialStarted counts verified Stripe trial starts. The vertical
+ * gaps between the lines are the funnel leaks, which is why this is four
+ * fixed lines and not a filter. */
 export interface GrowthSeries {
-  signups: FamiliesByDayPoint[];
+  startedOnboarding: FamiliesByDayPoint[];
   accounts: FamiliesByDayPoint[];
   setupDone: FamiliesByDayPoint[];
+  trialStarted: FamiliesByDayPoint[];
 }
 
 /** A family whose sends are blocked because they texted STOP. A choice,
@@ -255,10 +256,9 @@ export async function getFleetOverview(
 
   // Sequential on purpose, never Promise.all: see lib/admin/db.ts.
   const allSnapshots = await getFamilySnapshots(new Date(), rangeDays);
-  // Every real signup, husks included (founder ruling 2026-07-23): the
-  // signups line measures demand, so it must not require the account
-  // step the roster requires.
-  const signupsPerDay = await sql<{ day: string; n: number }[]>`
+  // Every real onboarding start, husks included: demand must not require
+  // the account step the roster requires.
+  const onboardingStartsPerDay = await sql<{ day: string; n: number }[]>`
     select ((f.created_at at time zone ${tz})::date)::text as day, count(*)::int as n
     from public.families f
     where coalesce(f.status, 'open') <> 'deleted'
@@ -296,6 +296,16 @@ export async function getFleetOverview(
       and f.sandbox is not true
       and f.profile_completed_at is not null
       and kid.first_at is not null
+    group by 1 order by 1
+  `;
+  // A trial starts only after a verified Stripe Payment Link checkout. It is
+  // a billing milestone, not a click on the paywall.
+  const trialsPerDay = await sql<{ day: string; n: number }[]>`
+    select ((f.trial_started_at at time zone ${tz})::date)::text as day, count(*)::int as n
+    from public.families f
+    where coalesce(f.status, 'open') <> 'deleted'
+      and f.sandbox is not true
+      and f.trial_started_at is not null
     group by 1 order by 1
   `;
   const runRows = await sql<{ status: string; n: number }[]>`
@@ -735,9 +745,10 @@ export async function getFleetOverview(
     activeFamilies: activeIds.size,
     newSignups: snapshots.filter((s) => new Date(s.createdAt).getTime() >= cutoff),
     growth: {
-      signups: buildCumulativeByDay(signupsPerDay, dayKey(now, tz)),
-      accounts: buildCumulativeByDay(accountsPerDay, dayKey(now, tz), signupsPerDay[0]?.day),
-      setupDone: buildCumulativeByDay(setupPerDay, dayKey(now, tz), signupsPerDay[0]?.day),
+      startedOnboarding: buildCumulativeByDay(onboardingStartsPerDay, dayKey(now, tz)),
+      accounts: buildCumulativeByDay(accountsPerDay, dayKey(now, tz), onboardingStartsPerDay[0]?.day),
+      setupDone: buildCumulativeByDay(setupPerDay, dayKey(now, tz), onboardingStartsPerDay[0]?.day),
+      trialStarted: buildCumulativeByDay(trialsPerDay, dayKey(now, tz), onboardingStartsPerDay[0]?.day),
     },
     runCounts: toCounts(runRows),
     runTrouble: runTroubleRows.map((row) => ({
