@@ -22,7 +22,7 @@ import postgres from "postgres";
 
 import { embedText } from "../apps/web/lib/learning/embeddings";
 import { assertConfirmedProdWrite } from "./prod-write-guard.mts";
-import { tx, listOf } from "./telnyx-shared.mts";
+import { listOf, normalizeTelnyxUsPhone, tx } from "./telnyx-shared.mts";
 
 interface ConversationMeta {
   id: string;
@@ -80,16 +80,6 @@ function db(): ReturnType<typeof postgres> {
   });
 }
 
-/** Accepts a Telnyx target string, returns +E.164 or null. */
-function normalizeE164(raw: string | undefined): string | null {
-  if (!raw) return null;
-  if (raw.startsWith("+")) return raw;
-  const digits = raw.replace(/\D/gu, "");
-  if (digits.length === 10) return `+1${digits}`;
-  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
-  return null;
-}
-
 function lineOf(metadata: Record<string, string> | undefined): "general" | "curriculum" {
   const id = metadata?.assistant_id;
   return CURRICULUM_ASSISTANT_ID && id === CURRICULUM_ASSISTANT_ID ? "curriculum" : "general";
@@ -128,8 +118,8 @@ async function resolveOwner(
   sql: ReturnType<typeof postgres>,
   metadata: Record<string, string> | undefined,
 ): Promise<Owner> {
-  const endUser = normalizeE164(metadata?.telnyx_end_user_target);
-  const agent = normalizeE164(metadata?.telnyx_agent_target);
+  const endUser = normalizeTelnyxUsPhone(metadata?.telnyx_end_user_target);
+  const agent = normalizeTelnyxUsPhone(metadata?.telnyx_agent_target);
   const candidates = [endUser, agent].filter((phone): phone is string => phone !== null);
 
   let familyId: string | null = null;

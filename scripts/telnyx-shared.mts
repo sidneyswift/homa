@@ -9,6 +9,8 @@ import path from "node:path";
 import { loadEnvFile } from "node:process";
 import { fileURLToPath } from "node:url";
 
+import { normalizeUsPhoneE164 } from "../packages/core/src/phone";
+
 export const REPO_ROOT = path.dirname(
   path.dirname(fileURLToPath(import.meta.url)),
 );
@@ -202,15 +204,9 @@ export interface SoleProprietorIdentity {
   postalCode: string;
 }
 
-/** Accepts human-typed US numbers ("954-990-3497", "(954) 990 3497") and
- *  returns +E.164; anything already +prefixed passes through. */
-function normalizeUsPhone(raw: string | undefined): string | undefined {
-  if (!raw) return raw;
-  if (raw.startsWith("+")) return raw;
-  const digits = raw.replace(/\D/gu, "");
-  if (digits.length === 10) return `+1${digits}`;
-  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
-  return raw;
+/** Accepts human-typed US texting numbers and returns canonical +1 E.164. */
+export function normalizeTelnyxUsPhone(raw: string | undefined): string | null {
+  return raw ? normalizeUsPhoneE164(raw) : null;
 }
 
 /**
@@ -394,7 +390,7 @@ export function readSoleProprietorIdentity(): SoleProprietorIdentity {
     firstName: process.env.TELNYX_SP_FIRST_NAME,
     lastName: process.env.TELNYX_SP_LAST_NAME,
     email: process.env.TELNYX_SP_EMAIL,
-    mobilePhone: normalizeUsPhone(process.env.TELNYX_SP_MOBILE),
+    mobilePhone: normalizeTelnyxUsPhone(process.env.TELNYX_SP_MOBILE),
     street: process.env.TELNYX_SP_STREET,
     city: process.env.TELNYX_SP_CITY,
     state: process.env.TELNYX_SP_STATE,
