@@ -312,6 +312,9 @@ jobs:
       - name: Instructions split and voice-mirror invariants (phone persona)
         run: pnpm check:instructions-split
 
+      - name: Runtime prompt asset checks
+        run: pnpm check:runtime-prompts
+
       - name: Eval-host isolation checks (no prod writes from local eval runs)
         run: pnpm check:eval-isolation
 
