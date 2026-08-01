@@ -9,7 +9,10 @@ import {
   insertStatePackRow,
 } from "../../../../lib/compliance/pack-store";
 import { emitMapEvent } from "../../../../lib/map/events";
-import { requireFamilyWithActor } from "../../../../lib/map/session";
+import {
+  requireFamilyFromBearer,
+  requireFamilyWithActor,
+} from "../../../../lib/map/session";
 import { getStateRequirementsDetail } from "../../../../lib/map/state-requirements";
 import { blobConfigured, uploadMaterialArtifacts } from "../../../../lib/materials/artifact-store";
 import { joinPageBodies, printableSlug } from "../../../../lib/materials/page-shell";
@@ -37,12 +40,20 @@ function failure(status: number, reason: string, note: string): Response {
   return Response.json({ ok: false, reason, note }, { status });
 }
 
-export async function POST(): Promise<Response> {
+export async function POST(request: Request): Promise<Response> {
   const startedAt = Date.now();
 
   let access;
   try {
-    access = await requireFamilyWithActor();
+    const hasBearer = request.headers.has("authorization");
+    const bearerFamily = hasBearer
+      ? await requireFamilyFromBearer(request)
+      : null;
+    access = hasBearer
+      ? bearerFamily
+        ? { family: bearerFamily, memberUserId: null }
+        : null
+      : await requireFamilyWithActor();
   } catch (error) {
     console.error(
       "state pack auth lookup failed:",

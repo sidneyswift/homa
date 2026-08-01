@@ -30,6 +30,7 @@ import {
   type OverlayModelState,
 } from "./overlay-model";
 import { OverlayHost } from "./overlay-host";
+import type { StateRecordDocument } from "../../lib/state-records";
 import { ReplySheet } from "./reply-sheet";
 import { TranscriptRibbon } from "./transcript-ribbon";
 import { useVoiceSession } from "./use-voice-session";
@@ -169,6 +170,25 @@ export function VoiceScreen() {
     router.replace("/chat");
   }
 
+  function openStateRecord(document: StateRecordDocument) {
+    setOverlayModel((current) => applyOverlaySignal(current, {
+      kind: "material",
+      key: `state-record:${document.id}`,
+      material: {
+        id: document.id,
+        title: document.title,
+        kind: "packet",
+        skill: null,
+        childName: null,
+        previewUrl: document.previewUrl,
+        pdfUrl: document.pdfUrl,
+        pageCount: document.pageCount,
+        status: document.status,
+        revisesId: document.revisesId,
+      },
+    }));
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: surface }}>
       <View style={{ flex: 1 }} onLayout={handleFieldLayout}>
@@ -244,6 +264,8 @@ export function VoiceScreen() {
           if (action === "change") session.sendText("I want to change this material.");
           if (action === "earlier") session.sendText("Show me the earlier version of this material.");
         }}
+        onStateRecordOpen={openStateRecord}
+        onStateRecordReady={(message) => session.announceResult(message)}
         printNotice={visiblePrintNotice}
         onReceiptPress={(signal) => {
           if (signal.toolName === "log_hours") {

@@ -10,6 +10,7 @@ import {
   parseQuestionCardPart,
   type QuestionCardData,
 } from "../chat/question-card-model";
+import type { StateRecordAction } from "../../lib/state-records";
 
 /**
  * Overlay signals for the voice-first screen: pure derivation from the
@@ -40,6 +41,7 @@ export type OverlaySignal =
     }
   | { kind: "question"; key: string; card: QuestionCardData }
   | { kind: "hours"; key: string }
+  | { kind: "state_records"; key: string; action: StateRecordAction }
   | {
       kind: "receipt";
       key: string;
@@ -300,6 +302,17 @@ function buildSignal(
     if (output.opened !== true) return null;
     return {
       signal: { kind: "planner", key, refreshCount: planWrites },
+      planWrites,
+    };
+  }
+  if (toolName === "open_state_records") {
+    if (output.opened !== true) return null;
+    const action = output.action;
+    if (action !== "view" && action !== "generate_pack" && action !== "generate_filing") {
+      return null;
+    }
+    return {
+      signal: { kind: "state_records", key, action },
       planWrites,
     };
   }

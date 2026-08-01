@@ -1216,7 +1216,7 @@ function prepSheetPage(
   return `${pageHeader(
     detail,
     `Your state · rules verified ${verifiedMonthYear(detail.sourceLastVerified)}`,
-    `Before you file: telling ${detail.stateName}`,
+    `Filing preparation for ${detail.stateName}`,
     `What ${detail.stateName} asks for, next to the details you already have.`,
   )}
 <div class="sp-prep">
@@ -1486,7 +1486,7 @@ export function composeStatePack(input: StatePackInput): StatePack {
     if (duties.notification) {
       contentPages.push({
         page: {
-          title: `Before you file: telling ${detail.stateName}`,
+          title: `Filing preparation for ${detail.stateName}`,
           body: prepSheetPage(detail, duties, family),
         },
         legalLine: true,

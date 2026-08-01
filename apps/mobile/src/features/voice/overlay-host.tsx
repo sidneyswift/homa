@@ -48,6 +48,8 @@ import type {
   OverlaySignal,
   ReceiptSignal,
 } from "./overlay-model";
+import type { StateRecordDocument } from "../../lib/state-records";
+import { StateRecordsCard } from "../state-records/state-records-card";
 
 /**
  * The voice screen's overlay layer: one signal at a time. Planner,
@@ -83,6 +85,8 @@ export function OverlayHost({
   onReceiptPress,
   float,
   onMaterialAction,
+  onStateRecordOpen,
+  onStateRecordReady,
   printNotice,
 }: {
   signal: OverlaySignal | null;
@@ -101,6 +105,8 @@ export function OverlayHost({
    *  scrim it would dim to background chrome and read as switched off. */
   float?: ReactNode;
   onMaterialAction?: (action: "print" | "keep" | "change" | "earlier") => void;
+  onStateRecordOpen?: (document: StateRecordDocument) => void;
+  onStateRecordReady?: (message: string) => void;
   printNotice?: string | null;
 }) {
   if (signal === null) return null;
@@ -144,6 +150,23 @@ export function OverlayHost({
           onAnswer={onAnswer}
           onDismiss={onDismiss}
         />
+      </OverlaySheet>
+    );
+  }
+  if (signal.kind === "state_records") {
+    return (
+      <OverlaySheet
+        onDismiss={onDismiss}
+        accessibilityLabel="State records"
+        float={float}
+      >
+        <ScrollView contentContainerStyle={{ padding: space.md, paddingBottom: space.xl }}>
+          <StateRecordsCard
+            action={signal.action}
+            onOpenDocument={(document) => onStateRecordOpen?.(document)}
+            onReady={onStateRecordReady}
+          />
+        </ScrollView>
       </OverlaySheet>
     );
   }
