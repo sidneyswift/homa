@@ -3,6 +3,30 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-08-01 · Founder ruling: iOS launches with monthly plans only
+
+Founder ruling, not an agent decision. Registered as
+`ios-monthly-only-launch` in `journeys/10-reconciliation.md` §5.
+
+**What was ruled.** Homa's native iOS paywall initially offers the monthly
+Homa, Homa Plus, and Homa Max subscriptions only. Annual plans remain
+available on the web through Stripe. The annual Apple product ids remain in
+the permanent provider catalog so Homa can verify any historical or future
+receipt, but those products are not merchandised or available for sale during
+the initial iOS launch.
+
+**What remains unchanged.** A family still has one Homa membership across web
+and native. The payment rail determines who collects and manages the payment,
+not where the family can use Homa. A Stripe annual subscriber can use iOS, and
+an Apple monthly subscriber can use web, without buying again.
+
+**Implementation consequence.** Mobile fetches and displays only the three
+monthly StoreKit products while restoration and server verification continue
+to recognize the full immutable Apple catalog. App Store Connect preserves the
+annual product records but removes them from sale. Reintroducing annual iOS
+plans later is an availability and merchandising change, not an entitlement
+migration.
+
 ## 2026-08-01 · Founder ruling: one Homa membership across web and native
 
 Founder ruling, not an agent decision. Registered as
