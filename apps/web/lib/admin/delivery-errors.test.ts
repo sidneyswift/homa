@@ -15,6 +15,7 @@ describe("isStopBlockedError", () => {
       ),
       true,
     );
+    assert.equal(isStopBlockedError("SMS suppressed (inbound-stop)"), true);
   });
 
   it("leaves real failures alone", () => {
@@ -30,6 +31,10 @@ describe("isStopBlockedError", () => {
   it("keeps the SQL patterns and the JS twin in sync", () => {
     // The SQL side matches with ilike; the JS side must agree on the
     // same two signatures, nothing more.
-    assert.deepEqual([...STOP_ERROR_PATTERNS], ["%40300%", "%stop message%"]);
+    assert.deepEqual([...STOP_ERROR_PATTERNS], [
+      "%40300%",
+      "%stop message%",
+      "%inbound-stop%",
+    ]);
   });
 });

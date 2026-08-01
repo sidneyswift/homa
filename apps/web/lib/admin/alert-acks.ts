@@ -153,6 +153,7 @@ export async function listHandledAlerts(rangeDays: number): Promise<HandledAlert
       and not (
         coalesce(d.error, '') ilike ${STOP_ERROR_PATTERNS[0]}
         or coalesce(d.error, '') ilike ${STOP_ERROR_PATTERNS[1]}
+        or coalesce(d.error, '') ilike ${STOP_ERROR_PATTERNS[2]}
       )
     order by a.created_at desc
     limit 12
