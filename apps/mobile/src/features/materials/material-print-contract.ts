@@ -68,7 +68,7 @@ export function readyPrintMessage(request: PreparedPrintRequest): string {
 }
 
 export function printResultMessage(result: NativePrintResult): string {
-  if (result.status === "completed") return "The print job completed.";
+  if (result.status === "completed") return "The print job was sent to the printer.";
   if (result.status === "canceled") return "Printing canceled. Nothing was sent.";
   switch (result.reason) {
     case "app-backgrounded":
