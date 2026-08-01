@@ -79,6 +79,29 @@ action from your own intent or narration.
 export const VOICE_MODE_RULES = buildVoiceModeRules();
 
 /**
+ * The AI SDK's typed realtime config does not yet expose OpenAI's
+ * `interrupt_response` field. Its provider pass-through replaces the whole
+ * top-level audio object, so keep every audio setting together here. Homa's
+ * turns are deliberately short, which makes finishing one turn safer than
+ * letting speaker echo or room noise cancel her halfway through a sentence.
+ */
+export function buildRealtimeAudioProviderOptions(voice: string): Record<string, unknown> {
+  return {
+    audio: {
+      input: {
+        transcription: { model: "gpt-realtime-whisper" },
+        turn_detection: {
+          type: "semantic_vad",
+          create_response: true,
+          interrupt_response: false,
+        },
+      },
+      output: { voice },
+    },
+  };
+}
+
+/**
  * Composes the whole instruction string, persona first, then how to talk
  * out loud, then what she actually knows about this family.
  *
