@@ -107,7 +107,7 @@ export default defineBoundedTool({
             objectKind: "family_event",
             objectId: eventId,
             effect: "family_event.added",
-            namedEffect: `adding ${parsed.value.title} to the family calendar`,
+            namedEffect: `${parsed.value.title} on the family calendar`,
             undoCapability: "exact_delete",
             payload: {
               effect: "family_event.added",

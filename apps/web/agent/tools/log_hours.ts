@@ -163,7 +163,7 @@ export default defineBoundedTool({
             objectKind: "hours_entry",
             objectId: entryId,
             effect: "hours.logged",
-            namedEffect: `logging ${input.minutes} minutes of ${input.subject}`,
+            namedEffect: `the ${input.minutes}-minute ${input.subject} entry in Hours`,
             undoCapability: "exact_delete",
             payload: {
               effect: "hours.logged",

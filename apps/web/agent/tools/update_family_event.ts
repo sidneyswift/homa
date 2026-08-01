@@ -123,7 +123,7 @@ export default defineBoundedTool({
             objectKind: "family_event",
             objectId: input.eventId,
             effect: "family_event.updated",
-            namedEffect: `changing ${predicted.value.title} on the family calendar`,
+            namedEffect: `${predicted.value.title} on the family calendar`,
             undoCapability: "exact_restore",
             payload: {
               effect: "family_event.updated",

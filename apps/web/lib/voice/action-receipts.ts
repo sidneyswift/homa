@@ -345,14 +345,20 @@ export async function undoVoiceAction(input: {
       for update
     `;
     if (rows.length === 0) {
-      return { status: "not_found", note: "There is no matching action from this Voice session to undo." };
+      return {
+        status: "not_found",
+        note: "Homa could not find a recent action to undo. Nothing changed. Try again from the Voice conversation where you made the change.",
+      };
     }
     const selected = rows[0];
     if (selected.undone_at) {
       return { status: "undone", receipt: publicReceipt(selected), alreadyUndone: true };
     }
     if (new Date(selected.expires_at).getTime() <= now.getTime()) {
-      return { status: "expired", note: "That action is outside the ten-minute Voice undo window." };
+      return {
+        status: "expired",
+        note: "That action is too old to undo safely. Nothing changed. Open the record to make a correction.",
+      };
     }
     if (!input.receiptId && voiceActionCandidatesAreAmbiguous(publicReceipt(selected), rows[1] ? publicReceipt(rows[1]) : undefined)) {
       return { status: "choose", candidates: rows.map(publicReceipt) };
@@ -372,7 +378,10 @@ export async function undoVoiceAction(input: {
           returning id
         `;
         if (removed.length === 0) {
-          return { status: "not_undoable", note: "That hours entry changed elsewhere, so Homa left the record alone." };
+          return {
+            status: "not_undoable",
+            note: "That entry in Hours changed after Homa saved it. Homa kept the newer version. Open Hours to review it.",
+          };
         }
         break;
       }
@@ -390,7 +399,10 @@ export async function undoVoiceAction(input: {
           returning id
         `;
         if (removed.length === 0) {
-          return { status: "not_undoable", note: "That calendar event changed elsewhere, so Homa left the calendar alone." };
+          return {
+            status: "not_undoable",
+            note: "That calendar event changed after Homa added it. Homa kept the newer version. Open the Planner to review it.",
+          };
         }
         break;
       }
@@ -413,7 +425,10 @@ export async function undoVoiceAction(input: {
           returning id
         `;
         if (restored.length === 0) {
-          return { status: "not_undoable", note: "That calendar event is no longer there, so Homa did not recreate it silently." };
+          return {
+            status: "not_undoable",
+            note: "That event was removed after Homa changed it. Nothing was recreated. Ask Homa to add it again if you still want it.",
+          };
         }
         break;
       }
@@ -431,7 +446,10 @@ export async function undoVoiceAction(input: {
           returning id
         `;
         if (restored.length === 0) {
-          return { status: "not_undoable", note: "That calendar slot now contains another change, so Homa left it alone." };
+          return {
+            status: "not_undoable",
+            note: "That event was already restored or replaced. Homa left the current calendar unchanged. Open the Planner to review it.",
+          };
         }
         break;
       }

@@ -139,25 +139,25 @@ describe("deriveOverlaySignals: mapping", () => {
         minutes: 45,
         actionReceipt: {
           id: "11111111-1111-4111-8111-111111111111",
-          namedEffect: "logging 45 minutes of math",
+          namedEffect: "the 45-minute math entry in Hours",
           expiresAt: "2026-08-01T12:10:00.000Z",
         },
       }),
       expected: {
         kind: "receipt",
         toolName: "log_hours",
-        summary: "Hours saved: math, 45 min",
+        summary: "Recorded in Hours: 45 minutes of math",
         actionReceipt: {
           id: "11111111-1111-4111-8111-111111111111",
-          namedEffect: "logging 45 minutes of math",
+          namedEffect: "the 45-minute math entry in Hours",
           expiresAt: "2026-08-01T12:10:00.000Z",
         },
       },
     },
     {
-      name: "log_hours double-log guard (no fields) still reads Hours saved",
+      name: "log_hours double-log guard (no fields) still reads Hours recorded",
       part: toolPart("log_hours", { logged: true, done: true }),
-      expected: { kind: "receipt", summary: "Hours saved" },
+      expected: { kind: "receipt", summary: "Hours recorded" },
     },
     {
       name: "log_hours failure is nothing (Homa narrates it herself)",
@@ -557,7 +557,7 @@ describe("deriveOverlaySignals: malformed input", () => {
     assert.deepEqual(keys, ["a1:2"]);
     assert.equal(signals.length, 1);
     assert.ok(signals[0].kind === "receipt");
-    assert.equal(signals[0].summary, "Hours saved: art, 15 min");
+    assert.equal(signals[0].summary, "Recorded in Hours: 15 minutes of art");
   });
 
   it("falls back to a positional message id when id is missing", () => {
@@ -585,7 +585,7 @@ describe("applyOverlaySignal and dismissActiveOverlay", () => {
     kind: "receipt",
     key: "a1:2",
     toolName: "log_hours",
-    summary: "Hours saved: math, 45 min",
+    summary: "Recorded in Hours: 45 minutes of math",
   };
   const receiptB: OverlaySignal = {
     kind: "receipt",

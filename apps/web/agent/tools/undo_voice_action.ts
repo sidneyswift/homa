@@ -4,6 +4,28 @@ import { defineBoundedTool, TOOL_DEADLINE } from "../../lib/agent-tool-deadline"
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { undoVoiceAction } from "../../lib/voice/action-receipts";
 
+function undoResultCopy(input: {
+  effect: "hours.logged" | "family_event.added" | "family_event.updated" | "family_event.removed";
+  namedEffect: string;
+  alreadyUndone: boolean;
+}): string {
+  const result = input.effect === "family_event.updated"
+    ? `the earlier details for ${input.namedEffect}`
+    : input.namedEffect;
+  if (input.alreadyUndone) {
+    const verb = input.effect === "family_event.updated"
+      ? "were already restored"
+      : input.effect === "family_event.removed"
+        ? "was already restored"
+        : "was already removed";
+    return `${result[0].toUpperCase()}${result.slice(1)} ${verb}. Nothing changed this time.`;
+  }
+  const verb = input.effect === "family_event.updated" || input.effect === "family_event.removed"
+    ? "Restored"
+    : "Removed";
+  return `${verb} ${result}.`;
+}
+
 export default defineBoundedTool({
   description:
     "Undo one recent reversible action from this same Voice session. Call with no receiptId for 'undo that'. If the result says choose, ask one short question using the returned named effects, then call again with the chosen receiptId. Never use for sends, printing, purchases, filings, account changes, or any effect the tool does not return.",
@@ -33,14 +55,14 @@ export default defineBoundedTool({
       return {
         undone: false,
         reason: "not_voice",
-        note: "This receipt belongs to Voice actions only. Nothing changed.",
+        note: "Nothing changed. Go back to the Voice conversation where you made the change and say ‘undo that.’",
       };
     }
     if (typeof attributes.memberUserId !== "string") {
       return {
         undone: false,
         reason: "no_actor",
-        note: "Homa could not verify which adult made that action. Nothing changed.",
+        note: "Nothing changed. Reopen Voice from your signed-in Homa app and try again.",
       };
     }
     const result = await undoVoiceAction({
@@ -58,7 +80,7 @@ export default defineBoundedTool({
           receiptId: receipt.id,
           namedEffect: receipt.namedEffect,
         })),
-        note: "Two recent actions could fit. Ask which named effect to undo, in one short question.",
+        note: "Homa found two recent actions. Nothing is undone yet. Ask which named effect to undo, in one short question.",
       };
     }
     if (result.status !== "undone") {
@@ -69,9 +91,11 @@ export default defineBoundedTool({
       alreadyUndone: result.alreadyUndone,
       receipt: result.receipt,
       preview: `Undo ${result.receipt.namedEffect}`,
-      note: result.alreadyUndone
-        ? "That action was already undone. Nothing changed twice."
-        : `Undone: ${result.receipt.namedEffect}.`,
+      note: undoResultCopy({
+        effect: result.receipt.effect,
+        namedEffect: result.receipt.namedEffect,
+        alreadyUndone: result.alreadyUndone,
+      }),
     };
   },
 });

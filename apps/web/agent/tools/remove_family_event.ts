@@ -71,7 +71,7 @@ export default defineBoundedTool({
             objectKind: "family_event",
             objectId: input.eventId,
             effect: "family_event.removed",
-            namedEffect: `removing ${before.title} from the family calendar`,
+            namedEffect: `${before.title} on the family calendar`,
             undoCapability: "append_only_restore",
             payload: {
               effect: "family_event.removed",

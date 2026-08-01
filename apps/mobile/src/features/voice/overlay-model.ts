@@ -212,11 +212,12 @@ function receiptSummaryFor(part: CompletedToolPart): string | null {
   if (toolName === "log_hours") {
     if (output.logged !== true) return null;
     if (typeof output.subject === "string" && typeof output.minutes === "number") {
-      return `Hours saved: ${output.subject}, ${output.minutes} min`;
+      const unit = output.minutes === 1 ? "minute" : "minutes";
+      return `Recorded in Hours: ${output.minutes} ${unit} of ${output.subject}`;
     }
     // The double-log guard path returns logged without the fields; the
     // block is on the record either way.
-    return "Hours saved";
+    return "Hours recorded";
   }
   // Named-effect chips (remember, forget, update_child_profile,
   // save_skill, forget_skill, mark_material_final) reuse the transcript
