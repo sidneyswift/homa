@@ -5,7 +5,17 @@ import {
   TOOL_DEADLINE,
 } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
-import { removeFamilyEventCaller, removeFamilyEventPinned } from "../../lib/family-events";
+import {
+  getFamilyEventCaller,
+  getFamilyEventPinned,
+  removeFamilyEventCaller,
+  removeFamilyEventPinned,
+} from "../../lib/family-events";
+import {
+  armVoiceActionThenMutate,
+  recordVoiceAction,
+  voiceToolReceiptContext,
+} from "../../lib/voice/action-receipts";
 
 /**
  * Removes one family calendar event (issue #176, CG-03). A model-supplied
@@ -36,16 +46,61 @@ export default defineBoundedTool({
       throw error;
     }
 
-    const result =
-      access.mode === "pinned"
-        ? await removeFamilyEventPinned(access.familyId, input.eventId)
-        : await removeFamilyEventCaller(access.db, access.familyId, input.eventId);
+    const receiptContext = voiceToolReceiptContext({
+      familyId: access.familyId,
+      attributes,
+      runtimeSessionId: ctx.session.id,
+      turnId: ctx.session.turn.id,
+    });
+    const before = receiptContext
+      ? access.mode === "pinned"
+        ? await getFamilyEventPinned(access.familyId, input.eventId)
+        : await getFamilyEventCaller(access.db, access.familyId, input.eventId)
+      : null;
+    if (receiptContext && !before) {
+      return { removed: false, note: "That event wasn't found on this family's calendar." };
+    }
+    const mutate = () => access.mode === "pinned"
+      ? removeFamilyEventPinned(access.familyId, input.eventId, before ?? undefined)
+      : removeFamilyEventCaller(access.db, access.familyId, input.eventId, before ?? undefined);
+    const armed = receiptContext && before
+      ? await armVoiceActionThenMutate({
+          familyId: receiptContext.familyId,
+          record: () => recordVoiceAction({
+            ...receiptContext,
+            objectKind: "family_event",
+            objectId: input.eventId,
+            effect: "family_event.removed",
+            namedEffect: `removing ${before.title} from the family calendar`,
+            undoCapability: "append_only_restore",
+            payload: {
+              effect: "family_event.removed",
+              before: {
+                childId: before.childId,
+                title: before.title,
+                startsOn: before.startsOn,
+                endsOn: before.endsOn,
+                startTime: before.startTime,
+                endTime: before.endTime,
+                note: before.note,
+              },
+            },
+          }),
+          mutate,
+          replay: async (receipt) => receipt.undoneAt
+            ? { removed: false as const, note: "That Voice action already ran and was undone." }
+            : { removed: true as const, title: before.title, event: before },
+          succeeded: (result) => result.removed,
+        })
+      : { actionReceipt: null, result: await mutate(), replayed: false };
+    const result = armed.result;
     if (!result.removed) return result;
 
     return {
       removed: true,
       done: true,
       title: result.title,
+      ...(armed.actionReceipt ? { actionReceipt: armed.actionReceipt } : {}),
       note: "Removed from the family calendar. Confirm it back in one short natural aside.",
     };
   },

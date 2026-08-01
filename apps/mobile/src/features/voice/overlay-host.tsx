@@ -81,6 +81,7 @@ export function OverlayHost({
   onDismiss,
   onAnswer,
   onReceiptPress,
+  onUndoReceipt,
   float,
   onMaterialAction,
   printNotice,
@@ -96,6 +97,9 @@ export function OverlayHost({
    *  sheet replaces the toast, or dismissing it) is the exit. Absent,
    *  a tap simply dismisses, as before. */
   onReceiptPress?: (signal: ReceiptSignal) => void;
+  /** The compact Undo affordance is present only for a server-issued,
+   * unexpired action receipt. Voice still owns the actual compensator. */
+  onUndoReceipt?: (signal: ReceiptSignal) => void;
   /** A live element (the character puck) rendered ABOVE the scrim,
    *  centered in the strip over the sheet, at full vibrancy. Under the
    *  scrim it would dim to background chrome and read as switched off. */
@@ -110,6 +114,7 @@ export function OverlayHost({
         signal={signal}
         onDismiss={onDismiss}
         onPress={onReceiptPress}
+        onUndo={onUndoReceipt}
       />
     );
   }
@@ -607,10 +612,12 @@ function ReceiptToast({
   signal,
   onDismiss,
   onPress,
+  onUndo,
 }: {
   signal: ReceiptSignal;
   onDismiss: () => void;
   onPress?: (signal: ReceiptSignal) => void;
+  onUndo?: (signal: ReceiptSignal) => void;
 }) {
   const insets = useSafeAreaInsets();
   // The timer keys on the signal, not the callback: a parent re-render
@@ -640,6 +647,14 @@ function ReceiptToast({
     else onDismiss();
   }
 
+  function handleUndo() {
+    if (timerRef.current !== null) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    onUndo?.(signal);
+  }
+
   return (
     <View
       pointerEvents="box-none"
@@ -652,10 +667,7 @@ function ReceiptToast({
         zIndex: 10,
       }}
     >
-      <Pressable
-        onPress={handlePress}
-        accessibilityRole="button"
-        accessibilityLabel={signal.summary}
+      <View
         style={{
           flexDirection: "row",
           alignItems: "center",
@@ -678,18 +690,43 @@ function ReceiptToast({
             backgroundColor: colors.sage,
           }}
         />
-        <Text
-          numberOfLines={2}
-          style={{
-            fontFamily: fontFamilies.bodyMedium,
-            fontSize: fontSize.sm,
-            color: colors.textBody,
-            flexShrink: 1,
-          }}
+        <Pressable
+          onPress={handlePress}
+          accessibilityRole="button"
+          accessibilityLabel={signal.summary}
+          style={{ flexShrink: 1 }}
         >
-          {signal.summary}
-        </Text>
-      </Pressable>
+          <Text
+            numberOfLines={2}
+            style={{
+              fontFamily: fontFamilies.bodyMedium,
+              fontSize: fontSize.sm,
+              color: colors.textBody,
+              flexShrink: 1,
+            }}
+          >
+            {signal.summary}
+          </Text>
+        </Pressable>
+        {signal.actionReceipt && onUndo ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Undo ${signal.actionReceipt.namedEffect}`}
+            onPress={handleUndo}
+            hitSlop={8}
+          >
+            <Text
+              style={{
+                fontFamily: fontFamilies.bodySemibold,
+                fontSize: fontSize.sm,
+                color: colors.brand,
+              }}
+            >
+              Undo
+            </Text>
+          </Pressable>
+        ) : null}
+      </View>
     </View>
   );
 }

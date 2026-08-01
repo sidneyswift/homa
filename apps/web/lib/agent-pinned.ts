@@ -148,7 +148,13 @@ export async function recordHoursPinned(input: {
   childName?: string | null;
   happenedOn?: string | null;
   note?: string | null;
-}): Promise<{ logged: boolean; note: string; weekMinutesForSubject?: number }> {
+}): Promise<{
+  logged: boolean;
+  note: string;
+  weekMinutesForSubject?: number;
+  entryId?: string;
+  inserted?: boolean;
+}> {
   if (!Number.isFinite(input.minutes) || input.minutes < 1 || input.minutes > 600) {
     return {
       logged: false,
@@ -206,7 +212,12 @@ export async function recordHoursPinned(input: {
     limit 1
   `;
   if (dupe[0]) {
-    return { logged: true, note: "That block is already on the record for that day; nothing added twice." };
+    return {
+      logged: true,
+      entryId: dupe[0].id,
+      inserted: false,
+      note: "That block is already on the record for that day; nothing added twice.",
+    };
   }
 
   const inserted = await sql<{ id: string }[]>`
@@ -220,7 +231,7 @@ export async function recordHoursPinned(input: {
     // A concurrent identical call won hours_log_block_unique_idx after
     // this one's guard SELECT ran; same outcome as the guard, and no
     // event for a row that never landed.
-    return { logged: true, note: "That block is already on the record for that day; nothing added twice." };
+    return { logged: true, inserted: false, note: "That block is already on the record for that day; nothing added twice." };
   }
 
   if (input.source === "call") {
@@ -254,6 +265,8 @@ export async function recordHoursPinned(input: {
   `;
   return {
     logged: true,
+    entryId: inserted[0].id,
+    inserted: true,
     note: "On the record.",
     weekMinutesForSubject: Number(week[0]?.total ?? 0),
   };

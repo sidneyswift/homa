@@ -3630,6 +3630,25 @@ await expectReadDenied("cron_runs");
 // Founder alert acks (migration #81): deny-all, server-only; only the
 // founder-gated /admin action writes.
 await expectReadDenied("admin_alert_acknowledgments");
+// Voice action receipts contain exact compensator snapshots. They are
+// deny-all through the Data API and readable only by the server-side undo
+// tool. The migration is additive, so absence on an older target is safe and
+// automatically turns into a permission probe once applied.
+{
+  const response = await rest(`voice_action_receipts?select=id&limit=1`, {
+    headers: { Prefer: "" },
+  });
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    coveredTables.add("voice_action_receipts");
+    report(
+      "voice_action_receipts absent from target (additive migration not applied yet); nothing exposed",
+      true,
+    );
+  } else {
+    await expectReadDenied("voice_action_receipts");
+  }
+}
 // Provider-neutral family subscriptions are server-only billing state. The
 // migration is additive and code falls back to the old mirrors before it
 // lands, so an absent table is an honest pre-deploy pass. Once present, both

@@ -133,11 +133,25 @@ describe("deriveOverlaySignals: mapping", () => {
     },
     {
       name: "log_hours success is a receipt with the hours summary",
-      part: toolPart("log_hours", { logged: true, subject: "math", minutes: 45 }),
+      part: toolPart("log_hours", {
+        logged: true,
+        subject: "math",
+        minutes: 45,
+        actionReceipt: {
+          id: "11111111-1111-4111-8111-111111111111",
+          namedEffect: "logging 45 minutes of math",
+          expiresAt: "2026-08-01T12:10:00.000Z",
+        },
+      }),
       expected: {
         kind: "receipt",
         toolName: "log_hours",
         summary: "Hours saved: math, 45 min",
+        actionReceipt: {
+          id: "11111111-1111-4111-8111-111111111111",
+          namedEffect: "logging 45 minutes of math",
+          expiresAt: "2026-08-01T12:10:00.000Z",
+        },
       },
     },
     {

@@ -46,6 +46,11 @@ export type OverlaySignal =
       toolName: string;
       summary: string;
       materialId?: string;
+      actionReceipt?: {
+        id: string;
+        namedEffect: string;
+        expiresAt: string;
+      };
     };
 
 /** A receipt toast's signal, the shape OverlayHost's onReceiptPress
@@ -149,6 +154,25 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function truncate(text: string, max = 80): string {
   return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+}
+
+function actionReceiptIn(output: Record<string, unknown>):
+  | { id: string; namedEffect: string; expiresAt: string }
+  | undefined {
+  const receipt = output.actionReceipt;
+  if (!isRecord(receipt)) return undefined;
+  if (
+    typeof receipt.id !== "string"
+    || typeof receipt.namedEffect !== "string"
+    || typeof receipt.expiresAt !== "string"
+  ) {
+    return undefined;
+  }
+  return {
+    id: receipt.id,
+    namedEffect: receipt.namedEffect,
+    expiresAt: receipt.expiresAt,
+  };
 }
 
 interface CompletedToolPart {
@@ -341,6 +365,7 @@ function buildSignal(
       ...(toolName === "mark_material_final" && typeof output.materialId === "string"
         ? { materialId: output.materialId }
         : {}),
+      ...(actionReceiptIn(output) ? { actionReceipt: actionReceiptIn(output) } : {}),
     },
     planWrites,
   };
