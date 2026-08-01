@@ -67,8 +67,10 @@ import {
 } from "../../lib/billing/channel-access";
 import {
   buildSmsSessionThreadId,
+  smsSessionDayKey,
   stripSmsSessionEpoch,
 } from "../../lib/sms-session-epoch";
+import { effectiveTimeZone } from "../../lib/time-zone";
 import { normalizeSmsAttachments } from "../../lib/voice/sms-attachments";
 import { sendHomaSms } from "../../lib/voice/telnyx-api";
 
@@ -311,6 +313,7 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
   const normalizedSender = normalizeUsPhoneE164(senderNumber);
   let familyId: string | null = null;
   let familySessionEpoch: string | null = null;
+  let familyTimeZone: string | null = null;
   let unlinkedSessionEpoch: string | null = null;
   let memberUserId: string | null = null;
   let memberName: string | null = null;
@@ -326,6 +329,7 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
       const identity = await findFamilyIdentityByPhone(normalizedSender);
       familyId = identity?.familyId ?? null;
       familySessionEpoch = identity?.sessionEpoch ?? null;
+      familyTimeZone = identity?.timeZone ?? null;
       memberUserId = identity?.memberUserId ?? null;
       memberName = identity?.memberDisplayName ?? null;
       canInviteFamilyMembers = identity?.canInviteFamilyMembers ?? false;
@@ -564,7 +568,11 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
     : (familySmsInviteContext?.sessionEpoch ??
       unlinkedSessionEpoch ??
       (familySmsInviteLookupFailed ? "invite-lookup-unavailable" : "unlinked"));
-  const sessionThreadId = buildSmsSessionThreadId(thread.id, accessEpoch);
+  const sessionThreadId = buildSmsSessionThreadId(
+    thread.id,
+    accessEpoch,
+    smsSessionDayKey(new Date(), effectiveTimeZone(familyTimeZone)),
+  );
   const sessionThread = { ...thread.toJSON(), id: sessionThreadId };
   let continuityAttributes: Record<string, string> = {};
   if (familyId) {

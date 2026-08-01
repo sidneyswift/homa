@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   buildSmsSessionThreadId,
+  smsSessionDayKey,
   stripSmsSessionEpoch,
 } from "./sms-session-epoch";
 
@@ -13,6 +14,23 @@ describe("SMS session access epochs", () => {
     assert.equal(
       buildSmsSessionThreadId(TELNYX_THREAD, "family:one"),
       buildSmsSessionThreadId(TELNYX_THREAD, "family:one"),
+    );
+  });
+
+  it("rotates a long-running SMS conversation at the family's 4am boundary", () => {
+    const beforeBoundary = smsSessionDayKey(
+      new Date("2026-08-01T07:59:00.000Z"),
+      "America/New_York",
+    );
+    const afterBoundary = smsSessionDayKey(
+      new Date("2026-08-01T08:01:00.000Z"),
+      "America/New_York",
+    );
+
+    assert.notEqual(beforeBoundary, afterBoundary);
+    assert.notEqual(
+      buildSmsSessionThreadId(TELNYX_THREAD, "family:one", beforeBoundary),
+      buildSmsSessionThreadId(TELNYX_THREAD, "family:one", afterBoundary),
     );
   });
 

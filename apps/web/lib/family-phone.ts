@@ -221,6 +221,8 @@ export async function findFamilyIdByPhone(phoneE164: string): Promise<string | n
 
 export interface FamilyPhoneIdentity {
   familyId: string;
+  /** The family's chat-day boundary is evaluated in this time zone. */
+  timeZone: string | null;
   /** Stable adult identity for conversation attribution. Null only for
    * legacy/unattributed phone rows. */
   memberUserId: string | null;
@@ -251,13 +253,14 @@ export async function findFamilyIdentityByPhone(
     {
       family_id: string;
       phone_row_id: string;
+      time_zone: string | null;
       member_user_id: string | null;
       display_name: string | null;
       can_invite_family_members: boolean;
       sms_signup_candidate: boolean;
     }[]
   >`
-    select p.family_id, p.id::text as phone_row_id,
+    select p.family_id, p.id::text as phone_row_id, f.time_zone,
            p.member_user_id, m.display_name,
            m.user_id is not null as can_invite_family_members,
            p.source = 'signup' and not exists (
@@ -265,6 +268,7 @@ export async function findFamilyIdentityByPhone(
              where signup_member.family_id = p.family_id
            ) as sms_signup_candidate
     from public.family_phones p
+    join public.families f on f.id = p.family_id
     left join public.family_members m
       on m.family_id = p.family_id and m.user_id = p.member_user_id
     where p.phone_e164 = ${phoneE164}
@@ -273,6 +277,7 @@ export async function findFamilyIdentityByPhone(
   if (!row) return null;
   return {
     familyId: row.family_id,
+    timeZone: row.time_zone,
     memberUserId: row.member_user_id,
     memberDisplayName: row.display_name,
     canInviteFamilyMembers: row.can_invite_family_members,
