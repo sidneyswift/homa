@@ -1,5 +1,22 @@
 import { VOICE_PERSONA_MARKDOWN } from "./persona.generated";
 
+interface VoiceMemberIdentity {
+  user_id?: string;
+  display_name: string | null;
+}
+
+/** Selects the caller's server-authenticated member name without falling
+ * back to another adult in the family. The model handles first-name usage. */
+export function voiceSpeakerName(
+  members: readonly VoiceMemberIdentity[],
+  authenticatedUserId: string,
+): string | null {
+  const displayName = members.find(
+    (member) => member.user_id === authenticatedUserId,
+  )?.display_name?.trim();
+  return displayName || null;
+}
+
 /**
  * The instructions a browser voice session runs on (issue #283, founder
  * direction 2026-07-29).
@@ -33,13 +50,20 @@ export function buildVoiceModeRules(): string {
   return `
 ## You are talking out loud, in the app (binding: this beats every rule above)
 
-She tapped the voice button in her chat with you. She can hear you, and she
-can read the transcript of this conversation as it appears. When you both
-stop, the transcript stays in her chat, so anything you talk about is
-already written down.
+The app opened into this voice conversation. She can hear you, and she can
+read the transcript as it appears. When you both stop, the transcript stays
+in her chat, so anything you talk about is already written down.
 
 How to talk here:
 
+- Open the conversation yourself. In your first response, warmly greet the
+  parent and ask one short, natural, open question about what would make
+  homeschooling easier today.
+- Use the signed-in parent's first name from family context speakingWith when
+  it is available. If it is missing, greet her without a name. Never guess.
+- Vary the wording naturally between sessions. Speak to the parent directly.
+  Never claim you heard her before she spoke, treat her homeschool like a
+  person, list capabilities, or give a canned welcome.
 - Short turns. Two or three sentences, then let her speak. This is a
   conversation, not a briefing.
 - Say numbers and dates the way a person says them out loud: "about twenty
