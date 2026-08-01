@@ -1,4 +1,6 @@
+import { ACTIVE_OBJECT_CURRENT_VERSION } from "@homa/core";
 import { useRouter } from "expo-router";
+import { useKeepAwake } from "expo-keep-awake";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, useColorScheme, View, type LayoutChangeEvent } from "react-native";
 import Animated, {
@@ -35,9 +37,10 @@ import {
   type OverlayModelState,
 } from "./overlay-model";
 import { OverlayHost } from "./overlay-host";
+import type { StateRecordDocument } from "../../lib/state-records";
 import { ReplySheet } from "./reply-sheet";
 import { TranscriptRibbon } from "./transcript-ribbon";
-import { useVoiceSession } from "./use-voice-session";
+import { useVoiceWorkbench } from "./voice-workbench-provider";
 
 const CHARACTER_SIZE = 240;
 const PUCK_SIZE = 72;
@@ -62,23 +65,24 @@ function GoldAuraField({ size }: { size: number }) {
 }
 
 /**
- * Homa's primary native conversation. A single purposeful tap starts the
- * microphone, then the session stays hands-free until the parent ends it.
- * Text is still available, just not placed ahead of the spoken relationship.
+ * Homa's primary native conversation. Opening the app starts the microphone
+ * and Homa takes the first turn. Text stays available as a quiet fallback.
  */
 export function VoiceScreen() {
+  useKeepAwake("homa-voice-conversation");
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const dark = useColorScheme() === "dark";
+  const { session, showActiveObject, clearActiveObject } = useVoiceWorkbench();
+  const startVoice = session.start;
+  const autoStartedRef = useRef(false);
   const [overlayModel, setOverlayModel] = useState<OverlayModelState>(EMPTY_OVERLAY_MODEL);
-  const activeMaterial = overlayModel.active?.kind === "material"
+  const activeMaterialId = overlayModel.active?.kind === "material"
     && overlayModel.active.material.id
-    ? { kind: "material" as const, id: overlayModel.active.material.id }
+    ? overlayModel.active.material.id
     : null;
-  const session = useVoiceSession(activeMaterial);
   const announceResult = session.announceResult;
   const handoffReady = session.handoffReady;
-  const suspendVoice = session.suspend;
   const { family } = useFamilyData();
   const [replyOpen, setReplyOpen] = useState(false);
   const [printNotice, setPrintNotice] = useState<{ key: string; message: string } | null>(null);
@@ -92,6 +96,12 @@ export function VoiceScreen() {
   const puck = useSharedValue(0);
   const messages = session.messages;
 
+  useEffect(() => {
+    if (autoStartedRef.current) return;
+    autoStartedRef.current = true;
+    startVoice();
+  }, [startVoice]);
+
   if (handledKeysRef.current === null) {
     handledKeysRef.current = new Set(deriveOverlaySignals([...messages], new Set()).keys);
   }
@@ -102,13 +112,29 @@ export function VoiceScreen() {
   }
 
   useEffect(() => {
+    if (!activeMaterialId) return;
+    const reference = {
+      kind: "material" as const,
+      objectId: activeMaterialId,
+      version: ACTIVE_OBJECT_CURRENT_VERSION,
+    };
+    showActiveObject(reference);
+    return () => clearActiveObject(reference);
+  }, [activeMaterialId, clearActiveObject, showActiveObject]);
+
+  useEffect(() => {
     const handled = handledKeysRef.current;
     if (!handled) return;
     const { signals } = deriveOverlaySignals([...messages], handled);
     if (signals.length === 0) return;
     for (const signal of signals) handled.add(signal.key);
-    setOverlayModel((current) => signals.reduce(applyOverlaySignal, current));
-  }, [messages]);
+    const plannerRequested = signals.some((signal) => signal.kind === "planner");
+    const overlaySignals = signals.filter((signal) => signal.kind !== "planner");
+    if (overlaySignals.length > 0) {
+      setOverlayModel((current) => overlaySignals.reduce(applyOverlaySignal, current));
+    }
+    if (plannerRequested) router.navigate("/planner");
+  }, [messages, router]);
 
   useEffect(() => {
     const handled = handledLessonKeysRef.current;
@@ -125,12 +151,12 @@ export function VoiceScreen() {
   useEffect(() => {
     if (!pendingLesson || !handoffReady) return;
     const timer = setTimeout(() => {
-      suspendVoice();
+      session.pauseForMicrophoneOwner("Lesson recording has the microphone.");
       setActiveLessonRecorder(pendingLesson);
       setPendingLesson(null);
     }, 0);
     return () => clearTimeout(timer);
-  }, [handoffReady, pendingLesson, suspendVoice]);
+  }, [handoffReady, pendingLesson, session]);
 
   useEffect(() => {
     const signal = overlayModel.active;
@@ -182,9 +208,15 @@ export function VoiceScreen() {
       ? (session.busyDetail ?? "getting ready")
       : characterState === "speaking"
         ? "speaking"
-        : session.failed
-          ? (session.busyDetail ?? "We got cut off")
-          : "Tap Homa to start talking";
+        : session.status === "paused"
+          ? (session.pauseReason ?? "Voice paused")
+          : session.muted
+            ? "muted"
+            : session.failed
+              ? (session.busyDetail ?? "We got cut off")
+              : session.turnActive
+                ? "listening"
+                : "Tap Homa to start talking";
   const characterLayerStyle = useAnimatedStyle(() => {
     if (fieldHeight.value === 0) return { opacity: 0 };
     return { opacity: 1 - puck.value, top: fieldHeight.value * 0.43 - AURA_SIZE / 2 };
@@ -202,9 +234,45 @@ export function VoiceScreen() {
   }
 
   function leaveVoice() {
-    session.end();
+    if (session.turnActive && !session.muted) session.toggleMute();
     router.replace("/chat");
   }
+
+  function openStateRecord(document: StateRecordDocument) {
+    setOverlayModel((current) => applyOverlaySignal(current, {
+      kind: "material",
+      key: `state-record:${document.id}`,
+      material: {
+        id: document.id,
+        title: document.title,
+        kind: "packet",
+        skill: null,
+        childName: null,
+        previewUrl: document.previewUrl,
+        pdfUrl: document.pdfUrl,
+        pageCount: document.pageCount,
+        status: document.status,
+        revisesId: document.revisesId,
+      },
+    }));
+  }
+
+  const primaryAction = session.turnActive
+    ? session.toggleMute
+    : session.status === "paused"
+      ? session.resume
+      : session.failed
+        ? session.retry
+        : session.start;
+  const primaryLabel = session.turnActive
+    ? session.muted
+      ? "Unmute"
+      : "Mute"
+    : session.status === "paused"
+      ? "Resume conversation"
+      : session.failed
+        ? "Try again"
+        : "Talk to Homa";
 
   if (activeLessonRecorder) {
     return (
@@ -221,7 +289,6 @@ export function VoiceScreen() {
       />
     );
   }
-
   return (
     <View style={{ flex: 1, backgroundColor: surface }}>
       <View style={{ flex: 1 }} onLayout={handleFieldLayout}>
@@ -233,8 +300,20 @@ export function VoiceScreen() {
             <GoldAuraField size={AURA_SIZE} />
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={session.turnActive ? "End voice conversation" : "Start talking with Homa"}
-              onPress={session.turnActive ? session.end : session.start}
+              accessibilityLabel={
+                session.turnActive
+                  ? "End voice conversation"
+                  : session.status === "paused"
+                    ? "Resume voice conversation"
+                    : "Start talking with Homa"
+              }
+              onPress={
+                session.turnActive
+                  ? session.end
+                  : session.status === "paused"
+                    ? session.resume
+                    : session.start
+              }
               hitSlop={20}
             >
               <HomaCharacter state={characterState} size={CHARACTER_SIZE} />
@@ -271,14 +350,14 @@ export function VoiceScreen() {
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={session.turnActive ? "End conversation" : "Start talking"}
-          onPress={session.turnActive ? session.end : session.start}
+          accessibilityLabel={primaryLabel}
+          onPress={primaryAction}
           style={{ flex: 1, minHeight: 48, alignItems: "center", justifyContent: "center", borderRadius: radius.pill, borderWidth: StyleSheet.hairlineWidth, borderColor: controlBorder, backgroundColor: controlFill }}
         >
           <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}>
-            {session.turnActive ? <MicOff size={16} color={controlText} /> : <Mic size={16} color={controlText} />}
+            {session.muted || session.status === "paused" ? <MicOff size={16} color={controlText} /> : <Mic size={16} color={controlText} />}
             <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: controlText }}>
-              {session.turnActive ? "End conversation" : "Talk to Homa"}
+              {primaryLabel}
             </Text>
           </View>
         </Pressable>
@@ -293,10 +372,13 @@ export function VoiceScreen() {
         onAnswer={(message) => session.sendText(message)}
         onMaterialAction={(action) => {
           if (action === "print") session.sendText("Print this.");
+          if (action === "share") session.sendText("Share this through an app I choose.");
           if (action === "keep") session.sendText("I love it. Keep this one.");
           if (action === "change") session.sendText("I want to change this material.");
           if (action === "earlier") session.sendText("Show me the earlier version of this material.");
         }}
+        onStateRecordOpen={openStateRecord}
+        onStateRecordReady={(message) => session.announceResult(message)}
         printNotice={visiblePrintNotice}
         onReceiptPress={(signal) => {
           if (signal.toolName === "log_hours") {

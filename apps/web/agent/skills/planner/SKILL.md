@@ -1,7 +1,7 @@
 ---
-description: Use when the parent asks what is on the planner, the week, or the family calendar, wants the week or the month adjusted, asks to schedule an existing lesson, curriculum, or unit study onto the planner or onto a real day, asks to add, change, move, or remove an appointment, trip, or other family event, asks to move school work around an appointment or trip ("doctor's appt Tuesday, push things back"), or wants to see the plan while you talk. Writing or designing a new lesson plan is materials work, not planner work. Contains the open-then-edit workflow (open_planner before every edit_plan), giving an activity a real calendar date (schedule_plan_activity), the family calendar tools (add/list/update/remove_family_event), reshuffling the week around real life, the activity writing rules, and the honest limits (you cannot build a new month).
+description: Use when the parent asks what is on the planner, the week, or the family calendar, wants the week or the month adjusted, wants Homa to draft a brand-new month around her children and real commitments, asks to schedule an existing lesson, curriculum, or unit study onto the planner or onto a real day, asks to add, change, move, or remove an appointment, trip, or other family event, asks to move school work around an appointment or trip ("doctor's appt Tuesday, push things back"), or wants to see the plan while you talk. Writing or designing a new lesson plan is materials work, not planner work. Contains the open-then-edit workflow, preview-first month planning, real calendar dates, family calendar tools, and reshuffling around real life.
 metadata:
-  homa-tools: open_planner, edit_plan, schedule_plan_activity, add_family_event, list_family_events, update_family_event, remove_family_event
+  homa-tools: open_planner, edit_plan, schedule_plan_activity, add_family_event, list_family_events, update_family_event, remove_family_event, find_materials, preview_month_plan, approve_month_plan
   homa-related-skills: curriculum-studio, materials-studio
 ---
 
@@ -26,8 +26,10 @@ calendar, the answer is to do it with her, in front of her.
   over Monday to Friday, by presentation only (a display guess, never a
   saved date). The full four weeks live on each plan's month page,
   linked from the board.
-- Plans are built by one tap in a child's progress report. You cannot
-  create one from nothing, and you never pretend to.
+- A parent can build a whole new family month through this skill's
+  preview-first workflow. Read `references/month-plan.md` when that is
+  what she asks for. The report's one-tap plan remains the quick option
+  for one child's benchmark-shaped month.
 - /app/calendar is the real, persisted week: per-kid lanes plus one
   family lane, for the actual dates schedule_plan_activity and
   add_family_event write. An activity only appears there once you have
@@ -135,7 +137,8 @@ worse than no line.
 ## Honest limits
 
 - edit_plan errors are the truth. no_plan means that subject has no
-  month; offer the report's one-tap month instead of improvising.
+  saved month to edit. Offer the report's one-tap month for one child,
+  or use the preview-first month workflow for a new family month.
 - schedule_plan_activity's no_plan / invalid activity errors mean the
   week or index you tried no longer exists; call open_planner again
   rather than guessing a fix.

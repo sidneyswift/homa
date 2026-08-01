@@ -6,10 +6,15 @@ import { composeStatePack } from "../../../../lib/compliance/pack";
 import {
   getRecentStatePack,
   getStatePackFamily,
+  getStatePackRecords,
   insertStatePackRow,
 } from "../../../../lib/compliance/pack-store";
+import { schoolYearStartFor } from "../../../../lib/compliance/deadlines";
 import { emitMapEvent } from "../../../../lib/map/events";
-import { requireFamilyWithActor } from "../../../../lib/map/session";
+import {
+  requireFamilyFromBearer,
+  requireFamilyWithActor,
+} from "../../../../lib/map/session";
 import { getStateRequirementsDetail } from "../../../../lib/map/state-requirements";
 import { blobConfigured, uploadMaterialArtifacts } from "../../../../lib/materials/artifact-store";
 import { joinPageBodies, printableSlug } from "../../../../lib/materials/page-shell";
@@ -37,12 +42,20 @@ function failure(status: number, reason: string, note: string): Response {
   return Response.json({ ok: false, reason, note }, { status });
 }
 
-export async function POST(): Promise<Response> {
+export async function POST(request: Request): Promise<Response> {
   const startedAt = Date.now();
 
   let access;
   try {
-    access = await requireFamilyWithActor();
+    const hasBearer = request.headers.has("authorization");
+    const bearerFamily = hasBearer
+      ? await requireFamilyFromBearer(request)
+      : null;
+    access = hasBearer
+      ? bearerFamily
+        ? { family: bearerFamily, memberUserId: null }
+        : null
+      : await requireFamilyWithActor();
   } catch (error) {
     console.error(
       "state pack auth lookup failed:",
@@ -109,12 +122,38 @@ export async function POST(): Promise<Response> {
     state: detail.stateCode,
   });
 
+  const timeZone = effectiveTimeZone(profile.timeZone);
+  const now = new Date();
   const generatedOn = new Intl.DateTimeFormat("en-US", {
-    timeZone: effectiveTimeZone(profile.timeZone),
+    timeZone,
     year: "numeric",
     month: "long",
     day: "numeric",
-  }).format(new Date());
+  }).format(now);
+  const todayIso = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+  const schoolYearStartOn = schoolYearStartFor(profile.schoolYearStartOn, todayIso);
+  let recordSet;
+  try {
+    recordSet = await getStatePackRecords(family.id, schoolYearStartOn);
+  } catch (error) {
+    console.error(
+      "state pack record read failed:",
+      error instanceof Error ? error.message : "unknown",
+    );
+    return failure(502, "records", "Could not read your attendance and hours record.");
+  }
+  if (recordSet.truncated) {
+    return failure(
+      409,
+      "records-too-large",
+      "Your Hours record is too large for a complete packet. Nothing was generated.",
+    );
+  }
 
   const packId = randomUUID();
   const pack = composeStatePack({
@@ -129,6 +168,10 @@ export async function POST(): Promise<Response> {
     },
     packId,
     generatedOn,
+    records: {
+      schoolYearStartOn,
+      entries: recordSet.entries,
+    },
   });
 
   const storedHtml = joinPageBodies(pack.pages.map((page) => page.body));
@@ -201,6 +244,8 @@ export async function POST(): Promise<Response> {
           sourceLastVerified: detail.sourceLastVerified,
           zeroDuty: pack.zeroDuty,
           generatedOn,
+          schoolYearStartOn,
+          sourceRecordEntries: recordSet.entries.length,
         },
       },
     });

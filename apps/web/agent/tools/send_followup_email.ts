@@ -7,8 +7,13 @@ import {
 } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { emitMapEvent } from "../../lib/map/events";
-import { getFamilyEmail, sendAgentComposedEmail } from "../../lib/map/email";
+import {
+  getFamilyEmail,
+  sendAgentComposedEmail,
+  sendAgentMaterialEmail,
+} from "../../lib/map/email";
 import { rateLimited } from "../../lib/map/ratelimit";
+import { getMaterialCaller, getMaterialPinned } from "../../lib/materials/library";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_PER_FAMILY_PER_DAY = 5;
@@ -34,6 +39,10 @@ export default defineBoundedTool({
       .min(1)
       .max(6)
       .describe("A few short paragraphs, in your own warm voice."),
+    materialId: z
+      .uuid()
+      .optional()
+      .describe("The exact server-verified visible final material id when the parent explicitly asks Homa to email that artifact."),
   }),
   async execute(input, ctx) {
     let access;
@@ -80,13 +89,20 @@ export default defineBoundedTool({
       return { sent: false, note: "No email is on file for this family yet." };
     }
 
-    const sent = await sendAgentComposedEmail(
-      email,
-      input.subject,
-      input.bodyLines,
-      undefined,
-      familyId,
-    );
+    const material = input.materialId
+      ? access.mode === "pinned"
+        ? await getMaterialPinned(familyId, input.materialId, { finalOnly: true })
+        : await getMaterialCaller(access.db, familyId, input.materialId)
+      : null;
+    if (input.materialId && (!material || material.status !== "final")) {
+      return {
+        sent: false,
+        note: "That version is not ready to email. Open the copy you want and tap Keep. Then ask Homa to email it again.",
+      };
+    }
+    const sent = material
+      ? await sendAgentMaterialEmail(email, input.subject, input.bodyLines, material, familyId)
+      : await sendAgentComposedEmail(email, input.subject, input.bodyLines, undefined, familyId);
     if (!sent) {
       return { sent: false, note: "The email failed to send. Tell the parent you'll try again shortly." };
     }

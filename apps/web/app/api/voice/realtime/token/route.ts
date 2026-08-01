@@ -6,7 +6,11 @@ import { loadFamilyContextPinned, renderFamilyContext } from "../../../../../lib
 import { emitMapEvent } from "../../../../../lib/map/events";
 import { rateLimited } from "../../../../../lib/map/ratelimit";
 import { resolveApiFamily } from "../../../../../lib/api-auth";
-import { buildRealtimeInstructions } from "../../../../../lib/voice/realtime-session";
+import {
+  buildRealtimeAudioProviderOptions,
+  buildRealtimeInstructions,
+  voiceSpeakerName,
+} from "../../../../../lib/voice/realtime-session";
 import { realtimeToolDefinitions } from "../../../../../lib/voice/realtime-tools";
 
 /**
@@ -110,7 +114,9 @@ export async function POST(request: Request): Promise<Response> {
   let familyContext = "";
   try {
     const rows = await loadFamilyContextPinned(familyId);
-    familyContext = renderFamilyContext(rows, { speakingWith: null });
+    familyContext = renderFamilyContext(rows, {
+      speakingWith: voiceSpeakerName(rows.members, auth.userId),
+    });
   } catch (error) {
     console.error(
       "realtime token: family context load failed:",
@@ -124,15 +130,8 @@ export async function POST(request: Request): Promise<Response> {
       model: MODEL,
       expiresAfterSeconds: TOKEN_TTL_SECONDS,
       sessionConfig: {
-        voice: VOICE,
         instructions: buildRealtimeInstructions(familyContext),
-        // Semantic turn detection handles "she paused to think" better
-        // than a silence timer, which matters when a parent is working out
-        // loud rather than dictating.
-        turnDetection: { type: "semantic-vad" },
-        // The transcript is the product here, not a byproduct: she reads it
-        // while Homa talks, and it lands in her chat afterwards.
-        inputAudioTranscription: {},
+        providerOptions: buildRealtimeAudioProviderOptions(VOICE),
         // Pinned server-side, so the browser cannot add a tool Homa was
         // never meant to have. Derived from the same zod schemas eve
         // validates against, so the model's arguments and the tool's

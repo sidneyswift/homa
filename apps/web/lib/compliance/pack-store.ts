@@ -1,5 +1,5 @@
 import { mapDb } from "../map/db";
-import { prefillBirthdate } from "./pack";
+import { prefillBirthdate, type StatePackRecordEntry } from "./pack";
 
 /**
  * Durable side of the state pack (plans/2026-07-28-state-pack.md D8):
@@ -23,7 +23,8 @@ export interface StatePackFamilyRow {
   lastName: string | null;
   usState: string | null;
   timeZone: string | null;
-  children: { name: string; birthdate: string | null }[];
+  schoolYearStartOn: string | null;
+  children: { id: string; name: string; birthdate: string | null }[];
 }
 
 export async function getStatePackFamily(
@@ -37,18 +38,20 @@ export async function getStatePackFamily(
       last_name: string | null;
       us_state: string | null;
       time_zone: string | null;
+      school_year_start_on: string | null;
     }[]
   >`
-    select name, first_name, last_name, us_state, time_zone
+    select name, first_name, last_name, us_state, time_zone,
+           school_year_start_on::text as school_year_start_on
     from public.families
     where id = ${familyId}
   `;
   const family = families[0];
   if (!family) return null;
   const children = await sql<
-    { name: string; birth_month: string | null; created_at: string }[]
+    { id: string; name: string; birth_month: string | null; created_at: string }[]
   >`
-    select name, birth_month::text as birth_month,
+    select id::text as id, name, birth_month::text as birth_month,
            created_at::text as created_at
     from public.children
     where family_id = ${familyId}
@@ -60,11 +63,52 @@ export async function getStatePackFamily(
     lastName: family.last_name,
     usState: family.us_state,
     timeZone: family.time_zone,
+    schoolYearStartOn: family.school_year_start_on,
     children: children.map((child) => ({
+      id: child.id,
       name: child.name,
       // Month-only for rows from the never-collected-day intake window
       // (prefillBirthdate; D5: only complete values reach the prep sheet).
       birthdate: prefillBirthdate(child.birth_month, child.created_at),
+    })),
+  };
+}
+
+const MAX_STATE_PACK_RECORD_ENTRIES = 10_000;
+
+export async function getStatePackRecords(
+  familyId: string,
+  schoolYearStartOn: string | null,
+): Promise<{ entries: StatePackRecordEntry[]; truncated: boolean }> {
+  const sql = mapDb();
+  const rows = await sql<{
+    child_id: string | null;
+    child_name: string | null;
+    happened_on: string;
+    subject: string;
+    minutes: number;
+  }[]>`
+    select h.child_id::text as child_id,
+           c.name as child_name,
+           h.happened_on::text as happened_on,
+           h.subject,
+           h.minutes
+    from public.hours_log h
+    left join public.children c
+      on c.id = h.child_id and c.family_id = h.family_id
+    where h.family_id = ${familyId}
+      and (${schoolYearStartOn}::date is null or h.happened_on >= ${schoolYearStartOn}::date)
+    order by h.happened_on asc, h.created_at asc, h.id asc
+    limit ${MAX_STATE_PACK_RECORD_ENTRIES + 1}
+  `;
+  return {
+    truncated: rows.length > MAX_STATE_PACK_RECORD_ENTRIES,
+    entries: rows.slice(0, MAX_STATE_PACK_RECORD_ENTRIES).map((row) => ({
+      childId: row.child_id,
+      childName: row.child_name,
+      happenedOn: row.happened_on,
+      subject: row.subject,
+      minutes: row.minutes,
     })),
   };
 }
