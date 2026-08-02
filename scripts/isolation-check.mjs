@@ -49,6 +49,7 @@ let morningOfferFunnelSchemaAvailable = false;
 let familyBillingSubscriptionsSchemaAvailable = false;
 let familyLibrarySchemaAvailable = false;
 let familyAssetPlanLinksSchemaAvailable = false;
+let familyCurriculumMappingSchemaAvailable = false;
 
 const projectRef = new URL(url).hostname.split(".")[0];
 const sql = dbPassword
@@ -2689,6 +2690,8 @@ async function expectAuthenticatedIsolation() {
     let familyAssetChildB = null;
     let familyAssetTagB = null;
     let familyAssetPlanLinkB = null;
+    let familyAssetUnitB = null;
+    let familyCurriculumMappingApprovalB = null;
     if (familyLibrarySchemaAvailable) {
       const [familyAssetUploadA] = await sql`
         insert into public.family_asset_uploads (
@@ -2746,7 +2749,7 @@ async function expectAuthenticatedIsolation() {
         )
         returning id
       `;
-      const [familyAssetUnitB] = await sql`
+      [familyAssetUnitB] = await sql`
         insert into public.family_assets (
           family_id, uploaded_by_user_id, parent_asset_id, ordinal, unit_label,
           title, original_name, url, download_url, media_type, byte_size, file_kind
@@ -2857,6 +2860,60 @@ async function expectAuthenticatedIsolation() {
           "constraint rejects a cross-family planner source link",
           crossFamilyPlanSourceRejected,
           "cross-family planner source insert unexpectedly succeeded",
+        );
+      }
+      if (familyCurriculumMappingSchemaAvailable) {
+        const curriculumDraftB = crypto.randomUUID();
+        [familyCurriculumMappingApprovalB] = await sql`
+          insert into public.family_curriculum_mapping_approvals (
+            draft_id, family_id, source_asset_id, final_revision,
+            decomposition_quality, unit_kind, declared_unit_count,
+            unit_asset_ids, planner_targets, revision_history
+          ) values (
+            ${curriculumDraftB}, ${familyBId}, ${familyAssetB.id}, 1,
+            'full', 'week', 1,
+            ${sql.json([
+              {
+                ordinal: 1,
+                id: familyAssetUnitB.id,
+                title: "Week 1",
+                sourceLocator: "Page 8",
+              },
+            ])},
+            '[]'::jsonb,
+            ${sql.json([{ revision: 1, action: "created" }])}
+          )
+          returning draft_id
+        `;
+        let crossFamilyCurriculumSourceRejected = false;
+        try {
+          await sql`
+            insert into public.family_curriculum_mapping_approvals (
+              draft_id, family_id, source_asset_id, final_revision,
+              decomposition_quality, unit_kind, declared_unit_count,
+              unit_asset_ids, planner_targets, revision_history
+            ) values (
+              ${crypto.randomUUID()}, ${familyBId}, ${familyAssetA.id}, 1,
+              'full', 'week', 1,
+              ${sql.json([
+                {
+                  ordinal: 1,
+                  id: familyAssetUnitB.id,
+                  title: "Week 1",
+                  sourceLocator: "Page 8",
+                },
+              ])},
+              '[]'::jsonb,
+              ${sql.json([{ revision: 1, action: "created" }])}
+            )
+          `;
+        } catch {
+          crossFamilyCurriculumSourceRejected = true;
+        }
+        report(
+          "constraint rejects a cross-family curriculum approval source",
+          crossFamilyCurriculumSourceRejected,
+          "cross-family curriculum approval unexpectedly succeeded",
         );
       }
     }
@@ -3123,6 +3180,60 @@ async function expectAuthenticatedIsolation() {
           "family_asset_plan_links",
           familyAssetPlanLinkWriteFixture,
           "cross-family token cannot mutate Family B planner source link",
+        );
+      }
+      if (familyCurriculumMappingApprovalB) {
+        await expectAuthenticatedRead(
+          familyBUser.accessToken,
+          "family_curriculum_mapping_approvals",
+          familyCurriculumMappingApprovalB.draft_id,
+          1,
+          "auth member can read own curriculum mapping approval",
+          "draft_id",
+        );
+        await expectAuthenticatedRead(
+          familyAUser.accessToken,
+          "family_curriculum_mapping_approvals",
+          familyCurriculumMappingApprovalB.draft_id,
+          0,
+          "auth member cannot read another family's curriculum mapping approval",
+          "draft_id",
+        );
+        const curriculumApprovalWriteFixture = {
+          keyColumn: "draft_id",
+          keyValue: familyCurriculumMappingApprovalB.draft_id,
+          insertRow: {
+            draft_id: crypto.randomUUID(),
+            family_id: familyBId,
+            source_asset_id: familyAssetB.id,
+            final_revision: 1,
+            decomposition_quality: "full",
+            unit_kind: "week",
+            declared_unit_count: 1,
+            unit_asset_ids: [
+              {
+                ordinal: 1,
+                id: familyAssetUnitB.id,
+                title: "Week 1",
+                sourceLocator: "Page 8",
+              },
+            ],
+            planner_targets: [],
+            revision_history: [{ revision: 1, action: "created" }],
+          },
+          updateRow: { final_revision: 2 },
+        };
+        await expectAuthenticatedWritesDenied(
+          familyBUser.accessToken,
+          "family_curriculum_mapping_approvals",
+          curriculumApprovalWriteFixture,
+          "auth member cannot mutate own curriculum mapping approval",
+        );
+        await expectAuthenticatedWritesDenied(
+          familyAUser.accessToken,
+          "family_curriculum_mapping_approvals",
+          curriculumApprovalWriteFixture,
+          "cross-family token cannot mutate Family B curriculum mapping approval",
         );
       }
     }
@@ -4174,6 +4285,23 @@ const FAMILY_LIBRARY_TABLES = [
     await expectReadDenied("family_asset_plan_links");
   }
 }
+{
+  const response = await rest(
+    "family_curriculum_mapping_approvals?select=draft_id&limit=1",
+    { headers: { Prefer: "" } },
+  );
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    coveredTables.add("family_curriculum_mapping_approvals");
+    report(
+      "family_curriculum_mapping_approvals absent from target (additive migration not applied yet); nothing exposed",
+      true,
+    );
+  } else {
+    familyCurriculumMappingSchemaAvailable = true;
+    await expectReadDenied("family_curriculum_mapping_approvals");
+  }
+}
 // Self-improving system tables (Layer 1-5): all admin-only, no client policies.
 await expectReadDenied("conversation_signals");
 await expectReadDenied("system_policies");
@@ -4784,6 +4912,31 @@ if (familyLibrarySchemaAvailable) {
         source_title: "Intruder resource",
       },
       "anon cannot forge planner source links",
+    );
+  }
+  if (familyCurriculumMappingSchemaAvailable) {
+    await expectInsertDenied(
+      "family_curriculum_mapping_approvals",
+      {
+        draft_id: "11111111-1111-4111-8111-111111111111",
+        family_id: "00000000-0000-0000-0000-000000000000",
+        source_asset_id: "00000000-0000-0000-0000-000000000000",
+        final_revision: 1,
+        decomposition_quality: "full",
+        unit_kind: "week",
+        declared_unit_count: 1,
+        unit_asset_ids: [
+          {
+            ordinal: 1,
+            id: "00000000-0000-0000-0000-000000000000",
+            title: "Intruder week",
+            sourceLocator: "Page 1",
+          },
+        ],
+        planner_targets: [],
+        revision_history: [{ revision: 1, action: "created" }],
+      },
+      "anon cannot forge curriculum mapping approvals",
     );
   }
 }

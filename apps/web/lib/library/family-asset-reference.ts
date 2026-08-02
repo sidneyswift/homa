@@ -3,6 +3,7 @@ export const MAX_FAMILY_ASSET_REFERENCES = 5;
 export interface FamilyAssetReferenceSnapshot {
   id: string;
   title: string;
+  sourceLocator?: string | null;
 }
 
 export interface FamilyAssetReference extends FamilyAssetReferenceSnapshot {
@@ -32,7 +33,17 @@ export function parseFamilyAssetReferenceSnapshots(
     }
     if (seen.has(row.id)) continue;
     seen.add(row.id);
-    references.push({ id: row.id, title: row.title.trim().slice(0, 180) });
+    const sourceLocator =
+      row.sourceLocator === null
+        ? null
+        : typeof row.sourceLocator === "string" && row.sourceLocator.trim().length > 0
+          ? row.sourceLocator.trim().slice(0, 160)
+          : undefined;
+    references.push({
+      id: row.id,
+      title: row.title.trim().slice(0, 180),
+      ...(sourceLocator !== undefined ? { sourceLocator } : {}),
+    });
     if (references.length === MAX_FAMILY_ASSET_REFERENCES) break;
   }
   return references;

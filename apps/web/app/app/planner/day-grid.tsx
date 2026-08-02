@@ -135,9 +135,10 @@ function ActivityCard({ item, plan }: { item: PlannerDayItem; plan: PlannerDayPl
                   className="underline decoration-border underline-offset-2 hover:text-body"
                 >
                   {source.title}
+                  {source.sourceLocator ? ` · ${source.sourceLocator}` : null}
                 </a>
               ) : (
-                source.title
+                `${source.title}${source.sourceLocator ? ` · ${source.sourceLocator}` : ""}`
               )}
             </span>
           ))}

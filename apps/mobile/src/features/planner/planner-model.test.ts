@@ -42,6 +42,7 @@ const source: FamilyAssetPlanLinkRecord = {
   activityText: "Count the stairs",
   assetId: "80000000-0000-4000-8000-000000000001",
   sourceTitle: "Counting workbook",
+  sourceLocator: "Page 8",
   libraryUrl:
     "https://thankshoma.com/app/library?asset=80000000-0000-4000-8000-000000000001",
 };
@@ -71,6 +72,7 @@ describe("native planner Family Library sources", () => {
       {
         id: source.assetId,
         title: source.sourceTitle,
+        sourceLocator: source.sourceLocator,
         libraryUrl: source.libraryUrl,
       },
     ]);

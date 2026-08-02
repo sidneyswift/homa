@@ -843,7 +843,7 @@ export async function getPlanBoard(
       : await sql<PlanSourceDisplayRow[]>`
           select link.child_id, link.subject_id, link.week,
                  link.activity_index, link.activity_text,
-                 link.asset_id, link.source_title
+                 link.asset_id, link.source_title, link.source_locator
           from public.family_asset_plan_links link
           join public.children c
             on c.id = link.child_id and c.family_id = link.family_id
@@ -927,7 +927,7 @@ export async function editPlanActivities(
     requestedAssetIds.length === 0
       ? []
       : await sql<CanonicalPlanSource[]>`
-          select id, title
+          select id, title, unit_source_locator as "sourceLocator"
           from public.family_assets
           where family_id = ${familyId}
             and id in ${sql(requestedAssetIds)}

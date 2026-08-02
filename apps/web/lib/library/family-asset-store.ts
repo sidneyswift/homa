@@ -137,6 +137,7 @@ export async function patchFamilyAsset(input: {
       from public.family_assets
       where id = ${input.patch.id}
         and family_id = ${input.familyId}
+        and parent_asset_id is null
         and deleted_at is null
       for update
     `;
@@ -243,6 +244,7 @@ export async function deleteFamilyAsset(input: {
       from public.family_assets
       where id = ${input.assetId}
         and family_id = ${input.familyId}
+        and parent_asset_id is null
         and deleted_at is null
       for update
     `;

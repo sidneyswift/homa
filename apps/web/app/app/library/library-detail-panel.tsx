@@ -9,7 +9,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { SidePanel } from "../../../components/chassis/side-panel";
 import {
@@ -21,12 +21,15 @@ import {
 } from "../../../lib/library/family-asset-shelf";
 import {
   type FamilyAssetFileKind,
+  FAMILY_CURRICULUM_UNIT_REVIEW_LABELS,
   FAMILY_ASSET_RESOURCE_KINDS,
   familyAssetProcessingRetryAvailable,
   formatFamilyAssetBytes,
   type FamilyAssetResourceKind,
   type FamilyAssetView,
+  type FamilyCurriculumUnitView,
 } from "../../../lib/library/family-assets";
+import { familyAssetLibraryHref } from "../../../lib/library/family-asset-reference";
 
 const FILE_KIND_LABELS: Record<FamilyAssetFileKind, string> = {
   document: "Document",
@@ -82,6 +85,8 @@ async function readAssetUpdate(response: Response): Promise<FamilyAssetView> {
 
 export function LibraryDetailPanel({
   asset,
+  curriculumUnits = [],
+  highlightedUnitId,
   childOptions,
   subjectOptions,
   onClose,
@@ -89,6 +94,8 @@ export function LibraryDetailPanel({
   onDeleted,
 }: {
   asset: FamilyAssetView;
+  curriculumUnits?: FamilyCurriculumUnitView[];
+  highlightedUnitId?: string | null;
   childOptions: LibraryChildOption[];
   subjectOptions: LibrarySubjectOption[];
   onClose: () => void;
@@ -96,6 +103,7 @@ export function LibraryDetailPanel({
   onDeleted: (assetId: string) => void;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const highlightedUnitRef = useRef<HTMLLIElement>(null);
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(asset.title);
   const [resourceKind, setResourceKind] = useState<FamilyAssetResourceKind | "">(
@@ -119,6 +127,14 @@ export function LibraryDetailPanel({
   const status = familyAssetStatusCopy(asset);
   const canRetryProcessing = familyAssetProcessingRetryAvailable(asset);
   const headingId = `library-asset-${asset.id}`;
+  const currentCurriculumUnitCount = curriculumUnits.filter(
+    (unit) => unit.isCurrent,
+  ).length;
+
+  useEffect(() => {
+    if (!highlightedUnitId || !highlightedUnitRef.current) return;
+    highlightedUnitRef.current.scrollIntoView({ block: "center" });
+  }, [highlightedUnitId]);
 
   function toggle(setter: (next: Set<string>) => void, current: Set<string>, id: string) {
     const next = new Set(current);
@@ -397,6 +413,56 @@ export function LibraryDetailPanel({
                 </dd>
               </dl>
             </section>
+
+            {curriculumUnits.length > 0 ? (
+              <section className="mt-8 border-t border-border-subtle pt-5">
+                <h3 className="font-display text-lg font-semibold text-strong">
+                  Curriculum units
+                </h3>
+                <p className="mt-1 text-sm leading-6 text-muted">
+                  Homa saved {currentCurriculumUnitCount} approved {currentCurriculumUnitCount === 1 ? "unit" : "units"} from this curriculum. Each one shows where it came from in the file.
+                </p>
+                <ol className="mt-3 space-y-2">
+                  {curriculumUnits.map((unit) => {
+                    const highlighted = unit.id === highlightedUnitId;
+                    return (
+                      <li
+                        key={unit.id}
+                        ref={highlighted ? highlightedUnitRef : undefined}
+                        id={`library-unit-${unit.id}`}
+                        className={`rounded-md border p-3 ${
+                          highlighted
+                            ? "border-brand bg-brand-soft"
+                            : "border-border-subtle bg-page"
+                        }`}
+                      >
+                        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                          <a
+                            href={familyAssetLibraryHref(unit.id)}
+                            className="font-semibold text-strong hover:text-brand"
+                          >
+                            {unit.unitLabel}
+                          </a>
+                          <span className="text-xs text-muted">{unit.sourceLocator}</span>
+                        </div>
+                        {!unit.isCurrent ? (
+                          <p className="mt-1 text-xs font-semibold text-muted">
+                            Earlier approved unit
+                          </p>
+                        ) : null}
+                        <p className="mt-1 text-sm leading-6 text-body">{unit.summary}</p>
+                        <p className="mt-1 text-xs text-muted">
+                          {unit.subjects.length > 0
+                            ? unit.subjects.map((subject) => subject.label).join(" · ")
+                            : "Subject not set"}
+                          {` · ${FAMILY_CURRICULUM_UNIT_REVIEW_LABELS[unit.confidence]}`}
+                        </p>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </section>
+            ) : null}
 
             <section className="mt-8 border-t border-border-subtle pt-5">
               {confirmingRemoval ? (

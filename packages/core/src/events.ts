@@ -853,6 +853,15 @@ export const EVENT_SCHEMAS = {
       use_kind: z.enum(["retrieval", "material", "planner"]),
     })
     .strict(),
+  "library.curriculum_mapped": z
+    .object({
+      family_id: z.uuid(),
+      asset_id: z.uuid(),
+      draft_id: z.uuid(),
+      unit_count: z.number().int().min(1).max(120),
+      planner_target_count: z.number().int().min(0).max(40),
+    })
+    .strict(),
   // The state pack (journeys/06 rows 47-50, J4; shipped 2026-07-28 per
   // docs/homa-planning/plans/2026-07-28-state-pack.md). Deterministic
   // web feature over the state_requirements table; no agent involved.

@@ -242,6 +242,7 @@ export async function findFamilyAssets(
       ) tag_search on true
       where asset.family_id = ${input.familyId}
         and asset.deleted_at is null
+        and asset.parent_asset_id is null
         and (
           ${filters.resourceKinds.length === 0}
           or asset.resource_kind = any(${sql.array(filters.resourceKinds)}::text[])

@@ -23,6 +23,11 @@ import {
   parseFamilyAssetSourceCardPart,
   type FamilyAssetSourceCardData,
 } from "./family-asset-source-card";
+import {
+  CurriculumMappingCard,
+  parseCurriculumMappingCardPart,
+  type CurriculumMappingCardData,
+} from "./curriculum-mapping-card";
 import { selectParentVisibleMaterialMessageParts } from "./material-message-parts";
 import {
   approvedOutboundChildFramingTexts,
@@ -140,6 +145,19 @@ export function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
   ) {
     return { label: "Planner updated", detail: output.summary };
   }
+  if (
+    part.toolName === "approve_curriculum_mapping" &&
+    output.approved === true &&
+    Array.isArray(output.unitAssets) &&
+    Array.isArray(output.plannerTargets)
+  ) {
+    const unitCount = output.unitAssets.length;
+    const additionCount = output.plannerTargets.length;
+    return {
+      label: output.alreadyApproved === true ? "Already saved" : "Units saved",
+      detail: `${unitCount} ${unitCount === 1 ? "unit" : "units"} · ${additionCount} Planner ${additionCount === 1 ? "addition" : "additions"}`,
+    };
+  }
   // The receipt fan's own chip
   // (plans/2026-07-21-chat-first-onboarding.md §6.4). Logging hours is
   // the keystone habit, and until now it was the only named effect in
@@ -245,6 +263,7 @@ type AssistantItem =
   | { kind: "text"; text: string }
   | { kind: "material"; material: MaterialArtifact }
   | { kind: "library_source"; source: FamilyAssetSourceCardData }
+  | { kind: "curriculum_mapping"; card: CurriculumMappingCardData }
   | { kind: "chip"; chip: MemoryChipContent }
   | { kind: "snap"; card: SnapCardData; sourceActionKey: string }
   | { kind: "questions"; card: QuestionCardData; sourceActionKey: string }
@@ -422,6 +441,11 @@ function assistantItems(message: EveMessage): AssistantItem[] {
     const librarySource = parseFamilyAssetSourceCardPart(part);
     if (librarySource) {
       items.push({ kind: "library_source", source: librarySource });
+      continue;
+    }
+    const curriculumMapping = parseCurriculumMappingCardPart(part);
+    if (curriculumMapping) {
+      items.push({ kind: "curriculum_mapping", card: curriculumMapping });
       continue;
     }
     const chip = memoryChipFor(part);
@@ -604,6 +628,8 @@ function AssistantItemView({
       return <MaterialCard material={item.material} />;
     case "library_source":
       return <FamilyAssetSourceCard source={item.source} />;
+    case "curriculum_mapping":
+      return <CurriculumMappingCard card={item.card} />;
     case "chip":
       return <MemoryChip chip={item.chip} />;
     case "checklist":
@@ -966,6 +992,9 @@ const TOOL_STATUS_LABELS: Record<string, string> = {
   load_skill: "getting set up…",
   manage_child_progress: "updating progress…",
   open_planner: "opening the planner…",
+  read_family_curriculum: "reading the curriculum…",
+  preview_curriculum_mapping: "building your review…",
+  approve_curriculum_mapping: "saving what you approved…",
   edit_plan: "updating the planner…",
   schedule_plan_activity: "putting it on the calendar…",
   add_family_event: "adding it to the calendar…",

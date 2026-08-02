@@ -83,7 +83,11 @@ function fakeDb(respond: (text: string, args: unknown[]) => unknown[] | Error): 
 function respondForEdit(options: {
   scheduled: { activity_index: number; scheduled_date: string }[];
   failInsert?: boolean;
-  canonicalSources?: { id: string; title: string }[];
+  canonicalSources?: {
+    id: string;
+    title: string;
+    sourceLocator?: string | null;
+  }[];
   existingSources?: Array<{
     asset_id: string;
     week: number;
@@ -98,7 +102,9 @@ function respondForEdit(options: {
     if (/select id, plan, progress from public\.child_plans/u.test(text)) {
       return [{ id: "plan-1", plan: plan(), progress: { "1.0": true } }];
     }
-    if (/select id, title from public\.family_assets/u.test(text)) {
+    if (
+      /select id, title, unit_source_locator as "sourceLocator"/u.test(text)
+    ) {
       return options.canonicalSources ?? [];
     }
     if (

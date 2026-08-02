@@ -67,7 +67,9 @@ export function ActivityRow({
               onPress={() => void Linking.openURL(source.libraryUrl)}
             >
               <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.xs, color: colors.brand, textDecorationLine: "underline" }}>
-                {index > 0 ? `, ${source.title}` : source.title}
+                {index > 0 ? ", " : ""}
+                {source.title}
+                {source.sourceLocator ? ` · ${source.sourceLocator}` : ""}
               </Text>
             </Pressable>
           ))}

@@ -1,7 +1,7 @@
 ---
-description: Use when a parent wants Homa to save, find, reopen, edit, remove, cite, or use a worksheet, book, curriculum, photo, or other resource their family owns or uploaded. Also use for "use my curriculum" and "what do we already have about this?" Not for authoring a new printable or curriculum; materials-studio and curriculum-studio own creation after the family source is retrieved.
+description: Use, and load before calling find_family_assets or get_family_asset, when a parent wants Homa to save, find, reopen, edit, remove, cite, or use a worksheet, book, curriculum, photo, or other resource their family owns or uploaded. Also use before another skill works from a family source, including "use my curriculum" and "what do we already have about this?" Not for authoring a new printable or curriculum; materials-studio and curriculum-studio own creation after the family source is retrieved.
 metadata:
-  homa-related-skills: materials-studio, curriculum-studio, planner
+  homa-related-skills: materials-studio, curriculum-studio, curriculum-mapping, planner
 ---
 
 # Family librarian
@@ -95,8 +95,9 @@ happens before any plan or printable:
    stays in Library.
 
 Do not decompose an uploaded curriculum into weeks or write it to the planner in
-this skill. That is the separate Plus workflow. Here, retrieve the real source
-and stop honestly if its bounded evidence cannot support the requested step.
+this skill. Load `curriculum-mapping` for that separate Homa Plus workflow.
+Here, retrieve the real source and stop honestly if its bounded evidence cannot
+support the requested step.
 
 ## Edit or delete
 
@@ -119,8 +120,9 @@ and stop honestly if its bounded evidence cannot support the requested step.
   the missing page or detail.
 - The request is only to create something new and names no family source: route
   to materials-studio or curriculum-studio without loading this skill.
-- The request is training export, curriculum decomposition, or automatic
-  planner mapping: those are separate workflows, not hidden work here.
+- The request is curriculum decomposition or approved automatic Planner
+  mapping: load curriculum-mapping. Training export remains a separate
+  workflow, never hidden work here.
 
 The tool result is the only truth about whether a save, update, retrieval, or
 deletion happened. Family identity always comes from authenticated context, and

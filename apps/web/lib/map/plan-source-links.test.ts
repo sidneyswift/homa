@@ -138,6 +138,7 @@ describe("attachPlanSourceRows", () => {
         activity_text: "Count the stairs",
         asset_id: ASSET_A,
         source_title: "Counting workbook",
+        source_locator: "page 12",
       },
       {
         child_id: "child-1",
@@ -147,10 +148,13 @@ describe("attachPlanSourceRows", () => {
         activity_text: "Stale text",
         asset_id: ASSET_B,
         source_title: "Wrong workbook",
+        source_locator: null,
       },
     ]);
     assert.deepEqual(attached.activitySources, {
-      "1.0": [{ id: ASSET_A, title: "Counting workbook" }],
+      "1.0": [
+        { id: ASSET_A, title: "Counting workbook", sourceLocator: "page 12" },
+      ],
     });
     assert.deepEqual(dashboard.activitySources, {});
   });
