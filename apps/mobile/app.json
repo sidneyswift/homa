@@ -19,7 +19,7 @@
       "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSMicrophoneUsageDescription": "Homa uses your microphone so you can talk together.",
+        "NSMicrophoneUsageDescription": "Homa uses your microphone when you choose to talk or record a lesson.",
         "NSCameraUsageDescription": "Homa may use your camera during a live conversation when you choose to share what you are seeing.",
         "NSCalendarsWriteOnlyAccessUsageDescription": "Homa adds only the planner items you choose. It cannot read your calendar."
       }
@@ -44,6 +44,13 @@
     },
     "plugins": [
       "expo-apple-authentication",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Homa uses your microphone when you choose to talk or record a lesson.",
+          "enableBackgroundRecording": false
+        }
+      ],
       "expo-iap",
       "expo-router",
       [

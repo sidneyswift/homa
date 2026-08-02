@@ -58,7 +58,6 @@ export default async function RecordLessonPage({
   return (
     <PageColumn>
       <LessonRecorder
-        familyId={family.id}
         childId={child.id}
         childName={child.name}
         kids={children.map((entry, index) => ({

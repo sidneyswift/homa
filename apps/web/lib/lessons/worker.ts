@@ -43,7 +43,7 @@ import {
   type LessonRecordingRow,
   type LessonSegmentRow,
 } from "./store";
-import { deleteLessonBlob } from "./blobs";
+import { deleteLessonBlob, readLessonBlob } from "./blobs";
 import { lessonAudioKeep } from "./keep-audio";
 
 /**
@@ -77,10 +77,18 @@ export async function processLessonSegment(
 ): Promise<void> {
   const segment = await claimSegmentWork(segmentId, familyId);
   if (segment === null) return;
+  const legacyUrlLane = isLegacyPublicLongFile(segment);
+  const audio = legacyUrlLane
+    ? null
+    : await readLessonBlob(segment.blobUrl, familyId);
+  if (!legacyUrlLane && audio === null) {
+    await releaseSegmentClaim(segmentId, familyId);
+    return;
+  }
 
   let transcript = segment.transcript;
   if (transcript === null) {
-    transcript = await transcribeSegment(segment);
+    transcript = await transcribeSegment(segment, audio);
     if (transcript === null) {
       await releaseSegmentClaim(segmentId, familyId);
       return;
@@ -94,7 +102,7 @@ export async function processLessonSegment(
 
   if (parseToneNotes(segment.toneNotes) === null) {
     const toneNotes = await toneNotesForSegment({
-      audioUrl: segment.blobUrl,
+      audio: audio === null ? new URL(segment.blobUrl) : new Uint8Array(audio),
       mediaType: segment.contentType,
       familyId,
     });
@@ -109,15 +117,14 @@ export async function processLessonSegment(
  *  30 to 60MB never passes through this function (§4.2). */
 async function transcribeSegment(
   segment: LessonSegmentRow,
+  audio: ArrayBuffer | null,
 ): Promise<string | null> {
-  if (segment.seq === FALLBACK_SEGMENT_SEQ && isLikelyLongFile(segment)) {
+  if (isLegacyPublicLongFile(segment)) {
     return transcribeAudioUrl(segment.blobUrl);
   }
+  if (audio === null) return null;
   try {
-    const response = await fetch(segment.blobUrl);
-    if (!response.ok) return null;
-    const bytes = await response.arrayBuffer();
-    return transcribeAudio(bytes, segment.contentType);
+    return transcribeAudio(audio, segment.contentType);
   } catch (error) {
     console.error(
       "lesson segment fetch failed:",
@@ -125,6 +132,16 @@ async function transcribeSegment(
     );
     return null;
   }
+}
+
+function isLegacyPublicLongFile(segment: LessonSegmentRow): boolean {
+  return (
+    segment.seq === FALLBACK_SEGMENT_SEQ
+    && isLikelyLongFile(segment)
+    && new URL(segment.blobUrl).hostname.endsWith(
+      ".public.blob.vercel-storage.com",
+    )
+  );
 }
 
 /** A recorder segment runs ~3 minutes; anything reporting longer came

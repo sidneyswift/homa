@@ -1,5 +1,6 @@
 import {
   getLessonForFamily,
+  getLessonReview,
   listLessonSegments,
 } from "../../../../../lib/lessons/store";
 import {
@@ -25,10 +26,10 @@ export async function GET(
   if (lesson === null) {
     return Response.json({ ok: false, reason: "unknown-lesson" }, { status: 404 });
   }
-  const segments = await listLessonSegments(
-    lessonId,
-    context.auth.familyId,
-  );
+  const [segments, review] = await Promise.all([
+    listLessonSegments(lessonId, context.auth.familyId),
+    getLessonReview(lessonId, context.auth.familyId),
+  ]);
   return Response.json({
     ok: true,
     status: lesson.status,
@@ -37,5 +38,12 @@ export async function GET(
       (segment) => segment.transcript !== null,
     ).length,
     error: lesson.status === "failed",
+    review: review
+      ? {
+          summary: review.summary,
+          evidenceCount: review.evidenceCount,
+          observationCount: review.observationCount,
+        }
+      : null,
   });
 }

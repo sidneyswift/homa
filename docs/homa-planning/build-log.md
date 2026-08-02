@@ -3,6 +3,35 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-08-01 · Founder ruling: copyright does not gate family uploads or training eligibility
+
+Founder ruling, not an agent decision. Registered as
+`family-upload-copyright-training-open` in
+`journeys/10-reconciliation.md` §5 and tracked by epic gh#352.
+
+**What was ruled.** A family may upload the worksheets, books, curriculums,
+photos, links, and other homeschool resources they want to use with Homa.
+Homa does not ask the parent to prove ownership or licensing and does not
+reject an upload because the resource may be copyrighted. Copyright status
+also does not by itself exclude a family-uploaded resource from future Homa
+training use. The founder accepted carrying that exposure until it becomes a
+concrete problem rather than making copyright review a launch gate.
+
+**What remains unchanged.** This ruling removes a copyright restriction. It
+does not remove family tenancy, child privacy, secret and sensitive-data
+controls, file-safety checks, provider-enforced limits, provenance, or
+deletion and export behavior. It does not authorize publishing a family's
+original on a public Homa surface, licensing it to another family, or
+presenting it as Homa-authored. The interim public-by-URL storage ruling and
+its required honest copy remain in force until gh#369 ships.
+
+**Implementation consequence.** Family Library intake has no copyright,
+license, publisher, or ownership attestation gate. Any later training-export
+ledger may record source and transformations, but copyright status is not a
+blocking or exclusion field. Safety and privacy exclusions stay deterministic
+and separate from copyright. Epic gh#352 and children gh#575 and gh#576 carry
+the product and data-pipeline work.
+
 ## 2026-08-01 · Founder ruling: iOS launches with monthly plans only
 
 Founder ruling, not an agent decision. Registered as

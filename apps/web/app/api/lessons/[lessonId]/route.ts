@@ -1,4 +1,4 @@
-import { deleteLessonBlob } from "../../../../lib/lessons/blobs";
+import { deleteLessonBlob, isFamilyLessonUrl } from "../../../../lib/lessons/blobs";
 import {
   deleteLessonRecording,
   listLessonMedia,
@@ -26,6 +26,19 @@ export async function DELETE(
   if (context.status !== "ok") return lessonRouteRefusal(context);
   const { lessonId } = await params;
 
+  let unregisteredBlobUrl: string | null = null;
+  try {
+    const body = (await request.json()) as { blobUrl?: unknown };
+    if (
+      typeof body.blobUrl === "string"
+      && isFamilyLessonUrl(body.blobUrl, context.auth.familyId, lessonId)
+    ) {
+      unregisteredBlobUrl = body.blobUrl;
+    }
+  } catch {
+    // A normal delete has no body.
+  }
+
   const [segments, media] = await Promise.all([
     listLessonSegments(lessonId, context.auth.familyId),
     listLessonMedia(lessonId, context.auth.familyId),
@@ -35,6 +48,9 @@ export async function DELETE(
   }
   for (const item of media) {
     await deleteLessonBlob(item.blobUrl, context.auth.familyId);
+  }
+  if (unregisteredBlobUrl) {
+    await deleteLessonBlob(unregisteredBlobUrl, context.auth.familyId);
   }
   const deleted = await deleteLessonRecording(
     lessonId,
