@@ -7,21 +7,14 @@ import {
 } from "@vercel/blob/client";
 import {
   AlertCircle,
-  Download,
-  FileArchive,
-  FileAudio,
-  FileImage,
-  FileQuestion,
-  FileText,
-  FileVideo,
   ChevronDown,
-  ChevronRight,
   Search,
   SlidersHorizontal,
   Upload,
 } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
+import { ShelfCover } from "../../../components/library/shelf-cover";
 import {
   familyAssetUploadFingerprint,
   familyAssetUploadPartByteSize,
@@ -34,7 +27,6 @@ import {
   type FamilyAssetUploadView,
 } from "../../../lib/library/family-asset-uploads";
 import {
-  formatFamilyAssetBytes,
   libraryUploadMediaType,
   MAX_LIBRARY_UPLOAD_BYTES,
   type FamilyAssetView,
@@ -47,7 +39,6 @@ import {
   familyAssetFilterOptions,
   familyAssetStatusCopy,
   filterFamilyAssets,
-  stableFamilyAssetDate,
 } from "../../../lib/library/family-asset-shelf";
 import { familyAssetLibraryHref } from "../../../lib/library/family-asset-reference";
 import {
@@ -108,14 +99,14 @@ const FILE_ACCEPT = [
   ".key",
 ].join(",");
 
-const FILE_KIND_ICONS = {
-  document: FileText,
-  image: FileImage,
-  audio: FileAudio,
-  video: FileVideo,
-  archive: FileArchive,
-  link: FileText,
-  other: FileQuestion,
+const FILE_KIND_COVER_LABELS: Record<FamilyAssetView["fileKind"], string> = {
+  document: "Document",
+  image: "Image",
+  audio: "Audio",
+  video: "Video",
+  archive: "Archive",
+  link: "Saved link",
+  other: "Resource",
 } as const;
 
 function uploadFailureMessage(error: unknown, resumable: boolean): string {
@@ -238,7 +229,23 @@ export function LibraryView({
     ? initialCurriculumUnitsByParent[selectedAssetId] ?? []
     : [];
   const activeFilterCount = [resourceKind, childId, subjectId, status].filter(Boolean).length;
+  const advancedFilterCount = [childId, subjectId, status].filter(Boolean).length;
   const hasSearch = query.trim().length > 0 || activeFilterCount > 0;
+  const showStatusFilter = filterOptions.statuses.some(
+    (itemStatus) => itemStatus !== "ready",
+  );
+  const hasAdvancedFilterOptions =
+    filterOptions.children.length > 0 ||
+    filterOptions.subjects.length > 0 ||
+    showStatusFilter;
+  const resourceKindCounts = useMemo(() => {
+    const counts = new Map<NonNullable<FamilyAssetView["resourceKind"]>, number>();
+    for (const asset of assets) {
+      if (!asset.resourceKind) continue;
+      counts.set(asset.resourceKind, (counts.get(asset.resourceKind) ?? 0) + 1);
+    }
+    return counts;
+  }, [assets]);
 
   useEffect(() => {
     if (!hasSearch) return;
@@ -760,7 +767,7 @@ export function LibraryView({
           <button
             type="button"
             onClick={beginAddingResources}
-            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-md bg-brand px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[var(--clay-700)]"
+            className="inline-flex min-h-11 shrink-0 self-start items-center justify-center gap-2 rounded-md bg-brand px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[var(--clay-700)] sm:self-auto"
           >
             <Upload size={18} aria-hidden="true" />
             Add resources
@@ -1009,110 +1016,139 @@ export function LibraryView({
         </section>
       ) : (
         <section className="mt-8">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="font-display text-xl font-semibold text-strong">Your shelf</h2>
-              <p className="mt-1 text-sm text-muted">
-                {visibleAssets.length === assets.length
-                  ? `${assets.length} ${assets.length === 1 ? "resource" : "resources"}`
-                  : `${visibleAssets.length} of ${assets.length} resources`}
-              </p>
-            </div>
-            <label className="relative block w-full sm:w-80">
-              <Search
-                size={17}
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-subtle"
-                aria-hidden="true"
-              />
-              <span className="sr-only">Search your Library</span>
-              <input
-                type="search"
-                value={query}
-                maxLength={180}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search title, child, or subject"
-                className="min-h-11 w-full rounded-md border border-border-subtle bg-card py-2 pl-9 pr-3 text-sm text-strong outline-none transition-colors placeholder:text-subtle focus:border-brand"
-              />
-            </label>
+          <div>
+            <h2 className="font-display text-xl font-semibold text-strong">Your shelf</h2>
+            <p className="mt-1 text-sm text-muted">
+              {visibleAssets.length === assets.length
+                ? `${assets.length} ${assets.length === 1 ? "resource" : "resources"}`
+                : `${visibleAssets.length} of ${assets.length} resources`}
+            </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setFiltersOpen((open) => !open)}
-            className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-brand hover:bg-brand-soft sm:hidden"
-            aria-expanded={filtersOpen || hasSearch}
-          >
-            <SlidersHorizontal size={16} aria-hidden="true" />
-            Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
-          </button>
+          <label className="relative mt-4 block w-full max-w-xl">
+            <Search
+              size={17}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-subtle"
+              aria-hidden="true"
+            />
+            <span className="sr-only">Search your Library</span>
+            <input
+              type="search"
+              value={query}
+              maxLength={180}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search title, child, or subject"
+              className="min-h-11 w-full rounded-md border border-border-subtle bg-card py-2 pl-9 pr-3 text-sm text-strong outline-none transition-colors placeholder:text-subtle focus:border-brand"
+            />
+          </label>
 
           <div
-            className={`${filtersOpen || hasSearch ? "grid" : "hidden"} mt-2 gap-2 sm:mt-4 sm:grid sm:grid-cols-2 xl:grid-cols-4`}
+            role="group"
+            className="mt-3 flex flex-wrap items-center gap-2"
+            aria-label="Filter by resource type"
           >
-            <label className="text-xs font-semibold text-muted">
-              Type
-              <select
-                value={resourceKind ?? ""}
-                onChange={(event) =>
-                  setResourceKind(
-                    (event.target.value || null) as FamilyAssetView["resourceKind"],
-                  )
+            <button
+              type="button"
+              aria-pressed={resourceKind === null}
+              onClick={() => setResourceKind(null)}
+              className={
+                resourceKind === null
+                  ? "inline-flex min-h-11 items-center rounded-pill bg-brand-soft px-3 py-2 text-sm font-bold text-[var(--clay-700)]"
+                  : "inline-flex min-h-11 items-center rounded-pill border border-border-subtle px-3 py-2 text-sm font-semibold text-muted hover:bg-card"
+              }
+            >
+              All {assets.length}
+            </button>
+            {filterOptions.resourceKinds.map((kind) => (
+              <button
+                key={kind}
+                type="button"
+                aria-pressed={resourceKind === kind}
+                onClick={() => setResourceKind(kind)}
+                className={
+                  resourceKind === kind
+                    ? "inline-flex min-h-11 items-center rounded-pill bg-brand-soft px-3 py-2 text-sm font-bold text-[var(--clay-700)]"
+                    : "inline-flex min-h-11 items-center rounded-pill border border-border-subtle px-3 py-2 text-sm font-semibold text-muted hover:bg-card"
                 }
-                className="mt-1 min-h-11 w-full rounded-md border border-border-subtle bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
               >
-                <option value="">All types</option>
-                {filterOptions.resourceKinds.map((kind) => (
-                  <option key={kind} value={kind}>
-                    {FAMILY_ASSET_RESOURCE_KIND_LABELS[kind]}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="text-xs font-semibold text-muted">
-              For
-              <select
-                value={childId ?? ""}
-                onChange={(event) => setChildId(event.target.value || null)}
-                className="mt-1 min-h-11 w-full rounded-md border border-border-subtle bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                {FAMILY_ASSET_RESOURCE_KIND_LABELS[kind]} {resourceKindCounts.get(kind) ?? 0}
+              </button>
+            ))}
+            {hasAdvancedFilterOptions ? (
+              <button
+                type="button"
+                onClick={() => setFiltersOpen((open) => !open)}
+                className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-border-subtle px-3 py-2 text-sm font-semibold text-muted hover:bg-card hover:text-strong"
+                aria-expanded={filtersOpen || advancedFilterCount > 0}
               >
-                <option value="">All resources</option>
-                <option value={FAMILY_ASSET_WHOLE_FAMILY_CHILD}>Whole family</option>
-                {filterOptions.children.map((child) => (
-                  <option key={child.id} value={child.id}>{child.name}</option>
-                ))}
-              </select>
-            </label>
-            <label className="text-xs font-semibold text-muted">
-              Subject
-              <select
-                value={subjectId ?? ""}
-                onChange={(event) => setSubjectId(event.target.value || null)}
-                className="mt-1 min-h-11 w-full rounded-md border border-border-subtle bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
-              >
-                <option value="">All subjects</option>
-                {filterOptions.subjects.map((subject) => (
-                  <option key={subject.id} value={subject.id}>{subject.label}</option>
-                ))}
-              </select>
-            </label>
-            <label className="text-xs font-semibold text-muted">
-              Status
-              <select
-                value={status ?? ""}
-                onChange={(event) =>
-                  setStatus((event.target.value || null) as FamilyAssetView["status"] | null)
-                }
-                className="mt-1 min-h-11 w-full rounded-md border border-border-subtle bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
-              >
-                <option value="">All statuses</option>
-                {filterOptions.statuses.map((itemStatus) => (
-                  <option key={itemStatus} value={itemStatus}>
-                    {FAMILY_ASSET_STATUS_LABELS[itemStatus]}
-                  </option>
-                ))}
-              </select>
-            </label>
+                <SlidersHorizontal size={16} aria-hidden="true" />
+                Filters{advancedFilterCount > 0 ? ` (${advancedFilterCount})` : ""}
+              </button>
+            ) : null}
           </div>
+
+          {hasAdvancedFilterOptions ? (
+            <div
+              className={`${filtersOpen || advancedFilterCount > 0 ? "grid" : "hidden"} mt-3 gap-2 rounded-md border border-border-subtle bg-card p-3 sm:grid-cols-2 lg:grid-cols-3`}
+            >
+              {filterOptions.children.length > 0 ? (
+                <label className="text-xs font-semibold text-muted">
+                  For
+                  <select
+                    value={childId ?? ""}
+                    onChange={(event) => setChildId(event.target.value || null)}
+                    className="mt-1 min-h-11 w-full rounded-md border border-border-subtle bg-page px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                  >
+                    <option value="">All resources</option>
+                    <option value={FAMILY_ASSET_WHOLE_FAMILY_CHILD}>Whole family</option>
+                    {filterOptions.children.map((child) => (
+                      <option key={child.id} value={child.id}>
+                        {child.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+              {filterOptions.subjects.length > 0 ? (
+                <label className="text-xs font-semibold text-muted">
+                  Subject
+                  <select
+                    value={subjectId ?? ""}
+                    onChange={(event) => setSubjectId(event.target.value || null)}
+                    className="mt-1 min-h-11 w-full rounded-md border border-border-subtle bg-page px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                  >
+                    <option value="">All subjects</option>
+                    {filterOptions.subjects.map((subject) => (
+                      <option key={subject.id} value={subject.id}>
+                        {subject.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+              {showStatusFilter ? (
+                <label className="text-xs font-semibold text-muted">
+                  Status
+                  <select
+                    value={status ?? ""}
+                    onChange={(event) =>
+                      setStatus(
+                        (event.target.value || null) as FamilyAssetView["status"] | null,
+                      )
+                    }
+                    className="mt-1 min-h-11 w-full rounded-md border border-border-subtle bg-page px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                  >
+                    <option value="">All statuses</option>
+                    {filterOptions.statuses.map((itemStatus) => (
+                      <option key={itemStatus} value={itemStatus}>
+                        {FAMILY_ASSET_STATUS_LABELS[itemStatus]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+            </div>
+          ) : null}
 
           {hasSearch ? (
             <button
@@ -1130,87 +1166,64 @@ export function LibraryView({
               <p className="mt-1 text-sm text-muted">Clear a filter or try another word.</p>
             </div>
           ) : (
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
+            <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
               {visibleAssets.map((asset) => {
-                const Icon = FILE_KIND_ICONS[asset.fileKind];
                 const assetStatus = familyAssetStatusCopy(asset);
+                const childNames = asset.children.slice(0, 2).map((child) => child.name);
+                const audience =
+                  childNames.length === 0
+                    ? "Whole family"
+                    : `${childNames.join(", ")}${asset.children.length > 2 ? `, +${asset.children.length - 2}` : ""}`;
+                const subject = asset.subjects[0]?.label ?? null;
+                const curriculumUnitCount =
+                  initialCurriculumUnitsByParent[asset.id]?.filter(
+                    (unit) => unit.isCurrent,
+                  ).length ?? 0;
                 return (
-                  <article
-                    key={asset.id}
-                    className="flex min-h-44 flex-col rounded-lg border border-border-subtle bg-card p-4 shadow-sm sm:min-h-52 sm:p-5"
-                  >
+                  <article key={asset.id}>
                     <button
                       type="button"
                       onClick={() => openAsset(asset)}
-                      className="group block w-full text-left"
+                      aria-label={`Open ${asset.title}`}
+                      className="group block w-full rounded-md text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-soft text-brand sm:h-10 sm:w-10">
-                          <Icon size={20} aria-hidden="true" />
-                        </div>
-                        <span className="rounded-full bg-page px-2.5 py-1 text-xs font-semibold text-muted">
-                          {assetStatus.label}
-                        </span>
+                      <div className="transition-transform duration-150 group-hover:-translate-y-1">
+                        <ShelfCover
+                          title={asset.title}
+                          publisher={asset.publisher}
+                          subject={subject}
+                          footer={
+                            asset.resourceKind
+                              ? FAMILY_ASSET_RESOURCE_KIND_LABELS[asset.resourceKind]
+                              : FILE_KIND_COVER_LABELS[asset.fileKind]
+                          }
+                          imageUrl={asset.fileKind === "image" ? asset.url : null}
+                          imageAlt={asset.title}
+                        />
                       </div>
-                      <h2 className="mt-3 line-clamp-2 font-display text-lg font-semibold text-strong group-hover:text-brand sm:mt-4">
+                      <h3 className="mt-2 line-clamp-2 text-[0.82rem] font-semibold leading-snug text-strong group-hover:text-brand">
                         {asset.title}
-                      </h2>
-                      <p className="mt-1 hidden truncate text-sm text-muted sm:block">
-                        {asset.originalName}
+                      </h3>
+                      <p className="mt-0.5 line-clamp-1 text-[0.72rem] text-subtle">
+                        {audience}{subject ? ` · ${subject}` : ""}
                       </p>
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {asset.resourceKind ? (
-                          <span className="rounded-full bg-brand-soft px-2.5 py-1 text-xs font-semibold text-brand">
-                            {FAMILY_ASSET_RESOURCE_KIND_LABELS[asset.resourceKind]}
-                          </span>
-                        ) : null}
-                        {asset.children.slice(0, 2).map((child) => (
-                          <span key={child.id} className="rounded-full bg-page px-2.5 py-1 text-xs text-muted">
-                            {child.name}
-                          </span>
-                        ))}
-                        {asset.children.length === 0 ? (
-                          <span className="rounded-full bg-page px-2.5 py-1 text-xs text-muted">Whole family</span>
-                        ) : null}
-                        {asset.subjects.slice(0, 1).map((subject) => (
-                          <span key={subject.id} className="rounded-full bg-page px-2.5 py-1 text-xs text-muted">
-                            {subject.label}
-                          </span>
-                        ))}
-                        {(initialCurriculumUnitsByParent[asset.id]?.filter(
-                          (unit) => unit.isCurrent,
-                        ).length ?? 0) > 0 ? (
-                          <span className="rounded-full bg-brand-soft px-2.5 py-1 text-xs text-brand">
-                            {initialCurriculumUnitsByParent[asset.id].filter(
-                              (unit) => unit.isCurrent,
-                            ).length} curriculum units
-                          </span>
-                        ) : null}
-                      </div>
-                      <p className="mt-1 text-xs text-subtle sm:mt-2">
-                        {formatFamilyAssetBytes(asset.byteSize)}
-                        <span className="hidden sm:inline">
-                          {` · ${stableFamilyAssetDate(asset.createdAt)}`}
-                        </span>
-                      </p>
+                      {curriculumUnitCount > 0 ? (
+                        <p className="mt-1 line-clamp-1 text-[0.7rem] font-semibold text-brand">
+                          {curriculumUnitCount} curriculum {curriculumUnitCount === 1 ? "unit" : "units"}
+                        </p>
+                      ) : null}
+                      {asset.status !== "ready" ? (
+                        <p
+                          className={
+                            assetStatus.tone === "processing"
+                              ? "mt-1 line-clamp-1 text-[0.7rem] font-semibold text-muted"
+                              : "mt-1 line-clamp-1 text-[0.7rem] font-semibold text-danger"
+                          }
+                        >
+                          {assetStatus.label}
+                        </p>
+                      ) : null}
                     </button>
-                    <div className="mt-auto flex items-center gap-2 pt-4 sm:pt-5">
-                      <a
-                        href={`/api/library/assets/${encodeURIComponent(asset.id)}/download?surface=shelf`}
-                        className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-md border border-border-subtle px-3 py-2 text-sm font-bold text-strong hover:bg-page"
-                      >
-                        <Download size={16} aria-hidden="true" />
-                        Download
-                      </a>
-                      <button
-                        type="button"
-                        onClick={() => openAsset(asset)}
-                        className="inline-flex min-h-11 flex-1 items-center justify-center gap-1 rounded-md px-3 py-2 text-sm font-bold text-brand hover:bg-brand-soft"
-                      >
-                        View details
-                        <ChevronRight size={16} aria-hidden="true" />
-                      </button>
-                    </div>
                   </article>
                 );
               })}

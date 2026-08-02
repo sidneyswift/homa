@@ -8,6 +8,7 @@ import {
   isFamilyLibraryUrl,
   libraryUploadMediaType,
   safeLibraryPathName,
+  stripFamilyChatBlobSuffix,
   titleFromLibraryFileName,
 } from "./family-assets";
 
@@ -24,6 +25,17 @@ describe("family asset exact metadata helpers", () => {
   it("keeps Library paths safe while preserving a useful filename", () => {
     assert.equal(safeLibraryPathName("  My Math / Week 1.pdf  "), "My-Math-Week-1.pdf");
     assert.equal(titleFromLibraryFileName("My Math Week 1.pdf"), "My Math Week 1");
+  });
+
+  it("removes only Vercel's exact chat Blob suffix", () => {
+    assert.equal(
+      stripFamilyChatBlobSuffix("IMG_6203-7T4Cg8XgYfJhL3SR8IExfYK44q7.jpg"),
+      "IMG_6203.jpg",
+    );
+    assert.equal(
+      stripFamilyChatBlobSuffix("unit-12345678901234567890123456.pdf"),
+      "unit-12345678901234567890123456.pdf",
+    );
   });
 
   it("accepts only this family's exact Library Blob prefix", () => {

@@ -6,6 +6,7 @@ import {
   FAMILY_ASSET_PROCESSING_QUEUED_NOTE,
   familyAssetFileKind,
   isFamilyLibraryUrl,
+  stripFamilyChatBlobSuffix,
   titleFromLibraryFileName,
   type FamilyAssetView,
 } from "./family-assets";
@@ -153,10 +154,18 @@ export function toFamilyAssetView(
     subjects: [],
   },
 ): FamilyAssetView {
+  const originalName = row.source_attachment_id
+    ? stripFamilyChatBlobSuffix(row.original_name)
+    : row.original_name;
+  const title =
+    row.source_attachment_id &&
+    row.title === titleFromLibraryFileName(row.original_name)
+      ? titleFromLibraryFileName(originalName)
+      : row.title;
   return {
     id: row.id,
-    title: row.title,
-    originalName: row.original_name,
+    title,
+    originalName,
     url: row.url,
     downloadUrl: row.download_url,
     mediaType: row.media_type,

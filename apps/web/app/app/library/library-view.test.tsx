@@ -86,19 +86,38 @@ describe("LibraryView", () => {
     assert.doesNotMatch(html, />Add resources<\/button>/);
   });
 
-  it("renders a compact shelf without showing the privacy warning until upload", () => {
+  it("renders a visual shelf without showing storage controls or privacy copy", () => {
     const html = renderLibrary(ASSETS);
     assert.match(html, />Add resources<\/button>/);
-    assert.match(html, />Download<\/a>/);
-    assert.match(html, />View details/);
     assert.match(html, /Search title, child, or subject/);
-    assert.match(html, />All types<\/option>/);
-    assert.match(html, />All resources<\/option>/);
-    assert.match(html, />All subjects<\/option>/);
-    assert.match(html, />All statuses<\/option>/);
-    assert.match(html, /\/api\/library\/assets\/asset-pdf\/download\?surface=shelf/);
+    assert.match(html, />All 2<\/button>/);
+    assert.match(html, />Worksheet 1<\/button>/);
+    assert.match(html, />Book 1<\/button>/);
+    assert.match(html, /aria-label="Open Math practice"/);
+    assert.match(html, /aspect-\[3\/4\]/);
+    assert.doesNotMatch(html, />Download<\/a>/);
+    assert.doesNotMatch(html, />View details/);
+    assert.doesNotMatch(html, /surface=shelf/);
+    assert.doesNotMatch(html, /math-practice\.pdf|nature-reader\.epub/);
     assert.doesNotMatch(html, /example\.public\.blob/);
     assert.doesNotMatch(html, /These files are not private/);
+  });
+
+  it("renders an image resource as a visual shelf item instead of a storage record", () => {
+    const html = renderLibrary([
+      {
+        ...ASSETS[0],
+        id: "asset-image",
+        title: "Botany field notes",
+        originalName: "IMG_6203-random-storage-suffix.jpg",
+        url: "https://example.public.blob.vercel-storage.com/botany.jpg",
+        mediaType: "image/jpeg",
+        fileKind: "image",
+      },
+    ]);
+
+    assert.match(html, /<img\b[^>]*alt="Botany field notes"/u);
+    assert.doesNotMatch(html, /IMG_6203-random-storage-suffix/u);
   });
 
   it("opens an exact source passed through a Library deep link", () => {
@@ -106,6 +125,7 @@ describe("LibraryView", () => {
     assert.match(html, /Library resource/u);
     assert.match(html, /Close resource details/u);
     assert.match(html, /Math practice/u);
+    assert.match(html, />Download<\/a>/);
   });
 
   it("shows every processing state on the shelf", () => {
@@ -115,10 +135,10 @@ describe("LibraryView", () => {
       { ...ASSETS[0], id: "attention", title: "Attention", status: "needs_attention" },
       { ...ASSETS[0], id: "failed", title: "Failed", status: "failed" },
     ]);
-    assert.match(html, />Ready<\/span>/);
-    assert.match(html, />Organizing details<\/span>/);
-    assert.match(html, />Needs attention<\/span>/);
-    assert.match(html, />Could not organize<\/span>/);
+    assert.doesNotMatch(html, /<p[^>]*>Ready<\/p>/);
+    assert.match(html, />Organizing details<\/p>/);
+    assert.match(html, />Needs attention<\/p>/);
+    assert.match(html, />Could not organize<\/p>/);
   });
 
   it("restores an interrupted upload with explicit resume and cleanup actions", () => {
@@ -212,6 +232,7 @@ describe("LibraryView", () => {
         },
       ],
       false,
+      "asset-pdf",
     );
     assert.match(html, /Your Library stays with you/);
     assert.match(html, />Download<\/a>/);
