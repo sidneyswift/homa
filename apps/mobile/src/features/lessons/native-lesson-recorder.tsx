@@ -21,6 +21,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { reportCrash } from "../../lib/crash-reporting";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, palette, radius, space } from "../../theme/tokens";
 import {
@@ -206,15 +207,28 @@ export function NativeLessonRecorder({
     setSaveError(null);
     setUploadPercent(0);
     setPhase("saving");
-    const result = await saveNativeLessonRecording({
-      intent,
-      uri: localUri,
-      durationSeconds: recordedDuration,
-      onProgress: (percentage) => {
-        setUploadPercent(percentage);
-        if (percentage >= 100) setPhase("analyzing");
-      },
-    });
+    let result;
+    try {
+      result = await saveNativeLessonRecording({
+        intent,
+        uri: localUri,
+        durationSeconds: recordedDuration,
+        onProgress: (percentage) => {
+          setUploadPercent(percentage);
+          if (percentage >= 100) setPhase("analyzing");
+        },
+      });
+    } catch (cause) {
+      reportCrash(cause, {
+        surface: "native-lesson-recorder",
+        operation: "save-recording",
+      });
+      setSaveError(
+        "The recording is still on this phone. Check your connection and try saving again.",
+      );
+      setPhase("save_failed");
+      return;
+    }
     if (result.status === "failed") {
       setSaveError(result.reason);
       setPhase("save_failed");
@@ -228,8 +242,11 @@ export function NativeLessonRecorder({
       setPhase("ready");
       return;
     }
-    setReviewSummary("The private audio is saved. Homa is still finishing the review and will keep working if you leave this screen.");
-    setPhase("ready");
+    if (result.status === "review_failed") {
+      setPhase("review_failed");
+      return;
+    }
+    setPhase("processing");
   }
 
   function discard() {
@@ -378,6 +395,30 @@ export function NativeLessonRecorder({
                 <PrimaryButton label="Try saving again" onPress={() => void saveAndReview()} />
               </View>
             ) : null}
+            {phase === "processing" ? (
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Recording saved</Text>
+                <Text style={styles.body}>
+                  {recorderPhaseCopy(phase, intent.childName)}
+                </Text>
+                <PrimaryButton
+                  label="Back to Voice"
+                  onPress={() => onResumeVoice()}
+                />
+              </View>
+            ) : null}
+            {phase === "review_failed" ? (
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Recording saved</Text>
+                <Text style={styles.body}>
+                  {recorderPhaseCopy(phase, intent.childName)}
+                </Text>
+                <PrimaryButton
+                  label="Back to Voice"
+                  onPress={() => onResumeVoice()}
+                />
+              </View>
+            ) : null}
             {phase === "consent_failed" ? (
               <View style={styles.card}>
                 <Text style={styles.cardTitle}>Nothing was recorded</Text>
@@ -398,7 +439,7 @@ export function NativeLessonRecorder({
           </>
         )}
 
-        {!(["review", "saving", "analyzing", "ready"] as LessonRecorderPhase[]).includes(phase) ? (
+        {!(["review", "saving", "analyzing", "processing", "review_failed", "ready"] as LessonRecorderPhase[]).includes(phase) ? (
           <Pressable
             accessibilityRole="button"
             onPress={canDiscard ? discard : onCancel}

@@ -4,7 +4,9 @@ import { useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { InlineError } from "../../components/ui/inline-error";
 import { toggleActivityCheck } from "../../lib/child-plans";
+import { createIdempotencyKey } from "../../lib/idempotency-key";
 import {
   createFamilyEvent,
   deleteFamilyEvent,
@@ -80,6 +82,7 @@ export default function PlannerScreen() {
   const [filterChildId, setFilterChildId] = useState<string | null>(null);
   const [composerDraft, setComposerDraft] = useState<EventComposerDraft | null>(null);
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
+  const [creatingEventId, setCreatingEventId] = useState<string | null>(null);
   const [schedulingActivity, setSchedulingActivity] = useState<PlanActivityView | null>(null);
   const [calendarExportOpen, setCalendarExportOpen] = useState(false);
 
@@ -88,7 +91,7 @@ export default function PlannerScreen() {
   }
 
   const range = useMemo(() => monthGridRange(anchorDate), [anchorDate]);
-  const { events, scheduleRows, childPlans, loading, reload } = usePlannerData(
+  const { events, scheduleRows, childPlans, loading, error: plannerError, reload } = usePlannerData(
     family?.id ?? null,
     children,
     range.start,
@@ -181,42 +184,55 @@ export default function PlannerScreen() {
 
   async function handleToggleActivity(activity: { childId: string; subjectId: string; week: number; activityIndex: number; done: boolean }) {
     await toggleActivityCheck(activity.childId, activity.subjectId, activity.week, activity.activityIndex, !activity.done);
-    void reload();
+    await reload();
   }
 
   function openNewEventComposer(date: DateOnly) {
     setEditingEventId(null);
+    setCreatingEventId(createIdempotencyKey());
     setComposerDraft(blankDraft(date));
   }
 
   function openEditEventComposer(event: FamilyEventRecord) {
     setEditingEventId(event.id);
+    setCreatingEventId(null);
     setComposerDraft(draftFromEvent(event));
   }
 
   async function handleSaveEvent() {
-    if (!composerDraft || !family) return;
+    if (!composerDraft || !family) {
+      throw new Error("planner event context is unavailable");
+    }
     const input = draftToInput(composerDraft);
     if (editingEventId) {
       await updateFamilyEvent(editingEventId, input);
     } else {
-      await createFamilyEvent(family.id, input);
+      if (!creatingEventId) {
+        throw new Error("planner create identity is unavailable");
+      }
+      await createFamilyEvent(creatingEventId, family.id, input);
     }
     setComposerDraft(null);
     setEditingEventId(null);
-    void reload();
+    setCreatingEventId(null);
+    await reload();
   }
 
   async function handleDeleteEvent() {
-    if (!editingEventId) return;
+    if (!editingEventId) {
+      throw new Error("planner delete context is unavailable");
+    }
     await deleteFamilyEvent(editingEventId);
     setComposerDraft(null);
     setEditingEventId(null);
-    void reload();
+    setCreatingEventId(null);
+    await reload();
   }
 
   async function handleScheduleActivity(date: DateOnly) {
-    if (!family || !schedulingActivity) return;
+    if (!family || !schedulingActivity) {
+      throw new Error("planner schedule context is unavailable");
+    }
     await scheduleActivity({
       familyId: family.id,
       childId: schedulingActivity.childId,
@@ -226,7 +242,7 @@ export default function PlannerScreen() {
       scheduledDate: date,
     });
     setSchedulingActivity(null);
-    void reload();
+    await reload();
   }
 
   if (viewMode === "hours") {
@@ -306,6 +322,10 @@ export default function PlannerScreen() {
           </View>
         ) : null}
 
+        {plannerError ? (
+          <InlineError message="This view couldn't refresh. Pull down to try again." />
+        ) : null}
+
         {viewMode === "month" ? (
           <MonthView
             anchorDate={anchorDate}
@@ -324,7 +344,7 @@ export default function PlannerScreen() {
             unscheduled={filteredUnscheduled}
             kids={filteredChildren}
             onPressEvent={openEditEventComposer}
-            onToggleActivity={(activity) => void handleToggleActivity(activity)}
+            onToggleActivity={handleToggleActivity}
             onScheduleActivity={setSchedulingActivity}
           />
         ) : (
@@ -335,7 +355,7 @@ export default function PlannerScreen() {
             unscheduled={filteredUnscheduled}
             kids={filteredChildren}
             onPressEvent={openEditEventComposer}
-            onToggleActivity={(activity) => void handleToggleActivity(activity)}
+            onToggleActivity={handleToggleActivity}
             onScheduleActivity={setSchedulingActivity}
           />
         )}
@@ -366,19 +386,25 @@ export default function PlannerScreen() {
           isEditing={editingEventId !== null}
           childrenList={children}
           onChange={setComposerDraft}
-          onSave={() => void handleSaveEvent()}
-          onDelete={editingEventId ? () => void handleDeleteEvent() : undefined}
+          onSave={handleSaveEvent}
+          onDelete={editingEventId ? handleDeleteEvent : undefined}
           onClose={() => {
             setComposerDraft(null);
             setEditingEventId(null);
+            setCreatingEventId(null);
           }}
         />
       ) : null}
 
       <ScheduleActivitySheet
+        key={
+          schedulingActivity
+            ? `${schedulingActivity.childId}.${schedulingActivity.subjectId}.${schedulingActivity.week}.${schedulingActivity.activityIndex}`
+            : "scheduler"
+        }
         activity={schedulingActivity}
         initialDate={anchorDate}
-        onSchedule={(date) => void handleScheduleActivity(date)}
+        onSchedule={handleScheduleActivity}
         onClose={() => setSchedulingActivity(null)}
       />
 

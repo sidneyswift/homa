@@ -4,6 +4,8 @@ import { Modal, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "../../components/ui/button";
+import { InlineError } from "../../components/ui/inline-error";
+import { reportCrash } from "../../lib/crash-reporting";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
 import { addDays, formatMonthDay, formatWeekdayLong, type DateOnly } from "./date-utils";
@@ -20,14 +22,40 @@ export function ScheduleActivitySheet({
 }: {
   activity: PlanActivityView | null;
   initialDate: DateOnly;
-  onSchedule: (date: DateOnly) => void;
+  onSchedule: (date: DateOnly) => Promise<void>;
   onClose: () => void;
 }) {
   const [date, setDate] = useState(initialDate);
+  const [saving, setSaving] = useState(false);
+  const [mutationError, setMutationError] = useState<string | null>(null);
   const visible = activity !== null;
 
+  async function handleSchedule() {
+    if (saving) return;
+    setMutationError(null);
+    setSaving(true);
+    try {
+      await onSchedule(date);
+    } catch (cause) {
+      reportCrash(cause, {
+        surface: "native-planner",
+        operation: "schedule-activity",
+      });
+      setMutationError(
+        "Your choice is still here. Homa couldn't confirm the schedule. Check your connection and try again.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={saving ? () => undefined : onClose}
+    >
       <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(51,42,33,0.42)" }}>
         <SafeAreaView
           style={{
@@ -49,7 +77,14 @@ export function ScheduleActivitySheet({
                 </Text>
               ) : null}
             </View>
-            <Pressable onPress={onClose} hitSlop={8}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Close activity scheduler"
+              accessibilityState={{ disabled: saving }}
+              disabled={saving}
+              onPress={onClose}
+              hitSlop={8}
+            >
               <X size={22} color={colors.textSubtle} />
             </Pressable>
           </View>
@@ -65,7 +100,14 @@ export function ScheduleActivitySheet({
               paddingVertical: space.sm,
             }}
           >
-            <Pressable onPress={() => setDate((current) => addDays(current, -1))} hitSlop={8}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Previous day"
+              accessibilityState={{ disabled: saving }}
+              disabled={saving}
+              onPress={() => setDate((current) => addDays(current, -1))}
+              hitSlop={8}
+            >
               <ChevronLeft size={22} color={colors.textBody} />
             </Pressable>
             <View style={{ alignItems: "center" }}>
@@ -76,12 +118,24 @@ export function ScheduleActivitySheet({
                 {formatMonthDay(date)}
               </Text>
             </View>
-            <Pressable onPress={() => setDate((current) => addDays(current, 1))} hitSlop={8}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Next day"
+              accessibilityState={{ disabled: saving }}
+              disabled={saving}
+              onPress={() => setDate((current) => addDays(current, 1))}
+              hitSlop={8}
+            >
               <ChevronRight size={22} color={colors.textBody} />
             </Pressable>
           </View>
 
-          <Button label="Put here" onPress={() => onSchedule(date)} />
+          {mutationError ? <InlineError message={mutationError} /> : null}
+          <Button
+            label={saving ? "Scheduling…" : "Put here"}
+            onPress={() => void handleSchedule()}
+            busy={saving}
+          />
         </SafeAreaView>
       </View>
     </Modal>

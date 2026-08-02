@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Modal,
   Pressable,
+  RefreshControl,
   ScrollView,
   Text,
   View,
@@ -10,6 +11,7 @@ import {
 import { useReducedMotion } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { InlineError } from "../../components/ui/inline-error";
 import { toggleActivityCheck } from "../../lib/child-plans";
 import { scheduleActivity } from "../../lib/plan-schedule";
 import { fontFamilies } from "../../theme/fonts";
@@ -558,12 +560,15 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
   const { family, children, loading: familyLoading } = useFamilyData();
   const weekStart = useMemo(() => startOfWeek(todayDateOnly()), []);
   const weekEnd = useMemo(() => addDays(weekStart, 6), [weekStart]);
-  const { events, scheduleRows, childPlans, sourceLinks, loading, reload } = usePlannerData(
-    family?.id ?? null,
-    children,
-    weekStart,
-    weekEnd,
-  );
+  const {
+    events,
+    scheduleRows,
+    childPlans,
+    sourceLinks,
+    loading,
+    error: plannerError,
+    reload,
+  } = usePlannerData(family?.id ?? null, children, weekStart, weekEnd);
   const [schedulingActivity, setSchedulingActivity] =
     useState<PlanActivityView | null>(null);
 
@@ -593,11 +598,13 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
       activity.activityIndex,
       !activity.done,
     );
-    void reload();
+    await reload();
   }
 
   async function handleScheduleActivity(date: DateOnly) {
-    if (!family || !schedulingActivity) return;
+    if (!family || !schedulingActivity) {
+      throw new Error("voice planner schedule context is unavailable");
+    }
     await scheduleActivity({
       familyId: family.id,
       childId: schedulingActivity.childId,
@@ -607,7 +614,7 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
       scheduledDate: date,
     });
     setSchedulingActivity(null);
-    void reload();
+    await reload();
   }
 
   return (
@@ -634,11 +641,19 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
       </View>
       <ScrollView
         contentContainerStyle={{ padding: space.md, paddingTop: space.xs, gap: space.md }}
+        refreshControl={(
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={() => void reload()}
+          />
+        )}
       >
         {familyLoading || (loading && events.length === 0 && scheduleRows.length === 0) ? (
           <View style={{ paddingVertical: space.xl, alignItems: "center" }}>
             <ActivityIndicator color={colors.brand} />
           </View>
+        ) : plannerError ? (
+          <InlineError message="This week couldn't refresh. Pull down to try again." />
         ) : (
           <WeekView
             weekStart={weekStart}
@@ -649,15 +664,20 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
             // Event editing lives on the Planner tab; this overlay is a
             // quick look while she keeps talking.
             onPressEvent={() => undefined}
-            onToggleActivity={(activity) => void handleToggleActivity(activity)}
+            onToggleActivity={handleToggleActivity}
             onScheduleActivity={setSchedulingActivity}
           />
         )}
       </ScrollView>
       <ScheduleActivitySheet
+        key={
+          schedulingActivity
+            ? `${schedulingActivity.childId}.${schedulingActivity.subjectId}.${schedulingActivity.week}.${schedulingActivity.activityIndex}`
+            : "voice-scheduler"
+        }
         activity={schedulingActivity}
         initialDate={todayDateOnly()}
-        onSchedule={(date) => void handleScheduleActivity(date)}
+        onSchedule={handleScheduleActivity}
         onClose={() => setSchedulingActivity(null)}
       />
     </View>

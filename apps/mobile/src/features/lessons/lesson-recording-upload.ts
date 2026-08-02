@@ -18,7 +18,13 @@ interface NativeBlobUpload {
 export type LessonSaveResult =
   | { status: "ready"; lessonId: string; review: LessonReview }
   | { status: "processing"; lessonId: string }
+  | { status: "review_failed"; lessonId: string }
   | { status: "failed"; reason: string };
+
+type LessonReviewOutcome =
+  | { status: "ready"; review: LessonReview }
+  | { status: "processing" }
+  | { status: "review_failed" };
 
 function apiUrl(path: string): string {
   return `${env.apiUrl.replace(/\/+$/, "")}${path}`;
@@ -136,22 +142,34 @@ export async function grantNativeLessonConsent(): Promise<void> {
   if (!response.ok) throw new Error("Homa could not save your privacy choice. Nothing was recorded.");
 }
 
-async function loadReadyReview(lessonId: string, token: string): Promise<LessonReview | null> {
+async function loadReadyReview(
+  lessonId: string,
+  token: string,
+): Promise<LessonReviewOutcome> {
   for (let attempt = 0; attempt < 30; attempt += 1) {
-    const response = await authenticatedFetch(`/api/lessons/${lessonId}/status`, token);
+    let response: Response;
+    try {
+      response = await authenticatedFetch(`/api/lessons/${lessonId}/status`, token);
+    } catch {
+      return { status: "processing" };
+    }
     const body = await jsonResponse(response);
-    if (!response.ok || body.status === "failed") return null;
+    if (!response.ok) return { status: "processing" };
+    if (body.status === "failed") return { status: "review_failed" };
     const review = body.review as Record<string, unknown> | null;
     if (body.status === "ready" && review && typeof review.summary === "string") {
       return {
-        summary: review.summary,
-        evidenceCount: Number(review.evidenceCount) || 0,
-        observationCount: Number(review.observationCount) || 0,
+        status: "ready",
+        review: {
+          summary: review.summary,
+          evidenceCount: Number(review.evidenceCount) || 0,
+          observationCount: Number(review.observationCount) || 0,
+        },
       };
     }
     await new Promise((resolve) => setTimeout(resolve, 2_000));
   }
-  return null;
+  return { status: "processing" };
 }
 
 export async function saveNativeLessonRecording(input: {
@@ -160,19 +178,28 @@ export async function saveNativeLessonRecording(input: {
   durationSeconds: number;
   onProgress?: (percentage: number) => void;
 }): Promise<LessonSaveResult> {
-  const token = await sessionToken();
-  const createResponse = await authenticatedFetch("/api/lessons", token, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ childId: input.intent.childId, source: "recorder" }),
-  });
-  const created = await jsonResponse(createResponse);
-  if (!createResponse.ok || typeof created.lessonId !== "string" || typeof created.uploadPrefix !== "string") {
-    return { status: "failed", reason: "Homa could not open a private lesson record. Nothing was uploaded." };
-  }
-  const lessonId = created.lessonId;
+  let token: string | null = null;
+  let lessonId: string | null = null;
   let blobUrl: string | null = null;
   try {
+    token = await sessionToken();
+    const createResponse = await authenticatedFetch("/api/lessons", token, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ childId: input.intent.childId, source: "recorder" }),
+    });
+    const created = await jsonResponse(createResponse);
+    if (
+      !createResponse.ok ||
+      typeof created.lessonId !== "string" ||
+      typeof created.uploadPrefix !== "string"
+    ) {
+      return {
+        status: "failed",
+        reason: "Homa could not open a private lesson record. Nothing was uploaded.",
+      };
+    }
+    lessonId = created.lessonId;
     const file = new File(input.uri);
     if (!file.exists || file.size === 0) throw new Error("The recording file is empty.");
     const contentType = file.type || "audio/mp4";
@@ -201,19 +228,25 @@ export async function saveNativeLessonRecording(input: {
       body: JSON.stringify({ durationSeconds: input.durationSeconds }),
     });
     if (!finishResponse.ok) throw new Error("Homa could not finish the lesson review.");
-    const review = await loadReadyReview(lessonId, token);
-    return review
-      ? { status: "ready", lessonId, review }
-      : { status: "processing", lessonId };
+    const reviewOutcome = await loadReadyReview(lessonId, token);
+    if (reviewOutcome.status === "ready") {
+      return { status: "ready", lessonId, review: reviewOutcome.review };
+    }
+    return { status: reviewOutcome.status, lessonId };
   } catch (error) {
-    await authenticatedFetch(`/api/lessons/${lessonId}`, token, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ blobUrl }),
-    }).catch(() => undefined);
+    if (token && lessonId) {
+      await authenticatedFetch(`/api/lessons/${lessonId}`, token, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ blobUrl }),
+      }).catch(() => undefined);
+    }
     return {
       status: "failed",
-      reason: error instanceof Error ? error.message : "Homa could not save this recording.",
+      reason:
+        error instanceof Error && error.message.startsWith("Your session expired.")
+          ? error.message
+          : "Homa could not save this recording. It is still on this phone. Check your connection and try again.",
     };
   }
 }

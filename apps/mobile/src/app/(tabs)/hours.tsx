@@ -51,17 +51,21 @@ export function HoursSurface({ embedded = false }: { embedded?: boolean }) {
   const loading = familyLoading || hoursLoading;
 
   async function handleSaveEdit(edit: { subject: HoursSubject; minutes: number; note: string | null }) {
-    if (!editingEntryId) return;
+    if (!editingEntryId) {
+      throw new Error("hours edit context is unavailable");
+    }
     await updateHoursEntry(editingEntryId, edit);
     setEditingEntryId(null);
-    void reload();
+    await reload();
   }
 
   async function handleDelete() {
-    if (!editingEntryId) return;
+    if (!editingEntryId) {
+      throw new Error("hours delete context is unavailable");
+    }
     await deleteHoursEntry(editingEntryId);
     setEditingEntryId(null);
-    void reload();
+    await reload();
   }
 
   const content = (
@@ -167,8 +171,8 @@ export function HoursSurface({ embedded = false }: { embedded?: boolean }) {
       <EntryEditor
         key={editingEntry?.id ?? "editor"}
         entry={editingEntry}
-        onSave={(edit) => void handleSaveEdit(edit)}
-        onDelete={() => void handleDelete()}
+        onSave={handleSaveEdit}
+        onDelete={handleDelete}
         onClose={() => setEditingEntryId(null)}
       />
     </>

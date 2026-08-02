@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { requireMutationReceipt } from "./mutation-receipt";
 
 /**
  * Reads and edits for hours_log, ported from apps/web/lib/hours.ts and
@@ -81,15 +82,22 @@ export interface HoursEntryEdit {
 export async function updateHoursEntry(
   entryId: string,
   edit: HoursEntryEdit,
-): Promise<{ error: string | null }> {
-  const { error } = await supabase
+): Promise<{ id: string }> {
+  const result = await supabase
     .from("hours_log")
     .update({ subject: edit.subject, minutes: edit.minutes, note: edit.note })
-    .eq("id", entryId);
-  return { error: error ? error.message : null };
+    .eq("id", entryId)
+    .select("id")
+    .maybeSingle();
+  return requireMutationReceipt("update_hours_entry", result);
 }
 
-export async function deleteHoursEntry(entryId: string): Promise<{ error: string | null }> {
-  const { error } = await supabase.from("hours_log").delete().eq("id", entryId);
-  return { error: error ? error.message : null };
+export async function deleteHoursEntry(entryId: string): Promise<{ id: string }> {
+  const result = await supabase
+    .from("hours_log")
+    .delete()
+    .eq("id", entryId)
+    .select("id")
+    .maybeSingle();
+  return requireMutationReceipt("delete_hours_entry", result);
 }

@@ -68,6 +68,10 @@ describe("native lesson recording handoff", () => {
     assert.match(recorderPhaseCopy("confirm", "Mia"), /Nothing is recording yet/u);
     assert.match(recorderPhaseCopy("paused", "Mia"), /Nothing new is being captured/u);
     assert.match(recorderPhaseCopy("review", "Mia"), /save it privately/u);
+    assert.match(recorderPhaseCopy("processing", "Mia"), /still finishing/u);
+    assert.doesNotMatch(recorderPhaseCopy("processing", "Mia"), /review is ready/u);
+    assert.match(recorderPhaseCopy("review_failed", "Mia"), /couldn't finish/u);
+    assert.doesNotMatch(recorderPhaseCopy("review_failed", "Mia"), /keeps working/u);
     assert.match(recorderPhaseCopy("ready", "Mia"), /review is ready/u);
   });
 

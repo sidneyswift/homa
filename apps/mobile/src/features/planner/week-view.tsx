@@ -28,7 +28,7 @@ export function WeekView({
   unscheduled: PlanActivityView[];
   kids: ChildRecord[];
   onPressEvent: (event: FamilyEventRecord) => void;
-  onToggleActivity: (activity: ScheduledActivityView) => void;
+  onToggleActivity: (activity: ScheduledActivityView) => Promise<void>;
   onScheduleActivity: (activity: PlanActivityView) => void;
 }) {
   const days = daysInRange(weekStart, addDays(weekStart, 6));

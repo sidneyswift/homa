@@ -1,4 +1,8 @@
 import { supabase } from "./supabase";
+import {
+  requireMutationReceipt,
+  requireReceiptValue,
+} from "./mutation-receipt";
 
 /**
  * Real dates for four-week-plan activities, ported from
@@ -48,20 +52,31 @@ export interface ScheduleActivityInput {
   scheduledDate: string;
 }
 
-export async function scheduleActivity(input: ScheduleActivityInput): Promise<{ error: string | null }> {
-  const { error } = await supabase.from("plan_activity_schedule").upsert(
-    {
-      family_id: input.familyId,
-      child_id: input.childId,
-      subject_id: input.subjectId,
-      week: input.week,
-      activity_index: input.activityIndex,
-      scheduled_date: input.scheduledDate,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "family_id,child_id,subject_id,week,activity_index" },
+export async function scheduleActivity(
+  input: ScheduleActivityInput,
+): Promise<{ id: string; scheduledDate: string }> {
+  const result = await supabase
+    .from("plan_activity_schedule")
+    .upsert(
+      {
+        family_id: input.familyId,
+        child_id: input.childId,
+        subject_id: input.subjectId,
+        week: input.week,
+        activity_index: input.activityIndex,
+        scheduled_date: input.scheduledDate,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "family_id,child_id,subject_id,week,activity_index" },
+    )
+    .select("id, scheduled_date")
+    .single();
+  const receipt = requireMutationReceipt("schedule_plan_activity", result);
+  requireReceiptValue(
+    "schedule_plan_activity",
+    receipt.scheduled_date === input.scheduledDate,
   );
-  return { error: error ? error.message : null };
+  return { id: receipt.id, scheduledDate: receipt.scheduled_date };
 }
 
 export async function unscheduleActivity(
@@ -69,13 +84,15 @@ export async function unscheduleActivity(
   subjectId: string,
   week: number,
   activityIndex: number,
-): Promise<{ error: string | null }> {
-  const { error } = await supabase
+): Promise<{ id: string }> {
+  const result = await supabase
     .from("plan_activity_schedule")
     .delete()
     .eq("child_id", childId)
     .eq("subject_id", subjectId)
     .eq("week", week)
-    .eq("activity_index", activityIndex);
-  return { error: error ? error.message : null };
+    .eq("activity_index", activityIndex)
+    .select("id")
+    .maybeSingle();
+  return requireMutationReceipt("unschedule_plan_activity", result);
 }
