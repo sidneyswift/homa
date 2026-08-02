@@ -1,9 +1,8 @@
-import * as Crypto from "expo-crypto";
-
 import type { MapAnswer } from "@homa/core";
 
 import { env, EVE_CHANNEL_HEADER } from "../../lib/env";
 import { supabase } from "../../lib/supabase";
+import { createIdempotencyKey } from "./idempotency-key";
 import type { DetailCardData, MapStateChild } from "./onboarding-card-model";
 
 function apiPath(path: string): string {
@@ -58,7 +57,7 @@ export async function saveChecklistAnswer(input: {
     body: JSON.stringify({
       ...input,
       source: "checklist",
-      idempotencyKey: Crypto.randomUUID(),
+      idempotencyKey: createIdempotencyKey(),
     }),
   }));
 }
