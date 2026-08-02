@@ -1,9 +1,16 @@
-import type { ProgressEvidenceClientContext } from "./chat-send-policy";
+import {
+  PROGRESS_NEXT_MOVE_CHAT_CHILD_HEADER,
+  PROGRESS_NEXT_MOVE_CHAT_FINGERPRINT_HEADER,
+} from "@homa/core";
+
+import type { ProgressClientContext, ProgressDraftIntent } from "./chat-send-policy";
 import { mergeComposerDraft } from "./composer-draft";
 
 export interface ProgressDraftBinding {
   childId: string;
   draftPrefix: string;
+  intent: ProgressDraftIntent;
+  proposalFingerprint: string | null;
 }
 
 const MAX_PROGRESS_CHILD_ID_CHARACTERS = 80;
@@ -29,12 +36,46 @@ export function progressChildIdFromRoute(
 
 export function progressEvidenceClientContext(
   childId: string,
-): ProgressEvidenceClientContext {
+): ProgressClientContext {
   return {
     source: "progress",
     intent: "share_progress_evidence",
     progressChildId: childId,
   };
+}
+
+export function progressClientContext(input: {
+  childId: string;
+  intent: ProgressDraftIntent;
+  proposalFingerprint: string | null;
+}): ProgressClientContext {
+  return {
+    source: "progress",
+    intent: input.intent,
+    progressChildId: input.childId,
+    ...(input.proposalFingerprint
+      ? { progressNextMoveFingerprint: input.proposalFingerprint }
+      : {}),
+  };
+}
+
+export function progressDraftIntentFromRoute(
+  value: string | string[] | undefined,
+): ProgressDraftIntent | null {
+  const intent = firstRouteValue(value);
+  return intent === "share_progress_evidence" ||
+    intent === "review_progress_next_move"
+    ? intent
+    : null;
+}
+
+export function progressFingerprintFromRoute(
+  value: string | string[] | undefined,
+): string | null {
+  const fingerprint = firstRouteValue(value);
+  return fingerprint && /^[a-f0-9]{64}$/u.test(fingerprint)
+    ? fingerprint
+    : null;
 }
 
 /** Preserves anything she was already typing and never sends on her behalf. */
@@ -52,18 +93,59 @@ export function bindProgressDraftContext(
   childId: string,
   incomingDraft: string,
   mergedDraft: string,
+  intent: ProgressDraftIntent = "share_progress_evidence",
+  proposalFingerprint: string | null = null,
 ): ProgressDraftBinding | null {
   const draftPrefix = incomingDraft.trim();
   if (childId.trim().length === 0 || draftPrefix.length === 0) return null;
   if (!mergedDraft.startsWith(draftPrefix)) return null;
-  return { childId, draftPrefix };
+  if (intent === "review_progress_next_move" && !proposalFingerprint) {
+    return null;
+  }
+  return { childId, draftPrefix, intent, proposalFingerprint };
 }
 
-/** Keeps the binding while she appends detail, and drops it after replacement. */
+/** Keeps explicit Progress context through arbitrary edits until send or unlink. */
 export function progressChildIdForDraft(
   binding: ProgressDraftBinding | null,
   currentDraft: string,
 ): string | null {
-  if (!binding || !currentDraft.startsWith(binding.draftPrefix)) return null;
+  if (!binding || currentDraft.trim().length === 0) return null;
   return binding.childId;
+}
+
+export function progressContextForDraft(
+  binding: ProgressDraftBinding | null,
+  currentDraft: string,
+): ProgressClientContext | null {
+  if (!binding || currentDraft.trim().length === 0) return null;
+  return progressClientContext({
+    childId: binding.childId,
+    intent: binding.intent,
+    proposalFingerprint: binding.proposalFingerprint,
+  });
+}
+
+export function progressTransportForDraft(
+  binding: ProgressDraftBinding | null,
+  currentDraft: string,
+):
+  | { clientContext: ProgressClientContext }
+  | { headers: Readonly<Record<string, string>> }
+  | null {
+  const context = progressContextForDraft(binding, currentDraft);
+  if (!context) return null;
+  if (
+    context.intent === "review_progress_next_move" &&
+    context.progressNextMoveFingerprint
+  ) {
+    return {
+      headers: {
+        [PROGRESS_NEXT_MOVE_CHAT_CHILD_HEADER]: context.progressChildId,
+        [PROGRESS_NEXT_MOVE_CHAT_FINGERPRINT_HEADER]:
+          context.progressNextMoveFingerprint,
+      },
+    };
+  }
+  return { clientContext: context };
 }

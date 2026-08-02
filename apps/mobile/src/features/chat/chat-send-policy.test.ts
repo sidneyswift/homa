@@ -100,4 +100,22 @@ describe("takeNextQueuedTurn", () => {
       remaining: [contextual],
     });
   });
+
+  it("keeps verified proposal headers on exactly one queued parent message", () => {
+    const headers = {
+      "x-homa-progress-next-move-child": "child-maya",
+      "x-homa-progress-next-move-fingerprint": "a".repeat(64),
+    };
+    assert.deepEqual(
+      takeNextQueuedTurn([
+        { text: "Adjust this idea", lane: "parent", headers },
+        { text: "Also help with lunch", lane: "parent" },
+      ]),
+      {
+        message: "Adjust this idea",
+        headers,
+        remaining: [{ text: "Also help with lunch", lane: "parent" }],
+      },
+    );
+  });
 });

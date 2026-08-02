@@ -55,11 +55,30 @@ export async function requireFamilyFromBearer(
   return (await requireFamilyWithActorFromBearer(request))?.family ?? null;
 }
 
-async function requireFamilyWithActorFromBearer(
+export async function requireFamilyWithAiConsentFromBearer(
   request: Request,
 ): Promise<{
   family: FamilyRow;
+  aiProcessingConsented: boolean;
+} | null> {
+  const context = await requireFamilyWithActorFromBearer(request, {
+    includeAiProcessingConsent: true,
+  });
+  return context
+    ? {
+        family: context.family,
+        aiProcessingConsented: context.aiProcessingConsented === true,
+      }
+    : null;
+}
+
+async function requireFamilyWithActorFromBearer(
+  request: Request,
+  options: { includeAiProcessingConsent?: boolean } = {},
+): Promise<{
+  family: FamilyRow;
   memberUserId: string;
+  aiProcessingConsented?: boolean;
 } | null> {
   const token = extractBearerToken(request.headers.get("authorization"));
   if (!token) return null;
@@ -77,7 +96,25 @@ async function requireFamilyWithActorFromBearer(
   if (error || !data.user) return null;
 
   const family = await getFamilyByAuthUser(data.user.id);
-  return family ? { family, memberUserId: data.user.id } : null;
+  if (!family) return null;
+  if (!options.includeAiProcessingConsent) {
+    return { family, memberUserId: data.user.id };
+  }
+
+  const { data: membership, error: membershipError } = await supabase
+    .from("family_members")
+    .select("ai_processing_consented_at")
+    .eq("family_id", family.id)
+    .eq("user_id", data.user.id)
+    .maybeSingle();
+  if (membershipError) {
+    throw new Error(`AI consent lookup failed: ${membershipError.message}`);
+  }
+  return {
+    family,
+    memberUserId: data.user.id,
+    aiProcessingConsented: Boolean(membership?.ai_processing_consented_at),
+  };
 }
 
 interface RequestAuthResolvers<T> {

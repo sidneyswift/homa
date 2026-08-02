@@ -7,6 +7,7 @@ import {
   messageSourceContext,
   messageSourceFromRequest,
 } from "../../lib/chat-message-source";
+import { resolveProgressNextMoveChatContext } from "../../lib/child-progress/next-move-chat-context";
 import {
   canonicalInboundAuthAttributes,
 } from "../../lib/conversation-continuity/canonical-inbound";
@@ -163,6 +164,16 @@ function supabaseAuth(): AuthFn<Request> {
     }
     if (membership?.display_name) attributes.memberName = membership.display_name;
     if (userData.user.email) attributes.email = userData.user.email;
+    if (channel === "mobile" && membership?.family_id) {
+      const progressNextMoveChatContext =
+        await resolveProgressNextMoveChatContext({
+          familyId: membership.family_id,
+          headers: request.headers,
+        });
+      if (progressNextMoveChatContext) {
+        attributes.progressNextMoveChatContext = progressNextMoveChatContext;
+      }
+    }
 
     // The context switcher's selection rides the same-origin request as a
     // cookie. It is a UI HINT, not an auth fact: family-context validates
@@ -194,6 +205,9 @@ export default eveChannel({
     const turnContext = [
       ...modalityContext,
       ...messageSourceContext(auth.attributes),
+      ...(typeof auth.attributes.progressNextMoveChatContext === "string"
+        ? [auth.attributes.progressNextMoveChatContext]
+        : []),
     ];
 
     // Sandboxed eval sessions skip continuity on purpose: they all

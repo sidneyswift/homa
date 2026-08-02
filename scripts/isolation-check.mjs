@@ -50,6 +50,7 @@ let familyBillingSubscriptionsSchemaAvailable = false;
 let familyLibrarySchemaAvailable = false;
 let familyAssetPlanLinksSchemaAvailable = false;
 let familyCurriculumMappingSchemaAvailable = false;
+let progressNextMovesSchemaAvailable = false;
 
 const projectRef = new URL(url).hostname.split(".")[0];
 const sql = dbPassword
@@ -3874,6 +3875,41 @@ async function expectAuthenticatedIsolation() {
       );
     }
 
+    if (progressNextMovesSchemaAvailable) {
+      const nextMoveFixture = {
+        table: "child_progress_next_moves",
+        label: "Progress next move",
+        keyColumn: "context_fingerprint",
+        keyValue: "a".repeat(64),
+        insertRow: {
+          family_id: familyBId,
+          child_id: childBId,
+          context_fingerprint: "a".repeat(64),
+          source_revision: 1,
+          prompt_version: "isolation",
+          status: "pending",
+        },
+        updateRow: { status: "superseded" },
+      };
+      await expectAuthenticatedReadDenied(
+        familyBUser.accessToken,
+        nextMoveFixture.table,
+        "auth member cannot read own Progress next move state",
+      );
+      await expectAuthenticatedWritesDenied(
+        familyBUser.accessToken,
+        nextMoveFixture.table,
+        nextMoveFixture,
+        "auth member cannot mutate own Progress next move state",
+      );
+      await expectAuthenticatedWritesDenied(
+        familyAUser.accessToken,
+        nextMoveFixture.table,
+        nextMoveFixture,
+        "cross-family token cannot mutate Family B Progress next move state",
+      );
+    }
+
     await expectAuthenticatedInsertDenied(
       familyAUser.accessToken,
       "children",
@@ -4019,6 +4055,26 @@ for (const table of [
   "child_observations",
 ]) {
   await expectAnonymousNoRowsOrDenied(table);
+}
+// Stable Progress next moves are derived, server-only state. The additive
+// migration may lead or follow this guard during rollout, so absence is safe;
+// once present, neither product Data API role may read or mutate it.
+{
+  const response = await rest(
+    "child_progress_next_moves?select=context_fingerprint&limit=1",
+    { headers: { Prefer: "" } },
+  );
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    coveredTables.add("child_progress_next_moves");
+    report(
+      "child_progress_next_moves absent from target (additive migration not applied yet); nothing exposed",
+      true,
+    );
+  } else {
+    progressNextMovesSchemaAvailable = true;
+    await expectReadDenied("child_progress_next_moves");
+  }
 }
 // Subject lesson packages are member-readable and server-write-only. This
 // also marks the new public tables as covered before the dynamic family probes.

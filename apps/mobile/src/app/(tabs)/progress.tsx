@@ -1,8 +1,10 @@
+import type { ChildProgressView } from "@homa/core";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { AiConsentGate } from "../../components/ai-consent-gate";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { useFamilyData } from "../../features/family/use-family-data";
@@ -12,6 +14,8 @@ import {
   progressUpdatedLine,
 } from "../../features/progress/map-model";
 import { SubjectCard } from "../../features/progress/subject-card";
+import { ProgressNextMoveCard } from "../../features/progress/progress-next-move-card";
+import { useProgressNextMove } from "../../features/progress/use-progress-next-move";
 import { useChildProgress } from "../../features/progress/use-child-progress";
 import {
   progressErrorPresentation,
@@ -53,15 +57,28 @@ export default function ProgressScreen() {
     view?.childId === effectiveChildId ? view : null;
   const loading = familyLoading || progressLoading;
 
-  function openProgressChat(childId: string, childName: string): void {
+  function openProgressChat(input: {
+    childId: string;
+    draft: string;
+    intent: "share_progress_evidence" | "review_progress_next_move";
+    fingerprint?: string;
+  }): void {
     router.push({
       pathname: "/chat",
       params: {
-        progressDraft: progressAssessmentDraft(childName),
-        progressDraftId: `${childId}:${Date.now()}`,
-        progressChildId: childId,
+        progressDraft: input.draft,
+        progressDraftId: `${input.childId}:${Date.now()}`,
+        progressChildId: input.childId,
+        progressIntent: input.intent,
+        ...(input.fingerprint
+          ? { progressNextMoveFingerprint: input.fingerprint }
+          : {}),
       },
     });
+  }
+
+  async function refreshProgress(): Promise<void> {
+    await reload();
   }
 
   async function handleProgressErrorAction(
@@ -180,7 +197,7 @@ export default function ProgressScreen() {
         refreshControl={
           <RefreshControl
             refreshing={progressLoading}
-            onRefresh={() => void reload()}
+            onRefresh={() => void refreshProgress()}
           />
         }
       >
@@ -267,16 +284,14 @@ export default function ProgressScreen() {
           </Card>
         ) : null}
 
-        {!loading && !error && visibleView && visibleView.subjects.length === 0 ? (
-          <AssessmentCta
-            childName={selectedChild?.name ?? visibleView.childName}
-            onPress={() =>
-              openProgressChat(
-                selectedChild?.id ?? visibleView.childId,
-                selectedChild?.name ?? visibleView.childName,
-              )
-            }
-          />
+        {visibleView ? (
+          <AiConsentGate purpose="progress" embedded>
+            <ProgressNextMoveSection
+              view={visibleView}
+              onRefreshProgress={refreshProgress}
+              onOpenChat={openProgressChat}
+            />
+          </AiConsentGate>
         ) : null}
 
         {visibleView?.subjects.map((subject) => (
@@ -289,6 +304,133 @@ export default function ProgressScreen() {
         ))}
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function ProgressNextMoveSection({
+  view,
+  onRefreshProgress,
+  onOpenChat,
+}: {
+  view: ChildProgressView;
+  onRefreshProgress: () => Promise<void>;
+  onOpenChat: (input: {
+    childId: string;
+    draft: string;
+    intent: "share_progress_evidence" | "review_progress_next_move";
+    fingerprint?: string;
+  }) => void;
+}) {
+  const nextMoveState = useProgressNextMove(view);
+
+  if (
+    nextMoveState.nextMove &&
+    nextMoveState.nextMove.kind !== "none" &&
+    nextMoveState.contextFingerprint
+  ) {
+    return (
+      <ProgressNextMoveCard
+        nextMove={nextMoveState.nextMove}
+        dismissing={nextMoveState.dismissing}
+        dismissError={nextMoveState.dismissError}
+        onDismiss={() => void nextMoveState.dismiss()}
+        onOpenChat={(draft) =>
+          onOpenChat({
+            childId: view.childId,
+            draft,
+            intent: "review_progress_next_move",
+            fingerprint: nextMoveState.contextFingerprint ?? undefined,
+          })
+        }
+      />
+    );
+  }
+
+  if (nextMoveState.loading || nextMoveState.pending) {
+    return (
+      <NextMoveStatusCard
+        title="Choosing one small next move"
+        body="Your Progress page is ready while Homa checks the evidence."
+      />
+    );
+  }
+
+  if (nextMoveState.error) {
+    return (
+      <NextMoveStatusCard
+        title="The next move is taking a break"
+        body={nextMoveState.error.message}
+        actionLabel={
+          nextMoveState.error.reason === "projection-changed"
+            ? "Refresh Progress"
+            : "Try again"
+        }
+        onAction={() =>
+          void (nextMoveState.error?.reason === "projection-changed"
+            ? onRefreshProgress()
+            : nextMoveState.retry())
+        }
+      />
+    );
+  }
+
+  if (
+    view.subjects.length === 0 &&
+    (!nextMoveState.nextMove || nextMoveState.nextMove.kind === "none")
+  ) {
+    return (
+      <AssessmentCta
+        childName={view.childName}
+        onPress={() =>
+          onOpenChat({
+            childId: view.childId,
+            draft: progressAssessmentDraft(view.childName),
+            intent: "share_progress_evidence",
+          })
+        }
+      />
+    );
+  }
+
+  return null;
+}
+
+function NextMoveStatusCard({
+  title,
+  body,
+  actionLabel,
+  onAction,
+}: {
+  title: string;
+  body: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}) {
+  return (
+    <Card style={{ gap: space.sm }}>
+      <Text
+        accessibilityLiveRegion="polite"
+        style={{
+          fontFamily: fontFamilies.bodySemibold,
+          fontSize: fontSize.sm,
+          color: colors.textStrong,
+        }}
+      >
+        {title}
+      </Text>
+      <Text
+        style={{
+          fontFamily: fontFamilies.body,
+          fontSize: fontSize.sm,
+          color: colors.textBody,
+        }}
+      >
+        {body}
+      </Text>
+      {actionLabel && onAction ? (
+        <Button label={actionLabel} variant="secondary" onPress={onAction} />
+      ) : null}
+    </Card>
   );
 }
 

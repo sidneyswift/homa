@@ -193,8 +193,12 @@ function progressViewData(view: ChildProgressView) {
             topics: domain.topics
               .slice(0, MAX_TOPICS_PER_DOMAIN)
               .map((topic) => ({
+                itemId: topic.itemId,
                 statement: bounded(topic.statement),
                 state: topic.state,
+                answer: topic.answer,
+                derivation: topic.source?.derivation ?? null,
+                observedAt: topic.observedAt,
               })),
           })),
       })),

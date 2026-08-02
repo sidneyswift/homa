@@ -3,12 +3,30 @@ import { describe, it } from "node:test";
 
 import {
   USAGE_SURFACES,
+  modelUsageChannelFromAttributes,
   usageSurfaceFromAttributes,
 } from "./model-usage";
 
 describe("model usage surfaces", () => {
   it("registers morning briefs for reporting and Gateway attribution", () => {
     assert.ok(USAGE_SURFACES.includes("morning_brief"));
+  });
+
+  it("attributes the internal Progress task to the native product surface", () => {
+    assert.ok(USAGE_SURFACES.includes("progress_next_move"));
+    const attributes = {
+      channel: "progress_next_move",
+      modelUsageSurface: "progress_next_move",
+    };
+    assert.equal(modelUsageChannelFromAttributes(attributes), "mobile");
+    assert.equal(usageSurfaceFromAttributes(attributes), "progress_next_move");
+    assert.equal(
+      usageSurfaceFromAttributes({
+        channel: "progress_next_move",
+        modelUsageSurface: "chat",
+      }),
+      "chat",
+    );
   });
 
   it("classifies an authenticated morning brief task by task kind", () => {
