@@ -42,7 +42,7 @@ export function AskHomaAboutChild({
       aria-busy={isPending ? "true" : undefined}
       className={ASK_HOMA_CLASSES[variant]}
     >
-      Ask HOMA about {childName}
+      Ask Homa about {childName}
     </button>
   );
 }

@@ -32,7 +32,7 @@ describe("ProgressUnavailable", () => {
       html,
       /<button[^>]*type="button"[^>]*>Retry<\/button>/u,
     );
-    assert.match(html, /Ask HOMA about Maya/u);
+    assert.match(html, /Ask Homa about Maya/u);
     assert.doesNotMatch(html, /\/report|\/onboarding/u);
   });
 });
