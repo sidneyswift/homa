@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { getMyFamily } from "../../../lib/family";
+import { getPaidAppShellData } from "../../../lib/app-data";
 import { getFamilyPhones } from "../../../lib/family-phone";
 import { agentJobsEnabled } from "../../../lib/jobs/flag";
 import { effectiveTimeZone } from "../../../lib/time-zone";
@@ -75,8 +75,9 @@ async function loadActiveAgentJobs(
 }
 
 export default async function TasksPage() {
-  const family = await getMyFamily();
-  if (!family?.profile_completed_at) redirect("/onboarding");
+  const data = await getPaidAppShellData();
+  if (!data) redirect("/onboarding");
+  const { family } = data;
 
   const supabase = await createSupabaseServerClient();
   const [scheduleResult, runsResult, phones, userResult, jobs] = await Promise.all([

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 
-import { getMyChildren, getMyFamily } from "../../../../lib/family";
+import { getPaidAppShellData } from "../../../../lib/app-data";
 import { lessonListenEnabled } from "../../../../lib/lessons/flag";
 import {
   getLessonForFamily,
@@ -81,12 +81,12 @@ export default async function LessonReviewPage({
 }) {
   if (!lessonListenEnabled()) notFound();
   const { lessonId } = await params;
-  const family = await getMyFamily();
-  if (!family) redirect("/onboarding");
+  const data = await getPaidAppShellData();
+  if (!data) redirect("/onboarding");
+  const { family, children } = data;
 
   const lesson = await getLessonForFamily(lessonId, family.id);
   if (!lesson) notFound();
-  const children = await getMyChildren(family.id);
   const childName =
     children.find((child) => child.id === lesson.childId)?.name ??
     "your child";

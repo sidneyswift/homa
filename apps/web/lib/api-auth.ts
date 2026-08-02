@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-import { createSupabaseServerClient } from "./supabase/server";
+import { createSupabaseRequestClient } from "./supabase/server";
 
 /**
  * Family resolution for API routes that serve both surfaces: the web
@@ -48,7 +48,7 @@ export async function resolveApiFamily(
     if (error || !data.user) return null;
     userId = data.user.id;
   } else {
-    supabase = await createSupabaseServerClient();
+    supabase = createSupabaseRequestClient(request);
     const { data } = await supabase.auth.getUser();
     if (!data.user) return null;
     userId = data.user.id;

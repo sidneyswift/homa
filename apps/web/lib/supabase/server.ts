@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, parseCookieHeader } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 /**
@@ -26,6 +26,35 @@ export async function createSupabaseServerClient() {
             // Called from a Server Component: cookie writes are not allowed
             // there. Safe to ignore; apps/web/proxy.ts refreshes sessions.
           }
+        },
+      },
+    },
+  );
+}
+
+/**
+ * Supabase client for Route Handlers that already receive an explicit Request.
+ * Reading the request header directly avoids depending on Next's ambient
+ * request store, which is not guaranteed to survive every route execution
+ * path. apps/web/proxy.ts owns session refresh and response cookie writes.
+ */
+export function createSupabaseRequestClient(request: Request) {
+  const requestCookies = parseCookieHeader(
+    request.headers.get("cookie") ?? "",
+  ).flatMap(({ name, value }) =>
+    value === undefined ? [] : [{ name, value }],
+  );
+
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return requestCookies;
+        },
+        setAll() {
+          // The proxy refreshes sessions before Route Handlers execute.
         },
       },
     },

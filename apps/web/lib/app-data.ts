@@ -26,12 +26,9 @@ import {
  * caller's RLS context, so every row is family-scoped by the database.
  */
 
-export interface AppData {
+export interface AppShellData {
   family: FamilyRecord;
   children: ChildRecord[];
-  reports: Map<string, DashboardReport>;
-  plans: DashboardPlan[];
-  pendingCurriculumChildIds: Set<string>;
   /** The signed-in adult's own name (multi-parent v0): greetings prefer
    * it over the family-level parent_display_name. Null when unset. */
   memberDisplayName: string | null;
@@ -39,6 +36,41 @@ export interface AppData {
    * prefers it over the family-level parent_avatar_url. */
   memberAvatarUrl: string | null;
 }
+
+export interface AppData extends AppShellData {
+  reports: Map<string, DashboardReport>;
+  plans: DashboardPlan[];
+  pendingCurriculumChildIds: Set<string>;
+}
+
+/** Setup-complete identity for the persistent app shell. It deliberately
+ * does not answer billing access, so the Library can keep existing family
+ * records reachable after cancellation without weakening RLS. */
+export const getAppShellData = cache(async (): Promise<AppShellData | null> => {
+  const family = await getMyFamily();
+  if (!family || !family.profile_completed_at) return null;
+  const [children, memberProfile] = await Promise.all([
+    getMyChildren(family.id),
+    getMyMemberProfile(),
+  ]);
+  if (children.length === 0) return null;
+  return {
+    family,
+    children,
+    memberDisplayName: memberProfile?.display_name ?? null,
+    memberAvatarUrl: memberProfile?.avatar_url ?? null,
+  };
+});
+
+/** The ordinary paid app admission check, without dashboard-only reads. */
+export const getPaidAppShellData = cache(
+  async (): Promise<AppShellData | null> => {
+    const shell = await getAppShellData();
+    if (!shell) return null;
+    if ((await familyAccountCheckout(shell.family.id)) !== null) return null;
+    return shell;
+  },
+);
 
 /**
  * getAppData(): AppData | null
@@ -52,18 +84,15 @@ export interface AppData {
  * per-route check that can drift (the Progress-bypass scar, dc4ab64b).
  */
 export const getAppData = cache(async (): Promise<AppData | null> => {
-  const family = await getMyFamily();
-  if (!family || !family.profile_completed_at) return null;
-  if ((await familyAccountCheckout(family.id)) !== null) return null;
-  const children = await getMyChildren(family.id);
-  if (children.length === 0) return null;
+  const shell = await getPaidAppShellData();
+  if (!shell) return null;
+  const { family, children } = shell;
 
   const childIds = children.map((child) => child.id);
-  const [reports, plans, pendingCurriculumChildIds, memberProfile] = await Promise.all([
+  const [reports, plans, pendingCurriculumChildIds] = await Promise.all([
     getReportsForChildren(childIds),
     getPlansForChildren(childIds),
     getPendingCurriculumChildIds(childIds),
-    getMyMemberProfile(),
   ]);
 
   return {
@@ -77,7 +106,7 @@ export const getAppData = cache(async (): Promise<AppData | null> => {
     // their ages and interests, are already in hand.
     plans: withAgeTemplates(children, plans),
     pendingCurriculumChildIds,
-    memberDisplayName: memberProfile?.display_name ?? null,
-    memberAvatarUrl: memberProfile?.avatar_url ?? null,
+    memberDisplayName: shell.memberDisplayName,
+    memberAvatarUrl: shell.memberAvatarUrl,
   };
 });

@@ -18,9 +18,20 @@ const ASSETS: FamilyAssetView[] = [
     byteSize: 1024,
     fileKind: "document",
     resourceKind: "worksheet",
+    authors: [],
+    publisher: null,
+    language: null,
     status: "ready",
+    processingErrorCode: null,
     processingNote: null,
+    sourceUploadId: "11111111-1111-4111-8111-111111111111",
+    sourceAttachmentId: null,
+    parentAssetId: null,
+    children: [],
+    subjects: [],
+    processedAt: "2026-08-01T12:00:00.000Z",
     createdAt: "2026-08-01T12:00:00.000Z",
+    updatedAt: "2026-08-01T12:00:00.000Z",
   },
   {
     id: "asset-ebook",
@@ -32,20 +43,35 @@ const ASSETS: FamilyAssetView[] = [
     byteSize: 2048,
     fileKind: "archive",
     resourceKind: "book",
+    authors: [],
+    publisher: null,
+    language: null,
     status: "ready",
+    processingErrorCode: null,
     processingNote: null,
+    sourceUploadId: "22222222-2222-4222-8222-222222222222",
+    sourceAttachmentId: null,
+    parentAssetId: null,
+    children: [],
+    subjects: [],
+    processedAt: "2026-08-01T12:00:00.000Z",
     createdAt: "2026-08-01T12:00:00.000Z",
+    updatedAt: "2026-08-01T12:00:00.000Z",
   },
 ];
 
 function renderLibrary(
   initialAssets: FamilyAssetView[],
   initialUploads: FamilyAssetUploadView[] = [],
+  canUpload = true,
 ): string {
   return renderToStaticMarkup(
     <LibraryView
       initialAssets={initialAssets}
       initialUploads={initialUploads}
+      childOptions={[{ id: "33333333-3333-4333-8333-333333333333", name: "Mia" }]}
+      subjectOptions={[{ id: "math", label: "Math" }]}
+      canUpload={canUpload}
     />,
   );
 }
@@ -61,10 +87,29 @@ describe("LibraryView", () => {
   it("renders a compact shelf without showing the privacy warning until upload", () => {
     const html = renderLibrary(ASSETS);
     assert.match(html, />Add resources<\/button>/);
-    assert.match(html, />Download file<\/a>/);
-    assert.match(html, />Document file<\/span>/);
-    assert.match(html, />Ebook file<\/span>/);
+    assert.match(html, />Download<\/a>/);
+    assert.match(html, />View details/);
+    assert.match(html, /Search title, child, or subject/);
+    assert.match(html, />All types<\/option>/);
+    assert.match(html, />All resources<\/option>/);
+    assert.match(html, />All subjects<\/option>/);
+    assert.match(html, />All statuses<\/option>/);
+    assert.match(html, /\/api\/library\/assets\/asset-pdf\/download\?surface=shelf/);
+    assert.doesNotMatch(html, /example\.public\.blob/);
     assert.doesNotMatch(html, /These files are not private/);
+  });
+
+  it("shows every processing state on the shelf", () => {
+    const html = renderLibrary([
+      ASSETS[0],
+      { ...ASSETS[0], id: "processing", title: "Processing", status: "processing" },
+      { ...ASSETS[0], id: "attention", title: "Attention", status: "needs_attention" },
+      { ...ASSETS[0], id: "failed", title: "Failed", status: "failed" },
+    ]);
+    assert.match(html, />Ready<\/span>/);
+    assert.match(html, />Organizing details<\/span>/);
+    assert.match(html, />Needs attention<\/span>/);
+    assert.match(html, />Could not organize<\/span>/);
   });
 
   it("restores an interrupted upload with explicit resume and cleanup actions", () => {
@@ -96,8 +141,10 @@ describe("LibraryView", () => {
       },
     ]);
     assert.match(html, /80% uploaded/);
+    assert.match(html, /1 unfinished upload/);
+    assert.match(html, /Everything already on your shelf is still available/);
     assert.match(html, /The connection stopped before the file finished uploading/);
-    assert.match(html, />Choose file to resume<\/button>/);
+    assert.match(html, />Choose same file to resume<\/button>/);
     assert.match(html, />Restart upload<\/button>/);
     assert.match(html, />Remove upload<\/button>/);
     assert.match(html, />Add another resource<\/button>/);
@@ -127,8 +174,41 @@ describe("LibraryView", () => {
       },
     ]);
 
-    assert.match(html, />Try remove again<\/button>/);
+    assert.match(html, />Try removing again<\/button>/);
     assert.match(html, /The file on your device was not changed/);
+    assert.doesNotMatch(html, />Choose same file to resume<\/button>/);
+    assert.doesNotMatch(html, />Restart upload<\/button>/);
+  });
+
+  it("keeps existing records manageable after membership ends", () => {
+    const html = renderLibrary(
+      ASSETS,
+      [
+        {
+          id: "11111111-1111-4111-8111-111111111111",
+          originalName: "unfinished.pdf",
+          pathname: "families/family-id/library/request-id/unfinished.pdf",
+          mediaType: "application/pdf",
+          byteSize: 1024,
+          lastModified: 123,
+          fingerprintSha256: "a".repeat(64),
+          blobUploadId: null,
+          blobKey: null,
+          completedParts: [],
+          status: "needs_attention",
+          statusNote: "Upload paused.",
+          errorCode: null,
+          createdAt: "2026-08-01T12:00:00.000Z",
+          updatedAt: "2026-08-01T12:01:00.000Z",
+        },
+      ],
+      false,
+    );
+    assert.match(html, /Your Library stays with you/);
+    assert.match(html, />Download<\/a>/);
+    assert.match(html, />Remove upload<\/button>/);
+    assert.doesNotMatch(html, />Add resources<\/button>/);
+    assert.doesNotMatch(html, />Add another resource<\/button>/);
     assert.doesNotMatch(html, />Choose file to resume<\/button>/);
     assert.doesNotMatch(html, />Restart upload<\/button>/);
   });

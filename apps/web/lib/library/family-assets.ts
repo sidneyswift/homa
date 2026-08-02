@@ -32,6 +32,22 @@ export const FAMILY_ASSET_STATUSES = [
 
 export type FamilyAssetStatus = (typeof FAMILY_ASSET_STATUSES)[number];
 
+export const FAMILY_ASSET_PROCESSING_QUEUED_NOTE =
+  "Your original is saved and ready to download. Homa will organize its Library details next.";
+export const FAMILY_ASSET_PROCESSING_RUNNING_NOTE =
+  "Your original is saved and ready to download. Homa is organizing its Library details.";
+
+export interface FamilyAssetChild {
+  id: string;
+  name: string;
+}
+
+export interface FamilyAssetSubject {
+  id: string;
+  label: string;
+  source: "model" | "parent" | "import" | "system";
+}
+
 export interface FamilyAssetView {
   id: string;
   title: string;
@@ -42,9 +58,47 @@ export interface FamilyAssetView {
   byteSize: number;
   fileKind: FamilyAssetFileKind;
   resourceKind: FamilyAssetResourceKind | null;
+  authors: string[];
+  publisher: string | null;
+  language: string | null;
   status: FamilyAssetStatus;
+  processingErrorCode: string | null;
   processingNote: string | null;
+  sourceUploadId: string | null;
+  sourceAttachmentId: string | null;
+  parentAssetId: string | null;
+  children: FamilyAssetChild[];
+  subjects: FamilyAssetSubject[];
+  processedAt: string | null;
   createdAt: string;
+  updatedAt: string;
+}
+
+const FAMILY_ASSET_PROCESSING_STALE_MS = 5 * 60 * 1000;
+const RETRYABLE_PROCESSING_ERRORS = new Set([
+  "processing_failed",
+  "processing_invalid_result",
+]);
+
+export function familyAssetProcessingRetryAvailable(
+  asset: Pick<
+    FamilyAssetView,
+    "status" | "processingErrorCode" | "updatedAt"
+  >,
+  now = new Date(),
+): boolean {
+  if (
+    (asset.status === "failed" || asset.status === "needs_attention") &&
+    asset.processingErrorCode !== null
+  ) {
+    return RETRYABLE_PROCESSING_ERRORS.has(asset.processingErrorCode);
+  }
+  if (asset.status !== "processing") return false;
+  const updatedAt = new Date(asset.updatedAt).getTime();
+  return (
+    Number.isFinite(updatedAt) &&
+    now.getTime() - updatedAt >= FAMILY_ASSET_PROCESSING_STALE_MS
+  );
 }
 
 export const MAX_LIBRARY_UPLOAD_BYTES = 500 * 1024 * 1024;

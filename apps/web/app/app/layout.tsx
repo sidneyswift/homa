@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import { ageInMonths } from "@homa/core";
 
-import { getAppData } from "../../lib/app-data";
+import { getAppShellData } from "../../lib/app-data";
 import { parentFirstName } from "../../lib/family";
 import {
   parseViewContext,
@@ -26,7 +26,7 @@ import { TimeZoneSync } from "../../components/dashboard/time-zone-sync";
  */
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const data = await getAppData();
+  const data = await getAppShellData();
   if (!data) redirect("/onboarding");
   const { family, children: kids, memberDisplayName, memberAvatarUrl } = data;
 

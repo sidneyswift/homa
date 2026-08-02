@@ -1,7 +1,10 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
+import { after } from "next/server";
 
 import { resolveApiFamily } from "../../../../lib/api-auth";
+import { familyAccountCheckout } from "../../../../lib/billing/wall";
 import { finalizeFamilyAssetUpload } from "../../../../lib/library/family-asset-upload-store";
+import { processQueuedFamilyAsset } from "../../../../lib/library/family-asset-processing";
 import { mapDb } from "../../../../lib/map/db";
 import { blobConfigured } from "../../../../lib/materials/artifact-store";
 
@@ -17,6 +20,8 @@ interface UploadTokenRow {
   status: string;
   error_code: string | null;
 }
+
+export const maxDuration = 300;
 
 function parseTokenPayload(value: string | null | undefined): UploadTokenPayload {
   if (!value) return {};
@@ -54,6 +59,13 @@ export async function POST(request: Request): Promise<Response> {
       : null;
   if (body.type === "blob.generate-client-token" && !auth) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
+  }
+  if (
+    body.type === "blob.generate-client-token" &&
+    auth &&
+    (await familyAccountCheckout(auth.familyId)) !== null
+  ) {
+    return Response.json({ ok: false, reason: "membership-required" }, { status: 402 });
   }
 
   try {
@@ -103,6 +115,21 @@ export async function POST(request: Request): Promise<Response> {
         });
         if (!finalized.ok && finalized.reason === "blob-not-found") {
           throw new Error("completed Blob was not readable yet");
+        }
+        if (finalized.ok) {
+          after(async () => {
+            try {
+              await processQueuedFamilyAsset({
+                familyId: finalized.familyId,
+                assetId: finalized.asset.id,
+              });
+            } catch (error) {
+              console.error(
+                "family Library metadata processing failed after Blob callback:",
+                error instanceof Error ? error.message : "unknown",
+              );
+            }
+          });
         }
       },
     });
