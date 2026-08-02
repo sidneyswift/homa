@@ -33,6 +33,28 @@ function normalizeSource(value: string): HoursSource {
   return value === "sms" || value === "call" ? value : "chat";
 }
 
+interface RawHoursLogRow {
+  id: string;
+  child_id: string | null;
+  subject: string;
+  minutes: number;
+  happened_on: string;
+  source: string;
+  note: string | null;
+}
+
+function toHoursLogRow(row: RawHoursLogRow): HoursLogRow {
+  return {
+    id: row.id,
+    childId: row.child_id ?? null,
+    subject: isHoursSubject(row.subject) ? row.subject : "other",
+    minutes: row.minutes,
+    happenedOn: row.happened_on,
+    source: normalizeSource(row.source),
+    note: row.note ?? null,
+  };
+}
+
 export async function getHoursLogForFamily(familyId: string): Promise<HoursLogRow[]> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
@@ -43,16 +65,26 @@ export async function getHoursLogForFamily(familyId: string): Promise<HoursLogRo
     .order("created_at", { ascending: false })
     .limit(MAX_HOURS_ROWS);
   if (error) throw new Error(`hours_log read failed: ${error.message}`);
-  return (data ?? []).map((row) => {
-    const subjectRaw = row.subject as string;
-    return {
-      id: row.id as string,
-      childId: (row.child_id as string | null) ?? null,
-      subject: isHoursSubject(subjectRaw) ? subjectRaw : "other",
-      minutes: row.minutes as number,
-      happenedOn: row.happened_on as string,
-      source: normalizeSource(row.source as string),
-      note: (row.note as string | null) ?? null,
-    };
-  });
+  return (data ?? []).map((row) => toHoursLogRow(row as RawHoursLogRow));
+}
+
+/** The Day, Week, and Month Planner reads only the dates already in view.
+ * The full compliance record remains exclusive to the Hours view. */
+export async function getHoursLogForFamilyBetween(
+  familyId: string,
+  fromDate: string,
+  toDate: string,
+): Promise<HoursLogRow[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("hours_log")
+    .select("id, child_id, subject, minutes, happened_on, source, note")
+    .eq("family_id", familyId)
+    .gte("happened_on", fromDate)
+    .lte("happened_on", toDate)
+    .order("happened_on", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(MAX_HOURS_ROWS);
+  if (error) throw new Error(`hours_log bounded read failed: ${error.message}`);
+  return (data ?? []).map((row) => toHoursLogRow(row as RawHoursLogRow));
 }

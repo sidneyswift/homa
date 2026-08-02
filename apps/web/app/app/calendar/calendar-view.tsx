@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
-import type { FamilyEventRow } from "../../../lib/family-events";
+import {
+  expandRecurringFamilyEvents,
+  familyEventChildIds,
+  type FamilyEventRow,
+} from "../../../lib/family-events";
 import { formatMinutesAsHours } from "../../../lib/hours-view";
 import type { PlanActivityScheduleRow } from "../../../lib/plan-schedule";
 import type { DashboardPlan } from "../../../lib/plan-week";
@@ -531,12 +535,16 @@ export function CalendarView({
 
   // Events straight from the rows: the week clip and the kid filter are
   // the only judgments here, everything else is placement.
-  const visibleEvents = familyEvents.filter(
-    (event) =>
-      event.startsOn <= lastDate &&
-      event.endsOn >= firstDate &&
-      (selectedKidId === null || event.childId === null || event.childId === selectedKidId),
+  const visibleEvents = expandRecurringFamilyEvents(familyEvents, firstDate, lastDate).filter(
+    (event) => {
+      const childIds = familyEventChildIds(event);
+      return selectedKidId === null || childIds.length === 0 || childIds.includes(selectedKidId);
+    },
   );
+  const eventKidIndex = (event: FamilyEventRow): number | null => {
+    const childIds = familyEventChildIds(event);
+    return childIds.length === 1 ? (kidIndexById.get(childIds[0]) ?? null) : null;
+  };
   const allDayBanners: AllDayBanner[] = visibleEvents
     .filter((event) => event.startTime === null || event.startsOn !== event.endsOn)
     .map((event) => ({
@@ -545,7 +553,7 @@ export function CalendarView({
       note: event.note,
       startIdx: event.startsOn <= firstDate ? 0 : weekDates.indexOf(event.startsOn),
       endIdx: event.endsOn >= lastDate ? 6 : weekDates.indexOf(event.endsOn),
-      kidIndex: event.childId === null ? null : (kidIndexById.get(event.childId) ?? null),
+      kidIndex: eventKidIndex(event),
       dateLabel: "",
       startsOn: event.startsOn,
       endsOn: event.endsOn,
@@ -582,7 +590,7 @@ export function CalendarView({
       note: event.note,
       timeLabel: formatTimeRange(event.startTime ?? "", event.endTime),
       startLabel: formatTimeRange(event.startTime ?? "", null),
-      kidIndex: event.childId === null ? null : (kidIndexById.get(event.childId) ?? null),
+      kidIndex: eventKidIndex(event),
       startMin,
       endMin: Math.max(endMin, startMin + 20),
       rawStartTime: event.startTime,

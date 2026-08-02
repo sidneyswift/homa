@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
 
 import type { ChildRecord } from "../../lib/family";
-import type { FamilyEventRecord } from "../../lib/family-events";
+import { familyEventChildIds, type FamilyEventRecord } from "../../lib/family-events";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, space } from "../../theme/tokens";
 import { ActivityRow } from "./activity-row";
@@ -56,14 +56,24 @@ export function DayAgenda({
 
       {hasContent ? (
         <View style={{ gap: 6 }}>
-          {events.map((event) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              childIndex={event.child_id ? kids.findIndex((c) => c.id === event.child_id) : null}
-              onPress={() => onPressEvent(event)}
-            />
-          ))}
+          {events.map((event) => {
+            const childIds = familyEventChildIds(event);
+            const names = childIds
+              .map((childId) => kids.find((kid) => kid.id === childId)?.name)
+              .filter((name): name is string => Boolean(name));
+            const childIndex = childIds.length === 1
+              ? kids.findIndex((kid) => kid.id === childIds[0])
+              : null;
+            return (
+              <EventCard
+                key={event.occurrence_key ?? `${event.id}:${event.starts_on}`}
+                event={event}
+                childIndex={childIndex === -1 ? null : childIndex}
+                audienceLabel={names.length > 0 ? names.join(" + ") : "Whole family"}
+                onPress={() => onPressEvent(event)}
+              />
+            );
+          })}
           {activities.map((activity) => (
             <ActivityRow
               key={activity.scheduleId}
@@ -74,7 +84,7 @@ export function DayAgenda({
         </View>
       ) : (
         <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textSubtle }}>
-          Nothing planned.
+          Nothing planned. Tap + to add an event.
         </Text>
       )}
     </View>

@@ -67,6 +67,23 @@ describe("device calendar export contract", () => {
     assert.match(payload.notes, /Homa planner link/);
   });
 
+  it("exports an occurrence from the canonical series start", () => {
+    const item = familyEventExportItem(
+      {
+        ...FAMILY_EVENT,
+        starts_on: "2026-11-09",
+        ends_on: "2026-11-09",
+        series_starts_on: "2026-11-02",
+        series_ends_on: "2026-11-02",
+      },
+      "Maya",
+      "America/New_York",
+      { frequency: "weekly", interval: 1, weekdays: [1], until: null },
+    );
+    assert.equal(item.startsOn, "2026-11-02");
+    assert.equal(item.endsOn, "2026-11-02");
+  });
+
   it("rejects invalid recurrence rather than sending a malformed native event", () => {
     const item = familyEventExportItem(FAMILY_EVENT, "Maya", "America/New_York", {
       frequency: "weekly",

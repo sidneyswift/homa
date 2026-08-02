@@ -529,6 +529,13 @@ async function familyEventsSchemaExists() {
   return rows[0]?.present === true;
 }
 
+async function familyEventChildrenSchemaExists() {
+  const rows = await sql`
+    select to_regclass('public.family_event_children') is not null as present
+  `;
+  return rows[0]?.present === true;
+}
+
 async function planActivityScheduleSchemaExists() {
   const rows = await sql`
     select to_regclass('public.plan_activity_schedule') is not null as present
@@ -2602,6 +2609,21 @@ async function expectAuthenticatedIsolation() {
           "create Family B family_events fixture",
         )
       : null;
+    const familyEventChildrenSchemaAvailable = await familyEventChildrenSchemaExists();
+    if (familyEventChildrenSchemaAvailable && familyEventBId) {
+      await jsonResponse(
+        await restAs(familyBUser.accessToken, "family_event_children?select=event_id", {
+          method: "POST",
+          body: JSON.stringify({
+            family_id: familyBId,
+            event_id: familyEventBId,
+            child_id: childBId,
+          }),
+          headers: { Prefer: "return=representation" },
+        }),
+        "create Family B family_event_children fixture",
+      );
+    }
     const planActivityScheduleSchemaAvailable = await planActivityScheduleSchemaExists();
     const planActivityScheduleBId = planActivityScheduleSchemaAvailable
       ? await insertFixtureRow(
@@ -3577,6 +3599,85 @@ async function expectAuthenticatedIsolation() {
           label,
           true,
           "not yet enforced: the family_events migration (issue #176) is deliberately pending on this target",
+        );
+      }
+    }
+
+    if (familyEventChildrenSchemaAvailable && familyEventBId) {
+      await expectAuthenticatedRead(
+        familyBUser.accessToken,
+        "family_event_children",
+        familyEventBId,
+        1,
+        "auth member can read own family event child audience",
+        "event_id",
+      );
+      await expectAuthenticatedRead(
+        familyAUser.accessToken,
+        "family_event_children",
+        familyEventBId,
+        0,
+        "auth member cannot read another family's event child audience",
+        "event_id",
+      );
+      await expectAuthenticatedInsertDenied(
+        familyAUser.accessToken,
+        "family_event_children",
+        {
+          family_id: familyBId,
+          event_id: familyEventBId,
+          child_id: childBId,
+        },
+        "auth member cannot add another family's event child audience",
+      );
+      await expectAuthenticatedUpdateDenied(
+        familyBUser.accessToken,
+        "family_event_children",
+        "event_id",
+        familyEventBId,
+        { child_id: childAId },
+        "auth member cannot update event child audience in place",
+      );
+      await expectAuthenticatedDeleteFiltered(
+        familyAUser.accessToken,
+        "family_event_children",
+        "event_id",
+        familyEventBId,
+        0,
+        "auth member cannot remove another family's event child audience",
+      );
+      await expectAuthenticatedRpcDenied(
+        familyAUser.accessToken,
+        "save_family_event_with_children",
+        {
+          p_mode: "update",
+          p_event_id: familyEventBId,
+          p_family_id: familyBId,
+          p_title: "Cross-family RPC update",
+          p_starts_on: "2026-01-01",
+          p_ends_on: "2026-01-01",
+          p_start_time: null,
+          p_end_time: null,
+          p_note: null,
+          p_recurrence_rule: null,
+          p_child_ids: [childBId],
+        },
+        "auth member cannot save another family's event audience through RPC",
+      );
+    } else {
+      coveredTables.add("family_event_children");
+      for (const label of [
+        "auth member can read own family event child audience",
+        "auth member cannot read another family's event child audience",
+        "auth member cannot add another family's event child audience",
+        "auth member cannot update event child audience in place",
+        "auth member cannot remove another family's event child audience",
+        "auth member cannot save another family's event audience through RPC",
+      ]) {
+        report(
+          label,
+          true,
+          "not yet enforced: the additive family_event_children migration is pending on this target",
         );
       }
     }

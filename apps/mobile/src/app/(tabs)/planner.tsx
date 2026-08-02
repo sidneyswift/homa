@@ -10,6 +10,7 @@ import { createIdempotencyKey } from "../../lib/idempotency-key";
 import {
   createFamilyEvent,
   deleteFamilyEvent,
+  familyEventChildIds,
   updateFamilyEvent,
   type FamilyEventRecord,
 } from "../../lib/family-events";
@@ -91,17 +92,19 @@ export default function PlannerScreen() {
   }
 
   const range = useMemo(() => monthGridRange(anchorDate), [anchorDate]);
-  const { events, scheduleRows, childPlans, loading, error: plannerError, reload } = usePlannerData(
+  const { events, scheduleRows, childPlans, hoursRows, loading, error: plannerError, reload } = usePlannerData(
     family?.id ?? null,
     children,
     range.start,
     range.end,
   );
 
-  const filteredChildren = filterChildId ? children.filter((child) => child.id === filterChildId) : children;
   const filteredEvents = useMemo(
     () => filterChildId
-      ? events.filter((event) => event.child_id === null || event.child_id === filterChildId)
+      ? events.filter((event) => {
+          const childIds = familyEventChildIds(event);
+          return childIds.length === 0 || childIds.includes(filterChildId);
+        })
       : events,
     [events, filterChildId],
   );
@@ -125,6 +128,12 @@ export default function PlannerScreen() {
       : unscheduled,
     [filterChildId, unscheduled],
   );
+  const filteredHoursRows = useMemo(
+    () => filterChildId
+      ? hoursRows.filter((row) => row.childId === null || row.childId === filterChildId)
+      : hoursRows,
+    [filterChildId, hoursRows],
+  );
   const visibleRange = useMemo(() => {
     if (viewMode === "hours") return { start: anchorDate, end: anchorDate };
     if (viewMode === "day") return { start: anchorDate, end: anchorDate };
@@ -140,10 +149,15 @@ export default function PlannerScreen() {
       .filter((event) => event.starts_on <= visibleRange.end && event.ends_on >= visibleRange.start)
       .map((event) => [event.id, event])).values()]
       .map((event) => {
-        const childName = event.child_id
-          ? children.find((child) => child.id === event.child_id)?.name ?? "Child"
-          : null;
-        return familyEventExportItem(event, childName, timeZone, event.recurrence_rule);
+        const childNames = familyEventChildIds(event)
+          .map((childId) => children.find((child) => child.id === childId)?.name)
+          .filter((name): name is string => Boolean(name));
+        return familyEventExportItem(
+          event,
+          childNames.length > 0 ? childNames.join(" + ") : null,
+          timeZone,
+          event.recurrence_rule,
+        );
       });
     const activityItems = filteredActivities
       .filter((activity) => activity.scheduledDate >= visibleRange.start && activity.scheduledDate <= visibleRange.end)
@@ -205,7 +219,7 @@ export default function PlannerScreen() {
     }
     const input = draftToInput(composerDraft);
     if (editingEventId) {
-      await updateFamilyEvent(editingEventId, input);
+      await updateFamilyEvent(editingEventId, family.id, input);
     } else {
       if (!creatingEventId) {
         throw new Error("planner create identity is unavailable");
@@ -275,7 +289,7 @@ export default function PlannerScreen() {
 
         {children.length > 1 ? (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.xs }}>
-            <FilterChip label="Everyone" active={filterChildId === null} onPress={() => setFilterChildId(null)} />
+            <FilterChip label="Whole family" active={filterChildId === null} onPress={() => setFilterChildId(null)} />
             {children.map((child, index) => (
               <FilterChip
                 key={child.id}
@@ -290,7 +304,7 @@ export default function PlannerScreen() {
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Add selected planner items to device calendar"
+          accessibilityLabel="Choose Planner items to copy to device calendar"
           onPress={() => setCalendarExportOpen(true)}
           style={{
             alignSelf: "flex-end",
@@ -307,7 +321,7 @@ export default function PlannerScreen() {
         >
           <CalendarPlus size={17} color={colors.brand} />
           <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.brand }}>
-            Add to device calendar
+            Copy to device calendar
           </Text>
         </Pressable>
       </View>
@@ -323,7 +337,7 @@ export default function PlannerScreen() {
         ) : null}
 
         {plannerError ? (
-          <InlineError message="This view couldn't refresh. Pull down to try again." />
+          <InlineError message="Planner couldn't refresh. Your saved items are safe. Pull down to try again." />
         ) : null}
 
         {viewMode === "month" ? (
@@ -342,7 +356,7 @@ export default function PlannerScreen() {
             events={filteredEvents}
             activities={filteredActivities}
             unscheduled={filteredUnscheduled}
-            kids={filteredChildren}
+            kids={children}
             onPressEvent={openEditEventComposer}
             onToggleActivity={handleToggleActivity}
             onScheduleActivity={setSchedulingActivity}
@@ -352,8 +366,9 @@ export default function PlannerScreen() {
             date={anchorDate}
             events={filteredEvents}
             activities={filteredActivities}
+            hoursRows={filteredHoursRows}
             unscheduled={filteredUnscheduled}
-            kids={filteredChildren}
+            kids={children}
             onPressEvent={openEditEventComposer}
             onToggleActivity={handleToggleActivity}
             onScheduleActivity={setSchedulingActivity}

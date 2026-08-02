@@ -50,6 +50,27 @@ function normalizeSource(value: string): HoursSource {
 
 const MAX_HOURS_ROWS = 3000;
 
+function toHoursLogRow(row: {
+  id: unknown;
+  child_id: unknown;
+  subject: unknown;
+  minutes: unknown;
+  happened_on: unknown;
+  source: unknown;
+  note: unknown;
+}): HoursLogRow {
+  const subjectRaw = row.subject as string;
+  return {
+    id: row.id as string,
+    childId: (row.child_id as string | null) ?? null,
+    subject: isHoursSubject(subjectRaw) ? subjectRaw : "other",
+    minutes: row.minutes as number,
+    happenedOn: row.happened_on as string,
+    source: normalizeSource(row.source as string),
+    note: (row.note as string | null) ?? null,
+  };
+}
+
 export async function getHoursLogForFamily(familyId: string): Promise<HoursLogRow[]> {
   const { data, error } = await supabase
     .from("hours_log")
@@ -59,18 +80,27 @@ export async function getHoursLogForFamily(familyId: string): Promise<HoursLogRo
     .order("created_at", { ascending: false })
     .limit(MAX_HOURS_ROWS);
   if (error) throw new Error(`hours_log read failed: ${error.message}`);
-  return (data ?? []).map((row) => {
-    const subjectRaw = row.subject as string;
-    return {
-      id: row.id as string,
-      childId: (row.child_id as string | null) ?? null,
-      subject: isHoursSubject(subjectRaw) ? subjectRaw : "other",
-      minutes: row.minutes as number,
-      happenedOn: row.happened_on as string,
-      source: normalizeSource(row.source as string),
-      note: (row.note as string | null) ?? null,
-    };
-  });
+  return (data ?? []).map(toHoursLogRow);
+}
+
+/** Loads only the Planner's visible calendar window. The full Hours
+ * record keeps its existing unbounded-by-date query. */
+export async function getHoursLogForFamilyBetween(
+  familyId: string,
+  fromDate: string,
+  toDate: string,
+): Promise<HoursLogRow[]> {
+  const { data, error } = await supabase
+    .from("hours_log")
+    .select("id, child_id, subject, minutes, happened_on, source, note")
+    .eq("family_id", familyId)
+    .gte("happened_on", fromDate)
+    .lte("happened_on", toDate)
+    .order("happened_on", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(MAX_HOURS_ROWS);
+  if (error) throw new Error(`hours_log Planner read failed: ${error.message}`);
+  return (data ?? []).map(toHoursLogRow);
 }
 
 export interface HoursEntryEdit {

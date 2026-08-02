@@ -2,16 +2,19 @@ import { View } from "react-native";
 
 import type { ChildRecord } from "../../lib/family";
 import type { FamilyEventRecord } from "../../lib/family-events";
+import type { HoursLogRow } from "../../lib/hours";
 import { space } from "../../theme/tokens";
 import { DayAgenda } from "./day-agenda";
 import { compareDateOnly, type DateOnly } from "./date-utils";
 import type { PlanActivityView, ScheduledActivityView } from "./planner-model";
 import { UnscheduledTray } from "./unscheduled-tray";
+import { RecordedHours } from "./recorded-hours";
 
 export function DayView({
   date,
   events,
   activities,
+  hoursRows,
   unscheduled,
   kids,
   onPressEvent,
@@ -21,6 +24,7 @@ export function DayView({
   date: DateOnly;
   events: FamilyEventRecord[];
   activities: ScheduledActivityView[];
+  hoursRows: HoursLogRow[];
   unscheduled: PlanActivityView[];
   kids: ChildRecord[];
   onPressEvent: (event: FamilyEventRecord) => void;
@@ -40,6 +44,7 @@ export function DayView({
         onToggleActivity={onToggleActivity}
         showWeekday={false}
       />
+      <RecordedHours rows={hoursRows.filter((row) => row.happenedOn === date)} kids={kids} />
       <UnscheduledTray activities={unscheduled} onSchedule={onScheduleActivity} />
     </View>
   );

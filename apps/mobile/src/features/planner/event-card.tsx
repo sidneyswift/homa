@@ -23,10 +23,12 @@ function formatTime(time: string | null): string | null {
 export function EventCard({
   event,
   childIndex,
+  audienceLabel,
   onPress,
 }: {
   event: FamilyEventRecord;
   childIndex: number | null;
+  audienceLabel: string;
   onPress: () => void;
 }) {
   const [background, textColor] =
@@ -55,7 +57,7 @@ export function EventCard({
           {event.title}
         </Text>
         <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: textColor }}>
-          {timeLabel}
+          {timeLabel} · {audienceLabel}
         </Text>
       </View>
     </Pressable>

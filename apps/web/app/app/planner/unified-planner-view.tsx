@@ -20,8 +20,18 @@ import {
   type CalendarActivityItem,
   type CalendarBoard,
 } from "../../../lib/calendar-view";
-import type { FamilyEventInput, FamilyEventRow } from "../../../lib/family-events";
-import type { HoursEntry } from "../../../lib/hours-view";
+import {
+  expandRecurringFamilyEvents,
+  familyEventChildIds,
+  type FamilyEventInput,
+  type FamilyEventRow,
+} from "../../../lib/family-events";
+import {
+  formatMinutesAsHours,
+  hoursSubjectTone,
+  SUBJECT_LABELS,
+  type HoursEntry,
+} from "../../../lib/hours-view";
 import { plannerActivityHelpHref } from "../../../lib/planner-activity-help";
 import type { PlanActivityScheduleRow } from "../../../lib/plan-schedule";
 import type { DashboardPlan } from "../../../lib/plan-week";
@@ -61,13 +71,17 @@ interface PlannerActivity extends CalendarActivityItem {
 interface ComposerState {
   eventId: string | null;
   title: string;
-  childId: string;
+  childIds: string[];
   startsOn: string;
   endsOn: string;
   allDay: boolean;
   startTime: string;
   endTime: string;
   note: string;
+  repeatWeekly: boolean;
+  recurrenceInterval: number;
+  recurrenceWeekdays: number[];
+  repeatUntil: string;
 }
 
 const VIEW_LABELS: ReadonlyArray<{ mode: PlannerViewMode; label: string }> = [
@@ -131,7 +145,8 @@ function dayNavigationDate(view: PlannerViewMode, date: string, direction: -1 | 
 }
 
 function eventVisibleToFocus(event: FamilyEventRow, focusChildId: string | null): boolean {
-  return focusChildId === null || event.childId === null || event.childId === focusChildId;
+  const childIds = familyEventChildIds(event);
+  return focusChildId === null || childIds.length === 0 || childIds.includes(focusChildId);
 }
 
 function eventsForDate(
@@ -139,7 +154,7 @@ function eventsForDate(
   date: string,
   focusChildId: string | null,
 ): FamilyEventRow[] {
-  return events
+  return expandRecurringFamilyEvents(events, date, date)
     .filter(
       (event) =>
         event.startsOn <= date &&
@@ -172,8 +187,10 @@ function activitiesForDate(board: CalendarBoard, date: string): PlannerActivity[
 }
 
 function childLabel(event: FamilyEventRow, kids: readonly UnifiedPlannerKid[]): string {
-  if (event.childId === null) return "Whole family";
-  return kids.find((kid) => kid.id === event.childId)?.name ?? "Family";
+  const childIds = familyEventChildIds(event);
+  if (childIds.length === 0) return "Whole family";
+  const names = childIds.map((childId) => kids.find((kid) => kid.id === childId)?.name ?? "Child");
+  return names.join(" + ");
 }
 
 function eventTimeLabel(event: FamilyEventRow): string {
@@ -191,31 +208,55 @@ function eventWhenLabel(event: FamilyEventRow): string {
   return event.startsOn === event.endsOn ? `${span}, ${range}` : `${span}, ${range} on the first day`;
 }
 
+function weekdayForDate(value: string): number {
+  return dateObject(value).getUTCDay();
+}
+
+function daysBetween(from: string, to: string): number {
+  return Math.round((dateObject(to).getTime() - dateObject(from).getTime()) / 86_400_000);
+}
+
+function recurrenceLabel(event: FamilyEventRow): string | null {
+  const rule = event.recurrence;
+  if (!rule) return null;
+  const cadence = rule.interval === 1 ? "Every week" : `Every ${rule.interval} weeks`;
+  return rule.until ? `${cadence} until ${formatShortDate(rule.until)}` : cadence;
+}
+
 function createComposer(date: string, childId: string | null): ComposerState {
   return {
     eventId: null,
     title: "",
-    childId: childId ?? "",
+    childIds: childId ? [childId] : [],
     startsOn: date,
     endsOn: date,
     allDay: false,
     startTime: "09:00",
     endTime: "10:00",
     note: "",
+    repeatWeekly: false,
+    recurrenceInterval: 1,
+    recurrenceWeekdays: [weekdayForDate(date)],
+    repeatUntil: "",
   };
 }
 
 function editComposer(event: FamilyEventRow): ComposerState {
+  const startsOn = event.seriesStartsOn ?? event.startsOn;
   return {
     eventId: event.id,
     title: event.title,
-    childId: event.childId ?? "",
-    startsOn: event.startsOn,
-    endsOn: event.endsOn,
+    childIds: familyEventChildIds(event),
+    startsOn,
+    endsOn: event.seriesEndsOn ?? event.endsOn,
     allDay: event.startTime === null,
     startTime: event.startTime ?? "09:00",
     endTime: event.endTime ?? "10:00",
     note: event.note ?? "",
+    repeatWeekly: event.recurrence != null,
+    recurrenceInterval: event.recurrence?.interval ?? 1,
+    recurrenceWeekdays: event.recurrence?.weekdays ?? [weekdayForDate(startsOn)],
+    repeatUntil: event.recurrence?.until ?? "",
   };
 }
 
@@ -382,6 +423,62 @@ function EventRow({
   );
 }
 
+function RecordedHours({
+  entries,
+  showChild,
+}: {
+  entries: readonly HoursEntry[];
+  showChild: boolean;
+}) {
+  if (entries.length === 0) return null;
+  const totalMinutes = entries.reduce((sum, entry) => sum + entry.minutes, 0);
+  return (
+    <section className="mt-5" aria-labelledby="planner-day-hours-title">
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 id="planner-day-hours-title" className="font-display text-base font-semibold text-strong">
+          Recorded time
+        </h3>
+        <span className="text-xs font-semibold text-muted">
+          {formatMinutesAsHours(totalMinutes)}
+        </span>
+      </div>
+      <ul className="mt-2 overflow-hidden rounded-[var(--radius-lg)] border border-border-subtle bg-card shadow-sm">
+        {entries.map((entry) => {
+          const [background, color] = hoursSubjectTone(entry.subject);
+          return (
+            <li
+              key={entry.id}
+              className="flex min-h-[58px] flex-wrap items-center gap-2 border-b border-border-subtle px-3.5 py-2.5 last:border-b-0"
+            >
+              <span
+                className="rounded-pill px-2.5 py-1 text-[0.68rem] font-bold"
+                style={{ background, color }}
+              >
+                {SUBJECT_LABELS[entry.subject]}
+              </span>
+              <span className="font-display text-sm font-semibold text-strong">
+                {formatMinutesAsHours(entry.minutes)}
+              </span>
+              {showChild ? (
+                <span className="text-xs font-semibold text-subtle">
+                  {entry.childName ?? "Whole family"}
+                </span>
+              ) : null}
+              {entry.note ? (
+                <span className="min-w-0 flex-1 basis-32 truncate text-xs text-muted">
+                  {entry.note}
+                </span>
+              ) : (
+                <span className="flex-1" />
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
 function ActivityDetails({
   activity,
   done,
@@ -465,6 +562,12 @@ function EventDetails({
           <dt className="text-muted">Who</dt>
           <dd className="font-semibold text-strong">{childLabel(event, kids)}</dd>
         </div>
+        {recurrenceLabel(event) ? (
+          <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 py-3">
+            <dt className="text-muted">Repeats</dt>
+            <dd className="font-semibold text-strong">{recurrenceLabel(event)}</dd>
+          </div>
+        ) : null}
         {event.note ? (
           <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 py-3">
             <dt className="text-muted">Note</dt>
@@ -477,7 +580,7 @@ function EventDetails({
         onClick={onEdit}
         className="mt-5 inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-4 py-2 text-sm font-bold text-body hover:bg-page"
       >
-        Edit appointment
+        Edit event
       </button>
     </ModalShell>
   );
@@ -506,21 +609,32 @@ function EventComposer({
   const [confirmDelete, setConfirmDelete] = useState(false);
   useEffect(() => titleRef.current?.focus(), []);
   const spansDays = composer.startsOn !== composer.endsOn;
+  const selectedNames = kids
+    .filter((kid) => composer.childIds.includes(kid.id))
+    .map((kid) => kid.name);
+  const audienceSummary = selectedNames.length > 0
+    ? selectedNames.join(" + ")
+    : "Whole family";
+  const repeatSummary = composer.repeatWeekly
+    ? composer.recurrenceInterval > 1
+      ? `Every ${composer.recurrenceInterval} weeks`
+      : "Every week"
+    : "Does not repeat";
 
   return (
     <ModalShell titleId="planner-composer-title" onClose={onClose}>
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 id="planner-composer-title" className="font-display text-2xl font-semibold text-strong">
-            {composer.eventId ? "Edit appointment" : "Add an appointment"}
+            {composer.eventId ? "Edit event" : "Add an event"}
           </h2>
-          <p className="mt-1 text-sm text-muted">For appointments and anything with a fixed time.</p>
+          <p className="mt-1 text-sm text-muted">Appointments, co-op, trips, and other fixed plans.</p>
         </div>
         <DialogClose onClose={onClose} />
       </div>
 
       <label className="mt-5 block text-sm font-semibold text-body">
-        What is it?
+        What&apos;s happening?
         <input
           ref={titleRef}
           value={composer.title}
@@ -536,13 +650,23 @@ function EventComposer({
         <input
           type="date"
           value={composer.startsOn}
-          onChange={(event) =>
+          onChange={(event) => {
+            const durationDays = Math.max(0, daysBetween(composer.startsOn, composer.endsOn));
+            const startsOn = event.target.value;
             onChange({
               ...composer,
-              startsOn: event.target.value,
-              endsOn: spansDays ? composer.endsOn : event.target.value,
-            })
-          }
+              startsOn,
+              endsOn: spansDays ? addDaysDateOnly(startsOn, durationDays) : startsOn,
+              repeatUntil:
+                composer.repeatUntil && composer.repeatUntil < startsOn
+                  ? startsOn
+                  : composer.repeatUntil,
+              recurrenceWeekdays:
+                composer.repeatWeekly && composer.recurrenceWeekdays.length === 1
+                  ? [weekdayForDate(startsOn)]
+                  : composer.recurrenceWeekdays,
+            });
+          }}
           className="mt-1.5 min-h-11 w-full rounded-md border border-border bg-card px-3 py-2 text-strong outline-none focus:border-brand"
         />
       </label>
@@ -581,34 +705,115 @@ function EventComposer({
       )}
 
       <details className="mt-4 rounded-md border border-border-subtle bg-page px-4 py-2">
-        <summary className="flex min-h-10 cursor-pointer items-center text-sm font-bold text-body">
-          Who, end date, and note
+        <summary className="flex min-h-11 cursor-pointer items-center text-sm text-body">
+          <span className="flex min-w-0 flex-col py-1">
+            <span className="font-bold">Who and repeat</span>
+            <span className="truncate text-xs font-normal text-muted">
+              {audienceSummary} · {repeatSummary}
+            </span>
+          </span>
         </summary>
-        <label className="mt-2 block text-sm font-semibold text-body">
-          Who is it for?
+        <fieldset className="mt-2">
+          <legend className="text-sm font-semibold text-body">Who is it for?</legend>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              aria-pressed={composer.childIds.length === 0}
+              onClick={() => onChange({ ...composer, childIds: [] })}
+              className={
+                composer.childIds.length === 0
+                  ? "min-h-9 rounded-pill border border-[var(--clay-200)] bg-brand-soft px-3.5 py-1.5 text-xs font-bold text-[var(--clay-700)]"
+                  : "min-h-9 rounded-pill border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-muted hover:border-[var(--clay-200)]"
+              }
+            >
+              Whole family
+            </button>
+            {kids.map((kid) => (
+              <button
+                key={kid.id}
+                type="button"
+                aria-pressed={composer.childIds.includes(kid.id)}
+                onClick={() =>
+                  onChange({
+                    ...composer,
+                    childIds: composer.childIds.includes(kid.id)
+                      ? composer.childIds.filter((childId) => childId !== kid.id)
+                      : [...composer.childIds, kid.id],
+                  })
+                }
+                className={
+                  composer.childIds.includes(kid.id)
+                    ? "min-h-9 rounded-pill border border-[var(--clay-200)] bg-brand-soft px-3.5 py-1.5 text-xs font-bold text-[var(--clay-700)]"
+                    : "min-h-9 rounded-pill border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-muted hover:border-[var(--clay-200)]"
+                }
+              >
+                {kid.name}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+        <label className="mt-4 block text-sm font-semibold text-body">
+          Repeat
           <select
-            value={composer.childId}
-            onChange={(event) => onChange({ ...composer, childId: event.target.value })}
+            value={composer.repeatWeekly ? "weekly" : "none"}
+            onChange={(event) =>
+              onChange({
+                ...composer,
+                repeatWeekly: event.target.value === "weekly",
+                recurrenceWeekdays:
+                  event.target.value === "weekly"
+                    ? [weekdayForDate(composer.startsOn)]
+                    : composer.recurrenceWeekdays,
+              })
+            }
             className="mt-1.5 min-h-11 w-full rounded-md border border-border bg-card px-3 py-2 text-strong outline-none focus:border-brand"
           >
-            <option value="">Whole family</option>
-            {kids.map((kid) => (
-              <option key={kid.id} value={kid.id}>
-                {kid.name}
-              </option>
-            ))}
+            <option value="none">Does not repeat</option>
+            <option value="weekly">
+              {composer.recurrenceInterval === 1
+                ? "Every week"
+                : `Every ${composer.recurrenceInterval} weeks`}
+            </option>
           </select>
         </label>
-        <label className="mt-4 block text-sm font-semibold text-body">
-          Ends on
+        {composer.repeatWeekly ? (
+          <label className="mt-4 block text-sm font-semibold text-body">
+            Repeats until <span className="font-normal text-muted">(optional)</span>
+            <input
+              type="date"
+              value={composer.repeatUntil}
+              min={composer.startsOn}
+              onChange={(event) => onChange({ ...composer, repeatUntil: event.target.value })}
+              className="mt-1.5 min-h-11 w-full rounded-md border border-border bg-card px-3 py-2 text-strong outline-none focus:border-brand"
+            />
+          </label>
+        ) : null}
+        <label className="mt-4 flex min-h-11 cursor-pointer items-center gap-2.5 text-sm font-semibold text-body">
           <input
-            type="date"
-            value={composer.endsOn}
-            min={composer.startsOn}
-            onChange={(event) => onChange({ ...composer, endsOn: event.target.value })}
-            className="mt-1.5 min-h-11 w-full rounded-md border border-border bg-card px-3 py-2 text-strong outline-none focus:border-brand"
+            type="checkbox"
+            checked={spansDays}
+            onChange={(event) =>
+              onChange({
+                ...composer,
+                endsOn: event.target.checked ? addDaysDateOnly(composer.startsOn, 1) : composer.startsOn,
+              })
+            }
+            className="h-[18px] w-[18px] accent-[var(--clay-500)]"
           />
+          Lasts more than one day
         </label>
+        {spansDays ? (
+          <label className="mt-2 block text-sm font-semibold text-body">
+            Last day
+            <input
+              type="date"
+              value={composer.endsOn}
+              min={composer.startsOn}
+              onChange={(event) => onChange({ ...composer, endsOn: event.target.value })}
+              className="mt-1.5 min-h-11 w-full rounded-md border border-border bg-card px-3 py-2 text-strong outline-none focus:border-brand"
+            />
+          </label>
+        ) : null}
         <label className="mt-4 block pb-2 text-sm font-semibold text-body">
           Note
           <textarea
@@ -633,7 +838,7 @@ function EventComposer({
           disabled={saving || composer.title.trim() === ""}
           className="inline-flex min-h-11 items-center rounded-pill bg-brand px-5 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {saving ? "Saving…" : composer.eventId ? "Save" : "Add"}
+          {saving ? "Saving…" : composer.eventId ? "Save changes" : "Add event"}
         </button>
         <button
           type="button"
@@ -649,7 +854,7 @@ function EventComposer({
             disabled={saving}
             className="ml-auto inline-flex min-h-11 items-center px-2 py-2 text-sm font-bold text-[var(--clay-700)] hover:underline disabled:opacity-50"
           >
-            {confirmDelete ? "Delete this appointment?" : "Delete"}
+            {confirmDelete ? "Confirm delete" : "Delete event"}
           </button>
         ) : null}
       </div>
@@ -693,6 +898,18 @@ export function UnifiedPlannerView({
   const [composerError, setComposerError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [dayFilter, setDayFilter] = useState({
+    routeChildId: focusChildId,
+    selectedChildId: focusChildId,
+  });
+  const dayFilterChildId = dayFilter.routeChildId === focusChildId
+    ? dayFilter.selectedChildId
+    : focusChildId;
+  const setDayFilterChildId = (selectedChildId: string | null) => {
+    setDayFilter({ routeChildId: focusChildId, selectedChildId });
+  };
+
+  const visibleFocusChildId = view === "day" ? dayFilterChildId : focusChildId;
 
   const buildBoard = (date: string) =>
     buildCalendarBoard({
@@ -708,7 +925,7 @@ export function UnifiedPlannerView({
       reportTokens: new Map(kids.map((kid) => [kid.id, reports.get(kid.id)?.token ?? null])),
       now,
       timeZone,
-      focusChildId,
+      focusChildId: visibleFocusChildId,
       weekOffsetDays: weekOffsetDaysForDate(today, date),
     });
 
@@ -717,10 +934,20 @@ export function UnifiedPlannerView({
     // The server replaces these arrays on refresh. The active date is
     // the only local navigation key.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeDate, familyEvents, focusChildId, hoursEntries, kids, plans, reports, scheduledActivities],
+    [activeDate, familyEvents, visibleFocusChildId, hoursEntries, kids, plans, reports, scheduledActivities],
   );
   const activeActivities = activitiesForDate(activeBoard, activeDate);
-  const activeEvents = eventsForDate(familyEvents, activeDate, focusChildId);
+  const activeEvents = eventsForDate(familyEvents, activeDate, visibleFocusChildId);
+  const activeHours = hoursEntries.filter(
+    (entry) =>
+      entry.happenedOn === activeDate
+      && (
+        visibleFocusChildId === null
+        || entry.childId === null
+        || entry.childId === visibleFocusChildId
+      ),
+  );
+  const activeHoursMinutes = activeHours.reduce((sum, entry) => sum + entry.minutes, 0);
   const resolvedDone = (activity: PlannerActivity) => doneOverrides[activity.key] ?? activity.done;
   const unfinished = activeActivities.filter((activity) => !resolvedDone(activity));
   const finished = activeActivities.filter(resolvedDone);
@@ -731,7 +958,7 @@ export function UnifiedPlannerView({
       day,
       activities,
       unfinished: activities.filter((activity) => !resolvedDone(activity)),
-      events: eventsForDate(familyEvents, day.date, focusChildId),
+      events: eventsForDate(familyEvents, day.date, visibleFocusChildId),
     };
   });
 
@@ -747,7 +974,7 @@ export function UnifiedPlannerView({
     }
     return boards;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeDate, familyEvents, focusChildId, hoursEntries, kids, plans, reports, scheduledActivities]);
+  }, [activeDate, familyEvents, visibleFocusChildId, hoursEntries, kids, plans, reports, scheduledActivities]);
   const monthActivityCounts = new Map<string, number>();
   for (const board of monthBoards) {
     for (const day of board.days) {
@@ -763,7 +990,7 @@ export function UnifiedPlannerView({
   function openNewAppointment() {
     setAddOpen(false);
     setComposerError(null);
-    setComposer(createComposer(activeDate, focusChildId));
+    setComposer(createComposer(activeDate, visibleFocusChildId));
   }
 
   function openEventEditor(event: FamilyEventRow) {
@@ -778,12 +1005,20 @@ export function UnifiedPlannerView({
     setComposerError(null);
     const input: FamilyEventInput = {
       title: composer.title,
-      childId: composer.childId || null,
+      childIds: composer.childIds,
       startsOn: composer.startsOn,
       endsOn: composer.endsOn,
       startTime: composer.allDay ? null : composer.startTime,
       endTime: composer.allDay ? null : composer.endTime,
       note: composer.note || null,
+      recurrence: composer.repeatWeekly
+        ? {
+            frequency: "weekly",
+            interval: composer.recurrenceInterval,
+            weekdays: composer.recurrenceWeekdays,
+            until: composer.repeatUntil || null,
+          }
+        : null,
     };
     const result = composer.eventId
       ? await updateFamilyEventAction(composer.eventId, input)
@@ -817,7 +1052,9 @@ export function UnifiedPlannerView({
     : finished.length > 0
       ? "All planned activities are finished"
       : activeEvents.length > 0
-        ? `${activeEvents.length} ${activeEvents.length === 1 ? "appointment" : "appointments"}`
+        ? `${activeEvents.length} ${activeEvents.length === 1 ? "event" : "events"}`
+        : activeHoursMinutes > 0
+          ? `${formatMinutesAsHours(activeHoursMinutes)} recorded`
         : "Nothing planned";
 
   return (
@@ -852,8 +1089,8 @@ export function UnifiedPlannerView({
               >
                 <Clock3 size={19} className="text-[var(--sky-600)]" />
                 <span>
-                  <span className="block text-sm font-bold text-strong">Appointment</span>
-                  <span className="block text-xs text-muted">Something with a fixed time</span>
+                  <span className="block text-sm font-bold text-strong">Event</span>
+                  <span className="block text-xs text-muted">Appointment, co-op, trip, or outing</span>
                 </span>
               </button>
               <Link
@@ -862,8 +1099,8 @@ export function UnifiedPlannerView({
               >
                 <GraduationCap size={19} className="text-brand" />
                 <span>
-                  <span className="block text-sm font-bold text-strong">Activity</span>
-                  <span className="block text-xs text-muted">Tell Homa what you want to add</span>
+                  <span className="block text-sm font-bold text-strong">Plan activity</span>
+                  <span className="block text-xs text-muted">Ask Homa to add schoolwork</span>
                 </span>
               </Link>
             </div>
@@ -928,7 +1165,7 @@ export function UnifiedPlannerView({
                 {view === "day"
                   ? dayStatus
                   : view === "week"
-                    ? `${totalWeekActivities} ${totalWeekActivities === 1 ? "activity" : "activities"} · ${totalWeekEvents} ${totalWeekEvents === 1 ? "appointment" : "appointments"}`
+                    ? `${totalWeekActivities} ${totalWeekActivities === 1 ? "activity" : "activities"} · ${totalWeekEvents} ${totalWeekEvents === 1 ? "event" : "events"}`
                     : "Tap a date to open its day."}
               </p>
             </div>
@@ -942,9 +1179,50 @@ export function UnifiedPlannerView({
           </div>
 
           {view === "day" ? (
-            <section className="mt-5 overflow-hidden rounded-[var(--radius-lg)] border border-border-subtle bg-card shadow-sm" aria-label={formatFullDate(activeDate)}>
+            <>
+              {kids.length > 1 ? (
+                <div
+                  className="mt-4 flex gap-2 overflow-x-auto pb-1"
+                  role="group"
+                  aria-label="Filter this day by child"
+                >
+                  <button
+                    type="button"
+                    aria-pressed={dayFilterChildId === null}
+                    onClick={() => setDayFilterChildId(null)}
+                    className={
+                      dayFilterChildId === null
+                        ? "min-h-9 flex-none rounded-pill border border-[var(--clay-200)] bg-brand-soft px-3.5 py-1.5 text-xs font-bold text-[var(--clay-700)]"
+                        : "min-h-9 flex-none rounded-pill border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-muted hover:border-[var(--clay-200)]"
+                    }
+                  >
+                    Whole family
+                  </button>
+                  {kids.map((kid) => (
+                    <button
+                      key={kid.id}
+                      type="button"
+                      aria-pressed={dayFilterChildId === kid.id}
+                      onClick={() => setDayFilterChildId(kid.id)}
+                      className={
+                        dayFilterChildId === kid.id
+                          ? "min-h-9 flex-none rounded-pill border border-[var(--clay-200)] bg-brand-soft px-3.5 py-1.5 text-xs font-bold text-[var(--clay-700)]"
+                          : "min-h-9 flex-none rounded-pill border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-muted hover:border-[var(--clay-200)]"
+                      }
+                    >
+                      {kid.name}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              <section className="mt-5 overflow-hidden rounded-[var(--radius-lg)] border border-border-subtle bg-card shadow-sm" aria-label={formatFullDate(activeDate)}>
               {activeEvents.map((event) => (
-                <EventRow key={event.id} event={event} kids={kids} onOpen={() => setSelectedEvent(event)} />
+                <EventRow
+                  key={event.occurrenceKey ?? event.id}
+                  event={event}
+                  kids={kids}
+                  onOpen={() => setSelectedEvent(event)}
+                />
               ))}
               {unfinished.map((activity) => (
                 <ActivityRow
@@ -992,7 +1270,9 @@ export function UnifiedPlannerView({
                     : null}
                 </>
               ) : null}
-            </section>
+              </section>
+              <RecordedHours entries={activeHours} showChild={kids.length > 1} />
+            </>
           ) : null}
 
           {view === "week" ? (
@@ -1007,7 +1287,7 @@ export function UnifiedPlannerView({
                 }
                 if (events.length > 0) {
                   summaryParts.push(
-                    `${events.length} ${events.length === 1 ? "appointment" : "appointments"}`,
+                    `${events.length} ${events.length === 1 ? "event" : "events"}`,
                   );
                 }
                 const summary = summaryParts.length > 0
@@ -1060,7 +1340,7 @@ export function UnifiedPlannerView({
                   const activityCount = monthActivityCounts.get(cell.date) ?? 0;
                   const eventCount = eventsForDate(familyEvents, cell.date, focusChildId).length;
                   const plannedCount = activityCount + eventCount;
-                  const label = `${formatFullDate(cell.date)}, ${activityCount} ${activityCount === 1 ? "activity" : "activities"}, ${eventCount} ${eventCount === 1 ? "appointment" : "appointments"}`;
+                  const label = `${formatFullDate(cell.date)}, ${activityCount} ${activityCount === 1 ? "activity" : "activities"}, ${eventCount} ${eventCount === 1 ? "event" : "events"}`;
                   return (
                     <Link
                       key={cell.date}

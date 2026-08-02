@@ -1,5 +1,5 @@
 import type { FamilyEventRecord } from "../../lib/family-events";
-import { addDays, compareDateOnly, daysInRange, type DateOnly } from "./date-utils";
+import { addDays, compareDateOnly, type DateOnly } from "./date-utils";
 
 function weekday(date: DateOnly): number {
   const [year, month, day] = date.split("-").map(Number);
@@ -26,13 +26,38 @@ export function expandRecurringFamilyEvents(
       continue;
     }
     const durationDays = Math.max(0, daysBetween(event.starts_on, event.ends_on));
-    for (const date of daysInRange(rangeStart, rangeEnd)) {
-      if (compareDateOnly(date, event.starts_on) < 0) continue;
-      if (rule.until && compareDateOnly(date, rule.until) > 0) continue;
-      const elapsedWeeks = Math.floor(daysBetween(event.starts_on, date) / 7);
-      if (elapsedWeeks % rule.interval !== 0 || !rule.weekdays.includes(weekday(date))) continue;
-      expanded.push({ ...event, starts_on: date, ends_on: addDays(date, durationDays) });
+    let candidate = addDays(rangeStart, -durationDays);
+    if (compareDateOnly(candidate, event.starts_on) < 0) candidate = event.starts_on;
+    while (
+      compareDateOnly(candidate, rangeEnd) <= 0
+      && (!rule.until || compareDateOnly(candidate, rule.until) <= 0)
+    ) {
+      const elapsedDays = daysBetween(event.starts_on, candidate);
+      const elapsedWeeks = Math.floor(elapsedDays / 7);
+      if (
+        elapsedDays >= 0
+        && elapsedWeeks % rule.interval === 0
+        && rule.weekdays.includes(weekday(candidate))
+      ) {
+        const occurrenceEnd = addDays(candidate, durationDays);
+        if (compareDateOnly(occurrenceEnd, rangeStart) >= 0) {
+          expanded.push({
+            ...event,
+            starts_on: candidate,
+            ends_on: occurrenceEnd,
+            series_starts_on: event.starts_on,
+            series_ends_on: event.ends_on,
+            occurrence_key: `${event.id}:${candidate}`,
+          });
+        }
+      }
+      candidate = addDays(candidate, 1);
     }
   }
-  return expanded;
+  return expanded.sort(
+    (left, right) =>
+      left.starts_on.localeCompare(right.starts_on)
+      || (left.start_time ?? "").localeCompare(right.start_time ?? "")
+      || left.title.localeCompare(right.title),
+  );
 }

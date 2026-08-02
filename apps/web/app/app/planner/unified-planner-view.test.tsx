@@ -29,6 +29,12 @@ const KID: UnifiedPlannerKid = {
   avatar_url: null,
 };
 
+const SECOND_KID: UnifiedPlannerKid = {
+  id: "kid-2",
+  name: "Remy",
+  avatar_url: null,
+};
+
 const PLAN: DashboardPlan = {
   childId: KID.id,
   subjectId: "math",
@@ -145,13 +151,13 @@ describe("UnifiedPlannerView", () => {
     const html = renderView({ view: "week" });
     assert.match(html, /Week summary/);
     assert.equal((html.match(/min-h-\[78px\]/g) ?? []).length, 7);
-    assert.match(html, /1 activity · 1 appointment/);
+    assert.match(html, /1 activity · 1 event/);
   });
 
   it("uses a familiar month grid that opens dates in Day", () => {
     const html = renderView({ view: "month" });
     assert.match(html, /August 2026 calendar/);
-    assert.match(html, /Monday, August 3, 2 activities, 1 appointment/);
+    assert.match(html, /Monday, August 3, 2 activities, 1 event/);
     assert.match(html, />3 planned</);
     assert.match(html, /view=day&amp;date=2026-08-03/);
   });
@@ -163,5 +169,45 @@ describe("UnifiedPlannerView", () => {
     assert.match(html, /30m/);
     assert.match(html, /Homa records the school time you tell her about\. Review or correct it here\./);
     assert.doesNotMatch(html, /The compliance record/);
+  });
+
+  it("shows recorded time on the day with subject and child context", () => {
+    const html = renderView({ kids: [KID, SECOND_KID], hoursEntries: [HOURS] });
+    assert.match(html, /Filter this day by child/);
+    assert.match(html, />Whole family<\/button>/);
+    assert.match(html, />Ari<\/button>/);
+    assert.match(html, />Recorded time<\/h3>/);
+    assert.match(html, />Math<\/span>/);
+    assert.match(html, />30m<\/span>/);
+    assert.match(html, />Ari<\/span>/);
+  });
+
+  it("names every explicitly included child on one shared event", () => {
+    const html = renderView({
+      kids: [KID, SECOND_KID],
+      familyEvents: [{ ...EVENT, childId: KID.id, childIds: [KID.id, SECOND_KID.id] }],
+    });
+    assert.match(html, /Ari \+ Remy/);
+    assert.equal((html.match(/>Dentist</g) ?? []).length, 1);
+  });
+
+  it("shows a weekly event on a later occurrence date", () => {
+    const html = renderView({
+      activeDate: "2026-08-10",
+      familyEvents: [
+        {
+          ...EVENT,
+          title: "Co-op",
+          recurrence: {
+            frequency: "weekly",
+            interval: 1,
+            weekdays: [1],
+            until: "2026-08-31",
+          },
+        },
+      ],
+    });
+    assert.match(html, /Co-op/);
+    assert.match(html, /Monday, August 10/);
   });
 });
