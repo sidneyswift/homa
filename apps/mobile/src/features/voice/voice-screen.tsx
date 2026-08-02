@@ -18,6 +18,11 @@ import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, palette, radius, space } from "../../theme/tokens";
 import { emitFamilyEvent } from "../../lib/events";
 import { useFamilyData } from "../family/use-family-data";
+import { NativeLessonRecorder } from "../lessons/native-lesson-recorder";
+import {
+  deriveLessonRecordingSignals,
+  type PreparedLessonRecording,
+} from "../lessons/lesson-recording-model";
 import {
   readyPrintMessage,
   runPreparedMaterialPrint,
@@ -77,11 +82,17 @@ export function VoiceScreen() {
     ? overlayModel.active.material.id
     : null;
   const announceResult = session.announceResult;
+  const handoffReady = session.handoffReady;
+  const pauseForMicrophoneOwner = session.pauseForMicrophoneOwner;
   const { family } = useFamilyData();
   const [replyOpen, setReplyOpen] = useState(false);
   const [printNotice, setPrintNotice] = useState<{ key: string; message: string } | null>(null);
+  const [pendingLesson, setPendingLesson] = useState<PreparedLessonRecording | null>(null);
+  const [activeLessonRecorder, setActiveLessonRecorder] = useState<PreparedLessonRecording | null>(null);
+  const lessonResumePromptRef = useRef<string | null>(null);
   const hoursKeyRef = useRef(0);
   const handledKeysRef = useRef<Set<string> | null>(null);
+  const handledLessonKeysRef = useRef<Set<string> | null>(null);
   const handledPrintKeysRef = useRef(new Set<string>());
   const fieldHeight = useSharedValue(0);
   const puck = useSharedValue(0);
@@ -95,6 +106,11 @@ export function VoiceScreen() {
 
   if (handledKeysRef.current === null) {
     handledKeysRef.current = new Set(deriveOverlaySignals([...messages], new Set()).keys);
+  }
+  if (handledLessonKeysRef.current === null) {
+    handledLessonKeysRef.current = new Set(
+      deriveLessonRecordingSignals([...messages], new Set()).keys,
+    );
   }
 
   useEffect(() => {
@@ -121,6 +137,35 @@ export function VoiceScreen() {
     }
     if (plannerRequested) router.navigate("/planner");
   }, [messages, router]);
+
+  useEffect(() => {
+    const handled = handledLessonKeysRef.current;
+    if (!handled) return;
+    const { signals } = deriveLessonRecordingSignals([...messages], handled);
+    const signal = signals.at(-1);
+    if (!signal) return;
+    for (const candidate of signals) handled.add(candidate.key);
+    setPendingLesson(signal.intent);
+  }, [messages]);
+
+  // Let Homa finish the spoken handoff first. Once the realtime session is
+  // listening again, release WebRTC's microphone before expo-audio can own it.
+  useEffect(() => {
+    if (!pendingLesson || !handoffReady) return;
+    const timer = setTimeout(() => {
+      pauseForMicrophoneOwner("Lesson recording has the microphone.");
+      setActiveLessonRecorder(pendingLesson);
+      setPendingLesson(null);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [handoffReady, pauseForMicrophoneOwner, pendingLesson]);
+
+  useEffect(() => {
+    const prompt = lessonResumePromptRef.current;
+    if (!prompt || !handoffReady) return;
+    lessonResumePromptRef.current = null;
+    session.sendText(prompt);
+  }, [handoffReady, session]);
 
   useEffect(() => {
     const signal = overlayModel.active;
@@ -238,6 +283,22 @@ export function VoiceScreen() {
         ? "Try again"
         : "Talk to Homa";
 
+  if (activeLessonRecorder) {
+    return (
+      <NativeLessonRecorder
+        intent={activeLessonRecorder}
+        onCancel={() => {
+          setActiveLessonRecorder(null);
+          session.resume();
+        }}
+        onResumeVoice={(prompt) => {
+          setActiveLessonRecorder(null);
+          if (prompt) lessonResumePromptRef.current = prompt;
+          session.resume();
+        }}
+      />
+    );
+  }
   return (
     <View style={{ flex: 1, backgroundColor: surface }}>
       <View style={{ flex: 1 }} onLayout={handleFieldLayout}>

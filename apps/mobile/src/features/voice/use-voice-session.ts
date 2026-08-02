@@ -63,6 +63,8 @@ export interface VoiceSession {
   lastAssistantText: string | null;
   failed: boolean;
   recovering: boolean;
+  speaking: boolean;
+  handoffReady: boolean;
   start: () => void;
   end: () => void;
   retry: () => void;
@@ -543,6 +545,8 @@ export function useVoiceSession(
     lastAssistantText: lastText(turns, "assistant"),
     failed: status === "failed",
     recovering: false,
+    speaking: status === "speaking",
+    handoffReady: status === "listening",
     start,
     end,
     retry,

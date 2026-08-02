@@ -5,6 +5,7 @@ import {
   lessonRouteRefusal,
   resolveLessonRoute,
 } from "../../../lib/lessons/route-auth";
+import { lessonBlobPrefix } from "../../../lib/lessons/blobs";
 
 /**
  * POST /api/lessons: opens one lesson (plan 2026-07-13-lesson-listen.md
@@ -44,5 +45,9 @@ export async function POST(request: Request): Promise<Response> {
   if (result.status === "daily_cap") {
     return Response.json({ ok: false, reason: "daily-cap" }, { status: 429 });
   }
-  return Response.json({ ok: true, lessonId: result.lesson.id });
+  return Response.json({
+    ok: true,
+    lessonId: result.lesson.id,
+    uploadPrefix: lessonBlobPrefix(context.auth.familyId, result.lesson.id),
+  });
 }

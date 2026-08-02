@@ -71,11 +71,11 @@ export function toneModelId(): string {
 /**
  * toneNotesForSegment(...): structured tone notes for one segment, or
  * null when the lane is off, the model refuses the container, or the
- * clock runs out. The audio rides by public blob URL so segment bytes
- * never pass through this function.
+ * clock runs out. New private recordings arrive as authenticated bytes;
+ * legacy public recordings can finish through their existing URL lane.
  */
 export async function toneNotesForSegment(input: {
-  audioUrl: string;
+  audio: Uint8Array | URL;
   mediaType: string;
   familyId: string;
 }): Promise<SegmentToneNotes | null> {
@@ -98,7 +98,7 @@ export async function toneNotesForSegment(input: {
             {
               type: "file",
               mediaType: input.mediaType,
-              data: new URL(input.audioUrl),
+              data: input.audio,
             },
             {
               type: "text",

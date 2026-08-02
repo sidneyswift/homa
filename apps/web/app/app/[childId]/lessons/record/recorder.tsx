@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { upload } from "@vercel/blob/client";
+import { uploadPresigned } from "@vercel/blob/client";
 
 import { prepareChildPhotoForUpload } from "../../../../../lib/child-photo-prepare";
 import { KidAvatar } from "../../../../../components/dashboard/kid-avatar";
@@ -80,14 +80,12 @@ export interface RecorderKidOption {
 }
 
 export function LessonRecorder({
-  familyId,
   childId,
   childName,
   kids,
   consentGranted,
   openLessonId,
 }: {
-  familyId: string;
   childId: string;
   childName: string;
   /** Every kid in the family; multi-kid families get the switcher. */
@@ -109,6 +107,7 @@ export function LessonRecorder({
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const lessonIdRef = useRef<string | null>(null);
+  const uploadPrefixRef = useRef<string | null>(null);
   const seqRef = useRef(1);
   const mimeRef = useRef("");
   const segmentStartedAtRef = useRef(0);
@@ -143,16 +142,17 @@ export function LessonRecorder({
   const uploadSegment = useCallback(
     (seq: number, blob: Blob, durationSeconds: number) => {
       const lessonId = lessonIdRef.current;
-      if (!lessonId || blob.size === 0) return;
+      const uploadPrefix = uploadPrefixRef.current;
+      if (!lessonId || !uploadPrefix || blob.size === 0) return;
       const mimeType = mimeRef.current || "audio/webm";
       const task = (async () => {
         for (let attempt = 0; attempt < 2; attempt += 1) {
           try {
-            const result = await upload(
-              `families/${familyId}/lessons/${lessonId}/segment-${String(seq).padStart(4, "0")}.${fileExtension(mimeType)}`,
+            const result = await uploadPresigned(
+              `${uploadPrefix}segment-${String(seq).padStart(4, "0")}.${fileExtension(mimeType)}`,
               blob,
               {
-                access: "public",
+                access: "private",
                 handleUploadUrl: "/api/lessons/upload",
                 clientPayload: mimeType,
                 contentType: mimeType,
@@ -179,7 +179,7 @@ export function LessonRecorder({
       })();
       uploadsRef.current.push(task);
     },
-    [familyId],
+    [],
   );
 
   // onstop restarts the next segment through this ref, which breaks
@@ -232,9 +232,10 @@ export function LessonRecorder({
       const payload = (await response.json()) as {
         ok: boolean;
         lessonId?: string;
+        uploadPrefix?: string;
         reason?: string;
       };
-      if (!payload.ok || !payload.lessonId) {
+      if (!payload.ok || !payload.lessonId || !payload.uploadPrefix) {
         setError(
           payload.reason === "daily-cap"
             ? "Six lessons in a day is Homa's current limit. Tomorrow opens more."
@@ -243,6 +244,7 @@ export function LessonRecorder({
         return;
       }
       lessonIdRef.current = payload.lessonId;
+      uploadPrefixRef.current = payload.uploadPrefix;
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
@@ -329,18 +331,19 @@ export function LessonRecorder({
   const addPhoto = useCallback(
     async (file: File | null) => {
       const lessonId = lessonIdRef.current;
-      if (!file || !lessonId) return;
+      const uploadPrefix = uploadPrefixRef.current;
+      if (!file || !lessonId || !uploadPrefix) return;
       const prepared = await prepareChildPhotoForUpload(file);
       if (!prepared) {
         setError("That photo didn't open. Try taking it again.");
         return;
       }
       try {
-        const result = await upload(
-          `families/${familyId}/lessons/${lessonId}/photo-${Date.now()}.jpg`,
+        const result = await uploadPresigned(
+          `${uploadPrefix}photo-${Date.now()}.jpg`,
           prepared,
           {
-            access: "public",
+            access: "private",
             handleUploadUrl: "/api/lessons/upload",
             clientPayload: "image/jpeg",
             contentType: "image/jpeg",
@@ -363,7 +366,7 @@ export function LessonRecorder({
         if (photoInputRef.current) photoInputRef.current.value = "";
       }
     },
-    [familyId],
+    [],
   );
 
   const uploadExistingFile = useCallback(
@@ -380,9 +383,10 @@ export function LessonRecorder({
         const payload = (await response.json()) as {
           ok: boolean;
           lessonId?: string;
+          uploadPrefix?: string;
           reason?: string;
         };
-        if (!payload.ok || !payload.lessonId) {
+        if (!payload.ok || !payload.lessonId || !payload.uploadPrefix) {
           setError(
             payload.reason === "daily-cap"
               ? "Six lessons in a day is Homa's current limit. Tomorrow opens more."
@@ -394,11 +398,11 @@ export function LessonRecorder({
         const lessonId = payload.lessonId;
         const mimeType = file.type || "audio/mp4";
         const durationSeconds = await readAudioDuration(file);
-        const result = await upload(
-          `families/${familyId}/lessons/${lessonId}/upload.${fileExtension(mimeType)}`,
+        const result = await uploadPresigned(
+          `${payload.uploadPrefix}upload.${fileExtension(mimeType)}`,
           file,
           {
-            access: "public",
+            access: "private",
             handleUploadUrl: "/api/lessons/upload",
             clientPayload: mimeType,
             contentType: mimeType,
@@ -430,7 +434,7 @@ export function LessonRecorder({
         if (fileInputRef.current) fileInputRef.current.value = "";
       }
     },
-    [childId, familyId, router],
+    [childId, router],
   );
 
   function agree() {
