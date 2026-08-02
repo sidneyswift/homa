@@ -1,0 +1,3723 @@
+{
+  "id": "cur-2026-08-01-peaceful-preschool",
+  "droppedBy": "Carolyng",
+  "droppedAt": "2026-08-01T23:03:25-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1785639805.923089",
+  "coversMessageTs": [],
+  "sourceFiles": [
+    {
+      "filename": "CalendarBundle.pdf",
+      "slackFileId": "F0BMED8JVH8",
+      "slackMessageTs": "1785639805.923089",
+      "localPath": ".cosmo/inspo-files/slack/1785639805.923089/CalendarBundle-F0BMED8JVH8.pdf",
+      "size": 1436836,
+      "sha256": "032c374a269df59532d04bd6b71754e40e9fc8ecc87619b4005fdfa14501c368",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BMED8JVH8-CalendarBundle.pdf",
+      "slackDeclaredSize": 1436836,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:01:18+00:00",
+      "blobReadBackSize": 1436836,
+      "blobReadBackSha256": "032c374a269df59532d04bd6b71754e40e9fc8ecc87619b4005fdfa14501c368",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "032c374a269df59532d04bd6b71754e40e9fc8ecc87619b4005fdfa14501c368:application/pdf"
+    },
+    {
+      "filename": "family vision.pdf",
+      "slackFileId": "F0BM866UGSF",
+      "slackMessageTs": "1785639805.923089",
+      "localPath": ".cosmo/inspo-files/slack/1785639805.923089/family vision-F0BM866UGSF.pdf",
+      "size": 3925200,
+      "sha256": "cf9740d37971c66411fcfd147bf976bebc3f783b2bcc89bc7bf28cb690266aba",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BM866UGSF-family%20vision.pdf",
+      "slackDeclaredSize": 3925200,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:01:19+00:00",
+      "blobReadBackSize": 3925200,
+      "blobReadBackSha256": "cf9740d37971c66411fcfd147bf976bebc3f783b2bcc89bc7bf28cb690266aba",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "cf9740d37971c66411fcfd147bf976bebc3f783b2bcc89bc7bf28cb690266aba:application/pdf"
+    },
+    {
+      "filename": "parent guide.pdf",
+      "slackFileId": "F0BLZ2D4UUF",
+      "slackMessageTs": "1785639805.923089",
+      "localPath": ".cosmo/inspo-files/slack/1785639805.923089/parent guide-F0BLZ2D4UUF.pdf",
+      "size": 49120554,
+      "sha256": "1fc7ad728d05aafff710bffadb710d0e12c6f5e274a0d7860becd0e91d4aba27",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BLZ2D4UUF-parent%20guide.pdf",
+      "slackDeclaredSize": 49120554,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:01:29+00:00",
+      "blobReadBackSize": 49120554,
+      "blobReadBackSha256": "1fc7ad728d05aafff710bffadb710d0e12c6f5e274a0d7860becd0e91d4aba27",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "1fc7ad728d05aafff710bffadb710d0e12c6f5e274a0d7860becd0e91d4aba27:application/pdf"
+    },
+    {
+      "filename": "printables.pdf",
+      "slackFileId": "F0BM867U1PD",
+      "slackMessageTs": "1785639805.923089",
+      "localPath": ".cosmo/inspo-files/slack/1785639805.923089/printables-F0BM867U1PD.pdf",
+      "size": 9848222,
+      "sha256": "3679efe19b0431e7a17ec8d3f5428eccedbee3c06055127d7e00d06396079954",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BM867U1PD-printables.pdf",
+      "slackDeclaredSize": 9848222,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:01:31+00:00",
+      "blobReadBackSize": 9848222,
+      "blobReadBackSha256": "3679efe19b0431e7a17ec8d3f5428eccedbee3c06055127d7e00d06396079954",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "3679efe19b0431e7a17ec8d3f5428eccedbee3c06055127d7e00d06396079954:application/pdf"
+    },
+    {
+      "filename": "recipes.pdf",
+      "slackFileId": "F0BMJ495DT6",
+      "slackMessageTs": "1785639805.923089",
+      "localPath": ".cosmo/inspo-files/slack/1785639805.923089/recipes-F0BMJ495DT6.pdf",
+      "size": 46298934,
+      "sha256": "df63837a90fb5e331331e7af7d4cad513ecc17fefac624b8c6a8078b58d808a9",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BMJ495DT6-recipes.pdf",
+      "slackDeclaredSize": 46298934,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:01:41+00:00",
+      "blobReadBackSize": 46298934,
+      "blobReadBackSha256": "df63837a90fb5e331331e7af7d4cad513ecc17fefac624b8c6a8078b58d808a9",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "df63837a90fb5e331331e7af7d4cad513ecc17fefac624b8c6a8078b58d808a9:application/pdf"
+    },
+    {
+      "filename": "supply list.pdf",
+      "slackFileId": "F0BMGB99C1F",
+      "slackMessageTs": "1785639805.923089",
+      "localPath": ".cosmo/inspo-files/slack/1785639805.923089/supply list-F0BMGB99C1F.pdf",
+      "size": 7269709,
+      "sha256": "2d5d85ce38fc10cc2c00fff43685e2596e593e5ab300b45d19b78895abfc39bb",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BMGB99C1F-supply%20list.pdf",
+      "slackDeclaredSize": 7269709,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:01:43+00:00",
+      "blobReadBackSize": 7269709,
+      "blobReadBackSha256": "2d5d85ce38fc10cc2c00fff43685e2596e593e5ab300b45d19b78895abfc39bb",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "2d5d85ce38fc10cc2c00fff43685e2596e593e5ab300b45d19b78895abfc39bb:application/pdf"
+    },
+    {
+      "filename": "the_peaceful_preschool_-_book_list.pdf",
+      "slackFileId": "F0BMCDVE8HL",
+      "slackMessageTs": "1785639805.923089",
+      "localPath": ".cosmo/inspo-files/slack/1785639805.923089/the_peaceful_preschool_-_book_list-F0BMCDVE8HL.pdf",
+      "size": 10106343,
+      "sha256": "df7489ce0720b58a56fbea44791f6eeb1e3536fa2876a92b4db78f87e323c330",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BMCDVE8HL-the_peaceful_preschool_-_book_list.pdf",
+      "slackDeclaredSize": 10106343,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:01:45+00:00",
+      "blobReadBackSize": 10106343,
+      "blobReadBackSha256": "df7489ce0720b58a56fbea44791f6eeb1e3536fa2876a92b4db78f87e323c330",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "df7489ce0720b58a56fbea44791f6eeb1e3536fa2876a92b4db78f87e323c330:application/pdf"
+    }
+  ],
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BMED8JVH8-CalendarBundle.pdf",
+  "name": "The Peaceful Preschool",
+  "stages": {
+    "captured": "2026-08-02T05:38:57+00:00",
+    "analyzed": "2026-08-02",
+    "captureGateReviewed": "2026-08-02",
+    "tasteLogged": true,
+    "taxonomy": {
+      "proposedTopics": [
+        "Fine Motor Control in Everyday Tasks",
+        "Gross Motor Locomotion and Coordination",
+        "Biblical Story and Verse Familiarity"
+      ],
+      "topicIds": [
+        "mt_dkvLZt8xgX",
+        "mt_3RzUdTRDxf",
+        "mt_kO_GoH5F5t"
+      ],
+      "domainsAdded": [
+        {
+          "rawPair": "Fine Motor > Fine Motor Development",
+          "subject": "fine_motor",
+          "domainId": "fine-motor-development",
+          "kind": "content"
+        },
+        {
+          "rawPair": "Gross Motor > Gross Motor Development",
+          "subject": "gross_motor",
+          "domainId": "gross-motor-development",
+          "kind": "content"
+        },
+        {
+          "rawPair": "Religious Education > Biblical Literacy",
+          "subject": "religious_education",
+          "domainId": "biblical-literacy",
+          "kind": "content"
+        }
+      ],
+      "dependencyEdgesAdded": 0,
+      "verification": {
+        "guard": "pnpm check:taxonomy",
+        "passed": true,
+        "topicCountBefore": 1733,
+        "topicCountAfter": 1736,
+        "topicsJsonDiff": "append-only topic objects with the required topicCount, frozen slug map, and manifest integrity updates"
+      },
+      "commit": "f0bc8fe4"
+    },
+    "graduation": {
+      "kind": "recipe",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/child-assisted-recipe-card.md",
+        "apps/web/agent/skills/materials-studio/SKILL.md",
+        "apps/web/agent/activity-formats.md"
+      ],
+      "verification": {
+        "layer4HaveRecipe": 14,
+        "layer4NoRecipe": 0,
+        "directRecipeFiles": 12,
+        "aliasesRequired": 0,
+        "fleetSkillsPassed": true,
+        "materialsPassed": true,
+        "curriculumChecksPassed": true
+      },
+      "commit": "f0bc8fe4",
+      "note": "The recipe, Format library route, and activity-format registry entry are implemented in commit f0bc8fe4 and carried by PR #615. Focused fleet-skill, materials, and curriculum checks passed."
+    },
+    "knowledgeMerged": "2026-08-02",
+    "slackReplyTs": "1785657706.579029",
+    "devSummaryTs": "1785657707.185019",
+    "shipReaction": true
+  },
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "CalendarBundle-F0BMED8JVH8.pdf",
+    "sourceParts": [
+      "CalendarBundle-F0BMED8JVH8.pdf",
+      "family vision-F0BM866UGSF.pdf",
+      "parent guide-F0BLZ2D4UUF.pdf",
+      "printables-F0BM867U1PD.pdf",
+      "recipes-F0BMJ495DT6.pdf",
+      "supply list-F0BMGB99C1F.pdf",
+      "the_peaceful_preschool_-_book_list-F0BMCDVE8HL.pdf"
+    ],
+    "sourceSha256": "032c374a269df59532d04bd6b71754e40e9fc8ecc87619b4005fdfa14501c368",
+    "pageCount": 347,
+    "mastersDir": ".cosmo/masters/cur-2026-08-01-peaceful-preschool",
+    "intakeAt": "2026-08-02T05:39:33+00:00",
+    "gateStatus": "findings",
+    "gateFindings": [
+      "page 6: looks blank (ink 0.0). Skip it or re-shoot it.",
+      "page 36: looks blank (ink 0.0). Skip it or re-shoot it.",
+      "page 36: byte-identical to page 6. The same page was captured twice.",
+      "page 42: looks blank (ink 0.0). Skip it or re-shoot it.",
+      "page 42: byte-identical to page 6. The same page was captured twice.",
+      "page 92: looks blank (ink 0.0). Skip it or re-shoot it.",
+      "page 92: byte-identical to page 6. The same page was captured twice.",
+      "page 142: looks blank (ink 0.0). Skip it or re-shoot it.",
+      "page 142: byte-identical to page 6. The same page was captured twice.",
+      "page 176: looks blank (ink 0.0). Skip it or re-shoot it.",
+      "page 176: byte-identical to page 6. The same page was captured twice.",
+      "page 192: looks blank (ink 0.0). Skip it or re-shoot it.",
+      "page 192: byte-identical to page 6. The same page was captured twice.",
+      "page 200: looks blank (ink 0.0). Skip it or re-shoot it.",
+      "page 200: byte-identical to page 6. The same page was captured twice.",
+      "page 208: looks blank (ink 0.0). Skip it or re-shoot it.",
+      "page 208: byte-identical to page 6. The same page was captured twice.",
+      "page 216: looks blank (ink 0.0). Skip it or re-shoot it.",
+      "page 216: byte-identical to page 6. The same page was captured twice.",
+      "page 230: looks blank (ink 0.0). Skip it or re-shoot it.",
+      "page 230: byte-identical to page 6. The same page was captured twice.",
+      "page 247: byte-identical to page 239. The same page was captured twice.",
+      "72 page(s) could not be read by the model ([1, 2, 4, 5, 7, 9, 11, 12, 13, 14, 16, 19, 20, 22, 23, 24, 25, 26, 27, 28, 30, 32, 34, 45, 46, 48, 50, 53, 54, 55, 58, 59, 62, 63, 66, 68, 69, 71, 239, 247, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334, 335, 336, 337, 338, 339, 340, 341, 347]), so they keep their OCR text.",
+      "11 page(s) produced no text: [6, 36, 42, 92, 142, 176, 192, 200, 208, 216, 230]. Spans cannot be verified against them."
+    ],
+    "gateFindingCount": 24,
+    "gateFindingsSha256": "2a8be1103fd6bac3cea6ade4a081250fa09366eced60b99ef00a5444d824ca46",
+    "normalizedMasterPages": 16,
+    "gateReview": {
+      "status": "reviewed",
+      "findingCount": 24,
+      "unresolvedFindingCount": 0,
+      "findingsSha256": "2a8be1103fd6bac3cea6ade4a081250fa09366eced60b99ef00a5444d824ca46",
+      "disposition": "mixed-reviewed",
+      "reviewedAt": "2026-08-02",
+      "note": "All 89 exact master pages implicated by blank, duplicate, empty-text, or attempted model-reread findings were visually reviewed locally. Local OCR recovered readable text from 60 pages that had been empty in the first pass. Eleven pages, 6, 36, 42, 92, 142, 176, 192, 200, 208, 216, and 230, are intentional blank separators. Page 247 intentionally repeats the printable cover on page 239 inside the exact publisher source. The external model reread could not run inside the sandbox, and no retry that would transmit Slack-sourced pages was authorized. The 347-page bundle is readable for analysis, and no content claim relies on an intentional blank page.",
+      "captureBinding": {
+        "version": 1,
+        "recordId": "cur-2026-08-01-peaceful-preschool",
+        "sourceReceiptSha256": "73caee97e698ec9fe5d5f85e65d6079590741146807547969e8fc59596a6312e",
+        "pageCount": 347,
+        "expectedPageCount": 347
+      }
+    },
+    "expectedPageCount": 347,
+    "reviewBinding": {
+      "version": 1,
+      "recordId": "cur-2026-08-01-peaceful-preschool",
+      "sourceReceiptSha256": "73caee97e698ec9fe5d5f85e65d6079590741146807547969e8fc59596a6312e",
+      "pageCount": 347,
+      "expectedPageCount": 347
+    },
+    "sourceReceipt": {
+      "version": 1,
+      "recordId": "cur-2026-08-01-peaceful-preschool",
+      "kind": "curriculum",
+      "parts": [
+        {
+          "file": "CalendarBundle-F0BMED8JVH8.pdf",
+          "sha256": "032c374a269df59532d04bd6b71754e40e9fc8ecc87619b4005fdfa14501c368",
+          "bytes": 1436836
+        },
+        {
+          "file": "family vision-F0BM866UGSF.pdf",
+          "sha256": "cf9740d37971c66411fcfd147bf976bebc3f783b2bcc89bc7bf28cb690266aba",
+          "bytes": 3925200
+        },
+        {
+          "file": "parent guide-F0BLZ2D4UUF.pdf",
+          "sha256": "1fc7ad728d05aafff710bffadb710d0e12c6f5e274a0d7860becd0e91d4aba27",
+          "bytes": 49120554
+        },
+        {
+          "file": "printables-F0BM867U1PD.pdf",
+          "sha256": "3679efe19b0431e7a17ec8d3f5428eccedbee3c06055127d7e00d06396079954",
+          "bytes": 9848222
+        },
+        {
+          "file": "recipes-F0BMJ495DT6.pdf",
+          "sha256": "df63837a90fb5e331331e7af7d4cad513ecc17fefac624b8c6a8078b58d808a9",
+          "bytes": 46298934
+        },
+        {
+          "file": "supply list-F0BMGB99C1F.pdf",
+          "sha256": "2d5d85ce38fc10cc2c00fff43685e2596e593e5ab300b45d19b78895abfc39bb",
+          "bytes": 7269709
+        },
+        {
+          "file": "the_peaceful_preschool_-_book_list-F0BMCDVE8HL.pdf",
+          "sha256": "df7489ce0720b58a56fbea44791f6eeb1e3536fa2876a92b4db78f87e323c330",
+          "bytes": 10106343
+        }
+      ]
+    }
+  },
+  "layer1_philosophy": {
+    "methodology": "A gentle, Christian, literature-rich preschool rhythm for ages 3 to 5. Each alphabet letter anchors one week of read-alouds, multisensory phonics, real-object counting, fine and large motor work, practical life, process art, and a Friday field trip. Montessori-influenced elements include a prepared environment, tactile letters, practical life, and the Three Period Lesson. Living books, narration, short lessons, nature, and beauty overlap with Charlotte Mason practice, but the source does not present itself as a complete Montessori or Charlotte Mason program.",
+    "principles": [
+      "Use hands-on experiences before expecting later abstract skills.",
+      "Let the child's comfort and developmental pace govern repetition, skipping, and session length.",
+      "Prepare an orderly, beautiful, natural home environment that makes independent activity accessible.",
+      "Teach letter sounds before emphasizing letter names, using tactile tracing, clay, salt, and real objects.",
+      "Teach early mathematics with manipulatives and real household quantities.",
+      "Place movement between quieter tasks because large motor work supports attention and learning.",
+      "Build self-respect and independence through real work in the home.",
+      "Use picture books, poems, Bible stories and verses, narration, nature, art, music, cooking, and field trips as one connected week.",
+      "Model first, invite recognition second, and ask for recall only when the child is ready.",
+      "Keep devices off during ordinary preschool life and preserve free exploration, responsive care, and healthy rhythms."
+    ],
+    "evidence": [
+      {
+        "claim": "Hands-on experience is the learning foundation",
+        "quote": "the best way for your child to learn is through hands-on experiences"
+      },
+      {
+        "claim": "Pacing follows the child",
+        "quote": "Your child\u2019s comfort level can be your guide."
+      },
+      {
+        "claim": "The source explicitly uses a Montessori presentation sequence",
+        "quote": "The Three Period Lesson"
+      },
+      {
+        "claim": "The learning environment joins order, beauty, and nature",
+        "quote": "An ideal learning environment should be beautiful."
+      },
+      {
+        "claim": "Movement is integral rather than an optional break",
+        "quote": "Don't underestimate the importance of movement for healthy learning."
+      },
+      {
+        "claim": "The weekly sequence is flexible",
+        "quote": "you could simply do two of the \u201cdays\u201d a week, and spread it out over all 52 weeks."
+      }
+    ],
+    "learningTheory": "Developmentally paced, multisensory, experiential, relationship-centered learning with modeling, repetition, free exploration, prepared-environment independence, and cumulative alphabet review.",
+    "assessmentApproach": "Observation only. Use the kindergarten readiness checklist periodically, notice what the child can do comfortably, repeat or skip activities, and never convert the checklist into a verdict or pressure to keep pace.",
+    "parentRole": "Act as a responsive model, environment-setter, read-aloud partner, narrator-listener, practical-life guide, and field-trip companion. Demonstrate an activity, invite the child to try, help only as needed, and stop or switch when attention and comfort say the session is done.",
+    "knowledgeBankMatches": [
+      {
+        "topicKey": "charlotte-mason",
+        "rowId": "6c24ca6d-6a70-4a14-b499-345d53d27243",
+        "topicType": "method_philosophy",
+        "status": "repo-recorded active related scope, not live-read in this subtask",
+        "note": "Related for living books, narration, short lessons, nature, beauty, and meaningful home work. The Peaceful Preschool is not labeled a complete Charlotte Mason curriculum, so this is overlap rather than identity."
+      },
+      {
+        "topicKey": "montessori",
+        "topicType": "method_philosophy",
+        "status": "related components, live row not read in this subtask",
+        "note": "The source explicitly borrows the Three Period Lesson, tactile sandpaper-letter logic, practical life, accessible tools, order, and prepared-environment independence. It also mixes these with literature, Christian devotion, thematic weeks, and field trips."
+      },
+      {
+        "topicKey": "play-based-preschool",
+        "topicType": "method_philosophy",
+        "status": "conceptual match, live row not read in this subtask",
+        "note": "Matches the source's hands-on, movement-rich, household-material, flexible preschool practice. The stronger distinctive procedure belongs in the format proposal below."
+      }
+    ],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "peaceful-preschool-alphabet-rhythm-format",
+        "mergedRowId": "6df62ad0-1153-4874-aa18-3af37f1a87a4",
+        "mergedAt": "2026-08-02",
+        "readBack": {
+          "status": "active",
+          "lens": "method",
+          "contributedBy": "founder",
+          "sourceTier": 2,
+          "confidence": "high",
+          "lastVerifiedAt": "2026-08-02 06:16:29.957339+00"
+        },
+        "topicType": "method_format",
+        "title": "Peaceful Preschool alphabet rhythm format",
+        "summary": "A 26-week, ages 3 to 5 home-preschool rhythm in which one alphabet letter anchors four short activity days and a Friday field trip. Every week joins living read-alouds, tactile letter-sound work, real-object counting, fine motor practice, movement, practical life, process art, optional cooking, and a theme.",
+        "content": "Prepare accessible trays, real tools, picture books, tactile letters, counting objects, art materials, and a calm daily rhythm. On Monday through Thursday, read one book, poem, Bible story, or verse; model the week's sound with glitter-glue, clay, salt, and object matching; count and classify real things; alternate fine and large motor work; complete one useful home task; and make art connected to the literature or theme. Invite narration without forcing it. Friday becomes a local field trip or simple shared celebration. Keep each activity brief, repeat what engages the child, skip what does not fit, and stretch the 26 weeks across 52 weeks when two activity days per week better fit the family.",
+        "citations": [
+          {
+            "url": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BLZ2D4UUF-parent%20guide.pdf",
+            "title": "The Peaceful Preschool parent guide"
+          },
+          {
+            "url": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BM867U1PD-printables.pdf",
+            "title": "The Peaceful Preschool printables"
+          },
+          {
+            "url": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BMJ495DT6-recipes.pdf",
+            "title": "The Peaceful Preschool recipes"
+          }
+        ],
+        "confidence": "high",
+        "sourceTier": 2,
+        "contributedBy": "founder",
+        "status": "active"
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Phonics",
+        "curriculumTopic": "Recognize and produce each single-letter sound",
+        "sourceQuote": "letter sounds",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_F978c32kDr",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics",
+        "curriculumTopic": "Recognize the full alphabet in upper and lower case",
+        "sourceQuote": "all letters and their sound",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_frDIaXzWbx",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Read Aloud",
+        "curriculumTopic": "Listen to picture books, poems, Bible passages, and alphabet books",
+        "sourceQuote": "Read Aloud",
+        "homaSubject": "English",
+        "homaDomain": "Reading Comprehension",
+        "homaTopicId": "mt_mLPEMpYb_R",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Narration",
+        "curriculumTopic": "Retell a read-aloud in the child's own words",
+        "sourceQuote": "tell you the story in their own words",
+        "homaSubject": "English",
+        "homaDomain": "Reading Comprehension",
+        "homaTopicId": "mt_zlSoIKPyId",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Poetry",
+        "curriculumTopic": "Hear, memorize, and enjoy short poems",
+        "sourceQuote": "poetry memorization",
+        "homaSubject": "English",
+        "homaDomain": "Literature",
+        "homaTopicId": "mt_xxhg1RZH67",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Counting Skills",
+        "curriculumTopic": "Count real objects and connect numerals with quantities",
+        "sourceQuote": "count real things",
+        "homaSubject": "Mathematics",
+        "homaDomain": "Counting & Cardinality",
+        "homaTopicId": "mt_w7e2j6z1m9",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Counting Skills",
+        "curriculumTopic": "Use one-to-one correspondence while moving objects",
+        "sourceQuote": "place the right amount of beans",
+        "homaSubject": "Mathematics",
+        "homaDomain": "Counting & Cardinality",
+        "homaTopicId": "mt_WcfaSfVT33",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Counting Skills",
+        "curriculumTopic": "Sort and classify household and nature objects",
+        "sourceQuote": "Categorize the animals by size.",
+        "homaSubject": "Mathematics",
+        "homaDomain": "Data & Statistics",
+        "homaTopicId": "mt_NJz7vT4Bhp",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Counting Skills",
+        "curriculumTopic": "Name and use circles, squares, and other two-dimensional shapes",
+        "sourceQuote": "Review shapes",
+        "homaSubject": "Mathematics",
+        "homaDomain": "Geometry",
+        "homaTopicId": "mt_KJeEeTutJI",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Counting Skills",
+        "curriculumTopic": "Use positional words in play and maps",
+        "sourceQuote": "over, under, inside",
+        "homaSubject": "Mathematics",
+        "homaDomain": "Geometry",
+        "homaTopicId": "mt_qeZYF6HZ4o",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Counting Skills",
+        "curriculumTopic": "Explore capacity while pouring and measuring",
+        "sourceQuote": "measuring cups",
+        "homaSubject": "Mathematics",
+        "homaDomain": "Measurement",
+        "homaTopicId": "mt_4lp_b5Pzik",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Counting Skills",
+        "curriculumTopic": "Create and extend visual patterns",
+        "sourceQuote": "pattern blocks",
+        "homaSubject": "Mathematics",
+        "homaDomain": "Algebra",
+        "homaTopicId": "mt_IOpwXalEo4",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science",
+        "curriculumTopic": "Observe with the five senses",
+        "sourceQuote": "five senses",
+        "homaSubject": "Science",
+        "homaDomain": "The Human Body",
+        "homaTopicId": "mt_nwSWPTENmv",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science",
+        "curriculumTopic": "Name common animals and compare animal families",
+        "sourceQuote": "Gather toy zoo animals",
+        "homaSubject": "Science",
+        "homaDomain": "Organisms & Life Processes",
+        "homaTopicId": "mt_zVLOm6U7bh",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science",
+        "curriculumTopic": "Observe common plants and trees",
+        "sourceQuote": "trees and plants",
+        "homaSubject": "Science",
+        "homaDomain": "Organisms & Life Processes",
+        "homaTopicId": "mt_j7cer_Nmor",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Nature Study",
+        "curriculumTopic": "Observe and record the outdoors",
+        "sourceQuote": "take a short nature walk",
+        "homaSubject": "Science",
+        "homaDomain": "Scientific Inquiry",
+        "homaTopicId": "mt_5hCA_R9fQg",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Science",
+        "curriculumTopic": "Test whether objects float or sink",
+        "sourceQuote": "Float and Sink",
+        "homaSubject": "Science",
+        "homaDomain": "Matter & Materials",
+        "homaTopicId": "mt_vgB4oY7Qyl",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Personal and Social Development",
+        "curriculumTopic": "Practice kindness, care, and neighborly contribution",
+        "sourceQuote": "Be kind to one another.",
+        "homaSubject": "Personal & Social Development",
+        "homaDomain": "Empathy & Social Awareness",
+        "homaTopicId": "mt_lAvS72LOUO",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Practical Life Skills",
+        "curriculumTopic": "Build a visible daily rhythm",
+        "sourceQuote": "morning routine",
+        "homaSubject": "Life Skills",
+        "homaDomain": "Daily Living",
+        "homaTopicId": "mt_TZ6weMcIsN",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Practical Life Skills",
+        "curriculumTopic": "Practice dressing, washing, brushing teeth, and other self-care",
+        "sourceQuote": "hand washing and teeth brushing",
+        "homaSubject": "Life Skills",
+        "homaDomain": "Daily Living",
+        "homaTopicId": "mt_k1u-rddlMM",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Practical Life Skills",
+        "curriculumTopic": "Contribute to real household chores",
+        "sourceQuote": "Brainstorm a chore list",
+        "homaSubject": "Life Skills",
+        "homaDomain": "Daily Living",
+        "homaTopicId": "mt_fJNgOr_ike",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Art Skills",
+        "curriculumTopic": "Make process art inspired by books, nature, and artists",
+        "sourceQuote": "watercolor paint",
+        "homaSubject": "Art",
+        "homaDomain": "Picture Study & Art Appreciation",
+        "homaTopicId": "mt_2u99ybq83k",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Music",
+        "curriculumTopic": "Listen and move to varied musical styles",
+        "sourceQuote": "Play different genres of music",
+        "homaSubject": "Music",
+        "homaDomain": "Composer Study & Music Appreciation",
+        "homaTopicId": "mt_DFIWe5Fe47",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Geography",
+        "curriculumTopic": "Draw a first map of home or neighborhood",
+        "sourceQuote": "Draw a map of your property or neighborhood",
+        "homaSubject": "History",
+        "homaDomain": "Geography & Maps",
+        "homaTopicId": "mt_s7spKtOztv",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Fine Motor Skills",
+        "curriculumTopic": "Develop hand strength, dexterity, bilateral coordination, and tool control",
+        "sourceQuote": "Fine Motor Skills",
+        "homaSubject": "Fine Motor",
+        "homaDomain": "Fine Motor Development",
+        "homaTopicId": "mt_dkvLZt8xgX",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Large Motor Skills",
+        "curriculumTopic": "Develop balance, crawling, hopping, skipping, throwing, catching, and coordinated movement",
+        "sourceQuote": "Large Motor Skills",
+        "homaSubject": "Gross Motor",
+        "homaDomain": "Gross Motor Development",
+        "homaTopicId": "mt_3RzUdTRDxf",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Christian Devotion",
+        "curriculumTopic": "Hear, memorize, and discuss Bible stories and verses",
+        "sourceQuote": "Bible verse or poetry memorization",
+        "homaSubject": "Religious Education",
+        "homaDomain": "Biblical Literacy",
+        "homaTopicId": "mt_kO_GoH5F5t",
+        "status": "mapped"
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 27,
+      "mapped": 27,
+      "unmapped": 0,
+      "noSubject": 0,
+      "partial": 0
+    },
+    "taxonomyRuling": "All 27 curriculum concepts now map to concrete taxonomy topics. Fine and gross motor work route into Homa's existing motor subjects through separate content domains, so they do not collide with scored assessment domains. Biblical story and verse familiarity remains a parked, content-only Religious Education subject, and a child's beliefs are never scored. No prerequisite edge was justified."
+  },
+  "layer3_structure": {
+    "ageRangeMonths": [
+      36,
+      60
+    ],
+    "cadence": "Twenty-six alphabet weeks. Monday through Thursday each include a read-aloud, phonics, counting, fine motor, large motor, practical life, and art. Friday is a field trip or shared celebration. Families may instead complete two activity days per week and spread the sequence across 52 weeks.",
+    "cadenceEvidence": "with Fridays set aside for field trips.",
+    "sessionLengthMinutes": {
+      "perActivitySuggested": 5,
+      "totalDailyMinutes": null,
+      "note": "The source recommends stopping after about five minutes when that better fits the child and does not prescribe a fixed daily total.",
+      "evidence": "It is better to spend 5 minutes doing an activity"
+    },
+    "weeklyTemplate": "Read one picture book, poem, Bible story or verse; model and review the letter sound with glitter glue, salt, clay, tracing, and real-object matching; count, sort, compare, or measure real things; complete fine motor and large motor work; practice one useful home skill; make art or cook around the theme; then use Friday for a related local outing or gathering.",
+    "progressionModel": "Linear A-to-Z letter sequence with cumulative review. Previously introduced letters, quantities, movement patterns, self-care tasks, and chores recur, while the parent adjusts difficulty to readiness.",
+    "reviewRhythm": "Daily tactile letter review and real-object practice, weekly cumulative alphabet flash or clay review, recurring narration and practical-life rehearsal, periodic observation through the kindergarten skills checklist, and no formal tests.",
+    "totalWeeks": 26,
+    "sequenceCounts": {
+      "alphabetWeeks": 26,
+      "coreActivityDays": 104,
+      "fieldTripDays": 26,
+      "totalPlannedDays": 130
+    }
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "guided-read-aloud-and-narration",
+        "description": "Read a short living book, poem, Bible passage, or alphabet book and invite an oral retelling or discussion without forcing performance.",
+        "sourceQuote": "Have your child tell you the story in their own words.",
+        "recipe": "narration-page",
+        "status": "have_recipe"
+      },
+      {
+        "type": "tactile-phonogram-cards",
+        "description": "Make and trace raised glitter-glue letters while saying the sound, preserving the source's sandpaper-letter logic without copying its printable art.",
+        "sourceQuote": "glitter glue flashcards",
+        "recipe": "flash-cards",
+        "status": "have_recipe"
+      },
+      {
+        "type": "letter-formation-practice",
+        "description": "Form and trace letters in salt, sand, clay, chalk, and other sensory media.",
+        "sourceQuote": "trace the letters in sand",
+        "recipe": "letter-number-formation-practice",
+        "status": "have_recipe"
+      },
+      {
+        "type": "real-object-counting",
+        "description": "Count, compare, group, add, subtract, and match numerals with real household, food, toy, and nature objects.",
+        "sourceQuote": "count real things",
+        "recipe": "number-practice-page",
+        "status": "have_recipe"
+      },
+      {
+        "type": "classification-and-sorting",
+        "description": "Sort objects by one observable attribute such as size, color, type, or family.",
+        "sourceQuote": "Categorize the animals by size.",
+        "recipe": "classification-sorting-mat",
+        "status": "have_recipe"
+      },
+      {
+        "type": "practical-life-routine",
+        "description": "Teach a real home-care or self-care sequence and let the child repeat it with accessible tools.",
+        "sourceQuote": "Practical Life Skills",
+        "recipe": "visual-schedule-cards",
+        "status": "have_recipe"
+      },
+      {
+        "type": "family-rhythm-planning",
+        "description": "Turn family essentials, morning routines, books, physical activity, and rest into a simple visible rhythm.",
+        "sourceQuote": "Writing Down Your Essentials/Vision/Schedule",
+        "recipe": "daily-rhythm-cards",
+        "status": "have_recipe"
+      },
+      {
+        "type": "fine-motor-invitation",
+        "description": "Use transferring, lacing, tonging, pinning, cutting, sewing, modeling, and hand-strengthening invitations.",
+        "sourceQuote": "Fine Motor Skills",
+        "recipe": "activity-pack",
+        "status": "have_recipe"
+      },
+      {
+        "type": "gross-motor-game",
+        "description": "Use crawling, rolling, balancing, hopping, skipping, throwing, catching, climbing, and dramatic movement between quieter tasks.",
+        "sourceQuote": "Large Motor Skills",
+        "recipe": "activity-pack",
+        "status": "have_recipe"
+      },
+      {
+        "type": "process-art-project",
+        "description": "Make child-led watercolor, collage, clay, print, nature, and book-inspired art with a short materials and process guide.",
+        "sourceQuote": "Art Skills",
+        "recipe": "art-project-instructions",
+        "status": "have_recipe"
+      },
+      {
+        "type": "cut-and-assemble-craft",
+        "description": "Create masks, puppets, kites, books, models, and themed props from simple household craft materials.",
+        "sourceQuote": "BUNNY MASK",
+        "recipe": "cut-and-assemble-craft",
+        "status": "have_recipe"
+      },
+      {
+        "type": "nature-observation",
+        "description": "Take a short outdoor walk, observe seasonal plants or animals, gather nature items, and draw or sort what was found.",
+        "sourceQuote": "take a short nature walk",
+        "recipe": "nature-observation-journal",
+        "status": "have_recipe"
+      },
+      {
+        "type": "preschool-field-trip",
+        "description": "Prepare a simple related local outing, observation focus, and short follow-up conversation or art response.",
+        "sourceQuote": "Fridays set aside for field trips.",
+        "recipe": "activity-pack",
+        "status": "have_recipe"
+      },
+      {
+        "type": "child-assisted-cooking",
+        "description": "Give a preschooler a safe, sequenced role in measuring, pouring, stirring, assembling, serving, and cleaning up a simple recipe.",
+        "sourceQuote": "Make apple crisp together",
+        "recipe": "child-assisted-recipe-card",
+        "status": "have_recipe"
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 14,
+      "haveRecipe": 14,
+      "noRecipe": 0
+    },
+    "recipeAudit": {
+      "auditedAt": "2026-08-02",
+      "directRecipeFiles": 12,
+      "aliasesRequired": 0,
+      "proposedRecipes": [],
+      "result": "All 14 recurring mechanics are covered by current reusable recipes. child-assisted-recipe-card is shipped and registered, with adult-only preparation separated from child jobs and a binding original-or-parent-provided recipe rule."
+    }
+  },
+  "layer5_lessons": {
+    "decompositionQuality": "full",
+    "unitKind": "week",
+    "unitsFound": 26,
+    "unitsDecomposed": 26,
+    "partOrder": [
+      "CalendarBundle.pdf",
+      "family vision.pdf",
+      "parent guide.pdf",
+      "printables.pdf",
+      "recipes.pdf",
+      "supply list.pdf",
+      "the_peaceful_preschool_-_book_list.pdf"
+    ],
+    "notes": "The source's own smallest stable planned unit is the letter week. All 26 weeks are decomposed below. Each row rolls up all Monday through Thursday directed books, poems, Bible readings, named songs or artworks, the weekly theme, representative activities and materials, and current taxonomy ids. Friday field trips remain part of the weekly row.",
+    "units": [
+      {
+        "ordinal": 1,
+        "unitKind": "week",
+        "unitLabel": "UNIT A",
+        "topic": {
+          "name": "letter a, apples, and measurement",
+          "quote": "Letter A"
+        },
+        "referencedWorks": [
+          {
+            "title": "How to Make an Apple Pie and See the World",
+            "author": "Marjorie Priceman",
+            "kind": "book",
+            "purpose": "read-aloud and narration",
+            "quote": "How to Make an Apple Pie and See The World"
+          },
+          {
+            "title": "Ten Apples Up on Top",
+            "author": "Theo LeSieg",
+            "kind": "book",
+            "purpose": "read-aloud and counting",
+            "quote": "Ten Apples Up on Top"
+          },
+          {
+            "title": "Favorite alphabet book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "favorite alphabet book"
+          },
+          {
+            "title": "Apple Pie ABC",
+            "author": null,
+            "kind": "book",
+            "purpose": "suggested alphabet book",
+            "quote": "Apple Pie ABC"
+          },
+          {
+            "title": "I Spy",
+            "author": null,
+            "kind": "book",
+            "purpose": "suggested alphabet book",
+            "quote": "| Spy"
+          },
+          {
+            "title": "An Alphabet in Art",
+            "author": null,
+            "kind": "book",
+            "purpose": "suggested alphabet book",
+            "quote": "Alphabet In Art"
+          },
+          {
+            "title": "Alphabet City",
+            "author": null,
+            "kind": "book",
+            "purpose": "suggested alphabet book",
+            "quote": "Alphabet City"
+          }
+        ],
+        "questions": [
+          {
+            "text": "Tell the story in your own words.",
+            "quote": "Have your child tell you the story in their own words."
+          }
+        ],
+        "themes": [
+          {
+            "name": "apples and orchards",
+            "evidence": "Apple snacks, crafts"
+          },
+          {
+            "name": "words used with care",
+            "evidence": "A word fitly spoken is like apples of gold"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Make and trace a tactile A card",
+            "quote": "Make Glitter Glue A."
+          },
+          {
+            "description": "Count and compare apples",
+            "quote": "Count Apples to 5."
+          },
+          {
+            "description": "Visit an orchard, farm, bakery, or market",
+            "quote": "Visit an apple orchard"
+          }
+        ],
+        "materials": [
+          {
+            "name": "apples",
+            "quote": "10 apples"
+          },
+          {
+            "name": "cinnamon sticks",
+            "quote": "Cinnamon Sticks"
+          },
+          {
+            "name": "red or green tissue paper",
+            "quote": "Red or green tissue paper"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_zlSoIKPyId",
+          "mt_w7e2j6z1m9",
+          "mt_4lp_b5Pzik",
+          "mt_nwSWPTENmv",
+          "mt_fJNgOr_ike",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 2,
+        "unitKind": "week",
+        "unitLabel": "UNIT B",
+        "topic": {
+          "name": "letter b, berries, animals, and kindness",
+          "quote": "Letter B"
+        },
+        "referencedWorks": [
+          {
+            "title": "Blueberries for Sal",
+            "author": "Robert McCloskey",
+            "kind": "book",
+            "purpose": "read-aloud and narration",
+            "quote": "Blueberries For Sal"
+          },
+          {
+            "title": "The Bible in Pictures for Little Eyes",
+            "author": "Kenneth N. Taylor",
+            "kind": "book",
+            "purpose": "creation story",
+            "quote": "Bible in Pictures for Little Eyes"
+          },
+          {
+            "title": "Favorite alphabet book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "favorite alphabet book"
+          },
+          {
+            "title": "So Many Bunnies",
+            "author": null,
+            "kind": "book",
+            "purpose": "suggested alphabet book",
+            "quote": "So Many Bunnies"
+          },
+          {
+            "title": "The Runaway Bunny",
+            "author": "Margaret Wise Brown",
+            "kind": "book",
+            "purpose": "read-aloud and dramatic play",
+            "quote": "The Runaway Bunny"
+          }
+        ],
+        "questions": [
+          {
+            "text": "Tell what happened in your own words.",
+            "quote": "ask them to tell you about it in their own words."
+          }
+        ],
+        "themes": [
+          {
+            "name": "bees, butterflies, and kindness",
+            "evidence": "Honey bees"
+          },
+          {
+            "name": "kindness",
+            "evidence": "Be kind to one another."
+          }
+        ],
+        "activities": [
+          {
+            "description": "Count and transfer berries",
+            "quote": "Count berries to 10."
+          },
+          {
+            "description": "Classify toy animals by size and family",
+            "quote": "Categorize the animals by size."
+          },
+          {
+            "description": "Act out the bunny's movements",
+            "quote": "Do a bunny hop race with your child."
+          }
+        ],
+        "materials": [
+          {
+            "name": "fresh, frozen, or dried berries",
+            "quote": "Fresh, frozen or dried berries"
+          },
+          {
+            "name": "assorted toy animals",
+            "quote": "Assorted toy animals"
+          },
+          {
+            "name": "cotton balls",
+            "quote": "Cotton balls"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_zlSoIKPyId",
+          "mt_w7e2j6z1m9",
+          "mt_NJz7vT4Bhp",
+          "mt_zVLOm6U7bh",
+          "mt_lAvS72LOUO",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf",
+          "mt_kO_GoH5F5t"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 3,
+        "unitKind": "week",
+        "unitLabel": "UNIT C",
+        "topic": {
+          "name": "letter c, children, senses, and community",
+          "quote": "Letter C"
+        },
+        "referencedWorks": [
+          {
+            "title": "Caps for Sale",
+            "author": "Esphyr Slobodkina",
+            "kind": "book",
+            "purpose": "read-aloud and narration",
+            "quote": "Caps For Sale"
+          },
+          {
+            "title": "The Cow",
+            "author": "Robert Louis Stevenson",
+            "kind": "poem",
+            "purpose": "poetry and nature",
+            "quote": "The Cow"
+          },
+          {
+            "title": "A Child's Garden of Verses",
+            "author": "Robert Louis Stevenson",
+            "kind": "book",
+            "purpose": "poetry collection",
+            "quote": "A Child\u2019s Garden of Verses"
+          },
+          {
+            "title": "Chicka Chicka Boom Boom",
+            "author": "Bill Martin Jr. and John Archambault",
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "Chicka Chicka Boom Boom"
+          },
+          {
+            "title": "Corduroy",
+            "author": "Don Freeman",
+            "kind": "book",
+            "purpose": "read-aloud and pretend store",
+            "quote": "Corduroy"
+          }
+        ],
+        "questions": [
+          {
+            "text": "Tell what happened in your own words.",
+            "quote": "ask them to tell you about it in their own words."
+          }
+        ],
+        "themes": [
+          {
+            "name": "children, families, and five senses",
+            "evidence": "Children and families."
+          },
+          {
+            "name": "family knowledge",
+            "evidence": "Write out a family tree."
+          }
+        ],
+        "activities": [
+          {
+            "description": "Count and sort hats and coins",
+            "quote": "Gather coins from around your house and sort them"
+          },
+          {
+            "description": "Form lower-case C in salt",
+            "quote": "Make lower case C in salt."
+          },
+          {
+            "description": "Draw and decorate an alphabet palm tree",
+            "quote": "Draw a palm tree with your child."
+          }
+        ],
+        "materials": [
+          {
+            "name": "hats and caps",
+            "quote": "Hats and caps"
+          },
+          {
+            "name": "coins",
+            "quote": "Coins"
+          },
+          {
+            "name": "wildflowers",
+            "quote": "Wildflowers"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_zlSoIKPyId",
+          "mt_xxhg1RZH67",
+          "mt_w7e2j6z1m9",
+          "mt_NJz7vT4Bhp",
+          "mt_nwSWPTENmv",
+          "mt_j7cer_Nmor",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 4,
+        "unitKind": "week",
+        "unitLabel": "UNIT D",
+        "topic": {
+          "name": "letter d, family rules, communication, and good deeds",
+          "quote": "Letter D"
+        },
+        "referencedWorks": [
+          {
+            "title": "If You Give a Dog a Donut",
+            "author": "Laura Numeroff",
+            "kind": "book",
+            "purpose": "read-aloud and dramatic play",
+            "quote": "If You Give A Dog A Donut"
+          },
+          {
+            "title": "Matthew 7:12",
+            "author": null,
+            "kind": "book",
+            "purpose": "Bible verse and kindness",
+            "quote": "Matthew 7:12"
+          },
+          {
+            "title": "Favorite alphabet book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "favorite alphabet book"
+          },
+          {
+            "title": "Make Way for Ducklings",
+            "author": "Robert McCloskey",
+            "kind": "book",
+            "purpose": "read-aloud and art observation",
+            "quote": "Make Way For Ducklings"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "family rules and practical life",
+            "evidence": "Family rules, practical life skills or chores, and expectations."
+          },
+          {
+            "name": "communication",
+            "evidence": "Speaking clearly. Communication."
+          }
+        ],
+        "activities": [
+          {
+            "description": "Make a tactile D card",
+            "quote": "Make Glitter Glue D."
+          },
+          {
+            "description": "Brainstorm and complete a neighborly good deed",
+            "quote": "Brainstorm 10 good deeds with your child."
+          },
+          {
+            "description": "Build a movement course around letter recall",
+            "quote": "Make an obstacle course with your child."
+          }
+        ],
+        "materials": [
+          {
+            "name": "mini donuts",
+            "quote": "A small package of donuts"
+          },
+          {
+            "name": "bird seed",
+            "quote": "Bird seed"
+          },
+          {
+            "name": "alphabet noodles",
+            "quote": "Alphabet noodles"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_w7e2j6z1m9",
+          "mt_KJeEeTutJI",
+          "mt_lAvS72LOUO",
+          "mt_fJNgOr_ike",
+          "mt_2u99ybq83k",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf",
+          "mt_kO_GoH5F5t"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 5,
+        "unitKind": "week",
+        "unitLabel": "UNIT E",
+        "topic": {
+          "name": "letter e, eggs, birds, and stewardship",
+          "quote": "Letter E"
+        },
+        "referencedWorks": [
+          {
+            "title": "Rechenka's Eggs",
+            "author": "Patricia Polacco",
+            "kind": "book",
+            "purpose": "read-aloud and art",
+            "quote": "Rechenka\u2019s Eggs"
+          },
+          {
+            "title": "Nest Eggs",
+            "author": "Robert Louis Stevenson",
+            "kind": "poem",
+            "purpose": "poetry and nature",
+            "quote": "Nest Eggs"
+          },
+          {
+            "title": "Favorite alphabet book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "favorite alphabet book"
+          },
+          {
+            "title": "An Egg Is Quiet",
+            "author": "Dianna Hutts Aston",
+            "kind": "book",
+            "purpose": "read-aloud and animal movement",
+            "quote": "An Egg Is Quiet"
+          },
+          {
+            "title": "Nature Anatomy",
+            "author": "Julia Rothman",
+            "kind": "book",
+            "purpose": "bird and nest drawing reference",
+            "quote": "Nature Anatomy"
+          },
+          {
+            "title": "ABC Song",
+            "author": null,
+            "kind": "song",
+            "purpose": "singing while working",
+            "quote": "ABC Song"
+          },
+          {
+            "title": "Jesus Loves Me",
+            "author": null,
+            "kind": "song",
+            "purpose": "singing while working",
+            "quote": "Jesus Loves Me"
+          },
+          {
+            "title": "If You're Happy and You Know It",
+            "author": null,
+            "kind": "song",
+            "purpose": "singing while working",
+            "quote": "If You\u2019re Happy And You Know It"
+          }
+        ],
+        "questions": [
+          {
+            "text": "How do the eggs differ in size and shape?",
+            "quote": "Discuss the differences in size and shape"
+          }
+        ],
+        "themes": [
+          {
+            "name": "earth and environmental stewardship",
+            "evidence": "Environmental stewardship"
+          },
+          {
+            "name": "birds, nests, and eggs",
+            "evidence": "Nests. Look for a nest."
+          }
+        ],
+        "activities": [
+          {
+            "description": "Match egg-carton numerals with quantities",
+            "quote": "Number the spaces in an egg carton 1-12."
+          },
+          {
+            "description": "Form lower-case E in salt",
+            "quote": "Make lower case E in salt."
+          },
+          {
+            "description": "Practice window cleaning as practical life",
+            "quote": "Clean windows together."
+          }
+        ],
+        "materials": [
+          {
+            "name": "eggs",
+            "quote": "dozen eggs"
+          },
+          {
+            "name": "beans",
+            "quote": "dried beans"
+          },
+          {
+            "name": "bird seed",
+            "quote": "bird seed"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_xxhg1RZH67",
+          "mt_w7e2j6z1m9",
+          "mt_WcfaSfVT33",
+          "mt_zVLOm6U7bh",
+          "mt_j7cer_Nmor",
+          "mt_fJNgOr_ike",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 6,
+        "unitKind": "week",
+        "unitLabel": "UNIT F",
+        "topic": {
+          "name": "letter f, oceans, fish, and floating",
+          "quote": "Letter F"
+        },
+        "referencedWorks": [
+          {
+            "title": "A Fish Out of Water",
+            "author": "Helen Palmer",
+            "kind": "book",
+            "purpose": "read-aloud and sensory science",
+            "quote": "Fish Out Of Water"
+          },
+          {
+            "title": "Jonah and the Whale",
+            "author": null,
+            "kind": "book",
+            "purpose": "Bible story",
+            "quote": "Jonah and the Whale"
+          },
+          {
+            "title": "Favorite ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "favorite ABC book"
+          },
+          {
+            "title": "Fish",
+            "author": "Liam Francis Walsh",
+            "kind": "book",
+            "purpose": "suggested alphabet book",
+            "quote": "Fish by Liam Francis Walsh"
+          },
+          {
+            "title": "Ten Little Fish",
+            "author": "Audrey Wood",
+            "kind": "book",
+            "purpose": "read-aloud and counting",
+            "quote": "Ten Little Fish"
+          },
+          {
+            "title": "The Long Leg",
+            "author": "Edward Hopper",
+            "kind": "artwork",
+            "purpose": "sea painting study",
+            "quote": "The Long Leg"
+          },
+          {
+            "title": "The Gulf Stream",
+            "author": "Winslow Homer",
+            "kind": "artwork",
+            "purpose": "sea painting study",
+            "quote": "The Gulf Stream"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "oceans and fish",
+            "evidence": "Oceans, fish."
+          },
+          {
+            "name": "aquarium observation",
+            "evidence": "Visit an aquarium or pet store."
+          }
+        ],
+        "activities": [
+          {
+            "description": "Match fish quantities with numerals",
+            "quote": "Gold fish count."
+          },
+          {
+            "description": "Explore sink, float, wet, and dry in a fish-bowl sensory bin",
+            "quote": "sink/float and wet/dry"
+          },
+          {
+            "description": "Play a phonics fishing game",
+            "quote": "Play carnival fishing game."
+          }
+        ],
+        "materials": [
+          {
+            "name": "goldfish crackers",
+            "quote": "goldfish crackers"
+          },
+          {
+            "name": "toy sea creatures",
+            "quote": "toy sea creatures"
+          },
+          {
+            "name": "watercolor paint",
+            "quote": "watercolor"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_w7e2j6z1m9",
+          "mt_NJz7vT4Bhp",
+          "mt_vgB4oY7Qyl",
+          "mt_zVLOm6U7bh",
+          "mt_2u99ybq83k",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf",
+          "mt_kO_GoH5F5t"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 7,
+        "unitKind": "week",
+        "unitLabel": "UNIT G",
+        "topic": {
+          "name": "letter g, goodness, zoo animals, and position",
+          "quote": "Letter G"
+        },
+        "referencedWorks": [
+          {
+            "title": "Go, Dog. Go!",
+            "author": "P. D. Eastman",
+            "kind": "book",
+            "purpose": "read-aloud and positional language",
+            "quote": "Go Dog, Go!"
+          },
+          {
+            "title": "Good Night, Gorilla",
+            "author": "Peggy Rathmann",
+            "kind": "book",
+            "purpose": "read-aloud and dramatic play",
+            "quote": "Good Night Gorilla"
+          },
+          {
+            "title": "ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "ABC book aloud"
+          },
+          {
+            "title": "Goodnight Moon",
+            "author": "Margaret Wise Brown and Clement Hurd",
+            "kind": "book",
+            "purpose": "read-aloud and shape play",
+            "quote": "Good Night Moon"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "goodness and favorite things",
+            "evidence": "Goodness. Favorite things."
+          },
+          {
+            "name": "farm and zoo animals",
+            "evidence": "Animals with letter G"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Repeat auditory object and number sequences",
+            "quote": "Introduce auditory sequences"
+          },
+          {
+            "description": "Count and add with toy zoo animals",
+            "quote": "Gather toy zoo animals and count them."
+          },
+          {
+            "description": "Build pictures from pattern blocks",
+            "quote": "Create pictures from pattern blocks."
+          }
+        ],
+        "materials": [
+          {
+            "name": "toy zoo animals",
+            "quote": "toy zoo animals"
+          },
+          {
+            "name": "pattern blocks",
+            "quote": "pattern blocks"
+          },
+          {
+            "name": "balloon",
+            "quote": "balloon"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_w7e2j6z1m9",
+          "mt_qeZYF6HZ4o",
+          "mt_KJeEeTutJI",
+          "mt_IOpwXalEo4",
+          "mt_zVLOm6U7bh",
+          "mt_TZ6weMcIsN",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 8,
+        "unitKind": "week",
+        "unitLabel": "UNIT H",
+        "topic": {
+          "name": "letter h, homes, neighborhoods, and bread",
+          "quote": "Letter H"
+        },
+        "referencedWorks": [
+          {
+            "title": "The Little House",
+            "author": "Virginia Lee Burton",
+            "kind": "book",
+            "purpose": "read-aloud and neighborhood observation",
+            "quote": "The Little House"
+          },
+          {
+            "title": "The Little Red Hen",
+            "author": "Diane Muldrow and J. P. Miller",
+            "kind": "book",
+            "purpose": "read-aloud, retelling, and bread baking",
+            "quote": "The Little Red Hen"
+          },
+          {
+            "title": "ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "ABC book aloud"
+          },
+          {
+            "title": "Harold and the Purple Crayon",
+            "author": "Crocket Johnson",
+            "kind": "book",
+            "purpose": "read-aloud and drawing",
+            "quote": "Harold And The Purple Crayon"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "homes around the world",
+            "evidence": "Homes around the world."
+          },
+          {
+            "name": "neighborhoods and shapes",
+            "evidence": "Form drawing. Shapes."
+          }
+        ],
+        "activities": [
+          {
+            "description": "Collect, sort, and count leaves",
+            "quote": "Gather leaves and sort/count them."
+          },
+          {
+            "description": "Bake and shape a simple loaf",
+            "quote": "Bread Baking"
+          },
+          {
+            "description": "Count household windows and introduce tally marks",
+            "quote": "Count all the windows in your house."
+          }
+        ],
+        "materials": [
+          {
+            "name": "leaves",
+            "quote": "leaves"
+          },
+          {
+            "name": "wheat seeds",
+            "quote": "wheat seeds"
+          },
+          {
+            "name": "felt squares",
+            "quote": "felt squares"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_zlSoIKPyId",
+          "mt_w7e2j6z1m9",
+          "mt_NJz7vT4Bhp",
+          "mt_KJeEeTutJI",
+          "mt_s7spKtOztv",
+          "mt_j7cer_Nmor",
+          "mt_fJNgOr_ike",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 9,
+        "unitKind": "week",
+        "unitLabel": "UNIT I",
+        "topic": {
+          "name": "letter i, position, maps, and nature drawing",
+          "quote": "Letter I"
+        },
+        "referencedWorks": [
+          {
+            "title": "Ice Cream Summer",
+            "author": "Peter Sis",
+            "kind": "book",
+            "purpose": "read-aloud and pretend shop",
+            "quote": "Ice Cream Summer"
+          },
+          {
+            "title": "Favorite Bible story or poem",
+            "author": null,
+            "kind": "book",
+            "purpose": "devotional read-aloud",
+            "quote": "favorite Bible story or poem"
+          },
+          {
+            "title": "ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "ABC book aloud"
+          },
+          {
+            "title": "Inch by Inch",
+            "author": "Leo Lionni",
+            "kind": "book",
+            "purpose": "read-aloud and measurement",
+            "quote": "Inch By Inch"
+          },
+          {
+            "title": "Nature Anatomy",
+            "author": "Julia Rothman",
+            "kind": "book",
+            "purpose": "nature drawing reference",
+            "quote": "Nature Anatomy"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "position words",
+            "evidence": "Prepositions."
+          },
+          {
+            "name": "Noah's ark and spatial language",
+            "evidence": "Noah's Ark. Draw an ark"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Draw a simple property or neighborhood map",
+            "quote": "Draw a map of your property or neighborhood"
+          },
+          {
+            "description": "Walk heel to toe on a line or beam",
+            "quote": "Walking on a line."
+          },
+          {
+            "description": "Prepare ice cream sundaes together",
+            "quote": "Make ice cream sundaes together."
+          }
+        ],
+        "materials": [
+          {
+            "name": "felt",
+            "quote": "felt squares"
+          },
+          {
+            "name": "beads",
+            "quote": "String beads"
+          },
+          {
+            "name": "small chalkboard",
+            "quote": "small chalkboard"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_w7e2j6z1m9",
+          "mt_qeZYF6HZ4o",
+          "mt_s7spKtOztv",
+          "mt_5hCA_R9fQg",
+          "mt_k1u-rddlMM",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf",
+          "mt_kO_GoH5F5t"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 10,
+        "unitKind": "week",
+        "unitLabel": "UNIT J",
+        "topic": {
+          "name": "letter j, fruit, character, and oral narration",
+          "quote": "Letter J"
+        },
+        "referencedWorks": [
+          {
+            "title": "Sheep in a Jeep",
+            "author": "Nancy Shaw",
+            "kind": "book",
+            "purpose": "read-aloud and narration",
+            "quote": "Sheep In A Jeep"
+          },
+          {
+            "title": "Jonah and the Whale",
+            "author": null,
+            "kind": "book",
+            "purpose": "Bible story and dramatic play",
+            "quote": "Jonah and the Whale"
+          },
+          {
+            "title": "ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "ABC book aloud"
+          },
+          {
+            "title": "The Giant Jam Sandwich",
+            "author": "John Vernon Lord",
+            "kind": "book",
+            "purpose": "read-aloud and narration",
+            "quote": "The Giant Jam Sandwich"
+          }
+        ],
+        "questions": [
+          {
+            "text": "Tell your version of the story.",
+            "quote": "Ask your child to tell you their version of the story."
+          },
+          {
+            "text": "Narrate the story orally.",
+            "quote": "Have your child narrate orally."
+          }
+        ],
+        "themes": [
+          {
+            "name": "fruit and character traits",
+            "evidence": "Fruit and character traits."
+          },
+          {
+            "name": "love, joy, and peace",
+            "evidence": "sweetness of love, joy and peace"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Make and review a tactile J",
+            "quote": "Make Glitter Glue J"
+          },
+          {
+            "description": "Count and sort toy cars by color",
+            "quote": "Gather all the toy cars from your house."
+          },
+          {
+            "description": "Prepare a child-assisted salad",
+            "quote": "Make a Chinese Chicken Salad with your child."
+          }
+        ],
+        "materials": [
+          {
+            "name": "toy cars",
+            "quote": "toy cars"
+          },
+          {
+            "name": "clothespins",
+            "quote": "clothespins"
+          },
+          {
+            "name": "fruit",
+            "quote": "fruit salad"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_zlSoIKPyId",
+          "mt_w7e2j6z1m9",
+          "mt_NJz7vT4Bhp",
+          "mt_lAvS72LOUO",
+          "mt_fJNgOr_ike",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf",
+          "mt_kO_GoH5F5t"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 11,
+        "unitKind": "week",
+        "unitLabel": "UNIT K",
+        "topic": {
+          "name": "letter k, imagination, kingdoms, and kites",
+          "quote": "Letter K"
+        },
+        "referencedWorks": [
+          {
+            "title": "A Kiss for Little Bear",
+            "author": "Else Holmelund Minarik",
+            "kind": "book",
+            "purpose": "read-aloud and dramatic play",
+            "quote": "A Kiss For Little Bear"
+          },
+          {
+            "title": "My Kingdom",
+            "author": "Robert Louis Stevenson",
+            "kind": "poem",
+            "purpose": "poetry and imagination",
+            "quote": "My Kingdom"
+          },
+          {
+            "title": "ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "ABC book aloud"
+          },
+          {
+            "title": "The Emperor and the Kite",
+            "author": "Jane Yolen",
+            "kind": "book",
+            "purpose": "read-aloud and narration",
+            "quote": "The Emperor And The Kite"
+          },
+          {
+            "title": "Hymn or children's song",
+            "author": null,
+            "kind": "song",
+            "purpose": "shared singing",
+            "quote": "hymn or children\u2019s song"
+          }
+        ],
+        "questions": [
+          {
+            "text": "Narrate the story.",
+            "quote": "Have your child narrate the story."
+          }
+        ],
+        "themes": [
+          {
+            "name": "imagination and fairy tales",
+            "evidence": "Imagination and fairy tales."
+          },
+          {
+            "name": "kingdoms and castles",
+            "evidence": "Draw a castle."
+          }
+        ],
+        "activities": [
+          {
+            "description": "Make and trace a tactile K",
+            "quote": "Make Glitter Glue K."
+          },
+          {
+            "description": "Hang laundry and use clothespins",
+            "quote": "Hang laundry together."
+          },
+          {
+            "description": "Layer crayon and paint for scratch-art kite making",
+            "quote": "Make a scratch art kite."
+          }
+        ],
+        "materials": [
+          {
+            "name": "toy or stuffed animals",
+            "quote": "toy or stuffed animals"
+          },
+          {
+            "name": "hemp twine",
+            "quote": "hemp twine"
+          },
+          {
+            "name": "oil pastels or crayons",
+            "quote": "oil pastels or crayons"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_zlSoIKPyId",
+          "mt_xxhg1RZH67",
+          "mt_w7e2j6z1m9",
+          "mt_IOpwXalEo4",
+          "mt_DFIWe5Fe47",
+          "mt_fJNgOr_ike",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 12,
+        "unitKind": "week",
+        "unitLabel": "UNIT L",
+        "topic": {
+          "name": "letter l, love, libraries, and neighborhoods",
+          "quote": "Letter L"
+        },
+        "referencedWorks": [
+          {
+            "title": "The Grouchy Ladybug",
+            "author": "Eric Carle",
+            "kind": "book",
+            "purpose": "read-aloud, clocks, and insects",
+            "quote": "The Grouchy Ladybug"
+          },
+          {
+            "title": "1 Corinthians 13",
+            "author": null,
+            "kind": "book",
+            "purpose": "Bible reading about love",
+            "quote": "1 Corinthians 13"
+          },
+          {
+            "title": "ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "ABC book aloud"
+          },
+          {
+            "title": "Lola at the Library",
+            "author": "Anna McQuinn",
+            "kind": "book",
+            "purpose": "read-aloud and narration",
+            "quote": "Lola At The Library"
+          },
+          {
+            "title": "Twinkle, Twinkle, Little Star",
+            "author": null,
+            "kind": "song",
+            "purpose": "singing during leaf art",
+            "quote": "Twinkle, Twinkle, Little Star"
+          }
+        ],
+        "questions": [
+          {
+            "text": "Narrate the story.",
+            "quote": "Have your child narrate the story."
+          }
+        ],
+        "themes": [
+          {
+            "name": "neighborhoods and love",
+            "evidence": "Neighborhoods. Love."
+          },
+          {
+            "name": "loving a neighbor",
+            "evidence": "love your neighbor as yourself"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Make and trace a tactile L",
+            "quote": "Make Glitter Glue L."
+          },
+          {
+            "description": "Play a ladybug balloon striking game",
+            "quote": "Play \u201cSwat the Ladybug.\u201d"
+          },
+          {
+            "description": "Alphabetize picture books by author",
+            "quote": "Alphabetize your picture books by author with your child."
+          }
+        ],
+        "materials": [
+          {
+            "name": "toy clock",
+            "quote": "toy clock"
+          },
+          {
+            "name": "red balloon",
+            "quote": "red balloon"
+          },
+          {
+            "name": "leaves",
+            "quote": "leaves"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_frDIaXzWbx",
+          "mt_mLPEMpYb_R",
+          "mt_zlSoIKPyId",
+          "mt_w7e2j6z1m9",
+          "mt_lAvS72LOUO",
+          "mt_j7cer_Nmor",
+          "mt_s7spKtOztv",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf",
+          "mt_kO_GoH5F5t"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 13,
+        "unitKind": "week",
+        "unitLabel": "UNIT M",
+        "topic": {
+          "name": "letter m, quantities, families, and the human body",
+          "quote": "Letter M"
+        },
+        "referencedWorks": [
+          {
+            "title": "Are You My Mother?",
+            "author": "P. D. Eastman",
+            "kind": "book",
+            "purpose": "read-aloud and animal families",
+            "quote": "Are You My Mother?"
+          },
+          {
+            "title": "The Moon",
+            "author": "Robert Louis Stevenson",
+            "kind": "poem",
+            "purpose": "poetry and rhyming",
+            "quote": "The Moon"
+          },
+          {
+            "title": "ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "ABC book aloud"
+          },
+          {
+            "title": "Madeline",
+            "author": "Ludwig Bemelmans",
+            "kind": "book",
+            "purpose": "read-aloud and loose-parts counting",
+            "quote": "Madeline"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "many, few, and the human body",
+            "evidence": "Quantities. Comparing many and few. Human body."
+          },
+          {
+            "name": "mothers and babies",
+            "evidence": "mothers and babies"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Make and trace a tactile M",
+            "quote": "Make Glitter Glue M."
+          },
+          {
+            "description": "Sort and match socks",
+            "quote": "Sort and match socks."
+          },
+          {
+            "description": "Cook an omelette together",
+            "quote": "Make an omelette together."
+          }
+        ],
+        "materials": [
+          {
+            "name": "play dough or clay",
+            "quote": "play dough or clay"
+          },
+          {
+            "name": "beans and seeds",
+            "quote": "beans and seeds"
+          },
+          {
+            "name": "egg carton",
+            "quote": "egg carton"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_w7e2j6z1m9",
+          "mt_NJz7vT4Bhp",
+          "mt_nwSWPTENmv",
+          "mt_zVLOm6U7bh",
+          "mt_TZ6weMcIsN",
+          "mt_fJNgOr_ike",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 14,
+        "unitKind": "week",
+        "unitLabel": "UNIT N",
+        "topic": {
+          "name": "letter n, night, nests, and new versus old",
+          "quote": "Letter N"
+        },
+        "referencedWorks": [
+          {
+            "title": "At Night",
+            "author": "Jonathan Bean",
+            "kind": "book",
+            "purpose": "read-aloud and home labels",
+            "quote": "At Night"
+          },
+          {
+            "title": "Noah's Ark",
+            "author": "Peter Spier",
+            "kind": "book",
+            "purpose": "Bible story and animal pairs",
+            "quote": "Noah\u2019s Ark"
+          },
+          {
+            "title": "ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "ABC book aloud"
+          },
+          {
+            "title": "Christmas in Noisy Village",
+            "author": "Astrid Lindgren",
+            "kind": "book",
+            "purpose": "read-aloud and holiday rhythm",
+            "quote": "Christmas In Noisy Village"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "new and old opposites",
+            "evidence": "Opposites. New and Old."
+          },
+          {
+            "name": "nests and shelter",
+            "evidence": "Nests. Look for a nest."
+          }
+        ],
+        "activities": [
+          {
+            "description": "Make N and label household or dollhouse furniture",
+            "quote": "Make Glitter Glue N."
+          },
+          {
+            "description": "Practice making a bed and changing sheets",
+            "quote": "Work on bed making"
+          },
+          {
+            "description": "Bake holiday gingersnaps",
+            "quote": "Bake Gingersnaps."
+          }
+        ],
+        "materials": [
+          {
+            "name": "pillows",
+            "quote": "pillows"
+          },
+          {
+            "name": "animal crackers",
+            "quote": "animal crackers"
+          },
+          {
+            "name": "leaves",
+            "quote": "leaves"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_w7e2j6z1m9",
+          "mt_NJz7vT4Bhp",
+          "mt_zVLOm6U7bh",
+          "mt_k1u-rddlMM",
+          "mt_TZ6weMcIsN",
+          "mt_fJNgOr_ike",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf",
+          "mt_kO_GoH5F5t"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 15,
+        "unitKind": "week",
+        "unitLabel": "UNIT O",
+        "topic": {
+          "name": "letter o, tastes, harvest, and transportation",
+          "quote": "Letter O"
+        },
+        "referencedWorks": [
+          {
+            "title": "Ox-Cart Man",
+            "author": "Donald Hall and Barbara Cooney",
+            "kind": "book",
+            "purpose": "read-aloud and history",
+            "quote": "Ox-Cart Man"
+          },
+          {
+            "title": "An Orange in January",
+            "author": "Dianna Hutts Aston",
+            "kind": "book",
+            "purpose": "read-aloud and citrus study",
+            "quote": "An Orange In January"
+          },
+          {
+            "title": "ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "ABC book aloud"
+          },
+          {
+            "title": "Room for a Little One",
+            "author": "Martin Waddell",
+            "kind": "book",
+            "purpose": "read-aloud and Christmas story",
+            "quote": "Room For A Little One"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "tastes and smells",
+            "evidence": "Talk about different tastes"
+          },
+          {
+            "name": "transportation through history",
+            "evidence": "transportation through history."
+          }
+        ],
+        "activities": [
+          {
+            "description": "Make and trace a tactile O",
+            "quote": "Make Glitter Glue O."
+          },
+          {
+            "description": "Count and sort coins",
+            "quote": "Count and sort coins."
+          },
+          {
+            "description": "Bake and decorate sugar cookies",
+            "quote": "Bake Sugar Cookies."
+          }
+        ],
+        "materials": [
+          {
+            "name": "coins",
+            "quote": "coins"
+          },
+          {
+            "name": "citrus fruits",
+            "quote": "citrus fruits"
+          },
+          {
+            "name": "popsicle sticks",
+            "quote": "popsicle sticks"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_w7e2j6z1m9",
+          "mt_NJz7vT4Bhp",
+          "mt_nwSWPTENmv",
+          "mt_4lp_b5Pzik",
+          "mt_2u99ybq83k",
+          "mt_fJNgOr_ike",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 16,
+        "unitKind": "week",
+        "unitLabel": "UNIT P",
+        "topic": {
+          "name": "letter p, countries, cultures, and Christmas",
+          "quote": "Letter P"
+        },
+        "referencedWorks": [
+          {
+            "title": "The Story of Ping",
+            "author": "Marjorie Flack",
+            "kind": "book",
+            "purpose": "read-aloud and landforms",
+            "quote": "The Story of Ping"
+          },
+          {
+            "title": "The Night Before Christmas",
+            "author": "Clement Clark Moore",
+            "kind": "poem",
+            "purpose": "poetry and rhyming",
+            "quote": "The Night Before Christmas"
+          },
+          {
+            "title": "Christmas-themed ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "Christmas themed ABC book"
+          },
+          {
+            "title": "The Year of the Perfect Christmas Tree",
+            "author": "Gloria Houston",
+            "kind": "book",
+            "purpose": "read-aloud and tradition",
+            "quote": "The Year of the Perfect Christmas Tree"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "countries and cultures",
+            "evidence": "Countries and cultures."
+          },
+          {
+            "name": "food and flags from other countries",
+            "evidence": "Try foods from other countries."
+          }
+        ],
+        "activities": [
+          {
+            "description": "Make and trace a tactile P",
+            "quote": "Make Glitter Glue P."
+          },
+          {
+            "description": "Build a sensory landforms demonstration",
+            "quote": "Land Forms Activity"
+          },
+          {
+            "description": "Measure and make popcorn balls",
+            "quote": "Make popcorn balls."
+          }
+        ],
+        "materials": [
+          {
+            "name": "rice",
+            "quote": "rice"
+          },
+          {
+            "name": "cotton balls",
+            "quote": "cotton balls"
+          },
+          {
+            "name": "popcorn kernels",
+            "quote": "popcorn kernels"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_xxhg1RZH67",
+          "mt_w7e2j6z1m9",
+          "mt_NJz7vT4Bhp",
+          "mt_4lp_b5Pzik",
+          "mt_2u99ybq83k",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 17,
+        "unitKind": "week",
+        "unitLabel": "UNIT Q",
+        "topic": {
+          "name": "letter q, quiet, queens, and quilts",
+          "quote": "Letter Q"
+        },
+        "referencedWorks": [
+          {
+            "title": "Queen Victoria's Bathing Machine",
+            "author": "Gloria Whelan",
+            "kind": "book",
+            "purpose": "read-aloud and counting gems",
+            "quote": "Queen Victoria\u2019s Bathing Machine"
+          },
+          {
+            "title": "Esther",
+            "author": null,
+            "kind": "book",
+            "purpose": "Bible story",
+            "quote": "story of Esther"
+          },
+          {
+            "title": "Favorite alphabet book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "favorite alphabet book"
+          },
+          {
+            "title": "The Quiltmaker's Gift",
+            "author": "Jeff Brumbeau",
+            "kind": "book",
+            "purpose": "read-aloud and quilt making",
+            "quote": "The Quiltmaker\u2019s Gift"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "quiet time and rest",
+            "evidence": "Quiet time. Talk about the importance of rest."
+          },
+          {
+            "name": "quilts and shapes",
+            "evidence": "Make a quilt collage"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Make and trace a tactile Q",
+            "quote": "Glitter glue Q."
+          },
+          {
+            "description": "Make and decorate a paper crown",
+            "quote": "Make a crown."
+          },
+          {
+            "description": "Assemble a quilt from squares",
+            "quote": "Make a quilt."
+          }
+        ],
+        "materials": [
+          {
+            "name": "glue-on gems",
+            "quote": "glue on gems"
+          },
+          {
+            "name": "clothespins",
+            "quote": "clothespins"
+          },
+          {
+            "name": "fabric squares",
+            "quote": "quilting squares"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_w7e2j6z1m9",
+          "mt_NJz7vT4Bhp",
+          "mt_KJeEeTutJI",
+          "mt_lAvS72LOUO",
+          "mt_2u99ybq83k",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf",
+          "mt_kO_GoH5F5t"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 18,
+        "unitKind": "week",
+        "unitLabel": "UNIT R",
+        "topic": {
+          "name": "letter r, rocks, rain, and geology",
+          "quote": "Letter R"
+        },
+        "referencedWorks": [
+          {
+            "title": "Roxaboxen",
+            "author": "Alice McLerran and Barbara Cooney",
+            "kind": "book",
+            "purpose": "read-aloud and small-world play",
+            "quote": "Roxaboxen"
+          },
+          {
+            "title": "Rain",
+            "author": "Robert Louis Stevenson",
+            "kind": "poem",
+            "purpose": "poetry and water cycle",
+            "quote": "Rain, by Robert Louis Stevenson"
+          },
+          {
+            "title": "Favorite ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "favorite ABC book"
+          },
+          {
+            "title": "Little Red Riding Hood",
+            "author": "James Marshall",
+            "kind": "book",
+            "purpose": "read-aloud and dramatic play",
+            "quote": "Red Riding Hood"
+          },
+          {
+            "title": "ABC Song",
+            "author": null,
+            "kind": "song",
+            "purpose": "singing during practical life",
+            "quote": "ABC song"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "rocks and geology",
+            "evidence": "Rocks and geology."
+          },
+          {
+            "name": "rock small-world play",
+            "evidence": "Create a home for them with sidewalk chalk."
+          }
+        ],
+        "activities": [
+          {
+            "description": "Make and review a tactile R",
+            "quote": "Glitter Glue R."
+          },
+          {
+            "description": "Count and arrange rocks as Roxaboxen",
+            "quote": "Roxaboxen Count"
+          },
+          {
+            "description": "Build and decorate a rainstick",
+            "quote": "Make a rainstick."
+          }
+        ],
+        "materials": [
+          {
+            "name": "rocks",
+            "quote": "rocks"
+          },
+          {
+            "name": "nails",
+            "quote": "nails"
+          },
+          {
+            "name": "card stock",
+            "quote": "card stock"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_xxhg1RZH67",
+          "mt_w7e2j6z1m9",
+          "mt_NJz7vT4Bhp",
+          "mt_5hCA_R9fQg",
+          "mt_2u99ybq83k",
+          "mt_fJNgOr_ike",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 19,
+        "unitKind": "week",
+        "unitLabel": "UNIT S",
+        "topic": {
+          "name": "letter s, snow, song, and shared soup",
+          "quote": "Letter S"
+        },
+        "referencedWorks": [
+          {
+            "title": "The Snowy Day",
+            "author": "Ezra Jack Keats",
+            "kind": "book",
+            "purpose": "read-aloud and narration",
+            "quote": "The Snowy Day"
+          },
+          {
+            "title": "Singing",
+            "author": "Robert Louis Stevenson",
+            "kind": "poem",
+            "purpose": "poetry and rhythm",
+            "quote": "Singing"
+          },
+          {
+            "title": "Favorite alphabet book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "favorite alphabet book"
+          },
+          {
+            "title": "Stone Soup",
+            "author": "Marcia Brown",
+            "kind": "book",
+            "purpose": "read-aloud, narration, and cooking",
+            "quote": "Stone Soup"
+          },
+          {
+            "title": "Hymnal or children's song book",
+            "author": null,
+            "kind": "book",
+            "purpose": "choose and sing songs",
+            "quote": "songbook or hymnal"
+          },
+          {
+            "title": "Head and Shoulders, Knees, and Toes",
+            "author": null,
+            "kind": "song",
+            "purpose": "action song",
+            "quote": "Head and Shoulders, Knees, and Toes"
+          },
+          {
+            "title": "Father Abraham",
+            "author": null,
+            "kind": "song",
+            "purpose": "action song",
+            "quote": "Father Abraham"
+          },
+          {
+            "title": "Deep and Wide",
+            "author": null,
+            "kind": "song",
+            "purpose": "action song",
+            "quote": "Deep and Wide"
+          }
+        ],
+        "questions": [
+          {
+            "text": "Narrate the story.",
+            "quote": "Ask your child to narrate the story to you."
+          }
+        ],
+        "themes": [
+          {
+            "name": "soup, feasts, and festivals",
+            "evidence": "Soup. Make Stone Soup together."
+          },
+          {
+            "name": "sunflowers and art",
+            "evidence": "Look at paintings of sunflowers together."
+          }
+        ],
+        "activities": [
+          {
+            "description": "Make and review a tactile S",
+            "quote": "Glitter Glue S."
+          },
+          {
+            "description": "Count marshmallow snowballs and match quantities",
+            "quote": "Count mini marshmallow \u201csnowballs.\u201d"
+          },
+          {
+            "description": "Prepare stone soup and record the retelling",
+            "quote": "Make stone soup with your child."
+          }
+        ],
+        "materials": [
+          {
+            "name": "mini marshmallows",
+            "quote": "mini marshmallow"
+          },
+          {
+            "name": "copy paper",
+            "quote": "copy paper"
+          },
+          {
+            "name": "seeds and pasta",
+            "quote": "seeds and pasta"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_zlSoIKPyId",
+          "mt_xxhg1RZH67",
+          "mt_w7e2j6z1m9",
+          "mt_DFIWe5Fe47",
+          "mt_lAvS72LOUO",
+          "mt_2u99ybq83k",
+          "mt_fJNgOr_ike",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 20,
+        "unitKind": "week",
+        "unitLabel": "UNIT T",
+        "topic": {
+          "name": "letter t, trees, truth, and seasonal traditions",
+          "quote": "Letter T"
+        },
+        "referencedWorks": [
+          {
+            "title": "A Tree Is Nice",
+            "author": "Janice May Udry and Marc Simont",
+            "kind": "book",
+            "purpose": "read-aloud and nature study",
+            "quote": "A Tree is Nice"
+          },
+          {
+            "title": "Philippians 4:8",
+            "author": null,
+            "kind": "book",
+            "purpose": "Bible verse and discussion",
+            "quote": "Philippians 4:8"
+          },
+          {
+            "title": "ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "ABC book aloud"
+          },
+          {
+            "title": "A Time to Keep",
+            "author": "Tasha Tudor",
+            "kind": "book",
+            "purpose": "read-aloud and family traditions",
+            "quote": "A Time To Keep"
+          },
+          {
+            "title": "Nature Anatomy",
+            "author": "Julia Rothman",
+            "kind": "book",
+            "purpose": "tree art reference",
+            "quote": "Nature Anatomy"
+          }
+        ],
+        "questions": [
+          {
+            "text": "What do true and lovely mean?",
+            "quote": "Discuss what \u201ctrue and lovely\u201d means."
+          }
+        ],
+        "themes": [
+          {
+            "name": "trees and forests",
+            "evidence": "Trees. Create a leaf rubbing."
+          },
+          {
+            "name": "family seasons and traditions",
+            "evidence": "Discuss favorite traditions"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Count and tally tree materials",
+            "quote": "Gather 10 pinecones, acorns, or twigs."
+          },
+          {
+            "description": "Plant and care for a shade tree",
+            "quote": "Plant a shade tree with your child."
+          },
+          {
+            "description": "Make bark rubbings outdoors",
+            "quote": "Make bark rubbings."
+          }
+        ],
+        "materials": [
+          {
+            "name": "pinecones, acorns, or twigs",
+            "quote": "pinecones, acorns, or twigs"
+          },
+          {
+            "name": "toothbrush",
+            "quote": "toothbrush"
+          },
+          {
+            "name": "copy paper and crayons",
+            "quote": "copy paper and crayons"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_w7e2j6z1m9",
+          "mt_j7cer_Nmor",
+          "mt_5hCA_R9fQg",
+          "mt_k1u-rddlMM",
+          "mt_2u99ybq83k",
+          "mt_DFIWe5Fe47",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf",
+          "mt_kO_GoH5F5t"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 21,
+        "unitKind": "week",
+        "unitLabel": "UNIT U",
+        "topic": {
+          "name": "letter u, umbrellas, unity, and position",
+          "quote": "Letter U"
+        },
+        "referencedWorks": [
+          {
+            "title": "A Great Day for Up",
+            "author": "Dr. Seuss",
+            "kind": "book",
+            "purpose": "read-aloud and direction words",
+            "quote": "A Great Day for Up"
+          },
+          {
+            "title": "Unreturning",
+            "author": "Emily Dickinson",
+            "kind": "poem",
+            "purpose": "poetry and nature",
+            "quote": "Unreturning"
+          },
+          {
+            "title": "Favorite ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "favorite ABC book aloud"
+          },
+          {
+            "title": "Umbrella",
+            "author": "Taro Yashima",
+            "kind": "book",
+            "purpose": "read-aloud and art",
+            "quote": "Umbrella, by Taro Yashima"
+          },
+          {
+            "title": "Encouraging songs",
+            "author": null,
+            "kind": "song",
+            "purpose": "shared memorized singing",
+            "quote": "encouraging songs"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "umbrellas and rain",
+            "evidence": "Umbrellas."
+          },
+          {
+            "name": "sibling unity and teamwork",
+            "evidence": "loyalty and teamwork amongst family members"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Count and pair family shoes",
+            "quote": "Collect pairs of shoes in your house."
+          },
+          {
+            "description": "Build a seashore sensory bin",
+            "quote": "Make a seashore sensory bin."
+          },
+          {
+            "description": "Build a toy boat from driftwood",
+            "quote": "Make a toy boat."
+          }
+        ],
+        "materials": [
+          {
+            "name": "pairs of shoes",
+            "quote": "pairs of shoes"
+          },
+          {
+            "name": "seashells",
+            "quote": "seashells"
+          },
+          {
+            "name": "driftwood",
+            "quote": "driftwood"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_xxhg1RZH67",
+          "mt_w7e2j6z1m9",
+          "mt_NJz7vT4Bhp",
+          "mt_qeZYF6HZ4o",
+          "mt_5hCA_R9fQg",
+          "mt_lAvS72LOUO",
+          "mt_fJNgOr_ike",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 22,
+        "unitKind": "week",
+        "unitLabel": "UNIT V",
+        "topic": {
+          "name": "letter v, violins, vines, and belief",
+          "quote": "Letter V"
+        },
+        "referencedWorks": [
+          {
+            "title": "Zin! Zin! Zin! A Violin",
+            "author": "Lloyd Moss",
+            "kind": "book",
+            "purpose": "read-aloud and instrument study",
+            "quote": "Zin! Zin! Zin! A Violin"
+          },
+          {
+            "title": "John 6:47",
+            "author": null,
+            "kind": "book",
+            "purpose": "Bible verse and vocabulary",
+            "quote": "John 6:47"
+          },
+          {
+            "title": "ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "ABC book aloud"
+          },
+          {
+            "title": "The Velveteen Rabbit",
+            "author": "Margery Williams",
+            "kind": "book",
+            "purpose": "read-aloud and dramatic play",
+            "quote": "The Velveteen Rabbit"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "vines and grapes",
+            "evidence": "Vines and grapes."
+          },
+          {
+            "name": "music and instruments",
+            "evidence": "different kinds of instruments in an orchestra"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Count and identify orchestral instruments",
+            "quote": "Count the different kinds of instruments in an orchestra."
+          },
+          {
+            "description": "Learn a simple dance step",
+            "quote": "Learn a basic dance step"
+          },
+          {
+            "description": "Construct a shoebox puppet theater",
+            "quote": "Shoebox Theatre"
+          }
+        ],
+        "materials": [
+          {
+            "name": "musical instrument miniatures",
+            "quote": "musical instruments Toob"
+          },
+          {
+            "name": "cooked spaghetti noodles",
+            "quote": "cooked spaghetti noodles"
+          },
+          {
+            "name": "shoe box",
+            "quote": "shoe box"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_w7e2j6z1m9",
+          "mt_DFIWe5Fe47",
+          "mt_IOpwXalEo4",
+          "mt_NJz7vT4Bhp",
+          "mt_fJNgOr_ike",
+          "mt_2u99ybq83k",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf",
+          "mt_kO_GoH5F5t"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 23,
+        "unitKind": "week",
+        "unitLabel": "UNIT W",
+        "topic": {
+          "name": "letter w, wind, whales, worms, and gardens",
+          "quote": "Letter W"
+        },
+        "referencedWorks": [
+          {
+            "title": "The Snail and the Whale",
+            "author": "Julia Donaldson",
+            "kind": "book",
+            "purpose": "read-aloud and floating science",
+            "quote": "The Snail and the Whale"
+          },
+          {
+            "title": "Who Has Seen the Wind?",
+            "author": "Christina Rosetti",
+            "kind": "poem",
+            "purpose": "poetry and wind play",
+            "quote": "Who Has Seen The Wind?"
+          },
+          {
+            "title": "ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "ABC book"
+          },
+          {
+            "title": "Wonderful Worms",
+            "author": "Linda Glaser",
+            "kind": "book",
+            "purpose": "read-aloud and gardening",
+            "quote": "Wonderful Worms"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "birds and wings",
+            "evidence": "Birds and wings."
+          },
+          {
+            "name": "wind, water, worms, and spring growth",
+            "evidence": "Observe new growth on the trees and plants"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Test and count objects that float or sink",
+            "quote": "Play Float and Sink."
+          },
+          {
+            "description": "Take a nature walk and gather collage materials",
+            "quote": "Take a nature walk."
+          },
+          {
+            "description": "Prepare a small garden and start seeds",
+            "quote": "Start garden seeds in flats."
+          }
+        ],
+        "materials": [
+          {
+            "name": "small test objects",
+            "quote": "small objects"
+          },
+          {
+            "name": "water",
+            "quote": "tub of water"
+          },
+          {
+            "name": "newspaper",
+            "quote": "newspaper"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_xxhg1RZH67",
+          "mt_w7e2j6z1m9",
+          "mt_vgB4oY7Qyl",
+          "mt_j7cer_Nmor",
+          "mt_5hCA_R9fQg",
+          "mt_TZ6weMcIsN",
+          "mt_fJNgOr_ike",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 24,
+        "unitKind": "week",
+        "unitLabel": "UNIT X",
+        "topic": {
+          "name": "letter x, fox stories, fitness, and coordination",
+          "quote": "Letter X"
+        },
+        "referencedWorks": [
+          {
+            "title": "Hattie and the Fox",
+            "author": "Mem Fox",
+            "kind": "book",
+            "purpose": "read-aloud and dramatic play",
+            "quote": "Hattie and the Fox"
+          },
+          {
+            "title": "John 3:3b",
+            "author": null,
+            "kind": "book",
+            "purpose": "Bible verse",
+            "quote": "John 3:3b"
+          },
+          {
+            "title": "ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "ABC book aloud"
+          },
+          {
+            "title": "Fox in Socks",
+            "author": "Dr. Seuss",
+            "kind": "book",
+            "purpose": "read-aloud and word play",
+            "quote": "Fox in Socks"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "physical fitness",
+            "evidence": "Physical fitness."
+          },
+          {
+            "name": "human body and outdoor movement",
+            "evidence": "Read about the human body."
+          }
+        ],
+        "activities": [
+          {
+            "description": "Count dried corn into a numbered egg carton",
+            "quote": "Counting Corn"
+          },
+          {
+            "description": "Roll, dry, paint, and string clay beads",
+            "quote": "Make beads from clay."
+          },
+          {
+            "description": "Set up bowling and make sock puppets",
+            "quote": "Make sock puppets."
+          }
+        ],
+        "materials": [
+          {
+            "name": "dried corn",
+            "quote": "dried corn"
+          },
+          {
+            "name": "clay",
+            "quote": "clay"
+          },
+          {
+            "name": "mismatched socks",
+            "quote": "mismatched socks"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_w7e2j6z1m9",
+          "mt_WcfaSfVT33",
+          "mt_TZ6weMcIsN",
+          "mt_k1u-rddlMM",
+          "mt_zVLOm6U7bh",
+          "mt_2u99ybq83k",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf",
+          "mt_kO_GoH5F5t"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 25,
+        "unitKind": "week",
+        "unitLabel": "UNIT Y",
+        "topic": {
+          "name": "letter y, yaks, pairs, pouring, and yarn",
+          "quote": "Letter Y"
+        },
+        "referencedWorks": [
+          {
+            "title": "Yaks Yak",
+            "author": "Linda Sue Park",
+            "kind": "book",
+            "purpose": "read-aloud and action words",
+            "quote": "Yaks Yak"
+          },
+          {
+            "title": "Matthew 5:14-16",
+            "author": null,
+            "kind": "book",
+            "purpose": "Bible verse",
+            "quote": "Matthew 5:14-16"
+          },
+          {
+            "title": "ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "ABC book aloud"
+          },
+          {
+            "title": "Extra Yarn",
+            "author": "Mac Barnett",
+            "kind": "book",
+            "purpose": "read-aloud, knitting, and pattern",
+            "quote": "Extra Yarn"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "yaks and oxen",
+            "evidence": "Yaks and oxen."
+          },
+          {
+            "name": "animal work and simple machines",
+            "evidence": "Make a pretend yoke"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Gather and count pairs of toy animals",
+            "quote": "Animal Pairs"
+          },
+          {
+            "description": "Pour and compare water or rice with measuring cups",
+            "quote": "Pouring activity"
+          },
+          {
+            "description": "Build a yarn over-and-under obstacle course",
+            "quote": "Make a yarn obstacle course."
+          }
+        ],
+        "materials": [
+          {
+            "name": "toy animals",
+            "quote": "toy animals"
+          },
+          {
+            "name": "measuring cups",
+            "quote": "measuring cups"
+          },
+          {
+            "name": "yarn",
+            "quote": "yarn"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_mLPEMpYb_R",
+          "mt_w7e2j6z1m9",
+          "mt_NJz7vT4Bhp",
+          "mt_4lp_b5Pzik",
+          "mt_qeZYF6HZ4o",
+          "mt_IOpwXalEo4",
+          "mt_fJNgOr_ike",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf",
+          "mt_kO_GoH5F5t"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      },
+      {
+        "ordinal": 26,
+        "unitKind": "week",
+        "unitLabel": "UNIT Z",
+        "topic": {
+          "name": "letter z, zoos, animals, and alphabet celebration",
+          "quote": "Letter Z"
+        },
+        "referencedWorks": [
+          {
+            "title": "If I Ran the Zoo",
+            "author": "Dr. Seuss",
+            "kind": "book",
+            "purpose": "read-aloud and zoo design",
+            "quote": "If I Ran The Zoo"
+          },
+          {
+            "title": "Animal Crackers",
+            "author": "Christopher Morley",
+            "kind": "poem",
+            "purpose": "poetry and shared snack",
+            "quote": "Animal Crackers"
+          },
+          {
+            "title": "Favorite ABC book",
+            "author": null,
+            "kind": "book",
+            "purpose": "alphabet review",
+            "quote": "favorite ABC book"
+          },
+          {
+            "title": "Z Is for Moose",
+            "author": "Kelly Bingham",
+            "kind": "book",
+            "purpose": "suggested alphabet book",
+            "quote": "Z is for Moose"
+          },
+          {
+            "title": "Put Me in the Zoo",
+            "author": "Robert Lopshire",
+            "kind": "book",
+            "purpose": "read-aloud and spot labeling",
+            "quote": "Put Me In The Zoo"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "zoo animals and alphabet celebration",
+            "evidence": "Zoo visit to celebrate getting through the alphabet."
+          },
+          {
+            "name": "classifying animals",
+            "evidence": "animal classification"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Design, paint, and populate a poster-board zoo",
+            "quote": "Design a zoo on a large poster board."
+          },
+          {
+            "description": "Count and divide animal crackers",
+            "quote": "Count and divide 20-30 animal crackers"
+          },
+          {
+            "description": "Count to 100 with circle counters",
+            "quote": "circle bingo style counters"
+          }
+        ],
+        "materials": [
+          {
+            "name": "toy zoo animals",
+            "quote": "toy zoo animals"
+          },
+          {
+            "name": "animal crackers",
+            "quote": "animal crackers"
+          },
+          {
+            "name": "paper plate",
+            "quote": "paper plate"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr",
+          "mt_frDIaXzWbx",
+          "mt_mLPEMpYb_R",
+          "mt_xxhg1RZH67",
+          "mt_w7e2j6z1m9",
+          "mt_NJz7vT4Bhp",
+          "mt_zVLOm6U7bh",
+          "mt_2u99ybq83k",
+          "mt_fJNgOr_ike",
+          "mt_dkvLZt8xgX",
+          "mt_3RzUdTRDxf"
+        ],
+        "ageRangeMonths": [
+          36,
+          60
+        ]
+      }
+    ]
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/cur-2026-08-01-peaceful-preschool.txt",
+    "textBlobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo-text/cur-2026-08-01-peaceful-preschool/cur-2026-08-01-peaceful-preschool.txt",
+    "textExtraction": {
+      "method": "PDF text layer plus local Tesseract OCR after exact-master visual review",
+      "pageCount": 347,
+      "chars": 229292,
+      "note": "The sidecar covers all seven exact source files. Sixty initially empty readable pages were recovered locally, 11 publisher separator pages are intentionally blank, 73 truncated parent-guide pages were replaced with longer local OCR, and two theme pages were locally reread. All stored claims below verify against this sidecar."
+    },
+    "subjects": [
+      {
+        "name": "alphabet letter sounds",
+        "role": "teaches",
+        "quote": "Each of the letters of the alphabet is given a week of learning"
+      },
+      {
+        "name": "hands-on preschool learning",
+        "role": "teaches",
+        "quote": "the best way for your child to learn is through hands-on experiences"
+      },
+      {
+        "name": "read-aloud and narration",
+        "role": "teaches",
+        "quote": "Read Aloud: This is a book, poem or verse"
+      },
+      {
+        "name": "practical life skills",
+        "role": "teaches",
+        "quote": "involving your child in the self esteem building work of the home"
+      },
+      {
+        "name": "Christian preschool devotion",
+        "role": "teaches",
+        "quote": "Bible verse or poetry memorization"
+      }
+    ],
+    "entities": [
+      {
+        "name": "The Peaceful Preschool",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "The Peaceful Preschool"
+      },
+      {
+        "name": "Jennifer Pepito",
+        "kind": "person",
+        "role": "identity",
+        "quote": "WRITTEN BY JENNIFER PEPITO"
+      },
+      {
+        "name": "The Peaceful Press",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "The Peaceful Press"
+      }
+    ],
+    "themes": [
+      {
+        "name": "responsive parent care",
+        "evidence": "highly responsive parents who spent time answering any questions"
+      },
+      {
+        "name": "learning without pressure",
+        "evidence": "your children\u2019s ability to learn without pressure"
+      },
+      {
+        "name": "each child's own pace",
+        "evidence": "every child has a different pace of learning"
+      },
+      {
+        "name": "beauty, order, and nature",
+        "evidence": "An ideal learning environment should be beautiful."
+      },
+      {
+        "name": "movement supports learning",
+        "evidence": "importance of movement for healthy learning"
+      },
+      {
+        "name": "predictable family rhythms",
+        "evidence": "Young children thrive on predictable rhythms"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "read aloud",
+        "occurrences": 91,
+        "quote": "Read Aloud"
+      },
+      {
+        "term": "phonics",
+        "occurrences": 137,
+        "quote": "Phonics"
+      },
+      {
+        "term": "counting skills",
+        "occurrences": 92,
+        "quote": "Counting Skills"
+      },
+      {
+        "term": "fine motor skills",
+        "occurrences": 96,
+        "quote": "Fine Motor Skills"
+      },
+      {
+        "term": "large motor skills",
+        "occurrences": 94,
+        "quote": "Large Motor Skills"
+      },
+      {
+        "term": "practical life skills",
+        "occurrences": 96,
+        "quote": "Practical Life Skills"
+      },
+      {
+        "term": "art skills",
+        "occurrences": 93,
+        "quote": "Art Skills"
+      },
+      {
+        "term": "field trip day",
+        "occurrences": 25,
+        "quote": "Field Trip Day"
+      }
+    ],
+    "referencedWorks": [],
+    "notes": "Whole-bundle aboutness describes the teaching purpose and identity. Every directed book, poem, Bible passage, named song, and artwork is recorded in its letter week under Layer 5, where a family can discover when and how the work is used."
+  },
+  "sourceCompleteness": {
+    "status": "complete-with-reviewed-source-artifacts",
+    "exactSourceFiles": 7,
+    "pageCount": 347,
+    "pageRanges": [
+      {
+        "pages": "1",
+        "filename": "CalendarBundle.pdf",
+        "note": "PNG calendar image carried under the source filename"
+      },
+      {
+        "pages": "2-4",
+        "filename": "family vision.pdf"
+      },
+      {
+        "pages": "5-238",
+        "filename": "parent guide.pdf"
+      },
+      {
+        "pages": "239-310",
+        "filename": "printables.pdf"
+      },
+      {
+        "pages": "311-337",
+        "filename": "recipes.pdf"
+      },
+      {
+        "pages": "338-341",
+        "filename": "supply list.pdf"
+      },
+      {
+        "pages": "342-347",
+        "filename": "the_peaceful_preschool_-_book_list.pdf"
+      }
+    ],
+    "reviewedFindingPages": 89,
+    "localOcrRecoveredEmptyPages": 60,
+    "intentionalBlankPages": [
+      6,
+      36,
+      42,
+      92,
+      142,
+      176,
+      192,
+      200,
+      208,
+      216,
+      230
+    ],
+    "acceptedRepeatedSourcePages": [
+      {
+        "page": 247,
+        "matchesPage": 239,
+        "disposition": "intentional repeated printables cover"
+      }
+    ],
+    "note": "Every capture finding was manually resolved against the exact master pages. External model rereading remained unavailable in the sandbox and was not retried because transmitting Slack-sourced pages lacked authorization. Local visual review and OCR provided readable evidence for the full analysis, while intentional blanks and the repeated publisher cover remain transparently recorded."
+  },
+  "routing": {
+    "skillUsed": "curriculum-ingestion",
+    "ruling": "Curriculum, not a standalone reference. Seven companion files form one complete 26-week preschool program with philosophy, a weekly sequence, daily activity categories, printables, recipes, master supplies, a book list, and family-planning tools.",
+    "recipeRuling": "Reuse current recipes for read-aloud narration, tactile letter work, counting, sorting, routines, motor invitations, art, crafts, nature study, and field trips. child-assisted-recipe-card now covers the final recurring mechanic with explicit adult-only preparation and copyright-safe original-or-parent-provided content."
+  },
+  "decisionsNeeded": [
+    {
+      "category": "knowledge_bank",
+      "item": "RESOLVED: peaceful-preschool-alphabet-rhythm-format was merged through the production knowledge gate as a founder-contributed method_format row and read back active.",
+      "impact": "Homa can retrieve the source's distinctive A-to-Z weekly procedure without claiming it is a complete implementation of Charlotte Mason, Montessori, or play-based preschool.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "taxonomy",
+      "item": "RESOLVED: added mt_dkvLZt8xgX for fine motor control, mt_3RzUdTRDxf for gross motor locomotion and coordination, and mt_kO_GoH5F5t for Biblical story and verse familiarity.",
+      "impact": "Every Layer 2 concept and relevant Layer 5 week now has a concrete route. Motor work uses content domains under Homa's existing motor subjects, while Religious Education remains parked content and never scores belief.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "recipe",
+      "item": "RESOLVED: child-assisted-recipe-card is implemented, routed from Material Studio, and registered as an activity format.",
+      "impact": "Homa can make an original or parent-provided cooking page that keeps adult-only preparation separate from real child jobs, then includes serving and cleanup.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "capture",
+      "item": "RESOLVED: 24 deterministic capture findings were linked to their exact digest and reviewed across 89 master pages. Sixty readable pages were locally recovered, 11 blank separators and one repeated publisher cover were accepted as source artifacts.",
+      "impact": "The verifier can distinguish source artifacts from missing evidence without hiding the failed optional external reread.",
+      "urgency": "resolved"
+    }
+  ],
+  "notes": "Full seven-file analysis with 26 of 26 source-owned letter weeks decomposed. Carolyng's explicit preference for one-book, one-letter connected weeks with low parent prep and an advance book list was already recorded in the 2026-08-01 six-drop taste wave. The method-format row is active in production, all 27 taxonomy concepts are mapped, and all 14 recurring activity mechanics have shipped recipes."
+}

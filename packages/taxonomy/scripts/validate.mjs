@@ -130,6 +130,14 @@ const MARBLE_TO_HOMA = {
   "Life Skills": "self_care",
   "Learning to Learn": "executive_function",
   "Computing": "computer_science",
+  // Inspo-flywheel addition (2026-08-02): Spanish foundational-literacy
+  // topics route to Homa's existing spanish subject.
+  "World Languages": "spanish",
+  // Inspo-flywheel additions (2026-08-02): curriculum content for Homa's
+  // existing motor lanes plus a parked, non-scored religious-content lane.
+  "Fine Motor": "fine_motor",
+  "Gross Motor": "gross_motor",
+  "Religious Education": "religious_education",
   // Inspo-flywheel addition (2026-07-20): Blossom & Root Level 0 introduced
   // Marble-style Art and Music enrichment topics; Homa's bank subjects are
   // "art" and "music" (see packages/core/src/map/content.ts).

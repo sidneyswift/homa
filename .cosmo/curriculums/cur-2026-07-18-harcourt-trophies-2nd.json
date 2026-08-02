@@ -5,12 +5,41 @@
   "droppedAt": "2026-07-18T16:52:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784407931.510559",
+  "libraryVisibility": "analysis-only",
+  "sharedSourceRecordId": "ref-2026-07-18-harcourt-trophies-2nd-lesson-planner",
   "relatedRefs": [
     "ref-2026-07-18-harcourt-trophies-2nd-practice-book",
     "ref-2026-07-18-harcourt-trophies-2nd-assessments",
     "ref-2026-07-18-harcourt-trophies-2nd-lesson-planner",
     "ref-2026-07-18-harcourt-trophies-2nd-day-detail-pages"
   ],
+  "sourceFiles": [
+    {
+      "filename": "1000197368.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-lesson-planner/1000197368.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197369.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-lesson-planner/1000197369.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197370.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-lesson-planner/1000197370.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    },
+    {
+      "filename": "1000197371.jpg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-harcourt-trophies-2nd-lesson-planner/1000197371.jpg",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true
+    }
+  ],
+  "sourceFilesNote": "This curriculum analysis and ref-2026-07-18-harcourt-trophies-2nd-lesson-planner share Slack drop 1784407931.510559 and the same four source images. The durable originals stay canonical under the reference record, with no duplicate Blob upload.",
 
   "layer1_philosophy": {
     "methodology": "Balanced Literacy (Harcourt Trophies)",
@@ -28,12 +57,14 @@
     "knowledgeBankGaps": [
       {
         "suggestedKey": "balanced-literacy-trophies",
+        "mergedRowId": "3e1b2871-8677-4a34-bc02-dd40f9772ff1",
         "topicType": "method_philosophy",
         "title": "Balanced Literacy (Harcourt Trophies)",
         "summary": "Story-centered weekly units where a single reading selection drives all ELA skill strands plus cross-curricular centers. Combines explicit phonics instruction with literature-based comprehension and integrated writing."
       },
       {
         "suggestedKey": "story-as-hub-format",
+        "mergedRowId": "f806d2f2-2232-49d7-943c-421680985557",
         "topicType": "method_format",
         "title": "Story-as-Hub Weekly Format",
         "summary": "One reading selection per week. All phonics, spelling, vocabulary, grammar, writing, and cross-curricular activities connect to the story. 5-day arc: introduce → practice → generalize → apply → assess. Teacher guide provides day-by-day scripted lessons."

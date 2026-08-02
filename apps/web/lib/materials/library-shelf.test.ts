@@ -14,8 +14,10 @@ import {
   dateFromRecordId,
   needsWork,
   parseLibraryRecord,
-  libraryJoinKey,
+  parseLibraryShelfRecords,
   recordIdFromBlobPath,
+  SHELF_STATUS_BLURB,
+  SHELF_STATUS_LABEL,
   SHELF_STATUS_ORDER,
   SHELF_STATUS_TODO,
   subjectAccent,
@@ -57,20 +59,42 @@ describe("classifyShelfStatus", () => {
     assert.equal(classifyShelfStatus("slack", true, false), "original-lost");
     assert.equal(classifyShelfStatus("scrape", true, false), "analysis-only");
   });
+
+  it("shows a requested missing original as waiting while letting a full recovery win", () => {
+    assert.equal(classifyShelfStatus("slack", true, false, "requested"), "awaiting-source");
+    assert.equal(classifyShelfStatus("slack", true, true, "requested"), "complete");
+  });
+
+  it("keeps a partial original waiting when source completeness requests more bytes", () => {
+    assert.equal(
+      classifyShelfStatus("slack", true, true, null, "requested"),
+      "awaiting-source",
+    );
+    assert.equal(
+      classifyShelfStatus("slack", true, true, null, "awaiting-source"),
+      "awaiting-source",
+    );
+  });
 });
 
 describe("needsWork", () => {
-  it("marks every status except complete", () => {
+  it("leaves complete and externally waiting records non-actionable", () => {
     assert.equal(needsWork("complete"), false);
     assert.equal(needsWork("unread"), true);
     assert.equal(needsWork("original-lost"), true);
     assert.equal(needsWork("analysis-only"), true);
+    assert.equal(needsWork("awaiting-source"), false);
+  });
+
+  it("labels the externally waiting shelf in plain language", () => {
+    assert.equal(SHELF_STATUS_LABEL["awaiting-source"], "Re-share requested");
+    assert.match(SHELF_STATUS_BLURB["awaiting-source"], /already been requested/i);
   });
 
   it("gives every actionable status a to-do a person can act on", () => {
     for (const status of SHELF_STATUS_ORDER) {
       const todo = SHELF_STATUS_TODO[status];
-      if (status === "complete") assert.equal(todo, null);
+      if (status === "complete" || status === "awaiting-source") assert.equal(todo, null);
       else assert.ok(todo && todo.length > 8, `${status} needs a real to-do`);
     }
   });
@@ -191,15 +215,37 @@ describe("parseLibraryRecord", () => {
       "science",
     );
   });
+
+  it("keeps non-shelf analysis for reconciliation, then excludes it from the shelf", () => {
+    const catalog = {
+      id: "ref-catalog-summary",
+      libraryVisibility: "catalog-only",
+      sourceUrl: "https://example.com/catalog",
+    };
+    const duplicate = {
+      id: "ref-stale-analysis",
+      libraryVisibility: "analysis-only",
+      duplicateOf: "ref-real-file",
+    };
+    const realFile = { id: "ref-real-file" };
+
+    assert.equal(parseLibraryRecord(catalog, "reference")?.id, catalog.id);
+    assert.equal(parseLibraryRecord(duplicate, "reference")?.id, duplicate.id);
+    const records = parseLibraryShelfRecords([catalog, duplicate, realFile], "reference");
+    assert.deepEqual(records.map((record) => record.id), [catalog.id, duplicate.id, realFile.id]);
+    assert.deepEqual(buildShelf(records, [], new Map()).map((record) => record.id), [realFile.id]);
+  });
 });
 
 describe("buildShelf", () => {
-  const original = (recordId: string, size: number, name = "f.pdf"): BlobOriginal => ({
-    recordId,
-    url: `https://blob/${recordId}/${name}`,
-    name,
-    size,
-  });
+  const blobUrl = (recordId: string, name: string) =>
+    `https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/${recordId}/${encodeURIComponent(name)}`;
+  const original = (
+    recordId: string,
+    size: number,
+    name = "f.pdf",
+    url = blobUrl(recordId, name),
+  ): BlobOriginal => ({ recordId, url, name, size });
 
   it("synthesises an unread book for bytes with no analysis", () => {
     const shelf = buildShelf([], [original("ref-2026-07-30-mystery", 1000, "Scan 7.pdf")], new Map());
@@ -234,6 +280,41 @@ describe("buildShelf", () => {
     const covers = new Map([["ref-a", "https://blob/inspo-covers/ref-a.jpg"]]);
     assert.equal(buildShelf(records, [], covers)[0].coverUrl, covers.get("ref-a"));
     assert.equal(buildShelf(records, [], new Map())[0].coverUrl, null);
+  });
+
+  it("puts a requested missing original on its own waiting shelf", () => {
+    const records = [
+      parseLibraryRecord(
+        {
+          id: "ref-waiting",
+          droppedBy: "aless",
+          originalRecovery: { status: "requested" },
+        },
+        "reference",
+      ),
+    ];
+
+    const shelf = buildShelf(records, [], new Map());
+    assert.equal(shelf[0].status, "awaiting-source");
+    assert.equal(needsWork(shelf[0].status), false);
+  });
+
+  it("keeps retained partial bytes on the waiting shelf", () => {
+    const records = [
+      parseLibraryRecord(
+        {
+          id: "cur-partial",
+          droppedBy: "carolyng",
+          sourceCompleteness: { status: "awaiting-source" },
+        },
+        "curriculum",
+      ),
+    ];
+
+    const shelf = buildShelf(records, [original("cur-partial", 10)], new Map());
+    assert.equal(shelf[0].status, "awaiting-source");
+    assert.equal(shelf[0].originalFiles.length, 1);
+    assert.equal(needsWork(shelf[0].status), false);
   });
 
   it("matches a drop- prefixed upload to its ref- analysis", () => {
@@ -307,9 +388,30 @@ describe("buildShelf", () => {
     assert.equal(shelf[0].extraFileCount, 1);
   });
 
-  it("folds a suffixed directory into the record it is part of", () => {
-    // cur-...-harcourt-science-pt1 is page range one of harcourt-science,
-    // not a curriculum of its own.
+  it("counts every unique multipart original while keeping the primary file size", () => {
+    const records = [parseLibraryRecord({ id: "cur-a", droppedBy: "aless" }, "curriculum")];
+    const back = original("cur-a", 400, "back.pdf");
+    const shelf = buildShelf(
+      records,
+      [original("cur-a", 500, "front.pdf"), back, { ...back }],
+      new Map(),
+    );
+
+    assert.equal(shelf[0].originalBytes, 500, "the detail view still reports the primary file");
+    assert.equal(countShelf(shelf).originalBytes, 900, "the shelf aggregate includes both parts");
+    assert.equal(
+      shelf[0].totalOriginalBytes,
+      900,
+      "the book retains its complete unique-file byte total",
+    );
+    assert.deepEqual(
+      shelf[0].originalFiles.map((file) => file.url),
+      [blobUrl("cur-a", "front.pdf"), blobUrl("cur-a", "back.pdf")],
+      "the detail model retains both exact links, primary first",
+    );
+  });
+
+  it("does not fold suffix-shaped directories without exact provenance", () => {
     const records = [
       parseLibraryRecord({ id: "cur-2026-07-19-harcourt-science", droppedBy: "aless" }, "curriculum"),
     ];
@@ -321,20 +423,126 @@ describe("buildShelf", () => {
       ],
       new Map(),
     );
-    assert.equal(shelf.length, 1, "scan parts became phantom books");
-    assert.equal(shelf[0].status, "complete");
-    assert.equal(shelf[0].extraFileCount, 1, "both parts belong to the one record");
-    assert.equal(shelf[0].originalName, "pt1.pdf", "largest part leads");
+    assert.equal(shelf.length, 3);
+    assert.equal(
+      shelf.find((book) => book.id === "cur-2026-07-19-harcourt-science")?.status,
+      "original-lost",
+    );
+    assert.equal(shelf.filter((book) => book.status === "unread").length, 2);
   });
 
-  it("gives a part to the longest matching record, never a shorter neighbour", () => {
+  it("folds exact source URLs that equal live objects on Homa's pinned Blob host", () => {
+    const first = original("cur-2026-07-19-hwt-pt1", 1_000, "handwriting-pt1.pdf");
+    const second = original("cur-2026-07-19-hwt-pt2", 900, "handwriting-pt2.pdf");
+    const records = [
+      parseLibraryRecord(
+        {
+          id: "cur-2026-07-19-handwriting-without-tears",
+          droppedBy: "aless",
+          sourceFiles: [
+            { blobUrl: first.url },
+            { blobUrl: second.url },
+          ],
+        },
+        "curriculum",
+      ),
+    ];
+    const shelf = buildShelf(records, [first, second], new Map());
+
+    assert.equal(shelf.length, 1);
+    assert.equal(shelf[0].status, "complete");
+    assert.deepEqual(shelf[0].originalFiles, [
+      { url: first.url, name: first.name, size: first.size },
+      { url: second.url, name: second.name, size: second.size },
+    ]);
+  });
+
+  it("rejects an exact foreign-host lookalike provenance URL", () => {
+    const part = original(
+      "cur-a-pt1",
+      500,
+      "part.pdf",
+      "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com.evil.example/inspo/cur-a-pt1/part.pdf",
+    );
+    const records = [
+      parseLibraryRecord(
+        { id: "cur-a", sourceFiles: [{ blobUrl: part.url }] },
+        "curriculum",
+      ),
+    ];
+
+    const shelf = buildShelf(records, [part], new Map());
+    assert.equal(shelf.length, 2);
+    assert.equal(shelf.find((book) => book.id === "cur-a")?.status, "original-lost");
+    assert.equal(shelf.find((book) => book.id === "cur-a-pt1")?.status, "unread");
+  });
+
+  it("rejects a pinned-host provenance URL absent from the live listing", () => {
+    const listed = original("cur-a-pt1", 500, "listed.pdf");
+    const claimedUrl = blobUrl("cur-a-pt1", "claimed-but-not-listed.pdf");
+    const records = [
+      parseLibraryRecord(
+        { id: "cur-a", sourceFiles: [{ blobUrl: claimedUrl }] },
+        "curriculum",
+      ),
+    ];
+
+    const shelf = buildShelf(records, [listed], new Map());
+    assert.equal(shelf.length, 2);
+    assert.equal(shelf.find((book) => book.id === "cur-a")?.status, "original-lost");
+    assert.equal(shelf.find((book) => book.id === "cur-a-pt1")?.status, "unread");
+  });
+
+  it("inherits a real cover from the leading part of a multipart curriculum", () => {
+    const canonicalId = "cur-2026-07-20-blossom-root-level0";
+    const leadingPartId = `${canonicalId}-la-notebook`;
+    const leading = original(leadingPartId, 500, "language-arts-notebook.pdf");
+    const math = original(`${canonicalId}-math-notebook`, 900, "math-notebook.pdf");
+    const records = [
+      parseLibraryRecord(
+        {
+          id: canonicalId,
+          droppedBy: "aless",
+          sourceFiles: [{ blobUrl: leading.url }, { blobUrl: math.url }],
+        },
+        "curriculum",
+      ),
+    ];
+    const coverUrl = "https://blob.vercel-storage.com/inspo-covers/blossom-la-notebook.jpg";
+    const shelf = buildShelf(
+      records,
+      [leading, math],
+      new Map([[leadingPartId, coverUrl]]),
+    );
+
+    assert.equal(shelf.length, 1);
+    assert.equal(shelf[0].status, "complete");
+    assert.equal(shelf[0].coverUrl, coverUrl);
+  });
+
+  it("does not resurrect a hidden analysis Blob as an unread book", () => {
+    const records = parseLibraryShelfRecords(
+      [{
+        id: "ref-hidden",
+        droppedBy: "atlas",
+        libraryVisibility: "analysis-only",
+      }],
+      "reference",
+    );
+    const shelf = buildShelf(records, [original("ref-hidden", 500)], new Map());
+
+    assert.deepEqual(shelf, []);
+  });
+
+  it("does not infer ownership from the longest matching record prefix", () => {
     const records = [
       parseLibraryRecord({ id: "cur-a", droppedBy: "x" }, "curriculum"),
       parseLibraryRecord({ id: "cur-a-level0", droppedBy: "x" }, "curriculum"),
     ];
     const shelf = buildShelf(records, [original("cur-a-level0-notebook", 10)], new Map());
-    assert.equal(shelf.find((b) => b.id === "cur-a-level0")?.status, "complete");
+    assert.equal(shelf.find((b) => b.id === "cur-a-level0")?.status, "original-lost");
     assert.equal(shelf.find((b) => b.id === "cur-a")?.status, "original-lost");
+    assert.equal(shelf.find((b) => b.id === "cur-a-level0-notebook")?.status, "unread");
   });
 
   it("sorts newest drop first", () => {
@@ -355,14 +563,23 @@ describe("countShelf", () => {
       parseLibraryRecord({ id: "ref-a", droppedBy: "sid" }, "reference"),
       parseLibraryRecord({ id: "ref-b", droppedBy: "sid" }, "reference"),
       parseLibraryRecord({ id: "ref-c", droppedBy: "cosmo-atlas-scrape" }, "reference"),
+      parseLibraryRecord(
+        {
+          id: "ref-d",
+          droppedBy: "aless",
+          originalRecovery: { status: "requested" },
+        },
+        "reference",
+      ),
     ];
     const counts = countShelf(
       buildShelf(records, [{ recordId: "ref-a", url: "u", name: "n.pdf", size: 500 }], new Map()),
     );
-    assert.equal(counts.total, 3);
+    assert.equal(counts.total, 4);
     assert.equal(counts.byStatus.complete, 1);
     assert.equal(counts.byStatus["original-lost"], 1);
     assert.equal(counts.byStatus["analysis-only"], 1);
+    assert.equal(counts.byStatus["awaiting-source"], 1);
     assert.equal(counts.needsWork, 2);
     assert.equal(counts.originalBytes, 500);
   });
@@ -375,6 +592,37 @@ describe("countShelf", () => {
  * of it.
  */
 describe("the real .cosmo corpus", () => {
+  const requestedRecoveryIds = [
+    "ref-2026-07-18-ab-pattern-worksheets",
+    "ref-2026-07-18-beginning-sounds-worksheets",
+    "ref-2026-07-18-beginning-sounds-worksheets-2",
+    "ref-2026-07-18-christmas-tree-playdough-counting",
+    "ref-2026-07-18-compound-word-puzzles",
+    "ref-2026-07-18-compound-words-playdough-mats",
+    "ref-2026-07-18-file-folder-presidents-money-match",
+    "ref-2026-07-18-hair-salon-scissor-cutting",
+    "ref-2026-07-18-health-human-body-unit",
+    "ref-2026-07-18-hole-punch-fine-motor",
+    "ref-2026-07-18-i-have-who-has-compound-words",
+    "ref-2026-07-18-layers-of-earth-labeling",
+    "ref-2026-07-18-numbers-0-10-counting-ordering",
+    "ref-2026-07-18-phoneme-substitution-cards",
+    "ref-2026-07-18-phonics-letter-sounds-cvc",
+    "ref-2026-07-18-snowball-fight-compound-word-game",
+    "ref-2026-07-18-solar-system-activity-packet",
+    "ref-2026-07-18-solar-system-cut-paste",
+    "ref-2026-07-18-solar-system-worksheets-prek",
+    "ref-2026-07-18-spanish-minibook-numeros-colores",
+    "ref-2026-07-18-volcano-labelling-worksheet",
+    "ref-2026-07-18-volcanoes-vocab-cards-test",
+    "ref-2026-07-18-winter-activities-centers-crafts",
+    "ref-2026-07-18-winter-animal-tracks-montessori",
+    "ref-2026-07-18-winter-patterns-cut-paste",
+    "ref-2026-07-19-listen-and-color-spring",
+    "ref-2026-07-19-presidents-day-coloring-pages",
+    "ref-2026-07-19-volcanoes-and-lava-workbook",
+  ].sort();
+
   function cosmoDir(): string | null {
     for (const candidate of [
       path.join(process.cwd(), ".cosmo"),
@@ -417,17 +665,149 @@ describe("the real .cosmo corpus", () => {
     }
   });
 
-  it("builds a shelf where every book lands in exactly one section", async (t) => {
+  it("keeps catalog summaries and analysis-only provenance out of the real file shelf", async (t) => {
     const root = cosmoDir();
     if (!root) return t.skip("no .cosmo corpus on this checkout");
 
     const refs = await loadAll(path.join(root, "references"), "ref-");
-    const records = refs.map(({ doc }) => parseLibraryRecord(doc, "reference"));
+    const curs = await loadAll(path.join(root, "curriculums"), "cur-");
+    const catalogIds = refs
+      .filter(
+        ({ doc }) =>
+          doc !== null &&
+          typeof doc === "object" &&
+          (doc as Record<string, unknown>).libraryVisibility === "catalog-only",
+      )
+      .map(({ doc }) => (doc as Record<string, unknown>).id)
+      .sort();
+    assert.deepEqual(catalogIds, [
+      "ref-2026-07-13-beast-academy-printables",
+      "ref-2026-07-13-bookshark-samples",
+      "ref-2026-07-13-dimensions-math-samples",
+      "ref-2026-07-13-oak-meadow-samples",
+    ]);
+
+    const analysisOnlyIds = [...refs, ...curs]
+      .filter(
+        ({ doc }) =>
+          doc !== null &&
+          typeof doc === "object" &&
+          (doc as Record<string, unknown>).libraryVisibility === "analysis-only",
+      )
+      .map(({ doc }) => (doc as Record<string, unknown>).id)
+      .sort();
+    assert.deepEqual(analysisOnlyIds, [
+      "cur-2026-07-18-harcourt-trophies-2nd",
+      "ref-2026-07-12-five-paragraph-essay-outline",
+      "ref-2026-07-12-pemdas-foldable",
+    ]);
+
+    const records = [
+      ...parseLibraryShelfRecords(
+        refs.map(({ doc }) => doc),
+        "reference",
+      ),
+      ...parseLibraryShelfRecords(
+        curs.map(({ doc }) => doc),
+        "curriculum",
+      ),
+    ];
     const shelf = buildShelf(records, [], new Map());
     const counts = countShelf(shelf);
 
-    assert.equal(counts.total, refs.length);
+    assert.equal(
+      counts.total,
+      refs.length + curs.length - catalogIds.length - analysisOnlyIds.length,
+    );
+    assert.equal(counts.byStatus["awaiting-source"], 31);
     const summed = SHELF_STATUS_ORDER.reduce((sum, s) => sum + counts.byStatus[s], 0);
     assert.equal(summed, counts.total, "a book fell outside every shelf section");
+  });
+
+  it("records the exact TPT re-share request receipt on all 28 affected analyses", async (t) => {
+    const root = cosmoDir();
+    if (!root) return t.skip("no .cosmo corpus on this checkout");
+
+    const refs = await loadAll(path.join(root, "references"), "ref-");
+    const requested = refs
+      .filter(({ doc }) => {
+        if (!doc || typeof doc !== "object") return false;
+        const recovery = (doc as Record<string, unknown>).originalRecovery;
+        return (
+          recovery !== null &&
+          typeof recovery === "object" &&
+          (recovery as Record<string, unknown>).status === "requested"
+        );
+      })
+      .map(({ doc }) => doc as Record<string, unknown>);
+
+    const tptRequested = requested.filter((doc) => requestedRecoveryIds.includes(String(doc.id)));
+    assert.deepEqual(
+      tptRequested.map((doc) => doc.id).sort(),
+      requestedRecoveryIds,
+    );
+    for (const doc of tptRequested) {
+      assert.deepEqual(doc.originalRecovery, {
+        status: "requested",
+        requestChannel: "C0BHQDC033M",
+        requestTs: "1785640462.608219",
+        requestedFrom: "Alessa",
+        reason: "expired private TPT URL",
+      });
+    }
+
+    const peaceful = requested.find(
+      (doc) => doc.id === "ref-2026-07-18-peaceful-press-playful-pioneers-coop",
+    );
+    assert.ok(peaceful);
+    assert.deepEqual(peaceful.originalRecovery, {
+      status: "requested",
+      requestChannel: "C0BHQDC033M",
+      requestTs: "1785644411.819469",
+      requestMode:
+        "top-level replacement because the historical source timestamp is not a valid Slack thread",
+      supersedesUnverifiableRequestTs: "1785640773.308319",
+      requestedFrom: "Alessa",
+      reason:
+        "The official product is free but its file is delivered only through checkout and email. No Homa inbox was authorized for that checkout, so Alessa was asked in a verified new channel thread to attach the original or identify the approved inbox.",
+    });
+    assert.equal(requested.length, 29);
+  });
+
+  it("keeps duplicate and shared-source provenance pointed at canonical records", async (t) => {
+    const root = cosmoDir();
+    if (!root) return t.skip("no .cosmo corpus on this checkout");
+
+    const refs = await loadAll(path.join(root, "references"), "ref-");
+    const curs = await loadAll(path.join(root, "curriculums"), "cur-");
+    const documents = [...refs, ...curs].map(({ doc }) => doc as Record<string, unknown>);
+    const byId = new Map<string, Record<string, unknown>>();
+    for (const doc of documents) {
+      if (typeof doc.id === "string") byId.set(doc.id, doc);
+    }
+    const duplicateTargets = new Map<string, string>([
+      [
+        "ref-2026-07-12-five-paragraph-essay-outline",
+        "ref-2026-07-16-five-paragraph-essay-outline",
+      ],
+      ["ref-2026-07-12-pemdas-foldable", "ref-2026-07-16-pemdas-foldable"],
+    ]);
+
+    for (const [duplicateId, canonicalId] of duplicateTargets) {
+      const duplicate = byId.get(duplicateId);
+      assert.ok(duplicate, `${duplicateId} is missing`);
+      assert.equal(duplicate.libraryVisibility, "analysis-only");
+      assert.equal(duplicate.duplicateOf, canonicalId);
+      assert.ok(byId.has(canonicalId), `${canonicalId} is missing`);
+    }
+
+    const harcourt = byId.get("cur-2026-07-18-harcourt-trophies-2nd");
+    const sharedId = "ref-2026-07-18-harcourt-trophies-2nd-lesson-planner";
+    const shared = byId.get(sharedId);
+    assert.ok(harcourt);
+    assert.ok(shared);
+    assert.equal(harcourt.libraryVisibility, "analysis-only");
+    assert.equal(harcourt.sharedSourceRecordId, sharedId);
+    assert.deepEqual(harcourt.sourceFiles, shared.sourceFiles);
   });
 });

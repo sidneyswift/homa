@@ -48,12 +48,42 @@ The curriculum writer loads this to recommend buildable activities.
 ### flash-cards
 - **Slug:** `[flash-cards]`
 - **Name:** Flash cards / cut-outs
-- **What it is:** A 2x2 or 2x3 grid of cards with dashed cut borders. Each card has a term, image, or problem on one side.
-- **Best for:** Drill and recall: sight words, math facts, vocabulary, matching games.
-- **Subjects:** Any subject with discrete facts to memorize
-- **Ages:** 3-14. Simpler content and larger cards for younger; denser content for older.
-- **Creation path:** html (precise grid and cut lines)
-- **Example activity:** `[flash-cards] Sight word flash cards for Fry's first 20 words`
+- **What it is:** Precise 2x2 cut-apart pages of 2.5in by 3.5in cards, with one exact prompt per card, optional mirrored backs or parent key, stable card ids, and explicit duplicate counts when the cards double as word-building tiles.
+- **Best for:** Brief recall rounds, taught letter and grapheme sets, sight words, math facts, vocabulary, portable review, and simple matching games.
+- **Subjects:** Any subject with a discrete trusted prompt set, especially ELA phonics and vocabulary or math facts.
+- **Ages:** 3-14. Younger learners get fewer, larger cards; older learners may use denser facts, but every card still carries one prompt.
+- **Creation path:** html (exact grid, cut lines, type, card ids, and front-to-back registration)
+- **Example activity:** `[flash-cards] A six-card deck across two cut-apart sheets for one taught vowel-team set, with graphemes on the front and parent pronunciation cues on a separate key.`
+
+### word-fluency-repeated-reading
+- **Slug:** `[word-fluency-repeated-reading]`
+- **Name:** Word fluency repeated reading
+- **What it is:** A calm two-page packet for rereading one closed, validated, already-taught word set. The child page keeps the same exact set across rounds; the parent page records miscues, self-corrections, and a brief smoothness note without generating a score or verdict.
+- **Best for:** Building automatic recognition of familiar phonics patterns, high-frequency words, morphology sets, or multisyllabic words after accurate decoding is established.
+- **Subjects:** ELA (phonics, decoding, word study, reading fluency)
+- **Ages:** 5-12. Evidence sets the word difficulty; age changes only item count, type size, and spacing.
+- **Creation path:** html packet (validated word ids, stable repeated-reading geometry, exact page roles, and optional code-issued timing fields)
+- **Example activity:** `[word-fluency-repeated-reading] Two untimed rereads of one validated vowel-team word set, with a separate parent observation page and no speed target.`
+
+### phonics-pattern-reference-chart
+- **Slug:** `[phonics-pattern-reference-chart]`
+- **Name:** Phonics pattern reference chart
+- **What it is:** A one-page visible reminder for one already-taught sound-spelling, syllable, or morphology pattern, with a small validated example set grouped and highlighted by exact target spans.
+- **Best for:** Keeping a known vowel team, digraph, affix, syllable pattern, or related-word structure beside the child during real reading and writing.
+- **Subjects:** ELA (phonics, spelling, morphology, word study)
+- **Ages:** 5-12. Younger learners get one group and larger words; older learners may compare up to three validated groups.
+- **Creation path:** html (exact words, groups, literal target spans, and readable chart geometry)
+- **Example activity:** `[phonics-pattern-reference-chart] One taught suffix chart with eight validated examples, literal suffix highlighting, and a short use-it-while-writing prompt.`
+
+### dictation-writing-practice
+- **Slug:** `[dictation-writing-practice]`
+- **Name:** Dictation writing practice
+- **What it is:** A three-page practice packet with answer-free child writing lines, an exact parent script for words and one original sentence, and a separate closed answer key. An optional unscored response prompt connects a just-read text to brief original writing.
+- **Best for:** Applying one taught spelling pattern, practicing sentence conventions, and moving from oral discussion into a manageable written response.
+- **Subjects:** ELA (spelling, phonics, sentence writing, written response)
+- **Ages:** 6-12. Evidence sets the target; age controls item count and writing-space size.
+- **Creation path:** html packet (stable item ids, exact scripts and answers, literal target spans, and verified page roles)
+- **Example activity:** `[dictation-writing-practice] Four validated pattern words, one original dictated sentence, and one open talk-first response prompt, with parent script and key on separate pages.`
 
 ### coloring-page
 - **Slug:** `[coloring-page]`
@@ -315,6 +345,66 @@ The curriculum writer loads this to recommend buildable activities.
 - **Creation path:** html
 - **Example activity:** `[checklist-assessment] Kindergarten readiness checklist covering letters, numbers, motor skills, and social development`
 
+### phonics-spelling-diagnostic-assessment
+- **Slug:** `[phonics-spelling-diagnostic-assessment]`
+- **Name:** Phonics and spelling home skill check
+- **What it is:** An exact-answer home observation packet. Its default mode checks one already-taught skill with two equivalent child forms, a parent guide, and a recording key. A code-issued policy may instead supply a one-form mastery observation or bounded instructional-starting-point screen, but generated prose never owns the score, stop branch, or route.
+- **Best for:** Choosing the next small practice step, checking a recently taught pattern, repeating the same skill without repeating items, and rendering a trusted progression screen without assigning a grade or reading level.
+- **Subjects:** ELA (letter knowledge, phonics, decoding, spelling, word study)
+- **Ages:** 4-12. Evidence sets the skill; age changes only type size and item count.
+- **Creation path:** html packet with exact page roles and a validated structured blueprint. Mastery and starting-point modes require an external versioned policy.
+- **Example activity:** `[phonics-spelling-diagnostic-assessment] Two equivalent six-item short-a reading forms for Maya, with a parent stop rule and exact item-by-item record page.`
+
+### phoneme-letter-building-mat
+- **Slug:** `[phoneme-letter-building-mat]`
+- **Name:** Phoneme-letter building mat
+- **What it is:** A reusable mat with one large box per spoken sound, plus cut-apart grapheme tiles and a separate parent key. The child says each sound, moves the validated tile or tile group into position, then sweeps and blends.
+- **Best for:** Segmenting and blending a taught word pattern, comparing phoneme count with letter count, and hands-on word building before writing.
+- **Subjects:** ELA (phonemic awareness, phonics, decoding, spelling)
+- **Ages:** 4-8. Use three large sound positions first, then four when the trusted target records require them.
+- **Creation path:** html packet (exact sound boxes, tile multiset, cut lines, and parent answer map)
+- **Example activity:** `[phoneme-letter-building-mat] A three-sound mat and exact grapheme-tile set for six validated words in one taught pattern.`
+
+### grapheme-marking-practice
+- **Slug:** `[grapheme-marking-practice]`
+- **Name:** Grapheme marking practice
+- **What it is:** A clean word-marking page where each item has code-validated grapheme spans. The child reads the word and underlines each sound spelling using one plain convention; a separate parent key shows the exact spans.
+- **Best for:** Noticing digraphs and trigraphs, comparing known spellings of one sound, and preparing a taught word set for sorting or spelling practice.
+- **Subjects:** ELA (phonics, decoding, spelling, word study)
+- **Ages:** 5-9. Younger learners get six large rows; older learners may use up to ten while keeping generous pencil space.
+- **Creation path:** html packet (exact character spans, baselines, modeled item, and answer key)
+- **Example activity:** `[grapheme-marking-practice] Eight validated words from one taught digraph set, with an original worked example and a separate span-marked key.`
+
+### picture-supported-syllable-ordering
+- **Slug:** `[picture-supported-syllable-ordering]`
+- **Name:** Picture-supported syllable ordering
+- **What it is:** A two-page Spanish word-building packet. Each child card shows one concrete picture, a trusted word's syllable chunks in a verified scrambled order, and one bounded area for writing the reconstructed whole word. The separate key preserves exact ordered chunks and answers.
+- **Best for:** Practicing already-taught Spanish syllable patterns and concrete vocabulary without adding cutting, pasting, or a visible model word.
+- **Subjects:** Spanish (foundational literacy, syllable structures, word formation)
+- **Ages:** 6-9. Begin with four large two-syllable cards, then use up to eight two- or three-syllable targets when trusted records support them.
+- **Creation path:** hybrid packet (one reviewed composed picture sheet plus exact HTML chunks, permutations, response cells, item ids, and key)
+- **Example activity:** `[picture-supported-syllable-ordering] Six trusted Spanish picture words with validated two-syllable chunks, a non-answer permutation for each, and a separate exact key.`
+
+### phonics-sound-card-game
+- **Slug:** `[phonics-sound-card-game]`
+- **Name:** Phonics sound card game
+- **What it is:** A cut-apart reading and matching deck whose hidden family ids form exact pairs or small sets by one taught sound-spelling rule. A shared duplex-safe back and parent answer map keep the child cards cue-free.
+- **Best for:** Repeated decoding through play, matching words with one grapheme, grouping allowed spellings of one known sound, and short family rounds.
+- **Subjects:** ELA (phonics, decoding, spelling patterns)
+- **Ages:** 5-9. Begin with 6 to 8 closed pairs and expand only after the rule is familiar.
+- **Creation path:** html packet (card fronts, shared back, closed answer map, and exact card ids)
+- **Example activity:** `[phonics-sound-card-game] A twelve-card original Sound match deck with six code-validated pairs for one taught sound-spelling relationship.`
+
+### decodable-story-page
+- **Slug:** `[decodable-story-page]`
+- **Name:** Decodable story page
+- **What it is:** A short original connected-text page whose every printed token and grapheme span has passed deterministic validation against a closed taught inventory, followed by a parent guide naming the practiced patterns and explicit heart words.
+- **Best for:** Applying taught phonics beyond isolated words, building short connected-text stamina, and making a personalized story from a validated decoding inventory.
+- **Subjects:** ELA (phonics, decoding, reading fluency)
+- **Ages:** 4-9. Sentence count, line length, and type size follow reading evidence, never a printed grade label.
+- **Creation path:** html packet (exact validated text, line breaks, page roles, and parent inventory note)
+- **Example activity:** `[decodable-story-page] An original eight-sentence story built only from one child's validated taught word inventory and named heart words.`
+
 ### clip-cards
 - **Slug:** `[clip-cards]`
 - **Name:** Clip cards
@@ -537,13 +627,13 @@ The curriculum writer loads this to recommend buildable activities.
 
 ### picture-bingo-board
 - **Slug:** `[picture-bingo-board]`
-- **Name:** Picture bingo board
-- **What it is:** A set of bingo-style boards built from one shared pool of items (vocabulary, math facts, sight words), each board a grid (usually 3x3) holding a different shuffled arrangement of the same pool plus one labeled free space, so a family can print several unique boards for a caller-led group round without any two boards matching.
-- **Best for:** Vocabulary recall and listening practice in any subject or language, a lower-pressure alternative to flash-card drill, group or co-op play, and foreign-language vocabulary where the caller says the word aloud and the child matches it to the picture.
-- **Subjects:** Any subject or language with a discrete, nameable item pool (animals, sight words, math facts, vocabulary sets)
+- **Name:** Picture or text bingo board
+- **What it is:** A set of bingo-style boards built from one shared item pool. Each grid carries a different shuffle plus one free space. Picture mode uses one composed visual board with exact HTML overlays; text mode uses exact HTML words or graphemes and no image cue.
+- **Best for:** Vocabulary recall, listening practice, lower-pressure drill, group or co-op play, and text-only decoding rounds from one validated taught phonics pool.
+- **Subjects:** Any subject or language with a discrete item pool, especially vocabulary, sight words, phonics, and math facts.
 - **Ages:** 3-8. A 3x3 grid (8 items plus free space) for ages 3-6 or 8-9 item pools; a 4x4 grid for ages 7+ or larger pools.
-- **Creation path:** hybrid (one complete-board image call per page, embedded unchanged), with an aligned HTML grid for exact labels, the free space, and per-board frame styling.
-- **Example activity:** `[picture-bingo-board] Four shuffled 3x3 boards of Spanish farm-animal vocabulary (el gato, la vaca, el pollito, el cerdo, el caballo, la gallina, el pato, el perro) with a "¡Gratis!" free space, for a caller-led round.`
+- **Creation path:** hybrid for picture boards (one composed board image per page plus exact HTML overlay); html only for text boards.
+- **Example activity:** `[picture-bingo-board] Four shuffled 3x3 text-only boards from one validated taught phonics pool, with a caller list and no picture cues.`
 
 ### chant-and-rhyme-card
 - **Slug:** `[chant-and-rhyme-card]`
@@ -594,3 +684,23 @@ The curriculum writer loads this to recommend buildable activities.
 - **Ages:** 7-11. A 3x3 with more given cells for younger; a 3x3 with fewer givens or a 4x4 for older.
 - **Creation path:** html (precise grid layout and borders, matching cross-number-puzzle's cell geometry).
 - **Example activity:** `[magic-square-puzzle] A 3x3 grid where every row, column, and diagonal must sum to 15, with 5 of the 9 cells already filled in.`
+
+### reader-theater-script
+- **Slug:** `[reader-theater-script]`
+- **Name:** Reader theater script
+- **What it is:** A multi-character performance script where children read assigned roles aloud, building oral reading fluency through dramatic rehearsal and repeated reading. Not a worksheet: nothing to fill in, cut, or paste. The child reads, re-reads across multiple sessions, and performs. Includes character-name labels before each line, choral/group lines marked distinctly, stage directions in brackets, and a parent note on how to use it.
+- **Best for:** Oral reading fluency, reading with expression, high-frequency word practice, comprehension through performance, collaborative family learning, reluctant readers who respond to drama, emergent readers who can join choral refrains.
+- **Subjects:** ELA (reading fluency, comprehension, vocabulary), cross-curricular when the script content covers science, social studies, or life skills.
+- **Ages:** 5-10. K-1 scripts use choral reading and pictograms for non-readers; grades 2-4 scripts add individual narrator roles and longer lines.
+- **Creation path:** html (precise typographic control for character labels, stage directions, and choral vs. individual line styling).
+- **Example activity:** `[reader-theater-script] "The Garden Helpers": a 4-character script about children planting a garden, with choral refrains about what plants need (sun, water, soil), grounding science vocabulary in a daily-life activity. 12 lines for K-1.`
+
+### child-assisted-recipe-card
+- **Slug:** `[child-assisted-recipe-card]`
+- **Name:** Child-assisted recipe card
+- **What it is:** A one-page family cooking guide with exact ingredients and tools, a separate ADULT FIRST safety strip, and 3-6 large picture-supported CHILD step cards. It closes with one serving job and one cleanup job.
+- **Best for:** Practical-life cooking, preschool theme weeks, simple measuring and counting practice, and turning a parent-approved recipe into real work a child can follow beside an adult.
+- **Subjects:** Life skills (kitchen and cooking), math (counting and measuring), science (sensory observation)
+- **Ages:** 3-8. Ages 3-4 get at most four large steps with ingredients prepared or premeasured by the adult. Older children may measure and read short labels when family evidence supports it. Heat, blades, raw animal proteins, and powered appliances remain adult jobs.
+- **Creation path:** html (ingredient amounts, actor labels, step order, and safety ownership must remain exact; small one-color inline icons are redundant cues)
+- **Example activity:** `[child-assisted-recipe-card] An original six-cup berry yogurt recipe with adult-prepared fruit, four child jobs, a counting prompt, serving, and table cleanup.`

@@ -1,0 +1,351 @@
+{
+  "id": "ref-2026-08-01-watercolor-space-reference-cards",
+  "droppedBy": "Carolyng",
+  "droppedAt": "2026-08-01T23:13:01-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1785640381.035819",
+  "coversMessageTs": [],
+  "sourceFiles": [
+    {
+      "filename": "constellations ttp.pdf",
+      "slackFileId": "F0BN8Q0B4QY",
+      "slackMessageTs": "1785640381.035819",
+      "localPath": ".cosmo/inspo-files/slack/1785640381.035819/constellations ttp-F0BN8Q0B4QY.pdf",
+      "size": 21164096,
+      "sha256": "df48955eccee88a17ece25169f65d3361c32ec6b6650a5f2a98456e9b03d3d5b",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-watercolor-space-reference-cards/1785640381.035819-F0BN8Q0B4QY-constellations%20ttp.pdf",
+      "slackDeclaredSize": 21164096,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:05:20+00:00",
+      "blobReadBackSize": 21164096,
+      "blobReadBackSha256": "df48955eccee88a17ece25169f65d3361c32ec6b6650a5f2a98456e9b03d3d5b",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "df48955eccee88a17ece25169f65d3361c32ec6b6650a5f2a98456e9b03d3d5b:application/pdf"
+    },
+    {
+      "filename": "phases of the moon ttp.pdf",
+      "slackFileId": "F0BM86XTGEP",
+      "slackMessageTs": "1785640381.035819",
+      "localPath": ".cosmo/inspo-files/slack/1785640381.035819/phases of the moon ttp-F0BM86XTGEP.pdf",
+      "size": 16868122,
+      "sha256": "91ef6e45ecf4ed09016301699939f04f2ae2c7b1be4cd7f1e54bef32a7dd6062",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-watercolor-space-reference-cards/1785640381.035819-F0BM86XTGEP-phases%20of%20the%20moon%20ttp.pdf",
+      "slackDeclaredSize": 16868122,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:05:24+00:00",
+      "blobReadBackSize": 16868122,
+      "blobReadBackSha256": "91ef6e45ecf4ed09016301699939f04f2ae2c7b1be4cd7f1e54bef32a7dd6062",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "91ef6e45ecf4ed09016301699939f04f2ae2c7b1be4cd7f1e54bef32a7dd6062:application/pdf"
+    },
+    {
+      "filename": "planets ttp.pdf",
+      "slackFileId": "F0BLZ343PTR",
+      "slackMessageTs": "1785640381.035819",
+      "localPath": ".cosmo/inspo-files/slack/1785640381.035819/planets ttp-F0BLZ343PTR.pdf",
+      "size": 15415544,
+      "sha256": "fbc3e13bb30b044381b66d5e9dc148f5dd23f50baf46e1aee0e874f4a9435a07",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-watercolor-space-reference-cards/1785640381.035819-F0BLZ343PTR-planets%20ttp.pdf",
+      "slackDeclaredSize": 15415544,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:05:27+00:00",
+      "blobReadBackSize": 15415544,
+      "blobReadBackSha256": "fbc3e13bb30b044381b66d5e9dc148f5dd23f50baf46e1aee0e874f4a9435a07",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "fbc3e13bb30b044381b66d5e9dc148f5dd23f50baf46e1aee0e874f4a9435a07:application/pdf"
+    }
+  ],
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-watercolor-space-reference-cards/1785640381.035819-F0BN8Q0B4QY-constellations%20ttp.pdf",
+  "title": "Watercolor Space Reference Cards",
+  "format": "science-reference-card-collection",
+  "publisher": "Green Urban Creative",
+  "gradeLevel": "early elementary, approximately ages 5 to 9",
+  "analysisQuality": "full",
+  "routing": {
+    "skillUsed": "reference-ingestion",
+    "ruling": "Reference, not curriculum. These three coordinated PDFs are visual reference posters and cut-apart card sets for constellations, moon phases, and solar-system objects. They contain no paced teaching sequence or instructional philosophy."
+  },
+  "layout": {
+    "structure": "reference-posters-and-card-grids",
+    "spacing": "airy",
+    "visualHierarchy": "one watercolor science object dominates each labeled card",
+    "whiteSpaceRatio": 0.48,
+    "flowDirection": "whole-sheet comparison poster followed by two-by-two card pages",
+    "notes": "The collection contains three coordinated source PDFs across 22 captured pages. Each topic opens with a whole-sheet comparison or catalog surface, then expands the same visual system into large cut-apart cards. Creator-use pages appear at the end of source parts, with one intentionally repeated page across two PDFs."
+  },
+  "skillTargeting": {
+    "subject": "science",
+    "domain": "space-exploration",
+    "topics": [
+      {
+        "id": "mt_BVpB5wyijZ",
+        "kind": "identification",
+        "mapped": true,
+        "note": "Spotting Constellations is an exact catalog match for the constellation poster and labeled constellation cards."
+      },
+      {
+        "id": "mt_ByXgbTld6R",
+        "kind": "sequence",
+        "mapped": true,
+        "note": "Moon Phases is an exact catalog match for the eight-phase comparison poster and phase cards."
+      },
+      {
+        "id": "mt_AVk2EmSULC",
+        "kind": "identification",
+        "mapped": true,
+        "note": "The Eight Planets is an exact catalog match for the solar-system comparison poster and planet cards."
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBand": [
+      60,
+      108
+    ],
+    "complexity": "multi-topic",
+    "prerequisites": [],
+    "scaffoldingLevel": "high",
+    "notes": "Every object is paired with a large illustration and short printed label. The materials support recognition, naming, matching, and visual comparison without requiring paragraph reading. An adult can choose one of the three topic sets at a time."
+  },
+  "theming": {
+    "themeType": "interest-led",
+    "characters": [],
+    "visualStyle": "hand-painted watercolor science illustration",
+    "colorPalette": "deep night-sky blues, grayscale moon phases, and full-color planets on white",
+    "appealDrivers": "Large watercolor subjects make abstract or distant space objects feel like collectible specimens. Repeating the same art at poster and card scale supports display, comparison, matching, and portable reference.",
+    "notes": "The art is observation-led rather than cartoon-led. The source explicitly says sizes and solar distances are artistically rendered, so the comparison poster is not evidence of proportional scale."
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "mixed",
+    "margins": "standard",
+    "inkDensity": "medium-heavy",
+    "colorRequirement": "needs color for full impact",
+    "notes": "Most card pages are portrait, while at least one comparison poster uses a landscape composition. Labels remain legible in grayscale, but color is part of the object-identification and watercolor-design value."
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/ref-2026-08-01-watercolor-space-reference-cards.txt",
+    "textBlobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo-text/ref-2026-08-01-watercolor-space-reference-cards/ref-2026-08-01-watercolor-space-reference-cards.txt",
+    "notes": "All 22 captured pages are represented in the sidecar. Low-OCR watercolor card pages were inspected at original resolution and transcribed locally. Page 22 repeats page 8 because two separate PDFs include the same creator-use page; it adds no second content card.",
+    "subjects": [
+      {
+        "name": "constellations",
+        "role": "about",
+        "quote": "constellations"
+      },
+      {
+        "name": "moon phases",
+        "role": "about",
+        "quote": "phases of the moon"
+      },
+      {
+        "name": "solar system",
+        "role": "about",
+        "quote": "solar system"
+      }
+    ],
+    "entities": [
+      {
+        "name": "Green Urban Creative",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "Green Urban Creative"
+      },
+      {
+        "name": "Moon",
+        "kind": "object",
+        "role": "about",
+        "quote": "New Moon"
+      },
+      {
+        "name": "Earth",
+        "kind": "place",
+        "role": "about",
+        "quote": "Earth"
+      },
+      {
+        "name": "Saturn",
+        "kind": "object",
+        "role": "about",
+        "quote": "Saturn"
+      }
+    ],
+    "themes": [
+      {
+        "name": "visual comparison",
+        "evidence": "New Moon Waxing Crescent First Quarter Waxing Gibbous"
+      },
+      {
+        "name": "hand-painted science reference",
+        "evidence": "materials are lovingly hand painted and designed with an emphasis on beauty and usefulness"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "moon",
+        "occurrences": 5,
+        "quote": "New Moon"
+      },
+      {
+        "term": "Saturn",
+        "occurrences": 3,
+        "quote": "Saturn"
+      },
+      {
+        "term": "constellation",
+        "occurrences": 1,
+        "quote": "constellations"
+      }
+    ],
+    "referencedWorks": [],
+    "textExtraction": {
+      "ocr": "tesseract-plus-manual-visual-transcription",
+      "visionModel": null,
+      "visionPages": [],
+      "manualVisualReviewPages": [
+        1,
+        8,
+        9,
+        12,
+        15,
+        16,
+        17,
+        19,
+        20,
+        22
+      ],
+      "note": "Tesseract supplied the ordinary text. Exact labels from low-OCR display and card pages were manually transcribed after local original-resolution review. No external vision provider was used."
+    }
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "flash-cards",
+      "nomenclature-cards"
+    ],
+    "gaps": [],
+    "notes": "flash-cards owns the stable two-by-two cut-apart deck. nomenclature-cards owns the reusable illustration-plus-label control-card mechanic, even though this source does not include the recipe's full unlabeled and name-only three-part extension. The watercolor subject matter is a visual treatment, not a separate format."
+  },
+  "sourceCompleteness": {
+    "status": "complete",
+    "sourceFileCount": 3,
+    "durableBlobCount": 3,
+    "capturedPageCount": 22,
+    "uniquePageCount": 21,
+    "acceptedDuplicatePageCount": 1,
+    "note": "All three Slack PDFs are hash-verified, stored in Blob, and rendered. Page 22 is byte-identical to page 8 because two separate source PDFs repeat the same creator-use page; no instructional content is missing."
+  },
+  "stages": {
+    "captured": "2026-08-02T05:35:58+00:00",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "recipe-audit",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/flash-cards.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/nomenclature-cards.md"
+      ],
+      "verification": {
+        "matchedRecipes": 2,
+        "unresolvedGaps": 0
+      },
+      "commit": "f0bc8fe4",
+      "note": "The reusable card surfaces resolve to shipped card recipes; no new format is required."
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "commit": "f0bc8fe4",
+      "note": "Spotting Constellations, Moon Phases, and The Eight Planets are exact existing taxonomy matches."
+    },
+    "analysisReceipt": {
+      "status": "complete",
+      "analyzedAt": "2026-08-02T05:44:48Z",
+      "method": "three-pdf-intake-plus-manual-local-review",
+      "sourceFileCount": 3,
+      "capturedPageCount": 22,
+      "uniquePageCount": 21,
+      "aboutnessClaimCount": 12,
+      "captureFindingsReviewed": 1,
+      "externalVisionProvider": null
+    },
+    "shippedPr": 615,
+    "slackReplyTs": "1785657927.963539",
+    "shipReaction": true
+  },
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "constellations ttp-F0BN8Q0B4QY.pdf",
+    "sourceParts": [
+      "constellations ttp-F0BN8Q0B4QY.pdf",
+      "phases of the moon ttp-F0BM86XTGEP.pdf",
+      "planets ttp-F0BLZ343PTR.pdf"
+    ],
+    "sourceSha256": "df48955eccee88a17ece25169f65d3361c32ec6b6650a5f2a98456e9b03d3d5b",
+    "pageCount": 22,
+    "mastersDir": ".cosmo/masters/ref-2026-08-01-watercolor-space-reference-cards",
+    "intakeAt": "2026-08-02T05:39:39+00:00",
+    "gateStatus": "findings",
+    "gateFindings": [
+      "page 22: byte-identical to page 8. The same page was captured twice."
+    ],
+    "gateFindingCount": 1,
+    "gateFindingsSha256": "274e5211a9a1adce1c15739a156825bf709be19e611a802274ff2ae6721a36f6",
+    "normalizedMasterPages": 0,
+    "gateReview": {
+      "status": "reviewed",
+      "findingsSha256": "274e5211a9a1adce1c15739a156825bf709be19e611a802274ff2ae6721a36f6",
+      "findingCount": 1,
+      "unresolvedFindingCount": 0,
+      "disposition": "accepted-source-artifact",
+      "reviewedAt": "2026-08-02T05:44:48Z",
+      "note": "Pages 8 and 22 were inspected and are byte-identical creator-use pages repeated by two separate source PDFs. The duplicate is an accepted source artifact, not a duplicated or missing instructional card.",
+      "captureBinding": {
+        "version": 1,
+        "recordId": "ref-2026-08-01-watercolor-space-reference-cards",
+        "sourceReceiptSha256": "952c8dc0d96334f82ccf0513a424c24cd666c68ddd9fd18e363f87d79af2d0c3",
+        "pageCount": 22,
+        "expectedPageCount": 22
+      }
+    },
+    "expectedPageCount": 22,
+    "reviewBinding": {
+      "version": 1,
+      "recordId": "ref-2026-08-01-watercolor-space-reference-cards",
+      "sourceReceiptSha256": "952c8dc0d96334f82ccf0513a424c24cd666c68ddd9fd18e363f87d79af2d0c3",
+      "pageCount": 22,
+      "expectedPageCount": 22
+    },
+    "sourceReceipt": {
+      "version": 1,
+      "recordId": "ref-2026-08-01-watercolor-space-reference-cards",
+      "kind": "reference",
+      "parts": [
+        {
+          "file": "constellations ttp-F0BN8Q0B4QY.pdf",
+          "sha256": "df48955eccee88a17ece25169f65d3361c32ec6b6650a5f2a98456e9b03d3d5b",
+          "bytes": 21164096
+        },
+        {
+          "file": "phases of the moon ttp-F0BM86XTGEP.pdf",
+          "sha256": "91ef6e45ecf4ed09016301699939f04f2ae2c7b1be4cd7f1e54bef32a7dd6062",
+          "bytes": 16868122
+        },
+        {
+          "file": "planets ttp-F0BLZ343PTR.pdf",
+          "sha256": "fbc3e13bb30b044381b66d5e9dc148f5dd23f50baf46e1aee0e874f4a9435a07",
+          "bytes": 15415544
+        }
+      ]
+    }
+  }
+}

@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:32:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784428344.403799",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "phonics-worksheet",
   "title": "Beginning Sounds Worksheets (2nd source, TPT)",
   "publisher": "TPT (link expired)",

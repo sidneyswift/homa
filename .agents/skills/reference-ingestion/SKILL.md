@@ -44,10 +44,10 @@ Links expire in hours and files leave Slack. Capture first, think later.
 - **Explode the capture and keep the text.** For a whole-book PDF (the phone lane: one CamScanner PDF per book, founder ruling 2026-07-28), run the intake instead of doing this by hand:
 
   ```
-  python3 .cosmo/scripts/book-intake.py <file.pdf> --id <ref-id> [--expect-pages N]
+  python3 .cosmo/scripts/book-intake.py <file.pdf> --id <ref-id> --expect-pages <independently-counted-N>
   ```
 
-  It writes per-page masters to `.cosmo/masters/<id>/`, the text sidecar to `.cosmo/text/<id>.txt`, a provenance manifest, and a stub JSON for you to fill in. Text comes from a **mixture**: tesseract over every page, then a vision model over the covers and any page OCR could not read honestly (see `references/aboutness.md`). It also runs the deterministic gates (page count, blank, blurry, page shot twice) and prints what the dropper should re-shoot. Report those findings in your Slack reply: one re-shot page now beats a permanent hole in the archive. For a single-page drop, write the sidecar by hand.
+  Count the intended source pages before running intake, from the physical source, its manifest, or another independent source. Never copy `book-intake.py`'s observed count back into `--expect-pages`; that launders a missing page into a passing assertion. The intake writes per-page masters to `.cosmo/masters/<id>/`, the text sidecar to `.cosmo/text/<id>.txt`, a provenance manifest, and a stub JSON for you to fill in. Text comes from a **mixture**: tesseract over every page, then a vision model over the covers and any page OCR could not read honestly (see `references/aboutness.md`). It also runs the deterministic gates (page count, blank, blurry, page shot twice) and prints what the dropper should re-shoot. Report those findings in your Slack reply: one re-shot page now beats a permanent hole in the archive. For a single-page drop, write the sidecar by hand.
 - The vision pass needs a fresh `VERCEL_OIDC_TOKEN` (`pnpm dev:token`, roughly twelve hours; never a gateway API key). If it is missing the intake keeps the OCR text and says so; refresh and re-run with `--force` rather than analysing a book whose cover was never actually read.
 - The sidecar is gitignored (extracted text of a copyrighted book is the copyrighted work, same ruling as the originals), and it is what makes dimension F's quotes verifiable. It is the one thing the pre-2026-07-28 corpus lost on every drop. Full contract: `references/aboutness.md`.
 
@@ -254,15 +254,27 @@ Use the teach-me-explainer technique: give the non-technical dropper vocabulary 
 
 Keep it warm, concrete, and jargon-light. These are homeschool moms, not designers.
 
-### 10. Verify, then react
+### 10. Verify, close out through the finalizer, then verify receipts
 
-Run the gate:
+Run the analysis gate first:
 
 ```
 python3 .cosmo/scripts/verify-ingestion.py <ref-id>
 ```
 
-React to the original Slack drop with :ship: **only on exit 0**, and only after the thread reply was actually sent (the one thing the script cannot see). The :ship: reaction is the verified-ingestion marker; its absence means the drop is not done. If the verifier is blocked because your checkout is stale, sync to `origin/main` first; a verdict from a stale tree is worthless.
+That default mode is deliberately pre-closeout. It cannot authorize a manual reply or reaction. Put the final thread copy in the closeout messages JSON, then use the same closed-set plan used by `stage-captured.py`. The plan must cover every Slack source and cover timestamp for the record, with `captureMessageTs` limited to the messages whose attachments were retained.
+
+```sh
+python3 .cosmo/scripts/finalize-ingestion-wave.py \
+  --plan <closed-set-plan.json> \
+  --messages <closeout-messages.json> \
+  --record <ref-id> \
+  --expect-covered <N> \
+  --apply
+python3 .cosmo/scripts/verify-ingestion.py <ref-id> --require-closeout
+```
+
+The finalizer inventories every covered Slack message, reads back the exact thread reply and every bot-owned `:ship:` reaction, persists those receipts, and reruns the authoritative closeout gate before it returns success. Do not post the reply or add `:ship:` by hand. The second command is the independent final readback. A drop is done only when both commands exit 0. If the verifier is blocked because your checkout is stale, sync to `origin/main` first; a verdict from a stale tree is worthless.
 
 ## File locations
 

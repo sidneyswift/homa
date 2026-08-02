@@ -36,3 +36,12 @@ console.log(`originals held: ${(view.counts.originalBytes / 1e9).toFixed(2)} GB`
 const missingTitle = view.books.filter((b) => !b.title.trim()).length;
 const missingDate = view.books.filter((b) => !b.droppedAt).length;
 console.log(`books with no title: ${missingTitle} | with no date: ${missingDate}`);
+
+const retainedWithoutCover = view.books
+  .filter((book) => book.originalUrl && !book.coverUrl)
+  .map((book) => book.id)
+  .sort();
+console.log(
+  `retained originals with no cover: ${retainedWithoutCover.length}`,
+);
+for (const id of retainedWithoutCover) console.log(`  ${id}`);

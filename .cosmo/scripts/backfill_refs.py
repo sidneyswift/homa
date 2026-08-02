@@ -290,7 +290,7 @@ def build_ref(ref_id, title, pdf_path, dropped_by, source_channel, dropped_at, t
     elif fmt == "graphic-organizer":
         recipe_match["matchedRecipes"] = ["structured-outline"]
     elif fmt in ("curriculum-sample", "textbook-sample"):
-        recipe_match["gaps"] = [f"curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes — {page_count} pages"]
+        recipe_match["gaps"] = [f"curriculum-sample: multi-page lesson plan with reading passages, exercises, and teacher notes, {page_count} pages"]
 
     # Skill targeting
     skill_targeting = {

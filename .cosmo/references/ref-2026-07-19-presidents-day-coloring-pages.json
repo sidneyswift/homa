@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:27:50-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784428070.521679",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "coloring page (title-inferred, never confirmed)",
   "title": "Presidents Day Coloring Pages: Presidents Day Coloring Sheets Fun Activity",
   "publisher": "TPT (seller unknown, link expired before capture)",

@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:27:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784428046.263989",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "file-folder-game",
   "title": "Money Match — Presidents' Day File Folder Matching Activity (Autism Educators)",
   "publisher": "AutismEducators.com",

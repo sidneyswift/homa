@@ -8,7 +8,7 @@ import { list } from "@vercel/blob";
 import {
   buildShelf,
   countShelf,
-  parseLibraryRecord,
+  parseLibraryShelfRecords,
   recordIdFromBlobPath,
   type BlobOriginal,
   type LibraryBook,
@@ -130,7 +130,7 @@ const readRecords = cache(async () => {
     readJsonDocs(path.join(root, "curriculums"), "cur-"),
   ]);
   const parse = (docs: unknown[], kind: LibraryKind) =>
-    docs.map((doc) => parseLibraryRecord(doc, kind));
+    parseLibraryShelfRecords(docs, kind);
   return [...parse(refs, "reference"), ...parse(curs, "curriculum")];
 });
 

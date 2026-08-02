@@ -152,6 +152,37 @@ describe("computeGapCoverage", () => {
   });
 });
 
+describe("Stairway phonics recipe graduation", () => {
+  it("aliases source-specific activity names to their broader recipe owners", () => {
+    assert.equal(
+      GAP_ALIASES["reading-placement-screen"],
+      "phonics-spelling-diagnostic-assessment",
+    );
+    assert.equal(
+      GAP_ALIASES["phonics-mastery-check"],
+      "phonics-spelling-diagnostic-assessment",
+    );
+    assert.equal(GAP_ALIASES["phonics-word-bingo"], "picture-bingo-board");
+    assert.equal(GAP_ALIASES["phonics-flash-card-deck"], "flash-cards");
+  });
+});
+
+describe("Blossom and Root Year 3 recipe graduation", () => {
+  it("aliases its broad word-play name to the existing reusable mechanic", () => {
+    assert.equal(GAP_ALIASES["word-play-cut-and-sort"], "cut-and-paste-word-work");
+  });
+});
+
+describe("Benchmark Grade 3 recipe graduation", () => {
+  it("aliases source-specific fluency and card names to reusable recipe owners", () => {
+    assert.equal(
+      GAP_ALIASES["word-fluency-speed-drill"],
+      "word-fluency-repeated-reading",
+    );
+    assert.equal(GAP_ALIASES["high-frequency-word-card-deck"], "flash-cards");
+  });
+});
+
 describe("summarizeIntake", () => {
   it("counts droppers across both corpora and orders latest drops", () => {
     const ref = parseCosmoReference({
@@ -229,5 +260,107 @@ describe("the real corpus and the real skill package", () => {
         `alias target "${target}" matches no shipped recipe, SKILL.md section, or registry slug`,
       );
     }
+  });
+
+  it("closes all eight Stairway Layer 4 recipe gaps", async () => {
+    const curriculum = JSON.parse(
+      await readFile(
+        path.join(
+          cosmoRoot,
+          "curriculums",
+          "cur-2026-07-31-stairway-to-reading.json",
+        ),
+        "utf8",
+      ),
+    ) as {
+      layer4_activities?: {
+        activityTypes?: Array<{
+          recipe?: string | null;
+          status?: string;
+          suggestedRecipe?: { name?: string };
+        }>;
+        stats?: { haveRecipe?: number; noRecipe?: number };
+      };
+    };
+    const suggested = (curriculum.layer4_activities?.activityTypes ?? []).filter(
+      (row) => row.suggestedRecipe?.name,
+    );
+    const recipeFiles = new Set(
+      (await readdir(path.join(path.dirname(skillPath), "references", "recipes")))
+        .filter((name) => name.endsWith(".md"))
+        .map((name) => name.slice(0, -3)),
+    );
+    const registry = new Set(
+      parseRegistrySlugs(await readFile(registryPath, "utf8")),
+    );
+
+    assert.equal(suggested.length, 8, "the historical Layer 4 gap census must stay complete");
+    for (const row of suggested) {
+      const gap = row.suggestedRecipe?.name;
+      assert.ok(gap);
+      const canonical = GAP_ALIASES[gap] ?? gap;
+      assert.equal(row.status, "have_recipe", `${gap} must be marked covered`);
+      assert.equal(row.recipe, canonical, `${gap} must name its canonical recipe`);
+      assert.ok(
+        recipeFiles.has(canonical) || registry.has(canonical),
+        `${gap} resolves to unshipped recipe ${canonical}`,
+      );
+    }
+    assert.deepEqual(curriculum.layer4_activities?.stats, {
+      totalActivityTypes: 12,
+      haveRecipe: 12,
+      noRecipe: 0,
+    });
+  });
+
+  it("closes all four Benchmark Grade 3 Layer 4 recipe gaps", async () => {
+    const curriculum = JSON.parse(
+      await readFile(
+        path.join(
+          cosmoRoot,
+          "curriculums",
+          "cur-2026-07-31-benchmark-grade-3-reading-workshop.json",
+        ),
+        "utf8",
+      ),
+    ) as {
+      layer4_activities?: {
+        activityTypes?: Array<{
+          recipe?: string | null;
+          status?: string;
+          suggestedRecipe?: { name?: string };
+        }>;
+        stats?: { totalActivityTypes?: number; haveRecipe?: number; noRecipe?: number };
+      };
+    };
+    const suggested = (curriculum.layer4_activities?.activityTypes ?? []).filter(
+      (row) => row.suggestedRecipe?.name,
+    );
+    const recipeFiles = new Set(
+      (await readdir(path.join(path.dirname(skillPath), "references", "recipes")))
+        .filter((name) => name.endsWith(".md"))
+        .map((name) => name.slice(0, -3)),
+    );
+    const registry = new Set(
+      parseRegistrySlugs(await readFile(registryPath, "utf8")),
+    );
+
+    assert.equal(suggested.length, 4, "the historical Layer 4 gap census must stay complete");
+    for (const row of suggested) {
+      const gap = row.suggestedRecipe?.name;
+      assert.ok(gap);
+      const canonical = GAP_ALIASES[gap] ?? gap;
+      assert.equal(row.status, "have_recipe", `${gap} must be marked covered`);
+      assert.equal(row.recipe, canonical, `${gap} must name its canonical recipe`);
+      assert.ok(
+        recipeFiles.has(canonical) || registry.has(canonical),
+        `${gap} resolves to unshipped recipe ${canonical}`,
+      );
+    }
+    assert.deepEqual(curriculum.layer4_activities?.stats, {
+      totalActivityTypes: 8,
+      haveRecipe: 8,
+      noRecipe: 0,
+    });
   });
 });

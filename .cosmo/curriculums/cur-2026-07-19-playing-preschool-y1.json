@@ -22,12 +22,14 @@
     "knowledgeBankGaps": [
       {
         "suggestedKey": "play-based-preschool",
+        "mergedRowId": "668c0b41-114d-4c52-a1f6-7af5849002b0",
         "topicType": "method_philosophy",
         "title": "Play-Based Preschool (Busy Toddler model)",
         "summary": "Hands-on, theme-driven preschool with no mastery expectations. Spiral skill development across 7 core skills (predicting, recall/retell, sorting, number sense, measuring, shapes, alphabet). Background knowledge and positive associations with learning are the goals. 45-60 minutes/day."
       },
       {
         "suggestedKey": "playing-preschool-format",
+        "mergedRowId": "c2e5e167-8083-4e87-8f62-375658e0374a",
         "topicType": "method_format",
         "title": "Playing Preschool Weekly Format",
         "summary": "5 days/week, 2-week themed units. Fixed skill rotation: Mon=predicting+sorting, Tue=letter+numbers, Wed=predicting+measuring, Thu=letter+numbers, Fri=recall/retell+shapes (wk1) or letter review (wk2). 4 activities/day: opening, read aloud, learning activity, easy activity. Sensory bins, process art, STEM, gross/fine motor woven throughout."

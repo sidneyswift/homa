@@ -21,12 +21,14 @@
     "knowledgeBankGaps": [
       {
         "suggestedKey": "direct-instruction-distar",
+        "mergedRowId": "50eb2c50-8a30-4e74-8f29-aa37bc0cfc62",
         "topicType": "method_philosophy",
         "title": "Direct Instruction (DISTAR) \u2014 Engelmann Method",
         "summary": "Highly structured, scripted teaching method where every word the teacher says is prescribed. Based on the principle that if a child fails, the communication was unclear, not the child. Uses carefully sequenced examples, built-in error correction, and modified orthography (joined letters, macrons) to teach reading through systematic phonics. Adapted from SRA's Distar Fast Cycle Reading Program for home use."
       },
       {
         "suggestedKey": "distar-home-reading-format",
+        "mergedRowId": "04bfb8f2-c178-43f9-b30e-2147d525454a",
         "topicType": "method_format",
         "title": "100 Easy Lessons Format \u2014 Scripted Daily Reading",
         "summary": "Each lesson is a single 20-minute session with 5-10 numbered tasks: sounds introduction, say-it-fast (oral blending), say-the-sounds (segmenting), word reading (arrow-and-ball notation), rhyming, story reading with comprehension questions, picture comprehension, and sounds writing (letter formation). Parent reads red text verbatim; child responses are indicated. Correction procedures boxed inline."

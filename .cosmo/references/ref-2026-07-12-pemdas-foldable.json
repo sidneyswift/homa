@@ -3,6 +3,8 @@
   "droppedBy": "sid",
   "droppedAt": "2026-07-12T22:00:00-04:00",
   "sourceChannel": "homa-inspo",
+  "libraryVisibility": "analysis-only",
+  "duplicateOf": "ref-2026-07-16-pemdas-foldable",
   "format": "worksheet",
   "title": "PEMDAS Foldable (Order of Operations)",
   "layout": {

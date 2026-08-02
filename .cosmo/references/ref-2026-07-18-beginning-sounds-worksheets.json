@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:31:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784428292.026779",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "phonics-worksheet",
   "title": "Beginning Sounds Worksheets — Letter Sounds and Letter Recognition Activities (FREE)",
   "publisher": "TPT (link expired before download)",

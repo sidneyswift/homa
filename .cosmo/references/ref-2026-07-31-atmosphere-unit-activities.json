@@ -1,0 +1,327 @@
+{
+  "id": "ref-2026-07-31-atmosphere-unit-activities",
+  "droppedBy": "Carolyng",
+  "droppedAt": "2026-07-31T13:30:05-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1785519005.330129",
+  "format": "science-activity-packet",
+  "title": "Atmosphere Unit Activities",
+  "publisher": "Rock Your Homeschool",
+  "gradeLevel": "upper elementary, approximately ages 9 to 11",
+  "analysisQuality": "full",
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "Atmosphere Unit Activities.pdf",
+    "sourceParts": [
+      "Atmosphere Unit Activities.pdf"
+    ],
+    "sourceSha256": "f100473c9f871e90783d5c7c19571ba26df15e30dd8c569362df6254675a9036",
+    "pageCount": 8,
+    "mastersDir": ".cosmo/masters/ref-2026-07-31-atmosphere-unit-activities",
+    "intakeAt": "2026-08-02T03:18:37+00:00",
+    "gateFindings": [],
+    "gateStatus": "complete",
+    "gateFindingCount": 0,
+    "gateFindingsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "normalizedMasterPages": 0,
+    "duplicateReceipts": [
+      {
+        "slackMessageTs": "1785640100.143779",
+        "sha256": "f100473c9f871e90783d5c7c19571ba26df15e30dd8c569362df6254675a9036",
+        "duplicateOf": {
+          "slackMessageTs": "1785519005.330129",
+          "filename": "Atmosphere Unit Activities.pdf"
+        },
+        "disposition": "byte-identical-source-occurrence",
+        "blobReuse": true,
+        "note": "The later Slack PDF is byte-identical to the canonical source. Its source occurrence is retained, while the canonical Blob and completed analysis are reused."
+      }
+    ],
+    "expectedPageCount": 8,
+    "sourceReceipt": {
+      "version": 1,
+      "recordId": "ref-2026-07-31-atmosphere-unit-activities",
+      "kind": "reference",
+      "parts": [
+        {
+          "file": "Atmosphere Unit Activities.pdf",
+          "sha256": "f100473c9f871e90783d5c7c19571ba26df15e30dd8c569362df6254675a9036",
+          "bytes": 1755813
+        }
+      ]
+    }
+  },
+  "routing": {
+    "skillUsed": "reference-ingestion",
+    "ruling": "Reference, not curriculum. This is an eight-page consumable activity packet with a reference chart, a cut-and-assemble model, labeling, drawing, word-search, crossword, and fill-in practice. It contains neither a teaching philosophy nor a paced instructional sequence, so it fails the curriculum skill's decisive philosophy-and-sequence test."
+  },
+  "layout": {
+    "structure": "sectioned",
+    "spacing": "airy",
+    "visualHierarchy": "large activity title, one instruction block, then one dominant work area",
+    "whiteSpaceRatio": 0.43,
+    "flowDirection": "top-down",
+    "notes": "Each child-facing page owns one task. Page 1 is a vertical distance chart of the five atmospheric layers. Page 2 turns the same nested structure into a cut-and-assemble model. Pages 3 and 4 shift to labeling, matching, drawing, and written characteristics. Pages 5 through 7 provide a word search, crossword, and fill-in review. The footer and restrained blue accent make the loose activities read as one packet even though the mechanics change page by page."
+  },
+  "skillTargeting": {
+    "subject": "science",
+    "domain": "weather-climate",
+    "topics": [
+      {
+        "id": "mt_fkcxpeYP85",
+        "kind": "conceptual",
+        "mapped": true,
+        "note": "The Atmosphere, ages 9 to 11. The packet defines the atmosphere, identifies its five major layers, locates weather in the troposphere, and teaches ozone protection and atmospheric composition."
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBand": [
+      108,
+      132
+    ],
+    "complexity": "single-skill",
+    "prerequisites": [],
+    "scaffoldingLevel": "medium",
+    "notes": "The packet stays on one conceptual target while varying the response mode. The opening chart supplies layer names and distances before later pages ask the child to label, match, recall, and apply those facts. A word bank appears on the labeling page, but the crossword and fill-in review require more independent recall."
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "clean science line art",
+    "colorPalette": "limited blue and black",
+    "appealDrivers": "The nested cut-and-assemble atmosphere model turns invisible vertical scale into something the child can physically build. The packet also changes mechanics often enough to avoid eight pages of repeated recall while keeping one visual language throughout.",
+    "notes": "The subject itself supplies the visual interest: Earth, atmospheric bands, aircraft, meteors, auroras, and satellites. There are no decorative mascots or licensed characters."
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "prints well in B&W",
+    "notes": "All activity content remains legible without color. The blue accent helps the source but does not encode answers, and the line-art craft is intentionally suitable for coloring before assembly."
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/ref-2026-07-31-atmosphere-unit-activities.txt",
+    "textBlobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo-text/ref-2026-07-31-atmosphere-unit-activities/ref-2026-07-31-atmosphere-unit-activities.txt",
+    "notes": "The text sidecar combines ordinary OCR with vision reads of the diagram-heavy cover and terms page. Subjects and identity facts below are backed by exact spans. Rock Your Homeschool is an identity entity, not a content subject.",
+    "subjects": [
+      {
+        "name": "Earth's atmosphere",
+        "quote": "The Earth is surrounded by a blanket of air called",
+        "role": "teaches"
+      },
+      {
+        "name": "layers of the atmosphere",
+        "quote": "Directions: Answer and label the layers of the atmosphere.",
+        "role": "teaches"
+      },
+      {
+        "name": "atmospheric composition",
+        "quote": "It is composed of about 78% nitrogen, 21% oxygen, and one percent other gases.",
+        "role": "teaches"
+      },
+      {
+        "name": "weather",
+        "quote": "Weather",
+        "role": "teaches"
+      },
+      {
+        "name": "ozone layer",
+        "quote": "It is a layer in the stratosphere which absorbs most of the ultraviolet radiaton reaching the earth from the sun.",
+        "role": "teaches"
+      }
+    ],
+    "entities": [
+      {
+        "name": "Rock Your Homeschool",
+        "kind": "organization",
+        "quote": "Rock Your Homeschool",
+        "role": "identity"
+      },
+      {
+        "name": "Earth",
+        "kind": "place",
+        "quote": "The Earth is surrounded by a blanket of air called",
+        "role": "about"
+      }
+    ],
+    "themes": [
+      {
+        "name": "Earth science",
+        "evidence": "where Earth\u2019s atmosphere meets space"
+      },
+      {
+        "name": "learning through varied puzzles and models",
+        "evidence": "ATMOSPHERE CROSSWORD PUZZLE"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "atmosphere",
+        "occurrences": 19,
+        "quote": "ATMOSPHERE"
+      },
+      {
+        "term": "troposphere",
+        "occurrences": 6,
+        "quote": "Troposphere"
+      },
+      {
+        "term": "stratosphere",
+        "occurrences": 6,
+        "quote": "Stratosphere"
+      },
+      {
+        "term": "mesosphere",
+        "occurrences": 5,
+        "quote": "Mesosphere"
+      },
+      {
+        "term": "thermosphere",
+        "occurrences": 4,
+        "quote": "Thermosphere"
+      },
+      {
+        "term": "exosphere",
+        "occurrences": 4,
+        "quote": "Exosphere"
+      },
+      {
+        "term": "ozone",
+        "occurrences": 4,
+        "quote": "Ozone"
+      },
+      {
+        "term": "weather",
+        "occurrences": 2,
+        "quote": "Weather"
+      },
+      {
+        "term": "carbon dioxide",
+        "occurrences": 2,
+        "quote": "CARBON DIOXIDE"
+      },
+      {
+        "term": "nitrogen",
+        "occurrences": 2,
+        "quote": "nitrogen"
+      }
+    ],
+    "referencedWorks": [],
+    "textExtraction": {
+      "ocr": "tesseract",
+      "visionModel": "google/gemini-3-flash",
+      "visionPages": [
+        1,
+        8
+      ],
+      "note": "Tesseract reads the text-bearing activity pages; vision re-reads the visual cover and terms page. Per-page provenance is retained in the intake manifest."
+    }
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "unit-study-packet",
+      "cut-and-assemble-craft"
+    ],
+    "gaps": [],
+    "notes": "unit-study-packet is the exact whole-item match: one science topic expressed through a reference poster, diagram work, craft, word search, crossword, and review. Page 2 is a direct cut-and-assemble-craft match because the child cuts nested atmospheric bands and builds the layered model. The other pages are already explicitly owned by the packet recipe, so no new format gap is manufactured from a one-off variation."
+  },
+  "sourceCompleteness": {
+    "status": "complete",
+    "sourceOccurrenceCount": 2,
+    "uniqueSourceFileCount": 1,
+    "durableBlobCount": 1,
+    "pageCount": 8,
+    "duplicateSourceOccurrenceCount": 1,
+    "note": "Both Slack source occurrences are recorded. Their byte hashes are identical, so the later occurrence correctly reuses the canonical Blob and eight-page analysis rather than creating a second intake."
+  },
+  "stages": {
+    "captured": "2026-08-02T05:35:58+00:00",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "recipe-audit",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/unit-study-packet.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/cut-and-assemble-craft.md"
+      ],
+      "verification": {
+        "matchedRecipes": 2,
+        "unresolvedGaps": 0
+      },
+      "commit": "f0bc8fe4",
+      "note": "Both reusable surfaces already resolve to shipped recipes, so this reference graduates without adding a duplicate format."
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "commit": "f0bc8fe4",
+      "note": "No taxonomy addition is needed. The exact Atmosphere topic already exists."
+    },
+    "analysisReceipt": {
+      "status": "complete",
+      "analyzedAt": "2026-08-02T05:44:48Z",
+      "method": "canonical-pdf-analysis-plus-byte-dedup-review",
+      "sourceOccurrenceCount": 2,
+      "uniqueSourceFileCount": 1,
+      "pageCount": 8,
+      "aboutnessClaimCount": 19,
+      "captureFindingsReviewed": 0,
+      "externalVisionProvider": "google/gemini-3-flash"
+    },
+    "shippedPr": 615,
+    "slackReplyTs": "1785657915.214829",
+    "shipReaction": true
+  },
+  "notes": "Carolyng described this as one example of a unit study. The strongest reusable signal is not a new recipe, because Homa already owns the unit-study-packet and cut-and-assemble-craft patterns. It is confirmation that a compact upper-elementary packet can move from reference chart to tactile model to independent recall without changing topics.",
+  "coversMessageTs": [
+    "1785640100.143779"
+  ],
+  "sourceFiles": [
+    {
+      "filename": "Atmosphere Unit Activities.pdf",
+      "slackFileId": "F0BM4SZM4UD",
+      "slackMessageTs": "1785519005.330129",
+      "localPath": ".cosmo/inspo-files/slack/1785519005.330129/Atmosphere Unit Activities.pdf",
+      "size": 1755813,
+      "sha256": "f100473c9f871e90783d5c7c19571ba26df15e30dd8c569362df6254675a9036",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-31-atmosphere-unit-activities/1785519005.330129-Atmosphere%20Unit%20Activities.pdf",
+      "slackDeclaredSize": 1755813,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:05:14+00:00",
+      "blobReadBackSize": 1755813,
+      "blobReadBackSha256": "f100473c9f871e90783d5c7c19571ba26df15e30dd8c569362df6254675a9036",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "f100473c9f871e90783d5c7c19571ba26df15e30dd8c569362df6254675a9036:application/pdf"
+    },
+    {
+      "filename": "Atmosphere Unit Activities.pdf",
+      "slackFileId": "F0BM86L4CP5",
+      "slackMessageTs": "1785640100.143779",
+      "localPath": ".cosmo/inspo-files/slack/1785640100.143779/Atmosphere Unit Activities-F0BM86L4CP5.pdf",
+      "size": 1755813,
+      "sha256": "f100473c9f871e90783d5c7c19571ba26df15e30dd8c569362df6254675a9036",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-31-atmosphere-unit-activities/1785519005.330129-Atmosphere%20Unit%20Activities.pdf",
+      "duplicateOf": {
+        "slackMessageTs": "1785519005.330129",
+        "filename": "Atmosphere Unit Activities.pdf"
+      },
+      "slackDeclaredSize": 1755813,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:05:14+00:00",
+      "blobReadBackSize": 1755813,
+      "blobReadBackSha256": "f100473c9f871e90783d5c7c19571ba26df15e30dd8c569362df6254675a9036",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "f100473c9f871e90783d5c7c19571ba26df15e30dd8c569362df6254675a9036:application/pdf"
+    }
+  ],
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-31-atmosphere-unit-activities/1785519005.330129-Atmosphere%20Unit%20Activities.pdf"
+}

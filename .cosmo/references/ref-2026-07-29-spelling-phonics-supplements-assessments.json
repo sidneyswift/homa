@@ -1,0 +1,393 @@
+{
+  "id": "ref-2026-07-29-spelling-phonics-supplements-assessments",
+  "droppedBy": "Carolyng",
+  "droppedAt": "2026-07-29T22:14:43-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1785377683.240299",
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "CamScanner 07-29-2026 20.11.pdf",
+    "sourceParts": [
+      "CamScanner 07-29-2026 20.11.pdf"
+    ],
+    "sourceSha256": "b81b3c92f39ef70e8523e21d7679b619851539a4d1a01ac8d0822611a1a46e6c",
+    "pageCount": 133,
+    "mastersDir": ".cosmo/masters/ref-2026-07-29-spelling-phonics-supplements-assessments",
+    "intakeAt": "2026-08-02T03:21:47+00:00",
+    "gateFindings": [],
+    "normalizedMasterPages": 39,
+    "gateStatus": "complete",
+    "gateFindingCount": 0,
+    "gateFindingsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "expectedPageCount": 133,
+    "sourceReceipt": {
+      "version": 1,
+      "recordId": "ref-2026-07-29-spelling-phonics-supplements-assessments",
+      "kind": "reference",
+      "parts": [
+        {
+          "file": "CamScanner 07-29-2026 20.11.pdf",
+          "sha256": "b81b3c92f39ef70e8523e21d7679b619851539a4d1a01ac8d0822611a1a46e6c",
+          "bytes": 43264287
+        }
+      ]
+    }
+  },
+  "routing": {
+    "skillUsed": "reference-ingestion",
+    "ruling": "Reference, not curriculum. This is a complete assessment and progress-monitoring kit with a 13-skill continuum, parallel phonics and spelling forms, scoring sheets, and an examiner manual. Its order tells an adult where to begin, when to stop, and which taught skill needs attention; it does not provide lessons, instructional pacing, or a sequence for teaching those skills. The curriculum skill requires a philosophy and a teaching sequence. This file provides a diagnostic procedure rather than a curriculum, so reference-ingestion is the correct route and its reusable value graduates through a materials-studio recipe."
+  },
+  "title": "Quick Phonics Assessment with Quick Spelling Assessment",
+  "format": "phonics-spelling-diagnostic-assessment-kit",
+  "coversMessageTs": [],
+  "sourceFiles": [
+    {
+      "filename": "CamScanner 07-29-2026 20.11.pdf",
+      "slackFileId": "F0BLB9KU2P9",
+      "slackMessageTs": "1785377683.240299",
+      "localPath": ".cosmo/inspo-files/slack/1785377683.240299/CamScanner 07-29-2026 20.11.pdf",
+      "size": 43264287,
+      "sha256": "b81b3c92f39ef70e8523e21d7679b619851539a4d1a01ac8d0822611a1a46e6c",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-29-spelling-phonics-supplements-assessments/1785377683.240299-CamScanner%2007-29-2026%2020.11.pdf",
+      "slackDeclaredSize": 43264287,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:55:43+00:00",
+      "blobReadBackSize": 43264287,
+      "blobReadBackSha256": "b81b3c92f39ef70e8523e21d7679b619851539a4d1a01ac8d0822611a1a46e6c",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "b81b3c92f39ef70e8523e21d7679b619851539a4d1a01ac8d0822611a1a46e6c:application/pdf"
+    }
+  ],
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-29-spelling-phonics-supplements-assessments/1785377683.240299-CamScanner%2007-29-2026%2020.11.pdf",
+  "analysisQuality": "full",
+  "layout": {
+    "structure": "sectioned multi-form assessment kit",
+    "spacing": "mixed",
+    "visualHierarchy": "skill-set label, large child-facing prompts or words, then adult scoring and interpretation fields",
+    "whiteSpaceRatio": 0.45,
+    "flowDirection": "top-down with left-to-right score tracking",
+    "notes": "The kit coordinates four page families. Child-facing phonics task cards isolate large letters, nonsense words, real words, or sentences with generous spacing. Spelling task cards pair each dictated word with an example sentence. Examiner and student forms use ruled grids keyed to the same 13-skill continuum. The manual shifts to dense two-column instructions, worked scoring examples, interpretation cases, and reproducible masters. Forms A, B, and C keep identical hierarchy while changing items, and summary sheets align three administrations across the page for progress monitoring."
+  },
+  "skillTargeting": {
+    "subject": "ela",
+    "domain": "phonics-word-reading",
+    "secondaryDomains": [
+      "spelling-word-study"
+    ],
+    "topics": [
+      {
+        "id": "mt_frDIaXzWbx",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Knowing all letters, ages 4 to 6. Skill Set 1 directly assesses letter names."
+      },
+      {
+        "id": "mt_F978c32kDr",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Single Letter Sounds, ages 4 to 6. Skill Set 2 asks for each letter sound and scores consonants and short vowels separately."
+      },
+      {
+        "id": "mt_Yw3cLdKa8n",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Reading and Writing CVC Words, ages 4 to 7. Skill Set 3 measures VC and CVC decoding in QPA and encoding in QSA."
+      },
+      {
+        "id": "mt_9-OHslmt1g",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Consonant Digraphs, ages 4 to 7. Skill Set 4 targets common beginning and ending consonant digraphs."
+      },
+      {
+        "id": "mt__KHQttMde3",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Blending Sounds to Read Words, ages 4 to 7. Skill Set 5 checks whether the child can blend CVCC and CCVC patterns in unfamiliar and real words."
+      },
+      {
+        "id": "mt_C7abt7pRr6",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Split Digraphs and Magic E, ages 5 to 7. Skill Set 6 is the source's Silent e level."
+      },
+      {
+        "id": "mt_a6m7PqTuJN",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "R-Controlled Vowel Sounds, ages 5 to 6. Skill Set 7 measures r-controlled vowel decoding and spelling."
+      },
+      {
+        "id": "mt_roAgL1rQRF",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Trigraphs, ages 5 to 6. Skill Set 8 includes advanced consonant sounds and consonant digraphs and trigraphs."
+      },
+      {
+        "id": "mt_XK7NYt61cO",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Silent Letters in Words, ages 9 to 10. Skill Set 8 explicitly includes silent consonants alongside advanced consonant spellings."
+      },
+      {
+        "id": "mt_BtMbZibZUj",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Vowel Digraphs, ages 4 to 7. Skill Set 9 assesses vowel digraph patterns."
+      },
+      {
+        "id": "mt_fMd7v87IiI",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Diphthongs and complex vowels, ages 5 to 6. Skill Set 9 combines diphthongs with advanced vowel sounds."
+      },
+      {
+        "id": "mt_HrgDjxcWvf",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Prefixes and suffixes, ages 7 to 9. Skill Set 10 measures common prefixes and common suffixes in real words."
+      },
+      {
+        "id": "mt_kVzAFMuFc4",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Syllables, ages 6 to 9. Skill Sets 11 through 13 progress from two-syllable through four-syllable words."
+      },
+      {
+        "id": "mt_14OR-MhGJ9",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Decoding unfamiliar words, ages 7 to 9. QPA uses pronounceable nonsense words through Skill Set 9 to distinguish transferable decoding from memorized sight vocabulary."
+      },
+      {
+        "id": "mt_AhfyJoTQtY",
+        "kind": "procedural",
+        "mapped": true,
+        "note": "Spelling from Dictation, ages 5 to 8. QSA dictates letters and words, supplies example sentences, and records encoding performance on the same continuum as QPA."
+      }
+    ],
+    "unmappedSkills": [],
+    "notes": "phonics-word-reading is the primary domain because QPA is the kit's diagnostic spine. QSA measures encoding and spelling on the same sequence, so spelling-word-study is retained as a secondary domain instead of forcing its topics into an unrelated primary label."
+  },
+  "difficulty": {
+    "ageBand": [
+      60,
+      156
+    ],
+    "complexity": "layered",
+    "prerequisites": [],
+    "scaffoldingLevel": "low",
+    "notes": "The full kit spans beginning readers through older students with unresolved decoding needs. Its own examples include first-, second-, third-, fourth-, fifth-, and seventh-grade students. There is intentionally no whole-kit prerequisite: the adult estimates a starting point, moves forward while a child succeeds, and backs up when the chosen point is too difficult. Child-facing tasks are low scaffold because prompts cannot reveal the target skill during diagnosis. The examiner support is high, with scripts, pronunciation guidance, scoring rules, stop conditions, and interpretation cases."
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "minimalist assessment forms with a dense professional manual",
+    "colorPalette": "black-and-white interiors with red, blue, and green cover accents",
+    "appealDrivers": "Large type, one skill set at a time, equivalent forms, and explicit stopping rules make a potentially stressful assessment feel bounded and predictable. The visual interest belongs to the cover branding; the administered pages stay deliberately quiet so decoration cannot cue an answer.",
+    "notes": "The manual cover uses photographs of children, but they are decorative and do not recur in the assessment. Real and nonsense words appear without a story theme so prior topic knowledge does not distort the phonics signal."
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "mixed",
+    "colorRequirement": "prints well in B&W",
+    "notes": "Administered task cards, response forms, score sheets, and manual pages are portrait. Task cards and forms are light on ink; the examiner manual is medium density and its cover is heavy. Color identifies the commercial cover but never carries a score, direction, or answer, so all working pages remain usable in black and white."
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "checklist-assessment",
+      "phonics-spelling-diagnostic-assessment"
+    ],
+    "gaps": [],
+    "notes": "checklist-assessment partially owns the repeatable name/date fields, observable skill rows, multi-date progress tracking, and notes for the adult. The new phonics-spelling-diagnostic-assessment recipe owns the defining workflow: one taught taxonomy skill, two equivalent child forms from one blueprint, closed answers, exact item-by-item scoring, warm stop rules, and parent-facing interpretation without a grade or clinical verdict. The Homa recipe uses original prompts and word sets and explicitly refuses the source's lists, scripts, thresholds, form system, and page geometry."
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/ref-2026-07-29-spelling-phonics-supplements-assessments.txt",
+    "textBlobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo-text/ref-2026-07-29-spelling-phonics-supplements-assessments/ref-2026-07-29-spelling-phonics-supplements-assessments.txt",
+    "notes": "The sidecar covers all 133 pages. Tesseract reads every page; vision re-reads the two captured covers and four sparse or display-heavy task pages. There are no empty pages and the deterministic intake reported no re-shoot findings. Key-term counts are exact case-insensitive counts over the retained sidecar, including repeated reproducible masters. Bibliography titles are not recorded as referenced works because they support the examiner manual and are not child readings or assigned curriculum works.",
+    "subjects": [
+      {
+        "name": "phonics assessment",
+        "role": "teaches",
+        "quote": "Quick Phonics Assessment (QPA) is a phonics assessment"
+      },
+      {
+        "name": "spelling assessment",
+        "role": "teaches",
+        "quote": "Quick Spelling\nAssessment (QSA) is a spelling assessment"
+      },
+      {
+        "name": "decoding skill diagnosis",
+        "role": "teaches",
+        "quote": "instructional needs in phonics and decoding skills"
+      },
+      {
+        "name": "progress monitoring",
+        "role": "teaches",
+        "quote": "TIME-EFFICIENT TOOLS FOR PROGRESS MONITORING"
+      },
+      {
+        "name": "instructional planning",
+        "role": "teaches",
+        "quote": "help plan instruction"
+      }
+    ],
+    "entities": [
+      {
+        "name": "Jan Hasbrouck",
+        "kind": "person",
+        "role": "identity",
+        "quote": "by Jan Hasbrouck"
+      },
+      {
+        "name": "Benchmark Education Company",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "Benchmark Education Company, LLC"
+      },
+      {
+        "name": "Quick Phonics Assessment",
+        "kind": "object",
+        "role": "identity",
+        "quote": "Quick Phonics Assessment (QPA)"
+      },
+      {
+        "name": "Quick Spelling Assessment",
+        "kind": "object",
+        "role": "identity",
+        "quote": "Quick Spelling Assessment"
+      },
+      {
+        "name": "Phonics Word Study Workshop",
+        "kind": "object",
+        "role": "decoration",
+        "quote": "PHONICS WORD STUDY",
+        "note": "Related-product display on the back cover, not part of the assessment content."
+      }
+    ],
+    "themes": [
+      {
+        "name": "diagnosis before instruction",
+        "evidence": "instructional needs in phonics and decoding skills"
+      },
+      {
+        "name": "efficient screening before individual assessment",
+        "evidence": "Administering QSA before QPA can save significant assessment time."
+      },
+      {
+        "name": "growth observed across the year",
+        "evidence": "Both QPA and QSA can be administered across a school year"
+      },
+      {
+        "name": "stopping before frustration",
+        "evidence": "student appears to be very frustrated."
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "skill set",
+        "occurrences": 282,
+        "quote": "Procedure for Skill Sets 1 and 2"
+      },
+      {
+        "term": "assessment",
+        "occurrences": 157,
+        "quote": "Administering QSA before QPA can save significant assessment time."
+      },
+      {
+        "term": "QPA",
+        "occurrences": 113,
+        "quote": "Quick Phonics Assessment (QPA) is a phonics assessment"
+      },
+      {
+        "term": "phonics",
+        "occurrences": 110,
+        "quote": "instructional needs in phonics and decoding skills"
+      },
+      {
+        "term": "QSA",
+        "occurrences": 107,
+        "quote": "Administering QSA before QPA can save significant assessment time."
+      },
+      {
+        "term": "spelling",
+        "occurrences": 88,
+        "quote": "Quick Spelling Assessment"
+      },
+      {
+        "term": "decoding",
+        "occurrences": 35,
+        "quote": "instructional needs in phonics and decoding skills"
+      },
+      {
+        "term": "consonant digraphs",
+        "occurrences": 32,
+        "quote": "Common Beginning and Ending Consonant Digraphs"
+      },
+      {
+        "term": "syllables",
+        "occurrences": 32,
+        "quote": "Three Syllables"
+      },
+      {
+        "term": "diphthongs",
+        "occurrences": 20,
+        "quote": "Vowel Digraphs, Diphthongs, and Advanced Vowel Sounds"
+      },
+      {
+        "term": "silent e",
+        "occurrences": 20,
+        "quote": "Silent e"
+      },
+      {
+        "term": "prefixes",
+        "occurrences": 19,
+        "quote": "Common Prefixes and Common Suffixes"
+      }
+    ],
+    "referencedWorks": [],
+    "textExtraction": {
+      "ocr": "tesseract",
+      "visionModel": "google/gemini-3-flash",
+      "visionPages": [
+        1,
+        3,
+        16,
+        17,
+        30,
+        133
+      ],
+      "note": "The intake reads dense pages with Tesseract and re-reads both covers plus sparse or display-heavy task cards with vision. Per-page provenance remains in the intake manifest."
+    }
+  },
+  "stages": {
+    "captured": "2026-08-02T03:26:47+00:00",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "recipe",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/phonics-spelling-diagnostic-assessment.md",
+        "apps/web/agent/skills/materials-studio/SKILL.md",
+        "apps/web/agent/activity-formats.md"
+      ],
+      "commit": "f0bc8fe4",
+      "note": "The recipe, Format library route, and activity-format registry entry are implemented in commit f0bc8fe4 and carried by PR #615."
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "commit": "f0bc8fe4",
+      "note": "No taxonomy write is needed. The 13-level continuum maps to existing phonics-word-reading and spelling-word-study topics."
+    },
+    "shippedPr": 615,
+    "slackReplyTs": "1785657344.533129",
+    "shipReaction": true
+  },
+  "notes": "Carolyng described the drop as helpful for practice and assessment before moving on. The captured file is an assessment kit, not ordinary practice: it uses one-to-one phonics tasks and group-capable spelling screens to find a starting point, identify skill-specific needs, choose whether to continue or back up, and compare fall, winter, and spring performance. The archive contains the commercial originals for provenance; any Homa graduation must preserve the diagnostic structure without reproducing protected word lists, scripts, or page design."
+}

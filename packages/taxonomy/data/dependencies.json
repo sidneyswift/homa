@@ -1,7 +1,7 @@
 {
   "version": "v1",
   "note": "`topicId` depends on `prerequisiteId` (the prerequisite). Directed edges of a DAG.",
-  "edgeCount": 3274,
+  "edgeCount": 3278,
   "dependencies": [
     {
       "topicId": "mt__00ZSLnB7p",
@@ -19646,6 +19646,30 @@
       "prerequisiteId": "mt_iyz7Owv1Fd",
       "strength": "hard",
       "reason": "Builds directly on counting mixed coins"
+    },
+    {
+      "topicId": "mt_e370b8d9a7",
+      "prerequisiteId": "mt_8d2f6a91c4",
+      "strength": "hard",
+      "reason": "Spanish syllable structures and consonant clusters build on secure grapheme-phoneme correspondences"
+    },
+    {
+      "topicId": "mt_5ee2f8c50d",
+      "prerequisiteId": "mt_e370b8d9a7",
+      "strength": "hard",
+      "reason": "Classifying adjacent Spanish vowels requires dividing words into syllables"
+    },
+    {
+      "topicId": "mt_22731d8eaa",
+      "prerequisiteId": "mt_e370b8d9a7",
+      "strength": "hard",
+      "reason": "Locating Spanish word stress and applying written accents requires identifying syllable boundaries"
+    },
+    {
+      "topicId": "mt_184d82a14e",
+      "prerequisiteId": "mt_e370b8d9a7",
+      "strength": "hard",
+      "reason": "Reading and spelling Spanish affixed words builds on accurate syllable decoding"
     }
   ]
 }

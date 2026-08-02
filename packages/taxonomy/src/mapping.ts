@@ -60,6 +60,23 @@ export const MARBLE_DOMAIN_MAP: Record<string, MarbleDomainTarget> = {
   // Charlotte Mason-leaning drops; materials hook, not an assessment.
   "English > Literature": { subject: "literacy", domainId: "literature", displayName: "Literature", kind: "content" },
 
+  // Inspo-flywheel addition (2026-08-02): the Grade K Benchmark Spanish
+  // workshop teaches Spanish orthographic correspondences that cannot be
+  // represented honestly as English phonics or second-language conversation.
+  "World Languages > Spanish Foundational Literacy": { subject: "spanish", domainId: "spanish-foundational-literacy", displayName: "Spanish foundational literacy", kind: "assessment" },
+
+  // Inspo-flywheel additions (2026-08-02): The Peaceful Preschool teaches
+  // motor work as recurring curriculum content. Homa already owns scored
+  // fine_motor and gross_motor lanes, so these use separate content domains
+  // rather than colliding with the authored assessment domains.
+  "Fine Motor > Fine Motor Development": { subject: "fine_motor", domainId: "fine-motor-development", displayName: "Fine motor development", kind: "content" },
+  "Gross Motor > Gross Motor Development": { subject: "gross_motor", domainId: "gross-motor-development", displayName: "Gross motor development", kind: "content" },
+
+  // Inspo-flywheel addition (2026-08-02): preserve explicitly devotional
+  // Bible-story and verse work as discoverable content without treating
+  // belief as a scored outcome or squeezing it into English literacy.
+  "Religious Education > Biblical Literacy": { subject: "religious_education", domainId: "biblical-literacy", displayName: "Biblical literacy", kind: "content" },
+
   // Science (19 domains) → science; five interest-led ones are content
   "Science > Scientific Inquiry": { subject: "science", domainId: "scientific-inquiry", displayName: "Scientific inquiry", kind: "assessment" },
   "Science > Organisms & Life Processes": { subject: "science", domainId: "organisms-life-processes", displayName: "Organisms & life processes", kind: "assessment" },
@@ -120,6 +137,7 @@ export const MARBLE_DOMAIN_MAP: Record<string, MarbleDomainTarget> = {
   // Studies and for Art/Music elsewhere in this session.
   "History > Civic Life": { subject: "social_studies", domainId: "civic-life", displayName: "Civic life", kind: "content" },
   "History > Colonial & Revolutionary America": { subject: "social_studies", domainId: "colonial-revolutionary-america", displayName: "Colonial & Revolutionary America", kind: "content" },
+  "History > Modern History": { subject: "social_studies", domainId: "modern-history", displayName: "Modern history", kind: "content" },
 
   // Personal & Social Development (6 domains) → social_emotional
   "Personal & Social Development > Emotional Literacy": { subject: "social_emotional", domainId: "emotional-literacy", displayName: "Emotional literacy", kind: "assessment" },

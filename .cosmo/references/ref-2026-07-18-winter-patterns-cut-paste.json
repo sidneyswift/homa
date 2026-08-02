@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:36:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784428579.642329",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "cut-and-paste-worksheet",
   "title": "Winter Patterns Cut and Paste",
   "publisher": "TPT (link likely expired)",

@@ -13,6 +13,7 @@ import {
 } from "../../../../lib/materials/library-shelf";
 import { EmptyNote, Pill, type PillTone } from "../../ui";
 import { BookCover } from "../book-cover";
+import { OriginalFileLinks } from "../original-file-links";
 import { ReadableTree } from "../readable-tree";
 
 /**
@@ -34,15 +35,10 @@ export const metadata: Metadata = { title: "Book" };
 const STATUS_TONE: Record<ShelfStatus, PillTone> = {
   unread: "rose",
   "original-lost": "gold",
+  "awaiting-source": "stone",
   complete: "sage",
   "analysis-only": "stone",
 };
-
-function formatBytes(bytes: number): string {
-  if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(1)} GB`;
-  if (bytes >= 1e6) return `${Math.round(bytes / 1e6)} MB`;
-  return `${Math.round(bytes / 1e3)} KB`;
-}
 
 function Fact({ label, value }: { label: string; value: string }) {
   return (
@@ -81,24 +77,7 @@ export default async function LibraryBookPage({
       <div className="mt-4 flex flex-col gap-6 sm:flex-row">
         <div className="w-[172px] shrink-0">
           <BookCover book={book} />
-          {book.originalUrl ? (
-            <a
-              href={book.originalUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-3 block rounded-md border border-border-subtle bg-card px-3 py-2 text-center text-[0.78rem] font-bold text-[var(--clay-600)] hover:bg-page"
-            >
-              Open the original
-            </a>
-          ) : null}
-          {book.originalBytes ? (
-            <p className="mt-1.5 text-center text-[0.68rem] text-subtle">
-              {formatBytes(book.originalBytes)}
-              {book.extraFileCount > 0
-                ? ` · ${book.extraFileCount} more ${book.extraFileCount === 1 ? "file" : "files"}`
-                : ""}
-            </p>
-          ) : null}
+          <OriginalFileLinks files={book.originalFiles} />
         </div>
 
         <div className="min-w-0 flex-1">

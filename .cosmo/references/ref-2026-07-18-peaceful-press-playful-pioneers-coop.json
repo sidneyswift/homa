@@ -4,6 +4,15 @@
   "droppedAt": "2026-07-18T21:55:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784426115.157809",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785644411.819469",
+    "requestMode": "top-level replacement because the historical source timestamp is not a valid Slack thread",
+    "supersedesUnverifiableRequestTs": "1785640773.308319",
+    "requestedFrom": "Alessa",
+    "reason": "The official product is free but its file is delivered only through checkout and email. No Homa inbox was authorized for that checkout, so Alessa was asked in a verified new channel thread to attach the original or identify the approved inbox."
+  },
   "format": "co-op-curriculum-guide",
   "title": "The Playful Pioneers Co-Op Guide — Literature & Project-Based Curriculum (26 Weeks)",
   "publisher": "The Peaceful Press",

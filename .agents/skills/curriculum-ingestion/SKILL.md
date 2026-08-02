@@ -9,7 +9,7 @@ description: Use when a complete curriculum, curriculum guide, scope-and-sequenc
 
 A full curriculum, curriculum guide, scope-and-sequence document, or methodology handbook is dropped in **#homa-inspo**. This is bigger than a single reference: it represents a teaching philosophy and a structured plan. Your job: decompose it into five layers, map it to Homa's systems, flag every gap, and surface decisions Sid needs to make.
 
-**Shared laws:** the non-negotiable laws in `reference-ingestion` (capture files immediately before analysis, dates from the Slack `ts` never the machine clock, append-only taxonomy, fresh branch and PR only, no binaries under `apps/web/agent/skills/`, copyrighted originals and images derived from them never enter the product, no em dash anywhere) apply to this skill identically. So do its two 2026-07-28 additions: **explode the capture with `python3 .cosmo/scripts/book-intake.py <file.pdf> --id <cur-id>`**, which writes the per-page masters, the gitignored `.cosmo/text/<id>.txt` sidecar, a provenance manifest, and a stub for you to fill in, and **record whole-curriculum `aboutness`** per `../reference-ingestion/references/aboutness.md`. Curriculum drops are usually the longest books in the corpus, so run the intake's gate findings back to the dropper before analyzing: a blurry week is a week that decomposes into nothing.
+**Shared laws:** the non-negotiable laws in `reference-ingestion` (capture files immediately before analysis, dates from the Slack `ts` never the machine clock, append-only taxonomy, fresh branch and PR only, no binaries under `apps/web/agent/skills/`, copyrighted originals and images derived from them never enter the product, no em dash anywhere) apply to this skill identically. So do its two 2026-07-28 additions: **count the intended pages outside the extraction, then explode the capture with `python3 .cosmo/scripts/book-intake.py <file.pdf> --id <cur-id> --expect-pages <independently-counted-N>`**, which writes the per-page masters, the gitignored `.cosmo/text/<id>.txt` sidecar, a provenance manifest, and a stub for you to fill in, and **record whole-curriculum `aboutness`** per `../reference-ingestion/references/aboutness.md`. Never infer `--expect-pages` from `book-intake.py`'s observed count. Curriculum drops are usually the longest books in the corpus, so run the intake's gate findings back to the dropper before analyzing: a blurry week is a week that decomposes into nothing.
 
 ## The five layers
 
@@ -247,14 +247,26 @@ When in doubt: if it has a philosophy and a sequence, it's a curriculum. If it's
 In order:
 
 1. Write or update the cur JSON, then regenerate the manifest: `python3 .cosmo/scripts/verify-ingestion.py --regen-index` (never hand-edit `index.json`; the indexed check below fails otherwise).
-2. Run the gate (curriculum mode checks: identity fields, the four core layers nonempty, index membership, decisions recorded, Layer-4 suggested recipe names as multi-word slugs, plus the Layer-5 decomposition and aboutness checks with their quote verification):
+2. Run the pre-closeout analysis gate (curriculum mode checks: identity fields, the four core layers nonempty, index membership, decisions recorded, Layer-4 suggested recipe names as multi-word slugs, plus the Layer-5 decomposition and aboutness checks with their quote verification):
 
 ```
 python3 .cosmo/scripts/verify-ingestion.py <cur-id>
 ```
 
-3. Send the #homa-dev summary and the thread acknowledgment.
-4. React to the **original Slack drop message** with 🚢 (`:ship:`) emoji **only on exit 0**. If any step failed or was skipped, do NOT react with 🚢; fix the issue first.
+3. Put the #homa-dev summary and thread acknowledgment in the closeout messages JSON. Use the same closed-set plan used by `stage-captured.py`; it must cover every source and cover timestamp, with `captureMessageTs` limited to attachment-bearing messages retained for this curriculum.
+4. Apply the closeout through the finalizer, never with hand-written Slack calls:
+
+```sh
+python3 .cosmo/scripts/finalize-ingestion-wave.py \
+  --plan <closed-set-plan.json> \
+  --messages <closeout-messages.json> \
+  --record <cur-id> \
+  --expect-covered <N> \
+  --apply
+python3 .cosmo/scripts/verify-ingestion.py <cur-id> --require-closeout
+```
+
+The finalizer inventories every covered Slack message, posts and reads back the exact thread acknowledgment and #homa-dev summary, verifies every bot-owned `:ship:` reaction, persists the receipts, and reruns the authoritative closeout gate before returning success. The second command is the independent final readback. If either command fails or any earlier step was skipped, the curriculum is not done.
 
 The 🚢 emoji is a **verified ingestion marker**. Its presence on a message means "this drop was fully processed through the correct ingestion skill." Its absence means it wasn't.
 

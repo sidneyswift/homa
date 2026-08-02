@@ -84,6 +84,10 @@ _No data yet — will populate as they drop references and give feedback._
 - Structured writing process (outline → rough draft → final draft) — process-oriented, not one-shot assignments
 - TPT as a source = comfortable with teacher-created resources, not just publisher curricula
 - *Subject range expanding:* math (PEMDAS) + ELA/writing (essay structure) — not math-only
+- *Diagnose before advancing in phonics and spelling* - Carolyng described the Quick Phonics Assessment and Quick Spelling Assessment capture (ref-2026-07-29-spelling-phonics-supplements-assessments) as helpful for practice and assessment before moving on. The preference is for a skill-by-skill starting point, explicit continue-or-back-up rules, and repeatable progress checks, not a one-score verdict on a child. (Carolyng, 2026-07-29)
+- *Short, varied phonics practice inside a complete progression* - Carolyng said she used Stairway to Reading (cur-2026-07-31-stairway-to-reading) with her children and highlighted its games, printable manipulatives, cards, letter and sound recognition, word building, and blending. The signal is not just “systematic phonics.” It is a mastery sequence that rotates tactile, visual, written, and game-based practice instead of asking a child to endure one long drill. (Carolyng, 2026-07-31)
+- *One book as the seed of an interdisciplinary study* - Carolyng explicitly asked Homa to notice how each Blossom and Root Book Seed turns one related book into deeper work spanning writing, drawing, science, history, projects, and other subjects. The preference is for a book to open a connected investigation, not end with a generic comprehension sheet. (Carolyng, 2026-07-31)
+- *Short, simple stories inside explicit word study* - Alessa explicitly called the Benchmark Grade 3 Word Study Resource Book's stories “great simple short stories.” The valued pattern is a brief connected text that gives a child an immediate place to apply the week's sound, spelling, syllable, or morphology pattern without a large reading-load jump. (Alessa, 2026-07-31)
 
 ## Anti-Patterns (Things They Don't Like)
 <!-- "Too much white space", "font too small", etc. -->
@@ -445,9 +449,38 @@ Plus Montessori materials/methods as supplemental activities across subjects.
 - Signal, behavioural and the strongest: this became the shipped `foldable` recipe and the golden anchor of the same name. Together with the essay outline four minutes later, two of his earliest drops are now anchors. His hit rate from drop to shipped product format is higher than any other dropper's.
 - Note on evidence: no message text accompanied the drop. Every signal is read from the artefact and from what was later built with it.
 
+### Aless, 2026-07-31 (Benchmark Taller del Lector Grade K Spanish)
+- Dropped: 12 Slack attachment occurrences representing 11 unique Grade K Spanish originals, grouped as `cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish`.
+- Explicit signal, daily-life grounding: "Take note on how this teaching manual focuses on day to day life for the students. Discussing technology they use and see as well as clothing. It educates students on thier day to day surroundings."
+- Explicit signal, playful literature as a science gateway: "Take note on how this file uses playful poems and stories to introduce the bigger topics of what plants and animals need to survive."
+- Explicit signal, personalized questions alongside poetry and literature: "take note on how this file introduces personalized questions to students. Asking about likes, dislikes and interests to while also introducing poetry and literature."
+- Explicit signal, approachable rules instruction: "this text is a great example of rules within the home and school. The way the rules are introduced are fun and easy."
+- Explicit signal, family history plus follow-up questions: "take note of how this text introduces family history and how books are supported with follow up questions"
+- Explicit signal, the importance of literature and stories: "this text introduces the importance of literature and stories."
+- Explicit signal, letter introduction and sound blending: "in this file take note of the way letters are introduced and blending sounds is taught"
+- Evidence note: these are the seven Grade K signals Alessa stated in Slack. Attachment-only messages in the grouped intake add no taste claim.
+
 ### Aless, 2026-07-18 (Harbor + Sprout Primary Level Workbook Sample)
 - Dropped: Harbor + Sprout Primary Level Workbook Sample (ref-2026-07-18-primary-level-workbook-sample), a 57-page sampler binding three companion workbooks (Visual Arts, Forestry, Paleontology), no commentary.
 - Continues her established thread, and sharpens it. Her section already records real-world, household-materials, outdoors-first picks; this book asks the child to press leaves from different tree species, run a colour scavenger hunt outdoors, and recreate a famous painting. It is the same instinct in a format that assumes the learning happens away from the page.
 - Signal: interest-led subjects over school subjects. Forestry and Paleontology are not primary-school headings, they are what a specific child is obsessed with. That is a different selection rule from the graded textbooks she dropped the following day, and it is worth not averaging the two: she collects both the scaffolding and the rabbit holes.
 - Signal, the strongest and the most uncomfortable for Homa: this book is mostly deliberate empty space. A prompt, then room. Nothing worked, nothing markable, no example to copy. Every other item she has dropped gives the parent structure; this one gives the child room, and she kept both. Homa's generator fills a page by default, so honouring this taste means teaching it to leave space on purpose.
 - Note on evidence: no message text accompanied the drop, so every signal is read from the artefact.
+
+### Carolyng, 2026-07-31 (Benchmark Taller del Lector Grade 2 Spanish)
+- Dropped the complete Grade 2 overview and all ten three-week unit guides, then explicitly asked Homa to study the classroom routines, weekly and daily breakdowns, books, related questions, teacher activities, vocabulary reinforcement, guided practice, independent work, observation, assessment, reflection, and projects.
+- Signal: the teacher-facing instructional sequence is part of the product. Carolyng wants Homa to preserve the path from a brief model and guided practice into independent reading, observation, reflection, and assessment, not merely extract a list of topics or generate disconnected worksheets.
+- Signal: a content-rich Spanish reading program should build language and subject knowledge together. Across the ten drops she highlighted reading fluency, comprehension, and vocabulary alongside habitats, government, technology, aviation, erosion, economics, and matter.
+- Signal: books should anchor discussion and transfer. Carolyng repeatedly asked Homa to notice which books are read, how vocabulary and concepts are pulled from them, how the teacher discusses and observes the reading, and how the child moves into independent work or a project.
+
+### Carolyng, 2026-07-31 (Layers of the Atmosphere Activities)
+- Dropped: Rock Your Homeschool's eight-page atmosphere packet (ref-2026-07-31-atmosphere-unit-activities), described as one example of a unit study.
+- Signal: confirms the existing multi-activity unit-study preference in a compact upper-elementary form. One topic moves from a reference chart to a tactile nested-layer model, labeling and drawing, then word-search, crossword, and fill-in recall. This reinforces the shipped `unit-study-packet` and `cut-and-assemble-craft` patterns; it does not justify a duplicate recipe.
+
+### Carolyng, 2026-08-01 (Six-drop curriculum and reference wave)
+- Peaceful Preschool (cur-2026-08-01-peaceful-preschool), explicit signal: she values a week that already connects one book, one letter, and related activities with minimal parent prep. A separate book list organized by week is essential because the parent needs time to borrow or buy each title.
+- Minibeast supplement (ref-2026-07-18-minibeast-pack), explicit signal: beautiful watercolor is part of the material's value, not decoration to strip away.
+- Advent activity cards (ref-2026-08-01-advent-countdown-activity-cards), explicit signal: small family activities work as a countdown structure that can be adapted beyond Christmas to another holiday, season, or big event.
+- Atmosphere packet (ref-2026-07-31-atmosphere-unit-activities), explicit signal: a strong unit supplement mixes information, cutting, fill-in work, drawing, word search, crossword, and vocabulary recall so a child applies one body of knowledge in several enjoyable ways.
+- Watercolor space cards (ref-2026-08-01-watercolor-space-reference-cards), explicit signal: review and reference materials should be beautiful enough to print, laminate, and keep. Carolyng said plainly that beautiful materials matter.
+- Spanish syllable worksheets (ref-2026-08-01-spanish-syllable-ordering-worksheets), explicit signal: picture reference, bold type, and generous spacing make a simple language practice page work. The cue and geometry are part of the teaching action.

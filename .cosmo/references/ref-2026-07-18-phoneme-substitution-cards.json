@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:29:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784428149.123199",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "phonemic-awareness-center",
   "title": "Phoneme Substitution Cards — Phonemic Awareness Center (281 pages)",
   "publisher": "My Teaching Pal (TPT)",

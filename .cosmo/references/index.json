@@ -2133,16 +2133,31 @@
     {
       "id": "ref-2026-07-18-minibeast-pack",
       "title": "Minibeast Pack (Fiddlesticks Kids)",
-      "droppedBy": "carolyng",
-      "droppedAt": "2026-07-18T01:17:00-04:00",
+      "droppedBy": "Carolyng",
+      "droppedAt": "2026-07-18T01:17:11-04:00",
       "subject": "science",
-      "domain": "nature-study",
+      "domain": "insects-minibeasts",
       "format": "activity-pack",
-      "about": [],
-      "entities": [],
-      "themes": [],
+      "about": [
+        "minibeasts",
+        "insect classification"
+      ],
+      "entities": [
+        "Fiddlesticks Kids",
+        "garden spider",
+        "black garden ant",
+        "banded snail",
+        "buff tailed bumblebee"
+      ],
+      "themes": [
+        "garden nature study",
+        "hands-on classification"
+      ],
       "works": [],
-      "ageBand": null
+      "ageBand": [
+        36,
+        72
+      ]
     },
     {
       "id": "ref-2026-07-18-montessori-3part-community-helpers",
@@ -2890,6 +2905,153 @@
       "ageBand": [
         84,
         132
+      ]
+    },
+    {
+      "id": "ref-2026-07-29-spelling-phonics-supplements-assessments",
+      "title": "Quick Phonics Assessment with Quick Spelling Assessment",
+      "droppedBy": "Carolyng",
+      "droppedAt": "2026-07-29T22:14:43-04:00",
+      "subject": "ela",
+      "domain": "phonics-word-reading",
+      "format": "phonics-spelling-diagnostic-assessment-kit",
+      "about": [
+        "phonics assessment",
+        "spelling assessment",
+        "decoding skill diagnosis",
+        "progress monitoring",
+        "instructional planning"
+      ],
+      "entities": [
+        "Jan Hasbrouck",
+        "Benchmark Education Company",
+        "Quick Phonics Assessment",
+        "Quick Spelling Assessment",
+        "Phonics Word Study Workshop"
+      ],
+      "themes": [
+        "diagnosis before instruction",
+        "efficient screening before individual assessment",
+        "growth observed across the year",
+        "stopping before frustration"
+      ],
+      "works": [],
+      "ageBand": [
+        60,
+        156
+      ]
+    },
+    {
+      "id": "ref-2026-07-31-atmosphere-unit-activities",
+      "title": "Atmosphere Unit Activities",
+      "droppedBy": "Carolyng",
+      "droppedAt": "2026-07-31T13:30:05-04:00",
+      "subject": "science",
+      "domain": "weather-climate",
+      "format": "science-activity-packet",
+      "about": [
+        "Earth's atmosphere",
+        "layers of the atmosphere",
+        "atmospheric composition",
+        "weather",
+        "ozone layer"
+      ],
+      "entities": [
+        "Rock Your Homeschool",
+        "Earth"
+      ],
+      "themes": [
+        "Earth science",
+        "learning through varied puzzles and models"
+      ],
+      "works": [],
+      "ageBand": [
+        108,
+        132
+      ]
+    },
+    {
+      "id": "ref-2026-08-01-advent-countdown-activity-cards",
+      "title": "Advent Christmas Activity Cards",
+      "droppedBy": "Carolyng",
+      "droppedAt": "2026-08-01T23:06:11-04:00",
+      "subject": "life_skills",
+      "domain": "daily-living",
+      "format": "activity-card-deck",
+      "about": [
+        "christmas family activities",
+        "christmas traditions"
+      ],
+      "entities": [
+        "Real Life at Home",
+        "Santa"
+      ],
+      "themes": [
+        "giving and community care",
+        "family togetherness",
+        "hands-on holiday making"
+      ],
+      "works": [
+        "The Nutcracker"
+      ],
+      "ageBand": [
+        48,
+        144
+      ]
+    },
+    {
+      "id": "ref-2026-08-01-spanish-syllable-ordering-worksheets",
+      "title": "Spanish Syllable Ordering Worksheets",
+      "droppedBy": "Carolyng",
+      "droppedAt": "2026-08-01T23:15:05-04:00",
+      "subject": "spanish",
+      "domain": "spanish-foundational-literacy",
+      "format": "picture-supported-syllable-ordering-worksheet-set",
+      "about": [
+        "spanish syllable ordering",
+        "spanish word formation",
+        "letter-syllable spelling"
+      ],
+      "entities": [
+        "Apoyo Educativo Ari"
+      ],
+      "themes": [
+        "picture-supported decoding",
+        "ordered word reconstruction"
+      ],
+      "works": [],
+      "ageBand": [
+        72,
+        96
+      ]
+    },
+    {
+      "id": "ref-2026-08-01-watercolor-space-reference-cards",
+      "title": "Watercolor Space Reference Cards",
+      "droppedBy": "Carolyng",
+      "droppedAt": "2026-08-01T23:13:01-04:00",
+      "subject": "science",
+      "domain": "space-exploration",
+      "format": "science-reference-card-collection",
+      "about": [
+        "constellations",
+        "moon phases",
+        "solar system"
+      ],
+      "entities": [
+        "Green Urban Creative",
+        "Moon",
+        "Earth",
+        "Saturn"
+      ],
+      "themes": [
+        "visual comparison",
+        "hand-painted science reference"
+      ],
+      "works": [],
+      "ageBand": [
+        60,
+        108
       ]
     }
   ]

@@ -127,4 +127,153 @@ describe("the real materials-studio package", () => {
     assert.match(strategy, /Pixel defects: regeneration may be appropriate/u);
     assert.match(strategy, /wrong subject/u);
   });
+
+  it("keeps the phonics and spelling check exact and source-independent", async () => {
+    const dir = new URL("../../agent/skills/materials-studio/", import.meta.url);
+    const [recipe, skill, registry] = await Promise.all([
+      readFile(
+        new URL("references/recipes/phonics-spelling-diagnostic-assessment.md", dir),
+        "utf8",
+      ),
+      readFile(new URL("SKILL.md", dir), "utf8"),
+      readFile(new URL("../../agent/activity-formats.md", import.meta.url), "utf8"),
+    ]);
+
+    assert.match(recipe, /^# Phonics and spelling diagnostic assessment$/mu);
+    assert.match(recipe, /The model chooses the exact skill/u);
+    assert.match(recipe, /Deterministic rules own validation and scoring/u);
+    assert.match(recipe, /literal equality or membership in[\s\S]*closed set/u);
+    assert.match(
+      recipe,
+      /pageRoles: \["child", "child", "parent_guide", "answer_key"\]/u,
+    );
+    assert.match(recipe, /not a standardized, clinical, or grade-placement instrument/u);
+    assert.doesNotMatch(
+      recipe,
+      /Quick Phonics|Quick Spelling|Jan Hasbrouck|Benchmark Education/u,
+      "The Homa recipe may preserve a workflow but never source identity or copy cues",
+    );
+    assert.match(
+      skill,
+      /\| Phonics and spelling diagnostic assessment \|[^\n]+\| phonics-spelling-diagnostic-assessment \|/u,
+    );
+    assert.match(
+      registry,
+      /- \*\*Slug:\*\* `\[phonics-spelling-diagnostic-assessment\]`/u,
+    );
+  });
+
+  it("ships every Stairway phonics mechanic through a reusable recipe", async () => {
+    const dir = new URL("../../agent/skills/materials-studio/", import.meta.url);
+    const recipeSlugs = [
+      "flash-cards",
+      "phoneme-letter-building-mat",
+      "grapheme-marking-practice",
+      "phonics-sound-card-game",
+      "decodable-story-page",
+    ] as const;
+    const [recipes, diagnostic, bingo, skill, registry] = await Promise.all([
+      Promise.all(
+        recipeSlugs.map(async (slug) => ({
+          slug,
+          body: await readFile(new URL(`references/recipes/${slug}.md`, dir), "utf8"),
+        })),
+      ),
+      readFile(
+        new URL("references/recipes/phonics-spelling-diagnostic-assessment.md", dir),
+        "utf8",
+      ),
+      readFile(new URL("references/recipes/picture-bingo-board.md", dir), "utf8"),
+      readFile(new URL("SKILL.md", dir), "utf8"),
+      readFile(new URL("../../agent/activity-formats.md", import.meta.url), "utf8"),
+    ]);
+
+    for (const { slug, body } of recipes) {
+      assert.match(body, /^# .+$/mu, `${slug} needs a title`);
+      assert.match(body, /^Great for:/mu, `${slug} needs routing guidance`);
+      assert.match(body, /^## Design patterns/mu, `${slug} needs binding design patterns`);
+      assert.match(body, /```html/u, `${slug} needs worked HTML`);
+      assert.doesNotMatch(
+        body,
+        /Stairway to Reading|Crazy Letters|Quick Phonics|Quick Spelling/u,
+        `${slug} must preserve the mechanic without source identity`,
+      );
+      assert.match(
+        skill,
+        new RegExp(`\\| [^\\n]+ \\|[^\\n]+\\| ${slug} \\|`, "u"),
+        `${slug} needs a Format library row`,
+      );
+      assert.ok(
+        registry.includes("- **Slug:** `[" + slug + "]`"),
+        `${slug} needs an exact activity-format slug line`,
+      );
+    }
+
+    assert.match(diagnostic, /code-issued progression policy/u);
+    assert.match(diagnostic, /Never write a threshold[\s\S]*placement rule in generated prose/u);
+    assert.match(bingo, /Use html only for text boards/u);
+    assert.match(bingo, /no image, emoji, rebus, or color-family cue/u);
+    const flashCards = recipes.find(({ slug }) => slug === "flash-cards")?.body ?? "";
+    assert.match(flashCards, /use 2 by 2 cards on letter paper by default/u);
+    assert.match(flashCards, /grid-template-rows: repeat\(2, 1fr\)/u);
+    assert.doesNotMatch(flashCards, /use 2 by 3 cards on letter paper by default/u);
+  });
+
+  it("ships the Benchmark Grade 3 practice mechanics without source policy", async () => {
+    const dir = new URL("../../agent/skills/materials-studio/", import.meta.url);
+    const recipeSlugs = [
+      "word-fluency-repeated-reading",
+      "phonics-pattern-reference-chart",
+      "dictation-writing-practice",
+    ] as const;
+    const [recipes, skill, registry] = await Promise.all([
+      Promise.all(
+        recipeSlugs.map(async (slug) => ({
+          slug,
+          body: await readFile(new URL(`references/recipes/${slug}.md`, dir), "utf8"),
+        })),
+      ),
+      readFile(new URL("SKILL.md", dir), "utf8"),
+      readFile(new URL("../../agent/activity-formats.md", import.meta.url), "utf8"),
+    ]);
+
+    for (const { slug, body } of recipes) {
+      assert.match(body, /^# .+$/mu, `${slug} needs a title`);
+      assert.match(body, /^Great for:/mu, `${slug} needs routing guidance`);
+      assert.match(body, /^## Design patterns/mu, `${slug} needs binding design patterns`);
+      assert.match(body, /```html/u, `${slug} needs worked HTML`);
+      assert.doesNotMatch(
+        body,
+        /Benchmark|Accountable Text|Interactive Text|Taller del Lector/u,
+        `${slug} must preserve the mechanic without source identity or wording`,
+      );
+      assert.match(
+        skill,
+        new RegExp(`\\| [^\\n]+ \\|[^\\n]+\\| ${slug} \\|`, "u"),
+        `${slug} needs a Format library row`,
+      );
+      assert.ok(
+        registry.includes("- **Slug:** `[" + slug + "]`"),
+        `${slug} needs an exact activity-format slug line`,
+      );
+    }
+
+    const bySlug = new Map(recipes.map(({ slug, body }) => [slug, body]));
+    assert.match(
+      bySlug.get("word-fluency-repeated-reading") ?? "",
+      /Never author a seconds target, words-per-minute goal,[\s\S]*threshold in prose/u,
+    );
+    assert.match(
+      bySlug.get("phonics-pattern-reference-chart") ?? "",
+      /Deterministic validation owns catalog membership,[\s\S]*target-span positions/u,
+    );
+    assert.match(
+      bySlug.get("dictation-writing-practice") ?? "",
+      /pageRoles: \["child", "parent_guide", "answer_key"\]/u,
+    );
+    assert.match(
+      bySlug.get("dictation-writing-practice") ?? "",
+      /Never invent a\s+pass threshold, mastery result, grade level, or timer/u,
+    );
+  });
 });

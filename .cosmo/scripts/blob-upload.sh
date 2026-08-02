@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# blob-upload.sh: upload a captured inspo original to the CORRECT Blob store.
+# blob-upload.sh: upload captured inspo bytes to the CORRECT Blob store.
 #
 # Cosmo's machine holds Vercel credentials for more than one project, and a
 # Blob read-write token is store-scoped: whichever token you use decides
@@ -14,8 +14,12 @@
 #   3. op run --env-file=.env.example (1Password fallback, if the item exists)
 #
 # Usage:
-#   bash .cosmo/scripts/blob-upload.sh <ref-id> <file> [content-type]
-# Prints the blob URL on success (record it as blobUrl in the ref JSON).
+#   bash .cosmo/scripts/blob-upload.sh <record-id> <file> [content-type]
+#   bash .cosmo/scripts/blob-upload.sh --text <record-id> <file> [content-type]
+#
+# The default uploads a Library original under inspo/. The explicit --text
+# mode uploads an extracted text sidecar under inspo-text/, which the admin
+# Library never lists as an original. Prints the Blob URL on success.
 
 set -euo pipefail
 
@@ -23,9 +27,33 @@ set -euo pipefail
 # ledger (every family-artifact URL is https://<this id>.public.blob...).
 EXPECTED_STORE_ID="pkvvudjdhxk33dig"
 
-REF_ID="${1:?usage: blob-upload.sh <ref-id> <file> [content-type]}"
-FILE="${2:?usage: blob-upload.sh <ref-id> <file> [content-type]}"
-CONTENT_TYPE="${3:-application/octet-stream}"
+NAMESPACE="inspo"
+DEFAULT_CONTENT_TYPE="application/octet-stream"
+case "${1:-}" in
+  --text)
+    NAMESPACE="inspo-text"
+    DEFAULT_CONTENT_TYPE="text/plain; charset=utf-8"
+    shift
+    ;;
+  --*)
+    echo "ERROR: unknown option: $1" >&2
+    exit 2
+    ;;
+esac
+
+RECORD_ID="${1:?usage: blob-upload.sh [--text] <record-id> <file> [content-type]}"
+FILE="${2:?usage: blob-upload.sh [--text] <record-id> <file> [content-type]}"
+CONTENT_TYPE="${3:-$DEFAULT_CONTENT_TYPE}"
+
+# The record id is one Blob path segment. Refuse separators, whitespace, and
+# shell metacharacters rather than allowing a caller to escape the selected
+# namespace or create a path the Library cannot join deterministically.
+case "$RECORD_ID" in
+  ""|"."|".."|*[!A-Za-z0-9._-]*)
+    echo "ERROR: record id must contain only letters, numbers, dot, underscore, and hyphen." >&2
+    exit 2
+    ;;
+esac
 
 [ -f "$FILE" ] || { echo "ERROR: no such file: $FILE" >&2; exit 1; }
 TOKEN="${BLOB_READ_WRITE_TOKEN:-}"
@@ -59,7 +87,7 @@ BASENAME=$(basename "$FILE")
 # 23 of 58 uploads in the 2026-07-30 rescue sweep, and every failure was a
 # filename with a space in it.
 ENCODED=$(printf '%s' "$BASENAME" | python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.stdin.read(), safe='.-_~'))")
-PATHNAME="inspo/${REF_ID}/${ENCODED}"
+PATHNAME="${NAMESPACE}/${RECORD_ID}/${ENCODED}"
 
 # Deterministic path, idempotent re-upload: no random suffix, overwrite ok.
 RESPONSE=$(curl -sf -X PUT "https://blob.vercel-storage.com/${PATHNAME}" \

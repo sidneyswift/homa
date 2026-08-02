@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:31:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784428264.835909",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "card-game",
   "title": "Snowball Fight — Compound Word Game",
   "publisher": "TPT (link expired before download)",

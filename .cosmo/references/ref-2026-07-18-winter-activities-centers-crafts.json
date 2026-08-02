@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:37:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784428624.399569",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "seasonal-activity-bundle",
   "title": "FREE Winter Activities Centers — Crafts, Counting Activities, Holiday/New Years",
   "publisher": "TPT (link likely expired)",

@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:29:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784428192.565579",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "fine-motor-activity",
   "title": "Celebration Theme Hole Punch Cut Strips — Fine Motor Activity (Early Learning Ideas)",
   "publisher": "Early Learning Ideas / Jennifer Hier (TPT)",
