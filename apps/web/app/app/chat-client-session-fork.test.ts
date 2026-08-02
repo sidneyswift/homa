@@ -55,19 +55,27 @@ describe("ChatClient session-fork fix (GH #170)", () => {
   });
 
   it("flushes whatever queued while recovery was undecided, on every one of its exits", () => {
+    const recoveryStart = source.indexOf(
+      "const startLostTurnRecovery = useCallback",
+    );
     const recoveryBody = source.slice(
-      source.indexOf("const startLostTurnRecovery = useCallback"),
-      source.indexOf("}, [\n    agentReset,"),
+      recoveryStart,
+      source.indexOf("useEffect(() => {\n    startRecoveryRef", recoveryStart),
     );
     const flushCount = recoveryBody.match(/flushQueuedMessages\(\)/gu)?.length ?? 0;
-    // Aborted-early-return, and the shared recovered/failed tail.
+    // Aborted early return and failed-recovery tail. The recovered path
+    // delegates to applyRecoveredTurn, whose shared close-out also flushes.
     assert.equal(flushCount, 2);
+    assert.match(
+      recoveryBody,
+      /if \(recovered\) \{\s*applyRecoveredTurn\(recovered\);\s*return;/u,
+    );
   });
 
   it("keeps flushQueuedMessages in startLostTurnRecovery's own dependency list", () => {
     assert.match(
       source,
-      /\}, \[\s*agentReset,\s*flushQueuedMessages,/u,
+      /const startLostTurnRecovery = useCallback\([\s\S]*?\}, \[[\s\S]*?flushQueuedMessages,[\s\S]*?\]\);/u,
     );
   });
 

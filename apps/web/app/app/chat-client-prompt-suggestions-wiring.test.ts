@@ -61,6 +61,9 @@ describe("ChatClient prompt suggestion wiring", () => {
   });
 
   it("cancels suggestions across recovery and requests from recovered messages", () => {
+    const recoveredCloseoutStart = source.indexOf(
+      "const applyRecoveredTurn = useCallback",
+    );
     const recoveryStart = source.indexOf(
       "const startLostTurnRecovery = useCallback",
     );
@@ -68,21 +71,35 @@ describe("ChatClient prompt suggestion wiring", () => {
       "startRecoveryRef.current = startLostTurnRecovery",
       recoveryStart,
     );
-    assert.ok(recoveryStart >= 0 && recoveryEnd > recoveryStart);
+    assert.ok(
+      recoveredCloseoutStart >= 0
+      && recoveryStart > recoveredCloseoutStart
+      && recoveryEnd > recoveryStart,
+    );
+    const recoveredCloseoutSource = source.slice(
+      recoveredCloseoutStart,
+      recoveryStart,
+    );
     const recoverySource = source.slice(recoveryStart, recoveryEnd);
     const startLifecycle = recoverySource.indexOf(
       'type: "recovery_started"',
     );
-    const recoverRequest = recoverySource.indexOf("recoverLostTurn({");
-    const foldRecovered = recoverySource.indexOf(
+    const recoverRequest = recoverySource.indexOf(
+      "recoverLastTurn(controller.signal)",
+    );
+    const foldRecovered = recoveredCloseoutSource.indexOf(
       "const messages = foldEventsToMessages(recovered.events);",
     );
 
     assert.ok(startLifecycle >= 0 && startLifecycle < recoverRequest);
     assert.ok(foldRecovered >= 0);
     assert.match(
-      recoverySource,
+      recoveredCloseoutSource,
       /type: "recovery_finished",\s*outcome: "recovered"/u,
+    );
+    assert.match(
+      recoverySource,
+      /if \(recovered\) \{\s*applyRecoveredTurn\(recovered\);/u,
     );
     assert.match(
       recoverySource,
@@ -94,7 +111,10 @@ describe("ChatClient prompt suggestion wiring", () => {
     );
     assert.ok(
       (recoverySource.match(/executePromptSuggestionLifecycleAction\(/gu)
-        ?.length ?? 0) >= 4,
+        ?.length ?? 0)
+      + (recoveredCloseoutSource.match(
+        /executePromptSuggestionLifecycleAction\(/gu,
+      )?.length ?? 0) >= 4,
     );
   });
 
