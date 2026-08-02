@@ -7,6 +7,7 @@ import {
 } from "./eval-isolation";
 import { type FamilyContextRows } from "./family-context";
 import { joinPageBodies } from "./materials/page-shell";
+import { messageSourceFromRequest } from "./chat-message-source";
 
 /**
  * The eval host's stand-in family (2026-07-24 routing-eval investigation).
@@ -223,6 +224,7 @@ export function evalFamilyFixtureAuth(
         memberName: onboardingModeRequested
           ? EVAL_ONBOARDING_FIXTURE_PARENT_NAME
           : EVAL_FIXTURE_PARENT_NAME,
+        messageSource: messageSourceFromRequest(request),
         ...(onboardingModeRequested
           ? {
               onboardingActive: "true",

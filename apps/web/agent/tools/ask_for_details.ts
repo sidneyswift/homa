@@ -6,6 +6,8 @@ import {
 } from "../../lib/agent-tool-deadline";
 import { z } from "zod";
 
+import { isSavedOnboardingCardAnswer } from "../../lib/chat-message-source";
+
 /**
  * The facts card: when Homa needs a small set of exact facts, she puts
  * up the fields instead of asking for them in a paragraph.
@@ -95,6 +97,13 @@ export default defineDynamic({
         ctx.session.auth.current?.attributes as { channel?: string } | undefined
       )?.channel;
       if (channel !== undefined && NO_CARD_CHANNELS.has(channel)) return null;
+      if (
+        isSavedOnboardingCardAnswer(
+          ctx.session.auth.current?.attributes,
+        )
+      ) {
+        return null;
+      }
       return askForDetails;
     },
   },

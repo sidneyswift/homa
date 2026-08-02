@@ -3,6 +3,8 @@ import {
   isVoiceTranscriptionText,
   markVoiceTranscription,
 } from "../../lib/voice/transcription-marker";
+import { messageModalityHeaders } from "../../lib/web-message-modality";
+import { messageSourceHeaders } from "../../lib/chat-message-source";
 
 export type ChatTurnModality = "text" | "voice";
 
@@ -25,12 +27,23 @@ export type ChatSendSource =
 export type ChatSendAcceptance = "rejected" | "queued" | "sent";
 
 /**
- * Which lane a queued message rides in. Directives never string-join
- * with the parent's words: a machine sentence glued onto the front of
- * what she was typing arrives wearing her voice, and the model answers
- * a sentence nobody wrote.
+ * Which lane a queued message rides in. Directives and saved card answers
+ * never string-join with the parent's typed words. Each carries different
+ * provenance, and one request can truthfully carry only one source header.
  */
-export type ChatSendLane = "parent" | "directive";
+export type ChatSendLane = "parent" | "saved_card_answer" | "directive";
+
+export function chatSendHeaders(
+  modality: ChatTurnModality,
+  lane: ChatSendLane,
+): Readonly<Record<string, string>> {
+  return {
+    ...messageModalityHeaders(modality),
+    ...messageSourceHeaders(
+      lane === "saved_card_answer" ? "saved_card_answer" : "parent",
+    ),
+  };
+}
 
 /**
  * isSendLineOccupied({busy, recovering}): whether a manual send right now
@@ -116,7 +129,11 @@ export function prepareChatSend(input: {
       input.source.kind === "progress_card"
         ? input.source.progressActionKey
         : null,
-    lane: directive ? "directive" : "parent",
+    lane: directive
+      ? "directive"
+      : input.source.kind === "card_answer"
+        ? "saved_card_answer"
+        : "parent",
   };
 }
 
@@ -175,10 +192,10 @@ export interface ChatQueueFlush {
  * model has to hear it that way or it answers her reaction without the
  * event that caused it.
  *
- * Within that order, one rule: a directive goes alone. The flush takes
- * either a single directive or the leading run of parent messages,
- * never a mix. Parent messages still join with a blank line between
- * them, exactly as they did before onboarding existed.
+ * Within that order, each source stays separate. A directive goes alone;
+ * otherwise the flush takes the leading run from one lane. Typed messages
+ * still join with typed messages, and saved card answers join only with
+ * saved card answers. Mixing either pair would make the request source lie.
  */
 export function flushChatQueue(
   queue: QueuedChatMessage[],
@@ -217,15 +234,16 @@ export function flushChatQueue(
       modality: "text",
     };
   }
+  const lane = all[0].lane;
   let end = 0;
-  while (end < all.length && all[end].lane === "parent") end += 1;
+  while (end < all.length && all[end].lane === lane) end += 1;
   const sending = all.slice(0, end);
   return {
     outgoing: sending
       .map((entry) => entry.text)
       .join("\n\n"),
     remaining: all.slice(end),
-    lane: "parent",
+    lane,
     modality: sending.some((entry) => entry.modality === "voice")
       ? "voice"
       : "text",
