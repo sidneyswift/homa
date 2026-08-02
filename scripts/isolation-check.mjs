@@ -2349,6 +2349,77 @@ async function cleanupIsolationFixtures() {
   }
 }
 
+async function expectEventsFamilyDeleteCascade(controlFamilyId, suffix) {
+  const disposableUser = await signUpFixtureUser("events-cascade", suffix);
+  const disposableFamilyId = await createFixtureFamily(
+    disposableUser,
+    "events cascade",
+  );
+  const marker = `isolation-${suffix}`;
+  let disposableEventId = null;
+  let controlEventId = null;
+
+  try {
+    const [constraint] = await sql`
+      select constraint_row.convalidated, constraint_row.confdeltype
+      from pg_constraint as constraint_row
+      where constraint_row.conrelid = 'public.events'::regclass
+        and constraint_row.conname = 'events_family_id_fkey'
+    `;
+    report(
+      "events family foreign key is validated and cascading",
+      constraint?.convalidated === true && constraint?.confdeltype === "c",
+      constraint
+        ? `validated ${constraint.convalidated}, delete action ${constraint.confdeltype}`
+        : "events_family_id_fkey is missing",
+    );
+
+    const [disposableEvent] = await sql`
+      insert into public.events (name, props, family_id)
+      values (
+        'isolation.family_delete_cascade',
+        ${sql.json({ marker, role: "disposable" })},
+        ${disposableFamilyId}
+      )
+      returning id
+    `;
+    disposableEventId = disposableEvent?.id ?? null;
+
+    const [controlEvent] = await sql`
+      insert into public.events (name, props, family_id)
+      values (
+        'isolation.family_delete_cascade',
+        ${sql.json({ marker, role: "control" })},
+        ${controlFamilyId}
+      )
+      returning id
+    `;
+    controlEventId = controlEvent?.id ?? null;
+
+    await sql`delete from public.families where id = ${disposableFamilyId}`;
+
+    const [result] = await sql`
+      select
+        count(*) filter (where id = ${disposableEventId})::integer as deleted_count,
+        count(*) filter (where id = ${controlEventId})::integer as control_count
+      from public.events
+      where id in (${disposableEventId}, ${controlEventId})
+    `;
+    report(
+      "family deletion cascades only that family's analytics events",
+      result?.deleted_count === 0 && result?.control_count === 1,
+      `deleted-family rows ${result?.deleted_count ?? "unknown"}, control-family rows ${result?.control_count ?? "unknown"}`,
+    );
+  } finally {
+    const eventIds = [disposableEventId, controlEventId].filter(
+      (id) => id !== null,
+    );
+    if (eventIds.length > 0) {
+      await sql`delete from public.events where id in ${sql(eventIds)}`;
+    }
+  }
+}
+
 async function expectAuthenticatedIsolation() {
   if (!sql) {
     report(
@@ -2367,6 +2438,7 @@ async function expectAuthenticatedIsolation() {
     const familyBMultiColumnUser = await signUpFixtureUser("b-multi", suffix);
     const familyAId = await createFixtureFamily(familyAUser, "A");
     const familyBId = await createFixtureFamily(familyBUser, "B");
+    await expectEventsFamilyDeleteCascade(familyBId, suffix);
     await insertFixtureFamilyMember(
       familyBId,
       familyBSecondUser.userId,
