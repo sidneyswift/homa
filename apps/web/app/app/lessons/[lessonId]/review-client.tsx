@@ -6,6 +6,7 @@ import { upload } from "@vercel/blob/client";
 
 import { prepareChildPhotoForUpload } from "../../../../lib/child-photo-prepare";
 import { keptAudioNote } from "../../../../lib/lessons/keep-audio";
+import { requestLessonReviewRetry } from "../../../../lib/lessons/retry-client";
 
 /**
  * The review page's client slivers (plan 2026-07-13-lesson-listen.md
@@ -68,25 +69,36 @@ export function LessonStatusPoll({
 export function RetryLessonAnalysis({ lessonId }: { lessonId: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
   return (
-    <button
-      type="button"
-      disabled={pending}
-      onClick={() => {
-        setPending(true);
-        void fetch(`/api/lessons/${lessonId}/finish`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({}),
-        })
-          .then(() => router.refresh())
-          .finally(() => setPending(false));
-      }}
-      className="mt-3 min-h-10 cursor-pointer rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover disabled:opacity-60"
-    >
-      {pending ? "Homa is trying again\u2026" : "Have Homa try again"}
-    </button>
+    <div>
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() => {
+          setPending(true);
+          setMessage(null);
+          void (async () => {
+            const result = await requestLessonReviewRetry(fetch, lessonId);
+            if (result.status === "refresh") {
+              router.refresh();
+            } else {
+              setMessage(result.message);
+            }
+            setPending(false);
+          })();
+        }}
+        className="mt-3 min-h-11 cursor-pointer rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover disabled:opacity-60"
+      >
+        {pending ? "Homa is trying again\u2026" : "Have Homa try again"}
+      </button>
+      {message ? (
+        <p role="alert" className="mt-3 text-sm text-body">
+          {message}
+        </p>
+      ) : null}
+    </div>
   );
 }
 

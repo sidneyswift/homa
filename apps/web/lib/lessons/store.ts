@@ -1,4 +1,8 @@
 import { mapDb } from "../map/db";
+import {
+  lessonAnalysisRetryState,
+  type LessonAnalysisRetryState,
+} from "./retry-state";
 
 /**
  * Lesson listen's durable state (plan 2026-07-13-lesson-listen.md,
@@ -103,6 +107,13 @@ interface LessonRecordingSqlRow {
   audio_deleted_at: string | null;
   audio_kept_at: string | null;
   error: string | null;
+}
+
+interface LessonRetrySqlRow {
+  status: LessonStatus;
+  attempts: number;
+  audio_deleted_at: string | null;
+  has_usable_transcript: boolean;
 }
 
 function toLessonRow(row: LessonRecordingSqlRow): LessonRecordingRow {
@@ -558,6 +569,102 @@ export async function finishLessonRecording(input: {
               attempts, audio_deleted_at::text, audio_kept_at::text, error
   `;
   return rows[0] === undefined ? null : toLessonRow(rows[0]);
+}
+
+export type RequestLessonAnalysisRetryResult =
+  | { status: "queued"; attempts: number }
+  | LessonAnalysisRetryState
+  | { status: "not_found" };
+
+function retryStateFromSqlRow(
+  row: LessonRetrySqlRow,
+): LessonAnalysisRetryState {
+  return lessonAnalysisRetryState({
+    status: row.status,
+    attempts: row.attempts,
+    maxAttempts: MAX_ANALYSIS_ATTEMPTS,
+    audioDeletedAt: row.audio_deleted_at,
+    hasUsableTranscript: row.has_usable_transcript,
+  });
+}
+
+/**
+ * Reads the server-authoritative retry state without changing it. This powers
+ * web and native presentation, so neither surface advertises an impossible
+ * retry after the attempt cap or raw-source deletion.
+ */
+export async function getLessonAnalysisRetryState(
+  lessonId: string,
+  familyId: string,
+): Promise<LessonAnalysisRetryState | { status: "not_found" }> {
+  const sql = mapDb();
+  const rows = await sql<LessonRetrySqlRow[]>`
+    select lesson.status,
+           lesson.attempts,
+           lesson.audio_deleted_at::text,
+           exists (
+             select 1
+             from public.lesson_segments segment
+             where segment.lesson_id = lesson.id
+               and segment.family_id = lesson.family_id
+               and btrim(coalesce(segment.transcript, '')) <> ''
+           ) as has_usable_transcript
+    from public.lesson_recordings lesson
+    where lesson.id = ${lessonId}
+      and lesson.family_id = ${familyId}
+  `;
+  return rows[0] === undefined
+    ? { status: "not_found" }
+    : retryStateFromSqlRow(rows[0]);
+}
+
+/**
+ * Atomically makes one failed review claimable again. The row lock serializes
+ * duplicate taps and devices. Attempts are deliberately unchanged here: the
+ * existing analysis claim is the only operation allowed to consume one.
+ */
+export async function requestLessonAnalysisRetry(
+  lessonId: string,
+  familyId: string,
+): Promise<RequestLessonAnalysisRetryResult> {
+  const sql = mapDb();
+  return await sql.begin(async (transaction) => {
+    const rows = await transaction<LessonRetrySqlRow[]>`
+      select lesson.status,
+             lesson.attempts,
+             lesson.audio_deleted_at::text,
+             exists (
+               select 1
+               from public.lesson_segments segment
+               where segment.lesson_id = lesson.id
+                 and segment.family_id = lesson.family_id
+                 and btrim(coalesce(segment.transcript, '')) <> ''
+             ) as has_usable_transcript
+      from public.lesson_recordings lesson
+      where lesson.id = ${lessonId}
+        and lesson.family_id = ${familyId}
+      for update
+    `;
+    const row = rows[0];
+    if (row === undefined) return { status: "not_found" };
+
+    const state = retryStateFromSqlRow(row);
+    if (state.status !== "available") return state;
+
+    const queued = await transaction<{ id: string }[]>`
+      update public.lesson_recordings
+      set status = 'uploaded', analysis_claimed_at = null
+      where id = ${lessonId}
+        and family_id = ${familyId}
+        and status = 'failed'
+        and attempts < ${MAX_ANALYSIS_ATTEMPTS}
+      returning id
+    `;
+    if (queued[0] === undefined) {
+      throw new Error("lesson retry: eligible locked row was not queued");
+    }
+    return { status: "queued", attempts: row.attempts };
+  });
 }
 
 /**

@@ -2,13 +2,12 @@ import { File, UploadType } from "expo-file-system";
 
 import { env, EVE_CHANNEL_HEADER } from "../../lib/env";
 import { supabase } from "../../lib/supabase";
-import type { PreparedLessonRecording } from "./lesson-recording-model";
-
-interface LessonReview {
-  summary: string;
-  evidenceCount: number;
-  observationCount: number;
-}
+import {
+  parseNativeLessonReviewOutcome,
+  type NativeLessonReview,
+  type NativeLessonReviewOutcome,
+  type PreparedLessonRecording,
+} from "./lesson-recording-model";
 
 interface NativeBlobUpload {
   url: string;
@@ -16,15 +15,24 @@ interface NativeBlobUpload {
 }
 
 export type LessonSaveResult =
-  | { status: "ready"; lessonId: string; review: LessonReview }
+  | { status: "ready"; lessonId: string; review: NativeLessonReview }
   | { status: "processing"; lessonId: string }
-  | { status: "review_failed"; lessonId: string }
+  | ({ lessonId: string } & Extract<
+      NativeLessonReviewOutcome,
+      { status: "review_failed" }
+    >)
   | { status: "failed"; reason: string };
 
-type LessonReviewOutcome =
-  | { status: "ready"; review: LessonReview }
-  | { status: "processing" }
-  | { status: "review_failed" };
+export type LessonRetryResult =
+  | NativeLessonReviewOutcome
+  | { status: "request_failed"; reason: string };
+
+export type LessonReviewStatusResult =
+  | NativeLessonReviewOutcome
+  | {
+      status: "status_unavailable";
+      reason: "temporary" | "not_found";
+    };
 
 function apiUrl(path: string): string {
   return `${env.apiUrl.replace(/\/+$/, "")}${path}`;
@@ -142,34 +150,96 @@ export async function grantNativeLessonConsent(): Promise<void> {
   if (!response.ok) throw new Error("Homa could not save your privacy choice. Nothing was recorded.");
 }
 
+async function loadLessonReviewStatusWithToken(
+  lessonId: string,
+  token: string,
+): Promise<LessonReviewStatusResult> {
+  let response: Response;
+  try {
+    response = await authenticatedFetch(`/api/lessons/${lessonId}/status`, token);
+  } catch {
+    return { status: "status_unavailable", reason: "temporary" };
+  }
+  const body = await jsonResponse(response);
+  if (!response.ok) {
+    return {
+      status: "status_unavailable",
+      reason: response.status === 404 ? "not_found" : "temporary",
+    };
+  }
+  return parseNativeLessonReviewOutcome(body)
+    ?? { status: "status_unavailable", reason: "temporary" };
+}
+
+export async function loadNativeLessonReviewStatus(
+  lessonId: string,
+): Promise<LessonReviewStatusResult> {
+  try {
+    const token = await sessionToken();
+    return await loadLessonReviewStatusWithToken(lessonId, token);
+  } catch {
+    return { status: "status_unavailable", reason: "temporary" };
+  }
+}
+
 async function loadReadyReview(
   lessonId: string,
   token: string,
-): Promise<LessonReviewOutcome> {
+): Promise<NativeLessonReviewOutcome> {
   for (let attempt = 0; attempt < 30; attempt += 1) {
-    let response: Response;
-    try {
-      response = await authenticatedFetch(`/api/lessons/${lessonId}/status`, token);
-    } catch {
-      return { status: "processing" };
+    const outcome = await loadLessonReviewStatusWithToken(lessonId, token);
+    if (outcome.status === "ready" || outcome.status === "review_failed") {
+      return outcome;
     }
-    const body = await jsonResponse(response);
-    if (!response.ok) return { status: "processing" };
-    if (body.status === "failed") return { status: "review_failed" };
-    const review = body.review as Record<string, unknown> | null;
-    if (body.status === "ready" && review && typeof review.summary === "string") {
-      return {
-        status: "ready",
-        review: {
-          summary: review.summary,
-          evidenceCount: Number(review.evidenceCount) || 0,
-          observationCount: Number(review.observationCount) || 0,
-        },
-      };
-    }
+    if (outcome.status === "status_unavailable") return { status: "processing" };
     await new Promise((resolve) => setTimeout(resolve, 2_000));
   }
   return { status: "processing" };
+}
+
+export async function retryNativeLessonReview(
+  lessonId: string,
+): Promise<LessonRetryResult> {
+  try {
+    const token = await sessionToken();
+    const response = await authenticatedFetch(
+      `/api/lessons/${lessonId}/retry`,
+      token,
+      { method: "POST" },
+    );
+    const body = await jsonResponse(response);
+    if (!response.ok) {
+      if (
+        body.reason === "attempts-exhausted" ||
+        body.reason === "source-unavailable"
+      ) {
+        return parseNativeLessonReviewOutcome({
+          ...body,
+          status: "review_failed",
+        }) ?? {
+          status: "review_failed",
+          retryable: false,
+          reason: "unknown",
+        };
+      }
+      return {
+        status: "request_failed",
+        reason:
+          body.reason === "no-session"
+            ? "Your session expired. Sign in again before asking Homa to retry."
+            : "Homa could not confirm another review started. The lesson is still saved. Check your connection and try again.",
+      };
+    }
+    const immediate = parseNativeLessonReviewOutcome(body);
+    if (immediate?.status === "review_failed") return immediate;
+    return await loadReadyReview(lessonId, token);
+  } catch {
+    return {
+      status: "request_failed",
+      reason:
+        "Homa could not confirm another review started. The lesson is still saved. Check your connection and try again.",
+    };
+  }
 }
 
 export async function saveNativeLessonRecording(input: {
@@ -177,10 +247,12 @@ export async function saveNativeLessonRecording(input: {
   uri: string;
   durationSeconds: number;
   onProgress?: (percentage: number) => void;
+  onLessonSaved?: (lessonId: string) => Promise<void>;
 }): Promise<LessonSaveResult> {
   let token: string | null = null;
   let lessonId: string | null = null;
   let blobUrl: string | null = null;
+  let lessonSaved = false;
   try {
     token = await sessionToken();
     const createResponse = await authenticatedFetch("/api/lessons", token, {
@@ -228,12 +300,19 @@ export async function saveNativeLessonRecording(input: {
       body: JSON.stringify({ durationSeconds: input.durationSeconds }),
     });
     if (!finishResponse.ok) throw new Error("Homa could not finish the lesson review.");
+    lessonSaved = true;
+    await input.onLessonSaved?.(lessonId);
     const reviewOutcome = await loadReadyReview(lessonId, token);
     if (reviewOutcome.status === "ready") {
       return { status: "ready", lessonId, review: reviewOutcome.review };
     }
-    return { status: reviewOutcome.status, lessonId };
+    return reviewOutcome.status === "review_failed"
+      ? { ...reviewOutcome, lessonId }
+      : { status: "processing", lessonId };
   } catch (error) {
+    if (lessonSaved && lessonId) {
+      return { status: "processing", lessonId };
+    }
     if (token && lessonId) {
       await authenticatedFetch(`/api/lessons/${lessonId}`, token, {
         method: "DELETE",

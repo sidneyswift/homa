@@ -482,6 +482,12 @@ jobs:
         timeout-minutes: 10
         run: pnpm test:voice-action-receipts:postgres
 
+      # A retry locks the family-scoped lesson row before failed -> uploaded.
+      # This proves concurrent requests consume only one analysis attempt.
+      - name: Recorded lesson retry disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm test:lesson-retry:postgres
+
       - name: Family Library retrieval disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:family-library-retrieval:postgres

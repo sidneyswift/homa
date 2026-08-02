@@ -26,14 +26,20 @@ import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, palette, radius, space } from "../../theme/tokens";
 import {
   formatLessonElapsed,
+  lessonReviewFailureCopy,
   recorderPhaseCopy,
+  type LessonReviewFailureReason,
   type LessonRecorderPhase,
   type PreparedLessonRecording,
 } from "./lesson-recording-model";
 import {
   grantNativeLessonConsent,
+  retryNativeLessonReview,
   saveNativeLessonRecording,
 } from "./lesson-recording-upload";
+import {
+  rememberTrackedLessonReview,
+} from "./lesson-review-tracker";
 
 const MINIMUM_FREE_SPACE_BYTES = 100 * 1024 * 1024;
 const RECORDING_OPTIONS = {
@@ -75,13 +81,15 @@ function PrimaryButton({
 }
 
 export function NativeLessonRecorder({
+  familyId,
   intent,
   onCancel,
   onResumeVoice,
 }: {
+  familyId: string;
   intent: PreparedLessonRecording;
   onCancel: () => void;
-  onResumeVoice: (prompt?: string) => void;
+  onResumeVoice: (prompt?: string, reviewedLessonId?: string) => void;
 }) {
   const insets = useSafeAreaInsets();
   const [phase, setPhase] = useState<LessonRecorderPhase>("consent");
@@ -90,6 +98,12 @@ export function NativeLessonRecorder({
   const [uploadPercent, setUploadPercent] = useState(0);
   const [reviewSummary, setReviewSummary] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [savedLessonId, setSavedLessonId] = useState<string | null>(null);
+  const [reviewRetryable, setReviewRetryable] = useState(false);
+  const [reviewFailureReason, setReviewFailureReason] =
+    useState<LessonReviewFailureReason>("unknown");
+  const [reviewRetryError, setReviewRetryError] = useState<string | null>(null);
+  const [reviewTrackingError, setReviewTrackingError] = useState<string | null>(null);
   const recorder = useAudioRecorder(RECORDING_OPTIONS);
   const recorderState = useAudioRecorderState(recorder, 250);
   const player = useAudioPlayer(localUri);
@@ -202,12 +216,49 @@ export function NativeLessonRecorder({
     }
   }
 
+  function deleteLocalRecording(uri: string) {
+    try {
+      const file = new File(uri);
+      if (file.exists) file.delete();
+      setLocalUri(null);
+    } catch (cause) {
+      reportCrash(cause, {
+        surface: "native-lesson-recorder",
+        operation: "delete-local-recording",
+      });
+    }
+  }
+
+  async function rememberReviewPointer(lessonId: string): Promise<boolean> {
+    try {
+      await rememberTrackedLessonReview(familyId, {
+        lessonId,
+        childId: intent.childId,
+        childName: intent.childName,
+        purpose: intent.purpose,
+        savedAt: new Date().toISOString(),
+      });
+      setReviewTrackingError(null);
+      return true;
+    } catch (cause) {
+      reportCrash(cause, {
+        surface: "native-lesson-recorder",
+        operation: "remember-review-pointer",
+      });
+      setReviewTrackingError(
+        "The lesson is saved, but Homa could not keep its review link on this phone. Keep this screen open and try again.",
+      );
+      return false;
+    }
+  }
+
   async function saveAndReview() {
     if (!localUri) return;
     setSaveError(null);
     setUploadPercent(0);
     setPhase("saving");
     let result;
+    let reviewPointerRemembered = false;
     try {
       result = await saveNativeLessonRecording({
         intent,
@@ -216,6 +267,11 @@ export function NativeLessonRecorder({
         onProgress: (percentage) => {
           setUploadPercent(percentage);
           if (percentage >= 100) setPhase("analyzing");
+        },
+        onLessonSaved: async (lessonId) => {
+          setSavedLessonId(lessonId);
+          reviewPointerRemembered = await rememberReviewPointer(lessonId);
+          if (reviewPointerRemembered) deleteLocalRecording(localUri);
         },
       });
     } catch (cause) {
@@ -234,19 +290,63 @@ export function NativeLessonRecorder({
       setPhase("save_failed");
       return;
     }
-    const file = new File(localUri);
-    if (file.exists) file.delete();
-    setLocalUri(null);
+    setSavedLessonId(result.lessonId);
+    if (!reviewPointerRemembered) {
+      reviewPointerRemembered = await rememberReviewPointer(result.lessonId);
+      if (reviewPointerRemembered) deleteLocalRecording(localUri);
+    }
     if (result.status === "ready") {
       setReviewSummary(result.review.summary);
+      setReviewRetryable(false);
       setPhase("ready");
       return;
     }
     if (result.status === "review_failed") {
+      setReviewRetryable(result.retryable);
+      setReviewFailureReason(result.reason);
       setPhase("review_failed");
       return;
     }
     setPhase("processing");
+  }
+
+  async function retryReview() {
+    if (!savedLessonId || !reviewRetryable) return;
+    setReviewRetryError(null);
+    setPhase("analyzing");
+    const result = await retryNativeLessonReview(savedLessonId);
+    if (result.status === "request_failed") {
+      setReviewRetryError(result.reason);
+      setPhase("review_failed");
+      return;
+    }
+    if (result.status === "ready") {
+      if (localUri && await rememberReviewPointer(savedLessonId)) {
+        deleteLocalRecording(localUri);
+      }
+      setReviewSummary(result.review.summary);
+      setReviewRetryable(false);
+      setPhase("ready");
+      return;
+    }
+    if (result.status === "review_failed") {
+      setReviewRetryable(result.retryable);
+      setReviewFailureReason(result.reason);
+      setPhase("review_failed");
+      return;
+    }
+    if (reviewTrackingError && await rememberReviewPointer(savedLessonId)) {
+      if (localUri) deleteLocalRecording(localUri);
+    }
+    setReviewRetryable(false);
+    setPhase("processing");
+  }
+
+  async function retryReviewTracking() {
+    if (!savedLessonId) return;
+    if (await rememberReviewPointer(savedLessonId)) {
+      if (localUri) deleteLocalRecording(localUri);
+    }
   }
 
   function discard() {
@@ -401,22 +501,72 @@ export function NativeLessonRecorder({
                 <Text style={styles.body}>
                   {recorderPhaseCopy(phase, intent.childName)}
                 </Text>
-                <PrimaryButton
-                  label="Back to Voice"
-                  onPress={() => onResumeVoice()}
-                />
+                {reviewTrackingError ? (
+                  <Text
+                    accessibilityLiveRegion="assertive"
+                    accessibilityRole="alert"
+                    style={styles.retryError}
+                  >
+                    {reviewTrackingError}
+                  </Text>
+                ) : null}
+                {reviewTrackingError ? (
+                  <PrimaryButton
+                    label="Keep checking this lesson"
+                    onPress={() => void retryReviewTracking()}
+                  />
+                ) : (
+                  <PrimaryButton
+                    label="Back to Voice"
+                    onPress={() => onResumeVoice()}
+                  />
+                )}
               </View>
             ) : null}
             {phase === "review_failed" ? (
               <View style={styles.card}>
-                <Text style={styles.cardTitle}>Recording saved</Text>
+                <Text style={styles.cardTitle}>Lesson saved</Text>
                 <Text style={styles.body}>
-                  {recorderPhaseCopy(phase, intent.childName)}
+                  {lessonReviewFailureCopy(reviewFailureReason)}
                 </Text>
-                <PrimaryButton
-                  label="Back to Voice"
-                  onPress={() => onResumeVoice()}
-                />
+                {reviewRetryError ? (
+                  <Text
+                    accessibilityLiveRegion="assertive"
+                    accessibilityRole="alert"
+                    style={styles.retryError}
+                  >
+                    {reviewRetryError}
+                  </Text>
+                ) : null}
+                {reviewTrackingError ? (
+                  <Text
+                    accessibilityLiveRegion="assertive"
+                    accessibilityRole="alert"
+                    style={styles.retryError}
+                  >
+                    {reviewTrackingError}
+                  </Text>
+                ) : null}
+                {reviewRetryable && savedLessonId ? (
+                  <PrimaryButton
+                    label="Try the review again"
+                    onPress={() => void retryReview()}
+                  />
+                ) : null}
+                {reviewTrackingError ? (
+                  <PrimaryButton
+                    label="Keep checking this lesson"
+                    onPress={() => void retryReviewTracking()}
+                  />
+                ) : (
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => onResumeVoice()}
+                    style={styles.secondaryButton}
+                  >
+                    <Text style={styles.secondaryButtonText}>Back to Voice</Text>
+                  </Pressable>
+                )}
               </View>
             ) : null}
             {phase === "consent_failed" ? (
@@ -432,7 +582,10 @@ export function NativeLessonRecorder({
                 <Text style={styles.body}>{reviewSummary}</Text>
                 <PrimaryButton
                   label="Talk with Homa about this lesson"
-                  onPress={() => onResumeVoice(`The lesson recording for ${intent.childName}'s ${intent.purpose} is saved. Please find the newest lesson review and talk me through what you noticed and what we should try next.`)}
+                  onPress={() => onResumeVoice(
+                    `This exact saved lesson review is for ${intent.childName}'s ${intent.purpose}. Talk with me about the evidence you noticed and what we should try next.`,
+                    savedLessonId ?? undefined,
+                  )}
                 />
               </View>
             ) : null}
@@ -478,6 +631,7 @@ const styles = StyleSheet.create({
   stopButton: { minHeight: 48, flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: space.sm, borderRadius: radius.pill, backgroundColor: colors.brand },
   stopButtonText: { fontFamily: fontFamilies.body, fontSize: fontSize.base, fontWeight: "700", color: colors.onBrand },
   unsavedNote: { fontFamily: fontFamilies.body, fontSize: fontSize.sm, lineHeight: 20, color: colors.textMuted },
+  retryError: { fontFamily: fontFamilies.body, fontSize: fontSize.sm, lineHeight: 20, color: colors.textBody },
   discardButton: { minHeight: 44, alignSelf: "center", flexDirection: "row", alignItems: "center", gap: space.xs, paddingHorizontal: space.md },
   discardText: { fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted },
 });

@@ -1,8 +1,12 @@
-import { ACTIVE_OBJECT_CURRENT_VERSION } from "@homa/core";
+import {
+  ACTIVE_OBJECT_CURRENT_VERSION,
+  activeObjectKey,
+  type ActiveObjectReference,
+} from "@homa/core";
 import { useRouter } from "expo-router";
 import { useKeepAwake } from "expo-keep-awake";
-import { useEffect, useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, useColorScheme, View, type LayoutChangeEvent } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AppState, Pressable, ScrollView, StyleSheet, Text, useColorScheme, View, type LayoutChangeEvent } from "react-native";
 import Animated, {
   Easing,
   ReduceMotion,
@@ -15,14 +19,30 @@ import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
 import { Mic, MicOff, X } from "lucide-react-native";
 
 import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, palette, radius, space } from "../../theme/tokens";
+import { colors, darkColors, fontSize, palette, radius, space } from "../../theme/tokens";
+import { reportCrash } from "../../lib/crash-reporting";
 import { emitFamilyEvent } from "../../lib/events";
 import { useFamilyData } from "../family/use-family-data";
 import { NativeLessonRecorder } from "../lessons/native-lesson-recorder";
+import { LessonReviewRecoveryCard } from "../lessons/lesson-review-recovery-card";
+import {
+  lessonReviewRecoveryFingerprint,
+  selectLessonReviewRecovery,
+  type LessonReviewRecoveryAction,
+  type TrackedLessonReviewStatus,
+} from "../lessons/lesson-review-recovery-model";
+import {
+  forgetTrackedLessonReview,
+  loadTrackedLessonReviews,
+} from "../lessons/lesson-review-tracker";
 import {
   deriveLessonRecordingSignals,
   type PreparedLessonRecording,
 } from "../lessons/lesson-recording-model";
+import {
+  loadNativeLessonReviewStatus,
+  retryNativeLessonReview,
+} from "../lessons/lesson-recording-upload";
 import {
   readyPrintMessage,
   runPreparedMaterialPrint,
@@ -48,9 +68,15 @@ import { useVoiceWorkbench } from "./voice-workbench-provider";
 const CHARACTER_SIZE = 240;
 const PUCK_SIZE = 72;
 const AURA_SIZE = CHARACTER_SIZE * 2.4;
-const NIGHT_NAVY = "#151B27";
 const CONTROL_FILL_LIGHT = "rgba(255,255,255,0.72)";
-const CONTROL_FILL_DARK = "rgba(51,46,41,0.72)";
+
+interface QueuedLessonReviewHandoff {
+  familyId: string;
+  lessonId: string;
+  prompt: string;
+  fingerprint: string;
+  activeObject: ActiveObjectReference | null;
+}
 
 function GoldAuraField({ size }: { size: number }) {
   return (
@@ -76,7 +102,12 @@ export function VoiceScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const dark = useColorScheme() === "dark";
-  const { session, showActiveObject, clearActiveObject } = useVoiceWorkbench();
+  const {
+    session,
+    activeObject,
+    showActiveObject,
+    clearActiveObject,
+  } = useVoiceWorkbench();
   const startVoice = session.start;
   const autoStartedRef = useRef(false);
   const [overlayModel, setOverlayModel] = useState<OverlayModelState>(EMPTY_OVERLAY_MODEL);
@@ -93,7 +124,20 @@ export function VoiceScreen() {
   const [printNotice, setPrintNotice] = useState<{ key: string; message: string } | null>(null);
   const [pendingLesson, setPendingLesson] = useState<PreparedLessonRecording | null>(null);
   const [activeLessonRecorder, setActiveLessonRecorder] = useState<PreparedLessonRecording | null>(null);
+  const [trackedLessonReviews, setTrackedLessonReviews] = useState<TrackedLessonReviewStatus[]>([]);
+  const [trackedLessonReviewsFamilyId, setTrackedLessonReviewsFamilyId] =
+    useState<string | null>(null);
+  const [hiddenLessonReviewStates, setHiddenLessonReviewStates] = useState<Map<string, string>>(
+    () => new Map(),
+  );
+  const [lessonRecoveryBusy, setLessonRecoveryBusy] = useState(false);
+  const [lessonRecoveryError, setLessonRecoveryError] = useState<string | null>(null);
   const lessonResumePromptRef = useRef<string | null>(null);
+  const queuedLessonReviewHandoffRef = useRef<QueuedLessonReviewHandoff | null>(null);
+  const pendingLessonReviewConsumptionRef = useRef<(
+    QueuedLessonReviewHandoff & { assistantTextBefore: string | null }
+  ) | null>(null);
+  const lessonRecoveryRefreshRef = useRef(0);
   const hoursKeyRef = useRef(0);
   const handledKeysRef = useRef<Set<string> | null>(null);
   const handledLessonKeysRef = useRef<Set<string> | null>(null);
@@ -107,6 +151,66 @@ export function VoiceScreen() {
     autoStartedRef.current = true;
     startVoice();
   }, [startVoice]);
+
+  const refreshTrackedLessonReviews = useCallback(async () => {
+    const familyId = family?.id;
+    const refresh = ++lessonRecoveryRefreshRef.current;
+    if (!familyId) return;
+    try {
+      const lessons = await loadTrackedLessonReviews(familyId);
+      const statuses = await Promise.all(
+        lessons.map(async (lesson) => ({
+          lesson,
+          outcome: await loadNativeLessonReviewStatus(lesson.lessonId),
+        })),
+      );
+      if (lessonRecoveryRefreshRef.current === refresh) {
+        setTrackedLessonReviewsFamilyId(familyId);
+        setTrackedLessonReviews(statuses);
+        setLessonRecoveryError(null);
+      }
+    } catch (cause) {
+      reportCrash(cause, {
+        surface: "native-voice",
+        operation: "refresh-lesson-reviews",
+      });
+    }
+  }, [family?.id]);
+
+  const acceptLessonReviewHandoff = useCallback((handoff: QueuedLessonReviewHandoff) => {
+    queuedLessonReviewHandoffRef.current = null;
+    pendingLessonReviewConsumptionRef.current = {
+      ...handoff,
+      assistantTextBefore: session.lastAssistantText,
+    };
+    lessonRecoveryRefreshRef.current += 1;
+    setHiddenLessonReviewStates((current) => new Map(current).set(
+      handoff.lessonId,
+      handoff.fingerprint,
+    ));
+    setLessonRecoveryBusy(false);
+    setLessonRecoveryError(null);
+  }, [session.lastAssistantText]);
+
+  useEffect(() => {
+    lessonRecoveryRefreshRef.current += 1;
+    if (!family?.id) return;
+    const initialTimer = setTimeout(() => {
+      void refreshTrackedLessonReviews();
+    }, 0);
+    const timer = setInterval(() => {
+      void refreshTrackedLessonReviews();
+    }, 20_000);
+    const appStateSubscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") void refreshTrackedLessonReviews();
+    });
+    return () => {
+      lessonRecoveryRefreshRef.current += 1;
+      clearTimeout(initialTimer);
+      clearInterval(timer);
+      appStateSubscription.remove();
+    };
+  }, [family?.id, refreshTrackedLessonReviews]);
 
   if (handledKeysRef.current === null) {
     handledKeysRef.current = new Set(deriveOverlaySignals([...messages], new Set()).keys);
@@ -155,21 +259,56 @@ export function VoiceScreen() {
   // Let Homa finish the spoken handoff first. Once the realtime session is
   // listening again, release WebRTC's microphone before expo-audio can own it.
   useEffect(() => {
-    if (!pendingLesson || !handoffReady) return;
+    if (!pendingLesson || !handoffReady || !family?.id) return;
     const timer = setTimeout(() => {
       pauseForMicrophoneOwner("Lesson recording has the microphone.");
       setActiveLessonRecorder(pendingLesson);
       setPendingLesson(null);
     }, 0);
     return () => clearTimeout(timer);
-  }, [handoffReady, pauseForMicrophoneOwner, pendingLesson]);
+  }, [family?.id, handoffReady, pauseForMicrophoneOwner, pendingLesson]);
 
   useEffect(() => {
+    if (!handoffReady) return;
+    const lessonHandoff = queuedLessonReviewHandoffRef.current;
+    if (lessonHandoff) {
+      const exactObjectReady = lessonHandoff.activeObject === null
+        ? activeObject === null
+        : activeObject !== null
+          && activeObjectKey(activeObject) === activeObjectKey(lessonHandoff.activeObject);
+      if (!exactObjectReady) return;
+      if (session.sendText(lessonHandoff.prompt)) {
+        acceptLessonReviewHandoff(lessonHandoff);
+      }
+      return;
+    }
     const prompt = lessonResumePromptRef.current;
-    if (!prompt || !handoffReady) return;
-    lessonResumePromptRef.current = null;
-    session.sendText(prompt);
-  }, [handoffReady, session]);
+    if (prompt && session.sendText(prompt)) lessonResumePromptRef.current = null;
+  }, [acceptLessonReviewHandoff, activeObject, handoffReady, session]);
+
+  useEffect(() => {
+    const pending = pendingLessonReviewConsumptionRef.current;
+    if (
+      !pending
+      || session.lastAssistantText === null
+      || session.lastAssistantText === pending.assistantTextBefore
+    ) {
+      return;
+    }
+    pendingLessonReviewConsumptionRef.current = null;
+    if (pending.activeObject) clearActiveObject(pending.activeObject);
+    void forgetTrackedLessonReview(pending.familyId, pending.lessonId)
+      .then(() => {
+        setTrackedLessonReviews((current) =>
+          current.filter((item) => item.lesson.lessonId !== pending.lessonId));
+      })
+      .catch((cause) => {
+        reportCrash(cause, {
+          surface: "native-voice",
+          operation: "forget-discussed-lesson-review",
+        });
+      });
+  }, [clearActiveObject, session.lastAssistantText]);
 
   useEffect(() => {
     const signal = overlayModel.active;
@@ -194,12 +333,17 @@ export function VoiceScreen() {
 
   const activeSignal = overlayModel.active;
   const overlayActive = activeSignal !== null && activeSignal.kind !== "receipt";
+  const activeLessonRecovery = selectLessonReviewRecovery(
+    trackedLessonReviewsFamilyId === family?.id ? trackedLessonReviews : [],
+    hiddenLessonReviewStates,
+  );
+  const recoveryVisible = activeLessonRecovery !== null && !overlayActive;
   const startersVisible = voicePromptStartersVisible({
     status: session.status,
     turnActive: session.turnActive,
     assistantHasReplied: session.lastAssistantText !== null,
     userHasReplied: session.lastUserText !== null,
-    overlayOpen: activeSignal !== null,
+    overlayOpen: activeSignal !== null || recoveryVisible,
     retired: startersRetired,
   });
   const visiblePrintNotice = printNotice
@@ -241,10 +385,10 @@ export function VoiceScreen() {
     if (fieldHeight.value === 0) return { opacity: 0 };
     return { opacity: 1 - puck.value, top: fieldHeight.value * 0.43 - AURA_SIZE / 2 };
   });
-  const surface = dark ? NIGHT_NAVY : colors.page;
-  const controlFill = dark ? CONTROL_FILL_DARK : CONTROL_FILL_LIGHT;
-  const controlBorder = dark ? palette.stone700 : colors.borderSubtle;
-  const controlText = dark ? palette.stone50 : colors.textStrong;
+  const surface = dark ? darkColors.page : colors.page;
+  const controlFill = dark ? darkColors.surfaceRaised : CONTROL_FILL_LIGHT;
+  const controlBorder = dark ? darkColors.borderSubtle : colors.borderSubtle;
+  const controlText = dark ? darkColors.textStrong : colors.textStrong;
 
   function handleFieldLayout(event: LayoutChangeEvent) {
     const height = event.nativeEvent.layout.height;
@@ -286,6 +430,95 @@ export function VoiceScreen() {
     }));
   }
 
+  function queueLessonReviewHandoff(handoff: QueuedLessonReviewHandoff) {
+    queuedLessonReviewHandoffRef.current = handoff;
+    if (handoff.activeObject) {
+      showActiveObject(handoff.activeObject);
+    } else {
+      clearActiveObject();
+    }
+    setLessonRecoveryBusy(true);
+    setLessonRecoveryError(
+      "Voice is getting ready. This review will stay here until Homa can open it with you.",
+    );
+    if (session.status === "paused") session.resume();
+    if (session.status === "failed") session.retry();
+    if (session.status === "idle") session.start();
+  }
+
+  async function handleLessonRecoveryAction(action: LessonReviewRecoveryAction) {
+    const recovery = activeLessonRecovery;
+    const familyId = family?.id;
+    if (!recovery || !familyId || lessonRecoveryBusy) return;
+    const lessonId = recovery.lesson.lessonId;
+    if (action === "later") {
+      setLessonRecoveryError(null);
+      setHiddenLessonReviewStates((current) => new Map(current).set(
+        lessonId,
+        lessonReviewRecoveryFingerprint(recovery.outcome),
+      ));
+      return;
+    }
+    if (action === "discuss") {
+      const reviewReady = recovery.outcome.status === "ready";
+      const handoff: QueuedLessonReviewHandoff = {
+        familyId,
+        lessonId,
+        prompt: reviewReady
+          ? `Talk with me about this lesson review for ${recovery.lesson.childName}'s ${recovery.lesson.purpose}. Explain the evidence you noticed and help me choose what to try next.`
+          : `Homa could not finish the review for ${recovery.lesson.childName}'s ${recovery.lesson.purpose}. Ask what I noticed, then help me choose a useful next step without asking us to repeat the lesson.`,
+        fingerprint: lessonReviewRecoveryFingerprint(recovery.outcome),
+        activeObject: recovery.outcome.status === "status_unavailable"
+          ? null
+          : {
+              kind: "recording",
+              objectId: lessonId,
+              version: ACTIVE_OBJECT_CURRENT_VERSION,
+            },
+      };
+      queueLessonReviewHandoff(handoff);
+      return;
+    }
+
+    setLessonRecoveryBusy(true);
+    setLessonRecoveryError(null);
+    lessonRecoveryRefreshRef.current += 1;
+    try {
+      if (action === "dismiss") {
+        await forgetTrackedLessonReview(familyId, lessonId);
+        setHiddenLessonReviewStates((current) => new Map(current).set(
+          lessonId,
+          lessonReviewRecoveryFingerprint(recovery.outcome),
+        ));
+        setTrackedLessonReviews((current) =>
+          current.filter((item) => item.lesson.lessonId !== lessonId));
+        return;
+      }
+
+      const result = await retryNativeLessonReview(lessonId);
+      if (result.status === "request_failed") {
+        setLessonRecoveryError(result.reason);
+        return;
+      }
+      setTrackedLessonReviews((current) =>
+        current.map((item) => item.lesson.lessonId === lessonId
+          ? { ...item, outcome: result }
+          : item));
+    } catch (cause) {
+      reportCrash(cause, {
+        surface: "native-voice",
+        operation: `lesson-review-${action}`,
+      });
+      setLessonRecoveryError(
+        action === "retry"
+          ? "Homa could not confirm another review started. The lesson is still saved. Try again when your connection is ready."
+          : "Homa could not dismiss this review yet. Please try again.",
+      );
+    } finally {
+      setLessonRecoveryBusy(false);
+    }
+  }
+
   const primaryAction = session.turnActive
     ? session.toggleMute
     : session.status === "paused"
@@ -303,18 +536,34 @@ export function VoiceScreen() {
         ? "Try again"
         : "Talk to Homa";
 
-  if (activeLessonRecorder) {
+  if (activeLessonRecorder && family?.id) {
     return (
       <NativeLessonRecorder
+        familyId={family.id}
         intent={activeLessonRecorder}
         onCancel={() => {
           setActiveLessonRecorder(null);
           session.resume();
         }}
-        onResumeVoice={(prompt) => {
+        onResumeVoice={(prompt, reviewedLessonId) => {
           setActiveLessonRecorder(null);
-          if (prompt) lessonResumePromptRef.current = prompt;
-          session.resume();
+          if (prompt && reviewedLessonId && family?.id) {
+            queueLessonReviewHandoff({
+              familyId: family.id,
+              lessonId: reviewedLessonId,
+              prompt,
+              fingerprint: "ready",
+              activeObject: {
+                kind: "recording",
+                objectId: reviewedLessonId,
+                version: ACTIVE_OBJECT_CURRENT_VERSION,
+              },
+            });
+          } else {
+            if (prompt) lessonResumePromptRef.current = prompt;
+            session.resume();
+          }
+          void refreshTrackedLessonReviews();
         }}
       />
     );
@@ -354,13 +603,26 @@ export function VoiceScreen() {
             </Pressable>
           </View>
           {statusText ? (
-            <Text style={{ marginTop: -space.xl, fontFamily: fontFamilies.body, fontSize: fontSize.base, color: dark ? palette.stone300 : colors.textMuted, textAlign: "center" }}>
+            <Text style={{ marginTop: -space.xl, fontFamily: fontFamilies.body, fontSize: fontSize.base, color: dark ? darkColors.textMuted : colors.textMuted, textAlign: "center" }}>
               {statusText}
             </Text>
           ) : null}
         </Animated.View>
 
-        <View style={{ flex: 1, justifyContent: "flex-end" }}>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-end" }}
+          showsVerticalScrollIndicator={false}
+        >
+          {recoveryVisible && activeLessonRecovery ? (
+            <LessonReviewRecoveryCard
+              item={activeLessonRecovery}
+              dark={dark}
+              busy={lessonRecoveryBusy}
+              error={lessonRecoveryError}
+              onAction={(action) => void handleLessonRecoveryAction(action)}
+            />
+          ) : null}
           <VoicePromptStarters
             visible={startersVisible}
             tone={dark ? "dark" : "light"}
@@ -374,7 +636,7 @@ export function VoiceScreen() {
             onPressReply={() => setReplyOpen(true)}
             tone={dark ? "dark" : "light"}
           />
-        </View>
+        </ScrollView>
       </View>
 
       <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm, paddingHorizontal: space.md, paddingTop: space.sm, paddingBottom: Math.max(insets.bottom, space.md) }}>
@@ -385,7 +647,7 @@ export function VoiceScreen() {
           hitSlop={8}
           style={({ pressed }) => ({ width: 40, height: 40, borderRadius: radius.pill, alignItems: "center", justifyContent: "center", backgroundColor: controlFill, opacity: pressed ? 0.7 : 1 })}
         >
-          <X size={18} color={dark ? palette.stone300 : colors.textMuted} />
+          <X size={18} color={dark ? darkColors.textMuted : colors.textMuted} />
         </Pressable>
         <Pressable
           accessibilityRole="button"

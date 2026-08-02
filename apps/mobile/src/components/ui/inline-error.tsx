@@ -10,16 +10,31 @@ import {
 } from "react-native";
 
 import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { colors, darkColors, fontSize, radius, space } from "../../theme/tokens";
 
 /** A visible and screen-reader-live recovery message, never color alone. */
 export function InlineError({
   message,
   style,
+  tone = "light",
 }: {
   message: string;
   style?: StyleProp<ViewStyle>;
+  tone?: "light" | "dark";
 }) {
+  const look = tone === "dark"
+    ? {
+        border: darkColors.danger,
+        background: darkColors.dangerSoft,
+        icon: darkColors.danger,
+        text: darkColors.textBody,
+      }
+    : {
+        border: colors.danger,
+        background: colors.dangerSoft,
+        icon: colors.danger,
+        text: colors.textBody,
+      };
   useEffect(() => {
     if (Platform.OS === "ios") {
       AccessibilityInfo.announceForAccessibility(message);
@@ -41,8 +56,8 @@ export function InlineError({
           padding: space.md,
           borderRadius: radius.md,
           borderWidth: 1,
-          borderColor: colors.danger,
-          backgroundColor: colors.dangerSoft,
+          borderColor: look.border,
+          backgroundColor: look.background,
         },
         style,
       ]}
@@ -51,7 +66,7 @@ export function InlineError({
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
       >
-        <CircleAlert size={19} color={colors.danger} />
+        <CircleAlert size={19} color={look.icon} />
       </View>
       <Text
         style={{
@@ -59,7 +74,7 @@ export function InlineError({
           fontFamily: fontFamilies.bodyMedium,
           fontSize: fontSize.sm,
           lineHeight: 20,
-          color: colors.textBody,
+          color: look.text,
         }}
       >
         {message}

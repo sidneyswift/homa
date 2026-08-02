@@ -79,6 +79,36 @@ export const colors = {
   info: palette.sky500,
 } as const;
 
+/**
+ * Native semantic colors for Homa's experimental quiet-evening theme.
+ * These mirror docs/homa-design/tokens/dark.css v4. Components choose this
+ * object as a complete theme so light-theme palette values cannot leak onto
+ * a navy surface.
+ */
+export const darkColors = {
+  page: "#151B27",
+  card: "#1E2635",
+  surfaceRaised: "#252E40",
+  surfaceSunken: "#101521",
+
+  textStrong: "#EEF2F8",
+  textBody: "#DCE3EE",
+  textMuted: "#9AA7BD",
+  textSubtle: "#7A87A0",
+
+  brand: "#FFD43B",
+  brandHover: "#FFDE62",
+  brandSoft: "rgba(255, 212, 59, 0.13)",
+  onBrand: "#402E05",
+
+  border: "#364156",
+  borderSubtle: "#2A3345",
+  focusRing: "#FFD43B",
+
+  danger: "#F58469",
+  dangerSoft: "rgba(226, 89, 59, 0.22)",
+} as const;
+
 /** 4px base scale (space-1 through space-24 in the token sheet). */
 export const space = {
   xs: 4,
