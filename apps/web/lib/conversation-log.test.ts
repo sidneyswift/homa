@@ -6,6 +6,7 @@ import {
   type PersistConversationMessageDependencies,
 } from "./conversation-log";
 import type { InboundContinuityInput } from "./conversation-continuity/ledger";
+import { markVoiceTranscription } from "./voice/transcription-marker";
 
 const FAMILY_ID = "family-1";
 const MESSAGE_ID = "22222222-2222-4222-8222-222222222222";
@@ -14,6 +15,10 @@ const EPISODE_ID = "33333333-3333-4333-8333-333333333333";
 describe("conversation log continuity integration", () => {
   it("carries validated web dictation provenance into the canonical user row", async () => {
     let canonicalModality: unknown = null;
+    let canonicalContent: unknown = null;
+    const dictatedContent = markVoiceTranscription(
+      "We worked for twenty minutes.",
+    );
 
     await persistConversationMessage(
       {
@@ -26,7 +31,7 @@ describe("conversation log continuity integration", () => {
         channelKind: "web",
         sequence: 1,
         role: "user",
-        content: "We worked for twenty minutes.",
+        content: dictatedContent,
         turnId: "turn-voice",
       },
       {
@@ -45,6 +50,7 @@ describe("conversation log continuity integration", () => {
         }),
         persistCanonical: async (input) => {
           canonicalModality = input.modality;
+          canonicalContent = input.content;
           return {
             id: MESSAGE_ID,
             episodeId: "episode-voice",
@@ -57,6 +63,7 @@ describe("conversation log continuity integration", () => {
     );
 
     assert.equal(canonicalModality, "voice");
+    assert.equal(canonicalContent, dictatedContent);
   });
 
   it("carries authenticated provider reply metadata into canonical persistence", async () => {

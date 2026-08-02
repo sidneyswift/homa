@@ -60,10 +60,18 @@ test("eve part placeholders leave the visible text", () => {
   assert.deepEqual(parsed.markers, []);
 });
 
-test("ordinary bracketed SMS blocks stay visible", () => {
+test("voice provenance leaves the visible words and hides only its prefix", () => {
   const text = "[Voice note, transcribed]: we finished the maze page";
   const parsed = parseAttachmentMarkers(text);
-  assert.equal(parsed.visibleText, text);
+  assert.equal(parsed.visibleText, "we finished the maze page");
+  assert.deepEqual(parsed.markers, []);
+});
+
+test("queued typed and dictated paragraphs keep their visible order", () => {
+  const parsed = parseAttachmentMarkers(
+    "I typed this first.\n\n[Voice note, transcribed]: Then I said this.",
+  );
+  assert.equal(parsed.visibleText, "I typed this first.\n\nThen I said this.");
   assert.deepEqual(parsed.markers, []);
 });
 
