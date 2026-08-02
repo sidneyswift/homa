@@ -30,6 +30,7 @@ describe("toAttachmentSummary", () => {
   it("maps a db row to the camelCase model-facing shape", () => {
     assert.deepEqual(
       toAttachmentSummary({
+        id: "00000000-0000-4000-8000-000000000001",
         url: "https://x.public.blob.vercel-storage.com/families/f1/chat/a.jpg",
         caption: "A hand-drawn letter ring",
         kind: "image",
@@ -38,6 +39,7 @@ describe("toAttachmentSummary", () => {
         created_at: "2026-07-19 12:00:00+00",
       }),
       {
+        id: "00000000-0000-4000-8000-000000000001",
         url: "https://x.public.blob.vercel-storage.com/families/f1/chat/a.jpg",
         caption: "A hand-drawn letter ring",
         kind: "image",
@@ -50,6 +52,7 @@ describe("toAttachmentSummary", () => {
 
   it("keeps family-wide filing and missing captions as nulls", () => {
     const summary = toAttachmentSummary({
+      id: "00000000-0000-4000-8000-000000000002",
       url: "https://x.public.blob.vercel-storage.com/families/f1/chat/b.pdf",
       caption: null,
       kind: "document",

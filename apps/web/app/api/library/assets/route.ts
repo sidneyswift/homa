@@ -1,4 +1,3 @@
-import { del } from "@vercel/blob";
 import { after } from "next/server";
 import { z } from "zod";
 
@@ -6,6 +5,7 @@ import { resolveApiFamily } from "../../../../lib/api-auth";
 import { finalizeFamilyAssetUpload } from "../../../../lib/library/family-asset-upload-store";
 import { processQueuedFamilyAsset } from "../../../../lib/library/family-asset-processing";
 import {
+  deleteFamilyAsset,
   getFamilyAsset,
   updateFamilyAsset,
 } from "../../../../lib/library/family-asset-store";
@@ -13,8 +13,6 @@ import {
   isFamilyLibraryUrl,
 } from "../../../../lib/library/family-assets";
 import { familyAssetUpdateSchema } from "../../../../lib/library/family-asset-shelf";
-import { mapDb } from "../../../../lib/map/db";
-import { emitMapEvent } from "../../../../lib/map/events";
 
 interface CreateFamilyAssetBody {
   reservationId?: unknown;
@@ -140,67 +138,15 @@ export async function DELETE(request: Request): Promise<Response> {
     return Response.json({ ok: false, reason: "bad-id" }, { status: 400 });
   }
 
-  const sql = mapDb();
-  const row = await sql.begin(async (transaction) => {
-    const rows = await transaction<{
-      url: string;
-      status: "ready" | "processing" | "needs_attention" | "failed";
-    }[]>`
-      select url, status
-      from public.family_assets
-      where id = ${id}
-        and family_id = ${auth.familyId}
-        and deleted_at is null
-      for update
-    `;
-    const target = rows[0];
-    if (!target) return null;
-    await transaction`
-      update public.family_assets
-      set status = 'processing',
-          processing_note = 'Removing original file',
-          processing_error_code = null,
-          updated_at = now()
-      where id = ${id}
-        and family_id = ${auth.familyId}
-        and deleted_at is null
-    `;
-    return target;
+  const result = await deleteFamilyAsset({
+    familyId: auth.familyId,
+    assetId: id,
   });
-  if (!row) {
-    return Response.json({ ok: false, reason: "not-found" }, { status: 404 });
-  }
-
-  try {
-    await del(row.url);
-  } catch (error) {
-    await sql`
-      update public.family_assets
-      set status = 'needs_attention',
-          processing_error_code = 'blob_delete_failed',
-          processing_note = 'The original file could not be removed yet.',
-          updated_at = now()
-      where id = ${id} and family_id = ${auth.familyId}
-    `;
-    console.error(
-      "library asset delete failed:",
-      error instanceof Error ? error.message : "unknown",
+  if (!result.ok) {
+    return Response.json(
+      { ok: false, reason: result.reason },
+      { status: result.reason === "not-found" ? 404 : 503 },
     );
-    return Response.json({ ok: false, reason: "delete-failed" }, { status: 503 });
   }
-
-  await sql`
-    update public.family_assets
-    set deleted_at = now(),
-        processing_note = null,
-        processing_error_code = null,
-        updated_at = now()
-    where id = ${id} and family_id = ${auth.familyId}
-  `;
-  await emitMapEvent("library.asset_deleted", {
-    family_id: auth.familyId,
-    asset_id: id,
-    prior_status: row.status,
-  });
   return Response.json({ ok: true });
 }

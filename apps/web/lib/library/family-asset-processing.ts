@@ -3,6 +3,7 @@ import "pdfjs-dist/legacy/build/pdf.worker.mjs";
 import mammoth from "mammoth";
 import * as XLSX from "xlsx";
 
+import { embedText } from "../learning/embeddings";
 import { mapDb } from "../map/db";
 import { emitMapEvent } from "../map/events";
 import { captionSmsImage } from "../voice/caption-image";
@@ -85,9 +86,14 @@ export interface FamilyAssetProcessingDependencies {
     mediaType: string;
     extractedText: string;
   }): Promise<unknown>;
+  embed(input: {
+    familyId: string;
+    text: string;
+  }): Promise<string | null>;
   complete(input: {
     asset: ClaimedFamilyAsset;
     verified: Extract<VerifiedFamilyAssetIngestion, { ok: true }>;
+    embedding: string | null;
   }): Promise<void>;
   fail(input: {
     asset: ClaimedFamilyAsset;
@@ -172,6 +178,29 @@ export function familyAssetFieldsFromVerified(
     resourceKind: current.resourceKind ?? verified.resourceKind,
     language: current.language ?? verified.language,
   };
+}
+
+/**
+ * Semantic search should recognize both what the source says and the verified
+ * Library facts around it. The embedding helper owns the final 8,000-character
+ * cap, so this document stays descriptive and deterministic.
+ */
+export function familyAssetEmbeddingDocument(input: {
+  asset: ClaimedFamilyAsset;
+  extractedText: string;
+  verified: Extract<VerifiedFamilyAssetIngestion, { ok: true }>;
+}): string {
+  const verifiedTitle = input.verified.title ?? input.asset.title;
+  const verifiedKind = input.verified.resourceKind ?? input.asset.resourceKind;
+  const tags = input.verified.tags.map((tag) => tag.value);
+  return [
+    `Title: ${verifiedTitle}`,
+    verifiedKind ? `Resource type: ${verifiedKind}` : null,
+    tags.length > 0 ? `Topics: ${tags.join(", ")}` : null,
+    input.extractedText,
+  ]
+    .filter((value): value is string => value !== null)
+    .join("\n");
 }
 
 async function fetchBoundedBytes(
@@ -385,6 +414,7 @@ async function claimFamilyAssetProcessing(input: {
 async function completeFamilyAssetProcessing(input: {
   asset: ClaimedFamilyAsset;
   verified: Extract<VerifiedFamilyAssetIngestion, { ok: true }>;
+  embedding: string | null;
 }): Promise<void> {
   const sql = mapDb();
   const completed = await sql.begin(async (transaction) => {
@@ -457,6 +487,10 @@ async function completeFamilyAssetProcessing(input: {
       set title = ${fields.title},
           resource_kind = ${fields.resourceKind},
           language = ${fields.language},
+          embedding = coalesce(
+            ${input.embedding}::extensions.vector(1536),
+            embedding
+          ),
           status = 'ready',
           processing_error_code = null,
           processing_note = null,
@@ -500,6 +534,7 @@ const PRODUCTION_PROCESSING_DEPENDENCIES: FamilyAssetProcessingDependencies = {
   claim: claimFamilyAssetProcessing,
   extract: extractFamilyAssetText,
   propose: proposeFamilyAssetIngestion,
+  embed: async ({ familyId, text }) => await embedText(text, { familyId }),
   complete: completeFamilyAssetProcessing,
   fail: failFamilyAssetProcessing,
 };
@@ -553,8 +588,23 @@ export async function processFamilyAssetWithDependencies(
     return { ok: false, reason: "invalid_result" };
   }
 
+  let embedding: string | null = null;
   try {
-    await dependencies.complete({ asset, verified });
+    embedding = await dependencies.embed({
+      familyId: asset.familyId,
+      text: familyAssetEmbeddingDocument({
+        asset,
+        extractedText: extracted.text,
+        verified,
+      }),
+    });
+  } catch {
+    // Embeddings improve retrieval but never decide whether an original is
+    // safely preserved or whether verified metadata may complete.
+  }
+
+  try {
+    await dependencies.complete({ asset, verified, embedding });
     return { ok: true, assetId: asset.id };
   } catch {
     await dependencies.fail({

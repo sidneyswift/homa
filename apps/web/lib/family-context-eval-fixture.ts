@@ -318,9 +318,69 @@ values (${sqlString(EVAL_ONBOARDING_FIXTURE_FAMILY_ID)},
         ${sqlString(EVAL_FIXTURE_PARENT_USER_ID)}, 'parent',
         ${sqlString(EVAL_ONBOARDING_FIXTURE_PARENT_NAME)});
 
+${evalFixtureLibrarySeedSql()}
+
 ${evalFixturePacketSeedSql()}
 
 ${evalFixturePlannerSeedSql()}
+`.trim();
+}
+
+/**
+ * A real family-owned curriculum source for the lost-curriculum-stack journey
+ * (gh#577). The prompt context does not mention it, so Homa can only discover
+ * it through the Family Library tools, exactly like a later live conversation.
+ */
+export const EVAL_FIXTURE_LIBRARY_ASSET_ID =
+  "00000000-0000-4000-8000-0000000000d1";
+export const EVAL_FIXTURE_LIBRARY_TITLE =
+  "Blossom and Root Early Years Science, Volume 1";
+
+export function evalFixtureLibrarySeedSql(): string {
+  const originalUrl =
+    `https://eval.public.blob.vercel-storage.com/families/` +
+    `${EVAL_FIXTURE_FAMILY_ID}/library/blossom-root-science.pdf`;
+  return `
+insert into public.family_assets (
+  id, family_id, uploaded_by_user_id, title, original_name, url,
+  download_url, media_type, byte_size, file_kind, resource_kind,
+  language, status, processed_at, created_at, updated_at
+)
+values (
+  ${sqlString(EVAL_FIXTURE_LIBRARY_ASSET_ID)},
+  ${sqlString(EVAL_FIXTURE_FAMILY_ID)},
+  ${sqlString(EVAL_FIXTURE_PARENT_USER_ID)},
+  ${sqlString(EVAL_FIXTURE_LIBRARY_TITLE)},
+  'blossom-root-early-years-science-volume-1.pdf',
+  ${sqlString(originalUrl)}, ${sqlString(`${originalUrl}?download=1`)},
+  'application/pdf', 2480000, 'document', 'curriculum', 'en',
+  'ready', timestamptz '2026-08-01 12:00:00+00',
+  timestamptz '2026-08-01 12:00:00+00',
+  timestamptz '2026-08-01 12:00:00+00'
+);
+
+insert into public.family_asset_children (family_id, asset_id, child_id)
+values (
+  ${sqlString(EVAL_FIXTURE_FAMILY_ID)},
+  ${sqlString(EVAL_FIXTURE_LIBRARY_ASSET_ID)},
+  ${sqlString(FIXTURE_CHILD_MAYA)}
+);
+
+insert into public.family_asset_tags (
+  family_id, asset_id, kind, value, catalog_id, quote, source_locator, source
+)
+values
+  (${sqlString(EVAL_FIXTURE_FAMILY_ID)},
+   ${sqlString(EVAL_FIXTURE_LIBRARY_ASSET_ID)},
+   'subject', 'Science', 'science', 'Nature study and science', 'Overview', 'model'),
+  (${sqlString(EVAL_FIXTURE_FAMILY_ID)},
+   ${sqlString(EVAL_FIXTURE_LIBRARY_ASSET_ID)},
+   'topic', 'seeds and plants', null,
+   'Seeds and plants grow through patient observation.', 'Week 4', 'model'),
+  (${sqlString(EVAL_FIXTURE_FAMILY_ID)},
+   ${sqlString(EVAL_FIXTURE_LIBRARY_ASSET_ID)},
+   'age_band', 'Early elementary', 'early_elem',
+   'Designed for early elementary learners.', 'Introduction', 'model');
 `.trim();
 }
 

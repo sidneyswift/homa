@@ -34,6 +34,7 @@ export const ATTACHMENT_KINDS = [
 ] as const;
 
 export interface ChatAttachmentDbRow {
+  id: string;
   url: string;
   caption: string | null;
   kind: string;
@@ -43,6 +44,7 @@ export interface ChatAttachmentDbRow {
 }
 
 export interface ChatAttachmentSummary {
+  id: string;
   url: string;
   caption: string | null;
   kind: string;
@@ -55,6 +57,7 @@ export function toAttachmentSummary(
   row: ChatAttachmentDbRow,
 ): ChatAttachmentSummary {
   return {
+    id: row.id,
     url: row.url,
     caption: row.caption,
     kind: row.kind,
@@ -87,7 +90,7 @@ async function findAttachmentsPinned(
 ): Promise<ChatAttachmentDbRow[]> {
   const sql = mapDb();
   return await sql<ChatAttachmentDbRow[]>`
-    select url, caption, kind, media_type, child_id,
+    select id, url, caption, kind, media_type, child_id,
            created_at::text as created_at
     from public.chat_attachments
     where family_id = ${familyId}
@@ -100,7 +103,7 @@ async function findAttachmentsPinned(
 
 export default defineBoundedTool({
   description:
-    "List files the parent has shared in chat (photos, PDFs, documents), newest first, each with its url, caption, kind, and date. Use it when she refers to something she already sent ('the photo I sent you', 'that page from last week'), especially in a later session where the original message is out of reach; never ask her to re-send a file this can find. An image url here is inside this family's own space: pass it to generate_image as a referenceImageUrls entry, or embed it with <img src=\"...\"> in create_printable html.",
+    "List files the parent has shared in chat (photos, PDFs, documents), newest first, each with its id, url, caption, kind, and date. Use it when she refers to something she already sent ('the photo I sent you', 'that page from last week'), especially in a later session where the original message is out of reach; never ask her to re-send a file this can find. If she wants to save that file in Family Library, load family-librarian before calling this tool and follow its copy workflow. An image url here is inside this family's own space: pass it to generate_image as a referenceImageUrls entry, or embed it with <img src=\"...\"> in create_printable html.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: true,
   inputSchema: z.object({
@@ -152,7 +155,7 @@ export default defineBoundedTool({
     } else {
       let query = access.db
         .from("chat_attachments")
-        .select("url, caption, kind, media_type, child_id, created_at")
+        .select("id, url, caption, kind, media_type, child_id, created_at")
         .eq("family_id", access.familyId)
         .order("created_at", { ascending: false })
         .limit(filters.limit);

@@ -112,6 +112,11 @@ loads:
 
 ## Before designing: check the library
 
+Family Library and Binder are different shelves. When the parent explicitly
+says to use an uploaded, owned, or Library source, load family-librarian and
+call find_family_assets, then get_family_asset, before designing. Do not add
+this lookup to an ordinary fresh-material request that names no family source.
+
 Call find_materials first when the request sounds like something this
 family may already have ("another one like...", a kind you have made
 before, a sibling wanting what the other kid has). A found final is

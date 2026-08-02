@@ -4,6 +4,8 @@ import { describe, it } from "node:test";
 import { resolveAgentAccess } from "./agent-db";
 import {
   EVAL_FIXTURE_FAMILY_ID,
+  EVAL_FIXTURE_LIBRARY_ASSET_ID,
+  EVAL_FIXTURE_LIBRARY_TITLE,
   EVAL_FIXTURE_PARENT_USER_ID,
   EVAL_FIXTURE_PAST_EVENT_TITLE,
   EVAL_FIXTURE_PLAN_CHILD_ID,
@@ -216,6 +218,14 @@ describe("evalFamilyFixtureSeedSql", () => {
   it("widens YYYY-MM birth months to real dates", () => {
     assert.ok(sql.includes("'2022-03-01'::date"));
     assert.ok(!sql.includes("'2022-03'::date"));
+  });
+
+  it("seeds a family-owned curriculum that only Library retrieval can reveal", () => {
+    assert.ok(sql.includes("public.family_assets"));
+    assert.ok(sql.includes(EVAL_FIXTURE_LIBRARY_ASSET_ID));
+    assert.ok(sql.includes(EVAL_FIXTURE_LIBRARY_TITLE));
+    assert.ok(sql.includes("public.family_asset_tags"));
+    assert.ok(sql.includes("'seeds and plants'"));
   });
 
   // The planner seed (issue #257, arc PR B0): scheduling and reshuffle

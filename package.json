@@ -72,6 +72,7 @@
     "hours-log:e2e": "pnpm test:hours-log:postgres",
     "test:hours-log:postgres": "NODE_OPTIONS=--conditions=react-server tsx scripts/hours-log-race-test.mts",
     "test:voice-action-receipts:postgres": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/voice-action-receipts-e2e.mts",
+    "test:family-library-retrieval:postgres": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/family-library-retrieval-e2e.mts",
     "check:taxonomy": "node packages/taxonomy/scripts/validate.mjs && tsx scripts/taxonomy-check.mts && tsx --test packages/taxonomy/src/progress.test.ts",
     "taxonomy:progress": "tsx packages/taxonomy/scripts/generate-progress-index.mts",
     "taxonomy:slugs": "tsx packages/taxonomy/scripts/generate-slug-map.mts",
