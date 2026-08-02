@@ -33,6 +33,13 @@ describe("native Progress child-safe presentation contract", () => {
     assert.match(cardSource, /accessibilityRole="button"/u);
     assert.match(cardSource, /accessibilityState=\{\{ expanded \}\}/u);
     assert.match(cardSource, /accessibilityLabel=/u);
+    assert.match(cardSource, /accessibilityHint=/u);
+    assert.match(cardSource, /expanded \? "Hide details" : "Show details"/u);
+    assert.match(cardSource, /minHeight: 44/u);
+    assert.match(cardSource, /summary\.sourceLabel/u);
+    assert.match(cardSource, /summary\.dateLabel/u);
+    assert.match(cardSource, /summary\.note/u);
+    assert.match(cardSource, /accessibilityElementsHidden/u);
     assert.match(cardSource, /freshness\?\.kind === "quiet"/u);
     assert.match(cardSource, /color: colors\.textBody/u);
     assert.doesNotMatch(cardSource, /color: colors\.(?:sage|success)/u);

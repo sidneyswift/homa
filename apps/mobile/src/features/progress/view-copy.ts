@@ -128,6 +128,13 @@ export interface ProgressSubjectTakeaway {
   stateLabel: string;
 }
 
+export interface ProgressSubjectSummary {
+  sourceLabel: string;
+  dateLabel: string;
+  note: string | null;
+  accessibilityLabel: string;
+}
+
 function compareAsciiDescending(left: string, right: string): number {
   if (left === right) return 0;
   return left < right ? 1 : -1;
@@ -201,12 +208,19 @@ export function progressSubjectSummary(
   subject: ProgressSubjectView,
   timeZone: string,
   conflicts: readonly OpenProgressConflictView[] = [],
-): string | null {
+): ProgressSubjectSummary | null {
   if (subject.summary === null) return null;
   const date = formatProgressDate(subject.summary.observedAt, timeZone);
   switch (subject.summary.kind) {
-    case "evidence":
-      return `${progressSourceLabel(subject.summary.source.kind)} · ${date}`;
+    case "evidence": {
+      const sourceLabel = progressSourceLabel(subject.summary.source.kind);
+      return {
+        sourceLabel,
+        dateLabel: date,
+        note: null,
+        accessibilityLabel: `${sourceLabel} · ${date}`,
+      };
+    }
     case "conflict": {
       const conflict = selectedSubjectConflict(subject, conflicts);
       const sourceLabels = conflict
@@ -221,7 +235,13 @@ export function progressSubjectSummary(
       const conflictDate = conflict
         ? formatProgressDate(conflict.observedAt, timeZone)
         : date;
-      return `${source} · ${conflictDate}. Homa kept both answers.`;
+      const note = "Homa kept both answers.";
+      return {
+        sourceLabel: source,
+        dateLabel: conflictDate,
+        note,
+        accessibilityLabel: `${source} · ${conflictDate}. ${note}`,
+      };
     }
   }
 }

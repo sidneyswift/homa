@@ -43,8 +43,17 @@ function subject(
 describe("native Progress collapsed summary", () => {
   it("leads with the latest source and family-local date", () => {
     assert.equal(
-      progressSubjectSummary(subject(), "America/New_York"),
+      progressSubjectSummary(subject(), "America/New_York")?.accessibilityLabel,
       "Lesson recording · Aug 1, 2026",
+    );
+    assert.deepEqual(
+      progressSubjectSummary(subject(), "America/New_York"),
+      {
+        sourceLabel: "Lesson recording",
+        dateLabel: "Aug 1, 2026",
+        note: null,
+        accessibilityLabel: "Lesson recording · Aug 1, 2026",
+      },
     );
   });
 
@@ -114,7 +123,8 @@ describe("native Progress collapsed summary", () => {
     ];
 
     assert.equal(
-      progressSubjectSummary(conflictSubject, "America/New_York", conflicts),
+      progressSubjectSummary(conflictSubject, "America/New_York", conflicts)
+        ?.accessibilityLabel,
       "Journal note and conversation · Aug 1, 2026. Homa kept both answers.",
     );
     assert.equal(
@@ -298,13 +308,19 @@ describe("native Progress collapsed summary", () => {
         stateLabel: "Two answers saved",
       },
     );
-    assert.equal(
+    assert.deepEqual(
       progressSubjectSummary(
         conflictSubject,
         "America/New_York",
         conflicts,
       ),
-      "Conversation and check-in · Aug 1, 2026. Homa kept both answers.",
+      {
+        sourceLabel: "Conversation and check-in",
+        dateLabel: "Aug 1, 2026",
+        note: "Homa kept both answers.",
+        accessibilityLabel:
+          "Conversation and check-in · Aug 1, 2026. Homa kept both answers.",
+      },
     );
   });
 
