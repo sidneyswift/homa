@@ -467,6 +467,10 @@ jobs:
         timeout-minutes: 10
         run: pnpm test:voice-action-receipts:postgres
 
+      - name: Conversation privacy disposable PostgreSQL E2E (two adults)
+        timeout-minutes: 10
+        run: pnpm conversation-privacy:e2e
+
   # Guard shard 3 of 3: the acceptance E2Es and the two secret-needing
   # database checks, the three longest steps in the roster (each 24-50s),
   # so they share a runner instead of tailing another shard.
@@ -511,9 +515,6 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-
-      - name: Conversation privacy disposable PostgreSQL E2E (two adults)
-        run: pnpm conversation-privacy:e2e
 
       - name: Tenancy isolation smoke check (M1-07 seed)
         run: pnpm check:isolation
