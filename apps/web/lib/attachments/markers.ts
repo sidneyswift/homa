@@ -17,8 +17,10 @@
  * "[file: name (type)]") are stripped too: the marker carries strictly
  * more information.
  *
- * Pure module, no imports, unit-tested without a browser.
+ * Pure parser, unit-tested without a browser.
  */
+
+import { stripVoiceTranscriptionMarker } from "../voice/transcription-marker";
 
 export interface PhotoMarker {
   kind: "photo";
@@ -102,7 +104,7 @@ export function parseAttachmentMarkers(text: string): ParsedMessageText {
       continue;
     }
     if (EVE_PLACEHOLDER.test(line.trim())) continue;
-    keptLines.push(line);
+    keptLines.push(stripVoiceTranscriptionMarker(line));
   }
   return { visibleText: keptLines.join("\n").trim(), markers };
 }

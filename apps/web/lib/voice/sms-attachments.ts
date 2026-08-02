@@ -13,6 +13,7 @@ import {
 import { captionSmsImage } from "./caption-image";
 import { downloadTelnyxMedia } from "./telnyx-api";
 import { transcribeAudio, transcribeSmsMedia } from "./transcribe";
+import { markVoiceTranscription } from "./transcription-marker";
 
 /**
  * The SMS attachment normalizer (founder ruling 2026-07-10: never deny
@@ -178,7 +179,6 @@ const DOCUMENT_MAX_BYTES = 4 * 1024 * 1024;
  *  the context window; MMS-size files stay far under this. */
 const EXTRACTED_TEXT_MAX_CHARS = 4000;
 
-const VOICE_NOTE_MARKER = "[Voice note, transcribed]";
 const VIDEO_MARKER = "[Video attached, audio track transcribed]";
 const VIDEO_DESCRIBED_MARKER = "[Video attached, watched]";
 
@@ -374,10 +374,12 @@ async function processSpeech(
 ): Promise<ProcessedSmsAttachment> {
   const transcript = await transcribeSmsMedia(url, mediaType);
   if (!transcript) return failedAttachment(kind, mediaType);
-  const marker = kind === "audio" ? VOICE_NOTE_MARKER : VIDEO_MARKER;
   return {
     result: { kind, mediaType, outcome: "transcribed" },
-    block: `${marker}: ${transcript}`,
+    block:
+      kind === "audio"
+        ? markVoiceTranscription(transcript)
+        : `${VIDEO_MARKER}: ${transcript}`,
   };
 }
 

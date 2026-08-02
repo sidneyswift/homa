@@ -7,9 +7,11 @@ import {
   flushChatQueue,
   focusChatComposerInput,
   isSendLineOccupied,
+  prepareAttachmentChatTurn,
   prepareChatSend,
 } from "./chat-send-policy";
 import { formatHiddenDirective } from "../../lib/onboarding/directives";
+import { VOICE_TRANSCRIPTION_MARKER } from "../../lib/voice/transcription-marker";
 
 describe("prepareChatSend", () => {
   it("queues a busy card action as text with its stable one-shot key", () => {
@@ -55,7 +57,7 @@ describe("prepareChatSend", () => {
     assert.equal(plan?.modality, "text");
   });
 
-  it("keeps normal dictated composer-send behavior unchanged", () => {
+  it("adds durable provenance to a dictated composer send", () => {
     const plan = prepareChatSend({
       text: "Here is our day",
       busy: false,
@@ -67,7 +69,24 @@ describe("prepareChatSend", () => {
     assert.equal(plan?.clearDraft, true);
     assert.equal(plan?.resetDraftFromVoice, true);
     assert.equal(plan?.modality, "voice");
+    assert.equal(
+      plan?.message,
+      `${VOICE_TRANSCRIPTION_MARKER}: Here is our day`,
+    );
     assert.equal(plan?.progressActionKey, null);
+  });
+
+  it("keeps a marked failed-send retry in the voice lane without nesting markers", () => {
+    const marked = `${VOICE_TRANSCRIPTION_MARKER}: Here is our day`;
+    const plan = prepareChatSend({
+      text: marked,
+      busy: false,
+      draftFromVoice: false,
+      source: { kind: "composer" },
+    });
+
+    assert.equal(plan?.modality, "voice");
+    assert.equal(plan?.message, marked);
   });
 
   it("queues a repeated one-shot card action only once", () => {
@@ -175,11 +194,20 @@ describe("flushChatQueue", () => {
 
   it("keeps voice provenance when a dictated message waits beside typed words", () => {
     const flush = flushChatQueue(
-      [parent("Mia finished the chapter", "voice")],
+      [
+        parent(
+          `${VOICE_TRANSCRIPTION_MARKER}: Mia finished the chapter`,
+          "voice",
+        ),
+      ],
       { text: "and Leo drew the map", lane: "parent", modality: "text" },
     );
 
     assert.equal(flush.modality, "voice");
+    assert.equal(
+      flush.outgoing,
+      `${VOICE_TRANSCRIPTION_MARKER}: Mia finished the chapter\n\nand Leo drew the map`,
+    );
   });
 
   it("sends a queued directive alone and holds her words for the next line", () => {
@@ -229,6 +257,36 @@ describe("flushChatQueue", () => {
     const round3 = flushChatQueue(round2.remaining);
     assert.equal(round3.outgoing, "ok");
     assert.deepEqual(round3.remaining, []);
+  });
+});
+
+describe("prepareAttachmentChatTurn", () => {
+  it("marks only the dictated caption and keeps attachment provenance separate", () => {
+    assert.deepEqual(
+      prepareAttachmentChatTurn({
+        text: "Maya read nine pages.",
+        attachmentBlocks: ["[Photo attached · workbook · https://example.test/a]"],
+        draftFromVoice: true,
+      }),
+      {
+        text: `${VOICE_TRANSCRIPTION_MARKER}: Maya read nine pages.\n\n[Photo attached · workbook · https://example.test/a]`,
+        modality: "voice",
+      },
+    );
+  });
+
+  it("does not call an attachment-only turn voice after the dictated draft was erased", () => {
+    assert.deepEqual(
+      prepareAttachmentChatTurn({
+        text: "   ",
+        attachmentBlocks: ["[File attached · plan.pdf · https://example.test/a]"],
+        draftFromVoice: true,
+      }),
+      {
+        text: "[File attached · plan.pdf · https://example.test/a]",
+        modality: "text",
+      },
+    );
   });
 });
 

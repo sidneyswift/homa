@@ -84,6 +84,7 @@ import {
   focusChatComposerInput,
   isSendLineOccupied,
   prepareChatSend,
+  prepareAttachmentChatTurn,
   type ChatSendAcceptance,
   type ChatSendSource,
   type ChatTurnModality,
@@ -2014,6 +2015,7 @@ export function ChatClient({
       setWallOpen(true);
       return;
     }
+    const draftFromVoice = draftFromVoiceRef.current;
     setPreparingAttachments(true);
     setAttachError(null);
     try {
@@ -2021,13 +2023,13 @@ export function ChatClient({
         attachments.staged,
         focusChildId,
       );
-      const trimmed = text.trim();
-      const turnText = [
-        ...(trimmed.length > 0 ? [trimmed] : []),
-        ...prepared.textBlocks,
-      ].join("\n\n");
+      const turn = prepareAttachmentChatTurn({
+        text,
+        attachmentBlocks: prepared.textBlocks,
+        draftFromVoice,
+      });
       const parts: UserContent = [
-        { type: "text", text: turnText },
+        { type: "text", text: turn.text },
         ...prepared.parts,
       ];
       const summary = summarizeOutgoingParts(parts);
@@ -2046,13 +2048,13 @@ export function ChatClient({
       if (!agent.session?.sessionId) durableCursorRef.current = 0;
       setBusySeconds(0);
       autoStoppedRef.current = false;
-      turnModalityRef.current = "text";
+      turnModalityRef.current = turn.modality;
       lastSendRef.current = { text: summary, atMs: currentTimeMs() };
       turnStartedAtRef.current = currentTimeMs();
       markTurnStarted();
       void sendRef.current?.({
         message: parts,
-        headers: messageModalityHeaders("text"),
+        headers: messageModalityHeaders(turn.modality),
       });
     } catch {
       // Files stay staged; her words stay in the composer. One quiet

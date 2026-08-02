@@ -1,4 +1,8 @@
 import { isHiddenDirective } from "../../lib/onboarding/directives";
+import {
+  isVoiceTranscriptionText,
+  markVoiceTranscription,
+} from "../../lib/voice/transcription-marker";
 
 export type ChatTurnModality = "text" | "voice";
 
@@ -80,8 +84,8 @@ export function prepareChatSend(input: {
   draftFromVoice: boolean;
   source: ChatSendSource;
 }): PreparedChatSend | null {
-  const message = input.text.trim();
-  if (message.length === 0) return null;
+  const rawMessage = input.text.trim();
+  if (rawMessage.length === 0) return null;
   // A tap on a card is not typing: it stays a text turn and it leaves
   // whatever she had half-written in the composer alone.
   const fromCard =
@@ -92,16 +96,20 @@ export function prepareChatSend(input: {
   // neither her draft nor the voice flag. The lane is decided by the
   // marker grammar rather than by the caller's say-so, so a caller that
   // forgets the source kind still cannot leak a marker into her words.
-  const directive = input.source.kind === "directive" || isHiddenDirective(message);
+  const directive =
+    input.source.kind === "directive" || isHiddenDirective(rawMessage);
+  const modality: ChatTurnModality =
+    fromCard || directive
+      ? "text"
+      : input.draftFromVoice || isVoiceTranscriptionText(rawMessage)
+        ? "voice"
+        : "text";
+  const message =
+    modality === "voice" ? markVoiceTranscription(rawMessage) : rawMessage;
   return {
     message,
     destination: input.busy ? "queue" : "send",
-    modality:
-      fromCard || directive
-        ? "text"
-        : input.draftFromVoice
-          ? "voice"
-          : "text",
+    modality,
     clearDraft: !fromCard && !directive,
     resetDraftFromVoice: !fromCard && !directive,
     progressActionKey:
@@ -221,6 +229,28 @@ export function flushChatQueue(
     modality: sending.some((entry) => entry.modality === "voice")
       ? "voice"
       : "text",
+  };
+}
+
+export function prepareAttachmentChatTurn(input: {
+  text: string;
+  attachmentBlocks: readonly string[];
+  draftFromVoice: boolean;
+}): { text: string; modality: ChatTurnModality } {
+  const parentText = input.text.trim();
+  const modality: ChatTurnModality =
+    parentText.length > 0 &&
+    (input.draftFromVoice || isVoiceTranscriptionText(parentText))
+      ? "voice"
+      : "text";
+  const markedParentText =
+    modality === "voice" ? markVoiceTranscription(parentText) : parentText;
+  return {
+    text: [
+      ...(markedParentText.length > 0 ? [markedParentText] : []),
+      ...input.attachmentBlocks,
+    ].join("\n\n"),
+    modality,
   };
 }
 
