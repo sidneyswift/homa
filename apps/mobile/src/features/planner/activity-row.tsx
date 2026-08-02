@@ -1,6 +1,9 @@
 import { Check } from "lucide-react-native";
+import { useState } from "react";
 import { Linking, Pressable, Text, View } from "react-native";
 
+import { InlineError } from "../../components/ui/inline-error";
+import { reportCrash } from "../../lib/crash-reporting";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
 import type { PlanActivityView } from "./planner-model";
@@ -16,13 +19,45 @@ export function ActivityRow({
   onToggle,
 }: {
   activity: PlanActivityView;
-  onToggle: () => void;
+  onToggle: () => Promise<void>;
 }) {
+  const [pending, setPending] = useState(false);
+  const [mutationError, setMutationError] = useState<string | null>(null);
+
+  async function handleToggle() {
+    if (pending) return;
+    setMutationError(null);
+    setPending(true);
+    try {
+      await onToggle();
+    } catch (cause) {
+      reportCrash(cause, { surface: "native-planner", operation: "toggle-activity" });
+      setMutationError(
+        "Homa couldn't confirm that check. Pull down to refresh before trying again.",
+      );
+    } finally {
+      setPending(false);
+    }
+  }
+
   return (
     <View style={{ paddingVertical: space.xs }}>
       <Pressable
-        onPress={onToggle}
-        style={{ flexDirection: "row", alignItems: "flex-start", gap: space.sm }}
+        accessibilityRole="checkbox"
+        accessibilityLabel={`${activity.text}. ${activity.childName}, ${activity.subjectName}`}
+        accessibilityState={{
+          checked: activity.done,
+          disabled: pending,
+          busy: pending,
+        }}
+        disabled={pending}
+        onPress={() => void handleToggle()}
+        style={{
+          minHeight: 44,
+          flexDirection: "row",
+          alignItems: "flex-start",
+          gap: space.sm,
+        }}
       >
         <View
           style={{
@@ -55,6 +90,9 @@ export function ActivityRow({
           </Text>
         </View>
       </Pressable>
+      {mutationError ? (
+        <InlineError message={mutationError} style={{ marginTop: space.xs }} />
+      ) : null}
       {activity.sources.length > 0 ? (
         <View style={{ marginLeft: 28, marginTop: 3, flexDirection: "row", flexWrap: "wrap" }}>
           <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.xs, color: colors.textSubtle }}>

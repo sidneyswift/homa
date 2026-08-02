@@ -4,6 +4,8 @@ import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-nativ
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "../../components/ui/button";
+import { InlineError } from "../../components/ui/inline-error";
+import { reportCrash } from "../../lib/crash-reporting";
 import { HOURS_SUBJECTS, type HoursSubject } from "../../lib/hours";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
@@ -28,20 +30,60 @@ export function EntryEditor({
   onClose,
 }: {
   entry: HoursEntry | null;
-  onSave: (edit: { subject: HoursSubject; minutes: number; note: string | null }) => void;
-  onDelete: () => void;
+  onSave: (edit: { subject: HoursSubject; minutes: number; note: string | null }) => Promise<void>;
+  onDelete: () => Promise<void>;
   onClose: () => void;
 }) {
   const [subject, setSubject] = useState<HoursSubject>(entry?.subject ?? "other");
   const [minutesText, setMinutesText] = useState(entry ? String(entry.minutes) : "");
   const [note, setNote] = useState(entry?.note ?? "");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"save" | "delete" | null>(null);
+  const [mutationError, setMutationError] = useState<string | null>(null);
 
   const minutes = Number(minutesText);
   const minutesValid = Number.isInteger(minutes) && minutes >= 1 && minutes <= 600;
+  const busy = pendingAction !== null;
+
+  async function handleSave() {
+    if (!minutesValid || busy) return;
+    setMutationError(null);
+    setPendingAction("save");
+    try {
+      await onSave({ subject, minutes, note: note.trim() || null });
+    } catch (cause) {
+      reportCrash(cause, { surface: "native-hours", operation: "save-entry" });
+      setMutationError(
+        "Your changes are still here. Homa couldn't confirm they saved. Check your connection and try again.",
+      );
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
+  async function handleDelete() {
+    if (busy) return;
+    setMutationError(null);
+    setPendingAction("delete");
+    try {
+      await onDelete();
+    } catch (cause) {
+      reportCrash(cause, { surface: "native-hours", operation: "delete-entry" });
+      setMutationError(
+        "Homa couldn't confirm the deletion. Close and refresh before trying again.",
+      );
+    } finally {
+      setPendingAction(null);
+    }
+  }
 
   return (
-    <Modal visible={entry !== null} animationType="slide" onRequestClose={onClose} presentationStyle="pageSheet">
+    <Modal
+      visible={entry !== null}
+      animationType="slide"
+      onRequestClose={busy ? () => undefined : onClose}
+      presentationStyle="pageSheet"
+    >
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }}>
         <View
           style={{
@@ -56,7 +98,14 @@ export function EntryEditor({
           <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }}>
             Edit entry
           </Text>
-          <Pressable onPress={onClose} hitSlop={8}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Close hours editor"
+            accessibilityState={{ disabled: busy }}
+            disabled={busy}
+            onPress={onClose}
+            hitSlop={8}
+          >
             <X size={22} color={colors.textSubtle} />
           </Pressable>
         </View>
@@ -72,6 +121,9 @@ export function EntryEditor({
                 return (
                   <Pressable
                     key={option}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: active, disabled: busy }}
+                    disabled={busy}
                     onPress={() => setSubject(option)}
                     style={{
                       paddingHorizontal: space.md,
@@ -102,6 +154,9 @@ export function EntryEditor({
               Minutes
             </Text>
             <TextInput
+              accessibilityLabel="Minutes"
+              accessibilityState={{ disabled: busy }}
+              editable={!busy}
               value={minutesText}
               onChangeText={setMinutesText}
               keyboardType="number-pad"
@@ -125,6 +180,9 @@ export function EntryEditor({
               Note
             </Text>
             <TextInput
+              accessibilityLabel="Note"
+              accessibilityState={{ disabled: busy }}
+              editable={!busy}
               value={note}
               onChangeText={setNote}
               placeholder="Optional"
@@ -146,10 +204,13 @@ export function EntryEditor({
             />
           </View>
 
+          {mutationError ? <InlineError message={mutationError} /> : null}
+
           <Button
-            label="Save changes"
-            disabled={!minutesValid}
-            onPress={() => onSave({ subject, minutes, note: note.trim() || null })}
+            label={pendingAction === "save" ? "Saving…" : "Save changes"}
+            disabled={!minutesValid || busy}
+            busy={pendingAction === "save"}
+            onPress={() => void handleSave()}
           />
 
           <View style={{ borderTopWidth: 1, borderTopColor: colors.borderSubtle, paddingTop: space.sm }}>
@@ -162,15 +223,30 @@ export function EntryEditor({
                 </Text>
                 <View style={{ flexDirection: "row", gap: space.sm }}>
                   <View style={{ flex: 1 }}>
-                    <Button label="Cancel" variant="secondary" onPress={() => setConfirmingDelete(false)} />
+                    <Button
+                      label="Cancel"
+                      variant="secondary"
+                      disabled={busy}
+                      onPress={() => setConfirmingDelete(false)}
+                    />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Button label="Delete" onPress={onDelete} />
+                    <Button
+                      label={pendingAction === "delete" ? "Deleting…" : "Delete"}
+                      onPress={() => void handleDelete()}
+                      disabled={busy}
+                      busy={pendingAction === "delete"}
+                    />
                   </View>
                 </View>
               </View>
             ) : (
-              <Pressable onPress={() => setConfirmingDelete(true)}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ disabled: busy }}
+                disabled={busy}
+                onPress={() => setConfirmingDelete(true)}
+              >
                 <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textMuted }}>
                   Delete this entry
                 </Text>

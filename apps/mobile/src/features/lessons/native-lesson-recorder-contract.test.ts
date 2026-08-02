@@ -64,6 +64,52 @@ describe("native lesson recorder safety contract", () => {
     assert.ok(deleteIndex < readyIndex);
   });
 
+  it("keeps local audio recoverable when session or creation fails", () => {
+    const saveStart = uploadSource.indexOf(
+      "export async function saveNativeLessonRecording",
+    );
+    const tryIndex = uploadSource.indexOf("try {", saveStart);
+    const sessionIndex = uploadSource.indexOf("token = await sessionToken()", saveStart);
+    const createIndex = uploadSource.indexOf(
+      'authenticatedFetch("/api/lessons", token',
+      saveStart,
+    );
+    const catchIndex = uploadSource.indexOf("} catch (error) {", saveStart);
+
+    assert.ok(saveStart < tryIndex);
+    assert.ok(tryIndex < sessionIndex);
+    assert.ok(sessionIndex < createIndex);
+    assert.ok(createIndex < catchIndex);
+    assert.match(
+      recorderSource,
+      /try \{[\s\S]*?await saveNativeLessonRecording[\s\S]*?\} catch \(cause\) \{[\s\S]*?setPhase\("save_failed"\)/u,
+    );
+    assert.match(
+      recorderSource,
+      /setPhase\("save_failed"\);[\s\S]*?return;[\s\S]*?const file = new File\(localUri\)/u,
+    );
+  });
+
+  it("keeps a saved but unfinished review distinct from ready", () => {
+    assert.match(
+      recorderSource,
+      /if \(result\.status === "ready"\) \{[\s\S]*?setPhase\("ready"\);[\s\S]*?return;[\s\S]*?\}[\s\S]*?setPhase\("processing"\);/u,
+    );
+    assert.match(
+      recorderSource,
+      /phase === "processing"[\s\S]*?Recording saved[\s\S]*?label="Back to Voice"[\s\S]*?onPress=\{\(\) => onResumeVoice\(\)\}/u,
+    );
+    assert.doesNotMatch(
+      recorderSource,
+      /setReviewSummary\([\s\S]*?still finishing[\s\S]*?setPhase\("ready"\)/u,
+    );
+    assert.match(uploadSource, /body\.status === "failed"[\s\S]*?status: "review_failed"/u);
+    assert.match(
+      recorderSource,
+      /result\.status === "review_failed"[\s\S]*?setPhase\("review_failed"\)/u,
+    );
+  });
+
   it("streams native audio through a family-scoped presigned upload", () => {
     assert.doesNotMatch(uploadSource, /@vercel\/blob/u);
     assert.match(uploadSource, /createUploadTask\(upload\.url/u);

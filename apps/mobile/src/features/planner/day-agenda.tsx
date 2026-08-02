@@ -28,7 +28,7 @@ export function DayAgenda({
   activities: ScheduledActivityView[];
   kids: ChildRecord[];
   onPressEvent: (event: FamilyEventRecord) => void;
-  onToggleActivity: (activity: ScheduledActivityView) => void;
+  onToggleActivity: (activity: ScheduledActivityView) => Promise<void>;
   showWeekday?: boolean;
 }) {
   const isToday = date === todayDateOnly();

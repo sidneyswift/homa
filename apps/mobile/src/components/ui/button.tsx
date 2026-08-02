@@ -40,6 +40,7 @@ export function Button({
   variant = "primary",
   size = "md",
   disabled = false,
+  busy = false,
   icon,
   style,
 }: {
@@ -49,6 +50,7 @@ export function Button({
   variant?: ButtonVariant;
   size?: "sm" | "md" | "lg";
   disabled?: boolean;
+  busy?: boolean;
   /** Optional mark shown before the label, e.g. the Google glyph. */
   icon?: ReactNode;
   style?: StyleProp<ViewStyle>;
@@ -57,25 +59,29 @@ export function Button({
   const vertical = size === "lg" ? 14 : size === "md" ? 12 : 8;
   const horizontal = size === "lg" ? space.lg : size === "md" ? 20 : space.md;
   const textSize = size === "sm" ? fontSize.sm : fontSize.base;
+  const minimumHeight = size === "lg" ? 52 : size === "md" ? 48 : 44;
+  const unavailable = disabled || busy;
 
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={label}
       accessibilityHint={accessibilityHint}
-      accessibilityState={{ disabled }}
+      accessibilityState={{ disabled: unavailable, busy }}
       onPress={onPress}
-      disabled={disabled}
+      disabled={unavailable}
       style={({ pressed }) => [
         {
           backgroundColor: look.backgroundColor,
           borderColor: look.borderColor,
           borderWidth: 1,
           borderRadius: radius.pill,
+          minHeight: minimumHeight,
           paddingVertical: vertical,
           paddingHorizontal: horizontal,
           alignItems: "center",
           justifyContent: "center",
-          opacity: disabled ? 0.6 : 1,
+          opacity: unavailable ? 0.6 : 1,
           transform: [{ scale: pressed ? pressScale : 1 }],
         },
         style,

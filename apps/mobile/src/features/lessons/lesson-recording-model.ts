@@ -14,6 +14,8 @@ export type LessonRecorderPhase =
   | "review"
   | "saving"
   | "analyzing"
+  | "processing"
+  | "review_failed"
   | "ready"
   | "save_failed"
   | "consent_failed"
@@ -110,6 +112,10 @@ export function recorderPhaseCopy(
       return "Saving the lesson privately. Keep Homa open until the upload finishes.";
     case "analyzing":
       return "The audio is saved. Homa is listening for the words, energy, and learning moments.";
+    case "processing":
+      return "The recording is saved. Homa is still finishing the lesson review. You can leave this screen while she keeps working.";
+    case "review_failed":
+      return "The recording is saved, but Homa couldn't finish this review. The audio is safe. You can leave this screen.";
     case "ready":
       return "The lesson review is ready. Return to Voice to talk it through.";
     case "save_failed":

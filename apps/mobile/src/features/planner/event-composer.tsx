@@ -4,6 +4,8 @@ import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-nativ
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "../../components/ui/button";
+import { InlineError } from "../../components/ui/inline-error";
+import { reportCrash } from "../../lib/crash-reporting";
 import type { ChildRecord } from "../../lib/family";
 import type { FamilyEventInput, FamilyEventRecord } from "../../lib/family-events";
 import { fontFamilies } from "../../theme/fonts";
@@ -29,7 +31,16 @@ function stepTime(time: string, direction: 1 | -1): string {
   return `${String(nextHour).padStart(2, "0")}:${String(nextMinute).padStart(2, "0")}`;
 }
 
-function DateStepper({ date, onChange }: { date: DateOnly; onChange: (next: DateOnly) => void }) {
+function DateStepper({
+  date,
+  disabled,
+  onChange,
+}: {
+  date: DateOnly;
+  disabled: boolean;
+  onChange: (next: DateOnly) => void;
+}) {
+  const dateLabel = `${formatWeekdayShort(date)}, ${formatMonthDay(date)}`;
   return (
     <View
       style={{
@@ -42,20 +53,43 @@ function DateStepper({ date, onChange }: { date: DateOnly; onChange: (next: Date
         paddingVertical: space.xs,
       }}
     >
-      <Pressable onPress={() => onChange(addDays(date, -1))} hitSlop={8}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Previous day from ${dateLabel}`}
+        accessibilityState={{ disabled }}
+        disabled={disabled}
+        onPress={() => onChange(addDays(date, -1))}
+        hitSlop={8}
+      >
         <ChevronLeft size={20} color={colors.textBody} />
       </Pressable>
       <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}>
         {formatWeekdayShort(date)}, {formatMonthDay(date)}
       </Text>
-      <Pressable onPress={() => onChange(addDays(date, 1))} hitSlop={8}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Next day from ${dateLabel}`}
+        accessibilityState={{ disabled }}
+        disabled={disabled}
+        onPress={() => onChange(addDays(date, 1))}
+        hitSlop={8}
+      >
         <ChevronRight size={20} color={colors.textBody} />
       </Pressable>
     </View>
   );
 }
 
-function TimeStepper({ time, onChange }: { time: string; onChange: (next: string) => void }) {
+function TimeStepper({
+  time,
+  disabled,
+  onChange,
+}: {
+  time: string;
+  disabled: boolean;
+  onChange: (next: string) => void;
+}) {
+  const timeLabel = formatTimeLabel(time);
   return (
     <View
       style={{
@@ -68,13 +102,27 @@ function TimeStepper({ time, onChange }: { time: string; onChange: (next: string
         paddingVertical: space.xs,
       }}
     >
-      <Pressable onPress={() => onChange(stepTime(time, -1))} hitSlop={8}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Earlier than ${timeLabel}`}
+        accessibilityState={{ disabled }}
+        disabled={disabled}
+        onPress={() => onChange(stepTime(time, -1))}
+        hitSlop={8}
+      >
         <ChevronLeft size={20} color={colors.textBody} />
       </Pressable>
       <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}>
         {formatTimeLabel(time)}
       </Text>
-      <Pressable onPress={() => onChange(stepTime(time, 1))} hitSlop={8}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Later than ${timeLabel}`}
+        accessibilityState={{ disabled }}
+        disabled={disabled}
+        onPress={() => onChange(stepTime(time, 1))}
+        hitSlop={8}
+      >
         <ChevronRight size={20} color={colors.textBody} />
       </Pressable>
     </View>
@@ -157,21 +205,53 @@ export function EventComposer({
   isEditing: boolean;
   childrenList: ChildRecord[];
   onChange: (next: EventComposerDraft) => void;
-  onSave: () => void;
-  onDelete?: () => void;
+  onSave: () => Promise<void>;
+  onDelete?: () => Promise<void>;
   onClose: () => void;
 }) {
-  const [saving, setSaving] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"save" | "delete" | null>(null);
+  const [mutationError, setMutationError] = useState<string | null>(null);
+  const busy = pendingAction !== null;
 
   async function handleSave() {
-    if (!draft.title.trim()) return;
-    setSaving(true);
-    await onSave();
-    setSaving(false);
+    if (!draft.title.trim() || busy) return;
+    setMutationError(null);
+    setPendingAction("save");
+    try {
+      await onSave();
+    } catch (cause) {
+      reportCrash(cause, { surface: "native-planner", operation: "save-event" });
+      setMutationError(
+        "Your plan is still here. Homa couldn't confirm it saved. Check your connection and try again.",
+      );
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
+  async function handleDelete() {
+    if (!onDelete || busy) return;
+    setMutationError(null);
+    setPendingAction("delete");
+    try {
+      await onDelete();
+    } catch (cause) {
+      reportCrash(cause, { surface: "native-planner", operation: "delete-event" });
+      setMutationError(
+        "Homa couldn't confirm the deletion. Close and refresh before trying again.",
+      );
+    } finally {
+      setPendingAction(null);
+    }
   }
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose} presentationStyle="pageSheet">
+    <Modal
+      visible={visible}
+      animationType="slide"
+      onRequestClose={busy ? () => undefined : onClose}
+      presentationStyle="pageSheet"
+    >
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }}>
         <View
           style={{
@@ -186,13 +266,23 @@ export function EventComposer({
           <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }}>
             {isEditing ? "Edit plan" : "New plan"}
           </Text>
-          <Pressable onPress={onClose} hitSlop={8}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Close plan editor"
+            accessibilityState={{ disabled: busy }}
+            disabled={busy}
+            onPress={onClose}
+            hitSlop={8}
+          >
             <X size={22} color={colors.textSubtle} />
           </Pressable>
         </View>
 
         <ScrollView contentContainerStyle={{ padding: space.md, gap: space.md }}>
           <TextInput
+            accessibilityLabel="Plan title"
+            accessibilityState={{ disabled: busy }}
+            editable={!busy}
             value={draft.title}
             onChangeText={(title) => onChange({ ...draft, title })}
             placeholder="What's happening?"
@@ -219,6 +309,9 @@ export function EventComposer({
                 return (
                   <Pressable
                     key={option.id ?? "everyone"}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: active, disabled: busy }}
+                    disabled={busy}
                     onPress={() => onChange({ ...draft, childId: option.id })}
                     style={{
                       paddingHorizontal: space.md,
@@ -250,6 +343,7 @@ export function EventComposer({
             </Text>
             <DateStepper
               date={draft.startsOn}
+              disabled={busy}
               onChange={(startsOn) =>
                 onChange({
                   ...draft,
@@ -263,12 +357,16 @@ export function EventComposer({
             </Text>
             <DateStepper
               date={draft.endsOn}
+              disabled={busy}
               onChange={(endsOn) => onChange({ ...draft, endsOn: endsOn < draft.startsOn ? draft.startsOn : endsOn })}
             />
           </View>
 
           <View style={{ gap: space.xs }}>
             <Pressable
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: draft.hasTime, disabled: busy }}
+              disabled={busy}
               onPress={() => onChange({ ...draft, hasTime: !draft.hasTime })}
               style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}
             >
@@ -289,10 +387,18 @@ export function EventComposer({
             {draft.hasTime ? (
               <View style={{ flexDirection: "row", gap: space.sm }}>
                 <View style={{ flex: 1 }}>
-                  <TimeStepper time={draft.startTime} onChange={(startTime) => onChange({ ...draft, startTime })} />
+                  <TimeStepper
+                    time={draft.startTime}
+                    disabled={busy}
+                    onChange={(startTime) => onChange({ ...draft, startTime })}
+                  />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <TimeStepper time={draft.endTime} onChange={(endTime) => onChange({ ...draft, endTime })} />
+                  <TimeStepper
+                    time={draft.endTime}
+                    disabled={busy}
+                    onChange={(endTime) => onChange({ ...draft, endTime })}
+                  />
                 </View>
               </View>
             ) : null}
@@ -303,6 +409,9 @@ export function EventComposer({
               Note
             </Text>
             <TextInput
+              accessibilityLabel="Note"
+              accessibilityState={{ disabled: busy }}
+              editable={!busy}
               value={draft.note}
               onChangeText={(note) => onChange({ ...draft, note })}
               placeholder="Optional"
@@ -323,13 +432,22 @@ export function EventComposer({
             />
           </View>
 
+          {mutationError ? <InlineError message={mutationError} /> : null}
+
           <Button
-            label={saving ? "Saving…" : isEditing ? "Save changes" : "Add to plan"}
+            label={pendingAction === "save" ? "Saving…" : isEditing ? "Save changes" : "Add to plan"}
             onPress={() => void handleSave()}
-            disabled={saving || !draft.title.trim()}
+            disabled={busy || !draft.title.trim()}
+            busy={pendingAction === "save"}
           />
           {isEditing && onDelete ? (
-            <Button label="Delete" variant="ghost" onPress={onDelete} />
+            <Button
+              label={pendingAction === "delete" ? "Deleting…" : "Delete"}
+              variant="ghost"
+              onPress={() => void handleDelete()}
+              disabled={busy}
+              busy={pendingAction === "delete"}
+            />
           ) : null}
         </ScrollView>
       </SafeAreaView>

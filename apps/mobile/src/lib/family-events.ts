@@ -1,4 +1,8 @@
 import { supabase } from "./supabase";
+import {
+  requireMutationReceipt,
+  requireReceiptValue,
+} from "./mutation-receipt";
 
 export interface FamilyEventRecurrence {
   frequency: "weekly";
@@ -61,28 +65,42 @@ export async function getFamilyEvents(
 }
 
 export async function createFamilyEvent(
+  eventId: string,
   familyId: string,
   input: FamilyEventInput,
-): Promise<{ error: string | null }> {
-  const { error } = await supabase.from("family_events").insert({
-    family_id: familyId,
-    child_id: input.childId,
-    title: input.title.trim(),
-    starts_on: input.startsOn,
-    ends_on: input.endsOn,
-    start_time: input.startTime,
-    end_time: input.endTime,
-    note: input.note?.trim() || null,
-    recurrence_rule: input.recurrence ?? null,
-  });
-  return { error: error ? error.message : null };
+): Promise<{ id: string }> {
+  const result = await supabase
+    .from("family_events")
+    .upsert(
+      {
+        id: eventId,
+        family_id: familyId,
+        child_id: input.childId,
+        title: input.title.trim(),
+        starts_on: input.startsOn,
+        ends_on: input.endsOn,
+        start_time: input.startTime,
+        end_time: input.endTime,
+        note: input.note?.trim() || null,
+        recurrence_rule: input.recurrence ?? null,
+      },
+      { onConflict: "id" },
+    )
+    .select("id, family_id")
+    .single();
+  const receipt = requireMutationReceipt("create_family_event", result);
+  requireReceiptValue(
+    "create_family_event",
+    receipt.id === eventId && receipt.family_id === familyId,
+  );
+  return { id: receipt.id };
 }
 
 export async function updateFamilyEvent(
   eventId: string,
   input: FamilyEventInput,
-): Promise<{ error: string | null }> {
-  const { error } = await supabase
+): Promise<{ id: string }> {
+  const result = await supabase
     .from("family_events")
     .update({
       child_id: input.childId,
@@ -94,11 +112,18 @@ export async function updateFamilyEvent(
       note: input.note?.trim() || null,
       recurrence_rule: input.recurrence ?? null,
     })
-    .eq("id", eventId);
-  return { error: error ? error.message : null };
+    .eq("id", eventId)
+    .select("id")
+    .maybeSingle();
+  return requireMutationReceipt("update_family_event", result);
 }
 
-export async function deleteFamilyEvent(eventId: string): Promise<{ error: string | null }> {
-  const { error } = await supabase.from("family_events").delete().eq("id", eventId);
-  return { error: error ? error.message : null };
+export async function deleteFamilyEvent(eventId: string): Promise<{ id: string }> {
+  const result = await supabase
+    .from("family_events")
+    .delete()
+    .eq("id", eventId)
+    .select("id")
+    .maybeSingle();
+  return requireMutationReceipt("delete_family_event", result);
 }

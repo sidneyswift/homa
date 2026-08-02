@@ -1,6 +1,11 @@
 import type { FourWeekPlan } from "@homa/core";
 
 import { supabase } from "./supabase";
+import {
+  requireMutationAcknowledgement,
+  requireMutationReceipt,
+  requireReceiptValue,
+} from "./mutation-receipt";
 
 /**
  * Four-week plan reads plus the atomic check-off toggle, ported from
@@ -50,7 +55,7 @@ export async function toggleActivityCheck(
   week: number,
   activityIndex: number,
   done: boolean,
-): Promise<{ error: string | null }> {
+): Promise<{ id: string; progressKey: string; done: boolean }> {
   const { error } = await supabase.rpc("toggle_plan_activity_check", {
     target_child_id: childId,
     target_subject_id: subjectId,
@@ -58,5 +63,20 @@ export async function toggleActivityCheck(
     target_activity_index: activityIndex,
     target_done: done,
   });
-  return { error: error ? error.message : null };
+  requireMutationAcknowledgement("toggle_plan_activity_check", error);
+
+  const result = await supabase
+    .from("child_plans")
+    .select("id, progress")
+    .eq("child_id", childId)
+    .eq("subject_id", subjectId)
+    .maybeSingle();
+  const receipt = requireMutationReceipt("verify_plan_activity_check", result);
+  const progressKey = `${week}.${activityIndex}`;
+  const progress = receipt.progress as Record<string, unknown>;
+  requireReceiptValue(
+    "verify_plan_activity_check",
+    progress[progressKey] === done,
+  );
+  return { id: receipt.id, progressKey, done };
 }
