@@ -15,21 +15,29 @@ the diff.
 1. `pnpm pull:state-requirements`: fetches the API and rewrites normalized,
    recursively key-sorted JSON in
    `data/state-requirements/` (51 per-state files + index + manifest).
-   A diff means the normalized upstream payload changed. Current validation
-   checks count and selected fields, but does not prove the exact jurisdiction
-   set, uniqueness, or every legal field. The pull does not delete stale files.
+   Before writing, the pull applies the source-backed exact-value corrections in
+   `scripts/state-requirements-reviewed-corrections.mts`. A correction only
+   recognizes its reviewed bad value and corrected value; a third value aborts
+   for human review. A diff means the upstream payload or reviewed correction
+   changed. Validation checks count, selected fields, and mechanically
+   checkable citation label-to-URL section consistency, but does not prove the
+   exact jurisdiction set, uniqueness, or every legal field. The pull does not
+   delete stale files.
 2. `git diff data/state-requirements`: THE review gate. Read every
    changed claim. Statute cites, deadlines, and threshold rules deserve a
    check against the linked statute (each state file carries
    `sources.statute_url` and `citation_urls`).
-3. `pnpm seed:state-requirements -- --confirm-prod`: upserts snapshots into the table
-   (direct pooler connection, `SUPABASE_DB_PASSWORD`; the table has no
-   Data API write policies). The confirmation flag is required for hosted
-   writes. The script performs 51 sequential upserts without one wrapping
-   transaction, then checks the final count. A mid-run failure can leave a
-   partial refresh. Its changed/unchanged summary compares payload JSON only,
-   while `updated_at` watches only payload and two booleans. Treat the summary
-   as narrower than full-row parity.
+3. Run the `State requirements seed` workflow on `main`, entering the exact
+   reviewed commit SHA. It calls
+   `pnpm seed:state-requirements -- --confirm-prod` with the repository's
+   production secrets and upserts snapshots through the direct pooler; the
+   table has no Data API write policies. A local run of that command remains
+   available when the same credentials are configured. The script performs 51
+   sequential upserts without one wrapping transaction, then reads every
+   payload back and compares it with the reviewed snapshots. A mid-run failure
+   can leave a partial refresh, but cannot report success without full payload
+   parity. Its changed/unchanged summary compares payload JSON only, while
+   `updated_at` watches only payload and two booleans.
 4. Commit the reviewed snapshot diff. Record a sanitized seed receipt with the
    target, snapshot pull time, row count, and outcome. Git history alone does
    not prove that the external table matches the commit.

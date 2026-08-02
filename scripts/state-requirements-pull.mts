@@ -37,6 +37,11 @@ import {
   type IndexStateEntry,
   type StateDetail,
 } from "./state-requirements-shared.mts";
+import {
+  applyReviewedStateRequirementCorrections,
+  findCitationUrlMismatches,
+  type ReviewedCorrectionReceipt,
+} from "./state-requirements-reviewed-corrections.mts";
 
 const BASE_URL = "https://homeschoolleap.com";
 const FETCH_TIMEOUT_MS = 20_000;
@@ -93,9 +98,19 @@ if (!Array.isArray(index.states) || index.states.length !== EXPECTED_JURISDICTIO
 const codes = index.states.map((entry) => entry.state_code).sort();
 const details = new Map<string, StateDetail>();
 const problems: string[] = [];
+const reviewedCorrections: ReviewedCorrectionReceipt[] = [];
 
 for (const code of codes) {
-  const detail = (await fetchJson(`/api/states/${code}`)) as StateDetail;
+  const upstream = (await fetchJson(`/api/states/${code}`)) as StateDetail;
+  const corrected = applyReviewedStateRequirementCorrections(upstream);
+  const detail = corrected.detail;
+  reviewedCorrections.push(...corrected.applied);
+  problems.push(...corrected.problems.map((problem) => `${code}: ${problem}`));
+  problems.push(
+    ...findCitationUrlMismatches(detail).map(
+      (problem) => `${code}: citation URL mismatch: ${problem}`,
+    ),
+  );
   if (detail.state_code !== code) problems.push(`${code}: payload says state_code=${detail.state_code}`);
   if (!Array.isArray(detail.pathways) || detail.pathways.length === 0) problems.push(`${code}: no pathways`);
   if (!detail.last_verified) problems.push(`${code}: missing last_verified`);
@@ -124,6 +139,7 @@ await writeFile(
     attribution: index.attribution,
     pulled_at: pulledAt,
     jurisdictions: codes.length,
+    reviewed_corrections: reviewedCorrections,
   }),
 );
 
@@ -135,6 +151,7 @@ for (const detail of details.values()) {
 }
 
 console.log(`Wrote ${codes.length} jurisdictions + index + manifest (pulled_at ${pulledAt}).`);
+console.log(`Applied ${reviewedCorrections.length} reviewed upstream correction(s).`);
 console.log(
   `Verification statuses: ${[...statuses.entries()].map(([status, n]) => `${status}=${n}`).join(", ")}; ` +
     `oldest last_verified ${oldestVerified}.`,
