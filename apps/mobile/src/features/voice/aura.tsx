@@ -20,7 +20,7 @@ import type { CharacterState } from "./character-state";
  * sunshine gold that breathe out of sync with the character's bob.
  * Deliberately NOT a spinner and NOT an equalizer: no strokes, no arcs,
  * no bars, just light that swells when she is paying attention, dims
- * while she works, and pulses gently while she talks.
+ * while she works, and follows the received audio level while she talks.
  *
  * Rendered behind the mark by HomaCharacter (homa-character.tsx); the
  * screen never mounts this on its own unless it wants a bare glow.
@@ -32,6 +32,7 @@ import type { CharacterState } from "./character-state";
 const SETTLE = Easing.bezier(0.22, 0.8, 0.28, 1);
 const BREATHE = Easing.inOut(Easing.sin);
 const SETTLE_MS = 280;
+const AUDIO_RESPONSE_MS = 120;
 
 /** One ring's breathing band in a given state. */
 interface Breath {
@@ -76,6 +77,7 @@ function AuraRing({
   coreStop,
   midStop,
   midOffset,
+  audioLevel,
 }: {
   state: CharacterState;
   diameter: number;
@@ -88,6 +90,7 @@ function AuraRing({
   coreStop: number;
   midStop: number;
   midOffset: number;
+  audioLevel: number | null;
 }) {
   const reduced = useReducedMotion();
   const scale = useSharedValue(1);
@@ -100,6 +103,21 @@ function AuraRing({
       return;
     }
     const band = bands[state];
+    if (state === "speaking" && audioLevel !== null) {
+      const level = Math.min(1, Math.max(0, audioLevel));
+      scale.value = withTiming(
+        band.scaleMin + (band.scaleMax - band.scaleMin) * level,
+        { duration: AUDIO_RESPONSE_MS, easing: SETTLE },
+      );
+      opacity.value = withTiming(
+        band.opacityMin + (band.opacityMax - band.opacityMin) * level,
+        { duration: AUDIO_RESPONSE_MS, easing: SETTLE },
+      );
+      return () => {
+        cancelAnimation(scale);
+        cancelAnimation(opacity);
+      };
+    }
     const half = band.period / 2;
     scale.value = withSequence(
       withTiming(band.scaleMin, { duration: SETTLE_MS, easing: SETTLE }),
@@ -121,7 +139,7 @@ function AuraRing({
       cancelAnimation(scale);
       cancelAnimation(opacity);
     };
-  }, [state, reduced, bands, stillOpacity, scale, opacity]);
+  }, [state, reduced, bands, stillOpacity, scale, opacity, audioLevel]);
 
   const ringStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -150,7 +168,15 @@ function AuraRing({
   );
 }
 
-export function Aura({ state, size }: { state: CharacterState; size: number }) {
+export function Aura({
+  state,
+  size,
+  audioLevel = null,
+}: {
+  state: CharacterState;
+  size: number;
+  audioLevel?: number | null;
+}) {
   // Wide and slow: best-in-class orbs radiate into their field. The
   // outer wash reaches ~2.4x the mark so the glow blends into the
   // screen's own gold field instead of dying at the silhouette
@@ -177,6 +203,7 @@ export function Aura({ state, size }: { state: CharacterState; size: number }) {
         coreStop={0.7}
         midStop={0.4}
         midOffset={0.68}
+        audioLevel={audioLevel}
       />
       <AuraRing
         state={state}
@@ -189,6 +216,7 @@ export function Aura({ state, size }: { state: CharacterState; size: number }) {
         coreStop={0.85}
         midStop={0.4}
         midOffset={0.55}
+        audioLevel={audioLevel}
       />
     </View>
   );

@@ -72,8 +72,40 @@ const family = {
   familyName: "Walker",
   parentName: "Robin Walker",
   children: [
-    { name: "Finn", birthdate: "2018-03-09" },
-    { name: "Maya", birthdate: "2020-11-21" },
+    {
+      id: "11111111-1111-4111-8111-111111111111",
+      name: "Finn",
+      birthdate: "2018-03-09",
+    },
+    {
+      id: "22222222-2222-4222-8222-222222222222",
+      name: "Maya",
+      birthdate: "2020-11-21",
+    },
+  ],
+};
+
+const records = {
+  schoolYearStartOn: "2026-07-01",
+  entries: [
+    {
+      happenedOn: "2026-07-08",
+      childId: null,
+      subject: "Science",
+      minutes: 75,
+    },
+    {
+      happenedOn: "2026-07-09",
+      childId: family.children[0].id,
+      subject: "Reading",
+      minutes: 40,
+    },
+    {
+      happenedOn: "2026-07-09",
+      childId: family.children[1].id,
+      subject: "Math",
+      minutes: 35,
+    },
   ],
 };
 
@@ -97,6 +129,7 @@ for (const code of CODES) {
     family,
     packId: "12345678-abcd-4ef0-8123-456789abcdef",
     generatedOn: "July 28, 2026",
+    records,
   });
   const rendered = await renderPrintableHtml(pack.html);
   const parity = rendered.pageCount === pack.pages.length;

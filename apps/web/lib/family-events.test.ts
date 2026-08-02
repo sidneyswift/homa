@@ -6,8 +6,41 @@ import {
   familyEventPatchIsEmpty,
   MAX_EVENT_WINDOW_DAYS,
   parseFamilyEventInput,
+  parseFamilyEventRecurrence,
   resolveEventWindow,
 } from "./family-events";
+
+describe("family event recurrence", () => {
+  it("normalizes a valid weekly series", () => {
+    assert.deepEqual(
+      parseFamilyEventRecurrence(
+        { frequency: "weekly", interval: 1, weekdays: [4, 2], until: "2026-12-31" },
+        "2026-08-04",
+      ),
+      {
+        ok: true,
+        value: { frequency: "weekly", interval: 1, weekdays: [2, 4], until: "2026-12-31" },
+      },
+    );
+  });
+
+  it("rejects duplicate weekdays and an end before the series starts", () => {
+    assert.equal(
+      parseFamilyEventRecurrence(
+        { frequency: "weekly", interval: 1, weekdays: [2, 2], until: null },
+        "2026-08-04",
+      ).ok,
+      false,
+    );
+    assert.equal(
+      parseFamilyEventRecurrence(
+        { frequency: "weekly", interval: 1, weekdays: [2], until: "2026-08-01" },
+        "2026-08-04",
+      ).ok,
+      false,
+    );
+  });
+});
 
 /**
  * parseFamilyEventInput (issue #176, CG-03): the one validation gate
@@ -28,6 +61,7 @@ describe("parseFamilyEventInput", () => {
       startTime: null,
       endTime: null,
       note: null,
+      recurrence: null,
     });
   });
 
@@ -231,6 +265,7 @@ describe("applyFamilyEventPatch", () => {
       startTime: "09:00",
       endTime: "17:00",
       note: "Pack the tent",
+      recurrence: null,
     });
   });
 

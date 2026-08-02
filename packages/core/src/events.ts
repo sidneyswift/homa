@@ -517,6 +517,83 @@ export const EVENT_SCHEMAS = {
       client: z.enum(PLANNER_EVENT_CLIENTS),
     })
     .strict(),
+  // A parent checked the exact device-calendar export before Homa asked
+  // for write-only access. Counts only, never titles, notes, or calendar
+  // names. The export remains a client-side copy of planner truth.
+  "planner.device_calendar_previewed": z
+    .object({
+      family_id: z.uuid(),
+      selected_count: z.number().int().min(1),
+      duplicate_count: z.number().int().min(0),
+    })
+    .strict(),
+  // The terminal receipt for one device-calendar export attempt. This is
+  // deliberately aggregate-only because the app must not send personal
+  // calendar metadata or planner content through analytics.
+  "planner.device_calendar_export_finished": z
+    .object({
+      family_id: z.uuid(),
+      outcome: z.enum(["saved", "canceled", "denied", "failed", "mixed", "duplicates_only"]),
+      selected_count: z.number().int().min(1),
+      saved_count: z.number().int().min(0),
+      duplicate_count: z.number().int().min(0),
+      failed_count: z.number().int().min(0),
+    })
+    .strict(),
+  // Voice-built month plans (gh#539). Drafts remain session-bound until
+  // approval, so these events carry only ids and counts, never plan copy.
+  "planner.month_draft_requested": z
+    .object({
+      family_id: z.uuid(),
+      draft_id: z.uuid(),
+      child_count: z.number().int().min(1).max(8),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
+  "planner.month_preview_ready": z
+    .object({
+      family_id: z.uuid(),
+      draft_id: z.uuid(),
+      revision: z.number().int().min(1),
+      conflict_count: z.number().int().min(0),
+      unresolved_count: z.number().int().min(0),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
+  "planner.month_approved": z
+    .object({
+      family_id: z.uuid(),
+      draft_id: z.uuid(),
+      revision: z.number().int().min(1),
+      child_count: z.number().int().min(1).max(8),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
+  "planner.month_revised": z
+    .object({
+      family_id: z.uuid(),
+      draft_id: z.uuid(),
+      revision: z.number().int().min(2),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
+  "planner.month_abandoned": z
+    .object({
+      family_id: z.uuid(),
+      draft_id: z.uuid(),
+      revision: z.number().int().min(1),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
+  "planner.month_restored": z
+    .object({
+      family_id: z.uuid(),
+      draft_id: z.uuid(),
+      revision: z.number().int().min(2),
+      restored_from: z.number().int().min(1),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
   // Homa edited a plan's activities from chat (the edit_plan tool, one
   // event per applied batch). Counts only, no activity text: the funnel
   // reads how often the agent drives the planner without carrying PII.
@@ -698,6 +775,24 @@ export const EVENT_SCHEMAS = {
     requested_copies: z.number().int().min(1).max(20),
     pages_selected: z.number().int().min(1),
     answer_key_excluded: z.boolean(),
+  }),
+  // The native share sheet is a parent-controlled handoff, never a
+  // delivery receipt. No destination app, account, message, or child
+  // detail enters analytics.
+  "materials.share_result": z.object({
+    family_id: z.uuid(),
+    material_id: z.uuid(),
+    outcome: z.enum(["handed_off", "canceled", "failed"]),
+    reason: z.enum([
+      "no-session",
+      "app-backgrounded",
+      "offline",
+      "missing-material",
+      "expired-material",
+      "download-failed",
+      "unsupported-destination",
+      "share-failed",
+    ]).optional(),
   }),
   // The state pack (journeys/06 rows 47-50, J4; shipped 2026-07-28 per
   // docs/homa-planning/plans/2026-07-28-state-pack.md). Deterministic

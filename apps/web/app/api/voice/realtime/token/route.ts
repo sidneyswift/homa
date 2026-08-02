@@ -9,6 +9,7 @@ import { resolveApiFamily } from "../../../../../lib/api-auth";
 import {
   buildRealtimeAudioProviderOptions,
   buildRealtimeInstructions,
+  voiceSpeakerName,
 } from "../../../../../lib/voice/realtime-session";
 import { realtimeToolDefinitions } from "../../../../../lib/voice/realtime-tools";
 
@@ -113,7 +114,9 @@ export async function POST(request: Request): Promise<Response> {
   let familyContext = "";
   try {
     const rows = await loadFamilyContextPinned(familyId);
-    familyContext = renderFamilyContext(rows, { speakingWith: null });
+    familyContext = renderFamilyContext(rows, {
+      speakingWith: voiceSpeakerName(rows.members, auth.userId),
+    });
   } catch (error) {
     console.error(
       "realtime token: family context load failed:",

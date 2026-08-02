@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -29,19 +29,22 @@ import { MaterialDetailModal } from "../../features/binder/material-detail-modal
 import { MaterialGridCard } from "../../features/binder/material-grid-card";
 import { useBinderData } from "../../features/binder/use-binder-data";
 import { useFamilyData } from "../../features/family/use-family-data";
+import { useVoiceWorkbench } from "../../features/voice/voice-workbench-provider";
 import { keepMaterial } from "../../lib/materials";
+import type { StateRecordDocument } from "../../lib/state-records";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { StateRecordsCard } from "../../features/state-records/state-records-card";
 
 const COVER_COUNT = 3;
 
 /**
  * Binder: every worksheet, coloring page, or other material Homa has
  * made, ported from apps/web/app/app/binder/{page,binder-view}.tsx.
- * Scoped out of this v1, each a tracked gap, not a silent one: the
- * StatePackCard/StateFilingCard compliance cards (a separate feature
- * bolted onto the top of web's page, not part of materials proper),
- * the VersionRail ("earlier tries" on a detail card), and per-child
+ * The state-record card above the material grid is a separate legal-record
+ * surface, backed by the server's reviewed requirements and append-only
+ * packet history. Still scoped out of this v1: the general materials
+ * VersionRail ("earlier tries" on a detail card), and per-child
  * view-context scoping (mobile has no equivalent session state yet;
  * the whole family's binder shows, same precedent Hours already set).
  *
@@ -58,6 +61,7 @@ export default function BinderScreen() {
   const [openMaterial, setOpenMaterial] = useState<BinderMaterial | null>(null);
   const [keepingId, setKeepingId] = useState<string | null>(null);
   const [nowMs] = useState(() => Date.now());
+  const { showActiveObject, clearActiveObject } = useVoiceWorkbench();
 
   const materials = useMemo(() => toBinderMaterials(finalMaterials, children), [finalMaterials, children]);
   const inProgress = useMemo(() => toBinderMaterials(inProgressMaterials, children), [inProgressMaterials, children]);
@@ -68,12 +72,60 @@ export default function BinderScreen() {
   const cover = showCover ? binderCover(materials, nowMs, COVER_COUNT) : null;
   const gridMaterials = cover ? filtered.filter((material) => !cover.items.some((item) => item.id === material.id)) : filtered;
 
+  useEffect(() => {
+    if (!openMaterial) return;
+    const reference = {
+      kind: "material" as const,
+      objectId: openMaterial.id,
+      version: openMaterial.createdAt,
+    };
+    return () => clearActiveObject(reference);
+  }, [clearActiveObject, openMaterial]);
+
   async function handleKeep(materialId: string) {
     if (!family) return;
     setKeepingId(materialId);
     await keepMaterial(family.id, materialId);
     setKeepingId(null);
     void reload();
+  }
+
+  function openStateRecord(document: StateRecordDocument) {
+    openMaterialDetail({
+      id: document.id,
+      title: document.title,
+      kind: "packet",
+      subject: document.type === "pack" ? "State pack" : "State filing",
+      theme: null,
+      skill: null,
+      childId: null,
+      childName: null,
+      previewUrl: document.previewUrl,
+      pdfUrl: document.pdfUrl,
+      createdAt: document.createdAt,
+      pageCount: document.pageCount,
+      pagePreviewUrls: null,
+    });
+  }
+
+  function openMaterialDetail(material: BinderMaterial) {
+    showActiveObject({
+      kind: "material",
+      objectId: material.id,
+      version: material.createdAt,
+    });
+    setOpenMaterial(material);
+  }
+
+  function closeMaterialDetail() {
+    if (openMaterial) {
+      clearActiveObject({
+        kind: "material",
+        objectId: openMaterial.id,
+        version: openMaterial.createdAt,
+      });
+    }
+    setOpenMaterial(null);
   }
 
   return (
@@ -101,6 +153,10 @@ export default function BinderScreen() {
           <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.danger }}>
             {"That didn't load. Pull down to try again."}
           </Text>
+        ) : null}
+
+        {!familyLoading && family ? (
+          <StateRecordsCard onOpenDocument={openStateRecord} />
         ) : null}
 
         {inProgress.length > 0 ? (
@@ -201,14 +257,14 @@ export default function BinderScreen() {
             <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textBody }}>
               {cover.heading}
             </Text>
-            <MaterialGrid materials={cover.items} onSelect={setOpenMaterial} />
+            <MaterialGrid materials={cover.items} onSelect={openMaterialDetail} />
           </View>
         ) : null}
 
-        {gridMaterials.length > 0 ? <MaterialGrid materials={gridMaterials} onSelect={setOpenMaterial} /> : null}
+        {gridMaterials.length > 0 ? <MaterialGrid materials={gridMaterials} onSelect={openMaterialDetail} /> : null}
       </ScrollView>
 
-      <MaterialDetailModal material={openMaterial} onClose={() => setOpenMaterial(null)} />
+      <MaterialDetailModal material={openMaterial} onClose={closeMaterialDetail} />
     </SafeAreaView>
   );
 }

@@ -6,6 +6,7 @@ import {
   buildRealtimeAudioProviderOptions,
   buildRealtimeInstructions,
   composeRealtimeInstructions,
+  voiceSpeakerName,
   VOICE_MODE_RULES,
 } from "./realtime-session";
 import { VOICE_PERSONA_MARKDOWN } from "./persona.generated";
@@ -36,6 +37,22 @@ describe("realtime voice instructions", () => {
     assert.ok(out.includes("You are Homa"));
     assert.ok(VOICE_PERSONA_MARKDOWN.length > 500);
     assert.ok(!VOICE_PERSONA_MARKDOWN.includes("## What you know each turn"));
+  });
+
+  it("opens the conversation itself with a varied, personal question", () => {
+    assert.match(VOICE_MODE_RULES, /Open the conversation yourself/u);
+    assert.match(VOICE_MODE_RULES, /first name/u);
+    assert.match(VOICE_MODE_RULES, /Vary the wording naturally/u);
+    assert.match(VOICE_MODE_RULES, /Never guess/u);
+  });
+
+  it("selects only the authenticated adult's own name", () => {
+    const members = [
+      { user_id: "adult-a", display_name: "Elena Rivera" },
+      { user_id: "adult-b", display_name: "Jordan Rivera" },
+    ];
+    assert.equal(voiceSpeakerName(members, "adult-b"), "Jordan Rivera");
+    assert.equal(voiceSpeakerName(members, "adult-c"), null);
   });
 });
 

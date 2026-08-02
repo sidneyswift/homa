@@ -533,6 +533,13 @@ async function planActivityScheduleSchemaExists() {
   return rows[0]?.present === true;
 }
 
+async function monthPlanApprovalsSchemaExists() {
+  const rows = await sql`
+    select to_regclass('public.month_plan_approvals') is not null as present
+  `;
+  return rows[0]?.present === true;
+}
+
 /**
  * The subject_lessons migration deliberately ships as an expand/contract
  * pair (2026-07-18 merge-to-main review finding): the enforcing trigger is
@@ -2468,6 +2475,18 @@ async function expectAuthenticatedIsolation() {
           "create Family B plan_activity_schedule fixture",
         )
       : null;
+    const monthPlanApprovalsSchemaAvailable = await monthPlanApprovalsSchemaExists();
+    const monthPlanApprovalBId = monthPlanApprovalsSchemaAvailable
+      ? (
+          await sql`
+            insert into public.month_plan_approvals
+              (draft_id, family_id, month_start, final_revision, revision_history)
+            values
+              (gen_random_uuid(), ${familyBId}, '2026-01-01'::date, 1, '[]'::jsonb)
+            returning draft_id
+          `
+        )[0]?.draft_id
+      : null;
     const materialBId = await insertFixtureRow(
       familyBUser,
       "materials",
@@ -3298,6 +3317,67 @@ async function expectAuthenticatedIsolation() {
           label,
           true,
           "not yet enforced: the plan_activity_schedule migration (issue #176) is deliberately pending on this target",
+        );
+      }
+    }
+
+    if (monthPlanApprovalsSchemaAvailable) {
+      await expectAuthenticatedRead(
+        familyBUser.accessToken,
+        "month_plan_approvals",
+        monthPlanApprovalBId,
+        1,
+        "auth member can read own approved month receipt",
+        "draft_id",
+      );
+      await expectAuthenticatedRead(
+        familyAUser.accessToken,
+        "month_plan_approvals",
+        monthPlanApprovalBId,
+        0,
+        "auth member cannot read another family's approved month receipt",
+        "draft_id",
+      );
+      await expectAuthenticatedInsertDenied(
+        familyBUser.accessToken,
+        "month_plan_approvals",
+        {
+          draft_id: "00000000-0000-4000-8000-000000000099",
+          family_id: familyBId,
+          month_start: "2026-02-01",
+          final_revision: 1,
+          revision_history: [],
+        },
+        "auth member cannot forge an approved month receipt",
+      );
+      await expectAuthenticatedUpdateDenied(
+        familyBUser.accessToken,
+        "month_plan_approvals",
+        "draft_id",
+        monthPlanApprovalBId,
+        { final_revision: 2 },
+        "auth member cannot update an approved month receipt",
+      );
+      await expectAuthenticatedDeleteDenied(
+        familyBUser.accessToken,
+        "month_plan_approvals",
+        "draft_id",
+        monthPlanApprovalBId,
+        "auth member cannot delete an approved month receipt",
+      );
+    } else {
+      coveredTables.add("month_plan_approvals");
+      for (const label of [
+        "auth member can read own approved month receipt",
+        "auth member cannot read another family's approved month receipt",
+        "auth member cannot forge an approved month receipt",
+        "auth member cannot update an approved month receipt",
+        "auth member cannot delete an approved month receipt",
+      ]) {
+        report(
+          label,
+          true,
+          "not yet enforced: the month_plan_approvals migration is pending on this target",
         );
       }
     }

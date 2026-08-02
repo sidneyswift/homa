@@ -247,22 +247,23 @@ describe("one row while Homa works", () => {
     );
     assert.match(
       source,
-      /busy &&\s*item\.kind === "message" &&\s*itemIndex === transcript\.length - 1 &&\s*item\.message\.role === "assistant" &&\s*!messageSaysSomething\(item\.message\)/u,
+      /renderBusy &&\s*item\.kind === "message" &&\s*itemIndex === transcript\.length - 1 &&\s*item\.message\.role === "assistant" &&\s*!messageSaysSomething\(item\.message\)/u,
     );
   });
 
   it("still renders the eyebrow once the turn is over", () => {
-    // The skip is gated on `busy` on purpose: when the turn ends, a
-    // message whose only content was tool calls becomes an honest
-    // receipt for work that really happened, and must come back.
+    // The skip is gated on the hydration-safe render status on purpose:
+    // when the turn ends, a message whose only content was tool calls
+    // becomes an honest receipt for work that really happened, and must
+    // come back.
     const source = readFileSync(
       new URL("./chat-client.tsx", import.meta.url),
       "utf8",
     );
     const skip = source.slice(source.indexOf("One row for one turn"));
     assert.ok(
-      skip.slice(0, 1400).includes("busy &&"),
-      "the skip is not gated on busy, so finished turns would vanish too",
+      skip.slice(0, 1400).includes("renderBusy &&"),
+      "the skip is not gated on render status, so finished turns would vanish too",
     );
   });
 });
