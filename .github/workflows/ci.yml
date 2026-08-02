@@ -488,6 +488,10 @@ jobs:
         timeout-minutes: 10
         run: pnpm test:family-curriculum-mapping:postgres
 
+      - name: Family Library training provenance disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm test:family-library-training:postgres
+
   # Guard shard 3 of 3: the acceptance E2Es and the two secret-needing
   # database checks, the three longest steps in the roster (each 24-50s),
   # so they share a runner instead of tailing another shard.
