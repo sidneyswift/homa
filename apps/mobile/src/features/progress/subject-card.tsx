@@ -39,7 +39,14 @@ export function SubjectCard({
       ? progressSubjectHeadline(subject.state)
       : null;
   const accessibilitySummary =
-    [...new Set([takeaway?.statement, statusLabel, takeaway?.stateLabel, summary])]
+    [
+      ...new Set([
+        takeaway?.statement,
+        statusLabel,
+        takeaway?.stateLabel,
+        summary?.accessibilityLabel,
+      ]),
+    ]
       .filter(Boolean)
       .join(". ") || "No evidence yet";
 
@@ -58,6 +65,11 @@ export function SubjectCard({
         accessibilityRole="button"
         accessibilityState={{ expanded }}
         accessibilityLabel={`${subject.displayName}. ${accessibilitySummary}`}
+        accessibilityHint={
+          expanded
+            ? "Collapses the subject details"
+            : "Expands the subject details"
+        }
         style={{ padding: space.md, gap: space.xs }}
       >
         <View
@@ -94,11 +106,6 @@ export function SubjectCard({
               </Text>
             </View>
           ) : null}
-          {expanded ? (
-            <ChevronUp size={18} color={colors.textSubtle} />
-          ) : (
-            <ChevronDown size={18} color={colors.textSubtle} />
-          )}
         </View>
 
         {takeaway ? (
@@ -139,16 +146,47 @@ export function SubjectCard({
                 }}
               />
             ) : null}
-            <Text
-              style={{
-                flex: 1,
-                fontFamily: fontFamilies.body,
-                fontSize: fontSize.xs,
-                color: colors.textMuted,
-              }}
-            >
-              {summary}
-            </Text>
+            <View style={{ flex: 1, gap: 2 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "baseline",
+                  flexWrap: "wrap",
+                  columnGap: space.sm,
+                  rowGap: 2,
+                }}
+              >
+                <Text
+                  style={{
+                    fontFamily: fontFamilies.bodySemibold,
+                    fontSize: fontSize.xs,
+                    color: colors.textBody,
+                  }}
+                >
+                  {summary.sourceLabel}
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: fontFamilies.body,
+                    fontSize: fontSize.xs,
+                    color: colors.textMuted,
+                  }}
+                >
+                  {summary.dateLabel}
+                </Text>
+              </View>
+              {summary.note ? (
+                <Text
+                  style={{
+                    fontFamily: fontFamilies.body,
+                    fontSize: fontSize.xs,
+                    color: colors.textMuted,
+                  }}
+                >
+                  {summary.note}
+                </Text>
+              ) : null}
+            </View>
           </View>
         ) : freshness ? (
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -160,6 +198,40 @@ export function SubjectCard({
             </Text>
           </View>
         ) : null}
+
+        <View
+          pointerEvents="none"
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          style={{
+            alignSelf: "flex-start",
+            minHeight: 44,
+            paddingHorizontal: space.sm,
+            paddingVertical: space.xs,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: space.xs,
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: radius.pill,
+            backgroundColor: colors.surfaceSunken,
+          }}
+        >
+          <Text
+            style={{
+              fontFamily: fontFamilies.bodySemibold,
+              fontSize: fontSize.xs,
+              color: colors.textBody,
+            }}
+          >
+            {expanded ? "Hide details" : "Show details"}
+          </Text>
+          {expanded ? (
+            <ChevronUp size={20} color={colors.textBody} />
+          ) : (
+            <ChevronDown size={20} color={colors.textBody} />
+          )}
+        </View>
       </Pressable>
 
       {expanded ? (
