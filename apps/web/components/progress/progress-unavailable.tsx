@@ -23,7 +23,7 @@ export function ProgressUnavailable({
         </h1>
         <p className="mt-2 max-w-2xl text-body">
           Progress could not load right now. Nothing was changed. You
-          can try again or ask HOMA about {childName}.
+          can try again or ask Homa about {childName}.
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
           <RetryProgress />

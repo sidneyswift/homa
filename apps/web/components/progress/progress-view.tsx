@@ -77,7 +77,7 @@ function ProgressEmptyState({
  * Never assessed: no report yet and nothing shared. Offer the first
  * check-in, the onboarding checklist deep-linked to THIS child via
  * `?start`, so the parent lands straight on their questions (the report's
- * "map next kid" card uses the same link). Ask HOMA stays as a quieter
+ * "map next kid" card uses the same link). Ask Homa stays as a quieter
  * second door for parents who would rather talk it through.
  */
 function AssessmentCta({

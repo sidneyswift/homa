@@ -4,8 +4,8 @@ import { Pressable, Text, View } from "react-native";
 
 import type { ChildProgressView, ProgressSubjectView } from "../../lib/child-progress";
 import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
-import { subjectBadge, subjectFreshness } from "./map-model";
+import { colors, fontSize, palette, radius, shadows, space } from "../../theme/tokens";
+import { subjectFreshness } from "./map-model";
 import { TopicRow } from "./topic-row";
 import { progressSubjectHeadline, progressSubjectSummary } from "./view-copy";
 
@@ -18,22 +18,19 @@ import { progressSubjectHeadline, progressSubjectSummary } from "./view-copy";
  */
 export function SubjectCard({
   subject,
-  scores,
   conflicts,
-  childName,
   timeZone,
 }: {
   subject: ProgressSubjectView;
-  scores: ChildProgressView["scores"];
   conflicts: ChildProgressView["conflicts"];
-  childName: string;
   timeZone: string;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const badge = subjectBadge(scores, subject.subjectId, childName);
   const freshness = subjectFreshness(subject, timeZone, new Date());
-  const summary = progressSubjectSummary(subject, timeZone);
+  const summary = progressSubjectSummary(subject, timeZone, conflicts);
   const needsConfirm = subject.state === "conflict";
+  const accessibilitySummary =
+    summary ?? (needsConfirm ? "Different answers" : freshness?.label ?? "No evidence yet");
 
   return (
     <View
@@ -47,6 +44,9 @@ export function SubjectCard({
     >
       <Pressable
         onPress={() => setExpanded((value) => !value)}
+        accessibilityRole="button"
+        accessibilityState={{ expanded }}
+        accessibilityLabel={`${subject.displayName}. ${accessibilitySummary}`}
         style={{ padding: space.md, gap: space.xs }}
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}>
@@ -69,7 +69,7 @@ export function SubjectCard({
                 backgroundColor: colors.goldSoft,
               }}
             >
-              <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.gold }}>
+              <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: palette.goldInk }}>
                 {progressSubjectHeadline("conflict")}
               </Text>
             </View>
@@ -81,37 +81,39 @@ export function SubjectCard({
           )}
         </View>
 
-        <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm, flexWrap: "wrap" }}>
-          {freshness ? (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+        {summary ? (
+          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 6 }}>
+            {freshness ? (
               <View
-                style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: freshness.dotColor }}
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
+                  backgroundColor: freshness.dotColor,
+                  marginTop: 6,
+                }}
               />
-              <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
-                {freshness.label}
-              </Text>
-            </View>
-          ) : null}
-          {badge ? (
-            <View
+            ) : null}
+            <Text
               style={{
-                paddingHorizontal: space.sm,
-                paddingVertical: 2,
-                borderRadius: radius.pill,
-                backgroundColor: badge.background,
+                flex: 1,
+                fontFamily: fontFamilies.body,
+                fontSize: fontSize.xs,
+                color: colors.textMuted,
               }}
             >
-              <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: badge.color }}>
-                {badge.label}
-              </Text>
-            </View>
-          ) : null}
-        </View>
-
-        {summary ? (
-          <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
-            {summary}
-          </Text>
+              {summary}
+            </Text>
+          </View>
+        ) : freshness ? (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <View
+              style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: freshness.dotColor }}
+            />
+            <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
+              {freshness.label}
+            </Text>
+          </View>
         ) : null}
       </Pressable>
 

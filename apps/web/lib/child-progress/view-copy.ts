@@ -51,8 +51,8 @@ export function progressTopicStateLabel(
       return "Shared earlier";
     case "ask_next":
       // Chat's "Ask me later" button is the PARENT deferring; this chip
-      // is HOMA owning the follow-up, so it names the actor.
-      return "HOMA asks later";
+      // is Homa owning the follow-up, so it names the actor.
+      return "Homa will ask";
     case "conflict":
       return "Please confirm";
     default:

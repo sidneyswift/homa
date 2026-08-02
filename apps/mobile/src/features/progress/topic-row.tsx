@@ -2,14 +2,19 @@ import { View, Text } from "react-native";
 
 import type { OpenProgressConflictView, ProgressTopicView } from "../../lib/child-progress";
 import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
-import { formatProgressDate, progressAnswerLabel, progressTopicStateLabel } from "./view-copy";
+import { colors, fontSize, palette, radius, space } from "../../theme/tokens";
+import {
+  formatProgressDate,
+  progressAnswerLabel,
+  progressConflictAnswerLine,
+  progressTopicStateLabel,
+} from "./view-copy";
 
 const STATE_CHIP_TONES: Record<ProgressTopicView["state"], { background: string; color: string }> = {
   observed_today: { background: colors.sageSoft, color: colors.success },
   older: { background: colors.surfaceSunken, color: colors.textMuted },
   ask_next: { background: colors.surfaceSunken, color: colors.textMuted },
-  conflict: { background: colors.goldSoft, color: colors.gold },
+  conflict: { background: colors.goldSoft, color: palette.goldInk },
 };
 
 function StateChip({ state }: { state: ProgressTopicView["state"] }) {
@@ -76,9 +81,7 @@ export function TopicRow({
               key={entry.evidenceId}
               style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}
             >
-              {(entry.adultDisplayName?.trim() || "An adult") +
-                ` said ${progressAnswerLabel(entry.answer).toLowerCase()}, ` +
-                formatProgressDate(entry.observedAt, timeZone) + "."}
+              {progressConflictAnswerLine(entry, timeZone)}
             </Text>
           ))}
         </View>

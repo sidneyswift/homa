@@ -130,7 +130,7 @@ describe("ProgressView", () => {
       html,
       /You have not shared any specific skills for Maya yet\./,
     );
-    assert.match(html, /Ask HOMA about Maya/);
+    assert.match(html, /Ask Homa about Maya/);
     assert.doesNotMatch(html, /Open the full report/);
     assert.doesNotMatch(html, /Maya(?:&#x27;|')s snapshot/);
     assert.doesNotMatch(html, /Subject by subject/);
@@ -174,8 +174,8 @@ describe("ProgressView", () => {
       html.indexOf("Start Maya") < html.indexOf('aria-label="Lessons"'),
       "the first check-in must outrank the recording door when unassessed",
     );
-    // Ask HOMA stays as the quieter second door.
-    assert.match(html, /Ask HOMA about Maya/);
+    // Ask Homa stays as the quieter second door.
+    assert.match(html, /Ask Homa about Maya/);
 
     assert.doesNotMatch(html, /Open the full report/);
     assert.doesNotMatch(html, /Maya(?:&#x27;|')s snapshot/);

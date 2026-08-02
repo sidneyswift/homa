@@ -172,7 +172,7 @@ export function ProgressDetailPanel({
             </div>
           ) : null}
           <ProgressChatDoor childId={childId} variant="link">
-            Tell HOMA something looks wrong
+            Tell Homa something looks wrong
           </ProgressChatDoor>
         </div>
     </SidePanel>

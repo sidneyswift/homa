@@ -125,6 +125,9 @@ jobs:
       - name: Mobile planner unit tests
         run: pnpm check:mobile-planner
 
+      - name: Mobile Progress unit tests
+        run: pnpm check:mobile-progress
+
       - name: Mobile voice unit tests
         run: pnpm check:mobile-voice
 

@@ -75,7 +75,7 @@ describe("ProgressDetailPanel", () => {
     for (const label of [
       "Shared today",
       "Shared earlier",
-      "HOMA asks later",
+      "Homa will ask",
       "Please confirm",
     ]) {
       assert.match(html, new RegExp(label));
@@ -105,7 +105,7 @@ describe("ProgressDetailPanel", () => {
       /<button[^>]*aria-label="Confirm Jordan(?:&#x27;|')s answer: Not yet"/,
     );
     assert.match(html, /tap the answer that fits today/);
-    assert.match(html, /Tell HOMA something looks wrong/);
+    assert.match(html, /Tell Homa something looks wrong/);
 
     // Bottom sheet on phones, side panel on desktop, house motion rules.
     assert.match(html, /max-h-\[78dvh\]/);
@@ -135,7 +135,7 @@ describe("ProgressDetailPanel", () => {
     assert.match(html, /aria-labelledby="progress-panel-literacy"/);
     assert.doesNotMatch(html, /Confirm (?:Elena|Jordan)/);
     assert.doesNotMatch(html, /tap the answer that fits today/);
-    assert.match(html, /Tell HOMA something looks wrong/);
+    assert.match(html, /Tell Homa something looks wrong/);
   });
 
   it("mirrors show the deeper-check card with the button inert", () => {

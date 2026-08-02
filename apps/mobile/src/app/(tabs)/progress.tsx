@@ -18,7 +18,7 @@ import { colors, fontSize, space } from "../../theme/tokens";
  * Progress: read-only v1, ported from apps/web/app/app/[childId]/
  * progress/page.tsx + components/progress/progress-view.tsx. Reads
  * the same pre-built child_progress_live projection web renders, so
- * subject wording, states, and badges match exactly (see
+ * subject evidence wording and states stay aligned (see
  * features/progress/view-copy.ts and map-model.ts).
  *
  * Scoped out of this v1, each a tracked gap rather than a silent one:
@@ -111,9 +111,7 @@ export default function ProgressScreen() {
           <SubjectCard
             key={subject.subjectId}
             subject={subject}
-            scores={view.scores}
             conflicts={view.conflicts}
-            childName={view.childName}
             timeZone={view.timeZone}
           />
         ))}

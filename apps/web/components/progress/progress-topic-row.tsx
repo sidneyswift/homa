@@ -178,7 +178,7 @@ export function ProgressTopicRow({
         </>
       ) : topic.state === "ask_next" ? (
         <p className="mt-3 text-sm text-body">
-          Nothing shared on this yet. HOMA will ask about it at a good
+          Nothing shared on this yet. Homa will ask about it at a good
           moment.
         </p>
       ) : (
