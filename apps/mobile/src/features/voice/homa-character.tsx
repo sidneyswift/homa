@@ -227,9 +227,11 @@ function CharacterEye({
 export function HomaCharacter({
   state,
   size,
+  audioLevel = null,
 }: {
   state: CharacterState;
   size: number;
+  audioLevel?: number | null;
 }) {
   const reduced = useReducedMotion();
   /** One viewBox unit in on-screen px; every body distance scales by it. */
@@ -374,7 +376,7 @@ export function HomaCharacter({
         pointerEvents="none"
         style={{ position: "absolute", left: -size * 0.8, top: -size * 0.8 }}
       >
-        <Aura state={state} size={size} />
+        <Aura state={state} size={size} audioLevel={audioLevel} />
       </View>
       <Animated.View
         pointerEvents="none"

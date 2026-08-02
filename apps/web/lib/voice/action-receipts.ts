@@ -28,6 +28,12 @@ const familyEventSnapshotSchema = z.object({
   startTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/u).nullable(),
   endTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/u).nullable(),
   note: z.string().max(500).nullable(),
+  recurrence: z.object({
+    frequency: z.literal("weekly"),
+    interval: z.number().int().min(1).max(52),
+    weekdays: z.array(z.number().int().min(0).max(6)).min(1).max(7),
+    until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u).nullable(),
+  }).nullable().optional(),
 });
 
 const hoursSnapshotSchema = z.object({
@@ -407,6 +413,7 @@ export async function undoVoiceAction(input: {
             and start_time is not distinct from ${after.startTime}
             and end_time is not distinct from ${after.endTime}
             and note is not distinct from ${after.note}
+            and recurrence_rule is not distinct from ${after.recurrence == null ? null : tx.json(after.recurrence as DbJson)}
           returning id
         `;
         if (removed.length === 0) {
@@ -425,7 +432,8 @@ export async function undoVoiceAction(input: {
           set child_id = ${before.childId}, title = ${before.title},
               starts_on = ${before.startsOn}, ends_on = ${before.endsOn},
               start_time = ${before.startTime}, end_time = ${before.endTime},
-              note = ${before.note}
+              note = ${before.note},
+              recurrence_rule = ${before.recurrence == null ? null : tx.json(before.recurrence as DbJson)}
           where id = ${selected.object_id} and family_id = ${input.familyId}
             and child_id is not distinct from ${after.childId}
             and title = ${after.title} and starts_on = ${after.startsOn}
@@ -433,6 +441,7 @@ export async function undoVoiceAction(input: {
             and start_time is not distinct from ${after.startTime}
             and end_time is not distinct from ${after.endTime}
             and note is not distinct from ${after.note}
+            and recurrence_rule is not distinct from ${after.recurrence == null ? null : tx.json(after.recurrence as DbJson)}
           returning id
         `;
         if (restored.length === 0) {
@@ -448,11 +457,12 @@ export async function undoVoiceAction(input: {
         const restored = await tx<{ id: string }[]>`
           insert into public.family_events
             (id, family_id, child_id, title, starts_on, ends_on,
-             start_time, end_time, note)
+             start_time, end_time, note, recurrence_rule)
           values
             (${selected.object_id}, ${input.familyId}, ${before.childId},
              ${before.title}, ${before.startsOn}, ${before.endsOn},
-             ${before.startTime}, ${before.endTime}, ${before.note})
+             ${before.startTime}, ${before.endTime}, ${before.note},
+             ${before.recurrence == null ? null : tx.json(before.recurrence as DbJson)})
           on conflict (id) do nothing
           returning id
         `;

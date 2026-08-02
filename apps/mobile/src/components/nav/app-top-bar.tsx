@@ -44,7 +44,7 @@ export function AppTopBar({ onMenuPress }: { onMenuPress: () => void }) {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Talk to Homa"
-          onPress={() => router.push("/voice")}
+          onPress={() => router.navigate("/voice")}
           hitSlop={8}
           style={{ padding: space.sm }}
         >

@@ -68,6 +68,10 @@ import {
   type ArchivedMessage,
 } from "./chat-storage";
 import {
+  hydrationSafeTranscriptSources,
+  useHydrated,
+} from "./chat-hydration";
+import {
   composerPrimaryAction,
   appendPreparedChatSendToQueue,
   flushChatQueue,
@@ -305,6 +309,7 @@ export function ChatClient({
   // Load + rotation decision, once per mount (fresh morning = fresh
   // session; the old session's messages fold into the archive).
   const [prepared] = useState(() => prepareChat(storageKey, timeZone));
+  const hydrated = useHydrated();
   // A saved event log without a session id is a dead half-turn: the
   // eve client wipes the id when a stream dies without reaching a
   // boundary event. With the server record on screen those events
@@ -319,6 +324,11 @@ export function ChatClient({
   const initialLiveMessages = staleSessionlessEvents
     ? []
     : foldEventsToMessages(prepared.initialEvents);
+  const serverArchived = useMemo(
+    () =>
+      serverHistory ? archiveFromServerHistory(serverHistory, []) : [],
+    [serverHistory],
+  );
   // Scrollback: the server record when the page load carried it (one
   // thread, same on every device), the localStorage cache otherwise.
   // Server rows stay unless the live reducer has the exact same turn.
@@ -1185,19 +1195,36 @@ export function ChatClient({
     };
   }, [agentStop, busy]);
 
-  const transcript = buildTranscript({
-    archived,
-    live: agent.data.messages,
-    liveTimes,
-    spoken,
+  // prepareChat reads localStorage in the browser, but localStorage does
+  // not exist during SSR. Rendering that restored state immediately made
+  // React compare the server's durable transcript with a different client
+  // tree and regenerate the whole chat during hydration (GH #405). Keep
+  // the first client snapshot on server-known data, then add the local
+  // live-session overlay once useSyncExternalStore reports hydration.
+  const renderSources = hydrationSafeTranscriptSources({
+    hydrated,
+    serverArchived,
+    clientArchived: archived,
+    clientLive: agent.data.messages,
+    clientLiveTimes: liveTimes,
+    clientSpoken: spoken,
   });
-  const liveMessageSet = new Set<EveMessage>(agent.data.messages);
+  const renderMessages = renderSources.live;
+  const renderBusy = hydrated && busy;
+  const transcript = buildTranscript({
+    archived: renderSources.archived,
+    live: renderMessages,
+    liveTimes: renderSources.liveTimes,
+    spoken: renderSources.spoken,
+    timeZone,
+  });
+  const liveMessageSet = new Set<EveMessage>(renderMessages);
   const progressSessionKey =
     agent.session?.sessionId ??
     prepared.initialSession?.sessionId ??
     "pending";
   const progressInteraction = latestProgressMessageInteraction({
-    messages: agent.data.messages,
+    messages: renderMessages,
     sessionKey: progressSessionKey,
     unavailableActionKeys: progressActionUnavailableKeys(
       progressActionLifecycle,
@@ -1245,16 +1272,16 @@ export function ChatClient({
   // The chips return whenever a session has no words in it yet: the
   // first run, and a fresh morning over yesterday's scrollback.
   const showSuggestions =
-    agent.data.messages.length === 0 && !busy && onboarding === null;
+    renderMessages.length === 0 && !renderBusy && onboarding === null;
   // The snap card's dim rule (founder call): while Homa's camera ask is
   // the live question, everything above it steps back. The only full
   // dim in the product; the card's own message stays full strength.
-  const activeSnap = busy ? null : latestSnapRequest(agent.data.messages);
+  const activeSnap = renderBusy ? null : latestSnapRequest(renderMessages);
   // The live choice card, if any: only the newest unanswered card takes
   // taps, and only while the line is free.
-  const activeQuestion = busy
+  const activeQuestion = renderBusy
     ? null
-    : latestQuestionRequest(agent.data.messages);
+    : latestQuestionRequest(renderMessages);
   // Computed here, above the rail gate that reads them; the docking
   // logic further down shares these same values.
   // The one checklist card that may still open the questions, and the
@@ -1269,11 +1296,11 @@ export function ChatClient({
   //
   // So: latest decides whether it renders as a card at all, and busy
   // only decides whether it can be tapped yet.
-  const latestChecklist = latestChecklistRequest(agent.data.messages);
-  const activeChecklist = busy ? null : latestChecklist;
-  const activeReport = latestReportReveal(agent.data.messages);
+  const latestChecklist = latestChecklistRequest(renderMessages);
+  const activeChecklist = renderBusy ? null : latestChecklist;
+  const activeReport = latestReportReveal(renderMessages);
   const promptSuggestionRailAllowed =
-    !busy
+    !renderBusy
     && !recovering
     && promptSuggestionPhase !== "idle"
     && progressInteraction === null
@@ -1295,7 +1322,8 @@ export function ChatClient({
     && attachments.staged.length === 0
     && dictation.phase === "idle";
   const showPromptSuggestionRail =
-    promptSuggestionRailAllowed
+    hydrated
+    && promptSuggestionRailAllowed
     && (
       promptSuggestionPhase === "loading"
       || (
@@ -1363,7 +1391,8 @@ export function ChatClient({
   // The day separator is the first to go. It separates two days, and on
   // the opening screen there is no day before it to separate from, so it
   // is a rule with nothing on the other side of it.
-  const suppressLeadingSeparator = Boolean(onboarding) && archived.length === 0;
+  const suppressLeadingSeparator =
+    Boolean(onboarding) && renderSources.archived.length === 0;
   // Everything before the first real message is a rule with nothing on
   // the other side of it. Computed once rather than tracked with a flag
   // during the map, which the React Compiler rejects and which breaks
@@ -1376,7 +1405,7 @@ export function ChatClient({
   // so taking one mid-turn would race it. This card posts to its own
   // route and saves itself, so there is nothing to race: she can keep
   // filling it in while Homa works, which is what she will try to do.
-  const activeDetail = latestDetailRequest(agent.data.messages);
+  const activeDetail = latestDetailRequest(renderMessages);
   const dockedDetail = activeDetail;
   // The chained card run (loop iteration 4). The persona walk measured
   // the 12-16 second model turn between the basics card and the
@@ -1482,7 +1511,7 @@ export function ChatClient({
         !appBasics &&
         kidChainStage === null &&
         (!onboarding || hasVisibleMessages)));
-  const planEditsSeen = planEditCount(agent.data.messages);
+  const planEditsSeen = planEditCount(renderMessages);
   useEffect(() => {
     const latest = latestPlannerOpen(agent.data.messages);
     if (handledPlannerPartKeyRef.current === undefined) {
@@ -1952,7 +1981,7 @@ export function ChatClient({
               // comes back the moment it has words, or when the turn
               // ends and the eyebrow becomes an honest receipt.
               if (
-                busy &&
+                renderBusy &&
                 item.kind === "message" &&
                 itemIndex === transcript.length - 1 &&
                 item.message.role === "assistant" &&
@@ -2096,7 +2125,7 @@ export function ChatClient({
             })}
           </>
         )}
-        {busy && busyLabel(agent.data.messages, busySeconds) ? (
+        {renderBusy && busyLabel(renderMessages, busySeconds) ? (
           // The mark is awake while Homa thinks, so the wait is never a
           // blank page (tester ask, evidence memo 1; MJ-06). Goes still
           // under reduced motion; the label still reads what is happening.
@@ -2115,7 +2144,7 @@ export function ChatClient({
               size={28}
               mood={busyMood(busySeconds)}
               seconds={busySeconds}
-              tool={activeToolName(agent.data.messages)}
+              tool={activeToolName(renderMessages)}
               className="self-center"
             />
             {busySeconds > 0 ? (
@@ -2124,7 +2153,7 @@ export function ChatClient({
               </span>
             ) : null}
             <span className="chat-busy-label">
-              {busyLabel(agent.data.messages, busySeconds)}
+              {busyLabel(renderMessages, busySeconds)}
             </span>
           </div>
         ) : null}
@@ -2161,7 +2190,7 @@ export function ChatClient({
             ))}
             <p className="flex items-center gap-3 text-xs text-subtle">
               Sends when Homa finishes
-              {busy ? (
+              {renderBusy ? (
                 <button
                   type="button"
                   onClick={() => agent.stop()}
@@ -2593,7 +2622,7 @@ export function ChatClient({
                 night): while Homa works, an empty composer shows Stop;
                 a typed one shows Stop AND Send, where Send queues the
                 message for the moment the turn ends. Idle shows Send. */}
-            {busy ? (
+            {renderBusy ? (
               <>
                 <button
                   type="button"
@@ -2648,7 +2677,7 @@ export function ChatClient({
             {attachError}
           </p>
         ) : null}
-        {busy && attachments.staged.length > 0 ? (
+        {renderBusy && attachments.staged.length > 0 ? (
           <p className="mx-auto mt-2 w-full max-w-[780px] text-sm text-subtle" role="status">
             Your files go out when Homa finishes this reply.
           </p>

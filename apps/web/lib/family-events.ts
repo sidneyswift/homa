@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { mapDb } from "./map/db";
+import { mapDb, type DbJson } from "./map/db";
 
 /**
  * family_events (issue #176, CG-03): Homa's own calendar for appointments,
@@ -33,6 +33,14 @@ export const MAX_FAMILY_EVENT_NOTE = 500;
 export const WRONG_CHILD_NOTE_FOR_EVENTS =
   "That child id is not in this family. Use a child id from the family context block, or leave it off for a whole-family event.";
 
+export interface FamilyEventRecurrence {
+  frequency: "weekly";
+  interval: number;
+  /** Sunday is 0, matching JavaScript and EventKit conversion. */
+  weekdays: number[];
+  until: string | null;
+}
+
 export interface FamilyEventRow {
   id: string;
   familyId: string;
@@ -46,6 +54,7 @@ export interface FamilyEventRow {
   startTime: string | null;
   endTime: string | null;
   note: string | null;
+  recurrence?: FamilyEventRecurrence | null;
   createdAt: string;
 }
 
@@ -63,6 +72,7 @@ export interface FamilyEventInput {
   /** Omit for a whole-family event. */
   childId?: string | null;
   note?: string | null;
+  recurrence?: FamilyEventRecurrence | null;
 }
 
 export interface ParsedFamilyEvent {
@@ -72,6 +82,7 @@ export interface ParsedFamilyEvent {
   startTime: string | null;
   endTime: string | null;
   note: string | null;
+  recurrence: FamilyEventRecurrence | null;
 }
 
 export type ParseFamilyEventResult =
@@ -80,6 +91,34 @@ export type ParseFamilyEventResult =
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+export function parseFamilyEventRecurrence(
+  value: FamilyEventRecurrence | null | undefined,
+  startsOn: string,
+): { ok: true; value: FamilyEventRecurrence | null } | { ok: false; error: string } {
+  if (value == null) return { ok: true, value: null };
+  if (value.frequency !== "weekly") {
+    return { ok: false, error: "Only weekly calendar recurrence is supported." };
+  }
+  if (!Number.isInteger(value.interval) || value.interval < 1 || value.interval > 52) {
+    return { ok: false, error: "A weekly recurrence interval must be 1 through 52." };
+  }
+  if (
+    value.weekdays.length < 1
+    || value.weekdays.length > 7
+    || new Set(value.weekdays).size !== value.weekdays.length
+    || value.weekdays.some((day) => !Number.isInteger(day) || day < 0 || day > 6)
+  ) {
+    return { ok: false, error: "Recurring weekdays must be unique values from Sunday 0 through Saturday 6." };
+  }
+  if (value.until !== null && (!DATE_RE.test(value.until) || value.until < startsOn)) {
+    return { ok: false, error: "A recurring event cannot end before it starts." };
+  }
+  return {
+    ok: true,
+    value: { ...value, weekdays: [...value.weekdays].sort((left, right) => left - right) },
+  };
+}
 
 /** Date-only day arithmetic in UTC, so a YYYY-MM-DD can never shift a
  * day through a local-timezone parse. */
@@ -176,9 +215,11 @@ export function parseFamilyEventInput(input: FamilyEventInput): ParseFamilyEvent
   }
   const noteRaw = input.note?.trim();
   const note = noteRaw && noteRaw.length > 0 ? noteRaw.slice(0, MAX_FAMILY_EVENT_NOTE) : null;
+  const recurrence = parseFamilyEventRecurrence(input.recurrence, input.startsOn);
+  if (!recurrence.ok) return recurrence;
   return {
     ok: true,
-    value: { title, startsOn: input.startsOn, endsOn, startTime, endTime, note },
+    value: { title, startsOn: input.startsOn, endsOn, startTime, endTime, note, recurrence: recurrence.value },
   };
 }
 
@@ -201,6 +242,7 @@ export interface RawFamilyEventRow {
   start_time: string | null;
   end_time: string | null;
   note: string | null;
+  recurrence_rule: unknown;
   created_at: string;
 }
 
@@ -215,6 +257,7 @@ export function toFamilyEventRow(row: RawFamilyEventRow): FamilyEventRow {
     startTime: normalizeTimeOfDay(row.start_time),
     endTime: normalizeTimeOfDay(row.end_time),
     note: row.note,
+    recurrence: row.recurrence_rule as FamilyEventRecurrence | null,
     createdAt: row.created_at,
   };
 }
@@ -223,7 +266,7 @@ export function toFamilyEventRow(row: RawFamilyEventRow): FamilyEventRow {
  * kept here so the read file and this file's own listFamilyEventsPinned
  * can never drift on what a "full row" means. */
 export const EVENT_COLUMNS =
-  "id, family_id, child_id, title, starts_on, ends_on, start_time, end_time, note, created_at";
+  "id, family_id, child_id, title, starts_on, ends_on, start_time, end_time, note, recurrence_rule, created_at";
 
 export async function getFamilyEventCaller(
   db: SupabaseClient,
@@ -251,7 +294,7 @@ export async function getFamilyEventPinned(
            to_char(ends_on, 'YYYY-MM-DD') as ends_on,
            to_char(start_time, 'HH24:MI') as start_time,
            to_char(end_time, 'HH24:MI') as end_time,
-           note, created_at::text as created_at
+           note, recurrence_rule, created_at::text as created_at
     from public.family_events
     where id = ${eventId} and family_id = ${familyId}
   `;
@@ -277,10 +320,11 @@ export async function listFamilyEventsPinned(
            to_char(ends_on, 'YYYY-MM-DD') as ends_on,
            to_char(start_time, 'HH24:MI') as start_time,
            to_char(end_time, 'HH24:MI') as end_time,
-           note, created_at::text as created_at
+           note, recurrence_rule, created_at::text as created_at
     from public.family_events
     where family_id = ${familyId}
-      and starts_on <= ${toDate} and ends_on >= ${fromDate}
+      and starts_on <= ${toDate}
+      and (ends_on >= ${fromDate} or recurrence_rule is not null)
     order by starts_on asc
   `;
   return rows.map(toFamilyEventRow);
@@ -300,6 +344,7 @@ export interface FamilyEventPatch {
   endsOn?: string;
   startTime?: string | null;
   endTime?: string | null;
+  recurrence?: FamilyEventRecurrence | null;
 }
 
 export function familyEventPatchIsEmpty(patch: FamilyEventPatch): boolean {
@@ -308,7 +353,8 @@ export function familyEventPatchIsEmpty(patch: FamilyEventPatch): boolean {
     patch.startsOn === undefined &&
     patch.endsOn === undefined &&
     patch.startTime === undefined &&
-    patch.endTime === undefined
+    patch.endTime === undefined &&
+    patch.recurrence === undefined
   );
 }
 
@@ -320,7 +366,7 @@ export function familyEventPatchIsEmpty(patch: FamilyEventPatch): boolean {
 export function applyFamilyEventPatch(
   existing: Pick<
     FamilyEventRow,
-    "title" | "startsOn" | "endsOn" | "startTime" | "endTime" | "note"
+    "title" | "startsOn" | "endsOn" | "startTime" | "endTime" | "note" | "recurrence"
   >,
   patch: FamilyEventPatch,
 ): ParseFamilyEventResult {
@@ -349,6 +395,7 @@ export function applyFamilyEventPatch(
     startTime: patch.startTime === undefined ? existing.startTime : patch.startTime,
     endTime: patch.endTime === undefined ? existing.endTime : patch.endTime,
     note: existing.note,
+    recurrence: patch.recurrence === undefined ? (existing.recurrence ?? null) : patch.recurrence,
   });
 }
 
@@ -395,6 +442,7 @@ export async function addFamilyEventCaller(
       start_time: parsed.value.startTime,
       end_time: parsed.value.endTime,
       note: parsed.value.note,
+      recurrence_rule: parsed.value.recurrence,
     })
     .select(EVENT_COLUMNS)
     .single();
@@ -432,17 +480,17 @@ export async function addFamilyEventPinned(
   const eventId = input.id ?? randomUUID();
   const inserted = await sql<RawFamilyEventRow[]>`
     insert into public.family_events
-      (id, family_id, child_id, title, starts_on, ends_on, start_time, end_time, note)
+      (id, family_id, child_id, title, starts_on, ends_on, start_time, end_time, note, recurrence_rule)
     values
       (${eventId}, ${familyId}, ${childId}, ${parsed.value.title}, ${parsed.value.startsOn},
        ${parsed.value.endsOn}, ${parsed.value.startTime}, ${parsed.value.endTime},
-       ${parsed.value.note})
+       ${parsed.value.note}, ${parsed.value.recurrence === null ? null : sql.json(parsed.value.recurrence as unknown as DbJson)})
     returning id, family_id, child_id, title,
               to_char(starts_on, 'YYYY-MM-DD') as starts_on,
               to_char(ends_on, 'YYYY-MM-DD') as ends_on,
               to_char(start_time, 'HH24:MI') as start_time,
               to_char(end_time, 'HH24:MI') as end_time,
-              note, created_at::text as created_at
+              note, recurrence_rule, created_at::text as created_at
   `;
   const event = toFamilyEventRow(inserted[0]);
   return {
@@ -497,6 +545,7 @@ export async function updateFamilyEventCaller(
       ends_on: parsed.value.endsOn,
       start_time: parsed.value.startTime,
       end_time: parsed.value.endTime,
+      recurrence_rule: parsed.value.recurrence,
     })
     .eq("id", eventId)
     .eq("family_id", familyId);
@@ -517,6 +566,9 @@ export async function updateFamilyEventCaller(
     update = expected.note === null
       ? update.is("note", null)
       : update.eq("note", expected.note);
+    update = expected.recurrence == null
+      ? update.is("recurrence_rule", null)
+      : update.eq("recurrence_rule", expected.recurrence);
   }
   const { data, error } = await update
     .select(EVENT_COLUMNS)
@@ -546,7 +598,7 @@ export async function updateFamilyEventPinned(
            to_char(ends_on, 'YYYY-MM-DD') as ends_on,
            to_char(start_time, 'HH24:MI') as start_time,
            to_char(end_time, 'HH24:MI') as end_time,
-           note, created_at::text as created_at
+           note, recurrence_rule, created_at::text as created_at
     from public.family_events
     where id = ${eventId} and family_id = ${familyId}
       ${expected ? sql`and child_id is not distinct from ${expected.childId}
@@ -554,7 +606,8 @@ export async function updateFamilyEventPinned(
         and ends_on = ${expected.endsOn}
         and start_time is not distinct from ${expected.startTime}
         and end_time is not distinct from ${expected.endTime}
-        and note is not distinct from ${expected.note}` : sql``}
+        and note is not distinct from ${expected.note}
+        and recurrence_rule is not distinct from ${expected.recurrence == null ? null : sql.json(expected.recurrence as unknown as DbJson)}` : sql``}
   `;
   const existing = rows[0];
   if (!existing) return { updated: false, note: EVENT_NOT_FOUND_NOTE };
@@ -568,20 +621,22 @@ export async function updateFamilyEventPinned(
         starts_on = ${parsed.value.startsOn},
         ends_on = ${parsed.value.endsOn},
         start_time = ${parsed.value.startTime},
-        end_time = ${parsed.value.endTime}
+        end_time = ${parsed.value.endTime},
+        recurrence_rule = ${parsed.value.recurrence === null ? null : sql.json(parsed.value.recurrence as unknown as DbJson)}
     where id = ${eventId} and family_id = ${familyId}
       ${expected ? sql`and child_id is not distinct from ${expected.childId}
         and title = ${expected.title} and starts_on = ${expected.startsOn}
         and ends_on = ${expected.endsOn}
         and start_time is not distinct from ${expected.startTime}
         and end_time is not distinct from ${expected.endTime}
-        and note is not distinct from ${expected.note}` : sql``}
+        and note is not distinct from ${expected.note}
+        and recurrence_rule is not distinct from ${expected.recurrence == null ? null : sql.json(expected.recurrence as unknown as DbJson)}` : sql``}
     returning id, family_id, child_id, title,
               to_char(starts_on, 'YYYY-MM-DD') as starts_on,
               to_char(ends_on, 'YYYY-MM-DD') as ends_on,
               to_char(start_time, 'HH24:MI') as start_time,
               to_char(end_time, 'HH24:MI') as end_time,
-              note, created_at::text as created_at
+              note, recurrence_rule, created_at::text as created_at
   `;
   if (!updated[0]) return { updated: false, note: EVENT_NOT_FOUND_NOTE };
   return {
@@ -631,6 +686,9 @@ export async function removeFamilyEventCaller(
     removal = expected.note === null
       ? removal.is("note", null)
       : removal.eq("note", expected.note);
+    removal = expected.recurrence == null
+      ? removal.is("recurrence_rule", null)
+      : removal.eq("recurrence_rule", expected.recurrence);
   }
   const { data, error } = await removal
     .select(EVENT_COLUMNS);
@@ -654,13 +712,14 @@ export async function removeFamilyEventPinned(
         and ends_on = ${expected.endsOn}
         and start_time is not distinct from ${expected.startTime}
         and end_time is not distinct from ${expected.endTime}
-        and note is not distinct from ${expected.note}` : sql``}
+        and note is not distinct from ${expected.note}
+        and recurrence_rule is not distinct from ${expected.recurrence == null ? null : sql.json(expected.recurrence as unknown as DbJson)}` : sql``}
     returning id, family_id, child_id, title,
               to_char(starts_on, 'YYYY-MM-DD') as starts_on,
               to_char(ends_on, 'YYYY-MM-DD') as ends_on,
               to_char(start_time, 'HH24:MI') as start_time,
               to_char(end_time, 'HH24:MI') as end_time,
-              note, created_at::text as created_at
+              note, recurrence_rule, created_at::text as created_at
   `;
   if (deleted.length === 0) return { removed: false, note: EVENT_NOT_FOUND_NOTE };
   const event = toFamilyEventRow(deleted[0]);

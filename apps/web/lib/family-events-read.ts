@@ -28,7 +28,7 @@ export async function getFamilyEventsForFamily(
     .select(EVENT_COLUMNS)
     .eq("family_id", familyId)
     .lte("starts_on", toDate)
-    .gte("ends_on", fromDate)
+    .or(`ends_on.gte.${fromDate},recurrence_rule.not.is.null`)
     .order("starts_on", { ascending: true });
   if (error) throw new Error(`family_events read failed: ${error.message}`);
   return (data ?? []).map((row) => toFamilyEventRow(row as RawFamilyEventRow));

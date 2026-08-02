@@ -47,6 +47,36 @@ const material = {
   pdfUrl: "https://blob.example/page.pdf",
 };
 
+const monthPlanPreview = {
+  draftId: "00000000-0000-4000-8000-000000000010",
+  revision: 1,
+  monthStart: "2026-09-01",
+  title: "September",
+  children: [
+    {
+      childId: "00000000-0000-4000-8000-000000000011",
+      childName: "Maya",
+      targets: ["Keep reading moving"],
+      weeks: [1, 2, 3, 4].map((week) => ({
+        week,
+        focus: "reading",
+        activities: [
+          {
+            text: "Read together for fifteen minutes.",
+            scheduledDate: week === 1 ? "2026-09-01" : null,
+            reusedMaterialId: null,
+          },
+        ],
+      })),
+      unresolvedChoices: [],
+    },
+  ],
+  conflicts: [],
+  unscheduledItems: [],
+  unresolvedChoices: [],
+  restoredFrom: null,
+};
+
 /** The raw questions payload as ask_user_questions carries it, on both
  * its input and (echoed) its output. */
 const askQuestions = [
@@ -91,6 +121,21 @@ describe("deriveOverlaySignals: mapping", () => {
       expected: null,
     },
     {
+      name: "open_state_records carries the requested native action",
+      part: toolPart("open_state_records", { opened: true, action: "generate_pack" }),
+      expected: { kind: "state_records", action: "generate_pack" },
+    },
+    {
+      name: "open_state_records refuses unknown actions",
+      part: toolPart("open_state_records", { opened: true, action: "submit_to_state" }),
+      expected: null,
+    },
+    {
+      name: "open_state_records with no authenticated state does not open",
+      part: toolPart("open_state_records", { opened: false, error: "no_state" }),
+      expected: null,
+    },
+    {
       name: "edit_plan updated:true is a planner signal with a write counted",
       part: toolPart("edit_plan", { updated: true, summary: "Swapped Tuesday" }),
       expected: { kind: "planner", refreshCount: 1 },
@@ -103,6 +148,22 @@ describe("deriveOverlaySignals: mapping", () => {
         scheduledDate: "2026-07-30",
       }),
       expected: { kind: "planner", refreshCount: 1 },
+    },
+    {
+      name: "a verified month preview opens the month plan sheet",
+      part: toolPart("preview_month_plan", {
+        previewed: true,
+        preview: monthPlanPreview,
+      }),
+      expected: { kind: "monthPlan" },
+    },
+    {
+      name: "a malformed month preview stays off the screen",
+      part: toolPart("preview_month_plan", {
+        previewed: true,
+        preview: { ...monthPlanPreview, children: "not-an-array" },
+      }),
+      expected: null,
     },
     {
       name: "edit_plan updated:false is nothing",
@@ -332,6 +393,39 @@ describe("deriveOverlaySignals: mapping", () => {
     assert.equal(signals.length, 1);
     assert.ok(signals[0].kind === "material");
     assert.deepEqual(signals[0].printRequest, printRequest);
+  });
+
+  it("accepts only a same-material native share request", () => {
+    const materialId = "11111111-1111-4111-8111-111111111111";
+    const shareRequest = {
+      materialId,
+      title: "Counting cards",
+      authorizedPdfPath: `/api/materials/${materialId}/pdf`,
+      suggestedMessage: "I thought you'd want a copy of Counting cards.",
+    };
+    const { signals } = deriveOverlaySignals(
+      [assistantMessage("msg-share", [
+        toolPart("prepare_material_share", {
+          material: { ...material, id: materialId, status: "final" },
+          shareRequest,
+        }),
+      ])],
+      new Set(),
+    );
+    assert.equal(signals[0]?.kind, "material");
+    if (signals[0]?.kind !== "material") throw new Error("expected material signal");
+    assert.deepEqual(signals[0].shareRequest, shareRequest);
+
+    const mismatched = deriveOverlaySignals(
+      [assistantMessage("msg-share-wrong", [
+        toolPart("prepare_material_share", {
+          material: { ...material, id: "22222222-2222-4222-8222-222222222222", status: "final" },
+          shareRequest,
+        }),
+      ])],
+      new Set(),
+    );
+    assert.deepEqual(mismatched.signals, []);
   });
 
   it("drops a print effect when its authorized route does not match the material", () => {

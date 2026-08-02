@@ -4,6 +4,7 @@ import { getChildPlans, type ChildPlanRecord } from "../../lib/child-plans";
 import { getFamilyEvents, type FamilyEventRecord } from "../../lib/family-events";
 import { getScheduledActivities, type PlanActivityScheduleRecord } from "../../lib/plan-schedule";
 import type { ChildRecord } from "../../lib/family";
+import { expandRecurringFamilyEvents } from "./recurring-family-events";
 
 interface PlannerData {
   events: FamilyEventRecord[];
@@ -45,7 +46,7 @@ export function usePlannerData(
         getScheduledActivities(familyId, rangeStart, rangeEnd),
         Promise.all(childIds.map((childId) => getChildPlans(childId))).then((lists) => lists.flat()),
       ]);
-      setEvents(nextEvents);
+      setEvents(expandRecurringFamilyEvents(nextEvents, rangeStart, rangeEnd));
       setScheduleRows(nextSchedule);
       setChildPlans(nextPlans);
       setError(null);

@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   appendUniqueVoiceToolEffects,
   messagesFromVoiceToolEffects,
+  openingResponseCreateEvent,
   parseVoiceToolBridgeOutput,
   spokenReplyResponseCreateEvent,
 } from "./realtime-tool-effects";
@@ -88,6 +89,12 @@ describe("native voice tool effects", () => {
         tools: [],
         tool_choice: "none",
       },
+    });
+  });
+
+  it("opens a new realtime conversation with one server-authored response", () => {
+    assert.deepEqual(openingResponseCreateEvent(), {
+      type: "response.create",
     });
   });
 });

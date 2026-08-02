@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react-native";
+import { CalendarPlus, ChevronLeft, ChevronRight, Plus } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,6 +13,11 @@ import {
 import { scheduleActivity } from "../../lib/plan-schedule";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { DayView } from "../../features/planner/day-view";
+import { DeviceCalendarExportSheet } from "../../features/planner/device-calendar-export-sheet";
+import {
+  familyEventExportItem,
+  planActivityExportItem,
+} from "../../features/planner/device-calendar-export";
 import {
   addDays,
   addMonths,
@@ -69,6 +74,7 @@ export default function PlannerScreen() {
   const [composerDraft, setComposerDraft] = useState<EventComposerDraft | null>(null);
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [schedulingActivity, setSchedulingActivity] = useState<PlanActivityView | null>(null);
+  const [calendarExportOpen, setCalendarExportOpen] = useState(false);
 
   const range = useMemo(() => monthGridRange(anchorDate), [anchorDate]);
   const { events, scheduleRows, childPlans, loading, reload } = usePlannerData(
@@ -79,23 +85,56 @@ export default function PlannerScreen() {
   );
 
   const filteredChildren = filterChildId ? children.filter((child) => child.id === filterChildId) : children;
-  const filteredEvents = filterChildId
-    ? events.filter((event) => event.child_id === null || event.child_id === filterChildId)
-    : events;
+  const filteredEvents = useMemo(
+    () => filterChildId
+      ? events.filter((event) => event.child_id === null || event.child_id === filterChildId)
+      : events,
+    [events, filterChildId],
+  );
   const scheduledActivities = useMemo(
     () => buildScheduledActivities(scheduleRows, childPlans, children),
     [scheduleRows, childPlans, children],
   );
-  const filteredActivities = filterChildId
-    ? scheduledActivities.filter((activity) => activity.childId === filterChildId)
-    : scheduledActivities;
+  const filteredActivities = useMemo(
+    () => filterChildId
+      ? scheduledActivities.filter((activity) => activity.childId === filterChildId)
+      : scheduledActivities,
+    [filterChildId, scheduledActivities],
+  );
   const unscheduled = useMemo(
     () => buildUnscheduledActivities(childPlans, scheduleRows, children),
     [childPlans, scheduleRows, children],
   );
-  const filteredUnscheduled = filterChildId
-    ? unscheduled.filter((activity) => activity.childId === filterChildId)
-    : unscheduled;
+  const filteredUnscheduled = useMemo(
+    () => filterChildId
+      ? unscheduled.filter((activity) => activity.childId === filterChildId)
+      : unscheduled,
+    [filterChildId, unscheduled],
+  );
+  const visibleRange = useMemo(() => {
+    if (viewMode === "day") return { start: anchorDate, end: anchorDate };
+    if (viewMode === "week") {
+      const start = startOfWeek(anchorDate);
+      return { start, end: addDays(start, 6) };
+    }
+    return monthGridRange(anchorDate);
+  }, [anchorDate, viewMode]);
+  const calendarExportItems = useMemo(() => {
+    const timeZone = family?.time_zone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const eventItems = [...new Map(filteredEvents
+      .filter((event) => event.starts_on <= visibleRange.end && event.ends_on >= visibleRange.start)
+      .map((event) => [event.id, event])).values()]
+      .map((event) => {
+        const childName = event.child_id
+          ? children.find((child) => child.id === event.child_id)?.name ?? "Child"
+          : null;
+        return familyEventExportItem(event, childName, timeZone, event.recurrence_rule);
+      });
+    const activityItems = filteredActivities
+      .filter((activity) => activity.scheduledDate >= visibleRange.start && activity.scheduledDate <= visibleRange.end)
+      .map((activity) => planActivityExportItem(activity, timeZone));
+    return [...eventItems, ...activityItems];
+  }, [children, family?.time_zone, filteredActivities, filteredEvents, visibleRange]);
 
   function goToday() {
     setAnchorDate(todayDateOnly());
@@ -206,6 +245,29 @@ export default function PlannerScreen() {
             ))}
           </ScrollView>
         ) : null}
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Add selected planner items to device calendar"
+          onPress={() => setCalendarExportOpen(true)}
+          style={{
+            alignSelf: "flex-end",
+            flexDirection: "row",
+            alignItems: "center",
+            gap: space.xs,
+            minHeight: 44,
+            paddingHorizontal: space.md,
+            borderRadius: radius.pill,
+            backgroundColor: colors.card,
+            borderWidth: 1,
+            borderColor: colors.borderSubtle,
+          }}
+        >
+          <CalendarPlus size={17} color={colors.brand} />
+          <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.brand }}>
+            Add to device calendar
+          </Text>
+        </Pressable>
       </View>
 
       <ScrollView
@@ -293,6 +355,15 @@ export default function PlannerScreen() {
         onSchedule={(date) => void handleScheduleActivity(date)}
         onClose={() => setSchedulingActivity(null)}
       />
+
+      {family && calendarExportOpen ? (
+        <DeviceCalendarExportSheet
+          visible
+          familyId={family.id}
+          items={calendarExportItems}
+          onClose={() => setCalendarExportOpen(false)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }

@@ -108,6 +108,7 @@ export default defineBoundedTool({
         startTime: event.startTime,
         endTime: event.endTime,
         note: event.note,
+        recurrence: event.recurrence,
       })),
       note:
         events.length === 0

@@ -28,12 +28,6 @@ import {
   trustedVoiceBridgeRequest,
   voiceBridgeMessageMatches,
 } from "../../lib/voice/voice-bridge-auth";
-import {
-  activeMaterialContext,
-  INVALID_ACTIVE_MATERIAL_CONTEXT,
-  resolveActiveMaterialCaller,
-  VOICE_ACTIVE_MATERIAL_HEADER,
-} from "../../lib/voice/active-material";
 
 /**
  * Route auth for the eve channel (minimal M1-01 slice of FR-1).
@@ -146,21 +140,11 @@ function supabaseAuth(): AuthFn<Request> {
       attributes.voiceBridge = "true";
       attributes.voiceBridgeMessageId = voiceBridge.messageId;
       attributes.voiceBridgeMessageSha256 = voiceBridge.messageSha256;
-    }
-    if (membership?.family_id) attributes.familyId = membership.family_id;
-    if (voiceBridge && membership?.family_id) {
-      const activeMaterialId = request.headers.get(VOICE_ACTIVE_MATERIAL_HEADER);
-      if (activeMaterialId) {
-        const activeMaterial = await resolveActiveMaterialCaller(
-          supabase,
-          membership.family_id,
-          activeMaterialId,
-        );
-        attributes.voiceActiveMaterialContext = activeMaterial
-          ? activeMaterialContext(activeMaterial)
-          : INVALID_ACTIVE_MATERIAL_CONTEXT;
+      if (voiceBridge.activeObjectContext) {
+        attributes.voiceBridgeActiveObjectContext = voiceBridge.activeObjectContext;
       }
     }
+    if (membership?.family_id) attributes.familyId = membership.family_id;
     attributes.memberUserId = userData.user.id;
     // Chat-first onboarding is a state of the FAMILY, not of a page
     // (plans/2026-07-21-chat-first-onboarding.md §2.2). Stamping it here
@@ -236,6 +220,7 @@ export default eveChannel({
         delete mutableAttributes.voiceBridge;
         delete mutableAttributes.voiceBridgeMessageId;
         delete mutableAttributes.voiceBridgeMessageSha256;
+        delete mutableAttributes.voiceBridgeActiveObjectContext;
       }
     }
     if (typeof familyId !== "string" || text.trim().length === 0) {
@@ -296,10 +281,6 @@ export default eveChannel({
     // so it may read recent continuity but must never bind a second thread,
     // claim the same reply twice, or create a duplicate episode.
     if (auth.attributes.voiceBridge === "true") {
-      const verifiedActiveMaterialContext =
-        typeof auth.attributes.voiceActiveMaterialContext === "string"
-          ? auth.attributes.voiceActiveMaterialContext
-          : null;
       try {
         const continuityContext = await loadRecentContinuityForMember({
           familyId,
@@ -310,8 +291,8 @@ export default eveChannel({
           auth,
           context: [
             ...modalityContext,
-            ...(verifiedActiveMaterialContext
-              ? [verifiedActiveMaterialContext]
+            ...(typeof auth.attributes.voiceBridgeActiveObjectContext === "string"
+              ? [auth.attributes.voiceBridgeActiveObjectContext]
               : []),
             ...(continuityContext ? [continuityContext] : []),
           ],
@@ -325,8 +306,8 @@ export default eveChannel({
           auth,
           context: [
             ...modalityContext,
-            ...(verifiedActiveMaterialContext
-              ? [verifiedActiveMaterialContext]
+            ...(typeof auth.attributes.voiceBridgeActiveObjectContext === "string"
+              ? [auth.attributes.voiceBridgeActiveObjectContext]
               : []),
           ],
         };

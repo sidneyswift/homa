@@ -120,6 +120,11 @@ export function appendUniqueVoiceToolEffects(
   return additions.length === 0 ? current : [...current, ...additions];
 }
 
+/** Ask the server-authored realtime persona to take the opening turn. */
+export function openingResponseCreateEvent(): Record<string, unknown> {
+  return { type: "response.create" };
+}
+
 /** One-response override after ask_homa. No second tool call is possible. */
 export function spokenReplyResponseCreateEvent(): Record<string, unknown> {
   return {

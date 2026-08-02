@@ -9,7 +9,7 @@ import {
   ASK_HOMA_TOOL_NAME,
   parseAskHomaInput,
 } from "../../../../../lib/voice/realtime-tools";
-import { parseActiveMaterialReference } from "../../../../../lib/voice/active-material";
+import { resolveActiveObject } from "../../../../../lib/voice/active-object";
 
 /**
  * POST /api/voice/realtime/tool: hands one spoken request to the full Homa
@@ -46,6 +46,8 @@ interface ToolCallBody {
   sourceText?: unknown;
   sourceSequence?: unknown;
   homaSessionState?: unknown;
+  /** A visible-object pointer only. The server derives familyId from auth,
+   * then re-resolves this id inside that family before Eve sees it. */
   activeObject?: unknown;
 }
 
@@ -115,6 +117,22 @@ export async function POST(request: Request): Promise<Response> {
       },
     });
   }
+  let activeObjectContext: string | undefined;
+  if (body.activeObject !== undefined && body.activeObject !== null) {
+    const activeObject = await resolveActiveObject(familyId, body.activeObject);
+    if (!activeObject.ok) {
+      return Response.json({
+        ok: false,
+        output: {
+          ok: false,
+          spokenReply:
+            "I cannot see that one safely anymore. Select it again, then ask me about it.",
+          effects: [],
+        },
+      });
+    }
+    activeObjectContext = activeObject.contextMarkdown;
+  }
   let sourceMessageId: string;
   try {
     const persisted = await persistCanonicalMessage({
@@ -148,8 +166,8 @@ export async function POST(request: Request): Promise<Response> {
     accessToken,
     message: sourceText,
     sourceMessageId,
+    activeObjectContext,
     sessionState: parseVoiceHomaSessionState(body.homaSessionState),
-    activeMaterial: parseActiveMaterialReference(body.activeObject) ?? undefined,
   });
 
   // Always 200 with a result the model can read aloud. A non-2xx here would

@@ -1,6 +1,7 @@
 import type { EveMessage } from "eve/client";
 
 import type { ArchivedMessage } from "./chat-storage";
+import { zonedDateParts } from "../../lib/time-zone";
 
 /**
  * Day grouping for the chat transcript (founder direction 2026-07-10
@@ -25,33 +26,62 @@ export type TranscriptItem =
       sourceLabel?: string;
     };
 
-/** One local-day bucket, used to decide where separators go. */
-function dayKeyOf(at: number): string {
+type CalendarDay = {
+  key: string;
+  ordinal: number;
+  year: number;
+};
+
+/** One calendar-day bucket, projected into the family's time zone. */
+function calendarDayOf(at: number, timeZone?: string): CalendarDay {
   const date = new Date(at);
-  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+  const { year, month, day } = timeZone
+    ? zonedDateParts(date, timeZone)
+    : {
+        year: date.getFullYear(),
+        month: date.getMonth() + 1,
+        day: date.getDate(),
+      };
+
+  return {
+    key: `${year}-${month}-${day}`,
+    ordinal: Math.floor(Date.UTC(year, month - 1, day) / (24 * 60 * 60 * 1000)),
+    year,
+  };
 }
 
 /**
  * dayLabelFor(at, now): the compact one-line day header (founder call
  * 2026-07-13, chat-refined question 3): "Today · July 13",
  * "Yesterday · July 12", "Tuesday · July 14", and "July 3 · 2025" once
- * the year differs. Local time on purpose: the separator answers "when
- * was this, for the person reading it here".
+ * the year differs. The explicit family time zone keeps the server and
+ * browser on the same calendar day during hydration.
  */
-export function dayLabelFor(at: number, now: number = Date.now()): string {
-  const day = dayKeyOf(at);
+export function dayLabelFor(
+  at: number,
+  now: number = Date.now(),
+  timeZone?: string,
+): string {
   const date = new Date(at);
+  const calendarDay = calendarDayOf(at, timeZone);
+  const currentDay = calendarDayOf(now, timeZone);
   const monthDay = date.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
+    ...(timeZone ? { timeZone } : {}),
   });
-  if (day === dayKeyOf(now)) return `Today · ${monthDay}`;
-  if (day === dayKeyOf(now - 24 * 60 * 60 * 1000)) return `Yesterday · ${monthDay}`;
-  if (date.getFullYear() === new Date(now).getFullYear()) {
-    const weekday = date.toLocaleDateString("en-US", { weekday: "long" });
+  if (calendarDay.key === currentDay.key) return `Today · ${monthDay}`;
+  if (calendarDay.ordinal === currentDay.ordinal - 1) {
+    return `Yesterday · ${monthDay}`;
+  }
+  if (calendarDay.year === currentDay.year) {
+    const weekday = date.toLocaleDateString("en-US", {
+      weekday: "long",
+      ...(timeZone ? { timeZone } : {}),
+    });
     return `${weekday} · ${monthDay}`;
   }
-  return `${monthDay} · ${date.getFullYear()}`;
+  return `${monthDay} · ${calendarDay.year}`;
 }
 
 /**
@@ -113,6 +143,7 @@ export function buildTranscript(input: {
    * rather than inside it and merge by clock. */
   spoken?: readonly ArchivedMessage[];
   now?: number;
+  timeZone?: string;
 }): TranscriptItem[] {
   const now = input.now ?? Date.now();
   const items: TranscriptItem[] = [];
@@ -136,13 +167,13 @@ export function buildTranscript(input: {
         items.push({ kind: "separator", key: `sep:${key}`, label: "Earlier" });
       }
     } else {
-      const day = dayKeyOf(at);
-      if (day !== previousDay) {
-        previousDay = day;
+      const calendarDay = calendarDayOf(at, input.timeZone);
+      if (calendarDay.key !== previousDay) {
+        previousDay = calendarDay.key;
         items.push({
           kind: "separator",
           key: `sep:${key}`,
-          label: dayLabelFor(at, now),
+          label: dayLabelFor(at, now, input.timeZone),
         });
       }
     }

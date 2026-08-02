@@ -1,5 +1,22 @@
 import { VOICE_PERSONA_MARKDOWN } from "./persona.generated";
 
+interface VoiceMemberIdentity {
+  user_id?: string;
+  display_name: string | null;
+}
+
+/** Selects the caller's server-authenticated member name without falling
+ * back to another adult in the family. The model handles first-name usage. */
+export function voiceSpeakerName(
+  members: readonly VoiceMemberIdentity[],
+  authenticatedUserId: string,
+): string | null {
+  const displayName = members.find(
+    (member) => member.user_id === authenticatedUserId,
+  )?.display_name?.trim();
+  return displayName || null;
+}
+
 /**
  * The instructions a browser voice session runs on (issue #283, founder
  * direction 2026-07-29).
@@ -33,13 +50,20 @@ export function buildVoiceModeRules(): string {
   return `
 ## You are talking out loud, in the app (binding: this beats every rule above)
 
-She tapped the voice button in her chat with you. She can hear you, and she
-can read the transcript of this conversation as it appears. When you both
-stop, the transcript stays in her chat, so anything you talk about is
-already written down.
+The app opened into this voice conversation. She can hear you, and she can
+read the transcript as it appears. When you both stop, the transcript stays
+in her chat, so anything you talk about is already written down.
 
 How to talk here:
 
+- Open the conversation yourself. In your first response, warmly greet the
+  parent and ask one short, natural, open question about what would make
+  homeschooling easier today.
+- Use the signed-in parent's first name from family context speakingWith when
+  it is available. If it is missing, greet her without a name. Never guess.
+- Vary the wording naturally between sessions. Speak to the parent directly.
+  Never claim you heard her before she spoke, treat her homeschool like a
+  person, list capabilities, or give a canned welcome.
 - Short turns. Two or three sentences, then let her speak. This is a
   conversation, not a briefing.
 - Say numbers and dates the way a person says them out loud: "about twenty
@@ -60,6 +84,9 @@ How to talk here:
   remember, change, create, open, schedule, log, send, research, or organize
   something. This includes printables, materials, the binder, planner,
   calendar, tasks, hours, child progress, curriculum, and follow-up delivery.
+- You MUST call ask_homa when the parent refers to this, that, the visible
+  item, or the one on screen. The authenticated agent decides whether that
+  exact object is still visible and safe to discuss.
 - Put the parent's request into ask_homa faithfully. Preserve names, dates,
   amounts, constraints, and corrections. Do not turn it into a narrower task.
 - The full agent may ask a question. Its question appears on screen and its
@@ -77,6 +104,36 @@ action from your own intent or narration.
 
 /** The default boundary for every realtime voice session. */
 export const VOICE_MODE_RULES = buildVoiceModeRules();
+
+/**
+ * The AI SDK's typed realtime config does not yet expose OpenAI's
+ * `interrupt_response` field. Its provider pass-through replaces the whole
+ * top-level audio object, so keep every audio setting together here.
+ *
+ * WebRTC suppresses the known speaker signal on-device. OpenAI's far-field
+ * filter then reduces remaining room noise before VAD. A threshold modestly
+ * above the provider default keeps hands-free barge-in available without
+ * letting ordinary speaker leakage cancel Homa's response.
+ */
+export function buildRealtimeAudioProviderOptions(voice: string): Record<string, unknown> {
+  return {
+    audio: {
+      input: {
+        transcription: { model: "gpt-realtime-whisper" },
+        noise_reduction: { type: "far_field" },
+        turn_detection: {
+          type: "server_vad",
+          threshold: 0.65,
+          prefix_padding_ms: 300,
+          silence_duration_ms: 650,
+          create_response: true,
+          interrupt_response: true,
+        },
+      },
+      output: { voice },
+    },
+  };
+}
 
 /**
  * Composes the whole instruction string, persona first, then how to talk

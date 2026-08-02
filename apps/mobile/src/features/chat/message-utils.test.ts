@@ -1,9 +1,14 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
-import type { EveMessage } from "eve/react";
+import type { EveMessage, EveMessagePart } from "eve/react";
 
-import { userMessageSendState } from "./message-utils";
+import {
+  partIsRenderable,
+  toolOnlyFallback,
+  userMessageSendState,
+} from "./message-utils";
 
 /**
  * The mobile twin of apps/web/app/app/message-parts-send-state.test.tsx's
@@ -85,5 +90,88 @@ describe("userMessageSendState", () => {
       } as unknown as EveMessage),
       null,
     );
+  });
+});
+
+function completedTool(
+  toolName: string,
+  output: Record<string, unknown>,
+): EveMessagePart {
+  return {
+    type: "dynamic-tool",
+    toolName,
+    state: "output-available",
+    toolCallId: `call-${toolName}`,
+    input: {},
+    output,
+  } as unknown as EveMessagePart;
+}
+
+function assistantWith(...parts: EveMessagePart[]): EveMessage {
+  return {
+    id: "turn_2:assistant",
+    role: "assistant",
+    parts,
+  } as unknown as EveMessage;
+}
+
+describe("mobile tool rendering", () => {
+  it("allows the planner card through the same renderability gate as its view", () => {
+    assert.equal(partIsRenderable(completedTool("open_planner", { opened: true })), true);
+    assert.equal(partIsRenderable(completedTool("open_planner", { opened: false })), false);
+  });
+
+  it("names a checklist result when the native card cannot render it yet", () => {
+    assert.equal(
+      toolOnlyFallback(
+        assistantWith(
+          completedTool("start_checklist", {
+            started: true,
+            childName: "Mia",
+          }),
+        ),
+      ),
+      "Mia's questions are ready, but that checklist cannot open in the phone app yet.",
+    );
+  });
+
+  it("keeps internal tool work quiet when the assistant also wrote a reply", () => {
+    assert.equal(
+      toolOnlyFallback(
+        assistantWith(
+          completedTool("get_children", { children: [] }),
+          { type: "text", text: "What should we try next?" } as EveMessagePart,
+        ),
+      ),
+      null,
+    );
+  });
+
+  it("shows an honest generic fallback instead of dropping an unknown tool-only turn", () => {
+    assert.equal(
+      toolOnlyFallback(assistantWith(completedTool("future_card", { opened: true }))),
+      "I could not show a result for that in the phone app.",
+    );
+  });
+
+  it("does not invent a fallback while a tool is still running", () => {
+    assert.equal(
+      toolOnlyFallback(
+        assistantWith({
+          type: "dynamic-tool",
+          toolName: "future_card",
+          state: "input-available",
+          toolCallId: "call-future-card",
+          input: {},
+        } as unknown as EveMessagePart),
+      ),
+      null,
+    );
+  });
+
+  it("wires the message-level fallback into the React Native transcript", async () => {
+    const source = await readFile(new URL("./message-view.tsx", import.meta.url), "utf8");
+    assert.match(source, /const fallback = toolOnlyFallback\(message\)/u);
+    assert.match(source, /\{fallback\}/u);
   });
 });

@@ -75,6 +75,17 @@ export default defineBoundedTool({
         .nullable()
         .optional()
         .describe("New 24h HH:MM end time. Pass null to clear it. Omit to keep the current one."),
+      recurrence: z
+        .object({
+          frequency: z.literal("weekly"),
+          interval: z.number().int().min(1).max(52),
+          weekdays: z.array(z.number().int().min(0).max(6)).min(1).max(7),
+          until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
+        })
+        .strict()
+        .nullable()
+        .optional()
+        .describe("Set or change a weekly series. Pass null to stop repeating; omit to keep recurrence unchanged."),
     })
     .strict(),
   async execute(input, ctx) {
@@ -95,6 +106,7 @@ export default defineBoundedTool({
       endsOn: input.endsOn,
       startTime: input.startTime,
       endTime: input.endTime,
+      recurrence: input.recurrence,
     };
     const receiptContext = voiceToolReceiptContext({
       familyId: access.familyId,
@@ -176,6 +188,7 @@ export default defineBoundedTool({
         endsOn: result.event.endsOn,
         startTime: result.event.startTime,
         endTime: result.event.endTime,
+        recurrence: result.event.recurrence,
       },
       ...(armed.actionReceipt ? { actionReceipt: armed.actionReceipt } : {}),
       note: "Updated on the family calendar. Confirm the change back in one short natural aside; the calendar page shows it right away.",
