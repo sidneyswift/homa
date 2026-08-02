@@ -18,8 +18,8 @@ describe("mobile onboarding card API contract", () => {
     assert.doesNotMatch(source, /familyId/u);
   });
 
-  it("gives every checklist answer a native UUID idempotency key", () => {
-    assert.match(source, /idempotencyKey: Crypto\.randomUUID\(\)/u);
+  it("gives every checklist answer a UUID idempotency key", () => {
+    assert.match(source, /idempotencyKey: createIdempotencyKey\(\)/u);
   });
 
   it("opens reports by token instead of exposing child or family identity", () => {
