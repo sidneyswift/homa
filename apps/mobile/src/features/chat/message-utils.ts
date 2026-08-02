@@ -123,9 +123,46 @@ export function partIsRenderable(part: EveMessagePart): boolean {
         typeof (output.material ?? output.worksheet)?.previewUrl === "string"
       );
     }
+    if (part.toolName === "open_planner") {
+      const output = (part.output ?? {}) as { opened?: unknown };
+      return output.opened === true;
+    }
     return memoryChipFor(part) !== null;
   }
   return false;
+}
+
+/**
+ * Last-resort copy for a completed assistant turn whose parts would all
+ * render as nothing on mobile. This is deliberately message-level: a
+ * normal authored reply stays clean even when it also used internal
+ * tools, while a UI tool mobile has not ported yet can never erase the
+ * whole turn (GH #376).
+ */
+export function toolOnlyFallback(message: EveMessage): string | null {
+  if (message.role !== "assistant" || message.parts.some(partIsRenderable)) {
+    return null;
+  }
+  const completedTool = message.parts.findLast(
+    (part) => part.type === "dynamic-tool" && part.state === "output-available",
+  );
+  if (!completedTool || completedTool.type !== "dynamic-tool") return null;
+
+  const output = (completedTool.output ?? {}) as Record<string, unknown>;
+  if (completedTool.toolName === "start_checklist" && output.started === true) {
+    const childName =
+      typeof output.childName === "string" ? `${output.childName}'s ` : "The ";
+    return `${childName}questions are ready, but that checklist cannot open in the phone app yet.`;
+  }
+  if (completedTool.toolName === "ask_for_details" && output.asked === true) {
+    return "That details card cannot open in the phone app yet. You can type the details here instead.";
+  }
+  if (completedTool.toolName === "score_child_report" && output.scored === true) {
+    const childName =
+      typeof output.childName === "string" ? `${output.childName}'s ` : "The ";
+    return `${childName}report is ready, but that report card cannot open in the phone app yet.`;
+  }
+  return "I could not show a result for that in the phone app.";
 }
 
 const TOOL_STATUS_LABELS: Record<string, string> = {

@@ -7,6 +7,7 @@ import { MarkdownText } from "./markdown-text";
 import {
   memoryChipFor,
   partIsRenderable,
+  toolOnlyFallback,
   userMessageSendState,
   type MemoryChipContent,
 } from "./message-utils";
@@ -182,7 +183,8 @@ export function MessageView({
   onRetryFailedMessage?: (text: string) => void;
 }) {
   const isUser = message.role === "user";
-  if (!message.parts.some(partIsRenderable)) return null;
+  const fallback = toolOnlyFallback(message);
+  if (!message.parts.some(partIsRenderable) && fallback === null) return null;
   // Where a user bubble sits between typed and delivered (GH #170 part
   // 2, message-utils.ts): never set for an assistant message.
   const sendState = isUser ? userMessageSendState(message) : null;
@@ -230,6 +232,19 @@ export function MessageView({
             questions={questions}
           />
         ))}
+        {fallback ? (
+          <Text
+            accessibilityRole="alert"
+            style={{
+              fontFamily: fontFamilies.body,
+              fontSize: fontSize.base,
+              lineHeight: fontSize.base * 1.5,
+              color: colors.textBody,
+            }}
+          >
+            {fallback}
+          </Text>
+        ) : null}
       </View>
       {sendState === "sending" ? (
         <Text
