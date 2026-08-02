@@ -2,7 +2,7 @@
 
 import { emitEvent } from "@homa/core";
 import type { UserContent } from "ai";
-import { Client } from "eve/client";
+import { Client, type HandleMessageStreamEvent } from "eve/client";
 import { useEveAgent, type EveMessage } from "eve/react";
 import {
   ArrowDown,
@@ -47,7 +47,10 @@ import { VoiceMode } from "./voice-mode";
 import { VoiceModeButton } from "./voice-mode-button";
 import { spokenTurnMessage, type VoiceTranscriptLine } from "./voice-transcript";
 import { ChecklistTakeover } from "./checklist-takeover";
-import { formatHiddenDirective } from "../../lib/onboarding/directives";
+import {
+  formatHiddenDirective,
+  isHiddenDirective,
+} from "../../lib/onboarding/directives";
 import {
   archiveFromServerHistory,
   type ChatHistoryPayload,
@@ -65,9 +68,12 @@ import {
   type ChatAttachmentReceipt,
 } from "./chat-attachments";
 import {
+  appendRecoveredArchiveState,
   archiveMessages,
   foldEventsToMessages,
   loadSavedChat,
+  localMessagesForServerReconciliation,
+  messagesMissingFromDurableHistory,
   prepareChat,
   pruneMessageTimes,
   saveChat,
@@ -156,11 +162,16 @@ import { buildTranscript } from "./transcript-days";
 import { markTurnStarted, takeTurnLatencyMs } from "./turn-clock";
 import { recoverLostTurn, type RecoveredTurn } from "./turn-recovery";
 import { createReattachableEveSession } from "./reattachable-eve-session";
+import { stripVoiceTranscriptionMarker } from "../../lib/voice/transcription-marker";
 import {
   createTurnBoundaryWatchdog,
   type TurnBoundaryWatchdog,
 } from "./turn-boundary-watchdog";
-import { restoreServerBoundEveSession } from "./web-session-restoration";
+import {
+  latestTurnSequence,
+  replayedMessageTimes,
+  restoreServerBoundEveSession,
+} from "./web-session-restoration";
 
 /**
  * The chat surface, the main column inside the /app frame: the sidebar
@@ -188,8 +199,8 @@ import { restoreServerBoundEveSession } from "./web-session-restoration";
  * without ever erroring, which left status "streaming" and the send
  * button disabled forever, with no busy label once the last text part
  * looked complete. Three defenses, all client-side (the turn itself is
- * durable server-side, and the resumable stream replays missed events
- * from the session's streamIndex on the next send):
+ * durable server-side, and Homa reconciles the browser to the durable
+ * waiting cursor before the next send):
  *   1. while Homa works the composer never goes dead: an empty composer
  *      shows Stop; a typed one shows Stop AND Send (founder ruling
  *      2026-07-10, the Claude/Cursor composer shape), and Send while
@@ -279,8 +290,24 @@ const STREAM_RECONNECT_ATTEMPTS = 8;
  *  that is still being written server-side gets its chance to land. */
 const RECOVERY_DEADLINE_MS = 240_000;
 
+interface BoundChatSendInput {
+  message: string | UserContent;
+  headers?: Readonly<Record<string, string>>;
+}
+
 function currentTimeMs(): number {
   return Date.now();
+}
+
+function visibleBoundSendSummary(message: string | UserContent): string | null {
+  const summary = summarizeOutgoingParts(message);
+  if (isHiddenDirective(summary)) return null;
+  const visible = summary
+    .split("\n")
+    .map(stripVoiceTranscriptionMarker)
+    .join("\n")
+    .trim();
+  return visible.length > 0 ? visible : null;
 }
 
 interface LostTurnRecoveryTarget {
@@ -360,11 +387,16 @@ export function ChatClient({
     prepared.initialEvents.length > 0;
   const shouldRestoreServerBinding =
     onboarding === null &&
-    familyId !== null &&
-    !prepared.initialSession?.sessionId;
+    familyId !== null;
   const [restoringBoundSession, setRestoringBoundSession] = useState(
     shouldRestoreServerBinding,
   );
+  const [bindingSyncFailure, setBindingSyncFailure] = useState(false);
+  const [bindingSyncFailureSummary, setBindingSyncFailureSummary] = useState<
+    string | null
+  >(null);
+  const [authorizationParked, setAuthorizationParked] = useState(false);
+  const [bindingRetryAttempt, setBindingRetryAttempt] = useState(0);
   const [sessionClient] = useState(
     () =>
       new Client({
@@ -403,6 +435,14 @@ export function ChatClient({
       ? archiveFromServerHistory(serverHistory, initialLiveMessages)
       : prepared.archived,
   );
+  // Missed current-session turns recovered before a send stay visible in this
+  // open tab. They are an in-memory overlay because restored Eve events are
+  // already persisted separately and would duplicate on a local-only reload.
+  const [replayedArchived, setReplayedArchived] = useState<ArchivedMessage[]>([]);
+  const [serverArchiveReconciled, setServerArchiveReconciled] = useState(false);
+  const replayedArchivedRef = useRef<ArchivedMessage[]>([]);
+  const serverArchiveReconciledRef = useRef(false);
+  const rotatedCachePersistedRef = useRef(!prepared.rotated);
   const [restoredPromptSuggestionSet] =
     useState<PromptSuggestionSet | null>(() =>
       restorePromptSuggestionSetForVisibleMessages({
@@ -442,12 +482,12 @@ export function ChatClient({
   /** The store's send, held by ref so onFinish can deliver the queue
    *  without capturing `agent` inside its own initializer (the React
    *  Compiler rejects that self-capture on mobile; twins stay alike). */
-  const sendRef = useRef<
-    ((input: {
-      message: string | UserContent;
-      headers?: Readonly<Record<string, string>>;
-    }) => Promise<void>) | null
-  >(null);
+  const sendRef = useRef<((input: BoundChatSendInput) => Promise<void>) | null>(
+    null,
+  );
+  /** Exact preflight-blocked input, kept until the parent retries or the
+   * authenticated binding can be reconciled. */
+  const pendingBoundSendRef = useRef<BoundChatSendInput | null>(null);
   /** Lost-turn recovery, held by ref for onFinish (same reason). */
   const startRecoveryRef = useRef<(() => void) | null>(null);
   // The attach flow (approved chat redesign): staged files upload to
@@ -1082,60 +1122,245 @@ export function ChatClient({
     }, 0);
   }, [clearReplyCutoffRecovery]);
 
-  const adoptServerRestoredSession = useCallback(
-    (restored: RecoveredTurn) => {
-      reattachableSession.adopt(restored.session);
-      saveChat(
-        storageKey,
-        {
-          archived: archivedRef.current,
-          events: restored.events,
-          session: restored.session,
-          messageTimes: {},
-          lastActivityAt: currentTimeMs(),
-        },
-        { mergeSessionEvents: true },
+  const adoptFreshEveSession = useCallback((options?: {
+    stageLocalForServerReconciliation?: boolean;
+  }) => {
+    const saved = loadSavedChat(storageKey);
+    const reconcilingServerReplay =
+      options?.stageLocalForServerReconciliation === true;
+    const savedSessionId = saved.session?.sessionId;
+    const useFullServerArchive =
+      serverArchiveReconciledRef.current && Boolean(serverHistory);
+    const durableMessageIds = new Set(
+      (serverHistory?.messages ?? [])
+        .filter((message) => message.sessionId === savedSessionId)
+        .flatMap((message) =>
+          message.turnId ? [`${message.turnId}:${message.role}`] : [],
+        ),
+    );
+    const currentMessages = reconcilingServerReplay
+      ? localMessagesForServerReconciliation(
+          saved.events ?? [],
+          savedSessionId,
+          durableMessageIds,
+        )
+      : foldEventsToMessages(saved.events ?? []);
+    const messagesToArchive = serverHistory && !reconcilingServerReplay
+      ? messagesMissingFromDurableHistory(
+          currentMessages,
+          durableMessageIds,
+        )
+      : currentMessages;
+    const stageLocalForServerReconciliation =
+      reconcilingServerReplay && Boolean(serverHistory);
+    const next = appendRecoveredArchiveState({
+      persisted: useFullServerArchive ? serverArchived : archivedRef.current,
+      replayed: stageLocalForServerReconciliation
+        ? replayedArchivedRef.current
+        : [],
+      additions: archiveMessages(
+        messagesToArchive,
+        saved.messageTimes ?? {},
+        savedSessionId,
+      ),
+      persistedArchiveHidden: stageLocalForServerReconciliation,
+    });
+    const nextArchived = next.persisted;
+    const freshSession = { streamIndex: 0 };
+    setArchived(nextArchived);
+    archivedRef.current = nextArchived;
+    setReplayedArchived(next.replayed);
+    replayedArchivedRef.current = next.replayed;
+    setServerArchiveReconciled(false);
+    serverArchiveReconciledRef.current = false;
+    setLiveTimes({});
+    reattachableSession.adopt(freshSession);
+    saveChat(storageKey, {
+      ...saved,
+      archived: nextArchived,
+      events: [],
+      session: freshSession,
+      messageTimes: {},
+      lastActivityAt: currentTimeMs(),
+    });
+    agentReset();
+    durableCursorRef.current = 0;
+  }, [
+    agentReset,
+    reattachableSession,
+    serverArchived,
+    serverHistory,
+    storageKey,
+  ]);
+
+  const revealServerRestoredEvents = useCallback(
+    (
+      events: readonly HandleMessageStreamEvent[],
+      runtimeSessionId: string,
+    ): boolean => {
+      const durableMessageIds = new Set(
+        (serverHistory?.messages ?? [])
+          .filter((message) => message.sessionId === runtimeSessionId)
+          .flatMap((message) =>
+            message.turnId ? [`${message.turnId}:${message.role}`] : [],
+          ),
       );
-      agentReset();
-      durableCursorRef.current = restored.session.streamIndex;
+      const restoredMessages = messagesMissingFromDurableHistory(
+        foldEventsToMessages(events),
+        durableMessageIds,
+      );
+      const restoredArchive = archiveMessages(
+        restoredMessages,
+        replayedMessageTimes(events),
+        runtimeSessionId,
+      );
+      if (!serverHistory) {
+        const nextArchived = [
+          ...archivedRef.current.filter(
+            (entry) => entry.sessionId !== runtimeSessionId,
+          ),
+          ...restoredArchive,
+        ];
+        archivedRef.current = nextArchived;
+        replayedArchivedRef.current = [];
+        serverArchiveReconciledRef.current = false;
+        setArchived(nextArchived);
+        setReplayedArchived([]);
+        setServerArchiveReconciled(false);
+        const saved = loadSavedChat(storageKey);
+        saveChat(storageKey, {
+          ...saved,
+          archived: nextArchived,
+          events: [],
+          messageTimes: {},
+        });
+        return true;
+      }
+      setServerArchiveReconciled(true);
+      serverArchiveReconciledRef.current = true;
+      if (restoredArchive.length === 0) return false;
+      const next = appendRecoveredArchiveState({
+        persisted: [],
+        replayed: replayedArchivedRef.current,
+        additions: restoredArchive,
+        persistedArchiveHidden: true,
+      });
+      replayedArchivedRef.current = next.replayed;
+      setReplayedArchived(next.replayed);
+      return false;
     },
-    [agentReset, reattachableSession, storageKey],
+    [serverHistory, storageKey],
   );
 
+  const appendRecoveredArchive = useCallback(
+    (additions: readonly ArchivedMessage[]): ArchivedMessage[] => {
+      const next = appendRecoveredArchiveState({
+        persisted: archivedRef.current,
+        replayed: replayedArchivedRef.current,
+        additions,
+        persistedArchiveHidden:
+          serverArchiveReconciledRef.current && Boolean(serverHistory),
+      });
+      archivedRef.current = next.persisted;
+      replayedArchivedRef.current = next.replayed;
+      setArchived(next.persisted);
+      setReplayedArchived(next.replayed);
+      return next.persisted;
+    },
+    [serverHistory],
+  );
+
+  const persistPreparedRotation = useCallback(() => {
+    if (rotatedCachePersistedRef.current) return;
+    saveChat(storageKey, {
+      archived: prepared.archived,
+      events: [],
+      session: undefined,
+      messageTimes: {},
+      lastActivityAt: prepared.lastActivityAt,
+      promptSuggestions: null,
+    });
+    rotatedCachePersistedRef.current = true;
+  }, [prepared.archived, prepared.lastActivityAt, storageKey]);
+
+  useEffect(() => {
+    persistPreparedRotation();
+  }, [persistPreparedRotation]);
+
   const sendAcrossTabs = useCallback(
-    async (input: {
-      message: string | UserContent;
-      headers?: Readonly<Record<string, string>>;
-    }): Promise<void> => {
+    async (input: BoundChatSendInput): Promise<void> => {
       await withChatTurnLock(storageKey, async () => {
-        const current = reattachableSession.session.state;
-        const saved = loadSavedChat(storageKey).session;
-        if (shouldAdoptSavedSession(current, saved)) {
-          reattachableSession.adopt(saved);
-          durableCursorRef.current = saved.streamIndex;
-        } else if (!current.sessionId) {
-          setRestoringBoundSession(true);
-          const restored = await restoreServerBoundEveSession({
-            client: sessionClient,
-            timeZone,
-            signal: new AbortController().signal,
+        persistPreparedRotation();
+        let current = reattachableSession.session.state;
+        const saved = loadSavedChat(storageKey);
+        if (shouldAdoptSavedSession(current, saved.session)) {
+          reattachableSession.adopt(saved.session);
+          durableCursorRef.current = saved.session.streamIndex;
+          current = reattachableSession.session.state;
+        }
+
+        // GH #702: Eve treats the first historical waiting boundary as the
+        // new turn's finish. Prove this browser is at the authenticated
+        // session's latest durable user turn before agentSend can append one.
+        setRestoringBoundSession(true);
+        const localLatestSequence = latestTurnSequence(saved.events ?? []);
+        const restored = await restoreServerBoundEveSession({
+          client: sessionClient,
+          current: {
+            sessionId: current.sessionId,
+            continuationToken: current.continuationToken,
+            latestSequence: localLatestSequence,
+          },
+          timeZone,
+          signal: new AbortController().signal,
+        });
+        if (restored === null) {
+          setRestoringBoundSession(false);
+          return;
+        }
+        if (restored.kind === "unavailable") {
+          pendingBoundSendRef.current = input;
+          setBindingSyncFailureSummary(
+            visibleBoundSendSummary(input.message),
+          );
+          setBindingSyncFailure(true);
+          setRestoringBoundSession(false);
+          return;
+        }
+        setBindingSyncFailure(false);
+        if (restored.kind === "replayed" || restored.kind === "parked") {
+          adoptFreshEveSession({
+            stageLocalForServerReconciliation: true,
           });
-          if (restored === null) {
+          revealServerRestoredEvents(
+            restored.events,
+            restored.runtimeSessionId,
+          );
+          if (restored.kind === "parked") {
+            pendingBoundSendRef.current = input;
+            setBindingSyncFailureSummary(
+              visibleBoundSendSummary(input.message),
+            );
+            setAuthorizationParked(true);
             setRestoringBoundSession(false);
             return;
           }
-          if (restored.kind === "resumed") {
-            adoptServerRestoredSession(restored);
-          }
-          setRestoringBoundSession(false);
+        } else if (restored.kind === "fresh" && current.sessionId) {
+          adoptFreshEveSession();
         }
+        setAuthorizationParked(false);
+        pendingBoundSendRef.current = null;
+        setBindingSyncFailureSummary(null);
+        setRestoringBoundSession(false);
         await agentSend(input);
       });
     },
     [
-      adoptServerRestoredSession,
+      adoptFreshEveSession,
       agentSend,
+      persistPreparedRotation,
       reattachableSession,
+      revealServerRestoredEvents,
       sessionClient,
       storageKey,
       timeZone,
@@ -1146,32 +1371,65 @@ export function ChatClient({
     sendRef.current = sendAcrossTabs;
   }, [sendAcrossTabs]);
 
-  // A localStorage miss is not permission to mint. The authenticated server
-  // binding is the cross-device authority; replaying it read-only recovers the
-  // exact Eve cursor and waits out any turn another tab is still streaming.
+  // Every tab proves its local sequence against the authenticated server
+  // binding on mount. A localStorage hit is still only a cache: GH #702 was a
+  // valid session id whose stream cursor sat nine complete turns behind.
   useEffect(() => {
     if (!shouldRestoreServerBinding) return;
     const controller = new AbortController();
     void (async () => {
-      const restored = await restoreServerBoundEveSession({
-        client: sessionClient,
-        timeZone,
-        signal: controller.signal,
+      await withChatTurnLock(storageKey, async () => {
+        const saved = loadSavedChat(storageKey);
+        const current = reattachableSession.session.state;
+        const localLatestSequence = latestTurnSequence(
+          saved.events ?? prepared.initialEvents,
+        );
+        const restored = await restoreServerBoundEveSession({
+          client: sessionClient,
+          current: {
+            sessionId: current.sessionId,
+            continuationToken: current.continuationToken,
+            latestSequence: localLatestSequence,
+          },
+          timeZone,
+          signal: controller.signal,
+        });
+        if (controller.signal.aborted || restored === null) return;
+        if (restored.kind === "unavailable") {
+          setBindingSyncFailure(true);
+          setRestoringBoundSession(false);
+          return;
+        }
+        if (restored.kind === "replayed" || restored.kind === "parked") {
+          adoptFreshEveSession({
+            stageLocalForServerReconciliation: true,
+          });
+          revealServerRestoredEvents(
+            restored.events,
+            restored.runtimeSessionId,
+          );
+          setAuthorizationParked(restored.kind === "parked");
+        } else if (restored.kind === "fresh" && current.sessionId) {
+          adoptFreshEveSession();
+        }
+        if (restored.kind !== "parked") setAuthorizationParked(false);
+        setBindingSyncFailure(false);
+        setRestoringBoundSession(false);
+        if (restored.kind !== "parked") flushQueuedMessages();
       });
-      if (controller.signal.aborted || restored === null) return;
-      if (restored.kind === "resumed") {
-        adoptServerRestoredSession(restored);
-      }
-      setRestoringBoundSession(false);
-      flushQueuedMessages();
     })();
     return () => controller.abort();
   }, [
-    adoptServerRestoredSession,
+    adoptFreshEveSession,
     flushQueuedMessages,
+    prepared.initialEvents,
+    reattachableSession,
+    revealServerRestoredEvents,
     sessionClient,
     shouldRestoreServerBinding,
+    storageKey,
     timeZone,
+    bindingRetryAttempt,
   ]);
 
   const recoverTurn = useCallback(
@@ -1208,12 +1466,13 @@ export function ChatClient({
       clearReplyCutoffRecovery();
       const messages = foldEventsToMessages(recovered.events);
       const stamped = stampMessageTimes(liveTimes, messages);
-      const nextArchived = [
-        ...archivedRef.current,
-        ...archiveMessages(messages, stamped),
-      ];
-      setArchived(nextArchived);
-      archivedRef.current = nextArchived;
+      const nextArchived = appendRecoveredArchive(
+        archiveMessages(
+          messages,
+          stamped,
+          recovered.session.sessionId,
+        ),
+      );
       setLiveTimes({});
       reattachableSession.adopt(recovered.session);
       saveChat(storageKey, {
@@ -1239,6 +1498,7 @@ export function ChatClient({
     },
     [
       agentReset,
+      appendRecoveredArchive,
       clearReplyCutoffRecovery,
       flushQueuedMessages,
       liveTimes,
@@ -1319,12 +1579,10 @@ export function ChatClient({
         const stillLive = messagesRef.current;
         if (stillLive.length > 0) {
           const stamped = stampMessageTimes(liveTimes, stillLive);
-          const nextArchived = [
-            ...archivedRef.current,
-            ...archiveMessages(stillLive, stamped),
-          ];
-          setArchived(nextArchived);
-          archivedRef.current = nextArchived;
+          const liveSessionId = reattachableSession.session.state.sessionId;
+          const nextArchived = appendRecoveredArchive(
+            archiveMessages(stillLive, stamped, liveSessionId),
+          );
           setLiveTimes({});
           saveChat(storageKey, {
             archived: nextArchived,
@@ -1368,12 +1626,14 @@ export function ChatClient({
     })();
   }, [
     agentReset,
+    appendRecoveredArchive,
     applyRecoveredTurn,
     currentRecoveryTarget,
     flushQueuedMessages,
     liveTimes,
     promptSuggestionLifecycleHandlers,
     recoverTurn,
+    reattachableSession,
     storageKey,
   ]);
 
@@ -1472,7 +1732,10 @@ export function ChatClient({
   const renderSources = hydrationSafeTranscriptSources({
     hydrated,
     serverArchived,
-    clientArchived: archived,
+    clientArchived: [
+      ...(serverArchiveReconciled && serverHistory ? serverArchived : archived),
+      ...replayedArchived,
+    ],
     clientLive: agent.data.messages,
     clientLiveTimes: liveTimes,
     clientSpoken: spoken,
@@ -1480,7 +1743,12 @@ export function ChatClient({
   const renderMessages = renderSources.live;
   const renderBusy = hydrated && busy;
   const renderRestoringBoundSession = hydrated && restoringBoundSession;
-  const lineOccupied = busy || recovering || renderRestoringBoundSession;
+  const lineOccupied =
+    busy ||
+    recovering ||
+    renderRestoringBoundSession ||
+    bindingSyncFailure ||
+    authorizationParked;
   const transcript = buildTranscript({
     archived: renderSources.archived,
     live: renderMessages,
@@ -1975,7 +2243,11 @@ export function ChatClient({
       // session racing the one that might still be finishing.
       busy: isSendLineOccupied({
         busy,
-        recovering: recovering || restoringBoundSession,
+        recovering:
+          recovering ||
+          restoringBoundSession ||
+          bindingSyncFailure ||
+          authorizationParked,
       }),
       draftFromVoice: draftFromVoiceRef.current,
       source,
@@ -2081,7 +2353,11 @@ export function ChatClient({
     if (
       isSendLineOccupied({
         busy,
-        recovering: recovering || restoringBoundSession,
+        recovering:
+          recovering ||
+          restoringBoundSession ||
+          bindingSyncFailure ||
+          authorizationParked,
       }) || preparingAttachments
     ) {
       return;
@@ -2159,6 +2435,21 @@ export function ChatClient({
       nextReplyCutoffRecoveryState(state, "retry"),
     );
     startLostTurnRecovery();
+  }
+
+  function retryBindingSync(): void {
+    if (restoringBoundSession) return;
+    const pending = pendingBoundSendRef.current;
+    if (pending === null) {
+      setBindingSyncFailure(false);
+      setRestoringBoundSession(true);
+      setBindingRetryAttempt((attempt) => attempt + 1);
+      return;
+    }
+    setBindingSyncFailure(false);
+    setBindingSyncFailureSummary(null);
+    setRestoringBoundSession(true);
+    void sendRef.current?.(pending);
   }
 
   function removeQueuedMessage(
@@ -2453,6 +2744,26 @@ export function ChatClient({
             </span>
           </div>
         ) : null}
+        {(bindingSyncFailure || authorizationParked) &&
+        bindingSyncFailureSummary ? (
+          <div className="flex flex-col items-end gap-1" role="alert">
+            <div className="max-w-[76%] rounded-lg rounded-br-sm bg-[var(--brand-soft-2)] px-[15px] py-2.5 text-[0.9rem] leading-normal text-strong opacity-70">
+              <p className="whitespace-pre-wrap">
+                {bindingSyncFailureSummary}
+              </p>
+            </div>
+            <p className="flex items-center gap-2 text-xs text-danger">
+              Not sent.
+              <button
+                type="button"
+                onClick={retryBindingSync}
+                className="font-semibold underline underline-offset-2 transition-opacity hover:opacity-80"
+              >
+                Retry
+              </button>
+            </p>
+          </div>
+        ) : null}
         {queuedParentMessages.length > 0 ? (
           // Messages sent mid-turn wait here as dimmed bubbles (the
           // Cursor queue, in texting clothes) and go out on turn end;
@@ -2485,7 +2796,9 @@ export function ChatClient({
               </div>
             ))}
             <p className="flex items-center gap-3 text-xs text-subtle">
-              Sends when Homa finishes
+              {bindingSyncFailure || authorizationParked
+                ? "Waiting to reconnect"
+                : "Sends when Homa finishes"}
               {renderBusy ? (
                 <button
                   type="button"
@@ -2506,8 +2819,38 @@ export function ChatClient({
             <span>
               {recovering && replyCutoffRecovery === "recovering"
                 ? "Homa got cut off. Reconnecting..."
-                : "Reconnecting..."}
+                : "Syncing missed replies..."}
             </span>
+          </div>
+        ) : bindingSyncFailure ? (
+          <div
+            className="flex flex-wrap items-center justify-center gap-3 text-sm text-body"
+            role="alert"
+          >
+            <span>Your conversation is safe. Homa could not reconnect.</span>
+            <button
+              type="button"
+              onClick={retryBindingSync}
+              className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-border bg-card px-4 py-2 font-bold text-strong shadow-sm transition-colors hover:border-brand hover:text-brand"
+            >
+              <RefreshCw size={15} aria-hidden="true" />
+              Try again
+            </button>
+          </div>
+        ) : authorizationParked ? (
+          <div
+            className="flex flex-wrap items-center justify-center gap-3 text-sm text-body"
+            role="status"
+          >
+            <span>Finish signing in above, then reconnect Homa.</span>
+            <button
+              type="button"
+              onClick={retryBindingSync}
+              className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-border bg-card px-4 py-2 font-bold text-strong shadow-sm transition-colors hover:border-brand hover:text-brand"
+            >
+              <RefreshCw size={15} aria-hidden="true" />
+              Reconnect Homa
+            </button>
           </div>
         ) : replyCutoffRecovery === "available" ? (
           <div

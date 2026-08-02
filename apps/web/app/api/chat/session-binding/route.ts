@@ -7,7 +7,8 @@ import { resolveApiFamily } from "../../../../lib/api-auth";
  *
  * The browser cannot read conversation_thread_bindings through the Data API,
  * by design. This narrow server read returns only the signed-in adult's own
- * web runtime cursor candidate; family and member identity come from auth.
+ * web runtime cursor candidate plus its latest durable user-turn sequence;
+ * family and member identity come from auth.
  */
 export async function GET(request: Request): Promise<Response> {
   if (rateLimited(`chat-session-binding:${clientIp(request)}`, 120)) {
