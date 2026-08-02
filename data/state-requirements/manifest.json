@@ -4,5 +4,49 @@
   "jurisdictions": 51,
   "license": "CC BY-SA 4.0",
   "pulled_at": "2026-07-28T20:34:09.967Z",
+  "reviewed_corrections": [
+    {
+      "checked_on": "2026-08-02",
+      "field": "sources.doe_url",
+      "id": "AZ-doe-url-2026-08-02",
+      "reason": "ADE directs homeschool questions and submissions to county superintendent offices; the upstream URL points to the separate ESA program.",
+      "source_urls": [
+        "https://www.azed.gov/adeinfo/agency-faqs",
+        "https://www.azleg.gov/ars/15/00802.htm"
+      ],
+      "state_code": "AZ"
+    },
+    {
+      "checked_on": "2026-08-02",
+      "field": "pathways[home_instruction].notification.deadline",
+      "id": "DC-notification-deadline-2026-08-02",
+      "reason": "OSSE requires initial notice at least 15 business days before instruction and annual continuation by August 15.",
+      "source_urls": [
+        "https://osse.dc.gov/page/apply-homeschool"
+      ],
+      "state_code": "DC"
+    },
+    {
+      "checked_on": "2026-08-02",
+      "field": "citation_urls and sources.additional_statutes",
+      "id": "MS-repealed-37-13-93-2026-08-02",
+      "reason": "Current Mississippi code marks sections 37-13-93 through 37-13-105 repealed; the upstream label also linked to section 37-13-91.",
+      "source_urls": [
+        "https://www.legislature.ms.gov/general-information/",
+        "https://law.justia.com/codes/mississippi/title-37/chapter-13/mississippi-compulsory-school-attendance-law/section-37-13-93/"
+      ],
+      "state_code": "MS"
+    },
+    {
+      "checked_on": "2026-08-02",
+      "field": "compulsory_education.notes",
+      "id": "OK-compulsory-notes-dedupe-2026-08-02",
+      "reason": "The numeric age fields already render the 5 through 18 range; the note should carry only the kindergarten opt-out and graduation conditions.",
+      "source_urls": [
+        "https://www.oscn.net/applications/oscn/DeliverDocument.asp?CiteID=90120"
+      ],
+      "state_code": "OK"
+    }
+  ],
   "source": "HomeschoolLeap public API"
 }

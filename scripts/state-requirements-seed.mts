@@ -203,10 +203,18 @@ for (const row of rows) {
   `;
 }
 
-const [{ count }] = await sql<{ count: number }[]>`
-  select count(*)::int as count from public.state_requirements
+const seeded = await sql<{ state_code: string; payload: unknown }[]>`
+  select state_code, payload from public.state_requirements order by state_code
 `;
-await sql.end();
+const seededPayloads = new Map(
+  seeded.map((row) => [row.state_code, stableStringify(row.payload)]),
+);
+const mismatches = rows.flatMap((row) => {
+  const actual = seededPayloads.get(row.state_code);
+  const expected = stableStringify(row.payload);
+  return actual === expected ? [] : [row.state_code];
+});
+const count = seeded.length;
 
 console.log(
   `Seeded state_requirements from snapshots pulled ${manifest.pulled_at}: ` +
@@ -214,8 +222,18 @@ console.log(
 );
 if (count !== EXPECTED_JURISDICTIONS) {
   console.error(`Row count ${count} does not match the expected ${EXPECTED_JURISDICTIONS}. Investigate.`);
+  await sql.end();
   process.exit(1);
 }
+if (mismatches.length > 0) {
+  console.error(
+    `Read-back mismatch for ${mismatches.length} jurisdiction(s): ${mismatches.join(", ")}`,
+  );
+  await sql.end();
+  process.exit(1);
+}
+await sql.end();
+console.log("Read-back verified every seeded payload against the reviewed snapshots.");
 if (changed > 0) {
   console.log("Changed rows mean families may see updated rules; if any change is user-visible, follow the runbook's correction steps.");
 }

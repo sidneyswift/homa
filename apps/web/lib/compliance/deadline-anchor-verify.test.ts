@@ -263,17 +263,24 @@ describe("the shipped anchor set", () => {
     }
   });
 
-  it("keeps multiple date-less rules distinct", () => {
-    // Sampling once dropped one of DC's two conditional rules, because
-    // the union dedupe keyed on calendar values and both rules carry
-    // none (caught by reading a production pack, 2026-07-29). Any state
-    // whose source names two timing rules must ship both.
+  it("keeps both District of Columbia rules distinct", () => {
+    // Sampling once dropped one of DC's two rules, because the old union
+    // dedupe keyed on calendar values. The reviewed source now makes the
+    // annual August 15 date explicit, but the initial business-day rule
+    // must still survive beside it.
     const dc = DEADLINE_ANCHORS.DC;
     assert.ok(dc, "DC has anchors");
-    assert.equal(dc.anchors.length, 2, "DC must keep both conditional rules");
-    const labels = dc.anchors.map((a) => a.label.toLowerCase());
-    assert.ok(labels.some((l) => l.includes("before instruction")));
-    assert.ok(labels.some((l) => l.includes("renew")));
+    assert.equal(dc.anchors.length, 2, "DC must keep both timing rules");
+    assert.ok(
+      dc.anchors.some(
+        (anchor) =>
+          anchor.withinDays === 15 &&
+          anchor.label.toLowerCase().includes("business days"),
+      ),
+    );
+    assert.ok(
+      dc.anchors.some((anchor) => anchor.month === 8 && anchor.day === 15),
+    );
   });
 
   it("never ships two anchors that say the same thing", () => {

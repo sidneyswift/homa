@@ -95,6 +95,24 @@ describe("states that name a date in law", () => {
     assert.equal(july.daysAway, 11);
   });
 
+  it("gives District of Columbia its August 15 continuation date", () => {
+    const outcome = filingDeadlines({
+      stateCode: "DC",
+      todayIso: "2026-08-01",
+      schoolYearStartIso: null,
+    });
+    assert.ok(outcome.ok);
+    assert.deepEqual(outcome.deadlines, [
+      {
+        stateCode: "DC",
+        dueOn: "2026-08-15",
+        label: "File annual continuation by August 15",
+        basis: "state_calendar",
+        daysAway: 14,
+      },
+    ]);
+  });
+
   it("points California at the opening of its October window", () => {
     // CA's rule is a window, October 1 through 15, and the verified
     // anchor carries both ends in its label. The date Homa puts on the

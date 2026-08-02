@@ -12,7 +12,7 @@
   },
   "compulsory_education": {
     "end_age": 18,
-    "notes": "Ages 5-18. Compulsory beginning at age 5, but parents may opt a 5-year-old out of kindergarten by notifying the superintendent by certified mail before enrollment or during the first school year. Children must attend until age 18 or high school graduation, whichever comes first.",
+    "notes": "Parents may opt a 5-year-old out of kindergarten by notifying the superintendent by certified mail before enrollment or during the first school year. Compulsory attendance ends at high school graduation if that comes before age 18.",
     "start_age": 5
   },
   "esa_programs": [],

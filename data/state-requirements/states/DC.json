@@ -45,7 +45,7 @@
       "is_default": true,
       "name": "Home Instruction",
       "notification": {
-        "deadline": "Before instruction begins; renewed annually before each school year",
+        "deadline": "At least 15 business days before the first date of home instruction; annual continuation due by August 15",
         "deadline_conditions": null,
         "frequency": "annual",
         "pathway_varies": false,
