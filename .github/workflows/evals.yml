@@ -138,3 +138,8 @@ jobs:
       # VERCEL_OIDC_TOKEN reaches this step through GITHUB_ENV, set above.
       - name: Behavioral evals (real model, disposable database)
         run: pnpm eval:sandbox --strict --max-concurrency 4
+
+      # This judgment has no durable effects. It still runs only here because
+      # it calls the real model and its ratchet is intentionally stochastic.
+      - name: Family Library ingestion judgment
+        run: pnpm eval:family-library-ingestion

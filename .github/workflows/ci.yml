@@ -393,6 +393,9 @@ jobs:
       - name: Materials checks (page shell pagination, packet bodies, binder model)
         run: pnpm check:materials
 
+      - name: Family Library ingestion contract and eval fixtures
+        run: pnpm check:family-library-ingestion
+
       - name: Ingestion ledger (every #homa-inspo drop has exactly one record)
         run: pnpm check:ingestion
 

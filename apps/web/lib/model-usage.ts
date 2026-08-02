@@ -44,6 +44,9 @@ export const USAGE_SURFACES = [
   // The judgment step that reads a parent's message for what it says
   // about her children (AGENTS.md "Models judge, code verifies").
   "progress_claim_extraction",
+  // The judgment step that proposes source-grounded metadata for one
+  // family-owned Library original. Deterministic verification follows.
+  "family_asset_ingestion",
   "embedding",
   "lesson_tone",
   "lesson_synthesis",
