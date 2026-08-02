@@ -12,6 +12,11 @@ export type LessonRecorderPhase =
   | "paused"
   | "interrupted"
   | "review"
+  | "saving"
+  | "analyzing"
+  | "ready"
+  | "save_failed"
+  | "consent_failed"
   | "permission_denied"
   | "low_storage";
 
@@ -88,9 +93,9 @@ export function recorderPhaseCopy(
 ): string {
   switch (phase) {
     case "confirm":
-      return `Nothing is recording yet. This local test is for ${childName}. Keep Homa open because leaving the app pauses recording.`;
+      return `Nothing is recording yet. This lesson is for ${childName}. Keep Homa open because leaving the app pauses recording.`;
     case "consent":
-      return "Please read the local-test details before recording a child's voice.";
+      return "Please read the privacy details before recording a child's voice.";
     case "starting":
       return "Getting the recorder ready.";
     case "recording":
@@ -100,7 +105,17 @@ export function recorderPhaseCopy(
     case "interrupted":
       return "Another app needed the microphone, so this recording paused.";
     case "review":
-      return "This recording is only on this phone. Homa has not saved or reviewed it.";
+      return "Play it back, discard it, or save it privately for Homa to review.";
+    case "saving":
+      return "Saving the lesson privately. Keep Homa open until the upload finishes.";
+    case "analyzing":
+      return "The audio is saved. Homa is listening for the words, energy, and learning moments.";
+    case "ready":
+      return "The lesson review is ready. Return to Voice to talk it through.";
+    case "save_failed":
+      return "The recording is still on this phone. Homa did not save it, so you can try again or discard it.";
+    case "consent_failed":
+      return "Homa could not save your privacy choice. Nothing was recorded.";
     case "permission_denied":
       return "Nothing was recorded. Microphone access is off for Homa.";
     case "low_storage":

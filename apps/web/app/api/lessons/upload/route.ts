@@ -1,17 +1,25 @@
-import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
+import { issueSignedToken } from "@vercel/blob";
+import {
+  handleUploadPresigned,
+  type HandleUploadPresignedBody,
+} from "@vercel/blob/client";
 
-import { blobConfigured } from "../../../../lib/materials/artifact-store";
+import {
+  lessonBlobConfigured,
+  lessonBlobToken,
+} from "../../../../lib/lessons/blobs";
 import {
   lessonRouteRefusal,
   resolveLessonRoute,
 } from "../../../../lib/lessons/route-auth";
+import { getLessonForFamily } from "../../../../lib/lessons/store";
 
 /**
  * POST /api/lessons/upload: the lesson lane's front door (the
  * /api/video/upload pattern, plan 2026-07-13-lesson-listen.md §4.3).
  * The recorder asks here for a scoped Blob client-upload token, then
  * uploads each ~3-minute segment (or the fallback file, or a worksheet
- * photo) straight to the homa-artifacts store and registers the URL on
+ * photo) straight to the private lesson store and registers the URL on
  * the matching /api/lessons route.
  *
  * Tenancy: the session resolves the family, the token only mints for
@@ -28,7 +36,7 @@ const AUDIO_MAX_BYTES = 100 * 1024 * 1024;
 const IMAGE_MAX_BYTES = 25 * 1024 * 1024;
 
 export async function POST(request: Request): Promise<Response> {
-  if (!blobConfigured()) {
+  if (!lessonBlobConfigured()) {
     return Response.json({ ok: false, reason: "not-configured" }, { status: 503 });
   }
   const context = await resolveLessonRoute(request);
@@ -38,30 +46,59 @@ export async function POST(request: Request): Promise<Response> {
   }
   const lessonsPrefix = `families/${context.auth.familyId}/lessons/`;
 
-  let body: HandleUploadBody;
+  let body: HandleUploadPresignedBody;
   try {
-    body = (await request.json()) as HandleUploadBody;
+    body = (await request.json()) as HandleUploadPresignedBody;
   } catch {
     return Response.json({ ok: false, reason: "bad-json" }, { status: 400 });
   }
 
+  if (body.type !== "blob.generate-presigned-url") {
+    return Response.json({ ok: false, reason: "unsupported-event" }, { status: 400 });
+  }
+
   try {
-    const result = await handleUpload({
+    const result = await handleUploadPresigned({
       request,
       body,
-      onBeforeGenerateToken: async (pathname, clientPayload) => {
+      // Completion webhooks are intentionally disabled. Segment registration is
+      // an authenticated Homa API call after Blob confirms the direct upload.
+      webhookPublicKey: "lesson-upload-callbacks-disabled",
+      getSignedToken: async (pathname, clientPayload) => {
         if (!pathname.startsWith(lessonsPrefix)) {
           throw new Error(
             "pathname must stay inside this family's lessons/ space",
           );
         }
+        const lessonId = pathname.slice(lessonsPrefix.length).split("/")[0] ?? "";
+        const lesson = await getLessonForFamily(lessonId, context.auth.familyId);
+        if (!lesson || lesson.status !== "recording") {
+          throw new Error("lesson upload must target an open lesson in this family");
+        }
         const isImage =
           typeof clientPayload === "string" &&
           clientPayload.startsWith("image/");
+        const maximumSizeInBytes = isImage ? IMAGE_MAX_BYTES : AUDIO_MAX_BYTES;
+        const allowedContentTypes = ["audio/*", "video/*", "image/*"];
+        const validUntil = Date.now() + 15 * 60 * 1000;
+        const token = lessonBlobToken();
+        if (!token) throw new Error("private lesson store is not configured");
         return {
-          allowedContentTypes: ["audio/*", "video/*", "image/*"],
-          maximumSizeInBytes: isImage ? IMAGE_MAX_BYTES : AUDIO_MAX_BYTES,
-          addRandomSuffix: true,
+          token: await issueSignedToken({
+            token,
+            pathname,
+            operations: ["put"],
+            allowedContentTypes,
+            maximumSizeInBytes,
+            validUntil,
+          }),
+          urlOptions: {
+            allowedContentTypes,
+            maximumSizeInBytes,
+            validUntil,
+            addRandomSuffix: true,
+            cacheControlMaxAge: 60,
+          },
         };
       },
     });

@@ -83,11 +83,13 @@ export function VoiceScreen() {
     : null;
   const announceResult = session.announceResult;
   const handoffReady = session.handoffReady;
+  const pauseForMicrophoneOwner = session.pauseForMicrophoneOwner;
   const { family } = useFamilyData();
   const [replyOpen, setReplyOpen] = useState(false);
   const [printNotice, setPrintNotice] = useState<{ key: string; message: string } | null>(null);
   const [pendingLesson, setPendingLesson] = useState<PreparedLessonRecording | null>(null);
   const [activeLessonRecorder, setActiveLessonRecorder] = useState<PreparedLessonRecording | null>(null);
+  const lessonResumePromptRef = useRef<string | null>(null);
   const hoursKeyRef = useRef(0);
   const handledKeysRef = useRef<Set<string> | null>(null);
   const handledLessonKeysRef = useRef<Set<string> | null>(null);
@@ -151,12 +153,19 @@ export function VoiceScreen() {
   useEffect(() => {
     if (!pendingLesson || !handoffReady) return;
     const timer = setTimeout(() => {
-      session.pauseForMicrophoneOwner("Lesson recording has the microphone.");
+      pauseForMicrophoneOwner("Lesson recording has the microphone.");
       setActiveLessonRecorder(pendingLesson);
       setPendingLesson(null);
     }, 0);
     return () => clearTimeout(timer);
-  }, [handoffReady, pendingLesson, session]);
+  }, [handoffReady, pauseForMicrophoneOwner, pendingLesson]);
+
+  useEffect(() => {
+    const prompt = lessonResumePromptRef.current;
+    if (!prompt || !handoffReady) return;
+    lessonResumePromptRef.current = null;
+    session.sendText(prompt);
+  }, [handoffReady, session]);
 
   useEffect(() => {
     const signal = overlayModel.active;
@@ -282,8 +291,9 @@ export function VoiceScreen() {
           setActiveLessonRecorder(null);
           session.resume();
         }}
-        onResumeVoice={() => {
+        onResumeVoice={(prompt) => {
           setActiveLessonRecorder(null);
+          if (prompt) lessonResumePromptRef.current = prompt;
           session.resume();
         }}
       />

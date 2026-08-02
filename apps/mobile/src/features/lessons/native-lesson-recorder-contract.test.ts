@@ -22,7 +22,9 @@ const voiceSessionSource = readFileSync(
  */
 describe("native lesson recorder safety contract", () => {
   it("releases Voice microphone ownership before showing the recorder", () => {
-    const suspendIndex = voiceScreenSource.indexOf("suspendVoice();");
+    const suspendIndex = voiceScreenSource.indexOf(
+      'pauseForMicrophoneOwner("Lesson recording has the microphone.");',
+    );
     const showRecorderIndex = voiceScreenSource.indexOf(
       "setActiveLessonRecorder(pendingLesson);",
     );
@@ -32,10 +34,10 @@ describe("native lesson recorder safety contract", () => {
     assert.ok(suspendIndex < showRecorderIndex);
   });
 
-  it("starts only from the explicit local-test button", () => {
+  it("starts only from the explicit consented recording button", () => {
     assert.match(
       recorderSource,
-      /label="Test recording on this phone" onPress=\{\(\) => void startCapture\(\)\}/u,
+      /label="Start lesson recording" onPress=\{\(\) => void startCapture\(\)\}/u,
     );
     assert.match(recorderSource, /requestRecordingPermissionsAsync\(\)/u);
     assert.match(recorderSource, /allowsBackgroundRecording: false/u);
@@ -43,14 +45,15 @@ describe("native lesson recorder safety contract", () => {
     assert.match(recorderSource, /recorder\.pause\(\)/u);
   });
 
-  it("keeps prototype audio local and deletes it before Voice resumes", () => {
-    assert.doesNotMatch(recorderSource, /fetch\(|upload\(|createUpload/u);
+  it("uses the protected lesson pipeline and removes the local copy after save", () => {
+    assert.match(recorderSource, /saveNativeLessonRecording/u);
+    assert.match(recorderSource, /grantNativeLessonConsent/u);
     const deleteIndex = recorderSource.indexOf("if (file.exists) file.delete();");
-    const resumeIndex = recorderSource.indexOf("onResumeVoice();");
+    const readyIndex = recorderSource.indexOf('setPhase("ready");');
 
     assert.notEqual(deleteIndex, -1);
-    assert.notEqual(resumeIndex, -1);
-    assert.ok(deleteIndex < resumeIndex);
+    assert.notEqual(readyIndex, -1);
+    assert.ok(deleteIndex < readyIndex);
   });
 
   it("releases the recorder and local audio on an unexpected unmount", () => {
@@ -60,7 +63,7 @@ describe("native lesson recorder safety contract", () => {
   });
 
   it("resumes the existing Voice context instead of starting a new conversation", () => {
-    assert.match(voiceSessionSource, /const resume = useCallback\(\(\) => connect\(false\)/u);
-    assert.match(voiceSessionSource, /if \(resetConversation\) \{/u);
+    assert.match(voiceSessionSource, /const resume = useCallback\(\(\) => \{[\s\S]*?connect\(true\)/u);
+    assert.match(voiceSessionSource, /if \(!preserveLogicalSession \|\| !sessionIdRef\.current\) \{/u);
   });
 });

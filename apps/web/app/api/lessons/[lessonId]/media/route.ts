@@ -1,6 +1,6 @@
 import { emitMapEvent } from "../../../../../lib/map/events";
 import { captionSmsImage } from "../../../../../lib/voice/caption-image";
-import { isFamilyLessonUrl } from "../../../../../lib/lessons/blobs";
+import { isFamilyLessonUrl, readLessonBlob } from "../../../../../lib/lessons/blobs";
 import {
   getLessonForFamily,
   registerLessonMedia,
@@ -67,12 +67,15 @@ export async function POST(
     return Response.json({ ok: false, reason: "media-cap" }, { status: 429 });
   }
 
-  const caption = await captionSmsImage({
-    image: new URL(blobUrl),
-    mediaType: contentType,
-    familyId: context.auth.familyId,
-    channel: "web",
-  });
+  const bytes = await readLessonBlob(blobUrl, context.auth.familyId);
+  const caption = bytes
+    ? await captionSmsImage({
+        image: new Uint8Array(bytes),
+        mediaType: contentType,
+        familyId: context.auth.familyId,
+        channel: "web",
+      })
+    : null;
   if (caption !== null) {
     await saveLessonMediaCaption({
       mediaId: result.mediaId,

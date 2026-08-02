@@ -29,6 +29,10 @@ import {
   type LessonRecorderPhase,
   type PreparedLessonRecording,
 } from "./lesson-recording-model";
+import {
+  grantNativeLessonConsent,
+  saveNativeLessonRecording,
+} from "./lesson-recording-upload";
 
 const MINIMUM_FREE_SPACE_BYTES = 100 * 1024 * 1024;
 const RECORDING_OPTIONS = {
@@ -36,11 +40,11 @@ const RECORDING_OPTIONS = {
   directory: "document" as const,
 };
 
-function localTestNotes(childName: string): string[] {
+function privacyNotes(childName: string): string[] {
   return [
-    `This test records audio for ${childName} only on this phone.`,
-    "Homa does not upload, save, transcribe, or review this recording.",
-    "Returning to Voice deletes the recording from this phone.",
+    `This records ${childName}'s lesson and saves it in private storage only after you tap Save and review.`,
+    "Homa transcribes the lesson, listens for learning moments, and adds evidence or observations to this child's progress.",
+    "Raw audio deletes after 30 days unless the review finds a breakthrough or sweet moment. You can delete it sooner.",
     "Let everyone in the room know before you start recording.",
   ];
 }
@@ -76,11 +80,15 @@ export function NativeLessonRecorder({
 }: {
   intent: PreparedLessonRecording;
   onCancel: () => void;
-  onResumeVoice: () => void;
+  onResumeVoice: (prompt?: string) => void;
 }) {
   const insets = useSafeAreaInsets();
   const [phase, setPhase] = useState<LessonRecorderPhase>("consent");
   const [localUri, setLocalUri] = useState<string | null>(null);
+  const [recordedDuration, setRecordedDuration] = useState(0);
+  const [uploadPercent, setUploadPercent] = useState(0);
+  const [reviewSummary, setReviewSummary] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const recorder = useAudioRecorder(RECORDING_OPTIONS);
   const recorderState = useAudioRecorderState(recorder, 250);
   const player = useAudioPlayer(localUri);
@@ -160,6 +168,15 @@ export function NativeLessonRecorder({
     }
   }
 
+  async function agreeAndContinue() {
+    try {
+      await grantNativeLessonConsent();
+      setPhase("confirm");
+    } catch {
+      setPhase("consent_failed");
+    }
+  }
+
   function pauseCapture() {
     recorder.pause();
     setPhase("paused");
@@ -176,11 +193,43 @@ export function NativeLessonRecorder({
       const uri = recorder.uri;
       if (!uri) throw new Error("missing-recording");
       setLocalUri(uri);
+      setRecordedDuration(Math.max(1, Math.round(recorderState.durationMillis / 1000)));
       setPhase("review");
       await setAudioModeAsync({ allowsRecording: false });
     } catch {
       setPhase("interrupted");
     }
+  }
+
+  async function saveAndReview() {
+    if (!localUri) return;
+    setSaveError(null);
+    setUploadPercent(0);
+    setPhase("saving");
+    const result = await saveNativeLessonRecording({
+      intent,
+      uri: localUri,
+      durationSeconds: recordedDuration,
+      onProgress: (percentage) => {
+        setUploadPercent(percentage);
+        if (percentage >= 100) setPhase("analyzing");
+      },
+    });
+    if (result.status === "failed") {
+      setSaveError(result.reason);
+      setPhase("save_failed");
+      return;
+    }
+    const file = new File(localUri);
+    if (file.exists) file.delete();
+    setLocalUri(null);
+    if (result.status === "ready") {
+      setReviewSummary(result.review.summary);
+      setPhase("ready");
+      return;
+    }
+    setReviewSummary("The private audio is saved. Homa is still finishing the review and will keep working if you leave this screen.");
+    setPhase("ready");
   }
 
   function discard() {
@@ -211,17 +260,8 @@ export function NativeLessonRecorder({
     );
   }
 
-  function deleteLocalRecordingAndResume() {
-    const uri = localUri ?? recorder.uri;
-    if (uri) {
-      const file = new File(uri);
-      if (file.exists) file.delete();
-    }
-    onResumeVoice();
-  }
-
   const elapsed = Math.round(recorderState.durationMillis / 1000);
-  const canDiscard = ["recording", "paused", "interrupted", "review"].includes(phase);
+  const canDiscard = ["recording", "paused", "interrupted", "review", "save_failed"].includes(phase);
 
   return (
     <View style={[styles.screen, { paddingTop: Math.max(insets.top, space.lg) }]}>
@@ -235,16 +275,16 @@ export function NativeLessonRecorder({
 
         {phase === "consent" ? (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>About this local test</Text>
-            {localTestNotes(intent.childName).map((commitment) => (
+            <Text style={styles.cardTitle}>Before Homa listens</Text>
+            {privacyNotes(intent.childName).map((commitment) => (
               <View key={commitment} style={styles.commitmentRow}>
                 <View style={styles.dot} />
                 <Text style={styles.body}>{commitment}</Text>
               </View>
             ))}
             <PrimaryButton
-              label="Continue"
-              onPress={() => setPhase("confirm")}
+              label="I agree, continue"
+              onPress={() => void agreeAndContinue()}
             />
           </View>
         ) : (
@@ -265,11 +305,11 @@ export function NativeLessonRecorder({
 
             {phase === "confirm" ? (
               <View style={styles.card}>
-                <Text style={styles.cardTitle}>Local test only</Text>
+                <Text style={styles.cardTitle}>Ready when you are</Text>
                 <Text style={styles.body}>
-                  This build can record and play audio on this phone, but it cannot save the lesson to Homa. Returning to Voice deletes the audio.
+                  The microphone is still off. Tap Start lesson recording when everyone in the room knows you are recording.
                 </Text>
-                <PrimaryButton label="Test recording on this phone" onPress={() => void startCapture()} />
+                <PrimaryButton label="Start lesson recording" onPress={() => void startCapture()} />
               </View>
             ) : null}
             {phase === "recording" ? (
@@ -320,15 +360,45 @@ export function NativeLessonRecorder({
                   </Text>
                 </Pressable>
                 <Text style={styles.unsavedNote}>
-                  Homa cannot save this recording yet. Returning to Voice deletes it from this phone.
+                  Nothing has left this phone yet. Save it privately for Homa to transcribe and review, or discard it.
                 </Text>
-                <PrimaryButton label="Delete audio and return to Voice" onPress={deleteLocalRecordingAndResume} />
+                <PrimaryButton label="Save and review with Homa" onPress={() => void saveAndReview()} />
+              </View>
+            ) : null}
+            {phase === "saving" || phase === "analyzing" ? (
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>{phase === "saving" ? `Saving privately · ${uploadPercent}%` : "Homa is reviewing the lesson"}</Text>
+                <Text style={styles.body}>{recorderPhaseCopy(phase, intent.childName)}</Text>
+              </View>
+            ) : null}
+            {phase === "save_failed" ? (
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>The recording stayed on this phone</Text>
+                <Text style={styles.body}>{saveError ?? recorderPhaseCopy(phase, intent.childName)}</Text>
+                <PrimaryButton label="Try saving again" onPress={() => void saveAndReview()} />
+              </View>
+            ) : null}
+            {phase === "consent_failed" ? (
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Nothing was recorded</Text>
+                <Text style={styles.body}>{recorderPhaseCopy(phase, intent.childName)}</Text>
+                <PrimaryButton label="Try again" onPress={() => void agreeAndContinue()} />
+              </View>
+            ) : null}
+            {phase === "ready" ? (
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Lesson review ready</Text>
+                <Text style={styles.body}>{reviewSummary}</Text>
+                <PrimaryButton
+                  label="Talk with Homa about this lesson"
+                  onPress={() => onResumeVoice(`The lesson recording for ${intent.childName}'s ${intent.purpose} is saved. Please find the newest lesson review and talk me through what you noticed and what we should try next.`)}
+                />
               </View>
             ) : null}
           </>
         )}
 
-        {phase !== "review" ? (
+        {!(["review", "saving", "analyzing", "ready"] as LessonRecorderPhase[]).includes(phase) ? (
           <Pressable
             accessibilityRole="button"
             onPress={canDiscard ? discard : onCancel}

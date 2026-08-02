@@ -11,7 +11,7 @@ import {
  * Prepares, but never starts, a native lesson recording. The model judges
  * which child and lesson purpose the parent named. Code verifies that the
  * child belongs to the authenticated family. The native screen owns the
- * explicit local-test explanation and start action.
+ * explicit privacy explanation, consent, and start action.
  */
 export default defineBoundedTool({
   description:
@@ -65,7 +65,7 @@ export default defineBoundedTool({
       childId: child.id,
       childName: child.name,
       purpose: input.purpose,
-      note: `The local recorder test is ready for ${child.name}'s ${input.purpose}. The app will explain that the audio stays on this phone. The microphone stays off until she starts recording.`,
+      note: `The lesson recorder is ready for ${child.name}'s ${input.purpose}. The app will explain private storage and ask the adult to agree before the microphone starts.`,
     };
   },
 });

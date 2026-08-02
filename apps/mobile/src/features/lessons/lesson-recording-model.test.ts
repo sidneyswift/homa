@@ -67,7 +67,8 @@ describe("native lesson recording handoff", () => {
   it("names capture and persistence truthfully", () => {
     assert.match(recorderPhaseCopy("confirm", "Mia"), /Nothing is recording yet/u);
     assert.match(recorderPhaseCopy("paused", "Mia"), /Nothing new is being captured/u);
-    assert.match(recorderPhaseCopy("review", "Mia"), /has not saved or reviewed it/u);
+    assert.match(recorderPhaseCopy("review", "Mia"), /save it privately/u);
+    assert.match(recorderPhaseCopy("ready", "Mia"), /review is ready/u);
   });
 
   it("renders an elapsed lesson clock", () => {
