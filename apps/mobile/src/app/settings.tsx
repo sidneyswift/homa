@@ -1,16 +1,19 @@
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ExternalLink } from "lucide-react-native";
+import { Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ageInMonths, ageLabel } from "@homa/core";
 
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
+import { LoadingStatus } from "../components/ui/loading-status";
 import { useBillingGate } from "../features/billing/use-billing-gate";
 import { useSession } from "../features/auth/session-provider";
 import { AddChildForm } from "../features/family/add-child-form";
 import { useFamilyData } from "../features/family/use-family-data";
 import { supabase } from "../lib/supabase";
+import { useAccessibilityAnnouncement } from "../lib/accessibility";
 import {
   openAppleSubscriptions,
   openPrivacyPolicy,
@@ -68,6 +71,7 @@ export default function SettingsScreen() {
       ? "Your free days are up."
       : "You haven't started your free 7 days yet.";
   })();
+  useAccessibilityAnnouncement(gate ? `Homa plan. ${planLine}` : null);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }} edges={["top"]}>
@@ -77,19 +81,20 @@ export default function SettingsScreen() {
             accessibilityRole="button"
             accessibilityLabel="Done"
             onPress={() => router.back()}
-            hitSlop={12}
+            style={{ minWidth: 44, minHeight: 44, justifyContent: "center" }}
           >
             <Text
               style={{
                 fontFamily: fontFamilies.bodyMedium,
                 fontSize: fontSize.base,
-                color: colors.brand,
+                color: colors.textStrong,
               }}
             >
               Done
             </Text>
           </Pressable>
           <Text
+            accessibilityRole="header"
             style={{
               fontFamily: fontFamilies.display,
               fontSize: fontSize.xxl,
@@ -107,15 +112,17 @@ export default function SettingsScreen() {
         </SettingsSection>
 
         <SettingsSection title="Your Homa plan">
-          <Text
-            style={{
-              fontFamily: fontFamilies.body,
-              fontSize: fontSize.base,
-              color: colors.textBody,
-            }}
-          >
-            {planLine}
-          </Text>
+          {gate ? (
+            <Text
+              style={{
+                fontFamily: fontFamilies.body,
+                fontSize: fontSize.base,
+                color: colors.textBody,
+              }}
+            >
+              {planLine}
+            </Text>
+          ) : <LoadingStatus label="Checking your Homa plan" />}
           {gate?.open && gate.billingProvider === "apple" ? (
             <SettingsLinkRow
               label="Manage Apple subscription"
@@ -133,6 +140,7 @@ export default function SettingsScreen() {
         {family ? (
           <View style={{ gap: space.sm }}>
             <Text
+              accessibilityRole="header"
               style={{
                 fontFamily: fontFamilies.bodySemibold,
                 fontSize: fontSize.sm,
@@ -192,6 +200,7 @@ function SettingsSection({
   return (
     <View style={{ gap: space.sm }}>
       <Text
+        accessibilityRole="header"
         style={{
           fontFamily: fontFamilies.bodySemibold,
           fontSize: fontSize.sm,
@@ -208,16 +217,17 @@ function SettingsSection({
 }
 
 function SettingsRow({ label, value }: { label: string; value: string }) {
+  const { fontScale } = useWindowDimensions();
+  const stacked = fontScale >= 1.4;
   return (
-    <View style={{ flexDirection: "row", justifyContent: "space-between", gap: space.md }}>
+    <View style={{ flexDirection: stacked ? "column" : "row", justifyContent: "space-between", gap: stacked ? space.xs : space.md }}>
       <Text
         style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textMuted }}
       >
         {label}
       </Text>
       <Text
-        style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.base, color: colors.textStrong }}
-        numberOfLines={1}
+        style={{ flexShrink: 1, textAlign: stacked ? "left" : "right", fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.base, color: colors.textStrong }}
       >
         {value}
       </Text>
@@ -228,15 +238,28 @@ function SettingsRow({ label, value }: { label: string; value: string }) {
 function SettingsLinkRow({ label, onPress }: { label: string; onPress: () => void }) {
   return (
     <Pressable
-      accessibilityRole="button"
+      accessible
+      accessibilityRole="link"
+      accessibilityLabel={label}
+      accessibilityHint="Opens outside Homa"
       onPress={onPress}
-      style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+      style={({ pressed }) => ({
+        minHeight: 44,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: space.sm,
+        opacity: pressed ? 0.6 : 1,
+      })}
     >
       <Text
-        style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.base, color: colors.brand }}
+        style={{ flexShrink: 1, fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.base, color: colors.textStrong, textDecorationLine: "underline" }}
       >
         {label}
       </Text>
+      <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+        <ExternalLink size={17} color={colors.textMuted} />
+      </View>
     </Pressable>
   );
 }

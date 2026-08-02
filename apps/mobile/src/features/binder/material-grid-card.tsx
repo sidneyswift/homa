@@ -8,6 +8,9 @@ import { KIND_LABELS } from "./binder-model";
 export function MaterialGridCard({ material, onPress }: { material: BinderMaterial; onPress: () => void }) {
   return (
     <Pressable
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={`Open ${material.title}. ${KIND_LABELS[material.kind]}. ${material.pageCount} ${material.pageCount === 1 ? "page" : "pages"}. For ${material.childName ?? "the family"}.`}
       onPress={onPress}
       style={{
         flex: 1,
@@ -20,28 +23,30 @@ export function MaterialGridCard({ material, onPress }: { material: BinderMateri
       }}
     >
       <Image
+        accessible={false}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
         source={{ uri: material.previewUrl }}
-        accessibilityLabel={`Preview of ${material.title}`}
         style={{ width: "100%", aspectRatio: 8.5 / 11, backgroundColor: "#FFFFFF" }}
         resizeMode="cover"
       />
       <View style={{ padding: space.sm, gap: 4 }}>
-        <Text numberOfLines={2} style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textStrong }}>
+        <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textStrong }}>
           {material.title}
         </Text>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
           <View style={{ paddingHorizontal: space.xs, paddingVertical: 2, borderRadius: radius.pill, backgroundColor: colors.brandSoft }}>
-            <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: 10, color: colors.brandHover }}>
+            <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: 10, color: colors.textStrong }}>
               {KIND_LABELS[material.kind]}
             </Text>
           </View>
           {material.pageCount > 1 ? (
-            <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textSubtle }}>
+            <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
               {material.pageCount} pages
             </Text>
           ) : null}
         </View>
-        <Text numberOfLines={1} style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.xs, color: colors.textMuted }}>
+        <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.xs, color: colors.textMuted }}>
           {material.childName ?? "Family"}
         </Text>
       </View>

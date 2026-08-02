@@ -194,6 +194,40 @@ export function visibleMobileChildFramingText(input: {
   });
 }
 
+/** The exact completed assistant text the mobile transcript is allowed to show. */
+export function visibleAssistantReplyText(message: EveMessage): string | null {
+  if (message.role !== "assistant" || message.metadata?.status === "streaming") {
+    return null;
+  }
+  const approvedTexts = approvedOutboundChildFramingTexts(message.parts);
+  const visibleText = message.parts
+    .flatMap((part) => {
+      if (part.type !== "text") return [];
+      const text = visibleMobileChildFramingText({
+        text: part.text,
+        approvedTexts,
+        streaming: false,
+      });
+      return text?.trim() ? [text.trim()] : [];
+    })
+    .join("\n\n");
+  return visibleText || toolOnlyFallback(message);
+}
+
+/** A bounded completion announcement that never bypasses display validation. */
+export function chatCompletionAnnouncement(messages: readonly EveMessage[]): string {
+  const latestAssistant = messages.findLast((message) => message.role === "assistant");
+  const visibleReply = latestAssistant ? visibleAssistantReplyText(latestAssistant) : null;
+  if (!visibleReply) return "Homa's reply is ready.";
+
+  const plainReply = visibleReply.replace(/\s+/gu, " ").trim();
+  if (plainReply.length <= 280) return `Homa replied: ${plainReply}`;
+  const prefix = plainReply.slice(0, 277);
+  const lastWordBoundary = prefix.lastIndexOf(" ");
+  const excerpt = prefix.slice(0, lastWordBoundary > 220 ? lastWordBoundary : 277);
+  return `Homa replied: ${excerpt}… Continue reading in Chat.`;
+}
+
 /**
  * Last-resort copy for a completed assistant turn whose parts would all
  * render as nothing on mobile. This is deliberately message-level: a

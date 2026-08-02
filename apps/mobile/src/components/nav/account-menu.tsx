@@ -1,8 +1,9 @@
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { LogOut, Settings } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
+import { useAccessibilityFocusOnChange } from "../../lib/accessibility";
 import { supabase } from "../../lib/supabase";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
@@ -26,6 +27,8 @@ export function AccountMenu({
 }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const firstActionRef = useRef<View>(null);
+  useAccessibilityFocusOnChange(firstActionRef, open ? "account-menu-open" : null);
 
   async function handleSignOut() {
     setOpen(false);
@@ -51,6 +54,8 @@ export function AccountMenu({
     >
       {open ? (
         <View
+          accessibilityRole="menu"
+          accessibilityLabel="Account actions"
           style={{
             position: "absolute",
             left: 0,
@@ -66,12 +71,17 @@ export function AccountMenu({
           }}
         >
           <Pressable
+            ref={firstActionRef}
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel="Open Settings"
             onPress={handleSettings}
             style={({ pressed }) => ({
               flexDirection: "row",
               alignItems: "center",
               gap: space.sm,
               borderRadius: radius.xs,
+              minHeight: 44,
               paddingHorizontal: space.sm,
               paddingVertical: 10,
               backgroundColor: pressed ? colors.page : "transparent",
@@ -86,12 +96,16 @@ export function AccountMenu({
           </Pressable>
           <View style={{ height: 1, backgroundColor: colors.borderSubtle, marginVertical: space.xs }} />
           <Pressable
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel="Sign out of Homa"
             onPress={() => void handleSignOut()}
             style={({ pressed }) => ({
               flexDirection: "row",
               alignItems: "center",
               gap: space.sm,
               borderRadius: radius.xs,
+              minHeight: 44,
               paddingHorizontal: space.sm,
               paddingVertical: 10,
               backgroundColor: pressed ? colors.page : "transparent",
@@ -108,12 +122,18 @@ export function AccountMenu({
       ) : null}
 
       <Pressable
+        accessible
+        accessibilityRole="button"
+        accessibilityLabel={`Account menu for ${parentName}, ${familyName}`}
+        accessibilityState={{ expanded: open }}
+        accessibilityHint={open ? "Shows Settings and Sign out" : "Opens Settings and Sign out"}
         onPress={() => setOpen((value) => !value)}
         style={({ pressed }) => ({
           flexDirection: "row",
           alignItems: "center",
           gap: space.sm,
           borderRadius: radius.sm,
+          minHeight: 44,
           paddingHorizontal: space.xs,
           paddingVertical: space.xs,
           backgroundColor: pressed ? colors.page : "transparent",
@@ -124,7 +144,7 @@ export function AccountMenu({
             width: 34,
             height: 34,
             borderRadius: 17,
-            backgroundColor: colors.sage,
+            backgroundColor: colors.success,
             alignItems: "center",
             justifyContent: "center",
           }}
@@ -135,12 +155,11 @@ export function AccountMenu({
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text
-            numberOfLines={1}
             style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textBody }}
           >
             {parentName}
           </Text>
-          <Text numberOfLines={1} style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textSubtle }}>
+          <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
             {familyName}
           </Text>
         </View>

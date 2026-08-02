@@ -126,8 +126,9 @@ describe("native Progress child-safe presentation contract", () => {
   });
 
   it("bounds navigation hierarchy while evidence text remains fully scalable", () => {
-    assert.match(progressScreenSource, /maxFontSizeMultiplier=\{2\}/u);
-    assert.doesNotMatch(cardSource, /takeaway\.statement[\s\S]{0,240}maxFontSizeMultiplier/u);
+    assert.doesNotMatch(progressScreenSource, /maxFontSizeMultiplier/u);
+    assert.doesNotMatch(kidSwitcherSource, /maxFontSizeMultiplier/u);
+    assert.doesNotMatch(cardSource, /maxFontSizeMultiplier/u);
   });
 
   it("uses the contrast-safe selected-child treatment", () => {

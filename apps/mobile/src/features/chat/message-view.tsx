@@ -1,6 +1,7 @@
 import { Pressable, Text, View } from "react-native";
 import type { EveMessage, EveMessagePart } from "eve/react";
 
+import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
 import { MarkdownText } from "./markdown-text";
@@ -56,14 +57,13 @@ function MemoryChip({ chip }: { chip: MemoryChipContent }) {
         style={{
           fontFamily: fontFamilies.bodySemibold,
           fontSize: fontSize.xs,
-          color: colors.sage,
+          color: colors.success,
         }}
       >
         {chip.label}
       </Text>
       {chip.detail ? (
         <Text
-          numberOfLines={1}
           style={{
             fontFamily: fontFamilies.body,
             fontSize: fontSize.xs,
@@ -318,7 +318,7 @@ export function MessageView({
           // her words with no sign anything was wrong).
           ...(isUser
             ? {
-                backgroundColor: colors.brand,
+                backgroundColor: colors.brandHover,
                 borderBottomRightRadius: radius.sm,
                 opacity: sendState === null ? 1 : 0.7,
               }
@@ -362,7 +362,7 @@ export function MessageView({
           style={{
             fontFamily: fontFamilies.body,
             fontSize: fontSize.xs,
-            color: colors.textSubtle,
+            color: colors.textMuted,
           }}
         >
           Sending&hellip;
@@ -376,7 +376,7 @@ export function MessageView({
             style={{
               fontFamily: fontFamilies.body,
               fontSize: fontSize.xs,
-              color: colors.danger,
+              color: colors.textBody,
             }}
           >
             Not sent.
@@ -386,13 +386,13 @@ export function MessageView({
               accessibilityRole="button"
               accessibilityLabel="Retry"
               onPress={() => onRetryFailedMessage(userMessageText(message))}
-              hitSlop={8}
+              style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: space.sm }}
             >
               <Text
                 style={{
                   fontFamily: fontFamilies.bodySemibold,
                   fontSize: fontSize.xs,
-                  color: colors.danger,
+                  color: colors.textBody,
                   textDecorationLine: "underline",
                 }}
               >
@@ -408,6 +408,7 @@ export function MessageView({
 
 /** The "thinking" or tool-status bubble shown while a turn is running. */
 export function BusyBubble({ label }: { label: string }) {
+  useAccessibilityAnnouncement(label);
   return (
     <View style={{ flexDirection: "row", justifyContent: "flex-start" }}>
       <View

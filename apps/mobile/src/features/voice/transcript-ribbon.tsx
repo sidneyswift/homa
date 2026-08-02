@@ -1,5 +1,7 @@
 import { Pressable, Text, View } from "react-native";
 
+import { Button } from "../../components/ui/button";
+import { InlineError } from "../../components/ui/inline-error";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, palette, space } from "../../theme/tokens";
 import { whisperText } from "./whisper-text";
@@ -42,7 +44,7 @@ export function TranscriptRibbon({
   const userWhisper = userText ? whisperText(userText) : null;
   const assistantWhisper = assistantText ? whisperText(assistantText) : null;
   const assistantColor = tone === "dark" ? palette.stone50 : colors.textBody;
-  const userColor = tone === "dark" ? palette.stone300 : colors.textSubtle;
+  const userColor = tone === "dark" ? palette.stone300 : colors.textMuted;
 
   return (
     <View
@@ -60,7 +62,6 @@ export function TranscriptRibbon({
             fontSize: fontSize.sm,
             lineHeight: fontSize.sm * 1.45,
             color: userColor,
-            opacity: 0.55,
             textAlign: "center",
           }}
         >
@@ -71,10 +72,10 @@ export function TranscriptRibbon({
         onPressReply ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Read the full reply"
+            accessibilityLabel={`Homa replied: ${assistantWhisper}`}
+            accessibilityHint="Opens the full reply"
             onPress={onPressReply}
-            hitSlop={8}
-            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+            style={({ pressed }) => ({ minHeight: 44, justifyContent: "center", opacity: pressed ? 0.6 : 1 })}
           >
             <Text
               numberOfLines={3}
@@ -83,7 +84,6 @@ export function TranscriptRibbon({
                 fontSize: fontSize.base,
                 lineHeight: fontSize.base * 1.5,
                 color: assistantColor,
-                opacity: 0.92,
                 textAlign: "center",
               }}
             >
@@ -98,7 +98,6 @@ export function TranscriptRibbon({
               fontSize: fontSize.base,
               lineHeight: fontSize.base * 1.5,
               color: assistantColor,
-              opacity: 0.92,
               textAlign: "center",
             }}
           >
@@ -109,39 +108,12 @@ export function TranscriptRibbon({
       {failed ? (
         <View
           style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
+            alignItems: "stretch",
             gap: space.sm,
           }}
         >
-          <Text
-            accessibilityRole="alert"
-            style={{
-              fontFamily: fontFamilies.body,
-              fontSize: fontSize.sm,
-              color: colors.danger,
-            }}
-          >
-            Not sent.
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Retry"
-            onPress={onRetry}
-            hitSlop={8}
-          >
-            <Text
-              style={{
-                fontFamily: fontFamilies.bodySemibold,
-                fontSize: fontSize.sm,
-                color: tone === "dark" ? palette.stone50 : colors.textStrong,
-                textDecorationLine: "underline",
-              }}
-            >
-              Retry
-            </Text>
-          </Pressable>
+          <InlineError message="Message not sent." tone={tone} />
+          <Button label="Retry" variant="secondary" tone={tone} onPress={onRetry} />
         </View>
       ) : null}
     </View>

@@ -5,7 +5,8 @@ import {
   FilePenLine,
   type LucideIcon,
 } from "lucide-react-native";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { useReducedMotion } from "react-native-reanimated";
 
 import { fontFamilies } from "../../theme/fonts";
 import {
@@ -44,11 +45,14 @@ export function VoicePromptStarters({
   tone: "light" | "dark";
   onPick: (starter: VoicePromptStarter) => void;
 }) {
+  const { fontScale } = useWindowDimensions();
+  const reducedMotion = useReducedMotion();
   if (!visible) return null;
 
   const dark = tone === "dark";
   const iconColor = dark ? palette.gold500 : colors.brand;
   const textColor = dark ? palette.stone50 : colors.textStrong;
+  const stacked = fontScale >= 1.4;
 
   return (
     <View
@@ -76,7 +80,7 @@ export function VoicePromptStarters({
             onPress={() => onPick(starter)}
             style={({ pressed }) => ({
               ...shadows.sm,
-              flexBasis: "46%",
+              flexBasis: stacked ? "100%" : "46%",
               flexGrow: 1,
               minHeight: 56,
               flexDirection: "row",
@@ -89,12 +93,11 @@ export function VoicePromptStarters({
               paddingHorizontal: 14,
               paddingVertical: 10,
               opacity: pressed ? 0.78 : 1,
-              transform: [{ scale: pressed ? pressScale : 1 }],
+              transform: [{ scale: pressed && !reducedMotion ? pressScale : 1 }],
             })}
           >
             <Icon size={18} color={iconColor} strokeWidth={2} />
             <Text
-              numberOfLines={2}
               style={{
                 flex: 1,
                 fontFamily: fontFamilies.body,

@@ -13,7 +13,7 @@ function TotalStat({ label, value }: { label: string; value: string }) {
           fontFamily: fontFamilies.bodyBold,
           fontSize: 10,
           letterSpacing: 0.4,
-          color: colors.textSubtle,
+          color: colors.textMuted,
           textTransform: "uppercase",
         }}
       >

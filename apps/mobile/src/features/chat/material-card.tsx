@@ -1,5 +1,6 @@
 import { Image, Linking, Pressable, Text, View } from "react-native";
 
+import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
@@ -67,7 +68,7 @@ export function MaterialCard({ material }: { material: MaterialArtifact }) {
         style={{
           fontFamily: fontFamilies.bodyMedium,
           fontSize: fontSize.sm,
-          color: colors.brand,
+          color: colors.textStrong,
         }}
       >
         {headline}
@@ -108,16 +109,19 @@ export function MaterialCard({ material }: { material: MaterialArtifact }) {
               key={source.id}
               disabled={!source.libraryUrl}
               accessibilityRole={source.libraryUrl ? "link" : "text"}
+              accessibilityLabel={source.libraryUrl ? `Open source ${source.title}` : source.title}
+              accessibilityHint={source.libraryUrl ? "Opens outside Homa" : undefined}
               onPress={() => {
                 if (!source.libraryUrl) return;
                 void Linking.openURL(source.libraryUrl);
               }}
+              style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: 2 }}
             >
               <Text
                 style={{
                   fontFamily: fontFamilies.bodyMedium,
                   fontSize: fontSize.xs,
-                  color: source.libraryUrl ? colors.brand : colors.textMuted,
+                  color: source.libraryUrl ? colors.textStrong : colors.textMuted,
                   textDecorationLine: source.libraryUrl ? "underline" : "none",
                 }}
               >
@@ -127,10 +131,18 @@ export function MaterialCard({ material }: { material: MaterialArtifact }) {
           ))}
         </View>
       ) : null}
-      <Pressable onPress={openPdf} accessibilityRole="link">
+      <Pressable
+        accessible
+        onPress={openPdf}
+        accessibilityRole="link"
+        accessibilityLabel={`Open PDF for ${material.title}`}
+        accessibilityHint="Opens outside Homa"
+      >
         <Image
+          accessible={false}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
           source={{ uri: material.previewUrl }}
-          accessibilityLabel={`Preview of ${material.title}`}
           style={{
             width: "100%",
             aspectRatio: 8.5 / 11,
@@ -142,30 +154,11 @@ export function MaterialCard({ material }: { material: MaterialArtifact }) {
           resizeMode="cover"
         />
       </Pressable>
-      <Pressable
+      <Button
+        label={pageCount > 1 ? `Open the ${pageCount}-page PDF` : "Open the printable PDF"}
         onPress={openPdf}
-        accessibilityRole="button"
-        style={{
-          marginTop: 2,
-          alignSelf: "flex-start",
-          borderRadius: radius.pill,
-          backgroundColor: colors.brand,
-          paddingHorizontal: 18,
-          paddingVertical: 10,
-        }}
-      >
-        <Text
-          style={{
-            fontFamily: fontFamilies.bodySemibold,
-            fontSize: fontSize.sm,
-            color: colors.onBrand,
-          }}
-        >
-          {pageCount > 1
-            ? `Open the ${pageCount}-page PDF`
-            : "Open the printable PDF"}
-        </Text>
-      </Pressable>
+        style={{ alignSelf: "flex-start" }}
+      />
     </Card>
   );
 }

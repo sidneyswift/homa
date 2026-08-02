@@ -1,10 +1,13 @@
 import { X } from "lucide-react-native";
-import { Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
-import { useState } from "react";
+import { Image, ScrollView, Text, View } from "react-native";
+import { useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "../../components/ui/button";
+import { AccessibleModal } from "../../components/ui/accessible-modal";
+import { IconButton } from "../../components/ui/icon-button";
 import { emitFamilyEvent } from "../../lib/events";
+import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
 import { useFamilyData } from "../family/use-family-data";
@@ -35,11 +38,16 @@ function formatKeptOn(dateOnly: string): string {
  * ("earlier tries") yet, a tracked gap, not a silent one.
  */
 export function MaterialDetailModal({ material, onClose }: { material: BinderMaterial | null; onClose: () => void }) {
+  const headingRef = useRef<View>(null);
   const { family } = useFamilyData();
   const [printing, setPrinting] = useState(false);
   const [printNotice, setPrintNotice] = useState<{ materialId: string; message: string } | null>(null);
   const [shareRequest, setShareRequest] = useState<PreparedMaterialShareRequest | null>(null);
   const [preparingShare, setPreparingShare] = useState(false);
+  const activeNotice = material && printNotice?.materialId === material.id
+    ? printNotice.message
+    : null;
+  useAccessibilityAnnouncement(activeNotice);
 
   async function printMaterial() {
     if (!material) return;
@@ -86,7 +94,13 @@ export function MaterialDetailModal({ material, onClose }: { material: BinderMat
   }
 
   return (
-    <Modal visible={material !== null} animationType="slide" onRequestClose={onClose} presentationStyle="pageSheet">
+    <AccessibleModal
+      visible={material !== null}
+      title={material ? `Material details. ${material.title}` : "Material details"}
+      initialFocusRef={headingRef}
+      onRequestClose={onClose}
+      presentationStyle="pageSheet"
+    >
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }}>
         <View
           style={{
@@ -98,12 +112,14 @@ export function MaterialDetailModal({ material, onClose }: { material: BinderMat
             borderBottomColor: colors.borderSubtle,
           }}
         >
-          <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }} numberOfLines={1}>
-            {material?.title ?? ""}
-          </Text>
-          <Pressable onPress={onClose} hitSlop={8}>
+          <View ref={headingRef} accessible accessibilityRole="header" accessibilityLabel={material ? `Material details. ${material.title}` : "Material details"} style={{ flex: 1 }}>
+            <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }}>
+              {material?.title ?? ""}
+            </Text>
+          </View>
+          <IconButton label="Close material details" onPress={onClose}>
             <X size={22} color={colors.textSubtle} />
-          </Pressable>
+          </IconButton>
         </View>
 
         {material ? (
@@ -131,20 +147,20 @@ export function MaterialDetailModal({ material, onClose }: { material: BinderMat
 
             <Button
               label={printing ? "Opening print sheet…" : material.pageCount > 1 ? `Print all ${material.pageCount} pages` : "Print it"}
-              disabled={printing}
+              busy={printing}
               onPress={() => void printMaterial()}
             />
             <Button
               label={preparingShare ? "Getting the PDF ready…" : "Share through another app"}
               variant="secondary"
-              disabled={preparingShare}
+              busy={preparingShare}
               onPress={() => void prepareShare()}
             />
             {shareRequest?.materialId === material.id ? (
               <MaterialShareComposer key={shareRequest.materialId} request={shareRequest} familyId={family?.id} />
             ) : null}
             {printNotice?.materialId === material.id ? (
-              <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}>
+              <Text accessibilityRole="text" style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}>
                 {printNotice.message}
               </Text>
             ) : null}
@@ -152,7 +168,7 @@ export function MaterialDetailModal({ material, onClose }: { material: BinderMat
         ) : null}
         <VoiceDock />
       </SafeAreaView>
-    </Modal>
+    </AccessibleModal>
   );
 }
 
@@ -164,7 +180,7 @@ function DetailField({ label, value }: { label: string; value: string }) {
           fontFamily: fontFamilies.bodyBold,
           fontSize: 10,
           letterSpacing: 0.4,
-          color: colors.textSubtle,
+          color: colors.textMuted,
           textTransform: "uppercase",
         }}
       >

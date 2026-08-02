@@ -3,7 +3,6 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Pressable,
   Text,
   View,
@@ -14,6 +13,7 @@ import type {
 } from "@homa/core";
 
 import { ErrorBoundary } from "../components/error-boundary";
+import { LoadingStatus } from "../components/ui/loading-status";
 import { SessionProvider, useSession } from "../features/auth/session-provider";
 import { VoiceWorkbenchProvider } from "../features/voice/voice-workbench-provider";
 import { initCrashReporting } from "../lib/crash-reporting";
@@ -139,10 +139,7 @@ function RootLoadingState() {
         gap: space.md,
       }}
     >
-      <ActivityIndicator color={colors.brand} />
-      <Text style={{ fontSize: fontSize.base, color: colors.textBody }}>
-        Opening Homa...
-      </Text>
+      <LoadingStatus label="Opening Homa" />
     </View>
   );
 }
@@ -191,7 +188,7 @@ function RootBootstrapFailure({
           alignItems: "center",
           justifyContent: "center",
           borderRadius: radius.pill,
-          backgroundColor: colors.brand,
+          backgroundColor: colors.brandHover,
           paddingHorizontal: space.lg,
         }}
       >

@@ -71,6 +71,9 @@ jobs:
       - name: Mobile voice unit tests
         run: pnpm check:mobile-voice
 
+      - name: Mobile accessibility contract
+        run: pnpm check:mobile-accessibility
+
       # A red mobile test suite must never reach an installed phone: this
       # runs before publish, not just in CI, since CI and this workflow
       # fire on the same push independently.

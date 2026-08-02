@@ -23,11 +23,13 @@ function formatTime(time: string | null): string | null {
 export function EventCard({
   event,
   childIndex,
+  ownerLabel,
   onPress,
 }: {
   event: FamilyEventRecord;
   childIndex: number | null;
-  onPress: () => void;
+  ownerLabel: string;
+  onPress?: () => void;
 }) {
   const [background, textColor] =
     childIndex === null ? [palette.stone100, colors.textBody] : kidTone(childIndex);
@@ -36,28 +38,46 @@ export function EventCard({
   const timeLabel =
     startTime && endTime ? `${startTime}–${endTime}` : startTime ? startTime : "All day";
 
-  return (
-    <Pressable
-      onPress={onPress}
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        gap: space.sm,
-        backgroundColor: background,
-        borderRadius: radius.sm,
-        paddingHorizontal: space.sm,
-        paddingVertical: space.sm,
-      }}
-    >
+  const content = (
+    <>
       {childIndex === null ? <Users size={14} color={textColor} /> : null}
       <View style={{ flex: 1 }}>
         <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: textColor }}>
           {event.title}
         </Text>
         <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: textColor }}>
-          {timeLabel}
+          {ownerLabel} · {timeLabel}
         </Text>
       </View>
+    </>
+  );
+  const style = {
+    minHeight: 44,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: space.sm,
+    backgroundColor: background,
+    borderRadius: radius.sm,
+    paddingHorizontal: space.sm,
+    paddingVertical: space.sm,
+  };
+
+  if (!onPress) {
+    return (
+      <View accessible accessibilityLabel={`${event.title}. ${ownerLabel}. ${timeLabel}`} style={style}>
+        {content}
+      </View>
+    );
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Edit ${event.title}. ${ownerLabel}. ${timeLabel}`}
+      onPress={onPress}
+      style={style}
+    >
+      {content}
     </Pressable>
   );
 }

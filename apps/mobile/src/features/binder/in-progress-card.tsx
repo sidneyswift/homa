@@ -32,16 +32,25 @@ export function InProgressCard({
         overflow: "hidden",
       }}
     >
-      <Pressable onPress={() => void Linking.openURL(material.pdfUrl).catch(() => {})}>
+      <Pressable
+        accessible
+        accessibilityRole="link"
+        accessibilityLabel={`Open draft PDF for ${material.title}`}
+        accessibilityHint="Opens outside Homa"
+        onPress={() => void Linking.openURL(material.pdfUrl).catch(() => {})}
+        style={{ minHeight: 44 }}
+      >
         <Image
+          accessible={false}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
           source={{ uri: material.previewUrl }}
-          accessibilityLabel={`Preview of ${material.title}`}
           style={{ width: "100%", aspectRatio: 8.5 / 11, backgroundColor: "#FFFFFF" }}
           resizeMode="cover"
         />
       </Pressable>
       <View style={{ padding: space.sm, gap: space.xs }}>
-        <Text numberOfLines={2} style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textStrong }}>
+        <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textStrong }}>
           {material.title}
         </Text>
         <Button label={keeping ? "Keeping…" : "Keep this one"} size="sm" disabled={keeping} onPress={onKeep} />

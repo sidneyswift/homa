@@ -27,7 +27,7 @@ export function WeekView({
   activities: ScheduledActivityView[];
   unscheduled: PlanActivityView[];
   kids: ChildRecord[];
-  onPressEvent: (event: FamilyEventRecord) => void;
+  onPressEvent?: (event: FamilyEventRecord) => void;
   onToggleActivity: (activity: ScheduledActivityView) => Promise<void>;
   onScheduleActivity: (activity: PlanActivityView) => void;
 }) {

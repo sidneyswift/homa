@@ -140,6 +140,9 @@ jobs:
       - name: Mobile voice unit tests
         run: pnpm check:mobile-voice
 
+      - name: Mobile accessibility contract
+        run: pnpm check:mobile-accessibility
+
   # The compile chain plus the checks that need real Supabase secrets.
   # Typecheck, lint, and build go through one turbo invocation so turbo
   # can schedule them across the runner's cores and reuse the shared

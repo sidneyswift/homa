@@ -1,9 +1,11 @@
 import { Plus } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BuiltInPlaceholderCard, TaskCard } from "../../features/tasks/task-card";
+import { InlineError } from "../../components/ui/inline-error";
+import { LoadingStatus } from "../../components/ui/loading-status";
 import { TaskEditSheet } from "../../features/tasks/task-edit-sheet";
 import { TaskHistoryRow } from "../../features/tasks/task-history-row";
 import { groupRunsByDay, HISTORY_RUN_LIMIT } from "../../features/tasks/task-view";
@@ -74,14 +76,14 @@ export default function TasksScreen() {
               fontFamily: fontFamilies.bodyBold,
               fontSize: 11,
               letterSpacing: 0.4,
-              color: colors.textSubtle,
+              color: colors.textMuted,
               textTransform: "uppercase",
             }}
           >
             On her own schedule
           </Text>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: space.sm }}>
-            <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.xxl, color: colors.textStrong }}>
+            <Text accessibilityRole="header" style={{ fontFamily: fontFamilies.display, fontSize: fontSize.xxl, color: colors.textStrong }}>
               Homa&apos;s tasks
             </Text>
             <Pressable
@@ -92,7 +94,8 @@ export default function TasksScreen() {
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 6,
-                backgroundColor: colors.brand,
+                minHeight: 44,
+                backgroundColor: colors.brandHover,
                 borderRadius: 999,
                 paddingHorizontal: space.md,
                 paddingVertical: space.xs,
@@ -112,17 +115,15 @@ export default function TasksScreen() {
 
         {loading && !data ? (
           <View style={{ paddingVertical: space.xl, alignItems: "center" }}>
-            <ActivityIndicator color={colors.brand} />
+            <LoadingStatus label="Loading Homa's tasks" />
           </View>
         ) : null}
 
-        {error ? (
-          <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.danger }}>{error}</Text>
-        ) : null}
+        {error ? <InlineError message={error} /> : null}
 
         {data ? (
           <View style={{ gap: space.sm }}>
-            <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: fontSize.xs, letterSpacing: 0.4, color: colors.textSubtle, textTransform: "uppercase" }}>
+            <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: fontSize.xs, letterSpacing: 0.4, color: colors.textMuted, textTransform: "uppercase" }}>
               Scheduled
             </Text>
             {!hasBrief ? (
@@ -157,7 +158,7 @@ export default function TasksScreen() {
 
         {data ? (
           <View style={{ gap: space.sm }}>
-            <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: fontSize.xs, letterSpacing: 0.4, color: colors.textSubtle, textTransform: "uppercase" }}>
+            <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: fontSize.xs, letterSpacing: 0.4, color: colors.textMuted, textTransform: "uppercase" }}>
               Task history
             </Text>
             {runs.length === 0 ? (
@@ -178,7 +179,7 @@ export default function TasksScreen() {
                         fontFamily: fontFamilies.bodyBold,
                         fontSize: 11,
                         letterSpacing: 0.4,
-                        color: colors.textSubtle,
+                        color: colors.textMuted,
                         textTransform: "uppercase",
                       }}
                     >
@@ -196,7 +197,7 @@ export default function TasksScreen() {
                     </View>
                   </View>
                 ))}
-                <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textSubtle, textAlign: "center" }}>
+                <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textMuted, textAlign: "center" }}>
                   {runs.length >= HISTORY_RUN_LIMIT
                     ? "This page shows your newest 30 task updates. Older ones are kept, just not shown here."
                     : "That's everything so far."}

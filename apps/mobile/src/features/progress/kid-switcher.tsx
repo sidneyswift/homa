@@ -50,7 +50,6 @@ export function KidSwitcher({
             }}
           >
             <Text
-              maxFontSizeMultiplier={2}
               style={{
                 fontFamily: active ? fontFamilies.bodySemibold : fontFamilies.bodyMedium,
                 fontSize: fontSize.sm,

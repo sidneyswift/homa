@@ -27,6 +27,7 @@ export function TextField({
       </Text>
       <TextInput
         {...inputProps}
+        accessibilityLabel={inputProps.accessibilityLabel ?? label}
         onFocus={(event) => {
           setFocused(true);
           inputProps.onFocus?.(event);
@@ -35,13 +36,14 @@ export function TextField({
           setFocused(false);
           inputProps.onBlur?.(event);
         }}
-        placeholderTextColor={colors.textSubtle}
+        placeholderTextColor={colors.textMuted}
         style={[
           {
             borderWidth: focused ? 2 : 1,
-            borderColor: focused ? colors.focusRing : colors.border,
+            borderColor: focused ? colors.brandHover : colors.textMuted,
             borderRadius: radius.md,
             backgroundColor: colors.card,
+            minHeight: 48,
             paddingHorizontal: space.md,
             paddingVertical: 12,
             fontFamily: fontFamilies.body,

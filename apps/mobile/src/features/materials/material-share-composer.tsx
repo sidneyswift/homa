@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Text, TextInput, View } from "react-native";
 
 import { Button } from "../../components/ui/button";
+import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { emitFamilyEvent } from "../../lib/events";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
@@ -20,6 +21,7 @@ export function MaterialShareComposer({
   const [message, setMessage] = useState(request.suggestedMessage);
   const [sharing, setSharing] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  useAccessibilityAnnouncement(notice);
 
   async function share() {
     setSharing(true);
@@ -70,7 +72,7 @@ export function MaterialShareComposer({
         onPress={() => void share()}
       />
       {notice ? (
-        <Text accessibilityLiveRegion="polite" style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}>
+        <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}>
           {notice}
         </Text>
       ) : null}

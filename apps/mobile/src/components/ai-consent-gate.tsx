@@ -1,6 +1,6 @@
 import type { MobileBootstrapFailureReason } from "@homa/core";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import {
   getMyConsentStatus,
@@ -14,6 +14,8 @@ import { fontFamilies } from "../theme/fonts";
 import { colors, fontSize, space } from "../theme/tokens";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
+import { InlineError } from "./ui/inline-error";
+import { LoadingStatus } from "./ui/loading-status";
 
 /**
  * App Review 5.1.2(i): explicit, affirmative consent before family data
@@ -96,7 +98,7 @@ export function AiConsentGate({
   }
 
   if (status === "loading") {
-    return <ActivityIndicator color={colors.brand} style={{ marginTop: space.xl }} />;
+    return <LoadingStatus label="Checking your privacy choice" style={{ marginTop: space.xl }} />;
   }
 
   if (status === "given") {
@@ -168,13 +170,7 @@ export function AiConsentGate({
           variant="ghost"
           onPress={() => void openPrivacyPolicy()}
         />
-        {errorMessage ? (
-          <Text
-            style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.danger }}
-          >
-            {errorMessage}
-          </Text>
-        ) : null}
+        {errorMessage ? <InlineError message={errorMessage} /> : null}
         <Button
           label={
             saving
