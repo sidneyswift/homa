@@ -40,6 +40,20 @@ export interface FamilyAssetUploadView {
   updatedAt: string;
 }
 
+/** Build the one-key JSON object persisted after a multipart part succeeds. */
+export function familyAssetUploadPartPatch(
+  part: FamilyAssetUploadPart,
+): Record<string, Record<string, string | number>> {
+  return {
+    [String(part.partNumber)]: {
+      etag: part.etag,
+      partNumber: part.partNumber,
+      byteSize: part.byteSize,
+      sha256: part.sha256,
+    },
+  };
+}
+
 export function familyAssetUploadPath(
   familyId: string,
   clientRequestId: string,
