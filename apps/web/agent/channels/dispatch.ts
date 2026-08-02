@@ -13,6 +13,7 @@ import {
   operationalDiagnostic,
   type OperationalPhase,
 } from "../../lib/operational-diagnostics";
+import { protectOutboundChildFraming } from "../../lib/outbound-child-framing";
 import {
   preflightTaskDispatch,
 } from "../../lib/tasks/dispatch-input";
@@ -32,6 +33,7 @@ import {
 } from "../../lib/tasks/store";
 import type { TaskDeliveryVersion } from "../../lib/tasks/delivery-version";
 import { type FamilyTaskKind } from "../../lib/tasks/kinds";
+import { currentOutboundChildFramingApproval } from "../outbound-child-framing-state";
 import {
   deliverResearchBriefDispatch,
   handleResearchBriefDispatchTerminalEvent,
@@ -195,12 +197,12 @@ export default defineChannel({
         });
         return;
       }
-      const text = data.message?.trim() ?? "";
+      const composedText = data.message?.trim() ?? "";
 
       // The composed text is about to reach the family verbatim. A turn
       // that narrated internal machinery instead of doing the task must
       // fail visibly, not deliver (2026-07-18 Gomes incident).
-      const narration = findInternalNarration(text, {
+      const narration = findInternalNarration(composedText, {
         codeAllowed: deliveryPref === "none",
       });
       if (narration) {
@@ -219,6 +221,11 @@ export default defineChannel({
         }
         return;
       }
+      const text = protectOutboundChildFraming({
+        text: composedText,
+        approvedText: currentOutboundChildFramingApproval(),
+        channel: "dispatch",
+      }).text;
 
       let deliveryPhase: OperationalPhase = "canonical_persist";
       try {

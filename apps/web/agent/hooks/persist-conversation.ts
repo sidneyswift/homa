@@ -7,7 +7,9 @@ import {
 } from "../../lib/conversation-continuity/session-lineage";
 import { persistConversationMessage } from "../../lib/conversation-log";
 import { emitMapEvent } from "../../lib/map/events";
+import { protectOutboundChildFraming } from "../../lib/outbound-child-framing";
 import { preparedResearchBriefOwnsCanonicalPersistence } from "../../lib/tasks/research-brief-delivery";
+import { currentOutboundChildFramingApproval } from "../outbound-child-framing-state";
 
 /**
  * Internal lesson-builder chatter is durable in Eve and the lesson row, but
@@ -20,6 +22,15 @@ export function shouldSkipConversationPersistence(
     | { channel?: unknown; voiceBridge?: unknown }
     | undefined;
   return values?.channel === "subject_lesson" || values?.voiceBridge === "true";
+}
+
+function outboundChannel(attributes: unknown) {
+  const channel = (attributes as { channel?: unknown } | undefined)?.channel;
+  if (channel === "web" || channel === "mobile") return channel;
+  if (channel === "sms" || channel === "email" || channel === "dispatch") {
+    return channel;
+  }
+  return null;
 }
 
 /**
@@ -112,13 +123,21 @@ export default defineHook({
         ) {
           return;
         }
+        const channel = outboundChannel(attributes);
+        const content = channel
+          ? protectOutboundChildFraming({
+              text: event.data.message.trim(),
+              approvedText: currentOutboundChildFramingApproval(),
+              channel,
+            }).text
+          : event.data.message;
         await persistConversationMessage({
           attributes,
           sessionId: ctx.session.id,
           channelKind: ctx.channel.kind,
           sequence: event.data.sequence,
           role: "assistant",
-          content: event.data.message,
+          content,
           turnId: event.data.turnId,
           finishReason: event.data.finishReason,
         });

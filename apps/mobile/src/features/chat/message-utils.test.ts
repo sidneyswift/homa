@@ -2,12 +2,15 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
+import { OUTBOUND_CHILD_FRAMING_FALLBACK } from "@homa/core";
 import type { EveMessage, EveMessagePart } from "eve/react";
 
 import {
+  approvedOutboundChildFramingTexts,
   partIsRenderable,
   toolOnlyFallback,
   userMessageSendState,
+  visibleMobileChildFramingText,
 } from "./message-utils";
 
 /**
@@ -121,6 +124,21 @@ describe("mobile tool rendering", () => {
     assert.equal(partIsRenderable(completedTool("open_planner", { opened: false })), false);
   });
 
+  it("does not flash a tool-only fallback while validation is streaming", () => {
+    assert.equal(
+      toolOnlyFallback({
+        ...assistantWith(
+          completedTool("review_child_framing", {
+            accepted: true,
+            text: "The research behind it.",
+          }),
+        ),
+        metadata: { status: "streaming" },
+      } as EveMessage),
+      null,
+    );
+  });
+
   it("names a checklist result when the native card cannot render it yet", () => {
     assert.equal(
       toolOnlyFallback(
@@ -173,5 +191,41 @@ describe("mobile tool rendering", () => {
     const source = await readFile(new URL("./message-view.tsx", import.meta.url), "utf8");
     assert.match(source, /const fallback = toolOnlyFallback\(message\)/u);
     assert.match(source, /\{fallback\}/u);
+  });
+});
+
+describe("mobile child-framing display", () => {
+  const safeText = "The research behind this activity is solid.";
+
+  it("preserves an exact safe validator result", () => {
+    const approvedTexts = approvedOutboundChildFramingTexts([
+      completedTool("review_child_framing", {
+        accepted: true,
+        text: safeText,
+      }),
+    ]);
+    assert.equal(
+      visibleMobileChildFramingText({
+        text: safeText,
+        approvedTexts,
+        streaming: true,
+      }),
+      safeText,
+    );
+  });
+
+  it("hides unresolved streaming text and fails closed when complete", () => {
+    const input = {
+      text: "She is not behind.",
+      approvedTexts: new Set<string>(),
+    };
+    assert.equal(
+      visibleMobileChildFramingText({ ...input, streaming: true }),
+      null,
+    );
+    assert.equal(
+      visibleMobileChildFramingText({ ...input, streaming: false }),
+      OUTBOUND_CHILD_FRAMING_FALLBACK.mobile,
+    );
   });
 });

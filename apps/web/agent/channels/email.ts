@@ -50,6 +50,8 @@ import {
 } from "../../lib/map/email";
 import { emitMapEvent } from "../../lib/map/events";
 import { operationalDiagnostic } from "../../lib/operational-diagnostics";
+import { protectOutboundChildFraming } from "../../lib/outbound-child-framing";
+import { currentOutboundChildFramingApproval } from "../outbound-child-framing-state";
 
 /**
  * Email as an adapter on the ONE agent (gateway-plan GW-3): a parent
@@ -409,7 +411,7 @@ export default defineChannel({
         turnId?: string;
       };
       if (data.finishReason !== "stop" || !data.message?.trim()) return;
-      const messageText = data.message.trim();
+      const composedText = data.message.trim();
       const to = channel.state.toEmail;
       const familyId = channel.state.familyId;
       const attributes = (ctx.session.auth.current?.attributes ?? {}) as {
@@ -425,6 +427,11 @@ export default defineChannel({
           ),
         );
       }
+      const messageText = protectOutboundChildFraming({
+        text: composedText,
+        approvedText: currentOutboundChildFramingApproval(),
+        channel: "email",
+      }).text;
       const persisted = await persistCanonicalMessage({
         attributes: ctx.session.auth.current?.attributes,
         sessionId: ctx.session.id,

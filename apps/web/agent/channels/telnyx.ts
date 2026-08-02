@@ -53,6 +53,7 @@ import {
   classifyFamilySmsInviteParentConfirmation,
 } from "../../lib/family-sms-invite-consent";
 import { emitMapEvent } from "../../lib/map/events";
+import { protectOutboundChildFraming } from "../../lib/outbound-child-framing";
 import { recordLeadContact } from "../../lib/phone-leads";
 import {
   classifySmsOptKeyword,
@@ -73,6 +74,7 @@ import {
 import { effectiveTimeZone } from "../../lib/time-zone";
 import { normalizeSmsAttachments } from "../../lib/voice/sms-attachments";
 import { sendHomaSms } from "../../lib/voice/telnyx-api";
+import { currentOutboundChildFramingApproval } from "../outbound-child-framing-state";
 
 /**
  * SMS channel (M5-01 groundwork, pulled forward as a founder experiment,
@@ -184,9 +186,14 @@ const { bot, channel, send } = chatSdkChannel({
         await completeInboundReceipt(attributes.inboundReceiptId);
       }
       if (!channel.thread) return;
+      const messageText = protectOutboundChildFraming({
+        text: event.message.trim(),
+        approvedText: currentOutboundChildFramingApproval(),
+        channel: "sms",
+      }).text;
       if (!attributes.familyId || !attributes.phoneNumber) {
         try {
-          await channel.thread.post(event.message);
+          await channel.thread.post(messageText);
           if (attributes.inboundReceiptId) {
             await completeInboundReceipt(attributes.inboundReceiptId);
           }
@@ -204,7 +211,7 @@ const { bot, channel, send } = chatSdkChannel({
         channel: "sms",
         sequence: event.sequence,
         role: "assistant",
-        content: event.message,
+        content: messageText,
         turnId: event.turnId,
       });
       if (!persisted) return;
@@ -219,7 +226,7 @@ const { bot, channel, send } = chatSdkChannel({
         providerThreadKey: channel.thread.id,
       });
       const genericContract = replyContractForReactiveMessage(
-        event.message,
+        messageText,
       );
       const openLoopAfterOutcome = async (
         deliveryOutcome: "sent" | "uncertain",
@@ -231,7 +238,7 @@ const { bot, channel, send } = chatSdkChannel({
                 deliveryOutcome,
                 runtimeSessionId: ctx.session.id,
                 turnId: event.turnId,
-                deliveredContent: event.message ?? undefined,
+                deliveredContent: messageText,
               })
             : { status: "no_unique_prompt" as const };
         if (
@@ -258,7 +265,7 @@ const { bot, channel, send } = chatSdkChannel({
         return;
       }
       try {
-        const posted = (await channel.thread.post(event.message)) as {
+        const posted = (await channel.thread.post(messageText)) as {
           id?: string;
         };
         await finishDeliveryAttempt(attempt, {
