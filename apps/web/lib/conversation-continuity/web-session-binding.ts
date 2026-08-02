@@ -38,6 +38,7 @@ export async function readWebSessionBinding(input: {
 }): Promise<WebSessionBinding | null> {
   const binding = await new PostgresContinuityRepository().findBinding(
     input.familyId,
+    input.memberUserId,
     "web",
     webSessionThreadHash(input.memberUserId),
   );

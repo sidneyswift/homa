@@ -209,6 +209,13 @@ export function normalizeTelnyxUsPhone(raw: string | undefined): string | null {
   return raw ? normalizeUsPhoneE164(raw) : null;
 }
 
+/** The end-user target is the only Telnyx participant that can own a call. */
+export function telnyxTranscriptOwnerPhone(
+  metadata: Record<string, string> | undefined,
+): string | null {
+  return normalizeTelnyxUsPhone(metadata?.telnyx_end_user_target);
+}
+
 /**
  * The "send an email" live tool (build-log 2026-07-08), shared verbatim
  * by both voice assistants (general inbound + curriculum call).

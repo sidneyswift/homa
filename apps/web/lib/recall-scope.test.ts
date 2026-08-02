@@ -87,12 +87,19 @@ describe("recall semantic scope contract", () => {
     }
   });
 
-  it("keeps a fallback so code ahead of schema still recalls something", () => {
-    assert.match(
+  it("fails closed instead of retrying the pre-privacy RPC", () => {
+    assert.doesNotMatch(
       recallSource,
       /semantic === null/u,
-      "a failed scoped RPC must retry unscoped rather than lose recall",
+      "a failed scoped RPC must not retry an older family-wide function",
     );
+    assert.match(recallSource, /\.then\(\(response\) => response\.data, \(\) => \[\]\)/u);
+  });
+
+  it("requires adult ownership on every pinned raw-history arm", () => {
+    assert.match(pinnedSource, /t\.member_user_id = \$\{input\.memberUserId\}/u);
+    assert.match(pinnedSource, /c\.member_user_id = \$\{input\.memberUserId\}/u);
+    assert.match(pinnedSource, /delivery\.recipient_member_user_id = \$\{input\.memberUserId\}/u);
   });
 
   it("filters the pinned semantic union by scope in SQL, not after the limit", () => {

@@ -62,6 +62,12 @@ const SUPABASE_AMBIENT_SHIM = `
 create role anon nologin;
 create role authenticated nologin;
 create role service_role nologin bypassrls;
+alter default privileges in schema public
+  grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public
+  grant all on sequences to anon, authenticated, service_role;
+alter default privileges in schema public
+  grant all on functions to anon, authenticated, service_role;
 create schema auth;
 -- email_confirmed_at exists on the real Supabase auth.users and is what
 -- the autoconfirm_new_user trigger (20260705202000_open_signup.sql)
@@ -77,6 +83,7 @@ create table auth.users (
 create function auth.uid() returns uuid
   language sql stable
   as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
+grant usage on schema auth to anon, authenticated, service_role;
 create schema extensions;
 create extension if not exists pgcrypto with schema extensions;
 create schema storage;

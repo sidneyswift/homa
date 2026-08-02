@@ -103,11 +103,20 @@ const CHECKS: Check[] = [
 ];
 
 async function main(): Promise<number> {
+  const userRows = await sql<{ id: string }[]>`
+    insert into auth.users (id) values (gen_random_uuid())
+    returning id
+  `;
+  const memberUserId = userRows[0].id;
   const familyRows = await sql<{ id: string }[]>`
     insert into public.families (name) values ('Recall eval (synthetic)')
     returning id
   `;
   const familyId = familyRows[0].id;
+  await sql`
+    insert into public.family_members (family_id, user_id, role, display_name)
+    values (${familyId}, ${memberUserId}, 'parent', 'Recall fixture')
+  `;
   const sessionId = `recall-eval-${Date.now()}`;
   console.log(`Seeded synthetic family ${familyId} (session ${sessionId})`);
 
@@ -121,10 +130,11 @@ async function main(): Promise<number> {
       if (embedding) embeddingsAvailable = true;
       await sql`
         insert into public.conversation_messages
-          (family_id, session_id, sequence, channel, role, content, embedding)
+          (family_id, session_id, sequence, channel, role, content, embedding,
+           member_user_id)
         values
           (${familyId}, ${sessionId}, ${sequence}, ${message.channel},
-           ${message.role}, ${message.content}, ${embedding})
+           ${message.role}, ${message.content}, ${embedding}, ${memberUserId})
       `;
     }
     console.log(
@@ -140,6 +150,7 @@ async function main(): Promise<number> {
       }
       const hits = await recallPinned({
         familyId,
+        memberUserId,
         query: check.query,
         scope: "chats",
         limit: 5,
@@ -170,6 +181,7 @@ async function main(): Promise<number> {
     try {
       const crossFamily = await recallPinned({
         familyId: strangerId,
+        memberUserId,
         query: "microwave",
         scope: "chats",
         limit: 5,
@@ -188,6 +200,7 @@ async function main(): Promise<number> {
       console.log(`Kept synthetic family ${familyId} (--keep); delete it when done.`);
     } else {
       await sql`delete from public.families where id = ${familyId}`;
+      await sql`delete from auth.users where id = ${memberUserId}`;
       console.log("Cleaned up the synthetic family.");
     }
   }

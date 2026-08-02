@@ -512,6 +512,9 @@ jobs:
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
+      - name: Conversation privacy disposable PostgreSQL E2E (two adults)
+        run: pnpm conversation-privacy:e2e
+
       - name: Tenancy isolation smoke check (M1-07 seed)
         run: pnpm check:isolation
         env:

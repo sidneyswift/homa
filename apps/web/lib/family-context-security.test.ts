@@ -301,6 +301,7 @@ describe("slim morning brief dynamic context", () => {
           continuityLoads += 1;
           assert.deepEqual(input, {
             familyId: "family-1",
+            memberUserId: null,
             episodeId: "episode-1",
             runtimeSessionId: "session-1",
           });

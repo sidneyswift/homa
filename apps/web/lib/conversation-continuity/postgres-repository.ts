@@ -87,6 +87,7 @@ export class PostgresContinuityRepository implements ContinuityRepository {
 
   async findBinding(
     familyId: string,
+    memberUserId: string | null,
     channel: ContinuityChannel,
     threadKeyHash: string,
   ): Promise<EpisodeBinding | null> {
@@ -108,6 +109,7 @@ export class PostgresContinuityRepository implements ContinuityRepository {
              last_seen_at::text as last_seen_at
       from public.conversation_thread_bindings
       where family_id = ${familyId}
+        and member_user_id is not distinct from ${memberUserId}
         and channel = ${channel} and thread_key_hash = ${threadKeyHash}
       limit 1
     `;
@@ -131,6 +133,7 @@ export class PostgresContinuityRepository implements ContinuityRepository {
     memberUserId: string | null;
     now: Date;
   }): Promise<string | null> {
+    if (!input.memberUserId) return null;
     const sql = mapDb();
     const rows = await sql<{ id: string }[]>`
       select e.id
@@ -138,13 +141,24 @@ export class PostgresContinuityRepository implements ContinuityRepository {
       where e.family_id = ${input.familyId}
         and e.status = 'open'
         and (
+          e.member_user_id = ${input.memberUserId}
+          or exists (
+            select 1
+            from public.conversation_deliveries own_delivery
+            where own_delivery.episode_id = e.id
+              and own_delivery.family_id = e.family_id
+              and own_delivery.recipient_member_user_id = ${input.memberUserId}
+              and own_delivery.status = 'sent'
+          )
+        )
+        and (
           exists (
             select 1
             from public.conversation_deliveries d
             join public.conversation_open_loops l on l.delivery_id = d.id
             where d.episode_id = e.id
               and d.family_id = e.family_id
-              and d.recipient_member_user_id is not distinct from ${input.memberUserId}
+              and d.recipient_member_user_id = ${input.memberUserId}
               and l.state = 'open'
               and l.expires_at > ${input.now.toISOString()}
           )
@@ -157,7 +171,7 @@ export class PostgresContinuityRepository implements ContinuityRepository {
           join public.conversation_open_loops l on l.delivery_id = d.id
           where d.episode_id = e.id
             and d.family_id = e.family_id
-            and d.recipient_member_user_id is not distinct from ${input.memberUserId}
+            and d.recipient_member_user_id = ${input.memberUserId}
             and l.state = 'open'
             and l.expires_at > ${input.now.toISOString()}
         ) desc,
@@ -175,9 +189,11 @@ export class PostgresContinuityRepository implements ContinuityRepository {
     const sql = mapDb();
     const rows = await sql<{ id: string }[]>`
       insert into public.conversation_episodes
-        (family_id, scope, opened_at, last_activity_at)
+        (family_id, scope, member_user_id, opened_at, last_activity_at)
       values
-        (${input.familyId}, 'household', ${input.now.toISOString()},
+        (${input.familyId},
+         ${input.memberUserId ? "member" : "household"},
+         ${input.memberUserId}, ${input.now.toISOString()},
          ${input.now.toISOString()})
       returning id
     `;
@@ -212,6 +228,7 @@ export class PostgresContinuityRepository implements ContinuityRepository {
   async listEpisodeMessages(
     familyId: string,
     episodeId: string,
+    memberUserId: string | null,
     excludeRuntimeSessionId: string | null,
   ): Promise<EpisodeMessage[]> {
     const sql = mapDb();
@@ -243,6 +260,7 @@ export class PostgresContinuityRepository implements ContinuityRepository {
                   and recipient.user_id = delivery.recipient_member_user_id
                  where delivery.message_id = recent.id
                    and delivery.status = 'sent'
+                   and delivery.recipient_member_user_id = ${memberUserId}
                ),
                '{}'
              ) as recipient_names
@@ -252,6 +270,18 @@ export class PostgresContinuityRepository implements ContinuityRepository {
         from public.conversation_messages
         where family_id = ${familyId}
           and episode_id = ${episodeId}
+          and ${memberUserId}::uuid is not null
+          and (
+            member_user_id = ${memberUserId}
+            or exists (
+              select 1
+              from public.conversation_deliveries own_delivery
+              where own_delivery.family_id = ${familyId}
+                and own_delivery.message_id = conversation_messages.id
+                and own_delivery.recipient_member_user_id = ${memberUserId}
+                and own_delivery.status = 'sent'
+            )
+          )
           and (
             ${excludeRuntimeSessionId}::text is null
             or session_id != ${excludeRuntimeSessionId}

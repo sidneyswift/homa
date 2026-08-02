@@ -23,6 +23,7 @@ class FakeContinuityRepository implements ContinuityRepository {
 
   async findBinding(
     _familyId: string,
+    _memberUserId: string | null,
     channel: EpisodeBinding["channel"],
     threadKeyHash: string,
   ): Promise<EpisodeBinding | null> {

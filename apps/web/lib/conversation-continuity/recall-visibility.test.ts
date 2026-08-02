@@ -76,11 +76,20 @@ describe("recall visibility wall", () => {
       path.join(migrationsDir, defining[defining.length - 1]),
       "utf8",
     );
-    const chatArms = windowsAfter(latest, "from public.conversation_messages", 200);
+    const definitionAt = latest.lastIndexOf(
+      "create or replace function public.recall_semantic",
+    );
+    assert.ok(definitionAt >= 0, "expected the latest function definition");
+    const definition = latest.slice(definitionAt);
+    const chatArms = windowsAfter(
+      definition,
+      "from public.conversation_messages",
+      250,
+    );
     assert.ok(chatArms.length >= 1, "expected a conversation_messages arm");
     for (const arm of chatArms) {
       assert.ok(
-        arm.includes("c.visibility = 'family'"),
+        /\b(?:c|message)\.visibility = 'family'/u.test(arm),
         `recall_semantic's chat arm lost its visibility filter:\n${arm}`,
       );
     }

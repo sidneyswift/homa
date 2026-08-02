@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   normalizeTelnyxUsPhone,
   readSoleProprietorIdentity,
+  telnyxTranscriptOwnerPhone,
 } from "./telnyx-shared.mts";
 
 const BASE_IDENTITY_ENV = {
@@ -49,6 +50,20 @@ test("Telnyx sole-prop phone normalization accepts formatted US numbers", () => 
 test("Telnyx script phone normalization rejects non-US plus-prefixed values", () => {
   assert.equal(normalizeTelnyxUsPhone("+441234567890"), null);
   assert.equal(normalizeTelnyxUsPhone("+1 954 990 3497"), "+19549903497");
+});
+
+test("Telnyx transcript ownership uses only the end-user target", () => {
+  assert.equal(
+    telnyxTranscriptOwnerPhone({
+      telnyx_end_user_target: "(561) 555-0123",
+      telnyx_agent_target: "+15615550999",
+    }),
+    "+15615550123",
+  );
+  assert.equal(
+    telnyxTranscriptOwnerPhone({ telnyx_agent_target: "+15615550999" }),
+    null,
+  );
 });
 
 test("Telnyx sole-prop phone normalization rejects invalid plus-prefixed values", () => {
