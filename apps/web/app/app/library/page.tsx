@@ -12,6 +12,11 @@ import {
   toFamilyAssetUploadView,
 } from "../../../lib/library/family-asset-upload-store";
 import { familyLibraryAccess } from "../../../lib/library/family-asset-shelf";
+import type {
+  FamilyCurriculumUnitConfidence,
+  FamilyCurriculumUnitKind,
+  FamilyCurriculumUnitView,
+} from "../../../lib/library/family-assets";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import { LibraryView } from "./library-view";
 
@@ -19,6 +24,11 @@ export const metadata: Metadata = {
   title: "Library",
   robots: { index: false },
 };
+
+const FAMILY_ASSET_LIBRARY_SELECT =
+  "id, title, original_name, url, download_url, media_type, byte_size, file_kind, resource_kind, authors, publisher, language, status, processing_error_code, processing_note, source_upload_id, source_attachment_id, parent_asset_id, processed_at, created_at, updated_at";
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 
 interface FamilyAssetChildLinkRow {
   asset_id: string;
@@ -33,6 +43,18 @@ interface FamilyAssetSubjectTagRow {
   source: "model" | "parent" | "import" | "system";
 }
 
+interface FamilyCurriculumUnitRow {
+  id: string;
+  parent_asset_id: string;
+  ordinal: number;
+  unit_label: string;
+  unit_kind: FamilyCurriculumUnitKind;
+  unit_source_locator: string;
+  unit_confidence: FamilyCurriculumUnitConfidence;
+  unit_summary: string;
+  is_current_decomposition: boolean;
+}
+
 export default async function LibraryPage({
   searchParams,
 }: {
@@ -43,18 +65,37 @@ export default async function LibraryPage({
 
   const requestedAsset = (await searchParams).asset;
   const requestedAssetId =
-    typeof requestedAsset === "string" ? requestedAsset : null;
+    typeof requestedAsset === "string" && UUID_PATTERN.test(requestedAsset)
+      ? requestedAsset
+      : null;
 
   const supabase = await createSupabaseServerClient();
-  const [assetResult, uploadResult, childLinkResult, subjectTagResult, gate] = await Promise.all([
+  const [
+    assetResult,
+    unitResult,
+    uploadResult,
+    childLinkResult,
+    subjectTagResult,
+    gate,
+  ] = await Promise.all([
+    supabase
+      .from("family_assets")
+      .select(FAMILY_ASSET_LIBRARY_SELECT)
+      .is("deleted_at", null)
+      .is("parent_asset_id", null)
+      .order("created_at", { ascending: false })
+      .limit(300),
     supabase
       .from("family_assets")
       .select(
-        "id, title, original_name, url, download_url, media_type, byte_size, file_kind, resource_kind, authors, publisher, language, status, processing_error_code, processing_note, source_upload_id, source_attachment_id, parent_asset_id, processed_at, created_at, updated_at",
+        "id, parent_asset_id, ordinal, unit_label, unit_kind, unit_source_locator, unit_confidence, unit_summary, is_current_decomposition",
       )
       .is("deleted_at", null)
-      .order("created_at", { ascending: false })
-      .limit(300),
+      .not("parent_asset_id", "is", null)
+      .eq("is_current_decomposition", true)
+      .order("parent_asset_id", { ascending: true })
+      .order("ordinal", { ascending: true })
+      .limit(1200),
     supabase
       .from("family_asset_uploads")
       .select(
@@ -77,6 +118,9 @@ export default async function LibraryPage({
   if (assetResult.error) {
     throw new Error(`family Library read failed: ${assetResult.error.message}`);
   }
+  if (unitResult.error) {
+    throw new Error(`family Library curriculum read failed: ${unitResult.error.message}`);
+  }
   if (uploadResult.error) {
     throw new Error(`family Library upload read failed: ${uploadResult.error.message}`);
   }
@@ -87,8 +131,57 @@ export default async function LibraryPage({
     throw new Error(`family Library subject read failed: ${subjectTagResult.error.message}`);
   }
 
-  const assetRows = (assetResult.data ?? []) as FamilyAssetRow[];
-  const visibleAssetIds = new Set(assetRows.map((row) => row.id));
+  let assetRows = (assetResult.data ?? []) as FamilyAssetRow[];
+  let unitRows = (unitResult.data ?? []) as FamilyCurriculumUnitRow[];
+  let requestedUnit = requestedAssetId
+    ? unitRows.find((unit) => unit.id === requestedAssetId) ?? null
+    : null;
+
+  if (
+    requestedAssetId &&
+    !requestedUnit &&
+    !assetRows.some((asset) => asset.id === requestedAssetId)
+  ) {
+    const exactUnitResult = await supabase
+      .from("family_assets")
+      .select(
+        "id, parent_asset_id, ordinal, unit_label, unit_kind, unit_source_locator, unit_confidence, unit_summary, is_current_decomposition",
+      )
+      .eq("id", requestedAssetId)
+      .is("deleted_at", null)
+      .not("parent_asset_id", "is", null)
+      .maybeSingle();
+    if (exactUnitResult.error) {
+      throw new Error(
+        `family Library exact curriculum unit read failed: ${exactUnitResult.error.message}`,
+      );
+    }
+    requestedUnit = exactUnitResult.data as FamilyCurriculumUnitRow | null;
+    if (requestedUnit) {
+      unitRows = [...unitRows, requestedUnit];
+      if (!assetRows.some((asset) => asset.id === requestedUnit?.parent_asset_id)) {
+        const parentResult = await supabase
+          .from("family_assets")
+          .select(FAMILY_ASSET_LIBRARY_SELECT)
+          .eq("id", requestedUnit.parent_asset_id)
+          .is("deleted_at", null)
+          .is("parent_asset_id", null)
+          .maybeSingle();
+        if (parentResult.error) {
+          throw new Error(
+            `family Library curriculum parent read failed: ${parentResult.error.message}`,
+          );
+        }
+        if (parentResult.data) {
+          assetRows = [...assetRows, parentResult.data as FamilyAssetRow];
+        }
+      }
+    }
+  }
+  const visibleAssetIds = new Set([
+    ...assetRows.map((row) => row.id),
+    ...unitRows.map((row) => row.id),
+  ]);
   const childById = new Map(data.children.map((child) => [child.id, child.name]));
   const subjectById = new Map(
     MAP_SUBJECTS.map((subject) => [subject.id, subject.displayName]),
@@ -122,10 +215,42 @@ export default async function LibraryPage({
       subjects: subjectsByAsset.get(row.id) ?? [],
     }),
   );
+  const curriculumUnitsByParent: Record<string, FamilyCurriculumUnitView[]> = {};
+  for (const row of unitRows) {
+    if (
+      !row.parent_asset_id ||
+      !Number.isInteger(row.ordinal) ||
+      !row.unit_label ||
+      !row.unit_kind ||
+      !row.unit_source_locator ||
+      !row.unit_confidence ||
+      !row.unit_summary
+    ) {
+      continue;
+    }
+    const units = curriculumUnitsByParent[row.parent_asset_id] ?? [];
+    units.push({
+      id: row.id,
+      parentAssetId: row.parent_asset_id,
+      isCurrent: row.is_current_decomposition,
+      ordinal: row.ordinal,
+      unitLabel: row.unit_label,
+      unitKind: row.unit_kind,
+      sourceLocator: row.unit_source_locator,
+      confidence: row.unit_confidence,
+      summary: row.unit_summary,
+      children: childrenByAsset.get(row.id) ?? [],
+      subjects: subjectsByAsset.get(row.id) ?? [],
+    });
+    curriculumUnitsByParent[row.parent_asset_id] = units;
+  }
   const initialSelectedAssetId =
     requestedAssetId && assets.some((asset) => asset.id === requestedAssetId)
       ? requestedAssetId
+      : requestedUnit && assets.some((asset) => asset.id === requestedUnit.parent_asset_id)
+        ? requestedUnit.parent_asset_id
       : null;
+  const initialSelectedUnitId = requestedUnit?.id ?? null;
   const uploads = ((uploadResult.data ?? []) as FamilyAssetUploadRow[]).map(
     toFamilyAssetUploadView,
   );
@@ -141,6 +266,7 @@ export default async function LibraryPage({
     <PageColumn>
       <LibraryView
         initialAssets={assets}
+        initialCurriculumUnitsByParent={curriculumUnitsByParent}
         initialUploads={uploads}
         childOptions={data.children.map((child) => ({ id: child.id, name: child.name }))}
         subjectOptions={MAP_SUBJECTS.map((subject) => ({
@@ -149,6 +275,7 @@ export default async function LibraryPage({
         }))}
         canUpload={access.canUpload}
         initialSelectedAssetId={initialSelectedAssetId}
+        initialSelectedUnitId={initialSelectedUnitId}
       />
     </PageColumn>
   );

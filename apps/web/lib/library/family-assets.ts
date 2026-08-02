@@ -74,6 +74,39 @@ export interface FamilyAssetView {
   updatedAt: string;
 }
 
+export type FamilyCurriculumUnitKind =
+  | "week"
+  | "lesson"
+  | "day"
+  | "chapter"
+  | "unit";
+
+export type FamilyCurriculumUnitConfidence = "high" | "medium" | "low";
+
+export const FAMILY_CURRICULUM_UNIT_REVIEW_LABELS: Record<
+  FamilyCurriculumUnitConfidence,
+  string
+> = {
+  high: "Source match: clear",
+  medium: "Source match: check Homa's summary",
+  low: "Source match: check the unit boundary",
+};
+
+/** One read-only unit from the current approved decomposition of an original. */
+export interface FamilyCurriculumUnitView {
+  id: string;
+  parentAssetId: string;
+  isCurrent: boolean;
+  ordinal: number;
+  unitLabel: string;
+  unitKind: FamilyCurriculumUnitKind;
+  sourceLocator: string;
+  confidence: FamilyCurriculumUnitConfidence;
+  summary: string;
+  children: FamilyAssetChild[];
+  subjects: FamilyAssetSubject[];
+}
+
 const FAMILY_ASSET_PROCESSING_STALE_MS = 5 * 60 * 1000;
 const RETRYABLE_PROCESSING_ERRORS = new Set([
   "processing_failed",

@@ -12,12 +12,12 @@ const ASSET_ID = "00000000-0000-4000-8000-000000000001";
 test("family source snapshots reject malformed rows and deduplicate ids", () => {
   assert.deepEqual(
     parseFamilyAssetReferenceSnapshots([
-      { id: ASSET_ID, title: "  Forest guide  " },
+      { id: ASSET_ID, title: "  Forest guide  ", sourceLocator: "  Page 8  " },
       { id: ASSET_ID, title: "Duplicate" },
       { id: "not-a-uuid", title: "Bad" },
       null,
     ]),
-    [{ id: ASSET_ID, title: "Forest guide" }],
+    [{ id: ASSET_ID, title: "Forest guide", sourceLocator: "Page 8" }],
   );
 });
 

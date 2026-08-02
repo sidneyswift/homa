@@ -53,7 +53,11 @@ export function UnscheduledTray({
             </Text>
             {activity.sources.length > 0 ? (
               <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.xs, color: colors.textSubtle }}>
-                From {activity.sources.map((source) => source.title).join(", ")}
+                From {activity.sources
+                  .map((source) =>
+                    `${source.title}${source.sourceLocator ? ` · ${source.sourceLocator}` : ""}`,
+                  )
+                  .join(", ")}
               </Text>
             ) : null}
           </View>

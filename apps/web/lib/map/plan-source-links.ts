@@ -20,6 +20,7 @@ export interface StoredPlanSourceLink {
 export interface CanonicalPlanSource {
   id: string;
   title: string;
+  sourceLocator?: string | null;
 }
 
 export type PlanSourceLinkWrite = StoredPlanSourceLink;
@@ -35,13 +36,20 @@ interface SourcedActivity {
 
 function sourcesForIds(
   ids: readonly string[] | undefined,
-  catalog: ReadonlyMap<string, string>,
+  catalog: ReadonlyMap<
+    string,
+    { title: string; sourceLocator: string | null }
+  >,
 ): SourcedActivity["sources"] {
   if (!ids) return [];
   return [...new Set(ids)].flatMap((id) => {
-    const title = catalog.get(id);
-    return title
-      ? [{ assetId: id, sourceTitle: title, sourceLocator: null }]
+    const source = catalog.get(id);
+    return source
+      ? [{
+          assetId: id,
+          sourceTitle: source.title,
+          sourceLocator: source.sourceLocator,
+        }]
       : [];
   });
 }
@@ -80,7 +88,10 @@ export function planSourceLinksAfterEdits(input: {
   }
 
   const catalog = new Map(
-    input.canonicalSources.map((source) => [source.id, source.title]),
+    input.canonicalSources.map((source) => [
+      source.id,
+      { title: source.title, sourceLocator: source.sourceLocator ?? null },
+    ]),
   );
   const touchedWeeks = new Set<number>();
   for (const edit of input.edits) {
@@ -127,6 +138,7 @@ export interface PlanSourceDisplayRow {
   activity_text: string;
   asset_id: string;
   source_title: string;
+  source_locator: string | null;
 }
 
 /** Attaches only exact-text source rows to their current activity. */
@@ -149,7 +161,11 @@ export function attachPlanSourceRows(
     const key = `${row.week}.${row.activity_index}`;
     const sources = parseFamilyAssetReferenceSnapshots([
       ...(plan.activitySources[key] ?? []),
-      { id: row.asset_id, title: row.source_title },
+      {
+        id: row.asset_id,
+        title: row.source_title,
+        sourceLocator: row.source_locator,
+      },
     ]);
     plan.activitySources[key] = sources;
   }

@@ -10,7 +10,7 @@ import { getFamilyAssetSource } from "../../lib/library/family-asset-retrieval";
 
 export default defineBoundedTool({
   description:
-    "Get one exact Family Library resource with its original URL, authenticated citation link, children, and bounded evidence with recorded provenance. Use only with an id from find_family_assets or a trusted current tool result. Calling this marks the chosen source as retrieved by Homa.",
+    "After loading family-librarian, get one exact Family Library resource with its original URL, authenticated citation link, children, and bounded evidence with recorded provenance. Use only with an id from find_family_assets or a trusted current tool result. Calling this marks the chosen source as retrieved by Homa.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: true,
   inputSchema: z.object({

@@ -43,6 +43,13 @@ const FAMILY_ASSET_PROCESSING_MAX_CHARS = 64_000;
 const FAMILY_ASSET_PROCESSING_MAX_PDF_PAGES = 120;
 const FAMILY_ASSET_PROCESSING_FETCH_TIMEOUT_MS = 60_000;
 
+/** Plus curriculum reading keeps page identity and may inspect more than the
+ *  lightweight Library classifier. It still stays bounded to one ready file. */
+export const FAMILY_CURRICULUM_SOURCE_MAX_SEGMENTS = 240;
+export const FAMILY_CURRICULUM_SOURCE_MAX_CHARS = 1_000_000;
+export const FAMILY_CURRICULUM_SOURCE_MAX_SEGMENT_CHARS = 32_000;
+const FAMILY_CURRICULUM_TEXT_SEGMENT_CHARS = 12_000;
+
 export type FamilyAssetProcessingCapability =
   | "text"
   | "pdf"
@@ -73,6 +80,30 @@ export interface ClaimedFamilyAsset {
 export type FamilyAssetTextExtraction =
   | { ok: true; text: string }
   | { ok: false; reason: FamilyAssetProcessingFailureReason };
+
+export type FamilyAssetSourceSegmentKind = "page" | "section" | "sheet" | "image";
+
+export interface FamilyAssetSourceSegment {
+  ordinal: number;
+  locator: string;
+  text: string;
+}
+
+export type FamilyAssetSourceDocument =
+  | {
+      ok: true;
+      segmentKind: FamilyAssetSourceSegmentKind;
+      segments: FamilyAssetSourceSegment[];
+      totalSegments: number;
+      truncated: boolean;
+    }
+  | { ok: false; reason: FamilyAssetProcessingFailureReason };
+
+export interface FamilyAssetSourceExtractionWindow {
+  startOrdinal: number;
+  maxSegments: number;
+  maxChars: number;
+}
 
 export interface FamilyAssetProcessingDependencies {
   claim(input: {
@@ -365,6 +396,241 @@ export async function extractFamilyAssetText(
   });
   return caption
     ? { ok: true, text: caption }
+    : { ok: false, reason: "unreadable" };
+}
+
+function splitSourceText(
+  text: string,
+  label: (ordinal: number) => string,
+  startOrdinal = 1,
+): FamilyAssetSourceSegment[] {
+  const normalized = text.trim();
+  if (!normalized) return [];
+  const segments: FamilyAssetSourceSegment[] = [];
+  let offset = 0;
+  let ordinal = startOrdinal;
+  while (offset < normalized.length) {
+    const hardEnd = Math.min(
+      normalized.length,
+      offset + FAMILY_CURRICULUM_TEXT_SEGMENT_CHARS,
+    );
+    const newline = normalized.lastIndexOf("\n", hardEnd);
+    const end =
+      hardEnd < normalized.length && newline > offset + 1_000
+        ? newline
+        : hardEnd;
+    const part = normalized.slice(offset, end).trim();
+    if (part) {
+      segments.push({ ordinal, locator: label(ordinal), text: part });
+      ordinal += 1;
+    }
+    offset = end;
+    while (offset < normalized.length && /\s/u.test(normalized[offset] ?? "")) {
+      offset += 1;
+    }
+  }
+  return segments;
+}
+
+/**
+ * Reads a ready Library original into deterministic page or section segments.
+ * The caller owns family and Plus checks. Keeping this function free of those
+ * decisions lets processing tests exercise extraction without billing state.
+ */
+export async function extractFamilyAssetSourceDocument(
+  asset: ClaimedFamilyAsset,
+  window?: FamilyAssetSourceExtractionWindow,
+): Promise<FamilyAssetSourceDocument> {
+  if (!isFamilyLibraryUrl(asset.url, asset.familyId)) {
+    return { ok: false, reason: "corrupt" };
+  }
+  const capability = familyAssetProcessingCapability(asset.mediaType);
+  if (!capability) return { ok: false, reason: "unsupported" };
+  const downloaded = await fetchBoundedBytes(asset.url);
+  if (!downloaded.ok) return downloaded;
+  const { bytes } = downloaded;
+
+  if (capability === "pdf") {
+    const task = getDocument({ data: bytes });
+    try {
+      const document = await task.promise;
+      const totalSegments = document.numPages;
+      const sourceSegmentLimit = Math.min(
+        document.numPages,
+        FAMILY_CURRICULUM_SOURCE_MAX_SEGMENTS,
+      );
+      const startOrdinal = window
+        ? Math.max(1, Math.min(window.startOrdinal, sourceSegmentLimit + 1))
+        : 1;
+      const segmentLimit = window
+        ? Math.min(
+            sourceSegmentLimit,
+            startOrdinal + Math.max(1, window.maxSegments) - 1,
+          )
+        : sourceSegmentLimit;
+      const charLimit = window
+        ? Math.min(
+            FAMILY_CURRICULUM_SOURCE_MAX_CHARS,
+            Math.max(1, window.maxChars),
+          )
+        : FAMILY_CURRICULUM_SOURCE_MAX_CHARS;
+      const segments: FamilyAssetSourceSegment[] = [];
+      let chars = 0;
+      let truncated = document.numPages > sourceSegmentLimit;
+      try {
+        for (
+          let pageNumber = startOrdinal;
+          pageNumber <= segmentLimit;
+          pageNumber += 1
+        ) {
+          const page = await document.getPage(pageNumber);
+          try {
+            const content = await page.getTextContent();
+            const raw = content.items
+              .flatMap((item) => ("str" in item ? [item.str] : []))
+              .join(" ")
+              .trim();
+            const remaining = charLimit - chars;
+            if (remaining <= 0) {
+              if (!window) truncated = true;
+              break;
+            }
+            if (segments.length > 0 && raw.length > remaining) {
+              if (!window) truncated = true;
+              break;
+            }
+            const segmentChars = Math.min(
+              remaining,
+              FAMILY_CURRICULUM_SOURCE_MAX_SEGMENT_CHARS,
+            );
+            const text = raw.slice(0, segmentChars);
+            if (raw.length > text.length) truncated = true;
+            segments.push({
+              ordinal: pageNumber,
+              locator: `Page ${pageNumber}`,
+              text,
+            });
+            chars += text.length;
+            if (!window && chars >= charLimit && pageNumber < sourceSegmentLimit) {
+              truncated = true;
+              break;
+            }
+          } finally {
+            page.cleanup();
+          }
+        }
+      } finally {
+        await document.cleanup();
+      }
+      return {
+        ok: true,
+        segmentKind: "page",
+        segments,
+        totalSegments,
+        truncated,
+      };
+    } catch (error) {
+      const name = error instanceof Error ? error.name : "";
+      if (name === "PasswordException") return { ok: false, reason: "encrypted" };
+      if (name === "InvalidPDFException") return { ok: false, reason: "corrupt" };
+      return { ok: false, reason: "transient" };
+    } finally {
+      await task.destroy();
+    }
+  }
+
+  if (capability === "text") {
+    const decoded = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
+    const clipped = decoded.slice(0, FAMILY_CURRICULUM_SOURCE_MAX_CHARS);
+    const segments = splitSourceText(clipped, (ordinal) => `Section ${ordinal}`);
+    return segments.length > 0
+      ? {
+          ok: true,
+          segmentKind: "section",
+          segments,
+          totalSegments: segments.length,
+          truncated: decoded.length > clipped.length,
+        }
+      : { ok: false, reason: "unreadable" };
+  }
+
+  if (capability === "word") {
+    try {
+      const { value } = await mammoth.extractRawText({ buffer: Buffer.from(bytes) });
+      const clipped = value.slice(0, FAMILY_CURRICULUM_SOURCE_MAX_CHARS);
+      const segments = splitSourceText(clipped, (ordinal) => `Section ${ordinal}`);
+      return segments.length > 0
+        ? {
+            ok: true,
+            segmentKind: "section",
+            segments,
+            totalSegments: segments.length,
+            truncated: value.length > clipped.length,
+          }
+        : { ok: false, reason: "unreadable" };
+    } catch {
+      return { ok: false, reason: "corrupt" };
+    }
+  }
+
+  if (capability === "spreadsheet") {
+    try {
+      const workbook = XLSX.read(Buffer.from(bytes), { type: "buffer" });
+      const segments: FamilyAssetSourceSegment[] = [];
+      let chars = 0;
+      let truncated = false;
+      for (const name of workbook.SheetNames) {
+        const sheet = workbook.Sheets[name];
+        const csv = sheet ? XLSX.utils.sheet_to_csv(sheet).trim() : "";
+        if (!csv) continue;
+        const remaining = FAMILY_CURRICULUM_SOURCE_MAX_CHARS - chars;
+        if (remaining <= 0) {
+          truncated = true;
+          break;
+        }
+        const clipped = csv.slice(0, remaining);
+        const sheetParts = splitSourceText(
+          clipped,
+          (ordinal) =>
+            ordinal === 1 ? `Sheet ${name}` : `Sheet ${name}, part ${ordinal}`,
+        );
+        for (const part of sheetParts) {
+          segments.push({ ...part, ordinal: segments.length + 1 });
+        }
+        chars += clipped.length;
+        if (csv.length > clipped.length) {
+          truncated = true;
+          break;
+        }
+      }
+      return segments.length > 0
+        ? {
+            ok: true,
+            segmentKind: "sheet",
+            segments,
+            totalSegments: segments.length,
+            truncated,
+          }
+        : { ok: false, reason: "unreadable" };
+    } catch {
+      return { ok: false, reason: "corrupt" };
+    }
+  }
+
+  const caption = await captionSmsImage({
+    image: bytes,
+    mediaType: bareMediaType(asset.mediaType),
+    familyId: asset.familyId,
+    channel: "web",
+  });
+  return caption
+    ? {
+        ok: true,
+        segmentKind: "image",
+        segments: [{ ordinal: 1, locator: "Image 1", text: caption }],
+        totalSegments: 1,
+        truncated: false,
+      }
     : { ok: false, reason: "unreadable" };
 }
 

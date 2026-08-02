@@ -17,7 +17,7 @@ const SUBJECT_IDS = new Set(MAP_SUBJECTS.map((subject) => subject.id));
 
 export default defineBoundedTool({
   description:
-    "Search or list resources this family saved in Family Library. Combines meaning-based retrieval with exact filters for resource type, child, subject, and processing status. Use when a parent asks what they own, names an uploaded curriculum or worksheet, or asks Homa to use one of their sources. Search returns candidates only; call get_family_asset on the chosen id before using or citing it.",
+    "After loading family-librarian, search or list resources this family saved in Family Library. Combines meaning-based retrieval with exact filters for resource type, child, subject, and processing status. Use when a parent asks what they own, names an uploaded curriculum or worksheet, or asks Homa to use one of their sources. Search returns candidates only; call get_family_asset on the chosen id before using or citing it.",
   deadlineMs: TOOL_DEADLINE.fetch,
   repeatable: true,
   inputSchema: z.object({

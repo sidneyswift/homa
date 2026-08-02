@@ -38,6 +38,7 @@ import {
   libraryUploadMediaType,
   MAX_LIBRARY_UPLOAD_BYTES,
   type FamilyAssetView,
+  type FamilyCurriculumUnitView,
 } from "../../../lib/library/family-assets";
 import {
   FAMILY_ASSET_RESOURCE_KIND_LABELS,
@@ -168,18 +169,22 @@ async function readJson<T>(response: Response): Promise<T> {
 
 export function LibraryView({
   initialAssets,
+  initialCurriculumUnitsByParent = {},
   initialUploads,
   childOptions = [],
   subjectOptions = [],
   canUpload = true,
   initialSelectedAssetId = null,
+  initialSelectedUnitId = null,
 }: {
   initialAssets: FamilyAssetView[];
+  initialCurriculumUnitsByParent?: Record<string, FamilyCurriculumUnitView[]>;
   initialUploads: FamilyAssetUploadView[];
   childOptions?: LibraryChildOption[];
   subjectOptions?: LibrarySubjectOption[];
   canUpload?: boolean;
   initialSelectedAssetId?: string | null;
+  initialSelectedUnitId?: string | null;
 }) {
   const pickerRef = useRef<HTMLInputElement>(null);
   const resumePickerRef = useRef<HTMLInputElement>(null);
@@ -229,6 +234,9 @@ export function LibraryView({
   const selectedAsset = selectedAssetId
     ? assets.find((asset) => asset.id === selectedAssetId) ?? null
     : null;
+  const selectedCurriculumUnits = selectedAssetId
+    ? initialCurriculumUnitsByParent[selectedAssetId] ?? []
+    : [];
   const activeFilterCount = [resourceKind, childId, subjectId, status].filter(Boolean).length;
   const hasSearch = query.trim().length > 0 || activeFilterCount > 0;
 
@@ -1169,6 +1177,15 @@ export function LibraryView({
                             {subject.label}
                           </span>
                         ))}
+                        {(initialCurriculumUnitsByParent[asset.id]?.filter(
+                          (unit) => unit.isCurrent,
+                        ).length ?? 0) > 0 ? (
+                          <span className="rounded-full bg-brand-soft px-2.5 py-1 text-xs text-brand">
+                            {initialCurriculumUnitsByParent[asset.id].filter(
+                              (unit) => unit.isCurrent,
+                            ).length} curriculum units
+                          </span>
+                        ) : null}
                       </div>
                       <p className="mt-1 text-xs text-subtle sm:mt-2">
                         {formatFamilyAssetBytes(asset.byteSize)}
@@ -1206,6 +1223,8 @@ export function LibraryView({
         <LibraryDetailPanel
           key={selectedAsset.id}
           asset={selectedAsset}
+          curriculumUnits={selectedCurriculumUnits}
+          highlightedUnitId={initialSelectedUnitId}
           childOptions={childOptions}
           subjectOptions={subjectOptions}
           onClose={closeAsset}

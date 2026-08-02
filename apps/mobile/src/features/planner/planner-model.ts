@@ -40,6 +40,7 @@ export interface PlanActivityView {
   sources: {
     id: string;
     title: string;
+    sourceLocator: string | null;
     libraryUrl: string;
   }[];
 }
@@ -81,6 +82,7 @@ function activitySources(
     .map((row) => ({
       id: row.assetId,
       title: row.sourceTitle,
+      sourceLocator: row.sourceLocator,
       libraryUrl: row.libraryUrl,
     }));
 }

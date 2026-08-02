@@ -9,6 +9,7 @@ const CHILD_ID = "00000000-0000-4000-8000-000000000002";
 const TASK_RUN_ID = "00000000-0000-4000-8000-000000000003";
 const ASSET_ID = "00000000-0000-4000-8000-000000000004";
 const UPLOAD_ID = "00000000-0000-4000-8000-000000000005";
+const DRAFT_ID = "00000000-0000-4000-8000-000000000006";
 
 const validLibraryEvents = {
   "library.upload_started": {
@@ -50,6 +51,13 @@ const validLibraryEvents = {
     family_id: FAMILY_ID,
     asset_id: ASSET_ID,
     use_kind: "retrieval",
+  },
+  "library.curriculum_mapped": {
+    family_id: FAMILY_ID,
+    asset_id: ASSET_ID,
+    draft_id: DRAFT_ID,
+    unit_count: 4,
+    planner_target_count: 4,
   },
 } as const;
 

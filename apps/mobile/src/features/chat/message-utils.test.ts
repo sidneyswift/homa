@@ -7,6 +7,7 @@ import type { EveMessage, EveMessagePart } from "eve/react";
 
 import {
   approvedOutboundChildFramingTexts,
+  memoryChipFor,
   partIsRenderable,
   toolOnlyFallback,
   userMessageSendState,
@@ -126,6 +127,22 @@ describe("mobile tool rendering", () => {
         text: "[[homa:onboarding details_saved summary=Mia]]",
       } as EveMessagePart),
       false,
+    );
+  });
+
+  it("shows a deterministic curriculum approval receipt", () => {
+    assert.deepEqual(
+      memoryChipFor(
+        completedTool("approve_curriculum_mapping", {
+          approved: true,
+          unitAssets: [{ id: "unit-1" }, { id: "unit-2" }],
+          plannerTargets: [{ week: 1 }],
+        }),
+      ),
+      {
+        label: "Units saved",
+        detail: "2 units · 1 Planner addition",
+      },
     );
   });
 

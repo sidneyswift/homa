@@ -22,6 +22,10 @@ test("Family Library writes and downloads re-scope client ids to the authenticat
   assert.match(assetStore, /delete from public\.family_asset_children[\s\S]*?and family_id = \$\{input\.familyId\}/u);
   assert.match(assetStore, /delete from public\.family_asset_tags[\s\S]*?and family_id = \$\{input\.familyId\}/u);
   assert.match(assetStore, /isFamilyLibraryUrl\(row\.url, input\.familyId\)/u);
+  assert.ok(
+    (assetStore.match(/and parent_asset_id is null/gu) ?? []).length >= 2,
+    "managed curriculum units cannot be edited or delete their shared original",
+  );
   assert.match(downloadRoute, /and family_id = \$\{auth\.familyId\}/u);
   assert.match(downloadRoute, /and deleted_at is null/u);
   assert.match(processRoute, /familyId:\s*auth\.familyId/u);

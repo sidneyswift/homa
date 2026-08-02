@@ -2,7 +2,7 @@
 description: Use when the parent asks what is on the planner, the week, or the family calendar, wants the week or the month adjusted, wants Homa to draft a brand-new month around her children and real commitments, asks to schedule an existing lesson, curriculum, or unit study onto the planner or onto a real day, asks to add, change, move, or remove an appointment, trip, or other family event, asks to move school work around an appointment or trip ("doctor's appt Tuesday, push things back"), or wants to see the plan while you talk. Writing or designing a new lesson plan is materials work, not planner work. Contains the open-then-edit workflow, preview-first month planning, real calendar dates, family calendar tools, and reshuffling around real life.
 metadata:
   homa-tools: open_planner, edit_plan, schedule_plan_activity, add_family_event, list_family_events, update_family_event, remove_family_event, find_materials, preview_month_plan, approve_month_plan, find_family_assets, get_family_asset
-  homa-related-skills: curriculum-studio, materials-studio, family-librarian
+  homa-related-skills: curriculum-studio, curriculum-mapping, materials-studio, family-librarian
 ---
 
 # The planner and family calendar
@@ -155,6 +155,12 @@ requested activity, ask for the missing page or detail instead of inventing a
 lesson. `preview_month_plan` does not accept Family Library source ids. When a
 new month needs visible source attribution, approve the month first, then use
 `edit_plan` to replace the exact grounded activities with their source ids.
+
+When the parent asks Homa to break a ready uploaded curriculum into its units
+or map several of those units at once, load `curriculum-mapping`. That workflow
+reads the whole source, shows a review, and writes only after explicit
+approval. `edit_plan` remains right for one already-known unit or one ordinary
+activity; a decomposed unit source still re-checks Homa Plus at write time.
 
 ## Honest limits
 

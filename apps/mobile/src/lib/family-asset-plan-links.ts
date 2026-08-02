@@ -9,6 +9,7 @@ export interface FamilyAssetPlanLinkRecord {
   activityText: string;
   assetId: string;
   sourceTitle: string;
+  sourceLocator: string | null;
   libraryUrl: string;
 }
 
@@ -25,7 +26,7 @@ export async function getFamilyAssetPlanLinks(
   const { data, error } = await supabase
     .from("family_asset_plan_links")
     .select(
-      "child_id, subject_id, week, activity_index, activity_text, asset_id, source_title",
+      "child_id, subject_id, week, activity_index, activity_text, asset_id, source_title, source_locator",
     )
     .eq("family_id", familyId)
     .in("child_id", [...childIds]);
@@ -40,6 +41,7 @@ export async function getFamilyAssetPlanLinks(
     activityText: row.activity_text as string,
     assetId: row.asset_id as string,
     sourceTitle: row.source_title as string,
+    sourceLocator: (row.source_locator as string | null) ?? null,
     libraryUrl: libraryUrl(row.asset_id as string),
   }));
 }

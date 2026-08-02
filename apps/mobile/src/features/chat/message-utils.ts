@@ -1,6 +1,8 @@
 import { isHiddenDirective, visibleOutboundChildFramingText } from "@homa/core";
 import type { EveMessage, EveMessagePart } from "eve/react";
 
+import { parseCurriculumMappingCardPart } from "./curriculum-mapping-card-model";
+
 import { parseQuestionCardPart } from "./question-card-model";
 import { parseLibrarySourceCardPart } from "./library-source-card-model";
 import {
@@ -76,6 +78,19 @@ export function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
   ) {
     return { label: "Final kept", detail: output.title };
   }
+  if (
+    part.toolName === "approve_curriculum_mapping" &&
+    output.approved === true &&
+    Array.isArray(output.unitAssets) &&
+    Array.isArray(output.plannerTargets)
+  ) {
+    const unitCount = output.unitAssets.length;
+    const additionCount = output.plannerTargets.length;
+    return {
+      label: output.alreadyApproved === true ? "Already saved" : "Units saved",
+      detail: `${unitCount} ${unitCount === 1 ? "unit" : "units"} · ${additionCount} Planner ${additionCount === 1 ? "addition" : "additions"}`,
+    };
+  }
   return null;
 }
 
@@ -123,6 +138,7 @@ export function partIsRenderable(part: EveMessagePart): boolean {
     if (parseChecklistCardPart(part) !== null) return true;
     if (parseDetailCardPart(part) !== null) return true;
     if (parseReportCardPart(part) !== null) return true;
+    if (parseCurriculumMappingCardPart(part) !== null) return true;
     if (
       part.toolName === "create_printable" ||
       part.toolName === "show_material" ||
@@ -223,6 +239,9 @@ const TOOL_STATUS_LABELS: Record<string, string> = {
   find_materials: "looking through your materials\u2026",
   find_family_assets: "looking through your Library\u2026",
   get_family_asset: "opening that Library source\u2026",
+  read_family_curriculum: "reading the curriculum\u2026",
+  preview_curriculum_mapping: "building your review\u2026",
+  approve_curriculum_mapping: "saving what you approved\u2026",
   mark_material_final: "keeping the final version\u2026",
   remember: "saving a note\u2026",
   forget: "tidying my notes\u2026",

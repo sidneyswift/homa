@@ -300,13 +300,13 @@ values (${sqlString(EVAL_FIXTURE_PARENT_USER_ID)}, 'walker-fixture@homatest.inva
 
 insert into public.families
   (id, name, us_state, parent_display_name, time_zone, status,
-   profile_completed_at, context, sandbox)
+   profile_completed_at, context, sandbox, billing_exempt)
 values
   (${sqlString(EVAL_FIXTURE_FAMILY_ID)}, ${sqlString(family.name ?? "Walker")},
    ${sqlString(family.us_state ?? "OH")},
    ${sqlString(family.parent_display_name ?? EVAL_FIXTURE_PARENT_NAME)},
    ${sqlString(family.time_zone ?? "America/New_York")}, 'claimed',
-   now(), ${sqlJson({ onboarding: { state: "done" } })}, true);
+   now(), ${sqlJson({ onboarding: { state: "done" } })}, true, true);
 
 insert into public.family_members (family_id, user_id, role, display_name)
 values (${sqlString(EVAL_FIXTURE_FAMILY_ID)}, ${sqlString(EVAL_FIXTURE_PARENT_USER_ID)},

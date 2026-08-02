@@ -5,6 +5,11 @@ import {
   TOOL_DEADLINE,
 } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import {
+  familyHasPlusCapability,
+  PLUS_CURRICULUM_NOTE,
+} from "../../lib/billing/plus-capability";
+import { familyAssetIdsIncludeCurriculumUnits } from "../../lib/library/family-curriculum-source";
 import { emitFamilyAssetUsed } from "../../lib/library/family-asset-events";
 import {
   familyAssetReferencesForSurface,
@@ -136,6 +141,20 @@ export default defineBoundedTool({
         };
       }
       edits.push(edit);
+    }
+
+    const requestedSourceIds = [
+      ...new Set(
+        edits.flatMap((edit) =>
+          edit.action === "remove" ? [] : edit.sourceFamilyAssetIds ?? [],
+        ),
+      ),
+    ];
+    if (
+      (await familyAssetIdsIncludeCurriculumUnits(familyId, requestedSourceIds)) &&
+      !(await familyHasPlusCapability(familyId))
+    ) {
+      return { error: "requires_plus", note: PLUS_CURRICULUM_NOTE };
     }
 
     const outcome = await editPlanActivities(

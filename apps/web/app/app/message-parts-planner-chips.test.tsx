@@ -83,6 +83,20 @@ describe("planner-family receipt chips", () => {
     assert.equal(chip.detail, "Co-op day");
   });
 
+  it("curriculum approval gets an exact units-and-additions receipt", () => {
+    const chip = memoryChipFor(
+      toolPart("approve_curriculum_mapping", {
+        approved: true,
+        unitAssets: [{ id: "unit-1" }, { id: "unit-2" }],
+        plannerTargets: [{ week: 1 }],
+      }),
+    );
+    assert.deepEqual(chip, {
+      label: "Units saved",
+      detail: "2 units · 1 Planner addition",
+    });
+  });
+
   it("failures, refusals, and unfinished calls never chip", () => {
     assert.equal(
       memoryChipFor(toolPart("schedule_plan_activity", { scheduled: false, note: "no plan" })),
@@ -125,5 +139,9 @@ describe("planner-family busy labels", () => {
     assert.equal(labelWhileRunning("update_family_event"), "updating the calendar…");
     assert.equal(labelWhileRunning("remove_family_event"), "taking it off the calendar…");
     assert.equal(labelWhileRunning("list_family_events"), "checking the calendar…");
+    assert.equal(
+      labelWhileRunning("approve_curriculum_mapping"),
+      "saving what you approved…",
+    );
   });
 });
