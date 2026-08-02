@@ -465,7 +465,7 @@ gh#299 should remain the iOS program parent, but receive a dated comment that su
 - gh#307 owns push delivery and other native retention leverage.
 - gh#308 owns App Store presentation and submission proof. The engineering-quality and study children below belong to gh#299; gh#308 consumes their evidence.
 
-### New epic A: Progress that tells mom what to do next
+### gh#617: Progress that tells mom what to do next
 
 Purpose: replace judgmental level reporting with evidence, confidence, a useful next move, and parent control.
 
@@ -477,15 +477,15 @@ Relationships:
 - Neighboring owner: gh#181 owns portfolio accretion and keepsakes.
 - Separate compliance work: gh#317 remains a state-evidence report under its existing owner, not a Progress child.
 
-Genuinely new children:
+Children:
 
-- Remove age-gap verdict presentation from Progress.
-- Evidence-first native Progress with confidence, conflicts, receipts, and one next move.
-- Shareable evaluator or co-op evidence brief.
+- gh#625, remove age-gap verdict presentation from Progress.
+- gh#623, evidence-first native Progress with confidence, conflicts, receipts, and one next move.
+- gh#624, shareable evaluator or co-op evidence brief.
 
 gh#393 remains part of the gh#403 feedback system. Progress may consume that signal but does not own it.
 
-### New epic B: Family teamwork and earned word of mouth
+### gh#618: Family teamwork and earned word of mouth
 
 Purpose: optional collaboration makes a parent-chosen family task easier, while single-caregiver families remain complete and private adult source conversations stay private.
 
@@ -495,39 +495,39 @@ Relationships:
 - Shared capability: gh#546 provides native system sharing while remaining owned by gh#534.
 - Separate neighboring work: gh#529 owns public community discovery and is not a caregiver-collaboration child.
 
-Genuinely new children:
+Children:
 
-- Adult invite and access center with plain shared-versus-private scope.
-- Shared family action receipts and caregiver handoff queue.
-- Contextual caregiver invitation from a real family task.
-- Outcome-earned external referral without account-access pressure.
+- gh#629, adult invite and access center with plain shared-versus-private scope.
+- gh#626, shared family action receipts and caregiver handoff queue.
+- gh#627, contextual caregiver invitation from a real family task.
+- gh#628, outcome-earned external referral without account-access pressure.
 
 ### Genuinely new children under existing owners
 
 Under gh#299:
 
-- Native bootstrap recovery for family, AI-consent, and billing-gate states.
-- Native offline and interrupted-state contract for safe cached state and draft recovery.
-- Native capture-to-verified-outcome event contract and parity guard.
+- gh#622, native bootstrap recovery for family, AI-consent, and billing-gate states.
+- gh#621, native offline and interrupted-state contract for safe cached state and draft recovery.
+- gh#619, native capture-to-verified-outcome event contract and parity guard.
 
 Under gh#534:
 
-- Certify spoken turn, tool effect, playback, interruption, audio route, and recovery on physical hardware.
+- gh#620, certify spoken turn, tool effect, playback, interruption, audio route, and recovery on physical hardware.
 
 Under gh#299, with evidence consumed by gh#308:
 
-- Native accessibility acceptance gauntlet and fixes.
-- Native performance budgets and release telemetry.
-- Five-mom award journey study and evidence package.
-- Rule and prototype iPad, orientation, and supported appearance.
-- Haptics, motion, sound, and Homa state language with accessible equivalents.
+- gh#633, native accessibility acceptance gauntlet and fixes.
+- gh#632, native performance budgets and release telemetry.
+- gh#634, five-mom award journey study and evidence package.
+- gh#631, rule and prototype iPad, orientation, and supported appearance.
+- gh#630, haptics, motion, sound, and Homa state language with accessible equivalents.
 
 The analytics child owns the typed event schema, app and web parity guard, validation, and full-loop definitions. gh#532, gh#304, gh#347, gh#392, and gh#394 consume that contract for their own product questions.
 
 ### Tracker reconciliation exceptions
 
 - gh#543 closed through PR #561 while physical-device Print and Share selection remained unchecked. The implementation stays closed; gh#538 and gh#546 own the destination proof, and the state-packet journey must be included in their fixtures.
-- gh#544 closed through PR #566 without a real-iPhone Voice journey in its closing evidence. The implementation stays closed; the new physical Voice certification child owns that missing final-path proof.
+- gh#544 closed through PR #566 without a real-iPhone Voice journey in its closing evidence. The implementation stays closed; gh#620 owns that missing final-path proof.
 
 ## 11. Priority order
 
