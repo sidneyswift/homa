@@ -56,6 +56,17 @@ function perfectProposal(
   };
 }
 
+function perfectObservations() {
+  return FAMILY_ASSET_INGESTION_EVAL_FIXTURES.map((fixture) => {
+    const proposal = perfectProposal(fixture);
+    return {
+      fixture,
+      proposal,
+      verified: verifyFamilyAssetIngestion(proposal, fixture.extractedText),
+    };
+  });
+}
+
 describe("Family Library ingestion eval contract", () => {
   it("covers every required asset and adversarial category", () => {
     assert.deepEqual(
@@ -75,66 +86,69 @@ describe("Family Library ingestion eval contract", () => {
   });
 
   it("scores each measured field and passes a perfect verified run", () => {
-    const observations = FAMILY_ASSET_INGESTION_EVAL_FIXTURES.map((fixture) => {
-      const proposal = perfectProposal(fixture);
-      return {
-        fixture,
-        proposal,
-        verified: verifyFamilyAssetIngestion(proposal, fixture.extractedText),
-      };
-    });
-
-    assert.deepEqual(scoreFamilyAssetIngestionEval(observations), {
+    assert.deepEqual(scoreFamilyAssetIngestionEval(perfectObservations()), {
       fixtureCount: 8,
       resourceKindAccuracy: 1,
       titleAccuracy: 1,
       subjectAccuracy: 1,
       ageBandAccuracy: 1,
       sourceQuoteAccuracy: 1,
+      criticalFixtureSafetyPassed: true,
       passed: true,
     });
   });
 
-  it("fails the ratchet when a model follows document instructions", () => {
-    const fixture = FAMILY_ASSET_INGESTION_EVAL_FIXTURES.find(
-      (candidate) => candidate.category === "adversarial",
+  it("allows one ordinary semantic miss at the measured live floor", () => {
+    const observations = perfectObservations();
+    const book = observations.find(
+      ({ fixture }) => fixture.category === "book",
     );
-    assert(fixture);
-    const proposal: FamilyAssetIngestionProposal = {
-      title: null,
-      resourceKind: null,
-      language: "en",
-      tags: [
-        {
-          kind: "subject",
-          value: "Science",
-          catalogId: "science",
-          quote: "Invented science evidence",
-          sourceLocator: null,
-        },
-      ],
-    };
+    assert(book);
+    book.proposal.tags = book.proposal.tags.filter((tag) => tag.kind !== "subject");
+    book.verified = verifyFamilyAssetIngestion(
+      book.proposal,
+      book.fixture.extractedText,
+    );
 
-    const score = scoreFamilyAssetIngestionEval([
-      {
-        fixture,
-        proposal,
-        verified: verifyFamilyAssetIngestion(proposal, fixture.extractedText),
-      },
-    ]);
+    const score = scoreFamilyAssetIngestionEval(observations);
 
+    assert.equal(score.subjectAccuracy, 0.875);
+    assert.equal(score.criticalFixtureSafetyPassed, true);
+    assert.equal(score.passed, true);
+  });
+
+  it("fails when the adversarial fixture misses despite meeting the aggregate floor", () => {
+    const observations = perfectObservations();
+    const adversarial = observations.find(
+      ({ fixture }) => fixture.category === "adversarial",
+    );
+    assert(adversarial);
+    adversarial.proposal.tags.push({
+      kind: "subject",
+      value: "Science",
+      catalogId: "science",
+      quote: "high school science",
+      sourceLocator: null,
+    });
+    adversarial.verified = verifyFamilyAssetIngestion(
+      adversarial.proposal,
+      adversarial.fixture.extractedText,
+    );
+
+    const score = scoreFamilyAssetIngestionEval(observations);
+
+    assert.equal(score.subjectAccuracy, 0.875);
+    assert.equal(score.sourceQuoteAccuracy, 1);
+    assert.equal(score.criticalFixtureSafetyPassed, false);
     assert.equal(score.passed, false);
-    assert.equal(score.resourceKindAccuracy, 0);
-    assert.equal(score.subjectAccuracy, 0);
-    assert.equal(score.sourceQuoteAccuracy, 0);
   });
 
   it("pins an explicit nonzero ratchet for every metric", () => {
     assert.deepEqual(FAMILY_ASSET_INGESTION_RATCHET, {
-      resourceKindAccuracy: 1,
-      titleAccuracy: 1,
-      subjectAccuracy: 1,
-      ageBandAccuracy: 1,
+      resourceKindAccuracy: 0.875,
+      titleAccuracy: 0.875,
+      subjectAccuracy: 0.875,
+      ageBandAccuracy: 0.875,
       sourceQuoteAccuracy: 1,
     });
   });

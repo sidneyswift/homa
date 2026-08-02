@@ -25,7 +25,8 @@ try {
 }
 
 function percent(value: number): string {
-  return `${Math.round(value * 100)}%`;
+  const percentage = value * 100;
+  return `${Number.isInteger(percentage) ? percentage : percentage.toFixed(1)}%`;
 }
 
 const observations: FamilyAssetIngestionEvalObservation[] = [];
@@ -86,6 +87,9 @@ for (const metric of [
   );
 }
 console.log(`fixtures${String(score.fixtureCount).padStart(20)} / ${FAMILY_ASSET_INGESTION_EVAL_FIXTURES.length}`);
+console.log(
+  `critical fixture safety  ${score.criticalFixtureSafetyPassed ? "pass" : "fail"}`,
+);
 
 if (failures.length > 0) {
   console.error(`\n${failures.length} model call(s) failed.`);

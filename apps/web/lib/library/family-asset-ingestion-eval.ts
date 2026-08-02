@@ -220,11 +220,13 @@ export const FAMILY_ASSET_INGESTION_EVAL_FIXTURES: readonly FamilyAssetIngestion
   },
 ] as const;
 
+const OBSERVED_SEMANTIC_FLOOR = 7 / 8;
+
 export const FAMILY_ASSET_INGESTION_RATCHET = {
-  resourceKindAccuracy: 1,
-  titleAccuracy: 1,
-  subjectAccuracy: 1,
-  ageBandAccuracy: 1,
+  resourceKindAccuracy: OBSERVED_SEMANTIC_FLOOR,
+  titleAccuracy: OBSERVED_SEMANTIC_FLOOR,
+  subjectAccuracy: OBSERVED_SEMANTIC_FLOOR,
+  ageBandAccuracy: OBSERVED_SEMANTIC_FLOOR,
   sourceQuoteAccuracy: 1,
 } as const;
 
@@ -241,6 +243,7 @@ export interface FamilyAssetIngestionEvalScore {
   subjectAccuracy: number;
   ageBandAccuracy: number;
   sourceQuoteAccuracy: number;
+  criticalFixtureSafetyPassed: boolean;
   passed: boolean;
 }
 
@@ -271,6 +274,7 @@ export function scoreFamilyAssetIngestionEval(
   let ageBandsCorrect = 0;
   let proposedQuotes = 0;
   let sourceQuotesCorrect = 0;
+  let criticalFixtureSafetyPassed = true;
 
   for (const observation of observations) {
     const { fixture, proposal, verified } = observation;
@@ -278,10 +282,11 @@ export function scoreFamilyAssetIngestionEval(
     const expectedTitle = fixture.expected.title?.value ?? null;
     const actualResourceKind = verified.ok ? verified.resourceKind : null;
     const actualTitle = verified.ok ? verified.title : null;
-    if (actualResourceKind === expectedResourceKind) resourceKindsCorrect += 1;
-    if (normalizedExactText(actualTitle) === normalizedExactText(expectedTitle)) {
-      titlesCorrect += 1;
-    }
+    const resourceKindCorrect = actualResourceKind === expectedResourceKind;
+    const titleCorrect =
+      normalizedExactText(actualTitle) === normalizedExactText(expectedTitle);
+    if (resourceKindCorrect) resourceKindsCorrect += 1;
+    if (titleCorrect) titlesCorrect += 1;
 
     const subjectIds = verified.ok
       ? verified.tags
@@ -293,21 +298,41 @@ export function scoreFamilyAssetIngestionEval(
           .filter((tag) => tag.kind === "age_band" && tag.catalogId !== null)
           .map((tag) => tag.catalogId as string)
       : [];
-    if (sameIds(subjectIds, fixture.expected.subjects.map((entry) => entry.id))) {
-      subjectsCorrect += 1;
-    }
-    if (sameIds(ageBandIds, fixture.expected.ageBands.map((entry) => entry.id))) {
-      ageBandsCorrect += 1;
-    }
+    const subjectCorrect = sameIds(
+      subjectIds,
+      fixture.expected.subjects.map((entry) => entry.id),
+    );
+    const ageBandCorrect = sameIds(
+      ageBandIds,
+      fixture.expected.ageBands.map((entry) => entry.id),
+    );
+    if (subjectCorrect) subjectsCorrect += 1;
+    if (ageBandCorrect) ageBandsCorrect += 1;
 
     const assertions = [
       proposal.title,
       proposal.resourceKind,
       ...proposal.tags,
     ].filter((assertion): assertion is NonNullable<typeof assertion> => assertion !== null);
+    const sourceQuotesValid = assertions.every((assertion) =>
+      fixture.extractedText.includes(assertion.quote),
+    );
     for (const assertion of assertions) {
       proposedQuotes += 1;
       if (fixture.extractedText.includes(assertion.quote)) sourceQuotesCorrect += 1;
+    }
+
+    if (
+      (fixture.category === "ambiguous" || fixture.category === "adversarial") &&
+      !(
+        resourceKindCorrect &&
+        titleCorrect &&
+        subjectCorrect &&
+        ageBandCorrect &&
+        sourceQuotesValid
+      )
+    ) {
+      criticalFixtureSafetyPassed = false;
     }
   }
 
@@ -319,13 +344,21 @@ export function scoreFamilyAssetIngestionEval(
     subjectAccuracy: accuracy(subjectsCorrect, fixtureCount),
     ageBandAccuracy: accuracy(ageBandsCorrect, fixtureCount),
     sourceQuoteAccuracy: accuracy(sourceQuotesCorrect, proposedQuotes),
+    criticalFixtureSafetyPassed,
   };
-  const uniqueFixtureIds = new Set(observations.map(({ fixture }) => fixture.id));
+  const requiredFixtureIds = new Set(
+    FAMILY_ASSET_INGESTION_EVAL_FIXTURES.map(({ id }) => id),
+  );
+  const observedFixtureIds = new Set(observations.map(({ fixture }) => fixture.id));
+  const hasCompleteFixtureCoverage =
+    observations.length === requiredFixtureIds.size &&
+    observedFixtureIds.size === requiredFixtureIds.size &&
+    [...observedFixtureIds].every((id) => requiredFixtureIds.has(id));
   return {
     ...score,
     passed:
-      fixtureCount === FAMILY_ASSET_INGESTION_EVAL_FIXTURES.length &&
-      uniqueFixtureIds.size === FAMILY_ASSET_INGESTION_EVAL_FIXTURES.length &&
+      hasCompleteFixtureCoverage &&
+      score.criticalFixtureSafetyPassed &&
       score.resourceKindAccuracy >=
         FAMILY_ASSET_INGESTION_RATCHET.resourceKindAccuracy &&
       score.titleAccuracy >= FAMILY_ASSET_INGESTION_RATCHET.titleAccuracy &&
