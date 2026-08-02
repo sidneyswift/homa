@@ -85,7 +85,7 @@ describe("ChatClient prompt suggestion wiring", () => {
       'type: "recovery_started"',
     );
     const recoverRequest = recoverySource.indexOf(
-      "recoverLastTurn(controller.signal)",
+      "recoverTurn(target, controller.signal)",
     );
     const foldRecovered = recoveredCloseoutSource.indexOf(
       "const messages = foldEventsToMessages(recovered.events);",

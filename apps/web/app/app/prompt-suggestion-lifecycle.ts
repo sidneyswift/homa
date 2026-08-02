@@ -33,8 +33,8 @@ export function promptSuggestionActionForLifecycleEvent(
   switch (event.type) {
     case "turn_finished":
       if (event.hasError) return "none";
-      if (event.hasQueuedFollowup) return "clear";
-      return event.autoStopped ? "start_recovery" : "request_messages";
+      if (event.autoStopped) return "start_recovery";
+      return event.hasQueuedFollowup ? "clear" : "request_messages";
     case "recovery_started":
       return "clear";
     case "recovery_finished":
