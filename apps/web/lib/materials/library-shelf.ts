@@ -36,6 +36,10 @@ export type ShelfStatus =
   /** Analysed, but the original is gone. Expired TeachersPayTeachers
    * and Etsy links land here; the analysis is all that survives. */
   | "original-lost"
+  /** Analysed, and the dropper has already been asked for missing source
+   * bytes. A partial original can remain while corrupt pages or a later
+   * installment are still outstanding. */
+  | "awaiting-source"
   /** Analysed, and no original was ever expected (web scrape). */
   | "analysis-only"
   /** Bytes in Blob with no analysis JSON at all. Cosmo missed it.
@@ -62,7 +66,12 @@ export interface LibraryBook {
   /** Public Blob URL of the original file, when the bytes survive. */
   originalUrl: string | null;
   originalName: string | null;
+  /** Size of the primary file shown on the detail page. */
   originalBytes: number | null;
+  /** Every unique original retained for this book, primary file first. */
+  originalFiles: LibraryOriginalFile[];
+  /** Bytes held across every unique original file for this book. */
+  totalOriginalBytes: number;
   /** Every extra file kept under the same record id (multi-part scans). */
   extraFileCount: number;
   /** The untouched analysis document, for the detail view's reader.
@@ -77,6 +86,8 @@ export interface BlobOriginal {
   name: string;
   size: number;
 }
+
+export type LibraryOriginalFile = Pick<BlobOriginal, "url" | "name" | "size">;
 
 const SCRAPE_DROPPERS = /atlas|scrape/i;
 
@@ -96,9 +107,18 @@ export function classifyShelfStatus(
   origin: LibraryOrigin,
   hasAnalysis: boolean,
   hasOriginal: boolean,
+  originalRecoveryStatus?: unknown,
+  sourceCompletenessStatus?: unknown,
 ): ShelfStatus {
   if (!hasAnalysis) return "unread";
+  if (
+    sourceCompletenessStatus === "requested" ||
+    sourceCompletenessStatus === "awaiting-source"
+  ) {
+    return "awaiting-source";
+  }
   if (hasOriginal) return "complete";
+  if (originalRecoveryStatus === "requested") return "awaiting-source";
   return origin === "scrape" ? "analysis-only" : "original-lost";
 }
 
@@ -107,6 +127,7 @@ export function classifyShelfStatus(
 export const SHELF_STATUS_ORDER: ShelfStatus[] = [
   "unread",
   "original-lost",
+  "awaiting-source",
   "complete",
   "analysis-only",
 ];
@@ -116,6 +137,7 @@ export const SHELF_STATUS_ORDER: ShelfStatus[] = [
 export const SHELF_STATUS_LABEL: Record<ShelfStatus, string> = {
   unread: "Never read",
   "original-lost": "File lost",
+  "awaiting-source": "Re-share requested",
   complete: "Complete",
   "analysis-only": "Never saved",
 };
@@ -125,6 +147,8 @@ export const SHELF_STATUS_BLURB: Record<ShelfStatus, string> = {
     "The file reached Blob but nobody ever analysed it. Cosmo missed these, and everything needed to finish them is already here.",
   "original-lost":
     "We kept the analysis but not the file. These came in as TeachersPayTeachers or Etsy links whose download window closed before capture ran.",
+  "awaiting-source":
+    "The missing original, continuation, or replacement pages have already been requested from the dropper. The book stays visible here while we wait, with no internal action due.",
   complete: "Analysis and the original file, both kept. Nothing to do.",
   "analysis-only":
     "Scraped from a publisher's sample page, so the file was read but never saved. The page is still public, so it can be fetched again.",
@@ -139,6 +163,7 @@ export const SHELF_STATUS_BLURB: Record<ShelfStatus, string> = {
 export const SHELF_STATUS_TODO: Record<ShelfStatus, string | null> = {
   unread: "Run the ingestion skill on this file",
   "original-lost": "Ask the dropper to re-share the file",
+  "awaiting-source": null,
   complete: null,
   "analysis-only": "Re-fetch the sample from the publisher's page",
 };
@@ -263,7 +288,17 @@ function readSubject(raw: Record<string, unknown>): string | null {
 export function parseLibraryRecord(
   raw: unknown,
   kind: LibraryKind,
-): Omit<LibraryBook, "status" | "coverUrl" | "originalUrl" | "originalName" | "originalBytes" | "extraFileCount"> | null {
+): Omit<
+  LibraryBook,
+  | "status"
+  | "coverUrl"
+  | "originalUrl"
+  | "originalName"
+  | "originalBytes"
+  | "originalFiles"
+  | "totalOriginalBytes"
+  | "extraFileCount"
+> | null {
   if (!raw || typeof raw !== "object") return null;
   const doc = raw as Record<string, unknown>;
   const id = firstString(doc.id);
@@ -287,11 +322,92 @@ export function parseLibraryRecord(
   };
 }
 
+/**
+ * Parse the analysis documents that represent individual retained or
+ * retainable files on the admin bookshelf. Catalog-only summaries and
+ * analysis-only provenance records remain valid for corpus search, but
+ * neither represents a distinct file a founder can open on the shelf.
+ */
+export function parseLibraryShelfRecords(
+  docs: unknown[],
+  kind: LibraryKind,
+): NonNullable<ReturnType<typeof parseLibraryRecord>>[] {
+  const records: NonNullable<ReturnType<typeof parseLibraryRecord>>[] = [];
+  for (const doc of docs) {
+    const record = parseLibraryRecord(doc, kind);
+    if (record) records.push(record);
+  }
+  return records;
+}
+
+function readOriginalRecoveryStatus(analysis: Record<string, unknown> | null): string | null {
+  if (!analysis || !analysis.originalRecovery || typeof analysis.originalRecovery !== "object") {
+    return null;
+  }
+  return firstString((analysis.originalRecovery as Record<string, unknown>).status);
+}
+
+function readSourceCompletenessStatus(analysis: Record<string, unknown> | null): string | null {
+  if (
+    !analysis ||
+    !analysis.sourceCompleteness ||
+    typeof analysis.sourceCompleteness !== "object"
+  ) {
+    return null;
+  }
+  return firstString((analysis.sourceCompleteness as Record<string, unknown>).status);
+}
+
 /** inspo/<record-id>/<file name>. Anything shallower is not ours. */
 export function recordIdFromBlobPath(pathname: string): string | null {
   const parts = pathname.split("/");
   if (parts.length < 3 || parts[0] !== "inspo") return null;
   return parts[1] || null;
+}
+
+const HOMA_PUBLIC_BLOB_HOST = "pkvvudjdhxk33dig.public.blob.vercel-storage.com";
+
+function isPinnedHomaBlobUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === "https:" &&
+      url.host === HOMA_PUBLIC_BLOB_HOST &&
+      url.username === "" &&
+      url.password === ""
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Exact live Blob objects claimed by each analysis document. A source
+ * URL is untrusted corpus text until it equals a URL returned by the
+ * current Blob listing and that URL belongs to Homa's pinned store.
+ * Keeping this keyed by the complete URL also means one claimed part
+ * cannot silently pull unclaimed neighbors from the same directory.
+ */
+function declaredOriginalOwners(
+  records: NonNullable<ReturnType<typeof parseLibraryRecord>>[],
+  originals: BlobOriginal[],
+): Map<string, Set<string>> {
+  const liveUrls = new Set(
+    originals.map((original) => original.url).filter(isPinnedHomaBlobUrl),
+  );
+  const owners = new Map<string, Set<string>>();
+  for (const record of records) {
+    if (!record.analysis || !Array.isArray(record.analysis.sourceFiles)) continue;
+    for (const source of record.analysis.sourceFiles) {
+      if (!source || typeof source !== "object") continue;
+      const blobUrl = firstString((source as Record<string, unknown>).blobUrl);
+      if (!blobUrl || !liveUrls.has(blobUrl)) continue;
+      const claimedBy = owners.get(blobUrl) ?? new Set<string>();
+      claimedBy.add(record.id);
+      owners.set(blobUrl, claimedBy);
+    }
+  }
+  return owners;
 }
 
 export function coverPathForRecord(recordId: string): string {
@@ -365,17 +481,34 @@ export function buildShelf(
   originals: BlobOriginal[],
   covers: Map<string, string>,
 ): LibraryBook[] {
+  const parsed = records.filter((record): record is NonNullable<typeof record> => record !== null);
+  const isHidden = (record: (typeof parsed)[number]) => {
+    const visibility = record.analysis?.libraryVisibility;
+    return visibility === "catalog-only" || visibility === "analysis-only";
+  };
+  // Hidden analyses still own their Blob objects. Keeping them in identity
+  // reconciliation prevents those bytes from reappearing as "Never read."
+  const hidden = parsed.filter(isHidden);
+  const present = parsed.filter((record) => !isHidden(record));
   const knownRecordIds = new Set(
-    records.filter((record) => record !== null).map((record) => record.id),
+    parsed.map((record) => record.id),
   );
+  const declaredOwners = declaredOriginalOwners(parsed, originals);
   const originalsById = new Map<string, BlobOriginal[]>();
   for (const original of dedupeOriginals(originals, knownRecordIds)) {
-    const list = originalsById.get(original.recordId) ?? [];
+    const claims = declaredOwners.get(original.url);
+    const [claimedOwner] = claims?.size === 1 ? claims : [];
+    // A declaration may fold an otherwise orphaned multipart object,
+    // but it may never steal bytes from another canonical record.
+    const owner =
+      claimedOwner &&
+      (!knownRecordIds.has(original.recordId) || claimedOwner === original.recordId)
+        ? claimedOwner
+        : original.recordId;
+    const list = originalsById.get(owner) ?? [];
     list.push(original);
-    originalsById.set(original.recordId, list);
+    originalsById.set(owner, list);
   }
-
-  const present = records.filter((record): record is NonNullable<typeof record> => record !== null);
 
   /**
    * Reconcile the ids that do not match exactly. Slug alone is not a
@@ -386,39 +519,10 @@ export function buildShelf(
    * accepted only when exactly one unmatched candidate exists on each
    * side; anything ambiguous stays unmatched and stays visible.
    */
-  /**
-   * A Blob directory named after a record plus a suffix holds part of
-   * that record, not separate material:
-   *
-   *   cur-2026-07-19-harcourt-science-pt1   is part of harcourt-science
-   *   cur-2026-07-20-blossom-root-level0-la-notebook   is part of level0
-   *
-   * Sixteen directories are parts like this, split because a phone scan
-   * had to be uploaded in pieces. Counted as their own books they read
-   * as sixteen curriculums nobody analysed, when in truth three
-   * curriculums were analysed and their scans arrived in parts. Longest
-   * match wins, so a record never steals a longer record's parts.
-   */
-  const partOwner = new Map<string, string>();
-  for (const blobId of originalsById.keys()) {
-    if (knownRecordIds.has(blobId)) continue;
-    let owner: string | null = null;
-    for (const record of present) {
-      if (!blobId.startsWith(`${record.id}-`)) continue;
-      if (!owner || record.id.length > owner.length) owner = record.id;
-    }
-    if (owner) partOwner.set(blobId, owner);
-  }
-  for (const [blobId, owner] of partOwner) {
-    const parts = originalsById.get(blobId) ?? [];
-    originalsById.set(owner, [...(originalsById.get(owner) ?? []), ...parts]);
-    originalsById.delete(blobId);
-  }
-
   const unmatchedBlobIds = [...originalsById.keys()].filter(
     (id) => !present.some((record) => record.id === id),
   );
-  const unmatchedRecords = present.filter((record) => !originalsById.has(record.id));
+  const unmatchedRecords = parsed.filter((record) => !originalsById.has(record.id));
   const aliasForRecord = new Map<string, string>();
   if (unmatchedBlobIds.length && unmatchedRecords.length) {
     const blobBySlug = new Map<string, string[]>();
@@ -440,31 +544,54 @@ export function buildShelf(
   }
 
   const books: LibraryBook[] = [];
-  const seen = new Set<string>();
+  const seen = new Set<string>(hidden.map((record) => record.id));
+  for (const record of hidden) {
+    const alias = aliasForRecord.get(record.id);
+    if (alias) seen.add(alias);
+  }
 
   for (const record of present) {
     seen.add(record.id);
     const alias = aliasForRecord.get(record.id);
     if (alias) seen.add(alias);
     const files = originalsById.get(record.id) ?? originalsById.get(alias ?? "") ?? [];
-    // Largest file is the real material; the rest are scan parts.
-    const primary = [...files].sort((a, b) => b.size - a.size)[0] ?? null;
+    const orderedFiles = [...files].sort(
+      (a, b) => b.size - a.size || a.name.localeCompare(b.name) || a.url.localeCompare(b.url),
+    );
+    // Largest file remains the primary cover source and summary file,
+    // while every retained original stays available to the detail UI.
+    const primary = orderedFiles[0] ?? null;
     books.push({
       ...record,
-      status: classifyShelfStatus(record.origin, true, files.length > 0),
+      status: classifyShelfStatus(
+        record.origin,
+        true,
+        files.length > 0,
+        readOriginalRecoveryStatus(record.analysis),
+        readSourceCompletenessStatus(record.analysis),
+      ),
       // Covers are keyed by the Blob directory, so an aliased record
-      // finds its cover under the alias, not under its own id.
-      coverUrl: covers.get(record.id) ?? covers.get(alias ?? "") ?? null,
+      // or folded part id, not necessarily under its own id.
+      coverUrl:
+        covers.get(record.id) ??
+        covers.get(alias ?? "") ??
+        orderedFiles.map((file) => covers.get(file.recordId)).find(Boolean) ??
+        null,
       originalUrl: primary?.url ?? null,
       originalName: primary?.name ?? null,
       originalBytes: primary?.size ?? null,
-      extraFileCount: Math.max(0, files.length - 1),
+      originalFiles: orderedFiles.map(({ url, name, size }) => ({ url, name, size })),
+      totalOriginalBytes: orderedFiles.reduce((sum, file) => sum + file.size, 0),
+      extraFileCount: Math.max(0, orderedFiles.length - 1),
     });
   }
 
   for (const [recordId, files] of originalsById) {
     if (seen.has(recordId)) continue;
-    const primary = [...files].sort((a, b) => b.size - a.size)[0];
+    const orderedFiles = [...files].sort(
+      (a, b) => b.size - a.size || a.name.localeCompare(b.name) || a.url.localeCompare(b.url),
+    );
+    const primary = orderedFiles[0];
     books.push({
       id: recordId,
       kind: recordId.startsWith("cur-") ? "curriculum" : "reference",
@@ -483,7 +610,9 @@ export function buildShelf(
       originalUrl: primary.url,
       originalName: primary.name,
       originalBytes: primary.size,
-      extraFileCount: Math.max(0, files.length - 1),
+      originalFiles: orderedFiles.map(({ url, name, size }) => ({ url, name, size })),
+      totalOriginalBytes: orderedFiles.reduce((sum, file) => sum + file.size, 0),
+      extraFileCount: Math.max(0, orderedFiles.length - 1),
       analysis: null,
     });
   }
@@ -512,6 +641,7 @@ export function countShelf(books: LibraryBook[]): ShelfCounts {
   const byStatus: Record<ShelfStatus, number> = {
     unread: 0,
     "original-lost": 0,
+    "awaiting-source": 0,
     complete: 0,
     "analysis-only": 0,
   };
@@ -520,7 +650,7 @@ export function countShelf(books: LibraryBook[]): ShelfCounts {
   let work = 0;
   for (const book of books) {
     byStatus[book.status] += 1;
-    originalBytes += book.originalBytes ?? 0;
+    originalBytes += book.totalOriginalBytes;
     if (book.coverUrl) withCover += 1;
     if (needsWork(book.status)) work += 1;
   }

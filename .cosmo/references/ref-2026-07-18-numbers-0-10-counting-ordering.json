@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:34:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784428453.549849",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "math-worksheet",
   "title": "Numbers 0 to 10 FREEBIE — Counting, Ordering, Missing, One More, One Less",
   "publisher": "TPT (link expired)",

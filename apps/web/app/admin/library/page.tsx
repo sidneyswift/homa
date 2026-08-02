@@ -38,6 +38,7 @@ export const metadata: Metadata = { title: "Library" };
 const STATUS_TONE: Record<ShelfStatus, "rose" | "gold" | "sage" | "stone"> = {
   unread: "rose",
   "original-lost": "gold",
+  "awaiting-source": "stone",
   complete: "sage",
   "analysis-only": "stone",
 };

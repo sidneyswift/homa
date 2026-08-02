@@ -1,32 +1,25 @@
 # Picture bingo board
 
-A set of bingo-style game boards built from one shared pool of items (a
-vocabulary set, math facts, sight words, or any themed collection): each
-board is a grid, usually 3x3, holding a different shuffled arrangement of
-items drawn from the same pool, plus one labeled free space. A caller
-names or shows one item at a time; the child covers or marks it on their
-own board if it appears there. Unlike a themed-worksheet or counting-mat,
-the whole point is the family printing several boards from one pool so
-more than one child (or one child playing several rounds) never sees the
-same arrangement twice.
+A set of bingo-style game boards built from one shared pool of items, either
+illustrated vocabulary or exact text such as math facts, sight words, or a
+taught phonics set. Each board is a grid, usually 3x3, holding a different
+shuffled arrangement from the same pool plus one labeled free space. A caller
+names or shows one item at a time; the child covers or marks it on their own
+board if it appears there. Unlike a themed worksheet or counting mat, the
+whole point is printing several boards from one pool so more than one child,
+or one child playing several rounds, never sees the same arrangement twice.
 
-Great for: ages 3-8, vocabulary recall and listening practice in any
-subject or language (farm animals, sight words, addition facts, state
-capitals), a lower-pressure recall alternative to a flash-card drill, and
-group or co-op play where every child needs their own unique board from
-the same call-list. Especially strong for foreign-language vocabulary
-sets, where the caller says the word aloud and the child matches it to
-the picture rather than reading it.
+Great for: ages 3-8, vocabulary recall and listening practice in any subject
+or language, a lower-pressure recall alternative to a flash-card drill,
+text-only decoding rounds from one taught phonics pool, and group or co-op
+play where every child needs a unique board from the same caller list.
 
-Creation path: hybrid, with one complete picture-grid composition per
-page and one generate_image call per board. Ask for the requested objects
-already arranged in that board's cells with no text, embed the complete
-image unchanged, then align one HTML grid over it for exact labels, the
-free space, and the border/frame. Never generate one image per pool item
-and never crop the composed image into sprites. A pool of 8-9 items is
-enough to fill a 3x3 board (8 cells plus one free space) with room to
-reshuffle into several distinct boards; a larger pool (12-16 items)
-supports a 4x4 board the same way.
+Creation path: hybrid for picture boards, with one complete picture-grid
+composition and one generate_image call per board. Embed that composition
+unchanged, then align one HTML grid over it for exact labels, the free space,
+and the frame. Use html only for text boards. Never generate art for a
+text-only decoding board. A pool of 8-9 items fills a 3x3 board; a larger pool
+of 12-16 supports a 4x4 board.
 
 Design patterns (all binding for picture-bingo-board):
 
@@ -36,6 +29,13 @@ Design patterns (all binding for picture-bingo-board):
   bigger than the grid, its own random subset) so families printing
   multiple boards can run a real multi-player round without duplicate
   cards.
+- **Choose one cue mode**: a picture board uses image recognition with exact
+  overlay labels when requested. A text-only board uses one validated taught
+  word or grapheme per cell, no image, emoji, rebus, or color-family cue.
+- **Text-only phonics stays controlled**: use one trusted taught pool. The
+  caller list contains exactly that pool, and each marked word is read aloud
+  once so locating a square does not replace decoding it. Never copy a source
+  word list, board arrangement, caller order, or free-space treatment.
 - **Grid size matches the pool and age**: a 3x3 grid (8 image cells plus
   1 free space) for ages 3-6 or pools of 8-9 items; a 4x4 grid (15 image
   cells plus 1 free space, or all 16 filled with no free space for older
@@ -73,6 +73,8 @@ Design patterns (all binding for picture-bingo-board):
     display: flex; align-items: center; justify-content: center;
     padding: 6px; }
   .bingo-cell img { max-width: 90%; max-height: 90%; object-fit: contain; }
+  .bingo-word { font: 700 29px Andika, sans-serif; color: #221e1a;
+    text-align: center; }
   .bingo-free { display: flex; align-items: center; justify-content: center;
     font-size: 20px; font-weight: 700; color: #e0a730; text-align: center; }
 </style>
@@ -80,13 +82,14 @@ Design patterns (all binding for picture-bingo-board):
 <div class="bingo-board">
   <div class="bingo-title">BINGO</div>
   <div class="bingo-grid">
-    <!-- 8 item cells, each <div class="bingo-cell"><img ...></div>,
-         plus one .bingo-free cell placed at the center grid position -->
+    <!-- Picture variant: one composed image aligned beneath this grid.
+         Text variant: 8 cells containing .bingo-word, no image at all.
+         Place one .bingo-free cell at the center grid position. -->
   </div>
 </div>
 ```
 
-Never generate a fresh illustration per item. For multiple boards, keep
-one board to one page and one composed image call. Repeat the same full
-visual descriptions so a cow, cat, or numeral remains recognizable across
-boards, and let HTML own the exact caller list.
+Never generate a fresh illustration per item. For picture boards, keep one
+board to one page and one composed image call, repeat the same full visual
+descriptions across boards, and let HTML own the exact caller list. For
+text-only boards, use no image call and let HTML own every exact word.

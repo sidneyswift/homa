@@ -34,8 +34,9 @@ of acknowledged-open gaps. Step 7 fails only on a gap that is neither
 shipped, aliased, registered, nor acknowledged there.
 """
 
-import json
 import glob
+import hashlib
+import json
 import re
 import subprocess
 import sys
@@ -56,6 +57,7 @@ TASTE_MD = COSMO / "homa-taste.md"
 INDEX_JSON = REFS_DIR / "index.json"
 CUR_INDEX_JSON = CURS_DIR / "index.json"
 TEXT_DIR = COSMO / "text"
+MASTERS_DIR = COSMO / "masters"
 
 MATERIALS_STUDIO = REPO_ROOT / "apps" / "web" / "agent" / "skills" / "materials-studio"
 RECIPES_DIR = MATERIALS_STUDIO / "references" / "recipes"
@@ -84,6 +86,12 @@ SLUG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)+$")
 CONTENT_RULES_FROM = "2026-07-28"
 
 ENTITY_KINDS = {"person", "character", "place", "organization", "animal", "event", "object"}
+GATE_REVIEW_DISPOSITIONS = {
+    "accepted-source-artifact",
+    "excluded-from-analysis",
+    "re-share-requested",
+    "mixed-reviewed",
+}
 
 # What part a claim plays, which is what decides whether it may answer a
 # content search. A span proves a thing is present; it cannot tell you the
@@ -496,6 +504,242 @@ def check_step11_reply(ref: dict) -> Tuple[bool, str]:
     return True, f"OK (reply expected for ts: {ts})"
 
 
+def validate_capture_gate_receipt(
+    receipt: dict,
+    review: Optional[dict],
+    *,
+    allow_legacy: bool,
+) -> Tuple[bool, str]:
+    status = receipt.get("gateStatus")
+    if status is None:
+        if allow_legacy:
+            return True, "OK (legacy capture predates explicit gate status)"
+        return False, "portable capture gate receipt is missing; rerun book-intake.py --check"
+    findings = receipt.get("gateFindings")
+    if not isinstance(findings, list) or any(not isinstance(row, str) for row in findings):
+        return False, "book-intake gateFindings is not a string array"
+    encoded = json.dumps(
+        findings, ensure_ascii=False, separators=(",", ":")
+    ).encode("utf-8")
+    digest = hashlib.sha256(encoded).hexdigest()
+    if receipt.get("gateFindingCount") != len(findings):
+        return False, "book-intake gate finding count does not match its findings"
+    if receipt.get("gateFindingsSha256") != digest:
+        return False, "book-intake gate finding digest does not match its findings"
+    if status == "complete":
+        if findings:
+            return False, "book-intake says complete but still has unresolved findings"
+        return True, "OK (portable deterministic capture receipt has no findings)"
+    if status != "findings":
+        return False, f"book-intake gateStatus is {status!r}; rerun book-intake.py --check"
+    if not findings:
+        return False, "book-intake says findings but its finding set is empty"
+    review = review or {}
+    required = (
+        review.get("status") == "reviewed",
+        review.get("findingsSha256") == digest,
+        review.get("findingCount") == len(findings),
+        review.get("disposition") in GATE_REVIEW_DISPOSITIONS,
+        isinstance(review.get("reviewedAt"), str) and bool(review.get("reviewedAt")),
+        isinstance(review.get("note"), str) and bool(review.get("note", "").strip()),
+    )
+    if not all(required):
+        return False, "book-intake findings lack an exact reviewed disposition"
+    unresolved = review.get("unresolvedFindingCount")
+    if (
+        not isinstance(unresolved, int)
+        or isinstance(unresolved, bool)
+        or unresolved < 0
+    ):
+        return False, "book-intake review must state a nonnegative unresolvedFindingCount"
+    if review.get("disposition") == "re-share-requested":
+        return False, "re-share-requested is not a terminal capture disposition"
+    if unresolved != 0:
+        return False, (
+            f"book-intake review still has {unresolved} unresolved finding(s)"
+        )
+    return True, (
+        f"OK ({len(findings)} capture finding(s) reviewed as "
+        f"{review['disposition']})"
+    )
+
+
+def _source_receipt_core(receipt: dict) -> Optional[dict]:
+    """Validated source receipt fields used for both portable and local checks."""
+    if not isinstance(receipt, dict):
+        return None
+    parts = receipt.get("parts")
+    if (
+        receipt.get("version") != 1
+        or not isinstance(receipt.get("recordId"), str)
+        or receipt.get("kind") not in {"reference", "curriculum"}
+        or not isinstance(parts, list)
+        or not parts
+    ):
+        return None
+    normalized = []
+    for part in parts:
+        if not isinstance(part, dict):
+            return None
+        filename = part.get("file")
+        digest = part.get("sha256")
+        byte_count = part.get("bytes")
+        if (
+            not isinstance(filename, str)
+            or not filename
+            or not isinstance(digest, str)
+            or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+            or not isinstance(byte_count, int)
+            or isinstance(byte_count, bool)
+            or byte_count <= 0
+        ):
+            return None
+        normalized.append({
+            "file": filename,
+            "sha256": digest,
+            "bytes": byte_count,
+        })
+    return {
+        "version": 1,
+        "recordId": receipt["recordId"],
+        "kind": receipt["kind"],
+        "parts": normalized,
+    }
+
+
+def _manifest_source_receipt(item_id: str, manifest: dict) -> Optional[dict]:
+    source = manifest.get("source") or {}
+    parts = source.get("parts")
+    if not parts and manifest.get("captureMethod") == "manual-local-image-review":
+        parts = []
+        for expected_page, page in enumerate(manifest.get("pages") or [], 1):
+            if not isinstance(page, dict) or page.get("page") != expected_page:
+                return None
+            local_value = page.get("sourceLocalPath")
+            if not isinstance(local_value, str) or not local_value:
+                return None
+            source_path = Path(local_value)
+            if not source_path.is_absolute():
+                source_path = REPO_ROOT / source_path
+            byte_count = page.get("bytes")
+            if byte_count is None:
+                try:
+                    source_path.resolve().relative_to(REPO_ROOT.resolve())
+                    byte_count = source_path.stat().st_size
+                except (OSError, ValueError):
+                    return None
+            parts.append({
+                "file": Path(local_value).name,
+                "sha256": page.get("sha256"),
+                "bytes": byte_count,
+            })
+    return _source_receipt_core({
+        "version": 1,
+        "recordId": manifest.get("id"),
+        "kind": manifest.get("kind"),
+        "parts": parts,
+    })
+
+
+def validate_capture_source_receipt(
+    item: dict,
+    manifest: Optional[dict],
+    *,
+    allow_legacy: bool,
+) -> Tuple[bool, str]:
+    """Bind committed source identity to retained files and a local manifest."""
+    item_id = item.get("id", "")
+    capture = item.get("capture") or {}
+    raw_receipt = capture.get("sourceReceipt")
+    if raw_receipt is None and allow_legacy:
+        return True, "OK (legacy capture predates portable source identity)"
+    receipt = _source_receipt_core(raw_receipt)
+    if receipt is None:
+        return False, "portable sourceReceipt is missing or malformed"
+    expected_kind = "curriculum" if item_id.startswith("cur-") else "reference"
+    if receipt["recordId"] != item_id or receipt["kind"] != expected_kind:
+        return False, "portable sourceReceipt is bound to a different record id or kind"
+
+    retained = item.get("sourceFiles")
+    if not isinstance(retained, list) or not retained:
+        return False, "portable sourceReceipt has no retained sourceFiles to verify"
+    used = set()
+    for part in receipt["parts"]:
+        match = None
+        for index, source_file in enumerate(retained):
+            if index in used or not isinstance(source_file, dict):
+                continue
+            local_name = Path(str(source_file.get("localPath") or "")).name
+            source_names = {source_file.get("filename"), local_name}
+            size = source_file.get("size", source_file.get("bytes"))
+            if (
+                source_file.get("sha256") == part["sha256"]
+                and size == part["bytes"]
+                and part["file"] in source_names
+            ):
+                match = index
+                break
+        if match is None:
+            return False, (
+                "portable sourceReceipt part is not retained with the same "
+                f"name, hash, and size: {part['file']}"
+            )
+        used.add(match)
+
+    if manifest is not None:
+        local_receipt = _manifest_source_receipt(item_id, manifest)
+        if local_receipt is None:
+            return False, "local manifest source identity is missing or malformed"
+        if receipt != local_receipt:
+            return False, "portable sourceReceipt differs from the local manifest"
+    return True, f"OK ({len(receipt['parts'])} retained source part(s) verified)"
+
+
+def check_capture_gates(item: dict) -> Tuple[bool, str]:
+    """A committed portable gate receipt must survive without ignored masters."""
+    item_id = item.get("id", "")
+    capture = item.get("capture") or {}
+    allow_legacy = _predates_content_rules(item)
+    manifest_path = MASTERS_DIR / item_id / "manifest.json"
+    if not manifest_path.exists():
+        passed, message = validate_capture_gate_receipt(
+            capture,
+            capture.get("gateReview"),
+            allow_legacy=allow_legacy,
+        )
+        if not passed:
+            return passed, message
+        source_passed, source_message = validate_capture_source_receipt(
+            item, None, allow_legacy=allow_legacy
+        )
+        return source_passed, source_message if not source_passed else f"{message}; {source_message}"
+
+    manifest = load_json(manifest_path)
+    if not manifest:
+        return False, "book-intake manifest is unreadable"
+    passed, message = validate_capture_gate_receipt(
+        manifest,
+        capture.get("gateReview"),
+        allow_legacy=allow_legacy,
+    )
+    if not passed or manifest.get("gateStatus") is None:
+        return passed, message
+
+    portable_fields = (
+        "gateStatus",
+        "gateFindings",
+        "gateFindingCount",
+        "gateFindingsSha256",
+    )
+    drifted = [field for field in portable_fields if capture.get(field) != manifest.get(field)]
+    if drifted:
+        return False, f"portable capture receipt differs from local manifest: {drifted}"
+    source_passed, source_message = validate_capture_source_receipt(
+        item, manifest, allow_legacy=allow_legacy
+    )
+    return source_passed, source_message if not source_passed else f"{message}; {source_message}"
+
+
 # ---------------------------------------------------------------------------
 # Curriculum checks (cur-*.json). The old script had no curriculum mode, so
 # curriculum :ship: reactions were entirely self-attested.
@@ -868,6 +1112,7 @@ def regen_index() -> None:
 # ---------------------------------------------------------------------------
 
 REF_CHECKS = [
+    ("Step 0: Capture gates", check_capture_gates),
     ("Step 1: Identify", check_step1_identify),
     ("Step 2: Five dimensions", check_step2_five_dimensions),
     ("Step 3: Store & index", check_step3_stored),
@@ -883,6 +1128,7 @@ REF_CHECKS = [
 ]
 
 CUR_CHECKS = [
+    ("Cur 0: Capture gates", check_capture_gates),
     ("Cur 1: Identity", check_cur_identity),
     ("Cur 2: Four layers", check_cur_layers),
     ("Cur 3: Indexed", check_cur_indexed),
@@ -948,6 +1194,144 @@ def self_test() -> int:
     sidecar.write_text(
         "Christopher Columbus was born in Genoa.\nThey landed on Hispaniola in 1492.\n"
     )
+    pending_gate_id = "ref-9999-01-01-pending-gate-selftest"
+    complete_gate_id = "ref-9999-01-01-complete-gate-selftest"
+    unreviewed_gate_id = "ref-9999-01-01-unreviewed-gate-selftest"
+    reviewed_gate_id = "ref-9999-01-01-reviewed-gate-selftest"
+    false_complete_gate_id = "ref-9999-01-01-false-complete-gate-selftest"
+    drifted_source_gate_id = "ref-9999-01-01-drifted-source-gate-selftest"
+    manual_source_gate_id = "ref-9999-01-01-manual-source-gate-selftest"
+    flagged = ["page 1: looks blank"]
+    flagged_digest = hashlib.sha256(
+        json.dumps(flagged, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    empty_digest = hashlib.sha256(b"[]").hexdigest()
+    first_source_part = {
+        "file": "part-1.pdf",
+        "sha256": "a" * 64,
+        "bytes": 101,
+    }
+    second_source_part = {
+        "file": "part-2.pdf",
+        "sha256": "b" * 64,
+        "bytes": 202,
+    }
+    manual_source_part = {
+        "file": "page-1.jpg",
+        "sha256": "c" * 64,
+        "bytes": 303,
+    }
+
+    def portable_source_receipt(item_id, parts=None, kind="reference"):
+        return {
+            "version": 1,
+            "recordId": item_id,
+            "kind": kind,
+            "parts": parts or [first_source_part],
+        }
+
+    def retained_source_files(parts=None):
+        return [
+            {
+                "filename": part["file"],
+                "localPath": f".cosmo/inspo-files/{part['file']}",
+                "sha256": part["sha256"],
+                "size": part["bytes"],
+            }
+            for part in (parts or [first_source_part])
+        ]
+
+    def capture_receipt(item_id, gate, review=None, parts=None):
+        capture = {
+            **gate,
+            "sourceReceipt": portable_source_receipt(item_id, parts),
+        }
+        if review is not None:
+            capture["gateReview"] = review
+        return capture
+
+    def reviewed(disposition, unresolved, **overrides):
+        review = {
+            "status": "reviewed",
+            "findingCount": 1,
+            "findingsSha256": flagged_digest,
+            "disposition": disposition,
+            "unresolvedFindingCount": unresolved,
+            "reviewedAt": "2026-08-02",
+            "note": "The exact finding set was reviewed.",
+        }
+        review.update(overrides)
+        return review
+
+    gate_payloads = {
+        pending_gate_id: {"gateStatus": "pending"},
+        complete_gate_id: {
+            "gateStatus": "complete",
+            "gateFindings": [],
+            "gateFindingCount": 0,
+            "gateFindingsSha256": empty_digest,
+        },
+        unreviewed_gate_id: {
+            "gateStatus": "findings",
+            "gateFindings": flagged,
+            "gateFindingCount": 1,
+            "gateFindingsSha256": flagged_digest,
+        },
+        reviewed_gate_id: {
+            "gateStatus": "findings",
+            "gateFindings": flagged,
+            "gateFindingCount": 1,
+            "gateFindingsSha256": flagged_digest,
+        },
+        false_complete_gate_id: {
+            "gateStatus": "complete",
+            "gateFindings": flagged,
+        },
+        drifted_source_gate_id: {
+            "gateStatus": "complete",
+            "gateFindings": [],
+            "gateFindingCount": 0,
+            "gateFindingsSha256": empty_digest,
+        },
+        manual_source_gate_id: {
+            "gateStatus": "complete",
+            "gateFindings": [],
+            "gateFindingCount": 0,
+            "gateFindingsSha256": empty_digest,
+        },
+    }
+    for gate_id, payload in gate_payloads.items():
+        parts = (
+            [first_source_part, second_source_part]
+            if gate_id == drifted_source_gate_id
+            else [first_source_part]
+        )
+        payload.update({
+            "id": gate_id,
+            "kind": "reference",
+            "source": {
+                "file": parts[0]["file"],
+                "sha256": parts[0]["sha256"],
+                "bytes": parts[0]["bytes"],
+                "parts": parts,
+            },
+        })
+    gate_payloads[manual_source_gate_id].pop("source")
+    gate_payloads[manual_source_gate_id].update({
+        "captureMethod": "manual-local-image-review",
+        "pages": [{
+            "page": 1,
+            "sourceLocalPath": f".cosmo/inspo-files/{manual_source_part['file']}",
+            "sha256": manual_source_part["sha256"],
+            "bytes": manual_source_part["bytes"],
+        }],
+    })
+    gate_dirs = [MASTERS_DIR / item_id for item_id in gate_payloads]
+    for gate_dir in gate_dirs:
+        gate_dir.mkdir(parents=True, exist_ok=True)
+        (gate_dir / "manifest.json").write_text(
+            json.dumps(gate_payloads[gate_dir.name]) + "\n"
+        )
 
     def about(**over):
         base = {
@@ -967,6 +1351,142 @@ def self_test() -> int:
 
     new, old = "2026-08-01", "2026-07-01"
     cases = [
+        ("a pending capture checkpoint fails",
+         check_capture_gates, ref(pending_gate_id, new), False),
+        ("a completed capture gate passes",
+         check_capture_gates, ref(
+             complete_gate_id,
+             new,
+             capture=capture_receipt(
+                 complete_gate_id, gate_payloads[complete_gate_id]
+             ),
+             sourceFiles=retained_source_files(),
+         ), True),
+        ("a completed gate cannot hide findings",
+         check_capture_gates, ref(false_complete_gate_id, new), False),
+        ("capture findings without a reviewed disposition fail",
+         check_capture_gates, ref(unreviewed_gate_id, new, capture={
+             "gateFindingCount": 1,
+             "gateFindingsSha256": flagged_digest,
+         }), False),
+        ("an exact reviewed capture-finding set passes",
+         check_capture_gates, ref(
+             reviewed_gate_id,
+             new,
+             capture=capture_receipt(
+                 reviewed_gate_id,
+                 gate_payloads[reviewed_gate_id],
+                 reviewed("accepted-source-artifact", 0),
+             ),
+             sourceFiles=retained_source_files(),
+         ), True),
+        ("a new item without a portable gate receipt fails in a clean checkout",
+         check_capture_gates, ref("ref-9999-01-01-no-manifest", new), False),
+        ("a legacy item without a gate receipt stays compatible",
+         check_capture_gates, ref("ref-2026-07-01-no-manifest", old), True),
+        ("a portable complete receipt passes without local masters",
+         check_capture_gates, ref(
+             "ref-9999-01-01-portable",
+             new,
+             capture=capture_receipt(
+                 "ref-9999-01-01-portable",
+                 {
+                     "gateStatus": "complete",
+                     "gateFindings": [],
+                     "gateFindingCount": 0,
+                     "gateFindingsSha256": empty_digest,
+                 },
+             ),
+             sourceFiles=retained_source_files(),
+         ), True),
+        ("a clean-checkout receipt is bound to retained source size and hash",
+         check_capture_gates, ref(
+             "ref-9999-01-01-portable-mismatch",
+             new,
+             capture=capture_receipt(
+                 "ref-9999-01-01-portable-mismatch",
+                 {
+                     "gateStatus": "complete",
+                     "gateFindings": [],
+                     "gateFindingCount": 0,
+                     "gateFindingsSha256": empty_digest,
+                 },
+             ),
+             sourceFiles=[{
+                 **retained_source_files()[0],
+                 "size": first_source_part["bytes"] + 1,
+             }],
+         ), False),
+        ("a local manifest catches reordered portable source parts",
+         check_capture_gates, ref(
+             drifted_source_gate_id,
+             new,
+             capture=capture_receipt(
+                 drifted_source_gate_id,
+                 gate_payloads[drifted_source_gate_id],
+                 parts=[second_source_part, first_source_part],
+             ),
+             sourceFiles=retained_source_files(
+                 [first_source_part, second_source_part]
+             ),
+         ), False),
+        ("a direct-image manifest verifies the same portable source contract",
+         check_capture_gates, ref(
+             manual_source_gate_id,
+             new,
+             capture=capture_receipt(
+                 manual_source_gate_id,
+                 gate_payloads[manual_source_gate_id],
+                 parts=[manual_source_part],
+             ),
+             sourceFiles=retained_source_files([manual_source_part]),
+         ), True),
+        ("a falsey non-array finding set fails closed",
+         check_capture_gates, ref("ref-9999-01-01-malformed-findings", new, capture={
+             "gateStatus": "complete",
+             "gateFindings": "",
+             "gateFindingCount": 0,
+             "gateFindingsSha256": empty_digest,
+         }), False),
+        ("findings status cannot carry an empty reviewed set",
+         check_capture_gates, ref("ref-9999-01-01-empty-findings", new, capture={
+             "gateStatus": "findings",
+             "gateFindings": [],
+             "gateFindingCount": 0,
+             "gateFindingsSha256": empty_digest,
+             "gateReview": {
+                 "status": "reviewed",
+                 "findingCount": 0,
+                 "findingsSha256": empty_digest,
+                 "disposition": "accepted-source-artifact",
+                 "reviewedAt": "2026-08-02",
+                 "note": "No findings were present.",
+             },
+         }), False),
+        ("a reviewed finding set must state zero unresolved findings",
+         lambda _item: validate_capture_gate_receipt(
+             gate_payloads[reviewed_gate_id],
+             reviewed("accepted-source-artifact", 0, unresolvedFindingCount=None),
+             allow_legacy=False,
+         ), {}, False),
+        ("a re-share-requested disposition is not terminal",
+         lambda _item: validate_capture_gate_receipt(
+             gate_payloads[reviewed_gate_id],
+             reviewed("re-share-requested", 0),
+             allow_legacy=False,
+         ), {}, False),
+        ("a mixed review passes only with explicit zero unresolved findings",
+         lambda _item: validate_capture_gate_receipt(
+             gate_payloads[reviewed_gate_id],
+             reviewed("mixed-reviewed", 0),
+             allow_legacy=False,
+         ), {}, True),
+        ("a mixed review with one unresolved finding fails",
+         lambda _item: validate_capture_gate_receipt(
+             gate_payloads[reviewed_gate_id],
+             reviewed("mixed-reviewed", 1),
+             allow_legacy=False,
+         ), {}, False),
         ("legacy ref without aboutness softens",
          check_aboutness, ref("ref-2026-07-01-x", old), True),
         ("new ref without aboutness fails",
@@ -1068,6 +1588,9 @@ def self_test() -> int:
                 failures += 1
     finally:
         sidecar.unlink(missing_ok=True)
+        for gate_dir in gate_dirs:
+            (gate_dir / "manifest.json").unlink(missing_ok=True)
+            gate_dir.rmdir()
 
     print(f"\nself-test: {len(cases) - failures} passed, {failures} failed")
     return 1 if failures else 0

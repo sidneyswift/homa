@@ -1,0 +1,2532 @@
+{
+  "id": "cur-2026-07-31-benchmark-grade-3-reading-workshop",
+  "droppedBy": "Alessa Llanes",
+  "droppedAt": "2026-07-31T22:52:55-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1785552775.173499",
+  "coversMessageTs": [
+    "1785552891.449889",
+    "1785581043.340999"
+  ],
+  "sourceCompleteness": {
+    "status": "requested",
+    "requestedScope": "Remaining daily teacher pages after Unit 8, Week 2",
+    "requestChannel": "C0BHQDC033M",
+    "threadTs": "1785552891.449889",
+    "replyTs": "1785643625.555959",
+    "requestedFrom": "Alessa",
+    "currentCoverage": "The current capture still supports all 30 weekly skill and text-title rows. The requested continuation is needed only for a full 150-lesson decomposition with every late Unit 8 through Unit 10 teacher prompt and question."
+  },
+  "sourceFiles": [
+    {
+      "filename": "Benchmark Grade 3 Word study resource book .pdf",
+      "slackFileId": "F0BM4MKDLHH",
+      "slackMessageTs": "1785552775.173499",
+      "localPath": ".cosmo/inspo-files/slack/1785552775.173499/Benchmark Grade 3 Word study resource book .pdf",
+      "size": 92578101,
+      "sha256": "267ed5441e1e7fe70ef4d48d0f1338dbe0f8f1d65039fce991a644844e1926c1",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-grade-3-reading-workshop/1785552775.173499-Benchmark%20Grade%203%20Word%20study%20resource%20book%20.pdf"
+    },
+    {
+      "filename": "Benchmark Grade 3 Vol 2.pdf",
+      "slackFileId": "F0BM4MRJ9PV",
+      "slackMessageTs": "1785552891.449889",
+      "localPath": ".cosmo/inspo-files/slack/1785552891.449889/Benchmark Grade 3 Vol 2.pdf",
+      "size": 104511128,
+      "sha256": "feb441a791e9bc2df693309a97ed7e4725b4d255018aaf115587300eea61ae7b",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-grade-3-reading-workshop/1785552891.449889-Benchmark%20Grade%203%20Vol%202.pdf"
+    },
+    {
+      "filename": "Benchmark Grade 3 Vol 1.pdf",
+      "slackFileId": "F0BM8VDSC06",
+      "slackMessageTs": "1785581043.340999",
+      "localPath": ".cosmo/inspo-files/slack/1785581043.340999/Benchmark Grade 3 Vol 1.pdf",
+      "size": 125394507,
+      "sha256": "377940f1f34cc81d30c81e7a7215728f518eec35b60515e3de2cb007174c5c0f",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-grade-3-reading-workshop/1785581043.340999-Benchmark%20Grade%203%20Vol%201.pdf"
+    }
+  ],
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-grade-3-reading-workshop/1785552775.173499-Benchmark%20Grade%203%20Word%20study%20resource%20book%20.pdf",
+  "name": "Benchmark Grade 3 Reading Workshop",
+  "stages": {
+    "captured": "2026-08-02T03:26:47+00:00",
+    "analyzed": "2026-08-02",
+    "tasteLogged": true,
+    "knowledgeMerged": "2026-08-02",
+    "graduation": {
+      "kind": "recipe",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/word-fluency-repeated-reading.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/phonics-pattern-reference-chart.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/dictation-writing-practice.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/flash-cards.md",
+        "apps/web/agent/skills/materials-studio/SKILL.md",
+        "apps/web/agent/activity-formats.md",
+        "apps/web/lib/materials/cosmo-funnel.ts"
+      ],
+      "aliases": {
+        "word-fluency-speed-drill": "word-fluency-repeated-reading",
+        "high-frequency-word-card-deck": "flash-cards"
+      },
+      "verification": {
+        "layer4HaveRecipe": 8,
+        "layer4NoRecipe": 0
+      },
+      "commit": null,
+      "note": "Recipe files, Format library routes, activity-format registry entries, and aliases are implemented in this working tree. Commit remains null until the parent session commits and ships the complete ingestion batch."
+    }
+  },
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "Benchmark Grade 3 Vol 1.pdf",
+    "sourceParts": [
+      "Benchmark Grade 3 Vol 1.pdf",
+      "Benchmark Grade 3 Vol 2.pdf",
+      "Benchmark Grade 3 Word study resource book .pdf"
+    ],
+    "sourceSha256": "377940f1f34cc81d30c81e7a7215728f518eec35b60515e3de2cb007174c5c0f",
+    "pageCount": 300,
+    "mastersDir": ".cosmo/masters/cur-2026-07-31-benchmark-grade-3-reading-workshop",
+    "intakeAt": "2026-08-02T03:47:31+00:00",
+    "gateFindings": [],
+    "normalizedMasterPages": 16,
+    "gateStatus": "complete",
+    "gateFindingCount": 0,
+    "gateFindingsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "expectedPageCount": 300,
+    "sourceReceipt": {
+      "version": 1,
+      "recordId": "cur-2026-07-31-benchmark-grade-3-reading-workshop",
+      "kind": "curriculum",
+      "parts": [
+        {
+          "file": "Benchmark Grade 3 Vol 1.pdf",
+          "sha256": "377940f1f34cc81d30c81e7a7215728f518eec35b60515e3de2cb007174c5c0f",
+          "bytes": 125394507
+        },
+        {
+          "file": "Benchmark Grade 3 Vol 2.pdf",
+          "sha256": "feb441a791e9bc2df693309a97ed7e4725b4d255018aaf115587300eea61ae7b",
+          "bytes": 104511128
+        },
+        {
+          "file": "Benchmark Grade 3 Word study resource book .pdf",
+          "sha256": "267ed5441e1e7fe70ef4d48d0f1338dbe0f8f1d65039fce991a644844e1926c1",
+          "bytes": 92578101
+        }
+      ]
+    }
+  },
+  "layer1_philosophy": {
+    "methodology": "Explicit, systematic phonics and word study taught through a fixed workshop cycle, with repeated application to connected reading and writing",
+    "principles": [
+      "Teach phonics, syllable types, spelling patterns, and morphology in a deliberate sequence that builds on previous learning.",
+      "Keep instruction active and brief, then spend substantial time applying the weekly word pattern in authentic connected text and writing.",
+      "Use a review-and-repetition cycle across several weeks, with cumulative checks, so a newly introduced pattern is not mistaken for mastery.",
+      "Differentiate the application text rather than withholding grade-level instruction: every week pairs an Accountable Text with a simpler Interactive Text for extra support.",
+      "Make thinking about words public through word sorts, partner talk, context clues, dictation, and reflection instead of relying on isolated worksheets alone."
+    ],
+    "evidence": [
+      {
+        "claim": "explicit and systematic instruction",
+        "quote": "phonics and word study instruction must be explicit and systematic"
+      },
+      {
+        "claim": "application to reading and writing",
+        "quote": "applying new skills in real reading and writing experiences"
+      },
+      {
+        "claim": "extended review for mastery",
+        "quote": "review-and-repetition cycle over extended periods of time to ensure mastery"
+      },
+      {
+        "claim": "whole-group and small-group workshop structure",
+        "quote": "whole-group mini-lessons, small-group instruction, independent work, and assessments"
+      },
+      {
+        "claim": "standalone or modular implementation",
+        "quote": "can be implemented with other Benchmark Workshop modules or stand on its own"
+      }
+    ],
+    "learningTheory": "systematic-sequential instruction with spiral review, explicit modeling, guided application, and mastery informed by cumulative evidence",
+    "assessmentApproach": "A spelling pre-assessment opens each week, a spelling-pattern assessment closes it, a cumulative unit assessment at the end of Week 3 revisits current and prior skills, and the separate Quick Phonics and Quick Spelling Assessments are intended for fall, winter, and spring diagnostic checks.",
+    "parentRole": "Act as the teacher: introduce the pattern explicitly, listen during passage reading, prompt the child to cite the text, model context and decoding strategies, give corrective feedback, adapt the support text when needed, and use cumulative evidence to decide review rather than treating one weekly score as mastery.",
+    "knowledgeBankMatches": [
+      {
+        "topicKey": "systematic-phonics-remediation",
+        "topicType": "method_philosophy",
+        "status": "related but not exact",
+        "note": "The Stairway to Reading proposal uses explicit sequencing, repetition, and mastery checks, but it is a one-to-one remedial program. Benchmark is a Grade 3 core workshop with whole-group, small-group, and differentiated connected-text application, so it needs its own scoped entry rather than inheriting the remediation format."
+      }
+    ],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "benchmark-systematic-phonics-word-study",
+        "mergedRowId": "b2716b1f-8e19-40ea-b207-46165e17c132",
+        "mergedAt": "2026-08-02",
+        "topicType": "method_philosophy",
+        "title": "Benchmark systematic phonics and word study",
+        "summary": "An explicit Grade 3 word-study approach that sequences phonics, syllable types, spelling patterns, and morphology, then applies each weekly target in connected reading, writing, sorting, dictation, and cumulative review.",
+        "content": "Teach one word pattern at a time through explicit correspondence or word-study instruction, automaticity practice, a grade-level Accountable Text, a simpler Interactive Text for extra support, word sorting, dictation, writing after reading, repeated reading, and assessment. Review skills across later weeks and use cumulative evidence to decide whether learning transferred. Preserve grade-level exposure while changing the support text and amount of modeling for children who need it.",
+        "citations": [
+          {
+            "url": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-grade-3-reading-workshop/1785581043.340999-Benchmark%20Grade%203%20Vol%201.pdf",
+            "title": "Benchmark Grade 3 Phonics and Word Study Workshop, Volume 1"
+          }
+        ],
+        "confidence": "high",
+        "sourceTier": 2,
+        "contributedBy": "founder",
+        "status": "active"
+      },
+      {
+        "suggestedKey": "benchmark-phonics-word-study-workshop-format",
+        "mergedRowId": "0d6f25a4-c0ff-4ef6-843e-8341e2d5960c",
+        "mergedAt": "2026-08-02",
+        "topicType": "method_format",
+        "title": "Benchmark Grade 3 phonics and word study workshop format",
+        "summary": "A 10-unit, 30-week workshop. Every week uses five lessons: introduce and pre-assess, read a grade-level passage, reread and write, read a simpler support passage, then review and assess.",
+        "content": "Organize the year as 10 three-week units. Each week targets one phonics, syllable, spelling, or morphology pattern. Lesson 1 introduces the pattern, builds automaticity, and pre-assesses spelling. Lesson 2 reads an Accountable Text and uses context clues and a closed sort. Lesson 3 rereads for fluency, writes about the text, completes dictation, and sorts by common features. Lesson 4 uses a simpler Interactive Text, multisyllabic decoding, buddy sorting, and high-frequency-word review. Lesson 5 rereads, decodes by analogy, assesses spelling, extends learning, and contributes to the cumulative unit check.",
+        "citations": [
+          {
+            "url": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-grade-3-reading-workshop/1785581043.340999-Benchmark%20Grade%203%20Vol%201.pdf",
+            "title": "Benchmark Grade 3 Phonics and Word Study Workshop, Volume 1"
+          }
+        ],
+        "confidence": "high",
+        "sourceTier": 2,
+        "contributedBy": "founder",
+        "status": "active"
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Phonics and Word Study",
+        "curriculumTopic": "Short and long vowel spellings",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_OgJPbGkrYk",
+        "status": "mapped",
+        "suggested": {
+          "note": "Alternative Spellings for Known Sounds covers choosing among common spellings for the same vowel sound; the separate Vowel Digraphs topic covers the vowel-pair portion."
+        }
+      },
+      {
+        "curriculumSubject": "Phonics and Word Study",
+        "curriculumTopic": "Vowel digraphs and vowel teams",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_BtMbZibZUj",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics and Word Study",
+        "curriculumTopic": "Diphthongs and variant vowel spellings",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_fMd7v87IiI",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics and Word Study",
+        "curriculumTopic": "R-controlled vowel sounds and syllables",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_a6m7PqTuJN",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics and Word Study",
+        "curriculumTopic": "Closed, open, consonant-le, vowel-team, vowel-consonant-e, and vowel-r syllable types",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_kVzAFMuFc4",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Word Study",
+        "curriculumTopic": "Compound words",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_70Ys4i1AB1",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Word Study",
+        "curriculumTopic": "Inflectional endings -ed and -ing",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt__CMXZiPfTV",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Grammar and Word Study",
+        "curriculumTopic": "Irregular plural nouns",
+        "homaSubject": "English",
+        "homaDomain": "Grammar & Punctuation",
+        "homaTopicId": "mt_nFBLNoChD0",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics and Word Study",
+        "curriculumTopic": "Hard and soft c and g",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_OgJPbGkrYk",
+        "status": "partial",
+        "suggested": {
+          "note": "Alternative Spellings for Known Sounds is the closest existing general topic. The curriculum teaches the specific following-vowel rules for c and g, but a narrower topic is not needed unless another source demonstrates an assessment gap."
+        }
+      },
+      {
+        "curriculumSubject": "Morphology",
+        "curriculumTopic": "Prefixes, suffixes, and related words",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_HrgDjxcWvf",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Spelling and Word Study",
+        "curriculumTopic": "Homophones",
+        "homaSubject": "English",
+        "homaDomain": "Spelling & Word Study",
+        "homaTopicId": "mt_37QCuGOxFe",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Fluency",
+        "curriculumTopic": "High-frequency word automaticity",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_YKkCM63fSC",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Vocabulary",
+        "curriculumTopic": "Use word parts and context clues to determine meaning",
+        "homaSubject": "English",
+        "homaDomain": "Vocabulary",
+        "homaTopicId": "mt_aw0PldeT_L",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Spelling and Word Study",
+        "curriculumTopic": "Spelling from dictation",
+        "homaSubject": "English",
+        "homaDomain": "Spelling & Word Study",
+        "homaTopicId": "mt_AhfyJoTQtY",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Vocabulary and Word Study",
+        "curriculumTopic": "Sort words by spelling pattern, meaning, and grammatical category",
+        "homaSubject": "English",
+        "homaDomain": "Vocabulary",
+        "homaTopicId": "mt_oL9s_bufDp",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Reading Fluency",
+        "curriculumTopic": "Repeated reading for accuracy, rate, and expression",
+        "homaSubject": "English",
+        "homaDomain": "Reading Comprehension",
+        "homaTopicId": "mt_b7n4w8q2r5",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Reading Comprehension",
+        "curriculumTopic": "Read short connected texts and answer evidence-based comprehension questions",
+        "homaSubject": "English",
+        "homaDomain": "Reading Comprehension",
+        "homaTopicId": "mt_2HKTDKk0hL",
+        "status": "partial",
+        "suggested": {
+          "note": "The existing topic explicitly covers short fiction. Benchmark also uses short nonfiction Accountable Texts, which map broadly to Reading for Meaning and Main Topic & Key Details without requiring a new topic."
+        }
+      },
+      {
+        "curriculumSubject": "Writing Composition",
+        "curriculumTopic": "Write a short response after discussing a connected text",
+        "homaSubject": "English",
+        "homaDomain": "Writing Composition",
+        "homaTopicId": "mt_hp2qJ-QRBn",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Unit context",
+        "curriculumTopic": "Animal characteristics and adaptation",
+        "homaSubject": "Science",
+        "homaDomain": "Organisms & Life Processes",
+        "homaTopicId": "mt_LRzjbo1Fn6",
+        "status": "partial",
+        "suggested": {
+          "note": "This is the Unit 1 connected-text theme, not the curriculum's assessed science scope. Keep it searchable as context without treating a phonics passage as a full science unit."
+        }
+      },
+      {
+        "curriculumSubject": "Unit context",
+        "curriculumTopic": "Government and civic life",
+        "homaSubject": "History",
+        "homaDomain": "Civics & Government",
+        "homaTopicId": "mt_mRc88GtMPn",
+        "status": "partial",
+        "suggested": {
+          "note": "Unit 3 passages cover elections, immigration, checks and balances, and local government as reading contexts, not as a complete civics sequence."
+        }
+      },
+      {
+        "curriculumSubject": "Unit context",
+        "curriculumTopic": "Characters and differing points of view",
+        "homaSubject": "English",
+        "homaDomain": "Reading Comprehension",
+        "homaTopicId": "mt_xjl6AEhnjk",
+        "status": "partial",
+        "suggested": {
+          "note": "Units 2 and 4 provide recurring literary context, while the explicit assessed targets remain phonics and word study."
+        }
+      },
+      {
+        "curriculumSubject": "Unit context",
+        "curriculumTopic": "Technological advancements and robots",
+        "homaSubject": "Science",
+        "homaDomain": "Scientific Inquiry",
+        "homaTopicId": "mt_Rk8pWn2Vq5",
+        "status": "partial",
+        "suggested": {
+          "note": "Unit 5 uses inventions, robots, transportation, and the web as connected-text contexts. It does not supply a complete technology curriculum."
+        }
+      },
+      {
+        "curriculumSubject": "Unit context",
+        "curriculumTopic": "Weather, climate, and severe weather",
+        "homaSubject": "Science",
+        "homaDomain": "Weather & Climate",
+        "homaTopicId": "mt_6EfevRyeFW",
+        "status": "partial",
+        "suggested": {
+          "note": "Unit 8 passages about hurricanes, blizzards, tornadoes, and tidal waves make the curriculum useful for practice around severe-weather vocabulary, but they are not a complete weather sequence."
+        }
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 23,
+      "mapped": 17,
+      "unmapped": 0,
+      "noSubject": 0,
+      "partial": 6
+    }
+  },
+  "layer3_structure": {
+    "ageRangeMonths": [
+      96,
+      108
+    ],
+    "cadence": "Five lessons per week for 30 weeks, organized as 10 units of three weeks each. Lessons 1 to 3 are the main whole-group sequence; Lessons 4 and 5 are a smaller-group extra-support sequence that uses the simpler Interactive Text.",
+    "sessionLengthMinutes": {
+      "total": null,
+      "note": "The guide gives component durations, commonly two to five minutes, but does not state one reliable total for the full daily lesson. Homa should preserve the short-component rhythm without inventing a total duration."
+    },
+    "weeklyTemplate": "Lesson 1: introduce the sound-spelling, syllable, or morphology target, build automaticity, pre-assess spelling, and reflect. Lesson 2: read the grade-level Accountable Text, use context clues, complete a closed sort, and reflect. Lesson 3: reread for fluency, discuss before writing, write a follow-up, complete dictation, and sort by common features. Lesson 4: read the simpler Interactive Text, apply the Reading Big Words Strategy, complete a buddy sort, review high-frequency words, and build fluency. Lesson 5: reread the support text, decode by analogy, assess the week's spelling pattern, review high-frequency words, extend learning, and contribute to the cumulative unit assessment.",
+    "progressionModel": "Linear sequence with spiral review and cumulative mastery evidence. The weekly target advances in order, but current and prior patterns remain in later fluency and assessment work for four to six weeks.",
+    "reviewRhythm": "Every week begins with a pre-assessment and ends with a spelling-pattern assessment. Every third week closes with a cumulative unit assessment of current and previously taught skills. The separate Quick Phonics and Quick Spelling Assessments are designed for fall, winter, and spring administration.",
+    "totalWeeks": 30,
+    "totalUnits": 10,
+    "lessonsPerWeek": 5,
+    "notes": "The workshop is written for a classroom and repeatedly refers to partners, whole groups, small groups, and differentiated readers. In a homeschool setting, the parent can keep the same instructional sequence but replace partner turns with parent-child talk and choose between the Accountable and Interactive Text based on observed reading support needs."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "connected-text-phonics-mini-unit",
+        "description": "A weekly target pattern is practiced in one grade-level Accountable Text and one simpler Interactive Text, each paired with vocabulary and comprehension work.",
+        "sourceQuote": "Accountable and Interactive Texts to apply the new skill to authentic reading",
+        "recipe": "reading-comprehension-mini-unit",
+        "status": "have_recipe"
+      },
+      {
+        "type": "word-pattern-sorting",
+        "description": "Closed, common-features, and buddy sorts group words by spelling pattern, meaning, or grammatical category.",
+        "sourceQuote": "Word Sorts to deepen students\u2019 awareness of common spelling patterns",
+        "recipe": "classification-sorting-mat",
+        "status": "have_recipe"
+      },
+      {
+        "type": "phonics-spelling-check",
+        "description": "A weekly pre-assessment, end-of-week spelling-pattern check, and cumulative unit check monitor current and earlier skills.",
+        "sourceQuote": "Cumulative Unit and Weekly Assessments",
+        "recipe": "phonics-spelling-diagnostic-assessment",
+        "status": "have_recipe"
+      },
+      {
+        "type": "passage-comprehension-close",
+        "description": "Short literal, inferential, evidence-finding, and personal-response questions follow each Accountable or Interactive Text.",
+        "sourceQuote": "Check Comprehension",
+        "recipe": "lesson-comprehension-check",
+        "status": "have_recipe"
+      },
+      {
+        "type": "word-fluency-speed-drill",
+        "description": "Differentiated lists of simpler and multisyllabic words are reread across the week to build automatic recall without framing the task as speed reading.",
+        "sourceQuote": "Build Automaticity activities for fluency building",
+        "recipe": "word-fluency-repeated-reading",
+        "status": "have_recipe",
+        "suggestedRecipe": {
+          "name": "word-fluency-speed-drill",
+          "creationPath": "html",
+          "description": "A parent-facing repeated-reading sheet with two difficulty bands, a small observation table for accuracy and smoothness across attempts, and explicit language that the goal is automaticity rather than racing.",
+          "complexity": "medium"
+        },
+        "notes": "RESOLVED 2026-08-02 through GAP_ALIASES: word-fluency-speed-drill maps to word-fluency-repeated-reading. The shared recipe keeps the validated word set stable across warm rereading rounds, separates the child page from parent observations, and refuses generated seconds targets, words-per-minute goals, pass lines, or progression thresholds. It copies no source list, band name, sequence, timing, script, or page geometry."
+      },
+      {
+        "type": "phonics-pattern-reference-chart",
+        "description": "A compact instructional chart names the target pattern, shows representative words, and remains available during reading and writing.",
+        "sourceQuote": "Instructional Charts to teach and review skills",
+        "recipe": "phonics-pattern-reference-chart",
+        "status": "have_recipe",
+        "suggestedRecipe": {
+          "name": "phonics-pattern-reference-chart",
+          "creationPath": "html",
+          "description": "A one-page reference with one target sound or morphology rule, a small set of validated example words grouped by spelling, and a parent note for using it during real reading and writing.",
+          "complexity": "low"
+        },
+        "notes": "RESOLVED 2026-08-02: shipped phonics-pattern-reference-chart with one trusted taught skill id, a closed example blueprint, deterministic word, group, and literal target-span validation, and original Homa geometry. It preserves no source chart title, examples, categories, order, color system, wording, or visual identity."
+      },
+      {
+        "type": "high-frequency-word-card-deck",
+        "description": "Cut-apart cards support rapid review of current and previously taught high-frequency words.",
+        "sourceQuote": "High-Frequency Word Cards",
+        "recipe": "flash-cards",
+        "status": "have_recipe",
+        "suggestedRecipe": {
+          "name": "high-frequency-word-card-deck",
+          "creationPath": "html",
+          "description": "Large cut-apart word cards from a supplied, age-appropriate word list, with restrained card backs and a short parent routine for retrieval practice in both directions.",
+          "complexity": "low"
+        },
+        "notes": "RESOLVED 2026-08-02 through GAP_ALIASES: high-frequency-word-card-deck maps to flash-cards because the reusable physical and retrieval procedure is identical. The shared recipe accepts one closed trusted word set and explicitly excludes the source's word list, order, categories, card backs, colors, routines, and visual design."
+      },
+      {
+        "type": "dictation-writing-follow-up",
+        "description": "The parent dictates words and sentences for guided spelling, then the child discusses and writes a brief response to the week's passage.",
+        "sourceQuote": "simple accountable text stories",
+        "recipe": "dictation-writing-practice",
+        "status": "have_recipe",
+        "suggestedRecipe": {
+          "name": "dictation-writing-practice",
+          "creationPath": "html",
+          "description": "A two-part page with parent-only dictated words and one original sentence, closed answer guidance, then a short talk-to-write response box tied to the child\u2019s just-read passage.",
+          "complexity": "medium"
+        },
+        "notes": "RESOLVED 2026-08-02: shipped dictation-writing-practice as a three-page child, parent-guide, and answer-key packet. Exact items, answers, accepted variants, target spans, and any scoring or timing policy stay deterministic; the optional talk-to-write response remains open and unscored. It copies no source list, sentence, passage, question, script, threshold, order, or layout."
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 8,
+      "haveRecipe": 8,
+      "noRecipe": 0
+    }
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/cur-2026-07-31-benchmark-grade-3-reading-workshop.txt",
+    "textBlobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo-text/cur-2026-07-31-benchmark-grade-3-reading-workshop/cur-2026-07-31-benchmark-grade-3-reading-workshop.txt",
+    "textExtraction": {
+      "ocr": "tesseract",
+      "visionModel": "google/gemini-3-flash",
+      "visionPages": [
+        1,
+        88,
+        300
+      ],
+      "emptyPages": []
+    },
+    "subjects": [
+      {
+        "name": "systematic phonics",
+        "role": "teaches",
+        "quote": "phonics and word study instruction must be explicit and systematic"
+      },
+      {
+        "name": "spelling patterns",
+        "role": "teaches",
+        "quote": "Spelling Patterns"
+      },
+      {
+        "name": "reading fluency",
+        "role": "teaches",
+        "quote": "Build Fluency"
+      },
+      {
+        "name": "multisyllabic decoding",
+        "role": "teaches",
+        "quote": "Reading Big Words Strategy"
+      },
+      {
+        "name": "passage comprehension",
+        "role": "teaches",
+        "quote": "Check Comprehension"
+      }
+    ],
+    "entities": [
+      {
+        "name": "Benchmark Education Company",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "Benchmark Education Company"
+      },
+      {
+        "name": "Wiley Blevins",
+        "kind": "person",
+        "role": "identity",
+        "quote": "Wiley Blevins"
+      },
+      {
+        "name": "Benchmark Phonics & Word Study Workshop",
+        "kind": "object",
+        "role": "identity",
+        "quote": "Benchmark Phonics & Word Study Workshop"
+      }
+    ],
+    "themes": [
+      {
+        "name": "application to real reading and writing",
+        "evidence": "applying new skills in real reading and writing experiences"
+      },
+      {
+        "name": "review until mastery",
+        "evidence": "review-and-repetition cycle over extended periods of time to ensure mastery"
+      },
+      {
+        "name": "differentiated access",
+        "evidence": "BUILT-IN DIFFERENTIATION"
+      },
+      {
+        "name": "word inquiry through discussion",
+        "evidence": "explore and discuss what they notice about words"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "Word Study Resource Book",
+        "occurrences": 224,
+        "quote": "Word Study Resource Book"
+      },
+      {
+        "term": "Build Automaticity",
+        "occurrences": 182,
+        "quote": "Build Automaticity"
+      },
+      {
+        "term": "Accountable Text",
+        "occurrences": 203,
+        "quote": "Accountable Text"
+      },
+      {
+        "term": "Interactive Text",
+        "occurrences": 207,
+        "quote": "Interactive Text"
+      },
+      {
+        "term": "Spelling Patterns",
+        "occurrences": 203,
+        "quote": "Spelling Patterns"
+      }
+    ],
+    "referencedWorks": [],
+    "notes": "The sixty internally titled grade-level and support passages are indexed under their exact week in Layer 5 rather than duplicated here. Incidental story characters and objects are not promoted to whole-curriculum subjects. Alessa described the appeal as great, simple, short stories; the analysis preserves that signal as a source note while the searchable claims themselves remain tied to the captured text."
+  },
+  "layer5_lessons": {
+    "decompositionQuality": "partial",
+    "unitKind": "week",
+    "unitsFound": 30,
+    "unitsDecomposed": 30,
+    "units": [
+      {
+        "ordinal": 1,
+        "unitLabel": "Unit 1, Week 1",
+        "topic": {
+          "name": "short vowels",
+          "quote": "Short Vowels"
+        },
+        "referencedWorks": [
+          {
+            "title": "How Animals Stay Warm",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "How Animals Stay Warm"
+          },
+          {
+            "title": "How Animals Stay Cool",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "How Animals Stay Cool"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "animal characteristics",
+            "evidence": "Animal Characteristics"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target pattern",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Read one Accountable Text and one Interactive Text",
+            "quote": "Accountable and Interactive Texts"
+          },
+          {
+            "description": "Sort words by spelling pattern",
+            "quote": "Sort Cards"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_OgJPbGkrYk",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 2,
+        "unitLabel": "Unit 1, Week 2",
+        "topic": {
+          "name": "long a spellings",
+          "quote": "Long a (a_e, ai, ay, a)"
+        },
+        "referencedWorks": [
+          {
+            "title": "Why the Turtle Sleeps Through Winter",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "Why the Turtle Sleeps Through Winter"
+          },
+          {
+            "title": "How Beaver Got His Flat Tail",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "How Beaver Got His Flat Tail"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "animal characteristics",
+            "evidence": "Animal Characteristics"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target pattern",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Read and reread connected text for fluency",
+            "quote": "Reread to Build Fluency"
+          },
+          {
+            "description": "Sort words by spelling pattern",
+            "quote": "Sort Cards"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_OgJPbGkrYk",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 3,
+        "unitLabel": "Unit 1, Week 3",
+        "topic": {
+          "name": "long o and long u spellings",
+          "quote": "Long 0 (0_e, 0a, ow, 0) and Long u (u_e, ue, ew, u)"
+        },
+        "referencedWorks": [
+          {
+            "title": "The Coolest Monkeys on Earth",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "The Coolest Monkeys on Earth"
+          },
+          {
+            "title": "The Great Snowy Owl",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "The Great Snowy Owl"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "animal characteristics",
+            "evidence": "Animal Characteristics"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target pattern",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Write a response after rereading",
+            "quote": "Writing a Follow-Up"
+          },
+          {
+            "description": "Complete a cumulative unit assessment",
+            "quote": "Cumulative Assessment"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_BtMbZibZUj",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 4,
+        "unitLabel": "Unit 2, Week 1",
+        "topic": {
+          "name": "long e spellings",
+          "quote": "Long e (e_e, ea, ee, ey, y, ie, e)"
+        },
+        "referencedWorks": [
+          {
+            "title": "Julie's Bike",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "Julie\u2019s Bike"
+          },
+          {
+            "title": "Yay for Pete!",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Yay for Pete!"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "characters shape their stories",
+            "evidence": "Characters Shape Their Stories"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target pattern",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Read and reread connected text for fluency",
+            "quote": "Reread to Build Fluency"
+          },
+          {
+            "description": "Complete dictation and word sorting",
+            "quote": "Dictation"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_BtMbZibZUj",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 5,
+        "unitLabel": "Unit 2, Week 2",
+        "topic": {
+          "name": "long i spellings",
+          "quote": "Long i (i_e, igh, y, ie, i)"
+        },
+        "referencedWorks": [
+          {
+            "title": "The Boy Who Cried Wolf",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "The Boy Who Cried Wolf"
+          },
+          {
+            "title": "Liza and the Giant",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Liza and the Giant"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "characters shape their stories",
+            "evidence": "Characters Shape Their Stories"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target pattern",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Read and reread connected text for fluency",
+            "quote": "Reread to Build Fluency"
+          },
+          {
+            "description": "Use context clues for word meaning",
+            "quote": "Context Clues"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_OgJPbGkrYk",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 6,
+        "unitLabel": "Unit 2, Week 3",
+        "topic": {
+          "name": "compound words",
+          "quote": "Compound Words"
+        },
+        "referencedWorks": [
+          {
+            "title": "Paul Bunyan and the Popcorn Blizzard",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "Paul Bunyan and the Popcorn Blizzard"
+          },
+          {
+            "title": "Home Sweet Home",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Home Sweet Home"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "characters shape their stories",
+            "evidence": "Characters Shape Their Stories"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target pattern",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Sort compound words by common features",
+            "quote": "Common Features Sort"
+          },
+          {
+            "description": "Complete a cumulative unit assessment",
+            "quote": "Cumulative Assessment"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_70Ys4i1AB1",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 7,
+        "unitLabel": "Unit 3, Week 1",
+        "topic": {
+          "name": "r-controlled vowels ar and or",
+          "quote": "r-Controlled Vowel (ar, or, oar, ore, our, oor)"
+        },
+        "referencedWorks": [
+          {
+            "title": "Electing a President",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "Electing a President"
+          },
+          {
+            "title": "Wave the Flag!",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Wave the Flag!"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "civic life and government",
+            "evidence": "We the People"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target pattern",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Read connected text and use context clues",
+            "quote": "Read Accountable Text"
+          },
+          {
+            "description": "Write a response after rereading",
+            "quote": "Writing a Follow-Up"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_a6m7PqTuJN",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 8,
+        "unitLabel": "Unit 3, Week 2",
+        "topic": {
+          "name": "r-controlled vowels er, ir, and ur",
+          "quote": "r-Controlled Vowels (er, ir, ur)"
+        },
+        "referencedWorks": [
+          {
+            "title": "One Nation from Many",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "One Nation from Many"
+          },
+          {
+            "title": "A Debate About Voting",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "A Debate About Voting"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "civic life and government",
+            "evidence": "We the People"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target pattern",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Read connected text and use context clues",
+            "quote": "Read Accountable Text"
+          },
+          {
+            "description": "Sort words by spelling pattern",
+            "quote": "Sort Cards"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_a6m7PqTuJN",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 9,
+        "unitLabel": "Unit 3, Week 3",
+        "topic": {
+          "name": "closed syllables",
+          "quote": "Closed Syllables"
+        },
+        "referencedWorks": [
+          {
+            "title": "Checks and Balances",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "Checks and Balances"
+          },
+          {
+            "title": "Your Local Government",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Your Local Government"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "civic life and government",
+            "evidence": "We the People"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Decode multisyllabic words by syllable type",
+            "quote": "Reading Big Words Strategy"
+          },
+          {
+            "description": "Read and reread connected text for fluency",
+            "quote": "Reread to Build Fluency"
+          },
+          {
+            "description": "Complete a cumulative unit assessment",
+            "quote": "Cumulative Assessment"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_kVzAFMuFc4",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 10,
+        "unitLabel": "Unit 4, Week 1",
+        "topic": {
+          "name": "open syllables",
+          "quote": "Open Syllables"
+        },
+        "referencedWorks": [
+          {
+            "title": "Half-Empty or Half-Full?",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "Half-Empty or Half-Full?"
+          },
+          {
+            "title": "Two Crows and a Pitcher",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Two Crows and a Pitcher"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "different perspectives",
+            "evidence": "Different Perspectives, Different Points of View"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Decode multisyllabic words by syllable type",
+            "quote": "Reading Big Words Strategy"
+          },
+          {
+            "description": "Read connected text and use context clues",
+            "quote": "Read Accountable Text"
+          },
+          {
+            "description": "Sort words by spelling pattern",
+            "quote": "Sort Cards"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_kVzAFMuFc4",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 11,
+        "unitLabel": "Unit 4, Week 2",
+        "topic": {
+          "name": "consonant-le syllables",
+          "quote": "Consonant -le Syllables"
+        },
+        "referencedWorks": [
+          {
+            "title": "The Blind Men and the Elephant",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "The Blind Men and the Elephant"
+          },
+          {
+            "title": "A Big Move",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "A Big Move"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "different perspectives",
+            "evidence": "Different Perspectives, Different Points of View"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Decode multisyllabic words by syllable type",
+            "quote": "Reading Big Words Strategy"
+          },
+          {
+            "description": "Read and reread connected text for fluency",
+            "quote": "Reread to Build Fluency"
+          },
+          {
+            "description": "Complete dictation and word sorting",
+            "quote": "Dictation"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_kVzAFMuFc4",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 12,
+        "unitLabel": "Unit 4, Week 3",
+        "topic": {
+          "name": "vowel-team syllables",
+          "quote": "Vowel Team Syllables"
+        },
+        "referencedWorks": [
+          {
+            "title": "My Favorite Way to Travel",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "My Favorite Way to Travel"
+          },
+          {
+            "title": "King Midas",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "King Midas"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "different perspectives",
+            "evidence": "Different Perspectives, Different Points of View"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Decode multisyllabic words by syllable type",
+            "quote": "Reading Big Words Strategy"
+          },
+          {
+            "description": "Write a response after rereading",
+            "quote": "Writing a Follow-Up"
+          },
+          {
+            "description": "Complete a cumulative unit assessment",
+            "quote": "Cumulative Assessment"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_kVzAFMuFc4",
+          "mt_BtMbZibZUj",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 13,
+        "unitLabel": "Unit 5, Week 1",
+        "topic": {
+          "name": "vowel-consonant-e syllables",
+          "quote": "Vowel-Consonant-e Syllables"
+        },
+        "referencedWorks": [
+          {
+            "title": "Medical Robots",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "Medical Robots"
+          },
+          {
+            "title": "Robots at Work",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Robots at Work"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "technological advancements",
+            "evidence": "Technological Advancements"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Decode multisyllabic words by syllable type",
+            "quote": "Reading Big Words Strategy"
+          },
+          {
+            "description": "Read connected text and use context clues",
+            "quote": "Read Accountable Text"
+          },
+          {
+            "description": "Sort words by spelling pattern",
+            "quote": "Sort Cards"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_kVzAFMuFc4",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 14,
+        "unitLabel": "Unit 5, Week 2",
+        "topic": {
+          "name": "vowel-r syllables",
+          "quote": "Vowel-r Syllables"
+        },
+        "referencedWorks": [
+          {
+            "title": "Getting from Here to There",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "Getting from Here to There"
+          },
+          {
+            "title": "Surfing the Web",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Surfing the Web"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "technological advancements",
+            "evidence": "Technological Advancements"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Decode multisyllabic words by syllable type",
+            "quote": "Reading Big Words Strategy"
+          },
+          {
+            "description": "Read and reread connected text for fluency",
+            "quote": "Reread to Build Fluency"
+          },
+          {
+            "description": "Complete dictation and word sorting",
+            "quote": "Dictation"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_a6m7PqTuJN",
+          "mt_kVzAFMuFc4",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 15,
+        "unitLabel": "Unit 5, Week 3",
+        "topic": {
+          "name": "inflectional endings ed and ing",
+          "quote": "Inflectional Endings"
+        },
+        "referencedWorks": [
+          {
+            "title": "Robot to the Rescue",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "Robot to the Rescue"
+          },
+          {
+            "title": "Smart Plastic",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Smart Plastic"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "technological advancements",
+            "evidence": "Technological Advancements"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Study how endings change familiar words",
+            "quote": "Word Study"
+          },
+          {
+            "description": "Write a response after rereading",
+            "quote": "Writing a Follow-Up"
+          },
+          {
+            "description": "Complete a cumulative unit assessment",
+            "quote": "Cumulative Assessment"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt__CMXZiPfTV",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 16,
+        "unitLabel": "Unit 6, Week 1",
+        "topic": {
+          "name": "irregular plurals",
+          "quote": "Irregular Plurals"
+        },
+        "referencedWorks": [
+          {
+            "title": "The Legend of Molly Pitcher",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "The Legend of Molly Pitcher"
+          },
+          {
+            "title": "Emma's Secret Dream",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Emma's Secret Dream"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "making decisions",
+            "evidence": "Making Decisions"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Study how irregular plural forms work",
+            "quote": "Word Study"
+          },
+          {
+            "description": "Read connected text and use context clues",
+            "quote": "Read Accountable Text"
+          },
+          {
+            "description": "Sort words by spelling pattern",
+            "quote": "Sort Cards"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_nFBLNoChD0",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 17,
+        "unitLabel": "Unit 6, Week 2",
+        "topic": {
+          "name": "long oo and short oo",
+          "quote": "Long 00 and Short oo"
+        },
+        "referencedWorks": [
+          {
+            "title": "Mr. Moody's House",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "Mr. Moody's House"
+          },
+          {
+            "title": "Good Night",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Good Night"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "making decisions",
+            "evidence": "Making Decisions"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target pattern",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Read and reread connected text for fluency",
+            "quote": "Reread to Build Fluency"
+          },
+          {
+            "description": "Complete dictation and word sorting",
+            "quote": "Dictation"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_BtMbZibZUj",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 18,
+        "unitLabel": "Unit 6, Week 3",
+        "topic": {
+          "name": "diphthong ou",
+          "quote": "Diphthong /ou/"
+        },
+        "referencedWorks": [
+          {
+            "title": "A Difficult Decision",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "A Difficult Decision"
+          },
+          {
+            "title": "The Right Choice",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "The Right Choice"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "making decisions",
+            "evidence": "Making Decisions"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target pattern",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Write a response after rereading",
+            "quote": "Writing a Follow-Up"
+          },
+          {
+            "description": "Complete a cumulative unit assessment",
+            "quote": "Cumulative Assessment"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_fMd7v87IiI",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 19,
+        "unitLabel": "Unit 7, Week 1",
+        "topic": {
+          "name": "suffixes er and or",
+          "quote": "Suffixes -er, -or"
+        },
+        "referencedWorks": [
+          {
+            "title": "Life in the City",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "Life in the City"
+          },
+          {
+            "title": "The Mission District",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "The Mission District"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "communities then and now",
+            "evidence": "Communities Then and Now"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Study suffixes as meaningful word parts",
+            "quote": "Word Study"
+          },
+          {
+            "description": "Read connected text and use context clues",
+            "quote": "Read Accountable Text"
+          },
+          {
+            "description": "Sort words by spelling pattern",
+            "quote": "Sort Cards"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_HrgDjxcWvf",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 20,
+        "unitLabel": "Unit 7, Week 2",
+        "topic": {
+          "name": "homophones",
+          "quote": "Homophones"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stone Soup",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "Stone Soup"
+          },
+          {
+            "title": "Community Action",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Community Action"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "communities then and now",
+            "evidence": "Communities Then and Now"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Sort same-sounding words by meaning and spelling",
+            "quote": "Homophones Chart"
+          },
+          {
+            "description": "Read and reread connected text for fluency",
+            "quote": "Reread to Build Fluency"
+          },
+          {
+            "description": "Complete dictation and word sorting",
+            "quote": "Dictation"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_37QCuGOxFe",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 21,
+        "unitLabel": "Unit 7, Week 3",
+        "topic": {
+          "name": "variant vowel aw and au",
+          "quote": "Variant Vowel /6/"
+        },
+        "referencedWorks": [
+          {
+            "title": "People of the Longhouse",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "People of the Longhouse"
+          },
+          {
+            "title": "An Awesome Book",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "An Awesome Book"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "communities then and now",
+            "evidence": "Communities Then and Now"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target pattern",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Write a response after rereading",
+            "quote": "Writing a Follow-Up"
+          },
+          {
+            "description": "Complete a cumulative unit assessment",
+            "quote": "Cumulative Assessment"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_fMd7v87IiI",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 22,
+        "unitLabel": "Unit 8, Week 1",
+        "topic": {
+          "name": "hard and soft c",
+          "quote": "Hard and Soft c"
+        },
+        "referencedWorks": [
+          {
+            "title": "Hurricane Watch",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "Hurricane Watch"
+          },
+          {
+            "title": "Blizzard!",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Blizzard!"
+          }
+        ],
+        "questions": [
+          {
+            "text": "How is a hurricane different from a rainstorm?",
+            "quote": "How is a hurricane different from a rainstorm?"
+          }
+        ],
+        "themes": [
+          {
+            "name": "weather and climate",
+            "evidence": "Weather and Climate"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target pattern",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Read connected text and use context clues",
+            "quote": "Read Accountable Text"
+          },
+          {
+            "description": "Sort words into hard-c and soft-c categories",
+            "quote": "Hard and Soft c Chart"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_OgJPbGkrYk",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 23,
+        "unitLabel": "Unit 8, Week 2",
+        "topic": {
+          "name": "hard and soft g",
+          "quote": "Hard and Soft g"
+        },
+        "referencedWorks": [
+          {
+            "title": "Pecos Bill Rides a Tornado",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "Pecos Bill Rides a Tornado"
+          },
+          {
+            "title": "A Rainbow of Colors",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "A Rainbow of Colors"
+          }
+        ],
+        "questions": [
+          {
+            "text": "Why did Pecos Bill decide to ride a tornado?",
+            "quote": "Why did Pecos Bill decide to ride a tornado?"
+          }
+        ],
+        "themes": [
+          {
+            "name": "weather and climate",
+            "evidence": "Weather and Climate"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target pattern",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Read connected text and use context clues",
+            "quote": "Read Accountable Text"
+          },
+          {
+            "description": "Sort words into hard-g and soft-g categories",
+            "quote": "Hard and Soft g Chart"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_OgJPbGkrYk",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 24,
+        "unitLabel": "Unit 8, Week 3",
+        "topic": {
+          "name": "diphthongs oi and ou",
+          "quote": "Diphthongs /oi/ and /ou/"
+        },
+        "referencedWorks": [
+          {
+            "title": "The Tidal Wave",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "The Tidal Wave"
+          },
+          {
+            "title": "Tornado!",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Tornado!"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "weather and climate",
+            "evidence": "Weather and Climate"
+          }
+        ],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target pattern",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Write a response after rereading",
+            "quote": "Writing a Follow-Up"
+          },
+          {
+            "description": "Complete a cumulative unit assessment",
+            "quote": "Cumulative Assessment"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          },
+          {
+            "name": "My Word Study",
+            "quote": "My Word Study"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_fMd7v87IiI",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 25,
+        "unitLabel": "Unit 9, Week 1",
+        "topic": {
+          "name": "suffixes able, ful, and less",
+          "quote": "Suffixes -able, -ful, -less"
+        },
+        "referencedWorks": [
+          {
+            "title": "Volunteer!",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "Volunteer!"
+          },
+          {
+            "title": "Computer Whiz Kid",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Computer Whiz Kid"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target word parts",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Read one Accountable Text and one Interactive Text",
+            "quote": "Accountable Text"
+          },
+          {
+            "description": "Sort words by suffix",
+            "quote": "Sort Cards"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_HrgDjxcWvf",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 26,
+        "unitLabel": "Unit 9, Week 2",
+        "topic": {
+          "name": "prefixes dis and un",
+          "quote": "Prefixes dis-, un-"
+        },
+        "referencedWorks": [
+          {
+            "title": "The Shade Tree",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "The Shade Tree"
+          },
+          {
+            "title": "The King's Road",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "The King\u2019s Road"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target word parts",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Read one Accountable Text and one Interactive Text",
+            "quote": "Accountable Text"
+          },
+          {
+            "description": "Sort words by prefix",
+            "quote": "Sort Cards"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_HrgDjxcWvf",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 27,
+        "unitLabel": "Unit 9, Week 3",
+        "topic": {
+          "name": "prefixes pre and re",
+          "quote": "Prefixes pre-, re-"
+        },
+        "referencedWorks": [
+          {
+            "title": "A New Business",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "A New Business"
+          },
+          {
+            "title": "Try Something New!",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Try Something New!"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target word parts",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Read one Accountable Text and one Interactive Text",
+            "quote": "Accountable Text"
+          },
+          {
+            "description": "Sort words by prefix",
+            "quote": "Sort Cards"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_HrgDjxcWvf",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 28,
+        "unitLabel": "Unit 10, Week 1",
+        "topic": {
+          "name": "unaccented final syllables en, on, ain, and in",
+          "quote": "Unaccented Final Syllables -en, -on, -ain, -in"
+        },
+        "referencedWorks": [
+          {
+            "title": "How Not to Win at Baseball",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "How Not to Win at Baseball"
+          },
+          {
+            "title": "Spin, Twist, and Zoom!",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Spin, Twist, and Zoom!"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Build automatic word recognition with the target syllables",
+            "quote": "Build Automaticity"
+          },
+          {
+            "description": "Read one Accountable Text and one Interactive Text",
+            "quote": "Accountable Text"
+          },
+          {
+            "description": "Sort words by final syllable",
+            "quote": "Sort Cards"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_kVzAFMuFc4",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 29,
+        "unitLabel": "Unit 10, Week 2",
+        "topic": {
+          "name": "suffixes ing, ment, and ness",
+          "quote": "Suffixes (-ing, -ment, -ness)"
+        },
+        "referencedWorks": [
+          {
+            "title": "Androcles and the Lion",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "Androcles and the Lion"
+          },
+          {
+            "title": "Nature's Forces: Thunder and Lightning",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Nature's Forces: Thunder and Lightning"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Study suffixes as meaningful word parts",
+            "quote": "Word Study"
+          },
+          {
+            "description": "Read one Accountable Text and one Interactive Text",
+            "quote": "Accountable Text"
+          },
+          {
+            "description": "Sort words by suffix",
+            "quote": "Sort Cards"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_HrgDjxcWvf",
+          "mt__CMXZiPfTV",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      },
+      {
+        "ordinal": 30,
+        "unitLabel": "Unit 10, Week 3",
+        "topic": {
+          "name": "related words",
+          "quote": "Related Words"
+        },
+        "referencedWorks": [
+          {
+            "title": "Arctic Meltdown",
+            "author": null,
+            "kind": "passage",
+            "purpose": "accountable-text",
+            "quote": "Arctic Meltdown"
+          },
+          {
+            "title": "Solar Eclipse",
+            "author": null,
+            "kind": "passage",
+            "purpose": "interactive-text",
+            "quote": "Solar Eclipse"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Use shared roots and word parts to connect related words",
+            "quote": "Related Words"
+          },
+          {
+            "description": "Read one Accountable Text and one Interactive Text",
+            "quote": "Accountable Text"
+          },
+          {
+            "description": "Complete a cumulative unit assessment",
+            "quote": "Cumulative Assessment"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Word Study Resource Book",
+            "quote": "Word Study Resource Book"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_HrgDjxcWvf",
+          "mt_aw0PldeT_L",
+          "mt_b7n4w8q2r5"
+        ],
+        "ageRangeMonths": [
+          96,
+          108
+        ]
+      }
+    ],
+    "notes": "All 30 weekly targets and all 60 titled Accountable and Interactive Texts are decomposed from the three-part capture. This remains partial under the Layer 5 honesty rule because the source defines five daily lessons per week, while this pass records the complete week-to-skill and week-to-text map rather than 150 daily rows. Volume 1 supplies Units 1 to 5. The captured Volume 2 stops during Unit 8, Week 2 and contains no teacher-guide pages for the rest of Unit 8 or Units 9 to 10. The Word Study Resource Book still supplies exact targets and both titled texts for all 30 weeks, so the missing daily teacher pages do not create a gap in the week-to-work index. Questions are not invented: two captured Unit 8 examples are recorded, and the rest remain empty until a future daily-lesson pass has the corresponding teacher page."
+  },
+  "decisionsNeeded": [
+    {
+      "category": "knowledge_bank",
+      "item": "RESOLVED: benchmark-systematic-phonics-word-study and benchmark-phonics-word-study-workshop-format were merged through the existing knowledge gate and read back active.",
+      "impact": "Homa can reproduce the method's explicit weekly cycle and distinguish a core Grade 3 workshop from remedial phonics programs. Production receipts: b2716b1f-8e19-40ea-b207-46165e17c132 and 0d6f25a4-c0ff-4ef6-843e-8341e2d5960c, merged 2026-08-02 as founder contributions.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "recipe",
+      "item": "RESOLVED: word-fluency-speed-drill aliases to word-fluency-repeated-reading, high-frequency-word-card-deck aliases to flash-cards, and phonics-pattern-reference-chart plus dictation-writing-practice shipped directly.",
+      "impact": "Materials-studio can now produce every repeatable Grade 3 workshop surface through reusable Homa-owned recipes. Exact words, target spans, answer keys, timing policies, scoring, and progression rules remain deterministic, while the recipes exclude the source's content, sequence, thresholds, scripts, and visual identity.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "source_completeness",
+      "item": "REQUESTED: Alessa was asked in the original Volume 2 thread for the remaining daily teacher pages after Unit 8, Week 2.",
+      "impact": "The current capture fully supports curriculum routing, 30-week planning, and story-title search. A complete 150-lesson prompt-and-question decomposition remains awaiting source; the request receipt is Slack reply 1785643625.555959 in thread 1785552891.449889.",
+      "status": "awaiting-source",
+      "urgency": "low"
+    },
+    {
+      "category": "taxonomy",
+      "item": "No taxonomy additions proposed.",
+      "impact": "The existing English phonics, spelling, vocabulary, fluency, comprehension, and writing topics cover the instructional scope. Unit themes are mapped as partial context so Homa does not confuse a phonics passage with a full science or civics lesson.",
+      "urgency": "resolved"
+    }
+  ],
+  "notes": "A complete 300-page, three-part capture: Volume 1, Volume 2, then the Word Study Resource Book. The files contain a core Grade 3 phonics and word-study workshop, not a general reading anthology. Its standout reusable pattern is a weekly pair of short connected texts, one grade-level Accountable Text and one simpler Interactive Text, used to apply the same word pattern at two support levels. Alessa's Slack comment called out the great simple short stories; all 60 titles are now searchable by week. The analysis does not turn incidental animals, robots, weather, or story characters into whole-curriculum subjects. Those themes remain attached to the relevant weekly works and contextual Layer 2 mappings."
+}

@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:21:35-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784427695.247009",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "coloring page (title-inferred, never confirmed)",
   "title": "Listen and Color Spring Worksheet: Garden Animals Coloring Sheet",
   "publisher": "TPT (seller unknown, link expired before capture)",

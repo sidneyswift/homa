@@ -172,6 +172,11 @@ export interface RasterizedPdfPages {
   pageCount: number;
 }
 
+export interface RasterizePdfOptions {
+  /** Owner-supplied password for a protected original. */
+  password?: string;
+}
+
 /**
  * rasterizePdfToJpegs(pdf, maxPages): the delivered PDF's own pixels,
  * page by page. Throws when the PDF cannot be parsed or the canvas
@@ -180,6 +185,7 @@ export interface RasterizedPdfPages {
 export async function rasterizePdfToJpegs(
   pdf: Buffer,
   maxPages: number,
+  options: RasterizePdfOptions = {},
 ): Promise<RasterizedPdfPages> {
   // Load the canvas backend (and its DOM global polyfills) before any
   // pdf.js work so an unavailable runtime fails here, cleanly.
@@ -188,6 +194,7 @@ export async function rasterizePdfToJpegs(
   // caller still uploads these exact bytes to Blob afterward.
   const task = getDocument({
     data: new Uint8Array(pdf),
+    password: options.password,
     standardFontDataUrl: standardFontDataPath(),
     CanvasFactory: NapiCanvasFactory,
   });

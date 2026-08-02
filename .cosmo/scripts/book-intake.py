@@ -17,9 +17,11 @@ envelope.
 WHAT IT WILL NOT DO:
 Re-encode a page it did not have to. When the PDF carries photographs (the
 CamScanner case), the embedded image is extracted byte-for-byte as the
-master. Rasterizing would bake in a second lossy pass over a photo that is
-already the only copy of a page. Only vector or text PDFs get rendered, at
-an explicit DPI recorded in the manifest.
+capture master. If a page was photographed sideways, the capture master is
+kept and a separate upright working master is created. JPEG pages use
+lossless jpegtran when possible; other pages become lossless PNGs. Only
+vector or text PDFs get rendered, at an explicit DPI recorded in the
+manifest.
 
 DETERMINISTIC GATES (no model, per the plan's gatekeeper stage):
 page-count assertion, blank detection by ink coverage, blur detection by
@@ -46,7 +48,10 @@ USAGE:
     book-intake.py <pdf> --id cur-2026-07-28-some-curriculum --kind curriculum
     book-intake.py <pdf> --id <id> --expect-pages 84   # assert the count
     book-intake.py <pdf> --id <id> --force             # redo a finished item
+    book-intake.py <pdf> --id <id> --jobs 4            # bounded page workers
+    book-intake.py <pdf...> --id <id> --resume-captured # finish after an interrupted gate
     book-intake.py --check <id>                        # re-run gates only
+    book-intake.py --normalize-masters <id>            # repair old sideways masters
     book-intake.py <pdf> --id <id> --no-vision         # tesseract only
 """
 
@@ -58,6 +63,8 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -178,6 +185,7 @@ VISION_MIN_CHARS = 40          # below this, with ink present, OCR gave up
 VISION_MIN_INK = 0.02
 VISION_QUALITY_FLOOR = 0.55    # garbled beyond usefulness
 PAGE_READ_SCRIPT = "scripts/page-read.mts"
+VISION_BATCH_PAGES = 12
 
 # Orientation. A page shot upside down is sharp, fully inked, and unique, so
 # EVERY other gate here passes it while its text comes out reversed. Three
@@ -191,6 +199,25 @@ PAGE_READ_SCRIPT = "scripts/page-read.mts"
 # OCR'd, and the angle is recorded so later image work knows.
 ORIENTATION_CONFIDENCE_MIN = 1.0
 
+# Tesseract is CPU and memory heavy. Concurrency is opt-in and capped so one
+# large wave cannot turn a typo into hundreds of simultaneous subprocesses.
+MAX_JOBS = 8
+
+
+def parse_jobs(value: str) -> int:
+    try:
+        jobs = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("jobs must be an integer") from exc
+    if not 1 <= jobs <= MAX_JOBS:
+        raise argparse.ArgumentTypeError(f"jobs must be between 1 and {MAX_JOBS}")
+    return jobs
+
+
+def _check_jobs(jobs: int) -> None:
+    if not 1 <= jobs <= MAX_JOBS:
+        raise ValueError(f"jobs must be between 1 and {MAX_JOBS}")
+
 
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -198,6 +225,165 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: f.read(1 << 20), b""):
             h.update(chunk)
     return h.hexdigest()
+
+
+def source_receipt(pdf_paths: list[Path]) -> dict:
+    parts = [
+        {"file": path.name, "sha256": sha256_file(path), "bytes": path.stat().st_size}
+        for path in pdf_paths
+    ]
+    return {
+        "file": parts[0]["file"],
+        "sha256": parts[0]["sha256"],
+        "bytes": parts[0]["bytes"],
+        "parts": parts,
+    }
+
+
+def portable_source_receipt(item_id: str, kind: str, source: dict) -> dict:
+    """Committed byte identity for verification without ignored local masters."""
+    return {
+        "version": 1,
+        "recordId": item_id,
+        "kind": kind,
+        "parts": [
+            {
+                "file": part["file"],
+                "sha256": part["sha256"],
+                "bytes": part["bytes"],
+            }
+            for part in source.get("parts", [])
+        ],
+    }
+
+
+def expected_page_count(manifest: dict) -> Optional[int]:
+    """The operator's assertion, with a legacy fallback to observed pages."""
+    expected = manifest.get("expectedPageCount")
+    if isinstance(expected, int) and not isinstance(expected, bool):
+        return expected
+    observed = manifest.get("pageCount")
+    if isinstance(observed, int) and not isinstance(observed, bool):
+        manifest["expectedPageCount"] = observed
+    return observed
+
+
+def atomic_json(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile("w", dir=path.parent, delete=False) as handle:
+        json.dump(payload, handle, indent=2)
+        handle.write("\n")
+        temporary = Path(handle.name)
+    temporary.replace(path)
+
+
+def source_checkpoint_path(item_dir: Path) -> Path:
+    return item_dir / "source-checkpoint.json"
+
+
+def write_source_checkpoint(
+    item_dir: Path, item_id: str, kind: str, pdf_paths: list[Path]
+) -> dict:
+    checkpoint = {
+        "version": 1,
+        "id": item_id,
+        "kind": kind,
+        "source": source_receipt(pdf_paths),
+    }
+    atomic_json(source_checkpoint_path(item_dir), checkpoint)
+    return checkpoint["source"]
+
+
+def verify_resume_checkpoint(
+    item_dir: Path, item_id: str, kind: str, pdf_paths: list[Path]
+) -> dict:
+    path = source_checkpoint_path(item_dir)
+    if not path.exists():
+        raise ValueError(
+            "captured masters predate the exact source checkpoint; run a full intake"
+        )
+    try:
+        checkpoint = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError("source checkpoint is unreadable") from error
+    expected = {
+        "version": 1,
+        "id": item_id,
+        "kind": kind,
+        "source": source_receipt(pdf_paths),
+    }
+    if checkpoint != expected:
+        raise ValueError("resume sources do not exactly match the capture checkpoint")
+    return expected["source"]
+
+
+def prepare_intake_workspace(
+    item_id: str,
+    out_dir: Path,
+    force: bool,
+    *,
+    kind: Optional[str] = None,
+    pdf_paths: Optional[list[Path]] = None,
+) -> None:
+    """Start a forced intake with no masters or sidecar from an older source."""
+    if force:
+        expected = (MASTERS_DIR / item_id).resolve()
+        if out_dir.resolve() != expected:
+            raise ValueError(f"refusing to clear unexpected intake path: {out_dir}")
+        if out_dir.exists():
+            shutil.rmtree(out_dir)
+        (TEXT_DIR / f"{item_id}.txt").unlink(missing_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    if not force and any(out_dir.iterdir()):
+        if kind is None or pdf_paths is None:
+            raise ValueError(
+                "non-empty intake workspace requires an exact source checkpoint"
+            )
+        verify_resume_checkpoint(out_dir, item_id, kind, pdf_paths)
+
+
+def gate_findings_sha256(findings: list[str]) -> str:
+    encoded = json.dumps(
+        findings, ensure_ascii=False, separators=(",", ":")
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def set_gate_result(manifest: dict, findings: list[str]) -> None:
+    digest = gate_findings_sha256(findings)
+    manifest["gateStatus"] = "complete" if not findings else "findings"
+    manifest["gateFindings"] = findings
+    manifest["gateFindingCount"] = len(findings)
+    manifest["gateFindingsSha256"] = digest
+    review = manifest.get("gateReview") or {}
+    if review.get("findingsSha256") != digest:
+        manifest.pop("gateReview", None)
+
+
+def add_extraction_findings(manifest: dict, findings: list[str]) -> list[str]:
+    combined = list(findings)
+    vision_failed = (manifest.get("textExtraction") or {}).get("visionFailed") or {}
+    if vision_failed:
+        pages = sorted(int(number) for number in vision_failed)
+        combined.append(
+            f"{len(pages)} page(s) could not be read by the model ({pages}), "
+            "so they keep their OCR text."
+        )
+    empty_pages = (manifest.get("text") or {}).get("emptyPages") or []
+    if empty_pages:
+        combined.append(
+            f"{len(empty_pages)} page(s) produced no text: "
+            f"{empty_pages[:12]}. Spans cannot be verified against them."
+        )
+    return combined
+
+
+def pdf_page_count(path: Path) -> int:
+    doc = fitz.open(path)
+    try:
+        return doc.page_count
+    finally:
+        doc.close()
 
 
 def page_metrics(path: Path) -> dict:
@@ -235,7 +421,21 @@ def page_metrics(path: Path) -> dict:
         return {"error": f"{type(exc).__name__}: {exc}"}
 
 
-def extract_pages(pdf_paths, out_dir: Path) -> list:
+def _page_image_covers_pdf_page(page) -> bool:
+    """Whether one embedded image is the page rather than an illustration."""
+    images = page.get_images(full=True)
+    if len(images) != 1:
+        return False
+    try:
+        page_area = page.rect.width * page.rect.height
+        placed = page.get_image_rects(images[0][0])
+        covered = max((rect.width * rect.height) for rect in placed) if placed else 0
+        return page_area > 0 and (covered / page_area) >= EMBEDDED_PAGE_COVERAGE
+    except Exception:
+        return False
+
+
+def extract_pages(pdf_paths, out_dir: Path, jobs: int = 1) -> list:
     """One master per page, numbered continuously across parts.
 
     A phone capture of a big book arrives in parts: CamScanner splits it and
@@ -249,19 +449,29 @@ def extract_pages(pdf_paths, out_dir: Path) -> list:
     pages = []
     number = 0
     for part_index, pdf_path in enumerate(pdf_paths, 1):
-        for page in _extract_one(pdf_path, out_dir, len(pdf_paths) > 1 and part_index or 0,
-                                 start_number=number):
+        for page in _extract_one(
+            pdf_path,
+            out_dir,
+            len(pdf_paths) > 1 and part_index or 0,
+            start_number=number,
+            jobs=jobs,
+        ):
             pages.append(page)
             number = page["page"]
     return pages
 
 
-def _extract_one(pdf_path: Path, out_dir: Path, part: int, start_number: int) -> list:
+def _extract_one(
+    pdf_path: Path,
+    out_dir: Path,
+    part: int,
+    start_number: int,
+    jobs: int = 1,
+) -> list:
     doc = fitz.open(pdf_path)
     pages = []
     for index, page in enumerate(doc):
         number = start_number + index + 1
-        images = page.get_images(full=True)
         record = {"page": number}
 
         # The CamScanner shape: exactly one photograph that COVERS the page.
@@ -269,15 +479,8 @@ def _extract_one(pdf_path: Path, out_dir: Path, part: int, start_number: int) ->
         # already the only surviving copy of a physical page. Anything that
         # merely sits on the page is an illustration, and the page around it
         # is what we actually want.
-        covers_page = False
-        if len(images) == 1:
-            try:
-                page_area = page.rect.width * page.rect.height
-                placed = page.get_image_rects(images[0][0])
-                covered = max((r.width * r.height) for r in placed) if placed else 0
-                covers_page = page_area > 0 and (covered / page_area) >= EMBEDDED_PAGE_COVERAGE
-            except Exception:
-                covers_page = False
+        images = page.get_images(full=True)
+        covers_page = _page_image_covers_pdf_page(page)
         if covers_page:
             xref = images[0][0]
             try:
@@ -290,27 +493,54 @@ def _extract_one(pdf_path: Path, out_dir: Path, part: int, start_number: int) ->
                     "reencoded": False, "dpi": None,
                 })
             except Exception as exc:
-                record.update({"error": f"extract failed: {exc}"})
+                record.update({"embeddedCaptureError": f"extract failed: {exc}"})
                 images = []  # fall through to render
         if "master" not in record:
             dest = out_dir / f"p{number:04d}.png"
             pix = page.get_pixmap(dpi=RENDER_DPI)
             pix.save(dest)
             record.update({
-                "master": dest.name, "source": "rendered",
+                "master": dest.name,
+                "source": (
+                    "rendered-fallback"
+                    if "embeddedCaptureError" in record
+                    else "rendered"
+                ),
                 "reencoded": True, "dpi": RENDER_DPI,
             })
 
         master_path = out_dir / record["master"]
+        metrics = page_metrics(master_path)
+        if covers_page and "error" in metrics:
+            capture_path = master_path.with_name(
+                f"p{number:04d}.embedded-capture{master_path.suffix.lower()}"
+            )
+            os.replace(master_path, capture_path)
+            rendered_path = out_dir / f"p{number:04d}.rendered.png"
+            pix = page.get_pixmap(dpi=RENDER_DPI)
+            pix.save(rendered_path)
+            record.update({
+                "master": rendered_path.name,
+                "source": "rendered-fallback",
+                "reencoded": True,
+                "dpi": RENDER_DPI,
+                "embeddedCaptureMaster": capture_path.name,
+                "embeddedCaptureBytes": capture_path.stat().st_size,
+                "embeddedCaptureSha256": sha256_file(capture_path),
+                "embeddedCaptureError": metrics["error"],
+            })
+            master_path = rendered_path
+            metrics = page_metrics(master_path)
         record["bytes"] = master_path.stat().st_size
         record["sha256"] = sha256_file(master_path)
         if part:
             record["part"] = part
             record["partPage"] = index + 1
-        record.update(page_metrics(master_path))
-        record["rotation"] = page_orientation(master_path)
+        record.update(metrics)
         pages.append(record)
     doc.close()
+    for record, rotation in zip(pages, page_orientations(out_dir, pages, jobs)):
+        record["rotation"] = rotation
     return pages
 
 
@@ -351,6 +581,93 @@ def page_orientation(image_path: Path) -> int:
     return int(rotate.group(1)) % 360
 
 
+def page_orientations(item_dir: Path, pages: list, jobs: int = 1) -> list:
+    """Orientation values in page order, even when checks finish out of order."""
+    _check_jobs(jobs)
+
+    def check(page):
+        if "master" not in page:
+            return 0
+        return page_orientation(item_dir / page["master"])
+
+    if jobs == 1:
+        return [check(page) for page in pages]
+    with ThreadPoolExecutor(
+        max_workers=jobs, thread_name_prefix="book-intake-orientation"
+    ) as executor:
+        return list(executor.map(check, pages))
+
+
+def _upright_name(source: Path, lossless_jpeg: bool) -> Path:
+    suffix = source.suffix if lossless_jpeg else ".png"
+    return source.with_name(f"{source.stem}.upright{suffix}")
+
+
+def normalize_page_master(item_dir: Path, page: dict) -> bool:
+    """Create an upright working master while retaining the exact capture.
+
+    The original PDF remains the durable source of truth in Blob. Keeping the
+    extracted capture beside the normalized derivative also makes this local
+    transformation auditable and reversible without another download.
+    """
+    rotation = int(page.get("rotation") or 0) % 360
+    if rotation == 0 or "master" not in page:
+        return False
+
+    source = item_dir / page["master"]
+    if not source.exists():
+        raise FileNotFoundError(f"missing master for page {page.get('page')}: {source}")
+
+    source_sha = sha256_file(source)
+    lossless_jpeg = source.suffix.lower() in {".jpg", ".jpeg"} and bool(shutil.which("jpegtran"))
+    dest = _upright_name(source, lossless_jpeg)
+    tmp = dest.with_name(f".{dest.name}.tmp")
+    lossless = False
+
+    if lossless_jpeg:
+        done = subprocess.run(
+            [
+                "jpegtran", "-copy", "all", "-perfect", "-rotate", str(rotation),
+                "-outfile", str(tmp), str(source),
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if done.returncode == 0 and tmp.exists():
+            lossless = True
+        else:
+            tmp.unlink(missing_ok=True)
+            lossless_jpeg = False
+            dest = _upright_name(source, False)
+            tmp = dest.with_name(f".{dest.name}.tmp")
+
+    if not lossless_jpeg:
+        with Image.open(source) as im:
+            im.rotate(-rotation, expand=True).save(tmp, "PNG")
+
+    os.replace(tmp, dest)
+    page["captureMaster"] = page["master"]
+    page["master"] = dest.name
+    page["normalization"] = {
+        "operation": "rotate-clockwise",
+        "degrees": rotation,
+        "sourceSha256": source_sha,
+        "lossless": lossless or dest.suffix.lower() == ".png",
+    }
+    page["normalizedRotation"] = rotation
+    page["rotation"] = 0
+    page["bytes"] = dest.stat().st_size
+    page["sha256"] = sha256_file(dest)
+    page.update(page_metrics(dest))
+    return True
+
+
+def normalize_page_masters(item_dir: Path, pages: list) -> int:
+    """Normalize every confidently detected sideways page in page order."""
+    return sum(1 for page in pages if normalize_page_master(item_dir, page))
+
+
 def ocr_page(image_path: Path, rotate: int = 0) -> str:
     if not shutil.which("tesseract"):
         return ""
@@ -379,8 +696,54 @@ def ocr_page(image_path: Path, rotate: int = 0) -> str:
             tmp.unlink(missing_ok=True)
 
 
+def ocr_pages(
+    item_dir: Path,
+    pages: list,
+    jobs: int = 1,
+    report_progress: bool = True,
+) -> list:
+    """OCR text in page order, with bounded parallel page workers."""
+    _check_jobs(jobs)
+
+    def read(page):
+        if "master" not in page:
+            return ""
+        return ocr_page(
+            item_dir / page["master"],
+            page.get("rotation", 0),
+        )
+
+    def collect(results):
+        texts = []
+        for page, text in zip(pages, results):
+            texts.append(text)
+            if report_progress and page["page"] % 10 == 0:
+                print(f"    ... page {page['page']}")
+        return texts
+
+    if jobs == 1:
+        return collect(map(read, pages))
+    with ThreadPoolExecutor(
+        max_workers=jobs, thread_name_prefix="book-intake-ocr"
+    ) as executor:
+        return collect(executor.map(read, pages))
+
+
 def _normalize_text(text: str) -> str:
     return re.sub(r"\s+", " ", (text or "").lower()).strip()
+
+
+def near_duplicate_text_ratio(a_text: str, b_text: str) -> float:
+    """Return the expensive similarity ratio only when cheap upper bounds pass."""
+    if not a_text or not b_text:
+        return 0.0
+    length_upper_bound = (2 * min(len(a_text), len(b_text))) / (len(a_text) + len(b_text))
+    if length_upper_bound < NEAR_DUPLICATE_TEXT_RATIO:
+        return 0.0
+    matcher = SequenceMatcher(None, a_text, b_text)
+    if matcher.quick_ratio() < NEAR_DUPLICATE_TEXT_RATIO:
+        return 0.0
+    return matcher.ratio()
 
 
 def ocr_quality(text: str) -> float:
@@ -454,50 +817,92 @@ def oidc_token() -> Optional[str]:
 
 def read_pages_with_vision(item_dir: Path, pages: list, wanted: list) -> dict:
     """Page number -> {text, description, kind, confidence} from the vision
-    model. Returns {} on any failure: a page keeps its tesseract text and the
-    caller reports the degradation rather than silently shipping less."""
+    model. Every attempted page receives either a read result or an explicit
+    failure so the caller cannot confuse a broken reader with no work."""
     if not wanted:
-        return {}
+        return {"read": {}, "failed": {}}
+
+    def failed_all(reason: str) -> dict:
+        return {"read": {}, "failed": {n: reason for n in wanted}}
+
     token = oidc_token()
     if not token:
         print("  WARNING: no VERCEL_OIDC_TOKEN, so the vision pass is skipped. "
               "Run `pnpm dev:token` and re-run with --force to read covers properly.")
-        return {}
+        return failed_all("no Vercel OIDC token")
     by_number = {p["page"]: p for p in pages}
-    payload = {
-        "model": VISION_MODEL,
-        "pages": [
-            {"page": n, "path": str((item_dir / by_number[n]["master"]).resolve())}
-            for n in wanted if "master" in by_number.get(n, {})
-        ],
-    }
     env = {**os.environ, "VERCEL_OIDC_TOKEN": token}
-    try:
-        done = subprocess.run(
-            ["corepack", "pnpm", "--filter", "web", "exec", "tsx", PAGE_READ_SCRIPT],
-            input=json.dumps(payload), capture_output=True, text=True,
-            cwd=COSMO.parent, env=env, timeout=120 + 60 * len(wanted), check=False,
-        )
-    except (subprocess.TimeoutExpired, OSError) as exc:
-        print(f"  WARNING: vision pass failed ({type(exc).__name__}); keeping OCR text.")
-        return {}
-    line = next((l for l in reversed(done.stdout.splitlines()) if l.startswith("{")), "")
-    if not line:
-        print(f"  WARNING: vision pass produced no result; keeping OCR text. "
-              f"{(done.stderr or '').strip().splitlines()[-1][:160] if done.stderr else ''}")
-        return {}
-    try:
-        parsed = json.loads(line)
-    except json.JSONDecodeError:
-        print("  WARNING: vision pass returned unparseable output; keeping OCR text.")
-        return {}
     out, failed = {}, {}
-    for row in parsed.get("pages", []):
-        if "error" in row:
-            print(f"  WARNING: page {row.get('page')} vision read failed ({row['error'][:110]}); keeping OCR text.")
-            failed[row["page"]] = row["error"]
+    batches = [
+        wanted[start:start + VISION_BATCH_PAGES]
+        for start in range(0, len(wanted), VISION_BATCH_PAGES)
+    ]
+    for batch_index, batch in enumerate(batches, 1):
+        if len(batches) > 1:
+            print(
+                f"    ... vision batch {batch_index}/{len(batches)} "
+                f"({len(batch)} page(s))"
+            )
+        payload = {
+            "model": VISION_MODEL,
+            "pages": [
+                {"page": n, "path": str((item_dir / by_number[n]["master"]).resolve())}
+                for n in batch if "master" in by_number.get(n, {})
+            ],
+        }
+        try:
+            done = subprocess.run(
+                ["corepack", "pnpm", "--filter", "web", "exec", "tsx", PAGE_READ_SCRIPT],
+                input=json.dumps(payload), capture_output=True, text=True,
+                cwd=COSMO.parent, env=env,
+                timeout=120 + 60 * len(batch), check=False,
+            )
+        except (subprocess.TimeoutExpired, OSError) as exc:
+            print(
+                f"  WARNING: vision batch {batch_index} failed "
+                f"({type(exc).__name__}); keeping OCR text."
+            )
+            failed.update({page: f"vision subprocess {type(exc).__name__}" for page in batch})
             continue
-        out[row["page"]] = row
+        line = next(
+            (value for value in reversed(done.stdout.splitlines()) if value.startswith("{")),
+            "",
+        )
+        if not line:
+            stderr_lines = [
+                value.strip()
+                for value in (done.stderr or "").splitlines()
+                if value.strip()
+            ]
+            detail = " | ".join(stderr_lines[-3:])[:300]
+            print(
+                f"  WARNING: vision batch {batch_index} produced no result; "
+                f"keeping OCR text. {detail}"
+            )
+            reason = f"vision subprocess produced no result{': ' + detail if detail else ''}"
+            failed.update({page: reason for page in batch})
+            continue
+        try:
+            parsed = json.loads(line)
+        except json.JSONDecodeError:
+            print(
+                f"  WARNING: vision batch {batch_index} returned unparseable output; "
+                "keeping OCR text."
+            )
+            failed.update({page: "vision subprocess returned unparseable output" for page in batch})
+            continue
+        for row in parsed.get("pages", []):
+            if "error" in row:
+                print(
+                    f"  WARNING: page {row.get('page')} vision read failed "
+                    f"({row['error'][:110]}); keeping OCR text."
+                )
+                failed[row["page"]] = row["error"]
+                continue
+            out[row["page"]] = row
+        for page_number in batch:
+            if page_number not in out and page_number not in failed:
+                failed[page_number] = "page missing from vision response"
     return {"read": out, "failed": failed}
 
 
@@ -519,23 +924,13 @@ def run_gates(pages: list, expect_pages, texts: dict = None) -> list:
              if p.get("inkCoverage", 0) >= BLANK_INK_COVERAGE and "sharpness" in p]
     median = float(np.median(inked)) if inked else 0.0
 
-    exact, near, rotated = {}, [], []
-
-    # For each page, how many OTHER pages read near-identically. More than one
-    # means this text is structure (header, template, catalogue), so it cannot
-    # be evidence that one page was captured twice.
-    family_size = {}
+    exact, near, rotated, near_candidates = {}, [], [], []
+    usable = {}
     if texts:
-        usable = {n: _normalize_text(v) for n, v in texts.items()
-                  if len(_normalize_text(v)) >= NEAR_DUPLICATE_MIN_CHARS}
-        for n, a_text in usable.items():
-            kin = 0
-            for m, b_text in usable.items():
-                if m == n:
-                    continue
-                if SequenceMatcher(None, a_text, b_text).ratio() >= NEAR_DUPLICATE_TEXT_RATIO:
-                    kin += 1
-            family_size[n] = kin
+        for n, value in texts.items():
+            normalized = _normalize_text(value)
+            if len(normalized) >= NEAR_DUPLICATE_MIN_CHARS:
+                usable[n] = normalized
     for p in pages:
         n = p["page"]
         if "error" in p:
@@ -560,27 +955,49 @@ def run_gates(pages: list, expect_pages, texts: dict = None) -> list:
             findings.append(f"page {n}: byte-identical to page {first}. The same page was captured twice.")
             continue
 
-        text = _normalize_text(texts.get(n, "")) if texts else ""
-        if family_size.get(n, 0) > BOILERPLATE_FAMILY_MIN:
-            text = ""  # structure, not this page's own content
+        text = usable.get(n, "")
         if len(text) >= NEAR_DUPLICATE_MIN_CHARS and "aHash" in p:
             value = int(p["aHash"], 16)
             for other_n, other_text, other_hash in near:
-                ratio = SequenceMatcher(None, text, other_text).ratio()
-                if ratio < NEAR_DUPLICATE_TEXT_RATIO:
-                    continue
                 distance = bin(value ^ other_hash).count("1")
                 if distance > NEAR_DUPLICATE_HAMMING:
-                    # Same words, different picture: a reused worksheet
-                    # template, not the same page twice.
                     continue
-                findings.append(
-                    f"page {n}: reads as the same page as page {other_n} shot again "
-                    f"({int(ratio * 100)}% identical text, images {distance} bits apart). "
-                    "Keep the sharper one and drop the other."
-                )
-                break
+                ratio = near_duplicate_text_ratio(text, other_text)
+                if ratio >= NEAR_DUPLICATE_TEXT_RATIO:
+                    near_candidates.append((n, other_n, ratio, distance))
             near.append((n, text, value))
+
+    # Only an image-and-text candidate can become a duplicate finding. Check
+    # that small set for a third near-identical text sibling. Three or more
+    # pages are a repeated workbook template or catalogue family, not one page
+    # photographed twice. This preserves the original guard without doing a
+    # full text comparison for every pair in a large curriculum.
+    similarity_cache = {}
+
+    def similarity(a_n: int, b_n: int) -> float:
+        key = tuple(sorted((a_n, b_n)))
+        if key not in similarity_cache:
+            similarity_cache[key] = near_duplicate_text_ratio(
+                usable.get(a_n, ""), usable.get(b_n, "")
+            )
+        return similarity_cache[key]
+
+    for n, other_n, ratio, distance in near_candidates:
+        kin = 0
+        for candidate_n in usable:
+            if candidate_n == n:
+                continue
+            if similarity(n, candidate_n) >= NEAR_DUPLICATE_TEXT_RATIO:
+                kin += 1
+                if kin > BOILERPLATE_FAMILY_MIN:
+                    break
+        if kin > BOILERPLATE_FAMILY_MIN:
+            continue
+        findings.append(
+            f"page {n}: reads as the same page as page {other_n} shot again "
+            f"({int(ratio * 100)}% identical text, images {distance} bits apart). "
+            "Keep the sharper one and drop the other."
+        )
 
     if rotated:
         findings.append(
@@ -620,9 +1037,22 @@ def stub_json(item_id: str, kind: str, manifest: dict, pdf_path: Path) -> Path:
         "sourceParts": [p["file"] for p in manifest["source"].get("parts", [])],
         "sourceSha256": manifest["source"]["sha256"],
         "pageCount": manifest["pageCount"],
+        "expectedPageCount": expected_page_count(manifest),
+        "sourceReceipt": portable_source_receipt(
+            item_id, kind, manifest["source"]
+        ),
         "mastersDir": manifest["mastersDir"],
         "intakeAt": manifest["intakeAt"],
+        "gateStatus": manifest.get("gateStatus"),
         "gateFindings": manifest["gateFindings"],
+        "gateFindingCount": manifest.get(
+            "gateFindingCount", len(manifest.get("gateFindings") or [])
+        ),
+        "gateFindingsSha256": manifest.get("gateFindingsSha256")
+        or gate_findings_sha256(manifest.get("gateFindings") or []),
+        "normalizedMasterPages": sum(
+            1 for page in manifest.get("pages", []) if page.get("normalizedRotation")
+        ),
     }
     if target.exists():
         # A re-run refreshes the capture block and touches nothing else. The
@@ -632,7 +1062,11 @@ def stub_json(item_id: str, kind: str, manifest: dict, pdf_path: Path) -> Path:
             existing = json.loads(target.read_text())
         except (json.JSONDecodeError, OSError):
             return target
-        existing["capture"] = {**(existing.get("capture") or {}), **capture}
+        existing_capture = existing.get("capture") or {}
+        review = existing_capture.get("gateReview") or {}
+        if review.get("findingsSha256") != capture["gateFindingsSha256"]:
+            existing_capture.pop("gateReview", None)
+        existing["capture"] = {**existing_capture, **capture}
         target.write_text(json.dumps(existing, indent=2) + "\n")
         return target
     stub = {
@@ -663,20 +1097,286 @@ def stub_json(item_id: str, kind: str, manifest: dict, pdf_path: Path) -> Path:
     return target
 
 
-def intake(pdf_paths, item_id: str, kind: str, expect_pages, force: bool,
-           use_vision: bool = True) -> int:
+def _captured_master_files(item_dir: Path, expected_pages: int) -> list[Path]:
+    """Return the untouched capture masters in strict page order.
+
+    Upright derivatives deliberately have a second dot in their name, so a
+    one-extension match separates them from the exact extracted captures.
+    """
+    by_page = {}
+    for path in item_dir.iterdir():
+        match = re.fullmatch(r"p(\d{4})\.[^.]+", path.name)
+        if not match or not path.is_file():
+            continue
+        page = int(match.group(1))
+        if page in by_page:
+            raise ValueError(f"page {page}: multiple capture masters")
+        by_page[page] = path
+    expected = set(range(1, expected_pages + 1))
+    actual = set(by_page)
+    if actual != expected:
+        missing = sorted(expected - actual)[:12]
+        extra = sorted(actual - expected)[:12]
+        raise ValueError(
+            f"capture master sequence differs from sources: missing={missing}, extra={extra}"
+        )
+    return [by_page[page] for page in range(1, expected_pages + 1)]
+
+
+def _upright_derivative(capture: Path) -> Optional[Path]:
+    matches = sorted(capture.parent.glob(f"{capture.stem}.upright.*"))
+    if len(matches) > 1:
+        raise ValueError(f"{capture.name}: multiple upright derivatives")
+    return matches[0] if matches else None
+
+
+def _rotation_matching_derivative(capture: Path, upright: Path) -> tuple[int, float]:
+    """Recover the exact clockwise rotation used for an existing derivative."""
+    with Image.open(capture) as source_image, Image.open(upright) as upright_image:
+        source = source_image.convert("L")
+        target = np.asarray(upright_image.convert("L").resize((96, 96)), dtype=np.float32)
+        candidates = []
+        for degrees in (90, 180, 270):
+            rotated = source.rotate(-degrees, expand=True).resize((96, 96))
+            error = float(np.mean(np.abs(np.asarray(rotated, dtype=np.float32) - target)))
+            candidates.append((error, degrees))
+    candidates.sort()
+    best_error, best_degrees = candidates[0]
+    next_error = candidates[1][0]
+    if next_error - best_error < 0.5:
+        raise ValueError(
+            f"{capture.name}: upright rotation is ambiguous "
+            f"(best={best_error:.2f}, next={next_error:.2f})"
+        )
+    return best_degrees, round(best_error, 3)
+
+
+def reconstruct_captured_pages(pdf_paths: list[Path], item_dir: Path, jobs: int = 1) -> list:
+    """Rebuild page provenance without rendering, orienting, or OCRing again."""
+    _check_jobs(jobs)
+    source_rows = []
+    for part_index, pdf_path in enumerate(pdf_paths, 1):
+        doc = fitz.open(pdf_path)
+        try:
+            for part_page, pdf_page in enumerate(doc, 1):
+                source_rows.append({
+                    "part": part_index,
+                    "partPage": part_page,
+                    "embedded": _page_image_covers_pdf_page(pdf_page),
+                })
+        finally:
+            doc.close()
+
+    captures = _captured_master_files(item_dir, len(source_rows))
+
+    def reconstruct(args):
+        number, capture, source = args
+        upright = _upright_derivative(capture)
+        master = upright or capture
+        record = {
+            "page": number,
+            "master": master.name,
+            "source": "embedded-image" if source["embedded"] else "rendered",
+            "reencoded": not source["embedded"],
+            "dpi": None if source["embedded"] else RENDER_DPI,
+            "bytes": master.stat().st_size,
+            "sha256": sha256_file(master),
+            "rotation": 0,
+        }
+        if len(pdf_paths) > 1:
+            record["part"] = source["part"]
+            record["partPage"] = source["partPage"]
+        if upright:
+            degrees, match_error = _rotation_matching_derivative(capture, upright)
+            record.update({
+                "captureMaster": capture.name,
+                "normalization": {
+                    "operation": "rotate-clockwise",
+                    "degrees": degrees,
+                    "sourceSha256": sha256_file(capture),
+                    "lossless": upright.suffix.lower() == ".png"
+                    or capture.suffix.lower() in {".jpg", ".jpeg"},
+                    "recoveredMatchMeanAbsError": match_error,
+                },
+                "normalizedRotation": degrees,
+            })
+        record.update(page_metrics(master))
+        return record
+
+    work = [(index, capture, source_rows[index - 1])
+            for index, capture in enumerate(captures, 1)]
+    if jobs == 1:
+        return [reconstruct(row) for row in work]
+    with ThreadPoolExecutor(
+        max_workers=jobs, thread_name_prefix="book-intake-resume"
+    ) as executor:
+        return list(executor.map(reconstruct, work))
+
+
+def resume_captured(
+    pdf_paths: list[Path],
+    item_id: str,
+    kind: str,
+    expect_pages: Optional[int],
+    force: bool,
+    jobs: int,
+) -> int:
+    """Finish an intake whose masters and sidecar survived an interrupted gate."""
+    item_dir = MASTERS_DIR / item_id
+    manifest_path = item_dir / "manifest.json"
+    pending_manifest = None
+    if manifest_path.exists() and not force:
+        try:
+            pending_manifest = json.loads(manifest_path.read_text())
+            existing_status = pending_manifest.get("gateStatus")
+        except (OSError, json.JSONDecodeError):
+            existing_status = None
+        if existing_status != "pending":
+            print(f"Already has a manifest: {manifest_path}\nRe-run with --force to replace it.")
+            return 2
+    if not item_dir.is_dir():
+        print(f"No captured masters for {item_id}. Run a full intake first.")
+        return 2
+
+    try:
+        source = verify_resume_checkpoint(item_dir, item_id, kind, pdf_paths)
+    except ValueError as error:
+        print(f"ERROR: {error}", file=sys.stderr)
+        return 2
+
+    source_count = sum(pdf_page_count(path) for path in pdf_paths)
+    if expect_pages is not None and source_count != expect_pages:
+        print(
+            f"ERROR: source page count is {source_count}, expected {expect_pages}",
+            file=sys.stderr,
+        )
+        return 2
+    by_page = sidecar_pages(item_id)
+    expected_numbers = set(range(1, source_count + 1))
+    if set(by_page) != expected_numbers:
+        missing = sorted(expected_numbers - set(by_page))[:12]
+        extra = sorted(set(by_page) - expected_numbers)[:12]
+        print(
+            f"ERROR: sidecar page sequence differs from sources: missing={missing}, extra={extra}",
+            file=sys.stderr,
+        )
+        return 2
+
+    if pending_manifest is not None:
+        identity_matches = (
+            pending_manifest.get("id") == item_id
+            and pending_manifest.get("kind") == kind
+            and pending_manifest.get("pageCount") == source_count
+            and pending_manifest.get("source") == source
+        )
+        if not identity_matches:
+            print(
+                "ERROR: pending manifest identity differs from the exact source checkpoint",
+                file=sys.stderr,
+            )
+            return 2
+        print(f"{item_id}: completing the pending manifest without reconstructing it")
+        return recheck(item_id)
+
+    print(f"{item_id}: reconstructing {source_count} captured page records with {jobs} jobs")
+    pages = reconstruct_captured_pages(pdf_paths, item_dir, jobs=jobs)
+    layer = text_layer(pdf_paths)
+    have_layer = sum(1 for text in layer if text.strip())
+    method = "pdf-text-layer" if have_layer >= max(1, source_count // 2) else "tesseract"
+    texts = [by_page[page] for page in range(1, source_count + 1)]
+    text_info = {
+        "path": str((TEXT_DIR / f"{item_id}.txt").relative_to(COSMO.parent)),
+        "chars": sum(len(text) for text in texts),
+        "emptyPages": [page for page, text in by_page.items() if not text.strip()],
+    }
+    first_mtime = min(path.stat().st_mtime for path in _captured_master_files(item_dir, source_count))
+    manifest = {
+        "id": item_id,
+        "kind": kind,
+        "intakeAt": datetime.fromtimestamp(first_mtime, timezone.utc).isoformat(timespec="seconds"),
+        "recoveredAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "recoveredFromExistingCapture": True,
+        "source": source,
+        "pageCount": source_count,
+        "expectedPageCount": expect_pages if expect_pages is not None else source_count,
+        "mastersDir": str(item_dir.relative_to(COSMO.parent)),
+        "textExtraction": {
+            "method": method,
+            "visionModel": None,
+            "visionAttempted": [],
+            "visionPages": [],
+            "visionFailed": {},
+            "recoveredBeforeVisionProvenance": True,
+            **text_info,
+        },
+        "text": text_info,
+        "gateStatus": "pending",
+        "gateFindings": ["Deterministic gates are pending after capture recovery."],
+        "pages": [{**page, "textSource": method} for page in pages],
+    }
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+
+    findings = add_extraction_findings(
+        manifest,
+        run_gates(
+            manifest["pages"],
+            expected_page_count(manifest),
+            texts={page: by_page[page] for page in range(1, source_count + 1)},
+        ),
+    )
+    set_gate_result(manifest, findings)
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+    stub = stub_json(item_id, kind, manifest, pdf_paths[0])
+
+    print(f"  manifest  {manifest_path}")
+    print(f"  stub      {stub}")
+    print(f"  {len(findings)} gate finding(s)")
+    for finding in findings:
+        print(f"    - {finding}")
+    return 1 if findings else 0
+
+
+def intake(
+    pdf_paths,
+    item_id: str,
+    kind: str,
+    expect_pages,
+    force: bool,
+    use_vision: bool = True,
+    jobs: int = 1,
+) -> int:
     out_dir = MASTERS_DIR / item_id
     manifest_path = out_dir / "manifest.json"
     if manifest_path.exists() and not force:
         print(f"Already ingested: {manifest_path}\nRe-run with --force to redo it.")
         return 0
-    out_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        prepare_intake_workspace(
+            item_id,
+            out_dir,
+            force,
+            kind=kind,
+            pdf_paths=pdf_paths,
+        )
+    except ValueError as error:
+        print(f"ERROR: {error}", file=sys.stderr)
+        return 2
+
+    # Pin source identity before rendering or OCR. A resumed run may reuse
+    # expensive masters only when every ordered source part has the same
+    # name, byte count, and SHA256 as this checkpoint.
+    source = write_source_checkpoint(out_dir, item_id, kind, pdf_paths)
 
     names = ", ".join(p.name for p in pdf_paths)
     print(f"Reading {names} ..." if len(pdf_paths) == 1
           else f"Reading {len(pdf_paths)} parts as one book: {names} ...")
-    pages = extract_pages(pdf_paths, out_dir)
+    if jobs > 1:
+        print(f"  using {jobs} jobs for page orientation and OCR")
+    pages = extract_pages(pdf_paths, out_dir, jobs=jobs)
+    normalized = normalize_page_masters(out_dir, pages)
     print(f"  {len(pages)} page(s) written to {out_dir}")
+    if normalized:
+        print(f"  {normalized} sideways page master(s) normalized; captures retained")
 
     layer = text_layer(pdf_paths)
     have_layer = sum(1 for t in layer if t.strip())
@@ -692,12 +1392,11 @@ def intake(pdf_paths, item_id: str, kind: str, expect_pages, force: bool,
             texts = [""] * len(pages)
             method = "none"
         else:
-            print(f"  no usable text layer, running OCR on {len(pages)} page(s) ...")
-            for p in pages:
-                texts.append(ocr_page(out_dir / p["master"], p.get("rotation", 0))
-                             if "master" in p else "")
-                if p["page"] % 10 == 0:
-                    print(f"    ... page {p['page']}")
+            suffix = f" with {jobs} jobs" if jobs > 1 else ""
+            print(
+                f"  no usable text layer, running OCR on {len(pages)} page(s){suffix} ..."
+            )
+            texts = ocr_pages(out_dir, pages, jobs=jobs)
 
     # The mixture: keep OCR where it is good, escalate where it is not.
     vision, vision_failed, vision_attempted = {}, {}, []
@@ -721,34 +1420,13 @@ def intake(pdf_paths, item_id: str, kind: str, expect_pages, force: bool,
                 print(f"  {len(vision)} page(s) re-read by the model")
 
     text_info = write_sidecar(item_id, pages, texts)
-    findings = run_gates(pages, expect_pages,
-                         texts={p["page"]: t for p, t in zip(pages, texts)})
-    if vision_failed:
-        findings.append(
-            f"{len(vision_failed)} page(s) could not be read by the model "
-            f"({sorted(vision_failed)}), so they keep their OCR text; that text is the "
-            "least trustworthy in the book, because these are the pages OCR did worst on."
-        )
-    if text_info["emptyPages"]:
-        findings.append(
-            f"{len(text_info['emptyPages'])} page(s) produced no text: "
-            f"{text_info['emptyPages'][:12]}. Spans cannot be verified against them."
-        )
-
     manifest = {
         "id": item_id,
         "kind": kind,
         "intakeAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "source": {
-            "file": pdf_paths[0].name,
-            "sha256": sha256_file(pdf_paths[0]),
-            "bytes": pdf_paths[0].stat().st_size,
-            "parts": [
-                {"file": p.name, "sha256": sha256_file(p), "bytes": p.stat().st_size}
-                for p in pdf_paths
-            ],
-        },
+        "source": source,
         "pageCount": len(pages),
+        "expectedPageCount": expect_pages if expect_pages is not None else len(pages),
         "mastersDir": str(out_dir.relative_to(COSMO.parent)),
         "textExtraction": {
             "method": method,
@@ -763,7 +1441,11 @@ def intake(pdf_paths, item_id: str, kind: str, expect_pages, force: bool,
             **text_info,
         },
         "text": text_info,
-        "gateFindings": findings,
+        # Persist the expensive work before the gates run. If a process is
+        # interrupted here, --check can finish the same capture instead of
+        # rendering and OCRing the entire book again.
+        "gateStatus": "pending",
+        "gateFindings": ["Deterministic gates are pending."],
         "pages": [
             {
                 **p,
@@ -776,6 +1458,17 @@ def intake(pdf_paths, item_id: str, kind: str, expect_pages, force: bool,
             for p in pages
         ],
     }
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+
+    findings = add_extraction_findings(
+        manifest,
+        run_gates(
+            pages,
+            expected_page_count(manifest),
+            texts={p["page"]: t for p, t in zip(pages, texts)},
+        ),
+    )
+    set_gate_result(manifest, findings)
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
 
     stub = stub_json(item_id, kind, manifest, pdf_paths[0])
@@ -842,37 +1535,50 @@ def revision(item_id: str) -> int:
     outcome = read_pages_with_vision(item_dir, pages, wanted)
     vision, failed = outcome.get("read", {}), outcome.get("failed", {})
 
-    method = manifest.get("textExtraction", {}).get("method", "tesseract")
+    te = manifest.setdefault("textExtraction", {})
+    prior_vision_text = {
+        p["page"]
+        for p in pages
+        if str(p.get("textSource", "")).startswith("vision:")
+    }
     for i, p in enumerate(pages):
         row = vision.get(p["page"])
         if row and (row.get("text") or "").strip():
             texts[i] = row["text"]
             p["textSource"] = f"vision:{row.get('model', VISION_MODEL)}"
             p["visual"] = {k: row[k] for k in ("description", "kind", "confidence") if k in row}
-        elif p["page"] in failed:
-            p["textSource"] = f"{method} (vision read failed)"
 
     text_info = write_sidecar(item_id, pages, texts)
-    te = manifest.setdefault("textExtraction", {})
     te["visionAttempted"] = sorted(set(te.get("visionAttempted") or []) | set(wanted))
     te["visionPages"] = sorted({p["page"] for p in pages if "visual" in p})
-    te["visionFailed"] = {str(k): v[:200] for k, v in sorted(failed.items())}
+    te["visionFailed"] = {
+        str(k): v[:200]
+        for k, v in sorted(failed.items())
+        if k not in prior_vision_text
+    }
+    retry_failed = dict(te.get("visionRetryFailed") or {})
+    for page_number in wanted:
+        retry_failed.pop(str(page_number), None)
+    retry_failed.update({str(k): v[:200] for k, v in sorted(failed.items())})
+    te["visionRetryFailed"] = retry_failed
     te.update(text_info)
     manifest["text"] = text_info
-    manifest["gateFindings"] = run_gates(
-        pages, manifest.get("pageCount"),
-        texts={p["page"]: t for p, t in zip(pages, texts)})
-    if failed:
-        manifest["gateFindings"].append(
-            f"{len(failed)} page(s) could not be read by the model ({sorted(failed)}), "
-            "so they keep their OCR text.")
+    findings = add_extraction_findings(
+        manifest,
+        run_gates(
+            pages,
+            expected_page_count(manifest),
+            texts={p["page"]: t for p, t in zip(pages, texts)},
+        ),
+    )
+    set_gate_result(manifest, findings)
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
     stub_json(item_id, manifest.get("kind", "reference"), manifest,
               Path(manifest["source"]["file"]))
     print(f"  {len(vision)} re-read, {len(failed)} still failing")
-    for f in manifest["gateFindings"]:
+    for f in findings:
         print(f"    - {f}")
-    return 1 if failed else 0
+    return 1 if findings else 0
 
 
 def recheck(item_id: str) -> int:
@@ -881,10 +1587,218 @@ def recheck(item_id: str) -> int:
         print(f"No manifest for {item_id}. Run intake first.")
         return 2
     manifest = json.loads(manifest_path.read_text())
-    findings = run_gates(manifest["pages"], manifest["pageCount"], texts=sidecar_pages(item_id))
+    findings = add_extraction_findings(
+        manifest,
+        run_gates(
+            manifest["pages"],
+            expected_page_count(manifest),
+            texts=sidecar_pages(item_id),
+        ),
+    )
+    set_gate_result(manifest, findings)
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+    stub_json(
+        item_id,
+        manifest.get("kind", "curriculum" if item_id.startswith("cur-") else "reference"),
+        manifest,
+        Path(manifest["source"]["file"]),
+    )
     print(f"{item_id}: {manifest['pageCount']} page(s), {len(findings)} finding(s)")
     for f in findings:
         print(f"  - {f}")
+    return 1 if findings else 0
+
+
+def repair_unreadable_masters(item_id: str) -> int:
+    """Render unreadable extracted masters from their exact source PDF pages.
+
+    Some scanner PDFs contain a full-page JPEG whose stream is truncated even
+    though the PDF renderer can still composite the page. Preserve that broken
+    embedded capture, render only the affected page, refresh its OCR, and rerun
+    the deterministic gates. No source Blob or analysis judgment is changed.
+    """
+    manifest_path = MASTERS_DIR / item_id / "manifest.json"
+    item_path = (
+        CURS_DIR if item_id.startswith("cur-") else REFS_DIR
+    ) / f"{item_id}.json"
+    if not manifest_path.exists() or not item_path.exists():
+        print(f"No manifest and corpus record pair for {item_id}.")
+        return 2
+    manifest = json.loads(manifest_path.read_text())
+    item = json.loads(item_path.read_text())
+    broken = [page for page in manifest.get("pages", []) if page.get("error")]
+    if not broken:
+        print(f"{item_id}: no unreadable masters need repair.")
+        return 0
+
+    sources_by_sha = {}
+    for source_file in item.get("sourceFiles") or []:
+        local_value = source_file.get("localPath")
+        digest = source_file.get("sha256")
+        if not local_value or not digest:
+            continue
+        local_path = Path(local_value)
+        if not local_path.is_absolute():
+            local_path = COSMO.parent / local_path
+        if local_path.exists():
+            sources_by_sha.setdefault(digest, []).append(local_path)
+
+    source_paths = []
+    for part in manifest.get("source", {}).get("parts", []):
+        candidates = sources_by_sha.get(part.get("sha256"), [])
+        named = [path for path in candidates if path.name == part.get("file")]
+        candidates = named or candidates
+        if not candidates:
+            print(f"Missing exact local source for {part.get('file')}.")
+            return 2
+        source_path = candidates[0]
+        if sha256_file(source_path) != part.get("sha256"):
+            print(f"Source hash changed for {source_path}.")
+            return 2
+        source_paths.append(source_path)
+
+    item_dir = manifest_path.parent
+    sidecar = sidecar_pages(item_id)
+    repaired = []
+    documents = {}
+    repaired_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    try:
+        for page in broken:
+            part_number = int(page.get("part") or 1)
+            part_page = int(page.get("partPage") or page["page"])
+            if not 1 <= part_number <= len(source_paths):
+                raise ValueError(f"page {page['page']} has invalid source part {part_number}")
+            document = documents.get(part_number)
+            if document is None:
+                document = fitz.open(source_paths[part_number - 1])
+                documents[part_number] = document
+            if not 1 <= part_page <= document.page_count:
+                raise ValueError(f"page {page['page']} has invalid part page {part_page}")
+
+            old_master = item_dir / page["master"]
+            if not old_master.exists():
+                raise FileNotFoundError(f"missing failed master {old_master}")
+            old_error = page["error"]
+            rendered = item_dir / f"p{page['page']:04d}.rendered.png"
+            temporary = item_dir / f".p{page['page']:04d}.rendered.tmp.png"
+            pix = document[part_page - 1].get_pixmap(dpi=RENDER_DPI)
+            pix.save(temporary)
+            os.replace(temporary, rendered)
+            metrics = page_metrics(rendered)
+            if "error" in metrics:
+                raise ValueError(
+                    f"rendered fallback for page {page['page']} is still unreadable: "
+                    f"{metrics['error']}"
+                )
+
+            page.update({
+                "master": rendered.name,
+                "source": "rendered-fallback",
+                "reencoded": True,
+                "dpi": RENDER_DPI,
+                "embeddedCaptureMaster": old_master.name,
+                "embeddedCaptureBytes": old_master.stat().st_size,
+                "embeddedCaptureSha256": sha256_file(old_master),
+                "embeddedCaptureError": old_error,
+                "bytes": rendered.stat().st_size,
+                "sha256": sha256_file(rendered),
+                "repair": {
+                    "at": repaired_at,
+                    "operation": "render-exact-source-pdf-page",
+                    "sourcePart": part_number,
+                    "sourcePartPage": part_page,
+                    "sourceSha256": manifest["source"]["parts"][part_number - 1]["sha256"],
+                },
+                **metrics,
+            })
+            page.pop("error", None)
+            rotation = page_orientation(rendered)
+            page["rotation"] = rotation
+            if rotation:
+                normalize_page_master(item_dir, page)
+            sidecar[page["page"]] = ocr_page(
+                item_dir / page["master"], page.get("rotation", 0)
+            )
+            page["textSource"] = "tesseract after rendered fallback"
+            repaired.append(page["page"])
+    except (OSError, ValueError, RuntimeError) as exc:
+        print(f"ERROR: unreadable-master repair stopped: {exc}")
+        return 2
+    finally:
+        for document in documents.values():
+            document.close()
+
+    expected_pages = set(range(1, manifest["pageCount"] + 1))
+    if set(sidecar) != expected_pages:
+        print("ERROR: sidecar page sequence is incomplete after repair.")
+        return 2
+    texts = [sidecar[number] for number in range(1, manifest["pageCount"] + 1)]
+    text_info = write_sidecar(item_id, manifest["pages"], texts)
+    extraction = manifest.setdefault("textExtraction", {})
+    extraction.update(text_info)
+    manifest["text"] = text_info
+    findings = add_extraction_findings(
+        manifest,
+        run_gates(
+            manifest["pages"],
+            expected_page_count(manifest),
+            texts={number: sidecar[number] for number in expected_pages},
+        ),
+    )
+    set_gate_result(manifest, findings)
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+    stub_json(
+        item_id,
+        manifest.get("kind", "curriculum" if item_id.startswith("cur-") else "reference"),
+        manifest,
+        source_paths[0],
+    )
+    print(f"{item_id}: repaired unreadable masters {repaired}")
+    for finding in findings:
+        print(f"  - {finding}")
+    return 1 if findings else 0
+
+
+def normalize_existing_masters(item_id: str) -> int:
+    """Repair manifests created before upright masters became automatic."""
+    manifest_path = MASTERS_DIR / item_id / "manifest.json"
+    if not manifest_path.exists():
+        print(f"No manifest for {item_id}. Run intake first.")
+        return 2
+    manifest = json.loads(manifest_path.read_text())
+    pages = manifest.get("pages") or []
+    changed = normalize_page_masters(manifest_path.parent, pages)
+    findings = add_extraction_findings(
+        manifest,
+        run_gates(
+            pages,
+            expected_page_count(manifest),
+            texts=sidecar_pages(item_id),
+        ),
+    )
+    set_gate_result(manifest, findings)
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+
+    folder = CURS_DIR if item_id.startswith("cur-") else REFS_DIR
+    item_path = folder / f"{item_id}.json"
+    if item_path.exists():
+        item = json.loads(item_path.read_text())
+        capture = item.setdefault("capture", {})
+        capture["gateFindings"] = findings
+        capture["gateStatus"] = manifest["gateStatus"]
+        capture["gateFindingCount"] = manifest["gateFindingCount"]
+        capture["gateFindingsSha256"] = manifest["gateFindingsSha256"]
+        review = capture.get("gateReview") or {}
+        if review.get("findingsSha256") != manifest["gateFindingsSha256"]:
+            capture.pop("gateReview", None)
+        capture["normalizedMasterPages"] = sum(
+            1 for page in pages if page.get("normalizedRotation")
+        )
+        item_path.write_text(json.dumps(item, indent=2) + "\n")
+
+    print(f"{item_id}: normalized {changed} page master(s), {len(findings)} finding(s)")
+    for finding in findings:
+        print(f"  - {finding}")
     return 1 if findings else 0
 
 
@@ -1098,11 +2012,30 @@ def main():
     parser.add_argument("--expect-pages", type=int,
                         help="page count the operator counted, asserted against the capture")
     parser.add_argument("--force", action="store_true", help="redo an already-ingested item")
+    parser.add_argument(
+        "--resume-captured",
+        action="store_true",
+        help="rebuild provenance and finish gates from existing masters plus sidecar",
+    )
     parser.add_argument("--check", metavar="ID", help="re-run the gates on an ingested item")
+    parser.add_argument(
+        "--repair-unreadable",
+        metavar="ID",
+        help="render unreadable extracted masters from their exact source PDF pages",
+    )
+    parser.add_argument("--normalize-masters", metavar="ID",
+                        help="make old sideways page masters upright, retaining captures")
     parser.add_argument("--revision", metavar="ID",
                         help="redo only the model pass on an ingested item, reusing its masters and text")
     parser.add_argument("--no-vision", action="store_true",
                         help="tesseract only; skip the model pass over covers and unreadable pages")
+    parser.add_argument(
+        "--jobs",
+        type=parse_jobs,
+        default=1,
+        metavar="N",
+        help=f"page orientation and OCR workers, 1-{MAX_JOBS} (default: 1)",
+    )
     parser.add_argument("--self-test", action="store_true", help="run the gate fixtures")
     args = parser.parse_args()
 
@@ -1110,6 +2043,10 @@ def main():
         return self_test()
     if args.revision:
         return revision(args.revision)
+    if args.repair_unreadable:
+        return repair_unreadable_masters(args.repair_unreadable)
+    if args.normalize_masters:
+        return normalize_existing_masters(args.normalize_masters)
     if args.check:
         return recheck(args.check)
     if not args.pdf or not args.id:
@@ -1124,8 +2061,24 @@ def main():
         print(f"ERROR: no such file: {', '.join(missing)}", file=sys.stderr)
         return 2
     kind = args.kind or ("curriculum" if args.id.startswith("cur-") else "reference")
-    return intake(pdf_paths, args.id, kind, args.expect_pages, args.force,
-                  use_vision=not args.no_vision)
+    if args.resume_captured:
+        return resume_captured(
+            pdf_paths,
+            args.id,
+            kind,
+            args.expect_pages,
+            args.force,
+            args.jobs,
+        )
+    return intake(
+        pdf_paths,
+        args.id,
+        kind,
+        args.expect_pages,
+        args.force,
+        use_vision=not args.no_vision,
+        jobs=args.jobs,
+    )
 
 
 if __name__ == "__main__":

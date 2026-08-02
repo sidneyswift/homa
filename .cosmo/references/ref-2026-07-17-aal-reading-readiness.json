@@ -3,6 +3,20 @@
   "droppedBy": "atlas-scrape",
   "droppedAt": "2026-07-17T00:00:00-04:00",
   "sourceChannel": "atlas-bulk-ingest",
+  "sourceUrl": "https://downloads.allaboutlearningpress.com/downloads/Free_Reports/Reading-Readiness-Checklist.pdf",
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-aal-reading-readiness/atlas-all-about-learning-reading-readiness.pdf",
+  "resourcedAt": "2026-08-01",
+  "sourceFiles": [
+    {
+      "filename": "atlas-all-about-learning-reading-readiness.pdf",
+      "localPath": ".cosmo/inspo-files/atlas-all-about-learning-reading-readiness.pdf",
+      "size": 2341030,
+      "sha256": "66ecf85ee142abd9e71c1da4122fd2aa563aedc5d030a6e4bb545586dcf998d6",
+      "contentType": "application/pdf",
+      "pageCount": 5,
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-17-aal-reading-readiness/atlas-all-about-learning-reading-readiness.pdf"
+    }
+  ],
   "format": "worksheet",
   "title": "Reading Readiness Checklist",
   "publisher": "All About Learning",

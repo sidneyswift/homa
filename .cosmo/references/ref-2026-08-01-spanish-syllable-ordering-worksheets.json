@@ -1,0 +1,390 @@
+{
+  "id": "ref-2026-08-01-spanish-syllable-ordering-worksheets",
+  "droppedBy": "Carolyng",
+  "droppedAt": "2026-08-01T23:15:05-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1785640505.484629",
+  "coversMessageTs": [],
+  "sourceFiles": [
+    {
+      "filename": "Fichas Ordena Si\u0301labas para Formar Palabras 01.jpg",
+      "slackFileId": "F0BMB473EDT",
+      "slackMessageTs": "1785640505.484629",
+      "localPath": ".cosmo/inspo-files/slack/1785640505.484629/Fichas Ordena Si\u0301labas para Formar Palabras 01-F0BMB473EDT.jpg",
+      "size": 167989,
+      "sha256": "7a7b132b4a6ed48c4676e568e28c770ece97dc4532e4dd88709b94c1ce706e74",
+      "contentType": "image/jpeg",
+      "width": 679,
+      "height": 960,
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-spanish-syllable-ordering-worksheets/1785640505.484629-F0BMB473EDT-Fichas%20Ordena%20Si%CC%81labas%20para%20Formar%20Palabras%2001.jpg"
+    },
+    {
+      "filename": "Fichas Ordena Si\u0301labas para Formar Palabras 02.jpg",
+      "slackFileId": "F0BN8Q3RYL8",
+      "slackMessageTs": "1785640505.484629",
+      "localPath": ".cosmo/inspo-files/slack/1785640505.484629/Fichas Ordena Si\u0301labas para Formar Palabras 02-F0BN8Q3RYL8.jpg",
+      "size": 237432,
+      "sha256": "4c75e25bae220f88eb39a6b265f13c7a904a8831adc279db45e870e74807d84e",
+      "contentType": "image/jpeg",
+      "width": 679,
+      "height": 960,
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-spanish-syllable-ordering-worksheets/1785640505.484629-F0BN8Q3RYL8-Fichas%20Ordena%20Si%CC%81labas%20para%20Formar%20Palabras%2002.jpg"
+    },
+    {
+      "filename": "Fichas Ordena Si\u0301labas para Formar Palabras 03.jpg",
+      "slackFileId": "F0BLZ36LE5D",
+      "slackMessageTs": "1785640505.484629",
+      "localPath": ".cosmo/inspo-files/slack/1785640505.484629/Fichas Ordena Si\u0301labas para Formar Palabras 03-F0BLZ36LE5D.jpg",
+      "size": 170317,
+      "sha256": "014dfbb0508e1aab710f3b4677e750170b761c24cd76c1243225bd51e20206ee",
+      "contentType": "image/jpeg",
+      "width": 679,
+      "height": 960,
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-spanish-syllable-ordering-worksheets/1785640505.484629-F0BLZ36LE5D-Fichas%20Ordena%20Si%CC%81labas%20para%20Formar%20Palabras%2003.jpg"
+    },
+    {
+      "filename": "Fichas Ordena Si\u0301labas para Formar Palabras 04.jpg",
+      "slackFileId": "F0BMEE2HRSN",
+      "slackMessageTs": "1785640505.484629",
+      "localPath": ".cosmo/inspo-files/slack/1785640505.484629/Fichas Ordena Si\u0301labas para Formar Palabras 04-F0BMEE2HRSN.jpg",
+      "size": 173618,
+      "sha256": "9dfc8af5264d5d2f86d981b292e991c01ed1ce567e48cf4e65291f68daac91f3",
+      "contentType": "image/jpeg",
+      "width": 679,
+      "height": 960,
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-spanish-syllable-ordering-worksheets/1785640505.484629-F0BMEE2HRSN-Fichas%20Ordena%20Si%CC%81labas%20para%20Formar%20Palabras%2004.jpg"
+    },
+    {
+      "filename": "Fichas Ordena Si\u0301labas para Formar Palabras 05.jpg",
+      "slackFileId": "F0BMGC23PUH",
+      "slackMessageTs": "1785640505.484629",
+      "localPath": ".cosmo/inspo-files/slack/1785640505.484629/Fichas Ordena Si\u0301labas para Formar Palabras 05-F0BMGC23PUH.jpg",
+      "size": 111696,
+      "sha256": "0a344b1f020778e5e9745a3437538f9938efc48f37293f2500e926bd5bfe9ef9",
+      "contentType": "image/jpeg",
+      "width": 679,
+      "height": 960,
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-spanish-syllable-ordering-worksheets/1785640505.484629-F0BMGC23PUH-Fichas%20Ordena%20Si%CC%81labas%20para%20Formar%20Palabras%2005.jpg"
+    },
+    {
+      "filename": "Fichas Ordena Si\u0301labas para Formar Palabras 06.jpg",
+      "slackFileId": "F0BMGC27ZED",
+      "slackMessageTs": "1785640505.484629",
+      "localPath": ".cosmo/inspo-files/slack/1785640505.484629/Fichas Ordena Si\u0301labas para Formar Palabras 06-F0BMGC27ZED.jpg",
+      "size": 117603,
+      "sha256": "af31605ac8891df20c920afe5774392bfbf9d2dc179bde09adb55fbbf50842cf",
+      "contentType": "image/jpeg",
+      "width": 679,
+      "height": 960,
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-spanish-syllable-ordering-worksheets/1785640505.484629-F0BMGC27ZED-Fichas%20Ordena%20Si%CC%81labas%20para%20Formar%20Palabras%2006.jpg"
+    },
+    {
+      "filename": "Fichas-lectoescritura-ordenar-si\u0301labas-palabras-01.jpg",
+      "slackFileId": "F0BMEE2J05Q",
+      "slackMessageTs": "1785640505.484629",
+      "localPath": ".cosmo/inspo-files/slack/1785640505.484629/Fichas-lectoescritura-ordenar-si\u0301labas-palabras-01-F0BMEE2J05Q.jpg",
+      "size": 97202,
+      "sha256": "1fe26c138f94d48386b1f260e200cdd15aab21cd24fcf42c4b0c89d70545087d",
+      "contentType": "image/jpeg",
+      "width": 600,
+      "height": 1023,
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-spanish-syllable-ordering-worksheets/1785640505.484629-F0BMEE2J05Q-Fichas-lectoescritura-ordenar-si%CC%81labas-palabras-01.jpg"
+    },
+    {
+      "filename": "Fichas-lectoescritura-ordenar-si\u0301labas-palabras-02.jpg",
+      "slackFileId": "F0BMJ520A2G",
+      "slackMessageTs": "1785640505.484629",
+      "localPath": ".cosmo/inspo-files/slack/1785640505.484629/Fichas-lectoescritura-ordenar-si\u0301labas-palabras-02-F0BMJ520A2G.jpg",
+      "size": 92595,
+      "sha256": "83ea68424ed20dbbde50361fb3696eac5592497c39d9c9715b1bc4361b7324d6",
+      "contentType": "image/jpeg",
+      "width": 600,
+      "height": 1023,
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-spanish-syllable-ordering-worksheets/1785640505.484629-F0BMJ520A2G-Fichas-lectoescritura-ordenar-si%CC%81labas-palabras-02.jpg"
+    },
+    {
+      "filename": "Fichas-lectoescritura-ordenar-si\u0301labas-palabras-03.jpg",
+      "slackFileId": "F0BN8Q4F8LQ",
+      "slackMessageTs": "1785640505.484629",
+      "localPath": ".cosmo/inspo-files/slack/1785640505.484629/Fichas-lectoescritura-ordenar-si\u0301labas-palabras-03-F0BN8Q4F8LQ.jpg",
+      "size": 95767,
+      "sha256": "c2d547ced3dd1dd8525c7e2c59779c83809d97c4263b6e8cb11e87a745c35159",
+      "contentType": "image/jpeg",
+      "width": 600,
+      "height": 1023,
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-spanish-syllable-ordering-worksheets/1785640505.484629-F0BN8Q4F8LQ-Fichas-lectoescritura-ordenar-si%CC%81labas-palabras-03.jpg"
+    },
+    {
+      "filename": "Fichas-lectoescritura-ordenar-si\u0301labas-palabras-04.jpg",
+      "slackFileId": "F0BN8Q3PHKJ",
+      "slackMessageTs": "1785640505.484629",
+      "localPath": ".cosmo/inspo-files/slack/1785640505.484629/Fichas-lectoescritura-ordenar-si\u0301labas-palabras-04-F0BN8Q3PHKJ.jpg",
+      "size": 93551,
+      "sha256": "40d4817b62c3eaf261142c9e453fb7455681ecc415607bb178e1e94a4d1fa390",
+      "contentType": "image/jpeg",
+      "width": 600,
+      "height": 1023,
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-spanish-syllable-ordering-worksheets/1785640505.484629-F0BN8Q3PHKJ-Fichas-lectoescritura-ordenar-si%CC%81labas-palabras-04.jpg"
+    }
+  ],
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-spanish-syllable-ordering-worksheets/1785640505.484629-F0BMB473EDT-Fichas%20Ordena%20Si%CC%81labas%20para%20Formar%20Palabras%2001.jpg",
+  "title": "Spanish Syllable Ordering Worksheets",
+  "format": "picture-supported-syllable-ordering-worksheet-set",
+  "publisher": "Apoyo Educativo Ari, credited on part of the set",
+  "gradeLevel": "early elementary Spanish literacy, approximately ages 6 to 8",
+  "analysisQuality": "full",
+  "routing": {
+    "skillUsed": "reference-ingestion",
+    "ruling": "Reference, not curriculum. These ten direct-image worksheets demonstrate two repeatable practice layouts for reconstructing Spanish words from scrambled syllables. They do not include a teaching philosophy, scope, or paced sequence."
+  },
+  "layout": {
+    "structure": "two worksheet series",
+    "spacing": "dense but regular",
+    "visualHierarchy": "picture cue, scrambled syllables, then one bounded written response area",
+    "whiteSpaceRatio": 0.31,
+    "flowDirection": "three-by-four prompt grids on pages 1 through 6, then three stacked letter sections on pages 7 through 10",
+    "notes": "Pages 1 through 4 place twelve picture-supported prompts in a three-by-four grid, with answer boxes on the first three pages. Pages 5 and 6 use three scrambled-syllable cells and three blank response cells under each of twelve pictures. Pages 7 through 10 group prompts by letters Aa through Ll, with three letter sections, twelve pictures per section, and numbered writing lines."
+  },
+  "skillTargeting": {
+    "subject": "spanish",
+    "domain": "spanish-foundational-literacy",
+    "topics": [
+      {
+        "id": "mt_e370b8d9a7",
+        "kind": "word-building",
+        "mapped": true,
+        "note": "Spanish Syllable Structures and Consonant Clusters is an exact match for reconstructing pictured words from printed syllable units."
+      },
+      {
+        "id": "mt_8d2f6a91c4",
+        "kind": "encoding",
+        "mapped": true,
+        "note": "Spanish Grapheme-Phoneme Correspondences supports the letter-group series, which pairs pictured words with syllables and a written answer."
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBand": [
+      72,
+      96
+    ],
+    "complexity": "layered",
+    "prerequisites": [],
+    "scaffoldingLevel": "medium",
+    "notes": "Every response has a picture cue and a closed set of printed syllables, which lowers vocabulary and retrieval demand. The child must still identify the pictured word, order two or three syllables, and write the result. The letter-group pages increase density to twelve prompts inside each section."
+  },
+  "theming": {
+    "themeType": "neutral",
+    "characters": [],
+    "visualStyle": "black-line picture cues with compact classroom worksheet geometry",
+    "colorPalette": "mostly black and white, with a multicolor dot border on the first series",
+    "appealDrivers": "Each picture makes the target word concrete before the child manipulates its syllable order. Repeated grid geometry makes the action predictable while the pictured vocabulary changes.",
+    "notes": "The illustrations function as answer cues, not decoration or narrative characters."
+  },
+  "printFormat": {
+    "pageSize": "unknown",
+    "orientation": "portrait",
+    "margins": "unknown",
+    "inkDensity": "light",
+    "colorRequirement": "prints well in B&W",
+    "notes": "The Slack sources are raster JPEGs at 679 by 960 or 600 by 1023 pixels, so they prove portrait layout but not a physical paper size or trim margin. Color is decorative and does not encode answers."
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/ref-2026-08-01-spanish-syllable-ordering-worksheets.txt",
+    "textBlobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo-text/ref-2026-08-01-spanish-syllable-ordering-worksheets/ref-2026-08-01-spanish-syllable-ordering-worksheets.txt",
+    "notes": "All ten JPEGs were inspected locally at original resolution. Exact visible instructions, letter groups, and scrambled syllables were manually transcribed to the sidecar. No semantic claims were inferred from filenames alone.",
+    "subjects": [
+      {
+        "name": "spanish syllable ordering",
+        "role": "teaches",
+        "quote": "Ordena para formar palabras:"
+      },
+      {
+        "name": "spanish word formation",
+        "role": "teaches",
+        "quote": "nombre correcto del dibujo"
+      },
+      {
+        "name": "letter-syllable spelling",
+        "role": "teaches",
+        "quote": "Observa y escribe correctamente."
+      }
+    ],
+    "entities": [
+      {
+        "name": "Apoyo Educativo Ari",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "Apoyo Educativo Ari"
+      }
+    ],
+    "themes": [
+      {
+        "name": "picture-supported decoding",
+        "evidence": "nombre correcto del dibujo"
+      },
+      {
+        "name": "ordered word reconstruction",
+        "evidence": "Ordena para formar palabras:"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "escribe",
+        "occurrences": 4,
+        "quote": "Observa y escribe correctamente."
+      }
+    ],
+    "referencedWorks": [],
+    "textExtraction": {
+      "ocr": "manual-visual-transcription",
+      "visionModel": null,
+      "visionPages": [],
+      "manualVisualReviewPages": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "note": "The direct JPEGs were reviewed at original resolution and exact visible evidence was transcribed by hand. No external vision provider was used."
+    }
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "picture-supported-syllable-ordering"
+    ],
+    "gaps": [],
+    "notes": "The shipped picture-supported-syllable-ordering recipe now owns this exact action with trusted Spanish segmentations, verified non-answer permutations, picture cues, bounded whole-word responses, and a separate exact key."
+  },
+  "sourceCompleteness": {
+    "status": "complete",
+    "sourceFileCount": 10,
+    "durableBlobCount": 10,
+    "reviewedImageCount": 10,
+    "note": "All ten Slack JPEGs are hash-verified, stored in Blob, and manually reviewed at original resolution. Every image has a durable local path, exact hash, dimensions, and text/visual evidence receipt."
+  },
+  "capture": {
+    "lane": "direct-image-set",
+    "sourceFile": "Fichas Ordena Sílabas para Formar Palabras 01-F0BMB473EDT.jpg",
+    "sourceFileCount": 10,
+    "sourceSha256": "7a7b132b4a6ed48c4676e568e28c770ece97dc4532e4dd88709b94c1ce706e74",
+    "pageCount": 10,
+    "expectedPageCount": 10,
+    "sourceReceipt": {
+      "version": 1,
+      "recordId": "ref-2026-08-01-spanish-syllable-ordering-worksheets",
+      "kind": "reference",
+      "parts": [
+        {
+          "file": "Fichas Ordena Sílabas para Formar Palabras 01-F0BMB473EDT.jpg",
+          "sha256": "7a7b132b4a6ed48c4676e568e28c770ece97dc4532e4dd88709b94c1ce706e74",
+          "bytes": 167989
+        },
+        {
+          "file": "Fichas Ordena Sílabas para Formar Palabras 02-F0BN8Q3RYL8.jpg",
+          "sha256": "4c75e25bae220f88eb39a6b265f13c7a904a8831adc279db45e870e74807d84e",
+          "bytes": 237432
+        },
+        {
+          "file": "Fichas Ordena Sílabas para Formar Palabras 03-F0BLZ36LE5D.jpg",
+          "sha256": "014dfbb0508e1aab710f3b4677e750170b761c24cd76c1243225bd51e20206ee",
+          "bytes": 170317
+        },
+        {
+          "file": "Fichas Ordena Sílabas para Formar Palabras 04-F0BMEE2HRSN.jpg",
+          "sha256": "9dfc8af5264d5d2f86d981b292e991c01ed1ce567e48cf4e65291f68daac91f3",
+          "bytes": 173618
+        },
+        {
+          "file": "Fichas Ordena Sílabas para Formar Palabras 05-F0BMGC23PUH.jpg",
+          "sha256": "0a344b1f020778e5e9745a3437538f9938efc48f37293f2500e926bd5bfe9ef9",
+          "bytes": 111696
+        },
+        {
+          "file": "Fichas Ordena Sílabas para Formar Palabras 06-F0BMGC27ZED.jpg",
+          "sha256": "af31605ac8891df20c920afe5774392bfbf9d2dc179bde09adb55fbbf50842cf",
+          "bytes": 117603
+        },
+        {
+          "file": "Fichas-lectoescritura-ordenar-sílabas-palabras-01-F0BMEE2J05Q.jpg",
+          "sha256": "1fe26c138f94d48386b1f260e200cdd15aab21cd24fcf42c4b0c89d70545087d",
+          "bytes": 97202
+        },
+        {
+          "file": "Fichas-lectoescritura-ordenar-sílabas-palabras-02-F0BMJ520A2G.jpg",
+          "sha256": "83ea68424ed20dbbde50361fb3696eac5592497c39d9c9715b1bc4361b7324d6",
+          "bytes": 92595
+        },
+        {
+          "file": "Fichas-lectoescritura-ordenar-sílabas-palabras-03-F0BN8Q4F8LQ.jpg",
+          "sha256": "c2d547ced3dd1dd8525c7e2c59779c83809d97c4263b6e8cb11e87a745c35159",
+          "bytes": 95767
+        },
+        {
+          "file": "Fichas-lectoescritura-ordenar-sílabas-palabras-04-F0BN8Q3PHKJ.jpg",
+          "sha256": "40d4817b62c3eaf261142c9e453fb7455681ecc415607bb178e1e94a4d1fa390",
+          "bytes": 93551
+        }
+      ]
+    },
+    "mastersDir": ".cosmo/masters/ref-2026-08-01-spanish-syllable-ordering-worksheets",
+    "intakeAt": "2026-08-02T05:44:48Z",
+    "gateStatus": "complete",
+    "gateFindings": [],
+    "gateFindingCount": 0,
+    "gateFindingsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "normalizedMasterPages": 0,
+    "manualReview": {
+      "status": "complete",
+      "reviewedAt": "2026-08-02T05:44:48Z",
+      "filesReviewed": 10,
+      "externalVisionProvider": null,
+      "note": "All ten direct JPEGs were inspected at original resolution and exact visible evidence was transcribed locally."
+    }
+  },
+  "stages": {
+    "captured": "2026-08-02T05:35:58+00:00",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "recipe",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/picture-supported-syllable-ordering.md",
+        "apps/web/agent/skills/materials-studio/SKILL.md",
+        "apps/web/agent/activity-formats.md"
+      ],
+      "verification": {
+        "matchedRecipes": 1,
+        "unresolvedGaps": 0
+      },
+      "commit": null,
+      "note": "The new shared recipe reproduces the reusable teaching action without copying the source list, art, directions, order, or layout. Trusted segmentation is required, and deterministic checks own chunk reconstruction and permutation integrity."
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "commit": null,
+      "note": "Spanish Syllable Structures and Consonant Clusters plus Spanish Grapheme-Phoneme Correspondences cover the learning targets. No taxonomy addition is needed."
+    },
+    "analysisReceipt": {
+      "status": "complete",
+      "analyzedAt": "2026-08-02T05:44:48Z",
+      "method": "ten-image-manual-local-review",
+      "sourceFileCount": 10,
+      "reviewedImageCount": 10,
+      "aboutnessClaimCount": 7,
+      "captureFindingsReviewed": 0,
+      "externalVisionProvider": null
+    },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  }
+}

@@ -1,59 +1,63 @@
 {
   "id": "ref-2026-07-18-minibeast-pack",
-  "droppedBy": "carolyng",
-  "droppedAt": "2026-07-18T01:17:00-04:00",
+  "droppedBy": "Carolyng",
+  "droppedAt": "2026-07-18T01:17:11-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784351831.836349",
   "format": "activity-pack",
   "title": "Minibeast Pack (Fiddlesticks Kids)",
+  "publisher": "Fiddlesticks Kids",
+  "gradeLevel": "preschool to early elementary, approximately ages 3 to 6",
+  "analysisQuality": "full",
+  "routing": {
+    "skillUsed": "reference-ingestion",
+    "ruling": "Reference, not curriculum. This is a ten-page printable pack with reusable identification, sorting, counter, card, and observation surfaces. It has no paced instructional sequence or teaching philosophy, so reference ingestion owns it."
+  },
   "dropperComment": "love the art style, math inclusion and simple activities for pre-k",
   "layout": {
     "structure": "modular-pages",
     "spacing": "airy",
     "visualHierarchy": "illustration-dominant",
     "whiteSpaceRatio": 0.45,
-    "flowDirection": "modular-pages"
+    "flowDirection": "modular-pages",
+    "notes": "The pack moves from a full-page bug-house poster to cut-out circular counters, a two-column classification mat, two intentionally open work surfaces, an identification grid, and three pages of two-by-two species cards. Large watercolor subjects and generous blank space keep every child-facing action visually obvious."
   },
   "skillTargeting": {
     "subject": "science",
-    "domain": "nature-study",
-    "topics": [],
-    "unmappedSkills": [
+    "domain": "insects-minibeasts",
+    "topics": [
       {
-        "slug": "science.minibeast-identification",
-        "description": "Identify common minibeasts/invertebrates (snail, woodlouse, ant, centipede, earthworm, ladybird, bumblebee, shield beetle, earwig, cranefly, spider, slug, moth, butterfly)"
+        "id": "mt_o4w9a6r8d2",
+        "kind": "identification",
+        "mapped": true,
+        "note": "Minibeast Identification is an exact catalog match for the labeled poster and species-card set."
       },
       {
-        "slug": "science.insect-classification",
-        "description": "Classify creatures as insect vs non-insect based on 6-leg arthropod rule"
-      },
-      {
-        "slug": "math.counting-with-manipulatives",
-        "description": "Count themed objects using cut-out counters"
+        "id": "mt_h6p2w8q3s5",
+        "kind": "classification",
+        "mapped": true,
+        "note": "Insect Classification is an exact catalog match for the definition and Insect versus Non Insect sorting mat."
       }
-    ]
+    ],
+    "unmappedSkills": []
   },
   "difficulty": {
-    "ageBandMonths": [
+    "ageBand": [
       36,
       72
     ],
-    "ageBandGrades": "Pre-K to 1",
-    "complexity": "single-skill",
+    "complexity": "multi-skill",
     "prerequisites": [],
-    "scaffolding": "high"
+    "scaffoldingLevel": "high",
+    "notes": "The poster and cards support recognition before the classification mat asks for a rule-based decision. Cutting and open drawing can be adult-assisted. No reading beyond short labels is required for most child-facing use."
   },
   "theming": {
     "themeType": "interest-led",
     "characters": [],
-    "visualStyle": "watercolor-naturalist",
-    "colorPalette": "full-color-watercolor",
-    "appealDrivers": [
-      "beautiful watercolor insect illustrations",
-      "nature-study aesthetic",
-      "tactile (print on watercolor paper)",
-      "garden/outdoor connection"
-    ]
+    "visualStyle": "watercolor naturalist illustration",
+    "colorPalette": "earthy greens, browns, and natural species colors on white",
+    "appealDrivers": "Naturalistic watercolor creatures make the identification surfaces feel collectible, while blank counters and open journal pages invite the child to connect the packet to creatures found outdoors.",
+    "notes": "The source uses no mascots or licensed characters. The minibeasts themselves carry the visual interest."
   },
   "printFormat": {
     "pageSize": "A4",
@@ -61,17 +65,100 @@
     "margins": "generous",
     "inkDensity": "medium",
     "colorRequirement": "needs color for full impact",
-    "printNotes": "Creator recommends printing on watercolor paper or thick cardstock for tactile quality"
+    "notes": "The creator recommends high-quality textured paper such as watercolor paper. Labels remain readable in grayscale, but color preserves the naturalist identification value and is part of the reference's strongest design signal."
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/ref-2026-07-18-minibeast-pack.txt",
+    "textBlobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo-text/ref-2026-07-18-minibeast-pack/ref-2026-07-18-minibeast-pack.txt",
+    "notes": "All ten pages were reviewed locally. Pages 4 and 5 are intentionally text-free child work surfaces, not missing capture. Exact textual claims below are verified against the sidecar; visual-only page structure is retained in layout and components.",
+    "subjects": [
+      {
+        "name": "minibeasts",
+        "role": "about",
+        "quote": "Minibeasts"
+      },
+      {
+        "name": "insect classification",
+        "role": "teaches",
+        "quote": "What is an insect?"
+      }
+    ],
+    "entities": [
+      {
+        "name": "Fiddlesticks Kids",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "Fiddlesticks Kids"
+      },
+      {
+        "name": "garden spider",
+        "kind": "animal",
+        "role": "about",
+        "quote": "garden spider"
+      },
+      {
+        "name": "black garden ant",
+        "kind": "animal",
+        "role": "about",
+        "quote": "black garden ant"
+      },
+      {
+        "name": "banded snail",
+        "kind": "animal",
+        "role": "about",
+        "quote": "banded snail"
+      },
+      {
+        "name": "buff tailed bumblebee",
+        "kind": "animal",
+        "role": "about",
+        "quote": "buff tailed bumblebee"
+      }
+    ],
+    "themes": [
+      {
+        "name": "garden nature study",
+        "evidence": "creatures you find in your own gardens"
+      },
+      {
+        "name": "hands-on classification",
+        "evidence": "Insect Non Insect"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "insect",
+        "occurrences": 4,
+        "quote": "insect"
+      },
+      {
+        "term": "minibeast",
+        "occurrences": 1,
+        "quote": "Minibeasts"
+      }
+    ],
+    "referencedWorks": [],
+    "textExtraction": {
+      "ocr": "tesseract",
+      "visionModel": null,
+      "visionPages": [],
+      "manualVisualReviewPages": [
+        4,
+        5
+      ],
+      "note": "Tesseract extracted the text-bearing pages. The two blank-work-surface pages were inspected at original resolution. No external vision provider was used."
+    }
   },
   "recipeMatch": {
-    "matchedRecipes": [],
-    "gaps": [
-      "nature-identification-poster: watercolor grid of 12+ species with labels \u2014 simpler than Stephanie Hathaway's numbered style, just illustration + common name",
-      "cut-out-counters: circular watercolor illustrations for cutting out and using as math manipulatives (counting, sorting, adding). Blank circles included for child to draw their own",
-      "classification-sorting-mat: T-chart or two-column sorting activity (insect vs non-insect, garden vs not-garden) where child places cut-out pieces",
-      "nature-journal-page: watercolor corner illustration with mostly blank page for child's own drawing/writing",
-      "spider-web-drawing-template: watercolor branch with web outline for child to draw spider or add to"
-    ]
+    "matchedRecipes": [
+      "nature-identification-poster",
+      "classification-sorting-mat",
+      "nature-observation-journal",
+      "flash-cards"
+    ],
+    "gaps": [],
+    "notes": "The identification grid, sorting mat, open observation surface, and two-by-two species cards all resolve to shipped recipes. The circular counters and spider-web starter are bounded variations inside those existing formats, not evidence for separate workflow recipes."
   },
   "components": [
     {
@@ -142,7 +229,107 @@
       "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-minibeast-pack/minibeastpack_compressed.pdf",
       "blobUploadedAt": "2026-07-30",
       "rescuedFromSlack": true
+    },
+    {
+      "filename": "Mini Beast Pack.pdf",
+      "slackFileId": "F0BLZ2M7NUX",
+      "slackMessageTs": "1785639867.520439",
+      "localPath": ".cosmo/inspo-files/slack/1785639867.520439/Mini Beast Pack-F0BLZ2M7NUX.pdf",
+      "size": 1068394,
+      "sha256": "206c8b4c176d52229eb9400be28b2570cc77db9c2594a02664621c7f31fd8fca",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-minibeast-pack/1785639867.520439-F0BLZ2M7NUX-Mini%20Beast%20Pack.pdf"
     }
   ],
-  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not."
+  "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not.",
+  "coversMessageTs": [
+    "1785639867.520439"
+  ],
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-minibeast-pack/minibeastpack_compressed.pdf",
+  "sourceCompleteness": {
+    "status": "complete",
+    "sourceOccurrenceCount": 2,
+    "verifiedOriginalCount": 1,
+    "durableBlobCount": 2,
+    "pageCount": 10,
+    "note": "The later Slack recovery supplied a hash-verified ten-page PDF and durable Blob receipt. The earlier rescued compressed Blob remains recorded as historical provenance; no source page is missing."
+  },
+  "stages": {
+    "captured": "2026-08-02T05:35:58+00:00",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "recipe-audit",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/nature-identification-poster.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/classification-sorting-mat.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/nature-observation-journal.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/flash-cards.md"
+      ],
+      "verification": {
+        "matchedRecipes": 4,
+        "unresolvedGaps": 0
+      },
+      "commit": null,
+      "note": "Every reusable surface resolves to a shipped recipe, so no recipe or format-registry change is required."
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "commit": null,
+      "note": "Minibeast Identification and Insect Classification are exact existing taxonomy matches."
+    },
+    "analysisReceipt": {
+      "status": "complete",
+      "analyzedAt": "2026-08-02T05:44:48Z",
+      "method": "pdf-intake-plus-manual-local-review",
+      "sourceFileCount": 1,
+      "pageCount": 10,
+      "aboutnessClaimCount": 11,
+      "captureFindingsReviewed": 1,
+      "externalVisionProvider": null
+    },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "Mini Beast Pack-F0BLZ2M7NUX.pdf",
+    "sourceParts": [
+      "Mini Beast Pack-F0BLZ2M7NUX.pdf"
+    ],
+    "sourceSha256": "206c8b4c176d52229eb9400be28b2570cc77db9c2594a02664621c7f31fd8fca",
+    "pageCount": 10,
+    "mastersDir": ".cosmo/masters/ref-2026-07-18-minibeast-pack",
+    "intakeAt": "2026-08-02T05:38:36+00:00",
+    "gateStatus": "findings",
+    "gateFindings": [
+      "2 page(s) produced no text: [4, 5]. Spans cannot be verified against them."
+    ],
+    "gateFindingCount": 1,
+    "gateFindingsSha256": "a76920dc22489b2b396582e9fe1bd13c44a6ac1bf0aef48df7585ea292485c57",
+    "normalizedMasterPages": 1,
+    "gateReview": {
+      "status": "reviewed",
+      "findingsSha256": "a76920dc22489b2b396582e9fe1bd13c44a6ac1bf0aef48df7585ea292485c57",
+      "findingCount": 1,
+      "unresolvedFindingCount": 0,
+      "disposition": "accepted-source-artifact",
+      "reviewedAt": "2026-08-02T05:44:48Z",
+      "note": "Pages 4 and 5 were inspected at original resolution. They are intentionally text-free child work surfaces, not missing or unreadable capture."
+    },
+    "expectedPageCount": 10,
+    "sourceReceipt": {
+      "version": 1,
+      "recordId": "ref-2026-07-18-minibeast-pack",
+      "kind": "reference",
+      "parts": [
+        {
+          "file": "Mini Beast Pack-F0BLZ2M7NUX.pdf",
+          "sha256": "206c8b4c176d52229eb9400be28b2570cc77db9c2594a02664621c7f31fd8fca",
+          "bytes": 1068394
+        }
+      ]
+    }
+  }
 }

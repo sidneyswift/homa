@@ -1,0 +1,245 @@
+{
+  "id": "ref-2026-08-01-advent-countdown-activity-cards",
+  "droppedBy": "Carolyng",
+  "droppedAt": "2026-08-01T23:06:11-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1785639971.841689",
+  "coversMessageTs": [],
+  "sourceFiles": [
+    {
+      "filename": "Advent_Christmas_Activity_Cards.pdf",
+      "slackFileId": "F0BMEDHP17U",
+      "slackMessageTs": "1785639971.841689",
+      "localPath": ".cosmo/inspo-files/slack/1785639971.841689/Advent_Christmas_Activity_Cards-F0BMEDHP17U.pdf",
+      "size": 6686623,
+      "sha256": "6a1c8965d21cb1c4eb7f5adc49ff4ff944d5f80c2a931d25be2f35d23b5b0ab5",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-advent-countdown-activity-cards/1785639971.841689-F0BMEDHP17U-Advent_Christmas_Activity_Cards.pdf"
+    }
+  ],
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-advent-countdown-activity-cards/1785639971.841689-F0BMEDHP17U-Advent_Christmas_Activity_Cards.pdf",
+  "title": "Advent Christmas Activity Cards",
+  "format": "activity-card-deck",
+  "publisher": "Real Life at Home",
+  "gradeLevel": "family use, approximately ages 4 to 12 with adult facilitation",
+  "analysisQuality": "full",
+  "routing": {
+    "skillUsed": "reference-ingestion",
+    "ruling": "Reference, not curriculum. This is a printable deck of selectable seasonal family prompts. It does not present a teaching philosophy, academic progression, or paced lesson sequence."
+  },
+  "layout": {
+    "structure": "cut-apart-card-grid",
+    "spacing": "airy",
+    "visualHierarchy": "one short activity prompt per bordered card",
+    "whiteSpaceRatio": 0.58,
+    "flowDirection": "two columns by four rows per card page",
+    "notes": "After one instruction and identity page, nine pages each hold eight text-led cards for a total of 72 activity prompts. Generous internal card spacing and restrained seasonal borders keep the cards easy to cut and quick to scan."
+  },
+  "skillTargeting": {
+    "subject": "life_skills",
+    "domain": "daily-living",
+    "topics": [
+      {
+        "id": "mt_TZ6weMcIsN",
+        "kind": "routine",
+        "mapped": true,
+        "note": "Daily Routine Building is the closest exact catalog skill: a parent selects and sequences cards into one activity per Advent day. The deck supplies prompts rather than a complete routine curriculum."
+      }
+    ],
+    "unmappedSkills": []
+  },
+  "difficulty": {
+    "ageBand": [
+      48,
+      144
+    ],
+    "complexity": "multi-skill",
+    "prerequisites": [],
+    "scaffoldingLevel": "high",
+    "notes": "Adults choose cards, supply materials, and adapt activities to the family. Child demand ranges from listening or visiting to cutting, baking, donating, volunteering, and making gifts, so execution difficulty varies by selected card."
+  },
+  "theming": {
+    "themeType": "seasonal",
+    "characters": [
+      "Santa"
+    ],
+    "visualStyle": "minimal text cards with restrained Christmas borders",
+    "colorPalette": "black type with red, green, and gold seasonal accents",
+    "appealDrivers": "The cards turn a long list of holiday possibilities into small daily choices. The range moves between crafts, food, outdoor play, family connection, and service, which lets a parent build a tradition without repeating one activity mode.",
+    "notes": "The card set is text-dominant. Seasonal decoration identifies the collection but does not carry instructional meaning."
+  },
+  "printFormat": {
+    "pageSize": "letter",
+    "orientation": "portrait",
+    "margins": "standard",
+    "inkDensity": "light",
+    "colorRequirement": "prints well in B&W",
+    "notes": "The border accents are decorative, so every prompt remains usable in grayscale. The eight-card grid is designed for straight cuts and repeated seasonal reuse."
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/ref-2026-08-01-advent-countdown-activity-cards.txt",
+    "textBlobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo-text/ref-2026-08-01-advent-countdown-activity-cards/ref-2026-08-01-advent-countdown-activity-cards.txt",
+    "notes": "All ten pages were inspected locally and representative exact prompts from every card page were transcribed because the decorative PDF font exposed little machine-readable text. No external vision provider was used.",
+    "subjects": [
+      {
+        "name": "christmas family activities",
+        "role": "about",
+        "quote": "holiday activity / Advent calendar cards"
+      },
+      {
+        "name": "christmas traditions",
+        "role": "about",
+        "quote": "Visit a Christmas Market"
+      }
+    ],
+    "entities": [
+      {
+        "name": "Real Life at Home",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "real life at home"
+      },
+      {
+        "name": "Santa",
+        "kind": "character",
+        "role": "about",
+        "quote": "Write a letter to Santa"
+      }
+    ],
+    "themes": [
+      {
+        "name": "giving and community care",
+        "evidence": "Collect food & donate to the local food bank or a family in need"
+      },
+      {
+        "name": "family togetherness",
+        "evidence": "Call or visit your grandparents or other extended family"
+      },
+      {
+        "name": "hands-on holiday making",
+        "evidence": "Make paper snowflakes"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "Christmas",
+        "occurrences": 10,
+        "quote": "Christmas Market"
+      },
+      {
+        "term": "Advent",
+        "occurrences": 1,
+        "quote": "Advent calendar cards"
+      }
+    ],
+    "referencedWorks": [
+      {
+        "title": "The Nutcracker",
+        "author": null,
+        "kind": "film",
+        "quote": "Watch the Nutcracker"
+      }
+    ],
+    "textExtraction": {
+      "ocr": "pdf-text-layer-plus-manual-visual-transcription",
+      "visionModel": null,
+      "visionPages": [],
+      "manualVisualReviewPages": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "note": "The PDF text layer was sparse, so exact visible prompts needed by the analysis were manually transcribed after original-resolution inspection."
+    }
+  },
+  "recipeMatch": {
+    "matchedRecipes": [
+      "visual-schedule-cards",
+      "flash-cards"
+    ],
+    "gaps": [],
+    "notes": "visual-schedule-cards owns the parent-selected daily sequence. flash-cards owns the reusable cut-apart prompt-card surface. The Christmas styling and unusually broad prompt set are content variants, not new format gaps."
+  },
+  "sourceCompleteness": {
+    "status": "complete",
+    "sourceFileCount": 1,
+    "durableBlobCount": 1,
+    "pageCount": 10,
+    "cardCount": 72,
+    "note": "The sole Slack PDF is hash-verified, stored in Blob, rendered into ten page masters, and fully reviewed. No page or companion file is missing."
+  },
+  "stages": {
+    "captured": "2026-08-02T05:35:58+00:00",
+    "analyzed": true,
+    "tasteLogged": true,
+    "graduation": {
+      "kind": "recipe-audit",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/visual-schedule-cards.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/flash-cards.md"
+      ],
+      "verification": {
+        "matchedRecipes": 2,
+        "unresolvedGaps": 0
+      },
+      "commit": null,
+      "note": "Both reusable card mechanics already resolve to shipped recipes."
+    },
+    "taxonomy": {
+      "proposedTopics": [],
+      "commit": null,
+      "note": "Daily Routine Building is the closest existing catalog match; no new academic topic is justified by a seasonal prompt deck."
+    },
+    "analysisReceipt": {
+      "status": "complete",
+      "analyzedAt": "2026-08-02T05:44:48Z",
+      "method": "pdf-intake-plus-manual-local-review",
+      "sourceFileCount": 1,
+      "pageCount": 10,
+      "cardCount": 72,
+      "aboutnessClaimCount": 10,
+      "captureFindingsReviewed": 0,
+      "externalVisionProvider": null
+    },
+    "shippedPr": null,
+    "slackReplyTs": null,
+    "shipReaction": false
+  },
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "Advent_Christmas_Activity_Cards-F0BMEDHP17U.pdf",
+    "sourceParts": [
+      "Advent_Christmas_Activity_Cards-F0BMEDHP17U.pdf"
+    ],
+    "sourceSha256": "6a1c8965d21cb1c4eb7f5adc49ff4ff944d5f80c2a931d25be2f35d23b5b0ab5",
+    "pageCount": 10,
+    "mastersDir": ".cosmo/masters/ref-2026-08-01-advent-countdown-activity-cards",
+    "intakeAt": "2026-08-02T05:39:15+00:00",
+    "gateStatus": "complete",
+    "gateFindings": [],
+    "gateFindingCount": 0,
+    "gateFindingsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "normalizedMasterPages": 0,
+    "expectedPageCount": 10,
+    "sourceReceipt": {
+      "version": 1,
+      "recordId": "ref-2026-08-01-advent-countdown-activity-cards",
+      "kind": "reference",
+      "parts": [
+        {
+          "file": "Advent_Christmas_Activity_Cards-F0BMEDHP17U.pdf",
+          "sha256": "6a1c8965d21cb1c4eb7f5adc49ff4ff944d5f80c2a931d25be2f35d23b5b0ab5",
+          "bytes": 6686623
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,2217 @@
+{
+  "id": "cur-2026-07-31-stairway-to-reading",
+  "droppedBy": "Carolyng",
+  "droppedAt": "2026-07-31T13:29:46-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1785518986.911909",
+  "routing": {
+    "skillUsed": "curriculum-ingestion",
+    "ruling": "Curriculum, not reference. The seven PDFs form one coherent remedial reading program: a diagnostic and introduction, a sequenced 40-lesson teacher guide, controlled reading material, flashcards, two practice games, and a completion checklist. Its value is the teaching method, placement logic, scope and sequence, recurring lesson structure, and per-lesson mastery progression. Those are the five curriculum layers, not the layout and print traits of one standalone worksheet. The curriculum-ingestion rule also treats a coherent multi-file curriculum wave as one analysis rather than fragmenting its companion assets into separate references.",
+    "recipeRuling": "All eight Layer 4 recipe gaps graduated on reusable Homa-owned surfaces. Reading placement and mastery observation use the phonics-spelling diagnostic recipe only when deterministic code supplies the policy, ordered skills, stops, and result route. Text-only phonics bingo remains the same shuffled-board mechanic as picture bingo. The source-specific flash-card name aliases to the existing subject-neutral flash-card format. Five distinct mechanics received self-contained recipes. No source word list, story, game rule, threshold, page geometry, or visual identity entered the skill package."
+  },
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "introduction.pdf",
+    "sourceParts": [
+      "introduction.pdf",
+      "Lessons.pdf",
+      "readingmaterial.pdf",
+      "flashcards.pdf",
+      "crazyletters.pdf",
+      "bingo.pdf",
+      "checklist.pdf"
+    ],
+    "sourceSha256": "24fea21235a588b50de13f441590fd3abfeb210ec39c75959924afa07c3fc1e7",
+    "pageCount": 415,
+    "mastersDir": ".cosmo/masters/cur-2026-07-31-stairway-to-reading",
+    "intakeAt": "2026-08-02T03:24:24+00:00",
+    "gateFindings": [],
+    "normalizedMasterPages": 1,
+    "gateStatus": "complete",
+    "gateFindingCount": 0,
+    "gateFindingsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "expectedPageCount": 415,
+    "sourceReceipt": {
+      "version": 1,
+      "recordId": "cur-2026-07-31-stairway-to-reading",
+      "kind": "curriculum",
+      "parts": [
+        {
+          "file": "introduction.pdf",
+          "sha256": "24fea21235a588b50de13f441590fd3abfeb210ec39c75959924afa07c3fc1e7",
+          "bytes": 418218
+        },
+        {
+          "file": "Lessons.pdf",
+          "sha256": "d34ac88afd3eb42875acdf56507602ad620ba71cc995aa175e24458240f87b39",
+          "bytes": 662292
+        },
+        {
+          "file": "readingmaterial.pdf",
+          "sha256": "e9232a788b8e886d8412a43c1dd2c4fd26a1eb4f440bc476029211718288fc62",
+          "bytes": 1170841
+        },
+        {
+          "file": "flashcards.pdf",
+          "sha256": "5175463295384bb992b33118e8dc09856150df8fa5d095476f2d900d293c3844",
+          "bytes": 138658
+        },
+        {
+          "file": "crazyletters.pdf",
+          "sha256": "52072243fb938373ef9d9310954a446ddad94aa638109a25a314b0593faa73f1",
+          "bytes": 2401021
+        },
+        {
+          "file": "bingo.pdf",
+          "sha256": "5ce01e36c1af6e7dac1dc89b95cfb2d96c193887e2ab6d8c97ffbd721c5cc7da",
+          "bytes": 347835
+        },
+        {
+          "file": "checklist.pdf",
+          "sha256": "f1f1bcfd177133478fe2c684b26b92b7bee857694805678f541e58dbffdfaaf4",
+          "bytes": 105815
+        }
+      ]
+    }
+  },
+  "name": "Stairway to Reading",
+  "layer1_philosophy": {
+    "methodology": "Diagnostic-placement, one-to-one, mastery-based systematic phonics remediation",
+    "principles": [
+      "Begin with a two-part diagnostic that tests decoding of unfamiliar words and oral reading level, then start at the first missing skill rather than at a fixed age or grade lesson.",
+      "Teach sound-letter correspondences and blending in a strict sequence, and do not advance until the current step can be performed accurately and fluently.",
+      "Use immediate, matter-of-fact correction, praise correct responses, and discourage guessing at unfamiliar words.",
+      "Build automaticity through daily practice, repetition, repeated reading, and several short, varied activities rather than one long drill.",
+      "Keep the intervention adaptive: the diagnostic chooses the entry lesson, lesson mastery chooses when to advance, and identified weak areas receive targeted practice."
+    ],
+    "evidence": [
+      {
+        "claim": "one-to-one remedial program",
+        "quote": "This is a one-on-one remedial reading program"
+      },
+      {
+        "claim": "diagnostic placement",
+        "quote": "The student\u2019s results on the test will indicate where to start Stairway to Reading."
+      },
+      {
+        "claim": "mastery before advancement",
+        "quote": "do not proceed to the next step until the current one has been mastered."
+      },
+      {
+        "claim": "immediate corrective feedback",
+        "quote": "Immediate feedback is the most powerful teaching tool there is."
+      },
+      {
+        "claim": "phonics decoding instead of guessing",
+        "quote": "every unknown word can be sounded out using the phonics skills the student has already learned."
+      },
+      {
+        "claim": "daily continuity",
+        "quote": "at least a little instruction every day, no exceptions."
+      }
+    ],
+    "learningTheory": "mastery-based-sequential-with-diagnostic-placement",
+    "assessmentApproach": "initial diagnostic placement plus an explicit word-reading mastery check at the end of each lesson",
+    "parentRole": "one-to-one instructor who prepares materials, models and prompts decoding, corrects errors immediately, varies practice, records completed activities, and decides when mastery is secure",
+    "knowledgeBankMatches": [
+      {
+        "topicKey": "direct-instruction-distar",
+        "topicType": "method_philosophy",
+        "status": "related but not exact",
+        "note": "Both methods are explicit, sequential, phonics-led, and mastery-gated. Stairway is not DISTAR: it is not fully scripted, begins with diagnostic placement, uses segmenting rather than continuous blending as a later recurring routine, and recommends up to an hour daily rather than a fixed 20-minute lesson."
+      }
+    ],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "systematic-phonics-remediation",
+        "mergedRowId": "f379531c-ecd6-40fe-835e-188e52ae1a74",
+        "mergedAt": "2026-08-02",
+        "topicType": "method_philosophy",
+        "title": "Systematic phonics remediation with diagnostic placement",
+        "summary": "A one-to-one reading intervention that identifies the first missing decoding skill, starts there, teaches sound-letter patterns in a fixed sequence, uses immediate correction and varied repetition, and advances only after accurate, fluent mastery."
+      },
+      {
+        "suggestedKey": "stairway-to-reading-format",
+        "mergedRowId": "a0e4dfce-f085-4fb5-9955-a99b2579767e",
+        "mergedAt": "2026-08-02",
+        "topicType": "method_format",
+        "title": "Stairway to Reading lesson format",
+        "summary": "A 40-lesson remedial reading sequence supported by a placement test, lesson guide, decodable reading material, flashcards, word bingo, Crazy Letters card games, a completion checklist, and progress graphs. Each lesson identifies who needs it, names the skill, rotates short practice activities, and closes with a word-reading mastery check."
+      }
+    ]
+  },
+  "layer2_scope": {
+    "mappings": [
+      {
+        "curriculumSubject": "Reading diagnosis",
+        "curriculumTopic": "Decode nonsense words and read graded passages aloud to locate the first missing skill and approximate reading level",
+        "sourceQuote": "In Part 1 of the diagnostic test, you are interested in assessing how good the student is at reading unknown words.",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_14OR-MhGJ9",
+        "status": "partial",
+        "suggested": {
+          "note": "Decoding unfamiliar words covers the skill being sampled, but the taxonomy does not encode this curriculum's diagnostic placement procedure as a child skill."
+        }
+      },
+      {
+        "curriculumSubject": "Phonics",
+        "curriculumTopic": "Primary sounds for all 26 letters",
+        "sourceQuote": "The first 12 Simple Code letters",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_F978c32kDr",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics",
+        "curriculumTopic": "Blend represented sounds from left to right to decode words",
+        "sourceQuote": "Blending sounds together",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt__KHQttMde3",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics and spelling",
+        "curriculumTopic": "Read, build, copy, and spell consonant-vowel-consonant words",
+        "sourceQuote": "three sounds and three letters",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_Yw3cLdKa8n",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics",
+        "curriculumTopic": "Read words with double consonants and adjacent consonant clusters in VCC, CVCC, and CCVC positions",
+        "sourceQuote": "Four-letter consonant-consonant-vowel-consonant words",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_797244e245",
+        "status": "mapped",
+        "suggested": {
+          "subject": "English",
+          "domain": "Phonics & Word Reading",
+          "name": "Consonant Clusters in One-Syllable Words",
+          "kind": "procedural",
+          "teachingWindowMonths": [
+            60,
+            96
+          ],
+          "note": "Resolved in this ingestion: mt_797244e245 covers reading and spelling one-syllable VCC, CVCC, and CCVC words while preserving each consonant sound. The existing blending and consonant-digraph topics did not encode that distinct adjacent-consonant procedure."
+        }
+      },
+      {
+        "curriculumSubject": "Phonics",
+        "curriculumTopic": "Split digraphs and final-e vowel changes",
+        "sourceQuote": "Magic \u2018e\u2019",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_C7abt7pRr6",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics",
+        "curriculumTopic": "Consonant digraphs and consonant spellings including ck, sh, th, ch, ng, nk, ph, gh, tch, wh, wr, gn, and kn",
+        "sourceQuote": "The consonant digraphs \u2018ck\u2019, \u2018sh\u2019, \u2018th\u2019, and \u2018ch\u2019",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_9-OHslmt1g",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics",
+        "curriculumTopic": "Common vowel digraphs and their sounds",
+        "sourceQuote": "The sound /\u0113/",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_BtMbZibZUj",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics",
+        "curriculumTopic": "Diphthongs and complex vowel spellings including ow, oo, ue, oy, and y as a vowel",
+        "sourceQuote": "The two sounds of the letters \u2018ow\u2019",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_fMd7v87IiI",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics",
+        "curriculumTopic": "R-controlled vowel sounds and alternative representations for er, ar, or, and air",
+        "sourceQuote": "The sounds /ar/ and /or/",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_a6m7PqTuJN",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics",
+        "curriculumTopic": "Segment multisyllable words for decoding",
+        "sourceQuote": "This lesson teaches students how to segment words of two or more syllables.",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_kVzAFMuFc4",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics",
+        "curriculumTopic": "Read words with silent initial letters",
+        "sourceQuote": "The silent letter digraphs \u2018wh\u2019, \u2018wr\u2019, \u2018gn\u2019, and \u2018kn\u2019",
+        "homaSubject": "English",
+        "homaDomain": "Spelling & Word Study",
+        "homaTopicId": "mt_XK7NYt61cO",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics",
+        "curriculumTopic": "Choose among alternative spellings for known vowel and consonant sounds",
+        "sourceQuote": "additional ways of representing the sound",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_OgJPbGkrYk",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Phonics and spelling",
+        "curriculumTopic": "Read and pronounce the inflectional ending ed",
+        "sourceQuote": "The suffix \u2018ed\u2019",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt__CMXZiPfTV",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Spelling",
+        "curriculumTopic": "Segment sounds and spell practiced words and sentences from dictation",
+        "sourceQuote": "Extra practice can be provided by dictating some of the sentences",
+        "homaSubject": "English",
+        "homaDomain": "Spelling & Word Study",
+        "homaTopicId": "mt_AhfyJoTQtY",
+        "status": "mapped"
+      },
+      {
+        "curriculumSubject": "Reading fluency",
+        "curriculumTopic": "Accurate decoding, repeated reading, automatic word recognition, and fluent oral reading",
+        "sourceQuote": "repeated reading of the non-comprehended passage",
+        "homaSubject": "English",
+        "homaDomain": "Phonics & Word Reading",
+        "homaTopicId": "mt_ZhvwM6LMBL",
+        "status": "mapped"
+      }
+    ],
+    "stats": {
+      "totalCurriculumTopics": 16,
+      "mapped": 15,
+      "unmapped": 0,
+      "noSubject": 0,
+      "partial": 1
+    }
+  },
+  "layer3_structure": {
+    "cadence": "Daily one-to-one instruction. Frequent, short sessions are preferred to irregular, long sessions, and the guide says the best results come from at least some instruction every day.",
+    "cadenceEvidence": "Frequent, short sessions are more effective than irregular, long sessions.",
+    "sessionLengthMinutes": {
+      "recommended": 60,
+      "minimumEffective": 15,
+      "activityMaximum": 10,
+      "evidence": "A commitment of approximately one hour a day is recommended, but even 15 minutes of instruction a day can make a big difference."
+    },
+    "weeklyTemplate": "No weekday template is prescribed. Start at the lesson selected by the diagnostic. In each daily session, rotate activities in blocks of no more than five or ten minutes, such as flashcards, letter or word manipulation, notebook work, word sorting, sentence reading, dictation, Bingo, Crazy Letters, and a decodable story. End on a successful activity, note what was completed, and continue the same lesson in later sessions until the mastery words are read with ease.",
+    "progressionModel": "Linear, diagnostic-entry, mastery progression through 40 lessons. Students may begin at Lessons 1, 3, 5, 7, 11, 12, or 13 according to the diagnostic, but once placed they proceed in sequence and do not advance until the current lesson is fluent.",
+    "reviewRhythm": "Every lesson ends with TESTING MASTERY. Segmenting becomes a five-minute opening routine from Lesson 19 onward, prior sound spellings remain in the flashcard deck, and repeated story reading is recommended when accuracy, comprehension, or fluency needs more practice.",
+    "totalWeeks": null,
+    "durationRange": "The source gives a shortest possible completion time of about six weeks and a longest possible time of a year or more, so a fixed week count would be false.",
+    "durationEvidence": "The shortest possi-ble time to complete the program is about six weeks, while the longest possible time is a year or more."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "reading-placement-screen",
+        "description": "A teacher and student diagnostic with six lines of nonsense words followed by six graded oral-reading passages; stopping rules route the learner to the first needed lesson.",
+        "sourceQuote": "The program begins with a diagnostic test",
+        "recipe": "phonics-spelling-diagnostic-assessment",
+        "status": "have_recipe",
+        "suggestedRecipe": {
+          "name": "reading-placement-screen",
+          "creationPath": "html",
+          "description": "Paired student and teacher pages with controlled nonsense-word rows, short leveled passages, explicit stop rules, and a placement key. Scoring and routing must remain deterministic and validated outside the rendered page.",
+          "complexity": "high"
+        },
+        "notes": "RESOLVED 2026-08-02 through GAP_ALIASES: reading-placement-screen maps to phonics-spelling-diagnostic-assessment. The shared recipe owns the exact observation and recording surface, not this source's nonsense-word lists, passages, thresholds, or lesson-routing table. It may name an instructional starting skill only when a versioned deterministic policy supplies the ordered skills, stop branches, and returned route; it never assigns a grade or reading level."
+      },
+      {
+        "type": "phonics-flash-card-drill",
+        "description": "Letter and grapheme cards for rapid sound retrieval, grouped into Flashcard Letters, Simple Code, and Advanced Code sets.",
+        "sourceQuote": "three different categories of flashcards",
+        "recipe": "flash-cards",
+        "status": "have_recipe",
+        "suggestedRecipe": {
+          "name": "phonics-flash-card-deck",
+          "creationPath": "html",
+          "description": "Cut-apart cards with one letter or grapheme, a cue word when needed, category labels, generous trim margins, and optional duplicate letters for word building.",
+          "complexity": "medium"
+        },
+        "notes": "RESOLVED 2026-08-02 through GAP_ALIASES: phonics-flash-card-deck maps to the new self-contained flash-cards recipe and the existing generic activity-format slug. Phonics is a validated deck mode, not a duplicate physical format. The recipe explicitly excludes the source's category system, word examples, order, cue design, and backs."
+      },
+      {
+        "type": "phoneme-letter-building",
+        "description": "The child moves letter cards into sound positions on a dry-erase board, says each sound, and blends the completed word.",
+        "sourceQuote": "LETTER ARRANGING",
+        "recipe": "phoneme-letter-building-mat",
+        "status": "have_recipe",
+        "suggestedRecipe": {
+          "name": "phoneme-letter-building-mat",
+          "creationPath": "html",
+          "description": "A reusable sound-position mat plus cut-apart letter tiles, with three- and four-position variants and parent prompts for saying each sound before blending.",
+          "complexity": "medium"
+        },
+        "notes": "RESOLVED 2026-08-02: shipped phoneme-letter-building-mat with code-validated ordered phoneme and grapheme records, an exact tile multiset, a separate parent key, and original Homa geometry."
+      },
+      {
+        "type": "word-copying-and-dictation",
+        "description": "The learner copies and later spells target words or sentences while saying each sound and observing capitalization and punctuation.",
+        "sourceQuote": "WORD COPYING",
+        "recipe": "copy-work-pages",
+        "status": "have_recipe"
+      },
+      {
+        "type": "phonics-word-sorting",
+        "description": "Words are copied into columns according to which letters represent the target sound or which sound a shared spelling represents.",
+        "sourceQuote": "WORD SORTING",
+        "recipe": "classification-sorting-mat",
+        "status": "have_recipe"
+      },
+      {
+        "type": "grapheme-underlining",
+        "description": "The learner reads each target word while underlining the letter or letters that represent every sound.",
+        "sourceQuote": "UNDERLINING",
+        "recipe": "grapheme-marking-practice",
+        "status": "have_recipe",
+        "suggestedRecipe": {
+          "name": "grapheme-marking-practice",
+          "creationPath": "html",
+          "description": "A clean word list with ample baseline space for marking grapheme boundaries, a modeled first item, and a compact parent key.",
+          "complexity": "low"
+        },
+        "notes": "RESOLVED 2026-08-02: shipped grapheme-marking-practice with exact character-span validation, one neutral underline convention, original items, and a separate parent key."
+      },
+      {
+        "type": "phonics-word-bingo",
+        "description": "Text-only Bingo boards give game-based decoding practice with each lesson's target word patterns.",
+        "sourceQuote": "BINGO",
+        "recipe": "picture-bingo-board",
+        "status": "have_recipe",
+        "suggestedRecipe": {
+          "name": "phonics-word-bingo",
+          "creationPath": "html",
+          "description": "Several shuffled, text-only word boards from one controlled phonics pool, with caller list, answer key, and no picture cues that let the learner bypass decoding.",
+          "complexity": "medium"
+        },
+        "notes": "RESOLVED 2026-08-02 through GAP_ALIASES: phonics-word-bingo maps to picture-bingo-board because the shared pool, shuffled unique boards, caller list, and marking loop are the same mechanic. The recipe now has an html-only exact-text variant with one trusted taught pool and no pictures, emoji, rebus cues, copied word list, or source board arrangement."
+      },
+      {
+        "type": "phonics-crazy-letters-game",
+        "description": "A printable matching card game asks the learner to pair words with the same target spelling or sound pattern.",
+        "sourceQuote": "CRAZY LETTERS",
+        "recipe": "phonics-sound-card-game",
+        "status": "have_recipe",
+        "suggestedRecipe": {
+          "name": "phonics-sound-card-game",
+          "creationPath": "html",
+          "description": "Cut-apart word cards organized into target-sound families, with matched sets, a compact rule card, and a back pattern that survives duplex-print drift.",
+          "complexity": "medium"
+        },
+        "notes": "RESOLVED 2026-08-02: shipped phonics-sound-card-game with closed family ids, deterministic family-size and uniqueness checks, original neutral rules, a duplex-tolerant Homa-made back, and no source title, deck, groupings, special cards, or directions."
+      },
+      {
+        "type": "decodable-sentence-and-story-reading",
+        "description": "Each lesson's companion pages provide controlled sentences and a short story using sound-letter correspondences already taught.",
+        "sourceQuote": "every unknown word can be sounded out using the phonics skills the student has already learned.",
+        "recipe": "decodable-story-page",
+        "status": "have_recipe",
+        "suggestedRecipe": {
+          "name": "decodable-story-page",
+          "creationPath": "html",
+          "description": "Short connected text constrained to a supplied grapheme inventory, with readable typography, optional repeated-reading marks, and a small parent note listing newly allowed patterns.",
+          "complexity": "high"
+        },
+        "notes": "RESOLVED 2026-08-02: shipped decodable-story-page for original connected text whose full token and grapheme inventory passes deterministic validation against trusted taught skills and explicit heart words. Without that validation the recipe stops; it never copies or paraphrases the source stories, sentences, characters, titles, lists, layout, or art."
+      },
+      {
+        "type": "phonics-mastery-check",
+        "description": "A small set of unfamiliar words tests whether the lesson's decoding skill is easy enough for the learner to advance.",
+        "sourceQuote": "TESTING MASTERY",
+        "recipe": "phonics-spelling-diagnostic-assessment",
+        "status": "have_recipe",
+        "suggestedRecipe": {
+          "name": "phonics-mastery-check",
+          "creationPath": "html",
+          "description": "A parent-facing check with a short controlled word set, neutral observation fields, and deterministic pass logic supplied by code rather than generated prose.",
+          "complexity": "medium"
+        },
+        "notes": "RESOLVED 2026-08-02 through GAP_ALIASES: phonics-mastery-check maps to phonics-spelling-diagnostic-assessment. The recipe can render a one-form mastery observation only from a code-issued policy and exact answer blueprint. It reports counts when no route is returned and never authors a pass threshold, advancement rule, or source word list in prose."
+      },
+      {
+        "type": "lesson-completion-checklist",
+        "description": "A nine-page checklist lets the parent mark which recurring activities have been completed for Lessons 1 through 40.",
+        "sourceQuote": "handy checklist",
+        "recipe": "checklist-assessment",
+        "status": "have_recipe"
+      },
+      {
+        "type": "repeated-reading-and-comprehension-prompts",
+        "description": "The learner rereads a difficult story for decoding automaticity, then the parent asks prediction or personal-response questions if comprehension still needs support.",
+        "sourceQuote": "asking frequent questions about what the student is reading",
+        "recipe": "reading-comprehension-mini-unit",
+        "status": "have_recipe"
+      }
+    ],
+    "stats": {
+      "totalActivityTypes": 12,
+      "haveRecipe": 12,
+      "noRecipe": 0
+    }
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/cur-2026-07-31-stairway-to-reading.txt",
+    "textBlobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo-text/cur-2026-07-31-stairway-to-reading/cur-2026-07-31-stairway-to-reading.txt",
+    "subjects": [
+      {
+        "name": "remedial reading",
+        "role": "teaches",
+        "quote": "one-on-one remedial reading program"
+      },
+      {
+        "name": "systematic phonics",
+        "role": "teaches",
+        "quote": "every unknown word can be sounded out using the phonics skills"
+      },
+      {
+        "name": "sound-letter correspondences",
+        "role": "teaches",
+        "quote": "all of the major sound-letter correspondences"
+      },
+      {
+        "name": "reading accuracy",
+        "role": "teaches",
+        "quote": "all that matters is accuracy"
+      },
+      {
+        "name": "reading fluency",
+        "role": "teaches",
+        "quote": "this kind of fluency has been achieved"
+      }
+    ],
+    "entities": [
+      {
+        "name": "Malkin Dare",
+        "kind": "person",
+        "role": "identity",
+        "quote": "author of Stairway to Reading, Malkin Dare"
+      },
+      {
+        "name": "Society for Quality Education",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "Society for Quality Education"
+      }
+    ],
+    "themes": [
+      {
+        "name": "mastery before advancement",
+        "evidence": "do not proceed to the next step until the current one has been mastered"
+      },
+      {
+        "name": "accuracy instead of guessing",
+        "evidence": "Most students are accustomed to guessing when they encounter an unknown word, but this practice should be vigorously discouraged."
+      },
+      {
+        "name": "practice and repetition",
+        "evidence": "even more practice and repetition"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "diagnostic test",
+        "occurrences": 20,
+        "quote": "diagnostic test"
+      },
+      {
+        "term": "flashcards",
+        "occurrences": 196,
+        "quote": "flashcards"
+      },
+      {
+        "term": "Reading Material",
+        "occurrences": 265,
+        "quote": "Reading Material"
+      },
+      {
+        "term": "Crazy Letters",
+        "occurrences": 142,
+        "quote": "CRAZY LETTERS"
+      },
+      {
+        "term": "segmenting",
+        "occurrences": 67,
+        "quote": "SEGMENTING"
+      }
+    ],
+    "referencedWorks": [
+      {
+        "title": "Hey! Listen to This: Stories to Read Aloud",
+        "author": "Jim Trelease",
+        "kind": "book",
+        "quote": "Hey! Listen to This: Stories to Read Aloud"
+      },
+      {
+        "title": "Read All About It!",
+        "author": "Jim Trelease",
+        "kind": "book",
+        "quote": "Read All About It!"
+      }
+    ],
+    "notes": "The companion stories contain many incidental people, animals, and places, but they are decodable practice content rather than the curriculum's subject. They are intentionally not promoted to whole-curriculum content tags."
+  },
+  "layer5_lessons": {
+    "decompositionQuality": "full",
+    "unitKind": "lesson",
+    "unitsFound": 40,
+    "unitsDecomposed": 40,
+    "units": [
+      {
+        "ordinal": 1,
+        "unitLabel": "Lesson 1",
+        "topic": {
+          "name": "sounds of the first 12 letters",
+          "quote": "The first 12 Simple Code letters"
+        },
+        "referencedWorks": [],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Practice the first 12 letter sounds with cards",
+            "quote": "FLASHCARDS"
+          },
+          {
+            "description": "Retrieve letter sounds along a movement path",
+            "quote": "TREASURE HUNT"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Simple Code flashcards",
+            "quote": "Simple Code flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr"
+        ]
+      },
+      {
+        "ordinal": 2,
+        "unitLabel": "Lesson 2",
+        "topic": {
+          "name": "blending the first 12 sounds",
+          "quote": "Blending sounds"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Arrange letter cards in sound order",
+            "quote": "LETTER ARRANGING"
+          },
+          {
+            "description": "Read a controlled story",
+            "quote": "STORY"
+          }
+        ],
+        "materials": [
+          {
+            "name": "dry-erase board",
+            "quote": "dry-erase board"
+          }
+        ],
+        "homaTopicIds": [
+          "mt__KHQttMde3",
+          "mt_Yw3cLdKa8n"
+        ]
+      },
+      {
+        "ordinal": 3,
+        "unitLabel": "Lesson 3",
+        "topic": {
+          "name": "sounds of the first 19 letters",
+          "quote": "The first 19 Simple Code letters"
+        },
+        "referencedWorks": [],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Practice 19 letter sounds with cards",
+            "quote": "FLASHCARDS"
+          },
+          {
+            "description": "Retrieve letter sounds along a movement path",
+            "quote": "TREASURE HUNT"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Simple Code flashcards",
+            "quote": "Simple Code flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr"
+        ]
+      },
+      {
+        "ordinal": 4,
+        "unitLabel": "Lesson 4",
+        "topic": {
+          "name": "blending the first 19 sounds",
+          "quote": "Blending sounds"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Arrange letter cards in sound order",
+            "quote": "LETTER ARRANGING"
+          },
+          {
+            "description": "Read a controlled story",
+            "quote": "STORY"
+          }
+        ],
+        "materials": [
+          {
+            "name": "dry-erase board",
+            "quote": "dry-erase board"
+          }
+        ],
+        "homaTopicIds": [
+          "mt__KHQttMde3",
+          "mt_Yw3cLdKa8n"
+        ]
+      },
+      {
+        "ordinal": 5,
+        "unitLabel": "Lesson 5",
+        "topic": {
+          "name": "sounds of all 26 letters",
+          "quote": "All 26 Simple Code letters"
+        },
+        "referencedWorks": [],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Practice all 26 primary letter sounds with cards",
+            "quote": "FLASHCARDS"
+          },
+          {
+            "description": "Retrieve letter sounds along a movement path",
+            "quote": "TREASURE HUNT"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Simple Code flashcards",
+            "quote": "Simple Code flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_F978c32kDr"
+        ]
+      },
+      {
+        "ordinal": 6,
+        "unitLabel": "Lesson 6",
+        "topic": {
+          "name": "blending all 26 primary sounds",
+          "quote": "Blending sounds together"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Arrange letter cards in sound order",
+            "quote": "LETTER ARRANGING"
+          },
+          {
+            "description": "Read a controlled story",
+            "quote": "STORY"
+          }
+        ],
+        "materials": [
+          {
+            "name": "dry-erase board",
+            "quote": "dry-erase board"
+          }
+        ],
+        "homaTopicIds": [
+          "mt__KHQttMde3",
+          "mt_Yw3cLdKa8n"
+        ]
+      },
+      {
+        "ordinal": 7,
+        "unitLabel": "Lesson 7",
+        "topic": {
+          "name": "double consonants representing one sound",
+          "quote": "Words with sounds represented by double consonants"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Arrange duplicate letter cards to spell words",
+            "quote": "LETTER ARRANGING"
+          },
+          {
+            "description": "Read a controlled story",
+            "quote": "STORY"
+          }
+        ],
+        "materials": [
+          {
+            "name": "flashcard letters",
+            "quote": "flashcard letters"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 8,
+        "unitLabel": "Lesson 8",
+        "topic": {
+          "name": "vowel-consonant-consonant words",
+          "quote": "Three-letter vowel-consonant-consonant words"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Arrange letters to preserve all three sounds",
+            "quote": "LETTER ARRANGING"
+          },
+          {
+            "description": "Read a controlled story",
+            "quote": "STORY"
+          }
+        ],
+        "materials": [
+          {
+            "name": "dry-erase board",
+            "quote": "dry-erase board"
+          }
+        ],
+        "homaTopicIds": [
+          "mt__KHQttMde3"
+        ]
+      },
+      {
+        "ordinal": 9,
+        "unitLabel": "Lesson 9",
+        "topic": {
+          "name": "consonant-vowel-consonant-consonant words",
+          "quote": "Four-letter consonant-vowel-consonant-consonant words"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Arrange letters to preserve all four sounds",
+            "quote": "LETTER ARRANGING"
+          },
+          {
+            "description": "Read a controlled story",
+            "quote": "STORY"
+          }
+        ],
+        "materials": [
+          {
+            "name": "dry-erase board",
+            "quote": "dry-erase board"
+          }
+        ],
+        "homaTopicIds": [
+          "mt__KHQttMde3"
+        ]
+      },
+      {
+        "ordinal": 10,
+        "unitLabel": "Lesson 10",
+        "topic": {
+          "name": "consonant-consonant-vowel-consonant words",
+          "quote": "Four-letter consonant-consonant-vowel-consonant words"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Arrange letters to preserve all four sounds",
+            "quote": "LETTER ARRANGING"
+          },
+          {
+            "description": "Read a controlled story",
+            "quote": "STORY"
+          }
+        ],
+        "materials": [
+          {
+            "name": "dry-erase board",
+            "quote": "dry-erase board"
+          }
+        ],
+        "homaTopicIds": [
+          "mt__KHQttMde3"
+        ]
+      },
+      {
+        "ordinal": 11,
+        "unitLabel": "Lesson 11",
+        "topic": {
+          "name": "split digraphs and magic e",
+          "quote": "Magic \u2018e\u2019"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Transform short-vowel words by adding final e",
+            "quote": "WORD CHANGING"
+          },
+          {
+            "description": "Practice the pattern through a card game",
+            "quote": "CRAZY LETTERS"
+          }
+        ],
+        "materials": [
+          {
+            "name": "transformation boxes",
+            "quote": "transformation boxes"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_C7abt7pRr6"
+        ]
+      },
+      {
+        "ordinal": 12,
+        "unitLabel": "Lesson 12",
+        "topic": {
+          "name": "consonant digraphs ck sh th and ch",
+          "quote": "The consonant digraphs \u2018ck\u2019, \u2018sh\u2019, \u2018th\u2019, and \u2018ch\u2019"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Arrange letters while treating each digraph as one sound",
+            "quote": "LETTER ARRANGING"
+          },
+          {
+            "description": "Read a controlled story",
+            "quote": "STORY"
+          }
+        ],
+        "materials": [
+          {
+            "name": "Advanced Code flashcards",
+            "quote": "Advanced Code flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_9-OHslmt1g"
+        ]
+      },
+      {
+        "ordinal": 13,
+        "unitLabel": "Lesson 13",
+        "topic": {
+          "name": "spellings for the long o sound",
+          "quote": "The sound /\u014d/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort long-o words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Read a controlled story",
+            "quote": "STORY"
+          }
+        ],
+        "materials": [
+          {
+            "name": "long-o flashcards",
+            "quote": "/\u014d/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_BtMbZibZUj",
+          "mt_C7abt7pRr6",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 14,
+        "unitLabel": "Lesson 14",
+        "topic": {
+          "name": "spellings for the ow sound",
+          "quote": "The sound /ow/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort ow-sound words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Practice the pattern through a card game",
+            "quote": "CRAZY LETTERS"
+          }
+        ],
+        "materials": [
+          {
+            "name": "ow-sound flashcards",
+            "quote": "/ow/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_fMd7v87IiI",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 15,
+        "unitLabel": "Lesson 15",
+        "topic": {
+          "name": "distinguishing the two sounds of ow",
+          "quote": "The two sounds of the letters \u2018ow\u2019"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort words by which sound ow represents",
+            "quote": "SOUND SORTING"
+          },
+          {
+            "description": "Underline the letters representing each sound",
+            "quote": "UNDERLINING"
+          }
+        ],
+        "materials": [
+          {
+            "name": "ow flashcards",
+            "quote": "\u2018ow\u2019 flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_fMd7v87IiI",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 16,
+        "unitLabel": "Lesson 16",
+        "topic": {
+          "name": "spellings for the er sound",
+          "quote": "The sound /er/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort er-sound words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Practice the pattern through a card game",
+            "quote": "CRAZY LETTERS"
+          }
+        ],
+        "materials": [
+          {
+            "name": "er-sound flashcards",
+            "quote": "/er/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_a6m7PqTuJN",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 17,
+        "unitLabel": "Lesson 17",
+        "topic": {
+          "name": "spellings for the long e sound",
+          "quote": "The sound /\u0113/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort long-e words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Practice the pattern through a card game",
+            "quote": "CRAZY LETTERS"
+          }
+        ],
+        "materials": [
+          {
+            "name": "long-e flashcards",
+            "quote": "/\u0113/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_BtMbZibZUj",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 18,
+        "unitLabel": "Lesson 18",
+        "topic": {
+          "name": "spellings for the ar and or sounds",
+          "quote": "The sounds /ar/ and /or/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort ar and or words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Practice the patterns through a card game",
+            "quote": "CRAZY LETTERS"
+          }
+        ],
+        "materials": [
+          {
+            "name": "ar and or flashcards",
+            "quote": "/ar/ and /or/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_a6m7PqTuJN",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 19,
+        "unitLabel": "Lesson 19",
+        "topic": {
+          "name": "segmenting multisyllable words",
+          "quote": "Segmenting words"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Mark vowels, divide words, and blend syllable parts",
+            "quote": "SEGMENTING"
+          }
+        ],
+        "materials": [
+          {
+            "name": "segmenting word lists",
+            "quote": "WORDS TO BE SEGMENTED"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_kVzAFMuFc4",
+          "mt_BhYJZUsErp"
+        ]
+      },
+      {
+        "ordinal": 20,
+        "unitLabel": "Lesson 20",
+        "topic": {
+          "name": "spellings for the long oo sound",
+          "quote": "The sound /oo/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort long-oo words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Read a controlled story",
+            "quote": "STORY"
+          }
+        ],
+        "materials": [
+          {
+            "name": "long-oo flashcards",
+            "quote": "/oo/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_BtMbZibZUj",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 21,
+        "unitLabel": "Lesson 21",
+        "topic": {
+          "name": "spellings for the short oo sound",
+          "quote": "The sound /\u0259/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort short-oo words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Distinguish long and short oo sounds",
+            "quote": "SOUND SORTING"
+          }
+        ],
+        "materials": [
+          {
+            "name": "short-oo flashcards",
+            "quote": "/\u0259/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_BtMbZibZUj",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 22,
+        "unitLabel": "Lesson 22",
+        "topic": {
+          "name": "silent-letter digraphs",
+          "quote": "The silent letter digraphs \u2018wh\u2019, \u2018wr\u2019, \u2018gn\u2019, and \u2018kn\u2019"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort silent-letter words by digraph",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Underline the letters representing each sound",
+            "quote": "UNDERLINING"
+          }
+        ],
+        "materials": [
+          {
+            "name": "silent-letter flashcards",
+            "quote": "silent letter flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_9-OHslmt1g",
+          "mt_XK7NYt61cO"
+        ]
+      },
+      {
+        "ordinal": 23,
+        "unitLabel": "Lesson 23",
+        "topic": {
+          "name": "spellings for the long i sound",
+          "quote": "The sound /\u012b/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort long-i words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Distinguish sounds represented by ie",
+            "quote": "SOUND SORTING"
+          }
+        ],
+        "materials": [
+          {
+            "name": "long-i flashcards",
+            "quote": "/\u012b/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_BtMbZibZUj",
+          "mt_C7abt7pRr6",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 24,
+        "unitLabel": "Lesson 24",
+        "topic": {
+          "name": "spellings for the z sound",
+          "quote": "The sound /z/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort z-sound words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Read a controlled story",
+            "quote": "STORY"
+          }
+        ],
+        "materials": [
+          {
+            "name": "z-sound flashcards",
+            "quote": "/z/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 25,
+        "unitLabel": "Lesson 25",
+        "topic": {
+          "name": "spellings for the long a sound",
+          "quote": "The sound /\u0101/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort long-a words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Practice the pattern through a card game",
+            "quote": "CRAZY LETTERS"
+          }
+        ],
+        "materials": [
+          {
+            "name": "long-a flashcards",
+            "quote": "/ \u0101/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_BtMbZibZUj",
+          "mt_C7abt7pRr6",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 26,
+        "unitLabel": "Lesson 26",
+        "topic": {
+          "name": "ng and nk sounds",
+          "quote": "The sounds /ng/ and /nk/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort ng and nk words",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Read a controlled story",
+            "quote": "STORY"
+          }
+        ],
+        "materials": [
+          {
+            "name": "ng and nk flashcards",
+            "quote": "/ng/ and /nk/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_9-OHslmt1g"
+        ]
+      },
+      {
+        "ordinal": 27,
+        "unitLabel": "Lesson 27",
+        "topic": {
+          "name": "spellings for the air sound",
+          "quote": "The sound /air/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort air-sound words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Practice the pattern through a card game",
+            "quote": "CRAZY LETTERS"
+          }
+        ],
+        "materials": [
+          {
+            "name": "air-sound flashcards",
+            "quote": "/air/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_a6m7PqTuJN",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 28,
+        "unitLabel": "Lesson 28",
+        "topic": {
+          "name": "spellings for the long u sound",
+          "quote": "The sound /\u016b/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort long-u words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Practice the pattern through a card game",
+            "quote": "CRAZY LETTERS"
+          }
+        ],
+        "materials": [
+          {
+            "name": "long-u flashcards",
+            "quote": "/\u016b/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_fMd7v87IiI",
+          "mt_C7abt7pRr6",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 29,
+        "unitLabel": "Lesson 29",
+        "topic": {
+          "name": "pronouncing the suffix ed",
+          "quote": "The suffix \u2018ed\u2019"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort ed words by ending sound",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Underline the letters representing each sound",
+            "quote": "UNDERLINING"
+          }
+        ],
+        "materials": [
+          {
+            "name": "ed flashcards",
+            "quote": "\u2018ed\u2019 flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt__CMXZiPfTV",
+          "mt_QdMMLRYWhn"
+        ]
+      },
+      {
+        "ordinal": 30,
+        "unitLabel": "Lesson 30",
+        "topic": {
+          "name": "spellings for the short o sound",
+          "quote": "The sound /\u014f/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort short-o words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Practice the pattern through a card game",
+            "quote": "CRAZY LETTERS"
+          }
+        ],
+        "materials": [
+          {
+            "name": "short-o flashcards",
+            "quote": "/\u014f/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_fMd7v87IiI",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 31,
+        "unitLabel": "Lesson 31",
+        "topic": {
+          "name": "spellings for the s sound",
+          "quote": "The sound /s/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort s-sound words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Distinguish sounds represented by c",
+            "quote": "SOUND SORTING"
+          }
+        ],
+        "materials": [
+          {
+            "name": "s-sound flashcards",
+            "quote": "/s/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 32,
+        "unitLabel": "Lesson 32",
+        "topic": {
+          "name": "spellings for the short u sound",
+          "quote": "The sound /\u016d/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort short-u words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Distinguish sounds represented by ou",
+            "quote": "SOUND SORTING"
+          }
+        ],
+        "materials": [
+          {
+            "name": "short-u flashcards",
+            "quote": "/\u016d/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_fMd7v87IiI",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 33,
+        "unitLabel": "Lesson 33",
+        "topic": {
+          "name": "spellings for the j sound",
+          "quote": "The sound /j/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort j-sound words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Distinguish sounds represented by g",
+            "quote": "SOUND SORTING"
+          }
+        ],
+        "materials": [
+          {
+            "name": "j-sound flashcards",
+            "quote": "/j/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_9-OHslmt1g",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 34,
+        "unitLabel": "Lesson 34",
+        "topic": {
+          "name": "spellings for the short e sound",
+          "quote": "The sound /\u0115/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort short-e words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Distinguish sounds represented by ea",
+            "quote": "SOUND SORTING"
+          }
+        ],
+        "materials": [
+          {
+            "name": "short-e flashcards",
+            "quote": "/\u011b/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_BtMbZibZUj",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 35,
+        "unitLabel": "Lesson 35",
+        "topic": {
+          "name": "spellings for the ch sound",
+          "quote": "The sound /ch/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort ch-sound words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Practice the pattern through a card game",
+            "quote": "CRAZY LETTERS"
+          }
+        ],
+        "materials": [
+          {
+            "name": "ch-sound flashcards",
+            "quote": "/ch/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_9-OHslmt1g",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 36,
+        "unitLabel": "Lesson 36",
+        "topic": {
+          "name": "spellings for the f sound",
+          "quote": "The sound /f/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort f-sound words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Practice the pattern through a card game",
+            "quote": "CRAZY LETTERS"
+          }
+        ],
+        "materials": [
+          {
+            "name": "f-sound flashcards",
+            "quote": "/f/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_9-OHslmt1g",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 37,
+        "unitLabel": "Lesson 37",
+        "topic": {
+          "name": "spellings for the oy sound",
+          "quote": "The sound /oy/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort oy-sound words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Read a controlled story",
+            "quote": "STORY"
+          }
+        ],
+        "materials": [
+          {
+            "name": "oy-sound flashcards",
+            "quote": "/oy/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_fMd7v87IiI"
+        ]
+      },
+      {
+        "ordinal": 38,
+        "unitLabel": "Lesson 38",
+        "topic": {
+          "name": "spellings for the k sound",
+          "quote": "The sound /k/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort k-sound words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Practice the pattern through a card game",
+            "quote": "CRAZY LETTERS"
+          }
+        ],
+        "materials": [
+          {
+            "name": "k-sound flashcards",
+            "quote": "/k/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_9-OHslmt1g",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 39,
+        "unitLabel": "Lesson 39",
+        "topic": {
+          "name": "y representing the short i sound",
+          "quote": "The sound /\u012d/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort short-i words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Sort words by sounds represented by y",
+            "quote": "SOUND SORTING"
+          }
+        ],
+        "materials": [
+          {
+            "name": "short-i flashcards",
+            "quote": "/\u012d/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_fMd7v87IiI",
+          "mt_OgJPbGkrYk"
+        ]
+      },
+      {
+        "ordinal": 40,
+        "unitLabel": "Lesson 40",
+        "topic": {
+          "name": "spellings for the sh sound",
+          "quote": "The sound /sh/"
+        },
+        "referencedWorks": [
+          {
+            "title": "Stairway to Reading Reading Material",
+            "author": "Malkin Dare",
+            "kind": "curriculum",
+            "quote": "Reading Material"
+          }
+        ],
+        "questions": [],
+        "themes": [],
+        "activities": [
+          {
+            "description": "Sort sh-sound words by spelling",
+            "quote": "WORD SORTING"
+          },
+          {
+            "description": "Distinguish sounds represented by ch",
+            "quote": "SOUND SORTING"
+          }
+        ],
+        "materials": [
+          {
+            "name": "sh-sound flashcards",
+            "quote": "/sh/ flashcards"
+          }
+        ],
+        "homaTopicIds": [
+          "mt_9-OHslmt1g",
+          "mt_OgJPbGkrYk"
+        ]
+      }
+    ],
+    "notes": "All 40 numbered lessons in the lesson guide are decomposed. The companion Reading Material, Flashcards, Crazy Letters, Bingo, and Checklist files are supporting assets referenced by those lessons, not additional lesson units. The lessons prescribe decoding activities and mastery word checks but do not print fixed comprehension questions or literary themes, so questions and themes remain empty instead of being invented. The program is for struggling readers of any age, so unit-level age ranges are omitted."
+  },
+  "decisionsNeeded": [
+    {
+      "category": "taxonomy",
+      "item": "RESOLVED: added mt_797244e245, Consonant Clusters in One-Syllable Words, under English > Phonics & Word Reading after confirming no existing topic covered preserving every sound in VCC, CVCC, and CCVC clusters.",
+      "impact": "Lessons 8 through 10 now map to a real assessment topic. topics.json grew from 1721 to 1722 entries, the slug and progress mappings were regenerated, the manifest count and integrity fields were updated, and pnpm check:taxonomy passed.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "recipe",
+      "item": "RESOLVED: reading-placement-screen and phonics-mastery-check alias to phonics-spelling-diagnostic-assessment; decodable-story-page shipped as a distinct validated connected-text recipe.",
+      "impact": "The diagnostic recipe now accepts code-issued mastery and instructional-starting-point policies while keeping all thresholds, stop branches, and routing outside prose. The story recipe refuses a decodable claim until every token and grapheme span passes deterministic validation.",
+      "urgency": "resolved"
+    },
+    {
+      "category": "recipe",
+      "item": "RESOLVED: phonics-flash-card-deck aliases to flash-cards, phonics-word-bingo aliases to picture-bingo-board, and phoneme-letter-building-mat, grapheme-marking-practice, and phonics-sound-card-game shipped directly.",
+      "impact": "Materials-studio can now produce the five distinct practice mechanics through reusable Homa-owned recipes while explicitly excluding the source's lists, stories, scripts, thresholds, rules, page geometry, and visual identity.",
+      "urgency": "resolved"
+    }
+  ],
+  "notes": "Stairway to Reading is a coherent seven-file capture totaling 415 pages: introduction and diagnostic, 40-lesson teacher guide, controlled Reading Material, flashcards, two practice games, and a lesson checklist. Its distinctive contribution is diagnostic-entry, one-to-one phonics remediation with a mastery check at every step. The full text sidecar covers every page. One rotated source page was normalized during intake, and the manifest reports no remaining unreadable-page gate finding. On 2026-08-02 all eight Layer 4 recipe gaps graduated: four through explicit aliases to broader recipe owners and four through direct source-named recipes, with flash-cards also receiving its first self-contained generic recipe. All twelve activity types now resolve to shipped recipes, and no source-authored word list, story, game, threshold, or layout entered Homa's skill package.",
+  "coversMessageTs": [],
+  "sourceFiles": [
+    {
+      "filename": "Lessons.pdf",
+      "slackFileId": "F0BN2H05EN4",
+      "slackMessageTs": "1785518986.911909",
+      "localPath": ".cosmo/inspo-files/slack/1785518986.911909/Lessons.pdf",
+      "size": 662292,
+      "sha256": "d34ac88afd3eb42875acdf56507602ad620ba71cc995aa175e24458240f87b39",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-Lessons.pdf"
+    },
+    {
+      "filename": "bingo.pdf",
+      "slackFileId": "F0BN2GYBD7A",
+      "slackMessageTs": "1785518986.911909",
+      "localPath": ".cosmo/inspo-files/slack/1785518986.911909/bingo.pdf",
+      "size": 347835,
+      "sha256": "5ce01e36c1af6e7dac1dc89b95cfb2d96c193887e2ab6d8c97ffbd721c5cc7da",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-bingo.pdf"
+    },
+    {
+      "filename": "checklist.pdf",
+      "slackFileId": "F0BLSRGL83H",
+      "slackMessageTs": "1785518986.911909",
+      "localPath": ".cosmo/inspo-files/slack/1785518986.911909/checklist.pdf",
+      "size": 105815,
+      "sha256": "f1f1bcfd177133478fe2c684b26b92b7bee857694805678f541e58dbffdfaaf4",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-checklist.pdf"
+    },
+    {
+      "filename": "crazyletters.pdf",
+      "slackFileId": "F0BMBT9UQ76",
+      "slackMessageTs": "1785518986.911909",
+      "localPath": ".cosmo/inspo-files/slack/1785518986.911909/crazyletters.pdf",
+      "size": 2401021,
+      "sha256": "52072243fb938373ef9d9310954a446ddad94aa638109a25a314b0593faa73f1",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-crazyletters.pdf"
+    },
+    {
+      "filename": "flashcards.pdf",
+      "slackFileId": "F0BLSRHLUNB",
+      "slackMessageTs": "1785518986.911909",
+      "localPath": ".cosmo/inspo-files/slack/1785518986.911909/flashcards.pdf",
+      "size": 138658,
+      "sha256": "5175463295384bb992b33118e8dc09856150df8fa5d095476f2d900d293c3844",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-flashcards.pdf"
+    },
+    {
+      "filename": "introduction.pdf",
+      "slackFileId": "F0BMA4X9VA5",
+      "slackMessageTs": "1785518986.911909",
+      "localPath": ".cosmo/inspo-files/slack/1785518986.911909/introduction.pdf",
+      "size": 418218,
+      "sha256": "24fea21235a588b50de13f441590fd3abfeb210ec39c75959924afa07c3fc1e7",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-introduction.pdf"
+    },
+    {
+      "filename": "readingmaterial.pdf",
+      "slackFileId": "F0BM67J2HFY",
+      "slackMessageTs": "1785518986.911909",
+      "localPath": ".cosmo/inspo-files/slack/1785518986.911909/readingmaterial.pdf",
+      "size": 1170841,
+      "sha256": "e9232a788b8e886d8412a43c1dd2c4fd26a1eb4f440bc476029211718288fc62",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-readingmaterial.pdf"
+    }
+  ],
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-Lessons.pdf",
+  "stages": {
+    "captured": "2026-08-02T03:26:47+00:00",
+    "analyzed": "2026-08-02T03:33:26+00:00",
+    "knowledgeMerged": "2026-08-02",
+    "taxonomy": {
+      "proposedTopics": [
+        "Consonant Clusters in One-Syllable Words"
+      ],
+      "topicIds": [
+        "mt_797244e245"
+      ],
+      "verification": {
+        "guard": "pnpm check:taxonomy",
+        "passed": true,
+        "topicCountBefore": 1721,
+        "topicCountAfter": 1722,
+        "topicsJsonDiff": "insertions-only"
+      },
+      "commit": null
+    },
+    "graduation": {
+      "kind": "recipe",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/flash-cards.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/phoneme-letter-building-mat.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/grapheme-marking-practice.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/phonics-sound-card-game.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/decodable-story-page.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/phonics-spelling-diagnostic-assessment.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/picture-bingo-board.md",
+        "apps/web/agent/skills/materials-studio/SKILL.md",
+        "apps/web/agent/activity-formats.md",
+        "apps/web/lib/materials/cosmo-funnel.ts"
+      ],
+      "aliases": {
+        "reading-placement-screen": "phonics-spelling-diagnostic-assessment",
+        "phonics-mastery-check": "phonics-spelling-diagnostic-assessment",
+        "phonics-word-bingo": "picture-bingo-board",
+        "phonics-flash-card-deck": "flash-cards"
+      },
+      "verification": {
+        "layer4HaveRecipe": 12,
+        "layer4NoRecipe": 0
+      },
+      "commit": null,
+      "note": "Recipe files, Format library routes, activity-format registry entries, and aliases are implemented in this working tree. Commit remains null until the parent session commits and ships the complete ingestion batch."
+    }
+  }
+}

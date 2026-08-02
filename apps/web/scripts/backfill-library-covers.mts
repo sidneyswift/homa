@@ -3,10 +3,10 @@
  *
  * The founder console's library shelf shows every ingested reference
  * and curriculum as a book. A record whose original bytes survive in
- * Blob deserves a real cover, meaning page 1 of the actual PDF the
- * co-founder dropped, not a generated placeholder. This script walks
- * inspo/ in Blob, rasterises the first page of every PDF, downscales
- * every image drop, and writes the result to inspo-covers/<id>.jpg.
+ * Blob deserves a real cover, meaning page 1 of the actual printable or
+ * slide 1 of the actual presentation the co-founder dropped, not a
+ * generated placeholder. This script walks inspo/ in Blob, renders the
+ * first real page, and writes the result to inspo-covers/<id>.jpg.
  *
  * Why a script and not a route: the originals average 43MB and one is
  * 128MB, so rasterising on request would blow every deadline tier we
@@ -20,12 +20,21 @@
  *
  * Usage:
  *   BLOB_READ_WRITE_TOKEN=... node --experimental-strip-types \
- *     scripts/backfill-library-covers.mts [--force] [--limit N] [--id <record-id>]
+ *     scripts/backfill-library-covers.mts [--force] [--limit N] [--id <record-id>] \
+ *     [--source-url <exact-live-blob-url>]
+ *
+ * Set LIBRARY_COVER_PDF_PASSWORD only for a password-protected original
+ * and always pair it with --id.
  */
+
+import { readFile } from "node:fs/promises";
 
 import { list, put } from "@vercel/blob";
 
-import { rasterizePdfToJpegs } from "../lib/materials/rasterize-pdf.ts";
+import {
+  renderLibraryCover,
+  selectLibraryCoverSource,
+} from "../lib/materials/library-cover-source.ts";
 import {
   coverPathForRecord,
   recordIdFromBlobPath,
@@ -35,10 +44,13 @@ const args = process.argv.slice(2);
 const FORCE = args.includes("--force");
 const LIMIT = readFlag("--limit");
 const ONLY_ID = readFlag("--id");
+const SOURCE_URL = readFlag("--source-url");
+const PDF_PASSWORD = process.env.LIBRARY_COVER_PDF_PASSWORD;
 
 function readFlag(name: string): string | null {
   const index = args.indexOf(name);
-  return index >= 0 && args[index + 1] ? args[index + 1] : null;
+  const value = index >= 0 ? args[index + 1] : null;
+  return value && !value.startsWith("--") ? value : null;
 }
 
 /** Blob's own listing is the authority on which originals exist; the
@@ -54,17 +66,38 @@ async function listAll(prefix: string) {
   return blobs;
 }
 
-function isPdf(name: string): boolean {
-  return /\.pdf$/i.test(name);
-}
-
-function isImage(name: string): boolean {
-  return /\.(jpe?g|png|webp|gif)$/i.test(name);
+async function claimedSourceUrls(recordId: string): Promise<Set<string>> {
+  const folder = recordId.startsWith("cur-") ? "curriculums" : "references";
+  const url = new URL(`../../../.cosmo/${folder}/${recordId}.json`, import.meta.url);
+  try {
+    const record = JSON.parse(await readFile(url, "utf8"));
+    return new Set(
+      (record.sourceFiles ?? [])
+        .map((source: { blobUrl?: unknown }) => source.blobUrl)
+        .filter((value: unknown): value is string => typeof value === "string"),
+    );
+  } catch {
+    return new Set();
+  }
 }
 
 async function main() {
+  if (args.includes("--source-url") && !SOURCE_URL) {
+    console.error("--source-url requires an exact live Blob URL");
+    process.exit(1);
+  }
+  if (SOURCE_URL && !ONLY_ID) {
+    console.error("--source-url requires --id so the source cannot cross record boundaries");
+    process.exit(1);
+  }
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     console.error("BLOB_READ_WRITE_TOKEN is required. Inside apps/web: vercel env pull .env.blob && source .env.blob");
+    process.exit(1);
+  }
+  if (PDF_PASSWORD && !ONLY_ID) {
+    console.error(
+      "LIBRARY_COVER_PDF_PASSWORD requires --id so it cannot be applied to unrelated records",
+    );
     process.exit(1);
   }
 
@@ -76,69 +109,72 @@ async function main() {
     existingCovers.map((b) => b.pathname.replace(/^inspo-covers\//, "").replace(/\.jpg$/, "")),
   );
 
-  // One cover per record: the largest file is the real material, the
-  // rest are extra scan parts of the same book.
-  const primaryByRecord = new Map<string, { pathname: string; url: string; size: number }>();
+  const recordIds = new Set<string>();
   for (const blob of originals) {
     const recordId = recordIdFromBlobPath(blob.pathname);
-    if (!recordId) continue;
-    const current = primaryByRecord.get(recordId);
-    if (!current || blob.size > current.size) primaryByRecord.set(recordId, blob);
+    if (recordId) recordIds.add(recordId);
   }
 
-  let targets = [...primaryByRecord.entries()];
-  if (ONLY_ID) targets = targets.filter(([id]) => id === ONLY_ID);
-  if (!FORCE) targets = targets.filter(([id]) => !haveCover.has(id));
+  let explicitSource: { pathname: string; url: string; size: number } | null = null;
+  if (SOURCE_URL && ONLY_ID) {
+    try {
+      explicitSource = selectLibraryCoverSource(
+        originals,
+        ONLY_ID,
+        SOURCE_URL,
+        await claimedSourceUrls(ONLY_ID),
+      );
+    } catch (error) {
+      console.error(`--source-url rejected: ${(error as Error).message}`);
+      process.exit(1);
+    }
+  }
+
+  let targets = ONLY_ID ? [ONLY_ID] : [...recordIds];
+  if (!FORCE) targets = targets.filter((id) => !haveCover.has(id));
   if (LIMIT) targets = targets.slice(0, Number(LIMIT));
 
   console.log(
-    `originals: ${originals.length} across ${primaryByRecord.size} records | covers present: ${haveCover.size} | to generate: ${targets.length}`,
+    `originals: ${originals.length} across ${recordIds.size} records | covers present: ${haveCover.size} | to generate: ${targets.length}`,
   );
 
   let made = 0;
-  let skipped = 0;
   let failed = 0;
 
-  for (const [recordId, blob] of targets) {
-    const name = blob.pathname.split("/").slice(2).join("/");
-    const mb = (blob.size / 1e6).toFixed(0);
+  for (const recordId of targets) {
     try {
-      let jpeg: Buffer;
+      const blob =
+        explicitSource && recordId === ONLY_ID
+          ? explicitSource
+          : selectLibraryCoverSource(originals, recordId);
+      const name = blob.pathname.split("/").slice(2).join("/");
+      const mb = (blob.size / 1e6).toFixed(0);
 
-      if (isPdf(name)) {
-        const response = await fetch(blob.url);
-        if (!response.ok) throw new Error(`fetch ${response.status}`);
-        const bytes = Buffer.from(await response.arrayBuffer());
-        const { pageJpegs } = await rasterizePdfToJpegs(bytes, 1);
-        if (!pageJpegs.length) throw new Error("no pages rendered");
-        jpeg = pageJpegs[0];
-      } else if (isImage(name)) {
-        // An image drop is already its own cover; keep the bytes as-is
-        // and let the shelf's CSS do the fitting.
-        const response = await fetch(blob.url);
-        if (!response.ok) throw new Error(`fetch ${response.status}`);
-        jpeg = Buffer.from(await response.arrayBuffer());
-      } else {
-        skipped += 1;
-        console.log(`  skip  ${recordId} (${name.slice(-40)}, unsupported type)`);
-        continue;
-      }
+      const response = await fetch(blob.url);
+      if (!response.ok) throw new Error(`fetch ${response.status}`);
+      const bytes = Buffer.from(await response.arrayBuffer());
+      const rendered = await renderLibraryCover(name, bytes, {
+        pdfPassword: PDF_PASSWORD ?? undefined,
+      });
 
-      await put(coverPathForRecord(recordId), jpeg, {
+      await put(coverPathForRecord(recordId), rendered.jpeg, {
         access: "public",
         contentType: "image/jpeg",
         addRandomSuffix: false,
         allowOverwrite: true,
       });
       made += 1;
-      console.log(`  cover ${recordId} (${mb}MB source)`);
+      console.log(
+        `  cover ${recordId} (${mb}MB source, page 1 from ${rendered.renderedFrom})`,
+      );
     } catch (error) {
       failed += 1;
       console.log(`  FAIL  ${recordId}: ${(error as Error).message}`);
     }
   }
 
-  console.log(`\ndone. generated ${made}, skipped ${skipped}, failed ${failed}`);
+  console.log(`\ndone. generated ${made}, failed ${failed}`);
+  if (failed > 0) process.exitCode = 1;
 }
 
 await main();

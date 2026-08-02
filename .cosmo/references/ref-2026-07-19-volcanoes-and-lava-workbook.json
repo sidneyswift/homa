@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:26:46-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784428006.878779",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "workbook (title-inferred, never confirmed)",
   "title": "Volcanoes and Lava Workbook",
   "publisher": "TPT (seller unknown, link expired before capture)",

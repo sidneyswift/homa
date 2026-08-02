@@ -92,6 +92,10 @@ export const GAP_ALIASES: Record<string, string> = {
   // under different names.
   "nature-notebook-page": "nature-observation-journal",
   "picture-study-card": "artist-composer-study-card",
+  // Blossom & Root Year 3 (2026-07-31) names a broad word-play activity
+  // around its instructional purpose. The existing recipe owns the exact
+  // see, write, cut, and paste mechanic without copying the source words.
+  "word-play-cut-and-sort": "cut-and-paste-word-work",
   // Mike Venezia Getting to Know trio (2026-07-21 curriculum-gap
   // graduation): artists and inventors-scientists each flagged the same
   // life-events-timeline shape under their own subject-specific name; both
@@ -99,6 +103,21 @@ export const GAP_ALIASES: Record<string, string> = {
   // life-events mode and an invention-progression mode.
   "artist-biography-timeline-page": "biography-timeline-page",
   "invention-timeline-page": "biography-timeline-page",
+  // Stairway to Reading (2026-07-31) described eight source activity
+  // names. Three are modes of broader shipped mechanics, and the source's
+  // phonics-deck name belongs to the existing subject-neutral flash-card
+  // surface. Scoring and instructional routing remain code-owned inside the
+  // diagnostic contract, never prose authored for a printable.
+  "reading-placement-screen": "phonics-spelling-diagnostic-assessment",
+  "phonics-mastery-check": "phonics-spelling-diagnostic-assessment",
+  "phonics-word-bingo": "picture-bingo-board",
+  "phonics-flash-card-deck": "flash-cards",
+  // Benchmark Grade 3 (2026-07-31) named one warm repeated-reading mechanic
+  // as a speed drill and one subject-specific card deck. The canonical
+  // recipes preserve the real procedure without source framing. Timing and
+  // progression policies remain deterministic inputs, never generated copy.
+  "word-fluency-speed-drill": "word-fluency-repeated-reading",
+  "high-frequency-word-card-deck": "flash-cards",
 };
 
 function asRecord(value: unknown): Record<string, unknown> | null {

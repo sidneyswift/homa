@@ -201,5 +201,82 @@
     ]
   },
   "notes": "This is Carolyng's highest praise yet \u2014 she called this an 'amazing example of reading comprehension.' What she's responding to is the COMPLETE SYSTEM: not just pretty pages, but a pedagogical architecture that spirals skill building across topics. The 4-section unit structure (Read \u2192 Learn Skill \u2192 Apply Skill to New Text \u2192 Build Vocabulary) is the reading comprehension equivalent of the Trophies' 5-layer curriculum architecture. Key insight: 'a spiral approach that can be expressed across subject matter to reinforce an array of skills with one activity.' She's describing SPIRAL CURRICULUM \u2014 skills build on each other across units, with each new topic reinforcing previous skills while introducing new ones. The magazine-style presentation (real photographs, vocabulary sidebars, colored section headers) makes what is essentially a workbook feel like a 'real' publication \u2014 which she called 'visually captivating.' This is the first reference that's PRIMARILY about reading comprehension as a skill (vs. the Trophies which teach reading through literature). The related-passage pattern for skill transfer is new and important.",
-  "rescueNote": "Original NOT rescued on 2026-07-30. Its Slack message is a thread reply, and conversations.history does not return those, so rescue-originals.py could not reach the files. Recovering it needs a conversations.replies call against the parent message. Recorded rather than left implicit: this is the only drop-shaped hole left in the corpus's durability, and it is a tooling limit, not a lost file."
+  "sourceFiles": [
+    {
+      "filename": "1000197506.jpg",
+      "slackFilename": "1000197506.jpg",
+      "slackFileId": "F0BJ7DFTMF0",
+      "slackMessageTs": "1784413127.552489",
+      "slackParentTs": "1784410924.341989",
+      "size": 502368,
+      "sha256": "1b982af59decf2017b5450a485139d939c79d9dbdd6afa5288e1d3657bd494a6",
+      "contentType": "image/jpeg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-reading-options-achievement/1000197506.jpg",
+      "blobUploadedAt": "2026-08-02T03:27:22Z",
+      "rescuedFromSlack": true,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true
+    },
+    {
+      "filename": "1000197507.jpg",
+      "slackFilename": "1000197507.jpg",
+      "slackFileId": "F0BHU2MU739",
+      "slackMessageTs": "1784413127.552489",
+      "slackParentTs": "1784410924.341989",
+      "size": 479296,
+      "sha256": "5b330c58416da407828d97b6e4ebd0ba0e0374bd6f7c4c89573bfbcb923f173b",
+      "contentType": "image/jpeg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-reading-options-achievement/1000197507.jpg",
+      "blobUploadedAt": "2026-08-02T03:27:22Z",
+      "rescuedFromSlack": true,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true
+    },
+    {
+      "filename": "1000197508.jpg",
+      "slackFilename": "1000197508.jpg",
+      "slackFileId": "F0BK3NX82TA",
+      "slackMessageTs": "1784413127.552489",
+      "slackParentTs": "1784410924.341989",
+      "size": 622441,
+      "sha256": "d454048601363e96790fd87ce3a4e9459e2e6057900cddee1088d57863516346",
+      "contentType": "image/jpeg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-reading-options-achievement/1000197508.jpg",
+      "blobUploadedAt": "2026-08-02T03:27:22Z",
+      "rescuedFromSlack": true,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true
+    },
+    {
+      "filename": "1000197509.jpg",
+      "slackFilename": "1000197509.jpg",
+      "slackFileId": "F0BJBAXG6HF",
+      "slackMessageTs": "1784413127.552489",
+      "slackParentTs": "1784410924.341989",
+      "size": 523043,
+      "sha256": "82f1ab561667c443a001a5ff15392830529e9cd07b136f086c85a5691ced2d59",
+      "contentType": "image/jpeg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-reading-options-achievement/1000197509.jpg",
+      "blobUploadedAt": "2026-08-02T03:27:22Z",
+      "rescuedFromSlack": true,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true
+    },
+    {
+      "filename": "1000197510.jpg",
+      "slackFilename": "1000197510.jpg",
+      "slackFileId": "F0BJ3600URH",
+      "slackMessageTs": "1784413127.552489",
+      "slackParentTs": "1784410924.341989",
+      "size": 638906,
+      "sha256": "6552e66f527115692cec3e8c791d2d5d3315da59d0ac9001c2382469d7792744",
+      "contentType": "image/jpeg",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-reading-options-achievement/1000197510.jpg",
+      "blobUploadedAt": "2026-08-02T03:27:22Z",
+      "rescuedFromSlack": true,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true
+    }
+  ],
+  "sourceFilesNote": "Originals rescued from Slack into Homa's pinned Blob store by rescue-originals.py. Each sourceFiles entry records Slack identity, byte size, SHA256, MIME type, upload time, and live Blob read-back verification."
 }

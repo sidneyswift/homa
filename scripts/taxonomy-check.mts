@@ -73,7 +73,13 @@ for (const subject of MAP_SUBJECTS) {
   for (const item of subject.items) bankItemIds.add(item.id);
 }
 
-const knownSubjects = new Set<string>([...bankSubjects, "life_skills"]);
+// life_skills and religious_education are parked content-only taxonomy
+// subjects. Neither becomes a scored MAP lane until a separate product ruling.
+const knownSubjects = new Set<string>([
+  ...bankSubjects,
+  "life_skills",
+  "religious_education",
+]);
 const topicIds = new Set<string>();
 let duplicateTopicIds = 0;
 let malformedIds = 0;

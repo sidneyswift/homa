@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:26:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784427968.975509",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "vocabulary-study-set",
   "title": "Volcanoes! Vocabulary Cards, Graphic Organizers, and Vocabulary Test (K-3rd Grade)",
   "publisher": "Teach to the Core (TPT)",

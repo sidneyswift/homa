@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:23:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784428719.046419",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "playdough-mat",
   "title": "Christmas Tree Playdough Counting to 12 \u2014 Fine Motor Freebie",
   "publisher": "TPT (link expired)",

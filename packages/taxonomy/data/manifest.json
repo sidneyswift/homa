@@ -9,33 +9,37 @@
     "ngss-ms"
   ],
   "counts": {
-    "topics": 1721,
+    "topics": 1736,
     "topicsBySubject": {
-      "Art": 3,
+      "Art": 5,
       "Computing": 21,
-      "English": 300,
-      "History": 163,
+      "English": 303,
+      "Fine Motor": 1,
+      "Gross Motor": 1,
+      "History": 164,
       "Learning to Learn": 18,
       "Life Skills": 42,
       "Mathematics": 512,
       "Music": 4,
       "Personal & Social Development": 90,
-      "Science": 568
+      "Religious Education": 1,
+      "Science": 569,
+      "World Languages": 5
     },
-    "dependencies": 3274,
+    "dependencies": 3278,
     "curricula": 7,
     "curriculumStandards": 3261,
-    "topicStandardLinks": 1859,
+    "topicStandardLinks": 1863,
     "clusters": 183
   },
   "files": {
     "topics.json": {
-      "bytes": 1789604,
-      "sha256": "67d73370e31cb3194a1cd0bf551133c62c508db38655dc8080dd9b035614ea4a"
+      "bytes": 1804434,
+      "sha256": "b0e9f0d95e3d7a8267fa93c7e8d58581ca431bdc2118e571f26fa38998f0b757"
     },
     "dependencies.json": {
-      "bytes": 706428,
-      "sha256": "2484073150bfd8250eeb847a6fcec50d179da592dca6cbafee2b4b53fe6c88af"
+      "bytes": 707310,
+      "sha256": "f98078aa67d854617b51907309934b09667db98b6a5f2d008e52619e48596873"
     },
     "curriculum-standards.json": {
       "bytes": 1621982,
@@ -52,5 +56,5 @@
     "teaching research",
     "visualizations"
   ],
-  "topicCount": 1614
+  "topicCount": 1736
 }

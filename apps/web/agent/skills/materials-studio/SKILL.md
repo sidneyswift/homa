@@ -75,6 +75,8 @@ Read either with:
 | Montessori | montessori |
 | Singapore Math (CPA progression) | singapore-math |
 | balanced literacy | balanced-literacy |
+| daily-life grounding (objects from the child's own world) | daily-life-grounding |
+| poetry-led science (poem/story opens every science lesson, ages ~4 to 7) | poetry-led-science |
 
 ### Math practice laws (binding, every math page; field directives 2026-07-18)
 
@@ -506,6 +508,16 @@ recipe is not a reason to force the wrong format.
 | Visual schedule cards | make cut-apart routine cards to sequence a day | visual-schedule-cards |
 | Cross-number puzzle | drill arithmetic inside a row and column sum-constraint grid | cross-number-puzzle |
 | Checklist assessment | give parents a warm whole-child readiness checklist | checklist-assessment |
+| Phonics and spelling diagnostic assessment | check one taught skill with equivalent forms, exact scoring, and warm stop rules | phonics-spelling-diagnostic-assessment |
+| Flash cards | make a precise cut-apart recall deck, including grapheme cards and duplicate word-building tiles | flash-cards |
+| Word fluency repeated reading | reread one validated taught word set without race or verdict framing | word-fluency-repeated-reading |
+| Phonics pattern reference chart | keep one validated taught sound-spelling or morphology pattern visible during real work | phonics-pattern-reference-chart |
+| Dictation writing practice | write exact heard words and one sentence, then compare through a separate parent key | dictation-writing-practice |
+| Phoneme-letter building mat | move grapheme tiles into one box per sound, then blend the completed word | phoneme-letter-building-mat |
+| Grapheme marking practice | mark exact grapheme boundaries in a validated taught word set | grapheme-marking-practice |
+| Picture-supported syllable ordering | identify a pictured Spanish word, reorder trusted syllable chunks, then write the whole word | picture-supported-syllable-ordering |
+| Phonics sound card game | match a closed deck by one taught sound-spelling relationship | phonics-sound-card-game |
+| Decodable story page | apply taught phonics in original connected text whose full token inventory passed validation | decodable-story-page |
 | Clip cards | make a clip-the-answer or mark-the-answer card set for repeat practice | clip-cards |
 | File-folder game | build a glue-in-a-folder board game with moveable pieces | file-folder-game |
 | Cloze story | have the child fill passage blanks from a word bank | cloze-story |
@@ -515,6 +527,7 @@ recipe is not a reason to force the wrong format.
 | Fraction maze escape | compare and order fractions by tracing a path through a grid | fraction-maze-escape |
 | Decimal path puzzle | order decimals by tracing the correct path through nodes | decimal-path-puzzle |
 | Daily rhythm cards | make cut-apart cards to build a visual daily schedule | daily-rhythm-cards |
+| Child-assisted recipe card | separate adult-only preparation from a child's picture-supported cooking jobs | child-assisted-recipe-card |
 | Activity pack | put four different mini-activities on one theme in quadrants | activity-pack |
 | Singapore math workbook page | teach number sense through the concrete-pictorial-abstract progression | singapore-workbook-page |
 | Narration page | pair a blank illustration box with dictation lines for CM-style narration or journaling | narration-page |
@@ -529,11 +542,12 @@ recipe is not a reason to force the wrong format.
 | Pattern extension practice | copy, continue, choose, or create a simple repeating AB pattern | pattern-extension-practice |
 | Comic narrative math page | teach a concept through 2-4 comic panels of character dialogue, ending in a story-linked question | comic-narrative-math-page |
 | Circle diagram two-set sort | sort items into two overlapping circles so both-attribute and neither-attribute items have a real home | circle-diagram-two-set-sort |
-| Picture bingo board | give a family several shuffled boards from one shared item pool for a caller-led recall game | picture-bingo-board |
+| Picture or text bingo board | give a family several shuffled picture or exact-text boards from one shared item pool | picture-bingo-board |
 | Biography timeline page | show 5-8 chronological events in a real person's life, or an invention's progression, as connected labeled boxes | biography-timeline-page |
 | Chart and graph skill practice | teach one concrete data-reading skill (calendar, timeline, bar graph, diagram) with a worked example plus practice questions | chart-and-graph-skill-practice |
 | Lesson comprehension check | close a taught lesson with 2 recall questions plus 1 open think-and-share question | lesson-comprehension-check |
 | Magic square puzzle | drill addition fluency in a self-checking grid where every row, column, and diagonal sums to the same target | magic-square-puzzle |
+| Reader theater script | build oral reading fluency through a multi-character performance script with assigned roles, choral refrains, and repeated reading across sessions | reader-theater-script |
 
 ## Design rules (binding)
 

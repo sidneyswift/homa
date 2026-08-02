@@ -3,6 +3,7 @@
   "droppedBy": "cosmo-atlas-scrape",
   "droppedAt": "2026-07-13T22:08:00-04:00",
   "sourceChannel": "atlas-scrape",
+  "libraryVisibility": "catalog-only",
   "format": "coursebook",
   "title": "Oak Meadow — Curriculum Sample Coursebooks (PK-12, All Subjects)",
   "sourceUrl": "https://www.oakmeadow.com/curriculum-samples/",

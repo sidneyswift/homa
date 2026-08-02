@@ -488,7 +488,7 @@ def write_outputs(rows) -> None:
         {"generatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
          "rows": rows}, indent=2) + "\n")
     with open(LEDGER_CSV, "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=COLUMNS)
+        w = csv.DictWriter(f, fieldnames=COLUMNS, lineterminator="\n")
         w.writeheader()
         w.writerows(rows)
 

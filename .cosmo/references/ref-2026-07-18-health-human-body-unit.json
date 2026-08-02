@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:28:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784428116.515299",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "science-unit-study",
   "title": "Health & the Human Body — Simple Science for Primary Students (Love To Teach Primary)",
   "publisher": "Love To Teach Primary (TPT)",

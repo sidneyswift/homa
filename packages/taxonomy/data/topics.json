@@ -1,6 +1,6 @@
 {
   "version": "v1",
-  "topicCount": 1721,
+  "topicCount": 1736,
   "topics": [
     {
       "id": "mt_AzTrT5ySCx",
@@ -33578,6 +33578,282 @@
       "Says in simple words what interest is: a little extra for borrowing"
     ],
     "assessmentPrompt": "If {{name}} borrowed a few dollars from you, would they understand it needs to be paid back, maybe with a little extra?",
+    "standards": []
+  },
+  {
+    "id": "mt_797244e245",
+    "type": "PROCEDURAL",
+    "subject": "English",
+    "domain": "Phonics & Word Reading",
+    "name": "Consonant Clusters in One-Syllable Words",
+    "description": "Read and spell one-syllable words with adjacent consonants in VCC, CVCC, and CCVC patterns, preserving each consonant sound in sequence rather than treating the cluster as one sound.",
+    "ageRangeStart": 5,
+    "ageRangeEnd": 8,
+    "centrality": 0.01,
+    "evidence": [
+      "Reads VCC words such as ask and elf without dropping the second consonant sound",
+      "Reads and spells CVCC words such as hand, milk, and best with every sound in order",
+      "Reads and spells CCVC words such as stop, frog, and plan without omitting either opening consonant sound"
+    ],
+    "assessmentPrompt": "When {{name}} reads words like hand, milk, stop, and frog, do they say every consonant sound in order without dropping one?",
+    "standards": []
+  },
+  {
+    "id": "mt_oL464a4gTV",
+    "type": "CONCEPTUAL",
+    "subject": "Science",
+    "domain": "Ecosystems & Habitats",
+    "name": "Evolution and Extinction Over Generations",
+    "description": "Understand that populations of living things change over many generations, that inherited differences can help some organisms survive and reproduce in a changing environment, and that a species can become extinct when it cannot survive those changes.",
+    "ageRangeStart": 8,
+    "ageRangeEnd": 10,
+    "centrality": 0.01,
+    "evidence": [
+      "Explains that evolution changes a population over generations, not one animal during its lifetime",
+      "Uses an example to show how an inherited difference can help some organisms survive and reproduce",
+      "Explains that extinction means no living members of a species remain and connects it to environmental change"
+    ],
+    "assessmentPrompt": "Can {{name}} explain why a helpful inherited difference may become more common over many generations, and how a changing environment can instead cause a species to become extinct?",
+    "standards": []
+  },
+  {
+    "id": "mt_DIMmXtTV66",
+    "type": "CONCEPTUAL",
+    "subject": "Art",
+    "domain": "Picture Study & Art Appreciation",
+    "name": "Color Relationships in Art",
+    "description": "Identify primary, complementary, analogous, warm, cool, and monochromatic color relationships on a color wheel, and explain how artists use those relationships to create contrast, unity, energy, or calm.",
+    "ageRangeStart": 7,
+    "ageRangeEnd": 10,
+    "centrality": 0.01,
+    "evidence": [
+      "Identifies red, yellow, and blue as primary colors and finds complementary pairs opposite each other on a color wheel",
+      "Distinguishes analogous, warm, cool, and monochromatic color groupings in an artwork",
+      "Explains how a chosen color relationship changes the contrast, unity, energy, or mood of an artwork"
+    ],
+    "assessmentPrompt": "When {{name}} studies an artwork, can they name its main color relationship and explain how those colors affect the contrast, unity, energy, or mood?",
+    "standards": []
+  },
+  {
+    "id": "mt_ZtkhHd0jHN",
+    "type": "CONCEPTUAL",
+    "subject": "Art",
+    "domain": "Picture Study & Art Appreciation",
+    "name": "Actual and Implied Texture in Art",
+    "description": "Distinguish actual texture that can be felt on an artwork's surface from implied texture that is represented visually, and describe how an artist creates or changes either kind of texture.",
+    "ageRangeStart": 7,
+    "ageRangeEnd": 10,
+    "centrality": 0.01,
+    "evidence": [
+      "Classifies examples as actual texture, implied texture, or both and explains the choice",
+      "Uses precise sensory words to describe the perceived surface of an artwork",
+      "Explains how materials, carving, collage, brushwork, or drawing marks create or change texture"
+    ],
+    "assessmentPrompt": "Can {{name}} compare a sculpture and a drawing, identify actual and implied texture, and explain how each artist created the surface effect?",
+    "standards": []
+  },
+  {
+    "id": "mt_7126b207e6",
+    "type": "CONCEPTUAL",
+    "subject": "English",
+    "domain": "Vocabulary",
+    "name": "Homographs and Multiple-Meaning Words",
+    "description": "Recognise that a homograph is one spelling with more than one meaning, and use sentence and passage context to select, explain, and use the intended meaning.",
+    "ageRangeStart": 7,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Identifies a common homograph in two sentences and states the different meaning in each",
+      "Uses nearby words, sentence structure, or an illustration as evidence for which meaning is intended",
+      "Writes or says two sentences that use the same homograph with two different meanings"
+    ],
+    "assessmentPrompt": "If {{name}} reads 'The bat flew out of the cave' and 'She swung the bat,' can they explain the two meanings of 'bat' and point to the context clue in each sentence?",
+    "standards": [
+      "ccss-ela:L.2.4",
+      "ccss-ela:L.2.4a"
+    ]
+  },
+  {
+    "id": "mt_5c7bd69bf5",
+    "type": "CONCEPTUAL",
+    "subject": "History",
+    "domain": "Modern History",
+    "name": "Aviation Pioneers and Early Flight",
+    "description": "Understand how the Wright brothers' early powered flights and the achievements of later pilots, including Amelia Earhart and Bessie Coleman, changed aviation, challenged barriers, and helped shape modern air travel.",
+    "ageRangeStart": 7,
+    "ageRangeEnd": 9,
+    "centrality": 0.01,
+    "evidence": [
+      "Identifies the Wright brothers as early airplane pioneers and explains why their successful powered flight mattered",
+      "Describes one achievement and one barrier or risk faced by a later pilot such as Amelia Earhart or Bessie Coleman",
+      "Places two or more aviation milestones in chronological order and explains one way early flight changed travel or inspired later pilots"
+    ],
+    "assessmentPrompt": "Could {{name}} make a simple timeline with the Wright brothers, Amelia Earhart, and Bessie Coleman, and explain why each mattered to aviation?",
+    "standards": [
+      "uk-nc-2013:Hist-KS1-2",
+      "uk-nc-2013:Hist-KS1-3"
+    ]
+  },
+  {
+    "id": "mt_8d2f6a91c4",
+    "type": "LANGUAGE",
+    "subject": "World Languages",
+    "domain": "Spanish Foundational Literacy",
+    "name": "Spanish Grapheme-Phoneme Correspondences",
+    "description": "Connect Spanish speech sounds to the letters, digraphs, and context-dependent spellings that represent them, then apply those correspondences while blending syllables and reading words.",
+    "ageRangeStart": 5,
+    "ageRangeEnd": 8,
+    "centrality": 0.01,
+    "evidence": [
+      "Names the sound represented by a familiar Spanish consonant or digraph in a spoken and printed word",
+      "Chooses between context-dependent spellings such as ca, que, qui, ce, ci, ga, gue, and gui for a heard syllable",
+      "Blends syllables and reads a short word using learned Spanish letter-sound correspondences"
+    ],
+    "assessmentPrompt": "When {{name}} hears and sees a familiar Spanish syllable or word, can they connect each sound to the expected letter or spelling pattern and blend it accurately?",
+    "standards": []
+  },
+  {
+    "id": "mt_3b7e5c90a1",
+    "type": "PROCEDURAL",
+    "subject": "English",
+    "domain": "Reading Comprehension",
+    "name": "Readers Theater Performance",
+    "description": "Develop understanding and oral reading fluency by rereading a script, taking a role, rehearsing with accuracy and expression, performing collaboratively, and reflecting on meaning and delivery.",
+    "ageRangeStart": 5,
+    "ageRangeEnd": 8,
+    "centrality": 0.01,
+    "evidence": [
+      "Rereads the same script role with growing accuracy, phrasing, and expression",
+      "Listens for cues and contributes the assigned lines or choral parts during rehearsal and performance",
+      "Explains the script's meaning and names one way the performance became clearer or more fluent"
+    ],
+    "assessmentPrompt": "After rehearsing a short script, can {{name}} perform a role accurately and expressively, respond to cues, and reflect on the story and their reading?",
+    "standards": []
+  },
+  {
+    "id": "mt_e370b8d9a7",
+    "type": "LANGUAGE",
+    "subject": "World Languages",
+    "domain": "Spanish Foundational Literacy",
+    "name": "Spanish Syllable Structures and Consonant Clusters",
+    "description": "Read and spell Spanish words by combining open and closed syllables and preserving each consonant sound in clusters with l or r.",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 8,
+    "centrality": 0.01,
+    "evidence": [
+      "Distinguishes an open syllable ending in a vowel from a closed syllable ending in a consonant",
+      "Segments and blends a Spanish word by its syllable boundaries",
+      "Reads and spells words with consonant clusters such as bl, cl, fl, br, cr, and tr without omitting a sound"
+    ],
+    "assessmentPrompt": "When {{name}} reads a Spanish word with a closed syllable or an l or r consonant cluster, can they divide, blend, and spell the syllables without dropping a sound?",
+    "standards": []
+  },
+  {
+    "id": "mt_5ee2f8c50d",
+    "type": "LANGUAGE",
+    "subject": "World Languages",
+    "domain": "Spanish Foundational Literacy",
+    "name": "Spanish Diphthongs, Hiatuses, and Triphthongs",
+    "description": "Recognize, divide, read, and spell Spanish vowel sequences as diphthongs, hiatuses, or triphthongs according to how their sounds combine across syllables.",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 8,
+    "centrality": 0.01,
+    "evidence": [
+      "Reads familiar Spanish words containing common diphthongs without separating a single syllable",
+      "Identifies when adjacent vowels form a hiatus across two syllables",
+      "Compares diphthongs, hiatuses, and triphthongs by dividing example words into spoken and written syllables"
+    ],
+    "assessmentPrompt": "Can {{name}} read several Spanish words with adjacent vowels, divide each into syllables, and explain whether the vowels form a diphthong, hiatus, or triphthong?",
+    "standards": []
+  },
+  {
+    "id": "mt_22731d8eaa",
+    "type": "LANGUAGE",
+    "subject": "World Languages",
+    "domain": "Spanish Foundational Literacy",
+    "name": "Spanish Stress and Written Accents",
+    "description": "Identify the stressed syllable in a Spanish word and apply grade-appropriate written-accent conventions, including distinctions among otherwise identical monosyllabic words.",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 8,
+    "centrality": 0.01,
+    "evidence": [
+      "Pronounces a Spanish word and identifies its stressed syllable",
+      "Reads and writes familiar words with a required written accent",
+      "Uses context and the written accent to distinguish familiar monosyllabic pairs such as el and él or tu and tú"
+    ],
+    "assessmentPrompt": "When {{name}} reads and writes a familiar Spanish word, can they identify the stressed syllable and include a written accent when the word requires one?",
+    "standards": []
+  },
+  {
+    "id": "mt_184d82a14e",
+    "type": "LANGUAGE",
+    "subject": "World Languages",
+    "domain": "Spanish Foundational Literacy",
+    "name": "Spanish Prefixes and Suffixes",
+    "description": "Use common Spanish prefixes and suffixes to read, build, spell, and explain related words while preserving the meaning of the base word.",
+    "ageRangeStart": 6,
+    "ageRangeEnd": 8,
+    "centrality": 0.01,
+    "evidence": [
+      "Separates a familiar Spanish word into a base and a common prefix or suffix",
+      "Explains how an affix changes or refines the base word's meaning",
+      "Builds and reads a related word by adding a familiar prefix or suffix to a base"
+    ],
+    "assessmentPrompt": "Given a familiar Spanish base word and affix, can {{name}} build and read the new word, identify its parts, and explain how its meaning changed?",
+    "standards": []
+  },
+  {
+    "id": "mt_dkvLZt8xgX",
+    "type": "PROCEDURAL",
+    "subject": "Fine Motor",
+    "domain": "Fine Motor Development",
+    "name": "Fine Motor Control in Everyday Tasks",
+    "description": "Develop hand strength, dexterity, two-hand coordination, and controlled tool use through everyday preschool tasks such as transferring, lacing, pinching, modeling, fastening, and cutting.",
+    "ageRangeStart": 2,
+    "ageRangeEnd": 6,
+    "centrality": 0.01,
+    "evidence": [
+      "Transfers small objects with a spoon, scoop, tongs, or fingers while controlling the release",
+      "Uses both hands together to lace, string large beads, open containers, or manage simple fasteners",
+      "Shapes dough and uses child-safe drawing, gluing, or cutting tools with growing control"
+    ],
+    "assessmentPrompt": "During an everyday handwork activity, can {{name}} coordinate both hands and use a child-safe tool with enough control to complete the task?",
+    "standards": []
+  },
+  {
+    "id": "mt_3RzUdTRDxf",
+    "type": "PROCEDURAL",
+    "subject": "Gross Motor",
+    "domain": "Gross Motor Development",
+    "name": "Gross Motor Locomotion and Coordination",
+    "description": "Develop balance, body control, coordinated locomotion, and object-control skills through crawling, walking, running, jumping, hopping, skipping, climbing, throwing, catching, and kicking.",
+    "ageRangeStart": 2,
+    "ageRangeEnd": 6,
+    "centrality": 0.01,
+    "evidence": [
+      "Moves through a short course by crawling, walking, running, or climbing with growing control",
+      "Jumps, hops, balances, or begins to skip while recovering safely when balance changes",
+      "Throws, catches, rolls, or kicks a large ball toward a nearby person or target"
+    ],
+    "assessmentPrompt": "During a short movement game, can {{name}} travel, balance, and control a large ball in ways that fit the activity?",
+    "standards": []
+  },
+  {
+    "id": "mt_kO_GoH5F5t",
+    "type": "CONCEPTUAL",
+    "subject": "Religious Education",
+    "domain": "Biblical Literacy",
+    "name": "Biblical Story and Verse Familiarity",
+    "description": "Listen to age-appropriate Bible stories and short verses, recall their people, events, and language, and discuss a central idea without treating a child's beliefs as an assessed outcome.",
+    "ageRangeStart": 3,
+    "ageRangeEnd": 6,
+    "centrality": 0.01,
+    "evidence": [
+      "Retells a main person or event from a Bible story that was read aloud",
+      "Recites or completes a familiar short verse or phrase after repeated shared reading",
+      "Connects a story or verse to its stated theme using their own words or a drawing"
+    ],
+    "assessmentPrompt": "After a familiar Bible story or verse is read aloud, can {{name}} recall a main part and say or show what idea the reading explored?",
     "standards": []
   }
 ]

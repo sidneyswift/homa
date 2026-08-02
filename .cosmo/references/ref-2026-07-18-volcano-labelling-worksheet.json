@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:17:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784427945.841589",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "labeling-worksheet",
   "title": "Volcano Labelling Worksheet with Answer Key (A4)",
   "publisher": "TPT (link expired)",

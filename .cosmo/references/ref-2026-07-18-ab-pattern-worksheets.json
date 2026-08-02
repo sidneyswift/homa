@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:21:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784428092.600859",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "pattern-worksheet",
   "title": "FREE AB Pattern Worksheets \u2014 No Prep, Designed for Special Education",
   "publisher": "TPT (link expired)",

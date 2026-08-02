@@ -4,6 +4,13 @@
   "droppedAt": "2026-07-18T22:20:00-04:00",
   "sourceChannel": "homa-inspo",
   "sourceMessageTs": "1784428025.883269",
+  "originalRecovery": {
+    "status": "requested",
+    "requestChannel": "C0BHQDC033M",
+    "requestTs": "1785640462.608219",
+    "requestedFrom": "Alessa",
+    "reason": "expired private TPT URL"
+  },
   "format": "labeling-worksheet",
   "title": "Layers of the Earth \u2014 Free Labeling Worksheet",
   "publisher": "TPT (link expired)",
