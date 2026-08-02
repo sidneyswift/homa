@@ -166,7 +166,7 @@
         "topicCountAfter": 1727,
         "topicsJsonDiff": "insertions-only"
       },
-      "commit": null
+      "commit": "f0bc8fe4"
     },
     "graduation": {
       "kind": "recipe-audit",
@@ -186,7 +186,7 @@
         "layer4NoRecipe": 0,
         "directRecipeFiles": 8
       },
-      "commit": null,
+      "commit": "f0bc8fe4",
       "note": "All ten recurring activities resolve to eight existing shipped recipes; no duplicate format is needed."
     }
   },

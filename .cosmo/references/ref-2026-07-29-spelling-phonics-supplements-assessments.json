@@ -368,15 +368,15 @@
         "apps/web/agent/skills/materials-studio/SKILL.md",
         "apps/web/agent/activity-formats.md"
       ],
-      "commit": null,
-      "note": "The recipe, Format library route, and activity-format registry entry are implemented in this working tree. The commit remains null until the parent session commits and ships the complete ingestion batch."
+      "commit": "f0bc8fe4",
+      "note": "The recipe, Format library route, and activity-format registry entry are implemented in commit f0bc8fe4 and carried by PR #615."
     },
     "taxonomy": {
       "proposedTopics": [],
-      "commit": null,
+      "commit": "f0bc8fe4",
       "note": "No taxonomy write is needed. The 13-level continuum maps to existing phonics-word-reading and spelling-word-study topics."
     },
-    "shippedPr": null,
+    "shippedPr": 615,
     "slackReplyTs": null,
     "shipReaction": false
   },

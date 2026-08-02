@@ -365,12 +365,12 @@
         "matchedRecipes": 1,
         "unresolvedGaps": 0
       },
-      "commit": null,
+      "commit": "f0bc8fe4",
       "note": "The new shared recipe reproduces the reusable teaching action without copying the source list, art, directions, order, or layout. Trusted segmentation is required, and deterministic checks own chunk reconstruction and permutation integrity."
     },
     "taxonomy": {
       "proposedTopics": [],
-      "commit": null,
+      "commit": "f0bc8fe4",
       "note": "Spanish Syllable Structures and Consonant Clusters plus Spanish Grapheme-Phoneme Correspondences cover the learning targets. No taxonomy addition is needed."
     },
     "analysisReceipt": {
@@ -383,7 +383,7 @@
       "captureFindingsReviewed": 0,
       "externalVisionProvider": null
     },
-    "shippedPr": null,
+    "shippedPr": 615,
     "slackReplyTs": null,
     "shipReaction": false
   }

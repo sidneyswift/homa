@@ -2184,7 +2184,7 @@
         "topicCountAfter": 1722,
         "topicsJsonDiff": "insertions-only"
       },
-      "commit": null
+      "commit": "f0bc8fe4"
     },
     "graduation": {
       "kind": "recipe",
@@ -2210,8 +2210,8 @@
         "layer4HaveRecipe": 12,
         "layer4NoRecipe": 0
       },
-      "commit": null,
-      "note": "Recipe files, Format library routes, activity-format registry entries, and aliases are implemented in this working tree. Commit remains null until the parent session commits and ships the complete ingestion batch."
+      "commit": "f0bc8fe4",
+      "note": "Recipe files, Format library routes, activity-format registry entries, and aliases are implemented in commit f0bc8fe4 and carried by PR #615."
     }
   }
 }

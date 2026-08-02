@@ -172,7 +172,7 @@
         "topicCountAfter": 1729,
         "topicsJsonDiff": "append-only topic objects with the required topicCount update"
       },
-      "commit": null
+      "commit": "f0bc8fe4"
     },
     "graduation": {
       "kind": "recipe-audit",
@@ -182,7 +182,7 @@
         "directRecipeFiles": 11,
         "aliasesRequired": 0
       },
-      "commit": null,
+      "commit": "f0bc8fe4",
       "note": "Every recurring printable activity resolves to a shipped recipe and registered format. The five-day readers-theater sequence is instructional method, not a missing printable format."
     },
     "knowledgeMerged": "2026-08-02"

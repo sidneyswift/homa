@@ -270,12 +270,12 @@
         "matchedRecipes": 4,
         "unresolvedGaps": 0
       },
-      "commit": null,
+      "commit": "f0bc8fe4",
       "note": "Every reusable surface resolves to a shipped recipe, so no recipe or format-registry change is required."
     },
     "taxonomy": {
       "proposedTopics": [],
-      "commit": null,
+      "commit": "f0bc8fe4",
       "note": "Minibeast Identification and Insect Classification are exact existing taxonomy matches."
     },
     "analysisReceipt": {
@@ -288,7 +288,7 @@
       "captureFindingsReviewed": 1,
       "externalVisionProvider": null
     },
-    "shippedPr": null,
+    "shippedPr": 615,
     "slackReplyTs": null,
     "shipReaction": false
   },

@@ -252,12 +252,12 @@
         "matchedRecipes": 2,
         "unresolvedGaps": 0
       },
-      "commit": null,
+      "commit": "f0bc8fe4",
       "note": "Both reusable surfaces already resolve to shipped recipes, so this reference graduates without adding a duplicate format."
     },
     "taxonomy": {
       "proposedTopics": [],
-      "commit": null,
+      "commit": "f0bc8fe4",
       "note": "No taxonomy addition is needed. The exact Atmosphere topic already exists."
     },
     "analysisReceipt": {
@@ -271,7 +271,7 @@
       "captureFindingsReviewed": 0,
       "externalVisionProvider": "google/gemini-3-flash"
     },
-    "shippedPr": null,
+    "shippedPr": 615,
     "slackReplyTs": null,
     "shipReaction": false
   },

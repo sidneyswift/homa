@@ -232,12 +232,12 @@
         "matchedRecipes": 2,
         "unresolvedGaps": 0
       },
-      "commit": null,
+      "commit": "f0bc8fe4",
       "note": "The reusable card surfaces resolve to shipped card recipes; no new format is required."
     },
     "taxonomy": {
       "proposedTopics": [],
-      "commit": null,
+      "commit": "f0bc8fe4",
       "note": "Spotting Constellations, Moon Phases, and The Eight Planets are exact existing taxonomy matches."
     },
     "analysisReceipt": {
@@ -251,7 +251,7 @@
       "captureFindingsReviewed": 1,
       "externalVisionProvider": null
     },
-    "shippedPr": null,
+    "shippedPr": 615,
     "slackReplyTs": null,
     "shipReaction": false
   },

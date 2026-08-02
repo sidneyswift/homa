@@ -190,12 +190,12 @@
         "matchedRecipes": 2,
         "unresolvedGaps": 0
       },
-      "commit": null,
+      "commit": "f0bc8fe4",
       "note": "Both reusable card mechanics already resolve to shipped recipes."
     },
     "taxonomy": {
       "proposedTopics": [],
-      "commit": null,
+      "commit": "f0bc8fe4",
       "note": "Daily Routine Building is the closest existing catalog match; no new academic topic is justified by a seasonal prompt deck."
     },
     "analysisReceipt": {
@@ -209,7 +209,7 @@
       "captureFindingsReviewed": 0,
       "externalVisionProvider": null
     },
-    "shippedPr": null,
+    "shippedPr": 615,
     "slackReplyTs": null,
     "shipReaction": false
   },

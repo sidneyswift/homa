@@ -123,7 +123,7 @@
         "topicCountAfter": 1736,
         "topicsJsonDiff": "append-only topic objects with the required topicCount, frozen slug map, and manifest integrity updates"
       },
-      "commit": null
+      "commit": "f0bc8fe4"
     },
     "graduation": {
       "kind": "recipe",
@@ -141,8 +141,8 @@
         "materialsPassed": true,
         "curriculumChecksPassed": true
       },
-      "commit": null,
-      "note": "The recipe, Format library route, and activity-format registry entry are implemented in this working tree. Focused fleet-skill, materials, and curriculum checks passed. Commit remains null until the parent session commits and ships the complete ingestion batch."
+      "commit": "f0bc8fe4",
+      "note": "The recipe, Format library route, and activity-format registry entry are implemented in commit f0bc8fe4 and carried by PR #615. Focused fleet-skill, materials, and curriculum checks passed."
     },
     "knowledgeMerged": "2026-08-02"
   },

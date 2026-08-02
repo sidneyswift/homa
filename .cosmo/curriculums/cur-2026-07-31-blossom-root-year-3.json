@@ -264,7 +264,7 @@
         "topicCountAfter": 1725,
         "topicsJsonDiff": "insertions-only"
       },
-      "commit": null
+      "commit": "f0bc8fe4"
     },
     "graduation": {
       "kind": "recipe-audit",
@@ -277,7 +277,7 @@
       "aliases": {
         "word-play-cut-and-sort": "cut-and-paste-word-work"
       },
-      "commit": null,
+      "commit": "f0bc8fe4",
       "note": "Every Layer 4 activity resolves to a shipped recipe file and Format library route. Copywork and dictation are distinct mechanics, and the word-play source name aliases to the existing cut-and-paste word-work recipe."
     }
   },

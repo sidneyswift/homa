@@ -309,7 +309,7 @@
         "topicsJsonDiff": "append-only topic objects with the required topicCount update",
         "dependenciesJsonDiff": "append-only dependency edges with the required edgeCount update"
       },
-      "commit": null
+      "commit": "f0bc8fe4"
     },
     "graduation": {
       "kind": "recipe-audit",
@@ -319,7 +319,7 @@
         "directRecipeFiles": 12,
         "aliasesRequired": 0
       },
-      "commit": null,
+      "commit": "f0bc8fe4",
       "note": "Every recurring Grade 1 activity resolves to a shipped Homa recipe. No duplicate recipe, new alias, or format registry entry is required."
     },
     "knowledgeMerged": "2026-08-02"
