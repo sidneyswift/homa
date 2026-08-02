@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
-import { requireFamilyWithActor } from "../../../../lib/map/session";
+import { requireFamilyWithActorFromRequest } from "../../../../lib/map/session";
 import { saveFamilyBasics } from "../../../../lib/onboarding/store";
 
 /**
@@ -59,7 +59,7 @@ export async function POST(request: Request): Promise<Response> {
 
   let actor;
   try {
-    actor = await requireFamilyWithActor();
+    actor = await requireFamilyWithActorFromRequest(request);
   } catch {
     return Response.json({ ok: false, reason: "auth-error" }, { status: 401 });
   }

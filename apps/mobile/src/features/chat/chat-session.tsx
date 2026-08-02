@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { useEveAgent, type EveMessage } from "eve/react";
+import { formatHiddenDirective } from "@homa/core";
 
 import { env, EVE_CHANNEL_HEADER } from "../../lib/env";
 import {
@@ -26,10 +27,20 @@ import { markTurnStarted, takeTurnLatencyMs } from "../../lib/turn-clock";
 import { recoverLostTurn } from "../../lib/turn-recovery";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, pressScale, radius, space } from "../../theme/tokens";
-import { isSendLineOccupied } from "./chat-send-policy";
+import {
+  isSendLineOccupied,
+  takeNextQueuedTurn,
+  type QueuedChatMessage,
+} from "./chat-send-policy";
 import { busyLabel, countLastTurnToolCalls } from "./message-utils";
 import { BusyBubble, MessageView } from "./message-view";
 import { latestQuestionRequest } from "./question-card-model";
+import {
+  latestChecklistRequest,
+  latestDetailRequest,
+  latestReportReveal,
+} from "./onboarding-card-model";
+import { ChecklistTakeover, type ChecklistExit } from "./checklist-takeover";
 
 /**
  * The chat surface, the mobile twin of apps/web/app/app/chat-client.tsx:
@@ -77,7 +88,7 @@ import { latestQuestionRequest } from "./question-card-model";
 const MODEL_TIER = "mid" as const;
 
 /** Where a send came from. A card tap is not typing; see sendMessage. */
-type ChatSendSource = "composer" | "card";
+type ChatSendSource = "composer" | "card" | "directive";
 
 /** Stream reconnects per turn; matches the web twin (chat-client.tsx). */
 const STREAM_RECONNECT_ATTEMPTS = 8;
@@ -167,15 +178,16 @@ export function ChatSession({
   const [questionAnswers, setQuestionAnswers] = useState<
     Record<string, string>
   >({});
+  const [checklistTakeover, setChecklistTakeover] = useState<string | null>(null);
   /** Last moment the stream showed signs of life (0 = none yet). */
   const lastStreamActivityRef = useRef(0);
-  /** Messages sent while a turn was running; flushed as one message the
-   *  moment the line is free. */
-  const [queued, setQueued] = useState<string[]>([]);
+  /** Messages sent while a turn was running. Adjacent parent messages may
+   *  batch, while hidden directives keep their own model turns. */
+  const [queued, setQueued] = useState<QueuedChatMessage[]>([]);
   /** Mirrors `queued` for the recovery effect below, which can settle up
    *  to RECOVERY_DEADLINE_MS after it started and would otherwise read
    *  a stale queue captured at that effect's own last run. */
-  const queuedRef = useRef<string[]>(queued);
+  const queuedRef = useRef<QueuedChatMessage[]>(queued);
   /** The store's send, held by ref so onFinish can deliver the queue
    *  without capturing `agent` inside its own initializer. */
   const sendRef = useRef<((input: { message: string }) => Promise<void>) | null>(
@@ -205,16 +217,17 @@ export function ChatSession({
    * recovery effect below can call it without re-running every render.
    */
   const flushQueued = useCallback(() => {
-    if (queuedRef.current.length === 0) return;
-    const message = queuedRef.current.join("\n\n");
-    setQueued([]);
+    const next = takeNextQueuedTurn(queuedRef.current);
+    if (!next) return;
+    queuedRef.current = next.remaining;
+    setQueued(next.remaining);
     // Next tick: this can run inside the previous send's own teardown
     // (onFinish) or inside a recovery's async close-out, and eve rejects
     // overlapping sends.
     setTimeout(() => {
-      lastSendRef.current = { text: message, atMs: currentTimeMs() };
+      lastSendRef.current = { text: next.message, atMs: currentTimeMs() };
       markTurnStarted();
-      void sendRef.current?.({ message });
+      void sendRef.current?.({ message: next.message });
     }, 0);
   }, []);
 
@@ -441,6 +454,10 @@ export function ChatSession({
     // half-written in the composer alone (the web twin's send policy,
     // apps/web/app/app/chat-send-policy.ts).
     if (source === "composer") setDraft("");
+    const queuedMessage: QueuedChatMessage = {
+      text: message,
+      lane: source === "directive" ? "directive" : "parent",
+    };
     // Sending mid-turn queues instead of refusing (texting model,
     // founder ruling 2026-07-10 night): the bubble waits by the
     // composer and goes out the moment the line is free. Occupied by an
@@ -450,7 +467,11 @@ export function ChatSession({
     // never start a second eve session racing the one that might still
     // be finishing.
     if (isSendLineOccupied({ busy, recovering })) {
-      setQueued((current) => [...current, message]);
+      setQueued((current) => {
+        const next = [...current, queuedMessage];
+        queuedRef.current = next;
+        return next;
+      });
       return;
     }
     // Reaching here means the line reads as free (not busy, not
@@ -465,11 +486,13 @@ export function ChatSession({
     if (!agent.session?.sessionId) durableCursorRef.current = 0;
     // A queue held back by a failed turn rides along with the next
     // manual send, in the order she wrote everything.
-    const outgoing = [...queued, message].join("\n\n");
-    setQueued([]);
-    lastSendRef.current = { text: outgoing, atMs: currentTimeMs() };
+    const next = takeNextQueuedTurn([...queuedRef.current, queuedMessage]);
+    if (!next) return;
+    queuedRef.current = next.remaining;
+    setQueued(next.remaining);
+    lastSendRef.current = { text: next.message, atMs: currentTimeMs() };
     markTurnStarted();
-    void agent.send({ message: outgoing });
+    void agent.send({ message: next.message });
   }
 
   function focusComposer() {
@@ -506,6 +529,24 @@ export function ChatSession({
     sendMessage(text, "card");
   }
 
+  function detailsSaved(summary: string): void {
+    sendMessage(formatHiddenDirective("details_saved", { summary }), "directive");
+  }
+
+  function closeChecklist(exit: ChecklistExit | null): void {
+    setChecklistTakeover(null);
+    if (!exit) return;
+    sendMessage(
+      formatHiddenDirective("checklist_complete", {
+        childId: exit.childId,
+        answered: exit.answered,
+        remaining: exit.remaining,
+        complete: exit.complete ? 1 : 0,
+      }),
+      "directive",
+    );
+  }
+
   const transcript = buildTranscript({
     archived,
     live: messages,
@@ -518,6 +559,9 @@ export function ChatSession({
   // hold a card whose id matches this one's.
   const liveMessageSet = new Set(messages);
   const activeQuestion = busy ? null : latestQuestionRequest(messages);
+  const activeChecklist = busy ? null : latestChecklistRequest(messages);
+  const activeDetail = busy ? null : latestDetailRequest(messages);
+  const activeReport = busy ? null : latestReportReveal(messages);
   // The chips return whenever a session has no words in it yet: the
   // first run, or a fresh morning over yesterday's scrollback.
   const showSuggestions = messages.length === 0 && !busy;
@@ -600,6 +644,21 @@ export function ChatSession({
                     onQuestionTypeInstead: focusComposer,
                     questionAnswers,
                   }}
+                  onboarding={{
+                    activeChecklistPartKey: liveMessageSet.has(item.message)
+                      ? activeChecklist?.partKey
+                      : undefined,
+                    activeDetailPartKey: liveMessageSet.has(item.message)
+                      ? activeDetail?.partKey
+                      : undefined,
+                    activeReportPartKey: liveMessageSet.has(item.message)
+                      ? activeReport?.partKey
+                      : undefined,
+                    onOpenChecklist: activeChecklist
+                      ? setChecklistTakeover
+                      : undefined,
+                    onDetailsSaved: activeDetail ? detailsSaved : undefined,
+                  }}
                 />
               ),
             )}
@@ -623,13 +682,13 @@ export function ChatSession({
           </>
         )}
         {statusLabel ? <BusyBubble label={statusLabel} /> : null}
-        {queued.length > 0 ? (
+        {queued.some((entry) => entry.lane === "parent") ? (
           // Messages sent mid-turn wait here as dimmed bubbles and go
           // out on turn end; the remove button pulls one back first.
           <View style={{ alignItems: "flex-end", gap: space.sm }}>
-            {queued.map((text, index) => (
+            {queued.map((entry, index) => entry.lane === "parent" ? (
               <View
-                key={`${index}:${text.slice(0, 24)}`}
+                key={`${index}:${entry.text.slice(0, 24)}`}
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
@@ -641,7 +700,11 @@ export function ChatSession({
                   accessibilityRole="button"
                   accessibilityLabel="Remove from queue"
                   onPress={() =>
-                    setQueued((current) => current.filter((_, at) => at !== index))
+                    setQueued((current) => {
+                      const next = current.filter((_, at) => at !== index);
+                      queuedRef.current = next;
+                      return next;
+                    })
                   }
                   hitSlop={8}
                 >
@@ -672,11 +735,11 @@ export function ChatSession({
                       color: colors.onBrand,
                     }}
                   >
-                    {text}
+                    {entry.text}
                   </Text>
                 </View>
               </View>
-            ))}
+            ) : null)}
             <View style={{ flexDirection: "row", alignItems: "center", gap: space.md }}>
               <Text
                 style={{
@@ -731,16 +794,21 @@ export function ChatSession({
         ) : null}
       </ScrollView>
 
-      <View
-        style={{
-          flexDirection: "row",
-          gap: space.sm,
-          padding: space.md,
-          borderTopWidth: 1,
-          borderTopColor: colors.borderSubtle,
-          backgroundColor: colors.page,
-        }}
-      >
+      {checklistTakeover ? (
+        <View style={{ padding: space.md, borderTopWidth: 1, borderTopColor: colors.borderSubtle, backgroundColor: colors.page }}>
+          <ChecklistTakeover childId={checklistTakeover} onClose={closeChecklist} />
+        </View>
+      ) : (
+        <View
+          style={{
+            flexDirection: "row",
+            gap: space.sm,
+            padding: space.md,
+            borderTopWidth: 1,
+            borderTopColor: colors.borderSubtle,
+            backgroundColor: colors.page,
+          }}
+        >
         <TextInput
           ref={composerRef}
           value={draft}
@@ -824,7 +892,8 @@ export function ChatSession({
             </Text>
           </Pressable>
         ) : null}
-      </View>
+        </View>
+      )}
     </View>
   );
 }

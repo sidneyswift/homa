@@ -119,6 +119,16 @@ function assistantWith(...parts: EveMessagePart[]): EveMessage {
 }
 
 describe("mobile tool rendering", () => {
+  it("does not render hidden protocol directives as parent messages", () => {
+    assert.equal(
+      partIsRenderable({
+        type: "text",
+        text: "[[homa:onboarding details_saved summary=Mia]]",
+      } as EveMessagePart),
+      false,
+    );
+  });
+
   it("allows the planner card through the same renderability gate as its view", () => {
     assert.equal(partIsRenderable(completedTool("open_planner", { opened: true })), true);
     assert.equal(partIsRenderable(completedTool("open_planner", { opened: false })), false);
@@ -139,17 +149,37 @@ describe("mobile tool rendering", () => {
     );
   });
 
-  it("names a checklist result when the native card cannot render it yet", () => {
+  it("renders a supported checklist without the tool-only fallback", () => {
     assert.equal(
       toolOnlyFallback(
         assistantWith(
           completedTool("start_checklist", {
             started: true,
+            childId: "71d07438-c69a-47e8-a09f-1f2dfc6e8e64",
             childName: "Mia",
           }),
         ),
       ),
-      "Mia's questions are ready, but that checklist cannot open in the phone app yet.",
+      null,
+    );
+  });
+
+  it("renders supported details and report cards without fallbacks", () => {
+    assert.equal(
+      toolOnlyFallback(assistantWith(completedTool("ask_for_details", {
+        asked: true,
+        kind: "child",
+      }))),
+      null,
+    );
+    assert.equal(
+      toolOnlyFallback(assistantWith(completedTool("score_child_report", {
+        scored: true,
+        childId: "71d07438-c69a-47e8-a09f-1f2dfc6e8e64",
+        childName: "Mia",
+        token: "report-token",
+      }))),
+      null,
     );
   });
 

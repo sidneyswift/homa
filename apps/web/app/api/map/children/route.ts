@@ -3,7 +3,7 @@ import { MAP_KID_CAP, mapChildRemoveSchema, mapChildSchema } from "@homa/core";
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
 import { familyAccountCheckout } from "../../../../lib/billing/wall";
-import { requireFamily } from "../../../../lib/map/session";
+import { requireFamilyFromRequest } from "../../../../lib/map/session";
 import { addChild, countChildren, removeChild } from "../../../../lib/map/store";
 
 /**
@@ -17,7 +17,7 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false }, { status: 429 });
   }
 
-  const family = await requireFamily();
+  const family = await requireFamilyFromRequest(request);
   if (!family) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
@@ -76,7 +76,7 @@ export async function DELETE(request: Request): Promise<Response> {
     return Response.json({ ok: false }, { status: 429 });
   }
 
-  const family = await requireFamily();
+  const family = await requireFamilyFromRequest(request);
   if (!family) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
