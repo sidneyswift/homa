@@ -5,6 +5,7 @@ import { View } from "react-native";
 import { AppDrawer } from "../../components/nav/app-drawer";
 import { AppTopBar } from "../../components/nav/app-top-bar";
 import { BillingGate } from "../../components/billing-gate";
+import { FamilyReadinessGate } from "../../components/family-readiness-gate";
 import { useSession } from "../../features/auth/session-provider";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { VoiceDock } from "../../features/voice/voice-dock";
@@ -29,9 +30,13 @@ export default function AppShellLayout() {
   if (!session) return <Redirect href="/signin" />;
 
   return (
-    <BillingGate>
-      <AppShell />
-    </BillingGate>
+    <FamilyReadinessGate>
+      {(family) => (
+        <BillingGate familyId={family.id}>
+          <AppShell />
+        </BillingGate>
+      )}
+    </FamilyReadinessGate>
   );
 }
 

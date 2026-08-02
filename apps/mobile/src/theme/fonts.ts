@@ -32,18 +32,26 @@ export const fontFamilies = {
   wordmark: "Fredoka_600SemiBold",
 } as const;
 
-/** Loads every brand font; the splash screen holds until this settles. */
-export function useHomaFonts(): boolean {
-  const [schibstedLoaded] = useSchibsted({
+export interface HomaFontState {
+  loaded: boolean;
+  error: Error | null;
+}
+
+/** Loads every brand font and surfaces Expo's failure signal to startup. */
+export function useHomaFonts(): HomaFontState {
+  const [schibstedLoaded, schibstedError] = useSchibsted({
     SchibstedGrotesk_600SemiBold,
     SchibstedGrotesk_700Bold,
   });
-  const [hankenLoaded] = useHanken({
+  const [hankenLoaded, hankenError] = useHanken({
     HankenGrotesk_400Regular,
     HankenGrotesk_500Medium,
     HankenGrotesk_600SemiBold,
     HankenGrotesk_700Bold,
   });
-  const [fredokaLoaded] = useFredoka({ Fredoka_600SemiBold });
-  return schibstedLoaded && hankenLoaded && fredokaLoaded;
+  const [fredokaLoaded, fredokaError] = useFredoka({ Fredoka_600SemiBold });
+  return {
+    loaded: schibstedLoaded && hankenLoaded && fredokaLoaded,
+    error: schibstedError ?? hankenError ?? fredokaError ?? null,
+  };
 }

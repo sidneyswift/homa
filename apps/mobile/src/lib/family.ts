@@ -1,4 +1,5 @@
 import { isValidBirthDate } from "@homa/core";
+import { AuthSessionMissingError } from "@supabase/supabase-js";
 
 import { supabase } from "./supabase";
 
@@ -70,8 +71,10 @@ export async function getMyMemberDisplayName(): Promise<string | null> {
 export async function getMyConsentStatus(): Promise<boolean> {
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser();
-  if (!user) return false;
+  if (userError) throw userError;
+  if (!user) throw new AuthSessionMissingError();
   const { data, error } = await supabase
     .from("family_members")
     .select("ai_processing_consented_at")

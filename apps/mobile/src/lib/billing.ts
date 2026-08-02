@@ -1,3 +1,8 @@
+import type { BootstrapResult } from "../features/bootstrap/bootstrap";
+import {
+  BootstrapFailure,
+} from "../features/bootstrap/bootstrap";
+import { runMobileBootstrapStep } from "../features/bootstrap/mobile-bootstrap";
 import { env, EVE_CHANNEL_HEADER } from "./env";
 import { supabase } from "./supabase";
 
@@ -28,18 +33,26 @@ function apiUrl(path: string): string {
   return `${env.apiUrl.replace(/\/+$/, "")}${path}`;
 }
 
-/** Null on any failure (offline, signed out, server error): a paywall
- *  that cannot ask the question must never guess the answer, the
- *  caller stays in its loading state rather than assuming either
- *  open or walled. */
-export async function fetchBillingGate(): Promise<BillingGateState | null> {
-  try {
-    const token = await bearerToken();
-    if (!token) return null;
+/** A failed check carries a closed reason: a paywall that cannot ask the
+ *  question must never guess either open or walled. */
+export async function fetchBillingGate(): Promise<
+  BootstrapResult<BillingGateState>
+> {
+  return runMobileBootstrapStep("billing", async () => {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) throw error;
+    const token = data.session?.access_token;
+    if (!token) throw new BootstrapFailure("billing", "expired_session");
     const response = await fetch(apiUrl("/api/billing/gate"), {
       headers: { Authorization: `Bearer ${token}`, ...EVE_CHANNEL_HEADER },
     });
-    if (!response.ok) return null;
+    if (response.status === 401 || response.status === 403) {
+      throw new BootstrapFailure("billing", "expired_session");
+    }
+    if (response.status >= 500) {
+      throw new BootstrapFailure("billing", "server_error");
+    }
+    if (!response.ok) throw new BootstrapFailure("billing", "unknown");
     const body = (await response.json()) as {
       ok?: boolean;
       open?: boolean;
@@ -48,7 +61,7 @@ export async function fetchBillingGate(): Promise<BillingGateState | null> {
       billingProvider?: "stripe" | "apple" | "google" | null;
       billingPeriod?: "monthly" | "annual" | null;
     };
-    if (!body.ok) return null;
+    if (!body.ok) throw new BootstrapFailure("billing", "unknown");
     return {
       open: body.open === true,
       lapsed: body.lapsed === true,
@@ -56,9 +69,7 @@ export async function fetchBillingGate(): Promise<BillingGateState | null> {
       billingProvider: body.billingProvider ?? null,
       billingPeriod: body.billingPeriod ?? null,
     };
-  } catch {
-    return null;
-  }
+  });
 }
 
 export type ConfirmApplePurchaseResult =

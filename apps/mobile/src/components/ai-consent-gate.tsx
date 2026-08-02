@@ -1,10 +1,14 @@
-import { useEffect, useState, type ReactNode } from "react";
+import type { MobileBootstrapFailureReason } from "@homa/core";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 
 import {
   getMyConsentStatus,
   recordAiProcessingConsent,
 } from "../lib/family";
+import { useSession } from "../features/auth/session-provider";
+import { reportBootstrapEvent } from "../features/bootstrap/bootstrap-events";
+import { runMobileBootstrapStep } from "../features/bootstrap/mobile-bootstrap";
 import { openPrivacyPolicy } from "../lib/web-links";
 import { fontFamilies } from "../theme/fonts";
 import { colors, fontSize, space } from "../theme/tokens";
@@ -21,33 +25,66 @@ import { Card } from "./ui/card";
  * local flag, so it survives reinstalls and is auditable.
  */
 export function AiConsentGate({ children }: { children: ReactNode }) {
-  const [status, setStatus] = useState<"loading" | "needed" | "given">(
-    "loading",
-  );
+  const [status, setStatus] =
+    useState<"loading" | "failed" | "needed" | "given">("loading");
+  const [failureReason, setFailureReason] =
+    useState<MobileBootstrapFailureReason | null>(null);
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const attemptRef = useRef(0);
+  const previousFailureRef = useRef<MobileBootstrapFailureReason | null>(null);
+  const { continueSignedOut } = useSession();
 
-  useEffect(() => {
-    let cancelled = false;
-    void getMyConsentStatus().then((consented) => {
-      if (!cancelled) setStatus(consented ? "given" : "needed");
-    });
-    return () => {
-      cancelled = true;
-    };
+  const loadConsent = useCallback(async () => {
+    const attempt = ++attemptRef.current;
+    void reportBootstrapEvent("attempted", "consent");
+    setStatus("loading");
+    setFailureReason(null);
+    const result = await runMobileBootstrapStep("consent", getMyConsentStatus);
+    if (attempt !== attemptRef.current) return;
+    if (result.ok) {
+      const recoveredFrom = previousFailureRef.current;
+      previousFailureRef.current = null;
+      setStatus(result.value ? "given" : "needed");
+      if (recoveredFrom) {
+        void reportBootstrapEvent("recovered", "consent", recoveredFrom);
+      }
+      return;
+    }
+    previousFailureRef.current = result.reason;
+    setFailureReason(result.reason);
+    setStatus("failed");
+    void reportBootstrapEvent("failed", "consent", result.reason);
   }, []);
 
+  useEffect(() => {
+    const timer = setTimeout(() => void loadConsent(), 0);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [loadConsent]);
+
   async function handleAgree() {
+    void reportBootstrapEvent("attempted", "consent");
     setSaving(true);
     setErrorMessage(null);
-    try {
-      await recordAiProcessingConsent();
+    const result = await runMobileBootstrapStep(
+      "consent",
+      recordAiProcessingConsent,
+    );
+    if (result.ok) {
       setStatus("given");
-    } catch {
+      const recoveredFrom = previousFailureRef.current;
+      previousFailureRef.current = null;
+      if (recoveredFrom) {
+        void reportBootstrapEvent("recovered", "consent", recoveredFrom);
+      }
+    } else {
+      previousFailureRef.current = result.reason;
+      void reportBootstrapEvent("failed", "consent", result.reason);
       setErrorMessage("That didn't go through. You can try again when you're ready.");
-    } finally {
-      setSaving(false);
     }
+    setSaving(false);
   }
 
   if (status === "loading") {
@@ -56,6 +93,44 @@ export function AiConsentGate({ children }: { children: ReactNode }) {
 
   if (status === "given") {
     return <>{children}</>;
+  }
+
+  if (status === "failed") {
+    return (
+      <View style={{ padding: space.lg }}>
+        <Card style={{ gap: space.md }}>
+          <Text
+            accessibilityRole="header"
+            style={{
+              fontFamily: fontFamilies.displaySemibold,
+              fontSize: fontSize.lg,
+              color: colors.textStrong,
+            }}
+          >
+            Your privacy choice is safe
+          </Text>
+          <Text
+            style={{
+              fontFamily: fontFamilies.body,
+              fontSize: fontSize.base,
+              color: colors.textBody,
+            }}
+          >
+            {failureReason === "expired_session"
+              ? "Your sign-in has expired. Sign in again before sharing anything with Homa."
+              : "We could not check your choice. Nothing has been shared with Homa."}
+          </Text>
+          <Button label="Try again" onPress={() => void loadConsent()} />
+          {failureReason === "expired_session" ? (
+            <Button
+              label="Continue to sign in"
+              variant="secondary"
+              onPress={continueSignedOut}
+            />
+          ) : null}
+        </Card>
+      </View>
+    );
   }
 
   return (
