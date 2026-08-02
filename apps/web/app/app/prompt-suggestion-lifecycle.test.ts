@@ -20,7 +20,7 @@ describe("prompt suggestion recovery lifecycle", () => {
     );
   });
 
-  it("keeps a queued follow-up ahead of auto-stop recovery", () => {
+  it("recovers an auto-stopped reply before its queued follow-up", () => {
     assert.equal(
       promptSuggestionActionForLifecycleEvent({
         type: "turn_finished",
@@ -28,7 +28,7 @@ describe("prompt suggestion recovery lifecycle", () => {
         autoStopped: true,
         hasQueuedFollowup: true,
       }),
-      "clear",
+      "start_recovery",
     );
   });
 

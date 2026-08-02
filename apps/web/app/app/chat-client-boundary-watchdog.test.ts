@@ -14,7 +14,11 @@ test("chat starts a read-only boundary witness before the hard stall abort", () 
   );
   assert.match(
     source,
-    /const recoverLastTurn = useCallback\([\s\S]*?recoverLostTurn\(\{[\s\S]*?signal,[\s\S]*?createTurnBoundaryWatchdog<RecoveredTurn>\(\{[\s\S]*?probe: recoverLastTurn,[\s\S]*?onRecovered: applyRecoveredTurn,[\s\S]*?\}\)/u,
+    /const recoverTurn = useCallback\([\s\S]*?recoverLostTurn\(\{[\s\S]*?signal,[\s\S]*?const recoverLastTurn = useCallback\([\s\S]*?recoverTurn\(target, signal\)/u,
+  );
+  assert.match(
+    source,
+    /createTurnBoundaryWatchdog<RecoveredTurn>\(\{[\s\S]*?probe: recoverLastTurn,[\s\S]*?onRecovered: applyRecoveredTurn,[\s\S]*?\}\)/u,
   );
 });
 
