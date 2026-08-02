@@ -68,6 +68,16 @@ export { US_STATES, type UsStateCode } from "./us-states";
 export { formatUsPhone, normalizeUsPhoneE164 } from "./phone";
 
 export {
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+  normalizePasswordRecoveryEmail,
+  parsePasswordRecoveryConfirmation,
+  passwordRecoveryRedirectUrl,
+  validatePasswordReset,
+  type PasswordResetValidation,
+} from "./password-recovery";
+
+export {
   DIRECTIVE_NAMESPACE,
   formatHiddenDirective,
   hasVisibleText,

@@ -1,0 +1,59 @@
+import { parsePasswordRecoveryConfirmation } from "@homa/core";
+import type { Metadata } from "next";
+import Link from "next/link";
+
+import { Logo } from "../../../components/brand/Logo";
+
+export const metadata: Metadata = {
+  title: "Confirm password reset",
+  referrer: "no-referrer",
+  robots: { index: false },
+};
+
+export default async function ConfirmPasswordResetPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ token_hash?: string; type?: string }>;
+}) {
+  const params = await searchParams;
+  const confirmation = parsePasswordRecoveryConfirmation(
+    params.token_hash ?? null,
+    params.type ?? null,
+  );
+
+  return (
+    <main className="mx-auto w-full max-w-md px-6 py-16">
+      <Logo size={28} />
+      <h1 className="mt-6 font-display text-3xl font-semibold leading-tight text-strong">
+        Reset your password
+      </h1>
+      {confirmation ? (
+        <form
+          action="/auth/confirm"
+          method="post"
+          className="mt-8 rounded-lg border border-border bg-card p-6 shadow-sm"
+        >
+          <input type="hidden" name="token_hash" value={confirmation.tokenHash} />
+          <input type="hidden" name="type" value="recovery" />
+          <p className="text-body">Your reset link is ready.</p>
+          <button
+            type="submit"
+            className="mt-6 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
+          >
+            Choose a new password
+          </button>
+        </form>
+      ) : (
+        <div className="mt-8 rounded-lg border border-border bg-card p-6 shadow-sm">
+          <p className="text-body">That reset link is incomplete or no longer active.</p>
+          <Link
+            href="/forgot-password"
+            className="mt-4 inline-block font-semibold text-brand underline underline-offset-2"
+          >
+            Send reset link
+          </Link>
+        </div>
+      )}
+    </main>
+  );
+}

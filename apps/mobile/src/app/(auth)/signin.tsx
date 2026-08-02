@@ -1,3 +1,7 @@
+import {
+  normalizePasswordRecoveryEmail,
+  passwordRecoveryRedirectUrl,
+} from "@homa/core";
 import { Redirect } from "expo-router";
 import { useState } from "react";
 import {
@@ -20,6 +24,7 @@ import { signInWithApple } from "../../features/auth/apple-sign-in";
 import { signInWithGoogle } from "../../features/auth/google-sign-in";
 import type { SignInFlowResult } from "../../features/auth/sign-in-result";
 import { useSession } from "../../features/auth/session-provider";
+import { env } from "../../lib/env";
 import { supabase } from "../../lib/supabase";
 import { openWebOnboarding } from "../../lib/web-links";
 import { fontFamilies } from "../../theme/fonts";
@@ -53,6 +58,8 @@ export default function SignInScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
+  const [recoveryPending, setRecoveryPending] = useState(false);
+  const [recoverySent, setRecoverySent] = useState(false);
   const [oauthPending, setOauthPending] = useState<"google" | "apple" | null>(
     null,
   );
@@ -94,6 +101,36 @@ export default function SignInScreen() {
       setError("That email and password didn't match. You can try again when you're ready.");
     }
     // Success: SessionProvider picks up the session and this screen redirects.
+  }
+
+  async function sendPasswordReset() {
+    const normalizedEmail = normalizePasswordRecoveryEmail(email);
+    if (!normalizedEmail) {
+      setError("Enter your email above, then tap Send reset link.");
+      return;
+    }
+    const redirectTo = passwordRecoveryRedirectUrl(env.apiUrl);
+    if (!redirectTo) {
+      setError("We couldn't send the reset link. Try again in a minute.");
+      return;
+    }
+
+    setRecoveryPending(true);
+    setRecoverySent(false);
+    setError(null);
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+      normalizedEmail,
+      { redirectTo },
+    );
+    setRecoveryPending(false);
+
+    if (resetError) {
+      console.error("mobile password recovery request failed:", resetError.message);
+      setError("We couldn't send the reset link. Try again in a minute.");
+      return;
+    }
+
+    setRecoverySent(true);
   }
 
   return (
@@ -189,6 +226,25 @@ export default function SignInScreen() {
               secureTextEntry
               autoComplete="current-password"
             />
+            <Button
+              label={recoveryPending ? "Sending link\u2026" : "Send reset link"}
+              variant="ghost"
+              onPress={() => void sendPasswordReset()}
+              disabled={pending || oauthPending !== null || recoveryPending}
+            />
+
+            {recoverySent ? (
+              <Text
+                accessibilityLiveRegion="polite"
+                style={{
+                  fontFamily: fontFamilies.body,
+                  fontSize: fontSize.sm,
+                  color: colors.textBody,
+                }}
+              >
+                If that email is connected to Homa, a reset link is on its way. It may take a minute.
+              </Text>
+            ) : null}
 
             {error ? (
               <Text
@@ -206,7 +262,7 @@ export default function SignInScreen() {
             <Button
               label={pending ? "One moment\u2026" : "Sign in"}
               onPress={() => void submit()}
-              disabled={pending || oauthPending !== null}
+              disabled={pending || oauthPending !== null || recoveryPending}
               size="lg"
             />
           </Card>

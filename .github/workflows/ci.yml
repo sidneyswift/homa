@@ -125,6 +125,9 @@ jobs:
       - name: Mobile bootstrap unit tests
         run: pnpm check:mobile-bootstrap
 
+      - name: Cross-platform password recovery contract
+        run: pnpm check:auth-recovery
+
       - name: Mobile planner unit tests
         run: pnpm check:mobile-planner
 
