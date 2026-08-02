@@ -7,7 +7,7 @@ import {
 import { createSupabaseServerClient } from "./supabase/server";
 
 /**
- * The /app/calendar page's plan_activity_schedule read, under the
+ * The Planner page's plan_activity_schedule read, under the
  * caller's own RLS session (the same posture as lib/hours.ts and
  * lib/family-events-read.ts).
  *

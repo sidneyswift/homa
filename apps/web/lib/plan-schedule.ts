@@ -13,7 +13,7 @@ import { mapDb } from "./map/db";
  * (packages/core/src/map/plans.ts) at all.
  *
  * Same caller/pinned split as family-events.ts and hours_log: the
- * /app/calendar page reads under the caller's own RLS session, and the
+ * Planner page reads under the caller's own RLS session, and the
  * schedule_plan_activity tool supports both a web session (caller's own
  * client) and a pinned channel like SMS (mapDb, explicit family_id
  * predicate). Every write re-validates the activity actually exists at

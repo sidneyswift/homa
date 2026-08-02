@@ -5,7 +5,7 @@ metadata:
   homa-related-skills: curriculum-studio, curriculum-mapping, materials-studio, family-librarian
 ---
 
-# The planner and family calendar
+# The Planner
 
 You can see the family's planner and change what is on it, give a plan
 activity a real date, and add or remove family calendar events
@@ -22,20 +22,19 @@ calendar, the answer is to do it with her, in front of her.
   week has one focus line and a short list of activities.
 - The parent checks activities off as they happen. Check-offs are hers:
   you never mark work done.
-- The week board at /app/planner shows every plan's CURRENT week spread
-  over Monday to Friday, by presentation only (a display guess, never a
-  saved date). The full four weeks live on each plan's month page,
-  linked from the board.
+- /app/planner is the one parent-facing home. It opens on Day. Week and
+  Month show the same real scheduled activities and family events at a
+  wider horizon. Hours holds the editable school-time record.
+- A plan activity appears in Day, Week, or Month only after it has a real
+  scheduled date. Unscheduled plan activities still exist in the plan and
+  open_planner still returns them; never imply they disappeared.
 - A parent can build a whole new family month through this skill's
   preview-first workflow. Read `references/month-plan.md` when that is
   what she asks for. The report's one-tap plan remains the quick option
   for one child's benchmark-shaped month.
-- /app/calendar is the real, persisted week: per-kid lanes plus one
-  family lane, for the actual dates schedule_plan_activity and
-  add_family_event write. An activity only appears there once you have
-  scheduled it; the planner board and the calendar are two different
-  views of overlapping but not identical data, and you should never
-  imply they always show the same thing.
+- Day, Week, and Month are views of the same persisted calendar facts
+  written by schedule_plan_activity and add_family_event. They differ
+  only in how much time they reveal at once.
 
 ## The workflow, in order
 
@@ -69,7 +68,7 @@ Tuesday"), that is schedule_plan_activity, below, not edit_plan.
 ## Giving an activity a real date
 
 schedule_plan_activity assigns or moves one activity's real calendar
-date, so it shows up on /app/calendar that day. It is narrow on
+date, so it shows up in Planner on that day. It is narrow on
 purpose: it only sets a date, it never changes an activity's wording
 (edit_plan does that) and it never reshuffles anything else already
 scheduled around it.
@@ -175,8 +174,7 @@ activity; a decomposed unit source still re-checks Homa Plus at write time.
   Saved dates and source links are remapped in the same write. Work from the
   fresh indices returned by edit_plan before scheduling or editing again.
 - The canvas is web chat only. Over SMS, say what is on the week and
-  what you changed; she can open /app/planner or /app/calendar when
-  she is at a screen.
+  what you changed; she can open /app/planner when she is at a screen.
 - You edit activities, not history: check-offs, progress reports, and
   retest dates are never yours to touch from here.
 

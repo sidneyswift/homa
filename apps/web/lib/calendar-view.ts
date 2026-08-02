@@ -7,7 +7,7 @@ import type { DashboardPlan } from "./plan-week";
 import { zonedDateParts } from "./time-zone";
 
 /**
- * Pure view-model for /app/calendar (issue #176, CG-03: "calendar and
+ * Pure view-model for Planner calendar views (issue #176, CG-03: "calendar and
  * homeschool planner in one"), the unified surface a co-founder asked
  * for in her own words: "have an option for each kid and then a family
  * calendar... check off each kid's lessons, added homa lessons, family
@@ -303,7 +303,7 @@ export interface CalendarDayLane {
   activities: CalendarActivityItem[];
   events: CalendarEventItem[];
   /** Minutes of hours_log time recorded for this lane on this day (a
-   * lightweight indicator; editing hours stays on /app/hours). */
+   * lightweight indicator; editing hours stays in Planner's Hours view). */
   hoursMinutes: number;
 }
 

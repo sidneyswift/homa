@@ -74,7 +74,7 @@ describe("HoursView", () => {
   it("shows the reassuring empty state with nothing logged", () => {
     const html = renderView([]);
     assert.match(html, /Nothing logged yet\./);
-    assert.match(html, /Homa logs school time the moment it comes up/);
+    assert.match(html, /Tell Homa how long schoolwork took in Chat, by text, or on a call/);
     assert.doesNotMatch(html, /role="dialog"/);
   });
 
@@ -104,10 +104,10 @@ describe("HoursView", () => {
     const html = renderView(entries, [MAYA, LEO], "child-maya");
     assert.match(html, />Maya<\/span>/);
     assert.doesNotMatch(html, />Leo<\/span>/);
-    assert.match(html, /Every school-time block logged for Maya/);
+    assert.match(html, /Homa records the school time you tell her about for Maya/);
   });
 
-  it("groups entries under Today with subject, minutes, note, and source", () => {
+  it("groups entries under Today with subject, minutes, note, and an easy Edit target", () => {
     const html = renderView([
       entry({ id: "a", subject: "reading", minutes: 30, note: "About 30 min of phonics" }),
     ]);
@@ -115,19 +115,15 @@ describe("HoursView", () => {
     assert.match(html, />Reading<\/span>/);
     assert.match(html, />30m<\/span>/);
     assert.match(html, /About 30 min of phonics/);
-    assert.match(html, />Chat<\/span>/);
+    assert.match(html, /min-h-11 min-w-11/);
     assert.match(html, />Edit<\/button>/);
   });
 
-  it("labels every source plainly: chat, text, and phone call", () => {
-    const html = renderView([
-      entry({ id: "a", source: "chat" }),
-      entry({ id: "b", source: "sms", happenedOn: "2026-07-10" }),
-      entry({ id: "c", source: "call", happenedOn: "2026-07-06" }),
-    ]);
-    assert.match(html, />Chat<\/span>/);
-    assert.match(html, />Text<\/span>/);
-    assert.match(html, />Phone call<\/span>/);
+  it("keeps source provenance behind Edit instead of competing with the activity", () => {
+    assert.doesNotMatch(renderView([entry({ source: "call" })]), /Phone call/);
+    assert.match(renderOverlay(entry({ source: "chat" })), /Added after you mentioned it in Chat\./);
+    assert.match(renderOverlay(entry({ source: "sms" })), /Added after you mentioned it by text\./);
+    assert.match(renderOverlay(entry({ source: "call" })), /Added after you mentioned it on a phone call\./);
   });
 
   it("shows which child a block belongs to only when more than one kid exists", () => {
@@ -169,7 +165,7 @@ describe("HoursEntryOverlay", () => {
     );
     assert.match(html, /role="dialog"/);
     assert.match(html, /aria-modal="true"/);
-    assert.match(html, /<h2 id="hours-entry-title"[^>]*>Edit this block<\/h2>/);
+    assert.match(html, /<h2 id="hours-entry-title"[^>]*>Edit recorded time<\/h2>/);
     assert.match(html, /<option value="science" selected="">Science<\/option>/);
     assert.match(html, /name="minutes"[^>]*value="90"/);
     assert.match(html, /Volcano experiment/);
@@ -178,10 +174,11 @@ describe("HoursEntryOverlay", () => {
 
   it("names who the block is for, or the whole family", () => {
     const forKid = renderOverlay(entry({ childName: "Maya" }));
-    assert.match(forKid, /Logged for Maya\./);
+    assert.match(forKid, /For Maya\./);
+    assert.match(forKid, /Added after you mentioned it in Chat\./);
 
     const familyWide = renderOverlay(entry({ childId: null, childName: null }));
-    assert.match(familyWide, /Logged for the whole family\./);
+    assert.match(familyWide, /For the whole family\./);
   });
 
   it("offers delete without immediately confirming it", () => {

@@ -2,7 +2,7 @@ import { isHoursSubject, type HoursSubject } from "./hours-model";
 import { createSupabaseServerClient } from "./supabase/server";
 
 /**
- * Server-side hours_log reads for the /app/hours page (CG-02, issue
+ * Server-side hours_log reads for the Planner Hours view (CG-02, issue
  * #174). All reads run under the caller's RLS context (publishable key
  * + session JWT), so every row is family-scoped by the database itself;
  * the explicit family_id predicate below is the same defense-in-depth

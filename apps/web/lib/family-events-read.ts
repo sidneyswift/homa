@@ -7,7 +7,7 @@ import {
 import { createSupabaseServerClient } from "./supabase/server";
 
 /**
- * The /app/calendar page's family_events read, under the caller's own
+ * The Planner page's family_events read, under the caller's own
  * RLS session, the same posture as lib/hours.ts's getHoursLogForFamily.
  *
  * Deliberately its OWN file, separate from lib/family-events.ts: this

@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { getAppData } from "../../lib/app-data";
 import { familyWallCheckout } from "../../lib/billing/wall";
 import { fetchChatHistory } from "../../lib/chat-history";
+import { plannerActivityHelpDraft } from "../../lib/planner-activity-help";
 import { getSlashMenuSkills } from "../../lib/slash-skills";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { effectiveTimeZone } from "../../lib/time-zone";
@@ -39,13 +40,27 @@ const DRAFT_PREFILLS: Record<string, string | undefined> = {
 export default async function ChatPage({
   searchParams,
 }: {
-  searchParams: Promise<{ draft?: string }>;
+  searchParams: Promise<{
+    draft?: string;
+    child?: string;
+    subject?: string;
+    check?: string;
+  }>;
 }) {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.auth.getClaims();
   const userId = (data?.claims?.sub as string | undefined) ?? "anonymous";
   const app = await getAppData();
-  const { draft } = await searchParams;
+  const query = await searchParams;
+  const { draft } = query;
+  const initialDraft = plannerActivityHelpDraft({
+    draft,
+    childId: query.child,
+    subjectId: query.subject,
+    checkId: query.check,
+    children: app?.children ?? [],
+    plans: app?.plans ?? [],
+  }) ?? DRAFT_PREFILLS[draft ?? ""];
 
   // The context switcher's selection: when one kid is selected, the
   // composer says so and the agent hears it (the eve channel reads the
@@ -95,10 +110,11 @@ export default async function ChatPage({
       slashSkills={slashSkills}
       // Deep links land with the composer already started; she edits and
       // sends herself. `journal` comes from the journal email;
-      // `schedule-week` comes from an empty /app/calendar, which is the
-      // one place a parent learns that school work needs real dates
-      // before the calendar (or a reshuffle) can do anything with it.
-      initialDraft={DRAFT_PREFILLS[draft ?? ""]}
+      // `schedule-week` comes from Planner when a parent wants Homa to
+      // put existing schoolwork on real dates before a reshuffle. An
+      // activity-help link carries plan coordinates only; the server
+      // resolves its words from this authenticated family's own plan.
+      initialDraft={initialDraft}
     />
   );
 }

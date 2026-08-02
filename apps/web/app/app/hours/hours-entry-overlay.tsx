@@ -13,13 +13,19 @@ import {
 } from "./actions";
 
 /**
- * The hours entry dialog: edit subject, minutes, and note, or delete the
- * block. Focus-trap and Escape behavior mirror the house pattern for
+ * The recorded-time dialog: edit subject, minutes, and note, or delete the
+ * entry. Focus-trap and Escape behavior mirror the house pattern for
  * centered dialogs (the Binder's MaterialDetailOverlay, the Tasks
  * editor), rather than inventing a new one.
  */
 
 const INITIAL_STATE: HoursActionState = { error: null };
+
+const SOURCE_EXPLANATIONS = {
+  chat: "Added after you mentioned it in Chat.",
+  sms: "Added after you mentioned it by text.",
+  call: "Added after you mentioned it on a phone call.",
+} as const;
 
 function DeleteEntryButton({ entry, onDone }: { entry: HoursEntry; onDone: () => void }) {
   const router = useRouter();
@@ -45,7 +51,7 @@ function DeleteEntryButton({ entry, onDone }: { entry: HoursEntry; onDone: () =>
     <div className="mt-4 border-t border-border-subtle pt-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs font-semibold text-muted">
-          {`Delete this ${entry.minutes}-minute ${SUBJECT_LABELS[entry.subject].toLowerCase()} block? This can't be undone.`}
+          {`Delete this ${entry.minutes}-minute ${SUBJECT_LABELS[entry.subject].toLowerCase()} entry? This can't be undone.`}
         </p>
         <div className="flex shrink-0 gap-2">
           <button
@@ -168,7 +174,7 @@ export function HoursEntryOverlay({
       >
         <div className="flex items-start justify-between gap-3">
           <h2 id="hours-entry-title" className="font-display text-xl font-semibold text-strong">
-            Edit this block
+            Edit recorded time
           </h2>
           <button
             ref={closeRef}
@@ -182,7 +188,10 @@ export function HoursEntryOverlay({
         </div>
 
         <p className="mt-1 text-sm text-muted">
-          {entry.childName ? `Logged for ${entry.childName}.` : "Logged for the whole family."}
+          {entry.childName ? `For ${entry.childName}.` : "For the whole family."}
+        </p>
+        <p className="mt-0.5 text-xs text-subtle">
+          {SOURCE_EXPLANATIONS[entry.source]}
         </p>
 
         <form action={formAction} className="mt-4 flex flex-col gap-3">

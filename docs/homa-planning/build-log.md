@@ -3,6 +3,41 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-08-02 · Founder ruling: Planner opens on one day
+
+**Ruling ID:** `planner-day-first-unification`
+
+After reviewing the earlier planner, calendar, and hours consolidation,
+the founder rejected both its structure and its cosmetics as too clunky:
+oversized checkboxes, too many simultaneous day containers, repeated actions,
+and too much visible explanation. The approved replacement was the Day-first
+prototype, followed by the explicit direction: "I LOVE IT! SHIP IT!"
+
+Current policy:
+
+- The product has one navigation destination named Planner. Calendar and Hours
+  are views inside it, not sibling destinations.
+- Planner opens on Day. The immediate view shows the active date, fixed
+  appointments, unfinished scheduled activities, and an honest remaining count.
+- Week is a seven-row summary, Month is a familiar date grid, and Hours is the
+  editable compliance record. Every view keeps the same active date.
+- A checkbox has a 22-pixel visual inside a 44-pixel hit target. Finished work is
+  collapsed behind `Show finished`.
+- There is one global Add action. Detail, editing, scheduling help, and secondary
+  fields appear only after a tap.
+- Homa offers schedule help only when there is a real need. The interface never
+  invents duration estimates, conflicts, or an Ideas store that production data
+  cannot support.
+- Existing `/app/calendar` and `/app/hours` links remain compatibility doors into
+  Planner. Web and native use the same four-view model.
+
+This supersedes only Q-A's default register presentation in
+`one-planner-arc`. Its unified data model, instrumentation, scheduling boundary,
+and native-parity direction remain binding.
+
+Implementation and verification are tracked by gh#258 and
+`docs/notes/unified-planner-implementation.md`.
+
 ## 2026-08-01 · Founder ruling: copyright does not gate family uploads or training eligibility
 
 Founder ruling, not an agent decision. Registered as
