@@ -19,6 +19,10 @@ import type { ChatAttachmentReceipt } from "./chat-attachments";
 import { MarkdownText } from "./markdown-text";
 import { MaterialCard, type MaterialArtifact } from "./material-card";
 import { selectParentVisibleMaterialMessageParts } from "./material-message-parts";
+import {
+  approvedOutboundChildFramingTexts,
+  visibleWebChildFramingText,
+} from "./outbound-child-framing-display";
 import { ProgressConflictCard } from "./progress-conflict-card";
 import {
   parseProgressMessagePart,
@@ -282,6 +286,10 @@ function endsTheTurn(part: EveMessagePart): boolean {
 
 function assistantItems(message: EveMessage): AssistantItem[] {
   const items: AssistantItem[] = [];
+  const approvedChildFramingTexts = approvedOutboundChildFramingTexts(
+    message.parts,
+  );
+  const messageIsStreaming = message.metadata?.status === "streaming";
   // Set once a card has claimed the screen; every later text part in
   // this message is the model filling a silence it was told to keep.
   let turnEnded = false;
@@ -313,10 +321,16 @@ function assistantItems(message: EveMessage): AssistantItem[] {
       // two paths from drifting, and the drift is exactly how
       // "I'll continue once she replies." reached a real screen.
       if (isStageDirection(trimmed) || isNarratedPause(trimmed)) continue;
-      const key = trimmed.replace(/\s+/g, " ");
+      const visibleText = visibleWebChildFramingText({
+        text: trimmed,
+        approvedTexts: approvedChildFramingTexts,
+        streaming: messageIsStreaming,
+      });
+      if (visibleText === null) continue;
+      const key = visibleText.replace(/\s+/g, " ");
       if (shownText.has(key)) continue;
       shownText.add(key);
-      items.push({ kind: "text", text: trimmed });
+      items.push({ kind: "text", text: visibleText });
       continue;
     }
     // Set on the CALL, not on the output, so a card still streaming has

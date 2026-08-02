@@ -5,10 +5,12 @@ import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
 import { MarkdownText } from "./markdown-text";
 import {
+  approvedOutboundChildFramingTexts,
   memoryChipFor,
   partIsRenderable,
   toolOnlyFallback,
   userMessageSendState,
+  visibleMobileChildFramingText,
   type MemoryChipContent,
 } from "./message-utils";
 import { MaterialCard, type MaterialArtifact } from "./material-card";
@@ -76,11 +78,13 @@ function MessagePartView({
   part,
   partKey,
   isUser,
+  assistantText,
   questions,
 }: {
   part: EveMessagePart;
   partKey: string;
   isUser: boolean;
+  assistantText?: string | null;
   questions: QuestionCardWiring;
 }) {
   if (part.type === "text") {
@@ -98,7 +102,9 @@ function MessagePartView({
         </Text>
       );
     }
-    return <MarkdownText text={part.text} />;
+    return assistantText === null
+      ? null
+      : <MarkdownText text={assistantText ?? part.text} />;
   }
   if (part.type === "dynamic-tool" && part.state === "output-available") {
     const questionCard = parseQuestionCardPart(part);
@@ -183,8 +189,31 @@ export function MessageView({
   onRetryFailedMessage?: (text: string) => void;
 }) {
   const isUser = message.role === "user";
+  const approvedChildFramingTexts = approvedOutboundChildFramingTexts(
+    message.parts,
+  );
+  const messageIsStreaming = message.metadata?.status === "streaming";
+  const assistantTextByPart = new Map<number, string | null>();
+  if (!isUser) {
+    for (const [index, part] of message.parts.entries()) {
+      if (part.type !== "text") continue;
+      assistantTextByPart.set(
+        index,
+        visibleMobileChildFramingText({
+          text: part.text,
+          approvedTexts: approvedChildFramingTexts,
+          streaming: messageIsStreaming,
+        }),
+      );
+    }
+  }
   const fallback = toolOnlyFallback(message);
-  if (!message.parts.some(partIsRenderable) && fallback === null) return null;
+  const hasRenderablePart = message.parts.some((part, index) =>
+    !isUser && part.type === "text"
+      ? (assistantTextByPart.get(index)?.trim().length ?? 0) > 0
+      : partIsRenderable(part),
+  );
+  if (!hasRenderablePart && fallback === null) return null;
   // Where a user bubble sits between typed and delivered (GH #170 part
   // 2, message-utils.ts): never set for an assistant message.
   const sendState = isUser ? userMessageSendState(message) : null;
@@ -229,6 +258,7 @@ export function MessageView({
             // and only the live card recognises itself.
             partKey={`${message.id}:${index}`}
             isUser={isUser}
+            assistantText={assistantTextByPart.get(index)}
             questions={questions}
           />
         ))}

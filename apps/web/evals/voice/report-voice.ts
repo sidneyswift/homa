@@ -15,15 +15,11 @@
  * the transcript to decide whether she got interesting. Run with
  * `pnpm eval:sandbox voice --verbose` and read the output.
  *
- * KNOWN RED, tracked as gh#433: the deficit-word floor fails intermittently
- * on "behind" in a NEGATING form ("she's not behind", "nothing suggests she's
- * falling behind"). Observed in five configurations on 2026-07-29 including
- * the pre-ruling voice, so it is not caused by `copy-voice-memorable`. Four
- * rounds of increasingly explicit prose did not hold it, which is the
- * models-judge-code-verifies failure class: reports have a deterministic word
- * gate and chat never got one. These evals are the regression test for that
- * fix; expect a red run here until it lands, and do not "fix" it by softening
- * the floor.
+ * Gh#433 established this as a models-judge-code-verifies failure class after
+ * prompt-only wording failed repeatedly. Complete SMS, email, and dispatch
+ * messages now require same-turn structured judgment plus deterministic
+ * verification whenever report vocabulary appears. This floor remains the
+ * end-agent regression test and must never be softened to make a run pass.
  */
 
 import { equals } from "eve/evals/expect";

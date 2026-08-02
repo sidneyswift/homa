@@ -161,6 +161,14 @@ export {
 
 export { BANNED_WORDS, EM_DASH, GENDERED_PRONOUNS } from "./map/copy-laws";
 export {
+  findOutboundChildFramingCandidate,
+  OUTBOUND_CHILD_FRAMING_FALLBACK,
+  protectOutboundChildFraming,
+  visibleOutboundChildFramingText,
+  type OutboundChildFramingChannel,
+  type OutboundChildFramingResult,
+} from "./outbound-child-framing";
+export {
   BANK_ITEM_DOMAINS,
   domainForBankItem,
 } from "./map/item-domains";

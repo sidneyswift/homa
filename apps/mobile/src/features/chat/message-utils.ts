@@ -1,3 +1,4 @@
+import { visibleOutboundChildFramingText } from "@homa/core";
 import type { EveMessage, EveMessagePart } from "eve/react";
 
 import { parseQuestionCardPart } from "./question-card-model";
@@ -132,6 +133,39 @@ export function partIsRenderable(part: EveMessagePart): boolean {
   return false;
 }
 
+export function approvedOutboundChildFramingTexts(
+  parts: readonly EveMessagePart[],
+): ReadonlySet<string> {
+  const approved = new Set<string>();
+  for (const part of parts) {
+    if (
+      part.type !== "dynamic-tool"
+      || part.toolName !== "review_child_framing"
+      || part.state !== "output-available"
+    ) {
+      continue;
+    }
+    const output = (part.output ?? {}) as Record<string, unknown>;
+    if (output.accepted === true && typeof output.text === "string") {
+      approved.add(output.text);
+    }
+  }
+  return approved;
+}
+
+export function visibleMobileChildFramingText(input: {
+  text: string;
+  approvedTexts: ReadonlySet<string>;
+  streaming: boolean;
+}): string | null {
+  return visibleOutboundChildFramingText({
+    text: input.text,
+    approvedText: input.approvedTexts.has(input.text) ? input.text : null,
+    channel: "mobile",
+    streaming: input.streaming,
+  });
+}
+
 /**
  * Last-resort copy for a completed assistant turn whose parts would all
  * render as nothing on mobile. This is deliberately message-level: a
@@ -140,7 +174,11 @@ export function partIsRenderable(part: EveMessagePart): boolean {
  * whole turn (GH #376).
  */
 export function toolOnlyFallback(message: EveMessage): string | null {
-  if (message.role !== "assistant" || message.parts.some(partIsRenderable)) {
+  if (
+    message.role !== "assistant"
+    || message.metadata?.status === "streaming"
+    || message.parts.some(partIsRenderable)
+  ) {
     return null;
   }
   const completedTool = message.parts.findLast(
