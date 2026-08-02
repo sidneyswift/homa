@@ -4,7 +4,6 @@ import {
   AlertCircle,
   Download,
   FileText,
-  Pencil,
   RefreshCw,
   Trash2,
   X,
@@ -83,6 +82,54 @@ async function readAssetUpdate(response: Response): Promise<FamilyAssetView> {
   return body.asset;
 }
 
+function hasSameIds(current: Set<string>, saved: readonly string[]): boolean {
+  return current.size === saved.length && saved.every((id) => current.has(id));
+}
+
+function editableSubjectIds(
+  asset: FamilyAssetView,
+  subjectOptions: readonly LibrarySubjectOption[],
+): string[] {
+  return asset.subjects
+    .map((subject) => subject.id)
+    .filter((id) => subjectOptions.some((option) => option.id === id));
+}
+
+interface LibraryDetailsDraft {
+  title: string;
+  resourceKind: FamilyAssetResourceKind | "";
+  childIds: Set<string>;
+  subjectIds: Set<string>;
+}
+
+function libraryDetailsDraft(
+  asset: FamilyAssetView,
+  subjectOptions: readonly LibrarySubjectOption[],
+): LibraryDetailsDraft {
+  return {
+    title: asset.title,
+    resourceKind: asset.resourceKind ?? "",
+    childIds: new Set(asset.children.map((child) => child.id)),
+    subjectIds: new Set(editableSubjectIds(asset, subjectOptions)),
+  };
+}
+
+function draftDiffersFromAsset(
+  draft: LibraryDetailsDraft,
+  asset: FamilyAssetView,
+  subjectOptions: readonly LibrarySubjectOption[],
+): boolean {
+  return (
+    draft.title.trim() !== asset.title ||
+    draft.resourceKind !== (asset.resourceKind ?? "") ||
+    !hasSameIds(
+      draft.childIds,
+      asset.children.map((child) => child.id),
+    ) ||
+    !hasSameIds(draft.subjectIds, editableSubjectIds(asset, subjectOptions))
+  );
+}
+
 export function LibraryDetailPanel({
   asset,
   curriculumUnits = [],
@@ -104,21 +151,7 @@ export function LibraryDetailPanel({
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const highlightedUnitRef = useRef<HTMLLIElement>(null);
-  const [editing, setEditing] = useState(false);
-  const [title, setTitle] = useState(asset.title);
-  const [resourceKind, setResourceKind] = useState<FamilyAssetResourceKind | "">(
-    asset.resourceKind ?? "",
-  );
-  const [childIds, setChildIds] = useState(
-    () => new Set(asset.children.map((child) => child.id)),
-  );
-  const [subjectIds, setSubjectIds] = useState(
-    () => new Set(
-      asset.subjects
-        .map((subject) => subject.id)
-        .filter((id) => subjectOptions.some((option) => option.id === id)),
-    ),
-  );
+  const [draft, setDraft] = useState<LibraryDetailsDraft | null>(null);
   const [saving, setSaving] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [removing, setRemoving] = useState(false);
@@ -127,42 +160,52 @@ export function LibraryDetailPanel({
   const status = familyAssetStatusCopy(asset);
   const canRetryProcessing = familyAssetProcessingRetryAvailable(asset);
   const headingId = `library-asset-${asset.id}`;
+  const detailsFormId = `library-asset-details-${asset.id}`;
   const currentCurriculumUnitCount = curriculumUnits.filter(
     (unit) => unit.isCurrent,
   ).length;
+  const currentDraft = draft ?? libraryDetailsDraft(asset, subjectOptions);
+  const { title, resourceKind, childIds, subjectIds } = currentDraft;
+  const hasChanges =
+    draft !== null && draftDiffersFromAsset(draft, asset, subjectOptions);
+  const displayedStatus = hasChanges
+    ? {
+        label: "Changes not saved",
+        detail: "Your original is safe. Save changes when these details look right.",
+        tone: "processing" as const,
+      }
+    : status;
 
   useEffect(() => {
     if (!highlightedUnitId || !highlightedUnitRef.current) return;
     highlightedUnitRef.current.scrollIntoView({ block: "center" });
   }, [highlightedUnitId]);
 
-  function toggle(setter: (next: Set<string>) => void, current: Set<string>, id: string) {
-    const next = new Set(current);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setter(next);
+  function updateDraft(
+    update: (current: LibraryDetailsDraft) => LibraryDetailsDraft,
+  ) {
+    setDraft((current) => {
+      const next = update(current ?? libraryDetailsDraft(asset, subjectOptions));
+      return draftDiffersFromAsset(next, asset, subjectOptions) ? next : null;
+    });
+  }
+
+  function toggle(field: "childIds" | "subjectIds", id: string) {
+    updateDraft((current) => {
+      const nextIds = new Set(current[field]);
+      if (nextIds.has(id)) nextIds.delete(id);
+      else nextIds.add(id);
+      return { ...current, [field]: nextIds };
+    });
+    setError(null);
   }
 
   function resetDraft() {
-    setTitle(asset.title);
-    setResourceKind(asset.resourceKind ?? "");
-    setChildIds(new Set(asset.children.map((child) => child.id)));
-    setSubjectIds(
-      new Set(
-        asset.subjects
-          .map((subject) => subject.id)
-          .filter((id) => subjectOptions.some((option) => option.id === id)),
-      ),
-    );
-  }
-
-  function beginEditing() {
-    resetDraft();
-    setError(null);
-    setEditing(true);
+    setDraft(null);
   }
 
   async function save() {
+    if (!hasChanges || saving) return;
     if (!title.trim()) {
       setError("Give this resource a title before saving.");
       return;
@@ -176,7 +219,7 @@ export function LibraryDetailPanel({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             id: asset.id,
-            title,
+            title: title.trim(),
             resourceKind: resourceKind || null,
             childIds: [...childIds],
             subjectIds: [...subjectIds],
@@ -184,9 +227,7 @@ export function LibraryDetailPanel({
         }),
       );
       onUpdated(updated);
-      setTitle(updated.title);
-      setResourceKind(updated.resourceKind ?? "");
-      setEditing(false);
+      setDraft(null);
     } catch {
       setError("Those changes did not save. Your earlier details are still here.");
     } finally {
@@ -240,13 +281,13 @@ export function LibraryDetailPanel({
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">
-            {editing ? "Edit Library resource" : "Library resource"}
+            Library resource
           </p>
           <h2
             id={headingId}
             className="mt-0.5 break-words font-display text-xl font-semibold text-strong"
           >
-            {asset.title}
+            {title.trim() || "Untitled resource"}
           </h2>
         </div>
         <button
@@ -261,10 +302,12 @@ export function LibraryDetailPanel({
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5">
-        <section className={`rounded-md border p-4 ${statusClasses(status.tone)}`}>
-          <p className="text-sm font-bold text-strong">{status.label}</p>
-          <p className="mt-1 text-sm leading-6 text-body">{status.detail}</p>
-          {canRetryProcessing ? (
+        <section
+          className={`rounded-md border p-4 ${statusClasses(displayedStatus.tone)}`}
+        >
+          <p className="text-sm font-bold text-strong">{displayedStatus.label}</p>
+          <p className="mt-1 text-sm leading-6 text-body">{displayedStatus.detail}</p>
+          {!hasChanges && canRetryProcessing ? (
             <button
               type="button"
               disabled={retrying}
@@ -275,10 +318,11 @@ export function LibraryDetailPanel({
               {retrying ? "Starting…" : "Try organizing again"}
             </button>
           ) : null}
-          {asset.status === "failed" && asset.processingErrorCode !== "blob_delete_failed" ? (
+          {!hasChanges &&
+          asset.status === "failed" &&
+          asset.processingErrorCode !== "blob_delete_failed" ? (
             <p className="mt-2 text-xs leading-5 text-muted">
-              Use Edit details to add or change the title, resource type, children, and
-              subjects.
+              You can add or correct the details below.
             </p>
           ) : null}
         </section>
@@ -290,86 +334,106 @@ export function LibraryDetailPanel({
           </div>
         ) : null}
 
-        {editing ? (
-          <section aria-label="Edit resource details" className="mt-5 space-y-5">
-            <h3 className="font-display text-lg font-semibold text-strong">
-              Edit details
-            </h3>
-            <label className="block text-sm font-semibold text-strong">
-              Title
-              <input
-                value={title}
-                maxLength={180}
-                onChange={(event) => setTitle(event.target.value)}
-                className="mt-2 min-h-11 w-full rounded-md border border-border-subtle bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
-              />
-            </label>
-            <label className="block text-sm font-semibold text-strong">
-              Resource type
-              <select
-                value={resourceKind}
-                onChange={(event) =>
-                  setResourceKind(event.target.value as FamilyAssetResourceKind | "")
-                }
-                className="mt-2 min-h-11 w-full rounded-md border border-border-subtle bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
-              >
-                <option value="">Not set</option>
-                {FAMILY_ASSET_RESOURCE_KINDS.map((kind) => (
-                  <option key={kind} value={kind}>
-                    {FAMILY_ASSET_RESOURCE_KIND_LABELS[kind]}
-                  </option>
-                ))}
-              </select>
-            </label>
+        <form
+          id={detailsFormId}
+          aria-label="Resource details"
+          className="mt-5 space-y-5"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void save();
+          }}
+        >
+          <h3 className="font-display text-lg font-semibold text-strong">Details</h3>
+          <label className="block text-sm font-semibold text-strong">
+            Title
+            <input
+              name="title"
+              value={title}
+              maxLength={180}
+              onChange={(event) => {
+                const nextTitle = event.target.value;
+                updateDraft((current) => ({ ...current, title: nextTitle }));
+                setError(null);
+              }}
+              className="mt-2 min-h-11 w-full rounded-md border border-border-subtle bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+            />
+          </label>
+          <label className="block text-sm font-semibold text-strong">
+            Resource type
+            <select
+              name="resourceKind"
+              value={resourceKind}
+              onChange={(event) => {
+                const nextResourceKind = event.target.value as
+                  | FamilyAssetResourceKind
+                  | "";
+                updateDraft((current) => ({
+                  ...current,
+                  resourceKind: nextResourceKind,
+                }));
+                setError(null);
+              }}
+              className="mt-2 min-h-11 w-full rounded-md border border-border-subtle bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+            >
+              <option value="">Not set</option>
+              {FAMILY_ASSET_RESOURCE_KINDS.map((kind) => (
+                <option key={kind} value={kind}>
+                  {FAMILY_ASSET_RESOURCE_KIND_LABELS[kind]}
+                </option>
+              ))}
+            </select>
+          </label>
 
-            <fieldset>
-              <legend className="text-sm font-semibold text-strong">For</legend>
-              <p className="mt-1 text-xs leading-5 text-muted">
-                Leaving all children unchecked saves this as Whole family.
-              </p>
-              <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                {childOptions.map((child) => (
-                  <label
-                    key={child.id}
-                    className="flex min-h-11 items-center gap-2 rounded-md border border-border-subtle px-3 py-2 text-sm text-body"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={childIds.has(child.id)}
-                      onChange={() => toggle(setChildIds, childIds, child.id)}
-                      className="h-4 w-4 accent-[var(--clay-600)]"
-                    />
-                    {child.name}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
+          <fieldset>
+            <legend className="text-sm font-semibold text-strong">For</legend>
+            <p className="mt-1 text-xs leading-5 text-muted">
+              Leaving all children unchecked saves this as Whole family.
+            </p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {childOptions.map((child) => (
+                <label
+                  key={child.id}
+                  className="flex min-h-11 items-center gap-2 rounded-md border border-border-subtle px-3 py-2 text-sm text-body"
+                >
+                  <input
+                    name="childIds"
+                    value={child.id}
+                    type="checkbox"
+                    checked={childIds.has(child.id)}
+                    onChange={() => toggle("childIds", child.id)}
+                    className="h-4 w-4 accent-[var(--clay-600)]"
+                  />
+                  {child.name}
+                </label>
+              ))}
+            </div>
+          </fieldset>
 
-            <fieldset>
-              <legend className="text-sm font-semibold text-strong">Subjects</legend>
-              <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                {subjectOptions.map((subject) => (
-                  <label
-                    key={subject.id}
-                    className="flex min-h-11 items-center gap-2 rounded-md border border-border-subtle px-3 py-2 text-sm text-body"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={subjectIds.has(subject.id)}
-                      onChange={() => toggle(setSubjectIds, subjectIds, subject.id)}
-                      className="h-4 w-4 accent-[var(--clay-600)]"
-                    />
-                    {subject.label}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
+          <fieldset>
+            <legend className="text-sm font-semibold text-strong">Subjects</legend>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {subjectOptions.map((subject) => (
+                <label
+                  key={subject.id}
+                  className="flex min-h-11 items-center gap-2 rounded-md border border-border-subtle px-3 py-2 text-sm text-body"
+                >
+                  <input
+                    name="subjectIds"
+                    value={subject.id}
+                    type="checkbox"
+                    checked={subjectIds.has(subject.id)}
+                    onChange={() => toggle("subjectIds", subject.id)}
+                    className="h-4 w-4 accent-[var(--clay-600)]"
+                  />
+                  {subject.label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        </form>
 
-          </section>
-        ) : (
-          <>
-            <section className="mt-5">
-              <h3 className="font-display text-lg font-semibold text-strong">Details</h3>
+            <section className="mt-8 border-t border-border-subtle pt-5">
+              <h3 className="font-display text-lg font-semibold text-strong">File details</h3>
               <dl className="mt-3 grid grid-cols-[minmax(7rem,auto)_1fr] gap-x-4 gap-y-3 text-sm">
                 <dt className="text-muted">Source</dt>
                 <dd className="text-right text-strong">{familyAssetSourceLabel(asset)}</dd>
@@ -381,12 +445,6 @@ export function LibraryDetailPanel({
                 <dd className="text-right text-strong">{fileKindLabel(asset)}</dd>
                 <dt className="text-muted">Added</dt>
                 <dd className="text-right text-strong">{stableFamilyAssetDate(asset.createdAt)}</dd>
-                <dt className="text-muted">Resource type</dt>
-                <dd className="text-right text-strong">
-                  {asset.resourceKind
-                    ? FAMILY_ASSET_RESOURCE_KIND_LABELS[asset.resourceKind]
-                    : "Not set"}
-                </dd>
                 {asset.authors.length > 0 ? (
                   <>
                     <dt className="text-muted">Author</dt>
@@ -399,18 +457,6 @@ export function LibraryDetailPanel({
                     <dd className="text-right text-strong">{asset.publisher}</dd>
                   </>
                 ) : null}
-                <dt className="text-muted">For</dt>
-                <dd className="text-right text-strong">
-                  {asset.children.length > 0
-                    ? asset.children.map((child) => child.name).join(", ")
-                    : "Whole family"}
-                </dd>
-                <dt className="text-muted">Subjects</dt>
-                <dd className="text-right text-strong">
-                  {asset.subjects.length > 0
-                    ? asset.subjects.map((subject) => subject.label).join(", ")
-                    : "Not set"}
-                </dd>
               </dl>
             </section>
 
@@ -502,35 +548,28 @@ export function LibraryDetailPanel({
                 </button>
               )}
             </section>
-          </>
-        )}
       </div>
 
       <footer className="shrink-0 border-t border-border-subtle bg-card px-5 py-3">
-        {editing ? (
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                resetDraft();
-                setEditing(false);
-                setError(null);
-              }}
-              className="min-h-11 rounded-md px-4 py-2 text-sm font-semibold text-muted hover:bg-page hover:text-strong"
-            >
-              Cancel
-            </button>
+        {hasChanges ? (
+          <p className="mb-2 text-xs font-semibold text-muted" aria-live="polite">
+            Unsaved changes
+          </p>
+        ) : null}
+        <div className="grid grid-cols-2 gap-2">
+          {hasChanges ? (
             <button
               type="button"
               disabled={saving}
-              onClick={() => void save()}
-              className="min-h-11 rounded-md bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)] disabled:cursor-wait disabled:opacity-60"
+              onClick={() => {
+                resetDraft();
+                setError(null);
+              }}
+              className="min-h-11 rounded-md border border-border-subtle px-3 py-2 text-sm font-bold text-strong hover:bg-page disabled:cursor-wait disabled:opacity-60"
             >
-              {saving ? "Saving…" : "Save changes"}
+              Cancel changes
             </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-2">
+          ) : (
             <a
               href={`/api/library/assets/${encodeURIComponent(asset.id)}/download?surface=detail`}
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-brand px-3 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)]"
@@ -538,16 +577,16 @@ export function LibraryDetailPanel({
               <Download size={17} aria-hidden="true" />
               Download
             </a>
-            <button
-              type="button"
-              onClick={beginEditing}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-bold text-brand hover:bg-brand-soft"
-            >
-              <Pencil size={15} aria-hidden="true" />
-              Edit details
-            </button>
-          </div>
-        )}
+          )}
+          <button
+            type="submit"
+            form={detailsFormId}
+            disabled={!hasChanges || saving}
+            className="min-h-11 rounded-md bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)] disabled:cursor-not-allowed disabled:bg-[var(--stone-200)] disabled:text-muted"
+          >
+            {saving ? "Saving…" : "Save changes"}
+          </button>
+        </div>
       </footer>
     </SidePanel>
   );

@@ -182,6 +182,22 @@ export interface FamilyAssetStatusCopy {
   tone: "ready" | "processing" | "attention" | "failed";
 }
 
+const LEGACY_EDIT_MODE_DETAILS = new Map([
+  [
+    "Your original is saved and ready to download. Open Edit details to add or correct the title, resource type, children, and subjects.",
+    "Your original is saved and ready to download. Add or correct the title, resource type, children, and subjects below.",
+  ],
+  [
+    "Your original is saved and ready to download. This file is too large for Homa to organize its Library details automatically. Use Edit details to add them yourself.",
+    "Your original is saved and ready to download. This file is too large for Homa to organize its Library details automatically. Add them below instead.",
+  ],
+]);
+
+function currentStatusDetail(note: string | null, fallback: string): string {
+  if (!note) return fallback;
+  return LEGACY_EDIT_MODE_DETAILS.get(note) ?? note;
+}
+
 export function familyAssetStatusCopy(
   asset: Pick<FamilyAssetView, "status" | "processingNote">,
 ): FamilyAssetStatusCopy {
@@ -195,26 +211,29 @@ export function familyAssetStatusCopy(
   if (asset.status === "processing") {
     return {
       label: FAMILY_ASSET_STATUS_LABELS.processing,
-      detail:
-        asset.processingNote ??
+      detail: currentStatusDetail(
+        asset.processingNote,
         "Your original is saved and ready to download. Homa is organizing its Library details.",
+      ),
       tone: "processing",
     };
   }
   if (asset.status === "needs_attention") {
     return {
       label: FAMILY_ASSET_STATUS_LABELS.needs_attention,
-      detail:
-        asset.processingNote ??
-        "Your original is saved and ready to download. Open Edit details to add or correct the title, resource type, children, and subjects.",
+      detail: currentStatusDetail(
+        asset.processingNote,
+        "Your original is saved and ready to download. Add or correct the title, resource type, children, and subjects below.",
+      ),
       tone: "attention",
     };
   }
   return {
     label: FAMILY_ASSET_STATUS_LABELS.failed,
-      detail:
-        asset.processingNote ??
-        "Your original is saved and ready to download. Homa could not organize its Library details.",
+    detail: currentStatusDetail(
+      asset.processingNote,
+      "Your original is saved and ready to download. Homa could not organize its Library details.",
+    ),
     tone: "failed",
   };
 }
