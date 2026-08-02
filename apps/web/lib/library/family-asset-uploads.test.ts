@@ -5,6 +5,7 @@ import {
   familyAssetUploadFingerprint,
   familyAssetUploadPartByteSize,
   familyAssetUploadPartCount,
+  familyAssetUploadPartPatch,
   familyAssetUploadPartSha256,
   familyAssetUploadPath,
   familyAssetUploadProgress,
@@ -88,6 +89,17 @@ describe("family asset upload recovery helpers", () => {
       mergeFamilyAssetUploadParts([first, second], [first]),
       [first, second],
     );
+  });
+
+  it("builds a typed JSON patch keyed by the completed part number", () => {
+    const part = {
+      etag: "first",
+      partNumber: 1,
+      byteSize: LIBRARY_MULTIPART_CHUNK_BYTES,
+      sha256: "a".repeat(64),
+    };
+
+    assert.deepEqual(familyAssetUploadPartPatch(part), { "1": part });
   });
 
   it("fingerprints file identity with content samples and metadata", async () => {

@@ -9,6 +9,7 @@ import {
 import {
   familyAssetUploadPartByteSize,
   familyAssetUploadPartCount,
+  familyAssetUploadPartPatch,
   familyAssetUploadPath,
   isFamilyAssetUploadFingerprint,
 } from "../../../../lib/library/family-asset-uploads";
@@ -231,17 +232,15 @@ export async function PATCH(request: Request): Promise<Response> {
     ) {
       return Response.json({ ok: false, reason: "bad-part" }, { status: 400 });
     }
+    const completedPart = familyAssetUploadPartPatch({
+      etag: input.etag,
+      partNumber: input.partNumber,
+      byteSize: input.byteSize,
+      sha256: input.sha256,
+    });
     rows = await sql<FamilyAssetUploadRow[]>`
       update public.family_asset_uploads
-      set completed_parts = completed_parts || jsonb_build_object(
-            ${String(input.partNumber)},
-            jsonb_build_object(
-              'etag', ${input.etag},
-              'partNumber', ${input.partNumber},
-              'byteSize', ${input.byteSize},
-              'sha256', ${input.sha256}
-            )
-          ),
+      set completed_parts = completed_parts || ${sql.json(completedPart)}::jsonb,
           status = 'uploading',
           status_note = null,
           error_code = null,
