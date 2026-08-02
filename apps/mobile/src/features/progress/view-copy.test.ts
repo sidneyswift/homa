@@ -7,7 +7,9 @@ import type {
 } from "../../lib/child-progress";
 import {
   progressAssessmentCta,
+  progressAssessmentDraft,
   progressConflictAnswerLine,
+  progressLoadErrorCopy,
   progressSubjectHeadline,
   progressSubjectSummary,
   progressTopicStateLabel,
@@ -126,10 +128,19 @@ describe("native Progress collapsed summary", () => {
     assert.equal(progressTopicStateLabel("ask_next"), "Homa will ask");
     assert.equal(progressTopicStateLabel("conflict"), "Different answers");
     assert.deepEqual(progressAssessmentCta("Maya"), {
-      heading: "See where Maya is today.",
+      heading: "Maya's progress page needs a first example.",
       body:
-        "Tell Homa about a lesson, a worksheet, or something Maya tried. " +
-        "Homa will use what you share to start this progress page.",
+        "Share one lesson, worksheet, or thing Maya tried. " +
+        "Homa will add it as one dated example and keep building the page when you share more.",
+    });
+    assert.equal(progressAssessmentDraft("Maya"), "Here's what Maya tried: ");
+    assert.deepEqual(progressLoadErrorCopy("Maya", false), {
+      heading: "Maya's progress didn't load.",
+      body: "Anything already saved for Maya is unchanged. Try again when you're ready.",
+    });
+    assert.deepEqual(progressLoadErrorCopy("Maya", true), {
+      heading: "Maya's progress is still here.",
+      body: "Homa couldn't refresh it. Try again when you're ready.",
     });
   });
 });

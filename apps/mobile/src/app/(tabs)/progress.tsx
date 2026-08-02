@@ -9,7 +9,11 @@ import { useFamilyData } from "../../features/family/use-family-data";
 import { KidSwitcher } from "../../features/progress/kid-switcher";
 import { SubjectCard } from "../../features/progress/subject-card";
 import { useChildProgress } from "../../features/progress/use-child-progress";
-import { progressAssessmentCta } from "../../features/progress/view-copy";
+import {
+  progressAssessmentCta,
+  progressAssessmentDraft,
+  progressLoadErrorCopy,
+} from "../../features/progress/view-copy";
 import { progressUpdatedLine } from "../../features/progress/map-model";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, space } from "../../theme/tokens";
@@ -37,7 +41,8 @@ import { colors, fontSize, space } from "../../theme/tokens";
 export default function ProgressScreen() {
   const { children, loading: familyLoading } = useFamilyData();
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
-  const effectiveChildId = selectedChildId ?? children[0]?.id ?? null;
+  const selectedChild = children.find((child) => child.id === selectedChildId) ?? children[0] ?? null;
+  const effectiveChildId = selectedChild?.id ?? null;
 
   const { view, loading: progressLoading, error, reload } = useChildProgress(effectiveChildId);
   const loading = familyLoading || progressLoading;
@@ -57,6 +62,9 @@ export default function ProgressScreen() {
   }
 
   const updatedLine = view ? progressUpdatedLine(view, new Date()) : null;
+  const errorCopy = selectedChild && error
+    ? progressLoadErrorCopy(selectedChild.name, view !== null)
+    : null;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }} edges={["bottom"]}>
@@ -68,7 +76,7 @@ export default function ProgressScreen() {
           <KidSwitcher kids={children} selectedChildId={effectiveChildId} onSelect={setSelectedChildId} />
         ) : null}
 
-        {view ? (
+        {selectedChild ? (
           <View style={{ gap: 2 }}>
             {updatedLine ? (
               <Text
@@ -84,27 +92,40 @@ export default function ProgressScreen() {
             <Text
               style={{ fontFamily: fontFamilies.display, fontSize: fontSize.xxl, color: colors.textStrong }}
             >
-              {view.childName}&rsquo;s progress
+              {selectedChild.name}&rsquo;s progress
             </Text>
           </View>
         ) : null}
 
-        {loading && !view ? (
-          <View style={{ paddingVertical: space.xl, alignItems: "center" }}>
+        {loading ? (
+          <View style={{ paddingVertical: view ? space.sm : space.xl, alignItems: "center", gap: space.sm }}>
             <ActivityIndicator color={colors.brand} />
+            {selectedChild ? (
+              <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted }}>
+                {view
+                  ? `Refreshing ${selectedChild.name}'s progress...`
+                  : `Loading ${selectedChild.name}'s progress...`}
+              </Text>
+            ) : null}
           </View>
         ) : null}
 
-        {error ? (
-          <Card>
-            <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.danger }}>
-              {"That didn't load. Pull down to try again."}
-            </Text>
+        {errorCopy ? (
+          <Card style={{ gap: space.md }}>
+            <View style={{ gap: space.xs }}>
+              <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }}>
+                {errorCopy.heading}
+              </Text>
+              <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}>
+                {errorCopy.body}
+              </Text>
+            </View>
+            <Button label="Try again" variant="secondary" onPress={() => void reload()} />
           </Card>
         ) : null}
 
-        {!loading && !error && view && view.subjects.length === 0 ? (
-          <AssessmentCta childName={view.childName} />
+        {!loading && !error && selectedChild && (!view || view.subjects.length === 0) ? (
+          <AssessmentCta childId={selectedChild.id} childName={selectedChild.name} />
         ) : null}
 
         {view?.subjects.map((subject) => (
@@ -120,9 +141,10 @@ export default function ProgressScreen() {
   );
 }
 
-function AssessmentCta({ childName }: { childName: string }) {
+function AssessmentCta({ childId, childName }: { childId: string; childName: string }) {
   const router = useRouter();
   const copy = progressAssessmentCta(childName);
+  const draft = progressAssessmentDraft(childName);
   return (
     <Card style={{ gap: space.md }}>
       <View style={{ gap: space.xs }}>
@@ -135,7 +157,18 @@ function AssessmentCta({ childName }: { childName: string }) {
           {copy.body}
         </Text>
       </View>
-      <Button label="Tell Homa about it" onPress={() => router.push("/chat")} />
+      <Button
+        label="Draft a note to Homa"
+        onPress={() =>
+          router.push({
+            pathname: "/chat",
+            params: {
+              progressDraft: draft,
+              progressDraftId: `${childId}:${Date.now()}`,
+            },
+          })
+        }
+      />
     </Card>
   );
 }
