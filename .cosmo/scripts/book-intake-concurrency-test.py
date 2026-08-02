@@ -132,7 +132,7 @@ class BookIntakeConcurrencyTest(unittest.TestCase):
                         [replacement],
                         item_id,
                         "curriculum",
-                        None,
+                        1,
                         False,
                         use_vision=False,
                     ),
@@ -230,6 +230,107 @@ class BookIntakeConcurrencyTest(unittest.TestCase):
                 "sha256": source_sha,
                 "bytes": source.stat().st_size,
             }])
+
+    def test_missing_expected_page_count_is_never_laundered_from_observed_count(self):
+        manifest = {"pageCount": 3}
+
+        self.assertIsNone(BOOK_INTAKE.expected_page_count(manifest))
+        self.assertNotIn("expectedPageCount", manifest)
+        self.assertTrue(any(
+            "independent expected page count is missing" in finding
+            for finding in BOOK_INTAKE.run_gates([], None)
+        ))
+
+    def test_intake_requires_a_positive_independent_expected_page_count(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            source = root / "source.pdf"
+            source.write_bytes(b"captured source")
+            masters = root / "masters"
+            text = root / "text"
+
+            with (
+                patch.object(BOOK_INTAKE, "MASTERS_DIR", masters),
+                patch.object(BOOK_INTAKE, "TEXT_DIR", text),
+                patch.object(
+                    BOOK_INTAKE,
+                    "extract_pages",
+                    side_effect=AssertionError("missing assertion must stop before extraction"),
+                ),
+            ):
+                result = BOOK_INTAKE.intake(
+                    [source],
+                    "ref-2026-08-02-count-required-fixture",
+                    "reference",
+                    None,
+                    False,
+                    use_vision=False,
+                )
+
+            self.assertEqual(result, 2)
+            self.assertFalse(masters.exists())
+
+    def test_same_findings_do_not_preserve_review_across_source_replacement(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            refs = root / "references"
+            curs = root / "curriculums"
+            refs.mkdir()
+            curs.mkdir()
+            item_id = "ref-2026-08-02-review-binding-fixture"
+            target = refs / f"{item_id}.json"
+            findings = ["page 1: looks blank"]
+            digest = BOOK_INTAKE.gate_findings_sha256(findings)
+            old_source = {
+                "file": "old.pdf",
+                "sha256": "a" * 64,
+                "bytes": 101,
+                "parts": [{"file": "old.pdf", "sha256": "a" * 64, "bytes": 101}],
+            }
+            new_source = {
+                "file": "new.pdf",
+                "sha256": "b" * 64,
+                "bytes": 202,
+                "parts": [{"file": "new.pdf", "sha256": "b" * 64, "bytes": 202}],
+            }
+            old_binding = BOOK_INTAKE.capture_review_binding(
+                item_id, "reference", old_source, 1, 1
+            )
+            target.write_text(json.dumps({
+                "id": item_id,
+                "capture": {
+                    "gateReview": {
+                        "status": "reviewed",
+                        "findingsSha256": digest,
+                        "captureBinding": old_binding,
+                    }
+                },
+            }))
+            manifest = {
+                "id": item_id,
+                "kind": "reference",
+                "source": new_source,
+                "pageCount": 1,
+                "expectedPageCount": 1,
+                "mastersDir": f".cosmo/masters/{item_id}",
+                "intakeAt": "2026-08-02T00:00:00+00:00",
+                "gateStatus": "findings",
+                "gateFindings": findings,
+                "gateFindingCount": 1,
+                "gateFindingsSha256": digest,
+                "pages": [{"page": 1}],
+                "text": {"path": f".cosmo/text/{item_id}.txt"},
+            }
+
+            with (
+                patch.object(BOOK_INTAKE, "REFS_DIR", refs),
+                patch.object(BOOK_INTAKE, "CURS_DIR", curs),
+            ):
+                BOOK_INTAKE.stub_json(item_id, "reference", manifest, Path("new.pdf"))
+
+            capture = json.loads(target.read_text())["capture"]
+            self.assertNotIn("gateReview", capture)
+            self.assertNotEqual(capture["reviewBinding"], old_binding)
 
     def test_gate_status_is_complete_only_when_findings_are_empty(self):
         clean = {"gateReview": {"findingsSha256": "stale"}}
@@ -460,6 +561,7 @@ class BookIntakeConcurrencyTest(unittest.TestCase):
                 "kind": "reference",
                 "source": source,
                 "pageCount": 1,
+                "expectedPageCount": 1,
                 "mastersDir": str(item_dir),
                 "intakeAt": "2026-08-02T00:00:00+00:00",
                 "text": {"path": str(text_dir / f"{item_id}.txt"), "chars": 17},

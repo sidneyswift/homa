@@ -5,7 +5,7 @@ import importlib.util
 import tempfile
 import unittest
 from pathlib import Path
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 from unittest.mock import patch
 
 
@@ -28,6 +28,18 @@ class FakeResponse:
 
     def read(self, _size: int) -> bytes:
         return self.chunks.pop(0)
+
+
+class InterruptedResponse(FakeResponse):
+    def __init__(self):
+        self.status = 200
+        self.sent = False
+
+    def read(self, _size: int) -> bytes:
+        if not self.sent:
+            self.sent = True
+            return b"fr"
+        raise URLError("connection interrupted")
 
 
 class DownloadPendingTest(unittest.TestCase):
@@ -113,22 +125,57 @@ class DownloadPendingTest(unittest.TestCase):
             self.assertFalse(result["skipped"])
             self.assertNotIn("Range", requests[0])
 
-    def test_http_416_discards_partial_before_retry(self):
+    def test_short_stale_partial_is_deleted_and_downloaded_fresh(self):
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)
             capture_root = root / "capture"
             directory = capture_root / "123.456"
             directory.mkdir(parents=True)
             partial = directory / "book-F1.pdf.part"
-            partial.write_bytes(b"st")
+            partial.write_bytes(b"XX")
+            requests = []
+
+            def urlopen(request, timeout):
+                del timeout
+                self.assertFalse(partial.exists())
+                requests.append(dict(request.header_items()))
+                return FakeResponse(b"fresh")
+
+            with (
+                patch.object(DOWNLOAD, "REPO", root),
+                patch.object(DOWNLOAD, "CAPTURE_ROOT", capture_root),
+                patch.object(DOWNLOAD, "urlopen", side_effect=urlopen),
+            ):
+                DOWNLOAD.download_one(
+                    "token",
+                    "123.456",
+                    {
+                        "id": "F1",
+                        "name": "book.pdf",
+                        "size": 5,
+                        "url_private_download": "https://slack.example/book.pdf",
+                    },
+                    {},
+                )
+
+            self.assertEqual(len(requests), 1)
+            self.assertNotIn("Range", requests[0])
+            self.assertEqual((directory / "book-F1.pdf").read_bytes(), b"fresh")
+
+    def test_http_416_discards_same_invocation_partial_before_retry(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            capture_root = root / "capture"
+            directory = capture_root / "123.456"
             requests = []
 
             def urlopen(request, timeout):
                 del timeout
                 requests.append(dict(request.header_items()))
                 if len(requests) == 1:
+                    return InterruptedResponse()
+                if len(requests) == 2:
                     raise HTTPError(request.full_url, 416, "range", None, None)
-                self.assertFalse(partial.exists())
                 return FakeResponse(b"fresh")
 
             with (
@@ -149,8 +196,9 @@ class DownloadPendingTest(unittest.TestCase):
                     {},
                 )
 
-            self.assertIn("Range", requests[0])
-            self.assertNotIn("Range", requests[1])
+            self.assertNotIn("Range", requests[0])
+            self.assertIn("Range", requests[1])
+            self.assertNotIn("Range", requests[2])
             self.assertEqual((directory / "book-F1.pdf").read_bytes(), b"fresh")
 
 

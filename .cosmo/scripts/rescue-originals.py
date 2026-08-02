@@ -55,6 +55,7 @@ CURS_DIR = COSMO / "curriculums"
 UPLOAD = COSMO / "scripts" / "blob-upload.sh"
 CHANNEL_ID = "C0BHQDC033M"
 EXPECTED_BLOB_HOST = "pkvvudjdhxk33dig.public.blob.vercel-storage.com"
+BLOB_READ_BACK_RECEIPT_VERSION = "sha256-content-type-v1"
 CHUNK_BYTES = 1 << 20
 HTTPS_CONTEXT = ssl.create_default_context(cafile=certifi.where() if certifi else None)
 MIME_RE = re.compile(r"^[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+-]*$")
@@ -564,12 +565,25 @@ def blob_read_back(
 def _source_file_match(entry: dict, new_entry: dict) -> bool:
     file_id = new_entry.get("slackFileId")
     entry_file_id = entry.get("slackFileId")
+    timestamp = new_entry.get("slackMessageTs")
+    entry_timestamp = entry.get("slackMessageTs")
     if entry_file_id:
-        return bool(file_id) and entry_file_id == file_id
+        return (
+            bool(file_id)
+            and entry_file_id == file_id
+            and (
+                (not timestamp and not entry_timestamp)
+                or (
+                    bool(timestamp)
+                    and (not entry_timestamp or entry_timestamp == timestamp)
+                )
+            )
+        )
     return (
         entry.get("filename") == new_entry.get("filename")
         and entry.get("sha256") == new_entry.get("sha256")
         and entry.get("size") == new_entry.get("size")
+        and (not entry_timestamp or entry_timestamp == timestamp)
     )
 
 
@@ -590,30 +604,69 @@ def merge_source_file(source_files: list, new_entry: dict) -> bool:
     return True
 
 
-def _entry_for_slack_id(source_files: list, file_id: str):
-    matches = [entry for entry in source_files if entry.get("slackFileId") == file_id]
+def _entry_for_slack_occurrence(
+    source_files: list, timestamp: str, file_id: str
+):
+    matches = [
+        entry
+        for entry in source_files
+        if entry.get("slackFileId") == file_id
+        and entry.get("slackMessageTs") == timestamp
+    ]
     if len(matches) > 1:
-        raise RescueError(f"sourceFiles has duplicate Slack file id {file_id}")
-    return matches[0] if matches else None
+        raise RescueError(
+            f"sourceFiles has duplicate Slack occurrence {timestamp}/{file_id}"
+        )
+    if matches:
+        return matches[0]
+    legacy = [
+        entry
+        for entry in source_files
+        if entry.get("slackFileId") == file_id
+        and not entry.get("slackMessageTs")
+    ]
+    if len(legacy) > 1:
+        raise RescueError(f"sourceFiles has ambiguous legacy Slack file id {file_id}")
+    return legacy[0] if legacy else None
 
 
-def verify_record_read_back(path: Path, slack_file_ids: list) -> list:
+def verify_record_read_back(path: Path, slack_occurrences: list) -> list:
     record = json.loads(path.read_text())
     source_files = record.get("sourceFiles") or []
-    for file_id in slack_file_ids:
-        matches = [entry for entry in source_files if entry.get("slackFileId") == file_id]
+    if len(slack_occurrences) != len(set(slack_occurrences)):
+        raise RescueError("Slack selection repeats a file occurrence")
+    for timestamp, file_id in slack_occurrences:
+        matches = [
+            entry
+            for entry in source_files
+            if entry.get("slackFileId") == file_id
+            and entry.get("slackMessageTs") == timestamp
+        ]
         if len(matches) != 1:
             raise RescueError(
-                f"record read-back has {len(matches)} entries for Slack file {file_id}"
+                f"record read-back has {len(matches)} entries for Slack occurrence "
+                f"{timestamp}/{file_id}"
             )
         entry = matches[0]
+        size = entry.get("size")
+        sha256 = entry.get("sha256")
+        content_type = entry.get("contentType")
         required = (
-            entry.get("blobUrl"),
-            entry.get("size"),
-            entry.get("sha256"),
-            entry.get("contentType"),
-            entry.get("slackSizeVerified"),
-            entry.get("blobReadBackVerified"),
+            isinstance(entry.get("blobUrl"), str) and bool(entry["blobUrl"]),
+            isinstance(size, int) and not isinstance(size, bool) and size > 0,
+            isinstance(sha256, str) and bool(re.fullmatch(r"[0-9a-f]{64}", sha256)),
+            isinstance(content_type, str) and bool(_normalized_mime(content_type)),
+            entry.get("slackDeclaredSize") == size,
+            entry.get("slackSizeVerified") is True,
+            entry.get("blobReadBackVerified") is True,
+            isinstance(entry.get("blobReadBackVerifiedAt"), str)
+            and bool(entry["blobReadBackVerifiedAt"].strip()),
+            entry.get("blobReadBackSize") == size,
+            entry.get("blobReadBackSha256") == sha256,
+            entry.get("blobReadBackContentType") == content_type,
+            entry.get("blobReadBackReceiptVersion")
+            == BLOB_READ_BACK_RECEIPT_VERSION,
+            entry.get("blobReadBackIdentity") == f"{sha256}:{content_type}",
         )
         if not all(required):
             raise RescueError(f"record read-back is incomplete for Slack file {file_id}")
@@ -642,7 +695,7 @@ def rescue_record(row: dict, messages: list, dry_run: bool = False) -> dict:
     if not isinstance(source_files, list):
         raise RescueError(f"sourceFiles is not an array for {item_id}")
     used_names = {entry.get("filename") for entry in source_files if entry.get("filename")}
-    slack_ids = []
+    slack_occurrences = []
     urls = []
     changed = False
     receipt_at = utc_receipt()
@@ -651,10 +704,16 @@ def rescue_record(row: dict, messages: list, dry_run: bool = False) -> dict:
         file_id = file_object.get("id")
         if not file_id:
             raise RescueError(f"Slack file {index} on {message.get('ts')} has no id")
-        slack_ids.append(file_id)
+        timestamp = message.get("ts")
+        if not isinstance(timestamp, str) or not timestamp:
+            raise RescueError(f"Slack file {file_id} has no message timestamp")
+        occurrence = (timestamp, file_id)
+        if occurrence in slack_occurrences:
+            raise RescueError(f"Slack selection repeats occurrence {timestamp}/{file_id}")
+        slack_occurrences.append(occurrence)
         expected_size = _expected_slack_size(file_object)
         content_type = slack_mime_type(file_object)
-        existing = _entry_for_slack_id(source_files, file_id)
+        existing = _entry_for_slack_occurrence(source_files, timestamp, file_id)
         original_name = file_object.get("name") or f"slack-{file_id}"
         filename = (
             existing.get("filename")
@@ -669,38 +728,58 @@ def rescue_record(row: dict, messages: list, dry_run: bool = False) -> dict:
             )
             continue
 
-        if (
-            existing
-            and existing.get("blobUrl")
-            and existing.get("size") == expected_size
-            and existing.get("sha256")
-            and existing.get("contentType") == content_type
-        ):
-            try:
-                blob_read_back(
-                    existing["blobUrl"],
-                    expected_size,
-                    existing["sha256"],
-                    content_type,
-                )
-                verified_existing = {
-                    **existing,
-                    "slackSizeVerified": True,
-                    "blobReadBackVerified": True,
-                    "blobReadBackVerifiedAt": receipt_at,
-                }
-                changed = merge_source_file(
-                    source_files, verified_existing
-                ) or changed
-                urls.append(existing["blobUrl"])
-                print(f"    verified existing {filename} | {existing['blobUrl']}")
-                continue
-            except RescueError:
-                print(f"    repairing failed read-back for {filename}")
-
         with tempfile.TemporaryDirectory(prefix="homa-rescue-original-") as raw:
             local = Path(raw) / filename
             download_receipt = download_slack_file(file_object, local)
+            if (
+                existing
+                and existing.get("blobUrl")
+                and existing.get("size") == download_receipt["size"]
+                and existing.get("sha256") == download_receipt["sha256"]
+                and existing.get("contentType") == download_receipt["contentType"]
+            ):
+                try:
+                    blob_read_back(
+                        existing["blobUrl"],
+                        download_receipt["size"],
+                        download_receipt["sha256"],
+                        download_receipt["contentType"],
+                    )
+                    verified_existing = {
+                        **existing,
+                        "filename": filename,
+                        "slackFilename": original_name,
+                        "slackFileId": file_id,
+                        "slackMessageTs": timestamp,
+                        **(
+                            {"slackParentTs": message["thread_ts"]}
+                            if message.get("thread_ts")
+                            and message.get("thread_ts") != timestamp
+                            else {}
+                        ),
+                        "slackDeclaredSize": expected_size,
+                        "slackSizeVerified": True,
+                        "blobReadBackVerified": True,
+                        "blobReadBackVerifiedAt": receipt_at,
+                        "blobReadBackSize": download_receipt["size"],
+                        "blobReadBackSha256": download_receipt["sha256"],
+                        "blobReadBackContentType": download_receipt["contentType"],
+                        "blobReadBackReceiptVersion": BLOB_READ_BACK_RECEIPT_VERSION,
+                        "blobReadBackIdentity": (
+                            f"{download_receipt['sha256']}:"
+                            f"{download_receipt['contentType']}"
+                        ),
+                        "rescuedFromSlack": True,
+                    }
+                    changed = merge_source_file(
+                        source_files, verified_existing
+                    ) or changed
+                    urls.append(existing["blobUrl"])
+                    print(f"    verified existing {filename} | {existing['blobUrl']}")
+                    continue
+                except RescueError:
+                    print(f"    repairing failed read-back for {filename}")
+
             blob_url = upload(item_id, local, download_receipt["contentType"])
             blob_read_back(
                 blob_url,
@@ -713,7 +792,7 @@ def rescue_record(row: dict, messages: list, dry_run: bool = False) -> dict:
             "filename": filename,
             "slackFilename": original_name,
             "slackFileId": file_id,
-            "slackMessageTs": message["ts"],
+            "slackMessageTs": timestamp,
             **(
                 {"slackParentTs": message["thread_ts"]}
                 if message.get("thread_ts") and message.get("thread_ts") != message.get("ts")
@@ -725,8 +804,18 @@ def rescue_record(row: dict, messages: list, dry_run: bool = False) -> dict:
             "blobUrl": blob_url,
             "blobUploadedAt": receipt_at,
             "rescuedFromSlack": True,
+            "slackDeclaredSize": expected_size,
             "slackSizeVerified": True,
             "blobReadBackVerified": True,
+            "blobReadBackVerifiedAt": receipt_at,
+            "blobReadBackSize": download_receipt["size"],
+            "blobReadBackSha256": download_receipt["sha256"],
+            "blobReadBackContentType": download_receipt["contentType"],
+            "blobReadBackReceiptVersion": BLOB_READ_BACK_RECEIPT_VERSION,
+            "blobReadBackIdentity": (
+                f"{download_receipt['sha256']}:"
+                f"{download_receipt['contentType']}"
+            ),
         }
         changed = merge_source_file(source_files, entry) or changed
         urls.append(blob_url)
@@ -751,12 +840,12 @@ def rescue_record(row: dict, messages: list, dry_run: bool = False) -> dict:
     if record_changed:
         path.write_text(json.dumps(record, indent=2) + "\n")
 
-    read_back = verify_record_read_back(path, slack_ids)
+    read_back = verify_record_read_back(path, slack_occurrences)
     print(
-        f"  read-back ok {item_id}: {len(slack_ids)} Slack file(s), "
+        f"  read-back ok {item_id}: {len(slack_occurrences)} Slack file(s), "
         f"{len(read_back)} sourceFiles row(s)"
     )
-    return {"id": item_id, "files": len(slack_ids), "urls": urls}
+    return {"id": item_id, "files": len(slack_occurrences), "urls": urls}
 
 
 def main() -> int:

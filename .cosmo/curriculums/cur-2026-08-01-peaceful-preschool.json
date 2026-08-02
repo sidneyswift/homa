@@ -199,9 +199,23 @@
       "findingsSha256": "2a8be1103fd6bac3cea6ade4a081250fa09366eced60b99ef00a5444d824ca46",
       "disposition": "mixed-reviewed",
       "reviewedAt": "2026-08-02",
-      "note": "All 89 exact master pages implicated by blank, duplicate, empty-text, or attempted model-reread findings were visually reviewed locally. Local OCR recovered readable text from 60 pages that had been empty in the first pass. Eleven pages, 6, 36, 42, 92, 142, 176, 192, 200, 208, 216, and 230, are intentional blank separators. Page 247 intentionally repeats the printable cover on page 239 inside the exact publisher source. The external model reread could not run inside the sandbox, and no retry that would transmit Slack-sourced pages was authorized. The 347-page bundle is readable for analysis, and no content claim relies on an intentional blank page."
+      "note": "All 89 exact master pages implicated by blank, duplicate, empty-text, or attempted model-reread findings were visually reviewed locally. Local OCR recovered readable text from 60 pages that had been empty in the first pass. Eleven pages, 6, 36, 42, 92, 142, 176, 192, 200, 208, 216, and 230, are intentional blank separators. Page 247 intentionally repeats the printable cover on page 239 inside the exact publisher source. The external model reread could not run inside the sandbox, and no retry that would transmit Slack-sourced pages was authorized. The 347-page bundle is readable for analysis, and no content claim relies on an intentional blank page.",
+      "captureBinding": {
+        "version": 1,
+        "recordId": "cur-2026-08-01-peaceful-preschool",
+        "sourceReceiptSha256": "73caee97e698ec9fe5d5f85e65d6079590741146807547969e8fc59596a6312e",
+        "pageCount": 347,
+        "expectedPageCount": 347
+      }
     },
     "expectedPageCount": 347,
+    "reviewBinding": {
+      "version": 1,
+      "recordId": "cur-2026-08-01-peaceful-preschool",
+      "sourceReceiptSha256": "73caee97e698ec9fe5d5f85e65d6079590741146807547969e8fc59596a6312e",
+      "pageCount": 347,
+      "expectedPageCount": 347
+    },
     "sourceReceipt": {
       "version": 1,
       "recordId": "cur-2026-08-01-peaceful-preschool",

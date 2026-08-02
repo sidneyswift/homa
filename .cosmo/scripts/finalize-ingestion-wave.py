@@ -19,6 +19,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from datetime import datetime, timezone
 from http.client import HTTPException
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -44,6 +45,7 @@ HTTPS_CONTEXT = (
 )
 NON_IDEMPOTENT_SLACK_METHODS = {"chat.postMessage", "reactions.add"}
 EXPECTED_BLOB_HOST = "pkvvudjdhxk33dig.public.blob.vercel-storage.com"
+BLOB_READ_BACK_RECEIPT_VERSION = "sha256-content-type-v1"
 
 
 class FinalizeError(RuntimeError):
@@ -216,9 +218,19 @@ def record_path(record_id: str, kind: str) -> Path:
     return path
 
 
-def run_verifier(record_id: str) -> None:
+def run_verifier(
+    record_id: str,
+    *,
+    require_closeout: bool = False,
+    require_portable_source: bool = False,
+) -> None:
+    command = [sys.executable, str(VERIFY), record_id]
+    if require_closeout:
+        command.append("--require-closeout")
+    if require_portable_source:
+        command.append("--require-portable-source")
     result = subprocess.run(
-        [sys.executable, str(VERIFY), record_id],
+        command,
         cwd=REPO,
         text=True,
         capture_output=True,
@@ -256,6 +268,7 @@ def validate_source_blob_url(record_id: str, source: dict) -> str:
 
 def has_bound_read_back_receipt(source: dict, slack_size: int) -> bool:
     content_type = normalized_content_type(source.get("contentType"))
+    receipt_identity = f"{source.get('sha256')}:{content_type}"
     return all(
         (
             source.get("slackSizeVerified") is True,
@@ -268,12 +281,15 @@ def has_bound_read_back_receipt(source: dict, slack_size: int) -> bool:
             source.get("blobReadBackSha256") == source.get("sha256"),
             normalized_content_type(source.get("blobReadBackContentType"))
             == content_type,
+            source.get("blobReadBackReceiptVersion")
+            == BLOB_READ_BACK_RECEIPT_VERSION,
+            source.get("blobReadBackIdentity") == receipt_identity,
             bool(content_type),
         )
     )
 
 
-def verify_blob_source_read_back(record_id: str, source: dict) -> None:
+def verify_blob_source_read_back(record_id: str, source: dict) -> dict[str, object]:
     url = validate_source_blob_url(record_id, source)
     expected_size = source.get("size")
     expected_sha = source.get("sha256")
@@ -310,7 +326,17 @@ def verify_blob_source_read_back(record_id: str, source: dict) -> None:
                     f"Blob read-back MIME is {actual_content_type or '<missing>'}, "
                     f"expected {expected_content_type}"
                 )
-            return
+            return {
+                "blobReadBackVerified": True,
+                "blobReadBackVerifiedAt": datetime.now(timezone.utc).isoformat(
+                    timespec="seconds"
+                ),
+                "blobReadBackSize": actual_size,
+                "blobReadBackSha256": digest.hexdigest(),
+                "blobReadBackContentType": actual_content_type,
+                "blobReadBackReceiptVersion": BLOB_READ_BACK_RECEIPT_VERSION,
+                "blobReadBackIdentity": f"{expected_sha}:{expected_content_type}",
+            }
         except (HTTPError, URLError, TimeoutError, OSError, HTTPException, FinalizeError) as error:
             last_error = error
             if attempt < 3:
@@ -321,21 +347,23 @@ def verify_blob_source_read_back(record_id: str, source: dict) -> None:
 
 
 def slack_file_expectations(
-    retained_timestamps: list[str], api_call=slack_api
+    covered_timestamps: list[str], api_call=slack_api
 ) -> dict[str, list[dict]]:
     expected: dict[str, list[dict]] = {}
-    for timestamp in retained_timestamps:
+    for timestamp in covered_timestamps:
         data = api_call(
             "reactions.get", {"channel": INSPO_CHANNEL, "timestamp": timestamp}
         )
         message = data.get("message")
         if not isinstance(message, dict) or str(message.get("ts") or "") != timestamp:
             raise FinalizeError(
-                f"Slack did not return the exact retained message {timestamp}"
+                f"Slack did not return the exact covered message {timestamp}"
             )
         files = message.get("files")
-        if not isinstance(files, list) or not files:
-            raise FinalizeError(f"retained Slack message {timestamp} has no files")
+        if files is None:
+            files = []
+        if not isinstance(files, list):
+            raise FinalizeError(f"Slack message {timestamp} has malformed file metadata")
         rows: list[dict] = []
         seen_ids: set[str] = set()
         for file in files:
@@ -360,7 +388,10 @@ def slack_file_expectations(
 
 
 def verify_record_slack_identity(
-    row: dict, expected_files_by_ts: dict[str, list[dict]]
+    row: dict,
+    expected_files_by_ts: dict[str, list[dict]],
+    *,
+    persist_blob_receipts: bool = False,
 ) -> Path:
     path = record_path(row["id"], row["kind"])
     record = json.loads(path.read_text())
@@ -372,19 +403,37 @@ def verify_record_slack_identity(
         raise FinalizeError(f"{row['id']} sourceMessageTs differs from the wave plan")
     if (record.get("coversMessageTs") or []) != expected_covers:
         raise FinalizeError(f"{row['id']} coversMessageTs differs from the wave plan")
+    covered_ts = row.get("coveredTs") or list(
+        dict.fromkeys([
+            row["sourceMessageTs"],
+            *(row.get("coversMessageTs") or []),
+        ])
+    )
     retained_ts = row["retainedTs"]
-    if set(expected_files_by_ts) != set(retained_ts):
+    if set(expected_files_by_ts) != set(covered_ts):
         raise FinalizeError(
-            f"{row['id']} Slack file expectations do not match retained timestamps"
+            f"{row['id']} Slack file expectations do not match covered timestamps"
         )
+    retained_set = set(retained_ts)
+    if not retained_set.issubset(set(covered_ts)):
+        raise FinalizeError(f"{row['id']} retained timestamps fall outside coverage")
     source_files = record.get("sourceFiles") or []
     if not isinstance(source_files, list):
         raise FinalizeError(f"{row['id']} sourceFiles is not an array")
     expected_occurrences: set[tuple[str, str]] = set()
-    for timestamp in retained_ts:
+    receipts_changed = False
+    for timestamp in covered_ts:
         expected_files = expected_files_by_ts.get(timestamp)
-        if not isinstance(expected_files, list) or not expected_files:
-            raise FinalizeError(f"{row['id']} has no Slack files for {timestamp}")
+        if not isinstance(expected_files, list):
+            raise FinalizeError(f"{row['id']} has invalid Slack files for {timestamp}")
+        if timestamp in retained_set and not expected_files:
+            raise FinalizeError(
+                f"{row['id']} retained Slack message {timestamp} has no attachments"
+            )
+        if timestamp not in retained_set and expected_files:
+            raise FinalizeError(
+                f"{row['id']} non-retained covered message {timestamp} has attachments"
+            )
         for expected in expected_files:
             file_id = expected.get("id")
             slack_size = expected.get("size")
@@ -418,13 +467,21 @@ def verify_record_slack_identity(
                     f"{row['id']} source SHA256 is invalid for {timestamp}/{file_id}"
                 )
             if not has_bound_read_back_receipt(source, slack_size):
-                verify_blob_source_read_back(row["id"], source)
+                receipt = verify_blob_source_read_back(row["id"], source)
+                source.update(
+                    {
+                        "slackDeclaredSize": slack_size,
+                        "slackSizeVerified": True,
+                        **receipt,
+                    }
+                )
+                receipts_changed = True
 
     unexpected = [
         (str(source.get("slackMessageTs")), str(source.get("slackFileId")))
         for source in source_files
         if isinstance(source, dict)
-        and source.get("slackMessageTs") in retained_ts
+        and source.get("slackMessageTs") in covered_ts
         and source.get("slackFileId")
         and (str(source.get("slackMessageTs")), str(source.get("slackFileId")))
         not in expected_occurrences
@@ -433,6 +490,32 @@ def verify_record_slack_identity(
         raise FinalizeError(
             f"{row['id']} has source occurrences absent from live Slack: {unexpected}"
         )
+    if receipts_changed and persist_blob_receipts:
+        atomic_json_write(path, record)
+        persisted = json.loads(path.read_text())
+        persisted_sources = persisted.get("sourceFiles") or []
+        if not isinstance(persisted_sources, list):
+            raise FinalizeError(
+                f"{row['id']} source receipt persistence lost sourceFiles"
+            )
+        for timestamp in covered_ts:
+            for expected in expected_files_by_ts[timestamp]:
+                file_id = expected["id"]
+                slack_size = expected["size"]
+                matches = [
+                    source
+                    for source in persisted_sources
+                    if isinstance(source, dict)
+                    and source.get("slackMessageTs") == timestamp
+                    and source.get("slackFileId") == file_id
+                ]
+                if len(matches) != 1 or not has_bound_read_back_receipt(
+                    matches[0], slack_size
+                ):
+                    raise FinalizeError(
+                        f"{row['id']} Blob receipt failed local read-back for "
+                        f"{timestamp}/{file_id}"
+                    )
     return path
 
 
@@ -441,6 +524,7 @@ def unique_marker_message(
     record_id: str,
     location: str,
     bot_user_id: str,
+    expected_thread_ts: str | None,
 ) -> dict | None:
     """Return the bot's unique marker message, ignoring every foreign author."""
     matches = [
@@ -448,6 +532,17 @@ def unique_marker_message(
         for message in messages
         if message.get("user") == bot_user_id
         and marker(record_id) in (message.get("text") or "")
+        and (
+            (
+                expected_thread_ts is not None
+                and message.get("thread_ts") == expected_thread_ts
+                and str(message.get("ts") or "") != expected_thread_ts
+            )
+            or (
+                expected_thread_ts is None
+                and not message.get("thread_ts")
+            )
+        )
     ]
     if len(matches) > 1:
         raise FinalizeError(f"{record_id} has duplicate bot-owned {location} messages")
@@ -475,7 +570,7 @@ def ensure_message(
         )
         location = "developer summary"
     existing = unique_marker_message(
-        existing_messages, record_id, location, bot_user_id
+        existing_messages, record_id, location, bot_user_id, thread_ts
     )
     if existing:
         if (existing.get("text") or "").strip() != text:
@@ -503,7 +598,9 @@ def ensure_message(
         read_back = paginated_messages(
             "conversations.history", {"channel": channel}, api_call
         )
-    verified = unique_marker_message(read_back, record_id, location, bot_user_id)
+    verified = unique_marker_message(
+        read_back, record_id, location, bot_user_id, thread_ts
+    )
     if not verified or verified.get("ts") != posted_ts or (verified.get("text") or "").strip() != text:
         raise FinalizeError(f"{record_id} {location} failed Slack read-back")
     return posted_ts
@@ -516,6 +613,15 @@ def reaction_owned(message: dict, user_id: str) -> bool:
     )
 
 
+def exact_reaction_message(data: dict, timestamp: str) -> dict:
+    message = data.get("message")
+    if not isinstance(message, dict) or str(message.get("ts") or "") != timestamp:
+        raise FinalizeError(
+            f"Slack reaction read-back did not return the exact Slack message {timestamp}"
+        )
+    return message
+
+
 def ensure_ship_reaction(
     channel: str,
     timestamp: str,
@@ -525,13 +631,13 @@ def ensure_ship_reaction(
     api_call=slack_api,
 ) -> bool:
     before = api_call("reactions.get", {"channel": channel, "timestamp": timestamp})
-    if reaction_owned(before.get("message") or {}, user_id):
+    if reaction_owned(exact_reaction_message(before, timestamp), user_id):
         return True
     if not apply:
         return False
     api_call("reactions.add", {"channel": channel, "timestamp": timestamp, "name": "ship"})
     after = api_call("reactions.get", {"channel": channel, "timestamp": timestamp})
-    if not reaction_owned(after.get("message") or {}, user_id):
+    if not reaction_owned(exact_reaction_message(after, timestamp), user_id):
         raise FinalizeError(f":ship: reaction failed read-back for Slack ts {timestamp}")
     return True
 
@@ -573,9 +679,13 @@ def finalize_row(
     row: dict, bot_user_id: str, *, apply: bool, api_call=slack_api
 ) -> dict:
     record_id = row["id"]
-    expected_files_by_ts = slack_file_expectations(row["retainedTs"], api_call)
-    path = verify_record_slack_identity(row, expected_files_by_ts)
-    run_verifier(record_id)
+    expected_files_by_ts = slack_file_expectations(row["coveredTs"], api_call)
+    path = verify_record_slack_identity(
+        row,
+        expected_files_by_ts,
+        persist_blob_receipts=apply,
+    )
+    run_verifier(record_id, require_portable_source=apply)
     thread_ts = ensure_message(
         channel=INSPO_CHANNEL,
         text=row["threadReply"],
@@ -611,6 +721,14 @@ def finalize_row(
             slack_reply_ts=thread_ts,
             dev_summary_ts=dev_ts,
             ship_reaction=True,
+        )
+        # The pre-closeout verifier proves the analysis. Only this second pass
+        # can prove that the exact Slack reply, reaction, and optional
+        # curriculum summary receipts survived the local readback.
+        run_verifier(
+            record_id,
+            require_closeout=True,
+            require_portable_source=True,
         )
     return {
         "id": record_id,

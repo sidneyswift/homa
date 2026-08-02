@@ -44,12 +44,11 @@ SHOWS, which no character-recognition pass can produce, and that lands in
 the manifest as `visual` for the theming and aboutness dimensions.
 
 USAGE:
-    book-intake.py <pdf> --id ref-2026-07-28-some-book
-    book-intake.py <pdf> --id cur-2026-07-28-some-curriculum --kind curriculum
-    book-intake.py <pdf> --id <id> --expect-pages 84   # assert the count
+    book-intake.py <pdf> --id ref-2026-07-28-some-book --expect-pages 84
+    book-intake.py <pdf> --id cur-2026-07-28-some-curriculum --kind curriculum --expect-pages 84
     book-intake.py <pdf> --id <id> --force             # redo a finished item
     book-intake.py <pdf> --id <id> --jobs 4            # bounded page workers
-    book-intake.py <pdf...> --id <id> --resume-captured # finish after an interrupted gate
+    book-intake.py <pdf...> --id <id> --expect-pages 84 --resume-captured
     book-intake.py --check <id>                        # re-run gates only
     book-intake.py --normalize-masters <id>            # repair old sideways masters
     book-intake.py <pdf> --id <id> --no-vision         # tesseract only
@@ -214,6 +213,16 @@ def parse_jobs(value: str) -> int:
     return jobs
 
 
+def parse_expected_pages(value: str) -> int:
+    try:
+        pages = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("expected pages must be an integer") from exc
+    if pages <= 0:
+        raise argparse.ArgumentTypeError("expected pages must be positive")
+    return pages
+
+
 def _check_jobs(jobs: int) -> None:
     if not 1 <= jobs <= MAX_JOBS:
         raise ValueError(f"jobs must be between 1 and {MAX_JOBS}")
@@ -257,15 +266,47 @@ def portable_source_receipt(item_id: str, kind: str, source: dict) -> dict:
     }
 
 
+def _positive_page_count(value) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value > 0
+
+
 def expected_page_count(manifest: dict) -> Optional[int]:
-    """The operator's assertion, with a legacy fallback to observed pages."""
+    """The independent operator assertion, never inferred from observed pages."""
     expected = manifest.get("expectedPageCount")
-    if isinstance(expected, int) and not isinstance(expected, bool):
+    if _positive_page_count(expected):
         return expected
-    observed = manifest.get("pageCount")
-    if isinstance(observed, int) and not isinstance(observed, bool):
-        manifest["expectedPageCount"] = observed
-    return observed
+    return None
+
+
+def capture_review_binding(
+    item_id: str,
+    kind: str,
+    source: dict,
+    page_count,
+    asserted_page_count,
+) -> Optional[dict]:
+    """Exact capture identity a human gate review must have inspected."""
+    if not _positive_page_count(page_count) or not _positive_page_count(
+        asserted_page_count
+    ):
+        return None
+    receipt = portable_source_receipt(item_id, kind, source)
+    parts = receipt.get("parts") or []
+    if not parts:
+        return None
+    encoded = json.dumps(
+        receipt,
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+    return {
+        "version": 1,
+        "recordId": item_id,
+        "sourceReceiptSha256": hashlib.sha256(encoded).hexdigest(),
+        "pageCount": page_count,
+        "expectedPageCount": asserted_page_count,
+    }
 
 
 def atomic_json(path: Path, payload: dict) -> None:
@@ -356,7 +397,18 @@ def set_gate_result(manifest: dict, findings: list[str]) -> None:
     manifest["gateFindingCount"] = len(findings)
     manifest["gateFindingsSha256"] = digest
     review = manifest.get("gateReview") or {}
-    if review.get("findingsSha256") != digest:
+    binding = capture_review_binding(
+        manifest.get("id", ""),
+        manifest.get("kind", "reference"),
+        manifest.get("source") or {},
+        manifest.get("pageCount"),
+        expected_page_count(manifest),
+    )
+    if (
+        review.get("findingsSha256") != digest
+        or binding is None
+        or review.get("captureBinding") != binding
+    ):
         manifest.pop("gateReview", None)
 
 
@@ -910,7 +962,12 @@ def run_gates(pages: list, expect_pages, texts: dict = None) -> list:
     """Deterministic findings. Every one names the page so a re-shoot is one
     page of work, and every one says what the operator should do about it."""
     findings = []
-    if expect_pages is not None and expect_pages != len(pages):
+    if not _positive_page_count(expect_pages):
+        findings.append(
+            "independent expected page count is missing. Count the source pages "
+            "outside this extraction and rerun with --expect-pages."
+        )
+    elif expect_pages != len(pages):
         findings.append(
             f"page count is {len(pages)}, operator expected {expect_pages}. "
             "A short count on a phone capture usually means a page was skipped."
@@ -1031,16 +1088,24 @@ def stub_json(item_id: str, kind: str, manifest: dict, pdf_path: Path) -> Path:
     this file never guesses at anything a model should be judging."""
     target_dir = CURS_DIR if kind == "curriculum" else REFS_DIR
     target = target_dir / f"{item_id}.json"
+    asserted_page_count = expected_page_count(manifest)
+    source_identity = portable_source_receipt(item_id, kind, manifest["source"])
+    review_binding = capture_review_binding(
+        item_id,
+        kind,
+        manifest["source"],
+        manifest["pageCount"],
+        asserted_page_count,
+    )
     capture = {
         "lane": "phone",
         "sourceFile": pdf_path.name,
         "sourceParts": [p["file"] for p in manifest["source"].get("parts", [])],
         "sourceSha256": manifest["source"]["sha256"],
         "pageCount": manifest["pageCount"],
-        "expectedPageCount": expected_page_count(manifest),
-        "sourceReceipt": portable_source_receipt(
-            item_id, kind, manifest["source"]
-        ),
+        "expectedPageCount": asserted_page_count,
+        "sourceReceipt": source_identity,
+        "reviewBinding": review_binding,
         "mastersDir": manifest["mastersDir"],
         "intakeAt": manifest["intakeAt"],
         "gateStatus": manifest.get("gateStatus"),
@@ -1064,7 +1129,11 @@ def stub_json(item_id: str, kind: str, manifest: dict, pdf_path: Path) -> Path:
             return target
         existing_capture = existing.get("capture") or {}
         review = existing_capture.get("gateReview") or {}
-        if review.get("findingsSha256") != capture["gateFindingsSha256"]:
+        if (
+            review.get("findingsSha256") != capture["gateFindingsSha256"]
+            or review_binding is None
+            or review.get("captureBinding") != review_binding
+        ):
             existing_capture.pop("gateReview", None)
         existing["capture"] = {**existing_capture, **capture}
         target.write_text(json.dumps(existing, indent=2) + "\n")
@@ -1222,6 +1291,12 @@ def resume_captured(
     jobs: int,
 ) -> int:
     """Finish an intake whose masters and sidecar survived an interrupted gate."""
+    if not _positive_page_count(expect_pages):
+        print(
+            "ERROR: --expect-pages must be a positive independent page count",
+            file=sys.stderr,
+        )
+        return 2
     item_dir = MASTERS_DIR / item_id
     manifest_path = item_dir / "manifest.json"
     pending_manifest = None
@@ -1245,7 +1320,7 @@ def resume_captured(
         return 2
 
     source_count = sum(pdf_page_count(path) for path in pdf_paths)
-    if expect_pages is not None and source_count != expect_pages:
+    if source_count != expect_pages:
         print(
             f"ERROR: source page count is {source_count}, expected {expect_pages}",
             file=sys.stderr,
@@ -1267,6 +1342,7 @@ def resume_captured(
             pending_manifest.get("id") == item_id
             and pending_manifest.get("kind") == kind
             and pending_manifest.get("pageCount") == source_count
+            and pending_manifest.get("expectedPageCount") == expect_pages
             and pending_manifest.get("source") == source
         )
         if not identity_matches:
@@ -1298,7 +1374,7 @@ def resume_captured(
         "recoveredFromExistingCapture": True,
         "source": source,
         "pageCount": source_count,
-        "expectedPageCount": expect_pages if expect_pages is not None else source_count,
+        "expectedPageCount": expect_pages,
         "mastersDir": str(item_dir.relative_to(COSMO.parent)),
         "textExtraction": {
             "method": method,
@@ -1345,6 +1421,12 @@ def intake(
     use_vision: bool = True,
     jobs: int = 1,
 ) -> int:
+    if not _positive_page_count(expect_pages):
+        print(
+            "ERROR: --expect-pages must be a positive independent page count",
+            file=sys.stderr,
+        )
+        return 2
     out_dir = MASTERS_DIR / item_id
     manifest_path = out_dir / "manifest.json"
     if manifest_path.exists() and not force:
@@ -1426,7 +1508,7 @@ def intake(
         "intakeAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "source": source,
         "pageCount": len(pages),
-        "expectedPageCount": expect_pages if expect_pages is not None else len(pages),
+        "expectedPageCount": expect_pages,
         "mastersDir": str(out_dir.relative_to(COSMO.parent)),
         "textExtraction": {
             "method": method,
@@ -2009,8 +2091,11 @@ def main():
     parser.add_argument("--id", help="item id: ref-YYYY-MM-DD-slug or cur-YYYY-MM-DD-slug")
     parser.add_argument("--kind", choices=("reference", "curriculum"),
                         help="defaults to curriculum for a cur- id, reference otherwise")
-    parser.add_argument("--expect-pages", type=int,
-                        help="page count the operator counted, asserted against the capture")
+    parser.add_argument(
+        "--expect-pages",
+        type=parse_expected_pages,
+        help="required independent page count asserted against the capture",
+    )
     parser.add_argument("--force", action="store_true", help="redo an already-ingested item")
     parser.add_argument(
         "--resume-captured",

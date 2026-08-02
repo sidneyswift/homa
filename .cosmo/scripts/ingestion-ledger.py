@@ -31,6 +31,7 @@ TWO MODES, on purpose:
 A row's `status` is the roll-up a human reads:
 
     complete      analysed, verifier-green, and carrying dimension F
+    waiting-source analysed, with an exact re-share request already sent
     legacy        analysed before the 2026-07-28 content rules; no aboutness
                   expected, but a re-ingest would add it
     partial       a record exists and something required is missing
@@ -223,6 +224,26 @@ def open_gap_slugs() -> set:
         return set()
 
 
+def source_completion_problems(rec: dict) -> list[str]:
+    """Return externally owned source gaps that prevent a complete roll-up."""
+    problems = []
+    completeness = rec.get("sourceCompleteness") or {}
+    completeness_status = completeness.get("status")
+    if completeness_status in {"requested", "awaiting-source"}:
+        problems.append(f"source completeness is {completeness_status}")
+
+    recovery = rec.get("originalRecovery") or {}
+    if recovery.get("status") == "requested":
+        problems.append("original re-share is requested")
+
+    capture = rec.get("capture") or {}
+    review = capture.get("gateReview") or {}
+    unresolved = review.get("unresolvedFindingCount")
+    if isinstance(unresolved, int) and not isinstance(unresolved, bool) and unresolved > 0:
+        problems.append(f"capture review has {unresolved} unresolved finding(s)")
+    return problems
+
+
 def describe_kind(rec) -> str:
     """What the thing IS, in the founder's words, not the record's filename."""
     if not rec:
@@ -362,6 +383,9 @@ def build_rows(verify: bool) -> list:
         if untracked:
             problems.append(f"gap(s) not in open-gaps.json: {untracked}")
 
+        source_problems = source_completion_problems(rec)
+        problems.extend(source_problems)
+
         # Graduation, checked against the filesystem rather than believed.
         # A record can claim it shipped a recipe and be wrong in either
         # direction: the PEMDAS foldable and the essay outline had BOTH a
@@ -472,7 +496,10 @@ def build_rows(verify: bool) -> list:
             problems.append("no book-intake run" + (" (legacy)" if legacy else ""))
 
         hard = [p for p in problems if "legacy" not in p]
-        if not problems:
+        internal_hard = [p for p in hard if p not in source_problems]
+        if source_problems and not internal_hard:
+            row["status"] = "waiting-source"
+        elif not problems:
             row["status"] = "complete"
         elif legacy and not hard:
             row["status"] = "legacy"

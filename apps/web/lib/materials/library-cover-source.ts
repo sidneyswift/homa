@@ -1,4 +1,5 @@
 import { execFile, spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
@@ -21,6 +22,92 @@ export interface LibraryCoverBlob {
   pathname: string;
   url: string;
   size: number;
+  etag?: string;
+}
+
+export interface LibraryCoverReceipt {
+  version: 1;
+  recordId: string;
+  source: {
+    pathname: string;
+    url: string;
+    size: number;
+    etag: string;
+  };
+  cover: {
+    pathname: string;
+    url: string;
+    size: number;
+    etag: string;
+    sha256: string;
+  };
+  renderedFrom: string;
+}
+
+export interface LibraryCoverEvidence {
+  size: number;
+  sha256: string;
+  width: number;
+  height: number;
+}
+
+export function blobPathnamesMatch(listed: string, readBack: string): boolean {
+  try {
+    return listed === decodeURIComponent(readBack);
+  } catch {
+    return false;
+  }
+}
+
+export function blobEtagsMatch(listed: string | undefined, readBack: string | undefined): boolean {
+  const normalize = (value: string | undefined) => value?.replace(/^W\//, "");
+  return Boolean(listed) && normalize(listed) === normalize(readBack);
+}
+
+export function blobReportedSizeMatches(listed: number, readBack: number): boolean {
+  return readBack === 0 || listed === readBack;
+}
+
+export async function retryLibraryCoverReadBack<T>(
+  read: () => Promise<T>,
+  options: {
+    attempts?: number;
+    wait?: (milliseconds: number) => Promise<void>;
+  } = {},
+): Promise<T> {
+  const attempts = options.attempts ?? 6;
+  if (!Number.isInteger(attempts) || attempts < 1) {
+    throw new Error("read-back attempts must be a positive integer");
+  }
+  const wait = options.wait ?? ((milliseconds) => new Promise((resolve) => {
+    setTimeout(resolve, milliseconds);
+  }));
+  let lastError: unknown = new Error("library cover read-back failed");
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await read();
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts) {
+        await wait(Math.min(250 * 2 ** (attempt - 1), 2_000));
+      }
+    }
+  }
+  throw lastError;
+}
+
+export function shouldPreserveLegacyLibraryCover(options: {
+  force: boolean;
+  exactRecord: boolean;
+  cover?: LibraryCoverBlob;
+  receipt?: LibraryCoverBlob;
+}): boolean {
+  return (
+    !options.force &&
+    !options.exactRecord &&
+    Boolean(options.cover) &&
+    !options.receipt
+  );
 }
 
 type PrintableKind = "image" | "pdf" | "pptx";
@@ -46,6 +133,54 @@ export interface RenderLibraryCoverOptions {
 export interface RenderedLibraryCover {
   jpeg: Buffer;
   renderedFrom: string;
+}
+
+export function libraryCoverReceiptMatches(
+  receipt: unknown,
+  recordId: string,
+  source: LibraryCoverBlob,
+  cover: LibraryCoverBlob,
+): receipt is LibraryCoverReceipt {
+  if (!receipt || typeof receipt !== "object") return false;
+  const candidate = receipt as Partial<LibraryCoverReceipt>;
+  return (
+    candidate.version === 1 &&
+    candidate.recordId === recordId &&
+    candidate.source?.pathname === source.pathname &&
+    candidate.source.url === source.url &&
+    candidate.source.size === source.size &&
+    Boolean(source.etag) &&
+    candidate.source.etag === source.etag &&
+    candidate.cover?.pathname === cover.pathname &&
+    candidate.cover.url === cover.url &&
+    candidate.cover.size === cover.size &&
+    Boolean(cover.etag) &&
+    candidate.cover.etag === cover.etag &&
+    typeof candidate.cover.sha256 === "string" &&
+    /^[0-9a-f]{64}$/.test(candidate.cover.sha256) &&
+    typeof candidate.renderedFrom === "string" &&
+    Boolean(candidate.renderedFrom)
+  );
+}
+
+export async function inspectLibraryCoverJpeg(
+  bytes: Buffer,
+): Promise<LibraryCoverEvidence> {
+  if (!bytes.length) throw new Error("cover is empty");
+  const metadata = await sharp(bytes).metadata();
+  if (
+    metadata.format !== "jpeg" ||
+    !metadata.width ||
+    !metadata.height
+  ) {
+    throw new Error("cover is not a decodable JPEG");
+  }
+  return {
+    size: bytes.length,
+    sha256: createHash("sha256").update(bytes).digest("hex"),
+    width: metadata.width,
+    height: metadata.height,
+  };
 }
 
 /**

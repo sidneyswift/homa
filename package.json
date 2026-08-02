@@ -28,7 +28,7 @@
     "check:drip": "tsx --test apps/web/lib/drip/sweep.test.ts",
     "check:billing": "tsx --tsconfig apps/web/tsconfig.json --test packages/core/src/billing-catalog.test.ts apps/web/lib/billing/entitlements.test.ts apps/web/lib/billing/wall-exemption.test.ts apps/web/lib/billing/channel-access.test.ts apps/web/lib/billing/purchased-tier.test.ts apps/web/app/app/settings/plan-section.test.tsx apps/web/app/app/settings/parents-section.test.tsx apps/web/lib/billing/account-access.test.ts apps/web/lib/billing/trial-reminder.test.ts apps/web/lib/billing/apple-verify.test.ts apps/web/components/billing/wall-copy.test.ts apps/web/components/marketing/landing-content.test.ts apps/web/lib/signup-session.test.ts",
     "check:isolation": "node scripts/isolation-check.mjs",
-    "check:ingestion": "python3 .cosmo/scripts/ingestion-ledger.py --check",
+    "check:ingestion": "python3 .cosmo/scripts/ingestion-ledger-test.py && python3 .cosmo/scripts/ingestion-ledger.py --check",
     "check:family-library-ingestion": "tsx --tsconfig apps/web/tsconfig.json --test apps/web/lib/library/family-asset-ingestion.test.ts apps/web/lib/library/family-asset-ingestion-eval.test.ts apps/web/lib/library/family-asset-reference.test.ts apps/web/lib/library/family-asset-provenance.test.ts apps/web/scripts/backfill-family-library-chat-attachments.test.ts",
     "check:eval-isolation": "tsx --tsconfig apps/web/tsconfig.json --test apps/web/lib/eval-isolation.test.ts apps/web/lib/map/db-target.test.ts apps/web/lib/materials/eval-blob-store.test.ts",
     "eval:sandbox": "tsx scripts/eval-sandbox.mts",

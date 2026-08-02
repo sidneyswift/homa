@@ -148,6 +148,28 @@ class StageCapturedTest(unittest.TestCase):
                 {"id": "ref-one"},
             ])
 
+    def test_record_scoped_retry_cannot_bypass_global_timestamp_ownership(self):
+        records = [
+            {
+                "id": "ref-2026-08-02-one",
+                "kind": "reference",
+                "title": "One",
+                "sourceMessageTs": "1.0",
+                "coversMessageTs": [],
+            },
+            {
+                "id": "ref-2026-08-02-two",
+                "kind": "reference",
+                "title": "Two",
+                "sourceMessageTs": "2.0",
+                "coversMessageTs": ["1.0"],
+                "captureMessageTs": ["1.0"],
+            },
+        ]
+
+        with self.assertRaisesRegex(RuntimeError, "assigned to both"):
+            STAGE.validate_plan_records(records)
+
     def test_plan_schema_binds_capture_messages_to_declared_record_coverage(self):
         valid = {
             "id": "ref-2026-08-02-example",
@@ -359,6 +381,74 @@ class StageCapturedTest(unittest.TestCase):
                 self.assertTrue(source["blobReadBackVerified"])
                 self.assertEqual(source["blobReadBackSize"], 5)
                 self.assertEqual(source["blobReadBackSha256"], "a" * 64)
+
+    def test_same_bytes_with_different_mime_use_distinct_verified_uploads(self):
+        with tempfile.TemporaryDirectory() as raw:
+            path = Path(raw) / "ref-mime.json"
+            record = {
+                "id": "ref-mime",
+                "kind": "reference",
+                "title": "MIME variants",
+                "sourceMessageTs": "1.0",
+                "coversMessageTs": ["2.0"],
+            }
+            pdf = {
+                "name": "same.pdf",
+                "fileId": "FPDF",
+                "ts": "1.0",
+                "localPath": "capture/1.0/same.pdf",
+                "size": 5,
+                "sha256": "a" * 64,
+                "mimetype": "application/pdf",
+            }
+            text = {
+                **pdf,
+                "name": "same.txt",
+                "fileId": "FTEXT",
+                "ts": "2.0",
+                "localPath": "capture/2.0/same.txt",
+                "mimetype": "text/plain; charset=utf-8",
+            }
+            pdf_key = STAGE.upload_key("ref-mime", pdf)
+            text_key = STAGE.upload_key("ref-mime", text)
+            self.assertNotEqual(pdf_key, text_key)
+            state = {
+                pdf_key: "https://blob/pdf",
+                text_key: "https://blob/text",
+            }
+
+            with patch.object(STAGE, "record_path", return_value=path):
+                STAGE.write_stub(
+                    record, [pdf, text], state, {"1.0": {"dropper": "Founder"}}
+                )
+
+            pdf_source, text_source = json.loads(path.read_text())["sourceFiles"]
+            self.assertEqual(pdf_source["blobUrl"], "https://blob/pdf")
+            self.assertEqual(pdf_source["contentType"], "application/pdf")
+            self.assertEqual(
+                pdf_source["blobReadBackContentType"], "application/pdf"
+            )
+            self.assertEqual(
+                pdf_source["blobReadBackReceiptVersion"],
+                STAGE.BLOB_READ_BACK_RECEIPT_VERSION,
+            )
+            self.assertEqual(
+                pdf_source["blobReadBackIdentity"],
+                f"{'a' * 64}:application/pdf",
+            )
+            self.assertEqual(text_source["blobUrl"], "https://blob/text")
+            self.assertEqual(text_source["contentType"], "text/plain")
+            self.assertEqual(
+                text_source["blobReadBackContentType"], "text/plain"
+            )
+            self.assertEqual(
+                text_source["blobReadBackReceiptVersion"],
+                STAGE.BLOB_READ_BACK_RECEIPT_VERSION,
+            )
+            self.assertEqual(
+                text_source["blobReadBackIdentity"],
+                f"{'a' * 64}:text/plain",
+            )
 
     def test_full_plan_requires_bidirectional_capture_coverage(self):
         files = {"1.0": [{}], "2.0": [{}]}

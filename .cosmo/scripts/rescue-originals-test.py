@@ -303,11 +303,12 @@ class RescueOriginalsTest(unittest.TestCase):
             with self.assertRaisesRegex(RESCUE.RescueError, "Slack declared 13"):
                 RESCUE.file_receipt(path, expected_size=13)
 
-    def test_source_file_merge_is_idempotent_by_slack_file_id(self):
+    def test_source_file_merge_is_idempotent_by_slack_occurrence(self):
         source_files = []
         entry = {
             "filename": "page.jpg",
             "slackFileId": "F123",
+            "slackMessageTs": "1.0",
             "blobUrl": "https://blob/page.jpg",
             "size": 14,
             "sha256": "abc",
@@ -339,6 +340,48 @@ class RescueOriginalsTest(unittest.TestCase):
         self.assertTrue(RESCUE.merge_source_file(source_files, second))
         self.assertEqual([entry["slackFileId"] for entry in source_files], ["F1", "F2"])
 
+    def test_same_slack_file_shared_twice_keeps_both_message_occurrences(self):
+        source_files = [{
+            "filename": "same.pdf",
+            "slackFileId": "F-SHARED",
+            "slackMessageTs": "1.0",
+            "blobUrl": "https://blob/same.pdf",
+            "size": 14,
+            "sha256": "abc",
+        }]
+        second = {**source_files[0], "slackMessageTs": "2.0"}
+
+        self.assertTrue(RESCUE.merge_source_file(source_files, second))
+        self.assertEqual(
+            [entry["slackMessageTs"] for entry in source_files],
+            ["1.0", "2.0"],
+        )
+
+    def test_record_read_back_rejects_an_unversioned_blob_receipt(self):
+        with tempfile.TemporaryDirectory() as raw:
+            path = Path(raw) / "ref-receipt.json"
+            path.write_text(json.dumps({
+                "sourceFiles": [{
+                    "slackMessageTs": "1.0",
+                    "slackFileId": "F123",
+                    "blobUrl": "https://blob/source.pdf",
+                    "size": 5,
+                    "sha256": "a" * 64,
+                    "contentType": "application/pdf",
+                    "slackDeclaredSize": 5,
+                    "slackSizeVerified": True,
+                    "blobReadBackVerified": True,
+                    "blobReadBackVerifiedAt": "2026-08-02T12:00:00+00:00",
+                    "blobReadBackSize": 5,
+                    "blobReadBackSha256": "a" * 64,
+                    "blobReadBackContentType": "application/pdf",
+                    "blobReadBackIdentity": f"{'a' * 64}:application/pdf",
+                }],
+            }))
+
+            with self.assertRaisesRegex(RESCUE.RescueError, "read-back is incomplete"):
+                RESCUE.verify_record_read_back(path, [("1.0", "F123")])
+
     def test_verified_legacy_blob_backfills_record_receipts_without_reupload(self):
         with tempfile.TemporaryDirectory() as raw:
             path = Path(raw) / "ref-old.json"
@@ -369,7 +412,15 @@ class RescueOriginalsTest(unittest.TestCase):
                 patch.object(RESCUE, "record_path", return_value=path),
                 patch.object(RESCUE, "blob_read_back") as read_back,
                 patch.object(RESCUE, "upload") as upload,
-                patch.object(RESCUE, "download_slack_file") as download,
+                patch.object(
+                    RESCUE,
+                    "download_slack_file",
+                    return_value={
+                        "size": 14,
+                        "sha256": "a" * 64,
+                        "contentType": "application/pdf",
+                    },
+                ) as download,
             ):
                 result = RESCUE.rescue_record(row, messages)
 
@@ -378,9 +429,113 @@ class RescueOriginalsTest(unittest.TestCase):
             self.assertTrue(saved["slackSizeVerified"])
             self.assertTrue(saved["blobReadBackVerified"])
             self.assertTrue(saved["blobReadBackVerifiedAt"])
+            self.assertEqual(saved["blobReadBackSha256"], "a" * 64)
+            self.assertEqual(
+                saved["blobReadBackReceiptVersion"],
+                RESCUE.BLOB_READ_BACK_RECEIPT_VERSION,
+            )
+            self.assertEqual(
+                saved["blobReadBackIdentity"],
+                f"{'a' * 64}:application/pdf",
+            )
             read_back.assert_called_once()
             upload.assert_not_called()
-            download.assert_not_called()
+            download.assert_called_once()
+
+    def test_same_size_wrong_existing_blob_is_replaced_from_fresh_slack_bytes(self):
+        with tempfile.TemporaryDirectory() as raw:
+            path = Path(raw) / "ref-old.json"
+            path.write_text(json.dumps({
+                "id": "ref-old",
+                "sourceFiles": [{
+                    "filename": "source.pdf",
+                    "slackFileId": "F123",
+                    "slackMessageTs": "1.0",
+                    "blobUrl": "https://blob/wrong.pdf",
+                    "size": 5,
+                    "sha256": "a" * 64,
+                    "contentType": "application/pdf",
+                }],
+            }))
+            row = {"record_id": "ref-old", "slack_ts": "1.0"}
+            messages = [{
+                "ts": "1.0",
+                "files": [{
+                    "id": "F123",
+                    "name": "source.pdf",
+                    "size": 5,
+                    "mimetype": "application/pdf",
+                }],
+            }]
+            with (
+                patch.object(RESCUE, "record_path", return_value=path),
+                patch.object(
+                    RESCUE,
+                    "download_slack_file",
+                    return_value={
+                        "size": 5,
+                        "sha256": "b" * 64,
+                        "contentType": "application/pdf",
+                    },
+                ) as download,
+                patch.object(
+                    RESCUE, "upload", return_value="https://blob/fresh.pdf"
+                ) as upload,
+                patch.object(RESCUE, "blob_read_back") as read_back,
+            ):
+                RESCUE.rescue_record(row, messages)
+
+            [saved] = json.loads(path.read_text())["sourceFiles"]
+            self.assertEqual(saved["sha256"], "b" * 64)
+            self.assertEqual(saved["blobUrl"], "https://blob/fresh.pdf")
+            download.assert_called_once()
+            upload.assert_called_once()
+            read_back.assert_called_once_with(
+                "https://blob/fresh.pdf", 5, "b" * 64, "application/pdf"
+            )
+
+    def test_rescue_keeps_same_file_id_at_two_slack_timestamps(self):
+        with tempfile.TemporaryDirectory() as raw:
+            path = Path(raw) / "ref-shared.json"
+            path.write_text(json.dumps({"id": "ref-shared", "sourceFiles": []}))
+            row = {"record_id": "ref-shared", "slack_ts": "1.0"}
+            messages = [
+                {
+                    "ts": "1.0",
+                    "files": [{"id": "F-SHARED", "name": "same.pdf", "size": 5}],
+                },
+                {
+                    "ts": "2.0",
+                    "thread_ts": "1.0",
+                    "files": [{"id": "F-SHARED", "name": "same.pdf", "size": 5}],
+                },
+            ]
+            receipt = {
+                "size": 5,
+                "sha256": "a" * 64,
+                "contentType": "application/pdf",
+            }
+            with (
+                patch.object(RESCUE, "record_path", return_value=path),
+                patch.object(RESCUE, "download_slack_file", return_value=receipt),
+                patch.object(
+                    RESCUE,
+                    "upload",
+                    side_effect=["https://blob/one.pdf", "https://blob/two.pdf"],
+                ),
+                patch.object(RESCUE, "blob_read_back"),
+            ):
+                result = RESCUE.rescue_record(row, messages)
+
+            sources = json.loads(path.read_text())["sourceFiles"]
+            self.assertEqual(result["files"], 2)
+            self.assertEqual(
+                [
+                    (source["slackMessageTs"], source["slackFileId"])
+                    for source in sources
+                ],
+                [("1.0", "F-SHARED"), ("2.0", "F-SHARED")],
+            )
 
 
 if __name__ == "__main__":

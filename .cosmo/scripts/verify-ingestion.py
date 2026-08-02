@@ -19,13 +19,22 @@ pass against deleted state). Before any check, this script confirms the
 checkout contains origin/main, and refuses to run otherwise.
 
 MODES:
-    python3 verify-ingestion.py <ref-id>       # single reference (ref-...)
-    python3 verify-ingestion.py <cur-id>       # single curriculum (cur-...)
+    python3 verify-ingestion.py <ref-id>       # analysis, before Slack closeout
+    python3 verify-ingestion.py <cur-id>       # analysis, before Slack closeout
+    python3 verify-ingestion.py <id> --require-closeout
+                                               # require finalizer receipts too
+    python3 verify-ingestion.py <id> --require-portable-source
+                                               # reject local-only source proof
     python3 verify-ingestion.py --all          # audit every ref and cur
     python3 verify-ingestion.py --recent 7     # refs and curs from last N days
     python3 verify-ingestion.py --regen-index  # rebuild both index.json files
                                                # from the individual JSONs
     Add --no-fetch to skip the network fetch in preflight (offline use).
+
+The default verdict is deliberately pre-closeout because the finalizer runs
+this verifier before it posts or reacts in Slack. It never calls that result
+fully complete. Use --require-closeout after finalization to require the
+persisted reply, reaction, and curriculum-summary readback receipts.
 
 OPEN GAPS:
 Not every recorded gap has a shipped recipe yet, and that is fine as long as
@@ -43,6 +52,7 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional, Tuple
+from urllib.parse import urlparse
 
 # ---------------------------------------------------------------------------
 # Path constants, resolved relative to repo root.
@@ -58,6 +68,7 @@ INDEX_JSON = REFS_DIR / "index.json"
 CUR_INDEX_JSON = CURS_DIR / "index.json"
 TEXT_DIR = COSMO / "text"
 MASTERS_DIR = COSMO / "masters"
+SOURCE_FILES_DIR = COSMO / "inspo-files"
 
 MATERIALS_STUDIO = REPO_ROOT / "apps" / "web" / "agent" / "skills" / "materials-studio"
 RECIPES_DIR = MATERIALS_STUDIO / "references" / "recipes"
@@ -103,6 +114,8 @@ CLAIM_ROLES = CONTENT_ROLES | {"cast", "identity", "decoration"}
 WORK_KINDS = {"book", "poem", "song", "film", "artwork", "game", "website", "curriculum"}
 EXTRACTION_QUALITY = {"full", "partial", "unavailable"}
 DECOMPOSITION_QUALITY = {"full", "partial", "unavailable"}
+BLOB_READ_BACK_RECEIPT_VERSION = "sha256-content-type-v1"
+EXPECTED_BLOB_HOST = "pkvvudjdhxk33dig.public.blob.vercel-storage.com"
 
 
 # ---------------------------------------------------------------------------
@@ -492,16 +505,110 @@ def check_step10_teaching_rules(ref: dict) -> Tuple[bool, str]:
     return True, f"OK ({len(targets)} teaching-rule file(s) exist)"
 
 
-def check_step11_reply(ref: dict) -> Tuple[bool, str]:
-    """
-    The Slack thread reply cannot be verified from the filesystem. For drops
-    with a sourceMessageTs, the reply is expected and the human-visible
-    :ship: reaction is the final signal; bulk refs have no message to reply to.
-    """
-    ts = ref.get("sourceMessageTs")
+def check_step11_reply(item: dict) -> Tuple[bool, str]:
+    """Require the receipts written only after finalizer Slack readback."""
+    ts = item.get("sourceMessageTs")
     if not ts:
         return True, "OK (no sourceMessageTs, bulk ingest, no reply needed)"
-    return True, f"OK (reply expected for ts: {ts})"
+    stages = item.get("stages") or {}
+    if not isinstance(stages.get("slackReplyTs"), str) or not stages.get(
+        "slackReplyTs", ""
+    ).strip():
+        return False, f"Slack reply receipt is missing for source ts {ts}"
+    if stages.get("shipReaction") is not True:
+        return False, f":ship: readback receipt is missing for source ts {ts}"
+    if item.get("id", "").startswith("cur-"):
+        if not isinstance(stages.get("devSummaryTs"), str) or not stages.get(
+            "devSummaryTs", ""
+        ).strip():
+            return False, "curriculum developer-summary receipt is missing"
+    return True, f"OK (Slack reply and :ship: readback receipts persisted for {ts})"
+
+
+def _positive_page_count(value) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value > 0
+
+
+def validate_capture_page_counts(
+    receipt: dict, *, allow_legacy: bool
+) -> Tuple[bool, str]:
+    observed = receipt.get("pageCount")
+    expected = receipt.get("expectedPageCount")
+    if expected is None and allow_legacy:
+        if observed is None or _positive_page_count(observed):
+            return True, "OK (legacy capture predates portable page-count assertion)"
+    if not _positive_page_count(observed):
+        return False, "capture pageCount must be a positive integer"
+    if not _positive_page_count(expected):
+        return False, "capture expectedPageCount must be a positive independent assertion"
+    if observed != expected:
+        return False, f"capture has {observed} page(s), independently expected {expected}"
+    return True, f"OK ({observed} observed page(s) match the independent assertion)"
+
+
+def _review_source_receipt(item_id: str, receipt: dict) -> Optional[dict]:
+    raw = receipt.get("sourceReceipt")
+    if raw is None:
+        source = receipt.get("source") or {}
+        raw = {
+            "version": 1,
+            "recordId": receipt.get("id", item_id),
+            "kind": receipt.get(
+                "kind", "curriculum" if item_id.startswith("cur-") else "reference"
+            ),
+            "parts": source.get("parts"),
+        }
+    if not isinstance(raw, dict) or not isinstance(raw.get("parts"), list):
+        return None
+    parts = []
+    for part in raw["parts"]:
+        if not isinstance(part, dict):
+            return None
+        parts.append({
+            "file": part.get("file"),
+            "sha256": part.get("sha256"),
+            "bytes": part.get("bytes"),
+        })
+    return {
+        "version": raw.get("version"),
+        "recordId": raw.get("recordId"),
+        "kind": raw.get("kind"),
+        "parts": parts,
+    }
+
+
+def capture_review_binding(item_id: str, receipt: dict) -> Optional[dict]:
+    observed = receipt.get("pageCount")
+    expected = receipt.get("expectedPageCount")
+    source = _review_source_receipt(item_id, receipt)
+    if (
+        not item_id
+        or not _positive_page_count(observed)
+        or not _positive_page_count(expected)
+        or source is None
+        or not source["parts"]
+    ):
+        return None
+    encoded = json.dumps(
+        source, ensure_ascii=False, separators=(",", ":"), sort_keys=True
+    ).encode("utf-8")
+    return {
+        "version": 1,
+        "recordId": item_id,
+        "sourceReceiptSha256": hashlib.sha256(encoded).hexdigest(),
+        "pageCount": observed,
+        "expectedPageCount": expected,
+    }
+
+
+def _valid_reviewed_at(value) -> bool:
+    if not isinstance(value, str) or not value.strip():
+        return False
+    try:
+        datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return True
 
 
 def validate_capture_gate_receipt(
@@ -509,6 +616,7 @@ def validate_capture_gate_receipt(
     review: Optional[dict],
     *,
     allow_legacy: bool,
+    item_id: str = "",
 ) -> Tuple[bool, str]:
     status = receipt.get("gateStatus")
     if status is None:
@@ -535,12 +643,13 @@ def validate_capture_gate_receipt(
     if not findings:
         return False, "book-intake says findings but its finding set is empty"
     review = review or {}
+    binding = capture_review_binding(item_id, receipt)
     required = (
         review.get("status") == "reviewed",
         review.get("findingsSha256") == digest,
         review.get("findingCount") == len(findings),
         review.get("disposition") in GATE_REVIEW_DISPOSITIONS,
-        isinstance(review.get("reviewedAt"), str) and bool(review.get("reviewedAt")),
+        _valid_reviewed_at(review.get("reviewedAt")),
         isinstance(review.get("note"), str) and bool(review.get("note", "").strip()),
     )
     if not all(required):
@@ -558,6 +667,15 @@ def validate_capture_gate_receipt(
         return False, (
             f"book-intake review still has {unresolved} unresolved finding(s)"
         )
+    if not allow_legacy:
+        if binding is None:
+            return False, "book-intake review cannot bind to malformed capture identity"
+        if receipt.get("sourceReceipt") is not None and receipt.get(
+            "reviewBinding"
+        ) != binding:
+            return False, "portable capture reviewBinding differs from capture identity"
+        if review.get("captureBinding") != binding:
+            return False, "book-intake review is not bound to this source and page assertion"
     return True, (
         f"OK ({len(findings)} capture finding(s) reviewed as "
         f"{review['disposition']})"
@@ -607,6 +725,102 @@ def _source_receipt_core(receipt: dict) -> Optional[dict]:
     }
 
 
+def _source_file_identity(source_file: dict) -> Optional[tuple[str, int]]:
+    if not isinstance(source_file, dict):
+        return None
+    digest = source_file.get("sha256")
+    size = source_file.get("size", source_file.get("bytes"))
+    if (
+        not isinstance(digest, str)
+        or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+        or not isinstance(size, int)
+        or isinstance(size, bool)
+        or size <= 0
+    ):
+        return None
+    return digest, size
+
+
+def _normalized_content_type(value) -> str:
+    if not isinstance(value, str):
+        return ""
+    return value.split(";", 1)[0].strip().lower()
+
+
+def _has_exact_homa_blob_url(item_id: str, source_file: dict) -> bool:
+    url = source_file.get("blobUrl") if isinstance(source_file, dict) else None
+    if not isinstance(url, str) or not url:
+        return False
+    parsed = urlparse(url)
+    expected_prefix = f"/inspo/{item_id}/"
+    return all((
+        parsed.scheme == "https",
+        parsed.netloc == EXPECTED_BLOB_HOST,
+        parsed.path.startswith(expected_prefix),
+        parsed.path != expected_prefix,
+        not parsed.params,
+        not parsed.query,
+        not parsed.fragment,
+    ))
+
+
+def _has_bound_blob_readback(item_id: str, source_file: dict) -> bool:
+    identity = _source_file_identity(source_file)
+    if identity is None:
+        return False
+    digest, size = identity
+    content_type = _normalized_content_type(source_file.get("contentType"))
+    receipt_identity = f"{digest}:{content_type}"
+    return all((
+        _has_exact_homa_blob_url(item_id, source_file),
+        source_file.get("blobReadBackVerified") is True,
+        isinstance(source_file.get("blobReadBackVerifiedAt"), str),
+        bool(source_file.get("blobReadBackVerifiedAt", "").strip()),
+        source_file.get("blobReadBackSize") == size,
+        source_file.get("blobReadBackSha256") == digest,
+        bool(content_type),
+        _normalized_content_type(source_file.get("blobReadBackContentType"))
+        == content_type,
+        source_file.get("blobReadBackReceiptVersion")
+        == BLOB_READ_BACK_RECEIPT_VERSION,
+        source_file.get("blobReadBackIdentity") == receipt_identity,
+    ))
+
+
+def _sha256_path(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _has_safe_local_source_proof(source_file: dict) -> bool:
+    identity = _source_file_identity(source_file)
+    local_value = source_file.get("localPath") if isinstance(source_file, dict) else None
+    if identity is None or not isinstance(local_value, str) or not local_value:
+        return False
+    candidate = Path(local_value)
+    if not candidate.is_absolute():
+        candidate = REPO_ROOT / candidate
+    try:
+        if candidate.is_symlink():
+            return False
+        resolved = candidate.resolve(strict=True)
+        resolved.relative_to(SOURCE_FILES_DIR.resolve(strict=True))
+        if not resolved.is_file() or resolved.stat().st_size != identity[1]:
+            return False
+        return _sha256_path(resolved) == identity[0]
+    except (OSError, ValueError):
+        return False
+
+
+def _source_file_has_byte_proof(item_id: str, source_file: dict) -> bool:
+    return _has_bound_blob_readback(
+        item_id, source_file
+    ) or _has_safe_local_source_proof(source_file)
+
+
 def _manifest_source_receipt(item_id: str, manifest: dict) -> Optional[dict]:
     source = manifest.get("source") or {}
     parts = source.get("parts")
@@ -646,12 +860,13 @@ def validate_capture_source_receipt(
     manifest: Optional[dict],
     *,
     allow_legacy: bool,
+    require_portable_source: bool = False,
 ) -> Tuple[bool, str]:
     """Bind committed source identity to retained files and a local manifest."""
     item_id = item.get("id", "")
     capture = item.get("capture") or {}
     raw_receipt = capture.get("sourceReceipt")
-    if raw_receipt is None and allow_legacy:
+    if raw_receipt is None and allow_legacy and not require_portable_source:
         return True, "OK (legacy capture predates portable source identity)"
     receipt = _source_receipt_core(raw_receipt)
     if receipt is None:
@@ -663,8 +878,24 @@ def validate_capture_source_receipt(
     retained = item.get("sourceFiles")
     if not isinstance(retained, list) or not retained:
         return False, "portable sourceReceipt has no retained sourceFiles to verify"
+    invalid_canonical = []
+    for index, source_file in enumerate(retained):
+        identity = _source_file_identity(source_file)
+        if identity is None:
+            if require_portable_source or not allow_legacy:
+                invalid_canonical.append(index)
+            continue
+    if invalid_canonical:
+        return False, (
+            "retained sourceFiles lack a valid sha256 and positive size: "
+            f"{invalid_canonical[:12]}"
+        )
+
     used = set()
+    receipt_identities = set()
     for part in receipt["parts"]:
+        identity = (part["sha256"], part["bytes"])
+        receipt_identities.add(identity)
         match = None
         for index, source_file in enumerate(retained):
             if index in used or not isinstance(source_file, dict):
@@ -686,41 +917,136 @@ def validate_capture_source_receipt(
             )
         used.add(match)
 
+    uncovered_occurrences = []
+    for index, source_file in enumerate(retained):
+        if index in used or _source_file_identity(source_file) is None:
+            continue
+        duplicate_of = source_file.get("duplicateOf")
+        if not isinstance(duplicate_of, dict):
+            uncovered_occurrences.append(index)
+            continue
+        duplicate_name = duplicate_of.get("filename")
+        duplicate_ts = duplicate_of.get("slackMessageTs")
+        canonical_matches = [
+            canonical_index
+            for canonical_index in used
+            if retained[canonical_index].get("filename") == duplicate_name
+            and retained[canonical_index].get("slackMessageTs") == duplicate_ts
+            and _source_file_identity(retained[canonical_index])
+            == _source_file_identity(source_file)
+        ]
+        if len(canonical_matches) != 1:
+            uncovered_occurrences.append(index)
+    if uncovered_occurrences:
+        return False, (
+            "portable sourceReceipt does not directly cover, or bind through "
+            "a byte-identical duplicateOf, retained source occurrence(s): "
+            f"{uncovered_occurrences[:12]}"
+        )
+
+    unproved = [
+        index
+        for index, source_file in enumerate(retained)
+        if _source_file_identity(source_file) in receipt_identities
+        and not (
+            _has_bound_blob_readback(item_id, source_file)
+            if require_portable_source
+            else _source_file_has_byte_proof(item_id, source_file)
+        )
+    ]
+    if unproved and (require_portable_source or not allow_legacy):
+        proof_requirement = (
+            "an exact bound Homa Blob readback receipt"
+            if require_portable_source
+            else "an exact bound Homa Blob readback receipt or safe local hash proof"
+        )
+        return False, (
+            f"{len(unproved)} retained source occurrence(s) lack "
+            f"{proof_requirement}"
+        )
+
     if manifest is not None:
         local_receipt = _manifest_source_receipt(item_id, manifest)
         if local_receipt is None:
             return False, "local manifest source identity is missing or malformed"
         if receipt != local_receipt:
             return False, "portable sourceReceipt differs from the local manifest"
-    return True, f"OK ({len(receipt['parts'])} retained source part(s) verified)"
+    proof_note = "legacy metadata" if unproved else "byte proof"
+    return True, (
+        f"OK ({len(receipt['parts'])} retained source part(s) verified with "
+        f"{proof_note})"
+    )
 
 
-def check_capture_gates(item: dict) -> Tuple[bool, str]:
+def validate_source_completion(item: dict) -> Tuple[bool, str]:
+    source_status = (item.get("sourceCompleteness") or {}).get("status")
+    if source_status in {"requested", "awaiting-source"}:
+        return False, f"source completeness is still {source_status}"
+    recovery_status = (item.get("originalRecovery") or {}).get("status")
+    if recovery_status == "requested":
+        return False, "original source recovery is still requested"
+    return True, "OK (no source request remains open)"
+
+
+def check_capture_gates(
+    item: dict, *, require_portable_source: bool = False
+) -> Tuple[bool, str]:
     """A committed portable gate receipt must survive without ignored masters."""
+    completion_passed, completion_message = validate_source_completion(item)
+    if not completion_passed:
+        return completion_passed, completion_message
     item_id = item.get("id", "")
     capture = item.get("capture") or {}
     allow_legacy = _predates_content_rules(item)
     manifest_path = MASTERS_DIR / item_id / "manifest.json"
     if not manifest_path.exists():
+        counts_passed, counts_message = validate_capture_page_counts(
+            capture, allow_legacy=allow_legacy
+        )
+        if not counts_passed:
+            return counts_passed, counts_message
+        source_passed, source_message = validate_capture_source_receipt(
+            item,
+            None,
+            allow_legacy=allow_legacy,
+            require_portable_source=require_portable_source,
+        )
+        if not source_passed:
+            return source_passed, source_message
         passed, message = validate_capture_gate_receipt(
             capture,
             capture.get("gateReview"),
             allow_legacy=allow_legacy,
+            item_id=item_id,
         )
         if not passed:
             return passed, message
-        source_passed, source_message = validate_capture_source_receipt(
-            item, None, allow_legacy=allow_legacy
-        )
-        return source_passed, source_message if not source_passed else f"{message}; {source_message}"
+        return True, f"{counts_message}; {message}; {source_message}"
 
     manifest = load_json(manifest_path)
     if not manifest:
         return False, "book-intake manifest is unreadable"
+    counts_passed, counts_message = validate_capture_page_counts(
+        manifest, allow_legacy=allow_legacy
+    )
+    if not counts_passed:
+        return counts_passed, counts_message
+    pages = manifest.get("pages")
+    if not isinstance(pages, list) or len(pages) != manifest.get("pageCount"):
+        return False, "book-intake manifest pageCount differs from its page rows"
+    source_passed, source_message = validate_capture_source_receipt(
+        item,
+        manifest,
+        allow_legacy=allow_legacy,
+        require_portable_source=require_portable_source,
+    )
+    if not source_passed:
+        return source_passed, source_message
     passed, message = validate_capture_gate_receipt(
         manifest,
         capture.get("gateReview"),
         allow_legacy=allow_legacy,
+        item_id=item_id,
     )
     if not passed or manifest.get("gateStatus") is None:
         return passed, message
@@ -730,14 +1056,13 @@ def check_capture_gates(item: dict) -> Tuple[bool, str]:
         "gateFindings",
         "gateFindingCount",
         "gateFindingsSha256",
+        "pageCount",
+        "expectedPageCount",
     )
     drifted = [field for field in portable_fields if capture.get(field) != manifest.get(field)]
     if drifted:
         return False, f"portable capture receipt differs from local manifest: {drifted}"
-    source_passed, source_message = validate_capture_source_receipt(
-        item, manifest, allow_legacy=allow_legacy
-    )
-    return source_passed, source_message if not source_passed else f"{message}; {source_message}"
+    return True, f"{counts_message}; {message}; {source_message}"
 
 
 # ---------------------------------------------------------------------------
@@ -811,12 +1136,15 @@ def check_cur_gap_slugs(cur: dict) -> Tuple[bool, str]:
 # ---------------------------------------------------------------------------
 
 def _dropped_on(item: dict) -> str:
-    """YYYY-MM-DD for the drop, from droppedAt, falling back to the id."""
+    """Canonical YYYY-MM-DD from the record id, with legacy fallback only."""
+    item_id = item.get("id", "") or ""
+    m = re.search(r"(?:ref|cur)-(\d{4}-\d{2}-\d{2})-", item_id)
+    if m:
+        return m.group(1)
     raw = (item.get("droppedAt") or "")[:10]
     if re.match(r"^\d{4}-\d{2}-\d{2}$", raw):
         return raw
-    m = re.search(r"(\d{4}-\d{2}-\d{2})", item.get("id", "") or "")
-    return m.group(1) if m else ""
+    return ""
 
 
 def _predates_content_rules(item: dict) -> bool:
@@ -1123,7 +1451,6 @@ REF_CHECKS = [
     ("Step 8: Format registry", check_step8_activity_format),
     ("Step 9: Taxonomy", check_step9_taxonomy),
     ("Step 10: Teaching rules", check_step10_teaching_rules),
-    ("Step 11: Reply sent", check_step11_reply),
     ("Step 12: Aboutness", check_aboutness),
 ]
 
@@ -1139,15 +1466,46 @@ CUR_CHECKS = [
 ]
 
 
-def verify_one(item_id: str, verbose: bool = True, fail_counts: Optional[dict] = None) -> bool:
+def check_capture_gates_portable(item: dict) -> Tuple[bool, str]:
+    return check_capture_gates(item, require_portable_source=True)
+
+
+def verification_checks(
+    item_id: str,
+    *,
+    require_closeout: bool,
+    require_portable_source: bool = False,
+) -> list:
+    checks = list(CUR_CHECKS if item_id.startswith("cur-") else REF_CHECKS)
+    if require_portable_source:
+        capture_name, _capture_check = checks[0]
+        checks[0] = (capture_name, check_capture_gates_portable)
+    if require_closeout:
+        checks.append(("Closeout: Slack receipts", check_step11_reply))
+    return checks
+
+
+def verify_one(
+    item_id: str,
+    verbose: bool = True,
+    fail_counts: Optional[dict] = None,
+    *,
+    require_closeout: bool = False,
+    require_portable_source: bool = False,
+) -> bool:
     if item_id.startswith("cur-"):
-        item, checks = load_cur(item_id), CUR_CHECKS
+        item = load_cur(item_id)
     else:
-        item, checks = load_ref(item_id), REF_CHECKS
+        item = load_ref(item_id)
     if item is None:
         if verbose:
             print(f"❌ {item_id}: JSON not found")
         return False
+    checks = verification_checks(
+        item_id,
+        require_closeout=require_closeout,
+        require_portable_source=require_portable_source,
+    )
 
     all_pass = True
     failures = []
@@ -1166,7 +1524,13 @@ def verify_one(item_id: str, verbose: bool = True, fail_counts: Optional[dict] =
 
     if verbose:
         if all_pass:
-            print(f"\n🚢 {item_id}: ALL STEPS PASSED, safe to react with :ship:")
+            if require_closeout:
+                print(f"\n🚢 {item_id}: ANALYSIS AND SLACK CLOSEOUT VERIFIED")
+            else:
+                print(
+                    f"\n✅ {item_id}: ANALYSIS PASSED; Slack closeout was not checked. "
+                    "Run with --require-closeout after finalization."
+                )
         else:
             print(f"\n🚫 {item_id}: BLOCKED, fix before reacting with :ship:")
             print(f"   Failed: {', '.join(failures)}")
@@ -1230,27 +1594,69 @@ def self_test() -> int:
             "parts": parts or [first_source_part],
         }
 
-    def retained_source_files(parts=None):
+    def retained_source_files(item_id, parts=None, *, proved=True):
         return [
             {
                 "filename": part["file"],
-                "localPath": f".cosmo/inspo-files/{part['file']}",
+                "slackMessageTs": f"1.{index + 1:06d}",
+                "localPath": (
+                    f".cosmo/inspo-files/{part['file']}" if proved else None
+                ),
                 "sha256": part["sha256"],
                 "size": part["bytes"],
+                **({
+                    "contentType": (
+                        "image/jpeg" if part["file"].endswith(".jpg")
+                        else "application/pdf"
+                    ),
+                    "blobUrl": (
+                        f"https://{EXPECTED_BLOB_HOST}/inspo/{item_id}/"
+                        f"{part['file']}"
+                    ),
+                    "blobReadBackVerified": True,
+                    "blobReadBackVerifiedAt": "2026-08-02T00:00:00Z",
+                    "blobReadBackSize": part["bytes"],
+                    "blobReadBackSha256": part["sha256"],
+                    "blobReadBackContentType": (
+                        "image/jpeg" if part["file"].endswith(".jpg")
+                        else "application/pdf"
+                    ),
+                    "blobReadBackReceiptVersion": BLOB_READ_BACK_RECEIPT_VERSION,
+                    "blobReadBackIdentity": (
+                        f"{part['sha256']}:"
+                        + (
+                            "image/jpeg" if part["file"].endswith(".jpg")
+                            else "application/pdf"
+                        )
+                    ),
+                } if proved else {}),
             }
-            for part in (parts or [first_source_part])
+            for index, part in enumerate(parts or [first_source_part])
         ]
 
-    def capture_receipt(item_id, gate, review=None, parts=None):
+    def capture_receipt(
+        item_id,
+        gate,
+        review=None,
+        parts=None,
+        page_count=1,
+        expected_page_count=1,
+    ):
         capture = {
             **gate,
+            "pageCount": page_count,
+            "expectedPageCount": expected_page_count,
             "sourceReceipt": portable_source_receipt(item_id, parts),
         }
+        binding = capture_review_binding(item_id, capture)
+        capture["reviewBinding"] = binding
         if review is not None:
-            capture["gateReview"] = review
+            bound_review = dict(review)
+            bound_review.setdefault("captureBinding", binding)
+            capture["gateReview"] = bound_review
         return capture
 
-    def reviewed(disposition, unresolved, **overrides):
+    def reviewed(disposition, unresolved, *, bound_to=None, **overrides):
         review = {
             "status": "reviewed",
             "findingCount": 1,
@@ -1260,6 +1666,10 @@ def self_test() -> int:
             "reviewedAt": "2026-08-02",
             "note": "The exact finding set was reviewed.",
         }
+        if bound_to is not None:
+            review["captureBinding"] = capture_review_binding(
+                bound_to.get("id", ""), bound_to
+            )
         review.update(overrides)
         return review
 
@@ -1309,6 +1719,9 @@ def self_test() -> int:
         payload.update({
             "id": gate_id,
             "kind": "reference",
+            "pageCount": 1,
+            "expectedPageCount": 1,
+            "pages": [{"page": 1}],
             "source": {
                 "file": parts[0]["file"],
                 "sha256": parts[0]["sha256"],
@@ -1350,7 +1763,72 @@ def self_test() -> int:
         return item
 
     new, old = "2026-08-01", "2026-07-01"
+    wrong_binding_capture = capture_receipt(
+        reviewed_gate_id,
+        gate_payloads[reviewed_gate_id],
+        reviewed("accepted-source-artifact", 0),
+    )
+    wrong_binding_capture["gateReview"]["captureBinding"] = {
+        **wrong_binding_capture["gateReview"]["captureBinding"],
+        "sourceReceiptSha256": "f" * 64,
+    }
+    invalid_date_capture = capture_receipt(
+        reviewed_gate_id,
+        gate_payloads[reviewed_gate_id],
+        reviewed("accepted-source-artifact", 0, reviewedAt="not-a-date"),
+    )
+    unversioned_readback_sources = retained_source_files(
+        "ref-9999-01-01-unversioned-readback"
+    )
+    unversioned_readback_sources[0].pop("blobReadBackReceiptVersion")
+    unversioned_readback_sources[0].pop("blobReadBackIdentity")
+    missing_blob_url_sources = retained_source_files(
+        "ref-9999-01-01-missing-blob-url"
+    )
+    missing_blob_url_sources[0].pop("blobUrl")
+    local_only_id = "ref-9999-01-01-local-only-source"
+    local_only_item = ref(
+        local_only_id,
+        new,
+        capture={"sourceReceipt": portable_source_receipt(local_only_id)},
+        sourceFiles=retained_source_files(local_only_id, proved=False),
+    )
+
+    def portable_mode_rejects_local_only_source(_item):
+        local_proof = globals()["_has_safe_local_source_proof"]
+        globals()["_has_safe_local_source_proof"] = lambda _source: True
+        try:
+            default_passed, _default_message = validate_capture_source_receipt(
+                local_only_item,
+                None,
+                allow_legacy=False,
+            )
+            portable_passed, portable_message = validate_capture_source_receipt(
+                local_only_item,
+                None,
+                allow_legacy=False,
+                require_portable_source=True,
+            )
+        finally:
+            globals()["_has_safe_local_source_proof"] = local_proof
+        return (
+            default_passed and not portable_passed,
+            portable_message,
+        )
+
     cases = [
+        ("a source-completeness request blocks closeout",
+         check_capture_gates, ref(
+             "ref-9999-01-01-source-requested",
+             new,
+             sourceCompleteness={"status": "requested"},
+         ), False),
+        ("an original-recovery request blocks closeout",
+         check_capture_gates, ref(
+             "ref-9999-01-01-original-requested",
+             new,
+             originalRecovery={"status": "requested"},
+         ), False),
         ("a pending capture checkpoint fails",
          check_capture_gates, ref(pending_gate_id, new), False),
         ("a completed capture gate passes",
@@ -1360,7 +1838,7 @@ def self_test() -> int:
              capture=capture_receipt(
                  complete_gate_id, gate_payloads[complete_gate_id]
              ),
-             sourceFiles=retained_source_files(),
+             sourceFiles=retained_source_files(complete_gate_id),
          ), True),
         ("a completed gate cannot hide findings",
          check_capture_gates, ref(false_complete_gate_id, new), False),
@@ -1378,12 +1856,33 @@ def self_test() -> int:
                  gate_payloads[reviewed_gate_id],
                  reviewed("accepted-source-artifact", 0),
              ),
-             sourceFiles=retained_source_files(),
+             sourceFiles=retained_source_files(reviewed_gate_id),
          ), True),
+        ("a review bound to different source bytes fails",
+         check_capture_gates, ref(
+             reviewed_gate_id,
+             new,
+             capture=wrong_binding_capture,
+             sourceFiles=retained_source_files(reviewed_gate_id),
+         ), False),
+        ("a review timestamp must be an ISO date or datetime",
+         check_capture_gates, ref(
+             reviewed_gate_id,
+             new,
+             capture=invalid_date_capture,
+             sourceFiles=retained_source_files(reviewed_gate_id),
+         ), False),
         ("a new item without a portable gate receipt fails in a clean checkout",
          check_capture_gates, ref("ref-9999-01-01-no-manifest", new), False),
         ("a legacy item without a gate receipt stays compatible",
          check_capture_gates, ref("ref-2026-07-01-no-manifest", old), True),
+        ("portable source mode refuses the legacy source-receipt bypass",
+         check_capture_gates_portable,
+         ref("ref-2026-07-01-no-manifest-portable", old), False),
+        ("a legacy observed count without an independent assertion stays compatible",
+         lambda _item: validate_capture_page_counts(
+             {"pageCount": 12}, allow_legacy=True
+         ), {}, True),
         ("a portable complete receipt passes without local masters",
          check_capture_gates, ref(
              "ref-9999-01-01-portable",
@@ -1397,8 +1896,48 @@ def self_test() -> int:
                      "gateFindingsSha256": empty_digest,
                  },
              ),
-             sourceFiles=retained_source_files(),
+             sourceFiles=retained_source_files("ref-9999-01-01-portable"),
          ), True),
+        ("portable page counts must agree in a clean checkout",
+         check_capture_gates, ref(
+             "ref-9999-01-01-portable-count-mismatch",
+             new,
+             capture=capture_receipt(
+                 "ref-9999-01-01-portable-count-mismatch",
+                 {
+                     "gateStatus": "complete",
+                     "gateFindings": [],
+                     "gateFindingCount": 0,
+                     "gateFindingsSha256": empty_digest,
+                 },
+                 page_count=1,
+                 expected_page_count=999,
+             ),
+             sourceFiles=retained_source_files(
+                 "ref-9999-01-01-portable-count-mismatch"
+             ),
+         ), False),
+        ("portable page counts cannot be omitted in a clean checkout",
+         check_capture_gates, ref(
+             "ref-9999-01-01-portable-count-missing",
+             new,
+             capture={
+                 key: value
+                 for key, value in capture_receipt(
+                     "ref-9999-01-01-portable-count-missing",
+                     {
+                         "gateStatus": "complete",
+                         "gateFindings": [],
+                         "gateFindingCount": 0,
+                         "gateFindingsSha256": empty_digest,
+                     },
+                 ).items()
+                 if key not in {"pageCount", "expectedPageCount"}
+             },
+             sourceFiles=retained_source_files(
+                 "ref-9999-01-01-portable-count-missing"
+             ),
+         ), False),
         ("a clean-checkout receipt is bound to retained source size and hash",
          check_capture_gates, ref(
              "ref-9999-01-01-portable-mismatch",
@@ -1413,9 +1952,132 @@ def self_test() -> int:
                  },
              ),
              sourceFiles=[{
-                 **retained_source_files()[0],
+                 **retained_source_files(
+                     "ref-9999-01-01-portable-mismatch"
+                 )[0],
                  "size": first_source_part["bytes"] + 1,
              }],
+         ), False),
+        ("every distinct retained source identity must be receipted",
+         check_capture_gates, ref(
+             "ref-9999-01-01-extra-source",
+             new,
+             capture=capture_receipt(
+                 "ref-9999-01-01-extra-source",
+                 {
+                     "gateStatus": "complete",
+                     "gateFindings": [],
+                     "gateFindingCount": 0,
+                     "gateFindingsSha256": empty_digest,
+                 },
+             ),
+             sourceFiles=retained_source_files(
+                 "ref-9999-01-01-extra-source",
+                 [first_source_part, second_source_part]
+             ),
+         ), False),
+        ("a byte-identical duplicate occurrence needs no second receipt part",
+         check_capture_gates, ref(
+             "ref-9999-01-01-duplicate-source",
+             new,
+             capture=capture_receipt(
+                 "ref-9999-01-01-duplicate-source",
+                 {
+                     "gateStatus": "complete",
+                     "gateFindings": [],
+                     "gateFindingCount": 0,
+                     "gateFindingsSha256": empty_digest,
+                 },
+             ),
+             sourceFiles=[
+                 *retained_source_files("ref-9999-01-01-duplicate-source"),
+                 {
+                     **retained_source_files(
+                         "ref-9999-01-01-duplicate-source"
+                     )[0],
+                     "filename": "part-1-copy.pdf",
+                     "slackMessageTs": "1.000002",
+                     "duplicateOf": {
+                         "slackMessageTs": "1.000001",
+                         "filename": "part-1.pdf",
+                     },
+                 },
+             ],
+         ), True),
+        ("an unmarked byte-identical source occurrence cannot be omitted",
+         check_capture_gates, ref(
+             "ref-9999-01-01-unmarked-duplicate-source",
+             new,
+             capture=capture_receipt(
+                 "ref-9999-01-01-unmarked-duplicate-source",
+                 {
+                     "gateStatus": "complete",
+                     "gateFindings": [],
+                     "gateFindingCount": 0,
+                     "gateFindingsSha256": empty_digest,
+                 },
+             ),
+             sourceFiles=[
+                 *retained_source_files(
+                     "ref-9999-01-01-unmarked-duplicate-source"
+                 ),
+                 {
+                     **retained_source_files(
+                         "ref-9999-01-01-unmarked-duplicate-source"
+                     )[0],
+                     "filename": "part-1-copy.pdf",
+                     "slackMessageTs": "1.000002",
+                 },
+             ],
+         ), False),
+        ("matching metadata without readback or safe local bytes is not proof",
+         check_capture_gates, ref(
+             "ref-9999-01-01-self-attested-source",
+             new,
+             capture=capture_receipt(
+                 "ref-9999-01-01-self-attested-source",
+                 {
+                     "gateStatus": "complete",
+                     "gateFindings": [],
+                     "gateFindingCount": 0,
+                     "gateFindingsSha256": empty_digest,
+                 },
+             ),
+             sourceFiles=retained_source_files(
+                 "ref-9999-01-01-self-attested-source", proved=False
+             ),
+         ), False),
+        ("portable source mode rejects otherwise safe local-only bytes",
+         portable_mode_rejects_local_only_source, {}, True),
+        ("unversioned readback metadata is not a bound byte receipt",
+         check_capture_gates, ref(
+             "ref-9999-01-01-unversioned-readback",
+             new,
+             capture=capture_receipt(
+                 "ref-9999-01-01-unversioned-readback",
+                 {
+                     "gateStatus": "complete",
+                     "gateFindings": [],
+                     "gateFindingCount": 0,
+                     "gateFindingsSha256": empty_digest,
+                 },
+             ),
+             sourceFiles=unversioned_readback_sources,
+         ), False),
+        ("readback metadata without the exact Homa Blob URL is not proof",
+         check_capture_gates, ref(
+             "ref-9999-01-01-missing-blob-url",
+             new,
+             capture=capture_receipt(
+                 "ref-9999-01-01-missing-blob-url",
+                 {
+                     "gateStatus": "complete",
+                     "gateFindings": [],
+                     "gateFindingCount": 0,
+                     "gateFindingsSha256": empty_digest,
+                 },
+             ),
+             sourceFiles=missing_blob_url_sources,
          ), False),
         ("a local manifest catches reordered portable source parts",
          check_capture_gates, ref(
@@ -1427,6 +2089,7 @@ def self_test() -> int:
                  parts=[second_source_part, first_source_part],
              ),
              sourceFiles=retained_source_files(
+                 drifted_source_gate_id,
                  [first_source_part, second_source_part]
              ),
          ), False),
@@ -1439,7 +2102,9 @@ def self_test() -> int:
                  gate_payloads[manual_source_gate_id],
                  parts=[manual_source_part],
              ),
-             sourceFiles=retained_source_files([manual_source_part]),
+             sourceFiles=retained_source_files(
+                 manual_source_gate_id, [manual_source_part]
+             ),
          ), True),
         ("a falsey non-array finding set fails closed",
          check_capture_gates, ref("ref-9999-01-01-malformed-findings", new, capture={
@@ -1466,27 +2131,109 @@ def self_test() -> int:
         ("a reviewed finding set must state zero unresolved findings",
          lambda _item: validate_capture_gate_receipt(
              gate_payloads[reviewed_gate_id],
-             reviewed("accepted-source-artifact", 0, unresolvedFindingCount=None),
+             reviewed(
+                 "accepted-source-artifact",
+                 0,
+                 bound_to=gate_payloads[reviewed_gate_id],
+                 unresolvedFindingCount=None,
+             ),
              allow_legacy=False,
+             item_id=reviewed_gate_id,
          ), {}, False),
         ("a re-share-requested disposition is not terminal",
          lambda _item: validate_capture_gate_receipt(
              gate_payloads[reviewed_gate_id],
-             reviewed("re-share-requested", 0),
+             reviewed(
+                 "re-share-requested",
+                 0,
+                 bound_to=gate_payloads[reviewed_gate_id],
+             ),
              allow_legacy=False,
+             item_id=reviewed_gate_id,
          ), {}, False),
         ("a mixed review passes only with explicit zero unresolved findings",
          lambda _item: validate_capture_gate_receipt(
              gate_payloads[reviewed_gate_id],
-             reviewed("mixed-reviewed", 0),
+             reviewed(
+                 "mixed-reviewed",
+                 0,
+                 bound_to=gate_payloads[reviewed_gate_id],
+             ),
              allow_legacy=False,
+             item_id=reviewed_gate_id,
          ), {}, True),
         ("a mixed review with one unresolved finding fails",
          lambda _item: validate_capture_gate_receipt(
              gate_payloads[reviewed_gate_id],
-             reviewed("mixed-reviewed", 1),
+             reviewed(
+                 "mixed-reviewed",
+                 1,
+                 bound_to=gate_payloads[reviewed_gate_id],
+             ),
              allow_legacy=False,
+             item_id=reviewed_gate_id,
          ), {}, False),
+        ("a new canonical id cannot be backdated into legacy capture bypass",
+         check_capture_gates, ref(
+             "ref-9999-01-01-backdated-bypass", old, capture={}
+         ), False),
+        ("Slack closeout without persisted receipts fails",
+         check_step11_reply, ref(
+             "ref-9999-01-01-closeout-missing",
+             new,
+             sourceMessageTs="1.000001",
+         ), False),
+        ("Slack closeout passes with finalizer receipts",
+         check_step11_reply, ref(
+             "ref-9999-01-01-closeout-complete",
+             new,
+             sourceMessageTs="1.000001",
+             stages={
+                 "slackReplyTs": "1.000002",
+                 "shipReaction": True,
+             },
+         ), True),
+        ("curriculum closeout also requires the developer summary receipt",
+         check_step11_reply, ref(
+             "cur-9999-01-01-closeout-missing-dev",
+             new,
+             sourceMessageTs="1.000001",
+             stages={
+                 "slackReplyTs": "1.000002",
+                 "shipReaction": True,
+             },
+         ), False),
+        ("curriculum closeout passes with all finalizer receipts",
+         check_step11_reply, ref(
+             "cur-9999-01-01-closeout-complete",
+             new,
+             sourceMessageTs="1.000001",
+             stages={
+                 "slackReplyTs": "1.000002",
+                 "devSummaryTs": "2.000001",
+                 "shipReaction": True,
+             },
+         ), True),
+        ("default verification remains pre-closeout for the finalizer",
+         lambda _item: (
+             all(
+                 fn is not check_step11_reply
+                 for _name, fn in verification_checks(
+                     "ref-9999-01-01-pre-closeout", require_closeout=False
+                 )
+             ),
+             "default check roster excludes Slack closeout",
+         ), {}, True),
+        ("explicit closeout verification adds the receipt gate",
+         lambda _item: (
+             any(
+                 fn is check_step11_reply
+                 for _name, fn in verification_checks(
+                     "ref-9999-01-01-full-closeout", require_closeout=True
+                 )
+             ),
+             "explicit check roster includes Slack closeout",
+         ), {}, True),
         ("legacy ref without aboutness softens",
          check_aboutness, ref("ref-2026-07-01-x", old), True),
         ("new ref without aboutness fails",
@@ -1597,11 +2344,15 @@ def self_test() -> int:
 
 
 def main():
-    args = [a for a in sys.argv[1:] if a != "--no-fetch"]
+    flags = {"--no-fetch", "--require-closeout", "--require-portable-source"}
+    args = [a for a in sys.argv[1:] if a not in flags]
     no_fetch = "--no-fetch" in sys.argv
+    require_closeout = "--require-closeout" in sys.argv
+    require_portable_source = "--require-portable-source" in sys.argv
     if not args:
         print("Usage: verify-ingestion.py <ref-id|cur-id> | --all | --recent <days> "
-              "| --regen-index | --self-test [--no-fetch]")
+              "| --regen-index | --self-test [--no-fetch] [--require-closeout] "
+              "[--require-portable-source]")
         sys.exit(1)
 
     if args[0] == "--regen-index":
@@ -1622,7 +2373,12 @@ def main():
         passed = 0
         for item_id in ids:
             print(f"\n{'=' * 60}\nChecking: {item_id}")
-            if verify_one(item_id, fail_counts=fail_counts):
+            if verify_one(
+                item_id,
+                fail_counts=fail_counts,
+                require_closeout=require_closeout,
+                require_portable_source=require_portable_source,
+            ):
                 passed += 1
         print(f"\n{'=' * 60}")
         print(f"TOTAL: {len(ids)} | PASSED: {passed} | FAILED: {len(ids) - passed}")
@@ -1646,13 +2402,25 @@ def main():
         passed = 0
         for item_id in recent:
             print(f"\n{'=' * 60}\nChecking: {item_id}")
-            if verify_one(item_id):
+            if verify_one(
+                item_id,
+                require_closeout=require_closeout,
+                require_portable_source=require_portable_source,
+            ):
                 passed += 1
         print(f"\n{'=' * 60}")
         print(f"RECENT ({days}d): {len(recent)} | PASSED: {passed} | FAILED: {len(recent) - passed}")
         sys.exit(0 if passed == len(recent) else 1)
 
-    sys.exit(0 if verify_one(args[0]) else 1)
+    sys.exit(
+        0
+        if verify_one(
+            args[0],
+            require_closeout=require_closeout,
+            require_portable_source=require_portable_source,
+        )
+        else 1
+    )
 
 
 if __name__ == "__main__":

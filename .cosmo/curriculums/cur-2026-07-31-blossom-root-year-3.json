@@ -404,9 +404,23 @@
       "findingsSha256": "9bf860e6c797d23b970404fd18a8dcf9db146584e823133028d79b26cd0cdff8",
       "disposition": "accepted-source-artifact",
       "reviewedAt": "2026-08-02",
-      "note": "All 79 findings were reviewed against the 22 exact originals. The repeated pages, blank separators, intentionally reused activity pages, and softer illustrated pages are publisher structure rather than capture loss; all 1,152 source pages remain represented and no re-share is required."
+      "note": "All 79 findings were reviewed against the 22 exact originals. The repeated pages, blank separators, intentionally reused activity pages, and softer illustrated pages are publisher structure rather than capture loss; all 1,152 source pages remain represented and no re-share is required.",
+      "captureBinding": {
+        "version": 1,
+        "recordId": "cur-2026-07-31-blossom-root-year-3",
+        "sourceReceiptSha256": "6b44872ca13f73ec9ac9055686011a455ffcf9ca6f973695fb334c2f610b1b7c",
+        "pageCount": 1152,
+        "expectedPageCount": 1152
+      }
     },
     "expectedPageCount": 1152,
+    "reviewBinding": {
+      "version": 1,
+      "recordId": "cur-2026-07-31-blossom-root-year-3",
+      "sourceReceiptSha256": "6b44872ca13f73ec9ac9055686011a455ffcf9ca6f973695fb334c2f610b1b7c",
+      "pageCount": 1152,
+      "expectedPageCount": 1152
+    },
     "sourceReceipt": {
       "version": 1,
       "recordId": "cur-2026-07-31-blossom-root-year-3",

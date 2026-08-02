@@ -173,11 +173,12 @@ def download_one(token: str, ts: str, file: dict, trusted: dict[str, dict]) -> d
             "skipped": True,
         }
     final.unlink(missing_ok=True)
-
-    if partial.exists() and (
-        not expected or partial.stat().st_size >= expected
-    ):
-        partial.unlink()
+    # A partial from an earlier process has no byte identity, ETag, or other
+    # receipt binding it to this Slack object. Starting from it could splice
+    # stale bytes onto a valid Range response and still hit the expected size.
+    # Retries within this call may resume the prefix they just downloaded, but
+    # every new invocation starts from Slack byte zero.
+    partial.unlink(missing_ok=True)
     last_error = None
     for attempt in range(1, 6):
         offset = partial.stat().st_size if partial.exists() else 0

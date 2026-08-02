@@ -44,6 +44,7 @@ class FakeSlack:
                 "user": self.posted_user,
             }
             if params.get("thread_ts"):
+                message["thread_ts"] = params["thread_ts"]
                 self.thread_messages.append(message)
             else:
                 self.channel_messages.append(message)
@@ -58,6 +59,18 @@ class FakeSlack:
 
 
 class FinalizeWaveTests(unittest.TestCase):
+    @staticmethod
+    def blob_receipt(size: int = 10) -> dict:
+        return {
+            "blobReadBackVerified": True,
+            "blobReadBackVerifiedAt": "2026-08-02T01:02:03+00:00",
+            "blobReadBackSize": size,
+            "blobReadBackSha256": "a" * 64,
+            "blobReadBackContentType": "application/pdf",
+            "blobReadBackReceiptVersion": MODULE.BLOB_READ_BACK_RECEIPT_VERSION,
+            "blobReadBackIdentity": f"{'a' * 64}:application/pdf",
+        }
+
     @staticmethod
     def source(
         timestamp: str,
@@ -88,6 +101,8 @@ class FinalizeWaveTests(unittest.TestCase):
                 "blobReadBackSize": size,
                 "blobReadBackSha256": "a" * 64,
                 "blobReadBackContentType": "application/pdf",
+                "blobReadBackReceiptVersion": MODULE.BLOB_READ_BACK_RECEIPT_VERSION,
+                "blobReadBackIdentity": f"{'a' * 64}:application/pdf",
             })
         return source
 
@@ -101,6 +116,18 @@ class FinalizeWaveTests(unittest.TestCase):
                 MODULE.slack_api("chat.postMessage", {"channel": "C", "text": "hello"})
 
         self.assertEqual(opener.call_count, 1)
+
+    def test_ingestion_skills_require_asserted_counts_and_verified_closeout(self):
+        repo = SCRIPT.parents[2]
+        for relative in (
+            ".agents/skills/reference-ingestion/SKILL.md",
+            ".agents/skills/curriculum-ingestion/SKILL.md",
+        ):
+            procedure = (repo / relative).read_text()
+            with self.subTest(skill=relative):
+                self.assertIn("--expect-pages <independently-counted-N>", procedure)
+                self.assertIn("finalize-ingestion-wave.py", procedure)
+                self.assertIn("--require-closeout", procedure)
 
     def test_idempotent_slack_read_still_retries_transport_failure(self):
         with (
@@ -185,6 +212,7 @@ class FinalizeWaveTests(unittest.TestCase):
             second = self.source("2.0", "F2", size=20)
             second["sha256"] = "b" * 64
             second["blobReadBackSha256"] = "b" * 64
+            second["blobReadBackIdentity"] = f"{'b' * 64}:application/pdf"
             record["sourceFiles"].append(second)
             path.write_text(json.dumps(record))
             with patch.object(MODULE, "record_path", return_value=path):
@@ -213,6 +241,59 @@ class FinalizeWaveTests(unittest.TestCase):
             with patch.object(MODULE, "record_path", return_value=path):
                 with self.assertRaisesRegex(MODULE.FinalizeError, "Slack file occurrence.*F2"):
                     MODULE.verify_record_slack_identity(row, expected)
+
+    def test_nonretained_covered_message_must_have_no_attachments(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "record.json"
+            path.write_text(json.dumps({
+                "id": "ref-1",
+                "sourceMessageTs": "1.0",
+                "coversMessageTs": ["2.0"],
+                "sourceFiles": [self.source("2.0", "F2")],
+            }))
+            row = {
+                "id": "ref-1",
+                "kind": "reference",
+                "sourceMessageTs": "1.0",
+                "coversMessageTs": ["2.0"],
+                "coveredTs": ["1.0", "2.0"],
+                "retainedTs": ["2.0"],
+            }
+            expected = {
+                "1.0": [{"id": "F1", "size": 10, "name": "missed.pdf"}],
+                "2.0": [{"id": "F2", "size": 10, "name": "kept.pdf"}],
+            }
+            with patch.object(MODULE, "record_path", return_value=path):
+                with self.assertRaisesRegex(
+                    MODULE.FinalizeError, "non-retained.*attachments"
+                ):
+                    MODULE.verify_record_slack_identity(row, expected)
+
+    def test_nonretained_text_only_message_is_proven_empty_and_allowed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "record.json"
+            path.write_text(json.dumps({
+                "id": "ref-1",
+                "sourceMessageTs": "1.0",
+                "coversMessageTs": ["2.0"],
+                "sourceFiles": [self.source("2.0", "F2")],
+            }))
+            row = {
+                "id": "ref-1",
+                "kind": "reference",
+                "sourceMessageTs": "1.0",
+                "coversMessageTs": ["2.0"],
+                "coveredTs": ["1.0", "2.0"],
+                "retainedTs": ["2.0"],
+            }
+            expected = {
+                "1.0": [],
+                "2.0": [{"id": "F2", "size": 10, "name": "kept.pdf"}],
+            }
+            with patch.object(MODULE, "record_path", return_value=path):
+                self.assertEqual(
+                    MODULE.verify_record_slack_identity(row, expected), path
+                )
 
     def test_blob_source_url_requires_https_pinned_host_and_exact_record_path(self):
         row = {
@@ -263,10 +344,94 @@ class FinalizeWaveTests(unittest.TestCase):
             expected = {"1.0": [{"id": "F1", "size": 10, "name": "one.pdf"}]}
             with (
                 patch.object(MODULE, "record_path", return_value=path),
-                patch.object(MODULE, "verify_blob_source_read_back") as read_back,
+                patch.object(
+                    MODULE,
+                    "verify_blob_source_read_back",
+                    return_value=self.blob_receipt(),
+                ) as read_back,
             ):
-                self.assertEqual(MODULE.verify_record_slack_identity(row, expected), path)
-            read_back.assert_called_once_with("ref-1", source)
+                self.assertEqual(
+                    MODULE.verify_record_slack_identity(
+                        row, expected, persist_blob_receipts=True
+                    ),
+                    path,
+                )
+            read_back.assert_called_once()
+            persisted = json.loads(path.read_text())
+            [persisted_source] = persisted["sourceFiles"]
+            self.assertTrue(MODULE.has_bound_read_back_receipt(persisted_source, 10))
+            self.assertEqual(persisted_source["slackFileId"], "F1")
+
+    def test_legacy_unversioned_receipt_performs_fresh_blob_read_back(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "record.json"
+            source = self.source("1.0", "F1")
+            source.pop("blobReadBackReceiptVersion")
+            source.pop("blobReadBackIdentity")
+            path.write_text(json.dumps({
+                "id": "ref-1",
+                "sourceMessageTs": "1.0",
+                "coversMessageTs": [],
+                "sourceFiles": [source],
+            }))
+            row = {
+                "id": "ref-1",
+                "kind": "reference",
+                "sourceMessageTs": "1.0",
+                "coversMessageTs": [],
+                "retainedTs": ["1.0"],
+            }
+            expected = {"1.0": [{"id": "F1", "size": 10, "name": "one.pdf"}]}
+            with (
+                patch.object(MODULE, "record_path", return_value=path),
+                patch.object(
+                    MODULE,
+                    "verify_blob_source_read_back",
+                    return_value=self.blob_receipt(),
+                ) as read_back,
+            ):
+                self.assertEqual(
+                    MODULE.verify_record_slack_identity(
+                        row, expected, persist_blob_receipts=True
+                    ),
+                    path,
+                )
+            read_back.assert_called_once()
+            [persisted_source] = json.loads(path.read_text())["sourceFiles"]
+            self.assertTrue(MODULE.has_bound_read_back_receipt(persisted_source, 10))
+
+    def test_dry_run_live_checks_missing_receipt_without_mutating_record(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "record.json"
+            record = {
+                "id": "ref-1",
+                "sourceMessageTs": "1.0",
+                "coversMessageTs": [],
+                "sourceFiles": [self.source("1.0", "F1", receipt=False)],
+            }
+            original = json.dumps(record)
+            path.write_text(original)
+            row = {
+                "id": "ref-1",
+                "kind": "reference",
+                "sourceMessageTs": "1.0",
+                "coversMessageTs": [],
+                "retainedTs": ["1.0"],
+            }
+            expected = {"1.0": [{"id": "F1", "size": 10, "name": "one.pdf"}]}
+
+            with (
+                patch.object(MODULE, "record_path", return_value=path),
+                patch.object(
+                    MODULE,
+                    "verify_blob_source_read_back",
+                    return_value=self.blob_receipt(),
+                ) as read_back,
+            ):
+                MODULE.verify_record_slack_identity(row, expected)
+
+            read_back.assert_called_once()
+            self.assertEqual(path.read_text(), original)
 
     def test_slack_file_expectations_read_every_attachment_from_exact_messages(self):
         fake = FakeSlack()
@@ -284,17 +449,28 @@ class FinalizeWaveTests(unittest.TestCase):
         self.assertEqual([file["id"] for file in expected["1.0"]], ["F1"])
         self.assertEqual([file["id"] for file in expected["2.0"]], ["F2", "F3"])
 
+    def test_slack_file_expectations_retains_exact_text_only_messages(self):
+        fake = FakeSlack()
+        fake.messages["2.0"] = {"ts": "2.0", "reactions": []}
+
+        expected = MODULE.slack_file_expectations(["1.0", "2.0"], fake)
+
+        self.assertEqual(expected["2.0"], [])
+
     def test_finalize_row_passes_live_slack_file_inventory_to_identity_check(self):
         row = {
             "id": "ref-1",
             "kind": "reference",
             "sourceMessageTs": "1.0",
-            "coversMessageTs": [],
-            "retainedTs": ["1.0"],
-            "coveredTs": ["1.0"],
+            "coversMessageTs": ["2.0"],
+            "retainedTs": ["2.0"],
+            "coveredTs": ["1.0", "2.0"],
             "threadReply": "Captured.\n\nIngestion record: `ref-1`",
         }
-        expected = {"1.0": [{"id": "F1", "size": 10, "name": "one.pdf"}]}
+        expected = {
+            "1.0": [],
+            "2.0": [{"id": "F2", "size": 10, "name": "two.pdf"}],
+        }
         fake = FakeSlack()
         with (
             patch.object(MODULE, "slack_file_expectations", return_value=expected) as inventory,
@@ -305,8 +481,185 @@ class FinalizeWaveTests(unittest.TestCase):
         ):
             MODULE.finalize_row(row, "BOT", apply=False, api_call=fake)
 
-        inventory.assert_called_once_with(["1.0"], fake)
-        identity.assert_called_once_with(row, expected)
+        inventory.assert_called_once_with(["1.0", "2.0"], fake)
+        identity.assert_called_once_with(
+            row, expected, persist_blob_receipts=False
+        )
+
+    def test_apply_aborts_when_post_closeout_verifier_fails(self):
+        row = {
+            "id": "ref-1",
+            "kind": "reference",
+            "sourceMessageTs": "1.0",
+            "coversMessageTs": [],
+            "retainedTs": ["1.0"],
+            "coveredTs": ["1.0"],
+            "threadReply": "Captured.\n\nIngestion record: `ref-1`",
+        }
+        fake = FakeSlack()
+        verifier_calls = []
+
+        def verifier(
+            record_id, *, require_closeout=False, require_portable_source=False
+        ):
+            verifier_calls.append(
+                (record_id, require_closeout, require_portable_source)
+            )
+            if require_closeout:
+                raise MODULE.FinalizeError("authoritative closeout verification failed")
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "record.json"
+            path.write_text(json.dumps({"id": "ref-1", "stages": {}}))
+            with (
+                patch.object(
+                    MODULE,
+                    "slack_file_expectations",
+                    return_value={"1.0": [{"id": "F1", "size": 10, "name": "source.pdf"}]},
+                ),
+                patch.object(MODULE, "verify_record_slack_identity", return_value=path),
+                patch.object(MODULE, "run_verifier", side_effect=verifier),
+            ):
+                with self.assertRaisesRegex(
+                    MODULE.FinalizeError,
+                    "authoritative closeout verification failed",
+                ):
+                    MODULE.finalize_row(row, "BOT", apply=True, api_call=fake)
+
+            self.assertEqual(
+                verifier_calls,
+                [("ref-1", False, True), ("ref-1", True, True)],
+            )
+            stages = json.loads(path.read_text())["stages"]
+            self.assertTrue(stages["slackReplyTs"])
+            self.assertTrue(stages["shipReaction"])
+
+    def test_apply_persists_blob_proof_before_verification_without_local_file(self):
+        row = {
+            "id": "ref-1",
+            "kind": "reference",
+            "sourceMessageTs": "1.0",
+            "coversMessageTs": [],
+            "retainedTs": ["1.0"],
+            "coveredTs": ["1.0"],
+            "threadReply": "Captured.\n\nIngestion record: `ref-1`",
+        }
+        fake = FakeSlack()
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "record.json"
+            source = self.source("1.0", "F1", receipt=False)
+            source["localPath"] = "ignored-capture/source.pdf"
+            path.write_text(json.dumps({
+                "id": "ref-1",
+                "sourceMessageTs": "1.0",
+                "coversMessageTs": [],
+                "sourceFiles": [source],
+                "stages": {},
+            }))
+            verifier_calls = []
+
+            def verifier(
+                record_id, *, require_closeout=False, require_portable_source=False
+            ):
+                persisted = json.loads(path.read_text())
+                [persisted_source] = persisted["sourceFiles"]
+                self.assertTrue(
+                    MODULE.has_bound_read_back_receipt(persisted_source, 10)
+                )
+                verifier_calls.append(
+                    (record_id, require_closeout, require_portable_source)
+                )
+                self.assertTrue(require_portable_source)
+                if not require_closeout:
+                    persisted_source.pop("localPath", None)
+                    MODULE.atomic_json_write(path, persisted)
+                else:
+                    self.assertNotIn("localPath", persisted_source)
+
+            with (
+                patch.object(MODULE, "record_path", return_value=path),
+                patch.object(
+                    MODULE,
+                    "verify_blob_source_read_back",
+                    return_value=self.blob_receipt(),
+                ),
+                patch.object(MODULE, "run_verifier", side_effect=verifier),
+            ):
+                result = MODULE.finalize_row(row, "BOT", apply=True, api_call=fake)
+
+            self.assertTrue(result["complete"])
+            self.assertEqual(
+                verifier_calls,
+                [("ref-1", False, True), ("ref-1", True, True)],
+            )
+
+    def test_apply_blocks_slack_when_historical_source_is_not_portable(self):
+        row = {
+            "id": "ref-1",
+            "kind": "reference",
+            "sourceMessageTs": "2.0",
+            "coversMessageTs": [],
+            "retainedTs": ["2.0"],
+            "coveredTs": ["2.0"],
+            "threadReply": "Captured.\n\nIngestion record: `ref-1`",
+        }
+        current = self.source("2.0", "F2", receipt=False)
+        historical = self.source("1.0", "F1", receipt=False)
+        current["duplicateOf"] = {
+            "slackMessageTs": "1.0",
+            "filename": historical["filename"],
+        }
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "record.json"
+            path.write_text(json.dumps({
+                "id": "ref-1",
+                "sourceMessageTs": "2.0",
+                "coversMessageTs": [],
+                "sourceFiles": [historical, current],
+                "stages": {},
+            }))
+
+            def verifier(
+                _record_id, *, require_closeout=False, require_portable_source=False
+            ):
+                self.assertFalse(require_closeout)
+                self.assertTrue(require_portable_source)
+                persisted_sources = json.loads(path.read_text())["sourceFiles"]
+                self.assertFalse(
+                    MODULE.has_bound_read_back_receipt(persisted_sources[0], 10)
+                )
+                self.assertTrue(
+                    MODULE.has_bound_read_back_receipt(persisted_sources[1], 10)
+                )
+                raise MODULE.FinalizeError("historical source is not portable")
+
+            with (
+                patch.object(
+                    MODULE,
+                    "slack_file_expectations",
+                    return_value={
+                        "2.0": [{"id": "F2", "size": 10, "name": "current.pdf"}]
+                    },
+                ),
+                patch.object(MODULE, "record_path", return_value=path),
+                patch.object(
+                    MODULE,
+                    "verify_blob_source_read_back",
+                    return_value=self.blob_receipt(),
+                ),
+                patch.object(MODULE, "run_verifier", side_effect=verifier),
+                patch.object(MODULE, "ensure_message") as ensure_message,
+                patch.object(MODULE, "ensure_ship_reaction") as ensure_reaction,
+            ):
+                with self.assertRaisesRegex(
+                    MODULE.FinalizeError, "historical source is not portable"
+                ):
+                    MODULE.finalize_row(row, "BOT", apply=True)
+
+            ensure_message.assert_not_called()
+            ensure_reaction.assert_not_called()
 
     def test_capture_timestamps_narrow_retention_to_attachment_messages(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -387,7 +740,9 @@ class FinalizeWaveTests(unittest.TestCase):
     def test_bot_marker_is_reused(self):
         fake = FakeSlack()
         text = "Captured and learned.\n\nIngestion record: `ref-1`"
-        fake.thread_messages.append({"ts": "9", "text": text, "user": "BOT"})
+        fake.thread_messages.append({
+            "ts": "9", "thread_ts": "1.0", "text": text, "user": "BOT"
+        })
 
         existing = MODULE.ensure_message(
             channel="C", text=text, record_id="ref-1", bot_user_id="BOT",
@@ -397,12 +752,26 @@ class FinalizeWaveTests(unittest.TestCase):
         self.assertEqual(existing, "9")
         self.assertEqual(len(fake.thread_messages), 1)
 
+    def test_thread_root_cannot_masquerade_as_existing_acknowledgment(self):
+        fake = FakeSlack()
+        text = "Captured and learned.\n\nIngestion record: `ref-1`"
+        fake.thread_messages.append({"ts": "1.0", "text": text, "user": "BOT"})
+
+        posted = MODULE.ensure_message(
+            channel="C", text=text, record_id="ref-1", bot_user_id="BOT",
+            thread_ts="1.0", apply=True, api_call=fake,
+        )
+
+        self.assertEqual(posted, "11")
+        self.assertEqual(len(fake.thread_messages), 2)
+        self.assertEqual(fake.thread_messages[-1]["thread_ts"], "1.0")
+
     def test_duplicate_bot_markers_are_rejected(self):
         fake = FakeSlack()
         text = "Captured and learned.\n\nIngestion record: `ref-1`"
         fake.thread_messages.extend([
-            {"ts": "8", "text": text, "user": "BOT"},
-            {"ts": "9", "text": text, "user": "BOT"},
+            {"ts": "8", "thread_ts": "1.0", "text": text, "user": "BOT"},
+            {"ts": "9", "thread_ts": "1.0", "text": text, "user": "BOT"},
         ])
 
         with self.assertRaisesRegex(MODULE.FinalizeError, "duplicate bot-owned"):
@@ -427,6 +796,7 @@ class FinalizeWaveTests(unittest.TestCase):
         fake = FakeSlack()
         fake.thread_messages.append({
             "ts": "9",
+            "thread_ts": "1.0",
             "text": "Old copy.\n\nIngestion record: `ref-1`",
             "user": "BOT",
         })
@@ -451,6 +821,21 @@ class FinalizeWaveTests(unittest.TestCase):
             "C", "1.0", "BOT", apply=True, api_call=fake,
         ))
         self.assertEqual(len(fake.messages["1.0"]["reactions"]), 1)
+
+    def test_reaction_readback_must_match_the_requested_message(self):
+        def wrong_message(_method, _params):
+            return {
+                "ok": True,
+                "message": {
+                    "ts": "different-message",
+                    "reactions": [{"name": "ship", "users": ["BOT"]}],
+                },
+            }
+
+        with self.assertRaisesRegex(MODULE.FinalizeError, "exact Slack message"):
+            MODULE.ensure_ship_reaction(
+                "C", "wanted-message", "BOT", apply=True, api_call=wrong_message,
+            )
 
     def test_receipts_round_trip_without_losing_record_content(self):
         with tempfile.TemporaryDirectory() as directory:

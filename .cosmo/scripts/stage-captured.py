@@ -46,6 +46,7 @@ UPLOAD_STATE = COSMO / "inspo-files" / "slack" / "upload-state.json"
 LEDGER = COSMO / "ingestion-ledger.json"
 UPLOAD = COSMO / "scripts" / "blob-upload.sh"
 EXPECTED_BLOB_HOST = "pkvvudjdhxk33dig.public.blob.vercel-storage.com"
+BLOB_READ_BACK_RECEIPT_VERSION = "sha256-content-type-v1"
 CHUNK_BYTES = 1 << 20
 HTTPS_CONTEXT = ssl.create_default_context(cafile=certifi.where() if certifi else None)
 
@@ -91,7 +92,15 @@ def content_type(item: dict) -> str:
     return mimetypes.guess_type(item["name"])[0] or "application/octet-stream"
 
 
+def normalized_content_type(item: dict) -> str:
+    return content_type(item).split(";", 1)[0].strip().lower()
+
+
 def upload_key(record_id: str, item: dict) -> str:
+    return f"{record_id}:{item['sha256']}:{normalized_content_type(item)}"
+
+
+def legacy_upload_key(record_id: str, item: dict) -> str:
     return f"{record_id}:{item['sha256']}"
 
 
@@ -194,26 +203,28 @@ def stored_name(item: dict) -> str:
 def upload_one(record_id: str, item: dict, state: dict) -> tuple[str, str, bool]:
     key = upload_key(record_id, item)
     original = verified_capture(item)
-    existing = state.get(key)
-    if isinstance(existing, str) and existing.startswith("https://"):
-        try:
-            verify_blob_read_back(
-                existing,
-                int(item["size"]),
-                str(item["sha256"]),
-                content_type(item),
-            )
-            return key, existing, False
-        except RuntimeError:
-            # Repair a stale, missing, overwritten, or wrongly typed cached
-            # object from the already hash-verified local capture below.
-            pass
+    blob_content_type = normalized_content_type(item)
+    for state_key in (key, legacy_upload_key(record_id, item)):
+        existing = state.get(state_key)
+        if isinstance(existing, str) and existing.startswith("https://"):
+            try:
+                verify_blob_read_back(
+                    existing,
+                    int(item["size"]),
+                    str(item["sha256"]),
+                    blob_content_type,
+                )
+                return key, existing, False
+            except RuntimeError:
+                # Repair a stale, missing, overwritten, or wrongly typed cached
+                # object from the already hash-verified local capture below.
+                pass
 
     with tempfile.TemporaryDirectory(prefix="homa-stage-") as temporary:
         linked = Path(temporary) / stored_name(item)
         os.link(original, linked)
         result = subprocess.run(
-            ["bash", str(UPLOAD), record_id, str(linked), content_type(item)],
+            ["bash", str(UPLOAD), record_id, str(linked), blob_content_type],
             cwd=REPO,
             capture_output=True,
             text=True,
@@ -227,7 +238,7 @@ def upload_one(record_id: str, item: dict, state: dict) -> tuple[str, str, bool]
         detail = result.stderr.strip() or result.stdout.strip() or "no Blob URL returned"
         raise RuntimeError(f"{record_id} {item['name']}: {detail}")
     verify_blob_read_back(
-        url, int(item["size"]), str(item["sha256"]), content_type(item)
+        url, int(item["size"]), str(item["sha256"]), blob_content_type
     )
     return key, url, True
 
@@ -266,6 +277,7 @@ def validate_plan_records(plan: object) -> list[dict]:
         raise RuntimeError(f"plan contains duplicate record IDs: {duplicates}")
     timestamp_pattern = re.compile(r"^\d+\.\d+$")
     id_pattern = re.compile(r"^(ref|cur)-[a-z0-9][a-z0-9-]*$")
+    timestamp_owner: dict[str, str] = {}
     for record in plan:
         record_id = record["id"]
         kind = record.get("kind")
@@ -308,6 +320,13 @@ def validate_plan_records(plan: object) -> list[dict]:
             raise RuntimeError(
                 f"{record_id} captureMessageTs fall outside declared coverage: {outside}"
             )
+        for timestamp in captured:
+            owner = timestamp_owner.get(timestamp)
+            if owner is not None:
+                raise RuntimeError(
+                    f"Slack timestamp {timestamp} is assigned to both {owner} and {record_id}"
+                )
+            timestamp_owner[timestamp] = record_id
     return plan
 
 
@@ -406,6 +425,7 @@ def write_stub(record: dict, items: list[dict], state: dict, rows: dict[str, dic
             raise RuntimeError(f"{record['id']} captured file has no Slack timestamp")
         canonical = seen_hashes.get(item["sha256"])
         url = state[upload_key(record["id"], item)]
+        blob_content_type = normalized_content_type(item)
         source = {
             "filename": item["name"],
             "slackFileId": file_id,
@@ -413,7 +433,7 @@ def write_stub(record: dict, items: list[dict], state: dict, rows: dict[str, dic
             "localPath": item["localPath"],
             "size": item["size"],
             "sha256": item["sha256"],
-            "contentType": content_type(item),
+            "contentType": blob_content_type,
             "blobUrl": url,
             "slackDeclaredSize": item["size"],
             "slackSizeVerified": True,
@@ -421,7 +441,9 @@ def write_stub(record: dict, items: list[dict], state: dict, rows: dict[str, dic
             "blobReadBackVerifiedAt": receipt_at,
             "blobReadBackSize": item["size"],
             "blobReadBackSha256": item["sha256"],
-            "blobReadBackContentType": content_type(item),
+            "blobReadBackContentType": blob_content_type,
+            "blobReadBackReceiptVersion": BLOB_READ_BACK_RECEIPT_VERSION,
+            "blobReadBackIdentity": f"{item['sha256']}:{blob_content_type}",
         }
         same_occurrence = bool(canonical) and (
             (
@@ -546,8 +568,17 @@ def main() -> int:
     for record in plan:
         items = [item for ts in capture_timestamps(record) for item in files_by_ts[ts]]
         record_items[record["id"]] = items
-        unique = len({item["sha256"] for item in items})
-        print(f"{record['id']}: {len(items)} file(s), {unique} unique hash(es)")
+        unique_hashes = len({item["sha256"] for item in items})
+        unique_uploads = len(
+            {
+                (item["sha256"], normalized_content_type(item))
+                for item in items
+            }
+        )
+        print(
+            f"{record['id']}: {len(items)} file(s), {unique_hashes} unique hash(es), "
+            f"{unique_uploads} Blob representation(s)"
+        )
 
     if args.dry_run:
         return 0
@@ -555,10 +586,11 @@ def main() -> int:
     futures = {}
     with ThreadPoolExecutor(max_workers=max(1, args.jobs)) as pool:
         for record in plan:
-            unique_by_hash: dict[str, dict] = {}
+            unique_by_upload: dict[tuple[str, str], dict] = {}
             for item in record_items[record["id"]]:
-                unique_by_hash.setdefault(item["sha256"], item)
-            for item in unique_by_hash.values():
+                identity = (str(item["sha256"]), normalized_content_type(item))
+                unique_by_upload.setdefault(identity, item)
+            for item in unique_by_upload.values():
                 future = pool.submit(upload_one, record["id"], item, state)
                 futures[future] = (record["id"], item["name"])
 

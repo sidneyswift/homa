@@ -2,13 +2,88 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  blobEtagsMatch,
+  blobPathnamesMatch,
+  blobReportedSizeMatches,
   chooseZipPrintableEntry,
+  inspectLibraryCoverJpeg,
   isSupportedLibraryCoverSource,
+  libraryCoverReceiptMatches,
   parseUnzipList,
   renderLibraryCover,
   renderPptxFirstSlide,
+  retryLibraryCoverReadBack,
   selectLibraryCoverSource,
+  shouldPreserveLegacyLibraryCover,
 } from "./library-cover-source";
+
+describe("blobPathnamesMatch", () => {
+  it("accepts Vercel get pathnames whose spaces are URL-encoded", () => {
+    assert.equal(
+      blobPathnamesMatch(
+        "inspo/ref-a/Atmosphere Unit Activities.pdf",
+        "inspo/ref-a/Atmosphere%20Unit%20Activities.pdf",
+      ),
+      true,
+    );
+  });
+
+  it("rejects malformed or genuinely different read-back paths", () => {
+    assert.equal(blobPathnamesMatch("inspo/ref-a/source.pdf", "%E0%A4%A"), false);
+    assert.equal(
+      blobPathnamesMatch("inspo/ref-a/source.pdf", "inspo/ref-b/source.pdf"),
+      false,
+    );
+  });
+});
+
+describe("Blob read-back metadata normalization", () => {
+  it("matches weak and strong forms of the same ETag", () => {
+    assert.equal(blobEtagsMatch('"abc"', 'W/"abc"'), true);
+    assert.equal(blobEtagsMatch('"abc"', '"def"'), false);
+    assert.equal(blobEtagsMatch(undefined, undefined), false);
+  });
+
+  it("accepts zero as an unavailable reported size but rejects other drift", () => {
+    assert.equal(blobReportedSizeMatches(1069, 0), true);
+    assert.equal(blobReportedSizeMatches(1069, 1069), true);
+    assert.equal(blobReportedSizeMatches(1069, 1068), false);
+  });
+});
+
+describe("retryLibraryCoverReadBack", () => {
+  it("retries transient provider reads with bounded backoff", async () => {
+    let calls = 0;
+    const waits: number[] = [];
+    const value = await retryLibraryCoverReadBack(
+      async () => {
+        calls += 1;
+        if (calls < 3) throw new Error("not visible yet");
+        return "verified";
+      },
+      {
+        attempts: 4,
+        wait: async (milliseconds) => {
+          waits.push(milliseconds);
+        },
+      },
+    );
+    assert.equal(value, "verified");
+    assert.deepEqual(waits, [250, 500]);
+  });
+
+  it("fails with the final provider error after exhausting attempts", async () => {
+    await assert.rejects(
+      retryLibraryCoverReadBack(
+        async () => {
+          throw new Error("still missing");
+        },
+        { attempts: 2, wait: async () => undefined },
+      ),
+      /still missing/,
+    );
+  });
+});
 
 describe("selectLibraryCoverSource", () => {
   const originals = [
@@ -112,6 +187,90 @@ describe("selectLibraryCoverSource", () => {
           "cur-notes",
         ),
       /no renderable live inspo objects found for record cur-notes/i,
+    );
+  });
+});
+
+describe("library cover receipts", () => {
+  const source = {
+    pathname: "inspo/ref-a/source.pdf",
+    url: "https://blob.example/inspo/ref-a/source.pdf",
+    size: 100,
+    etag: "source-v1",
+  };
+  const cover = {
+    pathname: "inspo-covers/ref-a.jpg",
+    url: "https://blob.example/inspo-covers/ref-a.jpg",
+    size: 50,
+    etag: "cover-v1",
+  };
+  const receipt = {
+    version: 1 as const,
+    recordId: "ref-a",
+    source: { ...source, etag: "source-v1" },
+    cover: { ...cover, etag: "cover-v1", sha256: "a".repeat(64) },
+    renderedFrom: "source.pdf",
+  };
+
+  it("binds a cover to the exact live source and cover objects", () => {
+    assert.equal(libraryCoverReceiptMatches(receipt, "ref-a", source, cover), true);
+    assert.equal(
+      libraryCoverReceiptMatches(
+        receipt,
+        "ref-a",
+        { ...source, etag: "source-v2" },
+        cover,
+      ),
+      false,
+    );
+    assert.equal(
+      libraryCoverReceiptMatches(
+        receipt,
+        "ref-a",
+        source,
+        { ...cover, etag: "cover-corrupt" },
+      ),
+      false,
+    );
+  });
+
+  it("rejects empty or non-JPEG cover bytes", async () => {
+    await assert.rejects(inspectLibraryCoverJpeg(Buffer.alloc(0)), /empty/i);
+    await assert.rejects(
+      inspectLibraryCoverJpeg(Buffer.from("not an image")),
+    );
+  });
+
+  it("preserves receiptless legacy covers unless the run explicitly scopes or forces them", () => {
+    const cover = {
+      pathname: "inspo-covers/ref-a.jpg",
+      url: "https://blob.example/inspo-covers/ref-a.jpg",
+      size: 50,
+      etag: "cover-v1",
+    };
+    assert.equal(
+      shouldPreserveLegacyLibraryCover({
+        force: false,
+        exactRecord: false,
+        cover,
+      }),
+      true,
+    );
+    assert.equal(
+      shouldPreserveLegacyLibraryCover({
+        force: false,
+        exactRecord: true,
+        cover,
+      }),
+      false,
+    );
+    assert.equal(
+      shouldPreserveLegacyLibraryCover({
+        force: true,
+        exactRecord: false,
+        cover,
+      }),
+      false,
     );
   });
 });
