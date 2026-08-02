@@ -27,8 +27,8 @@ import {
  * placement on /app/planner was presentation-only math
  * (spreadAcrossWeekdays); this is what makes "put the math worksheet on
  * Tuesday" a real, remembered fact instead of a guess the board
- * re-computes every visit. The scheduled activity then appears on
- * /app/calendar on that real date.
+ * re-computes every visit. The scheduled activity then appears in
+ * Planner on that real date.
  *
  * Narrow and reusable on purpose (AGENTS.md tool-authoring law): this
  * assigns or moves ONE activity's date and nothing else. It does not
@@ -39,7 +39,7 @@ import {
 
 export default defineBoundedTool({
   description:
-    "Give one plan activity a real calendar date, so it shows up on /app/calendar on that day. Use when the parent names a day for an existing activity ('let's do the math worksheet Tuesday', 'move story time to Thursday'), or right after finalizing a material built for a specific plan activity when the parent named a day for it. Always call open_planner first in this conversation to get real week and activity indices; never guess them. Re-scheduling the same activity (same child, subject, week, index) just moves its date, it never creates a duplicate.",
+    "Give one plan activity a real calendar date, so it shows up in Planner on that day. Use when the parent names a day for an existing activity ('let's do the math worksheet Tuesday', 'move story time to Thursday'), or right after finalizing a material built for a specific plan activity when the parent named a day for it. Always call open_planner first in this conversation to get real week and activity indices; never guess them. Re-scheduling the same activity (same child, subject, week, index) just moves its date, it never creates a duplicate.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: false,
   inputSchema: z

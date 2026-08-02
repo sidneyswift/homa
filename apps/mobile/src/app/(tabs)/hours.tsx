@@ -1,3 +1,4 @@
+import { Redirect } from "expo-router";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -33,7 +34,7 @@ import { colors, fontSize, radius, space } from "../../theme/tokens";
  * field yet (web's own issue #174 deferral), so totals render plainly,
  * never a red "behind" state.
  */
-export default function HoursScreen() {
+export function HoursSurface({ embedded = false }: { embedded?: boolean }) {
   const { family, children, loading: familyLoading } = useFamilyData();
   const { rows, loading: hoursLoading, error, reload } = useHoursData(family?.id ?? null);
   const [subjectFilter, setSubjectFilter] = useState<HoursSubject | null>(null);
@@ -63,24 +64,26 @@ export default function HoursScreen() {
     void reload();
   }
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }} edges={["bottom"]}>
+  const content = (
+    <>
       <ScrollView
         contentContainerStyle={{ padding: space.md, gap: space.md }}
         refreshControl={<RefreshControl refreshing={hoursLoading} onRefresh={() => void reload()} />}
       >
         <View style={{ gap: 2 }}>
-          <Text
-            style={{
-              fontFamily: fontFamilies.bodyBold,
-              fontSize: 11,
-              letterSpacing: 0.4,
-              color: colors.textSubtle,
-              textTransform: "uppercase",
-            }}
-          >
-            The compliance record
-          </Text>
+          {embedded ? null : (
+            <Text
+              style={{
+                fontFamily: fontFamilies.bodyBold,
+                fontSize: 11,
+                letterSpacing: 0.4,
+                color: colors.textSubtle,
+                textTransform: "uppercase",
+              }}
+            >
+              The compliance record
+            </Text>
+          )}
           <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.xxl, color: colors.textStrong }}>
             Hours
           </Text>
@@ -168,8 +171,22 @@ export default function HoursScreen() {
         onDelete={() => void handleDelete()}
         onClose={() => setEditingEntryId(null)}
       />
+    </>
+  );
+
+  if (embedded) {
+    return <View style={{ flex: 1, backgroundColor: colors.page }}>{content}</View>;
+  }
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }} edges={["bottom"]}>
+      {content}
     </SafeAreaView>
   );
+}
+
+/** Compatibility door for existing deep links. Planner owns Hours now. */
+export default function HoursScreen() {
+  return <Redirect href="/planner?view=hours" />;
 }
 
 function SubjectChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {

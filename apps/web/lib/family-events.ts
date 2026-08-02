@@ -9,7 +9,7 @@ import { mapDb, type DbJson } from "./map/db";
  * trips, and other non-school scheduling, alongside the school-plan
  * scheduling in lib/plan-schedule.ts. Same caller/pinned split as
  * hours_log (lib/hours.ts + lib/agent-pinned.ts's recordHoursPinned):
- * the parent-facing /app/calendar page reads under the caller's own RLS
+ * the parent-facing Planner reads under the caller's own RLS
  * session (lib/family-events-read.ts's getFamilyEventsForFamily), while
  * the add/remove agent tools support both a web session (the caller's
  * own Supabase client) and a pinned channel like SMS (mapDb with an

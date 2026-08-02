@@ -8,7 +8,6 @@ import {
   formatMinutesAsHours,
   filterEntries,
   groupEntriesByDay,
-  SOURCE_LABELS,
   SUBJECT_LABELS,
   subjectOptions,
   type ChildHoursTotals,
@@ -19,7 +18,7 @@ import { KidAvatar } from "../../../components/dashboard/kid-avatar";
 import { HoursEntryOverlay } from "./hours-entry-overlay";
 
 /**
- * The Hours page (CG-02, issue #174): a per-day log of every school-time
+ * The Planner Hours view (CG-02, issue #174): a per-day log of every school-time
  * block Homa has heard about, editable in place, with running totals
  * per child. Same filter-chip and grouped-list shape as the Binder and
  * Tasks History, so the surface feels like the rest of /app rather than
@@ -123,13 +122,10 @@ function EntryRow({
       ) : (
         <span className="flex-1" />
       )}
-      <span className="rounded-pill border border-border px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wide text-subtle">
-        {SOURCE_LABELS[entry.source]}
-      </span>
       <button
         type="button"
         onClick={onEdit}
-        className="text-xs font-semibold text-brand hover:underline"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center px-2 text-xs font-semibold text-brand hover:underline"
       >
         Edit
       </button>
@@ -143,6 +139,7 @@ export function HoursView({
   focusChildId,
   timeZone,
   now,
+  embedded = false,
 }: {
   /** The FULL family roster, always: avatar tones key off each kid's
    * position here so a kid keeps their color even when the context
@@ -157,6 +154,9 @@ export function HoursView({
   /** Server-supplied, same reasoning as the Binder and Planner: keeps
    * render pure and testable. */
   now: Date;
+  /** Planner owns the page title and view switcher when Hours is one
+   * of its views, so the standalone heading stays hidden there. */
+  embedded?: boolean;
 }) {
   const [filter, setFilter] = useState<HoursFilter>({ subject: null });
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -174,41 +174,44 @@ export function HoursView({
     [filtered, focusKid, kids, now, timeZone],
   );
   const editing = entries.find((entry) => entry.id === editingId) ?? null;
+  const totalsGrid = entries.length > 0 && totals.length > 0 ? (
+    <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {totals.map((total) => {
+        const kidIndex = kids.findIndex((kid) => kid.id === total.childId);
+        const kid = kids[kidIndex];
+        return (
+          <TotalsCard
+            key={total.childId}
+            total={total}
+            kidIndex={Math.max(0, kidIndex)}
+            avatarUrl={kid?.avatar_url ?? null}
+          />
+        );
+      })}
+    </section>
+  ) : null;
 
   return (
     <>
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
-            The compliance record
-          </p>
-          <h1 className="mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-strong">
-            Hours
-          </h1>
-          <p className="mt-1.5 max-w-xl text-sm text-muted">
-            {focusKid
-              ? `Every school-time block logged for ${focusKid.name}, plus anything for the whole family.`
-              : "Every school-time block Homa has heard about, by day."}
-          </p>
-        </div>
-      </header>
+      {embedded ? null : (
+        <header className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
+              The compliance record
+            </p>
+            <h1 className="mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-strong">
+              Hours
+            </h1>
+            <p className="mt-1.5 max-w-xl text-sm text-muted">
+              {focusKid
+                ? `Homa records the school time you tell her about for ${focusKid.name}, plus family time. Review or correct it here.`
+                : "Homa records the school time you tell her about. Review or correct it here."}
+            </p>
+          </div>
+        </header>
+      )}
 
-      {totals.length > 0 ? (
-        <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {totals.map((total) => {
-            const kidIndex = kids.findIndex((kid) => kid.id === total.childId);
-            const kid = kids[kidIndex];
-            return (
-              <TotalsCard
-                key={total.childId}
-                total={total}
-                kidIndex={Math.max(0, kidIndex)}
-                avatarUrl={kid?.avatar_url ?? null}
-              />
-            );
-          })}
-        </section>
-      ) : null}
+      {!embedded && totalsGrid ? <div className="mt-6">{totalsGrid}</div> : null}
 
       {subjects.length > 1 ? (
         <div
@@ -245,7 +248,7 @@ export function HoursView({
         <div className="mt-8 rounded-[var(--radius-xl)] border border-dashed border-border bg-card p-8 text-center">
           <p className="font-display text-lg font-semibold text-strong">Nothing logged yet.</p>
           <p className="mx-auto mt-1.5 max-w-sm text-sm text-muted">
-            {"Homa logs school time the moment it comes up, on chat, text, or a call. Mention a block (\"we did 45 minutes of math\") and it lands here on its own."}
+            Tell Homa how long schoolwork took in Chat, by text, or on a call. She records it here.
           </p>
         </div>
       ) : groups.length === 0 ? (
@@ -280,6 +283,20 @@ export function HoursView({
           ))}
         </div>
       )}
+
+      {embedded && totalsGrid ? (
+        <details className="mt-7 overflow-hidden rounded-[var(--radius-lg)] border border-border-subtle bg-card shadow-sm">
+          <summary className="min-h-12 cursor-pointer px-4 py-3 text-sm font-bold text-body">
+            Hours by child
+          </summary>
+          <div className="border-t border-border-subtle bg-page p-3">
+            <p className="mb-3 text-xs text-muted">
+              For your records only. Homa does not compare children.
+            </p>
+            {totalsGrid}
+          </div>
+        </details>
+      ) : null}
 
       {editing ? (
         <HoursEntryOverlay entry={editing} onClose={() => setEditingId(null)} />

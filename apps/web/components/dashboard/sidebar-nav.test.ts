@@ -25,16 +25,13 @@ describe("isAppNavItemActive", () => {
     assert.equal(progressItem?.href, "/app/progress");
   });
 
-  it("exposes the Hours navigation item (CG-02, issue #174)", () => {
-    const hoursItem = APP_NAV_ITEMS.find((item) => item.label === "Hours");
+  it("keeps Calendar and Hours inside one Planner navigation item", () => {
+    const plannerItem = APP_NAV_ITEMS.find((item) => item.label === "Planner");
 
-    assert.equal(hoursItem?.href, "/app/hours");
-  });
-
-  it("exposes the Calendar navigation item (CG-03, issue #176)", () => {
-    const calendarItem = APP_NAV_ITEMS.find((item) => item.label === "Calendar");
-
-    assert.equal(calendarItem?.href, "/app/calendar");
+    assert.equal(plannerItem?.href, "/app/planner");
+    const labels = APP_NAV_ITEMS.map((item) => String(item.label));
+    assert.equal(labels.includes("Calendar"), false);
+    assert.equal(labels.includes("Hours"), false);
   });
 
   it("exposes the family-owned Library beside Binder (issue #352)", () => {

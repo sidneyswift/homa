@@ -5,7 +5,7 @@ import { zonedDateParts, zonedDateString } from "./time-zone";
 import type { ViewContext } from "./view-context";
 
 /**
- * Pure view-model helpers for the /app/hours page (CG-02, issue #174),
+ * Pure view-model helpers for the Planner Hours view (CG-02, issue #174),
  * same split as lib/materials/binder.ts: page.tsx and hours.ts do the
  * auth-scoped reads, everything here is a pure function so scope,
  * grouping, filtering, and the running totals are unit-testable without

@@ -7,7 +7,7 @@ import { isHoursSubject } from "../../../lib/hours-model";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 
 /**
- * /app/hours server actions (CG-02, issue #174). hours_log already
+ * Planner Hours server actions (CG-02, issue #174). hours_log already
  * carries a real member-scoped RLS policy set (migration #37 plus the
  * update policy this ticket adds), so edits and deletes go straight
  * through the caller's own Supabase client, the same posture as
@@ -70,6 +70,7 @@ export async function updateHoursEntryAction(
   if (!data || data.length === 0) {
     return { error: "That entry couldn't be found. Refresh the page and try again." };
   }
+  revalidatePath("/app/planner");
   revalidatePath("/app/hours");
   return { error: null };
 }
@@ -88,6 +89,7 @@ export async function deleteHoursEntryAction(entryId: string): Promise<HoursActi
     console.error("hours_log delete failed:", error.message);
     return { error: "That didn't delete. Try again in a minute." };
   }
+  revalidatePath("/app/planner");
   revalidatePath("/app/hours");
   return { error: null };
 }

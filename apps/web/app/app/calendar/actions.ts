@@ -7,7 +7,7 @@ import { parseFamilyEventInput, type FamilyEventInput } from "../../../lib/famil
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 
 /**
- * /app/calendar server actions (issue #176, CG-03, the touch-and-do
+ * Planner appointment server actions (issue #176, CG-03, the touch-and-do
  * round: both ICP judges' "next wow" was adding and changing events
  * directly on the grid). Same posture as /app/hours actions:
  * family_events carries a full member-scoped RLS policy set (the
@@ -73,6 +73,7 @@ export async function createFamilyEventAction(
     console.error("family_events insert failed:", error.message);
     return { error: "That didn't save. Nothing changed; try again in a minute." };
   }
+  revalidatePath("/app/planner");
   revalidatePath("/app/calendar");
   return { error: null };
 }
@@ -114,6 +115,7 @@ export async function updateFamilyEventAction(
   if (!data || data.length === 0) {
     return { error: "That event isn't on your calendar anymore. Refresh and try again." };
   }
+  revalidatePath("/app/planner");
   revalidatePath("/app/calendar");
   return { error: null };
 }
@@ -136,6 +138,7 @@ export async function deleteFamilyEventAction(eventId: string): Promise<Calendar
   if (!data || data.length === 0) {
     return { error: "That event isn't on your calendar anymore. Refresh and try again." };
   }
+  revalidatePath("/app/planner");
   revalidatePath("/app/calendar");
   return { error: null };
 }

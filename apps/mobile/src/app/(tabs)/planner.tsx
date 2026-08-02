@@ -1,3 +1,4 @@
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { CalendarPlus, ChevronLeft, ChevronRight, Plus } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
@@ -12,6 +13,7 @@ import {
 } from "../../lib/family-events";
 import { scheduleActivity } from "../../lib/plan-schedule";
 import { useFamilyData } from "../../features/family/use-family-data";
+import { HoursSurface } from "./hours";
 import { DayView } from "../../features/planner/day-view";
 import { DeviceCalendarExportSheet } from "../../features/planner/device-calendar-export-sheet";
 import {
@@ -45,13 +47,12 @@ import { WeekView } from "../../features/planner/week-view";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
 
-type PlannerViewMode = "day" | "week" | "month";
+type PlannerViewMode = "day" | "week" | "month" | "hours";
 
 /**
- * Planner: one surface for what web splits across /app/planner (a
- * Mon-Fri checklist, no real dates) and /app/calendar (the real week
- * grid with family events), per founder direction 2026-07-29. Day/week/
- * month views over family_events + plan_activity_schedule, both
+ * Planner: one surface for day, week, month, and the Hours record, per
+ * founder direction 2026-08-02. Calendar views use family_events plus
+ * plan_activity_schedule, both
  * genuinely writable tables (full RLS insert/update/delete for
  * authenticated family members, confirmed, not assumed). Check-offs use
  * toggle_plan_activity_check, a new atomic single-key RPC
@@ -67,14 +68,24 @@ type PlannerViewMode = "day" | "week" | "month";
  * already does under the caller's own session on web.
  */
 export default function PlannerScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams<{ view?: string | string[] }>();
   const { family, children, loading: familyLoading } = useFamilyData();
-  const [viewMode, setViewMode] = useState<PlannerViewMode>("week");
+  const initialView = Array.isArray(params.view) ? params.view[0] : params.view;
+  const viewMode: PlannerViewMode =
+    initialView === "week" || initialView === "month" || initialView === "hours"
+      ? initialView
+      : "day";
   const [anchorDate, setAnchorDate] = useState<DateOnly>(todayDateOnly());
   const [filterChildId, setFilterChildId] = useState<string | null>(null);
   const [composerDraft, setComposerDraft] = useState<EventComposerDraft | null>(null);
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [schedulingActivity, setSchedulingActivity] = useState<PlanActivityView | null>(null);
   const [calendarExportOpen, setCalendarExportOpen] = useState(false);
+
+  function setViewMode(next: PlannerViewMode) {
+    router.setParams({ view: next });
+  }
 
   const range = useMemo(() => monthGridRange(anchorDate), [anchorDate]);
   const { events, scheduleRows, childPlans, loading, reload } = usePlannerData(
@@ -112,6 +123,7 @@ export default function PlannerScreen() {
     [filterChildId, unscheduled],
   );
   const visibleRange = useMemo(() => {
+    if (viewMode === "hours") return { start: anchorDate, end: anchorDate };
     if (viewMode === "day") return { start: anchorDate, end: anchorDate };
     if (viewMode === "week") {
       const start = startOfWeek(anchorDate);
@@ -157,6 +169,15 @@ export default function PlannerScreen() {
     if (viewMode === "week") return formatWeekRangeLabel(startOfWeek(anchorDate));
     return formatFullDate(anchorDate);
   }
+
+  const viewTabs = (
+    <View style={{ flexDirection: "row", backgroundColor: colors.surfaceSunken, borderRadius: radius.pill, padding: 3 }}>
+      <ViewModeTab label="Day" active={viewMode === "day"} onPress={() => setViewMode("day")} />
+      <ViewModeTab label="Week" active={viewMode === "week"} onPress={() => setViewMode("week")} />
+      <ViewModeTab label="Month" active={viewMode === "month"} onPress={() => setViewMode("month")} />
+      <ViewModeTab label="Hours" active={viewMode === "hours"} onPress={() => setViewMode("hours")} />
+    </View>
+  );
 
   async function handleToggleActivity(activity: { childId: string; subjectId: string; week: number; activityIndex: number; done: boolean }) {
     await toggleActivityCheck(activity.childId, activity.subjectId, activity.week, activity.activityIndex, !activity.done);
@@ -208,14 +229,19 @@ export default function PlannerScreen() {
     void reload();
   }
 
+  if (viewMode === "hours") {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }} edges={["bottom"]}>
+        <View style={{ padding: space.md, paddingBottom: 0 }}>{viewTabs}</View>
+        <HoursSurface embedded />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }} edges={["bottom"]}>
       <View style={{ padding: space.md, gap: space.sm }}>
-        <View style={{ flexDirection: "row", backgroundColor: colors.surfaceSunken, borderRadius: radius.pill, padding: 3 }}>
-          <ViewModeTab label="Day" active={viewMode === "day"} onPress={() => setViewMode("day")} />
-          <ViewModeTab label="Week" active={viewMode === "week"} onPress={() => setViewMode("week")} />
-          <ViewModeTab label="Month" active={viewMode === "month"} onPress={() => setViewMode("month")} />
-        </View>
+        {viewTabs}
 
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
           <Pressable onPress={goPrevious} hitSlop={8}>
@@ -369,7 +395,7 @@ export default function PlannerScreen() {
 }
 
 /**
- * Written as three explicit elements rather than VIEW_MODES.map(...):
+ * Written as four explicit elements rather than VIEW_MODES.map(...):
  * the mapped version's third (last) Pressable never received a single
  * tap in the simulator regardless of which mode's label sat there
  * (swapping the array order moved the dead one with it), while the

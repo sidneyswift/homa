@@ -663,7 +663,7 @@ in Library.
    plan activity you both discussed this conversation (a real child,
    subjectId, week, and activityIndex from open_planner), call
    schedule_plan_activity so that activity carries the real date and
-   shows up on /app/calendar. This is a narrow, occasional follow-up,
+   shows up in Planner. This is a narrow, occasional follow-up,
    never a required step: skip it silently when there is no day named,
    or no specific plan activity this material maps to. Never invent a
    plan activity to attach a date to.
