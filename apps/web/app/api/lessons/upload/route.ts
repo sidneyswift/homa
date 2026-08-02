@@ -1,4 +1,8 @@
-import { issueSignedToken } from "@vercel/blob";
+import {
+  issueSignedToken,
+  parseStoreIdFromDelegationToken,
+  presignUrl,
+} from "@vercel/blob";
 import {
   handleUploadPresigned,
   type HandleUploadPresignedBody,
@@ -58,6 +62,9 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
+    let nativeUpload:
+      | { url: string; storeId: string }
+      | undefined;
     const result = await handleUploadPresigned({
       request,
       body,
@@ -83,26 +90,40 @@ export async function POST(request: Request): Promise<Response> {
         const validUntil = Date.now() + 15 * 60 * 1000;
         const token = lessonBlobToken();
         if (!token) throw new Error("private lesson store is not configured");
+        const signedToken = await issueSignedToken({
+          token,
+          pathname,
+          operations: ["put"],
+          allowedContentTypes,
+          maximumSizeInBytes,
+          validUntil,
+        });
+        const urlOptions = {
+          allowedContentTypes,
+          maximumSizeInBytes,
+          validUntil,
+          addRandomSuffix: true,
+          cacheControlMaxAge: 60,
+        };
+        const { presignedUrl } = await presignUrl(signedToken, {
+          operation: "put",
+          pathname,
+          access: "private",
+          ...urlOptions,
+        });
+        nativeUpload = {
+          url: presignedUrl,
+          storeId: parseStoreIdFromDelegationToken(
+            signedToken.delegationToken,
+          ),
+        };
         return {
-          token: await issueSignedToken({
-            token,
-            pathname,
-            operations: ["put"],
-            allowedContentTypes,
-            maximumSizeInBytes,
-            validUntil,
-          }),
-          urlOptions: {
-            allowedContentTypes,
-            maximumSizeInBytes,
-            validUntil,
-            addRandomSuffix: true,
-            cacheControlMaxAge: 60,
-          },
+          token: signedToken,
+          urlOptions,
         };
       },
     });
-    return Response.json(result);
+    return Response.json({ ...result, nativeUpload });
   } catch (error) {
     console.error(
       "lesson upload token failed:",

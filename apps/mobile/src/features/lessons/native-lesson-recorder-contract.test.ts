@@ -14,6 +14,14 @@ const voiceSessionSource = readFileSync(
   new URL("../voice/use-voice-session.ts", import.meta.url),
   "utf8",
 );
+const uploadSource = readFileSync(
+  new URL("./lesson-recording-upload.ts", import.meta.url),
+  "utf8",
+);
+const uploadRouteSource = readFileSync(
+  new URL("../../../../web/app/api/lessons/upload/route.ts", import.meta.url),
+  "utf8",
+);
 
 /**
  * These wiring checks cover boundaries that are easy to regress without a
@@ -54,6 +62,18 @@ describe("native lesson recorder safety contract", () => {
     assert.notEqual(deleteIndex, -1);
     assert.notEqual(readyIndex, -1);
     assert.ok(deleteIndex < readyIndex);
+  });
+
+  it("streams native audio through a family-scoped presigned upload", () => {
+    assert.doesNotMatch(uploadSource, /@vercel\/blob/u);
+    assert.match(uploadSource, /createUploadTask\(upload\.url/u);
+    assert.match(uploadSource, /uploadType: UploadType\.BINARY_CONTENT/u);
+    assert.match(uploadSource, /multipart: false/u);
+    assert.match(uploadRouteSource, /resolveLessonRoute\(request\)/u);
+    assert.match(uploadRouteSource, /if \(!context\.consented\)/u);
+    assert.match(uploadRouteSource, /getLessonForFamily/u);
+    assert.match(uploadRouteSource, /presignUrl\(signedToken/u);
+    assert.match(uploadRouteSource, /parseStoreIdFromDelegationToken/u);
   });
 
   it("releases the recorder and local audio on an unexpected unmount", () => {
