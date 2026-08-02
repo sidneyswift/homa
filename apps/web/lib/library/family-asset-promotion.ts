@@ -9,6 +9,7 @@ import {
   MAX_LIBRARY_UPLOAD_BYTES,
   familyAssetFileKind,
   safeLibraryPathName,
+  stripFamilyChatBlobSuffix,
   titleFromLibraryFileName,
   type FamilyAssetView,
 } from "./family-assets";
@@ -35,7 +36,9 @@ export type PromoteFamilyAttachmentResult =
         | "save-failed";
     };
 
-function attachmentOriginalName(attachment: ChatAttachmentForPromotion): string {
+export function attachmentOriginalName(
+  attachment: Pick<ChatAttachmentForPromotion, "caption" | "kind" | "url">,
+): string {
   const captionNamesFile = attachment.kind !== "image";
   if (captionNamesFile && attachment.caption?.trim()) {
     return attachment.caption.trim().slice(0, 240);
@@ -43,7 +46,9 @@ function attachmentOriginalName(attachment: ChatAttachmentForPromotion): string 
   try {
     const pathname = new URL(attachment.url).pathname;
     const last = pathname.split("/").filter(Boolean).at(-1);
-    if (last) return decodeURIComponent(last).slice(0, 240);
+    if (last) {
+      return stripFamilyChatBlobSuffix(decodeURIComponent(last)).slice(0, 240);
+    }
   } catch {
     // URL validation happens before this helper; keep a defensive fallback.
   }

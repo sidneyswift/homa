@@ -268,6 +268,15 @@ export function titleFromLibraryFileName(name: string): string {
   return withoutExtension || normalized || "Untitled resource";
 }
 
+/**
+ * Chat attachments are stored by Vercel Blob with one exact 27-character
+ * suffix before the extension. Once an authenticated attachment is promoted
+ * to Library, that provider key is not part of the parent's filename.
+ */
+export function stripFamilyChatBlobSuffix(name: string): string {
+  return name.replace(/-[A-Za-z0-9]{27}(?=(?:\.[^.]+)?$)/u, "");
+}
+
 /** A client-supplied URL is only a candidate when it is in this exact
  * family's Library prefix on Homa's configured artifact store. */
 export function isFamilyLibraryUrl(url: string, familyId: string): boolean {

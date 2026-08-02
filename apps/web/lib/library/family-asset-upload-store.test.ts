@@ -3,7 +3,9 @@ import { describe, it } from "node:test";
 
 import {
   parseFamilyAssetUploadParts,
+  toFamilyAssetView,
   toFamilyAssetUploadView,
+  type FamilyAssetRow,
   type FamilyAssetUploadRow,
 } from "./family-asset-upload-store";
 import { LIBRARY_MULTIPART_CHUNK_BYTES } from "./family-asset-uploads";
@@ -87,6 +89,44 @@ describe("family asset upload persistence mapping", () => {
     assert.deepEqual(
       view.completedParts.map((part) => part.partNumber),
       [1, 2],
+    );
+  });
+
+  it("cleans a legacy chat Blob suffix without replacing an improved title", () => {
+    const row: FamilyAssetRow = {
+      id: "asset-id",
+      title: "IMG_6203-7T4Cg8XgYfJhL3SR8IExfYK44q7",
+      original_name: "IMG_6203-7T4Cg8XgYfJhL3SR8IExfYK44q7.jpg",
+      url: "https://assets.public.blob.vercel-storage.com/families/family-id/library/photo.jpg",
+      download_url: "https://assets.public.blob.vercel-storage.com/families/family-id/library/photo.jpg?download=1",
+      media_type: "image/jpeg",
+      byte_size: 1024,
+      file_kind: "image",
+      resource_kind: "worksheet",
+      authors: [],
+      publisher: null,
+      language: "en",
+      status: "ready",
+      processing_error_code: null,
+      processing_note: null,
+      source_upload_id: null,
+      source_attachment_id: "attachment-id",
+      parent_asset_id: null,
+      processed_at: "2026-08-02T12:01:00.000Z",
+      created_at: "2026-08-02T12:00:00.000Z",
+      updated_at: "2026-08-02T12:01:00.000Z",
+    };
+
+    assert.deepEqual(
+      {
+        title: toFamilyAssetView(row).title,
+        originalName: toFamilyAssetView(row).originalName,
+      },
+      { title: "IMG_6203", originalName: "IMG_6203.jpg" },
+    );
+    assert.equal(
+      toFamilyAssetView({ ...row, title: "Botany field notes" }).title,
+      "Botany field notes",
     );
   });
 });
