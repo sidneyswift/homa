@@ -399,7 +399,7 @@ jobs:
       - name: Ingestion ledger (every #homa-inspo drop has exactly one record)
         run: pnpm check:ingestion
 
-  # Guard shard 2 of 3: the Postgres-backed suites and the two fast
+  # Guard shard 2 of 3: the Postgres-backed suites and the fast
   # disposable E2Es. See the shard-1 comment for the balancing rule.
   db-checks:
     needs: classify-changes
@@ -466,6 +466,10 @@ jobs:
       - name: Voice action receipts disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:voice-action-receipts:postgres
+
+      - name: Family Library retrieval disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm test:family-library-retrieval:postgres
 
   # Guard shard 3 of 3: the acceptance E2Es and the two secret-needing
   # database checks, the three longest steps in the roster (each 24-50s),

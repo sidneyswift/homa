@@ -1,3 +1,4 @@
+import { del } from "@vercel/blob";
 import { MAP_SUBJECTS } from "@homa/core";
 
 import {
@@ -6,8 +7,14 @@ import {
   toFamilyAssetView,
 } from "./family-asset-upload-store";
 import type { FamilyAssetUpdate } from "./family-asset-shelf";
-import type { FamilyAssetView } from "./family-assets";
+import {
+  isFamilyLibraryUrl,
+  type FamilyAssetResourceKind,
+  type FamilyAssetStatus,
+  type FamilyAssetView,
+} from "./family-assets";
 import { mapDb } from "../map/db";
+import { emitMapEvent } from "../map/events";
 
 const SUBJECTS_BY_ID = new Map(
   MAP_SUBJECTS.map((subject) => [subject.id, subject.displayName]),
@@ -15,7 +22,22 @@ const SUBJECTS_BY_ID = new Map(
 
 export type UpdateFamilyAssetResult =
   | { ok: true; asset: FamilyAssetView }
-  | { ok: false; reason: "not-found" | "unknown-child" };
+  | {
+      ok: false;
+      reason: "not-found" | "unknown-child" | "unknown-subject";
+    };
+
+export interface FamilyAssetPatch {
+  id: string;
+  title?: string;
+  resourceKind?: FamilyAssetResourceKind | null;
+  childIds?: string[];
+  subjectIds?: string[];
+}
+
+export type DeleteFamilyAssetResult =
+  | { ok: true; priorStatus: FamilyAssetStatus }
+  | { ok: false; reason: "not-found" | "delete-failed" };
 
 export async function getFamilyAsset(
   familyId: string,
@@ -85,89 +107,210 @@ export async function updateFamilyAsset(input: {
   familyId: string;
   edit: FamilyAssetUpdate;
 }): Promise<UpdateFamilyAssetResult> {
+  return await patchFamilyAsset({
+    familyId: input.familyId,
+    patch: {
+      id: input.edit.id,
+      title: input.edit.title,
+      resourceKind: input.edit.resourceKind,
+      childIds: input.edit.childIds,
+      subjectIds: input.edit.subjectIds,
+    },
+  });
+}
+
+/** Applies only the supplied fields, preserving untouched model evidence. */
+export async function patchFamilyAsset(input: {
+  familyId: string;
+  patch: FamilyAssetPatch;
+}): Promise<UpdateFamilyAssetResult> {
   const sql = mapDb();
-  return await sql.begin(async (transaction) => {
-    const existing = await transaction<{ id: string }[]>`
-      select id
+  const result = await sql.begin(async (transaction) => {
+    const existingRows = await transaction<
+      Array<{
+        id: string;
+        title: string;
+        resource_kind: FamilyAssetResourceKind | null;
+      }>
+    >`
+      select id, title, resource_kind
       from public.family_assets
-      where id = ${input.edit.id}
+      where id = ${input.patch.id}
         and family_id = ${input.familyId}
         and deleted_at is null
       for update
     `;
-    if (!existing[0]) return { ok: false, reason: "not-found" } as const;
+    const existing = existingRows[0];
+    if (!existing) return { ok: false, reason: "not-found" } as const;
 
     const children =
-      input.edit.childIds.length === 0
-        ? []
+      input.patch.childIds === undefined
+        ? null
+        : input.patch.childIds.length === 0
+          ? []
         : await transaction<{ id: string; name: string }[]>`
             select id, name
             from public.children
             where family_id = ${input.familyId}
-              and id in ${transaction(input.edit.childIds)}
+              and id in ${transaction(input.patch.childIds)}
           `;
-    if (children.length !== input.edit.childIds.length) {
+    if (
+      children !== null &&
+      children.length !== (input.patch.childIds?.length ?? 0)
+    ) {
       return { ok: false, reason: "unknown-child" } as const;
     }
+    if (
+      input.patch.subjectIds?.some((subjectId) => !SUBJECTS_BY_ID.has(subjectId))
+    ) {
+      return { ok: false, reason: "unknown-subject" } as const;
+    }
 
-    const rows = await transaction<FamilyAssetRow[]>`
+    await transaction`
       update public.family_assets
-      set title = ${input.edit.title},
-          resource_kind = ${input.edit.resourceKind},
+      set title = ${input.patch.title ?? existing.title},
+          resource_kind = ${
+            input.patch.resourceKind === undefined
+              ? existing.resource_kind
+              : input.patch.resourceKind
+          },
           updated_at = now()
-      where id = ${input.edit.id}
+      where id = ${input.patch.id}
         and family_id = ${input.familyId}
         and deleted_at is null
-      returning ${transaction.unsafe(FAMILY_ASSET_ROW_SELECT)}
     `;
-    const row = rows[0];
-    if (!row) return { ok: false, reason: "not-found" } as const;
 
-    await transaction`
-      delete from public.family_asset_children
-      where asset_id = ${input.edit.id}
-        and family_id = ${input.familyId}
-    `;
-    for (const childId of input.edit.childIds) {
+    if (input.patch.childIds !== undefined) {
       await transaction`
-        insert into public.family_asset_children (family_id, asset_id, child_id)
-        values (${input.familyId}, ${input.edit.id}, ${childId})
+        delete from public.family_asset_children
+        where asset_id = ${input.patch.id}
+          and family_id = ${input.familyId}
       `;
+      for (const childId of input.patch.childIds) {
+        await transaction`
+          insert into public.family_asset_children (family_id, asset_id, child_id)
+          values (${input.familyId}, ${input.patch.id}, ${childId})
+        `;
+      }
     }
 
-    await transaction`
-      delete from public.family_asset_tags
-      where asset_id = ${input.edit.id}
-        and family_id = ${input.familyId}
-        and kind = 'subject'
-    `;
-    for (const subjectId of input.edit.subjectIds) {
-      const label = SUBJECTS_BY_ID.get(subjectId);
-      if (!label) continue;
+    if (input.patch.subjectIds !== undefined) {
       await transaction`
-        insert into public.family_asset_tags (
-          family_id, asset_id, kind, value, catalog_id, quote, source
-        )
-        values (
-          ${input.familyId}, ${input.edit.id}, 'subject', ${label},
-          ${subjectId}, ${label}, 'parent'
-        )
+        delete from public.family_asset_tags
+        where asset_id = ${input.patch.id}
+          and family_id = ${input.familyId}
+          and kind = 'subject'
       `;
+      for (const subjectId of input.patch.subjectIds) {
+        const label = SUBJECTS_BY_ID.get(subjectId);
+        if (!label) continue;
+        await transaction`
+          insert into public.family_asset_tags (
+            family_id, asset_id, kind, value, catalog_id, quote, source
+          )
+          values (
+            ${input.familyId}, ${input.patch.id}, 'subject', ${label},
+            ${subjectId}, ${label}, 'parent'
+          )
+        `;
+      }
     }
-
-    const childById = new Map(children.map((child) => [child.id, child]));
-    return {
-      ok: true,
-      asset: toFamilyAssetView(row, {
-        children: input.edit.childIds.flatMap((id) => {
-          const child = childById.get(id);
-          return child ? [{ id: child.id, name: child.name }] : [];
-        }),
-        subjects: input.edit.subjectIds.flatMap((id) => {
-          const label = SUBJECTS_BY_ID.get(id);
-          return label ? [{ id, label, source: "parent" as const }] : [];
-        }),
-      }),
-    };
+    return { ok: true } as const;
   });
+  if (!result.ok) return result;
+  const asset = await getFamilyAsset(input.familyId, input.patch.id);
+  return asset
+    ? { ok: true, asset }
+    : { ok: false, reason: "not-found" };
+}
+
+/**
+ * Removes one independently owned Library original, then retires its row.
+ * Both the asset id and its stored Blob URL are re-scoped to the authenticated
+ * family before any external delete. The same function serves UI and Eve so
+ * failure recovery and telemetry cannot drift between surfaces.
+ */
+export async function deleteFamilyAsset(input: {
+  familyId: string;
+  assetId: string;
+}): Promise<DeleteFamilyAssetResult> {
+  const sql = mapDb();
+  const row = await sql.begin(async (transaction) => {
+    const rows = await transaction<
+      Array<{ url: string; status: FamilyAssetStatus }>
+    >`
+      select url, status
+      from public.family_assets
+      where id = ${input.assetId}
+        and family_id = ${input.familyId}
+        and deleted_at is null
+      for update
+    `;
+    const target = rows[0];
+    if (!target) return null;
+    await transaction`
+      update public.family_assets
+      set status = 'processing',
+          processing_note = 'Removing original file',
+          processing_error_code = null,
+          updated_at = now()
+      where id = ${input.assetId}
+        and family_id = ${input.familyId}
+        and deleted_at is null
+    `;
+    return target;
+  });
+  if (!row) return { ok: false, reason: "not-found" };
+
+  if (!isFamilyLibraryUrl(row.url, input.familyId)) {
+    await sql`
+      update public.family_assets
+      set status = 'needs_attention',
+          processing_error_code = 'blob_url_invalid',
+          processing_note = 'The original file could not be removed yet.',
+          updated_at = now()
+      where id = ${input.assetId}
+        and family_id = ${input.familyId}
+        and deleted_at is null
+    `;
+    console.error("family Library delete refused a URL outside its family prefix");
+    return { ok: false, reason: "delete-failed" };
+  }
+
+  try {
+    await del(row.url);
+  } catch (error) {
+    await sql`
+      update public.family_assets
+      set status = 'needs_attention',
+          processing_error_code = 'blob_delete_failed',
+          processing_note = 'The original file could not be removed yet.',
+          updated_at = now()
+      where id = ${input.assetId}
+        and family_id = ${input.familyId}
+        and deleted_at is null
+    `;
+    console.error(
+      "library asset delete failed:",
+      error instanceof Error ? error.message : "unknown",
+    );
+    return { ok: false, reason: "delete-failed" };
+  }
+
+  await sql`
+    update public.family_assets
+    set deleted_at = now(),
+        processing_note = null,
+        processing_error_code = null,
+        updated_at = now()
+    where id = ${input.assetId}
+      and family_id = ${input.familyId}
+      and deleted_at is null
+  `;
+  await emitMapEvent("library.asset_deleted", {
+    family_id: input.familyId,
+    asset_id: input.assetId,
+    prior_status: row.status,
+  });
+  return { ok: true, priorStatus: row.status };
 }

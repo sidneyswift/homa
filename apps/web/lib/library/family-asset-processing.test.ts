@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   familyAssetFieldsFromVerified,
+  familyAssetEmbeddingDocument,
   familyAssetProcessingCapability,
   familyAssetProcessingFailureOutcome,
   processFamilyAssetWithDependencies,
@@ -53,6 +54,7 @@ function dependencies(
         },
       ],
     }),
+    embed: async () => "[0.1,0.2]",
     complete: async () => undefined,
     fail: async () => undefined,
     ...overrides,
@@ -75,17 +77,69 @@ describe("Family Library runtime processing", () => {
 
   it("completes only a source-verified model proposal", async () => {
     let completedTitle: string | null = null;
+    let completedEmbedding: string | null = null;
     const result = await processFamilyAssetWithDependencies(
       { familyId: ASSET.familyId, assetId: ASSET.id },
       dependencies({
-        complete: async ({ verified }) => {
+        complete: async ({ verified, embedding }) => {
           completedTitle = verified.title;
+          completedEmbedding = embedding;
         },
       }),
     );
 
     assert.deepEqual(result, { ok: true, assetId: ASSET.id });
     assert.equal(completedTitle, "Fractions Practice");
+    assert.equal(completedEmbedding, "[0.1,0.2]");
+  });
+
+  it("embeds verified meaning plus the bounded source text", () => {
+    const text = familyAssetEmbeddingDocument({
+      asset: ASSET,
+      extractedText: "Add fractions with like denominators.",
+      verified: {
+        ok: true,
+        title: "Fractions Practice",
+        resourceKind: "worksheet",
+        language: "en",
+        fieldEvidence: { title: null, resourceKind: null },
+        tags: [
+          {
+            kind: "subject",
+            value: "Math",
+            catalogId: "math",
+            quote: "fractions",
+            sourceLocator: "page 1",
+          },
+        ],
+        droppedFields: [],
+        droppedTags: [],
+      },
+    });
+
+    assert.match(text, /Title: Fractions Practice/u);
+    assert.match(text, /Resource type: worksheet/u);
+    assert.match(text, /Topics: Math/u);
+    assert.match(text, /Add fractions with like denominators\./u);
+  });
+
+  it("still completes when semantic indexing is unavailable", async () => {
+    let completed = false;
+    const result = await processFamilyAssetWithDependencies(
+      { familyId: ASSET.familyId, assetId: ASSET.id },
+      dependencies({
+        embed: async () => {
+          throw new Error("embedding provider unavailable");
+        },
+        complete: async ({ embedding }) => {
+          completed = true;
+          assert.equal(embedding, null);
+        },
+      }),
+    );
+
+    assert.deepEqual(result, { ok: true, assetId: ASSET.id });
+    assert.equal(completed, true);
   });
 
   it("records a permanent extraction outcome without calling the model", async () => {
