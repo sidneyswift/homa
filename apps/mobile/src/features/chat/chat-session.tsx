@@ -32,6 +32,10 @@ import {
   takeNextQueuedTurn,
   type QueuedChatMessage,
 } from "./chat-send-policy";
+import {
+  mergeComposerDraft,
+  type ComposerDraftRequest,
+} from "./composer-draft";
 import { busyLabel, countLastTurnToolCalls } from "./message-utils";
 import { BusyBubble, MessageView } from "./message-view";
 import { latestQuestionRequest } from "./question-card-model";
@@ -157,11 +161,15 @@ export function ChatSession({
   prepared,
   familyId,
   parentName,
+  draftRequest,
+  onDraftRequestHandled,
 }: {
   storageKey: string;
   prepared: PreparedChat;
   familyId: string | null;
   parentName: string | null;
+  draftRequest: ComposerDraftRequest | null;
+  onDraftRequestHandled: (requestId: string) => void;
 }) {
   const messagesRef = useRef<readonly EveMessage[]>([]);
   const [archived, setArchived] = useState<ArchivedMessage[]>(prepared.archived);
@@ -194,6 +202,7 @@ export function ChatSession({
     null,
   );
   const [draft, setDraft] = useState("");
+  const handledDraftRequestRef = useRef<string | null>(null);
   // Lost-turn recovery bookkeeping (lib/turn-recovery.ts): the durable
   // stream cursor (session streamIndex at mount + one per received
   // event, surviving storage event trimming), what the last send
@@ -202,6 +211,13 @@ export function ChatSession({
   const lastSendRef = useRef<{ text: string; atMs: number } | null>(null);
   const recoveryRef = useRef<AbortController | null>(null);
   const [recovering, setRecovering] = useState(false);
+
+  useEffect(() => {
+    if (!draftRequest || handledDraftRequestRef.current === draftRequest.id) return;
+    handledDraftRequestRef.current = draftRequest.id;
+    setDraft((current) => mergeComposerDraft(current, draftRequest.text));
+    onDraftRequestHandled(draftRequest.id);
+  }, [draftRequest, onDraftRequestHandled]);
 
   useEffect(() => {
     queuedRef.current = queued;

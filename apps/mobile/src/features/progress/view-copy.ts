@@ -84,11 +84,30 @@ export function progressAssessmentCta(childName: string): {
   body: string;
 } {
   return {
-    heading: `See where ${childName} is today.`,
+    heading: `${childName}'s progress page needs a first example.`,
     body:
-      `Tell Homa about a lesson, a worksheet, or something ${childName} tried. ` +
-      "Homa will use what you share to start this progress page.",
+      `Share one lesson, worksheet, or thing ${childName} tried. ` +
+      "Homa will add it as one dated example and keep building the page when you share more.",
   };
+}
+
+export function progressAssessmentDraft(childName: string): string {
+  return `Here's what ${childName} tried: `;
+}
+
+export function progressLoadErrorCopy(
+  childName: string,
+  hasCurrentView: boolean,
+): { heading: string; body: string } {
+  return hasCurrentView
+    ? {
+        heading: `${childName}'s progress is still here.`,
+        body: "Homa couldn't refresh it. Try again when you're ready.",
+      }
+    : {
+        heading: `${childName}'s progress didn't load.`,
+        body: `Anything already saved for ${childName} is unchanged. Try again when you're ready.`,
+      };
 }
 
 export function formatProgressDate(observedAt: string, timeZone: string): string {

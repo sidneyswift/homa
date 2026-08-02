@@ -33,14 +33,20 @@ export function KidSwitcher({
         return (
           <Pressable
             key={kid.id}
+            accessibilityRole="button"
+            accessibilityLabel={`Show ${kid.name}'s progress`}
+            accessibilityState={{ selected: active }}
             onPress={() => onSelect(kid.id)}
             style={{
+              minHeight: 44,
               paddingHorizontal: space.md,
               paddingVertical: space.sm,
               borderRadius: radius.pill,
               backgroundColor: active ? colors.brand : colors.card,
               borderWidth: 1,
               borderColor: active ? colors.brand : colors.borderSubtle,
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
             <Text

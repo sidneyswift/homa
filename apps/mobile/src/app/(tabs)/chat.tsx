@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ageInMonths, ageLabel } from "@homa/core";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { AiConsentGate } from "../../components/ai-consent-gate";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { useSession } from "../../features/auth/session-provider";
 import { ChatSession } from "../../features/chat/chat-session";
+import { parseComposerDraftRequest } from "../../features/chat/composer-draft";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { type ChildRecord } from "../../lib/family";
 import {
@@ -28,11 +30,22 @@ import { colors, fontSize, space } from "../../theme/tokens";
  * all, this screen is just the transcript, same as it always was.
  */
 export default function ChatScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams<{
+    progressDraft?: string | string[];
+    progressDraftId?: string | string[];
+  }>();
   const { session } = useSession();
   const { family, children, memberDisplayName, loading } = useFamilyData();
   const userId = session?.user.id ?? null;
   const [prepared, setPrepared] = useState<PreparedChat | null>(null);
   const readyFamily = family?.profile_completed_at && children.length > 0 ? family : null;
+  const draftRequest = parseComposerDraftRequest(params.progressDraftId, params.progressDraft);
+
+  const handleDraftRequestHandled = useCallback((requestId: string) => {
+    if (draftRequest?.id !== requestId) return;
+    router.setParams({ progressDraft: "", progressDraftId: "" });
+  }, [draftRequest?.id, router]);
 
   useEffect(() => {
     if (!userId) return;
@@ -103,6 +116,8 @@ export default function ChatScreen() {
               prepared={prepared}
               familyId={readyFamily.id}
               parentName={memberDisplayName ?? readyFamily.parent_display_name ?? null}
+              draftRequest={draftRequest}
+              onDraftRequestHandled={handleDraftRequestHandled}
             />
           </AiConsentGate>
         )}
