@@ -152,7 +152,7 @@ const TOO_LARGE_OUTCOME = {
   status: "needs_attention",
   errorCode: "content_too_large_to_process",
   processingNote:
-    "Your original is saved and ready to download. This file is too large for Homa to organize its Library details automatically. Use Edit details to add them yourself.",
+    "Your original is saved and ready to download. This file is too large for Homa to organize its Library details automatically. Add them below instead.",
   preserveOriginal: true,
 } as const satisfies FamilyAssetProcessingFailureOutcome;
 

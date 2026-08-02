@@ -156,6 +156,19 @@ describe("Family Library shelf contract", () => {
       detail: "Your original is still in your Library.",
       tone: "failed",
     });
+    assert.deepEqual(
+      familyAssetStatusCopy({
+        status: "needs_attention",
+        processingNote:
+          "Your original is saved and ready to download. This file is too large for Homa to organize its Library details automatically. Use Edit details to add them yourself.",
+      }),
+      {
+        label: "Needs attention",
+        detail:
+          "Your original is saved and ready to download. This file is too large for Homa to organize its Library details automatically. Add them below instead.",
+        tone: "attention",
+      },
+    );
   });
 
   it("accepts only closed, deduplicated parent edits", () => {

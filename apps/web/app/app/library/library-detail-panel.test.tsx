@@ -32,7 +32,7 @@ const ASSET: FamilyAssetView = {
   updatedAt: "2026-08-01T12:01:00.000Z",
 };
 
-test("Library detail names source, processing, associations, and authenticated actions", () => {
+test("Library detail exposes editable organization fields without a second edit mode", () => {
   const html = renderToStaticMarkup(
     <LibraryDetailPanel
       asset={ASSET}
@@ -45,7 +45,11 @@ test("Library detail names source, processing, associations, and authenticated a
   );
   assert.match(html, /Saved from chat/);
   assert.match(html, /Could not organize/);
-  assert.match(html, /Use Edit details to add or change/);
+  assert.match(html, /aria-label="Resource details"/);
+  assert.match(html, /name="title"[^>]*value="Backyard bird guide"/);
+  assert.match(html, /name="resourceKind"/);
+  assert.match(html, /name="childIds"/);
+  assert.match(html, /name="subjectIds"/);
   assert.match(html, />Ebook</);
   assert.match(html, /A\. Reader/);
   assert.match(html, /Field House/);
@@ -53,7 +57,8 @@ test("Library detail names source, processing, associations, and authenticated a
   assert.match(html, /Science/);
   assert.match(html, /\/api\/library\/assets\/11111111-1111-4111-8111-111111111111\/download\?surface=detail/);
   assert.doesNotMatch(html, /assets\.public\.blob/);
-  assert.match(html, />Edit details<\/button>/);
+  assert.doesNotMatch(html, />Edit details<\/button>/);
+  assert.match(html, /disabled=""[^>]*>Save changes<\/button>/);
   assert.match(html, />Remove from Library<\/button>/);
   assert.doesNotMatch(html, /Try organizing again/);
 });
