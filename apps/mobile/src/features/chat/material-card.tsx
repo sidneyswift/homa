@@ -1,4 +1,4 @@
-import { Image, Linking, Pressable, Text } from "react-native";
+import { Image, Linking, Pressable, Text, View } from "react-native";
 
 import { Card } from "../../components/ui/card";
 import { fontFamilies } from "../../theme/fonts";
@@ -26,6 +26,11 @@ export interface MaterialArtifact {
   status?: "draft" | "final" | "superseded";
   revisesId?: string | null;
   pageRoles?: ("child" | "answer_key" | "parent_guide" | "other")[];
+  sources?: {
+    id: string;
+    title: string;
+    libraryUrl: string | null;
+  }[];
 }
 
 const KIND_HEADLINES: Record<string, string> = {
@@ -86,6 +91,41 @@ export function MaterialCard({ material }: { material: MaterialArtifact }) {
         >
           {subtitle}
         </Text>
+      ) : null}
+      {material.sources && material.sources.length > 0 ? (
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 4 }}>
+          <Text
+            style={{
+              fontFamily: fontFamilies.bodyMedium,
+              fontSize: fontSize.xs,
+              color: colors.textMuted,
+            }}
+          >
+            Made from
+          </Text>
+          {material.sources.map((source, index) => (
+            <Pressable
+              key={source.id}
+              disabled={!source.libraryUrl}
+              accessibilityRole={source.libraryUrl ? "link" : "text"}
+              onPress={() => {
+                if (!source.libraryUrl) return;
+                void Linking.openURL(source.libraryUrl);
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: fontFamilies.bodyMedium,
+                  fontSize: fontSize.xs,
+                  color: source.libraryUrl ? colors.brand : colors.textMuted,
+                  textDecorationLine: source.libraryUrl ? "underline" : "none",
+                }}
+              >
+                {index > 0 ? `, ${source.title}` : source.title}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
       ) : null}
       <Pressable onPress={openPdf} accessibilityRole="link">
         <Image

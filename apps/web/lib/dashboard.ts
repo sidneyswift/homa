@@ -1,6 +1,10 @@
 import { getMapItem, type FourWeekPlan, type MapScores } from "@homa/core";
 
 import type { ArchivedScoring } from "./map/trajectory-eras";
+import {
+  attachPlanSourceRows,
+  type PlanSourceDisplayRow,
+} from "./map/plan-source-links";
 import { dashboardPlanFromRow, type DashboardPlan } from "./plan-week";
 import { createSupabaseServerClient } from "./supabase/server";
 
@@ -57,12 +61,27 @@ export async function getReportsForChildren(
 export async function getPlansForChildren(childIds: string[]): Promise<DashboardPlan[]> {
   if (childIds.length === 0) return [];
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("child_plans")
-    .select("child_id, subject_id, plan, progress, retest_at")
-    .in("child_id", childIds);
-  if (error) throw new Error(`child_plans read failed: ${error.message}`);
-  return (data ?? []).flatMap((row) => {
+  const [planResult, sourceResult] = await Promise.all([
+    supabase
+      .from("child_plans")
+      .select("child_id, subject_id, plan, progress, retest_at")
+      .in("child_id", childIds),
+    supabase
+      .from("family_asset_plan_links")
+      .select(
+        "child_id, subject_id, week, activity_index, activity_text, asset_id, source_title",
+      )
+      .in("child_id", childIds),
+  ]);
+  if (planResult.error) {
+    throw new Error(`child_plans read failed: ${planResult.error.message}`);
+  }
+  if (sourceResult.error) {
+    throw new Error(
+      `family asset plan links read failed: ${sourceResult.error.message}`,
+    );
+  }
+  const plans = (planResult.data ?? []).flatMap((row) => {
     const shaped = dashboardPlanFromRow({
       child_id: row.child_id as string,
       subject_id: row.subject_id as string,
@@ -72,6 +91,10 @@ export async function getPlansForChildren(childIds: string[]): Promise<Dashboard
     });
     return shaped ? [shaped] : [];
   });
+  return attachPlanSourceRows(
+    plans,
+    (sourceResult.data ?? []) as PlanSourceDisplayRow[],
+  );
 }
 
 export interface RecentWin {

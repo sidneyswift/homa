@@ -122,6 +122,9 @@ jobs:
       - name: Mobile chat unit tests
         run: pnpm check:mobile-chat
 
+      - name: Mobile planner unit tests
+        run: pnpm check:mobile-planner
+
       - name: Mobile voice unit tests
         run: pnpm check:mobile-voice
 
@@ -470,6 +473,10 @@ jobs:
       - name: Family Library retrieval disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:family-library-retrieval:postgres
+
+      - name: Family Library grounded-output disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm test:family-library-output:postgres
 
   # Guard shard 3 of 3: the acceptance E2Es and the two secret-needing
   # database checks, the three longest steps in the roster (each 24-50s),

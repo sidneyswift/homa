@@ -243,6 +243,7 @@ describe("archiveFromServerHistory", () => {
       childName: "Mateo",
       pdfUrl: "https://blob.example/page.pdf",
       pageCount: 1,
+      sources: [],
       status: "draft",
     });
     // Cards render above the reply words, matching live part order.
@@ -343,6 +344,27 @@ describe("toChatHistoryMaterial", () => {
     );
     assert.equal(mapped?.pageCount, 4);
     assert.equal(mapped?.pagePreviewUrls?.length, 4);
+  });
+
+  it("rebuilds Family Library source links from verified snapshots", () => {
+    const mapped = toChatHistoryMaterial(
+      materialRow({
+        family_sources: [
+          {
+            id: "20000000-0000-4000-8000-000000000001",
+            title: "Forest habitats workbook",
+          },
+        ],
+      }),
+    );
+    assert.deepEqual(mapped?.sources, [
+      {
+        id: "20000000-0000-4000-8000-000000000001",
+        title: "Forest habitats workbook",
+        libraryUrl:
+          "/app/library?asset=20000000-0000-4000-8000-000000000001",
+      },
+    ]);
   });
 });
 

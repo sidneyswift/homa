@@ -33,9 +33,17 @@ interface FamilyAssetSubjectTagRow {
   source: "model" | "parent" | "import" | "system";
 }
 
-export default async function LibraryPage() {
+export default async function LibraryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ asset?: string | string[] }>;
+}) {
   const data = await getAppShellData();
   if (!data) redirect("/onboarding");
+
+  const requestedAsset = (await searchParams).asset;
+  const requestedAssetId =
+    typeof requestedAsset === "string" ? requestedAsset : null;
 
   const supabase = await createSupabaseServerClient();
   const [assetResult, uploadResult, childLinkResult, subjectTagResult, gate] = await Promise.all([
@@ -114,6 +122,10 @@ export default async function LibraryPage() {
       subjects: subjectsByAsset.get(row.id) ?? [],
     }),
   );
+  const initialSelectedAssetId =
+    requestedAssetId && assets.some((asset) => asset.id === requestedAssetId)
+      ? requestedAssetId
+      : null;
   const uploads = ((uploadResult.data ?? []) as FamilyAssetUploadRow[]).map(
     toFamilyAssetUploadView,
   );
@@ -136,6 +148,7 @@ export default async function LibraryPage() {
           label: subject.displayName,
         }))}
         canUpload={access.canUpload}
+        initialSelectedAssetId={initialSelectedAssetId}
       />
     </PageColumn>
   );

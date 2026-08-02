@@ -39,6 +39,7 @@ function material(overrides: Partial<MaterialSummary> = {}): MaterialSummary {
     createdAt: "2026-07-10T12:00:00.000Z",
     pageCount: 1,
     pagePreviewUrls: null,
+    sources: [],
     ...overrides,
   };
 }

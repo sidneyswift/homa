@@ -48,6 +48,7 @@ let morningResearchBriefV2SchemaAvailable = false;
 let morningOfferFunnelSchemaAvailable = false;
 let familyBillingSubscriptionsSchemaAvailable = false;
 let familyLibrarySchemaAvailable = false;
+let familyAssetPlanLinksSchemaAvailable = false;
 
 const projectRef = new URL(url).hostname.split(".")[0];
 const sql = dbPassword
@@ -2683,9 +2684,11 @@ async function expectAuthenticatedIsolation() {
     `;
 
     let familyAssetUploadB = null;
+    let familyAssetA = null;
     let familyAssetB = null;
     let familyAssetChildB = null;
     let familyAssetTagB = null;
+    let familyAssetPlanLinkB = null;
     if (familyLibrarySchemaAvailable) {
       const [familyAssetUploadA] = await sql`
         insert into public.family_asset_uploads (
@@ -2713,7 +2716,7 @@ async function expectAuthenticatedIsolation() {
         )
         returning id
       `;
-      const [familyAssetA] = await sql`
+      [familyAssetA] = await sql`
         insert into public.family_assets (
           family_id, uploaded_by_user_id, source_upload_id, title, original_name, url,
           download_url, media_type, byte_size, file_kind
@@ -2823,6 +2826,39 @@ async function expectAuthenticatedIsolation() {
         )
         returning id
       `;
+      if (familyAssetPlanLinksSchemaAvailable) {
+        [familyAssetPlanLinkB] = await sql`
+          insert into public.family_asset_plan_links (
+            family_id, asset_id, child_id, subject_id, week,
+            activity_index, activity_text, source_title, source_locator
+          ) values (
+            ${familyBId}, ${familyAssetB.id}, ${childBId},
+            'isolation-check', 1, 0, 'Count the source examples.',
+            'Family B curriculum', 'page 1'
+          )
+          returning id
+        `;
+        let crossFamilyPlanSourceRejected = false;
+        try {
+          await sql`
+            insert into public.family_asset_plan_links (
+              family_id, asset_id, child_id, subject_id, week,
+              activity_index, activity_text, source_title
+            ) values (
+              ${familyBId}, ${familyAssetA.id}, ${childBId},
+              'isolation-check', 1, 1, 'Cross-family source.',
+              'Foreign curriculum'
+            )
+          `;
+        } catch {
+          crossFamilyPlanSourceRejected = true;
+        }
+        report(
+          "constraint rejects a cross-family planner source link",
+          crossFamilyPlanSourceRejected,
+          "cross-family planner source insert unexpectedly succeeded",
+        );
+      }
     }
 
     await expectAuthenticatedRead(
@@ -3045,6 +3081,50 @@ async function expectAuthenticatedIsolation() {
         },
         "cross-family token cannot mutate Family B family asset",
       );
+
+      if (familyAssetPlanLinkB) {
+        await expectAuthenticatedRead(
+          familyBUser.accessToken,
+          "family_asset_plan_links",
+          familyAssetPlanLinkB.id,
+          1,
+          "auth member can read own planner source link",
+        );
+        await expectAuthenticatedRead(
+          familyAUser.accessToken,
+          "family_asset_plan_links",
+          familyAssetPlanLinkB.id,
+          0,
+          "auth member cannot read another family's planner source link",
+        );
+        const familyAssetPlanLinkWriteFixture = {
+          keyColumn: "id",
+          keyValue: familyAssetPlanLinkB.id,
+          insertRow: {
+            family_id: familyBId,
+            asset_id: familyAssetB.id,
+            child_id: childBId,
+            subject_id: "isolation-check",
+            week: 1,
+            activity_index: 1,
+            activity_text: "Client-forged planner source.",
+            source_title: "Family B curriculum",
+          },
+          updateRow: { source_title: "Clients must never alter source links." },
+        };
+        await expectAuthenticatedWritesDenied(
+          familyBUser.accessToken,
+          "family_asset_plan_links",
+          familyAssetPlanLinkWriteFixture,
+          "auth member cannot mutate own planner source link",
+        );
+        await expectAuthenticatedWritesDenied(
+          familyAUser.accessToken,
+          "family_asset_plan_links",
+          familyAssetPlanLinkWriteFixture,
+          "cross-family token cannot mutate Family B planner source link",
+        );
+      }
     }
 
     if (subjectLessonBId) {
@@ -4078,6 +4158,22 @@ const FAMILY_LIBRARY_TABLES = [
     for (const table of FAMILY_LIBRARY_TABLES) await expectReadDenied(table);
   }
 }
+{
+  const response = await rest("family_asset_plan_links?select=id&limit=1", {
+    headers: { Prefer: "" },
+  });
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    coveredTables.add("family_asset_plan_links");
+    report(
+      "family_asset_plan_links absent from target (additive migration not applied yet); nothing exposed",
+      true,
+    );
+  } else {
+    familyAssetPlanLinksSchemaAvailable = true;
+    await expectReadDenied("family_asset_plan_links");
+  }
+}
 // Self-improving system tables (Layer 1-5): all admin-only, no client policies.
 await expectReadDenied("conversation_signals");
 await expectReadDenied("system_policies");
@@ -4674,6 +4770,22 @@ if (familyLibrarySchemaAvailable) {
     },
     "anon cannot forge family assets",
   );
+  if (familyAssetPlanLinksSchemaAvailable) {
+    await expectInsertDenied(
+      "family_asset_plan_links",
+      {
+        family_id: "00000000-0000-0000-0000-000000000000",
+        asset_id: "00000000-0000-0000-0000-000000000000",
+        child_id: "00000000-0000-0000-0000-000000000000",
+        subject_id: "intruder",
+        week: 1,
+        activity_index: 0,
+        activity_text: "Intruder source.",
+        source_title: "Intruder resource",
+      },
+      "anon cannot forge planner source links",
+    );
+  }
 }
 await expectInsertDenied(
   "session_context_snapshots",

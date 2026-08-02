@@ -11,8 +11,19 @@ import type { FourWeekPlan } from "@homa/core";
  */
 
 export type PlanEdit =
-  | { action: "add"; week: number; text: string }
-  | { action: "replace"; week: number; index: number; text: string }
+  | {
+      action: "add";
+      week: number;
+      text: string;
+      sourceFamilyAssetIds?: string[];
+    }
+  | {
+      action: "replace";
+      week: number;
+      index: number;
+      text: string;
+      sourceFamilyAssetIds?: string[];
+    }
   | { action: "remove"; week: number; index: number };
 
 export interface AppliedPlanEdits {

@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import type { FamilyAssetReference } from "../../../lib/library/family-asset-reference";
 import { planChecksStorageKey, usePlanChecks } from "../../../lib/use-plan-checks";
 import type { WeekdayCell } from "../../../lib/time-zone";
 import { KidAvatar } from "../../../components/dashboard/kid-avatar";
@@ -49,6 +50,8 @@ export interface PlannerDayItem {
   toneBg: string;
   toneInk: string;
   subjectLabel: string;
+  /** Family Library resources that grounded this activity. */
+  sources: FamilyAssetReference[];
 }
 
 export interface PlannerDay {
@@ -120,6 +123,26 @@ function ActivityCard({ item, plan }: { item: PlannerDayItem; plan: PlannerDayPl
           {item.text}
         </span>
       </label>
+      {item.sources.length > 0 ? (
+        <p className="ml-6 mt-1 text-[0.68rem] leading-snug text-subtle">
+          <span className="font-semibold">From </span>
+          {item.sources.map((source, index) => (
+            <span key={source.id}>
+              {index > 0 ? ", " : null}
+              {source.libraryUrl ? (
+                <a
+                  href={source.libraryUrl}
+                  className="underline decoration-border underline-offset-2 hover:text-body"
+                >
+                  {source.title}
+                </a>
+              ) : (
+                source.title
+              )}
+            </span>
+          ))}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -51,6 +51,11 @@ export function UnscheduledTray({
             <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.xs, color: colors.textSubtle }}>
               {activity.childName} · {activity.subjectName}
             </Text>
+            {activity.sources.length > 0 ? (
+              <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.xs, color: colors.textSubtle }}>
+                From {activity.sources.map((source) => source.title).join(", ")}
+              </Text>
+            ) : null}
           </View>
           <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.brand }}>
             Put on a day

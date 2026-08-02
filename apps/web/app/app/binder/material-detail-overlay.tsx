@@ -194,6 +194,31 @@ export function MaterialDetailOverlay({
           ) : null}
         </div>
 
+        {material.sources.length > 0 ? (
+          <div className="mt-3 rounded-md bg-page p-2.5">
+            <span className="block font-mono text-[0.6rem] uppercase tracking-widest text-subtle">
+              Made from
+            </span>
+            <div className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-sm">
+              {material.sources.map((source) =>
+                source.libraryUrl ? (
+                  <a
+                    key={source.id}
+                    href={source.libraryUrl}
+                    className="font-semibold text-strong underline decoration-border underline-offset-2 hover:text-brand"
+                  >
+                    {source.title}
+                  </a>
+                ) : (
+                  <span key={source.id} className="font-semibold text-muted">
+                    {source.title}
+                  </span>
+                ),
+              )}
+            </div>
+          </div>
+        ) : null}
+
         <a
           href={material.pdfUrl}
           target="_blank"

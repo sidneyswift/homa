@@ -558,7 +558,7 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
   const { family, children, loading: familyLoading } = useFamilyData();
   const weekStart = useMemo(() => startOfWeek(todayDateOnly()), []);
   const weekEnd = useMemo(() => addDays(weekStart, 6), [weekStart]);
-  const { events, scheduleRows, childPlans, loading, reload } = usePlannerData(
+  const { events, scheduleRows, childPlans, sourceLinks, loading, reload } = usePlannerData(
     family?.id ?? null,
     children,
     weekStart,
@@ -577,12 +577,12 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
   }, [refreshCount, reload]);
 
   const scheduledActivities = useMemo(
-    () => buildScheduledActivities(scheduleRows, childPlans, children),
-    [scheduleRows, childPlans, children],
+    () => buildScheduledActivities(scheduleRows, childPlans, children, sourceLinks),
+    [scheduleRows, childPlans, children, sourceLinks],
   );
   const unscheduled = useMemo(
-    () => buildUnscheduledActivities(childPlans, scheduleRows, children),
-    [childPlans, scheduleRows, children],
+    () => buildUnscheduledActivities(childPlans, scheduleRows, children, sourceLinks),
+    [childPlans, scheduleRows, children, sourceLinks],
   );
 
   async function handleToggleActivity(activity: ScheduledActivityView) {

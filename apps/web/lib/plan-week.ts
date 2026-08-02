@@ -6,6 +6,8 @@ import {
   type PlanWeek,
 } from "@homa/core";
 
+import type { FamilyAssetReferenceSnapshot } from "./library/family-asset-reference";
+
 import { profileInterestList } from "./map/profile-context";
 
 /**
@@ -26,6 +28,8 @@ export interface DashboardPlan {
   weeks: PlanWeek[];
   /** Server-synced check-offs, keyed "week.activityIndex". */
   progress: Record<string, boolean>;
+  /** Verified Family Library sources keyed by "week.activityIndex". */
+  activitySources: Record<string, FamilyAssetReferenceSnapshot[]>;
   /**
    * True when this week was derived from the child's AGE rather than
    * from anything the parent has told us, and is not stored.
@@ -94,6 +98,7 @@ export function withAgeTemplates(
         retestAt: new Date(nowMs + 28 * 24 * 60 * 60 * 1000).toISOString(),
         weeks: template.weeks,
         progress: {},
+        activitySources: {},
         provisional: true,
       } satisfies DashboardPlan,
     ];
@@ -178,5 +183,6 @@ export function dashboardPlanFromRow(row: {
     retestAt: row.retest_at,
     weeks,
     progress,
+    activitySources: {},
   };
 }

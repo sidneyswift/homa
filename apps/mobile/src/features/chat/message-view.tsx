@@ -14,6 +14,8 @@ import {
   type MemoryChipContent,
 } from "./message-utils";
 import { MaterialCard, type MaterialArtifact } from "./material-card";
+import { LibrarySourceCard } from "./library-source-card";
+import { parseLibrarySourceCardPart } from "./library-source-card-model";
 import { PlannerCard } from "./planner-card";
 import { QuestionCard } from "./question-card";
 import { parseQuestionCardPart } from "./question-card-model";
@@ -121,6 +123,14 @@ function MessagePartView({
             onTypeInstead={live ? questions.onQuestionTypeInstead : undefined}
             answeredSummary={questions.questionAnswers?.[partKey] ?? null}
           />
+        </View>
+      );
+    }
+    const librarySource = parseLibrarySourceCardPart(part);
+    if (librarySource) {
+      return (
+        <View style={{ marginTop: space.sm }}>
+          <LibrarySourceCard source={librarySource} />
         </View>
       );
     }

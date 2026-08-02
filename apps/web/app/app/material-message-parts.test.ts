@@ -137,6 +137,43 @@ describe("selectParentVisibleMaterialMessageParts", () => {
     assert.equal(selected.material.id, "math-v1");
   });
 
+  it("keeps packet data and rebuilds Family Library links from source ids", () => {
+    const [selected] = selectParentVisibleMaterialMessageParts([
+      printablePart({
+        id: "math-v1",
+        title: "Math facts",
+        skill: "addition",
+        childName: "Mateo",
+        previewUrl: "https://blob.example/math-v1.jpg",
+        pdfUrl: "https://blob.example/math-v1.pdf",
+        pageCount: 2,
+        pagePreviewUrls: [
+          "https://blob.example/math-v1-p1.jpg",
+          "https://blob.example/math-v1-p2.jpg",
+        ],
+        sources: [
+          {
+            id: "30000000-0000-4000-8000-000000000001",
+            title: "Favorite math workbook",
+            libraryUrl: "https://untrusted.example/source",
+          },
+        ],
+        status: "draft",
+        reviewPassed: true,
+      }),
+    ]);
+    assert.equal(selected.material.pageCount, 2);
+    assert.equal(selected.material.pagePreviewUrls?.length, 2);
+    assert.deepEqual(selected.material.sources, [
+      {
+        id: "30000000-0000-4000-8000-000000000001",
+        title: "Favorite math workbook",
+        libraryUrl:
+          "/app/library?asset=30000000-0000-4000-8000-000000000001",
+      },
+    ]);
+  });
+
   it("never leaks the synthetic legacy-part id onto the card", () => {
     const [selected] = selectParentVisibleMaterialMessageParts([
       {

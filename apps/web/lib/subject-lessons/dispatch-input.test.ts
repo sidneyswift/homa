@@ -477,6 +477,7 @@ describe("trusted printable lesson provenance", () => {
         childName: "Maya",
         requestSummary: null,
         revisesId: null,
+        sourceFamilyAssetIds: [],
         path: "html",
         lessonId: LESSON_ID,
       }

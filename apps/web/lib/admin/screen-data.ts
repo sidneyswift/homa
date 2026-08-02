@@ -148,6 +148,7 @@ export async function getFamilyScreenData(
           retestAt: row.retest_at,
           weeks,
           progress,
+          activitySources: {},
         });
       } catch (error) {
         console.error(

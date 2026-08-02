@@ -51,6 +51,14 @@ import {
   type PlanEdit,
 } from "./plan-edits";
 import {
+  attachPlanSourceRows,
+  planSourceLinksAfterEdits,
+  type CanonicalPlanSource,
+  type PlanSourceDisplayRow,
+  type PlanSourceLinkWrite,
+  type StoredPlanSourceLink,
+} from "./plan-source-links";
+import {
   cleanProfileFocus,
   cleanProfileInterests,
   firstFamilyStyle,
@@ -829,6 +837,23 @@ export async function getPlanBoard(
           join public.children c on c.id = p.child_id
           where p.child_id in ${sql(childIds)} and c.family_id = ${familyId}
         `;
+  const sourceRows =
+    childIds.length === 0
+      ? []
+      : await sql<PlanSourceDisplayRow[]>`
+          select link.child_id, link.subject_id, link.week,
+                 link.activity_index, link.activity_text,
+                 link.asset_id, link.source_title
+          from public.family_asset_plan_links link
+          join public.children c
+            on c.id = link.child_id and c.family_id = link.family_id
+          where link.family_id = ${familyId}
+            and link.child_id in ${sql(childIds)}
+        `;
+  const storedPlans = planRows.flatMap((planRow) => {
+    const shaped = dashboardPlanFromRow(planRow);
+    return shaped ? [shaped] : [];
+  });
   return {
     children: scoped.map((child) => ({
       id: child.id,
@@ -836,16 +861,24 @@ export async function getPlanBoard(
       avatarUrl: child.avatar_url,
       reportToken: child.token,
     })),
-    plans: withAgeTemplates(scoped, planRows.flatMap((row) => {
-      const shaped = dashboardPlanFromRow(row);
-      return shaped ? [shaped] : [];
-    })),
+    plans: withAgeTemplates(
+      scoped,
+      attachPlanSourceRows(storedPlans, sourceRows),
+    ),
   };
 }
 
 
 export type EditPlanOutcome =
-  | { status: "applied"; summary: string; plan: FourWeekPlan; added: number; replaced: number; removed: number }
+  | {
+      status: "applied";
+      summary: string;
+      plan: FourWeekPlan;
+      added: number;
+      replaced: number;
+      removed: number;
+      sourceLinks: PlanSourceLinkWrite[];
+    }
   | { status: "unknown_child" }
   | { status: "no_plan" }
   | { status: "invalid_edit"; note: string };
@@ -883,6 +916,59 @@ export async function editPlanActivities(
   if (!applied.ok) {
     return { status: "invalid_edit", note: applied.failure.note };
   }
+  const requestedAssetIds = [
+    ...new Set(
+      edits.flatMap((edit) =>
+        edit.action === "remove" ? [] : edit.sourceFamilyAssetIds ?? [],
+      ),
+    ),
+  ];
+  const canonicalSources =
+    requestedAssetIds.length === 0
+      ? []
+      : await sql<CanonicalPlanSource[]>`
+          select id, title
+          from public.family_assets
+          where family_id = ${familyId}
+            and id in ${sql(requestedAssetIds)}
+            and deleted_at is null
+        `;
+  if (canonicalSources.length !== requestedAssetIds.length) {
+    return {
+      status: "invalid_edit",
+      note: "One of those Family Library source ids is not active in this family. Open the source again before editing the plan.",
+    };
+  }
+  const existingSourceRows = await sql<
+    Array<{
+      asset_id: string;
+      week: number;
+      activity_index: number;
+      activity_text: string;
+      source_title: string;
+      source_locator: string | null;
+    }>
+  >`
+    select asset_id, week, activity_index, activity_text,
+           source_title, source_locator
+    from public.family_asset_plan_links
+    where family_id = ${familyId}
+      and child_id = ${childId}
+      and subject_id = ${subjectId}
+  `;
+  const sourceLinks = planSourceLinksAfterEdits({
+    plan: row.plan,
+    existing: existingSourceRows.map((link): StoredPlanSourceLink => ({
+      assetId: link.asset_id,
+      week: link.week,
+      activityIndex: link.activity_index,
+      activityText: link.activity_text,
+      sourceTitle: link.source_title,
+      sourceLocator: link.source_locator,
+    })),
+    edits,
+    canonicalSources,
+  });
   // One transaction for the plan write AND the whole schedule cascade
   // (issue #256): a crash between the UPDATE and the reinserts below
   // would strand schedule rows whose indices point at the wrong
@@ -945,6 +1031,28 @@ export async function editPlanActivities(
         `;
       }
     }
+    const touchedWeeks = [...new Set(edits.map((edit) => edit.week))];
+    for (const week of touchedWeeks) {
+      await tx`
+        delete from public.family_asset_plan_links
+        where family_id = ${familyId}
+          and child_id = ${childId}
+          and subject_id = ${subjectId}
+          and week = ${week}
+      `;
+      for (const link of sourceLinks.filter((candidate) => candidate.week === week)) {
+        await tx`
+          insert into public.family_asset_plan_links (
+            family_id, asset_id, child_id, subject_id, week,
+            activity_index, activity_text, source_title, source_locator
+          ) values (
+            ${familyId}, ${link.assetId}, ${childId}, ${subjectId}, ${link.week},
+            ${link.activityIndex}, ${link.activityText}, ${link.sourceTitle},
+            ${link.sourceLocator}
+          )
+        `;
+      }
+    }
   });
   await touchFamily(familyId, sql);
   return {
@@ -954,6 +1062,7 @@ export async function editPlanActivities(
     added: applied.result.added,
     replaced: applied.result.replaced,
     removed: applied.result.removed,
+    sourceLinks,
   };
 }
 

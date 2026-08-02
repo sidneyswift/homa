@@ -1,5 +1,10 @@
 import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
 
+import {
+  familyAssetReferencesForSurface,
+  type FamilyAssetReference,
+} from "./library/family-asset-reference";
+import { planActivitySourceSnapshots } from "./map/plan-source-links";
 import type { DashboardPlan } from "./plan-week";
 import { currentWeekIndex } from "./plan-week";
 import { scheduleKey } from "./plan-schedule";
@@ -40,6 +45,8 @@ export interface PlannerActivity {
   /** The real persisted date (YYYY-MM-DD) from plan_activity_schedule,
    * or null when the activity has never been put on a day. */
   scheduledDate: string | null;
+  /** Family Library resources that grounded this activity. */
+  sources: FamilyAssetReference[];
 }
 
 export interface PlannerWeekDetail {
@@ -99,6 +106,8 @@ export function shapePlannerPlan(
     fullWeeks: boolean;
     /** scheduleKey -> YYYY-MM-DD, from scheduledDatesByActivity. */
     scheduledDates: ReadonlyMap<string, string>;
+    /** Optional deployment origin for channel-safe Library links. */
+    siteRoot?: string;
   },
 ): PlannerPlanPayload {
   const currentIdx = currentWeekIndex(plan, options.nowMs);
@@ -116,6 +125,10 @@ export function shapePlannerPlan(
           options.scheduledDates.get(
             scheduleKey(plan.childId, plan.subjectId, week.week, index),
           ) ?? null,
+        sources: familyAssetReferencesForSurface(
+          planActivitySourceSnapshots(plan, week.week, index),
+          { siteRoot: options.siteRoot },
+        ),
       })),
     };
   };

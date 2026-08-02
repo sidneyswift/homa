@@ -26,6 +26,7 @@ function material(overrides: Partial<BinderMaterial> = {}): BinderMaterial {
     createdAt: new Date(Date.UTC(2026, 6, 28, 12)).toISOString(),
     pageCount: 1,
     pagePreviewUrls: null,
+    sources: [],
     ...overrides,
   };
 }

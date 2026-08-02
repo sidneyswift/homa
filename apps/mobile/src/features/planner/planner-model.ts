@@ -1,6 +1,7 @@
 import type { ChildPlanRecord } from "../../lib/child-plans";
 import type { PlanActivityScheduleRecord } from "../../lib/plan-schedule";
 import type { ChildRecord } from "../../lib/family";
+import type { FamilyAssetPlanLinkRecord } from "../../lib/family-asset-plan-links";
 
 /**
  * Joins plan_activity_schedule's dates with child_plans' text, ported
@@ -36,6 +37,11 @@ export interface PlanActivityView {
   activityIndex: number;
   text: string;
   done: boolean;
+  sources: {
+    id: string;
+    title: string;
+    libraryUrl: string;
+  }[];
 }
 
 export interface ScheduledActivityView extends PlanActivityView {
@@ -53,10 +59,37 @@ function childIndexOf(children: ChildRecord[], childId: string): number {
   return index === -1 ? 0 : index;
 }
 
+function activitySources(
+  rows: readonly FamilyAssetPlanLinkRecord[],
+  input: {
+    childId: string;
+    subjectId: string;
+    week: number;
+    activityIndex: number;
+    activityText: string;
+  },
+): PlanActivityView["sources"] {
+  return rows
+    .filter(
+      (row) =>
+        row.childId === input.childId &&
+        row.subjectId === input.subjectId &&
+        row.week === input.week &&
+        row.activityIndex === input.activityIndex &&
+        row.activityText === input.activityText,
+    )
+    .map((row) => ({
+      id: row.assetId,
+      title: row.sourceTitle,
+      libraryUrl: row.libraryUrl,
+    }));
+}
+
 export function buildScheduledActivities(
   scheduleRows: PlanActivityScheduleRecord[],
   childPlans: ChildPlanRecord[],
   children: ChildRecord[],
+  sourceLinks: readonly FamilyAssetPlanLinkRecord[] = [],
 ): ScheduledActivityView[] {
   const views: ScheduledActivityView[] = [];
   for (const row of scheduleRows) {
@@ -78,6 +111,13 @@ export function buildScheduledActivities(
       activityIndex: row.activity_index,
       text,
       done: Boolean(plan.progress[`${row.week}.${row.activity_index}`]),
+      sources: activitySources(sourceLinks, {
+        childId: row.child_id,
+        subjectId: row.subject_id,
+        week: row.week,
+        activityIndex: row.activity_index,
+        activityText: text,
+      }),
       scheduledDate: row.scheduled_date,
     });
   }
@@ -91,6 +131,7 @@ export function buildUnscheduledActivities(
   childPlans: ChildPlanRecord[],
   scheduleRows: PlanActivityScheduleRecord[],
   children: ChildRecord[],
+  sourceLinks: readonly FamilyAssetPlanLinkRecord[] = [],
 ): PlanActivityView[] {
   const views: PlanActivityView[] = [];
   for (const plan of childPlans) {
@@ -117,6 +158,13 @@ export function buildUnscheduledActivities(
         activityIndex,
         text,
         done: Boolean(plan.progress[`${week}.${activityIndex}`]),
+        sources: activitySources(sourceLinks, {
+          childId: plan.child_id,
+          subjectId: plan.subject_id,
+          week,
+          activityIndex,
+          activityText: text,
+        }),
       });
     });
   }

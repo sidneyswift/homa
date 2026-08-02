@@ -1,4 +1,8 @@
 import { selectParentVisibleMaterialRevisions } from "../../lib/materials/parent-visible";
+import {
+  familyAssetReferencesForSurface,
+  parseFamilyAssetReferenceSnapshots,
+} from "../../lib/library/family-asset-reference";
 import type { MaterialArtifact } from "./material-card";
 
 type MaterialStatus = "draft" | "final" | "superseded";
@@ -86,6 +90,19 @@ function parseMaterialMessagePart(
         typeof material.childName === "string" ? material.childName : null,
       previewUrl: material.previewUrl,
       pdfUrl: material.pdfUrl,
+      ...(typeof material.pageCount === "number"
+        ? { pageCount: material.pageCount }
+        : {}),
+      ...(Array.isArray(material.pagePreviewUrls)
+        ? {
+            pagePreviewUrls: material.pagePreviewUrls.filter(
+              (url): url is string => typeof url === "string",
+            ),
+          }
+        : {}),
+      sources: familyAssetReferencesForSurface(
+        parseFamilyAssetReferenceSnapshots(material.sources),
+      ),
     },
   };
 }

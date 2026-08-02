@@ -5,7 +5,13 @@ import {
   TOOL_DEADLINE,
 } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { emitFamilyAssetUsed } from "../../lib/library/family-asset-events";
+import {
+  familyAssetReferencesForSurface,
+  MAX_FAMILY_ASSET_REFERENCES,
+} from "../../lib/library/family-asset-reference";
 import { emitMapEvent } from "../../lib/map/events";
+import { siteUrl } from "../../lib/map/email";
 import { MAX_ACTIVITY_TEXT, type PlanEdit } from "../../lib/map/plan-edits";
 import { editPlanActivities, getPlanBoard } from "../../lib/map/store";
 
@@ -53,19 +59,43 @@ const editSchema = z
       .max(MAX_ACTIVITY_TEXT)
       .optional()
       .describe("The activity, one to three plain sentences a parent can act on. Required for add and replace."),
+    sourceFamilyAssetIds: z
+      .array(z.string().uuid())
+      .max(MAX_FAMILY_ASSET_REFERENCES)
+      .optional()
+      .describe(
+        "Exact Family Library asset ids that ground this added or replaced activity. Use ids from get_family_asset. Not allowed for remove.",
+      ),
   })
   .strict();
 
 function toPlanEdit(edit: z.infer<typeof editSchema>): PlanEdit | null {
   if (edit.action === "add") {
-    return edit.text ? { action: "add", week: edit.week, text: edit.text } : null;
+    return edit.text
+      ? {
+          action: "add",
+          week: edit.week,
+          text: edit.text,
+          ...(edit.sourceFamilyAssetIds
+            ? { sourceFamilyAssetIds: edit.sourceFamilyAssetIds }
+            : {}),
+        }
+      : null;
   }
   if (edit.action === "replace") {
     return edit.index !== undefined && edit.text
-      ? { action: "replace", week: edit.week, index: edit.index, text: edit.text }
+      ? {
+          action: "replace",
+          week: edit.week,
+          index: edit.index,
+          text: edit.text,
+          ...(edit.sourceFamilyAssetIds
+            ? { sourceFamilyAssetIds: edit.sourceFamilyAssetIds }
+            : {}),
+        }
       : null;
   }
-  return edit.index !== undefined
+  return edit.index !== undefined && !edit.sourceFamilyAssetIds?.length
     ? { action: "remove", week: edit.week, index: edit.index }
     : null;
 }
@@ -141,6 +171,28 @@ export default defineBoundedTool({
       removed: outcome.removed,
     });
 
+    const usedAssetIds = [
+      ...new Set(
+        edits.flatMap((edit) =>
+          edit.action === "remove" ? [] : edit.sourceFamilyAssetIds ?? [],
+        ),
+      ),
+    ];
+    for (const assetId of usedAssetIds) {
+      try {
+        await emitFamilyAssetUsed({
+          familyId,
+          assetId,
+          useKind: "planner",
+        });
+      } catch (error) {
+        console.error(
+          "family Library planner-use event failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      }
+    }
+
     const touchedWeeks = [...new Set(edits.map((edit) => edit.week))].sort();
     return {
       updated: true,
@@ -154,7 +206,22 @@ export default defineBoundedTool({
         .map((week) => ({
           week: week.week,
           focus: week.focus,
-          activities: week.activities.map((text, index) => ({ index, text })),
+          activities: week.activities.map((text, index) => ({
+            index,
+            text,
+            sources: outcome.sourceLinks
+              .filter(
+                (link) =>
+                  link.week === week.week && link.activityIndex === index,
+              )
+              .map((link) => ({
+                ...familyAssetReferencesForSurface(
+                  [{ id: link.assetId, title: link.sourceTitle }],
+                  { siteRoot: siteUrl() },
+                )[0],
+                sourceLocator: link.sourceLocator,
+              })),
+          })),
         })),
     };
   },

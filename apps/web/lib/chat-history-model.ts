@@ -15,6 +15,11 @@
 import type { EveMessage } from "eve/client";
 
 import {
+  familyAssetReferencesForSurface,
+  parseFamilyAssetReferenceSnapshots,
+  type FamilyAssetReference,
+} from "./library/family-asset-reference";
+import {
   selectParentVisibleMaterialRevisions,
   type MaterialRevisionCandidate,
 } from "./materials/parent-visible";
@@ -58,6 +63,8 @@ export interface ChatHistoryMaterial extends MaterialRevisionCandidate {
   pageCount: number;
   /** Per-page previews for multi-page materials, page 1 first. */
   pagePreviewUrls: string[] | null;
+  /** Verified Family Library inputs, linked back to their originals. */
+  sources: FamilyAssetReference[];
   /** materials.created_at as epoch ms, for transcript placement. */
   atMs: number;
 }
@@ -75,6 +82,7 @@ export interface ChatHistoryMaterialRow {
   child_name: string | null;
   page_count?: number | string | null;
   page_preview_urls?: unknown;
+  family_sources?: unknown;
   status: "draft" | "final" | "superseded";
   revises: string | null;
   review_pass: string | null;
@@ -205,6 +213,9 @@ export function toChatHistoryMaterial(
     pdfUrl: row.pdf_url,
     pageCount: parsePageCount(row.page_count),
     pagePreviewUrls: parsePagePreviewUrls(row.page_preview_urls),
+    sources: familyAssetReferencesForSurface(
+      parseFamilyAssetReferenceSnapshots(row.family_sources),
+    ),
     atMs,
   };
 }
@@ -230,6 +241,7 @@ function materialToolPart(material: ChatHistoryMaterial) {
         ...(material.pagePreviewUrls
           ? { pagePreviewUrls: material.pagePreviewUrls }
           : {}),
+        sources: material.sources,
         status: material.status,
         revisesId: material.revisesId,
         reviewPassed: material.reviewPass,

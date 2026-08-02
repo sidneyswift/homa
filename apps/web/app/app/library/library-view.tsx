@@ -48,6 +48,7 @@ import {
   filterFamilyAssets,
   stableFamilyAssetDate,
 } from "../../../lib/library/family-asset-shelf";
+import { familyAssetLibraryHref } from "../../../lib/library/family-asset-reference";
 import {
   LibraryDetailPanel,
   type LibraryChildOption,
@@ -171,12 +172,14 @@ export function LibraryView({
   childOptions = [],
   subjectOptions = [],
   canUpload = true,
+  initialSelectedAssetId = null,
 }: {
   initialAssets: FamilyAssetView[];
   initialUploads: FamilyAssetUploadView[];
   childOptions?: LibraryChildOption[];
   subjectOptions?: LibrarySubjectOption[];
   canUpload?: boolean;
+  initialSelectedAssetId?: string | null;
 }) {
   const pickerRef = useRef<HTMLInputElement>(null);
   const resumePickerRef = useRef<HTMLInputElement>(null);
@@ -194,7 +197,12 @@ export function LibraryView({
   const [uploadsExpanded, setUploadsExpanded] = useState(
     initialAssets.length === 0 && initialUploads.length > 0,
   );
-  const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
+  const [selectedAssetId, setSelectedAssetId] = useState<string | null>(() =>
+    initialSelectedAssetId &&
+    initialAssets.some((asset) => asset.id === initialSelectedAssetId)
+      ? initialSelectedAssetId
+      : null,
+  );
   const [pageError, setPageError] = useState<string | null>(null);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [privacyPromptOpen, setPrivacyPromptOpen] = useState(false);
@@ -283,12 +291,22 @@ export function LibraryView({
 
   function openAsset(asset: FamilyAssetView) {
     setSelectedAssetId(asset.id);
+    window.history.replaceState(
+      window.history.state,
+      "",
+      familyAssetLibraryHref(asset.id),
+    );
     void fetch("/api/library/events", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ kind: "reopened", assetId: asset.id }),
       keepalive: true,
     }).catch(() => undefined);
+  }
+
+  function closeAsset() {
+    setSelectedAssetId(null);
+    window.history.replaceState(window.history.state, "", "/app/library");
   }
 
   function updateUpload(id: string, changes: Partial<UploadRow>) {
@@ -1190,7 +1208,7 @@ export function LibraryView({
           asset={selectedAsset}
           childOptions={childOptions}
           subjectOptions={subjectOptions}
-          onClose={() => setSelectedAssetId(null)}
+          onClose={closeAsset}
           onUpdated={(updated) =>
             setAssets((current) =>
               current.map((asset) => (asset.id === updated.id ? updated : asset)),
@@ -1198,7 +1216,7 @@ export function LibraryView({
           }
           onDeleted={(assetId) => {
             setAssets((current) => current.filter((asset) => asset.id !== assetId));
-            setSelectedAssetId(null);
+            closeAsset();
           }}
         />
       ) : null}

@@ -13,7 +13,14 @@ import {
   completeAcceptedOfferFulfillment,
   reserveAcceptedOfferFulfillment,
 } from "../../lib/conversation-continuity/offer-fulfillment";
+import { emitFamilyAssetUsed } from "../../lib/library/family-asset-events";
+import { resolveMaterialFamilySources } from "../../lib/library/family-asset-provenance";
+import {
+  familyAssetReferencesForSurface,
+  MAX_FAMILY_ASSET_REFERENCES,
+} from "../../lib/library/family-asset-reference";
 import { emitMapEvent } from "../../lib/map/events";
+import { siteUrl } from "../../lib/map/email";
 import {
   blobConfigured,
   childAgeYearsForFamily,
@@ -208,6 +215,13 @@ export const createPrintableInputSchema = z.object({
     .uuid()
     .optional()
     .describe("When this is a revision, the id of the version it replaces (from the earlier create result). Keeps the version chain intact."),
+  sourceFamilyAssetIds: z
+    .array(z.uuid())
+    .max(MAX_FAMILY_ASSET_REFERENCES)
+    .optional()
+    .describe(
+      "Exact Family Library asset ids returned by get_family_asset that grounded this material. Omit on a revision to inherit its prior sources; pass an empty array only to deliberately clear them.",
+    ),
   requestSummary: z
     .string()
     .trim()
@@ -231,6 +245,7 @@ export interface PrintableGenerationInput {
   childName: string | null;
   requestSummary: string | null;
   revisesId: string | null;
+  sourceFamilyAssetIds: string[];
   path: "html" | "pageImageUrl" | "pages";
   lessonId?: string;
 }
@@ -294,6 +309,7 @@ export function buildPrintableGenerationInput(
     childName: input.childName ?? null,
     requestSummary: input.requestSummary ?? null,
     revisesId: input.revisesId ?? null,
+    sourceFamilyAssetIds: input.sourceFamilyAssetIds ?? [],
     path,
     ...(trustedLesson ? { lessonId: trustedLesson.lessonId } : {}),
   };
@@ -355,6 +371,22 @@ const createPrintable = defineBoundedTool({
     if (subjectLessonRestriction) {
       return { created: false, note: subjectLessonRestriction };
     }
+
+    const sourceResolution = await resolveMaterialFamilySources({
+      familyId,
+      requestedAssetIds: input.sourceFamilyAssetIds,
+      revisesMaterialId: input.revisesId,
+    });
+    if (!sourceResolution.ok) {
+      return {
+        created: false,
+        note:
+          sourceResolution.reason === "too-many-sources"
+            ? `A material can cite at most ${MAX_FAMILY_ASSET_REFERENCES} Family Library sources. Choose the sources that directly grounded this output.`
+            : "One of those Family Library source ids is not active in this family. Find and open the source again before creating the material.",
+      };
+    }
+    const familySources = sourceResolution.sources;
 
     if (!blobConfigured()) {
       return {
@@ -740,6 +772,7 @@ const createPrintable = defineBoundedTool({
       pageCount: rendered.pageCount,
       ...(rendered.pageCount > 1 ? { pagePreviewUrls } : {}),
       ...(input.pageRoles ? { pageRoles: input.pageRoles } : {}),
+      familySources,
       input: buildPrintableGenerationInput(
         input,
         input.pages ? "pages" : input.pageImageUrl ? "pageImageUrl" : "html",
@@ -852,6 +885,21 @@ const createPrintable = defineBoundedTool({
         };
       }
       materialId = insertedRow.id;
+    }
+
+    for (const familySource of familySources) {
+      try {
+        await emitFamilyAssetUsed({
+          familyId,
+          assetId: familySource.id,
+          useKind: "material",
+        });
+      } catch (error) {
+        console.error(
+          "family Library material-use event failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      }
     }
 
     // SMS delivery, gated on the review: a page the reviewer flagged
@@ -988,6 +1036,9 @@ const createPrintable = defineBoundedTool({
         revisesId: input.revisesId ?? null,
         reviewPassed: review === null ? null : review.pass,
         pageGeometry: rendered.pageGeometry,
+        sources: familyAssetReferencesForSurface(familySources, {
+          siteRoot: siteUrl(),
+        }),
       },
       review,
       sentByText,
