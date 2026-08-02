@@ -25,6 +25,12 @@ import {
   type VoiceHomaSessionState,
   type VoiceToolEffect,
 } from "./realtime-tool-effects";
+import {
+  readRemoteAudioLevel,
+  smoothVoiceLevel,
+  visualVoiceLevel,
+  type AudioEnergySample,
+} from "./remote-audio-level";
 import { settledTurns, type VoiceTurn } from "./voice-transcript";
 
 /** The client secret is scoped and short lived. It is safe to use only for
@@ -47,6 +53,7 @@ type VoiceStatus =
 export interface VoiceSession {
   messages: readonly EveMessage[];
   status: VoiceStatus;
+  assistantAudioLevel: number | null;
   turnActive: boolean;
   muted: boolean;
   pauseReason: string | null;
@@ -105,6 +112,7 @@ export function useVoiceSession(
   const [error, setError] = useState<string | null>(null);
   const [muted, setMuted] = useState(false);
   const [pauseReason, setPauseReason] = useState<string | null>(null);
+  const [assistantAudioLevel, setAssistantAudioLevel] = useState<number | null>(null);
   const [turns, setTurns] = useState<readonly VoiceTurn[]>([]);
   const [toolEffects, setToolEffects] = useState<readonly VoiceToolEffect[]>([]);
   const peerRef = useRef<RTCPeerConnection | null>(null);
@@ -129,6 +137,44 @@ export function useVoiceSession(
 
   useEffect(() => {
     statusRef.current = status;
+  }, [status]);
+
+  useEffect(() => {
+    if (status !== "speaking") return;
+
+    const peer = peerRef.current;
+    if (!peer) return;
+    let cancelled = false;
+    let polling = false;
+    let previousEnergy: AudioEnergySample | null = null;
+
+    const sample = async () => {
+      if (cancelled || polling) return;
+      polling = true;
+      try {
+        const report = await peer.getStats();
+        if (cancelled) return;
+        const reading = readRemoteAudioLevel(report, previousEnergy);
+        previousEnergy = reading.energy;
+        if (reading.level === null) return;
+        const visualLevel = visualVoiceLevel(reading.level);
+        setAssistantAudioLevel((current) =>
+          smoothVoiceLevel(current ?? 0, visualLevel),
+        );
+      } catch {
+        // Some WebRTC builds omit audio stats. The aura keeps its calm
+        // speaking fallback instead of interrupting the conversation.
+      } finally {
+        polling = false;
+      }
+    };
+
+    void sample();
+    const interval = setInterval(() => void sample(), 80);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [status]);
 
   const authenticatedFetch = useCallback(async (path: string, init: RequestInit = {}) => {
@@ -185,7 +231,10 @@ export function useVoiceSession(
       );
       if (typeof event !== "object" || event === null) return;
       const type = (event as { type?: unknown }).type;
-      if (type === "output_audio_buffer.started") setStatus("speaking");
+      if (type === "output_audio_buffer.started") {
+        setAssistantAudioLevel(null);
+        setStatus("speaking");
+      }
       if (type === "output_audio_buffer.stopped") setStatus("listening");
     },
     [persistSettledTurns],
@@ -481,6 +530,7 @@ export function useVoiceSession(
   return {
     messages: messagesFromVoiceToolEffects(toolEffects),
     status,
+    assistantAudioLevel: status === "speaking" ? assistantAudioLevel : null,
     turnActive,
     muted,
     pauseReason,

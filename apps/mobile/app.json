@@ -20,11 +20,16 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSMicrophoneUsageDescription": "Homa uses your microphone when you choose to talk or record a lesson.",
-        "NSCameraUsageDescription": "Homa may use your camera during a live conversation when you choose to share what you are seeing."
+        "NSCameraUsageDescription": "Homa may use your camera during a live conversation when you choose to share what you are seeing.",
+        "NSCalendarsWriteOnlyAccessUsageDescription": "Homa adds only the planner items you choose. It cannot read your calendar."
       }
     },
     "android": {
       "package": "com.thankshoma.homa",
+      "blockedPermissions": [
+        "android.permission.READ_CALENDAR",
+        "android.permission.WRITE_CALENDAR"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#FBF7F0",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -55,7 +60,8 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 120
         }
-      ]
+      ],
+      "./plugins/with-write-only-calendar"
     ],
     "experiments": {
       "reactCompiler": true

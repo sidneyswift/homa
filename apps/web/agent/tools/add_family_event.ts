@@ -60,6 +60,16 @@ export default defineBoundedTool({
         .max(500)
         .optional()
         .describe("Any extra detail the parent gave, in her own words."),
+      recurrence: z
+        .object({
+          frequency: z.literal("weekly"),
+          interval: z.number().int().min(1).max(52),
+          weekdays: z.array(z.number().int().min(0).max(6)).min(1).max(7),
+          until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
+        })
+        .strict()
+        .optional()
+        .describe("Weekly series when the parent says this repeats. Weekdays use Sunday 0 through Saturday 6. Omit for a one-time event."),
     })
     .strict(),
   async execute(input, ctx) {

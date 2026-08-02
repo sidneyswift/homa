@@ -326,7 +326,11 @@ export function VoiceScreen() {
               }
               hitSlop={20}
             >
-              <HomaCharacter state={characterState} size={CHARACTER_SIZE} />
+              <HomaCharacter
+                state={characterState}
+                size={CHARACTER_SIZE}
+                audioLevel={session.assistantAudioLevel}
+              />
             </Pressable>
           </View>
           {statusText ? (
@@ -398,7 +402,13 @@ export function VoiceScreen() {
           }
           setOverlayModel((current) => dismissActiveOverlay(current));
         }}
-        float={<HomaCharacter state={characterState} size={PUCK_SIZE} />}
+        float={(
+          <HomaCharacter
+            state={characterState}
+            size={PUCK_SIZE}
+            audioLevel={session.assistantAudioLevel}
+          />
+        )}
       />
     </View>
   );
