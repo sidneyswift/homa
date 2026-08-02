@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 
+import { progressEvidenceDerivationSchema } from "@homa/core";
 import { z } from "zod";
 
 import { progressConflictResolvedOutcomeSchema } from "./check-in-schema";
@@ -20,6 +21,7 @@ const evidenceSchema = z
     familyId: z.string(),
     itemId: z.string(),
     answer: z.enum(["easily", "getting_there", "not_yet"]),
+    derivation: progressEvidenceDerivationSchema.default("unknown"),
     source: z.enum([
       "journal",
       "conversation",

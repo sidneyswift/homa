@@ -5,6 +5,11 @@ export type ProgressEvidenceAnswer =
   | "getting_there"
   | "not_yet";
 
+export type ProgressEvidenceDerivation =
+  | "direct"
+  | "inferred"
+  | "unknown";
+
 export type ProgressSourceKind =
   | "journal"
   | "conversation"
@@ -250,6 +255,7 @@ export interface ProgressEvidence {
   familyId: string;
   itemId: string;
   answer: ProgressEvidenceAnswer;
+  derivation: ProgressEvidenceDerivation;
   source: ProgressSourceKind;
   memberUserId: string | null;
   adultDisplayName: string | null;
@@ -295,6 +301,7 @@ export type ProgressConflict =
 
 export interface ProgressEvidenceSourceView {
   kind: ProgressSourceKind;
+  derivation: ProgressEvidenceDerivation;
   adultDisplayName: string | null;
   checkInId: string | null;
 }

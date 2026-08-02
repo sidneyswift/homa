@@ -11,6 +11,7 @@ const evidence: ProgressEvidence = {
   familyId: "family-1",
   itemId: "math.counts-to-5",
   answer: "easily",
+  derivation: "direct",
   source: "checklist",
   memberUserId: "adult-1",
   adultDisplayName: "Elena",
@@ -98,6 +99,42 @@ describe("strict ChildProgressView schema", () => {
     );
     assert.throws(() =>
       parseChildProgressView({ ...view, snapshots: [] })
+    );
+  });
+
+  it("requires a closed derivation value on every evidence source", () => {
+    const view = validView();
+    const subject = view.subjects[0];
+    const domain = subject.domains[0];
+    const topic = domain.topics[0];
+    assert.ok(topic.source);
+
+    const missing = structuredClone(view) as unknown as Record<
+      string,
+      unknown
+    >;
+    const missingSource = (
+      (missing.subjects as Array<Record<string, unknown>>)[0]
+        .domains as Array<Record<string, unknown>>
+    )[0].topics as Array<Record<string, unknown>>;
+    delete (missingSource[0].source as Record<string, unknown>)
+      .derivation;
+    assert.throws(() => parseChildProgressView(missing));
+
+    assert.throws(() =>
+      parseChildProgressView({
+        ...view,
+        subjects: [{
+          ...subject,
+          domains: [{
+            ...domain,
+            topics: [{
+              ...topic,
+              source: { ...topic.source, derivation: "certain" },
+            }],
+          }],
+        }],
+      })
     );
   });
 });

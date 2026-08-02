@@ -20,6 +20,7 @@ function evidence(
     familyId: FAMILY_ID,
     itemId: "math.counts-to-5",
     answer: "easily",
+    derivation: "direct",
     source: "check_in",
     memberUserId: "member-1",
     adultDisplayName: "Elena",

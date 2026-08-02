@@ -34,6 +34,7 @@ import type {
   ProgressConflict,
   ProgressEvidence,
   ProgressEvidenceAnswer,
+  ProgressEvidenceDerivation,
   ProgressSelectionAnswer,
   ProgressSourceKind,
 } from "./types";
@@ -271,6 +272,7 @@ interface ProgressEvidenceWriteFields {
   memberUserId: string | null;
   itemId: string;
   answer: ProgressEvidenceAnswer;
+  derivation: ProgressEvidenceDerivation;
   quote: string | null;
   channel: ProgressCheckInChannel | null;
   messageId: string | null;
@@ -406,6 +408,7 @@ function toPublicProgressEvidence(
     familyId: evidence.familyId,
     itemId: evidence.itemId,
     answer: evidence.answer,
+    derivation: evidence.derivation,
     source: evidence.source,
     memberUserId: evidence.memberUserId,
     adultDisplayName: evidence.adultDisplayName,
@@ -876,6 +879,7 @@ export class ChildProgressService {
             childId: input.childId,
             memberUserId: input.memberUserId,
             source: input.source,
+            derivation: "direct",
             itemId: change.itemId,
             answer: change.answer,
             quote: null,
@@ -1229,6 +1233,7 @@ export class ChildProgressService {
   ): Promise<RecordProgressEvidenceResult> {
     const write: ProgressEvidenceWrite = {
       ...input,
+      derivation: "direct",
       channel: input.channel ?? null,
       messageId: input.messageId ?? null,
       providerMessageId: input.providerMessageId ?? null,
@@ -1597,6 +1602,8 @@ export class ChildProgressService {
         childId: input.childId,
         memberUserId: input.memberUserId,
         source: input.source ?? "journal",
+        derivation:
+          claim.confidence === "high" ? "direct" : "inferred",
         itemId: claim.itemId,
         answer: claim.answer,
         quote: Array.from(claim.quote).slice(0, 500).join(""),
@@ -1625,6 +1632,7 @@ export class ChildProgressService {
       childId: input.childId,
       memberUserId: input.memberUserId,
       source: input.source ?? "journal",
+      derivation: "unknown",
       itemId: candidate.itemId,
       answer: candidate.answer,
       quote: Array.from(candidate.clause).slice(0, 500).join(""),
@@ -1886,6 +1894,7 @@ export class ChildProgressService {
       familyId: write.familyId,
       itemId: write.itemId,
       answer: write.answer,
+      derivation: write.derivation,
       memberUserId: write.memberUserId,
       quote: write.quote,
       channel: write.channel,

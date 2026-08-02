@@ -37,6 +37,7 @@ describe("native Progress child-safe presentation contract", () => {
     assert.match(cardSource, /expanded \? "Hide details" : "Show details"/u);
     assert.match(cardSource, /minHeight: 44/u);
     assert.match(cardSource, /summary\.sourceLabel/u);
+    assert.match(cardSource, /summary\.derivationLabel/u);
     assert.match(cardSource, /summary\.dateLabel/u);
     assert.match(cardSource, /summary\.note/u);
     assert.match(cardSource, /accessibilityElementsHidden/u);

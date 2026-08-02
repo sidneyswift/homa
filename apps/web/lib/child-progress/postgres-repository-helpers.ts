@@ -23,6 +23,7 @@ import type {
   ProgressCheckInState,
   ProgressConflict,
   ProgressEvidenceAnswer,
+  ProgressEvidenceDerivation,
   ProgressSelectionAnswer,
   ProgressSourceKind,
 } from "./types";
@@ -42,6 +43,7 @@ export interface PostgresProgressEvidenceRow {
   family_id: string;
   item_id: string;
   answer: ProgressEvidenceAnswer;
+  derivation: ProgressEvidenceDerivation | null;
   source: ProgressSourceKind;
   member_user_id: string | null;
   current_adult_display_name: string | null;
@@ -163,6 +165,7 @@ export function mapPostgresProgressEvidenceRow(
     familyId: row.family_id,
     itemId: row.item_id,
     answer: row.answer,
+    derivation: row.derivation ?? "unknown",
     source: row.source,
     memberUserId: row.member_user_id,
     adultDisplayName:

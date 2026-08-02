@@ -46,6 +46,7 @@ function progressEvidence(
     familyId: FAMILY_ID,
     itemId: "math.counts-to-5",
     answer: "easily",
+    derivation: "direct",
     source: "journal",
     memberUserId: MEMBER_ID,
     adultDisplayName: "Synthetic adult",

@@ -1,5 +1,6 @@
 import type {
   ProgressEvidenceAnswer,
+  ProgressEvidenceDerivation,
   ProgressSourceKind,
   ProgressSubjectView,
   ProgressTopicView,
@@ -108,6 +109,21 @@ export function progressSourceLabel(
   }
 }
 
+export function progressEvidenceDerivationLabel(
+  derivation: ProgressEvidenceDerivation,
+): string {
+  switch (derivation) {
+    case "direct":
+      return "Shared directly";
+    case "inferred":
+      return "Homa matched this from what was shared";
+    case "unknown":
+      return "How this was matched was not saved";
+    default:
+      return unsupportedProgressCopyState(derivation);
+  }
+}
+
 export function progressEmptyState(
   childName: string,
 ): ProgressEmptyStateCopy {
@@ -186,7 +202,12 @@ export function progressSubjectSummary(
     case "evidence":
       // "latest:" scopes the source and date to the newest answer; the
       // bare triplet read as if every answer came from that one source.
-      return `${count} · latest: ${progressSourceLabel(subject.summary.source.kind)} · ${date}`;
+      return (
+        `${count} · latest: ` +
+        `${progressSourceLabel(subject.summary.source.kind)} · ` +
+        `${progressEvidenceDerivationLabel(subject.summary.source.derivation)} · ` +
+        date
+      );
     case "conflict": {
       const first =
         subject.summary.adultDisplayNames[0]?.trim() ||

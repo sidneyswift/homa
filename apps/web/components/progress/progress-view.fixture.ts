@@ -89,6 +89,7 @@ export const PROGRESS_FIXTURE_TODAY_TOPIC = {
   answer: "easily" as const,
   source: {
     kind: "check_in" as const,
+    derivation: "direct" as const,
     adultDisplayName: "Elena",
     checkInId: "check-in-1",
   },
@@ -129,6 +130,7 @@ export const PROGRESS_FIXTURE_VIEW: ChildProgressView = {
               answer: "getting_there",
               source: {
                 kind: "journal",
+                derivation: "inferred",
                 adultDisplayName: "Elena",
                 checkInId: null,
               },
@@ -168,6 +170,7 @@ export const PROGRESS_FIXTURE_VIEW: ChildProgressView = {
         observedAt: "2026-07-12T00:30:00.123456Z",
         source: {
           kind: "journal",
+          derivation: "inferred",
           adultDisplayName: "Elena",
           checkInId: null,
         },
@@ -185,6 +188,7 @@ export const PROGRESS_FIXTURE_VIEW: ChildProgressView = {
               answer: "easily",
               source: {
                 kind: "journal",
+                derivation: "inferred",
                 adultDisplayName: "Elena",
                 checkInId: null,
               },
@@ -209,6 +213,7 @@ export const PROGRESS_FIXTURE_VIEW: ChildProgressView = {
           observedAt: "2026-07-09T14:00:00.000000Z",
           source: {
             kind: "conversation",
+            derivation: "direct",
             adultDisplayName: "Elena",
             checkInId: null,
           },
@@ -220,6 +225,7 @@ export const PROGRESS_FIXTURE_VIEW: ChildProgressView = {
           observedAt: "2026-07-12T00:30:00.123456Z",
           source: {
             kind: "check_in",
+            derivation: "direct",
             adultDisplayName: "Jordan",
             checkInId: "check-in-1",
           },

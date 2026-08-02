@@ -163,6 +163,7 @@ function buildEvidenceSourceView(
 ): ProgressEvidenceSourceView {
   return {
     kind: evidence.source,
+    derivation: evidence.derivation,
     adultDisplayName: evidence.adultDisplayName ?? null,
     checkInId: evidence.checkInId,
   };

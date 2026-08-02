@@ -102,6 +102,7 @@ function view(): ChildProgressView {
                 answer: "easily",
                 source: {
                   kind: "journal",
+                  derivation: "direct",
                   adultDisplayName: "Elena",
                   checkInId: null,
                 },
@@ -277,6 +278,7 @@ describe("child progress tool result adapter", () => {
               familyId: FAMILY_ID,
               itemId: "literacy.emergent-reader",
               answer: "easily",
+              derivation: "direct",
               source: "journal",
               memberUserId: MEMBER_ID,
               adultDisplayName: "Elena",

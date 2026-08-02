@@ -26,6 +26,7 @@ function liveProjectionFixture() {
     familyId: "family-1",
     itemId: "math.counts-to-5",
     answer: "easily",
+    derivation: "direct",
     source: "checklist",
     memberUserId: "adult-1",
     adultDisplayName: "Elena",
@@ -93,6 +94,7 @@ describe("Postgres child progress row mapping", () => {
       family_id: "family-1",
       item_id: "math.counts-to-5",
       answer: "easily" as const,
+      derivation: "direct" as const,
       source: "checklist" as const,
       member_user_id: "adult-1",
       current_adult_display_name: "Elena Current",
@@ -115,8 +117,10 @@ describe("Postgres child progress row mapping", () => {
     const fallback = mapPostgresProgressEvidenceRow({
       ...row,
       current_adult_display_name: null,
+      derivation: null,
     });
     assert.equal(fallback.adultDisplayName, "Elena Saved");
+    assert.equal(fallback.derivation, "unknown");
     assert.equal("adultDisplayNameSnapshot" in fallback, false);
   });
 
@@ -480,6 +484,10 @@ describe("compatibility write contract", () => {
 });
 
 describe("live projection invalidation", () => {
+  it("uses projection version 4 for provenance-aware caches", () => {
+    assert.equal(CHILD_PROGRESS_PROJECTION_VERSION, "4");
+  });
+
   it("returns null for stale metadata, count drift, or invalid JSON", () => {
     const projection = liveProjectionFixture();
     const row = {

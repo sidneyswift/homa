@@ -1,3 +1,9 @@
+import {
+  CHILD_PROGRESS_PROJECTION_VERSION,
+  childProgressViewSchema,
+  type ChildProgressView,
+} from "@homa/core";
+
 import { mapDb } from "../map/db";
 
 /**
@@ -33,9 +39,34 @@ export interface SyncPullDelta {
   }[];
   progress: {
     childId: string;
-    projection: Record<string, unknown>;
+    projection: ChildProgressView;
     updatedAt: string;
   }[];
+}
+
+export interface SyncProgressRow {
+  child_id: string;
+  projection: unknown;
+  projection_version: string;
+  updated_at: string;
+}
+
+export function parseSyncProgressRows(
+  rows: readonly SyncProgressRow[],
+): SyncPullDelta["progress"] {
+  return rows.flatMap((row) => {
+    if (
+      row.projection_version !==
+      CHILD_PROGRESS_PROJECTION_VERSION
+    ) {
+      return [];
+    }
+    return [{
+      childId: row.child_id,
+      projection: childProgressViewSchema.parse(row.projection),
+      updatedAt: row.updated_at,
+    }];
+  });
 }
 
 const PULL_LIMIT = 500;
@@ -78,10 +109,9 @@ export async function getSyncPullDelta(
     where family_id = ${familyId} and updated_at > ${since}
     order by updated_at asc
   `;
-  const progress = await sql<
-    { child_id: string; projection: Record<string, unknown>; updated_at: string }[]
-  >`
-    select live.child_id, live.projection, live.updated_at::text
+  const progress = await sql<SyncProgressRow[]>`
+    select live.child_id, live.projection, live.projection_version,
+           live.updated_at::text
     from public.child_progress_live live
     where live.family_id = ${familyId} and live.updated_at > ${since}
     order by live.updated_at asc
@@ -105,10 +135,6 @@ export async function getSyncPullDelta(
       profile: row.profile,
       updatedAt: row.updated_at,
     })),
-    progress: progress.map((row) => ({
-      childId: row.child_id,
-      projection: row.projection,
-      updatedAt: row.updated_at,
-    })),
+    progress: parseSyncProgressRows(progress),
   };
 }

@@ -37,6 +37,7 @@ function evidence(
     familyId: FAMILY_ID,
     itemId: "math.counts-to-5",
     answer: "easily",
+    derivation: "direct",
     source: "check_in",
     memberUserId: "member-1",
     adultDisplayName: "Elena",
@@ -156,6 +157,7 @@ describe("child progress projection", () => {
         evidence({
           id: "latest-journal",
           itemId: "math.small-groups",
+          derivation: "inferred",
           source: "journal",
           checkInId: null,
           observedAt: "2026-07-12T00:30:00.000000Z",
@@ -169,6 +171,7 @@ describe("child progress projection", () => {
       observedAt: "2026-07-12T00:30:00.000000Z",
       source: {
         kind: "journal",
+        derivation: "inferred",
         adultDisplayName: "Elena",
         checkInId: null,
       },
@@ -272,6 +275,7 @@ describe("child progress projection", () => {
     const evidenceA = evidence({
       id: "evidence-a",
       answer: "easily",
+      derivation: "inferred",
       adultDisplayName: "Elena",
       memberUserId: "member-a",
       source: "journal",
@@ -282,6 +286,7 @@ describe("child progress projection", () => {
     const evidenceB = evidence({
       id: "evidence-b",
       answer: "not_yet",
+      derivation: "direct",
       adultDisplayName: "Jordan",
       memberUserId: "member-b",
       source: "report_probe",
@@ -307,6 +312,7 @@ describe("child progress projection", () => {
         observedAt: "2026-07-11T15:00:00.000Z",
         source: {
           kind: "journal",
+          derivation: "inferred",
           adultDisplayName: "Elena",
           checkInId: null,
         },
@@ -318,6 +324,7 @@ describe("child progress projection", () => {
         observedAt: "2026-07-11T16:00:00.000Z",
         source: {
           kind: "report_probe",
+          derivation: "direct",
           adultDisplayName: "Jordan",
           checkInId: "check-in-jordan",
         },
@@ -442,6 +449,7 @@ describe("child progress projection", () => {
     assert.equal(topic?.observedAt, observedAt);
     assert.deepEqual(topic?.source, {
       kind: "journal",
+      derivation: "direct",
       adultDisplayName: "Elena",
       checkInId: null,
     });

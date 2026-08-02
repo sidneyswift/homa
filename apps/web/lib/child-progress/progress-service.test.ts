@@ -222,6 +222,7 @@ class InMemoryChildProgressTransaction
       familyId: input.familyId,
       itemId: input.itemId,
       answer: input.answer,
+      derivation: input.derivation,
       source: input.source,
       memberUserId: input.memberUserId,
       adultDisplayName: adultDisplayName ?? null,
@@ -810,8 +811,42 @@ describe("child progress evidence service", () => {
 
     assert.equal(result.status, "recorded");
     assert.equal(repository.appendCount, 1);
+    assert.equal(
+      repository.projectionInput.evidence[0].derivation,
+      "direct",
+    );
     assert.equal(repository.observations.length, 0);
     assert.equal(repository.savedDerivedProgress.length, 1);
+  });
+
+  it("preserves medium validated claims as inferred evidence", async () => {
+    const repository = new InMemoryChildProgressRepository();
+    repository.projectionInput = emptyProjectionInput();
+    const service = createService(repository);
+
+    const result = await service.recordJournalProgressEvidence({
+      ...JOURNAL_PROVENANCE,
+      familyId: FAMILY_ID,
+      childId: CHILD_ID,
+      memberUserId: "adult-1",
+      quote: "She seems to count each shell once",
+      observedAt: "2026-07-11T17:30:00.000000Z",
+      idempotencyKey: "journal-inferred-claim",
+      claims: [{
+        childId: CHILD_ID,
+        itemId: "math.counts-to-5",
+        answer: "getting_there",
+        quote: "seems to count each shell once",
+        confidence: "medium",
+        statement: "Counts five objects accurately",
+        subjectId: "math",
+      }],
+    });
+
+    assert.equal(result.status, "recorded");
+    if (result.status === "recorded") {
+      assert.equal(result.evidence[0].derivation, "inferred");
+    }
   });
 
   it("keeps the parent's words as an observation when claims come back empty", async () => {
@@ -1003,6 +1038,7 @@ describe("child progress evidence service", () => {
         ["literacy.emergent-reader"],
       );
       assert.equal(result.evidence[0].adultDisplayName, "Elena");
+      assert.equal(result.evidence[0].derivation, "unknown");
       assert.equal(
         result.evidence[0].quote,
         "Maya can read an early chapter book",
@@ -1351,6 +1387,7 @@ describe("child progress evidence service", () => {
         familyId: FAMILY_ID,
         itemId: "math.counts-to-5",
         answer: "easily",
+        derivation: "direct",
         source: "checklist",
         memberUserId: "adult-1",
         adultDisplayName: "Elena",
@@ -1624,6 +1661,9 @@ describe("child progress evidence service", () => {
     });
 
     assert.equal(correction.status, "recorded");
+    if (correction.status === "recorded") {
+      assert.equal(correction.evidence[0].derivation, "direct");
+    }
     assert.equal(repository.supersedeCount, 1);
     assert.equal(repository.projectionInput.evidence.length, 2);
     assert.equal(
@@ -2266,6 +2306,10 @@ describe("child progress evidence service", () => {
       repository.projectionInput.evidence[0].checkInId,
       "check-in-1",
     );
+    assert.equal(
+      repository.projectionInput.evidence[0].derivation,
+      "direct",
+    );
   });
 
   it("preserves required check-in provenance through the public transaction", async () => {
@@ -2470,6 +2514,7 @@ describe("child progress evidence service", () => {
       familyId: FAMILY_ID,
       itemId: "literacy.chapter-books",
       answer: "easily",
+      derivation: "unknown",
       source: "legacy",
       memberUserId: null,
       adultDisplayName: null,
@@ -2505,6 +2550,7 @@ describe("child progress evidence service", () => {
       familyId: FAMILY_ID,
       itemId: "literacy.chapter-books",
       answer: "easily",
+      derivation: "unknown",
       source: "legacy",
       memberUserId: null,
       adultDisplayName: null,

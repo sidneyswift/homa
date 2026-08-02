@@ -157,6 +157,7 @@ class FakeChildProgressTransaction
       familyId: input.familyId,
       itemId: input.itemId,
       answer: input.answer,
+      derivation: input.derivation,
       source: input.source,
       memberUserId: input.memberUserId,
       adultDisplayName: this.repository.displayNameFor(
@@ -1097,6 +1098,7 @@ class FakeChildProgressRepository
       familyId: FAMILY_ID,
       itemId: input.itemId,
       answer: input.answer,
+      derivation: "direct",
       source: "conversation",
       memberUserId: input.memberUserId,
       adultDisplayName: this.displayNameFor(
