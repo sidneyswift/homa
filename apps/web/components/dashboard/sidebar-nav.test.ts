@@ -37,6 +37,12 @@ describe("isAppNavItemActive", () => {
     assert.equal(calendarItem?.href, "/app/calendar");
   });
 
+  it("exposes the family-owned Library beside Binder (issue #352)", () => {
+    const libraryItem = APP_NAV_ITEMS.find((item) => item.label === "Library");
+
+    assert.equal(libraryItem?.href, "/app/library");
+  });
+
   it("lights Progress on live child and index routes", () => {
     assert.equal(
       isAppNavItemActive("/app/progress", "/app/progress"),
