@@ -74,6 +74,10 @@ const FIXTURE_CHILD_STORY = "00000000-0000-4000-8000-000000000003";
 export const EVAL_FIXTURE_FAMILY_ID = "00000000-0000-4000-8000-0000000000f0";
 export const EVAL_ONBOARDING_FIXTURE_FAMILY_ID =
   "00000000-0000-4000-8000-0000000000f1";
+export const EVAL_FIRST_MAKING_FIXTURE_FAMILY_ID =
+  "00000000-0000-4000-8000-0000000000f2";
+export const EVAL_FIRST_MAKING_FIXTURE_CHILD_ID =
+  "00000000-0000-4000-8000-0000000000c1";
 export const EVAL_FIXTURE_PARENT_USER_ID =
   "00000000-0000-4000-8000-0000000000a0";
 
@@ -174,6 +178,7 @@ export const EVAL_FIXTURE_SESSION_ATTRIBUTE = "evalFamilyFixture";
  */
 export const EVAL_ONBOARDING_MODE_HEADER = "x-homa-eval-onboarding-mode";
 export const EVAL_ONBOARDING_MODE_HEADER_VALUE = "1";
+export const EVAL_FIRST_MAKING_MODE_HEADER_VALUE = "first-making";
 export const EVAL_ONBOARDING_SESSION_ATTRIBUTE = "evalOnboardingMode";
 
 /**
@@ -210,17 +215,22 @@ export function evalFamilyFixtureAuth(
     if (!auth || !isEvalFamilyFixtureDbBacked(environment ?? process.env)) {
       return auth;
     }
+    const onboardingMode = request.headers.get(EVAL_ONBOARDING_MODE_HEADER);
+    const firstMakingModeRequested =
+      onboardingMode === EVAL_FIRST_MAKING_MODE_HEADER_VALUE;
     const onboardingModeRequested =
-      request.headers.get(EVAL_ONBOARDING_MODE_HEADER) ===
-      EVAL_ONBOARDING_MODE_HEADER_VALUE;
+      onboardingMode === EVAL_ONBOARDING_MODE_HEADER_VALUE ||
+      firstMakingModeRequested;
     return {
       ...auth,
       attributes: {
         ...auth.attributes,
         channel: EVAL_FIXTURE_CHANNEL,
-        familyId: onboardingModeRequested
-          ? EVAL_ONBOARDING_FIXTURE_FAMILY_ID
-          : EVAL_FIXTURE_FAMILY_ID,
+        familyId: firstMakingModeRequested
+          ? EVAL_FIRST_MAKING_FIXTURE_FAMILY_ID
+          : onboardingModeRequested
+            ? EVAL_ONBOARDING_FIXTURE_FAMILY_ID
+            : EVAL_FIXTURE_FAMILY_ID,
         memberName: onboardingModeRequested
           ? EVAL_ONBOARDING_FIXTURE_PARENT_NAME
           : EVAL_FIXTURE_PARENT_NAME,
@@ -319,6 +329,28 @@ insert into public.family_members (family_id, user_id, role, display_name)
 values (${sqlString(EVAL_ONBOARDING_FIXTURE_FAMILY_ID)},
         ${sqlString(EVAL_FIXTURE_PARENT_USER_ID)}, 'parent',
         ${sqlString(EVAL_ONBOARDING_FIXTURE_PARENT_NAME)});
+
+insert into public.families
+  (id, name, us_state, parent_display_name, time_zone, status,
+   profile_completed_at, context, sandbox)
+values
+  (${sqlString(EVAL_FIRST_MAKING_FIXTURE_FAMILY_ID)}, 'First making fixture',
+   'DC', ${sqlString(EVAL_ONBOARDING_FIXTURE_PARENT_NAME)},
+   'America/New_York', 'claimed', now(),
+   ${sqlJson({ onboarding: { state: "active" } })}, true);
+
+insert into public.family_members (family_id, user_id, role, display_name)
+values (${sqlString(EVAL_FIRST_MAKING_FIXTURE_FAMILY_ID)},
+        ${sqlString(EVAL_FIXTURE_PARENT_USER_ID)}, 'parent',
+        ${sqlString(EVAL_ONBOARDING_FIXTURE_PARENT_NAME)});
+
+insert into public.children
+  (id, family_id, name, birth_month, profile, created_at)
+values
+  (${sqlString(EVAL_FIRST_MAKING_FIXTURE_CHILD_ID)},
+   ${sqlString(EVAL_FIRST_MAKING_FIXTURE_FAMILY_ID)}, 'Story',
+   '2021-02-01'::date, '{}'::jsonb,
+   timestamptz '2026-07-01 12:00:00+00');
 
 ${evalFixtureLibrarySeedSql()}
 

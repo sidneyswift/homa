@@ -24,7 +24,10 @@
  * renderer can fetch them back. Without this wrapper, isolated eval runs
  * still cannot write to production (lib/eval-isolation.ts scrubs the
  * credentials); the wrapper is for full fidelity, DB and blob-backed tools
- * succeed against real schema and storage instead of failing closed.
+ * succeed against real schema and storage instead of failing closed. Agent
+ * jobs default on inside this disposable runtime so job-backed capabilities
+ * expose the same tool surface they are designed to exercise; an explicit
+ * caller value still wins for negative tests.
  *
  * The cluster is removed on exit, success or failure. Nothing here needs
  * remote credentials.
@@ -386,6 +389,8 @@ async function main(): Promise<number> {
         cwd: WEB_DIR,
         env: {
           ...process.env,
+          HOMA_AGENT_JOBS_ENABLED:
+            process.env.HOMA_AGENT_JOBS_ENABLED ?? "true",
           HOMA_EVAL_DATABASE_URL: databaseUrl,
           HOMA_EVAL_BLOB_DIR: blobDir,
           HOMA_EVAL_BLOB_URL: blob.url,
