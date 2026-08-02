@@ -45,6 +45,8 @@ export {
 export {
   EVENT_SCHEMAS,
   MAP_FLOW_STEPS,
+  MOBILE_BOOTSTRAP_FAILURE_REASONS,
+  MOBILE_BOOTSTRAP_STAGES,
   PLANNER_EVENT_CLIENTS,
   PLANNER_EVENT_SURFACES,
   PLANNER_OFFER_VENUES,
@@ -54,6 +56,8 @@ export {
   type EventProps,
   type EventSink,
   type MapFlowStep,
+  type MobileBootstrapFailureReason,
+  type MobileBootstrapStage,
   type PlannerEventClient,
   type PlannerEventSurface,
   type WallDoor,

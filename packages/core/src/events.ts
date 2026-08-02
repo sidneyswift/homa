@@ -107,6 +107,31 @@ export const PLANNER_EVENT_CLIENTS = [
 ] as const;
 export type PlannerEventClient = (typeof PLANNER_EVENT_CLIENTS)[number];
 
+/**
+ * Native startup stages that can block the first usable screen. These events
+ * are deliberately content-free and family-free because fonts and persisted
+ * auth can fail before Homa has a trustworthy family context.
+ */
+export const MOBILE_BOOTSTRAP_STAGES = [
+  "fonts",
+  "session",
+  "family",
+  "consent",
+  "billing",
+] as const;
+export type MobileBootstrapStage = (typeof MOBILE_BOOTSTRAP_STAGES)[number];
+
+export const MOBILE_BOOTSTRAP_FAILURE_REASONS = [
+  "timeout",
+  "offline",
+  "expired_session",
+  "not_ready",
+  "server_error",
+  "unknown",
+] as const;
+export type MobileBootstrapFailureReason =
+  (typeof MOBILE_BOOTSTRAP_FAILURE_REASONS)[number];
+
 /** The three governed scheduling-offer venues (§4.3.8): the empty-grid
  * card, the moment after the first plan is built, and the capped
  * morning-brief offer. */
@@ -138,6 +163,17 @@ export const EVENT_SCHEMAS = {
     channel_variant: z.enum(["default", "conference"]),
     us_state: z.string().optional(),
     kid_age_bands: z.array(z.enum(KID_AGE_BANDS)).default([]),
+  }),
+  "mobile.bootstrap_failed": z.object({
+    stage: z.enum(MOBILE_BOOTSTRAP_STAGES),
+    reason: z.enum(MOBILE_BOOTSTRAP_FAILURE_REASONS),
+  }),
+  "mobile.bootstrap_attempted": z.object({
+    stage: z.enum(MOBILE_BOOTSTRAP_STAGES),
+  }),
+  "mobile.bootstrap_recovered": z.object({
+    stage: z.enum(MOBILE_BOOTSTRAP_STAGES),
+    reason: z.enum(MOBILE_BOOTSTRAP_FAILURE_REASONS),
   }),
   // Map (lead magnet v2) funnel. Emitted server-side only, with the
   // server key: the anon events policy stays waitlist-only on purpose.

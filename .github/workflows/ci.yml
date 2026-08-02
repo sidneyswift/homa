@@ -122,6 +122,9 @@ jobs:
       - name: Mobile chat unit tests
         run: pnpm check:mobile-chat
 
+      - name: Mobile bootstrap unit tests
+        run: pnpm check:mobile-bootstrap
+
       - name: Mobile planner unit tests
         run: pnpm check:mobile-planner
 

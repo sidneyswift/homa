@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import type { MobileBootstrapFailureReason } from "@homa/core";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -14,7 +15,7 @@ import {
   type PlanTier,
 } from "../features/billing/constants";
 import { useBillingGate } from "../features/billing/use-billing-gate";
-import { useFamilyData } from "../features/family/use-family-data";
+import { useSession } from "../features/auth/session-provider";
 import { confirmApplePurchase } from "../lib/billing";
 import { fontFamilies } from "../theme/fonts";
 import { colors, fontSize, space } from "../theme/tokens";
@@ -28,9 +29,15 @@ import { Card } from "./ui/card";
  * open family never mounts the paywall at all; a walled family never
  * sees Today, Chat, or Family underneath it.
  */
-export function BillingGate({ children }: { children: ReactNode }) {
-  const { gate, checked, refresh } = useBillingGate();
-  const { family } = useFamilyData();
+export function BillingGate({
+  children,
+  familyId,
+}: {
+  children: ReactNode;
+  familyId: string;
+}) {
+  const { gate, checked, failureReason, refresh } = useBillingGate();
+  const { continueSignedOut } = useSession();
 
   if (!checked) {
     return (
@@ -41,19 +48,33 @@ export function BillingGate({ children }: { children: ReactNode }) {
   }
 
   if (gate === null) {
-    return <GateCheckFailed onRetry={refresh} />;
+    return (
+      <GateCheckFailed
+        failureReason={failureReason}
+        onRetry={refresh}
+        onContinueSignedOut={continueSignedOut}
+      />
+    );
   }
 
   if (gate.open) return <>{children}</>;
 
-  return <Paywall familyId={family?.id ?? null} everTrialed={gate.lapsed} onUnlocked={refresh} />;
+  return <Paywall familyId={familyId} everTrialed={gate.lapsed} onUnlocked={refresh} />;
 }
 
 /** checked is true but gate is still null: the check itself failed
  *  (offline, signed out, server error, or the endpoint unreachable),
  *  not "still loading". Distinct from the paywall on purpose: this
  *  family's entitlement is simply unknown, never assumed walled. */
-function GateCheckFailed({ onRetry }: { onRetry: () => Promise<void> }) {
+function GateCheckFailed({
+  failureReason,
+  onRetry,
+  onContinueSignedOut,
+}: {
+  failureReason: MobileBootstrapFailureReason | null;
+  onRetry: () => Promise<void>;
+  onContinueSignedOut: () => void;
+}) {
   const [retrying, setRetrying] = useState(false);
 
   async function handleRetry() {
@@ -81,13 +102,23 @@ function GateCheckFailed({ onRetry }: { onRetry: () => Promise<void> }) {
           <Text
             style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textBody }}
           >
-            {"That didn't load. Check your connection and try again."}
+            {failureReason === "expired_session"
+              ? "Your sign-in has expired. Sign in again before Homa checks your plan."
+              : "That did not load. Check your connection and try again."}
           </Text>
           <Button
             label={retrying ? "Trying again…" : "Try again"}
             onPress={() => void handleRetry()}
             disabled={retrying}
           />
+          {failureReason === "expired_session" ? (
+            <Button
+              label="Continue to sign in"
+              variant="secondary"
+              onPress={onContinueSignedOut}
+              disabled={retrying}
+            />
+          ) : null}
         </Card>
       </ScrollView>
     </SafeAreaView>
@@ -101,7 +132,7 @@ function Paywall({
   everTrialed,
   onUnlocked,
 }: {
-  familyId: string | null;
+  familyId: string;
   everTrialed: boolean;
   onUnlocked: () => Promise<void>;
 }) {
