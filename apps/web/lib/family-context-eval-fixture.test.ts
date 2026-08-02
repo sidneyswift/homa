@@ -3,6 +3,9 @@ import { describe, it } from "node:test";
 
 import { resolveAgentAccess } from "./agent-db";
 import {
+  EVAL_FIRST_MAKING_FIXTURE_CHILD_ID,
+  EVAL_FIRST_MAKING_FIXTURE_FAMILY_ID,
+  EVAL_FIRST_MAKING_MODE_HEADER_VALUE,
   EVAL_FIXTURE_FAMILY_ID,
   EVAL_FIXTURE_LIBRARY_ASSET_ID,
   EVAL_FIXTURE_LIBRARY_TITLE,
@@ -43,6 +46,11 @@ const REQUEST = new Request("http://localhost/eve/v1/session");
 const ONBOARDING_REQUEST = new Request("http://localhost/eve/v1/session", {
   headers: {
     [EVAL_ONBOARDING_MODE_HEADER]: EVAL_ONBOARDING_MODE_HEADER_VALUE,
+  },
+});
+const FIRST_MAKING_REQUEST = new Request("http://localhost/eve/v1/session", {
+  headers: {
+    [EVAL_ONBOARDING_MODE_HEADER]: EVAL_FIRST_MAKING_MODE_HEADER_VALUE,
   },
 });
 
@@ -169,6 +177,23 @@ describe("evalFamilyFixtureAuth", () => {
     });
   });
 
+  it("opts the first-making eval into an active family with one child", async () => {
+    const auth = evalFamilyFixtureAuth(() => localDevAuth(), SANDBOX_ENV);
+    const stamped = await auth(FIRST_MAKING_REQUEST);
+
+    assert.ok(stamped);
+    assert.equal(
+      stamped.attributes.familyId,
+      EVAL_FIRST_MAKING_FIXTURE_FAMILY_ID,
+    );
+    assert.equal(stamped.attributes.memberName, "Sidney");
+    assert.equal(stamped.attributes.onboardingActive, "true");
+    assert.equal(
+      stamped.attributes[EVAL_ONBOARDING_SESSION_ATTRIBUTE],
+      "true",
+    );
+  });
+
   it("does not opt in for a truthy-looking header value", async () => {
     const auth = evalFamilyFixtureAuth(() => localDevAuth(), SANDBOX_ENV);
     const request = new Request("http://localhost/eve/v1/session", {
@@ -207,6 +232,13 @@ describe("evalFamilyFixtureSeedSql", () => {
     assert.ok(sql.includes(EVAL_ONBOARDING_FIXTURE_FAMILY_ID));
     assert.ok(sql.includes("'Onboarding fixture'"));
     assert.match(sql, /"onboarding":\s*\{"state":"active"\}/u);
+  });
+
+  it("seeds a separate active family at the first-making boundary", () => {
+    assert.ok(sql.includes(EVAL_FIRST_MAKING_FIXTURE_FAMILY_ID));
+    assert.ok(sql.includes(EVAL_FIRST_MAKING_FIXTURE_CHILD_ID));
+    assert.ok(sql.includes("'First making fixture'"));
+    assert.ok(sql.includes("'Story'"));
   });
 
   it("staggers child created_at so pinned load order is deterministic", () => {
