@@ -4,12 +4,17 @@ import { getChildPlans, type ChildPlanRecord } from "../../lib/child-plans";
 import { getFamilyEvents, type FamilyEventRecord } from "../../lib/family-events";
 import { getScheduledActivities, type PlanActivityScheduleRecord } from "../../lib/plan-schedule";
 import type { ChildRecord } from "../../lib/family";
+import {
+  getFamilyAssetPlanLinks,
+  type FamilyAssetPlanLinkRecord,
+} from "../../lib/family-asset-plan-links";
 import { expandRecurringFamilyEvents } from "./recurring-family-events";
 
 interface PlannerData {
   events: FamilyEventRecord[];
   scheduleRows: PlanActivityScheduleRecord[];
   childPlans: ChildPlanRecord[];
+  sourceLinks: FamilyAssetPlanLinkRecord[];
   loading: boolean;
   error: string | null;
   reload: () => Promise<void>;
@@ -27,6 +32,7 @@ export function usePlannerData(
   const [events, setEvents] = useState<FamilyEventRecord[]>([]);
   const [scheduleRows, setScheduleRows] = useState<PlanActivityScheduleRecord[]>([]);
   const [childPlans, setChildPlans] = useState<ChildPlanRecord[]>([]);
+  const [sourceLinks, setSourceLinks] = useState<FamilyAssetPlanLinkRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,20 +41,23 @@ export function usePlannerData(
       setEvents([]);
       setScheduleRows([]);
       setChildPlans([]);
+      setSourceLinks([]);
       setLoading(false);
       return;
     }
     setLoading(true);
     try {
       const childIds = children.map((child) => child.id);
-      const [nextEvents, nextSchedule, nextPlans] = await Promise.all([
+      const [nextEvents, nextSchedule, nextPlans, nextSourceLinks] = await Promise.all([
         getFamilyEvents(familyId, rangeStart, rangeEnd),
         getScheduledActivities(familyId, rangeStart, rangeEnd),
         Promise.all(childIds.map((childId) => getChildPlans(childId))).then((lists) => lists.flat()),
+        getFamilyAssetPlanLinks(familyId, childIds),
       ]);
       setEvents(expandRecurringFamilyEvents(nextEvents, rangeStart, rangeEnd));
       setScheduleRows(nextSchedule);
       setChildPlans(nextPlans);
+      setSourceLinks(nextSourceLinks);
       setError(null);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Something went wrong.");
@@ -64,5 +73,5 @@ export function usePlannerData(
     return () => clearTimeout(timer);
   }, [reload]);
 
-  return { events, scheduleRows, childPlans, loading, error, reload };
+  return { events, scheduleRows, childPlans, sourceLinks, loading, error, reload };
 }

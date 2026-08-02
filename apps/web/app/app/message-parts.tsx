@@ -18,6 +18,11 @@ import {
 import type { ChatAttachmentReceipt } from "./chat-attachments";
 import { MarkdownText } from "./markdown-text";
 import { MaterialCard, type MaterialArtifact } from "./material-card";
+import {
+  FamilyAssetSourceCard,
+  parseFamilyAssetSourceCardPart,
+  type FamilyAssetSourceCardData,
+} from "./family-asset-source-card";
 import { selectParentVisibleMaterialMessageParts } from "./material-message-parts";
 import {
   approvedOutboundChildFramingTexts,
@@ -239,6 +244,7 @@ type SourcedProgressAssistantItem = ProgressAssistantItem & {
 type AssistantItem =
   | { kind: "text"; text: string }
   | { kind: "material"; material: MaterialArtifact }
+  | { kind: "library_source"; source: FamilyAssetSourceCardData }
   | { kind: "chip"; chip: MemoryChipContent }
   | { kind: "snap"; card: SnapCardData; sourceActionKey: string }
   | { kind: "questions"; card: QuestionCardData; sourceActionKey: string }
@@ -411,6 +417,11 @@ function assistantItems(message: EveMessage): AssistantItem[] {
       if (material) {
         items.push({ kind: "material", material });
       }
+      continue;
+    }
+    const librarySource = parseFamilyAssetSourceCardPart(part);
+    if (librarySource) {
+      items.push({ kind: "library_source", source: librarySource });
       continue;
     }
     const chip = memoryChipFor(part);
@@ -591,6 +602,8 @@ function AssistantItemView({
       );
     case "material":
       return <MaterialCard material={item.material} />;
+    case "library_source":
+      return <FamilyAssetSourceCard source={item.source} />;
     case "chip":
       return <MemoryChip chip={item.chip} />;
     case "checklist":

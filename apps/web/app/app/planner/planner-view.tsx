@@ -9,6 +9,7 @@ import {
 } from "@homa/core";
 
 import { childTurnsAgeOn, currentWeekIndex, type DashboardPlan } from "../../../lib/plan-week";
+import { familyAssetReferencesForSurface } from "../../../lib/library/family-asset-reference";
 import { weekdayCells, weekSpanLabel } from "../../../lib/time-zone";
 import { KidAvatar } from "../../../components/dashboard/kid-avatar";
 import {
@@ -200,6 +201,9 @@ export function PlannerView({
           toneBg: tone.bg,
           toneInk: tone.ink,
           subjectLabel: subjectLabel(plan.subjectId),
+          sources: familyAssetReferencesForSurface(
+            plan.activitySources[`${week.week}.${index}`] ?? [],
+          ),
         });
       });
     });

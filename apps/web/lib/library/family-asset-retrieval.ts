@@ -3,6 +3,7 @@ import { MAP_SUBJECTS } from "@homa/core";
 import { embedText } from "../learning/embeddings";
 import { mapDb } from "../map/db";
 import { siteUrl } from "../map/email";
+import { familyAssetLibraryHref } from "./family-asset-reference";
 import {
   FAMILY_ASSET_RESOURCE_KINDS,
   FAMILY_ASSET_STATUSES,
@@ -161,7 +162,7 @@ function toFamilyAssetSource(
     originalName: row.original_name,
     originalUrl: row.url,
     citationUrl: `${siteUrl()}/api/library/assets/${row.id}/download`,
-    libraryUrl: `${siteUrl()}/app/library`,
+    libraryUrl: `${siteUrl()}${familyAssetLibraryHref(row.id)}`,
     mediaType: row.media_type,
     byteSize: Number(row.byte_size),
     fileKind: row.file_kind,

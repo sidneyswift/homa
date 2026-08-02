@@ -1,8 +1,8 @@
 ---
 description: Use when the parent asks what is on the planner, the week, or the family calendar, wants the week or the month adjusted, wants Homa to draft a brand-new month around her children and real commitments, asks to schedule an existing lesson, curriculum, or unit study onto the planner or onto a real day, asks to add, change, move, or remove an appointment, trip, or other family event, asks to move school work around an appointment or trip ("doctor's appt Tuesday, push things back"), or wants to see the plan while you talk. Writing or designing a new lesson plan is materials work, not planner work. Contains the open-then-edit workflow, preview-first month planning, real calendar dates, family calendar tools, and reshuffling around real life.
 metadata:
-  homa-tools: open_planner, edit_plan, schedule_plan_activity, add_family_event, list_family_events, update_family_event, remove_family_event, find_materials, preview_month_plan, approve_month_plan
-  homa-related-skills: curriculum-studio, materials-studio
+  homa-tools: open_planner, edit_plan, schedule_plan_activity, add_family_event, list_family_events, update_family_event, remove_family_event, find_materials, preview_month_plan, approve_month_plan, find_family_assets, get_family_asset
+  homa-related-skills: curriculum-studio, materials-studio, family-librarian
 ---
 
 # The planner and family calendar
@@ -134,6 +134,28 @@ If you do not actually know the curriculum's contents, ask or research
 before writing; a planner line naming lessons that do not exist is
 worse than no line.
 
+### Grounding an activity in Family Library
+
+When the parent explicitly says to use an uploaded, owned, or Library source,
+load family-librarian and retrieve the exact source before editing:
+
+1. Call `find_family_assets`, then `get_family_asset` on the chosen result.
+   Search results are candidates, never source authority.
+2. Call `open_planner` and ground the edit in the returned plan and indices.
+3. On every `edit_plan` add or replace derived from that source, include its
+   exact id in `sourceFamilyAssetIds`. Use at most five directly used sources.
+   Never put source ids on a remove.
+4. Trust the result. The Planner activity now carries a parent-visible source
+   link back to the Library original. Its wording, check-off, schedule, and
+   source connection move together on later edits.
+
+Retrieval is not curriculum decomposition. Use only the sequence or evidence
+the tools actually returned. If the bounded source evidence cannot support the
+requested activity, ask for the missing page or detail instead of inventing a
+lesson. `preview_month_plan` does not accept Family Library source ids. When a
+new month needs visible source attribution, approve the month first, then use
+`edit_plan` to replace the exact grounded activities with their source ids.
+
 ## Honest limits
 
 - edit_plan errors are the truth. no_plan means that subject has no
@@ -144,9 +166,8 @@ worse than no line.
   rather than guessing a fix.
 - Removing or replacing an activity clears or shifts its check-offs
   honestly; warn her when you remove something she already checked off.
-  It can also leave a stale scheduled date on the calendar pointing at
-  a different (still-in-range) activity in the same week; if you
-  notice this, just re-schedule it rather than treating it as broken.
+  Saved dates and source links are remapped in the same write. Work from the
+  fresh indices returned by edit_plan before scheduling or editing again.
 - The canvas is web chat only. Over SMS, say what is on the week and
   what you changed; she can open /app/planner or /app/calendar when
   she is at a screen.

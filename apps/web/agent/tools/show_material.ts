@@ -9,6 +9,8 @@ import {
   getMaterialCardCaller,
   getMaterialCardPinned,
 } from "../../lib/materials/library";
+import { familyAssetReferencesForSurface } from "../../lib/library/family-asset-reference";
+import { siteUrl } from "../../lib/map/email";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
 import { sendHomaSms } from "../../lib/voice/telnyx-api";
 
@@ -113,6 +115,9 @@ export default defineBoundedTool({
         pdfUrl: material.pdfUrl,
         pageCount: material.pageCount,
         ...(material.pagePreviewUrls ? { pagePreviewUrls: material.pagePreviewUrls } : {}),
+        sources: familyAssetReferencesForSurface(material.sources, {
+          siteRoot: siteUrl(),
+        }),
         status: material.status,
       },
       sentByText,

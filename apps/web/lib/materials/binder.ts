@@ -1,6 +1,10 @@
 import { MATERIAL_KINDS, type MaterialKind } from "./kinds";
 import type { MaterialSummary } from "./library";
 import type { ChildRecord } from "../family";
+import {
+  familyAssetReferencesForSurface,
+  type FamilyAssetReference,
+} from "../library/family-asset-reference";
 import type { ViewContext } from "../view-context";
 
 /**
@@ -31,6 +35,7 @@ export interface BinderMaterial {
   pageCount: number;
   /** Per-page previews for multi-page materials, page 1 first. */
   pagePreviewUrls: string[] | null;
+  sources: FamilyAssetReference[];
 }
 
 /**
@@ -58,6 +63,7 @@ export function toBinderMaterials(
     createdAt: material.createdAt,
     pageCount: material.pageCount,
     pagePreviewUrls: material.pagePreviewUrls,
+    sources: familyAssetReferencesForSurface(material.sources),
   }));
 }
 

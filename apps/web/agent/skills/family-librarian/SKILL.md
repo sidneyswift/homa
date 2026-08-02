@@ -1,7 +1,7 @@
 ---
 description: Use when a parent wants Homa to save, find, reopen, edit, remove, cite, or use a worksheet, book, curriculum, photo, or other resource their family owns or uploaded. Also use for "use my curriculum" and "what do we already have about this?" Not for authoring a new printable or curriculum; materials-studio and curriculum-studio own creation after the family source is retrieved.
 metadata:
-  homa-related-skills: materials-studio, curriculum-studio
+  homa-related-skills: materials-studio, curriculum-studio, planner
 ---
 
 # Family librarian
@@ -81,8 +81,18 @@ happens before any plan or printable:
 3. Then load the sibling that owns the requested effect:
    - `materials-studio` for a worksheet, page, packet, or printable.
    - `curriculum-studio` for a whole multi-week program Homa will author.
-4. Give the sibling the exact Library title, asset id, original URL when useful,
-   and evidence with its provenance. Generated work still lands in Binder.
+   - `planner` for adding or replacing a grounded activity in an existing plan.
+4. Carry the exact asset id into the downstream write, not just into your prose:
+   - On the first `create_printable` call, include it in
+     `sourceFamilyAssetIds`. On a revision, omit that field to inherit the
+     prior sources. Pass an empty array only when the parent deliberately asks
+     to remove the source connection.
+   - On an `edit_plan` add or replace, include it in
+     `sourceFamilyAssetIds`. A remove has no source input.
+5. Give the sibling the exact Library title, original URL when useful, and
+   evidence with its provenance. The result shows the parent which Library
+   source was used. Generated work still lands in Binder, and the original
+   stays in Library.
 
 Do not decompose an uploaded curriculum into weeks or write it to the planner in
 this skill. That is the separate Plus workflow. Here, retrieve the real source
@@ -109,8 +119,8 @@ and stop honestly if its bounded evidence cannot support the requested step.
   the missing page or detail.
 - The request is only to create something new and names no family source: route
   to materials-studio or curriculum-studio without loading this skill.
-- The request is training export, curriculum decomposition, planner mapping, or
-  visible Binder provenance: those are separate workflows, not hidden work here.
+- The request is training export, curriculum decomposition, or automatic
+  planner mapping: those are separate workflows, not hidden work here.
 
 The tool result is the only truth about whether a save, update, retrieval, or
 deletion happened. Family identity always comes from authenticated context, and

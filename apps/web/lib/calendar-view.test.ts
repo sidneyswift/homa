@@ -43,6 +43,7 @@ function mayaPlan(overrides: Partial<DashboardPlan> = {}): DashboardPlan {
       { week: 1, focus: "counting", activities: ["Count to 20 daily", "Play a counting game"] },
     ],
     progress: {},
+    activitySources: {},
     ...overrides,
   };
 }

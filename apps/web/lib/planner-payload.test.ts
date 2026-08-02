@@ -37,6 +37,7 @@ function plan(nowMs: number, overrides: Partial<DashboardPlan> = {}): DashboardP
       activities: [`W${week} first activity`, `W${week} second activity`],
     })),
     progress: { "1.0": true },
+    activitySources: {},
     ...overrides,
   };
 }
@@ -89,6 +90,35 @@ describe("shapePlannerPlan", () => {
     });
     assert.equal(shaped.weeks[0].activities[0].done, true);
     assert.equal(shaped.weeks[0].activities[1].done, false);
+  });
+
+  it("carries exact Family Library sources with channel-safe links", () => {
+    const shaped = shapePlannerPlan(
+      plan(NOW, {
+        activitySources: {
+          "2.0": [
+            {
+              id: "70000000-0000-4000-8000-000000000001",
+              title: "Math games workbook",
+            },
+          ],
+        },
+      }),
+      {
+        nowMs: NOW,
+        fullWeeks: true,
+        scheduledDates,
+        siteRoot: "https://thankshoma.com",
+      },
+    );
+    assert.deepEqual(shaped.weeks[1].activities[0].sources, [
+      {
+        id: "70000000-0000-4000-8000-000000000001",
+        title: "Math games workbook",
+        libraryUrl:
+          "https://thankshoma.com/app/library?asset=70000000-0000-4000-8000-000000000001",
+      },
+    ]);
   });
 
   it("returns the current week plus summaries on a family-wide call", () => {

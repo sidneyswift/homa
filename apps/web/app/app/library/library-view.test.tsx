@@ -64,6 +64,7 @@ function renderLibrary(
   initialAssets: FamilyAssetView[],
   initialUploads: FamilyAssetUploadView[] = [],
   canUpload = true,
+  initialSelectedAssetId: string | null = null,
 ): string {
   return renderToStaticMarkup(
     <LibraryView
@@ -72,6 +73,7 @@ function renderLibrary(
       childOptions={[{ id: "33333333-3333-4333-8333-333333333333", name: "Mia" }]}
       subjectOptions={[{ id: "math", label: "Math" }]}
       canUpload={canUpload}
+      initialSelectedAssetId={initialSelectedAssetId}
     />,
   );
 }
@@ -97,6 +99,13 @@ describe("LibraryView", () => {
     assert.match(html, /\/api\/library\/assets\/asset-pdf\/download\?surface=shelf/);
     assert.doesNotMatch(html, /example\.public\.blob/);
     assert.doesNotMatch(html, /These files are not private/);
+  });
+
+  it("opens an exact source passed through a Library deep link", () => {
+    const html = renderLibrary(ASSETS, [], true, "asset-pdf");
+    assert.match(html, /Library resource/u);
+    assert.match(html, /Close resource details/u);
+    assert.match(html, /Math practice/u);
   });
 
   it("shows every processing state on the shelf", () => {

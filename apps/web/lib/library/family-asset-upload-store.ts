@@ -75,6 +75,18 @@ export type FinalizeFamilyAssetUploadResult =
       reason: "not-found" | "abandoned" | "blob-not-found" | "blob-mismatch";
     };
 
+export interface FamilyAssetBlobDependencies {
+  head(url: string): Promise<HeadBlobResult>;
+  delete(url: string): Promise<void>;
+}
+
+const DEFAULT_BLOB_DEPENDENCIES: FamilyAssetBlobDependencies = {
+  head,
+  async delete(url) {
+    await del(url);
+  },
+};
+
 function isUploadPart(value: unknown): value is FamilyAssetUploadPart {
   if (!value || typeof value !== "object") return false;
   const part = value as Record<string, unknown>;
@@ -230,17 +242,20 @@ async function loadUpload(
  * completion and the signed Vercel callback may race, so the upload row is
  * locked and source_upload_id is unique inside the family.
  */
-export async function finalizeFamilyAssetUpload(input: {
-  reservationId: string;
-  blobUrl: string;
-  expectedFamilyId?: string;
-}): Promise<FinalizeFamilyAssetUploadResult> {
+export async function finalizeFamilyAssetUpload(
+  input: {
+    reservationId: string;
+    blobUrl: string;
+    expectedFamilyId?: string;
+  },
+  dependencies: FamilyAssetBlobDependencies = DEFAULT_BLOB_DEPENDENCIES,
+): Promise<FinalizeFamilyAssetUploadResult> {
   const upload = await loadUpload(input.reservationId, input.expectedFamilyId);
   if (!upload) return { ok: false, reason: "not-found" };
 
   if (upload.status === "abandoned" || upload.error_code === "blob_delete_failed") {
     try {
-      await del(input.blobUrl);
+      await dependencies.delete(input.blobUrl);
     } catch {
       console.error("abandoned family Library blob cleanup failed");
     }
@@ -249,7 +264,7 @@ export async function finalizeFamilyAssetUpload(input: {
 
   let blob: HeadBlobResult;
   try {
-    blob = await head(input.blobUrl);
+    blob = await dependencies.head(input.blobUrl);
   } catch {
     await markUploadNeedsAttention(
       upload,
@@ -347,7 +362,7 @@ export async function finalizeFamilyAssetUpload(input: {
     };
   }
   try {
-    await del(blob.url);
+    await dependencies.delete(blob.url);
   } catch {
     console.error("abandoned family Library blob cleanup failed after finalization race");
   }

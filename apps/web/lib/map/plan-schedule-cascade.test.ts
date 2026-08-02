@@ -20,6 +20,7 @@ import { editPlanActivities, writeRebuiltPlan } from "./store";
 
 const FAMILY = "11111111-1111-1111-1111-111111111111";
 const CHILD = "22222222-2222-2222-2222-222222222222";
+const ASSET = "33333333-3333-4333-8333-333333333333";
 
 function plan(overrides: Partial<FourWeekPlan> = {}): FourWeekPlan {
   return {
@@ -59,7 +60,11 @@ interface FakeDb {
 function fakeDb(respond: (text: string, args: unknown[]) => unknown[] | Error): FakeDb {
   const statements: Recorded[] = [];
   const makeTag = (inTx: boolean) => {
-    const tag = (strings: TemplateStringsArray, ...args: unknown[]): Promise<unknown[]> => {
+    const tag = (
+      strings: TemplateStringsArray | readonly string[],
+      ...args: unknown[]
+    ): Promise<unknown[]> | readonly string[] => {
+      if (!("raw" in strings)) return strings;
       const text = strings.join(" ? ").replace(/\s+/gu, " ").trim();
       statements.push({ text, args, inTx });
       const rows = respond(text, args);
@@ -78,11 +83,28 @@ function fakeDb(respond: (text: string, args: unknown[]) => unknown[] | Error): 
 function respondForEdit(options: {
   scheduled: { activity_index: number; scheduled_date: string }[];
   failInsert?: boolean;
+  canonicalSources?: { id: string; title: string }[];
+  existingSources?: Array<{
+    asset_id: string;
+    week: number;
+    activity_index: number;
+    activity_text: string;
+    source_title: string;
+    source_locator: string | null;
+  }>;
 }) {
   return (text: string): unknown[] | Error => {
     if (/select id from public\.children/u.test(text)) return [{ id: CHILD }];
     if (/select id, plan, progress from public\.child_plans/u.test(text)) {
       return [{ id: "plan-1", plan: plan(), progress: { "1.0": true } }];
+    }
+    if (/select id, title from public\.family_assets/u.test(text)) {
+      return options.canonicalSources ?? [];
+    }
+    if (
+      /select asset_id, week, activity_index, activity_text/u.test(text)
+    ) {
+      return options.existingSources ?? [];
     }
     if (/select activity_index, scheduled_date/u.test(text)) return options.scheduled;
     if (options.failInsert && /insert into public\.plan_activity_schedule/u.test(text)) {
@@ -178,6 +200,83 @@ describe("editPlanActivities schedule cascade (issue #256)", () => {
       /plan_activity_schedule/u.test(statement.text),
     );
     assert.deepEqual(scheduleStatements, []);
+  });
+
+  it("writes canonical source edges in the same transaction as the plan", async () => {
+    const db = fakeDb(
+      respondForEdit({
+        scheduled: [],
+        canonicalSources: [{ id: ASSET, title: "Counting workbook" }],
+      }),
+    );
+    const outcome = await editPlanActivities(
+      FAMILY,
+      CHILD,
+      "math",
+      [
+        {
+          action: "add",
+          week: 2,
+          text: "Count the workbook pictures",
+          sourceFamilyAssetIds: [ASSET],
+        },
+      ],
+      db.sql as Parameters<typeof editPlanActivities>[4],
+    );
+    assert.equal(outcome.status, "applied");
+    if (outcome.status !== "applied") return;
+    assert.equal(outcome.sourceLinks[0]?.sourceTitle, "Counting workbook");
+
+    const sourceWrites = db.statements.filter((statement) =>
+      /(?:delete from|insert into) public\.family_asset_plan_links/u.test(
+        statement.text,
+      ),
+    );
+    assert.equal(sourceWrites.length, 2);
+    assert.ok(sourceWrites.every((statement) => statement.inTx));
+    assert.deepEqual(sourceWrites[0].args, [FAMILY, CHILD, "math", 2]);
+    assert.deepEqual(sourceWrites[1].args, [
+      FAMILY,
+      ASSET,
+      CHILD,
+      "math",
+      2,
+      1,
+      "Count the workbook pictures",
+      "Counting workbook",
+      null,
+    ]);
+  });
+
+  it("rejects a source outside the family before any write", async () => {
+    const db = fakeDb(
+      respondForEdit({ scheduled: [], canonicalSources: [] }),
+    );
+    const outcome = await editPlanActivities(
+      FAMILY,
+      CHILD,
+      "math",
+      [
+        {
+          action: "replace",
+          week: 1,
+          index: 0,
+          text: "Use the foreign workbook",
+          sourceFamilyAssetIds: [ASSET],
+        },
+      ],
+      db.sql as Parameters<typeof editPlanActivities>[4],
+    );
+    assert.equal(outcome.status, "invalid_edit");
+    assert.equal(
+      db.statements.some(
+        (statement) =>
+          /update public\.child_plans|insert into public\.family_asset_plan_links/u.test(
+            statement.text,
+          ),
+      ),
+      false,
+    );
   });
 
   it("propagates a mid-cascade failure instead of reporting applied", async () => {

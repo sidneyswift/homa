@@ -100,4 +100,24 @@ describe("MaterialCard", () => {
     const html = renderToStaticMarkup(<MaterialCard material={artifact()} />);
     assert.match(html, /href="https:\/\/blob\.example\/packet\.pdf"/u);
   });
+
+  it("links the Family Library sources used to make the material", () => {
+    const html = renderToStaticMarkup(
+      <MaterialCard
+        material={artifact({
+          sources: [
+            {
+              id: "10000000-0000-4000-8000-000000000001",
+              title: "Mammal study guide",
+              libraryUrl:
+                "/app/library?asset=10000000-0000-4000-8000-000000000001",
+            },
+          ],
+        })}
+      />,
+    );
+    assert.match(html, /Made from/u);
+    assert.match(html, /Mammal study guide/u);
+    assert.match(html, /\/app\/library\?asset=/u);
+  });
 });

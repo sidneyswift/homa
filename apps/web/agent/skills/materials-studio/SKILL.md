@@ -117,6 +117,20 @@ says to use an uploaded, owned, or Library source, load family-librarian and
 call find_family_assets, then get_family_asset, before designing. Do not add
 this lookup to an ordinary fresh-material request that names no family source.
 
+Keep the source connection exact:
+
+- Collect only asset ids returned by `get_family_asset`, up to five sources
+  that directly grounded the material. A search result alone is not enough.
+- Include those ids in `sourceFamilyAssetIds` on the first create_printable
+  call. The tool verifies family ownership and saves a title snapshot, and the
+  Binder card cites the Library original.
+- On every revision, omit `sourceFamilyAssetIds` to inherit the earlier
+  version's sources. Pass an empty array only when the parent deliberately asks
+  to disconnect the new version from its Library sources.
+- When compiling source-grounded materials into a new packet, carry forward
+  the directly used Library asset ids shown on those materials, still capped
+  at five. Never infer a source from a similar title.
+
 Call find_materials first when the request sounds like something this
 family may already have ("another one like...", a kind you have made
 before, a sibling wanting what the other kid has). A found final is
@@ -580,6 +594,11 @@ curriculum (when the family follows one, e.g. "Handwriting Without
 Tears"), theme, characters (spelled the family's way), childId. Sloppy
 metadata means find_materials cannot find it next month, and the
 "same page for the sibling" move stops working.
+
+`sourceFamilyAssetIds` is provenance, not discovery metadata. Supply it only
+from exact Family Library retrieval as described above. A source-grounded
+material still belongs in Binder; its source card points back to the original
+in Library.
 
 ## The loop: draft, check, revise, finalize
 

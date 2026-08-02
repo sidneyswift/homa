@@ -10,6 +10,7 @@ import {
   type CallerAuthAttributes,
 } from "../../lib/agent-db";
 import { emitMapEvent } from "../../lib/map/events";
+import { siteUrl } from "../../lib/map/email";
 import { getPlanBoard } from "../../lib/map/store";
 import { plannerEventClient } from "../../lib/planner-events";
 import { shapePlannerPlan } from "../../lib/planner-payload";
@@ -96,7 +97,12 @@ export default defineBoundedTool({
       plans: board.plans
         .filter((plan) => plan.childId === child.id)
         .map((plan) =>
-          shapePlannerPlan(plan, { nowMs, fullWeeks, scheduledDates }),
+          shapePlannerPlan(plan, {
+            nowMs,
+            fullWeeks,
+            scheduledDates,
+            siteRoot: siteUrl(),
+          }),
         ),
     }));
 

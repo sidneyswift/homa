@@ -2,6 +2,7 @@ import { visibleOutboundChildFramingText } from "@homa/core";
 import type { EveMessage, EveMessagePart } from "eve/react";
 
 import { parseQuestionCardPart } from "./question-card-model";
+import { parseLibrarySourceCardPart } from "./library-source-card-model";
 
 /**
  * Transcript display logic ported from apps/web/app/app/chat/message-parts.tsx
@@ -111,6 +112,7 @@ export function partIsRenderable(part: EveMessagePart): boolean {
     // Homa's choice card (agent/tools/ask_user_questions.ts) draws as a
     // real tappable card here; question-card-model.ts owns the parsing.
     if (parseQuestionCardPart(part) !== null) return true;
+    if (parseLibrarySourceCardPart(part) !== null) return true;
     if (
       part.toolName === "create_printable" ||
       part.toolName === "show_material" ||
@@ -209,6 +211,8 @@ const TOOL_STATUS_LABELS: Record<string, string> = {
   show_material: "bringing the page back\u2026",
   generate_image: "making the image\u2026",
   find_materials: "looking through your materials\u2026",
+  find_family_assets: "looking through your Library\u2026",
+  get_family_asset: "opening that Library source\u2026",
   mark_material_final: "keeping the final version\u2026",
   remember: "saving a note\u2026",
   forget: "tidying my notes\u2026",

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+import type { FamilyAssetReference } from "../../lib/library/family-asset-reference";
+
 /**
  * Renders a create_printable result as a card around the real artifact:
  * the JPEG preview of the rendered page, with the PDF one tap away (the
@@ -29,6 +31,8 @@ export interface MaterialArtifact {
   pageCount?: number;
   /** Per-page previews (page 1 first) when more than one page exists. */
   pagePreviewUrls?: string[];
+  /** Family Library sources Homa used to make this artifact. */
+  sources?: FamilyAssetReference[];
 }
 
 const KIND_HEADLINES: Record<string, string> = {
@@ -82,6 +86,26 @@ export function MaterialCard({
         {material.title}
       </p>
       {subtitle ? <p className="mt-0.5 text-sm text-muted">{subtitle}</p> : null}
+      {material.sources && material.sources.length > 0 ? (
+        <p className="mt-1.5 text-xs text-subtle">
+          <span className="font-medium">Made from </span>
+          {material.sources.map((source, index) => (
+            <span key={source.id}>
+              {index > 0 ? ", " : null}
+              {source.libraryUrl ? (
+                <a
+                  href={source.libraryUrl}
+                  className="underline decoration-border underline-offset-2 hover:text-body"
+                >
+                  {source.title}
+                </a>
+              ) : (
+                source.title
+              )}
+            </span>
+          ))}
+        </p>
+      ) : null}
       <a
         href={pdfHref}
         target="_blank"

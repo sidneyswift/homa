@@ -42,6 +42,7 @@ function mayaPlan(overrides: Partial<DashboardPlan> = {}): DashboardPlan {
     retestAt: "2026-08-31T00:00:00Z",
     weeks: [{ week: 1, focus: "counting", activities: ["Count to 20 daily"] }],
     progress: {},
+    activitySources: {},
     ...overrides,
   };
 }

@@ -2,6 +2,10 @@ import { del } from "@vercel/blob";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type postgres from "postgres";
 
+import {
+  parseFamilyAssetReferenceSnapshots,
+  type FamilyAssetReferenceSnapshot,
+} from "../library/family-asset-reference";
 import { mapDb } from "../map/db";
 import { subjectLessonsEnabled } from "../subject-lessons/flag";
 import {
@@ -44,6 +48,8 @@ export interface MaterialSummary {
   pageCount: number;
   /** Per-page previews for multi-page materials, page 1 first. */
   pagePreviewUrls: string[] | null;
+  /** Verified Family Library inputs captured when this version was made. */
+  sources: FamilyAssetReferenceSnapshot[];
   html?: string;
 }
 
@@ -74,13 +80,15 @@ interface MaterialDbRow {
   created_at: string;
   page_count: number | string | null;
   page_preview_urls: string[] | null;
+  family_sources: unknown;
   html?: string;
   subject_lesson_id?: string | null;
 }
 
 const SUMMARY_COLUMNS =
   "id, title, kind, status, source, skill, subject, curriculum, theme, characters, child_id, preview_url, pdf_url, created_at, " +
-  "page_count:generation->pageCount, page_preview_urls:generation->pagePreviewUrls";
+  "page_count:generation->pageCount, page_preview_urls:generation->pagePreviewUrls, " +
+  "family_sources:generation->familySources";
 
 /** Rows older than the packet work carry no pageCount; they are one page. */
 function normalizePageCount(raw: number | string | null | undefined): number {
@@ -143,6 +151,7 @@ function toSummary(row: MaterialDbRow): MaterialSummary {
     createdAt: row.created_at,
     pageCount: normalizePageCount(row.page_count),
     pagePreviewUrls: normalizePagePreviewUrls(row.page_preview_urls),
+    sources: parseFamilyAssetReferenceSnapshots(row.family_sources),
     ...(row.html !== undefined ? { html: row.html } : {}),
   };
 }
@@ -167,6 +176,8 @@ export interface MaterialCardView {
   pageCount: number;
   /** Per-page previews for multi-page materials, page 1 first. */
   pagePreviewUrls: string[] | null;
+  /** Verified Family Library inputs captured when this version was made. */
+  sources: FamilyAssetReferenceSnapshot[];
   /** The stored review verdict; true when no review ran (create_printable's rule). */
   reviewPassed: boolean;
 }
@@ -182,6 +193,7 @@ interface MaterialCardRow {
   pdf_url: string;
   page_count: number | string | null;
   page_preview_urls: string[] | null;
+  family_sources: unknown;
   review_pass: string | null;
   subject_lesson_id?: string | null;
 }
@@ -198,6 +210,7 @@ function toCardView(row: MaterialCardRow): MaterialCardView {
     pdfUrl: row.pdf_url,
     pageCount: normalizePageCount(row.page_count),
     pagePreviewUrls: normalizePagePreviewUrls(row.page_preview_urls),
+    sources: parseFamilyAssetReferenceSnapshots(row.family_sources),
     reviewPassed: row.review_pass !== "false",
   };
 }
@@ -212,6 +225,7 @@ async function getMaterialCardPinnedLegacy(
            c.name as child_name, m.preview_url, m.pdf_url,
            m.generation->'pageCount' as page_count,
            m.generation->'pagePreviewUrls' as page_preview_urls,
+           m.generation->'familySources' as family_sources,
            m.generation->'review'->>'pass' as review_pass
     from public.materials m
     left join public.children c
@@ -231,6 +245,7 @@ async function getMaterialCardPinnedProtected(
            c.name as child_name, m.preview_url, m.pdf_url,
            m.generation->'pageCount' as page_count,
            m.generation->'pagePreviewUrls' as page_preview_urls,
+           m.generation->'familySources' as family_sources,
            m.generation->'review'->>'pass' as review_pass
     from public.materials m
     left join public.children c
@@ -278,6 +293,7 @@ export async function getMaterialCardCaller(
       "id, title, kind, status, skill, preview_url, pdf_url, " +
         "page_count:generation->pageCount, " +
         "page_preview_urls:generation->pagePreviewUrls, " +
+        "family_sources:generation->familySources, " +
         "review_pass:generation->review->>pass, children(name)",
     )
     .eq("family_id", familyId)
@@ -305,7 +321,8 @@ async function getMaterialPinnedLegacy(
            theme, characters, child_id, preview_url, pdf_url,
            created_at::text as created_at,
            generation->'pageCount' as page_count,
-           generation->'pagePreviewUrls' as page_preview_urls, html
+           generation->'pagePreviewUrls' as page_preview_urls,
+           generation->'familySources' as family_sources, html
     from public.materials
     where id = ${materialId} and family_id = ${familyId}
   `;
@@ -323,7 +340,8 @@ async function getMaterialPinnedProtected(
            theme, characters, child_id, preview_url, pdf_url,
            created_at::text as created_at, html, subject_lesson_id,
            generation->'pageCount' as page_count,
-           generation->'pagePreviewUrls' as page_preview_urls
+           generation->'pagePreviewUrls' as page_preview_urls,
+           generation->'familySources' as family_sources
     from public.materials
     where id = ${materialId} and family_id = ${familyId}
       and (
@@ -391,7 +409,8 @@ async function findMaterialsPinnedLegacy(
            theme, characters, child_id, preview_url, pdf_url,
            created_at::text as created_at,
            generation->'pageCount' as page_count,
-           generation->'pagePreviewUrls' as page_preview_urls
+           generation->'pagePreviewUrls' as page_preview_urls,
+           generation->'familySources' as family_sources
     from public.materials
     where family_id = ${familyId}
       and (${status === "any"} or status = ${status === "any" ? "final" : status})
@@ -420,7 +439,8 @@ async function findMaterialsPinnedProtected(
            theme, characters, child_id, preview_url, pdf_url,
            created_at::text as created_at, subject_lesson_id,
            generation->'pageCount' as page_count,
-           generation->'pagePreviewUrls' as page_preview_urls
+           generation->'pagePreviewUrls' as page_preview_urls,
+           generation->'familySources' as family_sources
     from public.materials
     where family_id = ${familyId}
       and (${status === "any"} or status = ${status === "any" ? "final" : status})
