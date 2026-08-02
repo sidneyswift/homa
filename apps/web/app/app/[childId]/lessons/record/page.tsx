@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
 import { familyWallCheckout } from "../../../../../lib/billing/wall";
-import { getMyChildren, getMyFamily } from "../../../../../lib/family";
+import { getPaidAppShellData } from "../../../../../lib/app-data";
 import { lessonListenEnabled } from "../../../../../lib/lessons/flag";
 import { LESSON_RECORD_WALL_SINCE_MS } from "../../../../../lib/lessons/route-auth";
 import { listLessonsForChild } from "../../../../../lib/lessons/store";
@@ -38,8 +38,9 @@ export default async function RecordLessonPage({
 }) {
   if (!lessonListenEnabled()) notFound();
   const { childId } = await params;
-  const family = await getMyFamily();
-  if (!family) redirect("/onboarding");
+  const data = await getPaidAppShellData();
+  if (!data) redirect("/onboarding");
+  const { family, children } = data;
 
   const createdAtMs = Date.parse(family.created_at);
   if (createdAtMs >= LESSON_RECORD_WALL_SINCE_MS) {
@@ -47,7 +48,6 @@ export default async function RecordLessonPage({
     if (checkout) redirect(`/app/${childId}/report`);
   }
 
-  const children = await getMyChildren(family.id);
   const child = children.find((entry) => entry.id === childId);
   if (!child) notFound();
 

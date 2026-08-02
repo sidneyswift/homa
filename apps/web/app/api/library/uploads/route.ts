@@ -2,6 +2,7 @@ import { del } from "@vercel/blob";
 import { z } from "zod";
 
 import { resolveApiFamily } from "../../../../lib/api-auth";
+import { familyAccountCheckout } from "../../../../lib/billing/wall";
 import {
   type FamilyAssetUploadRow,
   toFamilyAssetUploadView,
@@ -19,6 +20,7 @@ import {
   MAX_LIBRARY_UPLOAD_BYTES,
 } from "../../../../lib/library/family-assets";
 import { mapDb } from "../../../../lib/map/db";
+import { emitMapEvent } from "../../../../lib/map/events";
 import { blobConfigured } from "../../../../lib/materials/artifact-store";
 
 const uuidSchema = z.string().uuid();
@@ -128,6 +130,9 @@ export async function POST(request: Request): Promise<Response> {
   if (!auth) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
+  if ((await familyAccountCheckout(auth.familyId)) !== null) {
+    return Response.json({ ok: false, reason: "membership-required" }, { status: 402 });
+  }
   const parsed = reserveUploadSchema.safeParse(await readJson(request));
   if (!parsed.success || !isFamilyAssetUploadFingerprint(parsed.data?.fingerprintSha256 ?? "")) {
     return Response.json({ ok: false, reason: "bad-upload" }, { status: 400 });
@@ -144,7 +149,7 @@ export async function POST(request: Request): Promise<Response> {
     input.originalName,
   );
   const sql = mapDb();
-  const rows = await sql<FamilyAssetUploadRow[]>`
+  const rows = await sql<(FamilyAssetUploadRow & { inserted: boolean })[]>`
     insert into public.family_asset_uploads as existing (
       family_id, initiated_by_user_id, client_request_id, original_name,
       pathname, media_type, byte_size, last_modified, fingerprint_sha256
@@ -166,11 +171,18 @@ export async function POST(request: Request): Promise<Response> {
     returning id, family_id, initiated_by_user_id, original_name, pathname,
               media_type, byte_size, last_modified, fingerprint_sha256,
               blob_upload_id, blob_key, completed_parts, status, status_note, error_code,
-              created_at::text, updated_at::text
+              created_at::text, updated_at::text, (xmax = 0) as inserted
   `;
   const row = rows[0];
   if (!row) {
     return Response.json({ ok: false, reason: "request-conflict" }, { status: 409 });
+  }
+  if (row.inserted) {
+    await emitMapEvent("library.upload_started", {
+      family_id: auth.familyId,
+      upload_id: row.id,
+      bytes: Number(row.byte_size),
+    });
   }
   return Response.json({ ok: true, upload: toFamilyAssetUploadView(row) });
 }
@@ -179,6 +191,9 @@ export async function PATCH(request: Request): Promise<Response> {
   const auth = await resolveApiFamily(request);
   if (!auth) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
+  }
+  if ((await familyAccountCheckout(auth.familyId)) !== null) {
+    return Response.json({ ok: false, reason: "membership-required" }, { status: 402 });
   }
   const parsed = updateUploadSchema.safeParse(await readJson(request));
   if (!parsed.success) {

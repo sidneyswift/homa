@@ -794,6 +794,65 @@ export const EVENT_SCHEMAS = {
       "share-failed",
     ]).optional(),
   }),
+  // Family Library funnel and reuse loop (gh#580). Every shape is strict
+  // and content-free: titles, filenames, URLs, search text, child names,
+  // and extracted text never enter analytics.
+  "library.upload_started": z
+    .object({
+      family_id: z.uuid(),
+      upload_id: z.uuid(),
+      bytes: z.number().int().min(1).max(524_288_000),
+    })
+    .strict(),
+  "library.upload_completed": z
+    .object({
+      family_id: z.uuid(),
+      asset_id: z.uuid(),
+      bytes: z.number().int().min(1).max(524_288_000),
+    })
+    .strict(),
+  "library.asset_processed": z
+    .object({
+      family_id: z.uuid(),
+      asset_id: z.uuid(),
+    })
+    .strict(),
+  "library.asset_reopened": z
+    .object({
+      family_id: z.uuid(),
+      asset_id: z.uuid(),
+      status: z.enum(["ready", "processing", "needs_attention", "failed"]),
+    })
+    .strict(),
+  "library.searched": z
+    .object({
+      family_id: z.uuid(),
+      query_length: z.number().int().min(0).max(180),
+      active_filters: z.number().int().min(0).max(4),
+      result_count: z.number().int().min(0).max(300),
+    })
+    .strict(),
+  "library.original_downloaded": z
+    .object({
+      family_id: z.uuid(),
+      asset_id: z.uuid(),
+      surface: z.enum(["shelf", "detail"]),
+    })
+    .strict(),
+  "library.asset_deleted": z
+    .object({
+      family_id: z.uuid(),
+      asset_id: z.uuid(),
+      prior_status: z.enum(["ready", "processing", "needs_attention", "failed"]),
+    })
+    .strict(),
+  "library.asset_used": z
+    .object({
+      family_id: z.uuid(),
+      asset_id: z.uuid(),
+      use_kind: z.enum(["retrieval", "material", "planner"]),
+    })
+    .strict(),
   // The state pack (journeys/06 rows 47-50, J4; shipped 2026-07-28 per
   // docs/homa-planning/plans/2026-07-28-state-pack.md). Deterministic
   // web feature over the state_requirements table; no agent involved.

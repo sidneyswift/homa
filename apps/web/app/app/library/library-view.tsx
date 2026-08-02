@@ -14,11 +14,13 @@ import {
   FileQuestion,
   FileText,
   FileVideo,
+  ChevronDown,
+  ChevronRight,
   Search,
-  Trash2,
+  SlidersHorizontal,
   Upload,
 } from "lucide-react";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   familyAssetUploadFingerprint,
@@ -35,9 +37,22 @@ import {
   formatFamilyAssetBytes,
   libraryUploadMediaType,
   MAX_LIBRARY_UPLOAD_BYTES,
-  type FamilyAssetFileKind,
   type FamilyAssetView,
 } from "../../../lib/library/family-assets";
+import {
+  FAMILY_ASSET_RESOURCE_KIND_LABELS,
+  FAMILY_ASSET_STATUS_LABELS,
+  FAMILY_ASSET_WHOLE_FAMILY_CHILD,
+  familyAssetFilterOptions,
+  familyAssetStatusCopy,
+  filterFamilyAssets,
+  stableFamilyAssetDate,
+} from "../../../lib/library/family-asset-shelf";
+import {
+  LibraryDetailPanel,
+  type LibraryChildOption,
+  type LibrarySubjectOption,
+} from "./library-detail-panel";
 
 interface UploadRow {
   id: string;
@@ -91,29 +106,6 @@ const FILE_ACCEPT = [
   ".key",
 ].join(",");
 
-const FILE_KIND_LABELS: Record<FamilyAssetFileKind, string> = {
-  document: "Document file",
-  image: "Image file",
-  audio: "Audio file",
-  video: "Video file",
-  archive: "Archive file",
-  link: "Saved link",
-  other: "Other file",
-};
-
-function fileKindLabel(asset: FamilyAssetView): string {
-  if (asset.fileKind !== "archive") return FILE_KIND_LABELS[asset.fileKind];
-  if (
-    asset.mediaType === "application/epub+zip" ||
-    asset.mediaType === "application/vnd.amazon.ebook" ||
-    asset.mediaType === "application/x-mobipocket-ebook"
-  ) {
-    return "Ebook file";
-  }
-  if (asset.mediaType === "application/zip") return "ZIP archive";
-  return "Archive file";
-}
-
 const FILE_KIND_ICONS = {
   document: FileText,
   image: FileImage,
@@ -124,24 +116,15 @@ const FILE_KIND_ICONS = {
   other: FileQuestion,
 } as const;
 
-function stableDateLabel(iso: string): string {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(iso));
-}
-
 function uploadFailureMessage(error: unknown, resumable: boolean): string {
   if (error instanceof Error && error.message === "unsupported-file") {
     return "Homa cannot save that file type yet. Try a PDF, photo, audio, video, ebook, ZIP, Word, Excel, or PowerPoint file.";
   }
   if (error instanceof Error && error.message === "resume-file-mismatch") {
-    return "That is not the file this upload started with.";
+    return "That is not the original file. Choose the same file this upload started with.";
   }
   if (resumable) {
-    return "Upload paused. Your upload progress is still here.";
+    return "Upload paused. Your progress is saved. Choose the same file to resume.";
   }
   return "That file did not save. Nothing was added. Try again.";
 }
@@ -154,7 +137,9 @@ function rowFromPersistedUpload(upload: FamilyAssetUploadView): UploadRow {
     name: upload.originalName,
     progress: familyAssetUploadProgress(upload.byteSize, upload.completedParts),
     state: removeFailed ? "remove_failed" : "paused",
-    message: upload.statusNote ?? "Upload paused. Your upload progress is still here.",
+    message:
+      upload.statusNote ??
+      "Upload paused. Your progress is saved. Choose the same file to resume.",
   };
 }
 
@@ -183,9 +168,15 @@ async function readJson<T>(response: Response): Promise<T> {
 export function LibraryView({
   initialAssets,
   initialUploads,
+  childOptions = [],
+  subjectOptions = [],
+  canUpload = true,
 }: {
   initialAssets: FamilyAssetView[];
   initialUploads: FamilyAssetUploadView[];
+  childOptions?: LibraryChildOption[];
+  subjectOptions?: LibrarySubjectOption[];
+  canUpload?: boolean;
 }) {
   const pickerRef = useRef<HTMLInputElement>(null);
   const resumePickerRef = useRef<HTMLInputElement>(null);
@@ -195,10 +186,18 @@ export function LibraryView({
     initialUploads.map(rowFromPersistedUpload),
   );
   const [query, setQuery] = useState("");
+  const [resourceKind, setResourceKind] = useState<FamilyAssetView["resourceKind"]>(null);
+  const [childId, setChildId] = useState<string | null>(null);
+  const [subjectId, setSubjectId] = useState<string | null>(null);
+  const [status, setStatus] = useState<FamilyAssetView["status"] | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [uploadsExpanded, setUploadsExpanded] = useState(
+    initialAssets.length === 0 && initialUploads.length > 0,
+  );
+  const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
   const [pageError, setPageError] = useState<string | null>(null);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [privacyPromptOpen, setPrivacyPromptOpen] = useState(false);
-  const [deleting, setDeleting] = useState<Set<string>>(() => new Set());
   const hasRecoverableUpload = uploads.some(
     (upload) =>
       upload.state === "preparing" ||
@@ -207,13 +206,90 @@ export function LibraryView({
       upload.state === "remove_failed",
   );
 
-  const visibleAssets = useMemo(() => {
-    const needle = query.trim().toLocaleLowerCase();
-    if (!needle) return assets;
-    return assets.filter((asset) =>
-      `${asset.title} ${asset.originalName}`.toLocaleLowerCase().includes(needle),
-    );
-  }, [assets, query]);
+  const filterOptions = useMemo(() => familyAssetFilterOptions(assets), [assets]);
+  const visibleAssets = useMemo(
+    () =>
+      filterFamilyAssets(assets, {
+        query,
+        resourceKind,
+        childId,
+        subjectId,
+        status,
+      }),
+    [assets, query, resourceKind, childId, subjectId, status],
+  );
+  const selectedAsset = selectedAssetId
+    ? assets.find((asset) => asset.id === selectedAssetId) ?? null
+    : null;
+  const activeFilterCount = [resourceKind, childId, subjectId, status].filter(Boolean).length;
+  const hasSearch = query.trim().length > 0 || activeFilterCount > 0;
+
+  useEffect(() => {
+    if (!hasSearch) return;
+    const timer = window.setTimeout(() => {
+      void fetch("/api/library/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind: "searched",
+          queryLength: Math.min(180, query.trim().length),
+          activeFilters: activeFilterCount,
+          resultCount: visibleAssets.length,
+        }),
+        keepalive: true,
+      }).catch(() => undefined);
+    }, 650);
+    return () => window.clearTimeout(timer);
+  }, [activeFilterCount, hasSearch, query, visibleAssets.length]);
+
+  const processingAssetKey = assets
+    .filter((asset) => asset.status === "processing")
+    .map((asset) => asset.id)
+    .sort()
+    .join(",");
+
+  useEffect(() => {
+    if (!processingAssetKey) return;
+    const assetIds = processingAssetKey.split(",");
+    let refreshing = false;
+    const timer = window.setInterval(() => {
+      if (refreshing) return;
+      refreshing = true;
+      void Promise.all(
+        assetIds.map(async (assetId) => {
+          const response = await fetch(
+            `/api/library/assets?id=${encodeURIComponent(assetId)}`,
+          );
+          return await readJson<AssetFinalizationResponse>(response);
+        }),
+      )
+        .then((responses) => {
+          const refreshed = new Map(
+            responses.flatMap((response) =>
+              response.asset ? [[response.asset.id, response.asset] as const] : [],
+            ),
+          );
+          setAssets((current) =>
+            current.map((asset) => refreshed.get(asset.id) ?? asset),
+          );
+        })
+        .catch(() => undefined)
+        .finally(() => {
+          refreshing = false;
+        });
+    }, 4_000);
+    return () => window.clearInterval(timer);
+  }, [processingAssetKey]);
+
+  function openAsset(asset: FamilyAssetView) {
+    setSelectedAssetId(asset.id);
+    void fetch("/api/library/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind: "reopened", assetId: asset.id }),
+      keepalive: true,
+    }).catch(() => undefined);
+  }
 
   function updateUpload(id: string, changes: Partial<UploadRow>) {
     setUploads((current) =>
@@ -459,7 +535,7 @@ export function LibraryView({
         reservation: active,
         state: "added",
         progress: 100,
-        message: "Saved to your Library. You can download it anytime.",
+        message: "Saved to your Library. Download the original whenever you are signed in.",
       });
     } catch (error) {
       if (!(error instanceof Error && error.message === "resume-file-mismatch")) {
@@ -478,6 +554,7 @@ export function LibraryView({
 
   async function addFile(file: File) {
     const id = crypto.randomUUID();
+    setUploadsExpanded(true);
     setUploads((current) => [
       ...current,
       {
@@ -495,7 +572,7 @@ export function LibraryView({
         message:
           file.size > MAX_LIBRARY_UPLOAD_BYTES
             ? "That file is over 500 MB. Choose a smaller file."
-            : "There is nothing in that file to upload. Choose a copy that opens on your device.",
+            : "That file is empty. Choose a file that opens on your device.",
       });
       return;
     }
@@ -534,7 +611,7 @@ export function LibraryView({
       if (fingerprint !== reservation.fingerprintSha256) {
         updateUpload(row.id, {
           state: "paused",
-          message: "That is not the file this upload started with.",
+          message: "That is not the original file. Choose the same file this upload started with.",
         });
         return;
       }
@@ -548,6 +625,7 @@ export function LibraryView({
   }
 
   function beginResumeUpload(id: string) {
+    setUploadsExpanded(true);
     resumeUploadIdRef.current = id;
     resumePickerRef.current?.click();
   }
@@ -603,6 +681,7 @@ export function LibraryView({
   }
 
   function beginAddingResources() {
+    if (!canUpload) return;
     setPageError(null);
     if (privacyAccepted) {
       pickerRef.current?.click();
@@ -612,33 +691,18 @@ export function LibraryView({
   }
 
   function continueToFilePicker() {
+    if (!canUpload) return;
     setPrivacyAccepted(true);
     setPrivacyPromptOpen(false);
     pickerRef.current?.click();
   }
 
-  async function removeAsset(asset: FamilyAssetView) {
-    const confirmed = window.confirm(
-      `Remove “${asset.title}” from your Library? Homa will delete the saved copy.`,
-    );
-    if (!confirmed) return;
-    setPageError(null);
-    setDeleting((current) => new Set(current).add(asset.id));
-    try {
-      const response = await fetch(`/api/library/assets?id=${encodeURIComponent(asset.id)}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error(`delete failed: ${response.status}`);
-      setAssets((current) => current.filter((item) => item.id !== asset.id));
-    } catch {
-      setPageError("That file is still in your Library. Try removing it again.");
-    } finally {
-      setDeleting((current) => {
-        const next = new Set(current);
-        next.delete(asset.id);
-        return next;
-      });
-    }
+  function clearFilters() {
+    setQuery("");
+    setResourceKind(null);
+    setChildId(null);
+    setSubjectId(null);
+    setStatus(null);
   }
 
   return (
@@ -647,8 +711,8 @@ export function LibraryView({
         <div className="max-w-2xl">
           <h1 className="font-display text-3xl font-semibold text-strong">Library</h1>
           <p className="mt-2 text-base leading-7 text-body">
-            Keep the worksheets, books, and curriculums your family uses. Homa saves a
-            copy here without moving your file.
+            Keep your family&apos;s worksheets, books, and curriculum in one place. Homa
+            saves a copy here without moving the original on your device.
           </p>
         </div>
         <input
@@ -666,7 +730,7 @@ export function LibraryView({
           hidden
           onChange={onResumeFilePicked}
         />
-        {assets.length > 0 && !hasRecoverableUpload ? (
+        {canUpload && assets.length > 0 && !hasRecoverableUpload ? (
           <button
             type="button"
             onClick={beginAddingResources}
@@ -678,7 +742,23 @@ export function LibraryView({
         ) : null}
       </header>
 
-      {privacyPromptOpen && (assets.length > 0 || hasRecoverableUpload) ? (
+      {!canUpload ? (
+        <section className="mt-5 rounded-md border border-border-subtle bg-card px-4 py-4 shadow-sm">
+          <h2 className="font-semibold text-strong">Your Library stays with you</h2>
+          <p className="mt-1 text-sm leading-6 text-body">
+            Open, organize, download, or remove anything already here. Renew your
+            membership when you want to add another resource.
+          </p>
+          <a
+            href="/onboarding/trial"
+            className="mt-3 inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm font-bold text-brand hover:bg-brand-soft"
+          >
+            See membership options
+          </a>
+        </section>
+      ) : null}
+
+      {canUpload && privacyPromptOpen && (assets.length > 0 || hasRecoverableUpload) ? (
         <section
           aria-labelledby="library-privacy-heading"
           className="mt-5 rounded-md border border-[var(--gold-300)] bg-[var(--warning-soft)] px-4 py-4"
@@ -687,9 +767,9 @@ export function LibraryView({
             Before you choose files
           </h2>
           <p className="mt-1 text-sm leading-6 text-body">
-            These files are not private. Homa does not list them publicly, but anyone
-            with a hard-to-guess file link can open one. Skip anything with family
-            details you would not want shared.
+            Each file has a public link that opens without signing in. Homa does not
+            list the link, but anyone who gets it can open the file. This Library is
+            for curriculum and other files without private family information.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button
@@ -711,11 +791,30 @@ export function LibraryView({
       ) : null}
 
       {uploads.length > 0 ? (
-        <section aria-label="Uploads" className="mt-6 space-y-2">
-          {uploads.map((item) => (
+        <section aria-label="Uploads" className="mt-6">
+          <details
+            open={uploadsExpanded}
+            onToggle={(event) => setUploadsExpanded(event.currentTarget.open)}
+            className="rounded-lg border border-border-subtle bg-card shadow-sm"
+          >
+            <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-strong marker:content-none">
+              <span>
+                {uploads.length} unfinished {uploads.length === 1 ? "upload" : "uploads"}
+                <span className="ml-2 font-normal text-muted">
+                  Everything already on your shelf is still available.
+                </span>
+              </span>
+              <ChevronDown
+                size={18}
+                className={uploadsExpanded ? "rotate-180 text-muted" : "text-muted"}
+                aria-hidden="true"
+              />
+            </summary>
+            <div className="space-y-2 border-t border-border-subtle p-2">
+              {uploads.map((item) => (
             <div
               key={item.id}
-              className="rounded-md border border-border-subtle bg-card px-4 py-3 shadow-sm"
+              className="rounded-md bg-page px-4 py-3"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0 sm:flex-1">
@@ -733,16 +832,16 @@ export function LibraryView({
                   </p>
                 </div>
                 <div className="grid w-full grid-cols-1 gap-1 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap sm:justify-end">
-                  {item.state === "paused" ? (
+                  {canUpload && item.state === "paused" ? (
                     <button
                       type="button"
                       onClick={() => beginResumeUpload(item.id)}
                       className="inline-flex min-h-11 w-full items-center justify-center rounded-md px-3 text-sm font-bold text-brand hover:bg-brand-soft sm:w-auto"
                     >
-                      Choose file to resume
+                      Choose same file to resume
                     </button>
                   ) : null}
-                  {item.state === "paused" && item.progress > 0 ? (
+                  {canUpload && item.state === "paused" && item.progress > 0 ? (
                     <button
                       type="button"
                       onClick={() => void restartUpload(item)}
@@ -763,7 +862,7 @@ export function LibraryView({
                       {item.state === "paused"
                         ? "Remove upload"
                         : item.state === "remove_failed"
-                          ? "Try remove again"
+                          ? "Try removing again"
                           : "Dismiss"}
                     </button>
                   ) : null}
@@ -787,8 +886,9 @@ export function LibraryView({
               ) : null}
               {item.state === "paused" ? (
                 <p className="mt-3 text-xs leading-5 text-subtle">
-                  Restarting clears upload progress. Removing clears this unfinished
-                  upload from Homa. Neither changes the file on your device.
+                  {canUpload
+                    ? "Restarting clears upload progress. Removing clears this unfinished upload from Homa. Neither changes the file on your device."
+                    : "Removing clears this unfinished upload from Homa. The file on your device stays."}
                 </p>
               ) : null}
               {item.state === "remove_failed" ? (
@@ -797,11 +897,13 @@ export function LibraryView({
                 </p>
               ) : null}
             </div>
-          ))}
+              ))}
+            </div>
+          </details>
         </section>
       ) : null}
 
-      {hasRecoverableUpload ? (
+      {canUpload && hasRecoverableUpload ? (
         <button
           type="button"
           onClick={beginAddingResources}
@@ -824,15 +926,15 @@ export function LibraryView({
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-soft text-brand">
             <Upload size={22} aria-hidden="true" />
           </div>
-          {privacyPromptOpen ? (
+          {canUpload && privacyPromptOpen ? (
             <>
               <h2 className="mt-4 font-display text-2xl font-semibold text-strong">
                 Before you choose files
               </h2>
               <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-body">
-                These files are not private. Homa does not list them publicly, but anyone
-                with a hard-to-guess file link can open one. Skip anything with family
-                details you would not want shared.
+                Each file has a public link that opens without signing in. Homa does not
+                list the link, but anyone who gets it can open the file. This Library is
+                for curriculum and other files without private family information.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-2">
                 <button
@@ -851,7 +953,7 @@ export function LibraryView({
                 </button>
               </div>
             </>
-          ) : (
+          ) : canUpload ? (
             <>
               <h2 className="mt-4 font-display text-2xl font-semibold text-strong">
                 Add your first resource
@@ -868,81 +970,210 @@ export function LibraryView({
                 Add a resource
               </button>
             </>
+          ) : (
+            <>
+              <h2 className="mt-4 font-display text-2xl font-semibold text-strong">
+                Nothing saved here yet
+              </h2>
+              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-body">
+                Renew your membership when you are ready to add a resource.
+              </p>
+            </>
           )}
         </section>
       ) : (
         <section className="mt-8">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm font-semibold text-muted">
-              {assets.length} {assets.length === 1 ? "resource" : "resources"}
-            </p>
-            <label className="relative block w-full sm:w-72">
+            <div>
+              <h2 className="font-display text-xl font-semibold text-strong">Your shelf</h2>
+              <p className="mt-1 text-sm text-muted">
+                {visibleAssets.length === assets.length
+                  ? `${assets.length} ${assets.length === 1 ? "resource" : "resources"}`
+                  : `${visibleAssets.length} of ${assets.length} resources`}
+              </p>
+            </div>
+            <label className="relative block w-full sm:w-80">
               <Search
                 size={17}
                 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-subtle"
                 aria-hidden="true"
               />
-              <span className="sr-only">Search titles and file names</span>
+              <span className="sr-only">Search your Library</span>
               <input
                 type="search"
                 value={query}
+                maxLength={180}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search titles and file names"
+                placeholder="Search title, child, or subject"
                 className="min-h-11 w-full rounded-md border border-border-subtle bg-card py-2 pl-9 pr-3 text-sm text-strong outline-none transition-colors placeholder:text-subtle focus:border-brand"
               />
             </label>
           </div>
 
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((open) => !open)}
+            className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-brand hover:bg-brand-soft sm:hidden"
+            aria-expanded={filtersOpen || hasSearch}
+          >
+            <SlidersHorizontal size={16} aria-hidden="true" />
+            Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
+          </button>
+
+          <div
+            className={`${filtersOpen || hasSearch ? "grid" : "hidden"} mt-2 gap-2 sm:mt-4 sm:grid sm:grid-cols-2 xl:grid-cols-4`}
+          >
+            <label className="text-xs font-semibold text-muted">
+              Type
+              <select
+                value={resourceKind ?? ""}
+                onChange={(event) =>
+                  setResourceKind(
+                    (event.target.value || null) as FamilyAssetView["resourceKind"],
+                  )
+                }
+                className="mt-1 min-h-11 w-full rounded-md border border-border-subtle bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+              >
+                <option value="">All types</option>
+                {filterOptions.resourceKinds.map((kind) => (
+                  <option key={kind} value={kind}>
+                    {FAMILY_ASSET_RESOURCE_KIND_LABELS[kind]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-xs font-semibold text-muted">
+              For
+              <select
+                value={childId ?? ""}
+                onChange={(event) => setChildId(event.target.value || null)}
+                className="mt-1 min-h-11 w-full rounded-md border border-border-subtle bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+              >
+                <option value="">All resources</option>
+                <option value={FAMILY_ASSET_WHOLE_FAMILY_CHILD}>Whole family</option>
+                {filterOptions.children.map((child) => (
+                  <option key={child.id} value={child.id}>{child.name}</option>
+                ))}
+              </select>
+            </label>
+            <label className="text-xs font-semibold text-muted">
+              Subject
+              <select
+                value={subjectId ?? ""}
+                onChange={(event) => setSubjectId(event.target.value || null)}
+                className="mt-1 min-h-11 w-full rounded-md border border-border-subtle bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+              >
+                <option value="">All subjects</option>
+                {filterOptions.subjects.map((subject) => (
+                  <option key={subject.id} value={subject.id}>{subject.label}</option>
+                ))}
+              </select>
+            </label>
+            <label className="text-xs font-semibold text-muted">
+              Status
+              <select
+                value={status ?? ""}
+                onChange={(event) =>
+                  setStatus((event.target.value || null) as FamilyAssetView["status"] | null)
+                }
+                className="mt-1 min-h-11 w-full rounded-md border border-border-subtle bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+              >
+                <option value="">All statuses</option>
+                {filterOptions.statuses.map((itemStatus) => (
+                  <option key={itemStatus} value={itemStatus}>
+                    {FAMILY_ASSET_STATUS_LABELS[itemStatus]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          {hasSearch ? (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="mt-3 inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm font-semibold text-brand hover:bg-brand-soft"
+            >
+              Clear search and filters
+            </button>
+          ) : null}
+
           {visibleAssets.length === 0 ? (
             <div className="mt-5 rounded-lg border border-dashed border-border-subtle px-6 py-10 text-center">
-              <p className="font-semibold text-strong">Nothing matches that search.</p>
-              <p className="mt-1 text-sm text-muted">Try the title or the original file name.</p>
+              <p className="font-semibold text-strong">Nothing on this shelf matches.</p>
+              <p className="mt-1 text-sm text-muted">Clear a filter or try another word.</p>
             </div>
           ) : (
             <div className="mt-5 grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
               {visibleAssets.map((asset) => {
                 const Icon = FILE_KIND_ICONS[asset.fileKind];
+                const assetStatus = familyAssetStatusCopy(asset);
                 return (
                   <article
                     key={asset.id}
                     className="flex min-h-44 flex-col rounded-lg border border-border-subtle bg-card p-4 shadow-sm sm:min-h-52 sm:p-5"
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-soft text-brand sm:h-10 sm:w-10">
-                        <Icon size={20} aria-hidden="true" />
+                    <button
+                      type="button"
+                      onClick={() => openAsset(asset)}
+                      className="group block w-full text-left"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-soft text-brand sm:h-10 sm:w-10">
+                          <Icon size={20} aria-hidden="true" />
+                        </div>
+                        <span className="rounded-full bg-page px-2.5 py-1 text-xs font-semibold text-muted">
+                          {assetStatus.label}
+                        </span>
                       </div>
-                      <span className="rounded-full bg-page px-2.5 py-1 text-xs font-semibold text-muted">
-                        {fileKindLabel(asset)}
-                      </span>
-                    </div>
-                    <h2 className="mt-3 line-clamp-2 font-display text-lg font-semibold text-strong sm:mt-4">
-                      {asset.title}
-                    </h2>
-                    <p className="mt-1 hidden truncate text-sm text-muted sm:block">
-                      {asset.originalName}
-                    </p>
-                    <p className="mt-1 text-xs text-subtle sm:mt-2">
-                      {formatFamilyAssetBytes(asset.byteSize)}
-                      <span className="hidden sm:inline">
-                        {` · ${stableDateLabel(asset.createdAt)}`}
-                      </span>
-                    </p>
+                      <h2 className="mt-3 line-clamp-2 font-display text-lg font-semibold text-strong group-hover:text-brand sm:mt-4">
+                        {asset.title}
+                      </h2>
+                      <p className="mt-1 hidden truncate text-sm text-muted sm:block">
+                        {asset.originalName}
+                      </p>
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {asset.resourceKind ? (
+                          <span className="rounded-full bg-brand-soft px-2.5 py-1 text-xs font-semibold text-brand">
+                            {FAMILY_ASSET_RESOURCE_KIND_LABELS[asset.resourceKind]}
+                          </span>
+                        ) : null}
+                        {asset.children.slice(0, 2).map((child) => (
+                          <span key={child.id} className="rounded-full bg-page px-2.5 py-1 text-xs text-muted">
+                            {child.name}
+                          </span>
+                        ))}
+                        {asset.children.length === 0 ? (
+                          <span className="rounded-full bg-page px-2.5 py-1 text-xs text-muted">Whole family</span>
+                        ) : null}
+                        {asset.subjects.slice(0, 1).map((subject) => (
+                          <span key={subject.id} className="rounded-full bg-page px-2.5 py-1 text-xs text-muted">
+                            {subject.label}
+                          </span>
+                        ))}
+                      </div>
+                      <p className="mt-1 text-xs text-subtle sm:mt-2">
+                        {formatFamilyAssetBytes(asset.byteSize)}
+                        <span className="hidden sm:inline">
+                          {` · ${stableFamilyAssetDate(asset.createdAt)}`}
+                        </span>
+                      </p>
+                    </button>
                     <div className="mt-auto flex items-center gap-2 pt-4 sm:pt-5">
                       <a
-                        href={asset.downloadUrl}
-                        className="inline-flex min-h-10 flex-1 items-center justify-center gap-2 rounded-md border border-border-subtle px-3 py-2 text-sm font-bold text-strong hover:bg-page"
+                        href={`/api/library/assets/${encodeURIComponent(asset.id)}/download?surface=shelf`}
+                        className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-md border border-border-subtle px-3 py-2 text-sm font-bold text-strong hover:bg-page"
                       >
                         <Download size={16} aria-hidden="true" />
-                        Download file
+                        Download
                       </a>
                       <button
                         type="button"
-                        aria-label={`Remove ${asset.title} from Library`}
-                        disabled={deleting.has(asset.id)}
-                        onClick={() => void removeAsset(asset)}
-                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border-subtle text-muted hover:bg-page hover:text-danger disabled:cursor-wait disabled:opacity-50"
+                        onClick={() => openAsset(asset)}
+                        className="inline-flex min-h-11 flex-1 items-center justify-center gap-1 rounded-md px-3 py-2 text-sm font-bold text-brand hover:bg-brand-soft"
                       >
-                        <Trash2 size={17} aria-hidden="true" />
+                        View details
+                        <ChevronRight size={16} aria-hidden="true" />
                       </button>
                     </div>
                   </article>
@@ -952,6 +1183,25 @@ export function LibraryView({
           )}
         </section>
       )}
+
+      {selectedAsset ? (
+        <LibraryDetailPanel
+          key={selectedAsset.id}
+          asset={selectedAsset}
+          childOptions={childOptions}
+          subjectOptions={subjectOptions}
+          onClose={() => setSelectedAssetId(null)}
+          onUpdated={(updated) =>
+            setAssets((current) =>
+              current.map((asset) => (asset.id === updated.id ? updated : asset)),
+            )
+          }
+          onDeleted={(assetId) => {
+            setAssets((current) => current.filter((asset) => asset.id !== assetId));
+            setSelectedAssetId(null);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

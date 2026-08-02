@@ -7,6 +7,77 @@ import { MAP_ANSWERS } from "./map/bank";
 const FAMILY_ID = "00000000-0000-4000-8000-000000000001";
 const CHILD_ID = "00000000-0000-4000-8000-000000000002";
 const TASK_RUN_ID = "00000000-0000-4000-8000-000000000003";
+const ASSET_ID = "00000000-0000-4000-8000-000000000004";
+const UPLOAD_ID = "00000000-0000-4000-8000-000000000005";
+
+const validLibraryEvents = {
+  "library.upload_started": {
+    family_id: FAMILY_ID,
+    upload_id: UPLOAD_ID,
+    bytes: 1024,
+  },
+  "library.upload_completed": {
+    family_id: FAMILY_ID,
+    asset_id: ASSET_ID,
+    bytes: 1024,
+  },
+  "library.asset_processed": {
+    family_id: FAMILY_ID,
+    asset_id: ASSET_ID,
+  },
+  "library.asset_reopened": {
+    family_id: FAMILY_ID,
+    asset_id: ASSET_ID,
+    status: "ready",
+  },
+  "library.searched": {
+    family_id: FAMILY_ID,
+    query_length: 9,
+    active_filters: 2,
+    result_count: 3,
+  },
+  "library.original_downloaded": {
+    family_id: FAMILY_ID,
+    asset_id: ASSET_ID,
+    surface: "detail",
+  },
+  "library.asset_deleted": {
+    family_id: FAMILY_ID,
+    asset_id: ASSET_ID,
+    prior_status: "needs_attention",
+  },
+  "library.asset_used": {
+    family_id: FAMILY_ID,
+    asset_id: ASSET_ID,
+    use_kind: "retrieval",
+  },
+} as const;
+
+test("Library events accept every exact content-free shape", () => {
+  for (const [name, props] of Object.entries(validLibraryEvents)) {
+    const schema = EVENT_SCHEMAS[name as keyof typeof EVENT_SCHEMAS];
+    assert.ok(schema, `${name} is missing from the event registry`);
+    assert.equal(schema.safeParse(props).success, true, name);
+  }
+});
+
+test("Library events reject malformed ids and content-shaped properties", () => {
+  for (const [name, props] of Object.entries(validLibraryEvents)) {
+    const schema = EVENT_SCHEMAS[name as keyof typeof EVENT_SCHEMAS];
+    assert.equal(
+      schema.safeParse({ ...props, family_id: "not-a-uuid" }).success,
+      false,
+      `${name} accepted a malformed family UUID`,
+    );
+    for (const property of ["title", "filename", "url", "query", "content"] as const) {
+      assert.equal(
+        schema.safeParse({ ...props, [property]: "family content" }).success,
+        false,
+        `${name} accepted ${property}`,
+      );
+    }
+  }
+});
 
 const validSubjectLessonEvents = {
   "map.subject_lesson_requested": {

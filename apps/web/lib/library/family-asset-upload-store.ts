@@ -1,7 +1,9 @@
 import { del, head, type HeadBlobResult } from "@vercel/blob";
 
 import { mapDb } from "../map/db";
+import { emitMapEvent } from "../map/events";
 import {
+  FAMILY_ASSET_PROCESSING_QUEUED_NOTE,
   familyAssetFileKind,
   isFamilyLibraryUrl,
   titleFromLibraryFileName,
@@ -34,7 +36,7 @@ export interface FamilyAssetUploadRow {
   updated_at: string;
 }
 
-interface FamilyAssetRow {
+export interface FamilyAssetRow {
   id: string;
   title: string;
   original_name: string;
@@ -44,13 +46,30 @@ interface FamilyAssetRow {
   byte_size: number | string;
   file_kind: FamilyAssetView["fileKind"];
   resource_kind: FamilyAssetView["resourceKind"];
+  authors: string[];
+  publisher: string | null;
+  language: string | null;
   status: FamilyAssetView["status"];
+  processing_error_code: string | null;
   processing_note: string | null;
+  source_upload_id: string | null;
+  source_attachment_id: string | null;
+  parent_asset_id: string | null;
+  processed_at: string | null;
   created_at: string;
+  updated_at: string;
 }
 
+export const FAMILY_ASSET_ROW_SELECT = `
+  id, title, original_name, url, download_url, media_type, byte_size,
+  file_kind, resource_kind, authors, publisher, language, status,
+  processing_error_code, processing_note, source_upload_id,
+  source_attachment_id, parent_asset_id, processed_at::text,
+  created_at::text, updated_at::text
+`;
+
 export type FinalizeFamilyAssetUploadResult =
-  | { ok: true; asset: FamilyAssetView }
+  | { ok: true; asset: FamilyAssetView; familyId: string }
   | {
       ok: false;
       reason: "not-found" | "abandoned" | "blob-not-found" | "blob-mismatch";
@@ -115,7 +134,13 @@ export function toFamilyAssetUploadView(
   };
 }
 
-export function toFamilyAssetView(row: FamilyAssetRow): FamilyAssetView {
+export function toFamilyAssetView(
+  row: FamilyAssetRow,
+  associations: Pick<FamilyAssetView, "children" | "subjects"> = {
+    children: [],
+    subjects: [],
+  },
+): FamilyAssetView {
   return {
     id: row.id,
     title: row.title,
@@ -126,9 +151,20 @@ export function toFamilyAssetView(row: FamilyAssetRow): FamilyAssetView {
     byteSize: Number(row.byte_size),
     fileKind: row.file_kind,
     resourceKind: row.resource_kind,
+    authors: row.authors,
+    publisher: row.publisher,
+    language: row.language,
     status: row.status,
+    processingErrorCode: row.processing_error_code,
     processingNote: row.processing_note,
+    sourceUploadId: row.source_upload_id,
+    sourceAttachmentId: row.source_attachment_id,
+    parentAssetId: row.parent_asset_id,
+    children: associations.children,
+    subjects: associations.subjects,
+    processedAt: row.processed_at,
     createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 
@@ -233,7 +269,7 @@ export async function finalizeFamilyAssetUpload(input: {
   }
 
   const sql = mapDb();
-  const asset = await sql.begin(async (transaction) => {
+  const finalized = await sql.begin(async (transaction) => {
     const lockedRows = await transaction<FamilyAssetUploadRow[]>`
       select id, family_id, initiated_by_user_id, original_name, pathname,
              media_type, byte_size, last_modified, fingerprint_sha256,
@@ -255,7 +291,8 @@ export async function finalizeFamilyAssetUpload(input: {
     const rows = await transaction<FamilyAssetRow[]>`
       insert into public.family_assets (
         family_id, uploaded_by_user_id, source_upload_id, title, original_name,
-        url, download_url, media_type, byte_size, file_kind, status, processed_at
+        url, download_url, media_type, byte_size, file_kind, status,
+        processing_note, processed_at
       )
       values (
         ${locked.family_id},
@@ -268,14 +305,13 @@ export async function finalizeFamilyAssetUpload(input: {
         ${blob.contentType},
         ${blob.size},
         ${familyAssetFileKind(blob.contentType)},
-        'ready',
-        now()
+        'processing',
+        ${FAMILY_ASSET_PROCESSING_QUEUED_NOTE},
+        null
       )
       on conflict (family_id, source_upload_id) do update
       set source_upload_id = excluded.source_upload_id
-      returning id, title, original_name, url, download_url, media_type,
-                byte_size, file_kind, resource_kind, status,
-                processing_note, created_at::text
+      returning ${transaction.unsafe(FAMILY_ASSET_ROW_SELECT)}
     `;
     const row = rows[0];
     if (!row) return null;
@@ -289,10 +325,27 @@ export async function finalizeFamilyAssetUpload(input: {
           updated_at = now()
       where id = ${locked.id} and family_id = ${locked.family_id}
     `;
-    return toFamilyAssetView(row);
+    return {
+      asset: toFamilyAssetView(row),
+      completedNow: locked.status !== "ready",
+      familyId: locked.family_id,
+    };
   });
 
-  if (asset) return { ok: true, asset };
+  if (finalized) {
+    if (finalized.completedNow) {
+      await emitMapEvent("library.upload_completed", {
+        family_id: finalized.familyId,
+        asset_id: finalized.asset.id,
+        bytes: finalized.asset.byteSize,
+      });
+    }
+    return {
+      ok: true,
+      asset: finalized.asset,
+      familyId: finalized.familyId,
+    };
+  }
   try {
     await del(blob.url);
   } catch {
