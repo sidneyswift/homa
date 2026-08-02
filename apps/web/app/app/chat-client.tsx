@@ -61,6 +61,7 @@ import {
 import {
   archiveMessages,
   foldEventsToMessages,
+  loadSavedChat,
   prepareChat,
   pruneMessageTimes,
   saveChat,
@@ -68,6 +69,10 @@ import {
   updateSavedPromptSuggestionSet,
   type ArchivedMessage,
 } from "./chat-storage";
+import {
+  shouldAdoptSavedSession,
+  withChatTurnLock,
+} from "./chat-session-cache";
 import {
   hydrationSafeTranscriptSources,
   useHydrated,
@@ -143,6 +148,7 @@ import {
   createTurnBoundaryWatchdog,
   type TurnBoundaryWatchdog,
 } from "./turn-boundary-watchdog";
+import { restoreServerBoundEveSession } from "./web-session-restoration";
 
 /**
  * The chat surface, the main column inside the /app frame: the sidebar
@@ -334,19 +340,29 @@ export function ChatClient({
     Boolean(serverHistory) &&
     !prepared.initialSession?.sessionId &&
     prepared.initialEvents.length > 0;
-  const [reattachableSession] = useState(() => {
-    const client = new Client({
-      auth: {
-        bearer: async () => {
-          const { data } = await supabase.auth.getSession();
-          return data.session?.access_token ?? "";
+  const shouldRestoreServerBinding =
+    onboarding === null &&
+    familyId !== null &&
+    !prepared.initialSession?.sessionId;
+  const [restoringBoundSession, setRestoringBoundSession] = useState(
+    shouldRestoreServerBinding,
+  );
+  const [sessionClient] = useState(
+    () =>
+      new Client({
+        auth: {
+          bearer: async () => {
+            const { data } = await supabase.auth.getSession();
+            return data.session?.access_token ?? "";
+          },
         },
-      },
-      host: "",
-      maxReconnectAttempts: STREAM_RECONNECT_ATTEMPTS,
-    });
+        host: "",
+        maxReconnectAttempts: STREAM_RECONNECT_ATTEMPTS,
+      }),
+  );
+  const [reattachableSession] = useState(() => {
     return createReattachableEveSession({
-      createSession: (state) => client.session(state),
+      createSession: (state) => sessionClient.session(state),
       initialSession: staleSessionlessEvents
         ? undefined
         : prepared.initialSession,
@@ -762,13 +778,17 @@ export function ChatClient({
         setTurnSeconds((current) => ({ ...current, [lastMessage.id]: seconds }));
       }
       turnStartedAtRef.current = null;
-      saveChat(storageKey, {
-        archived: archivedRef.current,
-        events: snapshot.events,
-        session: snapshot.session,
-        messageTimes: stamped,
-        lastActivityAt: currentTimeMs(),
-      });
+      saveChat(
+        storageKey,
+        {
+          archived: archivedRef.current,
+          events: snapshot.events,
+          session: snapshot.session,
+          messageTimes: stamped,
+          lastActivityAt: currentTimeMs(),
+        },
+        { mergeSessionEvents: true },
+      );
       // onFinish fires for failed turns too; those already emit their
       // own error event (the agent.error effect), so an unconditional
       // "ok" here double-counted every failure (seen live 2026-07-11).
@@ -812,10 +832,6 @@ export function ChatClient({
   const agentReset = agent.reset;
   const agentSend = agent.send;
   const agentStop = agent.stop;
-
-  useEffect(() => {
-    sendRef.current = agentSend;
-  }, [agentSend]);
 
   // Only on a failure, so the happy path never pays for it, and only
   // when the answer is certain: an unreadable or missing token leaves
@@ -1011,6 +1027,98 @@ export function ChatClient({
       });
     }, 0);
   }, []);
+
+  const adoptServerRestoredSession = useCallback(
+    (restored: RecoveredTurn) => {
+      reattachableSession.adopt(restored.session);
+      saveChat(
+        storageKey,
+        {
+          archived: archivedRef.current,
+          events: restored.events,
+          session: restored.session,
+          messageTimes: {},
+          lastActivityAt: currentTimeMs(),
+        },
+        { mergeSessionEvents: true },
+      );
+      agentReset();
+      durableCursorRef.current = restored.session.streamIndex;
+    },
+    [agentReset, reattachableSession, storageKey],
+  );
+
+  const sendAcrossTabs = useCallback(
+    async (input: {
+      message: string | UserContent;
+      headers?: Readonly<Record<string, string>>;
+    }): Promise<void> => {
+      await withChatTurnLock(storageKey, async () => {
+        const current = reattachableSession.session.state;
+        const saved = loadSavedChat(storageKey).session;
+        if (shouldAdoptSavedSession(current, saved)) {
+          reattachableSession.adopt(saved);
+          durableCursorRef.current = saved.streamIndex;
+        } else if (!current.sessionId) {
+          setRestoringBoundSession(true);
+          const restored = await restoreServerBoundEveSession({
+            client: sessionClient,
+            timeZone,
+            signal: new AbortController().signal,
+          });
+          if (restored === null) {
+            setRestoringBoundSession(false);
+            return;
+          }
+          if (restored.kind === "resumed") {
+            adoptServerRestoredSession(restored);
+          }
+          setRestoringBoundSession(false);
+        }
+        await agentSend(input);
+      });
+    },
+    [
+      adoptServerRestoredSession,
+      agentSend,
+      reattachableSession,
+      sessionClient,
+      storageKey,
+      timeZone,
+    ],
+  );
+
+  useEffect(() => {
+    sendRef.current = sendAcrossTabs;
+  }, [sendAcrossTabs]);
+
+  // A localStorage miss is not permission to mint. The authenticated server
+  // binding is the cross-device authority; replaying it read-only recovers the
+  // exact Eve cursor and waits out any turn another tab is still streaming.
+  useEffect(() => {
+    if (!shouldRestoreServerBinding) return;
+    const controller = new AbortController();
+    void (async () => {
+      const restored = await restoreServerBoundEveSession({
+        client: sessionClient,
+        timeZone,
+        signal: controller.signal,
+      });
+      if (controller.signal.aborted || restored === null) return;
+      if (restored.kind === "resumed") {
+        adoptServerRestoredSession(restored);
+      }
+      setRestoringBoundSession(false);
+      flushQueuedMessages();
+    })();
+    return () => controller.abort();
+  }, [
+    adoptServerRestoredSession,
+    flushQueuedMessages,
+    sessionClient,
+    shouldRestoreServerBinding,
+    timeZone,
+  ]);
 
   const recoverLastTurn = useCallback(
     async (signal: AbortSignal): Promise<RecoveredTurn | null> => {
@@ -1292,6 +1400,8 @@ export function ChatClient({
   });
   const renderMessages = renderSources.live;
   const renderBusy = hydrated && busy;
+  const renderRestoringBoundSession = hydrated && restoringBoundSession;
+  const lineOccupied = busy || recovering || renderRestoringBoundSession;
   const transcript = buildTranscript({
     archived: renderSources.archived,
     live: renderMessages,
@@ -1353,7 +1463,7 @@ export function ChatClient({
   // The chips return whenever a session has no words in it yet: the
   // first run, and a fresh morning over yesterday's scrollback.
   const showSuggestions =
-    renderMessages.length === 0 && !renderBusy && onboarding === null;
+    renderMessages.length === 0 && !lineOccupied && onboarding === null;
   // The snap card's dim rule (founder call): while Homa's camera ask is
   // the live question, everything above it steps back. The only full
   // dim in the product; the card's own message stays full strength.
@@ -1383,6 +1493,7 @@ export function ChatClient({
   const promptSuggestionRailAllowed =
     !renderBusy
     && !recovering
+    && !renderRestoringBoundSession
     && promptSuggestionPhase !== "idle"
     && progressInteraction === null
     && activeSnap === null
@@ -1783,7 +1894,10 @@ export function ChatClient({
       // finished (chat-send-policy.ts's isSendLineOccupied; GH #170).
       // Either way a send here must queue, never start a second eve
       // session racing the one that might still be finishing.
-      busy: isSendLineOccupied({ busy, recovering }),
+      busy: isSendLineOccupied({
+        busy,
+        recovering: recovering || restoringBoundSession,
+      }),
       draftFromVoice: draftFromVoiceRef.current,
       source,
     });
@@ -1842,7 +1956,7 @@ export function ChatClient({
     lastSendRef.current = { text: outgoing, atMs: currentTimeMs() };
     turnStartedAtRef.current = currentTimeMs();
     markTurnStarted();
-    void agent.send({
+    void sendRef.current?.({
       message: outgoing,
       headers: messageModalityHeaders(turnModalityRef.current),
     });
@@ -1884,7 +1998,12 @@ export function ChatClient({
     // Attachments hold for the idle line already (no queueing for
     // files); recovering counts as occupied for the same session-fork
     // reason sendMessage's plan does (GH #170).
-    if (isSendLineOccupied({ busy, recovering }) || preparingAttachments) {
+    if (
+      isSendLineOccupied({
+        busy,
+        recovering: recovering || restoringBoundSession,
+      }) || preparingAttachments
+    ) {
       return;
     }
     if (!chatDoorTappedRef.current) {
@@ -1931,7 +2050,7 @@ export function ChatClient({
       lastSendRef.current = { text: summary, atMs: currentTimeMs() };
       turnStartedAtRef.current = currentTimeMs();
       markTurnStarted();
-      void agent.send({
+      void sendRef.current?.({
         message: parts,
         headers: messageModalityHeaders("text"),
       });
@@ -2283,9 +2402,9 @@ export function ChatClient({
             </p>
           </div>
         ) : null}
-        {recovering ? (
-          // The stream died but the turn is durable server-side; while
-          // the replay runs, the wait reads as work, not as a failure.
+        {recovering || renderRestoringBoundSession ? (
+          // A dead local stream or a missing local cursor both resolve from
+          // the durable server session. The wait reads as work, not failure.
           <div className="flex items-center gap-2.5 text-muted" role="status">
             <ThinkingMark size={28} mood="digging" />
             <span>Reconnecting&hellip;</span>

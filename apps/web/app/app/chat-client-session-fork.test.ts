@@ -27,14 +27,14 @@ describe("ChatClient session-fork fix (GH #170)", () => {
   it("folds recovering into the send-line-occupied decision for a plain composer send", () => {
     assert.match(
       source,
-      /busy: isSendLineOccupied\(\{ busy, recovering \}\)/u,
+      /busy: isSendLineOccupied\(\{[\s\S]*?busy,[\s\S]*?recovering: recovering \|\| restoringBoundSession,[\s\S]*?\}\)/u,
     );
   });
 
   it("folds recovering into the same gate for the attachment send path", () => {
     assert.match(
       source,
-      /if \(isSendLineOccupied\(\{ busy, recovering \}\) \|\| preparingAttachments\)/u,
+      /if \(\s*isSendLineOccupied\(\{[\s\S]*?busy,[\s\S]*?recovering: recovering \|\| restoringBoundSession,[\s\S]*?\}\) \|\| preparingAttachments\s*\)/u,
     );
   });
 

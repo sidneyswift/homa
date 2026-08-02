@@ -10,6 +10,9 @@ import {
   type PromptSuggestionSet,
 } from "../../lib/chat-suggestions/contract";
 import { effectiveTimeZone } from "../../lib/time-zone";
+import { mergeSavedSessionEvents } from "./chat-session-cache";
+
+export { mergeSavedSessionEvents } from "./chat-session-cache";
 
 /**
  * Transcript + session cursor persistence for the web chat, and the
@@ -70,6 +73,12 @@ export interface SavedChat {
   promptSuggestions?: PromptSuggestionSet | null;
 }
 
+export interface SaveChatOptions {
+  /** Merge this turn's absolute Eve stream range with a newer range another
+   * tab may already have written. Recovery and rotation deliberately replace. */
+  mergeSessionEvents?: boolean;
+}
+
 /** What the chat client mounts with after the rotation decision. */
 export interface PreparedChat {
   archived: ArchivedMessage[];
@@ -108,14 +117,21 @@ export function loadSavedChat(storageKey: string): SavedChat {
   }
 }
 
-export function saveChat(storageKey: string, chat: SavedChat): void {
+export function saveChat(
+  storageKey: string,
+  chat: SavedChat,
+  options: SaveChatOptions = {},
+): void {
   try {
+    const next = options.mergeSessionEvents
+      ? mergeSavedSessionEvents(loadSavedChat(storageKey), chat)
+      : chat;
     window.localStorage.setItem(
       storageKey,
       JSON.stringify({
-        ...chat,
-        archived: capArchived(chat.archived ?? []),
-        events: trimEventsForSave(chat.events ?? []),
+        ...next,
+        archived: capArchived(next.archived ?? []),
+        events: trimEventsForSave(next.events ?? []),
       }),
     );
   } catch {

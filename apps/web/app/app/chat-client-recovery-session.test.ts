@@ -27,4 +27,21 @@ describe("ChatClient recovered-session reattachment (GH #493)", () => {
       /durableCursorRef\.current = recovered\.session\.streamIndex/u,
     );
   });
+
+  it("blocks a cursorless tab until the authenticated server binding resolves", () => {
+    assert.match(source, /restoreServerBoundEveSession\(\{/u);
+    assert.match(source, /withChatTurnLock\(storageKey,/u);
+    assert.match(
+      source,
+      /recovering: recovering \|\| restoringBoundSession/u,
+    );
+    assert.match(
+      source,
+      /reattachableSession\.adopt\(restored\.session\)/u,
+    );
+    assert.match(
+      source,
+      /durableCursorRef\.current = restored\.session\.streamIndex/u,
+    );
+  });
 });
