@@ -2,13 +2,18 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
+import { progressErrorPresentation } from "./progress-error-model";
+
 const cardSource = readFileSync(new URL("./subject-card.tsx", import.meta.url), "utf8");
 const modelSource = readFileSync(new URL("./map-model.ts", import.meta.url), "utf8");
 const progressScreenSource = readFileSync(
   new URL("../../app/(tabs)/progress.tsx", import.meta.url),
   "utf8",
 );
-const kidSwitcherSource = readFileSync(new URL("./kid-switcher.tsx", import.meta.url), "utf8");
+const kidSwitcherSource = readFileSync(
+  new URL("./kid-switcher.tsx", import.meta.url),
+  "utf8",
+);
 
 describe("native Progress child-safe presentation contract", () => {
   it("keeps every internal score position out of the collapsed subject card", () => {
@@ -21,19 +26,94 @@ describe("native Progress child-safe presentation contract", () => {
 
   it("leads with evidence and exposes the expandable state to assistive technology", () => {
     assert.match(cardSource, /progressSubjectSummary\(subject, timeZone, conflicts\)/u);
+    assert.match(
+      cardSource,
+      /progressSubjectTakeaway\(subject, conflicts\)/u,
+    );
     assert.match(cardSource, /accessibilityRole="button"/u);
     assert.match(cardSource, /accessibilityState=\{\{ expanded \}\}/u);
     assert.match(cardSource, /accessibilityLabel=/u);
+    assert.match(cardSource, /freshness\?\.kind === "quiet"/u);
+    assert.match(cardSource, /color: colors\.textBody/u);
+    assert.doesNotMatch(cardSource, /color: colors\.(?:sage|success)/u);
     assert.doesNotMatch(cardSource, /Please confirm/u);
   });
 
-  it("keeps child selection accessible and every recovery state child-scoped", () => {
+  it("renders complete no-data, loading, and retry states instead of a blank body", () => {
+    assert.match(progressScreenSource, /familyLoading && children\.length === 0/u);
+    assert.match(progressScreenSource, /Loading your family/u);
+    assert.match(progressScreenSource, /progressAssessmentCta\(childName\)/u);
+    assert.match(progressScreenSource, /visibleView\.subjects\.length === 0/u);
+    assert.match(progressScreenSource, /ProgressSkeleton/u);
+    assert.match(progressScreenSource, /progressErrorPresentation\(failure, childName\)/u);
+    assert.match(progressScreenSource, /progressDraftId/u);
+    assert.match(progressScreenSource, /progressChildId/u);
+    assert.match(progressScreenSource, /label="Tell Homa"/u);
+    assert.doesNotMatch(progressScreenSource, /Tell Homa about \$\{childName\}/u);
+  });
+
+  it("gives each permanent failure a truthful recovery instead of retrying forever", () => {
+    assert.deepEqual(
+      progressErrorPresentation(
+        { kind: "authentication", message: "expired", reason: "no-session" },
+        "Maya",
+      ),
+      {
+        title: "Sign in again",
+        body: "Your session ended before Homa could load Maya’s progress.",
+        action: "reauthenticate",
+        actionLabel: "Sign in again",
+      },
+    );
+    assert.equal(
+      progressErrorPresentation(
+        { kind: "scope", message: "disabled", reason: "disabled" },
+        "Maya",
+      ).action,
+      "open-chat",
+    );
+    assert.equal(
+      progressErrorPresentation(
+        { kind: "scope", message: "missing", reason: "unknown-child" },
+        "Maya",
+      ).action,
+      "refresh-family",
+    );
+    assert.equal(
+      progressErrorPresentation(
+        { kind: "invalid", message: "invalid", reason: "invalid-projection" },
+        "Maya",
+      ).actionLabel,
+      "Check again",
+    );
+    assert.equal(
+      progressErrorPresentation(
+        { kind: "transient", message: "offline", reason: null },
+        "Maya",
+      ).actionLabel,
+      "Try again",
+    );
+  });
+
+  it("bounds navigation hierarchy while evidence text remains fully scalable", () => {
+    assert.match(progressScreenSource, /maxFontSizeMultiplier=\{2\}/u);
+    assert.doesNotMatch(cardSource, /takeaway\.statement[\s\S]{0,240}maxFontSizeMultiplier/u);
+  });
+
+  it("uses the contrast-safe selected-child treatment", () => {
     assert.match(kidSwitcherSource, /minHeight: 44/u);
     assert.match(kidSwitcherSource, /accessibilityState=\{\{ selected: active \}\}/u);
-    assert.match(kidSwitcherSource, /accessibilityLabel=\{`Show \$\{kid\.name\}'s progress`\}/u);
-    assert.match(progressScreenSource, /Loading \$\{selectedChild\.name\}'s progress/u);
-    assert.match(progressScreenSource, /progressLoadErrorCopy\(selectedChild\.name, view !== null\)/u);
-    assert.match(progressScreenSource, /label="Try again"/u);
-    assert.match(progressScreenSource, /progressDraft: draft/u);
+    assert.match(
+      kidSwitcherSource,
+      /accessibilityLabel=\{`Show \$\{kid\.name\}’s progress`\}/u,
+    );
+    assert.match(kidSwitcherSource, /backgroundColor: active \? colors\.brandHover/u);
+    assert.match(kidSwitcherSource, /color: active \? colors\.onBrand/u);
+  });
+
+  it("shows the conflict state once while preserving it in the accessible summary", () => {
+    assert.match(cardSource, /const needsConfirm = subject\.state === "conflict"/u);
+    assert.match(cardSource, /!needsConfirm \? \(/u);
+    assert.match(cardSource, /takeaway\?\.stateLabel/u);
   });
 });

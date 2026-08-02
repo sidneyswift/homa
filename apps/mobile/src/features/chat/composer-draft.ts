@@ -4,7 +4,7 @@ export interface ComposerDraftRequest {
 }
 
 const MAX_DRAFT_ID_LENGTH = 128;
-const MAX_DRAFT_TEXT_LENGTH = 2_000;
+const MAX_DRAFT_TEXT_LENGTH = 500;
 
 function firstParam(value: string | string[] | undefined): string | null {
   const candidate = Array.isArray(value) ? value[0] : value;

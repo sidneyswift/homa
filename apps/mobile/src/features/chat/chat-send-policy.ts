@@ -38,7 +38,14 @@ export function isSendLineOccupied(input: {
 export interface QueuedChatMessage {
   text: string;
   lane: "parent" | "directive";
+  clientContext?: ProgressEvidenceClientContext;
 }
+
+export type ProgressEvidenceClientContext = Readonly<Record<string, string>> & {
+  readonly source: "progress";
+  readonly intent: "share_progress_evidence";
+  readonly progressChildId: string;
+};
 
 /**
  * Takes exactly one model turn from the queue. Adjacent parent messages may
@@ -46,13 +53,23 @@ export interface QueuedChatMessage {
  */
 export function takeNextQueuedTurn(
   queue: readonly QueuedChatMessage[],
-): { message: string; remaining: QueuedChatMessage[] } | null {
+): {
+  message: string;
+  clientContext?: ProgressEvidenceClientContext;
+  remaining: QueuedChatMessage[];
+} | null {
   const first = queue[0];
   if (!first) return null;
-  if (first.lane === "directive") {
-    return { message: first.text, remaining: queue.slice(1) };
+  if (first.lane === "directive" || first.clientContext) {
+    return {
+      message: first.text,
+      ...(first.clientContext ? { clientContext: first.clientContext } : {}),
+      remaining: queue.slice(1),
+    };
   }
-  const boundary = queue.findIndex((entry) => entry.lane === "directive");
+  const boundary = queue.findIndex(
+    (entry) => entry.lane === "directive" || entry.clientContext !== undefined,
+  );
   const count = boundary === -1 ? queue.length : boundary;
   return {
     message: queue.slice(0, count).map((entry) => entry.text).join("\n\n"),

@@ -10,6 +10,7 @@ import { Card } from "../../components/ui/card";
 import { useSession } from "../../features/auth/session-provider";
 import { ChatSession } from "../../features/chat/chat-session";
 import { parseComposerDraftRequest } from "../../features/chat/composer-draft";
+import { progressChildIdFromRoute } from "../../features/chat/progress-draft";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { type ChildRecord } from "../../lib/family";
 import {
@@ -34,6 +35,7 @@ export default function ChatScreen() {
   const params = useLocalSearchParams<{
     progressDraft?: string | string[];
     progressDraftId?: string | string[];
+    progressChildId?: string | string[];
   }>();
   const { session } = useSession();
   const { family, children, memberDisplayName, loading } = useFamilyData();
@@ -41,11 +43,26 @@ export default function ChatScreen() {
   const [prepared, setPrepared] = useState<PreparedChat | null>(null);
   const readyFamily = family?.profile_completed_at && children.length > 0 ? family : null;
   const draftRequest = parseComposerDraftRequest(params.progressDraftId, params.progressDraft);
-
-  const handleDraftRequestHandled = useCallback((requestId: string) => {
-    if (draftRequest?.id !== requestId) return;
-    router.setParams({ progressDraft: "", progressDraftId: "" });
-  }, [draftRequest?.id, router]);
+  const requestedProgressChildId = progressChildIdFromRoute(
+    params.progressChildId,
+  );
+  const initialProgressChildId = children.some(
+    (child) => child.id === requestedProgressChildId,
+  )
+    ? requestedProgressChildId
+    : null;
+  const validatedDraftRequest = initialProgressChildId ? draftRequest : null;
+  const handleDraftRequestHandled = useCallback(
+    (requestId: string) => {
+      if (validatedDraftRequest?.id !== requestId) return;
+      router.setParams({
+        progressDraft: "",
+        progressDraftId: "",
+        progressChildId: "",
+      });
+    },
+    [router, validatedDraftRequest?.id],
+  );
 
   useEffect(() => {
     if (!userId) return;
@@ -116,7 +133,8 @@ export default function ChatScreen() {
               prepared={prepared}
               familyId={readyFamily.id}
               parentName={memberDisplayName ?? readyFamily.parent_display_name ?? null}
-              draftRequest={draftRequest}
+              draftRequest={validatedDraftRequest}
+              initialProgressChildId={initialProgressChildId}
               onDraftRequestHandled={handleDraftRequestHandled}
             />
           </AiConsentGate>

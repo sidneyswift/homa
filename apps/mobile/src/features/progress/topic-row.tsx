@@ -56,8 +56,29 @@ export function TopicRow({
   conflict: OpenProgressConflictView | null;
   timeZone: string;
 }) {
+  const conflictLines =
+    topic.state === "conflict" && conflict
+      ? conflict.adultAnswers.map((entry) =>
+          progressConflictAnswerLine(entry, timeZone),
+        )
+      : [];
+  const accessibilityLabel = [
+    topic.statement,
+    progressTopicStateLabel(topic.state),
+    topic.answer ? progressAnswerLabel(topic.answer) : null,
+    ...conflictLines,
+    topic.state !== "conflict" ? topic.detail : null,
+    topic.state !== "conflict" && topic.observedAt
+      ? formatProgressDate(topic.observedAt, timeZone)
+      : null,
+  ]
+    .filter(Boolean)
+    .join(". ");
+
   return (
     <View
+      accessible
+      accessibilityLabel={accessibilityLabel}
       style={{
         paddingVertical: space.sm,
         borderTopWidth: 1,
@@ -71,7 +92,7 @@ export function TopicRow({
         >
           {topic.statement}
         </Text>
-        <StateChip state={topic.state} />
+        {topic.state === "conflict" ? null : <StateChip state={topic.state} />}
       </View>
 
       {topic.state === "conflict" && conflict ? (

@@ -12,6 +12,26 @@ export {
 export { ACTION_COSTS } from "./action-costs";
 
 export {
+  CHILD_PROGRESS_PROJECTION_VERSION,
+  childProgressViewSchema,
+  parseChildProgressView,
+  progressEvidenceAnswerSchema,
+  progressSourceKindSchema,
+  type ChildProgressView,
+  type OpenProgressConflictView,
+  type ProgressConflictAdultAnswerView,
+  type ProgressDomainView,
+  type ProgressEvidenceAnswer,
+  type ProgressEvidenceSourceView,
+  type ProgressSourceKind,
+  type ProgressSubjectSummary,
+  type ProgressSubjectView,
+  type ProgressTopicView,
+} from "./child-progress-view";
+
+export { parseOffsetIsoTimestampEpochNanoseconds } from "./offset-timestamp";
+
+export {
   ACTIVE_OBJECT_CURRENT_VERSION,
   ACTIVE_OBJECT_KINDS,
   activeObjectKey,

@@ -34,22 +34,23 @@ export function KidSwitcher({
           <Pressable
             key={kid.id}
             accessibilityRole="button"
-            accessibilityLabel={`Show ${kid.name}'s progress`}
             accessibilityState={{ selected: active }}
+            accessibilityLabel={`Show ${kid.name}’s progress`}
             onPress={() => onSelect(kid.id)}
             style={{
               minHeight: 44,
               paddingHorizontal: space.md,
-              paddingVertical: space.sm,
+              paddingVertical: 10,
               borderRadius: radius.pill,
-              backgroundColor: active ? colors.brand : colors.card,
+              backgroundColor: active ? colors.brandHover : colors.card,
               borderWidth: 1,
-              borderColor: active ? colors.brand : colors.borderSubtle,
+              borderColor: active ? colors.brandHover : colors.borderSubtle,
               alignItems: "center",
               justifyContent: "center",
             }}
           >
             <Text
+              maxFontSizeMultiplier={2}
               style={{
                 fontFamily: active ? fontFamilies.bodySemibold : fontFamilies.bodyMedium,
                 fontSize: fontSize.sm,

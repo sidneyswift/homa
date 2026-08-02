@@ -1,56 +1,66 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { getChildProgressView, type ChildProgressView } from "../../lib/child-progress";
+import { getChildProgressView } from "../../lib/child-progress";
 import {
-  completeProgressLoad,
-  createProgressLoadState,
-  failProgressLoad,
-  startProgressLoad,
-  visibleProgressLoadState,
-} from "./load-state";
+  cancelChildProgressRequests,
+  createChildProgressRequestGate,
+  loadChildProgressRequest,
+  type ChildProgressSnapshot,
+} from "./child-progress-load";
 
-interface ChildProgressState {
-  view: ChildProgressView | null;
-  loading: boolean;
-  error: string | null;
+interface ChildProgressState extends Omit<ChildProgressSnapshot, "requestedChildId"> {
   reload: () => Promise<void>;
 }
 
-/** Loads one child's live Progress view (RLS-scoped), reloading on childId change. */
+const EMPTY_SNAPSHOT: ChildProgressSnapshot = {
+  requestedChildId: null,
+  view: null,
+  loading: false,
+  error: null,
+};
+
+/** Loads one child's canonical Progress view without cross-child stale commits. */
 export function useChildProgress(childId: string | null): ChildProgressState {
-  const requestIdRef = useRef(0);
-  const [state, setState] = useState(() => createProgressLoadState(childId));
+  const [snapshot, setSnapshot] = useState<ChildProgressSnapshot>(EMPTY_SNAPSHOT);
+  const requestGate = useRef(createChildProgressRequestGate());
 
   const reload = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
-    setState((current) => startProgressLoad(current, childId, requestId));
     if (!childId) {
+      cancelChildProgressRequests(requestGate.current);
+      setSnapshot(EMPTY_SNAPSHOT);
       return;
     }
-    try {
-      const nextView = await getChildProgressView(childId);
-      setState((current) => completeProgressLoad(current, childId, requestId, nextView));
-    } catch (cause) {
-      const message = cause instanceof Error ? cause.message : "Something went wrong.";
-      setState((current) => failProgressLoad(current, childId, requestId, message));
-    }
+    await loadChildProgressRequest({
+      childId,
+      gate: requestGate.current,
+      load: getChildProgressView,
+      commit: setSnapshot,
+    });
   }, [childId]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      void reload();
-    }, 0);
+    const gate = requestGate.current;
+    const timer = setTimeout(() => void reload(), 0);
     return () => {
       clearTimeout(timer);
-      requestIdRef.current += 1;
+      cancelChildProgressRequests(gate);
     };
   }, [reload]);
 
-  const visible = visibleProgressLoadState(state, childId);
+  // React renders once with the old snapshot before the child-change effect
+  // runs. Mask that frame so old evidence can never sit under the new pill.
+  if (snapshot.requestedChildId !== childId) {
+    return {
+      view: null,
+      loading: childId !== null,
+      error: null,
+      reload,
+    };
+  }
   return {
-    view: visible.view,
-    loading: visible.loading,
-    error: visible.error,
+    view: snapshot.view,
+    loading: snapshot.loading,
+    error: snapshot.error,
     reload,
   };
 }

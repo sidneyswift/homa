@@ -65,4 +65,39 @@ describe("takeNextQueuedTurn", () => {
       remaining: [{ text: "Her words", lane: "parent" }],
     });
   });
+
+  it("keeps an exact-child context attached to only its parent message", () => {
+    const context = {
+      source: "progress" as const,
+      intent: "share_progress_evidence" as const,
+      progressChildId: "child-maya",
+    };
+    assert.deepEqual(takeNextQueuedTurn([
+      { text: "Maya read a page", lane: "parent", clientContext: context },
+      { text: "Also help with lunch", lane: "parent" },
+    ]), {
+      message: "Maya read a page",
+      clientContext: context,
+      remaining: [{ text: "Also help with lunch", lane: "parent" }],
+    });
+  });
+
+  it("stops a plain parent batch before a contextual Progress message", () => {
+    const contextual = {
+      text: "Maya read a page",
+      lane: "parent" as const,
+      clientContext: {
+        source: "progress" as const,
+        intent: "share_progress_evidence" as const,
+        progressChildId: "child-maya",
+      },
+    };
+    assert.deepEqual(takeNextQueuedTurn([
+      { text: "First", lane: "parent" },
+      contextual,
+    ]), {
+      message: "First",
+      remaining: [contextual],
+    });
+  });
 });
