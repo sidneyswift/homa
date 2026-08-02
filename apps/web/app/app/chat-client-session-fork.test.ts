@@ -79,10 +79,10 @@ describe("ChatClient session-fork fix (GH #170)", () => {
     );
   });
 
-  it("reuses the one flush helper from onFinish instead of a second inline copy", () => {
+  it("reuses the flush helper after normal finish and defers it for cutoff recovery", () => {
     assert.match(
       source,
-      /if \(!snapshot\.error\) flushQueuedMessages\(\);/u,
+      /if \(!snapshot\.error && !autoStopped\) flushQueuedMessages\(\);/u,
     );
   });
 });

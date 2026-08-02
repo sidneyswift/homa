@@ -4,7 +4,14 @@ import { emitEvent } from "@homa/core";
 import type { UserContent } from "ai";
 import { Client } from "eve/client";
 import { useEveAgent, type EveMessage } from "eve/react";
-import { ArrowDown, ArrowUp, ChevronDown, Square, X } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronDown,
+  RefreshCw,
+  Square,
+  X,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Logo } from "../../components/brand/Logo";
@@ -124,6 +131,10 @@ import {
   promptSuggestionActionForLifecycleEvent,
   type PromptSuggestionLifecycleHandlers,
 } from "./prompt-suggestion-lifecycle";
+import {
+  nextReplyCutoffRecoveryState,
+  type ReplyCutoffRecoveryState,
+} from "./reply-cutoff-recovery";
 import {
   promptSuggestionRequestForMessages,
   restorePromptSuggestionSetForVisibleMessages,
@@ -270,6 +281,12 @@ const RECOVERY_DEADLINE_MS = 240_000;
 
 function currentTimeMs(): number {
   return Date.now();
+}
+
+interface LostTurnRecoveryTarget {
+  sentText: string;
+  sentAtMs: number;
+  minBoundaryIndex: number;
 }
 
 export function ChatClient({
@@ -550,10 +567,13 @@ export function ChatClient({
     staleSessionlessEvents ? 0 : prepared.initialSession?.streamIndex ?? 0,
   );
   const lastSendRef = useRef<{ text: string; atMs: number } | null>(null);
+  const replyCutoffTargetRef = useRef<LostTurnRecoveryTarget | null>(null);
   const recoveryRef = useRef<AbortController | null>(null);
   const boundaryWatchdogRef =
     useRef<TurnBoundaryWatchdog | null>(null);
   const [recovering, setRecovering] = useState(false);
+  const [replyCutoffRecovery, setReplyCutoffRecovery] =
+    useState<ReplyCutoffRecoveryState>("idle");
   /**
    * Dev only, and only ever set to a time we can prove: when a turn
    * fails on localhost, ask whether this machine's gateway credential is
@@ -565,6 +585,36 @@ export function ChatClient({
    *  onFinish it causes: the one stop that should trigger recovery,
    *  because nobody chose it and the durable turn may have finished. */
   const autoStoppedRef = useRef(false);
+
+  const currentRecoveryTarget = useCallback(
+    (): LostTurnRecoveryTarget | null => {
+      const lastSend = lastSendRef.current;
+      if (!lastSend) return null;
+      return {
+        sentText: lastSend.text,
+        sentAtMs: lastSend.atMs,
+        minBoundaryIndex: durableCursorRef.current,
+      };
+    },
+    [],
+  );
+
+  const captureReplyCutoffTarget = useCallback(() => {
+    if (replyCutoffTargetRef.current !== null) return;
+    const target = currentRecoveryTarget();
+    if (target === null) return;
+    replyCutoffTargetRef.current = target;
+    setReplyCutoffRecovery((state) =>
+      nextReplyCutoffRecoveryState(state, "detected"),
+    );
+  }, [currentRecoveryTarget]);
+
+  const clearReplyCutoffRecovery = useCallback(() => {
+    replyCutoffTargetRef.current = null;
+    setReplyCutoffRecovery((state) =>
+      nextReplyCutoffRecoveryState(state, "superseded"),
+    );
+  }, []);
 
   const clearPromptSuggestionLoadingTimer = useCallback(() => {
     if (promptSuggestionLoadingTimerRef.current === null) return;
@@ -826,7 +876,9 @@ export function ChatClient({
       // out as ONE follow-up turn the moment the line is free (also
       // after Stop, which is often pressed exactly to jump the line).
       // A failed turn holds the queue; her next manual send carries it.
-      if (!snapshot.error) flushQueuedMessages();
+      // An automatic stall stop is not a durable boundary, so recovery's
+      // close-out flushes that queue after it adopts or abandons replay.
+      if (!snapshot.error && !autoStopped) flushQueuedMessages();
     },
   });
   const agentError = agent.error;
@@ -1017,6 +1069,7 @@ export function ChatClient({
     // (onFinish) or inside a recovery's async close-out, and eve rejects
     // overlapping sends.
     setTimeout(() => {
+      clearReplyCutoffRecovery();
       setBusySeconds(0);
       turnModalityRef.current = flush.modality;
       lastSendRef.current = { text: message, atMs: currentTimeMs() };
@@ -1027,7 +1080,7 @@ export function ChatClient({
         headers: chatSendHeaders(turnModalityRef.current, flush.lane),
       });
     }, 0);
-  }, []);
+  }, [clearReplyCutoffRecovery]);
 
   const adoptServerRestoredSession = useCallback(
     (restored: RecoveredTurn) => {
@@ -1121,15 +1174,16 @@ export function ChatClient({
     timeZone,
   ]);
 
-  const recoverLastTurn = useCallback(
-    async (signal: AbortSignal): Promise<RecoveredTurn | null> => {
-      const lastSend = lastSendRef.current;
-      if (!lastSend) return null;
+  const recoverTurn = useCallback(
+    async (
+      target: LostTurnRecoveryTarget,
+      signal: AbortSignal,
+    ): Promise<RecoveredTurn | null> => {
       return await recoverLostTurn({
         supabase,
-        sentText: lastSend.text,
-        sentAtMs: lastSend.atMs,
-        minBoundaryIndex: durableCursorRef.current,
+        sentText: target.sentText,
+        sentAtMs: target.sentAtMs,
+        minBoundaryIndex: target.minBoundaryIndex,
         bearer: async () => {
           const { data } = await supabase.auth.getSession();
           return data.session?.access_token ?? "";
@@ -1140,9 +1194,18 @@ export function ChatClient({
     [supabase],
   );
 
+  const recoverLastTurn = useCallback(
+    async (signal: AbortSignal): Promise<RecoveredTurn | null> => {
+      const target = currentRecoveryTarget();
+      return target === null ? null : recoverTurn(target, signal);
+    },
+    [currentRecoveryTarget, recoverTurn],
+  );
+
   const applyRecoveredTurn = useCallback(
     (recovered: RecoveredTurn) => {
       boundaryWatchdogRef.current?.finish();
+      clearReplyCutoffRecovery();
       const messages = foldEventsToMessages(recovered.events);
       const stamped = stampMessageTimes(liveTimes, messages);
       const nextArchived = [
@@ -1176,6 +1239,7 @@ export function ChatClient({
     },
     [
       agentReset,
+      clearReplyCutoffRecovery,
       flushQueuedMessages,
       liveTimes,
       promptSuggestionLifecycleHandlers,
@@ -1207,8 +1271,9 @@ export function ChatClient({
    * settles, exactly like a normal turn's onFinish.
    */
   const startLostTurnRecovery = useCallback(() => {
-    const lastSend = lastSendRef.current;
-    if (!lastSend || recoveryRef.current) return;
+    const target = replyCutoffTargetRef.current ?? currentRecoveryTarget();
+    if (target === null || recoveryRef.current) return;
+    const isReplyCutoff = target === replyCutoffTargetRef.current;
     executePromptSuggestionLifecycleAction(
       promptSuggestionActionForLifecycleEvent({
         type: "recovery_started",
@@ -1221,7 +1286,7 @@ export function ChatClient({
     const deadline = setTimeout(() => controller.abort(), RECOVERY_DEADLINE_MS);
     setRecovering(true);
     void (async () => {
-      const recovered = await recoverLastTurn(controller.signal);
+      const recovered = await recoverTurn(target, controller.signal);
       clearTimeout(deadline);
       if (recoveryRef.current === controller) recoveryRef.current = null;
       if (controller.signal.aborted) {
@@ -1234,6 +1299,11 @@ export function ChatClient({
           promptSuggestionLifecycleHandlers,
         );
         setRecovering(false);
+        if (isReplyCutoff) {
+          setReplyCutoffRecovery((state) =>
+            nextReplyCutoffRecoveryState(state, "aborted"),
+          );
+        }
         // Gave up without a server answer, but the client still knows
         // what it saw before the stream died (GH #466: this branch used
         // to return here with no archive and no reset, so the stale live
@@ -1283,6 +1353,11 @@ export function ChatClient({
           null,
           promptSuggestionLifecycleHandlers,
         );
+        if (isReplyCutoff) {
+          setReplyCutoffRecovery((state) =>
+            nextReplyCutoffRecoveryState(state, "failed"),
+          );
+        }
       }
       setRecovering(false);
       // Whichever way it resolved, the line is free again: send anything
@@ -1294,10 +1369,11 @@ export function ChatClient({
   }, [
     agentReset,
     applyRecoveredTurn,
+    currentRecoveryTarget,
     flushQueuedMessages,
     liveTimes,
     promptSuggestionLifecycleHandlers,
-    recoverLastTurn,
+    recoverTurn,
     storageKey,
   ]);
 
@@ -1366,6 +1442,7 @@ export function ChatClient({
         wakeGraceTimer = null;
         // Still nothing after the grace: the stream really is dead.
         if (isStale(VISIBLE_STALL_MS)) {
+          captureReplyCutoffTarget();
           autoStoppedRef.current = true;
           agentStop();
         }
@@ -1373,6 +1450,7 @@ export function ChatClient({
     };
     const watchdog = setInterval(() => {
       if (isStale(WATCHDOG_STALL_MS)) {
+        captureReplyCutoffTarget();
         autoStoppedRef.current = true;
         agentStop();
       }
@@ -1383,7 +1461,7 @@ export function ChatClient({
       if (wakeGraceTimer !== null) clearTimeout(wakeGraceTimer);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [agentStop, busy]);
+  }, [agentStop, busy, captureReplyCutoffTarget]);
 
   // prepareChat reads localStorage in the browser, but localStorage does
   // not exist during SSR. Rendering that restored state immediately made
@@ -1951,6 +2029,7 @@ export function ChatClient({
     const outgoing = flush.outgoing;
     if (outgoing === null) return "rejected";
     setQueued(flush.remaining);
+    clearReplyCutoffRecovery();
     setBusySeconds(0);
     autoStoppedRef.current = false;
     turnModalityRef.current = flush.modality;
@@ -2045,6 +2124,7 @@ export function ChatClient({
       draftFromVoiceRef.current = false;
       attachments.clear();
       recoveryRef.current?.abort();
+      clearReplyCutoffRecovery();
       if (!agent.session?.sessionId) durableCursorRef.current = 0;
       setBusySeconds(0);
       autoStoppedRef.current = false;
@@ -2065,6 +2145,20 @@ export function ChatClient({
     } finally {
       setPreparingAttachments(false);
     }
+  }
+
+  function continueCutoffRecovery(): void {
+    if (
+      replyCutoffRecovery !== "available"
+      || replyCutoffTargetRef.current === null
+      || lineOccupied
+    ) {
+      return;
+    }
+    setReplyCutoffRecovery((state) =>
+      nextReplyCutoffRecoveryState(state, "retry"),
+    );
+    startLostTurnRecovery();
   }
 
   function removeQueuedMessage(
@@ -2409,7 +2503,26 @@ export function ChatClient({
           // the durable server session. The wait reads as work, not failure.
           <div className="flex items-center gap-2.5 text-muted" role="status">
             <ThinkingMark size={28} mood="digging" />
-            <span>Reconnecting&hellip;</span>
+            <span>
+              {recovering && replyCutoffRecovery === "recovering"
+                ? "Homa got cut off. Reconnecting..."
+                : "Reconnecting..."}
+            </span>
+          </div>
+        ) : replyCutoffRecovery === "available" ? (
+          <div
+            className="flex flex-wrap items-center justify-center gap-3 text-sm text-body"
+            role="alert"
+          >
+            <span>Homa got cut off. Your conversation is safe.</span>
+            <button
+              type="button"
+              onClick={continueCutoffRecovery}
+              className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-border bg-card px-4 py-2 font-bold text-strong shadow-sm transition-colors hover:border-brand hover:text-brand"
+            >
+              <RefreshCw size={15} aria-hidden="true" />
+              Reconnect and continue
+            </button>
           </div>
         ) : agent.error && staleOidcAt !== null ? (
           // Localhost only, and only once the dev route has confirmed it.
