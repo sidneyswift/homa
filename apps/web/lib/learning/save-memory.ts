@@ -78,14 +78,19 @@ export async function saveFamilyMemory(input: SaveMemoryInput): Promise<SaveMemo
     if (!childId) return { saved: false, reason: "unknown-child" };
   }
 
+  const memoryId = crypto.randomUUID();
   // Best-effort semantic index; null just means FTS-only for this row.
-  const embedding = await embedText(content, { familyId: input.familyId });
+  const embedding = await embedText(content, {
+    familyId: input.familyId,
+    resourceKind: "family_memory",
+    resourceId: memoryId,
+  });
 
   await sql`
     insert into public.family_memories
-      (family_id, child_id, kind, content, source, embedding, session_id)
+      (id, family_id, child_id, kind, content, source, embedding, session_id)
     values
-      (${input.familyId}, ${childId}, ${input.kind}, ${content}, ${input.source},
+      (${memoryId}, ${input.familyId}, ${childId}, ${input.kind}, ${content}, ${input.source},
        ${embedding}, ${input.sessionId ?? null})
   `;
   return { saved: true, childId };

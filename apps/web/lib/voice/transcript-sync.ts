@@ -157,7 +157,11 @@ async function upsertTranscript(
     conversation.created_at;
   const transcriptText = flattenTranscriptText(messages);
   // Best-effort semantic index; null just means FTS-only for this call.
-  const embedding = await embedText(transcriptText, { familyId: owner.familyId });
+  const embedding = await embedText(transcriptText, {
+    familyId: owner.familyId,
+    resourceKind: "call_transcript",
+    resourceId: conversation.id,
+  });
   const rows = await sql<{ id: string; inserted: boolean }[]>`
     insert into public.call_transcripts
       (conversation_id, line, assistant_id, channel, family_id, child_id,

@@ -74,6 +74,10 @@ export async function POST(
         mediaType: contentType,
         familyId: context.auth.familyId,
         channel: "web",
+        attribution: {
+          resourceKind: "lesson_media",
+          resourceId: result.mediaId,
+        },
       })
     : null;
   if (caption !== null) {

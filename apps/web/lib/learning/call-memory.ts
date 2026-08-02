@@ -58,6 +58,8 @@ export async function extractCallMemories(conversationId: string): Promise<boole
       source: "call",
       text: row.transcript_text,
       conversationLabel: `a phone call on Homa's ${row.line} line`,
+      resourceKind: "call_transcript",
+      resourceId: row.id,
     });
 
     await sql`

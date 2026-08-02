@@ -63,6 +63,9 @@ export async function describeAttachment(input: {
   mediaType: string;
   question: string;
   familyId: string;
+  sessionId: string;
+  turnId: string;
+  attachmentId: string;
 }): Promise<DescribeResult> {
   const model = describeModelId();
   const startedAt = Date.now();
@@ -106,6 +109,10 @@ export async function describeAttachment(input: {
       inputTokens: result.usage.inputTokens,
       outputTokens: result.usage.outputTokens,
       durationMs: Date.now() - startedAt,
+      sessionId: input.sessionId,
+      turnId: input.turnId,
+      resourceKind: "attachment",
+      resourceId: input.attachmentId,
     });
 
     const text = result.text.trim().slice(0, DESCRIBE_MAX_CHARS);

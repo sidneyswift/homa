@@ -65,6 +65,10 @@ export default defineBoundedTool({
 
     const assets = await findFamilyAssets({
       familyId: access.familyId,
+      usageAttribution: {
+        sessionId: ctx.session.id,
+        turnId: ctx.session.turn.id,
+      },
       query: input.query,
       resourceKinds: input.resourceKinds,
       childId: input.childId,

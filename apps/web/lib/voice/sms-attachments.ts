@@ -318,16 +318,28 @@ function failedAttachment(
 async function photoBlock(
   image: Uint8Array | URL,
   mediaType: string,
-  familyId: string | null,
+  attribution:
+    | { familyId: null; inboundMessageId: null }
+    | { familyId: string; inboundMessageId: string },
 ): Promise<string> {
-  if (!familyId) return PHOTO_MARKER;
-  const caption = await captionSmsImage({ image, mediaType, familyId });
+  if (!attribution.familyId) return PHOTO_MARKER;
+  const caption = await captionSmsImage({
+    image,
+    mediaType,
+    familyId: attribution.familyId,
+    attribution: {
+      resourceKind: "inbound_message",
+      resourceId: attribution.inboundMessageId,
+    },
+  });
   return caption ? `[Photo attached: ${caption}]` : PHOTO_MARKER;
 }
 
 async function convertBmpToPng(
   url: string,
-  familyId: string | null,
+  attribution:
+    | { familyId: null; inboundMessageId: null }
+    | { familyId: string; inboundMessageId: string },
 ): Promise<ProcessedSmsAttachment> {
   const bytes = await downloadTelnyxMedia(url);
   if (!bytes || bytes.byteLength === 0 || bytes.byteLength > IMAGE_CONVERT_MAX_BYTES) {
@@ -338,7 +350,7 @@ async function convertBmpToPng(
     return {
       result: { kind: "image", mediaType: "image/bmp", outcome: "converted" },
       part: { type: "image", image: png, mediaType: "image/png" },
-      block: await photoBlock(png, "image/png", familyId),
+      block: await photoBlock(png, "image/png", attribution),
     };
   } catch (error) {
     console.error(
@@ -352,17 +364,19 @@ async function convertBmpToPng(
 async function processImage(
   url: string,
   mediaType: string,
-  familyId: string | null,
+  attribution:
+    | { familyId: null; inboundMessageId: null }
+    | { familyId: string; inboundMessageId: string },
 ): Promise<ProcessedSmsAttachment> {
   if (MODEL_IMAGE_TYPES.has(mediaType)) {
     return {
       result: { kind: "image", mediaType, outcome: "model_native" },
       part: { type: "image", image: new URL(url) },
-      block: await photoBlock(new URL(url), mediaType, familyId),
+      block: await photoBlock(new URL(url), mediaType, attribution),
     };
   }
   if (CONVERTIBLE_IMAGE_TYPES.has(mediaType)) {
-    return await convertBmpToPng(url, familyId);
+    return await convertBmpToPng(url, attribution);
   }
   return failedAttachment("image", mediaType);
 }
@@ -523,7 +537,9 @@ async function processTextFile(
 
 async function processOneSmsAttachment(
   attachment: Attachment,
-  familyId: string | null,
+  attribution:
+    | { familyId: null; inboundMessageId: null }
+    | { familyId: string; inboundMessageId: string },
 ): Promise<ProcessedSmsAttachment> {
   const mediaType = bareMediaType(attachment.mimeType);
   const url = attachment.url;
@@ -531,7 +547,7 @@ async function processOneSmsAttachment(
   switch (attachment.type) {
     case "image": {
       if (!url) return failedAttachment("image", mediaType);
-      return await processImage(url, mediaType, familyId);
+      return await processImage(url, mediaType, attribution);
     }
     case "audio": {
       if (!url) return failedAttachment("audio", mediaType);
@@ -569,15 +585,22 @@ async function processOneSmsAttachment(
  */
 export async function normalizeSmsAttachments(
   attachments: Attachment[],
-  options?: { familyId?: string | null },
+  options?:
+    | { familyId?: null; inboundMessageId?: null }
+    | { familyId: string; inboundMessageId: string },
 ): Promise<NormalizedSmsAttachments> {
   const blocks: string[] = [];
   const mediaParts: Array<ImagePart | FilePart> = [];
   const results: SmsAttachmentResult[] = [];
-  const familyId = options?.familyId ?? null;
+  const attribution = options?.familyId
+    ? {
+        familyId: options.familyId,
+        inboundMessageId: options.inboundMessageId,
+      }
+    : { familyId: null, inboundMessageId: null };
 
   for (const attachment of attachments) {
-    const processed = await processOneSmsAttachment(attachment, familyId);
+    const processed = await processOneSmsAttachment(attachment, attribution);
     results.push(processed.result);
     if (processed.block) blocks.push(processed.block);
     if (processed.part) mediaParts.push(processed.part);

@@ -105,6 +105,7 @@ export async function processLessonSegment(
       audio: audio === null ? new URL(segment.blobUrl) : new Uint8Array(audio),
       mediaType: segment.contentType,
       familyId,
+      segmentId,
     });
     if (toneNotes !== null) {
       await saveSegmentToneNotes({ segmentId, familyId, toneNotes });
@@ -206,6 +207,7 @@ export async function runLessonAnalysis(
     const media = await listLessonMedia(lessonId, familyId);
     const insights = await synthesizeLessonReview({
       familyId,
+      lessonId,
       childName,
       segments: synthesisSegments,
       mediaCaptions: media.flatMap((item) =>
@@ -376,6 +378,8 @@ async function recordVerifiedClauses(input: {
     childId: input.lesson.childId,
     message,
     surface: "lesson",
+    resourceKind: "lesson",
+    resourceId: input.lesson.id,
   });
   const claims = capture.claims?.filter(
     (claim) => claim.childId === input.lesson.childId,

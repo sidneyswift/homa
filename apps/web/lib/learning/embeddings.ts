@@ -1,6 +1,10 @@
 import { embed } from "ai";
 
-import { gatewayAttribution, recordModelUsage } from "../model-usage";
+import {
+  gatewayAttribution,
+  recordModelUsage,
+  type UsageAttribution,
+} from "../model-usage";
 
 /**
  * Best-effort embeddings for the archive (migration #38). One rule
@@ -25,11 +29,11 @@ export function embeddingModelId(): string {
 /** Returns the pgvector literal ('[0.1,0.2,...]') or null on any failure. */
 export async function embedText(
   text: string,
-  attribution?: { familyId: string | null },
+  attribution: { familyId: string | null } & UsageAttribution,
 ): Promise<string | null> {
   const value = text.trim().slice(0, EMBED_MAX_CHARS);
   if (value.length < 3) return null;
-  const familyId = attribution?.familyId ?? null;
+  const familyId = attribution.familyId;
   const model = embeddingModelId();
   const started = Date.now();
   try {
@@ -44,14 +48,42 @@ export async function embedText(
     const vector = result.embedding;
     if (!Array.isArray(vector) || vector.length !== EMBEDDING_DIMS) return null;
 
-    await recordModelUsage({
+    const usage = {
       familyId,
-      surface: "embedding",
+      surface: "embedding" as const,
       model,
-      modality: "embedding",
+      modality: "embedding" as const,
       inputTokens: result.usage.tokens,
       durationMs: Date.now() - started,
-    });
+    };
+    if (attribution.sessionId) {
+      if (attribution.resourceKind && attribution.resourceId) {
+        await recordModelUsage({
+          ...usage,
+          sessionId: attribution.sessionId,
+          ...(attribution.turnId ? { turnId: attribution.turnId } : {}),
+          resourceKind: attribution.resourceKind,
+          resourceId: attribution.resourceId,
+        });
+      } else {
+        await recordModelUsage({
+          ...usage,
+          sessionId: attribution.sessionId,
+          ...(attribution.turnId ? { turnId: attribution.turnId } : {}),
+        });
+      }
+    } else {
+      const resourceKind = attribution.resourceKind;
+      const resourceId = attribution.resourceId;
+      if (!resourceKind || !resourceId) {
+        throw new Error("Embedding usage attribution is missing an owner");
+      }
+      await recordModelUsage({
+        ...usage,
+        resourceKind,
+        resourceId,
+      });
+    }
 
     return `[${vector.join(",")}]`;
   } catch (error) {

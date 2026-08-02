@@ -63,8 +63,12 @@ export default defineBoundedTool({
       };
     }
 
-    const rows = await mapDb()<{ media_type: string; kind: string }[]>`
-      select media_type, kind from public.chat_attachments
+    const rows = await mapDb()<{
+      id: string;
+      media_type: string;
+      kind: string;
+    }[]>`
+      select id, media_type, kind from public.chat_attachments
       where family_id = ${access.familyId} and url = ${input.url}
       limit 1
     `;
@@ -87,6 +91,9 @@ export default defineBoundedTool({
       mediaType: row.media_type,
       question: input.question,
       familyId: access.familyId,
+      sessionId: ctx.session.id,
+      turnId: ctx.session.turn.id,
+      attachmentId: row.id,
     });
 
     if (result.text === null) {

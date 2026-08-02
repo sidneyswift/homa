@@ -3,6 +3,7 @@ import { MAP_SUBJECTS } from "@homa/core";
 import { embedText } from "../learning/embeddings";
 import { mapDb } from "../map/db";
 import { siteUrl } from "../map/email";
+import type { UsageAttribution } from "../model-usage";
 import { familyAssetLibraryHref } from "./family-asset-reference";
 import {
   FAMILY_ASSET_RESOURCE_KINDS,
@@ -53,6 +54,7 @@ export interface FamilyAssetSearchResult extends FamilyAssetSource {
 
 export interface FindFamilyAssetsInput {
   familyId: string;
+  usageAttribution: UsageAttribution;
   query?: string;
   resourceKinds?: readonly FamilyAssetResourceKind[];
   childId?: string;
@@ -206,7 +208,10 @@ export async function findFamilyAssets(
 ): Promise<FamilyAssetSearchResult[]> {
   const filters = normalizeSearchInput(input);
   const queryEmbedding = filters.query
-    ? await dependencies.embed(filters.query, { familyId: input.familyId })
+    ? await dependencies.embed(filters.query, {
+        familyId: input.familyId,
+        ...input.usageAttribution,
+      })
     : null;
   const sql = mapDb();
   const rows = await sql<FamilyAssetSourceRow[]>`

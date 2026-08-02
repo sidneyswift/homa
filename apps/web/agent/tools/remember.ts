@@ -122,10 +122,18 @@ export default defineBoundedTool({
       return { saved: true, done: true, note: "Already saved (no duplicate added)." };
     }
 
+    const memoryId = crypto.randomUUID();
     // Best-effort semantic index; null just means FTS-only for this row.
-    const embedding = await embedText(input.content, { familyId });
+    const embedding = await embedText(input.content, {
+      familyId,
+      sessionId: ctx.session.id,
+      turnId: ctx.session.turn.id,
+      resourceKind: "family_memory",
+      resourceId: memoryId,
+    });
 
     const { error: insertError } = await db.from("family_memories").insert({
+      id: memoryId,
       family_id: familyId,
       child_id: input.childId ?? null,
       kind: input.kind,

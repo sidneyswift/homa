@@ -64,7 +64,11 @@ export async function runReportNarrative(childId: string, familyId?: string): Pr
   };
 
   try {
-    const generated = await generateReportNarrative(facts, source.familyId);
+    const generated = await generateReportNarrative(
+      facts,
+      source.familyId,
+      childId,
+    );
     const verdicts = validateNarrative(generated.value, gateContext);
     const meta: NarrativeMeta = {
       ...claim,
@@ -155,7 +159,11 @@ export async function runPlanNarrative(
   };
 
   try {
-    const generated = await generatePlanNarrative(facts, source.familyId);
+    const generated = await generatePlanNarrative(
+      facts,
+      source.familyId,
+      `${childId}:${subjectId}`,
+    );
     const verdicts = validatePlanNarrative(generated.value, gateContext);
     const meta: NarrativeMeta = {
       ...claim,

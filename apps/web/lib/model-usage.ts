@@ -61,7 +61,40 @@ export type UsageChannel =
   | "dispatch"
   | "subject_lesson";
 
-export interface ModelUsageRow {
+export const USAGE_RESOURCE_KINDS = [
+  "attachment",
+  "call_transcript",
+  "conversation_message",
+  "curriculum",
+  "family",
+  "family_asset",
+  "family_memory",
+  "inbound_message",
+  "lesson",
+  "lesson_media",
+  "lesson_segment",
+  "learning_review",
+  "material",
+  "month_plan",
+  "progress_report",
+  "semantic_search",
+] as const;
+export type UsageResourceKind = (typeof USAGE_RESOURCE_KINDS)[number];
+
+type UsageResourceAttribution =
+  | { resourceKind: UsageResourceKind; resourceId: string }
+  | { resourceKind?: null; resourceId?: null };
+
+export type UsageAttribution =
+  | ({ sessionId: string; turnId?: string | null } & UsageResourceAttribution)
+  | {
+      sessionId?: null;
+      turnId?: null;
+      resourceKind: UsageResourceKind;
+      resourceId: string;
+    };
+
+interface ModelUsageBaseRow {
   familyId: string | null;
   surface: UsageSurface;
   channel?: UsageChannel | null;
@@ -74,10 +107,10 @@ export interface ModelUsageRow {
   imagesCount?: number | null;
   imageSize?: string | null;
   durationMs?: number | null;
-  sessionId?: string | null;
-  turnId?: string | null;
   providerMetadata?: unknown;
 }
+
+export type ModelUsageRow = ModelUsageBaseRow & UsageAttribution;
 
 function nonNegativeOrNull(value: number | null | undefined): number | null {
   return typeof value === "number" && Number.isFinite(value) && value >= 0
@@ -85,16 +118,45 @@ function nonNegativeOrNull(value: number | null | undefined): number | null {
     : null;
 }
 
+export function modelUsageAttributionError(
+  row: Pick<
+    ModelUsageRow,
+    "sessionId" | "turnId" | "resourceKind" | "resourceId"
+  >,
+): string | null {
+  const sessionId = row.sessionId?.trim() || null;
+  const turnId = row.turnId?.trim() || null;
+  const resourceKind = row.resourceKind ?? null;
+  const resourceId = row.resourceId?.trim() || null;
+
+  if (turnId && !sessionId) return "turn_id requires session_id";
+  if ((resourceKind === null) !== (resourceId === null)) {
+    return "resource_kind and resource_id must be supplied together";
+  }
+  if (!sessionId && !resourceId) {
+    return "session_id or resource attribution is required";
+  }
+  return null;
+}
+
 /** Fire-and-forget insert; callers never await failure into their path. */
 export async function recordModelUsage(row: ModelUsageRow): Promise<void> {
   try {
+    const attributionError = modelUsageAttributionError(row);
+    if (attributionError) {
+      console.error(
+        "recordModelUsage rejected unattributed row (feature unaffected):",
+        attributionError,
+      );
+      return;
+    }
     const sql = mapDb();
     await sql`
       insert into public.model_usage
         (family_id, surface, channel, model, modality,
          input_tokens, output_tokens, cache_read_tokens, cache_write_tokens,
          images_count, image_size, duration_ms, session_id, turn_id,
-         provider_metadata)
+         resource_kind, resource_id, provider_metadata)
       values
         (${row.familyId}, ${row.surface}, ${row.channel ?? null}, ${row.model},
          ${row.modality},
@@ -103,6 +165,7 @@ export async function recordModelUsage(row: ModelUsageRow): Promise<void> {
          ${nonNegativeOrNull(row.imagesCount)}, ${row.imageSize ?? null},
          ${nonNegativeOrNull(row.durationMs)}, ${row.sessionId ?? null},
          ${row.turnId ?? null},
+         ${row.resourceKind ?? null}, ${row.resourceId ?? null},
          ${row.providerMetadata ? sql.json(row.providerMetadata as never) : null})
     `;
   } catch (error) {

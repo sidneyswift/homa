@@ -69,6 +69,8 @@ const childProgressOperations: ChildProgressToolOperations = {
       childId: input.childId,
       message: context.canonicalInboundText,
       surface: "journal",
+      resourceKind: "conversation_message",
+      resourceId: context.inboundMessageId,
     });
     const base = {
       familyId: context.familyId,

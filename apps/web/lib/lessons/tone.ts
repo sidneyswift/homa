@@ -78,6 +78,7 @@ export async function toneNotesForSegment(input: {
   audio: Uint8Array | URL;
   mediaType: string;
   familyId: string;
+  segmentId: string;
 }): Promise<SegmentToneNotes | null> {
   if (!toneNotesEnabled()) return null;
 
@@ -127,6 +128,8 @@ export async function toneNotesForSegment(input: {
       inputTokens: result.usage.inputTokens,
       outputTokens: result.usage.outputTokens,
       durationMs: Date.now() - startedAt,
+      resourceKind: "lesson_segment",
+      resourceId: input.segmentId,
     });
 
     return result.object;

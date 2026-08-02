@@ -112,13 +112,15 @@ export interface FamilyAssetProcessingDependencies {
   }): Promise<ClaimedFamilyAsset | null>;
   extract(asset: ClaimedFamilyAsset): Promise<FamilyAssetTextExtraction>;
   propose(input: {
-    familyId: string | null;
+    familyId: string;
+    assetId: string;
     originalName: string;
     mediaType: string;
     extractedText: string;
   }): Promise<unknown>;
   embed(input: {
     familyId: string;
+    assetId: string;
     text: string;
   }): Promise<string | null>;
   complete(input: {
@@ -393,6 +395,10 @@ export async function extractFamilyAssetText(
     mediaType: bareMediaType(asset.mediaType),
     familyId: asset.familyId,
     channel: "web",
+    attribution: {
+      resourceKind: "family_asset",
+      resourceId: asset.id,
+    },
   });
   return caption
     ? { ok: true, text: caption }
@@ -622,6 +628,10 @@ export async function extractFamilyAssetSourceDocument(
     mediaType: bareMediaType(asset.mediaType),
     familyId: asset.familyId,
     channel: "web",
+    attribution: {
+      resourceKind: "family_asset",
+      resourceId: asset.id,
+    },
   });
   return caption
     ? {
@@ -800,7 +810,12 @@ const PRODUCTION_PROCESSING_DEPENDENCIES: FamilyAssetProcessingDependencies = {
   claim: claimFamilyAssetProcessing,
   extract: extractFamilyAssetText,
   propose: proposeFamilyAssetIngestion,
-  embed: async ({ familyId, text }) => await embedText(text, { familyId }),
+  embed: async ({ familyId, assetId, text }) =>
+    await embedText(text, {
+      familyId,
+      resourceKind: "family_asset",
+      resourceId: assetId,
+    }),
   complete: completeFamilyAssetProcessing,
   fail: failFamilyAssetProcessing,
 };
@@ -833,6 +848,7 @@ export async function processFamilyAssetWithDependencies(
   try {
     proposal = await dependencies.propose({
       familyId: asset.familyId,
+      assetId: asset.id,
       originalName: asset.originalName,
       mediaType: asset.mediaType,
       extractedText: extracted.text,
@@ -858,6 +874,7 @@ export async function processFamilyAssetWithDependencies(
   try {
     embedding = await dependencies.embed({
       familyId: asset.familyId,
+      assetId: asset.id,
       text: familyAssetEmbeddingDocument({
         asset,
         extractedText: extracted.text,

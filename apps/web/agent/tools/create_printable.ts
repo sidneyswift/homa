@@ -677,6 +677,7 @@ const createPrintable = defineBoundedTool({
     // page against what this child can physically do) were unsatisfiable
     // while the brief carried no age at all.
     const childAgeYears = await childAgeYearsForFamily(familyId, input.childId);
+    let materialId: string = randomUUID();
     const brief = [
       `Title: ${input.title}`,
       `Kind: ${kind}`,
@@ -692,6 +693,9 @@ const createPrintable = defineBoundedTool({
     const review = await reviewArtifact({
       familyId,
       channel,
+      sessionId: ctx.session.id,
+      turnId: ctx.session.turn.id,
+      materialId,
       // Changed pages first: on a packet revision the pages carried over
       // by fromMaterialId are the ones she did not complain about, and
       // reviewing those instead of the page she asked about is how a
@@ -710,7 +714,6 @@ const createPrintable = defineBoundedTool({
       review?.pass === true
         ? acceptedOfferDeliveryIdFromAttributes(attributes)
         : null;
-    let materialId: string = randomUUID();
     let reservedSourceDeliveryId: string | null = null;
     if (sourceOfferDeliveryId) {
       try {

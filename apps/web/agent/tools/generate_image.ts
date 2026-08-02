@@ -180,6 +180,8 @@ const generateImage = defineBoundedTool({
     const result = await generateStudioImage({
       familyId: access.familyId,
       channel,
+      sessionId: ctx.session.id,
+      turnId: ctx.session.turn.id,
       prompt: input.prompt,
       shape: input.shape,
       referenceImageUrls: input.referenceImageUrls,

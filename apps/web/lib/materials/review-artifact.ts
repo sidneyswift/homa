@@ -210,6 +210,9 @@ interface ChunkVerdict {
 async function reviewChunk(input: {
   familyId: string;
   channel: UsageChannel;
+  sessionId: string;
+  turnId: string;
+  materialId: string;
   pages: readonly ReviewablePage[];
   pageCount: number;
   brief: string;
@@ -291,6 +294,10 @@ async function reviewChunk(input: {
       inputTokens: result.usage.inputTokens,
       outputTokens: result.usage.outputTokens,
       durationMs: Date.now() - startedAt,
+      sessionId: input.sessionId,
+      turnId: input.turnId,
+      resourceKind: "material",
+      resourceId: input.materialId,
     });
 
     return {
@@ -331,6 +338,9 @@ async function reviewChunk(input: {
 export async function reviewArtifact(input: {
   familyId: string;
   channel: UsageChannel;
+  sessionId: string;
+  turnId: string;
+  materialId: string;
   pages: readonly ReviewablePage[];
   pageCount: number;
   brief: string;

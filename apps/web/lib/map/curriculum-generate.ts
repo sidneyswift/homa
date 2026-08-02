@@ -82,6 +82,7 @@ export async function generateCurriculum(
   report: ReportFacts,
   call: CallFacts,
   familyId: string | null = null,
+  curriculumId: string = familyId ?? "fleet-curriculum-fixture",
 ): Promise<CurriculumGenerationResult> {
   const started = Date.now();
   const result = await generateObject({
@@ -111,6 +112,8 @@ export async function generateCurriculum(
     inputTokens: result.usage.inputTokens,
     outputTokens: result.usage.outputTokens,
     durationMs: Date.now() - started,
+    resourceKind: "curriculum",
+    resourceId: curriculumId,
   });
 
   return {

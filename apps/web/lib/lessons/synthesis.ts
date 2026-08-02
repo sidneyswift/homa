@@ -104,6 +104,7 @@ siblingNote in one neutral sentence; otherwise return null for it.`;
 
 export interface LessonSynthesisInput {
   familyId: string;
+  lessonId: string;
   childName: string;
   segments: Array<{
     seq: number;
@@ -205,6 +206,8 @@ export async function synthesizeLessonReview(
     inputTokens: result.usage.inputTokens,
     outputTokens: result.usage.outputTokens,
     durationMs: Date.now() - startedAt,
+    resourceKind: "lesson",
+    resourceId: input.lessonId,
   });
 
   return result.object;

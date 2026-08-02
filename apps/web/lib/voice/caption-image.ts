@@ -1,6 +1,10 @@
 import { generateText } from "ai";
 
-import { gatewayAttribution, recordModelUsage } from "../model-usage";
+import {
+  gatewayAttribution,
+  recordModelUsage,
+  type UsageAttribution,
+} from "../model-usage";
 
 /**
  * One-line captions for photos texted to Homa (the microwave lesson,
@@ -58,6 +62,7 @@ export async function captionSmsImage(input: {
   /** Usage-ledger channel. Defaults to "sms", the original caller;
    *  lesson media captions ride the same brain from web. */
   channel?: "sms" | "web";
+  attribution: UsageAttribution;
 }): Promise<string | null> {
   if (!captionsEnabled()) return null;
 
@@ -103,6 +108,7 @@ export async function captionSmsImage(input: {
       inputTokens: result.usage.inputTokens,
       outputTokens: result.usage.outputTokens,
       durationMs: Date.now() - startedAt,
+      ...input.attribution,
     });
 
     const caption = result.text.trim().replace(/\s+/g, " ");

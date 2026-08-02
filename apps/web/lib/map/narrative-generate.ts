@@ -43,6 +43,7 @@ function requiredStrings(ids: string[]): z.ZodObject<Record<string, z.ZodString>
 export async function generateReportNarrative(
   facts: ReportFacts,
   familyId: string | null = null,
+  reportId: string = familyId ?? "fleet-report-fixture",
 ): Promise<GenerationResult<ReportNarrative>> {
   const subjectIds = facts.subjects.map((subject) => subject.subjectId);
   const drawerIds = facts.subjects
@@ -91,6 +92,8 @@ export async function generateReportNarrative(
     inputTokens: result.usage.inputTokens,
     outputTokens: result.usage.outputTokens,
     durationMs: Date.now() - started,
+    resourceKind: "progress_report",
+    resourceId: reportId,
   });
 
   return {
@@ -106,6 +109,7 @@ export async function generateReportNarrative(
 export async function generatePlanNarrative(
   facts: PlanFacts,
   familyId: string | null = null,
+  planId: string = familyId ?? "fleet-plan-fixture",
 ): Promise<GenerationResult<PlanNarrative>> {
   const schema = z.object({
     intro: z.string(),
@@ -141,6 +145,8 @@ export async function generatePlanNarrative(
     inputTokens: result.usage.inputTokens,
     outputTokens: result.usage.outputTokens,
     durationMs: Date.now() - started,
+    resourceKind: "month_plan",
+    resourceId: planId,
   });
 
   return {

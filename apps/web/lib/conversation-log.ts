@@ -7,6 +7,7 @@ import {
 } from "./conversation-continuity/ledger";
 import { embedText } from "./learning/embeddings";
 import { mapDb } from "./map/db";
+import type { UsageAttribution } from "./model-usage";
 import { isHiddenDirective } from "./onboarding/directives";
 
 /**
@@ -37,7 +38,10 @@ export interface PersistConversationMessageDependencies {
   persistCanonical(
     input: PersistCanonicalMessageInput,
   ): ReturnType<typeof persistCanonicalMessage>;
-  embed(text: string, attribution: { familyId: string }): Promise<string | null>;
+  embed(
+    text: string,
+    attribution: { familyId: string } & UsageAttribution,
+  ): Promise<string | null>;
   /** sourceContent guards a replayed/delayed embedding write: the row's
    *  content may have moved on (a later terminal replacement) by the time
    *  this resolves, and a vector for text the row no longer holds must
@@ -176,18 +180,6 @@ async function persistConversationMessageWithDependencies(
   const isTerminalAssistantStop =
     input.role === "assistant" && input.finishReason === "stop";
 
-  // Best-effort semantic index (about 200-400ms per message inside the
-  // hook, after the user already has their streamed text). Null means
-  // this row is findable by FTS only, never a failed write.
-  //
-  // A hidden onboarding directive is skipped: it is the app talking, so
-  // indexing it would put machine text in the same vector space recall
-  // searches for the parent's own words, and it would spend an embedding
-  // call on a string nobody will ever look for.
-  const embedding = isHiddenDirective(content)
-    ? null
-    : await dependencies.embed(content, { familyId });
-
   const persisted = await dependencies.persistCanonical({
     attributes: { ...attrs, ...continuityAttributes },
     sessionId: input.sessionId,
@@ -206,6 +198,20 @@ async function persistConversationMessageWithDependencies(
         ? isTerminalAssistantStop
         : undefined,
   });
+  // Best-effort semantic index (about 200-400ms per message inside the
+  // hook, after the user already has their streamed text). Persist first
+  // so the canonical row owns both the embedding and its usage record.
+  // A hidden onboarding directive is app-authored machine text, so it is
+  // neither indexed nor charged to an artificial recall artifact.
+  const embedding = !persisted || isHiddenDirective(content)
+    ? null
+    : await dependencies.embed(content, {
+        familyId,
+        sessionId: input.sessionId,
+        ...(input.turnId ? { turnId: input.turnId } : {}),
+        resourceKind: "conversation_message",
+        resourceId: persisted.id,
+      });
   if (persisted && embedding) {
     await dependencies.saveEmbedding(
       persisted.id,

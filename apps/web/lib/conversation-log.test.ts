@@ -143,6 +143,7 @@ describe("conversation log continuity integration", () => {
       sourceContent: string;
       replaceExisting: boolean;
     }> = [];
+    let usageAttribution: unknown = null;
 
     const persisted = await persistConversationMessage(
       {
@@ -164,7 +165,10 @@ describe("conversation log continuity integration", () => {
           episodeId: EPISODE_ID,
           replyClaimed: false,
         }),
-        embed: async (text) => `embedding:${text}`,
+        embed: async (text, attribution) => {
+          usageAttribution = attribution;
+          return `embedding:${text}`;
+        },
         saveEmbedding: async (messageId, embedding, sourceContent, replaceExisting) => {
           writes.push({ messageId, embedding, sourceContent, replaceExisting });
         },
@@ -179,7 +183,54 @@ describe("conversation log continuity integration", () => {
         replaceExisting: true,
       },
     ]);
+    assert.deepEqual(usageAttribution, {
+      familyId: FAMILY_ID,
+      sessionId: "session-1",
+      turnId: "turn-1",
+      resourceKind: "conversation_message",
+      resourceId: MESSAGE_ID,
+    });
     assert.equal(persisted?.id, MESSAGE_ID);
+  });
+
+  it("does not buy an embedding when canonical persistence fails", async () => {
+    let embedCalls = 0;
+
+    const persisted = await persistConversationMessage(
+      {
+        attributes: { familyId: FAMILY_ID },
+        sessionId: "session-1",
+        channelKind: "web",
+        sequence: 1,
+        role: "user",
+        content: "A message whose durable write failed.",
+        turnId: "turn-1",
+      },
+      {
+        resolveInbound: async () => ({
+          episodeId: EPISODE_ID,
+          replyToMessageId: null,
+          repliedDeliveryId: null,
+          resolution: "none",
+          resolvedOutcome: null,
+          acceptedOfferDeliveryId: null,
+          resolutionMethod: null,
+          replyClassifierVersion: null,
+          replySourceChannel: null,
+          contextMarkdown: "",
+          threadKeyHash: "thread-1",
+        }),
+        persistCanonical: async () => null,
+        embed: async () => {
+          embedCalls += 1;
+          return "embedding";
+        },
+        saveEmbedding: async () => undefined,
+      },
+    );
+
+    assert.equal(persisted, null);
+    assert.equal(embedCalls, 0);
   });
 
   it("fills a null embedding for a non-terminal write without replacing an existing one", async () => {

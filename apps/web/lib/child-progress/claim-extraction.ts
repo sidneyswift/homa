@@ -2,7 +2,11 @@ import { generateObject } from "ai";
 import { z } from "zod";
 
 import { HOMA_MODEL } from "../../agent/model";
-import { gatewayAttribution, recordModelUsage } from "../model-usage";
+import {
+  gatewayAttribution,
+  recordModelUsage,
+  type UsageResourceKind,
+} from "../model-usage";
 import type { ClaimChild, ProposedClaim } from "./claim-validation";
 import { renderSkillCatalog } from "./skill-catalog";
 
@@ -100,6 +104,8 @@ export interface ClaimExtractionInput {
   children: readonly ClaimChild[];
   /** Where this message came from, for usage attribution only. */
   surface: "journal" | "lesson";
+  resourceKind: Extract<UsageResourceKind, "conversation_message" | "lesson">;
+  resourceId: string;
 }
 
 /**
@@ -163,6 +169,8 @@ export async function extractProgressClaims(
       inputTokens: result.usage.inputTokens,
       outputTokens: result.usage.outputTokens,
       durationMs: Date.now() - startedAt,
+      resourceKind: input.resourceKind,
+      resourceId: input.resourceId,
     });
 
     return result.object.claims;

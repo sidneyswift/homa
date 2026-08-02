@@ -98,6 +98,8 @@ export async function runSessionReview(
       text,
       conversationLabel: "recent chat messages with this family",
       sessionId,
+      resourceKind: "learning_review",
+      resourceId: claim.id,
     });
     await sql`
       update public.learning_reviews

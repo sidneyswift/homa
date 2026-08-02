@@ -337,6 +337,8 @@ export interface PinnedHoursRow {
 
 export async function recallPinned(input: {
   familyId: string;
+  sessionId: string;
+  turnId: string;
   query: string;
   scope: "calls" | "chats" | "memories" | "all";
   limit: number;
@@ -423,7 +425,11 @@ export async function recallPinned(input: {
     const wantMemories = input.scope === "memories" || input.scope === "all";
     const wantChats = input.scope === "chats" || input.scope === "all";
     const wantCalls = input.scope === "calls" || input.scope === "all";
-    const queryEmbedding = await embedText(input.query, { familyId: input.familyId });
+    const queryEmbedding = await embedText(input.query, {
+      familyId: input.familyId,
+      sessionId: input.sessionId,
+      turnId: input.turnId,
+    });
     if (queryEmbedding) {
       const rows = await sql<
         { source: string; happened_at: string | null; label: string; content: string }[]

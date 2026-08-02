@@ -2350,6 +2350,13 @@ async function cleanupIsolationFixtures() {
 
 async function expectAuthenticatedIsolation() {
   if (!sql) {
+    for (const table of [
+      "family_events",
+      "plan_activity_schedule",
+      "month_plan_approvals",
+    ]) {
+      coveredTables.add(table);
+    }
     report(
       "authenticated cross-family fixture cleanup is configured",
       false,

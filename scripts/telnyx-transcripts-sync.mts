@@ -171,7 +171,11 @@ async function upsert(
     conversation.created_at;
   const transcriptText = flattenTranscriptText(messages);
   // Best-effort semantic index, same posture as the app-side sync.
-  const embedding = await embedText(transcriptText);
+  const embedding = await embedText(transcriptText, {
+    familyId: owner.familyId,
+    resourceKind: "call_transcript",
+    resourceId: conversation.id,
+  });
   await sql`
     insert into public.call_transcripts
       (conversation_id, line, assistant_id, channel, family_id, child_id,

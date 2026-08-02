@@ -532,7 +532,12 @@ const handleInboundSms = async (thread: Thread, message: Message) => {
   // inline, failures become bracketed notes the agent can acknowledge.
   // Linked-family photos also get a caption block so the photo leaves a
   // searchable trace in the durable record (the microwave lesson).
-  const normalized = await normalizeSmsAttachments(attachments, { familyId });
+  const normalized = await normalizeSmsAttachments(
+    attachments,
+    familyId
+      ? { familyId, inboundMessageId: inboundReceipt.id }
+      : undefined,
+  );
   for (const result of normalized.results) {
     await emitMapEvent("sms.attachment_processed", {
       kind: result.kind,

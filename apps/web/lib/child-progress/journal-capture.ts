@@ -31,6 +31,8 @@ export interface JournalCaptureContext {
   childId: string;
   message: string;
   surface: "journal" | "lesson";
+  resourceKind: "conversation_message" | "lesson";
+  resourceId: string;
 }
 
 export interface JournalCaptureResult {
@@ -98,6 +100,8 @@ export async function captureJournalClaims(
       message: context.message,
       children,
       surface: context.surface,
+      resourceKind: context.resourceKind,
+      resourceId: context.resourceId,
     });
     const { accepted } = validateProposedClaims({
       message: context.message,

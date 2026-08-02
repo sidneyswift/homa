@@ -92,6 +92,8 @@ export async function extractMemoriesFromText(input: {
   conversationLabel: string;
   /** The reviewed session, when one exists (provenance stamp). */
   sessionId?: string | null;
+  resourceKind: "call_transcript" | "learning_review";
+  resourceId: string;
 }): Promise<ExtractionOutcome> {
   const model = extractionModel();
   const started = Date.now();
@@ -135,6 +137,9 @@ export async function extractMemoriesFromText(input: {
     inputTokens: result.usage.inputTokens,
     outputTokens: result.usage.outputTokens,
     durationMs: Date.now() - started,
+    ...(input.sessionId ? { sessionId: input.sessionId } : {}),
+    resourceKind: input.resourceKind,
+    resourceId: input.resourceId,
   });
 
   const outcome: ExtractionOutcome = {

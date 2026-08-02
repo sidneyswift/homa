@@ -117,7 +117,10 @@ async function main(): Promise<number> {
     // rows stay FTS-only and the semantic checks report SKIP.
     let embeddingsAvailable = false;
     for (const [sequence, message] of SEEDED_MESSAGES.entries()) {
-      const embedding = await embedText(message.content, { familyId });
+      const embedding = await embedText(message.content, {
+        familyId,
+        sessionId,
+      });
       if (embedding) embeddingsAvailable = true;
       await sql`
         insert into public.conversation_messages

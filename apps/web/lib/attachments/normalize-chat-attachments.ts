@@ -175,6 +175,10 @@ async function processImage(
     image: new URL(input.url),
     mediaType,
     familyId,
+    attribution: {
+      resourceKind: "attachment",
+      resourceId: input.url,
+    },
   });
   return {
     input,

@@ -488,6 +488,8 @@ export async function compactFamilyMemories(
     inputTokens: result.usage.inputTokens,
     outputTokens: result.usage.outputTokens,
     durationMs: Date.now() - started,
+    resourceKind: "family",
+    resourceId: familyId,
   });
 
   outcome.proposed = result.object.merges.length + result.object.splits.length;
@@ -518,7 +520,11 @@ export async function compactFamilyMemories(
       continue;
     }
 
-    const embedding = await embedText(content, { familyId });
+    const embedding = await embedText(content, {
+      familyId,
+      resourceKind: "family",
+      resourceId: familyId,
+    });
     const targetIds = checked.targets.map((row) => row.id);
 
     // Insert and supersede together: a crash between them would either
@@ -571,7 +577,11 @@ export async function compactFamilyMemories(
     const embedded = await Promise.all(
       checked.parts.map(async (part) => ({
         ...part,
-        embedding: await embedText(part.content, { familyId }),
+        embedding: await embedText(part.content, {
+          familyId,
+          resourceKind: "family",
+          resourceId: familyId,
+        }),
       })),
     );
 

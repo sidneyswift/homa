@@ -337,6 +337,8 @@ async function attemptGeneration(input: {
 export async function generateStudioImage(input: {
   familyId: string;
   channel: UsageChannel;
+  sessionId: string;
+  turnId: string;
   prompt: string;
   shape?: ImageShape;
   referenceImageUrls?: string[];
@@ -466,6 +468,8 @@ export async function generateStudioImage(input: {
     imagesCount: outcome.imagesCount,
     imageSize: size,
     durationMs: Date.now() - attemptStartedAt,
+    sessionId: input.sessionId,
+    turnId: input.turnId,
   });
 
   const url = await uploadStudioImageBytes({

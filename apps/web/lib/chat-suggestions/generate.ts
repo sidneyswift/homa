@@ -128,6 +128,8 @@ async function producePromptSuggestions(
     inputTokens: result.usage.inputTokens,
     outputTokens: result.usage.outputTokens,
     durationMs: Date.now() - started,
+    resourceKind: "conversation_message",
+    resourceId: input.request.assistantMessageId,
   });
 
   return result.output;

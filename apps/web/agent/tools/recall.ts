@@ -95,6 +95,8 @@ export default defineBoundedTool({
     if (access.mode === "pinned") {
       const results = await recallPinned({
         familyId: access.familyId,
+        sessionId: ctx.session.id,
+        turnId: ctx.session.turn.id,
         query: input.query,
         scope: input.scope,
         limit: input.limit,
@@ -205,7 +207,11 @@ export default defineBoundedTool({
     // RPC is SECURITY INVOKER, so the caller's own RLS decides which
     // rows exist for it; no family parameter can be gotten wrong.
     if (hits.length < input.limit) {
-      const queryEmbedding = await embedText(input.query, { familyId });
+      const queryEmbedding = await embedText(input.query, {
+        familyId,
+        sessionId: ctx.session.id,
+        turnId: ctx.session.turn.id,
+      });
       if (queryEmbedding) {
         // Ask only for the scope requested (gh#375). The RPC used to rank
         // memories, chats, and calls together and apply match_limit to
