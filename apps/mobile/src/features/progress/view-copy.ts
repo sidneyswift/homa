@@ -1,3 +1,5 @@
+import { parseOffsetIsoTimestampEpochNanoseconds } from "@homa/core";
+
 import type {
   OpenProgressConflictView,
   ProgressConflictAdultAnswerView,
@@ -18,7 +20,7 @@ import type {
 export function progressSubjectHeadline(state: ProgressSubjectView["state"]): string {
   switch (state) {
     case "conflict":
-      return "Different answers";
+      return "Two answers saved";
     case "updated_recently":
       return "Updated today";
     case "older":
@@ -29,13 +31,13 @@ export function progressSubjectHeadline(state: ProgressSubjectView["state"]): st
 export function progressTopicStateLabel(state: ProgressTopicView["state"]): string {
   switch (state) {
     case "observed_today":
-      return "Shared today";
+      return "Answer saved";
     case "older":
-      return "Shared earlier";
+      return "Earlier answer";
     case "ask_next":
-      return "Homa will ask";
+      return "Not shared yet";
     case "conflict":
-      return "Different answers";
+      return "Two answers saved";
   }
 }
 
@@ -84,30 +86,15 @@ export function progressAssessmentCta(childName: string): {
   body: string;
 } {
   return {
-    heading: `${childName}'s progress page needs a first example.`,
+    heading: `Start ${childName}’s progress`,
     body:
-      `Share one lesson, worksheet, or thing ${childName} tried. ` +
-      "Homa will add it as one dated example and keep building the page when you share more.",
+      `Tell Homa about a lesson, a worksheet, or something ${childName} tried. ` +
+      "One sentence is enough to begin.",
   };
 }
 
 export function progressAssessmentDraft(childName: string): string {
-  return `Here's what ${childName} tried: `;
-}
-
-export function progressLoadErrorCopy(
-  childName: string,
-  hasCurrentView: boolean,
-): { heading: string; body: string } {
-  return hasCurrentView
-    ? {
-        heading: `${childName}'s progress is still here.`,
-        body: "Homa couldn't refresh it. Try again when you're ready.",
-      }
-    : {
-        heading: `${childName}'s progress didn't load.`,
-        body: `Anything already saved for ${childName} is unchanged. Try again when you're ready.`,
-      };
+  return `I want to tell you something ${childName} tried: `;
 }
 
 export function formatProgressDate(observedAt: string, timeZone: string): string {
@@ -130,9 +117,84 @@ export function progressConflictAnswerLine(
 ): string {
   const adult = answer.adultDisplayName?.trim() || "an adult";
   return (
-    `Answer from ${adult}: ${progressAnswerLabel(answer.answer)} · ` +
+    `${adult}: ${progressAnswerLabel(answer.answer)} · ` +
+    `${progressSourceLabel(answer.source.kind)} · ` +
     `${formatProgressDate(answer.observedAt, timeZone)}.`
   );
+}
+
+export interface ProgressSubjectTakeaway {
+  statement: string;
+  stateLabel: string;
+}
+
+function compareAsciiDescending(left: string, right: string): number {
+  if (left === right) return 0;
+  return left < right ? 1 : -1;
+}
+
+function compareObservedAtDescending(left: string, right: string): number {
+  const leftNanoseconds = parseOffsetIsoTimestampEpochNanoseconds(left);
+  const rightNanoseconds = parseOffsetIsoTimestampEpochNanoseconds(right);
+  if (leftNanoseconds === rightNanoseconds) return 0;
+  return leftNanoseconds > rightNanoseconds ? -1 : 1;
+}
+
+function selectedSubjectConflict(
+  subject: ProgressSubjectView,
+  conflicts: readonly OpenProgressConflictView[],
+): OpenProgressConflictView | null {
+  const subjectItemIds = new Set(
+    subject.domains.flatMap((domain) =>
+      domain.topics.map((topic) => topic.itemId),
+    ),
+  );
+  return (
+    conflicts
+      .filter((entry) => subjectItemIds.has(entry.itemId))
+      .sort(
+        (left, right) =>
+          compareObservedAtDescending(left.observedAt, right.observedAt) ||
+          compareAsciiDescending(left.itemId, right.itemId) ||
+          compareAsciiDescending(left.id, right.id),
+      )[0] ?? null
+  );
+}
+
+/** One concrete skill for a collapsed card, newest evidence first. */
+export function progressSubjectTakeaway(
+  subject: ProgressSubjectView,
+  conflicts: readonly OpenProgressConflictView[] = [],
+): ProgressSubjectTakeaway | null {
+  const topics = subject.domains.flatMap((domain) => domain.topics);
+  const selectedConflict =
+    subject.state === "conflict"
+      ? selectedSubjectConflict(subject, conflicts)
+      : null;
+  const headlineTopics =
+    selectedConflict !== null
+      ? topics.filter((topic) => topic.itemId === selectedConflict.itemId)
+      : subject.state === "conflict"
+      ? topics.filter((topic) => topic.state === "conflict")
+      : topics;
+  const dated = headlineTopics
+    .filter((topic) => topic.observedAt !== null)
+    .sort(
+      (left, right) =>
+        compareObservedAtDescending(
+          left.observedAt as string,
+          right.observedAt as string,
+        ) || compareAsciiDescending(left.itemId, right.itemId),
+    );
+  const topic = dated[0] ?? headlineTopics[0] ?? topics[0];
+  if (!topic) return null;
+  return {
+    statement: topic.statement,
+    stateLabel:
+      topic.answer !== null
+        ? progressAnswerLabel(topic.answer)
+        : progressTopicStateLabel(topic.state),
+  };
 }
 
 export function progressSubjectSummary(
@@ -144,30 +206,22 @@ export function progressSubjectSummary(
   const date = formatProgressDate(subject.summary.observedAt, timeZone);
   switch (subject.summary.kind) {
     case "evidence":
-      return `Latest evidence: ${progressSourceLabel(subject.summary.source.kind)} · ${date}`;
+      return `${progressSourceLabel(subject.summary.source.kind)} · ${date}`;
     case "conflict": {
-      const first = subject.summary.adultDisplayNames[0]?.trim() || "Adult 1";
-      const second = subject.summary.adultDisplayNames[1]?.trim() || "Adult 2";
-      const subjectItemIds = new Set(
-        subject.domains.flatMap((domain) => domain.topics.map((topic) => topic.itemId)),
-      );
-      const conflict = conflicts
-        .filter((entry) => subjectItemIds.has(entry.itemId))
-        .sort(
-          (left, right) =>
-            new Date(right.observedAt).getTime() - new Date(left.observedAt).getTime() ||
-            right.id.localeCompare(left.id),
-        )[0];
+      const conflict = selectedSubjectConflict(subject, conflicts);
       const sourceLabels = conflict
         ? [...new Set(conflict.adultAnswers.map((answer) => progressSourceLabel(answer.source.kind)))]
         : [];
       const source =
         sourceLabels.length === 0
-          ? "Latest evidence"
-          : `Latest evidence: ${sourceLabels
+          ? "Progress answer"
+          : sourceLabels
               .map((label, index) => (index === 0 ? label : lowerFirst(label)))
-              .join(" and ")}`;
-      return `${source} · ${date}. ${first} and ${second} shared different answers, so Homa saved both.`;
+              .join(" and ");
+      const conflictDate = conflict
+        ? formatProgressDate(conflict.observedAt, timeZone)
+        : date;
+      return `${source} · ${conflictDate}. Homa kept both answers.`;
     }
   }
 }

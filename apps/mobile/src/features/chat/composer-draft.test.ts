@@ -14,7 +14,7 @@ describe("Progress Chat draft handoff", () => {
     );
     assert.equal(parseComposerDraftRequest("", "Draft"), null);
     assert.equal(parseComposerDraftRequest("request", " "), null);
-    assert.equal(parseComposerDraftRequest("request", "x".repeat(2_001)), null);
+    assert.equal(parseComposerDraftRequest("request", "x".repeat(501)), null);
   });
 
   it("preserves an existing unsent message when adding the Progress draft", () => {

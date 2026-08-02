@@ -7,7 +7,11 @@ import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, palette, radius, shadows, space } from "../../theme/tokens";
 import { subjectFreshness } from "./map-model";
 import { TopicRow } from "./topic-row";
-import { progressSubjectHeadline, progressSubjectSummary } from "./view-copy";
+import {
+  progressSubjectHeadline,
+  progressSubjectSummary,
+  progressSubjectTakeaway,
+} from "./view-copy";
 
 /**
  * One subject card, ported from apps/web/components/progress/
@@ -28,9 +32,16 @@ export function SubjectCard({
   const [expanded, setExpanded] = useState(false);
   const freshness = subjectFreshness(subject, timeZone, new Date());
   const summary = progressSubjectSummary(subject, timeZone, conflicts);
+  const takeaway = progressSubjectTakeaway(subject, conflicts);
   const needsConfirm = subject.state === "conflict";
+  const statusLabel =
+    needsConfirm || freshness?.kind === "quiet"
+      ? progressSubjectHeadline(subject.state)
+      : null;
   const accessibilitySummary =
-    summary ?? (needsConfirm ? "Different answers" : freshness?.label ?? "No evidence yet");
+    [...new Set([takeaway?.statement, statusLabel, takeaway?.stateLabel, summary])]
+      .filter(Boolean)
+      .join(". ") || "No evidence yet";
 
   return (
     <View
@@ -49,10 +60,19 @@ export function SubjectCard({
         accessibilityLabel={`${subject.displayName}. ${accessibilitySummary}`}
         style={{ padding: space.md, gap: space.xs }}
       >
-        <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "flex-start",
+            flexWrap: "wrap",
+            gap: space.sm,
+          }}
+        >
           <Text
+            accessibilityRole="header"
             style={{
               flex: 1,
+              minWidth: 150,
               fontFamily: fontFamilies.displaySemibold,
               fontSize: fontSize.base,
               color: colors.textStrong,
@@ -60,7 +80,7 @@ export function SubjectCard({
           >
             {subject.displayName}
           </Text>
-          {needsConfirm ? (
+          {statusLabel ? (
             <View
               style={{
                 paddingHorizontal: space.sm,
@@ -70,7 +90,7 @@ export function SubjectCard({
               }}
             >
               <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: palette.goldInk }}>
-                {progressSubjectHeadline("conflict")}
+                {statusLabel}
               </Text>
             </View>
           ) : null}
@@ -80,6 +100,31 @@ export function SubjectCard({
             <ChevronDown size={18} color={colors.textSubtle} />
           )}
         </View>
+
+        {takeaway ? (
+          <View style={{ gap: 2 }}>
+            <Text
+              style={{
+                fontFamily: fontFamilies.bodySemibold,
+                fontSize: fontSize.sm,
+                color: colors.textStrong,
+              }}
+            >
+              {takeaway.statement}
+            </Text>
+            {!needsConfirm ? (
+              <Text
+                style={{
+                  fontFamily: fontFamilies.bodySemibold,
+                  fontSize: fontSize.sm,
+                  color: colors.textBody,
+                }}
+              >
+                {takeaway.stateLabel}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
 
         {summary ? (
           <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 6 }}>
@@ -122,6 +167,7 @@ export function SubjectCard({
           {subject.domains.map((domain) => (
             <View key={domain.domainId} style={{ marginTop: space.sm }}>
               <Text
+                accessibilityRole="header"
                 style={{
                   fontFamily: fontFamilies.bodySemibold,
                   fontSize: fontSize.sm,

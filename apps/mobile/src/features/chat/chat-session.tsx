@@ -33,11 +33,17 @@ import {
   type QueuedChatMessage,
 } from "./chat-send-policy";
 import {
-  mergeComposerDraft,
   type ComposerDraftRequest,
 } from "./composer-draft";
 import { busyLabel, countLastTurnToolCalls } from "./message-utils";
 import { BusyBubble, MessageView } from "./message-view";
+import {
+  bindProgressDraftContext,
+  mergeProgressDraft,
+  progressChildIdForDraft,
+  progressEvidenceClientContext,
+  type ProgressDraftBinding,
+} from "./progress-draft";
 import { latestQuestionRequest } from "./question-card-model";
 import {
   latestChecklistRequest,
@@ -162,6 +168,7 @@ export function ChatSession({
   familyId,
   parentName,
   draftRequest,
+  initialProgressChildId,
   onDraftRequestHandled,
 }: {
   storageKey: string;
@@ -169,6 +176,7 @@ export function ChatSession({
   familyId: string | null;
   parentName: string | null;
   draftRequest: ComposerDraftRequest | null;
+  initialProgressChildId: string | null;
   onDraftRequestHandled: (requestId: string) => void;
 }) {
   const messagesRef = useRef<readonly EveMessage[]>([]);
@@ -198,11 +206,15 @@ export function ChatSession({
   const queuedRef = useRef<QueuedChatMessage[]>(queued);
   /** The store's send, held by ref so onFinish can deliver the queue
    *  without capturing `agent` inside its own initializer. */
-  const sendRef = useRef<((input: { message: string }) => Promise<void>) | null>(
-    null,
-  );
+  const sendRef = useRef<
+    ((input: {
+      message: string;
+      clientContext?: QueuedChatMessage["clientContext"];
+    }) => Promise<void>) | null
+  >(null);
   const [draft, setDraft] = useState("");
   const handledDraftRequestRef = useRef<string | null>(null);
+  const progressDraftBindingRef = useRef<ProgressDraftBinding | null>(null);
   // Lost-turn recovery bookkeeping (lib/turn-recovery.ts): the durable
   // stream cursor (session streamIndex at mount + one per received
   // event, surviving storage event trimming), what the last send
@@ -213,11 +225,30 @@ export function ChatSession({
   const [recovering, setRecovering] = useState(false);
 
   useEffect(() => {
-    if (!draftRequest || handledDraftRequestRef.current === draftRequest.id) return;
+    if (
+      !draftRequest ||
+      !initialProgressChildId ||
+      handledDraftRequestRef.current === draftRequest.id
+    ) {
+      return;
+    }
     handledDraftRequestRef.current = draftRequest.id;
-    setDraft((current) => mergeComposerDraft(current, draftRequest.text));
+    setDraft((current) => {
+      const merged = mergeProgressDraft(current, draftRequest.text);
+      progressDraftBindingRef.current = bindProgressDraftContext(
+        initialProgressChildId,
+        draftRequest.text,
+        merged,
+      );
+      return merged;
+    });
     onDraftRequestHandled(draftRequest.id);
-  }, [draftRequest, onDraftRequestHandled]);
+    setTimeout(() => composerRef.current?.focus(), 0);
+  }, [
+    draftRequest,
+    initialProgressChildId,
+    onDraftRequestHandled,
+  ]);
 
   useEffect(() => {
     queuedRef.current = queued;
@@ -243,7 +274,12 @@ export function ChatSession({
     setTimeout(() => {
       lastSendRef.current = { text: next.message, atMs: currentTimeMs() };
       markTurnStarted();
-      void sendRef.current?.({ message: next.message });
+      void sendRef.current?.({
+        message: next.message,
+        ...(next.clientContext
+          ? { clientContext: next.clientContext }
+          : {}),
+      });
     }, 0);
   }, []);
 
@@ -463,16 +499,35 @@ export function ChatSession({
     };
   }, [agentStop, busy]);
 
+  function updateDraft(next: string): void {
+    if (!progressChildIdForDraft(progressDraftBindingRef.current, next)) {
+      progressDraftBindingRef.current = null;
+    }
+    setDraft(next);
+  }
+
   function sendMessage(text: string, source: ChatSendSource = "composer") {
     const message = text.trim();
     if (message.length === 0) return;
     // A tap on a card is not typing, so it leaves whatever she had
     // half-written in the composer alone (the web twin's send policy,
     // apps/web/app/app/chat-send-policy.ts).
-    if (source === "composer") setDraft("");
+    const progressChildId = progressChildIdForDraft(
+      progressDraftBindingRef.current,
+      text,
+    );
+    const clientContext =
+      source === "composer" && progressChildId
+        ? progressEvidenceClientContext(progressChildId)
+        : undefined;
+    if (source === "composer") {
+      setDraft("");
+      progressDraftBindingRef.current = null;
+    }
     const queuedMessage: QueuedChatMessage = {
       text: message,
       lane: source === "directive" ? "directive" : "parent",
+      ...(clientContext ? { clientContext } : {}),
     };
     // Sending mid-turn queues instead of refusing (texting model,
     // founder ruling 2026-07-10 night): the bubble waits by the
@@ -508,7 +563,12 @@ export function ChatSession({
     setQueued(next.remaining);
     lastSendRef.current = { text: next.message, atMs: currentTimeMs() };
     markTurnStarted();
-    void agent.send({ message: next.message });
+    void agent.send({
+      message: next.message,
+      ...(next.clientContext
+        ? { clientContext: next.clientContext }
+        : {}),
+    });
   }
 
   function focusComposer() {
@@ -630,7 +690,7 @@ export function ChatSession({
                 <SuggestionChip
                   key={suggestion}
                   label={suggestion}
-                  onPress={() => sendMessage(suggestion)}
+                  onPress={() => sendMessage(suggestion, "card")}
                 />
               ))}
             </View>
@@ -690,7 +750,7 @@ export function ChatSession({
                   <SuggestionChip
                     key={suggestion}
                     label={suggestion}
-                    onPress={() => sendMessage(suggestion)}
+                    onPress={() => sendMessage(suggestion, "card")}
                   />
                 ))}
               </View>
@@ -828,7 +888,7 @@ export function ChatSession({
         <TextInput
           ref={composerRef}
           value={draft}
-          onChangeText={setDraft}
+          onChangeText={updateDraft}
           placeholder={"Tell Homa about your day\u2026"}
           placeholderTextColor={colors.textSubtle}
           returnKeyType="send"
