@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { saveFamilyContext } from "../../../../lib/map/store";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
-import { requireFamily } from "../../../../lib/map/session";
+import { requireFamilyFromRequest } from "../../../../lib/map/session";
 
 /**
  * POST /api/onboarding/homeschool-profile
@@ -30,7 +30,7 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false }, { status: 429 });
   }
 
-  const family = await requireFamily();
+  const family = await requireFamilyFromRequest(request);
   if (!family) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }

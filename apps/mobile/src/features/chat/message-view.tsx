@@ -19,6 +19,16 @@ import { parseLibrarySourceCardPart } from "./library-source-card-model";
 import { PlannerCard } from "./planner-card";
 import { QuestionCard } from "./question-card";
 import { parseQuestionCardPart } from "./question-card-model";
+import {
+  ChecklistCard,
+  DetailCard,
+  ReportRevealCard,
+} from "./onboarding-cards";
+import {
+  parseChecklistCardPart,
+  parseDetailCardPart,
+  parseReportCardPart,
+} from "./onboarding-card-model";
 
 /** Transcript bubbles, the mobile twin of apps/web's message-parts.tsx. */
 
@@ -76,18 +86,28 @@ export interface QuestionCardWiring {
   questionAnswers?: Record<string, string>;
 }
 
+export interface OnboardingCardWiring {
+  activeChecklistPartKey?: string;
+  activeDetailPartKey?: string;
+  activeReportPartKey?: string;
+  onOpenChecklist?: (childId: string) => void;
+  onDetailsSaved?: (summary: string) => void;
+}
+
 function MessagePartView({
   part,
   partKey,
   isUser,
   assistantText,
   questions,
+  onboarding,
 }: {
   part: EveMessagePart;
   partKey: string;
   isUser: boolean;
   assistantText?: string | null;
   questions: QuestionCardWiring;
+  onboarding: OnboardingCardWiring;
 }) {
   if (part.type === "text") {
     if (isUser) {
@@ -122,6 +142,43 @@ function MessagePartView({
             onSendAnswers={live ? questions.onSendQuestionAnswers : undefined}
             onTypeInstead={live ? questions.onQuestionTypeInstead : undefined}
             answeredSummary={questions.questionAnswers?.[partKey] ?? null}
+          />
+        </View>
+      );
+    }
+    const checklistCard = parseChecklistCardPart(part);
+    if (checklistCard) {
+      const live = partKey === onboarding.activeChecklistPartKey;
+      return (
+        <View style={{ marginTop: space.sm }}>
+          <ChecklistCard
+            card={checklistCard}
+            active={live}
+            onOpen={live ? onboarding.onOpenChecklist : undefined}
+          />
+        </View>
+      );
+    }
+    const detailCard = parseDetailCardPart(part);
+    if (detailCard) {
+      const live = partKey === onboarding.activeDetailPartKey;
+      return (
+        <View style={{ marginTop: space.sm }}>
+          <DetailCard
+            card={detailCard}
+            active={live}
+            onSaved={live ? onboarding.onDetailsSaved : undefined}
+          />
+        </View>
+      );
+    }
+    const reportCard = parseReportCardPart(part);
+    if (reportCard) {
+      return (
+        <View style={{ marginTop: space.sm }}>
+          <ReportRevealCard
+            card={reportCard}
+            active={partKey === onboarding.activeReportPartKey}
           />
         </View>
       );
@@ -188,10 +245,12 @@ function userMessageText(message: EveMessage): string {
 export function MessageView({
   message,
   questions = {},
+  onboarding = {},
   onRetryFailedMessage,
 }: {
   message: EveMessage;
   questions?: QuestionCardWiring;
+  onboarding?: OnboardingCardWiring;
   /** Resends this exact text (a card-equivalent send, so the existing
    *  session-fork guard and queueing apply the same as any other send).
    *  Undefined only hides the retry control, never the "Not sent" state
@@ -270,6 +329,7 @@ export function MessageView({
             isUser={isUser}
             assistantText={assistantTextByPart.get(index)}
             questions={questions}
+            onboarding={onboarding}
           />
         ))}
         {fallback ? (

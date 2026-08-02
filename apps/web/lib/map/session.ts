@@ -52,6 +52,15 @@ export async function requireFamily(): Promise<FamilyRow | null> {
 export async function requireFamilyFromBearer(
   request: Request,
 ): Promise<FamilyRow | null> {
+  return (await requireFamilyWithActorFromBearer(request))?.family ?? null;
+}
+
+async function requireFamilyWithActorFromBearer(
+  request: Request,
+): Promise<{
+  family: FamilyRow;
+  memberUserId: string;
+} | null> {
   const token = extractBearerToken(request.headers.get("authorization"));
   if (!token) return null;
 
@@ -67,7 +76,51 @@ export async function requireFamilyFromBearer(
   const { data, error } = await supabase.auth.getUser(token);
   if (error || !data.user) return null;
 
-  return await getFamilyByAuthUser(data.user.id);
+  const family = await getFamilyByAuthUser(data.user.id);
+  return family ? { family, memberUserId: data.user.id } : null;
+}
+
+interface RequestAuthResolvers<T> {
+  bearer: () => Promise<T | null>;
+  cookie: () => Promise<T | null>;
+}
+
+/**
+ * Selects one credential transport before resolving identity. An invalid
+ * bearer must fail closed instead of falling through to a browser cookie
+ * that may belong to a different principal.
+ */
+export function resolveRequestFamilyAuth<T>(
+  request: Request,
+  resolvers: RequestAuthResolvers<T>,
+): Promise<T | null> {
+  return request.headers.has("authorization")
+    ? resolvers.bearer()
+    : resolvers.cookie();
+}
+
+export function requireFamilyFromRequest(
+  request: Request,
+): Promise<FamilyRow | null> {
+  return resolveRequestFamilyAuth(request, {
+    bearer: () => requireFamilyFromBearer(request),
+    cookie: requireFamily,
+  });
+}
+
+export function requireFamilyWithActorFromRequest(
+  request: Request,
+): Promise<{
+  family: FamilyRow;
+  memberUserId: string | null;
+} | null> {
+  return resolveRequestFamilyAuth<{
+    family: FamilyRow;
+    memberUserId: string | null;
+  }>(request, {
+    bearer: () => requireFamilyWithActorFromBearer(request),
+    cookie: requireFamilyWithActor,
+  });
 }
 
 /**

@@ -1,6 +1,6 @@
 import { emitMapEvent } from "../../../../lib/map/events";
 import { setMapResumeCookie } from "../../../../lib/map/resume-cookie";
-import { requireFamily } from "../../../../lib/map/session";
+import { requireFamilyFromRequest } from "../../../../lib/map/session";
 import { attachAuthUser, getFamilyByResumeToken, getFamilyState, hasFamilyContext } from "../../../../lib/map/store";
 import { createSupabaseServerClient } from "../../../../lib/supabase/server";
 
@@ -20,9 +20,14 @@ import { createSupabaseServerClient } from "../../../../lib/supabase/server";
  * no account yet, resolve the auth session server-side and link it, so the
  * client never needs a dedicated "did Google work" round trip.
  */
-export async function GET(): Promise<Response> {
-  let family = await requireFamily();
-  if (!family) return Response.json({ ok: false });
+export async function GET(request: Request): Promise<Response> {
+  let family = await requireFamilyFromRequest(request);
+  if (!family) {
+    return Response.json(
+      { ok: false, reason: "no-session" },
+      { status: request.headers.has("authorization") ? 401 : 200 },
+    );
+  }
 
   try {
     if (!family.has_account) {
