@@ -137,8 +137,12 @@ import { latestQuestionRequest } from "./question-card";
 import { latestSnapRequest } from "./snap-card";
 import { buildTranscript } from "./transcript-days";
 import { markTurnStarted, takeTurnLatencyMs } from "./turn-clock";
-import { recoverLostTurn } from "./turn-recovery";
+import { recoverLostTurn, type RecoveredTurn } from "./turn-recovery";
 import { createReattachableEveSession } from "./reattachable-eve-session";
+import {
+  createTurnBoundaryWatchdog,
+  type TurnBoundaryWatchdog,
+} from "./turn-boundary-watchdog";
 
 /**
  * The chat surface, the main column inside the /app frame: the sidebar
@@ -234,6 +238,13 @@ const VISIBLE_STALL_MS = 20_000;
  *  the socket on suspend; the client reconnects and replays from
  *  streamIndex, but that round trip needs a moment). */
 const WAKE_GRACE_MS = 5_000;
+
+/** A quiet primary stream gets a read-only durable boundary witness well
+ *  before Homa considers aborting it. This catches a completed workflow
+ *  whose original HTTP response stayed open but stopped delivering bytes
+ *  (GH #466) without interrupting a genuinely long tool call. */
+const BOUNDARY_PROBE_STALL_MS = 30_000;
+const BOUNDARY_PROBE_INTERVAL_MS = 5_000;
 
 /** Foreground watchdog: past the longest normal tool run (image-heavy
  *  printables stream nothing while the render runs, ~60-90s). */
@@ -523,6 +534,8 @@ export function ChatClient({
   );
   const lastSendRef = useRef<{ text: string; atMs: number } | null>(null);
   const recoveryRef = useRef<AbortController | null>(null);
+  const boundaryWatchdogRef =
+    useRef<TurnBoundaryWatchdog | null>(null);
   const [recovering, setRecovering] = useState(false);
   /**
    * Dev only, and only ever set to a time we can prove: when a turn
@@ -723,10 +736,13 @@ export function ChatClient({
     initialEvents: staleSessionlessEvents ? [] : prepared.initialEvents,
     session: reattachableSession.session,
     onEvent() {
-      lastStreamActivityRef.current = currentTimeMs();
+      const nowMs = currentTimeMs();
+      lastStreamActivityRef.current = nowMs;
+      boundaryWatchdogRef.current?.noteActivity(nowMs);
       durableCursorRef.current += 1;
     },
     onFinish(snapshot) {
+      boundaryWatchdogRef.current?.finish();
       // Stamp this turn's new message ids with the clock (the only time
       // source the transcript has; eve events carry sequence numbers,
       // not times), then persist. Callbacks refresh every render (eve's
@@ -996,6 +1012,69 @@ export function ChatClient({
     }, 0);
   }, []);
 
+  const recoverLastTurn = useCallback(
+    async (signal: AbortSignal): Promise<RecoveredTurn | null> => {
+      const lastSend = lastSendRef.current;
+      if (!lastSend) return null;
+      return await recoverLostTurn({
+        supabase,
+        sentText: lastSend.text,
+        sentAtMs: lastSend.atMs,
+        minBoundaryIndex: durableCursorRef.current,
+        bearer: async () => {
+          const { data } = await supabase.auth.getSession();
+          return data.session?.access_token ?? "";
+        },
+        signal,
+      });
+    },
+    [supabase],
+  );
+
+  const applyRecoveredTurn = useCallback(
+    (recovered: RecoveredTurn) => {
+      boundaryWatchdogRef.current?.finish();
+      const messages = foldEventsToMessages(recovered.events);
+      const stamped = stampMessageTimes(liveTimes, messages);
+      const nextArchived = [
+        ...archivedRef.current,
+        ...archiveMessages(messages, stamped),
+      ];
+      setArchived(nextArchived);
+      archivedRef.current = nextArchived;
+      setLiveTimes({});
+      reattachableSession.adopt(recovered.session);
+      saveChat(storageKey, {
+        archived: nextArchived,
+        events: [],
+        session: recovered.session,
+        messageTimes: {},
+        lastActivityAt: currentTimeMs(),
+      });
+      agentReset();
+      durableCursorRef.current = recovered.session.streamIndex;
+      lastSendRef.current = null;
+      executePromptSuggestionLifecycleAction(
+        promptSuggestionActionForLifecycleEvent({
+          type: "recovery_finished",
+          outcome: "recovered",
+        }),
+        messages,
+        promptSuggestionLifecycleHandlers,
+      );
+      setRecovering(false);
+      flushQueuedMessages();
+    },
+    [
+      agentReset,
+      flushQueuedMessages,
+      liveTimes,
+      promptSuggestionLifecycleHandlers,
+      reattachableSession,
+      storageKey,
+    ],
+  );
+
   /**
    * Lost-turn recovery (incident 2026-07-11 follow-up): the durable
    * run usually outlives a dead stream, so replay the session
@@ -1033,17 +1112,7 @@ export function ChatClient({
     const deadline = setTimeout(() => controller.abort(), RECOVERY_DEADLINE_MS);
     setRecovering(true);
     void (async () => {
-      const recovered = await recoverLostTurn({
-        supabase,
-        sentText: lastSend.text,
-        sentAtMs: lastSend.atMs,
-        minBoundaryIndex: durableCursorRef.current,
-        bearer: async () => {
-          const { data } = await supabase.auth.getSession();
-          return data.session?.access_token ?? "";
-        },
-        signal: controller.signal,
-      });
+      const recovered = await recoverLastTurn(controller.signal);
       clearTimeout(deadline);
       if (recoveryRef.current === controller) recoveryRef.current = null;
       if (controller.signal.aborted) {
@@ -1094,39 +1163,8 @@ export function ChatClient({
         return;
       }
       if (recovered) {
-        // The fresh-start move done for her: the whole recovered session
-        // folds into the archive (reply included), then the store adopts
-        // the recovered cursor before its visible projection resets. The
-        // next send therefore continues this durable session instead of
-        // minting a replacement (GH #493). Nothing is lost or forked.
-        const messages = foldEventsToMessages(recovered.events);
-        const stamped = stampMessageTimes(liveTimes, messages);
-        const nextArchived = [
-          ...archivedRef.current,
-          ...archiveMessages(messages, stamped),
-        ];
-        setArchived(nextArchived);
-        archivedRef.current = nextArchived;
-        setLiveTimes({});
-        reattachableSession.adopt(recovered.session);
-        saveChat(storageKey, {
-          archived: nextArchived,
-          events: [],
-          session: recovered.session,
-          messageTimes: {},
-          lastActivityAt: currentTimeMs(),
-        });
-        agentReset();
-        durableCursorRef.current = recovered.session.streamIndex;
-        lastSendRef.current = null;
-        executePromptSuggestionLifecycleAction(
-          promptSuggestionActionForLifecycleEvent({
-            type: "recovery_finished",
-            outcome: "recovered",
-          }),
-          messages,
-          promptSuggestionLifecycleHandlers,
-        );
+        applyRecoveredTurn(recovered);
+        return;
       } else {
         executePromptSuggestionLifecycleAction(
           promptSuggestionActionForLifecycleEvent({
@@ -1146,17 +1184,43 @@ export function ChatClient({
     })();
   }, [
     agentReset,
+    applyRecoveredTurn,
     flushQueuedMessages,
     liveTimes,
     promptSuggestionLifecycleHandlers,
-    reattachableSession,
+    recoverLastTurn,
     storageKey,
-    supabase,
   ]);
 
   useEffect(() => {
     startRecoveryRef.current = startLostTurnRecovery;
   }, [startLostTurnRecovery]);
+
+  // The primary NDJSON response can remain open after its final bytes stop
+  // arriving. A second authenticated reader watches the same durable run;
+  // it never sends, stops, or advances anything. Primary activity cancels
+  // it through onEvent above. If it sees the missing boundary first, the
+  // shared close-out adopts that exact cursor and resets the stale stream.
+  useEffect(() => {
+    if (!busy) return;
+    const watchdog = createTurnBoundaryWatchdog<RecoveredTurn>({
+      stallMs: BOUNDARY_PROBE_STALL_MS,
+      probe: recoverLastTurn,
+      onRecovered: applyRecoveredTurn,
+    });
+    boundaryWatchdogRef.current = watchdog;
+    watchdog.begin(currentTimeMs());
+    const interval = setInterval(() => {
+      watchdog.check(currentTimeMs());
+    }, BOUNDARY_PROBE_INTERVAL_MS);
+    return () => {
+      clearInterval(interval);
+      watchdog.finish();
+      if (boundaryWatchdogRef.current === watchdog) {
+        boundaryWatchdogRef.current = null;
+      }
+    };
+  }, [applyRecoveredTurn, busy, recoverLastTurn]);
 
   useEffect(() => {
     if (!agentError || agentError === reportedErrorRef.current) return;

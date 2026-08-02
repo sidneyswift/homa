@@ -8,22 +8,22 @@ const source = readFileSync(
 );
 
 describe("ChatClient recovered-session reattachment (GH #493)", () => {
-  const recoveredBranch = source.slice(
-    source.indexOf("if (recovered) {"),
-    source.indexOf("} else {", source.indexOf("if (recovered) {")),
+  const recoveredCloseout = source.slice(
+    source.indexOf("const applyRecoveredTurn = useCallback"),
+    source.indexOf("const startLostTurnRecovery = useCallback"),
   );
 
   it("adopts and persists the recovered cursor before resetting projection", () => {
-    const adoptAt = recoveredBranch.indexOf(
+    const adoptAt = recoveredCloseout.indexOf(
       "reattachableSession.adopt(recovered.session)",
     );
-    const resetAt = recoveredBranch.indexOf("agentReset()");
+    const resetAt = recoveredCloseout.indexOf("agentReset()");
 
     assert.ok(adoptAt >= 0);
     assert.ok(resetAt > adoptAt);
-    assert.match(recoveredBranch, /session: recovered\.session/u);
+    assert.match(recoveredCloseout, /session: recovered\.session/u);
     assert.match(
-      recoveredBranch,
+      recoveredCloseout,
       /durableCursorRef\.current = recovered\.session\.streamIndex/u,
     );
   });
