@@ -33,7 +33,16 @@ describe("ChatSession session-fork fix (GH #170, mobile twin)", () => {
   });
 
   it("folds recovering into the send-line-occupied decision for a manual send", () => {
-    assert.match(source, /if \(isSendLineOccupied\(\{ busy, recovering \}\)\) \{/u);
+    assert.match(
+      source,
+      /if \(restoringSession \|\| isSendLineOccupied\(\{ busy, recovering \}\)\) \{/u,
+    );
+  });
+
+  it("blocks first-send controls while the shared server binding is unresolved", () => {
+    assert.match(source, /restoringSession: boolean;/u);
+    assert.match(source, /disabled=\{restoringSession \|\| draft\.trim\(\)\.length === 0\}/u);
+    assert.match(source, /recovering \|\| restoringSession/u);
   });
 
   it("no longer relies on a manual send aborting the running recovery as its fork guard", () => {

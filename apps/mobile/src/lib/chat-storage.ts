@@ -49,6 +49,7 @@ export interface PreparedChat {
 /** Local hour after which a returning visit starts a fresh model
  *  session: each morning is a fresh start, same memory. */
 export const FRESH_SESSION_BOUNDARY_HOUR = 4;
+const FALLBACK_TIME_ZONE = "America/Chicago";
 
 /** Scrollback cap; the full record lives in Postgres (recall). */
 export const MAX_ARCHIVED_MESSAGES = 200;
@@ -97,22 +98,51 @@ export async function clearSavedChat(storageKey: string): Promise<void> {
 }
 
 /**
- * shouldStartFreshSession(lastActivityAt, now): true when the last
- * activity happened before the most recent 4am local. Missing
- * lastActivityAt (legacy saves) counts as stale on purpose.
+ * shouldStartFreshSession(lastActivityAt, now, timeZone): true when the last
+ * activity belongs to an earlier family-local chat day. Missing activity
+ * (legacy saves) counts as stale on purpose.
  */
+function localDateKey(timeZone: string, instantMs: number): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(instantMs));
+  const get = (type: string) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")}`;
+}
+
+function localHour(timeZone: string, instantMs: number): number {
+  const value = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour: "numeric",
+    hour12: false,
+  }).format(new Date(instantMs));
+  return Number(value) % 24;
+}
+
+function previousDateKey(dateKey: string): string {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day - 1)).toISOString().slice(0, 10);
+}
+
+function chatDayKey(timeZone: string, instantMs: number): string {
+  const dateKey = localDateKey(timeZone, instantMs);
+  return localHour(timeZone, instantMs) < FRESH_SESSION_BOUNDARY_HOUR
+    ? previousDateKey(dateKey)
+    : dateKey;
+}
+
 export function shouldStartFreshSession(
   lastActivityAt: number | undefined,
   now: number = Date.now(),
+  timeZone: string | null | undefined = null,
 ): boolean {
   if (!lastActivityAt) return true;
-  const boundary = new Date(now);
-  boundary.setHours(FRESH_SESSION_BOUNDARY_HOUR, 0, 0, 0);
-  if (boundary.getTime() > now) {
-    // Before 4am: the live boundary is yesterday's 4am.
-    boundary.setDate(boundary.getDate() - 1);
-  }
-  return lastActivityAt < boundary.getTime();
+  const zone = timeZone || FALLBACK_TIME_ZONE;
+  return chatDayKey(zone, lastActivityAt) < chatDayKey(zone, now);
 }
 
 /**
@@ -122,12 +152,15 @@ export function shouldStartFreshSession(
  * exactly as before. Pure read; the rotated shape persists on the next
  * save (re-folding on reload is idempotent).
  */
-export async function prepareChat(storageKey: string): Promise<PreparedChat> {
+export async function prepareChat(
+  storageKey: string,
+  timeZone?: string | null,
+): Promise<PreparedChat> {
   const saved = await loadSavedChat(storageKey);
   const archived = saved.archived ?? [];
   const times = saved.messageTimes ?? {};
 
-  if (!shouldStartFreshSession(saved.lastActivityAt)) {
+  if (!shouldStartFreshSession(saved.lastActivityAt, Date.now(), timeZone)) {
     return {
       archived,
       initialEvents: saved.events ?? [],

@@ -1,3 +1,5 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { createSupabaseServerClient } from "./supabase/server";
 import {
   mergeChatHistoryRows,
@@ -61,10 +63,13 @@ export type {
 export async function fetchChatHistory(input: {
   familyId: string;
   userId: string;
+  /** Caller-scoped API client for bearer-authenticated mobile requests.
+   * Web Server Components omit it and use their cookie session. */
+  supabase?: SupabaseClient;
 }): Promise<ChatHistoryPayload | null> {
   if (process.env.HOMA_CHAT_HISTORY_DISABLED === "1") return null;
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = input.supabase ?? await createSupabaseServerClient();
 
     const { count: memberCount, error: memberError } = await supabase
       .from("family_members")
@@ -94,7 +99,8 @@ export async function fetchChatHistory(input: {
         .is("member_user_id", null)
         .order("created_at", { ascending: false })
         .limit(SLICE_LIMIT);
-      if (!legacy.error) legacyMine = (legacy.data ?? []) as ChatHistoryRow[];
+      if (legacy.error) return null;
+      legacyMine = (legacy.data ?? []) as ChatHistoryRow[];
     }
 
     const mineRows = (mine.data ?? []) as ChatHistoryRow[];
@@ -114,9 +120,8 @@ export async function fetchChatHistory(input: {
         .in("session_id", sessionIds)
         .order("created_at", { ascending: false })
         .limit(SLICE_LIMIT * 2);
-      if (!companionQuery.error) {
-        companions = (companionQuery.data ?? []) as ChatHistoryRow[];
-      }
+      if (companionQuery.error) return null;
+      companions = (companionQuery.data ?? []) as ChatHistoryRow[];
     }
 
     let deliveredQuery = supabase
@@ -131,6 +136,7 @@ export async function fetchChatHistory(input: {
         )
       : deliveredQuery.eq("recipient_member_user_id", input.userId);
     const delivered = await deliveredQuery;
+    if (delivered.error) return null;
 
     let deliveredRows: ChatHistoryRow[] = [];
     const deliveredIds = [
@@ -140,7 +146,7 @@ export async function fetchChatHistory(input: {
         ),
       ),
     ];
-    if (!delivered.error && deliveredIds.length > 0) {
+    if (deliveredIds.length > 0) {
       const deliveredMessages = await supabase
         .from("conversation_messages")
         .select(ROW_COLUMNS)
@@ -148,9 +154,8 @@ export async function fetchChatHistory(input: {
         .eq("visibility", "family")
         .in("id", deliveredIds)
         .limit(DELIVERY_CAP);
-      if (!deliveredMessages.error) {
-        deliveredRows = (deliveredMessages.data ?? []) as ChatHistoryRow[];
-      }
+      if (deliveredMessages.error) return null;
+      deliveredRows = (deliveredMessages.data ?? []) as ChatHistoryRow[];
     }
 
     const messages = mergeChatHistoryRows(
@@ -174,19 +179,18 @@ export async function fetchChatHistory(input: {
         .eq("family_id", input.familyId)
         .order("created_at", { ascending: false })
         .limit(MATERIAL_CAP);
-      if (!materialQuery.error) {
-        const sessionSet = new Set(historySessionIds);
-        materials = selectParentVisibleMaterialRevisions(
-          (
-            (materialQuery.data ?? []) as unknown as ChatHistoryMaterialRow[]
-          )
-            .map(toChatHistoryMaterial)
-            .filter(
-              (material): material is ChatHistoryMaterial =>
-                material !== null && sessionSet.has(material.sessionId),
-            ),
-        );
-      }
+      if (materialQuery.error) return null;
+      const sessionSet = new Set(historySessionIds);
+      materials = selectParentVisibleMaterialRevisions(
+        (
+          (materialQuery.data ?? []) as unknown as ChatHistoryMaterialRow[]
+        )
+          .map(toChatHistoryMaterial)
+          .filter(
+            (material): material is ChatHistoryMaterial =>
+              material !== null && sessionSet.has(material.sessionId),
+          ),
+      );
     }
 
     return { messages, materials };
