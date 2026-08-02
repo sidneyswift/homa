@@ -62,6 +62,75 @@ export interface ArchivedMessage {
    * channel "web" and modality "voice": it happened in the web app, it
    * just was not typed. Absent means text. */
   modality?: "text" | "voice";
+  /** Eve message ids restart in every runtime session. New local archives
+   * carry the session so recovery dedupe never crosses that boundary. */
+  sessionId?: string;
+}
+
+/**
+ * A stale-cursor replay temporarily renders the durable server archive plus an
+ * in-memory overlay. Later lost-turn recovery must append to that overlay as
+ * well as the persisted local archive, or resetting Eve's live reducer makes
+ * the recovered turn disappear from this tab.
+ */
+export function appendRecoveredArchiveState(input: {
+  persisted: readonly ArchivedMessage[];
+  replayed: readonly ArchivedMessage[];
+  additions: readonly ArchivedMessage[];
+  persistedArchiveHidden: boolean;
+}): { persisted: ArchivedMessage[]; replayed: ArchivedMessage[] } {
+  function appendUnique(
+    current: readonly ArchivedMessage[],
+    additions: readonly ArchivedMessage[],
+  ): ArchivedMessage[] {
+    const messageIds = new Set(
+      current.flatMap((entry) =>
+        entry.sessionId ? [`${entry.sessionId}:${entry.message.id}`] : [],
+      ),
+    );
+    const next = [...current];
+    for (const addition of additions) {
+      const key = addition.sessionId
+        ? `${addition.sessionId}:${addition.message.id}`
+        : null;
+      if (key !== null && messageIds.has(key)) continue;
+      if (key !== null) messageIds.add(key);
+      next.push(addition);
+    }
+    return next;
+  }
+
+  return {
+    persisted: appendUnique(input.persisted, input.additions),
+    replayed: input.persistedArchiveHidden
+      ? appendUnique(input.replayed, input.additions)
+      : [...input.replayed],
+  };
+}
+
+export function messagesMissingFromDurableHistory(
+  restored: readonly EveMessage[],
+  durableMessageIds: ReadonlySet<string>,
+): EveMessage[] {
+  return restored.filter((message) => !durableMessageIds.has(message.id));
+}
+
+/**
+ * Returns the trustworthy local side of a server-session reconciliation.
+ * Events without a session id are a dead partial projection and cannot be
+ * deduplicated against an authoritative replay because Eve message ids restart
+ * per session. Once replay succeeds, the server session is the only safe source.
+ */
+export function localMessagesForServerReconciliation(
+  events: readonly HandleMessageStreamEvent[],
+  sessionId: string | undefined,
+  durableMessageIds: ReadonlySet<string>,
+): readonly EveMessage[] {
+  if (!sessionId) return [];
+  return messagesMissingFromDurableHistory(
+    foldEventsToMessages(events),
+    durableMessageIds,
+  );
 }
 
 export interface SavedChat {
@@ -227,7 +296,11 @@ export function prepareChat(storageKey: string, timeZone?: string | null): Prepa
   return {
     archived: capArchived([
       ...archived,
-      ...archiveMessages(foldEventsToMessages(saved.events ?? []), times),
+      ...archiveMessages(
+        foldEventsToMessages(saved.events ?? []),
+        times,
+        saved.session?.sessionId,
+      ),
     ]),
     initialEvents: [],
     initialSession: undefined,
@@ -255,10 +328,12 @@ export function foldEventsToMessages(
 export function archiveMessages(
   messages: readonly EveMessage[],
   times: Record<string, number>,
+  sessionId?: string,
 ): ArchivedMessage[] {
   return messages.map((message) => ({
     at: times[message.id] ?? null,
     message,
+    ...(sessionId ? { sessionId } : {}),
   }));
 }
 

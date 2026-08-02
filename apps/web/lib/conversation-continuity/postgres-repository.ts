@@ -4,6 +4,7 @@ import type {
   ContinuityRepository,
   EpisodeBinding,
   EpisodeMessage,
+  UpsertBindingOptions,
 } from "./continuity-service";
 import type { PendingDeliveryCandidate } from "./reply-policy";
 
@@ -184,8 +185,13 @@ export class PostgresContinuityRepository implements ContinuityRepository {
     return rows[0].id;
   }
 
-  async upsertBinding(binding: EpisodeBinding): Promise<void> {
+  async upsertBinding(
+    binding: EpisodeBinding,
+    options?: UpsertBindingOptions,
+  ): Promise<void> {
     const sql = mapDb();
+    const preserveExistingBinding = options?.preserveExistingBinding === true;
+    const useDatabaseClock = options?.useDatabaseClock === true;
     await sql`
       insert into public.conversation_thread_bindings
         (family_id, member_user_id, channel, thread_key_hash,
@@ -195,17 +201,43 @@ export class PostgresContinuityRepository implements ContinuityRepository {
         (${binding.familyId}, ${binding.memberUserId}, ${binding.channel},
          ${binding.threadKeyHash}, ${binding.runtimeSessionId},
          ${binding.episodeId}, ${binding.pendingOfferDeliveryId ?? null},
-         ${binding.lastSeenAt.toISOString()})
+         case
+           when ${useDatabaseClock} then clock_timestamp()
+           else ${binding.lastSeenAt.toISOString()}::timestamptz
+         end)
       on conflict (channel, thread_key_hash) do update
       set family_id = excluded.family_id,
-          member_user_id = excluded.member_user_id,
-          runtime_session_id = excluded.runtime_session_id,
-          episode_id = excluded.episode_id,
+          member_user_id = case
+            when ${preserveExistingBinding}
+              and public.conversation_thread_bindings.family_id = excluded.family_id
+              then coalesce(
+                excluded.member_user_id,
+                public.conversation_thread_bindings.member_user_id
+              )
+            else excluded.member_user_id
+          end,
+          runtime_session_id = case
+            when ${preserveExistingBinding}
+              and public.conversation_thread_bindings.family_id = excluded.family_id
+              then public.conversation_thread_bindings.runtime_session_id
+            else excluded.runtime_session_id
+          end,
+          episode_id = case
+            when ${preserveExistingBinding}
+              and public.conversation_thread_bindings.family_id = excluded.family_id
+              then public.conversation_thread_bindings.episode_id
+            else excluded.episode_id
+          end,
           pending_offer_delivery_id = coalesce(
             excluded.pending_offer_delivery_id,
             public.conversation_thread_bindings.pending_offer_delivery_id
           ),
-          last_seen_at = excluded.last_seen_at
+          last_seen_at = case
+            when ${preserveExistingBinding}
+              and public.conversation_thread_bindings.family_id = excluded.family_id
+              then public.conversation_thread_bindings.last_seen_at
+            else excluded.last_seen_at
+          end
     `;
   }
 

@@ -27,6 +27,11 @@ export interface EpisodeBinding {
   lastSeenAt: Date;
 }
 
+export interface UpsertBindingOptions {
+  preserveExistingBinding?: boolean;
+  useDatabaseClock?: boolean;
+}
+
 export interface EpisodeMessage extends ContinuityContextMessage {
   runtimeSessionId: string;
 }
@@ -53,7 +58,10 @@ export interface ContinuityRepository {
     memberUserId: string | null;
     now: Date;
   }): Promise<string>;
-  upsertBinding(binding: EpisodeBinding): Promise<void>;
+  upsertBinding(
+    binding: EpisodeBinding,
+    options?: UpsertBindingOptions,
+  ): Promise<void>;
   listEpisodeMessages(
     familyId: string,
     episodeId: string,
@@ -169,16 +177,21 @@ export async function resolveInboundTurn(
       }));
   }
 
-  await repository.upsertBinding({
-    familyId: input.familyId,
-    memberUserId: input.memberUserId,
-    channel: input.channel,
-    threadKeyHash,
-    runtimeSessionId: input.runtimeSessionId,
-    episodeId,
-    pendingOfferDeliveryId: acceptedOfferDeliveryId,
-    lastSeenAt: input.now,
-  });
+  await repository.upsertBinding(
+    {
+      familyId: input.familyId,
+      memberUserId: input.memberUserId,
+      channel: input.channel,
+      threadKeyHash,
+      runtimeSessionId: input.runtimeSessionId,
+      episodeId,
+      pendingOfferDeliveryId: acceptedOfferDeliveryId,
+      lastSeenAt: input.now,
+    },
+    // The binding is the causal witness read before a web send. The database
+    // also timestamps the canonical message, so one clock must order both.
+    { useDatabaseClock: true },
+  );
 
   if (reply.kind === "ambiguous") {
     contextMarkdown = renderAmbiguousContext(reply.candidates);

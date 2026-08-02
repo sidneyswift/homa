@@ -272,6 +272,7 @@ export function archiveFromServerHistory(
   channel: ChatHistoryChannel;
   modality: "text" | "voice";
   message: EveMessage;
+  sessionId: string;
 }[] {
   const liveMessageIds = new Set(liveMessages.map((message) => message.id));
   const history = payload.messages.filter(
@@ -319,6 +320,7 @@ export function archiveFromServerHistory(
     at: entry.atMs,
     channel: entry.channel,
     modality: entry.modality,
+    sessionId: entry.sessionId,
     message: {
       id: `hist:${entry.id}`,
       role: entry.role,
@@ -334,6 +336,7 @@ export function archiveFromServerHistory(
       at: material.atMs,
       channel: "web",
       modality: "text",
+      sessionId: material.sessionId,
       message: {
         id: `mat:${material.id}`,
         role: "assistant",

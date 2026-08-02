@@ -259,8 +259,11 @@ type SourcedProgressAssistantItem = ProgressAssistantItem & {
   sourceActionKey: string;
 };
 
+type AuthorizationPart = Extract<EveMessagePart, { type: "authorization" }>;
+
 type AssistantItem =
   | { kind: "text"; text: string }
+  | { kind: "authorization"; part: AuthorizationPart }
   | { kind: "material"; material: MaterialArtifact }
   | { kind: "library_source"; source: FamilyAssetSourceCardData }
   | { kind: "curriculum_mapping"; card: CurriculumMappingCardData }
@@ -356,6 +359,10 @@ function assistantItems(message: EveMessage): AssistantItem[] {
       if (shownText.has(key)) continue;
       shownText.add(key);
       items.push({ kind: "text", text: visibleText });
+      continue;
+    }
+    if (part.type === "authorization") {
+      items.push({ kind: "authorization", part });
       continue;
     }
     // Set on the CALL, not on the output, so a card still streaming has
@@ -455,6 +462,51 @@ function assistantItems(message: EveMessage): AssistantItem[] {
     }
   }
   return items;
+}
+
+function AuthorizationCard({ part }: { part: AuthorizationPart }) {
+  const required = part.state === "required";
+  const authorized = part.state === "completed" && part.outcome === "authorized";
+  const instructions = part.authorization?.instructions;
+  const description = authorized
+    ? `${part.displayName} connected.`
+    : part.description;
+
+  return (
+    <div className="flex max-w-md flex-col items-start gap-3 rounded-lg border border-border bg-card p-4 shadow-sm">
+      <div className="space-y-1">
+        <p className="font-bold text-strong">
+          {required
+            ? `Connect ${part.displayName}`
+            : authorized
+              ? `${part.displayName} connected`
+              : `${part.displayName} connection ${part.outcome}`}
+        </p>
+        <p className="text-sm leading-relaxed text-body">{description}</p>
+        {instructions && instructions !== description ? (
+          <p className="text-sm leading-relaxed text-muted">{instructions}</p>
+        ) : null}
+      </div>
+      {required && part.authorization?.userCode ? (
+        <p className="flex items-center gap-2 text-sm text-muted">
+          <span>Code</span>
+          <code className="rounded-md bg-page px-2 py-1 font-mono text-strong">
+            {part.authorization.userCode}
+          </code>
+        </p>
+      ) : null}
+      {required && part.authorization?.url ? (
+        <a
+          href={part.authorization.url}
+          rel="noreferrer"
+          target="_blank"
+          className="inline-flex min-h-11 items-center rounded-pill bg-brand px-5 py-2 text-sm font-bold text-on-brand transition-opacity hover:opacity-90"
+        >
+          Sign in with {part.displayName}
+        </a>
+      ) : null}
+    </div>
+  );
 }
 
 /**
@@ -624,6 +676,8 @@ function AssistantItemView({
           <MarkdownText text={item.text} />
         </div>
       );
+    case "authorization":
+      return <AuthorizationCard part={item.part} />;
     case "material":
       return <MaterialCard material={item.material} />;
     case "library_source":
