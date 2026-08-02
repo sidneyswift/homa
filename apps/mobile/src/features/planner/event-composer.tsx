@@ -90,6 +90,7 @@ export interface EventComposerDraft {
   startTime: string;
   endTime: string;
   note: string;
+  recurrence: FamilyEventRecord["recurrence_rule"];
 }
 
 export function draftFromEvent(event: FamilyEventRecord): EventComposerDraft {
@@ -102,6 +103,7 @@ export function draftFromEvent(event: FamilyEventRecord): EventComposerDraft {
     startTime: event.start_time ?? "09:00",
     endTime: event.end_time ?? "10:00",
     note: event.note ?? "",
+    recurrence: event.recurrence_rule,
   };
 }
 
@@ -115,6 +117,7 @@ export function blankDraft(date: DateOnly): EventComposerDraft {
     startTime: "09:00",
     endTime: "10:00",
     note: "",
+    recurrence: null,
   };
 }
 
@@ -127,6 +130,7 @@ export function draftToInput(draft: EventComposerDraft): FamilyEventInput {
     startTime: draft.hasTime ? draft.startTime : null,
     endTime: draft.hasTime ? draft.endTime : null,
     note: draft.note || null,
+    recurrence: draft.recurrence,
   };
 }
 

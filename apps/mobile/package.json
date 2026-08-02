@@ -23,6 +23,7 @@
     "eve": "0.19.0",
     "expo": "~56.0.15",
     "expo-apple-authentication": "~56.0.4",
+    "expo-calendar": "~56.0.9",
     "expo-constants": "~56.0.20",
     "expo-dev-client": "~56.0.23",
     "expo-file-system": "~56.0.8",

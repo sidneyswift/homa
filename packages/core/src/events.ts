@@ -517,6 +517,29 @@ export const EVENT_SCHEMAS = {
       client: z.enum(PLANNER_EVENT_CLIENTS),
     })
     .strict(),
+  // A parent checked the exact device-calendar export before Homa asked
+  // for write-only access. Counts only, never titles, notes, or calendar
+  // names. The export remains a client-side copy of planner truth.
+  "planner.device_calendar_previewed": z
+    .object({
+      family_id: z.uuid(),
+      selected_count: z.number().int().min(1),
+      duplicate_count: z.number().int().min(0),
+    })
+    .strict(),
+  // The terminal receipt for one device-calendar export attempt. This is
+  // deliberately aggregate-only because the app must not send personal
+  // calendar metadata or planner content through analytics.
+  "planner.device_calendar_export_finished": z
+    .object({
+      family_id: z.uuid(),
+      outcome: z.enum(["saved", "canceled", "denied", "failed", "mixed", "duplicates_only"]),
+      selected_count: z.number().int().min(1),
+      saved_count: z.number().int().min(0),
+      duplicate_count: z.number().int().min(0),
+      failed_count: z.number().int().min(0),
+    })
+    .strict(),
   // Voice-built month plans (gh#539). Drafts remain session-bound until
   // approval, so these events carry only ids and counts, never plan copy.
   "planner.month_draft_requested": z
