@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
+import type { FamilyEventRow } from "../../../lib/family-events";
 import {
   expandRecurringFamilyEvents,
   familyEventChildIds,
-  type FamilyEventRow,
-} from "../../../lib/family-events";
+} from "../../../lib/family-events-model";
 import { formatMinutesAsHours } from "../../../lib/hours-view";
 import type { PlanActivityScheduleRow } from "../../../lib/plan-schedule";
 import type { DashboardPlan } from "../../../lib/plan-week";

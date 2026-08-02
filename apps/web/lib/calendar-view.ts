@@ -1,11 +1,11 @@
 import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
 
 import type { HoursLogRow } from "./hours";
+import type { FamilyEventRow } from "./family-events";
 import {
   expandRecurringFamilyEvents,
   familyEventChildIds,
-  type FamilyEventRow,
-} from "./family-events";
+} from "./family-events-model";
 import type { PlanActivityScheduleRow } from "./plan-schedule";
 import type { DashboardPlan } from "./plan-week";
 import { zonedDateParts } from "./time-zone";

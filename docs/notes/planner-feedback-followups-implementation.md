@@ -67,3 +67,9 @@ Fresh Homa UX, copy-reader, and copy-editor passes reviewed real simulator captu
 - Mobile and web typechecks passed.
 - Full lint passed with only pre-existing warnings outside this change.
 - Node 24 `VERCEL=1` Eve build passed, followed by all three stream-duration checks.
+
+## 2026-08-02 19:47 ET
+
+**Preview build correction**
+
+The first Vercel preview correctly rejected a client bundle that imported recurrence and audience helpers through `family-events.ts`, which also owns raw Postgres access. The pure helpers now live in `family-events-model.ts`; client Planner modules import that boundary directly, while the server module re-exports the same functions for tools and tests. The exact full Next 16 production build then passed locally, followed again by web typecheck, lint, all 38 focused Planner tests, the Node 24 Eve build, and the stream-duration guard.

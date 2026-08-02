@@ -20,12 +20,14 @@ import {
   type CalendarActivityItem,
   type CalendarBoard,
 } from "../../../lib/calendar-view";
+import type {
+  FamilyEventInput,
+  FamilyEventRow,
+} from "../../../lib/family-events";
 import {
   expandRecurringFamilyEvents,
   familyEventChildIds,
-  type FamilyEventInput,
-  type FamilyEventRow,
-} from "../../../lib/family-events";
+} from "../../../lib/family-events-model";
 import {
   formatMinutesAsHours,
   hoursSubjectTone,
