@@ -96,6 +96,14 @@ export function SignInForm({
             required
             className="mt-2 w-full rounded-md border border-border px-4 py-3 text-base text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
           />
+          <div className="mt-2 text-right">
+            <Link
+              href="/forgot-password"
+              className="text-sm font-semibold text-brand underline underline-offset-2"
+            >
+              Forgot password?
+            </Link>
+          </div>
 
           {state.error ? (
             <p className="mt-3 text-sm text-danger" role="alert">
