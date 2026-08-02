@@ -52,9 +52,6 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.110.0
         version: 2.110.0
-      '@vercel/blob':
-        specifier: ^2.6.1
-        version: 2.6.1
       ai:
         specifier: ^7.0.14
         version: 7.0.14(zod@4.4.3)

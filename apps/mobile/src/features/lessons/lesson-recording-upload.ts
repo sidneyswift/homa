@@ -1,5 +1,4 @@
-import { uploadPresigned } from "@vercel/blob/client";
-import { File } from "expo-file-system";
+import { File, UploadType } from "expo-file-system";
 
 import { env, EVE_CHANNEL_HEADER } from "../../lib/env";
 import { supabase } from "../../lib/supabase";
@@ -9,6 +8,11 @@ interface LessonReview {
   summary: string;
   evidenceCount: number;
   observationCount: number;
+}
+
+interface NativeBlobUpload {
+  url: string;
+  storeId: string;
 }
 
 export type LessonSaveResult =
@@ -40,6 +44,90 @@ async function authenticatedFetch(path: string, token: string, init: RequestInit
 
 async function jsonResponse(response: Response): Promise<Record<string, unknown>> {
   return (await response.json().catch(() => ({}))) as Record<string, unknown>;
+}
+
+function nativeBlobUpload(body: Record<string, unknown>): NativeBlobUpload {
+  const value = body.nativeUpload as Record<string, unknown> | undefined;
+  if (
+    !value ||
+    typeof value.url !== "string" ||
+    typeof value.storeId !== "string"
+  ) {
+    throw new Error("Homa could not authorize the private recording upload.");
+  }
+  return { url: value.url, storeId: value.storeId };
+}
+
+async function uploadLessonFile(input: {
+  file: File;
+  pathname: string;
+  contentType: string;
+  token: string;
+  onProgress?: (percentage: number) => void;
+}): Promise<string> {
+  const authorization = await authenticatedFetch(
+    "/api/lessons/upload",
+    input.token,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "blob.generate-presigned-url",
+        payload: {
+          pathname: input.pathname,
+          clientPayload: input.contentType,
+          multipart: false,
+        },
+      }),
+    },
+  );
+  const authorizationBody = await jsonResponse(authorization);
+  if (!authorization.ok) {
+    throw new Error("Homa could not authorize the private recording upload.");
+  }
+  const upload = nativeBlobUpload(authorizationBody);
+  const requestId = `${upload.storeId}:${Date.now()}:${Math.random().toString(16).slice(2)}`;
+  const task = input.file.createUploadTask(upload.url, {
+    httpMethod: "PUT",
+    uploadType: UploadType.BINARY_CONTENT,
+    mimeType: input.contentType,
+    sessionType: "background",
+    headers: {
+      "x-api-blob-request-id": requestId,
+      "x-vercel-blob-store-id": upload.storeId,
+      "x-api-blob-request-attempt": "0",
+      "x-api-version": "12",
+      "x-vercel-blob-access": "private",
+      "x-content-type": input.contentType,
+      "x-content-length": String(input.file.size),
+    },
+    onProgress: ({ bytesSent, totalBytes }) => {
+      const total = totalBytes > 0 ? totalBytes : input.file.size;
+      if (total > 0) {
+        input.onProgress?.(Math.min(100, Math.round((bytesSent / total) * 100)));
+      }
+    },
+  });
+  let result;
+  try {
+    result = await task.uploadAsync();
+  } finally {
+    task.release();
+  }
+  if (result.status < 200 || result.status >= 300) {
+    throw new Error("Homa could not securely upload the recording.");
+  }
+  let uploaded: Record<string, unknown>;
+  try {
+    uploaded = JSON.parse(result.body) as Record<string, unknown>;
+  } catch {
+    throw new Error("Homa could not confirm the private recording upload.");
+  }
+  if (typeof uploaded.url !== "string") {
+    throw new Error("Homa could not confirm the private recording upload.");
+  }
+  input.onProgress?.(100);
+  return uploaded.url;
 }
 
 export async function grantNativeLessonConsent(): Promise<void> {
@@ -87,22 +175,21 @@ export async function saveNativeLessonRecording(input: {
   try {
     const file = new File(input.uri);
     if (!file.exists || file.size === 0) throw new Error("The recording file is empty.");
-    const blob = await uploadPresigned(`${created.uploadPrefix}segment-1.m4a`, file, {
-      access: "private",
-      handleUploadUrl: apiUrl("/api/lessons/upload"),
-      headers: { Authorization: `Bearer ${token}`, ...EVE_CHANNEL_HEADER },
-      contentType: file.type || "audio/mp4",
-      multipart: file.size > 8 * 1024 * 1024,
-      onUploadProgress: ({ percentage }) => input.onProgress?.(Math.round(percentage)),
+    const contentType = file.type || "audio/mp4";
+    blobUrl = await uploadLessonFile({
+      file,
+      pathname: `${created.uploadPrefix}segment-1.m4a`,
+      contentType,
+      token,
+      onProgress: input.onProgress,
     });
-    blobUrl = blob.url;
     const segmentResponse = await authenticatedFetch(`/api/lessons/${lessonId}/segments`, token, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         seq: 1,
         blobUrl,
-        contentType: file.type || "audio/mp4",
+        contentType,
         durationSeconds: input.durationSeconds,
       }),
     });
