@@ -2102,7 +2102,16 @@
       "size": 662292,
       "sha256": "d34ac88afd3eb42875acdf56507602ad620ba71cc995aa175e24458240f87b39",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-Lessons.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-Lessons.pdf",
+      "slackDeclaredSize": 662292,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:57+00:00",
+      "blobReadBackSize": 662292,
+      "blobReadBackSha256": "d34ac88afd3eb42875acdf56507602ad620ba71cc995aa175e24458240f87b39",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "d34ac88afd3eb42875acdf56507602ad620ba71cc995aa175e24458240f87b39:application/pdf"
     },
     {
       "filename": "bingo.pdf",
@@ -2112,7 +2121,16 @@
       "size": 347835,
       "sha256": "5ce01e36c1af6e7dac1dc89b95cfb2d96c193887e2ab6d8c97ffbd721c5cc7da",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-bingo.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-bingo.pdf",
+      "slackDeclaredSize": 347835,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:56+00:00",
+      "blobReadBackSize": 347835,
+      "blobReadBackSha256": "5ce01e36c1af6e7dac1dc89b95cfb2d96c193887e2ab6d8c97ffbd721c5cc7da",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "5ce01e36c1af6e7dac1dc89b95cfb2d96c193887e2ab6d8c97ffbd721c5cc7da:application/pdf"
     },
     {
       "filename": "checklist.pdf",
@@ -2122,7 +2140,16 @@
       "size": 105815,
       "sha256": "f1f1bcfd177133478fe2c684b26b92b7bee857694805678f541e58dbffdfaaf4",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-checklist.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-checklist.pdf",
+      "slackDeclaredSize": 105815,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:56+00:00",
+      "blobReadBackSize": 105815,
+      "blobReadBackSha256": "f1f1bcfd177133478fe2c684b26b92b7bee857694805678f541e58dbffdfaaf4",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "f1f1bcfd177133478fe2c684b26b92b7bee857694805678f541e58dbffdfaaf4:application/pdf"
     },
     {
       "filename": "crazyletters.pdf",
@@ -2132,7 +2159,16 @@
       "size": 2401021,
       "sha256": "52072243fb938373ef9d9310954a446ddad94aa638109a25a314b0593faa73f1",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-crazyletters.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-crazyletters.pdf",
+      "slackDeclaredSize": 2401021,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:57+00:00",
+      "blobReadBackSize": 2401021,
+      "blobReadBackSha256": "52072243fb938373ef9d9310954a446ddad94aa638109a25a314b0593faa73f1",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "52072243fb938373ef9d9310954a446ddad94aa638109a25a314b0593faa73f1:application/pdf"
     },
     {
       "filename": "flashcards.pdf",
@@ -2142,7 +2178,16 @@
       "size": 138658,
       "sha256": "5175463295384bb992b33118e8dc09856150df8fa5d095476f2d900d293c3844",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-flashcards.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-flashcards.pdf",
+      "slackDeclaredSize": 138658,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:57+00:00",
+      "blobReadBackSize": 138658,
+      "blobReadBackSha256": "5175463295384bb992b33118e8dc09856150df8fa5d095476f2d900d293c3844",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "5175463295384bb992b33118e8dc09856150df8fa5d095476f2d900d293c3844:application/pdf"
     },
     {
       "filename": "introduction.pdf",
@@ -2152,7 +2197,16 @@
       "size": 418218,
       "sha256": "24fea21235a588b50de13f441590fd3abfeb210ec39c75959924afa07c3fc1e7",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-introduction.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-introduction.pdf",
+      "slackDeclaredSize": 418218,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:57+00:00",
+      "blobReadBackSize": 418218,
+      "blobReadBackSha256": "24fea21235a588b50de13f441590fd3abfeb210ec39c75959924afa07c3fc1e7",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "24fea21235a588b50de13f441590fd3abfeb210ec39c75959924afa07c3fc1e7:application/pdf"
     },
     {
       "filename": "readingmaterial.pdf",
@@ -2162,7 +2216,16 @@
       "size": 1170841,
       "sha256": "e9232a788b8e886d8412a43c1dd2c4fd26a1eb4f440bc476029211718288fc62",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-readingmaterial.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-readingmaterial.pdf",
+      "slackDeclaredSize": 1170841,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:58+00:00",
+      "blobReadBackSize": 1170841,
+      "blobReadBackSha256": "e9232a788b8e886d8412a43c1dd2c4fd26a1eb4f440bc476029211718288fc62",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "e9232a788b8e886d8412a43c1dd2c4fd26a1eb4f440bc476029211718288fc62:application/pdf"
     }
   ],
   "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-stairway-to-reading/1785518986.911909-Lessons.pdf",
@@ -2212,6 +2275,9 @@
       },
       "commit": "f0bc8fe4",
       "note": "Recipe files, Format library routes, activity-format registry entries, and aliases are implemented in commit f0bc8fe4 and carried by PR #615."
-    }
+    },
+    "slackReplyTs": "1785657478.937919",
+    "devSummaryTs": "1785657479.419579",
+    "shipReaction": true
   }
 }

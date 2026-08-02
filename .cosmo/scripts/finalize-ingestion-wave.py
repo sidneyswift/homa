@@ -643,7 +643,7 @@ def ensure_ship_reaction(
 
 
 def atomic_json_write(path: Path, payload: dict) -> None:
-    rendered = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+    rendered = json.dumps(payload, indent=2, ensure_ascii=True) + "\n"
     with tempfile.NamedTemporaryFile(
         mode="w", encoding="utf-8", dir=path.parent, delete=False
     ) as handle:

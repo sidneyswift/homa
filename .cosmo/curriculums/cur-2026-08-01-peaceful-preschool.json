@@ -14,7 +14,16 @@
       "size": 1436836,
       "sha256": "032c374a269df59532d04bd6b71754e40e9fc8ecc87619b4005fdfa14501c368",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BMED8JVH8-CalendarBundle.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BMED8JVH8-CalendarBundle.pdf",
+      "slackDeclaredSize": 1436836,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:01:18+00:00",
+      "blobReadBackSize": 1436836,
+      "blobReadBackSha256": "032c374a269df59532d04bd6b71754e40e9fc8ecc87619b4005fdfa14501c368",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "032c374a269df59532d04bd6b71754e40e9fc8ecc87619b4005fdfa14501c368:application/pdf"
     },
     {
       "filename": "family vision.pdf",
@@ -24,7 +33,16 @@
       "size": 3925200,
       "sha256": "cf9740d37971c66411fcfd147bf976bebc3f783b2bcc89bc7bf28cb690266aba",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BM866UGSF-family%20vision.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BM866UGSF-family%20vision.pdf",
+      "slackDeclaredSize": 3925200,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:01:19+00:00",
+      "blobReadBackSize": 3925200,
+      "blobReadBackSha256": "cf9740d37971c66411fcfd147bf976bebc3f783b2bcc89bc7bf28cb690266aba",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "cf9740d37971c66411fcfd147bf976bebc3f783b2bcc89bc7bf28cb690266aba:application/pdf"
     },
     {
       "filename": "parent guide.pdf",
@@ -34,7 +52,16 @@
       "size": 49120554,
       "sha256": "1fc7ad728d05aafff710bffadb710d0e12c6f5e274a0d7860becd0e91d4aba27",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BLZ2D4UUF-parent%20guide.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BLZ2D4UUF-parent%20guide.pdf",
+      "slackDeclaredSize": 49120554,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:01:29+00:00",
+      "blobReadBackSize": 49120554,
+      "blobReadBackSha256": "1fc7ad728d05aafff710bffadb710d0e12c6f5e274a0d7860becd0e91d4aba27",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "1fc7ad728d05aafff710bffadb710d0e12c6f5e274a0d7860becd0e91d4aba27:application/pdf"
     },
     {
       "filename": "printables.pdf",
@@ -44,7 +71,16 @@
       "size": 9848222,
       "sha256": "3679efe19b0431e7a17ec8d3f5428eccedbee3c06055127d7e00d06396079954",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BM867U1PD-printables.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BM867U1PD-printables.pdf",
+      "slackDeclaredSize": 9848222,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:01:31+00:00",
+      "blobReadBackSize": 9848222,
+      "blobReadBackSha256": "3679efe19b0431e7a17ec8d3f5428eccedbee3c06055127d7e00d06396079954",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "3679efe19b0431e7a17ec8d3f5428eccedbee3c06055127d7e00d06396079954:application/pdf"
     },
     {
       "filename": "recipes.pdf",
@@ -54,7 +90,16 @@
       "size": 46298934,
       "sha256": "df63837a90fb5e331331e7af7d4cad513ecc17fefac624b8c6a8078b58d808a9",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BMJ495DT6-recipes.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BMJ495DT6-recipes.pdf",
+      "slackDeclaredSize": 46298934,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:01:41+00:00",
+      "blobReadBackSize": 46298934,
+      "blobReadBackSha256": "df63837a90fb5e331331e7af7d4cad513ecc17fefac624b8c6a8078b58d808a9",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "df63837a90fb5e331331e7af7d4cad513ecc17fefac624b8c6a8078b58d808a9:application/pdf"
     },
     {
       "filename": "supply list.pdf",
@@ -64,7 +109,16 @@
       "size": 7269709,
       "sha256": "2d5d85ce38fc10cc2c00fff43685e2596e593e5ab300b45d19b78895abfc39bb",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BMGB99C1F-supply%20list.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BMGB99C1F-supply%20list.pdf",
+      "slackDeclaredSize": 7269709,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:01:43+00:00",
+      "blobReadBackSize": 7269709,
+      "blobReadBackSha256": "2d5d85ce38fc10cc2c00fff43685e2596e593e5ab300b45d19b78895abfc39bb",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "2d5d85ce38fc10cc2c00fff43685e2596e593e5ab300b45d19b78895abfc39bb:application/pdf"
     },
     {
       "filename": "the_peaceful_preschool_-_book_list.pdf",
@@ -74,7 +128,16 @@
       "size": 10106343,
       "sha256": "df7489ce0720b58a56fbea44791f6eeb1e3536fa2876a92b4db78f87e323c330",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BMCDVE8HL-the_peaceful_preschool_-_book_list.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BMCDVE8HL-the_peaceful_preschool_-_book_list.pdf",
+      "slackDeclaredSize": 10106343,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:01:45+00:00",
+      "blobReadBackSize": 10106343,
+      "blobReadBackSha256": "df7489ce0720b58a56fbea44791f6eeb1e3536fa2876a92b4db78f87e323c330",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "df7489ce0720b58a56fbea44791f6eeb1e3536fa2876a92b4db78f87e323c330:application/pdf"
     }
   ],
   "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-01-peaceful-preschool/1785639805.923089-F0BMED8JVH8-CalendarBundle.pdf",
@@ -144,7 +207,10 @@
       "commit": "f0bc8fe4",
       "note": "The recipe, Format library route, and activity-format registry entry are implemented in commit f0bc8fe4 and carried by PR #615. Focused fleet-skill, materials, and curriculum checks passed."
     },
-    "knowledgeMerged": "2026-08-02"
+    "knowledgeMerged": "2026-08-02",
+    "slackReplyTs": "1785657706.579029",
+    "devSummaryTs": "1785657707.185019",
+    "shipReaction": true
   },
   "capture": {
     "lane": "phone",

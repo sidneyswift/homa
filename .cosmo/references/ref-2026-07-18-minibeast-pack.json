@@ -225,12 +225,6 @@
   "notes": "10-page pack from Fiddlesticks Kids. Smallest reference yet but extremely focused: beautiful watercolor naturalist art + simple Pre-K activities. Carolyng specifically called out three things: (1) art style, (2) math inclusion (the counters), (3) simple activities for Pre-K. The art style is genuine watercolor naturalist illustration \u2014 the bumblebee, garden spider, and banded snail are painted with visible brushwork and naturalistic detail. This is the Charlotte Mason nature study aesthetic. The counters page is clever: watercolor art doubles as math manipulatives when cut out. The blank circles invite the child to draw creatures from their own garden \u2014 connecting indoor learning to outdoor observation. The classification mat (insect vs non-insect) teaches a real scientific concept through hands-on sorting. This is the most Pre-K-focused pack from Carolyng \u2014 confirms she has young learners in mind.",
   "sourceFiles": [
     {
-      "filename": "minibeastpack_compressed.pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-minibeast-pack/minibeastpack_compressed.pdf",
-      "blobUploadedAt": "2026-07-30",
-      "rescuedFromSlack": true
-    },
-    {
       "filename": "Mini Beast Pack.pdf",
       "slackFileId": "F0BLZ2M7NUX",
       "slackMessageTs": "1785639867.520439",
@@ -238,7 +232,36 @@
       "size": 1068394,
       "sha256": "206c8b4c176d52229eb9400be28b2570cc77db9c2594a02664621c7f31fd8fca",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-minibeast-pack/1785639867.520439-F0BLZ2M7NUX-Mini%20Beast%20Pack.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-minibeast-pack/1785639867.520439-F0BLZ2M7NUX-Mini%20Beast%20Pack.pdf",
+      "slackDeclaredSize": 1068394,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:01:48+00:00",
+      "blobReadBackSize": 1068394,
+      "blobReadBackSha256": "206c8b4c176d52229eb9400be28b2570cc77db9c2594a02664621c7f31fd8fca",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "206c8b4c176d52229eb9400be28b2570cc77db9c2594a02664621c7f31fd8fca:application/pdf"
+    }
+  ],
+  "historicalSourceArtifacts": [
+    {
+      "filename": "minibeastpack_compressed.pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-18-minibeast-pack/minibeastpack_compressed.pdf",
+      "blobUploadedAt": "2026-07-30",
+      "rescuedFromSlack": true,
+      "status": "superseded-derivative",
+      "size": 889872,
+      "sha256": "1a8be3504189d3ece96059ea59baf859573e35185703f578d180f3eeed4ad765",
+      "contentType": "application/pdf",
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:03:00+00:00",
+      "blobReadBackSize": 889872,
+      "blobReadBackSha256": "1a8be3504189d3ece96059ea59baf859573e35185703f578d180f3eeed4ad765",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "1a8be3504189d3ece96059ea59baf859573e35185703f578d180f3eeed4ad765:application/pdf",
+      "note": "Historical compressed derivative retained for provenance. The later exact Slack original is the sole canonical sourceFile."
     }
   ],
   "sourceFilesNote": "Originals rescued from Slack into Blob on 2026-07-30 by rescue-originals.py. Before that this record named no durable copy: the analysis existed and the file did not.",
@@ -249,6 +272,8 @@
   "sourceCompleteness": {
     "status": "complete",
     "sourceOccurrenceCount": 2,
+    "canonicalSourceOccurrenceCount": 1,
+    "historicalArtifactCount": 1,
     "verifiedOriginalCount": 1,
     "durableBlobCount": 2,
     "pageCount": 10,
@@ -289,8 +314,8 @@
       "externalVisionProvider": null
     },
     "shippedPr": 615,
-    "slackReplyTs": null,
-    "shipReaction": false
+    "slackReplyTs": "1785657908.820869",
+    "shipReaction": true
   },
   "capture": {
     "lane": "phone",

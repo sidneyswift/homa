@@ -26,7 +26,16 @@
       "size": 37038187,
       "sha256": "be5a6f06f47de5eebb0a344f0cf0ddbda5945ea4901fb9fa8e5dbe042aa61bcc",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785547589.308279-K%20Benchmark%20Education%20Teatro%20del%20lector%20.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785547589.308279-K%20Benchmark%20Education%20Teatro%20del%20lector%20.pdf",
+      "slackDeclaredSize": 37038187,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:58:11+00:00",
+      "blobReadBackSize": 37038187,
+      "blobReadBackSha256": "be5a6f06f47de5eebb0a344f0cf0ddbda5945ea4901fb9fa8e5dbe042aa61bcc",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "be5a6f06f47de5eebb0a344f0cf0ddbda5945ea4901fb9fa8e5dbe042aa61bcc:application/pdf"
     },
     {
       "filename": "K Taller Las Necesidades de Los plants y Los animals .pdf",
@@ -36,7 +45,16 @@
       "size": 59248677,
       "sha256": "8b2425c94c24c32a1584658e0b67e1e53b5897720ee579f904e2f68adc8f227d",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785547740.278989-K%20Taller%20Las%20Necesidades%20de%20Los%20plants%20y%20Los%20animals%20.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785547740.278989-K%20Taller%20Las%20Necesidades%20de%20Los%20plants%20y%20Los%20animals%20.pdf",
+      "slackDeclaredSize": 59248677,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:58:24+00:00",
+      "blobReadBackSize": 59248677,
+      "blobReadBackSha256": "8b2425c94c24c32a1584658e0b67e1e53b5897720ee579f904e2f68adc8f227d",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "8b2425c94c24c32a1584658e0b67e1e53b5897720ee579f904e2f68adc8f227d:application/pdf"
     },
     {
       "filename": "K Taller Todo historia tiene personajes.pdf",
@@ -46,7 +64,16 @@
       "size": 61493188,
       "sha256": "d1c3d9238cce8893f7066d89f033fb1b215f4b2bf0a0064eb8b14823b50ab448",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785548039.755929-K%20Taller%20Todo%20historia%20tiene%20personajes.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785548039.755929-K%20Taller%20Todo%20historia%20tiene%20personajes.pdf",
+      "slackDeclaredSize": 61493188,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:58:37+00:00",
+      "blobReadBackSize": 61493188,
+      "blobReadBackSha256": "d1c3d9238cce8893f7066d89f033fb1b215f4b2bf0a0064eb8b14823b50ab448",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "d1c3d9238cce8893f7066d89f033fb1b215f4b2bf0a0064eb8b14823b50ab448:application/pdf"
     },
     {
       "filename": "Taller K Las Reglas en la casa y en la escuela.pdf",
@@ -56,7 +83,16 @@
       "size": 58874215,
       "sha256": "0a1b548f84d42db10a6790402df664e4da4d7f3785662c7c6ca5fc925dac1df0",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785548279.527019-Taller%20K%20Las%20Reglas%20en%20la%20casa%20y%20en%20la%20escuela.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785548279.527019-Taller%20K%20Las%20Reglas%20en%20la%20casa%20y%20en%20la%20escuela.pdf",
+      "slackDeclaredSize": 58874215,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:58:50+00:00",
+      "blobReadBackSize": 58874215,
+      "blobReadBackSha256": "0a1b548f84d42db10a6790402df664e4da4d7f3785662c7c6ca5fc925dac1df0",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "0a1b548f84d42db10a6790402df664e4da4d7f3785662c7c6ca5fc925dac1df0:application/pdf"
     },
     {
       "filename": "Taller K Los escritores nos Quentin muchas historias .pdf",
@@ -66,7 +102,16 @@
       "size": 57427081,
       "sha256": "1a8f7997d935ee32a3d3492ceb7c3d5a298c6278b68158fd7bb74389be8a6169",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785548520.189369-Taller%20K%20Los%20escritores%20nos%20Quentin%20muchas%20historias%20.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785548520.189369-Taller%20K%20Los%20escritores%20nos%20Quentin%20muchas%20historias%20.pdf",
+      "slackDeclaredSize": 57427081,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:59:03+00:00",
+      "blobReadBackSize": 57427081,
+      "blobReadBackSha256": "1a8f7997d935ee32a3d3492ceb7c3d5a298c6278b68158fd7bb74389be8a6169",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "1a8f7997d935ee32a3d3492ceb7c3d5a298c6278b68158fd7bb74389be8a6169:application/pdf"
     },
     {
       "filename": "Taller K La technlogia en la casa y en la escuela .pdf",
@@ -76,7 +121,16 @@
       "size": 56121400,
       "sha256": "a47a51ea00d40410fe2fbb6d9476f74c80bcfb2f21d291c751149f862e663b5c",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785549756.318859-Taller%20K%20La%20technlogia%20en%20la%20casa%20y%20en%20la%20escuela%20.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785549756.318859-Taller%20K%20La%20technlogia%20en%20la%20casa%20y%20en%20la%20escuela%20.pdf",
+      "slackDeclaredSize": 56121400,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:59:18+00:00",
+      "blobReadBackSize": 56121400,
+      "blobReadBackSha256": "a47a51ea00d40410fe2fbb6d9476f74c80bcfb2f21d291c751149f862e663b5c",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "a47a51ea00d40410fe2fbb6d9476f74c80bcfb2f21d291c751149f862e663b5c:application/pdf"
     },
     {
       "filename": "Taller K Las historias nos ofrecen in mensaje.pdf",
@@ -86,7 +140,16 @@
       "size": 50655288,
       "sha256": "4a93759ebbc4c88718277c30e4ca6b1f0c05b639ab65039a5f62c777f9a4b769",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785550081.731089-Taller%20K%20Las%20historias%20nos%20ofrecen%20in%20mensaje.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785550081.731089-Taller%20K%20Las%20historias%20nos%20ofrecen%20in%20mensaje.pdf",
+      "slackDeclaredSize": 50655288,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:59:31+00:00",
+      "blobReadBackSize": 50655288,
+      "blobReadBackSha256": "4a93759ebbc4c88718277c30e4ca6b1f0c05b639ab65039a5f62c777f9a4b769",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "4a93759ebbc4c88718277c30e4ca6b1f0c05b639ab65039a5f62c777f9a4b769:application/pdf"
     },
     {
       "filename": "Taller K El tiempo y las estaciones.pdf",
@@ -96,7 +159,16 @@
       "size": 44376081,
       "sha256": "6c26fe1b4ba035a3bb0a367c391597986811d7d1b669efae865e910d3a0f03cb",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785550582.183149-Taller%20K%20El%20tiempo%20y%20las%20estaciones.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785550582.183149-Taller%20K%20El%20tiempo%20y%20las%20estaciones.pdf",
+      "slackDeclaredSize": 44376081,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:59:42+00:00",
+      "blobReadBackSize": 44376081,
+      "blobReadBackSha256": "6c26fe1b4ba035a3bb0a367c391597986811d7d1b669efae865e910d3a0f03cb",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "6c26fe1b4ba035a3bb0a367c391597986811d7d1b669efae865e910d3a0f03cb:application/pdf"
     },
     {
       "filename": "Part 1 Taller Grade K VOL 1.pdf",
@@ -106,7 +178,16 @@
       "size": 93173824,
       "sha256": "f46cb069ace73935cdfd3c3074c83478a20707c7ce288eeffe2b1a308d8345a9",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785550815.745139-Part%201%20Taller%20Grade%20K%20VOL%201.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785550815.745139-Part%201%20Taller%20Grade%20K%20VOL%201.pdf",
+      "slackDeclaredSize": 93173824,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:00:02+00:00",
+      "blobReadBackSize": 93173824,
+      "blobReadBackSha256": "f46cb069ace73935cdfd3c3074c83478a20707c7ce288eeffe2b1a308d8345a9",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "f46cb069ace73935cdfd3c3074c83478a20707c7ce288eeffe2b1a308d8345a9:application/pdf"
     },
     {
       "filename": "Part 2 Taller Grade K Vol 1.pdf",
@@ -116,7 +197,16 @@
       "size": 48204995,
       "sha256": "18935d87de23969686d7942a8df3cd0996c016d8e26428e027f728d55f35efaa",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785551025.852649-Part%202%20Taller%20Grade%20K%20Vol%201.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785551025.852649-Part%202%20Taller%20Grade%20K%20Vol%201.pdf",
+      "slackDeclaredSize": 48204995,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:00:13+00:00",
+      "blobReadBackSize": 48204995,
+      "blobReadBackSha256": "18935d87de23969686d7942a8df3cd0996c016d8e26428e027f728d55f35efaa",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "18935d87de23969686d7942a8df3cd0996c016d8e26428e027f728d55f35efaa:application/pdf"
     },
     {
       "filename": "Part 2 Taller Grade K Vol 1.pdf",
@@ -130,7 +220,16 @@
       "duplicateOf": {
         "slackMessageTs": "1785551025.852649",
         "filename": "Part 2 Taller Grade K Vol 1.pdf"
-      }
+      },
+      "slackDeclaredSize": 48204995,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:00:24+00:00",
+      "blobReadBackSize": 48204995,
+      "blobReadBackSha256": "18935d87de23969686d7942a8df3cd0996c016d8e26428e027f728d55f35efaa",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "18935d87de23969686d7942a8df3cd0996c016d8e26428e027f728d55f35efaa:application/pdf"
     },
     {
       "filename": "Taller Grade K Vol 2.pdf",
@@ -140,7 +239,16 @@
       "size": 133094937,
       "sha256": "9bf8ad7719a2a694360245e080f40a640db8a36e287f6a7e7c93bf754a3131da",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785551178.553679-Taller%20Grade%20K%20Vol%202.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785551178.553679-Taller%20Grade%20K%20Vol%202.pdf",
+      "slackDeclaredSize": 133094937,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:00:59+00:00",
+      "blobReadBackSize": 133094937,
+      "blobReadBackSha256": "9bf8ad7719a2a694360245e080f40a640db8a36e287f6a7e7c93bf754a3131da",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "9bf8ad7719a2a694360245e080f40a640db8a36e287f6a7e7c93bf754a3131da:application/pdf"
     }
   ],
   "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-benchmark-taller-del-lector-grade-k-spanish/1785547589.308279-K%20Benchmark%20Education%20Teatro%20del%20lector%20.pdf",
@@ -185,7 +293,10 @@
       "commit": "f0bc8fe4",
       "note": "Every recurring printable activity resolves to a shipped recipe and registered format. The five-day readers-theater sequence is instructional method, not a missing printable format."
     },
-    "knowledgeMerged": "2026-08-02"
+    "knowledgeMerged": "2026-08-02",
+    "slackReplyTs": "1785657661.368789",
+    "devSummaryTs": "1785657662.101849",
+    "shipReaction": true
   },
   "capture": {
     "lane": "phone",

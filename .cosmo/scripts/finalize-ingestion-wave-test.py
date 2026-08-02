@@ -840,16 +840,20 @@ class FinalizeWaveTests(unittest.TestCase):
     def test_receipts_round_trip_without_losing_record_content(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "record.json"
-            path.write_text(json.dumps({"id": "cur-1", "name": "A", "stages": {}}))
+            path.write_text(json.dumps({
+                "id": "cur-1",
+                "name": "A child’s guide",
+                "stages": {},
+            }))
             MODULE.persist_receipts(
                 path, slack_reply_ts="2.0", dev_summary_ts="3.0", ship_reaction=True
             )
             record = json.loads(path.read_text())
-            self.assertEqual(record["name"], "A")
+            self.assertEqual(record["name"], "A child’s guide")
+            self.assertIn("child\\u2019s", path.read_text())
             self.assertEqual(record["stages"]["slackReplyTs"], "2.0")
             self.assertEqual(record["stages"]["devSummaryTs"], "3.0")
             self.assertTrue(record["stages"]["shipReaction"])
-
 
 if __name__ == "__main__":
     unittest.main()

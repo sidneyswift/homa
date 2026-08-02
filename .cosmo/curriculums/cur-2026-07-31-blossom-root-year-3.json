@@ -19,7 +19,16 @@
       "size": 289772,
       "sha256": "f233db0d4080adcc86eec25ee8816df5936e2be73ce0ed0039279e1f6aa9ec0c",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-Clickable%20Links%20Prehistoric%20World.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-Clickable%20Links%20Prehistoric%20World.pdf",
+      "slackDeclaredSize": 289772,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:41+00:00",
+      "blobReadBackSize": 289772,
+      "blobReadBackSha256": "f233db0d4080adcc86eec25ee8816df5936e2be73ce0ed0039279e1f6aa9ec0c",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "f233db0d4080adcc86eec25ee8816df5936e2be73ce0ed0039279e1f6aa9ec0c:application/pdf"
     },
     {
       "filename": "Final Wild Files Year 3 Science.pdf",
@@ -29,7 +38,16 @@
       "size": 154969,
       "sha256": "ef84960cfe61b9bd8977c798844963cc5cebacdbcf7028c244943e2e1136a6d3",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-Final%20Wild%20Files%20Year%203%20Science.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-Final%20Wild%20Files%20Year%203%20Science.pdf",
+      "slackDeclaredSize": 154969,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:41+00:00",
+      "blobReadBackSize": 154969,
+      "blobReadBackSha256": "ef84960cfe61b9bd8977c798844963cc5cebacdbcf7028c244943e2e1136a6d3",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "ef84960cfe61b9bd8977c798844963cc5cebacdbcf7028c244943e2e1136a6d3:application/pdf"
     },
     {
       "filename": "Final Year 3 Prehistoric Life Parent Guide-compressed.pdf",
@@ -39,7 +57,16 @@
       "size": 3627536,
       "sha256": "f0dadef55d501850172b7bf858b6f4fa5d9c4c096d12c3bd3df50cc73fa5eed9",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-Final%20Year%203%20Prehistoric%20Life%20Parent%20Guide-compressed.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-Final%20Year%203%20Prehistoric%20Life%20Parent%20Guide-compressed.pdf",
+      "slackDeclaredSize": 3627536,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:42+00:00",
+      "blobReadBackSize": 3627536,
+      "blobReadBackSha256": "f0dadef55d501850172b7bf858b6f4fa5d9c4c096d12c3bd3df50cc73fa5eed9",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "f0dadef55d501850172b7bf858b6f4fa5d9c4c096d12c3bd3df50cc73fa5eed9:application/pdf"
     },
     {
       "filename": "Final Year 3 Prehistoric Notebook-compressed.pdf",
@@ -49,7 +76,16 @@
       "size": 2358844,
       "sha256": "e9f74f66d597b8439b6493d5404b1c52bbea4a6d829407c3f6b28830d6c27cb0",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-Final%20Year%203%20Prehistoric%20Notebook-compressed.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-Final%20Year%203%20Prehistoric%20Notebook-compressed.pdf",
+      "slackDeclaredSize": 2358844,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:43+00:00",
+      "blobReadBackSize": 2358844,
+      "blobReadBackSha256": "e9f74f66d597b8439b6493d5404b1c52bbea4a6d829407c3f6b28830d6c27cb0",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "e9f74f66d597b8439b6493d5404b1c52bbea4a6d829407c3f6b28830d6c27cb0:application/pdf"
     },
     {
       "filename": "Final Year 3 Science Lab Guide-compressed.pdf",
@@ -59,7 +95,16 @@
       "size": 4293457,
       "sha256": "b301487b3099b72a5b723fd165ef16fadf990d860adb07f0167df0d22935b365",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-Final%20Year%203%20Science%20Lab%20Guide-compressed.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-Final%20Year%203%20Science%20Lab%20Guide-compressed.pdf",
+      "slackDeclaredSize": 4293457,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:43+00:00",
+      "blobReadBackSize": 4293457,
+      "blobReadBackSha256": "b301487b3099b72a5b723fd165ef16fadf990d860adb07f0167df0d22935b365",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "b301487b3099b72a5b723fd165ef16fadf990d860adb07f0167df0d22935b365:application/pdf"
     },
     {
       "filename": "Final Year 3 Science Notebook.pdf",
@@ -69,7 +114,16 @@
       "size": 996964,
       "sha256": "be3954d61a71b222bcd133ddda3046e9e7b80600d1117182eed01d9ceea32f03",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-Final%20Year%203%20Science%20Notebook.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-Final%20Year%203%20Science%20Notebook.pdf",
+      "slackDeclaredSize": 996964,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:44+00:00",
+      "blobReadBackSize": 996964,
+      "blobReadBackSha256": "be3954d61a71b222bcd133ddda3046e9e7b80600d1117182eed01d9ceea32f03",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "be3954d61a71b222bcd133ddda3046e9e7b80600d1117182eed01d9ceea32f03:application/pdf"
     },
     {
       "filename": "Final Year 3 Science Parent Guide-compressed.pdf",
@@ -79,7 +133,16 @@
       "size": 1325539,
       "sha256": "9bf221411c5742d1dd3c70a652ae1eb4c8469964959169260b7476cdbabb9b74",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-Final%20Year%203%20Science%20Parent%20Guide-compressed.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-Final%20Year%203%20Science%20Parent%20Guide-compressed.pdf",
+      "slackDeclaredSize": 1325539,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:44+00:00",
+      "blobReadBackSize": 1325539,
+      "blobReadBackSha256": "9bf221411c5742d1dd3c70a652ae1eb4c8469964959169260b7476cdbabb9b74",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "9bf221411c5742d1dd3c70a652ae1eb4c8469964959169260b7476cdbabb9b74:application/pdf"
     },
     {
       "filename": "Level 3 Scavenger Hunts (compressed).pdf",
@@ -89,7 +152,16 @@
       "size": 3172498,
       "sha256": "17207351cba33ca948494c8e8638122ce3c9a0d0a695a1f5217b80cc5ffae810",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-Level%203%20Scavenger%20Hunts%20%28compressed%29.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-Level%203%20Scavenger%20Hunts%20%28compressed%29.pdf",
+      "slackDeclaredSize": 3172498,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:45+00:00",
+      "blobReadBackSize": 3172498,
+      "blobReadBackSha256": "17207351cba33ca948494c8e8638122ce3c9a0d0a695a1f5217b80cc5ffae810",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "17207351cba33ca948494c8e8638122ce3c9a0d0a695a1f5217b80cc5ffae810:application/pdf"
     },
     {
       "filename": "level 3 science supply master list.pdf",
@@ -99,7 +171,16 @@
       "size": 256773,
       "sha256": "4d214597164e388b5e346ee836de3f58df103122145d3073b290b3b3f5b2d2f3",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-level%203%20science%20supply%20master%20list.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-level%203%20science%20supply%20master%20list.pdf",
+      "slackDeclaredSize": 256773,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:45+00:00",
+      "blobReadBackSize": 256773,
+      "blobReadBackSha256": "4d214597164e388b5e346ee836de3f58df103122145d3073b290b3b3f5b2d2f3",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "4d214597164e388b5e346ee836de3f58df103122145d3073b290b3b3f5b2d2f3:application/pdf"
     },
     {
       "filename": "FINAL BR nature study year 3 student notebook.pdf",
@@ -109,7 +190,16 @@
       "size": 564348,
       "sha256": "9c82a3595e36535aecb3f5100f72b5c486be91adaa536f98b9969df0a8521245",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518674.234499-FINAL%20BR%20nature%20study%20year%203%20student%20notebook.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518674.234499-FINAL%20BR%20nature%20study%20year%203%20student%20notebook.pdf",
+      "slackDeclaredSize": 564348,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:45+00:00",
+      "blobReadBackSize": 564348,
+      "blobReadBackSha256": "9c82a3595e36535aecb3f5100f72b5c486be91adaa536f98b9969df0a8521245",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "9c82a3595e36535aecb3f5100f72b5c486be91adaa536f98b9969df0a8521245:application/pdf"
     },
     {
       "filename": "FINAL year 3 nature study parent guide-compressed.pdf",
@@ -119,7 +209,16 @@
       "size": 1107008,
       "sha256": "e7d02da51600df517055c12b265b3b5c3ed9a2e2c0246692e9a7eec970a9223d",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518674.234499-FINAL%20year%203%20nature%20study%20parent%20guide-compressed.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518674.234499-FINAL%20year%203%20nature%20study%20parent%20guide-compressed.pdf",
+      "slackDeclaredSize": 1107008,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:45+00:00",
+      "blobReadBackSize": 1107008,
+      "blobReadBackSha256": "e7d02da51600df517055c12b265b3b5c3ed9a2e2c0246692e9a7eec970a9223d",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "e7d02da51600df517055c12b265b3b5c3ed9a2e2c0246692e9a7eec970a9223d:application/pdf"
     },
     {
       "filename": "Content Warning The Secret Garden.pdf",
@@ -129,7 +228,16 @@
       "size": 74070,
       "sha256": "735b58e8bdeb4c233c7f7d7e9498a86172589f23399c0b088820a49d1a5db90d",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518746.734279-Content%20Warning%20The%20Secret%20Garden.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518746.734279-Content%20Warning%20The%20Secret%20Garden.pdf",
+      "slackDeclaredSize": 74070,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:45+00:00",
+      "blobReadBackSize": 74070,
+      "blobReadBackSha256": "735b58e8bdeb4c233c7f7d7e9498a86172589f23399c0b088820a49d1a5db90d",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "735b58e8bdeb4c233c7f7d7e9498a86172589f23399c0b088820a49d1a5db90d:application/pdf"
     },
     {
       "filename": "FINAL BR Language Arts Year 3 Creative Extensions.pdf",
@@ -139,7 +247,16 @@
       "size": 4534468,
       "sha256": "308058ed10c351fddcdc01af32c2d518decd27efda4ae27e8521595a2e29be44",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518746.734279-FINAL%20BR%20Language%20Arts%20Year%203%20Creative%20Extensions.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518746.734279-FINAL%20BR%20Language%20Arts%20Year%203%20Creative%20Extensions.pdf",
+      "slackDeclaredSize": 4534468,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:46+00:00",
+      "blobReadBackSize": 4534468,
+      "blobReadBackSha256": "308058ed10c351fddcdc01af32c2d518decd27efda4ae27e8521595a2e29be44",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "308058ed10c351fddcdc01af32c2d518decd27efda4ae27e8521595a2e29be44:application/pdf"
     },
     {
       "filename": "Final Year 3 LA Parent Guide-(u2).pdf",
@@ -149,7 +266,16 @@
       "size": 2268333,
       "sha256": "4a567257511a2849e184d6c66e04e0dcc73bab82171e0f66f28dc5dd9fe7c5c1",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518746.734279-Final%20Year%203%20LA%20Parent%20Guide-%28u2%29.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518746.734279-Final%20Year%203%20LA%20Parent%20Guide-%28u2%29.pdf",
+      "slackDeclaredSize": 2268333,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:47+00:00",
+      "blobReadBackSize": 2268333,
+      "blobReadBackSha256": "4a567257511a2849e184d6c66e04e0dcc73bab82171e0f66f28dc5dd9fe7c5c1",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "4a567257511a2849e184d6c66e04e0dcc73bab82171e0f66f28dc5dd9fe7c5c1:application/pdf"
     },
     {
       "filename": "Final Year 3 LA notebook.pdf",
@@ -159,7 +285,16 @@
       "size": 2239050,
       "sha256": "08ea4ba3dbc7a6d6f5b7c14701a2ead58f9bcbc7885657e6dc880c5829dc64e1",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518746.734279-Final%20Year%203%20LA%20notebook.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518746.734279-Final%20Year%203%20LA%20notebook.pdf",
+      "slackDeclaredSize": 2239050,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:47+00:00",
+      "blobReadBackSize": 2239050,
+      "blobReadBackSha256": "08ea4ba3dbc7a6d6f5b7c14701a2ead58f9bcbc7885657e6dc880c5829dc64e1",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "08ea4ba3dbc7a6d6f5b7c14701a2ead58f9bcbc7885657e6dc880c5829dc64e1:application/pdf"
     },
     {
       "filename": "Final Book Seed_ Joan Procter Profiles in Science Year 3-m-c.pdf",
@@ -169,7 +304,16 @@
       "size": 3440530,
       "sha256": "acef6a371ab6f4f8b99044af461d03a9e6ef0894dbd56d7fbb4f5adb773d82fd",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518863.704829-Final%20Book%20Seed_%20Joan%20Procter%20Profiles%20in%20Science%20Year%203-m-c.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518863.704829-Final%20Book%20Seed_%20Joan%20Procter%20Profiles%20in%20Science%20Year%203-m-c.pdf",
+      "slackDeclaredSize": 3440530,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:48+00:00",
+      "blobReadBackSize": 3440530,
+      "blobReadBackSha256": "acef6a371ab6f4f8b99044af461d03a9e6ef0894dbd56d7fbb4f5adb773d82fd",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "acef6a371ab6f4f8b99044af461d03a9e6ef0894dbd56d7fbb4f5adb773d82fd:application/pdf"
     },
     {
       "filename": "Final Book Seed_ Manfish and Life in the Ocean Profiles in Science Year 3-merged-compressed.pdf",
@@ -179,7 +323,16 @@
       "size": 2977787,
       "sha256": "24c7df1fbfc5cc8a3cebd56a713f79b8809b16e91df2e28643751a1f8c3e69dc",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518863.704829-Final%20Book%20Seed_%20Manfish%20and%20Life%20in%20the%20Ocean%20Profiles%20in%20Science%20Year%203-merged-compressed.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518863.704829-Final%20Book%20Seed_%20Manfish%20and%20Life%20in%20the%20Ocean%20Profiles%20in%20Science%20Year%203-merged-compressed.pdf",
+      "slackDeclaredSize": 2977787,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:48+00:00",
+      "blobReadBackSize": 2977787,
+      "blobReadBackSha256": "24c7df1fbfc5cc8a3cebd56a713f79b8809b16e91df2e28643751a1f8c3e69dc",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "24c7df1fbfc5cc8a3cebd56a713f79b8809b16e91df2e28643751a1f8c3e69dc:application/pdf"
     },
     {
       "filename": "Final Book Seed_ Rachel Carson Profiles in Science Year 3-m-c.pdf",
@@ -189,7 +342,16 @@
       "size": 2491324,
       "sha256": "d330c3156935aabb4d309ce04167b2b84b20b9d165357d840f1a586c287ba548",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518863.704829-Final%20Book%20Seed_%20Rachel%20Carson%20Profiles%20in%20Science%20Year%203-m-c.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518863.704829-Final%20Book%20Seed_%20Rachel%20Carson%20Profiles%20in%20Science%20Year%203-m-c.pdf",
+      "slackDeclaredSize": 2491324,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:49+00:00",
+      "blobReadBackSize": 2491324,
+      "blobReadBackSha256": "d330c3156935aabb4d309ce04167b2b84b20b9d165357d840f1a586c287ba548",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "d330c3156935aabb4d309ce04167b2b84b20b9d165357d840f1a586c287ba548:application/pdf"
     },
     {
       "filename": "Final Book Seed_ Shark Lady Profiles in Science Year 3-m-c.pdf",
@@ -199,7 +361,16 @@
       "size": 1977039,
       "sha256": "80fbb110772596bc208c5ed5ff95b36cc3ed05d69a4fe41bd4dd11a6622d6ea9",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518863.704829-Final%20Book%20Seed_%20Shark%20Lady%20Profiles%20in%20Science%20Year%203-m-c.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518863.704829-Final%20Book%20Seed_%20Shark%20Lady%20Profiles%20in%20Science%20Year%203-m-c.pdf",
+      "slackDeclaredSize": 1977039,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:49+00:00",
+      "blobReadBackSize": 1977039,
+      "blobReadBackSha256": "80fbb110772596bc208c5ed5ff95b36cc3ed05d69a4fe41bd4dd11a6622d6ea9",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "80fbb110772596bc208c5ed5ff95b36cc3ed05d69a4fe41bd4dd11a6622d6ea9:application/pdf"
     },
     {
       "filename": "Final Book Seed_ Summer Birds and Buzzing with Questions Profiles in Science Year 3-m-c.pdf",
@@ -209,7 +380,16 @@
       "size": 3301212,
       "sha256": "1ef62d13da93ec89c9304db8b6d4062687f78caa42eb6ce0eb00a198efa93f09",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518863.704829-Final%20Book%20Seed_%20Summer%20Birds%20and%20Buzzing%20with%20Questions%20Profiles%20in%20Science%20Year%203-m-c.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518863.704829-Final%20Book%20Seed_%20Summer%20Birds%20and%20Buzzing%20with%20Questions%20Profiles%20in%20Science%20Year%203-m-c.pdf",
+      "slackDeclaredSize": 3301212,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:50+00:00",
+      "blobReadBackSize": 3301212,
+      "blobReadBackSha256": "1ef62d13da93ec89c9304db8b6d4062687f78caa42eb6ce0eb00a198efa93f09",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "1ef62d13da93ec89c9304db8b6d4062687f78caa42eb6ce0eb00a198efa93f09:application/pdf"
     },
     {
       "filename": "Final Book Seed_ The Watcher Profiles in Science Year 3-c-m (1).pdf",
@@ -219,7 +399,16 @@
       "size": 3605655,
       "sha256": "9b3ab406ef8690889c3405e84f8e3153024badb2d5ef041424a7026827f3f4b7",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518863.704829-Final%20Book%20Seed_%20The%20Watcher%20Profiles%20in%20Science%20Year%203-c-m%20%281%29.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518863.704829-Final%20Book%20Seed_%20The%20Watcher%20Profiles%20in%20Science%20Year%203-c-m%20%281%29.pdf",
+      "slackDeclaredSize": 3605655,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:51+00:00",
+      "blobReadBackSize": 3605655,
+      "blobReadBackSha256": "9b3ab406ef8690889c3405e84f8e3153024badb2d5ef041424a7026827f3f4b7",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "9b3ab406ef8690889c3405e84f8e3153024badb2d5ef041424a7026827f3f4b7:application/pdf"
     },
     {
       "filename": "Final Year 3 art in math-merged.pdf",
@@ -229,7 +418,16 @@
       "size": 3904964,
       "sha256": "e0acf4de47f94c16de834aee5745f3a789b1fd7ec675576d2bc4843dc88b7269",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518883.169449-Final%20Year%203%20art%20in%20math-merged.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518883.169449-Final%20Year%203%20art%20in%20math-merged.pdf",
+      "slackDeclaredSize": 3904964,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:57:52+00:00",
+      "blobReadBackSize": 3904964,
+      "blobReadBackSha256": "e0acf4de47f94c16de834aee5745f3a789b1fd7ec675576d2bc4843dc88b7269",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "e0acf4de47f94c16de834aee5745f3a789b1fd7ec675576d2bc4843dc88b7269:application/pdf"
     }
   ],
   "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-07-31-blossom-root-year-3/1785518581.389829-Clickable%20Links%20Prehistoric%20World.pdf",
@@ -279,7 +477,10 @@
       },
       "commit": "f0bc8fe4",
       "note": "Every Layer 4 activity resolves to a shipped recipe file and Format library route. Copywork and dictation are distinct mechanics, and the word-play source name aliases to the existing cut-and-paste word-work recipe."
-    }
+    },
+    "slackReplyTs": "1785657473.041599",
+    "devSummaryTs": "1785657473.554569",
+    "shipReaction": true
   },
   "capture": {
     "lane": "phone",

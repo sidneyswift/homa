@@ -14,7 +14,16 @@
       "size": 21164096,
       "sha256": "df48955eccee88a17ece25169f65d3361c32ec6b6650a5f2a98456e9b03d3d5b",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-watercolor-space-reference-cards/1785640381.035819-F0BN8Q0B4QY-constellations%20ttp.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-watercolor-space-reference-cards/1785640381.035819-F0BN8Q0B4QY-constellations%20ttp.pdf",
+      "slackDeclaredSize": 21164096,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:05:20+00:00",
+      "blobReadBackSize": 21164096,
+      "blobReadBackSha256": "df48955eccee88a17ece25169f65d3361c32ec6b6650a5f2a98456e9b03d3d5b",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "df48955eccee88a17ece25169f65d3361c32ec6b6650a5f2a98456e9b03d3d5b:application/pdf"
     },
     {
       "filename": "phases of the moon ttp.pdf",
@@ -24,7 +33,16 @@
       "size": 16868122,
       "sha256": "91ef6e45ecf4ed09016301699939f04f2ae2c7b1be4cd7f1e54bef32a7dd6062",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-watercolor-space-reference-cards/1785640381.035819-F0BM86XTGEP-phases%20of%20the%20moon%20ttp.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-watercolor-space-reference-cards/1785640381.035819-F0BM86XTGEP-phases%20of%20the%20moon%20ttp.pdf",
+      "slackDeclaredSize": 16868122,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:05:24+00:00",
+      "blobReadBackSize": 16868122,
+      "blobReadBackSha256": "91ef6e45ecf4ed09016301699939f04f2ae2c7b1be4cd7f1e54bef32a7dd6062",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "91ef6e45ecf4ed09016301699939f04f2ae2c7b1be4cd7f1e54bef32a7dd6062:application/pdf"
     },
     {
       "filename": "planets ttp.pdf",
@@ -34,7 +52,16 @@
       "size": 15415544,
       "sha256": "fbc3e13bb30b044381b66d5e9dc148f5dd23f50baf46e1aee0e874f4a9435a07",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-watercolor-space-reference-cards/1785640381.035819-F0BLZ343PTR-planets%20ttp.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-watercolor-space-reference-cards/1785640381.035819-F0BLZ343PTR-planets%20ttp.pdf",
+      "slackDeclaredSize": 15415544,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:05:27+00:00",
+      "blobReadBackSize": 15415544,
+      "blobReadBackSha256": "fbc3e13bb30b044381b66d5e9dc148f5dd23f50baf46e1aee0e874f4a9435a07",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "fbc3e13bb30b044381b66d5e9dc148f5dd23f50baf46e1aee0e874f4a9435a07:application/pdf"
     }
   ],
   "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-watercolor-space-reference-cards/1785640381.035819-F0BN8Q0B4QY-constellations%20ttp.pdf",
@@ -252,8 +279,8 @@
       "externalVisionProvider": null
     },
     "shippedPr": 615,
-    "slackReplyTs": null,
-    "shipReaction": false
+    "slackReplyTs": "1785657927.963539",
+    "shipReaction": true
   },
   "capture": {
     "lane": "phone",

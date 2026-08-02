@@ -14,7 +14,16 @@
       "size": 6686623,
       "sha256": "6a1c8965d21cb1c4eb7f5adc49ff4ff944d5f80c2a931d25be2f35d23b5b0ab5",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-advent-countdown-activity-cards/1785639971.841689-F0BMEDHP17U-Advent_Christmas_Activity_Cards.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-advent-countdown-activity-cards/1785639971.841689-F0BMEDHP17U-Advent_Christmas_Activity_Cards.pdf",
+      "slackDeclaredSize": 6686623,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:05:11+00:00",
+      "blobReadBackSize": 6686623,
+      "blobReadBackSha256": "6a1c8965d21cb1c4eb7f5adc49ff4ff944d5f80c2a931d25be2f35d23b5b0ab5",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "6a1c8965d21cb1c4eb7f5adc49ff4ff944d5f80c2a931d25be2f35d23b5b0ab5:application/pdf"
     }
   ],
   "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-08-01-advent-countdown-activity-cards/1785639971.841689-F0BMEDHP17U-Advent_Christmas_Activity_Cards.pdf",
@@ -210,8 +219,8 @@
       "externalVisionProvider": null
     },
     "shippedPr": 615,
-    "slackReplyTs": null,
-    "shipReaction": false
+    "slackReplyTs": "1785657912.468219",
+    "shipReaction": true
   },
   "capture": {
     "lane": "phone",

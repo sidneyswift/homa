@@ -49,7 +49,16 @@
       "size": 43264287,
       "sha256": "b81b3c92f39ef70e8523e21d7679b619851539a4d1a01ac8d0822611a1a46e6c",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-29-spelling-phonics-supplements-assessments/1785377683.240299-CamScanner%2007-29-2026%2020.11.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-29-spelling-phonics-supplements-assessments/1785377683.240299-CamScanner%2007-29-2026%2020.11.pdf",
+      "slackDeclaredSize": 43264287,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T07:55:43+00:00",
+      "blobReadBackSize": 43264287,
+      "blobReadBackSha256": "b81b3c92f39ef70e8523e21d7679b619851539a4d1a01ac8d0822611a1a46e6c",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "b81b3c92f39ef70e8523e21d7679b619851539a4d1a01ac8d0822611a1a46e6c:application/pdf"
     }
   ],
   "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-29-spelling-phonics-supplements-assessments/1785377683.240299-CamScanner%2007-29-2026%2020.11.pdf",
@@ -377,8 +386,8 @@
       "note": "No taxonomy write is needed. The 13-level continuum maps to existing phonics-word-reading and spelling-word-study topics."
     },
     "shippedPr": 615,
-    "slackReplyTs": null,
-    "shipReaction": false
+    "slackReplyTs": "1785657344.533129",
+    "shipReaction": true
   },
   "notes": "Carolyng described the drop as helpful for practice and assessment before moving on. The captured file is an assessment kit, not ordinary practice: it uses one-to-one phonics tasks and group-capable spelling screens to find a starting point, identify skill-specific needs, choose whether to continue or back up, and compare fall, winter, and spring performance. The archive contains the commercial originals for provenance; any Homa graduation must preserve the diagnostic structure without reproducing protected word lists, scripts, or page design."
 }

@@ -272,8 +272,8 @@
       "externalVisionProvider": "google/gemini-3-flash"
     },
     "shippedPr": 615,
-    "slackReplyTs": null,
-    "shipReaction": false
+    "slackReplyTs": "1785657915.214829",
+    "shipReaction": true
   },
   "notes": "Carolyng described this as one example of a unit study. The strongest reusable signal is not a new recipe, because Homa already owns the unit-study-packet and cut-and-assemble-craft patterns. It is confirmation that a compact upper-elementary packet can move from reference chart to tactile model to independent recall without changing topics.",
   "coversMessageTs": [
@@ -288,7 +288,16 @@
       "size": 1755813,
       "sha256": "f100473c9f871e90783d5c7c19571ba26df15e30dd8c569362df6254675a9036",
       "contentType": "application/pdf",
-      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-31-atmosphere-unit-activities/1785519005.330129-Atmosphere%20Unit%20Activities.pdf"
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-31-atmosphere-unit-activities/1785519005.330129-Atmosphere%20Unit%20Activities.pdf",
+      "slackDeclaredSize": 1755813,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:05:14+00:00",
+      "blobReadBackSize": 1755813,
+      "blobReadBackSha256": "f100473c9f871e90783d5c7c19571ba26df15e30dd8c569362df6254675a9036",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "f100473c9f871e90783d5c7c19571ba26df15e30dd8c569362df6254675a9036:application/pdf"
     },
     {
       "filename": "Atmosphere Unit Activities.pdf",
@@ -302,7 +311,16 @@
       "duplicateOf": {
         "slackMessageTs": "1785519005.330129",
         "filename": "Atmosphere Unit Activities.pdf"
-      }
+      },
+      "slackDeclaredSize": 1755813,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-02T08:05:14+00:00",
+      "blobReadBackSize": 1755813,
+      "blobReadBackSha256": "f100473c9f871e90783d5c7c19571ba26df15e30dd8c569362df6254675a9036",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "f100473c9f871e90783d5c7c19571ba26df15e30dd8c569362df6254675a9036:application/pdf"
     }
   ],
   "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/ref-2026-07-31-atmosphere-unit-activities/1785519005.330129-Atmosphere%20Unit%20Activities.pdf"
