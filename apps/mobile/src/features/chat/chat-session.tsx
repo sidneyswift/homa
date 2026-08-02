@@ -165,6 +165,7 @@ export function buildEveTransport() {
 export function ChatSession({
   storageKey,
   prepared,
+  restoringSession,
   familyId,
   parentName,
   draftRequest,
@@ -173,6 +174,7 @@ export function ChatSession({
 }: {
   storageKey: string;
   prepared: PreparedChat;
+  restoringSession: boolean;
   familyId: string | null;
   parentName: string | null;
   draftRequest: ComposerDraftRequest | null;
@@ -520,10 +522,6 @@ export function ChatSession({
       source === "composer" && progressChildId
         ? progressEvidenceClientContext(progressChildId)
         : undefined;
-    if (source === "composer") {
-      setDraft("");
-      progressDraftBindingRef.current = null;
-    }
     const queuedMessage: QueuedChatMessage = {
       text: message,
       lane: source === "directive" ? "directive" : "parent",
@@ -537,13 +535,26 @@ export function ChatSession({
     // isSendLineOccupied; GH #170). Either way a send here must queue,
     // never start a second eve session racing the one that might still
     // be finishing.
-    if (isSendLineOccupied({ busy, recovering })) {
+    if (restoringSession || isSendLineOccupied({ busy, recovering })) {
+      // No session identity exists to queue against until restoration
+      // settles. Keep the composer's text intact and do not mint a fork.
+      if (restoringSession) return;
+      // A tap on a card is not typing, so it leaves whatever she had
+      // half-written in the composer alone.
+      if (source === "composer") {
+        setDraft("");
+        progressDraftBindingRef.current = null;
+      }
       setQueued((current) => {
         const next = [...current, queuedMessage];
         queuedRef.current = next;
         return next;
       });
       return;
+    }
+    if (source === "composer") {
+      setDraft("");
+      progressDraftBindingRef.current = null;
     }
     // Reaching here means the line reads as free (not busy, not
     // recovering), so any recovery handle left over is already spent or
@@ -634,13 +645,13 @@ export function ChatSession({
   // because eve ids restart with each session and the archive above can
   // hold a card whose id matches this one's.
   const liveMessageSet = new Set(messages);
-  const activeQuestion = busy ? null : latestQuestionRequest(messages);
-  const activeChecklist = busy ? null : latestChecklistRequest(messages);
-  const activeDetail = busy ? null : latestDetailRequest(messages);
-  const activeReport = busy ? null : latestReportReveal(messages);
+  const activeQuestion = busy || restoringSession ? null : latestQuestionRequest(messages);
+  const activeChecklist = busy || restoringSession ? null : latestChecklistRequest(messages);
+  const activeDetail = busy || restoringSession ? null : latestDetailRequest(messages);
+  const activeReport = busy || restoringSession ? null : latestReportReveal(messages);
   // The chips return whenever a session has no words in it yet: the
   // first run, or a fresh morning over yesterday's scrollback.
-  const showSuggestions = messages.length === 0 && !busy;
+  const showSuggestions = messages.length === 0 && !busy && !restoringSession;
 
   const statusLabel = busy ? busyLabel(messages) : null;
 
@@ -686,13 +697,15 @@ export function ChatSession({
                 alignItems: "center",
               }}
             >
-              {SUGGESTIONS.map((suggestion) => (
-                <SuggestionChip
-                  key={suggestion}
-                  label={suggestion}
-                  onPress={() => sendMessage(suggestion, "card")}
-                />
-              ))}
+              {showSuggestions
+                ? SUGGESTIONS.map((suggestion) => (
+                    <SuggestionChip
+                      key={suggestion}
+                      label={suggestion}
+                      onPress={() => sendMessage(suggestion, "card")}
+                    />
+                  ))
+                : null}
             </View>
           </View>
         ) : (
@@ -849,10 +862,12 @@ export function ChatSession({
             </View>
           </View>
         ) : null}
-        {recovering ? (
+        {recovering || restoringSession ? (
           // The stream died but the turn is durable server-side; while
           // the replay runs, the wait reads as work, not as a failure.
-          <BusyBubble label={"Reconnecting\u2026"} />
+          <BusyBubble
+            label={recovering ? "Reconnecting\u2026" : "Restoring conversation\u2026"}
+          />
         ) : agent.error ? (
           <Text
             accessibilityRole="alert"
@@ -946,7 +961,7 @@ export function ChatSession({
             accessibilityRole="button"
             accessibilityLabel="Send"
             onPress={() => sendMessage(draft)}
-            disabled={draft.trim().length === 0}
+            disabled={restoringSession || draft.trim().length === 0}
             style={({ pressed }) => ({
               minHeight: 48,
               borderRadius: radius.pill,
@@ -954,7 +969,7 @@ export function ChatSession({
               paddingHorizontal: space.lg,
               alignItems: "center",
               justifyContent: "center",
-              opacity: draft.trim().length === 0 ? 0.6 : 1,
+              opacity: restoringSession || draft.trim().length === 0 ? 0.6 : 1,
             })}
           >
             <Text

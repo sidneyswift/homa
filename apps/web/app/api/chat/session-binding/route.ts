@@ -1,6 +1,6 @@
 import { readWebSessionBinding } from "../../../../lib/conversation-continuity/web-session-binding";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
-import { requireFamilyWithActor } from "../../../../lib/map/session";
+import { resolveApiFamily } from "../../../../lib/api-auth";
 
 /**
  * GET /api/chat/session-binding
@@ -14,9 +14,9 @@ export async function GET(request: Request): Promise<Response> {
     return Response.json({ ok: false }, { status: 429 });
   }
 
-  let actor;
+  let auth;
   try {
-    actor = await requireFamilyWithActor();
+    auth = await resolveApiFamily(request);
   } catch (error) {
     console.error(
       "chat/session-binding auth lookup failed:",
@@ -27,23 +27,16 @@ export async function GET(request: Request): Promise<Response> {
       { status: 502 },
     );
   }
-  if (!actor) {
+  if (!auth) {
     return Response.json(
       { ok: false, reason: "no-session" },
       { status: 401 },
     );
   }
-  if (actor.memberUserId === null) {
-    return Response.json(
-      { ok: false, reason: "no-member" },
-      { status: 403 },
-    );
-  }
-
   try {
     const binding = await readWebSessionBinding({
-      familyId: actor.family.id,
-      memberUserId: actor.memberUserId,
+      familyId: auth.familyId,
+      memberUserId: auth.userId,
     });
     return Response.json({ ok: true, binding });
   } catch (error) {
