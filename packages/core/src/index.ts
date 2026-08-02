@@ -64,6 +64,16 @@ export { US_STATES, type UsStateCode } from "./us-states";
 export { formatUsPhone, normalizeUsPhoneE164 } from "./phone";
 
 export {
+  DIRECTIVE_NAMESPACE,
+  formatHiddenDirective,
+  hasVisibleText,
+  isHiddenDirective,
+  parseHiddenDirective,
+  type DirectiveName,
+  type HiddenDirective,
+} from "./hidden-directives";
+
+export {
   ageInMonths,
   ageLabel,
   aheadCapForAge,

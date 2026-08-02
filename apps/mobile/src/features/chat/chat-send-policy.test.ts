@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { isSendLineOccupied } from "./chat-send-policy";
+import { isSendLineOccupied, takeNextQueuedTurn } from "./chat-send-policy";
 
 /**
  * The mobile twin of apps/web/app/app/chat-send-policy.test.ts's
@@ -31,5 +31,38 @@ describe("isSendLineOccupied", () => {
 
   it("stays occupied if both happen to be true at once", () => {
     assert.equal(isSendLineOccupied({ busy: true, recovering: true }), true);
+  });
+});
+
+describe("takeNextQueuedTurn", () => {
+  it("batches adjacent parent messages", () => {
+    assert.deepEqual(takeNextQueuedTurn([
+      { text: "First", lane: "parent" },
+      { text: "Second", lane: "parent" },
+    ]), { message: "First\n\nSecond", remaining: [] });
+  });
+
+  it("keeps a directive out of the parent's turn", () => {
+    assert.deepEqual(takeNextQueuedTurn([
+      { text: "Her words", lane: "parent" },
+      { text: "[[homa:onboarding details_saved summary=Mia]]", lane: "directive" },
+      { text: "Later", lane: "parent" },
+    ]), {
+      message: "Her words",
+      remaining: [
+        { text: "[[homa:onboarding details_saved summary=Mia]]", lane: "directive" },
+        { text: "Later", lane: "parent" },
+      ],
+    });
+  });
+
+  it("sends a leading directive by itself", () => {
+    assert.deepEqual(takeNextQueuedTurn([
+      { text: "[[homa:onboarding kickoff]]", lane: "directive" },
+      { text: "Her words", lane: "parent" },
+    ]), {
+      message: "[[homa:onboarding kickoff]]",
+      remaining: [{ text: "Her words", lane: "parent" }],
+    });
   });
 });

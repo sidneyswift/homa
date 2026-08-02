@@ -5,7 +5,7 @@ import { liveProgressEnabled } from "../../../../lib/child-progress/flag";
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
 import { familyAccountCheckout } from "../../../../lib/billing/wall";
-import { requireFamilyWithActor } from "../../../../lib/map/session";
+import { requireFamilyWithActorFromRequest } from "../../../../lib/map/session";
 import {
   deleteAnswerWithProgressStatus,
   saveAnswerWithProgressStatus,
@@ -35,7 +35,7 @@ export async function POST(request: Request): Promise<Response> {
 
   let access;
   try {
-    access = await requireFamilyWithActor();
+    access = await requireFamilyWithActorFromRequest(request);
   } catch (error) {
     console.error(
       "map/answer auth lookup failed:",
@@ -82,6 +82,8 @@ export async function POST(request: Request): Promise<Response> {
       {
         source: parsed.data.source,
         memberUserId: access.memberUserId,
+        // ChildProgress currently classifies both browser and native app
+        // interactions as web evidence. Transport auth remains distinct.
         channel: "web",
         idempotencyKey: parsed.data.idempotencyKey,
       },
@@ -146,7 +148,7 @@ export async function DELETE(request: Request): Promise<Response> {
 
   let access;
   try {
-    access = await requireFamilyWithActor();
+    access = await requireFamilyWithActorFromRequest(request);
   } catch (error) {
     console.error(
       "map/answer delete auth lookup failed:",

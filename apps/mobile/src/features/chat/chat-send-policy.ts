@@ -34,3 +34,28 @@ export function isSendLineOccupied(input: {
 }): boolean {
   return input.busy || input.recovering;
 }
+
+export interface QueuedChatMessage {
+  text: string;
+  lane: "parent" | "directive";
+}
+
+/**
+ * Takes exactly one model turn from the queue. Adjacent parent messages may
+ * share a turn, but a hidden directive always travels alone.
+ */
+export function takeNextQueuedTurn(
+  queue: readonly QueuedChatMessage[],
+): { message: string; remaining: QueuedChatMessage[] } | null {
+  const first = queue[0];
+  if (!first) return null;
+  if (first.lane === "directive") {
+    return { message: first.text, remaining: queue.slice(1) };
+  }
+  const boundary = queue.findIndex((entry) => entry.lane === "directive");
+  const count = boundary === -1 ? queue.length : boundary;
+  return {
+    message: queue.slice(0, count).map((entry) => entry.text).join("\n\n"),
+    remaining: queue.slice(count),
+  };
+}

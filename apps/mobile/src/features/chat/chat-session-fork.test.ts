@@ -28,7 +28,7 @@ describe("ChatSession session-fork fix (GH #170, mobile twin)", () => {
   it("imports the shared occupied-check from chat-send-policy rather than re-deriving it", () => {
     assert.match(
       source,
-      /import \{ isSendLineOccupied \} from "\.\/chat-send-policy";/u,
+      /isSendLineOccupied,\s*takeNextQueuedTurn,/u,
     );
   });
 
@@ -71,7 +71,8 @@ describe("ChatSession session-fork fix (GH #170, mobile twin)", () => {
 
   it("mirrors queued into a ref so the long-lived recovery effect never reads a stale queue", () => {
     assert.match(source, /queuedRef\.current = queued;/u);
-    assert.match(source, /if \(queuedRef\.current\.length === 0\) return;/u);
+    assert.match(source, /takeNextQueuedTurn\(queuedRef\.current\)/u);
+    assert.match(source, /queuedRef\.current = next\.remaining;/u);
   });
 });
 

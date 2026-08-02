@@ -1,8 +1,13 @@
-import { visibleOutboundChildFramingText } from "@homa/core";
+import { isHiddenDirective, visibleOutboundChildFramingText } from "@homa/core";
 import type { EveMessage, EveMessagePart } from "eve/react";
 
 import { parseQuestionCardPart } from "./question-card-model";
 import { parseLibrarySourceCardPart } from "./library-source-card-model";
+import {
+  parseChecklistCardPart,
+  parseDetailCardPart,
+  parseReportCardPart,
+} from "./onboarding-card-model";
 
 /**
  * Transcript display logic ported from apps/web/app/app/chat/message-parts.tsx
@@ -107,12 +112,17 @@ export function userMessageSendState(
 }
 
 export function partIsRenderable(part: EveMessagePart): boolean {
-  if (part.type === "text") return part.text.trim().length > 0;
+  if (part.type === "text") {
+    return part.text.trim().length > 0 && !isHiddenDirective(part.text);
+  }
   if (part.type === "dynamic-tool" && part.state === "output-available") {
     // Homa's choice card (agent/tools/ask_user_questions.ts) draws as a
     // real tappable card here; question-card-model.ts owns the parsing.
     if (parseQuestionCardPart(part) !== null) return true;
     if (parseLibrarySourceCardPart(part) !== null) return true;
+    if (parseChecklistCardPart(part) !== null) return true;
+    if (parseDetailCardPart(part) !== null) return true;
+    if (parseReportCardPart(part) !== null) return true;
     if (
       part.toolName === "create_printable" ||
       part.toolName === "show_material" ||
