@@ -182,7 +182,6 @@ export function VoiceScreen() {
       announceResult(result.message);
       if (family?.id) {
         void emitFamilyEvent(family.id, "materials.print_result", {
-          family_id: family.id,
           material_id: signal.printRequest!.materialId,
           outcome: result.status,
           requested_copies: signal.printRequest!.copies,

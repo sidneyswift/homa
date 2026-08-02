@@ -160,7 +160,6 @@ export function DeviceCalendarExportSheet({
   function preview() {
     const duplicateCount = selectedItems.filter((item) => duplicates.has(calendarExportFingerprint(item))).length;
     void emitFamilyEvent(familyId, "planner.device_calendar_previewed", {
-      family_id: familyId,
       selected_count: selectedItems.length,
       duplicate_count: duplicateCount,
     });
@@ -184,7 +183,6 @@ export function DeviceCalendarExportSheet({
               ? "canceled"
               : "failed";
     void emitFamilyEvent(familyId, "planner.device_calendar_export_finished", {
-      family_id: familyId,
       outcome,
       selected_count: nextResults.length,
       saved_count: savedCount,
