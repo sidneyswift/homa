@@ -29,12 +29,12 @@ describe("family asset exact metadata helpers", () => {
 
   it("removes only Vercel's exact chat Blob suffix", () => {
     assert.equal(
-      stripFamilyChatBlobSuffix("IMG_6203-7T4Cg8XgYfJhL3SR8IExfYK44q7.jpg"),
+      stripFamilyChatBlobSuffix("IMG_6203-7T4Cg8XgYfJhL3SR8IExfYK44q7AbC.jpg"),
       "IMG_6203.jpg",
     );
     assert.equal(
-      stripFamilyChatBlobSuffix("unit-12345678901234567890123456.pdf"),
-      "unit-12345678901234567890123456.pdf",
+      stripFamilyChatBlobSuffix("unit-12345678901234567890123456789.pdf"),
+      "unit-12345678901234567890123456789.pdf",
     );
   });
 

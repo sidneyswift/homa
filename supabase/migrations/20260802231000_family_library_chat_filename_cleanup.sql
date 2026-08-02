@@ -1,4 +1,4 @@
--- Chat photo Blob paths carry Vercel's 27-character storage suffix. It is
+-- Chat photo Blob paths carry Vercel's 30-character storage suffix. It is
 -- not part of the filename the parent chose, so remove it from active Library
 -- records that are proven to originate from a chat attachment. Preserve any
 -- title that Homa or the parent already improved.
@@ -8,13 +8,13 @@ with candidates as (
     original_name,
     regexp_replace(
       original_name,
-      '-[A-Za-z0-9]{27}([.][^.]+)$',
+      '-[A-Za-z0-9]{30}([.][^.]+)?$',
       '\1'
     ) as cleaned_name
   from public.family_assets
   where source_attachment_id is not null
     and deleted_at is null
-    and original_name ~ '-[A-Za-z0-9]{27}[.][^.]+$'
+    and original_name ~ '-[A-Za-z0-9]{30}([.][^.]+)?$'
 ), cleaned as (
   select
     id,

@@ -9,7 +9,7 @@ describe("family chat attachment filename promotion", () => {
       attachmentOriginalName({
         caption: null,
         kind: "image",
-        url: "https://assets.public.blob.vercel-storage.com/families/family-id/chat/IMG_6203-7T4Cg8XgYfJhL3SR8IExfYK44q7.jpg",
+        url: "https://assets.public.blob.vercel-storage.com/families/family-id/chat/IMG_6203-7T4Cg8XgYfJhL3SR8IExfYK44q7AbC.jpg",
       }),
       "IMG_6203.jpg",
     );

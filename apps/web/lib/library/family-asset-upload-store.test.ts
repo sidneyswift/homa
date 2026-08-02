@@ -95,8 +95,8 @@ describe("family asset upload persistence mapping", () => {
   it("cleans a legacy chat Blob suffix without replacing an improved title", () => {
     const row: FamilyAssetRow = {
       id: "asset-id",
-      title: "IMG_6203-7T4Cg8XgYfJhL3SR8IExfYK44q7",
-      original_name: "IMG_6203-7T4Cg8XgYfJhL3SR8IExfYK44q7.jpg",
+      title: "IMG_6203-7T4Cg8XgYfJhL3SR8IExfYK44q7AbC",
+      original_name: "IMG_6203-7T4Cg8XgYfJhL3SR8IExfYK44q7AbC.jpg",
       url: "https://assets.public.blob.vercel-storage.com/families/family-id/library/photo.jpg",
       download_url: "https://assets.public.blob.vercel-storage.com/families/family-id/library/photo.jpg?download=1",
       media_type: "image/jpeg",
