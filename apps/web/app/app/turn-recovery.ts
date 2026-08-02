@@ -1,5 +1,5 @@
 import { Client } from "eve/client";
-import type { HandleMessageStreamEvent } from "eve/client";
+import type { HandleMessageStreamEvent, SessionState } from "eve/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
@@ -53,6 +53,18 @@ const SESSION_LOOKUP_RETRY_MS = 2_500;
 export interface RecoveredTurn {
   /** Every durable event of the session, through the closing boundary. */
   events: HandleMessageStreamEvent[];
+  /** The cursor immediately after that boundary, ready for the next turn. */
+  session: SessionState;
+}
+
+export function sessionStateAfterRecoveredBoundary(input: {
+  boundary: "session.waiting" | "session.completed";
+  sessionId: string;
+  streamIndex: number;
+}): SessionState {
+  return input.boundary === "session.waiting"
+    ? { sessionId: input.sessionId, streamIndex: input.streamIndex }
+    : { streamIndex: 0 };
 }
 
 async function sleep(ms: number, signal: AbortSignal): Promise<void> {
@@ -117,7 +129,14 @@ async function replaySessionToBoundary(input: {
     events.push(event);
     if (events.length - 1 < input.minBoundaryIndex) continue;
     if (event.type === "session.waiting" || event.type === "session.completed") {
-      return { events };
+      return {
+        events,
+        session: sessionStateAfterRecoveredBoundary({
+          boundary: event.type,
+          sessionId: input.sessionId,
+          streamIndex: events.length,
+        }),
+      };
     }
     // The server itself declared the turn or session failed: there is
     // no reply to recover, the error banner is the truth. step.failed

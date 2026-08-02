@@ -2,6 +2,7 @@
 
 import { emitEvent } from "@homa/core";
 import type { UserContent } from "ai";
+import { Client } from "eve/client";
 import { useEveAgent, type EveMessage } from "eve/react";
 import { ArrowDown, ArrowUp, ChevronDown, Square, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -137,6 +138,7 @@ import { latestSnapRequest } from "./snap-card";
 import { buildTranscript } from "./transcript-days";
 import { markTurnStarted, takeTurnLatencyMs } from "./turn-clock";
 import { recoverLostTurn } from "./turn-recovery";
+import { createReattachableEveSession } from "./reattachable-eve-session";
 
 /**
  * The chat surface, the main column inside the /app frame: the sidebar
@@ -321,6 +323,24 @@ export function ChatClient({
     Boolean(serverHistory) &&
     !prepared.initialSession?.sessionId &&
     prepared.initialEvents.length > 0;
+  const [reattachableSession] = useState(() => {
+    const client = new Client({
+      auth: {
+        bearer: async () => {
+          const { data } = await supabase.auth.getSession();
+          return data.session?.access_token ?? "";
+        },
+      },
+      host: "",
+      maxReconnectAttempts: STREAM_RECONNECT_ATTEMPTS,
+    });
+    return createReattachableEveSession({
+      createSession: (state) => client.session(state),
+      initialSession: staleSessionlessEvents
+        ? undefined
+        : prepared.initialSession,
+    });
+  });
   const initialLiveMessages = staleSessionlessEvents
     ? []
     : foldEventsToMessages(prepared.initialEvents);
@@ -700,15 +720,8 @@ export function ChatClient({
   );
 
   const agent = useEveAgent({
-    auth: {
-      bearer: async () => {
-        const { data } = await supabase.auth.getSession();
-        return data.session?.access_token ?? "";
-      },
-    },
-    maxReconnectAttempts: STREAM_RECONNECT_ATTEMPTS,
     initialEvents: staleSessionlessEvents ? [] : prepared.initialEvents,
-    initialSession: staleSessionlessEvents ? undefined : prepared.initialSession,
+    session: reattachableSession.session,
     onEvent() {
       lastStreamActivityRef.current = currentTimeMs();
       durableCursorRef.current += 1;
@@ -1082,8 +1095,10 @@ export function ChatClient({
       }
       if (recovered) {
         // The fresh-start move done for her: the whole recovered session
-        // folds into the archive (reply included), the store starts
-        // clean, and the error clears with it. Nothing is lost.
+        // folds into the archive (reply included), then the store adopts
+        // the recovered cursor before its visible projection resets. The
+        // next send therefore continues this durable session instead of
+        // minting a replacement (GH #493). Nothing is lost or forked.
         const messages = foldEventsToMessages(recovered.events);
         const stamped = stampMessageTimes(liveTimes, messages);
         const nextArchived = [
@@ -1093,15 +1108,16 @@ export function ChatClient({
         setArchived(nextArchived);
         archivedRef.current = nextArchived;
         setLiveTimes({});
+        reattachableSession.adopt(recovered.session);
         saveChat(storageKey, {
           archived: nextArchived,
           events: [],
-          session: undefined,
+          session: recovered.session,
           messageTimes: {},
           lastActivityAt: currentTimeMs(),
         });
         agentReset();
-        durableCursorRef.current = 0;
+        durableCursorRef.current = recovered.session.streamIndex;
         lastSendRef.current = null;
         executePromptSuggestionLifecycleAction(
           promptSuggestionActionForLifecycleEvent({
@@ -1133,6 +1149,7 @@ export function ChatClient({
     flushQueuedMessages,
     liveTimes,
     promptSuggestionLifecycleHandlers,
+    reattachableSession,
     storageKey,
     supabase,
   ]);
