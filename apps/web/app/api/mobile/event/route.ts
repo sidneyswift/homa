@@ -1,3 +1,6 @@
+import { CAPTURE_LOOP_EVENT_NAME } from "@homa/core";
+
+import { persistCaptureLoopEvent } from "../../../../lib/capture-loop-events";
 import { persistMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
 import { requireFamilyFromBearer } from "../../../../lib/map/session";
@@ -8,7 +11,9 @@ export const POST = createMobileFamilyEventHandler({
     rateLimited(`mobile-event:${clientIp(request)}`, 240),
   authenticate: requireFamilyFromBearer,
   persist: (name, props, familyId) =>
-    persistMapEvent(name, props, { familyId }),
+    name === CAPTURE_LOOP_EVENT_NAME
+      ? persistCaptureLoopEvent(familyId, props)
+      : persistMapEvent(name, props, { familyId }),
   logError: (message, error) => {
     console.error(
       `${message}:`,

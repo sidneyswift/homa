@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { mapDb, type DbJson } from "../map/db";
+import { captureLoopReceiptLockKey } from "../capture-loop-locks";
 
 export const VOICE_ACTION_UNDO_WINDOW_MS = 10 * 60 * 1000;
 export const VOICE_ACTION_AMBIGUITY_MS = 5_000;
@@ -418,6 +419,14 @@ export async function undoVoiceAction(input: {
       };
     }
     const selected = rows[0];
+    await tx`
+      select pg_advisory_xact_lock(
+        hashtextextended(
+          ${captureLoopReceiptLockKey(input.familyId, selected.id)},
+          0
+        )
+      )
+    `;
     if (selected.undone_at) {
       return { status: "undone", receipt: publicReceipt(selected), alreadyUndone: true };
     }

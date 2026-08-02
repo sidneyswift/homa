@@ -5,6 +5,7 @@ import type {
   EventProps,
   MobileFamilyEventName,
 } from "@homa/core";
+import { CAPTURE_LOOP_EVENT_NAME } from "@homa/core";
 
 import {
   createMobileFamilyEventHandler,
@@ -112,6 +113,109 @@ describe("native family event relay", () => {
         },
       },
     ]);
+  });
+
+  it("keeps canonical loop props family-free and acknowledges the scoped row", async () => {
+    const deps = dependencies();
+    const handler = createMobileFamilyEventHandler(deps.value);
+    const props = {
+      contract_version: 1,
+      event_id: "33333333-3333-4333-8333-333333333333",
+      loop_id: "44444444-4444-4444-8444-444444444444",
+      parent_loop_id: null,
+      branch_id: null,
+      branch_scope: "family",
+      profile: "direct_mutation",
+      intent: "complete_learning",
+      stage: "entry_intent",
+      sequence: 1,
+      surface: "planner",
+      object_kind: "plan_activity",
+      object_id: "55555555-5555-4555-8555-555555555555",
+      client_context: {
+        client: "ios",
+        app_version: "1.0.0",
+        build_number: "42",
+        runtime_version: "f33dd2307f31e8694a7b2727641a13a4f5f06f86",
+        update_id: "019fc368-64b6-7efe-8f33-912d8c430d6f",
+      },
+      outcome_kind: null,
+      result_state: "not_applicable",
+      receipt_kind: "none",
+      receipt_id: null,
+      revision: null,
+      revision_id: null,
+      corrects_event_id: null,
+      correction_result: null,
+      exit_reason: null,
+    } as const;
+    const response = await handler(
+      request({ name: CAPTURE_LOOP_EVENT_NAME, props }),
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("Cache-Control"), "private, no-store");
+    assert.deepEqual(deps.persisted, [
+      {
+        name: CAPTURE_LOOP_EVENT_NAME,
+        familyId: FAMILY_ID,
+        props,
+      },
+    ]);
+    assert.equal("family_id" in deps.persisted[0].props, false);
+  });
+
+  it("rejects web identity and server-owned outcomes at the native boundary", async () => {
+    const base = {
+      contract_version: 1,
+      event_id: "33333333-3333-4333-8333-333333333333",
+      loop_id: "44444444-4444-4444-8444-444444444444",
+      parent_loop_id: null,
+      branch_id: null,
+      branch_scope: "family",
+      profile: "proposed_effect",
+      intent: "create_material",
+      stage: "outcome_verified",
+      sequence: 7,
+      surface: "material_card",
+      object_kind: "material",
+      object_id: "55555555-5555-4555-8555-555555555555",
+      outcome_kind: "artifact_ready",
+      result_state: "complete",
+      receipt_kind: "artifact_receipt",
+      receipt_id: "55555555-5555-4555-8555-555555555555",
+      revision: 1,
+      revision_id: "55555555-5555-4555-8555-555555555555",
+      corrects_event_id: null,
+      correction_result: null,
+      exit_reason: null,
+    } as const;
+    const nativeContext = {
+      client: "ios",
+      app_version: "1.0.0",
+      build_number: "42",
+      runtime_version: "f33dd2307f31e8694a7b2727641a13a4f5f06f86",
+      update_id: "019fc368-64b6-7efe-8f33-912d8c430d6f",
+    } as const;
+    const webContext = {
+      client: "web",
+      app_version: "5148f800",
+      build_number: null,
+      runtime_version: null,
+      update_id: null,
+    } as const;
+
+    for (const client_context of [nativeContext, webContext]) {
+      const deps = dependencies();
+      const response = await createMobileFamilyEventHandler(deps.value)(
+        request({
+          name: CAPTURE_LOOP_EVENT_NAME,
+          props: { ...base, client_context },
+        }),
+      );
+      assert.equal(response.status, 400);
+      assert.equal(deps.persisted.length, 0);
+    }
   });
 
   it("fails closed for missing auth and rate limiting", async () => {
