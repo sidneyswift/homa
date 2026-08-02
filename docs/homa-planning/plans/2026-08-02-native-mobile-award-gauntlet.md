@@ -1,7 +1,7 @@
 # Homa native mobile award gauntlet
 
 **Date:** 2026-08-02  
-**Status:** Evidence-backed product and UX audit, issue architecture, and ship gates  
+**Status:** Evidence-backed product and UX audit, first production correction, issue architecture, and ship gates
 **Primary lens:** A homeschooling mom using one hand, often while teaching, running the day, carrying a child, or solving an interruption  
 **Product boundary:** Homa is the parent's command center. The best result usually leaves the screen and becomes a conversation, lesson, printable, outing, observation, or calmer plan.
 
@@ -28,7 +28,7 @@ The present app breaks that loop in several material places:
 
 - A new family still leaves native for onboarding and can fall into a half-created account state.
 - There is no single Today surface that answers, “What matters now?”
-- Progress leads with age-gap labels such as “Ahead · +11 mo” instead of evidence, confidence, and a useful next move.
+- Progress now leads with dated evidence, but confidence and a useful next move are still absent.
 - Binder and Planner can become dense walls of equally weighted content.
 - Settings asks for data in forms that feel like a database editor.
 - Native analytics record a few feature completions but not the family loop.
@@ -342,6 +342,7 @@ Evidence states:
 - **Simulator observed:** the surface or interaction was observed in a simulator.
 - **Device proof missing:** a journey depends on real audio, system destinations, hardware, or interruption behavior that has not passed on a physical device.
 - **Production blocked:** a confirmed production failure prevents a safe release claim.
+- **Production OTA published:** the compatible production update channel received the exact merge commit, but an installed release client was not observed applying it.
 - **Journey incomplete:** one or more required steps or states do not exist.
 - **Harmful framing present:** the surface works mechanically but violates a binding child, trust, or copy rule.
 - **Partial code evidence:** relevant implementation exists, but route-wide coverage has not been audited.
@@ -356,7 +357,7 @@ A cell may combine states when they describe different facts, such as a simulato
 | Daily information architecture | Journey incomplete | No Today; six destinations live in a drawer; Voice empty state carries too much responsibility |
 | Fresh-family activation | Journey incomplete | Native sign-in exists, but signup and onboarding leave the app and can create a family-less auth user |
 | Planning usability | Simulator observed | Real writable day, week, and month planner; the unscheduled backlog overwhelms the visible week |
-| Progress usefulness | Simulator observed, harmful framing present | A rich projection exists, but age-gap verdicts lead and a useful next action is absent |
+| Progress usefulness | Simulator observed, production OTA published, journey incomplete | Dated source evidence now leads and age-gap verdicts are absent from the native presentation. Confidence and a useful next action remain open in gh#623 |
 | Materials and off-screen outcomes | Simulator observed, device proof missing | Creation, Binder, native print, native share, and references exist; physical destinations and lifecycle remain incomplete |
 | Proactive help and retention | Journey incomplete | Tasks are useful, but there is no push channel, Today ritual, widget, or complete weekly review |
 | Optional family collaboration | Journey incomplete | Shared family state exists, but native invitations, handoff, role clarity, scoped-helper sharing, and a privacy ledger do not |
@@ -372,7 +373,7 @@ A cell may combine states when they describe different facts, such as a simulato
 |---|---|---|---|
 | Voice | Distinctive Homa character, calm palette, obvious talk action | A very large idle character and two talk prompts compete with a truncated recommendation that has no clear action | Make system state and the single next action dominant; tie any suggestion to a tappable outcome or remove it |
 | Planner | Day, week, and month modes; real writes; calendar export | “Not yet on a day” fills the first screen with long equal-weight items, while the actual week is pushed away | Show this week's commitments and load first; collapse unscheduled work into a count, a reason, and the next two decisions |
-| Progress | Child-specific dated data and expandable subjects | Repeated “Ahead · +N mo” pills become the visual thesis; evidence and next action are secondary or absent | Lead with one dated observation, confidence, and one parent-chosen next move |
+| Progress | Child-specific dated data, expandable subjects, conflict-safe read-only copy, and evidence-first collapsed cards | Dated source evidence now leads without age-gap verdicts; confidence and a useful next action are still absent | Add honest confidence and one parent-chosen next move without turning the page back into a scorecard |
 | Binder | Strong legal record detail and material lifecycle | A full state-record packet dominates the Binder before the parent's recent materials appear | Give records their own compact entry and let recent, in-progress, and reusable learning work lead |
 | Settings | Real plan state, child data, support, sign out, and deletion | Large empty cards and a database-like add-child form make setup feel clerical; “comma-separated” is implementation language | Use a date picker, interest chips or conversational intake, collapsible add-child flow, and concise account rows |
 | Sign in | Apple, Google, and email options are present and ordered correctly | “Open onboarding” tells a new family that native is not the real product; no password recovery exists | Keep account creation, family readiness, reset, and return in one coherent native flow |
@@ -482,6 +483,8 @@ Children:
 - gh#625, remove age-gap verdict presentation from Progress.
 - gh#623, evidence-first native Progress with confidence, conflicts, receipts, and one next move.
 - gh#624, shareable evaluator or co-op evidence brief.
+
+gh#625 is **FIXED and shipped**. PR gh#638 merged as `eb680a4220f525ece454f96826a592636e8d3935` on 2026-08-02. The local native visual gauntlet verified normal and conflicting collapsed and expanded cards, 445 ChildProgress tests passed, every required PR check passed, and [Mobile OTA run 30740113556](https://github.com/sidneyswift/homa/actions/runs/30740113556) published that exact commit to the production branch. The compatible runtime is `f33dd2307f31e8694a7b2727641a13a4f5f06f86`, update group `bcb7ec6e-b7f0-4f5b-bb44-d1e290a696a3`, and iOS update `019fc1a1-dcb2-7f11-9338-cf3046453d4e`. This is production-channel proof, not a claim that an installed release client was observed applying the update.
 
 gh#393 remains part of the gh#403 feedback system. Progress may consume that signal but does not own it.
 
