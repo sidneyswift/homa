@@ -17,14 +17,22 @@ import { Card } from "./ui/card";
 
 /**
  * App Review 5.1.2(i): explicit, affirmative consent before family data
- * reaches Homa, the moment it becomes true, chat, not sign-in (a family
- * mid web onboarding has nothing going to Homa yet either). Wraps
- * ChatSession; renders the disclosure in its place until the signed-in
- * adult agrees, then passes through. Record lives on family_members
+ * reaches Homa, the moment it becomes true, an AI experience, not sign-in
+ * (a family mid web onboarding has nothing going to Homa yet either).
+ * Renders the disclosure in place until the signed-in adult agrees, then
+ * passes through. Record lives on family_members
  * (supabase/migrations/20260728190000_ai_processing_consent.sql), not a
  * local flag, so it survives reinstalls and is auditable.
  */
-export function AiConsentGate({ children }: { children: ReactNode }) {
+export function AiConsentGate({
+  children,
+  purpose = "chat",
+  embedded = false,
+}: {
+  children: ReactNode;
+  purpose?: "chat" | "progress";
+  embedded?: boolean;
+}) {
   const [status, setStatus] =
     useState<"loading" | "failed" | "needed" | "given">("loading");
   const [failureReason, setFailureReason] =
@@ -97,7 +105,7 @@ export function AiConsentGate({ children }: { children: ReactNode }) {
 
   if (status === "failed") {
     return (
-      <View style={{ padding: space.lg }}>
+      <View style={embedded ? undefined : { padding: space.lg }}>
         <Card style={{ gap: space.md }}>
           <Text
             accessibilityRole="header"
@@ -134,16 +142,19 @@ export function AiConsentGate({ children }: { children: ReactNode }) {
   }
 
   return (
-    <View style={{ padding: space.lg }}>
+    <View style={embedded ? undefined : { padding: space.lg }}>
       <Card style={{ gap: space.md }}>
         <Text
+          accessibilityRole="header"
           style={{
             fontFamily: fontFamilies.displaySemibold,
             fontSize: fontSize.lg,
             color: colors.textStrong,
           }}
         >
-          Before you chat with Homa
+          {purpose === "progress"
+            ? "Before Homa suggests a next move"
+            : "Before you chat with Homa"}
         </Text>
         <Text
           style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textBody }}
@@ -165,7 +176,13 @@ export function AiConsentGate({ children }: { children: ReactNode }) {
           </Text>
         ) : null}
         <Button
-          label={saving ? "One moment\u2026" : "I agree, let's chat"}
+          label={
+            saving
+              ? "One moment\u2026"
+              : purpose === "progress"
+                ? "I agree, show suggestions"
+                : "I agree, let's chat"
+          }
           onPress={() => void handleAgree()}
           disabled={saving}
         />

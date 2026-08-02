@@ -3,7 +3,7 @@ import { defineHook } from "eve/hooks";
 import { HOMA_MODEL } from "../model";
 import {
   recordModelUsage,
-  usageChannelFromAttributes,
+  modelUsageChannelFromAttributes,
   usageSurfaceFromAttributes,
 } from "../../lib/model-usage";
 
@@ -44,7 +44,7 @@ export default defineHook({
         await recordModelUsage({
           familyId: attributes?.familyId ?? null,
           surface: usageSurfaceFromAttributes(attributes),
-          channel: usageChannelFromAttributes(attributes),
+          channel: modelUsageChannelFromAttributes(attributes),
           model: HOMA_MODEL,
           modality: "text",
           inputTokens: usage.inputTokens,

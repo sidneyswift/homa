@@ -38,12 +38,17 @@ export function isSendLineOccupied(input: {
 export interface QueuedChatMessage {
   text: string;
   lane: "parent" | "directive";
-  clientContext?: ProgressEvidenceClientContext;
+  clientContext?: ProgressClientContext;
+  headers?: Readonly<Record<string, string>>;
 }
 
-export type ProgressEvidenceClientContext = Readonly<Record<string, string>> & {
+export type ProgressDraftIntent =
+  | "share_progress_evidence"
+  | "review_progress_next_move";
+
+export type ProgressClientContext = Readonly<Record<string, string>> & {
   readonly source: "progress";
-  readonly intent: "share_progress_evidence";
+  readonly intent: ProgressDraftIntent;
   readonly progressChildId: string;
 };
 
@@ -55,20 +60,25 @@ export function takeNextQueuedTurn(
   queue: readonly QueuedChatMessage[],
 ): {
   message: string;
-  clientContext?: ProgressEvidenceClientContext;
+  clientContext?: ProgressClientContext;
+  headers?: Readonly<Record<string, string>>;
   remaining: QueuedChatMessage[];
 } | null {
   const first = queue[0];
   if (!first) return null;
-  if (first.lane === "directive" || first.clientContext) {
+  if (first.lane === "directive" || first.clientContext || first.headers) {
     return {
       message: first.text,
       ...(first.clientContext ? { clientContext: first.clientContext } : {}),
+      ...(first.headers ? { headers: first.headers } : {}),
       remaining: queue.slice(1),
     };
   }
   const boundary = queue.findIndex(
-    (entry) => entry.lane === "directive" || entry.clientContext !== undefined,
+    (entry) =>
+      entry.lane === "directive" ||
+      entry.clientContext !== undefined ||
+      entry.headers !== undefined,
   );
   const count = boundary === -1 ? queue.length : boundary;
   return {

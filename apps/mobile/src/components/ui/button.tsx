@@ -36,6 +36,7 @@ const VARIANT_STYLES: Record<
 export function Button({
   label,
   onPress,
+  accessibilityHint,
   variant = "primary",
   size = "md",
   disabled = false,
@@ -44,6 +45,7 @@ export function Button({
 }: {
   label: string;
   onPress: () => void;
+  accessibilityHint?: string;
   variant?: ButtonVariant;
   size?: "sm" | "md" | "lg";
   disabled?: boolean;
@@ -59,6 +61,8 @@ export function Button({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled }}
       onPress={onPress}
       disabled={disabled}
       style={({ pressed }) => [

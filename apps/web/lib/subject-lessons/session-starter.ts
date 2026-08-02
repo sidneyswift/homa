@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { resolveInternalEveOrigin } from "../internal-eve-route";
+
 import type {
   StartSubjectLessonSessionInput,
   StartSubjectLessonSessionResult,
@@ -17,31 +19,7 @@ export function resolveSubjectLessonInternalOrigin(input: {
   value: string | undefined;
   nodeEnv: string | undefined;
 }): string | null {
-  const value = input.value?.trim();
-  if (!value) return null;
-
-  let parsed: URL;
-  try {
-    parsed = new URL(value);
-  } catch {
-    return null;
-  }
-  if (
-    parsed.username
-    || parsed.password
-    || parsed.pathname !== "/"
-    || parsed.search
-    || parsed.hash
-  ) {
-    return null;
-  }
-  if (parsed.protocol === "https:") return parsed.origin;
-
-  const localHttp =
-    parsed.protocol === "http:"
-    && input.nodeEnv !== "production"
-    && (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1");
-  return localHttp ? parsed.origin : null;
+  return resolveInternalEveOrigin(input);
 }
 
 export async function startSubjectLessonSession(

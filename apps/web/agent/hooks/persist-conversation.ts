@@ -12,7 +12,7 @@ import { preparedResearchBriefOwnsCanonicalPersistence } from "../../lib/tasks/r
 import { currentOutboundChildFramingApproval } from "../outbound-child-framing-state";
 
 /**
- * Internal lesson-builder chatter is durable in Eve and the lesson row, but
+ * Internal producer chatter is durable in Eve and its purpose-built row, but
  * is not a parent conversation and must not enter recall.
  */
 export function shouldSkipConversationPersistence(
@@ -21,7 +21,11 @@ export function shouldSkipConversationPersistence(
   const values = attributes as
     | { channel?: unknown; voiceBridge?: unknown }
     | undefined;
-  return values?.channel === "subject_lesson" || values?.voiceBridge === "true";
+  return (
+    values?.channel === "subject_lesson" ||
+    values?.channel === "progress_next_move" ||
+    values?.voiceBridge === "true"
+  );
 }
 
 function outboundChannel(attributes: unknown) {

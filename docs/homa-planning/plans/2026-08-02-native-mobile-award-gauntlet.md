@@ -179,7 +179,7 @@ Only these four values appear in the tables. “Strong” still requires final-p
 |---|---|---|---|
 | Capture what happened | Voice, text, photo, or recording proposes a short observation for confirmation | Partial | Finish photo and lesson-review journeys |
 | See recent evidence | Lead with a concrete quote, work sample, or observed behavior and its date | Partial | Reorder Progress around evidence, not level labels |
-| Know what to try next | Every insight ends with one small, relevant next move | Missing | Build “Try next” cards from validated progress state |
+| Know what to try next | Every insight ends with one small, relevant next move | Partial | gh#645 adds one verified, source-grounded move with honest clarification and editable Chat handoff; measure real-family usefulness before calling the loop strong |
 | Understand confidence | Distinguish observed, inferred, and not yet known in plain language | Missing | Add confidence and source disclosure |
 | See change over time | A calm story of dated observations, changing support needs, and the parent's chosen next moves | Partial | Add trajectory with sparse, readable milestones |
 | Resolve conflicting evidence | Show both pieces and ask the parent, never silently average them | Missing | Port the exact conflict-resolution flow |
@@ -482,6 +482,7 @@ Children:
 
 - gh#625, remove age-gap verdict presentation from Progress.
 - gh#623, evidence-first native Progress with confidence, conflicts, receipts, and one next move.
+- gh#645, one verified next move from fresh canonical Progress evidence.
 - gh#624, shareable evaluator or co-op evidence brief.
 
 gh#625 is **FIXED and shipped**. PR gh#638 merged as `eb680a4220f525ece454f96826a592636e8d3935` on 2026-08-02. The local native visual gauntlet verified normal and conflicting collapsed and expanded cards, 445 ChildProgress tests passed, every required PR check passed, and [Mobile OTA run 30740113556](https://github.com/sidneyswift/homa/actions/runs/30740113556) published that exact commit to the production branch. The compatible runtime is `f33dd2307f31e8694a7b2727641a13a4f5f06f86`, update group `bcb7ec6e-b7f0-4f5b-bb44-d1e290a696a3`, and iOS update `019fc1a1-dcb2-7f11-9338-cf3046453d4e`. This is production-channel proof, not a claim that an installed release client was observed applying the update.

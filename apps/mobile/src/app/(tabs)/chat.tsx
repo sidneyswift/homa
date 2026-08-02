@@ -14,7 +14,11 @@ import {
   ChatSession,
 } from "../../features/chat/chat-session";
 import { parseComposerDraftRequest } from "../../features/chat/composer-draft";
-import { progressChildIdFromRoute } from "../../features/chat/progress-draft";
+import {
+  progressChildIdFromRoute,
+  progressDraftIntentFromRoute,
+  progressFingerprintFromRoute,
+} from "../../features/chat/progress-draft";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { type ChildRecord } from "../../lib/family";
 import {
@@ -49,6 +53,8 @@ export default function ChatScreen() {
     progressDraft?: string | string[];
     progressDraftId?: string | string[];
     progressChildId?: string | string[];
+    progressIntent?: string | string[];
+    progressNextMoveFingerprint?: string | string[];
   }>();
   const { session } = useSession();
   const { family, children, memberDisplayName, loading } = useFamilyData();
@@ -75,7 +81,18 @@ export default function ChatScreen() {
   )
     ? requestedProgressChildId
     : null;
-  const validatedDraftRequest = initialProgressChildId ? draftRequest : null;
+  const initialProgressIntent = progressDraftIntentFromRoute(
+    params.progressIntent,
+  );
+  const initialProgressFingerprint = progressFingerprintFromRoute(
+    params.progressNextMoveFingerprint,
+  );
+  const hasValidProgressContext =
+    initialProgressChildId !== null &&
+    initialProgressIntent !== null &&
+    (initialProgressIntent === "share_progress_evidence" ||
+      initialProgressFingerprint !== null);
+  const validatedDraftRequest = hasValidProgressContext ? draftRequest : null;
   const handleDraftRequestHandled = useCallback(
     (requestId: string) => {
       if (validatedDraftRequest?.id !== requestId) return;
@@ -83,6 +100,8 @@ export default function ChatScreen() {
         progressDraft: "",
         progressDraftId: "",
         progressChildId: "",
+        progressIntent: "",
+        progressNextMoveFingerprint: "",
       });
     },
     [router, validatedDraftRequest?.id],
@@ -228,6 +247,8 @@ export default function ChatScreen() {
               parentName={memberDisplayName ?? readyFamily.parent_display_name ?? null}
               draftRequest={validatedDraftRequest}
               initialProgressChildId={initialProgressChildId}
+              initialProgressIntent={initialProgressIntent}
+              initialProgressFingerprint={initialProgressFingerprint}
               onDraftRequestHandled={handleDraftRequestHandled}
             />
           </AiConsentGate>

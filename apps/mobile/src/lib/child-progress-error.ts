@@ -39,7 +39,13 @@ export function classifyChildProgressReadFailure(
   ) {
     return "scope";
   }
-  if (reason === "invalid-projection") return "invalid";
+  if (
+    reason === "invalid-projection" ||
+    reason === "invalid-result" ||
+    reason === "projection-changed"
+  ) {
+    return "invalid";
+  }
   if (status === 429 || status >= 500) return "transient";
   return "invalid";
 }

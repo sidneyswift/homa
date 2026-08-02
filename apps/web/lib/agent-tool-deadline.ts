@@ -89,6 +89,19 @@ export class ToolDeadlineError extends Error {
   }
 }
 
+/** Thrown before a Homa tool body runs in a restricted autonomous task. */
+export class ToolAccessBoundaryError extends Error {
+  readonly channel: string;
+
+  constructor(channel: string) {
+    super(
+      `This tool is not allowed in the restricted ${channel} task. Stop without trying another effect.`,
+    );
+    this.name = "ToolAccessBoundaryError";
+    this.channel = channel;
+  }
+}
+
 /**
  * Deadline tiers, in milliseconds. The numbers come from the real
  * latency of every completed call in public.agent_tool_calls as of
@@ -183,6 +196,11 @@ export function defineBoundedTool<TSchema extends z.ZodType, TOutput>(definition
    * being wrong the other way is a parent getting the same text twice.
    */
   repeatable: boolean;
+  /**
+   * Opts this exact tool into the autonomous Progress producer. Every other
+   * Homa tool is denied before its body runs, regardless of prompt text.
+   */
+  allowProgressNextMove?: boolean;
   execute(input: z.output<TSchema>, ctx: ToolContext): Promise<TOutput> | TOutput;
   // Both mirror eve's own defineTool overload rather than restating the
   // shapes; ApprovalContextInput is conditional on TInput, so a hand-written
@@ -190,10 +208,22 @@ export function defineBoundedTool<TSchema extends z.ZodType, TOutput>(definition
   approval?: ToolDefinition<z.output<TSchema>, unknown>["approval"];
   toModelOutput?: ToolDefinition<unknown, TOutput>["toModelOutput"];
 }): ToolDefinition<z.output<TSchema>, TOutput> {
-  const { deadlineMs, repeatable, execute, ...rest } = definition;
+  const {
+    deadlineMs,
+    repeatable,
+    allowProgressNextMove = false,
+    execute,
+    ...rest
+  } = definition;
   return defineTool({
     ...rest,
     async execute(input: z.output<TSchema>, ctx: ToolContext): Promise<TOutput> {
+      if (
+        ctx.session?.auth.current?.attributes.channel === "progress_next_move" &&
+        !allowProgressNextMove
+      ) {
+        throw new ToolAccessBoundaryError("progress_next_move");
+      }
       return await withToolDeadline(deadlineMs, () => execute(input, ctx), repeatable);
     },
   }) as ToolDefinition<z.output<TSchema>, TOutput>;

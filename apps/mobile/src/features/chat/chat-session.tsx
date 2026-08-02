@@ -30,6 +30,7 @@ import { colors, fontSize, pressScale, radius, space } from "../../theme/tokens"
 import {
   isSendLineOccupied,
   takeNextQueuedTurn,
+  type ProgressDraftIntent,
   type QueuedChatMessage,
 } from "./chat-send-policy";
 import {
@@ -39,9 +40,7 @@ import { busyLabel, countLastTurnToolCalls } from "./message-utils";
 import { BusyBubble, MessageView } from "./message-view";
 import {
   bindProgressDraftContext,
-  mergeProgressDraft,
-  progressChildIdForDraft,
-  progressEvidenceClientContext,
+  progressTransportForDraft,
   type ProgressDraftBinding,
 } from "./progress-draft";
 import { latestQuestionRequest } from "./question-card-model";
@@ -170,6 +169,8 @@ export function ChatSession({
   parentName,
   draftRequest,
   initialProgressChildId,
+  initialProgressIntent,
+  initialProgressFingerprint,
   onDraftRequestHandled,
 }: {
   storageKey: string;
@@ -179,6 +180,8 @@ export function ChatSession({
   parentName: string | null;
   draftRequest: ComposerDraftRequest | null;
   initialProgressChildId: string | null;
+  initialProgressIntent: ProgressDraftIntent | null;
+  initialProgressFingerprint: string | null;
   onDraftRequestHandled: (requestId: string) => void;
 }) {
   const messagesRef = useRef<readonly EveMessage[]>([]);
@@ -212,11 +215,31 @@ export function ChatSession({
     ((input: {
       message: string;
       clientContext?: QueuedChatMessage["clientContext"];
+      headers?: QueuedChatMessage["headers"];
     }) => Promise<void>) | null
   >(null);
   const [draft, setDraft] = useState("");
+  const [pendingProgressDraft, setPendingProgressDraft] = useState<{
+    request: ComposerDraftRequest;
+    childId: string;
+    intent: ProgressDraftIntent;
+    fingerprint: string | null;
+  } | null>(null);
+  const [parkedComposer, setParkedComposer] = useState<{
+    draft: string;
+    binding: ProgressDraftBinding | null;
+  } | null>(null);
   const handledDraftRequestRef = useRef<string | null>(null);
   const progressDraftBindingRef = useRef<ProgressDraftBinding | null>(null);
+  const [progressDraftBinding, setProgressDraftBindingState] =
+    useState<ProgressDraftBinding | null>(null);
+  const setProgressDraftBinding = useCallback(
+    (binding: ProgressDraftBinding | null) => {
+      progressDraftBindingRef.current = binding;
+      setProgressDraftBindingState(binding);
+    },
+    [],
+  );
   // Lost-turn recovery bookkeeping (lib/turn-recovery.ts): the durable
   // stream cursor (session streamIndex at mount + one per received
   // event, surviving storage event trimming), what the last send
@@ -230,26 +253,46 @@ export function ChatSession({
     if (
       !draftRequest ||
       !initialProgressChildId ||
+      !initialProgressIntent ||
       handledDraftRequestRef.current === draftRequest.id
     ) {
       return;
     }
     handledDraftRequestRef.current = draftRequest.id;
-    setDraft((current) => {
-      const merged = mergeProgressDraft(current, draftRequest.text);
-      progressDraftBindingRef.current = bindProgressDraftContext(
-        initialProgressChildId,
-        draftRequest.text,
-        merged,
-      );
-      return merged;
-    });
-    onDraftRequestHandled(draftRequest.id);
-    setTimeout(() => composerRef.current?.focus(), 0);
+    const timer = setTimeout(() => {
+      const incoming = {
+        request: draftRequest,
+        childId: initialProgressChildId,
+        intent: initialProgressIntent,
+        fingerprint: initialProgressFingerprint,
+      };
+      if (draft.trim().length > 0 || parkedComposer) {
+        setPendingProgressDraft(incoming);
+      } else {
+        setDraft(draftRequest.text);
+        setProgressDraftBinding(
+          bindProgressDraftContext(
+            initialProgressChildId,
+            draftRequest.text,
+            draftRequest.text,
+            initialProgressIntent,
+            initialProgressFingerprint,
+          ),
+        );
+        setTimeout(() => composerRef.current?.focus(), 0);
+      }
+      onDraftRequestHandled(draftRequest.id);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [
+    draft,
     draftRequest,
     initialProgressChildId,
+    initialProgressFingerprint,
+    initialProgressIntent,
     onDraftRequestHandled,
+    parkedComposer,
+    setProgressDraftBinding,
   ]);
 
   useEffect(() => {
@@ -281,6 +324,7 @@ export function ChatSession({
         ...(next.clientContext
           ? { clientContext: next.clientContext }
           : {}),
+        ...(next.headers ? { headers: next.headers } : {}),
       });
     }, 0);
   }, []);
@@ -502,9 +546,6 @@ export function ChatSession({
   }, [agentStop, busy]);
 
   function updateDraft(next: string): void {
-    if (!progressChildIdForDraft(progressDraftBindingRef.current, next)) {
-      progressDraftBindingRef.current = null;
-    }
     setDraft(next);
   }
 
@@ -514,18 +555,15 @@ export function ChatSession({
     // A tap on a card is not typing, so it leaves whatever she had
     // half-written in the composer alone (the web twin's send policy,
     // apps/web/app/app/chat-send-policy.ts).
-    const progressChildId = progressChildIdForDraft(
+    const progressTransport = progressTransportForDraft(
       progressDraftBindingRef.current,
       text,
     );
-    const clientContext =
-      source === "composer" && progressChildId
-        ? progressEvidenceClientContext(progressChildId)
-        : undefined;
+    const composerTransport = source === "composer" ? progressTransport : null;
     const queuedMessage: QueuedChatMessage = {
       text: message,
       lane: source === "directive" ? "directive" : "parent",
-      ...(clientContext ? { clientContext } : {}),
+      ...(composerTransport ?? {}),
     };
     // Sending mid-turn queues instead of refusing (texting model,
     // founder ruling 2026-07-10 night): the bubble waits by the
@@ -542,8 +580,7 @@ export function ChatSession({
       // A tap on a card is not typing, so it leaves whatever she had
       // half-written in the composer alone.
       if (source === "composer") {
-        setDraft("");
-        progressDraftBindingRef.current = null;
+        releaseComposerAfterSend();
       }
       setQueued((current) => {
         const next = [...current, queuedMessage];
@@ -553,8 +590,7 @@ export function ChatSession({
       return;
     }
     if (source === "composer") {
-      setDraft("");
-      progressDraftBindingRef.current = null;
+      releaseComposerAfterSend();
     }
     // Reaching here means the line reads as free (not busy, not
     // recovering), so any recovery handle left over is already spent or
@@ -579,7 +615,47 @@ export function ChatSession({
       ...(next.clientContext
         ? { clientContext: next.clientContext }
         : {}),
+      ...(next.headers ? { headers: next.headers } : {}),
     });
+  }
+
+  function releaseComposerAfterSend(): void {
+    if (parkedComposer) {
+      setDraft(parkedComposer.draft);
+      setProgressDraftBinding(parkedComposer.binding);
+      setParkedComposer(null);
+      return;
+    }
+    setDraft("");
+    setProgressDraftBinding(null);
+  }
+
+  function usePendingProgressDraft(): void {
+    if (!pendingProgressDraft) return;
+    setParkedComposer({
+      draft,
+      binding: progressDraftBindingRef.current,
+    });
+    setDraft(pendingProgressDraft.request.text);
+    setProgressDraftBinding(
+      bindProgressDraftContext(
+        pendingProgressDraft.childId,
+        pendingProgressDraft.request.text,
+        pendingProgressDraft.request.text,
+        pendingProgressDraft.intent,
+        pendingProgressDraft.fingerprint,
+      ),
+    );
+    setPendingProgressDraft(null);
+    setTimeout(() => composerRef.current?.focus(), 0);
+  }
+
+  function restoreParkedComposer(): void {
+    if (!parkedComposer) return;
+    setDraft(parkedComposer.draft);
+    setProgressDraftBinding(parkedComposer.binding);
+    setParkedComposer(null);
+    setTimeout(() => composerRef.current?.focus(), 0);
   }
 
   function focusComposer() {
@@ -890,31 +966,110 @@ export function ChatSession({
           <ChecklistTakeover childId={checklistTakeover} onClose={closeChecklist} />
         </View>
       ) : (
+        <View style={{ borderTopWidth: 1, borderTopColor: colors.borderSubtle, backgroundColor: colors.page }}>
+        {pendingProgressDraft ? (
+          <ProgressDraftChoice
+            intent={pendingProgressDraft.intent}
+            onUse={usePendingProgressDraft}
+            onKeep={() => setPendingProgressDraft(null)}
+          />
+        ) : parkedComposer ? (
+          <View style={{ paddingHorizontal: space.md, paddingTop: space.sm, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: space.sm }}>
+            <Text style={{ flex: 1, fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textBody }}>
+              Your earlier draft is safe.
+            </Text>
+            <Pressable accessibilityRole="button" onPress={restoreParkedComposer} style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: space.sm }}>
+              <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.brand }}>
+                Back to my draft
+              </Text>
+            </Pressable>
+          </View>
+        ) : null}
+        {progressDraftBinding ? (
+          <View
+            style={{
+              paddingHorizontal: space.md,
+              paddingTop: space.sm,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: space.sm,
+            }}
+          >
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text
+                style={{
+                  fontFamily: fontFamilies.bodySemibold,
+                  fontSize: fontSize.xs,
+                  color: colors.textStrong,
+                }}
+              >
+                {progressDraftBinding.intent === "review_progress_next_move"
+                  ? "Progress move attached"
+                  : "Progress context attached"}
+              </Text>
+              <Text
+                style={{
+                  fontFamily: fontFamilies.body,
+                  fontSize: fontSize.xs,
+                  color: colors.textBody,
+                }}
+              >
+                Edit anything. Homa will keep the right Progress context when you send.
+              </Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Remove Progress context"
+              accessibilityHint="Keeps your words and removes the attached Progress details."
+              onPress={() => setProgressDraftBinding(null)}
+              style={{
+                minHeight: 44,
+                justifyContent: "center",
+                paddingHorizontal: space.sm,
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: fontFamilies.bodySemibold,
+                  fontSize: fontSize.sm,
+                  color: colors.brand,
+                }}
+              >
+                Remove context
+              </Text>
+            </Pressable>
+          </View>
+        ) : null}
         <View
           style={{
             flexDirection: "row",
+            alignItems: "flex-end",
             gap: space.sm,
             padding: space.md,
-            borderTopWidth: 1,
-            borderTopColor: colors.borderSubtle,
-            backgroundColor: colors.page,
           }}
         >
         <TextInput
           ref={composerRef}
           value={draft}
           onChangeText={updateDraft}
+          accessibilityLabel="Message Homa"
           placeholder={"Tell Homa about your day\u2026"}
           placeholderTextColor={colors.textSubtle}
+          multiline
           returnKeyType="send"
+          submitBehavior="submit"
           onSubmitEditing={() => sendMessage(draft)}
           style={{
             flex: 1,
             minHeight: 48,
-            borderRadius: radius.pill,
+            maxHeight: 128,
+            borderRadius: radius.lg,
             borderWidth: 1,
             borderColor: colors.border,
             paddingHorizontal: 20,
+            paddingVertical: 12,
+            textAlignVertical: "top",
             fontFamily: fontFamilies.body,
             fontSize: fontSize.base,
             color: colors.textStrong,
@@ -984,7 +1139,51 @@ export function ChatSession({
           </Pressable>
         ) : null}
         </View>
+        </View>
       )}
+    </View>
+  );
+}
+
+function ProgressDraftChoice({
+  intent,
+  onUse,
+  onKeep,
+}: {
+  intent: ProgressDraftIntent;
+  onUse: () => void;
+  onKeep: () => void;
+}) {
+  return (
+    <View
+      accessibilityRole="alert"
+      style={{
+        margin: space.md,
+        marginBottom: 0,
+        padding: space.md,
+        gap: space.sm,
+        borderRadius: radius.lg,
+        backgroundColor: colors.brandSoft,
+      }}
+    >
+      <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textStrong }}>
+        You already have a draft
+      </Text>
+      <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}>
+        Keep it, or set it aside while you talk through this Progress idea.
+      </Text>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space.sm }}>
+        <Pressable accessibilityRole="button" onPress={onUse} style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: space.md, borderRadius: radius.pill, backgroundColor: colors.brand }}>
+          <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.onBrand }}>
+            {intent === "review_progress_next_move" ? "Use next move" : "Use Progress prompt"}
+          </Text>
+        </Pressable>
+        <Pressable accessibilityRole="button" onPress={onKeep} style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: space.md }}>
+          <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textStrong }}>
+            Keep my draft
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
 }

@@ -44,6 +44,8 @@ export const USAGE_SURFACES = [
   // The judgment step that reads a parent's message for what it says
   // about her children (AGENTS.md "Models judge, code verifies").
   "progress_claim_extraction",
+  // One read-only, evidence-grounded activity proposed for Progress.
+  "progress_next_move",
   // The judgment step that proposes source-grounded metadata for one
   // family-owned Library original. Deterministic verification follows.
   "family_asset_ingestion",
@@ -59,6 +61,7 @@ export type UsageChannel =
   | "sms"
   | "email"
   | "dispatch"
+  | "mobile"
   | "subject_lesson";
 
 export interface ModelUsageRow {
@@ -130,7 +133,9 @@ export function gatewayAttribution(
 }
 
 /** Session-auth attributes -> the ledger's channel value. */
-export function usageChannelFromAttributes(attributes: unknown): UsageChannel {
+export function usageChannelFromAttributes(
+  attributes: unknown,
+): Exclude<UsageChannel, "mobile"> {
   const channel = (attributes as { channel?: string } | undefined)?.channel;
   return channel === "sms"
     || channel === "email"
@@ -138,6 +143,16 @@ export function usageChannelFromAttributes(attributes: unknown): UsageChannel {
     || channel === "subject_lesson"
     ? channel
     : "web";
+}
+
+/** Model usage can distinguish native traffic without widening effect tables. */
+export function modelUsageChannelFromAttributes(
+  attributes: unknown,
+): UsageChannel {
+  const channel = (attributes as { channel?: string } | undefined)?.channel;
+  return channel === "mobile" || channel === "progress_next_move"
+    ? "mobile"
+    : usageChannelFromAttributes(attributes);
 }
 
 /** Authenticated task-kind and internal-channel attribution for Eve model calls. */
@@ -152,6 +167,12 @@ export function usageSurfaceFromAttributes(attributes: unknown): UsageSurface {
         deliveryVersion?: string;
       }
     | undefined;
+  if (
+    candidate?.channel === "progress_next_move" &&
+    candidate.modelUsageSurface === "progress_next_move"
+  ) {
+    return "progress_next_move";
+  }
   if (
     candidate?.channel === "subject_lesson"
     && candidate.modelUsageSurface

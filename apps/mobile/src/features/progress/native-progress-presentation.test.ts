@@ -14,6 +14,10 @@ const kidSwitcherSource = readFileSync(
   new URL("./kid-switcher.tsx", import.meta.url),
   "utf8",
 );
+const nextMoveCardSource = readFileSync(
+  new URL("./progress-next-move-card.tsx", import.meta.url),
+  "utf8",
+);
 
 describe("native Progress child-safe presentation contract", () => {
   it("keeps every internal score position out of the collapsed subject card", () => {
@@ -51,13 +55,31 @@ describe("native Progress child-safe presentation contract", () => {
     assert.match(progressScreenSource, /familyLoading && children\.length === 0/u);
     assert.match(progressScreenSource, /Loading your family/u);
     assert.match(progressScreenSource, /progressAssessmentCta\(childName\)/u);
-    assert.match(progressScreenSource, /visibleView\.subjects\.length === 0/u);
+    assert.match(progressScreenSource, /view\.subjects\.length === 0/u);
     assert.match(progressScreenSource, /ProgressSkeleton/u);
     assert.match(progressScreenSource, /progressErrorPresentation\(failure, childName\)/u);
     assert.match(progressScreenSource, /progressDraftId/u);
     assert.match(progressScreenSource, /progressChildId/u);
     assert.match(progressScreenSource, /label="Tell Homa"/u);
     assert.doesNotMatch(progressScreenSource, /Tell Homa about \$\{childName\}/u);
+  });
+
+  it("mounts the model-backed next move only inside durable AI consent", () => {
+    assert.match(
+      progressScreenSource,
+      /<AiConsentGate purpose="progress" embedded>[\s\S]*<ProgressNextMoveSection/u,
+    );
+    assert.match(
+      progressScreenSource,
+      /function ProgressNextMoveSection[\s\S]*useProgressNextMove\(view\)/u,
+    );
+    assert.doesNotMatch(
+      progressScreenSource.slice(
+        0,
+        progressScreenSource.indexOf("function ProgressNextMoveSection"),
+      ),
+      /useProgressNextMove\(/u,
+    );
   });
 
   it("gives each permanent failure a truthful recovery instead of retrying forever", () => {
@@ -123,5 +145,19 @@ describe("native Progress child-safe presentation contract", () => {
     assert.match(cardSource, /const needsConfirm = subject\.state === "conflict"/u);
     assert.match(cardSource, /!needsConfirm \? \(/u);
     assert.match(cardSource, /takeaway\?\.stateLabel/u);
+  });
+
+  it("makes each next-move action and destination predictable", () => {
+    assert.match(nextMoveCardSource, /"Adjust in Chat"/u);
+    assert.match(nextMoveCardSource, /"Answer in Chat"/u);
+    assert.match(
+      nextMoveCardSource,
+      /Nothing sends until you tap Send\./u,
+    );
+    assert.match(nextMoveCardSource, /Hides this suggestion until tomorrow\./u);
+    assert.match(
+      nextMoveCardSource,
+      /accessibilityState=\{\{ disabled: dismissing, busy: dismissing \}\}/u,
+    );
   });
 });

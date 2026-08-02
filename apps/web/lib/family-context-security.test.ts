@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { shouldSkipConversationPersistence } from "../agent/hooks/persist-conversation";
+import { shouldSkipConversationClassification } from "../agent/hooks/classify-conversation";
 import { resolveFamilyContextInstructionMarkdown } from "../agent/instructions/family-context";
 import {
   MissingFamilyContextError,
@@ -183,6 +184,57 @@ describe("subject lesson pinned family context", () => {
   });
 });
 
+describe("Progress next move restricted context", () => {
+  it("loads no broader family, sibling, memory, call, or continuity data", async () => {
+    const calls: string[] = [];
+    const markdown = await resolveFamilyContextInstructionMarkdown(
+      {
+        attributes: {
+          channel: "progress_next_move",
+          familyId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+          childId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+        },
+        sessionId: "session-1",
+        turnId: "turn-1",
+      },
+      {
+        loadCallerFamilyContext: async () => {
+          calls.push("caller-family");
+          throw new Error("must not load");
+        },
+        loadPinnedFamilyContext: async () => {
+          calls.push("pinned-family");
+          throw new Error("must not load");
+        },
+        renderFamilyContext: () => {
+          calls.push("render-family");
+          return "must not render";
+        },
+        loadProgressContext: async () => {
+          calls.push("progress");
+          return "must not load";
+        },
+        loadContinuityContext: async () => {
+          calls.push("continuity");
+          return "must not load";
+        },
+        loadRecentCallsContext: async () => {
+          calls.push("recent-calls");
+          return "must not load";
+        },
+        recordContextSnapshot: async () => {
+          calls.push("snapshot");
+        },
+      },
+    );
+
+    assert.deepEqual(calls, []);
+    assert.match(markdown ?? "", /^## Restricted Progress next move task/u);
+    assert.match(markdown ?? "", /exactly one authenticated child/u);
+    assert.match(markdown ?? "", /only permitted Homa effect/u);
+  });
+});
+
 describe("subject lesson task-spawn guard", () => {
   it("blocks task mutations only for the exact internal lesson channel", () => {
     assert.match(
@@ -197,9 +249,13 @@ describe("subject lesson task-spawn guard", () => {
 });
 
 describe("internal conversation persistence", () => {
-  it("skips lesson builders and hidden voice bridge turns", () => {
+  it("skips internal producers and hidden voice bridge turns", () => {
     assert.equal(
       shouldSkipConversationPersistence({ channel: "subject_lesson" }),
+      true,
+    );
+    assert.equal(
+      shouldSkipConversationPersistence({ channel: "progress_next_move" }),
       true,
     );
     assert.equal(
@@ -221,6 +277,28 @@ describe("internal conversation persistence", () => {
       false,
     );
     assert.equal(shouldSkipConversationPersistence(undefined), false);
+  });
+
+  it("keeps internal producer output out of family signal classification", () => {
+    assert.equal(
+      shouldSkipConversationClassification({ channel: "subject_lesson" }),
+      true,
+    );
+    assert.equal(
+      shouldSkipConversationClassification({ channel: "progress_next_move" }),
+      true,
+    );
+    assert.equal(
+      shouldSkipConversationClassification({
+        channel: "mobile",
+        voiceBridge: "true",
+      }),
+      true,
+    );
+    assert.equal(
+      shouldSkipConversationClassification({ channel: "mobile" }),
+      false,
+    );
   });
 });
 

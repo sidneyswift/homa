@@ -139,6 +139,7 @@ export type PinnedAgentChannel =
   | "email"
   | "dispatch"
   | "subject_lesson"
+  | "progress_next_move"
   | "agent-job"
   | "materials-lab";
 
@@ -147,6 +148,7 @@ const PINNED_CHANNELS = new Set<PinnedAgentChannel>([
   "email",
   "dispatch",
   "subject_lesson",
+  "progress_next_move",
   "agent-job",
   "materials-lab",
 ]);

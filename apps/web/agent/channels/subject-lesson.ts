@@ -4,6 +4,7 @@ import { z } from "zod";
 import { ACTION_COSTS } from "@homa/core";
 
 import { emitMapEvent } from "../../lib/map/events";
+import { internalEveRouteAuthorizationFailure } from "../../lib/internal-eve-route";
 import {
   classifySubjectLessonMessageCompletion,
   failSubjectLessonAttempt,
@@ -49,13 +50,7 @@ export function subjectLessonRouteAuthorizationFailure(
   request: Request,
   secret: string | undefined = process.env.CRON_SECRET,
 ): Response | null {
-  if (!secret) {
-    return Response.json({ ok: false }, { status: 503 });
-  }
-  if (request.headers.get("authorization") !== `Bearer ${secret}`) {
-    return Response.json({ ok: false }, { status: 401 });
-  }
-  return null;
+  return internalEveRouteAuthorizationFailure(request, secret);
 }
 
 export function subjectLessonStartHttpResponse(

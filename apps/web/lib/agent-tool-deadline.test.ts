@@ -6,6 +6,7 @@ import { z } from "zod";
 import {
   defineBoundedTool,
   TOOL_DEADLINE,
+  ToolAccessBoundaryError,
   ToolDeadlineError,
   withToolDeadline,
 } from "./agent-tool-deadline";
@@ -204,4 +205,58 @@ test("a bounded tool that answers passes its value straight through", async () =
     {},
   );
   assert.deepEqual(out, { echoed: "alphabet pages" });
+});
+
+test("a restricted Progress task cannot start an ordinary Homa tool", async () => {
+  let bodyRuns = 0;
+  const tool = defineBoundedTool({
+    description: "would write",
+    inputSchema: z.object({}),
+    deadlineMs: TOOL_DEADLINE.quick,
+    repeatable: false,
+    execute: () => {
+      bodyRuns += 1;
+      return "wrote";
+    },
+  });
+  const context = {
+    session: {
+      auth: { current: { attributes: { channel: "progress_next_move" } } },
+    },
+  };
+
+  await assert.rejects(
+    (tool.execute as (input: unknown, ctx: unknown) => Promise<unknown>)(
+      {},
+      context,
+    ),
+    ToolAccessBoundaryError,
+  );
+  assert.equal(bodyRuns, 0);
+});
+
+test("the one opted-in Progress persistence tool may start", async () => {
+  let bodyRuns = 0;
+  const tool = defineBoundedTool({
+    description: "persists the verified result",
+    inputSchema: z.object({}),
+    deadlineMs: TOOL_DEADLINE.quick,
+    repeatable: true,
+    allowProgressNextMove: true,
+    execute: () => {
+      bodyRuns += 1;
+      return "persisted";
+    },
+  });
+  const context = {
+    session: {
+      auth: { current: { attributes: { channel: "progress_next_move" } } },
+    },
+  };
+
+  const result = await (
+    tool.execute as (input: unknown, ctx: unknown) => Promise<unknown>
+  )({}, context);
+  assert.equal(result, "persisted");
+  assert.equal(bodyRuns, 1);
 });

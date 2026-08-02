@@ -30,6 +30,20 @@ export {
   type ProgressSubjectView,
   type ProgressTopicView,
 } from "./child-progress-view";
+export {
+  parseProgressNextMoveResponse,
+  PROGRESS_NEXT_MOVE_CHAT_CHILD_HEADER,
+  PROGRESS_NEXT_MOVE_CHAT_FINGERPRINT_HEADER,
+  progressNextMoveContextFingerprintSchema,
+  progressNextMoveDismissRequestSchema,
+  progressNextMoveEvidenceSchema,
+  progressNextMoveResponseSchema,
+  progressNextMoveSchema,
+  type ProgressNextMove,
+  type ProgressNextMoveDismissRequest,
+  type ProgressNextMoveEvidence,
+  type ProgressNextMoveResponse,
+} from "./progress-next-move";
 
 export { parseOffsetIsoTimestampEpochNanoseconds } from "./offset-timestamp";
 
