@@ -105,7 +105,6 @@ export type CaptureLoopObjectKind =
 export const CAPTURE_LOOP_OUTCOME_KINDS = [
   "durable_change",
   "artifact_ready",
-  "provider_delivery_confirmed",
 ] as const;
 export type CaptureLoopOutcomeKind =
   (typeof CAPTURE_LOOP_OUTCOME_KINDS)[number];
@@ -122,7 +121,6 @@ export const CAPTURE_LOOP_RECEIPT_KINDS = [
   "none",
   "database_receipt",
   "artifact_receipt",
-  "provider_delivery_receipt",
 ] as const;
 export type CaptureLoopReceiptKind =
   (typeof CAPTURE_LOOP_RECEIPT_KINDS)[number];
@@ -167,6 +165,7 @@ const IOS_BUILD_SCHEMA = z
   .regex(/^[0-9]+(?:\.[0-9]+){0,2}$/u);
 const ANDROID_BUILD_SCHEMA = z.string().min(1).max(30).regex(/^[0-9]+$/u);
 const EXPO_RUNTIME_FINGERPRINT_SCHEMA = z.string().regex(/^[a-f0-9]{40}$/u);
+const UUID_SCHEMA = z.uuid().transform((value) => value.toLowerCase());
 
 /**
  * This is a code identity, never a device identity. Native clients must send
@@ -189,7 +188,7 @@ export const captureLoopClientContextSchema = z.discriminatedUnion("client", [
       app_version: APP_VERSION_SCHEMA,
       build_number: IOS_BUILD_SCHEMA,
       runtime_version: EXPO_RUNTIME_FINGERPRINT_SCHEMA,
-      update_id: z.uuid().nullable(),
+      update_id: UUID_SCHEMA.nullable(),
     })
     .strict(),
   z
@@ -198,7 +197,7 @@ export const captureLoopClientContextSchema = z.discriminatedUnion("client", [
       app_version: APP_VERSION_SCHEMA,
       build_number: ANDROID_BUILD_SCHEMA,
       runtime_version: EXPO_RUNTIME_FINGERPRINT_SCHEMA,
-      update_id: z.uuid().nullable(),
+      update_id: UUID_SCHEMA.nullable(),
     })
     .strict(),
 ]);
@@ -247,10 +246,10 @@ export function buildCaptureLoopNativeClientContext(
 
 const CAPTURE_LOOP_EVENT_FIELDS = {
   contract_version: z.literal(CAPTURE_LOOP_CONTRACT_VERSION),
-  event_id: z.uuid(),
-  loop_id: z.uuid(),
-  parent_loop_id: z.uuid().nullable(),
-  branch_id: z.uuid().nullable(),
+  event_id: UUID_SCHEMA,
+  loop_id: UUID_SCHEMA,
+  parent_loop_id: UUID_SCHEMA.nullable(),
+  branch_id: UUID_SCHEMA.nullable(),
   branch_scope: z.enum(CAPTURE_LOOP_BRANCH_SCOPES),
   profile: z.enum(CAPTURE_LOOP_PROFILES),
   intent: z.enum(CAPTURE_LOOP_INTENTS),
@@ -258,13 +257,15 @@ const CAPTURE_LOOP_EVENT_FIELDS = {
   sequence: z.number().int().min(1).max(10_000),
   surface: z.enum(CAPTURE_LOOP_SURFACES),
   object_kind: z.enum(CAPTURE_LOOP_OBJECT_KINDS),
-  object_id: z.uuid().nullable(),
+  object_id: UUID_SCHEMA.nullable(),
   client_context: captureLoopClientContextSchema,
   outcome_kind: z.enum(CAPTURE_LOOP_OUTCOME_KINDS).nullable(),
   result_state: z.enum(CAPTURE_LOOP_RESULT_STATES),
   receipt_kind: z.enum(CAPTURE_LOOP_RECEIPT_KINDS),
+  receipt_id: UUID_SCHEMA.nullable(),
   revision: z.number().int().min(1).max(10_000).nullable(),
-  corrects_event_id: z.uuid().nullable(),
+  revision_id: UUID_SCHEMA.nullable(),
+  corrects_event_id: UUID_SCHEMA.nullable(),
   correction_result: z.enum(CAPTURE_LOOP_CORRECTION_RESULTS).nullable(),
   exit_reason: z.enum(CAPTURE_LOOP_EXIT_REASONS).nullable(),
 } as const;
@@ -278,30 +279,36 @@ interface CaptureLoopOutcomeRule {
   }>;
 }
 
-const DURABLE_PROFILES = [
-  "proposed_effect",
-  "direct_mutation",
-  "capture_confirmation",
-] as const satisfies ReadonlyArray<CaptureLoopProfile>;
-
-function durableCombinations(
+function directMutationCombination(
   intent: CaptureLoopIntent,
   object: CaptureLoopObjectKind,
-): CaptureLoopOutcomeRule["combinations"] {
-  return DURABLE_PROFILES.map((profile) => ({ profile, intent, object }));
+): CaptureLoopOutcomeRule["combinations"][number] {
+  return { profile: "direct_mutation", intent, object };
 }
 
 const OUTCOME_RULES: Record<CaptureLoopOutcomeKind, CaptureLoopOutcomeRule> = {
   durable_change: {
     receipt: "database_receipt",
     combinations: [
-      ...durableCombinations("prepare_day", "plan"),
-      ...durableCombinations("plan_learning", "plan"),
-      ...durableCombinations("schedule_learning", "plan_activity"),
-      ...durableCombinations("complete_learning", "progress_operation"),
-      ...durableCombinations("record_observation", "progress_operation"),
-      ...durableCombinations("record_hours", "hours_record"),
-      ...durableCombinations("manage_record", "compliance_record"),
+      {
+        profile: "proposed_effect",
+        intent: "prepare_day",
+        object: "plan",
+      },
+      {
+        profile: "proposed_effect",
+        intent: "plan_learning",
+        object: "plan",
+      },
+      directMutationCombination("schedule_learning", "plan_activity"),
+      directMutationCombination("complete_learning", "progress_operation"),
+      directMutationCombination("record_observation", "progress_operation"),
+      directMutationCombination("record_hours", "hours_record"),
+      {
+        profile: "proposed_effect",
+        intent: "manage_record",
+        object: "compliance_record",
+      },
     ],
   },
   artifact_ready: {
@@ -310,26 +317,6 @@ const OUTCOME_RULES: Record<CaptureLoopOutcomeKind, CaptureLoopOutcomeRule> = {
       {
         profile: "proposed_effect",
         intent: "create_material",
-        object: "material",
-      },
-      {
-        profile: "direct_mutation",
-        intent: "create_material",
-        object: "material",
-      },
-    ],
-  },
-  provider_delivery_confirmed: {
-    receipt: "provider_delivery_receipt",
-    combinations: [
-      {
-        profile: "proposed_effect",
-        intent: "share_material",
-        object: "material",
-      },
-      {
-        profile: "passive_delivery",
-        intent: "share_material",
         object: "material",
       },
     ],
@@ -350,7 +337,6 @@ const RECEIPT_OBJECTS: Record<
     "task_run",
   ]),
   artifact_receipt: new Set(["material"]),
-  provider_delivery_receipt: new Set(["material"]),
 };
 
 const EXIT_STAGES = new Set<CaptureLoopStage>([
@@ -438,7 +424,9 @@ function validateCaptureLoopEvent(
     outcome_kind: CaptureLoopOutcomeKind | null;
     result_state: CaptureLoopResultState;
     receipt_kind: CaptureLoopReceiptKind;
+    receipt_id: string | null;
     revision: number | null;
+    revision_id: string | null;
     corrects_event_id: string | null;
     correction_result: CaptureLoopCorrectionResult | null;
     exit_reason: CaptureLoopExitReason | null;
@@ -482,13 +470,23 @@ function validateCaptureLoopEvent(
   const revisionRequired =
     REVISIONED_PROFILES.has(event.profile) &&
     REVISION_STAGES.has(event.stage);
-  if (revisionRequired !== (event.revision !== null)) {
+  if (
+    revisionRequired !==
+    (event.revision !== null && event.revision_id !== null)
+  ) {
     context.addIssue({
       code: "custom",
       path: ["revision"],
       message: revisionRequired
-        ? "this lifecycle stage needs the exact proposal revision"
-        : "this profile or stage cannot claim a proposal revision",
+        ? "this lifecycle stage needs the exact proposal revision and id"
+        : "this profile or stage cannot claim a proposal revision or id",
+    });
+  }
+  if ((event.revision === null) !== (event.revision_id === null)) {
+    context.addIssue({
+      code: "custom",
+      path: ["revision_id"],
+      message: "proposal revision number and id must appear together",
     });
   }
 
@@ -531,6 +529,18 @@ function validateCaptureLoopEvent(
         message: "a verified outcome must declare complete or partial",
       });
     }
+    if (
+      event.profile === "proposed_effect" &&
+      event.intent === "manage_record" &&
+      event.object_kind === "compliance_record" &&
+      event.revision !== 1
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["revision"],
+        message: "each approved compliance packet is one exact revision row",
+      });
+    }
   } else if (event.outcome_kind !== null) {
     context.addIssue({
       code: "custom",
@@ -560,6 +570,15 @@ function validateCaptureLoopEvent(
       message: "this stage cannot carry an effect receipt",
     });
   }
+  if (receiptStage !== (event.receipt_id !== null)) {
+    context.addIssue({
+      code: "custom",
+      path: ["receipt_id"],
+      message: receiptStage
+        ? "a verified receipt stage needs its authoritative receipt id"
+        : "only a verified receipt stage may carry a receipt id",
+    });
+  }
 
   if (event.stage === "correction_or_undo_verified") {
     if (
@@ -568,6 +587,7 @@ function validateCaptureLoopEvent(
       event.corrects_event_id === null ||
       event.correction_result === null ||
       event.receipt_kind === "none" ||
+      event.receipt_id === null ||
       event.object_kind === "none" ||
       event.object_id === null
     ) {
@@ -594,6 +614,24 @@ function validateCaptureLoopEvent(
         message: "the correction receipt cannot verify this object kind",
       });
     }
+    const supportedCorrection =
+      (event.correction_result === "corrected" &&
+        event.receipt_kind === "artifact_receipt" &&
+        event.object_kind === "material") ||
+      (event.correction_result === "reversed" &&
+        event.receipt_kind === "database_receipt" &&
+        [
+          "progress_operation",
+          "plan_activity",
+          "hours_record",
+        ].includes(event.object_kind));
+    if (!supportedCorrection) {
+      context.addIssue({
+        code: "custom",
+        path: ["correction_result"],
+        message: "this correction has no deterministic product receipt linkage",
+      });
+    }
   } else if (
     event.corrects_event_id !== null ||
     event.correction_result !== null
@@ -608,6 +646,7 @@ function validateCaptureLoopEvent(
   if (
     event.stage === "rollback_verified" &&
     (event.receipt_kind === "none" ||
+      event.receipt_id === null ||
       event.object_kind === "none" ||
       event.object_id === null)
   ) {
@@ -619,6 +658,16 @@ function validateCaptureLoopEvent(
   }
   if (
     event.stage === "rollback_verified" &&
+    event.intent === "correct_or_undo"
+  ) {
+    context.addIssue({
+      code: "custom",
+      path: ["intent"],
+      message: "an undo receipt must be classified as a verified reversal",
+    });
+  }
+  if (
+    event.stage === "rollback_verified" &&
     event.receipt_kind !== "none" &&
     !RECEIPT_OBJECTS[event.receipt_kind].has(event.object_kind)
   ) {
@@ -626,6 +675,38 @@ function validateCaptureLoopEvent(
       code: "custom",
       path: ["receipt_kind"],
       message: "the rollback receipt cannot verify this object kind",
+    });
+  }
+  if (
+    event.stage === "rollback_verified" &&
+    (event.receipt_kind !== "database_receipt" ||
+      ![
+        "progress_operation",
+        "plan_activity",
+        "family_event",
+        "hours_record",
+      ].includes(event.object_kind))
+  ) {
+    context.addIssue({
+      code: "custom",
+      path: ["receipt_kind"],
+      message: "this rollback has no deterministic product receipt linkage",
+    });
+  }
+  if (
+    event.stage === "rollback_verified" &&
+    !(
+      (event.intent === "schedule_learning" &&
+        ["plan_activity", "family_event"].includes(event.object_kind)) ||
+      (["complete_learning", "record_observation"].includes(event.intent) &&
+        event.object_kind === "progress_operation") ||
+      (event.intent === "record_hours" && event.object_kind === "hours_record")
+    )
+  ) {
+    context.addIssue({
+      code: "custom",
+      path: ["intent"],
+      message: "the rollback intent and object kind are incompatible",
     });
   }
 
@@ -760,20 +841,18 @@ export const CAPTURE_LOOP_PROFILE_MANIFESTS = {
     "approval_recorded",
     "effect_attempted",
   ]),
-  capture_confirmation: profileManifest([
+  capture_confirmation: nonOutcomeProfile([
     "entry_intent",
     "capture_accepted",
     "proposal_ready",
     "review_presented",
     "approval_recorded",
     "effect_attempted",
-    "outcome_verified",
   ]),
-  passive_delivery: profileManifest([
+  passive_delivery: nonOutcomeProfile([
     "proposal_ready",
     "effect_attempted",
     "review_presented",
-    "outcome_verified",
   ]),
   background_observation: nonOutcomeProfile([
     "capture_accepted",
@@ -799,6 +878,25 @@ function hasOrderedStages(
   let cursor = 0;
   for (const stage of actual) {
     if (stage === required[cursor]) cursor += 1;
+  }
+  return cursor === required.length;
+}
+
+function hasOrderedRevisionStages(
+  actual: ReadonlyArray<CaptureLoopEventProps>,
+  required: ReadonlyArray<CaptureLoopStage>,
+  revision: number,
+  revisionId: string,
+): boolean {
+  let cursor = 0;
+  for (const event of actual) {
+    if (
+      event.stage === required[cursor] &&
+      event.revision === revision &&
+      event.revision_id === revisionId
+    ) {
+      cursor += 1;
+    }
   }
   return cursor === required.length;
 }
@@ -884,6 +982,51 @@ export function captureLoopTraceIssues(
       issues.push(`${stage} is not allowed for ${first.profile}`);
     }
   }
+  for (const [index, event] of ordered.entries()) {
+    const milestone = manifest.ordered_path.indexOf(event.stage);
+    if (milestone < 0) continue;
+    const requiredPrefix = manifest.ordered_path.slice(0, milestone + 1);
+    if (!hasOrderedStages(stages.slice(0, index + 1), requiredPrefix)) {
+      issues.push(`${event.stage} is missing required ${first.profile} predecessors`);
+    }
+    if (
+      event.revision !== null &&
+      event.revision_id !== null &&
+      REVISION_STAGES.has(event.stage)
+    ) {
+      const requiredRevisionStages = requiredPrefix.filter((stage) =>
+        REVISION_STAGES.has(stage),
+      );
+      if (
+        !hasOrderedRevisionStages(
+          ordered.slice(0, index + 1),
+          requiredRevisionStages,
+          event.revision,
+          event.revision_id,
+        )
+      ) {
+        issues.push(`${event.stage} does not follow the exact proposal revision`);
+      }
+    }
+  }
+  let highestRevision = 0;
+  const revisionIds = new Map<number, string>();
+  for (const event of ordered) {
+    if (event.revision === null || event.revision_id === null) continue;
+    const establishedRevisionId = revisionIds.get(event.revision);
+    if (
+      establishedRevisionId !== undefined &&
+      establishedRevisionId !== event.revision_id
+    ) {
+      issues.push("one proposal revision cannot change revision id");
+    } else {
+      revisionIds.set(event.revision, event.revision_id);
+    }
+    if (event.revision < highestRevision) {
+      issues.push("proposal revision cannot move backward");
+    }
+    highestRevision = Math.max(highestRevision, event.revision);
+  }
 
   const terminalIndexes = ordered
     .map((event, index) => (TERMINAL_STAGES.has(event.stage) ? index : -1))
@@ -907,6 +1050,12 @@ export function captureLoopTraceIssues(
       }
     }
   }
+  if (
+    unmatchedInterruptions > 0 &&
+    ordered.at(-1)?.stage !== "interrupted"
+  ) {
+    issues.push("trace continues without resuming its interruption");
+  }
 
   const terminal = ordered.at(-1);
   if (terminal?.stage === "outcome_verified") {
@@ -914,23 +1063,6 @@ export function captureLoopTraceIssues(
       issues.push(`${first.profile} cannot claim a verified outcome`);
     } else if (!hasOrderedStages(stages, manifest.success_path)) {
       issues.push(`${first.profile} outcome is missing required stages`);
-    }
-
-    if (terminal.revision !== null && manifest.success_path !== null) {
-      for (const requiredStage of manifest.success_path) {
-        if (!REVISION_STAGES.has(requiredStage)) continue;
-        let latest: CaptureLoopEventProps | undefined;
-        for (let index = ordered.length - 1; index >= 0; index -= 1) {
-          if (ordered[index]?.stage === requiredStage) {
-            latest = ordered[index];
-            break;
-          }
-        }
-        if (latest?.revision !== terminal.revision) {
-          issues.push("outcome does not match the latest reviewed revision");
-          break;
-        }
-      }
     }
   }
   if (terminal?.stage === "safe_abandonment") {
@@ -988,8 +1120,8 @@ const NORTH_STAR_OUTCOMES = new Set<CaptureLoopOutcomeKind>([
 /**
  * Emitters cannot claim value with a boolean. The reporting layer derives
  * eligibility from an intact trace and this closed outcome whitelist.
- * Advice, passive delivery, background capture, handoff, and provider-only
- * receipts remain visible diagnostics but never become a family win.
+ * Advice, passive delivery, background capture, and handoff remain visible
+ * diagnostics but never become a family win.
  */
 export function captureLoopTraceQualifiesForNorthStar(
   rawEvents: ReadonlyArray<unknown>,
@@ -1041,21 +1173,51 @@ export function captureLoopTraceQualifiesForStabilizedNorthStar(
 
   for (const rawCorrection of relatedCorrectionTraces) {
     if (captureLoopTraceIssues(rawCorrection).length > 0) return false;
-    const correction = rawCorrection
+    const correctionEvents = rawCorrection
       .map((event) => captureLoopEventPropsSchema.parse(event))
-      .sort((left, right) => left.sequence - right.sequence)
-      .at(-1);
+      .sort((left, right) => left.sequence - right.sequence);
+    const correction = correctionEvents.at(-1);
+    const correctionEntry = correctionEvents[0];
     if (
-      correction?.stage !== "correction_or_undo_verified" ||
+      correctionEntry?.intent !== "correct_or_undo" ||
+      correctionEntry.parent_loop_id !== original.loop_id
+    ) {
+      return false;
+    }
+    if (correction?.stage === "outcome_uncertain") return false;
+    if (correction?.stage !== "correction_or_undo_verified") {
+      const effectWasAttempted = correctionEvents.some(
+        (event) => event.stage === "effect_attempted",
+      );
+      if (
+        effectWasAttempted &&
+        correction?.stage !== "rollback_verified"
+      ) {
+        return false;
+      }
+      continue;
+    }
+    if (
       correction.parent_loop_id !== original.loop_id ||
       correction.corrects_event_id !== original.event_id ||
       correction.object_kind !== original.object_kind ||
       correction.object_id !== original.object_id ||
+      correction.receipt_kind !== original.receipt_kind ||
       correction.correction_result === null
     ) {
       return false;
     }
-    if (correction.correction_result === "reversed") return false;
+    if (correction.correction_result === "reversed") {
+      const usesAppendOnlyProgressUndo =
+        correction.object_kind === "progress_operation" &&
+        original.receipt_id === original.object_id &&
+        correction.receipt_id !== original.receipt_id;
+      const reusesMutableReceipt =
+        correction.object_kind !== "progress_operation" &&
+        correction.receipt_id === original.receipt_id;
+      if (!usesAppendOnlyProgressUndo && !reusesMutableReceipt) return false;
+      return false;
+    }
   }
 
   return true;

@@ -13,7 +13,14 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-import { EVENT_SCHEMAS } from "../packages/core/src/index";
+import {
+  CAPTURE_LOOP_EVENT_NAME,
+  EVENT_SCHEMAS,
+} from "../packages/core/src/index";
+import {
+  analyzeCaptureLoopUsage,
+  captureLoopStagingMatches,
+} from "./events-check-lib.mts";
 
 /** Registry entries allowed to have no emitter yet: [name, ticket]. */
 const STAGED_EVENTS: ReadonlyArray<readonly [string, string]> = [
@@ -50,7 +57,10 @@ function* walkSourceFiles(dir: string): Generator<string> {
     const path = join(dir, entry);
     if (statSync(path).isDirectory()) {
       if (!SKIP_DIRS.has(entry)) yield* walkSourceFiles(path);
-    } else if (/\.(ts|tsx)$/.test(entry)) {
+    } else if (
+      /\.[cm]?[jt]sx?$/u.test(entry) &&
+      !/\.(?:test|spec)\.[cm]?[jt]sx?$/u.test(entry)
+    ) {
       yield path;
     }
   }
@@ -63,8 +73,10 @@ function* walkSourceFiles(dir: string): Generator<string> {
 const EMIT_CALL = /emit(?:Map|Family)?Event(?:Once)?\s*(?:<[^>]*>)?\(\s*[\s\S]{0,200}?"([a-z_]+\.[a-z_]+)"/g;
 
 const emittedEventSites = new Map<string, string[]>();
+const sourceFiles: string[] = [];
 for (const root of ROOTS) {
   for (const file of walkSourceFiles(root)) {
+    sourceFiles.push(file);
     const text = readFileSync(file, "utf8");
     for (const match of text.matchAll(EMIT_CALL)) {
       const name = match[1];
@@ -73,6 +85,27 @@ for (const root of ROOTS) {
       emittedEventSites.set(name, sites);
     }
   }
+}
+const captureLoopUsage = analyzeCaptureLoopUsage({
+  sourceFiles,
+  wrapperModuleFiles: [
+    "apps/mobile/src/lib/capture-loop-events.ts",
+    "apps/web/lib/capture-loop-events.ts",
+  ],
+  captureContractFile: "packages/core/src/capture-loop.ts",
+  allowedLowLevelFiles: [
+    "apps/mobile/src/lib/capture-loop-events.ts",
+    "apps/web/lib/capture-loop-events.ts",
+    "apps/web/app/api/mobile/event/route.ts",
+    "apps/web/lib/mobile-family-events.ts",
+  ],
+});
+const captureLoopWrapperSites = captureLoopUsage.wrapperCallSites;
+if (captureLoopWrapperSites.size > 0) {
+  emittedEventSites.set(
+    CAPTURE_LOOP_EVENT_NAME,
+    [...captureLoopWrapperSites],
+  );
 }
 
 report(
@@ -92,6 +125,33 @@ for (const [name, sites] of [...emittedEventSites.entries()].sort()) {
 }
 
 const stagedNames = new Set(STAGED_EVENTS.map(([name]) => name));
+const captureLoopIsStaged = stagedNames.has(CAPTURE_LOOP_EVENT_NAME);
+report(
+  "capture-loop wrapper call sites match registry staging",
+  captureLoopStagingMatches(captureLoopIsStaged, captureLoopWrapperSites),
+  captureLoopIsStaged
+    ? `staged event is emitted in ${[...captureLoopWrapperSites].join(", ")}`
+    : "event is live but neither canonical wrapper has a non-test call site",
+);
+report(
+  "capture-loop wrappers are called directly",
+  captureLoopUsage.unsupportedWrapperSites.size === 0,
+  `unsupported wrapper syntax hides call sites in ${[
+    ...captureLoopUsage.unsupportedWrapperSites,
+  ].join(", ")}`,
+);
+report(
+  "capture-loop scanner resolved every canonical symbol",
+  captureLoopUsage.configurationFailures.length === 0,
+  captureLoopUsage.configurationFailures.join(", "),
+);
+report(
+  "capture-loop journeys cannot bypass canonical adapters",
+  captureLoopUsage.lowLevelBypassSites.size === 0,
+  `low-level capture-loop calls appear in ${[
+    ...captureLoopUsage.lowLevelBypassSites,
+  ].join(", ")}`,
+);
 for (const name of [...registryNames].sort()) {
   if (stagedNames.has(name)) continue;
   report(

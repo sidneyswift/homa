@@ -29,6 +29,8 @@ const PRIOR_EVENT_ID = "00000000-0000-4000-8000-000000000004";
 const SECOND_BRANCH_ID = "00000000-0000-4000-8000-000000000005";
 const SECOND_OBJECT_ID = "00000000-0000-4000-8000-000000000006";
 const CORRECTION_LOOP_ID = "00000000-0000-4000-8000-000000000007";
+const PROGRESS_ID = "00000000-0000-4000-8000-000000000008";
+const PROGRESS_UNDO_ID = "00000000-0000-4000-8000-000000000009";
 
 const REVISION_STAGES = new Set<CaptureLoopStage>([
   "proposal_ready",
@@ -58,6 +60,10 @@ function stageEvent(
 ): CaptureLoopEventProps {
   const profile = overrides.profile ?? "proposed_effect";
   const isOutcome = stage === "outcome_verified";
+  const isReceipt =
+    isOutcome ||
+    stage === "correction_or_undo_verified" ||
+    stage === "rollback_verified";
   const needsRevision =
     REVISIONED_PROFILES.has(profile) && REVISION_STAGES.has(stage);
   return {
@@ -84,7 +90,9 @@ function stageEvent(
     outcome_kind: isOutcome ? "artifact_ready" : null,
     result_state: isOutcome ? "complete" : "not_applicable",
     receipt_kind: isOutcome ? "artifact_receipt" : "none",
+    receipt_id: isReceipt ? MATERIAL_ID : null,
     revision: needsRevision ? 1 : null,
+    revision_id: needsRevision ? MATERIAL_ID : null,
     corrects_event_id: null,
     correction_result:
       stage === "correction_or_undo_verified" ? "corrected" : null,
@@ -153,11 +161,15 @@ test("capture loop registry has one canonical name and complete profile manifest
     );
     if (manifest.success_path === null) {
       assert.ok(
-        ["device_mutation", "device_handoff", "background_observation"].includes(
-          profile,
-        ),
+        [
+          "device_mutation",
+          "device_handoff",
+          "capture_confirmation",
+          "passive_delivery",
+          "background_observation",
+        ].includes(profile),
       );
-      assert.equal(manifest.ordered_path.at(-1), "effect_attempted");
+      assert.ok(manifest.ordered_path.includes("effect_attempted"), profile);
     } else {
       assert.equal(manifest.success_path.at(-1), "outcome_verified", profile);
     }
@@ -314,6 +326,128 @@ test("verified outcomes require exact product receipts and safe exits require ev
     false,
   );
 
+  const approvedPlan = stageEvent("outcome_verified", 7, {
+    profile: "proposed_effect",
+    intent: "plan_learning",
+    object_kind: "plan",
+    outcome_kind: "durable_change",
+    receipt_kind: "database_receipt",
+  });
+  assert.equal(captureLoopEventPropsSchema.safeParse(approvedPlan).success, true);
+  assert.equal(
+    captureLoopEventPropsSchema.safeParse({
+      ...approvedPlan,
+      profile: "direct_mutation",
+      revision: null,
+    }).success,
+    false,
+    "a month-plan approval receipt cannot certify a direct mutation path",
+  );
+  const approvedRecord = {
+    ...approvedPlan,
+    intent: "manage_record" as const,
+    object_kind: "compliance_record" as const,
+  };
+  assert.equal(captureLoopEventPropsSchema.safeParse(approvedRecord).success, true);
+  assert.equal(
+    captureLoopEventPropsSchema.safeParse({
+      ...approvedRecord,
+      revision: 2,
+    }).success,
+    false,
+    "a compliance packet row cannot claim an arbitrary trace revision",
+  );
+  assert.equal(
+    captureLoopEventPropsSchema.safeParse({
+      ...approvedRecord,
+      profile: "direct_mutation",
+      revision: null,
+      revision_id: null,
+    }).success,
+    false,
+    "an approved compliance packet cannot certify a direct mutation path",
+  );
+
+  for (const proposedWithoutRevisionReceipt of [
+    {
+      intent: "schedule_learning" as const,
+      object_kind: "plan_activity" as const,
+    },
+    {
+      intent: "complete_learning" as const,
+      object_kind: "progress_operation" as const,
+    },
+    {
+      intent: "record_observation" as const,
+      object_kind: "progress_operation" as const,
+    },
+    {
+      intent: "record_hours" as const,
+      object_kind: "hours_record" as const,
+    },
+  ]) {
+    assert.equal(
+      captureLoopEventPropsSchema.safeParse({
+        ...approvedPlan,
+        ...proposedWithoutRevisionReceipt,
+      }).success,
+      false,
+      "a proposed outcome must bind its deterministic receipt to the approved revision",
+    );
+  }
+
+  const supportedRollback = stageEvent("rollback_verified", 3, {
+    profile: "direct_mutation",
+    intent: "schedule_learning",
+    object_kind: "plan_activity",
+    object_id: SECOND_OBJECT_ID,
+    receipt_kind: "database_receipt",
+    receipt_id: SECOND_OBJECT_ID,
+    exit_reason: "timeout",
+  });
+  assert.equal(
+    captureLoopEventPropsSchema.safeParse(supportedRollback).success,
+    true,
+  );
+  assert.equal(
+    captureLoopEventPropsSchema.safeParse({
+      ...supportedRollback,
+      object_kind: "plan",
+    }).success,
+    false,
+  );
+  assert.equal(
+    captureLoopEventPropsSchema.safeParse({
+      ...supportedRollback,
+      intent: "create_material",
+      object_kind: "hours_record",
+    }).success,
+    false,
+    "rollback diagnostics cannot pair an unrelated intent with a valid receipt class",
+  );
+  const unsupportedFamilyEventCorrection = stageEvent(
+    "correction_or_undo_verified",
+    3,
+    {
+      event_id: eventId(32),
+      loop_id: CORRECTION_LOOP_ID,
+      parent_loop_id: LOOP_ID,
+      profile: "direct_mutation",
+      intent: "correct_or_undo",
+      object_kind: "family_event",
+      object_id: SECOND_OBJECT_ID,
+      receipt_kind: "database_receipt",
+      receipt_id: SECOND_OBJECT_ID,
+      corrects_event_id: PRIOR_EVENT_ID,
+      correction_result: "reversed",
+    },
+  );
+  assert.equal(
+    captureLoopEventPropsSchema.safeParse(unsupportedFamilyEventCorrection)
+      .success,
+    false,
+  );
+
   const abandoned = stageEvent("safe_abandonment", 2, {
     outcome_kind: null,
     receipt_kind: "none",
@@ -431,7 +565,7 @@ test("trace guard rejects missing approval, duplicate events, and false abandonm
   );
 });
 
-test("trace guard binds approval to the latest presented revision", () => {
+test("trace guard binds every effect to an earlier approval of the exact revision", () => {
   const trace = [
     stageEvent("entry_intent", 1),
     stageEvent("capture_accepted", 2),
@@ -446,10 +580,116 @@ test("trace guard binds approval to the latest presented revision", () => {
 
   assert.ok(
     captureLoopTraceIssues(trace).includes(
-      "outcome does not match the latest reviewed revision",
+      "effect_attempted does not follow the exact proposal revision",
     ),
   );
   assert.equal(captureLoopTraceQualifiesForNorthStar(trace), false);
+
+  const reorderedRevision = [
+    stageEvent("entry_intent", 1),
+    stageEvent("capture_accepted", 2),
+    stageEvent("proposal_ready", 3, { revision: 1 }),
+    stageEvent("review_presented", 4, { revision: 1 }),
+    stageEvent("approval_recorded", 5, { revision: 1 }),
+    stageEvent("effect_attempted", 6, { revision: 1 }),
+    stageEvent("proposal_ready", 7, { revision: 2 }),
+    stageEvent("review_presented", 8, { revision: 2 }),
+    stageEvent("effect_attempted", 9, { revision: 2 }),
+    stageEvent("approval_recorded", 10, { revision: 2 }),
+    stageEvent("outcome_verified", 11, { revision: 2 }),
+  ];
+  assert.ok(captureLoopTraceIssues(reorderedRevision).length > 0);
+  assert.equal(
+    captureLoopTraceQualifiesForNorthStar(reorderedRevision),
+    false,
+  );
+
+  const orderedRevision = reorderedRevision.map((event, index) => {
+    if (index === 8) {
+      return { ...event, stage: "approval_recorded" as const };
+    }
+    if (index === 9) {
+      return { ...event, stage: "effect_attempted" as const };
+    }
+    return event;
+  });
+  assert.deepEqual(captureLoopTraceIssues(orderedRevision), []);
+  assert.equal(captureLoopTraceQualifiesForNorthStar(orderedRevision), true);
+
+  const staleRevision = [
+    stageEvent("entry_intent", 1),
+    stageEvent("capture_accepted", 2),
+    stageEvent("proposal_ready", 3, { revision: 1 }),
+    stageEvent("review_presented", 4, { revision: 1 }),
+    stageEvent("approval_recorded", 5, { revision: 1 }),
+    stageEvent("proposal_ready", 6, { revision: 2 }),
+    stageEvent("effect_attempted", 7, { revision: 1 }),
+    stageEvent("outcome_verified", 8, { revision: 1 }),
+  ];
+  assert.ok(
+    captureLoopTraceIssues(staleRevision).includes(
+      "proposal revision cannot move backward",
+    ),
+  );
+  assert.equal(captureLoopTraceQualifiesForNorthStar(staleRevision), false);
+});
+
+test("material remakes keep a stable chain root and bind every stage to one revision row", () => {
+  const common = {
+    profile: "proposed_effect" as const,
+    intent: "create_material" as const,
+    object_kind: "material" as const,
+    object_id: MATERIAL_ID,
+  };
+  const remade = [
+    stageEvent("entry_intent", 1, common),
+    stageEvent("capture_accepted", 2, common),
+    stageEvent("proposal_ready", 3, {
+      ...common,
+      revision: 1,
+      revision_id: MATERIAL_ID,
+    }),
+    stageEvent("proposal_ready", 4, {
+      ...common,
+      revision: 2,
+      revision_id: SECOND_OBJECT_ID,
+    }),
+    stageEvent("review_presented", 5, {
+      ...common,
+      revision: 2,
+      revision_id: SECOND_OBJECT_ID,
+    }),
+    stageEvent("approval_recorded", 6, {
+      ...common,
+      revision: 2,
+      revision_id: SECOND_OBJECT_ID,
+    }),
+    stageEvent("effect_attempted", 7, {
+      ...common,
+      revision: 2,
+      revision_id: SECOND_OBJECT_ID,
+    }),
+    stageEvent("outcome_verified", 8, {
+      ...common,
+      revision: 2,
+      revision_id: SECOND_OBJECT_ID,
+      receipt_id: SECOND_OBJECT_ID,
+    }),
+  ];
+  assert.deepEqual(captureLoopTraceIssues(remade), []);
+  assert.equal(captureLoopTraceQualifiesForNorthStar(remade), true);
+
+  const splicedRevision = remade.map((event) =>
+    event.stage === "review_presented"
+      ? { ...event, revision_id: PRIOR_EVENT_ID }
+      : event,
+  );
+  assert.ok(
+    captureLoopTraceIssues(splicedRevision).includes(
+      "one proposal revision cannot change revision id",
+    ),
+  );
+  assert.equal(captureLoopTraceQualifiesForNorthStar(splicedRevision), false);
 });
 
 test("trace guard rejects branch, object, and sequence splicing", () => {
@@ -481,7 +721,7 @@ test("trace guard rejects branch, object, and sequence splicing", () => {
 test("effect failures and resumptions require evidence for their exact state", () => {
   const common = {
     profile: "direct_mutation" as const,
-    intent: "complete_learning" as const,
+    intent: "schedule_learning" as const,
     object_kind: "plan_activity" as const,
   };
   const falseFailure = [
@@ -509,6 +749,15 @@ test("effect failures and resumptions require evidence for their exact state", (
   ];
   assert.deepEqual(captureLoopTraceIssues(rolledBack), []);
 
+  const unapprovedRollback = [
+    stageEvent("effect_attempted", 1),
+    stageEvent("rollback_verified", 2, {
+      receipt_kind: "artifact_receipt",
+      exit_reason: "timeout",
+    }),
+  ];
+  assert.ok(captureLoopTraceIssues(unapprovedRollback).length > 0);
+
   const orphanResume = [
     stageEvent("entry_intent", 1, common),
     stageEvent("resumed", 2, common),
@@ -523,6 +772,39 @@ test("effect failures and resumptions require evidence for their exact state", (
       "resumed has no preceding interruption",
     ),
   );
+
+  const skippedResume = successfulTrace("direct_mutation", {
+    intent: "complete_learning",
+    object_kind: "progress_operation",
+    outcome_kind: "durable_change",
+    receipt_kind: "database_receipt",
+  });
+  skippedResume.splice(
+    1,
+    0,
+    stageEvent("interrupted", 2, {
+      profile: "direct_mutation",
+      intent: "complete_learning",
+      object_kind: "progress_operation",
+      exit_reason: "offline",
+    }),
+  );
+  skippedResume[2] = {
+    ...skippedResume[2],
+    event_id: eventId(3),
+    sequence: 3,
+  };
+  skippedResume[3] = {
+    ...skippedResume[3],
+    event_id: eventId(4),
+    sequence: 4,
+  };
+  assert.ok(
+    captureLoopTraceIssues(skippedResume).includes(
+      "trace continues without resuming its interruption",
+    ),
+  );
+  assert.equal(captureLoopTraceQualifiesForNorthStar(skippedResume), false);
 });
 
 test("incomplete, handoff, passive, and advice traces never become north-star wins", () => {
@@ -547,14 +829,24 @@ test("incomplete, handoff, passive, and advice traces never become north-star wi
   assert.deepEqual(captureLoopTraceIssues(handoff), []);
   assert.equal(captureLoopTraceQualifiesForNorthStar(handoff), false);
 
-  const passive = successfulTrace("passive_delivery", {
-    intent: "share_material",
-    object_kind: "material",
-    outcome_kind: "provider_delivery_confirmed",
-    receipt_kind: "provider_delivery_receipt",
-  });
+  const passiveCommon = {
+    profile: "passive_delivery" as const,
+    intent: "share_material" as const,
+  };
+  const passive = [
+    stageEvent("proposal_ready", 1, passiveCommon),
+    stageEvent("effect_attempted", 2, passiveCommon),
+    stageEvent("review_presented", 3, passiveCommon),
+  ];
   assert.deepEqual(captureLoopTraceIssues(passive), []);
   assert.equal(captureLoopTraceQualifiesForNorthStar(passive), false);
+
+  const directDraftClaim = successfulTrace("direct_mutation");
+  assert.ok(captureLoopTraceIssues(directDraftClaim).length > 0);
+  assert.equal(
+    captureLoopTraceQualifiesForNorthStar(directDraftClaim),
+    false,
+  );
 
   const partial = successfulTrace("direct_mutation", {
     intent: "schedule_learning",
@@ -602,6 +894,7 @@ test("verified corrections stabilize or reverse the original family win", () => 
       parent_loop_id: LOOP_ID,
     }),
     stageEvent("correction_or_undo_verified", 3, {
+      event_id: eventId(30),
       loop_id: CORRECTION_LOOP_ID,
       profile: "direct_mutation",
       intent: "correct_or_undo",
@@ -626,6 +919,192 @@ test("verified corrections stabilize or reverse the original family win", () => 
     captureLoopTraceQualifiesForStabilizedNorthStar(original, [reversed]),
     false,
   );
+  const wrongReceipt = correction.map((event) =>
+    event.stage === "correction_or_undo_verified"
+      ? { ...event, receipt_kind: "database_receipt" as const }
+      : event,
+  );
+  assert.ok(captureLoopTraceIssues(wrongReceipt).length > 0);
+  assert.equal(
+    captureLoopTraceQualifiesForStabilizedNorthStar(original, [wrongReceipt]),
+    false,
+  );
+
+  const progressOriginal = successfulTrace("direct_mutation", {
+    intent: "complete_learning",
+    object_kind: "progress_operation",
+    object_id: PROGRESS_ID,
+    outcome_kind: "durable_change",
+    receipt_kind: "database_receipt",
+  }).map((event) => ({
+    ...event,
+    receipt_id: event.stage === "outcome_verified" ? PROGRESS_ID : null,
+  }));
+  const progressOutcome = progressOriginal.at(-1);
+  assert.ok(progressOutcome);
+  const progressReversal = [
+    stageEvent("entry_intent", 1, {
+      loop_id: CORRECTION_LOOP_ID,
+      parent_loop_id: progressOutcome.loop_id,
+      profile: "direct_mutation",
+      intent: "correct_or_undo",
+      object_kind: "progress_operation",
+      object_id: PROGRESS_ID,
+    }),
+    stageEvent("effect_attempted", 2, {
+      loop_id: CORRECTION_LOOP_ID,
+      parent_loop_id: progressOutcome.loop_id,
+      profile: "direct_mutation",
+      intent: "correct_or_undo",
+      object_kind: "progress_operation",
+      object_id: PROGRESS_ID,
+    }),
+    stageEvent("correction_or_undo_verified", 3, {
+      event_id: eventId(31),
+      loop_id: CORRECTION_LOOP_ID,
+      parent_loop_id: progressOutcome.loop_id,
+      profile: "direct_mutation",
+      intent: "correct_or_undo",
+      object_kind: "progress_operation",
+      object_id: PROGRESS_ID,
+      receipt_kind: "database_receipt",
+      receipt_id: PROGRESS_UNDO_ID,
+      corrects_event_id: progressOutcome.event_id,
+      correction_result: "reversed",
+    }),
+  ];
+  assert.deepEqual(captureLoopTraceIssues(progressReversal), []);
+  assert.equal(
+    captureLoopTraceQualifiesForStabilizedNorthStar(
+      progressOriginal,
+      [progressReversal],
+    ),
+    false,
+  );
+  const unsupportedProgressCorrection = progressReversal.map((event) =>
+    event.stage === "correction_or_undo_verified"
+      ? { ...event, correction_result: "corrected" as const }
+      : event,
+  );
+  assert.ok(captureLoopTraceIssues(unsupportedProgressCorrection).length > 0);
+
+  const abandoned = [
+    stageEvent("entry_intent", 1, {
+      loop_id: CORRECTION_LOOP_ID,
+      profile: "direct_mutation",
+      intent: "correct_or_undo",
+      parent_loop_id: LOOP_ID,
+    }),
+    stageEvent("safe_abandonment", 2, {
+      loop_id: CORRECTION_LOOP_ID,
+      profile: "direct_mutation",
+      intent: "correct_or_undo",
+      parent_loop_id: LOOP_ID,
+      exit_reason: "parent_cancelled",
+    }),
+  ];
+  assert.deepEqual(captureLoopTraceIssues(abandoned), []);
+  assert.equal(
+    captureLoopTraceQualifiesForStabilizedNorthStar(original, [abandoned]),
+    true,
+  );
+
+  const uncertain = [
+    abandoned[0],
+    stageEvent("effect_attempted", 2, {
+      loop_id: CORRECTION_LOOP_ID,
+      profile: "direct_mutation",
+      intent: "correct_or_undo",
+      parent_loop_id: LOOP_ID,
+    }),
+    stageEvent("outcome_uncertain", 3, {
+      loop_id: CORRECTION_LOOP_ID,
+      profile: "direct_mutation",
+      intent: "correct_or_undo",
+      parent_loop_id: LOOP_ID,
+      exit_reason: "unknown",
+    }),
+  ];
+  assert.deepEqual(captureLoopTraceIssues(uncertain), []);
+  assert.equal(
+    captureLoopTraceQualifiesForStabilizedNorthStar(original, [uncertain]),
+    false,
+  );
+
+  const rolledBack = [
+    uncertain[0],
+    uncertain[1],
+    stageEvent("rollback_verified", 3, {
+      loop_id: CORRECTION_LOOP_ID,
+      profile: "direct_mutation",
+      intent: "correct_or_undo",
+      parent_loop_id: LOOP_ID,
+      receipt_kind: "artifact_receipt",
+      exit_reason: "timeout",
+    }),
+  ];
+  assert.ok(captureLoopTraceIssues(rolledBack).length > 0);
+  assert.equal(
+    captureLoopTraceQualifiesForStabilizedNorthStar(original, [rolledBack]),
+    false,
+  );
+
+  const attemptedOnly = uncertain.slice(0, 2);
+  assert.deepEqual(captureLoopTraceIssues(attemptedOnly), []);
+  assert.equal(
+    captureLoopTraceQualifiesForStabilizedNorthStar(original, [attemptedOnly]),
+    false,
+  );
+});
+
+test("capture confirmation stays diagnostic for each child branch", () => {
+  const capture = (
+    loop_id: string,
+    branch_id: string,
+    object_id: string,
+  ) =>
+    CAPTURE_LOOP_PROFILE_MANIFESTS.capture_confirmation.ordered_path.map(
+      (stage, index) =>
+        stageEvent(stage, index + 1, {
+          loop_id,
+          profile: "capture_confirmation",
+          intent: "capture_for_later",
+          branch_scope: "single_child",
+          branch_id,
+          object_id,
+        }),
+    );
+  const first = capture(LOOP_ID, PRIOR_EVENT_ID, MATERIAL_ID);
+  const second = capture(
+    CORRECTION_LOOP_ID,
+    SECOND_BRANCH_ID,
+    SECOND_OBJECT_ID,
+  );
+  assert.deepEqual(captureLoopTraceIssues(first), []);
+  assert.deepEqual(captureLoopTraceIssues(second), []);
+  assert.equal(captureLoopTraceQualifiesForNorthStar(first), false);
+  assert.equal(captureLoopTraceQualifiesForNorthStar(second), false);
+  assert.ok(
+    captureLoopTraceIssues([
+      ...first,
+      stageEvent("outcome_verified", first.length + 1, {
+        profile: "capture_confirmation",
+        intent: "capture_for_later",
+        branch_scope: "single_child",
+        branch_id: PRIOR_EVENT_ID,
+      }),
+    ]).length > 0,
+  );
+
+  const aggregate = successfulTrace("direct_mutation", {
+    intent: "complete_learning",
+    object_kind: "progress_operation",
+    outcome_kind: "durable_change",
+    receipt_kind: "database_receipt",
+    branch_scope: "multi_child_aggregate",
+  });
+  assert.deepEqual(captureLoopTraceIssues(aggregate), []);
+  assert.equal(captureLoopTraceQualifiesForNorthStar(aggregate), false);
 });
 
 test("an uncertain effect may reconcile to a later verified outcome in the same loop", () => {

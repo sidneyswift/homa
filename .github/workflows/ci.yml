@@ -119,6 +119,9 @@ jobs:
       - name: Lint mobile
         run: pnpm --filter mobile lint
 
+      - name: Event registry and capture-loop staging guard
+        run: pnpm check:event-registry
+
       - name: Mobile chat unit tests
         run: pnpm check:mobile-chat
 
