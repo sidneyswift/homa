@@ -4,6 +4,8 @@ import { describe, it } from "node:test";
 import {
   deriveLessonRecordingSignals,
   formatLessonElapsed,
+  lessonReviewFailureCopy,
+  parseNativeLessonReviewOutcome,
   parsePreparedLessonRecording,
   recorderPhaseCopy,
 } from "./lesson-recording-model";
@@ -78,5 +80,46 @@ describe("native lesson recording handoff", () => {
   it("renders an elapsed lesson clock", () => {
     assert.equal(formatLessonElapsed(0), "00:00");
     assert.equal(formatLessonElapsed(125), "02:05");
+  });
+
+  it("parses server-owned retryability and terminal reasons", () => {
+    assert.deepEqual(
+      parseNativeLessonReviewOutcome({
+        status: "failed",
+        retryable: true,
+        retryReason: null,
+      }),
+      { status: "review_failed", retryable: true, reason: "retryable" },
+    );
+    assert.deepEqual(
+      parseNativeLessonReviewOutcome({
+        status: "review_failed",
+        retryable: false,
+        reason: "attempts-exhausted",
+      }),
+      {
+        status: "review_failed",
+        retryable: false,
+        reason: "attempts_exhausted",
+      },
+    );
+    assert.deepEqual(
+      parseNativeLessonReviewOutcome({
+        status: "failed",
+        retryable: false,
+        retryReason: "source-unavailable",
+      }),
+      {
+        status: "review_failed",
+        retryable: false,
+        reason: "source_unavailable",
+      },
+    );
+  });
+
+  it("gives retryable and terminal review failures distinct copy", () => {
+    assert.match(lessonReviewFailureCopy("retryable"), /listen again/u);
+    assert.match(lessonReviewFailureCopy("attempts_exhausted"), /every safe pass/u);
+    assert.match(lessonReviewFailureCopy("source_unavailable"), /no longer available/u);
   });
 });

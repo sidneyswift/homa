@@ -2,7 +2,13 @@ import {
   getLessonForFamily,
   getLessonReview,
   listLessonSegments,
+  MAX_ANALYSIS_ATTEMPTS,
 } from "../../../../../lib/lessons/store";
+import {
+  hasUsableLessonTranscript,
+  lessonAnalysisRetryState,
+  lessonRetryApiReason,
+} from "../../../../../lib/lessons/retry-state";
 import {
   lessonRouteRefusal,
   resolveLessonRoute,
@@ -30,6 +36,15 @@ export async function GET(
     listLessonSegments(lessonId, context.auth.familyId),
     getLessonReview(lessonId, context.auth.familyId),
   ]);
+  const retryState = lessonAnalysisRetryState({
+    status: lesson.status,
+    attempts: lesson.attempts,
+    maxAttempts: MAX_ANALYSIS_ATTEMPTS,
+    audioDeletedAt: lesson.audioDeletedAt,
+    hasUsableTranscript: hasUsableLessonTranscript(
+      segments.map((segment) => segment.transcript),
+    ),
+  });
   return Response.json({
     ok: true,
     status: lesson.status,
@@ -38,6 +53,8 @@ export async function GET(
       (segment) => segment.transcript !== null,
     ).length,
     error: lesson.status === "failed",
+    retryable: retryState.status === "available",
+    retryReason: lessonRetryApiReason(retryState),
     review: review
       ? {
           summary: review.summary,

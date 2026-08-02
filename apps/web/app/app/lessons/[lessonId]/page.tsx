@@ -10,7 +10,13 @@ import {
   getLessonReview,
   listLessonMedia,
   listLessonSegments,
+  MAX_ANALYSIS_ATTEMPTS,
 } from "../../../../lib/lessons/store";
+import {
+  hasUsableLessonTranscript,
+  lessonAnalysisRetryState,
+  type LessonAnalysisRetryState,
+} from "../../../../lib/lessons/retry-state";
 import { lessonMomentSchema } from "../../../../lib/lessons/synthesis";
 import { PageColumn } from "../../../../components/dashboard/page-column";
 import {
@@ -74,6 +80,22 @@ function aboutMinute(segmentSeq: number): string {
   return minute === 0 ? "right at the start" : `about ${minute} minutes in`;
 }
 
+function failedLessonDetail(
+  state: LessonAnalysisRetryState,
+  audioDeletedAt: string | null,
+): string {
+  if (state.status === "exhausted") {
+    return "Homa tried every safe pass without getting a review she could trust. The lesson is still saved, but she will not pretend the review is ready.";
+  }
+  if (state.status === "source_unavailable") {
+    return "The raw audio has already been deleted, and there is not enough transcript left to build a trustworthy review.";
+  }
+  if (audioDeletedAt !== null) {
+    return "The raw audio has already been deleted, but Homa still has enough transcript to try the review again.";
+  }
+  return "This was not anything you did. The lesson is saved, and Homa can listen again from where she stopped.";
+}
+
 export default async function LessonReviewPage({
   params,
 }: {
@@ -102,6 +124,15 @@ export default async function LessonReviewPage({
     const transcribed = segments.filter(
       (segment) => segment.transcript !== null,
     ).length;
+    const retryState = lessonAnalysisRetryState({
+      status: lesson.status,
+      attempts: lesson.attempts,
+      maxAttempts: MAX_ANALYSIS_ATTEMPTS,
+      audioDeletedAt: lesson.audioDeletedAt,
+      hasUsableTranscript: hasUsableLessonTranscript(
+        segments.map((segment) => segment.transcript),
+      ),
+    });
     return (
       <PageColumn>
         <BackToKid childId={lesson.childId} childName={childName} />
@@ -114,11 +145,11 @@ export default async function LessonReviewPage({
               Homa couldn&apos;t finish this one.
             </p>
             <p className="mt-1 text-sm text-body">
-              This was not anything you did. The recording is safe and
-              nothing was lost. Homa can listen again from where she
-              stopped.
+              {failedLessonDetail(retryState, lesson.audioDeletedAt)}
             </p>
-            <RetryLessonAnalysis lessonId={lessonId} />
+            {retryState.status === "available" ? (
+              <RetryLessonAnalysis lessonId={lessonId} />
+            ) : null}
           </section>
         ) : (
           <section className="mt-4 rounded-lg border border-border-subtle bg-card p-6 shadow-sm">

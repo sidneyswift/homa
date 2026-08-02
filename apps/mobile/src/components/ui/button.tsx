@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Pressable, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, pressScale, radius, space } from "../../theme/tokens";
+import { colors, darkColors, fontSize, pressScale, radius, space } from "../../theme/tokens";
 
 /**
  * The Homa button: always pill-shaped (never square, per the component
@@ -11,6 +11,7 @@ import { colors, fontSize, pressScale, radius, space } from "../../theme/tokens"
  */
 
 type ButtonVariant = "primary" | "secondary" | "ghost";
+type ButtonTone = "light" | "dark";
 
 const VARIANT_STYLES: Record<
   ButtonVariant,
@@ -33,11 +34,30 @@ const VARIANT_STYLES: Record<
   },
 };
 
+const DARK_VARIANT_STYLES: typeof VARIANT_STYLES = {
+  primary: {
+    backgroundColor: darkColors.brand,
+    borderColor: darkColors.brand,
+    textColor: darkColors.onBrand,
+  },
+  secondary: {
+    backgroundColor: darkColors.surfaceRaised,
+    borderColor: darkColors.border,
+    textColor: darkColors.textStrong,
+  },
+  ghost: {
+    backgroundColor: "transparent",
+    borderColor: "transparent",
+    textColor: darkColors.brand,
+  },
+};
+
 export function Button({
   label,
   onPress,
   accessibilityHint,
   variant = "primary",
+  tone = "light",
   size = "md",
   disabled = false,
   busy = false,
@@ -48,6 +68,7 @@ export function Button({
   onPress: () => void;
   accessibilityHint?: string;
   variant?: ButtonVariant;
+  tone?: ButtonTone;
   size?: "sm" | "md" | "lg";
   disabled?: boolean;
   busy?: boolean;
@@ -55,7 +76,9 @@ export function Button({
   icon?: ReactNode;
   style?: StyleProp<ViewStyle>;
 }) {
-  const look = VARIANT_STYLES[variant];
+  const look = tone === "dark"
+    ? DARK_VARIANT_STYLES[variant]
+    : VARIANT_STYLES[variant];
   const vertical = size === "lg" ? 14 : size === "md" ? 12 : 8;
   const horizontal = size === "lg" ? space.lg : size === "md" ? 20 : space.md;
   const textSize = size === "sm" ? fontSize.sm : fontSize.base;

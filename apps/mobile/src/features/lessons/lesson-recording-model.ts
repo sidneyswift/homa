@@ -4,6 +4,27 @@ export interface PreparedLessonRecording {
   purpose: string;
 }
 
+export interface NativeLessonReview {
+  summary: string;
+  evidenceCount: number;
+  observationCount: number;
+}
+
+export type LessonReviewFailureReason =
+  | "retryable"
+  | "attempts_exhausted"
+  | "source_unavailable"
+  | "unknown";
+
+export type NativeLessonReviewOutcome =
+  | { status: "ready"; review: NativeLessonReview }
+  | { status: "processing" }
+  | {
+      status: "review_failed";
+      retryable: boolean;
+      reason: LessonReviewFailureReason;
+    };
+
 export type LessonRecorderPhase =
   | "confirm"
   | "consent"
@@ -24,6 +45,64 @@ export type LessonRecorderPhase =
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** Parses both the status poll and the retry command without trusting shape. */
+export function parseNativeLessonReviewOutcome(
+  value: unknown,
+): NativeLessonReviewOutcome | null {
+  if (!isRecord(value) || typeof value.status !== "string") return null;
+  if (value.status === "ready" && isRecord(value.review)) {
+    if (typeof value.review.summary !== "string") return null;
+    return {
+      status: "ready",
+      review: {
+        summary: value.review.summary,
+        evidenceCount: Number(value.review.evidenceCount) || 0,
+        observationCount: Number(value.review.observationCount) || 0,
+      },
+    };
+  }
+  if (
+    value.status === "processing" ||
+    value.status === "uploaded" ||
+    value.status === "analyzing" ||
+    value.status === "recording"
+  ) {
+    return { status: "processing" };
+  }
+  if (value.status !== "failed" && value.status !== "review_failed") {
+    return null;
+  }
+  const apiReason = value.retryReason ?? value.reason;
+  const reason: LessonReviewFailureReason =
+    apiReason === "attempts-exhausted"
+      ? "attempts_exhausted"
+      : apiReason === "source-unavailable"
+        ? "source_unavailable"
+        : value.retryable === true
+          ? "retryable"
+          : "unknown";
+  return {
+    status: "review_failed",
+    retryable: value.retryable === true,
+    reason,
+  };
+}
+
+export function lessonReviewFailureCopy(
+  reason: LessonReviewFailureReason,
+): string {
+  if (reason === "attempts_exhausted") {
+    return "Homa tried every safe pass without getting a review she could trust. The lesson is still saved, but she will not pretend the review is ready.";
+  }
+  if (reason === "source_unavailable") {
+    return "The raw audio is no longer available, and there is not enough transcript left to build a trustworthy review.";
+  }
+  if (reason === "retryable") {
+    return "The recording is saved, but Homa could not finish this review. You can ask her to listen again.";
+  }
+  return "The recording is saved, but Homa could not finish this review.";
 }
 
 /** A model tool result becomes a microphone handoff only through this

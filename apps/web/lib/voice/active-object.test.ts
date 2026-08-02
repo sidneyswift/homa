@@ -10,6 +10,7 @@ import {
 const FAMILY_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const FAMILY_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const MATERIAL_ID = "11111111-1111-4111-8111-111111111111";
+const RECORDING_ID = "22222222-2222-4222-8222-222222222222";
 
 function reader(records: ReadonlyMap<string, ActiveObjectRecord>): ActiveObjectReader {
   return {
@@ -47,6 +48,31 @@ describe("authenticated active object resolution", () => {
       reader(new Map([[`${FAMILY_A}:material:${MATERIAL_ID}`, record]])),
     );
     assert.deepEqual(result, { ok: false, reason: "stale" });
+  });
+
+  it("pins the exact current recording review without substituting a newer lesson", async () => {
+    const recording: ActiveObjectRecord = {
+      kind: "recording",
+      objectId: RECORDING_ID,
+      version: "current-parent-visible",
+      summary: {
+        childName: "Maya",
+        review: { summary: "Maya stayed with the tricky ending sounds." },
+      },
+    };
+    const result = await resolveActiveObject(
+      FAMILY_A,
+      {
+        kind: "recording",
+        objectId: RECORDING_ID,
+        version: "current-parent-visible",
+      },
+      reader(new Map([[`${FAMILY_A}:recording:${RECORDING_ID}`, recording]])),
+    );
+    assert.equal(result.ok, true);
+    if (!result.ok) return;
+    assert.match(result.contextMarkdown, /tricky ending sounds/u);
+    assert.match(result.contextMarkdown, /Never substitute the newest/u);
   });
 
   it("fails closed after the visible object is deleted", async () => {

@@ -46,6 +46,8 @@ function contextFor(record: ActiveObjectRecord): string {
   const retrievalRule =
     record.kind === "material" || record.kind === "state_packet"
       ? "Before judging or revising it, load this exact material id with find_materials. Do not substitute a similarly named item."
+      : record.kind === "recording"
+        ? "Use this exact saved lesson and its bounded review. Never substitute the newest or a similarly described recording."
       : "Use only this server-verified object when the parent says this, that, or the one on screen.";
   return [
     "## Visible object (server verified)",
@@ -172,18 +174,31 @@ async function readFromPostgres(
         id: string;
         version: string;
         child_id: string;
+        child_name: string;
         status: string;
         source: string;
         started_at: string;
         finished_at: string | null;
         duration_seconds: number | null;
+        review_summary: string | null;
+        review_insights: unknown;
+        evidence_count: number | null;
+        observation_count: number | null;
       }[]
     >`
-      select id, created_at::text as version, child_id, status, source,
-             started_at::text as started_at, finished_at::text as finished_at,
-             duration_seconds
-      from public.lesson_recordings
-      where id = ${reference.objectId} and family_id = ${familyId}
+      select lesson.id, lesson.created_at::text as version,
+             lesson.child_id, child.name as child_name, lesson.status,
+             lesson.source, lesson.started_at::text as started_at,
+             lesson.finished_at::text as finished_at,
+             lesson.duration_seconds, review.summary as review_summary,
+             review.insights as review_insights,
+             review.evidence_count, review.observation_count
+      from public.lesson_recordings lesson
+      join public.children child
+        on child.id = lesson.child_id and child.family_id = lesson.family_id
+      left join public.lesson_reviews review
+        on review.lesson_id = lesson.id and review.family_id = lesson.family_id
+      where lesson.id = ${reference.objectId} and lesson.family_id = ${familyId}
       limit 1
     `;
     const row = rows[0];
@@ -191,14 +206,26 @@ async function readFromPostgres(
       ? {
           kind: reference.kind,
           objectId: row.id,
-          version: row.version,
+          version:
+            reference.version === ACTIVE_OBJECT_CURRENT_VERSION
+              ? ACTIVE_OBJECT_CURRENT_VERSION
+              : row.version,
           summary: {
             childId: row.child_id,
+            childName: row.child_name,
             status: row.status,
             source: row.source,
             startedAt: row.started_at,
             finishedAt: row.finished_at,
             durationSeconds: row.duration_seconds,
+            review: row.review_summary === null
+              ? null
+              : {
+                  summary: row.review_summary,
+                  insights: row.review_insights,
+                  evidenceCount: row.evidence_count,
+                  observationCount: row.observation_count,
+                },
           },
         }
       : null;

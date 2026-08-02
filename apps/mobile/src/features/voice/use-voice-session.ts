@@ -68,7 +68,7 @@ export interface VoiceSession {
   start: () => void;
   end: () => void;
   retry: () => void;
-  sendText: (message: string) => void;
+  sendText: (message: string) => boolean;
   announceResult: (message: string) => void;
   toggleMute: () => void;
   pauseForMicrophoneOwner: (reason: string) => void;
@@ -490,20 +490,25 @@ export function useVoiceSession(
   const sendText = useCallback((message: string) => {
     const text = message.trim();
     const channel = channelRef.current;
-    if (!channel || text.length === 0) return;
-    pendingTextRef.current = { text, sequence: turnsRef.current.length };
-    setStatus("working");
-    channel.send(
-      JSON.stringify({
-        type: "conversation.item.create",
-        item: {
-          type: "message",
-          role: "user",
-          content: [{ type: "input_text", text }],
-        },
-      }),
-    );
-    channel.send(JSON.stringify({ type: "response.create" }));
+    if (!channel || text.length === 0) return false;
+    try {
+      channel.send(
+        JSON.stringify({
+          type: "conversation.item.create",
+          item: {
+            type: "message",
+            role: "user",
+            content: [{ type: "input_text", text }],
+          },
+        }),
+      );
+      channel.send(JSON.stringify({ type: "response.create" }));
+      pendingTextRef.current = { text, sequence: turnsRef.current.length };
+      setStatus("working");
+      return true;
+    } catch {
+      return false;
+    }
   }, []);
 
   const announceResult = useCallback((message: string) => {
