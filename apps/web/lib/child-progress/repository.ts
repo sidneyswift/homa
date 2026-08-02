@@ -12,6 +12,7 @@ import type {
   ProgressConflict,
   ProgressEvidence,
   ProgressEvidenceAnswer,
+  ProgressEvidenceDerivation,
   ProgressSelectionAnswer,
   ResolvedProgressConflict,
   ProgressSourceKind,
@@ -42,6 +43,7 @@ interface AppendProgressEvidenceFields {
   familyId: string;
   itemId: string;
   answer: ProgressEvidenceAnswer;
+  derivation: ProgressEvidenceDerivation;
   memberUserId: string | null;
   quote: string | null;
   channel: ProgressCheckInChannel | null;

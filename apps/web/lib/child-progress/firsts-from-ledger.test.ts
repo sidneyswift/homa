@@ -21,6 +21,7 @@ function row(overrides: Partial<StoredProgressEvidence> = {}): StoredProgressEvi
     familyId: "fam-1",
     itemId: BANK_ID,
     answer: "easily",
+    derivation: "direct",
     source: "journal",
     memberUserId: "user-1",
     adultDisplayName: "Alessa",

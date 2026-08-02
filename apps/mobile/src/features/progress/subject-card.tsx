@@ -175,6 +175,17 @@ export function SubjectCard({
                   {summary.dateLabel}
                 </Text>
               </View>
+              {summary.derivationLabel ? (
+                <Text
+                  style={{
+                    fontFamily: fontFamilies.body,
+                    fontSize: fontSize.xs,
+                    color: colors.textMuted,
+                  }}
+                >
+                  {summary.derivationLabel}
+                </Text>
+              ) : null}
               {summary.note ? (
                 <Text
                   style={{

@@ -5,6 +5,7 @@ import type {
 import {
   formatProgressDate,
   progressAnswerLabel,
+  progressEvidenceDerivationLabel,
   progressSourceLabel,
   progressTopicStateLabel,
 } from "../../lib/child-progress/view-copy";
@@ -77,6 +78,10 @@ function ProgressConflictAnswers({
               </p>
               <p className="mt-1 font-mono text-sm text-muted">
                 {progressSourceLabel(adultAnswer.source.kind)}{" "}
+                {"\u00b7"}{" "}
+                {progressEvidenceDerivationLabel(
+                  adultAnswer.source.derivation,
+                )}{" "}
                 {"\u00b7"}{" "}
                 {formatProgressDate(
                   adultAnswer.observedAt,
@@ -173,6 +178,10 @@ export function ProgressTopicRow({
               : ""}
           </p>
           <p className="mt-1 font-mono text-sm text-muted">
+            {progressEvidenceDerivationLabel(
+              topic.source.derivation,
+            )}{" "}
+            {"\u00b7"}{" "}
             {formatProgressDate(topic.observedAt, timeZone)}
           </p>
         </>

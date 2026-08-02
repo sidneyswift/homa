@@ -6,6 +6,7 @@ import {
   progressAnswerLabel,
   progressAssessmentCta,
   progressEmptyState,
+  progressEvidenceDerivationLabel,
   progressSourceLabel,
   progressSubjectHeadline,
   progressSubjectSummary,
@@ -90,6 +91,23 @@ describe("live Progress copy", () => {
     );
   });
 
+  it("explains evidence derivation without model jargon", () => {
+    assert.deepEqual(
+      ["direct", "inferred", "unknown"].map((derivation) =>
+        progressEvidenceDerivationLabel(
+          derivation as Parameters<
+            typeof progressEvidenceDerivationLabel
+          >[0],
+        )
+      ),
+      [
+        "Shared directly",
+        "Homa matched this from what was shared",
+        "How this was matched was not saved",
+      ],
+    );
+  });
+
   it("builds a reassuring empty state without counts or history links", () => {
     const copy = progressEmptyState("Maya");
 
@@ -157,6 +175,7 @@ describe("live Progress copy", () => {
             observedAt: "2026-07-12T00:30:00.000000Z",
             source: {
               kind: "journal",
+              derivation: "inferred",
               adultDisplayName: "Elena",
               checkInId: null,
             },
@@ -165,7 +184,7 @@ describe("live Progress copy", () => {
         },
         "America/Los_Angeles",
       ),
-      "3 answers · latest: Journal note · Jul 11, 2026",
+      "3 answers · latest: Journal note · Homa matched this from what was shared · Jul 11, 2026",
     );
   });
 

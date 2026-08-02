@@ -4,7 +4,7 @@ import { parseOffsetIsoTimestampEpochNanoseconds } from "./offset-timestamp";
 
 // A stored projection is rebuilt whenever this version changes. Keep the
 // client schema and the repository cache gate on this one shared value.
-export const CHILD_PROGRESS_PROJECTION_VERSION = "3";
+export const CHILD_PROGRESS_PROJECTION_VERSION = "4";
 
 const offsetTimestampSchema = z.string().refine((value) => {
   try {
@@ -34,6 +34,12 @@ export const progressEvidenceAnswerSchema = z.enum([
   "not_yet",
 ]);
 
+export const progressEvidenceDerivationSchema = z.enum([
+  "direct",
+  "inferred",
+  "unknown",
+]);
+
 export const progressSourceKindSchema = z.enum([
   "journal",
   "conversation",
@@ -52,6 +58,7 @@ export const progressSourceKindSchema = z.enum([
 const evidenceSourceViewSchema = z
   .object({
     kind: progressSourceKindSchema,
+    derivation: progressEvidenceDerivationSchema,
     adultDisplayName: z.string().nullable(),
     checkInId: z.string().nullable(),
   })
@@ -197,6 +204,9 @@ export const childProgressViewSchema = z
   .strict();
 
 export type ProgressEvidenceAnswer = z.infer<typeof progressEvidenceAnswerSchema>;
+export type ProgressEvidenceDerivation = z.infer<
+  typeof progressEvidenceDerivationSchema
+>;
 export type ProgressSourceKind = z.infer<typeof progressSourceKindSchema>;
 export type ProgressEvidenceSourceView = z.infer<typeof evidenceSourceViewSchema>;
 export type ProgressTopicView = z.infer<typeof progressTopicSchema>;

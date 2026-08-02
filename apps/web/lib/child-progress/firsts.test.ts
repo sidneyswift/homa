@@ -32,6 +32,7 @@ function ev(overrides: Partial<ProgressEvidence> = {}): ProgressEvidence {
     familyId: "fam-1",
     itemId: BANK_A,
     answer: "easily" as ProgressEvidenceAnswer,
+    derivation: "direct",
     source: "journal" as ProgressSourceKind,
     memberUserId: "user-1",
     adultDisplayName: "Alessa",

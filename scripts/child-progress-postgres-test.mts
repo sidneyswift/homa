@@ -53,6 +53,14 @@ const progressLoopCleanupMigrationPath = path.join(
   repoRoot,
   "supabase/migrations/20260716041217_conversation_progress_loop_cleanup.sql",
 );
+const evidenceDerivationMigrationPath = path.join(
+  repoRoot,
+  "supabase/migrations/20260802200000_child_progress_evidence_derivation.sql",
+);
+const evidenceDerivationContractMigrationPath = path.join(
+  repoRoot,
+  "supabase/migrations/20260802210000_child_progress_evidence_derivation_not_null.sql",
+);
 const familyId = "00000000-0000-0000-0000-000000000001";
 const childId = "00000000-0000-0000-0000-000000000002";
 const adultA = "00000000-0000-0000-0000-000000000003";
@@ -1958,6 +1966,10 @@ async function runAdapterAssertions(input: {
         reconciliation_lock_key: string;
         redundant_conflict_actor_columns: number;
         evidence_provenance_columns: number;
+        evidence_derivation_not_null: boolean;
+        evidence_derivation_has_default: boolean;
+        evidence_derivation_check: boolean;
+        reconciliation_writes_derivation: boolean;
         evidence_name_snapshot_length: number | null;
         evidence_name_snapshot_trigger_exists: boolean;
         prompt_marker_columns: number;
@@ -2032,6 +2044,37 @@ async function runAdapterAssertions(input: {
               'provider_message_id'
             )
         ) as evidence_provenance_columns,
+        exists (
+          select 1
+          from information_schema.columns column_info
+          where column_info.table_schema = 'public'
+            and column_info.table_name = 'child_progress_evidence'
+            and column_info.column_name = 'derivation'
+            and column_info.is_nullable = 'NO'
+        ) as evidence_derivation_not_null,
+        exists (
+          select 1
+          from information_schema.columns column_info
+          where column_info.table_schema = 'public'
+            and column_info.table_name = 'child_progress_evidence'
+            and column_info.column_name = 'derivation'
+            and column_info.column_default is not null
+        ) as evidence_derivation_has_default,
+        exists (
+          select 1
+          from pg_constraint constraint_info
+          where constraint_info.conname =
+            'child_progress_evidence_derivation_check'
+            and constraint_info.conrelid =
+              'public.child_progress_evidence'::regclass
+        ) as evidence_derivation_check,
+        position(
+          'derivation' in pg_get_functiondef(
+            to_regprocedure(
+              'private.reconcile_child_answers_to_progress()'
+            )
+          )
+        ) > 0 as reconciliation_writes_derivation,
         (
           select column_info.character_maximum_length
           from information_schema.columns column_info
@@ -2192,6 +2235,10 @@ async function runAdapterAssertions(input: {
       ),
       redundant_conflict_actor_columns: 0,
       evidence_provenance_columns: 3,
+      evidence_derivation_not_null: true,
+      evidence_derivation_has_default: true,
+      evidence_derivation_check: true,
+      reconciliation_writes_derivation: true,
       evidence_name_snapshot_length: 120,
       evidence_name_snapshot_trigger_exists: true,
       prompt_marker_columns: 2,
@@ -2255,6 +2302,12 @@ async function runAdapterAssertions(input: {
       idempotencyKey: "postgres-cross-family-visible",
     });
     assert.equal(familyAEvidence.status, "recorded");
+    if (familyAEvidence.status === "recorded") {
+      assert.equal(
+        familyAEvidence.evidence[0].derivation,
+        "direct",
+      );
+    }
     const familyAServiceView =
       await service.getChildProgressView(familyId, childId);
     assert.ok(familyAServiceView);
@@ -2265,6 +2318,14 @@ async function runAdapterAssertions(input: {
         .find((topic) => topic.itemId === "phonics.joins-rhymes")
         ?.answer,
       "easily",
+    );
+    assert.equal(
+      familyAServiceView.subjects
+        .flatMap((subject) => subject.domains)
+        .flatMap((domain) => domain.topics)
+        .find((topic) => topic.itemId === "phonics.joins-rhymes")
+        ?.source?.derivation,
+      "direct",
     );
     const familyARepositoryView = await repository.loadLiveView(
       familyId,
@@ -2280,6 +2341,24 @@ async function runAdapterAssertions(input: {
         ?.answer,
       "easily",
     );
+    assert.equal(
+      familyARepositoryView.subjects
+        .flatMap((subject) => subject.domains)
+        .flatMap((domain) => domain.topics)
+        .find((topic) => topic.itemId === "phonics.joins-rhymes")
+        ?.source?.derivation,
+      "direct",
+    );
+    const [storedDirectDerivation] = await sql<
+      { derivation: string }[]
+    >`
+      select derivation
+      from public.child_progress_evidence
+      where child_id = ${childId}
+        and family_id = ${familyId}
+        and idempotency_key = 'postgres-cross-family-visible'
+    `;
+    assert.equal(storedDirectDerivation.derivation, "direct");
     assert.equal(
       await service.getChildProgressView(crossFamilyId, childId),
       null,
@@ -2669,7 +2748,12 @@ async function runAdapterAssertions(input: {
     await sql`select * from private.reconcile_child_answers_to_progress()`;
     await sql`select * from private.reconcile_child_answers_to_progress()`;
     const [firstReconciliation] = await sql<
-      { total: number; active: number; answer: string }[]
+      {
+        total: number;
+        active: number;
+        answer: string;
+        derivation: string;
+      }[]
     >`
       select count(*)::integer as total,
              count(*) filter (
@@ -2677,7 +2761,10 @@ async function runAdapterAssertions(input: {
              )::integer as active,
              max(answer) filter (
                where superseded_at is null
-             ) as answer
+             ) as answer,
+             max(derivation) filter (
+               where superseded_at is null
+             ) as derivation
       from public.child_progress_evidence
       where child_id = ${childId}
         and family_id = ${familyId}
@@ -2688,6 +2775,7 @@ async function runAdapterAssertions(input: {
       total: 1,
       active: 1,
       answer: "easily",
+      derivation: "unknown",
     });
     await sql`
       update public.child_answers
@@ -6250,6 +6338,44 @@ async function main(): Promise<void> {
         database,
         "-f",
         progressLoopCleanupMigrationPath,
+      ],
+      env,
+    );
+    await run(
+      path.join(postgresBin, "psql"),
+      [
+        "--single-transaction",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        socketDir,
+        "-p",
+        String(port),
+        "-U",
+        username,
+        "-d",
+        database,
+        "-f",
+        evidenceDerivationMigrationPath,
+      ],
+      env,
+    );
+    await run(
+      path.join(postgresBin, "psql"),
+      [
+        "--single-transaction",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        socketDir,
+        "-p",
+        String(port),
+        "-U",
+        username,
+        "-d",
+        database,
+        "-f",
+        evidenceDerivationContractMigrationPath,
       ],
       env,
     );

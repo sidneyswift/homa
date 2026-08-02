@@ -4,6 +4,7 @@ import type {
   OpenProgressConflictView,
   ProgressConflictAdultAnswerView,
   ProgressEvidenceAnswer,
+  ProgressEvidenceDerivation,
   ProgressSourceKind,
   ProgressSubjectView,
   ProgressTopicView,
@@ -81,6 +82,22 @@ export function progressSourceLabel(source: ProgressSourceKind): string {
   }
 }
 
+export function progressEvidenceDerivationLabel(
+  derivation: ProgressEvidenceDerivation,
+  adultDisplayName: string | null = null,
+): string {
+  switch (derivation) {
+    case "direct": {
+      const adult = adultDisplayName?.trim();
+      return adult ? `${adult} shared this directly` : "Shared directly";
+    }
+    case "inferred":
+      return "Homa matched this from what was shared";
+    case "unknown":
+      return "How this was matched was not saved";
+  }
+}
+
 export function progressAssessmentCta(childName: string): {
   heading: string;
   body: string;
@@ -119,6 +136,7 @@ export function progressConflictAnswerLine(
   return (
     `${adult}: ${progressAnswerLabel(answer.answer)} · ` +
     `${progressSourceLabel(answer.source.kind)} · ` +
+    `${progressEvidenceDerivationLabel(answer.source.derivation)} · ` +
     `${formatProgressDate(answer.observedAt, timeZone)}.`
   );
 }
@@ -130,6 +148,7 @@ export interface ProgressSubjectTakeaway {
 
 export interface ProgressSubjectSummary {
   sourceLabel: string;
+  derivationLabel: string | null;
   dateLabel: string;
   note: string | null;
   accessibilityLabel: string;
@@ -214,11 +233,16 @@ export function progressSubjectSummary(
   switch (subject.summary.kind) {
     case "evidence": {
       const sourceLabel = progressSourceLabel(subject.summary.source.kind);
+      const derivationLabel = progressEvidenceDerivationLabel(
+        subject.summary.source.derivation,
+        subject.summary.source.adultDisplayName,
+      );
       return {
         sourceLabel,
+        derivationLabel,
         dateLabel: date,
         note: null,
-        accessibilityLabel: `${sourceLabel} · ${date}`,
+        accessibilityLabel: `${sourceLabel} · ${derivationLabel} · ${date}`,
       };
     }
     case "conflict": {
@@ -238,6 +262,7 @@ export function progressSubjectSummary(
       const note = "Homa kept both answers.";
       return {
         sourceLabel: source,
+        derivationLabel: null,
         dateLabel: conflictDate,
         note,
         accessibilityLabel: `${source} · ${conflictDate}. ${note}`,

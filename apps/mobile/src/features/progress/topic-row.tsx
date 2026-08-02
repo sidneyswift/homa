@@ -7,6 +7,7 @@ import {
   formatProgressDate,
   progressAnswerLabel,
   progressConflictAnswerLine,
+  progressEvidenceDerivationLabel,
   progressTopicStateLabel,
 } from "./view-copy";
 
@@ -68,6 +69,12 @@ export function TopicRow({
     topic.answer ? progressAnswerLabel(topic.answer) : null,
     ...conflictLines,
     topic.state !== "conflict" ? topic.detail : null,
+    topic.state !== "conflict" && topic.source
+      ? progressEvidenceDerivationLabel(
+          topic.source.derivation,
+          topic.source.adultDisplayName,
+        )
+      : null,
     topic.state !== "conflict" && topic.observedAt
       ? formatProgressDate(topic.observedAt, timeZone)
       : null,
@@ -117,6 +124,12 @@ export function TopicRow({
           ) : null}
           <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
             {topic.detail}
+            {topic.source
+              ? ` ${progressEvidenceDerivationLabel(
+                  topic.source.derivation,
+                  topic.source.adultDisplayName,
+                )}.`
+              : ""}
             {topic.observedAt ? ` ${formatProgressDate(topic.observedAt, timeZone)}.` : ""}
           </Text>
         </>

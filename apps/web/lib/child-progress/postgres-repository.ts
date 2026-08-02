@@ -186,7 +186,8 @@ async function loadEvidenceRows(
 ): Promise<StoredProgressEvidence[]> {
   const rows = await sql<PostgresProgressEvidenceRow[]>`
     select evidence.id, evidence.child_id, evidence.family_id,
-           evidence.item_id, evidence.answer, evidence.source,
+           evidence.item_id, evidence.answer, evidence.derivation,
+           evidence.source,
            evidence.member_user_id,
            member.display_name as current_adult_display_name,
            evidence.adult_display_name_snapshot,
@@ -699,14 +700,15 @@ class PostgresChildProgressTransaction
     const rows = await this.sql<PostgresProgressEvidenceRow[]>`
       with inserted as (
         insert into public.child_progress_evidence (
-          child_id, family_id, item_id, answer, source,
+          child_id, family_id, item_id, answer, derivation, source,
           member_user_id, quote, channel, message_id,
           provider_message_id,
           check_in_id, supersedes_id,
           observed_at, idempotency_key
         )
         select ${input.childId}, ${input.familyId}, ${input.itemId},
-               ${input.answer}, ${input.source}, ${input.memberUserId},
+               ${input.answer}, ${input.derivation}, ${input.source},
+               ${input.memberUserId},
                ${input.quote}, ${input.channel ?? null},
                ${input.messageId ?? null},
                ${input.providerMessageId ?? null},
@@ -721,7 +723,8 @@ class PostgresChildProgressTransaction
         returning *
       )
       select inserted.id, inserted.child_id, inserted.family_id,
-             inserted.item_id, inserted.answer, inserted.source,
+             inserted.item_id, inserted.answer,
+             inserted.derivation, inserted.source,
              inserted.member_user_id,
              member.display_name as current_adult_display_name,
              inserted.adult_display_name_snapshot,

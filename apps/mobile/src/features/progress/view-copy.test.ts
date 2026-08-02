@@ -9,6 +9,7 @@ import {
   progressAssessmentCta,
   progressAssessmentDraft,
   progressConflictAnswerLine,
+  progressEvidenceDerivationLabel,
   progressSubjectHeadline,
   progressSubjectSummary,
   progressSubjectTakeaway,
@@ -31,6 +32,7 @@ function subject(
       observedAt,
       source: {
         kind: "lesson_listen",
+        derivation: "inferred",
         adultDisplayName: "Elena",
         checkInId: null,
       },
@@ -44,15 +46,17 @@ describe("native Progress collapsed summary", () => {
   it("leads with the latest source and family-local date", () => {
     assert.equal(
       progressSubjectSummary(subject(), "America/New_York")?.accessibilityLabel,
-      "Lesson recording · Aug 1, 2026",
+      "Lesson recording · Homa matched this from what was shared · Aug 1, 2026",
     );
     assert.deepEqual(
       progressSubjectSummary(subject(), "America/New_York"),
       {
         sourceLabel: "Lesson recording",
+        derivationLabel: "Homa matched this from what was shared",
         dateLabel: "Aug 1, 2026",
         note: null,
-        accessibilityLabel: "Lesson recording · Aug 1, 2026",
+        accessibilityLabel:
+          "Lesson recording · Homa matched this from what was shared · Aug 1, 2026",
       },
     );
   });
@@ -98,6 +102,7 @@ describe("native Progress collapsed summary", () => {
             observedAt,
             source: {
               kind: "journal",
+              derivation: "inferred",
               adultDisplayName: "Elena",
               checkInId: null,
             },
@@ -109,6 +114,7 @@ describe("native Progress collapsed summary", () => {
             observedAt,
             source: {
               kind: "conversation",
+              derivation: "direct",
               adultDisplayName: "Jordan",
               checkInId: null,
             },
@@ -129,7 +135,11 @@ describe("native Progress collapsed summary", () => {
     );
     assert.equal(
       progressConflictAnswerLine(conflicts[0].adultAnswers[0], "America/New_York"),
-      "Elena: Easily · Journal note · Aug 1, 2026.",
+      "Elena: Easily · Journal note · Homa matched this from what was shared · Aug 1, 2026.",
+    );
+    assert.equal(
+      progressConflictAnswerLine(conflicts[0].adultAnswers[1], "America/New_York"),
+      "Jordan: Getting there · Conversation · Shared directly · Aug 1, 2026.",
     );
   });
 
@@ -146,6 +156,25 @@ describe("native Progress collapsed summary", () => {
     assert.equal(
       progressAssessmentDraft("Maya"),
       "I want to tell you something Maya tried: ",
+    );
+  });
+
+  it("explains direct, inferred, and historical evidence in family language", () => {
+    assert.deepEqual(
+      [
+        progressEvidenceDerivationLabel("direct", "Elena"),
+        progressEvidenceDerivationLabel("inferred", "Elena"),
+        progressEvidenceDerivationLabel("unknown", "Elena"),
+      ],
+      [
+        "Elena shared this directly",
+        "Homa matched this from what was shared",
+        "How this was matched was not saved",
+      ],
+    );
+    assert.equal(
+      progressEvidenceDerivationLabel("direct", "  "),
+      "Shared directly",
     );
   });
 
@@ -166,6 +195,7 @@ describe("native Progress collapsed summary", () => {
                   answer: "easily",
                   source: {
                     kind: "lesson_listen",
+                    derivation: "direct",
                     adultDisplayName: "Elena",
                     checkInId: null,
                   },
@@ -196,6 +226,7 @@ describe("native Progress collapsed summary", () => {
             observedAt: sameTime,
             source: {
               kind: "journal",
+              derivation: "inferred",
               adultDisplayName: "Elena",
               checkInId: null,
             },
@@ -207,6 +238,7 @@ describe("native Progress collapsed summary", () => {
             observedAt: sameTime,
             source: {
               kind: "journal",
+              derivation: "direct",
               adultDisplayName: "Jordan",
               checkInId: null,
             },
@@ -231,6 +263,7 @@ describe("native Progress collapsed summary", () => {
             observedAt: sameTime,
             source: {
               kind: "conversation",
+              derivation: "direct",
               adultDisplayName: "Elena",
               checkInId: null,
             },
@@ -242,6 +275,7 @@ describe("native Progress collapsed summary", () => {
             observedAt: sameTime,
             source: {
               kind: "check_in",
+              derivation: "direct",
               adultDisplayName: "Jordan",
               checkInId: "check-in-1",
             },
@@ -292,6 +326,7 @@ describe("native Progress collapsed summary", () => {
               answer: "easily",
               source: {
                 kind: "conversation",
+                derivation: "direct",
                 adultDisplayName: "Elena",
                 checkInId: null,
               },
@@ -316,6 +351,7 @@ describe("native Progress collapsed summary", () => {
       ),
       {
         sourceLabel: "Conversation and check-in",
+        derivationLabel: null,
         dateLabel: "Aug 1, 2026",
         note: "Homa kept both answers.",
         accessibilityLabel:
@@ -341,6 +377,7 @@ describe("native Progress collapsed summary", () => {
                   answer: "getting_there",
                   source: {
                     kind: "journal",
+                    derivation: "inferred",
                     adultDisplayName: "Elena",
                     checkInId: null,
                   },
@@ -354,6 +391,7 @@ describe("native Progress collapsed summary", () => {
                   answer: "easily",
                   source: {
                     kind: "conversation",
+                    derivation: "direct",
                     adultDisplayName: "Elena",
                     checkInId: null,
                   },
