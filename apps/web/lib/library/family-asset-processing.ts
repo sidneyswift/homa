@@ -46,7 +46,8 @@ const FAMILY_ASSET_PROCESSING_FETCH_TIMEOUT_MS = 60_000;
 /** Plus curriculum reading keeps page identity and may inspect more than the
  *  lightweight Library classifier. It still stays bounded to one ready file. */
 export const FAMILY_CURRICULUM_SOURCE_MAX_SEGMENTS = 240;
-const FAMILY_CURRICULUM_SOURCE_MAX_CHARS = 1_000_000;
+export const FAMILY_CURRICULUM_SOURCE_MAX_CHARS = 1_000_000;
+export const FAMILY_CURRICULUM_SOURCE_MAX_SEGMENT_CHARS = 32_000;
 const FAMILY_CURRICULUM_TEXT_SEGMENT_CHARS = 12_000;
 
 export type FamilyAssetProcessingCapability =
@@ -97,6 +98,12 @@ export type FamilyAssetSourceDocument =
       truncated: boolean;
     }
   | { ok: false; reason: FamilyAssetProcessingFailureReason };
+
+export interface FamilyAssetSourceExtractionWindow {
+  startOrdinal: number;
+  maxSegments: number;
+  maxChars: number;
+}
 
 export interface FamilyAssetProcessingDependencies {
   claim(input: {
@@ -432,6 +439,7 @@ function splitSourceText(
  */
 export async function extractFamilyAssetSourceDocument(
   asset: ClaimedFamilyAsset,
+  window?: FamilyAssetSourceExtractionWindow,
 ): Promise<FamilyAssetSourceDocument> {
   if (!isFamilyLibraryUrl(asset.url, asset.familyId)) {
     return { ok: false, reason: "corrupt" };
@@ -446,15 +454,35 @@ export async function extractFamilyAssetSourceDocument(
     const task = getDocument({ data: bytes });
     try {
       const document = await task.promise;
-      const segmentLimit = Math.min(
+      const totalSegments = document.numPages;
+      const sourceSegmentLimit = Math.min(
         document.numPages,
         FAMILY_CURRICULUM_SOURCE_MAX_SEGMENTS,
       );
+      const startOrdinal = window
+        ? Math.max(1, Math.min(window.startOrdinal, sourceSegmentLimit + 1))
+        : 1;
+      const segmentLimit = window
+        ? Math.min(
+            sourceSegmentLimit,
+            startOrdinal + Math.max(1, window.maxSegments) - 1,
+          )
+        : sourceSegmentLimit;
+      const charLimit = window
+        ? Math.min(
+            FAMILY_CURRICULUM_SOURCE_MAX_CHARS,
+            Math.max(1, window.maxChars),
+          )
+        : FAMILY_CURRICULUM_SOURCE_MAX_CHARS;
       const segments: FamilyAssetSourceSegment[] = [];
       let chars = 0;
-      let truncated = document.numPages > segmentLimit;
+      let truncated = document.numPages > sourceSegmentLimit;
       try {
-        for (let pageNumber = 1; pageNumber <= segmentLimit; pageNumber += 1) {
+        for (
+          let pageNumber = startOrdinal;
+          pageNumber <= segmentLimit;
+          pageNumber += 1
+        ) {
           const page = await document.getPage(pageNumber);
           try {
             const content = await page.getTextContent();
@@ -462,20 +490,31 @@ export async function extractFamilyAssetSourceDocument(
               .flatMap((item) => ("str" in item ? [item.str] : []))
               .join(" ")
               .trim();
-            const remaining = FAMILY_CURRICULUM_SOURCE_MAX_CHARS - chars;
+            const remaining = charLimit - chars;
             if (remaining <= 0) {
-              truncated = true;
+              if (!window) truncated = true;
               break;
             }
-            const text = raw.length > remaining ? raw.slice(0, remaining) : raw;
-            if (raw.length > remaining) truncated = true;
+            if (segments.length > 0 && raw.length > remaining) {
+              if (!window) truncated = true;
+              break;
+            }
+            const segmentChars = Math.min(
+              remaining,
+              FAMILY_CURRICULUM_SOURCE_MAX_SEGMENT_CHARS,
+            );
+            const text = raw.slice(0, segmentChars);
+            if (raw.length > text.length) truncated = true;
             segments.push({
               ordinal: pageNumber,
               locator: `Page ${pageNumber}`,
               text,
             });
             chars += text.length;
-            if (truncated && raw.length > remaining) break;
+            if (!window && chars >= charLimit && pageNumber < sourceSegmentLimit) {
+              truncated = true;
+              break;
+            }
           } finally {
             page.cleanup();
           }
@@ -487,7 +526,7 @@ export async function extractFamilyAssetSourceDocument(
         ok: true,
         segmentKind: "page",
         segments,
-        totalSegments: document.numPages,
+        totalSegments,
         truncated,
       };
     } catch (error) {

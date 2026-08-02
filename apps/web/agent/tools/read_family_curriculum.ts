@@ -73,7 +73,7 @@ export default defineBoundedTool({
       title: result.asset.title,
       segmentKind: result.document.segmentKind,
       totalSegments: result.document.totalSegments,
-      sourceTruncated: result.document.truncated,
+      sourceTruncated: result.document.truncated || result.page.truncated,
       segments: result.page.segments,
       nextCursor: result.page.nextCursor,
       note:

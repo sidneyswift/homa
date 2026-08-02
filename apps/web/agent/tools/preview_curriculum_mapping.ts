@@ -171,24 +171,13 @@ export default defineBoundedTool({
               draftToken: input.draftToken!,
               proposal: input.proposal!,
             })
-          : (() => {
-              const restored = restoreCurriculumMappingDraft({
-                familyId,
-                sessionId: ctx.session.id,
-                secret: process.env.CRON_SECRET,
-                draftToken: input.draftToken!,
-                restoreRevision: input.restoreRevision!,
-              });
-              return restored
-                ? { ok: true as const, ...restored }
-                : {
-                    ok: false as const,
-                    failure: {
-                      code: "invalid" as const,
-                      note: "That earlier review version is no longer available.",
-                    },
-                  };
-            })();
+          : restoreCurriculumMappingDraft({
+              familyId,
+              sessionId: ctx.session.id,
+              secret: process.env.CRON_SECRET,
+              draftToken: input.draftToken!,
+              restoreRevision: input.restoreRevision!,
+            });
 
     if (!result.ok) {
       return {

@@ -1,6 +1,8 @@
 import { mapDb } from "../map/db";
 import {
   extractFamilyAssetSourceDocument,
+  FAMILY_CURRICULUM_SOURCE_MAX_SEGMENTS,
+  FAMILY_CURRICULUM_SOURCE_MAX_SEGMENT_CHARS,
   type ClaimedFamilyAsset,
   type FamilyAssetProcessingFailureReason,
   type FamilyAssetSourceDocument,
@@ -8,7 +10,8 @@ import {
 } from "./family-asset-processing";
 
 export const FAMILY_CURRICULUM_READ_MAX_SEGMENTS = 8;
-export const FAMILY_CURRICULUM_READ_MAX_CHARS = 32_000;
+export const FAMILY_CURRICULUM_READ_MAX_CHARS =
+  FAMILY_CURRICULUM_SOURCE_MAX_SEGMENT_CHARS;
 
 export interface ReadyFamilyCurriculum extends ClaimedFamilyAsset {
   updatedAt: string;
@@ -136,6 +139,7 @@ export async function familyAssetIdsIncludeCurriculumUnits(
 export interface FamilyCurriculumReadPage {
   segments: FamilyAssetSourceSegment[];
   nextCursor: number | null;
+  truncated: boolean;
 }
 
 /** A pure output limiter, so a source read cannot flood one agent turn. */
@@ -146,22 +150,31 @@ export function sliceFamilyCurriculumDocument(
   const start = Math.max(1, cursor);
   const segments: FamilyAssetSourceSegment[] = [];
   let chars = 0;
+  let truncated = false;
   for (const segment of document.segments) {
     if (segment.ordinal < start) continue;
     if (segments.length >= FAMILY_CURRICULUM_READ_MAX_SEGMENTS) break;
     const remaining = FAMILY_CURRICULUM_READ_MAX_CHARS - chars;
     if (remaining <= 0) break;
+    if (segments.length > 0 && segment.text.length > remaining) break;
     const text = segment.text.slice(0, remaining);
     segments.push({ ...segment, text });
     chars += text.length;
-    if (text.length < segment.text.length) break;
+    if (text.length < segment.text.length) {
+      truncated = true;
+      break;
+    }
   }
   const last = segments.at(-1);
+  const readableLastOrdinal = Math.min(
+    document.totalSegments,
+    FAMILY_CURRICULUM_SOURCE_MAX_SEGMENTS,
+  );
   const nextCursor =
-    last && document.segments.some((segment) => segment.ordinal > last.ordinal)
+    last && last.ordinal < readableLastOrdinal
       ? last.ordinal + 1
       : null;
-  return { segments, nextCursor };
+  return { segments, nextCursor, truncated };
 }
 
 export async function readFamilyCurriculumSource(input: {
@@ -171,7 +184,11 @@ export async function readFamilyCurriculumSource(input: {
 }): Promise<FamilyCurriculumSourceReadResult> {
   const ready = await getReadyFamilyCurriculum(input.familyId, input.assetId);
   if (!ready.ok) return ready;
-  const document = await extractFamilyAssetSourceDocument(ready.asset);
+  const document = await extractFamilyAssetSourceDocument(ready.asset, {
+    startOrdinal: input.cursor,
+    maxSegments: FAMILY_CURRICULUM_READ_MAX_SEGMENTS,
+    maxChars: FAMILY_CURRICULUM_READ_MAX_CHARS,
+  });
   if (!document.ok) return document;
   return {
     ok: true,

@@ -260,6 +260,8 @@ try {
     draftToken: firstToken,
   });
   assert.equal(repeated.status, "already_approved");
+  assert.ok(repeated.status === "already_approved");
+  assert.deepEqual(repeated.plannerTargets, approved.plannerTargets);
   const [afterRepeat] = await sql<{ count: number }[]>`
     select count(*)::int as count
     from public.family_assets

@@ -6,7 +6,10 @@ import {
   curriculumPlannerSourceTitle,
   curriculumUnitUrl,
   invalidCurriculumEvidenceOrdinals,
+  parseApprovedCurriculumPlannerTargets,
   proposedCurriculumMappingSchema,
+  restoreCurriculumMappingDraft,
+  reviseCurriculumMappingDraft,
   signCurriculumMappingDraft,
   verifyCurriculumMappingDraft,
   type CurriculumMappingDraftPayload,
@@ -199,5 +202,45 @@ describe("family curriculum mapping contract", () => {
     const bounded = curriculumPlannerSourceTitle("A".repeat(180), "Week 12");
     assert.equal(bounded.length <= 180, true);
     assert.match(bounded, /Week 12$/u);
+  });
+
+  it("reads an idempotent receipt from the approval ledger", () => {
+    const placement = curriculumMappingPreviewFromDraft(payload()).placements[0];
+    assert.deepEqual(parseApprovedCurriculumPlannerTargets([placement]), [placement]);
+    assert.deepEqual(
+      parseApprovedCurriculumPlannerTargets([{ ...placement, week: 9 }]),
+      [],
+    );
+  });
+
+  it("stops revisions and restores before producing an invalid 101st token", async () => {
+    const full = payload();
+    full.createdAt = new Date().toISOString();
+    full.history = Array.from({ length: 100 }, (_, index) => ({
+      revision: index + 1,
+      proposal: PROPOSAL,
+      action: "revised" as const,
+      restoredFrom: null,
+    }));
+    const token = signCurriculumMappingDraft(full, SESSION_ID, SECRET);
+    const revised = await reviseCurriculumMappingDraft({
+      familyId: FAMILY_ID,
+      sessionId: SESSION_ID,
+      secret: SECRET,
+      draftToken: token,
+      proposal: PROPOSAL,
+    });
+    assert.equal(revised.ok, false);
+    if (!revised.ok) assert.equal(revised.failure.code, "revision_limit");
+
+    const restored = restoreCurriculumMappingDraft({
+      familyId: FAMILY_ID,
+      sessionId: SESSION_ID,
+      secret: SECRET,
+      draftToken: token,
+      restoreRevision: 1,
+    });
+    assert.equal(restored.ok, false);
+    if (!restored.ok) assert.equal(restored.failure.code, "revision_limit");
   });
 });

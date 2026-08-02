@@ -40,4 +40,3 @@ export function approveCurriculumMappingDraftState(
 ): CurriculumMappingSessionState {
   return { activeDraftId: null, lastApprovedDraftId: draftId };
 }
-

@@ -30,6 +30,7 @@ const SUBJECT_NAMES = new Map(
   MAP_SUBJECTS.map((subject) => [subject.id, subject.displayName]),
 );
 const MAX_PLAN_SOURCE_TITLE = 180;
+const MAX_CURRICULUM_MAPPING_REVISIONS = 100;
 
 export const CURRICULUM_UNIT_KINDS = [
   "week",
@@ -283,7 +284,7 @@ const planBaseVersionSchema = z.object({
 });
 
 const curriculumMappingRevisionSnapshotSchema = z.object({
-  revision: z.number().int().min(1).max(100),
+  revision: z.number().int().min(1).max(MAX_CURRICULUM_MAPPING_REVISIONS),
   proposal: proposedCurriculumMappingSchema,
   action: z.enum(["created", "revised", "restored"]),
   restoredFrom: z.number().int().min(1).max(100).nullable(),
@@ -302,8 +303,16 @@ const curriculumMappingDraftPayloadSchema = z.object({
   eligibleChildIds: z.array(z.string().uuid()).min(1).max(50),
   childNames: z.record(z.string(), z.string()),
   planBaseVersions: z.array(planBaseVersionSchema).max(40),
-  history: z.array(curriculumMappingRevisionSnapshotSchema).min(1).max(100),
+  history: z
+    .array(curriculumMappingRevisionSnapshotSchema)
+    .min(1)
+    .max(MAX_CURRICULUM_MAPPING_REVISIONS),
 });
+
+type CurriculumMappingPreviewFailure =
+  | CurriculumMappingDraftFailure
+  | { code: "invalid"; note: string }
+  | { code: "revision_limit"; note: string };
 
 export function verifyCurriculumMappingDraft(
   token: string,
@@ -639,7 +648,7 @@ export async function reviseCurriculumMappingDraft(input: {
   proposal: ProposedCurriculumMapping;
 }): Promise<
   | { ok: true; draftToken: string; preview: CurriculumMappingPreview }
-  | { ok: false; failure: CurriculumMappingDraftFailure | { code: "invalid"; note: string } }
+  | { ok: false; failure: CurriculumMappingPreviewFailure }
 > {
   const previous = verifyCurriculumMappingDraft(
     input.draftToken,
@@ -651,6 +660,16 @@ export async function reviseCurriculumMappingDraft(input: {
     return {
       ok: false,
       failure: { code: "invalid", note: "This curriculum preview expired. Build a fresh one." },
+    };
+  }
+  if (previous.history.length >= MAX_CURRICULUM_MAPPING_REVISIONS) {
+    return {
+      ok: false,
+      failure: {
+        code: "revision_limit",
+        note:
+          "This curriculum review reached its 100-version limit. Build a fresh review before making another change.",
+      },
     };
   }
   const proposal = proposedCurriculumMappingSchema.parse(input.proposal);
@@ -706,7 +725,9 @@ export function restoreCurriculumMappingDraft(input: {
   secret?: string;
   draftToken: string;
   restoreRevision: number;
-}): { draftToken: string; preview: CurriculumMappingPreview } | null {
+}):
+  | { ok: true; draftToken: string; preview: CurriculumMappingPreview }
+  | { ok: false; failure: CurriculumMappingPreviewFailure } {
   const previous = verifyCurriculumMappingDraft(
     input.draftToken,
     input.sessionId,
@@ -716,7 +737,25 @@ export function restoreCurriculumMappingDraft(input: {
   const target = previous?.history.find(
     (entry) => entry.revision === input.restoreRevision,
   );
-  if (!previous || !target) return null;
+  if (!previous || !target) {
+    return {
+      ok: false,
+      failure: {
+        code: "invalid",
+        note: "That earlier review version is no longer available.",
+      },
+    };
+  }
+  if (previous.history.length >= MAX_CURRICULUM_MAPPING_REVISIONS) {
+    return {
+      ok: false,
+      failure: {
+        code: "revision_limit",
+        note:
+          "This curriculum review reached its 100-version limit. Build a fresh review before restoring another version.",
+      },
+    };
+  }
   const payload: CurriculumMappingDraftPayload = {
     ...previous,
     history: [
@@ -730,6 +769,7 @@ export function restoreCurriculumMappingDraft(input: {
     ],
   };
   return {
+    ok: true,
     draftToken: signCurriculumMappingDraft(payload, input.sessionId, input.secret),
     preview: curriculumMappingPreviewFromDraft(payload),
   };
@@ -789,6 +829,30 @@ function parseApprovedUnitAssets(value: unknown): Array<{
   });
 }
 
+const approvedPlannerTargetsSchema = z
+  .array(
+    z
+      .object({
+        unitOrdinal: z.number().int().min(1).max(5_000),
+        unitLabel: z.string().min(1).max(120),
+        childId: z.string().uuid(),
+        childName: z.string().min(1).max(180),
+        subjectId: z.string().min(1).max(80),
+        subjectName: z.string().min(1).max(120),
+        week: z.number().int().min(1).max(4),
+        activityText: z.string().min(1).max(MAX_ACTIVITY_TEXT),
+      })
+      .strict(),
+  )
+  .max(40);
+
+export function parseApprovedCurriculumPlannerTargets(
+  value: unknown,
+): CurriculumMappingPreviewPlacement[] {
+  const parsed = approvedPlannerTargetsSchema.safeParse(value);
+  return parsed.success ? parsed.data : [];
+}
+
 export async function approveCurriculumMappingDraft(input: {
   familyId: string;
   sessionId: string;
@@ -831,6 +895,9 @@ export async function approveCurriculumMappingDraft(input: {
         status: "already_approved" as const,
         revision: prior[0].final_revision,
         unitAssets: parseApprovedUnitAssets(prior[0].unit_asset_ids),
+        plannerTargets: parseApprovedCurriculumPlannerTargets(
+          prior[0].planner_targets,
+        ),
       };
     }
 
@@ -941,63 +1008,136 @@ export async function approveCurriculumMappingDraft(input: {
         and deleted_at is null
     `;
 
-    for (const unit of snapshot.proposal.units) {
-      const unitId = unitIds.get(unit.ordinal)!;
-      await tx`
-        insert into public.family_assets (
-          id, family_id, uploaded_by_user_id, parent_asset_id, atlas_id,
-          ordinal, unit_label, title, original_name, url, download_url,
-          media_type, byte_size, file_kind, resource_kind, authors, publisher,
-          language, status, content_sha256, processed_at, unit_kind,
-          unit_source_locator, unit_confidence, unit_summary,
-          decomposition_draft_id, is_current_decomposition
-        ) values (
-          ${unitId}, ${input.familyId}, ${source.uploaded_by_user_id}, ${source.id},
-          ${source.atlas_id}, ${unit.ordinal}, ${unit.unitLabel}, ${unit.unitLabel},
-          ${source.original_name},
-          ${curriculumUnitUrl(source.url, payload.draftId, unit.ordinal)},
-          ${source.download_url}, ${source.media_type}, ${Number(source.byte_size)},
-          ${source.file_kind}, 'curriculum', ${source.authors}, ${source.publisher},
-          ${source.language}, 'ready', ${source.content_sha256}, now(),
-          ${snapshot.proposal.unitKind}, ${unit.sourceLocator}, ${unit.confidence},
-          ${unit.summary}, ${payload.draftId}, true
-        )
-      `;
-      for (const childId of payload.eligibleChildIds) {
-        await tx`
-          insert into public.family_asset_children (family_id, asset_id, child_id)
-          values (${input.familyId}, ${unitId}, ${childId})
-        `;
-      }
-      for (const subjectId of unit.subjectIds) {
-        await tx`
-          insert into public.family_asset_tags (
-            family_id, asset_id, kind, value, catalog_id, quote,
-            source_locator, source
-          ) values (
-            ${input.familyId}, ${unitId}, 'subject',
-            ${SUBJECT_NAMES.get(subjectId) ?? subjectId}, ${subjectId},
-            ${unit.evidenceQuote}, ${unit.sourceLocator}, 'model'
-          )
-        `;
-      }
-      for (const topic of unit.topics) {
-        await tx`
-          insert into public.family_asset_tags (
-            family_id, asset_id, kind, value, catalog_id, quote,
-            source_locator, source
-          ) values (
-            ${input.familyId}, ${unitId}, 'topic', ${topic.name}, null,
-            ${topic.quote}, ${unit.sourceLocator}, 'model'
-          )
-        `;
-      }
-    }
+    const processedAt = new Date();
+    const unitRows = snapshot.proposal.units.map((unit) => ({
+      id: unitIds.get(unit.ordinal)!,
+      family_id: input.familyId,
+      uploaded_by_user_id: source.uploaded_by_user_id,
+      parent_asset_id: source.id,
+      atlas_id: source.atlas_id,
+      ordinal: unit.ordinal,
+      unit_label: unit.unitLabel,
+      title: unit.unitLabel,
+      original_name: source.original_name,
+      url: curriculumUnitUrl(source.url, payload.draftId, unit.ordinal),
+      download_url: source.download_url,
+      media_type: source.media_type,
+      byte_size: Number(source.byte_size),
+      file_kind: source.file_kind,
+      resource_kind: "curriculum",
+      authors: source.authors,
+      publisher: source.publisher,
+      language: source.language,
+      status: "ready",
+      content_sha256: source.content_sha256,
+      processed_at: processedAt,
+      unit_kind: snapshot.proposal.unitKind,
+      unit_source_locator: unit.sourceLocator,
+      unit_confidence: unit.confidence,
+      unit_summary: unit.summary,
+      decomposition_draft_id: payload.draftId,
+      is_current_decomposition: true,
+    }));
+    await tx`
+      insert into public.family_assets ${tx(
+        unitRows,
+        "id",
+        "family_id",
+        "uploaded_by_user_id",
+        "parent_asset_id",
+        "atlas_id",
+        "ordinal",
+        "unit_label",
+        "title",
+        "original_name",
+        "url",
+        "download_url",
+        "media_type",
+        "byte_size",
+        "file_kind",
+        "resource_kind",
+        "authors",
+        "publisher",
+        "language",
+        "status",
+        "content_sha256",
+        "processed_at",
+        "unit_kind",
+        "unit_source_locator",
+        "unit_confidence",
+        "unit_summary",
+        "decomposition_draft_id",
+        "is_current_decomposition",
+      )}
+    `;
+
+    const childLinkRows = snapshot.proposal.units.flatMap((unit) =>
+      payload.eligibleChildIds.map((childId) => ({
+        family_id: input.familyId,
+        asset_id: unitIds.get(unit.ordinal)!,
+        child_id: childId,
+      })),
+    );
+    await tx`
+      insert into public.family_asset_children ${tx(
+        childLinkRows,
+        "family_id",
+        "asset_id",
+        "child_id",
+      )}
+    `;
+
+    const tagRows = snapshot.proposal.units.flatMap((unit) => [
+      ...unit.subjectIds.map((subjectId) => ({
+        family_id: input.familyId,
+        asset_id: unitIds.get(unit.ordinal)!,
+        kind: "subject",
+        value: SUBJECT_NAMES.get(subjectId) ?? subjectId,
+        catalog_id: subjectId,
+        quote: unit.evidenceQuote,
+        source_locator: unit.sourceLocator,
+        source: "model",
+      })),
+      ...unit.topics.map((topic) => ({
+        family_id: input.familyId,
+        asset_id: unitIds.get(unit.ordinal)!,
+        kind: "topic",
+        value: topic.name,
+        catalog_id: null,
+        quote: topic.quote,
+        source_locator: unit.sourceLocator,
+        source: "model",
+      })),
+    ]);
+    await tx`
+      insert into public.family_asset_tags ${tx(
+        tagRows,
+        "family_id",
+        "asset_id",
+        "kind",
+        "value",
+        "catalog_id",
+        "quote",
+        "source_locator",
+        "source",
+      )}
+    `;
 
     const plansByKey = new Map(
       planRows.map((plan) => [planKey(plan.child_id, plan.subject_id), plan]),
     );
     const placementsByPlan = new Map<string, typeof snapshot.proposal.placements>();
+    const planLinkRows: Array<{
+      family_id: string;
+      asset_id: string;
+      child_id: string;
+      subject_id: string;
+      week: number;
+      activity_index: number;
+      activity_text: string;
+      source_title: string;
+      source_locator: string;
+    }> = [];
     for (const placement of snapshot.proposal.placements) {
       const key = planKey(placement.childId, placement.subjectId);
       const list = placementsByPlan.get(key) ?? [];
@@ -1053,18 +1193,35 @@ export async function approveCurriculumMappingDraft(input: {
             updated_at = now()
         where id = ${plan.id}
       `;
-      for (const link of links) {
-        await tx`
-          insert into public.family_asset_plan_links (
-            family_id, asset_id, child_id, subject_id, week,
-            activity_index, activity_text, source_title, source_locator
-          ) values (
-            ${input.familyId}, ${link.assetId}, ${plan.child_id},
-            ${plan.subject_id}, ${link.week}, ${link.activityIndex},
-            ${link.activityText}, ${link.sourceTitle}, ${link.sourceLocator}
-          )
-        `;
-      }
+      planLinkRows.push(
+        ...links.map((link) => ({
+          family_id: input.familyId,
+          asset_id: link.assetId,
+          child_id: plan.child_id,
+          subject_id: plan.subject_id,
+          week: link.week,
+          activity_index: link.activityIndex,
+          activity_text: link.activityText,
+          source_title: link.sourceTitle,
+          source_locator: link.sourceLocator,
+        })),
+      );
+    }
+    if (planLinkRows.length > 0) {
+      await tx`
+        insert into public.family_asset_plan_links ${tx(
+          planLinkRows,
+          "family_id",
+          "asset_id",
+          "child_id",
+          "subject_id",
+          "week",
+          "activity_index",
+          "activity_text",
+          "source_title",
+          "source_locator",
+        )}
+      `;
     }
 
     const preview = curriculumMappingPreviewFromDraft(payload);
@@ -1089,11 +1246,11 @@ export async function approveCurriculumMappingDraft(input: {
       status: "approved" as const,
       revision: snapshot.revision,
       unitAssets,
+      plannerTargets: preview.placements,
     };
   });
 
   if (result.status === "stale") return result;
-  const preview = curriculumMappingPreviewFromDraft(payload);
   return {
     status: result.status,
     draftId: payload.draftId,
@@ -1105,6 +1262,6 @@ export async function approveCurriculumMappingDraft(input: {
       ...unit,
       libraryUrl: `${siteUrl()}${familyAssetLibraryHref(unit.id)}`,
     })),
-    plannerTargets: preview.placements,
+    plannerTargets: result.plannerTargets,
   };
 }
