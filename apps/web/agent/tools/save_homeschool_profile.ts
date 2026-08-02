@@ -7,6 +7,7 @@ import { z } from "zod";
 import { HOMESCHOOL_STYLES } from "@homa/core";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { isSavedOnboardingCardAnswer } from "../../lib/chat-message-source";
 import { saveFamilyContext } from "../../lib/map/store";
 import { scanMemoryContent } from "../../lib/agent-memory";
 
@@ -75,6 +76,13 @@ export default defineBoundedTool({
   repeatable: false,
   inputSchema: profileInput,
   async execute(input, ctx) {
+    if (isSavedOnboardingCardAnswer(ctx.session.auth.current?.attributes)) {
+      return {
+        saved: false,
+        done: true,
+        note: "The authenticated card already saved this profile. Do not retry this tool; react to the parent instead.",
+      };
+    }
     let access;
     try {
       access = await resolveAgentAccess(ctx.session.auth.current?.attributes);

@@ -7,6 +7,7 @@ import { z } from "zod";
 import { US_STATES } from "@homa/core";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { isSavedOnboardingCardAnswer } from "../../lib/chat-message-source";
 import { saveFamilyBasics } from "../../lib/onboarding/store";
 
 const US_STATE_CODES: ReadonlySet<string> = new Set<string>(
@@ -71,6 +72,13 @@ export default defineBoundedTool({
   repeatable: false,
   inputSchema: basicsInput,
   async execute(input, ctx) {
+    if (isSavedOnboardingCardAnswer(ctx.session.auth.current?.attributes)) {
+      return {
+        saved: false,
+        done: true,
+        note: "The authenticated card already saved these basics. Do not retry this tool; react to the parent instead.",
+      };
+    }
     let access;
     try {
       access = await resolveAgentAccess(ctx.session.auth.current?.attributes);

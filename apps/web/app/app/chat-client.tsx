@@ -45,7 +45,6 @@ import {
   archiveFromServerHistory,
   type ChatHistoryPayload,
 } from "../../lib/chat-history-model";
-import { messageModalityHeaders } from "../../lib/web-message-modality";
 import type { PromptSuggestionSet } from "../../lib/chat-suggestions/contract";
 import type { SlashSkillItem } from "../../lib/slash-skills";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
@@ -78,6 +77,7 @@ import {
   useHydrated,
 } from "./chat-hydration";
 import {
+  chatSendHeaders,
   composerPrimaryAction,
   appendPreparedChatSendToQueue,
   flushChatQueue,
@@ -1024,7 +1024,7 @@ export function ChatClient({
       markTurnStarted();
       void sendRef.current?.({
         message,
-        headers: messageModalityHeaders(turnModalityRef.current),
+        headers: chatSendHeaders(turnModalityRef.current, flush.lane),
       });
     }, 0);
   }, []);
@@ -1959,7 +1959,7 @@ export function ChatClient({
     markTurnStarted();
     void sendRef.current?.({
       message: outgoing,
-      headers: messageModalityHeaders(turnModalityRef.current),
+      headers: chatSendHeaders(turnModalityRef.current, flush.lane),
     });
     return "sent";
   }
@@ -2054,7 +2054,7 @@ export function ChatClient({
       markTurnStarted();
       void sendRef.current?.({
         message: parts,
-        headers: messageModalityHeaders(turn.modality),
+        headers: chatSendHeaders(turn.modality, "parent"),
       });
     } catch {
       // Files stay staged; her words stay in the composer. One quiet

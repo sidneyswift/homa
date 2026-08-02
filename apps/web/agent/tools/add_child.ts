@@ -7,6 +7,7 @@ import { z } from "zod";
 import { MAP_KID_CAP } from "@homa/core";
 
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { isSavedOnboardingCardAnswer } from "../../lib/chat-message-source";
 import { emitMapEvent } from "../../lib/map/events";
 import { addChild, countChildren } from "../../lib/map/store";
 
@@ -50,6 +51,13 @@ export default defineBoundedTool({
   repeatable: false,
   inputSchema: addChildInput,
   async execute(input, ctx) {
+    if (isSavedOnboardingCardAnswer(ctx.session.auth.current?.attributes)) {
+      return {
+        added: false,
+        done: true,
+        note: "The authenticated child card already added this child. Do not retry this tool; continue the onboarding arc.",
+      };
+    }
     let access;
     try {
       access = await resolveAgentAccess(ctx.session.auth.current?.attributes);

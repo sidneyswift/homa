@@ -4,6 +4,10 @@ import { createClient } from "@supabase/supabase-js";
 
 import { familyAccountGate } from "../../lib/billing/wall";
 import {
+  messageSourceContext,
+  messageSourceFromRequest,
+} from "../../lib/chat-message-source";
+import {
   canonicalInboundAuthAttributes,
 } from "../../lib/conversation-continuity/canonical-inbound";
 import {
@@ -131,6 +135,7 @@ function supabaseAuth(): AuthFn<Request> {
     const attributes: Record<string, string> = {
       channel,
       messageModality: messageModalityFromRequest(request),
+      messageSource: messageSourceFromRequest(request),
       supabaseAccessToken: token,
     };
     const voiceBridge = trustedVoiceBridgeRequest(request, {
@@ -183,19 +188,24 @@ export default eveChannel({
     const auth = defaultEveAuth(ctx);
     if (!auth) return { auth };
 
+    const modalityContext = voiceTranscriptionContext(
+      auth.attributes.messageModality === "voice" ? "voice" : "text",
+    );
+    const turnContext = [
+      ...modalityContext,
+      ...messageSourceContext(auth.attributes),
+    ];
+
     // Sandboxed eval sessions skip continuity on purpose: they all
     // authenticate as the same local-dev principal, so the ledger would
     // stitch unrelated evals into one episode and feed one eval's
     // messages into the next one's context.
     if (auth.attributes[EVAL_FIXTURE_SESSION_ATTRIBUTE] === "true") {
-      return { auth };
+      return { auth, context: turnContext };
     }
 
     const familyId = auth.attributes.familyId;
     const memberUserId = auth.attributes.memberUserId;
-    const modalityContext = voiceTranscriptionContext(
-      auth.attributes.messageModality === "voice" ? "voice" : "text",
-    );
     const text =
       typeof message === "string"
         ? message
@@ -258,7 +268,7 @@ export default eveChannel({
           attributes,
         },
         context: [
-          ...modalityContext,
+          ...turnContext,
           [
             "## Account gate",
             "",
@@ -290,7 +300,7 @@ export default eveChannel({
         return {
           auth,
           context: [
-            ...modalityContext,
+            ...turnContext,
             ...(typeof auth.attributes.voiceBridgeActiveObjectContext === "string"
               ? [auth.attributes.voiceBridgeActiveObjectContext]
               : []),
@@ -305,7 +315,7 @@ export default eveChannel({
         return {
           auth,
           context: [
-            ...modalityContext,
+            ...turnContext,
             ...(typeof auth.attributes.voiceBridgeActiveObjectContext === "string"
               ? [auth.attributes.voiceBridgeActiveObjectContext]
               : []),
@@ -341,7 +351,7 @@ export default eveChannel({
           },
         },
         context: [
-          ...modalityContext,
+          ...turnContext,
           ...(continuity.contextMarkdown
             ? [continuity.contextMarkdown]
             : []),
@@ -352,7 +362,7 @@ export default eveChannel({
         "eve channel: continuity resolution failed:",
         error instanceof Error ? error.message : "unknown",
       );
-      return { auth, context: modalityContext };
+      return { auth, context: turnContext };
     }
   },
 });

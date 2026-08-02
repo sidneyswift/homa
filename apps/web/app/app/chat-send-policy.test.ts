@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  chatSendHeaders,
   composerPrimaryAction,
   appendPreparedChatSendToQueue,
   flushChatQueue,
@@ -11,7 +12,18 @@ import {
   prepareChatSend,
 } from "./chat-send-policy";
 import { formatHiddenDirective } from "../../lib/onboarding/directives";
+import { HOMA_MESSAGE_SOURCE_HEADER } from "../../lib/chat-message-source";
+import { HOMA_MESSAGE_MODALITY_HEADER } from "../../lib/web-message-modality";
 import { VOICE_TRANSCRIPTION_MARKER } from "../../lib/voice/transcription-marker";
+
+describe("chatSendHeaders", () => {
+  it("carries saved-card provenance into the agent request", () => {
+    assert.deepEqual(chatSendHeaders("text", "saved_card_answer"), {
+      [HOMA_MESSAGE_MODALITY_HEADER]: "text",
+      [HOMA_MESSAGE_SOURCE_HEADER]: "saved-card-answer",
+    });
+  });
+});
 
 describe("prepareChatSend", () => {
   it("queues a busy card action as text with its stable one-shot key", () => {
@@ -55,6 +67,19 @@ describe("prepareChatSend", () => {
     assert.equal(plan?.clearDraft, false);
     assert.equal(plan?.resetDraftFromVoice, false);
     assert.equal(plan?.modality, "text");
+  });
+
+  it("preserves a saved detail card as its own request source", () => {
+    const plan = prepareChatSend({
+      text: "Sidney, District of Columbia · Eclectic",
+      busy: false,
+      draftFromVoice: true,
+      source: { kind: "card_answer" },
+    });
+
+    assert.equal(plan?.lane, "saved_card_answer");
+    assert.equal(plan?.modality, "text");
+    assert.equal(plan?.clearDraft, false);
   });
 
   it("adds durable provenance to a dictated composer send", () => {
@@ -166,6 +191,13 @@ describe("flushChatQueue", () => {
       lane: "directive",
       modality: "text",
     }) as const;
+  const savedCardAnswer = (text: string) =>
+    ({
+      text,
+      progressActionKey: null,
+      lane: "saved_card_answer",
+      modality: "text",
+    }) as const;
 
   it("says nothing when there is nothing queued", () => {
     assert.deepEqual(flushChatQueue([]), {
@@ -208,6 +240,21 @@ describe("flushChatQueue", () => {
       flush.outgoing,
       `${VOICE_TRANSCRIPTION_MARKER}: Mia finished the chapter\n\nand Leo drew the map`,
     );
+  });
+
+  it("sends a saved card answer alone instead of merging its provenance with typed prose", () => {
+    const first = flushChatQueue([
+      savedCardAnswer("Sidney, District of Columbia · Eclectic"),
+      parent("and I have a question"),
+    ]);
+
+    assert.equal(
+      first.outgoing,
+      "Sidney, District of Columbia · Eclectic",
+    );
+    assert.equal(first.lane, "saved_card_answer");
+    assert.deepEqual(first.remaining, [parent("and I have a question")]);
+    assert.equal(flushChatQueue(first.remaining).lane, "parent");
   });
 
   it("sends a queued directive alone and holds her words for the next line", () => {
