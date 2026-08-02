@@ -83,6 +83,7 @@ export default defineBoundedTool({
                 startTime: before.startTime,
                 endTime: before.endTime,
                 note: before.note,
+                recurrence: before.recurrence ?? null,
               },
             },
           }),

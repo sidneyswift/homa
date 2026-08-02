@@ -2,27 +2,31 @@ import { z } from "zod";
 
 import { defineBoundedTool, TOOL_DEADLINE } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
-import { undoVoiceAction } from "../../lib/voice/action-receipts";
+import {
+  undoVoiceAction,
+  type VoiceActionEffect,
+  type VoiceUndoCapability,
+} from "../../lib/voice/action-receipts";
 
 function undoResultCopy(input: {
-  effect: "hours.logged" | "family_event.added" | "family_event.updated" | "family_event.removed";
+  effect: VoiceActionEffect;
+  undoCapability: VoiceUndoCapability;
   namedEffect: string;
   alreadyUndone: boolean;
 }): string {
+  const restoresPriorState = input.undoCapability !== "exact_delete";
   const result = input.effect === "family_event.updated"
     ? `the earlier details for ${input.namedEffect}`
     : input.namedEffect;
   if (input.alreadyUndone) {
     const verb = input.effect === "family_event.updated"
       ? "were already restored"
-      : input.effect === "family_event.removed"
+      : restoresPriorState
         ? "was already restored"
         : "was already removed";
     return `${result[0].toUpperCase()}${result.slice(1)} ${verb}. Nothing changed this time.`;
   }
-  const verb = input.effect === "family_event.updated" || input.effect === "family_event.removed"
-    ? "Restored"
-    : "Removed";
+  const verb = restoresPriorState ? "Restored" : "Removed";
   return `${verb} ${result}.`;
 }
 
@@ -58,7 +62,8 @@ export default defineBoundedTool({
         note: "Nothing changed. Go back to the Voice conversation where you made the change and say ‘undo that.’",
       };
     }
-    if (typeof attributes.memberUserId !== "string") {
+    const actor = z.string().uuid().safeParse(attributes.memberUserId);
+    if (!actor.success) {
       return {
         undone: false,
         reason: "no_actor",
@@ -67,7 +72,7 @@ export default defineBoundedTool({
     }
     const result = await undoVoiceAction({
       familyId,
-      actorUserId: attributes.memberUserId,
+      actorUserId: actor.data,
       runtimeSessionId: ctx.session.id,
       undoTurnId: ctx.session.turn.id,
       ...(input.receiptId ? { receiptId: input.receiptId } : {}),
@@ -93,6 +98,7 @@ export default defineBoundedTool({
       preview: `Undo ${result.receipt.namedEffect}`,
       note: undoResultCopy({
         effect: result.receipt.effect,
+        undoCapability: result.receipt.undoCapability,
         namedEffect: result.receipt.namedEffect,
         alreadyUndone: result.alreadyUndone,
       }),

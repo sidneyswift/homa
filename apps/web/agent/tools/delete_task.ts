@@ -5,8 +5,16 @@ import {
   TOOL_DEADLINE,
 } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
-import { deleteCustomTask } from "../../lib/tasks/custom";
+import {
+  deleteCustomTask,
+  getTaskMutationSnapshot,
+} from "../../lib/tasks/custom";
 import { refuseScheduleSpawnedSession } from "../../lib/tasks/guard";
+import {
+  armVoiceActionThenMutate,
+  recordVoiceAction,
+  voiceToolReceiptContext,
+} from "../../lib/voice/action-receipts";
 
 export default defineBoundedTool({
   description:
@@ -31,8 +39,42 @@ export default defineBoundedTool({
       throw error;
     }
 
-    const result = await deleteCustomTask(familyId, input.taskId);
+    const before = await getTaskMutationSnapshot(familyId, input.taskId);
+    if (!before || before.kind !== "custom") {
+      return { deleted: false, note: "That task is not in this family." };
+    }
+    const receiptContext = voiceToolReceiptContext({
+      familyId,
+      attributes,
+      runtimeSessionId: ctx.session.id,
+      turnId: ctx.session.turn.id,
+    });
+    const mutate = () => deleteCustomTask(familyId, input.taskId);
+    const armed = receiptContext
+      ? await armVoiceActionThenMutate({
+          familyId,
+          record: () => recordVoiceAction({
+            ...receiptContext,
+            objectKind: "task",
+            objectId: input.taskId,
+            effect: "task.deleted",
+            namedEffect: before.label ?? "scheduled task",
+            undoCapability: "append_only_restore",
+            payload: { effect: "task.deleted", before },
+          }),
+          mutate,
+          replay: async (receipt) => receipt.undoneAt
+            ? { ok: false as const, note: "That Voice action already ran and was undone." }
+            : { ok: true as const },
+          succeeded: (result) => result.ok,
+        })
+      : { actionReceipt: null, result: await mutate(), replayed: false };
+    const result = armed.result;
     if (!result.ok) return { deleted: false, note: result.note };
-    return { deleted: true, note: "Task deleted. Confirm to the parent in one short aside." };
+    return {
+      deleted: true,
+      ...(armed.actionReceipt ? { actionReceipt: armed.actionReceipt } : {}),
+      note: "Task deleted. Confirm to the parent in one short aside.",
+    };
   },
 });

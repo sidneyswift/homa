@@ -147,6 +147,7 @@ export default defineBoundedTool({
                 startTime: before.startTime,
                 endTime: before.endTime,
                 note: before.note,
+                recurrence: before.recurrence ?? null,
               },
               after: {
                 childId: before.childId,
@@ -156,6 +157,7 @@ export default defineBoundedTool({
                 startTime: predicted.value.startTime,
                 endTime: predicted.value.endTime,
                 note: predicted.value.note,
+                recurrence: predicted.value.recurrence,
               },
             },
           }),

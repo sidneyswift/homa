@@ -10,14 +10,18 @@ create table if not exists public.voice_action_receipts (
   actor_user_id uuid not null,
   runtime_session_id text not null check (char_length(runtime_session_id) between 1 and 200),
   turn_id text not null check (char_length(turn_id) between 1 and 200),
-  object_kind text not null check (object_kind in ('hours_entry', 'family_event')),
+  object_kind text not null check (object_kind in ('hours_entry', 'family_event', 'plan_activity', 'task')),
   object_id uuid not null,
   effect text not null check (
     effect in (
       'hours.logged',
       'family_event.added',
       'family_event.updated',
-      'family_event.removed'
+      'family_event.removed',
+      'plan_activity.scheduled',
+      'task.created',
+      'task.updated',
+      'task.deleted'
     )
   ),
   named_effect text not null check (char_length(named_effect) between 1 and 240),

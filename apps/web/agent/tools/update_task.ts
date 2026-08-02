@@ -9,9 +9,15 @@ import {
   setTaskPaused,
   updateCustomTask,
   updateTaskSchedule,
+  getTaskMutationSnapshot,
   type CustomTaskInput,
 } from "../../lib/tasks/custom";
 import { refuseScheduleSpawnedSession } from "../../lib/tasks/guard";
+import {
+  armVoiceActionThenMutate,
+  recordVoiceAction,
+  voiceToolReceiptContext,
+} from "../../lib/voice/action-receipts";
 
 export default defineBoundedTool({
   description:
@@ -70,29 +76,78 @@ export default defineBoundedTool({
       };
     }
 
-    if (paused !== undefined) {
-      const result = await setTaskPaused(familyId, taskId, paused);
-      if (!result.ok) return { updated: false, note: result.note };
-      if (!hasPatch) {
-        return {
-          updated: true,
-          note: `Task ${paused ? "paused" : "resumed"}. Tell the parent in one short aside.`,
-        };
+    const before = await getTaskMutationSnapshot(familyId, taskId);
+    if (!before) return { updated: false, note: "That task is not in this family." };
+    const normalizedWeekdays = cleanPatch.weekdays === undefined
+      ? before.weekdays
+      : [...new Set(cleanPatch.weekdays)].sort((left, right) => left - right);
+    const after = {
+      ...before,
+      label: cleanPatch.label ?? before.label,
+      prompt: cleanPatch.prompt ?? before.prompt,
+      localHour: cleanPatch.localHour ?? before.localHour,
+      weekdays: normalizedWeekdays,
+      deliveryPref: cleanPatch.deliveryPref ?? before.deliveryPref,
+      paused: paused ?? before.paused,
+      pausedAt: paused === undefined
+        ? before.pausedAt
+        : paused
+          ? (before.pausedAt ?? new Date().toISOString())
+          : null,
+    };
+    const receiptContext = voiceToolReceiptContext({
+      familyId,
+      attributes,
+      runtimeSessionId: ctx.session.id,
+      turnId: ctx.session.turn.id,
+    });
+    const mutate = async () => {
+      if (hasPatch) {
+        const result = scheduleOnly
+          ? await updateTaskSchedule(familyId, taskId, {
+              ...(cleanPatch.weekdays !== undefined ? { weekdays: cleanPatch.weekdays } : {}),
+              ...(cleanPatch.localHour !== undefined ? { localHour: cleanPatch.localHour } : {}),
+              ...(cleanPatch.deliveryPref !== undefined
+                ? { deliveryPref: cleanPatch.deliveryPref }
+                : {}),
+            })
+          : await updateCustomTask(familyId, taskId, cleanPatch);
+        if (!result.ok) return { updated: false as const, note: result.note };
       }
-    }
-
-    if (hasPatch) {
-      const result = scheduleOnly
-        ? await updateTaskSchedule(familyId, taskId, {
-            ...(cleanPatch.weekdays !== undefined ? { weekdays: cleanPatch.weekdays } : {}),
-            ...(cleanPatch.localHour !== undefined ? { localHour: cleanPatch.localHour } : {}),
-            ...(cleanPatch.deliveryPref !== undefined
-              ? { deliveryPref: cleanPatch.deliveryPref }
-              : {}),
-          })
-        : await updateCustomTask(familyId, taskId, cleanPatch);
-      if (!result.ok) return { updated: false, note: result.note };
-    }
-    return { updated: true, note: "Task updated. Tell the parent in one short aside." };
+      if (paused !== undefined) {
+        const result = await setTaskPaused(familyId, taskId, paused);
+        if (!result.ok) return { updated: false as const, note: result.note };
+      }
+      return {
+        updated: true as const,
+        note: paused !== undefined && !hasPatch
+          ? `Task ${paused ? "paused" : "resumed"}. Tell the parent in one short aside.`
+          : "Task updated. Tell the parent in one short aside.",
+      };
+    };
+    const armed = receiptContext
+      ? await armVoiceActionThenMutate({
+          familyId,
+          record: () => recordVoiceAction({
+            ...receiptContext,
+            objectKind: "task",
+            objectId: taskId,
+            effect: "task.updated",
+            namedEffect: `${before.label ?? "scheduled task"} changes`,
+            undoCapability: "exact_restore",
+            payload: { effect: "task.updated", before, after },
+          }),
+          mutate,
+          replay: async (receipt) => receipt.undoneAt
+            ? { updated: false as const, note: "That Voice action already ran and was undone." }
+            : { updated: true as const, note: "Task updated." },
+          succeeded: (result) => result.updated,
+        })
+      : { actionReceipt: null, result: await mutate(), replayed: false };
+    if (!armed.result.updated) return armed.result;
+    return {
+      ...armed.result,
+      ...(armed.actionReceipt ? { actionReceipt: armed.actionReceipt } : {}),
+    };
   },
 });

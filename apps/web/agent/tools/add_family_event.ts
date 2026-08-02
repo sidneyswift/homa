@@ -129,6 +129,7 @@ export default defineBoundedTool({
                 startTime: parsed.value.startTime,
                 endTime: parsed.value.endTime,
                 note: parsed.value.note,
+                recurrence: parsed.value.recurrence,
               },
             },
           }),

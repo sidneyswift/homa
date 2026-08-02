@@ -6,6 +6,7 @@ import {
   NON_UNDOABLE_VOICE_EFFECTS,
   voiceActionCandidatesAreAmbiguous,
   voiceActionEffectSchema,
+  voiceToolReceiptContext,
 } from "./action-receipts";
 
 describe("Voice action receipt contract", () => {
@@ -33,6 +34,59 @@ describe("Voice action receipt contract", () => {
     for (const effect of NON_UNDOABLE_VOICE_EFFECTS) {
       assert.equal(voiceActionEffectSchema.safeParse(effect).success, false);
     }
+  });
+
+  it("ignores non-Voice turns but fails closed for unattributed Voice writes", () => {
+    assert.equal(
+      voiceToolReceiptContext({
+        familyId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        attributes: { messageModality: "text" },
+        runtimeSessionId: "session-1",
+        turnId: "turn-1",
+      }),
+      null,
+    );
+    assert.throws(
+      () => voiceToolReceiptContext({
+        familyId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        attributes: { messageModality: "voice" },
+        runtimeSessionId: "session-1",
+        turnId: "turn-1",
+      }),
+      /signed-in adult/u,
+    );
+  });
+
+  it("accepts only a trusted Voice actor and bounded turn identity", () => {
+    assert.deepEqual(
+      voiceToolReceiptContext({
+        familyId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        attributes: {
+          messageModality: "voice",
+          memberUserId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+        },
+        runtimeSessionId: "session-1",
+        turnId: "turn-1",
+      }),
+      {
+        familyId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        actorUserId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+        runtimeSessionId: "session-1",
+        turnId: "turn-1",
+      },
+    );
+    assert.throws(
+      () => voiceToolReceiptContext({
+        familyId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        attributes: {
+          messageModality: "voice",
+          memberUserId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+        },
+        runtimeSessionId: "",
+        turnId: "turn-1",
+      }),
+      /which conversation/u,
+    );
   });
 
   it("does not run a mutation when receipt arming fails", async () => {

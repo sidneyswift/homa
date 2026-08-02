@@ -46,6 +46,11 @@ try {
     select id from public.families order by created_at limit 1
   `;
   assert.ok(family?.id, "eval fixture family exists");
+  const [familyChild] = await sql<{ id: string }[]>`
+    select id from public.children where family_id = ${family.id}
+    order by created_at limit 1
+  `;
+  assert.ok(familyChild?.id, "eval fixture child exists");
 
   let hoursSequence = 0;
   const insertHours = async (familyId: string) => {
@@ -503,8 +508,270 @@ try {
   `;
   assert.equal(replacementRow.title, "Replacement event");
 
+  const scheduledActivityId = randomUUID();
+  const scheduledActivity = {
+    childId: familyChild.id,
+    subjectId: "math",
+    week: 1,
+    activityIndex: 0,
+    scheduledDate: "2026-08-07",
+  };
+  await sql`
+    insert into public.plan_activity_schedule
+      (id, family_id, child_id, subject_id, week, activity_index, scheduled_date)
+    values
+      (${scheduledActivityId}, ${family.id}, ${scheduledActivity.childId},
+       ${scheduledActivity.subjectId}, ${scheduledActivity.week},
+       ${scheduledActivity.activityIndex}, ${scheduledActivity.scheduledDate})
+  `;
+  const scheduleReceipt = await committedReceipt({
+    familyId: family.id,
+    actorUserId: actor,
+    runtimeSessionId: "voice-plan-schedule",
+    turnId: "turn-plan-schedule",
+    objectKind: "plan_activity",
+    objectId: scheduledActivityId,
+    effect: "plan_activity.scheduled",
+    namedEffect: "scheduling the math activity for Friday",
+    undoCapability: "exact_delete",
+    payload: {
+      effect: "plan_activity.scheduled",
+      before: null,
+      after: scheduledActivity,
+    },
+    now,
+  });
+  const scheduleUndo = await undoVoiceAction({
+    familyId: family.id,
+    actorUserId: actor,
+    runtimeSessionId: "voice-plan-schedule",
+    undoTurnId: "turn-plan-schedule-undo",
+    receiptId: scheduleReceipt.id,
+    now: new Date(now.getTime() + 60_000),
+  });
+  assert.equal(scheduleUndo.status, "undone");
+  const [scheduleCount] = await sql<{ count: number }[]>`
+    select count(*)::int as count from public.plan_activity_schedule
+    where id = ${scheduledActivityId} and family_id = ${family.id}
+  `;
+  assert.equal(scheduleCount.count, 0);
+
+  const movedActivityId = randomUUID();
+  const movedActivityBefore = {
+    ...scheduledActivity,
+    activityIndex: 1,
+    scheduledDate: "2026-08-06",
+  };
+  const movedActivityAfter = {
+    ...movedActivityBefore,
+    scheduledDate: "2026-08-08",
+  };
+  await sql`
+    insert into public.plan_activity_schedule
+      (id, family_id, child_id, subject_id, week, activity_index, scheduled_date)
+    values
+      (${movedActivityId}, ${family.id}, ${movedActivityAfter.childId},
+       ${movedActivityAfter.subjectId}, ${movedActivityAfter.week},
+       ${movedActivityAfter.activityIndex}, ${movedActivityAfter.scheduledDate})
+  `;
+  const movedActivityReceipt = await committedReceipt({
+    familyId: family.id,
+    actorUserId: actor,
+    runtimeSessionId: "voice-plan-moved",
+    turnId: "turn-plan-moved",
+    objectKind: "plan_activity",
+    objectId: movedActivityId,
+    effect: "plan_activity.scheduled",
+    namedEffect: "moving the math activity to Saturday",
+    undoCapability: "exact_restore",
+    payload: {
+      effect: "plan_activity.scheduled",
+      before: movedActivityBefore,
+      after: movedActivityAfter,
+    },
+    now,
+  });
+  const movedActivityUndo = await undoVoiceAction({
+    familyId: family.id,
+    actorUserId: actor,
+    runtimeSessionId: "voice-plan-moved",
+    undoTurnId: "turn-plan-moved-undo",
+    receiptId: movedActivityReceipt.id,
+    now: new Date(now.getTime() + 60_000),
+  });
+  assert.equal(movedActivityUndo.status, "undone");
+  const [restoredActivity] = await sql<{ scheduled_date: string }[]>`
+    select to_char(scheduled_date, 'YYYY-MM-DD') as scheduled_date
+    from public.plan_activity_schedule
+    where id = ${movedActivityId} and family_id = ${family.id}
+  `;
+  assert.equal(restoredActivity.scheduled_date, movedActivityBefore.scheduledDate);
+
+  const taskCreatedAt = "2026-08-01T15:00:00.000Z";
+  const taskNextRunAt = "2026-08-03T13:00:00.000Z";
+  const taskId = randomUUID();
+  const taskSnapshot = {
+    kind: "custom" as const,
+    label: "Sunday prep",
+    prompt: "Help me prepare the coming homeschool week.",
+    localHour: 9,
+    weekdays: [0],
+    deliveryPref: "text" as const,
+    paused: false,
+    pausedAt: null,
+    enabled: true,
+    nextRunAt: taskNextRunAt,
+    lastRunAt: null,
+    createdBy: "homa" as const,
+    recipientMemberUserId: null,
+    sourceOfferDeliveryId: null,
+    createdAt: taskCreatedAt,
+  };
+  await sql`
+    insert into public.agent_schedules
+      (id, family_id, kind, next_run_at, enabled, created_at, local_hour,
+       weekdays, delivery_pref, label, prompt, created_by)
+    values
+      (${taskId}, ${family.id}, ${taskSnapshot.kind}, ${taskSnapshot.nextRunAt},
+       ${taskSnapshot.enabled}, ${taskSnapshot.createdAt}, ${taskSnapshot.localHour},
+       ${sql.array(taskSnapshot.weekdays)}::smallint[], ${taskSnapshot.deliveryPref},
+       ${taskSnapshot.label}, ${taskSnapshot.prompt}, ${taskSnapshot.createdBy})
+  `;
+  const createdTaskReceipt = await committedReceipt({
+    familyId: family.id,
+    actorUserId: actor,
+    runtimeSessionId: "voice-task-created",
+    turnId: "turn-task-created",
+    objectKind: "task",
+    objectId: taskId,
+    effect: "task.created",
+    namedEffect: "creating the Sunday prep task",
+    undoCapability: "exact_delete",
+    payload: { effect: "task.created", after: taskSnapshot },
+    now,
+  });
+  const createdTaskUndo = await undoVoiceAction({
+    familyId: family.id,
+    actorUserId: actor,
+    runtimeSessionId: "voice-task-created",
+    undoTurnId: "turn-task-created-undo",
+    receiptId: createdTaskReceipt.id,
+    now: new Date(now.getTime() + 60_000),
+  });
+  assert.equal(createdTaskUndo.status, "undone");
+  const [createdTaskCount] = await sql<{ count: number }[]>`
+    select count(*)::int as count from public.agent_schedules
+    where id = ${taskId} and family_id = ${family.id}
+  `;
+  assert.equal(createdTaskCount.count, 0);
+
+  const updatedTaskId = randomUUID();
+  const updatedTaskBefore = {
+    ...taskSnapshot,
+    label: "Monday preview",
+    prompt: "Show me the homeschool plan before Monday begins.",
+    localHour: 8,
+    weekdays: [1],
+  };
+  const updatedTaskAfter = {
+    ...updatedTaskBefore,
+    label: "Monday morning preview",
+    localHour: 7,
+    paused: true,
+    pausedAt: "2026-08-01T15:30:00.000Z",
+  };
+  await sql`
+    insert into public.agent_schedules
+      (id, family_id, kind, next_run_at, enabled, created_at, local_hour,
+       weekdays, delivery_pref, label, prompt, created_by, paused_at)
+    values
+      (${updatedTaskId}, ${family.id}, ${updatedTaskAfter.kind},
+       ${updatedTaskAfter.nextRunAt}, ${updatedTaskAfter.enabled},
+       ${updatedTaskAfter.createdAt}, ${updatedTaskAfter.localHour},
+       ${sql.array(updatedTaskAfter.weekdays)}::smallint[],
+       ${updatedTaskAfter.deliveryPref}, ${updatedTaskAfter.label},
+       ${updatedTaskAfter.prompt}, ${updatedTaskAfter.createdBy},
+       ${updatedTaskAfter.pausedAt})
+  `;
+  const updatedTaskReceipt = await committedReceipt({
+    familyId: family.id,
+    actorUserId: actor,
+    runtimeSessionId: "voice-task-updated",
+    turnId: "turn-task-updated",
+    objectKind: "task",
+    objectId: updatedTaskId,
+    effect: "task.updated",
+    namedEffect: "changing the Monday preview task",
+    undoCapability: "exact_restore",
+    payload: {
+      effect: "task.updated",
+      before: updatedTaskBefore,
+      after: updatedTaskAfter,
+    },
+    now,
+  });
+  const updatedTaskUndo = await undoVoiceAction({
+    familyId: family.id,
+    actorUserId: actor,
+    runtimeSessionId: "voice-task-updated",
+    undoTurnId: "turn-task-updated-undo",
+    receiptId: updatedTaskReceipt.id,
+    now: new Date(now.getTime() + 60_000),
+  });
+  assert.equal(updatedTaskUndo.status, "undone");
+  const [restoredUpdatedTask] = await sql<{
+    label: string;
+    local_hour: number;
+    paused_at: string | null;
+  }[]>`
+    select label, local_hour, paused_at::text from public.agent_schedules
+    where id = ${updatedTaskId} and family_id = ${family.id}
+  `;
+  assert.equal(restoredUpdatedTask.label, updatedTaskBefore.label);
+  assert.equal(restoredUpdatedTask.local_hour, updatedTaskBefore.localHour);
+  assert.equal(restoredUpdatedTask.paused_at, null);
+
+  const deletedTaskId = randomUUID();
+  const deletedTaskSnapshot = {
+    ...taskSnapshot,
+    label: "Friday review",
+    prompt: "Help me review what worked in homeschool this week.",
+    localHour: 16,
+    weekdays: [5],
+  };
+  const deletedTaskReceipt = await committedReceipt({
+    familyId: family.id,
+    actorUserId: actor,
+    runtimeSessionId: "voice-task-deleted",
+    turnId: "turn-task-deleted",
+    objectKind: "task",
+    objectId: deletedTaskId,
+    effect: "task.deleted",
+    namedEffect: "deleting the Friday review task",
+    undoCapability: "append_only_restore",
+    payload: { effect: "task.deleted", before: deletedTaskSnapshot },
+    now,
+  });
+  const deletedTaskUndo = await undoVoiceAction({
+    familyId: family.id,
+    actorUserId: actor,
+    runtimeSessionId: "voice-task-deleted",
+    undoTurnId: "turn-task-deleted-undo",
+    receiptId: deletedTaskReceipt.id,
+    now: new Date(now.getTime() + 60_000),
+  });
+  assert.equal(deletedTaskUndo.status, "undone");
+  const [restoredTask] = await sql<{ label: string; local_hour: number }[]>`
+    select label, local_hour from public.agent_schedules
+    where id = ${deletedTaskId} and family_id = ${family.id}
+  `;
+  assert.deepEqual(restoredTask, {
+    label: deletedTaskSnapshot.label,
+    local_hour: deletedTaskSnapshot.localHour,
+  });
+
   console.log(
-    "PASS voice action receipts: lifecycle, undo, retry, scope, expiry, interruption, and concurrent-state guards",
+    "PASS voice action receipts: lifecycle, undo, retry, scope, expiry, interruption, planner, task, and concurrent-state guards",
   );
 } finally {
   await sql.end();

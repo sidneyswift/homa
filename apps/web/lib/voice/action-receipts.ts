@@ -10,6 +10,10 @@ export const voiceActionEffectSchema = z.enum([
   "family_event.added",
   "family_event.updated",
   "family_event.removed",
+  "plan_activity.scheduled",
+  "task.created",
+  "task.updated",
+  "task.deleted",
 ]);
 export type VoiceActionEffect = z.infer<typeof voiceActionEffectSchema>;
 
@@ -45,6 +49,32 @@ const hoursSnapshotSchema = z.object({
   note: z.string().max(200).nullable(),
 });
 
+const planActivitySnapshotSchema = z.object({
+  childId: z.string().uuid(),
+  subjectId: z.string().min(1).max(80),
+  week: z.number().int().min(1).max(4),
+  activityIndex: z.number().int().min(0),
+  scheduledDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u),
+});
+
+const taskSnapshotSchema = z.object({
+  kind: z.enum(["journal_prompt", "morning_brief", "custom"]),
+  label: z.string().max(60).nullable(),
+  prompt: z.string().max(1000).nullable(),
+  localHour: z.number().int().min(0).max(23),
+  weekdays: z.array(z.number().int().min(0).max(6)).min(1).max(7),
+  deliveryPref: z.enum(["text", "email", "none"]),
+  paused: z.boolean(),
+  pausedAt: z.string().nullable(),
+  enabled: z.boolean(),
+  nextRunAt: z.string().nullable(),
+  lastRunAt: z.string().nullable(),
+  createdBy: z.enum(["system", "parent", "homa"]),
+  recipientMemberUserId: z.string().uuid().nullable(),
+  sourceOfferDeliveryId: z.string().uuid().nullable(),
+  createdAt: z.string().nullable(),
+});
+
 const receiptPayloadSchema = z.discriminatedUnion("effect", [
   z.object({ effect: z.literal("hours.logged"), after: hoursSnapshotSchema }),
   z.object({
@@ -60,6 +90,18 @@ const receiptPayloadSchema = z.discriminatedUnion("effect", [
     effect: z.literal("family_event.removed"),
     before: familyEventSnapshotSchema,
   }),
+  z.object({
+    effect: z.literal("plan_activity.scheduled"),
+    before: planActivitySnapshotSchema.nullable(),
+    after: planActivitySnapshotSchema,
+  }),
+  z.object({ effect: z.literal("task.created"), after: taskSnapshotSchema }),
+  z.object({
+    effect: z.literal("task.updated"),
+    before: taskSnapshotSchema,
+    after: taskSnapshotSchema,
+  }),
+  z.object({ effect: z.literal("task.deleted"), before: taskSnapshotSchema }),
 ]);
 export type VoiceActionCompensatorPayload = z.infer<typeof receiptPayloadSchema>;
 
@@ -69,7 +111,7 @@ export interface VoiceActionReceipt {
   actorUserId: string;
   runtimeSessionId: string;
   turnId: string;
-  objectKind: "hours_entry" | "family_event";
+  objectKind: "hours_entry" | "family_event" | "plan_activity" | "task";
   objectId: string;
   effect: VoiceActionEffect;
   namedEffect: string;
@@ -86,7 +128,7 @@ interface RawReceiptRow {
   actor_user_id: string;
   runtime_session_id: string;
   turn_id: string;
-  object_kind: "hours_entry" | "family_event";
+  object_kind: "hours_entry" | "family_event" | "plan_activity" | "task";
   object_id: string;
   effect: VoiceActionEffect;
   named_effect: string;
@@ -157,13 +199,21 @@ export function voiceToolReceiptContext(input: {
     memberUserId?: unknown;
     messageModality?: unknown;
   };
+  if (attributes.messageModality !== "voice") return null;
+
   const actor = z.string().uuid().safeParse(attributes.memberUserId);
-  if (attributes.messageModality !== "voice" || !actor.success) return null;
+  if (!actor.success) {
+    throw new Error(
+      "Voice changes require a signed-in adult. Nothing was changed. Reopen Voice from the signed-in Homa app and try again.",
+    );
+  }
   if (
     input.runtimeSessionId.length === 0 || input.runtimeSessionId.length > 200
     || input.turnId.length === 0 || input.turnId.length > 200
   ) {
-    return null;
+    throw new Error(
+      "Voice could not prove which conversation made this change. Nothing was changed. Reopen Voice and try again.",
+    );
   }
   return {
     familyId: input.familyId,
@@ -470,6 +520,122 @@ export async function undoVoiceAction(input: {
           return {
             status: "not_undoable",
             note: "That event was already restored or replaced. Homa left the current calendar unchanged. Open the Planner to review it.",
+          };
+        }
+        break;
+      }
+      case "plan_activity.scheduled": {
+        const { before, after } = payload;
+        if (before === null) {
+          const removed = await tx<{ id: string }[]>`
+            delete from public.plan_activity_schedule
+            where id = ${selected.object_id} and family_id = ${input.familyId}
+              and child_id = ${after.childId} and subject_id = ${after.subjectId}
+              and week = ${after.week} and activity_index = ${after.activityIndex}
+              and scheduled_date = ${after.scheduledDate}
+            returning id
+          `;
+          if (removed.length === 0) {
+            return {
+              status: "not_undoable",
+              note: "That activity moved again after Homa scheduled it. Homa kept the newer date. Open the Planner to review it.",
+            };
+          }
+        } else {
+          const restored = await tx<{ id: string }[]>`
+            update public.plan_activity_schedule
+            set scheduled_date = ${before.scheduledDate}, updated_at = now()
+            where id = ${selected.object_id} and family_id = ${input.familyId}
+              and child_id = ${after.childId} and subject_id = ${after.subjectId}
+              and week = ${after.week} and activity_index = ${after.activityIndex}
+              and scheduled_date = ${after.scheduledDate}
+            returning id
+          `;
+          if (restored.length === 0) {
+            return {
+              status: "not_undoable",
+              note: "That activity moved again after Homa scheduled it. Homa kept the newer date. Open the Planner to review it.",
+            };
+          }
+        }
+        break;
+      }
+      case "task.created": {
+        const after = payload.after;
+        const removed = await tx<{ id: string }[]>`
+          delete from public.agent_schedules
+          where id = ${selected.object_id} and family_id = ${input.familyId}
+            and kind = ${after.kind} and label is not distinct from ${after.label}
+            and prompt is not distinct from ${after.prompt}
+            and local_hour = ${after.localHour}
+            and weekdays = ${tx.array(after.weekdays)}::smallint[]
+            and delivery_pref = ${after.deliveryPref}
+            and paused_at is null and enabled = ${after.enabled}
+            and last_run_at is null and created_by = ${after.createdBy}
+            and recipient_member_user_id is not distinct from ${after.recipientMemberUserId}
+            and source_offer_delivery_id is not distinct from ${after.sourceOfferDeliveryId}
+          returning id
+        `;
+        if (removed.length === 0) {
+          return {
+            status: "not_undoable",
+            note: "That task changed or ran after Homa created it. Homa kept the current task. Open Tasks to review it.",
+          };
+        }
+        break;
+      }
+      case "task.updated": {
+        const { before, after } = payload;
+        const restored = await tx<{ id: string }[]>`
+          update public.agent_schedules
+          set label = ${before.label}, prompt = ${before.prompt},
+              local_hour = ${before.localHour},
+              weekdays = ${tx.array(before.weekdays)}::smallint[],
+              delivery_pref = ${before.deliveryPref},
+              paused_at = ${before.pausedAt},
+              enabled = ${before.enabled},
+              next_run_at = coalesce(${before.nextRunAt}, next_run_at)
+          where id = ${selected.object_id} and family_id = ${input.familyId}
+            and kind = ${after.kind} and label is not distinct from ${after.label}
+            and prompt is not distinct from ${after.prompt}
+            and local_hour = ${after.localHour}
+            and weekdays = ${tx.array(after.weekdays)}::smallint[]
+            and delivery_pref = ${after.deliveryPref}
+            and (${after.paused} = (paused_at is not null))
+            and enabled = ${after.enabled}
+            and last_run_at is not distinct from ${after.lastRunAt}
+          returning id
+        `;
+        if (restored.length === 0) {
+          return {
+            status: "not_undoable",
+            note: "That task changed or ran again after Homa updated it. Homa kept the newer version. Open Tasks to review it.",
+          };
+        }
+        break;
+      }
+      case "task.deleted": {
+        const before = payload.before;
+        const restored = await tx<{ id: string }[]>`
+          insert into public.agent_schedules
+            (id, family_id, kind, next_run_at, last_run_at, enabled, created_at,
+             local_hour, weekdays, delivery_pref, label, prompt, created_by,
+             paused_at, recipient_member_user_id, source_offer_delivery_id)
+          values
+            (${selected.object_id}, ${input.familyId}, ${before.kind},
+             ${before.nextRunAt}, ${before.lastRunAt}, ${before.enabled},
+             coalesce(${before.createdAt}, now()), ${before.localHour},
+             ${tx.array(before.weekdays)}::smallint[], ${before.deliveryPref},
+             ${before.label}, ${before.prompt}, ${before.createdBy},
+             ${before.pausedAt},
+             ${before.recipientMemberUserId}, ${before.sourceOfferDeliveryId})
+          on conflict (id) do nothing
+          returning id
+        `;
+        if (restored.length === 0) {
+          return {
+            status: "not_undoable",
+            note: "That task was already restored or replaced. Homa left the current task unchanged. Open Tasks to review it.",
           };
         }
         break;
