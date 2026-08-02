@@ -542,6 +542,74 @@ async function monthPlanApprovalsSchemaExists() {
   return rows[0]?.present === true;
 }
 
+async function familyAssetTrainingSchemaIsIsolated() {
+  const [presence] = await sql`
+    select to_regnamespace('training') is not null as schema_exists
+  `;
+  if (!presence?.schema_exists) {
+    report(
+      "family asset training ledger absent from target (additive migration not applied yet); nothing exposed",
+      true,
+    );
+    return false;
+  }
+
+  const [row] = await sql`
+    select
+      (
+        select count(*)::integer
+        from information_schema.tables
+        where table_schema = 'training'
+          and table_name in (
+            'dataset_builds',
+            'family_asset_sources',
+            'family_asset_exports',
+            'family_asset_actions'
+          )
+      ) as table_count,
+      has_schema_privilege('anon', 'training', 'USAGE') as anon_schema_usage,
+      has_schema_privilege(
+        'authenticated', 'training', 'USAGE'
+      ) as authenticated_schema_usage,
+      exists (
+        select 1
+        from information_schema.role_table_grants
+        where table_schema = 'training'
+          and grantee in ('anon', 'authenticated')
+      ) as product_table_grant,
+      (
+        select count(*)::integer
+        from pg_trigger
+        where tgname in (
+          'propagate_family_asset_soft_deletion',
+          'propagate_family_asset_hard_deletion'
+        )
+          and not tgisinternal
+      ) as deletion_trigger_count,
+      exists (
+        select 1
+        from information_schema.columns
+        where table_schema = 'training'
+          and column_name like '%copyright%'
+      ) as copyright_gate_exists
+  `;
+  const isolated =
+    row?.table_count === 4 &&
+    row?.anon_schema_usage === false &&
+    row?.authenticated_schema_usage === false &&
+    row?.product_table_grant === false &&
+    row?.deletion_trigger_count === 2 &&
+    row?.copyright_gate_exists === false;
+  report(
+    "family asset training ledger is outside product access and deletion-aware",
+    isolated,
+    isolated
+      ? "four private training tables, no product grants, both deletion triggers, no copyright gate"
+      : JSON.stringify(row),
+  );
+  return isolated;
+}
+
 /**
  * The subject_lessons migration deliberately ships as an expand/contract
  * pair (2026-07-18 merge-to-main review finding): the enforcing trigger is
@@ -4968,6 +5036,15 @@ await expectInsertDenied(
 
 if (sql) {
   try {
+    await familyAssetTrainingSchemaIsIsolated();
+  } catch (error) {
+    report(
+      "family asset training ledger is outside product access and deletion-aware",
+      false,
+      error instanceof Error ? error.message : String(error),
+    );
+  }
+  try {
     morningResearchBriefV2SchemaAvailable =
       await morningResearchBriefV2SchemaExists();
     report(
@@ -5002,6 +5079,11 @@ if (sql) {
     );
   }
 } else {
+  report(
+    "family asset training ledger is outside product access and deletion-aware",
+    false,
+    "missing SUPABASE_DB_PASSWORD",
+  );
   report(
     "morning research brief v2 migration is applied to the isolation target",
     false,
