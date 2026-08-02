@@ -192,7 +192,19 @@ describe("canonical native Progress read boundary", () => {
     );
     assert.notEqual(waitIndex, -1);
     assert.ok(publishIndex > waitIndex);
-    assert.match(otaWorkflowSource, /select\(\.name == "Vercel"\)/u);
-    assert.match(otaWorkflowSource, /checks: read/u);
+    assert.match(
+      otaWorkflowSource,
+      /repos\/\$\{GITHUB_REPOSITORY\}\/commits\/\$\{GITHUB_SHA\}\/status/u,
+    );
+    assert.match(otaWorkflowSource, /select\(\.context == "Vercel"\)/u);
+    assert.match(otaWorkflowSource, /statuses: read/u);
+    assert.doesNotMatch(otaWorkflowSource, /\/check-runs/u);
+    assert.match(
+      otaWorkflowSource,
+      /- "\.github\/workflows\/mobile-ota-update\.yml"/u,
+    );
+    assert.match(otaWorkflowSource, /success\)\s+exit 0/u);
+    assert.match(otaWorkflowSource, /failure\|error\)/u);
+    assert.match(otaWorkflowSource, /for attempt in \$\(seq 1 90\)/u);
   });
 });

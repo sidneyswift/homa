@@ -19,6 +19,7 @@ on:
   push:
     branches: [main]
     paths:
+      - ".github/workflows/mobile-ota-update.yml"
       - "apps/mobile/**"
       - "packages/core/**"
   workflow_dispatch: {}
@@ -28,8 +29,8 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  checks: read
   contents: read
+  statuses: read
 
 jobs:
   publish-update:
@@ -98,16 +99,25 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           for attempt in $(seq 1 90); do
-            state="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/check-runs" --jq '(.check_runs | map(select(.name == "Vercel")) | sort_by(.started_at) | last) // {status:"missing", conclusion:""} | [.status, (.conclusion // "")] | @tsv')"
-            status="$(printf '%s' "$state" | cut -f1)"
-            conclusion="$(printf '%s' "$state" | cut -f2)"
-            if [ "$status" = "completed" ] && [ "$conclusion" = "success" ]; then
-              exit 0
-            fi
-            if [ "$status" = "completed" ]; then
-              printf 'Vercel deployment did not succeed: %s\n' "$conclusion"
-              exit 1
-            fi
+            # Vercel reports through GitHub's commit-status API, not the
+            # check-runs API. The wrong endpoint stranded the 2026-08-02
+            # Progress OTA even after its production deployment succeeded.
+            state="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/status" --jq '(.statuses | map(select(.context == "Vercel")) | sort_by(.created_at) | last) // {state:"missing"} | .state')"
+            case "$state" in
+              success)
+                exit 0
+                ;;
+              failure|error)
+                printf 'Vercel deployment did not succeed: %s\n' "$state"
+                exit 1
+                ;;
+              pending|missing)
+                ;;
+              *)
+                printf 'Unexpected Vercel deployment state: %s\n' "$state"
+                exit 1
+                ;;
+            esac
             sleep 10
           done
           printf 'Timed out waiting for the Vercel deployment check.\n'
