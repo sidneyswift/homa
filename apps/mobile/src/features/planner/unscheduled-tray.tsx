@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text, View, useWindowDimensions } from "react-native";
 
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
@@ -19,7 +19,10 @@ export function UnscheduledTray({
   activities: PlanActivityView[];
   onSchedule: (activity: PlanActivityView) => void;
 }) {
+  const { fontScale } = useWindowDimensions();
   if (activities.length === 0) return null;
+
+  const largeText = fontScale >= 1.4;
 
   return (
     <View
@@ -36,23 +39,28 @@ export function UnscheduledTray({
       {activities.map((activity) => (
         <Pressable
           key={`${activity.childId}.${activity.subjectId}.${activity.week}.${activity.activityIndex}`}
+          accessibilityRole="button"
+          accessibilityLabel={`Put ${activity.text} on a day for ${activity.childName}, ${activity.subjectName}`}
+          accessibilityHint="Opens the date picker"
           onPress={() => onSchedule(activity)}
           style={{
-            flexDirection: "row",
+            minHeight: 48,
+            flexDirection: largeText ? "column" : "row",
             justifyContent: "space-between",
-            alignItems: "center",
-            paddingVertical: space.xs,
+            alignItems: largeText ? "stretch" : "center",
+            gap: space.sm,
+            paddingVertical: space.sm,
           }}
         >
           <View style={{ flex: 1 }}>
             <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}>
               {activity.text}
             </Text>
-            <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.xs, color: colors.textSubtle }}>
+            <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.xs, color: colors.textMuted }}>
               {activity.childName} · {activity.subjectName}
             </Text>
             {activity.sources.length > 0 ? (
-              <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.xs, color: colors.textSubtle }}>
+              <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.xs, color: colors.textMuted }}>
                 From {activity.sources
                   .map((source) =>
                     `${source.title}${source.sourceLocator ? ` · ${source.sourceLocator}` : ""}`,
@@ -61,7 +69,7 @@ export function UnscheduledTray({
               </Text>
             ) : null}
           </View>
-          <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.brand }}>
+          <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textStrong }}>
             Put on a day
           </Text>
         </Pressable>

@@ -1,9 +1,10 @@
 import { useRef } from "react";
-import { Modal, Pressable, ScrollView, View } from "react-native";
-import { useReducedMotion } from "react-native-reanimated";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { colors, radius, shadows, space } from "../../theme/tokens";
+import { AccessibleModal } from "../../components/ui/accessible-modal";
+import { fontFamilies } from "../../theme/fonts";
+import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
 import { MarkdownText } from "../chat/markdown-text";
 
 /**
@@ -32,17 +33,18 @@ export function ReplySheet({
   text: string;
   onDismiss: () => void;
 }) {
-  const reducedMotion = useReducedMotion();
   const insets = useSafeAreaInsets();
+  const headingRef = useRef<View>(null);
   // Same responder-props swipe as overlay-host (no PanResponder; its
   // create-with-closures shape trips the react-hooks/refs rule).
   const dragStartY = useRef<number | null>(null);
 
   return (
-    <Modal
+    <AccessibleModal
       visible
+      title="Homa's full reply"
+      initialFocusRef={headingRef}
       transparent
-      animationType={reducedMotion ? "fade" : "slide"}
       onRequestClose={onDismiss}
     >
       <View
@@ -55,11 +57,11 @@ export function ReplySheet({
         <Pressable
           style={{ flex: 1 }}
           onPress={onDismiss}
-          accessibilityRole="button"
-          accessibilityLabel="Close"
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
         />
         <View
-          accessibilityLabel="The full reply"
+          onAccessibilityEscape={onDismiss}
           style={{
             height: "65%",
             backgroundColor: colors.card,
@@ -85,9 +87,13 @@ export function ReplySheet({
               }
             }}
             accessibilityRole="button"
-            accessibilityLabel="Swipe down to close"
+            accessibilityLabel="Close full reply"
+            accessibilityHint="Double tap to close. You can also swipe down."
+            onAccessibilityTap={onDismiss}
             style={{
+              minHeight: 44,
               alignItems: "center",
+              justifyContent: "center",
               paddingTop: space.sm,
               paddingBottom: space.xs,
             }}
@@ -108,10 +114,22 @@ export function ReplySheet({
               paddingBottom: space.xl,
             }}
           >
+            <View ref={headingRef} accessible accessibilityRole="header" accessibilityLabel="Homa's full reply">
+              <Text
+                style={{
+                  paddingBottom: space.sm,
+                  fontFamily: fontFamilies.displaySemibold,
+                  fontSize: fontSize.lg,
+                  color: colors.textStrong,
+                }}
+              >
+                Homa&apos;s full reply
+              </Text>
+            </View>
             <MarkdownText text={text} />
           </ScrollView>
         </View>
       </View>
-    </Modal>
+    </AccessibleModal>
   );
 }

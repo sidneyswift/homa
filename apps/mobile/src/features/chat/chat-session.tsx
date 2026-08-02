@@ -5,12 +5,16 @@ import {
   ScrollView,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { useEveAgent, type EveMessage } from "eve/react";
+import { useReducedMotion } from "react-native-reanimated";
 import { formatHiddenDirective } from "@homa/core";
 
 import { env, EVE_CHANNEL_HEADER } from "../../lib/env";
+import { useAccessibilityAnnouncement } from "../../lib/accessibility";
+import { InlineError } from "../../components/ui/inline-error";
 import {
   archiveMessages,
   foldEventsToMessages,
@@ -36,7 +40,11 @@ import {
 import {
   type ComposerDraftRequest,
 } from "./composer-draft";
-import { busyLabel, countLastTurnToolCalls } from "./message-utils";
+import {
+  busyLabel,
+  chatCompletionAnnouncement,
+  countLastTurnToolCalls,
+} from "./message-utils";
 import { BusyBubble, MessageView } from "./message-view";
 import {
   bindProgressDraftContext,
@@ -184,6 +192,9 @@ export function ChatSession({
   initialProgressFingerprint: string | null;
   onDraftRequestHandled: (requestId: string) => void;
 }) {
+  const { fontScale } = useWindowDimensions();
+  const reducedMotion = useReducedMotion();
+  const stackComposer = fontScale >= 1.4;
   const messagesRef = useRef<readonly EveMessage[]>([]);
   const [archived, setArchived] = useState<ArchivedMessage[]>(prepared.archived);
   const archivedRef = useRef(archived);
@@ -195,6 +206,16 @@ export function ChatSession({
   const reportedErrorRef = useRef<Error | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const composerRef = useRef<TextInput>(null);
+  const userStopReasonRef = useRef<"stop" | "send-now" | null>(null);
+  const turnAnnouncementSequenceRef = useRef(0);
+  const [turnAnnouncement, setTurnAnnouncement] = useState<{
+    message: string;
+    occurrenceId: number;
+  } | null>(null);
+  useAccessibilityAnnouncement(
+    turnAnnouncement?.message,
+    turnAnnouncement?.occurrenceId,
+  );
   /** Choice card partKey -> the message her taps sent from that card. */
   const [questionAnswers, setQuestionAnswers] = useState<
     Record<string, string>
@@ -380,6 +401,22 @@ export function ChatSession({
         snapshot.data.messages,
       );
       setLiveTimes(stamped);
+      const stopped = userStopReasonRef.current;
+      userStopReasonRef.current = null;
+      const announcement = stopped === "send-now"
+        ? "Homa stopped. Your queued message is sending now."
+        : stopped === "stop"
+          ? "Homa stopped. Your message draft is still here."
+          : snapshot.error
+            ? null
+            : (chatCompletionAnnouncement(snapshot.data.messages) ?? "Homa's reply is ready.");
+      if (announcement) {
+        turnAnnouncementSequenceRef.current += 1;
+        setTurnAnnouncement({
+          message: announcement,
+          occurrenceId: turnAnnouncementSequenceRef.current,
+        });
+      }
       void saveChat(storageKey, {
         archived: archivedRef.current,
         events: snapshot.events,
@@ -413,6 +450,11 @@ export function ChatSession({
 
   const busy = agent.status === "submitted" || agent.status === "streaming";
   const messages = agent.data.messages;
+
+  function stopForUser(reason: "stop" | "send-now"): void {
+    userStopReasonRef.current = reason;
+    agentStop();
+  }
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -741,7 +783,7 @@ export function ChatSession({
           gap: space.md,
           flexGrow: 1,
         }}
-        onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}
+        onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: !reducedMotion })}
         keyboardShouldPersistTaps="handled"
       >
         {!hasAnyMessages ? (
@@ -863,7 +905,7 @@ export function ChatSession({
               >
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Remove from queue"
+                  accessibilityLabel={`Remove queued message: ${entry.text}`}
                   onPress={() =>
                     setQueued((current) => {
                       const next = current.filter((_, at) => at !== index);
@@ -871,13 +913,13 @@ export function ChatSession({
                       return next;
                     })
                   }
-                  hitSlop={8}
+                  style={{ minWidth: 44, minHeight: 44, alignItems: "center", justifyContent: "center" }}
                 >
                   <Text
                     style={{
                       fontFamily: fontFamilies.bodySemibold,
                       fontSize: fontSize.sm,
-                      color: colors.textSubtle,
+                      color: colors.textMuted,
                     }}
                   >
                     {"\u2715"}
@@ -887,8 +929,9 @@ export function ChatSession({
                   style={{
                     borderRadius: radius.lg,
                     borderBottomRightRadius: radius.sm,
-                    backgroundColor: colors.brand,
-                    opacity: 0.7,
+                    backgroundColor: colors.brandSoft,
+                    borderWidth: 1,
+                    borderColor: colors.brandHover,
                     paddingHorizontal: 18,
                     paddingVertical: 12,
                   }}
@@ -897,7 +940,7 @@ export function ChatSession({
                     style={{
                       fontFamily: fontFamilies.body,
                       fontSize: fontSize.base,
-                      color: colors.onBrand,
+                      color: colors.textStrong,
                     }}
                   >
                     {entry.text}
@@ -910,7 +953,7 @@ export function ChatSession({
                 style={{
                   fontFamily: fontFamilies.body,
                   fontSize: fontSize.xs,
-                  color: colors.textSubtle,
+                  color: colors.textMuted,
                 }}
               >
                 Sends when Homa finishes
@@ -921,14 +964,16 @@ export function ChatSession({
                 // moment the abort settles.
                 <Pressable
                   accessibilityRole="button"
-                  onPress={() => agent.stop()}
-                  hitSlop={8}
+                  accessibilityLabel="Stop Homa and send the queued message now"
+                  onPress={() => stopForUser("send-now")}
+                  style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: space.sm }}
                 >
                   <Text
                     style={{
                       fontFamily: fontFamilies.bodySemibold,
                       fontSize: fontSize.xs,
-                      color: colors.brand,
+                      color: colors.textStrong,
+                      textDecorationLine: "underline",
                     }}
                   >
                     Send now
@@ -945,19 +990,7 @@ export function ChatSession({
             label={recovering ? "Reconnecting\u2026" : "Restoring conversation\u2026"}
           />
         ) : agent.error ? (
-          <Text
-            accessibilityRole="alert"
-            style={{
-              textAlign: "center",
-              fontFamily: fontFamilies.body,
-              fontSize: fontSize.sm,
-              color: colors.danger,
-            }}
-          >
-            {
-              "Your conversation is safe; that last message didn't go through. Try sending it again."
-            }
-          </Text>
+          <InlineError message="Your conversation is safe; that last message didn't go through. Try sending it again." />
         ) : null}
       </ScrollView>
 
@@ -979,7 +1012,7 @@ export function ChatSession({
               Your earlier draft is safe.
             </Text>
             <Pressable accessibilityRole="button" onPress={restoreParkedComposer} style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: space.sm }}>
-              <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.brand }}>
+              <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textStrong }}>
                 Back to my draft
               </Text>
             </Pressable>
@@ -1033,7 +1066,7 @@ export function ChatSession({
                 style={{
                   fontFamily: fontFamilies.bodySemibold,
                   fontSize: fontSize.sm,
-                  color: colors.brand,
+                  color: colors.textStrong,
                 }}
               >
                 Remove context
@@ -1043,8 +1076,8 @@ export function ChatSession({
         ) : null}
         <View
           style={{
-            flexDirection: "row",
-            alignItems: "flex-end",
+            flexDirection: stackComposer ? "column" : "row",
+            alignItems: stackComposer ? "stretch" : "flex-end",
             gap: space.sm,
             padding: space.md,
           }}
@@ -1055,13 +1088,14 @@ export function ChatSession({
           onChangeText={updateDraft}
           accessibilityLabel="Message Homa"
           placeholder={"Tell Homa about your day\u2026"}
-          placeholderTextColor={colors.textSubtle}
+          placeholderTextColor={colors.textMuted}
           multiline
           returnKeyType="send"
           submitBehavior="submit"
           onSubmitEditing={() => sendMessage(draft)}
           style={{
-            flex: 1,
+            flex: stackComposer ? undefined : 1,
+            width: stackComposer ? "100%" : undefined,
             minHeight: 48,
             maxHeight: 128,
             borderRadius: radius.lg,
@@ -1082,10 +1116,11 @@ export function ChatSession({
         {busy ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Stop"
-            onPress={() => agent.stop()}
+            accessibilityLabel="Stop Homa's response"
+            onPress={() => stopForUser("stop")}
             style={({ pressed }) => ({
               minHeight: 48,
+              alignSelf: stackComposer ? "stretch" : "auto",
               borderRadius: radius.pill,
               borderWidth: draft.trim().length > 0 ? 1 : 0,
               borderColor: pressed ? colors.brand : colors.border,
@@ -1094,7 +1129,7 @@ export function ChatSession({
                   ? colors.card
                   : pressed
                     ? colors.brandHover
-                    : colors.brand,
+                    : colors.brandHover,
               paddingHorizontal: space.lg,
               alignItems: "center",
               justifyContent: "center",
@@ -1114,13 +1149,15 @@ export function ChatSession({
         {!busy || draft.trim().length > 0 ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Send"
+            accessibilityLabel={busy ? "Queue message to send when Homa finishes" : "Send message to Homa"}
+            accessibilityState={{ disabled: restoringSession || draft.trim().length === 0 }}
             onPress={() => sendMessage(draft)}
             disabled={restoringSession || draft.trim().length === 0}
             style={({ pressed }) => ({
               minHeight: 48,
+              alignSelf: stackComposer ? "stretch" : "auto",
               borderRadius: radius.pill,
-              backgroundColor: pressed ? colors.brandHover : colors.brand,
+              backgroundColor: colors.brandHover,
               paddingHorizontal: space.lg,
               alignItems: "center",
               justifyContent: "center",
@@ -1154,9 +1191,11 @@ function ProgressDraftChoice({
   onUse: () => void;
   onKeep: () => void;
 }) {
+  useAccessibilityAnnouncement(
+    "You already have a draft. Keep it, or set it aside while you talk through this Progress idea.",
+  );
   return (
     <View
-      accessibilityRole="alert"
       style={{
         margin: space.md,
         marginBottom: 0,
@@ -1173,7 +1212,7 @@ function ProgressDraftChoice({
         Keep it, or set it aside while you talk through this Progress idea.
       </Text>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space.sm }}>
-        <Pressable accessibilityRole="button" onPress={onUse} style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: space.md, borderRadius: radius.pill, backgroundColor: colors.brand }}>
+        <Pressable accessibilityRole="button" onPress={onUse} style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: space.md, borderRadius: radius.pill, backgroundColor: colors.brandHover }}>
           <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.onBrand }}>
             {intent === "review_progress_next_move" ? "Use next move" : "Use Progress prompt"}
           </Text>
@@ -1195,17 +1234,22 @@ function SuggestionChip({
   label: string;
   onPress: () => void;
 }) {
+  const reducedMotion = useReducedMotion();
   return (
     <Pressable
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={label}
       onPress={onPress}
       style={({ pressed }) => ({
+        minHeight: 44,
         borderRadius: radius.pill,
         borderWidth: 1,
         borderColor: pressed ? colors.brand : colors.border,
         backgroundColor: colors.card,
         paddingHorizontal: space.md,
         paddingVertical: 10,
-        transform: [{ scale: pressed ? pressScale : 1 }],
+        transform: [{ scale: pressed && !reducedMotion ? pressScale : 1 }],
       })}
     >
       <Text
@@ -1235,7 +1279,7 @@ function DaySeparator({ label }: { label: string }) {
         style={{
           fontFamily: fontFamilies.bodySemibold,
           fontSize: fontSize.xs,
-          color: colors.textSubtle,
+          color: colors.textMuted,
         }}
       >
         {label}

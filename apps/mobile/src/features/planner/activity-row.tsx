@@ -85,7 +85,7 @@ export function ActivityRow({
           >
             {activity.text}
           </Text>
-          <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.xs, color: colors.textSubtle }}>
+          <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.xs, color: colors.textMuted }}>
             {activity.childName} · {activity.subjectName}
           </Text>
         </View>
@@ -94,18 +94,21 @@ export function ActivityRow({
         <InlineError message={mutationError} style={{ marginTop: space.xs }} />
       ) : null}
       {activity.sources.length > 0 ? (
-        <View style={{ marginLeft: 28, marginTop: 3, flexDirection: "row", flexWrap: "wrap" }}>
-          <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.xs, color: colors.textSubtle }}>
+        <View style={{ marginLeft: 28, marginTop: 3, flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: space.xs }}>
+          <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.xs, color: colors.textMuted }}>
             From{" "}
           </Text>
           {activity.sources.map((source, index) => (
             <Pressable
               key={source.id}
               accessibilityRole="link"
+              accessibilityLabel={`Open source ${source.title}${source.sourceLocator ? `, ${source.sourceLocator}` : ""}`}
+              accessibilityHint="Opens the Family Library source"
               onPress={() => void Linking.openURL(source.libraryUrl)}
+              style={{ minHeight: 44, justifyContent: "center" }}
             >
-              <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.xs, color: colors.brand, textDecorationLine: "underline" }}>
-                {index > 0 ? ", " : ""}
+              <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.xs, color: colors.textStrong, textDecorationLine: "underline" }}>
+                {index > 0 ? "Also " : ""}
                 {source.title}
                 {source.sourceLocator ? ` · ${source.sourceLocator}` : ""}
               </Text>

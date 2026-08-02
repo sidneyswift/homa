@@ -1,9 +1,11 @@
 import { X } from "lucide-react-native";
-import { useState } from "react";
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useRef, useState } from "react";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { AccessibleModal } from "../../components/ui/accessible-modal";
 import { Button } from "../../components/ui/button";
+import { IconButton } from "../../components/ui/icon-button";
 import { InlineError } from "../../components/ui/inline-error";
 import { reportCrash } from "../../lib/crash-reporting";
 import { HOURS_SUBJECTS, type HoursSubject } from "../../lib/hours";
@@ -34,6 +36,7 @@ export function EntryEditor({
   onDelete: () => Promise<void>;
   onClose: () => void;
 }) {
+  const headingRef = useRef<View>(null);
   const [subject, setSubject] = useState<HoursSubject>(entry?.subject ?? "other");
   const [minutesText, setMinutesText] = useState(entry ? String(entry.minutes) : "");
   const [note, setNote] = useState(entry?.note ?? "");
@@ -78,9 +81,10 @@ export function EntryEditor({
   }
 
   return (
-    <Modal
+    <AccessibleModal
       visible={entry !== null}
-      animationType="slide"
+      title="Edit hours entry"
+      initialFocusRef={headingRef}
       onRequestClose={busy ? () => undefined : onClose}
       presentationStyle="pageSheet"
     >
@@ -95,19 +99,19 @@ export function EntryEditor({
             borderBottomColor: colors.borderSubtle,
           }}
         >
-          <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }}>
-            Edit entry
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Close hours editor"
+          <View ref={headingRef} accessible accessibilityRole="header" accessibilityLabel="Edit hours entry" style={{ flex: 1 }}>
+            <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }}>
+              Edit entry
+            </Text>
+          </View>
+          <IconButton
+            label="Close hours editor"
             accessibilityState={{ disabled: busy }}
             disabled={busy}
             onPress={onClose}
-            hitSlop={8}
           >
             <X size={22} color={colors.textSubtle} />
-          </Pressable>
+          </IconButton>
         </View>
 
         <ScrollView contentContainerStyle={{ padding: space.md, gap: space.md }}>
@@ -123,13 +127,16 @@ export function EntryEditor({
                     key={option}
                     accessibilityRole="radio"
                     accessibilityState={{ checked: active, disabled: busy }}
+                    accessibilityLabel={SUBJECT_LABELS[option]}
                     disabled={busy}
                     onPress={() => setSubject(option)}
                     style={{
                       paddingHorizontal: space.md,
+                      minHeight: 44,
+                      justifyContent: "center",
                       paddingVertical: space.xs,
                       borderRadius: radius.pill,
-                      backgroundColor: active ? colors.brand : colors.card,
+                      backgroundColor: active ? colors.brandHover : colors.card,
                       borderWidth: 1,
                       borderColor: active ? colors.brand : colors.borderSubtle,
                     }}
@@ -161,7 +168,7 @@ export function EntryEditor({
               onChangeText={setMinutesText}
               keyboardType="number-pad"
               placeholder="1–600"
-              placeholderTextColor={colors.textSubtle}
+              placeholderTextColor={colors.textMuted}
               style={{
                 fontFamily: fontFamilies.body,
                 fontSize: fontSize.base,
@@ -170,6 +177,7 @@ export function EntryEditor({
                 borderWidth: 1,
                 borderColor: colors.border,
                 borderRadius: radius.sm,
+                minHeight: 48,
                 padding: space.sm,
               }}
             />
@@ -186,7 +194,7 @@ export function EntryEditor({
               value={note}
               onChangeText={setNote}
               placeholder="Optional"
-              placeholderTextColor={colors.textSubtle}
+              placeholderTextColor={colors.textMuted}
               multiline
               maxLength={200}
               style={{
@@ -221,8 +229,8 @@ export function EntryEditor({
                     ? `Delete this ${entry.minutes}-minute ${SUBJECT_LABELS[entry.subject].toLowerCase()} block? This can't be undone.`
                     : ""}
                 </Text>
-                <View style={{ flexDirection: "row", gap: space.sm }}>
-                  <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space.sm }}>
+                  <View style={{ flex: 1, minWidth: 128 }}>
                     <Button
                       label="Cancel"
                       variant="secondary"
@@ -230,7 +238,7 @@ export function EntryEditor({
                       onPress={() => setConfirmingDelete(false)}
                     />
                   </View>
-                  <View style={{ flex: 1 }}>
+                  <View style={{ flex: 1, minWidth: 128 }}>
                     <Button
                       label={pendingAction === "delete" ? "Deleting…" : "Delete"}
                       onPress={() => void handleDelete()}
@@ -243,9 +251,11 @@ export function EntryEditor({
             ) : (
               <Pressable
                 accessibilityRole="button"
+                accessibilityLabel="Delete this hours entry"
                 accessibilityState={{ disabled: busy }}
                 disabled={busy}
                 onPress={() => setConfirmingDelete(true)}
+                style={{ minHeight: 44, justifyContent: "center" }}
               >
                 <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textMuted }}>
                   Delete this entry
@@ -255,6 +265,6 @@ export function EntryEditor({
           </View>
         </ScrollView>
       </SafeAreaView>
-    </Modal>
+    </AccessibleModal>
   );
 }

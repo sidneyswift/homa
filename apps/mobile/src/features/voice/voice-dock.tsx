@@ -1,8 +1,10 @@
 import { usePathname, useRouter } from "expo-router";
 import { ChevronDown, Mic, MicOff, PhoneOff, Sparkles } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
 import { deriveCharacterState } from "./character-state";
@@ -10,6 +12,7 @@ import { HomaCharacter } from "./homa-character";
 import {
   voiceDockPresentation,
   voiceDockStatusLabel,
+  voiceStatusAnnouncement,
 } from "./voice-dock-model";
 import { useVoiceWorkbench } from "./voice-workbench-provider";
 
@@ -24,6 +27,8 @@ export function VoiceDock() {
   const pathname = usePathname();
   const router = useRouter();
   const { session } = useVoiceWorkbench();
+  const insets = useSafeAreaInsets();
+  const { fontScale } = useWindowDimensions();
   const [expandedPathname, setExpandedPathname] = useState<string | null>(null);
   const presentation = voiceDockPresentation({
     pathname,
@@ -31,13 +36,6 @@ export function VoiceDock() {
     muted: session.muted,
     manuallyExpanded: expandedPathname === pathname,
   });
-
-  if (presentation === "hidden") return null;
-
-  function endVoice() {
-    setExpandedPathname(null);
-    session.end();
-  }
 
   const statusLabel = voiceDockStatusLabel({
     status: session.status,
@@ -49,10 +47,28 @@ export function VoiceDock() {
     turnActive: session.turnActive,
     assistantTextStreaming: session.assistantTextStreaming,
   });
+  const largeText = fontScale >= 1.5;
+  useAccessibilityAnnouncement(
+    presentation === "hidden"
+      ? null
+      : voiceStatusAnnouncement({
+          status: session.status,
+          muted: session.muted,
+          pauseReason: session.pauseReason,
+          busyDetail: session.busyDetail,
+        }),
+  );
+
+  if (presentation === "hidden") return null;
+
+  function endVoice() {
+    setExpandedPathname(null);
+    session.end();
+  }
 
   if (presentation === "compact") {
     return (
-      <View style={styles.safeLane} pointerEvents="box-none">
+      <View style={[styles.safeLane, { paddingBottom: Math.max(insets.bottom, space.sm) }]} pointerEvents="box-none">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Homa Voice. ${statusLabel}. Show controls`}
@@ -86,14 +102,16 @@ export function VoiceDock() {
         : session.toggleMute;
 
   return (
-    <View style={styles.safeLane} pointerEvents="box-none">
-      <View style={styles.dock} accessibilityLiveRegion="polite">
-        <View style={styles.puckInset} accessibilityElementsHidden>
-          <HomaCharacter state={characterState} size={40} />
-        </View>
+    <View style={[styles.safeLane, { paddingBottom: Math.max(insets.bottom, space.sm) }]} pointerEvents="box-none">
+      <View style={[styles.dock, largeText && styles.dockLargeText]}>
+        {!largeText ? (
+          <View style={styles.puckInset} accessibilityElementsHidden>
+            <HomaCharacter state={characterState} size={40} />
+          </View>
+        ) : null}
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={connecting ? "Cancel voice connection" : primaryLabel}
+          accessibilityLabel={`${statusLabel}. ${connecting ? "Cancel voice connection" : primaryLabel}`}
           onPress={primaryAction}
           style={({ pressed }) => [styles.statusControl, pressed && styles.pressed]}
         >
@@ -103,42 +121,44 @@ export function VoiceDock() {
             <Mic size={17} color={failed ? colors.brand : colors.success} />
           )}
           <View style={styles.statusCopy}>
-            <Text style={styles.statusText} numberOfLines={1}>{statusLabel}</Text>
-            <Text style={styles.actionText} numberOfLines={1}>{primaryLabel}</Text>
+            <Text style={styles.statusText}>{statusLabel}</Text>
+            <Text style={styles.actionText}>{primaryLabel}</Text>
           </View>
         </Pressable>
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Return to Homa Voice"
-          onPress={() => router.navigate("/voice")}
-          hitSlop={8}
-          style={({ pressed }) => [styles.iconControl, pressed && styles.pressed]}
-        >
-          <Sparkles size={18} color={colors.textBody} />
-        </Pressable>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="End voice conversation"
-          onPress={endVoice}
-          hitSlop={8}
-          style={({ pressed }) => [styles.iconControl, pressed && styles.pressed]}
-        >
-          <PhoneOff size={18} color={colors.textMuted} />
-        </Pressable>
-
-        {!paused && !failed && !session.muted && !connecting ? (
+        <View style={[styles.iconActions, largeText && styles.iconActionsLargeText]}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Collapse Homa Voice controls"
-            onPress={() => setExpandedPathname(null)}
+            accessibilityLabel="Return to Homa Voice"
+            onPress={() => router.navigate("/voice")}
             hitSlop={8}
             style={({ pressed }) => [styles.iconControl, pressed && styles.pressed]}
           >
-            <ChevronDown size={18} color={colors.textMuted} />
+            <Sparkles size={18} color={colors.textBody} />
           </Pressable>
-        ) : null}
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="End voice conversation"
+            onPress={endVoice}
+            hitSlop={8}
+            style={({ pressed }) => [styles.iconControl, pressed && styles.pressed]}
+          >
+            <PhoneOff size={18} color={colors.textMuted} />
+          </Pressable>
+
+          {!paused && !failed && !session.muted && !connecting ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Collapse Homa Voice controls"
+              onPress={() => setExpandedPathname(null)}
+              hitSlop={8}
+              style={({ pressed }) => [styles.iconControl, pressed && styles.pressed]}
+            >
+              <ChevronDown size={18} color={colors.textMuted} />
+            </Pressable>
+          ) : null}
+        </View>
       </View>
     </View>
   );
@@ -178,6 +198,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     ...shadows.md,
   },
+  dockLargeText: {
+    flexDirection: "column",
+    alignItems: "stretch",
+    borderRadius: radius.lg,
+    padding: space.sm,
+  },
   puckInset: {
     width: 42,
     height: 42,
@@ -196,7 +222,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     backgroundColor: colors.surfaceSunken,
   },
-  statusCopy: { flex: 1 },
+  statusCopy: { flex: 1, minWidth: 0 },
   statusText: {
     fontFamily: fontFamilies.bodySemibold,
     fontSize: fontSize.sm,
@@ -213,6 +239,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.pill,
+  },
+  iconActions: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  iconActionsLargeText: {
+    justifyContent: "space-around",
   },
   pressed: { opacity: 0.65 },
 });

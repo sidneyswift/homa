@@ -1,8 +1,8 @@
-import { useEffect } from "react";
-import { AccessibilityInfo, Platform, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import { Button } from "../../components/ui/button";
 import { InlineError } from "../../components/ui/inline-error";
+import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, darkColors, fontSize, radius, space } from "../../theme/tokens";
 import {
@@ -47,11 +47,7 @@ export function LessonReviewRecoveryCard({
   const copy = lessonReviewRecoveryCopy(item);
   const theme = dark ? darkColors : colors;
 
-  useEffect(() => {
-    if (Platform.OS === "ios") {
-      AccessibilityInfo.announceForAccessibility(`${copy.title}. ${copy.body}`);
-    }
-  }, [copy.body, copy.title]);
+  useAccessibilityAnnouncement(`${copy.title}. ${copy.body}`);
 
   return (
     <View
@@ -70,7 +66,6 @@ export function LessonReviewRecoveryCard({
       </Text>
       <Text
         accessibilityRole="header"
-        accessibilityLiveRegion="polite"
         style={[styles.title, { color: theme.textStrong }]}
       >
         {copy.title}

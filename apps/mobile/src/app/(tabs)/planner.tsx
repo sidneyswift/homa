@@ -1,10 +1,12 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { CalendarPlus, ChevronLeft, ChevronRight, Plus } from "lucide-react-native";
+import { CalendarPlus, Check, ChevronLeft, ChevronRight, Plus } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { InlineError } from "../../components/ui/inline-error";
+import { IconButton } from "../../components/ui/icon-button";
+import { LoadingStatus } from "../../components/ui/loading-status";
 import { toggleActivityCheck } from "../../lib/child-plans";
 import { createIdempotencyKey } from "../../lib/idempotency-key";
 import {
@@ -260,17 +262,23 @@ export default function PlannerScreen() {
         {viewTabs}
 
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-          <Pressable onPress={goPrevious} hitSlop={8}>
+          <IconButton label="Show the previous date range" onPress={goPrevious}>
             <ChevronLeft size={22} color={colors.textBody} />
-          </Pressable>
-          <Pressable onPress={goToday}>
+          </IconButton>
+          <Pressable
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel={`Go to today. Showing ${headerLabel()}`}
+            onPress={goToday}
+            style={{ minHeight: 44, flex: 1, alignItems: "center", justifyContent: "center" }}
+          >
             <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }}>
               {headerLabel()}
             </Text>
           </Pressable>
-          <Pressable onPress={goNext} hitSlop={8}>
+          <IconButton label="Show the next date range" onPress={goNext}>
             <ChevronRight size={22} color={colors.textBody} />
-          </Pressable>
+          </IconButton>
         </View>
 
         {children.length > 1 ? (
@@ -306,7 +314,7 @@ export default function PlannerScreen() {
           }}
         >
           <CalendarPlus size={17} color={colors.brand} />
-          <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.brand }}>
+          <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textStrong }}>
             Add to device calendar
           </Text>
         </Pressable>
@@ -318,7 +326,7 @@ export default function PlannerScreen() {
       >
         {familyLoading || (loading && events.length === 0 && scheduleRows.length === 0) ? (
           <View style={{ paddingVertical: space.xl, alignItems: "center" }}>
-            <ActivityIndicator color={colors.brand} />
+            <LoadingStatus label="Loading your planner" />
           </View>
         ) : null}
 
@@ -361,7 +369,9 @@ export default function PlannerScreen() {
         )}
       </ScrollView>
 
-      <Pressable
+      <IconButton
+        label="Add plan item"
+        accessibilityHint={`Opens a new plan for ${formatFullDate(anchorDate)}`}
         onPress={() => openNewEventComposer(anchorDate)}
         style={{
           position: "absolute",
@@ -370,14 +380,14 @@ export default function PlannerScreen() {
           width: 52,
           height: 52,
           borderRadius: radius.pill,
-          backgroundColor: colors.brand,
+          backgroundColor: colors.brandHover,
           alignItems: "center",
           justifyContent: "center",
           ...shadows.md,
         }}
       >
         <Plus size={24} color={colors.onBrand} />
-      </Pressable>
+      </IconButton>
 
       {composerDraft ? (
         <EventComposer
@@ -439,9 +449,14 @@ function ViewModeTab({
 }) {
   return (
     <Pressable
+      accessible
+      accessibilityRole="tab"
+      accessibilityLabel={`${label} planner view`}
+      accessibilityState={{ selected: active }}
       onPress={onPress}
       style={{
         flex: 1,
+        minHeight: 44,
         paddingVertical: space.xs,
         borderRadius: radius.pill,
         alignItems: "center",
@@ -473,20 +488,34 @@ function FilterChip({
   tone?: readonly [string, string];
   onPress: () => void;
 }) {
-  const background = active ? colors.brand : tone ? tone[0] : colors.card;
+  const background = active ? colors.brandHover : tone ? tone[0] : colors.card;
   const textColor = active ? colors.onBrand : tone ? tone[1] : colors.textBody;
   return (
     <Pressable
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={`Filter planner by ${label}`}
+      accessibilityState={{ selected: active }}
       onPress={onPress}
       style={{
+        minHeight: 44,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: space.xs,
         paddingHorizontal: space.md,
         paddingVertical: space.xs,
         borderRadius: radius.pill,
         backgroundColor: background,
         borderWidth: 1,
-        borderColor: active ? colors.brand : colors.borderSubtle,
+        borderColor: active ? colors.brandHover : colors.borderSubtle,
       }}
     >
+      {active ? (
+        <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+          <Check size={15} color={colors.onBrand} />
+        </View>
+      ) : null}
       <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: textColor }}>{label}</Text>
     </Pressable>
   );

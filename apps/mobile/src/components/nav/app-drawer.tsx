@@ -1,12 +1,22 @@
 import { Link } from "expo-router";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, type RefObject } from "react";
 import { X } from "lucide-react-native";
-import { Animated, Dimensions, Pressable, View } from "react-native";
+import {
+  AccessibilityInfo,
+  Animated,
+  Dimensions,
+  Pressable,
+  ScrollView,
+  View,
+  findNodeHandle,
+} from "react-native";
+import { useReducedMotion } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AccountMenu } from "./account-menu";
 import { SidebarNav } from "./sidebar-nav";
 import { Logo } from "../brand/logo";
+import { IconButton } from "../ui/icon-button";
 import { colors, radius, shadows, space } from "../../theme/tokens";
 
 const DRAWER_WIDTH = Math.min(300, Dimensions.get("window").width * 0.85);
@@ -30,11 +40,13 @@ export function AppDrawer({
   onClose,
   parentName,
   familyName,
+  returnFocusRef,
 }: {
   open: boolean;
   onClose: () => void;
   parentName: string;
   familyName: string;
+  returnFocusRef?: RefObject<View | null>;
 }) {
   // useMemo, not useRef: the new react-hooks/refs lint rule forbids
   // reading .current during render at all, including the ordinary RN
@@ -43,25 +55,57 @@ export function AppDrawer({
   // re-renders the same way.
   const translateX = useMemo(() => new Animated.Value(-DRAWER_WIDTH), []);
   const backdropOpacity = useMemo(() => new Animated.Value(0), []);
+  const closeButtonRef = useRef<View>(null);
+  const wasOpen = useRef(false);
+  const restoreFocusOnClose = useRef(true);
+  const reducedMotion = useReducedMotion();
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
-    Animated.timing(translateX, {
-      toValue: open ? 0 : -DRAWER_WIDTH,
-      duration: 220,
-      useNativeDriver: true,
-    }).start();
-    Animated.timing(backdropOpacity, {
-      toValue: open ? 1 : 0,
-      duration: 220,
-      useNativeDriver: true,
-    }).start();
-  }, [open, translateX, backdropOpacity]);
+    const previousOpen = wasOpen.current;
+    wasOpen.current = open;
+    if (open && !previousOpen) restoreFocusOnClose.current = true;
+    const duration = reducedMotion ? 0 : 220;
+    Animated.parallel([
+      Animated.timing(translateX, {
+        toValue: open ? 0 : -DRAWER_WIDTH,
+        duration,
+        useNativeDriver: true,
+      }),
+      Animated.timing(backdropOpacity, {
+        toValue: open ? 1 : 0,
+        duration,
+        useNativeDriver: true,
+      }),
+    ]).start(({ finished }) => {
+      if (!finished || (!previousOpen && !open)) return;
+      const target = open
+        ? closeButtonRef.current
+        : restoreFocusOnClose.current
+          ? returnFocusRef?.current
+          : null;
+      const node = target ? findNodeHandle(target) : null;
+      if (node) AccessibilityInfo.setAccessibilityFocus(node);
+      if (!open) restoreFocusOnClose.current = true;
+    });
+  }, [backdropOpacity, open, reducedMotion, returnFocusRef, translateX]);
+
+  function dismissDrawer() {
+    restoreFocusOnClose.current = true;
+    onClose();
+  }
+
+  function closeForNavigation() {
+    restoreFocusOnClose.current = false;
+    onClose();
+  }
 
   return (
     <View
       style={{ position: "absolute", top: 0, bottom: 0, left: 0, right: 0 }}
       pointerEvents={open ? "auto" : "none"}
+      accessibilityElementsHidden={!open}
+      importantForAccessibility={open ? "yes" : "no-hide-descendants"}
     >
       <Animated.View
         style={{
@@ -71,14 +115,16 @@ export function AppDrawer({
         }}
       >
         <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Close menu"
-          onPress={onClose}
+          onPress={dismissDrawer}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
           style={{ flex: 1 }}
         />
       </Animated.View>
 
       <Animated.View
+        accessibilityViewIsModal={open}
+        onAccessibilityEscape={dismissDrawer}
         style={{
           position: "absolute",
           top: 0,
@@ -109,27 +155,29 @@ export function AppDrawer({
               paddingBottom: space.lg,
             }}
           >
-            <Link href="/chat" onPress={onClose} asChild>
-              <Pressable accessibilityRole="button" accessibilityLabel="Home">
+            <Link href="/chat" onPress={closeForNavigation} asChild>
+              <Pressable accessibilityRole="link" accessibilityLabel="Homa home" style={{ minWidth: 44, minHeight: 44, alignItems: "center", justifyContent: "center" }}>
                 <Logo size={26} />
               </Pressable>
             </Link>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Close menu"
-              onPress={onClose}
-              hitSlop={8}
-              style={{ padding: space.xs }}
+            <IconButton
+              ref={closeButtonRef}
+              label="Close menu"
+              onPress={dismissDrawer}
             >
               <X size={20} color={colors.textSubtle} />
-            </Pressable>
+            </IconButton>
           </View>
 
-          <View style={{ flex: 1 }}>
-            <SidebarNav onNavigate={onClose} />
-          </View>
-
-          <AccountMenu parentName={parentName} familyName={familyName} onNavigate={onClose} />
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={{ flex: 1 }}>
+              <SidebarNav onNavigate={closeForNavigation} />
+            </View>
+            <AccountMenu parentName={parentName} familyName={familyName} onNavigate={closeForNavigation} />
+          </ScrollView>
         </View>
       </Animated.View>
     </View>

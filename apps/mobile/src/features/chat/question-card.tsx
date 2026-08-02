@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { Logo } from "../../components/brand/logo";
 import { Card } from "../../components/ui/card";
+import { useAccessibilityFocusOnChange } from "../../lib/accessibility";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
 import {
@@ -50,13 +51,12 @@ function CardHeading({
       <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flex: 1 }}>
         <Logo size={15} variant="mark" />
         <Text
-          numberOfLines={1}
           style={{
             flexShrink: 1,
             fontFamily: fontFamilies.bodyBold,
             fontSize: fontSize.xs,
             textTransform: "uppercase",
-            color: colors.textSubtle,
+            color: colors.textMuted,
           }}
         >
           {label}
@@ -67,7 +67,7 @@ function CardHeading({
           style={{
             fontFamily: fontFamilies.bodySemibold,
             fontSize: fontSize.xs,
-            color: colors.textSubtle,
+            color: colors.textMuted,
           }}
         >
           {step}
@@ -85,7 +85,12 @@ function TextAction({
   onPress: () => void;
 }) {
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} hitSlop={8}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={{ minHeight: 44, justifyContent: "center" }}
+    >
       {({ pressed }) => (
         <Text
           style={{
@@ -119,6 +124,8 @@ export function QuestionCard({
   const [answers, setAnswers] = useState<string[][]>(() =>
     card.questions.map(() => []),
   );
+  const [transitioning, setTransitioning] = useState(false);
+  const questionHeadingRef = useRef<View>(null);
   // Both guards mirror web's question-card.tsx, where clicking the real
   // card exposed them. A useState initializer runs once, so a card that
   // later arrives with a different question count left `answers` at the
@@ -137,6 +144,11 @@ export function QuestionCard({
   const question = card.questions[Math.min(step, total - 1)];
   const picked = answers[step] ?? [];
   const spent = !active || onSendAnswers === undefined;
+  useAccessibilityFocusOnChange(
+    questionHeadingRef,
+    spent ? null : `${currentSignature}:${step}`,
+    () => setTransitioning(false),
+  );
 
 
   /**
@@ -159,11 +171,15 @@ export function QuestionCard({
       index === step ? make(entry) : entry,
     );
     setAnswers(next);
-    if (step + 1 < total) setStep(step + 1);
+    if (step + 1 < total) {
+      setTransitioning(true);
+      setStep(step + 1);
+    }
     else onSendAnswers?.(composeAnswerMessage(card.questions, next));
   }
 
   function onPick(label: string) {
+    if (transitioning) return;
     if (question.multiSelect) {
       updateStep((entry) =>
         entry.includes(label)
@@ -176,6 +192,7 @@ export function QuestionCard({
   }
 
   function onSkip() {
+    if (transitioning) return;
     commit(() => []);
   }
 
@@ -191,7 +208,7 @@ export function QuestionCard({
             style={{
               fontFamily: fontFamilies.bodySemibold,
               fontSize: fontSize.sm,
-              color: colors.sage,
+              color: colors.success,
             }}
           >
             {CHECK}
@@ -202,7 +219,7 @@ export function QuestionCard({
               fontFamily: fontFamilies.bodySemibold,
               fontSize: fontSize.sm,
               lineHeight: fontSize.sm * 1.5,
-              color: colors.sage,
+              color: colors.success,
             }}
           >
             {`You said: ${answeredSummary}`}
@@ -218,16 +235,23 @@ export function QuestionCard({
         label={question.header || "One question"}
         step={total > 1 ? `${step + 1}/${total}` : null}
       />
-      <Text
-        style={{
-          fontFamily: fontFamilies.displaySemibold,
-          fontSize: fontSize.lg,
-          lineHeight: fontSize.lg * 1.35,
-          color: colors.textStrong,
-        }}
+      <View
+        ref={questionHeadingRef}
+        accessible
+        accessibilityRole="header"
+        accessibilityLabel={`Question ${step + 1} of ${total}. ${question.question}`}
       >
-        {question.question}
-      </Text>
+        <Text
+          style={{
+            fontFamily: fontFamilies.displaySemibold,
+            fontSize: fontSize.lg,
+            lineHeight: fontSize.lg * 1.35,
+            color: colors.textStrong,
+          }}
+        >
+          {question.question}
+        </Text>
+      </View>
       {question.multiSelect && !spent ? (
         <Text
           style={{
@@ -246,7 +270,7 @@ export function QuestionCard({
             fontFamily: fontFamilies.body,
             fontSize: fontSize.sm,
             lineHeight: fontSize.sm * 1.5,
-            color: colors.textSubtle,
+            color: colors.textMuted,
           }}
         >
           {question.options.map((option) => option.label).join(DOT)}
@@ -259,10 +283,10 @@ export function QuestionCard({
               return (
                 <Pressable
                   key={option.label}
-                  accessibilityRole="button"
-                  accessibilityState={
-                    question.multiSelect ? { selected: on } : undefined
-                  }
+                  accessibilityRole={question.multiSelect ? "checkbox" : "radio"}
+                  accessibilityLabel={option.label}
+                  accessibilityState={{ checked: on, disabled: transitioning }}
+                  disabled={transitioning}
                   onPress={() => onPick(option.label)}
                   style={({ pressed }) => ({
                     flexDirection: "row",
@@ -275,6 +299,7 @@ export function QuestionCard({
                     backgroundColor: on ? colors.brandSoft : colors.page,
                     paddingHorizontal: space.md,
                     paddingVertical: 12,
+                    opacity: transitioning ? 0.6 : 1,
                   })}
                 >
                   <View style={{ flex: 1, gap: 2 }}>
@@ -305,7 +330,7 @@ export function QuestionCard({
                       style={{
                         fontFamily: fontFamilies.bodySemibold,
                         fontSize: fontSize.base,
-                        color: colors.brand,
+                        color: colors.textStrong,
                       }}
                     >
                       {CHECK}
@@ -330,16 +355,18 @@ export function QuestionCard({
             {question.multiSelect ? (
               <Pressable
                 accessibilityRole="button"
-                disabled={picked.length === 0}
+                accessibilityLabel={step + 1 < total ? "Next question" : "Finish questions"}
+                accessibilityState={{ disabled: picked.length === 0 || transitioning }}
+                disabled={picked.length === 0 || transitioning}
                 onPress={() => commit((entry) => [...entry])}
                 style={({ pressed }) => ({
                   minHeight: 44,
                   borderRadius: radius.pill,
-                  backgroundColor: pressed ? colors.brandHover : colors.brand,
+                  backgroundColor: colors.brandHover,
                   paddingHorizontal: space.lg,
                   alignItems: "center",
                   justifyContent: "center",
-                  opacity: picked.length === 0 ? 0.6 : 1,
+                  opacity: picked.length === 0 || transitioning ? 0.6 : pressed ? 0.85 : 1,
                 })}
               >
                 <Text

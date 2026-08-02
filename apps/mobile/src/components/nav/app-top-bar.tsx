@@ -1,9 +1,11 @@
 import { useRouter } from "expo-router";
 import { Menu, Mic } from "lucide-react-native";
-import { Pressable, View } from "react-native";
+import type { RefObject } from "react";
+import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Logo } from "../brand/logo";
+import { IconButton } from "../ui/icon-button";
 import { colors, space } from "../../theme/tokens";
 
 /**
@@ -14,7 +16,13 @@ import { colors, space } from "../../theme/tokens";
  * see app-drawer.tsx). Persistent across every screen in this shell,
  * mirroring web's "the app frame renders once" design.
  */
-export function AppTopBar({ onMenuPress }: { onMenuPress: () => void }) {
+export function AppTopBar({
+  menuButtonRef,
+  onMenuPress,
+}: {
+  menuButtonRef?: RefObject<View | null>;
+  onMenuPress: () => void;
+}) {
   const router = useRouter();
   return (
     <SafeAreaView edges={["top"]} style={{ backgroundColor: colors.page }}>
@@ -29,27 +37,22 @@ export function AppTopBar({ onMenuPress }: { onMenuPress: () => void }) {
           borderBottomColor: colors.borderSubtle,
         }}
       >
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Open menu"
+        <IconButton
+          ref={menuButtonRef}
+          label="Open menu"
           onPress={onMenuPress}
-          hitSlop={8}
-          style={{ padding: space.sm }}
         >
           <Menu size={22} color={colors.textBody} />
-        </Pressable>
+        </IconButton>
 
         <Logo size={24} />
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Talk to Homa"
+        <IconButton
+          label="Talk to Homa"
           onPress={() => router.navigate("/voice")}
-          hitSlop={8}
-          style={{ padding: space.sm }}
         >
           <Mic size={22} color={colors.textBody} />
-        </Pressable>
+        </IconButton>
       </View>
     </SafeAreaView>
   );

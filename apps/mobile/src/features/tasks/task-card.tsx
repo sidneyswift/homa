@@ -28,23 +28,34 @@ function taskIcon(kind: TaskRowView["kind"], color: string) {
   }
 }
 
-function PauseToggle({ on, pending, onToggle }: { on: boolean; pending: boolean; onToggle: () => void }) {
+function PauseToggle({
+  label,
+  on,
+  pending,
+  onToggle,
+}: {
+  label: string;
+  on: boolean;
+  pending: boolean;
+  onToggle: () => void;
+}) {
   return (
     <Pressable
       accessibilityRole="switch"
       accessibilityState={{ checked: on, disabled: pending }}
-      accessibilityLabel={on ? "Turn this task off" : "Turn this task on"}
+      accessibilityLabel={`${label} task`}
       disabled={pending}
       onPress={onToggle}
-      hitSlop={8}
-      style={{ opacity: pending ? 0.6 : 1 }}
+      style={{ minWidth: 52, minHeight: 44, alignItems: "center", justifyContent: "center", opacity: pending ? 0.6 : 1 }}
     >
       <View
         style={{
           height: 26,
           width: 46,
           borderRadius: radius.pill,
-          backgroundColor: on ? colors.brand : colors.brandSoft,
+          borderWidth: 1.5,
+          borderColor: on ? colors.brandHover : colors.textMuted,
+          backgroundColor: on ? colors.brandHover : colors.surfaceSunken,
           justifyContent: "center",
         }}
       >
@@ -56,7 +67,7 @@ function PauseToggle({ on, pending, onToggle }: { on: boolean; pending: boolean;
             height: 20,
             width: 20,
             borderRadius: radius.pill,
-            backgroundColor: colors.card,
+            backgroundColor: on ? colors.card : colors.textMuted,
             ...shadows.sm,
           }}
         />
@@ -120,28 +131,27 @@ export function TaskCard({
               {copy.label}
             </Text>
             <Text
-              numberOfLines={2}
-              style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: on ? colors.textMuted : colors.textSubtle }}
+              style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted }}
             >
               {copy.description}
             </Text>
-            <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: 11, color: colors.textSubtle, marginTop: 2 }}>
+            <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: 11, color: colors.textMuted, marginTop: 2 }}>
               {weekdaysLabel(task.weekdays)} {"·"} {hourLabel(task.localHour)} {"·"} {deliveryLabel}
             </Text>
           </View>
         </View>
-        <PauseToggle on={on} pending={pausePending} onToggle={onTogglePaused} />
+        <PauseToggle label={copy.label} on={on} pending={pausePending} onToggle={onTogglePaused} />
       </View>
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
         {next ? (
           <View style={{ paddingHorizontal: space.sm, paddingVertical: 3, borderRadius: radius.pill, backgroundColor: colors.brandSoft }}>
-            <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: 11, color: colors.brandHover }}>
+            <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: 11, color: colors.textStrong }}>
               Next {"·"} {next}
             </Text>
           </View>
         ) : on && task.nextRunAt !== null ? (
           <View style={{ paddingHorizontal: space.sm, paddingVertical: 3, borderRadius: radius.pill, backgroundColor: colors.brandSoft }}>
-            <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: 11, color: colors.brandHover }}>Next {"·"} soon</Text>
+            <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: 11, color: colors.textStrong }}>Next {"·"} soon</Text>
           </View>
         ) : !on ? (
           <View style={{ paddingHorizontal: space.sm, paddingVertical: 3, borderRadius: radius.pill, backgroundColor: colors.surfaceSunken }}>
@@ -191,7 +201,7 @@ export function BuiltInPlaceholderCard({ kind, note }: { kind: "morning_brief" |
         <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted }}>
           {copy.description}
         </Text>
-        <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: 11, color: colors.textSubtle, marginTop: 2 }}>
+        <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: 11, color: colors.textMuted, marginTop: 2 }}>
           {note}
         </Text>
       </View>

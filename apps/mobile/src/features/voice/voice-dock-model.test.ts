@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { voiceDockPresentation, voiceDockStatusLabel } from "./voice-dock-model";
+import {
+  voiceDockPresentation,
+  voiceDockStatusLabel,
+  voiceStatusAnnouncement,
+} from "./voice-dock-model";
 
 describe("Voice shell dock presentation", () => {
   it("uses the compact Homa puck for routine listening, working, and speaking", () => {
@@ -42,6 +46,29 @@ describe("Voice shell dock presentation", () => {
     assert.equal(
       voiceDockStatusLabel({ status: "paused", muted: false, pauseReason: "Voice paused for the recorder." }),
       "Voice paused for the recorder.",
+    );
+  });
+
+  it("gives every active state one concise spoken outcome", () => {
+    assert.equal(
+      voiceStatusAnnouncement({ status: "idle", muted: false, pauseReason: null }),
+      null,
+    );
+    assert.equal(
+      voiceStatusAnnouncement({ status: "listening", muted: false, pauseReason: null }),
+      "Homa is listening.",
+    );
+    assert.equal(
+      voiceStatusAnnouncement({ status: "working", muted: false, pauseReason: null, busyDetail: "Checking the planner." }),
+      "Homa is working. Checking the planner.",
+    );
+    assert.equal(
+      voiceStatusAnnouncement({ status: "speaking", muted: false, pauseReason: null }),
+      "Homa is speaking.",
+    );
+    assert.equal(
+      voiceStatusAnnouncement({ status: "failed", muted: false, pauseReason: null }),
+      "Voice was interrupted. Try again when you are ready.",
     );
   });
 });

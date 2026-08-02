@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { Text, View, useWindowDimensions } from "react-native";
 
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
+import { InlineError } from "../../components/ui/inline-error";
 import { TextField } from "../../components/ui/text-field";
+import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { addChild } from "../../lib/family";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, space } from "../../theme/tokens";
@@ -16,6 +18,7 @@ export function AddChildForm({
   familyId: string;
   onAdded: () => void;
 }) {
+  const { fontScale } = useWindowDimensions();
   const [name, setName] = useState("");
   const [birthYear, setBirthYear] = useState("");
   const [birthMonth, setBirthMonth] = useState("");
@@ -24,10 +27,13 @@ export function AddChildForm({
   const [focus, setFocus] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [receipt, setReceipt] = useState<string | null>(null);
+  useAccessibilityAnnouncement(receipt);
 
   async function submit() {
     setPending(true);
     setError(null);
+    setReceipt(null);
     const result = await addChild({
       familyId,
       name,
@@ -45,18 +51,21 @@ export function AddChildForm({
       setError(result.error);
       return;
     }
+    const addedName = name.trim();
     setName("");
     setBirthYear("");
     setBirthMonth("");
     setBirthDay("");
     setInterests("");
     setFocus("");
+    setReceipt(`${addedName} added.`);
     onAdded();
   }
 
   return (
     <Card style={{ gap: space.md }}>
       <Text
+        accessibilityRole="header"
         style={{
           fontFamily: fontFamilies.displaySemibold,
           fontSize: fontSize.lg,
@@ -72,7 +81,7 @@ export function AddChildForm({
         placeholder="Maya"
         autoCapitalize="words"
       />
-      <View style={{ flexDirection: "row", gap: space.md }}>
+      <View style={{ flexDirection: fontScale >= 1.4 ? "column" : "row", gap: space.md }}>
         <View style={{ flex: 1 }}>
           <TextField
             label="Birth year"
@@ -116,22 +125,16 @@ export function AddChildForm({
         onChangeText={setFocus}
         placeholder="reading confidence"
       />
-      {error ? (
-        <Text
-          accessibilityRole="alert"
-          style={{
-            fontFamily: fontFamilies.body,
-            fontSize: fontSize.sm,
-            color: colors.danger,
-          }}
-        >
-          {error}
+      {error ? <InlineError message={error} /> : null}
+      {receipt ? (
+        <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}>
+          {receipt}
         </Text>
       ) : null}
       <Button
         label={pending ? "One moment\u2026" : "Add child"}
         onPress={() => void submit()}
-        disabled={pending}
+        busy={pending}
       />
     </Card>
   );

@@ -12,14 +12,14 @@ import { hourLabel } from "./task-view";
  * scrollable chip row, the same widget shape web already uses for days.
  */
 
-const DAYS: readonly { value: number; short: string }[] = [
-  { value: 0, short: "S" },
-  { value: 1, short: "M" },
-  { value: 2, short: "T" },
-  { value: 3, short: "W" },
-  { value: 4, short: "T" },
-  { value: 5, short: "F" },
-  { value: 6, short: "S" },
+const DAYS: readonly { value: number; short: string; label: string }[] = [
+  { value: 0, short: "S", label: "Sunday" },
+  { value: 1, short: "M", label: "Monday" },
+  { value: 2, short: "T", label: "Tuesday" },
+  { value: 3, short: "W", label: "Wednesday" },
+  { value: 4, short: "T", label: "Thursday" },
+  { value: 5, short: "F", label: "Friday" },
+  { value: 6, short: "S", label: "Saturday" },
 ];
 
 export function WeekdayChips({
@@ -34,13 +34,14 @@ export function WeekdayChips({
       <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textBody }}>
         Which days?
       </Text>
-      <View style={{ flexDirection: "row", gap: space.xs }}>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space.xs }}>
         {DAYS.map((day, index) => {
           const active = selected.has(day.value);
           return (
             <Pressable
               key={`${day.value}-${index}`}
               accessibilityRole="checkbox"
+              accessibilityLabel={day.label}
               accessibilityState={{ checked: active }}
               onPress={() => {
                 const next = new Set(selected);
@@ -49,8 +50,8 @@ export function WeekdayChips({
                 onChange(next);
               }}
               style={{
-                height: 36,
-                width: 36,
+                height: 44,
+                width: 44,
                 borderRadius: radius.pill,
                 borderWidth: 1,
                 borderColor: active ? colors.brand : colors.border,
@@ -63,7 +64,7 @@ export function WeekdayChips({
                 style={{
                   fontFamily: fontFamilies.bodyBold,
                   fontSize: fontSize.xs,
-                  color: active ? colors.brandHover : colors.textMuted,
+                  color: active ? colors.textStrong : colors.textMuted,
                 }}
               >
                 {day.short}
@@ -90,8 +91,13 @@ export function HourChips({ hour, onChange }: { hour: number; onChange: (hour: n
           return (
             <Pressable
               key={option}
+              accessibilityRole="radio"
+              accessibilityLabel={hourLabel(option)}
+              accessibilityState={{ checked: active }}
               onPress={() => onChange(option)}
               style={{
+                minHeight: 44,
+                justifyContent: "center",
                 paddingHorizontal: space.sm,
                 paddingVertical: space.xs,
                 borderRadius: radius.pill,
@@ -104,7 +110,7 @@ export function HourChips({ hour, onChange }: { hour: number; onChange: (hour: n
                 style={{
                   fontFamily: fontFamilies.bodyBold,
                   fontSize: fontSize.xs,
-                  color: active ? colors.brandHover : colors.textMuted,
+                  color: active ? colors.textStrong : colors.textMuted,
                 }}
               >
                 {hourLabel(option)}
@@ -154,9 +160,10 @@ export function DeliveryChoice({
             <Pressable
               key={option.value}
               accessibilityRole="radio"
+              accessibilityLabel={option.label}
               accessibilityState={{ checked: active }}
               onPress={() => onChange(option.value)}
-              style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}
+              style={{ minHeight: 44, flexDirection: "row", alignItems: "center", gap: space.sm }}
             >
               <View
                 style={{
@@ -164,13 +171,13 @@ export function DeliveryChoice({
                   width: 18,
                   borderRadius: radius.pill,
                   borderWidth: 1.5,
-                  borderColor: active ? colors.brand : colors.border,
+                  borderColor: active ? colors.brandHover : colors.textMuted,
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
                 {active ? (
-                  <View style={{ height: 10, width: 10, borderRadius: radius.pill, backgroundColor: colors.brand }} />
+                  <View style={{ height: 10, width: 10, borderRadius: radius.pill, backgroundColor: colors.brandHover }} />
                 ) : null}
               </View>
               <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody, flexShrink: 1 }}>
@@ -180,8 +187,13 @@ export function DeliveryChoice({
           );
         })}
         {!textingLinked ? (
-          <Pressable onPress={() => router.push("/settings")}>
-            <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.brand }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Set up texting in Settings"
+            onPress={() => router.push("/settings")}
+            style={{ minHeight: 44, justifyContent: "center" }}
+          >
+            <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textStrong }}>
               Set up texting in Settings
             </Text>
           </Pressable>

@@ -5,6 +5,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
+import { InlineError } from "../../components/ui/inline-error";
+import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { supabase } from "../../lib/supabase";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, space } from "../../theme/tokens";
@@ -31,6 +33,13 @@ export default function DeleteAccountScreen() {
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  useAccessibilityAnnouncement(
+    deleting
+      ? "Deleting your account"
+      : confirming
+        ? "Are you sure? This deletes your account right away."
+        : null,
+  );
 
   async function handleDelete() {
     setDeleting(true);
@@ -58,10 +67,10 @@ export default function DeleteAccountScreen() {
             accessibilityRole="button"
             accessibilityLabel="Back"
             onPress={() => router.back()}
-            hitSlop={12}
+            style={{ minWidth: 44, minHeight: 44, justifyContent: "center" }}
           >
             <Text
-              style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.base, color: colors.brand }}
+              style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.base, color: colors.textStrong }}
             >
               Back
             </Text>
@@ -69,6 +78,7 @@ export default function DeleteAccountScreen() {
         </View>
 
         <Text
+          accessibilityRole="header"
           style={{ fontFamily: fontFamilies.display, fontSize: fontSize.xxl, color: colors.textStrong }}
         >
           Delete your account
@@ -89,13 +99,7 @@ export default function DeleteAccountScreen() {
           </Text>
         </Card>
 
-        {errorMessage ? (
-          <Text
-            style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.danger }}
-          >
-            {errorMessage}
-          </Text>
-        ) : null}
+        {errorMessage ? <InlineError message={errorMessage} /> : null}
 
         {!confirming ? (
           <Button
@@ -106,7 +110,8 @@ export default function DeleteAccountScreen() {
         ) : (
           <View style={{ gap: space.sm }}>
             <Text
-              style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.base, color: colors.danger }}
+              accessibilityRole="header"
+              style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.base, color: colors.textStrong }}
             >
               Are you sure? This deletes your account right away.
             </Text>

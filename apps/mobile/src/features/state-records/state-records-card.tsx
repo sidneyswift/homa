@@ -1,9 +1,11 @@
 import { ExternalLink } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Linking, Pressable, Text, View } from "react-native";
+import { Linking, Pressable, Text, View } from "react-native";
 
 import { Button } from "../../components/ui/button";
+import { LoadingStatus } from "../../components/ui/loading-status";
+import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import {
   fetchStateRecords,
   generateStateRecord,
@@ -46,6 +48,7 @@ export function StateRecordsCard({
   const [note, setNote] = useState<string | null>(null);
   const [resolution, setResolution] = useState<"settings" | "retry" | null>(null);
   const actedRef = useRef(false);
+  useAccessibilityAnnouncement(note);
 
   const load = useCallback(async () => {
     const result = await fetchStateRecords();
@@ -121,7 +124,7 @@ export function StateRecordsCard({
       }}
     >
       <View style={{ gap: 3 }}>
-        <Text style={{ fontFamily: fontFamilies.displaySemibold, fontSize: fontSize.xl, color: colors.textStrong }}>
+        <Text accessibilityRole="header" style={{ fontFamily: fontFamilies.displaySemibold, fontSize: fontSize.xl, color: colors.textStrong }}>
           State records
         </Text>
         <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted }}>
@@ -129,7 +132,7 @@ export function StateRecordsCard({
         </Text>
       </View>
 
-      {loading ? <ActivityIndicator color={colors.brand} /> : null}
+      {loading ? <LoadingStatus label="Loading state records" /> : null}
       {note ? <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}>{note}</Text> : null}
       {!loading && !summary && resolution ? (
         <Button
@@ -216,9 +219,16 @@ export function StateRecordsCard({
           <View style={{ gap: space.xs }}>
             <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: fontSize.sm, color: colors.textStrong }}>Sources</Text>
             {summary.sources.map((source) => (
-              <Pressable key={source.url} onPress={() => void Linking.openURL(source.url)} style={{ flexDirection: "row", gap: space.xs, alignItems: "center" }}>
+              <Pressable
+                key={source.url}
+                accessibilityRole="link"
+                accessibilityLabel={`Open source ${source.label}`}
+                accessibilityHint="Opens outside Homa"
+                onPress={() => void Linking.openURL(source.url)}
+                style={{ minHeight: 44, flexDirection: "row", gap: space.xs, alignItems: "center" }}
+              >
                 <ExternalLink size={14} color={colors.brand} />
-                <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.brand }}>{source.label}</Text>
+                <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textStrong }}>{source.label}</Text>
               </Pressable>
             ))}
           </View>
@@ -240,7 +250,7 @@ export function StateRecordsCard({
 function Fact({ label, value }: { label: string; value: string }) {
   return (
     <View style={{ minWidth: 105, flexGrow: 1 }}>
-      <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: 10, letterSpacing: 0.4, textTransform: "uppercase", color: colors.textSubtle }}>{label}</Text>
+      <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: 10, letterSpacing: 0.4, textTransform: "uppercase", color: colors.textMuted }}>{label}</Text>
       <Text style={{ marginTop: 2, fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}>{value}</Text>
     </View>
   );
@@ -267,11 +277,22 @@ function DocumentRow({ document, onOpen }: { document: StateRecordDocument; onOp
         {document.status === "final" ? "Current" : "Earlier copy"} · {document.pageCount} {document.pageCount === 1 ? "page" : "pages"} · Made {formatDate(document.createdAt)}
       </Text>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space.sm }}>
-        <Pressable onPress={onOpen} accessibilityRole="button">
-          <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.brand }}>Preview, print, or share</Text>
+        <Pressable
+          onPress={onOpen}
+          accessibilityRole="button"
+          accessibilityLabel={`Preview, print, or share ${document.title}`}
+          style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: space.xs }}
+        >
+          <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textStrong }}>Preview, print, or share</Text>
         </Pressable>
-        <Pressable onPress={() => void Linking.openURL(document.pdfUrl)} accessibilityRole="link">
-          <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.brand }}>Open PDF</Text>
+        <Pressable
+          onPress={() => void Linking.openURL(document.pdfUrl)}
+          accessibilityRole="link"
+          accessibilityLabel={`Open PDF for ${document.title}`}
+          accessibilityHint="Opens outside Homa"
+          style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: space.xs }}
+        >
+          <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textStrong }}>Open PDF</Text>
         </Pressable>
       </View>
     </View>

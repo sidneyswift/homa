@@ -69,7 +69,7 @@ export function LibrarySourceCard({
           style={{
             fontFamily: fontFamilies.bodySemibold,
             fontSize: fontSize.sm,
-            color: colors.brand,
+            color: colors.textStrong,
           }}
         >
           Open in Library

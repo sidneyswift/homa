@@ -19,12 +19,14 @@ import { GoogleGlyph } from "../../components/brand/google-glyph";
 import { Logo } from "../../components/brand/logo";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
+import { InlineError } from "../../components/ui/inline-error";
 import { TextField } from "../../components/ui/text-field";
 import { signInWithApple } from "../../features/auth/apple-sign-in";
 import { signInWithGoogle } from "../../features/auth/google-sign-in";
 import type { SignInFlowResult } from "../../features/auth/sign-in-result";
 import { useSession } from "../../features/auth/session-provider";
 import { env } from "../../lib/env";
+import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { supabase } from "../../lib/supabase";
 import { openWebOnboarding } from "../../lib/web-links";
 import { fontFamilies } from "../../theme/fonts";
@@ -64,6 +66,11 @@ export default function SignInScreen() {
     null,
   );
   const [error, setError] = useState<string | null>(null);
+  const recoveryMessage = recoverySent
+    ? "If that email is connected to Homa, a reset link is on its way. It may take a minute."
+    : null;
+  useAccessibilityAnnouncement(recoveryMessage);
+  const signInBusy = oauthPending !== null || pending;
 
   if (session) return <Redirect href="/" />;
 
@@ -176,7 +183,10 @@ export default function SignInScreen() {
                   AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
                 }
                 cornerRadius={26}
-                style={{ width: "100%", height: 52 }}
+                accessibilityLabel="Continue with Apple"
+                accessibilityState={{ disabled: signInBusy }}
+                pointerEvents={signInBusy ? "none" : "auto"}
+                style={{ width: "100%", height: 52, opacity: signInBusy ? 0.55 : 1 }}
                 onPress={() => {
                   if (oauthPending || pending) return;
                   void continueWith("apple", signInWithApple);
@@ -193,7 +203,7 @@ export default function SignInScreen() {
               size="lg"
               icon={<GoogleGlyph />}
               onPress={() => void continueWith("google", signInWithGoogle)}
-              disabled={oauthPending !== null || pending}
+              disabled={signInBusy}
             />
 
             <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}>
@@ -235,29 +245,17 @@ export default function SignInScreen() {
 
             {recoverySent ? (
               <Text
-                accessibilityLiveRegion="polite"
                 style={{
                   fontFamily: fontFamilies.body,
                   fontSize: fontSize.sm,
                   color: colors.textBody,
                 }}
               >
-                If that email is connected to Homa, a reset link is on its way. It may take a minute.
+                {recoveryMessage}
               </Text>
             ) : null}
 
-            {error ? (
-              <Text
-                accessibilityRole="alert"
-                style={{
-                  fontFamily: fontFamilies.body,
-                  fontSize: fontSize.sm,
-                  color: colors.danger,
-                }}
-              >
-                {error}
-              </Text>
-            ) : null}
+            {error ? <InlineError message={error} /> : null}
 
             <Button
               label={pending ? "One moment\u2026" : "Sign in"}

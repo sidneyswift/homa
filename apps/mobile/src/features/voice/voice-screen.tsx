@@ -21,6 +21,7 @@ import { Mic, MicOff, X } from "lucide-react-native";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, darkColors, fontSize, palette, radius, space } from "../../theme/tokens";
 import { reportCrash } from "../../lib/crash-reporting";
+import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { emitFamilyEvent } from "../../lib/events";
 import { useFamilyData } from "../family/use-family-data";
 import { NativeLessonRecorder } from "../lessons/native-lesson-recorder";
@@ -64,6 +65,7 @@ import type { VoicePromptStarter } from "./voice-prompt-starters-model";
 import { voicePromptStartersVisible } from "./voice-prompt-starters-model";
 import { VoicePromptStarters } from "./voice-prompt-starters";
 import { useVoiceWorkbench } from "./voice-workbench-provider";
+import { voiceStatusAnnouncement } from "./voice-dock-model";
 
 const CHARACTER_SIZE = 240;
 const PUCK_SIZE = 72;
@@ -381,6 +383,16 @@ export function VoiceScreen() {
               : session.turnActive
                 ? "listening"
                 : "Tap Homa to start talking";
+  useAccessibilityAnnouncement(
+    activeLessonRecorder || startersVisible || overlayActive || recoveryVisible
+      ? null
+      : voiceStatusAnnouncement({
+          status: session.status,
+          muted: session.muted,
+          pauseReason: session.pauseReason,
+          busyDetail: session.busyDetail,
+        }),
+  );
   const characterLayerStyle = useAnimatedStyle(() => {
     if (fieldHeight.value === 0) return { opacity: 0 };
     return { opacity: 1 - puck.value, top: fieldHeight.value * 0.43 - AURA_SIZE / 2 };

@@ -1,6 +1,6 @@
 import { Component, type ReactNode } from "react";
 import * as Updates from "expo-updates";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text } from "react-native";
 
 import { reportCrash } from "../lib/crash-reporting";
 import { fontFamilies } from "../theme/fonts";
@@ -43,7 +43,11 @@ export class ErrorBoundary extends Component<Props, State> {
     if (!this.state.hasError) return this.props.children;
 
     return (
-      <View style={styles.container}>
+      <ScrollView
+        style={styles.screen}
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.title}>Homa hit a snag.</Text>
         <Text style={styles.body}>
           {
@@ -51,19 +55,23 @@ export class ErrorBoundary extends Component<Props, State> {
           }
         </Text>
         <Button label="Reload" onPress={this.handleReload} />
-      </View>
+      </ScrollView>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
+    backgroundColor: colors.page,
+  },
+  container: {
+    flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: space.xl,
+    paddingVertical: space.xl,
     gap: space.md,
-    backgroundColor: colors.page,
   },
   title: {
     fontFamily: fontFamilies.displaySemibold,

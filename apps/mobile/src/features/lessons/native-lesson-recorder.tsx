@@ -21,6 +21,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { InlineError } from "../../components/ui/inline-error";
+import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { reportCrash } from "../../lib/crash-reporting";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, palette, radius, space } from "../../theme/tokens";
@@ -104,6 +106,7 @@ export function NativeLessonRecorder({
     useState<LessonReviewFailureReason>("unknown");
   const [reviewRetryError, setReviewRetryError] = useState<string | null>(null);
   const [reviewTrackingError, setReviewTrackingError] = useState<string | null>(null);
+  useAccessibilityAnnouncement(recorderPhaseCopy(phase, intent.childName));
   const recorder = useAudioRecorder(RECORDING_OPTIONS);
   const recorderState = useAudioRecorderState(recorder, 250);
   const player = useAudioPlayer(localUri);
@@ -501,15 +504,7 @@ export function NativeLessonRecorder({
                 <Text style={styles.body}>
                   {recorderPhaseCopy(phase, intent.childName)}
                 </Text>
-                {reviewTrackingError ? (
-                  <Text
-                    accessibilityLiveRegion="assertive"
-                    accessibilityRole="alert"
-                    style={styles.retryError}
-                  >
-                    {reviewTrackingError}
-                  </Text>
-                ) : null}
+                {reviewTrackingError ? <InlineError message={reviewTrackingError} /> : null}
                 {reviewTrackingError ? (
                   <PrimaryButton
                     label="Keep checking this lesson"
@@ -529,24 +524,8 @@ export function NativeLessonRecorder({
                 <Text style={styles.body}>
                   {lessonReviewFailureCopy(reviewFailureReason)}
                 </Text>
-                {reviewRetryError ? (
-                  <Text
-                    accessibilityLiveRegion="assertive"
-                    accessibilityRole="alert"
-                    style={styles.retryError}
-                  >
-                    {reviewRetryError}
-                  </Text>
-                ) : null}
-                {reviewTrackingError ? (
-                  <Text
-                    accessibilityLiveRegion="assertive"
-                    accessibilityRole="alert"
-                    style={styles.retryError}
-                  >
-                    {reviewTrackingError}
-                  </Text>
-                ) : null}
+                {reviewRetryError ? <InlineError message={reviewRetryError} /> : null}
+                {reviewTrackingError ? <InlineError message={reviewTrackingError} /> : null}
                 {reviewRetryable && savedLessonId ? (
                   <PrimaryButton
                     label="Try the review again"
@@ -610,7 +589,7 @@ export function NativeLessonRecorder({
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { flexGrow: 1, paddingHorizontal: space.lg, paddingBottom: space.xl, gap: space.md },
-  eyebrow: { fontFamily: fontFamilies.body, fontSize: fontSize.sm, fontWeight: "700", color: colors.brand, textTransform: "uppercase", letterSpacing: 1.1 },
+  eyebrow: { fontFamily: fontFamilies.body, fontSize: fontSize.sm, fontWeight: "700", color: colors.textStrong, textTransform: "uppercase", letterSpacing: 1.1 },
   title: { fontFamily: fontFamilies.display, fontSize: fontSize.xxxl, fontWeight: "700", color: colors.textStrong },
   purpose: { marginTop: -space.sm, fontFamily: fontFamilies.body, fontSize: fontSize.lg, color: colors.textBody },
   card: { gap: space.md, padding: space.lg, borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.borderSubtle, backgroundColor: colors.card },
@@ -623,12 +602,12 @@ const styles = StyleSheet.create({
   status: { fontFamily: fontFamilies.body, fontSize: fontSize.base, lineHeight: 22, textAlign: "center", color: palette.goldInk },
   privacyCard: { padding: space.md, borderRadius: radius.lg, backgroundColor: palette.sage50 },
   privacyTitle: { marginBottom: space.xs, fontFamily: fontFamilies.display, fontSize: fontSize.base, fontWeight: "600", color: colors.textStrong },
-  primaryButton: { minHeight: 52, alignItems: "center", justifyContent: "center", borderRadius: radius.pill, backgroundColor: colors.brand, paddingHorizontal: space.lg },
+  primaryButton: { minHeight: 52, alignItems: "center", justifyContent: "center", borderRadius: radius.pill, backgroundColor: colors.brandHover, paddingHorizontal: space.lg },
   primaryButtonText: { fontFamily: fontFamilies.body, fontSize: fontSize.base, fontWeight: "700", color: colors.onBrand },
   actions: { flexDirection: "row", gap: space.sm },
   secondaryButton: { minHeight: 48, flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: space.sm, borderRadius: radius.pill, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border, backgroundColor: colors.card, paddingHorizontal: space.md },
   secondaryButtonText: { fontFamily: fontFamilies.body, fontSize: fontSize.base, fontWeight: "600", color: colors.textStrong },
-  stopButton: { minHeight: 48, flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: space.sm, borderRadius: radius.pill, backgroundColor: colors.brand },
+  stopButton: { minHeight: 48, flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: space.sm, borderRadius: radius.pill, backgroundColor: colors.brandHover },
   stopButtonText: { fontFamily: fontFamilies.body, fontSize: fontSize.base, fontWeight: "700", color: colors.onBrand },
   unsavedNote: { fontFamily: fontFamilies.body, fontSize: fontSize.sm, lineHeight: 20, color: colors.textMuted },
   retryError: { fontFamily: fontFamilies.body, fontSize: fontSize.sm, lineHeight: 20, color: colors.textBody },

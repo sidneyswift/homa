@@ -1,9 +1,11 @@
-import { ChevronLeft, ChevronRight, X } from "lucide-react-native";
-import { useState } from "react";
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Check, ChevronLeft, ChevronRight, X } from "lucide-react-native";
+import { useRef, useState } from "react";
+import { Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { AccessibleModal } from "../../components/ui/accessible-modal";
 import { Button } from "../../components/ui/button";
+import { IconButton } from "../../components/ui/icon-button";
 import { InlineError } from "../../components/ui/inline-error";
 import { reportCrash } from "../../lib/crash-reporting";
 import type { ChildRecord } from "../../lib/family";
@@ -53,29 +55,25 @@ function DateStepper({
         paddingVertical: space.xs,
       }}
     >
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`Previous day from ${dateLabel}`}
+      <IconButton
+        label={`Previous day from ${dateLabel}`}
         accessibilityState={{ disabled }}
         disabled={disabled}
         onPress={() => onChange(addDays(date, -1))}
-        hitSlop={8}
       >
         <ChevronLeft size={20} color={colors.textBody} />
-      </Pressable>
-      <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}>
+      </IconButton>
+      <Text style={{ flex: 1, textAlign: "center", fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}>
         {formatWeekdayShort(date)}, {formatMonthDay(date)}
       </Text>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`Next day from ${dateLabel}`}
+      <IconButton
+        label={`Next day from ${dateLabel}`}
         accessibilityState={{ disabled }}
         disabled={disabled}
         onPress={() => onChange(addDays(date, 1))}
-        hitSlop={8}
       >
         <ChevronRight size={20} color={colors.textBody} />
-      </Pressable>
+      </IconButton>
     </View>
   );
 }
@@ -102,29 +100,25 @@ function TimeStepper({
         paddingVertical: space.xs,
       }}
     >
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`Earlier than ${timeLabel}`}
+      <IconButton
+        label={`Earlier than ${timeLabel}`}
         accessibilityState={{ disabled }}
         disabled={disabled}
         onPress={() => onChange(stepTime(time, -1))}
-        hitSlop={8}
       >
         <ChevronLeft size={20} color={colors.textBody} />
-      </Pressable>
-      <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}>
+      </IconButton>
+      <Text style={{ flex: 1, textAlign: "center", fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}>
         {formatTimeLabel(time)}
       </Text>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`Later than ${timeLabel}`}
+      <IconButton
+        label={`Later than ${timeLabel}`}
         accessibilityState={{ disabled }}
         disabled={disabled}
         onPress={() => onChange(stepTime(time, 1))}
-        hitSlop={8}
       >
         <ChevronRight size={20} color={colors.textBody} />
-      </Pressable>
+      </IconButton>
     </View>
   );
 }
@@ -209,9 +203,12 @@ export function EventComposer({
   onDelete?: () => Promise<void>;
   onClose: () => void;
 }) {
+  const { fontScale } = useWindowDimensions();
+  const headingRef = useRef<View>(null);
   const [pendingAction, setPendingAction] = useState<"save" | "delete" | null>(null);
   const [mutationError, setMutationError] = useState<string | null>(null);
   const busy = pendingAction !== null;
+  const largeText = fontScale >= 1.4;
 
   async function handleSave() {
     if (!draft.title.trim() || busy) return;
@@ -246,9 +243,10 @@ export function EventComposer({
   }
 
   return (
-    <Modal
+    <AccessibleModal
       visible={visible}
-      animationType="slide"
+      title={isEditing ? "Edit plan" : "New plan"}
+      initialFocusRef={headingRef}
       onRequestClose={busy ? () => undefined : onClose}
       presentationStyle="pageSheet"
     >
@@ -263,19 +261,19 @@ export function EventComposer({
             borderBottomColor: colors.borderSubtle,
           }}
         >
-          <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }}>
-            {isEditing ? "Edit plan" : "New plan"}
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Close plan editor"
+          <View ref={headingRef} accessible accessibilityRole="header" accessibilityLabel={isEditing ? "Edit plan" : "New plan"} style={{ flex: 1 }}>
+            <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }}>
+              {isEditing ? "Edit plan" : "New plan"}
+            </Text>
+          </View>
+          <IconButton
+            label="Close plan editor"
             accessibilityState={{ disabled: busy }}
             disabled={busy}
             onPress={onClose}
-            hitSlop={8}
           >
             <X size={22} color={colors.textSubtle} />
-          </Pressable>
+          </IconButton>
         </View>
 
         <ScrollView contentContainerStyle={{ padding: space.md, gap: space.md }}>
@@ -286,7 +284,7 @@ export function EventComposer({
             value={draft.title}
             onChangeText={(title) => onChange({ ...draft, title })}
             placeholder="What's happening?"
-            placeholderTextColor={colors.textSubtle}
+            placeholderTextColor={colors.textMuted}
             style={{
               fontFamily: fontFamilies.body,
               fontSize: fontSize.base,
@@ -295,6 +293,7 @@ export function EventComposer({
               borderWidth: 1,
               borderColor: colors.border,
               borderRadius: radius.sm,
+              minHeight: 48,
               padding: space.sm,
             }}
           />
@@ -310,18 +309,28 @@ export function EventComposer({
                   <Pressable
                     key={option.id ?? "everyone"}
                     accessibilityRole="radio"
+                    accessibilityLabel={option.name}
                     accessibilityState={{ checked: active, disabled: busy }}
                     disabled={busy}
                     onPress={() => onChange({ ...draft, childId: option.id })}
                     style={{
                       paddingHorizontal: space.md,
+                      minHeight: 44,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: space.xs,
                       paddingVertical: space.xs,
                       borderRadius: radius.pill,
-                      backgroundColor: active ? colors.brand : colors.card,
+                      backgroundColor: active ? colors.brandHover : colors.card,
                       borderWidth: 1,
                       borderColor: active ? colors.brand : colors.borderSubtle,
                     }}
-                  >
+                    >
+                    {active ? (
+                      <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                        <Check size={14} color={colors.onBrand} />
+                      </View>
+                    ) : null}
                     <Text
                       style={{
                         fontFamily: fontFamilies.bodyMedium,
@@ -368,7 +377,7 @@ export function EventComposer({
               accessibilityState={{ checked: draft.hasTime, disabled: busy }}
               disabled={busy}
               onPress={() => onChange({ ...draft, hasTime: !draft.hasTime })}
-              style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}
+              style={{ minHeight: 44, flexDirection: "row", alignItems: "center", gap: space.sm }}
             >
               <View
                 style={{
@@ -378,22 +387,32 @@ export function EventComposer({
                   borderWidth: 1.5,
                   borderColor: draft.hasTime ? colors.brand : colors.border,
                   backgroundColor: draft.hasTime ? colors.brand : "transparent",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
-              />
+              >
+                {draft.hasTime ? <Check size={14} color={colors.onBrand} /> : null}
+              </View>
               <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}>
                 Set a time (first day only)
               </Text>
             </Pressable>
             {draft.hasTime ? (
-              <View style={{ flexDirection: "row", gap: space.sm }}>
-                <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: largeText ? "column" : "row", gap: space.sm }}>
+                <View style={{ flex: largeText ? undefined : 1, gap: space.xs }}>
+                  <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textMuted }}>
+                    Starts at
+                  </Text>
                   <TimeStepper
                     time={draft.startTime}
                     disabled={busy}
                     onChange={(startTime) => onChange({ ...draft, startTime })}
                   />
                 </View>
-                <View style={{ flex: 1 }}>
+                <View style={{ flex: largeText ? undefined : 1, gap: space.xs }}>
+                  <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textMuted }}>
+                    Ends at
+                  </Text>
                   <TimeStepper
                     time={draft.endTime}
                     disabled={busy}
@@ -415,7 +434,7 @@ export function EventComposer({
               value={draft.note}
               onChangeText={(note) => onChange({ ...draft, note })}
               placeholder="Optional"
-              placeholderTextColor={colors.textSubtle}
+              placeholderTextColor={colors.textMuted}
               multiline
               style={{
                 fontFamily: fontFamilies.body,
@@ -451,6 +470,6 @@ export function EventComposer({
           ) : null}
         </ScrollView>
       </SafeAreaView>
-    </Modal>
+    </AccessibleModal>
   );
 }
