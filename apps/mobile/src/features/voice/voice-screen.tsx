@@ -40,6 +40,9 @@ import { OverlayHost } from "./overlay-host";
 import type { StateRecordDocument } from "../../lib/state-records";
 import { ReplySheet } from "./reply-sheet";
 import { TranscriptRibbon } from "./transcript-ribbon";
+import type { VoicePromptStarter } from "./voice-prompt-starters-model";
+import { voicePromptStartersVisible } from "./voice-prompt-starters-model";
+import { VoicePromptStarters } from "./voice-prompt-starters";
 import { useVoiceWorkbench } from "./voice-workbench-provider";
 
 const CHARACTER_SIZE = 240;
@@ -86,6 +89,7 @@ export function VoiceScreen() {
   const pauseForMicrophoneOwner = session.pauseForMicrophoneOwner;
   const { family } = useFamilyData();
   const [replyOpen, setReplyOpen] = useState(false);
+  const [startersRetired, setStartersRetired] = useState(false);
   const [printNotice, setPrintNotice] = useState<{ key: string; message: string } | null>(null);
   const [pendingLesson, setPendingLesson] = useState<PreparedLessonRecording | null>(null);
   const [activeLessonRecorder, setActiveLessonRecorder] = useState<PreparedLessonRecording | null>(null);
@@ -191,6 +195,14 @@ export function VoiceScreen() {
 
   const activeSignal = overlayModel.active;
   const overlayActive = activeSignal !== null && activeSignal.kind !== "receipt";
+  const startersVisible = voicePromptStartersVisible({
+    status: session.status,
+    turnActive: session.turnActive,
+    assistantHasReplied: session.lastAssistantText !== null,
+    userHasReplied: session.lastUserText !== null,
+    overlayOpen: activeSignal !== null,
+    retired: startersRetired,
+  });
   const visiblePrintNotice = printNotice
     && activeSignal?.kind === "material"
     && printNotice.key === activeSignal.key
@@ -211,7 +223,7 @@ export function VoiceScreen() {
     turnActive: session.turnActive,
     assistantTextStreaming: session.assistantTextStreaming,
   });
-  const statusText = overlayActive
+  const statusText = startersVisible || overlayActive
     ? null
     : characterState === "thinking"
       ? (session.busyDetail ?? "getting ready")
@@ -245,6 +257,15 @@ export function VoiceScreen() {
   function leaveVoice() {
     if (session.turnActive && !session.muted) session.toggleMute();
     router.replace("/chat");
+  }
+
+  function handlePromptStarter(starter: VoicePromptStarter) {
+    setStartersRetired(true);
+    if (starter.action.kind === "route") {
+      router.navigate(starter.action.href);
+      return;
+    }
+    session.sendText(starter.action.text);
   }
 
   function openStateRecord(document: StateRecordDocument) {
@@ -341,6 +362,11 @@ export function VoiceScreen() {
         </Animated.View>
 
         <View style={{ flex: 1, justifyContent: "flex-end" }}>
+          <VoicePromptStarters
+            visible={startersVisible}
+            tone={dark ? "dark" : "light"}
+            onPick={handlePromptStarter}
+          />
           <TranscriptRibbon
             userText={session.turnActive && !session.assistantTextStreaming ? session.lastUserText : null}
             assistantText={session.turnActive && !session.assistantTextStreaming ? null : session.lastAssistantText}

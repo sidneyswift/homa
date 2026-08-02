@@ -82,10 +82,7 @@ type ChatSendSource = "composer" | "card";
 /** Stream reconnects per turn; matches the web twin (chat-client.tsx). */
 const STREAM_RECONNECT_ATTEMPTS = 8;
 
-/** The opening prompts every quiet surface offers. Exported so the
- *  voice screen's idle chips (features/voice/suggestion-chips.tsx) say
- *  exactly what chat says instead of drifting a second copy, the same
- *  single-source rule as buildEveTransport below. */
+/** Chat's opening prompts. Native Voice owns task-specific starter cards. */
 export const SUGGESTIONS = [
   "What should we work on this week?",
   "Make a worksheet for today",
@@ -888,4 +885,3 @@ function DaySeparator({ label }: { label: string }) {
     </View>
   );
 }
-
