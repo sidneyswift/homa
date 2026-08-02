@@ -61,7 +61,6 @@ export function MaterialDetailModal({ material, onClose }: { material: BinderMat
     setPrintNotice({ materialId: material.id, message: result.message });
     if (family?.id) {
       void emitFamilyEvent(family.id, "materials.print_result", {
-        family_id: family.id,
         material_id: prepared.materialId,
         outcome: result.status,
         requested_copies: prepared.copies,

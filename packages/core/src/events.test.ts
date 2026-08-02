@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { EVENT_SCHEMAS } from "./events";
+import {
+  EVENT_SCHEMAS,
+  MOBILE_FAMILY_EVENT_NAMES,
+  mobileFamilyEventRequestSchema,
+  type MobileFamilyEventName,
+} from "./events";
 import { MAP_ANSWERS } from "./map/bank";
 
 const FAMILY_ID = "00000000-0000-4000-8000-000000000001";
@@ -364,9 +369,98 @@ test("native share results record handoff state without destination or message",
     outcome: "handed_off",
   };
   assert.equal(EVENT_SCHEMAS["materials.share_result"].safeParse(event).success, true);
-  const parsed = EVENT_SCHEMAS["materials.share_result"].parse({ ...event, destination: "mail" });
-  assert.equal("destination" in parsed, false);
+  assert.equal(
+    EVENT_SCHEMAS["materials.share_result"].safeParse({
+      ...event,
+      destination: "mail",
+    }).success,
+    false,
+  );
   assert.equal(EVENT_SCHEMAS["materials.share_result"].safeParse({ ...event, outcome: "delivered" }).success, false);
+});
+
+test("mobile family event allowlist matches every strict wire variant", () => {
+  const validRequests = {
+    "chat.turn_completed": {
+      status: "ok",
+      modality: "text",
+      latency_ms: 120,
+      model_tier: "premium",
+      tool_calls: 1,
+    },
+    "materials.print_result": {
+      material_id: "11111111-1111-4111-8111-111111111111",
+      outcome: "completed",
+      requested_copies: 1,
+      pages_selected: 2,
+      answer_key_excluded: false,
+    },
+    "materials.share_result": {
+      material_id: "22222222-2222-4222-8222-222222222222",
+      outcome: "handed_off",
+    },
+    "planner.device_calendar_previewed": {
+      selected_count: 2,
+      duplicate_count: 0,
+    },
+    "planner.device_calendar_export_finished": {
+      outcome: "saved",
+      selected_count: 2,
+      saved_count: 2,
+      duplicate_count: 0,
+      failed_count: 0,
+    },
+  } satisfies Record<MobileFamilyEventName, unknown>;
+
+  assert.deepEqual(
+    Object.keys(validRequests).sort(),
+    [...MOBILE_FAMILY_EVENT_NAMES].sort(),
+  );
+  for (const [name, props] of Object.entries(validRequests)) {
+    assert.equal(
+      mobileFamilyEventRequestSchema.safeParse({ name, props }).success,
+      true,
+      `${name} is missing from the mobile wire contract`,
+    );
+  }
+});
+
+test("mobile family event wire variants reject identity and family content", () => {
+  const base = {
+    name: "materials.share_result",
+    props: {
+      material_id: "22222222-2222-4222-8222-222222222222",
+      outcome: "handed_off",
+    },
+  } as const;
+  const forbiddenProperties = [
+    "family_id",
+    "user_id",
+    "member_user_id",
+    "child_name",
+    "message",
+    "text",
+    "content",
+    "transcript",
+    "prompt",
+    "email",
+    "phone",
+    "recipient",
+    "filename",
+    "title",
+    "url",
+  ] as const;
+
+  for (const property of forbiddenProperties) {
+    assert.equal(
+      mobileFamilyEventRequestSchema.safeParse({
+        ...base,
+        props: { ...base.props, [property]: "forbidden" },
+      }).success,
+      false,
+      `mobile event wire accepted ${property}`,
+    );
+  }
 });
 
 test("progress event registry contains all eleven exact names", () => {

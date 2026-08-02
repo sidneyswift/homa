@@ -132,6 +132,22 @@ export const MOBILE_BOOTSTRAP_FAILURE_REASONS = [
 export type MobileBootstrapFailureReason =
   (typeof MOBILE_BOOTSTRAP_FAILURE_REASONS)[number];
 
+/**
+ * The only family-scoped analytics names a native client may submit through
+ * the authenticated mobile event relay. Keeping this allowlist beside the
+ * canonical schemas prevents the app and server from drifting into two
+ * different contracts.
+ */
+export const MOBILE_FAMILY_EVENT_NAMES = [
+  "chat.turn_completed",
+  "materials.print_result",
+  "materials.share_result",
+  "planner.device_calendar_previewed",
+  "planner.device_calendar_export_finished",
+] as const;
+export type MobileFamilyEventName =
+  (typeof MOBILE_FAMILY_EVENT_NAMES)[number];
+
 /** The three governed scheduling-offer venues (§4.3.8): the empty-grid
  * card, the moment after the first plan is built, and the capped
  * morning-brief offer. */
@@ -804,32 +820,38 @@ export const EVENT_SCHEMAS = {
   // Native iOS owns the only trustworthy print terminal. Ready is not an
   // outcome here: the app emits after UIPrintInteractionController's
   // completion handler reports completed, canceled, or failed.
-  "materials.print_result": z.object({
-    family_id: z.uuid(),
-    material_id: z.uuid(),
-    outcome: z.enum(["completed", "canceled", "failed"]),
-    requested_copies: z.number().int().min(1).max(20),
-    pages_selected: z.number().int().min(1),
-    answer_key_excluded: z.boolean(),
-  }),
+  "materials.print_result": z
+    .object({
+      family_id: z.uuid(),
+      material_id: z.uuid(),
+      outcome: z.enum(["completed", "canceled", "failed"]),
+      requested_copies: z.number().int().min(1).max(20),
+      pages_selected: z.number().int().min(1),
+      answer_key_excluded: z.boolean(),
+    })
+    .strict(),
   // The native share sheet is a parent-controlled handoff, never a
   // delivery receipt. No destination app, account, message, or child
   // detail enters analytics.
-  "materials.share_result": z.object({
-    family_id: z.uuid(),
-    material_id: z.uuid(),
-    outcome: z.enum(["handed_off", "canceled", "failed"]),
-    reason: z.enum([
-      "no-session",
-      "app-backgrounded",
-      "offline",
-      "missing-material",
-      "expired-material",
-      "download-failed",
-      "unsupported-destination",
-      "share-failed",
-    ]).optional(),
-  }),
+  "materials.share_result": z
+    .object({
+      family_id: z.uuid(),
+      material_id: z.uuid(),
+      outcome: z.enum(["handed_off", "canceled", "failed"]),
+      reason: z
+        .enum([
+          "no-session",
+          "app-backgrounded",
+          "offline",
+          "missing-material",
+          "expired-material",
+          "download-failed",
+          "unsupported-destination",
+          "share-failed",
+        ])
+        .optional(),
+    })
+    .strict(),
   // Family Library funnel and reuse loop (gh#580). Every shape is strict
   // and content-free: titles, filenames, URLs, search text, child names,
   // and extracted text never enter analytics.
@@ -1154,17 +1176,21 @@ export const EVENT_SCHEMAS = {
       position: z.number().int().min(0).max(1),
     })
     .strict(),
-  // Chat (FR-4). journeys/06 §4.4 #15. Emitted with the signed-in caller's
-  // token and family_id (events policy, migration #13). No message content.
-  "chat.turn_completed": z.object({
-    status: z.enum(["ok", "error"]),
-    error_class: z.enum(["turn_failed", "send_failed", "unknown"]).optional(),
-    modality: z.enum(["text", "voice"]),
-    latency_ms: z.number().int().min(0),
-    model_tier: z.enum(["fast", "mid", "premium"]),
-    tool_calls: z.number().int().min(0),
-    suggestion_set_id: z.uuid().optional(),
-  }),
+  // Chat (FR-4). journeys/06 §4.4 #15. Web emits under the signed-in caller's
+  // token; native uses the authenticated server relay. No message content.
+  "chat.turn_completed": z
+    .object({
+      status: z.enum(["ok", "error"]),
+      error_class: z
+        .enum(["turn_failed", "send_failed", "unknown"])
+        .optional(),
+      modality: z.enum(["text", "voice"]),
+      latency_ms: z.number().int().min(0),
+      model_tier: z.enum(["fast", "mid", "premium"]),
+      tool_calls: z.number().int().min(0),
+      suggestion_set_id: z.uuid().optional(),
+    })
+    .strict(),
   // Canonical persistence successfully claimed one open loop for a parent
   // reply. Ambiguous candidates never emit. No content, message id, or
   // recipient address enters events.
@@ -1401,6 +1427,54 @@ export const EVENT_SCHEMAS = {
 
 export type EventName = keyof typeof EVENT_SCHEMAS;
 export type EventProps<N extends EventName> = z.input<(typeof EVENT_SCHEMAS)[N]>;
+
+/**
+ * The native wire contract deliberately omits family_id. The authenticated
+ * relay re-derives and stamps it, both inside schemas that require the field
+ * and on the event row itself.
+ */
+export const mobileFamilyEventRequestSchema = z.discriminatedUnion("name", [
+  z
+    .object({
+      name: z.literal("chat.turn_completed"),
+      props: EVENT_SCHEMAS["chat.turn_completed"],
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal("materials.print_result"),
+      props: EVENT_SCHEMAS["materials.print_result"].omit({ family_id: true }),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal("materials.share_result"),
+      props: EVENT_SCHEMAS["materials.share_result"].omit({ family_id: true }),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal("planner.device_calendar_previewed"),
+      props: EVENT_SCHEMAS["planner.device_calendar_previewed"].omit({
+        family_id: true,
+      }),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal("planner.device_calendar_export_finished"),
+      props: EVENT_SCHEMAS["planner.device_calendar_export_finished"].omit({
+        family_id: true,
+      }),
+    })
+    .strict(),
+]);
+
+export type MobileFamilyEventRequest = z.infer<
+  typeof mobileFamilyEventRequestSchema
+>;
+export type MobileFamilyEventClientProps<N extends MobileFamilyEventName> =
+  Omit<EventProps<N>, "family_id">;
 
 export interface EventSink {
   supabaseUrl: string;

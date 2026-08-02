@@ -29,7 +29,6 @@ export function MaterialShareComposer({
     setNotice(result.message);
     if (familyId) {
       void emitFamilyEvent(familyId, "materials.share_result", {
-        family_id: familyId,
         material_id: request.materialId,
         outcome: result.status === "handed-off" ? "handed_off" : result.status,
         ...(result.status === "failed" ? { reason: result.reason } : {}),

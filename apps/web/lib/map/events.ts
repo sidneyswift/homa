@@ -3,9 +3,9 @@ import { EVENT_SCHEMAS, type EventName, type EventProps, type MapFlowStep } from
 import { mapDb, type DbJson } from "./db";
 
 /**
- * Server-side event emission for names the public events policy will not
- * accept (map.*, sms.*; the policy stays waitlist-only on purpose). These
- * insert through the server's own database connection. Best-effort by law:
+ * Server-side event emission for names the public or family event policies
+ * will not accept (map.*, sms.*, native outcome namespaces). These insert
+ * through the server's own database connection. Best-effort by law:
  * analytics never break the feature emitting them.
  */
 function familyIdFromProps(props: unknown): string | null {
@@ -58,26 +58,39 @@ export async function emitMapEventOnce<N extends EventName>(
   }
 }
 
+/**
+ * Validates and persists one event, surfacing database failures to callers
+ * that need a truthful receipt. Most product emitters should keep using the
+ * best-effort emitMapEvent wrapper below.
+ */
+export async function persistMapEvent<N extends EventName>(
+  name: N,
+  props: EventProps<N>,
+  options: { familyId?: string | null } = {},
+): Promise<void> {
+  const parsed = EVENT_SCHEMAS[name].parse(props);
+  const sql = mapDb();
+  const familyId = options.familyId ?? familyIdFromProps(parsed);
+  if (familyId) {
+    await sql`
+      insert into public.events (name, props, family_id)
+      values (${name}, ${sql.json(parsed as unknown as DbJson)}, ${familyId})
+    `;
+    return;
+  }
+  await sql`
+    insert into public.events (name, props)
+    values (${name}, ${sql.json(parsed as unknown as DbJson)})
+  `;
+}
+
 export async function emitMapEvent<N extends EventName>(
   name: N,
   props: EventProps<N>,
   options: { familyId?: string | null } = {},
 ): Promise<void> {
   try {
-    const parsed = EVENT_SCHEMAS[name].parse(props);
-    const sql = mapDb();
-    const familyId = options.familyId ?? familyIdFromProps(parsed);
-    if (familyId) {
-      await sql`
-        insert into public.events (name, props, family_id)
-        values (${name}, ${sql.json(parsed as unknown as DbJson)}, ${familyId})
-      `;
-      return;
-    }
-    await sql`
-      insert into public.events (name, props)
-      values (${name}, ${sql.json(parsed as unknown as DbJson)})
-    `;
+    await persistMapEvent(name, props, options);
   } catch (error) {
     console.error(`emitMapEvent(${name}) failed:`, error);
   }
