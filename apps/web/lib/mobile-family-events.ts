@@ -1,4 +1,5 @@
 import {
+  CAPTURE_LOOP_EVENT_NAME,
   mobileFamilyEventRequestSchema,
   type EventProps,
   type MobileFamilyEventName,
@@ -67,7 +68,8 @@ export function createMobileFamilyEventHandler(
     }
 
     const scopedProps =
-      parsed.data.name === "chat.turn_completed"
+      parsed.data.name === "chat.turn_completed" ||
+      parsed.data.name === CAPTURE_LOOP_EVENT_NAME
         ? parsed.data.props
         : { ...parsed.data.props, family_id: family.id };
 

@@ -7,6 +7,7 @@ import {
   mobileFamilyEventRequestSchema,
   type MobileFamilyEventName,
 } from "./events";
+import { CAPTURE_LOOP_EVENT_NAME } from "./capture-loop";
 import { MAP_ANSWERS } from "./map/bank";
 
 const FAMILY_ID = "00000000-0000-4000-8000-000000000001";
@@ -409,6 +410,35 @@ test("mobile family event allowlist matches every strict wire variant", () => {
       saved_count: 2,
       duplicate_count: 0,
       failed_count: 0,
+    },
+    [CAPTURE_LOOP_EVENT_NAME]: {
+      contract_version: 1,
+      event_id: "33333333-3333-4333-8333-333333333333",
+      loop_id: "44444444-4444-4444-8444-444444444444",
+      parent_loop_id: null,
+      branch_id: null,
+      branch_scope: "family",
+      profile: "direct_mutation",
+      intent: "complete_learning",
+      stage: "entry_intent",
+      sequence: 1,
+      surface: "planner",
+      object_kind: "plan_activity",
+      object_id: "55555555-5555-4555-8555-555555555555",
+      client_context: {
+        client: "ios",
+        app_version: "1.0.0",
+        build_number: "42",
+        runtime_version: "f33dd2307f31e8694a7b2727641a13a4f5f06f86",
+        update_id: "019fc368-64b6-7efe-8f33-912d8c430d6f",
+      },
+      outcome_kind: null,
+      result_state: "not_applicable",
+      receipt_kind: "none",
+      revision: null,
+      corrects_event_id: null,
+      correction_result: null,
+      exit_reason: null,
     },
   } satisfies Record<MobileFamilyEventName, unknown>;
 

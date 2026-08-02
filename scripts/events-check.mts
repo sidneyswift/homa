@@ -17,6 +17,10 @@ import { EVENT_SCHEMAS } from "../packages/core/src/index";
 
 /** Registry entries allowed to have no emitter yet: [name, ticket]. */
 const STAGED_EVENTS: ReadonlyArray<readonly [string, string]> = [
+  [
+    "product.loop_stage_recorded",
+    "gh#532, gh#304, and gh#347 emit; gh#392 and gh#394 consume",
+  ],
   // The one-planner arc registers ahead of its emitters (gh#257 PR B0
   // registers the namespace; later arc PRs bring the code paths).
   ["planner.week_repaired", "gh#259 (arc C: reshuffle receipt with undo)"],

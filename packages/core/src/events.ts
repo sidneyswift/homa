@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+import {
+  CAPTURE_LOOP_EVENT_NAME,
+  captureLoopEventPropsSchema,
+  nativeCaptureLoopEventPropsSchema,
+} from "./capture-loop";
 import { MAP_ANSWERS } from "./map/bank";
 import { KID_AGE_BANDS, WAITLIST_SOURCES } from "./waitlist";
 
@@ -144,6 +149,7 @@ export const MOBILE_FAMILY_EVENT_NAMES = [
   "materials.share_result",
   "planner.device_calendar_previewed",
   "planner.device_calendar_export_finished",
+  CAPTURE_LOOP_EVENT_NAME,
 ] as const;
 export type MobileFamilyEventName =
   (typeof MOBILE_FAMILY_EVENT_NAMES)[number];
@@ -191,6 +197,7 @@ export const EVENT_SCHEMAS = {
     stage: z.enum(MOBILE_BOOTSTRAP_STAGES),
     reason: z.enum(MOBILE_BOOTSTRAP_FAILURE_REASONS),
   }),
+  [CAPTURE_LOOP_EVENT_NAME]: captureLoopEventPropsSchema,
   // Map (lead magnet v2) funnel. Emitted server-side only, with the
   // server key: the anon events policy stays waitlist-only on purpose.
   // Props carry pseudonymous ids, never names or emails.
@@ -1466,6 +1473,12 @@ export const mobileFamilyEventRequestSchema = z.discriminatedUnion("name", [
       props: EVENT_SCHEMAS["planner.device_calendar_export_finished"].omit({
         family_id: true,
       }),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal(CAPTURE_LOOP_EVENT_NAME),
+      props: nativeCaptureLoopEventPropsSchema,
     })
     .strict(),
 ]);
