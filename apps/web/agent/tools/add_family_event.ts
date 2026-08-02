@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { z } from "zod";
 
 import {
@@ -5,7 +7,18 @@ import {
   TOOL_DEADLINE,
 } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
-import { addFamilyEventCaller, addFamilyEventPinned } from "../../lib/family-events";
+import {
+  addFamilyEventCaller,
+  addFamilyEventPinned,
+  getFamilyEventCaller,
+  getFamilyEventPinned,
+  parseFamilyEventInput,
+} from "../../lib/family-events";
+import {
+  armVoiceActionThenMutate,
+  recordVoiceAction,
+  voiceToolReceiptContext,
+} from "../../lib/voice/action-receipts";
 
 /**
  * Homa's own family calendar (issue #176, CG-03), a co-founder's own
@@ -84,15 +97,71 @@ export default defineBoundedTool({
       throw error;
     }
 
-    const result =
-      access.mode === "pinned"
-        ? await addFamilyEventPinned(access.familyId, input)
-        : await addFamilyEventCaller(access.db, access.familyId, input);
+    const receiptContext = voiceToolReceiptContext({
+      familyId: access.familyId,
+      attributes,
+      runtimeSessionId: ctx.session.id,
+      turnId: ctx.session.turn.id,
+    });
+    const parsed = parseFamilyEventInput(input);
+    if (!parsed.ok) return { added: false, note: parsed.error };
+    const eventId = randomUUID();
+    const mutate = () => access.mode === "pinned"
+      ? addFamilyEventPinned(access.familyId, { ...input, id: eventId })
+      : addFamilyEventCaller(access.db, access.familyId, { ...input, id: eventId });
+    const armed = receiptContext
+      ? await armVoiceActionThenMutate({
+          familyId: receiptContext.familyId,
+          record: () => recordVoiceAction({
+            ...receiptContext,
+            objectKind: "family_event",
+            objectId: eventId,
+            effect: "family_event.added",
+            namedEffect: `${parsed.value.title} on the family calendar`,
+            undoCapability: "exact_delete",
+            payload: {
+              effect: "family_event.added",
+              after: {
+                childId: input.childId ?? null,
+                title: parsed.value.title,
+                startsOn: parsed.value.startsOn,
+                endsOn: parsed.value.endsOn,
+                startTime: parsed.value.startTime,
+                endTime: parsed.value.endTime,
+                note: parsed.value.note,
+                recurrence: parsed.value.recurrence,
+              },
+            },
+          }),
+          mutate,
+          replay: async (receipt) => {
+            if (receipt.undoneAt) {
+              return { added: false as const, note: "That Voice action already ran and was undone." };
+            }
+            const event = access.mode === "pinned"
+              ? await getFamilyEventPinned(access.familyId, eventId)
+              : await getFamilyEventCaller(access.db, access.familyId, eventId);
+            return event
+              ? {
+                  added: true as const,
+                  eventId: event.id,
+                  title: event.title,
+                  startsOn: event.startsOn,
+                  endsOn: event.endsOn,
+                  event,
+                }
+              : { added: false as const, note: "That Voice action already ran, but the event is no longer there." };
+          },
+          succeeded: (result) => result.added,
+        })
+      : { actionReceipt: null, result: await mutate(), replayed: false };
+    const result = armed.result;
     if (!result.added) return result;
 
     return {
       ...result,
       done: true,
+      ...(armed.actionReceipt ? { actionReceipt: armed.actionReceipt } : {}),
       note: "Added to the family calendar. Confirm it back to the parent in one short natural aside; the calendar page shows it right away.",
     };
   },

@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { z } from "zod";
 
 import {
@@ -10,7 +12,13 @@ import { plannerEventClient } from "../../lib/planner-events";
 import {
   schedulePlanActivityCaller,
   schedulePlanActivityPinned,
+  getPlanActivitySchedulePinned,
 } from "../../lib/plan-schedule";
+import {
+  armVoiceActionThenMutate,
+  recordVoiceAction,
+  voiceToolReceiptContext,
+} from "../../lib/voice/action-receipts";
 
 /**
  * Gives one plan activity a REAL persisted calendar date (issue #176,
@@ -67,10 +75,57 @@ export default defineBoundedTool({
       throw error;
     }
 
-    const result =
-      access.mode === "pinned"
-        ? await schedulePlanActivityPinned(access.familyId, input)
-        : await schedulePlanActivityCaller(access.db, access.familyId, input);
+    const before = await getPlanActivitySchedulePinned(access.familyId, input);
+    const scheduleId = before?.id ?? randomUUID();
+    const receiptContext = voiceToolReceiptContext({
+      familyId: access.familyId,
+      attributes,
+      runtimeSessionId: ctx.session.id,
+      turnId: ctx.session.turn.id,
+    });
+    const mutate = () => access.mode === "pinned"
+      ? schedulePlanActivityPinned(access.familyId, { ...input, id: scheduleId })
+      : schedulePlanActivityCaller(access.db, access.familyId, { ...input, id: scheduleId });
+    const armed = receiptContext
+      ? await armVoiceActionThenMutate({
+          familyId: access.familyId,
+          record: () => recordVoiceAction({
+            ...receiptContext,
+            objectKind: "plan_activity",
+            objectId: scheduleId,
+            effect: "plan_activity.scheduled",
+            namedEffect: `scheduled activity on ${input.scheduledDate}`,
+            undoCapability: before ? "exact_restore" : "exact_delete",
+            payload: {
+              effect: "plan_activity.scheduled",
+              before: before ? {
+                childId: before.childId,
+                subjectId: before.subjectId,
+                week: before.week,
+                activityIndex: before.activityIndex,
+                scheduledDate: before.scheduledDate,
+              } : null,
+              after: {
+                childId: input.childId,
+                subjectId: input.subjectId,
+                week: input.week,
+                activityIndex: input.activityIndex,
+                scheduledDate: input.scheduledDate,
+              },
+            },
+          }),
+          mutate,
+          replay: async (receipt) => receipt.undoneAt
+            ? { scheduled: false as const, note: "That Voice action already ran and was undone." }
+            : {
+                scheduled: true as const,
+                ...input,
+                activityText: "this activity",
+              },
+          succeeded: (result) => result.scheduled,
+        })
+      : { actionReceipt: null, result: await mutate(), replayed: false };
+    const result = armed.result;
     if (!result.scheduled) return result;
 
     // The write above already re-verified childId inside this family;
@@ -88,6 +143,7 @@ export default defineBoundedTool({
     return {
       ...result,
       done: true,
+      ...(armed.actionReceipt ? { actionReceipt: armed.actionReceipt } : {}),
       note: "Scheduled on the family calendar. Confirm it back in one short natural aside, naming the day and the activity.",
     };
   },

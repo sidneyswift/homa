@@ -12,8 +12,16 @@ import {
   completeAcceptedOfferFulfillment,
   reserveAcceptedOfferFulfillment,
 } from "../../lib/conversation-continuity/offer-fulfillment";
-import { createCustomTask } from "../../lib/tasks/custom";
+import {
+  createCustomTask,
+  getTaskMutationSnapshot,
+} from "../../lib/tasks/custom";
 import { refuseScheduleSpawnedSession } from "../../lib/tasks/guard";
+import {
+  armVoiceActionThenMutate,
+  recordVoiceAction,
+  voiceToolReceiptContext,
+} from "../../lib/voice/action-receipts";
 
 /**
  * Parent-created scheduled tasks over chat (HT-6, M3-08 pulled forward).
@@ -98,14 +106,67 @@ export default defineBoundedTool({
         );
       }
     }
-    const result = await createCustomTask(
+    const receiptContext = voiceToolReceiptContext({
+      familyId,
+      attributes,
+      runtimeSessionId: ctx.session.id,
+      turnId: ctx.session.turn.id,
+    });
+    const recipientMemberUserId =
+      typeof memberUserId === "string" ? memberUserId : null;
+    const mutate = () => createCustomTask(
       familyId,
       input,
       "homa",
-      typeof memberUserId === "string" ? memberUserId : null,
+      recipientMemberUserId,
       reservedSourceDeliveryId,
       taskId,
     );
+    const armed = receiptContext
+      ? await armVoiceActionThenMutate({
+          familyId,
+          record: () => recordVoiceAction({
+            ...receiptContext,
+            objectKind: "task",
+            objectId: taskId,
+            effect: "task.created",
+            namedEffect: input.label,
+            undoCapability: "exact_delete",
+            payload: {
+              effect: "task.created",
+              after: {
+                kind: "custom",
+                label: input.label.trim(),
+                prompt: input.prompt.trim(),
+                localHour: input.localHour,
+                weekdays: [...new Set(input.weekdays)].sort((left, right) => left - right),
+                deliveryPref: input.deliveryPref,
+                paused: false,
+                pausedAt: null,
+                enabled: true,
+                nextRunAt: null,
+                lastRunAt: null,
+                createdBy: "homa",
+                recipientMemberUserId,
+                sourceOfferDeliveryId: reservedSourceDeliveryId,
+                createdAt: null,
+              },
+            },
+          }),
+          mutate,
+          replay: async (receipt) => {
+            if (receipt.undoneAt) {
+              return { ok: false as const, note: "That Voice action already ran and was undone." };
+            }
+            const task = await getTaskMutationSnapshot(familyId, taskId);
+            return task
+              ? { ok: true as const, id: taskId }
+              : { ok: false as const, note: "That Voice action already ran, but the task is no longer there." };
+          },
+          succeeded: (result) => result.ok,
+        })
+      : { actionReceipt: null, result: await mutate(), replayed: false };
+    const result = armed.result;
     if (!result.ok) return { created: false, note: result.note };
     try {
       if (reservedSourceDeliveryId) {
@@ -125,6 +186,7 @@ export default defineBoundedTool({
     return {
       created: true,
       taskId: result.id,
+      ...(armed.actionReceipt ? { actionReceipt: armed.actionReceipt } : {}),
       note: "Task created; it shows on the Homa's tasks page and runs at the next scheduled hour. Confirm to the parent in one short natural aside.",
     };
   },

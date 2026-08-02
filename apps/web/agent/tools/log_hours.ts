@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { emitEvent } from "@homa/core";
 import { z } from "zod";
 
@@ -9,6 +11,11 @@ import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-d
 import { recordHoursPinned } from "../../lib/agent-pinned";
 import { HOURS_SUBJECTS, type HoursSubject } from "../../lib/hours-model";
 import { effectiveTimeZone, zonedDateString } from "../../lib/time-zone";
+import {
+  armVoiceActionThenMutate,
+  recordVoiceAction,
+  voiceToolReceiptContext,
+} from "../../lib/voice/action-receipts";
 
 /**
  * Capture-time school hours (M3-05 slice; lab evidence in build-log
@@ -60,7 +67,20 @@ export default defineBoundedTool({
       throw error;
     }
 
+    const receiptContext = voiceToolReceiptContext({
+      familyId: access.familyId,
+      attributes: ctx.session.auth.current?.attributes,
+      runtimeSessionId: ctx.session.id,
+      turnId: ctx.session.turn.id,
+    });
+
     if (access.mode === "pinned") {
+      if (receiptContext) {
+        return {
+          logged: false,
+          note: "Homa could not guarantee an atomic Voice receipt on this expired session. Nothing changed. Start a fresh Voice session and try once more.",
+        };
+      }
       const pinnedChannel = (ctx.session.auth.current?.attributes as { channel?: string })
         ?.channel;
       const result = await recordHoursPinned({
@@ -79,15 +99,14 @@ export default defineBoundedTool({
         happenedOn: input.happenedOn ?? null,
         note: input.note ?? null,
       });
-      return result.logged
-        ? {
+      if (!result.logged) return result;
+      return {
             ...result,
             done: true,
             subject: input.subject,
             minutes: input.minutes,
             note: "On the record. Mention it in one short natural aside; the running week total is there if it fits naturally.",
-          }
-        : result;
+          };
     }
 
     const { db, familyId } = access;
@@ -121,15 +140,54 @@ export default defineBoundedTool({
       };
     }
 
-    const { error: insertError } = await db.from("hours_log").insert({
-      family_id: familyId,
-      child_id: input.childId ?? null,
-      subject: input.subject,
-      minutes: input.minutes,
-      happened_on: happenedOn,
-      source: "chat",
-      note: input.note ?? null,
-    });
+    const entryId = randomUUID();
+    const mutate = async () => await db
+      .from("hours_log")
+      .insert({
+        id: entryId,
+        family_id: familyId,
+        child_id: input.childId ?? null,
+        subject: input.subject,
+        minutes: input.minutes,
+        happened_on: happenedOn,
+        source: "chat",
+        note: input.note ?? null,
+      })
+      .select("id")
+      .single();
+    const armed = receiptContext
+      ? await armVoiceActionThenMutate({
+          familyId: receiptContext.familyId,
+          record: () => recordVoiceAction({
+            ...receiptContext,
+            objectKind: "hours_entry",
+            objectId: entryId,
+            effect: "hours.logged",
+            namedEffect: `the ${input.minutes}-minute ${input.subject} entry in Hours`,
+            undoCapability: "exact_delete",
+            payload: {
+              effect: "hours.logged",
+              after: {
+                childId: input.childId ?? null,
+                subject: input.subject,
+                minutes: input.minutes,
+                happenedOn,
+                source: "chat",
+                note: input.note ?? null,
+              },
+            },
+          }),
+          mutate,
+          replay: async () => await db
+            .from("hours_log")
+            .select("id")
+            .eq("id", entryId)
+            .eq("family_id", familyId)
+            .single(),
+          succeeded: (result) => !result.error && Boolean(result.data?.id),
+        })
+      : { actionReceipt: null, result: await mutate(), replayed: false };
+    const { error: insertError } = armed.result;
     if (insertError) {
       // 23505 from hours_log_block_unique_idx: a concurrent identical
       // call won the insert after this one's guard SELECT ran; losing
@@ -183,6 +241,7 @@ export default defineBoundedTool({
       subject: input.subject,
       minutes: input.minutes,
       weekMinutesForSubject: weekMinutes,
+      ...(armed.actionReceipt ? { actionReceipt: armed.actionReceipt } : {}),
       note: "On the record. Mention it in one short natural aside; the running week total is there if it fits naturally.",
     };
   },

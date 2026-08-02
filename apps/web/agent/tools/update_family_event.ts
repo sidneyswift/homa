@@ -6,10 +6,18 @@ import {
 } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import {
+  applyFamilyEventPatch,
+  getFamilyEventCaller,
+  getFamilyEventPinned,
   updateFamilyEventCaller,
   updateFamilyEventPinned,
   type FamilyEventPatch,
 } from "../../lib/family-events";
+import {
+  armVoiceActionThenMutate,
+  recordVoiceAction,
+  voiceToolReceiptContext,
+} from "../../lib/voice/action-receipts";
 
 /**
  * Changes one existing family calendar event in one call (issue #257,
@@ -100,10 +108,75 @@ export default defineBoundedTool({
       endTime: input.endTime,
       recurrence: input.recurrence,
     };
-    const result =
-      access.mode === "pinned"
-        ? await updateFamilyEventPinned(access.familyId, input.eventId, patch)
-        : await updateFamilyEventCaller(access.db, access.familyId, input.eventId, patch);
+    const receiptContext = voiceToolReceiptContext({
+      familyId: access.familyId,
+      attributes,
+      runtimeSessionId: ctx.session.id,
+      turnId: ctx.session.turn.id,
+    });
+    const before = receiptContext
+      ? access.mode === "pinned"
+        ? await getFamilyEventPinned(access.familyId, input.eventId)
+        : await getFamilyEventCaller(access.db, access.familyId, input.eventId)
+      : null;
+    if (receiptContext && !before) {
+      return { updated: false, note: "That event wasn't found on this family's calendar." };
+    }
+    const predicted = before ? applyFamilyEventPatch(before, patch) : null;
+    if (predicted && !predicted.ok) return { updated: false, note: predicted.error };
+    const mutate = () => access.mode === "pinned"
+      ? updateFamilyEventPinned(access.familyId, input.eventId, patch, before ?? undefined)
+      : updateFamilyEventCaller(access.db, access.familyId, input.eventId, patch, before ?? undefined);
+    const armed = receiptContext && before && predicted?.ok
+      ? await armVoiceActionThenMutate({
+          familyId: receiptContext.familyId,
+          record: () => recordVoiceAction({
+            ...receiptContext,
+            objectKind: "family_event",
+            objectId: input.eventId,
+            effect: "family_event.updated",
+            namedEffect: `${predicted.value.title} on the family calendar`,
+            undoCapability: "exact_restore",
+            payload: {
+              effect: "family_event.updated",
+              before: {
+                childId: before.childId,
+                title: before.title,
+                startsOn: before.startsOn,
+                endsOn: before.endsOn,
+                startTime: before.startTime,
+                endTime: before.endTime,
+                note: before.note,
+                recurrence: before.recurrence ?? null,
+              },
+              after: {
+                childId: before.childId,
+                title: predicted.value.title,
+                startsOn: predicted.value.startsOn,
+                endsOn: predicted.value.endsOn,
+                startTime: predicted.value.startTime,
+                endTime: predicted.value.endTime,
+                note: predicted.value.note,
+                recurrence: predicted.value.recurrence,
+              },
+            },
+          }),
+          mutate,
+          replay: async (receipt) => {
+            if (receipt.undoneAt) {
+              return { updated: false as const, note: "That Voice action already ran and was undone." };
+            }
+            const event = access.mode === "pinned"
+              ? await getFamilyEventPinned(access.familyId, input.eventId)
+              : await getFamilyEventCaller(access.db, access.familyId, input.eventId);
+            return event
+              ? { updated: true as const, event, before }
+              : { updated: false as const, note: "That Voice action already ran, but the event is no longer there." };
+          },
+          succeeded: (result) => result.updated,
+        })
+      : { actionReceipt: null, result: await mutate(), replayed: false };
+    const result = armed.result;
     if (!result.updated) return result;
 
     return {
@@ -119,6 +192,7 @@ export default defineBoundedTool({
         endTime: result.event.endTime,
         recurrence: result.event.recurrence,
       },
+      ...(armed.actionReceipt ? { actionReceipt: armed.actionReceipt } : {}),
       note: "Updated on the family calendar. Confirm the change back in one short natural aside; the calendar page shows it right away.",
     };
   },

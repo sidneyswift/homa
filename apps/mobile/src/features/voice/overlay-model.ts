@@ -58,6 +58,11 @@ export type OverlaySignal =
       toolName: string;
       summary: string;
       materialId?: string;
+      actionReceipt?: {
+        id: string;
+        namedEffect: string;
+        expiresAt: string;
+      };
     };
 
 /** A receipt toast's signal, the shape OverlayHost's onReceiptPress
@@ -164,6 +169,25 @@ function truncate(text: string, max = 80): string {
   return text.length > max ? `${text.slice(0, max - 1)}…` : text;
 }
 
+function actionReceiptIn(output: Record<string, unknown>):
+  | { id: string; namedEffect: string; expiresAt: string }
+  | undefined {
+  const receipt = output.actionReceipt;
+  if (!isRecord(receipt)) return undefined;
+  if (
+    typeof receipt.id !== "string"
+    || typeof receipt.namedEffect !== "string"
+    || typeof receipt.expiresAt !== "string"
+  ) {
+    return undefined;
+  }
+  return {
+    id: receipt.id,
+    namedEffect: receipt.namedEffect,
+    expiresAt: receipt.expiresAt,
+  };
+}
+
 interface CompletedToolPart {
   toolName: string;
   output: Record<string, unknown>;
@@ -201,11 +225,12 @@ function receiptSummaryFor(part: CompletedToolPart): string | null {
   if (toolName === "log_hours") {
     if (output.logged !== true) return null;
     if (typeof output.subject === "string" && typeof output.minutes === "number") {
-      return `Hours saved: ${output.subject}, ${output.minutes} min`;
+      const unit = output.minutes === 1 ? "minute" : "minutes";
+      return `Recorded in Hours: ${output.minutes} ${unit} of ${output.subject}`;
     }
     // The double-log guard path returns logged without the fields; the
     // block is on the record either way.
-    return "Hours saved";
+    return "Hours recorded";
   }
   // Named-effect chips (remember, forget, update_child_profile,
   // save_skill, forget_skill, mark_material_final) reuse the transcript
@@ -380,6 +405,7 @@ function buildSignal(
       ...(toolName === "mark_material_final" && typeof output.materialId === "string"
         ? { materialId: output.materialId }
         : {}),
+      ...(actionReceiptIn(output) ? { actionReceipt: actionReceiptIn(output) } : {}),
     },
     planWrites,
   };

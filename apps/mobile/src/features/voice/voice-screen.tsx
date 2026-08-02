@@ -402,6 +402,13 @@ export function VoiceScreen() {
           }
           setOverlayModel((current) => dismissActiveOverlay(current));
         }}
+        onUndoReceipt={(signal) => {
+          if (!signal.actionReceipt) return;
+          session.sendText(
+            `Undo ${signal.actionReceipt.namedEffect}. Use action receipt ${signal.actionReceipt.id}.`,
+          );
+          setOverlayModel((current) => dismissActiveOverlay(current));
+        }}
         float={(
           <HomaCharacter
             state={characterState}

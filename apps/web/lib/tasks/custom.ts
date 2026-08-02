@@ -44,6 +44,72 @@ export interface FamilyTaskRow {
   createdBy: "system" | "parent" | "homa";
 }
 
+export interface TaskMutationSnapshot {
+  kind: FamilyTaskKind;
+  label: string | null;
+  prompt: string | null;
+  localHour: number;
+  weekdays: number[];
+  deliveryPref: "text" | "email" | "none";
+  paused: boolean;
+  pausedAt: string | null;
+  enabled: boolean;
+  nextRunAt: string;
+  lastRunAt: string | null;
+  createdBy: "system" | "parent" | "homa";
+  recipientMemberUserId: string | null;
+  sourceOfferDeliveryId: string | null;
+  createdAt: string;
+}
+
+export async function getTaskMutationSnapshot(
+  familyId: string,
+  taskId: string,
+): Promise<TaskMutationSnapshot | null> {
+  const sql = mapDb();
+  const rows = await sql<{
+    kind: FamilyTaskKind;
+    label: string | null;
+    prompt: string | null;
+    local_hour: number;
+    weekdays: number[];
+    delivery_pref: "text" | "email" | "none";
+    paused_at: string | null;
+    enabled: boolean;
+    next_run_at: string;
+    last_run_at: string | null;
+    created_by: "system" | "parent" | "homa";
+    recipient_member_user_id: string | null;
+    source_offer_delivery_id: string | null;
+    created_at: string;
+  }[]>`
+    select kind, label, prompt, local_hour, weekdays, delivery_pref,
+           paused_at::text, enabled, next_run_at::text, last_run_at::text,
+           created_by, recipient_member_user_id, source_offer_delivery_id,
+           created_at::text
+    from public.agent_schedules
+    where id = ${taskId} and family_id = ${familyId}
+  `;
+  const row = rows[0];
+  return row ? {
+    kind: row.kind,
+    label: row.label,
+    prompt: row.prompt,
+    localHour: row.local_hour,
+    weekdays: row.weekdays,
+    deliveryPref: row.delivery_pref,
+    paused: row.paused_at !== null,
+    pausedAt: row.paused_at,
+    enabled: row.enabled,
+    nextRunAt: row.next_run_at,
+    lastRunAt: row.last_run_at,
+    createdBy: row.created_by,
+    recipientMemberUserId: row.recipient_member_user_id,
+    sourceOfferDeliveryId: row.source_offer_delivery_id,
+    createdAt: row.created_at,
+  } : null;
+}
+
 function toRow(row: {
   id: string;
   kind: FamilyTaskKind;

@@ -45,12 +45,52 @@ export interface PlanActivityScheduleRow {
 }
 
 export interface SchedulePlanActivityInput {
+  /** Server-chosen id for a newly armed Voice receipt. Never model input. */
+  id?: string;
   childId: string;
   subjectId: string;
   week: number;
   activityIndex: number;
   /** YYYY-MM-DD. */
   scheduledDate: string;
+}
+
+export async function getPlanActivitySchedulePinned(
+  familyId: string,
+  input: Pick<SchedulePlanActivityInput, "childId" | "subjectId" | "week" | "activityIndex">,
+): Promise<PlanActivityScheduleRow | null> {
+  const sql = mapDb();
+  const rows = await sql<{
+    id: string;
+    family_id: string;
+    child_id: string;
+    subject_id: string;
+    week: number;
+    activity_index: number;
+    scheduled_date: string;
+    created_at: string;
+    updated_at: string;
+  }[]>`
+    select id, family_id, child_id, subject_id, week, activity_index,
+           to_char(scheduled_date, 'YYYY-MM-DD') as scheduled_date,
+           created_at::text, updated_at::text
+    from public.plan_activity_schedule
+    where family_id = ${familyId} and child_id = ${input.childId}
+      and subject_id = ${input.subjectId} and week = ${input.week}
+      and activity_index = ${input.activityIndex}
+  `;
+  const row = rows[0];
+  return row ? {
+    id: row.id,
+    familyId: row.family_id,
+    childId: row.child_id,
+    subjectId: row.subject_id,
+    week: row.week,
+    activityIndex: row.activity_index,
+    scheduledDate: row.scheduled_date,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  } : null;
 }
 
 export type SchedulePlanActivityResult =
@@ -159,6 +199,7 @@ export async function schedulePlanActivityCaller(
 
   const { error } = await db.from("plan_activity_schedule").upsert(
     {
+      ...(input.id ? { id: input.id } : {}),
       family_id: familyId,
       child_id: input.childId,
       subject_id: input.subjectId,
@@ -202,9 +243,10 @@ export async function schedulePlanActivityPinned(
 
   await sql`
     insert into public.plan_activity_schedule
-      (family_id, child_id, subject_id, week, activity_index, scheduled_date)
+      (id, family_id, child_id, subject_id, week, activity_index, scheduled_date)
     values
-      (${familyId}, ${input.childId}, ${input.subjectId}, ${input.week},
+      (coalesce(${input.id ?? null}::uuid, gen_random_uuid()), ${familyId},
+       ${input.childId}, ${input.subjectId}, ${input.week},
        ${input.activityIndex}, ${input.scheduledDate})
     on conflict (family_id, child_id, subject_id, week, activity_index)
     do update set scheduled_date = excluded.scheduled_date, updated_at = now()
