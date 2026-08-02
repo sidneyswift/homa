@@ -16,6 +16,7 @@ import {
 } from "../apps/web/lib/library/family-asset-retrieval";
 import { finalizeFamilyAssetUpload } from "../apps/web/lib/library/family-asset-upload-store";
 import { editPlanActivities, getPlanBoard } from "../apps/web/lib/map/store";
+import { toBinderMaterials } from "../apps/web/lib/materials/binder";
 import { getMaterialPinned } from "../apps/web/lib/materials/library";
 
 const databaseUrl = process.env.HOMA_EVAL_DATABASE_URL;
@@ -149,9 +150,11 @@ try {
     materialId,
     { finalOnly: true },
   );
-  assert.equal(material?.sources[0]?.id, assetId);
+  assert.ok(material);
+  assert.equal(material.sources[0]?.id, assetId);
+  const [binderMaterial] = toBinderMaterials([material], []);
   assert.match(
-    material?.sources[0]?.libraryUrl ?? "",
+    binderMaterial.sources[0]?.libraryUrl ?? "",
     new RegExp(`/app/library\\?asset=${assetId}$`, "u"),
   );
 
