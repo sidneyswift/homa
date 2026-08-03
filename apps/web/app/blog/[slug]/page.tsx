@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
 
 import { Footer } from "../../../components/marketing/Footer";
 import { Nav } from "../../../components/marketing/Nav";
@@ -114,7 +115,7 @@ export default async function BlogPostPage({
             ) : null}
           </header>
           <div className="blog-prose mt-8">
-            <MDXRemote source={post.body} />
+            <MDXRemote source={post.body} options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }} />
           </div>
         </article>
 

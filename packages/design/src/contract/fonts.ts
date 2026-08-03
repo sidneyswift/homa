@@ -1,0 +1,258 @@
+import { DESIGN_CONTRACT_VERSION } from "./version.ts";
+
+/**
+ * Font metadata is intentionally separate from the semantic type scale. The
+ * type scale says where a face may appear. This registry says which licensed
+ * source, binary, and platform adapter can fulfil that role.
+ */
+export const FONT_SYSTEM_SCHEMA_VERSION = 1 as const;
+
+export const fontLicense = {
+  name: "SIL Open Font License 1.1",
+  identifier: "OFL-1.1",
+  url: "https://scripts.sil.org/OFL",
+} as const;
+const googleFontsSource = {
+  provider: "Google Fonts",
+  license: fontLicense,
+} as const;
+
+export const approvedFontFamilies = {
+  display: {
+    family: "EB Garamond",
+    role: "display",
+    source: {
+      ...googleFontsSource,
+      specimenUrl: "https://fonts.google.com/specimen/EB+Garamond",
+      repositoryUrl: "https://github.com/google/fonts/tree/main/ofl/ebgaramond",
+    },
+    allowedWeights: [400, 500, 600, 700],
+    allowedStyles: ["normal", "italic"],
+    subsets: ["latin"],
+    nativeNames: {
+      regular: "EBGaramond_400Regular",
+      medium: "EBGaramond_500Medium",
+      semibold: "EBGaramond_600SemiBold",
+      bold: "EBGaramond_700Bold",
+    },
+  },
+  interface: {
+    family: "DM Sans",
+    role: "interface",
+    source: {
+      ...googleFontsSource,
+      specimenUrl: "https://fonts.google.com/specimen/DM+Sans",
+      repositoryUrl: "https://github.com/google/fonts/tree/main/ofl/dmsans",
+    },
+    allowedWeights: [400, 500, 600, 700],
+    allowedStyles: ["normal", "italic"],
+    subsets: ["latin"],
+    nativeNames: {
+      regular: "DMSans_400Regular",
+      medium: "DMSans_500Medium",
+      semibold: "DMSans_600SemiBold",
+      bold: "DMSans_700Bold",
+    },
+  },
+  wordmark: {
+    family: "Fredoka",
+    role: "wordmark",
+    source: {
+      ...googleFontsSource,
+      specimenUrl: "https://fonts.google.com/specimen/Fredoka",
+      repositoryUrl: "https://github.com/google/fonts/tree/main/ofl/fredoka",
+    },
+    allowedWeights: [500, 600, 700],
+    allowedStyles: ["normal"],
+    subsets: ["latin"],
+    nativeNames: {
+      semibold: "Fredoka_600SemiBold",
+    },
+  },
+} as const;
+
+export type FontFamilyRole = keyof typeof approvedFontFamilies;
+export type FontFormat = "ttf" | "woff";
+export type FontStyle = "normal" | "italic";
+
+export interface FontAssetRecord {
+  id: string;
+  role: FontFamilyRole;
+  family: string;
+  path: string;
+  format: FontFormat;
+  weight: number;
+  style: FontStyle;
+  subsets: readonly string[];
+  sha256: string;
+  binaryInspection: {
+    family: string;
+    style: string;
+    weightClass: number;
+    glyphCoverage: string;
+    inspectionTool: string;
+  };
+}
+
+/**
+ * These are checked-in specimens used by the approval lab and deterministic
+ * generation checks. Runtime web and native loaders are recorded below and
+ * are not inferred from these three specimen files.
+ */
+export const checkedInFontAssets: readonly FontAssetRecord[] = [
+  {
+    id: "eb-garamond-600-latin-ttf",
+    role: "display",
+    family: "EB Garamond",
+    path: "apps/web/assets/fonts/quiet-authority/eb-garamond-600-latin.ttf",
+    format: "ttf",
+    weight: 600,
+    style: "normal",
+    subsets: ["latin"],
+    sha256: "b536adfa0f5746cfbd148d8a1a669540366edef2c85c4b49450798a037bd928c",
+    binaryInspection: {
+      family: "EB Garamond",
+      style: "SemiBold,Regular",
+      weightClass: 600,
+      glyphCoverage: "latin-and-latin-extended",
+      inspectionTool: "fontconfig fc-scan",
+    },
+  },
+  {
+    id: "dm-sans-700-latin-ttf",
+    role: "interface",
+    family: "DM Sans",
+    path: "apps/web/assets/fonts/quiet-authority/dm-sans-700-latin.ttf",
+    format: "ttf",
+    weight: 700,
+    style: "normal",
+    subsets: ["latin"],
+    sha256: "2a8e7f713ee79fbccdef3cef5c787aff47580299f7da60144961e7db2ec08211",
+    binaryInspection: {
+      family: "DM Sans",
+      style: "Bold",
+      weightClass: 700,
+      glyphCoverage: "latin-and-latin-extended",
+      inspectionTool: "fontconfig fc-scan",
+    },
+  },
+  {
+    id: "fredoka-600-latin-woff",
+    role: "wordmark",
+    family: "Fredoka",
+    path: "apps/web/assets/fonts/fredoka-600-latin.woff",
+    format: "woff",
+    weight: 600,
+    style: "normal",
+    subsets: ["latin"],
+    sha256: "ca6f7ba0a393960b2a3036754726529ddd19b8a20be3faeb8cfabad3882b888a",
+    binaryInspection: {
+      family: "Fredoka SemiBold",
+      style: "Regular",
+      weightClass: 600,
+      glyphCoverage: "latin",
+      inspectionTool: "fontconfig fc-scan",
+    },
+  },
+] as const;
+
+export const runtimeFontSources = {
+  webProduct: {
+    adapter: "next/font/google",
+    package: "next",
+    source: "Google Fonts",
+    roles: {
+      display: { family: "EB Garamond", weights: [400, 500, 600, 700], styles: ["normal", "italic"] },
+      interface: { family: "DM Sans", weights: [400, 500, 600, 700], styles: ["normal", "italic"] },
+      wordmark: { family: "Fredoka", weights: [500, 600], styles: ["normal"] },
+    },
+  },
+  nativeProduct: {
+    adapter: "@expo-google-fonts",
+    packages: {
+      display: "@expo-google-fonts/eb-garamond",
+      interface: "@expo-google-fonts/dm-sans",
+      wordmark: "@expo-google-fonts/fredoka",
+    },
+    source: "Google Fonts",
+    roles: {
+      display: { family: "EB Garamond", weights: [400, 500, 600, 700], styles: ["normal"] },
+      interface: { family: "DM Sans", weights: [400, 500, 600, 700], styles: ["normal"] },
+      wordmark: { family: "Fredoka", weights: [600], styles: ["normal"] },
+    },
+  },
+} as const;
+
+export type TypographyChannel = keyof typeof runtimeFontSources | "marketingRich" | "emailConstrained" | "smsPlainText" | "artifactPrint" | "providerConstrained" | "metadataConstrained";
+
+type RoleStack = {
+  preferred: string;
+  fallback: readonly string[];
+  delivery: "runtime" | "safe-fallback" | "embedded" | "rasterized" | "plain-text";
+};
+
+export const channelTypography = {
+  webProduct: {
+    display: { preferred: "EB Garamond", fallback: ["Georgia", "Times New Roman", "serif"], delivery: "runtime" },
+    interface: { preferred: "DM Sans", fallback: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "sans-serif"], delivery: "runtime" },
+    wordmark: { preferred: "Fredoka", fallback: ["Arial Rounded MT Bold", "Arial", "sans-serif"], delivery: "runtime" },
+  },
+  nativeProduct: {
+    display: { preferred: "EBGaramond_700Bold", fallback: ["Georgia", "System"], delivery: "runtime" },
+    interface: { preferred: "DMSans_400Regular", fallback: ["System"], delivery: "runtime" },
+    wordmark: { preferred: "Fredoka_600SemiBold", fallback: ["Arial Rounded MT Bold", "System"], delivery: "runtime" },
+  },
+  marketingRich: {
+    display: { preferred: "EB Garamond", fallback: ["Georgia", "Times New Roman", "serif"], delivery: "runtime" },
+    interface: { preferred: "DM Sans", fallback: ["ui-sans-serif", "system-ui", "sans-serif"], delivery: "runtime" },
+    wordmark: { preferred: "Fredoka", fallback: ["Arial Rounded MT Bold", "Arial", "sans-serif"], delivery: "runtime" },
+  },
+  emailConstrained: {
+    display: { preferred: "Georgia", fallback: ["Times New Roman", "serif"], delivery: "safe-fallback" },
+    interface: { preferred: "Arial", fallback: ["Helvetica Neue", "Helvetica", "sans-serif"], delivery: "safe-fallback" },
+    wordmark: { preferred: "image-lockup", fallback: ["Arial Rounded MT Bold", "Arial", "sans-serif"], delivery: "rasterized" },
+  },
+  smsPlainText: {
+    display: { preferred: "plain-text", fallback: [], delivery: "plain-text" },
+    interface: { preferred: "plain-text", fallback: [], delivery: "plain-text" },
+    wordmark: { preferred: "plain-text", fallback: [], delivery: "plain-text" },
+  },
+  artifactPrint: {
+    display: { preferred: "EB Garamond", fallback: ["Georgia", "Times New Roman", "serif"], delivery: "embedded" },
+    interface: { preferred: "DM Sans", fallback: ["Arial", "Helvetica", "sans-serif"], delivery: "embedded" },
+    wordmark: { preferred: "rasterized-logo", fallback: ["Arial Rounded MT Bold", "Arial", "sans-serif"], delivery: "rasterized" },
+  },
+  providerConstrained: {
+    display: { preferred: "Georgia", fallback: ["Times New Roman", "serif"], delivery: "safe-fallback" },
+    interface: { preferred: "Arial", fallback: ["Helvetica Neue", "Helvetica", "sans-serif"], delivery: "safe-fallback" },
+    wordmark: { preferred: "image-lockup", fallback: ["Arial Rounded MT Bold", "Arial", "sans-serif"], delivery: "rasterized" },
+  },
+  metadataConstrained: {
+    display: { preferred: "plain-text", fallback: [], delivery: "plain-text" },
+    interface: { preferred: "plain-text", fallback: [], delivery: "plain-text" },
+    wordmark: { preferred: "plain-text", fallback: [], delivery: "plain-text" },
+  },
+} satisfies Record<TypographyChannel, Record<FontFamilyRole, RoleStack>>;
+
+export const fontVerificationFloor = {
+  status: "contract-ready-adoption-evidence-pending",
+  requiredEvidence: [
+    "font-load-and-missing-font-behavior",
+    "cls-and-line-wrap-regression",
+    "dynamic-type-and-localization-expansion",
+    "pdf-embedding-and-grayscale-print",
+    "independent-typography-review",
+    "independent-accessibility-review",
+  ],
+  note: "This contract records approved sources and fallbacks. It does not claim rendered, delivered, or platform proof.",
+} as const;
+
+export const FONT_SYSTEM_CONTRACT = {
+  version: DESIGN_CONTRACT_VERSION,
+  schemaVersion: FONT_SYSTEM_SCHEMA_VERSION,
+  approvedFamilies: approvedFontFamilies,
+  checkedInAssets: checkedInFontAssets,
+  runtimeSources: runtimeFontSources,
+  channels: channelTypography,
+  verification: fontVerificationFloor,
+} as const;
