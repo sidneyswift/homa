@@ -25,4 +25,9 @@ describe("mobile onboarding card API contract", () => {
   it("opens reports by token instead of exposing child or family identity", () => {
     assert.match(source, /\/onboarding\/r\/\$\{encodeURIComponent\(token\)\}/u);
   });
+
+  it("polls the family-scoped first-making status endpoint", () => {
+    assert.match(source, /\/api\/onboarding\/making-status\?jobId=/u);
+    assert.match(source, /fetchMakingStatus/u);
+  });
 });

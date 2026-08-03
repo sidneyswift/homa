@@ -9,6 +9,7 @@ import {
   latestDetailRequest,
   parseChecklistCardPart,
   parseDetailCardPart,
+  parseFirstMakingCardPart,
   parseReportCardPart,
   withChecklistAnswer,
 } from "./onboarding-card-model";
@@ -41,12 +42,23 @@ describe("mobile onboarding card parsers", () => {
       childName: "Mia",
       token: "report-token",
     }))?.token, "report-token");
+    assert.equal(parseFirstMakingCardPart(tool("start_first_making", {
+      started: true,
+      jobId: "job-1",
+      childId: "child-1",
+      childName: "Mia",
+      title: "Mia's dinosaur page",
+    }))?.title, "Mia's dinosaur page");
   });
 
   it("rejects refusals and malformed outputs", () => {
     assert.equal(parseChecklistCardPart(tool("start_checklist", { started: false })), null);
     assert.equal(parseDetailCardPart(tool("ask_for_details", { asked: true, kind: "unknown" })), null);
     assert.equal(parseReportCardPart(tool("score_child_report", { scored: true })), null);
+    assert.equal(parseFirstMakingCardPart(tool("start_first_making", {
+      started: true,
+      childId: "child-1",
+    })), null);
   });
 
   it("settles a detail card after the next user message", () => {

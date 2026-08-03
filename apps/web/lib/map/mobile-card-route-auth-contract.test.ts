@@ -12,6 +12,7 @@ const routes = [
   "apps/web/app/api/map/state/route.ts",
   "apps/web/app/api/onboarding/basics/route.ts",
   "apps/web/app/api/onboarding/homeschool-profile/route.ts",
+  "apps/web/app/api/onboarding/making-status/route.ts",
 ] as const;
 
 describe("mobile onboarding card route authentication", () => {

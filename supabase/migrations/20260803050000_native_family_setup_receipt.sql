@@ -79,6 +79,21 @@ begin
 
   update public.families f
      set profile_completed_at = coalesce(f.profile_completed_at, now()),
+         context = case
+           when f.context ? 'onboarding' then f.context
+           else jsonb_set(
+             coalesce(f.context, '{}'::jsonb),
+             '{onboarding}',
+             jsonb_build_object(
+               'state', 'active',
+               'beatsDone', '[]'::jsonb,
+               'checklist', '{}'::jsonb,
+               'updatedAt', to_jsonb(now()),
+               'paywallShownAt', null
+             ),
+             true
+           )
+         end,
          time_zone = case
            when p_time_zone is not null
             and exists (
@@ -161,6 +176,21 @@ begin
 
   update public.families f
      set profile_completed_at = coalesce(f.profile_completed_at, now()),
+         context = case
+           when f.context ? 'onboarding' then f.context
+           else jsonb_set(
+             coalesce(f.context, '{}'::jsonb),
+             '{onboarding}',
+             jsonb_build_object(
+               'state', 'active',
+               'beatsDone', '[]'::jsonb,
+               'checklist', '{}'::jsonb,
+               'updatedAt', to_jsonb(now()),
+               'paywallShownAt', null
+             ),
+             true
+           )
+         end,
          time_zone = case
            when p_time_zone is not null
             and exists (

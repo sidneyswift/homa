@@ -1,15 +1,16 @@
 import { z } from "zod";
 
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
-import { requireFamilyWithActor } from "../../../../lib/map/session";
+import { requireFamilyWithActorFromRequest } from "../../../../lib/map/session";
 import { readMakingStatus } from "../../../../lib/onboarding/making-status";
 
 /**
  * GET /api/onboarding/making-status?jobId=...
  * The first-making promise card's own read, so waiting on the page
  * costs no model turn (same shape as the checklist card's re-read of
- * /api/map/state). The family comes from the session, never the query;
- * a job id from another family simply does not exist here.
+ * /api/map/state). The family comes from the browser cookie or native
+ * bearer session, never the query; a job id from another family simply
+ * does not exist here.
  */
 
 const jobIdSchema = z.uuid();
@@ -21,7 +22,7 @@ export async function GET(request: Request): Promise<Response> {
 
   let actor;
   try {
-    actor = await requireFamilyWithActor();
+    actor = await requireFamilyWithActorFromRequest(request);
   } catch {
     return Response.json({ ok: false, reason: "auth-error" }, { status: 401 });
   }

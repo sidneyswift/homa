@@ -3,7 +3,13 @@ import type { MapAnswer } from "@homa/core";
 import { env, EVE_CHANNEL_HEADER } from "../../lib/env";
 import { supabase } from "../../lib/supabase";
 import { createIdempotencyKey } from "./idempotency-key";
-import type { DetailCardData, MapStateChild } from "./onboarding-card-model";
+import type {
+  DetailCardData,
+  MakingPhase,
+  MakingStatusMaterial,
+  MakingStatusResponse,
+  MapStateChild,
+} from "./onboarding-card-model";
 
 function apiPath(path: string): string {
   return `${env.apiUrl.replace(/\/+$/, "")}${path}`;
@@ -128,6 +134,69 @@ export async function recordReportReveal(token: string): Promise<void> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token, entry: "chat" }),
   });
+}
+
+function isMakingPhase(value: unknown): value is MakingPhase {
+  return value === "making"
+    || value === "ready"
+    || value === "stalled"
+    || value === "stopped";
+}
+
+function parseMakingMaterial(value: unknown): MakingStatusMaterial | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const material = value as Record<string, unknown>;
+  if (
+    typeof material.id !== "string"
+    || typeof material.title !== "string"
+    || typeof material.previewUrl !== "string"
+    || typeof material.pdfUrl !== "string"
+  ) {
+    return null;
+  }
+  return {
+    id: material.id,
+    title: material.title,
+    kind: typeof material.kind === "string" ? material.kind : null,
+    skill: typeof material.skill === "string" ? material.skill : null,
+    childName: typeof material.childName === "string" ? material.childName : null,
+    previewUrl: material.previewUrl,
+    pdfUrl: material.pdfUrl,
+    pageCount:
+      typeof material.pageCount === "number" && material.pageCount >= 1
+        ? Math.floor(material.pageCount)
+        : 1,
+    pagePreviewUrls: Array.isArray(material.pagePreviewUrls)
+      ? material.pagePreviewUrls.filter(
+          (entry): entry is string => typeof entry === "string",
+        )
+      : [],
+  };
+}
+
+export async function fetchMakingStatus(
+  jobId: string,
+): Promise<MakingStatusResponse | null> {
+  try {
+    const response = await authenticatedRequest(
+      `/api/onboarding/making-status?jobId=${encodeURIComponent(jobId)}`,
+    );
+    if (!response.ok) return null;
+    const data = await response.json().catch(() => ({})) as {
+      ok?: unknown;
+      phase?: unknown;
+      material?: unknown;
+    };
+    if (data.ok !== true || !isMakingPhase(data.phase)) return null;
+    return {
+      phase: data.phase,
+      material: data.material === null || data.material === undefined
+        ? null
+        : parseMakingMaterial(data.material),
+    };
+  } catch {
+    return null;
+  }
 }
 
 export function reportUrl(token: string): string {

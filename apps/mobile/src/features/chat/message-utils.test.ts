@@ -188,6 +188,19 @@ describe("mobile tool rendering", () => {
     assert.equal(partIsRenderable(completedTool("open_planner", { opened: false })), false);
   });
 
+  it("allows a confirmed first-making promise through the renderability gate", () => {
+    assert.equal(
+      partIsRenderable(completedTool("start_first_making", {
+        started: true,
+        jobId: "job-1",
+        childId: "child-1",
+        childName: "Mia",
+        title: "Mia's dinosaur page",
+      })),
+      true,
+    );
+  });
+
   it("does not flash a tool-only fallback while validation is streaming", () => {
     assert.equal(
       toolOnlyFallback({

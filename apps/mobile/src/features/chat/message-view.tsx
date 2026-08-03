@@ -25,11 +25,13 @@ import { parseQuestionCardPart } from "./question-card-model";
 import {
   ChecklistCard,
   DetailCard,
+  FirstMakingCard,
   ReportRevealCard,
 } from "./onboarding-cards";
 import {
   parseChecklistCardPart,
   parseDetailCardPart,
+  parseFirstMakingCardPart,
   parseReportCardPart,
 } from "./onboarding-card-model";
 
@@ -131,6 +133,14 @@ function MessagePartView({
       : <MarkdownText text={assistantText ?? part.text} />;
   }
   if (part.type === "dynamic-tool" && part.state === "output-available") {
+    const firstMakingCard = parseFirstMakingCardPart(part);
+    if (firstMakingCard) {
+      return (
+        <View style={{ marginTop: space.sm }}>
+          <FirstMakingCard card={firstMakingCard} />
+        </View>
+      );
+    }
     const questionCard = parseQuestionCardPart(part);
     if (questionCard) {
       // Only the newest unanswered card takes taps; every older one

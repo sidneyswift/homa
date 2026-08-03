@@ -20,8 +20,10 @@ import { TextField } from "../../components/ui/text-field";
 import { useAccessibilityFocusOnChange } from "../../lib/accessibility";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { MaterialCard } from "./material-card";
 import {
   fetchMapChild,
+  fetchMakingStatus,
   finalizeReport,
   recordReportReveal,
   reportNarrativeSettled,
@@ -35,6 +37,7 @@ import {
   spokenDate,
   type ChecklistCardData,
   type DetailCardData,
+  type FirstMakingCardData,
   type ReportCardData,
 } from "./onboarding-card-model";
 
@@ -548,6 +551,79 @@ export function ReportRevealCard({
       <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
         {`Sorted across ${MAP_SUBJECTS.length} subjects`}
       </Text>
+    </View>
+  );
+}
+
+const MAKING_POLL_MS = 20_000;
+const MAKING_POLL_CAP_MS = 30 * 60_000;
+
+export function FirstMakingCard({ card }: { card: FirstMakingCardData }) {
+  const [status, setStatus] = useState<Awaited<ReturnType<typeof fetchMakingStatus>>>(null);
+
+  useEffect(() => {
+    let current = true;
+    let elapsed = 0;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const ask = async () => {
+      const next = await fetchMakingStatus(card.jobId);
+      if (!current) return;
+      if (next) setStatus(next);
+      const settled = next?.phase === "ready" || next?.phase === "stopped";
+      elapsed += MAKING_POLL_MS;
+      if (!settled && elapsed < MAKING_POLL_CAP_MS) {
+        timer = setTimeout(() => void ask(), MAKING_POLL_MS);
+      }
+    };
+    void ask();
+
+    return () => {
+      current = false;
+      if (timer) clearTimeout(timer);
+    };
+  }, [card.jobId]);
+
+  const phase = status?.phase ?? "making";
+  if (phase === "ready" && status?.material) {
+    return (
+      <View style={{ marginTop: space.sm }}>
+        <MaterialCard
+          material={{
+            ...status.material,
+            kind: status.material.kind ?? undefined,
+          }}
+        />
+      </View>
+    );
+  }
+
+  if (phase === "stopped") {
+    return <Receipt label="Making stopped" detail={card.title} />;
+  }
+
+  return (
+    <View
+      accessibilityLabel={`${card.title}, being made`}
+      style={{ gap: space.sm }}
+    >
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: space.sm }}>
+        <Text style={{ borderRadius: radius.pill, backgroundColor: colors.brandSoft, paddingHorizontal: 10, paddingVertical: 5, fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textStrong }}>
+          {card.childName}
+        </Text>
+        <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
+          {phase === "stalled" ? "paused for now" : "being made"}
+        </Text>
+      </View>
+      <Text style={{ fontFamily: fontFamilies.displaySemibold, fontSize: fontSize.lg, lineHeight: 24, color: colors.textStrong }}>
+        {card.title}
+      </Text>
+      <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, lineHeight: 20, color: colors.textMuted }}>
+        {phase === "stalled"
+          ? "This one hit a snag while building. Nothing is lost, and you can ask Homa about it whenever you like."
+          : "Homa is drawing this now. It usually takes a few minutes, and it will land right here and in your Binder. You do not have to wait for it."}
+      </Text>
+      {phase === "making" ? <LoadingStatus label="Making your page" /> : null}
     </View>
   );
 }

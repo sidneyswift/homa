@@ -127,6 +127,8 @@ describe("native durable mutation contract", () => {
     assert.match(nativeFamilySetupMigration, /on conflict \(id\) do nothing/u);
     assert.match(nativeFamilySetupMigration, /family_members_one_family_per_user_idx/u);
     assert.match(nativeFamilySetupMigration, /profile_completed_at = coalesce/u);
+    assert.match(nativeFamilySetupMigration, /when f\.context \? 'onboarding' then f\.context/u);
+    assert.match(nativeFamilySetupMigration, /'state', 'active'/u);
     assert.match(nativeFamilySetupMigration, /grant execute on function public\.add_my_child_native_v1/u);
     assert.match(nativeFamilySetupMigration, /security definer/u);
     assert.match(nativeFamilySetupMigration, /set search_path = ''/u);

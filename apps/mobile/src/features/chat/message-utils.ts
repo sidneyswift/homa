@@ -8,6 +8,7 @@ import { parseLibrarySourceCardPart } from "./library-source-card-model";
 import {
   parseChecklistCardPart,
   parseDetailCardPart,
+  parseFirstMakingCardPart,
   parseReportCardPart,
 } from "./onboarding-card-model";
 
@@ -137,6 +138,7 @@ export function partIsRenderable(part: EveMessagePart): boolean {
     if (parseLibrarySourceCardPart(part) !== null) return true;
     if (parseChecklistCardPart(part) !== null) return true;
     if (parseDetailCardPart(part) !== null) return true;
+    if (parseFirstMakingCardPart(part) !== null) return true;
     if (parseReportCardPart(part) !== null) return true;
     if (parseCurriculumMappingCardPart(part) !== null) return true;
     if (

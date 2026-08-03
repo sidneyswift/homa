@@ -32,6 +32,33 @@ export interface ReportCardData {
   alreadyScored: boolean;
 }
 
+export type MakingPhase = "making" | "ready" | "stalled" | "stopped";
+
+export interface FirstMakingCardData {
+  jobId: string;
+  childId: string;
+  childName: string;
+  title: string;
+  alreadyStarted: boolean;
+}
+
+export interface MakingStatusMaterial {
+  id: string;
+  title: string;
+  kind: string | null;
+  skill: string | null;
+  childName: string | null;
+  previewUrl: string;
+  pdfUrl: string;
+  pageCount: number;
+  pagePreviewUrls: string[];
+}
+
+export interface MakingStatusResponse {
+  phase: MakingPhase;
+  material: MakingStatusMaterial | null;
+}
+
 export interface MapStateChild {
   id: string;
   name: string;
@@ -137,6 +164,35 @@ export function parseReportCardPart(part: EveMessagePart): ReportCardData | null
       ? output.strengths.filter((value): value is string => typeof value === "string")
       : [],
     alreadyScored: output.alreadyScored === true,
+  };
+}
+
+export function parseFirstMakingCardPart(
+  part: EveMessagePart,
+): FirstMakingCardData | null {
+  if (
+    part.type !== "dynamic-tool"
+    || part.toolName !== "start_first_making"
+    || part.state !== "output-available"
+  ) {
+    return null;
+  }
+  const output = (part.output ?? {}) as Record<string, unknown>;
+  if (
+    output.started !== true
+    || typeof output.jobId !== "string"
+    || typeof output.childId !== "string"
+    || typeof output.childName !== "string"
+    || typeof output.title !== "string"
+  ) {
+    return null;
+  }
+  return {
+    jobId: output.jobId,
+    childId: output.childId,
+    childName: output.childName,
+    title: output.title,
+    alreadyStarted: output.alreadyStarted === true,
   };
 }
 
