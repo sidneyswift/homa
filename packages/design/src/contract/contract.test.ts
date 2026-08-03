@@ -9,6 +9,13 @@ import { MOTION_CONTRACT } from "./motion.ts";
 import { STATES_CONTRACT } from "./states.ts";
 import { fontRoles, typeRoles } from "./typography.ts";
 import {
+  NATIVE_PROJECTION_CONTRACT,
+  nativeHapticRoles,
+  nativePlatformContract,
+  nativePrimitiveAdapters,
+  nativePrimitiveRoles,
+} from "./native.ts";
+import {
   FONT_SYSTEM_CONTRACT,
   approvedFontFamilies,
   channelTypography,
@@ -153,4 +160,27 @@ test("channel reductions preserve meaning without importing product motion", () 
     assert.equal(channelProfiles[channel].motion === "none" || channelProfiles[channel].motion === "provider-owned", true);
     assert.ok(channelProfiles[channel].preservedElements.includes("plain-language-next-move") || channelProfiles[channel].preservedElements.includes("useful-next-move"));
   }
+});
+
+test("native projection covers every approved primitive role and disposition", () => {
+  assert.equal(NATIVE_PROJECTION_CONTRACT.version, "quiet-authority-v1");
+  assert.equal(NATIVE_PROJECTION_CONTRACT.schemaVersion, 1);
+  assert.deepEqual(Object.keys(nativePrimitiveAdapters).sort(), [...nativePrimitiveRoles].sort());
+  for (const role of nativePrimitiveRoles) {
+    const adapter = nativePrimitiveAdapters[role];
+    assert.match(adapter.component, /^Native[A-Z]/u);
+    assert.match(adapter.source, /^apps\/mobile\/src\/components\/ui\/semantic\.tsx$/u);
+    assert.ok(adapter.legacyComponents.length > 0, `${role} must name its migration source`);
+    assert.ok(adapter.requiredStates.length > 0, `${role} must name required states`);
+    assert.ok(adapter.accessibility.length > 0, `${role} must name accessibility obligations`);
+  }
+});
+
+test("native platform contract keeps accessibility and haptics explicit", () => {
+  assert.equal(nativePlatformContract.target.minimumHitTargetPt, 44);
+  assert.equal(nativePlatformContract.dynamicType.maxFontSizeMultiplier, null);
+  assert.equal(nativePlatformContract.reducedMotion.endpoint, "final-still-immediately");
+  assert.equal(nativePlatformContract.appearance.profiles.includes("dark"), true);
+  assert.equal(Object.keys(nativeHapticRoles).sort().join(","), "error,press,select,success,warning");
+  assert.equal(NATIVE_PROJECTION_CONTRACT.verification.physicalDevice, "required");
 });
