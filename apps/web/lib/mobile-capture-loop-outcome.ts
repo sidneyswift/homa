@@ -25,8 +25,16 @@ export interface MobileCaptureLoopOutcomeDependencies {
     loopId: string,
     receiptId: string,
   ) => Promise<boolean>;
+  loadUnresolvedBindings?: (
+    familyId: string,
+  ) => Promise<ReadonlyArray<PendingNativeScheduleOutcome>>;
   persist: (familyId: string, props: CaptureLoopEventProps) => Promise<void>;
   logError: (message: string, error?: unknown) => void;
+}
+
+export interface PendingNativeScheduleOutcome {
+  loop_id: string;
+  receipt_id: string;
 }
 
 function response(body: Record<string, unknown>, status = 200): Response {
@@ -119,6 +127,24 @@ export function createMobileCaptureLoopOutcomeHandler(
       return response({ ok: false, reason: "auth-lookup-failed" }, 502);
     }
     if (!family) return response({ ok: false, reason: "no-session" }, 401);
+
+    if (request.method === "GET") {
+      if (!dependencies.loadUnresolvedBindings) {
+        return response({ ok: false, reason: "method-not-allowed" }, 405);
+      }
+      try {
+        return response({
+          ok: true,
+          outcomes: await dependencies.loadUnresolvedBindings(family.id),
+        });
+      } catch (error) {
+        dependencies.logError("mobile capture loop recovery lookup failed", error);
+        return response({ ok: false, reason: "unavailable" }, 503);
+      }
+    }
+    if (request.method !== "POST") {
+      return response({ ok: false, reason: "method-not-allowed" }, 405);
+    }
 
     let raw: unknown;
     try {
@@ -240,7 +266,7 @@ export function createMobileCaptureLoopOutcomeHandler(
             reloadError,
           );
         }
-        return response({ ok: false, reason: "receipt-already-claimed" }, 409);
+        return response({ ok: true, already_recorded: true });
       }
       dependencies.logError("mobile capture loop outcome persistence failed", error);
       return response({ ok: false, reason: "unavailable" }, 503);
@@ -281,4 +307,37 @@ export async function hasNativeScheduleReceiptBinding(
     ) as present
   `;
   return rows[0]?.present === true;
+}
+
+export async function loadUnresolvedNativeScheduleBindings(
+  familyId: string,
+): Promise<PendingNativeScheduleOutcome[]> {
+  const sql = mapDb();
+  const rows = await sql<PendingNativeScheduleOutcome[]>`
+    select
+      binding.loop_id::text,
+      binding.receipt_id::text
+    from public.mobile_capture_loop_receipts binding
+    where binding.family_id = ${familyId}::uuid
+      and not exists (
+        select 1
+        from public.events event
+        where event.family_id = binding.family_id
+          and event.name = ${CAPTURE_LOOP_EVENT_NAME}
+          and event.props ->> 'loop_id' = binding.loop_id::text
+          and event.props ->> 'stage' = 'outcome_verified'
+          and event.props ->> 'receipt_id' = binding.receipt_id::text
+      )
+      and not exists (
+        select 1
+        from public.events event
+        where event.family_id = binding.family_id
+          and event.name = ${CAPTURE_LOOP_EVENT_NAME}
+          and event.props ->> 'stage' = 'outcome_verified'
+          and event.props ->> 'receipt_id' = binding.receipt_id::text
+      )
+    order by binding.created_at asc
+    limit 32
+  `;
+  return rows;
 }

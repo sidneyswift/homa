@@ -14,7 +14,10 @@ import { IconButton } from "../../components/ui/icon-button";
 import { LoadingStatus } from "../../components/ui/loading-status";
 import { toggleActivityCheck } from "../../lib/child-plans";
 import { PlanActivityCheckConflictError } from "../../lib/plan-check-mutation";
-import { verifyNativeScheduleOutcome } from "../../lib/capture-loop-outcome";
+import {
+  listUnresolvedNativeScheduleOutcomes,
+  verifyNativeScheduleOutcome,
+} from "../../lib/capture-loop-outcome";
 import {
   forgetPendingNativeScheduleOutcome,
   reconcilePendingNativeScheduleOutcomes,
@@ -151,6 +154,13 @@ export default function PlannerScreen() {
   useFocusEffect(useCallback(() => {
     if (familyId) {
       void reconcilePendingNativeScheduleOutcomes(familyId, verifyNativeScheduleOutcome);
+      void listUnresolvedNativeScheduleOutcomes().then(async (candidates) => {
+        for (const candidate of candidates) {
+          if (await verifyNativeScheduleOutcome(candidate.loopId, candidate.receiptId)) {
+            await forgetPendingNativeScheduleOutcome(familyId, candidate.loopId).catch(() => undefined);
+          }
+        }
+      });
     }
   }, [familyId]));
 
@@ -376,6 +386,7 @@ export default function PlannerScreen() {
     );
     loop?.record("entry_intent");
     loop?.record("effect_attempted");
+    if (loop) await loop.flush();
     try {
       const result = await scheduleActivity({
         familyId: family.id,
@@ -393,7 +404,6 @@ export default function PlannerScreen() {
           loopId: loop.loopId,
           receiptId: result.id,
         }).catch(() => undefined);
-        await loop.flush();
         const verified = await verifyNativeScheduleOutcome(loop.loopId, result.id);
         if (verified) {
           await forgetPendingNativeScheduleOutcome(family.id, loop.loopId).catch(() => undefined);

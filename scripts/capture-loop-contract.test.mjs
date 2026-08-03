@@ -35,6 +35,14 @@ const nativeScheduleMigrationPath = new URL(
   "../supabase/migrations/20260803043000_native_capture_loop_schedule_receipts.sql",
   import.meta.url,
 );
+const nativeOutcomePath = new URL(
+  "../apps/web/lib/mobile-capture-loop-outcome.ts",
+  import.meta.url,
+);
+const nativeOutcomeRoutePath = new URL(
+  "../apps/web/app/api/mobile/capture-loop/outcome/route.ts",
+  import.meta.url,
+);
 
 test("capture loop retries are family-scoped and idempotent in storage", () => {
   assert.equal(existsSync(migrationPath), true);
@@ -106,8 +114,15 @@ test("the canonical event is emitted by the native Planner journey", () => {
   assert.doesNotMatch(checker, /\[\s*"product\.loop_stage_recorded"/u);
   assert.match(planner, /emitNativeCaptureLoopStage/u);
   assert.match(planner, /verifyNativeScheduleOutcome/u);
+  assert.match(planner, /listUnresolvedNativeScheduleOutcomes/u);
+  assert.match(planner, /if \(loop\) await loop\.flush\(\)/u);
   assert.match(planner, /captureLoopId: loop\?\.loopId/u);
   const migration = readFileSync(nativeScheduleMigrationPath, "utf8");
   assert.match(migration, /schedule_plan_activity_native_v1/u);
   assert.match(migration, /mobile_capture_loop_receipts/u);
+  const outcome = readFileSync(nativeOutcomePath, "utf8");
+  const outcomeRoute = readFileSync(nativeOutcomeRoutePath, "utf8");
+  assert.match(outcome, /loadUnresolvedNativeScheduleBindings/u);
+  assert.match(outcome, /event\.props ->> 'receipt_id'/u);
+  assert.match(outcomeRoute, /export const GET = POST/u);
 });

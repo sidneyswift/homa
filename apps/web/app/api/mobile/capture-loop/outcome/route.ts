@@ -2,6 +2,7 @@ import {
   createMobileCaptureLoopOutcomeHandler,
   hasNativeScheduleReceiptBinding,
   loadNativeCaptureLoopEvents,
+  loadUnresolvedNativeScheduleBindings,
 } from "../../../../../lib/mobile-capture-loop-outcome";
 import { persistCaptureLoopEvent } from "../../../../../lib/capture-loop-events";
 import { clientIp, rateLimited } from "../../../../../lib/map/ratelimit";
@@ -13,6 +14,7 @@ export const POST = createMobileCaptureLoopOutcomeHandler({
   authenticate: requireFamilyFromBearer,
   loadEvents: loadNativeCaptureLoopEvents,
   loadReceiptBinding: hasNativeScheduleReceiptBinding,
+  loadUnresolvedBindings: loadUnresolvedNativeScheduleBindings,
   persist: persistCaptureLoopEvent,
   logError: (message, error) => {
     console.error(
@@ -21,3 +23,5 @@ export const POST = createMobileCaptureLoopOutcomeHandler({
     );
   },
 });
+
+export const GET = POST;

@@ -64,6 +64,13 @@ function request(body: unknown): Request {
   });
 }
 
+function recoveryRequest(): Request {
+  return new Request("https://thankshoma.com/api/mobile/capture-loop/outcome", {
+    method: "GET",
+    headers: { Authorization: "Bearer verified-token" },
+  });
+}
+
 function dependencies(
   events: CaptureLoopEventProps[],
   overrides: Partial<MobileCaptureLoopOutcomeDependencies> = {},
@@ -74,6 +81,7 @@ function dependencies(
     authenticate: async () => ({ id: FAMILY_ID }),
     loadEvents: async () => events,
     loadReceiptBinding: async () => true,
+    loadUnresolvedBindings: async () => [],
     persist: async (_familyId, props) => {
       persisted.push(props);
       events.push(props);
@@ -171,10 +179,24 @@ test("a concurrent receipt claim is replay-safe", async () => {
   const response = await createMobileCaptureLoopOutcomeHandler(deps.value)(
     request({ loop_id: LOOP_ID, receipt_id: RECEIPT_ID }),
   );
-  assert.equal(response.status, 409);
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { ok: true, already_recorded: true });
+});
+
+test("server lists unresolved native schedule bindings for crash recovery", async () => {
+  const deps = dependencies([], {
+    loadUnresolvedBindings: async () => [
+      { loop_id: LOOP_ID, receipt_id: RECEIPT_ID },
+    ],
+  });
+  const response = await createMobileCaptureLoopOutcomeHandler(deps.value)(
+    recoveryRequest(),
+  );
+
+  assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), {
-    ok: false,
-    reason: "receipt-already-claimed",
+    ok: true,
+    outcomes: [{ loop_id: LOOP_ID, receipt_id: RECEIPT_ID }],
   });
 });
 
