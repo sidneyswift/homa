@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "version": "quiet-authority-v1",
-  "sourceChecksum": "b43ada06edeedd7af93dfca7b84a3a493334af3f29a6707474701507459276a9",
+  "sourceChecksum": "cb79adb67b2f055645702a43cdfaf8cbd9aecfac482a40790a001dd3d5aaacb6",
   "source": {
     "brand": {
       "version": "quiet-authority-v1",
@@ -244,7 +244,9 @@
         "warning",
         "error",
         "info",
-        "external"
+        "external",
+        "refresh",
+        "stop"
       ],
       "semanticIconAliases": {
         "back": "ArrowLeft",
@@ -273,7 +275,9 @@
         "warning": "TriangleAlert",
         "error": "CircleAlert",
         "info": "Info",
-        "external": "ExternalLink"
+        "external": "ExternalLink",
+        "refresh": "RefreshCw",
+        "stop": "Square"
       }
     },
     "layout": {

@@ -247,11 +247,7 @@ export function VoiceMode({
       <div className="flex items-center gap-3">
         <span
           aria-hidden="true"
-          className={
-            isPlaying
-              ? "flex size-9 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand"
-              : "flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-soft text-[var(--clay-700)]"
-          }
+          className={`quiet-chat__voice-status-mark ${isPlaying ? "quiet-chat__voice-status-mark--active" : ""}`}
         >
           <Icon
             name="voice"
@@ -260,7 +256,7 @@ export function VoiceMode({
           />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block font-semibold text-strong">
+          <span className="quiet-chat__voice-title">
             {error
               ? "We got cut off"
               : connecting
@@ -269,7 +265,7 @@ export function VoiceMode({
                   ? "Homa is talking"
                   : "Listening"}
           </span>
-          <span className="block text-sm text-muted">
+          <span className="quiet-chat__voice-copy">
             {error ?? "Talk normally. Every turn appears in your chat as you go."}
           </span>
         </span>
@@ -277,7 +273,7 @@ export function VoiceMode({
           type="button"
           onClick={leave}
           aria-label="End the conversation"
-          className="quiet-chat__voice-close flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-card text-strong transition-colors hover:border-brand"
+          className="quiet-chat__voice-close"
         >
           <Icon name="close" size={20} />
         </button>

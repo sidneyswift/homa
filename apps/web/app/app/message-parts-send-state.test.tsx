@@ -147,6 +147,7 @@ describe("MessageView send-state rendering", () => {
       />,
     );
     assert.match(html, /Not sent/u);
+    assert.match(html, /quiet-message__retry/u);
     assert.match(html, />Retry</u);
   });
 

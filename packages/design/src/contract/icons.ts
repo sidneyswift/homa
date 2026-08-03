@@ -9,7 +9,7 @@ export const iconContract = {
   source: "semantic-adapter-only",
   characterIsNotAControl: true,
 } as const;
-export const semanticIcons = ["back", "next", "close", "menu", "more", "add", "edit", "delete", "calendar", "book", "plan", "progress", "chat", "tasks", "settings", "logout", "print", "share", "voice", "muted", "end", "collapse", "check", "warning", "error", "info", "external"] as const;
+export const semanticIcons = ["back", "next", "close", "menu", "more", "add", "edit", "delete", "calendar", "book", "plan", "progress", "chat", "tasks", "settings", "logout", "print", "share", "voice", "muted", "end", "collapse", "check", "warning", "error", "info", "external", "refresh", "stop"] as const;
 export type SemanticIconName = (typeof semanticIcons)[number];
 
 /**
@@ -45,6 +45,8 @@ export const semanticIconAliases = {
   error: "CircleAlert",
   info: "Info",
   external: "ExternalLink",
+  refresh: "RefreshCw",
+  stop: "Square",
 } as const satisfies Record<SemanticIconName, string>;
 
 export const ICON_CONTRACT = { version: DESIGN_CONTRACT_VERSION, iconContract, semanticIcons, semanticIconAliases } as const;

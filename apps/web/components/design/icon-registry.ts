@@ -20,8 +20,10 @@ import {
   Pencil,
   Plus,
   Printer,
+  RefreshCw,
   Share2,
   Settings,
+  Square,
   Sparkles,
   Trash2,
   TriangleAlert,
@@ -64,6 +66,8 @@ export const semanticIconRegistry = {
   error: CircleAlert,
   info: Info,
   external: ExternalLink,
+  refresh: RefreshCw,
+  stop: Square,
 } as const satisfies Record<SemanticIconName, LucideIcon>;
 
 export type { SemanticIconName };

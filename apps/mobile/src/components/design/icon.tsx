@@ -19,8 +19,10 @@ import {
   Pencil,
   Plus,
   Printer,
+  RefreshCw,
   Share2,
   Settings,
+  Square,
   LogOut,
   Sparkles,
   Trash2,
@@ -59,6 +61,8 @@ const semanticIconRegistry = {
   error: CircleAlert,
   info: Info,
   external: ExternalLink,
+  refresh: RefreshCw,
+  stop: Square,
 } as const satisfies Record<SemanticIconName, LucideIcon>;
 
 type IconProps = Omit<LucideProps, "size" | "strokeWidth" | "accessibilityLabel" | "accessible"> & {

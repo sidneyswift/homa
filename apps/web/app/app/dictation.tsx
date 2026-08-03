@@ -334,7 +334,7 @@ export function DictationRow({
       ) : (
         <>
           <span
-            className="dictation-pulse h-2.5 w-2.5 shrink-0 rounded-full bg-brand"
+            className="quiet-chat__dictation-pulse"
             aria-hidden="true"
           />
           <span className="text-muted">Listening&hellip;</span>
