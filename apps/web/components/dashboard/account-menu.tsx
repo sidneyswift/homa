@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LogOut, Settings } from "lucide-react";
 
 import { signOutAction } from "../../app/signin/actions";
+import { Icon } from "../design/Icon";
 import { QuietAction } from "../design/QuietAction";
 
 /**
@@ -53,7 +53,7 @@ export function AccountMenu({
               onClick={close}
               kind="quiet"
               className="quiet-shell__menu-action"
-              icon={<Settings size={18} aria-hidden="true" />}
+              icon={<Icon name="settings" size={20} />}
             >
               Settings
             </QuietAction>
@@ -63,7 +63,7 @@ export function AccountMenu({
                 type="submit"
                 kind="quiet"
                 className="quiet-shell__menu-action"
-                icon={<LogOut size={18} aria-hidden="true" />}
+                icon={<Icon name="logout" size={20} />}
               >
                 Sign out
               </QuietAction>

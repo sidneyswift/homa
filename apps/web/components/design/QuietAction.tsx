@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, MouseEventHandler, ReactNode } from "react";
 
 type ActionProps = {
   children: ReactNode;
@@ -8,7 +8,8 @@ type ActionProps = {
   href?: string;
   className?: string;
   icon?: ReactNode;
-} & Pick<ButtonHTMLAttributes<HTMLButtonElement>, "disabled" | "type" | "onClick">;
+  onClick?: MouseEventHandler<HTMLElement>;
+} & Pick<ButtonHTMLAttributes<HTMLButtonElement>, "disabled" | "type">;
 
 export function QuietAction({
   children,
@@ -29,6 +30,12 @@ export function QuietAction({
     </>
   );
 
-  if (href && !disabled) return <Link className={classes} href={href}>{content}</Link>;
+  if (href && !disabled) {
+    return (
+      <Link className={classes} href={href} onClick={onClick}>
+        {content}
+      </Link>
+    );
+  }
   return <button className={classes} disabled={disabled} type={type} onClick={onClick}>{content}</button>;
 }

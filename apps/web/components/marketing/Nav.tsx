@@ -15,7 +15,7 @@ export function Nav() {
   const openPopup = useSignupPopup();
   const signedInItems: readonly QuietNavMenuItem[] = [
     ...APP_NAV_ITEMS,
-    { href: "/app/settings", label: "Settings" },
+    { href: "/app/settings", label: "Settings", icon: "settings", dividerBefore: true },
   ];
 
   return (

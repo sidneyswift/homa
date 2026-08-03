@@ -18,12 +18,12 @@ import { Icon, type SemanticIconName } from "../design/Icon";
  * signed-in visitors (same tabs, same icons, no drift).
  */
 export const APP_NAV_ITEMS = [
-  { href: "/app", label: "Chat", icon: "voice" },
+  { href: "/app", label: "Chat", icon: "chat" },
   { href: "/app/progress", label: "Progress", icon: "progress" },
   { href: "/app/planner", label: "Planner", icon: "calendar" },
   { href: "/app/library", label: "Library", icon: "book" },
   { href: "/app/binder", label: "Binder", icon: "book" },
-  { href: "/app/tasks", label: "Tasks", icon: "plan" },
+  { href: "/app/tasks", label: "Tasks", icon: "tasks" },
 ] as const satisfies ReadonlyArray<{
   href: string;
   label: string;

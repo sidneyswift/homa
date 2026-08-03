@@ -9,10 +9,12 @@ import {
   ChevronRight,
   Clock3,
   GraduationCap,
-  Plus,
-  X,
 } from "lucide-react";
 
+import { Icon } from "../../../components/design/Icon";
+import { QuietAction } from "../../../components/design/QuietAction";
+import { QuietFrame } from "../../../components/design/QuietFrame";
+import { QuietStatus } from "../../../components/design/QuietStatus";
 import { KidAvatar } from "../../../components/dashboard/kid-avatar";
 import {
   buildCalendarBoard,
@@ -312,21 +314,22 @@ function ModalShell({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-[rgba(51,42,33,0.42)] p-4 backdrop-blur-[2px]">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-[color-mix(in_srgb,var(--homa-midnight)_42%,transparent)] p-4 backdrop-blur-[2px]">
       <button
         type="button"
         className="absolute inset-0 cursor-default"
         aria-label="Close dialog"
         onClick={onClose}
       />
-      <section
+      <QuietFrame
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative z-10 max-h-[calc(100vh-2rem)] w-full max-w-[520px] overflow-y-auto rounded-[var(--radius-xl)] bg-card p-6 shadow-[0_24px_70px_rgba(51,42,33,0.24)]"
+        as="section"
+        className="relative z-10 max-h-[calc(100vh-2rem)] w-full max-w-[520px] overflow-y-auto p-6"
       >
         {children}
-      </section>
+      </QuietFrame>
     </div>
   );
 }
@@ -344,9 +347,9 @@ function DialogClose({
       disabled={disabled}
       onClick={onClose}
       aria-label="Close"
-      className="grid h-11 w-11 flex-none place-items-center rounded-full bg-page text-muted hover:text-strong disabled:cursor-not-allowed disabled:opacity-50"
+      className="grid h-11 w-11 flex-none place-items-center rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-transparent text-[var(--homa-ink-muted)] transition-colors hover:border-[var(--homa-ink)] hover:text-[var(--homa-ink)] disabled:cursor-not-allowed disabled:opacity-50"
     >
-      <X size={19} />
+      <Icon name="close" size={20} />
     </button>
   );
 }
@@ -541,22 +544,22 @@ function ActivityDetails({
         </div>
       </dl>
       <div className="mt-5 flex flex-wrap gap-2">
-        <Link
+        <QuietAction
           href={plannerActivityHelpHref({
             childId: activity.childId,
             subjectId: activity.subjectId,
             checkId: activity.checkId,
           })}
-          className="inline-flex min-h-11 items-center rounded-pill bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)]"
+          icon={<Icon name="next" size={16} />}
         >
           Ask Homa how to do it
-        </Link>
-        <Link
+        </QuietAction>
+        <QuietAction
+          kind="secondary"
           href="/app?draft=schedule-week"
-          className="inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-4 py-2 text-sm font-bold text-body hover:bg-page"
         >
           Change the day
-        </Link>
+        </QuietAction>
       </div>
     </ModalShell>
   );
@@ -619,7 +622,7 @@ function EventDetails({
           <button
             type="button"
             onClick={onMove}
-            className="inline-flex min-h-11 items-center rounded-pill bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)]"
+            className="quiet-action quiet-action--primary quiet-action--default"
           >
             Move
           </button>
@@ -627,7 +630,7 @@ function EventDetails({
         <button
           type="button"
           onClick={onEdit}
-          className="inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-4 py-2 text-sm font-bold text-body hover:bg-page"
+          className="quiet-action quiet-action--secondary quiet-action--default"
         >
           {event.recurrence ? "Edit series" : "Edit event"}
         </button>
@@ -635,7 +638,7 @@ function EventDetails({
           <button
             type="button"
             onClick={onDelete}
-            className="ml-auto inline-flex min-h-11 items-center px-2 py-2 text-sm font-bold text-[var(--clay-700)] hover:underline"
+            className="ml-auto inline-flex min-h-11 items-center px-2 py-2 text-sm font-bold text-[var(--homa-brand-text)] hover:underline"
           >
             Delete
           </button>
@@ -1440,21 +1443,20 @@ export function UnifiedPlannerView({
         : "Nothing planned";
 
   return (
-    <div className="mx-auto w-full max-w-[820px]">
+    <div className="mx-auto w-full max-w-[820px]" data-brand-surface="planner">
       {planChecks.getMessage() ? (
-        <div
-          role="status"
-          className="mb-3 flex items-start justify-between gap-3 rounded-md border border-border bg-card p-3 text-sm text-body"
-        >
-          <span>{planChecks.getMessage()}</span>
-          <button
-            type="button"
-            onClick={() => planChecks.clearMessage()}
-            className="font-semibold text-brand hover:underline"
-          >
-            Dismiss
-          </button>
-        </div>
+        <QuietStatus tone="attention" className="mb-3">
+          <div className="flex items-start justify-between gap-3 text-sm">
+            <span>{planChecks.getMessage()}</span>
+            <button
+              type="button"
+              onClick={() => planChecks.clearMessage()}
+              className="font-semibold text-[var(--homa-highlight-ink)] hover:underline"
+            >
+              Dismiss
+            </button>
+          </div>
+        </QuietStatus>
       ) : null}
       <header className="flex items-center justify-between gap-4">
         <h1 className="font-display text-[2rem] font-semibold leading-tight tracking-[-0.02em] text-strong">
@@ -1473,9 +1475,9 @@ export function UnifiedPlannerView({
             type="button"
             aria-expanded={addOpen}
             onClick={() => setAddOpen((open) => !open)}
-            className="relative z-30 inline-flex min-h-11 items-center gap-1.5 rounded-pill bg-brand px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-[var(--clay-700)]"
+            className="quiet-action quiet-action--primary quiet-action--default relative z-30"
           >
-            <Plus size={18} /> Add to planner
+            <Icon name="add" size={20} /> Add to planner
           </button>
           {addOpen ? (
             <div className="absolute right-0 top-[calc(100%+0.5rem)] z-30 w-64 overflow-hidden rounded-lg border border-border-subtle bg-card p-1.5 shadow-lg">
@@ -1513,7 +1515,7 @@ export function UnifiedPlannerView({
             aria-current={view === mode ? "page" : undefined}
             className={
               view === mode
-                ? "flex min-h-[46px] flex-1 items-center justify-center border-b-2 border-brand px-2 py-2 text-sm font-bold text-[var(--clay-700)] sm:flex-none sm:px-5"
+                ? "flex min-h-[46px] flex-1 items-center justify-center border-b-2 border-[var(--homa-midnight-action)] px-2 py-2 text-sm font-bold text-[var(--homa-midnight-action)] sm:flex-none sm:px-5"
                 : "flex min-h-[46px] flex-1 items-center justify-center border-b-2 border-transparent px-2 py-2 text-sm font-semibold text-muted hover:bg-page hover:text-body sm:flex-none sm:px-5"
             }
           >
