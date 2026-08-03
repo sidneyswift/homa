@@ -166,6 +166,10 @@
     "lastCaptured": "2026-08-03T16:32:17+00:00",
     "analyzed": "2026-08-03",
     "tasteLogged": true,
+    "knowledgeMerged": "2026-08-03",
+    "knowledgeRows": [
+      "c7231da4-590a-4023-9e48-a2983df5495e"
+    ],
     "taxonomy": {
       "proposedTopics": [],
       "note": "Listening to Texts Read Aloud, Themes and Messages, and Text and Media Connections already cover the reusable learning targets."
@@ -190,7 +194,9 @@
       "sourceFileCount": 8,
       "pageCount": 8,
       "aboutnessClaimCount": 10
-    }
+    },
+    "slackReplyTs": "1785775737.650669",
+    "shipReaction": true
   },
   "format": "curiosity-led-notebooking-method",
   "publisher": "source not identified in the supplied images",
@@ -234,15 +240,23 @@
     "unmappedSkills": []
   },
   "difficulty": {
-    "ageBand": [48, 168],
+    "ageBand": [
+      48,
+      168
+    ],
     "complexity": "mixed-age open response",
-    "prerequisites": ["access to several thematically related books", "adult read-aloud support for younger children"],
+    "prerequisites": [
+      "access to several thematically related books",
+      "adult read-aloud support for younger children"
+    ],
     "scaffoldingLevel": "low and choice-preserving",
     "notes": "The method adapts by response mode rather than by assigning easier content. Younger children may draw or dictate; older children may label or copy a quotation."
   },
   "theming": {
     "themeType": "literature-led interdisciplinary",
-    "characters": ["Peter Pan"],
+    "characters": [
+      "Peter Pan"
+    ],
     "visualStyle": "minimal editorial carousel on warm paper texture",
     "colorPalette": "warm cream, charcoal, and muted gray",
     "appealDrivers": "A broad story theme generates a rich reading basket, while the child's own attention decides what becomes permanent.",
@@ -259,38 +273,87 @@
   "aboutness": {
     "extractionQuality": "full",
     "textSidecar": ".cosmo/text/ref-2026-08-02-curiosity-led-notebooking.txt",
-    "textBlobUrl": null,
+    "textBlobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo-text/ref-2026-08-02-curiosity-led-notebooking/ref-2026-08-02-curiosity-led-notebooking.txt",
     "notes": "All eight supplied images were reviewed at original resolution and transcribed into a page-marked local sidecar.",
     "subjects": [
-      {"name": "curiosity-led notebooking", "role": "teaches", "quote": "I don’t assign what goes in their notebook pages."},
-      {"name": "thematic read-aloud planning", "role": "teaches", "quote": "I built our picture book reading around six themes from the story."},
-      {"name": "child-selected reading response", "role": "teaches", "quote": "choose the one book that captured their attention most"}
+      {
+        "name": "curiosity-led notebooking",
+        "role": "teaches",
+        "quote": "I don\u2019t assign what goes in their notebook pages."
+      },
+      {
+        "name": "thematic read-aloud planning",
+        "role": "teaches",
+        "quote": "I built our picture book reading around six themes from the story."
+      },
+      {
+        "name": "child-selected reading response",
+        "role": "teaches",
+        "quote": "choose the one book that captured their attention most"
+      }
     ],
     "entities": [
-      {"name": "Peter Pan", "kind": "object", "role": "about", "quote": "Peter Pan"}
+      {
+        "name": "Peter Pan",
+        "kind": "object",
+        "role": "about",
+        "quote": "Peter Pan"
+      }
     ],
     "themes": [
-      {"name": "curiosity before compliance", "evidence": "trust curiosity to lead the way"},
-      {"name": "reading atmosphere", "evidence": "beautiful books being read aloud"},
-      {"name": "individual expression", "evidence": "No two notebook pages ever look alike."}
+      {
+        "name": "curiosity before compliance",
+        "evidence": "trust curiosity to lead the way"
+      },
+      {
+        "name": "reading atmosphere",
+        "evidence": "beautiful books being read aloud"
+      },
+      {
+        "name": "individual expression",
+        "evidence": "No two notebook pages ever look alike."
+      }
     ],
     "keyTerms": [
-      {"term": "notebook page", "occurrences": 8, "quote": "notebook page"},
-      {"term": "picture books", "occurrences": 5, "quote": "picture books"}
+      {
+        "term": "notebook page",
+        "occurrences": 8,
+        "quote": "notebook page"
+      },
+      {
+        "term": "picture books",
+        "occurrences": 5,
+        "quote": "picture books"
+      }
     ],
     "referencedWorks": [
-      {"title": "Peter Pan", "kind": "book", "quote": "Peter Pan"}
+      {
+        "title": "Peter Pan",
+        "kind": "book",
+        "quote": "Peter Pan"
+      }
     ],
     "textExtraction": {
       "ocr": "manual-verbatim-transcription",
       "visionModel": null,
       "visionPages": [],
-      "manualVisualReviewPages": [1,2,3,4,5,6,7,8],
+      "manualVisualReviewPages": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
       "note": "The source consisted of eight legible JPEG frames, so direct local review was more accurate than OCR."
     }
   },
   "recipeMatch": {
-    "matchedRecipes": ["curiosity-led-notebook-page"],
+    "matchedRecipes": [
+      "curiosity-led-notebook-page"
+    ],
     "gaps": [],
     "notes": "A new recipe captures the source's distinctive division of responsibility: the adult supplies a broad theme and rich books; the child chooses the actual content and medium."
   },
@@ -318,14 +381,46 @@
       "recordId": "ref-2026-08-02-curiosity-led-notebooking",
       "kind": "reference",
       "parts": [
-        {"file": "0abe2a64-85c6-48c3-992f-443569bacb50-1_all_242872.jpg", "sha256": "4d83221250cf01ddb8d8caa2780e2a4109b486796e8795f612a8b43424e0f580", "bytes": 43549},
-        {"file": "0abe2a64-85c6-48c3-992f-443569bacb50-1_all_242873.jpg", "sha256": "08592e80c28a591f8f609e88637059de7f77db25e07fc0529cccef950d65da92", "bytes": 59529},
-        {"file": "1000201610.jpg", "sha256": "c8e4ab0a41bbdf9ea99160a7b0070be493bd3deed2c10386db5eeb039f0f4842", "bytes": 72374},
-        {"file": "1000201612.jpg", "sha256": "a32fd8036ec837be64d0ab0bd1864ba904e23ce5db1788109d10eec7edb57063", "bytes": 75624},
-        {"file": "1000201614.jpg", "sha256": "8e04feeea791244b04539aeff6840b6daee3d4680e93fa7493da7b2d9e9401d7", "bytes": 60658},
-        {"file": "1000201616.jpg", "sha256": "1a5ff5a864dfb78ca3f8fb49459ff707a7b9ef2e3ddca29b37c8a8a94d81f1c3", "bytes": 58193},
-        {"file": "1000201618.jpg", "sha256": "207c708e0ffb1c99e61d10d7fcde352eb87c3e5acf6f204a2f2b3782de0a12a9", "bytes": 62096},
-        {"file": "1000201620.jpg", "sha256": "e3a53287a6429dc40e3fd97165371f4a974d7e8fad2b59bf6677b81df25fa96c", "bytes": 60110}
+        {
+          "file": "0abe2a64-85c6-48c3-992f-443569bacb50-1_all_242872.jpg",
+          "sha256": "4d83221250cf01ddb8d8caa2780e2a4109b486796e8795f612a8b43424e0f580",
+          "bytes": 43549
+        },
+        {
+          "file": "0abe2a64-85c6-48c3-992f-443569bacb50-1_all_242873.jpg",
+          "sha256": "08592e80c28a591f8f609e88637059de7f77db25e07fc0529cccef950d65da92",
+          "bytes": 59529
+        },
+        {
+          "file": "1000201610.jpg",
+          "sha256": "c8e4ab0a41bbdf9ea99160a7b0070be493bd3deed2c10386db5eeb039f0f4842",
+          "bytes": 72374
+        },
+        {
+          "file": "1000201612.jpg",
+          "sha256": "a32fd8036ec837be64d0ab0bd1864ba904e23ce5db1788109d10eec7edb57063",
+          "bytes": 75624
+        },
+        {
+          "file": "1000201614.jpg",
+          "sha256": "8e04feeea791244b04539aeff6840b6daee3d4680e93fa7493da7b2d9e9401d7",
+          "bytes": 60658
+        },
+        {
+          "file": "1000201616.jpg",
+          "sha256": "1a5ff5a864dfb78ca3f8fb49459ff707a7b9ef2e3ddca29b37c8a8a94d81f1c3",
+          "bytes": 58193
+        },
+        {
+          "file": "1000201618.jpg",
+          "sha256": "207c708e0ffb1c99e61d10d7fcde352eb87c3e5acf6f204a2f2b3782de0a12a9",
+          "bytes": 62096
+        },
+        {
+          "file": "1000201620.jpg",
+          "sha256": "e3a53287a6429dc40e3fd97165371f4a974d7e8fad2b59bf6677b81df25fa96c",
+          "bytes": 60110
+        }
       ]
     }
   },

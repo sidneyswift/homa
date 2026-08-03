@@ -1,6 +1,6 @@
 {
   "channel": "C0BHQDC033M",
-  "refreshedAt": "2026-08-03T16:04:35+00:00",
+  "refreshedAt": "2026-08-03T16:51:59+00:00",
   "drops": [
     {
       "ts": "1784260449.909939",
@@ -2501,7 +2501,7 @@
       "ts": "1785675375.042129",
       "user": "Carolyng",
       "text": "Subject matter is notebooking, or making notebook pages, at the end of book studies. There is a main text, in this example it is a 6 week reading of Peter Pan. Then topics from Peter pan - ie London, crocodiles, bioluminescence, are used to choose supplemental books for each age group and a topic is",
-      "ship": false,
+      "ship": true,
       "files": [
         {
           "name": "0abe2a64-85c6-48c3-992f-443569bacb50-1_all_242872.jpg",
@@ -2549,7 +2549,7 @@
       "ts": "1785700107.950499",
       "user": "Carolyng",
       "text": "Subject by subject plans from prek to high-school.  Says what kids need to know and by when. Ingest information not limited to books, websites, subjects and activities by grade. Great resource for creating curriculum and ensuring mastery of subjects per grade.",
-      "ship": false,
+      "ship": true,
       "files": [
         {
           "name": "home learning year by year .pdf",
@@ -2562,7 +2562,7 @@
       "ts": "1785702827.343619",
       "user": "Alessa Llanes",
       "text": "",
-      "ship": false,
+      "ship": true,
       "files": [
         {
           "name": "Tractor del lector Guia del maestro .pdf",
@@ -2575,7 +2575,7 @@
       "ts": "1785709042.176199",
       "user": "Alessa Llanes",
       "text": "",
-      "ship": false,
+      "ship": true,
       "files": [
         {
           "name": "Your literacy Standards companion part 1.pdf",
@@ -2593,7 +2593,7 @@
       "ts": "1785709128.170449",
       "user": "Alessa Llanes",
       "text": "",
-      "ship": false,
+      "ship": true,
       "files": [
         {
           "name": "Your literacy Standards companion part 1.pdf",
@@ -2606,7 +2606,7 @@
       "ts": "1785709173.066689",
       "user": "Alessa Llanes",
       "text": "",
-      "ship": false,
+      "ship": true,
       "files": [
         {
           "name": "Your Literacy Standards Companion part 2 .pdf",
