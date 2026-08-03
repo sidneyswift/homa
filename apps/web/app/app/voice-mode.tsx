@@ -2,8 +2,10 @@
 
 import { openai } from "@ai-sdk/openai";
 import { experimental_useRealtime as useRealtime } from "@ai-sdk/react";
-import { Mic, MicOff, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { Icon } from "../../components/design/Icon";
+import { QuietFrame } from "../../components/design/QuietFrame";
 
 import {
   settledTurns,
@@ -237,9 +239,10 @@ export function VoiceMode({
   const connecting = status !== "connected" && error === null;
 
   return (
-    <section
+    <QuietFrame
+      as="section"
       aria-label="Talking with Homa"
-      className="rounded-lg border border-border bg-card p-4 shadow-sm"
+      className="quiet-chat__voice-panel p-4"
     >
       <div className="flex items-center gap-3">
         <span
@@ -250,7 +253,11 @@ export function VoiceMode({
               : "flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-soft text-[var(--clay-700)]"
           }
         >
-          {isCapturing ? <Mic size={17} /> : <MicOff size={17} />}
+          <Icon
+            name="voice"
+            size={20}
+            className={isCapturing ? undefined : "opacity-65"}
+          />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block font-semibold text-strong">
@@ -270,11 +277,11 @@ export function VoiceMode({
           type="button"
           onClick={leave}
           aria-label="End the conversation"
-          className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-card text-strong transition-colors hover:border-brand"
+          className="quiet-chat__voice-close flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-card text-strong transition-colors hover:border-brand"
         >
-          <X size={16} aria-hidden="true" />
+          <Icon name="close" size={20} />
         </button>
       </div>
-    </section>
+    </QuietFrame>
   );
 }

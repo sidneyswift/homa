@@ -685,3 +685,76 @@
   .quiet-fixture__grid { grid-template-columns: 1fr; }
   .quiet-fixture__guide { min-height: 240px; padding-inline: 8px; }
 }
+
+/* -------------------------------------------------------------------------
+   Quiet chat surface
+   -------------------------------------------------------------------------
+   The chat state machine stays in the route. These selectors give its
+   transcript, recovery states, and composer one visual contract without
+   making message content depend on a card-shaped wrapper.
+   ------------------------------------------------------------------------- */
+.quiet-chat {
+  background: var(--homa-canvas);
+  color: var(--homa-ink);
+}
+
+.quiet-chat__column { background: var(--homa-canvas); }
+.quiet-chat__transcript { scrollbar-color: var(--homa-control-boundary) transparent; scrollbar-gutter: stable; }
+.quiet-chat__busy { color: color-mix(in srgb, var(--homa-ink) 66%, var(--homa-canvas)); }
+.quiet-chat__voice-panel { box-shadow: 0 8px 24px color-mix(in srgb, var(--homa-ink) 6%, transparent); }
+.quiet-chat__voice-close { min-width: 44px; }
+.quiet-chat__voice-close:focus-visible { outline: 3px solid color-mix(in srgb, var(--homa-visual-coral) 70%, transparent); outline-offset: 3px; }
+.quiet-chat__inline-action { min-height: 28px; padding: 0 4px; font-size: 0.75rem; text-decoration: underline; text-underline-offset: 3px; }
+.quiet-chat__status-action { min-width: 144px; }
+.quiet-chat__suggestion {
+  min-height: 36px;
+  border: 1px solid color-mix(in srgb, var(--homa-control-boundary) 72%, transparent);
+  background: var(--homa-info-tint);
+  color: color-mix(in srgb, var(--homa-ink) 72%, var(--homa-canvas));
+  font-family: var(--font-sans);
+  font-weight: 600;
+}
+.quiet-chat__suggestion:hover { border-color: var(--homa-brand-text); background: var(--homa-paper); color: var(--homa-ink); }
+.quiet-chat__suggestion:focus-visible,
+.quiet-chat__composer-action:focus-visible,
+.quiet-chat__back-to-now:focus-visible { outline: 3px solid color-mix(in srgb, var(--homa-visual-coral) 70%, transparent); outline-offset: 3px; }
+.quiet-chat__composer {
+  border: 1px solid var(--homa-control-boundary);
+  background: var(--homa-paper);
+  box-shadow: 0 18px 42px color-mix(in srgb, var(--homa-ink) 9%, transparent);
+}
+.quiet-chat__composer-form {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.quiet-chat__composer-form:focus-within { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--homa-visual-coral) 28%, transparent); }
+.quiet-chat__composer-action {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background var(--homa-motion-fast) var(--homa-motion-ease-out), border-color var(--homa-motion-fast) var(--homa-motion-ease-out), transform var(--homa-motion-fast) var(--homa-motion-ease-out);
+}
+.quiet-chat__composer-action:hover:not(:disabled) { transform: translateY(-1px); }
+.quiet-chat__composer-action:active:not(:disabled) { transform: translateY(1px); }
+.quiet-chat__composer-action--send,
+.quiet-chat__composer-action--stop-primary { border: 1px solid transparent; background: var(--homa-midnight-action); color: var(--homa-paper); }
+.quiet-chat__composer-action--send:hover:not(:disabled),
+.quiet-chat__composer-action--stop-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--homa-midnight-action) 88%, var(--homa-ink)); }
+.quiet-chat__composer-action--stop-secondary { border: 1px solid var(--homa-control-boundary); background: var(--homa-paper); color: var(--homa-ink); }
+.quiet-chat__composer-action--stop-secondary:hover:not(:disabled) { border-color: var(--homa-ink); background: var(--homa-canvas); }
+.quiet-chat__composer-action--mic { border: 1px solid transparent; background: transparent; color: var(--homa-brand-text); }
+.quiet-chat__composer-action--mic:hover:not(:disabled) { background: var(--homa-info-tint); }
+.quiet-chat__stop-glyph { width: 12px; height: 12px; border-radius: 2px; background: currentColor; }
+.quiet-chat__back-to-now { border-color: var(--homa-control-boundary); background: var(--homa-paper); color: var(--homa-ink); }
+.quiet-chat__back-to-now:hover { border-color: var(--homa-brand-text); color: var(--homa-brand-text); }
+
+@media (prefers-reduced-motion: reduce) {
+  .quiet-chat__composer-action { transition: none; }
+  .quiet-chat__composer-action:hover:not(:disabled), .quiet-chat__composer-action:active:not(:disabled) { transform: none; }
+}
