@@ -393,6 +393,25 @@ Run entry, permission prime, loading, working, review, commitment, success, undo
 - Five-mom diagnostic protocol passes.
 - Issue closes with final-path evidence, not repository presence or agent assertion.
 
+### Current gauntlet result by epic
+
+The loop definitions above are applied to every epic below. `Source` means a
+local contract or implementation check passed. `Surface` means a simulator or
+prototype surface was reviewed. `Study` means a parent or caregiver outcome
+study passed. A status without release-grade proof is not an award pass.
+
+| Epic | Current result | Failed or blocked loop | Next evidence that can change the result |
+|---|---|---|---|
+| Release truth, accessibility, and physical-device proof | Source and surface evidence only. Accessibility static, node, isolated typecheck, and rendered Jest checks pass; simulator sign-in renders. | Trust and privacy, physical accessibility, and release proof remain blocked by #606, #620, #626, and #726. | Production isolation probe, installed release packet, VoiceOver and Dynamic Type tasks, and five-mom study in #634. |
+| First family win, identity, and demand test | Source evidence for receipt-checked family and learner setup; sign-in surface is coherent. | Value, authenticated web handoff, first artifact, and release proof are unproven. | Apply and privilege-probe the migration, choose the handoff contract, then complete #304 from fresh install through a server-verified first material. |
+| Today and one-thumb re-entry | Planner scheduling has source evidence, but the family re-entry surface is not present. | Comprehension and value fail the current bar because Today is missing. | Ship #303, test three proposed priorities and empty-week states, then run comprehension and return-loop measures. |
+| Voice-owned shell and active-object continuity | Source evidence for bounded startup, cancel, late-stream cleanup, owner isolation, and 148 voice tests. | Comprehension has a known “keep listening” versus “Muted” failure; physical voice, handoff, and accessibility proof are open. | #535, #536, and #620 on a release build with interruption, navigation, audio-route, and recovery tasks. |
+| Evidence-first Progress and truthful records | State and copy requirements are specified, with shared receipt boundaries available. | Parent value, sparse-data comprehension, and accessibility parity are unproven. | #623 and #634, using evidence, confidence, and one next move as the primary task. |
+| Materials and Binder flywheel | Prototype scanability and server-side artifact boundaries are reviewed. | Print, share, revision, and physical handoff loops lack device proof and a measured reuse outcome. | #531, #538, #546, and #687 with exact previews, system-result receipts, and Binder reopen measurement. |
+| Proactive help and consented retention | Product guardrails and permission timing are defined. | No measured value or fatigue result exists; delivery behavior is not release-proven. | #307, #401, and #688 after a verified value moment, with opt-out and complaint kill rules. |
+| Optional family collaboration and word of mouth | Access levels and outcome-earned referral boundaries are specified. | Privacy, task value, and referral loops are blocked until adult identity and restore semantics are ruled. | #606, #618, #626, #628, and #629, with zero cross-adult sentinel reads. |
+| Privacy and access foundation | Source review found the production P0 and added explicit release gates. | Trust loop fails automatically while raw adult history can cross an access boundary. | Fix, deploy, migrate, and adversarially probe #606, then record the founder restore ruling. |
+
 ## Metrics and kill rules
 
 ### North-star behavior
