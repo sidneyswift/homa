@@ -122,6 +122,13 @@ function ownerIssue(path: string): `gh#${number}` {
   if (/^(?:apps\/web\/app\/(?:blog|world|page)|apps\/web\/components\/marketing)/.test(path)) return "gh#683";
   if (/signin|password|onboarding|paywall|billing|unsubscribe|join/.test(path)) return "gh#684";
   if (/manifest|opengraph|twitter-image|apple-icon|favicon|homa\.vcf|robots|sitemap|rss\.xml|apps\/web\/public/.test(path)) return "gh#689";
+  if ([
+    "packages/design/src/contract/brand.ts",
+    "packages/design/src/contract/identity.ts",
+    "scripts/brand-assets.mts",
+    "scripts/identity-assets.mts",
+    "scripts/identity-assets.test.mts",
+  ].includes(path)) return "gh#719";
   if (/^(?:\.agents|apps\/web\/agent|packages\/core\/src\/map\/copy-laws|apps\/web\/lib\/copy-laws-runtime)/.test(path)) return "gh#739";
   if (/^apps\/web\/components\/design\//.test(path)) return "gh#724";
   if (/^(?:DESIGN\.md|docs\/homa-design|packages\/design|scripts\/)/.test(path)) return "gh#717";
