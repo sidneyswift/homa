@@ -142,7 +142,11 @@ used_by: null
    (`marketing-video-producer`).
 
 3. **Gates on the pillars (§7).** Reader gate then editor gate, in that order, on
-   the article and on the script, each with its own persona.
+   the article and on the script, each with its own persona. The article gets a
+   second fresh blog-reader cold-read after editor fixes. Any new comprehension
+   failure returns to the main agent for revision and another editor check on
+   changed copy. Completion means no unresolved reader failure and zero editor
+   must-fixes, not merely that the gates were invoked.
 
 4. **Derive, gate again.** The email derives from the gated article and gets the
    full two-gate treatment with the waitlist-subscriber persona (it lands in real
@@ -290,7 +294,8 @@ the staged drafts folder never touches the production build.
 - **SEO plumbing:** per-article `generateMetadata` (title, description, OG),
   JSON-LD Article schema, sitemap coverage (extend `app/sitemap.ts`, or create it
   if absent, including existing routes).
-- **Conversion:** every article ends in the existing waitlist CTA pattern.
+- **Conversion:** every article ends with one verified current Homa CTA,
+  normally `/onboarding`. Blog copy never mentions or links to a waitlist.
 - **Publishing an article** = distributor copies `article.mdx` to
   `apps/web/content/blog/<slug>.mdx`, copies `images/` to
   `apps/web/public/blog/<slug>/`, commits. CI (typecheck + build) must stay green;

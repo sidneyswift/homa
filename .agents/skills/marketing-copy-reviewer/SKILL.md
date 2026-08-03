@@ -26,7 +26,11 @@ This gate's dispatch prompt must contain, in this order, pasted verbatim:
 > character, first person, as reactions happen: what you feel, what you skim,
 > what confuses you, what earns you, the exact line where your attention dies
 > if it dies, and what you actually do at the end (finish, share, save, close,
-> unsubscribe). Do NOT edit, rewrite, suggest phrasings, or give a summary
+> unsubscribe). For an article, react at every heading or transition: say what
+> you expect to learn next and whether the next section answers that need. Name
+> the first moment the piece feels disconnected, repetitive, written for a
+> search engine, or like a reference manual instead of a coherent read. Do NOT
+> edit, rewrite, suggest phrasings, or give a summary
 > verdict. Reactions only. Honesty over politeness: a polite review here
 > produces content nobody reads.
 

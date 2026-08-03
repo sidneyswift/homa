@@ -107,7 +107,7 @@ article bodies and email bodies.
 
 | Format | Rules |
 |---|---|
-| Article | 800 to 1400 words, one idea deep. Title answers what she actually searched. Headers she can skim. Every claim traces to the bundle's signal. Ends with one clear CTA to a current Homa path, usually /onboarding or the article's canonical URL. |
+| Article | 800 to 1400 words, one idea deep. Title answers what she actually searched, and the first 100 words answer it plainly. Sections form a coherent reader journey, not a keyword outline. Every claim traces to the bundle's signal or a current primary source. Ends with one clear CTA to a current Homa path, usually /onboarding or the article's canonical URL. |
 | Video script | Hook lands inside 2 seconds, spoken or on-screen. 3 to 5 beats. 20 to 40 seconds total. One CTA. Assume sound-off viewing works via captions. |
 | TikTok caption | Max 2200 chars. Hook line first, 3 to 5 hashtags, no hashtag walls. |
 | Instagram caption | Max 2200 chars. Line breaks for breath. 3 to 5 hashtags. |

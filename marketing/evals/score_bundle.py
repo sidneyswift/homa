@@ -12,7 +12,9 @@ docs/homa-planning/14-marketing-demand-engine.md section 14. Checks:
                     marketing/voice/house-style.md), HOMA in prose,
                     "behind" framing, sibling comparisons
   3. duplication    title/body similarity vs drafts, published, and the blog
-  4. completeness   every meta.yml format file exists; platform length
+  4. article        required frontmatter, meta-description length, and no
+                    retired waitlist destination in blog copy
+  5. completeness   every meta.yml format file exists; platform length
                     limits; email subject; video present when the lane ran
 
 Usage:
@@ -55,6 +57,8 @@ EMAIL_SUBJECT_MAX = 50
 PIN_TITLE_MAX = 100
 PIN_DESCRIPTION_MAX = 500
 DUP_RATIO = 0.7
+ARTICLE_FRONTMATTER_FIELDS = ("title", "description", "date", "tags", "hero")
+WAITLIST_RE = re.compile(r"\bwaitlist\b|/waitlist\b", re.IGNORECASE)
 
 
 def load_banlist() -> list[str]:
@@ -109,6 +113,12 @@ def body_of(mdx: Path) -> str:
     text = mdx.read_text(encoding="utf-8")
     parts = text.split("---", 2)
     return parts[2] if len(parts) == 3 else text
+
+
+def frontmatter_of(mdx: Path) -> str:
+    text = mdx.read_text(encoding="utf-8")
+    parts = text.split("---", 2)
+    return parts[1] if len(parts) == 3 else ""
 
 
 def is_published_blog_mirror(article: Path, other: Path) -> bool:
@@ -209,6 +219,28 @@ def check_duplication(bundle: Path, f: Findings) -> None:
                        f"body {ratio:.0%} similar to {other.relative_to(REPO_ROOT)}")
 
 
+def check_article_contract(bundle: Path, f: Findings) -> None:
+    article = bundle / "article.mdx"
+    if not article.exists():
+        return
+    frontmatter = frontmatter_of(article)
+    if not frontmatter:
+        f.fail("article", "article.mdx", "missing YAML frontmatter")
+        return
+    for field in ARTICLE_FRONTMATTER_FIELDS:
+        if not re.search(rf"^{field}:\s*.+$", frontmatter, re.MULTILINE):
+            f.fail("article", "article.mdx", f"missing frontmatter field: {field}")
+    description = re.search(r'^description:\s*"?(.*?)"?\s*$', frontmatter,
+                            re.MULTILINE)
+    if description and len(description.group(1).strip()) >= 160:
+        f.fail("article", "article.mdx",
+               f"description is {len(description.group(1).strip())} chars, max 159")
+    for number, line in enumerate(body_of(article).splitlines(), 1):
+        if WAITLIST_RE.search(line):
+            f.fail("article", "article.mdx",
+                   f"body L{number}: retired waitlist product state")
+
+
 def check_completeness(bundle: Path, meta: dict, f: Findings) -> None:
     for fmt in meta["formats"]:
         if not (bundle / fmt["file"]).exists():
@@ -282,6 +314,7 @@ def main() -> int:
     check_grounding(bundle, meta, args.signals_dir.resolve(), findings)
     check_voice(bundle, load_banlist(), findings)
     check_duplication(bundle, findings)
+    check_article_contract(bundle, findings)
     check_completeness(bundle, meta, findings)
 
     card = write_scorecard(args.scorecards_dir.resolve(), bundle_id, findings)

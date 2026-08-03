@@ -29,8 +29,12 @@ ends at a staged, committed, scored bundle. Always.
    `marketing-copy-reviewer` (article gets the blog-reader persona, script
    gets shortform-viewer), rewrite from accepted reactions yourself, then
    dispatch `marketing-copy-editor`, implement every must-fix yourself.
-   Record each gate run (persona, date) for meta.yml. Reader before editor is
-   a hard law; both subagents are read-only.
+   For the article, then dispatch a second fresh blog-reader cold-read on the
+   post-editor draft. If it finds confusion or attention loss, rewrite and
+   rerun the editor on changed copy. A gate is complete only when the article
+   has no unresolved reader failure and zero editor must-fixes. Record the
+   whole sequence (persona, result, date) for meta.yml. Reader before editor
+   is a hard law; all gate subagents are read-only.
 6. **Derive the email.** `marketing-email-writer` from the gated article, then
    full gates on it (waitlist-subscriber persona, then editor).
 7. **Derive the micro-copy** from the gated pillars, one file each per the
