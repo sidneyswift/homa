@@ -4,7 +4,7 @@ import { WorldRealClient } from "./world-real-client";
 /**
  * /world-real: the "real-world companion" sibling of /world (2026-07-22).
  * Every environment is genuinely photoreal; the one exception in any frame
- * is Homa, a small solid clay-orange character with no arms or legs. Same
+ * is Homa, a small solid warm house character with no arms or legs. Same
  * beat sheet and copy as /world's v2, so the two routes are a controlled
  * art-direction comparison. noindex + absent from sitemap.ts while this is
  * an experiment.

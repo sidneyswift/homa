@@ -46,6 +46,7 @@ interface Classification {
 }
 
 const rules: ReadonlyArray<{ match: (path: string) => boolean; value: Classification }> = [
+  { match: (path) => path === "apps/web/lib/materials/page-shell.ts", value: { type: "renderer", audiences: ["family", "child"], disposition: "regenerate-derived", targetProfile: "artifact-print" } },
   { match: (path) => /^apps\/web\/app\/api\/(?:link-phone|email\/unsubscribe)\/route\.ts$/.test(path), value: { type: "template", audiences: ["family"], disposition: "replace-active", targetProfile: "web-constrained" } },
   { match: (path) => /^apps\/web\/app\/.+\/route\.ts$/.test(path), value: { type: "renderer", audiences: ["family", "provider"], disposition: "replace-active", targetProfile: "web-constrained" } },
   { match: (path) => /^apps\/web\/app\/(?:manifest|robots|sitemap)\.ts$/.test(path) || /^apps\/web\/public\/(?:ai|llms|llms-full)\.txt$/.test(path), value: { type: "generator", audiences: ["public", "provider"], disposition: "regenerate-derived", targetProfile: "metadata-constrained" } },
@@ -74,6 +75,7 @@ const rules: ReadonlyArray<{ match: (path: string) => boolean; value: Classifica
 ];
 
 const candidateSelectors: Array<(path: string) => boolean> = [
+  (path) => path === "apps/web/lib/materials/page-shell.ts",
   (path) => /^apps\/web\/(?:app|components)\/.+\.tsx$/.test(path) && !/\.(?:test|spec)\.tsx$/.test(path),
   (path) => /^apps\/web\/app\/.+\/route\.ts$/.test(path),
   (path) => /^apps\/web\/app\/(?:manifest|robots|sitemap)\.ts$/.test(path),
