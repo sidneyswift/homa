@@ -385,6 +385,9 @@ jobs:
       - name: Design authoring rails check (coverage, contract, residue, fingerprints)
         run: pnpm check:design-authoring
 
+      - name: Licensed font system contract and residue check
+        run: pnpm check:font-system
+
       - name: Durable artifact design-era check (classification and Quiet print markers)
         run: pnpm check:artifact-brand-era
 
@@ -396,6 +399,9 @@ jobs:
 
       - name: Design contract type and semantic tests
         run: pnpm check:design-contract
+
+      - name: Semantic icon direct-import residue check
+        run: pnpm check:icon-residue
 
       - name: Tool deadline guard (no unbounded tool can freeze a turn)
         run: pnpm check:tool-deadlines

@@ -1,5 +1,5 @@
 import type { LucideProps } from "lucide-react";
-import { iconContract, type SemanticIconName } from "@homa/design/contract";
+import { iconContract, isSemanticIconName, type SemanticIconName } from "@homa/design/contract";
 import { semanticIconRegistry } from "./icon-registry";
 
 type IconSize = (typeof iconContract.sizes)[number];
@@ -31,7 +31,9 @@ export function Icon({
   label,
   ...props
 }: IconProps) {
+  if (!isSemanticIconName(name)) throw new Error(`Unknown web semantic icon role: ${name}`);
   const Glyph = semanticIconRegistry[name];
+  if (!Glyph) throw new Error(`Missing web glyph for semantic icon role: ${name}`);
   return (
     <Glyph
       {...props}

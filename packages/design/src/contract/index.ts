@@ -1,6 +1,7 @@
 export * from "./version.ts";
 export * from "./colors.ts";
 export * from "./typography.ts";
+export * from "./fonts.ts";
 export * from "./layout.ts";
 export * from "./motion.ts";
 export * from "./states.ts";
