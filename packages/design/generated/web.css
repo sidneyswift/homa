@@ -1,4 +1,4 @@
-/* Homa design contract quiet-authority-v1; source-sha256 b6edd66761804263fe342ab8dfc7b80c07a8d0c60874d819816aa13dadf4750b */
+/* Homa design contract quiet-authority-v1; source-sha256 381387b8dd8b6103ae0755cd6e478557ebff3f85940c5fed2c1fc90f1e0f1cf4 */
 :root {
   --homa-canvas: #F7F4EE;
   --homa-ink: #20242B;
@@ -20,6 +20,9 @@
   --homa-radius-control: 12px;
   --homa-radius-card: 18px;
   --homa-radius-frame: 28px;
+  --homa-font-display: EB Garamond, Georgia, Times New Roman, serif;
+  --homa-font-interface: DM Sans, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+  --homa-font-wordmark: Fredoka, Arial Rounded MT Bold, Arial, sans-serif;
   --homa-motion-ease-out: cubic-bezier(0.22, 0.8, 0.28, 1);
   --homa-motion-ease-in-out: cubic-bezier(0.5, 0, 0.2, 1);
   --homa-motion-fast: 120ms;
