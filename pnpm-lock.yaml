@@ -13,6 +13,9 @@ importers:
 
   .:
     devDependencies:
+      axe-core:
+        specifier: ^4.12.1
+        version: 4.12.1
       postgres:
         specifier: ^3.4.9
         version: 3.4.9
@@ -8962,7 +8965,9 @@ snapshots:
       metro-runtime: 0.84.4
     transitivePeerDependencies:
       - '@babel/core'
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@react-native/normalize-colors@0.74.89': {}
 
