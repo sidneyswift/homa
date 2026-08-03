@@ -83857,7 +83857,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "147fcd3e30018eec07c7095aab91e708742af9d5a55e420767ab450a39a52e8b",
+        "fixtureChecksum": "1dbf67f668279d16d72c6fb4ade5e0ec679e80ab9acbf6cd0ab9230e973d5ff3",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -83892,7 +83892,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "147fcd3e30018eec07c7095aab91e708742af9d5a55e420767ab450a39a52e8b"
+        "1dbf67f668279d16d72c6fb4ade5e0ec679e80ab9acbf6cd0ab9230e973d5ff3"
       ],
       "disposition": "replace-active",
       "featureFlags": [],

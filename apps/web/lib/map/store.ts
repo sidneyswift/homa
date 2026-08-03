@@ -30,6 +30,7 @@ import {
 import {
   CHILD_PROGRESS_RECONCILIATION_ADVISORY_LOCK_KEY,
 } from "../child-progress/postgres-repository-helpers";
+import { foldFamilyDataIntoTx } from "../family-fold";
 import { resolveOnboardingCompletion } from "../onboarding/store";
 import { dashboardPlanFromRow, withAgeTemplates, type DashboardPlan } from "../plan-week";
 import { subjectLessonsEnabled } from "../subject-lessons/flag";
@@ -158,6 +159,19 @@ export async function startAnonymousFamily(
 
 type MapDatabase = ReturnType<typeof mapDb>;
 
+async function foldFamilyInto(
+  sql: MapDatabase,
+  fromId: string,
+  intoId: string,
+): Promise<void> {
+  const folded = await sql.begin((tx) =>
+    foldFamilyDataIntoTx(tx, fromId, intoId)
+  );
+  if (!folded) {
+    throw new Error("Family fold source or destination is missing");
+  }
+}
+
 interface AttachAuthUserInput {
   /** The caller's own (already anonymous, or email-only) family. */
   familyId: string;
@@ -167,6 +181,9 @@ interface AttachAuthUserInput {
   lastName?: string;
   phoneE164?: string;
   usState?: string;
+  /** Legacy/test-only compatibility path. Production account recovery must
+   * resume the matched family without folding this sitting into it. */
+  allowExistingFamilyFold?: boolean;
 }
 
 /**
@@ -232,6 +249,10 @@ export async function attachAuthUser(
 
   const target = accountAttachmentTarget(input.familyId, existing[0]?.id);
   if (target.returning) {
+    if (input.allowExistingFamilyFold) {
+      await foldFamilyInto(sql, input.familyId, target.familyId);
+      return { ...target, resumeToken };
+    }
     // A verified returning account may resume its own family. Do not merge
     // the anonymous sitting into that family: matching an email or auth user
     // proves a recovery destination, not that two family records should
