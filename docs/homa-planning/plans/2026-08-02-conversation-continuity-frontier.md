@@ -3,7 +3,8 @@
 Status: implementation-ready specification, gauntlet passed  
 Date: 2026-08-02  
 Owner: product engineering  
-Epic: to be created after this specification passes the gauntlet and tracker reconciliation  
+Specification PR: #746
+Epic: #747
 Research cutoff: 2026-08-02 America/New_York  
 Homa baseline: `821ca8ff9134b54c26f7e4f53fb3a4ec0d3252a9`
 
@@ -1363,6 +1364,11 @@ of the continuity epic.
 The P0 in #606 is a hard prerequisite for checkpoint, recall, and history expansion.
 Do not broaden context while the current adult-ownership gap remains live.
 
+At this specification's cutoff, PR #607 is open, GitHub reports it conflicting, no
+approval review exists, and its rollout contract forbids merge until the one-time
+production migration is explicitly approved and schema verification passes. This is a
+live P0 escalation, not work satisfied by #746 or #747.
+
 Every new table:
 
 - carries `family_id` and a non-null `principal_id` where private conversation is
@@ -1564,7 +1570,8 @@ Score:
 
 ### Phase 0: reconcile and measure
 
-- Rebase on current main and reconcile #491, #179, #175, #302, #621, #493, and #606.
+- Begin from the reconciled tracker: #491 closed as a completed investigation; #179,
+  #175, #302, and #621 own the follow-on scopes recorded below.
 - Complete and live-verify #606 before checkpoint hydration, widened private retrieval,
   Recall v2, or history search. Coordinator shadow work that does not widen reads may
   proceed independently.
@@ -1667,44 +1674,42 @@ No destructive migration belongs in this epic's first release.
 
 ## Issue decomposition
 
-Before creating the epic, rebase this evidence against current main and reconcile the
-tracker:
+Tracker reconciliation completed on 2026-08-02 against Homa `821ca8ff`:
 
-- close or rescope #491 to residual evidence not covered by #602, #707, and #708;
-- rewrite #179 around one-timeline search and exact-position reopen, with no raw
-  session list;
-- resolve #175's binder-versus-separate-area parent surface before making durable work
-  a delivery dependency;
-- split #302 conceptually so shared protocol and state-machine foundations precede
-  #708's client subscription and queue UI, while render-by-kind remains independent;
-- leave native offline drafts and interrupted-state language in #621;
-- keep web admission, fenced retry, waits, queue states, stop, and recovery UX in #708
-  rather than opening a duplicate UX issue.
+- #491 closed with merged #602 and #707 evidence; #708 owns the residual structural fix.
+- #179 now owns one-timeline search and exact-position reopen with no raw session list.
+- #175 now owns only chat-born durable work after #377 shipped binder drafts; its
+  binder-versus-separate-area surface remains a `founder-decision`.
+- #302 retains shared protocol, state-machine, and render-by-kind work under the iOS
+  epic; its shared foundation precedes #708's client subscription and queue UI.
+- #621 retains native offline drafts and interrupted-state language.
+- #493 remains open only for its production observation window through August 8.
+- #606 remains the open P0 production privacy gate.
 
 Core epic children:
 
 | Order | Issue | Type and priority | Parent-visible outcome | Completion dependency |
 |---:|---|---|---|---|
 | 1 | Existing #708, authoritative web turns | feature, P1 | A sent message never disappears; Queued, Working, Needs you, Checking result, Stop, and failure states tell the truth | Shared protocol boundary from #302 |
-| 2 | New: upgrade Eve 0.19.0 to 0.29.5 safely | chore, P1 | No visible change until compatibility is proved; recovery becomes simpler behind the adapter | Independent of #708 critical path |
-| 3 | New: append-only conversation checkpoints | feature, P1 | A fresh worker retains the current goal, decisions, corrections, and open promises | #708 identity; #606 before hydration |
-| 4 | New: typed context manifest and bounded renderer | feature, P1 | Homa uses current authorized context and says when a source could not load | #606; checkpoint contract for checkpoint slot |
-| 5 | New: continuity observability and fault-injection gates | chore, P1 | The team detects stale projection, orphan turns, duplicate output, and degraded handoff before a parent does | Begins before #708 canary and expands with each child |
+| 2 | #749, upgrade Eve 0.19.0 to 0.29.5 safely | chore, P1 | No visible change until compatibility is proved; recovery becomes simpler behind the adapter | Independent of #708 critical path |
+| 3 | #750, append-only conversation checkpoints | feature, P1 | A fresh worker retains the current goal, decisions, corrections, and open promises | #708 identity; #606 before hydration |
+| 4 | #751, typed context manifest and bounded renderer | feature, P1 | Homa uses current authorized context and says when a source could not load | #606; checkpoint contract for checkpoint slot |
+| 5 | #748, continuity observability and fault-injection gates | chore, P1 | The team detects stale projection, orphan turns, duplicate output, and degraded handoff before a parent does | Begins before #708 canary and expands with each child |
 
 Prerequisites and gates are linked to the epic but are not children: #606 is the live
 P0 privacy gate for expanded private reads, #493 remains open only for its observation
 window through August 8, #302 owns shared chat protocol work under the iOS epic, and a
-new `founder-decision` issue must confirm M4-12 retention plus the proposed 24-hour
+#754 `founder-decision` must confirm M4-12 retention plus the proposed 24-hour
 physical-erasure SLO before production activation.
 
 Related follow-ons, not epic completion gates:
 
 | Issue | Role |
 |---|---|
-| New: source-backed Recall v2 backend | Adds cited, scoped older-context retrieval and index health after #606 |
+| #753 | Adds cited, scoped Recall v2 retrieval and index health after #606 |
 | Existing #179 | Adds one-timeline date search, exact-position reopen, and visible source chips after Recall v2 |
 | Existing #175 | Adds durable work resumption after its parent-surface decision |
-| New: reviewed memory freshness experiment | P2 investigation of copy-on-write candidates after privacy, current compaction, and review semantics are reconciled |
+| #752 | P2 investigation of copy-on-write memory candidates after privacy, current compaction, and review semantics are reconciled |
 
 Issue #400 remains out of scope until its founder decision. Issue #396 is not required
 because a filesystem workspace is not memory.
