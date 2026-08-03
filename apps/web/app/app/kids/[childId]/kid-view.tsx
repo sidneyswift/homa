@@ -14,6 +14,9 @@ import { movedUpCount } from "../../../../components/dashboard/movement";
 import { StatTiles } from "../../../../components/dashboard/stat-tiles";
 import { WinsCard } from "../../../../components/dashboard/wins-card";
 import { AskHomaAboutChild } from "../../../../components/progress/ask-homa-about-child";
+import { QuietAction } from "../../../../components/design/QuietAction";
+import { QuietFrame } from "../../../../components/design/QuietFrame";
+import { QuietStatus } from "../../../../components/design/QuietStatus";
 import { SubjectList } from "./subject-list";
 
 /**
@@ -62,10 +65,10 @@ export function KidView({
       <header className="flex flex-wrap items-center gap-4">
         <KidAvatar name={child.name} index={kidIndex} avatarUrl={child.avatar_url} size={52} />
         <div className="min-w-0 flex-1">
-          <h1 className="font-display text-[1.8rem] font-semibold leading-tight tracking-[-0.015em] text-strong">
+          <h1 className="font-display text-[1.8rem] font-semibold leading-tight tracking-[-0.015em] text-[color:var(--homa-ink)]">
             {child.name}&apos;s progress
           </h1>
-          <p className="mt-0.5 text-sm text-muted">
+          <p className="mt-0.5 text-sm text-[color:var(--homa-ink-muted)]">
             {ageLabel(months)}
             {child.profile.interests?.length
               ? ` \u00b7 into ${child.profile.interests.join(", ")}`
@@ -74,7 +77,7 @@ export function KidView({
         </div>
         {pill ? (
           <span
-            className="whitespace-nowrap rounded-pill px-3 py-1.5 text-[0.78rem] font-bold"
+            className="whitespace-nowrap rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-canvas)] px-3 py-1.5 text-[0.78rem] font-bold text-[color:var(--homa-brand-text)]"
             style={{ background: pill.bg, color: pill.ink }}
           >
             {pill.label}
@@ -94,8 +97,8 @@ export function KidView({
                 aria-current={current ? "page" : undefined}
                 className={
                   current
-                    ? "inline-flex items-center gap-2 rounded-pill bg-brand-soft px-3.5 py-1.5 text-sm font-bold text-[var(--clay-700)]"
-                    : "inline-flex items-center gap-2 rounded-pill border border-border-subtle bg-card px-3.5 py-1.5 text-sm font-medium text-muted transition-colors hover:border-brand hover:text-body"
+                    ? "quiet-filter quiet-filter--active inline-flex items-center gap-2"
+                    : "quiet-filter inline-flex items-center gap-2"
                 }
               >
                 <KidAvatar name={entry.name} index={index} avatarUrl={entry.avatar_url} size={20} />
@@ -111,39 +114,35 @@ export function KidView({
       {/* The per-kid note: core's reviewed homaNote, the same words the
           report opens with, plus the movement celebration when earned. */}
       {report ? (
-        <section
-          aria-label="A note from HOMA"
-          className="mt-4 flex gap-4 rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5"
-        >
+        <QuietStatus tone="constructive" className="mt-4 flex gap-4 p-5">
           <div className="flex-shrink-0 pt-0.5">
             <Logo variant="mark" size={34} />
           </div>
           <div>
             <p
-              className="font-mono text-[0.65rem] uppercase tracking-widest"
-              style={{ color: "var(--sage-700)" }}
+              className="font-sans text-[0.68rem] font-bold uppercase tracking-[0.14em]"
             >
-              A note from HOMA
+              A note from Homa
             </p>
-            <p className="mt-1 font-serif italic text-strong">{noteGreeting(parentFirstName)}</p>
-            <p className="mt-1 text-body">
+            <p className="mt-1 font-serif italic text-[color:var(--homa-ink)]">{noteGreeting(parentFirstName)}</p>
+            <p className="mt-1 text-[color:var(--homa-ink-muted)]">
               {homaNote(report.scores, child.name)}
               {moved > 0
                 ? ` Since last check-in, ${moved} ${moved === 1 ? "subject" : "subjects"} moved up.`
                 : ""}
             </p>
           </div>
-        </section>
+        </QuietStatus>
       ) : (
-        <section className="mt-4 rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
-          <p className="font-display text-lg font-semibold text-strong">
+        <QuietFrame tone="paper" className="mt-4 p-6">
+          <p className="font-display text-lg font-semibold text-[color:var(--homa-ink)]">
             {months < 24
               ? `${child.name}'s checklist opens at age 2.`
               : isInScoredRange(months)
                 ? `${child.name}'s picture starts with the checklist.`
                 : `${child.name} is past the checklist's range.`}
           </p>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-sm text-[color:var(--homa-ink-muted)]">
             {months < 24
               ? "Until then, this page keeps their spot warm."
               : isInScoredRange(months)
@@ -151,14 +150,11 @@ export function KidView({
                 : "Chat still knows the whole family, and this page holds whatever you add."}
           </p>
           {isInScoredRange(months) ? (
-            <Link
-              href="/onboarding"
-              className="mt-4 inline-flex min-h-10 items-center rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover"
-            >
+            <QuietAction href="/onboarding" size="default" className="mt-4">
               Start {child.name}&apos;s checklist
-            </Link>
+            </QuietAction>
           ) : null}
-        </section>
+        </QuietFrame>
       )}
 
       {report ? <SubjectList report={report} childName={child.name} ageMonths={months} /> : null}
@@ -171,37 +167,33 @@ export function KidView({
       ) : null}
 
       {curriculum ? (
-        <section className="mt-4 rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5">
+        <QuietFrame tone="mineral" className="mt-4 p-5">
           <p
-            className="font-mono text-[0.65rem] uppercase tracking-widest"
-            style={{ color: "var(--sage-700)" }}
+            className="font-sans text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[color:var(--homa-brand-text)]"
           >
             {child.name}&apos;s curriculum {"\u00b7"} {curriculum.curriculum.durationLabel}
           </p>
-          <p className="mt-1.5 font-display text-lg font-semibold text-strong">
+          <p className="mt-1.5 font-display text-lg font-semibold text-[color:var(--homa-ink)]">
             {curriculum.curriculum.title}
           </p>
-          <p className="mt-1 text-sm text-body">{curriculum.curriculum.overview}</p>
+          <p className="mt-1 text-sm text-[color:var(--homa-ink-muted)]">{curriculum.curriculum.overview}</p>
           {curriculum.curriculum.subjects.length > 0 ? (
-            <p className="mt-2 text-xs text-muted">
+            <p className="mt-2 text-xs text-[color:var(--homa-ink-muted)]">
               Covers {curriculum.curriculum.subjects.map((subject) => subject.subjectName).join(", ")}.
             </p>
           ) : null}
-        </section>
+        </QuietFrame>
       ) : curriculumPending ? (
-        <p className="mt-4 text-sm text-muted">
-          HOMA is building {child.name}&apos;s curriculum from your call.
+        <p className="mt-4 text-sm text-[color:var(--homa-ink-muted)]">
+          Homa is building {child.name}&apos;s curriculum from your call.
         </p>
       ) : null}
 
       <div className="mt-6 flex flex-wrap gap-2">
         {progressAction ? (
-          <Link
-            href={progressAction.href}
-            className="inline-flex min-h-11 items-center rounded-pill bg-[var(--brand-active)] px-5 py-2.5 text-sm font-semibold text-on-brand transition-colors hover:bg-[var(--clay-600)]"
-          >
+          <QuietAction href={progressAction.href}>
             {progressAction.label}
-          </Link>
+          </QuietAction>
         ) : null}
         <AskHomaAboutChild
           childId={child.id}

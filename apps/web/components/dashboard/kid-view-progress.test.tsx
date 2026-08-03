@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { after, describe, it } from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
 
+import { COLOR_CONTRACT } from "@homa/design/contract";
 import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 import { KidView } from "../../app/app/kids/[childId]/kid-view";
@@ -16,10 +16,6 @@ const CHILD: ChildRecord = {
   profile: {},
   avatar_url: null,
 };
-const GLOBALS_CSS = readFileSync(
-  new URL("../../app/globals.css", import.meta.url),
-  "utf8",
-);
 const ORIGINAL_LIVE_PROGRESS_FLAG =
   process.env.HOMA_LIVE_PROGRESS_ENABLED;
 const ROUTER = {
@@ -42,21 +38,8 @@ after(() => {
   }
 });
 
-function cssHexToken(name: string): string {
-  const match = GLOBALS_CSS.match(
-    new RegExp(
-      `--${name}:\\s*#([0-9a-f]{6})`,
-      "iu",
-    ),
-  );
-  if (!match?.[1]) {
-    throw new TypeError(`Missing CSS color token --${name}`);
-  }
-  return match[1];
-}
-
 function relativeLuminance(hex: string): number {
-  const channels = hex.match(/../gu)?.map(
+  const channels = hex.replace(/^#/u, "").match(/../gu)?.map(
     (channel) => Number.parseInt(channel, 16) / 255,
   );
   if (!channels || channels.length !== 3) {
@@ -101,28 +84,16 @@ describe("KidView progress action", () => {
       </AppRouterContext.Provider>,
     );
     const progressLink = html.match(
-      /<a class="([^"]+)" href="\/app\/child-1\/progress">See all progress<\/a>/u,
+      /<a class="([^"]+)" href="\/app\/child-1\/progress">[\s\S]*See all progress[\s\S]*<\/a>/u,
     );
 
     assert.ok(progressLink);
     const className = progressLink[1] ?? "";
-    assert.match(className, /min-h-11/u);
-    assert.match(className, /bg-\[var\(--brand-active\)\]/u);
-    assert.match(className, /text-on-brand/u);
-    assert.match(
-      className,
-      /hover:bg-\[var\(--clay-600\)\]/u,
-    );
-    assert.match(
-      GLOBALS_CSS,
-      /--brand-active:\s*var\(--clay-700\)/u,
-    );
-    const onBrand = cssHexToken("on-brand");
+    assert.match(className, /quiet-action/u);
+    assert.match(className, /quiet-action--primary/u);
+    assert.match(className, /quiet-action--default/u);
     assert.ok(
-      contrastRatio(onBrand, cssHexToken("clay-700")) >= 4.5,
-    );
-    assert.ok(
-      contrastRatio(onBrand, cssHexToken("clay-600")) >= 4.5,
+      contrastRatio(COLOR_CONTRACT.tokens.paper, COLOR_CONTRACT.tokens.midnightAction) >= 4.5,
     );
   });
 });
