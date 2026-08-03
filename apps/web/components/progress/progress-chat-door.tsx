@@ -22,10 +22,12 @@ const DOOR_CLASSES = {
 export function ProgressChatDoor({
   childId,
   variant = "secondary",
+  onOpen,
   children,
 }: {
   childId: string;
   variant?: keyof typeof DOOR_CLASSES;
+  onOpen?: () => void | Promise<void>;
   children: ReactNode;
 }) {
   const router = useRouter();
@@ -33,6 +35,7 @@ export function ProgressChatDoor({
 
   function openFocusedChat() {
     startTransition(async () => {
+      await onOpen?.();
       await focusChildThenOpenChat(childId, {
         setViewContext: setViewContextAction,
         navigate: (href) => router.push(href),
