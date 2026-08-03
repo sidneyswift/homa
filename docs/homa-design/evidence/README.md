@@ -56,6 +56,15 @@ location. Commit only the content-free receipt path beside the row. A pending
 row may not be promoted to `pass` until every profile gate and the full
 evidence record are populated.
 
+`handwrytten-stationery.json` is the #740 physical-mail contract. It binds the
+Handwrytten wrapper, outbox, copy, Logo source, Quiet authority stationery
+specification, provider payload limits, public Blob migration, stop-generation
+timestamp, and provider-version rollback boundary. It is deliberately
+`candidate` with provider and physical proof pending. `pnpm
+check:handwrytten-stationery` rejects missing source paths, stale specification
+fingerprints, unsafe provider limits, simulated read-backs, or an attempt to
+stop the retired template before both real proofs exist.
+
 `pnpm check:brand-assets` runs the canonical generator in check mode. A clean
 checkout must reproduce every web, marketing, native, and distribution asset
 from `packages/design/src/contract`: text and vector assets are byte-for-byte.

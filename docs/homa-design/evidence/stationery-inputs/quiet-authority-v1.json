@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "handwrytten-stationery:quiet-authority-v1",
+  "designEra": "quiet-authority-v1",
+  "purpose": "A genuine thank-you card, calm and recognizably Homa without behaving like campaign collateral.",
+  "dimensions": {
+    "dimensionId": "3",
+    "name": "A2 Folded Landscape",
+    "outputDpi": 600,
+    "panelWidthPx": 3300,
+    "panelHeightPx": 2550,
+    "panelCount": 2,
+    "bleed": "full-bleed",
+    "safeAreaPx": {
+      "top": 180,
+      "right": 180,
+      "bottom": 180,
+      "left": 180
+    }
+  },
+  "front": {
+    "role": "quiet-thank-you",
+    "logo": "none",
+    "displayCopy": "Thank you",
+    "displayTypography": "EB Garamond italic in the static art source, with a provider-safe fallback recorded before rasterization",
+    "inkToken": "ink",
+    "accentToken": "visualCoral",
+    "imagery": "none"
+  },
+  "back": {
+    "role": "quiet-colophon",
+    "logo": "master-homa-lockup",
+    "displayCopy": "none",
+    "inkToken": "ink",
+    "accentToken": "visualCoral",
+    "imagery": "none"
+  },
+  "interior": {
+    "messageSource": "apps/web/lib/cards/message.ts",
+    "wishesExport": "THANK_YOU_CARD_WISHES",
+    "handwritingProviderFont": "hwDavid",
+    "messageMaxCharacters": 500,
+    "wishesMaxCharacters": 50,
+    "webFontEmbedding": "forbidden"
+  },
+  "providerReductionRules": [
+    "Rasterize Homa-owned type and Logo geometry before upload; Handwrytten receives images, not web font files.",
+    "Keep all copy and Logo geometry inside the recorded trim-safe area; vendor quality checks are required for every cover.",
+    "Use only approved Quiet authority color tokens and their print-safe values; do not invent provider-only semantic colors.",
+    "Keep the front free of a Logo and promotional call to action; the back carries the master Homa lockup as a quiet maker mark.",
+    "Keep the writing side to the approved message and wishes exports; no child name, learning result, or inferred family detail is added."
+  ]
+}
