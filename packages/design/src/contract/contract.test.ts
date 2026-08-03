@@ -6,7 +6,16 @@ import { CONTENT_CONTRACT } from "./content.ts";
 import { MOTION_CONTRACT } from "./motion.ts";
 import { STATES_CONTRACT } from "./states.ts";
 import { fontRoles, typeRoles } from "./typography.ts";
-import { iconContract, semanticIconAliases, semanticIcons } from "./icons.ts";
+import {
+  createSemanticIconRegistry,
+  getSemanticIcon,
+  iconContract,
+  isSemanticIconName,
+  semanticIconAdapterContract,
+  semanticIconAdapters,
+  semanticIconAliases,
+  semanticIcons,
+} from "./icons.ts";
 
 function luminance(hex: string): number {
   const channels = [1, 3, 5].map((index) => Number.parseInt(hex.slice(index, index + 2), 16) / 255).map((value) => value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
@@ -53,4 +62,18 @@ test("semantic icon vocabulary has a concrete platform alias for every name", ()
   assert.equal(iconContract.source, "semantic-adapter-only");
   assert.deepEqual(iconContract.sizes, [16, 20, 24]);
   assert.equal(iconContract.strokePx, 1.75);
+});
+
+test("semantic icon adapters are complete and fail closed", () => {
+  assert.deepEqual(semanticIconAdapterContract.platforms, ["web", "native"]);
+  assert.equal(semanticIconAdapterContract.sourcePolicy, "registry-only");
+  for (const platform of semanticIconAdapterContract.platforms) {
+    assert.deepEqual(Object.keys(semanticIconAdapters[platform]).sort(), [...semanticIcons].sort());
+  }
+  assert.equal(isSemanticIconName("back"), true);
+  assert.equal(isSemanticIconName("not-a-role"), false);
+  const registry = createSemanticIconRegistry("web", Object.fromEntries(semanticIcons.map((name) => [name, name])) as Record<typeof semanticIcons[number], string>);
+  assert.equal(getSemanticIcon("web", registry, "back"), "back");
+  assert.throws(() => getSemanticIcon("web", registry, "not-a-role"), /Unknown web semantic icon role/);
+  assert.throws(() => createSemanticIconRegistry("native", { back: "ArrowLeft" } as never), /missing=/);
 });

@@ -30,7 +30,7 @@ import {
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { SemanticIconName } from "@homa/design/contract";
+import { createSemanticIconRegistry, type SemanticIconName } from "@homa/design/contract";
 
 /**
  * The web edge maps semantic contract names to the installed Lucide glyphs.
@@ -38,7 +38,7 @@ import type { SemanticIconName } from "@homa/design/contract";
  * registry is intentionally small, so an alias can be reviewed as part of the
  * design contract instead of being inferred from a screen's local context.
  */
-export const semanticIconRegistry = {
+export const semanticIconRegistry = createSemanticIconRegistry("web", {
   back: ArrowLeft,
   next: ArrowRight,
   close: X,
@@ -68,6 +68,6 @@ export const semanticIconRegistry = {
   external: ExternalLink,
   refresh: RefreshCw,
   stop: Square,
-} as const satisfies Record<SemanticIconName, LucideIcon>;
+} as const satisfies Record<SemanticIconName, LucideIcon>);
 
 export type { SemanticIconName };
