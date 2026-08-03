@@ -32,26 +32,11 @@ import type { ReportCardData } from "./onboarding-cards";
  * scoring route, which has the long function and the background hook
  * built for exactly that. It is idempotent, so a remount costs nothing.
  *
- * Act 3, added 2026-07-22 (founder: "it says its ready, but when you
- * click it starts the generation... it does not say its ready until it
- * actually is"). The scores ARE ready the instant Act 2 shows them; the
- * WORDS are not, and finalizeReport's fire-and-forget POST just started
- * them writing somewhere the parent cannot see. Saying "ready" and
- * offering "the whole report" before that write finishes oversold the
- * card's own claim the moment she tapped through and landed on the
- * report page's own honest "Homa is writing" screen instead.
- *
- * So the card now polls the same token-scoped status endpoint the
- * report page's own writing beat already uses (narrative-status), and
- * carries two more states than the one before it: numbers in, words
- * still writing (headline says exactly that, strengths already shown
- * since they are real, no button yet because there is nothing whole to
- * open), then ready for real, the original copy restored. Nothing here
- * is a new turn or a new server call; the same fire-and-forget kick
- * from Act 2 keeps running, and the status route self-heals it if it
- * ever silently failed. She is never asked to wait on this: the
- * composer beneath the card was never gone, and the arc moves on with
- * or without a finished narrative.
+ * Act 3 keeps the optional writing honest without making it a gate. The
+ * deterministic report and its template fallback both exist as soon as
+ * Act 2 does, so its open action is always available. The prose can
+ * improve in place when it settles. A parent who asks for the report is
+ * asking for the report, not for an optional model-writing job to finish.
  */
 
 const LINE_STAGGER_MS = 700;
@@ -59,13 +44,11 @@ const LINE_STAGGER_MS = 700;
 const MINIMUM_HOLD_MS = LINE_STAGGER_MS * 2 + 800;
 
 /**
- * The reveal's own view beacon, on the same route the report page uses.
- * entry "chat" is what makes the rebuild's central claim measurable: one
- * family in four never opened the emailed link, and this is the field
- * that says whether being shown the report beats being sent it.
+ * The reveal's rendered beacon. The report page owns the separate open
+ * receipt because rendering a card does not prove the parent opened it.
  */
-function beaconChatReveal(token: string): void {
-  void fetch("/api/map/report-viewed", {
+function beaconChatReportRendered(token: string): void {
+  void fetch("/api/map/report-rendered", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token, entry: "chat" }),
@@ -140,9 +123,9 @@ export function ReportRevealCard({
     if (finalizedRef.current) return;
     finalizedRef.current = true;
     if (!card.alreadyScored) finalizeReport(card.childId);
-    // Only a live reveal counts as a view. A card scrolled past in
-    // yesterday's transcript is scrollback, not a reading.
-    if (active) beaconChatReveal(card.token);
+    // Only a live card counts as rendered. A card scrolled past in
+    // yesterday's transcript is scrollback, not a new handoff.
+    if (active) beaconChatReportRendered(card.token);
   }, [card.childId, card.alreadyScored, card.token, active]);
 
   useEffect(() => {
@@ -241,11 +224,7 @@ export function ReportRevealCard({
     <section
       data-brand-layer="report-reveal"
       className="quiet-report__reveal w-full max-w-[26rem] rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-4 shadow-md sm:p-5"
-      aria-label={
-        narrativeReady
-          ? `${card.childName}'s progress report`
-          : `${card.childName}'s numbers, report still writing`
-      }
+      aria-label={`${card.childName}'s progress report`}
     >
       <div className="flex items-center justify-between gap-2">
         <span className="shrink-0 rounded-[var(--homa-radius-control)] bg-[var(--homa-info-tint)] px-2.5 py-1 text-xs font-bold text-[var(--homa-info-ink)]">
@@ -258,7 +237,7 @@ export function ReportRevealCard({
       <p className="mt-3 font-display text-lg font-semibold leading-snug text-strong">
         {narrativeReady
           ? `${card.childName}'s progress report is ready.`
-          : `${card.childName}'s numbers are in.`}
+          : `${card.childName}'s progress report is ready.`}
       </p>
       <p className="mt-1.5 text-sm text-muted">
         {narrativeReady ? (
@@ -267,10 +246,9 @@ export function ReportRevealCard({
             {skippedLine ? ` ${skippedLine}` : ""}
           </>
         ) : (
-          // The honest split the report page's own writing beat already
-          // makes: the scores below are real right now; the sentences
-          // are still being written, and nothing here is waiting on her.
-          "I'm still writing the words to go with them. Keep going, there's nothing to wait for."
+          // The report page owns a deterministic template fallback. The
+          // sentence layer may improve after she opens it, never before.
+          "Built from your answers. I'm still polishing the written note, and the full report is ready now."
         )}
       </p>
       {/* "Strongest" is a comparison, so it only renders when there is
@@ -296,16 +274,14 @@ export function ReportRevealCard({
           </div>
         </div>
       ) : null}
-      {narrativeReady ? (
-        <button
-          type="button"
-          disabled={onOpenReport === undefined}
-          onClick={() => onOpenReport?.(card.childId)}
-          className="quiet-action quiet-action--primary mt-4 min-h-12 w-full px-4 py-3 text-base shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          See the whole report
-        </button>
-      ) : null}
+      <button
+        type="button"
+        disabled={onOpenReport === undefined}
+        onClick={() => onOpenReport?.(card.childId)}
+        className="quiet-action quiet-action--primary mt-4 min-h-12 w-full px-4 py-3 text-base shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        Open the full report
+      </button>
     </section>
   );
 }

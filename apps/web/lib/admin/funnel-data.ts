@@ -1,7 +1,6 @@
 import { MAP_FLOW_STEPS, type MapFlowStep } from "@homa/core";
 
 import {
-  KEPT_PREP_EVENTS,
   LOOP_BACK_EVENTS,
   PARENT_INITIATED_EVENTS,
 } from "../activation/signals";
@@ -94,17 +93,15 @@ export interface FunnelData {
 }
 
 /**
- * The activation ladder (founder decision 2026-07-20): what a parent does
- * AFTER the report, counted ONLY from parent-initiated events.
+ * The activation handoff: the visible report, then the parent-directed path
+ * from opening it through one changed plan and one closed learning loop.
  *
- * Homa's own activity is deliberately excluded. In the 2026-07-20 read, 32
- * families had a research brief sent and 31 got a thank-you card while only
- * 8 ever wrote back, so a ladder built on machine events would have shown a
- * healthy funnel while the humans stayed quiet. progress.evidence_recorded
- * is excluded for the same reason: the scoring pipeline emits it during the
- * assessment, so it measures Homa, not a parent logging anything.
- *
- * The bar: a stage counts only when a human hand caused the event.
+ * Only report_rendered represents Homa's delivery of the handoff. Every
+ * later rung is parent-directed. In the 2026-07-20 read, 32 families had a
+ * research brief sent and 31 got a thank-you card while only 8 ever wrote
+ * back, so machine work cannot count as activation. progress.evidence
+ * recorded is excluded for the same reason: the scoring pipeline emits it
+ * during assessment, so it does not prove a parent logged anything.
  *
  * Counted over ONE cohort (every live family that has a report) rather than
  * as windowed event counts, so each rung is the same set of families and the
@@ -114,13 +111,8 @@ export interface FunnelData {
  *
  * Sources are chosen for reliability, not tidiness. "Opened the report"
  * reads child_reports.viewed_at (a durable column) rather than the
- * map.report_viewed event, and "asked" reads conversation_messages
- * (role='user'), which is family-scoped across every channel. Two events
- * that look right are still NOT used here: sms.message_received only began
- * carrying a family id on 2026-07-20 (the 231 events before that are
- * unattributable forever), and conversation.reply_resolved is 95% orphaned
- * family ids (203 of 216, all purged anonymous leads). conversation_messages
- * covers both channels durably, so it stays the source either way.
+ * map.report_viewed event. The remaining stages are exact effect events,
+ * rather than messages that merely imply an intention.
  */
 const ACTIVATION_STAGES: {
   key: string;
@@ -129,24 +121,30 @@ const ACTIVATION_STAGES: {
   source: string;
 }[] = [
   {
+    key: "rendered",
+    name: "Report shown",
+    blurb: "Homa put the scored report in the conversation.",
+    source: "map.report_rendered",
+  },
+  {
     key: "opened",
     name: "Opened the report",
     blurb: "They actually looked at it.",
     source: "child_reports.viewed_at",
   },
   {
-    key: "asked",
-    name: "Asked Homa for something",
+    key: "planner",
+    name: "Opened the Planner",
     blurb:
-      "A message in any channel, or a tap on a report action: the first time Homa is treated as an assistant.",
-    source: "conversation_messages (user) · report.action_tapped",
+      "The current week is visible, grounded in the family's actual plan.",
+    source: "planner.viewed",
   },
   {
-    key: "kept",
-    name: "Kept the prep",
+    key: "adjusted",
+    name: "Changed the plan",
     blurb:
-      "A plan they said yes to, or a finished worksheet: the moment Homa did the work for them.",
-    source: "map.plan_consented · materials.finalized",
+      "A parent-directed edit, scheduling change, or approved month replaced the default.",
+    source: "map.plan_edited · planner.activity_scheduled · planner.month_approved",
   },
   {
     key: "looped",
@@ -155,6 +153,12 @@ const ACTIVATION_STAGES: {
       "An observation, a correction, hours logged, or plan progress. This is the loop that makes Homa smarter.",
     source:
       "progress.observation_saved · map.answers_corrected · chat.hours_logged · map.plan_progress",
+  },
+  {
+    key: "complete",
+    name: "Completed the activation handoff",
+    blurb: "The report, real week, one adjustment, and one learning loop all happened.",
+    source: "event-derived activation state",
   },
 ];
 
@@ -235,10 +239,12 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
   const activationRows = await sql<
     {
       base: number;
+      rendered: number;
       opened: number;
-      asked: number;
-      kept: number;
+      planner: number;
+      adjusted: number;
       looped: number;
+      complete: number;
       w2_eligible: number;
       w2_returned: number;
     }[]
@@ -257,25 +263,27 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
     flags as (
       select c.id,
         exists (
+          select 1 from public.events e
+          where e.family_id = c.id and e.name = 'map.report_rendered'
+        ) as rendered,
+        exists (
           select 1 from public.children ch
           join public.child_reports r on r.child_id = ch.id
           where ch.family_id = c.id and r.viewed_at is not null
         ) as opened,
-        (
-          exists (
-            select 1 from public.conversation_messages m
-            where m.family_id = c.id and m.role = 'user'
-          )
-          or exists (
-            select 1 from public.events e
-            where e.family_id = c.id and e.name = 'report.action_tapped'
-          )
-        ) as asked,
         exists (
           select 1 from public.events e
           where e.family_id = c.id
-            and e.name = any(string_to_array(${KEPT_PREP_EVENTS.join(",")}, ','))
-        ) as kept,
+            and e.name = 'planner.viewed'
+        ) as planner,
+        exists (
+          select 1 from public.events e
+          where e.family_id = c.id
+            and e.name in (
+              'map.plan_edited', 'planner.activity_scheduled',
+              'planner.week_repaired', 'planner.month_approved'
+            )
+        ) as adjusted,
         exists (
           select 1 from public.events e
           where e.family_id = c.id
@@ -299,10 +307,12 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
     )
     select
       count(*)::int as base,
+      (count(*) filter (where rendered))::int as rendered,
       (count(*) filter (where opened))::int as opened,
-      (count(*) filter (where asked))::int as asked,
-      (count(*) filter (where kept))::int as kept,
+      (count(*) filter (where planner))::int as planner,
+      (count(*) filter (where adjusted))::int as adjusted,
       (count(*) filter (where looped))::int as looped,
+      (count(*) filter (where rendered and opened and planner and adjusted and looped))::int as complete,
       (count(*) filter (where w2_eligible))::int as w2_eligible,
       (count(*) filter (where w2_eligible and w2_returned))::int as w2_returned
     from flags
@@ -390,10 +400,12 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
 
   const activationRow = activationRows[0];
   const activationByKey: Record<string, number> = {
+    rendered: activationRow.rendered,
     opened: activationRow.opened,
-    asked: activationRow.asked,
-    kept: activationRow.kept,
+    planner: activationRow.planner,
+    adjusted: activationRow.adjusted,
     looped: activationRow.looped,
+    complete: activationRow.complete,
   };
   const activation: ActivationLadder = {
     base: activationRow.base,

@@ -27,7 +27,11 @@ import type { SubjectLessonSummary } from "../../../../lib/subject-lessons/types
 import { Logo } from "../../../../components/brand/Logo";
 import { DoorLink } from "../../../../components/billing/door-link";
 import { ReportLockOffer } from "../../../../components/billing/report-lock-offer";
-import { reportLockRowLine } from "../../../../components/billing/wall-copy";
+import {
+  SAMPLE_REPORT_TRIAL_LINE,
+  TRIAL_GATE_CTA,
+  reportLockRowLine,
+} from "../../../../components/billing/wall-copy";
 import { CallHomaPs } from "./call-homa-ps";
 import { MonthButton } from "./month-button";
 import { ReceiptsList, type ReceiptRow } from "./receipts-list";
@@ -997,11 +1001,10 @@ export function ReportView({
                         "mt-4 inline-flex items-center px-5 py-2.5 text-sm font-bold",
                       )}
                     >
-                      Start your free trial
+                      {TRIAL_GATE_CTA}
                     </Link>
                     <p className="mt-3 text-xs" style={{ color: "color-mix(in srgb, var(--homa-paper) 62%, transparent)" }}>
-                      Five minutes of questions, benchmarked against national standards. 30 free
-                      days, then $19 a month.
+                      {SAMPLE_REPORT_TRIAL_LINE}
                     </p>
                   </>
                 ) : (

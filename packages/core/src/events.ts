@@ -254,9 +254,17 @@ export const EVENT_SCHEMAS = {
     observations: z.number().int().min(0),
     bank_version: z.string(),
   }),
+  // The scored-report card rendered in chat. This records that Homa made the
+  // handoff visible, not that the parent deliberately opened the report.
+  "map.report_rendered": z.object({
+    family_id: z.uuid(),
+    child_id: z.uuid(),
+    entry: z.literal("chat"),
+  }),
   // The one-world unification (2026-07-07) retired the family bridge and
   // its events: a family exists from the first tap, so there is nothing
   // to bridge. map.family_bridged / map.family_bridge_skipped ended here.
+  // This event is a deliberate report-page open, never the chat card mount.
   "map.report_viewed": z.object({
     family_id: z.uuid(),
     child_id: z.uuid(),

@@ -69,6 +69,7 @@ export function isEvalFamilyFixtureEnabled(
 const FIXTURE_CHILD_FINN = "00000000-0000-4000-8000-000000000001";
 const FIXTURE_CHILD_MAYA = "00000000-0000-4000-8000-000000000002";
 const FIXTURE_CHILD_STORY = "00000000-0000-4000-8000-000000000003";
+const EVAL_FIXTURE_MAYA_REPORT_TOKEN = "eval-fixture-maya-report";
 
 /** The Walker family and Rachel's membership user, same synthetic scheme. */
 export const EVAL_FIXTURE_FAMILY_ID = "00000000-0000-4000-8000-0000000000f0";
@@ -315,6 +316,15 @@ values (${sqlString(EVAL_FIXTURE_FAMILY_ID)}, ${sqlString(EVAL_FIXTURE_PARENT_US
 insert into public.children (id, family_id, name, birth_month, profile, created_at)
 values
 ${childValues};
+
+-- The activation-handoff recovery eval needs a real, family-owned report
+-- token. The report tool checks this row through the same tenant-scoped store
+-- read that production uses, so a prompt-only fixture would not prove it can
+-- actually open a report.
+insert into public.child_reports (child_id, scores, bank_version, history, token)
+values
+  (${sqlString(FIXTURE_CHILD_MAYA)}, '{}'::jsonb, 'eval-fixture', '[]'::jsonb,
+   ${sqlString(EVAL_FIXTURE_MAYA_REPORT_TOKEN)});
 
 insert into public.families
   (id, name, us_state, parent_display_name, time_zone, status,
