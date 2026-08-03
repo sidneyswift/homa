@@ -31,9 +31,9 @@ import {
   type LucideIcon,
   type LucideProps,
 } from "lucide-react-native";
-import { iconContract, type SemanticIconName } from "@homa/design/contract";
+import { createSemanticIconRegistry, iconContract, isSemanticIconName, type SemanticIconName } from "@homa/design/contract";
 
-const semanticIconRegistry = {
+const semanticIconRegistry = createSemanticIconRegistry("native", {
   back: ArrowLeft,
   next: ArrowRight,
   close: X,
@@ -63,7 +63,7 @@ const semanticIconRegistry = {
   external: ExternalLink,
   refresh: RefreshCw,
   stop: Square,
-} as const satisfies Record<SemanticIconName, LucideIcon>;
+} as const satisfies Record<SemanticIconName, LucideIcon>);
 
 type IconProps = Omit<LucideProps, "size" | "strokeWidth" | "accessibilityLabel" | "accessible"> & {
   name: SemanticIconName;
@@ -81,7 +81,9 @@ export function Icon({
   accessibilityLabel,
   ...props
 }: IconProps) {
+  if (!isSemanticIconName(name)) throw new Error(`Unknown native semantic icon role: ${name}`);
   const Glyph = semanticIconRegistry[name];
+  if (!Glyph) throw new Error(`Missing native glyph for semantic icon role: ${name}`);
   return (
     <Glyph
       {...props}
