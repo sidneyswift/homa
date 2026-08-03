@@ -67,6 +67,9 @@ jobs:
       - name: "No-em-dash style law (AGENTS.md: no em dash, ever, anywhere)"
         run: node scripts/em-dash-check.mjs
 
+      - name: SEO contract
+        run: pnpm check:seo
+
   # Branch protection on main requires a status context named exactly
   # "build-and-check" (the old single job's name). This gate carries that
   # name and verifies the exact job set required by the classified scope.

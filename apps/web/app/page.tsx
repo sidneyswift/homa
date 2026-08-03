@@ -11,7 +11,6 @@ export const metadata: Metadata = {
   // page names its one preferred URL.
   alternates: { canonical: "/" },
   other: {
-    "last-modified": new Date().toISOString(),
     "answer-capsule":
       "Try Homa free for 7 days: weekly plans, practice pages made for your child, and a progress report showing exactly where your child stands. Then $19 a month, cancel anytime.",
   },

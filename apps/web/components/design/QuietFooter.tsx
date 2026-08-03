@@ -9,6 +9,9 @@ export const QUIET_FOOTER_COLUMNS = [
     [
       ["Your child's progress report", "/onboarding"],
       ["How the report works", "/onboarding/method"],
+      ["Homeschool planner", "/features/homeschool-planner"],
+      ["Hours and state rules", "/features/homeschool-hours-tracker"],
+      ["Progress reports", "/features/homeschool-progress-tracker"],
       ["Features", "/#features"],
     ],
   ],

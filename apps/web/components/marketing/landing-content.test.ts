@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   CAPABILITY_ITEMS,
+  CAPABILITY_FEATURE_HREFS,
   FOUNDER_STORY_COPY,
   HERO_COPY,
   PAIN_ITEMS,
@@ -44,6 +45,18 @@ test("the capability section exposes four shipped product nouns in parent-day or
   assert.deepEqual(
     CAPABILITY_ITEMS.map(({ title }) => title),
     ["The weekly plan", "Practice pages", "The binder", "Hours and state rules"],
+  );
+});
+
+test("each capability card points to its canonical feature page", () => {
+  assert.deepEqual(
+    CAPABILITY_ITEMS.map(({ id }) => CAPABILITY_FEATURE_HREFS[id]),
+    [
+      "/features/homeschool-planner",
+      "/features/personalized-practice-pages",
+      "/features/homeschool-record-keeping",
+      "/features/homeschool-hours-tracker",
+    ],
   );
 });
 
