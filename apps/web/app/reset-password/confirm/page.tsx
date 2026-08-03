@@ -22,33 +22,33 @@ export default async function ConfirmPasswordResetPage({
   );
 
   return (
-    <main className="mx-auto w-full max-w-md px-6 py-16">
+    <main className="quiet-auth-shell quiet-account-surface" data-brand-surface="reset-password-confirm">
       <Logo size={28} />
-      <h1 className="mt-6 font-display text-3xl font-semibold leading-tight text-strong">
+      <h1 className="mt-6 font-display text-3xl font-semibold leading-tight text-[var(--homa-ink)]">
         Reset your password
       </h1>
       {confirmation ? (
         <form
           action="/auth/confirm"
           method="post"
-          className="mt-8 rounded-lg border border-border bg-card p-6 shadow-sm"
+          className="mt-8 rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm"
         >
           <input type="hidden" name="token_hash" value={confirmation.tokenHash} />
           <input type="hidden" name="type" value="recovery" />
-          <p className="text-body">Your reset link is ready.</p>
+          <p className="text-[var(--homa-ink)]">Your reset link is ready.</p>
           <button
             type="submit"
-            className="mt-6 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
+            className="mt-6 min-h-12 w-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)] shadow-sm transition-colors hover:bg-[var(--homa-ink)]"
           >
             Choose a new password
           </button>
         </form>
       ) : (
-        <div className="mt-8 rounded-lg border border-border bg-card p-6 shadow-sm">
-          <p className="text-body">That reset link is incomplete or no longer active.</p>
+        <div className="mt-8 rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm">
+          <p className="text-[var(--homa-ink)]">That reset link is incomplete or no longer active.</p>
           <Link
             href="/forgot-password"
-            className="mt-4 inline-block font-semibold text-brand underline underline-offset-2"
+            className="mt-4 inline-block font-semibold text-[var(--homa-brand-text)] underline underline-offset-2"
           >
             Send reset link
           </Link>

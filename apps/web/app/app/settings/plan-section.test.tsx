@@ -31,6 +31,12 @@ function state(overrides: Partial<FamilyPlanState> = {}): FamilyPlanState {
 }
 
 describe("PlanSection", () => {
+  it("anchors the plan offer to the Quiet authority frame", () => {
+    const html = renderToStaticMarkup(<PlanSection plan={state()} />);
+    assert.match(html, /quiet-frame/u);
+    assert.match(html, /homa-soft-boundary/u);
+  });
+
   it("gives a base-tier family the way to add Plus, which is the whole point", () => {
     const html = renderToStaticMarkup(<PlanSection plan={state()} />);
     assert.match(html, /Add Homa Plus/u);

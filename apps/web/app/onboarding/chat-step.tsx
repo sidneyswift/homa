@@ -20,7 +20,7 @@ import type { OnboardingChatProps } from "./onboarding-chat-props";
  */
 export function ChatStep({ chat }: { chat: OnboardingChatProps }) {
   return (
-    <div className="fixed inset-0 z-0 bg-page">
+    <div className="fixed inset-0 z-0 bg-[var(--homa-canvas)]">
       <ChatClient
         storageKey={chat.storageKey}
         familyId={chat.familyId}

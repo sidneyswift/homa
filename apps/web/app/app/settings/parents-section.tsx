@@ -1,11 +1,11 @@
 "use client";
 
 import { useActionState, useRef, useState } from "react";
-import { MessageCircle, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { uploadAvatarPhoto } from "../../../lib/avatar-upload";
 import { ConfirmRemoveButton } from "../../../components/dashboard/confirm-remove-button";
+import { Icon } from "../../../components/design/Icon";
 import { PhoneClaim } from "../../../components/phone-claim";
 import {
   cancelInviteAction,
@@ -31,10 +31,10 @@ import { SectionHeading } from "./section-heading";
 const INITIAL_STATE: SetupFormState = { error: null };
 
 const inputClass =
-  "mt-2 w-full rounded-md border border-border bg-card px-4 py-3 text-base text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30";
+  "mt-2 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-3 text-base text-[var(--homa-ink)] focus:border-[var(--homa-visual-coral)] focus:outline-none focus:ring-2 focus:ring-[var(--homa-visual-coral)]/30";
 
 const rowButtonClass =
-  "min-h-9 cursor-pointer rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong disabled:opacity-60";
+  "min-h-9 cursor-pointer rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-1.5 text-sm font-medium text-[var(--homa-ink)] transition-colors hover:border-[var(--homa-visual-coral)] hover:text-[var(--homa-ink)] disabled:opacity-60";
 
 export interface AdultRow {
   userId: string;
@@ -72,14 +72,14 @@ function AdultAvatar({ adult, size }: { adult: AdultRow; size: number }) {
         src={adult.avatarUrl}
         alt=""
         style={{ width: size, height: size }}
-        className="shrink-0 rounded-full border border-border-subtle object-cover"
+        className="shrink-0 rounded-full border border-[var(--homa-soft-boundary)] object-cover"
       />
     );
   }
   return (
     <span
       style={{ width: size, height: size }}
-      className="inline-flex shrink-0 items-center justify-center rounded-full bg-[var(--sage-500)] text-base font-bold text-white"
+      className="inline-flex shrink-0 items-center justify-center rounded-full bg-[var(--homa-constructive-ink)] text-base font-bold text-white"
       aria-hidden="true"
     >
       {adult.name.charAt(0)}
@@ -101,18 +101,18 @@ function AdultRowLine({
     <span className="min-w-0 flex-1">
       {/* The name line wraps (never truncates): on a 390px screen the
           Main account tag must stay readable, not clipped. */}
-      <span className="block font-semibold text-strong">
+      <span className="block font-semibold text-[var(--homa-ink)]">
         {adult.name}
-        {adult.isYou ? <span className="font-normal text-muted"> (you)</span> : null}
+        {adult.isYou ? <span className="font-normal text-[var(--homa-muted-ink)]"> (you)</span> : null}
         {showPrimaryTag && adult.isPrimary ? (
-          <span className="ml-2 inline-flex whitespace-nowrap rounded-pill bg-[var(--stone-100)] px-2 py-0.5 align-middle text-[0.66rem] font-bold uppercase tracking-[0.06em] text-muted">
+          <span className="ml-2 inline-flex whitespace-nowrap rounded-[var(--homa-radius-control)] bg-[var(--homa-soft-boundary)] px-2 py-0.5 align-middle text-[0.66rem] font-bold uppercase tracking-[0.06em] text-[var(--homa-muted-ink)]">
             Main account
           </span>
         ) : null}
       </span>
-      {adult.email ? <span className="block truncate text-sm text-muted">{adult.email}</span> : null}
+      {adult.email ? <span className="block truncate text-sm text-[var(--homa-muted-ink)]">{adult.email}</span> : null}
       {adult.phoneDisplay ? (
-        <span className="block text-sm text-muted">{adult.phoneDisplay}</span>
+        <span className="block text-sm text-[var(--homa-muted-ink)]">{adult.phoneDisplay}</span>
       ) : null}
     </span>
   );
@@ -184,8 +184,8 @@ function MyAdultItem({
       )}
 
       {editing ? (
-        <form action={action} className="mt-3 rounded-md bg-page p-4">
-          <label className="block text-sm font-medium text-strong" htmlFor="my-display-name">
+        <form action={action} className="mt-3 rounded-[var(--homa-radius-control)] bg-[var(--homa-canvas)] p-4">
+          <label className="block text-sm font-medium text-[var(--homa-ink)]" htmlFor="my-display-name">
             Your name
           </label>
           <input
@@ -198,7 +198,7 @@ function MyAdultItem({
             className={inputClass}
           />
 
-          <label className="mt-4 block text-sm font-medium text-strong" htmlFor="my-photo">
+          <label className="mt-4 block text-sm font-medium text-[var(--homa-ink)]" htmlFor="my-photo">
             Your photo
           </label>
           <div className="mt-2 flex items-center gap-3">
@@ -208,7 +208,7 @@ function MyAdultItem({
               <img
                 src={photoPreview}
                 alt="Your new photo"
-                className="h-10 w-10 rounded-full border border-border object-cover"
+                className="h-10 w-10 rounded-full border border-[var(--homa-control-boundary)] object-cover"
               />
             ) : (
               <AdultAvatar adult={adult} size={40} />
@@ -219,11 +219,11 @@ function MyAdultItem({
               type="file"
               accept="image/*"
               onChange={(event) => choosePhoto(event.target.files?.[0] ?? null)}
-              className="min-w-0 text-sm text-body file:mr-3 file:cursor-pointer file:rounded-pill file:border file:border-border file:bg-card file:px-4 file:py-2 file:text-sm file:font-semibold file:text-strong hover:file:border-brand"
+              className="min-w-0 text-sm text-[var(--homa-ink)] file:mr-3 file:cursor-pointer file:rounded-[var(--homa-radius-control)] file:border file:border-[var(--homa-control-boundary)] file:bg-[var(--homa-paper)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[var(--homa-ink)] hover:file:border-[var(--homa-visual-coral)]"
             />
           </div>
 
-          <label className="mt-4 block text-sm font-medium text-strong" htmlFor="my-phone">
+          <label className="mt-4 block text-sm font-medium text-[var(--homa-ink)]" htmlFor="my-phone">
             Your cell number
           </label>
           <input
@@ -237,13 +237,13 @@ function MyAdultItem({
             placeholder="Ten digits, like 954 555 0123"
             className={inputClass}
           />
-          <p className="mt-2 text-xs text-muted">
+          <p className="mt-2 text-xs text-[var(--homa-muted-ink)]">
             Texts from this number reach your family&apos;s Homa. Clear it to unlink.
             Standard messaging rates apply.
           </p>
 
           {state.error ? (
-            <p className="mt-3 text-sm text-danger" role="alert">
+            <p className="mt-3 text-sm text-[var(--homa-error-ink)]" role="alert">
               {state.error}
             </p>
           ) : null}
@@ -259,7 +259,7 @@ function MyAdultItem({
             <button
               type="submit"
               disabled={pending}
-              className="min-h-10 cursor-pointer rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover disabled:opacity-60"
+              className="min-h-10 cursor-pointer rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2 text-sm font-semibold text-[var(--homa-paper)] transition-colors hover:bg-[var(--homa-ink)] disabled:opacity-60"
             >
               {pending ? "Saving\u2026" : "Save"}
             </button>
@@ -270,7 +270,7 @@ function MyAdultItem({
                 choosePhoto(null);
                 if (fileInputRef.current) fileInputRef.current.value = "";
               }}
-              className="min-h-10 cursor-pointer rounded-pill px-4 py-2 text-sm font-medium text-muted transition-colors hover:text-strong"
+              className="min-h-10 cursor-pointer rounded-[var(--homa-radius-control)] px-4 py-2 text-sm font-medium text-[var(--homa-muted-ink)] transition-colors hover:text-[var(--homa-ink)]"
             >
               Cancel
             </button>
@@ -289,14 +289,14 @@ function PendingInviteItem({ invite }: { invite: PendingInviteRow }) {
     <li className="py-3 last:pb-0">
       <div className="flex items-center gap-3">
         <span
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-dashed border-border text-base font-bold text-subtle"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-dashed border-[var(--homa-control-boundary)] text-base font-bold text-[var(--homa-muted-ink)]"
           aria-hidden="true"
         >
           {invite.email.charAt(0).toUpperCase()}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate font-medium text-strong">{invite.email}</span>
-          <span className="block text-sm text-muted">{invite.sentDisplay}</span>
+          <span className="block truncate font-medium text-[var(--homa-ink)]">{invite.email}</span>
+          <span className="block text-sm text-[var(--homa-muted-ink)]">{invite.sentDisplay}</span>
         </span>
         <form action={action}>
           <input type="hidden" name="invite_id" value={invite.id} />
@@ -306,7 +306,7 @@ function PendingInviteItem({ invite }: { invite: PendingInviteRow }) {
         </form>
       </div>
       {state.error ? (
-        <p className="mt-2 text-sm text-danger" role="alert">
+        <p className="mt-2 text-sm text-[var(--homa-error-ink)]" role="alert">
           {state.error}
         </p>
       ) : null}
@@ -322,8 +322,8 @@ function LegacyPhoneItem({ phone }: { phone: LegacyPhoneRow }) {
     <li className="py-3 last:pb-0">
       <div className="flex items-center gap-3">
         <span className="min-w-0 flex-1">
-          <span className="block truncate font-medium text-strong">{phone.display}</span>
-          <span className="block text-sm text-muted">Linked number</span>
+          <span className="block truncate font-medium text-[var(--homa-ink)]">{phone.display}</span>
+          <span className="block text-sm text-[var(--homa-muted-ink)]">Linked number</span>
         </span>
         <form action={action}>
           <input type="hidden" name="phone" value={phone.e164} />
@@ -331,7 +331,7 @@ function LegacyPhoneItem({ phone }: { phone: LegacyPhoneRow }) {
         </form>
       </div>
       {state.error ? (
-        <p className="mt-2 text-sm text-danger" role="alert">
+        <p className="mt-2 text-sm text-[var(--homa-error-ink)]" role="alert">
           {state.error}
         </p>
       ) : null}
@@ -356,22 +356,22 @@ function InviteDisclosure() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-3 inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-pill border border-border bg-card px-5 py-2 text-sm font-semibold text-strong transition-colors hover:border-brand"
+        className="mt-3 inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-5 py-2 text-sm font-semibold text-[var(--homa-ink)] transition-colors hover:border-[var(--homa-visual-coral)]"
       >
-        <Plus size={16} aria-hidden="true" />
+        <Icon name="add" size={16} />
         Invite another parent
       </button>
     );
   }
 
   return (
-    <form action={action} className="mt-3 rounded-md bg-page p-4">
-      <p className="font-medium text-strong">Invite another parent</p>
-      <p className="mt-1 text-sm text-body">
+    <form action={action} className="mt-3 rounded-[var(--homa-radius-control)] bg-[var(--homa-canvas)] p-4">
+      <p className="font-medium text-[var(--homa-ink)]">Invite another parent</p>
+      <p className="mt-1 text-sm text-[var(--homa-ink)]">
         They&apos;ll see everything here: the kids, every conversation with Homa so
         far, and all your materials. They sign in with their own Google or email.
       </p>
-      <label className="mt-3 block text-sm font-medium text-strong" htmlFor="invite-email">
+      <label className="mt-3 block text-sm font-medium text-[var(--homa-ink)]" htmlFor="invite-email">
         Their email
       </label>
       <input
@@ -383,12 +383,12 @@ function InviteDisclosure() {
         placeholder="name@example.com"
         className={inputClass}
       />
-      <p className="mt-2 text-xs text-muted">
+      <p className="mt-2 text-xs text-[var(--homa-muted-ink)]">
         The emailed link works for 7 days. If they&apos;ve never used Homa, signing
         in creates their account.
       </p>
       {state.error ? (
-        <p className="mt-3 text-sm text-danger" role="alert">
+        <p className="mt-3 text-sm text-[var(--homa-error-ink)]" role="alert">
           {state.error}
         </p>
       ) : null}
@@ -396,14 +396,14 @@ function InviteDisclosure() {
         <button
           type="submit"
           disabled={pending}
-          className="min-h-10 cursor-pointer rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover disabled:opacity-60"
+          className="min-h-10 cursor-pointer rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2 text-sm font-semibold text-[var(--homa-paper)] transition-colors hover:bg-[var(--homa-ink)] disabled:opacity-60"
         >
           {pending ? "Sending\u2026" : "Send invite"}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="min-h-10 cursor-pointer rounded-pill px-4 py-2 text-sm font-medium text-muted transition-colors hover:text-strong"
+          className="min-h-10 cursor-pointer rounded-[var(--homa-radius-control)] px-4 py-2 text-sm font-medium text-[var(--homa-muted-ink)] transition-colors hover:text-[var(--homa-ink)]"
         >
           Cancel
         </button>
@@ -440,11 +440,11 @@ export function ParentsSection({
     <div id="parents">
       <SectionHeading>Parents</SectionHeading>
       {multiAdult && adults.some((adult) => adult.isPrimary) ? (
-        <p className="mt-2 text-sm text-body">
+        <p className="mt-2 text-sm text-[var(--homa-ink)]">
           The main account set up Homa and gets her task texts.
         </p>
       ) : null}
-      <ul className="divide-y divide-[var(--stone-100)]">
+      <ul className="divide-y divide-[var(--homa-soft-boundary)]">
         {adults.map((adult) =>
           adult.isYou ? (
             <MyAdultItem
@@ -468,22 +468,22 @@ export function ParentsSection({
         ))}
       </ul>
       {hasOtherAdult ? (
-        <p className="mt-1 text-xs text-muted">Each parent edits their own info.</p>
+        <p className="mt-1 text-xs text-[var(--homa-muted-ink)]">Each parent edits their own info.</p>
       ) : null}
 
       {homaNumberDisplay && homaNumberE164 ? (
-        <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-body">
+        <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[var(--homa-ink)]">
           {/* sms:, never tel:: tapping this opens Messages, it never
               dials. whitespace-nowrap: the number itself must never
               split across lines (2026-07-13 UX read). */}
           <a
             href={`sms:${homaNumberE164}`}
-            className="inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-pill border border-border bg-card px-3.5 py-1.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
+            className="inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3.5 py-1.5 text-sm font-semibold text-[var(--homa-ink)] transition-colors hover:border-[var(--homa-visual-coral)]"
           >
-            <MessageCircle size={15} className="text-brand" aria-hidden="true" />
+            <Icon name="chat" size={16} className="text-[var(--homa-brand-text)]" />
             Text Homa {"\u00b7"} {homaNumberDisplay}
           </a>
-          <span className="text-muted">Only texts from the numbers above reach her.</span>
+          <span className="text-[var(--homa-muted-ink)]">Only texts from the numbers above reach her.</span>
         </p>
       ) : null}
 

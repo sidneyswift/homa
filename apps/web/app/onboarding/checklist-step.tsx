@@ -456,25 +456,25 @@ export function ChecklistStep({
 
   if (flushing || !current || !domain) {
     return (
-      <div aria-busy="true" className="mx-auto max-w-[36rem] rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
-        <p className="font-display text-lg font-semibold text-strong">
+      <div aria-busy="true" className="mx-auto max-w-[36rem] rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm">
+        <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">
           Questionnaire done.
         </p>
         {saveError && !flushing ? (
           <>
-            <p className="mt-2 text-body">{saveError}</p>
+            <p className="mt-2 text-[var(--homa-ink)]">{saveError}</p>
             <button
               type="button"
               onClick={() => void completeWhenSaved()}
-              className="mt-4 rounded-pill border border-border bg-card px-4 py-2 text-sm font-semibold text-strong transition duration-(--dur-fast) ease-out hover:border-brand hover:bg-brand-soft"
+              className="mt-4 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-2 text-sm font-semibold text-[var(--homa-ink)] transition duration-(--homa-motion-fast) ease-out hover:border-[var(--homa-visual-coral)] hover:bg-[var(--homa-info-tint)]"
             >
               try saving again
             </button>
           </>
         ) : (
-          <p className="mt-2 flex items-center gap-2 text-body" role="status">
+          <p className="mt-2 flex items-center gap-2 text-[var(--homa-ink)]" role="status">
             <span
-              className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand motion-reduce:animate-none"
+              className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--homa-midnight-action)] motion-reduce:animate-none"
               aria-hidden="true"
             />
             Saving the last answers{"\u2026"}
@@ -537,28 +537,28 @@ export function ChecklistStep({
             they're actually answering about right now. */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2">
-            <span className="shrink-0 rounded-pill bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand">
+            <span className="shrink-0 rounded-[var(--homa-radius-control)] bg-[var(--homa-info-tint)] px-2.5 py-1 text-xs font-bold text-[var(--homa-brand-text)]">
               {child.name}
             </span>
             {headerInterests ? (
-              <span className="truncate text-xs text-subtle">
+              <span className="truncate text-xs text-[var(--homa-muted-ink)]">
                 {headerInterests}
               </span>
             ) : null}
           </div>
-          <p className="shrink-0 font-mono text-xs text-subtle">{timeLabel}</p>
+          <p className="shrink-0 font-mono text-xs text-[var(--homa-muted-ink)]">{timeLabel}</p>
         </div>
-        <p className="mt-2 truncate font-display text-lg font-bold text-strong">
+        <p className="mt-2 truncate font-display text-lg font-bold text-[var(--homa-ink)]">
           {domain.displayName}
         </p>
         {/* One continuous hairline, small screens only: the rail carries
             per-subject progress wherever it fits. */}
         <div
-          className={`mt-2 h-1 overflow-hidden rounded-pill bg-border-subtle ${compact ? "" : "lg:hidden"}`}
+          className={`mt-2 h-1 overflow-hidden rounded-[var(--homa-radius-control)] bg-[var(--homa-soft-boundary)] ${compact ? "" : "lg:hidden"}`}
           aria-hidden="true"
         >
           <div
-            className="h-full rounded-pill bg-brand transition-[width] duration-(--dur-base) ease-out"
+            className="h-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] transition-[width] duration-(--homa-motion-base) ease-out"
             style={{ width: `${Math.round((subjectsDone / plans.length) * 100)}%` }}
           />
         </div>
@@ -569,8 +569,8 @@ export function ChecklistStep({
             compete with the thing she is actually being asked.
             One quiet line, no animation, no count that ticks. */}
         {monthSoFar ? (
-          <p className="mt-2 truncate text-xs text-subtle">
-            <span className="font-semibold text-muted">
+          <p className="mt-2 truncate text-xs text-[var(--homa-muted-ink)]">
+            <span className="font-semibold text-[var(--homa-muted-ink)]">
               {subjectsDone > 0 ? `${child.name}'s month so far: ` : `A month for ${child.name}: `}
             </span>
             {monthSoFar.weeks[0]?.focus ?? ""}
@@ -580,10 +580,10 @@ export function ChecklistStep({
         {/* Fixed minimum height so the card never jumps as question length
             changes; the question centers in the leftover space so the
             reserve reads as breathing room, not a void. */}
-        <div className="mt-3 flex min-h-[19rem] flex-col rounded-lg border border-border-subtle bg-card p-6 shadow-[var(--shadow-md)]">
+        <div className="mt-3 flex min-h-[19rem] flex-col rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-[var(--shadow-md)]">
           <p
             className={`text-sm font-medium ${
-              kicker?.tone === "gold" ? "text-[var(--gold-ink)]" : "text-muted"
+              kicker?.tone === "gold" ? "text-[var(--homa-highlight-ink)]" : "text-[var(--homa-muted-ink)]"
             } ${kicker ? "" : "invisible"}`}
           >
             {kicker?.text ?? "\u00a0"}
@@ -593,7 +593,7 @@ export function ChecklistStep({
                 2026-07-08), so "Story counts out loud to 10?" always
                 names who's being asked about, load-bearing with two or
                 more kids in one sitting. */}
-            <h2 className="font-display text-xl font-semibold leading-snug text-strong">
+            <h2 className="font-display text-xl font-semibold leading-snug text-[var(--homa-ink)]">
               {personalizeStatement(child.name, current.item)}?
             </h2>
           </div>
@@ -605,10 +605,10 @@ export function ChecklistStep({
                 type="button"
                 onClick={() => answerCurrent(value)}
                 aria-pressed={flashAnswer === value}
-                className={`min-h-12 rounded-pill border px-3 py-3 text-sm font-semibold transition duration-(--dur-fast) ease-out motion-safe:active:scale-[var(--press-scale)] ${
+                className={`min-h-12 rounded-[var(--homa-radius-control)] border px-3 py-3 text-sm font-semibold transition duration-(--homa-motion-fast) ease-out motion-safe:active:scale-[var(--press-scale)] ${
                   flashAnswer === value
-                    ? "border-brand bg-brand text-on-brand"
-                    : "border-border bg-card text-strong hover:border-brand hover:bg-brand-soft"
+                    ? "border-[var(--homa-visual-coral)] bg-[var(--homa-midnight-action)] text-[var(--homa-paper)]"
+                    : "border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] text-[var(--homa-ink)] hover:border-[var(--homa-visual-coral)] hover:bg-[var(--homa-info-tint)]"
                 }`}
               >
                 {label}
@@ -633,7 +633,7 @@ export function ChecklistStep({
                   type="button"
                   onClick={() => void goBack()}
                   disabled={undoing}
-                  className="text-sm text-subtle underline-offset-2 hover:underline"
+                  className="text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
                 >
                   {undoing ? "undoing..." : "undo last answer"}
                 </button>
@@ -646,7 +646,7 @@ export function ChecklistStep({
               <button
                 type="button"
                 onClick={() => answerCurrent("skip")}
-                className="text-sm text-subtle underline-offset-2 hover:underline"
+                className="text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
               >
                 {flashAnswer === "skip"
                   ? "Skipped. Never counts against her."
@@ -654,11 +654,11 @@ export function ChecklistStep({
               </button>
             </span>
             {easilyStreak >= 3 ? (
-              <span className="font-hand text-lg text-sage">on a roll {"\u270e"}</span>
+              <span className="font-hand text-lg text-[var(--homa-constructive-ink)]">on a roll {"\u270e"}</span>
             ) : null}
           </div>
           {saveError ? (
-            <p className="mt-3 text-center text-sm text-body">{saveError}</p>
+            <p className="mt-3 text-center text-sm text-[var(--homa-ink)]">{saveError}</p>
           ) : null}
         </div>
 
@@ -674,7 +674,7 @@ export function ChecklistStep({
         <button
           type="button"
           onClick={exitChecklist}
-          className="mt-6 text-sm text-subtle underline-offset-2 hover:underline"
+          className="mt-6 text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
         >
           {"\u2190"} {exitLabel}
         </button>

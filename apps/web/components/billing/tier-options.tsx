@@ -4,7 +4,6 @@ import { useId, useState } from "react";
 
 import type { WallDoor } from "@homa/core";
 
-import { reportButtonClass } from "../../app/onboarding/r/[token]/report-button";
 import type { BillingPeriod, PlanTier, TierCheckout } from "../../lib/billing/wall-types";
 import { sendWallBeacon } from "./wall-beacon";
 import {
@@ -91,7 +90,7 @@ export function TierOptions({
   const href = usingAnnual ? (activeCheckout.annualUrl as string) : activeCheckout.monthlyUrl;
 
   return (
-    <div className="mt-6 flex flex-col gap-4">
+    <div className="quiet-tier-options mt-6 flex flex-col gap-4" data-brand-layer="tier-options">
       {anyAnnualAvailable ? (
         // A tablist promises tab panels that do not exist here; this is
         // one choice between two options, so it is a real radio group
@@ -101,7 +100,7 @@ export function TierOptions({
         // reading axis (headline, rows, and every line under the
         // button), and a centered control in the middle of it makes the
         // eye jump sideways on the way to the prices.
-        <fieldset className="w-fit self-start rounded-pill border border-border bg-card p-1">
+        <fieldset className="w-fit self-start rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-1">
           <legend className="sr-only">Billing period</legend>
           <div className="flex items-center gap-1">
             {(["monthly", "annual"] as const).map((option) => (
@@ -109,10 +108,10 @@ export function TierOptions({
                 key={option}
                 htmlFor={`${groupId}-period-${option}`}
                 // min-h-11 is the 44px touch minimum; the old pill was 32px.
-                className={`inline-flex min-h-11 cursor-pointer items-center rounded-pill px-4 text-sm font-semibold transition duration-(--dur-fast) ease-out focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--clay-600)] motion-safe:active:scale-[var(--press-scale)] ${
+                className={`inline-flex min-h-11 cursor-pointer items-center rounded-[var(--homa-radius-control)] px-4 text-sm font-semibold transition duration-(--homa-motion-fast) ease-out focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--homa-midnight-action)] motion-safe:active:scale-[var(--press-scale)] ${
                   period === option
-                    ? "bg-[var(--clay-700)] text-on-brand"
-                    : "text-muted hover:text-strong"
+                    ? "bg-[var(--homa-brand-text)] text-[var(--homa-paper)]"
+                    : "text-[var(--homa-muted-ink)] hover:text-[var(--homa-ink)]"
                 }`}
               >
                 <input
@@ -166,10 +165,10 @@ export function TierOptions({
               // belonging to the tier NAME, and centering it against a
               // row whose height varies with how the delta line wraps
               // leaves it floating beside nothing.
-              className={`flex w-full cursor-pointer items-start gap-3 rounded-md border p-4 text-left transition duration-(--dur-fast) ease-out focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--clay-600)] motion-safe:active:scale-[var(--press-scale)] ${
+              className={`flex w-full cursor-pointer items-start gap-3 rounded-[var(--homa-radius-control)] border p-4 text-left transition duration-(--homa-motion-fast) ease-out focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--homa-midnight-action)] motion-safe:active:scale-[var(--press-scale)] ${
                 isSelected
-                  ? "border-2 border-[var(--clay-600)] bg-[var(--brand-soft)]"
-                  : "border-border-subtle bg-card hover:border-border"
+                  ? "border-2 border-[var(--homa-midnight-action)] bg-[var(--homa-info-tint)]"
+                  : "border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] hover:border-[var(--homa-control-boundary)]"
               }`}
             >
               <input
@@ -184,11 +183,11 @@ export function TierOptions({
               <span
                 aria-hidden="true"
                 className={`mt-1 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
-                  isSelected ? "border-[var(--clay-600)]" : "border-border"
+                  isSelected ? "border-[var(--homa-midnight-action)]" : "border-[var(--homa-control-boundary)]"
                 }`}
               >
                 {isSelected ? (
-                  <span className="h-2.5 w-2.5 rounded-full bg-[var(--clay-600)]" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[var(--homa-midnight-action)]" />
                 ) : null}
               </span>
 
@@ -198,19 +197,19 @@ export function TierOptions({
                   wrapping around the price. */}
               <span className="min-w-0 flex-1">
                 <span className="flex items-baseline justify-between gap-3">
-                  <span className="min-w-0 font-display text-lg font-bold text-strong">
+                  <span className="min-w-0 font-display text-lg font-bold text-[var(--homa-ink)]">
                     {TIER_NAMES[tier]}
                   </span>
                   <span className="shrink-0 whitespace-nowrap">
-                    <span className="font-display text-xl font-bold text-strong">
+                    <span className="font-display text-xl font-bold text-[var(--homa-ink)]">
                       ${tierPriceAmount(tier, rowPeriod).toLocaleString("en-US")}
                     </span>
-                    <span className="text-sm font-normal text-muted">
+                    <span className="text-sm font-normal text-[var(--homa-muted-ink)]">
                       /{tierPriceUnit(rowPeriod)}
                     </span>
                   </span>
                 </span>
-                <span className="mt-1 block text-sm text-muted">{tierDelta(tier)}</span>
+                <span className="mt-1 block text-sm text-[var(--homa-muted-ink)]">{tierDelta(tier)}</span>
               </span>
             </label>
           );
@@ -229,10 +228,7 @@ export function TierOptions({
               tier: activeTier,
             });
           }}
-          className={reportButtonClass(
-            "primary-strong",
-            "flex min-h-14 w-full items-center justify-center px-6 text-base font-semibold",
-          )}
+          className="quiet-action quiet-action--primary quiet-action--large flex min-h-14 w-full items-center justify-center px-6 text-base font-semibold"
         >
           {TRIAL_GATE_CTA}
         </a>
@@ -242,10 +238,10 @@ export function TierOptions({
             asked question and a would-leave for both multi-child
             readers, so it sits at the button rather than below the
             fold. */}
-        <p className="mt-2 text-sm font-semibold text-strong">
+        <p className="mt-2 text-sm font-semibold text-[var(--homa-ink)]">
           {tierChargeLine(activeTier, effectivePeriod)}
         </p>
-        <p className="mt-1 text-sm text-body">{TRIAL_GATE_FAMILY_PRICE}</p>
+        <p className="mt-1 text-sm text-[var(--homa-ink)]">{TRIAL_GATE_FAMILY_PRICE}</p>
       </div>
     </div>
   );

@@ -18,20 +18,20 @@ export default async function ForgotPasswordPage({
   const { error } = await searchParams;
 
   return (
-    <main className="quiet-auth-shell">
+    <main className="quiet-auth-shell quiet-account-surface" data-brand-surface="forgot-password">
       <QuietFrame className="quiet-auth-card" as="article">
         <Logo size={28} />
-        <h1 className="mt-6 font-display text-3xl font-semibold leading-tight text-strong">
+        <h1 className="mt-6 font-display text-3xl font-semibold leading-tight text-[var(--homa-ink)]">
           Reset your password
         </h1>
-        <p className="mt-2 text-body">
+        <p className="mt-2 text-[var(--homa-ink)]">
           Enter the email you use for Homa. We&apos;ll send you a link to choose a new password.
         </p>
         <div className="mt-8">
           <ForgotPasswordForm expired={error === "expired"} />
         </div>
-        <p className="mt-4 text-center text-sm text-body">
-          <Link href="/signin" className="font-semibold text-brand underline underline-offset-2">
+        <p className="mt-4 text-center text-sm text-[var(--homa-ink)]">
+          <Link href="/signin" className="font-semibold text-[var(--homa-brand-text)] underline underline-offset-2">
             Return to sign in
           </Link>
         </p>

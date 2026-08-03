@@ -447,22 +447,22 @@ export function MapFlow({
   function renderPhase(): ReactNode {
     if (phase === "loading") {
       return (
-        <div aria-busy="true" className="rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
-          <div className="h-4 w-2/3 animate-pulse rounded bg-border-subtle" />
-          <div className="mt-3 h-4 w-1/2 animate-pulse rounded bg-border-subtle" />
+        <div aria-busy="true" className="rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm">
+          <div className="h-4 w-2/3 animate-pulse rounded bg-[var(--homa-soft-boundary)]" />
+          <div className="mt-3 h-4 w-1/2 animate-pulse rounded bg-[var(--homa-soft-boundary)]" />
         </div>
       );
     }
 
     if (phase === "bootstrap-error") {
       return (
-        <div className="rounded-lg border border-border-subtle bg-card p-6 text-center shadow-sm">
-          <p className="font-display text-lg font-semibold text-strong">Couldn&apos;t start just now.</p>
-          <p className="mt-2 text-body">Nothing was lost, one more try usually does it.</p>
+        <div className="rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 text-center shadow-sm">
+          <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">Couldn&apos;t start just now.</p>
+          <p className="mt-2 text-[var(--homa-ink)]">Nothing was lost, one more try usually does it.</p>
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="mt-4 min-h-11 rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-hover"
+            className="mt-4 min-h-11 rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2.5 text-sm font-semibold text-[var(--homa-paper)] hover:bg-[var(--homa-ink)]"
           >
             Try again
           </button>
@@ -742,6 +742,7 @@ export function MapFlow({
   return (
     <div
       key={phase}
+      data-brand-layer="onboarding-flow"
       ref={wrapperRef}
       tabIndex={-1}
       className={`flow-step-in outline-none ${widthClass}`}

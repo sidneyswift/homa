@@ -32,12 +32,12 @@ export function NextKidStep({
 
   return (
     <div>
-      <h1 className="font-display text-3xl font-bold leading-tight text-strong">
+      <h1 className="font-display text-3xl font-bold leading-tight text-[var(--homa-ink)]">
         {nextKid.name}&apos;s questions now, or {reportLabel} first?
       </h1>
 
-      <div className="mt-6 rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
-        <p className="text-sm text-muted">
+      <div className="mt-6 rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm">
+        <p className="text-sm text-[var(--homa-muted-ink)]">
           {started
             ? `${nextKid.answered} answer${nextKid.answered === 1 ? "" : "s"} already saved. A few minutes finishes it.`
             : `Same questionnaire, tuned to ${nextKid.name}'s age. About five minutes.`}
@@ -46,7 +46,7 @@ export function NextKidStep({
           <button
             type="button"
             onClick={onAnswerNext}
-            className="min-h-12 w-full rounded-pill border-[1.5px] border-[var(--sage-300)] bg-transparent px-6 py-3 text-base font-semibold text-[var(--sage-700)] transition duration-(--dur-fast) ease-out hover:bg-[var(--sage-50)] motion-safe:active:scale-[var(--press-scale)]"
+            className="min-h-12 w-full rounded-[var(--homa-radius-control)] border-[1.5px] border-[var(--homa-constructive-ink)] bg-transparent px-6 py-3 text-base font-semibold text-[var(--homa-constructive-ink)] transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-constructive-tint)] motion-safe:active:scale-[var(--press-scale)]"
           >
             {started
               ? `Continue ${nextKid.name}'s questionnaire`
@@ -55,7 +55,7 @@ export function NextKidStep({
           <button
             type="button"
             onClick={onSeeReports}
-            className="min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)]"
+            className="min-h-12 w-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)] shadow-sm transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] motion-safe:active:scale-[var(--press-scale)]"
           >
             See {reportLabel}
           </button>

@@ -69,21 +69,21 @@ export function HomeschoolStep({ onDone }: { onDone: () => void }) {
 
   return (
     <div>
-      <h1 className="font-display text-3xl font-bold leading-tight text-strong">
+      <h1 className="font-display text-3xl font-bold leading-tight text-[var(--homa-ink)]">
         About your homeschool.
       </h1>
-      <p className="mt-3 text-body">
+      <p className="mt-3 text-[var(--homa-ink)]">
         Optional, and it makes your kids&apos; materials fit what you&apos;re already doing.
       </p>
 
-      <div className="mt-6 rounded-lg border border-border-subtle bg-card p-5 shadow-sm sm:p-6">
+      <div className="mt-6 rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-5 shadow-sm sm:p-6">
         <div>
           {/* Multi-select (founder request 2026-07-06: more than one must
               be pickable). Selected chips take the soft brand tint, same
               as the TagInput chips below: several solid clay pills would
               fight the one real CTA on this card. */}
-          <p className="font-medium text-strong">
-            Styles you follow? <span className="font-normal text-muted">(pick any that fit)</span>
+          <p className="font-medium text-[var(--homa-ink)]">
+            Styles you follow? <span className="font-normal text-[var(--homa-muted-ink)]">(pick any that fit)</span>
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             {HOMESCHOOL_STYLES.map((value) => {
@@ -94,10 +94,10 @@ export function HomeschoolStep({ onDone }: { onDone: () => void }) {
                   type="button"
                   onClick={() => toggleStyle(value)}
                   aria-pressed={selected}
-                  className={`min-h-10 rounded-pill border px-4 py-2 text-sm transition duration-(--dur-fast) ease-out ${
+                  className={`min-h-10 rounded-[var(--homa-radius-control)] border px-4 py-2 text-sm transition duration-(--homa-motion-fast) ease-out ${
                     selected
-                      ? "border-brand bg-brand-soft text-[var(--clay-700)]"
-                      : "border-border bg-card text-strong hover:border-brand"
+                      ? "border-[var(--homa-visual-coral)] bg-[var(--homa-info-tint)] text-[var(--homa-brand-text)]"
+                      : "border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] text-[var(--homa-ink)] hover:border-[var(--homa-visual-coral)]"
                   }`}
                 >
                   {HOMESCHOOL_STYLE_LABELS[value]}
@@ -107,7 +107,7 @@ export function HomeschoolStep({ onDone }: { onDone: () => void }) {
           </div>
           {styles.length > 0 ? (
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="text-sm text-muted">How closely?</span>
+              <span className="text-sm text-[var(--homa-muted-ink)]">How closely?</span>
               {(
                 [
                   ["closely", "pretty closely"],
@@ -120,10 +120,10 @@ export function HomeschoolStep({ onDone }: { onDone: () => void }) {
                   type="button"
                   onClick={() => setStrictness(strictness === value ? null : value)}
                   aria-pressed={strictness === value}
-                  className={`min-h-10 rounded-pill border px-4 py-2 text-sm ${
+                  className={`min-h-10 rounded-[var(--homa-radius-control)] border px-4 py-2 text-sm ${
                     strictness === value
-                      ? "border-brand bg-brand-soft text-[var(--clay-700)]"
-                      : "border-border bg-card text-strong hover:border-brand"
+                      ? "border-[var(--homa-visual-coral)] bg-[var(--homa-info-tint)] text-[var(--homa-brand-text)]"
+                      : "border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] text-[var(--homa-ink)] hover:border-[var(--homa-visual-coral)]"
                   }`}
                 >
                   {label}
@@ -144,8 +144,8 @@ export function HomeschoolStep({ onDone }: { onDone: () => void }) {
         />
 
         <div className="mt-5">
-          <p className="font-medium text-strong">Anything that matters to your family?</p>
-          <p className="mt-1 text-sm text-muted">
+          <p className="font-medium text-[var(--homa-ink)]">Anything that matters to your family?</p>
+          <p className="mt-1 text-sm text-[var(--homa-muted-ink)]">
             Faith, values, aesthetics, screen rules. Materials will respect it.
           </p>
           <textarea
@@ -153,7 +153,7 @@ export function HomeschoolStep({ onDone }: { onDone: () => void }) {
             onChange={(event) => setValues(event.target.value)}
             rows={2}
             maxLength={500}
-            className="mt-2 w-full rounded-md border border-border px-4 py-2.5 text-sm text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
+            className="mt-2 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] px-4 py-2.5 text-sm text-[var(--homa-ink)] focus:border-[var(--homa-visual-coral)] focus:outline-none focus:ring-2 focus:ring-[var(--homa-visual-coral)]/30"
           />
         </div>
 
@@ -161,7 +161,7 @@ export function HomeschoolStep({ onDone }: { onDone: () => void }) {
           type="button"
           onClick={() => void saveAndContinue()}
           disabled={busy}
-          className="mt-6 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+          className="mt-6 min-h-12 w-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)] shadow-sm transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
         >
           {busy ? "Saving\u2026" : "Continue"}
         </button>
@@ -169,7 +169,7 @@ export function HomeschoolStep({ onDone }: { onDone: () => void }) {
           type="button"
           onClick={onDone}
           disabled={busy}
-          className="mt-2 w-full text-center text-sm text-subtle underline-offset-2 hover:underline"
+          className="mt-2 w-full text-center text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
         >
           skip for now
         </button>

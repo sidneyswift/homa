@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { CreditCard, LogOut } from "lucide-react";
-
 import { ageInMonths, ageLabel, formatUsPhone } from "@homa/core";
 
 import { getAppData } from "../../../lib/app-data";
@@ -16,6 +14,7 @@ import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import { signOutAction } from "../../signin/actions";
 import { MemoriesCard } from "../../../components/dashboard/memories-card";
 import { PageColumn } from "../../../components/dashboard/page-column";
+import { Icon } from "../../../components/design/Icon";
 import { FamilyDetailsSection } from "./family-details-section";
 import { HomeschoolSection } from "./homeschool-section";
 import { PlanSection } from "./plan-section";
@@ -107,19 +106,19 @@ export default async function SettingsPage({
 
   return (
     <PageColumn>
-      <div className="mx-auto w-full max-w-[720px]">
+      <div className="quiet-account-surface mx-auto w-full max-w-[720px]" data-brand-surface="settings">
         <header>
-          <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
+          <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[var(--homa-muted-ink)]">
             {family.name}
           </p>
-          <h1 className="mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-strong">
+          <h1 className="mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-[var(--homa-ink)]">
             Settings
           </h1>
         </header>
 
         <div className="mt-6 flex flex-col gap-4">
-          <section className="rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
-            <h2 className="font-display text-xl font-semibold text-strong">Your family</h2>
+          <section className="quiet-frame quiet-frame--paper rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm" data-brand-layer="family-settings">
+            <h2 className="font-display text-xl font-semibold text-[var(--homa-ink)]">Your family</h2>
 
             <KidsSection
               kids={children.map((child, index) => ({
@@ -207,31 +206,31 @@ export default async function SettingsPage({
         </div>
 
         <footer className="mt-6 flex flex-wrap items-center justify-between gap-3 px-1">
-          <p className="text-sm text-muted">Signed in as {user?.email ?? "your account"}</p>
+          <p className="text-sm text-[var(--homa-muted-ink)]">Signed in as {user?.email ?? "your account"}</p>
           <div className="flex flex-wrap items-center gap-3">
             {plan.billingProvider === "apple" ? (
               <a
                 href="https://apps.apple.com/account/subscriptions"
-                className="inline-flex min-h-10 items-center gap-2 rounded-pill border border-border bg-card px-5 py-2 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong"
+                className="inline-flex min-h-10 items-center gap-2 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-5 py-2 text-sm font-medium text-[var(--homa-ink)] transition-colors hover:border-[var(--homa-visual-coral)] hover:text-[var(--homa-ink)]"
               >
-                <CreditCard size={15} aria-hidden="true" />
+                <Icon name="plan" size={16} />
                 Manage App Store subscription
               </a>
             ) : hasBilling ? (
               <a
                 href="/api/billing/portal"
-                className="inline-flex min-h-10 items-center gap-2 rounded-pill border border-border bg-card px-5 py-2 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong"
+                className="inline-flex min-h-10 items-center gap-2 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-5 py-2 text-sm font-medium text-[var(--homa-ink)] transition-colors hover:border-[var(--homa-visual-coral)] hover:text-[var(--homa-ink)]"
               >
-                <CreditCard size={15} aria-hidden="true" />
+                <Icon name="plan" size={16} />
                 Manage billing
               </a>
             ) : null}
             <form action={signOutAction}>
               <button
                 type="submit"
-                className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-pill border border-border bg-card px-5 py-2 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong"
+                className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-5 py-2 text-sm font-medium text-[var(--homa-ink)] transition-colors hover:border-[var(--homa-visual-coral)] hover:text-[var(--homa-ink)]"
               >
-                <LogOut size={15} aria-hidden="true" />
+                <Icon name="logout" size={16} />
                 Sign out
               </button>
             </form>

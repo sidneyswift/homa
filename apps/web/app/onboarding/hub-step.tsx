@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Plus } from "lucide-react";
+
+import { Icon } from "../../components/design/Icon";
 
 import { MAP_KID_CAP } from "@homa/core";
 
@@ -64,10 +65,10 @@ export function HubStep({
 
   return (
     <div>
-      <h1 className="font-display text-3xl font-bold leading-tight text-strong">
+      <h1 className="font-display text-3xl font-bold leading-tight text-[var(--homa-ink)]">
         {welcomeBack ? "Welcome back" : "Your family"}
       </h1>
-      <p className="mt-3 text-body">
+      <p className="mt-3 text-[var(--homa-ink)]">
         {childrenList.length === 0
           ? "Add your kids and we'll get mapping."
           : "Everything saves as you go. Pick up anywhere."}
@@ -79,10 +80,10 @@ export function HubStep({
             return (
               <div
                 key={child.id}
-                className="relative rounded-lg border border-sage/40 bg-[var(--accent-sage-soft)] p-5"
+                className="relative rounded-[var(--homa-radius-card)] border border-[color-mix(in_srgb,var(--homa-constructive-ink)_40%,transparent)] bg-[var(--homa-constructive-tint)] p-5"
               >
-                <p className="font-display text-lg font-semibold text-strong">{child.name}</p>
-                <p className="mt-1 text-body">
+                <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">{child.name}</p>
+                <p className="mt-1 text-[var(--homa-ink)]">
                   The questionnaire starts at age 2. I&apos;ll email you the moment {child.name}&apos;s is
                   ready. Everything you&apos;ve shared is saved.
                 </p>
@@ -92,12 +93,12 @@ export function HubStep({
           }
           if (child.reportToken) {
             return (
-              <div key={child.id} className="relative rounded-lg border border-border-subtle bg-card p-5 shadow-sm">
-                <p className="font-display text-lg font-semibold text-strong">{child.name}</p>
-                <p className="mt-1 text-body">The report is ready, and it&apos;s in your inbox too.</p>
+              <div key={child.id} className="relative rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-5 shadow-sm">
+                <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">{child.name}</p>
+                <p className="mt-1 text-[var(--homa-ink)]">The report is ready, and it&apos;s in your inbox too.</p>
                 <a
                   href={`/onboarding/r/${child.reportToken}`}
-                  className="mt-3 inline-flex min-h-11 items-center rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand transition duration-(--dur-fast) ease-out hover:bg-brand-hover"
+                  className="mt-3 inline-flex min-h-11 items-center rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2.5 text-sm font-semibold text-[var(--homa-paper)] transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)]"
                 >
                   Open {child.name}&apos;s report
                 </a>
@@ -110,13 +111,13 @@ export function HubStep({
           // ask, so the honest action is the report itself.
           if (isChecklistComplete(child)) {
             return (
-              <div key={child.id} className="relative rounded-lg border border-border-subtle bg-card p-5 shadow-sm">
-                <p className="font-display text-lg font-semibold text-strong">{child.name}</p>
-                <p className="mt-1 text-body">Every question is answered. The report is one tap away.</p>
+              <div key={child.id} className="relative rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-5 shadow-sm">
+                <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">{child.name}</p>
+                <p className="mt-1 text-[var(--homa-ink)]">Every question is answered. The report is one tap away.</p>
                 <button
                   type="button"
                   onClick={() => onSeeReport(child.id)}
-                  className="mt-3 inline-flex min-h-11 items-center rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)]"
+                  className="mt-3 inline-flex min-h-11 items-center rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2.5 text-sm font-semibold text-[var(--homa-paper)] transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] motion-safe:active:scale-[var(--press-scale)]"
                 >
                   See {child.name}&apos;s report
                 </button>
@@ -126,7 +127,7 @@ export function HubStep({
           }
           const started = child.answered > 0;
           return (
-            <div key={child.id} className="relative rounded-lg border border-border-subtle bg-card p-5 shadow-sm">
+            <div key={child.id} className="relative rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-5 shadow-sm">
               {/* Further simplified (2026-07-07, "subtitles are
                   unneeded"): the separate subtitle line is gone; the one
                   fact worth keeping, how many answers already exist,
@@ -135,10 +136,10 @@ export function HubStep({
                   shown at all once there's nothing to report ("About 5
                   minutes" was cut too, matching the reasoning it was
                   removed in on the checklist's first-question kicker). */}
-              <p className="font-display text-lg font-semibold text-strong">
+              <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">
                 {child.name}
                 {started ? (
-                  <span className="font-normal text-muted">
+                  <span className="font-normal text-[var(--homa-muted-ink)]">
                     {" "}
                     ({child.answered} answer{child.answered === 1 ? "" : "s"} saved)
                   </span>
@@ -154,7 +155,7 @@ export function HubStep({
                 type="button"
                 onClick={() => onStartChecklist(child.id)}
                 aria-label={started ? "Continue the questionnaire" : `Start ${child.name}'s questionnaire`}
-                className="mt-3 inline-flex min-h-11 w-28 items-center justify-center rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)]"
+                className="mt-3 inline-flex min-h-11 w-28 items-center justify-center rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2.5 text-sm font-semibold text-[var(--homa-paper)] transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] motion-safe:active:scale-[var(--press-scale)]"
               >
                 {started ? "Continue" : "Start"}
               </button>
@@ -165,7 +166,7 @@ export function HubStep({
       </div>
 
       {anyPending && childrenList.every((child) => !child.inRange) ? (
-        <p className="mt-4 text-body">
+        <p className="mt-4 text-[var(--homa-ink)]">
           You&apos;re all set. We&apos;ll email you when the questionnaire is ready for their age.
         </p>
       ) : null}
@@ -175,27 +176,27 @@ export function HubStep({
           <button
             type="button"
             onClick={onAddKids}
-            className="inline-flex min-h-11 items-center gap-1.5 self-start rounded-pill border-[1.5px] border-[var(--sage-300)] px-4 py-2 text-sm font-semibold text-[var(--sage-700)] transition duration-(--dur-fast) ease-out hover:bg-[var(--sage-50)] motion-safe:active:scale-[var(--press-scale)]"
+            className="inline-flex min-h-11 items-center gap-1.5 self-start rounded-[var(--homa-radius-control)] border-[1.5px] border-[var(--homa-constructive-ink)] px-4 py-2 text-sm font-semibold text-[var(--homa-constructive-ink)] transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-constructive-tint)] motion-safe:active:scale-[var(--press-scale)]"
           >
-            <Plus size={15} aria-hidden="true" />
+            <Icon name="add" size={16} />
             add another kid
           </button>
         ) : null}
         {email ? (
           linkStatus === "sent" ? (
-            <p className="text-sm text-muted">Link sent. It works on any device.</p>
+            <p className="text-sm text-[var(--homa-muted-ink)]">Link sent. It works on any device.</p>
           ) : (
             <>
               {linkStatus === "failed" ? (
-                <p className="text-sm text-body">That link did not send. You can try again.</p>
+                <p className="text-sm text-[var(--homa-ink)]">That link did not send. You can try again.</p>
               ) : null}
               <button
                 type="button"
                 onClick={() => void emailMeThisLink()}
                 disabled={linkStatus === "sending"}
-                className="inline-flex items-center gap-1.5 self-start text-sm text-muted underline-offset-2 transition-colors duration-(--dur-fast) ease-out hover:text-strong hover:underline disabled:cursor-wait disabled:opacity-70"
+                className="inline-flex items-center gap-1.5 self-start text-sm text-[var(--homa-muted-ink)] underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-ink)] hover:underline disabled:cursor-wait disabled:opacity-70"
               >
-                <Mail size={14} aria-hidden="true" />
+                <Icon name="chat" size={16} />
                 {linkStatus === "sending" ? "sending..." : "email me this link (for later, or another device)"}
               </button>
             </>

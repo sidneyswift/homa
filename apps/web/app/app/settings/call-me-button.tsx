@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Phone } from "lucide-react";
+
+import { Icon } from "../../../components/design/Icon";
 
 /**
  * "Have Homa call me" on the signed-in adult's own row (#283).
@@ -74,7 +75,7 @@ export function CallMeButton({ hasPhone }: { hasPhone: boolean }) {
 
   if (phase === "ringing") {
     return (
-      <span className="text-sm text-muted">
+      <span className="text-sm text-[var(--homa-muted-ink)]">
         Calling you now, your phone should ring in a moment.
       </span>
     );
@@ -87,12 +88,12 @@ export function CallMeButton({ hasPhone }: { hasPhone: boolean }) {
         onClick={call}
         disabled={phase === "calling" || !hasPhone}
         title={hasPhone ? undefined : "Add your cell number first"}
-        className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-1.5 text-sm font-medium text-[var(--homa-ink)] transition-colors hover:border-[var(--homa-visual-coral)] hover:text-[var(--homa-ink)] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <Phone aria-hidden="true" className="size-4" />
+        <Icon name="voice" size={16} />
         {phase === "calling" ? "Calling…" : "Have Homa call me"}
       </button>
-      {message ? <span className="text-sm text-muted">{message}</span> : null}
+      {message ? <span className="text-sm text-[var(--homa-muted-ink)]">{message}</span> : null}
     </span>
   );
 }
