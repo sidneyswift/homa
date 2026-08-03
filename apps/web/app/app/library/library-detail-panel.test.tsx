@@ -43,6 +43,9 @@ test("Library detail exposes editable organization fields without a second edit 
       onDeleted={() => undefined}
     />,
   );
+  assert.match(html, /data-brand-surface="library-detail"/u);
+  assert.match(html, /quiet-context-sheet/u);
+  assert.match(html, /quiet-status quiet-status--error/u);
   assert.match(html, /Saved from chat/);
   assert.match(html, /Could not organize/);
   assert.match(html, /aria-label="Resource details"/);
@@ -58,8 +61,8 @@ test("Library detail exposes editable organization fields without a second edit 
   assert.match(html, /\/api\/library\/assets\/11111111-1111-4111-8111-111111111111\/download\?surface=detail/);
   assert.doesNotMatch(html, /assets\.public\.blob/);
   assert.doesNotMatch(html, />Edit details<\/button>/);
-  assert.match(html, /disabled=""[^>]*>Save changes<\/button>/);
-  assert.match(html, />Remove from Library<\/button>/);
+  assert.match(html, /disabled=""[^>]*>[\s\S]*?Save changes<\/span>/u);
+  assert.match(html, /Remove from Library<\/span>/u);
   assert.doesNotMatch(html, /Try organizing again/);
 });
 
@@ -79,7 +82,7 @@ test("Library detail retries only transient processing failures", () => {
       onDeleted={() => undefined}
     />,
   );
-  assert.match(html, />Try organizing again<\/button>/);
+  assert.match(html, /Try organizing again<\/span>/u);
   assert.match(
     html,
     /\/api\/library\/assets\/11111111-1111-4111-8111-111111111111\/download\?surface=detail/,

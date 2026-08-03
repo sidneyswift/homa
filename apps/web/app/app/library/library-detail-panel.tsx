@@ -1,16 +1,11 @@
 "use client";
 
-import {
-  AlertCircle,
-  Download,
-  FileText,
-  RefreshCw,
-  Trash2,
-  X,
-} from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
 import { SidePanel } from "../../../components/chassis/side-panel";
+import { Icon } from "../../../components/design/Icon";
+import { QuietAction } from "../../../components/design/QuietAction";
+import { QuietStatus } from "../../../components/design/QuietStatus";
 import {
   FAMILY_ASSET_DELETE_CONSEQUENCE,
   FAMILY_ASSET_RESOURCE_KIND_LABELS,
@@ -68,10 +63,13 @@ interface AssetUpdateResponse {
   asset?: FamilyAssetView;
 }
 
-function statusClasses(tone: ReturnType<typeof familyAssetStatusCopy>["tone"]): string {
-  if (tone === "ready") return "border-sage/30 bg-[var(--accent-sage-soft)]";
-  if (tone === "processing") return "border-[var(--gold-300)] bg-[var(--warning-soft)]";
-  return "border-[var(--danger)] bg-[var(--danger-soft)]";
+function statusTone(
+  tone: ReturnType<typeof familyAssetStatusCopy>["tone"],
+): "info" | "constructive" | "attention" | "error" {
+  if (tone === "ready") return "constructive";
+  if (tone === "processing") return "info";
+  if (tone === "attention") return "attention";
+  return "error";
 }
 
 async function readAssetUpdate(response: Response): Promise<FamilyAssetView> {
@@ -274,18 +272,24 @@ export function LibraryDetailPanel({
   }
 
   return (
-    <SidePanel labelledBy={headingId} onClose={onClose} initialFocusRef={closeRef}>
-      <header className="flex items-start gap-3 border-b border-border-subtle px-5 pb-4 pt-3 lg:pt-5">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-brand-soft text-brand">
-          <FileText size={20} aria-hidden="true" />
+    <SidePanel
+      labelledBy={headingId}
+      onClose={onClose}
+      initialFocusRef={closeRef}
+      variant="quiet"
+    >
+      <div data-brand-surface="library-detail" data-brand-fixture="quiet-authority-v1" className="flex min-h-0 flex-1 flex-col">
+      <header className="flex items-start gap-3 border-b border-[var(--homa-control-boundary)] px-5 pb-4 pt-3 lg:pt-5">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--homa-radius-control)] bg-[var(--homa-highlight-tint)] text-[var(--homa-highlight-ink)]">
+          <Icon name="book" size={20} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
             Library resource
           </p>
           <h2
             id={headingId}
-            className="mt-0.5 break-words font-display text-xl font-semibold text-strong"
+            className="mt-0.5 break-words font-display text-xl font-semibold text-[var(--homa-ink)]"
           >
             {title.trim() || "Untitled resource"}
           </h2>
@@ -295,43 +299,45 @@ export function LibraryDetailPanel({
           type="button"
           onClick={onClose}
           aria-label="Close resource details"
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted hover:bg-page hover:text-strong"
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] text-[var(--homa-ink)] hover:border-[var(--homa-midnight-action)]"
         >
-          <X size={19} aria-hidden="true" />
+          <Icon name="close" size={20} />
         </button>
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5">
         <section
-          className={`rounded-md border p-4 ${statusClasses(displayedStatus.tone)}`}
+          className="mt-5"
         >
-          <p className="text-sm font-bold text-strong">{displayedStatus.label}</p>
-          <p className="mt-1 text-sm leading-6 text-body">{displayedStatus.detail}</p>
+          <QuietStatus tone={hasChanges ? "attention" : statusTone(displayedStatus.tone)} className="p-4">
+            <p className="text-sm font-bold">{displayedStatus.label}</p>
+            <p className="mt-1 text-sm leading-6">{displayedStatus.detail}</p>
+          </QuietStatus>
           {!hasChanges && canRetryProcessing ? (
-            <button
-              type="button"
+            <QuietAction
+              kind="quiet"
               disabled={retrying}
               onClick={() => void retryProcessing()}
-              className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-md px-3 py-2 text-sm font-bold text-brand hover:bg-card disabled:cursor-wait disabled:opacity-60"
+              className="mt-2 px-3 text-sm"
+              icon={<Icon name="progress" size={16} />}
             >
-              <RefreshCw size={16} aria-hidden="true" />
               {retrying ? "Starting…" : "Try organizing again"}
-            </button>
+            </QuietAction>
           ) : null}
           {!hasChanges &&
           asset.status === "failed" &&
           asset.processingErrorCode !== "blob_delete_failed" ? (
-            <p className="mt-2 text-xs leading-5 text-muted">
+            <p className="mt-2 text-xs leading-5 text-[color:color-mix(in_srgb,var(--homa-ink)_62%,var(--homa-canvas))]">
               You can add or correct the details below.
             </p>
           ) : null}
         </section>
 
         {error ? (
-          <div className="mt-4 flex items-start gap-2 rounded-md border border-[var(--danger)] bg-[var(--danger-soft)] px-3 py-3 text-sm text-danger">
-            <AlertCircle size={17} className="mt-0.5 shrink-0" aria-hidden="true" />
+          <QuietStatus tone="error" className="mt-4 flex items-start gap-2 px-3 py-3 text-sm">
+            <Icon name="error" size={16} className="mt-0.5 shrink-0" />
             <p>{error}</p>
-          </div>
+          </QuietStatus>
         ) : null}
 
         <form
@@ -343,8 +349,8 @@ export function LibraryDetailPanel({
             void save();
           }}
         >
-          <h3 className="font-display text-lg font-semibold text-strong">Details</h3>
-          <label className="block text-sm font-semibold text-strong">
+          <h3 className="font-display text-lg font-semibold text-[var(--homa-ink)]">Details</h3>
+          <label className="block text-sm font-semibold text-[var(--homa-ink)]">
             Title
             <input
               name="title"
@@ -355,10 +361,10 @@ export function LibraryDetailPanel({
                 updateDraft((current) => ({ ...current, title: nextTitle }));
                 setError(null);
               }}
-              className="mt-2 min-h-11 w-full rounded-md border border-border-subtle bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+              className="mt-2 min-h-11 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 py-2 text-sm font-normal text-[var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
             />
           </label>
-          <label className="block text-sm font-semibold text-strong">
+          <label className="block text-sm font-semibold text-[var(--homa-ink)]">
             Resource type
             <select
               name="resourceKind"
@@ -373,7 +379,7 @@ export function LibraryDetailPanel({
                 }));
                 setError(null);
               }}
-              className="mt-2 min-h-11 w-full rounded-md border border-border-subtle bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+              className="mt-2 min-h-11 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 py-2 text-sm font-normal text-[var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
             >
               <option value="">Not set</option>
               {FAMILY_ASSET_RESOURCE_KINDS.map((kind) => (
@@ -385,15 +391,15 @@ export function LibraryDetailPanel({
           </label>
 
           <fieldset>
-            <legend className="text-sm font-semibold text-strong">For</legend>
-            <p className="mt-1 text-xs leading-5 text-muted">
+            <legend className="text-sm font-semibold text-[var(--homa-ink)]">For</legend>
+            <p className="mt-1 text-xs leading-5 text-[color:color-mix(in_srgb,var(--homa-ink)_62%,var(--homa-canvas))]">
               Leaving all children unchecked saves this as Whole family.
             </p>
             <div className="mt-2 grid grid-cols-2 gap-2">
               {childOptions.map((child) => (
                 <label
                   key={child.id}
-                  className="flex min-h-11 items-center gap-2 rounded-md border border-border-subtle px-3 py-2 text-sm text-body"
+                  className="flex min-h-11 items-center gap-2 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] px-3 py-2 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]"
                 >
                   <input
                     name="childIds"
@@ -401,7 +407,7 @@ export function LibraryDetailPanel({
                     type="checkbox"
                     checked={childIds.has(child.id)}
                     onChange={() => toggle("childIds", child.id)}
-                    className="h-4 w-4 accent-[var(--clay-600)]"
+                    className="h-4 w-4 accent-[var(--homa-midnight-action)]"
                   />
                   {child.name}
                 </label>
@@ -410,12 +416,12 @@ export function LibraryDetailPanel({
           </fieldset>
 
           <fieldset>
-            <legend className="text-sm font-semibold text-strong">Subjects</legend>
+            <legend className="text-sm font-semibold text-[var(--homa-ink)]">Subjects</legend>
             <div className="mt-2 grid grid-cols-2 gap-2">
               {subjectOptions.map((subject) => (
                 <label
                   key={subject.id}
-                  className="flex min-h-11 items-center gap-2 rounded-md border border-border-subtle px-3 py-2 text-sm text-body"
+                  className="flex min-h-11 items-center gap-2 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] px-3 py-2 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]"
                 >
                   <input
                     name="subjectIds"
@@ -423,7 +429,7 @@ export function LibraryDetailPanel({
                     type="checkbox"
                     checked={subjectIds.has(subject.id)}
                     onChange={() => toggle("subjectIds", subject.id)}
-                    className="h-4 w-4 accent-[var(--clay-600)]"
+                    className="h-4 w-4 accent-[var(--homa-midnight-action)]"
                   />
                   {subject.label}
                 </label>
@@ -432,40 +438,40 @@ export function LibraryDetailPanel({
           </fieldset>
         </form>
 
-            <section className="mt-8 border-t border-border-subtle pt-5">
-              <h3 className="font-display text-lg font-semibold text-strong">File details</h3>
+            <section className="mt-8 border-t border-[var(--homa-control-boundary)] pt-5">
+              <h3 className="font-display text-lg font-semibold text-[var(--homa-ink)]">File details</h3>
               <dl className="mt-3 grid grid-cols-[minmax(7rem,auto)_1fr] gap-x-4 gap-y-3 text-sm">
-                <dt className="text-muted">Source</dt>
-                <dd className="text-right text-strong">{familyAssetSourceLabel(asset)}</dd>
-                <dt className="text-muted">Original file</dt>
-                <dd className="break-all text-right text-strong">{asset.originalName}</dd>
-                <dt className="text-muted">Size</dt>
-                <dd className="text-right text-strong">{formatFamilyAssetBytes(asset.byteSize)}</dd>
-                <dt className="text-muted">File type</dt>
-                <dd className="text-right text-strong">{fileKindLabel(asset)}</dd>
-                <dt className="text-muted">Added</dt>
-                <dd className="text-right text-strong">{stableFamilyAssetDate(asset.createdAt)}</dd>
+                <dt className="text-[color:color-mix(in_srgb,var(--homa-ink)_62%,var(--homa-canvas))]">Source</dt>
+                <dd className="text-right text-[var(--homa-ink)]">{familyAssetSourceLabel(asset)}</dd>
+                <dt className="text-[color:color-mix(in_srgb,var(--homa-ink)_62%,var(--homa-canvas))]">Original file</dt>
+                <dd className="break-all text-right text-[var(--homa-ink)]">{asset.originalName}</dd>
+                <dt className="text-[color:color-mix(in_srgb,var(--homa-ink)_62%,var(--homa-canvas))]">Size</dt>
+                <dd className="text-right text-[var(--homa-ink)]">{formatFamilyAssetBytes(asset.byteSize)}</dd>
+                <dt className="text-[color:color-mix(in_srgb,var(--homa-ink)_62%,var(--homa-canvas))]">File type</dt>
+                <dd className="text-right text-[var(--homa-ink)]">{fileKindLabel(asset)}</dd>
+                <dt className="text-[color:color-mix(in_srgb,var(--homa-ink)_62%,var(--homa-canvas))]">Added</dt>
+                <dd className="text-right text-[var(--homa-ink)]">{stableFamilyAssetDate(asset.createdAt)}</dd>
                 {asset.authors.length > 0 ? (
                   <>
-                    <dt className="text-muted">Author</dt>
-                    <dd className="text-right text-strong">{asset.authors.join(", ")}</dd>
+                    <dt className="text-[color:color-mix(in_srgb,var(--homa-ink)_62%,var(--homa-canvas))]">Author</dt>
+                    <dd className="text-right text-[var(--homa-ink)]">{asset.authors.join(", ")}</dd>
                   </>
                 ) : null}
                 {asset.publisher ? (
                   <>
-                    <dt className="text-muted">Publisher</dt>
-                    <dd className="text-right text-strong">{asset.publisher}</dd>
+                    <dt className="text-[color:color-mix(in_srgb,var(--homa-ink)_62%,var(--homa-canvas))]">Publisher</dt>
+                    <dd className="text-right text-[var(--homa-ink)]">{asset.publisher}</dd>
                   </>
                 ) : null}
               </dl>
             </section>
 
             {curriculumUnits.length > 0 ? (
-              <section className="mt-8 border-t border-border-subtle pt-5">
-                <h3 className="font-display text-lg font-semibold text-strong">
+              <section className="mt-8 border-t border-[var(--homa-control-boundary)] pt-5">
+                <h3 className="font-display text-lg font-semibold text-[var(--homa-ink)]">
                   Curriculum units
                 </h3>
-                <p className="mt-1 text-sm leading-6 text-muted">
+                <p className="mt-1 text-sm leading-6 text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
                   Homa saved {currentCurriculumUnitCount} approved {currentCurriculumUnitCount === 1 ? "unit" : "units"} from this curriculum. Each one shows where it came from in the file.
                 </p>
                 <ol className="mt-3 space-y-2">
@@ -476,28 +482,28 @@ export function LibraryDetailPanel({
                         key={unit.id}
                         ref={highlighted ? highlightedUnitRef : undefined}
                         id={`library-unit-${unit.id}`}
-                        className={`rounded-md border p-3 ${
+                        className={`rounded-[var(--homa-radius-control)] border p-3 ${
                           highlighted
-                            ? "border-brand bg-brand-soft"
-                            : "border-border-subtle bg-page"
+                            ? "border-[var(--homa-midnight-action)] bg-[var(--homa-highlight-tint)]"
+                            : "border-[var(--homa-control-boundary)] bg-[var(--homa-canvas)]"
                         }`}
                       >
                         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                           <a
                             href={familyAssetLibraryHref(unit.id)}
-                            className="font-semibold text-strong hover:text-brand"
+                            className="font-semibold text-[var(--homa-ink)] hover:text-[var(--homa-brand-text)]"
                           >
                             {unit.unitLabel}
                           </a>
-                          <span className="text-xs text-muted">{unit.sourceLocator}</span>
+                          <span className="text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_56%,var(--homa-canvas))]">{unit.sourceLocator}</span>
                         </div>
                         {!unit.isCurrent ? (
-                          <p className="mt-1 text-xs font-semibold text-muted">
+                          <p className="mt-1 text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_62%,var(--homa-canvas))]">
                             Earlier approved unit
                           </p>
                         ) : null}
-                        <p className="mt-1 text-sm leading-6 text-body">{unit.summary}</p>
-                        <p className="mt-1 text-xs text-muted">
+                        <p className="mt-1 text-sm leading-6 text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">{unit.summary}</p>
+                        <p className="mt-1 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_62%,var(--homa-canvas))]">
                           {unit.subjects.length > 0
                             ? unit.subjects.map((subject) => subject.label).join(" · ")
                             : "Subject not set"}
@@ -510,84 +516,80 @@ export function LibraryDetailPanel({
               </section>
             ) : null}
 
-            <section className="mt-8 border-t border-border-subtle pt-5">
+            <section className="mt-8 border-t border-[var(--homa-control-boundary)] pt-5">
               {confirmingRemoval ? (
-                <div className="rounded-md border border-[var(--danger)] bg-[var(--danger-soft)] p-4">
-                  <h3 className="font-semibold text-strong">Remove this original?</h3>
-                  <p className="mt-2 text-sm leading-6 text-body">
+                <QuietStatus tone="error" className="p-4">
+                  <h3 className="font-semibold">Remove this original?</h3>
+                  <p className="mt-2 text-sm leading-6">
                     {FAMILY_ASSET_DELETE_CONSEQUENCE}
                   </p>
                   <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                    <button
-                      type="button"
+                    <QuietAction
+                      kind="secondary"
                       onClick={() => setConfirmingRemoval(false)}
-                      className="min-h-11 rounded-md px-4 py-2 text-sm font-semibold text-muted hover:bg-card hover:text-strong"
                     >
                       Keep original
-                    </button>
-                    <button
-                      type="button"
+                    </QuietAction>
+                    <QuietAction
+                      kind="primary"
                       disabled={removing}
                       onClick={() => void remove()}
-                      className="min-h-11 rounded-md bg-[var(--danger)] px-4 py-2 text-sm font-bold text-white disabled:cursor-wait disabled:opacity-60"
                     >
                       {removing ? "Removing…" : "Remove original"}
-                    </button>
+                    </QuietAction>
                   </div>
-                </div>
+                </QuietStatus>
               ) : (
-                <button
-                  type="button"
+                <QuietAction
+                  kind="quiet"
                   onClick={() => setConfirmingRemoval(true)}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-danger hover:bg-[var(--danger-soft)]"
+                  className="px-3 text-sm"
+                  icon={<Icon name="delete" size={16} />}
                 >
-                  <Trash2 size={16} aria-hidden="true" />
                   {asset.processingErrorCode === "blob_delete_failed"
                     ? "Try removal again"
                     : "Remove from Library"}
-                </button>
+                </QuietAction>
               )}
             </section>
       </div>
 
-      <footer className="shrink-0 border-t border-border-subtle bg-card px-5 py-3">
+      <footer className="shrink-0 border-t border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-5 py-3">
         {hasChanges ? (
-          <p className="mb-2 text-xs font-semibold text-muted" aria-live="polite">
+          <p className="mb-2 text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_62%,var(--homa-canvas))]" aria-live="polite">
             Unsaved changes
           </p>
         ) : null}
         <div className="grid grid-cols-2 gap-2">
           {hasChanges ? (
-            <button
-              type="button"
+            <QuietAction
+              kind="secondary"
               disabled={saving}
               onClick={() => {
                 resetDraft();
                 setError(null);
               }}
-              className="min-h-11 rounded-md border border-border-subtle px-3 py-2 text-sm font-bold text-strong hover:bg-page disabled:cursor-wait disabled:opacity-60"
             >
               Cancel changes
-            </button>
+            </QuietAction>
           ) : (
-            <a
+            <QuietAction
               href={`/api/library/assets/${encodeURIComponent(asset.id)}/download?surface=detail`}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-brand px-3 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)]"
+              icon={<Icon name="external" size={16} />}
             >
-              <Download size={17} aria-hidden="true" />
               Download
-            </a>
+            </QuietAction>
           )}
-          <button
+          <QuietAction
             type="submit"
             form={detailsFormId}
             disabled={!hasChanges || saving}
-            className="min-h-11 rounded-md bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)] disabled:cursor-not-allowed disabled:bg-[var(--stone-200)] disabled:text-muted"
           >
             {saving ? "Saving…" : "Save changes"}
-          </button>
+          </QuietAction>
         </div>
       </footer>
+      </div>
     </SidePanel>
   );
 }
