@@ -25,6 +25,7 @@
     "check:design-tokens": "tsx scripts/design-tokens-check.mts && tsx --test scripts/design-tokens-check.test.ts",
     "check:brand-surfaces": "node --experimental-strip-types scripts/brand-surfaces.mts --check && node --experimental-strip-types --test scripts/brand-surfaces.test.mts",
     "check:brand-residue": "node --experimental-strip-types scripts/brand-residue-check.mts && node --experimental-strip-types --test scripts/brand-residue-check.test.mts",
+    "audit:brand-residue": "node --experimental-strip-types scripts/brand-residue-check.mts --full",
     "check:design-contract": "pnpm --filter @homa/design typecheck && pnpm --filter @homa/design test",
     "check:design-parity": "node --experimental-strip-types scripts/design-contract.mts --check",
     "check:mobile-brand": "tsx --test scripts/mobile-brand-assets.test.mts apps/mobile/src/components/design/icon-registry.test.ts",
