@@ -494,13 +494,6 @@ language, spacing, or layout correction reuses the existing art. Only a
 request to change what an illustration depicts earns a replacement composed
 sheet, never a fan-out of replacement icons.
 
-The image-budget count returned by `generate_image` is a coordination signal,
-not a surprise after the work is blocked. At the tool's close-to-limit warning,
-tell the parent before starting further art-dependent work that the remaining
-images may affect this request, and offer reuse or an HTML/CSS path. Do not
-make the parent discover a daily limit only when a requested revision cannot
-be completed.
-
 | Format | Reach for it when the page must... | Recipe file |
 | --- | --- | --- |
 | Foldable / notebook insert | be a tactile fold-and-glue tool with reference and practice on one object | foldable |

@@ -22,11 +22,6 @@ import {
   generateStudioImage,
   IMAGE_SHAPES,
 } from "../../lib/materials/generate-image";
-import {
-  imageBudgetNote,
-  imagesGeneratedToday,
-  MAX_IMAGES_PER_FAMILY_PER_DAY,
-} from "../../lib/materials/image-budget";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
 import { sendSmsProgressTextOnce } from "../../lib/sms-progress";
 
@@ -55,9 +50,8 @@ export function subjectLessonImageGenerationRestriction(
  * image (shape 'portrait', then create_printable's pageImageUrl path).
  * Reference images from the family's own library steer style and enable
  * "same page, different character". Costs real money per image, so it
- * is family-gated and rate limited; the model receives only the
- * finished URL, never bytes. Prompt craft lives in the materials-studio
- * skill, not here.
+ * is family-scoped; the model receives only the finished URL, never
+ * bytes. Prompt craft lives in the materials-studio skill, not here.
  */
 const generateImage = defineBoundedTool({
   description:
@@ -137,14 +131,6 @@ const generateImage = defineBoundedTool({
         note: "Image generation is not configured on this deployment. Design the page without a generated image.",
       };
     }
-    const usedToday = await imagesGeneratedToday(access.familyId);
-    if (usedToday >= MAX_IMAGES_PER_FAMILY_PER_DAY) {
-      return {
-        generated: false,
-        note: `This family's image budget for today is used up. Design with what you already generated, or use pure CSS. ${imageBudgetNote(usedToday)}`,
-      };
-    }
-
     const attributes = ctx.session.auth.current?.attributes as
       | { phoneNumber?: string }
       | undefined;
@@ -208,7 +194,7 @@ const generateImage = defineBoundedTool({
     return {
       generated: true,
       url: result.url,
-      note: `Embed it with <img src="..."> in page HTML, or pass it to create_printable as pageImageUrl when it IS the whole page. Reuse this exact URL for revisions.${fallbackNote} ${imageBudgetNote(usedToday + 1)}`,
+      note: `Embed it with <img src="..."> in page HTML, or pass it to create_printable as pageImageUrl when it IS the whole page. Reuse this exact URL for revisions.${fallbackNote}`,
     };
   },
 });
