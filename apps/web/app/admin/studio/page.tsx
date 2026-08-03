@@ -50,7 +50,7 @@ function runLabel(status: StudioRunRow["status"]): string {
 
 function RunCard({ run }: { run: StudioRunRow }) {
   return (
-    <details className="rounded-[var(--radius-md)] border border-border-subtle bg-card px-4 py-3">
+    <details className="rounded-[var(--homa-radius-control)] border border-border-subtle bg-card px-4 py-3">
       <summary className="flex cursor-pointer flex-wrap items-center gap-2.5 [&::-webkit-details-marker]:hidden">
         <span className="min-w-[200px] flex-1 text-[0.88rem] font-semibold text-strong">
           {run.request}
@@ -71,7 +71,7 @@ function RunCard({ run }: { run: StudioRunRow }) {
           </p>
         ) : null}
         {run.error ? (
-          <p className="text-[0.8rem] font-semibold text-[var(--rose-600)]">{run.error}</p>
+          <p className="text-[0.8rem] font-semibold text-[var(--homa-error-ink)]">{run.error}</p>
         ) : null}
         {run.status === "completed" && run.materials.length === 0 ? (
           <p className="text-[0.8rem] text-muted">
@@ -114,7 +114,7 @@ function RunCard({ run }: { run: StudioRunRow }) {
                   href={material.pdfUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="font-semibold text-[var(--clay-600)] hover:underline"
+                  className="font-semibold text-[var(--homa-brand-text)] hover:underline"
                 >
                   Open PDF
                 </a>
@@ -125,21 +125,21 @@ function RunCard({ run }: { run: StudioRunRow }) {
         <p className="mt-3 flex flex-wrap gap-4 text-[0.76rem]">
           <Link
             href={`/admin/studio/runs/${run.id}`}
-            className="font-bold text-[var(--clay-600)] hover:underline"
+            className="font-bold text-[var(--homa-brand-text)] hover:underline"
           >
             Open the run: trace, feedback, agent packet
           </Link>
           {run.sessionId ? (
             <Link
               href={`/admin/sessions/${run.sessionId}`}
-              className="font-semibold text-[var(--clay-600)] hover:underline"
+              className="font-semibold text-[var(--homa-brand-text)] hover:underline"
             >
               Session X-ray
             </Link>
           ) : null}
           <Link
             href={`/admin/chats?family=${run.familyId}`}
-            className="font-semibold text-[var(--clay-600)] hover:underline"
+              className="font-semibold text-[var(--homa-brand-text)] hover:underline"
           >
             Family thread
           </Link>
@@ -152,7 +152,7 @@ function RunCard({ run }: { run: StudioRunRow }) {
 
 function FleetRow({ material }: { material: FleetMaterialRow }) {
   return (
-    <div className="flex flex-wrap items-center gap-2.5 rounded-[var(--radius-md)] border border-border-subtle bg-card px-4 py-2.5">
+    <div className="flex flex-wrap items-center gap-2.5 rounded-[var(--homa-radius-control)] border border-border-subtle bg-card px-4 py-2.5">
       <span className="min-w-[180px] flex-1 text-[0.84rem] font-semibold text-strong">
         {material.title}
       </span>
@@ -168,7 +168,7 @@ function FleetRow({ material }: { material: FleetMaterialRow }) {
       {material.sessionId ? (
         <Link
           href={`/admin/sessions/${material.sessionId}`}
-          className="text-[0.72rem] font-semibold text-[var(--clay-600)] hover:underline"
+          className="text-[0.72rem] font-semibold text-[var(--homa-brand-text)] hover:underline"
         >
           Session X-ray
         </Link>
@@ -195,7 +195,7 @@ function FunnelStageCard({
   children: ReactNode;
 }) {
   return (
-    <div className="rounded-[var(--radius-md)] border border-border-subtle bg-card p-4">
+    <div className="rounded-[var(--homa-radius-control)] border border-border-subtle bg-card p-4">
       <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.12em] text-subtle">
         {step} · {title}
       </p>
@@ -279,14 +279,14 @@ function CosmoFunnel({
               "no open gaps"
             ) : (
               <>
-                <span className="font-semibold text-[var(--gold-ink,#8A6410)]">
+                <span className="font-semibold text-[var(--homa-highlight-ink)]">
                   {coverage.openCount} open
                 </span>{" "}
                 in the graduation backlog below
               </>
             )}
             {" · "}
-            <a href="#skill-package" className="font-semibold text-[var(--clay-600)] hover:underline">
+            <a href="#skill-package" className="font-semibold text-[var(--homa-brand-text)] hover:underline">
               read the skill package
             </a>
           </p>
@@ -303,15 +303,15 @@ function CosmoFunnel({
               : ""}
           </p>
           <p>
-            <a href="#ledger" className="font-semibold text-[var(--clay-600)] hover:underline">
+            <a href="#ledger" className="font-semibold text-[var(--homa-brand-text)] hover:underline">
               see every run and material in the ledger
             </a>
           </p>
         </FunnelStageCard>
       </div>
 
-      <details className="rounded-[var(--radius-md)] border border-border-subtle bg-card px-4 py-3">
-        <summary className="cursor-pointer text-[0.85rem] font-bold text-[var(--clay-600)] [&::-webkit-details-marker]:hidden">
+      <details className="rounded-[var(--homa-radius-control)] border border-border-subtle bg-card px-4 py-3">
+        <summary className="cursor-pointer text-[0.85rem] font-bold text-[var(--homa-brand-text)] [&::-webkit-details-marker]:hidden">
           Latest drops through the analyzer
         </summary>
         <div className="mt-2.5 flex flex-col gap-1.5 border-t border-border-subtle pt-2.5">
@@ -341,8 +341,8 @@ function CosmoFunnel({
         </div>
       </details>
 
-      <details className="rounded-[var(--radius-md)] border border-border-subtle bg-card px-4 py-3">
-        <summary className="cursor-pointer text-[0.85rem] font-bold text-[var(--clay-600)] [&::-webkit-details-marker]:hidden">
+      <details className="rounded-[var(--homa-radius-control)] border border-border-subtle bg-card px-4 py-3">
+        <summary className="cursor-pointer text-[0.85rem] font-bold text-[var(--homa-brand-text)] [&::-webkit-details-marker]:hidden">
           Format gaps: {coverage.openCount} open · {coverage.coveredCount} covered
         </summary>
         <div className="mt-2.5 border-t border-border-subtle pt-2.5">
@@ -374,8 +374,8 @@ function CosmoFunnel({
       </details>
 
       {cosmo.tasteModel ? (
-        <details className="rounded-[var(--radius-md)] border border-border-subtle bg-card px-4 py-3">
-          <summary className="cursor-pointer text-[0.85rem] font-bold text-[var(--clay-600)] [&::-webkit-details-marker]:hidden">
+        <details className="rounded-[var(--homa-radius-control)] border border-border-subtle bg-card px-4 py-3">
+          <summary className="cursor-pointer text-[0.85rem] font-bold text-[var(--homa-brand-text)] [&::-webkit-details-marker]:hidden">
             Read the taste model
             {cosmo.catalogStatuses.length > 0
               ? ` · catalog: ${cosmo.catalogStatuses
@@ -388,7 +388,7 @@ function CosmoFunnel({
           </pre>
           {cosmo.inspoCatalog ? (
             <details className="mt-2">
-              <summary className="cursor-pointer text-[0.78rem] font-bold text-[var(--clay-600)]">
+              <summary className="cursor-pointer text-[0.78rem] font-bold text-[var(--homa-brand-text)]">
                 Read the inspo catalog
               </summary>
               <pre className="mt-2 max-h-[420px] overflow-auto whitespace-pre-wrap rounded-md bg-page px-3.5 py-3 text-[0.74rem] leading-relaxed text-body">
@@ -431,7 +431,7 @@ export default async function AdminStudioPage({
   );
 
   return (
-    <div className="flex flex-col gap-8">
+    <div data-brand-surface="admin-studio" className="quiet-admin__child flex flex-col gap-8">
       <div>
         <SectionHead
           eyebrow="Inspo funnel"
@@ -451,8 +451,8 @@ export default async function AdminStudioPage({
           title="One timeline of everything the skill makes"
           sub="Lab runs are real agent sessions against a sandbox family: same skill, same tools, same quality check. Fleet rows are what real families got. Nothing here texts or emails anyone."
         />
-        <details className="mt-3 rounded-[var(--radius-md)] border border-border-subtle bg-card">
-          <summary className="cursor-pointer px-4 py-3 text-[0.9rem] font-bold text-[var(--clay-600)] [&::-webkit-details-marker]:hidden">
+        <details className="mt-3 rounded-[var(--homa-radius-control)] border border-border-subtle bg-card">
+          <summary className="cursor-pointer px-4 py-3 text-[0.9rem] font-bold text-[var(--homa-brand-text)] [&::-webkit-details-marker]:hidden">
             + New lab run
           </summary>
           <div className="border-t border-border-subtle p-4">
@@ -471,7 +471,7 @@ export default async function AdminStudioPage({
                 aria-current={active ? "true" : undefined}
                 className={
                   active
-                    ? "rounded-pill border border-[var(--clay-300)] bg-brand-soft px-3.5 py-1.5 text-[0.78rem] font-bold text-[var(--clay-700)]"
+                    ? "rounded-pill border border-[var(--homa-midnight-action)] bg-[var(--homa-info-tint)] px-3.5 py-1.5 text-[0.78rem] font-bold text-[var(--homa-info-ink)]"
                     : "rounded-pill border border-border bg-card px-3.5 py-1.5 text-[0.78rem] font-semibold text-muted hover:text-strong"
                 }
               >
@@ -526,7 +526,7 @@ export default async function AdminStudioPage({
           </EmptyNote>
         ) : (
           <div className="mt-3 flex flex-col gap-3">
-            <div className="rounded-[var(--radius-md)] border border-border-subtle bg-card p-4">
+            <div className="rounded-[var(--homa-radius-control)] border border-border-subtle bg-card p-4">
               <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.12em] text-subtle">
                 Routing contract: when does this skill load?
               </p>
@@ -545,7 +545,7 @@ export default async function AdminStudioPage({
                 {skillPackage.anchors.length} golden anchors
               </p>
               <details className="mt-3">
-                <summary className="cursor-pointer text-[0.8rem] font-bold text-[var(--clay-600)]">
+                <summary className="cursor-pointer text-[0.8rem] font-bold text-[var(--homa-brand-text)]">
                   Read the full SKILL.md
                 </summary>
                 <pre className="mt-2 max-h-[540px] overflow-auto whitespace-pre-wrap rounded-md bg-page px-3.5 py-3 text-[0.74rem] leading-relaxed text-body">
@@ -554,7 +554,7 @@ export default async function AdminStudioPage({
               </details>
             </div>
 
-            <div className="rounded-[var(--radius-md)] border border-border-subtle bg-card p-4">
+            <div className="rounded-[var(--homa-radius-control)] border border-border-subtle bg-card p-4">
               <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.12em] text-subtle">
                 Tool surface: which sections drive each tool
               </p>
@@ -580,7 +580,7 @@ export default async function AdminStudioPage({
                   <tbody>
                     {skillPackage.toolSurface.map((entry) => (
                       <tr key={entry.tool} className="border-b border-border-subtle align-top">
-                        <td className="py-2 pr-3 font-mono text-[0.74rem] font-bold text-[var(--clay-700)]">
+                        <td className="py-2 pr-3 font-mono text-[0.74rem] font-bold text-[var(--homa-info-ink)]">
                           {entry.tool}
                         </td>
                         <td className="py-2 pr-3 text-muted">{entry.role}</td>
@@ -592,7 +592,7 @@ export default async function AdminStudioPage({
               </div>
             </div>
 
-            <div className="rounded-[var(--radius-md)] border border-border-subtle bg-card p-4">
+            <div className="rounded-[var(--homa-radius-control)] border border-border-subtle bg-card p-4">
               <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.12em] text-subtle">
                 Golden anchors · the reference images the model rides on
               </p>

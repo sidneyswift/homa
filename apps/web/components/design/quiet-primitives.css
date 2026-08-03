@@ -885,3 +885,21 @@
   .quiet-admin__segment { transition: none; }
   .quiet-admin__nav-item:hover { transform: none; }
 }
+
+/* Child routes inherit the shell authority without requiring a route-sized
+   rewrite of their data components. These hooks also give screenshot and
+   accessibility checks a stable surface boundary for every admin section. */
+.quiet-admin__child { min-width: 0; color: var(--homa-ink); }
+.quiet-admin__child .bg-card { background: var(--homa-paper); }
+.quiet-admin__child .bg-page { background: var(--homa-canvas); }
+.quiet-admin__child .border-border,
+.quiet-admin__child .border-border-subtle { border-color: var(--homa-control-boundary); }
+.quiet-admin__child .quiet-admin__card,
+.quiet-admin__child .quiet-admin__table,
+.quiet-admin__child .quiet-admin__trace { min-width: 0; }
+.quiet-admin__child .quiet-admin__card,
+.quiet-admin__child .quiet-admin__table { border-color: var(--homa-control-boundary); }
+.quiet-admin__child a:focus-visible,
+.quiet-admin__child button:focus-visible,
+.quiet-admin__child summary:focus-visible,
+.quiet-admin__child input:focus-visible { outline: 3px solid color-mix(in srgb, var(--homa-visual-coral) 70%, transparent); outline-offset: 3px; }

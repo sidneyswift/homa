@@ -56,7 +56,7 @@ export default async function AdminMakingsPage() {
   ];
 
   return (
-    <div>
+    <div data-brand-surface="admin-makings" className="quiet-admin__child">
       <p className="font-mono text-[0.64rem] font-bold uppercase tracking-[0.13em] text-subtle">
         Founder · what families make
       </p>
@@ -73,7 +73,7 @@ export default async function AdminMakingsPage() {
         {tiles.map((tile) => (
           <div
             key={tile.label}
-            className="rounded-lg border border-border-subtle bg-card p-4"
+            className="quiet-admin__tile rounded-lg border border-border-subtle bg-card p-4"
           >
             <p className="text-xs font-bold uppercase tracking-wide text-subtle">
               {tile.label}
@@ -95,7 +95,7 @@ export default async function AdminMakingsPage() {
         {readings.length === 0 ? (
           <EmptyNote>Nobody has made anything since Monday.</EmptyNote>
         ) : (
-          <div className="mt-3 overflow-x-auto">
+          <div className="quiet-admin__table mt-3 overflow-x-auto">
             <table className="w-full min-w-[40rem] text-sm">
               <thead>
                 <tr className="border-b border-border-subtle text-left text-xs uppercase tracking-wide text-subtle">

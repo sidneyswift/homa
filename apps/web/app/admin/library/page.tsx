@@ -54,7 +54,7 @@ function BookTile({ book }: { book: LibraryBook }) {
   return (
     <Link
       href={`/admin/library/${encodeURIComponent(book.id)}`}
-      className="group block rounded-[var(--radius-md)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--clay-500)]"
+      className="group block rounded-[var(--homa-radius-card)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--homa-visual-coral)]"
     >
       <div className="transition-transform duration-150 group-hover:-translate-y-1">
         <BookCover book={book} />
@@ -67,7 +67,7 @@ function BookTile({ book }: { book: LibraryBook }) {
         {book.droppedAt ? ` · ${book.droppedAt.slice(0, 10)}` : ""}
       </p>
       {todo ? (
-        <p className="mt-1 line-clamp-1 text-[0.68rem] font-semibold text-[var(--clay-600)]">
+        <p className="mt-1 line-clamp-1 text-[0.68rem] font-semibold text-[var(--homa-brand-text)]">
           {todo}
         </p>
       ) : null}
@@ -108,7 +108,7 @@ export default async function LibraryPage({
     : null;
 
   return (
-    <div>
+    <div data-brand-surface="admin-library" className="quiet-admin__child">
       <SectionHead
         eyebrow="Corpus"
         title="Library"
@@ -136,8 +136,8 @@ export default async function LibraryPage({
           href="/admin/library"
           className={
             activeStatus === null
-              ? "rounded-pill bg-brand-soft px-3 py-1 text-[0.75rem] font-bold text-[var(--clay-700)]"
-              : "rounded-pill border border-border-subtle px-3 py-1 text-[0.75rem] font-semibold text-muted hover:bg-page"
+              ? "rounded-pill bg-[var(--homa-info-tint)] px-3 py-1 text-[0.75rem] font-bold text-[var(--homa-info-ink)]"
+              : "rounded-pill border border-border-subtle px-3 py-1 text-[0.75rem] font-semibold text-muted hover:bg-[var(--homa-canvas)]"
           }
         >
           All {counts.total}
@@ -148,8 +148,8 @@ export default async function LibraryPage({
             href={`/admin/library?status=${value}`}
             className={
               activeStatus === value
-                ? "rounded-pill bg-brand-soft px-3 py-1 text-[0.75rem] font-bold text-[var(--clay-700)]"
-                : "rounded-pill border border-border-subtle px-3 py-1 text-[0.75rem] font-semibold text-muted hover:bg-page"
+                ? "rounded-pill bg-[var(--homa-info-tint)] px-3 py-1 text-[0.75rem] font-bold text-[var(--homa-info-ink)]"
+                : "rounded-pill border border-border-subtle px-3 py-1 text-[0.75rem] font-semibold text-muted hover:bg-[var(--homa-canvas)]"
             }
           >
             {SHELF_STATUS_LABEL[value]} {counts.byStatus[value]}
@@ -165,7 +165,7 @@ export default async function LibraryPage({
           defaultValue={q ?? ""}
           placeholder="Search title, publisher, subject, or who dropped it"
           aria-label="Search the library"
-          className="w-full max-w-md rounded-md border border-border-subtle bg-card px-3 py-2 text-sm text-body placeholder:text-subtle focus:border-[var(--clay-400)] focus:outline-none"
+          className="w-full max-w-md rounded-md border border-border-subtle bg-card px-3 py-2 text-sm text-body placeholder:text-subtle focus:border-[var(--homa-midnight-action)] focus:outline-none"
         />
       </form>
 

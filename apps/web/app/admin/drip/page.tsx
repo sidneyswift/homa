@@ -27,7 +27,7 @@ export default async function AdminDripPage() {
   const live = dripEnabled();
 
   return (
-    <div>
+    <div data-brand-surface="admin-drip" className="quiet-admin__child">
       <p className="font-mono text-[0.64rem] font-bold uppercase tracking-[0.13em] text-subtle">
         Founder · drip
       </p>
@@ -101,7 +101,7 @@ export default async function AdminDripPage() {
                 (head) => (
                   <th
                     key={head}
-                    className="border border-border-subtle bg-[var(--surface-sunken)] px-3 py-1.5 text-left font-mono text-[0.62rem] font-bold uppercase tracking-[0.08em] text-subtle"
+                    className="border border-border-subtle bg-[var(--homa-canvas)] px-3 py-1.5 text-left font-mono text-[0.62rem] font-bold uppercase tracking-[0.08em] text-subtle"
                   >
                     {head}
                   </th>
@@ -123,7 +123,7 @@ export default async function AdminDripPage() {
                 <td className="border border-border-subtle px-3 py-2 font-mono">{row.delivered}</td>
                 <td
                   className="border border-border-subtle px-3 py-2 font-mono"
-                  style={row.failed > 0 ? { color: "var(--rose-600)", fontWeight: 700 } : undefined}
+                  style={row.failed > 0 ? { color: "var(--homa-error-ink)", fontWeight: 700 } : undefined}
                 >
                   {row.failed}
                 </td>
@@ -195,7 +195,7 @@ export default async function AdminDripPage() {
                 {["Family", "Nudge", "Why", "Delivery", "Outcome", "Sent"].map((head) => (
                   <th
                     key={head}
-                    className="border border-border-subtle bg-[var(--surface-sunken)] px-3 py-1.5 text-left font-mono text-[0.62rem] font-bold uppercase tracking-[0.08em] text-subtle"
+                    className="border border-border-subtle bg-[var(--homa-canvas)] px-3 py-1.5 text-left font-mono text-[0.62rem] font-bold uppercase tracking-[0.08em] text-subtle"
                   >
                     {head}
                   </th>

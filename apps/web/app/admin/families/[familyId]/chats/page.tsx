@@ -65,7 +65,7 @@ export default async function AdminFamilyChatsPage({
       sub="Every channel, one thread. Dashed rows are the scheduler's own prompts to Homa, which the family never sees."
     >
       {() => (
-        <div>
+        <div data-brand-surface="admin-family-chats" className="quiet-admin__child">
           <div className="flex flex-wrap items-center gap-1.5">
             {CHANNEL_FILTERS.map((filter) => (
               <Link
@@ -73,8 +73,8 @@ export default async function AdminFamilyChatsPage({
                 href={withParams({ channel: filter.value, before: null })}
                 className={
                   channel === filter.value
-                    ? "inline-flex min-h-9 items-center rounded-pill border border-[var(--clay-400)] bg-brand-soft px-3 py-1 text-sm font-bold text-[var(--clay-700)]"
-                    : "inline-flex min-h-9 items-center rounded-pill border border-border-subtle bg-card px-3 py-1 text-sm font-medium text-muted hover:border-[var(--clay-300)]"
+                    ? "inline-flex min-h-9 items-center rounded-pill border border-[var(--homa-midnight-action)] bg-[var(--homa-info-tint)] px-3 py-1 text-sm font-bold text-[var(--homa-info-ink)]"
+                    : "inline-flex min-h-9 items-center rounded-pill border border-border-subtle bg-card px-3 py-1 text-sm font-medium text-muted hover:border-[var(--homa-midnight-action)]"
                 }
               >
                 {filter.label}
@@ -84,8 +84,8 @@ export default async function AdminFamilyChatsPage({
               href={withParams({ xray: !xray, before: query.before ?? null })}
               className={
                 xray
-                  ? "ml-auto inline-flex min-h-9 items-center rounded-pill border border-[var(--gold-ink)] bg-[var(--gold-100)] px-3 py-1 font-mono text-xs font-bold text-[var(--gold-ink-strong)]"
-                  : "ml-auto inline-flex min-h-9 items-center rounded-pill border border-border-subtle bg-card px-3 py-1 font-mono text-xs font-bold text-muted hover:border-[var(--gold-ink)]"
+                  ? "ml-auto inline-flex min-h-9 items-center rounded-pill border border-[var(--homa-highlight-ink)] bg-[var(--homa-highlight-tint)] px-3 py-1 font-mono text-xs font-bold text-[var(--homa-highlight-ink)]"
+                  : "ml-auto inline-flex min-h-9 items-center rounded-pill border border-border-subtle bg-card px-3 py-1 font-mono text-xs font-bold text-muted hover:border-[var(--homa-highlight-ink)]"
               }
             >
               X-ray: {xray ? "on" : "off"}
@@ -96,7 +96,7 @@ export default async function AdminFamilyChatsPage({
             <p className="mt-3 text-center">
               <Link
                 href={withParams({ before: messages[0]?.createdAt ?? null })}
-                className="text-sm font-semibold text-[var(--clay-600)] hover:underline"
+                className="text-sm font-semibold text-[var(--homa-brand-text)] hover:underline"
               >
                 Load older messages
               </Link>

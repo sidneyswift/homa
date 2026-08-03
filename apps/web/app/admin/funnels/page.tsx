@@ -28,7 +28,7 @@ export default async function AdminFunnelsPage() {
   const stepMax = Math.max(...reachedSteps.map((step) => step.count), 1);
 
   return (
-    <div>
+    <div data-brand-surface="admin-funnels" className="quiet-admin__child">
       <p className="font-mono text-[0.64rem] font-bold uppercase tracking-[0.13em] text-subtle">
         Founder · funnels &amp; flows
       </p>
@@ -56,12 +56,12 @@ export default async function AdminFunnelsPage() {
                   <span className="text-sm font-bold text-strong">{stage.name}</span>
                   <span className="block font-mono text-[0.62rem] text-subtle">{stage.source}</span>
                 </span>
-                <span className="h-5 overflow-hidden rounded-md bg-[var(--surface-sunken)]">
+                <span className="h-5 overflow-hidden rounded-md bg-[var(--homa-canvas)]">
                   <span
                     className="block h-full rounded-md"
                     style={{
                       width: `${Math.max(2, Math.round((stage.count / max) * 100))}%`,
-                      background: "linear-gradient(90deg, var(--clay-300), var(--clay-500))",
+                      background: "linear-gradient(90deg, var(--homa-info-tint), var(--homa-info-ink))",
                     }}
                   />
                 </span>
@@ -98,12 +98,12 @@ export default async function AdminFunnelsPage() {
                     <span className="text-sm font-bold text-strong">{step.label}</span>
                     <span className="block font-mono text-[0.62rem] text-subtle">{step.step}</span>
                   </span>
-                  <span className="h-5 overflow-hidden rounded-md bg-[var(--surface-sunken)]">
+                  <span className="h-5 overflow-hidden rounded-md bg-[var(--homa-canvas)]">
                     <span
                       className="block h-full rounded-md"
                       style={{
                         width: `${Math.max(2, Math.round((step.count / stepMax) * 100))}%`,
-                        background: "linear-gradient(90deg, var(--sage-300), var(--sage-500))",
+                        background: "linear-gradient(90deg, var(--homa-constructive-tint), var(--homa-constructive-ink))",
                       }}
                     />
                   </span>
@@ -140,12 +140,12 @@ export default async function AdminFunnelsPage() {
                     {stage.source}
                   </span>
                 </span>
-                <span className="h-5 overflow-hidden rounded-md bg-[var(--surface-sunken)]">
+                <span className="h-5 overflow-hidden rounded-md bg-[var(--homa-canvas)]">
                   <span
                     className="block h-full rounded-md"
                     style={{
                       width: `${Math.max(2, Math.round((stage.count / Math.max(data.activation.base, 1)) * 100))}%`,
-                      background: "linear-gradient(90deg, var(--gold-300), var(--clay-500))",
+                      background: "linear-gradient(90deg, var(--homa-highlight-tint), var(--homa-highlight-ink))",
                     }}
                   />
                 </span>
@@ -271,10 +271,10 @@ export default async function AdminFunnelsPage() {
               style={{
                 borderColor:
                   node.tone === "fail"
-                    ? "var(--rose-500)"
+                    ? "var(--homa-error-ink)"
                     : node.tone === "warn"
-                      ? "var(--gold-300)"
-                      : "var(--border-subtle)",
+                      ? "var(--homa-highlight-ink)"
+                      : "var(--homa-control-boundary)",
               }}
             >
               <b
@@ -282,10 +282,10 @@ export default async function AdminFunnelsPage() {
                 style={{
                   color:
                     node.tone === "fail"
-                      ? "var(--rose-600)"
+                      ? "var(--homa-error-ink)"
                       : node.tone === "warn"
-                        ? "var(--gold-ink)"
-                        : "var(--text-strong)",
+                        ? "var(--homa-highlight-ink)"
+                        : "var(--homa-ink)",
                 }}
               >
                 {node.count}
@@ -317,7 +317,7 @@ export default async function AdminFunnelsPage() {
                 {["Cohort", "W1", "W2", "W3", "W4"].map((head) => (
                   <th
                     key={head}
-                    className="border border-border-subtle bg-[var(--surface-sunken)] px-3 py-1.5 text-center font-mono text-[0.62rem] font-bold uppercase tracking-[0.08em] text-subtle"
+                    className="border border-border-subtle bg-[var(--homa-canvas)] px-3 py-1.5 text-center font-mono text-[0.62rem] font-bold uppercase tracking-[0.08em] text-subtle"
                   >
                     {head}
                   </th>
@@ -336,10 +336,10 @@ export default async function AdminFunnelsPage() {
                       className="border border-border-subtle px-3 py-1.5 text-center"
                       style={
                         value === null
-                          ? { color: "var(--text-subtle)" }
+                          ? { color: "color-mix(in srgb, var(--homa-ink) 52%, var(--homa-canvas))" }
                           : value === cohort.size && cohort.size > 0
-                            ? { background: "var(--sage-50)", color: "var(--sage-700)", fontWeight: 700 }
-                            : { background: "var(--surface-sunken)" }
+                            ? { background: "var(--homa-constructive-tint)", color: "var(--homa-constructive-ink)", fontWeight: 700 }
+                            : { background: "var(--homa-canvas)" }
                       }
                     >
                       {value === null ? "\u00b7" : value}

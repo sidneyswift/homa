@@ -36,7 +36,7 @@ describe("ConversationCard", () => {
       <ConversationCard {...base} undeliveredCount={6} />,
     );
     assert.match(html, /texts and emails we sent · 6 did not arrive/u);
-    assert.match(html, /--rose-600/u);
+    assert.match(html, /--homa-error-ink/u);
     assert.doesNotMatch(html, /morning briefs among them/u);
   });
 

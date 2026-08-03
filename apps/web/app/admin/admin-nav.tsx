@@ -1,19 +1,9 @@
 "use client";
 
-import {
-  Activity,
-  ChartNoAxesColumn,
-  Filter,
-  Gauge,
-  Library,
-  ListTree,
-  Mail,
-  MessagesSquare,
-  Palette,
-  Users,
-} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
+import { Icon } from "../../components/design/Icon";
 
 /**
  * The founder console's nav (MJ-14; Chats and Sessions added by the
@@ -23,16 +13,16 @@ import { usePathname } from "next/navigation";
  */
 
 const ITEMS = [
-  { href: "/admin", label: "Overview", icon: ChartNoAxesColumn },
-  { href: "/admin/families", label: "Families", icon: Users },
-  { href: "/admin/chats", label: "Chats", icon: MessagesSquare },
-  { href: "/admin/sessions", label: "Sessions", icon: Activity },
-  { href: "/admin/pulse", label: "Pulse", icon: ListTree },
-  { href: "/admin/funnels", label: "Funnels", icon: Filter },
-  { href: "/admin/drip", label: "Drip", icon: Mail },
-  { href: "/admin/makings", label: "Makings", icon: Gauge },
-  { href: "/admin/studio", label: "Studio", icon: Palette },
-  { href: "/admin/library", label: "Library", icon: Library },
+  { href: "/admin", label: "Overview", icon: "progress" },
+  { href: "/admin/families", label: "Families", icon: "book" },
+  { href: "/admin/chats", label: "Chats", icon: "chat" },
+  { href: "/admin/sessions", label: "Sessions", icon: "tasks" },
+  { href: "/admin/pulse", label: "Pulse", icon: "info" },
+  { href: "/admin/funnels", label: "Funnels", icon: "next" },
+  { href: "/admin/drip", label: "Drip", icon: "calendar" },
+  { href: "/admin/makings", label: "Makings", icon: "add" },
+  { href: "/admin/studio", label: "Studio", icon: "edit" },
+  { href: "/admin/library", label: "Library", icon: "book" },
 ] as const;
 
 export function AdminNav() {
@@ -42,7 +32,6 @@ export function AdminNav() {
       {ITEMS.map((item) => {
         const active =
           item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
-        const Icon = item.icon;
         return (
           <Link
             key={item.href}
@@ -53,7 +42,7 @@ export function AdminNav() {
                 : "quiet-admin__nav-item flex min-h-10 items-center gap-2.5 rounded-md px-3 py-2 text-[0.9rem] font-medium text-muted transition-colors"
             }
           >
-            <Icon className="quiet-admin__nav-icon" size={17} strokeWidth={1.75} aria-hidden="true" />
+            <Icon name={item.icon} className="quiet-admin__nav-icon" size={20} />
             {item.label}
           </Link>
         );

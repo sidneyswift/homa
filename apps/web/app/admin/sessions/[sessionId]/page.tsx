@@ -45,10 +45,10 @@ export default async function AdminSessionDetailPage({
   const totalTokensOut = detail.usage.reduce((sum, line) => sum + line.tokensOut, 0);
 
   return (
-    <div>
+    <div data-brand-surface="admin-session-detail" className="quiet-admin__child">
       <Link
         href="/admin/sessions"
-        className="text-sm font-semibold text-[var(--clay-600)] hover:underline"
+        className="text-sm font-semibold text-[var(--homa-brand-text)] hover:underline"
       >
         All sessions
       </Link>
@@ -65,7 +65,7 @@ export default async function AdminSessionDetailPage({
           <>
             <Link
               href={`/admin/families/${detail.familyId}`}
-              className="font-semibold text-[var(--clay-600)] hover:underline"
+        className="font-semibold text-[var(--homa-brand-text)] hover:underline"
             >
               {detail.familyName}
             </Link>
@@ -82,7 +82,7 @@ export default async function AdminSessionDetailPage({
       <p className="mt-1 font-mono text-[0.62rem] text-subtle">{detail.sessionId}</p>
 
       {detail.run?.error ? (
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 rounded-md border border-[var(--rose-500)] bg-[var(--danger-soft)] px-3.5 py-2.5 text-sm font-semibold text-[var(--rose-600)]">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 rounded-md border border-[var(--homa-error-ink)] bg-[var(--homa-error-tint)] px-3.5 py-2.5 text-sm font-semibold text-[var(--homa-error-ink)]">
           <div className="min-w-0">
             {detail.run.error}
             {detail.toolCalls.some((call) => call.status === "requested") ? (

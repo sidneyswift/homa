@@ -69,7 +69,7 @@ function ThreadMaterialCard({ material }: { material: ThreadMaterial }) {
           {reviewLabel ? ` · ${reviewLabel}` : ""}
         </p>
         {material.reviewPass === false && material.reviewIssues.length > 0 ? (
-          <p className="mt-1 text-[0.68rem] text-[var(--gold-ink-strong)]">
+          <p className="mt-1 text-[0.68rem] text-[var(--homa-highlight-ink)]">
             {material.reviewIssues[0]}
           </p>
         ) : null}
@@ -77,7 +77,7 @@ function ThreadMaterialCard({ material }: { material: ThreadMaterial }) {
           href={material.pdfUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-1 inline-block text-[0.68rem] font-semibold text-[var(--clay-600)] hover:underline"
+          className="mt-1 inline-block text-[0.68rem] font-semibold text-[var(--homa-brand-text)] hover:underline"
         >
           Open PDF
         </a>
@@ -140,9 +140,9 @@ export function ChatThread({
                   <div
                     className={
                       internal
-                        ? "max-w-[82%] rounded-2xl border border-dashed border-border bg-[var(--surface-sunken)] px-3.5 py-2.5"
+                        ? "max-w-[82%] rounded-2xl border border-dashed border-border bg-[var(--homa-canvas)] px-3.5 py-2.5"
                         : mine
-                          ? "max-w-[82%] rounded-2xl rounded-br-md bg-[var(--clay-100)] px-3.5 py-2.5"
+                          ? "max-w-[82%] rounded-2xl rounded-br-md bg-[var(--homa-info-tint)] px-3.5 py-2.5"
                           : "max-w-[82%] rounded-2xl rounded-bl-md border border-border-subtle bg-card px-3.5 py-2.5 shadow-sm"
                     }
                   >
@@ -176,7 +176,7 @@ export function ChatThread({
                       <p className="mt-1">
                         <Link
                           href={`/admin/sessions/${encodeURIComponent(message.sessionId)}`}
-                          className="inline-flex rounded-pill border border-dashed border-[var(--gold-ink)] bg-[var(--gold-100)] px-2 py-0.5 font-mono text-[0.6rem] font-bold text-[var(--gold-ink-strong)] hover:underline"
+                          className="inline-flex rounded-pill border border-dashed border-[var(--homa-highlight-ink)] bg-[var(--homa-highlight-tint)] px-2 py-0.5 font-mono text-[0.6rem] font-bold text-[var(--homa-highlight-ink)] hover:underline"
                         >
                           session {message.sessionId.slice(0, 18)}... · open trace
                         </Link>
