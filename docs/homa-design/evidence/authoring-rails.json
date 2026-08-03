@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
   "contractSourceChecksum": "e35b834293407d95ab57d9f23e07739e235c056ad469916c16e58f9d62c73758",
-  "manifestFingerprint": "6289649c02a1d05c37faa7dc099e41d50f606211e0bacafccd6aa10b6bf4ffc6",
+  "manifestFingerprint": "ac6fefede873be41ee7b5969a1e7896cf12fea7c1b14999d33f1ec89bd19d34e",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "authoringRoots": [
     ".agents/skills/",
@@ -16,13 +16,13 @@
   "counts": {
     "authoring-rule": 126,
     "agent-skill": 46,
-    "prompt": 119,
+    "prompt": 120,
     "evaluator": 7,
     "golden-fixture": 8
   },
-  "expectedPaths": 306,
-  "coveredPaths": 306,
-  "sourceFingerprint": "ba4feaf5a4cad0c3e6607021ee045347c3c3364fc3d2e7d5650f663f536c49cb",
+  "expectedPaths": 307,
+  "coveredPaths": 307,
+  "sourceFingerprint": "b5904392c83de3c410e99b1ebe8f34ee173396f7b94075f2d133676dd6710ae9",
   "assetGenerator": {
     "paths": [
       "scripts/brand-assets.mts"

@@ -17,7 +17,6 @@ import {
 import { subjectLessonsEnabled } from "../../../../lib/subject-lessons/flag";
 import { isFamilyAccountOwner } from "../../../../lib/subject-lessons/owner";
 import { listCurrentSubjectLessonSummaries } from "../../../../lib/subject-lessons/store";
-import { NarrativeBeat } from "../../../onboarding/r/[token]/narrative-beat";
 import { ReportView } from "../../../onboarding/r/[token]/report-view";
 import { CompleteProfilePrompt } from "./complete-profile-prompt";
 import { WelcomeChooser } from "./welcome-chooser";
@@ -77,32 +76,6 @@ export default async function AppReportPage({
   const flagOn = narrativeEnabled();
   const meta = report.narrativeMeta;
   const ready = meta?.status === "ready" && report.narrative !== null;
-
-  // Same honest writing beat as the token page: fresh from scoring, the
-  // model may still be writing this report's words.
-  if (flagOn && !ready && meta?.status !== "failed") {
-    return (
-      <div className="mx-auto w-full max-w-xl px-6 py-16">
-        <h1 className="font-display text-3xl font-bold leading-tight text-strong">
-          Homa is writing {report.childName}&apos;s report
-        </h1>
-        <p className="mt-2 text-body">
-          The numbers are done. Now every sentence gets written for {report.childName}{" "}
-          specifically.
-        </p>
-        <div className="mt-6">
-          <NarrativeBeat
-            token={token}
-            lines={[
-              `Reading your ${report.scores.observationCount} answers`,
-              `Looking across all ${report.scores.totalSubjects} subjects`,
-              `Writing ${report.childName}'s report`,
-            ]}
-          />
-        </div>
-      </div>
-    );
-  }
 
   const stateRequirements = report.usState
     ? await getStateRequirements(report.usState).catch(() => null)

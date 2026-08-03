@@ -172,6 +172,10 @@ export function tierMonthlyButton(tier: PlanTier): string {
  */
 export const TRIAL_GATE_CTA = "Start your 7 free days";
 
+/** The public sample report is a trial surface too, so it shares the
+ * same CTA and regular-monthly price copy as the account gate. */
+export const SAMPLE_REPORT_TRIAL_LINE = `Five minutes of questions, benchmarked against national standards. ${TRIAL_GATE_CTA.replace(/^Start your /, "")}, ${tierChargeLine("regular", "monthly").toLowerCase()}`;
+
 /** Under the button: what this selection costs once the trial ends,
  *  as a full sentence, so the commitment is stated in the same glance
  *  as the button that makes it. */

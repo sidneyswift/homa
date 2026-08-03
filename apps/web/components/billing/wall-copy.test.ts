@@ -4,6 +4,7 @@ import test from "node:test";
 
 import * as wallCopy from "./wall-copy";
 import {
+  SAMPLE_REPORT_TRIAL_LINE,
   TRIAL_GATE_AGE_RANGE,
   TRIAL_GATE_ARTIFACT_CAPTION,
   TRIAL_GATE_WHAT_IT_IS,
@@ -391,6 +392,14 @@ test("the button commits to a price without carrying it in the label", () => {
   assert.equal(tierChargeLine("regular", "monthly"), "Then $19 a month.");
   assert.equal(tierChargeLine("plus", "monthly"), "Then $49 a month.");
   assert.equal(tierChargeLine("elite", "annual"), "Then $1,910 a year.");
+});
+
+test("the public sample report uses the active trial and monthly-price copy", () => {
+  assert.equal(
+    SAMPLE_REPORT_TRIAL_LINE,
+    "Five minutes of questions, benchmarked against national standards. 7 free days, then $19 a month.",
+  );
+  assert.doesNotMatch(SAMPLE_REPORT_TRIAL_LINE, /30 free days/i);
 });
 
 test("the proof row names real people and never a fabricated crowd", () => {
