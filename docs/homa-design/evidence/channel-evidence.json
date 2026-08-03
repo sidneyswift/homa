@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "channel-evidence-v1",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "d2720bd89b36377fd288db7fea7490915834d627618331e4f1a17ab3bedf3830",
+  "ownedInputFingerprint": "41e433cfefd58084c0702f57b8407563c5e1b7c34f02f1a0243270d4ee03343d",
   "records": [
     {
       "id": "channel:email",
@@ -21,7 +21,7 @@
       "contractVersion": "@homa/design:quiet-authority-v1",
       "harnessVersion": "channel-evidence-v1",
       "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-      "ownedInputFingerprint": "d2720bd89b36377fd288db7fea7490915834d627618331e4f1a17ab3bedf3830",
+      "ownedInputFingerprint": "41e433cfefd58084c0702f57b8407563c5e1b7c34f02f1a0243270d4ee03343d",
       "observedAt": null,
       "environment": "synthetic-contract-fixture",
       "browserOrOperatingSystem": null,
@@ -66,8 +66,8 @@
       "ownerIssue": "gh#728",
       "surfaceCoverage": {
         "selector": "parent-pdf",
-        "surfaceCount": 36,
-        "surfaceIdsFingerprint": "07412d6360e093b6edd794524ff9ef6c507907a905c221e91cef7c4b499397bb"
+        "surfaceCount": 37,
+        "surfaceIdsFingerprint": "08c6a1876995ee3d097385791b2b3e41531cab0a0fe9dd1e8176a0f6d9409e1b"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/parent-pdf.json",
       "fixtureChecksum": "ab26dc0e9cdca23930a5502d0512042c870271890f992a87827d3df218153314",
@@ -75,7 +75,7 @@
       "contractVersion": "@homa/design:quiet-authority-v1",
       "harnessVersion": "channel-evidence-v1",
       "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-      "ownedInputFingerprint": "d2720bd89b36377fd288db7fea7490915834d627618331e4f1a17ab3bedf3830",
+      "ownedInputFingerprint": "41e433cfefd58084c0702f57b8407563c5e1b7c34f02f1a0243270d4ee03343d",
       "observedAt": null,
       "environment": "synthetic-contract-fixture",
       "browserOrOperatingSystem": null,
@@ -118,8 +118,8 @@
       "ownerIssue": "gh#728",
       "surfaceCoverage": {
         "selector": "physical-print",
-        "surfaceCount": 36,
-        "surfaceIdsFingerprint": "16d56bd6eb9e1d22b088f2ef973ea7bc19b1eff6620cb73c036d1e239abffcbf"
+        "surfaceCount": 37,
+        "surfaceIdsFingerprint": "bfcd6404118003270fc6a581a558b0ece90b397e079cfc75ef1b2ce38b039a0d"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/physical-print.json",
       "fixtureChecksum": "53d9f100310e6668b99ba2b43775e904a7cb2618fff4acc729c0814cd9327795",
@@ -127,7 +127,7 @@
       "contractVersion": "@homa/design:quiet-authority-v1",
       "harnessVersion": "channel-evidence-v1",
       "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-      "ownedInputFingerprint": "d2720bd89b36377fd288db7fea7490915834d627618331e4f1a17ab3bedf3830",
+      "ownedInputFingerprint": "41e433cfefd58084c0702f57b8407563c5e1b7c34f02f1a0243270d4ee03343d",
       "observedAt": null,
       "environment": "synthetic-contract-fixture",
       "browserOrOperatingSystem": null,
@@ -175,7 +175,7 @@
       "contractVersion": "@homa/design:quiet-authority-v1",
       "harnessVersion": "channel-evidence-v1",
       "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-      "ownedInputFingerprint": "d2720bd89b36377fd288db7fea7490915834d627618331e4f1a17ab3bedf3830",
+      "ownedInputFingerprint": "41e433cfefd58084c0702f57b8407563c5e1b7c34f02f1a0243270d4ee03343d",
       "observedAt": null,
       "environment": "synthetic-contract-fixture",
       "browserOrOperatingSystem": null,
@@ -224,7 +224,7 @@
       "contractVersion": "@homa/design:quiet-authority-v1",
       "harnessVersion": "channel-evidence-v1",
       "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-      "ownedInputFingerprint": "d2720bd89b36377fd288db7fea7490915834d627618331e4f1a17ab3bedf3830",
+      "ownedInputFingerprint": "41e433cfefd58084c0702f57b8407563c5e1b7c34f02f1a0243270d4ee03343d",
       "observedAt": null,
       "environment": "synthetic-contract-fixture",
       "browserOrOperatingSystem": null,
