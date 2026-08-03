@@ -116,7 +116,7 @@ export default function RootLayout({
       // theme scripts.
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
+      <body className="quiet-root min-h-full flex flex-col">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd).replace(/</g, "\\u003c") }}
