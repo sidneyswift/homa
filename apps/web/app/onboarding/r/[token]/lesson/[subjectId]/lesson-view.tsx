@@ -61,7 +61,7 @@ function ActiveBuildView({
           id="lesson-build-heading"
           className="font-display text-xl font-semibold text-strong"
         >
-          HOMA is making the lesson and worksheet
+          Homa is making the lesson and worksheet
         </h2>
         <p className="mt-3 text-body" role="status">
           This page updates when both are ready.

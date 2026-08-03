@@ -1,7 +1,7 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { Logo } from "../../../../../../components/brand/Logo";
+import { QuietAction } from "../../../../../../components/design/QuietAction";
 import type {
   SubjectLessonBuildStatus,
   SubjectLessonContent,
@@ -55,12 +55,12 @@ export function SubjectLessonUnavailable({
       <p className="mt-3 text-body">
         The progress report is still available.
       </p>
-      <Link
+      <QuietAction
         href={`/onboarding/r/${encodeURIComponent(token)}`}
-        className="mt-6 inline-flex min-h-11 items-center rounded-pill bg-[var(--clay-700)] px-6 py-2.5 font-semibold text-on-brand transition duration-(--dur-fast) ease-out hover:bg-[var(--clay-600)] focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none motion-safe:active:scale-[var(--press-scale)]"
+        className="mt-6"
       >
         Back to the report
-      </Link>
+      </QuietAction>
     </main>
   );
 }
@@ -96,13 +96,13 @@ export function LessonShell({
           <div className="px-7 py-8 sm:px-10">{children}</div>
 
           <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle px-7 py-4 text-sm text-subtle sm:px-10">
-            <span>made with HOMA for {props.childName}</span>
-            <Link
+            <span>made with Homa for {props.childName}</span>
+            <QuietAction
+              kind="quiet"
               href={`/onboarding/r/${encodeURIComponent(props.token)}`}
-              className="inline-flex min-h-11 items-center rounded-pill px-2 font-semibold text-[var(--clay-700)] underline-offset-2 hover:text-[var(--clay-600)] hover:underline focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none"
             >
               Back to the report
-            </Link>
+            </QuietAction>
           </footer>
         </article>
       </main>
@@ -163,7 +163,7 @@ export function SavedLessonContent({
             </ul>
           </div>
         ) : null}
-        <ol className="mt-6 list-decimal space-y-4 pl-6 text-body marker:font-semibold marker:text-[var(--clay-700)]">
+        <ol className="mt-6 list-decimal space-y-4 pl-6 text-body marker:font-semibold marker:text-[var(--homa-midnight-action)]">
           {content.steps.map((step, index) => (
             <li key={`${index}-${step}`} className="pl-1">
               {step}
