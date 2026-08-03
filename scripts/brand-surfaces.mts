@@ -13,6 +13,7 @@ import {
   type BrandSurfaceManifest,
   type BrandSurfaceRecord,
 } from "../packages/design/src/surfaces.ts";
+import { DESIGN_CONTRACT_VERSION } from "../packages/design/src/contract/version.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUTPUT = resolve(ROOT, "docs/homa-design/evidence/surfaces.json");
@@ -31,11 +32,11 @@ const initialObservedAt = existing?.surfaces?.[0]?.evidenceMetadata?.observedAt
 const legacyPatterns: ReadonlyArray<[string, RegExp]> = [
   ["legacy-font-schibsted", /Schibsted|schibsted/i],
   ["legacy-font-hanken", /Hanken|hanken/i],
-  ["legacy-font-caveat", /Caveat|caveat/i],
+  ["legacy-font-caveat", /\bCaveat\b/g],
   ["legacy-warm-playful-doctrine", /warm and playful/i],
   ["legacy-coral-action", /(?:primary|button|action|cta)[^\n]{0,80}(?:#F05A31|coral)|(?:#F05A31|coral)[^\n]{0,80}(?:primary|button|action|cta)/i],
-  ["legacy-shape-language", /\b(?:blob|squiggle|wavy band|doodle)\b/i],
-  ["legacy-token-namespace", /(?:--|\b)(?:clay|sage|gold|sky|stone|pill)(?:-|\b)/i],
+  ["legacy-shape-language", /\b(?:squiggle|wavy band)\b/i],
+  ["legacy-token-namespace", /(?:--(?:clay|sage|gold|sky|stone|pill)(?:[-_][a-z0-9-]+|\b)|\b(?:clay|sage|gold|sky|stone|pill)-(?:50|100|200|300|400|500|600|700|800|900)\b)/i],
 ];
 
 interface Classification {
@@ -60,12 +61,18 @@ const rules: ReadonlyArray<{ match: (path: string) => boolean; value: Classifica
   { match: (path) => /^apps\/mobile\/(?:modules|app\.json|assets\/)/.test(path), value: { type: "asset", audiences: ["family", "provider"], disposition: "regenerate-derived", targetProfile: "native-distribution" } },
   { match: (path) => path === "apps/web/app/globals.css", value: { type: "component-family", audiences: ["family"], disposition: "replace-active", targetProfile: "web-product" } },
   { match: (path) => /^apps\/web\/(?:public|app)\/.+\.(?:svg|png|jpg|jpeg|webp|avif|gif|ico|vcf)$/i.test(path), value: { type: "asset", audiences: ["family", "public", "provider"], disposition: "regenerate-derived", targetProfile: "asset-derived" } },
+  { match: (path) => /^packages\/design\/src\/contract\/contract\.test\.ts$/.test(path), value: { type: "authoring-rule", audiences: ["developer"], disposition: "approved-profile-rule", targetProfile: "design-contract" } },
   { match: (path) => /^packages\/design\/src\/.+\.ts$/.test(path), value: { type: "authoring-rule", audiences: ["developer"], disposition: "approved-carry-forward", targetProfile: "design-contract" } },
   { match: (path) => /^packages\/design\/generated\/.+\.(?:json|css)$/.test(path), value: { type: "generator", audiences: ["developer"], disposition: "regenerate-derived", targetProfile: "design-projection" } },
+  { match: (path) => /^marketing\/evals\/fixtures\/.+\.(?:md|mdx|json|yml|yaml)$/.test(path), value: { type: "golden-fixture", audiences: ["developer"], disposition: "regenerate-derived", targetProfile: "verification" } },
+  { match: (path) => /^marketing\/evals\/.+\.(?:py|md|mdx|json|yml|yaml)$/.test(path), value: { type: "evaluator", audiences: ["developer"], disposition: "replace-active", targetProfile: "verification" } },
+  { match: (path) => /^marketing\/voice\/.+\.(?:md|mdx)$/.test(path) || path === "marketing/AGENTS.md", value: { type: "authoring-rule", audiences: ["developer", "public"], disposition: "replace-active", targetProfile: "authoring" } },
   { match: (path) => /^marketing\//.test(path), value: { type: "template", audiences: ["public"], disposition: "replace-active", targetProfile: "marketing-rich" } },
   { match: (path) => path === "DESIGN.md" || /^(?:AGENTS|BUILD|README)\.md$/.test(path) || /^docs\/homa-design\/(?!evidence\/)/.test(path), value: { type: "authoring-rule", audiences: ["developer", "operator"], disposition: "replace-active", targetProfile: "authoring" } },
+  { match: (path) => /^\.agents\/skills\/.+\/SKILL\.md$/.test(path), value: { type: "agent-skill", audiences: ["developer"], disposition: "replace-active", targetProfile: "authoring" } },
   { match: (path) => /^\.agents\/skills\/.+\.(?:md|ts)$/.test(path), value: { type: "authoring-rule", audiences: ["developer"], disposition: "replace-active", targetProfile: "authoring" } },
-  { match: (path) => /^apps\/web\/agent\/skills\/.+\.(?:md|ts)$/.test(path), value: { type: "agent-skill", audiences: ["family", "developer"], disposition: "replace-active", targetProfile: "generated-content" } },
+  { match: (path) => /^apps\/web\/agent\/skills\/.+\/SKILL\.md$/.test(path), value: { type: "agent-skill", audiences: ["family", "developer"], disposition: "replace-active", targetProfile: "generated-content" } },
+  { match: (path) => /^apps\/web\/agent\/skills\/.+\.(?:md|ts)$/.test(path), value: { type: "authoring-rule", audiences: ["family", "developer"], disposition: "replace-active", targetProfile: "generated-content" } },
   { match: (path) => /^(?:packages\/core\/src\/map\/copy-laws|apps\/web\/lib\/copy-laws-runtime)\.ts$/.test(path), value: { type: "authoring-rule", audiences: ["family", "developer"], disposition: "replace-active", targetProfile: "generated-content" } },
   { match: (path) => /^apps\/web\/agent\/.+\.(?:md|ts)$/.test(path), value: { type: "prompt", audiences: ["family", "developer"], disposition: "replace-active", targetProfile: "generated-content" } },
   { match: (path) => /^scripts\/.+(?:brand|design|social|font|asset|template|prompt|persona|anchor).+\.(?:mjs|mts|ts)$/.test(path), value: { type: "generator", audiences: ["developer"], disposition: "regenerate-derived", targetProfile: "authoring" } },
@@ -110,14 +117,14 @@ function ownerIssue(path: string): `gh#${number}` {
   if (/^apps\/mobile\//.test(path)) return "gh#686";
   if (/^apps\/web\/(?:app|components)\/admin\//.test(path)) return "gh#733";
   if (/report|material|print|pdf|compliance|filing/.test(path)) return "gh#687";
-  if (/(?:email|sms|telnyx|handwrytten)/.test(path)) return "gh#688";
   if (/^marketing\//.test(path)) return "gh#741";
+  if (/(?:email|sms|telnyx|handwrytten)/.test(path)) return "gh#688";
   if (/^(?:apps\/web\/app\/(?:blog|world|page)|apps\/web\/components\/marketing)/.test(path)) return "gh#683";
   if (/signin|password|onboarding|paywall|billing|unsubscribe|join/.test(path)) return "gh#684";
   if (/manifest|opengraph|twitter-image|apple-icon|favicon|homa\.vcf|robots|sitemap|rss\.xml|apps\/web\/public/.test(path)) return "gh#689";
   if (/^(?:\.agents|apps\/web\/agent|packages\/core\/src\/map\/copy-laws|apps\/web\/lib\/copy-laws-runtime)/.test(path)) return "gh#739";
   if (/^apps\/web\/components\/design\//.test(path)) return "gh#724";
-  if (/^(?:DESIGN\.md|docs\/homa-design|scripts\/)/.test(path)) return "gh#717";
+  if (/^(?:DESIGN\.md|docs\/homa-design|packages\/design|scripts\/)/.test(path)) return "gh#717";
   if (/^apps\/web\/app\/app\//.test(path)) return "gh#685";
   return "gh#683";
 }
@@ -151,6 +158,25 @@ function deliveryState(path: string, targetProfile: string): BrandDeliveryState 
   return "controlled-current";
 }
 
+function consumersFor(path: string, type: BrandManifestType): string[] {
+  switch (type) {
+    case "authoring-rule":
+      return ["design-authoring", "@homa/design"];
+    case "agent-skill":
+      return [path.startsWith(".agents/") ? "fleet-skill-loader" : "eve-skill-loader", "design-authoring"];
+    case "prompt":
+      return ["eve-prompt-loader", "design-authoring"];
+    case "evaluator":
+      return ["authoring-rails-check", "interface-gauntlet"];
+    case "golden-fixture":
+      return ["authoring-rails-check", "interface-gauntlet"];
+    case "generator":
+      return ["brand-generation", "@homa/design"];
+    default:
+      return ["brand-surface-manifest"];
+  }
+}
+
 function recordFor(path: string): BrandSurfaceRecord {
   const classification = classify(path);
   const bytes = readFileSync(resolve(ROOT, path));
@@ -169,6 +195,7 @@ function recordFor(path: string): BrandSurfaceRecord {
     criticality: criticality(path, audiences), ownerIssue: ownerIssue(path),
     upstreamDomainOwners: [classification.targetProfile],
     dependencies: ["@homa/design"],
+    consumers: consumersFor(path, classification.type),
     requiredStates: requiredStates(path, text, classification.targetProfile),
     viewports: isRendered ? isNative ? ["compact-native", "large-text-native"] : ["320px", "390px", "768px", "1440px", "200%-zoom", "400%-reflow"] : [],
     devices: isNative ? ["oldest-supported-iPhone", "current-iPhone", "Android-compile-only"] : [],
@@ -190,7 +217,7 @@ function recordFor(path: string): BrandSurfaceRecord {
     evidencePath: null,
     requiredEvidence: isRendered ? ["baseline-pixels-pending", "baseline-interactions-pending", "performance-pending", "accessibility-pending", "residue"] : ["source-fingerprint", "legacy-signature-review"],
     productionProbe: classification.targetProfile === "authoring" ? "not-production-reachable" : "pending:brand-production-probe",
-    evidenceMetadata: { contractVersion: "@homa/design:not-yet-cutover", harnessVersion: "brand-surfaces-v1", observedAt: initialObservedAt, environment: "clean-checkout-forensics", clientRuntimeFingerprint: null, pixels: null, interactions: null, performance: null, accessibility: null, artifactGeneration: null, providerState: null, publicCacheBehavior: null },
+    evidenceMetadata: { contractVersion: `@homa/design:${DESIGN_CONTRACT_VERSION}`, harnessVersion: "brand-surfaces-v1", observedAt: initialObservedAt, environment: "clean-checkout-forensics", clientRuntimeFingerprint: null, pixels: null, interactions: null, performance: null, accessibility: null, artifactGeneration: null, providerState: null, publicCacheBehavior: null },
     productionReadback: null, deletionCommit: null,
     deliveryState: deliveryState(path, classification.targetProfile), rolloutState: "inventory",
   };
@@ -221,12 +248,13 @@ const providerRecords: BrandSurfaceRecord[] = externalSurfaces.map(([key, type, 
   reachability: key.includes("google-play") || key.includes("future-mobile-push") ? "internal" : "external",
   audiences: ["family", "provider"], criticality: criticalityValue as BrandCriticality, ownerIssue: issue as `gh#${number}`,
   upstreamDomainOwners: ["constrained-projection"], dependencies: ["@homa/design/constrained-projection"], requiredStates: ["default", "failure", "fallback"], viewports: [], devices: [], clients: ["provider-client"], assistiveModes: [], appearanceModes: ["provider-supported"],
+  consumers: ["provider-projection", "brand-surface-manifest"],
   baseline: { fixtureChecksum: null, renderPath: null, interactionRecordingPath: null }, approvedTarget: "quiet-authority-v1",
   targetProfiles: ["constrained-projection"],
   requirements: { atoms: ["semantic-color", "Logo"], patterns: ["one-useful-next-move"], assets: ["approved-provider-asset"], fonts: ["provider-safe-fallback"], copyRoles: ["true-clear-memorable"] },
   legacySignatures: [], currentAssetHashes: [], disposition: disposition as BrandDisposition, featureFlags: [], migrationFlag: null, rollbackBoundary: "provider-or-artifact-version-restore", evidencePath: null,
   requiredEvidence: ["provider-readback-pending", "production-probe-pending", "residue"], productionProbe: "pending:provider-probe",
-  evidenceMetadata: { contractVersion: "@homa/design:not-yet-cutover", harnessVersion: "brand-surfaces-v1", observedAt: initialObservedAt, environment: "clean-checkout-forensics", clientRuntimeFingerprint: null, pixels: null, interactions: null, performance: null, accessibility: null, artifactGeneration: null, providerState: null, publicCacheBehavior: null },
+  evidenceMetadata: { contractVersion: `@homa/design:${DESIGN_CONTRACT_VERSION}`, harnessVersion: "brand-surfaces-v1", observedAt: initialObservedAt, environment: "clean-checkout-forensics", clientRuntimeFingerprint: null, pixels: null, interactions: null, performance: null, accessibility: null, artifactGeneration: null, providerState: null, publicCacheBehavior: null },
   productionReadback: null, deletionCommit: null,
   deliveryState: delivery as BrandDeliveryState, rolloutState: "inventory",
 }));

@@ -64,9 +64,9 @@ answer map fails, drop the item or rebuild the set before rendering.
   .game-card { min-height: 150px; border: 2px dashed #8c8175;
     border-radius: 10px; display: grid; place-items: center;
     position: relative; background: #fff; }
-  .game-word { font: 700 31px Andika, sans-serif; color: #221e1a; }
+  .game-word { font: 700 31px Andika, sans-serif; color: var(--homa-ink); }
   .game-id { position: absolute; right: 8px; bottom: 6px;
-    font: 500 9px 'Plus Jakarta Sans', sans-serif; color: #6b6259; }
+    font: 500 9px 'Plus Jakarta Sans', sans-serif; color: var(--homa-control-boundary); }
 </style>
 <div class="game-grid">
   <div class="game-card">

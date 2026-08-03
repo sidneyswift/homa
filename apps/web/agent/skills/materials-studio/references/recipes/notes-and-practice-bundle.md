@@ -31,7 +31,7 @@ Design patterns (all binding for notes-and-practice bundles):
   - Numbered problems or matching columns.
   - Problems progress from straightforward application to
     multi-step or tricky edge cases.
-  - Answer blanks: `border-bottom: 2px solid #6b6259; width: 80px;`
+  - Answer blanks: `border-bottom: 2px solid var(--homa-control-boundary); width: 80px;`
   - For matching: two columns with items to connect.
   - Include 8-12 problems for grades 3-5, 12-16 for grades 6-8.
 
@@ -45,7 +45,7 @@ Design patterns (all binding for notes-and-practice bundles):
     margin-bottom: 16px; font-size: 13px;
     font-family: 'Plus Jakarta Sans', sans-serif; }
   .notes-header .field { flex: 1 1 40%; }
-  .notes-header .field-line { border-bottom: 1.5px solid #6b6259;
+  .notes-header .field-line { border-bottom: 1.5px solid var(--homa-control-boundary);
     min-width: 120px; display: inline-block; margin-left: 4px; }
   .notes-title { font-family: 'Fredoka', sans-serif; font-size: 22px;
     font-weight: 700; margin-bottom: 16px; text-align: center; }
@@ -53,11 +53,11 @@ Design patterns (all binding for notes-and-practice bundles):
     padding-top: 10px; }
   .notes-two-col { display: grid; grid-template-columns: 120px 1fr;
     gap: 4px 14px; margin-bottom: 8px; }
-  .notes-term { font-size: 13px; font-weight: 700; color: #221e1a;
+  .notes-term { font-size: 13px; font-weight: 700; color: var(--homa-ink);
     padding-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif; }
-  .notes-explanation { font-size: 13px; color: #6b6259;
+  .notes-explanation { font-size: 13px; color: var(--homa-control-boundary);
     line-height: 1.8; font-family: 'Plus Jakarta Sans', sans-serif; }
-  .notes-blank { border-bottom: 2px solid #6b6259; width: 80px;
+  .notes-blank { border-bottom: 2px solid var(--homa-control-boundary); width: 80px;
     display: inline-block; margin: 0 4px; }
   .notes-student-lines { margin-top: 6px; }
   .notes-student-lines div { border-bottom: 1.5px solid #d9d2c7;
@@ -95,7 +95,7 @@ Design patterns (all binding for notes-and-practice bundles):
     font-size: 14px; margin-bottom: 14px; display: flex;
     align-items: baseline; gap: 8px; }
   .practice-num { font-weight: 700; min-width: 24px; }
-  .practice-blank { border-bottom: 2px solid #6b6259; width: 80px;
+  .practice-blank { border-bottom: 2px solid var(--homa-control-boundary); width: 80px;
     display: inline-block; margin: 0 4px; }
   .practice-work-area { border: 1.5px solid #d9d2c7; border-radius: 4px;
     min-height: 48px; margin-left: 32px; margin-bottom: 8px; }

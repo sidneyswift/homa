@@ -68,11 +68,11 @@ and call it decodable on plausibility alone.
   .story-head { display: flex; justify-content: space-between;
     align-items: end; margin-bottom: 20px; }
   .story-title { font: 750 28px 'Plus Jakarta Sans', sans-serif; }
-  .rereads { font: 600 12px 'Plus Jakarta Sans', sans-serif; color: #6b6259; }
-  .story-text { font: 500 26px/1.65 Andika, sans-serif; color: #221e1a;
+  .rereads { font: 600 12px 'Plus Jakarta Sans', sans-serif; color: var(--homa-control-boundary); }
+  .story-text { font: 500 26px/1.65 Andika, sans-serif; color: var(--homa-ink);
     max-width: 6.7in; }
   .story-text p { margin: 0 0 15px; }
-  .talk { margin-top: 24px; border-top: 1.5px solid #b3a492;
+  .talk { margin-top: 24px; border-top: 1.5px solid var(--homa-control-boundary);
     padding-top: 12px; font: 600 15px 'Plus Jakarta Sans', sans-serif; }
 </style>
 <div class="story-head">

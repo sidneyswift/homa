@@ -78,9 +78,9 @@ for target words with their syllables instead of guessing.
     margin-bottom: 10px; }
   .chunks { display: flex; justify-content: center; gap: 10px;
     flex-wrap: wrap; margin-bottom: 12px; }
-  .chunk { border: 2px solid #221e1a; border-radius: 9px; padding: 7px 12px;
+  .chunk { border: 2px solid var(--homa-ink); border-radius: 9px; padding: 7px 12px;
     font: 750 27px Andika, sans-serif; letter-spacing: 0.04em; }
-  .answer-cell { min-height: 46px; border: 2px solid #6b6259;
+  .answer-cell { min-height: 46px; border: 2px solid var(--homa-control-boundary);
     border-radius: 8px; }
 </style>
 <div class="syllable-grid">

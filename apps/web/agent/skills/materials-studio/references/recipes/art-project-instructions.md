@@ -41,7 +41,7 @@ Design patterns (all binding for art-project-instructions):
   curriculum's own vocabulary (an element, a principle, or a technique
   name) rather than inventing new terms.
 - **Inspiration thumbnail (optional, hybrid only)**: a small bordered
-  box (`border: 2px solid #221e1a; border-radius: 6px;`) near the title
+  box (`border: 2px solid var(--homa-ink); border-radius: 6px;`) near the title
   holding a generated example of the finished piece or the technique in
   progress. Skip entirely for the bare technique-reference variant.
 - **Materials list**: a short bulleted list before the steps, plain
@@ -49,14 +49,14 @@ Design patterns (all binding for art-project-instructions):
   like buttons or bottle caps"), never brand names or specialty-store
   items unless the technique truly requires them.
 - **Numbered steps**: 3-6 numbered steps in a vertical list
-  (`.api-step` circles, `border: 2px solid #221e1a; border-radius:
+  (`.api-step` circles, `border: 2px solid var(--homa-ink); border-radius:
   50%;`), one clear physical action per step, in plain declarative
   sentences a young reader or a parent reading aloud can follow. Where
   the source curriculum names its own phases (for example "Plan,"
   "Create," "Reflect"), use those phase words as small step-group
   labels instead of inventing new ones.
 - **Reflection prompt (optional)**: one short open-ended question at
-  the bottom (`border: 1.5px solid #6b6259; border-radius: 6px;
+  the bottom (`border: 1.5px solid var(--homa-control-boundary); border-radius: 6px;
   min-height: 60px;`) with a blank box for a dictated or written answer.
   Reuse the family's own comprehension-skill vocabulary for the question
   when their curriculum ties a reading or thinking skill to that unit
@@ -70,7 +70,7 @@ Design patterns (all binding for art-project-instructions):
   or experiment that follows this same materials-list-plus-numbered-steps
   shell (a published science textbook's "Investigate" activity, for
   example), add one small bordered tip box (`border: 1.5px solid
-  #b3a492; border-radius: 6px; padding: 10px 14px; background:
+  var(--homa-control-boundary); border-radius: 6px; padding: 10px 14px; background:
   #f0ede8;`) near the last step, naming and defining the one inquiry
   skill the activity practices, for example "Science Skill: To draw a
   conclusion, use what you have observed to form an idea." Pull the
@@ -112,7 +112,7 @@ Design patterns (all binding for art-project-instructions):
   under the title stating what the child will see or find out, in plain
   active words ("See how clay absorbs water," "Make your own gravity"),
   never a mechanism lecture; (2) one small "Did you know?" fact box
-  (`border: 1.5px solid #6b6259; border-radius: 6px; padding: 10px 14px;`)
+  (`border: 1.5px solid var(--homa-control-boundary); border-radius: 6px; padding: 10px 14px;`)
   holding a single concrete, child-facing fact connected to the experiment,
   with a real number or comparison when one exists ("the Sun is about 100
   times wider than Earth"); this box is different from the skill-tip
@@ -129,28 +129,28 @@ Design patterns (all binding for art-project-instructions):
 <style>
   .api-page { font-family: 'Andika', sans-serif; padding: 24px; }
   .api-tag { display: inline-block; font-size: 12px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.04em; color: #6b6259;
+    text-transform: uppercase; letter-spacing: 0.04em; color: var(--homa-control-boundary);
     margin-bottom: 6px; }
-  .api-title { font-size: 26px; font-weight: 700; color: #221e1a;
+  .api-title { font-size: 26px; font-weight: 700; color: var(--homa-ink);
     margin-bottom: 12px; }
-  .api-thumb { border: 2px solid #221e1a; border-radius: 6px;
+  .api-thumb { border: 2px solid var(--homa-ink); border-radius: 6px;
     width: 140px; height: 140px; float: right; margin: 0 0 12px 16px; }
-  .api-materials { border: 1.5px solid #b3a492; border-radius: 6px;
+  .api-materials { border: 1.5px solid var(--homa-control-boundary); border-radius: 6px;
     padding: 12px 16px; margin-bottom: 16px; background: #f0ede8; }
   .api-step { display: flex; gap: 12px; align-items: flex-start;
     margin-bottom: 12px; }
   .api-step-num { flex-shrink: 0; width: 28px; height: 28px;
-    border: 2px solid #221e1a; border-radius: 50%; display: flex;
+    border: 2px solid var(--homa-ink); border-radius: 50%; display: flex;
     align-items: center; justify-content: center; font-weight: 700; }
-  .api-reflection { border: 1.5px solid #6b6259; border-radius: 6px;
+  .api-reflection { border: 1.5px solid var(--homa-control-boundary); border-radius: 6px;
     padding: 14px; min-height: 60px; margin-top: 16px; font-size: 14px; }
   .api-skill-strip { display: flex; gap: 8px; margin-bottom: 10px; }
-  .api-skill-chip { border: 1.5px solid #6b6259; border-radius: 6px;
+  .api-skill-chip { border: 1.5px solid var(--homa-control-boundary); border-radius: 6px;
     padding: 6px 8px; font-size: 11px; font-weight: 600; text-align: center;
-    color: #6b6259; }
-  .api-stat-block { font-size: 13px; color: #6b6259; margin-bottom: 10px;
+    color: var(--homa-control-boundary); }
+  .api-stat-block { font-size: 13px; color: var(--homa-control-boundary); margin-bottom: 10px;
     line-height: 1.6; }
-  .api-prep { border: 1.5px dashed #b3a492; border-radius: 6px;
+  .api-prep { border: 1.5px dashed var(--homa-control-boundary); border-radius: 6px;
     padding: 10px 14px; margin-bottom: 14px; background: #f6f4f0; }
 </style>
 ```

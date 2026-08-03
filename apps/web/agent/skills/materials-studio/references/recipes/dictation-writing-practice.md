@@ -86,7 +86,7 @@ pass threshold, mastery result, grade level, or timer in generated prose.
 
 ```html
 <style>
-  .dictation { font-family: Andika, sans-serif; color: #221e1a; }
+  .dictation { font-family: Andika, sans-serif; color: var(--homa-ink); }
   .head { display: flex; justify-content: space-between;
     align-items: baseline; margin-bottom: 18px; }
   .title { font: 750 28px 'Plus Jakarta Sans', sans-serif; }
@@ -97,15 +97,15 @@ pass threshold, mastery result, grade level, or timer in generated prose.
   .item { display: grid; grid-template-columns: 34px 1fr;
     align-items: end; min-height: 58px; }
   .number { font: 700 16px 'Plus Jakarta Sans', sans-serif; }
-  .line { border-bottom: 1.8px solid #6b6259; min-height: 46px; }
+  .line { border-bottom: 1.8px solid var(--homa-control-boundary); min-height: 46px; }
   .sentence { margin-top: 20px; }
   .sentence .line { min-height: 64px; }
-  .response { margin-top: 22px; border: 1.5px solid #b3a492;
+  .response { margin-top: 22px; border: 1.5px solid var(--homa-control-boundary);
     border-radius: 10px; padding: 16px; }
   .response p { font: 600 17px 'Plus Jakarta Sans', sans-serif;
     margin: 0 0 10px; }
   .response-space { min-height: 145px;
-    background: repeating-linear-gradient(#fff 0 34px, #b3a492 35px 36px); }
+    background: repeating-linear-gradient(#fff 0 34px, var(--homa-control-boundary) 35px 36px); }
 </style>
 <main class="dictation">
   <header class="head">

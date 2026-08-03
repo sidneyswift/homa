@@ -374,7 +374,7 @@ the same four-per-page grid (`create_printable`'s `pages` input), never
 smaller cards to squeeze more onto one sheet; a family naming a different
 size still grids by this rule, whatever whole count that size's own rows
 and columns fit. Each cell is a cut line only, no fill:
-`border: 2px dashed #b3a492;` and no `background` declaration; a shaded
+`border: 2px dashed var(--homa-control-boundary);` and no `background` declaration; a shaded
 cell multiplies the ink cost across the whole printed deck. A card-grid
 page's only job is to hold cards, so skip a decorative page title that
 would eat into that space.
@@ -382,7 +382,7 @@ would eat into that space.
 **Letter boxes**: some handwriting curricula (Handwriting Without
 Tears, for one) teach letters inside a box, not on a three-line guide.
 When the family's curriculum metadata or the parent's ask points that
-way, draw rows of practice boxes (`border: 3px solid #221e1a;
+way, draw rows of practice boxes (`border: 3px solid var(--homa-ink);
 width/height: 90px;`) with one model letter in the first box of each
 row, and keep box proportions exact; this is precisely where the html
 path beats the image model.
@@ -460,7 +460,7 @@ counters):
 ```html
 <style>
   .tenframe { border-collapse: collapse; margin: 16px 0; }
-  .tenframe td { width: 74px; height: 74px; border: 3px solid #221e1a; }
+  .tenframe td { width: 74px; height: 74px; border: 3px solid var(--homa-ink); }
 </style>
 <table class="tenframe">
   <tr><td></td><td></td><td></td><td></td><td></td></tr>

@@ -41,7 +41,7 @@ Design patterns (all binding for mazes):
   .maze-container { position: relative; width: 100%; }
   .maze-img { width: 100%; display: block; }
   .maze-label { position: absolute; font-family: 'Fredoka', sans-serif;
-    font-size: 18px; font-weight: 600; color: #221e1a;
+    font-size: 18px; font-weight: 600; color: var(--homa-ink);
     background: rgba(255,255,255,0.85); padding: 2px 8px;
     border-radius: 4px; }
   .maze-start { position: absolute; font-family: 'Fredoka', sans-serif;

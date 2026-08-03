@@ -21,7 +21,7 @@ single page requires surgical positioning the image model cannot guarantee.
 Design patterns (all binding for number-practice-page):
 
 - **Zone layout**: divide the page into 4-5 bordered sections
-  (`border: 1.5px solid #6b6259; border-radius: 6px;`), each with a
+  (`border: 1.5px solid var(--homa-control-boundary); border-radius: 6px;`), each with a
   different activity targeting the same number.
 - **Large numeral model**: top-center of the page, oversized
   (`font-size: 96px; font-weight: 700;`) so the child sees the target
@@ -45,16 +45,16 @@ Design patterns (all binding for number-practice-page):
 <style>
   .np-page { font-family: 'Andika', sans-serif; padding: 24px; }
   .np-numeral { text-align: center; font-size: 96px; font-weight: 700;
-    color: #221e1a; margin-bottom: 16px; }
-  .np-section { border: 1.5px solid #6b6259; border-radius: 6px;
+    color: var(--homa-ink); margin-bottom: 16px; }
+  .np-section { border: 1.5px solid var(--homa-control-boundary); border-radius: 6px;
     padding: 14px 16px; margin-bottom: 12px; }
   .np-section-title { font-size: 14px; font-weight: 600;
-    color: #6b6259; margin-bottom: 8px; }
+    color: var(--homa-control-boundary); margin-bottom: 8px; }
   .np-ten-frame { display: grid; grid-template-columns: repeat(5, 48px);
     gap: 4px; }
-  .np-ten-cell { width: 48px; height: 48px; border: 2px solid #6b6259;
+  .np-ten-cell { width: 48px; height: 48px; border: 2px solid var(--homa-control-boundary);
     border-radius: 4px; }
-  .np-trace-line { border-bottom: 2px solid #6b6259;
+  .np-trace-line { border-bottom: 2px solid var(--homa-control-boundary);
     min-height: 48px; margin-bottom: 8px; }
 </style>
 ```

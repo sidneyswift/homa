@@ -29,7 +29,7 @@ Design patterns (all binding for letter-number-formation-practice):
   words every time: line, curve, big, little, up, down, across, around. Do
   not invent a new vocabulary per letter.
 - **Formation box, capitals and digits**: a single rectangle
-  (`border: 2px solid #221e1a; height: 96px;`) with no interior guide line.
+  (`border: 2px solid var(--homa-ink); height: 96px;`) with no interior guide line.
   Capitals and digits are single-story: every stroke reaches from the top
   of the box to the bottom, or stops at a marked midpoint for a letter like
   E or F.
@@ -67,13 +67,13 @@ Design patterns (all binding for letter-number-formation-practice):
 ```html
 <style>
   .lf-page { font-family: 'Andika', sans-serif; padding: 24px; text-align: center; }
-  .lf-model { font-size: 84px; font-weight: 700; color: #221e1a; }
-  .lf-cue { font-size: 15px; color: #6b6259; margin: 4px 0 20px; }
+  .lf-model { font-size: 84px; font-weight: 700; color: var(--homa-ink); }
+  .lf-cue { font-size: 15px; color: var(--homa-control-boundary); margin: 4px 0 20px; }
   .lf-box-capital { display: inline-block; width: 96px; height: 96px;
-    border: 2px solid #221e1a; border-radius: 4px; margin: 0 6px;
+    border: 2px solid var(--homa-ink); border-radius: 4px; margin: 0 6px;
     position: relative; }
   .lf-box-lowercase { display: inline-block; width: 96px; height: 128px;
-    border-top: 2px solid #221e1a; border-bottom: 2px solid #221e1a;
+    border-top: 2px solid var(--homa-ink); border-bottom: 2px solid var(--homa-ink);
     margin: 0 6px; position: relative; }
   .lf-chair-rail { position: absolute; left: 0; right: 0; top: 64px;
     border-top: 2px dotted #a39c8f; }

@@ -17,7 +17,7 @@ Design patterns (all binding for guided-notes):
   right column (~70%) for definitions/notes with fill-in blanks.
   `display: grid; grid-template-columns: 30% 70%;`
 - **Fill-in blanks**: inline underscores in the right column
-  (`border-bottom: 1.5px solid #6b6259; min-width: 80px;
+  (`border-bottom: 1.5px solid var(--homa-control-boundary); min-width: 80px;
   display: inline-block;`) within otherwise complete sentences.
 - **Summary section**: at bottom of page with 3-4 blank lines and
   the prompt "Summary: In your own words..."

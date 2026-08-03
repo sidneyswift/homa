@@ -78,7 +78,7 @@ are available, ask for the family's exact words instead of inventing a chart.
 
 ```html
 <style>
-  .chart { font-family: Andika, sans-serif; color: #221e1a; }
+  .chart { font-family: Andika, sans-serif; color: var(--homa-ink); }
   .title { font: 750 31px 'Plus Jakarta Sans', sans-serif;
     margin-bottom: 10px; }
   .reminder { font-size: 18px; line-height: 1.45; margin-bottom: 20px; }
@@ -92,7 +92,7 @@ are available, ask for the family's exact words instead of inventing a chart.
   .example { font-size: 30px; line-height: 1.2; }
   .target { font-weight: 800; text-decoration: underline;
     text-decoration-thickness: 3px; text-underline-offset: 4px; }
-  .use { margin-top: 22px; border-top: 1.5px solid #b3a492;
+  .use { margin-top: 22px; border-top: 1.5px solid var(--homa-control-boundary);
     padding-top: 14px; font: 600 17px 'Plus Jakarta Sans', sans-serif; }
 </style>
 <main class="chart">

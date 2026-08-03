@@ -22,6 +22,24 @@ intentionally allowed to fail while migration work remains: its findings are
 the eradication queue, not a reason to add another baseline exemption. A final
 release may not close until the audit passes from a clean checkout.
 
+`authoring-rails.json` is generated from the exact tracked authoring sources.
+`pnpm check:design-authoring` requires every `.agents/skills/`,
+`apps/web/agent/`, marketing voice and evaluator, design guide, and typed
+contract source to have an exact manifest row, named consumer, current source
+fingerprint, Quiet authority contract version, and no temporary migration
+exemption. It also checks that the brand asset generator names contract roles,
+that all generated asset rows are fingerprinted, and that authored residue is
+zero. The one negative contract sentinel is recorded as an approved profile
+rule, not a legacy allowlist.
+
+`pnpm check:brand-assets` runs the canonical generator in check mode. A clean
+checkout must reproduce every web, marketing, native, and distribution asset
+from `packages/design/src/contract`: text and vector assets are byte-for-byte.
+PNG projections are compared as decoded pixels, with a quantized visual
+signature fallback for renderer-level anti-aliasing differences, so
+platform-specific PNG compression metadata cannot become a false source of
+drift while palette, geometry, or crop changes still fail.
+
 The manifest records Android as intentionally unreleased because the existing
 cross-platform ruling reserves Android for a future build. That is a release
 disposition, not permission for visual drift: Android shares the native

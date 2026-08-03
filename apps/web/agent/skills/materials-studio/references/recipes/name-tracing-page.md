@@ -33,7 +33,7 @@ a hope.
   <line x1="0" y1="130" x2="700" y2="130" stroke="#3a3a3a" stroke-width="3"/>
   <circle cx="8" cy="9" r="6" fill="#4f9d5e"/>
   <text x="16" y="129" font-family="Fredoka, sans-serif" font-size="174"
-    fill="none" stroke="#b3a492" stroke-width="2.5" stroke-dasharray="5,5">Amalia</text>
+    fill="none" stroke="var(--homa-control-boundary)" stroke-width="2.5" stroke-dasharray="5,5">Amalia</text>
 </svg></div>
 ```
 
@@ -53,7 +53,7 @@ a hope.
 
 - The name is something the child FILLS IN, never a solid dark word she
   scribbles over (verbatim parent correction). Two allowed styles:
-  dotted outline (`fill="none" stroke="#b3a492" stroke-width="2.5"
+  dotted outline (`fill="none" stroke="var(--homa-control-boundary)" stroke-width="2.5"
   stroke-dasharray="5,5"`, the store-bought look) or pale solid fill
   (`fill="#c9c2b8"`, no darker). Solid dark ink is for the model row
   only, if the page has one.

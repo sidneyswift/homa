@@ -30,7 +30,7 @@ Design patterns (all binding for cut-and-paste):
   vertically: (1) printed model word in large clear type, (2) a
   writing practice line matching the handwriting-practice baseline,
   (3) a cut-out tile at the bottom of the cell.
-- **Dotted cut borders**: `border: 2px dashed #b3a492;` on cut-out
+- **Dotted cut borders**: `border: 2px dashed var(--homa-control-boundary);` on cut-out
   tiles and the horizontal separator line between the practice area
   and the tile strip.
 - **Cut tiles strip**: a horizontal band at the bottom of the page,
@@ -38,7 +38,7 @@ Design patterns (all binding for cut-and-paste):
   ("✂️ cut along this line"). Each tile repeats the word in a
   bordered box the child cuts out individually.
 - **Writing lines**: match the tracing-guide baseline style
-  (`border-bottom: 2px solid #6b6259; min-height: 28px;`).
+  (`border-bottom: 2px solid var(--homa-control-boundary); min-height: 28px;`).
 - **Consistent cell sizing**: all cells equal height and width for
   clean grid alignment.
 - **Visual clarity**: large, clear font for model words
@@ -50,19 +50,19 @@ Design patterns (all binding for cut-and-paste):
 <style>
   .cwp-grid { display: grid; grid-template-columns: 1fr 1fr;
     gap: 16px; margin-bottom: 24px; }
-  .cwp-cell { border: 1.5px solid #6b6259; border-radius: 6px;
+  .cwp-cell { border: 1.5px solid var(--homa-control-boundary); border-radius: 6px;
     padding: 14px 16px; text-align: center; }
   .cwp-model { font-family: 'Andika', sans-serif; font-size: 32px;
-    font-weight: 600; color: #221e1a; margin-bottom: 8px; }
-  .cwp-write-line { border-bottom: 2px solid #6b6259;
+    font-weight: 600; color: var(--homa-ink); margin-bottom: 8px; }
+  .cwp-write-line { border-bottom: 2px solid var(--homa-control-boundary);
     min-height: 28px; margin: 8px auto; width: 85%; }
-  .cwp-cut-separator { border-top: 2.5px dashed #b3a492;
+  .cwp-cut-separator { border-top: 2.5px dashed var(--homa-control-boundary);
     margin: 20px 0 12px; position: relative; padding-top: 4px; }
-  .cwp-cut-label { font-size: 10px; color: #b3a492;
+  .cwp-cut-label { font-size: 10px; color: var(--homa-control-boundary);
     letter-spacing: 0.1em; text-align: center; }
   .cwp-tiles { display: grid; grid-template-columns: repeat(4, 1fr);
     gap: 10px; }
-  .cwp-tile { border: 2px dashed #b3a492; border-radius: 4px;
+  .cwp-tile { border: 2px dashed var(--homa-control-boundary); border-radius: 4px;
     padding: 10px; text-align: center; font-family: 'Andika', sans-serif;
     font-size: 22px; }
 </style>

@@ -1,16 +1,17 @@
 ---
 name: homa-design
-description: Use when building or styling any Homa-branded interface, page, component, or asset in this project (apps/web, prototypes, mocks, social/marketing artifacts), or when writing Homa product/marketing copy. Homa is the AI homeschooling assistant this project builds. Covers brand tokens (colors, type, radii, shadows), fonts, the logo mark, UI kit components, voice/copy rules, and social/landing templates.
+description: Use when building or styling any Homa-branded interface, page, component, or asset in this project (apps/web, prototypes, mocks, social/marketing artifacts), or when writing Homa product/marketing copy. Homa is the AI homeschooling assistant this project builds. Covers the Quiet authority contract, fonts, the real Logo mark, semantic primitives, motion, channel profiles, and voice/copy rules.
 ---
 
 # Homa Design System
 
-The design system's source of truth lives at `docs/homa-design/` (kept there, not inside this skill folder, so it stays browsable as project documentation and stays a single copy). Read `docs/homa-design/SKILL.md` first for the quick reference (fonts, colors, components, voice, dark theme), then `docs/homa-design/readme.md` for the full guide. Explore `docs/homa-design/{tokens,components,guidelines,social,templates,ui_kits}/` as needed.
+The design system's source of truth lives at `docs/homa-design/` (kept there, not inside this skill folder, so it stays browsable as project documentation and stays a single copy). Read `docs/homa-design/SKILL.md` first for the quick reference, then `docs/homa-design/readme.md` for the full guide and `packages/design/src/contract/` for typed values. Generated projections are checked by `pnpm check:design-parity` and `pnpm check:design-authoring`.
 
-Do not edit `docs/homa-design/_ds_bundle.js`, `_ds_manifest.json`, or `_adherence.oxlintrc.json`, they are generated.
+Do not edit generated projections by hand. Run the contract and brand
+generators, then use their check modes in CI.
 
 ## Project-specific notes
 
-- `apps/web` hand-copies tokens, fonts, and the `Logo` component into `apps/web/app/globals.css`, `apps/web/app/layout.tsx`, and `apps/web/components/brand/Logo.tsx` (temporary, until the `packages/design` workspace package lands per ticket M1-17). If you change anything in `docs/homa-design/`, check whether those files need the same update so they don't silently drift out of sync.
-- The repo root also has a `DESIGN.md`, a spec-compliant (`google-labs-code/design.md` format) token summary for design tooling that reads that exact filename. It is derived from `docs/homa-design/tokens/`, update its front matter too when tokens change.
-- Hard copy rules from `docs/homa-design/CLAUDE.md`: never use an em dash (use a comma, period, colon, or mid-dot instead). Write "Homa" in prose and conversation; use "HOMA" in the wordmark and on UI surfaces, per global founder ruling D8.
+- `docs/homa-design/readme.md` is the human guide, `packages/design/src/contract/` is the typed authority, `packages/design/generated/` is generated projection, and `DESIGN.md` is the compact tooling summary. If one changes, run the parity and authoring checks before calling the rail current.
+- The real Logo component owns Homa's mark and wordmark. Do not redraw the house, eyes, roof, character, or thread in a route, prompt, email, print renderer, or asset generator.
+- Hard copy rules from the repository instructions and `docs/homa-design/readme.md`: never use an em dash, write "Homa" in prose, and keep semantic colors truthful rather than decorative.

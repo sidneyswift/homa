@@ -53,6 +53,8 @@ test("manifest uses only the approved contract enums and records owned-input fre
     assert.ok(brandDeliveryStates.includes(surface.deliveryState));
     assert.ok(surface.requiredStates.includes("default"));
     assert.equal(surface.ownerIssue.startsWith("gh#"), true);
+    assert.ok(Array.isArray(surface.consumers));
+    if (["authoring-rule", "agent-skill", "prompt", "evaluator", "golden-fixture"].includes(surface.type)) assert.ok(surface.consumers.length > 0, `missing consumers: ${surface.paths[0]}`);
   }
 });
 

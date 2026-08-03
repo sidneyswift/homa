@@ -17,8 +17,8 @@ Design patterns (all binding for labeled-anatomy-diagram):
   B&W line art suitable for coloring.
 - **Leader lines**: extend from numbered circles on the illustration to
   the margin. Numbers in small circles (`width: 24px; height: 24px;
-  border-radius: 50%; border: 2px solid #221e1a; font-size: 14px;`).
-- **Word bank**: bordered box at bottom (`border: 1.5px solid #6b6259;
+  border-radius: 50%; border: 2px solid var(--homa-ink); font-size: 14px;`).
+- **Word bank**: bordered box at bottom (`border: 1.5px solid var(--homa-control-boundary);
   border-radius: 6px; padding: 12px;`) with shuffled terms in a
   horizontal list separated by bullet dots.
 - **Three scaffolding levels** (generate all three as separate pages

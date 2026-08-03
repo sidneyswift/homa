@@ -70,7 +70,7 @@ mapping is absent or ambiguous.
     margin-bottom: 24px; }
   .sound-row { display: grid; grid-template-columns: repeat(3, 1fr);
     gap: 14px; margin: 22px 0 36px; }
-  .sound-box { height: 150px; border: 3px solid #221e1a;
+  .sound-box { height: 150px; border: 3px solid var(--homa-ink);
     border-radius: 14px; background: #fff; }
   .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
   .tile { min-height: 90px; border: 2px dashed #8c8175;

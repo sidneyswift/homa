@@ -85,7 +85,7 @@ pass line, or next-skill threshold in prose.
 
 ```html
 <style>
-  .practice { font-family: Andika, sans-serif; color: #221e1a; }
+  .practice { font-family: Andika, sans-serif; color: var(--homa-ink); }
   .head { display: flex; justify-content: space-between;
     align-items: baseline; margin-bottom: 18px; }
   .title { font: 750 28px 'Plus Jakarta Sans', sans-serif; }
@@ -97,7 +97,7 @@ pass line, or next-skill threshold in prose.
     margin: 0 0 10px; }
   .words { display: grid; grid-template-columns: repeat(3, 1fr);
     gap: 12px; }
-  .word { min-height: 68px; border: 1.5px solid #b3a492;
+  .word { min-height: 68px; border: 1.5px solid var(--homa-control-boundary);
     border-radius: 8px; display: grid; place-items: center;
     font-size: 29px; background: #fff; }
 </style>
