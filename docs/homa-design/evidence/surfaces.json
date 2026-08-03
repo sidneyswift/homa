@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "40b26f78dc2424e8237eebb1980b15fd8a30d4af25135618d5b39f563148fdbb",
+  "ownedInputFingerprint": "2200ae7d30b2cf810c44e098cee755c49a0a65dd87c86d0e58885ee7a9e33d9d",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -2197,7 +2197,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "7472196d10d9a5a3230d84493d0deb170387091692d9a714eec15c01d6234687",
+        "fixtureChecksum": "5b9c832d8c3f0bf7877c60cf1f494763194bde70e0a7faa380e1dd6c435959ec",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -2222,7 +2222,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "7472196d10d9a5a3230d84493d0deb170387091692d9a714eec15c01d6234687"
+        "5b9c832d8c3f0bf7877c60cf1f494763194bde70e0a7faa380e1dd6c435959ec"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -122166,7 +122166,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "dc176296080a3f8c75e7339b4ccad1accde30926d30e670709a537ddc28d0535",
+        "fixtureChecksum": "bee9338daafb56ad346414b7eec4358ebae554ca95781b3fff11789e79049ed3",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -122201,7 +122201,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "dc176296080a3f8c75e7339b4ccad1accde30926d30e670709a537ddc28d0535"
+        "bee9338daafb56ad346414b7eec4358ebae554ca95781b3fff11789e79049ed3"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -122283,7 +122283,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "7a33faea4b2cb592ac37b7f0c88f02a7c48018e2c1b700b72329a130fd305b69",
+        "fixtureChecksum": "7ad2b9d6bc5db0806c31a23524df95457e5a9525cfde29ca1a3b72ba4cfc641c",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -122318,7 +122318,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "7a33faea4b2cb592ac37b7f0c88f02a7c48018e2c1b700b72329a130fd305b69"
+        "7ad2b9d6bc5db0806c31a23524df95457e5a9525cfde29ca1a3b72ba4cfc641c"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -126749,7 +126749,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "4ce6f17367300f8394d3a7fb826d412a1dbdd18edc10d850d8a90de269debee5",
+        "fixtureChecksum": "7562752b8f4a867dd7a0360bbb26884a18988ccaff1f884475c0ecd18520156f",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -126784,7 +126784,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "4ce6f17367300f8394d3a7fb826d412a1dbdd18edc10d850d8a90de269debee5"
+        "7562752b8f4a867dd7a0360bbb26884a18988ccaff1f884475c0ecd18520156f"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -130600,7 +130600,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "990ab638d69ce6db9dde1b214d7101f615f7591da05e876c660ee39e391f99f8",
+        "fixtureChecksum": "674e8a6fc1e31c7e1eea2a6c2eb89ba117585dcc72b5a6eb26bc395d06759253",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -130625,7 +130625,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "990ab638d69ce6db9dde1b214d7101f615f7591da05e876c660ee39e391f99f8"
+        "674e8a6fc1e31c7e1eea2a6c2eb89ba117585dcc72b5a6eb26bc395d06759253"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
