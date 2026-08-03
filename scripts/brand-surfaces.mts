@@ -21,7 +21,11 @@ const CHECK = process.argv.includes("--check");
 const sha256 = (value: string | Buffer) => createHash("sha256").update(value).digest("hex");
 const git = (...args: string[]) => execFileSync("git", args, { cwd: ROOT, encoding: "utf8" }).trim();
 const trackedFiles = git("ls-files").split("\n").filter(Boolean).sort();
-const initialObservedAt = git("show", "-s", "--format=%cI", "HEAD");
+const existing = existsSync(OUTPUT)
+  ? JSON.parse(readFileSync(OUTPUT, "utf8")) as Partial<BrandSurfaceManifest>
+  : null;
+const initialObservedAt = existing?.surfaces?.[0]?.evidenceMetadata?.observedAt
+  ?? git("show", "-s", "--format=%cI", "HEAD");
 
 const legacyPatterns: ReadonlyArray<[string, RegExp]> = [
   ["legacy-font-schibsted", /Schibsted|schibsted/i],
@@ -225,7 +229,6 @@ const providerRecords: BrandSurfaceRecord[] = externalSurfaces.map(([key, type, 
 
 const surfaces = [...candidates.map(recordFor), ...providerRecords].sort((a, b) => a.paths[0]!.localeCompare(b.paths[0]!));
 const ownedInputFingerprint = sha256(surfaces.map((surface) => `${surface.paths.join("|")}:${surface.currentAssetHashes.join("|")}`).join("\n"));
-const existing = existsSync(OUTPUT) ? JSON.parse(readFileSync(OUTPUT, "utf8")) as Partial<BrandSurfaceManifest> : null;
 const baselineSourceCommit = existing?.baselineSourceCommit ?? git("rev-parse", "HEAD");
 const baselineSourceCommitTimestamp = existing?.baselineSourceCommitTimestamp ?? git("show", "-s", "--format=%cI", baselineSourceCommit);
 
