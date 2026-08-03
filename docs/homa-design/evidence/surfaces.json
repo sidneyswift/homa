@@ -118183,8 +118183,7 @@
         "brand-surface-manifest"
       ],
       "requiredStates": [
-        "default",
-        "success"
+        "default"
       ],
       "viewports": [
         "320px",
@@ -118209,7 +118208,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "d2f961367e04c985d050de8c5a31520ef29cbd5e4d5c9932f35ea6724ff13bb0",
+        "fixtureChecksum": "ff7058fdc2be397b14f612fef98ff8f9635592d446caa794ae92b1217321e422",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -118244,7 +118243,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "d2f961367e04c985d050de8c5a31520ef29cbd5e4d5c9932f35ea6724ff13bb0"
+        "ff7058fdc2be397b14f612fef98ff8f9635592d446caa794ae92b1217321e422"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
