@@ -1,0 +1,407 @@
+{
+  "schemaVersion": 1,
+  "designEra": "quiet-authority-v1",
+  "harnessVersion": "provider-handoff-v1",
+  "ownerIssue": "gh#732",
+  "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
+  "ownedInputFingerprint": "069d14f75fa887c694e8773fbdac985ace06550786512ad331185e750a7df075",
+  "surfaceCoverage": {
+    "selector": "ownerIssue:gh#732",
+    "surfaceCount": 2,
+    "surfaceIds": [
+      "surface:6fa1d3818d14e555",
+      "surface:84f00929110b64a6"
+    ],
+    "surfaceIdsFingerprint": "df1fcf9adcc946d89571cdff3b109eac5ea13c4fd4fdf048f7c1383a7f343101"
+  },
+  "records": [
+    {
+      "id": "stripe-checkout-and-portal",
+      "provider": "stripe",
+      "journey": "acquisition",
+      "ownerIssue": "gh#732",
+      "status": "pending",
+      "providerProfile": "provider-constrained",
+      "sourcePaths": [
+        "apps/web/app/api/billing/confirm/route.ts",
+        "apps/web/app/api/billing/portal/route.ts",
+        "apps/web/app/api/billing/webhook/route.ts",
+        "apps/web/lib/billing/portal.ts",
+        "apps/web/lib/billing/wall.ts",
+        "apps/web/components/billing/wall-copy.ts",
+        "apps/web/app/app/settings/plan-section.tsx",
+        "apps/web/.env.example"
+      ],
+      "surfaceIds": ["surface:84f00929110b64a6"],
+      "accountOwner": "Homa billing owner",
+      "presentation": {
+        "asset": "Stripe-hosted Checkout and Customer Portal surfaces, constrained provider profile",
+        "color": ["--homa-midnight", "--homa-paper", "--homa-ink", "--homa-action"],
+        "logo": "apps/web/components/brand/Logo.tsx",
+        "copy": [
+          "apps/web/components/billing/wall-copy.ts",
+          "apps/web/app/app/settings/plan-section.tsx"
+        ],
+        "typography": "Provider-safe sans fallback, with Homa wording and action hierarchy preserved where Stripe does not accept custom font assets"
+      },
+      "configurableFields": [
+        {
+          "key": "checkout-success-redirect",
+          "sourcePaths": ["apps/web/app/api/billing/confirm/route.ts"],
+          "environment": "both",
+          "accountOwner": "Homa billing owner",
+          "updatePath": "Stripe Dashboard payment link after-completion URL, then deploy route contract if the destination changes",
+          "fallback": "Return to /app when session_id is missing, unverifiable, or the family is not authenticated",
+          "cacheBehavior": "Stripe owns the hosted checkout response; Homa never caches session or entitlement state",
+          "rollback": "Restore the previous Payment Link completion URL and redeploy only if the route contract changed"
+        },
+        {
+          "key": "customer-portal-configuration",
+          "sourcePaths": ["apps/web/lib/billing/portal.ts", "apps/web/app/api/billing/portal/route.ts"],
+          "environment": "both",
+          "accountOwner": "Homa billing owner",
+          "updatePath": "Stripe Dashboard Billing customer portal configuration",
+          "fallback": "Return the authenticated family to /app/settings when no Stripe customer exists or the provider call fails",
+          "cacheBehavior": "Portal sessions are one-time provider URLs and are not persisted or cached by Homa",
+          "rollback": "Restore the prior Stripe portal configuration and keep the Homa route fallback active"
+        },
+        {
+          "key": "billing-webhook-endpoint",
+          "sourcePaths": ["apps/web/app/api/billing/webhook/route.ts", "apps/web/.env.example"],
+          "environment": "production",
+          "accountOwner": "Homa billing owner",
+          "updatePath": "Stripe Dashboard Developers Webhooks endpoint and STRIPE_WEBHOOK_SECRET in Vercel",
+          "fallback": "Acknowledge unknown families safely, return 503 when the endpoint is intentionally dark, and let Stripe retry transient failures",
+          "cacheBehavior": "Webhook events are processed idempotently into the family billing mirror, never from a cached browser state",
+          "rollback": "Disable the endpoint in Stripe, restore the prior secret, and reconcile the family mirror before re-enabling"
+        }
+      ],
+      "environment": {
+        "supported": ["sandbox", "production"],
+        "notes": "Test and live Stripe keys are selected server-side. Empty live configuration falls through to test by the existing billing contract."
+      },
+      "fallback": "No provider error strands a family: Checkout confirmation returns to /app and Portal errors return to settings.",
+      "cache": "No checkout, portal, customer, or entitlement response is cached by Homa.",
+      "updatePath": "Stripe Dashboard plus the route and environment owners named above.",
+      "readback": {
+        "status": "pending",
+        "apiAvailable": true,
+        "evidencePath": null,
+        "observedAt": null,
+        "externalStateSimulated": false
+      },
+      "rollback": {
+        "owner": "Homa billing owner",
+        "restoreAction": "Restore the previous Stripe hosted configuration and route commit, then verify a sandbox checkout before production re-enable.",
+        "restoreTarget": "Stripe Checkout, Customer Portal, webhook endpoint, and Homa billing mirror"
+      },
+      "contracts": [
+        "Family identity comes from authenticated Homa context and Stripe client_reference_id must agree.",
+        "Entitlements are written only after verified Checkout or webhook evidence and remain idempotent.",
+        "Stripe retries transient webhook failures while unknown families are acknowledged without cross-tenant writes.",
+        "Payment failures return a truthful recovery destination instead of a branded dead end."
+      ]
+    },
+    {
+      "id": "supabase-auth-email-and-callback",
+      "provider": "supabase",
+      "journey": "authentication",
+      "ownerIssue": "gh#732",
+      "status": "pending",
+      "providerProfile": "provider-constrained",
+      "sourcePaths": [
+        "apps/web/app/auth/callback/route.ts",
+        "apps/web/app/auth/confirm/route.ts",
+        "apps/web/lib/supabase/server.ts",
+        "apps/web/lib/supabase/client.ts",
+        "supabase/templates/recovery.html",
+        "apps/web/app/signin/signin-form.tsx",
+        "apps/web/app/forgot-password/page.tsx",
+        "apps/web/.env.example"
+      ],
+      "surfaceIds": ["surface:6fa1d3818d14e555"],
+      "accountOwner": "Homa identity owner",
+      "presentation": {
+        "asset": "Supabase Auth email template and callback surfaces, constrained provider profile",
+        "color": ["--homa-paper", "--homa-ink", "--homa-midnight", "--homa-action"],
+        "logo": "apps/web/components/brand/Logo.tsx",
+        "copy": [
+          "supabase/templates/recovery.html",
+          "apps/web/app/signin/signin-form.tsx",
+          "apps/web/app/forgot-password/page.tsx"
+        ],
+        "typography": "DM Sans interface fallback with EB Garamond reserved for Homa-owned display contexts; email clients receive provider-safe fallback stacks"
+      },
+      "configurableFields": [
+        {
+          "key": "auth-email-template",
+          "sourcePaths": ["supabase/templates/recovery.html"],
+          "environment": "production",
+          "accountOwner": "Homa identity owner",
+          "updatePath": "Supabase Dashboard Authentication Email Templates, then capture a real delivered message",
+          "fallback": "A user can request another link or return to /forgot-password when the token is expired",
+          "cacheBehavior": "Supabase owns token issuance and delivery; Homa does not cache reset tokens or provider message bodies",
+          "rollback": "Restore the previous Supabase template and resend a fresh recovery email"
+        },
+        {
+          "key": "redirect-allow-list",
+          "sourcePaths": ["apps/web/app/auth/callback/route.ts", "apps/web/app/auth/confirm/route.ts", "apps/web/.env.example"],
+          "environment": "both",
+          "accountOwner": "Homa identity owner",
+          "updatePath": "Supabase Dashboard Authentication URL Configuration and Homa redirect route",
+          "fallback": "Reject unsafe next paths and redirect failed exchanges to /signin?error=oauth or /forgot-password?error=expired",
+          "cacheBehavior": "PKCE verifier and auth cookies remain provider/session scoped, never application cache",
+          "rollback": "Restore the prior allow-list entry and callback commit, then test one email and one OAuth exchange"
+        }
+      ],
+      "environment": {
+        "supported": ["sandbox", "production"],
+        "notes": "Local, preview, and production redirect origins must be explicitly allow-listed in Supabase. Production callback uses the forwarded host only after same-origin path validation."
+      },
+      "fallback": "Expired or failed authentication links return to the relevant Homa recovery screen with a truthful explanation.",
+      "cache": "Auth tokens, PKCE verifiers, and reset links are never cached by Homa.",
+      "updatePath": "Supabase Dashboard templates and URL configuration, plus the callback/template source files.",
+      "readback": {
+        "status": "pending",
+        "apiAvailable": true,
+        "evidencePath": null,
+        "observedAt": null,
+        "externalStateSimulated": false
+      },
+      "rollback": {
+        "owner": "Homa identity owner",
+        "restoreAction": "Restore the prior template and redirect configuration, then run a sandbox reset and OAuth exchange before production re-enable.",
+        "restoreTarget": "Supabase email template, redirect allow-list, callback, and recovery routes"
+      },
+      "contracts": [
+        "Session cookies are minted only by Supabase's verified code exchange.",
+        "next paths are same-origin and safe before they influence a redirect.",
+        "Expired recovery tokens never create a session and return to the recovery screen.",
+        "Tenant identity is derived from the authenticated Supabase session, never provider callback text."
+      ]
+    },
+    {
+      "id": "google-identity",
+      "provider": "google",
+      "journey": "authentication",
+      "ownerIssue": "gh#732",
+      "status": "pending",
+      "providerProfile": "provider-constrained",
+      "sourcePaths": [
+        "apps/web/app/onboarding/parent-step.tsx",
+        "apps/web/app/signin/signin-form.tsx",
+        "apps/web/app/auth/callback/route.ts",
+        "apps/mobile/src/features/auth/google-sign-in.ts",
+        "apps/mobile/src/lib/supabase.ts",
+        "apps/mobile/app.json"
+      ],
+      "surfaceIds": [],
+      "accountOwner": "Homa identity owner",
+      "presentation": {
+        "asset": "Google hosted consent screen and system browser session, constrained provider profile",
+        "color": ["--homa-paper", "--homa-ink", "--homa-midnight"],
+        "logo": "apps/web/components/brand/GoogleGlyph.tsx",
+        "copy": [
+          "apps/web/app/onboarding/parent-step.tsx",
+          "apps/web/app/signin/signin-form.tsx"
+        ],
+        "typography": "Google and system consent UI owns its provider typography; Homa owns the entry surface and uses DM Sans interface styling"
+      },
+      "configurableFields": [
+        {
+          "key": "web-oauth-redirect",
+          "sourcePaths": ["apps/web/app/onboarding/parent-step.tsx", "apps/web/app/signin/signin-form.tsx", "apps/web/app/auth/callback/route.ts"],
+          "environment": "both",
+          "accountOwner": "Homa identity owner",
+          "updatePath": "Supabase Google provider settings and redirect allow-list, paired with the Homa callback route",
+          "fallback": "Return to Homa sign-in with an OAuth error and preserve a safe /app destination",
+          "cacheBehavior": "OAuth code and PKCE verifier are single-use provider/session values, never cached by Homa",
+          "rollback": "Restore the previous redirect allow-list and callback commit, then run one sign-in in sandbox"
+        },
+        {
+          "key": "native-deep-link",
+          "sourcePaths": ["apps/mobile/src/features/auth/google-sign-in.ts", "apps/mobile/app.json"],
+          "environment": "both",
+          "accountOwner": "Homa identity owner",
+          "updatePath": "Supabase redirect allow-list plus the Homa app scheme and shipped native binary",
+          "fallback": "Dismissal or a missing code leaves the user on the native sign-in screen with a recoverable message",
+          "cacheBehavior": "The system browser owns the OAuth session; Homa exchanges the one-time code and stores only Supabase's session",
+          "rollback": "Restore homa://auth/callback and the previous app binary configuration, then verify a development build"
+        }
+      ],
+      "environment": {
+        "supported": ["sandbox", "production"],
+        "notes": "Web uses /auth/callback. Native uses the exact homa://auth/callback deep link because the provider allow-list requires a stable literal URI."
+      },
+      "fallback": "Provider cancellation and callback errors return the user to Homa's sign-in surface without creating partial account state.",
+      "cache": "No Google token, consent response, or authorization code is cached by Homa.",
+      "updatePath": "Google provider configuration through Supabase, the Homa web callback, and native scheme configuration.",
+      "readback": {
+        "status": "pending",
+        "apiAvailable": true,
+        "evidencePath": null,
+        "observedAt": null,
+        "externalStateSimulated": false
+      },
+      "rollback": {
+        "owner": "Homa identity owner",
+        "restoreAction": "Restore the prior provider redirect configuration and native scheme, then verify one web and one native sign-in in sandbox.",
+        "restoreTarget": "Google provider settings, Supabase redirect allow-list, Homa callback, and native deep link"
+      },
+      "contracts": [
+        "OAuth returns through a safe same-origin path before Homa creates the session.",
+        "Native OAuth uses the system browser instead of an embedded WebView.",
+        "A missing or failed code never silently reports a signed-in state.",
+        "The authenticated Supabase session remains the only authority for family identity."
+      ]
+    },
+    {
+      "id": "apple-identity",
+      "provider": "apple",
+      "journey": "authentication",
+      "ownerIssue": "gh#732",
+      "status": "pending",
+      "providerProfile": "provider-constrained",
+      "sourcePaths": [
+        "apps/mobile/src/features/auth/apple-sign-in.ts",
+        "apps/mobile/src/app/(auth)/signin.tsx",
+        "apps/mobile/app.json",
+        "apps/mobile/src/lib/supabase.ts"
+      ],
+      "surfaceIds": [],
+      "accountOwner": "Homa identity owner",
+      "presentation": {
+        "asset": "Apple system Sign in with Apple sheet, constrained provider profile",
+        "color": ["--homa-paper", "--homa-ink", "--homa-midnight"],
+        "logo": "apps/mobile/src/components/brand/logo.tsx",
+        "copy": ["apps/mobile/src/app/(auth)/signin.tsx"],
+        "typography": "Apple system sheet owns provider typography; Homa owns the entry surface and uses DM Sans interface styling"
+      },
+      "configurableFields": [
+        {
+          "key": "apple-sign-in-entitlement",
+          "sourcePaths": ["apps/mobile/app.json", "apps/mobile/src/features/auth/apple-sign-in.ts"],
+          "environment": "production",
+          "accountOwner": "Homa identity owner",
+          "updatePath": "Apple Developer capability and Expo native entitlement, followed by a store-signed build",
+          "fallback": "Dismissal or a missing identity token leaves the user on sign-in with a recoverable failure state",
+          "cacheBehavior": "Apple owns the account sheet; Homa forwards only the signed identity token to Supabase and does not cache it",
+          "rollback": "Remove the entitlement only in a coordinated binary release and retain the alternate email path"
+        }
+      ],
+      "environment": {
+        "supported": ["sandbox", "production"],
+        "notes": "Apple identity is currently a native system-sheet flow. The entitlement, bundle identifier, and Supabase Apple provider client configuration must agree."
+      },
+      "fallback": "Email sign-in remains available when Apple is unavailable, cancelled, or returns no identity token.",
+      "cache": "No Apple identity token or private relay address is cached by Homa.",
+      "updatePath": "Apple Developer capability, Expo app configuration, and Supabase Apple provider settings.",
+      "readback": {
+        "status": "pending",
+        "apiAvailable": false,
+        "evidencePath": null,
+        "observedAt": null,
+        "externalStateSimulated": false
+      },
+      "rollback": {
+        "owner": "Homa identity owner",
+        "restoreAction": "Keep email and Google sign-in visible, revert the native entitlement/configuration in the next binary, and verify the remaining identity paths.",
+        "restoreTarget": "Apple entitlement, Supabase Apple provider client, and native sign-in entry"
+      },
+      "contracts": [
+        "Apple's identity token is sent to Supabase's verified signInWithIdToken call.",
+        "A cancelled system sheet is not an authentication error and never creates a partial session.",
+        "Email and Google remain available as truthful alternatives.",
+        "Native identity is tied to the configured bundle identifier, not a client-supplied family ID."
+      ]
+    },
+    {
+      "id": "apple-subscription-management",
+      "provider": "apple",
+      "journey": "billing",
+      "ownerIssue": "gh#732",
+      "status": "pending",
+      "providerProfile": "provider-constrained",
+      "sourcePaths": [
+        "apps/mobile/src/components/billing-gate.tsx",
+        "apps/mobile/src/lib/billing.ts",
+        "apps/mobile/src/lib/web-links.ts",
+        "apps/mobile/src/app/settings.tsx",
+        "apps/web/app/api/billing/apple/confirm/route.ts",
+        "apps/web/app/api/billing/apple/webhook/route.ts",
+        "apps/web/lib/billing/apple-verify.ts",
+        "apps/web/lib/billing/wall.ts",
+        "apps/web/.env.example"
+      ],
+      "surfaceIds": [],
+      "accountOwner": "Homa billing owner",
+      "presentation": {
+        "asset": "StoreKit purchase and restore UI plus Apple's subscription-management URL, constrained provider profile",
+        "color": ["--homa-paper", "--homa-ink", "--homa-midnight", "--homa-action"],
+        "logo": "apps/mobile/src/components/brand/logo.tsx",
+        "copy": [
+          "apps/mobile/src/components/billing-gate.tsx",
+          "apps/mobile/src/app/settings.tsx"
+        ],
+        "typography": "StoreKit and Apple's management surface own provider typography; Homa uses its native DM Sans and EB Garamond roles around the handoff"
+      },
+      "configurableFields": [
+        {
+          "key": "storekit-product-catalog",
+          "sourcePaths": ["apps/mobile/src/components/billing-gate.tsx", "apps/mobile/src/lib/billing.ts"],
+          "environment": "both",
+          "accountOwner": "Homa billing owner",
+          "updatePath": "App Store Connect subscription products plus the Homa provider-product catalog",
+          "fallback": "If App Store products cannot load, show a retryable unavailable state and do not guess entitlement",
+          "cacheBehavior": "StoreKit owns product availability; Homa only keeps the in-memory current purchase state",
+          "rollback": "Restore the previous App Store product identifiers and provider catalog, then test restore before re-enabling purchases"
+        },
+        {
+          "key": "subscription-management-link",
+          "sourcePaths": ["apps/mobile/src/lib/web-links.ts", "apps/mobile/src/app/settings.tsx"],
+          "environment": "production",
+          "accountOwner": "Homa billing owner",
+          "updatePath": "Apple's documented subscription-management URL and native settings entry",
+          "fallback": "Keep the Homa settings surface available if the external URL cannot open",
+          "cacheBehavior": "The management URL is static and is not a customer-specific cached entitlement response",
+          "rollback": "Restore the prior URL and settings copy, then open it from a signed store build"
+        },
+        {
+          "key": "app-store-server-notifications",
+          "sourcePaths": ["apps/web/app/api/billing/apple/webhook/route.ts", "apps/web/lib/billing/apple-verify.ts"],
+          "environment": "production",
+          "accountOwner": "Homa billing owner",
+          "updatePath": "App Store Connect App Store Server Notifications endpoint and Homa JWS verifier",
+          "fallback": "A notification with no linked family is acknowledged without a cross-tenant write; unverifiable payloads fail closed",
+          "cacheBehavior": "Apple notifications update the durable family subscription mirror; no notification is treated as browser cache",
+          "rollback": "Disable the notification endpoint, restore the previous verifier and route commit, then reconcile affected family mirrors"
+        }
+      ],
+      "environment": {
+        "supported": ["sandbox", "production"],
+        "notes": "The same webhook accepts signed sandbox and production notifications. StoreKit sandbox is required before any production read-back."
+      },
+      "fallback": "A failed purchase or unavailable catalog keeps the paywall closed to entitlement claims, offers retry or restore, and leaves account access truthful.",
+      "cache": "Entitlement truth comes from verified StoreKit transactions and the durable family mirror, never from a cached client flag.",
+      "updatePath": "App Store Connect, StoreKit/native configuration, and the Homa Apple verification routes.",
+      "readback": {
+        "status": "pending",
+        "apiAvailable": true,
+        "evidencePath": null,
+        "observedAt": null,
+        "externalStateSimulated": false
+      },
+      "rollback": {
+        "owner": "Homa billing owner",
+        "restoreAction": "Disable the changed Apple product or notification configuration, restore the prior verifier/catalog, and verify restore and account access before reopening.",
+        "restoreTarget": "StoreKit catalog, Apple subscription management handoff, App Store Server Notifications, and entitlement mirror"
+      },
+      "contracts": [
+        "StoreKit transactions are verified server-side before entitlements change.",
+        "appAccountToken must match the authenticated family before an Apple purchase can unlock access.",
+        "Apple subscription statuses normalize into the shared account-access vocabulary used by Stripe.",
+        "Provider outages never become a guessed paid state and never cross family boundaries."
+      ]
+    }
+  ]
+}

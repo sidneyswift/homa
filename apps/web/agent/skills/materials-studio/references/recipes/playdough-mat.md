@@ -12,7 +12,7 @@ image-direct viable for themed versions with illustrations.
 
 Design patterns (all binding for playdough-mat):
 
-- **Thick bold outlines**: `border: 4px solid #221e1a;` on all shapes.
+- **Thick bold outlines**: `border: 4px solid var(--homa-ink);` on all shapes.
   Lines must be wide enough for playdough to sit on.
 - **Generous sizing**: minimum 3 inches per shape. 2-4 shapes per
   page maximum.

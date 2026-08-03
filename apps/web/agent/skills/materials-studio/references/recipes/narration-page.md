@@ -25,12 +25,12 @@ Design patterns (all binding for narration-page):
   TO the child in second person and phrased warmly and concretely (never
   "describe the narrative arc"; instead "What happened in the story? Or
   what was your favorite part?").
-- **Illustration box**: a bordered rectangle (`border: 2px solid #221e1a;`)
+- **Illustration box**: a bordered rectangle (`border: 2px solid var(--homa-ink);`)
   taking roughly 55-60% of the page height, left blank for the child's own
   drawing. Never pre-fill it with generated art; the box is for the
   child's hand, not Homa's.
 - **Dictation lines**: 6-8 wide-ruled lines below the box
-  (`border-bottom: 1px solid #6b6259; min-height: 32px;`), for a parent to
+  (`border-bottom: 1px solid var(--homa-control-boundary); min-height: 32px;`), for a parent to
   write down the child's spoken words. Leave them genuinely blank, no
   sentence starters unless the prompt specifically calls for one.
 - **No correct answer**: this is a record of the child's own thinking, not
@@ -54,11 +54,11 @@ Design patterns (all binding for narration-page):
   .narr-header { display: flex; align-items: center; gap: 10px;
     margin-bottom: 6px; }
   .narr-icon { width: 28px; height: 28px; }
-  .narr-title { font-size: 20px; font-weight: 600; color: #221e1a; }
-  .narr-prompt { font-size: 15px; color: #221e1a; margin-bottom: 14px;
+  .narr-title { font-size: 20px; font-weight: 600; color: var(--homa-ink); }
+  .narr-prompt { font-size: 15px; color: var(--homa-ink); margin-bottom: 14px;
     line-height: 1.5; }
-  .narr-illustration { border: 2px solid #221e1a; border-radius: 4px;
+  .narr-illustration { border: 2px solid var(--homa-ink); border-radius: 4px;
     min-height: 340px; margin-bottom: 16px; }
-  .narr-line { border-bottom: 1px solid #6b6259; min-height: 32px; }
+  .narr-line { border-bottom: 1px solid var(--homa-control-boundary); min-height: 32px; }
 </style>
 ```

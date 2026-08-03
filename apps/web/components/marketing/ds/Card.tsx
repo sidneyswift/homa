@@ -5,9 +5,8 @@ import { useState, type CSSProperties, type ReactNode } from "react";
 import { useCanHover, usePrefersReducedMotion } from "./use-interaction-media";
 
 /**
- * Homa Card, soft warm surface container. Ported from
- * docs/homa-design/components/layout/Card.jsx (source of truth); keep in
- * sync until packages/design exists (M1-17). The interactive hover-lift only
+ * Homa Card, soft surface container. This is a legacy projection migrating to
+ * the semantic primitives in @homa/design. The interactive hover-lift only
  * fires on hover-capable devices (never triggers on a touch tap), and its
  * translate is dropped under reduced motion while the shadow depth cue stays.
  */

@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "../../../packages/design/generated/web.css";
+@import "../components/design/quiet-primitives.css";
 /* Homa's acts (the thinking mark's character animation). Its own file
    because it is a character library rather than page styling, and because
    it breaks this file's transform-only rule on purpose; the reasons are
@@ -20,129 +22,130 @@
 }
 
 /* ============================================================================
-   Homa Design System v3 tokens, copied VERBATIM and in full from
-   docs/homa-design/tokens/{colors,shapes,typography,spacing,radius,shadows,
-   motion}.css for the Deliverable 0 design pass. A formal `packages/design`
-   workspace package lands with ticket M1-17; until then, keep this block in
-   sync by hand with docs/homa-design/tokens/. Read docs/homa-design/SKILL.md
-   before extending this page's visual system, and the emil-design-eng /
-   review-animations skills (.agents/skills/) before adding any new motion.
+   Temporary compatibility projection for surfaces migrating to Quiet
+   authority. The canonical contract is @homa/design. Do not add new values
+   here. Surface migrations replace this layer behind their own gates. Read
+   the active design guide and review-animations skill before adding motion.
    ========================================================================= */
 :root {
-  /* --- Warm neutrals (stone) --- */
-  --stone-50:  #FBF7F0;
-  --stone-100: #F3ECE1;
-  --stone-200: #E7DDCE;
-  --stone-300: #D6C8B4;
-  --stone-400: #B3A492;
-  --stone-500: #8A7D6C;
-  --stone-600: #6B6259;
-  --stone-700: #4E463E;
-  --stone-800: #332E29;
-  --stone-900: #221E1A;
+  /* Primitive aliases intentionally stay concrete while migration is in
+     flight. Static contrast tests and non-browser consumers can resolve the
+     new values without evaluating a CSS variable chain. */
+  /* --- Contract-backed compatibility names --- */
+  --stone-50:  #F7F4EE;
+  --stone-100: #EEEAE2;
+  --stone-200: #DED8CC;
+  --stone-300: #918B83;
+  --stone-400: #77736B;
+  --stone-500: #68645E;
+  --stone-600: #5B5852;
+  --stone-700: #3F3D39;
+  --stone-800: #20242B;
+  --stone-900: #20242B;
 
-  /* --- Clay / coral (primary) --- */
-  --clay-50:  #FFF0E8;
-  --clay-100: #FFDDC9;
-  --clay-200: #FFBE9C;
-  --clay-300: #FB9868;
-  --clay-400: #F1793F;
+  /* --- Coral compatibility names --- */
+  --clay-50:  #FBE8DF;
+  --clay-100: #F8D8CC;
+  --clay-200: #F1B29A;
+  --clay-300: #EA8969;
+  --clay-400: #E7602F;
   --clay-500: #E7602F;
-  --clay-600: #C44C22;
-  --clay-700: #9C3B1B;
+  --clay-600: #A33F22;
+  /* Deep filled controls project to Quiet authority midnight ink. */
+  --clay-700: #27374D;
 
-  /* --- Sage / mint (secondary) --- */
-  --sage-50:  #EAF6EC;
-  --sage-100: #D2ECD6;
-  --sage-200: #A9DBB1;
-  --sage-300: #7CC689;
-  --sage-400: #55AF66;
-  --sage-500: #3D9A50;
-  --sage-600: #2F7C40;
-  --sage-700: #275F34;
+  /* --- Constructive compatibility names --- */
+  --sage-50:  #E5EFE8;
+  --sage-100: #D7E9DC;
+  --sage-200: #B5D2BD;
+  --sage-300: #85B595;
+  --sage-400: #5F9271;
+  --sage-500: #335C46;
+  --sage-600: #335C46;
+  --sage-700: #284938;
 
-  /* --- Gold / sunshine (accent) --- */
-  --gold-100: #FFF3C2;
-  --gold-300: #FFE175;
-  --gold-400: #FFD43B;
-  --gold-500: #F0BE00;
-  --gold-ink: #8A6410;        /* the ONE text/icon color on gold tints (gold-100/300) */
-  --gold-ink-strong: #402E05; /* text/icons on solid gold (gold-400/500) */
+  /* --- Highlight compatibility names --- */
+  --gold-100: #F7EBC7;
+  --gold-300: #EBCF82;
+  --gold-400: #D6AC43;
+  --gold-500: #76560F;
+  --gold-ink: #76560F;
+  --gold-ink-strong: #4D380A;
 
-  /* --- Sky / pool aqua (info accent) --- */
-  --sky-100: #DDF3F9;
-  --sky-300: #9FDCEC;
-  --sky-500: #4FB4D6;
-  --sky-600: #3A8FA9;
+  /* --- Information compatibility names --- */
+  --sky-100: #E4EFF2;
+  --sky-300: #AFCED5;
+  --sky-500: #2F5968;
+  --sky-600: #2F5968;
 
-  /* --- Support: warm coral-red for errors --- */
-  --rose-100: #FDE1D8;
-  --rose-500: #E2593B;
-  --rose-600: #BC4527;
+  /* --- Error compatibility names --- */
+  --rose-100: #F5E5E1;
+  --rose-500: #923F33;
+  --rose-600: #703027;
 
-  /* --- Pop accents (playful, use sparingly: doodles, bands, moments) --- */
-  --pop-cobalt:      #2E6BE6;
-  --pop-cobalt-deep: #2456BF;
-  --pop-blush:       #F49A90;
-  --pop-navy:        #23304F;
+  /* --- Structural compatibility names --- */
+  --pop-cobalt:      var(--homa-midnight-action);
+  --pop-cobalt-deep: #1B2738;
+  --pop-blush:       #E7A18D;
+  --pop-navy:        var(--homa-contained-band);
 
-  /* --- Section bands (full-bleed playful backgrounds) --- */
-  --band-sky:      #9FE0EE;
-  --band-mint:     #BDE7C5;
-  --band-blush:    #F8B7AE;
-  --band-sunshine: #FFDB4D;
+  /* --- Section bands --- */
+  --band-sky:      var(--homa-info-tint);
+  --band-mint:     var(--homa-constructive-tint);
+  --band-blush:    var(--homa-error-tint);
+  --band-sunshine: var(--homa-highlight-tint);
 
   /* =====================  SEMANTIC ALIASES  ===================== */
 
   /* Surfaces & backgrounds */
-  --bg-page:        var(--stone-50);
-  --bg-page-warm:   #F7EFE2;      /* alt warm section band */
-  --surface-card:   #FFFFFF;
-  --surface-raised: #FFFDF9;
-  --surface-sunken: var(--stone-100);
-  --surface-inverse:var(--stone-900);
+  --bg-page:        var(--homa-canvas);
+  --bg-page-warm:   #F0ECE4;
+  --surface-card:   var(--homa-paper);
+  --surface-raised: var(--homa-floating);
+  --surface-sunken: #EEEAE2;
+  --surface-inverse:var(--homa-contained-band);
 
   /* Text */
-  --text-strong:  var(--stone-900);
-  --text-body:    var(--stone-800);
-  --text-muted:   var(--stone-600);
-  --text-subtle:  var(--stone-500);
-  --text-inverse: var(--stone-50);
-  --text-on-clay: #FFFFFF;
+  --text-strong:  var(--homa-ink);
+  --text-body:    var(--homa-ink);
+  --text-muted:   #5B5852;
+  --text-subtle:  #77736B;
+  --text-inverse: var(--homa-paper);
+  --text-on-clay: var(--homa-paper);
 
   /* Brand */
-  --brand:          var(--clay-500);
-  --brand-hover:    var(--clay-600);
+  --brand:          var(--homa-visual-coral);
+  --brand-hover:    var(--homa-brand-text);
   --brand-active:   var(--clay-700);
-  --brand-soft:     var(--clay-50);
-  --brand-soft-2:   var(--clay-100);
-  --on-brand:       #FFFFFF;
+  --brand-soft:     #FBE8DF;
+  --brand-soft-2:   #F8D8CC;
+  --on-brand:       #FFFEFC;
 
-  --accent-sage:    var(--sage-500);
-  --accent-sage-soft: var(--sage-50);
-  --accent-gold:    var(--gold-500);
-  --accent-gold-soft: var(--gold-100);
+  --accent-sage:    var(--homa-constructive-ink);
+  --accent-sage-soft: var(--homa-constructive-tint);
+  --accent-gold:    var(--homa-highlight-ink);
+  --accent-gold-soft: var(--homa-highlight-tint);
 
   /* Borders & lines */
-  --border-subtle:  var(--stone-200);
-  --border-default: var(--stone-300);
-  --border-strong:  var(--stone-400);
-  --border-brand:   var(--clay-300);
+  --border-subtle:  #DED8CC;
+  --border-default: var(--homa-control-boundary);
+  --border-strong:  #77736B;
+  --border-brand:   var(--homa-visual-coral);
 
   /* Focus ring */
-  --focus-ring: var(--clay-400);
+  --focus-ring: var(--homa-visual-coral);
 
   /* Semantic status */
-  --success:      var(--sage-600);
-  --success-soft: var(--sage-50);
-  --warning:      var(--gold-500);
-  --warning-soft: var(--gold-100);
-  --danger:       var(--rose-500);
-  --danger-soft:  var(--rose-100);
-  --info:         var(--sky-500);
-  --info-soft:    var(--sky-100);
+  --success:      var(--homa-constructive-ink);
+  --success-soft: var(--homa-constructive-tint);
+  --warning:      var(--homa-highlight-ink);
+  --warning-soft: var(--homa-highlight-tint);
+  --danger:       var(--homa-error-ink);
+  --danger-soft:  var(--homa-error-tint);
+  --info:         var(--homa-info-ink);
+  --info-soft:    var(--homa-info-tint);
 
-  /* --- Playful shapes (docs/homa-design/tokens/shapes.css) --- */
+  /* --- Legacy shapes, retained only until surface migration --- */
   --blob-1: 61% 39% 55% 45% / 49% 56% 44% 51%;
   --blob-2: 42% 58% 47% 53% / 56% 41% 59% 44%;
   --blob-3: 55% 45% 62% 38% / 46% 61% 39% 54%;
@@ -152,7 +155,7 @@
   --bg-paper: repeating-linear-gradient(to bottom, transparent 0, transparent 31px, var(--paper-rule) 31px, var(--paper-rule) 32px);
   --squiggle-ink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='8' viewBox='0 0 40 8'%3E%3Cpath d='M0 4 Q5 0 10 4 T20 4 T30 4 T40 4' fill='none' stroke='%23221E1A' stroke-width='1.6'/%3E%3C/svg%3E");
 
-  /* --- Type scale (docs/homa-design/tokens/typography.css) --- */
+  /* --- Legacy type scale, retained only until surface migration --- */
   --text-2xs:  0.6875rem;
   --text-xs:   0.75rem;
   --text-sm:   0.875rem;
@@ -176,7 +179,7 @@
   --tracking-normal: 0;
   --tracking-wide:   0.06em;
 
-  /* --- Spacing (docs/homa-design/tokens/spacing.css) --- */
+  /* --- Legacy spacing, retained only until surface migration --- */
   --space-0:  0;
   --space-1:  0.25rem;
   --space-2:  0.5rem;
@@ -195,7 +198,7 @@
   --container-lg: 1100px;
   --container-xl: 1280px;
 
-  /* --- Radii (docs/homa-design/tokens/radius.css) --- */
+  /* --- Legacy radii, retained only until surface migration --- */
   --radius-xs:   6px;
   --radius-sm:   10px;
   --radius-md:   16px;
@@ -205,7 +208,7 @@
   --radius-pill: 999px;
   --radius-card: var(--radius-lg);
 
-  /* --- Shadows (docs/homa-design/tokens/shadows.css) --- */
+  /* --- Legacy shadows, retained only until surface migration --- */
   --shadow-xs:  0 1px 2px rgba(51, 42, 33, 0.06);
   --shadow-sm:  0 1px 3px rgba(51, 42, 33, 0.08), 0 1px 2px rgba(51, 42, 33, 0.04);
   --shadow-md:  0 4px 12px rgba(51, 42, 33, 0.08), 0 2px 4px rgba(51, 42, 33, 0.05);
@@ -214,7 +217,7 @@
   --shadow-focus: 0 0 0 4px rgba(241, 121, 63, 0.22);
   --shadow-inset: inset 0 1px 2px rgba(51, 42, 33, 0.06);
 
-  /* --- Motion (docs/homa-design/tokens/motion.css): gentle, no bounce --- */
+  /* --- Legacy motion, retained only until surface migration --- */
   --ease-out:   cubic-bezier(0.22, 0.8, 0.28, 1);
   --ease-in-out: cubic-bezier(0.5, 0, 0.2, 1);
   --motion-ease-out: var(--ease-out);       /* alias for the Tailwind @theme wiring below */
@@ -225,11 +228,11 @@
   --press-scale: 0.98;
 
   /* --- Fonts: next/font variables (set on <html> in layout.tsx) feed these --- */
-  --font-display: var(--font-schibsted), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-wordmark: var(--font-fredoka), var(--font-hanken), sans-serif; /* the bounced Homa lockup only */
+  --font-display: var(--font-eb-garamond), Georgia, "Times New Roman", serif;
+  --font-wordmark: var(--font-fredoka), sans-serif; /* the real Homa lockup only */
   --font-serif: var(--font-eb-garamond), Georgia, "Times New Roman", serif;
-  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-hand: var(--font-caveat), "Segoe Script", cursive;
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-hand: var(--font-eb-garamond), Georgia, "Times New Roman", serif;
   --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", Menlo, monospace;
 }
 
@@ -272,7 +275,7 @@
   --font-mono: var(--font-mono);
 }
 
-/* Homa base rules (docs/homa-design/tokens/base.css): no surface falls back
+/* Homa base rules: no surface falls back
    to the UA serif; headings always use the display font. Dark theme is
    experimental and opt-in per docs/homa-design/SKILL.md, so this marketing
    page does not follow prefers-color-scheme. */
@@ -289,10 +292,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ============================================================================
-   Landing page kit CSS, ported verbatim from
-   docs/homa-design/ui_kits/landing/index.html. Scroll reveals are armed by
+   Landing page compatibility CSS. Surface migration under gh#683 owns the
+   eventual replacement. Scroll reveals are armed by
    JS (html.rv-armed) so no-JS, print, and reduced-motion always see content.
-   Gentle rise, no bounce, per the emil-design-eng motion rules (opacity +
+   Gentle rise, no bounce, per the motion contract (opacity +
    transform only, ease-out, 30-80ms stagger).
    ========================================================================= */
 
@@ -353,7 +356,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Hamburger toggle and card menu: phones only, hidden past the kit's 880px
    breakpoint (the media block below shows them). Menu entrance per the
-   emil-design-eng rules: opacity + transform, ease-out, from scale(0.98)
+   motion contract: opacity + transform, ease-out, from scale(0.98)
    never scale(0), origin at the trigger edge; React unmounts it instantly
    on close, the same behavior as the signup popup. */
 .lp-nav-toggle {
@@ -735,7 +738,7 @@ html.rv-armed [data-reveal].rv-no-anim, html.rv-armed [data-reveal-kids].rv-no-a
 /* ============================================================================
    Onboarding flow step entrance (/onboarding, MapFlow). One gentle rise per
    step change, opacity + transform only, brand ease-out, under 300ms per the
-   emil-design-eng motion rules. Keyframes are fine here: steps mount once,
+   motion contract. Keyframes are fine here: steps mount once,
    they are never retargeted mid-flight.
    ========================================================================= */
 @keyframes flow-step-in {

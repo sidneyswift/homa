@@ -42,10 +42,10 @@ export const SOURCE_LABELS: Record<HoursSource, string> = {
 };
 
 const HOURS_SUBJECT_TONES: ReadonlyArray<readonly [string, string]> = [
-  ["var(--clay-50)", "var(--clay-700)"],
-  ["var(--sage-50)", "var(--sage-700)"],
-  ["var(--gold-100)", "var(--gold-ink)"],
-  ["var(--sky-100)", "var(--sky-600)"],
+  ["var(--homa-error-tint)", "var(--homa-brand-text)"],
+  ["var(--homa-constructive-tint)", "var(--homa-constructive-ink)"],
+  ["var(--homa-highlight-tint)", "var(--homa-highlight-ink)"],
+  ["var(--homa-info-tint)", "var(--homa-info-ink)"],
 ];
 
 /** One stable, design-system tone per hours subject. Shared by the compact

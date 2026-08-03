@@ -19,7 +19,7 @@ Design patterns (all binding for 3-part-nomenclature-cards):
   `border: 2px solid #c0392b;`), Grid 2 = image only (blue border
   `border: 2px solid #2980b9;`), Grid 3 = label only (blue border).
 - **All cards same size**: ~3×4 inches (`width: 216px; height: 288px;`).
-- **Dashed cut borders**: `border: 2px dashed #b3a492;` on the outer
+- **Dashed cut borders**: `border: 2px dashed var(--homa-control-boundary);` on the outer
   cut line of each card.
 - **Montessori color convention**: red border on control cards, blue on
   parts 2 and 3.

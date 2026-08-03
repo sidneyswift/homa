@@ -20,7 +20,7 @@ If several terms could fit, list the best match first, then 1–2 alternates wit
 ## Instructions
 
 1. **Read for intent, not keywords.** Users describe what they *see* or *feel* ("springy", "slides off", "draws itself in"), not the technical name. Map the sensation to the glossary below.
-2. **Use the glossary's naming descriptions as written.** They are a vocabulary aid, not Homa product-motion policy. For Homa design or implementation decisions, follow `docs/homa-design/readme.md`, `docs/homa-design/tokens/motion.css`, and `review-animations`.
+2. **Use the glossary's naming descriptions as written.** They are a vocabulary aid, not Homa product-motion policy. For Homa design or implementation decisions, follow `docs/homa-design/readme.md`, `packages/design/src/contract/motion.ts`, and `review-animations`.
 3. **Disambiguate close terms.** When two compete (*Clip-path* vs *Mask*, *Pop in* vs *Bounce*, *Shared element transition* vs *Layout animation*), contrast them so the user can pick.
 4. **When nothing matches exactly,** name the closest term and say plainly it's an approximation, or describe the effect in the glossary's vocabulary (e.g. "that's a *stagger* of *scale-in* entrances").
 5. **Stay within this glossary.** If a term genuinely isn't here, say so rather than inventing one: though you may explain the concept using these words.

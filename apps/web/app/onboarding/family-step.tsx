@@ -33,7 +33,7 @@ import { uploadAvatarPhoto } from "../../lib/avatar-upload";
  */
 
 const inputClass =
-  "mt-2 w-full rounded-md border border-border bg-card px-4 py-3 text-base text-strong transition-colors duration-(--dur-fast) ease-out focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30";
+  "mt-2 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-3 text-base text-[var(--homa-ink)] transition-colors duration-(--homa-motion-fast) ease-out focus:border-[var(--homa-visual-coral)] focus:outline-none focus:ring-2 focus:ring-[var(--homa-visual-coral)]/30";
 
 export function FamilyStep({
   firstName,
@@ -118,21 +118,21 @@ export function FamilyStep({
 
   return (
     <div>
-      <h1 className="font-display text-3xl font-bold leading-tight text-strong">
+      <h1 className="font-display text-3xl font-bold leading-tight text-[var(--homa-ink)]">
         {firstName ? `Nice to meet you, ${firstName}.` : "Let's set up your family."}
       </h1>
-      <p className="mt-3 text-body">
+      <p className="mt-3 text-[var(--homa-ink)]">
         One quick card about your family, then we&apos;ll add your kids.
       </p>
 
       <form
         onSubmit={handleSubmit}
         noValidate
-        className="mt-6 rounded-lg border border-border-subtle bg-card p-6 shadow-sm"
+        className="mt-6 rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm"
       >
-        <h2 className="font-display text-xl font-semibold text-strong">Create your family</h2>
+        <h2 className="font-display text-xl font-semibold text-[var(--homa-ink)]">Create your family</h2>
 
-        <label className="mt-4 block font-medium text-strong" htmlFor="family-name">
+        <label className="mt-4 block font-medium text-[var(--homa-ink)]" htmlFor="family-name">
           Family name
         </label>
         <input
@@ -146,7 +146,7 @@ export function FamilyStep({
           className={inputClass}
         />
 
-        <label className="mt-4 block font-medium text-strong" htmlFor="family-parent-name">
+        <label className="mt-4 block font-medium text-[var(--homa-ink)]" htmlFor="family-parent-name">
           Your name
         </label>
         <input
@@ -160,9 +160,9 @@ export function FamilyStep({
           className={inputClass}
         />
 
-        <label className="mt-4 block font-medium text-strong" htmlFor="family-state">
+        <label className="mt-4 block font-medium text-[var(--homa-ink)]" htmlFor="family-state">
           State{" "}
-          <span className="font-normal text-muted">(so Homa can follow your state&apos;s rules)</span>
+          <span className="font-normal text-[var(--homa-muted-ink)]">(so Homa can follow your state&apos;s rules)</span>
         </label>
         <select
           id="family-state"
@@ -182,8 +182,8 @@ export function FamilyStep({
           ))}
         </select>
 
-        <label className="mt-4 block font-medium text-strong" htmlFor="family-photo">
-          Your photo <span className="font-normal text-muted">(optional)</span>
+        <label className="mt-4 block font-medium text-[var(--homa-ink)]" htmlFor="family-photo">
+          Your photo <span className="font-normal text-[var(--homa-muted-ink)]">(optional)</span>
         </label>
         <div className="mt-2 flex items-center gap-3">
           {photoPreview ? (
@@ -193,7 +193,7 @@ export function FamilyStep({
             <img
               src={photoPreview}
               alt="Your profile photo preview"
-              className="h-12 w-12 rounded-full border border-border object-cover"
+              className="h-12 w-12 rounded-full border border-[var(--homa-control-boundary)] object-cover"
             />
           ) : null}
           <input
@@ -202,7 +202,7 @@ export function FamilyStep({
             type="file"
             accept="image/*"
             onChange={(event) => choosePhoto(event.target.files?.[0] ?? null)}
-            className="text-sm text-body file:mr-3 file:cursor-pointer file:rounded-pill file:border file:border-border file:bg-card file:px-4 file:py-2 file:text-sm file:font-semibold file:text-strong hover:file:border-brand"
+            className="text-sm text-[var(--homa-ink)] file:mr-3 file:cursor-pointer file:rounded-[var(--homa-radius-control)] file:border file:border-[var(--homa-control-boundary)] file:bg-[var(--homa-paper)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[var(--homa-ink)] hover:file:border-[var(--homa-visual-coral)]"
           />
           {photo ? (
             <button
@@ -211,7 +211,7 @@ export function FamilyStep({
                 choosePhoto(null);
                 if (fileInputRef.current) fileInputRef.current.value = "";
               }}
-              className="text-sm text-subtle underline-offset-2 hover:underline"
+              className="text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
             >
               remove
             </button>
@@ -219,7 +219,7 @@ export function FamilyStep({
         </div>
 
         {error ? (
-          <p className="mt-3 text-sm text-danger" role="alert">
+          <p className="mt-3 text-sm text-[var(--homa-error-ink)]" role="alert">
             {error}
           </p>
         ) : null}
@@ -227,7 +227,7 @@ export function FamilyStep({
         <button
           type="submit"
           disabled={busy}
-          className="mt-6 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+          className="mt-6 min-h-12 w-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)] shadow-sm transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
         >
           {busy ? "Saving…" : "Continue"}
         </button>

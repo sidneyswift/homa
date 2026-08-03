@@ -26,7 +26,7 @@ variant per page based on the week's topic):
   species or subjects down the left side (empty circle + name, for the
   child to circle which one they observed or chose), with 4-5 note lines
   beside each. Below, one large bordered illustration box
-  (`border: 2px solid #221e1a;`) for the child's drawing.
+  (`border: 2px solid var(--homa-ink);`) for the child's drawing.
 - **Variant B, five-senses log**: four short prompt rows down the left
   ("I see...", "I hear...", "I smell...", "I feel..."), each with 1-2
   lines beside a large illustration box on the right, plus a small
@@ -51,16 +51,16 @@ variant per page based on the week's topic):
 <style>
   .nj-page { font-family: 'Andika', sans-serif; padding: 24px; }
   .nj-header { display: flex; align-items: center; gap: 10px;
-    margin-bottom: 12px; font-size: 14px; color: #6b6259; }
-  .nj-title { font-size: 20px; font-weight: 600; color: #221e1a;
+    margin-bottom: 12px; font-size: 14px; color: var(--homa-control-boundary); }
+  .nj-title { font-size: 20px; font-weight: 600; color: var(--homa-ink);
     margin-bottom: 12px; }
-  .nj-illustration { border: 2px solid #221e1a; border-radius: 4px;
+  .nj-illustration { border: 2px solid var(--homa-ink); border-radius: 4px;
     min-height: 260px; }
   .nj-split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .nj-line { border-bottom: 1px solid #6b6259; min-height: 26px; }
-  .nj-specimen-circle { border: 2px dashed #6b6259; border-radius: 50%;
+  .nj-line { border-bottom: 1px solid var(--homa-control-boundary); min-height: 26px; }
+  .nj-specimen-circle { border: 2px dashed var(--homa-control-boundary); border-radius: 50%;
     width: 120px; height: 120px; display: flex; align-items: center;
     justify-content: center; text-align: center; font-size: 11px;
-    color: #6b6259; padding: 8px; }
+    color: var(--homa-control-boundary); padding: 8px; }
 </style>
 ```

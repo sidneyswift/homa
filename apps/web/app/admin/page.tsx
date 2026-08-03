@@ -126,7 +126,7 @@ export default async function AdminOverviewPage({
     data.emailTrouble.length > 0;
 
   return (
-    <div>
+    <div data-brand-surface="admin-overview" className="quiet-admin__overview">
       <p className="font-mono text-[0.64rem] font-bold uppercase tracking-[0.13em] text-subtle">
         Founder · fleet overview
       </p>
@@ -139,30 +139,30 @@ export default async function AdminOverviewPage({
           : `${data.newSignups.length} joined ${rangeLabel}.`}
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-3">
-        <div className="inline-flex rounded-pill border border-border-subtle bg-card p-0.5 text-sm font-semibold">
+        <div className="quiet-admin__segmented inline-flex rounded-pill border border-border-subtle bg-card p-0.5 text-sm font-semibold">
           <Link
             href={includeTests ? "/admin?families=all" : "/admin"}
-            className={`rounded-pill px-3.5 py-1.5 ${rangeDays === 7 ? "bg-[var(--stone-800)] text-white" : "text-muted"}`}
+            className={`quiet-admin__segment rounded-pill px-3.5 py-1.5 ${rangeDays === 7 ? "quiet-admin__segment--active" : "text-muted"}`}
           >
             This week
           </Link>
           <Link
             href={includeTests ? "/admin?range=28d&families=all" : "/admin?range=28d"}
-            className={`rounded-pill px-3.5 py-1.5 ${rangeDays === 28 ? "bg-[var(--stone-800)] text-white" : "text-muted"}`}
+            className={`quiet-admin__segment rounded-pill px-3.5 py-1.5 ${rangeDays === 28 ? "quiet-admin__segment--active" : "text-muted"}`}
           >
             Last 4 weeks
           </Link>
         </div>
-        <div className="inline-flex rounded-pill border border-border-subtle bg-card p-0.5 text-sm font-semibold">
+        <div className="quiet-admin__segmented inline-flex rounded-pill border border-border-subtle bg-card p-0.5 text-sm font-semibold">
           <Link
             href={rangeDays === 28 ? "/admin?range=28d" : "/admin"}
-            className={`rounded-pill px-3.5 py-1.5 ${!includeTests ? "bg-[var(--stone-800)] text-white" : "text-muted"}`}
+            className={`quiet-admin__segment rounded-pill px-3.5 py-1.5 ${!includeTests ? "quiet-admin__segment--active" : "text-muted"}`}
           >
             Customers
           </Link>
           <Link
             href={rangeDays === 28 ? "/admin?range=28d&families=all" : "/admin?families=all"}
-            className={`rounded-pill px-3.5 py-1.5 ${includeTests ? "bg-[var(--stone-800)] text-white" : "text-muted"}`}
+            className={`quiet-admin__segment rounded-pill px-3.5 py-1.5 ${includeTests ? "quiet-admin__segment--active" : "text-muted"}`}
           >
             Everyone
           </Link>
@@ -311,7 +311,7 @@ export default async function AdminOverviewPage({
         ) : null}
       </div>
 
-      <div className="mt-5 rounded-lg border border-border-subtle bg-card p-5 shadow-sm">
+      <div className="quiet-admin__panel mt-5 rounded-lg border border-border-subtle bg-card p-5 shadow-sm">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <p className="text-[0.72rem] font-bold text-muted">Families over time</p>
           <p className="text-xs text-subtle">

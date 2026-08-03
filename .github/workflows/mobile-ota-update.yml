@@ -22,6 +22,7 @@ on:
       - ".github/workflows/mobile-ota-update.yml"
       - "apps/mobile/**"
       - "packages/core/**"
+      - "packages/design/**"
   workflow_dispatch: {}
 
 concurrency:
@@ -73,6 +74,9 @@ jobs:
 
       - name: Mobile accessibility contract
         run: pnpm check:mobile-accessibility
+
+      - name: Native interface gauntlet
+        run: pnpm check:native-interface-gauntlet
 
       # A red mobile test suite must never reach an installed phone: this
       # runs before publish, not just in CI, since CI and this workflow

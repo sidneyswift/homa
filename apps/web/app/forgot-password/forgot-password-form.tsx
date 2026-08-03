@@ -48,9 +48,9 @@ export function ForgotPasswordForm({ expired = false }: { expired?: boolean }) {
 
   if (sent) {
     return (
-      <div className="rounded-lg border border-border bg-card p-6 shadow-sm" aria-live="polite">
-        <h2 className="font-display text-xl font-semibold text-strong">Check your inbox</h2>
-        <p className="mt-2 text-body">
+      <div className="quiet-frame quiet-frame--paper rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm" data-brand-layer="forgot-password-success" aria-live="polite">
+        <h2 className="font-display text-xl font-semibold text-[var(--homa-ink)]">Check your inbox</h2>
+        <p className="mt-2 text-[var(--homa-ink)]">
           If that email is connected to Homa, a reset link is on its way. It may take a minute.
         </p>
       </div>
@@ -60,14 +60,15 @@ export function ForgotPasswordForm({ expired = false }: { expired?: boolean }) {
   return (
     <form
       onSubmit={(event) => void submit(event)}
-      className="rounded-lg border border-border bg-card p-6 shadow-sm"
+      className="quiet-frame quiet-frame--paper rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm"
+      data-brand-layer="forgot-password-form"
     >
       {expired ? (
-        <p className="mb-4 text-sm text-body" role="alert">
+        <p className="mb-4 text-sm text-[var(--homa-ink)]" role="alert">
           That reset link has expired or already been used. Send yourself a fresh one below.
         </p>
       ) : null}
-      <label className="block font-medium text-strong" htmlFor="recovery-email">
+      <label className="block font-medium text-[var(--homa-ink)]" htmlFor="recovery-email">
         Email
       </label>
       <input
@@ -78,17 +79,17 @@ export function ForgotPasswordForm({ expired = false }: { expired?: boolean }) {
         required
         value={email}
         onChange={(event) => setEmail(event.target.value)}
-        className="mt-2 w-full rounded-md border border-border px-4 py-3 text-base text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
+        className="mt-2 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] px-4 py-3 text-base text-[var(--homa-ink)] focus:border-[var(--homa-visual-coral)] focus:outline-none focus:ring-2 focus:ring-[var(--homa-visual-coral)]/30"
       />
       {error ? (
-        <p className="mt-3 text-sm text-danger" role="alert">
+        <p className="mt-3 text-sm text-[var(--homa-error-ink)]" role="alert">
           {error}
         </p>
       ) : null}
       <button
         type="submit"
         disabled={pending}
-        className="mt-6 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-60"
+        className="mt-6 min-h-12 w-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)] shadow-sm transition-colors hover:bg-[var(--homa-ink)] disabled:opacity-60"
       >
         {pending ? "Sending link…" : "Send reset link"}
       </button>

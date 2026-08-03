@@ -2,22 +2,16 @@
 
 This is a compact reviewer reference, not an independent design authority.
 Current Homa sources win in this order: repository instructions and founder
-rulings, `docs/homa-design/readme.md`,
-`docs/homa-design/tokens/motion.css`, then the two motion specimens under
-`docs/homa-design/guidelines/`.
+rulings, `docs/homa-design/readme.md`, `packages/design/src/contract/motion.ts`,
+then the two motion specimens owned by the interface gauntlet.
 
 ## Current tokens
 
-Read the token file before citing a value. As of the current design source:
-
-| Purpose | Token | Current value |
-| --- | --- | --- |
-| Entrances and responsive state changes | `--ease-out` | `cubic-bezier(0.22, 0.8, 0.28, 1)` |
-| On-screen state movement | `--ease-in-out` | `cubic-bezier(0.5, 0, 0.2, 1)` |
-| Hover and press feedback | `--dur-fast` | `120ms` |
-| Base state changes | `--dur-base` | `200ms` |
-| Entrances | `--dur-slow` | `320ms` |
-| Press feedback | `--press-scale` | `0.98` |
+Read `packages/design/src/contract/motion.ts` before citing a value. Product
+adapters consume the generated projection, rather than copying timing values
+into a skill or component. The active sequence is `peek → orient → draw →
+land → still`, with a maximum of 900ms and an immediate final still for
+Reduced Motion.
 
 Do not duplicate these values in production code when the shared token is
 available. If the source tokens change, this table must change in the same
@@ -39,8 +33,9 @@ documentation reconciliation pass.
 The current check-off specimen establishes a bounded exception with its own
 timing:
 
-- The circle fills sage and pops over 350ms.
-- One gold star floats up over 800ms.
+- The circle fills its constructive state and uses the documented 350ms
+  specimen timing.
+- One highlight accent floats up over the documented 800ms specimen timing.
 - The title quiets to a strike-through.
 - The action is undoable and never opens a modal.
 - Reduced motion uses an instant fill and no floating star.

@@ -15,6 +15,10 @@ const GLOBALS_CSS = readFileSync(
   new URL("../../app/globals.css", import.meta.url),
   "utf8",
 );
+const QUIET_PRIMITIVES_CSS = readFileSync(
+  new URL("../design/quiet-primitives.css", import.meta.url),
+  "utf8",
+);
 
 describe("isAppNavItemActive", () => {
   it("exposes the approved Progress navigation item", () => {
@@ -78,14 +82,15 @@ describe("isAppNavItemActive", () => {
 });
 
 describe("desktop sidebar visibility", () => {
-  it("uses a dedicated screen-only host that cannot be filtered as an aside", () => {
-    assert.match(SIDEBAR_SOURCE, /<div\s+data-app-sidebar/u);
+  it("uses the Quiet frame as a dedicated screen-only host", () => {
+    assert.match(SIDEBAR_SOURCE, /<QuietFrame/u);
+    assert.match(SIDEBAR_SOURCE, /data-app-sidebar=""/u);
     assert.doesNotMatch(SIDEBAR_SOURCE, /<aside/u);
     assert.match(
       SIDEBAR_SOURCE,
       /data-app-sidebar=""\s+role="complementary"\s+aria-label="App sidebar"/u,
     );
-    assert.match(SIDEBAR_SOURCE, /className="app-sidebar /u);
+    assert.match(SIDEBAR_SOURCE, /className="app-sidebar quiet-shell__rail"/u);
     assert.doesNotMatch(SIDEBAR_SOURCE, /hidden.*lg:flex|lg:flex.*hidden/u);
     assert.match(
       GLOBALS_CSS,
@@ -95,5 +100,37 @@ describe("desktop sidebar visibility", () => {
       GLOBALS_CSS,
       /@media screen and \(min-width:\s*64rem\)\s*\{\s*\.app-sidebar\s*\{\s*display:\s*flex !important;\s*\}/u,
     );
+  });
+});
+
+describe("Quiet signed-in shell contract", () => {
+  const SHELL_SOURCES = [
+    SIDEBAR_SOURCE,
+    readFileSync(new URL("./sidebar-nav.tsx", import.meta.url), "utf8"),
+    readFileSync(new URL("./shell.tsx", import.meta.url), "utf8"),
+    readFileSync(new URL("./mobile-nav.tsx", import.meta.url), "utf8"),
+    readFileSync(new URL("./context-switcher.tsx", import.meta.url), "utf8"),
+    readFileSync(new URL("./account-menu.tsx", import.meta.url), "utf8"),
+  ].join("\n");
+
+  it("routes shell geometry and actions through Quiet primitives", () => {
+    assert.match(SHELL_SOURCES, /QuietFrame/u);
+    assert.match(SHELL_SOURCES, /QuietAction/u);
+    assert.match(SHELL_SOURCES, /QuietStatus/u);
+    assert.match(SHELL_SOURCES, /quiet-shell__nav-item--active/u);
+    assert.match(SHELL_SOURCES, /quiet-shell__context-live/u);
+  });
+
+  it("does not reintroduce compatibility palette classes into the shell", () => {
+    assert.doesNotMatch(
+      SHELL_SOURCES,
+      /bg-page|bg-card|border-border-subtle|shadow-\[var\(--shadow|text-subtle|text-body|bg-brand/u,
+    );
+  });
+
+  it("keeps reduced motion and 44px interaction targets in the shell CSS", () => {
+    assert.match(QUIET_PRIMITIVES_CSS, /\.quiet-shell__icon-action\s*\{[\s\S]*width:\s*44px/u);
+    assert.match(QUIET_PRIMITIVES_CSS, /\.quiet-shell__nav-item\s*\{[\s\S]*min-height:\s*44px/u);
+    assert.match(QUIET_PRIMITIVES_CSS, /@media \(prefers-reduced-motion:\s*reduce\)/u);
   });
 });

@@ -1,9 +1,8 @@
 import type { CSSProperties, ReactNode } from "react";
 
 /**
- * Homa Badge, small status/label pill. Ported from
- * docs/homa-design/components/data-display/Badge.jsx (source of truth); keep
- * in sync until packages/design exists (M1-17).
+ * Homa Badge, small status/label pill. This is a legacy projection migrating
+ * to the semantic primitives in @homa/design.
  */
 
 type BadgeTone = "neutral" | "brand" | "sage" | "gold" | "success" | "warning" | "danger" | "info";

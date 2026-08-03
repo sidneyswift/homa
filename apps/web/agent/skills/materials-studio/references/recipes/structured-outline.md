@@ -29,7 +29,7 @@ Design patterns (all binding for outlines):
 - **Sub-fields**: each section breaks into labeled sub-parts
   ("a. topic sentence", "b. supporting evidence", "c. explanation").
   Sub-labels in the left column; blank lines in the right.
-- **Blank lines**: `border-bottom: 1.5px solid #6b6259; min-height:
+- **Blank lines**: `border-bottom: 1.5px solid var(--homa-control-boundary); min-height:
   24px;`. Use generous spacing so the child can write comfortably.
   3-4 lines per sub-field for younger writers, 2 lines for older.
 - **Difficulty variants**: same layout, different field counts. A
@@ -52,17 +52,17 @@ Design patterns (all binding for outlines):
     margin-bottom: 20px; font-size: 13px;
     font-family: 'Plus Jakarta Sans', sans-serif; }
   .outline-header .field { flex: 1 1 40%; }
-  .outline-header .field-line { border-bottom: 1.5px solid #6b6259;
+  .outline-header .field-line { border-bottom: 1.5px solid var(--homa-control-boundary);
     min-width: 120px; display: inline-block; margin-left: 4px; }
-  .section { border-top: 2px solid #221e1a; margin-top: 16px;
+  .section { border-top: 2px solid var(--homa-ink); margin-top: 16px;
     padding-top: 10px; }
   .section-title { font-weight: 700; font-size: 15px;
     margin-bottom: 8px; font-family: 'Plus Jakarta Sans', sans-serif; }
   .two-col { display: grid; grid-template-columns: 170px 1fr;
     gap: 4px 12px; margin-bottom: 6px; }
-  .two-col .label { font-size: 12px; color: #6b6259;
+  .two-col .label { font-size: 12px; color: var(--homa-control-boundary);
     font-style: italic; padding-top: 4px; }
-  .two-col .blank { border-bottom: 1.5px solid #6b6259;
+  .two-col .blank { border-bottom: 1.5px solid var(--homa-control-boundary);
     min-height: 24px; }
 </style>
 

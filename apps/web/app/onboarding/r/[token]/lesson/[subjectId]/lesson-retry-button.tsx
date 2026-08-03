@@ -3,6 +3,8 @@
 import { useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
+import { QuietAction } from "../../../../../../components/design/QuietAction";
+
 type SubjectLessonRequest = (
   input: RequestInfo | URL,
   init?: RequestInit,
@@ -66,8 +68,7 @@ export function SubjectLessonRetryButton({
 
   return (
     <div className="mt-4">
-      <button
-        type="button"
+      <QuietAction
         disabled={busy}
         aria-busy={busy}
         onClick={() => {
@@ -86,10 +87,9 @@ export function SubjectLessonRetryButton({
             }
           });
         }}
-        className="inline-flex min-h-11 items-center justify-center rounded-pill bg-[var(--clay-700)] px-6 py-2.5 font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-[var(--clay-600)] focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none motion-safe:active:scale-[var(--press-scale)] disabled:cursor-wait disabled:opacity-60"
       >
         {busy ? retryCopy.pending : retryCopy.action}
-      </button>
+      </QuietAction>
       {error ? (
         <p className="mt-3 text-sm text-[var(--rose-600)]" role="alert">
           {error}

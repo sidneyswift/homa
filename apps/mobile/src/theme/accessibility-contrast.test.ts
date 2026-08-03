@@ -33,7 +33,7 @@ const NORMAL_TEXT_PAIRS = [
   ["field focus boundary", colors.brandHover, colors.card],
   ["success text on page", colors.success, colors.page],
   ["success text on soft sage", colors.success, colors.sageSoft],
-  ["dark primary button", darkColors.onBrand, darkColors.brand],
+  ["dark primary button", darkColors.onBrand, darkColors.action],
   ["dark strong text", darkColors.textStrong, darkColors.page],
   ["dark body text", darkColors.textBody, darkColors.page],
   ["dark muted text", darkColors.textMuted, darkColors.page],

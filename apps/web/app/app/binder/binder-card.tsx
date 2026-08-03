@@ -11,10 +11,10 @@ import { KIND_LABELS, type BinderMaterial } from "../../../lib/materials/binder"
  */
 
 const KIND_TONES: ReadonlyArray<readonly [string, string]> = [
-  ["var(--clay-50)", "var(--clay-700)"],
-  ["var(--sage-50)", "var(--sage-700)"],
-  ["var(--gold-100)", "var(--gold-ink)"],
-  ["var(--sky-100)", "var(--sky-600)"],
+  ["var(--homa-error-tint)", "var(--homa-brand-text)"],
+  ["var(--homa-constructive-tint)", "var(--homa-constructive-ink)"],
+  ["var(--homa-highlight-tint)", "var(--homa-highlight-ink)"],
+  ["var(--homa-info-tint)", "var(--homa-info-ink)"],
 ];
 
 const KIND_ORDER = Object.keys(KIND_LABELS);
@@ -37,9 +37,9 @@ export function BinderCard({
       type="button"
       onClick={() => onOpen(material)}
       aria-label={`${material.title}. View and print.`}
-      className="group block w-full rounded-[var(--radius-lg)] text-left transition-transform duration-(--dur-fast) ease-out motion-safe:hover:-translate-y-0.5"
+      className="quiet-artifact-card"
     >
-      <span className="block overflow-hidden rounded-lg border border-border-subtle bg-white shadow-sm transition-shadow group-hover:shadow-md">
+      <span className="quiet-artifact-card__preview block">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={material.previewUrl}
@@ -48,10 +48,10 @@ export function BinderCard({
           loading="lazy"
         />
       </span>
-      <span className="mt-2 block truncate font-semibold text-strong">{material.title}</span>
-      <span className="mt-0.5 flex items-center gap-1.5 text-xs text-subtle">
+      <span className="mt-2 block truncate font-semibold text-[color:var(--homa-ink)]">{material.title}</span>
+      <span className="mt-0.5 flex items-center gap-1.5 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
         <span
-          className="rounded-pill px-2 py-0.5 text-[0.65rem] font-bold"
+          className="rounded-[var(--homa-radius-control)] px-2 py-0.5 text-[0.65rem] font-bold"
           style={{ background: chipBg, color: chipInk }}
         >
           {KIND_LABELS[material.kind]}

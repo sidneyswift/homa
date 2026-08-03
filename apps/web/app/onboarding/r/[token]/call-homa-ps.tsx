@@ -110,7 +110,7 @@ export function CallHomaPs({
           <button
             type="button"
             onClick={() => void call()}
-            className="font-semibold text-brand underline underline-offset-2 transition-opacity duration-(--dur-fast) ease-out hover:opacity-80"
+            className="font-semibold text-[var(--homa-brand-text)] underline underline-offset-2 transition-opacity duration-(--homa-motion-fast) ease-out hover:opacity-80"
           >
             have me call you now
           </button>

@@ -1,0 +1,28 @@
+/* Homa design contract quiet-authority-v1; source-sha256 cb79adb67b2f055645702a43cdfaf8cbd9aecfac482a40790a001dd3d5aaacb6 */
+:root {
+  --homa-canvas: #F7F4EE;
+  --homa-ink: #20242B;
+  --homa-paper: #FFFEFC;
+  --homa-floating: #FFFFFF;
+  --homa-visual-coral: #E7602F;
+  --homa-midnight-action: #27374D;
+  --homa-brand-text: #A33F22;
+  --homa-control-boundary: #918B83;
+  --homa-constructive-ink: #335C46;
+  --homa-constructive-tint: #E5EFE8;
+  --homa-info-ink: #2F5968;
+  --homa-info-tint: #E4EFF2;
+  --homa-highlight-ink: #76560F;
+  --homa-highlight-tint: #F7EBC7;
+  --homa-error-ink: #923F33;
+  --homa-error-tint: #F5E5E1;
+  --homa-contained-band: #27374D;
+  --homa-radius-control: 12px;
+  --homa-radius-card: 18px;
+  --homa-radius-frame: 28px;
+  --homa-motion-ease-out: cubic-bezier(0.22, 0.8, 0.28, 1);
+  --homa-motion-ease-in-out: cubic-bezier(0.5, 0, 0.2, 1);
+  --homa-motion-fast: 120ms;
+  --homa-motion-base: 200ms;
+  --homa-motion-slow: 320ms;
+}

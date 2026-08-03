@@ -3,7 +3,7 @@ import { getMapSubject, type SubjectScore } from "@homa/core";
 /**
  * The whole-picture chart: one dot per subject on a months-ahead axis,
  * server-rendered SVG (no client JS). Anti-guilt display law applies:
- * growing subjects sit in sky just left of the at-age line with the word
+ * growing subjects sit in the information tone just left of the at-age line with the word
  * "growing", never a negative number, never red. When prior scores exist,
  * subjects that moved UP show a faded ring at the old spot with a
  * connector, the before/after made visible; drops draw nothing.
@@ -21,9 +21,9 @@ const AXIS_MIN = -6;
 const AXIS_MAX = 26;
 
 const COLORS = {
-  gold: "var(--gold-400)",
-  sage: "var(--sage-300)",
-  sky: "var(--sky-500)",
+  highlight: "var(--homa-highlight-ink)",
+  constructive: "var(--homa-constructive-ink)",
+  info: "var(--homa-info-ink)",
 } as const;
 
 const POSITION_RANK: Record<SubjectScore["position"], number> = {
@@ -52,8 +52,8 @@ function priorMonths(score: SubjectScore, prior: SubjectScore[] | null): number 
 }
 
 function rowColor(score: SubjectScore): string {
-  if (score.position === "growing") return COLORS.sky;
-  return (score.monthsAhead ?? 0) >= 6 ? COLORS.gold : COLORS.sage;
+  if (score.position === "growing") return COLORS.info;
+  return (score.monthsAhead ?? 0) >= 6 ? COLORS.highlight : COLORS.constructive;
 }
 
 function rowLabel(score: SubjectScore): string {
@@ -88,14 +88,14 @@ function StackedChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectSco
             x2={x(months)}
             y1={HEADER - 6}
             y2={height - 6}
-            stroke={months === 0 ? "var(--stone-300)" : "var(--stone-100)"}
+            stroke={months === 0 ? "var(--homa-control-boundary)" : "var(--homa-soft-boundary)"}
             strokeWidth={months === 0 ? 2 : 1}
           />
           <text
             x={x(months)}
             y={12}
             textAnchor="middle"
-            style={{ font: "500 11px var(--font-mono)", fill: "var(--text-subtle)" }}
+            style={{ font: "500 11px var(--font-mono)", fill: "var(--homa-muted-ink)" }}
           >
             {months === 0 ? "at age" : `+${months}${months === 24 ? " mo" : ""}`}
           </text>
@@ -122,9 +122,9 @@ function StackedChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectSco
               y={labelY}
               style={{
                 font: "600 13px var(--font-sans)",
-                fill: "var(--text-body)",
+                fill: "var(--homa-ink)",
                 paintOrder: "stroke",
-                stroke: "var(--surface-card, #fff)",
+                stroke: "var(--homa-paper)",
                 strokeWidth: 4,
                 strokeLinejoin: "round",
               }}
@@ -138,11 +138,11 @@ function StackedChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectSco
                   x2={dotX}
                   y1={cy}
                   y2={cy}
-                  stroke="var(--stone-300)"
+                  stroke="var(--homa-control-boundary)"
                   strokeWidth={2}
                   strokeDasharray="1.5 3"
                 />
-                <circle cx={priorX} cy={cy} r={5.5} fill="none" stroke="var(--stone-300)" strokeWidth={2} />
+                <circle cx={priorX} cy={cy} r={5.5} fill="none" stroke="var(--homa-control-boundary)" strokeWidth={2} />
               </>
             ) : null}
             <circle
@@ -150,7 +150,7 @@ function StackedChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectSco
               cy={cy}
               r={8}
               fill={color}
-              stroke="#fff"
+              stroke="var(--homa-paper)"
               strokeWidth={2.5}
               style={{ filter: "drop-shadow(0 0 1px rgba(78,70,62,.35))" }}
             />
@@ -160,9 +160,9 @@ function StackedChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectSco
               textAnchor={flip ? "end" : "start"}
               style={{
                 font: "500 11px var(--font-mono)",
-                fill: "var(--text-muted)",
+                fill: "var(--homa-muted-ink)",
                 paintOrder: "stroke",
-                stroke: "var(--surface-card, #fff)",
+                stroke: "var(--homa-paper)",
                 strokeWidth: 4,
                 strokeLinejoin: "round",
               }}
@@ -201,14 +201,14 @@ function WideChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectScore[
             x2={x(months)}
             y1={22}
             y2={height - 14}
-            stroke={months === 0 ? "var(--stone-300)" : "var(--stone-100)"}
+            stroke={months === 0 ? "var(--homa-control-boundary)" : "var(--homa-soft-boundary)"}
             strokeWidth={months === 0 ? 2 : 1}
           />
           <text
             x={x(months)}
             y={14}
             textAnchor="middle"
-            style={{ font: "500 10px var(--font-mono)", fill: "var(--text-subtle)" }}
+            style={{ font: "500 10px var(--font-mono)", fill: "var(--homa-muted-ink)" }}
           >
             {months === 0 ? "at age" : `+${months}${months === 24 ? " mo" : ""}`}
           </text>
@@ -227,7 +227,7 @@ function WideChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectScore[
               x={LABEL_W - 10}
               y={cy + 4}
               textAnchor="end"
-              style={{ font: "600 12px var(--font-sans)", fill: "var(--text-body)" }}
+              style={{ font: "600 12px var(--font-sans)", fill: "var(--homa-ink)" }}
             >
               {domain?.displayName ?? score.subjectId}
             </text>
@@ -238,11 +238,11 @@ function WideChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectScore[
                   x2={dotX}
                   y1={cy}
                   y2={cy}
-                  stroke="var(--stone-300)"
+                  stroke="var(--homa-control-boundary)"
                   strokeWidth={2}
                   strokeDasharray="1.5 3"
                 />
-                <circle cx={priorX} cy={cy} r={5} fill="none" stroke="var(--stone-300)" strokeWidth={2} />
+                <circle cx={priorX} cy={cy} r={5} fill="none" stroke="var(--homa-control-boundary)" strokeWidth={2} />
               </>
             ) : null}
             <circle
@@ -250,14 +250,14 @@ function WideChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectScore[
               cy={cy}
               r={7}
               fill={rowColor(score)}
-              stroke="#fff"
+              stroke="var(--homa-paper)"
               strokeWidth={2.5}
               style={{ filter: "drop-shadow(0 0 1px rgba(78,70,62,.35))" }}
             />
             <text
               x={dotX + 14}
               y={cy + 4}
-              style={{ font: "500 10px var(--font-mono)", fill: "var(--text-subtle)" }}
+              style={{ font: "500 10px var(--font-mono)", fill: "var(--homa-muted-ink)" }}
             >
               {rowLabel(score)}
             </text>

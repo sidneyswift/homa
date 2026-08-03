@@ -4,12 +4,12 @@ import {
   useNavigation,
   useRouter,
 } from "expo-router";
-import { CalendarPlus, Check, ChevronLeft, ChevronRight, Plus } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { InlineError } from "../../components/ui/inline-error";
+import { Icon } from "../../components/design/icon";
 import { IconButton } from "../../components/ui/icon-button";
 import { LoadingStatus } from "../../components/ui/loading-status";
 import { toggleActivityCheck } from "../../lib/child-plans";
@@ -439,7 +439,7 @@ export default function PlannerScreen() {
 
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
           <IconButton label="Show the previous date range" onPress={goPrevious}>
-            <ChevronLeft size={22} color={colors.textBody} />
+            <Icon name="back" size={24} color={colors.textBody} />
           </IconButton>
           <Pressable
             accessible
@@ -453,7 +453,7 @@ export default function PlannerScreen() {
             </Text>
           </Pressable>
           <IconButton label="Show the next date range" onPress={goNext}>
-            <ChevronRight size={22} color={colors.textBody} />
+            <Icon name="next" size={24} color={colors.textBody} />
           </IconButton>
         </View>
 
@@ -489,7 +489,7 @@ export default function PlannerScreen() {
             borderColor: colors.borderSubtle,
           }}
         >
-          <CalendarPlus size={17} color={colors.brand} />
+          <Icon name="calendar" size={20} color={colors.action} />
           <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textStrong }}>
             Add to device calendar
           </Text>
@@ -557,13 +557,13 @@ export default function PlannerScreen() {
           width: 52,
           height: 52,
           borderRadius: radius.pill,
-          backgroundColor: colors.brandHover,
+          backgroundColor: colors.action,
           alignItems: "center",
           justifyContent: "center",
           ...shadows.md,
         }}
       >
-        <Plus size={24} color={colors.onBrand} />
+        <Icon name="add" size={24} color={colors.onBrand} />
       </IconButton>
 
       {composerDraft ? (
@@ -675,7 +675,7 @@ function FilterChip({
   tone?: readonly [string, string];
   onPress: () => void;
 }) {
-  const background = active ? colors.brandHover : tone ? tone[0] : colors.card;
+  const background = active ? colors.action : tone ? tone[0] : colors.card;
   const textColor = active ? colors.onBrand : tone ? tone[1] : colors.textBody;
   return (
     <Pressable
@@ -695,12 +695,12 @@ function FilterChip({
         borderRadius: radius.pill,
         backgroundColor: background,
         borderWidth: 1,
-        borderColor: active ? colors.brandHover : colors.borderSubtle,
+        borderColor: active ? colors.action : colors.borderSubtle,
       }}
     >
       {active ? (
         <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-          <Check size={15} color={colors.onBrand} />
+          <Icon name="check" size={16} color={colors.onBrand} />
         </View>
       ) : null}
       <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: textColor }}>{label}</Text>

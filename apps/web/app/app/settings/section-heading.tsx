@@ -16,8 +16,8 @@ export function SectionHeading({
 }) {
   return (
     <p
-      className={`text-[0.66rem] font-bold uppercase tracking-[0.14em] text-subtle ${
-        first ? "mt-4" : "mt-6 border-t border-[var(--stone-100)] pt-5"
+      className={`text-[0.66rem] font-bold uppercase tracking-[0.14em] text-[var(--homa-muted-ink)] ${
+        first ? "mt-4" : "mt-6 border-t border-[var(--homa-soft-boundary)] pt-5"
       }`}
     >
       {children}

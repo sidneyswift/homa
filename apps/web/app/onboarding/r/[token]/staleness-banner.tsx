@@ -22,10 +22,11 @@ export function StalenessBanner({
 }) {
   return (
     <div
-      className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md px-4 py-3 print:hidden"
-      style={{ background: "var(--info-soft)" }}
+      data-brand-layer="report-staleness"
+      className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[var(--homa-radius-control)] px-4 py-3 print:hidden"
+      style={{ background: "var(--homa-info-tint)" }}
     >
-      <p className="text-sm" style={{ color: "var(--sky-600)" }}>
+      <p className="text-sm" style={{ color: "var(--homa-info-ink)" }}>
         <span className="font-semibold">
           {childName} was {ageLabel(staleness.ageThenMonths)} when you answered these; they&apos;re{" "}
           {ageLabel(staleness.ageNowMonths)} now.

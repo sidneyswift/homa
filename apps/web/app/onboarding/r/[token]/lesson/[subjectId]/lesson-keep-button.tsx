@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   useEffect,
   useRef,
@@ -9,6 +8,8 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
+
+import { QuietAction } from "../../../../../../components/design/QuietAction";
 
 type SubjectLessonKeepRequest = (
   input: RequestInfo | URL,
@@ -77,15 +78,14 @@ function KeptLessonHandoff({
         Kept in Binder
       </h3>
       <p className="mt-2 text-body">
-        HOMA can help you adjust the lesson or talk through how it went.
+        Homa can help you adjust the lesson or talk through how it went.
       </p>
       <div className="mt-4">
-        <Link
+        <QuietAction
           href="/app"
-          className="inline-flex min-h-11 items-center justify-center rounded-pill bg-[var(--clay-700)] px-6 py-2.5 font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-[var(--clay-600)] focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none motion-safe:active:scale-[var(--press-scale)]"
         >
-          Message HOMA about this lesson
-        </Link>
+          Message Homa about this lesson
+        </QuietAction>
         {showPhoneSetupLink ? (
           <section
             aria-labelledby="phone-setup-heading"
@@ -98,15 +98,16 @@ function KeptLessonHandoff({
               Prefer text?
             </h4>
             <p className="mt-2 text-sm text-body">
-              Phone setup is optional. HOMA sends one research note by text each
+              Phone setup is optional. Homa sends one research note by text each
               weekday morning.
             </p>
-            <Link
+            <QuietAction
+              kind="secondary"
               href="/app/settings?edit=phone#parents"
-              className="mt-2 inline-flex min-h-11 items-center rounded-pill border border-border px-4 py-2 text-sm font-semibold text-[var(--clay-700)] transition duration-(--dur-fast) ease-out hover:border-[var(--clay-600)] hover:text-[var(--clay-600)] focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none"
+              className="mt-2"
             >
               Open phone settings
-            </Link>
+            </QuietAction>
           </section>
         ) : null}
       </div>
@@ -150,8 +151,7 @@ export function SubjectLessonKeepButton({
 
   return (
     <div className="mt-5">
-      <button
-        type="button"
+      <QuietAction
         disabled={pending}
         onClick={() => {
           setFailed(false);
@@ -164,10 +164,9 @@ export function SubjectLessonKeepButton({
             setKept(true);
           });
         }}
-        className="inline-flex min-h-11 items-center justify-center rounded-pill bg-[var(--clay-700)] px-6 py-2.5 font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-[var(--clay-600)] focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none motion-safe:active:scale-[var(--press-scale)] disabled:cursor-wait disabled:opacity-60"
       >
         {pending ? "Keeping..." : "Keep in Binder"}
-      </button>
+      </QuietAction>
       <p className="mt-2 text-sm text-muted">
         Binder saves the worksheet for later. The lesson stays at this link.
       </p>

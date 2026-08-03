@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "designEra": "quiet-authority-v1",
+  "contractVersion": "@homa/design:quiet-authority-v1",
+  "harnessVersion": "handwrytten-stationery-v1",
+  "ownerIssue": "gh#740",
+  "provider": "handwrytten",
+  "status": "candidate",
+  "sourcePaths": [
+    "apps/web/.env.example",
+    "apps/web/components/brand/Logo.tsx",
+    "apps/web/lib/cards/handwrytten.ts",
+    "apps/web/lib/cards/message.ts",
+    "apps/web/lib/cards/thank-you.ts",
+    "apps/web/scripts/handwrytten-brand-card.mts",
+    "apps/web/scripts/handwrytten-smoke.mts",
+    "docs/homa-design/evidence/stationery-inputs/quiet-authority-v1.json",
+    "docs/homa-planning/plans/2026-07-11-thank-you-cards.md",
+    "packages/design/src/contract/brand.ts",
+    "packages/design/src/contract/colors.ts",
+    "packages/design/src/contract/typography.ts",
+    "supabase/migrations/20260711170000_thank_you_cards.sql"
+  ],
+  "sourceSpec": {
+    "path": "docs/homa-design/evidence/stationery-inputs/quiet-authority-v1.json",
+    "sha256": "f6f120f07d70d0daf22d28a175a67b4feb011e26968a91ceb2303803cc9850a3"
+  },
+  "account": {
+    "accountOwner": "Homa founder and operations owner",
+    "providerAccount": "Handwrytten production account",
+    "priorConfiguration": {
+      "cardId": "349914",
+      "handwritingFont": "hwDavid",
+      "enablementVariable": "THANK_YOU_CARDS_ENABLED",
+      "testModeVariable": "HANDWRYTTEN_TEST_MODE"
+    },
+    "replacementConfiguration": {
+      "cardId": null,
+      "handwritingFont": "hwDavid",
+      "templateName": "Homa thank you, Quiet authority v1",
+      "providerReadback": {
+        "status": "pending",
+        "evidencePath": null,
+        "observedAt": null,
+        "note": "A real Handwrytten custom-card create, quality check, detail read-back, and account-owner confirmation are still required."
+      }
+    }
+  },
+  "providerConstraints": {
+    "dimensionId": "3",
+    "dimensionName": "A2 Folded Landscape",
+    "outputDpi": 600,
+    "panelWidthPx": 3300,
+    "panelHeightPx": 2550,
+    "maxMessageCharacters": 500,
+    "maxWishesCharacters": 50,
+    "requiredEnvironment": [
+      "THANK_YOU_CARDS_ENABLED",
+      "THANK_YOU_CARDS_MONTHLY_CAP",
+      "HANDWRYTTEN_API_KEY",
+      "HANDWRYTTEN_CARD_ID",
+      "HANDWRYTTEN_FONT",
+      "HANDWRYTTEN_TEST_MODE",
+      "HANDWRYTTEN_RETURN_ADDRESS_ID"
+    ],
+    "requiredGenerationOrder": [
+      "host-approved-panels-on-public-Blob",
+      "customCards.uploadImage",
+      "customCards.checkImage",
+      "customCards.create",
+      "customCards.get-readback"
+    ],
+    "requiredVendorChecks": [
+      "cover-quality-check",
+      "custom-card-detail-readback"
+    ],
+    "allowedHandwritingFonts": [
+      "hwDavid"
+    ],
+    "webFontEmbedding": "forbidden"
+  },
+  "historicalDelivery": {
+    "deliveryState": "delivered-historical",
+    "retiredTemplateId": "349914",
+    "recallStatus": "cannot-recall",
+    "stopGenerationTimestamp": null,
+    "note": "Cards already mailed with the prior template are external historical copies. They remain truthful provenance and are never described as recalled."
+  },
+  "stopGeneration": {
+    "status": "pending",
+    "owner": "Homa founder and operations owner",
+    "retiredTemplateId": "349914",
+    "timestamp": null,
+    "prerequisiteEvidence": [
+      "provider custom-card create, quality check, and detail read-back",
+      "physical card crop, ink, handwriting, contrast, privacy, and recipient-experience proof"
+    ],
+    "reason": "Do not stop generation of the current template until the replacement is provider-verified and physically inspected."
+  },
+  "rollback": {
+    "owner": "Homa founder and operations owner",
+    "boundary": "provider-version-restore",
+    "restoreAction": "Restore HANDWRYTTEN_CARD_ID to the last accepted card, keep the sweep dark while checking the provider account, then redeploy the server configuration.",
+    "restoreTarget": "349914",
+    "measuredRestoreTimeSeconds": null,
+    "cacheBehavior": "Public Blob cover URLs are immutable inputs to the provider record. A failed replacement remains private or unreferenced; the current card ID is not switched until read-back passes.",
+    "publicAssetMigration": "Record every generated cover URL and stop using the retired URL as the current source only after the replacement has a verified provider card. Preserve required lineage privately.",
+    "restoreProof": {
+      "status": "pending",
+      "evidencePath": null,
+      "observedAt": null,
+      "note": "A measured restore rehearsal and provider read-back are still required."
+    }
+  },
+  "physicalProof": {
+    "status": "pending",
+    "evidencePath": null,
+    "observedAt": null,
+    "note": "No physical Quiet authority card has been accepted yet. Inspect trim, safe area, ink, handwriting, contrast, address safety, privacy, and recipient experience before rollout."
+  },
+  "contracts": [
+    "thank_you_cards unique family id and deny-all server-only outbox",
+    "primary-parent recipient snapshot and no later-member reminting",
+    "no address inference, no child data, and no provider payload beyond the approved message",
+    "explicit live-mode and account-level test-mode safety checks",
+    "basket clear and optimistic-lock recording before any retry or restore"
+  ]
+}

@@ -32,19 +32,19 @@ export function StateCard({
       : null;
 
   return (
-    <details className={`group rounded-lg border border-border-subtle bg-card ${className}`.trim()}>
+    <details data-brand-layer="report-state" className={`group rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] ${className}`.trim()}>
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-5 [&::-webkit-details-marker]:hidden">
         <span className="min-w-0">
-          <span className="block font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
+          <span className="block font-mono text-[0.65rem] uppercase tracking-widest text-[var(--homa-muted-ink)]">
             Your state {"\u00b7"} last verified {verified}
           </span>
-          <span className="mt-1 block font-display text-base font-semibold text-strong">
+          <span className="mt-1 block font-display text-base font-semibold text-[var(--homa-ink)]">
             What {summary.stateName} asks of homeschooling families
           </span>
         </span>
         <span
           aria-hidden="true"
-          className="flex-shrink-0 text-subtle transition-transform duration-(--dur-fast) ease-out group-open:rotate-180"
+          className="flex-shrink-0 text-[var(--homa-muted-ink)] transition-transform duration-(--homa-motion-fast) ease-out group-open:rotate-180"
         >
           {"\u25BE"}
         </span>
@@ -91,7 +91,7 @@ export function StateCard({
                 href={summary.sourcePageUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline underline-offset-2 hover:text-brand"
+                className="text-[var(--homa-brand-text)] underline underline-offset-2"
               >
                 See the source
               </a>

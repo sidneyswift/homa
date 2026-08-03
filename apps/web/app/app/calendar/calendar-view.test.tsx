@@ -100,6 +100,16 @@ function renderView(props: Partial<Parameters<typeof CalendarView>[0]> = {}): st
 }
 
 describe("CalendarView", () => {
+  it("projects the calendar onto the Quiet authority surface contract", () => {
+    const html = renderView();
+    assert.match(html, /data-brand-surface="calendar"/u);
+    assert.match(html, /data-brand-fixture="quiet-authority-v1"/u);
+    assert.match(html, /quiet-frame quiet-frame--paper/u);
+    assert.match(html, /quiet-action quiet-action--primary/u);
+    assert.match(html, /<svg[^>]*aria-hidden="true"/u);
+    assert.doesNotMatch(html, /clay|bg-brand|text-brand|Schibsted|Hanken|Caveat/u);
+  });
+
   it("names the family's calendar and the week span", () => {
     const html = renderView();
     assert.match(html, />The Chen family<\/h1>/);
@@ -216,7 +226,7 @@ describe("CalendarView", () => {
   it("links to the existing week planner rather than replacing it", () => {
     const html = renderView();
     assert.match(html, /href="\/app\/planner"/);
-    assert.match(html, />Open the week planner<\/a>/);
+    assert.match(html, />Open the week planner<\/span>/);
   });
 });
 

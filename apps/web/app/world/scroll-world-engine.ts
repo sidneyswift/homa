@@ -13,7 +13,7 @@
  *   rAF loop, the injected style tag, and the blob object URLs, so the Next
  *   route can unmount cleanly.
  * - No topbar/brand/nav DOM: the route renders its own Homa header above the
- *   engine (real Logo component, brand pill button). The route rail dots
+ *   engine (real Logo component, Quiet action button). The route rail dots
  *   remain as the in-world navigation.
  * - No html/body CSS: globals.css owns the document; the engine only styles
  *   inside its container.
@@ -454,8 +454,8 @@ export function mountScrollWorld(container: HTMLElement, config: WorldConfig): (
   }
   function ctaBtns(cta: WorldCta) {
     let h = "";
-    if (cta.primary) h += `<a class="sw-btn sw-btn--primary" href="${esc(cta.primary.href)}">${esc(cta.primary.label)}</a>`;
-    if (cta.secondary) h += `<a class="sw-btn sw-btn--ghost" href="${esc(cta.secondary.href)}">${esc(cta.secondary.label)}</a>`;
+    if (cta.primary) h += `<a class="quiet-action quiet-action--primary quiet-action--default sw-btn" href="${esc(cta.primary.href)}">${esc(cta.primary.label)}</a>`;
+    if (cta.secondary) h += `<a class="quiet-action quiet-action--secondary quiet-action--default sw-btn" href="${esc(cta.secondary.href)}">${esc(cta.secondary.label)}</a>`;
     return h;
   }
 }
@@ -484,16 +484,16 @@ function injectCSS(): HTMLStyleElement {
   const existing = document.getElementById("sw-css");
   if (existing) return existing as HTMLStyleElement;
   const css = `
-  .sw-root{--sw-bg:#FBF7F0;--sw-ink:#221E1A;--sw-ink-soft:#6B6157;--sw-accent:#E7602F;
-    --sw-font-display:system-ui,sans-serif;--sw-font-body:system-ui,sans-serif;
+  .sw-root{--sw-bg:var(--homa-canvas);--sw-ink:var(--homa-ink);--sw-ink-soft:color-mix(in srgb,var(--homa-ink) 68%,var(--homa-canvas));--sw-accent:var(--homa-visual-coral);
+    --sw-font-display:var(--font-display);--sw-font-body:var(--font-sans);
     color:var(--sw-ink);font-family:var(--sw-font-body);}
   .sw-sky{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:var(--sw-bg);}
   .sw-sky__grad{position:absolute;inset:-10%;background:linear-gradient(178deg,color-mix(in srgb,var(--sw-accent) 10%,var(--sw-bg)) 0%,var(--sw-bg) 55%,color-mix(in srgb,var(--sw-accent) 5%,var(--sw-bg)) 100%);}
-  .sw-sky__glow{position:absolute;inset:0;background:radial-gradient(60% 42% at 74% 16%,color-mix(in srgb,var(--sw-accent) 18%,transparent),transparent 70%),radial-gradient(46% 34% at 50% 50%,color-mix(in srgb,#fff 45%,transparent),transparent 70%);}
+  .sw-sky__glow{position:absolute;inset:0;background:radial-gradient(60% 42% at 74% 16%,color-mix(in srgb,var(--sw-accent) 18%,transparent),transparent 70%),radial-gradient(46% 34% at 50% 50%,color-mix(in srgb,var(--homa-paper) 45%,transparent),transparent 70%);}
   .sw-particles{position:absolute;inset:-6% -2%;}
   .sw-pt{position:absolute;width:13px;height:13px;transform:scale(var(--sw-sc,1));opacity:0;animation:sw-drift linear infinite;}
   .sw-pt::before{content:"";position:absolute;inset:0;border-radius:50%;}
-  .sw-pt--dot::before{background:radial-gradient(circle at 34% 30%,color-mix(in srgb,var(--sw-accent) 55%,#fff),color-mix(in srgb,var(--sw-accent) 80%,#000) 82%);}
+  .sw-pt--dot::before{background:radial-gradient(circle at 34% 30%,color-mix(in srgb,var(--sw-accent) 55%,var(--homa-paper)),color-mix(in srgb,var(--sw-accent) 80%,var(--homa-ink)) 82%);}
   .sw-pt--ring::before{background:transparent;border:2px solid color-mix(in srgb,var(--sw-accent) 45%,transparent);}
   @keyframes sw-drift{0%{opacity:0;transform:scale(var(--sw-sc)) translate(0,12vh) rotate(0)}12%{opacity:.4}88%{opacity:.35}100%{opacity:0;transform:scale(var(--sw-sc)) translate(4vw,-22vh) rotate(210deg)}}
   .sw-scrollbar{position:fixed;top:0;left:0;right:0;height:3px;z-index:60;background:color-mix(in srgb,var(--sw-accent) 14%,transparent);}
@@ -507,29 +507,30 @@ function injectCSS(): HTMLStyleElement {
   .sw-copylayer{position:fixed;inset:0;z-index:20;pointer-events:none;}
   .sw-copylayer::before{content:"";position:absolute;inset:0;width:min(58vw,780px);background:linear-gradient(90deg,var(--sw-bg) 0%,color-mix(in srgb,var(--sw-bg) 82%,transparent) 34%,color-mix(in srgb,var(--sw-bg) 40%,transparent) 62%,transparent 100%);}
   .sw-copy{position:absolute;left:clamp(18px,5vw,64px);top:50%;transform:translateY(-50%);width:min(42vw,460px);opacity:0;will-change:opacity,transform;}
-  .sw-copy__num{font-family:var(--font-mono,ui-monospace,Menlo,monospace);font-size:.74rem;letter-spacing:.12em;color:var(--sw-ink-soft);}
-  .sw-copy__eyebrow{display:block;margin-top:18px;font-family:var(--sw-font-display);font-weight:700;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--sw-accent);}
-  .sw-copy__title{font-family:var(--sw-font-display);font-weight:700;color:var(--sw-ink);font-size:clamp(2rem,4.4vw,3.4rem);line-height:1.05;margin:12px 0 0;letter-spacing:-.015em;text-shadow:0 2px 20px color-mix(in srgb,var(--sw-bg) 70%,transparent);}
-  .sw-copy__body{margin-top:16px;font-size:clamp(1rem,1.25vw,1.13rem);line-height:1.55;color:color-mix(in srgb,var(--sw-ink) 80%,var(--sw-ink-soft));max-width:42ch;text-shadow:0 1px 12px color-mix(in srgb,var(--sw-bg) 90%,transparent);}
+  .sw-copy__num{font-family:var(--sw-font-body);font-size:.75rem;font-variant-numeric:tabular-nums;letter-spacing:.12em;color:var(--sw-ink-soft);}
+  .sw-copy__eyebrow{display:block;margin-top:18px;font-family:var(--sw-font-body);font-weight:700;font-size:.75rem;line-height:1rem;letter-spacing:.08em;text-transform:uppercase;color:var(--sw-accent);}
+  .sw-copy__title{font-family:var(--sw-font-display);font-weight:600;color:var(--sw-ink);font-size:clamp(2rem,4.4vw,3.4rem);line-height:1.05;margin:12px 0 0;letter-spacing:-.015em;text-shadow:0 2px 20px color-mix(in srgb,var(--sw-bg) 70%,transparent);}
+  .sw-copy__body{margin-top:16px;font-family:var(--sw-font-body);font-size:clamp(1rem,1.25vw,1.13rem);line-height:1.55;color:color-mix(in srgb,var(--sw-ink) 80%,var(--sw-ink-soft));max-width:42ch;text-shadow:0 1px 12px color-mix(in srgb,var(--sw-bg) 90%,transparent);}
   .sw-copy__tags{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 0;padding:0;}
-  .sw-copy__tags li{font-size:.8rem;font-weight:600;color:color-mix(in srgb,var(--sw-accent) 72%,#000);padding:7px 14px;border-radius:999px;background:color-mix(in srgb,var(--sw-accent) 12%,#fff);border:1px solid color-mix(in srgb,var(--sw-accent) 28%,transparent);}
+  .sw-copy__tags li{font-family:var(--sw-font-body);font-size:.8rem;font-weight:600;color:color-mix(in srgb,var(--sw-accent) 72%,var(--homa-ink));padding:7px 14px;border-radius:var(--homa-radius-control);background:color-mix(in srgb,var(--sw-accent) 12%,var(--homa-paper));border:1px solid color-mix(in srgb,var(--sw-accent) 28%,transparent);}
   .sw-copy__cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px;pointer-events:auto;}
-  .sw-btn{text-decoration:none;font-weight:600;font-size:.95rem;padding:13px 24px;border-radius:999px;transition:transform .2s;}
-  .sw-btn--primary{color:#fff;background:var(--sw-accent);}
-  .sw-btn--primary:hover{transform:translateY(-2px);}
-  .sw-btn--ghost{color:var(--sw-ink);border:1.5px solid color-mix(in srgb,var(--sw-ink) 25%,transparent);}
-  .sw-btn--ghost:hover{transform:translateY(-2px);}
+  .sw-btn{display:inline-flex;min-height:44px;align-items:center;justify-content:center;text-decoration:none;font-family:var(--sw-font-body);font-weight:700;font-size:.9375rem;line-height:1;padding:0 18px;border-radius:var(--homa-radius-control);transition:background var(--homa-motion-fast) var(--homa-motion-ease-out),border-color var(--homa-motion-fast) var(--homa-motion-ease-out),transform var(--homa-motion-fast) var(--homa-motion-ease-out);}
+  .sw-btn--primary{color:var(--homa-paper);background:var(--homa-midnight-action);border:1px solid transparent;}
+  .sw-btn--primary:hover{background:color-mix(in srgb,var(--homa-midnight-action) 88%,var(--homa-ink));transform:translateY(-1px);}
+  .sw-btn--ghost{color:var(--sw-ink);background:transparent;border:1px solid var(--homa-control-boundary);}
+  .sw-btn--ghost:hover{background:var(--homa-paper);border-color:var(--homa-ink);transform:translateY(-1px);}
+  .sw-btn:focus-visible{outline:3px solid color-mix(in srgb,var(--homa-visual-coral) 70%,transparent);outline-offset:3px;}
   .sw-route{position:fixed;right:clamp(14px,2.4vw,30px);top:50%;z-index:40;transform:translateY(-50%);display:flex;flex-direction:column;gap:22px;padding:18px 10px;}
   .sw-route::before{content:"";position:absolute;left:50%;top:22px;bottom:22px;width:2px;transform:translateX(-50%);background:var(--sw-accent);opacity:.28;}
   .sw-route__dot{position:relative;border:0;background:transparent;cursor:pointer;width:14px;height:14px;display:grid;place-items:center;}
-  .sw-route__dot i{width:9px;height:9px;border-radius:50%;background:color-mix(in srgb,var(--sw-accent) 40%,transparent);transition:transform .3s,background .3s,box-shadow .3s;}
+  .sw-route__dot i{width:9px;height:9px;border-radius:50%;background:color-mix(in srgb,var(--sw-accent) 40%,transparent);transition:transform var(--homa-motion-slow) var(--homa-motion-ease-out),background var(--homa-motion-slow) var(--homa-motion-ease-out),box-shadow var(--homa-motion-slow) var(--homa-motion-ease-out);}
   .sw-route__dot:hover i{transform:scale(1.25);background:var(--sw-accent);}
   .sw-route__dot.is-active i{background:var(--sw-accent);transform:scale(1.4);box-shadow:0 0 0 5px color-mix(in srgb,var(--sw-accent) 22%,transparent);}
-  .sw-route__label{position:absolute;right:24px;top:50%;transform:translateY(-50%) translateX(6px);white-space:nowrap;font-size:.78rem;font-weight:600;color:var(--sw-ink);background:color-mix(in srgb,#fff 85%,transparent);backdrop-filter:blur(6px);padding:5px 11px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;border:1px solid color-mix(in srgb,var(--sw-accent) 14%,transparent);}
+  .sw-route__label{position:absolute;right:24px;top:50%;transform:translateY(-50%) translateX(6px);white-space:nowrap;font-family:var(--sw-font-body);font-size:.8125rem;font-weight:600;color:var(--sw-ink);background:color-mix(in srgb,var(--homa-paper) 85%,transparent);backdrop-filter:blur(6px);padding:5px 11px;border-radius:var(--homa-radius-control);opacity:0;pointer-events:none;transition:opacity var(--homa-motion-base) var(--homa-motion-ease-out),transform var(--homa-motion-base) var(--homa-motion-ease-out);border:1px solid color-mix(in srgb,var(--sw-accent) 14%,transparent);}
   .sw-route__dot:hover .sw-route__label,.sw-route__dot.is-active .sw-route__label{opacity:1;transform:translateY(-50%) translateX(0);}
-  .sw-hint{position:fixed;left:50%;bottom:26px;z-index:30;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:var(--sw-ink-soft);transition:opacity .3s;}
-  .sw-hint i{width:22px;height:34px;border-radius:12px;border:2px solid color-mix(in srgb,var(--sw-ink) 28%,transparent);position:relative;}
-  .sw-hint i::after{content:"";position:absolute;left:50%;top:7px;width:4px;height:7px;border-radius:2px;background:var(--sw-accent);transform:translateX(-50%);animation:sw-wheel 1.7s ease-in-out infinite;}
+  .sw-hint{position:fixed;left:50%;bottom:26px;z-index:30;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;font-family:var(--sw-font-body);font-size:.75rem;line-height:1rem;letter-spacing:.08em;text-transform:uppercase;color:var(--sw-ink-soft);transition:opacity var(--homa-motion-slow) var(--homa-motion-ease-out);}
+  .sw-hint i{width:22px;height:34px;border-radius:var(--homa-radius-control);border:2px solid color-mix(in srgb,var(--sw-ink) 28%,transparent);position:relative;}
+  .sw-hint i::after{content:"";position:absolute;left:50%;top:7px;width:4px;height:7px;border-radius:2px;background:var(--sw-accent);transform:translateX(-50%);animation:sw-wheel 1.7s var(--homa-motion-ease-in-out) infinite;}
   @keyframes sw-wheel{0%{opacity:0;top:6px}40%{opacity:1}100%{opacity:0;top:17px}}
   .sw-track{position:relative;z-index:1;width:100%;pointer-events:none;}
   @media (max-width:860px){
@@ -551,7 +552,7 @@ function injectCSS(): HTMLStyleElement {
     .sw-route__dot{width:28px;height:28px;}
     .sw-btn{padding:15px 26px;}
   }
-  @media (prefers-reduced-motion:reduce){ .sw-hint i::after{animation:none;} .sw-pt{display:none;} }
+  @media (prefers-reduced-motion:reduce){ .sw-hint i::after{animation:none;} .sw-pt{display:none;} .sw-btn,.sw-route__dot i,.sw-route__label,.sw-hint{transition:none;} }
   `;
   const style = document.createElement("style");
   style.id = "sw-css";

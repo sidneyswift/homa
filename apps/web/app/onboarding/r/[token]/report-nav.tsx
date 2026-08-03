@@ -11,7 +11,7 @@ import { Logo } from "../../../../components/brand/Logo";
  */
 export function ReportNav() {
   return (
-    <header className="sticky top-0 z-30 border-b border-border-subtle bg-page/95 backdrop-blur print:hidden">
+    <header data-brand-layer="report-nav" className="sticky top-0 z-30 border-b border-[var(--homa-control-boundary)] bg-[color-mix(in_srgb,var(--homa-canvas)_95%,transparent)] backdrop-blur print:hidden">
       <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-3 px-4 py-2.5">
         <Link href="/app" aria-label="Open Homa" className="inline-flex rounded-md">
           <Logo size={22} />
@@ -19,13 +19,13 @@ export function ReportNav() {
         <nav className="flex items-center gap-2">
           <Link
             href="/app"
-            className="inline-flex min-h-9 items-center rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-semibold text-strong transition-colors duration-(--dur-fast) ease-out hover:border-brand"
+            className="quiet-action quiet-action--secondary min-h-9 px-4 py-1.5 text-sm"
           >
             Open Homa
           </Link>
           <Link
             href="/app/settings"
-            className="inline-flex min-h-9 items-center rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-semibold text-strong transition-colors duration-(--dur-fast) ease-out hover:border-brand"
+            className="quiet-action quiet-action--secondary min-h-9 px-4 py-1.5 text-sm"
           >
             Settings
           </Link>

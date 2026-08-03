@@ -2,8 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Pause, Play } from "lucide-react";
 
+import { Icon } from "../../../components/design/Icon";
+import { QuietAction } from "../../../components/design/QuietAction";
+import { QuietStatus } from "../../../components/design/QuietStatus";
 import {
   approveAgentJobStageAction,
   cancelAgentJobAction,
@@ -30,20 +32,20 @@ import {
  * jobId inside the caller's own family; this component never touches the DB.
  */
 
-/** A stage status's chip color. Calm-first: sage for finished, warm brand
- * for the one waiting on the parent, muted for everything still ahead. No
- * red, ever, not even for a failed stage (copy law). */
-function stageChipClass(status: AgentJobStageStatus): string {
+/** A stage status maps to the shared truthful state vocabulary. Calm-first:
+ * constructive for finished, attention for the one waiting on the parent,
+ * info for everything still ahead. No red, even for a failed stage. */
+function stageChipTone(status: AgentJobStageStatus): "constructive" | "attention" | "info" {
   switch (status) {
     case "approved":
     case "skipped":
-      return "bg-[var(--sage-50)] text-[var(--sage-700)]";
+      return "constructive";
     case "ready_for_review":
-      return "bg-brand-soft text-[var(--clay-700)]";
+      return "attention";
     case "in_progress":
-      return "bg-brand-soft text-brand";
+      return "attention";
     default:
-      return "bg-[var(--brand-soft-2)] text-muted";
+      return "info";
   }
 }
 
@@ -56,31 +58,27 @@ function VolumeList({ job }: { job: AgentJobView }) {
       {job.stages.map((stage) => (
         <li
           key={stage.stageNumber}
-          className="flex items-center justify-between gap-3 rounded-md border border-border-subtle bg-page px-3 py-2"
+          className="flex items-center justify-between gap-3 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-canvas)] px-3 py-2"
         >
-          <span className="text-sm text-body">
-            <span className="font-semibold text-strong">
+          <span className="text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">
+            <span className="font-semibold text-[color:var(--homa-ink)]">
               {noun.singular} {stage.stageNumber}
             </span>
-            {stage.title ? <span className="text-muted"> {"·"} {stage.title}</span> : null}
+            {stage.title ? <span className="text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]"> {"·"} {stage.title}</span> : null}
           </span>
-          <span
-            className={`shrink-0 rounded-pill px-2.5 py-1 text-[0.7rem] font-bold ${stageChipClass(
-              stage.status,
-            )}`}
-          >
+          <QuietStatus tone={stageChipTone(stage.status)} className="shrink-0 px-2.5 py-1 text-[0.7rem] font-bold">
             {stageStatusLabel(stage.status)}
-          </span>
+          </QuietStatus>
         </li>
       ))}
       {remaining ? (
-        <li className="flex items-center justify-between gap-3 rounded-md border border-dashed border-border-subtle px-3 py-2">
-          <span className="text-sm font-semibold text-muted">
+        <li className="flex items-center justify-between gap-3 rounded-[var(--homa-radius-control)] border border-dashed border-[var(--homa-control-boundary)] px-3 py-2">
+          <span className="text-sm font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
             {remaining.from === remaining.to
               ? `${noun.singular} ${remaining.from}`
               : `${noun.plural} ${remaining.from}-${remaining.to}`}
           </span>
-          <span className="shrink-0 rounded-pill bg-[var(--brand-soft-2)] px-2.5 py-1 text-[0.7rem] font-bold text-muted">
+          <span className="shrink-0 rounded-[var(--homa-radius-control)] bg-[var(--homa-canvas)] px-2.5 py-1 text-[0.7rem] font-bold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
             Up next
           </span>
         </li>
@@ -99,28 +97,24 @@ function CancelBuildButton({ job, onDone }: { job: AgentJobView; onDone: () => v
 
   if (!confirming) {
     return (
-      <div className="mt-4 border-t border-border-subtle pt-3">
-        <button
-          type="button"
-          onClick={() => setConfirming(true)}
-          className="text-xs font-semibold text-muted hover:underline"
-        >
+      <div className="mt-4 border-t border-[var(--homa-control-boundary)] pt-3">
+        <QuietAction kind="quiet" className="px-0 text-xs" onClick={() => setConfirming(true)}>
           Stop this build
-        </button>
-        {error ? <p className="mt-2 text-sm text-muted">{error}</p> : null}
+        </QuietAction>
+        {error ? <QuietStatus tone="error" className="mt-2 text-sm">{error}</QuietStatus> : null}
       </div>
     );
   }
 
   return (
-    <div className="mt-4 border-t border-border-subtle pt-3">
+    <div className="mt-4 border-t border-[var(--homa-control-boundary)] pt-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs font-semibold text-muted">
+        <p className="text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
           Stop this build? Everything already built stays in your Binder.
         </p>
         <div className="flex shrink-0 gap-2">
-          <button
-            type="button"
+          <QuietAction
+            kind="secondary"
             disabled={pending}
             onClick={() => {
               setError(null);
@@ -134,17 +128,13 @@ function CancelBuildButton({ job, onDone }: { job: AgentJobView; onDone: () => v
                 }
               });
             }}
-            className="rounded-pill border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-strong transition-colors hover:border-brand disabled:opacity-60"
+            className="text-xs"
           >
             {pending ? "Stopping…" : "Stop build"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setConfirming(false)}
-            className="rounded-pill px-3.5 py-1.5 text-xs font-bold text-muted transition-colors hover:text-body"
-          >
+          </QuietAction>
+          <QuietAction kind="quiet" className="text-xs" onClick={() => setConfirming(false)}>
             Keep building
-          </button>
+          </QuietAction>
         </div>
       </div>
     </div>
@@ -180,40 +170,34 @@ function SteerControls({ job, onDone }: { job: AgentJobView; onDone: () => void 
   return (
     <div className="mt-4 flex flex-col gap-2.5">
       {job.status === "awaiting_input" ? (
-        <button
-          type="button"
+        <QuietAction
           disabled={pending}
           onClick={() => run(() => approveAgentJobStageAction(job.id, readyStage))}
-          className="inline-flex items-center justify-center gap-2 rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover disabled:opacity-60"
+          icon={<Icon name="check" size={16} />}
         >
-          <Check size={16} aria-hidden="true" />
           {pending ? "Saving…" : "Approve and keep building"}
-        </button>
+        </QuietAction>
       ) : null}
 
       {job.status === "paused" ? (
-        <button
-          type="button"
+        <QuietAction
+          kind="secondary"
           disabled={pending}
           onClick={() => run(() => resumeAgentJobAction(job.id))}
-          className="inline-flex items-center justify-center gap-2 rounded-pill border border-border bg-card px-5 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-brand disabled:opacity-60"
         >
-          <Play size={15} aria-hidden="true" />
           Resume building
-        </button>
+        </QuietAction>
       ) : (
-        <button
-          type="button"
+        <QuietAction
+          kind="secondary"
           disabled={pending}
           onClick={() => run(() => pauseAgentJobAction(job.id))}
-          className="inline-flex items-center justify-center gap-2 rounded-pill border border-border bg-card px-5 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-brand disabled:opacity-60"
         >
-          <Pause size={15} aria-hidden="true" />
           Pause
-        </button>
+        </QuietAction>
       )}
 
-      {error ? <p className="text-sm text-muted">{error}</p> : null}
+      {error ? <QuietStatus tone="error" className="text-sm">{error}</QuietStatus> : null}
     </div>
   );
 }
@@ -231,7 +215,7 @@ export function AgentJobOverlay({ job, onClose }: { job: AgentJobView; onClose: 
 
   return (
     <DialogShell titleId="agent-job-title" heading={job.title} onClose={onClose}>
-      <p className="mt-1 text-sm text-muted">{note}</p>
+      <p className="mt-1 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">{note}</p>
       <VolumeList job={job} />
       <SteerControls job={job} onDone={onClose} />
       <CancelBuildButton job={job} onDone={onClose} />

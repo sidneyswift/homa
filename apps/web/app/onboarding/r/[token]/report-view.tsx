@@ -100,13 +100,13 @@ const POSITION_RANK: Record<SubjectScore["position"], number> = {
 function badgeStyleForPosition(position: SubjectScore["position"]): CSSProperties {
   switch (position) {
     case "ahead":
-      return { background: "var(--gold-100)", color: "var(--gold-ink)" };
+      return { background: "var(--homa-highlight-tint)", color: "var(--homa-highlight-ink)" };
     case "on_track":
-      return { background: "var(--accent-sage-soft)", color: "var(--sage-700)" };
+      return { background: "var(--homa-constructive-tint)", color: "var(--homa-constructive-ink)" };
     case "growing":
-      return { background: "var(--info-soft)", color: "var(--sky-600)" };
+      return { background: "var(--homa-info-tint)", color: "var(--homa-info-ink)" };
     case "not_mapped":
-      return { background: "var(--surface-sunken)", color: "var(--text-muted)" };
+      return { background: "var(--homa-canvas)", color: "var(--homa-muted-ink)" };
     default: {
       const exhaustive: never = position;
       throw new Error(`Unhandled map position: ${exhaustive}`);
@@ -115,9 +115,9 @@ function badgeStyleForPosition(position: SubjectScore["position"]): CSSPropertie
 }
 
 interface Movement {
-  /** "+4 mo since Jun 6" (gold) or "moved up since Jun 6" (sage). */
+  /** "+4 mo since Jun 6" (highlight) or "moved up since Jun 6" (constructive). */
   label: string;
-  tone: "gold" | "sage";
+  tone: "highlight" | "constructive";
 }
 
 function movementFor(
@@ -137,10 +137,10 @@ function movementFor(
     previous.monthsAhead !== null &&
     current.monthsAhead > previous.monthsAhead
   ) {
-    return { label: `+${current.monthsAhead - previous.monthsAhead} mo since ${since}`, tone: "gold" };
+    return { label: `+${current.monthsAhead - previous.monthsAhead} mo since ${since}`, tone: "highlight" };
   }
   if (POSITION_RANK[current.position] > POSITION_RANK[previous.position]) {
-    return { label: `moved up since ${since}`, tone: "sage" };
+    return { label: `moved up since ${since}`, tone: "constructive" };
   }
   return null;
 }
@@ -312,7 +312,7 @@ export function ReportView({
         </span>
       </div>
       <h1 className="mt-5 font-display text-4xl font-bold leading-none tracking-tight text-strong sm:text-5xl">
-        {report.childName}&apos;s <span style={{ color: "var(--clay-600)" }}>progress report</span>
+        {report.childName}&apos;s <span style={{ color: "var(--homa-brand-text)" }}>progress report</span>
       </h1>
       {/* No subtitle (round 2, founder ask 2026-07-09): the heading
           flowing straight into age, subjects, and benchmarks below
@@ -344,18 +344,18 @@ export function ReportView({
     // full-width snapshot, founder ask 2026-07-11); standalone is
     // untouched, the letter has no grid.
     <div
-      className={`flex gap-4 rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5 ${inApp ? "lg:col-span-2" : ""}`.trim()}
+      data-brand-layer="report-note"
+      className={`quiet-report__note flex gap-4 rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-constructive-tint)] p-5 ${inApp ? "lg:col-span-2" : ""}`.trim()}
     >
       <div className="flex-shrink-0 pt-0.5">
         <Logo variant="mark" size={34} />
       </div>
       <div className="min-w-0 flex-1">
-        {/* sage-700, not the sage-500 default: at this tiny size on the
-            sage-50 card, sage-500 sits near 3.2:1, under the 4.5:1 AA
-            bar (report-preview.tsx picked sage-700 for the same eyebrow). */}
+        {/* The constructive ink keeps this small eyebrow above the AA
+            contrast bar on the tinted note surface. */}
         <p
           className="font-mono text-[0.65rem] uppercase tracking-widest"
-          style={{ color: "var(--sage-700)" }}
+          style={{ color: "var(--homa-constructive-ink)" }}
         >
           A note from Homa
         </p>
@@ -447,7 +447,7 @@ export function ReportView({
     return (
       <div
         key={score.subjectId}
-        className="rounded-md border border-dashed border-border-subtle px-4 py-3.5"
+        className="rounded-[var(--homa-radius-control)] border border-dashed border-[var(--homa-soft-boundary)] px-4 py-3.5"
       >
         <p className="font-semibold text-muted">{domain?.displayName}</p>
         <p className="mt-0.5 text-sm text-subtle">
@@ -500,7 +500,7 @@ export function ReportView({
           new Set(domain?.items.flatMap((item) => [...item.sources]) ?? []),
         );
         return (
-          <details key={score.subjectId} id={`subject-${score.subjectId}`} className="group rounded-md border border-border-subtle">
+          <details key={score.subjectId} id={`subject-${score.subjectId}`} className="group rounded-[var(--homa-radius-control)] border border-[var(--homa-soft-boundary)]">
             <summary className="flex cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden">
               <span
                 className="flex-shrink-0 whitespace-nowrap rounded-pill px-3 py-1 text-xs font-bold"
@@ -522,9 +522,9 @@ export function ReportView({
                   <span
                     className="mt-0.5 inline-block rounded-pill px-2 py-0.5 font-mono text-[0.65rem] font-bold"
                     style={
-                      movement.tone === "gold"
-                        ? { background: "var(--gold-100)", color: "var(--gold-ink)" }
-                        : { background: "var(--accent-sage-soft)", color: "var(--sage-700)" }
+                      movement.tone === "highlight"
+                        ? { background: "var(--homa-highlight-tint)", color: "var(--homa-highlight-ink)" }
+                        : { background: "var(--homa-constructive-tint)", color: "var(--homa-constructive-ink)" }
                     }
                   >
                     {"\u2191"} {movement.label}
@@ -533,12 +533,12 @@ export function ReportView({
               </span>
               <span
                 aria-hidden="true"
-                className="flex-shrink-0 text-subtle transition-transform duration-(--dur-fast) ease-out group-open:rotate-180"
+                className="flex-shrink-0 text-[var(--homa-muted-ink)] transition-transform duration-(--homa-motion-fast) ease-out group-open:rotate-180"
               >
                 {"\u25BE"}
               </span>
             </summary>
-            <div className="border-t border-border-subtle px-5 pb-5 pt-4">
+            <div className="border-t border-[var(--homa-soft-boundary)] px-5 pb-5 pt-4">
               {/* 1. What this subject is, in plain words. */}
               <p className="text-sm text-body">{domain?.whatItIs}</p>
 
@@ -555,7 +555,7 @@ export function ReportView({
                   />
                 </>
               ) : (
-                <p className="mt-4 text-sm text-muted">
+                <p className="mt-4 text-sm text-[var(--homa-muted-ink)]">
                   No answers here yet. A few would fill this subject in.
                 </p>
               )}
@@ -564,7 +564,7 @@ export function ReportView({
                   paragraph, connecting the subject and her answers. */}
               {score.position !== "not_mapped" ? (
                 <>
-                  <p className="mt-5 font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
+                  <p className="mt-5 font-mono text-[0.65rem] uppercase tracking-widest text-[var(--homa-muted-ink)]">
                     Why this is interesting
                   </p>
                   <p className="mt-1 whitespace-pre-line text-sm text-body">{whyInteresting}</p>
@@ -589,7 +589,7 @@ export function ReportView({
                         href={href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-muted underline underline-offset-2 transition-colors duration-(--dur-fast) ease-out hover:text-brand"
+                        className="text-[var(--homa-muted-ink)] underline underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-brand-text)]"
                       >
                         {source.label}
                       </a>
@@ -637,7 +637,7 @@ export function ReportView({
                           : "primary",
                         `inline-flex ${subjectActionHeight} items-center px-4 py-2 text-xs font-semibold ${
                           subjectLessonsEnabled
-                            ? "focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none"
+                            ? "focus-visible:outline-2 focus-visible:outline-[var(--homa-visual-coral)] focus-visible:outline-offset-2"
                             : ""
                         }`.trim(),
                       )}
@@ -729,14 +729,14 @@ export function ReportView({
   // Methodology: closed by default, one plain paragraph, the
   // sources one more tap down (founder ask 2026-07-08).
   const methodologyCard = (
-    <details className={`group rounded-lg bg-[var(--surface-sunken)] ${inApp ? "" : "mt-9"}`.trim()}>
+    <details data-brand-layer="report-methodology" className={`quiet-report__methodology group rounded-[var(--homa-radius-card)] bg-[var(--homa-canvas)] ${inApp ? "" : "mt-9"}`.trim()}>
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-5 [&::-webkit-details-marker]:hidden">
         <h3 className="font-display text-base font-semibold text-strong">
           How this report is made
         </h3>
         <span
           aria-hidden="true"
-          className="flex-shrink-0 text-subtle transition-transform duration-(--dur-fast) ease-out group-open:rotate-180"
+          className="flex-shrink-0 text-[var(--homa-muted-ink)] transition-transform duration-(--homa-motion-fast) ease-out group-open:rotate-180"
         >
           {"\u25BE"}
         </span>
@@ -763,7 +763,7 @@ export function ReportView({
             Sources{" "}
             <span
               aria-hidden="true"
-              className="inline-block transition-transform duration-(--dur-fast) ease-out group-open/sources:rotate-180"
+              className="inline-block transition-transform duration-(--homa-motion-fast) ease-out group-open/sources:rotate-180"
             >
               {"\u25BE"}
             </span>
@@ -778,7 +778,7 @@ export function ReportView({
                     href={source.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-muted underline underline-offset-2 transition-colors duration-(--dur-fast) ease-out hover:text-brand"
+                    className="text-[var(--homa-muted-ink)] underline underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-brand-text)]"
                   >
                     {source.label}
                   </a>
@@ -801,7 +801,7 @@ export function ReportView({
   // each sibling's own report page links directly.
   const siblingsCard =
     !sample && !mirror && readyKids.length > 0 ? (
-      <div className={`rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5 print:hidden ${inApp ? "" : "mt-9"}`.trim()}>
+      <div data-brand-layer="report-siblings" className={`quiet-report__support rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-constructive-tint)] p-5 print:hidden ${inApp ? "" : "mt-9"}`.trim()}>
         <p className="font-display text-lg font-semibold text-strong">
           {readyKids.length === 1
             ? `${readyKids[0].name}'s report is ready too.`
@@ -845,7 +845,7 @@ export function ReportView({
   // Next kid handoff.
   const nextKidCard =
     !sample && !mirror && nextKid ? (
-      <div className={`rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5 print:hidden ${inApp ? "" : "mt-9"}`.trim()}>
+      <div data-brand-layer="report-next-child" className={`quiet-report__support rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-constructive-tint)] p-5 print:hidden ${inApp ? "" : "mt-9"}`.trim()}>
         <p className="font-display text-lg font-semibold text-strong">
           {nextKid.name} is next.
         </p>
@@ -875,7 +875,7 @@ export function ReportView({
           token={report.token}
         />
       ) : sample ? (
-        <Link href="/onboarding" className="text-brand underline-offset-2 hover:underline">
+        <Link href="/onboarding" className="text-[var(--homa-brand-text)] underline-offset-2 hover:underline">
           Get your own
         </Link>
       ) : null}
@@ -890,14 +890,15 @@ export function ReportView({
   // mirror PageColumn so the report sits like every other app page.
   if (inApp) {
     return (
-      <div className="px-5 py-7 pb-16 lg:px-10 lg:py-8">
+      <div data-brand-surface="report" data-brand-context="app" className="quiet-report quiet-report--app px-5 py-7 pb-16 lg:px-10 lg:py-8">
         <div className="mx-auto w-full max-w-[1040px]">
           {stalenessBanner}
 
           {/* Hero: the report's header band as its own card. */}
           <div
-            style={{ background: "var(--band-sky)" }}
-            className="overflow-hidden rounded-[28px] border border-border px-7 pb-7 pt-8 shadow-sm sm:px-10"
+            data-brand-layer="report-hero"
+            style={{ background: "var(--homa-info-tint)" }}
+            className="quiet-report__hero overflow-hidden rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] px-7 pb-7 pt-8 shadow-sm sm:px-10"
           >
             {heroInner}
           </div>
@@ -906,7 +907,7 @@ export function ReportView({
             {noteCard}
             {snapshotCard}
 
-            <section className="rounded-lg border border-border-subtle bg-card p-5 shadow-sm lg:col-span-2">
+            <section data-brand-layer="report-subjects" className="quiet-report__subjects rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-5 shadow-sm lg:col-span-2">
               {subjectsHeading}
               {subjectRows}
             </section>
@@ -916,7 +917,7 @@ export function ReportView({
             {siblingsCard}
             {nextKidCard}
 
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border-subtle bg-card px-5 py-4 text-sm text-subtle lg:col-span-2">
+            <div data-brand-layer="report-footer" className="quiet-report__footer flex flex-wrap items-center justify-between gap-2 rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-5 py-4 text-sm text-[var(--homa-muted-ink)] lg:col-span-2">
               {footerContent}
             </div>
           </div>
@@ -928,7 +929,7 @@ export function ReportView({
   // ---- Standalone: the token page's one long letter card, exactly as
   // it prints and shares.
   return (
-    <div className="min-h-screen bg-page pb-16">
+    <div data-brand-surface="report" data-brand-context="standalone" className="quiet-report quiet-print-surface quiet-report--standalone min-h-screen bg-[var(--homa-canvas)] pb-16">
       {/* The way out (founder ask 2026-07-08: the report page had no
           path to the app or settings). The sample keeps its own CTAs;
           the mirror sits inside the admin frame, which owns the way
@@ -937,7 +938,7 @@ export function ReportView({
 
       <main className="mx-auto w-full max-w-2xl px-4 pt-6">
         {sample ? (
-          <p className="mb-4 rounded-md px-4 py-3 text-sm font-semibold" style={{ background: "var(--gold-100)", color: "var(--gold-ink)" }}>
+          <p className="mb-4 rounded-[var(--homa-radius-control)] px-4 py-3 text-sm font-semibold" style={{ background: "var(--homa-highlight-tint)", color: "var(--homa-highlight-ink)" }}>
             Sample report. Maya is a demonstration child; every number below is example data.{" "}
             <Link href="/onboarding" className="underline">Get your own child&apos;s report</Link>, free, in
             about five minutes.
@@ -949,9 +950,9 @@ export function ReportView({
             permanent URL always knows how much the child has grown. */}
         {stalenessBanner}
 
-        <div className="overflow-hidden rounded-[28px] border border-border bg-card shadow-lg print:border-0 print:shadow-none">
+        <div className="quiet-frame overflow-hidden rounded-[var(--homa-radius-card)] border-[var(--homa-control-boundary)] shadow-lg print:border-0 print:shadow-none">
           {/* Header band */}
-          <div style={{ background: "var(--band-sky)" }} className="px-7 pb-7 pt-8 sm:px-10">
+          <div data-brand-layer="report-hero" style={{ background: "var(--homa-info-tint)" }} className="quiet-report__hero px-7 pb-7 pt-8 sm:px-10">
             {heroInner}
           </div>
 
@@ -978,11 +979,11 @@ export function ReportView({
                 dashboard renders none (the frame is already home), and
                 the mirror renders none (both doors are hers). */}
             {!mirror ? (
-              <div className="mt-9 rounded-lg p-6 print:hidden" style={{ background: "var(--surface-inverse)" }}>
-                <h3 className="font-display text-2xl font-bold" style={{ color: "#fff" }}>
+              <div data-brand-layer="report-cta" className="quiet-report__cta mt-9 rounded-[var(--homa-radius-card)] p-6 print:hidden" style={{ background: "var(--homa-contained-band)" }}>
+                <h3 className="font-display text-2xl font-bold" style={{ color: "var(--homa-paper)" }}>
                   This report is where {report.childName} starts, not where {report.childName} stays.
                 </h3>
-                <p className="mt-2 max-w-lg" style={{ color: "var(--stone-300)" }}>
+                <p className="mt-2 max-w-lg" style={{ color: "color-mix(in srgb, var(--homa-paper) 76%, transparent)" }}>
                   Homa builds a plan for whatever is growing, makes materials for exactly those
                   skills, and re-draws this report as {report.childName} grows, so you watch the
                   numbers move.
@@ -998,7 +999,7 @@ export function ReportView({
                     >
                       Start your free trial
                     </Link>
-                    <p className="mt-3 text-xs" style={{ color: "var(--stone-400)" }}>
+                    <p className="mt-3 text-xs" style={{ color: "color-mix(in srgb, var(--homa-paper) 62%, transparent)" }}>
                       Five minutes of questions, benchmarked against national standards. 30 free
                       days, then $19 a month.
                     </p>
@@ -1021,21 +1022,21 @@ export function ReportView({
           </div>
 
           {/* Footer */}
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle px-7 py-4 text-sm text-subtle sm:px-10">
+          <div data-brand-layer="report-footer" className="quiet-report__footer flex flex-wrap items-center justify-between gap-2 border-t border-[var(--homa-soft-boundary)] px-7 py-4 text-sm text-[var(--homa-muted-ink)] sm:px-10">
             {footerContent}
           </div>
         </div>
 
         {!mirror ? (
-          <p className="mt-4 text-center text-sm text-subtle print:hidden">
+          <p className="mt-4 text-center text-sm text-[var(--homa-muted-ink)] print:hidden">
             {sample ? (
-              <Link href="/onboarding" className="text-brand underline-offset-2 hover:underline">
+              <Link href="/onboarding" className="text-[var(--homa-brand-text)] underline-offset-2 hover:underline">
                 back to your family
               </Link>
             ) : (
               <Link
                 href={`/app/${report.childId}/report`}
-                className="text-brand underline-offset-2 hover:underline"
+                className="text-[var(--homa-brand-text)] underline-offset-2 hover:underline"
               >
                 open this report in Homa
               </Link>

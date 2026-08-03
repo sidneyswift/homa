@@ -13,7 +13,7 @@ const MONTHS = [
 ] as const;
 
 const selectClass =
-  "mt-2 w-full rounded-md border border-border bg-card px-3 py-3 text-base text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30";
+  "mt-2 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 py-3 text-base text-[var(--homa-ink)] focus:border-[var(--homa-visual-coral)] focus:outline-none focus:ring-2 focus:ring-[var(--homa-visual-coral)]/30";
 
 /** "2019-03-14" from the children row, split for the three selects. */
 function parseIsoDate(value: string | undefined): {
@@ -42,7 +42,7 @@ export function BirthdayFields({
   return (
     <div className="mt-4 grid grid-cols-[1.4fr_1fr_1.1fr] gap-2.5">
       <div>
-        <label className="block text-sm font-medium text-strong" htmlFor={`${idPrefix}-month`}>
+        <label className="block text-sm font-medium text-[var(--homa-ink)]" htmlFor={`${idPrefix}-month`}>
           Birth month
         </label>
         <select
@@ -59,7 +59,7 @@ export function BirthdayFields({
         </select>
       </div>
       <div>
-        <label className="block text-sm font-medium text-strong" htmlFor={`${idPrefix}-day`}>
+        <label className="block text-sm font-medium text-[var(--homa-ink)]" htmlFor={`${idPrefix}-day`}>
           Day
         </label>
         <select
@@ -76,7 +76,7 @@ export function BirthdayFields({
         </select>
       </div>
       <div>
-        <label className="block text-sm font-medium text-strong" htmlFor={`${idPrefix}-year`}>
+        <label className="block text-sm font-medium text-[var(--homa-ink)]" htmlFor={`${idPrefix}-year`}>
           Year
         </label>
         <select

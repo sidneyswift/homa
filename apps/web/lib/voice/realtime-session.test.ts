@@ -46,6 +46,12 @@ describe("realtime voice instructions", () => {
     assert.match(VOICE_MODE_RULES, /Never guess/u);
   });
 
+  it("asks rather than acts when it only partly hears the parent", () => {
+    assert.match(VOICE_MODE_RULES, /Only act on audio you can understand with confidence/u);
+    assert.match(VOICE_MODE_RULES, /Do not guess what the parent meant/u);
+    assert.match(VOICE_MODE_RULES, /call ask_homa/u);
+  });
+
   it("selects only the authenticated adult's own name", () => {
     const members = [
       { user_id: "adult-a", display_name: "Elena Rivera" },
@@ -57,22 +63,21 @@ describe("realtime voice instructions", () => {
 });
 
 describe("realtime voice interruption policy", () => {
-  it("lets the parent interrupt through filtered, thresholded speech detection", () => {
+  it("waits for a semantic turn and does not cancel Homa on possible speech", () => {
     const mapped = openai.experimental_realtime("gpt-realtime-2.1").buildSessionConfig({
       providerOptions: buildRealtimeAudioProviderOptions("marin"),
-    }) as { audio?: unknown };
+    }) as { audio?: unknown; reasoning?: unknown };
 
+    assert.deepEqual(mapped.reasoning, { effort: "low" });
     assert.deepEqual(mapped.audio, {
       input: {
         transcription: { model: "gpt-realtime-whisper" },
         noise_reduction: { type: "far_field" },
         turn_detection: {
-          type: "server_vad",
-          threshold: 0.65,
-          prefix_padding_ms: 300,
-          silence_duration_ms: 650,
+          type: "semantic_vad",
+          eagerness: "low",
           create_response: true,
-          interrupt_response: true,
+          interrupt_response: false,
         },
       },
       output: { voice: "marin" },

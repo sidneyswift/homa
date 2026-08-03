@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { getFamilyMaterialsDeep } from "../../../../../lib/admin/family-deep-data";
 import { requireFounder } from "../../../../../lib/admin/gate";
 import { timeAgo } from "../../../../../lib/admin/format";
+import { AdminArtifactPreview } from "../../../artifact-preview";
 import { EmptyNote, Pill, statusTone } from "../../../ui";
 import { FamilyShell, isUuid } from "../family-shell";
 
@@ -44,20 +45,13 @@ export default async function AdminFamilyMaterialsPage({
                   key={material.id}
                   className="overflow-hidden rounded-lg border border-border-subtle bg-card shadow-sm"
                 >
-                  <a
+                  <AdminArtifactPreview
+                    src={material.previewUrl}
+                    alt={`Preview of ${material.title}`}
                     href={material.pdfUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block border-b border-border-subtle bg-[var(--surface-sunken)]"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={material.previewUrl}
-                      alt={`Preview of ${material.title}`}
-                      className="aspect-[8.5/6] w-full object-cover object-top"
-                      loading="lazy"
-                    />
-                  </a>
+                    className="border-0 rounded-none shadow-none"
+                    imageClassName="aspect-[8.5/6]"
+                  />
                   <div className="p-3.5">
                     <p className="truncate font-display text-sm font-bold text-strong">
                       {material.title}
@@ -78,10 +72,10 @@ export default async function AdminFamilyMaterialsPage({
                     </p>
                     {material.generation ? (
                       <details className="mt-2">
-                        <summary className="cursor-pointer font-mono text-[0.62rem] font-bold uppercase tracking-[0.1em] text-[var(--sky-600)]">
+                        <summary className="cursor-pointer font-mono text-[0.62rem] font-bold uppercase tracking-[0.1em] text-[var(--homa-info-ink)]">
                           How this was made
                         </summary>
-                        <div className="mt-1.5 rounded-md bg-[var(--surface-sunken)] p-2.5 font-mono text-[0.68rem] text-muted">
+                        <div className="mt-1.5 rounded-md bg-[var(--homa-canvas)] p-2.5 font-mono text-[0.68rem] text-muted">
                           {material.generation.input ? (
                             <p className="whitespace-pre-wrap break-words">
                               {Object.entries(material.generation.input)
@@ -92,7 +86,7 @@ export default async function AdminFamilyMaterialsPage({
                             </p>
                           ) : null}
                           {material.generation.review && !material.generation.review.pass ? (
-                            <p className="mt-1.5 text-[var(--gold-ink)]">
+                            <p className="mt-1.5 text-[var(--homa-highlight-ink)]">
                               review issues: {material.generation.review.issues.join("; ")}
                             </p>
                           ) : null}
@@ -102,7 +96,7 @@ export default async function AdminFamilyMaterialsPage({
                               they would be invisible to the console that is
                               supposed to be how quality gets watched. */}
                           {material.generation.review?.advisoryIssues?.length ? (
-                            <p className="mt-1.5 text-[var(--gold-ink)]">
+                            <p className="mt-1.5 text-[var(--homa-highlight-ink)]">
                               later-page notes (shipped, not held):{" "}
                               {material.generation.review.advisoryIssues.join("; ")}
                             </p>
@@ -111,7 +105,7 @@ export default async function AdminFamilyMaterialsPage({
                             <p className="mt-1.5">
                               <Link
                                 href={`/admin/sessions/${encodeURIComponent(material.generation.sessionId)}`}
-                                className="text-[var(--sky-600)] hover:underline"
+                                className="text-[var(--homa-info-ink)] hover:underline"
                               >
                                 open the session that made it
                               </Link>

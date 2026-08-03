@@ -4,7 +4,7 @@ import { TRIAL_REMINDER_OUTER_NOTE } from "../billing/trial-reminder";
 import { emailHash } from "../email/hash";
 import { mintUnsubscribeToken } from "../email/unsubscribe-token";
 import { normalizeRfcMessageId } from "../conversation-continuity/rfc-message-id";
-import { escapeHtml } from "../html-escape";
+import { renderHomaEmailHtml } from "../email/render";
 import type { TaskDeliveryVersion } from "../tasks/delivery-version";
 import { validateResearchBriefFormat } from "../tasks/research-brief-format";
 import { mapDb, type DbJson } from "./db";
@@ -268,34 +268,7 @@ async function submitToResend(
     return { result: { status: "rejected" }, error: "RESEND_API_KEY not set" };
   }
 
-  const paragraphs = args.bodyLines
-    .map(
-      (line) =>
-        `<p style="margin:0 0 14px;font-size:16px;line-height:1.6;color:#332E29;">${escapeHtml(line)}</p>`,
-    )
-    .join("");
-  const cta = args.cta
-    ? `<a href="${escapeHtml(args.cta.url)}" style="display:inline-block;background:#E7602F;color:#ffffff;border-radius:999px;padding:12px 26px;font-weight:700;font-size:16px;text-decoration:none;margin:6px 0 14px;">${escapeHtml(args.cta.label)}</a>`
-    : "";
-
-  const html = `<!doctype html>
-<html><body style="margin:0;background:#FBF7F0;padding:24px 12px;font-family:'Hanken Grotesk',-apple-system,'Segoe UI',sans-serif;">
-  <span style="display:none!important;visibility:hidden;opacity:0;height:0;width:0;">${escapeHtml(args.preview)}</span>
-  <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:22px;padding:32px 30px;border:1px solid #E7DDCE;">
-    <!-- The name, typed: "Homa", never "HOMA" and never lowercase (founder
-         correction 2026-07-28, brand-casing-homa). Email clients cannot run
-         the real Logo component, so this is the name as words rather than a
-         hand-typed imitation of the mark. -->
-    <div style="font-weight:600;font-size:20px;color:#E7602F;margin-bottom:18px;">Homa</div>
-    <h1 style="font-size:24px;line-height:1.2;color:#221E1A;margin:0 0 16px;">${escapeHtml(args.heading)}</h1>
-    ${paragraphs}
-    ${cta}
-    <p style="margin:16px 0 0;font-size:13px;line-height:1.6;color:#8A7D6C;">${escapeHtml(args.footerNote)}</p>
-  </div>
-  <p style="max-width:560px;margin:14px auto 0;font-size:12px;line-height:1.6;color:#8A7D6C;text-align:center;">
-    ${escapeHtml(args.outerNote ?? "You signed up for Homa at thankshoma.com. Reply to this email and Homa answers. We only email you about your own family's homeschool, never promotions. Every kind of email has an off switch.")}
-  </p>
-</body></html>`;
+  const html = renderHomaEmailHtml(args);
 
   const text = [args.heading, "", ...args.bodyLines.map(stripTags), args.cta ? `${args.cta.label}: ${args.cta.url}` : "", "", stripTags(args.footerNote)].join("\n");
 

@@ -59,13 +59,13 @@ An AI homeschool assistant that keeps a family's context, helps create learning 
 | `apps/mobile/` | Expo (React Native) companion app: pure client on the same Supabase + eve backend |
 | `packages/core/` | The domain system (profiles, benchmarks, questionnaire, generators) |
 | `packages/core/src/events.ts` and `events.test.ts` | Typed event registry and exact schema tests, including the nine PII-free ChildProgress events |
-| `packages/design/` | Placeholder for the upcoming shared design package, ticket M1-17; runtime copies still live in web and mobile |
+| `packages/design/` | Quiet authority contract and deterministic projections; runtime copies remain temporary migration targets under gh#720 and gh#724 |
 | `packages/taxonomy/` | Subject, domain, topic skill graph, validation tooling, and the generated narrow progress-metadata export |
 | `supabase/` | Local database migrations; local presence does not prove remote application |
 | `data/` | Reviewed snapshots of external reference data (`state-requirements/`: HomeschoolLeap API pulls that seed the `state_requirements` table; runbook: `docs/homa-planning/runbooks/state-requirements-refresh.md`) |
 | `marketing/` | Demand-gen engine state: signal reservoir, staged/published bundles, personas, voice, routines (spec: `docs/homa-planning/14-marketing-demand-engine.md`) |
 | `docs/homa-planning/` | Product contract, founder registry, ticket backlog, dated plans, runbooks, and preserved history |
-| `docs/homa-design/` | Brand + UI source of truth ("Warm and playful"): tokens, UI kits, voice rules |
+| `docs/homa-design/` | Quiet authority human guide, workflow, and quarantined legacy evidence |
 | `docs/homa-benchmarks/` | Internal national-benchmark corpus (ages 2 to 16, all subjects): sourced anchor base for the map bank and progress reports |
 | `docs/homa-curriculum-atlas/` | Curriculum atlas: dated competitive/reference profiles of the homeschool curriculum market (87 profiles with parseable front matter, category comparisons, market overview, product implications) |
 | `docs/notes/` | Running implementation notes that record discoveries and plan deviations |

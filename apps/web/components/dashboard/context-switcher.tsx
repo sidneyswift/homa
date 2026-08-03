@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, useTransition } from "react";
-import { Check, Users } from "lucide-react";
+import { Users } from "lucide-react";
 
 import { ageLabel } from "@homa/core";
 
@@ -13,6 +13,8 @@ import {
   pageShowsContextSwitcher,
   VIEW_CONTEXT_FAMILY,
 } from "../../lib/view-context";
+import { Icon } from "../design/Icon";
+import { QuietStatus } from "../design/QuietStatus";
 import { KidAvatar } from "./kid-avatar";
 import { type SidebarKid } from "./sidebar";
 
@@ -53,13 +55,8 @@ import { type SidebarKid } from "./sidebar";
 function FamilyAvatar({ size }: { size: number }) {
   return (
     <span
-      className="inline-flex shrink-0 items-center justify-center rounded-full"
-      style={{
-        width: size,
-        height: size,
-        background: "var(--stone-100)",
-        color: "var(--stone-600)",
-      }}
+      className="quiet-shell__family-avatar"
+      style={{ width: size, height: size }}
     >
       <Users size={size * 0.55} aria-hidden="true" />
     </span>
@@ -151,7 +148,7 @@ function SwitcherMenu({
   }
 
   return (
-    <div ref={rootRef} className="relative">
+    <div ref={rootRef} className="quiet-shell__context">
       <button
         type="button"
         aria-expanded={open ? "true" : "false"}
@@ -172,26 +169,32 @@ function SwitcherMenu({
       </button>
 
       {open ? (
-        <div
-          id={menuId}
-          role="menu"
-          className="absolute right-0 top-full z-50 mt-2 w-60 origin-top-right rounded-md border border-border-subtle bg-card p-1.5 shadow-lg transition-[opacity,translate,scale] duration-(--dur-base) ease-out starting:-translate-y-1 starting:scale-[0.98] starting:opacity-0 motion-reduce:transition-none"
-        >
+        <>
+          <div className="quiet-shell__context-live" aria-live="polite">
+            <QuietStatus tone="info">
+              Viewing {currentKid ? currentKid.name : "the whole family"}
+            </QuietStatus>
+          </div>
+          <div
+            id={menuId}
+            role="menu"
+            className="quiet-shell__menu quiet-shell__context-menu"
+          >
           <button
             type="button"
             role="menuitemradio"
             aria-checked={current === VIEW_CONTEXT_FAMILY ? "true" : "false"}
             data-drawer-close=""
             onClick={() => pickAndClose(VIEW_CONTEXT_FAMILY)}
-            className="flex w-full cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-left text-sm font-medium text-body transition-colors duration-(--dur-fast) ease-out hover:bg-page"
+            className="quiet-shell__menu-action"
           >
             <FamilyAvatar size={26} />
             <span className="min-w-0 flex-1 truncate">Whole family</span>
             {current === VIEW_CONTEXT_FAMILY ? (
-              <Check size={16} className="shrink-0 text-brand" aria-hidden="true" />
+              <Icon name="check" size={16} />
             ) : null}
           </button>
-          <div className="mx-2 my-1 h-px bg-border-subtle" aria-hidden="true" />
+          <div className="quiet-shell__menu-separator" aria-hidden="true" />
           {kids.map((kid, index) => (
             <button
               key={kid.id}
@@ -200,16 +203,17 @@ function SwitcherMenu({
               aria-checked={current === kid.id ? "true" : "false"}
               data-drawer-close=""
               onClick={() => pickAndClose(kid.id)}
-              className="flex w-full cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-left text-sm font-medium text-body transition-colors duration-(--dur-fast) ease-out hover:bg-page"
+              className="quiet-shell__menu-action"
             >
               <SwitcherKidAvatar kid={kid} index={index} size={26} />
               <span className="min-w-0 flex-1 truncate">{kid.name}</span>
               {current === kid.id ? (
-                <Check size={16} className="shrink-0 text-brand" aria-hidden="true" />
+                <Icon name="check" size={16} />
               ) : null}
             </button>
           ))}
-        </div>
+          </div>
+        </>
       ) : null}
     </div>
   );
@@ -227,7 +231,7 @@ export function ContextSwitcher({
     <SwitcherMenu
       kids={kids}
       selected={selected}
-      buttonClassName="flex cursor-pointer items-center rounded-full p-0.5 transition-colors duration-(--dur-fast) ease-out hover:bg-page active:bg-[var(--stone-100)]"
+      buttonClassName="quiet-shell__context-trigger"
     />
   );
 }
@@ -251,11 +255,11 @@ export function DesktopContextSwitcher({
   if (kids.length < 2 || !pageShowsContextSwitcher(pathname)) return null;
 
   return (
-    <div className="fixed right-3.5 top-3.5 z-30 hidden lg:block print:hidden">
+    <div className="quiet-shell__context-desktop print:hidden">
       <SwitcherMenu
         kids={kids}
         selected={selected}
-        buttonClassName="flex cursor-pointer items-center rounded-full border border-border-subtle bg-card p-1 shadow-[var(--shadow-md)] transition-colors duration-(--dur-fast) ease-out hover:bg-page active:bg-[var(--stone-100)]"
+        buttonClassName="quiet-shell__context-trigger quiet-shell__context-trigger--desktop"
       />
     </div>
   );
@@ -275,22 +279,22 @@ export function ViewingRows({ kids }: { kids: SidebarKid[] }) {
 
   const kid = kids[0];
   return (
-    <div className="mt-6 px-1">
-      <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-subtle">
+    <div className="quiet-shell__viewing">
+      <p className="quiet-shell__viewing-label">
         My kids
       </p>
       <ul className="mt-2 flex flex-col gap-1">
         <li>
           <Link
             href={`/app/kids/${kid.id}`}
-            className="flex items-center gap-2.5 rounded-md px-1 py-1.5 hover:bg-page"
+            className="quiet-shell__viewing-link"
           >
             <SwitcherKidAvatar kid={kid} index={0} size={30} />
             <span className="min-w-0">
-              <span className="block truncate text-sm font-semibold text-body">
+              <span className="quiet-shell__viewing-name">
                 {kid.name}
               </span>
-              <span className="block text-[0.72rem] text-subtle">
+              <span className="quiet-shell__viewing-age">
                 {ageLabel(kid.ageMonths)}
               </span>
             </span>

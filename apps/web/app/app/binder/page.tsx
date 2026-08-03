@@ -19,6 +19,7 @@ import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import { effectiveTimeZone } from "../../../lib/time-zone";
 import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../../lib/view-context";
 import { PageColumn } from "../../../components/dashboard/page-column";
+import { QuietFrame } from "../../../components/design/QuietFrame";
 import { BinderView } from "./binder-view";
 import { InProgressShelf } from "./in-progress-shelf";
 import { StateFilingCard } from "./state-filing-card";
@@ -181,11 +182,11 @@ export default async function BinderPage() {
           </div>
         ) : null}
         {packReady ? null : (
-          <section className="rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
-            <h2 className="font-display text-xl font-semibold text-strong">
+          <QuietFrame tone="paper" as="section" className="p-6">
+            <h2 className="font-display text-xl font-semibold text-[color:var(--homa-ink)]">
               Your state pack
             </h2>
-            <p className="mt-2 text-sm text-body">
+            <p className="mt-2 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">
               I do not have your state&apos;s pack ready yet.
               {family.us_state ? null : (
                 <>
@@ -194,7 +195,7 @@ export default async function BinderPage() {
                 </>
               )}
             </p>
-          </section>
+          </QuietFrame>
         )}
       </div>
       <InProgressShelf materials={inProgressMaterials} />

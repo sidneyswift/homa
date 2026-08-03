@@ -67,12 +67,13 @@ export function WallModal({
   }
 
   return (
-    <div className="wall-overlay" onClick={dismiss}>
+    <div className="quiet-paywall-surface wall-overlay" data-brand-surface="wall-modal" onClick={dismiss}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label={WALL_HEADLINE}
-        className="wall-card wall-card--pricing"
+        className="quiet-paywall__modal wall-card wall-card--pricing"
+        data-brand-layer="wall-modal"
         onClick={(event) => event.stopPropagation()}
       >
         <WallOffer door={door} childName={childName} checkout={checkout} />
@@ -80,7 +81,7 @@ export function WallModal({
           ref={dismissRef}
           type="button"
           onClick={dismiss}
-          className="mt-4 text-sm text-muted underline underline-offset-2 transition-colors duration-(--dur-fast) ease-out hover:text-strong"
+          className="mt-4 text-sm text-[var(--homa-muted-ink)] underline underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-ink)]"
         >
           {WALL_DISMISS}
         </button>

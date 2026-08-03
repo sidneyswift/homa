@@ -318,10 +318,10 @@ export function DeepDiveStep({
   if (mode === null) {
     return (
       <div>
-        <h1 className="font-display text-3xl font-bold leading-tight text-strong">
+        <h1 className="font-display text-3xl font-bold leading-tight text-[var(--homa-ink)]">
           Going deeper on {domain.displayName.toLowerCase()}
         </h1>
-        <p className="mt-3 text-body">
+        <p className="mt-3 text-[var(--homa-ink)]">
           A few more questions to pin down where {child.name} stands and where a plan should
           start. Two ways to do it:
         </p>
@@ -329,20 +329,20 @@ export function DeepDiveStep({
           <button
             type="button"
             onClick={() => chooseMode("parent")}
-            className="rounded-lg border border-border-subtle bg-card p-5 text-left shadow-sm transition duration-(--dur-fast) ease-out hover:border-brand"
+            className="rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-5 text-left shadow-sm transition duration-(--homa-motion-fast) ease-out hover:border-[var(--homa-visual-coral)]"
           >
-            <p className="font-display text-lg font-semibold text-strong">Answer from what you&apos;ve seen</p>
-            <p className="mt-1 text-sm text-muted">
+            <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">Answer from what you&apos;ve seen</p>
+            <p className="mt-1 text-sm text-[var(--homa-muted-ink)]">
               Your own noticing, from memory, right now.
             </p>
           </button>
           <button
             type="button"
             onClick={() => chooseMode("together")}
-            className="rounded-lg border border-border-subtle bg-card p-5 text-left shadow-sm transition duration-(--dur-fast) ease-out hover:border-brand"
+            className="rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-5 text-left shadow-sm transition duration-(--homa-motion-fast) ease-out hover:border-[var(--homa-visual-coral)]"
           >
-            <p className="font-display text-lg font-semibold text-strong">Sit with {child.name} and try them</p>
-            <p className="mt-1 text-sm text-muted">
+            <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">Sit with {child.name} and try them</p>
+            <p className="mt-1 text-sm text-[var(--homa-muted-ink)]">
               Try each one together, casually. No test energy, just the two of you finding out.
             </p>
           </button>
@@ -350,7 +350,7 @@ export function DeepDiveStep({
         <button
           type="button"
           onClick={onExit}
-          className="mt-6 text-sm text-subtle underline-offset-2 hover:underline"
+          className="mt-6 text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
         >
           back to the report
         </button>
@@ -360,23 +360,23 @@ export function DeepDiveStep({
 
   if (flushing || !current) {
     return (
-      <div aria-busy="true" className="rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
-        <p className="font-display text-lg font-semibold text-strong">
+      <div aria-busy="true" className="rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm">
+        <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">
           Deep dive done.
         </p>
         {saveError && !flushing ? (
           <>
-            <p className="mt-2 text-body">{saveError}</p>
+            <p className="mt-2 text-[var(--homa-ink)]">{saveError}</p>
             <button
               type="button"
               onClick={() => finish()}
-              className="mt-4 rounded-pill border border-border bg-card px-4 py-2 text-sm font-semibold text-strong transition duration-(--dur-fast) ease-out hover:border-brand hover:bg-brand-soft"
+              className="mt-4 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-2 text-sm font-semibold text-[var(--homa-ink)] transition duration-(--homa-motion-fast) ease-out hover:border-[var(--homa-visual-coral)] hover:bg-[var(--homa-info-tint)]"
             >
               try saving again
             </button>
           </>
         ) : (
-          <p className="mt-2 text-body">Updating {child.name}&apos;s report{"\u2026"}</p>
+          <p className="mt-2 text-[var(--homa-ink)]">Updating {child.name}&apos;s report{"\u2026"}</p>
         )}
       </div>
     );
@@ -385,26 +385,26 @@ export function DeepDiveStep({
   return (
     <div>
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-muted">
+        <p className="text-sm font-medium text-[var(--homa-muted-ink)]">
           {child.name} {"\u00b7"} {domain.displayName} deep dive
         </p>
-        <p className="font-mono text-xs text-subtle">
+        <p className="font-mono text-xs text-[var(--homa-muted-ink)]">
           {sittingCount + 1} of up to {DEEP_DIVE_CAP}
         </p>
       </div>
 
       {mode === "together" && sittingCount === 0 ? (
-        <p className="mt-4 rounded-md bg-[var(--accent-sage-soft)] px-4 py-3 text-sm text-body">
+        <p className="mt-4 rounded-[var(--homa-radius-control)] bg-[var(--homa-constructive-tint)] px-4 py-3 text-sm text-[var(--homa-ink)]">
           Keep it playful: &ldquo;hey {child.name}, want to try something?&rdquo; Stop anytime,
           everything saves as you go.
         </p>
       ) : null}
 
-      <div className="mt-3 flex min-h-[19rem] flex-col rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
-        <p className="text-sm font-medium text-subtle">
+      <div className="mt-3 flex min-h-[19rem] flex-col rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm">
+        <p className="text-sm font-medium text-[var(--homa-muted-ink)]">
           {mode === "together" ? `Try it with ${child.name}:` : `From what you've seen:`}
         </p>
-        <h2 className="mt-1 font-display text-xl font-semibold leading-snug text-strong">
+        <h2 className="mt-1 font-display text-xl font-semibold leading-snug text-[var(--homa-ink)]">
           {personalizeStatement(child.name, current)}?
         </h2>
 
@@ -414,7 +414,7 @@ export function DeepDiveStep({
               key={value}
               type="button"
               onClick={() => answerCurrent(value)}
-              className="min-h-12 rounded-pill border border-border bg-card px-4 py-3 text-sm font-semibold text-strong transition duration-(--dur-fast) ease-out hover:border-brand hover:bg-brand-soft motion-safe:active:scale-[var(--press-scale)]"
+              className="min-h-12 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-3 text-sm font-semibold text-[var(--homa-ink)] transition duration-(--homa-motion-fast) ease-out hover:border-[var(--homa-visual-coral)] hover:bg-[var(--homa-info-tint)] motion-safe:active:scale-[var(--press-scale)]"
             >
               {label}
             </button>
@@ -426,7 +426,7 @@ export function DeepDiveStep({
               type="button"
               onClick={() => void goBack()}
               disabled={undoing}
-              className="text-sm text-subtle underline-offset-2 hover:underline"
+              className="text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
             >
               {undoing ? "undoing..." : `${"\u2190"} back`}
             </button>
@@ -434,13 +434,13 @@ export function DeepDiveStep({
           <button
             type="button"
             onClick={() => finish()}
-            className="text-sm text-subtle underline-offset-2 hover:underline"
+            className="text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
           >
             stop here and update the report
           </button>
         </div>
         {saveError ? (
-          <p className="mt-3 text-sm text-body">{saveError}</p>
+          <p className="mt-3 text-sm text-[var(--homa-ink)]">{saveError}</p>
         ) : null}
       </div>
     </div>

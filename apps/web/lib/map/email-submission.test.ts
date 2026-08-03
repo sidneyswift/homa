@@ -7,6 +7,7 @@ import {
   submitAgentComposedEmail,
   submitResearchBriefEmail,
 } from "./email";
+import { renderHomaEmailHtml } from "../email/render";
 import {
   deliverTaskMessage,
   type TaskDeliveryLedger,
@@ -78,6 +79,60 @@ describe("Resend submission failure classification", () => {
       },
       true,
     );
+  });
+});
+
+describe("Quiet authority email shell", () => {
+  it("renders the shared shell through the Resend payload with safe fallbacks", async () => {
+    let payload: unknown;
+
+    await withMockResend(
+      async (_input, init) => {
+        payload = JSON.parse(String(init?.body));
+        return Response.json({ id: "quiet-shell-1" });
+      },
+      async () => {
+        const result = await submitAgentComposedEmail(
+          "parent@example.com",
+          "A <quiet> invitation",
+          ["A line with & safe content."],
+        );
+        assert.equal(result.status, "submitted");
+      },
+    );
+
+    assert.ok(payload && typeof payload === "object");
+    const renderedPayload = payload as { html: string; text: string };
+    assert.match(renderedPayload.html, /color-scheme: light dark/u);
+    assert.match(renderedPayload.html, /role="presentation"/u);
+    assert.match(renderedPayload.html, /font-family:'DM Sans', 'Segoe UI', Arial, sans-serif/u);
+    assert.match(renderedPayload.html, /font-family:'EB Garamond', Georgia, serif/u);
+    assert.match(renderedPayload.html, /Homa <span aria-hidden="true"/u);
+    assert.match(renderedPayload.html, /&lt;quiet&gt;/u);
+    assert.match(renderedPayload.html, /A line with &amp; safe content\./u);
+    assert.doesNotMatch(renderedPayload.html, /<quiet>/u);
+    assert.doesNotMatch(renderedPayload.html, /<safe>/u);
+    assert.match(renderedPayload.text, /A <quiet> invitation/u);
+    assert.match(renderedPayload.text, /A line with & safe content\./u);
+  });
+
+  it("keeps the CTA as an escaped, table-backed Quiet action", () => {
+    const html = renderHomaEmailHtml({
+      preview: "A preview",
+      heading: "Open the report",
+      bodyLines: ["The report is ready."],
+      cta: {
+        label: "Open <report>",
+        url: "https://thankshoma.com/report?child=<story>",
+      },
+      footerNote: "A footer note.",
+    });
+
+    assert.match(html, /class="email-cta"/u);
+    assert.match(html, /role="presentation"/u);
+    assert.match(html, /href="https:\/\/thankshoma\.com\/report\?child=&lt;story&gt;"/u);
+    assert.match(html, /Open &lt;report&gt;/u);
+    assert.doesNotMatch(html, /href="[^"]*<story>/u);
   });
 });
 

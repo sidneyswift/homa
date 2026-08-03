@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { Bell, FlaskConical, Moon } from "lucide-react";
 
+import { Icon } from "../../../components/design/Icon";
+import { QuietFrame } from "../../../components/design/QuietFrame";
 import { isResearchBriefFeedbackEligible } from "../../../lib/tasks/research-brief-feedback-contract";
 import { recordResearchBriefFeedbackAction } from "./actions";
 import { HISTORY_RUN_LIMIT } from "./task-copy";
@@ -25,12 +26,12 @@ function runIcon(kind: TaskRunView["kind"]) {
   switch (kind) {
     case "morning_brief":
     case "fleet_research":
-      return <FlaskConical size={16} />;
+      return <Icon name="progress" size={16} />;
     case "journal_prompt":
-      return <Moon size={16} />;
+      return <Icon name="book" size={16} />;
     case "custom":
     case "agent_job":
-      return <Bell size={16} />;
+      return <Icon name="tasks" size={16} />;
     default: {
       // Exhaustiveness stays compile-checked, but the runtime default must
       // render, not throw: run rows come from the database, so a kind added
@@ -38,7 +39,7 @@ function runIcon(kind: TaskRunView["kind"]) {
       // a throw here kills the whole page during SSR streaming.
       const exhaustive: never = kind;
       void exhaustive;
-      return <Bell size={16} />;
+      return <Icon name="info" size={16} />;
     }
   }
 }
@@ -113,7 +114,7 @@ function BriefFeedbackControls({ run }: { run: TaskRunView }) {
 
   return (
     <div className="mt-3">
-      <p id={promptId} className="text-xs font-semibold text-muted">
+      <p id={promptId} className="text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
         Was this helpful?
       </p>
       <div
@@ -150,8 +151,8 @@ function BriefFeedbackControls({ run }: { run: TaskRunView }) {
               }}
               className={
                 state.ariaPressed
-                  ? "min-h-11 min-w-11 rounded-pill border-2 border-[var(--clay-700)] bg-brand-soft px-3 py-2 text-xs font-semibold text-[var(--clay-700)] disabled:cursor-not-allowed disabled:opacity-60"
-                  : "min-h-11 min-w-11 rounded-pill border border-border-subtle bg-card px-3 py-2 text-xs font-semibold text-muted disabled:cursor-not-allowed disabled:opacity-60"
+                  ? "min-h-11 min-w-11 rounded-[var(--homa-radius-control)] border-2 border-[var(--homa-midnight-action)] bg-[var(--homa-midnight-action)] px-3 py-2 text-xs font-semibold text-[var(--homa-paper)] disabled:cursor-not-allowed disabled:opacity-60"
+                  : "min-h-11 min-w-11 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 py-2 text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))] disabled:cursor-not-allowed disabled:opacity-60"
               }
             >
               {label}
@@ -160,7 +161,7 @@ function BriefFeedbackControls({ run }: { run: TaskRunView }) {
         })}
       </div>
       <p
-        className="mt-1.5 min-h-4 text-xs font-semibold text-muted"
+        className="mt-1.5 min-h-4 text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]"
         aria-live="polite"
         aria-atomic="true"
       >
@@ -237,20 +238,20 @@ export function TaskHistory({
   timeZone: string;
 }) {
   return (
-    <section className="mt-8">
-      <h2 className="text-sm font-bold uppercase tracking-[0.12em] text-subtle">Task history</h2>
+    <section className="mt-8" data-brand-surface="task-history">
+      <h2 className="text-sm font-bold uppercase tracking-[0.12em] text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">Task history</h2>
       {runs.length === 0 ? (
-        <div className="mt-3 rounded-lg border border-border-subtle bg-card p-6 text-center shadow-sm">
-          <p className="font-display text-lg font-semibold text-strong">Nothing here yet.</p>
-          <p className="mx-auto mt-1.5 max-w-md text-sm text-muted">
+        <QuietFrame tone="paper" as="section" className="mt-3 p-6 text-center">
+          <p className="font-display text-lg font-semibold text-[color:var(--homa-ink)]">Nothing here yet.</p>
+          <p className="mx-auto mt-1.5 max-w-md text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
             When Homa finishes one of your tasks, it shows up here.
           </p>
-        </div>
+        </QuietFrame>
       ) : (
         <div className="mt-3 flex flex-col gap-5">
           {groupRunsByDay(runs, timeZone).map((group) => (
             <div key={group.key}>
-              <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
+              <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
                 {group.label}
               </p>
               <ol className="mt-2 flex flex-col gap-2.5">
@@ -259,33 +260,31 @@ export function TaskHistory({
                   const askable = showsAskHoma(run);
                   const feedbackable = showsBriefFeedback(run);
                   return (
-                    <li
-                      key={run.id}
-                      className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm"
-                    >
+                    <li key={run.id}>
+                      <QuietFrame as="article" tone="paper" className="p-4">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="flex items-center gap-2 font-semibold text-strong">
-                          <span className="text-brand">{runIcon(run.kind)}</span>
+                        <p className="flex items-center gap-2 font-semibold text-[color:var(--homa-ink)]">
+                          <span className="text-[color:var(--homa-brand-text)]">{runIcon(run.kind)}</span>
                           {run.title}
                         </p>
-                        <p className="shrink-0 text-xs font-semibold text-subtle">
+                        <p className="shrink-0 text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
                           {timeLabel(run.startedAt, timeZone)}
                         </p>
                       </div>
                       {run.summary ? (
-                        <p className="mt-2 max-w-[65ch] whitespace-pre-line text-sm leading-relaxed text-body">
+                        <p className="mt-2 max-w-[65ch] whitespace-pre-line text-sm leading-relaxed text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">
                           {run.summary}
                         </p>
                       ) : null}
                       {note || askable ? (
                         <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
                           {note ? (
-                            <p className="text-xs font-semibold text-subtle">{note}</p>
+                            <p className="text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">{note}</p>
                           ) : null}
                           {askable ? (
                             <Link
                               href="/app"
-                              className="text-xs font-semibold text-brand hover:underline"
+                              className="text-xs font-semibold text-[color:var(--homa-brand-text)] hover:underline"
                             >
                               Ask Homa about this
                             </Link>
@@ -293,6 +292,7 @@ export function TaskHistory({
                         </div>
                       ) : null}
                       {feedbackable ? <BriefFeedbackControls run={run} /> : null}
+                      </QuietFrame>
                     </li>
                   );
                 })}
@@ -302,7 +302,7 @@ export function TaskHistory({
           {/* The feed ends on purpose, and the capped line answers the
               real question plainly: kept, not thrown away (reader gate
               2026-07-13 flagged the soft version as trust-costing). */}
-          <p className="text-center text-xs font-semibold text-subtle">
+          <p className="text-center text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
             {runs.length >= HISTORY_RUN_LIMIT
               ? "This page shows your newest 30 task updates. Older ones are kept, just not shown here."
               : "That's everything so far."}

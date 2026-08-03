@@ -1,8 +1,8 @@
 "use client";
 
-import { Check, Mic, X } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
+import { Icon } from "../../components/design/Icon";
 import { ThinkingMark } from "../../components/brand/ThinkingMark";
 
 /**
@@ -291,9 +291,9 @@ export function MicButton({ onStart }: { onStart: () => void }) {
       aria-label="Talk instead of typing"
       title="Talk instead of typing"
       onClick={onStart}
-      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-page hover:text-strong"
+      className="quiet-chat__composer-action quiet-chat__composer-action--mic"
     >
-      <Mic size={20} aria-hidden="true" />
+      <Icon name="voice" size={20} />
     </button>
   );
 }
@@ -334,7 +334,7 @@ export function DictationRow({
       ) : (
         <>
           <span
-            className="dictation-pulse h-2.5 w-2.5 shrink-0 rounded-full bg-brand"
+            className="quiet-chat__dictation-pulse"
             aria-hidden="true"
           />
           <span className="text-muted">Listening&hellip;</span>
@@ -349,18 +349,18 @@ export function DictationRow({
         aria-label="Throw away what you said"
         onClick={onCancel}
         disabled={transcribing}
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted transition-colors hover:border-brand disabled:opacity-60"
+        className="quiet-chat__composer-action quiet-chat__composer-action--stop-secondary disabled:opacity-60"
       >
-        <X size={18} aria-hidden="true" />
+        <Icon name="close" size={20} />
       </button>
       <button
         type="button"
         aria-label="Add what you said to the message"
         onClick={onAccept}
         disabled={transcribing}
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-60"
+        className="quiet-chat__composer-action quiet-chat__composer-action--send disabled:opacity-60"
       >
-        <Check size={18} aria-hidden="true" />
+        <Icon name="check" size={20} />
       </button>
     </div>
   );

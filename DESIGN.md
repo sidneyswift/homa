@@ -1,112 +1,126 @@
 ---
-version: alpha
-name: Homa · Warm and Playful
-description: Coral-primary, cream-paper design system for Homa, a calm AI homeschool assistant. Schoolbook charm held together by editorial restraint.
+version: quiet-authority-v1
+contractChecksum: cb79adb67b2f055645702a43cdfaf8cbd9aecfac482a40790a001dd3d5aaacb6
+name: Homa, quiet authority
+description: A calm, capable, artifact-first design system for homeschooling families. Real work leads, Homa keeps the thread, and every meaningful moment ends with one useful next move.
 colors:
-  primary: "#E7602F"
-  secondary: "#3D9A50"
-  tertiary: "#F0BE00"
-  neutral: "#FBF7F0"
-  surface: "#FFFFFF"
-  "on-primary": "#FFFFFF"
-  "on-surface": "#221E1A"
-  info: "#4FB4D6"
-  error: "#E2593B"
+  canvas: "#F7F4EE"
+  ink: "#20242B"
+  paper: "#FFFEFC"
+  floating: "#FFFFFF"
+  visual-coral: "#E7602F"
+  primary-action: "#27374D"
+  brand-text: "#A33F22"
+  control-boundary: "#918B83"
+  constructive-ink: "#335C46"
+  constructive-tint: "#E5EFE8"
+  info-ink: "#2F5968"
+  info-tint: "#E4EFF2"
+  highlight-ink: "#76560F"
+  highlight-tint: "#F7EBC7"
+  error-ink: "#923F33"
+  error-tint: "#F5E5E1"
 typography:
   display:
-    fontFamily: Schibsted Grotesk
-    fontSize: 3rem
-    fontWeight: 700
-    letterSpacing: -0.02em
+    fontFamily: EB Garamond
+    minimumFontSize: 20px
+    role: meaningful invitations, page titles, and reflective framing
+  interface:
+    fontFamily: DM Sans
+    role: UI, body, labels, data, and controls
   wordmark:
     fontFamily: Fredoka
-    fontWeight: 600
-  serif-accent:
-    fontFamily: EB Garamond
-    fontSize: 1.125rem
-  body-md:
-    fontFamily: Hanken Grotesk
-    fontSize: 1rem
-    fontWeight: 400
-    lineHeight: 1.5
-  label-caps:
-    fontFamily: Hanken Grotesk
-    fontSize: 0.75rem
-    letterSpacing: 0.06em
-rounded:
-  sm: 10px
-  md: 16px
-  lg: 22px
-  full: 999px
-spacing:
-  sm: 8px
-  md: 16px
-  lg: 24px
-components:
-  button-primary:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    rounded: "{rounded.full}"
-    padding: 12px
-  button-primary-hover:
-    backgroundColor: "#C44C22"
-  card:
-    backgroundColor: "{colors.surface}"
-    rounded: "{rounded.lg}"
+    role: real Logo component only
+shape:
+  control: 12px
+  card: 18px
+  frame: 28px
+  pill: prohibited as a default shape
+motion:
+  sequence: peek, orient, draw, land, still
+  duration: 120ms to 320ms per movement, under 900ms total
+  reducedMotion: final still immediately
 ---
 
-## Overview
+# Homa design system
 
-This file is a spec-compliant summary of Homa's design system for agents and tools that specifically read `DESIGN.md` (for example Google Stitch). **`docs/homa-design/` remains the single source of truth**, read `docs/homa-design/SKILL.md` first for the full quick reference, tokens, and components. If the tokens in `docs/homa-design/tokens/` change, update this file's front matter to match, the same rule that applies to `apps/web`'s hand-copied tokens (see `AGENTS.md`).
+This file is the compact machine-facing summary of the Quiet authority
+contract. The canonical typed values live in `packages/design/src/contract`
+and the human guide lives in `docs/homa-design/readme.md`. Generated
+projections must carry the contract version and source checksum.
 
-Homa is a calm, capable AI co-pilot for homeschooling moms. Direction: **"Warm and playful"**, the schoolbook charm of a children's museum held together by editorial restraint. Cream paper (sometimes ruled like a notebook), a coral primary with mint, sunshine, and pool-aqua friends, clean modern headlines with a clay accent word, the little-home character mark beside the bounced "Homa" wordmark, chunky pill buttons, blob-masked photos, squiggle dividers. Rule of restraint: one or two playful devices per surface, never all of them at once. The promise, said everywhere: **"You've got this. Homa's got the rest."** Every surface should express one feeling, calm, and one relationship, a companion in your corner.
+## North star
 
-## Colors
+Homa should feel like quiet authority: grown-up enough to trust, warm enough
+to invite curiosity, and specific enough to help a family take the next step.
+The governing composition is:
 
-- **Primary · clay/coral (`#E7602F`):** the one driver for interaction (buttons, links, focus).
-- **Secondary · sage/mint (`#3D9A50`):** growth, progress, "on track" states. Never paired with red for contrast, Homa has no "behind" state (anti-guilt display law).
-- **Tertiary · gold/sunshine (`#F0BE00`):** accent, celebration, checkmark/gold-star progress language. Text on gold tints always uses the dedicated `gold-ink` token, never plain dark or white.
-- **Neutral · warm cream (`#FBF7F0`):** the page background, never pure white or gray, everything is warm-toned including neutrals (a "stone" scale, not a gray scale).
-- **Info · sky/pool aqua (`#4FB4D6`):** a fourth accent for informational moments, distinct from the sage/gold/clay trio.
-- **Error · warm coral-red (`#E2593B`):** used sparingly and never for "behind" or comparison framing, only for real errors (a broken form field, a failed request).
+1. Show a real family detail or learning artifact.
+2. Let Homa keep the thread without becoming the subject.
+3. Offer one useful next move.
 
-Full scales (50–900 steps per color, dark theme remap, section bands, pop accents) live in `docs/homa-design/tokens/colors.css`.
+The object leads. Homa is a guide, not a mascot pasted over the work. A child
+is never framed as a verdict, compared with a sibling, or described as behind.
+Homa suggests, the parent decides, and every claim stays truthful.
 
-## Typography
+## Color roles
 
-- **Display (Schibsted Grotesk):** headlines, big numbers, dialog titles. 700 at hero scale, 600 for mid titles, tracked -0.015em.
-- **Wordmark (Fredoka):** the bounced "Homa" lockup only, never running text or headlines.
-- **Serif accent (EB Garamond):** italics inside a headline, taglines, and pull quotes only.
-- **Body/UI (Hanken Grotesk):** everything else, the humanist sans workhorse.
-- **Hand (Caveat):** Homa's handwriting, product margin notes, always sage, one per surface, max.
-- **Mono (JetBrains Mono):** data and numeric readouts.
+Mineral canvas and paper carry most of the surface. Midnight owns functional
+actions and selection. Coral is the memorable visual signature, used for the
+roof thread, Homa presence, punctuation, and occasional large visual fields.
+It is not the default filled button, and white text on coral is not an approved
+normal-text pair. Green, blue, amber, and red are semantic states only.
 
-Keep it to two voices per screen plus body. Full type scale (sizes, line heights, weights, tracking) in `docs/homa-design/tokens/typography.css`.
+Approved proportions are approximately 76 percent mineral or paper, 16
+percent midnight structure, 6 percent coral signature, and 2 percent semantic
+state color. The proportion is a discipline, not a quota that overrides a
+truthful state.
 
-## Layout & Spacing
+## Type roles
 
-4px base scale, generous and airy (`--space-1` through `--space-24`, 4px to 96px). Container widths: 640/820/1100/1280px (sm/md/lg/xl). Full scale in `docs/homa-design/tokens/spacing.css`.
+EB Garamond is the display voice and never renders below 20px. Use it for
+meaningful invitations, page titles, and reflection. DM Sans is the interface
+and body voice, including data and labels. Fredoka is allowed only inside the
+real Logo component. There is no hand font in the active contract.
 
-## Elevation & Depth
+Use sentence case. Keep a readable measure, test long names and localization,
+and preserve the display voice when a line wraps. Approved web hero sizes are
+44/46 on phone and 64/66 on desktop. Body is 16/24, large body 18/28, small
+body 14/20, control 15/20, caption 13/18, and eyebrow 12/16.
 
-Shadows are soft and warm-tinted (brown, not gray), low spread, diffuse, five steps (`xs` through `xl`) plus a dedicated focus glow and an inset for pressed/sunken fields. Full values in `docs/homa-design/tokens/shadows.css`.
+## Shape, depth, and density
 
-## Shapes
+Controls use 12px corners, cards 18px, and large frames 28px. Pills are a
+specific compact treatment, not the default geometry. Use at most two
+elevations and avoid nested bordered cards. A fine warm rule often carries
+more authority than another floating white panel.
 
-Corners are soft and rounded, never sharp: `sm` 10px, `md` 16px, `lg` 22px (the card radius), up to `2xl` 40px, and a `pill` (999px) for buttons. Playful devices layer on top, organic blob masks for photos, a ruled-notebook paper background, and an ink squiggle divider, used one or two per surface, never all at once. Full tokens in `docs/homa-design/tokens/radius.css` and `docs/homa-design/tokens/shapes.css`.
+## Motion
 
-## Components
+The Homa choreography is `peek → orient → draw → land → still`. Motion begins
+only when the underlying state is truthful, can be interrupted, and settles
+quickly. Loops belong only to a live state. Reduced Motion renders the final
+oriented still immediately, with no simulated delay.
 
-- **Button:** pill-shaped (`rounded.full`), warm clay primary, variants `primary | secondary | soft | ghost | danger`, sizes `sm | md | lg`. Never ship a square or sharp-cornered button.
-- **Card:** white surface, `rounded.lg` corners, soft shadow.
+## Signature and channel reductions
 
-Full component catalog (Badge, Callout, Chip, Skeleton, EmptyState, Doodle, Squiggle, navigation, and more) with props and usage in `docs/homa-design/components/`.
+The full product signature is one real artifact, one small Homa presence, one
+roof-derived coral thread, and one useful next move. Static-rich channels keep
+the artifact, Logo, thread, and next move. Constrained channels keep the Logo,
+accessible colors, plain language, and next move. A provider cannot invent a
+second Homa.
 
-## Copy and usage rules
+## Accessibility and evidence
 
-- **Do** write "Homa" every time the name is typed, in prose, headings, buttons, emails, and every UI surface. **Never** type "HOMA". The logo is the logo: render the real `Logo` component rather than typing letters meant to stand in for it. Founder correction 2026-07-28 (`brand-casing-homa`), retiring global D8's old "HOMA on UI surfaces" wording.
-- **Do** lead with growth, effort, and "on track" framing on any dashboard or report.
-- **Don't** use an em dash, anywhere, ever, use a comma, period, colon, or mid-dot instead.
-- **Don't** show a red "behind" label or compare siblings, this is a hard anti-guilt law, not a style preference.
-- **Don't** fabricate social proof (family counts, testimonials) in any generated UI copy.
-- **Don't** hand-edit `docs/homa-design/_ds_bundle.js`, `_ds_manifest.json`, or `_adherence.oxlintrc.json`, they are generated.
+Every applicable interactive state proves keyboard focus, pressed, disabled,
+loading, error, success, forced colors, increased contrast, Reduced Motion,
+200 percent zoom, and 400 percent reflow. Native surfaces prove VoiceOver,
+Dynamic Type, safe areas, keyboard, Reduce Motion, and appearance. PDFs and
+physical print use their own evidence floors. Source inspection is not proof of
+rendered or delivered behavior.
+
+## Copy
+
+Write Homa, never HOMA. Use clear, memorable, kind language. Never use an
+em dash. Never use red or behind framing for a child. Never compare siblings.
+Say the real thing, offer one useful next move, and leave the parent in charge.

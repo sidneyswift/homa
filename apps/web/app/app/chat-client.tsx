@@ -4,18 +4,12 @@ import { emitEvent } from "@homa/core";
 import type { UserContent } from "ai";
 import { Client, type HandleMessageStreamEvent } from "eve/client";
 import { useEveAgent, type EveMessage } from "eve/react";
-import {
-  ArrowDown,
-  ArrowUp,
-  ChevronDown,
-  RefreshCw,
-  Square,
-  X,
-} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Logo } from "../../components/brand/Logo";
 import { ThinkingMark } from "../../components/brand/ThinkingMark";
+import { Icon } from "../../components/design/Icon";
+import { QuietAction } from "../../components/design/QuietAction";
 import { sendWallBeacon } from "../../components/billing/wall-beacon";
 import { WallModal } from "../../components/billing/wall-modal";
 import type { WallCheckout } from "../../lib/billing/wall-types";
@@ -37,11 +31,9 @@ import {
 } from "./onboarding-cards";
 import { AnotherKidCard } from "./another-kid-card";
 import {
-  cardWantsComposer,
   DetailCard,
   latestDetailRequest,
   NO_STYLES_SUMMARY,
-  type DetailCardKind,
 } from "./detail-card";
 import { VoiceMode } from "./voice-mode";
 import { VoiceModeButton } from "./voice-mode-button";
@@ -55,7 +47,6 @@ import {
   archiveFromServerHistory,
   type ChatHistoryPayload,
 } from "../../lib/chat-history-model";
-import type { PromptSuggestionSet } from "../../lib/chat-suggestions/contract";
 import type { SlashSkillItem } from "../../lib/slash-skills";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 import {
@@ -78,7 +69,6 @@ import {
   pruneMessageTimes,
   saveChat,
   stampMessageTimes,
-  updateSavedPromptSuggestionSet,
   type ArchivedMessage,
 } from "./chat-storage";
 import {
@@ -131,24 +121,10 @@ import {
   latestProgressMessageInteraction,
   type ProgressMessageInteraction,
 } from "./progress-interaction-policy";
-import { requestPromptSuggestionSet } from "./prompt-suggestion-client";
-import {
-  executePromptSuggestionLifecycleAction,
-  promptSuggestionActionForLifecycleEvent,
-  type PromptSuggestionLifecycleHandlers,
-} from "./prompt-suggestion-lifecycle";
 import {
   nextReplyCutoffRecoveryState,
   type ReplyCutoffRecoveryState,
 } from "./reply-cutoff-recovery";
-import {
-  promptSuggestionRequestForMessages,
-  restorePromptSuggestionSetForVisibleMessages,
-} from "./prompt-suggestion-policy";
-import {
-  PromptSuggestionRail,
-  type PromptSuggestionPhase,
-} from "./prompt-suggestion-rail";
 import {
   latestPlannerOpen,
   planEditCount,
@@ -188,8 +164,8 @@ import {
  * the transcript is ONE continuous history under day separators (the
  * Slack-channel reading of the one chat), while the model session
  * rotates at the first visit after 4am local (chat-storage.ts). Old
- * days stay scrollable above; the morning lands on a clean "today" with
- * the suggestion chips back. The durable record is Postgres
+ * days stay scrollable above; the morning lands on a clean "today."
+ * The durable record is Postgres
  * (conversation_messages via the persist hook + recall); localStorage
  * is the render cache (M1-02 replaces it as the render source).
  *
@@ -246,14 +222,6 @@ import {
 
 // agent.ts pins the gateway model: the mid tier in journeys/06 terms.
 const MODEL_TIER = "mid" as const;
-
-const PROMPT_SUGGESTION_LOADING_DELAY_MS = 500;
-
-const SUGGESTIONS = [
-  "What should we work on this week?",
-  "Make a worksheet for today",
-  "We had a rough morning, help me reset",
-] as const;
 
 /** One-time flag for the filing tag's self-introduction. */
 const FILING_HINT_STORAGE_KEY = "homa-chat-filing-hint";
@@ -443,26 +411,6 @@ export function ChatClient({
   const replayedArchivedRef = useRef<ArchivedMessage[]>([]);
   const serverArchiveReconciledRef = useRef(false);
   const rotatedCachePersistedRef = useRef(!prepared.rotated);
-  const [restoredPromptSuggestionSet] =
-    useState<PromptSuggestionSet | null>(() =>
-      restorePromptSuggestionSetForVisibleMessages({
-        archivedMessages: archived.map(({ message }) => message),
-        currentMessages: initialLiveMessages,
-        promptSuggestionSet: prepared.promptSuggestions,
-        staleSessionlessEvents,
-      }),
-    );
-  const [promptSuggestionSet, setPromptSuggestionSet] =
-    useState<PromptSuggestionSet | null>(restoredPromptSuggestionSet);
-  const [promptSuggestionPhase, setPromptSuggestionPhase] =
-    useState<PromptSuggestionPhase>(
-      restoredPromptSuggestionSet ? "ready" : "idle",
-    );
-  const promptSuggestionAbortRef = useRef<AbortController | null>(null);
-  const promptSuggestionLoadingTimerRef =
-    useRef<ReturnType<typeof setTimeout> | null>(null);
-  const promptSuggestionRequestStartedAtRef = useRef<number | null>(null);
-  const suggestionSetIdForTurnRef = useRef<string | null>(null);
   // Message id -> arrival time. State (not a ref) because the transcript
   // grouping reads it during render.
   const [liveTimes, setLiveTimes] = useState<Record<string, number>>(() => ({
@@ -491,7 +439,7 @@ export function ChatClient({
   /** Lost-turn recovery, held by ref for onFinish (same reason). */
   const startRecoveryRef = useRef<(() => void) | null>(null);
   // The attach flow (approved chat redesign): staged files upload to
-  // the family's own blob space as she picks them; send trades URLs
+  // the family's own storage space as she picks them; send trades URLs
   // for model parts and binder receipts.
   const attachments = useChatAttachments(familyId);
   const [preparingAttachments, setPreparingAttachments] = useState(false);
@@ -656,163 +604,11 @@ export function ChatClient({
     );
   }, []);
 
-  const clearPromptSuggestionLoadingTimer = useCallback(() => {
-    if (promptSuggestionLoadingTimerRef.current === null) return;
-    clearTimeout(promptSuggestionLoadingTimerRef.current);
-    promptSuggestionLoadingTimerRef.current = null;
-  }, []);
-
-  const cancelPromptSuggestionRequest = useCallback(() => {
-    const controller = promptSuggestionAbortRef.current;
-    promptSuggestionAbortRef.current = null;
-    controller?.abort();
-    clearPromptSuggestionLoadingTimer();
-    promptSuggestionRequestStartedAtRef.current = null;
-  }, [clearPromptSuggestionLoadingTimer]);
-
-  const clearPromptSuggestionState = useCallback(() => {
-    cancelPromptSuggestionRequest();
-    setPromptSuggestionSet(null);
-    setPromptSuggestionPhase("idle");
-    updateSavedPromptSuggestionSet(storageKey, null);
-  }, [cancelPromptSuggestionRequest, storageKey]);
-
-  const emitPromptSuggestionsShown = useCallback(
-    async (suggestionSet: PromptSuggestionSet, latencyMs: number) => {
-      if (!familyId) return;
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-      if (!url || !key) return;
-      const { data } = await supabase.auth.getSession();
-      const accessToken = data.session?.access_token;
-      if (!accessToken) return;
-      await emitEvent(
-        { supabaseUrl: url, supabaseKey: key, accessToken, familyId },
-        "chat.prompt_suggestions_shown",
-        {
-          suggestion_set_id: suggestionSet.setId,
-          prompt_version: suggestionSet.promptVersion,
-          source: suggestionSet.source,
-          count: suggestionSet.suggestions.length,
-          latency_ms: latencyMs,
-        },
-      );
-    },
-    [familyId, supabase],
-  );
-
-  const emitPromptSuggestionTapped = useCallback(
-    async (suggestionSet: PromptSuggestionSet, position: number) => {
-      if (!familyId) return;
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-      if (!url || !key) return;
-      const { data } = await supabase.auth.getSession();
-      const accessToken = data.session?.access_token;
-      if (!accessToken) return;
-      await emitEvent(
-        { supabaseUrl: url, supabaseKey: key, accessToken, familyId },
-        "chat.prompt_suggestion_tapped",
-        {
-          suggestion_set_id: suggestionSet.setId,
-          prompt_version: suggestionSet.promptVersion,
-          source: suggestionSet.source,
-          position,
-        },
-      );
-    },
-    [familyId, supabase],
-  );
-
-  const requestPromptSuggestionsForMessages = useCallback(
-    async (messages: readonly EveMessage[]): Promise<void> => {
-      clearPromptSuggestionState();
-      const request = promptSuggestionRequestForMessages(messages);
-      if (!request) return;
-
-      const controller = new AbortController();
-      const startedAt = currentTimeMs();
-      promptSuggestionAbortRef.current = controller;
-      promptSuggestionRequestStartedAtRef.current = startedAt;
-      setPromptSuggestionPhase("pending");
-      promptSuggestionLoadingTimerRef.current = setTimeout(() => {
-        if (
-          promptSuggestionAbortRef.current === controller
-          && !controller.signal.aborted
-        ) {
-          setPromptSuggestionPhase("loading");
-        }
-      }, PROMPT_SUGGESTION_LOADING_DELAY_MS);
-
-      try {
-        const suggestionSet = await requestPromptSuggestionSet(request, {
-          signal: controller.signal,
-        });
-        if (
-          promptSuggestionAbortRef.current !== controller
-          || controller.signal.aborted
-        ) {
-          return;
-        }
-
-        const requestStartedAt =
-          promptSuggestionRequestStartedAtRef.current ?? startedAt;
-        clearPromptSuggestionLoadingTimer();
-        promptSuggestionAbortRef.current = null;
-        promptSuggestionRequestStartedAtRef.current = null;
-        setPromptSuggestionSet(suggestionSet);
-        setPromptSuggestionPhase("ready");
-        updateSavedPromptSuggestionSet(storageKey, suggestionSet);
-        void emitPromptSuggestionsShown(
-          suggestionSet,
-          Math.max(0, currentTimeMs() - requestStartedAt),
-        );
-      } catch (error) {
-        if (
-          promptSuggestionAbortRef.current !== controller
-          || controller.signal.aborted
-          || (error instanceof DOMException && error.name === "AbortError")
-        ) {
-          return;
-        }
-        clearPromptSuggestionLoadingTimer();
-        promptSuggestionAbortRef.current = null;
-        promptSuggestionRequestStartedAtRef.current = null;
-        setPromptSuggestionPhase("idle");
-      }
-    },
-    [
-      clearPromptSuggestionLoadingTimer,
-      clearPromptSuggestionState,
-      emitPromptSuggestionsShown,
-      storageKey,
-    ],
-  );
-
-  const promptSuggestionLifecycleHandlers =
-    useMemo<PromptSuggestionLifecycleHandlers<EveMessage>>(
-      () => ({
-        clear: clearPromptSuggestionState,
-        requestMessages: (messages) => {
-          void requestPromptSuggestionsForMessages(messages);
-        },
-        startRecovery: () => {
-          startRecoveryRef.current?.();
-        },
-      }),
-      [
-        clearPromptSuggestionState,
-        requestPromptSuggestionsForMessages,
-      ],
-    );
-
   const emitTurnCompleted = useCallback(
     async (
       status: "ok" | "error",
       errorClass?: "turn_failed" | "send_failed" | "unknown",
     ) => {
-      const suggestionSetId = suggestionSetIdForTurnRef.current;
-      suggestionSetIdForTurnRef.current = null;
       if (!familyId) return;
       const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -830,9 +626,6 @@ export function ChatClient({
           latency_ms: takeTurnLatencyMs(),
           model_tier: MODEL_TIER,
           tool_calls: countLastTurnToolCalls(messagesRef.current),
-          ...(suggestionSetId
-            ? { suggestion_set_id: suggestionSetId }
-            : {}),
         },
       );
     },
@@ -883,23 +676,14 @@ export function ChatClient({
       // onFinish fires for failed turns too; those already emit their
       // own error event (the agent.error effect), so an unconditional
       // "ok" here double-counted every failure (seen live 2026-07-11).
-      // Consume the stall marker before choosing a suggestion action.
-      // A partial auto-stopped reply belongs to recovery, never generation.
+      // Consume the stall marker before deciding whether the queue can
+      // advance. A partial auto-stopped reply belongs to recovery.
       const autoStopped = autoStoppedRef.current;
       autoStoppedRef.current = false;
-      const promptSuggestionAction =
-        promptSuggestionActionForLifecycleEvent({
-          type: "turn_finished",
-          hasError: Boolean(snapshot.error),
-          autoStopped,
-          hasQueuedFollowup: queued.length > 0,
-        });
       if (!snapshot.error) void emitTurnCompleted("ok");
-      executePromptSuggestionLifecycleAction(
-        promptSuggestionAction,
-        snapshot.data.messages,
-        promptSuggestionLifecycleHandlers,
-      );
+      if (autoStopped && !snapshot.error) {
+        startRecoveryRef.current?.();
+      }
       // The post-turn review trigger (M2-13): fire-and-forget; the server
       // decides whether enough new conversation accumulated to review.
       const sessionId = snapshot.session?.sessionId;
@@ -965,24 +749,6 @@ export function ChatClient({
   useEffect(() => {
     sendMessageRef.current = sendMessage;
   });
-
-  useEffect(() => {
-    if (
-      prepared.promptSuggestions !== null
-      && restoredPromptSuggestionSet === null
-    ) {
-      updateSavedPromptSuggestionSet(storageKey, null);
-    }
-  }, [prepared.promptSuggestions, restoredPromptSuggestionSet, storageKey]);
-
-  useEffect(() => {
-    return () => {
-      promptSuggestionAbortRef.current?.abort();
-      if (promptSuggestionLoadingTimerRef.current !== null) {
-        clearTimeout(promptSuggestionLoadingTimerRef.current);
-      }
-    };
-  }, []);
 
   const [draft, setDraft] = useState(initialDraft ?? "");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -1485,14 +1251,6 @@ export function ChatClient({
       agentReset();
       durableCursorRef.current = recovered.session.streamIndex;
       lastSendRef.current = null;
-      executePromptSuggestionLifecycleAction(
-        promptSuggestionActionForLifecycleEvent({
-          type: "recovery_finished",
-          outcome: "recovered",
-        }),
-        messages,
-        promptSuggestionLifecycleHandlers,
-      );
       setRecovering(false);
       flushQueuedMessages();
     },
@@ -1502,7 +1260,6 @@ export function ChatClient({
       clearReplyCutoffRecovery,
       flushQueuedMessages,
       liveTimes,
-      promptSuggestionLifecycleHandlers,
       reattachableSession,
       storageKey,
     ],
@@ -1534,13 +1291,6 @@ export function ChatClient({
     const target = replyCutoffTargetRef.current ?? currentRecoveryTarget();
     if (target === null || recoveryRef.current) return;
     const isReplyCutoff = target === replyCutoffTargetRef.current;
-    executePromptSuggestionLifecycleAction(
-      promptSuggestionActionForLifecycleEvent({
-        type: "recovery_started",
-      }),
-      null,
-      promptSuggestionLifecycleHandlers,
-    );
     const controller = new AbortController();
     recoveryRef.current = controller;
     const deadline = setTimeout(() => controller.abort(), RECOVERY_DEADLINE_MS);
@@ -1550,14 +1300,6 @@ export function ChatClient({
       clearTimeout(deadline);
       if (recoveryRef.current === controller) recoveryRef.current = null;
       if (controller.signal.aborted) {
-        executePromptSuggestionLifecycleAction(
-          promptSuggestionActionForLifecycleEvent({
-            type: "recovery_finished",
-            outcome: "aborted",
-          }),
-          null,
-          promptSuggestionLifecycleHandlers,
-        );
         setRecovering(false);
         if (isReplyCutoff) {
           setReplyCutoffRecovery((state) =>
@@ -1603,14 +1345,6 @@ export function ChatClient({
         applyRecoveredTurn(recovered);
         return;
       } else {
-        executePromptSuggestionLifecycleAction(
-          promptSuggestionActionForLifecycleEvent({
-            type: "recovery_finished",
-            outcome: "failed",
-          }),
-          null,
-          promptSuggestionLifecycleHandlers,
-        );
         if (isReplyCutoff) {
           setReplyCutoffRecovery((state) =>
             nextReplyCutoffRecoveryState(state, "failed"),
@@ -1631,7 +1365,6 @@ export function ChatClient({
     currentRecoveryTarget,
     flushQueuedMessages,
     liveTimes,
-    promptSuggestionLifecycleHandlers,
     recoverTurn,
     reattachableSession,
     storageKey,
@@ -1807,10 +1540,6 @@ export function ChatClient({
     !transcript.some(
       (item) => item.kind === "message" && messageSpeaksWords(item.message),
     );
-  // The chips return whenever a session has no words in it yet: the
-  // first run, and a fresh morning over yesterday's scrollback.
-  const showSuggestions =
-    renderMessages.length === 0 && !lineOccupied && onboarding === null;
   // The snap card's dim rule (founder call): while Homa's camera ask is
   // the live question, everything above it steps back. The only full
   // dim in the product; the card's own message stays full strength.
@@ -1820,15 +1549,13 @@ export function ChatClient({
   const activeQuestion = renderBusy
     ? null
     : latestQuestionRequest(renderMessages);
-  // Computed here, above the rail gate that reads them; the docking
-  // logic further down shares these same values.
   // The one checklist card that may still open the questions, and the
   // one report reveal that may still open the report. Same rule as the
   // snap card: newest, nothing from her after it, and only while the
   // line is free.
   // Two questions, and conflating them was a bug the founder hit: "ok
   // this didnt make a card". The card HAD been made. Because `active`
-  // was gated on `busy`, it rendered as its own spent pill for the rest
+  // was gated on `busy`, it rendered as its own spent status for the rest
   // of the turn, so what she saw where a card should be was the grey
   // receipt that means "already done".
   //
@@ -1837,39 +1564,6 @@ export function ChatClient({
   const latestChecklist = latestChecklistRequest(renderMessages);
   const activeChecklist = renderBusy ? null : latestChecklist;
   const activeReport = latestReportReveal(renderMessages);
-  const promptSuggestionRailAllowed =
-    !renderBusy
-    && !recovering
-    && !renderRestoringBoundSession
-    && promptSuggestionPhase !== "idle"
-    && progressInteraction === null
-    && activeSnap === null
-    && activeQuestion === null
-    // Never during onboarding. The arc has exactly one next thing at
-    // every beat, and the rail is a second voice proposing a different
-    // one: the founder's walk ended on a card saying "Start the
-    // questions", a chip saying "Explain next step", and an open box,
-    // three answers to what-do-I-do-now. The rail also knew the word
-    // "step", which the mode bans Homa herself from saying.
-    && onboarding === null
-    // And never while any card holds the floor, onboarding or not. The
-    // list knew snap and question cards but was never taught the
-    // checklist invite or the report reveal.
-    && activeChecklist === null
-    && activeReport === null
-    && draft.trim().length === 0
-    && attachments.staged.length === 0
-    && dictation.phase === "idle";
-  const showPromptSuggestionRail =
-    hydrated
-    && promptSuggestionRailAllowed
-    && (
-      promptSuggestionPhase === "loading"
-      || (
-        promptSuggestionPhase === "ready"
-        && (promptSuggestionSet?.suggestions.length ?? 0) > 0
-      )
-    );
 
   useEffect(() => {
     // First paint lands at the bottom instantly (yesterday above the
@@ -1964,8 +1658,8 @@ export function ChatClient({
   // and the founder hit the un-docked version live: the invite in the
   // transcript, an open composer under it, and a suggestion chip between
   // them, three different answers to "what do I do now" on one screen.
-  // Docking is also what retires the other two: the composer and its
-  // rail hide while any card is docked, so the card is the whole ask.
+  // Docking also retires the open composer while the card holds the
+  // floor, so the card is the whole ask.
   // activeChecklist is already null while a turn runs, so during
   // streaming the composer stays and nothing flickers.
   // latestChecklist, not activeChecklist: it docks the moment it exists,
@@ -1993,21 +1687,6 @@ export function ChatClient({
       Boolean(dockedChained) ||
       kidChainStage !== null ||
       dockedDetail !== null);
-  /** Which card is in the dock, whoever put it there. */
-  const dockedCardKind: DetailCardKind | null = appBasics
-    ? "family_basics"
-    : dockedChained
-      ? "homeschool_profile"
-      : kidChainStage === "card"
-        ? "child"
-        : (dockedDetail?.card.kind ?? null);
-  /**
-   * The composer keeps the card company only when the card cannot say
-   * everything she might need to (cardWantsComposer).
-   *
-   * Read from the card KIND rather than the field on screen, so it does
-   * not appear and disappear as she steps through a card's questions.
-   */
   /**
    * The composer sits beside a card only on a question the card cannot
    * enumerate, which is a fact about the STEP she is on rather than the
@@ -2265,7 +1944,6 @@ export function ChatClient({
       setWallOpen(true);
       return "rejected";
     }
-    clearPromptSuggestionState();
     if (plan.clearDraft) dictation.clearCutoffNotice();
     if (plan.resetDraftFromVoice) draftFromVoiceRef.current = false;
     if (plan.clearDraft) setDraft("");
@@ -2315,15 +1993,6 @@ export function ChatClient({
     return "sent";
   }
 
-  function sendPromptSuggestion(index: number, suggestion: string): void {
-    const suggestionSet = promptSuggestionSet;
-    if (suggestionSet?.suggestions[index] !== suggestion) return;
-    const result = sendMessage(suggestion);
-    if (result === "rejected") return;
-    suggestionSetIdForTurnRef.current = suggestionSet.setId;
-    void emitPromptSuggestionTapped(suggestionSet, index);
-  }
-
   /**
    * The retry affordance on a "Not sent" bubble (GH #170, part 2: a
    * dropped connection used to erase her words with nothing on screen
@@ -2340,7 +2009,7 @@ export function ChatClient({
   }
 
   /**
-   * The attach send path: trades the staged blob URLs for model parts,
+   * The attach send path: trades the staged storage URLs for model parts,
    * marker text, and binder receipts (/api/chat/attachments), then
    * sends ONE turn carrying text + media parts. Runs only while idle
    * (the send button holds staged files back during a running turn, so
@@ -2394,7 +2063,6 @@ export function ChatClient({
           [summary]: prepared.receipts,
         }));
       }
-      clearPromptSuggestionState();
       dictation.clearCutoffNotice();
       setDraft("");
       draftFromVoiceRef.current = false;
@@ -2472,8 +2140,11 @@ export function ChatClient({
     // its own fixed inset-0, so reserving the 56px left a strip of bare
     // page under the dock, which a floating card hid and a flush bottom
     // sheet cannot.
-    <div className={onboarding ? "flex h-dvh" : "flex h-[calc(100dvh-3.5rem)] lg:h-dvh"}>
-    <div className="relative flex h-full min-w-0 flex-1 flex-col">
+    <div
+      data-brand-surface="chat"
+      className={`quiet-chat ${onboarding ? "flex h-dvh" : "flex h-[calc(100dvh-3.5rem)] lg:h-dvh"}`}
+    >
+    <div className="quiet-chat__column relative flex h-full min-w-0 flex-1 flex-col">
       {/* The morning scrolls into everything above it: a soft fade at
           the top edge whenever there is more past to scroll to. This
           lives outside the scrollable <main> as a plain absolute
@@ -2490,6 +2161,7 @@ export function ChatClient({
       {/* 780px is the kit's transcript measure (ChatView.jsx). Turns get
           gap-6 so the flat replies and bubbles keep a clear rhythm. */}
       <main
+        data-brand-layer="transcript"
         ref={transcriptRef}
         onScroll={handleTranscriptScroll}
         // More air above the first line than below the last (founder
@@ -2501,7 +2173,7 @@ export function ChatClient({
         // of the screen by itself, so the welcome takes the middle of what
         // is left rather than crowding down onto it. This column is
         // flex-1, so "what is left" is exactly the space above the dock.
-        className={`mx-auto flex w-full max-w-[780px] flex-1 flex-col gap-6 overflow-y-auto px-4 pt-10 sm:px-6 ${
+        className={`quiet-chat__transcript mx-auto flex w-full max-w-[780px] flex-1 flex-col gap-6 overflow-y-auto px-4 pt-10 sm:px-6 ${
           openingMoment ? "ob-open-column justify-center pb-4" : "pb-6"
         }`}
       >
@@ -2702,7 +2374,7 @@ export function ChatClient({
                           : "flex"
                       }
                     >
-                      <span className="inline-flex items-center rounded-pill border border-border-subtle bg-card px-2.5 py-0.5 text-[11px] font-semibold text-subtle">
+                      <span className="quiet-chat__source-chip">
                         {item.sourceLabel}
                       </span>
                     </p>
@@ -2726,7 +2398,7 @@ export function ChatClient({
           // The character escalates on that same clock too, and this is
           // the only place all three meet: seconds, mood and words are
           // one reading of one wait, never three opinions about it.
-          <div className="flex items-baseline gap-2.5 text-muted">
+          <div className="quiet-chat__busy flex items-baseline gap-2.5 text-muted" role="status">
             <ThinkingMark
               size={28}
               mood={busyMood(busySeconds)}
@@ -2747,20 +2419,22 @@ export function ChatClient({
         {(bindingSyncFailure || authorizationParked) &&
         bindingSyncFailureSummary ? (
           <div className="flex flex-col items-end gap-1" role="alert">
-            <div className="max-w-[76%] rounded-lg rounded-br-sm bg-[var(--brand-soft-2)] px-[15px] py-2.5 text-[0.9rem] leading-normal text-strong opacity-70">
+            <div className="quiet-chat__status-bubble">
               <p className="whitespace-pre-wrap">
                 {bindingSyncFailureSummary}
               </p>
             </div>
             <p className="flex items-center gap-2 text-xs text-danger">
               Not sent.
-              <button
-                type="button"
-                onClick={retryBindingSync}
-                className="font-semibold underline underline-offset-2 transition-opacity hover:opacity-80"
-              >
-                Retry
-              </button>
+                <QuietAction
+                  kind="quiet"
+                  size="default"
+                  type="button"
+                  onClick={retryBindingSync}
+                  className="quiet-chat__inline-action"
+                >
+                  Retry
+                </QuietAction>
             </p>
           </div>
         ) : null}
@@ -2786,16 +2460,16 @@ export function ChatClient({
                   onClick={() => removeQueuedMessage(index, entry)}
                   className="text-subtle transition-colors hover:text-strong"
                 >
-                  <X size={14} aria-hidden="true" />
+                  <Icon name="close" size={16} />
                 </button>
-                <div className="rounded-lg rounded-br-sm bg-brand px-[18px] py-3.5 text-[0.95rem] leading-normal text-on-brand opacity-70">
+                <div className="quiet-chat__queued-bubble">
                   <p className="whitespace-pre-wrap">
                     {entry.text}
                   </p>
                 </div>
               </div>
             ))}
-            <p className="flex items-center gap-3 text-xs text-subtle">
+            <p className="quiet-chat__queued-meta">
               {bindingSyncFailure || authorizationParked
                 ? "Waiting to reconnect"
                 : "Sends when Homa finishes"}
@@ -2803,7 +2477,7 @@ export function ChatClient({
                 <button
                   type="button"
                   onClick={() => agent.stop()}
-                  className="font-semibold text-brand transition-colors hover:underline"
+                  className="quiet-chat__queued-send"
                 >
                   Send now
                 </button>
@@ -2828,14 +2502,16 @@ export function ChatClient({
             role="alert"
           >
             <span>Your conversation is safe. Homa could not reconnect.</span>
-            <button
+            <QuietAction
+              kind="secondary"
+              size="default"
               type="button"
               onClick={retryBindingSync}
-              className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-border bg-card px-4 py-2 font-bold text-strong shadow-sm transition-colors hover:border-brand hover:text-brand"
+              className="quiet-chat__status-action"
             >
-              <RefreshCw size={15} aria-hidden="true" />
+              <Icon name="refresh" size={16} />
               Try again
-            </button>
+            </QuietAction>
           </div>
         ) : authorizationParked ? (
           <div
@@ -2843,14 +2519,16 @@ export function ChatClient({
             role="status"
           >
             <span>Finish signing in above, then reconnect Homa.</span>
-            <button
+            <QuietAction
+              kind="secondary"
+              size="default"
               type="button"
               onClick={retryBindingSync}
-              className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-border bg-card px-4 py-2 font-bold text-strong shadow-sm transition-colors hover:border-brand hover:text-brand"
+              className="quiet-chat__status-action"
             >
-              <RefreshCw size={15} aria-hidden="true" />
+              <Icon name="refresh" size={16} />
               Reconnect Homa
-            </button>
+            </QuietAction>
           </div>
         ) : replyCutoffRecovery === "available" ? (
           <div
@@ -2858,14 +2536,16 @@ export function ChatClient({
             role="alert"
           >
             <span>Homa got cut off. Your conversation is safe.</span>
-            <button
+            <QuietAction
+              kind="secondary"
+              size="default"
               type="button"
               onClick={continueCutoffRecovery}
-              className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-border bg-card px-4 py-2 font-bold text-strong shadow-sm transition-colors hover:border-brand hover:text-brand"
+              className="quiet-chat__status-action"
             >
-              <RefreshCw size={15} aria-hidden="true" />
+              <Icon name="refresh" size={16} />
               Reconnect and continue
-            </button>
+            </QuietAction>
           </div>
         ) : agent.error && staleOidcAt !== null ? (
           // Localhost only, and only once the dev route has confirmed it.
@@ -2875,7 +2555,7 @@ export function ChatClient({
           // parent-facing string. Sits above the two below so a stale
           // credential never masquerades as either.
           <p
-            className="mx-auto max-w-md rounded-md border border-border bg-card px-3 py-2 text-center font-mono text-xs text-body"
+            className="quiet-chat__debug mx-auto max-w-md"
             role="alert"
           >
             DEV: the Vercel OIDC token expired at{" "}
@@ -2897,16 +2577,18 @@ export function ChatClient({
             <p className="text-center text-sm text-danger">
               Homa did not manage to start. Nothing is lost.
             </p>
-            <button
+            <QuietAction
+              kind="secondary"
+              size="default"
               type="button"
               // A reload, not a second send path: the kickoff already
               // retries itself on load when the conversation is empty,
               // and that path is the tested one.
               onClick={() => window.location.reload()}
-              className="min-h-11 rounded-pill border border-border bg-card px-5 py-2 text-sm font-bold text-strong shadow-sm transition-colors hover:border-brand"
+              className="quiet-chat__status-action"
             >
               Try again
-            </button>
+            </QuietAction>
           </div>
         ) : agent.error ? (
           <p className="text-center text-sm text-danger" role="alert">
@@ -2931,19 +2613,19 @@ export function ChatClient({
             onClick={() =>
               bottomRef.current?.scrollIntoView({ behavior: "smooth" })
             }
-            className="absolute -top-14 left-1/2 z-10 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full border border-border bg-card text-strong shadow-md transition-colors hover:border-brand hover:text-brand"
+            className="quiet-chat__back-to-now absolute -top-14 left-1/2 z-10"
           >
-            <ArrowDown size={18} aria-hidden="true" />
+            <Icon name="next" size={20} className="rotate-90" />
           </button>
         </div>
       ) : null}
 
       {/* The redesigned composer (chat-refined, approved 2026-07-13):
-          docked suggestion chips, then a soft card holding the pending
-          attachment chips, the input, and a toolbar rail (+, camera,
-          the About tag, mic, send). Typing stays enabled while Homa
-          works, and sending mid-turn queues; staged files hold Send
-          until the line is free (the queue stays text-only). */}
+          a soft card holding the pending attachment chips, the input,
+          and a toolbar rail (+, camera, the About tag, mic, send).
+          Typing stays enabled while Homa works, and sending mid-turn
+          queues; staged files hold Send until the line is free (the
+          queue stays text-only). */}
       <footer
         // The rule belongs to the composer, which is a low box that needs
         // an edge to sit against. A docked card brings its own border and
@@ -2954,28 +2636,13 @@ export function ChatClient({
         // footer gives up its side and bottom padding at that size and
         // the card reaches the edges itself. Everything from sm up, and
         // everything outside onboarding, keeps the padded dock.
-        className={`pt-3 sm:bg-page sm:px-6 sm:pb-5 sm:pt-3 ${
+        data-brand-layer="composer"
+        className={`quiet-chat__footer pt-3 sm:px-6 sm:pb-5 sm:pt-3 ${
           sheetDock
             ? "ob-dock-sheet px-0 pb-0 sm:rounded-none sm:border-t-0 sm:shadow-none"
-            : `bg-page px-4 pb-5 ${showComposer ? "border-t border-border-subtle" : ""}`
+            : `px-4 pb-5 ${showComposer ? "quiet-chat__footer--with-rule" : ""}`
         }`}
       >
-        {showSuggestions ? (
-          // The chips dock quietly by the keyboard (D1 steal, founder
-          // pick) instead of floating mid-transcript.
-          <div className="mx-auto mb-2.5 flex w-full max-w-[780px] flex-wrap gap-2">
-            {SUGGESTIONS.map((suggestion) => (
-              <button
-                key={suggestion}
-                type="button"
-                onClick={() => sendMessage(suggestion)}
-                className="rounded-pill bg-[var(--stone-100)] px-3.5 py-1.5 text-[0.8rem] text-muted transition-colors hover:bg-[var(--stone-200)] hover:text-strong"
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
-        ) : null}
         {checklistTakeover !== null ? (
           // The questions, docked where the composer was, so answering
           // them never leaves the conversation (founder note,
@@ -3164,7 +2831,7 @@ export function ChatClient({
           </div>
         ) : null}
         <div
-          className={`mx-auto w-full max-w-[780px] rounded-[22px] shadow-md ${
+          className={`quiet-chat__composer mx-auto w-full max-w-[780px] ${
             // Inside the phone sheet this is a zone, not a box: the CSS
             // strips its chrome and gives it a hairline instead. From sm
             // up it is the second of two floating boxes, so it takes a
@@ -3183,20 +2850,10 @@ export function ChatClient({
               />
             </div>
           ) : null}
-          {showPromptSuggestionRail ? (
-            <PromptSuggestionRail
-              phase={promptSuggestionPhase}
-              suggestions={promptSuggestionSet?.suggestions ?? []}
-              onSelect={sendPromptSuggestion}
-            />
-          ) : null}
           <form
+            data-brand-layer="composer-form"
             ref={composerFormRef}
-            className={`w-full border border-border-subtle bg-card px-3 pb-2 pt-2.5 transition-shadow focus-within:ring-2 focus-within:ring-brand/30 ${
-              showPromptSuggestionRail
-                ? "-mt-px rounded-b-[22px] rounded-t-none"
-                : "rounded-[22px]"
-            }`}
+            className="quiet-chat__composer-form w-full px-3 pb-2 pt-2.5"
             onSubmit={(event) => {
               event.preventDefault();
               if (attachments.readyCount > 0) {
@@ -3248,7 +2905,7 @@ export function ChatClient({
             </div>
           )}
           {filingHintOpen && focusChildName ? (
-            <p className="mb-1.5 ml-[52px] w-fit rounded-md bg-[var(--stone-900)] px-2.5 py-1.5 text-xs font-medium text-[var(--stone-50)]">
+            <p className="quiet-chat__hint mb-1.5 ml-[52px] w-fit">
               Photos and files you send are saved in {focusChildName}&apos;s
               binder. Change kids at the top right.
             </p>
@@ -3266,10 +2923,10 @@ export function ChatClient({
                 type="button"
                 aria-label={`Attachments save to ${focusChildName}'s binder; tap for details`}
                 onClick={() => setFilingHintOpen((current) => !current)}
-                className="ml-1 inline-flex min-h-8 items-center gap-1 rounded-pill bg-brand-soft px-2.5 py-1 text-xs font-semibold text-[var(--clay-700)]"
+                className="quiet-chat__focus-tag ml-1"
               >
                 About {focusChildName}
-                <ChevronDown size={12} aria-hidden="true" />
+                <Icon name="next" size={16} className="rotate-90" />
               </button>
             ) : null}
             <span className="flex-1" />
@@ -3286,21 +2943,21 @@ export function ChatClient({
                   type="button"
                   aria-label="Stop"
                   onClick={() => agent.stop()}
-                  className={
+                  className={`quiet-chat__composer-action ${
                     draft.trim().length > 0
-                      ? "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-strong shadow-sm transition-colors hover:border-brand"
-                      : "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
-                  }
+                      ? "quiet-chat__composer-action--stop-secondary"
+                      : "quiet-chat__composer-action--stop-primary"
+                  }`}
                 >
-                  <Square size={14} fill="currentColor" aria-hidden="true" />
+                  <Icon name="stop" size={16} />
                 </button>
                 {draft.trim().length > 0 && attachments.staged.length === 0 ? (
                   <button
                     type="submit"
                     aria-label="Send"
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
+                    className="quiet-chat__composer-action quiet-chat__composer-action--send"
                   >
-                    <ArrowUp size={18} aria-hidden="true" />
+                    <Icon name="next" size={20} className="-rotate-90" />
                   </button>
                 ) : null}
               </>
@@ -3322,9 +2979,9 @@ export function ChatClient({
                     ? attachments.anyUploading || preparingAttachments
                     : draft.trim().length === 0 || attachments.anyUploading
                 }
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-60"
+                className="quiet-chat__composer-action quiet-chat__composer-action--send disabled:opacity-60"
               >
-                <ArrowUp size={18} aria-hidden="true" />
+                <Icon name="next" size={20} className="-rotate-90" />
               </button>
             )}
           </div>

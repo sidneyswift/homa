@@ -149,17 +149,17 @@ export function ScoringStep({
 
   if (failed) {
     return (
-      <div className="rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
-        <p className="font-display text-lg font-semibold text-strong">
+      <div className="rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm">
+        <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">
           The report didn&apos;t build.
         </p>
-        <p className="mt-2 text-body">
+        <p className="mt-2 text-[var(--homa-ink)]">
           Your answers are saved. Try again now, or come back later with the link in your inbox.
         </p>
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="mt-4 min-h-11 rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-hover"
+          className="mt-4 min-h-11 rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2.5 text-sm font-semibold text-[var(--homa-paper)] hover:bg-[var(--homa-ink)]"
         >
           Try again
         </button>
@@ -174,22 +174,22 @@ export function ScoringStep({
 
   return (
     <div aria-busy="true">
-      <h1 className="font-display text-3xl font-bold leading-tight text-strong">
+      <h1 className="font-display text-3xl font-bold leading-tight text-[var(--homa-ink)]">
         {headline}
       </h1>
-      <div className="mt-6 rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
+      <div className="mt-6 rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm">
         {/* Keyed by position: two kids can share a name, so the line text
             alone is not unique. The list itself never reorders. */}
         {lines.slice(0, lineCount).map((line, index) => (
-          <p key={index} className="mt-2 flex items-center gap-2 text-body first:mt-0">
-            <span className={index < lineCount - 1 ? "text-sage" : "text-subtle"} aria-hidden="true">
+          <p key={index} className="mt-2 flex items-center gap-2 text-[var(--homa-ink)] first:mt-0">
+            <span className={index < lineCount - 1 ? "text-[var(--homa-constructive-ink)]" : "text-[var(--homa-muted-ink)]"} aria-hidden="true">
               {index < lineCount - 1 ? "\u2713" : "\u25cb"}
             </span>
             {line}
           </p>
         ))}
       </div>
-      <p className="mt-4 font-hand text-xl text-sage">worth the wait {"\u270e"}</p>
+      <p className="mt-4 font-hand text-xl text-[var(--homa-constructive-ink)]">worth the wait {"\u270e"}</p>
     </div>
   );
 }

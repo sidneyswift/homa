@@ -22,9 +22,9 @@ import {
 } from "../../theme/tokens";
 
 /**
- * The Homa button: always pill-shaped (never square, per the component
- * catalog), warm clay primary, quiet secondary. Press feedback is the
- * design system's gentle scale, no bounce.
+ * The Homa button: functional controls use the contract's 12px control
+ * radius, midnight action ink, and a quiet secondary boundary. Press
+ * feedback is a small scale only when motion is allowed.
  */
 
 type ButtonVariant = "primary" | "secondary" | "ghost";
@@ -35,8 +35,8 @@ const VARIANT_STYLES: Record<
   { backgroundColor: string; borderColor: string; textColor: string }
 > = {
   primary: {
-    backgroundColor: colors.brandHover,
-    borderColor: colors.brandHover,
+    backgroundColor: colors.action,
+    borderColor: colors.action,
     textColor: colors.onBrand,
   },
   secondary: {
@@ -53,8 +53,8 @@ const VARIANT_STYLES: Record<
 
 const DARK_VARIANT_STYLES: typeof VARIANT_STYLES = {
   primary: {
-    backgroundColor: darkColors.brand,
-    borderColor: darkColors.brand,
+    backgroundColor: darkColors.action,
+    borderColor: darkColors.action,
     textColor: darkColors.onBrand,
   },
   secondary: {
@@ -119,7 +119,7 @@ export function Button({
           backgroundColor: look.backgroundColor,
           borderColor: look.borderColor,
           borderWidth: 1,
-          borderRadius: radius.pill,
+          borderRadius: radius.md,
           minHeight: minimumHeight,
           paddingVertical: vertical,
           paddingHorizontal: horizontal,

@@ -24,7 +24,7 @@ export function WallOffer({
   checkout: WallCheckout;
 }) {
   return (
-    <div>
+    <div className="quiet-paywall__content" data-brand-layer="wall-offer">
       {/* No uppercase transform: WALL_EYEBROW is "Homa membership", and
           rendering it uppercase puts "HOMA" on screen, which the
           2026-07-28 brand correction (`brand-casing-homa`) retires. The
@@ -33,19 +33,19 @@ export function WallOffer({
           of it. */}
       <p
         className="font-mono text-[0.7rem] tracking-wide"
-        style={{ color: "var(--sage-700)" }}
+        style={{ color: "var(--homa-constructive-ink)" }}
       >
         {WALL_EYEBROW}
       </p>
-      <h2 className="mt-2 font-display text-2xl font-bold leading-tight text-strong">
+      <h2 className="mt-2 font-display text-2xl font-bold leading-tight text-[var(--homa-ink)]">
         {WALL_HEADLINE}
       </h2>
       {/* Reassure before inform (and the reader gate's bridge): the
           report she already has is hers for good, then the thing she
           just tapped, named, inside what the 7 free days include. */}
-      <p className="mt-3 text-body">{wallReportLine(childName)}</p>
-      <p className="mt-2 text-body">{wallIncludedLine(door, childName)}</p>
-      <p className="mt-2 text-body">{WALL_MECHANICS_LINE}</p>
+      <p className="mt-3 text-[var(--homa-ink)]">{wallReportLine(childName)}</p>
+      <p className="mt-2 text-[var(--homa-ink)]">{wallIncludedLine(door, childName)}</p>
+      <p className="mt-2 text-[var(--homa-ink)]">{WALL_MECHANICS_LINE}</p>
       <TierOptions door={door} checkout={checkout} />
     </div>
   );

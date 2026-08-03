@@ -26,7 +26,7 @@ Design patterns (all binding for visual-schedule-cards):
 - **Card structure**: illustration (top 60%), activity name in large
   text (bottom 30%, `font-size: 20px; font-weight: 700;`), optional
   clock icon showing time (bottom corner).
-- **Dashed cut borders**: `border: 2.5px dashed #b3a492;` around
+- **Dashed cut borders**: `border: 2.5px dashed var(--homa-control-boundary);` around
   each card.
 - **Common activities**: wake up, breakfast, get dressed, brush teeth,
   learning time, lunch, outdoor play, rest time, dinner, bedtime.

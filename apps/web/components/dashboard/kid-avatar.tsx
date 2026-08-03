@@ -8,10 +8,10 @@
  */
 
 const AVATAR_TONES: ReadonlyArray<readonly [string, string]> = [
-  ["var(--clay-100)", "var(--clay-700)"],
-  ["var(--sky-100)", "var(--sky-600)"],
-  ["var(--sage-100)", "var(--sage-700)"],
-  ["var(--gold-100)", "var(--gold-ink)"],
+  ["var(--homa-error-tint)", "var(--homa-brand-text)"],
+  ["var(--homa-info-tint)", "var(--homa-info-ink)"],
+  ["var(--homa-constructive-tint)", "var(--homa-constructive-ink)"],
+  ["var(--homa-highlight-tint)", "var(--homa-highlight-ink)"],
 ];
 
 /** Deterministic avatar tone per list position, shared with KidCard. */
@@ -45,7 +45,7 @@ export function KidAvatar({
         alt={label ?? ""}
         title={label}
         style={{ width: size, height: size }}
-        className="shrink-0 rounded-full border border-border-subtle object-cover"
+        className="shrink-0 rounded-full border border-[color:var(--homa-control-boundary)] object-cover"
       />
     );
   }

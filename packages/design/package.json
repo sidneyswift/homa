@@ -1,0 +1,18 @@
+{
+  "name": "@homa/design",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./surfaces": "./src/surfaces.ts",
+    "./contract": "./src/contract/index.ts",
+    "./icons": "./src/contract/icons.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test src/contract/contract.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}

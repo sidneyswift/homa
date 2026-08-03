@@ -71,6 +71,21 @@ function renderOverlay(entryToEdit: HoursEntry): string {
 }
 
 describe("HoursView", () => {
+  it("projects the log and editor onto the Quiet authority surface contract", () => {
+    const html = renderView([entry()]);
+    assert.match(html, /data-brand-surface="hours"/u);
+    assert.match(html, /data-brand-fixture="quiet-authority-v1"/u);
+    assert.match(html, /quiet-frame quiet-frame--paper/u);
+    assert.match(html, /quiet-action quiet-action--quiet/u);
+    assert.doesNotMatch(html, /clay|bg-brand|text-brand|Schibsted|Hanken|Caveat/u);
+
+    const overlay = renderOverlay(entry());
+    assert.match(overlay, /quiet-artifact-backdrop/u);
+    assert.match(overlay, /quiet-artifact-dialog/u);
+    assert.match(overlay, /quiet-action quiet-action--primary/u);
+    assert.doesNotMatch(overlay, /clay|bg-brand|text-brand|Schibsted|Hanken|Caveat/u);
+  });
+
   it("shows the reassuring empty state with nothing logged", () => {
     const html = renderView([]);
     assert.match(html, /Nothing logged yet\./);
@@ -115,8 +130,8 @@ describe("HoursView", () => {
     assert.match(html, />Reading<\/span>/);
     assert.match(html, />30m<\/span>/);
     assert.match(html, /About 30 min of phonics/);
-    assert.match(html, /min-h-11 min-w-11/);
-    assert.match(html, />Edit<\/button>/);
+    assert.match(html, /quiet-action quiet-action--quiet/);
+    assert.match(html, />Edit<\/span>/);
   });
 
   it("keeps source provenance behind Edit instead of competing with the activity", () => {
@@ -130,7 +145,7 @@ describe("HoursView", () => {
     // The child-badge span carries its own distinct classes, unlike the
     // totals card's name (which always renders "Maya" regardless).
     const soloHtml = renderView([entry({ childId: "child-maya" })], [MAYA]);
-    assert.doesNotMatch(soloHtml, /text-xs font-semibold text-subtle">Maya</);
+    assert.doesNotMatch(soloHtml, /text-xs font-semibold text-\[color:color-mix\(in_srgb,var\(--homa-ink\)_52%,var\(--homa-canvas\)\)\]">Maya</);
 
     const multiHtml = renderView(
       [
@@ -139,8 +154,8 @@ describe("HoursView", () => {
       ],
       [MAYA, LEO],
     );
-    assert.match(multiHtml, /text-xs font-semibold text-subtle">Maya</);
-    assert.match(multiHtml, /text-xs font-semibold text-subtle">Whole family</);
+    assert.match(multiHtml, /text-xs font-semibold text-\[color:color-mix\(in_srgb,var\(--homa-ink\)_52%,var\(--homa-canvas\)\)\]">Maya</);
+    assert.match(multiHtml, /text-xs font-semibold text-\[color:color-mix\(in_srgb,var\(--homa-ink\)_52%,var\(--homa-canvas\)\)\]">Whole family</);
   });
 
   it("only shows the subject filter chips when more than one subject is present", () => {
@@ -169,7 +184,7 @@ describe("HoursEntryOverlay", () => {
     assert.match(html, /<option value="science" selected="">Science<\/option>/);
     assert.match(html, /name="minutes"[^>]*value="90"/);
     assert.match(html, /Volcano experiment/);
-    assert.match(html, />Save changes<\/button>/);
+    assert.match(html, />Save changes<\/span>/);
   });
 
   it("names who the block is for, or the whole family", () => {

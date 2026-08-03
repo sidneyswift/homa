@@ -315,6 +315,17 @@ test("the charged-today answer is rendered, not merely exported", () => {
   assert.match(TRIAL_GATE_REASSURANCE, /charged/i);
 });
 
+test("billing presentation surfaces use Quiet markers and actions", () => {
+  const trial = readFileSync(new URL("./trial-gate.tsx", import.meta.url), "utf8");
+  const tiers = readFileSync(new URL("./tier-options.tsx", import.meta.url), "utf8");
+  const modal = readFileSync(new URL("./wall-modal.tsx", import.meta.url), "utf8");
+  assert.match(trial, /data-brand-layer="trial-gate"/u);
+  assert.match(tiers, /quiet-tier-options/u);
+  assert.match(tiers, /quiet-action quiet-action--primary/u);
+  assert.match(modal, /quiet-paywall__modal/u);
+  assert.doesNotMatch(tiers, /reportButtonClass/u);
+});
+
 test("the first thing the list offers is an outcome, not a chore", () => {
   assert.doesNotMatch(TRIAL_GATE_EVERY_PLAN[0], /^The questionnaire/i);
   assert.match(TRIAL_GATE_EVERY_PLAN[0], /report/i);

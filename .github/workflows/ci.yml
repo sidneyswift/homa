@@ -67,6 +67,11 @@ jobs:
       - name: "No-em-dash style law (AGENTS.md: no em dash, ever, anywhere)"
         run: node scripts/em-dash-check.mjs
 
+      - name: SEO contract
+        # This job deliberately has no dependency install. Keep the SEO
+        # contract dependency-free so the fast gate can execute it directly.
+        run: node --experimental-strip-types scripts/seo-contract-check.mts
+
   # Branch protection on main requires a status context named exactly
   # "build-and-check" (the old single job's name). This gate carries that
   # name and verifies the exact job set required by the classified scope.
@@ -119,6 +124,9 @@ jobs:
       - name: Lint mobile
         run: pnpm --filter mobile lint
 
+      - name: Mobile brand contract and icon registry
+        run: pnpm check:mobile-brand
+
       - name: Event registry and capture-loop staging guard
         run: pnpm check:event-registry
 
@@ -142,6 +150,9 @@ jobs:
 
       - name: Mobile accessibility contract
         run: pnpm check:mobile-accessibility
+
+      - name: Native interface gauntlet
+        run: pnpm check:native-interface-gauntlet
 
   # The compile chain plus the checks that need real Supabase secrets.
   # Typecheck, lint, and build go through one turbo invocation so turbo
@@ -288,7 +299,18 @@ jobs:
     if: needs.classify-changes.outputs.scope == 'full'
     runs-on: ubuntu-24.04
     steps:
+      # The residue ratchet compares the PR head with its base SHA. A shallow
+      # checkout hides that object and forces the checker into its historical
+      # fallback, which would scan unrelated main-branch files.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch PR base and head for delivery-delta guards
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch --no-tags origin "${{ github.event.pull_request.base.sha }}"
+          git fetch --no-tags origin "${{ github.event.pull_request.head.sha }}"
 
       - uses: pnpm/action-setup@v4
         with:
@@ -341,6 +363,39 @@ jobs:
 
       - name: Design-token check (colour utilities name a declared token)
         run: pnpm check:design-tokens
+
+      - name: Brand-surface manifest check (coverage, provenance, legacy baseline)
+        run: pnpm check:brand-surfaces
+
+      - name: Marketing production contract check (bundles, queues, generators, publishers)
+        run: pnpm check:marketing-production
+
+      - name: Channel evidence contract check (fresh fingerprints and hard gates)
+        run: pnpm check:channel-evidence
+
+      - name: Provider handoff contract check (owned fields and external read-back gates)
+        run: pnpm check:provider-handoffs
+
+      - name: Handwrytten stationery contract check (source inventory and irreversible-delivery gates)
+        run: pnpm check:handwrytten-stationery
+
+      - name: Brand asset generation and fingerprint check
+        run: pnpm check:brand-assets
+
+      - name: Design authoring rails check (coverage, contract, residue, fingerprints)
+        run: pnpm check:design-authoring
+
+      - name: Durable artifact design-era check (classification and Quiet print markers)
+        run: pnpm check:artifact-brand-era
+
+      - name: Active brand residue check (changed files cannot revive legacy identity)
+        run: pnpm check:brand-residue
+
+      - name: Design contract parity check (byte-stable projections)
+        run: pnpm check:design-parity
+
+      - name: Design contract type and semantic tests
+        run: pnpm check:design-contract
 
       - name: Tool deadline guard (no unbounded tool can freeze a turn)
         run: pnpm check:tool-deadlines

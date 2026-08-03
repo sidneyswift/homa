@@ -92,12 +92,12 @@ export function ExtrasStep({
           first question's hint. One question per card (founder call
           2026-07-06: "these should be separated, one question at a
           time"), same rhythm as the questionnaire itself. */}
-      <p className="font-hand text-2xl text-sage">questionnaire done {"\u2713"}</p>
+      <p className="font-hand text-2xl text-[var(--homa-constructive-ink)]">questionnaire done {"\u2713"}</p>
       {/* "while I build" is honest only when the report is actually next;
           with another kid's questions still open, the build may wait on
           the next-kid choice one screen later. And once several reports
           are queued, "the reports" beats naming only this kid. */}
-      <h1 className="mt-1 font-display text-3xl font-bold leading-tight text-strong">
+      <h1 className="mt-1 font-display text-3xl font-bold leading-tight text-[var(--homa-ink)]">
         {hasNextKid
           ? `Two quick extras about ${child.name}`
           : pendingReportCount > 1
@@ -107,9 +107,9 @@ export function ExtrasStep({
 
       <div
         key={step}
-        className="flow-step-in mt-6 rounded-lg border border-border-subtle bg-card p-6 shadow-[var(--shadow-md)] sm:p-7"
+        className="flow-step-in mt-6 rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-[var(--shadow-md)] sm:p-7"
       >
-        <p className="font-mono text-xs text-subtle">extra {step + 1} of 2</p>
+        <p className="font-mono text-xs text-[var(--homa-muted-ink)]">extra {step + 1} of 2</p>
 
         {step === 0 ? (
           <>
@@ -125,14 +125,14 @@ export function ExtrasStep({
             <button
               type="button"
               onClick={() => setStep(1)}
-              className="mt-7 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)]"
+              className="mt-7 min-h-12 w-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)] shadow-sm transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] motion-safe:active:scale-[var(--press-scale)]"
             >
               Next
             </button>
             <button
               type="button"
               onClick={() => setStep(1)}
-              className="mt-2 w-full text-center text-sm text-subtle underline-offset-2 hover:underline"
+              className="mt-2 w-full text-center text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
             >
               skip this one
             </button>
@@ -157,7 +157,7 @@ export function ExtrasStep({
               type="button"
               onClick={() => void finish()}
               disabled={busy}
-              className="mt-7 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+              className="mt-7 min-h-12 w-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)] shadow-sm transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
             >
               {busy ? "Saving\u2026" : finishLabel}
             </button>
@@ -166,7 +166,7 @@ export function ExtrasStep({
                 type="button"
                 onClick={() => setStep(0)}
                 disabled={busy}
-                className="text-sm text-subtle underline-offset-2 hover:underline"
+                className="text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
               >
                 back
               </button>
@@ -174,7 +174,7 @@ export function ExtrasStep({
                 type="button"
                 onClick={() => void finish()}
                 disabled={busy}
-                className="text-sm text-subtle underline-offset-2 hover:underline"
+                className="text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
               >
                 {finishSkipLabel}
               </button>

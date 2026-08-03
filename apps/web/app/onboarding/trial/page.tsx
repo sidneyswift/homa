@@ -54,7 +54,7 @@ export default async function TrialGatePage() {
   // ruling): a logo home link and the two-link footer, nothing that
   // reads as an exit-ramp buffet at the commitment moment.
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--bg-page-warm)] [background-image:var(--bg-paper)]">
+    <div className="quiet-paywall-surface flex min-h-screen flex-col bg-[var(--homa-canvas)]" data-brand-surface="trial">
       <header className="flex w-full items-center px-6 py-4 sm:px-10">
         <Link href="/" aria-label="Homa home" className="inline-flex">
           <Logo size={26} />
@@ -69,16 +69,16 @@ export default async function TrialGatePage() {
           />
         </div>
       </main>
-      {/* text-muted, not text-subtle: subtle measures 3.52:1 on this
+      {/* text-[var(--homa-muted-ink)], not text-[var(--homa-muted-ink)]: subtle measures 3.52:1 on this
           warm page background, under the 4.5:1 WCAG AA floor for text
           this size, and this footer carries the privacy link on a page
           that is asking for a card. */}
-      <footer className="mx-auto w-full max-w-[36rem] px-6 pb-8 text-center text-sm text-muted">
+      <footer className="mx-auto w-full max-w-[36rem] px-6 pb-8 text-center text-sm text-[var(--homa-muted-ink)]">
         {/* The method link moved into the gate's own proof row, next to
             the sample report, so it is not offered twice on one page. */}
         <p>
           <Link
-            className="underline underline-offset-2 transition-colors duration-(--dur-fast) ease-out hover:text-brand"
+            className="underline underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-brand-text)]"
             href="/privacy"
           >
             Privacy
@@ -89,7 +89,7 @@ export default async function TrialGatePage() {
               by name, to read the cancellation and refund language
               before typing a number. */}
           <Link
-            className="underline underline-offset-2 transition-colors duration-(--dur-fast) ease-out hover:text-brand"
+            className="underline underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-brand-text)]"
             href="/terms"
           >
             Terms

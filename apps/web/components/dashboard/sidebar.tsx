@@ -1,14 +1,14 @@
 import Link from "next/link";
 
 import { Logo } from "../brand/Logo";
+import { QuietFrame } from "../design/QuietFrame";
 import { AccountMenu } from "./account-menu";
 import { ViewingRows } from "./context-switcher";
 import { SidebarNav } from "./sidebar-nav";
 
 /**
- * The app's left rail, ported from the design system's web-app template
- * (docs/homa-design/templates/web-app/WebApp.dc.html): floating white
- * card, nav, and the account footer (AccountMenu: the name row opens
+ * The app's left rail, ported from the former web-app template: floating
+ * surface, nav, and the account footer (AccountMenu: the name row opens
  * Settings and Sign out). The kid rows left the desktop rail (founder
  * ruling 2026-07-12: the kid switcher is the top-right avatar,
  * DesktopContextSwitcher, same corner as the phone bar's) and the phone
@@ -50,15 +50,17 @@ export interface SidebarProps {
 
 export function Sidebar(props: SidebarProps) {
   return (
-    <div
+    <QuietFrame
+      as="div"
+      tone="paper"
       data-app-sidebar=""
       role="complementary"
       aria-label="App sidebar"
-      className="app-sidebar sticky top-3.5 m-3.5 h-[calc(100dvh-28px)] w-[248px] shrink-0 flex-col rounded-[var(--radius-xl)] border border-border-subtle bg-card p-3.5 shadow-[var(--shadow-md)]"
+      className="app-sidebar quiet-shell__rail"
     >
-      <div className="px-2.5 pb-5 pt-1">
+      <div className="quiet-shell__rail-logo">
         {/* The wordmark is a home link everywhere (tester ask, memo 2). */}
-        <Link href="/app" aria-label="Home" className="inline-flex rounded-md">
+        <Link href="/app" aria-label="Home" className="quiet-shell__logo">
           <Logo size={26} />
         </Link>
       </div>
@@ -66,7 +68,7 @@ export function Sidebar(props: SidebarProps) {
       {/* The rail carries no kid rows: desktop's switcher is the
           top-right avatar (DesktopContextSwitcher, in the shell). */}
       <SidebarContent {...props} withViewingRows={false} />
-    </div>
+    </QuietFrame>
   );
 }
 

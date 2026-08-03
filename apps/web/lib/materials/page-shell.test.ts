@@ -115,6 +115,18 @@ test("a packet document boxes every page and repeats the footer on each", () => 
   assert.match(document, /week two/u);
 });
 
+test("printable shells carry the Quiet contract and semantic artifact tokens", () => {
+  const document = wrapPrintablePage("<h1>Counting practice</h1>", "Story");
+  assert.match(document, /data-brand-era="quiet-authority-v1"/u);
+  assert.match(document, /data-brand-profile="artifact-print"/u);
+  assert.match(document, /data-brand-surface="materials-page-shell"/u);
+  assert.match(document, /--homa-canvas: #F7F4EE/u);
+  assert.match(document, /--homa-ink: #20242B/u);
+  assert.match(document, /--homa-midnight-action: #27374D/u);
+  assert.match(document, /font-family: var\(--homa-font-interface\)/u);
+  assert.doesNotMatch(document, /#FBF7F0|#221E1A|#8A7D6C|Hanken|Schibsted/u);
+});
+
 test("a single page keeps the exact one-box contract", () => {
   const document = wrapPrintablePage("<div>one page</div>", "");
   const pageBoxes = document.split(`class="${SHEET_PAGE_CLASS}"`).length - 1;

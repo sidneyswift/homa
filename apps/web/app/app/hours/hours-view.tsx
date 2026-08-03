@@ -15,6 +15,8 @@ import {
   type HoursFilter,
 } from "../../../lib/hours-view";
 import { KidAvatar } from "../../../components/dashboard/kid-avatar";
+import { QuietAction } from "../../../components/design/QuietAction";
+import { QuietFrame } from "../../../components/design/QuietFrame";
 import { HoursEntryOverlay } from "./hours-entry-overlay";
 
 /**
@@ -27,10 +29,13 @@ import { HoursEntryOverlay } from "./hours-entry-overlay";
  * a follow-up, issue #174's deferral #1).
  */
 
-const CHIP_ON =
-  "min-h-9 rounded-pill border border-[var(--clay-200)] bg-brand-soft px-3.5 py-1.5 text-xs font-bold text-[var(--clay-700)]";
-const CHIP_OFF =
-  "min-h-9 rounded-pill border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-muted transition-colors hover:border-[var(--clay-200)]";
+const CHIP_ON = "quiet-filter quiet-filter--active";
+const CHIP_OFF = "quiet-filter";
+
+const INK = "text-[color:var(--homa-ink)]";
+const BODY = "text-[color:color-mix(in_srgb,var(--homa-ink)_78%,var(--homa-canvas))]";
+const MUTED = "text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]";
+const SUBTLE = "text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]";
 
 /** A signed-in family's kid roster, the same slice PlannerKid reads, for
  * avatar tone and photo lookups by position in the FULL family list. */
@@ -50,32 +55,32 @@ function TotalsCard({
   avatarUrl: string | null;
 }) {
   return (
-    <div className="rounded-[var(--radius-lg)] border border-border-subtle bg-card p-4 shadow-sm">
+    <QuietFrame as="article" className="p-4">
       <div className="flex items-center gap-2.5">
         <KidAvatar name={total.childName} index={kidIndex} avatarUrl={avatarUrl} size={28} />
-        <span className="font-display text-base font-semibold text-strong">{total.childName}</span>
+        <span className={`font-display text-base font-semibold ${INK}`}>{total.childName}</span>
       </div>
       <dl className="mt-3 grid grid-cols-3 gap-2 text-center">
         <div>
-          <dt className="text-[0.6rem] font-bold uppercase tracking-wide text-subtle">This week</dt>
-          <dd className="mt-0.5 font-display text-lg font-semibold text-strong">
+          <dt className={`text-[0.6rem] font-bold uppercase tracking-wide ${SUBTLE}`}>This week</dt>
+          <dd className={`mt-0.5 font-display text-lg font-semibold ${INK}`}>
             {formatMinutesAsHours(total.week)}
           </dd>
         </div>
         <div>
-          <dt className="text-[0.6rem] font-bold uppercase tracking-wide text-subtle">This month</dt>
-          <dd className="mt-0.5 font-display text-lg font-semibold text-strong">
+          <dt className={`text-[0.6rem] font-bold uppercase tracking-wide ${SUBTLE}`}>This month</dt>
+          <dd className={`mt-0.5 font-display text-lg font-semibold ${INK}`}>
             {formatMinutesAsHours(total.month)}
           </dd>
         </div>
         <div>
-          <dt className="text-[0.6rem] font-bold uppercase tracking-wide text-subtle">School year</dt>
-          <dd className="mt-0.5 font-display text-lg font-semibold text-strong">
+          <dt className={`text-[0.6rem] font-bold uppercase tracking-wide ${SUBTLE}`}>School year</dt>
+          <dd className={`mt-0.5 font-display text-lg font-semibold ${INK}`}>
             {formatMinutesAsHours(total.schoolYear)}
           </dd>
         </div>
       </dl>
-    </div>
+    </QuietFrame>
   );
 }
 
@@ -90,33 +95,29 @@ function EntryRow({
 }) {
   const [bg, ink] = hoursSubjectTone(entry.subject);
   return (
-    <li className="flex flex-wrap items-center gap-2.5 rounded-md border border-border-subtle bg-card px-3.5 py-2.5 shadow-sm">
+    <li className="quiet-frame quiet-frame--paper flex flex-wrap items-center gap-2.5 px-3.5 py-2.5">
       <span
-        className="rounded-pill px-2.5 py-1 text-[0.68rem] font-bold"
+        className="rounded-[var(--homa-radius-control)] px-2.5 py-1 text-[0.68rem] font-bold"
         style={{ background: bg, color: ink }}
       >
         {SUBJECT_LABELS[entry.subject]}
       </span>
-      <span className="font-display text-sm font-semibold text-strong">
+      <span className={`font-display text-sm font-semibold ${INK}`}>
         {formatMinutesAsHours(entry.minutes)}
       </span>
       {showChild ? (
-        <span className="text-xs font-semibold text-subtle">
+        <span className={`text-xs font-semibold ${SUBTLE}`}>
           {entry.childName ?? "Whole family"}
         </span>
       ) : null}
       {entry.note ? (
-        <span className="min-w-0 flex-1 basis-40 truncate text-xs text-muted">{entry.note}</span>
+        <span className={`min-w-0 flex-1 basis-40 truncate text-xs ${MUTED}`}>{entry.note}</span>
       ) : (
         <span className="flex-1" />
       )}
-      <button
-        type="button"
-        onClick={onEdit}
-        className="inline-flex min-h-11 min-w-11 items-center justify-center px-2 text-xs font-semibold text-brand hover:underline"
-      >
+      <QuietAction kind="quiet" size="default" onClick={onEdit} className="min-h-11 min-w-11 px-2 text-xs">
         Edit
-      </button>
+      </QuietAction>
     </li>
   );
 }
@@ -180,17 +181,17 @@ export function HoursView({
   ) : null;
 
   return (
-    <>
+    <div data-brand-surface="hours" data-brand-fixture="quiet-authority-v1">
       {embedded ? null : (
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
+            <p className={`text-[0.68rem] font-bold uppercase tracking-[0.16em] ${SUBTLE}`}>
               The compliance record
             </p>
-            <h1 className="mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-strong">
+            <h1 className={`mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] ${INK}`}>
               Hours
             </h1>
-            <p className="mt-1.5 max-w-xl text-sm text-muted">
+            <p className={`mt-1.5 max-w-xl text-sm ${MUTED}`}>
               {focusKid
                 ? `Homa records the school time you tell her about for ${focusKid.name}, plus family time. Review or correct it here.`
                 : "Homa records the school time you tell her about. Review or correct it here."}
@@ -207,7 +208,7 @@ export function HoursView({
           role="group"
           aria-label="Filter by subject"
         >
-          <span className="mr-1 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-subtle">
+          <span className={`mr-1 text-[0.65rem] font-bold uppercase tracking-[0.14em] ${SUBTLE}`}>
             Subject
           </span>
           <button
@@ -233,14 +234,14 @@ export function HoursView({
       ) : null}
 
       {entries.length === 0 ? (
-        <div className="mt-8 rounded-[var(--radius-xl)] border border-dashed border-border bg-card p-8 text-center">
-          <p className="font-display text-lg font-semibold text-strong">Nothing logged yet.</p>
-          <p className="mx-auto mt-1.5 max-w-sm text-sm text-muted">
+        <QuietFrame className="mt-8 border-dashed p-8 text-center">
+          <p className={`font-display text-lg font-semibold ${INK}`}>Nothing logged yet.</p>
+          <p className={`mx-auto mt-1.5 max-w-sm text-sm ${MUTED}`}>
             Tell Homa how long schoolwork took in Chat, by text, or on a call. She records it here.
           </p>
-        </div>
+        </QuietFrame>
       ) : groups.length === 0 ? (
-        <p className="mt-8 rounded-lg border border-dashed border-border bg-card p-6 text-center text-sm text-muted">
+        <p className={`quiet-frame quiet-frame--paper mt-8 border-dashed p-6 text-center text-sm ${MUTED}`}>
           {filter.subject
             ? `Nothing logged for ${SUBJECT_LABELS[filter.subject].toLowerCase()} yet.`
             : "Nothing logged yet."}
@@ -250,10 +251,10 @@ export function HoursView({
           {groups.map((group) => (
             <section key={group.key}>
               <div className="flex items-baseline justify-between gap-3">
-                <h2 className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
+                <h2 className={`text-[0.68rem] font-bold uppercase tracking-[0.16em] ${SUBTLE}`}>
                   {group.label}
                 </h2>
-                <span className="text-xs font-semibold text-muted">
+                <span className={`text-xs font-semibold ${MUTED}`}>
                   {formatMinutesAsHours(group.totalMinutes)}
                 </span>
               </div>
@@ -273,12 +274,12 @@ export function HoursView({
       )}
 
       {embedded && totalsGrid ? (
-        <details className="mt-7 overflow-hidden rounded-[var(--radius-lg)] border border-border-subtle bg-card shadow-sm">
-          <summary className="min-h-12 cursor-pointer px-4 py-3 text-sm font-bold text-body">
+        <details className="quiet-frame quiet-frame--paper mt-7 overflow-hidden">
+          <summary className={`min-h-12 cursor-pointer px-4 py-3 text-sm font-bold ${BODY}`}>
             Hours by child
           </summary>
-          <div className="border-t border-border-subtle bg-page p-3">
-            <p className="mb-3 text-xs text-muted">
+          <div className="border-t border-[var(--homa-control-boundary)] bg-[var(--homa-canvas)] p-3">
+            <p className={`mb-3 text-xs ${MUTED}`}>
               For your records only. Homa does not compare children.
             </p>
             {totalsGrid}
@@ -289,6 +290,6 @@ export function HoursView({
       {editing ? (
         <HoursEntryOverlay entry={editing} onClose={() => setEditingId(null)} />
       ) : null}
-    </>
+    </div>
   );
 }

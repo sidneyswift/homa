@@ -6,8 +6,8 @@ import { Eyebrow } from "./dividers";
 import { FAQ_ITEMS } from "./faq-items";
 
 /**
- * FAQ, evolved from docs/homa-design/ui_kits/landing/LandingPage.jsx into a
- * ruled reference sheet: one warm card holding every answer over the design
+ * FAQ, evolved from the former landing composition into a ruled reference
+ * sheet: one quiet authority card holding every answer over the design
  * system's paper-rule texture, with two more sheets peeking out beneath like
  * pages in the binder. Items live in faq-items.ts, shared with the FAQPage
  * JSON-LD on the landing page.

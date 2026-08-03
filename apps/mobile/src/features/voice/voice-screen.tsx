@@ -16,8 +16,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
-import { Mic, MicOff, X } from "lucide-react-native";
 
+import { Icon } from "../../components/design/icon";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, darkColors, fontSize, palette, radius, space } from "../../theme/tokens";
 import { reportCrash } from "../../lib/crash-reporting";
@@ -70,8 +70,6 @@ import { voiceStatusAnnouncement } from "./voice-dock-model";
 const CHARACTER_SIZE = 240;
 const PUCK_SIZE = 72;
 const AURA_SIZE = CHARACTER_SIZE * 2.4;
-const CONTROL_FILL_LIGHT = "rgba(255,255,255,0.72)";
-
 interface QueuedLessonReviewHandoff {
   familyId: string;
   lessonId: string;
@@ -398,7 +396,7 @@ export function VoiceScreen() {
     return { opacity: 1 - puck.value, top: fieldHeight.value * 0.43 - AURA_SIZE / 2 };
   });
   const surface = dark ? darkColors.page : colors.page;
-  const controlFill = dark ? darkColors.surfaceRaised : CONTROL_FILL_LIGHT;
+  const controlFill = dark ? darkColors.surfaceRaised : colors.card;
   const controlBorder = dark ? darkColors.borderSubtle : colors.borderSubtle;
   const controlText = dark ? darkColors.textStrong : colors.textStrong;
 
@@ -701,9 +699,9 @@ export function VoiceScreen() {
           accessibilityLabel="Use text chat"
           onPress={leaveVoice}
           hitSlop={8}
-          style={({ pressed }) => ({ width: 40, height: 40, borderRadius: radius.pill, alignItems: "center", justifyContent: "center", backgroundColor: controlFill, opacity: pressed ? 0.7 : 1 })}
+          style={({ pressed }) => ({ width: 44, height: 44, borderRadius: radius.pill, alignItems: "center", justifyContent: "center", backgroundColor: controlFill, opacity: pressed ? 0.7 : 1 })}
         >
-          <X size={18} color={dark ? darkColors.textMuted : colors.textMuted} />
+          <Icon name="close" size={20} color={dark ? darkColors.textMuted : colors.textMuted} />
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -712,7 +710,9 @@ export function VoiceScreen() {
           style={{ flex: 1, minHeight: 48, alignItems: "center", justifyContent: "center", borderRadius: radius.pill, borderWidth: StyleSheet.hairlineWidth, borderColor: controlBorder, backgroundColor: controlFill }}
         >
           <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}>
-            {session.muted || session.status === "paused" ? <MicOff size={16} color={controlText} /> : <Mic size={16} color={controlText} />}
+            {session.muted || session.status === "paused"
+              ? <Icon name="muted" size={16} color={controlText} />
+              : <Icon name="voice" size={16} color={controlText} />}
             <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: controlText }}>
               {primaryLabel}
             </Text>

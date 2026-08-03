@@ -43,14 +43,14 @@ which currently fails under expo-router server rendering.
 
 | Piece | Where | Notes |
 |---|---|---|
-| Design tokens | `src/theme/tokens.ts` | Hand-copied from `docs/homa-design/tokens/`, same sync rule as `apps/web` |
-| Fonts | `src/theme/fonts.ts` | Schibsted Grotesk, Hanken Grotesk, Fredoka via `@expo-google-fonts` |
+| Design tokens | `src/theme/tokens.ts` | Temporary legacy projection, migrating to `@homa/design` under gh#720 |
+| Fonts | `src/theme/fonts.ts` | Temporary legacy projection. Quiet authority roles are generated from `@homa/design`; migration is tracked by gh#715 and gh#720. |
 | Auth | `src/lib/supabase.ts` | supabase-js + AsyncStorage sessions (cookie-free twin of `@supabase/ssr`) |
 | Chat | `src/features/chat/` | `useEveAgent` from `eve/react` against `EXPO_PUBLIC_API_URL/eve/v1/*` |
 | Streaming | `src/lib/streaming-fetch.ts` | `expo/fetch` installed globally; RN's built-in fetch cannot stream NDJSON |
 | Family data | `src/lib/family.ts` | Port of `apps/web/lib/family.ts` + home actions, RLS-scoped |
 | Events | `src/lib/events.ts` | `@homa/core` typed registry, caller's own token |
-| Brand assets | `assets/brand/*.svg` | PNGs in `assets/images/` are generated: `rsvg-convert -w 1024 -h 1024 brand/<name>.svg -o images/<name>.png` |
+| Brand assets | `assets/brand/*.svg` | SVG and PNG projections are generated together from the Quiet authority contract: `pnpm gen:brand` |
 
 The home greeting uses the current member display name when available. M1-17
 owns design-system integration, not general mobile parity.

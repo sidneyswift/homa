@@ -1,7 +1,12 @@
 import { BANNED_WORDS, EM_DASH } from "@homa/core";
+import { colorTokens, fontRoles } from "@homa/design/contract";
 
 import { HOUSE_PATH } from "../../components/brand/Logo";
 import { escapeHtml } from "../html-escape";
+import {
+  MATERIAL_BRAND_ERA,
+  MATERIAL_TARGET_PROFILE,
+} from "./brand-era";
 
 /**
  * The printable page shell: the fixed contract around agent-composed
@@ -161,7 +166,10 @@ export function isAllowedPrintableSubresourceUrl(rawUrl: string): boolean {
 }
 
 /** The footer's house mark, inlined as raw SVG (same art as the Logo). */
-const FOOTER_MARK_SVG = `<svg width="12" height="12" viewBox="0 0 48 48" aria-hidden="true"><path d="${HOUSE_PATH}" fill="none" stroke="#8A7D6C" stroke-width="3.2" stroke-linejoin="round"/><circle cx="17.4" cy="26" r="2.7" fill="#8A7D6C"/><circle cx="30.6" cy="26" r="2.7" fill="#8A7D6C"/></svg>`;
+const FOOTER_MARK_SVG = `<svg width="12" height="12" viewBox="0 0 48 48" aria-hidden="true"><path d="${HOUSE_PATH}" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/><circle cx="17.4" cy="26" r="2.7" fill="currentColor"/><circle cx="30.6" cy="26" r="2.7" fill="currentColor"/></svg>`;
+
+const PRINT_INTERFACE_FONT_STACK = `"${fontRoles.interface.family}", "Segoe UI", sans-serif`;
+const PRINT_DISPLAY_FONT_STACK = `"${fontRoles.display.family}", Georgia, "Times New Roman", serif`;
 
 /**
  * How a multi-page material's pages live in the one `materials.html`
@@ -248,16 +256,32 @@ export function wrapPrintableDocument(
     )
     .join("\n");
   return `<!doctype html>
-<html>
+<html data-brand-era="${MATERIAL_BRAND_ERA}" data-brand-profile="${MATERIAL_TARGET_PROFILE}" data-brand-surface="materials-page-shell">
 <head>
 <meta charset="utf-8" />
+<meta name="color-scheme" content="light" />
 <style>
+  :root {
+    --homa-canvas: ${colorTokens.canvas};
+    --homa-ink: ${colorTokens.ink};
+    --homa-paper: ${colorTokens.paper};
+    --homa-floating: ${colorTokens.floating};
+    --homa-visual-coral: ${colorTokens.visualCoral};
+    --homa-midnight-action: ${colorTokens.midnightAction};
+    --homa-brand-text: ${colorTokens.brandText};
+    --homa-control-boundary: ${colorTokens.controlBoundary};
+    --homa-radius-control: 12px;
+    --homa-radius-card: 18px;
+    --homa-font-interface: ${PRINT_INTERFACE_FONT_STACK};
+    --homa-font-display: ${PRINT_DISPLAY_FONT_STACK};
+  }
   @page { size: letter; margin: 0; }
   html, body { margin: 0; padding: 0; }
   body {
     width: 8.5in;
-    font-family: -apple-system, "Segoe UI", sans-serif;
-    color: #221e1a;
+    font-family: var(--homa-font-interface);
+    color: var(--homa-ink);
+    background: var(--homa-canvas);
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -267,6 +291,7 @@ export function wrapPrintableDocument(
     width: 8.5in;
     height: 11in;
     overflow: hidden;
+    background: var(--homa-paper);
     page-break-after: always;
     break-after: page;
     page-break-inside: avoid;
@@ -280,6 +305,7 @@ export function wrapPrintableDocument(
     box-sizing: border-box;
     height: 100%;
     padding: 0.55in 0.6in 0.95in;
+    color: var(--homa-ink);
   }
   .homa-sheet-footer {
     position: absolute;
@@ -291,7 +317,7 @@ export function wrapPrintableDocument(
     align-items: center;
     gap: 5px;
     font-size: 9.5px;
-    color: #8a7d6c;
+    color: color-mix(in srgb, var(--homa-ink) 58%, var(--homa-canvas));
   }
 </style>
 </head>

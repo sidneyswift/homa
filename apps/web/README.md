@@ -115,19 +115,22 @@ pnpm --filter web dev   # http://localhost:3000
   `lib/materials/pinned-privacy.test.ts` protects final-only lesson visibility
   across pinned find, show, and card reads while preserving the exact
   pre-migration legacy query shape.
-- `components/marketing/` landing sections, ported from
-  `docs/homa-design/ui_kits/landing/` (tokens hand-copied into
-  `app/globals.css` until `packages/design` lands, ticket M1-17).
+- `components/marketing/` landing sections, migrating to the Quiet authority
+  contract under gh#683 (legacy values remain frozen until each row passes its
+  own evidence gate).
 - `vercel.json` registers the hourly `/api/map/cron` request. Registration does
   not prove successful production execution.
 
 ## Webchat prompt suggestions
 
-The founder-editable production prompt lives at
-`agent/prompt-suggestions.md`. Live next-message suggestions run only in web
-chat. SMS, email, dispatch, and mobile do not use them. The latest eligible
-rail is stored in local browser chat state so it can return after a route
-change or reload; it is not durable family data.
+Webchat prompt suggestions are paused pending a more valuable redesign.
+`ChatClient` renders neither the fixed starter chips nor the generated rail,
+and it does not request suggestion sets after replies. SMS, email, dispatch,
+and mobile remain unchanged.
+
+The isolated implementation is retained for redesign work. Its editable
+prompt lives at `agent/prompt-suggestions.md`, and suggestion sets remain
+local browser data rather than durable family data.
 
 Run `pnpm check:prompt-suggestions` for the credential-free fixture, contract,
 policy, storage, rail, and client checks that CI uses. Run

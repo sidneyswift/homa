@@ -1,7 +1,7 @@
 /**
  * Generate the static Homa brand assets from the design-system logo geometry
- * (docs/homa-design/components/brand/Logo.jsx, mirrored in
- * apps/web/components/brand/Logo.tsx). Run with: pnpm gen:brand
+ * (@homa/design's generated brand contract, projected in web and native
+ * adapters). Run with: pnpm gen:brand
  *
  * Outputs:
  * - apps/web/public/brand/homa-lockup.svg / .png    (mark + bounced wordmark, light surfaces)
@@ -17,36 +17,93 @@
  *   and 1320x2868 phone wallpapers, the largest current iPhone resolution,
  *   iOS scales down cleanly. Solid backgrounds on purpose: iOS composites
  *   transparent avatars onto an auto-picked color that can swallow the mark.)
+ * - apps/mobile/assets/brand/                       (Expo icon, adaptive icon,
+ *   monochrome icon, and splash SVGs; the same contract geometry and colors)
+ * - apps/mobile/assets/images/                     (the PNG projections Expo
+ *   consumes, rasterized from the native SVGs above)
  *
  * The wordmark letters are converted to vector paths via satori + the vendored
  * Fredoka 600 WOFF, so the SVGs render correctly without the font installed.
- * Token hexes are inlined (static files cannot read CSS variables); they are
- * hand-copied from apps/web/app/globals.css, same as opengraph-image.tsx.
+ * Token hexes are inlined from the Quiet authority contract so generated
+ * distribution assets do not create a second palette authority.
  */
 
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile as writeGeneratedFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import satori from "satori";
 import sharp from "sharp";
+import { colorTokens, logoGeometry } from "../packages/design/src/contract/index.ts";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const WEB_ROOT = join(REPO_ROOT, "apps/web");
 const BRAND_DIR = join(WEB_ROOT, "public/brand");
 const MARKETING_BRAND_DIR = join(REPO_ROOT, "marketing/assets/brand");
+const MOBILE_BRAND_DIR = join(REPO_ROOT, "apps/mobile/assets/brand");
+const MOBILE_IMAGE_DIR = join(REPO_ROOT, "apps/mobile/assets/images");
+const CHECK = process.argv.includes("--check");
 
-// globals.css tokens, by hand: clay-500 (brand), clay-400 (mark on dark),
-// stone-900 (text-strong, also the pupils), clay-50 (the soft app-icon
-// surface), and the dark theme's night-sky page (tokens/dark.css --bg-page).
-const CLAY_500 = "#E7602F";
-const CLAY_400 = "#F1793F";
-const STONE_900 = "#221E1A";
-const CLAY_50 = "#FFF0E8";
-const BG_PAGE = "#FBF7F0";
-const NIGHT_NAVY = "#151B27";
+const VISUAL_CORAL = colorTokens.visualCoral;
+const INK = colorTokens.ink;
+const MINERAL_CANVAS = colorTokens.canvas;
+const CONTAINED_BAND = colorTokens.containedBand;
 
-const HOUSE_PATH =
-  "M24 5.6 C22.5 5.6 21 6.2 19.8 7.3 L7.1 18.9 C5.5 20.4 4.6 22.5 4.6 24.7 L4.6 35.2 C4.6 40.1 8.5 44 13.4 44 L34.6 44 C39.5 44 43.4 40.1 43.4 35.2 L43.4 24.7 C43.4 22.5 42.5 20.4 40.9 18.9 L28.2 7.3 C27 6.2 25.5 5.6 24 5.6 Z";
+const HOUSE_PATH = logoGeometry.housePath;
+
+async function writeOutput(path: string, content: string | Buffer): Promise<void> {
+  if (!CHECK) {
+    await writeGeneratedFile(path, content);
+    return;
+  }
+  let existing: Buffer;
+  try {
+    existing = await readFile(path);
+  } catch {
+    throw new Error(`Generated brand asset is missing: ${path}`);
+  }
+  const expected = Buffer.isBuffer(content) ? content : Buffer.from(content);
+  if (existing.equals(expected)) return;
+
+  // PNG encoders can produce different chunk/compression bytes on macOS and
+  // Linux even when they rasterize the exact same image. Compare decoded
+  // pixels for raster projections so CI proves the visual asset is current
+  // without making a platform-specific zlib stream an accidental authority.
+  if (path.endsWith(".png")) {
+    const [existingRaster, expectedRaster] = await Promise.all([
+      sharp(existing).ensureAlpha().raw().toBuffer({ resolveWithObject: true }),
+      sharp(expected).ensureAlpha().raw().toBuffer({ resolveWithObject: true }),
+    ]);
+    const sameRaster =
+      existingRaster.info.width === expectedRaster.info.width
+      && existingRaster.info.height === expectedRaster.info.height
+      && existingRaster.info.channels === expectedRaster.info.channels
+      && existingRaster.data.equals(expectedRaster.data);
+    if (sameRaster) return;
+
+    // libvips can also vary a handful of anti-aliased edge pixels between
+    // bundled builds. A 64px visual signature, quantized to four bits per
+    // channel, still catches palette, geometry, and crop drift while
+    // remaining stable across those renderer-level differences.
+    const [existingSignature, expectedSignature] = await Promise.all([
+      sharp(existing)
+        .removeAlpha()
+        .resize({ width: 64, height: 64, fit: "fill" })
+        .raw()
+        .toBuffer(),
+      sharp(expected)
+        .removeAlpha()
+        .resize({ width: 64, height: 64, fit: "fill" })
+        .raw()
+        .toBuffer(),
+    ]);
+    if (
+      existingSignature.length === expectedSignature.length
+      && existingSignature.every((value, index) => (value >> 4) === (expectedSignature[index] >> 4))
+    ) return;
+  }
+
+  throw new Error(`Generated brand asset is stale: ${path}`);
+}
 
 // [letter, baseline offset in em, rotation in deg], the bounced wordmark.
 const WORDMARK_LETTERS: ReadonlyArray<readonly [string, number, number]> = [
@@ -71,16 +128,16 @@ function houseMarkElement(size: number, body: string) {
     "svg",
     { width: size, height: size, viewBox: "0 0 48 48" },
     el("path", { d: HOUSE_PATH, fill: body }),
-    el("circle", { cx: 17.4, cy: 26, r: 4.8, fill: "#FFFFFF" }),
-    el("circle", { cx: 30.6, cy: 26, r: 4.8, fill: "#FFFFFF" }),
-    el("circle", { cx: 18.3, cy: 26.7, r: 2.2, fill: STONE_900 }),
-    el("circle", { cx: 31.5, cy: 26.7, r: 2.2, fill: STONE_900 }),
+    el("circle", { cx: 17.4, cy: 26, r: 4.8, fill: colorTokens.paper }),
+    el("circle", { cx: 30.6, cy: 26, r: 4.8, fill: colorTokens.paper }),
+    el("circle", { cx: 18.3, cy: 26.7, r: 2.2, fill: INK }),
+    el("circle", { cx: 31.5, cy: 26.7, r: 2.2, fill: INK }),
   );
 }
 
 function lockupElement(tone: "light" | "dark") {
-  const body = tone === "dark" ? CLAY_400 : CLAY_500;
-  const word = tone === "dark" ? "#FFFFFF" : STONE_900;
+  const body = VISUAL_CORAL;
+  const word = tone === "dark" ? colorTokens.paper : INK;
   const fontSize = MARK_SIZE * 0.98;
 
   return el(
@@ -154,15 +211,14 @@ const MARK_BOXES = {
   avatar: "-8 -8 64 64",
 } as const;
 
-// The two brand-card mark colorways (guidelines/brand-logo-lockup.card.html):
-// solid = colored house with white eyes; inverse = white house with colored
-// eyes (the app-icon treatment for sitting on a clay surface).
+// The two approved mark colorways: solid = visual-coral house with paper eyes;
+// inverse = paper house with coral eyes for a visual-coral surface.
 function markSvgColored(
   viewBox: keyof typeof MARK_BOXES,
   colors: { body: string; eyes: string; pupils: string },
 ): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${MARK_BOXES[viewBox]}">
-  <!-- The little-home mark from components/brand/Logo.tsx, token hexes
+  <!-- The little-home mark from the real Logo component, token values
        inlined. Generated by scripts/brand-assets.mts, do not edit by hand. -->
   <path d="${HOUSE_PATH}" fill="${colors.body}"/>
   <circle cx="17.4" cy="26" r="4.8" fill="${colors.eyes}"/>
@@ -182,7 +238,40 @@ function markSvgColored(
  *   profiles, OAuth consent screens) never clip the corners
  */
 function markSvg(viewBox: keyof typeof MARK_BOXES = "standard"): string {
-  return markSvgColored(viewBox, { body: CLAY_500, eyes: "#FFFFFF", pupils: STONE_900 });
+  return markSvgColored(viewBox, { body: VISUAL_CORAL, eyes: colorTokens.paper, pupils: INK });
+}
+
+function mobileMarkGroup(options: {
+  scale: number;
+  body: string;
+  eyes?: string;
+  pupils?: string;
+}): string {
+  const eyes = options.eyes ?? colorTokens.paper;
+  const pupils = options.pupils ?? INK;
+  return `<g transform="translate(24 24.8) scale(${options.scale}) translate(-24 -24.8)">
+    <path d="${HOUSE_PATH}" fill="${options.body}" />
+    <circle cx="17.4" cy="26" r="4.8" fill="${eyes}" />
+    <circle cx="30.6" cy="26" r="4.8" fill="${eyes}" />
+    <circle cx="18.3" cy="26.7" r="2.2" fill="${pupils}" />
+    <circle cx="31.5" cy="26.7" r="2.2" fill="${pupils}" />
+  </g>`;
+}
+
+/** Native SVG projections are generated here so Expo cannot drift from the
+ * same contract that powers web and marketing assets. */
+function mobileAssetSvgs(): Readonly<Record<string, string>> {
+  const body = colorTokens.visualCoral;
+  const canvas = colorTokens.canvas;
+  const paper = colorTokens.paper;
+  const ink = colorTokens.ink;
+  return {
+    "android-background.svg": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">\n  <rect x="0" y="0" width="48" height="48" fill="${canvas}" />\n</svg>\n`,
+    "android-foreground.svg": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">\n  <!-- Android adaptive foreground: mark inside the ~66% safe zone. -->\n  ${mobileMarkGroup({ scale: 0.52, body, eyes: paper, pupils: ink })}\n</svg>\n`,
+    "android-monochrome.svg": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">\n  <!-- Android monochrome glyph: single-color silhouette, OS tints it. -->\n  <g transform="translate(24 24.8) scale(0.52) translate(-24 -24.8)">\n    <path d="${HOUSE_PATH}" fill="${paper}" />\n  </g>\n</svg>\n`,
+    "icon.svg": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">\n  <!-- App icon: the master Homa mark on the Quiet canvas. -->\n  <rect x="0" y="0" width="48" height="48" fill="${canvas}" />\n  ${mobileMarkGroup({ scale: 0.66, body, eyes: paper, pupils: ink })}\n</svg>\n`,
+    "splash-icon.svg": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">\n  <!-- Transparent splash mark. Expo supplies the Quiet canvas behind it. -->\n  ${mobileMarkGroup({ scale: 1, body, eyes: paper, pupils: ink }).replace(/ transform="[^"]+"/, "")}\n</svg>\n`,
+  };
 }
 
 /** Solid-background raster: the mark centered on a filled canvas (no alpha). */
@@ -252,6 +341,27 @@ async function main() {
 
   await mkdir(BRAND_DIR, { recursive: true });
   await mkdir(MARKETING_BRAND_DIR, { recursive: true });
+  await mkdir(MOBILE_BRAND_DIR, { recursive: true });
+  await mkdir(MOBILE_IMAGE_DIR, { recursive: true });
+
+  const mobileSvgs = mobileAssetSvgs();
+  for (const [name, svg] of Object.entries(mobileSvgs)) {
+    await writeOutput(join(MOBILE_BRAND_DIR, name), svg);
+  }
+  console.log("wrote native SVG brand assets (Expo icon, adaptive icon, monochrome icon, splash)");
+
+  const mobilePngs = [
+    ["android-background.svg", "android-icon-background.png", 1024],
+    ["android-foreground.svg", "android-icon-foreground.png", 1024],
+    ["android-monochrome.svg", "android-icon-monochrome.png", 1024],
+    ["icon.svg", "icon.png", 1024],
+    ["icon.svg", "favicon.png", 48],
+    ["splash-icon.svg", "splash-icon.png", 1024],
+  ] as const;
+  for (const [svgName, pngName, width] of mobilePngs) {
+    await writeOutput(join(MOBILE_IMAGE_DIR, pngName), await renderSvgToPng(mobileSvgs[svgName], width));
+  }
+  console.log("wrote native PNG projections (Expo icon, adaptive icon, monochrome icon, favicon, splash)");
 
   for (const tone of ["light", "dark"] as const) {
     const raw = await satori(lockupElement(tone) as never, { ...CANVAS, fonts: [...fonts] });
@@ -259,8 +369,8 @@ async function main() {
     const png = await renderSvgToPng(svg, 1200);
     const suffix = tone === "dark" ? "-dark" : "";
     for (const dir of [BRAND_DIR, MARKETING_BRAND_DIR]) {
-      await writeFile(join(dir, `homa-lockup${suffix}.svg`), svg);
-      await writeFile(join(dir, `homa-lockup${suffix}.png`), png);
+      await writeOutput(join(dir, `homa-lockup${suffix}.svg`), svg);
+      await writeOutput(join(dir, `homa-lockup${suffix}.png`), png);
     }
     console.log(`wrote homa-lockup${suffix}.svg + .png (web public + marketing)`);
   }
@@ -268,16 +378,16 @@ async function main() {
   const mark = markSvg();
   const tightMark = markSvg("tight");
   const avatarMark = markSvg("avatar");
-  await writeFile(join(BRAND_DIR, "homa-mark.svg"), mark);
-  await writeFile(join(BRAND_DIR, "homa-mark-512.png"), await renderSvgToPng(mark, 512));
-  await writeFile(join(WEB_ROOT, "app/icon.svg"), tightMark);
+  await writeOutput(join(BRAND_DIR, "homa-mark.svg"), mark);
+  await writeOutput(join(BRAND_DIR, "homa-mark-512.png"), await renderSvgToPng(mark, 512));
+  await writeOutput(join(WEB_ROOT, "app/icon.svg"), tightMark);
   console.log("wrote homa-mark.svg, homa-mark-512.png, app/icon.svg");
 
   // Marketing gets the avatar-safe padded mark (social profiles, OAuth
   // consent screens), preserving the sizes the existing files shipped with.
-  await writeFile(join(MARKETING_BRAND_DIR, "homa-mark.svg"), avatarMark);
-  await writeFile(join(MARKETING_BRAND_DIR, "homa-mark-512.png"), await renderSvgToPng(avatarMark, 512));
-  await writeFile(join(MARKETING_BRAND_DIR, "homa-mark-120.png"), await renderSvgToPng(avatarMark, 120));
+  await writeOutput(join(MARKETING_BRAND_DIR, "homa-mark.svg"), avatarMark);
+  await writeOutput(join(MARKETING_BRAND_DIR, "homa-mark-512.png"), await renderSvgToPng(avatarMark, 512));
+  await writeOutput(join(MARKETING_BRAND_DIR, "homa-mark-120.png"), await renderSvgToPng(avatarMark, 120));
   console.log("wrote marketing homa-mark.svg + 512/120 PNGs");
 
   // Phone-ready rasters with SOLID backgrounds (iOS composites transparent
@@ -285,18 +395,18 @@ async function main() {
   // Colorways are the brand card's three sanctioned surface treatments.
   const inverseAvatarMark = markSvgColored("avatar", {
     body: "#FFFFFF",
-    eyes: CLAY_500,
+    eyes: VISUAL_CORAL,
     pupils: "#FFFFFF",
   });
   const nightAvatarMark = markSvgColored("avatar", {
-    body: CLAY_400,
+    body: VISUAL_CORAL,
     eyes: "#FFFFFF",
-    pupils: STONE_900,
+    pupils: INK,
   });
   const nightStandardMark = markSvgColored("standard", {
-    body: CLAY_400,
+    body: VISUAL_CORAL,
     eyes: "#FFFFFF",
-    pupils: STONE_900,
+    pupils: INK,
   });
 
   const PHONE_DIR = join(MARKETING_BRAND_DIR, "phone");
@@ -304,12 +414,12 @@ async function main() {
 
   const pfpCanvas = { width: 1024, height: 1024 };
   const pfps = [
-    { name: "homa-pfp-clay-1024.png", svg: inverseAvatarMark, background: CLAY_500 },
-    { name: "homa-pfp-cream-1024.png", svg: avatarMark, background: CLAY_50 },
-    { name: "homa-pfp-night-1024.png", svg: nightAvatarMark, background: NIGHT_NAVY },
+    { name: "homa-pfp-clay-1024.png", svg: inverseAvatarMark, background: VISUAL_CORAL },
+    { name: "homa-pfp-cream-1024.png", svg: avatarMark, background: MINERAL_CANVAS },
+    { name: "homa-pfp-night-1024.png", svg: nightAvatarMark, background: CONTAINED_BAND },
   ];
   for (const { name, svg, background } of pfps) {
-    await writeFile(
+    await writeOutput(
       join(PHONE_DIR, name),
       await renderMarkOnBackground({ markSvgText: svg, markWidth: 780, canvas: pfpCanvas, background }),
     );
@@ -320,11 +430,11 @@ async function main() {
   // Mark sits a touch above center so iOS name/clock chrome doesn't crowd it.
   const wallCanvas = { width: 1320, height: 2868 };
   const walls = [
-    { name: "homa-wallpaper-cream.png", svg: markSvg(), background: BG_PAGE },
-    { name: "homa-wallpaper-night.png", svg: nightStandardMark, background: NIGHT_NAVY },
+    { name: "homa-wallpaper-cream.png", svg: markSvg(), background: MINERAL_CANVAS },
+    { name: "homa-wallpaper-night.png", svg: nightStandardMark, background: CONTAINED_BAND },
   ];
   for (const { name, svg, background } of walls) {
-    await writeFile(
+    await writeOutput(
       join(PHONE_DIR, name),
       await renderMarkOnBackground({
         markSvgText: svg,
@@ -341,7 +451,7 @@ async function main() {
   for (const size of [16, 32, 48]) {
     icoEntries.push({ size, png: await renderSvgToPng(tightMark, size) });
   }
-  await writeFile(join(WEB_ROOT, "app/favicon.ico"), packIco(icoEntries));
+  await writeOutput(join(WEB_ROOT, "app/favicon.ico"), packIco(icoEntries));
   console.log("wrote app/favicon.ico (16, 32, 48)");
 }
 

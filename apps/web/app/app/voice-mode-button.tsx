@@ -1,6 +1,6 @@
 "use client";
 
-import { AudioLines } from "lucide-react";
+import { Icon } from "../../components/design/Icon";
 
 /**
  * The composer's primary button while the box is empty: start talking
@@ -28,9 +28,9 @@ export function VoiceModeButton({ onStart }: { onStart: () => void }) {
       aria-label="Talk with Homa"
       title="Talk with Homa"
       onClick={onStart}
-      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
+      className="quiet-chat__composer-action quiet-chat__composer-action--send"
     >
-      <AudioLines size={18} aria-hidden="true" />
+      <Icon name="voice" size={20} />
     </button>
   );
 }

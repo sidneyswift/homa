@@ -1,42 +1,29 @@
 import type { Metadata, Viewport } from "next";
-import { Caveat, EB_Garamond, Fredoka, Hanken_Grotesk, JetBrains_Mono, Schibsted_Grotesk } from "next/font/google";
+import { DM_Sans, EB_Garamond, Fredoka, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { DevToolbarSlot } from "../components/dev/dev-toolbar-slot";
 import { WaitlistQueueFlusher } from "./waitlist-queue-flusher";
 
-// Homa Design System v3 fonts (docs/homa-design/tokens/fonts.css), loaded via
-// next/font for self-hosting + zero layout shift instead of the DS's raw
-// Google Fonts @import. Weights mirror the token file exactly.
-const schibstedGrotesk = Schibsted_Grotesk({
-  variable: "--font-schibsted",
+// Temporary legacy font projection. The Quiet authority font projection is
+// owned by @homa/design and rolls out through the surface gauntlets.
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const ebGaramond = EB_Garamond({
   variable: "--font-eb-garamond",
   subsets: ["latin"],
   style: ["normal", "italic"],
-  weight: ["400", "500"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const fredoka = Fredoka({
   variable: "--font-fredoka",
   subsets: ["latin"],
   weight: ["500", "600"],
-});
-
-const hankenGrotesk = Hanken_Grotesk({
-  variable: "--font-hanken",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const caveat = Caveat({
-  variable: "--font-caveat",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
 });
 
 const jetBrainsMono = JetBrains_Mono({
@@ -83,7 +70,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FBF7F0",
+  themeColor: "#F7F4EE",
 };
 
 /**
@@ -121,7 +108,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${schibstedGrotesk.variable} ${ebGaramond.variable} ${fredoka.variable} ${hankenGrotesk.variable} ${caveat.variable} ${jetBrainsMono.variable} h-full antialiased`}
+      className={`${dmSans.variable} ${ebGaramond.variable} ${fredoka.variable} ${jetBrainsMono.variable} h-full antialiased`}
       // The landing page arms its scroll-reveal system pre-paint with an
       // inline script that adds .rv-armed to this element before hydration
       // (app/page.tsx); suppress the one-level attribute check so React
@@ -129,7 +116,7 @@ export default function RootLayout({
       // theme scripts.
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
+      <body className="quiet-root min-h-full flex flex-col">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd).replace(/</g, "\\u003c") }}

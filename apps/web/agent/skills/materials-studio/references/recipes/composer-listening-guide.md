@@ -48,23 +48,23 @@ Design patterns (all binding for composer-listening-guide):
 ```html
 <style>
   .listen-guide { font-family: 'Andika', sans-serif; padding: 24px; }
-  .listen-piece { font-size: 30px; font-weight: 700; color: #221e1a; }
-  .listen-composer { font-size: 15px; color: #6b6259; margin-bottom: 16px; }
-  .listen-for { border: 2.5px solid #221e1a; border-radius: 8px;
+  .listen-piece { font-size: 30px; font-weight: 700; color: var(--homa-ink); }
+  .listen-composer { font-size: 15px; color: var(--homa-control-boundary); margin-bottom: 16px; }
+  .listen-for { border: 2.5px solid var(--homa-ink); border-radius: 8px;
     padding: 12px 14px; margin-bottom: 18px; font-size: 15px; }
   .listen-for strong { text-transform: uppercase; font-size: 12px;
     letter-spacing: 0.05em; display: block; margin-bottom: 4px;
-    color: #6b6259; }
+    color: var(--homa-control-boundary); }
   .moment { display: flex; gap: 12px; align-items: flex-start;
-    border: 1.5px solid #6b6259; border-radius: 6px; padding: 10px;
+    border: 1.5px solid var(--homa-control-boundary); border-radius: 6px; padding: 10px;
     margin-bottom: 10px; }
-  .moment-check { width: 22px; height: 22px; border: 2px solid #221e1a;
+  .moment-check { width: 22px; height: 22px; border: 2px solid var(--homa-ink);
     border-radius: 4px; flex-shrink: 0; }
   .moment-text { font-size: 14px; flex: 1; }
-  .moment-sketch { width: 90px; height: 58px; border: 1px dashed #6b6259;
+  .moment-sketch { width: 90px; height: 58px; border: 1px dashed var(--homa-control-boundary);
     border-radius: 4px; flex-shrink: 0; }
   .listen-feeling { margin-top: 18px; font-size: 15px; }
-  .listen-feeling .rule { border-bottom: 1.5px solid #221e1a;
+  .listen-feeling .rule { border-bottom: 1.5px solid var(--homa-ink);
     display: inline-block; width: 60%; }
 </style>
 <div class="listen-guide">

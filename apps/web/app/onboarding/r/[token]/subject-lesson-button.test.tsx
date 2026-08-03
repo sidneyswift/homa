@@ -242,7 +242,7 @@ describe("retained report subject lesson actions", () => {
       const card = subjectCardHtml(html, subjectId);
       assert.match(
         card,
-        /<button[^>]*bg-\[var\(--clay-700\)\][^>]*>Build the next lesson<\/button>/u,
+        /<button[^>]*quiet-action--primary[^>]*>Build the next lesson<\/button>/u,
       );
       assert.equal(
         (card.match(/Build the next lesson/gu) ?? []).length,
@@ -265,7 +265,7 @@ describe("retained report subject lesson actions", () => {
 
     assert.match(
       card,
-      /<a[^>]*bg-\[var\(--clay-700\)\][^>]*>Open the lesson<\/a>/u,
+      /<a[^>]*quiet-action--primary[^>]*>Open the lesson<\/a>/u,
     );
     assert.match(
       card,
@@ -370,10 +370,10 @@ describe("SubjectLessonButton", () => {
 
     assert.match(
       html,
-      /<a[^>]*bg-\[var\(--clay-700\)\][^>]*hover:bg-\[var\(--clay-600\)\][^>]*>Open the lesson<\/a>/u,
+      /<a[^>]*quiet-action--primary[^>]*>Open the lesson<\/a>/u,
     );
     assert.match(html, /min-h-11/u);
-    assert.match(html, /focus-visible:shadow-\[var\(--shadow-focus\)\]/u);
+    assert.match(html, /focus-visible:outline-2/u);
     assert.doesNotMatch(html, /<button/u);
   });
 
@@ -504,10 +504,13 @@ describe("SubjectLessonButton", () => {
     const { SUBJECT_LESSON_INFO_NOTE_CLASS } =
       await loadSubjectLessonButton();
 
-    assert.match(SUBJECT_LESSON_INFO_NOTE_CLASS, /text-strong/u);
     assert.match(
       SUBJECT_LESSON_INFO_NOTE_CLASS,
-      /bg-\[var\(--info-soft\)\]/u,
+      /text-\[var\(--homa-ink\)\]/u,
+    );
+    assert.match(
+      SUBJECT_LESSON_INFO_NOTE_CLASS,
+      /bg-\[var\(--homa-info-tint\)\]/u,
     );
     assert.doesNotMatch(SUBJECT_LESSON_INFO_NOTE_CLASS, /sky-600/u);
     assert.ok(

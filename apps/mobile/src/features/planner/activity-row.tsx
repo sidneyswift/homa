@@ -1,8 +1,8 @@
-import { Check } from "lucide-react-native";
 import { useState } from "react";
 import { Linking, Pressable, Text, View } from "react-native";
 
 import { InlineError } from "../../components/ui/inline-error";
+import { Icon } from "../../components/design/icon";
 import { reportCrash } from "../../lib/crash-reporting";
 import { PlanActivityCheckConflictError } from "../../lib/plan-check-mutation";
 import { fontFamilies } from "../../theme/fonts";
@@ -76,14 +76,14 @@ export function ActivityRow({
             height: 20,
             borderRadius: radius.xs,
             borderWidth: 1.5,
-            borderColor: checked ? colors.brand : colors.border,
-            backgroundColor: checked ? colors.brand : "transparent",
+            borderColor: checked ? colors.action : colors.border,
+            backgroundColor: checked ? colors.action : "transparent",
             alignItems: "center",
             justifyContent: "center",
             marginTop: 1,
           }}
         >
-          {checked ? <Check size={13} color={colors.onBrand} /> : null}
+          {checked ? <Icon name="check" size={16} color={colors.onBrand} /> : null}
         </View>
         <View style={{ flex: 1 }}>
           <Text

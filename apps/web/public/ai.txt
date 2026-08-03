@@ -7,3 +7,9 @@
 #   https://thankshoma.com/llms.txt
 #   https://thankshoma.com/llms-full.txt
 # Sitemap: https://thankshoma.com/sitemap.xml
+# Canonical feature pages:
+#   https://thankshoma.com/features/homeschool-planner
+#   https://thankshoma.com/features/homeschool-hours-tracker
+#   https://thankshoma.com/features/homeschool-progress-tracker
+#   https://thankshoma.com/features/homeschool-record-keeping
+#   https://thankshoma.com/features/personalized-practice-pages

@@ -62,6 +62,13 @@ function renderParentsSection(
 }
 
 describe("Parents settings phone editor destination", () => {
+  it("uses the semantic Quiet icon adapter for the call affordance", () => {
+    assert.match(SETTINGS_PAGE_SOURCE, /data-brand-surface="settings"/u);
+    const source = readFileSync(new URL("./parents-section.tsx", import.meta.url), "utf8");
+    assert.match(source, /<Icon name="chat"/u);
+    assert.doesNotMatch(source, /from "lucide-react"/u);
+  });
+
   it("opens only for the exact server-derived phone edit request", () => {
     assert.equal(shouldOpenSignedInAdultPhoneEditor("phone"), true);
     for (const value of [undefined, "profile", ["phone"]] as const) {

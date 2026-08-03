@@ -42,9 +42,9 @@ export function KidSwitcher({
               paddingHorizontal: space.md,
               paddingVertical: 10,
               borderRadius: radius.pill,
-              backgroundColor: active ? colors.brandHover : colors.card,
+              backgroundColor: active ? colors.action : colors.card,
               borderWidth: 1,
-              borderColor: active ? colors.brandHover : colors.borderSubtle,
+              borderColor: active ? colors.action : colors.borderSubtle,
               alignItems: "center",
               justifyContent: "center",
             }}

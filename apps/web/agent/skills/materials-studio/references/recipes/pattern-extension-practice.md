@@ -55,11 +55,11 @@ Design patterns (all binding for pattern-extension-practice):
 ```html
 <style>
   .pat-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-  .pat-cell { width: 56px; height: 56px; border: 2px solid #221e1a;
+  .pat-cell { width: 56px; height: 56px; border: 2px solid var(--homa-ink);
     border-radius: 8px; display: flex; align-items: center;
     justify-content: center; }
-  .pat-cell-blank { border: 2px dashed #6b6259; background: #fff; }
-  .pat-instruction { font-size: 16px; font-weight: 600; color: #221e1a;
+  .pat-cell-blank { border: 2px dashed var(--homa-control-boundary); background: #fff; }
+  .pat-instruction { font-size: 16px; font-weight: 600; color: var(--homa-ink);
     margin-bottom: 12px; }
 </style>
 ```

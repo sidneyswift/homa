@@ -57,20 +57,20 @@ Design patterns (all binding for biography-timeline-page):
 ```html
 <style>
   .bio-timeline { font-family: 'Andika', sans-serif; padding: 24px; }
-  .bio-title { font-size: 26px; font-weight: 700; color: #221e1a;
+  .bio-title { font-size: 26px; font-weight: 700; color: var(--homa-ink);
     margin-bottom: 20px; text-align: center; }
   .bio-strip { display: flex; align-items: flex-start; gap: 0;
     position: relative; }
   .bio-strip::before { content: ""; position: absolute; top: 54px;
-    left: 4%; right: 4%; height: 3px; background: #b3a492; z-index: 0; }
+    left: 4%; right: 4%; height: 3px; background: var(--homa-control-boundary); z-index: 0; }
   .bio-event { flex: 1; display: flex; flex-direction: column;
     align-items: center; padding: 0 8px; position: relative; z-index: 1; }
-  .bio-year { background: #221e1a; color: #fff; font-weight: 700;
+  .bio-year { background: var(--homa-ink); color: #fff; font-weight: 700;
     font-size: 13px; border-radius: 999px; padding: 4px 12px;
     margin-bottom: 10px; }
   .bio-image { width: 100%; aspect-ratio: 1 / 1; border: 2px solid
-    #221e1a; border-radius: 6px; margin-bottom: 8px; }
-  .bio-caption { font-size: 13px; color: #221e1a; text-align: center;
+    var(--homa-ink); border-radius: 6px; margin-bottom: 8px; }
+  .bio-caption { font-size: 13px; color: var(--homa-ink); text-align: center;
     line-height: 1.35; }
 </style>
 

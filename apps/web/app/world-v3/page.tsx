@@ -6,8 +6,8 @@ import { W3Reveal } from "./reveal";
 
 /**
  * /world-v3: the composition-system landing experiment (2026-07-22), built
- * from the founder-approved mock saved at
- * docs/homa-design/explorations/2026-07-22-landing-v3-composition-mock.html.
+ * from a founder-approved composition exploration. The active target is now
+ * the Quiet authority contract and public-web migration issue.
  * The system: contained media on the cream page (never full-bleed photos),
  * real product UI as the literal proof (report card, worksheet, planner
  * board, morning note), photos demoted to small tilted chips, text position
@@ -420,7 +420,7 @@ const WORKSHEET_ROWS = [
  */
 function Dino({ kind }: { kind: "longneck" | "stego" | "trike" }) {
   const s = {
-    stroke: "#221E1A",
+    stroke: "var(--homa-ink)",
     strokeWidth: 2.2,
     strokeLinejoin: "round" as const,
     strokeLinecap: "round" as const,
@@ -436,7 +436,7 @@ function Dino({ kind }: { kind: "longneck" | "stego" | "trike" }) {
                L16 39 L16 27.5 Q10 30 3 29 Z"
             {...s}
           />
-          <circle cx="42.2" cy="9.4" r="1.15" fill="#221E1A" />
+          <circle cx="42.2" cy="9.4" r="1.15" fill="var(--homa-ink)" />
         </>
       )}
       {kind === "stego" && (
@@ -447,10 +447,10 @@ function Dino({ kind }: { kind: "longneck" | "stego" | "trike" }) {
                L17 39 L17 28 Q10 31 3 30 Z"
             {...s}
           />
-          <path d="M18 24.5 L20.5 17 L24.5 23" fill="none" stroke="#221E1A" strokeWidth="2.2" strokeLinejoin="round" />
-          <path d="M25.5 22.5 L28.5 15 L32.5 21" fill="none" stroke="#221E1A" strokeWidth="2.2" strokeLinejoin="round" />
-          <path d="M33.5 21 L36.5 16 L39 22.5" fill="none" stroke="#221E1A" strokeWidth="2.2" strokeLinejoin="round" />
-          <circle cx="43.4" cy="24.4" r="1.05" fill="#221E1A" />
+          <path d="M18 24.5 L20.5 17 L24.5 23" fill="none" stroke="var(--homa-ink)" strokeWidth="2.2" strokeLinejoin="round" />
+          <path d="M25.5 22.5 L28.5 15 L32.5 21" fill="none" stroke="var(--homa-ink)" strokeWidth="2.2" strokeLinejoin="round" />
+          <path d="M33.5 21 L36.5 16 L39 22.5" fill="none" stroke="var(--homa-ink)" strokeWidth="2.2" strokeLinejoin="round" />
+          <circle cx="43.4" cy="24.4" r="1.05" fill="var(--homa-ink)" />
         </>
       )}
       {kind === "trike" && (
@@ -461,9 +461,9 @@ function Dino({ kind }: { kind: "longneck" | "stego" | "trike" }) {
                L17 39 L17 28 Q10 31 3 30 Z"
             {...s}
           />
-          <path d="M43.5 18 Q46 23 43.5 28" fill="none" stroke="#221E1A" strokeWidth="1.8" strokeLinecap="round" />
-          <path d="M50 19.5 L57.5 15.5" fill="none" stroke="#221E1A" strokeWidth="2.2" strokeLinecap="round" />
-          <circle cx="47.6" cy="23.4" r="1.05" fill="#221E1A" />
+          <path d="M43.5 18 Q46 23 43.5 28" fill="none" stroke="var(--homa-ink)" strokeWidth="1.8" strokeLinecap="round" />
+          <path d="M50 19.5 L57.5 15.5" fill="none" stroke="var(--homa-ink)" strokeWidth="2.2" strokeLinecap="round" />
+          <circle cx="47.6" cy="23.4" r="1.05" fill="var(--homa-ink)" />
         </>
       )}
     </svg>
@@ -475,8 +475,8 @@ const CSS = `
   --w3-line: rgba(34,30,26,.08);
   --w3-shadow: var(--shadow-sm, 0 10px 30px rgba(90,62,40,.10));
   --w3-shadow-lg: var(--shadow-lg, 0 24px 60px rgba(90,62,40,.16));
-  background: var(--bg-page, #FBF7F0);
-  color: var(--text-strong, #221E1A);
+  background: var(--homa-canvas);
+  color: var(--homa-ink);
   font-family: var(--font-sans, system-ui, sans-serif);
   overflow-x: clip;
 }
@@ -515,17 +515,17 @@ const CSS = `
 
 /* chrome */
 .w3-topbar{position:sticky; top:0; z-index:50; display:flex; align-items:center; justify-content:space-between;
-  padding:14px clamp(18px,5vw,48px); background:color-mix(in srgb, var(--bg-page,#FBF7F0) 88%, transparent);
+  padding:14px clamp(18px,5vw,48px); background:color-mix(in srgb, var(--homa-canvas) 88%, transparent);
   backdrop-filter:blur(12px);}
 .w3-cta{font-weight:600; font-size:.88rem; text-decoration:none; color:#fff; background:var(--brand,#E7602F);
   padding:10px 20px; border-radius:999px; box-shadow:var(--w3-shadow); white-space:nowrap;
   transition:background .2s, transform .2s;}
-.w3-cta:hover{background:var(--brand-hover,#C44C22);}
+.w3-cta:hover{background:var(--homa-brand-text);}
 .w3-cta:active{transform:scale(.97);}
 
 /* hero */
 .w3-hero{text-align:center; padding-top:clamp(28px,5vw,64px);}
-.w3-chip-clay{display:inline-block; font-size:.8rem; font-weight:600; color:var(--brand-hover,#C44C22);
+.w3-chip-clay{display:inline-block; font-size:.8rem; font-weight:600; color:var(--homa-brand-text);
   background:var(--brand-soft,#FFF0E8); border:1px solid var(--clay-100,#FFDDC9);
   padding:7px 14px; border-radius:999px; margin-bottom:26px;}
 .w3-phone-stage{position:relative; display:flex; justify-content:center; margin-top:8px;}
@@ -602,7 +602,7 @@ html:not(.w3-armed) .w3-traj-dot{opacity:1;}
 .w3-paper-char{position:absolute; right:-17px; top:-21px; z-index:2;}
 .w3-ph{display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
   border-bottom:2px solid #f0ede6; padding-bottom:10px; margin-bottom:6px;}
-.w3-ph-t{display:block; font-family:var(--font-display); font-weight:700; font-size:1.08rem; color:#221E1A;
+.w3-ph-t{display:block; font-family:var(--font-display); font-weight:700; font-size:1.08rem; color:var(--homa-ink);
   line-height:1.2;}
 .w3-instr{display:block; font-size:.72rem; color:#8C8478; margin-top:4px;}
 .w3-ph-k{font-size:.68rem; color:#9C9186; white-space:nowrap; padding-top:3px;}
@@ -613,7 +613,7 @@ html:not(.w3-armed) .w3-traj-dot{opacity:1;}
 .w3-dino{width:54px; height:40px; flex-shrink:0;}
 /* The answer box is where a child writes the count, so it reads as a writing
    field: a ruled guide line inside a printable-weight box, not a checkbox. */
-.w3-ansbox{width:36px; height:36px; border:2.5px solid #221E1A; border-radius:8px; flex-shrink:0;
+.w3-ansbox{width:36px; height:36px; border:2.5px solid var(--homa-ink); border-radius:8px; flex-shrink:0;
   position:relative; background:#fff; display:grid; place-items:center;}
 .w3-ansbox::after{content:""; position:absolute; left:7px; right:7px; bottom:8px;
   border-bottom:1.5px dashed #CFC8BA;}
@@ -631,10 +631,10 @@ html:not(.w3-armed) .w3-traj-dot{opacity:1;}
 .w3-goal{display:flex; align-items:center; gap:8px; font-size:.74rem; font-weight:600; border-radius:10px;
   padding:7px 11px; margin-bottom:7px;}
 .w3-goal-lb{font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; font-weight:700; opacity:.75;}
-.w3-goal-clay{background:var(--brand-soft,#FFF0E8); color:var(--brand-hover,#C44C22);}
+.w3-goal-clay{background:var(--homa-error-tint); color:var(--homa-brand-text);}
 .w3-goal-sage{background:var(--sage-50,#EAF6EC); color:var(--sage-600,#2F7C40);}
 .w3-days{display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-top:12px;}
-.w3-day{background:var(--bg-page,#FBF7F0); border:1px solid var(--w3-line); border-radius:13px; padding:9px;}
+.w3-day{background:var(--homa-canvas); border:1px solid var(--w3-line); border-radius:13px; padding:9px;}
 .w3-day.w3-today{border:1.6px solid var(--brand,#E7602F);}
 .w3-dh{font-size:.66rem; font-weight:700; letter-spacing:.06em; color:var(--text-subtle,#9C9186);
   margin-bottom:7px; display:flex; justify-content:space-between; align-items:center;}
@@ -666,7 +666,7 @@ html:not(.w3-armed) .w3-slide{transform:none; opacity:1;}
 .w3-night i{position:absolute; width:3px; height:3px; border-radius:50%; background:var(--gold-300,#FFE175);
   opacity:.7;}
 .w3-s1{top:14%; left:8%;} .w3-s2{top:24%; left:88%;} .w3-s3{top:10%; left:55%;} .w3-s4{top:38%; left:72%;}
-.w3-mnote{background:#fff; color:#221E1A; border-radius:14px; padding:12px 15px; max-width:330px;
+.w3-mnote{background:var(--homa-paper); color:var(--homa-ink); border-radius:14px; padding:12px 15px; max-width:330px;
   box-shadow:0 12px 34px rgba(0,0,0,.35);}
 .w3-mh{display:flex; align-items:center; gap:7px; font-size:.72rem; font-weight:700;
   color:var(--gold-ink,#8A6410); letter-spacing:.06em; text-transform:uppercase; margin-bottom:6px;}
@@ -683,9 +683,9 @@ html:not(.w3-armed) .w3-slide{transform:none; opacity:1;}
 .w3-btn-row{display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:10px;}
 .w3-btn{font-weight:600; font-size:.95rem; padding:14px 26px; border-radius:999px; text-decoration:none;}
 .w3-btn-primary{background:var(--brand,#E7602F); color:#fff; box-shadow:var(--w3-shadow);}
-.w3-btn-primary:hover{background:var(--brand-hover,#C44C22);}
-.w3-btn-ghost{color:var(--text-strong,#221E1A);
-  border:1.5px solid color-mix(in srgb, var(--text-strong,#221E1A) 25%, transparent);}
+.w3-btn-primary:hover{background:var(--homa-brand-text);}
+.w3-btn-ghost{color:var(--homa-ink);
+  border:1.5px solid color-mix(in srgb, var(--homa-ink) 25%, transparent);}
 
 /* trust */
 .w3-trust{max-width:1020px; margin:0 auto;}

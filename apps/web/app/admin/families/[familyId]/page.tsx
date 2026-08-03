@@ -95,8 +95,8 @@ export default async function AdminFamilyDetailPage({
   ];
 
   return (
-    <div>
-      <Link href="/admin/families" className="text-sm font-semibold text-[var(--clay-600)] hover:underline">
+    <div data-brand-surface="admin-family-detail" className="quiet-admin__child">
+      <Link href="/admin/families" className="text-sm font-semibold text-[var(--homa-brand-text)] hover:underline">
         Back to families
       </Link>
       <div className="mt-2 flex flex-wrap items-center gap-3">
@@ -164,7 +164,7 @@ export default async function AdminFamilyDetailPage({
                       {kid.hasReport ? (
                         <Link
                           href={`/admin/families/${detail.id}/report/${kid.id}`}
-                          className="text-xs font-semibold text-[var(--clay-600)] hover:underline"
+                          className="text-xs font-semibold text-[var(--homa-brand-text)] hover:underline"
                         >
                           view report
                         </Link>

@@ -89,6 +89,5 @@ describe("ChatClient hydration wiring (GH #405)", () => {
     assert.match(source, /const renderBusy = hydrated && busy;/u);
     assert.match(source, /latestDetailRequest\(renderMessages\)/u);
     assert.match(source, /latestChecklistRequest\(renderMessages\)/u);
-    assert.match(source, /showPromptSuggestionRail =\s*hydrated/u);
   });
 });

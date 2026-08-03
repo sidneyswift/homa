@@ -25,7 +25,7 @@ else in the bundle derives from it after it survives the gates.
      three might...").
    - Claims rules from house-style apply hard here: temporal never causal on
      efficacy, no outcome guarantees, no clinical words.
-   - End with the waitlist CTA: one warm offer pointing at /waitlist.
+   - End with one warm CTA to a current Homa path, normally /onboarding. Use the article's canonical URL when the article itself is the next step. Do not mention or link to a waitlist.
 4. Frontmatter, exactly this contract (the blog build fails on violations,
    which is the point):
 

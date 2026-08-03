@@ -34,7 +34,7 @@ const breadcrumbJsonLd = {
 
 export default function MethodPage() {
   return (
-    <div className="min-h-screen bg-page">
+    <div className="quiet-onboarding-surface min-h-screen bg-[var(--homa-canvas)]" data-brand-surface="onboarding-method">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c") }}
@@ -44,16 +44,16 @@ export default function MethodPage() {
           <Logo size={26} />
         </Link>
 
-        <h1 className="mt-8 font-display text-3xl font-bold leading-tight text-strong">
+        <h1 className="mt-8 font-display text-3xl font-bold leading-tight text-[var(--homa-ink)]">
           How the progress report is made
         </h1>
-        <p className="mt-4 text-body">
+        <p className="mt-4 text-[var(--homa-ink)]">
           You answer a short questionnaire about what you&apos;ve seen your child do, day to day.
           Nothing is asked of your child, ever.
         </p>
 
-        <h2 className="mt-8 font-display text-xl font-semibold text-strong">The method</h2>
-        <ol className="mt-3 list-decimal space-y-3 pl-5 text-body">
+        <h2 className="mt-8 font-display text-xl font-semibold text-[var(--homa-ink)]">The method</h2>
+        <ol className="mt-3 list-decimal space-y-3 pl-5 text-[var(--homa-ink)]">
           <li>
             Every question is tied to the age when that skill is typical: its benchmark. The
             benchmarks come from the published sources below, the same ones schools and
@@ -95,27 +95,27 @@ export default function MethodPage() {
           </li>
         </ol>
 
-        <h2 className="mt-8 font-display text-xl font-semibold text-strong">What the report is not</h2>
-        <p className="mt-3 text-body">
+        <h2 className="mt-8 font-display text-xl font-semibold text-[var(--homa-ink)]">What the report is not</h2>
+        <p className="mt-3 text-[var(--homa-ink)]">
           Not a test. Not a medical or developmental evaluation. Not advice. It is your own
           observations, organized and compared with national benchmarks. Every child grows in
           their own order. A first report is an estimate, and it improves as you answer more.
           If something ever worries you, your pediatrician is the right person to ask.
         </p>
 
-        <h2 className="mt-8 font-display text-xl font-semibold text-strong">Sources</h2>
-        <ul className="mt-3 space-y-2 text-body">
+        <h2 className="mt-8 font-display text-xl font-semibold text-[var(--homa-ink)]">Sources</h2>
+        <ul className="mt-3 space-y-2 text-[var(--homa-ink)]">
           {Object.entries(MAP_SOURCES).map(([key, source]) => (
             <li key={key}>
-              <a href={source.url} className="text-brand underline-offset-2 hover:underline" rel="noopener noreferrer" target="_blank">
+              <a href={source.url} className="text-[var(--homa-brand-text)] underline-offset-2 hover:underline" rel="noopener noreferrer" target="_blank">
                 {source.label}
               </a>
             </li>
           ))}
         </ul>
 
-        <h2 className="mt-8 font-display text-xl font-semibold text-strong">Coverage today</h2>
-        <p className="mt-3 text-body">
+        <h2 className="mt-8 font-display text-xl font-semibold text-[var(--homa-ink)]">Coverage today</h2>
+        <p className="mt-3 text-[var(--homa-ink)]">
           The questionnaire covers ages 2 to 16 across {MAP_SUBJECTS.length} subjects
           ({MAP_SUBJECTS.map((domain) => domain.displayName).join(", ")}). Early ages use
           developmental milestones; school ages use national grade standards. Every question is
@@ -123,7 +123,7 @@ export default function MethodPage() {
           never as a quiz question for the child. Under 2, we save what you share and email you
           when they turn 2.
         </p>
-        <p className="mt-3 text-body">
+        <p className="mt-3 text-[var(--homa-ink)]">
           If we ever correct a benchmark, your existing report stays exactly as it was scored;
           nothing changes until you answer again. (Each report records the question-bank version
           that scored it, currently {MAP_BANK_VERSION}.)
@@ -132,7 +132,7 @@ export default function MethodPage() {
         <p className="mt-10">
           <Link
             href="/onboarding"
-            className="inline-flex min-h-12 items-center rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand hover:bg-brand-hover"
+            className="inline-flex min-h-12 items-center rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)] hover:bg-[var(--homa-ink)]"
           >
             Start your free trial
           </Link>

@@ -71,10 +71,10 @@ set is missing, ask for the target rather than making a broad alphabet deck.
   .card { border: 2px dashed #8c8175; border-radius: 10px;
     padding: 18px; display: grid; place-items: center; position: relative;
     background: #fff; }
-  .prompt { font: 700 52px Andika, sans-serif; color: #221e1a;
+  .prompt { font: 700 52px Andika, sans-serif; color: var(--homa-ink);
     text-align: center; line-height: 1.1; }
   .card-id { position: absolute; left: 10px; bottom: 8px;
-    font: 500 9px 'Plus Jakarta Sans', sans-serif; color: #6b6259; }
+    font: 500 9px 'Plus Jakarta Sans', sans-serif; color: var(--homa-control-boundary); }
 </style>
 <div class="deck">
   <div class="card">

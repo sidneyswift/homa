@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FileDown, Loader2 } from "lucide-react";
+
+import { Icon } from "../../../components/design/Icon";
+import { QuietAction } from "../../../components/design/QuietAction";
+import { QuietFrame } from "../../../components/design/QuietFrame";
+import { QuietStatus } from "../../../components/design/QuietStatus";
 
 /**
  * The filing card (gh#421): the button that produces the document a
@@ -83,42 +86,35 @@ export function StateFilingCard({
         : `${stateName} uses its own form, so Homa fills a sheet you copy across, with your family's details already in place.`;
 
   return (
-    <section className="rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
-      <p className="font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
+    <QuietFrame tone="paper" as="section" className="p-6">
+      <p className="font-mono text-[0.65rem] uppercase tracking-widest text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
         {dueLabel ? `Your filing · due ${dueLabel}` : "Your filing"}
       </p>
-      <h2 className="mt-1 font-display text-xl font-semibold text-strong">
+      <h2 className="mt-1 font-display text-xl font-semibold text-[color:var(--homa-ink)]">
         What you send {stateName}
       </h2>
-      <p className="mt-2 max-w-[42rem] text-sm text-body">{describe}</p>
+      <p className="mt-2 max-w-[42rem] text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">{describe}</p>
 
       {entitled ? (
         <>
           <div className="mt-4 flex flex-wrap items-center gap-3">
-            <button
-              type="button"
+            <QuietAction
               onClick={makeFiling}
               disabled={status.kind === "working"}
-              className="inline-flex items-center gap-2 rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-60"
+              icon={status.kind === "working" ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--homa-paper)] border-t-transparent" /> : <Icon name="print" size={16} />}
             >
               {status.kind === "working" ? (
-                <>
-                  <Loader2 size={16} aria-hidden="true" className="animate-spin" />
-                  Filling it in...
-                </>
+                "Filling it in..."
               ) : (
-                <>
-                  <FileDown size={16} aria-hidden="true" />
-                  Get your filing
-                </>
+                "Get your filing"
               )}
-            </button>
+            </QuietAction>
             {status.kind === "done" ? (
               <a
                 href={status.pdfPath}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-semibold text-brand underline underline-offset-2"
+                className="text-sm font-semibold text-[color:var(--homa-brand-text)] underline underline-offset-2"
               >
                 Open it
               </a>
@@ -127,61 +123,58 @@ export function StateFilingCard({
           {status.kind === "done" && status.gaps.length > 0 ? (
             // Named rather than counted: a family who knows it is three
             // blanks and which three can finish them at the kitchen table.
-            <div className="mt-3 rounded-md border border-border-subtle bg-surface-subtle p-3">
-              <p className="text-sm font-semibold text-strong">
+            <QuietStatus tone="attention" className="mt-3 p-3">
+              <p className="text-sm font-semibold text-[color:var(--homa-ink)]">
                 {status.gaps.length === 1
                   ? "One blank to fill in by hand"
                   : `${status.gaps.length} blanks to fill in by hand`}
               </p>
-              <ul className="mt-1 list-disc pl-5 text-sm text-body">
+              <ul className="mt-1 list-disc pl-5 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">
                 {status.gaps.map((gap) => (
                   <li key={gap}>{gap}</li>
                 ))}
               </ul>
-              <p className="mt-2 text-xs text-muted">
+              <p className="mt-2 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
                 Homa left these blank rather than guessing. Everything else
                 is already filled in.
               </p>
-            </div>
+            </QuietStatus>
           ) : null}
         </>
       ) : (
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <Link
-            href="/app/settings"
-            className="inline-flex items-center gap-2 rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
-          >
+          <QuietAction href="/app/settings" icon={<Icon name="next" size={16} />}>
             See Homa Plus
-          </Link>
-          <span className="text-sm text-muted">
+          </QuietAction>
+          <span className="text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
             Plus fills your filing in and tells you when it is due.
           </span>
         </div>
       )}
 
       {status.kind === "error" ? (
-        <p className="mt-3 text-sm text-muted">{status.note}</p>
+        <QuietStatus tone="error" className="mt-3 text-sm">{status.note}</QuietStatus>
       ) : null}
 
       {needsSchoolYearStart ? (
-        <p className="mt-3 text-xs text-muted">
+        <p className="mt-3 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
           {stateName} counts your deadline from the day you start your
           school year, so Homa needs that date to tell you when this is
           due.{" "}
-          <Link
+          <a
             href="/app/settings"
-            className="underline underline-offset-2 hover:text-brand"
+            className="underline underline-offset-2 hover:text-[color:var(--homa-brand-text)]"
           >
             Add it in settings
-          </Link>
+          </a>
           .
         </p>
       ) : null}
 
-      <p className="mt-3 text-xs text-muted">
+      <p className="mt-3 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
         Homa fills this in for you and does not send it. You send it
         yourself, and Homa never files anything on your behalf.
       </p>
-    </section>
+    </QuietFrame>
   );
 }

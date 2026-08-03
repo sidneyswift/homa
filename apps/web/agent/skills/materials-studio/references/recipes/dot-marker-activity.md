@@ -14,7 +14,7 @@ for heavily themed versions where illustrations dominate.
 Design patterns (all binding for dot-marker-activity):
 
 - **Large circles**: minimum 1 inch diameter (`width: 96px;
-  height: 96px; border-radius: 50%; border: 3px solid #221e1a;`).
+  height: 96px; border-radius: 50%; border: 3px solid var(--homa-ink);`).
 - **Circle arrangement**: circles form the target letter/number/shape.
   Well-spaced so a toddler can stamp without precision.
 - **Model at top**: the target letter/number/shape shown clearly at

@@ -22,7 +22,7 @@ import {
  */
 
 const inputClass =
-  "mt-2 w-full rounded-md border border-border bg-card px-4 py-3 text-base text-strong transition-colors duration-(--dur-fast) ease-out focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30";
+  "mt-2 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-3 text-base text-[var(--homa-ink)] transition-colors duration-(--homa-motion-fast) ease-out focus:border-[var(--homa-midnight-action)] focus:outline-none focus:ring-2 focus:ring-[var(--homa-visual-coral)]/30";
 
 const INITIAL_STATE: ProfileExtrasState = { error: null };
 
@@ -33,10 +33,10 @@ export function CompleteProfilePrompt({ childName }: { childName: string }) {
   if (dismissed || state.saved) return null;
 
   return (
-    <div className="mx-auto mt-8 w-full max-w-[36rem] px-6">
+    <div data-brand-layer="report-profile-prompt" className="mx-auto mt-8 w-full max-w-[36rem] px-6">
       <form
         action={action}
-        className="rounded-lg border border-border-subtle bg-card p-6 shadow-sm"
+        className="quiet-frame rounded-[var(--homa-radius-card)] border-[var(--homa-control-boundary)] p-6 shadow-sm"
       >
         <p className="font-mono text-xs text-subtle">optional, anytime</p>
         <h2 className="mt-1 font-display text-xl font-semibold text-strong">
@@ -119,7 +119,7 @@ export function CompleteProfilePrompt({ childName }: { childName: string }) {
         <button
           type="submit"
           disabled={pending}
-          className="mt-6 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+          className="quiet-action quiet-action--primary mt-6 min-h-12 w-full px-6 py-3 text-base shadow-sm disabled:opacity-60"
         >
           {pending ? "Saving…" : "Save"}
         </button>

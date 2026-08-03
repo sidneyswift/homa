@@ -33,7 +33,7 @@ export function DashboardShell({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-dvh bg-page lg:flex">
+    <div className="quiet-shell">
       <Sidebar
         parentName={parentName}
         familyName={familyName}
@@ -55,7 +55,7 @@ export function DashboardShell({
           the selection affects). */}
       <DesktopContextSwitcher kids={kids} selected={viewContext} />
 
-      <main className="min-w-0 flex-1">{children}</main>
+      <main className="quiet-shell__main">{children}</main>
     </div>
   );
 }

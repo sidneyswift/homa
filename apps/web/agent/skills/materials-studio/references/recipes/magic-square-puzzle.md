@@ -28,8 +28,8 @@ Design patterns (all binding for magic-square-puzzle):
   cells (`width: 56px; height: 56px;`), matching cross-number-puzzle's
   cell dimensions so the two formats read as siblings.
 - **Given vs. blank cells**: some cells hold a printed number
-  (`font-weight: 700; color: #221e1a;`), the rest are blank
-  (`border: 1px solid #6b6259;`) for the child to fill in.
+  (`font-weight: 700; color: var(--homa-ink);`), the rest are blank
+  (`border: 1px solid var(--homa-control-boundary);`) for the child to fill in.
 - **Target sum stated once**: a single rules box at the top states the
   magic number every row, column, and diagonal must reach ("Every row,
   column, and diagonal adds up to 15."). Never repeat or vary the target
@@ -38,8 +38,8 @@ Design patterns (all binding for magic-square-puzzle):
   (`background: linear-gradient(...)` or a thin dashed overlay) may hint
   at the two diagonals for a first 3x3 puzzle; drop the hint for harder
   puzzles once the child understands diagonals count too.
-- **Bold outer border**: `border: 3px solid #221e1a;`. Thinner inner
-  borders: `border: 1px solid #6b6259;`, matching cross-number-puzzle.
+- **Bold outer border**: `border: 3px solid var(--homa-ink);`. Thinner inner
+  borders: `border: 1px solid var(--homa-control-boundary);`, matching cross-number-puzzle.
 - **Difficulty progression**: a 3x3 with 5-6 given cells for a first
   puzzle; a 3x3 with only 3-4 given cells, or a 4x4, for advanced.
 - **Optional historical or cultural aside**: a short factual footnote box
@@ -56,16 +56,16 @@ Design patterns (all binding for magic-square-puzzle):
 ```html
 <style>
   .magic-square-page { font-family: 'Andika', sans-serif; padding: 24px; }
-  .magic-rules { border: 1.5px solid #6b6259; border-radius: 6px;
+  .magic-rules { border: 1.5px solid var(--homa-control-boundary); border-radius: 6px;
     padding: 12px; font-size: 13px; margin-bottom: 20px; }
   .magic-grid { display: grid; grid-template-columns: repeat(3, 56px);
-    border: 3px solid #221e1a; width: fit-content; }
-  .magic-cell { width: 56px; height: 56px; border: 1px solid #6b6259;
+    border: 3px solid var(--homa-ink); width: fit-content; }
+  .magic-cell { width: 56px; height: 56px; border: 1px solid var(--homa-control-boundary);
     display: flex; align-items: center; justify-content: center;
     font-size: 20px; }
-  .magic-cell.given { font-weight: 700; color: #221e1a; }
+  .magic-cell.given { font-weight: 700; color: var(--homa-ink); }
   .magic-cell.blank { color: transparent; }
-  .magic-aside { margin-top: 20px; font-size: 12px; color: #6b6259;
+  .magic-aside { margin-top: 20px; font-size: 12px; color: var(--homa-control-boundary);
     font-style: italic; }
 </style>
 

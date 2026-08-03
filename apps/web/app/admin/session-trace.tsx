@@ -55,7 +55,7 @@ export function SessionTrace({
     );
   }
   return (
-    <ol className="mt-3 flex flex-col gap-2 border-l-2 border-border pl-4">
+    <ol className="quiet-admin__trace mt-3 flex flex-col gap-2 border-l-2 border-border pl-4">
       {events.map((event, position) => {
         if (event.kind === "snapshot") {
           const snapshot = detail.snapshots[event.index];
@@ -69,7 +69,7 @@ export function SessionTrace({
                   The dynamic blocks this turn carried ·{" "}
                   {formatInt(snapshot.content.length)} chars
                 </summary>
-                <pre className="mt-2 max-h-[420px] overflow-auto whitespace-pre-wrap rounded-md bg-[var(--surface-sunken)] p-3 font-mono text-xs text-muted">
+                <pre className="mt-2 max-h-[420px] overflow-auto whitespace-pre-wrap rounded-md bg-[var(--homa-canvas)] p-3 font-mono text-xs text-muted">
                   {snapshot.content}
                 </pre>
               </details>
@@ -89,7 +89,7 @@ export function SessionTrace({
               <div
                 className={
                   mine
-                    ? "mt-1 rounded-md border border-[var(--clay-200)] bg-[var(--clay-50)] px-3.5 py-2.5"
+                    ? "mt-1 rounded-md border border-[var(--homa-info-ink)] bg-[var(--homa-info-tint)] px-3.5 py-2.5"
                     : "mt-1 rounded-md border border-border-subtle bg-card px-3.5 py-2.5 shadow-sm"
                 }
               >
@@ -108,14 +108,14 @@ export function SessionTrace({
             <div
               className={
                 died
-                  ? "mt-1 rounded-md border border-[var(--rose-500)] bg-[var(--pop-navy)] px-3.5 py-2.5"
-                  : "mt-1 rounded-md bg-[var(--pop-navy)] px-3.5 py-2.5"
+                  ? "mt-1 rounded-md border border-[var(--homa-error-ink)] bg-[var(--homa-contained-band)] px-3.5 py-2.5"
+                  : "mt-1 rounded-md bg-[var(--homa-contained-band)] px-3.5 py-2.5"
               }
             >
-              <p className="break-words font-mono text-xs text-[#EAF0FF]">
+              <p className="break-words font-mono text-xs text-[var(--homa-paper)]">
                 {call.tool}({call.args ? JSON.stringify(call.args) : ""})
               </p>
-              <p className="mt-1 break-words font-mono text-xs text-[#9FDCEC]">
+              <p className="mt-1 break-words font-mono text-xs text-[var(--homa-info-tint)]">
                 {call.status === "requested"
                   ? "never returned"
                   : `${call.status}${call.isError ? " · tool errored" : ""} · ${

@@ -4,6 +4,8 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { QuietAction } from "../../../components/design/QuietAction";
+import { QuietStatus } from "../../../components/design/QuietStatus";
 import { createTaskAction, updateTaskAction, type TaskActionState } from "./actions";
 import type { TaskRowView } from "./tasks-view";
 
@@ -36,12 +38,12 @@ function hourOption(hour: number): string {
 const INITIAL_STATE: TaskActionState = { error: null };
 
 export const taskInputClass =
-  "w-full rounded-md border border-border bg-page px-3 py-2 text-sm text-body outline-none focus:border-brand";
+  "w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-canvas)] px-3 py-2 text-sm text-[color:var(--homa-ink)] outline-none transition-colors focus:border-[var(--homa-midnight-action)] focus:ring-2 focus:ring-[color:color-mix(in_srgb,var(--homa-visual-coral)_24%,transparent)]";
 
 export function WeekdayChips({ defaultSelected }: { defaultSelected: ReadonlySet<number> }) {
   return (
     <fieldset>
-      <legend className="text-sm font-semibold text-strong">Which days?</legend>
+      <legend className="text-sm font-semibold text-[color:var(--homa-ink)]">Which days?</legend>
       <div className="mt-1.5 flex gap-1.5">
         {DAYS.map((day, index) => (
           <label
@@ -55,7 +57,7 @@ export function WeekdayChips({ defaultSelected }: { defaultSelected: ReadonlySet
               defaultChecked={defaultSelected.has(day.value)}
               className="peer sr-only"
             />
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-pill border border-border bg-card text-xs font-bold text-muted transition-colors peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:text-[var(--clay-700)]">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] text-xs font-bold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))] transition-colors peer-checked:border-[var(--homa-midnight-action)] peer-checked:bg-[var(--homa-midnight-action)] peer-checked:text-[var(--homa-paper)]">
               {day.short}
             </span>
           </label>
@@ -67,7 +69,7 @@ export function WeekdayChips({ defaultSelected }: { defaultSelected: ReadonlySet
 
 export function HourField({ defaultHour }: { defaultHour: number }) {
   return (
-    <label className="flex flex-col gap-1 text-sm font-semibold text-strong">
+    <label className="flex flex-col gap-1 text-sm font-semibold text-[color:var(--homa-ink)]">
       What time?
       <select name="localHour" defaultValue={defaultHour} className={taskInputClass}>
         {HOURS.map((hour) => (
@@ -107,8 +109,8 @@ export function DeliveryChoice({
 }) {
   return (
     <fieldset>
-      <legend className="text-sm font-semibold text-strong">How should it reach you?</legend>
-      <div className="mt-1.5 flex flex-col gap-1 text-sm text-body">
+      <legend className="text-sm font-semibold text-[color:var(--homa-ink)]">How should it reach you?</legend>
+      <div className="mt-1.5 flex flex-col gap-1 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">
         {deliveryOptions(textingLinked)
           .filter((option) => values.includes(option.value))
           .map((option) => (
@@ -118,7 +120,7 @@ export function DeliveryChoice({
                 name="deliveryPref"
                 value={option.value}
                 defaultChecked={defaultValue === option.value}
-                className="accent-[var(--brand,#E7602F)]"
+                className="accent-[var(--homa-midnight-action)]"
               />
               {option.label}
             </label>
@@ -126,7 +128,7 @@ export function DeliveryChoice({
         {!textingLinked ? (
           <Link
             href="/app/settings"
-            className="text-xs font-semibold text-brand hover:underline"
+            className="text-xs font-semibold text-[color:var(--homa-brand-text)] hover:underline"
           >
             Set up texting in Settings
           </Link>
@@ -146,21 +148,13 @@ export function TaskFormButtons({
   onCancel: () => void;
 }) {
   return (
-    <div className="flex gap-2">
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover disabled:opacity-60"
-      >
+    <div className="flex flex-wrap gap-2">
+      <QuietAction type="submit" disabled={pending}>
         {submitLabel}
-      </button>
-      <button
-        type="button"
-        onClick={onCancel}
-        className="rounded-pill border border-border bg-card px-5 py-2 text-sm font-semibold text-strong transition-colors hover:border-brand"
-      >
+      </QuietAction>
+      <QuietAction type="button" kind="secondary" onClick={onCancel}>
         Cancel
-      </button>
+      </QuietAction>
     </div>
   );
 }
@@ -200,13 +194,13 @@ export function TaskForm({
   };
 
   return (
-    <form action={formAction} className="flex flex-col gap-3">
+    <form action={formAction} className="flex flex-col gap-3" data-brand-surface="task-form">
       {/* Example task swapped from a reminder to a look-it-up ask
           (reader gate 2026-07-12): reminders are the obvious use, the
           example is the one place that shows Homa can research too.
           No cadence words in the example (editor gate, same day): the
           day and time fields below are the one home for timing. */}
-      <label className="flex flex-col gap-1 text-sm font-semibold text-strong">
+      <label className="flex flex-col gap-1 text-sm font-semibold text-[color:var(--homa-ink)]">
         What should it be called?
         <input
           name="label"
@@ -218,7 +212,7 @@ export function TaskForm({
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-sm font-semibold text-strong">
+      <label className="flex flex-col gap-1 text-sm font-semibold text-[color:var(--homa-ink)]">
         What should Homa do?
         <textarea
           name="prompt"
@@ -242,7 +236,7 @@ export function TaskForm({
         />
       </div>
 
-      {state.error ? <p className="text-sm text-muted">{state.error}</p> : null}
+      {state.error ? <QuietStatus tone="error" className="text-sm">{state.error}</QuietStatus> : null}
 
       {/* "Add this task", never "Create task": the button that opened
           this dialog says "Add a task", and one action keeps one name

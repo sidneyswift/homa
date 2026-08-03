@@ -1,4 +1,5 @@
 import type { DashboardPlan, DashboardReport } from "../../lib/dashboard";
+import { QuietFrame } from "../design/QuietFrame";
 
 /**
  * The three stat tiles, template layout with honest numbers. The mock's
@@ -16,7 +17,7 @@ interface Tile {
 }
 
 const SUB_TONE: Record<Tile["subTone"], React.CSSProperties> = {
-  muted: { color: "var(--text-muted)" },
+  muted: { color: "var(--text-[color:var(--homa-ink-muted)])" },
   sage: { color: "var(--sage-700)", fontWeight: 700 },
   gold: { color: "var(--gold-ink)", fontWeight: 700 },
 };
@@ -89,15 +90,15 @@ export function StatTiles({
   return (
     <div className="mt-6 grid gap-4 sm:grid-cols-3">
       {tiles.map((tile) => (
-        <div key={tile.label} className="rounded-lg border border-border-subtle bg-card p-5 shadow-sm">
-          <p className="text-[0.8rem] font-semibold text-muted">{tile.label}</p>
-          <p className="mt-1.5 font-display text-[2rem] font-semibold leading-none text-strong">
+        <QuietFrame as="div" key={tile.label} className="p-5">
+          <p className="text-[0.8rem] font-semibold text-[color:var(--homa-ink-muted)]">{tile.label}</p>
+          <p className="mt-1.5 font-display text-[2rem] font-semibold leading-none text-[color:var(--homa-ink)]">
             {tile.value}
           </p>
           <p className="mt-1.5 text-xs" style={SUB_TONE[tile.subTone]}>
             {tile.sub}
           </p>
-        </div>
+        </QuietFrame>
       ))}
     </div>
   );
