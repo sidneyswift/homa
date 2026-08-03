@@ -1339,6 +1339,27 @@ html.rv-armed [data-reveal].rv-no-anim, html.rv-armed [data-reveal-kids].rv-no-a
 .blog-prose p { margin: 0 0 var(--space-5); }
 .blog-prose ul, .blog-prose ol { margin: 0 0 var(--space-5); padding-left: var(--space-6); }
 .blog-prose li { margin-bottom: var(--space-2); }
+.blog-prose table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  margin: 0 0 var(--space-5);
+  border-collapse: collapse;
+  font-size: var(--text-base);
+}
+.blog-prose th,
+.blog-prose td {
+  min-width: 10rem;
+  border: 1px solid var(--border-subtle);
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  vertical-align: top;
+}
+.blog-prose th {
+  background: var(--brand-soft);
+  color: var(--text-strong);
+  font-weight: var(--weight-semibold);
+}
 .blog-prose a {
   color: var(--brand);
   text-decoration: underline;
