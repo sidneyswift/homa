@@ -13,6 +13,7 @@ import {
   buildStudioBrief,
   STUDIO_RUN_UUID_PATTERN,
 } from "../../../../../lib/materials/studio-brief";
+import { AdminArtifactPreview } from "../../../artifact-preview";
 import { AgentPromptButton } from "../../../agent-prompt-button";
 import { SessionTrace } from "../../../session-trace";
 import { EmptyNote, Pill, SectionHead } from "../../../ui";
@@ -97,12 +98,11 @@ export default async function AdminStudioRunPage({
                 key={material.id}
                 className="flex flex-wrap items-start gap-4 rounded-[var(--radius-md)] border border-border-subtle bg-card p-4"
               >
-                {/* Blob preview JPEGs have no next/image loader config; plain img matches the chat card. */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <AdminArtifactPreview
                   src={material.previewUrl}
                   alt={`${material.title} preview`}
-                  className="w-[180px] rounded-md border border-border-subtle"
+                  className="w-[180px] shrink-0"
+                  imageClassName="rounded-md"
                 />
                 <div className="min-w-[240px] flex-1 text-sm">
                   <p className="text-base font-bold text-strong">{material.title}</p>
