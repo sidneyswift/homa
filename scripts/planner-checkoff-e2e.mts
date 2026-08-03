@@ -486,10 +486,6 @@ try {
     /child does not belong to the caller's family/u,
   );
 
-  await sql`
-    insert into public.family_members (family_id, user_id, role)
-    values (${foreignFamilyId}, ${EVAL_FIXTURE_PARENT_USER_ID}, 'helper')
-  `;
   const multiFamilyReceipt = await setCheck({
     childId: foreignChildId,
     subjectId: "multi-family",
@@ -497,6 +493,7 @@ try {
     done: true,
     expectedText: activityA,
     revision: 1,
+    userId: foreignUserId,
   });
   assert.equal(multiFamilyReceipt.status, "applied");
   assert.equal(multiFamilyReceipt.family_id, foreignFamilyId);
@@ -524,6 +521,7 @@ try {
     done: false,
     expectedText: activityA,
     revision: 1,
+    userId: foreignUserId,
   });
   await waitForV2LockWait();
 
@@ -531,7 +529,7 @@ try {
   const membershipRemoval = sql`
     delete from public.family_members
     where family_id = ${foreignFamilyId}
-      and user_id = ${EVAL_FIXTURE_PARENT_USER_ID}
+      and user_id = ${foreignUserId}
   `.then(() => {
     removalFinished = true;
   });
