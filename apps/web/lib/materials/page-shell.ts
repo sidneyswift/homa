@@ -3,6 +3,10 @@ import { colorTokens, fontRoles } from "@homa/design/contract";
 
 import { HOUSE_PATH } from "../../components/brand/Logo";
 import { escapeHtml } from "../html-escape";
+import {
+  MATERIAL_BRAND_ERA,
+  MATERIAL_TARGET_PROFILE,
+} from "./brand-era";
 
 /**
  * The printable page shell: the fixed contract around agent-composed
@@ -252,7 +256,7 @@ export function wrapPrintableDocument(
     )
     .join("\n");
   return `<!doctype html>
-<html data-brand-era="quiet-authority-v1" data-brand-surface="materials-page-shell">
+<html data-brand-era="${MATERIAL_BRAND_ERA}" data-brand-profile="${MATERIAL_TARGET_PROFILE}" data-brand-surface="materials-page-shell">
 <head>
 <meta charset="utf-8" />
 <meta name="color-scheme" content="light" />

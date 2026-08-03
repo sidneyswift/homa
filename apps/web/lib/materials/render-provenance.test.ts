@@ -55,6 +55,10 @@ describe("render provenance", () => {
       rendererVersion: "HeadlessChrome/140.0.0.0",
       previewPageCap: 6,
     });
+    assert.deepEqual(raster.brand, {
+      designEra: "quiet-authority-v1",
+      targetProfile: "artifact-print",
+    });
     assert.equal(raster.renderer, "pdfjs-raster");
     assert.equal(raster.rendererVersion, "HeadlessChrome/140.0.0.0");
 
@@ -73,6 +77,8 @@ describe("render provenance", () => {
     assert.equal(provenance.rasterJpegQuality, 85);
     assert.equal(provenance.previewPageCap, 6);
     assert.match(provenance.shellFingerprint, /^[0-9a-f]{16}$/);
+    assert.equal(provenance.brand.designEra, "quiet-authority-v1");
+    assert.equal(provenance.brand.targetProfile, "artifact-print");
   });
 });
 

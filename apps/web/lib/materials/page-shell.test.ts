@@ -118,6 +118,7 @@ test("a packet document boxes every page and repeats the footer on each", () => 
 test("printable shells carry the Quiet contract and semantic artifact tokens", () => {
   const document = wrapPrintablePage("<h1>Counting practice</h1>", "Story");
   assert.match(document, /data-brand-era="quiet-authority-v1"/u);
+  assert.match(document, /data-brand-profile="artifact-print"/u);
   assert.match(document, /data-brand-surface="materials-page-shell"/u);
   assert.match(document, /--homa-canvas: #F7F4EE/u);
   assert.match(document, /--homa-ink: #20242B/u);
