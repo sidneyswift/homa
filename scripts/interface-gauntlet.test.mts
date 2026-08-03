@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import {
   GAUNTLET_LONG_COPY,
   GAUNTLET_PERFORMANCE_BUDGET,
@@ -29,4 +30,11 @@ test("static interface contract is healthy even before rendered evidence is supp
   assert.equal(report.contract, "quiet-authority-v1");
   assert.match(report.manifestFingerprint, /^[0-9a-f]{64}$/u);
   assert.equal(report.status, "pass", report.issues.map((issue) => `${issue.check}: ${issue.detail}`).join("\n"));
+});
+
+test("shared Quiet navigation can shrink and wrap long localized labels", () => {
+  const css = readFileSync("apps/web/components/design/quiet-primitives.css", "utf8");
+  assert.match(css, /\.quiet-nav__row\s*\{[^}]*min-width:\s*0;/su);
+  assert.match(css, /\.quiet-nav__links\s*\{[^}]*flex:\s*1 1 auto;[^}]*min-width:\s*0;/su);
+  assert.match(css, /\.quiet-nav__link,\s*\.quiet-nav__signin\s*\{[^}]*overflow-wrap:\s*anywhere;[^}]*white-space:\s*normal;/su);
 });
