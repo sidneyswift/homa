@@ -373,6 +373,9 @@ jobs:
       - name: Design authoring rails check (coverage, contract, residue, fingerprints)
         run: pnpm check:design-authoring
 
+      - name: Durable artifact design-era check (classification and Quiet print markers)
+        run: pnpm check:artifact-brand-era
+
       - name: Active brand residue check (changed files cannot revive legacy identity)
         run: pnpm check:brand-residue
 

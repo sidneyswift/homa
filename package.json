@@ -27,6 +27,7 @@
     "check:brand-surfaces": "node --experimental-strip-types scripts/brand-surfaces.mts --check && node --experimental-strip-types --test scripts/brand-surfaces.test.mts",
     "check:brand-assets": "node --experimental-strip-types scripts/brand-assets.mts --check",
     "check:design-authoring": "node --experimental-strip-types scripts/design-authoring-rails-check.mts --check && node --experimental-strip-types --test scripts/design-authoring-rails-check.test.mts",
+    "check:artifact-brand-era": "node --experimental-strip-types scripts/artifact-brand-era-check.mts && node --experimental-strip-types --test scripts/artifact-brand-era-check.test.mts",
     "audit:interface-gauntlet": "node --experimental-strip-types scripts/interface-gauntlet.mts --strict",
     "check:interface-gauntlet": "node --experimental-strip-types scripts/interface-gauntlet.mts && node --experimental-strip-types --test scripts/interface-gauntlet.test.mts",
     "check:brand-residue": "node --experimental-strip-types scripts/brand-residue-check.mts && node --experimental-strip-types --test scripts/brand-residue-check.test.mts",

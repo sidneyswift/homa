@@ -1,6 +1,10 @@
 import { createHash } from "node:crypto";
 
 import { wrapPrintableDocument } from "./page-shell";
+import {
+  materialArtifactBrand,
+  type MaterialArtifactBrand,
+} from "./brand-era";
 
 /**
  * What it took to turn this material's stored html into the page images we
@@ -40,6 +44,9 @@ export const RENDER_RASTER_SCALE = 2.5;
 export const RENDER_RASTER_JPEG_QUALITY = 85;
 
 export interface RenderProvenance {
+  /** The approved design era and constrained print profile that produced the
+   * durable PDF and its previews. Missing on historical rows by design. */
+  brand: MaterialArtifactBrand;
   /** Content hash of the document shell (doctype, stylesheet, sheet and
    * footer scaffolding) that wrapped this material's page bodies. Two
    * materials with the same fingerprint were shelled identically. */
@@ -80,6 +87,7 @@ export function buildRenderProvenance(input: {
   previewPageCap: number;
 }): RenderProvenance {
   return {
+    brand: materialArtifactBrand(),
     shellFingerprint: pageShellFingerprint(),
     viewport: { width: RENDER_VIEWPORT.width, height: RENDER_VIEWPORT.height },
     rasterScale: RENDER_RASTER_SCALE,

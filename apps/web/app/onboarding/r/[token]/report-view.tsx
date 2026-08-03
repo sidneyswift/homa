@@ -929,7 +929,7 @@ export function ReportView({
   // ---- Standalone: the token page's one long letter card, exactly as
   // it prints and shares.
   return (
-    <div data-brand-surface="report" data-brand-context="standalone" className="quiet-report quiet-report--standalone min-h-screen bg-[var(--homa-canvas)] pb-16">
+    <div data-brand-surface="report" data-brand-context="standalone" className="quiet-report quiet-print-surface quiet-report--standalone min-h-screen bg-[var(--homa-canvas)] pb-16">
       {/* The way out (founder ask 2026-07-08: the report page had no
           path to the app or settings). The sample keeps its own CTAs;
           the mirror sits inside the admin frame, which owns the way
