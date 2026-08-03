@@ -206,8 +206,6 @@ export function LibraryView({
       : null,
   );
   const [pageError, setPageError] = useState<string | null>(null);
-  const [privacyAccepted, setPrivacyAccepted] = useState(false);
-  const [privacyPromptOpen, setPrivacyPromptOpen] = useState(false);
   const hasRecoverableUpload = uploads.some(
     (upload) =>
       upload.state === "preparing" ||
@@ -722,17 +720,6 @@ export function LibraryView({
   function beginAddingResources() {
     if (!canUpload) return;
     setPageError(null);
-    if (privacyAccepted) {
-      pickerRef.current?.click();
-      return;
-    }
-    setPrivacyPromptOpen(true);
-  }
-
-  function continueToFilePicker() {
-    if (!canUpload) return;
-    setPrivacyAccepted(true);
-    setPrivacyPromptOpen(false);
     pickerRef.current?.click();
   }
 
@@ -795,36 +782,6 @@ export function LibraryView({
           <QuietAction href="/onboarding/trial" kind="quiet" className="mt-3">
             See membership options
           </QuietAction>
-        </QuietFrame>
-      ) : null}
-
-      {canUpload && privacyPromptOpen && (assets.length > 0 || hasRecoverableUpload) ? (
-        <QuietFrame
-          as="section"
-          aria-labelledby="library-privacy-heading"
-          className="mt-5 border-[var(--homa-highlight-ink)] bg-[var(--homa-highlight-tint)] px-4 py-4"
-        >
-          <h2 id="library-privacy-heading" className="font-semibold text-[var(--homa-ink)]">
-            Before you choose files
-          </h2>
-          <p className="mt-1 text-sm leading-6 text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">
-            Each file has a public link that opens without signing in. Homa does not
-            list the link, but anyone who gets it can open the file. This Library is
-            for curriculum and other files without private family information.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <QuietAction
-              onClick={continueToFilePicker}
-            >
-              Choose files
-            </QuietAction>
-            <QuietAction
-              kind="secondary"
-              onClick={() => setPrivacyPromptOpen(false)}
-            >
-              Go back
-            </QuietAction>
-          </div>
         </QuietFrame>
       ) : null}
 
@@ -960,31 +917,7 @@ export function LibraryView({
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[var(--homa-radius-control)] bg-[var(--homa-highlight-tint)] text-[var(--homa-highlight-ink)]">
             <Icon name="add" size={24} />
           </div>
-          {canUpload && privacyPromptOpen ? (
-            <>
-              <h2 className="mt-4 font-display text-2xl font-semibold text-[var(--homa-ink)]">
-                Before you choose files
-              </h2>
-              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">
-                Each file has a public link that opens without signing in. Homa does not
-                list the link, but anyone who gets it can open the file. This Library is
-                for curriculum and other files without private family information.
-              </p>
-              <div className="mt-6 flex flex-wrap justify-center gap-2">
-                <QuietAction
-                  onClick={continueToFilePicker}
-                >
-                  Choose files
-                </QuietAction>
-                <QuietAction
-                  kind="secondary"
-                  onClick={() => setPrivacyPromptOpen(false)}
-                >
-                  Go back
-                </QuietAction>
-              </div>
-            </>
-          ) : canUpload ? (
+          {canUpload ? (
             <>
               <h2 className="mt-4 font-display text-2xl font-semibold text-[var(--homa-ink)]">
                 Add your first resource
