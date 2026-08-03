@@ -47,6 +47,7 @@ const fixtureUserIds = [];
 let morningResearchBriefV2SchemaAvailable = false;
 let morningOfferFunnelSchemaAvailable = false;
 let familyBillingSubscriptionsSchemaAvailable = false;
+let accountDeletionJobsSchemaAvailable = false;
 let familyLibrarySchemaAvailable = false;
 let familyAssetPlanLinksSchemaAvailable = false;
 let familyCurriculumMappingSchemaAvailable = false;
@@ -4809,6 +4810,25 @@ await expectReadDenied("admin_alert_acknowledgments");
     await expectReadDenied("family_billing_subscriptions");
   }
 }
+// Account-deletion audit rows are server-only. The migration is additive and
+// is intentionally safe to deploy before the app route, so this check arms
+// when the table reaches the target.
+{
+  const response = await rest(`account_deletion_jobs?select=id&limit=1`, {
+    headers: { Prefer: "" },
+  });
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    coveredTables.add("account_deletion_jobs");
+    report(
+      "account_deletion_jobs absent from target (additive migration not applied yet); nothing exposed",
+      true,
+    );
+  } else {
+    accountDeletionJobsSchemaAvailable = true;
+    await expectReadDenied("account_deletion_jobs");
+  }
+}
 // The material studio's run ledger (materials_studio_runs migration):
 // deny-all, server-only, written by the materials-lab channel route and
 // read by the founder console. Arms automatically once the additive
@@ -5479,6 +5499,16 @@ if (familyBillingSubscriptionsSchemaAvailable) {
       status: "active",
     },
     "anon cannot forge family billing subscriptions",
+  );
+}
+if (accountDeletionJobsSchemaAvailable) {
+  await expectInsertDenied(
+    "account_deletion_jobs",
+    {
+      family_id: "00000000-0000-0000-0000-000000000000",
+      requested_by_user_id: "00000000-0000-0000-0000-000000000000",
+    },
+    "anon cannot forge account deletion jobs",
   );
 }
 await expectInsertDenied(
