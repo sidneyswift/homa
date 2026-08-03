@@ -115,8 +115,8 @@ describe("drag failure visibility (issue #256)", () => {
       source.indexOf("{dragError ? ("),
       source.indexOf("{dragError ? (") + 900,
     );
-    assert.match(notice, /var\(--danger\)/u);
-    assert.match(notice, /var\(--danger-soft\)/u);
+    assert.match(notice, /var\(--homa-error-ink\)/u);
+    assert.match(notice, /var\(--homa-error-tint\)/u);
   });
 });
 
