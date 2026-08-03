@@ -429,6 +429,8 @@
   transform: translateX(1px);
 }
 .quiet-shell__nav-item:focus-visible,
+.quiet-shell__menu-action:focus-visible,
+.quiet-shell__viewing-link:focus-visible,
 .quiet-shell__account-trigger:focus-visible,
 .quiet-shell__icon-action:focus-visible,
 .quiet-shell__context-trigger:focus-visible {
