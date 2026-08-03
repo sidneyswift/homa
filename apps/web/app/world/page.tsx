@@ -3,7 +3,7 @@ import { WorldClient } from "./world-client";
 
 /**
  * /world: the scroll-world landing experiment (2026-07-21). One continuous
- * pre-rendered camera flight through a miniature clay Homa world, scrubbed by
+ * pre-rendered camera flight through a miniature crafted Homa world, scrubbed by
  * scroll; a homeschool day from the morning table to the little home at
  * golden hour. Mobile-first: phones get a native 9:16 clip chain, desktop a
  * 16:9 one. This route exists to decide whether we love the format; the

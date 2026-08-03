@@ -4,7 +4,7 @@ import type { WorldConfig } from "../world/scroll-world-engine";
  * /world-real: the "real-world companion" sibling of /world. Every
  * environment is genuinely photoreal (a real phone, a real kitchen, a real
  * desk); the only stylized element in any frame is Homa herself, rendered
- * as a small solid clay-orange house-shaped character with no arms or legs,
+ * as a small solid warm house-shaped character with no arms or legs,
  * always the exact logo color. Same beat sheet and copy as /world's v2
  * (docs/homa-planning/plans/2026-07-21-world-v2-beats.md), so the two
  * routes are a controlled art-direction comparison, not a copy comparison.
@@ -31,7 +31,7 @@ export const WORLD_REAL_CONFIG: WorldConfig = {
       stillMobile: `${A}/hero-m.webp`,
       clip: `${A}/hero-m.mp4`,
       clipMobile: `${A}/hero-m.mp4`,
-      accent: "#C44C22",
+      accent: "var(--homa-brand-text)",
       scroll: 1.6,
       linger: 0.35,
       eyebrow: "For homeschool parents",
@@ -46,7 +46,7 @@ export const WORLD_REAL_CONFIG: WorldConfig = {
       stillMobile: `${A}/report-m.webp`,
       clip: `${A}/report-m.mp4`,
       clipMobile: `${A}/report-m.mp4`,
-      accent: "#2F7C40",
+      accent: "var(--homa-constructive-ink)",
       linger: 0.4,
       eyebrow: "See it, first",
       title: "Where she's at, subject by subject.",
@@ -60,7 +60,7 @@ export const WORLD_REAL_CONFIG: WorldConfig = {
       stillMobile: `${A}/worksheet-m.webp`,
       clip: `${A}/worksheet-m.mp4`,
       clipMobile: `${A}/worksheet-m.mp4`,
-      accent: "#2E6BE6",
+      accent: "var(--homa-info-ink)",
       linger: 0.3,
       eyebrow: "Act on it",
       title: "Not a grade level. Her level, in her dinosaurs.",
@@ -74,7 +74,7 @@ export const WORLD_REAL_CONFIG: WorldConfig = {
       stillMobile: `${A}/planner-m.webp`,
       clip: `${A}/planner-m.mp4`,
       clipMobile: `${A}/planner-m.mp4`,
-      accent: "#23304F",
+      accent: "var(--homa-midnight-action)",
       linger: 0.3,
       eyebrow: "The loop",
       title: "When life happens, the week bends.",
@@ -88,7 +88,7 @@ export const WORLD_REAL_CONFIG: WorldConfig = {
       stillMobile: `${A}/observatory-m.webp`,
       clip: `${A}/observatory-m.mp4`,
       clipMobile: `${A}/observatory-m.mp4`,
-      accent: "#8A6410",
+      accent: "var(--homa-highlight-ink)",
       linger: 0.35,
       eyebrow: "Always working",
       title: "While you sleep, she's still thinking about your kids.",
@@ -102,7 +102,7 @@ export const WORLD_REAL_CONFIG: WorldConfig = {
       stillMobile: `${A}/finale-m.webp`,
       clip: `${A}/finale-m.mp4`,
       clipMobile: `${A}/finale-m.mp4`,
-      accent: "#E7602F",
+      accent: "var(--homa-visual-coral)",
       scroll: 1.8,
       linger: 0.45,
       eyebrow: "Start with the free report",
