@@ -342,6 +342,9 @@ jobs:
       - name: Design-token check (colour utilities name a declared token)
         run: pnpm check:design-tokens
 
+      - name: Brand-surface manifest check (coverage, provenance, legacy baseline)
+        run: pnpm check:brand-surfaces
+
       - name: Tool deadline guard (no unbounded tool can freeze a turn)
         run: pnpm check:tool-deadlines
 

@@ -1,0 +1,3197 @@
+{
+  "schemaVersion": 1,
+  "designEra": "warm-playful-baseline",
+  "sourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
+  "ownedInputFingerprint": "6bac59ee73abcbce805d95a6fbdbf0e5c614900530639ac5fec374fd029ae439",
+  "records": [
+    {
+      "path": ".agents/skills/curriculum-ingestion/references/lesson-decomposition.md",
+      "sourceHash": "357866187e3018b97841386ec0a4e05286925c264cb6e22c3d0bf7d1452be839",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": ".agents/skills/exploring-ui-directions/references/artifact-contract.md",
+      "sourceHash": "df051f83d18f2aea5d5b9ad2749bde29f225b708194bba579f0b13be68594647",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": ".agents/skills/finding-unknowns/references/mock-before-wire.md",
+      "sourceHash": "d2af825b0c63f3320198ff44ecabd38f575b9d0dfc53b1b71d172d672cda17cd",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": ".agents/skills/implementation-notes/SKILL.md",
+      "sourceHash": "30e258c86dde847290d7738adbe4bd893bb1efd5d7f674dd96ad284581439f25",
+      "legacySignatures": [
+        "legacy-font-caveat"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": ".agents/skills/marketing-illustrator/SKILL.md",
+      "sourceHash": "36166a8708fa9956241e4deed99fafdcad1c238ae74d47b505584cc2b00ee200",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": ".agents/skills/reference-ingestion/references/aboutness.md",
+      "sourceHash": "35025b5879bdf8ad7b04a5ed63d0808954e148feaa86a6302deb6d50be9d8e64",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": ".agents/skills/reference-ingestion/SKILL.md",
+      "sourceHash": "ca4adeb81b3be52ccf17d67f735741a09a2691ea3a56b912af7e4ea23a191c96",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": ".agents/skills/review-animations/STANDARDS.md",
+      "sourceHash": "a2bf1a1fa56ace5919af231b17c3b85a78247d45478c24094c435336f2e32959",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "AGENTS.md",
+      "sourceHash": "8659eb9c976b2af50d884d761f3eec25ef3be153d848d6bcb575ec1ed7e634cb",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/app/_layout.tsx",
+      "sourceHash": "d25dfa330d98d7d6152c7006a355639c3a3e07512b1efe91232eb5549d86c180",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/app/(tabs)/binder.tsx",
+      "sourceHash": "615f77da7f2feca0ac0b686ecce2de38fa7d8a869b9be5c0e3784dac4e8d21b6",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/app/(tabs)/hours.tsx",
+      "sourceHash": "7ed6a27ab075d383414c4f113f23af8d87891c1bf568fed20420263999a05aea",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/app/(tabs)/planner.tsx",
+      "sourceHash": "89442fd75afe91379015cf451e0660406cad90fed5822ad3ff5fcc1d12774e07",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/app/voice-shell-547-lab.tsx",
+      "sourceHash": "1b1f85363ddf17bbd50387a1a76cf2db220994c25c05d3f7d60001daf390ad71",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/components/brand/logo.tsx",
+      "sourceHash": "47c608f3a05c59af2fc2ebbaa1b493a2201e33a9418f446316f52f0f06f3bf0b",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/components/ui/button.tsx",
+      "sourceHash": "ef1e870e4223d17d763c080cac7dd2a3a05457e55a144988116d7a0e779291a9",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/components/ui/icon-button.tsx",
+      "sourceHash": "f0d93e5e19e93c84747a211350936a1a0b7e1ee94f7cb036138ea5018a796c16",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/components/ui/text-field.tsx",
+      "sourceHash": "e71212b30b085f9291b39e6f7c5e323e3c4991c7b9fb0d23cd64d2e167d84b2e",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/binder/material-grid-card.tsx",
+      "sourceHash": "87a354d8ad8615d13c342de53f19ee0c3906140fc56a548210dacac38254be8c",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/chat/chat-session.tsx",
+      "sourceHash": "cda78b9a63f307187d129e63d29808b468e3f57ce53f957364cc94e417d9afb5",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/chat/checklist-takeover.tsx",
+      "sourceHash": "3f9c3af24c8ec67a7fb194223de11acb28f9b616ad6c47552d6b03fec320b9b7",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/chat/message-view.tsx",
+      "sourceHash": "97ad43f2acc2fdfdf75721bb90cfb72a1222d8d3b148e2dd1901d35a73b37fdd",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/chat/onboarding-cards.tsx",
+      "sourceHash": "6c3c7b5c246abd5af0129a9150532e6a65767a8aac4423f09e1a21d3f5e2b6c7",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/chat/planner-card.tsx",
+      "sourceHash": "9a0b49fe4b66001bf931709b47574f8c72646fe735f60a2ac0c1ea5fa2214441",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/chat/question-card.tsx",
+      "sourceHash": "15b281abf7b266b8ff5227bee5e2f8dc31098d15cd29a0c2b9b0a3c7cb48cee3",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/hours/entry-editor.tsx",
+      "sourceHash": "c74c4c3615064d0a4fb71596475c25b5a592ed5c32584861fd4f762d1cb31b8e",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/hours/entry-row.tsx",
+      "sourceHash": "0f2b87e0454b990b7e3dd777d0f1b3f7fd72628dbd2b6816ce926ec267e1ddff",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/lessons/lesson-recording-upload.ts",
+      "sourceHash": "0a38ffc355682dfb9cfb1d9b6c7914de62e49ed54bbe4272144cc8a8374dcaec",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/lessons/native-lesson-recorder.tsx",
+      "sourceHash": "22c678886e14a6ecd2d5082aaeca53ec80e5c0d2c465a6e10edb7adc3d4fe07f",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/planner/event-composer.tsx",
+      "sourceHash": "7a4dbc01e1afe6450b0568e2c0770e47fe4c44a04e655932b18b303748c27197",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/planner/month-view.tsx",
+      "sourceHash": "ed5e59900bc21a8018c0bdff796175ae1a9590cec06f01568083874fc978b5a8",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/planner/recorded-hours.tsx",
+      "sourceHash": "432cc364f7a5d2da60c6799d3ffc3a9c61e8ed8b80b497a73b30659dabffb4a8",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/progress/kid-switcher.tsx",
+      "sourceHash": "e9c39936ba53747ec41f4d3cd77c97ee35f04cf4ff65482ccad618bff87ddc42",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/progress/map-model.ts",
+      "sourceHash": "7cb56aeba415b83fb6157b4f82fcbea05069a96f777c36dc7faf2ba9163562ed",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/progress/progress-next-move-card.tsx",
+      "sourceHash": "d3dd45325ef136a07dd4ff759904fcd89a841fab57ca773f7f7c6089edda8d2c",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/progress/subject-card.tsx",
+      "sourceHash": "bab891be2eddbb7f9236cd43cf8e5dc3377a1c8808866da59d4e5d7adc711400",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/progress/topic-row.tsx",
+      "sourceHash": "89a0335fede717d23902f5db1323bcfe66909db0ef987be928afb9fdfda58a80",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/progress/use-child-progress.ts",
+      "sourceHash": "06ae9329ff0cda4fb16b2931e18527416e505fde916dc36bc3bf9617d4ed6c2d",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/tasks/task-card.tsx",
+      "sourceHash": "a6bc1ab8beca54a92297109e6c0130993e7de3fa6f36db6f9253434a718c86b0",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/tasks/task-form-fields.tsx",
+      "sourceHash": "6be04746a4415c7d981fe5fe541b283097fc72ae37da404bdfda415d96d74992",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/tasks/task-history-row.tsx",
+      "sourceHash": "33319e910a9012f7ad43e01a372dca3f8f8aaa06b50b08d65e52a70b09856ce5",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/voice/aura.tsx",
+      "sourceHash": "04ce53bee4fc58fe451c135d5c41d9401c782b904647850e239292a99bc19602",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/voice/homa-character.tsx",
+      "sourceHash": "eff36f195c7730d54204596fc8560d10337f080528b5ef00bec7d4ee30bb1b08",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/voice/overlay-host.tsx",
+      "sourceHash": "0cbba32d830d60a346bd5fde065352c6c46d61a0d488fb0193298f59dff46fad",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/voice/reply-sheet.tsx",
+      "sourceHash": "8663a7ede2f26cfa171f22c769b6794ab3c5a88816af8943cf7ee2ee757c0c96",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/voice/voice-dock.tsx",
+      "sourceHash": "51b9be35203fb7f18ee230b4931902da27b06708717fe80ffafb365a4da2669e",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/features/voice/voice-screen.tsx",
+      "sourceHash": "992ced8f76f212e205e6cd8965eb399ff44a1822eced09a2069458f12a295cdc",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/lib/materials.ts",
+      "sourceHash": "33c2e1a04ae7b4bfc9c774371c0b3f0a5af5d174e4c2717a08edfbaee1fb8ffa",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/theme/fonts.ts",
+      "sourceHash": "35a295a0dbb50bf17869952c413425829ad3bff541916bdccdf58eae88c2844c",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-font-hanken",
+        "legacy-font-caveat"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/theme/tokens.ts",
+      "sourceHash": "bc61a9f2e193b9374b78fde4e5cd8d2d3067ef3cfcfcba15c7d96265e20a1bbf",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/agent/activity-formats.md",
+      "sourceHash": "c99f6492391010fdf3fa7b765377527a1ccc226dc82a9f795f4bfb4c84bd975f",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/agent/curriculum-writer.md",
+      "sourceHash": "7991346343c7a4c6e028655b78f5b56fcf43f652ed9e9bdaa3eed9bca8608672",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/agent/skills/family-librarian/SKILL.md",
+      "sourceHash": "5e538522f3c0da8d8e5978424f35a5481f7569803b0846f764c10d353e73d038",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/agent/skills/materials-studio/references/recipes/art-project-instructions.md",
+      "sourceHash": "db4100ed0cdec20be5f66dfe1736ba8f96f8de4bd358056dcb16fba416b497ad",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/agent/skills/materials-studio/SKILL.md",
+      "sourceHash": "5ff16697a8ac3bc6e62102c3aaee2b63ef00c019eb0145d2cb6784432aa71299",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/agent/skills/research-brief/SKILL.md",
+      "sourceHash": "a0dab501da52e7bfaa431227ef2bbbfe26b1fc21ba8042d6ab7f6ae7b6424bd9",
+      "legacySignatures": [
+        "legacy-font-caveat"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/agent/tools/create_printable.ts",
+      "sourceHash": "6adbdf59ee01dd422a6e788db3b753dc4c7299294374e2e36080d419bc7dde0b",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/agent/tools/find_attachments.ts",
+      "sourceHash": "8467282b158ad23856268236ed735b005e10e7194bda9ab7cf67c844369908de",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/agent/tools/save_family_asset.ts",
+      "sourceHash": "8da039dea23e28b1ef0fabdd85be9a3f6dd877ec24069ad0f84d6a01b299d2da",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/agent/tools/write_file.ts",
+      "sourceHash": "76242590da9eb7385c5658490b319cae3e96c721f19469ac1968a97b8e07d015",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/admin-nav.tsx",
+      "sourceHash": "d5cb6eaf6a024157608414ed7e0415a09b214a92694ea3a317ea3f4f64b6ca96",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/agent-prompt-button.tsx",
+      "sourceHash": "90ae0c3fb7afaff87d008867199ea810d901df81e954370a96dd95b790e27318",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/alert-ack-button.tsx",
+      "sourceHash": "158247d4b84f398274d1ae54450c8865601ecd101c0a65500068046e212862c3",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/chats/page.tsx",
+      "sourceHash": "a31347d9a60eb6e0cf291eafe9c6012f0660b7bbd8bf5eb118d09ff2a9778d13",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/chats/thread.tsx",
+      "sourceHash": "274b22a3aaac71544af7e418326c3a4ce1de01f2fb8ddda6ee3d6ba8ba882c0c",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/conversation-card.tsx",
+      "sourceHash": "399c2a533022029f4863c14cc655b93df1bd59fa92c7bef2f1314fa68e6277d9",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/drip/page.tsx",
+      "sourceHash": "3fba8b1d1fa0c912fc7918a4e9ad8ecaa39c2fe7050bd630c6794781bdd1be43",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/families-table.tsx",
+      "sourceHash": "321cc42754c279cd0f7649cb00a73918d2c44e7647bc07e513542b0a7f307aba",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/families/[familyId]/brain/page.tsx",
+      "sourceHash": "5424de3cb89c3f045868dff594752aaaa8aa2e00d61c3a779e06284422685a57",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/families/[familyId]/build-report-button.tsx",
+      "sourceHash": "d4ebbd970b778c72530d640396055c5683fd270a9181660d6267b0799435d485",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "apps/web/app/admin/families/[familyId]/chats/page.tsx",
+      "sourceHash": "df038fe729ae6ccd3de2c62ad37fdaf42db52c7f49d06f39b1fbdfad2e7ae63c",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/families/[familyId]/family-shell.tsx",
+      "sourceHash": "2a3cfcade5a1121b41407ecff23db23643fd5c6ace793b27b85411315ea9e358",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/families/[familyId]/family-tabs.tsx",
+      "sourceHash": "3ee8dee113e111b36d216ae30307bac16f7d1a311c6b4b0e2489e3a01c914763",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/families/[familyId]/materials/page.tsx",
+      "sourceHash": "d85282756448ae77e802596b28432466ced5e824ea137df3065c4545e6ea5109",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/families/[familyId]/page.tsx",
+      "sourceHash": "a90531be7b84cddc1ca8195296f10d9a5e0846c452d5e022db623dabc6148d34",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/families/[familyId]/phone-lend-controls.tsx",
+      "sourceHash": "7974f5c11e19607264ea7c1b9ec21b25c8ad2f669d52bb1a6d735e1b2903daeb",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/families/[familyId]/report/[childId]/page.tsx",
+      "sourceHash": "ad0e64fc7b2b4deb2d0ec6418b6a8311a73dc1f95293c002ab0d6e7e0bb4f249",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/families/[familyId]/screen/page.tsx",
+      "sourceHash": "cfcca2ea7e60e1bfa1b03820dcd7166fbbe620ab64cb91c9037aedda3621fddc",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/families/[familyId]/screen/screen-pieces.tsx",
+      "sourceHash": "d3b8b5d8463893920c1d584473aab338696b38a969afa4b37457e300256f1bf1",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/families/[familyId]/tasks/page.tsx",
+      "sourceHash": "53cc444c3c0c31471f550957d73c59d3f048143c255566823e7e34e40989eec7",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/families/[familyId]/test-family-controls.tsx",
+      "sourceHash": "e5cbff0d84b3751ea3b5403e48a5f9b8c818d528c1b8f5687ea368dbef720d9c",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/families/page.tsx",
+      "sourceHash": "68661fe0aa2f17db7e688fad323298b2e3ec788be28fd55eb381ce49e08c19e3",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/funnels/drip-preview.tsx",
+      "sourceHash": "61fe3ed4e34670959aaaae25328c04491070beb5dc587568e490b64778036a84",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/funnels/page.tsx",
+      "sourceHash": "9fc41cffef205ba378b101ceb2b666dcbd25dbaee574c7a838e0e64bb2243a9f",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/growth-chart.tsx",
+      "sourceHash": "b8db4250c2bde8b6ff079de85f7be2d4b2aa268031ddb6e13974767424f1bf3a",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/layout.tsx",
+      "sourceHash": "0729f37436d5dfba62abcc235ba204813536e57d268035109be094c4996525b4",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/library/[id]/page.tsx",
+      "sourceHash": "58b215f8abec16b6a369a9d31bb9d6f056ff0c2d29257daaeaa709278a8dc39a",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/library/book-cover.tsx",
+      "sourceHash": "b0844e99e2ec570265f56df276aae01cba3b75171faacc866f3a74b0ad09a777",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/library/original-file-links.tsx",
+      "sourceHash": "8f6d46c9e6547daecd70a73a15ff188ecf9ad2006559029a869ea311bd21f043",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/library/page.tsx",
+      "sourceHash": "08f5d58f29300fae060a9778ba3351f24068fc78f6000fe7f5ef6dd431732892",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/library/readable-tree.tsx",
+      "sourceHash": "b2e9757a81212a97e98d134a120b62b8e85d898cd3f2d6a01aff8ed4ee96e46c",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/morning-offer-funnel.tsx",
+      "sourceHash": "f6d6f64bf1cb93154a11a72ee508b7cef643fd885bc8e784615e1d144e688b7f",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/page.tsx",
+      "sourceHash": "03ae8918676101427120e211c3df68c93e12ee78b9fb81ea796b5d6f26a89808",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/pulse/page.tsx",
+      "sourceHash": "869f16a40eb23e969b34a1f65bbc891ebc1347fa45476e0877d1e7a922c59de8",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/session-trace.tsx",
+      "sourceHash": "8942483aa795903b349ea92f4f656e1379bb420a52ab1a840d913d8ad867e4fa",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/sessions/[sessionId]/page.tsx",
+      "sourceHash": "a22a97e013493f15856e9cf1277023f9fdab7c1c06da4f925882f76b3a4acc27",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/sessions/page.tsx",
+      "sourceHash": "f912968a3894976b31a8f9efdc036b6595457b39b76a150d37c5b75f27d0d13c",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/studio/page.tsx",
+      "sourceHash": "c5bd78eb063b5b05a67a75ab9ea5413ba4fc6ea9e4b7fc20be2a084266973f60",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/studio/reference/[file]/route.ts",
+      "sourceHash": "0048f14e298c8a69f77a7b14919e7d9c4503b5c6248851ab098ac7c44928c0b1",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/studio/run-form.tsx",
+      "sourceHash": "861419735d8e49486b648bc397b9ee499be5ead0afb8de1a3a6abcba847de3a7",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/studio/runs/[runId]/page.tsx",
+      "sourceHash": "714b0e4af08050985f494c0d18dbd677892e1f6b09a3b60986c291ecd50c523d",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/studio/runs/feedback-form.tsx",
+      "sourceHash": "66a78f2690bdd05fe4212d7a61dbf3381ccfaa2ec2e8dbc9df97689da047336a",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/admin/ui.tsx",
+      "sourceHash": "83fc5ee03a6558780e816ef4ddf446524d18b1a620e51f7a16c591fe58abc5fc",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/api/chat/attachments/route.ts",
+      "sourceHash": "ad40fc6922d6d28c6f00cda70c546b08a1cefe29bf1e4d1d7a52db537484492e",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/api/chat/upload/route.ts",
+      "sourceHash": "fc7b807493f9f153e0f08f411e36ac612ba70f469d137504a1bb50c54c380658",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/api/compliance/filing/route.ts",
+      "sourceHash": "ae9aa04683aa7150305e2d2699f0d5d676de732f82112e4fa7128b9a33eefc44",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/api/compliance/pack/route.ts",
+      "sourceHash": "4a0d59ed3b26876b95511ae4973cafb9ed5384306ec1ecc30a8caa63c792f048",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/api/lessons/upload/route.ts",
+      "sourceHash": "789cb78d9e669a7b3a57ea2d57ae636ade23b5e9abaa55d6bb808e95dab57e16",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/api/library/assets/route.ts",
+      "sourceHash": "ff784300504dae74ad60b86dbcabadc381caa136e19a8ebc86c119c115697c0e",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/api/library/upload/route.ts",
+      "sourceHash": "e1fd40a693529f09390e848a46da7828bfca0b6802ecf665d0fc620c639fca08",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/api/library/uploads/route.ts",
+      "sourceHash": "2b1330a85612bed0d6afe4bec32672c6eba83a1b979f94a77379c3318aae36db",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/api/link-phone/route.ts",
+      "sourceHash": "52e7af05083b2c2531ed051135981c19fbb1a610b86964caa100e39d8f87d8fd",
+      "legacySignatures": [
+        "legacy-font-hanken"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/api/map/children/route.ts",
+      "sourceHash": "a42fff096a6892a61a26e5bc876f08306b63c69c01b4b7fb2b318d01ff8e93c2",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/api/materials/[id]/pdf/route.ts",
+      "sourceHash": "f433d046ad8dac698328ce77793fc7577d61a829b7b17506e69505175b060080",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/api/video/describe/route.ts",
+      "sourceHash": "253f6f43d89907b16a2f90dcf7f978a22d969207be6fb3b426afe79d25617f79",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/api/video/upload/route.ts",
+      "sourceHash": "ad387204cb9c4f755a7854ee41d1423400108d2fea1ef80612726f828669fe85",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/[childId]/lessons/record/recorder.tsx",
+      "sourceHash": "4e7141888866a5e567caa1a6f80736a0b5137a96f03735e4bf21313a1c84f681",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/[childId]/report/complete-profile-prompt.tsx",
+      "sourceHash": "b455591c6dd4767b4546cb7a27e973e7132bd3a249a800693f37060f37adfffb",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "apps/web/app/app/[childId]/report/welcome-chooser.tsx",
+      "sourceHash": "0b8226a06ba351b84803e5a916923f1ca94d059c06cc8e0c6d7ef5861e9f0897",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "apps/web/app/app/another-kid-card.tsx",
+      "sourceHash": "e9a00aa01e8fbce091804204f8272db09cc461216cb0844fe3ffa4313098205f",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/attachment-message-parts.tsx",
+      "sourceHash": "c8560216c0c7dafedb1992df212d45b48d9dd44e3a13284ece62c6450bb1e41a",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/binder/binder-card.tsx",
+      "sourceHash": "99f03ce1156772b912046d1d9d489036a98ee7a4cf2eb5e121a6cd71e2ed115c",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/binder/binder-view.tsx",
+      "sourceHash": "873fd32e74c93a06f0443a64c6e0e27d8995231c201405225da86644a4e5ace7",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/binder/in-progress-shelf.tsx",
+      "sourceHash": "68a44b6a9debfbd7a5e6a4bc244a44fb3def1048d20c6c05b1513b98c4f70d64",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/binder/material-detail-overlay.tsx",
+      "sourceHash": "fb5855c7c70eeae8e9e2966781015d6aabf0d25269842f74a45159ed91cc369e",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "apps/web/app/app/binder/state-filing-card.tsx",
+      "sourceHash": "4ef8bf310b7154543905598ba6ffc7f07dc50e6e454727c6575ce773addd9264",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "apps/web/app/app/binder/state-pack-card.tsx",
+      "sourceHash": "8cbc3472ed3f7120d762c6c19ae2c5cbdd511c13df403379d84d90348e8d380a",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/calendar/calendar-view.tsx",
+      "sourceHash": "d5708862e070500d280fb190a9474d4779ae557b175b7bc8999ca9bf8a01b042",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/chat-attachments.tsx",
+      "sourceHash": "0c05c57c62bb509699bc699c7ac4deca9b1530b0286d88e63a59517735eaa3ee",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/chat-client.tsx",
+      "sourceHash": "cf603148b5028cd21a00498d2f03a3b7615b998cb34e4bc289ddf4d74188ca18",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/curriculum-mapping-card.tsx",
+      "sourceHash": "314644781cfd6aa977da28b6d85a15ad06ea862e72ab2d8412d386f497ee6a02",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/detail-card.tsx",
+      "sourceHash": "bc6797cd1ffd679ba078209f948ffaffc8fcef3626aceb0b5762e5a34deb70d7",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/dictation.tsx",
+      "sourceHash": "2ae3d74b80adc45e105340d537a49c37def118d5872f264fe08e69da175ccd1c",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/error.tsx",
+      "sourceHash": "46be837fc630e48d8aac99936c5b8f8d73061773a7aa88b4cfa94360df3ce5be",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/hours/hours-entry-overlay.tsx",
+      "sourceHash": "5892c68cca24caef3f74dce6cf0cc4abea2a419f419aaa741d120b68958b39b8",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/hours/hours-view.tsx",
+      "sourceHash": "0d9208be86cf89d6d8220258a7545b75e7d28dd5ce55148c13d66bf9c1d68d62",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/kids/[childId]/kid-view.tsx",
+      "sourceHash": "ff7313be67dd308bba3f291022178f3af92a645ad8b21a407a822a7b6107047e",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/kids/[childId]/subject-list.tsx",
+      "sourceHash": "a9ca8ceadda09a3431cec20247f118b862dbf9e19f6477d233d1916fe405a37b",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/lessons/[lessonId]/page.tsx",
+      "sourceHash": "f7e193b5538bf75fa09ac49f968011d0f7ff63ab360d2eec2472ed77065b1bee",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/lessons/[lessonId]/review-client.tsx",
+      "sourceHash": "3c640a8c86cb65fa135d753b191b0df4469be88823e142254c22a5aa5a28d422",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/library/library-detail-panel.tsx",
+      "sourceHash": "21833edbb16ce03727cba429a65e7d26938c8acb1e8fcb9df3226ba4f42d85e1",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/library/library-view.tsx",
+      "sourceHash": "83f0e54e517ee03bbbfc74405461c6138d29f142e5cb725a20b2ff6e3b5576bb",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/markdown-text.tsx",
+      "sourceHash": "5af2959c7cccdf000602475af069184bbd604b66f22e2018a1f25297c8728a4f",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/material-card.tsx",
+      "sourceHash": "0833e5903caad258497b6a6193bd31d310fbf71d480b98f95420f0fd04210118",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "apps/web/app/app/message-parts.tsx",
+      "sourceHash": "35fd3058ece78833896e90df72e5050d91b3785b9127da0037f36704f230ee96",
+      "legacySignatures": [
+        "legacy-coral-action",
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/onboarding-cards.tsx",
+      "sourceHash": "7f5e2da91908f3ebf1905906760223c80ec3f1976f3ade857787776846b86c8f",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/planner-canvas.tsx",
+      "sourceHash": "45384379273679862b26044f779c4b6bb3a5a595d2863a9763e85f3b04807158",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/planner/day-grid.tsx",
+      "sourceHash": "109a583f6fef431558d5f66b71497099aa04c596cb01917dce5f6eec0513aef6",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/planner/planner-view.tsx",
+      "sourceHash": "86d2d3c5ea640f4a022c79f93bc0cd58612378aa5f32e6569fb0565a3b3f0443",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/planner/unified-planner-view.tsx",
+      "sourceHash": "6463b6a7bffdfea17263dd375291b63f7c4fddca8bb0cfec1a15dc8a0b48a1b0",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/progress-conflict-card.tsx",
+      "sourceHash": "0b8ad3070168e9b781a90c910a8e1774718ff173697c9762ea992f0c51ff4915",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/progress-question-card.tsx",
+      "sourceHash": "af9bd82aa536ad283ac75666d698e4ece1eb9449ebb0f8eed44e8fd177745c1c",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/progress-update-chip.tsx",
+      "sourceHash": "98b9085e6e3954ba9da6e30eaf0fd676cca4c868970ed76257fc83fd66a32933",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/prompt-suggestion-rail.tsx",
+      "sourceHash": "639cd41d49798cf2bb16353492df881472146b4a0c187daac1d2c2065941ef86",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/question-card.tsx",
+      "sourceHash": "aee0e660cb5bf9ddc1d3983da15177dee01d1016f452e5b03ce3ed9524d66b58",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/report-reveal-card.tsx",
+      "sourceHash": "9af1fc2b0faa9a57fe3be6bff88d37801adeb073467dff5971838319525a6f4f",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "apps/web/app/app/settings/call-me-button.tsx",
+      "sourceHash": "300beb26cbeb5959e7377c6e84bc68a6fa76add4347d0a31bad3afd2715b3572",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/settings/family-details-section.tsx",
+      "sourceHash": "edf88b1a725a74e4eed5cff8dd71f820227f313273e26322dc870781ee1062a0",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/settings/homeschool-section.tsx",
+      "sourceHash": "16efa36223e953bfc1cca243105e1da940066c1861ed4ec9d3105bc049213f20",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/settings/kid-photo-field.tsx",
+      "sourceHash": "8bcfc2cdb1ee8a1567a178443b2ece1ddcf0e19916936a9e81fe18f1c1059c07",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/settings/kids-section.tsx",
+      "sourceHash": "7200ad526d664364319cb1a8326a1c1360e21cddaa550880d39cd8b8864c3e65",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/settings/page.tsx",
+      "sourceHash": "990d2ef84ea9ee7be234a1b7538258d3ffc0feeab1bef874dcde1d1fee612d6c",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/settings/parents-section.tsx",
+      "sourceHash": "ecfbf74b6a494179e214f4129b0805fd4b205082a915d1b07a1544f31d7e4bb7",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/settings/plan-section.tsx",
+      "sourceHash": "d31aa54f0ad400c3ac0ce4a7f9b4288fe5d0c34246518e9672e90a1b13e7bb25",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/settings/section-heading.tsx",
+      "sourceHash": "8614978e08001fb217cc891cbc60319a7be7d06e18b23f100cd9e08c1f20ce06",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/tasks/agent-job-card.tsx",
+      "sourceHash": "579f73501ac12a767477e054068acc2834bc3f2ff1179a523bb804c88368218b",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/tasks/agent-job-overlay.tsx",
+      "sourceHash": "cfe712f0c297fdd1a310d83828e8a316c88db59ecf92382bc62283a812511436",
+      "legacySignatures": [
+        "legacy-coral-action",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/tasks/task-edit-overlay.tsx",
+      "sourceHash": "f3ee3eeb6ac8cacc928b6ecf7fd43689d64c596270018aa676b0c05140383287",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/tasks/task-form.tsx",
+      "sourceHash": "7b51871f9cf0bea6d1c9d13cb2add5aea6126424063a39875115f0cfaecdc60d",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/tasks/task-history.tsx",
+      "sourceHash": "1d7f0f45e2e869d09b00656f548c593a2c7aad021faa7a50be7bc8011f6819dd",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/tasks/tasks-view.tsx",
+      "sourceHash": "bbe0df3a8a5b2d9fb66396172087f3ecae5e205307437b9e20dbece730c21c9d",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/voice-mode.tsx",
+      "sourceHash": "c4569c663024130943548831298a90f347fe00db726ac721a477f3268653e753",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/app/worked-for.tsx",
+      "sourceHash": "78ab420ed2ea22745fcd3dc4086e1b281ae06c8583db1fc2e4cb6a8788c89391",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/blog/[slug]/page.tsx",
+      "sourceHash": "88dfdeff9df1ef670eef1d000db722872fb0112deabe235831568f6ae77e3652",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/blog/page.tsx",
+      "sourceHash": "56c0fdfc15bfd939843ce412755f3ae6d297ee0b5a8c92547519584f4edd30d1",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/dev/choice-card/choice-card-bench.tsx",
+      "sourceHash": "5c9f5644e849e38b2be68d01b636de7c35b9dbd686471fdc76df6c6679033c04",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/error.tsx",
+      "sourceHash": "fc7c9cd7edf409bf35d61d4f082c274499e514371f898e8be4371458a986ed98",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/forgot-password/forgot-password-form.tsx",
+      "sourceHash": "cbe94d69ac96128dc2f99596fa366ec21d00a904e51d4eea82adfaeea24a08a5",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/globals.css",
+      "sourceHash": "a820530a65b48d39f12800ee03331fca6ebf02ed1f9f5082eec395cf9f4be529",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-font-hanken",
+        "legacy-font-caveat",
+        "legacy-coral-action",
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/join/page.tsx",
+      "sourceHash": "ca56058c1988d0b4700646f245131d9a6cd9ab0e5c88479226561add143ed71e",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/layout.tsx",
+      "sourceHash": "2167af58246c752ecbfacc538550300fc5d86785f807f13219e544bd7b323781",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-font-hanken",
+        "legacy-font-caveat"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/manifest.ts",
+      "sourceHash": "f41ed303f3a906dc8b07ab337bf20d84737aaba78a798d8f26631ac255ca64d9",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "apps/web/app/not-found.tsx",
+      "sourceHash": "14b064b98ee7a3d085f65c3f8e124d2a300b39d8d925c551c2326386c5e6b51e",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/checklist-step.tsx",
+      "sourceHash": "921889e34fe9920013ee9eafd9613ba5e62197b201e578e7e039612d24fa69c1",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/deep-dive-step.tsx",
+      "sourceHash": "3b4f46906e222e3ff9b2d38560f306b8830352e9595ba2f477a4dca9873a1638",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/extras-step.tsx",
+      "sourceHash": "e3f5c22918d11696a1d99d623657809c20aee8e80ce97d76050de424d037081e",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/family-step.tsx",
+      "sourceHash": "31dfcd2d80522a7030b4186f1683ea26d4bd376b9db3b5ee1a94bbff5e169ce9",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/homeschool-step.tsx",
+      "sourceHash": "7dacb452db74c04c03b420fcd9ac1caf0ecae13b63f038179d0e602b0aa568c9",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/hub-step.tsx",
+      "sourceHash": "bc5f851a9307ed5f81fb0e01ae72dad1944e71099e01a3d27b978fb6e7442e98",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/kids-step.tsx",
+      "sourceHash": "d87c6bbc2ddac612f69f74afc1d397af5057b25e082d99c1df71c575d551cbf5",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/map-flow.tsx",
+      "sourceHash": "1d01cfa1269bf9795529148bd99f1b658fb969c26573fd7e753a56193eca2451",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/method/page.tsx",
+      "sourceHash": "5e0e13566b9000cdef121e43aa910908afff7c35a034815d5ef84fe989a4d8e2",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/next-kid-step.tsx",
+      "sourceHash": "48b421e0a38170090861f189e53c02f4b5983afa894b0c6a66e43e3a0f07bfb0",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/parent-step.tsx",
+      "sourceHash": "67434f32ab533e58c2de2a80f872a3dd36e42eeec6a0dc32b71b819721e11468",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/preparing-step.tsx",
+      "sourceHash": "cd5522eb146ca4ed4a7a87d5397da6a4ab523bd17608427c7fa9aedfbbc58499",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/r/[token]/lesson/[subjectId]/lesson-keep-button.tsx",
+      "sourceHash": "46c29df9fe746b18d20198f67f9b8535dd564978b6016d87fffc0761fe8a813b",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/r/[token]/lesson/[subjectId]/lesson-layout.tsx",
+      "sourceHash": "49275c7ef17565f8ac1b5433ad0eeb8e3ed978cfd4a4b44aed2bb06106067ab0",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/r/[token]/lesson/[subjectId]/lesson-retry-button.tsx",
+      "sourceHash": "d2d3b00a862297998469812d4951f141056a347ad6d941713fa57d616c233b0e",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/r/[token]/lesson/[subjectId]/lesson-view.tsx",
+      "sourceHash": "4add84558068d68e3ecbdbd12fc68fc3892c307424d283487ed073361dbd7f0a",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/r/[token]/month-button.tsx",
+      "sourceHash": "ed722e5f8afff1000d69db611feeda3017d5355a4c8de17149d495adc4b6d1ce",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/r/[token]/narrative-beat.tsx",
+      "sourceHash": "4b173939d561e7ff2b835942fff179b03b94ba303a0e775549aeaa645633fe42",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/r/[token]/one-pager/page.tsx",
+      "sourceHash": "220b046871eab6b5473b829d8ea2e50dbd3610731b6e753aa71a80867b7d6043",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/r/[token]/page.tsx",
+      "sourceHash": "4f4d29cbfe217989070575e4f858a22779590ea24897871e55c74febb797865b",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/r/[token]/plan/[subjectId]/page.tsx",
+      "sourceHash": "0b92011d2d3a896244a3654a91d2e221020e7c1f398834195baf86843f7be2ff",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/r/[token]/plan/[subjectId]/plan-weeks.tsx",
+      "sourceHash": "168f82a6cc51fa2ac3cecaf327d891d9da40f23dda300ebe2b097745bfb1eaa0",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/r/[token]/receipts-list.tsx",
+      "sourceHash": "28a4c61f809ae97c4ab69c03e76b0a92d2b501268834a9b9257d8bb2c6032651",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/r/[token]/report-button.ts",
+      "sourceHash": "7d8c4489696d83e1c8bb70209f40d7bbf925ae56b5a66c42742ed0908a60f9b9",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "apps/web/app/onboarding/r/[token]/report-chart.tsx",
+      "sourceHash": "975dc1b8819ba490dc9d3f8411dbbfa3bc5d0c6442434c8586b7315e423f2747",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "apps/web/app/onboarding/r/[token]/report-nav.tsx",
+      "sourceHash": "6db17d1020521983190034c3f25c9cfc1bae0db996d79838501e00f544c827b6",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "apps/web/app/onboarding/r/[token]/report-view.tsx",
+      "sourceHash": "b58a284d9728c03bc8e6a3105f7cb780743a169c8f33604d0f697643705a68ba",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "apps/web/app/onboarding/r/[token]/staleness-banner.tsx",
+      "sourceHash": "623ba308e5250326aefb614636a2dc3c9ddae20bd9919cd603ce2125bd13173e",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/r/[token]/trajectory-chart.tsx",
+      "sourceHash": "c328d788434c83fd211be406cada16a57084ca69ad7a3a66437603e6afbf2732",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/remove-kid.tsx",
+      "sourceHash": "a33ffd31ce043d4e93b7a45c14a90f8aaf8757d93434fad8ddd43f5200b78ad7",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/report-preview.tsx",
+      "sourceHash": "529939d8ed33ef3860b98734d549281cbba01dcf2dd388a018b27b78cbb45d3f",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "apps/web/app/onboarding/report-rail.tsx",
+      "sourceHash": "17292a25961c8007dcb6d2992872ce8c72316e7f9a71b37203fb1300ce413905",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "apps/web/app/onboarding/scoring-step.tsx",
+      "sourceHash": "ee026a1813c7a718e70ab120a5233342d6e7ce5b14570e62530e2830204c398b",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/onboarding/tag-input.tsx",
+      "sourceHash": "36ebf8ddf88ee1d75f386a7774858d508b6700bd8a43e1d8c714af713c27d5f1",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/opengraph-image.tsx",
+      "sourceHash": "06a3a0cad1149f359ecbec7a651afeac6812b5a3895ee9522e232f2803d0012d",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/page.tsx",
+      "sourceHash": "16874196fd7745fbab9208d460c57035d70f6f96df37254c47a5adf2978292aa",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/reset-password/confirm/page.tsx",
+      "sourceHash": "5be2348808f997d36f84484de845b73c4f520d0d4939e227934cc42f58aea227",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/reset-password/reset-password-form.tsx",
+      "sourceHash": "bda894ff17763313e76f2dfeb19f6f3381127509ef38d71b89a8162e732fc12e",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/signin/signin-form.tsx",
+      "sourceHash": "c56194366466aa1820e9e62b32dba38cd5be4cd79bab436f5d69de0a3fe220bc",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/world-real/page.tsx",
+      "sourceHash": "a98d44ac8bed769bec67605cd6613c0122e3c1b98fec93a49bd3c41e9746bf0b",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/world-v3/homa-character.tsx",
+      "sourceHash": "12f5b9609cdc46190665f3f43158349eb41d8f8e95eacc93620c74f738491d43",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/world-v3/page.tsx",
+      "sourceHash": "1fe007f232cad78d40995fa419fbe74ff5e66df15ab24e76ff0277600b00e817",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/world-v4/page.tsx",
+      "sourceHash": "e391a078f73f9513515303b723094d23da076e25bd907637ed86fc61bc786f85",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/world-v4/v4-scrub.tsx",
+      "sourceHash": "4b680aa64be1086ddcbe0b33ef3f82a11c460201db09d40e284a9d8701f4958a",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/world/page.tsx",
+      "sourceHash": "88fc626d4ccf7fd11f50b6a9a9852fd76c4eba691c14e1d316fa4c6b45e23860",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/world/world-client.tsx",
+      "sourceHash": "103aa887a7800a0f070cbc8585ace4337ba9d66f62ffca97f0b95eabe05037c3",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/billing/lockout-card.tsx",
+      "sourceHash": "d0fb1fabef0520a5ef29ba1e05e129bb11892ae517b83bb1ac03eebef2497575",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/billing/report-lock-offer.tsx",
+      "sourceHash": "2126be0afcf6a3b905ea9bef3eb5b559b389a88c3dd1ed006bc55fcca8602416",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "apps/web/components/billing/tier-options.tsx",
+      "sourceHash": "cfebcf7030d540e72c93fd39c05cb93ad443e9f12721dd8c16f7e03f2659ac3e",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/billing/trial-gate.tsx",
+      "sourceHash": "aaf4082328458542c8569abc67b41ce65ef069d46088212ad38082d3cbd963c3",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/billing/wall-offer.tsx",
+      "sourceHash": "be20277061327451c411821ffdff62ded50bfa8cf5d1748ae578b3028c1707d0",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/brand/Logo.tsx",
+      "sourceHash": "16c54293bd2265b3e216cf93bda25b25fc5d2d4f6115b5de7c1d3ed15d07e0c3",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/chassis/side-panel.tsx",
+      "sourceHash": "8fbc83a6dabbef7996ea7705f937f17db5efa16bde779fdfacb47e9c732a38d7",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/dashboard/account-menu.tsx",
+      "sourceHash": "92666d30570d5027d7abc7b6c2b549d4886290dbbb1d19c34ae9f2bffcbd83c6",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/dashboard/confirm-remove-button.tsx",
+      "sourceHash": "4df9ea68876e9492aac7c7faf2574201c6a8e5f57108072f3bd6d6cd5c9b7457",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/dashboard/context-switcher.tsx",
+      "sourceHash": "6cb0a54982ea9382d96230c6a21388137b1b787a79e6c691a4df921f6d5c2b92",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/dashboard/kid-avatar.tsx",
+      "sourceHash": "6585b1c2cdee4712192f73c0f2fd79fef446d2d8b45bbaeecc07f2c157836e9c",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/dashboard/kid-pill.tsx",
+      "sourceHash": "cbab4b151de1307c7b0e6b094766c4f1f80c5d7b55127ff17d38d4bdc90a6776",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/dashboard/memories-card.tsx",
+      "sourceHash": "bafe544a3f13993a62edb6da53490c0681a47af8c1d2934c772affaae7440ef9",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/dashboard/mobile-nav.tsx",
+      "sourceHash": "f730d948de0ae770cb99d71268833d06ece5daf0b8497a1ed1bbd2111f939cd7",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/dashboard/month-card.tsx",
+      "sourceHash": "0e5e59810d9e29d404bee7a77444728dff033d019d086ac8d4596182c77f6a07",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/dashboard/sidebar-nav.tsx",
+      "sourceHash": "bd68fff736fadbaa3aa8b809561505c092d7ed0d3484eca7ca30398760ddb050",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/dashboard/stat-tiles.tsx",
+      "sourceHash": "2add539507fdc21b2c0184adf3af40740d0e04a429b678c4f92c9657fcc0dd02",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/dashboard/subject-gauge.tsx",
+      "sourceHash": "885948471445bc75dcc5b2a4ddab1d2335255728727209b816d15c36522e1922",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/dashboard/wins-card.tsx",
+      "sourceHash": "fea19bb883784420bbb469f69459586923e16bbe716959b2e7d9d99d6c7bb683",
+      "legacySignatures": [
+        "legacy-font-caveat",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/dev/dev-toolbar.tsx",
+      "sourceHash": "ceb441c097e128baf3579e55ae8965ad1d54481cd634523e80e45e079382df5b",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/dev/test-mode-bar.tsx",
+      "sourceHash": "3157cd0c62dd035816c517cfd34c4fb100fbda87f604c65a822fe5a64108647f",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/library/shelf-cover.tsx",
+      "sourceHash": "d9c18225602b1b332bbfa760f7f0a0ffa92ce3b74c16a23f28bc552653888fa1",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/CapabilityProof.tsx",
+      "sourceHash": "2d059b39bf110796e2063bb7280b39e97535be6101db28a5e66087a88824dc17",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/CtaBand.tsx",
+      "sourceHash": "3d8ae5e5149807a8dec74e0b23e8793ee032c49c28b20c1b6460a82d720945d5",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/dividers.tsx",
+      "sourceHash": "d3bea086b6468a442bb427b6d519cb0f59935fc6c4fe6f22d6474a9f143ccec9",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/Doodle.tsx",
+      "sourceHash": "afcf70eeaf9660c5ea795b89c06440b1c3efa71951684e477f5ecd649b7e7304",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/ds/Avatar.tsx",
+      "sourceHash": "02d6ee95b64f75d34e1543f382b862e2a5b049c1d6177af7846a780d27ede5dd",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/ds/Badge.tsx",
+      "sourceHash": "666bfb4a138068ec5a68b1d8e5beff4f7d1202b954503c976e18c863c1a884fe",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/ds/Button.tsx",
+      "sourceHash": "a7740d92965809abb41ae641a678cd92815be20f39df7e6c7bdc670c5b34a429",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/ds/Squiggle.tsx",
+      "sourceHash": "a9adc1f37f1fadaa449b92bf9bffe04285fbe28a1e91ae90cc9a05c97d100157",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/Faq.tsx",
+      "sourceHash": "f26482df54edb953fbc5d1908c8c369fa105b7e3f1aecfc4d0994f14adb10246",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/Features.tsx",
+      "sourceHash": "90a6a7e612b69957e337b9ba4a742915e39121384854f7e4aea2a85ae0095feb",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/Footer.tsx",
+      "sourceHash": "22d3902287acf660c66b3bccab35163ee74fd090ac45f84befc14f52626a9d32",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/Hero.tsx",
+      "sourceHash": "a0cd04ca28ce69cb8b082357d63f5aac0adcc9899090073a24b7907fe58b3c75",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/HeroProductDemo.tsx",
+      "sourceHash": "45b49489be153f2c4c5dc9be67df2ff51fb9eb1cc6a1913a15a1b021b7f2b282",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/Nav.tsx",
+      "sourceHash": "e9eaeca1e24fd30182b8dca4e84035b8f21ba4f3507e02c997518f3f66c9013f",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/PainBridge.tsx",
+      "sourceHash": "84b6682231df8a6246fa311216c7215ee56ac63e9652155d9d9fd0095a02b258",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/PlatformStrip.tsx",
+      "sourceHash": "aca0653979e279f8c8488bd3ba3b6cafe00b0239d2922f91cdd8f62f0e0c2c9a",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/SampleReportProof.tsx",
+      "sourceHash": "2e47fdae3d39a1d0e8d0df4fbc24a89744930d4cc318d34815b0d5be766cce13",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/Stories.tsx",
+      "sourceHash": "f251d0de7d494d8459165838544830bcb26850acd70bf6df63273ae3e662e5a9",
+      "legacySignatures": [
+        "legacy-font-caveat",
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/thread/HowThread.tsx",
+      "sourceHash": "55d271d4bc0dbb5a374c676e9ce76ad704a2c15a8c242feceae763ad3e355cdb",
+      "legacySignatures": [
+        "legacy-font-caveat",
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/thread/vignettes.tsx",
+      "sourceHash": "02edc521eaaca2bd15e989516b29caf3d876b39e309e9d988b10cb4962545724",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-font-caveat",
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/phone-claim.tsx",
+      "sourceHash": "90910f3cc2910bec9675b3a69d5f4e352b0158bf616a38b4116e89abd1b37648",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/progress/abilities-card.tsx",
+      "sourceHash": "a080ebc898e52825956afba707b6970b7c10d68eb87313054828fed1c5caf7ad",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/progress/ask-homa-about-child.tsx",
+      "sourceHash": "917476bdc842c4c0798431136407389361f696128e9ff0fdf2a7135250b0d3f4",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/progress/firsts-page.tsx",
+      "sourceHash": "76fbd5568c401483202beccbd3ea30393101bda25e7a9617d3204b00bccf65f8",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/progress/lessons-card.tsx",
+      "sourceHash": "88ca092b2e5c987da96414cea38486252925fbee55dce330c74b76f1d22d3455",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/progress/progress-chat-door.tsx",
+      "sourceHash": "4f9592c0c30555b509d3ff7b243111ad0d4f8bea262f8f2ba2b38a970b3d2c19",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/progress/progress-detail-panel.tsx",
+      "sourceHash": "7254b373424e254d14b30feca988a7bdadc998eb3771faaec38ab1ad76279d56",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/progress/progress-map.tsx",
+      "sourceHash": "5f02b0e7e0ee24710fb3073368099068b2c200179c9747cb184769ac6a8a3f0f",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/progress/progress-topic-row.tsx",
+      "sourceHash": "98c2b2ac16acb3dd5acab42f2839e1fb560c3f15e08ab550724582d201cf198b",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/progress/progress-unavailable.tsx",
+      "sourceHash": "c5b44d9da6b77bd433c056b96ecc39eb53a2b6099bba53b70d25d033573a8306",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/progress/progress-view.tsx",
+      "sourceHash": "2e863c890a5b88ec8df1a3aba8857231d05924c00e8b50bb5d36f03fb1e4d0f2",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/progress/provenance-body.tsx",
+      "sourceHash": "6d12a5f21dfa5d250255bb83f820b8cbbfdb6f24ce198a9af91a1e402d583a90",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/progress/retry-progress.tsx",
+      "sourceHash": "1643118e2dd1f2a48705186cf2f9e33d31860c32a4f38770beff72b9a5fe91ac",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/evals/curriculum-mapping/preview-routing.eval.ts",
+      "sourceHash": "5c44423f13cd65ce5da7c8d8d3f55b8b5e4745893603fead5d6c19af58502ee9",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/lib/compliance/filing-document.ts",
+      "sourceHash": "68cd8a9b22749d7c0bd38f510b23a9402b907336ad0f1d8c605b0319c68f9bd8",
+      "legacySignatures": [
+        "legacy-font-hanken"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "apps/web/lib/compliance/filing-methods.data.ts",
+      "sourceHash": "9874f5310c742b66af619114cf621b04b273509a1eff5cb6b8d77b0c77c68146",
+      "legacySignatures": [
+        "legacy-font-caveat"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "apps/web/lib/map/email.ts",
+      "sourceHash": "3e318eb37f3cea6deb7a78b4802e6415548556a98b45036e5f911de345fedc50",
+      "legacySignatures": [
+        "legacy-font-hanken"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "BUILD.md",
+      "sourceHash": "ab363a59f94e546befef59eca4f760f5da72e1f0d7180db5cb9c679468a0d74b",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "DESIGN.md",
+      "sourceHash": "d192372596c69a511d69c3f6d5d777928d14c7f887437b617da389f4f1744871",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-font-hanken",
+        "legacy-font-caveat",
+        "legacy-warm-playful-doctrine",
+        "legacy-coral-action",
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/_adherence.oxlintrc.json",
+      "sourceHash": "4f35b23705adcc0106ad7b985737e1ef2baaab5e57e9f6ba31c8dfddeacf3447",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-font-hanken",
+        "legacy-font-caveat",
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/_ds_bundle.js",
+      "sourceHash": "1e478d994c4f3b45f8cf847cc0cfb339dd1ad978e06dd7be7459f38b890e1ee3",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/_ds_manifest.json",
+      "sourceHash": "3bfebcbf6bbd094bf58459ae13695908420960825e3c0877b21a84e9476944d4",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-font-hanken",
+        "legacy-font-caveat",
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/AUDIT.md",
+      "sourceHash": "f9400ad4cec362297808afa505ccc0dc831158c537f4210f11cbc3286f787d74",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-font-caveat",
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/actions/Button.d.ts",
+      "sourceHash": "3facfc32b07d64bcbad3874a52537aead5d70b2926a3113555f09cd378c61073",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/actions/Button.prompt.md",
+      "sourceHash": "57fdd185eb1b88e74da53f914cc5abcbf66e85d8ce9e1ada1691da82169b87f7",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/actions/buttons.card.html",
+      "sourceHash": "8b2bba0d748e72e71496935c4686a128b9a0d60aeebb568733ec45dac363f6cc",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/actions/IconButton.d.ts",
+      "sourceHash": "8519077d360a4f82a22fa136809474cc9bb841f3fcc9a2c0c20196dac4de4503",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/brand/logo.card.html",
+      "sourceHash": "593de66a309b0082ba1f0a31306fab8edde76ceccc442fdf3bf4b1e266fd84fb",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/brand/Logo.d.ts",
+      "sourceHash": "38c6bce802278b5fbe81f2b55f9af1ac8ded05985ea9ecbec181f4ce37b4da67",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/brand/Logo.prompt.md",
+      "sourceHash": "5b5919894b07f7c32fb364ab1ff1a52e4af3262b427039ba40517408991fd23c",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/data-display/Badge.d.ts",
+      "sourceHash": "9f0375393ff7578d0d7038ae37b990f95d1f6be674b17aad78628c3377a07899",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/data-display/Badge.prompt.md",
+      "sourceHash": "2c8da4e15b9439c6a8043b2c3a43c9f7e21d54f75a5f9625b52b6eca02cd6820",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/data-display/data-display.card.html",
+      "sourceHash": "746393d79fb6471adf9f2532791f81e30bf8c7306521fe912f8f1f195f321ed5",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/data-display/ProgressBar.d.ts",
+      "sourceHash": "1de0dcea7eab75d0bf216f5e70d63135284e8e3e3b4e55ae807bed59536ec658",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/data-display/ProgressBar.prompt.md",
+      "sourceHash": "708d80e399674bb93d3b70396c19a0c19f28eac061792f433f64bd814ae08120",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/feedback/Callout.d.ts",
+      "sourceHash": "74d3ec9dab159db19dacdb912ec20b1957ab03d6bc74c4489b7052dbff554c1e",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/feedback/Callout.prompt.md",
+      "sourceHash": "e23563873485d0dcf002a5f9307763af2d7513afe196edcd2a168ac77bb2b2c3",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/feedback/feedback.card.html",
+      "sourceHash": "c4a2087404970332ffbc56f0cfb7b9b778545546a4214e02a41f94df8c357e0e",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/feedback/Toast.d.ts",
+      "sourceHash": "5dff474b5cdc50370f68b303b6c6ba244aab07e6be98fbe2789d02f48b0245f7",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/feedback/Toast.prompt.md",
+      "sourceHash": "dd8f7494d61d3e6cdee7e0eaf48f966c1ce126852975576108e107442043084e",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/forms/Checkbox.d.ts",
+      "sourceHash": "4c911854a3a15a7e2b92fa95f4ed5e6ff5b090846d47be1ab6c7a439ceda155b",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/forms/Checkbox.prompt.md",
+      "sourceHash": "4cde19d517e817a8e396a6edf5bb4b1c15d11fbab583fa743fef84d41f6e020b",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/forms/Chip.d.ts",
+      "sourceHash": "5216426d4c8b3ea88af1d4f69fcb9e46f13c25e9be402e6408eac2a76afde578",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/forms/Chip.prompt.md",
+      "sourceHash": "e74b82bad30b6b5036b731354acb41abaa7f96fdf9737c2e7c498771b56fed5c",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/forms/forms.card.html",
+      "sourceHash": "b893d83b6b994c639c9468e900d995b4dae05cd9df31c9c0fc67e26493aee8e0",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/forms/Input.prompt.md",
+      "sourceHash": "e67271ffa5bdcb4b647813b9ad29e318ed7de69de599951d102a9bc5e46fcea6",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/forms/Switch.d.ts",
+      "sourceHash": "b6b3b5a7247349824e1ccc6e14f14955096bc7a6b232c387449c18d34ecfb5fa",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/forms/Switch.prompt.md",
+      "sourceHash": "bd1a88ca78c42da0b92181633b0c1fb52edefb2bb4c4e432b5d66fcf94044180",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/forms/Textarea.prompt.md",
+      "sourceHash": "dc5fde0419d26073d99c1d118e6cbe75b124595d19e4cbc9a58d14ac4bbf22db",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/layout/cards.card.html",
+      "sourceHash": "0a127f536a03a0912ba4872254151d6df0065abca94d0268368a5fca4794ae35",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/media/icons.card.html",
+      "sourceHash": "66f50e7d29cf314a2fe095dd2b1bb8ae92fb7c08a5b09d029fe275ff73f48949",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/navigation/navigation.card.html",
+      "sourceHash": "ae6f3bca5285a80ce31b0aa94db4b58eadfd853ebb8486056c02f2b57773256d",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/navigation/Tabs.d.ts",
+      "sourceHash": "6474c20d72bf32ee906409d286543a2a4d5b4dab2fb489b13279df0a6fa19c52",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/navigation/Tabs.prompt.md",
+      "sourceHash": "44af24183e425a6eb123a738eeba2b12879dd4dabea8ce86856a5d8b16cb2df8",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/playful/Doodle.d.ts",
+      "sourceHash": "5bb5a4aa689a45a358c9986396ca8ddd0f3ee9f2774dc3c815f00487ef46e5f5",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/playful/Doodle.prompt.md",
+      "sourceHash": "112e1b44b4c9b3c4d5be2bf1c1ec2e81055451048d07e552a04b91016dccac0c",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/playful/playful.card.html",
+      "sourceHash": "4568fc69f549684d1fb08d4b302762e9713a8cba2ffc4424609ffa5112d6e197",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/playful/Squiggle.d.ts",
+      "sourceHash": "a04ec79696e704c80e1c5c80e410c26f77d027b875cb476407d862b9ac454229",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/playful/Squiggle.prompt.md",
+      "sourceHash": "2d7072791170c4df903482cd0f240c8a8454c3e0b6b5c1b4913733a477569649",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/states/Skeleton.prompt.md",
+      "sourceHash": "9314596bd8669b6e47fc5865ef67aa5f0af848a377e87e6ac1a8d86d63c6c2b6",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/components/states/states.card.html",
+      "sourceHash": "1073ad993ecbfbc24cb509f15264bdfe34660bb1603df6598c3dd9188f30fa4f",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/explorations/2026-07-22-landing-v3-composition-mock.html",
+      "sourceHash": "fb7f687541f08a7afaeeb22bd8bee156d3b81a7f1d1594c401716bd274e6933e",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/explorations/2026-07-22-landing-v3-composition-mock.md",
+      "sourceHash": "3c2d2026fdb22ac5c9c1d7722345a9622ca6b4d81e765b8849b3d15a9ffebd48",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/explorations/font-probe.html",
+      "sourceHash": "1c6c7b67dc011b8a96fa7b8210e4a52f16148953d2a9560eb0b658121e5bcf2a",
+      "legacySignatures": [
+        "legacy-font-hanken"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/explorations/fredoka-headers.html",
+      "sourceHash": "853acf8196155e471d8bd4d2d9a1d412b239a2c9f41be177b2f31a0dd345f500",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/explorations/garamond-compare.html",
+      "sourceHash": "7d834d2c111b1a5e6958e70fd3f1bd93c2a8eb6ea3bb71c3fd4d2abcaee2163c",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/explorations/header-sans-options.html",
+      "sourceHash": "74720687273233cc333c69f9705d47592b8cfedc627946e36d4a7da5154ca641",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-font-hanken",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/explorations/logo-variations.html",
+      "sourceHash": "ed54563c46ec95791f7e0759a675a556c7976dadb8d2e4d601e3bbf46a8288dc",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/explorations/thank-you-card/front.html",
+      "sourceHash": "4489f0277373e904043cd21e97872dcf61147386dcd4b4724f46ac23b0562f12",
+      "legacySignatures": [
+        "legacy-font-caveat",
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/brand-device.card.html",
+      "sourceHash": "a51c259e026629129f14c53f1d93496d33eb2807ad2177aa552cd0f6b38801da",
+      "legacySignatures": [
+        "legacy-font-caveat",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/brand-logo-lockup.card.html",
+      "sourceHash": "b94a2459ed2a1c959fc78d00c8c34c0a90a02475b957eb9a6e106bf993a9d368",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/brand-motion.card.html",
+      "sourceHash": "3f7e475dd44b19c57a369894ae7878cdddd8a509b804f13af33d3df9cdf11e5f",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/brand-voice.card.html",
+      "sourceHash": "21dc78babae6147d51a17ceaf778a315be93785a7bc2f5f8716a1408d192670b",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/color-accents.card.html",
+      "sourceHash": "7fb06202b4a1c87e00743aecf72d7aeab805d2be15bb121c26abf43f0ded3df2",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/color-clay.card.html",
+      "sourceHash": "47fa637a5be2b654748f959699643828ad8d8d569165d9d41dc912938f6028ad",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/color-pop.card.html",
+      "sourceHash": "c3df2bfa51669e8ba7623802c50f7091b0a8ab3106fbc0f8f495a534b26fbeb8",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/color-semantic.card.html",
+      "sourceHash": "2ba200d628657f8da006b45f0e9b44f125578016ef9ba5e0bf660f056962c148",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/color-stone.card.html",
+      "sourceHash": "c77bfdf7862cd7221b45353c5e439e0aaa863aa2877ae450658648ea40acbe57",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/copy-kit.card.html",
+      "sourceHash": "8c02cd71af9f6a5cc84de04fd397396fa462d3fbcf3c8a84a63356f75ddc66df",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/dark-mode.card.html",
+      "sourceHash": "af0c42133be1f6990c144dc5ffc693dfaf28e85d6f759936d175bcd2ee3a29b7",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/data-viz.card.html",
+      "sourceHash": "0bc4e9dac087d549d11273785d7405346f4b327b8ae53af1dc47d3da8edcacf3",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/motion-check-off.card.html",
+      "sourceHash": "d96ae095c03091c628d72e699a84111b0250926e0b14ca521034c74f5c24c26a",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/radius.card.html",
+      "sourceHash": "ed069ac8bdcf23f62aca70945aa929fa62a9a9dd0baa07edea234b325de2c5ca",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/shadows.card.html",
+      "sourceHash": "6d3a8fe729d04454d897585e68bbe84016800ca63eda3a94fd4eb17f180d0c35",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/spacing-scale.card.html",
+      "sourceHash": "a33114ee6bb4a8daca3cc8bbf2919947e2cc86c9b487e5404df787a9aa38f0a4",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/type-accent-mono.card.html",
+      "sourceHash": "73ebbc338f2df9f48c2349ee935335d93a0505e23350780f4ebc4af167513328",
+      "legacySignatures": [
+        "legacy-font-caveat",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/type-body.card.html",
+      "sourceHash": "a62259586b95077882744acccccc326a6fe272382685d323ba7f3861b51283f9",
+      "legacySignatures": [
+        "legacy-font-hanken",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/guidelines/type-display.card.html",
+      "sourceHash": "4a214693eb45962f87e5998c4ec62c3f7c80ef136b4a1377bb7317218c584330",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-font-hanken",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/readme.md",
+      "sourceHash": "0ae056f7f47f08384e166cee8c265242a23b5ea4efb57ef6cc05c4eedb4244dd",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-font-hanken",
+        "legacy-font-caveat",
+        "legacy-warm-playful-doctrine",
+        "legacy-coral-action",
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/SKILL.md",
+      "sourceHash": "607320074262378fac050949b5a8d83dd43b215cd5284b8ab595fa3ccadba0ae",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-font-hanken",
+        "legacy-font-caveat",
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/social/brand-promise.html",
+      "sourceHash": "4ce16e9c99107ec59d71dde53c5917f93159377872d9cd82b08042ce95368eef",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/social/carousel-cover.html",
+      "sourceHash": "5f2b3f9dd6661c6803c082a9257ca8515e43a47c2b82be70a0a61435f8f98c98",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/social/notification-moment.html",
+      "sourceHash": "85da60022104d14759e5c4f01477101b9cc748944dc6547f468c8f2f4b01977e",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/social/post-tip.html",
+      "sourceHash": "1b5414b1bb77180ae6243735789d5e6d2574225703f68f03f8d1e79a62f1a298",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/social/quote-card.html",
+      "sourceHash": "f737bf520be8c213857b858e23f481875706dc07a3ac968191f697b1f40e3ad3",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/social/README.md",
+      "sourceHash": "3467e08a2fe7fbf603fe97de3b24beb87c6f5a605b4cdf2b548cae5e2f8a7215",
+      "legacySignatures": [
+        "legacy-font-caveat"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/social/story-announcement.html",
+      "sourceHash": "0f889437ee2159399b99bad92f22147076cbfeee8008349414d112f8d0366ebe",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/templates/landing-page/LandingPage.dc.html",
+      "sourceHash": "08071a6383d7e02a4e3f9a70e5e1d83e5990b8469841e2a55e9392ae512b7871",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/templates/web-app/WebApp.dc.html",
+      "sourceHash": "08de53ddc8b0511f3fae7fd693181f3d39fd349b5db98861ffa1d192dc188064",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/templates/worksheet/Worksheet.dc.html",
+      "sourceHash": "9075b8a2360a89136835bf1bc6088e2196ef238adec81fd773babe58bc4dfc92",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/tokens/colors.css",
+      "sourceHash": "a4a6debbd94094fdcc385e313dbadda1186e7e4bbdea0c3fec95dde256a2cd6a",
+      "legacySignatures": [
+        "legacy-warm-playful-doctrine",
+        "legacy-coral-action",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/tokens/dark.css",
+      "sourceHash": "7677b8342851600577f521cd7f585f800de62b8d19fafccd61b18800056ae493",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/tokens/fonts.css",
+      "sourceHash": "fb63a2dba06b22f78a35dbe02514cab0179c765f4eb00bc798f63782577e4cc6",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-font-hanken",
+        "legacy-font-caveat"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/tokens/radius.css",
+      "sourceHash": "1edb906686119d067a00193a2769915abc99bf15c99be4d75fd4f896741546e7",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/tokens/shadows.css",
+      "sourceHash": "d4e122324e51f9834e5d53522ca8810035204094e0f72ac0af757442cc944a79",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/tokens/shapes.css",
+      "sourceHash": "ee9a27b681a0e7c7f50372879b1f91a90e21a640b84d787e98104398c72b80f3",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/tokens/typography.css",
+      "sourceHash": "d79a6ff4a8ed39c2495a01cac22bd62b44f980fdd44941a0faf44caf7060eb97",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-font-hanken"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/ui_kits/landing/image-slot.js",
+      "sourceHash": "ab557420166fb99f58167d371c091766afedb663aef57deb3296aafabf05c575",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/ui_kits/landing/README.md",
+      "sourceHash": "20a09c69c2737a4ba109b1c7b204c6e8650f57db46f294cc1b4584ede5afab1f",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/ui_kits/mobile-app/splash.html",
+      "sourceHash": "acfe584afccc87fa8fe0e680ed96e2ce2cbbc2f6411d922640dc51de5f4d4a5b",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "marketing/content/drafts/2026-07-05-how-to-track-homeschool-hours/video/script.md",
+      "sourceHash": "69223d8ed1a226fd1e5b25d2b6caab09b8c5ed9775d2c4f51a515eca97058f95",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "marketing/content/drafts/2026-07-05-ugc-homa-intro/video/script.md",
+      "sourceHash": "cb937c1573778d3cbd4054709129049406b2e95aeb888a1f7a5638349d7022b9",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "README.md",
+      "sourceHash": "84507fc9a96c76c3022bc09063afa51557263931dcc50fc385be068e0d69b60c",
+      "legacySignatures": [
+        "legacy-warm-playful-doctrine",
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "scripts/brand-assets.mts",
+      "sourceHash": "a556ce6deecd013ddada2a1e55b68c9a60485d6b2df438dc3327e878599173a9",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "scripts/build-material-anchors.mts",
+      "sourceHash": "6f687ce3892a1e6bd7ec8774c648b659fd11d57e9578705956be0e24a8e38dc2",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "regenerate-derived"
+    }
+  ]
+}

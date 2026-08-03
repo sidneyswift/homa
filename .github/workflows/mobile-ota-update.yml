@@ -22,6 +22,7 @@ on:
       - ".github/workflows/mobile-ota-update.yml"
       - "apps/mobile/**"
       - "packages/core/**"
+      - "packages/design/**"
   workflow_dispatch: {}
 
 concurrency:
