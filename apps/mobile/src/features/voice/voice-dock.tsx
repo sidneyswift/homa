@@ -1,12 +1,12 @@
 import { usePathname, useRouter } from "expo-router";
-import { ChevronDown, Mic, MicOff, PhoneOff, Sparkles } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { Pressable, StyleSheet, Text, View, useColorScheme, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Icon } from "../../components/design/icon";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
+import { colors, darkColors, fontSize, palette, radius, shadows, space } from "../../theme/tokens";
 import { deriveCharacterState } from "./character-state";
 import { HomaCharacter } from "./homa-character";
 import {
@@ -29,6 +29,7 @@ export function VoiceDock() {
   const { session } = useVoiceWorkbench();
   const insets = useSafeAreaInsets();
   const { fontScale } = useWindowDimensions();
+  const dark = useColorScheme() === "dark";
   const [expandedPathname, setExpandedPathname] = useState<string | null>(null);
   const [renderedPathname, setRenderedPathname] = useState(pathname);
   if (renderedPathname !== pathname) {
@@ -53,6 +54,11 @@ export function VoiceDock() {
     assistantTextStreaming: session.assistantTextStreaming,
   });
   const largeText = fontScale >= 1.5;
+  const surface = dark ? darkColors.page : colors.page;
+  const card = dark ? darkColors.surfaceRaised : colors.card;
+  const boundary = dark ? darkColors.borderSubtle : colors.borderSubtle;
+  const bodyText = dark ? darkColors.textBody : colors.textBody;
+  const mutedText = dark ? darkColors.textMuted : colors.textMuted;
   useAccessibilityAnnouncement(
     presentation === "hidden"
       ? null
@@ -73,12 +79,12 @@ export function VoiceDock() {
 
   if (presentation === "compact") {
     return (
-      <View style={[styles.safeLane, { paddingBottom: Math.max(insets.bottom, space.sm) }]} pointerEvents="box-none">
+      <View style={[styles.safeLane, { backgroundColor: surface, paddingBottom: Math.max(insets.bottom, space.sm) }]} pointerEvents="box-none">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Homa Voice. ${statusLabel}. Show controls`}
           onPress={() => setExpandedPathname(pathname)}
-          style={({ pressed }) => [styles.puck, pressed && styles.pressed]}
+          style={({ pressed }) => [styles.puck, { backgroundColor: card, borderColor: boundary }, pressed && styles.pressed]}
         >
           <HomaCharacter state={characterState} size={PUCK_SIZE} />
         </Pressable>
@@ -107,8 +113,8 @@ export function VoiceDock() {
         : session.toggleMute;
 
   return (
-    <View style={[styles.safeLane, { paddingBottom: Math.max(insets.bottom, space.sm) }]} pointerEvents="box-none">
-      <View style={[styles.dock, largeText && styles.dockLargeText]}>
+    <View style={[styles.safeLane, { backgroundColor: surface, paddingBottom: Math.max(insets.bottom, space.sm) }]} pointerEvents="box-none">
+      <View style={[styles.dock, { backgroundColor: card, borderColor: boundary }, largeText && styles.dockLargeText]}>
         {!largeText ? (
           <View style={styles.puckInset} accessibilityElementsHidden>
             <HomaCharacter state={characterState} size={40} />
@@ -117,17 +123,18 @@ export function VoiceDock() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${statusLabel}. ${connecting ? "Cancel voice connection" : primaryLabel}`}
+          accessibilityState={{ busy: connecting || session.status === "working" }}
           onPress={primaryAction}
-          style={({ pressed }) => [styles.statusControl, pressed && styles.pressed]}
+          style={({ pressed }) => [styles.statusControl, { backgroundColor: dark ? darkColors.surfaceSunken : colors.surfaceSunken }, pressed && styles.pressed]}
         >
           {paused || session.muted ? (
-            <MicOff size={17} color={colors.brand} />
+            <Icon name="muted" size={20} color={dark ? darkColors.brand : palette.clay600} />
           ) : (
-            <Mic size={17} color={failed ? colors.brand : colors.success} />
+            <Icon name="voice" size={20} color={failed ? (dark ? darkColors.brand : palette.clay600) : (dark ? darkColors.textBody : colors.success)} />
           )}
           <View style={styles.statusCopy}>
-            <Text style={styles.statusText}>{statusLabel}</Text>
-            <Text style={styles.actionText}>{primaryLabel}</Text>
+            <Text style={[styles.statusText, { color: bodyText }]}>{statusLabel}</Text>
+            <Text style={[styles.actionText, { color: mutedText }]}>{primaryLabel}</Text>
           </View>
         </Pressable>
 
@@ -139,7 +146,7 @@ export function VoiceDock() {
             hitSlop={8}
             style={({ pressed }) => [styles.iconControl, pressed && styles.pressed]}
           >
-            <Sparkles size={18} color={colors.textBody} />
+            <Icon name="chat" size={20} color={bodyText} />
           </Pressable>
 
           <Pressable
@@ -149,7 +156,7 @@ export function VoiceDock() {
             hitSlop={8}
             style={({ pressed }) => [styles.iconControl, pressed && styles.pressed]}
           >
-            <PhoneOff size={18} color={colors.textMuted} />
+            <Icon name="end" size={20} color={mutedText} />
           </Pressable>
 
           {!paused && !failed && !session.muted && !connecting ? (
@@ -160,7 +167,7 @@ export function VoiceDock() {
               hitSlop={8}
               style={({ pressed }) => [styles.iconControl, pressed && styles.pressed]}
             >
-              <ChevronDown size={18} color={colors.textMuted} />
+              <Icon name="collapse" size={20} color={mutedText} />
             </Pressable>
           ) : null}
         </View>

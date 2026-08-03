@@ -9,7 +9,7 @@ export const iconContract = {
   source: "semantic-adapter-only",
   characterIsNotAControl: true,
 } as const;
-export const semanticIcons = ["back", "next", "close", "menu", "more", "add", "edit", "delete", "calendar", "book", "plan", "progress", "chat", "tasks", "settings", "logout", "print", "share", "voice", "check", "warning", "error", "info", "external"] as const;
+export const semanticIcons = ["back", "next", "close", "menu", "more", "add", "edit", "delete", "calendar", "book", "plan", "progress", "chat", "tasks", "settings", "logout", "print", "share", "voice", "muted", "end", "collapse", "check", "warning", "error", "info", "external"] as const;
 export type SemanticIconName = (typeof semanticIcons)[number];
 
 /**
@@ -37,6 +37,9 @@ export const semanticIconAliases = {
   print: "Printer",
   share: "Share2",
   voice: "Mic",
+  muted: "MicOff",
+  end: "PhoneOff",
+  collapse: "ChevronDown",
   check: "Check",
   warning: "TriangleAlert",
   error: "CircleAlert",
