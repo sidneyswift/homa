@@ -1,12 +1,12 @@
 import type { ReactNode, RefObject } from "react";
 import {
-  AccessibilityInfo,
   Modal,
   View,
-  findNodeHandle,
   type ModalProps,
 } from "react-native";
 import { useReducedMotion } from "react-native-reanimated";
+
+import { sendAccessibilityFocus } from "../../lib/accessibility";
 
 type AccessibleModalProps = Omit<ModalProps, "animationType" | "children" | "visible"> & {
   animationType?: ModalProps["animationType"];
@@ -19,8 +19,7 @@ type AccessibleModalProps = Omit<ModalProps, "animationType" | "children" | "vis
 
 function focusAccessibilityNode(target: View | null | undefined): void {
   const frame = requestAnimationFrame(() => {
-    const node = target ? findNodeHandle(target) : null;
-    if (node) AccessibilityInfo.setAccessibilityFocus(node);
+    sendAccessibilityFocus(target);
   });
   void frame;
 }

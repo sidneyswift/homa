@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
-import { AccessibilityInfo, View, findNodeHandle } from "react-native";
+import { AccessibilityInfo, View } from "react-native";
+
+/** Sends React Native's supported focus event to a mounted host view. */
+export function sendAccessibilityFocus(target: View | null | undefined): boolean {
+  if (!target) return false;
+  AccessibilityInfo.sendAccessibilityEvent(target, "focus");
+  return true;
+}
 
 /**
  * Announces a transient state once per distinct appearance while a screen
@@ -63,9 +70,7 @@ export function useAccessibilityFocusOnChange(
       frame = requestAnimationFrame(() => {
         if (cancelled) return;
         attempts += 1;
-        const node = targetRef.current ? findNodeHandle(targetRef.current) : null;
-        if (node) {
-          AccessibilityInfo.setAccessibilityFocus(node);
+        if (sendAccessibilityFocus(targetRef.current)) {
           onFocusedRef.current?.();
           return;
         }

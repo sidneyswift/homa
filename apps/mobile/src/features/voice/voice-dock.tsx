@@ -30,6 +30,11 @@ export function VoiceDock() {
   const insets = useSafeAreaInsets();
   const { fontScale } = useWindowDimensions();
   const [expandedPathname, setExpandedPathname] = useState<string | null>(null);
+  const [renderedPathname, setRenderedPathname] = useState(pathname);
+  if (renderedPathname !== pathname) {
+    setRenderedPathname(pathname);
+    setExpandedPathname(null);
+  }
   const presentation = voiceDockPresentation({
     pathname,
     status: session.status,

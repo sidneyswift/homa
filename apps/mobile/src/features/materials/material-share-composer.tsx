@@ -68,7 +68,7 @@ export function MaterialShareComposer({
       </Text>
       <Button
         label={sharing ? "Opening your apps…" : "Choose an app"}
-        disabled={sharing}
+        busy={sharing}
         onPress={() => void share()}
       />
       {notice ? (
