@@ -22,6 +22,9 @@ test("Quiet footer keeps one canonical link set for every public shell", () => {
   assert.deepEqual(labels, [
     "Your child's progress report",
     "How the report works",
+    "Homeschool planner",
+    "Hours and state rules",
+    "Progress reports",
     "Features",
     "Our story",
     "Blog",
