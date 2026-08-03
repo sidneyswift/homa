@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import type { SemanticIconName } from "@homa/design/contract";
 
 import { Logo } from "../brand/Logo";
@@ -22,6 +22,7 @@ export type QuietNavMenuItem = {
   href: string;
   label: string;
   icon?: SemanticIconName;
+  dividerBefore?: boolean;
 };
 
 export type QuietNavProps = {
@@ -271,11 +272,14 @@ export function QuietNav({
           >
             {signedIn ? (
               <>
-                {signedInItems.map(({ href, label, icon }) => (
-                  <Link key={href} href={href} className="quiet-nav__menu-link" onClick={closeMenu}>
-                    {icon ? <Icon name={icon} size={20} /> : null}
-                    {label}
-                  </Link>
+                {signedInItems.map(({ href, label, icon, dividerBefore }) => (
+                  <Fragment key={href}>
+                    {dividerBefore ? <div className="quiet-nav__divider" aria-hidden="true" /> : null}
+                    <Link href={href} className="quiet-nav__menu-link" onClick={closeMenu}>
+                      {icon ? <Icon name={icon} size={20} /> : null}
+                      {label}
+                    </Link>
+                  </Fragment>
                 ))}
               </>
             ) : (
