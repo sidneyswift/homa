@@ -44,6 +44,9 @@ describe("InProgressShelf", () => {
     assert.match(html, /https:\/\/example\.test\/preview\.jpg/u);
     assert.match(html, /Keep this one/u);
     assert.match(html, /for Amalia/u);
+    assert.match(html, /quiet-frame/u);
+    assert.match(html, /quiet-action/u);
+    assert.doesNotMatch(html, /clay|bg-brand|text-brand/u);
   });
 
   it("counts in the singular for one item and the plural for several", () => {

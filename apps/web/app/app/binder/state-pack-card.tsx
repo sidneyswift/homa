@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FileDown, Loader2 } from "lucide-react";
+
+import { Icon } from "../../../components/design/Icon";
+import { QuietAction } from "../../../components/design/QuietAction";
+import { QuietFrame } from "../../../components/design/QuietFrame";
+import { QuietStatus } from "../../../components/design/QuietStatus";
 
 /**
  * The state pack card (plans/2026-07-28-state-pack.md D6): the one
@@ -58,14 +61,14 @@ export function StatePackCard({
   }
 
   return (
-    <section className="rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
-      <p className="font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
+    <QuietFrame tone="paper" as="section" className="p-6">
+      <p className="font-mono text-[0.65rem] uppercase tracking-widest text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
         Your state {"·"} rules verified {verifiedMonthYear}
       </p>
-      <h2 className="mt-1 font-display text-xl font-semibold text-strong">
+      <h2 className="mt-1 font-display text-xl font-semibold text-[color:var(--homa-ink)]">
         Your {stateName} pack
       </h2>
-      <p className="mt-2 max-w-[42rem] text-sm text-body">
+      <p className="mt-2 max-w-[42rem] text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">
         The key requirements, deadlines, and record templates for the
         pathway most {stateName} families use, in one printable pack of
         about {expectedPages} pages. Made fresh each time from the
@@ -73,49 +76,42 @@ export function StatePackCard({
         school year.
       </p>
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <button
-          type="button"
+        <QuietAction
           onClick={makePack}
           disabled={status.kind === "working"}
-          className="inline-flex items-center gap-2 rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-60"
+          icon={status.kind === "working" ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--homa-paper)] border-t-transparent" /> : <Icon name="print" size={16} />}
         >
           {status.kind === "working" ? (
-            <>
-              <Loader2 size={16} aria-hidden="true" className="animate-spin" />
-              Making your pack...
-            </>
+            "Making your pack..."
           ) : (
-            <>
-              <FileDown size={16} aria-hidden="true" />
-              Get your {stateName} pack
-            </>
+            `Get your ${stateName} pack`
           )}
-        </button>
+        </QuietAction>
         {status.kind === "done" ? (
           <a
             href={status.pdfPath}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-semibold text-brand underline underline-offset-2"
+            className="text-sm font-semibold text-[color:var(--homa-brand-text)] underline underline-offset-2"
           >
             Open your pack
           </a>
         ) : null}
       </div>
       {status.kind === "error" ? (
-        <p className="mt-3 text-sm text-muted">{status.note}</p>
+        <QuietStatus tone="error" className="mt-3 text-sm">{status.note}</QuietStatus>
       ) : null}
-      <p className="mt-3 text-xs text-muted">
+      <p className="mt-3 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
         Not {stateName}?{" "}
-        <Link
+        <a
           href="/app/settings"
-          className="underline underline-offset-2 hover:text-brand"
+          className="underline underline-offset-2 hover:text-[color:var(--homa-brand-text)]"
         >
           Update your state in settings
-        </Link>
+        </a>
         . The pack is legal information, not legal advice, and making it
         does not notify your state.
       </p>
-    </section>
+    </QuietFrame>
   );
 }

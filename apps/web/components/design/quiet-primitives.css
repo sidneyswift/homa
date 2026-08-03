@@ -39,6 +39,73 @@
 .quiet-action:disabled { cursor: not-allowed; opacity: 0.5; }
 .quiet-action__icon { display: inline-flex; }
 
+/* Family artifact controls keep the same quiet geometry as shell actions,
+   while staying compact enough for a filter row and a document shelf. */
+.quiet-filter {
+  min-height: 36px;
+  border: 1px solid var(--homa-control-boundary);
+  border-radius: var(--homa-radius-control);
+  background: var(--homa-paper);
+  color: color-mix(in srgb, var(--homa-ink) 68%, var(--homa-canvas));
+  padding: 6px 14px;
+  font: 700 0.75rem/1.2 var(--font-sans);
+  cursor: pointer;
+  transition: background var(--homa-motion-fast) var(--homa-motion-ease-out),
+    border-color var(--homa-motion-fast) var(--homa-motion-ease-out),
+    color var(--homa-motion-fast) var(--homa-motion-ease-out);
+}
+
+.quiet-filter:hover { border-color: var(--homa-midnight-action); color: var(--homa-midnight-action); }
+.quiet-filter--active { border-color: var(--homa-midnight-action); background: var(--homa-midnight-action); color: var(--homa-paper); }
+.quiet-filter--active:hover { border-color: var(--homa-midnight-action); background: color-mix(in srgb, var(--homa-midnight-action) 88%, var(--homa-ink)); color: var(--homa-paper); }
+.quiet-filter:focus-visible { outline: 3px solid color-mix(in srgb, var(--homa-visual-coral) 70%, transparent); outline-offset: 3px; }
+.quiet-filter:disabled { cursor: not-allowed; opacity: 0.5; }
+
+.quiet-search {
+  display: flex;
+  min-height: 44px;
+  min-width: min(100%, 260px);
+  align-items: center;
+  border: 1px solid var(--homa-control-boundary);
+  border-radius: var(--homa-radius-control);
+  background: var(--homa-paper);
+  padding: 0 14px;
+  color: color-mix(in srgb, var(--homa-ink) 66%, var(--homa-canvas));
+  transition: border-color var(--homa-motion-fast) var(--homa-motion-ease-out), box-shadow var(--homa-motion-fast) var(--homa-motion-ease-out);
+}
+
+.quiet-search:focus-within { border-color: var(--homa-midnight-action); box-shadow: 0 0 0 3px color-mix(in srgb, var(--homa-visual-coral) 24%, transparent); }
+.quiet-search__input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--homa-ink); font: 400 0.875rem/1.4 var(--font-sans); }
+.quiet-search__input::placeholder { color: color-mix(in srgb, var(--homa-ink) 52%, var(--homa-canvas)); }
+
+.quiet-artifact-card {
+  display: block;
+  width: 100%;
+  border-radius: var(--homa-radius-card);
+  color: var(--homa-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--homa-motion-fast) var(--homa-motion-ease-out);
+}
+
+.quiet-artifact-card:hover { transform: translateY(-2px); }
+.quiet-artifact-card:focus-visible { outline: 3px solid color-mix(in srgb, var(--homa-visual-coral) 70%, transparent); outline-offset: 4px; }
+.quiet-artifact-card__preview { overflow: hidden; border: 1px solid var(--homa-control-boundary); border-radius: var(--homa-radius-card); background: var(--homa-paper); box-shadow: 0 8px 20px color-mix(in srgb, var(--homa-ink) 7%, transparent); transition: box-shadow var(--homa-motion-fast) var(--homa-motion-ease-out); }
+.quiet-artifact-card:hover .quiet-artifact-card__preview { box-shadow: 0 14px 30px color-mix(in srgb, var(--homa-ink) 12%, transparent); }
+
+.quiet-artifact-backdrop { background: color-mix(in srgb, var(--homa-contained-band) 58%, transparent); backdrop-filter: blur(2px); }
+.quiet-artifact-dialog { max-height: 90vh; width: 100%; max-width: 28rem; overflow-y: auto; padding: 1.25rem; }
+.quiet-artifact-meta { border-radius: var(--homa-radius-control); background: var(--homa-canvas); padding: 0.625rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .quiet-filter,
+  .quiet-search,
+  .quiet-artifact-card,
+  .quiet-artifact-card__preview {
+    transition: none;
+  }
+}
+
 /* -------------------------------------------------------------------------
    Quiet authority shared web shell
    ------------------------------------------------------------------------- */
