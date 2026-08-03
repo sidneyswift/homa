@@ -11,6 +11,8 @@ import {
 } from "../../../../lib/child-progress";
 import { firstsPageFromLedger } from "../../../../lib/child-progress/firsts-from-ledger";
 import { liveProgressEnabled } from "../../../../lib/child-progress/flag";
+import { abilitiesExplorerEnabled } from "../../../../lib/child-progress/abilities-explorer-flag";
+import { buildAbilitiesExplorerPayload } from "../../../../lib/child-progress/abilities-explorer";
 import { loadChildProgressPageState } from "../../../../lib/child-progress/page-state";
 import { progressRoutePolicy } from "../../../../lib/child-progress/route-policy";
 import { lessonListenEnabled } from "../../../../lib/lessons/flag";
@@ -113,6 +115,13 @@ export default async function ChildProgressPage({
   // (agent-led-live-progress ruling: token and share reports remain).
   const report = data.reports.get(child.id) ?? null;
 
+  const abilitiesExplorer = abilitiesExplorerEnabled()
+    ? buildAbilitiesExplorerPayload(
+        pageState.view,
+        new Date(pageState.view.projectedAt),
+      )
+    : null;
+
   // The chart's eras, re-normalized to one measuring stick where the
   // evidence ledger reaches (mixed-scales fix 3). familyId comes from
   // the session and the child was re-scoped above, per the tenancy law.
@@ -149,6 +158,7 @@ export default async function ChildProgressPage({
             }
           : null
       }
+      abilitiesExplorer={abilitiesExplorer}
     />
   );
 }

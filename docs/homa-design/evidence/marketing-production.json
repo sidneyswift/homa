@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
-  "contractSourceChecksum": "000dc7a4059396c796a5c731a6672c39ffac1679ce7ba33998abee96b4ce0f99",
-  "surfaceManifestFingerprint": "40845b54ff48723c75f9dc8e7020282bd4fa84dc4edef9d127eb7ed3f1b3b275",
-  "authoringManifestFingerprint": "40845b54ff48723c75f9dc8e7020282bd4fa84dc4edef9d127eb7ed3f1b3b275",
-  "ownedInputFingerprint": "d0d218203d56ccd43e488de84d2ed691317990b647d1ba3aa8b37a614166f730",
+  "contractSourceChecksum": "e35b834293407d95ab57d9f23e07739e235c056ad469916c16e58f9d62c73758",
+  "surfaceManifestFingerprint": "4b786f2f0160c2e6cb390cf53e7163b9aefbbc6427ab036c026f46b8cd98bee8",
+  "authoringManifestFingerprint": "4b786f2f0160c2e6cb390cf53e7163b9aefbbc6427ab036c026f46b8cd98bee8",
+  "ownedInputFingerprint": "fd4ae86fec3dc98ae37243114dc46cae597ce0cd83e9d4547a0559524dfbc683",
   "sourceOfTruth": [
     "marketing/AGENTS.md",
     "marketing/voice/house-style.md",
@@ -605,8 +605,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "f8f20a0a5b45a654d8dbc384050bbe0c00b9681507e3d74e03436f41bf3966a0",
-      "bytes": 6294,
+      "sourceHash": "6338b3e54cde1b23bf30a78f5ce1eb09e350439711a9bbf7e4e7ab0aaf4b70a7",
+      "bytes": 5307,
       "legacySignatures": []
     },
     {
@@ -814,8 +814,8 @@
         "evaluator"
       ],
       "state": "active",
-      "sourceHash": "804402d7ebab0dfbcc678bc345aef54bb301ad53beef7c14d0769213af5f28ec",
-      "bytes": 11419,
+      "sourceHash": "a9c75ca23751fe89f8fc54193c213b02a940ae8dd348db77753cee758b5071a6",
+      "bytes": 12029,
       "legacySignatures": []
     },
     {
@@ -880,7 +880,7 @@
         "evaluator"
       ],
       "state": "active",
-      "sourceHash": "455b0ba8333d7625a28ed06afb1701f37f4bc663681efdeca326ef3cbc1bbc5f",
+      "sourceHash": "54581d539b9e36cb7d1cf56930af578eacb17f92e2c4c47e838a61b86b5882cd",
       "bytes": 187,
       "legacySignatures": []
     },
@@ -1631,7 +1631,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "f8f20a0a5b45a654d8dbc384050bbe0c00b9681507e3d74e03436f41bf3966a0"
+          "sourceHash": "6338b3e54cde1b23bf30a78f5ce1eb09e350439711a9bbf7e4e7ab0aaf4b70a7"
         },
         {
           "file": "video/script.md",
@@ -1833,7 +1833,7 @@
         "marketing/evals/scorecards/"
       ],
       "id": "generator:92cc4d015ee58a8e",
-      "sourceHash": "804402d7ebab0dfbcc678bc345aef54bb301ad53beef7c14d0769213af5f28ec"
+      "sourceHash": "a9c75ca23751fe89f8fc54193c213b02a940ae8dd348db77753cee758b5071a6"
     },
     {
       "path": "scripts/brand-assets.mts",

@@ -1,38 +1,31 @@
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { InlineError } from "../../components/ui/inline-error";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
+import { env } from "../../lib/env";
 import { supabase } from "../../lib/supabase";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, space } from "../../theme/tokens";
 
 /**
- * Full deletion, not deactivation (App Review 5.1.1(v)): calls
- * delete_own_account(), a SECURITY DEFINER Postgres function scoped to
- * auth.uid() (supabase/migrations/20260728180000_self_account_deletion.sql).
- * Verified end to end against production on 2026-07-28: a sole-member
- * family's family, children, and derived-signal rows are all removed
- * before the identity itself is; a co-parented family survives for the
- * remaining parent, only the caller's own membership and identity go.
- *
- * Gap, tracked separately: Apple also requires revoking the Sign in with
- * Apple token via its REST API on deletion. That call needs a Sign in
- * with Apple private key from Apple Developer's Keys section (Team ID,
- * Key ID, .p8), which does not exist in this project yet, a founder-only
- * step. Shipping a fake revoke call would be worse than shipping none;
- * this screen deletes the real account and data today, and the revoke
- * call lands the moment that credential exists.
+ * Full family deletion, not deactivation: the shared server workflow stops
+ * Stripe billing, revokes every family session and schedule, deletes scoped
+ * artifacts, then removes family records. Apple Sign in token revocation is
+ * separately blocked by the founder-only credential in #314, so this UI
+ * never claims Apple revoked a token when that credential is unavailable.
  */
 export default function DeleteAccountScreen() {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [confirmation, setConfirmation] = useState<string | null>(null);
+  const [typedConfirmation, setTypedConfirmation] = useState("");
   useAccessibilityAnnouncement(
     deleting
       ? "Deleting your account"
@@ -41,15 +34,50 @@ export default function DeleteAccountScreen() {
         : null,
   );
 
+  useEffect(() => {
+    async function loadConfirmation(): Promise<void> {
+      try {
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token;
+        if (!token) return;
+        const response = await fetch(`${env.apiUrl}/api/account-deletion`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const body = (await response.json().catch(() => null)) as { confirmation?: string } | null;
+        if (response.ok && body?.confirmation) setConfirmation(body.confirmation);
+        else setErrorMessage("I could not load your family account. Go back and try again.");
+      } catch {
+        setErrorMessage("I could not load your family account. Go back and try again.");
+      }
+    }
+    void loadConfirmation();
+  }, []);
+
   async function handleDelete() {
     setDeleting(true);
     setErrorMessage(null);
-    const { error } = await supabase.rpc("delete_own_account");
-    if (error) {
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) {
+        setDeleting(false);
+        setErrorMessage("Your session expired. Sign in again and try once more.");
+        return;
+      }
+      const response = await fetch(`${env.apiUrl}/api/account-deletion`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ confirmation: typedConfirmation }),
+      });
+      const body = (await response.json().catch(() => null)) as { state?: string; message?: string } | null;
+      if (!response.ok || (body?.state !== "complete" && body?.state !== "in_progress")) {
+        setDeleting(false);
+        setErrorMessage(body?.message ?? "That didn't go through; your account is still available.");
+        return;
+      }
+    } catch {
       setDeleting(false);
-      setErrorMessage(
-        "That didn't go through; your account is untouched. Check your connection and try again.",
-      );
+      setErrorMessage("That didn't go through; your account is still available.");
       return;
     }
     // The identity behind this session no longer exists. This screen sits
@@ -88,14 +116,17 @@ export default function DeleteAccountScreen() {
           <Text
             style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textBody }}
           >
-            {
-              "This removes your family's information from Homa: your children's profiles, chat history, and records. If you share this family with another parent, their access and the family's records stay in place; only your own account goes."
-            }
+            This permanently deletes your family&apos;s Homa records and stored files. It signs every parent out and cannot be undone.
           </Text>
           <Text
             style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textBody }}
           >
             This cannot be undone.
+          </Text>
+          <Text
+            style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textBody }}
+          >
+            You can download records from Progress and Family Library first, but exporting is optional and will not delay deletion.
           </Text>
         </Card>
 
@@ -115,9 +146,32 @@ export default function DeleteAccountScreen() {
             >
               Are you sure? This deletes your account right away.
             </Text>
+            <Text
+              style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textBody }}
+            >
+              Type {confirmation ?? "your family confirmation"} to enable deletion.
+            </Text>
+            <TextInput
+              value={typedConfirmation}
+              onChangeText={setTypedConfirmation}
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!deleting}
+              placeholder={confirmation ?? "Loading…"}
+              style={{
+                minHeight: 48,
+                borderWidth: 1,
+                borderColor: colors.border,
+                borderRadius: 12,
+                paddingHorizontal: space.md,
+                fontFamily: fontFamilies.body,
+                fontSize: fontSize.base,
+                color: colors.textStrong,
+              }}
+            />
             <Button
               label={deleting ? "Deleting…" : "Yes, delete my account"}
-              disabled={deleting}
+              disabled={deleting || typedConfirmation !== confirmation}
               onPress={() => void handleDelete()}
             />
             <Button

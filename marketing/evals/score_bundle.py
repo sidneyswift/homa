@@ -111,6 +111,16 @@ def body_of(mdx: Path) -> str:
     return parts[2] if len(parts) == 3 else text
 
 
+def is_published_blog_mirror(article: Path, other: Path) -> bool:
+    """Ignore the exact web copy created by the blog distributor."""
+    published_root = REPO_ROOT / "marketing" / "content" / "published"
+    blog_root = REPO_ROOT / "apps" / "web" / "content" / "blog"
+    if article.parent.parent != published_root or other.parent != blog_root:
+        return False
+    slug = re.sub(r"^\d{4}-\d{2}-\d{2}-", "", article.parent.name)
+    return other == blog_root / f"{slug}.mdx"
+
+
 class Findings:
     def __init__(self) -> None:
         self.items: list[dict] = []
@@ -188,6 +198,8 @@ def check_duplication(bundle: Path, f: Findings) -> None:
         for other in corpus.rglob("*.mdx"):
             if other.resolve() == article.resolve():
                 continue
+            if is_published_blog_mirror(article, other):
+                continue
             if title and normalize_title(read_frontmatter_title(other)) == title:
                 f.fail("duplication", "article.mdx",
                        f"same title as {other.relative_to(REPO_ROOT)}")
@@ -239,9 +251,11 @@ def write_scorecard(scorecards_dir: Path, bundle_id: str, f: Findings) -> Path:
     json_path = scorecards_dir / f"{bundle_id}.json"
     json_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     lines = [f"# Scorecard: {bundle_id}", "",
-             f"Result: {'PASS' if passed else 'FAIL'} ({len(f.items)} findings)", ""]
-    for item in f.items:
-        lines.append(f"- [{item['check']}] {item['file']}: {item['detail']}")
+             f"Result: {'PASS' if passed else 'FAIL'} ({len(f.items)} findings)"]
+    if f.items:
+        lines.append("")
+        for item in f.items:
+            lines.append(f"- [{item['check']}] {item['file']}: {item['detail']}")
     (scorecards_dir / f"{bundle_id}.md").write_text("\n".join(lines) + "\n",
                                                     encoding="utf-8")
     return json_path
