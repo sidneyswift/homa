@@ -3,9 +3,9 @@
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
   "contractSourceChecksum": "cb79adb67b2f055645702a43cdfaf8cbd9aecfac482a40790a001dd3d5aaacb6",
-  "surfaceManifestFingerprint": "e540dcd90f7737a43bd54293e9e550676f34e8a5c8f9c1a3bb0a11429d63c736",
-  "authoringManifestFingerprint": "e540dcd90f7737a43bd54293e9e550676f34e8a5c8f9c1a3bb0a11429d63c736",
-  "ownedInputFingerprint": "529e5efd827f4243639525887d4b59c743bf524d579091f7babad2f4415942d0",
+  "surfaceManifestFingerprint": "069d14f75fa887c694e8773fbdac985ace06550786512ad331185e750a7df075",
+  "authoringManifestFingerprint": "069d14f75fa887c694e8773fbdac985ace06550786512ad331185e750a7df075",
+  "ownedInputFingerprint": "d1bddb89e87a07faccdc3459a52bb0143ef699b7c071ac671a44f4ae3e7f3cfe",
   "sourceOfTruth": [
     "marketing/AGENTS.md",
     "marketing/voice/house-style.md",
@@ -605,8 +605,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "dc176296080a3f8c75e7339b4ccad1accde30926d30e670709a537ddc28d0535",
-      "bytes": 6391,
+      "sourceHash": "bee9338daafb56ad346414b7eec4358ebae554ca95781b3fff11789e79049ed3",
+      "bytes": 6392,
       "legacySignatures": []
     },
     {
@@ -616,8 +616,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "7a33faea4b2cb592ac37b7f0c88f02a7c48018e2c1b700b72329a130fd305b69",
-      "bytes": 273,
+      "sourceHash": "7ad2b9d6bc5db0806c31a23524df95457e5a9525cfde29ca1a3b72ba4cfc641c",
+      "bytes": 368,
       "legacySignatures": []
     },
     {
@@ -1089,8 +1089,8 @@
         "seo-template"
       ],
       "state": "active",
-      "sourceHash": "4ce6f17367300f8394d3a7fb826d412a1dbdd18edc10d850d8a90de269debee5",
-      "bytes": 11407,
+      "sourceHash": "7562752b8f4a867dd7a0360bbb26884a18988ccaff1f884475c0ecd18520156f",
+      "bytes": 11409,
       "legacySignatures": []
     },
     {
@@ -1453,8 +1453,8 @@
         "voice"
       ],
       "state": "active",
-      "sourceHash": "990ab638d69ce6db9dde1b214d7101f615f7591da05e876c660ee39e391f99f8",
-      "bytes": 5752,
+      "sourceHash": "674e8a6fc1e31c7e1eea2a6c2eb89ba117585dcc72b5a6eb26bc395d06759253",
+      "bytes": 5824,
       "legacySignatures": []
     },
     {
@@ -1631,7 +1631,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "dc176296080a3f8c75e7339b4ccad1accde30926d30e670709a537ddc28d0535"
+          "sourceHash": "bee9338daafb56ad346414b7eec4358ebae554ca95781b3fff11789e79049ed3"
         },
         {
           "file": "video/script.md",
@@ -1674,7 +1674,7 @@
         "marketing/content/drafts/*/article.mdx"
       ],
       "id": "generator:69357e3c58450984",
-      "sourceHash": "7472196d10d9a5a3230d84493d0deb170387091692d9a714eec15c01d6234687"
+      "sourceHash": "5b9c832d8c3f0bf7877c60cf1f494763194bde70e0a7faa380e1dd6c435959ec"
     },
     {
       "path": ".agents/skills/marketing-copy-editor/SKILL.md",
