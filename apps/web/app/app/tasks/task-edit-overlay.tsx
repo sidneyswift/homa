@@ -2,7 +2,9 @@
 
 import { useActionState, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Play } from "lucide-react";
+
+import { QuietAction } from "../../../components/design/QuietAction";
+import { QuietStatus } from "../../../components/design/QuietStatus";
 
 import {
   deleteTaskAction,
@@ -68,7 +70,7 @@ function BuiltInScheduleForm({
           textingLinked={textingLinked}
         />
       </div>
-      {state.error ? <p className="text-sm text-muted">{state.error}</p> : null}
+      {state.error ? <QuietStatus tone="error" className="text-sm">{state.error}</QuietStatus> : null}
       <TaskFormButtons pending={pending} submitLabel="Save changes" onCancel={onDone} />
     </form>
   );
@@ -82,14 +84,14 @@ function RunNowSection({ task, onDone }: { task: TaskRowView; onDone: () => void
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   return (
-    <div className="mt-4 border-t border-border-subtle pt-3">
+    <div className="mt-4 border-t border-[var(--homa-control-boundary)] pt-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs text-muted">
+        <p className="text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
           Homa runs this task right away, exactly as saved. The result shows
           up in History. The schedule stays the same.
         </p>
-        <button
-          type="button"
+        <QuietAction
+          kind="secondary"
           disabled={pending}
           onClick={() => {
             setError(null);
@@ -103,13 +105,12 @@ function RunNowSection({ task, onDone }: { task: TaskRowView; onDone: () => void
               }
             });
           }}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-pill border border-border bg-card px-4 py-2 text-sm font-semibold text-strong transition-colors hover:border-brand disabled:opacity-60"
+          className="shrink-0"
         >
-          <Play size={14} aria-hidden="true" />
           {pending ? "Starting\u2026" : "Run now"}
-        </button>
+        </QuietAction>
       </div>
-      {error ? <p className="mt-2 text-sm text-muted">{error}</p> : null}
+      {error ? <QuietStatus tone="error" className="mt-2 text-sm">{error}</QuietStatus> : null}
     </div>
   );
 }
@@ -125,27 +126,23 @@ function DeleteTaskButton({ task, onDone }: { task: TaskRowView; onDone: () => v
 
   if (!confirming) {
     return (
-      <div className="mt-4 border-t border-border-subtle pt-3">
-        <button
-          type="button"
-          onClick={() => setConfirming(true)}
-          className="text-xs font-semibold text-muted hover:underline"
-        >
+      <div className="mt-4 border-t border-[var(--homa-control-boundary)] pt-3">
+        <QuietAction kind="quiet" className="px-0 text-xs" onClick={() => setConfirming(true)}>
           Delete this task
-        </button>
+        </QuietAction>
       </div>
     );
   }
 
   return (
-    <div className="mt-4 border-t border-border-subtle pt-3">
+    <div className="mt-4 border-t border-[var(--homa-control-boundary)] pt-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs font-semibold text-muted">
+        <p className="text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
           {`Delete "${name}"? This can't be undone.`}
         </p>
         <div className="flex shrink-0 gap-2">
-          <button
-            type="button"
+          <QuietAction
+            kind="secondary"
             disabled={pending}
             onClick={() => {
               startTransition(async () => {
@@ -156,17 +153,13 @@ function DeleteTaskButton({ task, onDone }: { task: TaskRowView; onDone: () => v
                 }
               });
             }}
-            className="rounded-pill border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-strong transition-colors hover:border-brand disabled:opacity-60"
+            className="text-xs"
           >
             {pending ? "Deleting\u2026" : "Delete"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setConfirming(false)}
-            className="rounded-pill px-3.5 py-1.5 text-xs font-bold text-muted transition-colors hover:text-body"
-          >
+          </QuietAction>
+          <QuietAction kind="quiet" className="text-xs" onClick={() => setConfirming(false)}>
             Keep
-          </button>
+          </QuietAction>
         </div>
       </div>
     </div>
@@ -193,7 +186,7 @@ export function TaskEditOverlay({
           {/* One sentence on what the task does, the card's own
               description (founder ruling 2026-07-12; it replaced a
               three-sentence you-decide explainer). */}
-          <p className="mt-1 text-sm text-muted">{builtIn.description}</p>
+          <p className="mt-1 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">{builtIn.description}</p>
           <div className="mt-4">
             <BuiltInScheduleForm
               task={task}

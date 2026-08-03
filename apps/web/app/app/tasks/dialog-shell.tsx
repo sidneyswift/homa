@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
-import { X } from "lucide-react";
+
+import { Icon } from "../../../components/design/Icon";
+import { QuietFrame } from "../../../components/design/QuietFrame";
 
 /**
  * The centered modal shell for the Tasks surface: backdrop, focus trap,
@@ -83,15 +85,17 @@ export function DialogShell({
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(51,42,33,0.42)] p-4"
+      data-brand-surface="task-dialog"
+      className="quiet-artifact-backdrop fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
-      <div
-        className={`max-h-[90vh] w-full ${contentClassName} overflow-y-auto rounded-[var(--radius-xl)] border border-border-subtle bg-card p-5 shadow-[var(--shadow-xl)]`}
+      <QuietFrame
+        as="section"
+        className={`quiet-artifact-dialog ${contentClassName}`}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
-          <h2 id={titleId} className="font-display text-xl font-semibold text-strong">
+          <h2 id={titleId} className="font-display text-xl font-semibold text-[color:var(--homa-ink)]">
             {heading}
           </h2>
           <button
@@ -99,13 +103,13 @@ export function DialogShell({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-md p-1.5 text-subtle transition-colors duration-(--dur-fast) ease-out hover:bg-page hover:text-body"
+            className="grid h-11 w-11 place-items-center rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-transparent text-[color:var(--homa-ink)] transition-colors hover:border-[var(--homa-ink)]"
           >
-            <X size={18} aria-hidden="true" />
+            <Icon name="close" size={20} />
           </button>
         </div>
         {children}
-      </div>
+      </QuietFrame>
     </div>
   );
 }

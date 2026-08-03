@@ -135,6 +135,9 @@ describe("TasksView", () => {
   it("renders task cards as dialog openers with the editor closed", () => {
     const html = renderView([BRIEF_TASK, CUSTOM_TASK]);
 
+    assert.match(html, /data-brand-surface="tasks"/);
+    assert.match(html, /quiet-frame quiet-frame--paper quiet-task-card/);
+
     // Every real task's title is a button that promises the dialog.
     assert.match(
       html,
@@ -145,7 +148,10 @@ describe("TasksView", () => {
       /<button[^>]*aria-haspopup="dialog"[^>]*>Co-op prep<\/button>/,
     );
     // "Add a task" opens the same dialog.
-    assert.match(html, /<button[^>]*aria-haspopup="dialog"[^>]*>.*Add a task<\/button>/);
+    assert.match(
+      html,
+      /<button[^>]*aria-haspopup="dialog"[^>]*>[\s\S]*?Add a task<\/span>[\s\S]*?<\/button>/,
+    );
     // First paint keeps the editor closed.
     assert.doesNotMatch(html, /role="dialog"/);
 
@@ -181,13 +187,13 @@ describe("TasksView", () => {
   it("wears its state: Next chip and warm disc on, Off chip and muted disc off", () => {
     const onHtml = renderView([BRIEF_TASK]);
     assert.match(onHtml, /Next \u00b7 Mon, Jul 13, 9:00 AM/);
-    assert.match(onHtml, /bg-brand-soft text-brand/);
+    assert.match(onHtml, /quiet-status quiet-status--constructive/);
     assert.doesNotMatch(onHtml, />Off</);
 
     const offHtml = renderView([{ ...BRIEF_TASK, paused: true }]);
     assert.match(offHtml, />Off</);
     assert.doesNotMatch(offHtml, /Next \u00b7/);
-    assert.doesNotMatch(offHtml, /bg-brand-soft text-brand/);
+    assert.doesNotMatch(offHtml, /quiet-status quiet-status--constructive/);
   });
 
   it("says soon, never a past time, while the scheduler catches up", () => {
@@ -220,6 +226,9 @@ describe("TasksView", () => {
       startedAt: "2026-07-10T13:00:00.000Z",
     };
     const html = renderView([BRIEF_TASK], [doneRun, failedRun]);
+
+    assert.match(html, /data-brand-surface="task-history"/);
+    assert.match(html, /quiet-frame quiet-frame--paper/);
 
     // The short status note plus the on-page door (the old "Reply
     // there and Homa answers" sentence retired with the link).
@@ -330,7 +339,7 @@ describe("TasksView", () => {
     );
     assert.match(
       html,
-      /border-2 border-\[var\(--clay-700\)\][^"]*bg-brand-soft[^"]*text-\[var\(--clay-700\)\]/,
+      /border-2 border-\[var\(--homa-midnight-action\)\][^"]*bg-\[var\(--homa-midnight-action\)\][^"]*text-\[var\(--homa-paper\)\]/,
     );
     assert.match(html, /aria-live="polite"/);
     assert.match(html, />Ask Homa about this<\/a>/);
@@ -400,10 +409,10 @@ describe("AgentJobOverlay", () => {
     // only at the gate; Pause and the two-tap stop stay quiet. No red anywhere.
     assert.match(
       html,
-      /<button[^>]*bg-brand[^>]*text-on-brand[^>]*>[\s\S]*?Approve and keep building<\/button>/,
+      /<button[^>]*quiet-action quiet-action--primary[^>]*>[\s\S]*?Approve and keep building<\/span>[\s\S]*?<\/button>/,
     );
-    assert.match(html, />Pause<\/button>/);
-    assert.match(html, />Stop this build<\/button>/);
+    assert.match(html, />Pause<\/span><\/button>/);
+    assert.match(html, />Stop this build<\/span><\/button>/);
     assert.doesNotMatch(html, /Resume building/);
   });
 
@@ -417,41 +426,44 @@ describe("AgentJobOverlay", () => {
       ],
     });
     assert.doesNotMatch(running, /Approve and keep building/);
-    assert.match(running, />Pause<\/button>/);
+    assert.match(running, />Pause<\/span><\/button>/);
     assert.match(running, /Weeks 5-8[\s\S]*Building/);
 
     const paused = renderJobOverlay({ ...AWAITING_JOB, status: "paused" });
     assert.match(paused, /Resume building/);
-    assert.doesNotMatch(paused, />Pause<\/button>/);
+    assert.doesNotMatch(paused, />Pause<\/span><\/button>/);
   });
 });
 
 describe("TaskEditOverlay", () => {
   it("offers Run now on every saved task, built-in or custom", () => {
     const custom = renderOverlay(CUSTOM_TASK);
-    assert.match(custom, />Run now<\/button>/);
+    assert.match(custom, />Run now<\/span><\/button>/);
     assert.match(
       custom,
       /Homa runs this task right away, exactly as saved\. The result shows up in History\. The schedule stays the same\./,
     );
 
     const builtIn = renderOverlay(BRIEF_TASK);
-    assert.match(builtIn, />Run now<\/button>/);
+    assert.match(builtIn, />Run now<\/span><\/button>/);
 
     // Nothing is saved yet in create mode, so there is nothing to run.
     const creating = renderOverlay(null);
-    assert.doesNotMatch(creating, />Run now<\/button>/);
+    assert.doesNotMatch(creating, />Run now<\/span><\/button>/);
   });
 
   it("gives a custom task the full form plus delete", () => {
     const html = renderOverlay(CUSTOM_TASK);
 
     assert.match(html, /role="dialog"/);
+    assert.match(html, /data-brand-surface="task-dialog"/);
+    assert.match(html, /quiet-artifact-backdrop/);
     assert.match(html, /aria-modal="true"/);
     assert.match(html, /<h2 id="task-edit-title"[^>]*>Edit task<\/h2>/);
 
     // The full form, prefilled from the task.
     assert.match(html, /What should it be called\?/);
+    assert.match(html, /data-brand-surface="task-form"/);
     assert.match(html, /name="label"[^>]*value="Co-op prep"/);
     assert.match(html, /What should Homa do\?/);
     assert.match(html, /Remind me to pack the co-op bag\./);
@@ -468,8 +480,8 @@ describe("TaskEditOverlay", () => {
     assert.match(html, /Email me\./);
     assert.match(html, /Just save it to this page\./);
 
-    assert.match(html, />Save changes<\/button>/);
-    assert.match(html, />Delete this task<\/button>/);
+    assert.match(html, />Save changes<\/span><\/button>/);
+    assert.match(html, />Delete this task<\/span><\/button>/);
   });
 
   it("gives a built-in task the schedule only, words stay Homa's", () => {
@@ -499,7 +511,7 @@ describe("TaskEditOverlay", () => {
     assert.match(html, /Text me\./);
     assert.match(html, /Email me\./);
     assert.match(html, /Just save it to this page\./);
-    assert.match(html, />Save changes<\/button>/);
+    assert.match(html, />Save changes<\/span><\/button>/);
   });
 
   it("creates through the same dialog under one action name", () => {
@@ -507,7 +519,7 @@ describe("TaskEditOverlay", () => {
 
     assert.match(html, /<h2 id="task-edit-title"[^>]*>Add a task<\/h2>/);
     // One name per action: the commit button echoes "Add", never "Create".
-    assert.match(html, />Add this task<\/button>/);
+    assert.match(html, />Add this task<\/span><\/button>/);
     assert.doesNotMatch(html, /Create task/);
     assert.doesNotMatch(html, /Delete this task/);
     // The example ask shows research, without cadence words (the day and

@@ -2,8 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Bell, ChevronRight, FlaskConical, Moon, Plus } from "lucide-react";
 
+import { Icon } from "../../../components/design/Icon";
+import { QuietAction } from "../../../components/design/QuietAction";
+import { QuietFrame } from "../../../components/design/QuietFrame";
+import { QuietStatus } from "../../../components/design/QuietStatus";
 import { setTaskPausedAction } from "./actions";
 import { AgentJobCard } from "./agent-job-card";
 import type { AgentJobView } from "./agent-job-view";
@@ -85,18 +88,18 @@ function TaskIcon({ kind }: { kind: TaskRowView["kind"] | "fleet_research" }) {
   switch (kind) {
     case "morning_brief":
     case "fleet_research":
-      return <FlaskConical size={18} />;
+      return <Icon name="plan" size={20} />;
     case "journal_prompt":
-      return <Moon size={18} />;
+      return <Icon name="voice" size={20} />;
     case "custom":
-      return <Bell size={18} />;
+      return <Icon name="tasks" size={20} />;
     default: {
       // Display-only switch: schedule kinds come from the database, so an
       // additive kind from a newer deploy must render a generic icon, not
       // throw and take the page down (the agent_job lesson, 2026-07-21).
       const exhaustive: never = kind;
       void exhaustive;
-      return <Bell size={18} />;
+      return <Icon name="tasks" size={20} />;
     }
   }
 }
@@ -123,21 +126,21 @@ function PauseToggle({ task }: { task: TaskRowView }) {
           if (result.error === null) router.refresh();
         });
       }}
-      className="-m-2.5 shrink-0 cursor-pointer rounded-pill p-2.5 disabled:opacity-60"
+      className="quiet-task-switch -m-2.5 shrink-0 cursor-pointer p-2.5 disabled:opacity-60"
     >
       <span
         aria-hidden="true"
         className={
           on
-            ? "relative block h-6 w-11 rounded-pill bg-brand transition-colors"
-            : "relative block h-6 w-11 rounded-pill bg-[var(--brand-soft-2)] transition-colors"
+            ? "relative block h-6 w-11 rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] transition-colors"
+            : "relative block h-6 w-11 rounded-[var(--homa-radius-control)] bg-[var(--homa-canvas)] transition-colors"
         }
       >
         <span
           className={
             on
-              ? "absolute top-0.5 left-[1.4rem] h-5 w-5 rounded-pill bg-card shadow-sm transition-all"
-              : "absolute top-0.5 left-0.5 h-5 w-5 rounded-pill bg-card shadow-sm transition-all"
+              ? "absolute top-0.5 left-[1.4rem] h-5 w-5 rounded-[var(--homa-radius-control)] bg-[var(--homa-paper)] shadow-sm transition-all"
+              : "absolute top-0.5 left-0.5 h-5 w-5 rounded-[var(--homa-radius-control)] bg-[var(--homa-paper)] shadow-sm transition-all"
           }
         />
       </span>
@@ -177,9 +180,10 @@ function TaskCard({
           (a native button cannot wrap the switch). The icon disc and
           the Next/Off chip wear the on/off state, so it reads from
           across the room, not just off the switch. */}
-      <div
+      <QuietFrame
+        as="article"
         onClick={() => setEditing(true)}
-        className="group flex cursor-pointer flex-col rounded-lg border border-border-subtle bg-card p-4 shadow-sm transition duration-(--dur-fast) ease-out hover:border-[var(--clay-300)] motion-safe:active:scale-[var(--press-scale)]"
+        className="quiet-task-card group flex cursor-pointer flex-col p-4 transition duration-(--dur-fast) ease-out hover:border-[var(--homa-midnight-action)] motion-safe:active:scale-[var(--press-scale)]"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
@@ -187,8 +191,8 @@ function TaskCard({
               aria-hidden="true"
               className={
                 on
-                  ? "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-brand-soft text-brand"
-                  : "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-[var(--brand-soft-2)] text-subtle"
+                  ? "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--homa-radius-control)] bg-[var(--homa-highlight-tint)] text-[var(--homa-highlight-ink)]"
+                  : "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--homa-radius-control)] bg-[var(--homa-canvas)] text-[var(--homa-muted-ink)]"
               }
             >
               <TaskIcon kind={task.kind} />
@@ -199,16 +203,16 @@ function TaskCard({
                 aria-haspopup="dialog"
                 aria-expanded={editing}
                 onClick={() => setEditing(true)}
-                className="text-left font-semibold text-strong"
+                className="text-left font-semibold text-[var(--homa-ink)]"
               >
                 {copy.label}
               </button>
-              <p className={on ? "mt-0.5 text-sm text-muted" : "mt-0.5 text-sm text-subtle"}>
+              <p className={on ? "mt-0.5 text-sm text-[var(--homa-muted-ink)]" : "mt-0.5 text-sm text-[var(--homa-muted-ink)] opacity-70"}>
                 {copy.description}
               </p>
               {/* Delivery shows for every kind since built-ins became a
                   choice too (founder ruling 2026-07-12 evening). */}
-              <p className="mt-2 text-xs font-semibold text-subtle">
+              <p className="mt-2 text-xs font-semibold text-[var(--homa-muted-ink)]">
                 {weekdaysLabel(task.weekdays)} {"\u00b7"} {hourLabel(task.localHour)}
                 {` \u00b7 ${
                   task.deliveryPref === "text"
@@ -224,27 +228,23 @@ function TaskCard({
         </div>
         <div className="mt-3 flex items-center justify-between gap-3">
           {next ? (
-            <span className="rounded-pill bg-brand-soft px-2.5 py-1 text-[0.7rem] font-bold text-[var(--clay-700)]">
+            <QuietStatus tone="constructive" className="quiet-task-status px-2.5 py-1 text-[0.7rem] font-bold">
               Next {"\u00b7"} {next}
-            </span>
+            </QuietStatus>
           ) : on && task.nextRunAt !== null ? (
-            <span className="rounded-pill bg-brand-soft px-2.5 py-1 text-[0.7rem] font-bold text-[var(--clay-700)]">
+            <QuietStatus tone="constructive" className="quiet-task-status px-2.5 py-1 text-[0.7rem] font-bold">
               Next {"\u00b7"} soon
-            </span>
+            </QuietStatus>
           ) : !on ? (
-            <span className="rounded-pill bg-[var(--brand-soft-2)] px-2.5 py-1 text-[0.7rem] font-bold text-muted">
+            <QuietStatus tone="info" className="quiet-task-status px-2.5 py-1 text-[0.7rem] font-bold">
               Off
-            </span>
+            </QuietStatus>
           ) : (
             <span />
           )}
-          <ChevronRight
-            size={16}
-            aria-hidden="true"
-            className="shrink-0 text-subtle transition-transform duration-(--dur-fast) ease-out group-hover:translate-x-0.5"
-          />
+          <Icon name="next" size={16} className="shrink-0 text-[var(--homa-muted-ink)] transition-transform duration-(--dur-fast) ease-out group-hover:translate-x-0.5" />
         </div>
-      </div>
+      </QuietFrame>
       {editing ? (
         <TaskEditOverlay
           task={task}
@@ -265,21 +265,21 @@ function DarkKindCard({
 }) {
   const copy = BUILT_IN_COPY[kind];
   return (
-    <div className="rounded-lg border border-dashed border-border-subtle bg-card p-4">
+    <QuietFrame as="article" tone="mineral" className="border-dashed p-4">
       <div className="flex items-start gap-3">
         <span
           aria-hidden="true"
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-[var(--brand-soft-2)] text-subtle"
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--homa-radius-control)] bg-[var(--homa-paper)] text-[var(--homa-muted-ink)]"
         >
           <TaskIcon kind={kind} />
         </span>
         <div>
-          <p className="font-semibold text-strong">{copy.label}</p>
-          <p className="mt-0.5 text-sm text-muted">{copy.description}</p>
-          <p className="mt-2 text-xs font-semibold text-subtle">{note}</p>
+          <p className="font-semibold text-[var(--homa-ink)]">{copy.label}</p>
+          <p className="mt-0.5 text-sm text-[var(--homa-muted-ink)]">{copy.description}</p>
+          <p className="mt-2 text-xs font-semibold text-[var(--homa-muted-ink)]">{note}</p>
         </div>
       </div>
-    </div>
+    </QuietFrame>
   );
 }
 
@@ -309,31 +309,30 @@ export function TasksView({
   const hasJournal = tasks.some((task) => task.kind === "journal_prompt");
 
   return (
-    <>
+    <div data-brand-surface="tasks" data-brand-fixture="quiet-authority-v1" className="quiet-task-surface">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
+          <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[var(--homa-brand-text)]">
             On her own schedule
           </p>
-          <h1 className="mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-strong">
+          <h1 className="mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-[var(--homa-ink)]">
             Homa&apos;s tasks
           </h1>
-          <p className="mt-1.5 max-w-xl text-sm text-muted">
+          <p className="mt-1.5 max-w-xl text-sm text-[var(--homa-muted-ink)]">
             Homa works on these by herself: morning briefs about your kids,
             evening check-ins, and any tasks you give her. Everything she
             does shows up below. Your kids&apos; week stays in the
             Planner tab.
           </p>
         </div>
-        <button
-          type="button"
+        <QuietAction
           aria-haspopup="dialog"
           aria-expanded={creating}
           onClick={() => setCreating(true)}
-          className="inline-flex items-center gap-2 rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover"
+          icon={<Icon name="add" size={16} />}
         >
-          <Plus size={16} /> Add a task
-        </button>
+          Add a task
+        </QuietAction>
       </header>
 
       {creating ? (
@@ -351,7 +350,7 @@ export function TasksView({
           nothing is building. */}
       {jobs.length > 0 ? (
         <section className="mt-6">
-          <h2 className="text-sm font-bold uppercase tracking-[0.12em] text-subtle">
+          <h2 className="text-sm font-bold uppercase tracking-[0.12em] text-[var(--homa-muted-ink)]">
             In progress
           </h2>
           <div className="mt-3 grid gap-3 md:grid-cols-2">
@@ -363,7 +362,7 @@ export function TasksView({
       ) : null}
 
       <section className="mt-6">
-        <h2 className="text-sm font-bold uppercase tracking-[0.12em] text-subtle">Scheduled</h2>
+        <h2 className="text-sm font-bold uppercase tracking-[0.12em] text-[var(--homa-muted-ink)]">Scheduled</h2>
         <div className="mt-3 grid gap-3 md:grid-cols-2">
           {!hasBrief ? (
             // The placeholder names time, never a control or a concept
@@ -401,6 +400,6 @@ export function TasksView({
       </section>
 
       <TaskHistory runs={runs} timeZone={timeZone} />
-    </>
+    </div>
   );
 }
