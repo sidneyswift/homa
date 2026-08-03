@@ -14,10 +14,12 @@ import { siteUrl } from "../../lib/map/email";
 import { getPlanBoard } from "../../lib/map/store";
 import { plannerEventClient } from "../../lib/planner-events";
 import { shapePlannerPlan } from "../../lib/planner-payload";
+import { listPlannerLearningActivitiesPinned } from "../../lib/planner-learning-activities";
 import {
   listScheduledDatesPinned,
   scheduledDatesByActivity,
 } from "../../lib/plan-schedule";
+import { addDaysDateOnly } from "../../lib/unified-planner";
 
 /**
  * Opens the week planner as a canvas beside the chat AND returns what is
@@ -39,7 +41,7 @@ import {
  * was unexecutable as written.
  *
  * Read-only: this tool never changes a plan. Edits go through edit_plan,
- * activity check-offs stay with the parent.
+ * and exact completions go through complete_planner_activity.
  *
  * Tenancy: familyId comes from session auth only; a model-supplied
  * childId is re-verified inside THAT family (getPlanBoard's explicit
@@ -55,7 +57,7 @@ const NO_PANEL_CHANNELS = new Set(["sms", "email", "dispatch", "agent-job"]);
 
 export default defineBoundedTool({
   description:
-    "Open the family's week planner beside the chat and see what is on it. Use when the parent asks what is planned, wants to see or adjust the week or the month, asks to schedule an existing lesson or curriculum onto the planner, asks how to input things into the planner, or when you are about to edit or schedule a plan and need the current activities, exact text, plan revision, indices, and real scheduled dates. Pass childId to get that child's plans with all four weeks in full; without it every plan returns its current week plus per-week summaries. Each stored plan includes planRevision, and each activity in a full week carries scheduledDate, the real persisted calendar date from schedule_plan_activity, or null when it has never been put on a day. In web chat this opens the planner panel next to the conversation, and in the phone app the week slides up in place; over SMS or email no panel opens, so tell the week in plain words instead. Read-only; make changes with edit_plan or schedule_plan_activity.",
+    "Open the family's Planner beside the chat and see both planned and completed learning. Use when the parent asks what is planned or logged, wants to see or adjust the week or month, asks to schedule an existing lesson or curriculum, asks how to input things, or when you are about to edit, schedule, or complete an existing item. Pass childId to get that child's plans with all four weeks in full; without it every plan returns the current week plus summaries. Each generated activity includes its exact text, index, scheduledDate, and planRevision for stale-safe edits, schedules, and completions. learningActivities are stable independent rows with ids, dates, status, childIds, and optional duration. In web chat this opens the Planner panel, and in the phone app the week slides up; over SMS or email tell it in plain words. Read-only; use the exact Planner tools to make changes.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: true,
   inputSchema: z.object({
@@ -80,16 +82,24 @@ export default defineBoundedTool({
     }
     const attrs = (attributes ?? {}) as CallerAuthAttributes & { channel?: string };
 
-    const [board, scheduleRows] = await Promise.all([
+    const now = new Date();
+    const today = now.toISOString().slice(0, 10);
+    const [board, scheduleRows, learningActivities] = await Promise.all([
       getPlanBoard(familyId, input.childId ?? null),
       listScheduledDatesPinned(familyId, input.childId ?? null),
+      listPlannerLearningActivitiesPinned({
+        familyId,
+        fromDate: addDaysDateOnly(today, -14),
+        toDate: addDaysDateOnly(today, 42),
+        childId: input.childId ?? null,
+      }),
     ]);
     if (!board) {
       return { error: "unknown_child", note: WRONG_CHILD_NOTE };
     }
     const scheduledDates = scheduledDatesByActivity(scheduleRows);
 
-    const nowMs = Date.now();
+    const nowMs = now.getTime();
     const fullWeeks = Boolean(input.childId);
     const children = board.children.map((child) => ({
       childId: child.id,
@@ -130,6 +140,15 @@ export default defineBoundedTool({
         ? board.children.find((child) => child.id === input.childId)?.name ?? null
         : null,
       children,
+      learningActivities: learningActivities.map((activity) => ({
+        id: activity.id,
+        title: activity.title,
+        subject: activity.subject,
+        activityDate: activity.activityDate,
+        status: activity.status,
+        childIds: activity.childIds,
+        durationMinutes: activity.durationMinutes,
+      })),
       note: [
         // Honesty wording, updated with the phone app's voice surface
         // and chat planner card (2026-07-31, supersedes the interim
@@ -143,6 +162,7 @@ export default defineBoundedTool({
         hasStored
           ? [
               "Activity indices above are what edit_plan and schedule_plan_activity address. Copy the planRevision and exact activity text into a write; they prove the slot is still the one the parent saw.",
+              "Use complete_planner_activity with the exact planRevision, indices, and text to mark generated work finished. Stable learningActivities use their id.",
               "scheduledDate is the activity's real calendar date; null means the parent has not put it on a day.",
               fullWeeks
                 ? ""

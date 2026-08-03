@@ -96,6 +96,16 @@ async function persistCaptureLoopEventInTransaction(
             select 1 from public.plan_activity_schedule row
             where row.id = ${props.object_id}::uuid
               and row.family_id = ${familyId}::uuid
+          ) or exists (
+            select 1 from public.planner_learning_activities row
+            where row.id = ${props.object_id}::uuid
+              and row.family_id = ${familyId}::uuid
+          ) or exists (
+            select 1
+            from public.child_plans plan
+            join public.children child on child.id = plan.child_id
+            where plan.id = ${props.object_id}::uuid
+              and child.family_id = ${familyId}::uuid
           )
           when ${props.object_kind}::text = 'family_event' then exists (
             select 1 from public.family_events row
@@ -200,7 +210,12 @@ async function persistCaptureLoopEventInTransaction(
                     and receipt.family_id = ${familyId}::uuid
                     and receipt.object_kind = 'plan_activity'
                     and receipt.object_id = ${props.object_id}::uuid
-                    and receipt.effect = 'plan_activity.scheduled'
+                    and receipt.effect in (
+                      'plan_activity.scheduled',
+                      'plan_activity.completed',
+                      'planner_activity.recorded',
+                      'planner_activity.completed'
+                    )
                     and receipt.status = 'committed'
                     and receipt.undone_at is null
               )
@@ -437,7 +452,12 @@ async function persistCaptureLoopEventInTransaction(
                       or (
                         ${props.object_kind}::text = 'plan_activity'
                         and receipt.object_kind = 'plan_activity'
-                        and receipt.effect = 'plan_activity.scheduled'
+                        and receipt.effect in (
+                          'plan_activity.scheduled',
+                          'plan_activity.completed',
+                          'planner_activity.recorded',
+                          'planner_activity.completed'
+                        )
                       )
                       or (
                         ${props.object_kind}::text = 'family_event'

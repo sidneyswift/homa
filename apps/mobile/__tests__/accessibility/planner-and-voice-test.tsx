@@ -116,6 +116,7 @@ describe("large-text Planner accessibility", () => {
         anchorDate="2026-08-15"
         events={[plannerEvent]}
         activities={[plannerActivity]}
+        learningActivities={[]}
         onSelectDate={onSelectDate}
       />,
     );

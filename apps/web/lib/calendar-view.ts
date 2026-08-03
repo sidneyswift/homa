@@ -275,6 +275,7 @@ export interface CalendarActivityItem {
   childId: string;
   subjectId: string;
   subjectLabel: string;
+  planRevision: number;
   /** "week.activityIndex", the same key the existing plan-checks store
    * and PLAN_CHECK_KEY_RE use, so this reuses that check-off mechanism
    * rather than inventing a second one. */
@@ -408,6 +409,7 @@ export function buildCalendarBoard(input: BuildCalendarBoardInput): CalendarBoar
       childId: row.childId,
       subjectId: row.subjectId,
       subjectLabel: subjectLabelFor(row.subjectId),
+      planRevision: plan.planRevision ?? 1,
       checkId,
       text,
       done: Boolean(plan.progress[checkId]),

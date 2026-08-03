@@ -34,7 +34,7 @@ import {
 
 export default defineBoundedTool({
   description:
-    "Add an appointment, trip, or other non-school event to the family's own calendar (never Google or any external calendar): a doctor's appointment, a co-op day, a museum visit, a family trip. Use when the parent mentions something happening on a specific day or date range that is not a school lesson. Give it a whole family (omit childId) or one child's own calendar. Does not touch or reshuffle anything else already scheduled.",
+    "Load the planner skill before calling. Add an appointment, trip, or other non-school event to the family's own calendar (never Google or any external calendar): a doctor's appointment, a co-op day, a museum visit, a family trip. Use when the parent mentions something happening on a specific day or date range that is not a school lesson. Give it a whole family (omit childId) or one child's own calendar. Does not touch or reshuffle anything else already scheduled.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: false,
   inputSchema: z

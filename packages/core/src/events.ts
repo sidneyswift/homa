@@ -598,6 +598,33 @@ export const EVENT_SCHEMAS = {
       client: z.enum(PLANNER_EVENT_CLIENTS),
     })
     .strict(),
+  // A parent recap or future request became one stable Planner row. Counts
+  // and enums only; lesson text and the provenance quote stay in the record.
+  "planner.learning_recorded": z
+    .object({
+      family_id: z.uuid(),
+      subject: z.string().min(1).max(80),
+      status: z.enum(["planned", "completed"]),
+      audience: z.enum(["whole_family", "children"]),
+      child_count: z.number().int().min(0).max(12),
+      has_duration: z.boolean(),
+      surface: z.enum(PLANNER_EVENT_SURFACES),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
+  // One exact planned activity became completed, whether it came from a
+  // stable log row or a generated four-week plan.
+  "planner.learning_completed": z
+    .object({
+      family_id: z.uuid(),
+      subject: z.string().min(1).max(80),
+      target: z.enum(["logged_activity", "generated_plan_activity"]),
+      child_count: z.number().int().min(0).max(12),
+      has_duration: z.boolean(),
+      surface: z.enum(PLANNER_EVENT_SURFACES),
+      client: z.enum(PLANNER_EVENT_CLIENTS),
+    })
+    .strict(),
   // A reshuffle moved school work around real life; moves counts the
   // batch. Staged until the arc-C reshuffle receipt lands (gh#259).
   "planner.week_repaired": z

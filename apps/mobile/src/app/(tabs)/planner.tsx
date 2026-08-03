@@ -25,6 +25,10 @@ import {
   type FamilyEventRecord,
 } from "../../lib/family-events";
 import { scheduleActivity } from "../../lib/plan-schedule";
+import {
+  setPlannerLearningActivityStatus,
+  type PlannerLearningActivityRecord,
+} from "../../lib/planner-learning-activities";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { HoursSurface } from "./hours";
 import { DayView } from "../../features/planner/day-view";
@@ -108,6 +112,7 @@ export default function PlannerScreen() {
     scheduleRows,
     childPlans,
     hoursRows,
+    learningActivities,
     loading,
     error: plannerError,
     reload,
@@ -172,6 +177,16 @@ export default function PlannerScreen() {
       ? hoursRows.filter((row) => row.childId === null || row.childId === filterChildId)
       : hoursRows,
     [filterChildId, hoursRows],
+  );
+  const filteredLearningActivities = useMemo(
+    () => filterChildId
+      ? learningActivities.filter(
+          (activity) =>
+            activity.childIds.length === 0
+            || activity.childIds.includes(filterChildId),
+        )
+      : learningActivities,
+    [filterChildId, learningActivities],
   );
   const visibleRange = useMemo(() => {
     if (viewMode === "hours") return { start: anchorDate, end: anchorDate };
@@ -256,6 +271,17 @@ export default function PlannerScreen() {
     }
     await reload();
     throw new PlanActivityCheckConflictError(outcome);
+  }
+
+  async function handleToggleLearningActivity(
+    activity: PlannerLearningActivityRecord,
+  ) {
+    await setPlannerLearningActivityStatus({
+      activityId: activity.id,
+      expectedStatus: activity.status,
+      status: activity.status === "completed" ? "planned" : "completed",
+    });
+    await reload();
   }
 
   function openNewEventComposer(date: DateOnly) {
@@ -453,6 +479,7 @@ export default function PlannerScreen() {
             anchorDate={anchorDate}
             events={filteredEvents}
             activities={filteredActivities}
+            learningActivities={filteredLearningActivities}
             onSelectDate={(date) => {
               setAnchorDate(date);
               setViewMode("day");
@@ -463,10 +490,12 @@ export default function PlannerScreen() {
             weekStart={startOfWeek(anchorDate)}
             events={filteredEvents}
             activities={filteredActivities}
+            learningActivities={filteredLearningActivities}
             unscheduled={filteredUnscheduled}
             kids={children}
             onPressEvent={openEditEventComposer}
             onToggleActivity={handleToggleActivity}
+            onToggleLearningActivity={handleToggleLearningActivity}
             onScheduleActivity={setSchedulingActivity}
           />
         ) : (
@@ -474,11 +503,13 @@ export default function PlannerScreen() {
             date={anchorDate}
             events={filteredEvents}
             activities={filteredActivities}
+            learningActivities={filteredLearningActivities}
             hoursRows={filteredHoursRows}
             unscheduled={filteredUnscheduled}
             kids={children}
             onPressEvent={openEditEventComposer}
             onToggleActivity={handleToggleActivity}
+            onToggleLearningActivity={handleToggleLearningActivity}
             onScheduleActivity={setSchedulingActivity}
           />
         )}

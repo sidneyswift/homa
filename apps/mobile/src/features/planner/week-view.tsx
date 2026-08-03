@@ -2,6 +2,7 @@ import { View } from "react-native";
 
 import type { ChildRecord } from "../../lib/family";
 import type { FamilyEventRecord } from "../../lib/family-events";
+import type { PlannerLearningActivityRecord } from "../../lib/planner-learning-activities";
 import { space } from "../../theme/tokens";
 import { DayAgenda } from "./day-agenda";
 import { daysInRange, addDays, compareDateOnly, type DateOnly } from "./date-utils";
@@ -16,19 +17,23 @@ export function WeekView({
   weekStart,
   events,
   activities,
+  learningActivities,
   unscheduled,
   kids,
   onPressEvent,
   onToggleActivity,
+  onToggleLearningActivity,
   onScheduleActivity,
 }: {
   weekStart: DateOnly;
   events: FamilyEventRecord[];
   activities: ScheduledActivityView[];
+  learningActivities: PlannerLearningActivityRecord[];
   unscheduled: PlanActivityView[];
   kids: ChildRecord[];
   onPressEvent?: (event: FamilyEventRecord) => void;
   onToggleActivity: (activity: ScheduledActivityView) => Promise<void>;
+  onToggleLearningActivity: (activity: PlannerLearningActivityRecord) => Promise<void>;
   onScheduleActivity: (activity: PlanActivityView) => void;
 }) {
   const days = daysInRange(weekStart, addDays(weekStart, 6));
@@ -42,9 +47,13 @@ export function WeekView({
           date={day}
           events={events.filter((event) => compareDateOnly(event.starts_on, day) <= 0 && compareDateOnly(event.ends_on, day) >= 0)}
           activities={activities.filter((activity) => activity.scheduledDate === day)}
+          learningActivities={learningActivities.filter(
+            (activity) => activity.activityDate === day,
+          )}
           kids={kids}
           onPressEvent={onPressEvent}
           onToggleActivity={onToggleActivity}
+          onToggleLearningActivity={onToggleLearningActivity}
         />
       ))}
     </View>

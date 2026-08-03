@@ -30,6 +30,10 @@ import {
   type HoursEntry,
 } from "../../../lib/hours-view";
 import { plannerActivityHelpHref } from "../../../lib/planner-activity-help";
+import type {
+  PlannerLearningActivity,
+  PlannerLearningStatus,
+} from "../../../lib/planner-learning-activities";
 import type { PlanActivityScheduleRow } from "../../../lib/plan-schedule";
 import type { DashboardPlan } from "../../../lib/plan-week";
 import {
@@ -50,6 +54,7 @@ import {
   updateFamilyEventAction,
 } from "../calendar/actions";
 import { HoursView } from "../hours/hours-view";
+import { setPlannerLearningActivityStatusAction } from "./actions";
 
 export interface UnifiedPlannerKid {
   id: string;
@@ -195,6 +200,27 @@ function activitiesForDate(board: CalendarBoard, date: string): PlannerActivity[
     }
   }
   return activities;
+}
+
+function learningActivityVisibleToFocus(
+  activity: PlannerLearningActivity,
+  focusChildId: string | null,
+): boolean {
+  return focusChildId === null
+    || activity.childIds.length === 0
+    || activity.childIds.includes(focusChildId);
+}
+
+function learningActivitiesForDate(
+  activities: readonly PlannerLearningActivity[],
+  date: string,
+  focusChildId: string | null,
+): PlannerLearningActivity[] {
+  return activities.filter(
+    (activity) =>
+      activity.activityDate === date
+      && learningActivityVisibleToFocus(activity, focusChildId),
+  );
 }
 
 function childLabel(event: FamilyEventRow, kids: readonly UnifiedPlannerKid[]): string {
@@ -414,6 +440,81 @@ function ActivityRow({
   );
 }
 
+function learningActivityChildLabel(
+  activity: PlannerLearningActivity,
+  kids: readonly UnifiedPlannerKid[],
+): string {
+  if (activity.childIds.length === 0) return "Whole family";
+  return activity.childIds
+    .map((childId) => kids.find((kid) => kid.id === childId)?.name ?? "Child")
+    .join(" + ");
+}
+
+function LearningActivityRow({
+  activity,
+  status,
+  kids,
+  saving,
+  onToggle,
+  onOpen,
+}: {
+  activity: PlannerLearningActivity;
+  status: PlannerLearningStatus;
+  kids: readonly UnifiedPlannerKid[];
+  saving: boolean;
+  onToggle: () => void;
+  onOpen: () => void;
+}) {
+  const completed = status === "completed";
+  return (
+    <div className="grid min-h-[72px] grid-cols-[48px_minmax(0,1fr)] items-center border-b border-border-subtle last:border-b-0">
+      <button
+        type="button"
+        onClick={onToggle}
+        disabled={saving}
+        aria-pressed={completed}
+        aria-label={`${completed ? "Mark not finished" : "Mark finished"}: ${activity.title}`}
+        className="grid h-11 w-11 place-items-center rounded-full disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <span
+          aria-hidden="true"
+          className={
+            completed
+              ? "grid h-[22px] w-[22px] place-items-center rounded-[7px] border border-[var(--sage-500)] bg-[var(--sage-500)] text-white"
+              : "grid h-[22px] w-[22px] place-items-center rounded-[7px] border-[1.5px] border-[var(--stone-500)] bg-card text-transparent"
+          }
+        >
+          <Icon name="check" size={16} />
+        </span>
+      </button>
+      <button
+        type="button"
+        onClick={onOpen}
+        className="grid min-h-[70px] w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-sm py-2.5 text-left hover:bg-page"
+      >
+        <span className="min-w-0">
+          <span
+            className={
+              completed
+                ? "block font-display text-base font-semibold leading-snug text-muted line-through"
+                : "block font-display text-base font-semibold leading-snug text-strong"
+            }
+          >
+            {activity.title}
+          </span>
+          <span className="mt-0.5 block text-sm text-muted">
+            {learningActivityChildLabel(activity, kids)} · {SUBJECT_LABELS[activity.subject]}
+            {completed && activity.durationMinutes
+              ? ` · ${formatMinutesAsHours(activity.durationMinutes)} reported`
+              : ""}
+          </span>
+        </span>
+        <Icon name="next" size={20} className="mr-1 text-subtle" />
+      </button>
+    </div>
+  );
+}
+
 function EventRow({
   event,
   kids,
@@ -552,6 +653,75 @@ function ActivityDetails({
         >
           Change the day
         </QuietAction>
+      </div>
+    </ModalShell>
+  );
+}
+
+function LearningActivityDetails({
+  activity,
+  status,
+  kids,
+  onClose,
+}: {
+  activity: PlannerLearningActivity;
+  status: PlannerLearningStatus;
+  kids: readonly UnifiedPlannerKid[];
+  onClose: () => void;
+}) {
+  return (
+    <ModalShell titleId="planner-learning-activity-title" onClose={onClose}>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2
+            id="planner-learning-activity-title"
+            className="font-display text-2xl font-semibold text-strong"
+          >
+            {activity.title}
+          </h2>
+          <p className="mt-1 text-sm text-muted">{formatFullDate(activity.activityDate)}</p>
+        </div>
+        <DialogClose onClose={onClose} />
+      </div>
+      <dl className="mt-5 divide-y divide-border-subtle border-y border-border-subtle text-sm">
+        <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 py-3">
+          <dt className="text-muted">Who</dt>
+          <dd className="font-semibold text-strong">
+            {learningActivityChildLabel(activity, kids)}
+          </dd>
+        </div>
+        <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 py-3">
+          <dt className="text-muted">Subject</dt>
+          <dd className="font-semibold text-strong">{SUBJECT_LABELS[activity.subject]}</dd>
+        </div>
+        <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 py-3">
+          <dt className="text-muted">Status</dt>
+          <dd className="font-semibold text-strong">
+            {status === "completed" ? "Finished" : "To do"}
+          </dd>
+        </div>
+        {activity.durationMinutes ? (
+          <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 py-3">
+            <dt className="text-muted">Reported time</dt>
+            <dd className="font-semibold text-strong">
+              {formatMinutesAsHours(activity.durationMinutes)}
+            </dd>
+          </div>
+        ) : null}
+        {activity.note ? (
+          <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 py-3">
+            <dt className="text-muted">Note</dt>
+            <dd className="whitespace-pre-wrap text-body">{activity.note}</dd>
+          </div>
+        ) : null}
+      </dl>
+      <div className="mt-5">
+        <Link
+          href={`/app?draft=${encodeURIComponent(`Change this Planner item: ${activity.title}`)}`}
+          className="inline-flex min-h-11 items-center rounded-pill bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)]"
+        >
+          Ask Homa to change it
+        </Link>
       </div>
     </ModalShell>
   );
@@ -1154,6 +1324,7 @@ export function UnifiedPlannerView({
   plans,
   familyEvents,
   scheduledActivities,
+  learningActivities,
   hoursEntries,
   timeZone,
   now,
@@ -1166,6 +1337,7 @@ export function UnifiedPlannerView({
   plans: DashboardPlan[];
   familyEvents: FamilyEventRow[];
   scheduledActivities: PlanActivityScheduleRow[];
+  learningActivities: PlannerLearningActivity[];
   hoursEntries: HoursEntry[];
   timeZone: string;
   now: Date;
@@ -1181,7 +1353,12 @@ export function UnifiedPlannerView({
     refresh: refreshPlanChecks,
   });
   const [showFinished, setShowFinished] = useState(false);
+  const [learningStatusOverrides, setLearningStatusOverrides] = useState<
+    Record<string, PlannerLearningStatus>
+  >({});
   const [selectedActivity, setSelectedActivity] = useState<PlannerActivity | null>(null);
+  const [selectedLearningActivity, setSelectedLearningActivity] =
+    useState<PlannerLearningActivity | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<FamilyEventRow | null>(null);
   const [composer, setComposer] = useState<ComposerState | null>(null);
   const [moveState, setMoveState] = useState<MoveComposerState | null>(null);
@@ -1189,6 +1366,8 @@ export function UnifiedPlannerView({
   const [composerError, setComposerError] = useState<string | null>(null);
   const [recurringActionError, setRecurringActionError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [savingLearningActivityId, setSavingLearningActivityId] = useState<string | null>(null);
+  const [learningActivityError, setLearningActivityError] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [dayFilter, setDayFilter] = useState({
     routeChildId: focusChildId,
@@ -1228,6 +1407,11 @@ export function UnifiedPlannerView({
     [activeDate, familyEvents, visibleFocusChildId, hoursEntries, kids, plans, scheduledActivities],
   );
   const activeActivities = activitiesForDate(activeBoard, activeDate);
+  const activeLearningActivities = learningActivitiesForDate(
+    learningActivities,
+    activeDate,
+    visibleFocusChildId,
+  );
   const activeEvents = eventsForDate(familyEvents, activeDate, visibleFocusChildId);
   const activeHours = hoursEntries.filter(
     (entry) =>
@@ -1249,15 +1433,34 @@ export function UnifiedPlannerView({
           activity.checkId,
         )
       : activity.done;
+  const resolvedLearningStatus = (activity: PlannerLearningActivity) =>
+    learningStatusOverrides[activity.id] ?? activity.status;
   const unfinished = activeActivities.filter((activity) => !resolvedDone(activity));
   const finished = activeActivities.filter(resolvedDone);
+  const plannedLearning = activeLearningActivities.filter(
+    (activity) => resolvedLearningStatus(activity) === "planned",
+  );
+  const completedLearning = activeLearningActivities.filter(
+    (activity) => resolvedLearningStatus(activity) === "completed",
+  );
 
   const weekDays = activeBoard.days.map((day) => {
     const activities = activitiesForDate(activeBoard, day.date);
+    const dayLearning = learningActivitiesForDate(
+      learningActivities,
+      day.date,
+      visibleFocusChildId,
+    );
     return {
       day,
       activities,
       unfinished: activities.filter((activity) => !resolvedDone(activity)),
+      plannedLearning: dayLearning.filter(
+        (activity) => resolvedLearningStatus(activity) === "planned",
+      ),
+      completedLearning: dayLearning.filter(
+        (activity) => resolvedLearningStatus(activity) === "completed",
+      ),
       events: eventsForDate(familyEvents, day.date, visibleFocusChildId),
     };
   });
@@ -1282,6 +1485,19 @@ export function UnifiedPlannerView({
       monthActivityCounts.set(day.date, activitiesForDate(board, day.date).length);
     }
   }
+  for (const activity of learningActivities) {
+    if (
+      activity.activityDate < monthRange.start
+      || activity.activityDate > monthRange.end
+      || !learningActivityVisibleToFocus(activity, focusChildId)
+    ) {
+      continue;
+    }
+    monthActivityCounts.set(
+      activity.activityDate,
+      (monthActivityCounts.get(activity.activityDate) ?? 0) + 1,
+    );
+  }
 
   function toggleActivity(activity: PlannerActivity) {
     planChecks.toggle({
@@ -1290,6 +1506,39 @@ export function UnifiedPlannerView({
       checkKey: activity.checkId,
       expectedText: activity.text,
     });
+  }
+
+  async function toggleLearningActivity(activity: PlannerLearningActivity) {
+    if (savingLearningActivityId) return;
+    const expectedStatus = resolvedLearningStatus(activity);
+    const status = expectedStatus === "completed" ? "planned" : "completed";
+    if (
+      status === "planned"
+      && activity.hoursEntryIds.length > 0
+      && !window.confirm(
+        "Mark this not finished? The time linked to this activity will also be removed from Hours.",
+      )
+    ) {
+      return;
+    }
+    setSavingLearningActivityId(activity.id);
+    setLearningActivityError(null);
+    const result = await setPlannerLearningActivityStatusAction({
+      activityId: activity.id,
+      expectedStatus,
+      status,
+    });
+    setSavingLearningActivityId(null);
+    if (!result.ok) {
+      setLearningActivityError(result.reason);
+      router.refresh();
+      return;
+    }
+    setLearningStatusOverrides((current) => ({
+      ...current,
+      [activity.id]: result.status,
+    }));
+    router.refresh();
   }
 
   function openNewAppointment() {
@@ -1422,12 +1671,17 @@ export function UnifiedPlannerView({
     router.refresh();
   }
 
-  const totalWeekActivities = weekDays.reduce((sum, day) => sum + day.unfinished.length, 0);
+  const totalWeekActivities = weekDays.reduce(
+    (sum, day) => sum + day.unfinished.length + day.plannedLearning.length,
+    0,
+  );
   const totalWeekEvents = weekDays.reduce((sum, day) => sum + day.events.length, 0);
-  const dayStatus = unfinished.length > 0
-    ? `${unfinished.length} ${unfinished.length === 1 ? "activity" : "activities"} left`
-    : finished.length > 0
-      ? "All planned activities are finished"
+  const remainingCount = unfinished.length + plannedLearning.length;
+  const completedCount = finished.length + completedLearning.length;
+  const dayStatus = remainingCount > 0
+    ? `${remainingCount} ${remainingCount === 1 ? "activity" : "activities"} left`
+    : completedCount > 0
+      ? "Everything is finished"
       : activeEvents.length > 0
         ? `${activeEvents.length} ${activeEvents.length === 1 ? "event" : "events"}`
         : activeHoursMinutes > 0
@@ -1606,6 +1860,14 @@ export function UnifiedPlannerView({
                   ))}
                 </div>
               ) : null}
+              {learningActivityError ? (
+                <p
+                  role="alert"
+                  className="mt-4 rounded-md border border-[var(--clay-200)] bg-brand-soft px-4 py-3 text-sm font-semibold text-[var(--clay-700)]"
+                >
+                  {learningActivityError}
+                </p>
+              ) : null}
               <section className="mt-5 overflow-hidden rounded-[var(--radius-lg)] border border-border-subtle bg-card shadow-sm" aria-label={formatFullDate(activeDate)}>
               {activeEvents.map((event) => (
                 <EventRow
@@ -1613,6 +1875,17 @@ export function UnifiedPlannerView({
                   event={event}
                   kids={kids}
                   onOpen={() => setSelectedEvent(event)}
+                />
+              ))}
+              {plannedLearning.map((activity) => (
+                <LearningActivityRow
+                  key={activity.id}
+                  activity={activity}
+                  status={resolvedLearningStatus(activity)}
+                  kids={kids}
+                  saving={savingLearningActivityId === activity.id}
+                  onToggle={() => void toggleLearningActivity(activity)}
+                  onOpen={() => setSelectedLearningActivity(activity)}
                 />
               ))}
               {unfinished.map((activity) => (
@@ -1630,7 +1903,11 @@ export function UnifiedPlannerView({
                   onOpen={() => setSelectedActivity(activity)}
                 />
               ))}
-              {activeEvents.length === 0 && unfinished.length === 0 && finished.length === 0 ? (
+              {activeEvents.length === 0
+                && unfinished.length === 0
+                && finished.length === 0
+                && plannedLearning.length === 0
+                && completedLearning.length === 0 ? (
                 <div className="px-6 py-12 text-center">
                   <h3 className="font-display text-lg font-semibold text-strong">Nothing planned</h3>
                   <p className="mt-1 text-sm text-muted">This day can stay open.</p>
@@ -1643,7 +1920,7 @@ export function UnifiedPlannerView({
                   </button>
                 </div>
               ) : null}
-              {finished.length > 0 ? (
+              {completedCount > 0 ? (
                 <>
                   <button
                     type="button"
@@ -1651,25 +1928,40 @@ export function UnifiedPlannerView({
                     onClick={() => setShowFinished((show) => !show)}
                     className="min-h-12 w-full border-t border-border-subtle px-4 py-3 text-left text-sm font-bold text-muted hover:bg-page"
                   >
-                    {showFinished ? "Hide" : "Show"} {finished.length} finished{" "}
-                    {finished.length === 1 ? "activity" : "activities"}
+                    {showFinished ? "Hide" : "Show"} {completedCount} finished{" "}
+                    {completedCount === 1 ? "activity" : "activities"}
                   </button>
                   {showFinished
-                    ? finished.map((activity) => (
-                        <ActivityRow
-                          key={activity.key}
-                          activity={activity}
-                          checked={resolvedDone(activity)}
-                          pending={planChecks.isPending(
-                            activity.childId,
-                            activity.subjectId,
-                            activity.checkId,
-                          )}
-                          writable={activityWritable(activity)}
-                          onToggle={() => toggleActivity(activity)}
-                          onOpen={() => setSelectedActivity(activity)}
-                        />
-                      ))
+                    ? (
+                        <>
+                          {completedLearning.map((activity) => (
+                            <LearningActivityRow
+                              key={activity.id}
+                              activity={activity}
+                              status={resolvedLearningStatus(activity)}
+                              kids={kids}
+                              saving={savingLearningActivityId === activity.id}
+                              onToggle={() => void toggleLearningActivity(activity)}
+                              onOpen={() => setSelectedLearningActivity(activity)}
+                            />
+                          ))}
+                          {finished.map((activity) => (
+                            <ActivityRow
+                              key={activity.key}
+                              activity={activity}
+                              checked={resolvedDone(activity)}
+                              pending={planChecks.isPending(
+                                activity.childId,
+                                activity.subjectId,
+                                activity.checkId,
+                              )}
+                              writable={activityWritable(activity)}
+                              onToggle={() => toggleActivity(activity)}
+                              onOpen={() => setSelectedActivity(activity)}
+                            />
+                          ))}
+                        </>
+                      )
                     : null}
                 </>
               ) : null}
@@ -1680,12 +1972,19 @@ export function UnifiedPlannerView({
 
           {view === "week" ? (
             <section className="mt-5 overflow-hidden rounded-[var(--radius-lg)] border border-border-subtle bg-card shadow-sm" aria-label="Week summary">
-              {weekDays.map(({ day, unfinished: dayActivities, events }) => {
+              {weekDays.map(({
+                day,
+                unfinished: dayActivities,
+                plannedLearning: dayPlannedLearning,
+                completedLearning: dayCompletedLearning,
+                events,
+              }) => {
                 const firstEvent = events[0];
                 const summaryParts: string[] = [];
-                if (dayActivities.length > 0) {
+                const remainingActivities = dayActivities.length + dayPlannedLearning.length;
+                if (remainingActivities > 0) {
                   summaryParts.push(
-                    `${dayActivities.length} ${dayActivities.length === 1 ? "activity" : "activities"}`,
+                    `${remainingActivities} ${remainingActivities === 1 ? "activity" : "activities"}`,
                   );
                 }
                 if (events.length > 0) {
@@ -1696,7 +1995,8 @@ export function UnifiedPlannerView({
                 const summary = summaryParts.length > 0
                   ? summaryParts.join(" · ")
                   : activitiesForDate(activeBoard, day.date).some(resolvedDone)
-                    ? "All activities finished"
+                    || dayCompletedLearning.length > 0
+                    ? "Everything finished"
                     : "Nothing planned";
                 return (
                   <Link
@@ -1742,7 +2042,7 @@ export function UnifiedPlannerView({
                 {monthCells.map((cell) => {
                   const activityCount = monthActivityCounts.get(cell.date) ?? 0;
                   const eventCount = eventsForDate(familyEvents, cell.date, focusChildId).length;
-                  const plannedCount = activityCount + eventCount;
+                  const itemCount = activityCount + eventCount;
                   const label = `${formatFullDate(cell.date)}, ${activityCount} ${activityCount === 1 ? "activity" : "activities"}, ${eventCount} ${eventCount === 1 ? "event" : "events"}`;
                   return (
                     <Link
@@ -1758,9 +2058,9 @@ export function UnifiedPlannerView({
                       }
                     >
                       {cell.dayOfMonth}
-                      {plannedCount > 0 ? (
+                      {itemCount > 0 ? (
                         <span className="mt-3 block whitespace-nowrap text-[0.6rem] font-bold text-muted">
-                          {plannedCount} planned
+                          {itemCount} {itemCount === 1 ? "item" : "items"}
                         </span>
                       ) : null}
                     </Link>
@@ -1777,6 +2077,14 @@ export function UnifiedPlannerView({
           activity={selectedActivity}
           done={resolvedDone(selectedActivity)}
           onClose={() => setSelectedActivity(null)}
+        />
+      ) : null}
+      {selectedLearningActivity ? (
+        <LearningActivityDetails
+          activity={selectedLearningActivity}
+          status={resolvedLearningStatus(selectedLearningActivity)}
+          kids={kids}
+          onClose={() => setSelectedLearningActivity(null)}
         />
       ) : null}
       {selectedEvent ? (

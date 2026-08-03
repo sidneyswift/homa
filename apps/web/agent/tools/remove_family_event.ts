@@ -26,7 +26,7 @@ import {
 
 export default defineBoundedTool({
   description:
-    "Remove one event from the family calendar (an appointment or trip added earlier, or a mistake). Use eventId from list_family_events or from add_family_event's own result. Never removes a school plan activity; that stays on the plan.",
+    "Load the planner skill before calling. Remove one event from the family calendar (an appointment or trip added earlier, or a mistake). Use eventId from list_family_events or from add_family_event's own result. Never removes a school plan activity; that stays on the plan.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: false,
   inputSchema: z

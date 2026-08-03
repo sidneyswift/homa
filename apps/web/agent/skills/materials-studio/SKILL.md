@@ -1,5 +1,5 @@
 ---
-description: Use when a parent wants to create, review, revise, approve, finalize, combine, or print a child material, including natural reactions to the material currently visible. Covers worksheets, lesson plans, cards, posters, scaffolds, and multi-page packets. Not for designing a whole curriculum; curriculum-studio owns that.
+description: Use when a parent wants to create, write, draft, review, revise, approve, finalize, combine, or print a child material, including a lesson plan for a named day or week and natural reactions to the material currently visible. Covers worksheets, lesson plans, cards, posters, scaffolds, and multi-page packets. Not for scheduling an existing lesson or curriculum; planner owns placement. Not for designing a whole curriculum; curriculum-studio owns that.
 ---
 
 # The materials studio

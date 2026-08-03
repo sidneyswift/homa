@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
+import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
@@ -9,6 +10,7 @@ import type { FamilyEventRow } from "../../../lib/family-events";
 import type { HoursEntry } from "../../../lib/hours-view";
 import type { PlanActivityScheduleRow } from "../../../lib/plan-schedule";
 import type { DashboardPlan } from "../../../lib/plan-week";
+import type { PlannerLearningActivity } from "../../../lib/planner-learning-activities";
 import {
   UnifiedPlannerView,
   type UnifiedPlannerKid,
@@ -107,6 +109,45 @@ const HOURS: HoursEntry = {
   note: "Fractions",
 };
 
+const PLANNED_LOG: PlannerLearningActivity = {
+  id: "learning-1",
+  familyId: "family-1",
+  title: "Horizons lesson 42",
+  subject: "math",
+  activityDate: "2026-08-03",
+  status: "planned",
+  durationMinutes: null,
+  note: null,
+  sourceChannel: "web",
+  sourceQuote: "We will do Horizons lesson 42.",
+  sourceMessageId: "10000000-0000-4000-8000-000000000001",
+  completionSourceChannel: null,
+  completionSourceQuote: null,
+  completionSourceMessageId: null,
+  completedAt: null,
+  createdAt: "2026-08-01T00:00:00.000Z",
+  updatedAt: "2026-08-01T00:00:00.000Z",
+  childIds: [KID.id, SECOND_KID.id],
+  hoursEntryIds: [],
+};
+
+const COMPLETED_LOG: PlannerLearningActivity = {
+  ...PLANNED_LOG,
+  id: "learning-2",
+  title: "Piano practice",
+  subject: "music",
+  status: "completed",
+  durationMinutes: 20,
+  sourceQuote: "Piano practice took 20 minutes.",
+  sourceMessageId: "10000000-0000-4000-8000-000000000002",
+  completionSourceChannel: "web",
+  completionSourceQuote: "Piano practice took 20 minutes.",
+  completionSourceMessageId: "10000000-0000-4000-8000-000000000002",
+  completedAt: "2026-08-03T14:00:00.000Z",
+  childIds: [KID.id],
+  hoursEntryIds: ["20000000-0000-4000-8000-000000000001"],
+};
+
 function renderView(
   overrides: Partial<Parameters<typeof UnifiedPlannerView>[0]> = {},
 ): string {
@@ -117,6 +158,7 @@ function renderView(
         plans={[PLAN]}
         familyEvents={[EVENT]}
         scheduledActivities={SCHEDULE}
+        learningActivities={[]}
         hoursEntries={[]}
         timeZone="America/New_York"
         now={new Date("2026-08-03T14:00:00.000Z")}
@@ -166,6 +208,43 @@ describe("UnifiedPlannerView", () => {
     assert.match(html, /h-\[22px\] w-\[22px\]/);
   });
 
+  it("renders logged learning as planned work and completed history across every view", () => {
+    const learningActivities = [PLANNED_LOG, COMPLETED_LOG];
+    const dayHtml = renderView({
+      kids: [KID, SECOND_KID],
+      learningActivities,
+    });
+    assert.match(dayHtml, /Horizons lesson 42/);
+    assert.match(dayHtml, /Ari \+ Remy · Math/);
+    assert.match(dayHtml, /Show 2 finished activities/);
+    assert.doesNotMatch(dayHtml, /Piano practice/);
+
+    const weekHtml = renderView({
+      view: "week",
+      kids: [KID, SECOND_KID],
+      learningActivities,
+    });
+    assert.match(weekHtml, /2 activities · 1 event/);
+
+    const monthHtml = renderView({
+      view: "month",
+      kids: [KID, SECOND_KID],
+      learningActivities,
+    });
+    assert.match(monthHtml, /Monday, August 3, 4 activities, 1 event/);
+    assert.match(monthHtml, />5 items</);
+  });
+
+  it("confirms the atomic Hours correction and labels duration as reported", () => {
+    assert.match(
+      plannerSource,
+      /Mark this not finished\? The time linked to this activity will also be removed from Hours\./u,
+    );
+    assert.match(plannerSource, /Reported time/u);
+    assert.match(plannerSource, /reported`/u);
+    assert.doesNotMatch(plannerSource, /Correct it in Hours/u);
+  });
+
   it("summarizes seven days in Week instead of rendering seven agenda cards", () => {
     const html = renderView({ view: "week" });
     assert.match(html, /Week summary/);
@@ -177,7 +256,7 @@ describe("UnifiedPlannerView", () => {
     const html = renderView({ view: "month" });
     assert.match(html, /August 2026 calendar/);
     assert.match(html, /Monday, August 3, 2 activities, 1 event/);
-    assert.match(html, />3 planned</);
+    assert.match(html, />3 items</);
     assert.match(html, /view=day&amp;date=2026-08-03/);
   });
 

@@ -19,6 +19,10 @@ import {
 import { toggleActivityCheck } from "../../lib/child-plans";
 import { PlanActivityCheckConflictError } from "../../lib/plan-check-mutation";
 import { scheduleActivity } from "../../lib/plan-schedule";
+import {
+  setPlannerLearningActivityStatus,
+  type PlannerLearningActivityRecord,
+} from "../../lib/planner-learning-activities";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
 import { MaterialCard } from "../chat/material-card";
@@ -584,6 +588,7 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
     scheduleRows,
     childPlans,
     sourceLinks,
+    learningActivities,
     loading,
     error: plannerError,
     reload,
@@ -632,6 +637,17 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
     }
     await reload();
     throw new PlanActivityCheckConflictError(outcome);
+  }
+
+  async function handleToggleLearningActivity(
+    activity: PlannerLearningActivityRecord,
+  ) {
+    await setPlannerLearningActivityStatus({
+      activityId: activity.id,
+      expectedStatus: activity.status,
+      status: activity.status === "completed" ? "planned" : "completed",
+    });
+    await reload();
   }
 
   async function handleScheduleActivity(date: DateOnly) {
@@ -694,9 +710,11 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
             weekStart={weekStart}
             events={events}
             activities={scheduledActivities}
+            learningActivities={learningActivities}
             unscheduled={unscheduled}
             kids={children}
             onToggleActivity={handleToggleActivity}
+            onToggleLearningActivity={handleToggleLearningActivity}
             onScheduleActivity={setSchedulingActivity}
           />
         )}

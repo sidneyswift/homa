@@ -1,6 +1,9 @@
 import { z } from "zod";
+import type { TransactionSql } from "postgres";
 
+import { HOURS_SUBJECTS } from "../hours-model";
 import { mapDb, type DbJson } from "../map/db";
+import { PLANNER_LEARNING_SOURCE_CHANNELS } from "../planner-learning-activities";
 import { captureLoopReceiptLockKey } from "../capture-loop-locks";
 
 export const VOICE_ACTION_UNDO_WINDOW_MS = 10 * 60 * 1000;
@@ -12,6 +15,9 @@ export const voiceActionEffectSchema = z.enum([
   "family_event.updated",
   "family_event.removed",
   "plan_activity.scheduled",
+  "plan_activity.completed",
+  "planner_activity.recorded",
+  "planner_activity.completed",
   "task.created",
   "task.updated",
   "task.deleted",
@@ -48,6 +54,51 @@ const hoursSnapshotSchema = z.object({
   happenedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u),
   source: z.string().min(1).max(32),
   note: z.string().max(200).nullable(),
+});
+
+const linkedHoursSnapshotSchema = hoursSnapshotSchema.extend({
+  id: z.string().uuid(),
+});
+
+const plannerActivityIdentitySchema = z.object({
+  title: z.string().min(1).max(300),
+  subject: z.enum(HOURS_SUBJECTS),
+  activityDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u),
+  note: z.string().max(500).nullable(),
+  sourceChannel: z.enum(PLANNER_LEARNING_SOURCE_CHANNELS),
+  sourceQuote: z.string().min(1).max(1000),
+  sourceMessageId: z.string().uuid(),
+  childIds: z.array(z.string().uuid()).max(12),
+});
+
+const plannerActivityRecordedSnapshotSchema = plannerActivityIdentitySchema.extend({
+  status: z.enum(["planned", "completed"]),
+  durationMinutes: z.number().int().min(1).max(600).nullable(),
+  idempotencyKey: z.string().min(16).max(200),
+  hours: z.array(linkedHoursSnapshotSchema).max(12),
+});
+
+const plannerActivityCompletedSnapshotSchema = plannerActivityIdentitySchema.extend({
+  durationMinutes: z.number().int().min(1).max(600).nullable(),
+  completionSourceChannel: z.enum(PLANNER_LEARNING_SOURCE_CHANNELS),
+  completionSourceQuote: z.string().min(1).max(1000),
+  completionSourceMessageId: z.string().uuid(),
+  completionIdempotencyKey: z.string().min(16).max(200),
+  hours: z.array(linkedHoursSnapshotSchema).max(12),
+});
+
+const generatedPlanCompletionSnapshotSchema = z.object({
+  childId: z.string().uuid(),
+  subjectId: z.string().min(1).max(80),
+  week: z.number().int().min(1).max(4),
+  activityIndex: z.number().int().min(0).max(999),
+  expectedText: z.string().min(1).max(4000),
+  planRevision: z.number().int().min(1),
+  progressKey: z.string().regex(/^[1-4]\.(0|[1-9][0-9]{0,2})$/u),
+  beforeProgressRevision: z.number().int().min(0),
+  beforeValue: z.boolean().nullable(),
+  afterProgressRevision: z.number().int().min(1),
+  hours: z.array(linkedHoursSnapshotSchema).max(1),
 });
 
 const planActivitySnapshotSchema = z.object({
@@ -95,6 +146,19 @@ const receiptPayloadSchema = z.discriminatedUnion("effect", [
     effect: z.literal("plan_activity.scheduled"),
     before: planActivitySnapshotSchema.nullable(),
     after: planActivitySnapshotSchema,
+  }),
+  z.object({
+    effect: z.literal("plan_activity.completed"),
+    completion: generatedPlanCompletionSnapshotSchema,
+  }),
+  z.object({
+    effect: z.literal("planner_activity.recorded"),
+    after: plannerActivityRecordedSnapshotSchema,
+  }),
+  z.object({
+    effect: z.literal("planner_activity.completed"),
+    beforeStatus: z.literal("planned"),
+    after: plannerActivityCompletedSnapshotSchema,
   }),
   z.object({ effect: z.literal("task.created"), after: taskSnapshotSchema }),
   z.object({
@@ -381,6 +445,143 @@ export function voiceActionCandidatesAreAmbiguous(
   ) <= VOICE_ACTION_AMBIGUITY_MS;
 }
 
+type LinkedHoursSnapshot = z.infer<typeof linkedHoursSnapshotSchema>;
+type PlannerActivityIdentitySnapshot = z.infer<typeof plannerActivityIdentitySchema>;
+
+interface StoredHoursRow {
+  id: string;
+  child_id: string | null;
+  subject: string;
+  minutes: number;
+  happened_on: string;
+  source: string;
+  note: string | null;
+}
+
+function sameStringSet(left: readonly string[], right: readonly string[]): boolean {
+  return JSON.stringify([...new Set(left)].sort())
+    === JSON.stringify([...new Set(right)].sort());
+}
+
+function sameHoursRows(
+  rows: readonly StoredHoursRow[],
+  snapshots: readonly LinkedHoursSnapshot[],
+): boolean {
+  if (rows.length !== snapshots.length) return false;
+  const expected = new Map(snapshots.map((snapshot) => [snapshot.id, snapshot]));
+  return rows.every((row) => {
+    const snapshot = expected.get(row.id);
+    return snapshot !== undefined
+      && row.child_id === snapshot.childId
+      && row.subject === snapshot.subject
+      && row.minutes === snapshot.minutes
+      && row.happened_on === snapshot.happenedOn
+      && row.source === snapshot.source
+      && row.note === snapshot.note;
+  });
+}
+
+interface StoredPlannerActivityRow {
+  id: string;
+  title: string;
+  subject: string;
+  activity_date: string;
+  status: "planned" | "completed";
+  duration_minutes: number | null;
+  note: string | null;
+  source_channel: string;
+  source_quote: string;
+  source_message_id: string | null;
+  idempotency_key: string;
+  completion_source_channel: string | null;
+  completion_source_quote: string | null;
+  completion_source_message_id: string | null;
+  completion_idempotency_key: string | null;
+}
+
+async function lockPlannerReceiptState(input: {
+  tx: TransactionSql;
+  familyId: string;
+  activityId: string;
+  expectedHours: readonly LinkedHoursSnapshot[];
+}): Promise<{
+  activity: StoredPlannerActivityRow;
+  childIds: string[];
+  hoursMatch: boolean;
+} | null> {
+  const activityRows = await input.tx<StoredPlannerActivityRow[]>`
+    select id, title, subject, activity_date::text, status,
+           duration_minutes, note, source_channel, source_quote,
+           source_message_id, idempotency_key,
+           completion_source_channel, completion_source_quote,
+           completion_source_message_id, completion_idempotency_key
+    from public.planner_learning_activities
+    where id = ${input.activityId} and family_id = ${input.familyId}
+    for update
+  `;
+  const activity = activityRows[0];
+  if (!activity) return null;
+
+  const childRows = await input.tx<{ child_id: string }[]>`
+    select child_id
+    from public.planner_learning_activity_children
+    where activity_id = ${input.activityId} and family_id = ${input.familyId}
+    order by child_id
+    for update
+  `;
+  const expectedHoursIds = input.expectedHours.map((hour) => hour.id);
+  const linkRows = await input.tx<Array<{
+    activity_id: string;
+    hours_entry_id: string;
+  }>>`
+    select activity_id, hours_entry_id
+    from public.planner_learning_activity_hours
+    where family_id = ${input.familyId}
+      and (
+        activity_id = ${input.activityId}
+        or hours_entry_id = any(${input.tx.array(expectedHoursIds)}::uuid[])
+      )
+    order by activity_id, hours_entry_id
+    for update
+  `;
+  const expectedLinks = expectedHoursIds
+    .map((hoursEntryId) => `${input.activityId}:${hoursEntryId}`);
+  const actualLinks = linkRows
+    .map((link) => `${link.activity_id}:${link.hours_entry_id}`);
+  const hoursRows = expectedHoursIds.length === 0
+    ? []
+    : await input.tx<StoredHoursRow[]>`
+        select id, child_id, subject, minutes, happened_on::text,
+               source, note
+        from public.hours_log
+        where family_id = ${input.familyId}
+          and id = any(${input.tx.array(expectedHoursIds)}::uuid[])
+        order by id
+        for update
+      `;
+  return {
+    activity,
+    childIds: childRows.map((row) => row.child_id),
+    hoursMatch: sameStringSet(actualLinks, expectedLinks)
+      && sameHoursRows(hoursRows, input.expectedHours),
+  };
+}
+
+function plannerIdentityMatches(
+  row: StoredPlannerActivityRow,
+  childIds: readonly string[],
+  snapshot: PlannerActivityIdentitySnapshot,
+): boolean {
+  return row.title === snapshot.title
+    && row.subject === snapshot.subject
+    && row.activity_date === snapshot.activityDate
+    && row.note === snapshot.note
+    && row.source_channel === snapshot.sourceChannel
+    && row.source_quote === snapshot.sourceQuote
+    && row.source_message_id === snapshot.sourceMessageId
+    && sameStringSet(childIds, snapshot.childIds);
+}
+
 export type UndoVoiceActionResult =
   | { status: "undone"; receipt: VoiceActionReceipt; alreadyUndone: boolean }
   | { status: "choose"; candidates: VoiceActionReceipt[] }
@@ -566,6 +767,205 @@ export async function undoVoiceAction(input: {
               note: "That activity moved again after Homa scheduled it. Homa kept the newer date. Open the Planner to review it.",
             };
           }
+        }
+        break;
+      }
+      case "plan_activity.completed": {
+        const completion = payload.completion;
+        const planRows = await tx<Array<{
+          id: string;
+          child_id: string;
+          subject_id: string;
+          plan: { weeks?: Array<{ week: number; activities: unknown[] }> };
+          progress: Record<string, unknown>;
+          plan_revision: number;
+          progress_revision: number;
+        }>>`
+          select plan.id, plan.child_id, plan.subject_id, plan.plan,
+                 plan.progress, plan.plan_revision::integer as plan_revision,
+                 plan.progress_revision::integer as progress_revision
+          from public.child_plans plan
+          join public.children child
+            on child.id = plan.child_id and child.family_id = ${input.familyId}
+          where plan.id = ${selected.object_id}
+          for update of plan
+        `;
+        const plan = planRows[0];
+        const weeks = Array.isArray(plan?.plan?.weeks) ? plan.plan.weeks : [];
+        const matchingWeeks = weeks.filter((week) => week.week === completion.week);
+        const actualText = matchingWeeks.length === 1
+          && Array.isArray(matchingWeeks[0].activities)
+          ? matchingWeeks[0].activities[completion.activityIndex]
+          : null;
+        const hoursIds = completion.hours.map((hour) => hour.id);
+        const hoursRows = hoursIds.length === 0
+          ? []
+          : await tx<StoredHoursRow[]>`
+              select id, child_id, subject, minutes, happened_on::text,
+                     source, note
+              from public.hours_log
+              where family_id = ${input.familyId}
+                and id = any(${tx.array(hoursIds)}::uuid[])
+              order by id
+              for update
+            `;
+        if (
+          !plan
+          || plan.child_id !== completion.childId
+          || plan.subject_id !== completion.subjectId
+          || plan.plan_revision !== completion.planRevision
+          || plan.progress_revision !== completion.afterProgressRevision
+          || actualText !== completion.expectedText
+          || plan.progress?.[completion.progressKey] !== true
+          || !sameHoursRows(hoursRows, completion.hours)
+        ) {
+          return {
+            status: "not_undoable",
+            note: "That plan or its Hours entry changed after Homa marked the activity finished. Homa kept the newer version. Open Planner to review it.",
+          };
+        }
+        const nextProgress = { ...plan.progress };
+        if (completion.beforeValue === null) {
+          delete nextProgress[completion.progressKey];
+        } else {
+          nextProgress[completion.progressKey] = completion.beforeValue;
+        }
+        const restored = await tx<{ id: string }[]>`
+          update public.child_plans
+          set progress = ${tx.json(nextProgress as DbJson)}, updated_at = now()
+          where id = ${plan.id}
+            and progress_revision = ${completion.afterProgressRevision}
+          returning id
+        `;
+        if (restored.length === 0) {
+          return {
+            status: "not_undoable",
+            note: "That plan changed while Homa was undoing the check-off. Homa kept the newer version. Open Planner to review it.",
+          };
+        }
+        if (hoursIds.length > 0) {
+          const removedHours = await tx<{ id: string }[]>`
+            delete from public.hours_log
+            where family_id = ${input.familyId}
+              and id = any(${tx.array(hoursIds)}::uuid[])
+            returning id
+          `;
+          if (removedHours.length !== hoursIds.length) {
+            throw new Error("Planner completion undo lost its locked Hours rows");
+          }
+        }
+        break;
+      }
+      case "planner_activity.recorded": {
+        const after = payload.after;
+        const state = await lockPlannerReceiptState({
+          tx,
+          familyId: input.familyId,
+          activityId: selected.object_id,
+          expectedHours: after.hours,
+        });
+        const completionMatches = after.status === "completed"
+          ? state?.activity.completion_source_channel === after.sourceChannel
+            && state.activity.completion_source_quote === after.sourceQuote
+            && state.activity.completion_source_message_id === after.sourceMessageId
+            && state.activity.completion_idempotency_key === after.idempotencyKey
+          : state?.activity.completion_source_channel === null
+            && state.activity.completion_source_quote === null
+            && state.activity.completion_source_message_id === null
+            && state.activity.completion_idempotency_key === null;
+        if (
+          !state
+          || !plannerIdentityMatches(state.activity, state.childIds, after)
+          || state.activity.status !== after.status
+          || state.activity.duration_minutes !== after.durationMinutes
+          || state.activity.idempotency_key !== after.idempotencyKey
+          || !completionMatches
+          || !state.hoursMatch
+        ) {
+          return {
+            status: "not_undoable",
+            note: "That Planner activity or its Hours entry changed after Homa recorded it. Homa kept the newer version. Open Planner to review it.",
+          };
+        }
+        const removed = await tx<{ id: string }[]>`
+          delete from public.planner_learning_activities
+          where id = ${selected.object_id} and family_id = ${input.familyId}
+          returning id
+        `;
+        if (removed.length === 0) {
+          throw new Error("Planner activity undo lost its locked activity row");
+        }
+        const hoursIds = after.hours.map((hour) => hour.id);
+        if (hoursIds.length > 0) {
+          const removedHours = await tx<{ id: string }[]>`
+            delete from public.hours_log
+            where family_id = ${input.familyId}
+              and id = any(${tx.array(hoursIds)}::uuid[])
+            returning id
+          `;
+          if (removedHours.length !== hoursIds.length) {
+            throw new Error("Planner activity undo lost its locked Hours rows");
+          }
+        }
+        break;
+      }
+      case "planner_activity.completed": {
+        const after = payload.after;
+        const state = await lockPlannerReceiptState({
+          tx,
+          familyId: input.familyId,
+          activityId: selected.object_id,
+          expectedHours: after.hours,
+        });
+        if (
+          !state
+          || !plannerIdentityMatches(state.activity, state.childIds, after)
+          || state.activity.status !== "completed"
+          || state.activity.duration_minutes !== after.durationMinutes
+          || state.activity.completion_source_channel !== after.completionSourceChannel
+          || state.activity.completion_source_quote !== after.completionSourceQuote
+          || state.activity.completion_source_message_id !== after.completionSourceMessageId
+          || state.activity.completion_idempotency_key !== after.completionIdempotencyKey
+          || !state.hoursMatch
+        ) {
+          return {
+            status: "not_undoable",
+            note: "That Planner activity or its Hours entry changed after Homa marked it finished. Homa kept the newer version. Open Planner to review it.",
+          };
+        }
+        const hoursIds = after.hours.map((hour) => hour.id);
+        await tx`
+          delete from public.planner_learning_activity_hours
+          where family_id = ${input.familyId}
+            and activity_id = ${selected.object_id}
+        `;
+        if (hoursIds.length > 0) {
+          const removedHours = await tx<{ id: string }[]>`
+            delete from public.hours_log
+            where family_id = ${input.familyId}
+              and id = any(${tx.array(hoursIds)}::uuid[])
+            returning id
+          `;
+          if (removedHours.length !== hoursIds.length) {
+            throw new Error("Planner activity completion undo lost its locked Hours rows");
+          }
+        }
+        const restored = await tx<{ id: string }[]>`
+          update public.planner_learning_activities
+          set status = 'planned', duration_minutes = null,
+              completion_source_channel = null,
+              completion_source_quote = null,
+              completion_source_message_id = null,
+              completion_idempotency_key = null,
+              completed_by_user_id = null,
+              completed_at = null,
+              updated_at = now()
+          where id = ${selected.object_id} and family_id = ${input.familyId}
+            and status = 'completed'
+          returning id
+        `;
+        if (restored.length === 0) {
+          throw new Error("Planner activity completion undo lost its locked activity row");
         }
         break;
       }
