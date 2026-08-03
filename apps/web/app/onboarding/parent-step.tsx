@@ -268,7 +268,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
                   >
                     Sign in
                   </a>{" "}
-                  and we&apos;ll take you to the right place.
+                  to continue where you left off.
                 </p>
               ) : null}
               {notice ? (
@@ -277,12 +277,23 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
                 </p>
               ) : null}
 
+              <p className="mt-4 text-center text-sm text-[var(--homa-muted-ink)]">
+                Have you used Homa before?{" "}
+                <a
+                  href="/signin?next=/app"
+                  className="font-semibold text-[var(--homa-brand-text)] underline underline-offset-2"
+                >
+                  Sign in to pick up where you left off
+                </a>
+                .
+              </p>
+
               <button
                 type="submit"
                 disabled={busy}
                 className="group mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-[1.0625rem] font-semibold text-[var(--homa-paper)] shadow-sm transition-[background-color,transform,box-shadow] duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
               >
-                {busy ? "One moment\u2026" : "Get started"}
+                {busy ? "One moment\u2026" : "Create account"}
                 {busy ? null : (
                   <Icon
                     name="next"

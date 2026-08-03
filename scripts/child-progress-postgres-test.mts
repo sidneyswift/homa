@@ -838,6 +838,7 @@ async function runFamilyFoldCompatibilityAssertions(
       authUserId: attachFixture.adultAId,
       email: "returning@example.com",
       firstName: "Returning",
+      allowExistingFamilyFold: true,
     },
     sql,
   );
