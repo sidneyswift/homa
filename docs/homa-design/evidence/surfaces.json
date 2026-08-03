@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "4b786f2f0160c2e6cb390cf53e7163b9aefbbc6427ab036c026f46b8cd98bee8",
+  "ownedInputFingerprint": "9b0da4c5ea5978fc9556d48b40ab02a5566e442797c6087844d828ccd2814cc0",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -29168,7 +29168,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "c99f6492391010fdf3fa7b765377527a1ccc226dc82a9f795f4bfb4c84bd975f",
+        "fixtureChecksum": "cda1f9103a04096e34edd7763a62960347ede50371e805b494e1ea4e6ab89ac0",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -29193,7 +29193,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "c99f6492391010fdf3fa7b765377527a1ccc226dc82a9f795f4bfb4c84bd975f"
+        "cda1f9103a04096e34edd7763a62960347ede50371e805b494e1ea4e6ab89ac0"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -34020,7 +34020,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "c6e796b219e82d333420cb261e5a01c11a91dfc13c798a005d05334f6675feb3",
+        "fixtureChecksum": "142b00f1852478cd945af8c67b81ee2e1441f7b449465b818fdbdee23d0ab9b3",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -34045,7 +34045,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "c6e796b219e82d333420cb261e5a01c11a91dfc13c798a005d05334f6675feb3"
+        "142b00f1852478cd945af8c67b81ee2e1441f7b449465b818fdbdee23d0ab9b3"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -36257,6 +36257,95 @@
       "legacySignatures": [],
       "currentAssetHashes": [
         "60bbdc66e6a4c17d727955bdb012c71f168d798b45591bc981b8242a287d3e70"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "source-fingerprint",
+        "legacy-signature-review"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:7a8e3a80659d24c6",
+      "paths": [
+        "apps/web/agent/skills/materials-studio/references/recipes/curiosity-led-notebook-page.md"
+      ],
+      "type": "authoring-rule",
+      "reachability": "authenticated",
+      "audiences": [
+        "family",
+        "developer"
+      ],
+      "criticality": "journey-critical",
+      "ownerIssue": "gh#687",
+      "upstreamDomainOwners": [
+        "generated-content"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "design-authoring",
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "success"
+      ],
+      "viewports": [],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [],
+      "appearanceModes": [],
+      "baseline": {
+        "fixtureChecksum": "a39b747ddcb2bf29eadb307ba09d79655f67d15c5da0a81d7f5c799dc66ed236",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "generated-content"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [],
+        "assets": [],
+        "fonts": [],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "a39b747ddcb2bf29eadb307ba09d79655f67d15c5da0a81d7f5c799dc66ed236"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
