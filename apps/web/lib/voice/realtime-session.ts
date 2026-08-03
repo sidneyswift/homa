@@ -74,6 +74,13 @@ How to talk here:
 - When a request needs ask_homa, call it immediately. The app shows that you
   are working, so do not narrate a fake preamble before the tool call.
 
+## Unclear audio
+
+- Only act on audio you can understand with confidence.
+- If audio is ambiguous, noisy, partial, or cut off, ask one short question
+  for a repeat. Do not guess what the parent meant, call ask_homa, or spend
+  time trying to reconstruct it.
+
 ## What you can actually do right now (binding)
 
 - You are the same Homa as chat, with the same fleet skills and authenticated
@@ -110,24 +117,24 @@ export const VOICE_MODE_RULES = buildVoiceModeRules();
  * `interrupt_response` field. Its provider pass-through replaces the whole
  * top-level audio object, so keep every audio setting together here.
  *
- * WebRTC suppresses the known speaker signal on-device. OpenAI's far-field
- * filter then reduces remaining room noise before VAD. A threshold modestly
- * above the provider default keeps hands-free barge-in available without
- * letting ordinary speaker leakage cancel Homa's response.
+ * Semantic VAD uses the parent's words, not only a fixed silence window, to
+ * decide whether she has finished. Low eagerness favors a real conversational
+ * pause over a fast response. Automatic cancellation stays off until the
+ * client owns the full barge-in lifecycle, including playback clear and
+ * transcript truncation.
  */
 export function buildRealtimeAudioProviderOptions(voice: string): Record<string, unknown> {
   return {
+    reasoning: { effort: "low" },
     audio: {
       input: {
         transcription: { model: "gpt-realtime-whisper" },
         noise_reduction: { type: "far_field" },
         turn_detection: {
-          type: "server_vad",
-          threshold: 0.65,
-          prefix_padding_ms: 300,
-          silence_duration_ms: 650,
+          type: "semantic_vad",
+          eagerness: "low",
           create_response: true,
-          interrupt_response: true,
+          interrupt_response: false,
         },
       },
       output: { voice },
