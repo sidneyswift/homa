@@ -138,7 +138,12 @@ describe("the real materials-studio package", () => {
 
     assert.match(
       skill,
-      /Routine and chore charts are visual schedules[\s\S]*visual-schedule-cards/u,
+      /Routine and chore charts are visual schedules[\s\S]*read_file[\s\S]*visual-schedule-cards/u,
+    );
+    assert.doesNotMatch(
+      skill,
+      /Load\s+`visual-schedule-cards`/u,
+      "a recipe is read from materials-studio, not loaded as a standalone skill",
     );
     assert.match(
       skill,
