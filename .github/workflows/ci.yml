@@ -385,6 +385,9 @@ jobs:
       - name: Design authoring rails check (coverage, contract, residue, fingerprints)
         run: pnpm check:design-authoring
 
+      - name: Licensed font system contract and residue check
+        run: pnpm check:font-system
+
       - name: Durable artifact design-era check (classification and Quiet print markers)
         run: pnpm check:artifact-brand-era
 

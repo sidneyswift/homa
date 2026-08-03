@@ -9,6 +9,7 @@ import {
   DESIGN_CONTRACT_SCHEMA_VERSION,
   DESIGN_CONTRACT_VERSION,
   ICON_CONTRACT,
+  FONT_SYSTEM_CONTRACT,
   LAYOUT_CONTRACT,
   MOTION_CONTRACT,
   PROFILES_CONTRACT,
@@ -34,6 +35,7 @@ const source = {
   colors: COLOR_CONTRACT,
   content: CONTENT_CONTRACT,
   icons: ICON_CONTRACT,
+  fonts: FONT_SYSTEM_CONTRACT,
   layout: LAYOUT_CONTRACT,
   motion: MOTION_CONTRACT,
   profiles: PROFILES_CONTRACT,
@@ -44,9 +46,10 @@ const sourceChecksum = createHash("sha256").update(canonical(source)).digest("he
 const header = `Homa design contract ${DESIGN_CONTRACT_VERSION}; source-sha256 ${sourceChecksum}`;
 const outputs: Record<string, string> = {
   "contract.json": `${JSON.stringify({ schemaVersion: DESIGN_CONTRACT_SCHEMA_VERSION, version: DESIGN_CONTRACT_VERSION, sourceChecksum, source }, null, 2)}\n`,
-  "native.json": `${JSON.stringify({ version: DESIGN_CONTRACT_VERSION, sourceChecksum, colors: COLOR_CONTRACT.tokens, typography: TYPOGRAPHY_CONTRACT, layout: LAYOUT_CONTRACT, motion: MOTION_CONTRACT, states: STATES_CONTRACT, profiles: PROFILES_CONTRACT }, null, 2)}\n`,
-  "channels.json": `${JSON.stringify({ version: DESIGN_CONTRACT_VERSION, sourceChecksum, profiles: PROFILES_CONTRACT.targetProfiles, content: CONTENT_CONTRACT }, null, 2)}\n`,
-  "web.css": `/* ${header} */\n:root {\n${Object.entries(COLOR_CONTRACT.tokens).map(([name, value]) => `  --homa-${name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}: ${value};`).join("\n")}\n  --homa-radius-control: ${LAYOUT_CONTRACT.radii.control}px;\n  --homa-radius-card: ${LAYOUT_CONTRACT.radii.card}px;\n  --homa-radius-frame: ${LAYOUT_CONTRACT.radii.frame}px;\n  --homa-motion-ease-out: ${MOTION_CONTRACT.easeOut};\n  --homa-motion-ease-in-out: ${MOTION_CONTRACT.easeInOut};\n  --homa-motion-fast: ${MOTION_CONTRACT.durations.fast}ms;\n  --homa-motion-base: ${MOTION_CONTRACT.durations.base}ms;\n  --homa-motion-slow: ${MOTION_CONTRACT.durations.slow}ms;\n}\n`,
+  "native.json": `${JSON.stringify({ version: DESIGN_CONTRACT_VERSION, sourceChecksum, colors: COLOR_CONTRACT.tokens, typography: TYPOGRAPHY_CONTRACT, fonts: FONT_SYSTEM_CONTRACT, layout: LAYOUT_CONTRACT, motion: MOTION_CONTRACT, states: STATES_CONTRACT, profiles: PROFILES_CONTRACT }, null, 2)}\n`,
+  "channels.json": `${JSON.stringify({ version: DESIGN_CONTRACT_VERSION, sourceChecksum, profiles: PROFILES_CONTRACT.targetProfiles, typography: TYPOGRAPHY_CONTRACT, fonts: FONT_SYSTEM_CONTRACT, content: CONTENT_CONTRACT }, null, 2)}\n`,
+  "fonts.json": `${JSON.stringify(FONT_SYSTEM_CONTRACT, null, 2)}\n`,
+  "web.css": `/* ${header} */\n:root {\n${Object.entries(COLOR_CONTRACT.tokens).map(([name, value]) => `  --homa-${name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}: ${value};`).join("\n")}\n  --homa-radius-control: ${LAYOUT_CONTRACT.radii.control}px;\n  --homa-radius-card: ${LAYOUT_CONTRACT.radii.card}px;\n  --homa-radius-frame: ${LAYOUT_CONTRACT.radii.frame}px;\n  --homa-font-display: EB Garamond, Georgia, Times New Roman, serif;\n  --homa-font-interface: DM Sans, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;\n  --homa-font-wordmark: Fredoka, Arial Rounded MT Bold, Arial, sans-serif;\n  --homa-motion-ease-out: ${MOTION_CONTRACT.easeOut};\n  --homa-motion-ease-in-out: ${MOTION_CONTRACT.easeInOut};\n  --homa-motion-fast: ${MOTION_CONTRACT.durations.fast}ms;\n  --homa-motion-base: ${MOTION_CONTRACT.durations.base}ms;\n  --homa-motion-slow: ${MOTION_CONTRACT.durations.slow}ms;\n}\n`,
 };
 const designDocument = readFileSync(DESIGN_PATH, "utf8");
 const checksumLine = `contractChecksum: ${sourceChecksum}`;

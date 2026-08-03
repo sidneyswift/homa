@@ -55,6 +55,15 @@ body, 14/20 small body, 15/20 controls, 13/18 captions, and 12/16 eyebrows.
 Metric figures stay in DM Sans with tabular figures. Test long names,
 localization, font failure, Dynamic Type, and PDF embedding.
 
+Font provenance and fallbacks live in the typed registry at
+`packages/design/src/contract/fonts.ts` and its generated projection at
+`packages/design/generated/fonts.json`. The registry records the SIL Open Font
+License source, checked-in specimen hashes, runtime loaders, and a declared
+fallback for every channel. The evidence file at
+`docs/homa-design/evidence/font-system.json` is a contract check, not a claim
+that rendered loading, layout stability, native accessibility, or PDF
+embedding has already passed.
+
 ### Geometry
 
 Controls are 12px, cards 18px, and large frames 28px. Use a 4px spacing base,
