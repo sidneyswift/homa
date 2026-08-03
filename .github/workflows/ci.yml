@@ -373,6 +373,9 @@ jobs:
       - name: Provider handoff contract check (owned fields and external read-back gates)
         run: pnpm check:provider-handoffs
 
+      - name: Handwrytten stationery contract check (source inventory and irreversible-delivery gates)
+        run: pnpm check:handwrytten-stationery
+
       - name: Brand asset generation and fingerprint check
         run: pnpm check:brand-assets
 
