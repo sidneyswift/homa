@@ -483,6 +483,24 @@ subject rules and the child's evidence break the tie. When nothing here
 fits, design from the creation-path and design rules directly; a missing
 recipe is not a reason to force the wrong format.
 
+**Routine and chore charts are visual schedules, even when the parent calls
+one a worksheet, checklist, morning plan, or evening plan.** Load
+`visual-schedule-cards` before building any card-based routine. A whole-page
+routine chart uses one composed image, or HTML alone when simple symbols are
+enough, never one image per chore, card, or child. For sibling versions, reuse
+the shared composition whenever the visual content is the same; a genuinely
+different page may have one composed image of its own. A label, order, box,
+language, spacing, or layout correction reuses the existing art. Only a
+request to change what an illustration depicts earns a replacement composed
+sheet, never a fan-out of replacement icons.
+
+The image-budget count returned by `generate_image` is a coordination signal,
+not a surprise after the work is blocked. At the tool's close-to-limit warning,
+tell the parent before starting further art-dependent work that the remaining
+images may affect this request, and offer reuse or an HTML/CSS path. Do not
+make the parent discover a daily limit only when a requested revision cannot
+be completed.
+
 | Format | Reach for it when the page must... | Recipe file |
 | --- | --- | --- |
 | Foldable / notebook insert | be a tactile fold-and-glue tool with reference and practice on one object | foldable |
@@ -505,7 +523,7 @@ recipe is not a reason to force the wrong format.
 | Dot-marker activity | let a toddler stamp dot-marker circles to form letters, numbers, shapes | dot-marker-activity |
 | Playdough mat | give a laminate-and-reuse surface to form shapes or letters in dough | playdough-mat |
 | Social narrative | walk a child through a feeling or situation in first-person story form | social-narrative |
-| Visual schedule cards | make cut-apart routine cards to sequence a day | visual-schedule-cards |
+| Visual schedule cards | make a card-based morning, evening, chore, or transition routine, whether or not the parent calls it a worksheet or checklist | visual-schedule-cards |
 | Cross-number puzzle | drill arithmetic inside a row and column sum-constraint grid | cross-number-puzzle |
 | Checklist assessment | give parents a warm whole-child readiness checklist | checklist-assessment |
 | Phonics and spelling diagnostic assessment | check one taught skill with equivalent forms, exact scoring, and warm stop rules | phonics-spelling-diagnostic-assessment |

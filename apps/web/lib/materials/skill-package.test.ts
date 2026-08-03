@@ -128,6 +128,31 @@ describe("the real materials-studio package", () => {
     assert.match(strategy, /wrong subject/u);
   });
 
+  it("routes routine charts to one composed visual-schedule sheet, not per-card art", async () => {
+    const dir = new URL("../../agent/skills/materials-studio/", import.meta.url);
+    const [skill, recipe, dailyRhythm] = await Promise.all([
+      readFile(new URL("SKILL.md", dir), "utf8"),
+      readFile(new URL("references/recipes/visual-schedule-cards.md", dir), "utf8"),
+      readFile(new URL("references/recipes/daily-rhythm-cards.md", dir), "utf8"),
+    ]);
+
+    assert.match(
+      skill,
+      /Routine and chore charts are visual schedules[\s\S]*visual-schedule-cards/u,
+    );
+    assert.match(
+      skill,
+      /never one image per chore, card, or child/u,
+    );
+    assert.match(recipe, /Never generate one\s+image per card/u);
+    assert.match(recipe, /each distinct page still gets at most one composed sheet/u);
+    assert.match(
+      dailyRhythm,
+      /Html path preferred/u,
+      "a text-and-symbol daily rhythm card set remains the non-image alternative",
+    );
+  });
+
   it("keeps the phonics and spelling check exact and source-independent", async () => {
     const dir = new URL("../../agent/skills/materials-studio/", import.meta.url);
     const [recipe, skill, registry] = await Promise.all([
