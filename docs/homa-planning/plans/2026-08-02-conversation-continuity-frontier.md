@@ -1,8 +1,9 @@
 # Conversation continuity v2: reliable turns, typed handoffs, and current memory
 
-Status: implementation-ready specification, gauntlet passed  
+Status: design complete, production activation blocked by #606, #754, ownership, and
+release gates
 Date: 2026-08-02  
-Owner: product engineering  
+Owner: unassigned within product engineering; named DRI required before implementation
 Specification PR: #746
 Epic: #747
 Research cutoff: 2026-08-02 America/New_York  
@@ -36,6 +37,10 @@ memory review is a separate later experiment, not part of this epic. A model may
 propose semantic structure; deterministic code verifies provenance, scope, versions,
 and effects. Provider memory is never product truth.
 
+The Eve package upgrade is linked parallel modernization, not a completion gate. The
+family-visible continuity outcome must pass on Eve 0.19 before an all-channel runtime
+cutover adds its separate blast radius.
+
 Do not replace Homa's episode ledger with provider conversation history, one eternal
 Eve session, a per-family filesystem, or an opaque long-context prompt. Those options
 move the failure instead of fixing it.
@@ -63,6 +68,12 @@ That promise means:
   delivered to them.
 - A message marked `Sent` is durably accepted even if Homa's work is still queued,
   waiting for the parent, or being reconciled.
+- Once uncertain work is durably fenced and quarantined, unrelated later messages
+  continue. Homa blocks only the affected operation or resource, never offers a blind
+  Retry, and gives the parent an opaque support reference if the result cannot be
+  verified.
+- Every state uses visible words and accessible semantics. Meaning never depends only
+  on color, motion, a spinner, or knowledge of an Eve session.
 
 ## What happens today
 
@@ -283,6 +294,30 @@ reference patterns.
 | 38 | Derived data can outlive privacy deletion | Checkpoints, embeddings, and traces copy source meaning | Use immediate query denial plus deletion outbox fan-out and bounded erasure |
 | 39 | Durable rows can still look lost | Carolyng's canonical messages existed while her browser was nine turns behind | Gate client projection lag, replacement count, and exactly-once rendering |
 | 40 | Strict FIFO can answer burst fragments separately | Parents often send a schedule or correction in pieces | Launch strict for truth, instrument bursts, and test explicit coalescing later |
+| 41 | Strict FIFO can become permanent unavailability | An unresolved provider ambiguity can keep the adult queue head nonterminal forever | Fence and quarantine immediately, release unrelated conversation, retain resource-scoped holds, and bound the parent-visible outcome |
+| 42 | A legacy request can cross the cutover snapshot | A request may pass the browser gate before `legacy_draining` but call Eve afterward | Commit an epoch-bound ingress reservation before every legacy dispatch and drain reservations to zero |
+| 43 | Deletion can erase replay protection | Removing an admission key lets a delayed same-key request recreate content or effects | Retain only approved content-free replay tombstones and emit a deletion projection |
+| 44 | Runtime modernization can delay the family fix | #708 can satisfy continuity on Eve 0.19 while #749 adds all-channel cutover risk | Keep #749 parallel and non-gating unless a named invariant proves otherwise |
+| 45 | A checkpoint can be perfectly safe and useless | A validator may drop everything while passing every safety test | Require blinded uplift against exact tail plus typed open loops and durable work before hydration |
+| 46 | Privacy migration can be logically right but operationally unsafe | #607 combines lock-taking DDL, broad backfill, and policy replacement without bounded production evidence | Stage schema, bounded backfill, validation, and enforcement with lock, latency, and compatibility gates |
+| 47 | Truthful state can still be unusable | Cursor convergence does not prove comprehension, focus, accessibility, or safe retry behavior | Gate the rendered experience with parent comprehension, VoiceOver, keyboard, focus, scroll, motion, and color-independent tests |
+
+### Council reconciliation, 2026-08-02
+
+Independent architecture, execution, and family-UX reviewers gave conditional approval.
+All three preserved server-owned durable acceptance, principal-scoped authority, fenced
+attempts, lineage effects, one-way migration, and source-backed handoff. All three also
+found the same liveness defect: unresolved `uncertain` work could block an adult
+forever. The accepted correction is immediate durable quarantine, resource-scoped
+holds, bounded parent-visible reconciliation, and continued unrelated conversation.
+
+The strongest rival is a thinner principal journal kernel using exact recent dialogue,
+typed open loops, durable work, and one source-backed pre-rotation handoff, while
+deferring semantic checkpoints, persisted manifests, and the Eve upgrade. This spec
+keeps the relational v2 design because it fits Homa's current ledger and RLS model, but
+the rival wins if fault injection repeatedly exposes cross-table drift or the blinded
+checkpoint ablation shows no material value. The Eve upgrade is therefore parallel,
+and checkpoint hydration remains off until it beats the simpler baseline.
 
 ### Improved implementation prompt
 
@@ -295,7 +330,7 @@ Use this prompt for every child ticket:
 > adult, child, source message, verbatim quote, artifact, open-loop, and work-object
 > reference. Treat model context as a bounded projection, never the archive. Add the
 > failure tests, telemetry, pinned assignment or deployment version, shadow comparison,
-> rollback path, and live
+> bounded liveness, accessible parent states, rollback path, and live
 > verification assigned to the slice. Do not create a second tracker for existing
 > issues #708, #179, #175, #302, #493, or #606.
 
@@ -407,6 +442,8 @@ explicit deliveries by `(created_at, id)` as source-backed entries. Existing mes
 rows remain the canonical source; the private entry index owns navigation order. A
 household-global ordinal is never returned, logged as a private cursor, or used to
 derive counts. Another adult's activity therefore creates no filtered sequence gap.
+The bulk re-index is resumable and precomputed outside the family authority lock
+through a recorded high-watermark. Ambiguous ownership is never promoted.
 
 #### Always-on admission registry
 
@@ -436,26 +473,42 @@ legacy endpoint becomes translate-or-read-only for that family. It cannot start 
 work. This admission shim and its historical keys remain active through every
 coordinator implementation rollback.
 
-The first migration uses a per-family authority handoff. A transaction locks the
-family capability row, changes `legacy` to `legacy_draining`, and makes every #707
-dispatch endpoint return retryable `migration_in_progress` without durable acceptance
-while preserving the same client key. The bubble remains `Checking send` and retries
-that key automatically after the authority state settles. A bounded hard failure
-becomes proved `Not sent`, never a new key. The
-drainer takes a cursor-consistent snapshot of every adult's binding, canonical tail,
-Eve session, event cursor, pending receipt, wait, and open loop. It requires zero
-running, parked, dispatching, uncertain, or unprojected legacy obligations. Canary
-families are selected only when this bounded drain can settle; this first release does
-not import a live legacy worker into v2.
+Every legacy request registers a generation-bound ingress reservation before any Eve
+dispatch. `conversation_ingress_reservations` records the family, principal, canonical
+source key, ingress epoch, binding generation, runtime version, state (`reserved`,
+`dispatching`, `settled`, `uncertain`, or `cancelled`), and bounded lifecycle times.
+The same canonical source cannot own two nonterminal reservations. Moving to
+`legacy_draining` atomically refuses new reservations for the closing epoch. A request
+that passed an earlier browser check but has not committed this reservation has no
+dispatch authority.
 
-With the family row still locked, the cutover records each principal's final legacy
-high-watermark, increments the binding generation and ingress epoch, changes state to
-`v2`, initializes empty v2 queue heads, and only then permits the first authoritative
-admission. Persistence hooks reject and quarantine any event from the closed legacy
-generation; an effect-capable late event triggers reconciliation and blocks admission
-rather than being silently discarded. If the drain cannot reach zero, the state returns
-to `legacy` before any v2 input is accepted. After state reaches `v2`, it never returns
-to legacy.
+The first migration uses a bounded per-family authority handoff:
+
+1. While the family remains `legacy`, precompute the private entry backfill through
+   high-watermark H1.
+2. In a short transaction, lock the family capability row, change `legacy` to
+   `legacy_draining`, close the current ingress epoch to new reservations, and commit.
+   Every #707 dispatch endpoint then returns retryable `migration_in_progress` without
+   durable acceptance while preserving the same client key. The bubble remains
+   `Checking send`; a bounded hard failure becomes proved `Not sent`, never a new key.
+3. Outside the row lock, drain every generation-bound reservation, Eve session, event
+   cursor, pending receipt, wait, open loop, and effect. Catch the private entry index
+   up from H1 through final high-watermark H2. Require 100 percent eligible-row parity,
+   zero ambiguous ownership promoted, and zero running, parked, dispatching, uncertain,
+   or unprojected legacy obligations.
+4. In a final compare-and-swap transaction, lock the row, recheck the epoch, H2
+   checksum, and zero-obligation census, record each principal's final legacy
+   high-watermark, increment the binding generation and ingress epoch, change state to
+   `v2`, initialize empty v2 queue heads, and only then permit the first authoritative
+   admission.
+
+The final transaction targets p99 at two seconds and has a five-second hard timeout.
+`legacy_draining` has a 60-second hard timeout and returns to `legacy` before any v2
+input is accepted if zero cannot be proved. Persistence hooks reject and quarantine
+events from the closed generation. An effect-capable late event triggers resource
+reconciliation, never silent discard or duplicate dispatch. After state reaches `v2`,
+it never returns to legacy. A migrated family rolls back only to a prior
+schema-compatible coordinator that understands the same ingress epochs.
 
 Eve package cutover uses a separate deployment-wide session-admission barrier, not a
 family capability. Every Eve-using ingress and scheduler must consult it before
@@ -478,6 +531,10 @@ before Eve dispatch. Eve materialization is a runtime witness, not the condition
 history existence. The current message table keeps its non-null runtime `session_id`
 and `sequence`; add `conversation_input_id` and `conversation_entry_id` links instead
 of inventing a fake session.
+
+`conversation_inputs.input_text` is the sole v2 authority for accepted parent content.
+Any materialized runtime message is a derived witness and must be hash-equal to its
+authorized input revision. It cannot overwrite, broaden, or resurrect the input.
 
 A first message creates an `initial` input and a new turn in one transaction. An active
 HITL answer creates a separate `resume` input with its own entry, sequence,
@@ -516,15 +573,17 @@ nullable `retry_of_turn_id`, immutable `execution_lineage_id`, globally monotoni
 `member_queue_sequence`, `admission_episode_sequence`, `predecessor_queue_sequence`,
 nullable `current_attempt_id`, `lease_version`, `coordinator_version`, `state`,
 `cancel_requested_at`, nullable `failure_code`, nullable `uncertainty_kind` (`dispatch`,
-`terminal_output`, or `external_effect`),
+`terminal_output`, or `external_effect`), nullable `quarantined_at`,
 `retry_safety`, and lifecycle timestamps.
 
 `admission_episode_sequence` records where the root input appeared in the visible
 timeline. `predecessor_queue_sequence` records the causal queue boundary. At claim,
-strict FIFO guarantees every lower queue sequence is terminal. Context includes every
-authorized input, output, and proved effect from those settled predecessor turns even
-when an output was appended after this turn's input. The current input is passed
-separately. Entries from higher queue sequences are excluded.
+strict FIFO guarantees every lower queue sequence is queue-settled: terminal normally,
+or durably fenced and quarantined with an unresolved obligation. Context includes every
+authorized input, output, and proved effect from those settled predecessor turns plus
+typed unresolved open loops. It never treats an unverified effect as present or absent.
+The current input is passed separately. Entries from higher queue sequences are
+excluded.
 
 Stored transitions are:
 
@@ -532,13 +591,25 @@ Stored transitions are:
 accepted -> running | failed | cancelled
 running -> waiting | completed | failed | uncertain | cancelled
 waiting -> running | failed | cancelled
-uncertain -> completed | failed
+uncertain -> completed | failed | quarantined
 ```
 
-Terminal turns are immutable. If a failed or reconciled uncertain turn is proved safe
-to try again, the retry endpoint creates a new linked turn with the same root input, a
-new member queue sequence, the same execution lineage, and no duplicate parent entry.
-The old turn remains failed. An unreconciled uncertain turn never offers Retry.
+`quarantined` is terminal for the principal conversation queue, but it is not evidence
+that an external effect did or did not happen. Entering it requires one transaction
+that fences the attempt, creates a reconciliation obligation, records every affected
+resource and effect key, advances the queue, and emits a parent-visible projection.
+Late outputs and events from the fenced attempt cannot become canonical. Unrelated
+later turns may proceed immediately. Conflicting effects remain denied until the
+obligation reaches proof or an explicitly authorized new logical operation.
+
+Terminal turns are immutable. If a failed turn, or a quarantined obligation that later
+proves absence, is safe to try again under the effect contract, the retry endpoint
+creates a new linked turn with the same root input, a new member queue sequence, the
+same execution lineage, and no duplicate parent entry. The old turn remains failed or
+quarantined. A quarantined turn offers no Retry before that proof. Later proof appends
+a linked status entry and settles the obligation; it does not reopen or replay the old
+turn.
+
 Automatic recovery attempts within one nonterminal turn are capped at three and stop
 immediately on any ambiguous effect. Initial execution and parent-authorized HITL
 resumes do not consume that recovery budget.
@@ -554,8 +625,9 @@ principal_id, member_queue_sequence)` spans episode rotation.
 Workers select queue rows with `FOR UPDATE SKIP LOCKED`, so they may skip an entirely
 busy principal. After locking one queue row, a worker may claim only its exact
 `head_turn_id` by comparing `head_version`; it never applies `SKIP LOCKED` to turns
-inside that principal. Waiting and recoverable heads remain the head. The terminal
-settlement transaction advances the pointer to the next accepted sequence or null.
+inside that principal. Waiting and recoverable heads remain the head. A terminal or
+atomic quarantine settlement advances the pointer to the next accepted sequence or
+null.
 Lease expiry creates recovery only for the same head. Database checks and a unique
 active-head constraint allow at most one running or waiting turn per principal and
 forbid a higher sequence from becoming active first. A completed turn requires a
@@ -619,8 +691,29 @@ reconciled receipt keyed to the execution lineage and deterministic logical oper
 with the same validated request fingerprint. Turn and tool-call IDs remain forensic
 links, not replay authority. If an external effect may have happened but cannot yet be
 proved, the turn becomes `uncertain`; the UI says `Checking whether that finished`,
-offers no Retry, and an effect-specific reconciler either attaches the result or marks
-the attempt safely retryable.
+offers no Retry, and Homa immediately fences and quarantines the attempt before
+releasing unrelated later turns. An effect-specific reconciler either attaches proof
+or leaves the exact operation non-retryable.
+
+#### Reconciliation obligations and bounded liveness
+
+`conversation_reconciliation_obligations` stores `id`, `family_id`, `principal_id`,
+`turn_id`, `attempt_id`, `uncertainty_kind`, nullable `effect_receipt_id`, nullable
+scoped resource type and ID, nullable `effect_key`, state (`reconciling`,
+`proved_succeeded`, `proved_absent`, or `outcome_unverified`), an opaque support
+reference, `reconcile_started_at`, `deadline_at`, `escalated_at`, `resolved_at`, and
+bounded evidence metadata. The support reference contains no family identifier and
+maps to sanitized operator telemetry only.
+
+One durable quarantine transaction must complete before the principal queue advances.
+It fences all late attempt writes, creates the obligation, preserves the unresolved
+receipt and open loop, and applies resource-scoped holds. Reconciliation begins within
+60 seconds. Dispatch or terminal-output uncertainty reaches proof or
+`outcome_unverified` within five minutes. External-effect uncertainty reaches proof or
+`outcome_unverified`, pages an operator, and shows `Could not confirm` within 15
+minutes. These deadlines bound the parent-visible uncertainty, not the lifetime of a
+provider investigation. No unrelated successor remains blocked after quarantine, and
+no conflicting effect is authorized while its obligation lacks proof.
 
 #### Runtime-event inbox and canonical projection feed
 
@@ -891,6 +984,11 @@ is injected into an Eve worker:
 - three manual or nightly runs produce zero unsupported or contradictory items;
 - typed open loops and explicit corrections have 100 percent preservation;
 - source scope, quote, and entry identity are correct for 100 percent of items;
+- at least 200 held-out cross-session cases compare checkpoint hydration blindly with
+  exact recent dialogue plus typed open loops and durable work across three runs;
+- before evaluation, the continuity-quality or bounded-context-cost improvement is
+  registered, and hydration requires a positive 95 percent confidence bound with no
+  privacy, provenance, correction, decision, or effect-authority regression;
 - the first 200 canary candidates receive human review before hydration, with the same
   zero-unsupported and full-preservation thresholds;
 - any unsupported item, contradictory correction, missing open loop, or cross-adult
@@ -1080,8 +1178,16 @@ Required upgrade work:
 turn ID, stable provider idempotency key, state (`reserved`, `creating`, `active`,
 `terminal`, or `uncertain`), nullable runtime session ID, lease, error code, and
 timestamps. Every session-creation path must lock the barrier, require `open`, and
-commit a unique generation-bound reservation before calling Eve. A static guard rejects
-any direct session creation outside this wrapper.
+require its runtime deployment version to match the open generation, then commit a
+unique generation-bound reservation before calling Eve. A static guard rejects any
+direct session creation outside this wrapper.
+
+Eve 0.19 does not currently expose a proved session-creation idempotency field through
+Homa's client path. Before barrier activation, #749 must name and implement the exact
+reconciliation seam, such as a Homa-owned proxy route or a tested patch, then prove by
+crash injection that the same reservation key finds the original provider session
+after creation but before runtime ID persistence. Until that contract passes, an
+ambiguous creation cannot retry and package cutover cannot begin.
 
 Moving to `draining` locks the same singleton row, closes the generation to new
 reservations atomically, and records the census generation. Previously committed
@@ -1096,6 +1202,12 @@ mobile sends that cannot reach their normal durable admission boundary say `Not 
 already accepted work remains visible and queued. Voice fails before token or session
 creation with a retryable unavailable response. The barrier does not change channel
 identity, receipts, or the web-only coordinator scope.
+
+Before a package deploy starts, `draining` may abort back to `open` on the unchanged
+generation and deployment version. A drain that cannot prove zero reservations and
+provider sessions within 15 minutes aborts, reopens, and pages. The same canonical
+source retains its reservation identity and cannot obtain another nonterminal row.
+Once candidate deployment begins, only the full zero-census rollback may reopen.
 
 Use Eve native stable event IDs, bounded catch-up, snapshots, reconnect, and cancel
 where they pass Homa's contract. Retire custom paths only after shadow traces prove
@@ -1121,6 +1233,17 @@ Before history UX signoff, run a one-pass prototype at 390 by 844 pixels over a 
 sanitized timeline. The parent must find Tuesday's schedule, understand the source
 chip, return to latest, and send without encountering runtime-session language.
 
+Before activity-state signoff, compare the current two-axis receipt plus activity row,
+a composite status, and an exception-first presentation at the same viewport. Five
+target parents each test slow admission, two queued sends, `Needs you`, lost
+connection, uncertain effect, second-device resolution, Stop, failure, and recovery.
+Choose the smallest presentation with at least 90 percent correct answers to whether
+Homa received the message, what is happening, and whether retry is safe, with zero
+unsafe duplicate-action choices. Automated accessibility scans must have zero critical
+or serious findings; VoiceOver-mobile and keyboard-desktop flows must have zero
+blockers, preserve focus and scroll, use 44-pixel controls, respect reduced motion, and
+never rely on color alone.
+
 ### Delivery and work are separate states
 
 Parent message states:
@@ -1141,11 +1264,12 @@ Homa activity states are a separate row:
 | Queued | Accepted and not yet claimed | Quiet `Queued` plus Cancel; name the earlier blocked turn only when one exists |
 | Working | A fenced worker owns the turn | `Working` plus Stop |
 | Needs you | Homa is waiting for a named answer or approval | Persistent card with Answer, conditionally Skip, and Stop |
-| Checking result | Dispatch, reply persistence, or an external effect is ambiguous | No Retry; show the honest recovery detail below |
+| Checking result | A fenced reconciliation obligation is still seeking proof | No Retry; unrelated later messages may continue; show the honest recovery detail below |
 | Completed | Canonical reply or proved no-reply effect exists | Usually no label |
 | Stopping | Cancellation requested but not yet acknowledged | Disabled Stop control |
 | Stopped | Remaining work was cancelled | Completed actions remain visible |
 | Could not finish | Accepted work ended without a safe result | Retry only when effect reconciliation proves it safe |
+| Could not confirm | The reconciliation deadline ended without proof | No Retry; name the affected action, keep conflicting operations blocked, and show an opaque support reference |
 
 Do not use `Worked for 4 seconds` as evidence that the parent message was seen. It may
 remain an expandable activity detail after the acceptance and completion states are
@@ -1153,13 +1277,21 @@ truthful.
 
 `Needs you` names the blocked request and its deadline. Later sent messages visibly say
 why they are queued. On bounded expiry, Homa preserves an open loop, releases the queue,
-and explains that no approval was assumed. `Checking result` never offers blind retry.
+and explains that no approval was assumed. If another device already answered, a stale
+card reconciles to `Answered on your other device`, never a generic `409` error.
+`Checking result` never offers blind retry and never blocks unrelated later messages
+after durable quarantine.
 
 The expandable detail follows `uncertainty_kind`:
 
 - dispatch: `Checking whether Homa started this`;
 - terminal output: `Checking Homa's reply`;
 - external effect: `Checking whether that action finished`.
+
+If an external deadline ends without proof, use the shape: `I couldn't confirm whether
+that action finished. I won't run it again. Check the destination or contact us with
+reference H7K4.` The real reference is opaque and correlates only to sanitized operator
+telemetry.
 
 Each detail resolves from its own authority: Eve dispatch key and event inbox, Eve
 terminal event plus canonical output transaction, or the lineage-scoped provider and
@@ -1283,16 +1415,23 @@ of the continuity epic.
 
 1. Missing dispatch acknowledgement, terminal output persistence, or effect receipt
    moves the turn to `uncertain`, records its typed kind, and shows `Checking result`.
-2. Dispatch reconciliation queries Eve by dispatch key and runtime inbox. Output
+2. In one transaction Homa fences the attempt, creates a typed reconciliation
+   obligation with its resource holds and support reference, moves the turn to
+   `quarantined`, and advances the principal queue. Unrelated later messages may start;
+   no conflicting effect may run and no Retry is offered.
+3. Dispatch reconciliation queries Eve by dispatch key and runtime inbox. Output
    reconciliation reads the bounded Eve event prefix and canonical message row. Effect
    reconciliation queries the provider with the original lineage effect key.
-3. If the dispatch, output, or effect happened, it attaches the canonical evidence and settles the original
-   turn. If it did not happen, it marks the original turn `failed` and retry-safe; an
-   explicit or policy-allowed retry creates a linked turn over the same root input and
-   execution lineage. Proved successful lineage effects are reused, never executed
+4. If the dispatch, output, or effect happened, Homa attaches canonical evidence,
+   settles the obligation, and appends one linked status entry. If absence is proved,
+   it records that proof and may offer a new linked turn only when the effect contract
+   makes retry safe. Proved successful lineage effects are reused, never executed
    again.
-4. If the provider cannot answer, Homa leaves a visible plain-language status and does
-   not offer blind Retry.
+5. Reconciliation starts within 60 seconds. Internal uncertainty resolves or becomes
+   `outcome_unverified` within five minutes. External-effect uncertainty resolves or
+   becomes `outcome_unverified`, pages an operator, and shows `Could not confirm`
+   within 15 minutes. The affected operation remains non-retryable without later
+   proof, but the adult conversation remains available.
 
 ### Recall an older exchange
 
@@ -1322,7 +1461,7 @@ of the continuity epic.
 | Process crashes while dispatching to Eve | Turn says `Checking whether Homa started this`; reconcile dispatch key and never blind replay | Kill before and after Eve acknowledgement |
 | Same idempotency key carries different content | Reject with `409`; original turn remains unchanged | Vary text, attachment revision, modality, and wait ID |
 | Two tabs send together | Stable member queue sequence, one active worker, no loss | Real two-page test with randomized delay |
-| First v2 admission races a legacy session | The send remains `Checking send` on the same key while `legacy_draining` reaches zero, then is admitted once through v2 or becomes proved `Not sent` | Send, park, reconnect, and emit a late legacy event at every cutover boundary |
+| First v2 admission races a legacy session | Every legacy request reserves under its closing epoch before dispatch; the send remains `Checking send` on the same key while `legacy_draining` reaches zero, then is admitted once through v2 or becomes proved `Not sent` | Send before and after reservation commit, park, reconnect, and emit a late legacy effect at every cutover boundary |
 | Same request retries | Same input, entry, and turn returned | Replay key from two devices |
 | Retry after safe terminal failure | New linked turn uses the same root input and execution lineage, reuses proved receipts, and creates no second bubble | Retry before and after later queued work, with one prior success and one proved failure |
 | Retry remaining work while an effect is unresolved | Recovery remains blocked on the same lineage; only an explicit confirmed Do again action may create a new lineage after prior-effect disclosure | Attempt Retry remaining work and Do again around started, uncertain, reconciled, and succeeded receipts |
@@ -1336,10 +1475,10 @@ of the continuity epic.
 | Legacy Eve event has no ID | Inbox dedupes exact session, absolute sequence, kind, and keyed payload digest | Pre-upgrade parked session fixture |
 | Model succeeds but terminal persistence fails | Turn says `Checking Homa's reply`; recovery reads Eve result and persists once | Fail DB write after terminal event |
 | Old worker writes after lease replacement | Every event, message, receipt, and settlement is rejected by fence | Pause worker, expire lease, then release both workers |
-| External side effect is ambiguous | UI says `Checking whether that action finished`; reconcile before resume and never blind retry | Crash before and after provider acknowledgement |
+| External side effect is ambiguous | Fence and quarantine the attempt, release unrelated conversation, hold the affected resource, show `Checking whether that action finished`, then prove the result or show `Could not confirm` within 15 minutes with no blind Retry | Crash before and after provider acknowledgement, then make the provider permanently unavailable |
 | Two adults edit one shared plan | Version, lock, append, or conflict policy preserves both intents | Concurrent schedule, plan, and artifact writes |
 | Delayed v2 retry arrives after coordinator rollback | Always-on admission key returns the original result and browser-owned legacy never executes it | Restore the prior compatible coordinator, then replay the old key and a stale-client payload |
-| Terminal row exists but stream never reaches client | Refresh reads canonical result | Drop final SSE frame |
+| Terminal row exists but stream never reaches client | Automatic catch-up reads the canonical result; refresh is optional redraw, never recovery | Drop final SSE frame and forbid a model rerun |
 | Cancel during tool call | Remaining work stops; completed effect and receipt stay visible | Cancel before, during, and after exact side effect |
 | Rotation while active | Rotation waits; no binding flip | Barrier test around every state |
 | Rotation checkpoint fails | Previous checkpoint plus exact tail, explicit degraded state | Model error, timeout, invalid source quote |
@@ -1352,11 +1491,12 @@ of the continuity epic.
 | Recall index is rebuilding | Result says partial or unavailable, never zero-history | Dirty-index fixture |
 | Semantic result is wrong | Provenance shown; no automatic memory write | Near-neighbor family-language eval |
 | Co-parent asks for other adult's text | Zero source candidates and no count leakage | Same-family two-adult sentinels |
-| Adult account is deleted | Rows never become shared null-owned history | Post-deletion privacy fixture from #606 |
+| Adult account or sentence is deleted | Rows never become shared null-owned history; stale clients receive a deletion projection; content-free tombstones prevent same-key recreation | Post-deletion privacy, stale-device replay, and delayed same-key fixtures from #606 and #754 |
 | Background consolidation races correction | Candidate activation loses expected-version CAS | Delayed review job fixture |
 | Consolidation partially fails | Input untouched; partial candidate remains inactive | Cancel and restart at every batch |
 | Provider changes compaction representation | Homa checkpoint still boots another provider | Cross-model and no-provider-state eval |
 | Deployment changes Eve version with parked session | Deployment is blocked or session resolved before bump | Upgrade runbook HITL replay |
+| Pre-deploy Eve drain cannot reach zero | Abort within 15 minutes, reopen the unchanged generation and version, and page without issuing duplicate reservations | Leave one `creating` and one `uncertain` reservation during barrier abort |
 | Migration and code deploy are skewed | Old path keeps working through expand-contract | Old-code/new-schema and new-code/old-schema checks |
 
 ## Privacy and security gates
@@ -1368,6 +1508,16 @@ At this specification's cutoff, PR #607 is open, GitHub reports it conflicting, 
 approval review exists, and its rollout contract forbids merge until the one-time
 production migration is explicitly approved and schema verification passes. This is a
 live P0 escalation, not work satisfied by #746 or #747.
+
+Before #607 is approved, its migration must be rebased and conflict-free, then split
+into bounded schema, backfill, and enforcement stages. Lock-taking DDL uses a
+two-second `lock_timeout`; idempotent backfill batches contain at most 1,000 rows with
+a five-second statement timeout; indexes are concurrent where PostgreSQL permits;
+foreign keys are added `NOT VALID` and validated separately. Sanitized production row
+counts, query and lock plans, eligible-row parity, old-code/new-schema and
+new-code/old-schema probes, two-adult sentinels, database latency stop actions, and the
+live alias are required evidence. Privacy rollback never restores permissive RLS;
+failure is fail-closed and forward-fixed.
 
 Every new table:
 
@@ -1402,14 +1552,17 @@ checkpoint, and memory query rechecks principal status, authority epoch, audienc
 source deletion, and eligibility.
 
 The deletion fan-out covers `conversation_inputs.input_text`, attachment references,
-admission keys, entries, turns, waits, approval receipts, same-turn resume manifests,
-attempts, runtime-event receipts, projection events, effect-receipt request metadata,
+entries, turns, waits, approval receipts, same-turn resume manifests, attempts,
+runtime-event receipts, projection content, effect-receipt request metadata,
 checkpoints, context snapshots, embeddings, memory candidates, topic labels, indexes,
-retained Eve sessions, and durable Eve sandbox data. Individual sentence deletion erases the source text and raw derivatives,
-leaves only an opaque ordered tombstone needed to prevent replay, and invalidates every
-checkpoint that cited it. Domain effects such as an already-created schedule follow
-their own product deletion contract rather than disappearing as a side effect of chat
-deletion.
+retained Eve sessions, and durable Eve sandbox data. Individual sentence deletion
+erases the source text and raw derivatives, emits an opaque deletion projection so
+stale devices remove it on refresh, and invalidates every checkpoint that cited it.
+Minimum admission, effect, and ordering tombstones remain only to prevent replay. They
+contain no text, embedding, provider payload, source quote, reconstructable content
+hash, or context. A delayed same-key request cannot recreate deleted content or
+effects. Domain effects such as an already-created schedule follow their own product
+deletion contract rather than disappearing as a side effect of chat deletion.
 
 The canonical retention rule comes from `record-export` in
 `docs/homa-planning/journeys/10-reconciliation.md`: conversation records remain while
@@ -1418,9 +1571,12 @@ record. Query-time denial and worker fencing are synchronous. Homa-owned raw con
 must be erased within 24 hours of an accepted explicit deletion; retained Eve session
 or sandbox copies use the same 24-hour operational SLO and alert on breach. This 24-hour
 SLO is an implementation proposal that must be confirmed under the still-open M4-12
-retention schedule before production activation. No legal-hold exception is currently
-authorized; adding one requires a founder and legal ruling. Restore applies only to a
-superseded memory revision, never a privacy deletion.
+retention schedule before production activation. #754 must explicitly authorize the
+minimum tombstone fields and their retention. Before it closes, schema and synthetic
+fixtures may proceed, but no real-family payload enters a new continuity store,
+including shadow storage. No legal-hold exception is currently authorized; adding one
+requires a founder and legal ruling. Restore applies only to a superseded memory
+revision, never a privacy deletion.
 
 Traces store identifiers, timings, enums, counts, keyed digests, slot metadata, and
 bounded sanitized payloads only. Raw content hashes do not leave the approved store.
@@ -1482,9 +1638,15 @@ Initial rollout gates:
 | Reconnect convergence | Reconnect start until client sequence equals canonical sequence | At least 100 forced reconnects and rolling seven days | p99 at most five seconds | Web owner returns cohort to shadow |
 | Terminal exactly once | Canonical terminal row rendered count per turn | Rolling 24 hours, at least 500 terminal turns | Exactly once for 100 percent | Web owner stops widening on any duplicate or omission |
 | Bounded wait release | Expiry until queue becomes claimable | At least 100 clock-driven wait fixtures and all canary expiries | 99.9 percent within 60 seconds | Coordinator owner disables HITL parking |
+| Uncertainty quarantine | Detection through fenced obligation and queue release | Every forced uncertainty and rolling canary traffic | Reconciliation starts within 60 seconds; zero unrelated successors blocked after quarantine | Coordinator owner stops widening on the first breach |
+| Uncertainty disposition | Obligation start through proof or `outcome_unverified` | Every forced uncertainty and all canary uncertainties | Internal at most five minutes; external at most 15 minutes with operator page and support reference | On-call disables effect-capable canarying on the first breach |
+| Rendered reconnect integrity | Canonical DOM, status direction, focus, scroll, and model-dispatch audit | At least 100 forced reconnects across two tabs and two devices | p99 convergence at most five seconds; zero duplicate bubbles, backward status, lost focus or scroll, or model reruns | Web owner returns cohort to shadow |
+| Status comprehension | Five target-parent one-pass tests covering queue, wait, uncertainty, Stop, failure, and second-device resolution | Before first authoritative UI canary | At least 90 percent correct receipt, state, and safe-action answers; zero unsafe retry choices | Product owner keeps UI in prototype |
+| Accessibility | Automated scan plus VoiceOver-mobile and keyboard-desktop paths | Every UI activation candidate | Zero critical or serious automated findings and zero manual blockers; meaning independent of color and motion | Accessibility reviewer blocks canary |
 | Checkpoint freshness | Active checkpoint covers latest settled predecessor at rotation cutoff | Rolling seven days, at least 200 rotations | At least 99.5 percent | Continuity owner disables checkpoint hydration |
 | Degraded checkpoint rate | Rotations using explicit raw-tail fallback | Rolling seven days, at least 200 rotations | At most 0.5 percent | Continuity owner halts widening and investigates separately from freshness |
 | Checkpoint semantic support | Adjudicated item review plus first 200 canary candidates | Three offline runs and 200 reviewed canary candidates | Zero unsupported or contradictory items; 100 percent open-loop, correction, source, and scope preservation | Continuity owner disables hydration on the first miss |
+| Checkpoint utility | Blinded comparison with exact recent dialogue plus typed open loops and durable work | At least 200 held-out cross-session cases across three runs | Pre-registered improvement in continuity quality or bounded context cost with positive 95 percent confidence bound and no safety regression | Continuity owner keeps hydration disabled without demonstrated value |
 | Cross-adult privacy | Sentinel query across context, checkpoint, recall, and history surfaces | Every CI run and every canary cohort | Zero candidates and zero count leakage | Privacy owner disables the affected capability immediately |
 | First useful activity latency | `202` to first Queued, Working, or Needs you state compared with pre-canary baseline | Rolling seven days, at least 500 turns per cohort | p95 regression at most 10 percent | Product engineering returns cohort to shadow |
 | Cost per completed turn | Model, database, vector, and background cost divided by completed authoritative turns | Rolling seven days, at least 500 turns | Increase at most 15 percent before an explicit budget ruling | Engineering owner pauses widening |
@@ -1498,12 +1660,14 @@ measurement. They may not be weakened silently to make a rollout green.
 
 - turn state-machine transition table;
 - idempotent admission and monotonic ordering;
-- legacy-draining authority handoff, final cursor snapshot, and late-event quarantine;
+- epoch-bound legacy reservation before dispatch, H1/H2 backfill, bounded
+  legacy-draining authority handoff, final cursor snapshot, and late-event quarantine;
 - immutable request fingerprint mismatch rejection;
 - queue leasing, fencing, expiry, and crash recovery;
 - per-principal head locking, concurrent-worker FIFO, and atomic head advancement;
 - separate automatic-recovery and HITL-resume attempt budgets and overflow behavior;
-- exact effect receipts and ambiguous-effect reconciliation;
+- exact effect receipts, immediate durable uncertainty quarantine, resource-scoped
+  holds, bounded reconciliation, and late-proof settlement;
 - retry-lineage receipt reuse and mismatched-fingerprint rejection;
 - never-started, dispatching, acknowledged, and uncertain dispatch recovery;
 - HITL answer versus new-turn routing;
@@ -1517,7 +1681,12 @@ measurement. They may not be weakened silently to make a rollout green.
 - source scope before recall ranking;
 - expected-version candidate activation;
 - same-family two-adult privacy and post-deletion behavior;
-- exact sequence-52 to sequence-61 projection replay;
+- deletion projection plus content-free replay tombstone behavior against stale-device
+  and delayed same-key requests;
+- exact sequence-52 to sequence-61 projection replay from one immutable sanitized
+  fixture containing all nine production-shaped turns, expected DOM order, optimistic
+  send, exactly-once reply, source date, redaction manifest, evidence hash, and
+  no-second-model-call assertion;
 - tenant-keyed projection allocation, snapshot cursor consistency, and rollback gaps;
 - old-code/new-schema and new-code/old-schema compatibility.
 
@@ -1572,10 +1741,16 @@ Score:
 
 - Begin from the reconciled tracker: #491 closed as a completed investigation; #179,
   #175, #302, and #621 own the follow-on scopes recorded below.
-- Complete and live-verify #606 before checkpoint hydration, widened private retrieval,
-  Recall v2, or history search. Coordinator shadow work that does not widen reads may
-  proceed independently.
-- Finish #493's observation window through August 8.
+- Rebase #607, resolve its conflict, bound and approve its migration, then complete and
+  live-verify #606 before any widened private read. This live P0 is the first execution
+  gate.
+- Close #754 before real-family payload enters any new continuity store, including
+  shadow storage. Schema and synthetic fixtures may proceed independently.
+- Land #748's baseline telemetry, immutable Carolyng fixture, and shared fault harness
+  before authoritative traffic. #748 remains the cross-cutting release-certification
+  stream through every later phase.
+- Keep #493's observation window through August 8 as parallel evidence, never a Phase
+  1 completion gate.
 - Keep #707 recovery active.
 - Establish baseline turn, client projection, context, latency, and cost metrics.
 
@@ -1583,14 +1758,18 @@ Rollback: none, this phase changes no behavior.
 
 ### Phase 1: authoritative web coordinator on the current Eve pin
 
-- Add non-claimable shadow rows and compare ordering, accepted input, Eve input, and
-  canonical output.
+- Deliver #708 as separate schema and compatibility, metadata-only shadow, Eve 0.19
+  adapter and receipts, authoritative admission and projection, waits and resume, and
+  one-way family-canary slices. Every slice has its own owner, flag, merge gate,
+  deploy probe, and rollback. No mega PR owns the whole transition.
 - Put Eve behind a worker adapter whose contract includes causal cutoff, fences,
-  waits, receipts, and terminal projection.
-- Put selected idle families into `legacy_draining`, require zero nonterminal or
-  unprojected legacy obligations, then atomically advance their ingress epoch to v2.
-- Canary authoritative server admission only after the exact Carolyng replay and all
-  deterministic gates pass.
+  waits, receipts, bounded uncertainty quarantine, and terminal projection.
+- Backfill through H1, close the legacy ingress epoch to new reservations, drain and
+  catch up through H2 outside the row lock, then atomically advance the family to v2
+  only after checksum and zero-obligation proof.
+- Canary authoritative server admission only after the exact Carolyng replay,
+  rendered reconnect, status-comprehension, accessibility, and all deterministic gates
+  pass.
 - Keep #707 as the legacy admission path for families that have never entered v2.
 
 Coordinator rollback is admission-first, drain-safe, and never crosses the one-way
@@ -1600,17 +1779,26 @@ authority boundary:
 2. If the coordinator itself is unsafe, reject new affected sends before durable
    acceptance and show `Not sent`.
 3. Keep coordinator worker, event, reconciliation, and UI read paths available for
-   every accepted nonterminal turn.
+   every accepted nonterminal turn and quarantined obligation.
 4. Drain or explicitly fail those turns without redispatching input through legacy.
 5. Disable optional candidate capabilities, then deploy the prior schema-compatible
    coordinator implementation for already migrated families.
 6. Keep #707 only for families that never crossed the authority boundary. A migrated
    family never routes new or retried sends through browser-owned dispatch.
 
-### Phase 2: Eve 0.29 compatibility in parallel
+### Parallel, non-gating modernization: Eve 0.29
 
-- Upgrade through the mandatory runbook in a code-only PR with all newly available
-  behavior disabled.
+#749 does not gate #747 closure. #708 is required to satisfy every family-visible
+continuity invariant on Eve 0.19. Split barrier schema, wrappers, static guard, census,
+and abort behavior from package compatibility and package activation. A later finding
+may make #749 gating only by attaching evidence that a named #747 threshold cannot pass
+on Eve 0.19.
+
+- Land and prove the all-ingress barrier and census under Eve 0.19 first. Every creator
+  checks that its runtime version matches the open generation, so a warm old deployment
+  cannot create sessions after reopen.
+- Upgrade through the mandatory runbook in a separate code-only PR with all newly
+  available behavior disabled.
 - Prove the worker adapter against both versions before enabling stable IDs, bounded
   catch-up, snapshot, reconnect, cancel, or improved compaction.
 - Put every Eve ingress and scheduler into `draining`, close the barrier generation,
@@ -1619,6 +1807,12 @@ authority boundary:
 - Disable new HITL parking across all channels during the window, move the global
   barrier to `paused`, deploy the exact pin, run cross-channel synthetic admission
   probes, then reopen.
+
+Before package deployment begins, `draining` may return to `open` on the unchanged
+version and generation. A pre-deploy drain that cannot prove zero reservations and
+provider sessions within 15 minutes aborts, reopens the old version, and pages. The
+same canonical source cannot obtain a second nonterminal reservation. After candidate
+deployment starts, rollback follows the full drain procedure below.
 
 The Eve upgrade is one global cutover. To roll back: move every Eve ingress and
 scheduler to `draining`, durably defer new text and scheduled work, drain or explicitly
@@ -1632,11 +1826,17 @@ rollback stops and the incident remains live rather than mixing runtime versions
 ### Phase 3: checkpoints, then context manifest
 
 - Generate checkpoint candidates in non-authoritative shadow.
-- Compare them with raw transcript golden answers and open-loop state.
+- Compare them blindly with exact recent dialogue plus typed open loops and durable
+  work across at least 200 held-out cross-session cases and three runs. Pre-register the
+  continuity-quality or bounded-context-cost improvement, require a positive 95
+  percent confidence bound, and preserve zero unsupported claims plus 100 percent of
+  corrections, decisions, sources, and open loops.
 - Enable checkpoint activation separately from hydration.
 - Record metadata-only manifests while rendering the current Markdown unchanged.
 - Enable manifest rendering separately from recording.
-- Enable checkpoint hydration for canaries only after #606 and source-revocation tests.
+- Enable checkpoint hydration for canaries only after #606, source-revocation tests,
+  and the comparative utility gate. A safe checkpoint that adds no measured value does
+  not ship.
 
 Rollback disables hydration first while leaving the current family context and raw
 recent tail. Generation may continue in shadow. Candidate rows remain non-authoritative
@@ -1660,7 +1860,8 @@ privacy and existing-compaction overlap are reconciled.
 1. Complete, apply, and live-verify #606 with explicit migration approval before any
    widened private read.
 2. Add only the turn-coordinator schema. Deploy shadow writers and verify it.
-3. Upgrade Eve in an independent code-only PR with new behavior disabled.
+3. Separately land the #749 barrier and census under Eve 0.19. Activate the package
+   upgrade only in its own release window after the #708 canary stabilizes.
 4. Add checkpoint schema only when #708 identity is authoritative.
 5. Add manifest metadata columns only when the manifest writer is ready.
 6. Add Recall v2 indexes and functions in their own additive migration.
@@ -1681,7 +1882,8 @@ Tracker reconciliation completed on 2026-08-02 against Homa `821ca8ff`:
 - #175 now owns only chat-born durable work after #377 shipped binder drafts; its
   binder-versus-separate-area surface remains a `founder-decision`.
 - #302 retains shared protocol, state-machine, and render-by-kind work under the iOS
-  epic; its shared foundation precedes #708's client subscription and queue UI.
+  epic. Only its scoped `packages/chat-core` protocol slice precedes #708's client
+  subscription and queue UI; unrelated mobile rendering does not block web continuity.
 - #621 retains native offline drafts and interrupted-state language.
 - #493 remains open only for its production observation window through August 8.
 - #606 remains the open P0 production privacy gate.
@@ -1690,11 +1892,10 @@ Core epic children:
 
 | Order | Issue | Type and priority | Parent-visible outcome | Completion dependency |
 |---:|---|---|---|---|
-| 1 | Existing #708, authoritative web turns | feature, P1 | A sent message never disappears; Queued, Working, Needs you, Checking result, Stop, and failure states tell the truth | Shared protocol boundary from #302 |
-| 2 | #749, upgrade Eve 0.19.0 to 0.29.5 safely | chore, P1 | No visible change until compatibility is proved; recovery becomes simpler behind the adapter | Independent of #708 critical path |
-| 3 | #750, append-only conversation checkpoints | feature, P1 | A fresh worker retains the current goal, decisions, corrections, and open promises | #708 identity; #606 before hydration |
-| 4 | #751, typed context manifest and bounded renderer | feature, P1 | Homa uses current authorized context and says when a source could not load | #606; checkpoint contract for checkpoint slot |
-| 5 | #748, continuity observability and fault-injection gates | chore, P1 | The team detects stale projection, orphan turns, duplicate output, and degraded handoff before a parent does | Begins before #708 canary and expands with each child |
+| 1 | #748, continuity observability and fault-injection gates | chore, P1 | The team detects stale projection, orphan turns, duplicate output, inaccessible states, and degraded handoff before a parent does | Baseline lands first; certification expands with every child and closes last |
+| 2 | Existing #708, authoritative web turns | feature, P1 | A sent message never disappears; Queued, Working, Needs you, Checking result, Stop, and failure states tell the truth without blocking unrelated later turns | Scoped protocol slice from #302; #748 pre-canary harness |
+| 3 | #750, append-only conversation checkpoints | feature, P1 | A fresh worker retains the current goal, decisions, corrections, and open promises | #708 identity; #606 and #754 before real-family data; comparative utility before hydration |
+| 4 | #751, typed context manifest and bounded renderer | feature, P1 | Homa uses current authorized context and says when a source could not load | #606; winning handoff contract for checkpoint slot |
 
 Prerequisites and gates are linked to the epic but are not children: #606 is the live
 P0 privacy gate for expanded private reads, #493 remains open only for its observation
@@ -1711,13 +1912,19 @@ Related follow-ons, not epic completion gates:
 | Existing #175 | Adds durable work resumption after its parent-surface decision |
 | #752 | P2 investigation of copy-on-write memory candidates after privacy, current compaction, and review semantics are reconciled |
 
+Linked parallel modernization, not an epic completion gate:
+
+| Issue | Role |
+|---|---|
+| #749 | Lands the all-ingress barrier and census on Eve 0.19, then separately validates and activates Eve 0.29 in its own release window |
+
 Issue #400 remains out of scope until its founder decision. Issue #396 is not required
 because a filesystem workspace is not memory.
 
 Every child ticket contains:
 
 - parent-visible outcome;
-- exact existing owner and files;
+- named implementation owner and exact files;
 - schema and API contract;
 - explicit non-goals and overlap with existing issues;
 - state transitions and failure behavior;
@@ -1726,6 +1933,22 @@ Every child ticket contains:
 - telemetry query, window, minimum sample, threshold, and stop action;
 - assignment or deployment rollback, including in-flight work;
 - production probe and sanitized evidence required to close.
+
+Before implementation, assign each child a named DRI and backup plus its migration
+owner, canary owner, on-call responder, and stop-action authority. Record native
+dependency edges rather than leaving the graph only in prose.
+
+#708 remains one parent issue but ships through mandatory staged PR slices: additive
+schema and compatibility; metadata-only shadow admission and largest-cohort backfill
+rehearsal; Eve 0.19 adapter, attempts, fencing, receipts, and bounded uncertainty;
+authoritative admission, projection, and accessible state UX; waits, approvals, and
+resume manifests; then legacy drain and one-way family canary. Each slice has its own
+flag, tests, owner, rollback, production probe, and merge criterion.
+
+The critical path is #607 and #606 in parallel with #754 and #748 baseline, then the
+scoped #302 protocol slice, staged #708 on Eve 0.19, #750 only after its ablation, and
+#751 against the winning handoff path. #749 and #493 remain parallel evidence and
+modernization.
 
 Each child starts `docs/notes/conversation-continuity-<slice>-implementation.md` as a
 small deviation log. Discoveries may refine the implementation, but cannot silently
@@ -1924,15 +2147,27 @@ founder review policy.
 Before implementation begins, sign off that:
 
 - the one-timeline founder ruling is preserved;
-- #606 is the privacy gate;
+- #607 is conflict-free, current, bounded, explicitly approved, migrated, and
+  live-probed; #606 closes with two-adult sentinel evidence;
+- #754 authorizes the erasure SLO and minimum content-free replay tombstones before
+  any real-family payload enters a new continuity store;
 - provider sessions and provider memory are not product truth;
 - checkpoint proposals cannot authorize facts or effects;
 - accepted input means a durable Homa row, not a client bubble or stream event;
+- every legacy request reserves under its ingress epoch before Eve dispatch, and no
+  accepted input can reach both legacy and v2 execution paths;
+- uncertain work is fenced and quarantined before queue release, remains non-retryable
+  without proof, and blocks only conflicting resources;
+- deletion removes stale-device content while replay tombstones prevent recreation;
 - each child has a pinned assignment or deployment version, drain-safe rollback,
   adversarial tests, and observable outcome;
 - existing issues are reused rather than duplicated;
 - Carolyng's exact nine-turn report replays cleanly without asking her to refresh;
-- no accepted input can reach both legacy and v2 execution paths;
+- status comprehension and accessibility gates pass before authoritative UI canary;
+- checkpoint hydration beats the exact-tail and typed-open-loop baseline before it
+  becomes authoritative;
+- #749 remains linked and non-gating unless measured evidence proves a named #747
+  invariant cannot pass on Eve 0.19;
 - #606 remains a plainly visible live P0 gate for private retrieval.
 
 ## Decisions locked for implementation
@@ -1943,3 +2178,5 @@ Before implementation begins, sign off that:
    requires measured evidence and a founder ruling.
 3. Serialize per adult. Shared family writes use explicit resource concurrency rather
    than a whole-family chat queue.
+4. Treat the design as complete but production activation as blocked until #606,
+   #754, ownership, observability, bounded uncertainty, and rollback gates are proved.
