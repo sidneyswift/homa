@@ -1,9 +1,22 @@
 import { CircleAlert } from "lucide-react-native";
-import { Text, View, type StyleProp, type ViewStyle } from "react-native";
+import {
+  Text,
+  View,
+  useWindowDimensions,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { fontFamilies } from "../../theme/fonts";
-import { colors, darkColors, fontSize, radius, space } from "../../theme/tokens";
+import {
+  colors,
+  darkColors,
+  fontSize,
+  lineHeightFor,
+  radius,
+  space,
+} from "../../theme/tokens";
 
 /** A visible and screen-reader-live recovery message, never color alone. */
 export function InlineError({
@@ -15,6 +28,7 @@ export function InlineError({
   style?: StyleProp<ViewStyle>;
   tone?: "light" | "dark";
 }) {
+  const { fontScale } = useWindowDimensions();
   const look = tone === "dark"
     ? {
         border: darkColors.danger,
@@ -62,7 +76,7 @@ export function InlineError({
           flex: 1,
           fontFamily: fontFamilies.bodyMedium,
           fontSize: fontSize.sm,
-          lineHeight: 20,
+          lineHeight: lineHeightFor(fontSize.sm, fontScale),
           color: look.text,
         }}
       >

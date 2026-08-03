@@ -31,6 +31,7 @@ The award standard is therefore a measured closed loop, not a feature count.
 
 - Native route and feature inventory under `apps/mobile/src/`.
 - Xcode 26.6 iOS 18.6 simulator build from this branch installed and rendered the current native sign-in surface. This proves bundle and shell rendering only, not an authenticated setup, first useful outcome, or physical-device behavior.
+- The simulator Dynamic Type pass found and fixed clipped custom-font glyphs in sign-in copy, fields, and controls. Large text now uses a scaled line box, the shared logo falls back to its accessible mark at the largest sizes, and icon buttons stack their label without mid-word breaks. Default and maximum-category screenshots render; VoiceOver and physical-device proof remain open.
 - Native package boundary in [`apps/mobile/README.md`](../../../apps/mobile/README.md).
 - Existing launch research in [`docs/homa-planning/plans/2026-07-28-ios-launch-evidence/`](../2026-07-28-ios-launch-evidence/).
 - Voice shell direction screenshots in [`docs/homa-planning/plans/2026-08-01-voice-shell-direction-lab/`](2026-08-01-voice-shell-direction-lab/).

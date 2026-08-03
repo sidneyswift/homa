@@ -9,6 +9,7 @@ import {
   Platform,
   ScrollView,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -30,7 +31,7 @@ import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { supabase } from "../../lib/supabase";
 import { openWebOnboarding } from "../../lib/web-links";
 import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, space } from "../../theme/tokens";
+import { colors, fontSize, lineHeightFor, space } from "../../theme/tokens";
 
 /**
  * Google, Apple, and email + password sign-in, matching the web /signin
@@ -56,6 +57,9 @@ function describeSignInFailure(result: SignInFlowResult): string | null {
 
 export default function SignInScreen() {
   const { session } = useSession();
+  const { fontScale } = useWindowDimensions();
+  const bodyLineHeight = lineHeightFor(fontSize.base, fontScale);
+  const smallLineHeight = lineHeightFor(fontSize.sm, fontScale);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
@@ -177,6 +181,7 @@ export default function SignInScreen() {
                 textAlign: "center",
                 fontFamily: fontFamilies.body,
                 fontSize: fontSize.base,
+                lineHeight: bodyLineHeight,
                 color: colors.textBody,
               }}
             >
@@ -231,6 +236,7 @@ export default function SignInScreen() {
                 style={{
                   fontFamily: fontFamilies.body,
                   fontSize: fontSize.sm,
+                  lineHeight: smallLineHeight,
                   color: colors.textMuted,
                 }}
               >
@@ -268,6 +274,7 @@ export default function SignInScreen() {
                 style={{
                   fontFamily: fontFamilies.body,
                   fontSize: fontSize.sm,
+                  lineHeight: smallLineHeight,
                   color: colors.textBody,
                 }}
               >
@@ -292,6 +299,7 @@ export default function SignInScreen() {
                 textAlign: "center",
                 fontFamily: fontFamilies.body,
                 fontSize: fontSize.sm,
+                lineHeight: smallLineHeight,
                 color: colors.textMuted,
               }}
             >

@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { Text, View, useWindowDimensions } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 
 import { fontFamilies } from "../../theme/fonts";
@@ -52,6 +52,7 @@ export function Logo({
   variant?: "full" | "mark";
   tone?: "light" | "dark";
 }) {
+  const { fontScale } = useWindowDimensions();
   const body = tone === "dark" ? palette.clay400 : colors.brand;
   const word = tone === "dark" ? "#FFFFFF" : colors.textStrong;
 
@@ -73,7 +74,10 @@ export function Logo({
     </Svg>
   );
 
-  if (variant === "mark") {
+  // At the largest system text sizes, the wordmark's letters grow with the
+  // user's chosen scale. Keep the accessible Homa identity visible as the
+  // mark rather than shrinking or capping the user's text setting.
+  if (variant === "mark" || (variant === "full" && fontScale >= 1.8)) {
     return (
       <View accessibilityRole="image" accessibilityLabel="Homa">
         {mark}

@@ -1,8 +1,14 @@
 import { useState } from "react";
-import { Text, TextInput, View, type TextInputProps } from "react-native";
+import {
+  Text,
+  TextInput,
+  View,
+  useWindowDimensions,
+  type TextInputProps,
+} from "react-native";
 
 import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { colors, fontSize, lineHeightFor, radius, space } from "../../theme/tokens";
 
 /**
  * Labeled input matching the web auth fields: 16px corners, warm border,
@@ -13,6 +19,8 @@ export function TextField({
   ...inputProps
 }: { label: string } & TextInputProps) {
   const [focused, setFocused] = useState(false);
+  const { fontScale } = useWindowDimensions();
+  const textLineHeight = lineHeightFor(fontSize.base, fontScale);
 
   return (
     <View style={{ gap: space.sm }}>
@@ -20,6 +28,7 @@ export function TextField({
         style={{
           fontFamily: fontFamilies.bodyMedium,
           fontSize: fontSize.base,
+          lineHeight: textLineHeight,
           color: colors.textStrong,
         }}
       >
@@ -48,6 +57,7 @@ export function TextField({
             paddingVertical: 12,
             fontFamily: fontFamilies.body,
             fontSize: fontSize.base,
+            lineHeight: textLineHeight,
             color: colors.textStrong,
           },
           inputProps.style,

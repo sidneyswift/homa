@@ -1,9 +1,25 @@
 import type { ReactNode } from "react";
-import { Pressable, Text, View, type StyleProp, type ViewStyle } from "react-native";
+import {
+  Pressable,
+  Text,
+  View,
+  useWindowDimensions,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 import { useReducedMotion } from "react-native-reanimated";
 
 import { fontFamilies } from "../../theme/fonts";
-import { colors, darkColors, fontSize, palette, pressScale, radius, space } from "../../theme/tokens";
+import {
+  colors,
+  darkColors,
+  fontSize,
+  lineHeightFor,
+  palette,
+  pressScale,
+  radius,
+  space,
+} from "../../theme/tokens";
 
 /**
  * The Homa button: always pill-shaped (never square, per the component
@@ -78,12 +94,15 @@ export function Button({
   style?: StyleProp<ViewStyle>;
 }) {
   const reducedMotion = useReducedMotion();
+  const { fontScale } = useWindowDimensions();
   const look = tone === "dark"
     ? DARK_VARIANT_STYLES[variant]
     : VARIANT_STYLES[variant];
   const vertical = size === "lg" ? 14 : size === "md" ? 12 : 8;
   const horizontal = size === "lg" ? space.lg : size === "md" ? 20 : space.md;
   const textSize = size === "sm" ? fontSize.sm : fontSize.base;
+  const textLineHeight = lineHeightFor(textSize, fontScale);
+  const largeText = fontScale >= 1.4;
   const minimumHeight = size === "lg" ? 52 : size === "md" ? 48 : 44;
   const unavailable = disabled || busy;
 
@@ -114,7 +133,7 @@ export function Button({
     >
       <View
         style={{
-          flexDirection: "row",
+          flexDirection: icon && largeText ? "column" : "row",
           alignItems: "center",
           justifyContent: "center",
           flexShrink: 1,
@@ -127,6 +146,7 @@ export function Button({
           style={{
             fontFamily: fontFamilies.bodySemibold,
             fontSize: textSize,
+            lineHeight: textLineHeight,
             color: look.textColor,
             flexShrink: 1,
             textAlign: "center",
