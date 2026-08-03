@@ -57,4 +57,53 @@ describe("recurring family events", () => {
     assert.equal(rows[0]?.starts_on, "2026-08-04");
     assert.equal(rows[0]?.ends_on, "2026-08-06");
   });
+
+  it("applies cancelled and moved occurrence exceptions", () => {
+    const rows = expandRecurringFamilyEvents([
+      event({
+        occurrence_exceptions: [
+          {
+            occurrence_on: "2026-08-11",
+            kind: "cancelled",
+            starts_on: null,
+            ends_on: null,
+            start_time: null,
+            end_time: null,
+          },
+          {
+            occurrence_on: "2026-08-18",
+            kind: "moved",
+            starts_on: "2026-08-19",
+            ends_on: "2026-08-19",
+            start_time: "11:00",
+            end_time: "14:00",
+          },
+        ],
+      }),
+    ], "2026-08-10", "2026-08-25");
+    assert.deepEqual(rows.map((row) => row.starts_on), ["2026-08-19", "2026-08-25"]);
+    assert.equal(rows[0]?.original_occurrence_on, "2026-08-18");
+    assert.equal(rows[0]?.series_start_time, "09:00");
+  });
+
+  it("includes a moved exception whose original date is outside the window", () => {
+    const rows = expandRecurringFamilyEvents([
+      event({
+        occurrence_exceptions: [
+          {
+            occurrence_on: "2026-08-04",
+            kind: "moved",
+            starts_on: "2026-08-12",
+            ends_on: "2026-08-12",
+            start_time: "09:00",
+            end_time: "12:00",
+          },
+        ],
+      }),
+    ], "2026-08-10", "2026-08-16");
+    assert.deepEqual(rows.map((row) => row.starts_on), ["2026-08-11", "2026-08-12"]);
+    const moved = rows.find((row) => row.original_occurrence_on === "2026-08-04");
+    assert.equal(moved?.starts_on, "2026-08-12");
+    assert.equal(moved?.occurrence_key, `${event().id}:2026-08-04`);
+  });
 });

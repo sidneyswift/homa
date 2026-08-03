@@ -52,6 +52,16 @@ export interface FamilyEventRecurrence {
   until: string | null;
 }
 
+export interface FamilyEventOccurrenceException {
+  /** The generated occurrence's original series date. */
+  occurrenceOn: string;
+  kind: "cancelled" | "moved";
+  startsOn: string | null;
+  endsOn: string | null;
+  startTime: string | null;
+  endTime: string | null;
+}
+
 export interface FamilyEventRow {
   id: string;
   familyId: string;
@@ -70,10 +80,15 @@ export interface FamilyEventRow {
   endTime: string | null;
   note: string | null;
   recurrence?: FamilyEventRecurrence | null;
+  occurrenceExceptions?: FamilyEventOccurrenceException[];
   /** Present on an expanded recurring occurrence so editing can retain the
    * canonical series start instead of moving the series to this occurrence. */
   seriesStartsOn?: string;
   seriesEndsOn?: string;
+  seriesStartTime?: string | null;
+  seriesEndTime?: string | null;
+  /** Stable original date for a generated or moved occurrence. */
+  originalOccurrenceOn?: string;
   occurrenceKey?: string;
   createdAt: string;
 }
@@ -96,6 +111,20 @@ export interface FamilyEventInput {
   childIds?: string[];
   note?: string | null;
   recurrence?: FamilyEventRecurrence | null;
+}
+
+export interface FamilyEventTimingInput {
+  startsOn: string;
+  endsOn?: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
+}
+
+export interface ParsedFamilyEventTiming {
+  startsOn: string;
+  endsOn: string;
+  startTime: string | null;
+  endTime: string | null;
 }
 
 export interface ParsedFamilyEvent {
@@ -145,6 +174,39 @@ export function parseFamilyEventRecurrence(
   return {
     ok: true,
     value: { ...value, weekdays: [...value.weekdays].sort((left, right) => left - right) },
+  };
+}
+
+export function parseFamilyEventTiming(
+  input: FamilyEventTimingInput,
+): { ok: true; value: ParsedFamilyEventTiming } | { ok: false; error: string } {
+  if (!DATE_RE.test(input.startsOn)) {
+    return { ok: false, error: "The start date must be a real calendar date, YYYY-MM-DD." };
+  }
+  const endsOnRaw = input.endsOn?.trim();
+  const endsOn = endsOnRaw && endsOnRaw.length > 0 ? endsOnRaw : input.startsOn;
+  if (!DATE_RE.test(endsOn)) {
+    return { ok: false, error: "The end date must be a real calendar date, YYYY-MM-DD." };
+  }
+  if (endsOn < input.startsOn) {
+    return { ok: false, error: "The event's end date is before its start date." };
+  }
+  const startTimeRaw = input.startTime?.trim();
+  const startTime = startTimeRaw && startTimeRaw.length > 0 ? startTimeRaw : null;
+  if (startTime && !TIME_RE.test(startTime)) {
+    return { ok: false, error: "The start time must be 24h HH:MM, e.g. 14:00." };
+  }
+  const endTimeRaw = input.endTime?.trim();
+  const endTime = endTimeRaw && endTimeRaw.length > 0 ? endTimeRaw : null;
+  if (endTime && !TIME_RE.test(endTime)) {
+    return { ok: false, error: "The end time must be 24h HH:MM, e.g. 15:00." };
+  }
+  if (startTime && endTime && endTime <= startTime && endsOn === input.startsOn) {
+    return { ok: false, error: "The end time must be after the start time on a single-day event." };
+  }
+  return {
+    ok: true,
+    value: { startsOn: input.startsOn, endsOn, startTime, endTime },
   };
 }
 
@@ -202,37 +264,15 @@ export function parseFamilyEventInput(input: FamilyEventInput): ParseFamilyEvent
   if (title.length === 0) {
     return { ok: false, error: "An event needs a short title." };
   }
-  if (!DATE_RE.test(input.startsOn)) {
-    return { ok: false, error: "The start date must be a real calendar date, YYYY-MM-DD." };
-  }
-  const endsOnRaw = input.endsOn?.trim();
-  const endsOn = endsOnRaw && endsOnRaw.length > 0 ? endsOnRaw : input.startsOn;
-  if (!DATE_RE.test(endsOn)) {
-    return { ok: false, error: "The end date must be a real calendar date, YYYY-MM-DD." };
-  }
-  if (endsOn < input.startsOn) {
-    return { ok: false, error: "The event's end date is before its start date." };
-  }
-  const startTimeRaw = input.startTime?.trim();
-  const startTime = startTimeRaw && startTimeRaw.length > 0 ? startTimeRaw : null;
-  if (startTime && !TIME_RE.test(startTime)) {
-    return { ok: false, error: "The start time must be 24h HH:MM, e.g. 14:00." };
-  }
-  const endTimeRaw = input.endTime?.trim();
-  const endTime = endTimeRaw && endTimeRaw.length > 0 ? endTimeRaw : null;
-  if (endTime && !TIME_RE.test(endTime)) {
-    return { ok: false, error: "The end time must be 24h HH:MM, e.g. 15:00." };
-  }
-  if (startTime && endTime && endTime <= startTime && endsOn === input.startsOn) {
-    return { ok: false, error: "The end time must be after the start time on a single-day event." };
-  }
+  const timing = parseFamilyEventTiming(input);
+  if (!timing.ok) return timing;
   const noteRaw = input.note?.trim();
   const note = noteRaw && noteRaw.length > 0 ? noteRaw.slice(0, MAX_FAMILY_EVENT_NOTE) : null;
   const recurrence = parseFamilyEventRecurrence(input.recurrence, input.startsOn);
   if (!recurrence.ok) return recurrence;
   return {
     ok: true,
-    value: { title, startsOn: input.startsOn, endsOn, startTime, endTime, note, recurrence: recurrence.value },
+    value: { title, ...timing.value, note, recurrence: recurrence.value },
   };
 }
 
@@ -257,7 +297,30 @@ export interface RawFamilyEventRow {
   note: string | null;
   recurrence_rule: unknown;
   child_ids?: string[] | null;
+  occurrence_exceptions?: RawFamilyEventOccurrenceExceptionRow[] | null;
   created_at: string;
+}
+
+export interface RawFamilyEventOccurrenceExceptionRow {
+  occurrence_on: string;
+  kind: "cancelled" | "moved";
+  starts_on: string | null;
+  ends_on: string | null;
+  start_time: string | null;
+  end_time: string | null;
+}
+
+export function toFamilyEventOccurrenceException(
+  row: RawFamilyEventOccurrenceExceptionRow,
+): FamilyEventOccurrenceException {
+  return {
+    occurrenceOn: row.occurrence_on,
+    kind: row.kind,
+    startsOn: row.starts_on,
+    endsOn: row.ends_on,
+    startTime: normalizeTimeOfDay(row.start_time),
+    endTime: normalizeTimeOfDay(row.end_time),
+  };
 }
 
 export function toFamilyEventRow(row: RawFamilyEventRow): FamilyEventRow {
@@ -275,6 +338,9 @@ export function toFamilyEventRow(row: RawFamilyEventRow): FamilyEventRow {
     endTime: normalizeTimeOfDay(row.end_time),
     note: row.note,
     recurrence: row.recurrence_rule as FamilyEventRecurrence | null,
+    occurrenceExceptions: (row.occurrence_exceptions ?? []).map(
+      toFamilyEventOccurrenceException,
+    ),
     createdAt: row.created_at,
   };
 }
@@ -312,6 +378,35 @@ export async function getFamilyEventChildIdsCaller(
   return childIdsByEvent;
 }
 
+/** Reads occurrence exceptions separately so caller-JWT reads keep the RLS
+ * boundary explicit and do not depend on PostgREST relationship inference. */
+export async function getFamilyEventOccurrenceExceptionsCaller(
+  db: SupabaseClient,
+  familyId: string,
+  eventIds: readonly string[],
+): Promise<Map<string, FamilyEventOccurrenceException[]>> {
+  const exceptionsByEvent = new Map<string, FamilyEventOccurrenceException[]>(
+    eventIds.map((eventId) => [eventId, []]),
+  );
+  if (eventIds.length === 0) return exceptionsByEvent;
+  const { data, error } = await db
+    .from("family_event_occurrence_exceptions")
+    .select("event_id, occurrence_on, kind, starts_on, ends_on, start_time, end_time")
+    .eq("family_id", familyId)
+    .in("event_id", [...eventIds]);
+  if (error) throw new Error(`family event occurrence exceptions read failed: ${error.message}`);
+  for (const row of data ?? []) {
+    const eventId = row.event_id as string;
+    exceptionsByEvent.get(eventId)?.push(
+      toFamilyEventOccurrenceException(row as RawFamilyEventOccurrenceExceptionRow),
+    );
+  }
+  for (const exceptions of exceptionsByEvent.values()) {
+    exceptions.sort((left, right) => left.occurrenceOn.localeCompare(right.occurrenceOn));
+  }
+  return exceptionsByEvent;
+}
+
 export async function getFamilyEventCaller(
   db: SupabaseClient,
   familyId: string,
@@ -324,10 +419,21 @@ export async function getFamilyEventCaller(
     .eq("family_id", familyId)
     .maybeSingle();
   if (error || !data) return null;
-  const childIdsByEvent = await getFamilyEventChildIdsCaller(db, familyId, [eventId]);
+  const [childIdsByEvent, exceptionsByEvent] = await Promise.all([
+    getFamilyEventChildIdsCaller(db, familyId, [eventId]),
+    getFamilyEventOccurrenceExceptionsCaller(db, familyId, [eventId]),
+  ]);
   return toFamilyEventRow({
     ...(data as unknown as RawFamilyEventRow),
     child_ids: childIdsByEvent.get(eventId) ?? [],
+    occurrence_exceptions: (exceptionsByEvent.get(eventId) ?? []).map((exception) => ({
+      occurrence_on: exception.occurrenceOn,
+      kind: exception.kind,
+      starts_on: exception.startsOn,
+      ends_on: exception.endsOn,
+      start_time: exception.startTime,
+      end_time: exception.endTime,
+    })),
   });
 }
 
@@ -348,7 +454,22 @@ export async function getFamilyEventPinned(
              from public.family_event_children link
              where link.event_id = event.id and link.family_id = event.family_id
              order by link.child_id
-           ) as child_ids
+           ) as child_ids,
+           coalesce((
+             select jsonb_agg(
+               jsonb_build_object(
+                 'occurrence_on', to_char(exception.occurrence_on, 'YYYY-MM-DD'),
+                 'kind', exception.kind,
+                 'starts_on', case when exception.starts_on is null then null else to_char(exception.starts_on, 'YYYY-MM-DD') end,
+                 'ends_on', case when exception.ends_on is null then null else to_char(exception.ends_on, 'YYYY-MM-DD') end,
+                 'start_time', case when exception.start_time is null then null else to_char(exception.start_time, 'HH24:MI') end,
+                 'end_time', case when exception.end_time is null then null else to_char(exception.end_time, 'HH24:MI') end
+               ) order by exception.occurrence_on
+             )
+             from public.family_event_occurrence_exceptions exception
+             where exception.event_id = event.id
+               and exception.family_id = event.family_id
+           ), '[]'::jsonb) as occurrence_exceptions
     from public.family_events event
     where event.id = ${eventId} and event.family_id = ${familyId}
   `;
@@ -380,7 +501,22 @@ export async function listFamilyEventsPinned(
              from public.family_event_children link
              where link.event_id = event.id and link.family_id = event.family_id
              order by link.child_id
-           ) as child_ids
+           ) as child_ids,
+           coalesce((
+             select jsonb_agg(
+               jsonb_build_object(
+                 'occurrence_on', to_char(exception.occurrence_on, 'YYYY-MM-DD'),
+                 'kind', exception.kind,
+                 'starts_on', case when exception.starts_on is null then null else to_char(exception.starts_on, 'YYYY-MM-DD') end,
+                 'ends_on', case when exception.ends_on is null then null else to_char(exception.ends_on, 'YYYY-MM-DD') end,
+                 'start_time', case when exception.start_time is null then null else to_char(exception.start_time, 'HH24:MI') end,
+                 'end_time', case when exception.end_time is null then null else to_char(exception.end_time, 'HH24:MI') end
+               ) order by exception.occurrence_on
+             )
+             from public.family_event_occurrence_exceptions exception
+             where exception.event_id = event.id
+               and exception.family_id = event.family_id
+           ), '[]'::jsonb) as occurrence_exceptions
     from public.family_events event
     where event.family_id = ${familyId}
       and event.starts_on <= ${toDate}

@@ -21,6 +21,9 @@ const inlineError = source("../components/ui/inline-error.tsx");
 const familyEventChildrenMigration = source(
   "../../../../supabase/migrations/20260802232000_family_event_children.sql",
 );
+const familyEventOccurrenceMigration = source(
+  "../../../../supabase/migrations/20260803003000_family_event_occurrence_exceptions.sql",
+);
 
 describe("native durable mutation contract", () => {
   it("requires exact provider receipts before returning success", () => {
@@ -34,6 +37,8 @@ describe("native durable mutation contract", () => {
       "create_family_event",
       "update_family_event",
       "delete_family_event",
+      "move_family_event_occurrence",
+      "delete_family_event_occurrence",
     ]) {
       assert.ok(familyEvents.includes(`requireMutationReceipt("${operation}"`));
     }
@@ -63,6 +68,14 @@ describe("native durable mutation contract", () => {
       plannerRoute,
       /createFamilyEvent\(creatingEventId, family\.id, input\)/u,
     );
+  });
+
+  it("routes one recurring occurrence through an exact database receipt", () => {
+    assert.match(familyEvents, /\.rpc\("save_family_event_occurrence_exception"/u);
+    assert.match(familyEventOccurrenceMigration, /security definer/u);
+    assert.match(familyEventOccurrenceMigration, /public\.is_family_event_occurrence/u);
+    assert.match(familyEventOccurrenceMigration, /on conflict \(event_id, occurrence_on\) do update/u);
+    assert.match(plannerRoute, /original_occurrence_on \?\? editingEvent\.starts_on/u);
   });
 
   it("keeps editors and checkboxes pending until their receipt resolves", () => {
@@ -102,8 +115,19 @@ describe("native durable mutation contract", () => {
     assert.match(eventComposer, /Does not repeat/u);
     assert.match(eventComposer, /Lasts more than one day/u);
     assert.match(eventComposer, /\{spansDays \? \([\s\S]*?Last day/u);
-    assert.match(eventComposer, /Add a time/u);
+    assert.match(eventComposer, /Include a time/u);
     assert.doesNotMatch(eventComposer, /first day only/u);
+  });
+
+  it("shows recurring scope first and hides series fields for one occurrence", () => {
+    assert.match(eventComposer, /This event/u);
+    assert.match(eventComposer, /Entire series/u);
+    assert.match(eventComposer, /occurrenceOnly \? null/u);
+    assert.match(eventComposer, /Move this event/u);
+    assert.match(eventComposer, /Delete entire series/u);
+    assert.match(eventComposer, /Other dates stay/u);
+    assert.match(eventComposer, /including past dates/u);
+    assert.match(plannerRoute, /recurringEditScope === "occurrence"/u);
   });
 
   it("propagates rejected receipts through Planner, Hours, and Voice", () => {

@@ -12,7 +12,9 @@ import { createIdempotencyKey } from "../../lib/idempotency-key";
 import {
   createFamilyEvent,
   deleteFamilyEvent,
+  deleteFamilyEventOccurrence,
   familyEventChildIds,
+  moveFamilyEventOccurrence,
   updateFamilyEvent,
   type FamilyEventRecord,
 } from "../../lib/family-events";
@@ -39,6 +41,7 @@ import {
 import {
   blankDraft,
   draftFromEvent,
+  draftFromOccurrence,
   draftToInput,
   EventComposer,
   type EventComposerDraft,
@@ -85,6 +88,8 @@ export default function PlannerScreen() {
   const [filterChildId, setFilterChildId] = useState<string | null>(null);
   const [composerDraft, setComposerDraft] = useState<EventComposerDraft | null>(null);
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
+  const [editingEvent, setEditingEvent] = useState<FamilyEventRecord | null>(null);
+  const [recurringEditScope, setRecurringEditScope] = useState<"occurrence" | "series" | null>(null);
   const [creatingEventId, setCreatingEventId] = useState<string | null>(null);
   const [schedulingActivity, setSchedulingActivity] = useState<PlanActivityView | null>(null);
   const [calendarExportOpen, setCalendarExportOpen] = useState(false);
@@ -205,14 +210,33 @@ export default function PlannerScreen() {
 
   function openNewEventComposer(date: DateOnly) {
     setEditingEventId(null);
+    setEditingEvent(null);
+    setRecurringEditScope(null);
     setCreatingEventId(createIdempotencyKey());
     setComposerDraft(blankDraft(date));
   }
 
   function openEditEventComposer(event: FamilyEventRecord) {
     setEditingEventId(event.id);
+    setEditingEvent(event);
     setCreatingEventId(null);
-    setComposerDraft(draftFromEvent(event));
+    if (event.recurrence_rule) {
+      setRecurringEditScope("occurrence");
+      setComposerDraft(draftFromOccurrence(event));
+    } else {
+      setRecurringEditScope(null);
+      setComposerDraft(draftFromEvent(event));
+    }
+  }
+
+  function changeRecurringEditScope(scope: "occurrence" | "series") {
+    if (!editingEvent?.recurrence_rule) return;
+    setRecurringEditScope(scope);
+    setComposerDraft(
+      scope === "occurrence"
+        ? draftFromOccurrence(editingEvent)
+        : draftFromEvent(editingEvent),
+    );
   }
 
   async function handleSaveEvent() {
@@ -220,7 +244,19 @@ export default function PlannerScreen() {
       throw new Error("planner event context is unavailable");
     }
     const input = draftToInput(composerDraft);
-    if (editingEventId) {
+    if (editingEventId && editingEvent?.recurrence_rule && recurringEditScope === "occurrence") {
+      await moveFamilyEventOccurrence(
+        editingEventId,
+        family.id,
+        editingEvent.original_occurrence_on ?? editingEvent.starts_on,
+        {
+          startsOn: composerDraft.startsOn,
+          endsOn: composerDraft.endsOn,
+          startTime: composerDraft.hasTime ? composerDraft.startTime : null,
+          endTime: composerDraft.hasTime ? composerDraft.endTime : null,
+        },
+      );
+    } else if (editingEventId) {
       await updateFamilyEvent(editingEventId, family.id, input);
     } else {
       if (!creatingEventId) {
@@ -230,17 +266,29 @@ export default function PlannerScreen() {
     }
     setComposerDraft(null);
     setEditingEventId(null);
+    setEditingEvent(null);
+    setRecurringEditScope(null);
     setCreatingEventId(null);
     await reload();
   }
 
   async function handleDeleteEvent() {
-    if (!editingEventId) {
+    if (!editingEventId || !family) {
       throw new Error("planner delete context is unavailable");
     }
-    await deleteFamilyEvent(editingEventId);
+    if (editingEvent?.recurrence_rule && recurringEditScope === "occurrence") {
+      await deleteFamilyEventOccurrence(
+        editingEventId,
+        family.id,
+        editingEvent.original_occurrence_on ?? editingEvent.starts_on,
+      );
+    } else {
+      await deleteFamilyEvent(editingEventId);
+    }
     setComposerDraft(null);
     setEditingEventId(null);
+    setEditingEvent(null);
+    setRecurringEditScope(null);
     setCreatingEventId(null);
     await reload();
   }
@@ -406,6 +454,7 @@ export default function PlannerScreen() {
 
       {composerDraft ? (
         <EventComposer
+          key={`${editingEventId ?? creatingEventId ?? "new"}:${recurringEditScope ?? "single"}`}
           visible
           draft={composerDraft}
           isEditing={editingEventId !== null}
@@ -413,9 +462,18 @@ export default function PlannerScreen() {
           onChange={setComposerDraft}
           onSave={handleSaveEvent}
           onDelete={editingEventId ? handleDeleteEvent : undefined}
+          recurringEditScope={recurringEditScope}
+          recurringOriginalDate={
+            editingEvent?.original_occurrence_on ?? editingEvent?.starts_on
+          }
+          onRecurringEditScopeChange={
+            recurringEditScope ? changeRecurringEditScope : undefined
+          }
           onClose={() => {
             setComposerDraft(null);
             setEditingEventId(null);
+            setEditingEvent(null);
+            setRecurringEditScope(null);
             setCreatingEventId(null);
           }}
         />

@@ -74,6 +74,92 @@ describe("family event recurrence", () => {
     assert.equal(events[0].seriesStartsOn, "2026-08-03");
     assert.equal(events[0].occurrenceKey, "event-1:2026-08-10");
   });
+
+  it("cancels one occurrence and moves another without changing the series", () => {
+    const events = expandRecurringFamilyEvents(
+      [
+        {
+          id: "event-1",
+          familyId: "family-1",
+          childId: null,
+          childIds: [],
+          title: "Co-op",
+          startsOn: "2026-08-03",
+          endsOn: "2026-08-03",
+          startTime: "09:00",
+          endTime: "12:00",
+          note: null,
+          recurrence: {
+            frequency: "weekly",
+            interval: 1,
+            weekdays: [1],
+            until: "2026-08-31",
+          },
+          occurrenceExceptions: [
+            {
+              occurrenceOn: "2026-08-10",
+              kind: "cancelled",
+              startsOn: null,
+              endsOn: null,
+              startTime: null,
+              endTime: null,
+            },
+            {
+              occurrenceOn: "2026-08-17",
+              kind: "moved",
+              startsOn: "2026-08-18",
+              endsOn: "2026-08-18",
+              startTime: "10:00",
+              endTime: "13:00",
+            },
+          ],
+          createdAt: "2026-08-01T00:00:00.000Z",
+        },
+      ],
+      "2026-08-10",
+      "2026-08-24",
+    );
+    assert.deepEqual(events.map((event) => event.startsOn), ["2026-08-18", "2026-08-24"]);
+    assert.equal(events[0].originalOccurrenceOn, "2026-08-17");
+    assert.equal(events[0].startTime, "10:00");
+    assert.equal(events[0].seriesStartTime, "09:00");
+  });
+
+  it("includes an occurrence moved into the window from an earlier date", () => {
+    const events = expandRecurringFamilyEvents(
+      [
+        {
+          id: "event-1",
+          familyId: "family-1",
+          childId: null,
+          title: "Co-op",
+          startsOn: "2026-08-03",
+          endsOn: "2026-08-03",
+          startTime: null,
+          endTime: null,
+          note: null,
+          recurrence: { frequency: "weekly", interval: 1, weekdays: [1], until: null },
+          occurrenceExceptions: [
+            {
+              occurrenceOn: "2026-08-03",
+              kind: "moved",
+              startsOn: "2026-08-12",
+              endsOn: "2026-08-12",
+              startTime: null,
+              endTime: null,
+            },
+          ],
+          createdAt: "2026-08-01T00:00:00.000Z",
+        },
+      ],
+      "2026-08-10",
+      "2026-08-16",
+    );
+    assert.deepEqual(events.map((event) => event.startsOn), ["2026-08-10", "2026-08-12"]);
+    const moved = events.find((event) => event.originalOccurrenceOn === "2026-08-03");
+    assert.equal(moved?.startsOn, "2026-08-12");
+    assert.equal(moved?.occurrenceKey, "event-1:2026-08-03");
+  });
 });
 
 describe("family event child audience", () => {

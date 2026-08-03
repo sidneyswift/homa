@@ -536,6 +536,13 @@ async function familyEventChildrenSchemaExists() {
   return rows[0]?.present === true;
 }
 
+async function familyEventOccurrenceExceptionsSchemaExists() {
+  const rows = await sql`
+    select to_regclass('public.family_event_occurrence_exceptions') is not null as present
+  `;
+  return rows[0]?.present === true;
+}
+
 async function planActivityScheduleSchemaExists() {
   const rows = await sql`
     select to_regclass('public.plan_activity_schedule') is not null as present
@@ -2605,6 +2612,12 @@ async function expectAuthenticatedIsolation() {
             title: "Isolation check family event",
             starts_on: "2026-01-01",
             ends_on: "2026-01-01",
+            recurrence_rule: {
+              frequency: "weekly",
+              interval: 1,
+              weekdays: [4],
+              until: "2026-02-01",
+            },
           },
           "create Family B family_events fixture",
         )
@@ -2623,6 +2636,33 @@ async function expectAuthenticatedIsolation() {
         }),
         "create Family B family_event_children fixture",
       );
+    }
+    const familyEventOccurrenceExceptionsSchemaAvailable =
+      await familyEventOccurrenceExceptionsSchemaExists();
+    if (familyEventOccurrenceExceptionsSchemaAvailable && familyEventBId) {
+      const receipt = await jsonResponse(
+        await restAs(
+          familyBUser.accessToken,
+          "rpc/save_family_event_occurrence_exception",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              p_event_id: familyEventBId,
+              p_family_id: familyBId,
+              p_occurrence_on: "2026-01-08",
+              p_kind: "cancelled",
+              p_starts_on: null,
+              p_ends_on: null,
+              p_start_time: null,
+              p_end_time: null,
+            }),
+          },
+        ),
+        "create Family B family event occurrence exception fixture",
+      );
+      if (receipt !== "2026-01-08") {
+        throw new Error("family event occurrence exception fixture returned no exact receipt");
+      }
     }
     const planActivityScheduleSchemaAvailable = await planActivityScheduleSchemaExists();
     const planActivityScheduleBId = planActivityScheduleSchemaAvailable
@@ -3679,6 +3719,82 @@ async function expectAuthenticatedIsolation() {
           label,
           true,
           "not yet enforced: the additive family_event_children migration is pending on this target",
+        );
+      }
+    }
+
+    if (familyEventOccurrenceExceptionsSchemaAvailable && familyEventBId) {
+      await expectAuthenticatedRead(
+        familyBUser.accessToken,
+        "family_event_occurrence_exceptions",
+        familyEventBId,
+        1,
+        "auth member can read own family event occurrence exception",
+        "event_id",
+      );
+      await expectAuthenticatedRead(
+        familyAUser.accessToken,
+        "family_event_occurrence_exceptions",
+        familyEventBId,
+        0,
+        "auth member cannot read another family's event occurrence exception",
+        "event_id",
+      );
+      await expectAuthenticatedInsertDenied(
+        familyBUser.accessToken,
+        "family_event_occurrence_exceptions",
+        {
+          family_id: familyBId,
+          event_id: familyEventBId,
+          occurrence_on: "2026-01-15",
+          kind: "cancelled",
+        },
+        "auth member cannot bypass the occurrence exception RPC",
+      );
+      await expectAuthenticatedUpdateDenied(
+        familyBUser.accessToken,
+        "family_event_occurrence_exceptions",
+        "event_id",
+        familyEventBId,
+        { kind: "moved" },
+        "auth member cannot edit an occurrence exception directly",
+      );
+      await expectAuthenticatedDeleteDenied(
+        familyBUser.accessToken,
+        "family_event_occurrence_exceptions",
+        "event_id",
+        familyEventBId,
+        "auth member cannot delete an occurrence exception directly",
+      );
+      await expectAuthenticatedRpcDenied(
+        familyAUser.accessToken,
+        "save_family_event_occurrence_exception",
+        {
+          p_event_id: familyEventBId,
+          p_family_id: familyBId,
+          p_occurrence_on: "2026-01-15",
+          p_kind: "cancelled",
+          p_starts_on: null,
+          p_ends_on: null,
+          p_start_time: null,
+          p_end_time: null,
+        },
+        "auth member cannot change another family's recurring occurrence through RPC",
+      );
+    } else {
+      coveredTables.add("family_event_occurrence_exceptions");
+      for (const label of [
+        "auth member can read own family event occurrence exception",
+        "auth member cannot read another family's event occurrence exception",
+        "auth member cannot bypass the occurrence exception RPC",
+        "auth member cannot edit an occurrence exception directly",
+        "auth member cannot delete an occurrence exception directly",
+        "auth member cannot change another family's recurring occurrence through RPC",
+      ]) {
+        report(
+          label,
+          true,
+          "not yet enforced: the additive family event occurrence exception migration is pending on this target",
         );
       }
     }
