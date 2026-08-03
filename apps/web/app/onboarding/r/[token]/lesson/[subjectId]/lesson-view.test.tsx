@@ -198,9 +198,10 @@ function contrastRatio(first: string, second: string): number {
 }
 
 function interactiveClassForText(html: string, text: string): string {
+  const escapedText = text.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
   const match = html.match(
     new RegExp(
-      `<(?:a|button)[^>]*class="([^"]+)"[^>]*>${text}</(?:a|button)>`,
+      `<(?:a|button)[^>]*class="([^"]+)"[^>]*>(?:<span[^>]*>)?${escapedText}(?:</span>)?</(?:a|button)>`,
       "u",
     ),
   );
@@ -268,7 +269,7 @@ describe("retained subject lesson states", () => {
         "Lesson goal",
         LESSON_GOAL_CONTEXT,
         BASE_PROPS.targetStatement,
-        "HOMA is making the lesson and worksheet",
+        "Homa is making the lesson and worksheet",
         "This page updates when both are ready.",
         "You can leave and come back. Your request is saved.",
       ]);
@@ -279,7 +280,7 @@ describe("retained subject lesson states", () => {
       );
       assert.doesNotMatch(
         html,
-        /HOMA is making this lesson|Making the worksheet|lesson request|practice page|Try again|Mark lesson complete|Keep/u,
+        /Homa is making this lesson|Making the worksheet|lesson request|practice page|Try again|Mark lesson complete|Keep/u,
       );
     }
   });
@@ -472,20 +473,15 @@ describe("owner worksheet Keep and daily-loop handoff", () => {
     assert.equal(html.match(/Keep in Binder/gu)?.length, 1);
     assert.match(
       html,
-      /<button[^>]*>Keep in Binder<\/button><p[^>]*>Binder saves the worksheet for later\. The lesson stays at this link\.<\/p>/u,
+      /<button[^>]*><span>Keep in Binder<\/span><\/button><p[^>]*>Binder saves the worksheet for later\. The lesson stays at this link\.<\/p>/u,
     );
     assert.doesNotMatch(
       html,
       /Kept in Binder|Message Homa about this lesson|Prefer text\?|Phone setup is optional\.|Open phone settings/u,
     );
     const className = interactiveClassForText(html, "Keep in Binder");
-    assert.match(className, /min-h-11/u);
-    assert.match(className, /bg-\[var\(--clay-700\)\]/u);
-    assert.match(className, /hover:bg-\[var\(--clay-600\)\]/u);
-    assert.match(
-      className,
-      /focus-visible:shadow-\[var\(--shadow-focus\)\]/u,
-    );
+    assert.match(className, /quiet-action quiet-action--primary/u);
+    assert.doesNotMatch(className, /clay-700|clay-600|rounded-pill/u);
   });
 
   it("shows the kept handoff and conditional phone setup link after finalization", () => {
@@ -500,35 +496,35 @@ describe("owner worksheet Keep and daily-loop handoff", () => {
 
     assertTextOrder(html, [
       "Kept in Binder",
-      "HOMA can help you adjust the lesson or talk through how it went.",
-      "Message HOMA about this lesson",
+      "Homa can help you adjust the lesson or talk through how it went.",
+      "Message Homa about this lesson",
       "Prefer text?",
-      "Phone setup is optional. HOMA sends one research note by text each weekday morning.",
+      "Phone setup is optional. Homa sends one research note by text each weekday morning.",
       "Open phone settings",
     ]);
     assert.match(
       html,
-      /href="\/app"[^>]*>Message HOMA about this lesson<\/a>/u,
+      /class="[^"]*quiet-action quiet-action--primary[^"]*" href="\/app"><span>Message Homa about this lesson<\/span><\/a>/u,
     );
     assert.match(
       html,
-      /href="\/app\/settings\?edit=phone#parents"[^>]*>Open phone settings<\/a>/u,
+      /class="[^"]*quiet-action quiet-action--secondary[^"]*" href="\/app\/settings\?edit=phone#parents"><span>Open phone settings<\/span><\/a>/u,
     );
     assert.match(
       html,
       /<section[^>]*aria-labelledby="phone-setup-heading"[^>]*class="[^"]*border-border-subtle[^"]*bg-card[^"]*"[^>]*>/u,
     );
     assert.match(
-      interactiveClassForText(html, "Message HOMA about this lesson"),
-      /bg-\[var\(--clay-700\)\]/u,
+      interactiveClassForText(html, "Message Homa about this lesson"),
+      /quiet-action quiet-action--primary/u,
     );
     assert.match(
       interactiveClassForText(html, "Open phone settings"),
-      /border-border/u,
+      /quiet-action quiet-action--secondary/u,
     );
     assert.doesNotMatch(
       interactiveClassForText(html, "Open phone settings"),
-      /bg-\[var\(--clay-700\)\]/u,
+      /clay-700|clay-600|rounded-pill/u,
     );
     assert.doesNotMatch(html, /The worksheet is in Binder\./u);
 
@@ -540,10 +536,10 @@ describe("owner worksheet Keep and daily-loop handoff", () => {
       },
       showPhoneSetupLink: false,
     });
-    assert.match(linkedPhoneHtml, /Message HOMA about this lesson/u);
+    assert.match(linkedPhoneHtml, /Message Homa about this lesson/u);
     assert.doesNotMatch(
       linkedPhoneHtml,
-      /Prefer text\?|Phone setup is optional\.|HOMA sends one research note by text each weekday morning\.|Open phone settings/u,
+      /Prefer text\?|Phone setup is optional\.|Homa sends one research note by text each weekday morning\.|Open phone settings/u,
     );
   });
 
@@ -602,7 +598,7 @@ describe("owner worksheet Keep and daily-loop handoff", () => {
 
     assert.doesNotMatch(
       html,
-      /Keep in Binder|Binder saves the worksheet|Kept in Binder|Message HOMA about this lesson|Prefer text\?|research note by text|Open phone settings/u,
+      /Keep in Binder|Binder saves the worksheet|Kept in Binder|Message Homa about this lesson|Prefer text\?|research note by text|Open phone settings/u,
     );
   });
 
@@ -693,17 +689,13 @@ describe("retained lesson contrast and retry", () => {
       interactiveClassForText(failedHtml, "Make the lesson again"),
       interactiveClassForText(inactiveHtml, "Back to the report"),
     ]) {
-      assert.match(className, /bg-\[var\(--clay-700\)\]/u);
-      assert.match(className, /hover:bg-\[var\(--clay-600\)\]/u);
-      assert.match(
-        className,
-        /focus-visible:shadow-\[var\(--shadow-focus\)\]/u,
-      );
+      assert.match(className, /quiet-action/u);
+      assert.doesNotMatch(className, /clay-700|clay-600|rounded-pill/u);
     }
     assert.doesNotMatch(readyHtml, />Worksheet ready</u);
     assert.match(
       readyHtml,
-      /marker:text-\[var\(--clay-700\)\]/u,
+      /marker:text-\[var\(--homa-midnight-action\)\]/u,
     );
     assert.doesNotMatch(MATERIAL_CARD_SOURCE, /\btext-brand\b/u);
     assert.match(RETRY_SOURCE, /text-\[var\(--rose-600\)\]/u);

@@ -79,17 +79,17 @@ export function WelcomeChooser({
   }, [router, pathname]);
 
   return (
-    <div className="wall-overlay" onClick={dismiss}>
+    <div data-brand-surface="report-welcome" className="wall-overlay" onClick={dismiss}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label={`${childName}'s full report is open`}
-        className="wall-card"
+        className="wall-card quiet-report__welcome"
         onClick={(event) => event.stopPropagation()}
       >
         <p
           className="font-mono text-[0.65rem] uppercase tracking-widest"
-          style={{ color: "var(--sage-700)" }}
+          style={{ color: "var(--homa-constructive-ink)" }}
         >
           Your 7 free days started
         </p>

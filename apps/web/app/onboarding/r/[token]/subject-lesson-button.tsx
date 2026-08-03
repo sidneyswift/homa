@@ -32,7 +32,7 @@ export const SUBJECT_LESSON_GENERIC_FAILURE =
 export const SUBJECT_LESSON_OWNER_DENIAL =
   "Your report is safe. This lesson can only be built from the account that created the report.";
 export const SUBJECT_LESSON_INFO_NOTE_CLASS =
-  "rounded-md bg-[var(--info-soft)] px-3 py-2 text-xs font-semibold text-strong";
+  "rounded-[var(--homa-radius-control)] bg-[var(--homa-info-tint)] px-3 py-2 text-xs font-semibold text-[var(--homa-ink)]";
 
 /**
  * Starts one owner-authorized lesson package. The route remains the authority
@@ -147,7 +147,7 @@ export function SubjectLessonButton({
   const [wallOpen, setWallOpen] = useState(false);
   const buttonClass = reportButtonClass(
     emphasis === "primary" ? "primary-strong" : "secondary",
-    "inline-flex min-h-11 items-center px-4 py-2 text-xs font-semibold focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none",
+    "inline-flex min-h-11 items-center px-4 py-2 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-[var(--homa-visual-coral)] focus-visible:outline-offset-2",
   );
 
   if (lessonUrl) {
@@ -199,7 +199,7 @@ export function SubjectLessonButton({
           : "Build the next lesson"}
       </button>
       {state === "failed" ? (
-        <p className="w-full text-xs text-[var(--rose-600)]" role="alert">
+        <p className="w-full text-xs text-[var(--homa-error-ink)]" role="alert">
           {SUBJECT_LESSON_GENERIC_FAILURE}
         </p>
       ) : null}

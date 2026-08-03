@@ -50,7 +50,10 @@ export function ReportSnapshot({
   if (story.subjects.length === 0) return null;
 
   return (
-    <div className={`rounded-lg bg-[var(--surface-sunken)] p-5 ${className}`.trim()}>
+    <div
+      data-brand-layer="report-snapshot"
+      className={`quiet-report__snapshot rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-canvas)] p-5 ${className}`.trim()}
+    >
       <p className="font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
         {childName}&apos;s snapshot {"\u00b7"} {generatedDate}
       </p>

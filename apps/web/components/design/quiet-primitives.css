@@ -1412,7 +1412,7 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
 }
 
 /* -------------------------------------------------------------------------
-   Quiet account, onboarding, and paywall surfaces
+   Quiet account, onboarding, paywall, report, and printable artifact surfaces
    ------------------------------------------------------------------------- */
 .quiet-account-surface,
 .quiet-onboarding-surface,
@@ -1484,6 +1484,38 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
 }
 @media (prefers-reduced-motion: reduce) {
   .quiet-onboarding-surface .flow-step-in { animation: none; }
+}
+
+/* Reports are evidence first. These hooks keep the shared renderer, the
+   sample preview, and print-first renditions on one surface grammar while
+   leaving the data and disclosure behavior in their route components. */
+.quiet-report { color: var(--homa-ink); }
+.quiet-report__hero { border-color: var(--homa-control-boundary); }
+.quiet-report__note,
+.quiet-report__support,
+.quiet-report__lock { border-color: var(--homa-control-boundary); }
+.quiet-report__snapshot,
+.quiet-report__methodology { color: var(--homa-ink); }
+.quiet-report__subjects { box-shadow: 0 10px 26px color-mix(in srgb, var(--homa-ink) 6%, transparent); }
+.quiet-report__reveal { box-shadow: 0 10px 26px color-mix(in srgb, var(--homa-ink) 7%, transparent); }
+.quiet-report__cta { color: var(--homa-paper); }
+.quiet-report__footer { border-color: var(--homa-soft-boundary); }
+.quiet-report a:focus-visible,
+.quiet-report button:focus-visible,
+.quiet-report summary:focus-visible { outline: 3px solid color-mix(in srgb, var(--homa-visual-coral) 70%, transparent); outline-offset: 3px; }
+.quiet-report-preview { color: var(--homa-ink); }
+.quiet-print-surface { color: var(--homa-ink); }
+
+@media print {
+  .quiet-print-surface { background: var(--homa-paper) !important; }
+  .quiet-print-surface .quiet-frame { border: 0; box-shadow: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiet-report-preview,
+  .quiet-report__reveal { transition: none; }
+  .quiet-report-preview:hover,
+  .quiet-report__reveal:hover { transform: none; }
 }
 
 /* Child routes inherit the shell authority without requiring a route-sized

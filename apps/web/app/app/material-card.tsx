@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import type { FamilyAssetReference } from "../../lib/library/family-asset-reference";
+import { Icon } from "../../components/design/Icon";
 
 /**
  * Renders a create_printable result as a card around the real artifact:
@@ -76,9 +76,12 @@ export function MaterialCard({
     .join(" · ");
 
   return (
-    <div className="w-full max-w-sm rounded-lg border border-border bg-card p-4 shadow-sm">
+    <div
+      data-brand-layer="material-card"
+      className="quiet-artifact-card w-full max-w-sm border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-4 shadow-sm"
+    >
       {showStatusHeadline ? (
-        <p className="text-sm font-medium text-[var(--clay-700)]">{headline}</p>
+        <p className="text-sm font-medium text-[var(--homa-brand-text)]">{headline}</p>
       ) : null}
       <p
         className={`${showStatusHeadline ? "mt-1 " : ""}font-display text-lg font-semibold text-strong`}
@@ -95,7 +98,7 @@ export function MaterialCard({
               {source.libraryUrl ? (
                 <a
                   href={source.libraryUrl}
-                  className="underline decoration-border underline-offset-2 hover:text-body"
+                  className="underline decoration-[var(--homa-control-boundary)] underline-offset-2 hover:text-[var(--homa-ink)]"
                 >
                   {source.title}
                 </a>
@@ -111,7 +114,7 @@ export function MaterialCard({
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Open the ${material.title} PDF`}
-        className="mt-3 block overflow-hidden rounded-md border border-border-subtle bg-white transition-shadow hover:shadow-md focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none"
+        className="quiet-artifact-card__preview mt-3 block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--homa-visual-coral)]"
       >
         {/* Plain img on purpose: blob previews are remote, sized by the
             letter aspect ratio, and never above the fold. */}
@@ -134,9 +137,9 @@ export function MaterialCard({
             onClick={() => setPageIndex((index) => Math.max(0, index - 1))}
             disabled={pageIndex === 0}
             aria-label="Previous page"
-            className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border bg-card text-body transition-colors hover:border-[var(--clay-200)] disabled:opacity-40"
+            className="quiet-action quiet-action--secondary min-h-9 min-w-9 px-2 text-body disabled:opacity-40"
           >
-            <ChevronLeft size={16} aria-hidden="true" />
+            <Icon name="back" size={16} />
           </button>
           <span aria-live="polite" className="text-xs font-semibold text-muted">
             Page {pageIndex + 1} of {pageCount}
@@ -149,9 +152,9 @@ export function MaterialCard({
             }
             disabled={pageIndex >= pagePreviews.length - 1}
             aria-label="Next page"
-            className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border bg-card text-body transition-colors hover:border-[var(--clay-200)] disabled:opacity-40"
+            className="quiet-action quiet-action--secondary min-h-9 min-w-9 px-2 text-body disabled:opacity-40"
           >
-            <ChevronRight size={16} aria-hidden="true" />
+            <Icon name="next" size={16} />
           </button>
         </div>
       ) : null}
@@ -159,7 +162,7 @@ export function MaterialCard({
         href={pdfHref}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-4 inline-flex min-h-11 items-center rounded-pill bg-[var(--clay-700)] px-5 py-2.5 text-sm font-semibold text-on-brand shadow-sm transition-colors hover:bg-[var(--clay-600)] focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none motion-safe:active:scale-[var(--press-scale)]"
+        className="quiet-action quiet-action--primary mt-4 min-h-11 px-5 py-2.5 text-sm shadow-sm"
       >
         {pageCount > 1 ? `Print all ${pageCount} pages` : "Print it"}
       </a>

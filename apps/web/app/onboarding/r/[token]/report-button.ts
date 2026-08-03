@@ -1,10 +1,9 @@
 /**
- * Shared class strings for the report view's pill buttons
+ * Shared class strings for the report view's controls
  * (/onboarding/r/[token]). Centralizes the one thing that silently drifted
- * once already: the emil-design-eng motion contract (brand ease-out transition
- * plus a reduced-motion-safe press scale) together with the pill shape and the
- * two color variants. A new report button literally cannot be built without
- * carrying that motion now.
+ * once already: the Quiet motion and authority contract together with the
+ * control geometry and the two color variants. A new report button literally
+ * cannot be built without carrying that motion now.
  *
  * Callers still pass their own size, padding, and margins. Those legitimately
  * vary per placement, so keeping them at the call site is intentional, not an
@@ -17,24 +16,23 @@ export type ReportButtonVariant =
   | "primary-strong"
   | "secondary";
 
-/** Pill shape plus the motion contract every report button must carry. */
+/** Control shape plus the motion contract every report button must carry. */
 const REPORT_BUTTON_BASE =
-  "rounded-pill transition duration-(--dur-fast) ease-out motion-safe:active:scale-[var(--press-scale)]";
+  "quiet-action transition duration-(--homa-motion-fast) ease-out motion-safe:active:scale-[var(--press-scale)]";
 
 const REPORT_BUTTON_VARIANT: Record<ReportButtonVariant, string> = {
-  /** Solid clay, the main action. */
-  primary: "bg-brand text-on-brand hover:bg-brand-hover",
-  /** AA-safe solid clay for new normal-size controls. */
-  "primary-strong":
-    "bg-[var(--clay-700)] text-on-brand hover:bg-[var(--clay-600)]",
-  /** Bordered card surface, a secondary or side action. */
-  secondary: "border border-border bg-card text-strong hover:border-brand",
+  /** Midnight action, the main action. */
+  primary: "quiet-action--primary",
+  /** Same authority treatment for a prominent report action. */
+  "primary-strong": "quiet-action--primary",
+  /** Bordered paper surface, a secondary or side action. */
+  secondary: "quiet-action--secondary",
 };
 
 /**
- * Build a report pill button's className.
- * @param variant `"primary"` (legacy solid clay), `"primary-strong"`
- *                (AA-safe solid clay), or `"secondary"` (bordered).
+ * Build a report control's className.
+ * @param variant `"primary"` (midnight action), `"primary-strong"`
+ *                (same authority treatment), or `"secondary"` (bordered).
  * @param layout  per-placement classes: size, padding, margins, `inline-flex`,
  *                `items-center`, `font-semibold`, `print:hidden`, and so on.
  */
