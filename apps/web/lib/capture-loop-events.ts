@@ -203,6 +203,15 @@ async function persistCaptureLoopEventInTransaction(
                     and receipt.effect = 'plan_activity.scheduled'
                     and receipt.status = 'committed'
                     and receipt.undone_at is null
+              ) or (
+                ${props.profile}::text = 'direct_mutation'
+                and ${props.intent}::text = 'schedule_learning'
+                and exists (
+                  select 1 from public.plan_activity_schedule receipt
+                  where receipt.id = ${props.receipt_id}::uuid
+                    and receipt.id = ${props.object_id}::uuid
+                    and receipt.family_id = ${familyId}::uuid
+                )
               )
               when ${props.object_kind}::text = 'progress_operation' then exists (
                 select 1 from public.child_progress_operations receipt

@@ -2,7 +2,6 @@ import {
   CAPTURE_LOOP_EVENT_NAME,
   buildCaptureLoopNativeClientContext,
   nativeCaptureLoopEventPropsSchema,
-  type CaptureLoopEventProps,
   type CaptureLoopNativeClientContext,
 } from "@homa/core";
 import Constants from "expo-constants";
@@ -10,11 +9,17 @@ import * as Updates from "expo-updates";
 import { Platform } from "react-native";
 
 import { emitFamilyEvent } from "./events";
+import type { NativeCaptureLoopEventInput } from "./capture-loop-session";
 
-export type NativeCaptureLoopEventInput = Omit<
-  CaptureLoopEventProps,
-  "client_context"
->;
+export { createNativeCaptureLoopSession } from "./capture-loop-session";
+export type {
+  NativeCaptureLoopEventInput,
+  NativeCaptureLoopIdFactory,
+  NativeCaptureLoopSession,
+  NativeCaptureLoopSessionInput,
+  NativeCaptureLoopStage,
+  NativeCaptureLoopStageEmitter,
+} from "./capture-loop-session";
 
 /**
  * Reads code identity only. Expo runtimeVersion is the fingerprint-policy

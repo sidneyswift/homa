@@ -27,6 +27,14 @@ const relayHandlerPath = new URL(
   import.meta.url,
 );
 const checkerPath = new URL("./events-check.mts", import.meta.url);
+const plannerPath = new URL(
+  "../apps/mobile/src/app/(tabs)/planner.tsx",
+  import.meta.url,
+);
+const nativeScheduleMigrationPath = new URL(
+  "../supabase/migrations/20260803043000_native_capture_loop_schedule_receipts.sql",
+  import.meta.url,
+);
 
 test("capture loop retries are family-scoped and idempotent in storage", () => {
   assert.equal(existsSync(migrationPath), true);
@@ -89,11 +97,17 @@ test("the authenticated relay preserves family row scope without adding it to lo
   assert.match(handler, /dependencies\.persist/u);
 });
 
-test("the canonical event remains staged until journey-owned emitters ship", () => {
+test("the canonical event is emitted by the native Planner journey", () => {
   const checker = readFileSync(checkerPath, "utf8");
+  const planner = readFileSync(plannerPath, "utf8");
 
-  assert.match(checker, /product\.loop_stage_recorded/u);
-  for (const issue of ["gh#532", "gh#304", "gh#347", "gh#392", "gh#394"]) {
-    assert.match(checker, new RegExp(issue, "u"));
-  }
+  assert.match(checker, /CAPTURE_LOOP_EVENT_NAME/u);
+  assert.match(checker, /captureLoopWrapperSites/u);
+  assert.doesNotMatch(checker, /\[\s*"product\.loop_stage_recorded"/u);
+  assert.match(planner, /emitNativeCaptureLoopStage/u);
+  assert.match(planner, /verifyNativeScheduleOutcome/u);
+  assert.match(planner, /captureLoopId: loop\?\.loopId/u);
+  const migration = readFileSync(nativeScheduleMigrationPath, "utf8");
+  assert.match(migration, /schedule_plan_activity_native_v1/u);
+  assert.match(migration, /mobile_capture_loop_receipts/u);
 });

@@ -46,6 +46,8 @@ export async function getScheduledActivities(
 
 export interface ScheduleActivityInput {
   familyId: string;
+  /** When present, use the server-bound native mutation wrapper. */
+  captureLoopId?: string;
   childId: string;
   subjectId: string;
   week: number;
@@ -118,17 +120,31 @@ function parseScheduleReceipt(raw: unknown): ScheduleReceipt | null {
 export async function scheduleActivity(
   input: ScheduleActivityInput,
 ): Promise<{ id: string; scheduledDate: string }> {
-  const result = await supabase
-    .rpc("schedule_plan_activity_v2", {
-      target_child_id: input.childId,
-      target_subject_id: input.subjectId,
-      target_week: input.week,
-      target_activity_index: input.activityIndex,
-      target_scheduled_date: input.scheduledDate,
-      target_expected_text: input.expectedText,
-      target_plan_revision: input.planRevision,
-      target_schedule_id: null,
-    })
+  const result = await supabase.rpc(
+    input.captureLoopId ? "schedule_plan_activity_native_v1" : "schedule_plan_activity_v2",
+    input.captureLoopId
+      ? {
+          target_loop_id: input.captureLoopId,
+          target_child_id: input.childId,
+          target_subject_id: input.subjectId,
+          target_week: input.week,
+          target_activity_index: input.activityIndex,
+          target_scheduled_date: input.scheduledDate,
+          target_expected_text: input.expectedText,
+          target_plan_revision: input.planRevision,
+          target_schedule_id: null,
+        }
+      : {
+          target_child_id: input.childId,
+          target_subject_id: input.subjectId,
+          target_week: input.week,
+          target_activity_index: input.activityIndex,
+          target_scheduled_date: input.scheduledDate,
+          target_expected_text: input.expectedText,
+          target_plan_revision: input.planRevision,
+          target_schedule_id: null,
+        },
+  )
     .single();
   const rawReceipt = requireMutationReceipt("schedule_plan_activity", result);
   const receipt = parseScheduleReceipt(rawReceipt);

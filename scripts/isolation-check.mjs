@@ -3998,6 +3998,72 @@ async function expectAuthenticatedIsolation() {
           true,
         );
       }
+      const [nativeScheduleFunction] = await sql`
+        select to_regprocedure(
+          'public.schedule_plan_activity_native_v1(uuid,uuid,text,smallint,smallint,date,text,bigint,uuid)'
+        ) is not null as available
+      `;
+      if (nativeScheduleFunction?.available === true) {
+        await expectAuthenticatedRpcDenied(
+          familyAUser.accessToken,
+          "schedule_plan_activity_native_v1",
+          {
+            target_loop_id: "00000000-0000-4000-8000-0000000000aa",
+            target_child_id: childBId,
+            target_subject_id: "isolation-check",
+            target_week: 1,
+            target_activity_index: 0,
+            target_scheduled_date: "2026-01-04",
+            target_expected_text: "Cross-family source.",
+            target_plan_revision: 1,
+            target_schedule_id: null,
+          },
+          "auth member cannot bind a native schedule loop to another family's plan activity",
+        );
+        const [nativeSchedulePrivileges] = await sql`
+          select
+            has_function_privilege(
+              'authenticated',
+              'public.schedule_plan_activity_native_v1(uuid,uuid,text,smallint,smallint,date,text,bigint,uuid)',
+              'execute'
+            ) as authenticated_can_execute,
+            has_function_privilege(
+              'anon',
+              'public.schedule_plan_activity_native_v1(uuid,uuid,text,smallint,smallint,date,text,bigint,uuid)',
+              'execute'
+            ) as anon_can_execute
+        `;
+        report(
+          "native schedule RPC is authenticated-only",
+          nativeSchedulePrivileges?.authenticated_can_execute === true &&
+            nativeSchedulePrivileges?.anon_can_execute === false,
+          JSON.stringify(nativeSchedulePrivileges),
+        );
+        const [nativeReceiptPrivileges] = await sql`
+          select
+            has_table_privilege(
+              'authenticated',
+              'public.mobile_capture_loop_receipts',
+              'select'
+            ) as authenticated_can_read,
+            has_table_privilege(
+              'anon',
+              'public.mobile_capture_loop_receipts',
+              'select'
+            ) as anon_can_read
+        `;
+        report(
+          "native schedule receipt bindings are server-only",
+          nativeReceiptPrivileges?.authenticated_can_read === false &&
+            nativeReceiptPrivileges?.anon_can_read === false,
+          JSON.stringify(nativeReceiptPrivileges),
+        );
+      } else {
+        report(
+          "native schedule RPC absent from target (additive migration not applied yet); nothing exposed",
+          true,
+        );
+      }
       await expectAuthenticatedRead(
         familyBUser.accessToken,
         "plan_activity_schedule",

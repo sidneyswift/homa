@@ -48,6 +48,8 @@ describe("native durable mutation contract", () => {
     for (const operation of ["schedule_plan_activity", "unschedule_plan_activity"]) {
       assert.ok(planSchedule.includes(`requireMutationReceipt("${operation}"`));
     }
+    assert.match(planSchedule, /schedule_plan_activity_native_v1/u);
+    assert.match(plannerRoute, /captureLoopId: loop\?\.loopId/u);
     assert.match(
       childPlans,
       /\.rpc\("set_plan_activity_check_v2"/u,

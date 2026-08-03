@@ -39,8 +39,10 @@ const materialLineageSiblingId = uuid("3", 13);
 const materialLineageCorrectedId = uuid("3", 14);
 const childAId = uuid("2", 1);
 const mutablePlanAId = uuid("2", 2);
+const childBId = uuid("2", 3);
 const scheduleAId = uuid("4", 1);
 const scheduleBId = uuid("4", 2);
+const nativeScheduleLoopId = uuid("a", 1);
 const progressRecordedId = uuid("6", 1);
 const progressPendingId = uuid("6", 2);
 const progressConflictId = uuid("6", 3);
@@ -232,6 +234,8 @@ async function run(
 
 const baseSchema = `
   create extension if not exists pgcrypto;
+  create role authenticated;
+  create role anon;
   create table public.families (id uuid primary key);
   create table public.events (
     id uuid primary key default gen_random_uuid(),
@@ -273,6 +277,48 @@ const baseSchema = `
     id uuid primary key,
     family_id uuid not null references public.families (id) on delete cascade
   );
+  create or replace function public.schedule_plan_activity_v2(
+    target_child_id uuid,
+    target_subject_id text,
+    target_week smallint,
+    target_activity_index smallint,
+    target_scheduled_date date,
+    target_expected_text text,
+    target_plan_revision bigint,
+    target_schedule_id uuid default null
+  )
+  returns table (
+    status text,
+    reason text,
+    family_id uuid,
+    plan_id uuid,
+    plan_revision bigint,
+    scheduled_date date,
+    activity_text text,
+    schedule_id uuid
+  )
+  language plpgsql
+  security definer
+  as $$
+  begin
+    if target_child_id <> '${childAId}'::uuid then
+      raise exception 'child does not belong to the caller''s family'
+        using errcode = '42501';
+    end if;
+    insert into public.plan_activity_schedule (id, family_id)
+    values ('${scheduleAId}'::uuid, '${familyAId}'::uuid)
+    on conflict (id) do nothing;
+    return query select
+      'applied'::text,
+      null::text,
+      '${familyAId}'::uuid,
+      null::uuid,
+      1::bigint,
+      target_scheduled_date,
+      target_expected_text,
+      '${scheduleAId}'::uuid;
+  end;
+  $$;
   create table public.family_events (
     id uuid primary key,
     family_id uuid not null references public.families (id) on delete cascade
@@ -346,6 +392,7 @@ async function main(): Promise<void> {
     for (const migration of [
       "20260802225000_events_family_delete_cascade.sql",
       "20260802230000_capture_loop_event_idempotency.sql",
+      "20260803043000_native_capture_loop_schedule_receipts.sql",
     ]) {
       await run(
         path.join(postgresBin, "psql"),
@@ -379,7 +426,9 @@ async function main(): Promise<void> {
 
     await sql`
       insert into public.children (id, family_id)
-      values (${childAId}, ${familyAId})
+      values
+        (${childAId}, ${familyAId}),
+        (${childBId}, ${familyBId})
     `;
     await sql`
       insert into public.child_plans (id, child_id)
@@ -427,6 +476,101 @@ async function main(): Promise<void> {
         (${scheduleAId}, ${familyAId}),
         (${scheduleBId}, ${familyBId})
     `;
+    const nativeScheduleRows = await sql<{
+      status: string;
+      family_id: string;
+      schedule_id: string;
+      scheduled_date: string;
+    }[]>`
+      select status, family_id, schedule_id, scheduled_date::text
+      from public.schedule_plan_activity_native_v1(
+        ${nativeScheduleLoopId}::uuid,
+        ${childAId}::uuid,
+        'math'::text,
+        1::smallint,
+        0::smallint,
+        '2026-08-10'::date,
+        'Native schedule fixture.'::text,
+        1::bigint,
+        null::uuid
+      )
+    `;
+    assert.deepEqual(nativeScheduleRows[0], {
+      status: "applied",
+      family_id: familyAId,
+      schedule_id: scheduleAId,
+      scheduled_date: "2026-08-10",
+    });
+    const nativeBindings = await sql<{
+      loop_id: string;
+      family_id: string;
+      receipt_id: string;
+      child_id: string;
+      scheduled_date: string;
+    }[]>`
+      select loop_id, family_id, receipt_id, child_id, scheduled_date::text
+      from public.mobile_capture_loop_receipts
+      where loop_id = ${nativeScheduleLoopId}::uuid
+    `;
+    assert.deepEqual(nativeBindings[0], {
+      loop_id: nativeScheduleLoopId,
+      family_id: familyAId,
+      receipt_id: scheduleAId,
+      child_id: childAId,
+      scheduled_date: "2026-08-10",
+    });
+    const nativeRetryRows = await sql<{ status: string; schedule_id: string }[]>`
+      select status, schedule_id
+      from public.schedule_plan_activity_native_v1(
+        ${nativeScheduleLoopId}::uuid,
+        ${childAId}::uuid,
+        'math'::text,
+        1::smallint,
+        0::smallint,
+        '2026-08-10'::date,
+        'Native schedule fixture.'::text,
+        1::bigint,
+        null::uuid
+      )
+    `;
+    assert.deepEqual(nativeRetryRows[0], {
+      status: "applied",
+      schedule_id: scheduleAId,
+    });
+    await assert.rejects(
+      sql`
+        select *
+        from public.schedule_plan_activity_native_v1(
+          ${nativeScheduleLoopId}::uuid,
+          ${childAId}::uuid,
+          'math'::text,
+          1::smallint,
+          0::smallint,
+          '2026-08-11'::date,
+          'Native schedule fixture.'::text,
+          1::bigint,
+          null::uuid
+        )
+      `,
+      /already used for another operation/u,
+    );
+    await assert.rejects(
+      sql`
+        select *
+        from public.schedule_plan_activity_native_v1(
+          ${uuid("a", 2)}::uuid,
+          ${childBId}::uuid,
+          'math'::text,
+          1::smallint,
+          0::smallint,
+          '2026-08-10'::date,
+          'Native schedule fixture.'::text,
+          1::bigint,
+          null::uuid
+        )
+      `,
+      /child does not belong to the caller/u,
+    );
     await sql`
       insert into public.voice_action_receipts
         (id, family_id, object_kind, object_id, effect, status, undone_at)
@@ -1246,13 +1390,30 @@ async function main(): Promise<void> {
       ),
       /outside the authenticated family/u,
     );
+    await persistCaptureLoopEventWithSql(
+      sql,
+      familyAId,
+      loopEvent({
+        eventSequence: 117,
+        loopId: uuid("c", 117),
+        stage: "outcome_verified",
+        sequence: 3,
+        profile: "direct_mutation",
+        intent: "schedule_learning",
+        objectKind: "plan_activity",
+        objectId: scheduleAId,
+        receiptKind: "database_receipt",
+        receiptId: scheduleAId,
+        outcomeKind: "durable_change",
+      }),
+    );
     await assert.rejects(
       persistCaptureLoopEventWithSql(
         sql,
         familyAId,
         loopEvent({
-          eventSequence: 117,
-          loopId: uuid("c", 117),
+          eventSequence: 118,
+          loopId: uuid("c", 118),
           stage: "outcome_verified",
           sequence: 3,
           profile: "direct_mutation",
@@ -1260,7 +1421,7 @@ async function main(): Promise<void> {
           objectKind: "plan_activity",
           objectId: scheduleAId,
           receiptKind: "database_receipt",
-          receiptId: scheduleAId,
+          receiptId: scheduleBId,
           outcomeKind: "durable_change",
         }),
       ),

@@ -14,6 +14,16 @@ import { IconButton } from "../../components/ui/icon-button";
 import { LoadingStatus } from "../../components/ui/loading-status";
 import { toggleActivityCheck } from "../../lib/child-plans";
 import { PlanActivityCheckConflictError } from "../../lib/plan-check-mutation";
+import { verifyNativeScheduleOutcome } from "../../lib/capture-loop-outcome";
+import {
+  forgetPendingNativeScheduleOutcome,
+  reconcilePendingNativeScheduleOutcomes,
+  rememberPendingNativeScheduleOutcome,
+} from "../../lib/capture-loop-pending";
+import {
+  createNativeCaptureLoopSession,
+  emitNativeCaptureLoopStage,
+} from "../../lib/capture-loop-events";
 import { createIdempotencyKey } from "../../lib/idempotency-key";
 import {
   createFamilyEvent,
@@ -121,6 +131,7 @@ export default function PlannerScreen() {
   );
   const latestReload = useRef(reload);
   const hasBlurredPlanner = useRef(false);
+  const familyId = family?.id ?? null;
   useEffect(() => {
     latestReload.current = reload;
   }, [reload]);
@@ -137,6 +148,11 @@ export default function PlannerScreen() {
     hasBlurredPlanner.current = false;
     void latestReload.current();
   }, []));
+  useFocusEffect(useCallback(() => {
+    if (familyId) {
+      void reconcilePendingNativeScheduleOutcomes(familyId, verifyNativeScheduleOutcome);
+    }
+  }, [familyId]));
 
   const filteredEvents = useMemo(
     () => filterChildId
@@ -347,16 +363,52 @@ export default function PlannerScreen() {
     if (!family || !schedulingActivity) {
       throw new Error("planner schedule context is unavailable");
     }
-    await scheduleActivity({
-      familyId: family.id,
-      childId: schedulingActivity.childId,
-      subjectId: schedulingActivity.subjectId,
-      week: schedulingActivity.week,
-      activityIndex: schedulingActivity.activityIndex,
-      planRevision: schedulingActivity.planRevision,
-      expectedText: schedulingActivity.text,
-      scheduledDate: date,
-    });
+    const loop = createNativeCaptureLoopSession(
+      {
+        familyId: family.id,
+        profile: "direct_mutation",
+        intent: "schedule_learning",
+        surface: "planner",
+        objectKind: "plan_activity",
+        objectId: null,
+      },
+      (familyId, event) => emitNativeCaptureLoopStage(familyId, event),
+    );
+    loop?.record("entry_intent");
+    loop?.record("effect_attempted");
+    try {
+      const result = await scheduleActivity({
+        familyId: family.id,
+        captureLoopId: loop?.loopId,
+        childId: schedulingActivity.childId,
+        subjectId: schedulingActivity.subjectId,
+        week: schedulingActivity.week,
+        activityIndex: schedulingActivity.activityIndex,
+        planRevision: schedulingActivity.planRevision,
+        expectedText: schedulingActivity.text,
+        scheduledDate: date,
+      });
+      if (loop) {
+        await rememberPendingNativeScheduleOutcome(family.id, {
+          loopId: loop.loopId,
+          receiptId: result.id,
+        }).catch(() => undefined);
+        await loop.flush();
+        const verified = await verifyNativeScheduleOutcome(loop.loopId, result.id);
+        if (verified) {
+          await forgetPendingNativeScheduleOutcome(family.id, loop.loopId).catch(() => undefined);
+        } else {
+          loop.record("outcome_uncertain", { exitReason: "unknown" });
+          await loop.flush();
+        }
+      }
+    } catch (cause) {
+      if (loop) {
+        loop.record("outcome_uncertain", { exitReason: "unknown" });
+        await loop.flush();
+      }
+      throw cause;
+    }
     setSchedulingActivity(null);
     await reload();
   }

@@ -24,10 +24,6 @@ import {
 
 /** Registry entries allowed to have no emitter yet: [name, ticket]. */
 const STAGED_EVENTS: ReadonlyArray<readonly [string, string]> = [
-  [
-    "product.loop_stage_recorded",
-    "gh#532, gh#304, and gh#347 emit; gh#392 and gh#394 consume",
-  ],
   // The one-planner arc registers ahead of its emitters (gh#257 PR B0
   // registers the namespace; later arc PRs bring the code paths).
   ["planner.week_repaired", "gh#259 (arc C: reshuffle receipt with undo)"],
@@ -97,7 +93,9 @@ const captureLoopUsage = analyzeCaptureLoopUsage({
     "apps/mobile/src/lib/capture-loop-events.ts",
     "apps/web/lib/capture-loop-events.ts",
     "apps/web/app/api/mobile/event/route.ts",
+    "apps/web/app/api/mobile/capture-loop/outcome/route.ts",
     "apps/web/lib/mobile-family-events.ts",
+    "apps/web/lib/mobile-capture-loop-outcome.ts",
   ],
 });
 const captureLoopWrapperSites = captureLoopUsage.wrapperCallSites;
