@@ -10,3 +10,5 @@ export * from "./brand.ts";
 export * from "./identity.ts";
 export * from "./icons.ts";
 export * from "./content.ts";
+export * from "./channels.ts";
+export * from "./doctrine.ts";

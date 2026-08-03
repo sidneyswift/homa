@@ -6,8 +6,9 @@ user-invocable: true
 
 # Homa design skill
 
-Read `readme.md` and the typed contract under `packages/design/src/contract`
-before changing a visual surface. Use the generated surface manifest to find
+Read `doctrine.md`, then `readme.md` and the typed contract under
+`packages/design/src/contract` before changing a visual surface. Use the
+generated surface manifest to find
 the row, owner issue, target profile, states, and evidence requirements.
 
 ## Non-negotiable direction
