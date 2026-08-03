@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import { nativeAccessibilityJourneys } from "../apps/mobile/src/lib/accessibility/acceptance-manifest";
 import {
+  findAccessibilityTestBoundaryViolations,
   findHandoffRegistryViolations,
   findJourneyManifestViolations,
   findSurfaceRegistryViolations,
@@ -137,4 +138,75 @@ test("handoff registry reports both unregistered and stale effects", () => {
 
 test("the five priority journeys name every state and evidence dimension", () => {
   assert.deepEqual(findJourneyManifestViolations(nativeAccessibilityJourneys), []);
+});
+
+test("accepts a complete rendered runner outside the production package graph", () => {
+  assert.deepEqual(
+    findAccessibilityTestBoundaryViolations(
+      {
+        packageManager: "pnpm@10.12.1",
+        scripts: {
+          "check:mobile-accessibility":
+            "corepack pnpm --dir tooling/mobile-accessibility-tests install --frozen-lockfile",
+        },
+      },
+      { scripts: { typecheck: "tsc --noEmit" } },
+      {
+        packageManager: "pnpm@10.12.1",
+        scripts: { test: "jest", typecheck: "tsc" },
+        devDependencies: {
+          "@testing-library/react-native": "14.0.1",
+          "@types/jest": "29.5.14",
+          "@types/react": "19.2.2",
+          expo: "56.0.15",
+          jest: "29.7.0",
+          "jest-expo": "56.0.5",
+          react: "19.2.3",
+          "react-native": "0.85.3",
+          "test-renderer": "1.2.0",
+          typescript: "6.0.3",
+        },
+      },
+    ),
+    [],
+  );
+});
+
+test("rejects test peers and scripts inside the production package graph", () => {
+  assert.deepEqual(
+    findAccessibilityTestBoundaryViolations(
+      {
+        packageManager: "pnpm@10.12.1",
+        scripts: { "check:mobile-accessibility": "tsx check.ts" },
+        devDependencies: { "jest-expo": "56.0.5" },
+      },
+      {
+        scripts: { "test:accessibility": "jest" },
+        devDependencies: { "@testing-library/react-native": "14.0.1" },
+      },
+      {
+        packageManager: "pnpm@9.0.0",
+        scripts: { test: "jest" },
+        devDependencies: {},
+      },
+    ),
+    [
+      "apps/mobile cannot own accessibility test dependency: @testing-library/react-native",
+      "apps/mobile cannot own accessibility test script: test:accessibility",
+      "isolated accessibility runner is missing dependency: @testing-library/react-native",
+      "isolated accessibility runner is missing dependency: @types/jest",
+      "isolated accessibility runner is missing dependency: @types/react",
+      "isolated accessibility runner is missing dependency: expo",
+      "isolated accessibility runner is missing dependency: jest",
+      "isolated accessibility runner is missing dependency: jest-expo",
+      "isolated accessibility runner is missing dependency: react",
+      "isolated accessibility runner is missing dependency: react-native",
+      "isolated accessibility runner is missing dependency: test-renderer",
+      "isolated accessibility runner is missing dependency: typescript",
+      "isolated accessibility runner is missing script: typecheck",
+      "isolated accessibility runner must use the root pnpm version",
+      "root cannot own React Native test dependency: jest-expo",
+      "root check:mobile-accessibility must frozen-install the isolated runner",
+    ],
+  );
 });

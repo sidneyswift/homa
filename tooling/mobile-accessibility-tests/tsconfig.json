@@ -1,0 +1,20 @@
+{
+  "extends": "../../apps/mobile/tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@/*": ["../../apps/mobile/src/*"],
+      "@/assets/*": ["../../apps/mobile/assets/*"],
+      "@testing-library/react-native": [
+        "./node_modules/@testing-library/react-native"
+      ]
+    },
+    "types": ["jest"]
+  },
+  "include": [
+    "../../apps/mobile/env.d.ts",
+    "../../apps/mobile/__tests__/accessibility/**/*.ts",
+    "../../apps/mobile/__tests__/accessibility/**/*.tsx"
+  ],
+  "exclude": ["node_modules", "../../apps/mobile/android", "../../apps/mobile/ios"]
+}
