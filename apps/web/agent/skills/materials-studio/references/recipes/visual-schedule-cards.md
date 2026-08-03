@@ -20,6 +20,16 @@ blank label bands. Place that one image behind the HTML card grid; HTML
 owns every activity label, time, and dashed cut line. Never generate one
 image per card.
 
+This recipe owns routine and chore charts even when the parent says
+"worksheet," "checklist," "morning plan," or "evening plan." Use one
+composed sheet for a shared family routine. When sibling pages need different
+activity pictures, each distinct page still gets at most one composed sheet,
+not one image per task. Keep the illustration object-only when a task needs a
+plain visual reference rather than a child character. Text, order, checkboxes,
+language, and spacing all belong to HTML, so those revisions reuse the exact
+existing image URL. A changed activity picture may replace only that page's
+single composed sheet.
+
 Design patterns (all binding for visual-schedule-cards):
 
 - **Card grid**: 2×3 or 2×4 grid on the page. Each card ~3×4 inches.
