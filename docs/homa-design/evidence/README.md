@@ -32,6 +32,22 @@ that all generated asset rows are fingerprinted, and that authored residue is
 zero. The one negative contract sentinel is recorded as an approved profile
 rule, not a legacy allowlist.
 
+`channel-evidence.json` is the deterministic delivery contract for the five
+non-web channel bundles owned by gh#728: email, parent-facing PDF, physical
+print, hosted providers, and distribution assets. It records the exact
+surface-coverage fingerprint, synthetic fixture checksum, design contract,
+harness, and every profile hard gate. The initial rows are deliberately
+`pending`: a synthetic fixture proves the schema without pretending that an
+Apple Mail render, tagged PDF, physical print, provider read-back, or public
+distribution receipt exists. `pnpm check:channel-evidence` fails when a
+manifest or fixture changes, when a profile disappears, when a passing gate
+lacks a retained proof path, or when a provider capability is simulated.
+
+Real receipts must be redacted and retained in the approved private evidence
+location. Commit only the content-free receipt path beside the row. A pending
+row may not be promoted to `pass` until every profile gate and the full
+evidence record are populated.
+
 `pnpm check:brand-assets` runs the canonical generator in check mode. A clean
 checkout must reproduce every web, marketing, native, and distribution asset
 from `packages/design/src/contract`: text and vector assets are byte-for-byte.
