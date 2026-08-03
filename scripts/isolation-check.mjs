@@ -2869,6 +2869,38 @@ async function expectAuthenticatedIsolation() {
       },
       "create Family B child plan fixture",
     );
+    const [childPlanRebuildHistoryB] = await sql`
+      insert into public.child_plan_rebuild_history (
+        child_id,
+        subject_id,
+        plan_id,
+        plan_revision,
+        progress_revision,
+        plan,
+        progress,
+        remapped_progress,
+        source_links,
+        scheduled_days,
+        archived_done_count,
+        preserved_done_count,
+        reason
+      ) values (
+        ${childBId},
+        'isolation-check',
+        ${childPlanBId},
+        1,
+        0,
+        '{}'::jsonb,
+        '{}'::jsonb,
+        '{}'::jsonb,
+        '[]'::jsonb,
+        '[]'::jsonb,
+        0,
+        0,
+        'deep-dive-rebuild'
+      )
+      returning id
+    `;
     // Chat attachments are server-write-only, so the fixture goes in
     // through the privileged connection, like the ChildProgress rows.
     const [chatAttachmentB] = await sql`
@@ -3176,6 +3208,52 @@ async function expectAuthenticatedIsolation() {
       childPlanBId,
       0,
       "auth member cannot read another family's child plan",
+    );
+    await expectAuthenticatedRead(
+      familyBUser.accessToken,
+      "child_plan_rebuild_history",
+      childPlanRebuildHistoryB.id,
+      1,
+      "auth member can read own child plan rebuild history",
+    );
+    await expectAuthenticatedRead(
+      familyAUser.accessToken,
+      "child_plan_rebuild_history",
+      childPlanRebuildHistoryB.id,
+      0,
+      "auth member cannot read another family's child plan rebuild history",
+    );
+    const childPlanRebuildHistoryWriteFixture = {
+      keyColumn: "id",
+      keyValue: childPlanRebuildHistoryB.id,
+      insertRow: {
+        child_id: childBId,
+        subject_id: "isolation-client-forge",
+        plan_id: childPlanBId,
+        plan_revision: 1,
+        progress_revision: 0,
+        plan: {},
+        progress: {},
+        remapped_progress: {},
+        source_links: [],
+        scheduled_days: [],
+        archived_done_count: 0,
+        preserved_done_count: 0,
+        reason: "deep-dive-rebuild",
+      },
+      updateRow: { archived_done_count: 1 },
+    };
+    await expectAuthenticatedWritesDenied(
+      familyBUser.accessToken,
+      "child_plan_rebuild_history",
+      childPlanRebuildHistoryWriteFixture,
+      "auth member cannot mutate own child plan rebuild history",
+    );
+    await expectAuthenticatedWritesDenied(
+      familyAUser.accessToken,
+      "child_plan_rebuild_history",
+      childPlanRebuildHistoryWriteFixture,
+      "cross-family token cannot mutate Family B child plan rebuild history",
     );
     // toggle_plan_activity_check (migration 20260729160000) is the atomic
     // single-key alternative to the whole-map-replace check-off sync;
@@ -4367,6 +4445,7 @@ await expectReadDenied("family_phone_access_epochs");
 await expectEmptyRead("child_answers");
 await expectEmptyRead("child_reports");
 await expectEmptyRead("child_plans");
+await expectReadDenied("child_plan_rebuild_history");
 // Product report tables (migration #23): family-scoped by RLS through
 // is_child_family_member. Anon has no policy, so reads return nothing;
 // cross-family access is proven by the same identity model as children.
@@ -4999,6 +5078,25 @@ await expectInsertDenied(
     retest_at: "2026-01-01T00:00:00Z",
   },
   "anon cannot forge child_plans",
+);
+await expectInsertDenied(
+  "child_plan_rebuild_history",
+  {
+    child_id: "00000000-0000-0000-0000-000000000000",
+    subject_id: "math",
+    plan_id: "00000000-0000-0000-0000-000000000000",
+    plan_revision: 1,
+    progress_revision: 0,
+    plan: {},
+    progress: {},
+    remapped_progress: {},
+    source_links: [],
+    scheduled_days: [],
+    archived_done_count: 0,
+    preserved_done_count: 0,
+    reason: "deep-dive-rebuild",
+  },
+  "anon cannot forge child plan rebuild history",
 );
 await expectInsertDenied(
   "child_progress_evidence",

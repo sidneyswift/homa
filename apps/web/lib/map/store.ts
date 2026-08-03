@@ -50,6 +50,7 @@ import {
   scheduleRemapForEdits,
   type PlanEdit,
 } from "./plan-edits";
+import { remapProgressForRebuiltPlan } from "./plan-progress-remap";
 import {
   attachPlanSourceRows,
   planSourceLinksAfterEdits,
@@ -1390,21 +1391,140 @@ export async function writeRebuiltPlan(
     subjectId: string;
     plan: FourWeekPlan;
   },
-): Promise<{ retestAt: string; clearedScheduledDays: number }> {
+): Promise<{
+  retestAt: string;
+  progress: Record<string, boolean>;
+  wasNew: boolean;
+  clearedScheduledDays: number;
+  clearedSourceLinks: number;
+  archivedDoneCount: number;
+  preservedDoneCount: number;
+  archivedUnmatchedDoneCount: number;
+  rebuildHistoryId: string | null;
+}> {
   return sql.begin(async (tx) => {
-    const inserted = await tx<{ retest_at: string }[]>`
-      insert into public.child_plans (child_id, subject_id, plan, bank_version, retest_at)
-      values (${input.childId}, ${input.subjectId}, ${sql.json(input.plan as unknown as DbJson)},
-              ${MAP_BANK_VERSION}, now() + make_interval(days => ${RETEST_DAYS}))
+    const childRows = await tx<{ id: string }[]>`
+      select id
+      from public.children
+      where id = ${input.childId} and family_id = ${input.familyId}
+      for update
+    `;
+    if (!childRows[0]) {
+      throw new Error("plan rebuild child does not belong to the family");
+    }
+
+    const existingRows = await tx<
+      Array<{
+        id: string;
+        plan: FourWeekPlan;
+        progress: Record<string, boolean> | null;
+        plan_revision: number | string;
+        progress_revision: number | string;
+      }>
+    >`
+      select id, plan, progress, plan_revision, progress_revision
+      from public.child_plans
+      where child_id = ${input.childId} and subject_id = ${input.subjectId}
+      for update
+    `;
+    const existing = existingRows[0];
+    const priorProgress = existing?.progress ?? {};
+    const remapped = existing
+      ? remapProgressForRebuiltPlan(existing.plan, input.plan, priorProgress)
+      : {
+          progress: {},
+          archivedDoneCount: 0,
+          preservedDoneCount: 0,
+          archivedUnmatchedDoneCount: 0,
+        };
+    const sourceLinks = existing
+      ? await tx<
+          Array<{
+            asset_id: string;
+            week: number;
+            activity_index: number;
+            activity_text: string;
+            source_title: string;
+            source_locator: string | null;
+          }>
+        >`
+          select asset_id, week, activity_index, activity_text,
+                 source_title, source_locator
+          from public.family_asset_plan_links
+          where family_id = ${input.familyId}
+            and child_id = ${input.childId}
+            and subject_id = ${input.subjectId}
+          order by week, activity_index, asset_id
+          for update
+        `
+      : [];
+    const scheduledDays = existing
+      ? await tx<
+          Array<{
+            week: number;
+            activity_index: number;
+            scheduled_date: string;
+          }>
+        >`
+          select week, activity_index,
+                 to_char(scheduled_date, 'YYYY-MM-DD') as scheduled_date
+          from public.plan_activity_schedule
+          where family_id = ${input.familyId}
+            and child_id = ${input.childId}
+            and subject_id = ${input.subjectId}
+          order by week, activity_index
+          for update
+        `
+      : [];
+
+    let rebuildHistoryId: string | null = null;
+    if (existing) {
+      const archived = await tx<Array<{ id: string }>>`
+        insert into public.child_plan_rebuild_history (
+          child_id, subject_id, plan_id, plan_revision, progress_revision,
+          plan, progress, remapped_progress, source_links, scheduled_days,
+          archived_done_count, preserved_done_count, reason
+        ) values (
+          ${input.childId}, ${input.subjectId}, ${existing.id},
+          ${Number(existing.plan_revision)}, ${Number(existing.progress_revision)},
+          ${sql.json(existing.plan as unknown as DbJson)},
+          ${sql.json(priorProgress as unknown as DbJson)},
+          ${sql.json(remapped.progress as unknown as DbJson)},
+          ${sql.json(sourceLinks as unknown as DbJson)},
+          ${sql.json(scheduledDays as unknown as DbJson)},
+          ${remapped.archivedDoneCount}, ${remapped.preservedDoneCount},
+          'deep-dive-rebuild'
+        )
+        returning id
+      `;
+      rebuildHistoryId = archived[0]?.id ?? null;
+      if (!rebuildHistoryId) {
+        throw new Error("plan rebuild history insert returned no id");
+      }
+    }
+
+    const inserted = await tx<
+      Array<{ retest_at: string; progress: Record<string, boolean> }>
+    >`
+      insert into public.child_plans (
+        child_id, subject_id, plan, bank_version, progress, retest_at
+      )
+      values (
+        ${input.childId}, ${input.subjectId},
+        ${sql.json(input.plan as unknown as DbJson)}, ${MAP_BANK_VERSION},
+        ${sql.json(remapped.progress as unknown as DbJson)},
+        now() + make_interval(days => ${RETEST_DAYS})
+      )
       on conflict (child_id, subject_id) do update
         set plan = excluded.plan,
             bank_version = excluded.bank_version,
+            progress = excluded.progress,
             retest_at = excluded.retest_at,
             retest_emailed_at = null,
             narrative = null,
             narrative_meta = null,
             updated_at = now()
-      returning retest_at::text as retest_at
+      returning retest_at::text as retest_at, progress
     `;
     const cleared = await tx<{ id: string }[]>`
       delete from public.plan_activity_schedule
@@ -1413,8 +1533,74 @@ export async function writeRebuiltPlan(
         and subject_id = ${input.subjectId}
       returning id
     `;
-    return { retestAt: inserted[0].retest_at, clearedScheduledDays: cleared.length };
+    const clearedLinks = await tx<{ id: string }[]>`
+      delete from public.family_asset_plan_links
+      where family_id = ${input.familyId}
+        and child_id = ${input.childId}
+        and subject_id = ${input.subjectId}
+      returning id
+    `;
+    return {
+      retestAt: inserted[0].retest_at,
+      progress: inserted[0].progress,
+      wasNew: !existing,
+      clearedScheduledDays: cleared.length,
+      clearedSourceLinks: clearedLinks.length,
+      archivedDoneCount: remapped.archivedDoneCount,
+      preservedDoneCount: remapped.preservedDoneCount,
+      archivedUnmatchedDoneCount: remapped.archivedUnmatchedDoneCount,
+      rebuildHistoryId,
+    };
   });
+}
+
+export interface PlanRebuildReceipt {
+  preservedDoneCount: number;
+  archivedUnmatchedDoneCount: number;
+  clearedScheduledDays: number;
+}
+
+/**
+ * Resolves a rebuild receipt through the same shareable report token as the
+ * plan page. The archive id alone carries no authority: it must belong to the
+ * token's child, the requested subject, and the current plan row.
+ */
+export async function getPlanRebuildReceipt(
+  reportToken: string,
+  subjectId: string,
+  rebuildHistoryId: string,
+  sql: MapDatabase = mapDb(),
+): Promise<PlanRebuildReceipt | null> {
+  const rows = await sql<
+    Array<{
+      preserved_done_count: number | string;
+      archived_unmatched_done_count: number | string;
+      cleared_scheduled_days: number | string;
+    }>
+  >`
+    select
+      h.preserved_done_count,
+      h.archived_done_count - h.preserved_done_count
+        as archived_unmatched_done_count,
+      jsonb_array_length(h.scheduled_days) as cleared_scheduled_days
+    from public.child_plan_rebuild_history h
+    join public.child_reports r on r.child_id = h.child_id
+    join public.child_plans p
+      on p.id = h.plan_id
+     and p.child_id = h.child_id
+     and p.subject_id = h.subject_id
+    where r.token = ${reportToken}
+      and h.subject_id = ${subjectId}
+      and h.id::text = ${rebuildHistoryId}
+    limit 1
+  `;
+  const row = rows[0];
+  if (!row) return null;
+  return {
+    preservedDoneCount: Number(row.preserved_done_count),
+    archivedUnmatchedDoneCount: Number(row.archived_unmatched_done_count),
+    clearedScheduledDays: Number(row.cleared_scheduled_days),
+  };
 }
 
 /**
@@ -1446,6 +1632,12 @@ export async function getOrBuildPlan(
    * month (always 0 when nothing was rebuilt); the plan page's receipt
    * copy keys on this. */
   clearedScheduledDays: number;
+  /** Completed activities that still matched one exact activity. */
+  preservedDoneCount: number;
+  /** Completed activities kept with the old plan instead of guessed. */
+  archivedUnmatchedDoneCount: number;
+  /** Immutable server receipt for an actual replacement, never a first build. */
+  rebuildHistoryId: string | null;
 } | null> {
   const sql = mapDb();
   const rows = await sql<
@@ -1496,6 +1688,9 @@ export async function getOrBuildPlan(
       narrativeMeta: existing[0].narrative_meta,
       progress: existing[0].progress ?? {},
       clearedScheduledDays: 0,
+      preservedDoneCount: 0,
+      archivedUnmatchedDoneCount: 0,
+      rebuildHistoryId: null,
     };
   }
 
@@ -1525,10 +1720,11 @@ export async function getOrBuildPlan(
 
   // A rebuild restarts the month: fresh plan, fresh retest clock, the
   // retest email re-armed, and the plan narrative reset so the words get
-  // rewritten next to the new month. Checks are the parent's own work
-  // (source data) and survive the rebuild. The old month's placed
-  // calendar days do NOT survive it: writeRebuiltPlan clears them in
-  // the same transaction as the upsert (issue #256).
+  // rewritten next to the new month. An exact, unique activity keeps its
+  // checkmark. Every other old checkmark stays in immutable history rather
+  // than moving to different work. The old month's placed calendar days do
+  // not survive it: writeRebuiltPlan clears them in the same transaction as
+  // the upsert (issue #256).
   const written = await writeRebuiltPlan(sql, {
     familyId: row.family_id,
     childId: row.child_id,
@@ -1542,12 +1738,15 @@ export async function getOrBuildPlan(
     childName: row.child_name,
     familyId: row.family_id,
     childId: row.child_id,
-    wasNew: existing.length === 0,
+    wasNew: written.wasNew,
     retestAt: written.retestAt,
     narrative: null,
     narrativeMeta: null,
-    progress: existing[0]?.progress ?? {},
+    progress: written.progress,
     clearedScheduledDays: written.clearedScheduledDays,
+    preservedDoneCount: written.preservedDoneCount,
+    archivedUnmatchedDoneCount: written.archivedUnmatchedDoneCount,
+    rebuildHistoryId: written.rebuildHistoryId,
   };
 }
 
