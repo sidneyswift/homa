@@ -5,7 +5,7 @@
   "contractSourceChecksum": "cb79adb67b2f055645702a43cdfaf8cbd9aecfac482a40790a001dd3d5aaacb6",
   "surfaceManifestFingerprint": "40b26f78dc2424e8237eebb1980b15fd8a30d4af25135618d5b39f563148fdbb",
   "authoringManifestFingerprint": "40b26f78dc2424e8237eebb1980b15fd8a30d4af25135618d5b39f563148fdbb",
-  "ownedInputFingerprint": "a47960085bb1db86a8bec8783435b717ae77447a79db3c87cc7d8e50ee9d40aa",
+  "ownedInputFingerprint": "529e5efd827f4243639525887d4b59c743bf524d579091f7babad2f4415942d0",
   "sourceOfTruth": [
     "marketing/AGENTS.md",
     "marketing/voice/house-style.md",
@@ -212,11 +212,9 @@
         "asset"
       ],
       "state": "retired-quarantined",
-      "sourceHash": "d2f961367e04c985d050de8c5a31520ef29cbd5e4d5c9932f35ea6724ff13bb0",
-      "bytes": 1822,
-      "legacySignatures": [
-        "legacy-palette-value"
-      ]
+      "sourceHash": "ff7058fdc2be397b14f612fef98ff8f9635592d446caa794ae92b1217321e422",
+      "bytes": 828,
+      "legacySignatures": []
     },
     {
       "id": "marketing:b25bd7457e3d3d6f",

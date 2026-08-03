@@ -43,6 +43,7 @@ const CHECKER_FILES = new Set([
   "scripts/brand-residue-check.mts",
   "scripts/brand-residue-check.test.mts",
   "scripts/design-authoring-rails-check.mts",
+  "scripts/marketing-production-check.mts",
   // The inventory generator must name the retired signals so it can preserve
   // their provenance in the immutable baseline.
   "scripts/brand-surfaces.mts",
