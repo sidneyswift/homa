@@ -5,6 +5,7 @@ import {
   Pressable,
   ScrollView,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,7 +20,7 @@ import { LoadingStatus } from "../../components/ui/loading-status";
 import { TextField } from "../../components/ui/text-field";
 import { useAccessibilityFocusOnChange } from "../../lib/accessibility";
 import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { colors, fontSize, lineHeightFor, radius, space } from "../../theme/tokens";
 import { MaterialCard } from "./material-card";
 import {
   fetchMapChild,
@@ -559,6 +560,7 @@ const MAKING_POLL_MS = 20_000;
 const MAKING_POLL_CAP_MS = 30 * 60_000;
 
 export function FirstMakingCard({ card }: { card: FirstMakingCardData }) {
+  const { fontScale } = useWindowDimensions();
   const [status, setStatus] = useState<Awaited<ReturnType<typeof fetchMakingStatus>>>(null);
 
   useEffect(() => {
@@ -615,10 +617,10 @@ export function FirstMakingCard({ card }: { card: FirstMakingCardData }) {
           {phase === "stalled" ? "paused for now" : "being made"}
         </Text>
       </View>
-      <Text style={{ fontFamily: fontFamilies.displaySemibold, fontSize: fontSize.lg, lineHeight: 24, color: colors.textStrong }}>
+      <Text style={{ fontFamily: fontFamilies.displaySemibold, fontSize: fontSize.lg, lineHeight: lineHeightFor(fontSize.lg, fontScale), color: colors.textStrong }}>
         {card.title}
       </Text>
-      <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, lineHeight: 20, color: colors.textMuted }}>
+      <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, lineHeight: lineHeightFor(fontSize.sm, fontScale), color: colors.textMuted }}>
         {phase === "stalled"
           ? "This one hit a snag while building. Nothing is lost, and you can ask Homa about it whenever you like."
           : "Homa is drawing this now. It usually takes a few minutes, and it will land right here and in your Binder. You do not have to wait for it."}
