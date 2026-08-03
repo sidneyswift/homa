@@ -36,7 +36,7 @@ The award standard is therefore a measured closed loop, not a feature count.
 - Read-only UX review of the three screenshots by an independent subagent using [`homa-uxui-reviewer`](../../../.agents/skills/homa-uxui-reviewer/SKILL.md).
 - Production planner release after PR #759: Vercel alias `thankshoma.com` is Ready, `/` returns 200, `/app/planner` returns the expected 307 auth redirect, main CI is green, and the mobile OTA workflow is green.
 - Main head after merge: `3ca8a606c74e9037e69a79ae06ffb6d2f931c95d`.
-- Native Planner scheduling now has one complete instrumented capture-to-effect slice in [PR #764](https://github.com/sidneyswift/homa/pull/764): the server owns the schedule receipt binding, the client flushes the pre-effect trace, and restart recovery plus duplicate receipt claims are covered by deterministic and disposable PostgreSQL tests. GitHub CI run [30792411407](https://github.com/sidneyswift/homa/actions/runs/30792411407) and its Vercel preview passed for commit `e3390652`.
+- Native Planner scheduling now has one instrumented capture-to-effect slice in [PR #764](https://github.com/sidneyswift/homa/pull/764): the server owns the schedule receipt binding, the client awaits the best-effort pre-effect telemetry emission before the mutation, and restart recovery plus duplicate receipt claims are covered by deterministic and disposable PostgreSQL tests. GitHub CI run [30792411407](https://github.com/sidneyswift/homa/actions/runs/30792411407) and its Vercel preview passed for commit `e3390652`. This proves the no-false-outcome boundary, not durable telemetry delivery or a physical-device journey.
 
 ### Not yet proven
 
