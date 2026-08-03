@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
 import type { EveMessage, EveMessagePart } from "eve/react";
@@ -119,5 +120,16 @@ describe("planEditCount", () => {
       ]),
     ];
     assert.equal(planEditCount(messages), 0);
+  });
+});
+
+describe("Planner canvas request ordering", () => {
+  it("allows only the newest board request to update the panel", () => {
+    const source = readFileSync(
+      new URL("./planner-canvas.tsx", import.meta.url),
+      "utf8",
+    );
+    assert.match(source, /latestBoardRequestRef\.current !== requestId/u);
+    assert.match(source, /latestBoardRequestRef\.current \+= 1/u);
   });
 });

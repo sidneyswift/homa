@@ -42,6 +42,8 @@ const calendarActionsSource = readFileSync(new URL("../calendar/actions.ts", imp
 const PLAN: DashboardPlan = {
   childId: KID.id,
   subjectId: "math",
+  planRevision: 1,
+  progressRevision: 1,
   done: 1,
   total: 2,
   retestAt: "2026-08-31T00:00:00.000Z",
@@ -113,7 +115,6 @@ function renderView(
       <UnifiedPlannerView
         kids={[KID]}
         plans={[PLAN]}
-        reports={new Map([[KID.id, { token: "report-token" }]])}
         familyEvents={[EVENT]}
         scheduledActivities={SCHEDULE}
         hoursEntries={[]}

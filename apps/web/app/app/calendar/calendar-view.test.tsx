@@ -12,9 +12,8 @@ import { CalendarView, type CalendarKid } from "./calendar-view";
 /**
  * /app/calendar (issue #176, CG-03). Same posture as the Hours and Tasks
  * UI tests: static server render, assertions on the HTML contract, no
- * browser. usePlanChecks' useSyncExternalStore reads its SSR snapshot
- * (always null) during renderToStaticMarkup, so the checkbox renders
- * from the plan's own initialChecks without ever touching localStorage.
+ * browser. The authenticated controller reads the plan's server snapshot
+ * during renderToStaticMarkup without touching browser-only state.
  */
 
 const ROUTER = {
@@ -37,6 +36,8 @@ function mayaPlan(overrides: Partial<DashboardPlan> = {}): DashboardPlan {
   return {
     childId: "child-maya",
     subjectId: "math",
+    planRevision: 1,
+    progressRevision: 0,
     done: 0,
     total: 1,
     retestAt: "2026-08-31T00:00:00Z",
@@ -84,10 +85,6 @@ function renderView(props: Partial<Parameters<typeof CalendarView>[0]> = {}): st
       <CalendarView
         kids={[MAYA, LEO]}
         plans={[]}
-        reports={new Map([
-          ["child-maya", { token: "token-maya" }],
-          ["child-leo", { token: "token-leo" }],
-        ])}
         familyEvents={[]}
         scheduledActivities={[]}
         hoursEntries={[]}
@@ -264,7 +261,7 @@ describe("week navigation", () => {
 
 describe("family shapes", () => {
   it("asks for a child instead of rendering an empty grid when there are none", () => {
-    const html = renderView({ kids: [], reports: new Map() });
+    const html = renderView({ kids: [] });
     assert.match(html, /Add a child first to see their calendar/);
     // No grid, and no crash reaching for kids[0]'s tone.
     assert.doesNotMatch(html, /All day/);
@@ -273,7 +270,6 @@ describe("family shapes", () => {
   it("skips the filter chips for an only child but still renders the grid", () => {
     const html = renderView({
       kids: [MAYA],
-      reports: new Map([["child-maya", { token: "token-maya" }]]),
       familyEvents: [event({ childId: "child-maya", title: "Swim lesson" })],
     });
     assert.doesNotMatch(html, />Everyone</);

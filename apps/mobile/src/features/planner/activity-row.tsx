@@ -4,6 +4,7 @@ import { Linking, Pressable, Text, View } from "react-native";
 
 import { InlineError } from "../../components/ui/inline-error";
 import { reportCrash } from "../../lib/crash-reporting";
+import { PlanActivityCheckConflictError } from "../../lib/plan-check-mutation";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
 import type { PlanActivityView } from "./planner-model";
@@ -11,8 +12,8 @@ import type { PlanActivityView } from "./planner-model";
 /**
  * One plan activity: a checkbox plus its text, ported from web's
  * ActivityCard/usePlanChecks (apps/web/app/app/planner/day-grid.tsx).
- * Checking here calls toggle_plan_activity_check (an atomic single-key
- * write), not web's whole-map-replace POST.
+ * Checking here calls the stale-safe atomic plan operation. A normal
+ * revision conflict is a refresh state, not a crash.
  */
 export function ActivityRow({
   activity,
@@ -22,20 +23,30 @@ export function ActivityRow({
   onToggle: () => Promise<void>;
 }) {
   const [pending, setPending] = useState(false);
+  const [pendingDone, setPendingDone] = useState<boolean | null>(null);
   const [mutationError, setMutationError] = useState<string | null>(null);
+  const checked = pendingDone ?? activity.done;
 
   async function handleToggle() {
     if (pending) return;
     setMutationError(null);
+    setPendingDone(!activity.done);
     setPending(true);
     try {
       await onToggle();
     } catch (cause) {
+      if (cause instanceof PlanActivityCheckConflictError) {
+        setMutationError(
+          "This plan changed since you opened it. Pull down to refresh, then check the activity before trying again.",
+        );
+        return;
+      }
       reportCrash(cause, { surface: "native-planner", operation: "toggle-activity" });
       setMutationError(
         "Homa couldn't confirm that check. Pull down to refresh before trying again.",
       );
     } finally {
+      setPendingDone(null);
       setPending(false);
     }
   }
@@ -46,7 +57,7 @@ export function ActivityRow({
         accessibilityRole="checkbox"
         accessibilityLabel={`${activity.text}. ${activity.childName}, ${activity.subjectName}`}
         accessibilityState={{
-          checked: activity.done,
+          checked,
           disabled: pending,
           busy: pending,
         }}
@@ -65,22 +76,22 @@ export function ActivityRow({
             height: 20,
             borderRadius: radius.xs,
             borderWidth: 1.5,
-            borderColor: activity.done ? colors.brand : colors.border,
-            backgroundColor: activity.done ? colors.brand : "transparent",
+            borderColor: checked ? colors.brand : colors.border,
+            backgroundColor: checked ? colors.brand : "transparent",
             alignItems: "center",
             justifyContent: "center",
             marginTop: 1,
           }}
         >
-          {activity.done ? <Check size={13} color={colors.onBrand} /> : null}
+          {checked ? <Check size={13} color={colors.onBrand} /> : null}
         </View>
         <View style={{ flex: 1 }}>
           <Text
             style={{
               fontFamily: fontFamilies.body,
               fontSize: fontSize.sm,
-              color: activity.done ? colors.textMuted : colors.textBody,
-              textDecorationLine: activity.done ? "line-through" : "none",
+              color: checked ? colors.textMuted : colors.textBody,
+              textDecorationLine: checked ? "line-through" : "none",
             }}
           >
             {activity.text}

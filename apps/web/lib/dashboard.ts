@@ -64,7 +64,9 @@ export async function getPlansForChildren(childIds: string[]): Promise<Dashboard
   const [planResult, sourceResult] = await Promise.all([
     supabase
       .from("child_plans")
-      .select("child_id, subject_id, plan, progress, retest_at")
+      .select(
+        "child_id, subject_id, plan, progress, retest_at, plan_revision, progress_revision",
+      )
       .in("child_id", childIds),
     supabase
       .from("family_asset_plan_links")
@@ -88,6 +90,8 @@ export async function getPlansForChildren(childIds: string[]): Promise<Dashboard
       plan: row.plan as FourWeekPlan,
       progress: (row.progress ?? null) as Record<string, boolean> | null,
       retest_at: row.retest_at as string,
+      plan_revision: row.plan_revision as number,
+      progress_revision: row.progress_revision as number,
     });
     return shaped ? [shaped] : [];
   });

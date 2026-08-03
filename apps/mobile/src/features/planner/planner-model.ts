@@ -35,8 +35,11 @@ export interface PlanActivityView {
   subjectName: string;
   week: number;
   activityIndex: number;
+  checkKey: string;
   text: string;
   done: boolean;
+  planRevision: number;
+  progressRevision: number;
   sources: {
     id: string;
     title: string;
@@ -111,8 +114,11 @@ export function buildScheduledActivities(
       subjectName: plan.plan.subjectName,
       week: row.week,
       activityIndex: row.activity_index,
+      checkKey: `${row.week}.${row.activity_index}`,
       text,
       done: Boolean(plan.progress[`${row.week}.${row.activity_index}`]),
+      planRevision: plan.plan_revision,
+      progressRevision: plan.progress_revision,
       sources: activitySources(sourceLinks, {
         childId: row.child_id,
         subjectId: row.subject_id,
@@ -158,8 +164,11 @@ export function buildUnscheduledActivities(
         subjectName: plan.plan.subjectName,
         week,
         activityIndex,
+        checkKey: `${week}.${activityIndex}`,
         text,
         done: Boolean(plan.progress[`${week}.${activityIndex}`]),
+        planRevision: plan.plan_revision,
+        progressRevision: plan.progress_revision,
         sources: activitySources(sourceLinks, {
           childId: plan.child_id,
           subjectId: plan.subject_id,

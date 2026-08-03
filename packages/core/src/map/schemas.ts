@@ -173,6 +173,7 @@ export type MapReportCorrection = z.infer<typeof mapReportCorrectionSchema>;
 /** Full-map sync of the four-week plan's check-offs (idempotent: the
  * client sends the whole checks map, keyed "week.activityIndex"). */
 const PLAN_CHECK_KEY_RE = /^[1-4]\.[0-5]$/;
+const PLAN_ACTIVITY_CHECK_KEY_RE = /^[1-4]\.(0|[1-9][0-9]{0,2})$/;
 
 const mapPlanChecksSchema = z.record(z.string(), z.boolean()).transform((checks) =>
   Object.fromEntries(
@@ -181,11 +182,121 @@ const mapPlanChecksSchema = z.record(z.string(), z.boolean()).transform((checks)
 );
 
 export const mapPlanProgressSchema = z.object({
-  childId: z.uuid(),
+  reportToken: z.string().min(16).max(200),
   subjectId: z.string().min(1).max(40),
   checks: mapPlanChecksSchema,
 });
 export type MapPlanProgress = z.infer<typeof mapPlanProgressSchema>;
+
+export const planActivityCheckKeySchema = z
+  .string()
+  .regex(PLAN_ACTIVITY_CHECK_KEY_RE, "expected week.activityIndex");
+
+const safeDatabaseRevisionSchema = z
+  .union([z.number().int().safe(), z.string().regex(/^\d+$/)])
+  .transform(Number)
+  .pipe(z.number().int().safe().nonnegative());
+
+const positiveDatabaseRevisionSchema = safeDatabaseRevisionSchema.pipe(
+  z.number().positive(),
+);
+
+export const planActivityProgressSnapshotSchema = z.record(
+  planActivityCheckKeySchema,
+  z.boolean(),
+);
+
+export const planActivityCheckRequestSchema = z
+  .object({
+    childId: z.uuid(),
+    subjectId: z.string().min(1).max(40),
+    checkKey: planActivityCheckKeySchema,
+    done: z.boolean(),
+    expectedText: z.string().min(1).max(4000),
+    planRevision: z.number().int().safe().positive(),
+  })
+  .strict();
+export type PlanActivityCheckRequest = z.infer<
+  typeof planActivityCheckRequestSchema
+>;
+
+export const PLAN_ACTIVITY_CHECK_CONFLICT_REASONS = [
+  "activity-mismatch",
+  "invalid-plan",
+  "invalid-progress",
+  "plan-missing",
+  "revision-mismatch",
+] as const;
+export const planActivityCheckConflictReasonSchema = z.enum(
+  PLAN_ACTIVITY_CHECK_CONFLICT_REASONS,
+);
+
+export const planActivityCheckRpcReceiptSchema = z.discriminatedUnion(
+  "status",
+  [
+    z
+      .object({
+        status: z.literal("applied"),
+        reason: z.null(),
+        family_id: z.uuid(),
+        plan_id: z.uuid(),
+        plan_revision: positiveDatabaseRevisionSchema,
+        progress_revision: safeDatabaseRevisionSchema,
+        progress_snapshot: planActivityProgressSnapshotSchema,
+        progress_key: planActivityCheckKeySchema,
+        done: z.boolean(),
+        changed: z.boolean(),
+      })
+      .strict(),
+    z
+      .object({
+        status: z.literal("conflict"),
+        reason: planActivityCheckConflictReasonSchema,
+        family_id: z.uuid().nullable(),
+        plan_id: z.uuid().nullable(),
+        plan_revision: positiveDatabaseRevisionSchema.nullable(),
+        progress_revision: safeDatabaseRevisionSchema.nullable(),
+        progress_snapshot: z.unknown().nullable(),
+        progress_key: planActivityCheckKeySchema,
+        done: z.null(),
+        changed: z.null(),
+      })
+      .strict(),
+  ],
+);
+export type PlanActivityCheckRpcReceipt = z.infer<
+  typeof planActivityCheckRpcReceiptSchema
+>;
+
+export const planActivityCheckResponseSchema = z.discriminatedUnion(
+  "status",
+  [
+    z
+      .object({
+        status: z.literal("applied"),
+        planId: z.uuid(),
+        planRevision: z.number().int().safe().positive(),
+        progressRevision: z.number().int().safe().nonnegative(),
+        progress: planActivityProgressSnapshotSchema,
+        checkKey: planActivityCheckKeySchema,
+        done: z.boolean(),
+      })
+      .strict(),
+    z
+      .object({
+        status: z.literal("conflict"),
+        reason: planActivityCheckConflictReasonSchema,
+        planId: z.uuid().nullable(),
+        planRevision: z.number().int().safe().positive().nullable(),
+        progressRevision: z.number().int().safe().nonnegative().nullable(),
+        checkKey: planActivityCheckKeySchema,
+      })
+      .strict(),
+  ],
+);
+export type PlanActivityCheckResponse = z.infer<
+  typeof planActivityCheckResponseSchema
+>;
 
 /** The report's one-tap month: consent IS the explicit ask the email
  * doctrine requires before a retest email may ever be armed. */

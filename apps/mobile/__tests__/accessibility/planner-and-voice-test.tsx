@@ -61,8 +61,11 @@ const plannerActivity: ScheduledActivityView = {
   subjectName: "Reading",
   week: 1,
   activityIndex: 0,
+  checkKey: "1.0",
   text: "Read one short story together.",
   done: false,
+  planRevision: 1,
+  progressRevision: 0,
   sources: [],
 };
 

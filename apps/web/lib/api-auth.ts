@@ -17,10 +17,16 @@ export interface ApiFamilyAuth {
   familyId: string;
 }
 
-function bearerToken(request: Request): string | null {
+export type RequestAuthTransport =
+  | { kind: "bearer"; token: string }
+  | { kind: "cookie" }
+  | { kind: "invalid" };
+
+export function requestAuthTransport(request: Request): RequestAuthTransport {
   const header = request.headers.get("authorization");
-  const match = /^Bearer\s+(.+)$/i.exec(header ?? "");
-  return match?.[1] ?? null;
+  if (header === null) return { kind: "cookie" };
+  const match = /^Bearer ([A-Za-z0-9\-._~+/]+=*)$/i.exec(header);
+  return match ? { kind: "bearer", token: match[1] } : { kind: "invalid" };
 }
 
 /**
@@ -35,8 +41,10 @@ export async function resolveApiFamily(
   let supabase: SupabaseClient;
   let userId: string;
 
-  const token = bearerToken(request);
-  if (token) {
+  const transport = requestAuthTransport(request);
+  if (transport.kind === "invalid") return null;
+  if (transport.kind === "bearer") {
+    const token = transport.token;
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
     if (!url || !key) return null;

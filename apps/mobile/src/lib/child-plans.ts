@@ -1,24 +1,18 @@
 import type { FourWeekPlan } from "@homa/core";
 
-import { supabase } from "./supabase";
 import {
-  requireMutationAcknowledgement,
-  requireMutationReceipt,
-  requireReceiptValue,
-} from "./mutation-receipt";
+  executePlanActivityCheck,
+  type PlanActivityCheckInput,
+  type PlanActivityCheckOutcome,
+} from "./plan-check-mutation";
+import { supabase } from "./supabase";
 
 /**
- * Four-week plan reads plus the atomic check-off toggle, ported from
- * apps/web/lib/map/store.ts's plan reads and
- * supabase/migrations/20260729160000_toggle_plan_activity_check.sql.
- *
- * Check-offs on web go through a whole-map-replace POST
- * (apps/web/app/api/map/plan/progress/route.ts): the client sends its
- * entire locally-believed progress object and the server overwrites the
- * whole column, so two clients toggling near-simultaneously can clobber
- * each other. toggle_plan_activity_check sets exactly one key atomically
- * instead, so mobile's writes are safe alongside web's without needing
- * web to change anything.
+ * Four-week plan reads plus the stale-safe atomic check operation. A
+ * positional key alone is not identity after a plan rebuild, so every
+ * write also proves the exact activity text and plan revision the parent
+ * saw. The RPC returns the complete authoritative progress snapshot and
+ * its own monotonic revision in the same locked operation.
  */
 
 export interface ChildPlanRecord {
@@ -28,12 +22,14 @@ export interface ChildPlanRecord {
   plan: FourWeekPlan;
   progress: Record<string, boolean>;
   retest_at: string | null;
+  plan_revision: number;
+  progress_revision: number;
 }
 
 export async function getChildPlans(childId: string): Promise<ChildPlanRecord[]> {
   const { data, error } = await supabase
     .from("child_plans")
-    .select("id, child_id, subject_id, plan, progress, retest_at")
+    .select("id, child_id, subject_id, plan, progress, retest_at, plan_revision, progress_revision")
     .eq("child_id", childId);
   if (error) throw new Error(`plan read failed: ${error.message}`);
   return (data ?? []) as ChildPlanRecord[];
@@ -43,40 +39,17 @@ export async function getFamilyChildPlans(childIds: string[]): Promise<ChildPlan
   if (childIds.length === 0) return [];
   const { data, error } = await supabase
     .from("child_plans")
-    .select("id, child_id, subject_id, plan, progress, retest_at")
+    .select("id, child_id, subject_id, plan, progress, retest_at, plan_revision, progress_revision")
     .in("child_id", childIds);
   if (error) throw new Error(`plan read failed: ${error.message}`);
   return (data ?? []) as ChildPlanRecord[];
 }
 
 export async function toggleActivityCheck(
-  childId: string,
-  subjectId: string,
-  week: number,
-  activityIndex: number,
-  done: boolean,
-): Promise<{ id: string; progressKey: string; done: boolean }> {
-  const { error } = await supabase.rpc("toggle_plan_activity_check", {
-    target_child_id: childId,
-    target_subject_id: subjectId,
-    target_week: week,
-    target_activity_index: activityIndex,
-    target_done: done,
-  });
-  requireMutationAcknowledgement("toggle_plan_activity_check", error);
-
-  const result = await supabase
-    .from("child_plans")
-    .select("id, progress")
-    .eq("child_id", childId)
-    .eq("subject_id", subjectId)
-    .maybeSingle();
-  const receipt = requireMutationReceipt("verify_plan_activity_check", result);
-  const progressKey = `${week}.${activityIndex}`;
-  const progress = receipt.progress as Record<string, unknown>;
-  requireReceiptValue(
-    "verify_plan_activity_check",
-    progress[progressKey] === done,
+  input: PlanActivityCheckInput,
+): Promise<PlanActivityCheckOutcome> {
+  return executePlanActivityCheck(
+    (args) => supabase.rpc("set_plan_activity_check_v2", args).single(),
+    input,
   );
-  return { id: receipt.id, progressKey, done };
 }

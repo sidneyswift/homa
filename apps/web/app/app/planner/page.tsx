@@ -44,7 +44,7 @@ export default async function PlannerPage({
 }) {
   const data = await getAppData();
   if (!data) redirect("/onboarding");
-  const { family, children, reports, plans } = data;
+  const { family, children, plans } = data;
 
   const cookieStore = await cookies();
   const viewContext = parseViewContext(
@@ -118,7 +118,6 @@ export default async function PlannerPage({
           avatar_url: child.avatar_url,
         }))}
         plans={plans}
-        reports={reports}
         familyEvents={familyEvents}
         scheduledActivities={scheduledActivities}
         hoursEntries={hoursEntries}

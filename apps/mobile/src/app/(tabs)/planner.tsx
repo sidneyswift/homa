@@ -1,6 +1,11 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+  useFocusEffect,
+  useLocalSearchParams,
+  useNavigation,
+  useRouter,
+} from "expo-router";
 import { CalendarPlus, Check, ChevronLeft, ChevronRight, Plus } from "lucide-react-native";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -8,6 +13,7 @@ import { InlineError } from "../../components/ui/inline-error";
 import { IconButton } from "../../components/ui/icon-button";
 import { LoadingStatus } from "../../components/ui/loading-status";
 import { toggleActivityCheck } from "../../lib/child-plans";
+import { PlanActivityCheckConflictError } from "../../lib/plan-check-mutation";
 import { createIdempotencyKey } from "../../lib/idempotency-key";
 import {
   createFamilyEvent,
@@ -63,11 +69,8 @@ type PlannerViewMode = "day" | "week" | "month" | "hours";
  * plan_activity_schedule, both
  * genuinely writable tables (full RLS insert/update/delete for
  * authenticated family members, confirmed, not assumed). Check-offs use
- * toggle_plan_activity_check, a new atomic single-key RPC
- * (supabase/migrations/20260729160000_toggle_plan_activity_check.sql):
- * web's own check-off sync replaces the whole progress map per write,
- * a real clobber hazard with a second writer, so mobile doesn't
- * reproduce it.
+ * set_plan_activity_check, an atomic operation that rejects a positional
+ * key when either its exact text or its plan revision is stale.
  *
  * Web has no direct UI to schedule a plan activity onto a real day at
  * all today (only the schedule_plan_activity chat tool can); the
@@ -77,6 +80,7 @@ type PlannerViewMode = "day" | "week" | "month" | "hours";
  */
 export default function PlannerScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const params = useLocalSearchParams<{ view?: string | string[] }>();
   const { family, children, loading: familyLoading } = useFamilyData();
   const initialView = Array.isArray(params.view) ? params.view[0] : params.view;
@@ -99,12 +103,40 @@ export default function PlannerScreen() {
   }
 
   const range = useMemo(() => monthGridRange(anchorDate), [anchorDate]);
-  const { events, scheduleRows, childPlans, hoursRows, loading, error: plannerError, reload } = usePlannerData(
+  const {
+    events,
+    scheduleRows,
+    childPlans,
+    hoursRows,
+    loading,
+    error: plannerError,
+    reload,
+    reconcileAfterAmbiguousWrite,
+    applyActivityCheck,
+  } = usePlannerData(
     family?.id ?? null,
     children,
     range.start,
     range.end,
   );
+  const latestReload = useRef(reload);
+  const hasBlurredPlanner = useRef(false);
+  useEffect(() => {
+    latestReload.current = reload;
+  }, [reload]);
+  // Only a real navigation blur arms refocus refresh. Effect cleanup does
+  // not, so React Strict Mode cannot duplicate the initial Planner load.
+  useEffect(
+    () => navigation.addListener("blur", () => {
+      hasBlurredPlanner.current = true;
+    }),
+    [navigation],
+  );
+  useFocusEffect(useCallback(() => {
+    if (!hasBlurredPlanner.current) return;
+    hasBlurredPlanner.current = false;
+    void latestReload.current();
+  }, []));
 
   const filteredEvents = useMemo(
     () => filterChildId
@@ -203,9 +235,27 @@ export default function PlannerScreen() {
     </View>
   );
 
-  async function handleToggleActivity(activity: { childId: string; subjectId: string; week: number; activityIndex: number; done: boolean }) {
-    await toggleActivityCheck(activity.childId, activity.subjectId, activity.week, activity.activityIndex, !activity.done);
+  async function handleToggleActivity(activity: PlanActivityView) {
+    let outcome;
+    try {
+      outcome = await toggleActivityCheck({
+        childId: activity.childId,
+        subjectId: activity.subjectId,
+        checkKey: activity.checkKey,
+        done: !activity.done,
+        expectedText: activity.text,
+        planRevision: activity.planRevision,
+      });
+    } catch (cause) {
+      await reconcileAfterAmbiguousWrite();
+      throw cause;
+    }
+    if (outcome.status === "applied") {
+      applyActivityCheck(activity, outcome);
+      return;
+    }
     await reload();
+    throw new PlanActivityCheckConflictError(outcome);
   }
 
   function openNewEventComposer(date: DateOnly) {

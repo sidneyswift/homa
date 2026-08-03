@@ -7,7 +7,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { SidePanel } from "../../components/chassis/side-panel";
 import { parsePlanBoardResponse, type PlanBoardPayload } from "../../lib/plan-board";
-import { planChecksStorageKey, overwritePlanChecks } from "../../lib/use-plan-checks";
 import { PlannerView } from "./planner/planner-view";
 
 /**
@@ -149,9 +148,7 @@ type BoardState =
 /**
  * The panel itself. Fetches the board on open and again whenever
  * refreshSignal grows (one edit_plan result = one refetch). After an
- * edit-triggered refetch the server's check-off map is written THROUGH
- * to localStorage: the server just remapped indices, so right now it is
- * the truth, and a stale local copy would tick the wrong boxes.
+ * Every refetch replaces the board with the server's revisioned snapshot.
  */
 export function PlannerCanvasPanel({
   childId,
@@ -168,44 +165,46 @@ export function PlannerCanvasPanel({
 }) {
   const [state, setState] = useState<BoardState>({ phase: "loading" });
   const lastRefreshRef = useRef(refreshSignal);
+  const latestBoardRequestRef = useRef(0);
 
   // A promise chain, not an async body: every setState lives inside a
   // .then/.catch callback, so the effect's synchronous path never sets
   // state (the set-state-in-effect rule's cascade concern).
-  const fetchBoard = useCallback((overwriteChecks: boolean) => {
+  const fetchBoard = useCallback(() => {
+    const requestId = latestBoardRequestRef.current + 1;
+    latestBoardRequestRef.current = requestId;
     fetch("/api/map/plan/board")
       .then((response) => response.json())
       .then((payload) => {
+        if (latestBoardRequestRef.current !== requestId) return;
         const board = parsePlanBoardResponse(payload);
         if (!board) {
           setState({ phase: "error" });
           return;
         }
-        if (overwriteChecks) {
-          for (const plan of board.plans) {
-            const token = board.kids.find((kid) => kid.id === plan.childId)?.reportToken;
-            if (!token) continue;
-            overwritePlanChecks(
-              planChecksStorageKey(token, plan.subjectId),
-              plan.progress,
-            );
-          }
-        }
         setState({ phase: "ready", board });
       })
       .catch(() => {
+        if (latestBoardRequestRef.current !== requestId) return;
         setState({ phase: "error" });
       });
   }, []);
 
+  useEffect(
+    () => () => {
+      latestBoardRequestRef.current += 1;
+    },
+    [],
+  );
+
   useEffect(() => {
-    fetchBoard(false);
+    fetchBoard();
   }, [fetchBoard]);
 
   useEffect(() => {
     if (refreshSignal === lastRefreshRef.current) return;
     lastRefreshRef.current = refreshSignal;
-    fetchBoard(true);
+    fetchBoard();
   }, [refreshSignal, fetchBoard]);
 
   const headingId = "planner-canvas-heading";
@@ -262,6 +261,7 @@ export function PlannerCanvasPanel({
           now={new Date()}
           focusChildId={childId}
           surface="canvas"
+          onPlannerRefresh={fetchBoard}
         />
       )}
     </div>
