@@ -1,10 +1,10 @@
 import { useRouter } from "expo-router";
-import { Menu, Mic } from "lucide-react-native";
 import type { RefObject } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Logo } from "../brand/logo";
+import { Icon } from "../design/icon";
 import { IconButton } from "../ui/icon-button";
 import { colors, space } from "../../theme/tokens";
 
@@ -42,7 +42,7 @@ export function AppTopBar({
           label="Open menu"
           onPress={onMenuPress}
         >
-          <Menu size={22} color={colors.textBody} />
+          <Icon name="menu" size={20} color={colors.textBody} />
         </IconButton>
 
         <Logo size={24} />
@@ -51,7 +51,7 @@ export function AppTopBar({
           label="Talk to Homa"
           onPress={() => router.navigate("/voice")}
         >
-          <Mic size={22} color={colors.textBody} />
+          <Icon name="voice" size={20} color={colors.textBody} />
         </IconButton>
       </View>
     </SafeAreaView>

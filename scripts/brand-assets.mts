@@ -17,6 +17,10 @@
  *   and 1320x2868 phone wallpapers, the largest current iPhone resolution,
  *   iOS scales down cleanly. Solid backgrounds on purpose: iOS composites
  *   transparent avatars onto an auto-picked color that can swallow the mark.)
+ * - apps/mobile/assets/brand/                       (Expo icon, adaptive icon,
+ *   monochrome icon, and splash SVGs; the same contract geometry and colors)
+ * - apps/mobile/assets/images/                     (the PNG projections Expo
+ *   consumes, rasterized from the native SVGs above)
  *
  * The wordmark letters are converted to vector paths via satori + the vendored
  * Fredoka 600 WOFF, so the SVGs render correctly without the font installed.
@@ -35,6 +39,8 @@ const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const WEB_ROOT = join(REPO_ROOT, "apps/web");
 const BRAND_DIR = join(WEB_ROOT, "public/brand");
 const MARKETING_BRAND_DIR = join(REPO_ROOT, "marketing/assets/brand");
+const MOBILE_BRAND_DIR = join(REPO_ROOT, "apps/mobile/assets/brand");
+const MOBILE_IMAGE_DIR = join(REPO_ROOT, "apps/mobile/assets/images");
 
 const CLAY_500 = colorTokens.visualCoral;
 const CLAY_400 = colorTokens.visualCoral;
@@ -182,6 +188,39 @@ function markSvg(viewBox: keyof typeof MARK_BOXES = "standard"): string {
   return markSvgColored(viewBox, { body: CLAY_500, eyes: colorTokens.paper, pupils: STONE_900 });
 }
 
+function mobileMarkGroup(options: {
+  scale: number;
+  body: string;
+  eyes?: string;
+  pupils?: string;
+}): string {
+  const eyes = options.eyes ?? colorTokens.paper;
+  const pupils = options.pupils ?? STONE_900;
+  return `<g transform="translate(24 24.8) scale(${options.scale}) translate(-24 -24.8)">
+    <path d="${HOUSE_PATH}" fill="${options.body}" />
+    <circle cx="17.4" cy="26" r="4.8" fill="${eyes}" />
+    <circle cx="30.6" cy="26" r="4.8" fill="${eyes}" />
+    <circle cx="18.3" cy="26.7" r="2.2" fill="${pupils}" />
+    <circle cx="31.5" cy="26.7" r="2.2" fill="${pupils}" />
+  </g>`;
+}
+
+/** Native SVG projections are generated here so Expo cannot drift from the
+ * same contract that powers web and marketing assets. */
+function mobileAssetSvgs(): Readonly<Record<string, string>> {
+  const body = colorTokens.visualCoral;
+  const canvas = colorTokens.canvas;
+  const paper = colorTokens.paper;
+  const ink = colorTokens.ink;
+  return {
+    "android-background.svg": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">\n  <rect x="0" y="0" width="48" height="48" fill="${canvas}" />\n</svg>\n`,
+    "android-foreground.svg": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">\n  <!-- Android adaptive foreground: mark inside the ~66% safe zone. -->\n  ${mobileMarkGroup({ scale: 0.52, body, eyes: paper, pupils: ink })}\n</svg>\n`,
+    "android-monochrome.svg": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">\n  <!-- Android monochrome glyph: single-color silhouette, OS tints it. -->\n  <g transform="translate(24 24.8) scale(0.52) translate(-24 -24.8)">\n    <path d="${HOUSE_PATH}" fill="${paper}" />\n  </g>\n</svg>\n`,
+    "icon.svg": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">\n  <!-- App icon: the master Homa mark on the Quiet canvas. -->\n  <rect x="0" y="0" width="48" height="48" fill="${canvas}" />\n  ${mobileMarkGroup({ scale: 0.66, body, eyes: paper, pupils: ink })}\n</svg>\n`,
+    "splash-icon.svg": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">\n  <!-- Transparent splash mark. Expo supplies the Quiet canvas behind it. -->\n  ${mobileMarkGroup({ scale: 1, body, eyes: paper, pupils: ink }).replace(/ transform="[^"]+"/, "")}\n</svg>\n`,
+  };
+}
+
 /** Solid-background raster: the mark centered on a filled canvas (no alpha). */
 async function renderMarkOnBackground(options: {
   markSvgText: string;
@@ -249,6 +288,27 @@ async function main() {
 
   await mkdir(BRAND_DIR, { recursive: true });
   await mkdir(MARKETING_BRAND_DIR, { recursive: true });
+  await mkdir(MOBILE_BRAND_DIR, { recursive: true });
+  await mkdir(MOBILE_IMAGE_DIR, { recursive: true });
+
+  const mobileSvgs = mobileAssetSvgs();
+  for (const [name, svg] of Object.entries(mobileSvgs)) {
+    await writeFile(join(MOBILE_BRAND_DIR, name), svg);
+  }
+  console.log("wrote native SVG brand assets (Expo icon, adaptive icon, monochrome icon, splash)");
+
+  const mobilePngs = [
+    ["android-background.svg", "android-icon-background.png", 1024],
+    ["android-foreground.svg", "android-icon-foreground.png", 1024],
+    ["android-monochrome.svg", "android-icon-monochrome.png", 1024],
+    ["icon.svg", "icon.png", 1024],
+    ["icon.svg", "favicon.png", 48],
+    ["splash-icon.svg", "splash-icon.png", 1024],
+  ] as const;
+  for (const [svgName, pngName, width] of mobilePngs) {
+    await writeFile(join(MOBILE_IMAGE_DIR, pngName), await renderSvgToPng(mobileSvgs[svgName], width));
+  }
+  console.log("wrote native PNG projections (Expo icon, adaptive icon, monochrome icon, favicon, splash)");
 
   for (const tone of ["light", "dark"] as const) {
     const raw = await satori(lockupElement(tone) as never, { ...CANVAS, fonts: [...fonts] });

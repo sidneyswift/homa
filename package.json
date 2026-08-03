@@ -26,6 +26,7 @@
     "check:brand-residue": "node --experimental-strip-types scripts/brand-residue-check.mts && node --experimental-strip-types --test scripts/brand-residue-check.test.mts",
     "check:design-contract": "pnpm --filter @homa/design typecheck && pnpm --filter @homa/design test",
     "check:design-parity": "node --experimental-strip-types scripts/design-contract.mts --check",
+    "check:mobile-brand": "tsx --test scripts/mobile-brand-assets.test.mts apps/mobile/src/components/design/icon-registry.test.ts",
     "check:auth-recovery": "tsx --test packages/core/src/password-recovery.test.ts scripts/password-recovery-contract.test.mts scripts/supabase-password-recovery-template.test.mts",
     "auth-recovery:template": "tsx scripts/supabase-password-recovery-template.mts",
     "check:event-registry": "tsx scripts/events-check.mts && tsx --test scripts/events-check.test.mts",
