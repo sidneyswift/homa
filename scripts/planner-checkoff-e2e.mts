@@ -15,13 +15,20 @@ if (!databaseUrl) {
 }
 
 type CheckStatus = "applied" | "conflict";
+type ConflictReason =
+  | "activity-mismatch"
+  | "invalid-plan"
+  | "invalid-progress"
+  | "plan-missing"
+  | "revision-mismatch";
 
 interface CheckReceipt {
   status: CheckStatus;
-  plan_id: string;
-  plan_revision: string | number;
+  reason: ConflictReason | null;
+  plan_id: string | null;
+  plan_revision: string | number | null;
   progress_key: string;
-  done: boolean;
+  done: boolean | null;
 }
 
 interface PlanState {
@@ -109,6 +116,8 @@ try {
     }),
   ]);
   assert.equal(receiptA.status, "applied");
+  assert.equal(receiptA.reason, null);
+  assert.equal(receiptA.done, true);
   assert.equal(receiptB.status, "applied");
   const concurrent = await readPlan();
   assert.equal(concurrent.progress["2.0"], true);
@@ -146,6 +155,8 @@ try {
     revision,
   });
   assert.equal(textConflict.status, "conflict");
+  assert.equal(textConflict.reason, "activity-mismatch");
+  assert.equal(textConflict.done, null);
   assert.equal((await readPlan()).progress["2.0"], undefined);
 
   await sql`
@@ -171,6 +182,8 @@ try {
     revision,
   });
   assert.equal(revisionConflict.status, "conflict");
+  assert.equal(revisionConflict.reason, "revision-mismatch");
+  assert.equal(revisionConflict.done, null);
   assert.equal((await readPlan()).progress["2.0"], undefined);
 
   const replacement = "Read one chapter, then tell the funniest part.";
@@ -197,6 +210,8 @@ try {
     revision: revision + 1,
   });
   assert.equal(staleReceipt.status, "conflict");
+  assert.equal(staleReceipt.reason, "revision-mismatch");
+  assert.equal(staleReceipt.done, null);
   assert.equal((await readPlan()).progress["2.0"], undefined);
 
   const currentReceipt = await setCheck({
@@ -210,6 +225,28 @@ try {
   const afterProgress = await readPlan();
   assert.equal(afterProgress.progress["2.0"], true);
   assert.equal(Number(afterProgress.plan_revision), revision + 2);
+
+  await sql`
+    update public.child_plans
+    set progress = '[]'::jsonb
+    where child_id = ${EVAL_FIXTURE_PLAN_CHILD_ID}
+      and subject_id = ${EVAL_FIXTURE_PLAN_SUBJECT}
+  `;
+  const invalidProgress = await setCheck({
+    checkKey: "2.0",
+    done: false,
+    expectedText: replacement,
+    revision: revision + 2,
+  });
+  assert.equal(invalidProgress.status, "conflict");
+  assert.equal(invalidProgress.reason, "invalid-progress");
+  assert.equal(invalidProgress.done, null);
+  await sql`
+    update public.child_plans
+    set progress = '{}'::jsonb
+    where child_id = ${EVAL_FIXTURE_PLAN_CHILD_ID}
+      and subject_id = ${EVAL_FIXTURE_PLAN_SUBJECT}
+  `;
 
   await sql`
     update public.child_plans
@@ -240,7 +277,22 @@ try {
     revision: Number(duplicateWeekPlan.plan_revision),
   });
   assert.equal(duplicateWeekConflict.status, "conflict");
+  assert.equal(duplicateWeekConflict.reason, "invalid-plan");
+  assert.equal(duplicateWeekConflict.done, null);
   assert.equal((await readPlan()).progress["2.0"], undefined);
+
+  const missingPlan = await setCheck({
+    subjectId: "missing-plan",
+    checkKey: "1.0",
+    done: true,
+    expectedText: "No longer here",
+    revision: 1,
+  });
+  assert.equal(missingPlan.status, "conflict");
+  assert.equal(missingPlan.reason, "plan-missing");
+  assert.equal(missingPlan.plan_id, null);
+  assert.equal(missingPlan.plan_revision, null);
+  assert.equal(missingPlan.done, null);
 
   await assert.rejects(
     sql.begin(async (transaction) => {
@@ -324,6 +376,7 @@ try {
 
   console.log("PASS  Planner check-offs preserve concurrent keys");
   console.log("PASS  Planner check-offs reject stale text and revisions");
+  console.log("PASS  Planner conflicts carry typed, non-positional receipts");
   console.log("PASS  plan_revision changes only with plan meaning");
   console.log("PASS  Planner check-offs enforce family tenancy");
   console.log("PASS  expand phase preserves the legacy operation");

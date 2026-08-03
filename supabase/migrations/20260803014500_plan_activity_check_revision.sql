@@ -45,6 +45,7 @@ create or replace function public.set_plan_activity_check(
 )
 returns table (
   status text,
+  reason text,
   plan_id uuid,
   plan_revision bigint,
   progress_key text,
@@ -97,8 +98,25 @@ begin
   for update;
 
   if locked_plan.id is null then
-    raise exception 'no plan found for this child and subject'
-      using errcode = 'P0002';
+    return query select
+      'conflict'::text,
+      'plan-missing'::text,
+      null::uuid,
+      null::bigint,
+      target_check_key,
+      null::boolean;
+    return;
+  end if;
+
+  if locked_plan.plan_revision <> target_plan_revision then
+    return query select
+      'conflict'::text,
+      'revision-mismatch'::text,
+      locked_plan.id,
+      locked_plan.plan_revision,
+      target_check_key,
+      null::boolean;
+    return;
   end if;
 
   select
@@ -114,31 +132,50 @@ begin
   ) as week_entry
   where week_entry ->> 'week' = target_week::text;
 
-  if matching_week_count = 1
-    and week_activities is not null
-    and jsonb_typeof(week_activities) = 'array'
-    and target_activity_index < jsonb_array_length(week_activities)
-    and jsonb_typeof(week_activities -> target_activity_index) = 'string'
+  if matching_week_count <> 1
+    or week_activities is null
+    or jsonb_typeof(week_activities) <> 'array'
+    or target_activity_index >= jsonb_array_length(week_activities)
+    or jsonb_typeof(week_activities -> target_activity_index) <> 'string'
   then
-    current_activity_text := week_activities ->> target_activity_index;
+    return query select
+      'conflict'::text,
+      'invalid-plan'::text,
+      locked_plan.id,
+      locked_plan.plan_revision,
+      target_check_key,
+      null::boolean;
+    return;
+  end if;
+
+  current_activity_text := week_activities ->> target_activity_index;
+
+  if current_activity_text is distinct from target_expected_text then
+    return query select
+      'conflict'::text,
+      'activity-mismatch'::text,
+      locked_plan.id,
+      locked_plan.plan_revision,
+      target_check_key,
+      null::boolean;
+    return;
+  end if;
+
+  if jsonb_typeof(locked_plan.progress) <> 'object' then
+    return query select
+      'conflict'::text,
+      'invalid-progress'::text,
+      locked_plan.id,
+      locked_plan.plan_revision,
+      target_check_key,
+      null::boolean;
+    return;
   end if;
 
   current_done := coalesce(
     locked_plan.progress -> target_check_key = 'true'::jsonb,
     false
   );
-
-  if locked_plan.plan_revision <> target_plan_revision
-    or current_activity_text is distinct from target_expected_text
-  then
-    return query select
-      'conflict'::text,
-      locked_plan.id,
-      locked_plan.plan_revision,
-      target_check_key,
-      current_done;
-    return;
-  end if;
 
   if coalesce(
     locked_plan.progress -> target_check_key,
@@ -161,6 +198,7 @@ begin
 
   return query select
     'applied'::text,
+    null::text,
     locked_plan.id,
     locked_plan.plan_revision,
     target_check_key,

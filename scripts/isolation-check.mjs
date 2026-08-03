@@ -3153,6 +3153,31 @@ async function expectAuthenticatedIsolation() {
       },
       "auth member cannot toggle another family's plan activity check",
     );
+    const [staleSafeCheckFunction] = await sql`
+      select to_regprocedure(
+        'public.set_plan_activity_check(uuid,text,text,boolean,text,bigint)'
+      ) is not null as available
+    `;
+    if (staleSafeCheckFunction?.available === true) {
+      await expectAuthenticatedRpcDenied(
+        familyAUser.accessToken,
+        "set_plan_activity_check",
+        {
+          target_child_id: childBId,
+          target_subject_id: "isolation-check",
+          target_check_key: "1.0",
+          target_done: true,
+          target_expected_text: "Cross-family source.",
+          target_plan_revision: 1,
+        },
+        "auth member cannot use stale-safe check-off on another family's plan",
+      );
+    } else {
+      report(
+        "stale-safe Planner check function absent from target (additive migration not applied yet); nothing exposed",
+        true,
+      );
+    }
     await expectAuthenticatedRead(
       familyBUser.accessToken,
       "chat_attachments",
