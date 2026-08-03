@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { Check, Clock3, FileCheck2, Files, HelpCircle } from "lucide-react";
 import { useState } from "react";
 
 import { QuietAction } from "../design/QuietAction";
@@ -9,6 +8,7 @@ import { QuietFrame } from "../design/QuietFrame";
 import { QuietStatus } from "../design/QuietStatus";
 import { QuietThread } from "../design/QuietThread";
 import { Icon } from "../design/Icon";
+import type { SemanticIconName } from "../design/Icon";
 import { QuietFooter } from "../design/QuietFooter";
 import { ReportPreview } from "../../app/onboarding/report-preview";
 import { FAQ_ITEMS } from "./faq-items";
@@ -16,11 +16,11 @@ import { HERO_COPY, PAIN_CLOSING, PAIN_ITEMS, CAPABILITY_FEATURE_HREFS, CAPABILI
 import { Nav } from "./Nav";
 import { SignupPopupProvider, useSignupPopup } from "./SignupPopupProvider";
 
-const PAIN_ICONS: Record<PainId, typeof Clock3> = {
-  planning: Clock3,
-  proof: HelpCircle,
-  scattered: Files,
-  paperwork: FileCheck2,
+const PAIN_ICONS: Record<PainId, SemanticIconName> = {
+  planning: "time",
+  proof: "help",
+  scattered: "files",
+  paperwork: "document",
 };
 
 const QUIET_LANDING_CSS = `
@@ -197,7 +197,7 @@ function HeroObject() {
         <div className="qa-object__tasks" role="list" aria-label="Today's plan">
           {tasks.map(([title, body, time], index) => (
             <div className="qa-object__task" key={title} role="listitem">
-              <span className="qa-object__task-mark" aria-hidden="true">{index === 0 ? <Check size={16} strokeWidth={3} /> : null}</span>
+              <span className="qa-object__task-mark" aria-hidden="true">{index === 0 ? <Icon name="check" size={16} /> : null}</span>
               <div><strong>{title}</strong><span>{body}</span></div>
               <time>{time}</time>
             </div>
@@ -214,7 +214,7 @@ function HeroObject() {
 
 function QuietCapabilityProof({ capabilityId }: { capabilityId: CapabilityId }) {
   if (capabilityId === "plan") {
-    return <div className="qa-proof"><div className="qa-proof__meta"><strong>Maya · age 4</strong><span>Tuesday · 1h 25m</span></div><div className="qa-proof__rows">{[["Butterfly math", "Done"], ["Butterfly book", "20m"], ["Science walk", "30m"]].map(([title, meta], index) => <div className="qa-proof__row" key={title}><span className="qa-proof__mark">{index === 0 ? <Check size={11} strokeWidth={3} /> : null}</span><span>{title}</span><small>{meta}</small></div>)}</div></div>;
+    return <div className="qa-proof"><div className="qa-proof__meta"><strong>Maya · age 4</strong><span>Tuesday · 1h 25m</span></div><div className="qa-proof__rows">{[["Butterfly math", "Done"], ["Butterfly book", "20m"], ["Science walk", "30m"]].map(([title, meta], index) => <div className="qa-proof__row" key={title}><span className="qa-proof__mark">{index === 0 ? <Icon name="check" size={16} /> : null}</span><span>{title}</span><small>{meta}</small></div>)}</div></div>;
   }
   if (capabilityId === "practice") {
     return <div className="qa-proof qa-proof__document"><Image src="/images/hero-butterfly-math.png" alt="" width={1024} height={1536} sizes="62px" /><div><div className="qa-proof__meta"><strong>Made for Maya</strong><span>Tuesday</span></div><p>A practice page shaped around this week&apos;s lesson.</p><span className="qa-proof__document-status">Ready to print</span></div></div>;
@@ -262,7 +262,7 @@ export function QuietLanding() {
                 <p className="qa-hero__body">{HERO_COPY.body}</p>
                 <div className="qa-hero__actions"><TrialAction /><TrialAction secondary /></div>
                 <p className="qa-hero__note">{HERO_COPY.primaryActionNote}</p>
-                <ul className="qa-hero__proofs"><li><Check size={15} strokeWidth={3} /> Weekly plans that adapt</li><li><Check size={15} strokeWidth={3} /> Practice pages made for your child</li><li><Check size={15} strokeWidth={3} /> Records you can find again</li></ul>
+                <ul className="qa-hero__proofs"><li><Icon name="check" size={16} /> Weekly plans that adapt</li><li><Icon name="check" size={16} /> Practice pages made for your child</li><li><Icon name="check" size={16} /> Records you can find again</li></ul>
                 <QuietThread className="qa-thread" label="A line connecting today's work to what comes next" />
               </div>
               <HeroObject />
@@ -271,7 +271,7 @@ export function QuietLanding() {
 
           <section id="how" className="qa-band qa-section" aria-labelledby="quiet-how-title">
             <div className="qa-section__intro"><div className="qa-eyebrow">The work around teaching</div><h2 id="quiet-how-title">Planning and records take time.</h2><p className="qa-section__lead">Homa prepares the week, keeps the record, and leaves you with more attention for the part only you can do.</p></div>
-            <div className="qa-pain-grid">{PAIN_ITEMS.map(({ id, title, body }) => { const Icon = PAIN_ICONS[id]; return <QuietFrame as="article" tone="paper" className="qa-frame qa-pain-card" key={id}><span className="qa-pain-card__icon"><Icon size={20} aria-hidden="true" /></span><h3>{title}</h3><p>{body}</p></QuietFrame>; })}</div>
+            <div className="qa-pain-grid">{PAIN_ITEMS.map(({ id, title, body }) => { const icon = PAIN_ICONS[id]; return <QuietFrame as="article" tone="paper" className="qa-frame qa-pain-card" key={id}><span className="qa-pain-card__icon"><Icon name={icon} size={20} /></span><h3>{title}</h3><p>{body}</p></QuietFrame>; })}</div>
             <p className="qa-closing">{PAIN_CLOSING}</p>
           </section>
 

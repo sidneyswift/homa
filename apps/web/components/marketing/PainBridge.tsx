@@ -1,14 +1,14 @@
-import { Clock3, FileCheck2, Files, HelpCircle, type LucideIcon } from "lucide-react";
-
+import { Icon } from "../design/Icon";
+import type { SemanticIconName } from "../design/Icon";
 import { Doodle } from "./Doodle";
 import { Eyebrow } from "./dividers";
 import { PAIN_CLOSING, PAIN_ITEMS, type PainId } from "./landing-content";
 
-const PAIN_ICONS: Record<PainId, LucideIcon> = {
-  planning: Clock3,
-  proof: HelpCircle,
-  scattered: Files,
-  paperwork: FileCheck2,
+const PAIN_ICONS: Record<PainId, SemanticIconName> = {
+  planning: "time",
+  proof: "help",
+  scattered: "files",
+  paperwork: "document",
 };
 
 /**
@@ -132,7 +132,7 @@ export function PainBridge() {
         }}
       >
         {PAIN_ITEMS.map(({ id, title, body }) => {
-          const Icon = PAIN_ICONS[id];
+          const icon = PAIN_ICONS[id];
           const { tint, ink, blob } = PAIN_ACCENTS[id];
           return (
             <article key={id} style={{ minWidth: 0, display: "flex" }}>
@@ -163,7 +163,7 @@ export function PainBridge() {
                     border: "2px solid var(--surface-card)",
                   }}
                 >
-                  <Icon size={23} color={ink} aria-hidden="true" />
+                  <Icon name={icon} size={24} color={ink} />
                 </span>
                 <h3
                   className="lp-painb-title"

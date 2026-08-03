@@ -1,13 +1,8 @@
-import {
-  BookOpen,
-  CalendarDays,
-  ClipboardCheck,
-  FilePenLine,
-  type LucideIcon,
-} from "lucide-react-native";
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { useReducedMotion } from "react-native-reanimated";
 
+import { Icon } from "../../components/design/icon";
+import type { SemanticIconName } from "@homa/design/contract";
 import { fontFamilies } from "../../theme/fonts";
 import {
   colors,
@@ -29,11 +24,11 @@ const CARD_FILL_DARK = "rgba(51,46,41,0.78)";
 const CARD_BORDER_LIGHT = "rgba(214,200,180,0.8)";
 const CARD_BORDER_DARK = "rgba(214,200,180,0.28)";
 
-const STARTER_ICONS: Record<VoicePromptStarterId, LucideIcon> = {
-  worksheet: FilePenLine,
-  lesson_plan: BookOpen,
-  planner: CalendarDays,
-  lesson_log: ClipboardCheck,
+const STARTER_ICONS: Record<VoicePromptStarterId, SemanticIconName> = {
+  worksheet: "edit",
+  lesson_plan: "book",
+  planner: "calendar",
+  lesson_log: "plan",
 };
 
 export function VoicePromptStarters({
@@ -66,7 +61,7 @@ export function VoicePromptStarters({
       }}
     >
       {VOICE_PROMPT_STARTERS.map((starter) => {
-        const Icon = STARTER_ICONS[starter.id];
+        const icon = STARTER_ICONS[starter.id];
         const hint = starter.action.kind === "route"
           ? "Opens your homeschool planner"
           : "Starts this request with Homa";
@@ -96,7 +91,7 @@ export function VoicePromptStarters({
               transform: [{ scale: pressed && !reducedMotion ? pressScale : 1 }],
             })}
           >
-            <Icon size={18} color={iconColor} strokeWidth={2} />
+            <Icon name={icon} size={20} color={iconColor} />
             <Text
               style={{
                 flex: 1,

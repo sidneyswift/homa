@@ -7,7 +7,6 @@ import {
   useAudioRecorderState,
 } from "expo-audio";
 import { File, Paths } from "expo-file-system";
-import { Pause, Play, RotateCcw, Square, Trash2 } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   Alert,
@@ -22,6 +21,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { InlineError } from "../../components/ui/inline-error";
+import { Icon } from "../../components/design/icon";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { reportCrash } from "../../lib/crash-reporting";
 import { fontFamilies } from "../../theme/fonts";
@@ -435,11 +435,11 @@ export function NativeLessonRecorder({
             {phase === "recording" ? (
               <View style={styles.actions}>
                 <Pressable accessibilityRole="button" onPress={pauseCapture} style={styles.secondaryButton}>
-                  <Pause size={18} color={colors.textStrong} />
+                  <Icon name="pause" size={20} color={colors.textStrong} />
                   <Text style={styles.secondaryButtonText}>Pause</Text>
                 </Pressable>
                 <Pressable accessibilityRole="button" onPress={() => void stopCapture()} style={styles.stopButton}>
-                  <Square size={17} color={colors.onBrand} fill={colors.onBrand} />
+                  <Icon name="stop" size={16} color={colors.onBrand} fill={colors.onBrand} />
                   <Text style={styles.stopButtonText}>Stop</Text>
                 </Pressable>
               </View>
@@ -447,11 +447,11 @@ export function NativeLessonRecorder({
             {phase === "paused" || phase === "interrupted" ? (
               <View style={styles.actions}>
                 <Pressable accessibilityRole="button" onPress={resumeCapture} style={styles.secondaryButton}>
-                  <RotateCcw size={18} color={colors.textStrong} />
+                  <Icon name="refresh" size={20} color={colors.textStrong} />
                   <Text style={styles.secondaryButtonText}>Resume</Text>
                 </Pressable>
                 <Pressable accessibilityRole="button" onPress={() => void stopCapture()} style={styles.stopButton}>
-                  <Square size={17} color={colors.onBrand} fill={colors.onBrand} />
+                  <Icon name="stop" size={16} color={colors.onBrand} fill={colors.onBrand} />
                   <Text style={styles.stopButtonText}>Stop</Text>
                 </Pressable>
               </View>
@@ -471,9 +471,9 @@ export function NativeLessonRecorder({
                   style={styles.secondaryButton}
                 >
                   {player.playing ? (
-                    <Pause size={18} color={colors.textStrong} />
+                    <Icon name="pause" size={20} color={colors.textStrong} />
                   ) : (
-                    <Play size={18} color={colors.textStrong} />
+                    <Icon name="play" size={20} color={colors.textStrong} />
                   )}
                   <Text style={styles.secondaryButtonText}>
                     {player.playing ? "Pause playback" : "Play recording"}
@@ -577,7 +577,7 @@ export function NativeLessonRecorder({
             onPress={canDiscard ? discard : onCancel}
             style={styles.discardButton}
           >
-            <Trash2 size={17} color={colors.textMuted} />
+            <Icon name="delete" size={16} color={colors.textMuted} />
             <Text style={styles.discardText}>{canDiscard ? "Discard recording" : "Cancel"}</Text>
           </Pressable>
         ) : null}

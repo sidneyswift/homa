@@ -1,9 +1,10 @@
 "use client";
 
 import type { EveMessage, EveMessagePart } from "eve/react";
-import { CalendarDays, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+import { Icon } from "../../components/design/Icon";
 
 import { SidePanel } from "../../components/chassis/side-panel";
 import { parsePlanBoardResponse, type PlanBoardPayload } from "../../lib/plan-board";
@@ -120,7 +121,7 @@ export function PlannerCard({
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md"
         style={{ background: "var(--sage-50)", color: "var(--sage-700)" }}
       >
-        <CalendarDays size={18} aria-hidden="true" />
+        <Icon name="calendar" size={20} />
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-semibold text-strong">
@@ -226,7 +227,7 @@ export function PlannerCanvasPanel({
           onClick={onClose}
           className="flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-card hover:text-strong"
         >
-          <X size={18} aria-hidden="true" />
+          <Icon name="close" size={20} />
         </button>
       </div>
     </header>

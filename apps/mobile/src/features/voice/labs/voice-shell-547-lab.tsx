@@ -1,21 +1,3 @@
-import {
-  Bell,
-  BookOpen,
-  CalendarDays,
-  Check,
-  ChevronLeft,
-  FileText,
-  Menu,
-  MessageCircle,
-  Mic,
-  MicOff,
-  Pause,
-  Printer,
-  RotateCw,
-  Settings2,
-  Volume2,
-  X,
-} from "lucide-react-native";
 import { useLocalSearchParams } from "expo-router";
 import {
   ActivityIndicator,
@@ -31,9 +13,11 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { Logo } from "../../../components/brand/logo";
+import { Icon } from "../../../components/design/icon";
+import type { SemanticIconName } from "@homa/design/contract";
 import { fontFamilies } from "../../../theme/fonts";
 import { colors, fontSize, palette, radius, shadows, space } from "../../../theme/tokens";
 
@@ -52,7 +36,7 @@ interface StateSpec {
   detail: string;
   color: string;
   soft: string;
-  icon: ComponentType<{ size?: number; color?: string }>;
+  icon: SemanticIconName;
 }
 
 const SURFACES: readonly { id: Surface; label: string }[] = [
@@ -69,42 +53,42 @@ const STATE_SPECS: Record<VoiceState, StateSpec> = {
     detail: "Homa can hear you",
     color: colors.sage,
     soft: colors.sageSoft,
-    icon: Mic,
+    icon: "voice",
   },
   speaking: {
     label: "Speaking",
     detail: "Homa is answering",
     color: colors.brand,
     soft: colors.brandSoft,
-    icon: Volume2,
+    icon: "volume",
   },
   muted: {
     label: "Muted",
     detail: "Tap to turn your mic on",
     color: colors.textMuted,
     soft: colors.surfaceSunken,
-    icon: MicOff,
+    icon: "muted",
   },
   paused: {
     label: "Paused for recorder",
     detail: "The lesson recorder has the mic",
     color: palette.goldInk,
     soft: colors.goldSoft,
-    icon: Pause,
+    icon: "pause",
   },
   reconnecting: {
     label: "Reconnecting",
     detail: "Your conversation is safe",
     color: palette.sky600,
     soft: palette.sky100,
-    icon: RotateCw,
+    icon: "refresh",
   },
   attention: {
     label: "Needs your attention",
     detail: "One choice is waiting",
     color: palette.goldInk,
     soft: colors.goldSoft,
-    icon: Bell,
+    icon: "reminder",
   },
 };
 
@@ -245,7 +229,7 @@ function LabTopBar({
   return (
     <View style={styles.topBar}>
       <Pressable accessibilityRole="button" accessibilityLabel="Open menu, prototype only" style={styles.iconHit}>
-        <Menu size={22} color={colors.textBody} />
+        <Icon name="menu" size={24} color={colors.textBody} />
       </Pressable>
       <Logo size={24} />
       <Pressable
@@ -254,7 +238,7 @@ function LabTopBar({
         onPress={onOpenPanel}
         style={styles.labButton}
       >
-        <Settings2 size={16} color={colors.brandHover} />
+        <Icon name="settings" size={16} color={colors.brandHover} />
         <Text style={styles.labButtonText}>Lab</Text>
       </Pressable>
     </View>
@@ -330,7 +314,7 @@ function PlannerSurface({ controlReserve }: { controlReserve: number }) {
       >
         <Segmented labels={["Day", "Week", "Month"]} selected="Week" />
         <View style={styles.dateRow}>
-          <ChevronLeft size={20} color={colors.textMuted} />
+          <Icon name="back" size={20} color={colors.textMuted} />
           <View style={styles.centered}>
             <Text style={styles.sectionTitle}>Aug 3 to 9</Text>
             <Text style={styles.caption}>Everyone</Text>
@@ -399,10 +383,10 @@ function BinderSurface({ controlReserve }: { controlReserve: number }) {
         <Chip label="Reading" />
       </View>
       <View style={styles.materialGrid}>
-        <MaterialTile title="Fraction picnic" child="Mia" tone={colors.goldSoft} icon={FileText} />
-        <MaterialTile title="Backyard birds" child="Noah" tone={colors.sageSoft} icon={BookOpen} />
-        <MaterialTile title="Story starters" child="Mia" tone={palette.sky100} icon={MessageCircle} />
-        <MaterialTile title="Number hunt" child="Noah" tone={colors.brandSoft} icon={CalendarDays} />
+        <MaterialTile title="Fraction picnic" child="Mia" tone={colors.goldSoft} icon="document" />
+        <MaterialTile title="Backyard birds" child="Noah" tone={colors.sageSoft} icon="book" />
+        <MaterialTile title="Story starters" child="Mia" tone={palette.sky100} icon="chat" />
+        <MaterialTile title="Number hunt" child="Noah" tone={colors.brandSoft} icon="calendar" />
       </View>
     </ScrollView>
   );
@@ -412,17 +396,17 @@ function MaterialTile({
   title,
   child,
   tone,
-  icon: Icon,
+  icon,
 }: {
   title: string;
   child: string;
   tone: string;
-  icon: ComponentType<{ size?: number; color?: string }>;
+  icon: SemanticIconName;
 }) {
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={`Open ${title} for ${child}`} style={styles.materialTile}>
       <View style={[styles.materialPreview, { backgroundColor: tone }]}>
-        <Icon size={26} color={colors.textBody} />
+        <Icon name={icon} size={24} color={colors.textBody} />
         <View style={styles.previewLine} />
         <View style={[styles.previewLine, { width: "54%" }]} />
       </View>
@@ -448,7 +432,7 @@ function PreviewSurface({
       >
         <View style={styles.previewHeader}>
           <Pressable accessibilityRole="button" accessibilityLabel="Back to Binder" style={styles.iconHit}>
-            <ChevronLeft size={20} color={colors.textBody} />
+            <Icon name="back" size={20} color={colors.textBody} />
           </Pressable>
           <View style={styles.flexOne}>
             <Text numberOfLines={1} style={styles.sectionTitle}>Fraction picnic</Text>
@@ -475,7 +459,7 @@ function PreviewSurface({
           onPress={onOpenSystemSheet}
           style={styles.primaryButton}
         >
-          <Printer size={18} color={colors.onBrand} />
+          <Icon name="print" size={20} color={colors.onBrand} />
           <Text style={styles.primaryButtonText}>Print 2 copies</Text>
         </Pressable>
       </View>
@@ -516,7 +500,7 @@ function ConfirmationSurface({ controlReserve }: { controlReserve: number }) {
       </View>
       <View style={styles.confirmCard}>
         <View style={styles.confirmIcon}>
-          <BookOpen size={22} color={colors.sage} />
+          <Icon name="book" size={24} color={colors.sage} />
         </View>
         <View style={styles.flexOne}>
           <Text style={styles.overline}>NOAH · MATH</Text>
@@ -533,7 +517,7 @@ function ConfirmationSurface({ controlReserve }: { controlReserve: number }) {
           <Text style={styles.secondaryButtonText}>Change it</Text>
         </Pressable>
         <Pressable accessibilityRole="button" style={styles.primaryButton}>
-          <Check size={18} color={colors.onBrand} />
+          <Icon name="check" size={20} color={colors.onBrand} />
           <Text style={styles.primaryButtonText}>Save observation</Text>
         </Pressable>
       </View>
@@ -559,7 +543,7 @@ function VoiceControl({
   onSetState: (state: VoiceState) => void;
 }) {
   const spec = STATE_SPECS[state];
-  const Icon = spec.icon;
+  const icon = spec.icon;
   const actionState: VoiceState = state === "muted" ? "listening" : "muted";
   const actionLabel = state === "muted" ? "Turn microphone on" : "Mute microphone";
 
@@ -583,10 +567,10 @@ function VoiceControl({
           onPress={() => onSetState(actionState)}
           style={styles.roundControl}
         >
-          <Icon size={19} color={spec.color} />
+          <Icon name={icon} size={20} color={spec.color} />
         </Pressable>
         <Pressable accessibilityRole="button" accessibilityLabel="Return to Voice" style={styles.returnButton}>
-          <MessageCircle size={17} color={colors.onBrand} />
+          <Icon name="chat" size={16} color={colors.onBrand} />
           <Text style={styles.returnButtonText}>Voice</Text>
         </Pressable>
       </View>
@@ -640,10 +624,10 @@ function VoiceControl({
         onPress={() => onSetState(actionState)}
         style={styles.roundControl}
       >
-        <Icon size={18} color={spec.color} />
+        <Icon name={icon} size={20} color={spec.color} />
       </Pressable>
       <Pressable accessibilityRole="button" accessibilityLabel="Return to Voice" style={styles.compactReturn}>
-        <MessageCircle size={18} color={colors.onBrand} />
+        <Icon name="chat" size={20} color={colors.onBrand} />
       </Pressable>
     </View>
   );
@@ -677,7 +661,7 @@ function LabPanel({
             <Text style={styles.caption}>Issue #547 · Fake interaction evidence</Text>
           </View>
           <Pressable accessibilityRole="button" accessibilityLabel="Close lab controls" onPress={onClose} style={styles.iconHit}>
-            <X size={22} color={colors.textBody} />
+            <Icon name="close" size={24} color={colors.textBody} />
           </Pressable>
         </View>
         <ScrollView contentContainerStyle={styles.panelContent}>
@@ -704,7 +688,7 @@ function LabPanel({
             <View style={styles.stateGrid}>
               {(Object.keys(STATE_SPECS) as VoiceState[]).map((id) => {
                 const item = STATE_SPECS[id];
-                const Icon = item.icon;
+                const icon = item.icon;
                 return (
                   <Pressable
                     key={id}
@@ -714,7 +698,7 @@ function LabPanel({
                     style={[styles.stateChoice, state === id ? styles.stateChoiceSelected : null]}
                   >
                     <View style={[styles.stateChoiceIcon, { backgroundColor: item.soft }]}>
-                      <Icon size={17} color={item.color} />
+                      <Icon name={icon} size={16} color={item.color} />
                     </View>
                     <Text style={styles.stateChoiceLabel}>{item.label}</Text>
                   </Pressable>
@@ -782,7 +766,7 @@ function SystemSheet({
           <Text style={styles.passiveVoiceText}>Homa is {spec.label.toLowerCase()}. Voice controls return when this sheet closes.</Text>
         </View>
         <View style={styles.printPreviewMini}>
-          <FileText size={44} color={colors.textMuted} />
+          <Icon name="document" size={24} color={colors.textMuted} />
           <View>
             <Text style={styles.sectionTitle}>Fraction picnic</Text>
             <Text style={styles.caption}>2 pages · 2 copies</Text>

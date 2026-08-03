@@ -5,6 +5,9 @@ import { fileURLToPath } from "node:url";
 
 type IconImportPackage = "lucide-react" | "lucide-react-native";
 type IconImportKind = "adapter" | "migration-pending";
+export type IconSurfaceClass = "user-facing" | "admin-founder" | "dev-only";
+export type IconGlyphSupport = "supported" | "unsupported-glyph";
+export type IconMigrationDecision = "migrate" | "retain-unsupported";
 
 export type IconImportFinding = {
   path: string;
@@ -16,6 +19,14 @@ export type IconImportException = {
   path: string;
   package: IconImportPackage;
   kind: IconImportKind;
+};
+
+export type IconImportReview = {
+  path: string;
+  surfaceClass: IconSurfaceClass;
+  glyphSupport: IconGlyphSupport;
+  decision: IconMigrationDecision;
+  rationale: string;
 };
 
 export type IconImportResidueReport = {
@@ -30,6 +41,11 @@ type ExceptionManifest = {
   ownerIssue: string;
   policy: string;
   entries: IconImportException[];
+  review: {
+    baselinePendingCount: number;
+    status: "migrated" | "pending";
+    entries: IconImportReview[];
+  };
 };
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -113,13 +129,37 @@ export function validateIconImportExceptions(
   };
 }
 
+export function validateIconImportReview(review: ExceptionManifest["review"]): IconImportReview[] {
+  if (review.status !== "migrated") throw new Error(`Icon import review is not complete: ${review.status}`);
+  if (review.baselinePendingCount !== review.entries.length) {
+    throw new Error(`Icon import review baseline count ${review.baselinePendingCount} does not match ${review.entries.length} reviewed paths`);
+  }
+  const paths = new Set<string>();
+  for (const entry of review.entries) {
+    if (paths.has(entry.path)) throw new Error(`duplicate icon import review: ${entry.path}`);
+    paths.add(entry.path);
+    if (!entry.path.startsWith("apps/web/") && !entry.path.startsWith("apps/mobile/")) throw new Error(`icon import review path is outside app sources: ${entry.path}`);
+    if (entry.glyphSupport === "unsupported-glyph" && entry.decision !== "retain-unsupported") throw new Error(`unsupported glyph review must retain an explicit exception: ${entry.path}`);
+    if (entry.glyphSupport === "supported" && entry.decision !== "migrate") throw new Error(`supported glyph review must migrate: ${entry.path}`);
+    if (entry.rationale.trim().length < 20) throw new Error(`icon import review rationale is too short: ${entry.path}`);
+  }
+  return review.entries;
+}
+
 export function readIconImportExceptions(): IconImportException[] {
   if (!existsSync(EXCEPTIONS_PATH)) throw new Error(`Missing icon import exception manifest: ${EXCEPTIONS_PATH}`);
   const manifest = JSON.parse(readFileSync(EXCEPTIONS_PATH, "utf8")) as ExceptionManifest;
   if (manifest.schemaVersion !== 1 || manifest.ownerIssue !== "gh#718" || manifest.policy !== "new-direct-imports-fail") {
     throw new Error("Icon import exception manifest has an invalid schema, owner, or policy");
   }
+  validateIconImportReview(manifest.review);
   return manifest.entries;
+}
+
+export function readIconImportReview(): IconImportReview[] {
+  const manifest = JSON.parse(readFileSync(EXCEPTIONS_PATH, "utf8")) as ExceptionManifest;
+  validateIconImportReview(manifest.review);
+  return manifest.review.entries;
 }
 
 export function runIconImportResidueCheck(): IconImportResidueReport {

@@ -9,7 +9,10 @@ export const iconContract = {
   source: "semantic-adapter-only",
   characterIsNotAControl: true,
 } as const;
-export const semanticIcons = ["back", "next", "close", "menu", "more", "add", "edit", "delete", "calendar", "book", "plan", "progress", "chat", "tasks", "settings", "logout", "print", "share", "voice", "muted", "end", "collapse", "check", "warning", "error", "info", "external", "refresh", "stop"] as const;
+export const semanticIcons = [
+  "back", "next", "close", "menu", "more", "add", "edit", "delete", "calendar", "book", "plan", "progress", "chat", "tasks", "settings", "logout", "print", "share", "voice", "muted", "end", "collapse", "expand", "check", "warning", "error", "info", "external", "refresh", "stop",
+  "play", "pause", "reminder", "experiment", "journal", "document", "undo", "phone", "camera", "image", "time", "learn", "command", "bookmark_add", "bookmark_remove", "erase", "history", "mail", "search", "spark", "person", "people", "tools", "folder", "files", "help", "nature", "globe", "mobile", "send", "assistant", "volume",
+] as const;
 export type SemanticIconName = (typeof semanticIcons)[number];
 
 /**
@@ -40,6 +43,7 @@ export const semanticIconAliases = {
   muted: "MicOff",
   end: "PhoneOff",
   collapse: "ChevronDown",
+  expand: "ChevronUp",
   check: "Check",
   warning: "TriangleAlert",
   error: "CircleAlert",
@@ -47,6 +51,38 @@ export const semanticIconAliases = {
   external: "ExternalLink",
   refresh: "RefreshCw",
   stop: "Square",
+  play: "Play",
+  pause: "Pause",
+  reminder: "Bell",
+  experiment: "FlaskConical",
+  journal: "Moon",
+  document: "FileText",
+  undo: "Undo2",
+  phone: "PhoneForwarded",
+  camera: "Camera",
+  image: "Image",
+  time: "Clock3",
+  learn: "GraduationCap",
+  command: "Zap",
+  bookmark_add: "BookmarkPlus",
+  bookmark_remove: "BookmarkMinus",
+  erase: "Eraser",
+  history: "History",
+  mail: "Mail",
+  search: "Search",
+  spark: "Sparkles",
+  person: "UserRound",
+  people: "Users",
+  tools: "Wrench",
+  folder: "FolderOpen",
+  files: "Files",
+  help: "HelpCircle",
+  nature: "Leaf",
+  globe: "Globe2",
+  mobile: "Smartphone",
+  send: "ArrowUp",
+  assistant: "Bot",
+  volume: "Volume2",
 } as const satisfies Record<SemanticIconName, string>;
 
 export type SemanticIconPlatform = "web" | "native";

@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, useTransition } from "react";
-import { Users } from "lucide-react";
-
 import { ageLabel } from "@homa/core";
 
 import { setViewContextAction } from "../../app/app/view-context-actions";
@@ -58,7 +56,7 @@ function FamilyAvatar({ size }: { size: number }) {
       className="quiet-shell__family-avatar"
       style={{ width: size, height: size }}
     >
-      <Users size={size * 0.55} aria-hidden="true" />
+      <Icon name="people" size={20} />
     </span>
   );
 }

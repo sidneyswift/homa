@@ -2,7 +2,6 @@
 
 import { upload } from "@vercel/blob/client";
 import type { FilePart, ImagePart, UserContent } from "ai";
-import { Camera, FileText, Image as ImageIcon } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 
 import { Icon } from "../../components/design/Icon";
@@ -280,7 +279,7 @@ export function AttachMenuButton({
               onClick={() => pick(libraryRef.current)}
               className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm font-medium text-strong transition-colors hover:bg-page"
             >
-              <ImageIcon size={17} className="text-muted" aria-hidden="true" />
+              <Icon name="image" size={16} className="text-muted" />
               Photo or video
             </button>
             <button
@@ -288,7 +287,7 @@ export function AttachMenuButton({
               onClick={() => pick(fileRef.current)}
               className="flex w-full items-center gap-2.5 border-t border-border-subtle px-3.5 py-2.5 text-left text-sm font-medium text-strong transition-colors hover:bg-page"
             >
-              <FileText size={17} className="text-muted" aria-hidden="true" />
+              <Icon name="document" size={16} className="text-muted" />
               File (PDF, Word, more)
             </button>
           </div>
@@ -329,7 +328,7 @@ export function CameraButton({
         onClick={() => cameraRef.current?.click()}
         className="flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors hover:bg-page hover:text-strong disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <Camera size={19} aria-hidden="true" />
+        <Icon name="camera" size={20} />
       </button>
     </>
   );
@@ -363,7 +362,7 @@ export function PendingAttachmentChips({
               className={`flex h-full w-full items-center justify-center text-muted ${item.status === "uploading" ? "opacity-50" : ""}`}
               title={item.name}
             >
-              <FileText size={20} aria-hidden="true" />
+              <Icon name="document" size={20} />
             </span>
           )}
           {item.status === "uploading" ? (

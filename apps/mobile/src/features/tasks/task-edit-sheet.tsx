@@ -1,9 +1,9 @@
-import { Play, X } from "lucide-react-native";
 import { useRef, useState, type ReactNode, type RefObject } from "react";
 import { Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AccessibleModal } from "../../components/ui/accessible-modal";
+import { Icon } from "../../components/design/icon";
 import { Button } from "../../components/ui/button";
 import { IconButton } from "../../components/ui/icon-button";
 import { InlineError } from "../../components/ui/inline-error";
@@ -72,7 +72,7 @@ function SheetHeader({ title, headingRef, onClose }: { title: string; headingRef
         </Text>
       </View>
       <IconButton label={`Close ${title.toLowerCase()}`} onPress={onClose}>
-        <X size={22} color={colors.textSubtle} />
+        <Icon name="close" size={24} color={colors.textSubtle} />
       </IconButton>
     </View>
   );
@@ -103,7 +103,7 @@ function RunNowSection({ taskId, onDone }: { taskId: string; onDone: () => void 
       <Button
         label={pending ? "Starting…" : "Run now"}
         variant="secondary"
-        icon={<Play size={14} color={colors.textStrong} />}
+        icon={<Icon name="play" size={16} color={colors.textStrong} />}
         onPress={() => void handlePress()}
         disabled={pending}
       />

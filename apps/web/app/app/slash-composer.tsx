@@ -1,9 +1,8 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
-import { Zap } from "lucide-react";
-
 import { KidAvatar } from "../../components/dashboard/kid-avatar";
+import { Icon } from "../../components/design/Icon";
 import { setViewContextAction } from "./view-context-actions";
 
 /**
@@ -207,7 +206,7 @@ export function SlashComposer({
           />
         ) : (
           <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-page text-subtle">
-            <Zap size={14} aria-hidden="true" />
+            <Icon name="command" size={16} />
           </span>
         )}
         <span className="min-w-0 flex-1">

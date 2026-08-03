@@ -1,8 +1,8 @@
 "use client";
 
-import { Check, Undo2 } from "lucide-react";
 import { useState, useTransition } from "react";
 
+import { Icon } from "../../components/design/Icon";
 import { acknowledgeAlertAction, unacknowledgeAlertAction } from "./actions";
 import type { AlertSource } from "../../lib/admin/alert-acks";
 
@@ -35,7 +35,6 @@ export function AlertAckButton({
     });
   };
 
-  const Icon = mode === "undo" ? Undo2 : Check;
   return (
     <span className="inline-flex items-center gap-2">
       {error ? <span className="text-[0.7rem] font-semibold text-[var(--rose-600)]">{error}</span> : null}
@@ -45,7 +44,7 @@ export function AlertAckButton({
         disabled={pending}
         className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-pill border border-border bg-card px-2.5 py-1 text-[0.7rem] font-bold text-muted shadow-sm transition-colors hover:text-strong disabled:opacity-50"
       >
-        <Icon size={12} aria-hidden="true" />
+        <Icon name={mode === "undo" ? "undo" : "check"} size={16} />
         {mode === "undo" ? "Bring back" : "Mark handled"}
       </button>
     </span>

@@ -1,6 +1,6 @@
-import { Bell, ChevronRight, FlaskConical, Moon } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
+import { Icon } from "../../components/design/icon";
 import type { TaskRowView } from "../../lib/tasks";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
@@ -15,15 +15,15 @@ import { BUILT_IN_COPY, hourLabel, nextRunLabel, weekdaysLabel } from "./task-vi
 function taskIcon(kind: TaskRowView["kind"], color: string) {
   switch (kind) {
     case "morning_brief":
-      return <FlaskConical size={18} color={color} />;
+      return <Icon name="experiment" size={20} color={color} />;
     case "journal_prompt":
-      return <Moon size={18} color={color} />;
+      return <Icon name="journal" size={20} color={color} />;
     case "custom":
-      return <Bell size={18} color={color} />;
+      return <Icon name="reminder" size={20} color={color} />;
     default: {
       const exhaustive: never = kind;
       void exhaustive;
-      return <Bell size={18} color={color} />;
+      return <Icon name="reminder" size={20} color={color} />;
     }
   }
 }
@@ -160,7 +160,7 @@ export function TaskCard({
         ) : (
           <View />
         )}
-        <ChevronRight size={16} color={colors.textSubtle} />
+        <Icon name="next" size={16} color={colors.textSubtle} />
       </View>
     </Pressable>
   );

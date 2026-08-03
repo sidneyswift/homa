@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { ArrowUp, Check, ChevronLeft, ChevronRight, FileText, Plus } from "lucide-react";
 
 import { Logo } from "../brand/Logo";
+import { Icon } from "../design/Icon";
 
 /**
  * iOS Messages (16+) doesn't draw a triangular tail: the "tail" illusion is
@@ -248,7 +248,7 @@ export function HeroProductDemo() {
                 color: "var(--clay-600)",
               }}
             >
-              <ChevronLeft size={18} strokeWidth={2.6} aria-hidden="true" />
+              <Icon name="back" size={20} />
               <span
                 style={{
                   minWidth: 18,
@@ -293,7 +293,7 @@ export function HeroProductDemo() {
               }}
             >
               Homa
-              <ChevronRight size={10} color="var(--text-subtle)" strokeWidth={2.6} aria-hidden="true" />
+              <Icon name="next" size={16} color="var(--text-subtle)" />
             </p>
           </div>
 
@@ -403,7 +403,7 @@ export function HeroProductDemo() {
                     flexShrink: 0,
                   }}
                 >
-                  <FileText size={14} color="var(--sky-600)" aria-hidden="true" />
+                  <Icon name="document" size={16} color="var(--sky-600)" />
                 </span>
                 <div style={{ minWidth: 0 }}>
                   <p
@@ -430,7 +430,7 @@ export function HeroProductDemo() {
                       fontWeight: 700,
                     }}
                   >
-                    <Check size={11} aria-hidden="true" />
+                    <Icon name="check" size={16} />
                     Saved to the binder
                   </p>
                 </div>
@@ -462,7 +462,7 @@ export function HeroProductDemo() {
                 color: "var(--stone-700)",
               }}
             >
-              <Plus size={15} strokeWidth={2.4} aria-hidden="true" />
+              <Icon name="add" size={16} />
             </span>
             <span
               style={{
@@ -494,7 +494,7 @@ export function HeroProductDemo() {
                 color: "#fff",
               }}
             >
-              <ArrowUp size={16} strokeWidth={2.8} aria-hidden="true" />
+              <Icon name="send" size={16} />
             </span>
           </div>
           <div

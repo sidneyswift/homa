@@ -1,8 +1,8 @@
 "use client";
 
-import { PhoneForwarded, Undo2 } from "lucide-react";
 import { useState, useTransition } from "react";
 
+import { Icon } from "../../../../components/design/Icon";
 import { lendFounderPhoneAction, returnFounderPhoneAction } from "../../actions";
 
 /**
@@ -68,7 +68,7 @@ export function PhoneLendControls({
           disabled={pending}
           className={chipClass}
         >
-          <Undo2 size={12} aria-hidden="true" />
+          <Icon name="undo" size={16} />
           {pending
             ? "Moving\u2026"
             : `Send ${prettyPhone(phone)} home${homeFamilyName ? ` to ${homeFamilyName}` : ""}`}
@@ -84,7 +84,7 @@ export function PhoneLendControls({
             disabled={pending}
             className={chipClass}
           >
-            <PhoneForwarded size={12} aria-hidden="true" />
+            <Icon name="phone" size={16} />
             {pending
               ? "Moving\u2026"
               : armedPhone === phone

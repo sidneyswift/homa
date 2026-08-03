@@ -3,14 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Clock3,
-  GraduationCap,
-} from "lucide-react";
-
 import { Icon } from "../../../components/design/Icon";
 import { QuietAction } from "../../../components/design/QuietAction";
 import { QuietFrame } from "../../../components/design/QuietFrame";
@@ -388,7 +380,7 @@ function ActivityRow({
               : "grid h-[22px] w-[22px] place-items-center rounded-[7px] border-[1.5px] border-[var(--stone-500)] bg-card text-transparent"
           }
         >
-          <Check size={14} strokeWidth={3} />
+          <Icon name="check" size={16} />
         </span>
       </button>
       <button
@@ -416,7 +408,7 @@ function ActivityRow({
             {activity.kidName} · {activity.subjectLabel}
           </span>
         </span>
-        <ChevronRight size={18} className="mr-1 text-subtle" aria-hidden="true" />
+        <Icon name="next" size={20} className="mr-1 text-subtle" />
       </button>
     </div>
   );
@@ -447,7 +439,7 @@ function EventRow({
           </span>
           <span className="mt-0.5 block text-sm text-muted">{childLabel(event, kids)}</span>
         </span>
-        <ChevronRight size={18} className="text-subtle" aria-hidden="true" />
+        <Icon name="next" size={20} className="text-subtle" />
       </button>
     </div>
   );
@@ -1486,7 +1478,7 @@ export function UnifiedPlannerView({
                 onClick={openNewAppointment}
                 className="flex min-h-12 w-full items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-page"
               >
-                <Clock3 size={19} className="text-[var(--sky-600)]" />
+                <Icon name="time" size={20} className="text-[var(--sky-600)]" />
                 <span>
                   <span className="block text-sm font-bold text-strong">Event</span>
                   <span className="block text-xs text-muted">Appointment, co-op, trip, or outing</span>
@@ -1496,7 +1488,7 @@ export function UnifiedPlannerView({
                 href="/app?draft=schedule-week"
                 className="flex min-h-12 items-center gap-3 rounded-md px-3 py-2 hover:bg-page"
               >
-                <GraduationCap size={19} className="text-brand" />
+                <Icon name="learn" size={20} className="text-brand" />
                 <span>
                   <span className="block text-sm font-bold text-strong">Plan activity</span>
                   <span className="block text-xs text-muted">Ask Homa to add schoolwork</span>
@@ -1549,7 +1541,7 @@ export function UnifiedPlannerView({
               aria-label={`Previous ${view}`}
               className="grid h-11 w-11 flex-none place-items-center rounded-full border border-border bg-card text-body hover:bg-page"
             >
-              <ChevronLeft size={21} />
+              <Icon name="back" size={20} />
             </Link>
             <div className="min-w-0 text-center">
               {view === "day" && activeDate === today ? (
@@ -1573,7 +1565,7 @@ export function UnifiedPlannerView({
               aria-label={`Next ${view}`}
               className="grid h-11 w-11 flex-none place-items-center rounded-full border border-border bg-card text-body hover:bg-page"
             >
-              <ChevronRight size={21} />
+              <Icon name="next" size={20} />
             </Link>
           </div>
 
@@ -1730,7 +1722,7 @@ export function UnifiedPlannerView({
                         </span>
                       ) : null}
                     </span>
-                    <ChevronRight size={19} className="text-subtle" />
+                      <Icon name="next" size={20} className="text-subtle" />
                   </Link>
                 );
               })}
