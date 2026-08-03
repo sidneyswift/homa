@@ -507,6 +507,12 @@ jobs:
         timeout-minutes: 10
         run: pnpm test:family-library-training:postgres
 
+      # Planner check-offs are positional until the stable-ID migration.
+      # This proves stale clients fail closed and concurrent keys survive.
+      - name: Planner stale-safe check-off disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm test:planner-checkoff:postgres
+
   # Guard shard 3 of 3: the acceptance E2Es and the two secret-needing
   # database checks, the three longest steps in the roster (each 24-50s),
   # so they share a runner instead of tailing another shard.
