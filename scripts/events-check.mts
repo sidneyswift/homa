@@ -25,10 +25,6 @@ import {
 /** Registry entries allowed to have no emitter yet: [name, ticket]. */
 const STAGED_EVENTS: ReadonlyArray<readonly [string, string]> = [
   [
-    "product.loop_stage_recorded",
-    "gh#532, gh#304, and gh#347 emit; gh#392 and gh#394 consume",
-  ],
-  [
     "chat.prompt_suggestions_shown",
     "gh#737 (prompt suggestion redesign; currently paused)",
   ],
