@@ -127,7 +127,7 @@ export function FamiliesTable({
   const rows = state.allRows ? sorted : sorted.slice(0, ROW_CAP);
 
   return (
-    <div id="families" className="mt-3 rounded-lg border border-border-subtle bg-card p-4 shadow-sm">
+    <div id="families" className="quiet-admin__table mt-3 rounded-lg border border-border-subtle bg-card p-4 shadow-sm">
       <div className="flex flex-wrap items-center gap-1.5">
         <Link href={buildHref(base, state, { stage: null })}>
           <Pill tone={state.stage === null ? "clay" : "outline"}>All {snapshots.length}</Pill>
@@ -209,7 +209,7 @@ export function FamiliesTable({
                       <span
                         className={
                           s.stage === "quiet"
-                            ? "font-semibold text-[var(--gold-ink)]"
+                            ? "font-semibold text-[var(--homa-highlight-ink)]"
                             : "text-muted"
                         }
                       >

@@ -39,7 +39,7 @@ export default async function AdminChatsPage({
     : [];
 
   return (
-    <div>
+    <div data-brand-surface="admin-chats" className="quiet-admin__child">
       <p className="font-mono text-[0.64rem] font-bold uppercase tracking-[0.13em] text-subtle">
         Founder · chat reader
       </p>
@@ -61,8 +61,8 @@ export default async function AdminChatsPage({
               aria-current={family.id === selectedId ? "page" : undefined}
               className={
                 family.id === selectedId
-                  ? "rounded-md border border-[var(--clay-400)] bg-brand-soft px-3 py-2 shadow-sm"
-                  : "rounded-md border border-border-subtle bg-card px-3 py-2 shadow-sm transition-colors hover:border-[var(--clay-300)]"
+                  ? "rounded-md border border-[var(--homa-midnight-action)] bg-[var(--homa-info-tint)] px-3 py-2 shadow-sm"
+                  : "rounded-md border border-border-subtle bg-card px-3 py-2 shadow-sm transition-colors hover:border-[var(--homa-midnight-action)]"
               }
             >
               <p className="truncate text-sm font-bold text-strong">{familyDisplayName(family.name)}</p>
@@ -81,7 +81,7 @@ export default async function AdminChatsPage({
               <Pill tone="stone">{selected.messagesTotal} messages</Pill>
               <Link
                 href={`/admin/families/${selected.id}/chats`}
-                className="text-sm font-semibold text-[var(--clay-600)] hover:underline"
+                className="text-sm font-semibold text-[var(--homa-brand-text)] hover:underline"
               >
                 Open in the family file
               </Link>
@@ -89,8 +89,8 @@ export default async function AdminChatsPage({
                 href={`/admin/chats?family=${selected.id}${xray ? "" : "&xray=1"}`}
                 className={
                   xray
-                    ? "ml-auto inline-flex min-h-9 items-center rounded-pill border border-[var(--gold-ink)] bg-[var(--gold-100)] px-3 py-1 font-mono text-xs font-bold text-[var(--gold-ink-strong)]"
-                    : "ml-auto inline-flex min-h-9 items-center rounded-pill border border-border-subtle bg-card px-3 py-1 font-mono text-xs font-bold text-muted hover:border-[var(--gold-ink)]"
+                    ? "ml-auto inline-flex min-h-9 items-center rounded-pill border border-[var(--homa-highlight-ink)] bg-[var(--homa-highlight-tint)] px-3 py-1 font-mono text-xs font-bold text-[var(--homa-highlight-ink)]"
+                    : "ml-auto inline-flex min-h-9 items-center rounded-pill border border-border-subtle bg-card px-3 py-1 font-mono text-xs font-bold text-muted hover:border-[var(--homa-highlight-ink)]"
                 }
               >
                 X-ray: {xray ? "on" : "off"}
@@ -101,7 +101,7 @@ export default async function AdminChatsPage({
             <p className="mb-3 text-center">
               <Link
                 href={`/admin/chats?family=${selectedId}&before=${encodeURIComponent(messages[0]?.createdAt ?? "")}${xray ? "&xray=1" : ""}`}
-                className="text-sm font-semibold text-[var(--clay-600)] hover:underline"
+                className="text-sm font-semibold text-[var(--homa-brand-text)] hover:underline"
               >
                 Load older messages
               </Link>

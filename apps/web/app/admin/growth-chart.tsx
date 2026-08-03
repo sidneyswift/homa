@@ -56,26 +56,26 @@ export function GrowthChart({ series }: { series: GrowthSeries }) {
     {
       points: startedOnboarding,
       label: "email collected",
-      stroke: "var(--clay-500)",
-      labelFill: "var(--text-strong)",
+      stroke: "var(--homa-visual-coral)",
+      labelFill: "var(--homa-ink)",
     },
     {
       points: series.accounts,
       label: "created account",
-      stroke: "var(--sky-600)",
-      labelFill: "var(--sky-600)",
+      stroke: "var(--homa-info-ink)",
+      labelFill: "var(--homa-info-ink)",
     },
     {
       points: series.setupDone,
       label: "added a child",
-      stroke: "var(--sage-500)",
-      labelFill: "var(--sage-600)",
+      stroke: "var(--homa-constructive-ink)",
+      labelFill: "var(--homa-constructive-ink)",
     },
     {
       points: series.trialStarted,
       label: "trial started",
-      stroke: "var(--gold-500)",
-      labelFill: "var(--gold-ink)",
+      stroke: "var(--homa-highlight-ink)",
+      labelFill: "var(--homa-highlight-ink)",
     },
   ].filter((line) => line.points.length > 1);
 

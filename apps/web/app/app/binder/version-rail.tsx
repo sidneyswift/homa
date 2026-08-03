@@ -55,7 +55,7 @@ export function VersionRail({ materialId }: { materialId: string }) {
     <section className="mt-4" aria-labelledby="version-rail-heading">
       <h3
         id="version-rail-heading"
-        className="font-mono text-[0.6rem] uppercase tracking-widest text-subtle"
+        className="font-mono text-[0.6rem] uppercase tracking-widest text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]"
       >
         Earlier tries
       </h3>
@@ -74,18 +74,18 @@ export function VersionRail({ materialId }: { materialId: string }) {
                 <img
                   src={version.previewUrl ?? ""}
                   alt={`Version ${version.ordinal}`}
-                  className="block h-24 w-[74px] rounded border border-border-subtle bg-white object-cover"
+                  className="block h-24 w-[74px] rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] object-cover"
                   loading="lazy"
                 />
               </a>
-              <span className="mt-1 block text-center text-[0.65rem] text-subtle">
+              <span className="mt-1 block text-center text-[0.65rem] text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
                 {version.ordinal}
               </span>
             </li>
           ))}
         </ul>
       ) : null}
-      <p className="mt-1.5 text-xs text-subtle">
+      <p className="mt-1.5 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
         {`You and Homa made ${versions.length} versions of this together.`}
         {reclaimed > 0
           ? ` ${reclaimed === 1 ? "One older picture is" : `${reclaimed} older pictures are`} no longer saved.`

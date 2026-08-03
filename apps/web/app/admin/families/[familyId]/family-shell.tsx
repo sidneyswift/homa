@@ -27,10 +27,10 @@ export async function FamilyShell({
   if (!header) notFound();
 
   return (
-    <div>
+    <div data-brand-surface="admin-family-detail" className="quiet-admin__child">
       <Link
         href="/admin/families"
-        className="text-sm font-semibold text-[var(--clay-600)] hover:underline"
+        className="text-sm font-semibold text-[var(--homa-brand-text)] hover:underline"
       >
         Back to families
       </Link>

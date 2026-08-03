@@ -5,17 +5,14 @@ import type { UserContent } from "ai";
 import { Client, type HandleMessageStreamEvent } from "eve/client";
 import { useEveAgent, type EveMessage } from "eve/react";
 import {
-  ArrowDown,
-  ArrowUp,
-  ChevronDown,
   RefreshCw,
-  Square,
-  X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Logo } from "../../components/brand/Logo";
 import { ThinkingMark } from "../../components/brand/ThinkingMark";
+import { Icon } from "../../components/design/Icon";
+import { QuietAction } from "../../components/design/QuietAction";
 import { sendWallBeacon } from "../../components/billing/wall-beacon";
 import { WallModal } from "../../components/billing/wall-modal";
 import type { WallCheckout } from "../../lib/billing/wall-types";
@@ -2472,8 +2469,11 @@ export function ChatClient({
     // its own fixed inset-0, so reserving the 56px left a strip of bare
     // page under the dock, which a floating card hid and a flush bottom
     // sheet cannot.
-    <div className={onboarding ? "flex h-dvh" : "flex h-[calc(100dvh-3.5rem)] lg:h-dvh"}>
-    <div className="relative flex h-full min-w-0 flex-1 flex-col">
+    <div
+      data-brand-surface="chat"
+      className={`quiet-chat ${onboarding ? "flex h-dvh" : "flex h-[calc(100dvh-3.5rem)] lg:h-dvh"}`}
+    >
+    <div className="quiet-chat__column relative flex h-full min-w-0 flex-1 flex-col">
       {/* The morning scrolls into everything above it: a soft fade at
           the top edge whenever there is more past to scroll to. This
           lives outside the scrollable <main> as a plain absolute
@@ -2490,6 +2490,7 @@ export function ChatClient({
       {/* 780px is the kit's transcript measure (ChatView.jsx). Turns get
           gap-6 so the flat replies and bubbles keep a clear rhythm. */}
       <main
+        data-brand-layer="transcript"
         ref={transcriptRef}
         onScroll={handleTranscriptScroll}
         // More air above the first line than below the last (founder
@@ -2501,7 +2502,7 @@ export function ChatClient({
         // of the screen by itself, so the welcome takes the middle of what
         // is left rather than crowding down onto it. This column is
         // flex-1, so "what is left" is exactly the space above the dock.
-        className={`mx-auto flex w-full max-w-[780px] flex-1 flex-col gap-6 overflow-y-auto px-4 pt-10 sm:px-6 ${
+        className={`quiet-chat__transcript mx-auto flex w-full max-w-[780px] flex-1 flex-col gap-6 overflow-y-auto px-4 pt-10 sm:px-6 ${
           openingMoment ? "ob-open-column justify-center pb-4" : "pb-6"
         }`}
       >
@@ -2726,7 +2727,7 @@ export function ChatClient({
           // The character escalates on that same clock too, and this is
           // the only place all three meet: seconds, mood and words are
           // one reading of one wait, never three opinions about it.
-          <div className="flex items-baseline gap-2.5 text-muted">
+          <div className="quiet-chat__busy flex items-baseline gap-2.5 text-muted" role="status">
             <ThinkingMark
               size={28}
               mood={busyMood(busySeconds)}
@@ -2754,13 +2755,15 @@ export function ChatClient({
             </div>
             <p className="flex items-center gap-2 text-xs text-danger">
               Not sent.
-              <button
-                type="button"
-                onClick={retryBindingSync}
-                className="font-semibold underline underline-offset-2 transition-opacity hover:opacity-80"
-              >
-                Retry
-              </button>
+                <QuietAction
+                  kind="quiet"
+                  size="default"
+                  type="button"
+                  onClick={retryBindingSync}
+                  className="quiet-chat__inline-action"
+                >
+                  Retry
+                </QuietAction>
             </p>
           </div>
         ) : null}
@@ -2786,7 +2789,7 @@ export function ChatClient({
                   onClick={() => removeQueuedMessage(index, entry)}
                   className="text-subtle transition-colors hover:text-strong"
                 >
-                  <X size={14} aria-hidden="true" />
+                  <Icon name="close" size={16} />
                 </button>
                 <div className="rounded-lg rounded-br-sm bg-brand px-[18px] py-3.5 text-[0.95rem] leading-normal text-on-brand opacity-70">
                   <p className="whitespace-pre-wrap">
@@ -2828,14 +2831,16 @@ export function ChatClient({
             role="alert"
           >
             <span>Your conversation is safe. Homa could not reconnect.</span>
-            <button
+            <QuietAction
+              kind="secondary"
+              size="default"
               type="button"
               onClick={retryBindingSync}
-              className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-border bg-card px-4 py-2 font-bold text-strong shadow-sm transition-colors hover:border-brand hover:text-brand"
+              className="quiet-chat__status-action"
             >
               <RefreshCw size={15} aria-hidden="true" />
               Try again
-            </button>
+            </QuietAction>
           </div>
         ) : authorizationParked ? (
           <div
@@ -2843,14 +2848,16 @@ export function ChatClient({
             role="status"
           >
             <span>Finish signing in above, then reconnect Homa.</span>
-            <button
+            <QuietAction
+              kind="secondary"
+              size="default"
               type="button"
               onClick={retryBindingSync}
-              className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-border bg-card px-4 py-2 font-bold text-strong shadow-sm transition-colors hover:border-brand hover:text-brand"
+              className="quiet-chat__status-action"
             >
               <RefreshCw size={15} aria-hidden="true" />
               Reconnect Homa
-            </button>
+            </QuietAction>
           </div>
         ) : replyCutoffRecovery === "available" ? (
           <div
@@ -2858,14 +2865,16 @@ export function ChatClient({
             role="alert"
           >
             <span>Homa got cut off. Your conversation is safe.</span>
-            <button
+            <QuietAction
+              kind="secondary"
+              size="default"
               type="button"
               onClick={continueCutoffRecovery}
-              className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-border bg-card px-4 py-2 font-bold text-strong shadow-sm transition-colors hover:border-brand hover:text-brand"
+              className="quiet-chat__status-action"
             >
               <RefreshCw size={15} aria-hidden="true" />
               Reconnect and continue
-            </button>
+            </QuietAction>
           </div>
         ) : agent.error && staleOidcAt !== null ? (
           // Localhost only, and only once the dev route has confirmed it.
@@ -2897,16 +2906,18 @@ export function ChatClient({
             <p className="text-center text-sm text-danger">
               Homa did not manage to start. Nothing is lost.
             </p>
-            <button
+            <QuietAction
+              kind="secondary"
+              size="default"
               type="button"
               // A reload, not a second send path: the kickoff already
               // retries itself on load when the conversation is empty,
               // and that path is the tested one.
               onClick={() => window.location.reload()}
-              className="min-h-11 rounded-pill border border-border bg-card px-5 py-2 text-sm font-bold text-strong shadow-sm transition-colors hover:border-brand"
+              className="quiet-chat__status-action"
             >
               Try again
-            </button>
+            </QuietAction>
           </div>
         ) : agent.error ? (
           <p className="text-center text-sm text-danger" role="alert">
@@ -2931,9 +2942,9 @@ export function ChatClient({
             onClick={() =>
               bottomRef.current?.scrollIntoView({ behavior: "smooth" })
             }
-            className="absolute -top-14 left-1/2 z-10 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full border border-border bg-card text-strong shadow-md transition-colors hover:border-brand hover:text-brand"
+            className="quiet-chat__back-to-now absolute -top-14 left-1/2 z-10 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full border border-border bg-card text-strong shadow-md transition-colors hover:border-brand hover:text-brand"
           >
-            <ArrowDown size={18} aria-hidden="true" />
+            <Icon name="next" size={20} className="rotate-90" />
           </button>
         </div>
       ) : null}
@@ -2954,7 +2965,8 @@ export function ChatClient({
         // footer gives up its side and bottom padding at that size and
         // the card reaches the edges itself. Everything from sm up, and
         // everything outside onboarding, keeps the padded dock.
-        className={`pt-3 sm:bg-page sm:px-6 sm:pb-5 sm:pt-3 ${
+        data-brand-layer="composer"
+        className={`quiet-chat__footer pt-3 sm:bg-page sm:px-6 sm:pb-5 sm:pt-3 ${
           sheetDock
             ? "ob-dock-sheet px-0 pb-0 sm:rounded-none sm:border-t-0 sm:shadow-none"
             : `bg-page px-4 pb-5 ${showComposer ? "border-t border-border-subtle" : ""}`
@@ -2969,7 +2981,7 @@ export function ChatClient({
                 key={suggestion}
                 type="button"
                 onClick={() => sendMessage(suggestion)}
-                className="rounded-pill bg-[var(--stone-100)] px-3.5 py-1.5 text-[0.8rem] text-muted transition-colors hover:bg-[var(--stone-200)] hover:text-strong"
+                className="quiet-chat__suggestion rounded-pill bg-[var(--stone-100)] px-3.5 py-1.5 text-[0.8rem] text-muted transition-colors hover:bg-[var(--stone-200)] hover:text-strong"
               >
                 {suggestion}
               </button>
@@ -3164,7 +3176,7 @@ export function ChatClient({
           </div>
         ) : null}
         <div
-          className={`mx-auto w-full max-w-[780px] rounded-[22px] shadow-md ${
+          className={`quiet-chat__composer mx-auto w-full max-w-[780px] rounded-[22px] shadow-md ${
             // Inside the phone sheet this is a zone, not a box: the CSS
             // strips its chrome and gives it a hairline instead. From sm
             // up it is the second of two floating boxes, so it takes a
@@ -3190,9 +3202,10 @@ export function ChatClient({
               onSelect={sendPromptSuggestion}
             />
           ) : null}
-          <form
+            <form
+            data-brand-layer="composer-form"
             ref={composerFormRef}
-            className={`w-full border border-border-subtle bg-card px-3 pb-2 pt-2.5 transition-shadow focus-within:ring-2 focus-within:ring-brand/30 ${
+            className={`quiet-chat__composer-form w-full border border-border-subtle bg-card px-3 pb-2 pt-2.5 transition-shadow focus-within:ring-2 focus-within:ring-brand/30 ${
               showPromptSuggestionRail
                 ? "-mt-px rounded-b-[22px] rounded-t-none"
                 : "rounded-[22px]"
@@ -3269,7 +3282,7 @@ export function ChatClient({
                 className="ml-1 inline-flex min-h-8 items-center gap-1 rounded-pill bg-brand-soft px-2.5 py-1 text-xs font-semibold text-[var(--clay-700)]"
               >
                 About {focusChildName}
-                <ChevronDown size={12} aria-hidden="true" />
+                <Icon name="next" size={16} className="rotate-90" />
               </button>
             ) : null}
             <span className="flex-1" />
@@ -3286,21 +3299,21 @@ export function ChatClient({
                   type="button"
                   aria-label="Stop"
                   onClick={() => agent.stop()}
-                  className={
+                  className={`quiet-chat__composer-action ${
                     draft.trim().length > 0
-                      ? "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-strong shadow-sm transition-colors hover:border-brand"
-                      : "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
-                  }
+                      ? "quiet-chat__composer-action--stop-secondary"
+                      : "quiet-chat__composer-action--stop-primary"
+                  }`}
                 >
-                  <Square size={14} fill="currentColor" aria-hidden="true" />
+                  <span aria-hidden="true" className="quiet-chat__stop-glyph" />
                 </button>
                 {draft.trim().length > 0 && attachments.staged.length === 0 ? (
                   <button
                     type="submit"
                     aria-label="Send"
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
+                    className="quiet-chat__composer-action quiet-chat__composer-action--send"
                   >
-                    <ArrowUp size={18} aria-hidden="true" />
+                    <Icon name="next" size={20} className="-rotate-90" />
                   </button>
                 ) : null}
               </>
@@ -3322,9 +3335,9 @@ export function ChatClient({
                     ? attachments.anyUploading || preparingAttachments
                     : draft.trim().length === 0 || attachments.anyUploading
                 }
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-60"
+                className="quiet-chat__composer-action quiet-chat__composer-action--send disabled:opacity-60"
               >
-                <ArrowUp size={18} aria-hidden="true" />
+                <Icon name="next" size={20} className="-rotate-90" />
               </button>
             )}
           </div>

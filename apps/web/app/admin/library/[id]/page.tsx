@@ -42,7 +42,7 @@ const STATUS_TONE: Record<ShelfStatus, PillTone> = {
 
 function Fact({ label, value }: { label: string; value: string }) {
   return (
-    <div>
+    <div data-brand-surface="admin-library-detail" className="quiet-admin__child">
       <p className="font-mono text-[0.58rem] font-bold uppercase tracking-[0.12em] text-subtle">
         {label}
       </p>
@@ -69,7 +69,7 @@ export default async function LibraryBookPage({
     <div>
       <Link
         href="/admin/library"
-        className="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[var(--clay-600)] hover:underline"
+        className="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-[var(--homa-brand-text)] hover:underline"
       >
         Back to the shelf
       </Link>
@@ -95,9 +95,9 @@ export default async function LibraryBookPage({
           ) : null}
 
           {todo ? (
-            <div className="mt-3 rounded-[var(--radius-md)] border border-[var(--clay-200)] bg-[var(--clay-50)] px-3.5 py-3">
-              <p className="text-[0.82rem] font-bold text-[var(--clay-700)]">{todo}</p>
-              <p className="mt-1 text-[0.8rem] text-[var(--clay-700)] opacity-90">
+            <div className="mt-3 rounded-[var(--homa-radius-control)] border border-[var(--homa-highlight-ink)] bg-[var(--homa-highlight-tint)] px-3.5 py-3">
+              <p className="text-[0.82rem] font-bold text-[var(--homa-highlight-ink)]">{todo}</p>
+              <p className="mt-1 text-[0.8rem] text-[var(--homa-highlight-ink)] opacity-90">
                 {SHELF_STATUS_BLURB[book.status]}
               </p>
             </div>
@@ -123,7 +123,7 @@ export default async function LibraryBookPage({
                   key={dimension.label}
                   className={
                     dimension.present
-                      ? "rounded-pill bg-[var(--sage-50)] px-2.5 py-0.5 text-[0.72rem] font-bold text-[var(--sage-700)]"
+                      ? "rounded-pill bg-[var(--homa-constructive-tint)] px-2.5 py-0.5 text-[0.72rem] font-bold text-[var(--homa-constructive-ink)]"
                       : "rounded-pill border border-dashed border-border px-2.5 py-0.5 text-[0.72rem] font-semibold text-subtle line-through"
                   }
                   title={
@@ -145,7 +145,7 @@ export default async function LibraryBookPage({
           <div className="mt-8">
             <ReadableTree nodes={sections} />
           </div>
-          <details className="mt-6 rounded-[var(--radius-md)] border border-border-subtle bg-card px-4 py-3">
+          <details className="mt-6 rounded-[var(--homa-radius-control)] border border-border-subtle bg-card px-4 py-3">
             <summary className="cursor-pointer text-[0.8rem] font-bold text-muted [&::-webkit-details-marker]:hidden">
               The raw analysis file
             </summary>

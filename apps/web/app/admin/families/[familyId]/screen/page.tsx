@@ -85,15 +85,15 @@ export default async function AdminFamilyScreenPage({
   };
 
   return (
-    <div>
+    <div data-brand-surface="admin-family-screen" className="quiet-admin__child">
       <Link
         href={`/admin/families/${familyId}`}
-        className="text-sm font-semibold text-[var(--clay-600)] hover:underline"
+        className="text-sm font-semibold text-[var(--homa-brand-text)] hover:underline"
       >
         Back to the family file
       </Link>
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-t-[var(--radius-lg)] bg-[var(--pop-navy)] px-4 py-2.5 text-sm text-white">
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-t-[var(--homa-radius-card)] bg-[var(--homa-contained-band)] px-4 py-2.5 text-sm text-[var(--homa-paper)]">
         <p>
           Viewing as <b>{data.family.parentName ?? familyDisplayName(data.family.name)}</b> · read-only · nothing
           here reaches the family
@@ -102,7 +102,7 @@ export default async function AdminFamilyScreenPage({
           href={href({ xray: !xray })}
           className={
             xray
-              ? "ml-auto inline-flex min-h-9 items-center rounded-pill bg-[var(--gold-300)] px-3.5 py-1 font-mono text-xs font-bold text-[var(--gold-ink-strong)]"
+              ? "ml-auto inline-flex min-h-9 items-center rounded-pill bg-[var(--homa-highlight-tint)] px-3.5 py-1 font-mono text-xs font-bold text-[var(--homa-highlight-ink)]"
               : "ml-auto inline-flex min-h-9 items-center rounded-pill border border-white/40 px-3.5 py-1 font-mono text-xs font-bold text-white hover:border-white"
           }
         >
@@ -110,7 +110,7 @@ export default async function AdminFamilyScreenPage({
         </Link>
       </div>
 
-      <div className="flex flex-col overflow-hidden rounded-b-[var(--radius-lg)] border border-t-0 border-border bg-page shadow-[var(--shadow-md)] lg:flex-row">
+      <div className="flex flex-col overflow-hidden rounded-b-[var(--homa-radius-card)] border border-t-0 border-border bg-[var(--homa-canvas)] shadow-[var(--shadow-md)] lg:flex-row">
         <aside className="flex shrink-0 gap-1 overflow-x-auto border-b border-border-subtle bg-card p-2.5 lg:w-[184px] lg:flex-col lg:border-b-0 lg:border-r lg:p-3.5">
           <span className="hidden px-2 pb-2 lg:block">
             <Logo size={22} />
@@ -122,8 +122,8 @@ export default async function AdminFamilyScreenPage({
               aria-current={tab === entry.id ? "page" : undefined}
               className={
                 tab === entry.id
-                  ? "flex min-h-10 items-center whitespace-nowrap rounded-md bg-brand-soft px-3 py-2 text-[0.9rem] font-bold text-[var(--clay-700)]"
-                  : "flex min-h-10 items-center whitespace-nowrap rounded-md px-3 py-2 text-[0.9rem] font-medium text-muted hover:bg-page hover:text-body"
+                  ? "flex min-h-10 items-center whitespace-nowrap rounded-md bg-[var(--homa-info-tint)] px-3 py-2 text-[0.9rem] font-bold text-[var(--homa-info-ink)]"
+                  : "flex min-h-10 items-center whitespace-nowrap rounded-md px-3 py-2 text-[0.9rem] font-medium text-muted hover:bg-[var(--homa-canvas)] hover:text-body"
               }
             >
               {entry.label}
@@ -141,7 +141,7 @@ export default async function AdminFamilyScreenPage({
                   href={href({ childId: null })}
                   className={
                     !focusChild
-                      ? "inline-flex min-h-9 items-center rounded-pill bg-brand-soft px-3 py-1 text-sm font-bold text-[var(--clay-700)]"
+                      ? "inline-flex min-h-9 items-center rounded-pill bg-[var(--homa-info-tint)] px-3 py-1 text-sm font-bold text-[var(--homa-info-ink)]"
                       : "inline-flex min-h-9 items-center rounded-pill border border-border-subtle bg-card px-3 py-1 text-sm text-muted hover:text-body"
                   }
                 >
@@ -154,7 +154,7 @@ export default async function AdminFamilyScreenPage({
                   href={href({ childId: child.id })}
                   className={
                     focusChild?.id === child.id
-                      ? "inline-flex min-h-9 items-center rounded-pill bg-brand-soft px-3 py-1 text-sm font-bold text-[var(--clay-700)]"
+                      ? "inline-flex min-h-9 items-center rounded-pill bg-[var(--homa-info-tint)] px-3 py-1 text-sm font-bold text-[var(--homa-info-ink)]"
                       : "inline-flex min-h-9 items-center rounded-pill border border-border-subtle bg-card px-3 py-1 text-sm text-muted hover:text-body"
                   }
                 >
@@ -327,7 +327,7 @@ function PlannerTab({
                             aria-hidden="true"
                             className={
                               done
-                                ? "mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--sage-500)] text-[0.6rem] font-bold text-white"
+                                ? "mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--homa-constructive-ink)] text-[0.6rem] font-bold text-[var(--homa-paper)]"
                                 : "mt-0.5 inline-flex h-4 w-4 shrink-0 rounded-full border border-border bg-card"
                             }
                           >

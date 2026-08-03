@@ -2,9 +2,10 @@
 
 import { upload } from "@vercel/blob/client";
 import type { FilePart, ImagePart, UserContent } from "ai";
-import { Camera, FileText, Image as ImageIcon, Plus, X } from "lucide-react";
+import { Camera, FileText, Image as ImageIcon } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 
+import { Icon } from "../../components/design/Icon";
 import { prepareChildPhotoForUpload } from "../../lib/child-photo-prepare";
 
 /**
@@ -263,7 +264,7 @@ export function AttachMenuButton({
         onClick={() => setOpen((current) => !current)}
         className="flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors hover:bg-page hover:text-strong disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <Plus size={20} aria-hidden="true" />
+        <Icon name="add" size={20} />
       </button>
       {open ? (
         <>
@@ -381,7 +382,7 @@ export function PendingAttachmentChips({
             onClick={() => onRemove(item.localId)}
             className="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(34,30,26,0.72)] text-white transition-colors hover:bg-[rgba(34,30,26,0.9)]"
           >
-            <X size={11} aria-hidden="true" />
+            <Icon name="close" size={16} />
           </button>
         </div>
       ))}

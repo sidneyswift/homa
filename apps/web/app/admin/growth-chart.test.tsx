@@ -47,10 +47,10 @@ describe("GrowthChart", () => {
     // Gridlines step 20 at max 68: labels 0 through 80, scaled by signups.
     assert.match(html, />80</u);
     assert.match(html, />0</u);
-    assert.match(html, /--clay-500/u);
-    assert.match(html, /--sky-600/u);
-    assert.match(html, /--sage-500/u);
-    assert.match(html, /--gold-500/u);
+    assert.match(html, /--homa-visual-coral/u);
+    assert.match(html, /--homa-info-ink/u);
+    assert.match(html, /--homa-constructive-ink/u);
+    assert.match(html, /--homa-highlight-ink/u);
   });
 
   it("uses a 10 step for small fleets and survives missing lower lines", () => {

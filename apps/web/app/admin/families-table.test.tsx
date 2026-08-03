@@ -96,8 +96,8 @@ describe("FamiliesTable", () => {
       />,
     );
     assert.match(html, />test</u);
-    assert.match(html, /--gold-ink/u);
-    assert.doesNotMatch(html, /--rose-600/u);
+    assert.match(html, /--homa-highlight-ink/u);
+    assert.doesNotMatch(html, /--homa-error-ink/u);
   });
 
   it("sorts by messages the family sent, loudest first and quietest first", () => {

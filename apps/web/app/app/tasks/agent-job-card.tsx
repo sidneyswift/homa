@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, ChevronRight, Layers } from "lucide-react";
+
+import { Icon } from "../../../components/design/Icon";
+import { QuietFrame } from "../../../components/design/QuietFrame";
+import { QuietStatus } from "../../../components/design/QuietStatus";
 
 import { AgentJobOverlay } from "./agent-job-overlay";
 import { jobMetaLine, jobPill, type AgentJobView, type JobPillTone } from "./agent-job-view";
@@ -16,13 +19,13 @@ import { jobMetaLine, jobPill, type AgentJobView, type JobPillTone } from "./age
  */
 
 function JobIcon({ skill }: { skill: string }) {
-  return skill === "curriculum-studio" ? <BookOpen size={18} /> : <Layers size={18} />;
+  return skill === "curriculum-studio" ? <Icon name="book" size={20} /> : <Icon name="tasks" size={20} />;
 }
 
-const PILL_CLASS: Record<JobPillTone, string> = {
-  attention: "bg-brand-soft text-[var(--clay-700)]",
-  building: "bg-[var(--sage-50)] text-[var(--sage-700)]",
-  muted: "bg-[var(--brand-soft-2)] text-muted",
+const STATUS_TONE: Record<JobPillTone, "attention" | "constructive" | "info"> = {
+  attention: "attention",
+  building: "constructive",
+  muted: "info",
 };
 
 export function AgentJobCard({ job, timeZone }: { job: AgentJobView; timeZone: string }) {
@@ -32,17 +35,18 @@ export function AgentJobCard({ job, timeZone }: { job: AgentJobView; timeZone: s
 
   return (
     <>
-      <div
+      <QuietFrame
+        as="article"
         onClick={() => setOpen(true)}
-        className="group flex cursor-pointer flex-col rounded-lg border border-border-subtle bg-card p-4 shadow-sm transition duration-(--dur-fast) ease-out hover:border-[var(--clay-300)] motion-safe:active:scale-[var(--press-scale)]"
+        className="quiet-task-card group flex cursor-pointer flex-col p-4 transition duration-(--dur-fast) ease-out hover:border-[var(--homa-midnight-action)] motion-safe:active:scale-[var(--press-scale)]"
       >
         <div className="flex items-start gap-3">
           <span
             aria-hidden="true"
             className={
               calm
-                ? "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-brand-soft text-brand"
-                : "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-[var(--brand-soft-2)] text-subtle"
+                ? "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--homa-radius-control)] bg-[var(--homa-highlight-tint)] text-[var(--homa-highlight-ink)]"
+                : "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--homa-radius-control)] bg-[var(--homa-canvas)] text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]"
             }
           >
             <JobIcon skill={job.skill} />
@@ -53,26 +57,20 @@ export function AgentJobCard({ job, timeZone }: { job: AgentJobView; timeZone: s
               aria-haspopup="dialog"
               aria-expanded={open}
               onClick={() => setOpen(true)}
-              className="text-left font-semibold text-strong"
+              className="text-left font-semibold text-[color:var(--homa-ink)]"
             >
               {job.title}
             </button>
-            <p className="mt-0.5 text-sm text-muted">{jobMetaLine(job, timeZone)}</p>
+            <p className="mt-0.5 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">{jobMetaLine(job, timeZone)}</p>
           </div>
         </div>
         <div className="mt-3 flex items-center justify-between gap-3">
-          <span
-            className={`rounded-pill px-2.5 py-1 text-[0.7rem] font-bold ${PILL_CLASS[pill.tone]}`}
-          >
+          <QuietStatus tone={STATUS_TONE[pill.tone]} className="quiet-task-status px-2.5 py-1 text-[0.7rem] font-bold">
             {pill.label}
-          </span>
-          <ChevronRight
-            size={16}
-            aria-hidden="true"
-            className="shrink-0 text-subtle transition-transform duration-(--dur-fast) ease-out group-hover:translate-x-0.5"
-          />
+          </QuietStatus>
+          <Icon name="next" size={16} className="shrink-0 text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))] transition-transform duration-(--dur-fast) ease-out group-hover:translate-x-0.5" />
         </div>
-      </div>
+      </QuietFrame>
       {open ? <AgentJobOverlay job={job} onClose={() => setOpen(false)} /> : null}
     </>
   );

@@ -9,7 +9,10 @@ type ActionProps = {
   className?: string;
   icon?: ReactNode;
   onClick?: MouseEventHandler<HTMLElement>;
-} & Pick<ButtonHTMLAttributes<HTMLButtonElement>, "disabled" | "type">;
+} & Pick<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  "disabled" | "type" | "aria-haspopup" | "aria-expanded" | "aria-label"
+>;
 
 export function QuietAction({
   children,
@@ -21,6 +24,9 @@ export function QuietAction({
   disabled = false,
   type = "button",
   onClick,
+  "aria-haspopup": ariaHasPopup,
+  "aria-expanded": ariaExpanded,
+  "aria-label": ariaLabel,
 }: ActionProps) {
   const classes = `quiet-action quiet-action--${kind} quiet-action--${size} ${className}`.trim();
   const content = (
@@ -32,10 +38,10 @@ export function QuietAction({
 
   if (href && !disabled) {
     return (
-      <Link className={classes} href={href} onClick={onClick}>
+      <Link className={classes} href={href} onClick={onClick} aria-haspopup={ariaHasPopup} aria-expanded={ariaExpanded} aria-label={ariaLabel}>
         {content}
       </Link>
     );
   }
-  return <button className={classes} disabled={disabled} type={type} onClick={onClick}>{content}</button>;
+  return <button className={classes} disabled={disabled} type={type} onClick={onClick} aria-haspopup={ariaHasPopup} aria-expanded={ariaExpanded} aria-label={ariaLabel}>{content}</button>;
 }

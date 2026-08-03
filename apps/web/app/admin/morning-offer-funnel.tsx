@@ -54,7 +54,7 @@ export function MorningOfferFunnel({
   return (
     <section
       aria-labelledby="morning-offer-funnel-title"
-      className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm"
+      className="quiet-admin__card rounded-lg border border-border-subtle bg-card p-4 shadow-sm"
     >
       <p
         id="morning-offer-funnel-title"
@@ -64,7 +64,7 @@ export function MorningOfferFunnel({
       </p>
 
       {summary.unclassified > 0 ? (
-        <div className="mt-3 rounded-md bg-[var(--gold-100)] px-3 py-2 text-[0.75rem] font-semibold text-[var(--gold-ink)]">
+        <div className="mt-3 rounded-md bg-[var(--homa-highlight-tint)] px-3 py-2 text-[0.75rem] font-semibold text-[var(--homa-highlight-ink)]">
           <p>
             {countPhrase(
               summary.unclassified,
@@ -115,8 +115,8 @@ export function MorningOfferFunnel({
       ) : null}
 
       <div
-        className="mt-4 rounded-md bg-[var(--surface-sunken)] px-4 py-3"
-        style={{ borderLeft: "3px solid var(--border-brand)" }}
+        className="mt-4 rounded-md bg-[var(--homa-canvas)] px-4 py-3"
+        style={{ borderLeft: "3px solid var(--homa-visual-coral)" }}
       >
         <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.1em] text-subtle">
           What this panel is for

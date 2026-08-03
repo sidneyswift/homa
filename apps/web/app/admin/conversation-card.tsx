@@ -32,12 +32,12 @@ export function ConversationCard({
   rangeLabel: string;
 }) {
   return (
-    <section className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm md:col-span-2">
+    <section className="quiet-admin__card rounded-lg border border-border-subtle bg-card p-4 shadow-sm md:col-span-2">
       <p className="text-[0.72rem] font-bold text-muted">Conversation {rangeLabel}</p>
       <p className="mt-1 font-display text-[1.55rem] font-semibold leading-none text-strong">
         {activeFamilies} of {totalFamilies}
       </p>
-      <p className="mt-1.5 text-[0.72rem] font-semibold text-[var(--sage-600)]">
+      <p className="mt-1.5 text-[0.72rem] font-semibold text-[var(--homa-constructive-ink)]">
         families talked with Homa
       </p>
 
@@ -69,8 +69,8 @@ export function ConversationCard({
             className="text-[0.72rem]"
             style={
               undeliveredCount > 0
-                ? { color: "var(--rose-600)", fontWeight: 600 }
-                : { color: "var(--text-subtle)" }
+                ? { color: "var(--homa-error-ink)", fontWeight: 600 }
+                : { color: "color-mix(in srgb, var(--homa-ink) 52%, var(--homa-canvas))" }
             }
           >
             {undeliveredCount > 0

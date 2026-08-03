@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
+import { Icon } from "../../../components/design/Icon";
+import { QuietFrame } from "../../../components/design/QuietFrame";
 import { KIND_LABELS, subjectLabel, type BinderMaterial } from "../../../lib/materials/binder";
 import { VersionRail } from "./version-rail";
 
@@ -101,15 +102,16 @@ export function MaterialDetailOverlay({
       role="dialog"
       aria-modal="true"
       aria-labelledby="binder-detail-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(51,42,33,0.42)] p-4"
+      className="quiet-artifact-backdrop fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
-      <div
-        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[var(--radius-xl)] border border-border-subtle bg-card p-5 shadow-[var(--shadow-xl)]"
+      <QuietFrame
+        as="section"
+        className="quiet-artifact-dialog relative"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
-          <p className="font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
+          <p className="font-mono text-[0.65rem] uppercase tracking-widest text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
             {KIND_LABELS[material.kind]}
           </p>
           <button
@@ -117,9 +119,9 @@ export function MaterialDetailOverlay({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-md p-1.5 text-subtle transition-colors duration-(--dur-fast) ease-out hover:bg-page hover:text-body"
+            className="grid h-11 w-11 place-items-center rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-transparent text-[color:var(--homa-ink)] transition-colors hover:border-[var(--homa-ink)]"
           >
-            <X size={18} aria-hidden="true" />
+            <Icon name="close" size={20} />
           </button>
         </div>
 
@@ -131,7 +133,7 @@ export function MaterialDetailOverlay({
               ? `Preview of ${material.title}, page ${pageIndex + 1} of ${material.pageCount}`
               : `Preview of ${material.title}`
           }
-          className="mx-auto mt-3 block aspect-[8.5/11] w-2/3 rounded-md border border-border-subtle object-cover shadow-sm"
+          className="mx-auto mt-3 block aspect-[8.5/11] w-2/3 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] object-cover shadow-sm"
         />
         {pagePreviews.length > 1 ? (
           <div className="mx-auto mt-2 flex w-2/3 items-center justify-between">
@@ -140,11 +142,11 @@ export function MaterialDetailOverlay({
               onClick={() => setPageIndex((index) => Math.max(0, index - 1))}
               disabled={pageIndex === 0}
               aria-label="Previous page"
-              className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border bg-card text-body transition-colors hover:border-[var(--clay-200)] disabled:opacity-40"
+              className="grid h-11 w-11 place-items-center rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] text-[color:var(--homa-ink)] transition-colors hover:border-[var(--homa-midnight-action)] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <ChevronLeft size={16} aria-hidden="true" />
+              <Icon name="back" size={16} />
             </button>
-            <span aria-live="polite" className="text-xs font-semibold text-muted">
+            <span aria-live="polite" className="text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
               Page {pageIndex + 1} of {material.pageCount}
             </span>
             <button
@@ -154,40 +156,40 @@ export function MaterialDetailOverlay({
               }
               disabled={pageIndex >= pagePreviews.length - 1}
               aria-label="Next page"
-              className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border bg-card text-body transition-colors hover:border-[var(--clay-200)] disabled:opacity-40"
+              className="grid h-11 w-11 place-items-center rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] text-[color:var(--homa-ink)] transition-colors hover:border-[var(--homa-midnight-action)] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <ChevronRight size={16} aria-hidden="true" />
+              <Icon name="next" size={16} />
             </button>
           </div>
         ) : null}
 
-        <h2 id="binder-detail-title" className="mt-4 font-display text-xl font-semibold text-strong">
+        <h2 id="binder-detail-title" className="mt-4 font-display text-xl font-semibold text-[color:var(--homa-ink)]">
           {material.title}
         </h2>
 
         <div className="mt-3 grid grid-cols-2 gap-2">
-          <div className="rounded-md bg-page p-2.5">
-            <span className="block font-mono text-[0.6rem] uppercase tracking-widest text-subtle">
+          <div className="quiet-artifact-meta">
+            <span className="block font-mono text-[0.6rem] uppercase tracking-widest text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
               For
             </span>
-            <span className="mt-0.5 block text-sm font-semibold text-strong">
+            <span className="mt-0.5 block text-sm font-semibold text-[color:var(--homa-ink)]">
               {material.childName ?? "The whole family"}
             </span>
           </div>
-          <div className="rounded-md bg-page p-2.5">
-            <span className="block font-mono text-[0.6rem] uppercase tracking-widest text-subtle">
+          <div className="quiet-artifact-meta">
+            <span className="block font-mono text-[0.6rem] uppercase tracking-widest text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
               Kept on
             </span>
-            <span className="mt-0.5 block text-sm font-semibold text-strong">
+            <span className="mt-0.5 block text-sm font-semibold text-[color:var(--homa-ink)]">
               {formattedDate(material.createdAt, timeZone)}
             </span>
           </div>
           {material.subject ? (
-            <div className="col-span-2 rounded-md bg-page p-2.5">
-              <span className="block font-mono text-[0.6rem] uppercase tracking-widest text-subtle">
+            <div className="quiet-artifact-meta col-span-2">
+              <span className="block font-mono text-[0.6rem] uppercase tracking-widest text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
                 Subject
               </span>
-              <span className="mt-0.5 block text-sm font-semibold text-strong">
+              <span className="mt-0.5 block text-sm font-semibold text-[color:var(--homa-ink)]">
                 {subjectLabel(material.subject)}
               </span>
             </div>
@@ -195,8 +197,8 @@ export function MaterialDetailOverlay({
         </div>
 
         {material.sources.length > 0 ? (
-          <div className="mt-3 rounded-md bg-page p-2.5">
-            <span className="block font-mono text-[0.6rem] uppercase tracking-widest text-subtle">
+          <div className="quiet-artifact-meta mt-3">
+            <span className="block font-mono text-[0.6rem] uppercase tracking-widest text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
               Made from
             </span>
             <div className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-sm">
@@ -205,12 +207,12 @@ export function MaterialDetailOverlay({
                   <a
                     key={source.id}
                     href={source.libraryUrl}
-                    className="font-semibold text-strong underline decoration-border underline-offset-2 hover:text-brand"
+                    className="font-semibold text-[color:var(--homa-ink)] underline decoration-[var(--homa-control-boundary)] underline-offset-2 hover:text-[color:var(--homa-brand-text)]"
                   >
                     {source.title}
                   </a>
                 ) : (
-                  <span key={source.id} className="font-semibold text-muted">
+                  <span key={source.id} className="font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
                     {source.title}
                   </span>
                 ),
@@ -223,13 +225,14 @@ export function MaterialDetailOverlay({
           href={material.pdfUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 inline-block rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
+          className="quiet-action quiet-action--primary mt-4"
         >
-          {material.pageCount > 1 ? `Print all ${material.pageCount} pages` : "Print it"}
+          <span>{material.pageCount > 1 ? `Print all ${material.pageCount} pages` : "Print it"}</span>
+          <span className="quiet-action__icon" aria-hidden="true"><Icon name="print" size={20} /></span>
         </a>
 
         <VersionRail materialId={material.id} />
-      </div>
+      </QuietFrame>
     </div>
   );
 }

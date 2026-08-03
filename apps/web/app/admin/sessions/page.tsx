@@ -53,7 +53,7 @@ export default async function AdminSessionsPage({
   };
 
   return (
-    <div>
+    <div data-brand-surface="admin-sessions" className="quiet-admin__child">
       <p className="font-mono text-[0.64rem] font-bold uppercase tracking-[0.13em] text-subtle">
         Founder · session inspector
       </p>
@@ -72,8 +72,8 @@ export default async function AdminSessionsPage({
             href={href({ channel: filter.value })}
             className={
               channel === filter.value
-                ? "inline-flex min-h-9 items-center rounded-pill border border-[var(--clay-400)] bg-brand-soft px-3 py-1 text-sm font-bold text-[var(--clay-700)]"
-                : "inline-flex min-h-9 items-center rounded-pill border border-border-subtle bg-card px-3 py-1 text-sm font-medium text-muted hover:border-[var(--clay-300)]"
+                ? "inline-flex min-h-9 items-center rounded-pill border border-[var(--homa-midnight-action)] bg-[var(--homa-info-tint)] px-3 py-1 text-sm font-bold text-[var(--homa-info-ink)]"
+                : "inline-flex min-h-9 items-center rounded-pill border border-border-subtle bg-card px-3 py-1 text-sm font-medium text-muted hover:border-[var(--homa-midnight-action)]"
             }
           >
             {filter.label}
@@ -83,8 +83,8 @@ export default async function AdminSessionsPage({
           href={href({ failed: !failedOnly })}
           className={
             failedOnly
-              ? "inline-flex min-h-9 items-center rounded-pill border border-[var(--rose-500)] bg-[var(--danger-soft)] px-3 py-1 text-sm font-bold text-[var(--rose-600)]"
-              : "inline-flex min-h-9 items-center rounded-pill border border-border-subtle bg-card px-3 py-1 text-sm font-medium text-muted hover:border-[var(--rose-500)]"
+              ? "inline-flex min-h-9 items-center rounded-pill border border-[var(--homa-error-ink)] bg-[var(--homa-error-tint)] px-3 py-1 text-sm font-bold text-[var(--homa-error-ink)]"
+              : "inline-flex min-h-9 items-center rounded-pill border border-border-subtle bg-card px-3 py-1 text-sm font-medium text-muted hover:border-[var(--homa-error-ink)]"
           }
         >
           Trouble only
@@ -137,7 +137,7 @@ export default async function AdminSessionsPage({
               </>
             );
             const className =
-              "flex w-full flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-border-subtle bg-card px-3.5 py-2.5 text-left shadow-sm transition-colors hover:border-[var(--clay-300)]";
+              "flex w-full flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-border-subtle bg-card px-3.5 py-2.5 text-left shadow-sm transition-colors hover:border-[var(--homa-midnight-action)]";
             return session.sessionId ? (
               <Link
                 key={session.key}
@@ -147,7 +147,7 @@ export default async function AdminSessionsPage({
                 {inner}
               </Link>
             ) : (
-              <div key={session.key} className={className.replace(" hover:border-[var(--clay-300)]", "")}>
+              <div key={session.key} className={className.replace(" hover:border-[var(--homa-midnight-action)]", "")}>
                 {inner}
                 <span className="w-full font-mono text-[0.62rem] text-subtle">
                   no eve session ever started for this run; the error above is the whole story

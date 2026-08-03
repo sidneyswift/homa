@@ -24,11 +24,11 @@ const CATEGORIES: { key: PulseCategory | "all"; label: string }[] = [
 ];
 
 const DOT_COLOR: Record<PulseCategory, string> = {
-  signup: "var(--sage-500)",
-  send: "var(--sky-500)",
-  fail: "var(--rose-500)",
-  usage: "var(--stone-400)",
-  billing: "var(--gold-300)",
+  signup: "var(--homa-constructive-ink)",
+  send: "var(--homa-info-ink)",
+  fail: "var(--homa-error-ink)",
+  usage: "color-mix(in srgb, var(--homa-ink) 46%, var(--homa-canvas))",
+  billing: "var(--homa-highlight-ink)",
 };
 
 export default async function AdminPulsePage({
@@ -52,7 +52,7 @@ export default async function AdminPulsePage({
     .filter((day) => day.items.length > 0);
 
   return (
-    <div>
+    <div data-brand-surface="admin-pulse" className="quiet-admin__child">
       <p className="font-mono text-[0.64rem] font-bold uppercase tracking-[0.13em] text-subtle">
         Founder · the pulse
       </p>
@@ -70,8 +70,8 @@ export default async function AdminPulsePage({
             href={c.key === "all" ? "/admin/pulse" : `/admin/pulse?cat=${c.key}`}
             className={
               category === c.key
-                ? "rounded-pill border border-[var(--clay-400)] bg-brand-soft px-3.5 py-1.5 text-sm font-bold text-[var(--clay-700)]"
-                : "rounded-pill border border-border bg-card px-3.5 py-1.5 text-sm font-semibold text-body hover:border-[var(--clay-300)]"
+                ? "rounded-pill border border-[var(--homa-midnight-action)] bg-[var(--homa-info-tint)] px-3.5 py-1.5 text-sm font-bold text-[var(--homa-info-ink)]"
+                : "rounded-pill border border-border bg-card px-3.5 py-1.5 text-sm font-semibold text-body hover:border-[var(--homa-midnight-action)]"
             }
           >
             {c.label}

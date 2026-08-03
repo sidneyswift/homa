@@ -61,8 +61,8 @@ function chip(href: string, label: string, active: boolean) {
       href={href}
       className={
         active
-          ? "rounded-pill border border-[var(--clay-400)] bg-brand-soft px-3.5 py-1.5 text-sm font-bold text-[var(--clay-700)]"
-          : "rounded-pill border border-border bg-card px-3.5 py-1.5 text-sm font-semibold text-body hover:border-[var(--clay-300)]"
+          ? "rounded-pill border border-[var(--homa-midnight-action)] bg-[var(--homa-info-tint)] px-3.5 py-1.5 text-sm font-bold text-[var(--homa-info-ink)]"
+          : "rounded-pill border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3.5 py-1.5 text-sm font-semibold text-body hover:border-[var(--homa-midnight-action)]"
       }
     >
       {label}
@@ -102,7 +102,7 @@ export default async function AdminFamiliesPage({
   };
 
   return (
-    <div>
+    <div data-brand-surface="admin-families" className="quiet-admin__child">
       <p className="font-mono text-[0.64rem] font-bold uppercase tracking-[0.13em] text-subtle">
         Founder · families
       </p>
@@ -142,7 +142,7 @@ export default async function AdminFamiliesPage({
         <EmptyNote>No families match this filter right now.</EmptyNote>
       ) : (
         <div className="mt-4 overflow-hidden rounded-lg border border-border-subtle bg-card shadow-sm">
-          <div className="hidden grid-cols-[minmax(160px,1.5fr)_110px_60px_minmax(100px,1fr)_110px_110px] gap-3 border-b border-border-subtle bg-[var(--surface-sunken)] px-4 py-2 font-mono text-[0.6rem] font-bold uppercase tracking-[0.1em] text-subtle md:grid">
+          <div className="hidden grid-cols-[minmax(160px,1.5fr)_110px_60px_minmax(100px,1fr)_110px_110px] gap-3 border-b border-border-subtle bg-[var(--homa-canvas)] px-4 py-2 font-mono text-[0.6rem] font-bold uppercase tracking-[0.1em] text-subtle md:grid">
             <span>Family</span>
             <span>Account / stage</span>
             <span>Kids</span>
@@ -161,7 +161,7 @@ export default async function AdminFamiliesPage({
                 <li key={s.id} className="border-b border-border-subtle last:border-b-0">
                   <Link
                     href={`/admin/families/${s.id}`}
-                    className="grid grid-cols-2 items-center gap-x-3 gap-y-1.5 px-4 py-3 text-sm hover:bg-page md:grid-cols-[minmax(160px,1.5fr)_140px_60px_minmax(100px,1fr)_110px_110px]"
+                    className="grid grid-cols-2 items-center gap-x-3 gap-y-1.5 px-4 py-3 text-sm hover:bg-[var(--homa-canvas)] md:grid-cols-[minmax(160px,1.5fr)_140px_60px_minmax(100px,1fr)_110px_110px]"
                   >
                     <span className="col-span-2 md:col-span-1">
                       <span className="font-bold text-strong">
