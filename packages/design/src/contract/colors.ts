@@ -42,6 +42,57 @@ export const colorUsage = {
   containedBand: "contained mineral band with paper foreground",
 } as const satisfies Record<ColorToken, string>;
 
+/**
+ * The native adapter still needs a few tonal steps for child-facing accents,
+ * calendars, and truthful status surfaces. They live here, beside the
+ * semantic contract, so React Native cannot grow a private color vocabulary.
+ */
+export const nativeColorScale = {
+  stone50: colorTokens.canvas,
+  stone100: "#EEEAE2",
+  stone200: "#DED8CC",
+  stone300: colorTokens.controlBoundary,
+  stone400: "#77736B",
+  stone500: "#68645E",
+  stone600: "#5B5852",
+  stone700: "#3F3D39",
+  stone800: colorTokens.ink,
+  stone900: colorTokens.ink,
+  clay50: "#FBE8DF",
+  clay100: "#F8D8CC",
+  clay200: "#F1B29A",
+  clay300: "#EA8969",
+  clay400: colorTokens.visualCoral,
+  clay500: colorTokens.visualCoral,
+  clay600: colorTokens.brandText,
+  clay700: colorTokens.brandText,
+  sage50: colorTokens.constructiveTint,
+  sage100: "#D7E9DC",
+  sage200: "#B5D2BD",
+  sage300: "#85B595",
+  sage400: "#5F9271",
+  sage500: colorTokens.constructiveInk,
+  sage600: colorTokens.constructiveInk,
+  sage700: "#284938",
+  sage800: "#1F382A",
+  gold100: colorTokens.highlightTint,
+  gold300: "#EBCF82",
+  gold400: "#D6AC43",
+  gold500: colorTokens.highlightInk,
+  goldInk: colorTokens.highlightInk,
+  goldInkStrong: "#4D380A",
+  sky50: colorTokens.infoTint,
+  sky100: colorTokens.infoTint,
+  sky300: "#AFCED5",
+  sky500: colorTokens.infoInk,
+  sky600: colorTokens.infoInk,
+  rose100: colorTokens.errorTint,
+  rose500: colorTokens.errorInk,
+  rose600: "#703027",
+} as const;
+
+export type NativeColorScaleToken = keyof typeof nativeColorScale;
+
 export const approvedColorPairs = [
   { foreground: "ink", background: "canvas", minimumRatio: 4.5, usage: "body" },
   { foreground: "ink", background: "paper", minimumRatio: 4.5, usage: "body" },
@@ -56,4 +107,10 @@ export const approvedColorPairs = [
   { foreground: "visualCoral", background: "canvas", minimumRatio: 3, usage: "large-display-only" },
 ] as const;
 
-export const COLOR_CONTRACT = { version: DESIGN_CONTRACT_VERSION, tokens: colorTokens, usage: colorUsage, approvedPairs: approvedColorPairs } as const;
+export const COLOR_CONTRACT = {
+  version: DESIGN_CONTRACT_VERSION,
+  tokens: colorTokens,
+  usage: colorUsage,
+  nativeColorScale,
+  approvedPairs: approvedColorPairs,
+} as const;

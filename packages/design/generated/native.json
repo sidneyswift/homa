@@ -1,6 +1,6 @@
 {
   "version": "quiet-authority-v1",
-  "sourceChecksum": "000dc7a4059396c796a5c731a6672c39ffac1679ce7ba33998abee96b4ce0f99",
+  "sourceChecksum": "e35b834293407d95ab57d9f23e07739e235c056ad469916c16e58f9d62c73758",
   "colors": {
     "canvas": "#F7F4EE",
     "ink": "#20242B",
@@ -19,6 +19,49 @@
     "errorInk": "#923F33",
     "errorTint": "#F5E5E1",
     "containedBand": "#27374D"
+  },
+  "nativeColorScale": {
+    "stone50": "#F7F4EE",
+    "stone100": "#EEEAE2",
+    "stone200": "#DED8CC",
+    "stone300": "#918B83",
+    "stone400": "#77736B",
+    "stone500": "#68645E",
+    "stone600": "#5B5852",
+    "stone700": "#3F3D39",
+    "stone800": "#20242B",
+    "stone900": "#20242B",
+    "clay50": "#FBE8DF",
+    "clay100": "#F8D8CC",
+    "clay200": "#F1B29A",
+    "clay300": "#EA8969",
+    "clay400": "#E7602F",
+    "clay500": "#E7602F",
+    "clay600": "#A33F22",
+    "clay700": "#A33F22",
+    "sage50": "#E5EFE8",
+    "sage100": "#D7E9DC",
+    "sage200": "#B5D2BD",
+    "sage300": "#85B595",
+    "sage400": "#5F9271",
+    "sage500": "#335C46",
+    "sage600": "#335C46",
+    "sage700": "#284938",
+    "sage800": "#1F382A",
+    "gold100": "#F7EBC7",
+    "gold300": "#EBCF82",
+    "gold400": "#D6AC43",
+    "gold500": "#76560F",
+    "goldInk": "#76560F",
+    "goldInkStrong": "#4D380A",
+    "sky50": "#E4EFF2",
+    "sky100": "#E4EFF2",
+    "sky300": "#AFCED5",
+    "sky500": "#2F5968",
+    "sky600": "#2F5968",
+    "rose100": "#F5E5E1",
+    "rose500": "#923F33",
+    "rose600": "#703027"
   },
   "typography": {
     "version": "quiet-authority-v1",
@@ -990,6 +1033,743 @@
       "typed": "packages/design/src/contract",
       "generated": "packages/design/generated",
       "tooling": "DESIGN.md"
+    }
+  },
+  "projection": {
+    "version": "quiet-authority-v1",
+    "schemaVersion": 1,
+    "source": "@homa/design/contract",
+    "theme": {
+      "palette": {
+        "stone50": "#F7F4EE",
+        "stone100": "#EEEAE2",
+        "stone200": "#DED8CC",
+        "stone300": "#918B83",
+        "stone400": "#77736B",
+        "stone500": "#68645E",
+        "stone600": "#5B5852",
+        "stone700": "#3F3D39",
+        "stone800": "#20242B",
+        "stone900": "#20242B",
+        "clay50": "#FBE8DF",
+        "clay100": "#F8D8CC",
+        "clay200": "#F1B29A",
+        "clay300": "#EA8969",
+        "clay400": "#E7602F",
+        "clay500": "#E7602F",
+        "clay600": "#A33F22",
+        "clay700": "#A33F22",
+        "sage50": "#E5EFE8",
+        "sage100": "#D7E9DC",
+        "sage200": "#B5D2BD",
+        "sage300": "#85B595",
+        "sage400": "#5F9271",
+        "sage500": "#335C46",
+        "sage600": "#335C46",
+        "sage700": "#284938",
+        "sage800": "#1F382A",
+        "gold100": "#F7EBC7",
+        "gold300": "#EBCF82",
+        "gold400": "#D6AC43",
+        "gold500": "#76560F",
+        "goldInk": "#76560F",
+        "goldInkStrong": "#4D380A",
+        "sky50": "#E4EFF2",
+        "sky100": "#E4EFF2",
+        "sky300": "#AFCED5",
+        "sky500": "#2F5968",
+        "sky600": "#2F5968",
+        "rose100": "#F5E5E1",
+        "rose500": "#923F33",
+        "rose600": "#703027"
+      },
+      "colors": {
+        "light": {
+          "page": "#F7F4EE",
+          "card": "#FFFEFC",
+          "surfaceSunken": "#EEEAE2",
+          "textStrong": "#20242B",
+          "textBody": "#20242B",
+          "textMuted": "#5B5852",
+          "textSubtle": "#68645E",
+          "brand": "#E7602F",
+          "action": "#27374D",
+          "brandHover": "#A33F22",
+          "brandSoft": "#FBE8DF",
+          "onBrand": "#FFFEFC",
+          "sage": "#335C46",
+          "sageSoft": "#E5EFE8",
+          "gold": "#76560F",
+          "goldSoft": "#F7EBC7",
+          "border": "#918B83",
+          "borderSubtle": "#DED8CC",
+          "focusRing": "#E7602F",
+          "success": "#335C46",
+          "danger": "#923F33",
+          "dangerSoft": "#F5E5E1",
+          "info": "#2F5968"
+        },
+        "dark": {
+          "page": "#1E2936",
+          "card": "#27374D",
+          "surfaceRaised": "#33465E",
+          "surfaceSunken": "#17212C",
+          "textStrong": "#FFFEFC",
+          "textBody": "#F2EEE7",
+          "textMuted": "#C7C2BA",
+          "textSubtle": "#A9A39A",
+          "brand": "#E7602F",
+          "action": "#27374D",
+          "brandHover": "#F0835A",
+          "brandSoft": "#573426",
+          "onBrand": "#FFFEFC",
+          "sage": "#9BC5A8",
+          "sageSoft": "#294737",
+          "gold": "#EBCF82",
+          "goldSoft": "#51431F",
+          "border": "#53677D",
+          "borderSubtle": "#40546A",
+          "focusRing": "#F0835A",
+          "success": "#9BC5A8",
+          "danger": "#F2A296",
+          "dangerSoft": "#59332E",
+          "info": "#AFCED5"
+        }
+      },
+      "typography": {
+        "fontRoles": {
+          "display": {
+            "family": "EB Garamond",
+            "minimumPx": 20,
+            "allowedWeights": [
+              400,
+              500,
+              600,
+              700
+            ],
+            "purpose": "meaningful invitations, page titles, reflective framing"
+          },
+          "interface": {
+            "family": "DM Sans",
+            "minimumPx": 12,
+            "allowedWeights": [
+              400,
+              500,
+              600,
+              700
+            ],
+            "purpose": "UI, body, labels, data, and controls"
+          },
+          "wordmark": {
+            "family": "Fredoka",
+            "minimumPx": 12,
+            "allowedWeights": [
+              500,
+              600,
+              700
+            ],
+            "purpose": "real Logo component only"
+          }
+        },
+        "typeRoles": {
+          "hero": {
+            "familyRole": "display",
+            "phone": {
+              "size": 44,
+              "lineHeight": 46
+            },
+            "desktop": {
+              "size": 64,
+              "lineHeight": 66
+            }
+          },
+          "pageTitle": {
+            "familyRole": "display",
+            "minSize": 32,
+            "maxSize": 40,
+            "minLineHeight": 36,
+            "maxLineHeight": 44
+          },
+          "sectionTitle": {
+            "familyRole": "display",
+            "minSize": 26,
+            "maxSize": 32,
+            "minLineHeight": 31,
+            "maxLineHeight": 37
+          },
+          "body": {
+            "familyRole": "interface",
+            "size": 16,
+            "lineHeight": 24
+          },
+          "bodyLarge": {
+            "familyRole": "interface",
+            "size": 18,
+            "lineHeight": 28
+          },
+          "bodySmall": {
+            "familyRole": "interface",
+            "size": 14,
+            "lineHeight": 20
+          },
+          "control": {
+            "familyRole": "interface",
+            "size": 15,
+            "lineHeight": 20
+          },
+          "label": {
+            "familyRole": "interface",
+            "size": 14,
+            "lineHeight": 20
+          },
+          "caption": {
+            "familyRole": "interface",
+            "size": 13,
+            "lineHeight": 18
+          },
+          "eyebrow": {
+            "familyRole": "interface",
+            "size": 12,
+            "lineHeight": 16,
+            "tracking": "0.08em"
+          },
+          "metric": {
+            "familyRole": "interface",
+            "size": 16,
+            "lineHeight": 20,
+            "tabular": true
+          }
+        },
+        "typeScale": {
+          "xs": 12,
+          "sm": 14,
+          "base": 16,
+          "lg": 18,
+          "xl": 22,
+          "xxl": 28,
+          "xxxl": 36
+        },
+        "families": {
+          "display": {
+            "family": "EB Garamond",
+            "role": "display",
+            "source": {
+              "provider": "Google Fonts",
+              "license": {
+                "name": "SIL Open Font License 1.1",
+                "identifier": "OFL-1.1",
+                "url": "https://scripts.sil.org/OFL"
+              },
+              "specimenUrl": "https://fonts.google.com/specimen/EB+Garamond",
+              "repositoryUrl": "https://github.com/google/fonts/tree/main/ofl/ebgaramond"
+            },
+            "allowedWeights": [
+              400,
+              500,
+              600,
+              700
+            ],
+            "allowedStyles": [
+              "normal",
+              "italic"
+            ],
+            "subsets": [
+              "latin"
+            ],
+            "nativeNames": {
+              "regular": "EBGaramond_400Regular",
+              "medium": "EBGaramond_500Medium",
+              "semibold": "EBGaramond_600SemiBold",
+              "bold": "EBGaramond_700Bold"
+            }
+          },
+          "interface": {
+            "family": "DM Sans",
+            "role": "interface",
+            "source": {
+              "provider": "Google Fonts",
+              "license": {
+                "name": "SIL Open Font License 1.1",
+                "identifier": "OFL-1.1",
+                "url": "https://scripts.sil.org/OFL"
+              },
+              "specimenUrl": "https://fonts.google.com/specimen/DM+Sans",
+              "repositoryUrl": "https://github.com/google/fonts/tree/main/ofl/dmsans"
+            },
+            "allowedWeights": [
+              400,
+              500,
+              600,
+              700
+            ],
+            "allowedStyles": [
+              "normal",
+              "italic"
+            ],
+            "subsets": [
+              "latin"
+            ],
+            "nativeNames": {
+              "regular": "DMSans_400Regular",
+              "medium": "DMSans_500Medium",
+              "semibold": "DMSans_600SemiBold",
+              "bold": "DMSans_700Bold"
+            }
+          },
+          "wordmark": {
+            "family": "Fredoka",
+            "role": "wordmark",
+            "source": {
+              "provider": "Google Fonts",
+              "license": {
+                "name": "SIL Open Font License 1.1",
+                "identifier": "OFL-1.1",
+                "url": "https://scripts.sil.org/OFL"
+              },
+              "specimenUrl": "https://fonts.google.com/specimen/Fredoka",
+              "repositoryUrl": "https://github.com/google/fonts/tree/main/ofl/fredoka"
+            },
+            "allowedWeights": [
+              500,
+              600,
+              700
+            ],
+            "allowedStyles": [
+              "normal"
+            ],
+            "subsets": [
+              "latin"
+            ],
+            "nativeNames": {
+              "semibold": "Fredoka_600SemiBold"
+            }
+          }
+        }
+      },
+      "spacing": {
+        "base": 4,
+        "scale": [
+          0,
+          4,
+          8,
+          12,
+          16,
+          20,
+          24,
+          32,
+          40,
+          48,
+          64,
+          80,
+          96
+        ]
+      },
+      "radii": {
+        "control": 12,
+        "card": 18,
+        "frame": 28,
+        "compactPill": 999
+      },
+      "elevation": {
+        "sm": {
+          "shadowColor": "#20242B",
+          "shadowOpacity": 0.08,
+          "shadowRadius": 3,
+          "shadowOffset": {
+            "width": 0,
+            "height": 1
+          },
+          "elevation": 2
+        },
+        "md": {
+          "shadowColor": "#20242B",
+          "shadowOpacity": 0.08,
+          "shadowRadius": 12,
+          "shadowOffset": {
+            "width": 0,
+            "height": 4
+          },
+          "elevation": 4
+        }
+      },
+      "motion": {
+        "sequence": [
+          "peek",
+          "orient",
+          "draw",
+          "land",
+          "still"
+        ],
+        "durations": {
+          "fast": 120,
+          "base": 200,
+          "slow": 320
+        },
+        "totalMaximum": 900,
+        "easeOut": "cubic-bezier(0.22, 0.8, 0.28, 1)",
+        "easeInOut": "cubic-bezier(0.5, 0, 0.2, 1)",
+        "pressScale": 0.98,
+        "reducedMotionEndpoint": "final-still-immediately",
+        "loopPolicy": "truthful-live-state-only"
+      }
+    },
+    "primitiveRoles": [
+      "text",
+      "surface",
+      "action",
+      "field",
+      "choice",
+      "status",
+      "identity",
+      "navigation",
+      "sheet",
+      "feedback",
+      "artifact"
+    ],
+    "primitiveAdapters": {
+      "text": {
+        "component": "NativeText",
+        "source": "apps/mobile/src/components/ui/semantic.tsx",
+        "disposition": "new-primitive",
+        "legacyComponents": [
+          "react-native/Text",
+          "route-local text styles"
+        ],
+        "requiredStates": [
+          "rest",
+          "dynamic-type",
+          "localized-expansion"
+        ],
+        "accessibility": [
+          "allowFontScaling",
+          "no-essential-line-clamp"
+        ]
+      },
+      "surface": {
+        "component": "NativeSurface",
+        "source": "apps/mobile/src/components/ui/semantic.tsx",
+        "disposition": "new-primitive",
+        "legacyComponents": [
+          "Card",
+          "route-local View surfaces"
+        ],
+        "requiredStates": [
+          "rest",
+          "appearance",
+          "increased-contrast"
+        ],
+        "accessibility": [
+          "semantic-background-boundary",
+          "no-color-only-state"
+        ]
+      },
+      "action": {
+        "component": "NativeAction",
+        "source": "apps/mobile/src/components/ui/semantic.tsx",
+        "disposition": "wrap-existing",
+        "legacyComponents": [
+          "Button",
+          "IconButton",
+          "route-local Pressable"
+        ],
+        "requiredStates": [
+          "rest",
+          "pressed",
+          "disabled",
+          "loading",
+          "error",
+          "offline",
+          "interrupted",
+          "dynamic-type",
+          "appearance",
+          "reduced-motion",
+          "increased-contrast",
+          "localized-expansion"
+        ],
+        "accessibility": [
+          "button-role",
+          "44pt-target",
+          "accessibilityState",
+          "focus-visible-boundary"
+        ]
+      },
+      "field": {
+        "component": "NativeField",
+        "source": "apps/mobile/src/components/ui/semantic.tsx",
+        "disposition": "wrap-existing",
+        "legacyComponents": [
+          "TextField",
+          "route-local TextInput"
+        ],
+        "requiredStates": [
+          "rest",
+          "pressed",
+          "disabled",
+          "loading",
+          "error",
+          "offline",
+          "interrupted",
+          "dynamic-type",
+          "appearance",
+          "reduced-motion",
+          "increased-contrast",
+          "localized-expansion",
+          "keyboard"
+        ],
+        "accessibility": [
+          "label-and-error",
+          "allowFontScaling",
+          "keyboard-reachable"
+        ]
+      },
+      "choice": {
+        "component": "NativeChoice",
+        "source": "apps/mobile/src/components/ui/semantic.tsx",
+        "disposition": "new-primitive",
+        "legacyComponents": [
+          "route-local radio",
+          "route-local checkbox",
+          "route-local Switch"
+        ],
+        "requiredStates": [
+          "rest",
+          "pressed",
+          "disabled",
+          "loading",
+          "error",
+          "offline",
+          "interrupted",
+          "dynamic-type",
+          "appearance",
+          "reduced-motion",
+          "increased-contrast",
+          "localized-expansion",
+          "selected"
+        ],
+        "accessibility": [
+          "checkbox-radio-switch-role",
+          "checked-state",
+          "44pt-target"
+        ]
+      },
+      "status": {
+        "component": "NativeStatus",
+        "source": "apps/mobile/src/components/ui/semantic.tsx",
+        "disposition": "wrap-existing",
+        "legacyComponents": [
+          "InlineError",
+          "LoadingStatus",
+          "route-local status rows"
+        ],
+        "requiredStates": [
+          "loading",
+          "success",
+          "error",
+          "offline",
+          "interrupted",
+          "localized-expansion"
+        ],
+        "accessibility": [
+          "text-or-progressbar-role",
+          "announcement-adapter",
+          "not-color-only"
+        ]
+      },
+      "identity": {
+        "component": "NativeIdentity",
+        "source": "apps/mobile/src/components/ui/semantic.tsx",
+        "disposition": "wrap-existing",
+        "legacyComponents": [
+          "Logo",
+          "Homa character adapters"
+        ],
+        "requiredStates": [
+          "rest",
+          "appearance",
+          "reduced-motion"
+        ],
+        "accessibility": [
+          "real-logo-adapter",
+          "descriptive-image-label"
+        ]
+      },
+      "navigation": {
+        "component": "NativeNavigation",
+        "source": "apps/mobile/src/components/ui/semantic.tsx",
+        "disposition": "new-primitive",
+        "legacyComponents": [
+          "SidebarNav",
+          "AppDrawer",
+          "route-local navigation Pressable"
+        ],
+        "requiredStates": [
+          "rest",
+          "pressed",
+          "selected",
+          "disabled",
+          "dynamic-type",
+          "safe-area"
+        ],
+        "accessibility": [
+          "selected-state",
+          "44pt-target",
+          "safe-area-context"
+        ]
+      },
+      "sheet": {
+        "component": "NativeSheet",
+        "source": "apps/mobile/src/components/ui/semantic.tsx",
+        "disposition": "wrap-existing",
+        "legacyComponents": [
+          "AccessibleModal",
+          "route-local Modal"
+        ],
+        "requiredStates": [
+          "rest",
+          "loading",
+          "error",
+          "reduced-motion",
+          "safe-area",
+          "keyboard"
+        ],
+        "accessibility": [
+          "modal-focus-lifecycle",
+          "escape-dismiss",
+          "safe-area-context",
+          "reduced-motion-endpoint"
+        ]
+      },
+      "feedback": {
+        "component": "NativeFeedback",
+        "source": "apps/mobile/src/components/ui/semantic.tsx",
+        "disposition": "new-primitive",
+        "legacyComponents": [
+          "useAccessibilityAnnouncement",
+          "route-local completion cues"
+        ],
+        "requiredStates": [
+          "pressed",
+          "success",
+          "error",
+          "offline",
+          "interrupted",
+          "reduced-motion"
+        ],
+        "accessibility": [
+          "announcement-adapter",
+          "haptic-role-is-explicit",
+          "truthful-state-only"
+        ]
+      },
+      "artifact": {
+        "component": "NativeArtifact",
+        "source": "apps/mobile/src/components/ui/semantic.tsx",
+        "disposition": "new-primitive",
+        "legacyComponents": [
+          "material cards",
+          "report previews",
+          "route-local artifact rows"
+        ],
+        "requiredStates": [
+          "rest",
+          "pressed",
+          "selected",
+          "loading",
+          "success",
+          "error",
+          "offline",
+          "localized-expansion"
+        ],
+        "accessibility": [
+          "title-and-status",
+          "preview-is-decorative-when-labelled",
+          "44pt-target"
+        ]
+      }
+    },
+    "platform": {
+      "target": {
+        "minimumHitTargetPt": 44,
+        "minimumIconPt": 24
+      },
+      "safeArea": {
+        "adapter": "react-native-safe-area-context",
+        "requiredEdges": [
+          "top",
+          "bottom"
+        ],
+        "sheetBottomPadding": "inset-aware"
+      },
+      "dynamicType": {
+        "adapter": "React Native allowFontScaling",
+        "probe": "accessibility-extra-extra-extra-large",
+        "maxFontSizeMultiplier": null,
+        "clippingPolicy": "never-clip-essential-copy"
+      },
+      "appearance": {
+        "adapter": "React Native useColorScheme",
+        "profiles": [
+          "light",
+          "dark"
+        ],
+        "adaptiveSurfaceRule": "select-a-complete-profile"
+      },
+      "reducedMotion": {
+        "adapter": "react-native-reanimated useReducedMotion",
+        "endpoint": "final-still-immediately",
+        "loops": "live-state-only"
+      },
+      "reducedTransparency": {
+        "adapter": "platform-preference-adapter",
+        "endpoint": "opaque-surface-with-preserved-hierarchy",
+        "proof": "manual-device-required"
+      },
+      "increasedContrast": {
+        "adapter": "platform-preference-adapter",
+        "endpoint": "explicit-boundaries-and-approved-contrast-pairs",
+        "proof": "simulator-and-manual-device-required"
+      },
+      "keyboard": {
+        "adapter": "KeyboardAvoidingView-or-scroll-container",
+        "endpoint": "focused-field-and-next-action-remain-reachable"
+      },
+      "localization": {
+        "endpoint": "allow-copy-expansion-and-natural-wrapping",
+        "prohibited": [
+          "essential-line-clamp",
+          "fixed-width-label"
+        ]
+      }
+    },
+    "haptics": {
+      "press": {
+        "platformEvent": "selection",
+        "truth": "direct manipulation was accepted"
+      },
+      "select": {
+        "platformEvent": "selection",
+        "truth": "a choice changed"
+      },
+      "success": {
+        "platformEvent": "notification-success",
+        "truth": "the server or device confirmed completion"
+      },
+      "error": {
+        "platformEvent": "notification-error",
+        "truth": "a real failure needs attention"
+      },
+      "warning": {
+        "platformEvent": "notification-warning",
+        "truth": "a meaningful risk or interruption is present"
+      }
+    },
+    "verification": {
+      "staticContract": "required",
+      "renderedFixture": "required",
+      "simulator": "required",
+      "physicalDevice": "required",
+      "voiceOver": "physical-device-required",
+      "android": "compile-only-until-founder-ruling"
     }
   }
 }
