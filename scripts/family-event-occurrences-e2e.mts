@@ -6,6 +6,7 @@ import {
   EVAL_FIXTURE_FAMILY_ID,
   EVAL_FIXTURE_PARENT_USER_ID,
   EVAL_ONBOARDING_FIXTURE_FAMILY_ID,
+  EVAL_ONBOARDING_FIXTURE_PARENT_USER_ID,
 } from "../apps/web/lib/family-context-eval-fixture";
 
 /**
@@ -198,7 +199,7 @@ try {
     insert into public.family_members (family_id, user_id, role)
     values (${EVAL_FIXTURE_FAMILY_ID}, ${SECOND_PARENT_ID}, 'parent')
   `;
-  await asAuthenticated(EVAL_FIXTURE_PARENT_USER_ID, async (transaction) =>
+  await asAuthenticated(EVAL_ONBOARDING_FIXTURE_PARENT_USER_ID, async (transaction) =>
     await saveException(transaction, {
       eventId: FOREIGN_SERIES_ID,
       familyId: EVAL_ONBOARDING_FIXTURE_FAMILY_ID,
