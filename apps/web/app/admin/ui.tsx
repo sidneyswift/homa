@@ -11,16 +11,16 @@ import type { ReactNode } from "react";
 export type PillTone = "sage" | "gold" | "rose" | "sky" | "stone" | "clay" | "outline";
 
 const PILL_STYLES: Record<PillTone, { background: string; color: string; border?: string }> = {
-  sage: { background: "var(--sage-50)", color: "var(--sage-700)" },
-  gold: { background: "var(--gold-100)", color: "var(--gold-ink)" },
-  rose: { background: "var(--danger-soft)", color: "var(--rose-600)" },
-  sky: { background: "var(--info-soft)", color: "var(--sky-600)" },
-  stone: { background: "var(--stone-100)", color: "var(--stone-700)" },
-  clay: { background: "var(--brand-soft)", color: "var(--clay-700)" },
+  sage: { background: "var(--homa-constructive-tint)", color: "var(--homa-constructive-ink)" },
+  gold: { background: "var(--homa-highlight-tint)", color: "var(--homa-highlight-ink)" },
+  rose: { background: "var(--homa-error-tint)", color: "var(--homa-error-ink)" },
+  sky: { background: "var(--homa-info-tint)", color: "var(--homa-info-ink)" },
+  stone: { background: "var(--homa-canvas)", color: "color-mix(in srgb, var(--homa-ink) 68%, var(--homa-canvas))" },
+  clay: { background: "var(--homa-info-tint)", color: "var(--homa-info-ink)" },
   outline: {
-    background: "var(--surface-card)",
-    color: "var(--stone-600)",
-    border: "1px dashed var(--border-default)",
+    background: "var(--homa-paper)",
+    color: "color-mix(in srgb, var(--homa-ink) 68%, var(--homa-canvas))",
+    border: "1px dashed var(--homa-control-boundary)",
   },
 };
 
@@ -37,7 +37,7 @@ export function Pill({
   const style = PILL_STYLES[tone];
   return (
     <span
-      className="inline-flex items-center whitespace-nowrap rounded-pill px-2.5 py-0.5 text-[0.72rem] font-bold"
+      className="quiet-admin__pill inline-flex items-center whitespace-nowrap rounded-pill px-2.5 py-0.5 text-[0.72rem] font-bold"
       style={{ background: style.background, color: style.color, border: style.border }}
       title={title}
     >
@@ -98,7 +98,7 @@ export function Tile({
     rose: { color: "var(--rose-600)", fontWeight: 600 },
   }[subTone];
   return (
-    <div className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm">
+    <div className="quiet-admin__tile rounded-lg border border-border-subtle bg-card p-4 shadow-sm">
       <p className="text-[0.72rem] font-bold text-muted">{label}</p>
       <p className="mt-1 font-display text-[1.55rem] font-semibold leading-none text-strong">
         {value}
@@ -126,7 +126,7 @@ export function Spark({ values, width = 110, height = 26 }: { values: number[]; 
       <polyline
         points={points}
         fill="none"
-        stroke={flat ? "var(--stone-300)" : "var(--clay-400)"}
+        stroke={flat ? "var(--homa-control-boundary)" : "var(--homa-brand-text)"}
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -146,13 +146,13 @@ export function AlertRow({
   children: ReactNode;
 }) {
   const styles = {
-    rose: { background: "var(--danger-soft)", border: "1px solid var(--rose-500)", color: "var(--rose-600)" },
-    gold: { background: "var(--gold-100)", border: "1px solid var(--gold-300)", color: "var(--gold-ink-strong)" },
-    sky: { background: "var(--info-soft)", border: "1px solid var(--sky-100)", color: "var(--pop-navy, var(--stone-800))" },
+    rose: { background: "var(--homa-error-tint)", border: "1px solid color-mix(in srgb, var(--homa-error-ink) 38%, var(--homa-control-boundary))", color: "var(--homa-error-ink)" },
+    gold: { background: "var(--homa-highlight-tint)", border: "1px solid color-mix(in srgb, var(--homa-highlight-ink) 34%, var(--homa-control-boundary))", color: "var(--homa-highlight-ink)" },
+    sky: { background: "var(--homa-info-tint)", border: "1px solid color-mix(in srgb, var(--homa-info-ink) 34%, var(--homa-control-boundary))", color: "var(--homa-info-ink)" },
   }[tone];
   return (
     <div
-      className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 rounded-md px-3.5 py-2.5 text-sm"
+      className="quiet-admin__alert flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 rounded-md px-3.5 py-2.5 text-sm"
       style={styles}
     >
       <div className="min-w-0">{children}</div>
@@ -164,7 +164,7 @@ export function AlertRow({
 export function SectionHead({ eyebrow, title, sub }: { eyebrow: string; title: string; sub?: string }) {
   return (
     <div className="mt-8">
-      <p className="font-mono text-[0.64rem] font-bold uppercase tracking-[0.13em] text-subtle">
+      <p className="quiet-admin__eyebrow font-mono text-[0.64rem] font-bold uppercase tracking-[0.13em]">
         {eyebrow}
       </p>
       <h2 className="mt-0.5 font-display text-lg font-bold text-strong">{title}</h2>
@@ -175,7 +175,7 @@ export function SectionHead({ eyebrow, title, sub }: { eyebrow: string; title: s
 
 export function EmptyNote({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-3 rounded-md border border-dashed border-border bg-card px-3.5 py-3 text-sm text-subtle">
+    <p className="quiet-admin__empty-note mt-3 rounded-md border border-dashed border-border bg-card px-3.5 py-3 text-sm text-subtle">
       {children}
     </p>
   );

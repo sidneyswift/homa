@@ -38,7 +38,7 @@ const ITEMS = [
 export function AdminNav() {
   const pathname = usePathname();
   return (
-    <nav aria-label="Founder console" className="flex gap-1 lg:flex-col">
+    <nav aria-label="Founder console" className="quiet-admin__nav flex gap-1 lg:flex-col">
       {ITEMS.map((item) => {
         const active =
           item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
@@ -49,11 +49,11 @@ export function AdminNav() {
             href={item.href}
             className={
               active
-                ? "flex min-h-10 items-center gap-2.5 rounded-md bg-brand-soft px-3 py-2 text-[0.9rem] font-bold text-[var(--clay-700)]"
-                : "flex min-h-10 items-center gap-2.5 rounded-md px-3 py-2 text-[0.9rem] font-medium text-muted transition-colors hover:bg-page hover:text-body"
+                ? "quiet-admin__nav-item quiet-admin__nav-item--active flex min-h-10 items-center gap-2.5 rounded-md px-3 py-2 text-[0.9rem] font-bold"
+                : "quiet-admin__nav-item flex min-h-10 items-center gap-2.5 rounded-md px-3 py-2 text-[0.9rem] font-medium text-muted transition-colors"
             }
           >
-            <Icon size={16} aria-hidden="true" />
+            <Icon className="quiet-admin__nav-icon" size={17} strokeWidth={1.75} aria-hidden="true" />
             {item.label}
           </Link>
         );

@@ -825,3 +825,49 @@
   .quiet-chat__composer-action { transition: none; }
   .quiet-chat__composer-action:hover:not(:disabled), .quiet-chat__composer-action:active:not(:disabled) { transform: none; }
 }
+
+/* -------------------------------------------------------------------------
+   Quiet admin shell
+   -------------------------------------------------------------------------
+   Founder tooling is dense by nature. The shell uses the same authority
+   primitives as the family product, while preserving operational state
+   colors inside the shared admin UI pieces.
+   ------------------------------------------------------------------------- */
+.quiet-admin { background: var(--homa-canvas); color: var(--homa-ink); }
+.quiet-admin__rail { border-color: var(--homa-control-boundary); background: var(--homa-paper); box-shadow: 0 16px 36px color-mix(in srgb, var(--homa-ink) 8%, transparent); }
+.quiet-admin__home { padding: 6px; margin: -6px; border-radius: var(--homa-radius-control); }
+.quiet-admin__home:focus-visible,
+.quiet-admin__parent-link:focus-visible,
+.quiet-admin__nav-item:focus-visible,
+.quiet-admin__segment:focus-visible { outline: 3px solid color-mix(in srgb, var(--homa-visual-coral) 70%, transparent); outline-offset: 3px; }
+.quiet-admin__eyebrow { color: var(--homa-brand-text); }
+.quiet-admin__account { border-color: color-mix(in srgb, var(--homa-control-boundary) 58%, transparent); }
+.quiet-admin__parent-link { color: var(--homa-brand-text); text-decoration: none; }
+.quiet-admin__parent-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.quiet-admin__mobile-header { border-color: color-mix(in srgb, var(--homa-control-boundary) 58%, transparent); background: color-mix(in srgb, var(--homa-canvas) 94%, transparent); }
+.quiet-admin__badge { background: var(--homa-info-tint); color: var(--homa-info-ink); }
+.quiet-admin__nav { scrollbar-width: thin; }
+.quiet-admin__nav-item { color: color-mix(in srgb, var(--homa-ink) 66%, var(--homa-canvas)); text-decoration: none; transition: background var(--homa-motion-fast) var(--homa-motion-ease-out), color var(--homa-motion-fast) var(--homa-motion-ease-out), transform var(--homa-motion-fast) var(--homa-motion-ease-out); }
+.quiet-admin__nav-item:hover { background: var(--homa-info-tint); color: var(--homa-ink); transform: translateX(2px); }
+.quiet-admin__nav-item--active { background: var(--homa-midnight-action); color: var(--homa-paper); }
+.quiet-admin__nav-item--active:hover { background: color-mix(in srgb, var(--homa-midnight-action) 88%, var(--homa-ink)); color: var(--homa-paper); }
+.quiet-admin__nav-icon { color: currentColor; }
+.quiet-admin__segmented { border-color: var(--homa-control-boundary); background: var(--homa-paper); }
+.quiet-admin__segment { min-height: 40px; color: color-mix(in srgb, var(--homa-ink) 66%, var(--homa-canvas)); text-decoration: none; transition: background var(--homa-motion-fast) var(--homa-motion-ease-out), color var(--homa-motion-fast) var(--homa-motion-ease-out); }
+.quiet-admin__segment:hover { color: var(--homa-ink); }
+.quiet-admin__segment--active { background: var(--homa-midnight-action); color: var(--homa-paper); }
+.quiet-admin__segment--active:hover { background: color-mix(in srgb, var(--homa-midnight-action) 88%, var(--homa-ink)); color: var(--homa-paper); }
+.quiet-admin__panel,
+.quiet-admin__tile { border-color: var(--homa-control-boundary); background: var(--homa-paper); box-shadow: 0 10px 26px color-mix(in srgb, var(--homa-ink) 6%, transparent); }
+.quiet-admin__empty-note { border-color: var(--homa-control-boundary); background: var(--homa-paper); }
+
+@media (max-width: 63.999rem) {
+  .quiet-admin__nav { overflow-x: auto; padding-bottom: 2px; }
+  .quiet-admin__nav-item { flex: 0 0 auto; min-height: 44px; white-space: nowrap; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiet-admin__nav-item,
+  .quiet-admin__segment { transition: none; }
+  .quiet-admin__nav-item:hover { transform: none; }
+}
