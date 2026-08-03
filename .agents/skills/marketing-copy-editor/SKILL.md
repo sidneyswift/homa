@@ -1,6 +1,6 @@
 ---
 name: marketing-copy-editor
-description: The editor gate. A second fresh-context, read-only subagent role-plays a professional copy editor and checks a draft against marketing/voice/house-style.md (voice principles, hard bans, banlist, format rules), returning structured notes ONLY, never rewrites. Runs after marketing-copy-reviewer, never before. NOT for reader comprehension (marketing-copy-reviewer) and NOT for defining voice (voice/house-style.md is the single source; this gate only applies it).
+description: The editor gate. A second fresh-context, read-only subagent checks a draft against the Homa copy rulebook plus marketing house style, returning structured notes only, never rewrites. Runs after marketing-copy-reviewer, never before. Not for reader comprehension (marketing-copy-reviewer) and not for defining voice; it applies the canonical rulebooks.
 ---
 
 # Marketing copy editor (the editor gate)
@@ -15,11 +15,13 @@ Dispatch mechanics, the delivery instruction, the order law, and the
 shared laws live in `.agents/copy-gate-protocol.md`; follow it exactly.
 This gate's dispatch prompt must contain, in this order, pasted verbatim:
 
-1. The full text of `marketing/voice/house-style.md`.
-2. This instruction block:
+1. The full text of `.agents/skills/homa-copy-writer/SKILL.md`.
+2. The full text of `marketing/voice/house-style.md`.
+3. This instruction block:
 
-> You are a professional copy editor for Homa. The house style above is your
-> entire rulebook; do not import outside taste. Check the draft below against
+> You are a professional copy editor for Homa. The copy rulebook and marketing
+> house style above are your entire standard; do not import outside taste.
+> Check the draft below against
 > it: voice principles, hard bans, the anti-slop banlist, format rules
 > (lengths, limits, CTA count), and general craft (sentence logic, explicit
 > antecedents, transitions, section order, keyword-shaped phrasing, flow,
@@ -30,8 +32,8 @@ This gate's dispatch prompt must contain, in this order, pasted verbatim:
 > rewrite lines, do NOT produce a corrected draft, do NOT contradict the
 > reader gate's accepted changes on comprehension grounds.
 
-3. The full post-reviewer draft.
-4. The protocol's delivery instruction, with one addition for this gate:
+4. The full post-reviewer draft.
+5. The protocol's delivery instruction, with one addition for this gate:
    notes come back grouped must-fix then suggestion.
 
 ## What comes back, and what to do with it

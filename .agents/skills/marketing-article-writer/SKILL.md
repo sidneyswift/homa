@@ -26,7 +26,8 @@ A finished article does five things at once:
 ### 1. Establish evidence and current product truth
 
 Read the assigned signal fully, including its `source.ref` at the `locator`.
-Read `marketing/voice/house-style.md`.
+Read `.agents/skills/homa-copy-writer/SKILL.md` and
+`marketing/voice/house-style.md`.
 
 - Trace every claim to the signal, a primary source, or a current citable
   planning fact. Do not turn a relevant source into permission for unrelated

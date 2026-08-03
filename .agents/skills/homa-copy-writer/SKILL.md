@@ -1,6 +1,6 @@
 ---
 name: homa-copy-writer
-description: The Homa copy rulebook. Read BEFORE writing or editing any parent-facing words anywhere in the product or marketing: progress reports, four-week plans, dashboard cards, UI microcopy, chat/SMS/voice prompts, emails, landing and marketing pages. Clarity and low cognitive load beat personality, and fewer words is NOT the goal (a 3-word sentence can confuse as hard as a 20-word one). Also the router for WHERE a copy fix belongs: generator prompt, template sentence bank, component string, or the page itself. Pairs with homa-copy-reviewer (ICP read-along gate) and homa-copy-editor (senior editor gate). Layers on top of marketing/voice/house-style.md; never replaces its bans or format limits.
+description: The Homa copy rulebook. Read before writing or editing parent-facing words anywhere in the product or marketing. Copy must be true, clear, and memorable; boring is a failure state, and fewer words is not the goal. Also routes each fix to its producer: generator prompt, template sentence bank, component string, or page. Pairs with homa-copy-reviewer then homa-copy-editor. Layers on top of marketing/voice/house-style.md; never replaces its bans or format limits.
 ---
 
 # Homa copy writer · the rulebook
