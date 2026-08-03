@@ -290,6 +290,7 @@ export function validateHandwryttenStationery(input: {
   validateEvidence(issues, rollback?.restoreProof, "rollback-proof");
   validateEvidence(issues, file.physicalProof, "physical-proof");
   if (!Array.isArray(file.contracts) || file.contracts.length < 4 || file.contracts.some((contract) => !isNonEmpty(contract))) add(issues, "contracts", "Stationery contract must name preserved outbox, recipient, privacy, and provider safety contracts.");
+  if ((file.status === "provider-verified" || file.status === "production-accepted") && account?.replacementConfiguration?.providerReadback.status !== "pass") add(issues, "status-before-provider-proof", "A provider-verified stationery status requires a passing external read-back.");
   if (file.status === "production-accepted" && (stop?.status !== "complete" || account?.replacementConfiguration?.providerReadback.status !== "pass" || file.physicalProof?.status !== "pass")) add(issues, "production-acceptance", "Production acceptance requires completed stop-generation, provider read-back, and physical proof.");
   return issues;
 }

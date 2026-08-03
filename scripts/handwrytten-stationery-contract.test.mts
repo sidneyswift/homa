@@ -48,6 +48,12 @@ test("production acceptance requires provider read-back, physical proof, and sto
   assert.equal(invalid.stopGeneration.timestamp, null);
 });
 
+test("provider-verified cannot bypass the external provider read-back", () => {
+  const invalid = structuredClone(inputs.stationery) as HandwryttenStationeryFile;
+  invalid.status = "provider-verified";
+  assert.ok(validate(invalid).some((issue) => issue.code === "status-before-provider-proof"));
+});
+
 test("provider constraints preserve the real Handwrytten payload boundary", () => {
   const invalid = structuredClone(inputs.stationery) as HandwryttenStationeryFile;
   invalid.providerConstraints.maxMessageCharacters = 501;
