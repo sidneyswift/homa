@@ -1,8 +1,8 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
 import { useState } from "react";
 
+import { Icon } from "../../../components/design/Icon";
 import { deletionConfirmationFor } from "../../../lib/account-deletion-confirmation";
 
 type DeletionState = "idle" | "submitting" | "complete" | "in_progress" | "blocked";
@@ -47,7 +47,7 @@ export function DeleteFamilyDataCard({ familyName }: { familyName: string }) {
     <section className="rounded-lg border border-danger/40 bg-card p-6 shadow-sm">
       <div className="flex items-start gap-3">
         <span className="mt-0.5 rounded-full bg-danger/10 p-2 text-danger">
-          <AlertTriangle size={18} aria-hidden="true" />
+          <Icon name="warning" size={20} />
         </span>
         <div>
           <h2 className="font-display text-xl font-semibold text-strong">Delete account and family data</h2>
