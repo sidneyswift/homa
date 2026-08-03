@@ -17,6 +17,8 @@ export const logoGeometry = {
 
 export const roofThread = {
   source: "master-roof-derived-path",
+  viewBox: "0 0 320 48",
+  path: "M3 30 C34 5 55 44 84 19 S137 6 159 28 S212 43 235 20 S278 3 317 23",
   productStrokePx: 2,
   brandStrokePx: 3,
   maximumTurns: 2,

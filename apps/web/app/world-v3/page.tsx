@@ -194,12 +194,7 @@ export default function WorldV3Page() {
                 </div>
               ))}
               <div className="w3-pfoot">
-                <svg width="14" height="14" viewBox="0 0 48 48" aria-hidden="true">
-                  <path
-                    d="M24 5.6 C22.5 5.6 21 6.2 19.8 7.3 L7.1 18.9 C5.5 20.4 4.6 22.5 4.6 24.7 L4.6 35.2 C4.6 40.1 8.5 44 13.4 44 L34.6 44 C39.5 44 43.4 40.1 43.4 35.2 L43.4 24.7 C43.4 22.5 42.5 20.4 40.9 18.9 L28.2 7.3 C27 6.2 25.5 5.6 24 5.6 Z"
-                    fill="#E7602F"
-                  />
-                </svg>
+                <Logo size={14} variant="mark" />
                 <span>made by Homa for Maya</span>
               </div>
             </div>
@@ -312,12 +307,7 @@ export default function WorldV3Page() {
           </p>
           <div className="w3-mnote">
             <div className="w3-mh">
-              <svg width="13" height="13" viewBox="0 0 48 48" aria-hidden="true">
-                <path
-                  d="M24 5.6 C22.5 5.6 21 6.2 19.8 7.3 L7.1 18.9 C5.5 20.4 4.6 22.5 4.6 24.7 L4.6 35.2 C4.6 40.1 8.5 44 13.4 44 L34.6 44 C39.5 44 43.4 40.1 43.4 35.2 L43.4 24.7 C43.4 22.5 42.5 20.4 40.9 18.9 L28.2 7.3 C27 6.2 25.5 5.6 24 5.6 Z"
-                  fill="var(--gold-ink, #8A6410)"
-                />
-              </svg>
+              <Logo size={13} variant="mark" />
               Morning note
             </div>
             <p>Maya narrates everything she plays. Tomorrow&apos;s worksheet turns that into a story.</p>

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "version": "quiet-authority-v1",
-  "sourceChecksum": "ca48745c8f5cfe7f65c6cab581edb1b412cfe3caa8bd078409f10e35d4401ee3",
+  "sourceChecksum": "8b56bf820fe6eae4ca4e0cdabebc4864744c8c2cbe27e71d49434841d2aee4dc",
   "source": {
     "brand": {
       "version": "quiet-authority-v1",
@@ -41,6 +41,8 @@
       },
       "roofThread": {
         "source": "master-roof-derived-path",
+        "viewBox": "0 0 320 48",
+        "path": "M3 30 C34 5 55 44 84 19 S137 6 159 28 S212 43 235 20 S278 3 317 23",
         "productStrokePx": 2,
         "brandStrokePx": 3,
         "maximumTurns": 2,
@@ -78,6 +80,708 @@
           "decorative-thread-without-meaning"
         ]
       }
+    },
+    "identity": {
+      "version": "quiet-authority-v1",
+      "geometry": {
+        "version": "quiet-authority-v1",
+        "logo": {
+          "source": "packages/design/src/contract/brand.ts#logoGeometry",
+          "anatomy": "house-with-two-watchful-eyes-no-mouth",
+          "viewBox": "0 0 48 48",
+          "clearSpace": {
+            "unit": "viewBox",
+            "allSides": 16
+          },
+          "minimumMarkPx": 20,
+          "minimumLockupPx": 88,
+          "eyeAnatomy": [
+            {
+              "cx": 17.4,
+              "cy": 26,
+              "r": 4.8,
+              "pupilCx": 18.3,
+              "pupilCy": 26.7,
+              "pupilR": 2.2
+            },
+            {
+              "cx": 30.6,
+              "cy": 26,
+              "r": 4.8,
+              "pupilCx": 31.5,
+              "pupilCy": 26.7,
+              "pupilR": 2.2
+            }
+          ],
+          "pupilFill": "#20242B"
+        },
+        "character": {
+          "source": "master-homa-house",
+          "states": [
+            "peek",
+            "orient",
+            "working",
+            "needs-you",
+            "ready",
+            "interrupted",
+            "offline",
+            "error",
+            "still"
+          ],
+          "anatomy": "same-mark-with-stateful-gaze-and-posture",
+          "prohibited": [
+            "mouth",
+            "independent-character-geometry",
+            "character-as-control"
+          ],
+          "motionSequence": [
+            "peek",
+            "orient",
+            "draw",
+            "land",
+            "still"
+          ]
+        },
+        "roofThread": {
+          "source": "packages/design/src/contract/brand.ts#roofThread",
+          "viewBox": "0 0 320 48",
+          "path": "M3 30 C34 5 55 44 84 19 S137 6 159 28 S212 43 235 20 S278 3 317 23",
+          "stroke": {
+            "productPx": 2,
+            "brandPx": 3,
+            "caps": "round"
+          },
+          "endpoints": [
+            "real-learning-object",
+            "useful-next-move"
+          ],
+          "maximumTurns": 2,
+          "prohibitedCollisions": [
+            "face",
+            "text",
+            "control"
+          ]
+        },
+        "imagery": {
+          "subject": "real-family-artifact-first",
+          "light": "natural-window-light",
+          "camera": "family-height",
+          "privacy": "no-identifying-family-data",
+          "crop": "preserve-object-and-next-move-safe-zone",
+          "prohibited": [
+            "staged-stock-as-universal-proof",
+            "character-over-object",
+            "decorative-thread-without-meaning"
+          ]
+        }
+      },
+      "safeAreas": {
+        "standard": {
+          "viewBox": "0 0 48 48",
+          "clearSpace": 16,
+          "use": "product-mark"
+        },
+        "tight": {
+          "viewBox": "4.2 5 39.6 39.6",
+          "clearSpace": 0,
+          "use": "tiny-favicon"
+        },
+        "avatar": {
+          "viewBox": "-8 -8 64 64",
+          "clearSpace": 8,
+          "use": "circular-avatar-and-oauth"
+        },
+        "lockup": {
+          "viewBox": "103.5 61.5 359 80.75",
+          "clearSpace": 16,
+          "use": "wordmark-lockup"
+        },
+        "adaptiveForeground": {
+          "viewBox": "0 0 48 48",
+          "clearSpace": 8,
+          "use": "android-adaptive-foreground"
+        },
+        "monochrome": {
+          "viewBox": "0 0 48 48",
+          "clearSpace": 8,
+          "use": "os-tinted-silhouette"
+        },
+        "fullBleed": {
+          "viewBox": "0 0 48 48",
+          "clearSpace": 0,
+          "use": "solid-background"
+        },
+        "printInline": {
+          "viewBox": "0 0 48 48",
+          "clearSpace": 2,
+          "use": "small-print-footer"
+        }
+      },
+      "assets": [
+        {
+          "id": "web-lockup-light-svg",
+          "path": "apps/web/public/brand/homa-lockup.svg",
+          "source": "master-homa-lockup",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "svg",
+          "expectedDimensions": {
+            "width": 359,
+            "height": 81
+          },
+          "safeArea": "lockup",
+          "appearance": "light",
+          "destination": "web-public",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "web-lockup-light-png",
+          "path": "apps/web/public/brand/homa-lockup.png",
+          "source": "master-homa-lockup",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 1200,
+            "height": 270
+          },
+          "safeArea": "lockup",
+          "appearance": "light",
+          "destination": "web-public",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "web-lockup-dark-svg",
+          "path": "apps/web/public/brand/homa-lockup-dark.svg",
+          "source": "master-homa-lockup",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "svg",
+          "expectedDimensions": {
+            "width": 359,
+            "height": 81
+          },
+          "safeArea": "lockup",
+          "appearance": "dark",
+          "destination": "web-public",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "web-lockup-dark-png",
+          "path": "apps/web/public/brand/homa-lockup-dark.png",
+          "source": "master-homa-lockup",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 1200,
+            "height": 270
+          },
+          "safeArea": "lockup",
+          "appearance": "dark",
+          "destination": "web-public",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "web-mark-standard-svg",
+          "path": "apps/web/public/brand/homa-mark.svg",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "svg",
+          "expectedDimensions": {
+            "width": 48,
+            "height": 48
+          },
+          "safeArea": "standard",
+          "appearance": "light",
+          "destination": "web-public",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "web-mark-standard-png",
+          "path": "apps/web/public/brand/homa-mark-512.png",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 512,
+            "height": 512
+          },
+          "safeArea": "standard",
+          "appearance": "light",
+          "destination": "web-public",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "web-mark-tiny-svg",
+          "path": "apps/web/app/icon.svg",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "svg",
+          "expectedDimensions": {
+            "width": 40,
+            "height": 40
+          },
+          "safeArea": "tight",
+          "appearance": "light",
+          "destination": "web-app-icon",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "web-favicon-ico",
+          "path": "apps/web/app/favicon.ico",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "ico",
+          "expectedDimensions": {
+            "width": 48,
+            "height": 48
+          },
+          "safeArea": "tight",
+          "appearance": "light",
+          "destination": "web-app-icon",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts",
+          "outputVariants": [
+            16,
+            32,
+            48
+          ]
+        },
+        {
+          "id": "marketing-lockup-light-svg",
+          "path": "marketing/assets/brand/homa-lockup.svg",
+          "source": "master-homa-lockup",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "svg",
+          "expectedDimensions": {
+            "width": 359,
+            "height": 81
+          },
+          "safeArea": "lockup",
+          "appearance": "light",
+          "destination": "marketing-library",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "marketing-lockup-light-png",
+          "path": "marketing/assets/brand/homa-lockup.png",
+          "source": "master-homa-lockup",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 1200,
+            "height": 270
+          },
+          "safeArea": "lockup",
+          "appearance": "light",
+          "destination": "marketing-library",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "marketing-lockup-dark-svg",
+          "path": "marketing/assets/brand/homa-lockup-dark.svg",
+          "source": "master-homa-lockup",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "svg",
+          "expectedDimensions": {
+            "width": 359,
+            "height": 81
+          },
+          "safeArea": "lockup",
+          "appearance": "dark",
+          "destination": "marketing-library",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "marketing-lockup-dark-png",
+          "path": "marketing/assets/brand/homa-lockup-dark.png",
+          "source": "master-homa-lockup",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 1200,
+            "height": 270
+          },
+          "safeArea": "lockup",
+          "appearance": "dark",
+          "destination": "marketing-library",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "marketing-mark-avatar-svg",
+          "path": "marketing/assets/brand/homa-mark.svg",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "svg",
+          "expectedDimensions": {
+            "width": 64,
+            "height": 64
+          },
+          "safeArea": "avatar",
+          "appearance": "transparent",
+          "destination": "marketing-library",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "marketing-mark-avatar-512",
+          "path": "marketing/assets/brand/homa-mark-512.png",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 512,
+            "height": 512
+          },
+          "safeArea": "avatar",
+          "appearance": "transparent",
+          "destination": "marketing-library",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "marketing-mark-avatar-120",
+          "path": "marketing/assets/brand/homa-mark-120.png",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 120,
+            "height": 120
+          },
+          "safeArea": "avatar",
+          "appearance": "transparent",
+          "destination": "marketing-library",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "marketing-pfp-clay",
+          "path": "marketing/assets/brand/phone/homa-pfp-clay-1024.png",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 1024,
+            "height": 1024
+          },
+          "safeArea": "avatar",
+          "appearance": "solid-clay",
+          "destination": "marketing-library",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "marketing-pfp-cream",
+          "path": "marketing/assets/brand/phone/homa-pfp-cream-1024.png",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 1024,
+            "height": 1024
+          },
+          "safeArea": "avatar",
+          "appearance": "solid-cream",
+          "destination": "marketing-library",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "marketing-pfp-night",
+          "path": "marketing/assets/brand/phone/homa-pfp-night-1024.png",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 1024,
+            "height": 1024
+          },
+          "safeArea": "avatar",
+          "appearance": "solid-night",
+          "destination": "marketing-library",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "marketing-wallpaper-cream",
+          "path": "marketing/assets/brand/phone/homa-wallpaper-cream.png",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 1320,
+            "height": 2868
+          },
+          "safeArea": "standard",
+          "appearance": "solid-cream",
+          "destination": "marketing-library",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "marketing-wallpaper-night",
+          "path": "marketing/assets/brand/phone/homa-wallpaper-night.png",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 1320,
+            "height": 2868
+          },
+          "safeArea": "standard",
+          "appearance": "solid-night",
+          "destination": "marketing-library",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "native-android-background-svg",
+          "path": "apps/mobile/assets/brand/android-background.svg",
+          "source": "master-surface",
+          "geometryAuthority": "none",
+          "format": "svg",
+          "expectedDimensions": {
+            "width": 48,
+            "height": 48
+          },
+          "safeArea": "fullBleed",
+          "appearance": "adaptive",
+          "destination": "native-asset",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "native-android-foreground-svg",
+          "path": "apps/mobile/assets/brand/android-foreground.svg",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "svg",
+          "expectedDimensions": {
+            "width": 48,
+            "height": 48
+          },
+          "safeArea": "adaptiveForeground",
+          "appearance": "adaptive",
+          "destination": "native-asset",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "native-android-monochrome-svg",
+          "path": "apps/mobile/assets/brand/android-monochrome.svg",
+          "source": "master-homa-house-silhouette",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry",
+          "format": "svg",
+          "expectedDimensions": {
+            "width": 48,
+            "height": 48
+          },
+          "safeArea": "monochrome",
+          "appearance": "monochrome",
+          "destination": "native-asset",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "native-icon-svg",
+          "path": "apps/mobile/assets/brand/icon.svg",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "svg",
+          "expectedDimensions": {
+            "width": 48,
+            "height": 48
+          },
+          "safeArea": "standard",
+          "appearance": "light",
+          "destination": "native-asset",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "native-splash-svg",
+          "path": "apps/mobile/assets/brand/splash-icon.svg",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "svg",
+          "expectedDimensions": {
+            "width": 48,
+            "height": 48
+          },
+          "safeArea": "standard",
+          "appearance": "transparent",
+          "destination": "native-asset",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "native-android-background-png",
+          "path": "apps/mobile/assets/images/android-icon-background.png",
+          "source": "master-surface",
+          "geometryAuthority": "none",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 1024,
+            "height": 1024
+          },
+          "safeArea": "fullBleed",
+          "appearance": "adaptive",
+          "destination": "native-raster",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "native-android-foreground-png",
+          "path": "apps/mobile/assets/images/android-icon-foreground.png",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 1024,
+            "height": 1024
+          },
+          "safeArea": "adaptiveForeground",
+          "appearance": "adaptive",
+          "destination": "native-raster",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "native-android-monochrome-png",
+          "path": "apps/mobile/assets/images/android-icon-monochrome.png",
+          "source": "master-homa-house-silhouette",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 1024,
+            "height": 1024
+          },
+          "safeArea": "monochrome",
+          "appearance": "monochrome",
+          "destination": "native-raster",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "native-icon-png",
+          "path": "apps/mobile/assets/images/icon.png",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 1024,
+            "height": 1024
+          },
+          "safeArea": "standard",
+          "appearance": "light",
+          "destination": "native-raster",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "native-favicon-png",
+          "path": "apps/mobile/assets/images/favicon.png",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 48,
+            "height": 48
+          },
+          "safeArea": "tight",
+          "appearance": "light",
+          "destination": "native-raster",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        },
+        {
+          "id": "native-splash-png",
+          "path": "apps/mobile/assets/images/splash-icon.png",
+          "source": "master-homa-house",
+          "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+          "format": "png",
+          "expectedDimensions": {
+            "width": 1024,
+            "height": 1024
+          },
+          "safeArea": "standard",
+          "appearance": "transparent",
+          "destination": "native-raster",
+          "lifecycle": "active-derived",
+          "generator": "scripts/brand-assets.mts"
+        }
+      ],
+      "consumers": [
+        {
+          "path": "apps/web/components/brand/Logo.tsx",
+          "authority": "@homa/design/contract#logoGeometry",
+          "role": "web-logo-adapter"
+        },
+        {
+          "path": "apps/web/components/brand/ThinkingMark.tsx",
+          "authority": "components/brand/Logo.tsx",
+          "role": "web-character-animation"
+        },
+        {
+          "path": "apps/web/components/brand/thinking-acts.tsx",
+          "authority": "components/brand/Logo.tsx",
+          "role": "web-character-animation"
+        },
+        {
+          "path": "apps/web/app/world-v3/homa-character.tsx",
+          "authority": "components/brand/Logo.tsx",
+          "role": "web-character-adapter"
+        },
+        {
+          "path": "apps/web/app/opengraph-image.tsx",
+          "authority": "@homa/design/contract#logoGeometry",
+          "role": "open-graph-renderer"
+        },
+        {
+          "path": "apps/web/app/apple-icon.tsx",
+          "authority": "@homa/design/contract#logoGeometry",
+          "role": "apple-icon-renderer"
+        },
+        {
+          "path": "apps/web/lib/materials/page-shell.ts",
+          "authority": "components/brand/Logo.tsx",
+          "role": "print-renderer"
+        },
+        {
+          "path": "apps/web/lib/compliance/pack.ts",
+          "authority": "components/brand/Logo.tsx",
+          "role": "compliance-renderer"
+        },
+        {
+          "path": "apps/mobile/src/components/brand/logo.tsx",
+          "authority": "@homa/design/contract#logoGeometry",
+          "role": "native-logo-adapter"
+        },
+        {
+          "path": "apps/mobile/src/features/voice/homa-character.tsx",
+          "authority": "components/brand/logo.tsx",
+          "role": "native-character-animation"
+        },
+        {
+          "path": "scripts/brand-assets.mts",
+          "authority": "@homa/design/contract#logoGeometry+colorTokens",
+          "role": "asset-generator"
+        },
+        {
+          "path": "apps/web/lib/contact-card-photo.ts",
+          "authority": "apps/web/public/brand/homa-mark-512.png",
+          "role": "vcard-derived-embed"
+        }
+      ]
     },
     "colors": {
       "version": "quiet-authority-v1",
@@ -278,551 +982,6 @@
         "external": "ExternalLink",
         "refresh": "RefreshCw",
         "stop": "Square"
-      },
-      "semanticIconAdapterContract": {
-        "platforms": [
-          "web",
-          "native"
-        ],
-        "packages": {
-          "web": "lucide-react",
-          "native": "lucide-react-native"
-        },
-        "unknownRole": "throw",
-        "sourcePolicy": "registry-only"
-      },
-      "semanticIconAdapters": {
-        "web": {
-          "back": "ArrowLeft",
-          "next": "ArrowRight",
-          "close": "X",
-          "menu": "Menu",
-          "more": "Ellipsis",
-          "add": "Plus",
-          "edit": "Pencil",
-          "delete": "Trash2",
-          "calendar": "CalendarDays",
-          "book": "BookOpen",
-          "plan": "ClipboardCheck",
-          "progress": "ChartNoAxesCombined",
-          "chat": "Sparkles",
-          "tasks": "ListChecks",
-          "settings": "Settings",
-          "logout": "LogOut",
-          "print": "Printer",
-          "share": "Share2",
-          "voice": "Mic",
-          "muted": "MicOff",
-          "end": "PhoneOff",
-          "collapse": "ChevronDown",
-          "check": "Check",
-          "warning": "TriangleAlert",
-          "error": "CircleAlert",
-          "info": "Info",
-          "external": "ExternalLink",
-          "refresh": "RefreshCw",
-          "stop": "Square"
-        },
-        "native": {
-          "back": "ArrowLeft",
-          "next": "ArrowRight",
-          "close": "X",
-          "menu": "Menu",
-          "more": "Ellipsis",
-          "add": "Plus",
-          "edit": "Pencil",
-          "delete": "Trash2",
-          "calendar": "CalendarDays",
-          "book": "BookOpen",
-          "plan": "ClipboardCheck",
-          "progress": "ChartNoAxesCombined",
-          "chat": "Sparkles",
-          "tasks": "ListChecks",
-          "settings": "Settings",
-          "logout": "LogOut",
-          "print": "Printer",
-          "share": "Share2",
-          "voice": "Mic",
-          "muted": "MicOff",
-          "end": "PhoneOff",
-          "collapse": "ChevronDown",
-          "check": "Check",
-          "warning": "TriangleAlert",
-          "error": "CircleAlert",
-          "info": "Info",
-          "external": "ExternalLink",
-          "refresh": "RefreshCw",
-          "stop": "Square"
-        }
-      }
-    },
-    "fonts": {
-      "version": "quiet-authority-v1",
-      "schemaVersion": 1,
-      "approvedFamilies": {
-        "display": {
-          "family": "EB Garamond",
-          "role": "display",
-          "source": {
-            "provider": "Google Fonts",
-            "license": {
-              "name": "SIL Open Font License 1.1",
-              "identifier": "OFL-1.1",
-              "url": "https://scripts.sil.org/OFL"
-            },
-            "specimenUrl": "https://fonts.google.com/specimen/EB+Garamond",
-            "repositoryUrl": "https://github.com/google/fonts/tree/main/ofl/ebgaramond"
-          },
-          "allowedWeights": [
-            400,
-            500,
-            600,
-            700
-          ],
-          "allowedStyles": [
-            "normal",
-            "italic"
-          ],
-          "subsets": [
-            "latin"
-          ],
-          "nativeNames": {
-            "regular": "EBGaramond_400Regular",
-            "medium": "EBGaramond_500Medium",
-            "semibold": "EBGaramond_600SemiBold",
-            "bold": "EBGaramond_700Bold"
-          }
-        },
-        "interface": {
-          "family": "DM Sans",
-          "role": "interface",
-          "source": {
-            "provider": "Google Fonts",
-            "license": {
-              "name": "SIL Open Font License 1.1",
-              "identifier": "OFL-1.1",
-              "url": "https://scripts.sil.org/OFL"
-            },
-            "specimenUrl": "https://fonts.google.com/specimen/DM+Sans",
-            "repositoryUrl": "https://github.com/google/fonts/tree/main/ofl/dmsans"
-          },
-          "allowedWeights": [
-            400,
-            500,
-            600,
-            700
-          ],
-          "allowedStyles": [
-            "normal",
-            "italic"
-          ],
-          "subsets": [
-            "latin"
-          ],
-          "nativeNames": {
-            "regular": "DMSans_400Regular",
-            "medium": "DMSans_500Medium",
-            "semibold": "DMSans_600SemiBold",
-            "bold": "DMSans_700Bold"
-          }
-        },
-        "wordmark": {
-          "family": "Fredoka",
-          "role": "wordmark",
-          "source": {
-            "provider": "Google Fonts",
-            "license": {
-              "name": "SIL Open Font License 1.1",
-              "identifier": "OFL-1.1",
-              "url": "https://scripts.sil.org/OFL"
-            },
-            "specimenUrl": "https://fonts.google.com/specimen/Fredoka",
-            "repositoryUrl": "https://github.com/google/fonts/tree/main/ofl/fredoka"
-          },
-          "allowedWeights": [
-            500,
-            600,
-            700
-          ],
-          "allowedStyles": [
-            "normal"
-          ],
-          "subsets": [
-            "latin"
-          ],
-          "nativeNames": {
-            "semibold": "Fredoka_600SemiBold"
-          }
-        }
-      },
-      "checkedInAssets": [
-        {
-          "id": "eb-garamond-600-latin-ttf",
-          "role": "display",
-          "family": "EB Garamond",
-          "path": "apps/web/assets/fonts/quiet-authority/eb-garamond-600-latin.ttf",
-          "format": "ttf",
-          "weight": 600,
-          "style": "normal",
-          "subsets": [
-            "latin"
-          ],
-          "sha256": "b536adfa0f5746cfbd148d8a1a669540366edef2c85c4b49450798a037bd928c",
-          "binaryInspection": {
-            "family": "EB Garamond",
-            "style": "SemiBold,Regular",
-            "weightClass": 600,
-            "glyphCoverage": "latin-and-latin-extended",
-            "inspectionTool": "fontconfig fc-scan"
-          }
-        },
-        {
-          "id": "dm-sans-700-latin-ttf",
-          "role": "interface",
-          "family": "DM Sans",
-          "path": "apps/web/assets/fonts/quiet-authority/dm-sans-700-latin.ttf",
-          "format": "ttf",
-          "weight": 700,
-          "style": "normal",
-          "subsets": [
-            "latin"
-          ],
-          "sha256": "2a8e7f713ee79fbccdef3cef5c787aff47580299f7da60144961e7db2ec08211",
-          "binaryInspection": {
-            "family": "DM Sans",
-            "style": "Bold",
-            "weightClass": 700,
-            "glyphCoverage": "latin-and-latin-extended",
-            "inspectionTool": "fontconfig fc-scan"
-          }
-        },
-        {
-          "id": "fredoka-600-latin-woff",
-          "role": "wordmark",
-          "family": "Fredoka",
-          "path": "apps/web/assets/fonts/fredoka-600-latin.woff",
-          "format": "woff",
-          "weight": 600,
-          "style": "normal",
-          "subsets": [
-            "latin"
-          ],
-          "sha256": "ca6f7ba0a393960b2a3036754726529ddd19b8a20be3faeb8cfabad3882b888a",
-          "binaryInspection": {
-            "family": "Fredoka SemiBold",
-            "style": "Regular",
-            "weightClass": 600,
-            "glyphCoverage": "latin",
-            "inspectionTool": "fontconfig fc-scan"
-          }
-        }
-      ],
-      "runtimeSources": {
-        "webProduct": {
-          "adapter": "next/font/google",
-          "package": "next",
-          "source": "Google Fonts",
-          "roles": {
-            "display": {
-              "family": "EB Garamond",
-              "weights": [
-                400,
-                500,
-                600,
-                700
-              ],
-              "styles": [
-                "normal",
-                "italic"
-              ]
-            },
-            "interface": {
-              "family": "DM Sans",
-              "weights": [
-                400,
-                500,
-                600,
-                700
-              ],
-              "styles": [
-                "normal",
-                "italic"
-              ]
-            },
-            "wordmark": {
-              "family": "Fredoka",
-              "weights": [
-                500,
-                600
-              ],
-              "styles": [
-                "normal"
-              ]
-            }
-          }
-        },
-        "nativeProduct": {
-          "adapter": "@expo-google-fonts",
-          "packages": {
-            "display": "@expo-google-fonts/eb-garamond",
-            "interface": "@expo-google-fonts/dm-sans",
-            "wordmark": "@expo-google-fonts/fredoka"
-          },
-          "source": "Google Fonts",
-          "roles": {
-            "display": {
-              "family": "EB Garamond",
-              "weights": [
-                400,
-                500,
-                600,
-                700
-              ],
-              "styles": [
-                "normal"
-              ]
-            },
-            "interface": {
-              "family": "DM Sans",
-              "weights": [
-                400,
-                500,
-                600,
-                700
-              ],
-              "styles": [
-                "normal"
-              ]
-            },
-            "wordmark": {
-              "family": "Fredoka",
-              "weights": [
-                600
-              ],
-              "styles": [
-                "normal"
-              ]
-            }
-          }
-        }
-      },
-      "channels": {
-        "webProduct": {
-          "display": {
-            "preferred": "EB Garamond",
-            "fallback": [
-              "Georgia",
-              "Times New Roman",
-              "serif"
-            ],
-            "delivery": "runtime"
-          },
-          "interface": {
-            "preferred": "DM Sans",
-            "fallback": [
-              "ui-sans-serif",
-              "system-ui",
-              "-apple-system",
-              "Segoe UI",
-              "sans-serif"
-            ],
-            "delivery": "runtime"
-          },
-          "wordmark": {
-            "preferred": "Fredoka",
-            "fallback": [
-              "Arial Rounded MT Bold",
-              "Arial",
-              "sans-serif"
-            ],
-            "delivery": "runtime"
-          }
-        },
-        "nativeProduct": {
-          "display": {
-            "preferred": "EBGaramond_700Bold",
-            "fallback": [
-              "Georgia",
-              "System"
-            ],
-            "delivery": "runtime"
-          },
-          "interface": {
-            "preferred": "DMSans_400Regular",
-            "fallback": [
-              "System"
-            ],
-            "delivery": "runtime"
-          },
-          "wordmark": {
-            "preferred": "Fredoka_600SemiBold",
-            "fallback": [
-              "Arial Rounded MT Bold",
-              "System"
-            ],
-            "delivery": "runtime"
-          }
-        },
-        "marketingRich": {
-          "display": {
-            "preferred": "EB Garamond",
-            "fallback": [
-              "Georgia",
-              "Times New Roman",
-              "serif"
-            ],
-            "delivery": "runtime"
-          },
-          "interface": {
-            "preferred": "DM Sans",
-            "fallback": [
-              "ui-sans-serif",
-              "system-ui",
-              "sans-serif"
-            ],
-            "delivery": "runtime"
-          },
-          "wordmark": {
-            "preferred": "Fredoka",
-            "fallback": [
-              "Arial Rounded MT Bold",
-              "Arial",
-              "sans-serif"
-            ],
-            "delivery": "runtime"
-          }
-        },
-        "emailConstrained": {
-          "display": {
-            "preferred": "Georgia",
-            "fallback": [
-              "Times New Roman",
-              "serif"
-            ],
-            "delivery": "safe-fallback"
-          },
-          "interface": {
-            "preferred": "Arial",
-            "fallback": [
-              "Helvetica Neue",
-              "Helvetica",
-              "sans-serif"
-            ],
-            "delivery": "safe-fallback"
-          },
-          "wordmark": {
-            "preferred": "image-lockup",
-            "fallback": [
-              "Arial Rounded MT Bold",
-              "Arial",
-              "sans-serif"
-            ],
-            "delivery": "rasterized"
-          }
-        },
-        "smsPlainText": {
-          "display": {
-            "preferred": "plain-text",
-            "fallback": [],
-            "delivery": "plain-text"
-          },
-          "interface": {
-            "preferred": "plain-text",
-            "fallback": [],
-            "delivery": "plain-text"
-          },
-          "wordmark": {
-            "preferred": "plain-text",
-            "fallback": [],
-            "delivery": "plain-text"
-          }
-        },
-        "artifactPrint": {
-          "display": {
-            "preferred": "EB Garamond",
-            "fallback": [
-              "Georgia",
-              "Times New Roman",
-              "serif"
-            ],
-            "delivery": "embedded"
-          },
-          "interface": {
-            "preferred": "DM Sans",
-            "fallback": [
-              "Arial",
-              "Helvetica",
-              "sans-serif"
-            ],
-            "delivery": "embedded"
-          },
-          "wordmark": {
-            "preferred": "rasterized-logo",
-            "fallback": [
-              "Arial Rounded MT Bold",
-              "Arial",
-              "sans-serif"
-            ],
-            "delivery": "rasterized"
-          }
-        },
-        "providerConstrained": {
-          "display": {
-            "preferred": "Georgia",
-            "fallback": [
-              "Times New Roman",
-              "serif"
-            ],
-            "delivery": "safe-fallback"
-          },
-          "interface": {
-            "preferred": "Arial",
-            "fallback": [
-              "Helvetica Neue",
-              "Helvetica",
-              "sans-serif"
-            ],
-            "delivery": "safe-fallback"
-          },
-          "wordmark": {
-            "preferred": "image-lockup",
-            "fallback": [
-              "Arial Rounded MT Bold",
-              "Arial",
-              "sans-serif"
-            ],
-            "delivery": "rasterized"
-          }
-        },
-        "metadataConstrained": {
-          "display": {
-            "preferred": "plain-text",
-            "fallback": [],
-            "delivery": "plain-text"
-          },
-          "interface": {
-            "preferred": "plain-text",
-            "fallback": [],
-            "delivery": "plain-text"
-          },
-          "wordmark": {
-            "preferred": "plain-text",
-            "fallback": [],
-            "delivery": "plain-text"
-          }
-        }
-      },
-      "verification": {
-        "status": "contract-ready-adoption-evidence-pending",
-        "requiredEvidence": [
-          "font-load-and-missing-font-behavior",
-          "cls-and-line-wrap-regression",
-          "dynamic-type-and-localization-expansion",
-          "pdf-embedding-and-grayscale-print",
-          "independent-typography-review",
-          "independent-accessibility-review"
-        ],
-        "note": "This contract records approved sources and fallbacks. It does not claim rendered, delivered, or platform proof."
       }
     },
     "layout": {
