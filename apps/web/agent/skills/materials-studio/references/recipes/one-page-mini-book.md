@@ -27,7 +27,7 @@ Design patterns (all binding for one-page-mini-book):
   layout on the flat sheet is NOT the reading order; consult fold
   diagrams to place content correctly.
 - **Center horizontal line = CUT line**: dashed, labeled "✂️ cut"
-  (`border-top: 2.5px dashed #b3a492;`). All other internal lines are
+  (`border-top: 2.5px dashed var(--homa-control-boundary);`). All other internal lines are
   FOLD lines (`border: 1px solid #ccc;`).
 - **Panel content**: cover (panel 1), story pages (panels 2-7), back
   cover (panel 8). Text must be oriented correctly for post-fold

@@ -17,7 +17,7 @@ pieces, assembled with the packet recipe.
 
 Design patterns (all binding for file-folder-game):
 
-- **Board zones**: large labeled regions (`border: 2px dashed #6b6259;
+- **Board zones**: large labeled regions (`border: 2px dashed var(--homa-control-boundary);
   border-radius: 10px;`) sized so a piece fits inside with margin.
 - **Pieces page**: outline-only cut-out tiles with clear cut lines, all
   the same size, no piece ambiguous about where it belongs at the base

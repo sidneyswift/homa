@@ -25,7 +25,7 @@ works when the comparison is text-and-caption only with no illustration.
 Design patterns (all binding for then-and-now-comparison):
 
 - **Two-panel layout**: side by side on a wide page, stacked on a
-  narrow one. Equal-size bordered panels (`border: 2px solid #221e1a;
+  narrow one. Equal-size bordered panels (`border: 2px solid var(--homa-ink);
   border-radius: 6px;`), never one panel visually larger than the
   other, so neither time period reads as more important.
 - **Panel labels**: a short label above each panel in the curriculum's
@@ -40,10 +40,10 @@ Design patterns (all binding for then-and-now-comparison):
 - **One caption per panel**: one or two short declarative sentences
   below each illustration, plain language a young reader can follow.
 - **Divider**: a vertical rule between side-by-side panels
-  (`border-left: 2px dashed #b3a492;`), or a horizontal rule between
+  (`border-left: 2px dashed var(--homa-control-boundary);`), or a horizontal rule between
   stacked panels, never a jarring color break.
 - **Reflection question**: one short open-ended prompt at the bottom
-  (`border: 1.5px solid #6b6259; border-radius: 6px; min-height: 60px;
+  (`border: 1.5px solid var(--homa-control-boundary); border-radius: 6px; min-height: 60px;
   padding: 12px;`) asking the child to name what changed or why,
   reusing the curriculum's own comparison-skill vocabulary ("alike and
   different," "compare") when it names one, with a blank space for a
@@ -53,19 +53,19 @@ Design patterns (all binding for then-and-now-comparison):
 ```html
 <style>
   .tnc-page { font-family: 'Andika', sans-serif; padding: 24px; }
-  .tnc-title { font-size: 24px; font-weight: 700; color: #221e1a;
+  .tnc-title { font-size: 24px; font-weight: 700; color: var(--homa-ink);
     margin-bottom: 16px; }
-  .tnc-panels { display: flex; gap: 0; border: 2px solid #221e1a;
+  .tnc-panels { display: flex; gap: 0; border: 2px solid var(--homa-ink);
     border-radius: 6px; overflow: hidden; }
   .tnc-panel { flex: 1; padding: 16px; }
-  .tnc-panel + .tnc-panel { border-left: 2px dashed #b3a492; }
+  .tnc-panel + .tnc-panel { border-left: 2px dashed var(--homa-control-boundary); }
   .tnc-label { font-size: 13px; font-weight: 700; text-transform:
-    uppercase; letter-spacing: 0.04em; color: #6b6259;
+    uppercase; letter-spacing: 0.04em; color: var(--homa-control-boundary);
     margin-bottom: 8px; text-align: center; }
   .tnc-image { width: 100%; aspect-ratio: 1 / 1; border: 1.5px solid
-    #b3a492; border-radius: 6px; margin-bottom: 10px; }
-  .tnc-caption { font-size: 15px; color: #221e1a; text-align: center; }
-  .tnc-reflection { border: 1.5px solid #6b6259; border-radius: 6px;
+    var(--homa-control-boundary); border-radius: 6px; margin-bottom: 10px; }
+  .tnc-caption { font-size: 15px; color: var(--homa-ink); text-align: center; }
+  .tnc-reflection { border: 1.5px solid var(--homa-control-boundary); border-radius: 6px;
     padding: 14px; min-height: 60px; margin-top: 18px; font-size: 14px; }
 </style>
 ```

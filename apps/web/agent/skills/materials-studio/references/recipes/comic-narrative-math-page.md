@@ -38,7 +38,7 @@ Design patterns (all binding for comic-narrative-math-page):
 - **Keep characters visually consistent panel to panel**: describe the
   colors, outfit, and props once for the complete strip so the same call
   renders the same character across every panel.
-- **2-4 panels**, bordered (`border: 2px solid #221e1a; border-radius:
+- **2-4 panels**, bordered (`border: 2px solid var(--homa-ink); border-radius:
   8px;`), read left-to-right then top-to-bottom (a 2x2 grid) or as a
   single top-to-bottom column on a narrow layout. Never more than 4: this
   is a short beat, not a full story.
@@ -63,20 +63,20 @@ Design patterns (all binding for comic-narrative-math-page):
 <style>
   .comic-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
     margin-bottom: 20px; }
-  .comic-panel { border: 2px solid #221e1a; border-radius: 8px;
+  .comic-panel { border: 2px solid var(--homa-ink); border-radius: 8px;
     overflow: hidden; position: relative; background: #fff; }
   .comic-panel img { width: 100%; display: block; }
   .speech-bubble { position: absolute; background: #fff;
-    border: 2px solid #221e1a; border-radius: 16px; padding: 8px 12px;
+    border: 2px solid var(--homa-ink); border-radius: 16px; padding: 8px 12px;
     font-size: 14px; font-weight: 600; max-width: 70%; }
   .speech-bubble::after { content: ""; position: absolute; width: 0;
     height: 0; border: 10px solid transparent; }
   .speech-bubble.tail-left::after { left: 16px; bottom: -18px;
-    border-top-color: #221e1a; }
+    border-top-color: var(--homa-ink); }
   .try-it-box { border: 3px solid #2f6f4f; border-radius: 10px;
     background: #eaf5ee; padding: 16px 18px; margin-top: 8px; }
   .try-it-label { font-size: 13px; font-weight: 700; color: #2f6f4f;
     text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
-  .try-it-question { font-size: 17px; font-weight: 600; color: #221e1a; }
+  .try-it-question { font-size: 17px; font-weight: 600; color: var(--homa-ink); }
 </style>
 ```

@@ -210,7 +210,7 @@ validated, non-overlapping set for the chosen skill.
     margin-bottom: 18px; }
   .items { display: grid; gap: 13px; }
   .item { display: grid; grid-template-columns: 38px 1fr;
-    align-items: center; min-height: 74px; border-bottom: 1.5px solid #b3a492;
+    align-items: center; min-height: 74px; border-bottom: 1.5px solid var(--homa-control-boundary);
     font-family: Andika, sans-serif; }
   .number { font: 700 17px 'Plus Jakarta Sans', sans-serif; }
   .word { font-size: 30px; letter-spacing: 0.02em; }

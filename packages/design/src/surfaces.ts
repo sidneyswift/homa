@@ -72,6 +72,8 @@ export interface BrandSurfaceRecord {
   ownerIssue: `gh#${number}`;
   upstreamDomainOwners: string[];
   dependencies: string[];
+  /** Named loaders, generators, evaluators, or projections that consume this row. */
+  consumers: string[];
   requiredStates: string[];
   viewports: string[];
   devices: string[];

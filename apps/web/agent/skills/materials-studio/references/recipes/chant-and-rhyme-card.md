@@ -60,20 +60,20 @@ Design patterns (all binding for chant-and-rhyme-card):
 <style>
   .crc-page { font-family: 'Andika', sans-serif; padding: 28px; }
   .crc-tag { display: inline-block; font-size: 12px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.04em; color: #6b6259;
+    text-transform: uppercase; letter-spacing: 0.04em; color: var(--homa-control-boundary);
     margin-bottom: 6px; }
-  .crc-title { font-size: 28px; font-weight: 700; color: #221e1a;
+  .crc-title { font-size: 28px; font-weight: 700; color: var(--homa-ink);
     margin-bottom: 18px; }
   .crc-verse { margin-bottom: 18px; }
-  .crc-line { font-size: 19px; line-height: 1.75; color: #221e1a; }
-  .crc-cue { display: inline-block; border: 1.5px solid #6b6259;
+  .crc-line { font-size: 19px; line-height: 1.75; color: var(--homa-ink); }
+  .crc-cue { display: inline-block; border: 1.5px solid var(--homa-control-boundary);
     border-radius: 6px; padding: 1px 7px; font-size: 11px; font-weight: 700;
-    letter-spacing: 0.04em; color: #6b6259; margin-right: 8px;
+    letter-spacing: 0.04em; color: var(--homa-control-boundary); margin-right: 8px;
     vertical-align: 2px; }
-  .crc-action { font-style: italic; font-size: 15px; color: #6b6259; }
-  .crc-parent { border: 1.5px solid #b3a492; border-radius: 6px;
+  .crc-action { font-style: italic; font-size: 15px; color: var(--homa-control-boundary); }
+  .crc-parent { border: 1.5px solid var(--homa-control-boundary); border-radius: 6px;
     padding: 12px 16px; margin-top: 24px; background: #f0ede8;
-    font-size: 14px; line-height: 1.6; color: #221e1a; }
+    font-size: 14px; line-height: 1.6; color: var(--homa-ink); }
 </style>
 <div class="crc-page">
   <div class="crc-tag">Practicing: Call and response</div>

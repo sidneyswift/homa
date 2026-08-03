@@ -14,17 +14,17 @@ Design patterns (all binding for cut-and-assemble-craft):
 
 - **Piece layout**: maximize use of page space. Pieces arranged in a
   grid or tessellated layout with dashed cut borders
-  (`border: 2.5px dashed #b3a492;`).
+  (`border: 2.5px dashed var(--homa-control-boundary);`).
 - **Labels on every piece**: "Tab A", "Fold here", "Glue to B" in
-  small text (`font-size: 11px; color: #6b6259;`).
+  small text (`font-size: 11px; color: var(--homa-control-boundary);`).
 - **Assembly instructions**: at top of page or on a separate guide
   panel. Numbered steps with small diagrams if needed.
 - **Tabs for gluing**: small rectangular extensions on pieces where
   glue goes. Marked with a different background
   (`background: #f0ede8;`).
-- **Fold lines**: gray dotted (`border: 2px dotted #b3a492;`), labeled
+- **Fold lines**: gray dotted (`border: 2px dotted var(--homa-control-boundary);`), labeled
   "fold".
-- **Cut lines**: dashed (`border: 2.5px dashed #b3a492;`), labeled
+- **Cut lines**: dashed (`border: 2.5px dashed var(--homa-control-boundary);`), labeled
   with scissors icon "✂️".
 - **B&W line art**: all pieces are outline-only for coloring before
   assembly.

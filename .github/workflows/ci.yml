@@ -367,6 +367,12 @@ jobs:
       - name: Brand-surface manifest check (coverage, provenance, legacy baseline)
         run: pnpm check:brand-surfaces
 
+      - name: Brand asset generation and fingerprint check
+        run: pnpm check:brand-assets
+
+      - name: Design authoring rails check (coverage, contract, residue, fingerprints)
+        run: pnpm check:design-authoring
+
       - name: Active brand residue check (changed files cannot revive legacy identity)
         run: pnpm check:brand-residue
 

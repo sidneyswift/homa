@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "designEra": "quiet-authority-v1",
+  "contractVersion": "quiet-authority-v1",
+  "contractSourceChecksum": "cb79adb67b2f055645702a43cdfaf8cbd9aecfac482a40790a001dd3d5aaacb6",
+  "manifestFingerprint": "cce6c6a1bbf300ba8f7371be9e48d626c9c188d5c349a0bb56ab6912ca21cbf2",
+  "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
+  "authoringRoots": [
+    ".agents/skills/",
+    "apps/web/agent/",
+    "marketing/voice/",
+    "marketing/evals/",
+    "docs/homa-design/",
+    "packages/design/src/contract/"
+  ],
+  "counts": {
+    "authoring-rule": 119,
+    "agent-skill": 46,
+    "prompt": 118,
+    "evaluator": 7,
+    "golden-fixture": 8
+  },
+  "expectedPaths": 298,
+  "coveredPaths": 298,
+  "sourceFingerprint": "db7835df6a009d69d5c0429e3aba7e74cb824b4936747e6d30dab04ba0172e35",
+  "assetGenerator": {
+    "paths": [
+      "scripts/brand-assets.mts"
+    ],
+    "sourceHashes": {
+      "scripts/brand-assets.mts": "672d9b0411eb4f5c36e359763db16cc57929e723bdb61732932d61aa89a772b2"
+    },
+    "findings": [],
+    "generatedAssets": 17
+  },
+  "residue": {
+    "findings": [],
+    "approvedProfileRules": [
+      {
+        "path": "packages/design/src/contract/contract.test.ts",
+        "rule": "negative-identity-sentinel",
+        "reason": "The contract test proves retired fonts and shape words cannot enter the active typed contract. It is a negative assertion, not an authoring instruction.",
+        "sourceHash": "9be096080de88fa7e70a008fc7cb920fbd3726749c9b93d12cc51db6f4532418"
+      }
+    ]
+  },
+  "status": "pass"
+}

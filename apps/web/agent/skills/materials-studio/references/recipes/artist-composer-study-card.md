@@ -54,18 +54,18 @@ Design patterns (all binding for artist-composer-study-card):
   .study-card { font-family: 'Andika', sans-serif; padding: 24px; }
   .study-tag { display: flex; align-items: center; gap: 8px;
     font-size: 13px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.04em; color: #6b6259; margin-bottom: 8px; }
-  .study-name { font-size: 32px; font-weight: 700; color: #221e1a;
+    letter-spacing: 0.04em; color: var(--homa-control-boundary); margin-bottom: 8px; }
+  .study-name { font-size: 32px; font-weight: 700; color: var(--homa-ink);
     margin-bottom: 16px; }
   .study-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
     margin-bottom: 16px; }
-  .study-frame { border: 3px solid #221e1a; border-radius: 6px;
+  .study-frame { border: 3px solid var(--homa-ink); border-radius: 6px;
     min-height: 180px; }
-  .study-circle { border: 2px solid #6b6259; border-radius: 50%;
+  .study-circle { border: 2px solid var(--homa-control-boundary); border-radius: 50%;
     aspect-ratio: 1 / 1; display: flex; align-items: center;
     justify-content: center; text-align: center; font-size: 12px;
-    color: #6b6259; padding: 12px; }
-  .study-reflection { border: 1.5px solid #6b6259; border-radius: 6px;
+    color: var(--homa-control-boundary); padding: 12px; }
+  .study-reflection { border: 1.5px solid var(--homa-control-boundary); border-radius: 6px;
     padding: 14px; min-height: 90px; font-size: 14px; }
 </style>
 ```

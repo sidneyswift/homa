@@ -53,7 +53,7 @@ Design patterns (all binding for picture-bingo-board):
   teacher can tell boards apart at a glance while calling items, without
   needing to compare every cell.
 - **Even grid lines, no cell ambiguity**: solid ruled borders
-  (`border: 2px solid #221e1a;`) between every cell, square aspect ratio
+  (`border: 2px solid var(--homa-ink);`) between every cell, square aspect ratio
   per cell, image filling most of the cell with a small margin so nothing
   touches the grid line.
 - **Caller list note**: below or beside the boards (or in the parent
@@ -68,12 +68,12 @@ Design patterns (all binding for picture-bingo-board):
   .bingo-title { text-align: center; font-size: 34px; font-weight: 800;
     color: #e0a730; letter-spacing: 0.06em; margin-bottom: 10px; }
   .bingo-grid { display: grid; grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr); border: 2px solid #221e1a; }
-  .bingo-cell { border: 2px solid #221e1a; aspect-ratio: 1 / 1;
+    grid-template-rows: repeat(3, 1fr); border: 2px solid var(--homa-ink); }
+  .bingo-cell { border: 2px solid var(--homa-ink); aspect-ratio: 1 / 1;
     display: flex; align-items: center; justify-content: center;
     padding: 6px; }
   .bingo-cell img { max-width: 90%; max-height: 90%; object-fit: contain; }
-  .bingo-word { font: 700 29px Andika, sans-serif; color: #221e1a;
+  .bingo-word { font: 700 29px Andika, sans-serif; color: var(--homa-ink);
     text-align: center; }
   .bingo-free { display: flex; align-items: center; justify-content: center;
     font-size: 20px; font-weight: 700; color: #e0a730; text-align: center; }

@@ -16,10 +16,10 @@ text precision.
 Design patterns (all binding for cloze-story):
 
 - **Word bank first**: bordered box at top (`border: 1.5px solid
-  #6b6259; border-radius: 6px;`), words separated by generous space,
+  var(--homa-control-boundary); border-radius: 6px;`), words separated by generous space,
   each word used exactly once at the base level.
 - **Blanks sized to the answer**: underline blanks
-  (`border-bottom: 2px solid #221e1a;`) wide enough for the longest
+  (`border-bottom: 2px solid var(--homa-ink);`) wide enough for the longest
   bank word, so blank width never gives the answer away.
 - **Story about the child's world**: their name, their pets, their
   interests seed the story. A cloze about their own dog beats a generic

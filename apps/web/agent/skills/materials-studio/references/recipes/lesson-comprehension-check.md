@@ -23,7 +23,7 @@ Design patterns (all binding for lesson-comprehension-check):
 - **Recall questions first**: phrased directly from the lesson's own
   content, answerable by remembering or re-reading what was just taught
   ("What did the pioneers use to cross the river?"). One short blank line
-  each (`border-bottom: 1.5px solid #6b6259; min-width: 200px;`).
+  each (`border-bottom: 1.5px solid var(--homa-control-boundary); min-width: 200px;`).
 - **Open question last**: labeled "Think and Share" or "Write and Share"
   in the curriculum's own words, phrased to require the child's own
   reasoning, opinion, or connection tied to the lesson's actual target
@@ -31,7 +31,7 @@ Design patterns (all binding for lesson-comprehension-check):
   lines or `min-height: 70px;`) for a dictated or written answer.
 - **Boxed header banner**: "What Did You Learn?" (or the curriculum's own
   wording) in bold at the top of the box, visually distinct from the rest
-  of the page (`background: #f5f1ea; border: 1.5px solid #6b6259;
+  of the page (`background: var(--homa-canvas); border: 1.5px solid var(--homa-control-boundary);
   border-radius: 6px; padding: 16px;`).
 - **Bottom-of-lesson placement**: sits at the end of a lesson or passage,
   either the bottom third of a longer page or its own short page.
@@ -44,17 +44,17 @@ Design patterns (all binding for lesson-comprehension-check):
 
 ```html
 <style>
-  .lcc-box { font-family: 'Andika', sans-serif; background: #f5f1ea;
-    border: 1.5px solid #6b6259; border-radius: 6px; padding: 18px; }
-  .lcc-header { font-size: 17px; font-weight: 700; color: #221e1a;
+  .lcc-box { font-family: 'Andika', sans-serif; background: var(--homa-canvas);
+    border: 1.5px solid var(--homa-control-boundary); border-radius: 6px; padding: 18px; }
+  .lcc-header { font-size: 17px; font-weight: 700; color: var(--homa-ink);
     margin-bottom: 12px; }
   .lcc-question { font-size: 14px; margin-bottom: 12px; }
-  .lcc-blank { border-bottom: 1.5px solid #6b6259; min-width: 200px;
+  .lcc-blank { border-bottom: 1.5px solid var(--homa-control-boundary); min-width: 200px;
     display: inline-block; margin-left: 6px; }
   .lcc-open-label { font-weight: 700; font-size: 13px;
-    text-transform: uppercase; letter-spacing: 0.03em; color: #6b6259;
+    text-transform: uppercase; letter-spacing: 0.03em; color: var(--homa-control-boundary);
     margin-bottom: 6px; }
-  .lcc-open-box { border: 1.5px solid #6b6259; border-radius: 6px;
+  .lcc-open-box { border: 1.5px solid var(--homa-control-boundary); border-radius: 6px;
     min-height: 70px; padding: 10px; }
 </style>
 

@@ -15,10 +15,10 @@ Design patterns (all binding for classification-sorting-mat):
 - **Two-section page**: top section is the sorting mat, bottom section
   is the cut-out pieces grid.
 - **Sorting mat**: 2-3 labeled columns separated by bold lines
-  (`border: 2px solid #221e1a;`). Large category headers
+  (`border: 2px solid var(--homa-ink);`). Large category headers
   (`font-size: 24px; font-weight: 700;`). Zones large enough for
   4-6 pieces each.
-- **Cut-out pieces grid**: dashed borders (`border: 2px dashed #b3a492;`)
+- **Cut-out pieces grid**: dashed borders (`border: 2px dashed var(--homa-control-boundary);`)
   around each piece. Pieces sized to fit in the mat zones.
 - **Cut line label**: "✂️ cut apart" between the mat and pieces sections.
 - **Lamination-friendly**: no color fills that waste ink. Outlines and

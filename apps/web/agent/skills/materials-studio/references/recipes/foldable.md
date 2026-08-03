@@ -31,7 +31,7 @@ On the flap surface: a prompt or question.
 
 Design patterns (all binding for foldables):
 
-- **Fold lines**: `border-top: 2.5px dashed #b3a492;` between panels.
+- **Fold lines**: `border-top: 2.5px dashed var(--homa-control-boundary);` between panels.
   Label faintly: "✂️ cut" on outer edges, "fold" on internal
   creases, "glue here ▸" on the attachment tab.
 - **Glue tab**: a narrow strip (~0.75in) on one end with a dotted
@@ -43,7 +43,7 @@ Design patterns (all binding for foldables):
   carry its own accent color for color-coded-by-concept.
 - **Practice panel**: practice problems are part of the foldable, not
   a separate page. Place them in the bottom or back panel with answer
-  blanks (`border-bottom: 2px solid #6b6259; width: 60px; display:
+  blanks (`border-bottom: 2px solid var(--homa-control-boundary); width: 60px; display:
   inline-block;`).
 - **Scaffolded versions**: generate the blank (fill-in) version first.
   Offer answer-key and color versions as follow-ups if the parent
@@ -59,19 +59,19 @@ Design patterns (all binding for foldables):
 <style>
   .foldable { width: 100%; }
   .panel { min-height: 200px; padding: 20px 24px;
-    border-bottom: 2.5px dashed #b3a492; position: relative; }
+    border-bottom: 2.5px dashed var(--homa-control-boundary); position: relative; }
   .panel:last-child { border-bottom: none; }
   .fold-label { position: absolute; right: 12px; top: -10px;
-    font-size: 10px; color: #b3a492; font-family: sans-serif;
+    font-size: 10px; color: var(--homa-control-boundary); font-family: sans-serif;
     letter-spacing: 0.1em; }
-  .glue-tab { height: 56px; border: 2px dotted #b3a492;
+  .glue-tab { height: 56px; border: 2px dotted var(--homa-control-boundary);
     background: #f5f0e8; display: flex; align-items: center;
     justify-content: center; font-size: 11px; letter-spacing: 0.2em;
-    color: #b3a492; text-transform: uppercase; }
+    color: var(--homa-control-boundary); text-transform: uppercase; }
   .concept-letter { font-family: 'Fredoka', sans-serif;
     font-weight: 700; font-size: 96px; display: inline-block;
     margin: 0 6px; }
-  .practice-blank { border-bottom: 2px solid #6b6259;
+  .practice-blank { border-bottom: 2px solid var(--homa-control-boundary);
     width: 60px; display: inline-block; margin: 0 4px; }
 </style>
 

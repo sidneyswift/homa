@@ -14,7 +14,7 @@ illustration. 6-8 cards per letter page, 2 columns.
 
 Design patterns (all binding for clip-cards):
 
-- **Card geometry**: rounded rectangle (`border: 2px solid #221e1a;
+- **Card geometry**: rounded rectangle (`border: 2px solid var(--homa-ink);
   border-radius: 12px;`), roughly 3.5in wide so a clothespin fits the
   bottom edge. Answer choices sit in a row flush with the bottom edge
   with clear space between them for the clip.

@@ -16,11 +16,10 @@ Use sources in this order:
 
 1. Repository `AGENTS.md`, `BUILD.md`, and explicit founder rulings.
 2. `docs/homa-design/readme.md`, especially its Motion section.
-3. `docs/homa-design/tokens/motion.css` for exact easing, duration, and press
-   tokens.
-4. `docs/homa-design/guidelines/brand-motion.card.html` and
-   `docs/homa-design/guidelines/motion-check-off.card.html` for the two current
-   motion specimens.
+3. `packages/design/src/contract/motion.ts` for exact easing, duration, and
+   press tokens.
+4. The current motion specimens and fixture gallery owned by the interface
+   gauntlet for the two motion examples.
 5. The implementation, tests, and rendered evidence under review.
 6. The secondary review heuristics in [STANDARDS.md](STANDARDS.md), only where
    they do not conflict with sources above.
@@ -48,10 +47,9 @@ judgment.
 2. **Brand character.** Homa UI motion is gentle and quick. Bounce, spin,
    parallax, confetti, and infinite loops do not belong in product UI. The
    animated splash landing is the one documented bounce exception.
-3. **Current tokens.** Prefer `--ease-out`, `--dur-fast`, `--dur-base`,
-   `--dur-slow`, and `--press-scale` rather than new local values. Current
-   values live in `docs/homa-design/tokens/motion.css`, never copy them from a
-   historical skill.
+3. **Current tokens.** Prefer the generated motion projection from
+   `packages/design/src/contract/motion.ts` rather than new local values. Never
+   copy timing values from a historical skill.
 4. **Documented patterns.** Button hover darkens, card hover may lift 2px, and
    press feedback uses the current press token. Entrances are gentle rises.
    The check-off interaction is undoable, uses no modal or confetti, and has a

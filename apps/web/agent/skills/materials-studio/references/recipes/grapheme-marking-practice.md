@@ -63,10 +63,10 @@ by a model guess after rendering.
     margin: 10px 0 20px; }
   .mark-list { display: grid; gap: 12px; }
   .mark-row { display: grid; grid-template-columns: 36px 1fr;
-    align-items: end; min-height: 72px; border-bottom: 1px solid #b3a492; }
+    align-items: end; min-height: 72px; border-bottom: 1px solid var(--homa-control-boundary); }
   .mark-word { font: 600 31px Andika, sans-serif; letter-spacing: 0.04em;
     padding-bottom: 18px; }
-  .grapheme-answer { border-bottom: 3px solid #221e1a; }
+  .grapheme-answer { border-bottom: 3px solid var(--homa-ink); }
 </style>
 <div class="mark-title">Mark the sound spellings</div>
 <div class="mark-cue">Read each word. Underline the letters for each sound.</div>

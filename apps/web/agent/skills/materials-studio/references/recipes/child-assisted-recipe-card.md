@@ -103,14 +103,14 @@ and every job for this child."
 
 ```html
 <style>
-  .car-page { font-family: 'Andika', sans-serif; color: #221e1a;
+  .car-page { font-family: 'Andika', sans-serif; color: var(--homa-ink);
     padding: 15mm; background: #fff; }
   .car-title { font-size: 30px; font-weight: 750; margin: 0 0 4px; }
   .car-meta { display: flex; gap: 12px; font-size: 15px;
     margin-bottom: 14px; }
   .car-top { display: grid; grid-template-columns: 1fr 1fr;
     gap: 14px; }
-  .car-box { border: 2px solid #221e1a; border-radius: 8px;
+  .car-box { border: 2px solid var(--homa-ink); border-radius: 8px;
     padding: 12px 14px; }
   .car-adult { background: #f0ede8; }
   .car-label { font-size: 13px; font-weight: 800; letter-spacing: .05em;
@@ -118,16 +118,16 @@ and every job for this child."
   .car-steps { display: grid; grid-template-columns: 1fr 1fr;
     gap: 10px; margin-top: 14px; }
   .car-step { display: grid; grid-template-columns: 42px 1fr;
-    gap: 10px; align-items: center; border: 2px solid #221e1a;
+    gap: 10px; align-items: center; border: 2px solid var(--homa-ink);
     border-radius: 8px; padding: 10px; min-height: 92px; }
-  .car-icon { width: 40px; height: 40px; border: 2px solid #221e1a;
+  .car-icon { width: 40px; height: 40px; border: 2px solid var(--homa-ink);
     border-radius: 50%; display: flex; align-items: center;
     justify-content: center; font-size: 13px; font-weight: 800; }
   .car-verb { display: block; font-size: 22px; font-weight: 800; }
   .car-child { font-size: 11px; font-weight: 800; letter-spacing: .05em; }
   .car-finish { display: grid; grid-template-columns: 1fr 1fr;
     gap: 10px; margin-top: 12px; }
-  .car-footer { font-size: 12px; color: #6b6259; margin-top: 10px; }
+  .car-footer { font-size: 12px; color: var(--homa-control-boundary); margin-top: 10px; }
 </style>
 <main class="car-page">
   <h1 class="car-title">Berry yogurt cups</h1>

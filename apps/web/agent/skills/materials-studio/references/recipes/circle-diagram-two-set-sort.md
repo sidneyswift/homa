@@ -63,10 +63,10 @@ Design patterns (all binding for circle-diagram-two-set-sort):
   .circle-label-right { position: absolute; top: 8px; right: 6%;
     font-size: 15px; font-weight: 700; color: #b5432f; }
   .item-bank { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px;
-    padding: 12px; border: 1.5px dashed #b3a492; border-radius: 8px; }
-  .item-chip { border: 1.5px solid #6b6259; border-radius: 6px;
+    padding: 12px; border: 1.5px dashed var(--homa-control-boundary); border-radius: 8px; }
+  .item-chip { border: 1.5px solid var(--homa-control-boundary); border-radius: 6px;
     padding: 6px 10px; font-size: 16px; font-weight: 600; }
-  .reasoning-line { border-bottom: 2px solid #6b6259; min-height: 26px;
+  .reasoning-line { border-bottom: 2px solid var(--homa-control-boundary); min-height: 26px;
     margin-top: 14px; }
 </style>
 
