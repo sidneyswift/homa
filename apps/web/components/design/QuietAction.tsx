@@ -11,7 +11,12 @@ type ActionProps = {
   onClick?: MouseEventHandler<HTMLElement>;
 } & Pick<
   ButtonHTMLAttributes<HTMLButtonElement>,
-  "disabled" | "type" | "aria-haspopup" | "aria-expanded" | "aria-label"
+  | "disabled"
+  | "type"
+  | "form"
+  | "aria-haspopup"
+  | "aria-expanded"
+  | "aria-label"
 >;
 
 export function QuietAction({
@@ -23,6 +28,7 @@ export function QuietAction({
   icon,
   disabled = false,
   type = "button",
+  form,
   onClick,
   "aria-haspopup": ariaHasPopup,
   "aria-expanded": ariaExpanded,
@@ -43,5 +49,5 @@ export function QuietAction({
       </Link>
     );
   }
-  return <button className={classes} disabled={disabled} type={type} onClick={onClick} aria-haspopup={ariaHasPopup} aria-expanded={ariaExpanded} aria-label={ariaLabel}>{content}</button>;
+  return <button className={classes} disabled={disabled} type={type} form={form} onClick={onClick} aria-haspopup={ariaHasPopup} aria-expanded={ariaExpanded} aria-label={ariaLabel}>{content}</button>;
 }

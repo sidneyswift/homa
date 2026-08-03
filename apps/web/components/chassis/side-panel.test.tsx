@@ -46,4 +46,16 @@ describe("SidePanel", () => {
     assert.match(html, /rgba\(51,42,33,0\.42\)/);
     assert.match(html, /bg-\[var\(--stone-300\)\]/);
   });
+
+  it("supports the Quiet context-sheet variant without changing the default", () => {
+    const html = renderToStaticMarkup(
+      <SidePanel labelledBy="h" onClose={() => {}} variant="quiet">
+        <span id="h" />
+      </SidePanel>,
+    );
+    assert.match(html, /quiet-context-sheet__scrim/u);
+    assert.match(html, /quiet-context-sheet/u);
+    assert.match(html, /quiet-context-sheet__grabber/u);
+    assert.doesNotMatch(html, /rgba\(51,42,33,0\.42\)/u);
+  });
 });

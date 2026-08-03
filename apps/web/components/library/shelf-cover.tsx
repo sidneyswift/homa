@@ -9,40 +9,40 @@ const ACCENT_STYLE: Record<
   { cloth: string; spine: string; ink: string; sub: string }
 > = {
   clay: {
-    cloth: "var(--clay-700)",
-    spine: "var(--clay-800, #7d2f15)",
-    ink: "#FFF6F1",
-    sub: "var(--clay-200)",
+    cloth: "var(--homa-midnight-action)",
+    spine: "var(--homa-visual-coral)",
+    ink: "var(--homa-paper)",
+    sub: "color-mix(in srgb, var(--homa-paper) 72%, transparent)",
   },
   sky: {
-    cloth: "var(--sky-600)",
-    spine: "#2E7488",
-    ink: "#F2FBFE",
-    sub: "var(--sky-100)",
+    cloth: "var(--homa-info-tint)",
+    spine: "var(--homa-info-ink)",
+    ink: "var(--homa-info-ink)",
+    sub: "color-mix(in srgb, var(--homa-info-ink) 72%, transparent)",
   },
   sage: {
-    cloth: "var(--sage-700)",
-    spine: "#1E4B29",
-    ink: "#F3FAF4",
-    sub: "var(--sage-200)",
+    cloth: "var(--homa-constructive-tint)",
+    spine: "var(--homa-constructive-ink)",
+    ink: "var(--homa-constructive-ink)",
+    sub: "color-mix(in srgb, var(--homa-constructive-ink) 72%, transparent)",
   },
   gold: {
-    cloth: "var(--gold-500)",
-    spine: "#C89C00",
-    ink: "#3A2E00",
-    sub: "#7A6200",
+    cloth: "var(--homa-highlight-tint)",
+    spine: "var(--homa-highlight-ink)",
+    ink: "var(--homa-highlight-ink)",
+    sub: "color-mix(in srgb, var(--homa-highlight-ink) 72%, transparent)",
   },
   rose: {
-    cloth: "var(--rose-600)",
-    spine: "#96351D",
-    ink: "#FFF4F1",
-    sub: "var(--rose-100)",
+    cloth: "var(--homa-error-tint)",
+    spine: "var(--homa-error-ink)",
+    ink: "var(--homa-error-ink)",
+    sub: "color-mix(in srgb, var(--homa-error-ink) 72%, transparent)",
   },
   stone: {
-    cloth: "var(--stone-700)",
-    spine: "var(--stone-800)",
-    ink: "#FBF7F0",
-    sub: "var(--stone-300)",
+    cloth: "var(--homa-canvas)",
+    spine: "var(--homa-control-boundary)",
+    ink: "var(--homa-ink)",
+    sub: "color-mix(in srgb, var(--homa-ink) 62%, transparent)",
   },
 };
 
@@ -70,12 +70,11 @@ export function ShelfCover({
   imageUrl?: string | null;
   imageAlt?: string;
 }) {
-  const shared =
-    "relative aspect-[3/4] w-full overflow-hidden rounded-[3px_var(--radius-sm)_var(--radius-sm)_3px] shadow-[var(--shadow-md)]";
+  const shared = "quiet-library-cover";
 
   if (imageUrl) {
     return (
-      <div className={`${shared} bg-[var(--stone-200)]`}>
+      <div className={`${shared} bg-[var(--homa-canvas)]`}>
         {/* The parent already received this exact family-scoped URL through
             the authenticated Library read. A plain image avoids coupling
             arbitrary Blob hosts to Next image configuration. */}
@@ -86,10 +85,10 @@ export function ShelfCover({
           loading="lazy"
           className="h-full w-full object-cover object-top"
         />
-        <span
-          aria-hidden="true"
-          className="absolute inset-y-0 left-0 w-[6px] bg-gradient-to-r from-black/25 to-transparent"
-        />
+      <span
+        aria-hidden="true"
+        className="absolute inset-y-0 left-0 w-[6px] bg-gradient-to-r from-black/25 to-transparent"
+      />
       </div>
     );
   }
