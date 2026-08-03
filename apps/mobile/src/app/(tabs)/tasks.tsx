@@ -1,9 +1,9 @@
-import { Plus } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { BuiltInPlaceholderCard, TaskCard } from "../../features/tasks/task-card";
+import { Icon } from "../../components/design/icon";
 import { InlineError } from "../../components/ui/inline-error";
 import { LoadingStatus } from "../../components/ui/loading-status";
 import { TaskEditSheet } from "../../features/tasks/task-edit-sheet";
@@ -101,7 +101,7 @@ export default function TasksScreen() {
                 paddingVertical: space.xs,
               }}
             >
-              <Plus size={16} color={colors.onBrand} />
+              <Icon name="add" size={16} color={colors.onBrand} />
               <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.onBrand }}>
                 Add
               </Text>

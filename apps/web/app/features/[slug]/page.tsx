@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { Button } from "../../../components/marketing/ds/Button";
@@ -8,6 +7,7 @@ import { Card } from "../../../components/marketing/ds/Card";
 import { Doodle } from "../../../components/marketing/Doodle";
 import { Footer } from "../../../components/marketing/Footer";
 import { Nav } from "../../../components/marketing/Nav";
+import { Icon } from "../../../components/design/Icon";
 import { FEATURE_PAGES, getFeaturePage } from "../../../lib/feature-pages";
 
 const BASE_URL = "https://thankshoma.com";
@@ -411,7 +411,7 @@ export default async function FeaturePage({
               <p className="feature-lede">{page.intro}</p>
               {page.heroNote ? <p className="feature-hero-note">{page.heroNote}</p> : null}
               <div className="feature-actions">
-                <Button href="/onboarding" size="lg" iconRight={<ArrowRight size={18} aria-hidden="true" />}>
+                <Button href="/onboarding" size="lg" iconRight={<Icon name="next" size={20} />}>
                   Start your free trial
                 </Button>
                 <Link className="feature-secondary-link" href="#how-it-works">
@@ -484,7 +484,7 @@ export default async function FeaturePage({
                       <h3>{related.eyebrow}</h3>
                       <p>{related.metadataDescription}</p>
                       <span>
-                        Read about {related.eyebrow.toLowerCase()} <ArrowRight size={16} aria-hidden="true" />
+                        Read about {related.eyebrow.toLowerCase()} <Icon name="next" size={16} />
                       </span>
                     </Card>
                   </Link>
@@ -499,7 +499,7 @@ export default async function FeaturePage({
             <Doodle name="sun" size={30} color="var(--gold-ink-strong)" />
             <h2>{page.finalHeading}</h2>
             <p>{page.finalBody}</p>
-            <Button href="/onboarding" size="lg" iconRight={<ArrowRight size={18} aria-hidden="true" />}>
+            <Button href="/onboarding" size="lg" iconRight={<Icon name="next" size={20} />}>
               Start your free trial
             </Button>
           </div>

@@ -1,9 +1,9 @@
-import { X } from "lucide-react-native";
 import { Image, ScrollView, Text, View } from "react-native";
 import { useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "../../components/ui/button";
+import { Icon } from "../../components/design/icon";
 import { AccessibleModal } from "../../components/ui/accessible-modal";
 import { IconButton } from "../../components/ui/icon-button";
 import { emitFamilyEvent } from "../../lib/events";
@@ -118,7 +118,7 @@ export function MaterialDetailModal({ material, onClose }: { material: BinderMat
             </Text>
           </View>
           <IconButton label="Close material details" onPress={onClose}>
-            <X size={22} color={colors.textSubtle} />
+            <Icon name="close" size={20} color={colors.textSubtle} />
           </IconButton>
         </View>
 

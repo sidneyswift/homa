@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
 
 import { Button } from "./ds/Button";
+import { Icon } from "../design/Icon";
 import { Doodle } from "./Doodle";
 import { HeroProductDemo } from "./HeroProductDemo";
 import { HERO_COPY } from "./landing-content";
@@ -313,11 +313,11 @@ export function Hero() {
             style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 14, marginTop: 26, marginBottom: 10 }}
           >
             {openPopup ? (
-              <Button variant="primary" size="lg" onClick={openPopup} iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
+              <Button variant="primary" size="lg" onClick={openPopup} iconRight={<Icon name="next" size={20} color="#fff" />}>
                 {HERO_COPY.primaryAction}
               </Button>
             ) : (
-              <Button variant="primary" size="lg" href="/onboarding" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
+              <Button variant="primary" size="lg" href="/onboarding" iconRight={<Icon name="next" size={20} color="#fff" />}>
                 {HERO_COPY.primaryAction}
               </Button>
             )}

@@ -1,6 +1,5 @@
-import { ArrowRight } from "lucide-react";
-
 import { ReportPreview } from "../../app/onboarding/report-preview";
+import { Icon } from "../design/Icon";
 import { Button } from "./ds/Button";
 import { Squiggle } from "./ds/Squiggle";
 import { Eyebrow } from "./dividers";
@@ -79,7 +78,7 @@ export function SampleReportProof() {
               variant="primary"
               size="lg"
               href={SAMPLE_REPORT_COPY.href}
-              iconRight={<ArrowRight size={18} color="currentColor" aria-hidden="true" />}
+              iconRight={<Icon name="next" size={20} color="currentColor" />}
             >
               {SAMPLE_REPORT_COPY.action}
             </Button>

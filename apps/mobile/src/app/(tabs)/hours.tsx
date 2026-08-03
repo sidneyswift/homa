@@ -1,10 +1,10 @@
 import { Redirect } from "expo-router";
-import { Check } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useFamilyData } from "../../features/family/use-family-data";
+import { Icon } from "../../components/design/icon";
 import { InlineError } from "../../components/ui/inline-error";
 import { LoadingStatus } from "../../components/ui/loading-status";
 import { EntryEditor } from "../../features/hours/entry-editor";
@@ -216,7 +216,7 @@ function SubjectChip({ label, active, onPress }: { label: string; active: boolea
     >
       {active ? (
         <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-          <Check size={14} color={colors.textStrong} />
+          <Icon name="check" size={16} color={colors.textStrong} />
         </View>
       ) : null}
       <Text

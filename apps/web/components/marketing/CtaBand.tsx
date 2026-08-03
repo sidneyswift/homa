@@ -1,11 +1,10 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
-
 import { Button } from "./ds/Button";
 import { Doodle } from "./Doodle";
 import { HERO_COPY } from "./landing-content";
 import { useSignupPopup } from "./SignupPopupProvider";
+import { Icon } from "../design/Icon";
 
 /**
  * CTA band, grown from the former landing composition. `data-final-cta` lets
@@ -99,11 +98,11 @@ export function CtaBand() {
         </p>
         <div data-reveal="" className="rv-d2" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           {openPopup ? (
-            <Button variant="primary" size="lg" onClick={openPopup} iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
+            <Button variant="primary" size="lg" onClick={openPopup} iconRight={<Icon name="next" size={20} color="#fff" />}>
               {HERO_COPY.primaryAction}
             </Button>
           ) : (
-            <Button variant="primary" size="lg" href="/onboarding" iconRight={<ArrowRight size={18} color="#fff" aria-hidden="true" />}>
+            <Button variant="primary" size="lg" href="/onboarding" iconRight={<Icon name="next" size={20} color="#fff" />}>
               {HERO_COPY.primaryAction}
             </Button>
           )}

@@ -1,6 +1,5 @@
 import { Link } from "expo-router";
 import { useEffect, useMemo, useRef, type RefObject } from "react";
-import { X } from "lucide-react-native";
 import {
   Animated,
   Dimensions,
@@ -14,6 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AccountMenu } from "./account-menu";
 import { SidebarNav } from "./sidebar-nav";
 import { Logo } from "../brand/logo";
+import { Icon } from "../design/icon";
 import { IconButton } from "../ui/icon-button";
 import { sendAccessibilityFocus } from "../../lib/accessibility";
 import { colors, radius, shadows, space } from "../../theme/tokens";
@@ -163,7 +163,7 @@ export function AppDrawer({
               label="Close menu"
               onPress={dismissDrawer}
             >
-              <X size={20} color={colors.textSubtle} />
+              <Icon name="close" size={20} color={colors.textSubtle} />
             </IconButton>
           </View>
 
