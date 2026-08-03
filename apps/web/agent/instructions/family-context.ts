@@ -10,6 +10,7 @@ import {
   getChildProgressView,
   listActiveFamilyProgressCheckIns,
 } from "../../lib/child-progress/runtime";
+import { findAbilitiesExplorerAbility } from "../../lib/child-progress/abilities-explorer";
 import {
   loadEnabledChildProgressAgentContext,
 } from "../../lib/child-progress/agent-context";
@@ -122,6 +123,9 @@ interface FamilyContextInstructionAttributes {
   familyId?: string;
   supabaseAccessToken?: string;
   viewChildId?: string;
+  /** Short-lived focus hint from the authenticated abilities explorer door. */
+  viewAbilityChildId?: string;
+  viewAbilityId?: string;
   /** Subject-lesson sessions stamp the lesson's own child here, never
    *  viewChildId (that's the web app's context-switcher cookie). Used as
    *  a focusChildId fallback so a lesson session's family context is
@@ -285,6 +289,23 @@ export async function resolveFamilyContextInstructionMarkdown(
       focusChildId: attributes?.viewChildId ?? attributes?.childId,
       speakingWith: attributes?.memberName ?? null,
     });
+    const focusedAbility =
+      attributes?.viewAbilityChildId && attributes.viewAbilityId
+        ? {
+            child: rows.children.find(
+              (child) => child.id === attributes.viewAbilityChildId,
+            ),
+            ability: findAbilitiesExplorerAbility(attributes.viewAbilityId),
+          }
+        : null;
+    const abilityFocusContext =
+      focusedAbility?.child && focusedAbility.ability
+        ? [
+            "## Recently opened ability",
+            `The parent just opened ${focusedAbility.ability.name} for ${focusedAbility.child.name} in ${focusedAbility.ability.domainName}.`,
+            `Validated ability id: ${focusedAbility.ability.id}. Treat this as the focus of the parent's next question, not as a new progress answer.`,
+          ].join("\n")
+        : "";
     let progressContext = "";
     if (attributes?.familyId) {
       try {
@@ -367,6 +388,7 @@ export async function resolveFamilyContextInstructionMarkdown(
     }
     const markdown = [
       familyContext,
+      abilityFocusContext,
       progressContext,
       onboardingContext,
       recentCallsContext,
