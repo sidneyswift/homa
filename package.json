@@ -26,6 +26,7 @@
     "check:design-tokens": "tsx scripts/design-tokens-check.mts && tsx --test scripts/design-tokens-check.test.ts",
     "check:brand-surfaces": "node --experimental-strip-types scripts/brand-surfaces.mts --check && node --experimental-strip-types --test scripts/brand-surfaces.test.mts",
     "check:channel-evidence": "node --experimental-strip-types scripts/channel-evidence-check.mts && node --experimental-strip-types --test scripts/channel-evidence-check.test.mts",
+    "check:provider-handoffs": "node --experimental-strip-types scripts/provider-handoff-check.mts && node --experimental-strip-types --test scripts/provider-handoff-check.test.mts",
     "check:brand-assets": "node --experimental-strip-types scripts/brand-assets.mts --check",
     "check:design-authoring": "node --experimental-strip-types scripts/design-authoring-rails-check.mts --check && node --experimental-strip-types --test scripts/design-authoring-rails-check.test.mts",
     "check:artifact-brand-era": "node --experimental-strip-types scripts/artifact-brand-era-check.mts && node --experimental-strip-types --test scripts/artifact-brand-era-check.test.mts",

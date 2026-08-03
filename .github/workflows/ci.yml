@@ -370,6 +370,9 @@ jobs:
       - name: Channel evidence contract check (fresh fingerprints and hard gates)
         run: pnpm check:channel-evidence
 
+      - name: Provider handoff contract check (owned fields and external read-back gates)
+        run: pnpm check:provider-handoffs
+
       - name: Brand asset generation and fingerprint check
         run: pnpm check:brand-assets
 
