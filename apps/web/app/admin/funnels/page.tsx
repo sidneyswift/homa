@@ -123,7 +123,7 @@ export default async function AdminFunnelsPage() {
       <SectionHead
         eyebrow="Humans"
         title="After the report: the activation ladder"
-        sub="Parent-initiated only. Homa's own work (briefs sent, cards mailed, evidence recorded by the scorer) is excluded on purpose, so this reads what families do, never how busy Homa is."
+        sub="The first rung is the report Homa showed. Every later rung is parent-directed, so this reads real activation rather than how busy Homa is."
       />
       <p className="mt-1 max-w-2xl text-sm text-muted">
         Out of {data.activation.base} families who reached a report in this window.

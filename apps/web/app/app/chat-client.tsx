@@ -131,6 +131,7 @@ import {
   PlannerCanvasPanel,
   type PlannerOpenSignal,
 } from "./planner-canvas";
+import { latestReportOpen } from "./report-open";
 import { SlashComposer } from "./slash-composer";
 import { latestQuestionRequest } from "./question-card";
 import { latestSnapRequest } from "./snap-card";
@@ -1730,6 +1731,7 @@ export function ChatClient({
         kidChainStage === null &&
         (!onboarding || hasVisibleMessages)));
   const planEditsSeen = planEditCount(renderMessages);
+  const handledReportOpenPartKeyRef = useRef<string | null | undefined>(undefined);
   useEffect(() => {
     const latest = latestPlannerOpen(agent.data.messages);
     if (handledPlannerPartKeyRef.current === undefined) {
@@ -1739,6 +1741,17 @@ export function ChatClient({
     if (!latest || latest.partKey === handledPlannerPartKeyRef.current) return;
     handledPlannerPartKeyRef.current = latest.partKey;
     setPlannerCanvas(latest.signal);
+  }, [agent.data.messages]);
+
+  useEffect(() => {
+    const latest = latestReportOpen(agent.data.messages);
+    if (handledReportOpenPartKeyRef.current === undefined) {
+      handledReportOpenPartKeyRef.current = latest?.partKey ?? null;
+      return;
+    }
+    if (!latest || latest.partKey === handledReportOpenPartKeyRef.current) return;
+    handledReportOpenPartKeyRef.current = latest.partKey;
+    window.location.assign(`/app/${latest.signal.childId}/report`);
   }, [agent.data.messages]);
 
   // The opening machine message (plans/2026-07-21-chat-first-onboarding.md
