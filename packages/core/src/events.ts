@@ -497,6 +497,57 @@ export const EVENT_SCHEMAS = {
       child_id: z.uuid(),
     })
     .strict(),
+  // The dense abilities explorer records navigation only. Ability ids,
+  // names, evidence, quotes, and parent answers stay in the authenticated
+  // product surface, never in analytics properties.
+  "progress.explorer_opened": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      subject: z.enum(["math", "literacy", "science"]),
+      device: z.enum(["desktop", "phone", "tablet", "unknown"]),
+    })
+    .strict(),
+  "progress.explorer_subject_selected": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      subject: z.enum(["math", "literacy", "science"]),
+      device: z.enum(["desktop", "phone", "tablet", "unknown"]),
+    })
+    .strict(),
+  "progress.explorer_ability_detail_opened": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      subject: z.enum(["math", "literacy", "science"]),
+      device: z.enum(["desktop", "phone", "tablet", "unknown"]),
+    })
+    .strict(),
+  "progress.explorer_find_opened": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      subject: z.enum(["math", "literacy", "science"]),
+      device: z.enum(["desktop", "phone", "tablet", "unknown"]),
+    })
+    .strict(),
+  "progress.explorer_connected_ability_opened": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      subject: z.enum(["math", "literacy", "science"]),
+      device: z.enum(["desktop", "phone", "tablet", "unknown"]),
+    })
+    .strict(),
+  "progress.explorer_ask_homa_opened": z
+    .object({
+      family_id: z.uuid(),
+      child_id: z.uuid(),
+      subject: z.enum(["math", "literacy", "science"]),
+      device: z.enum(["desktop", "phone", "tablet", "unknown"]),
+    })
+    .strict(),
   // The report's one-tap month: the parent explicitly asked Homa to build
   // the plan and check back, which is what arms the retest email.
   "map.plan_consented": z.object({

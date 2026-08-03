@@ -210,6 +210,42 @@ const validProgressEvents = {
     family_id: FAMILY_ID,
     child_id: CHILD_ID,
   },
+  "progress.explorer_opened": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subject: "math",
+    device: "desktop",
+  },
+  "progress.explorer_subject_selected": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subject: "science",
+    device: "phone",
+  },
+  "progress.explorer_ability_detail_opened": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subject: "literacy",
+    device: "tablet",
+  },
+  "progress.explorer_find_opened": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subject: "math",
+    device: "unknown",
+  },
+  "progress.explorer_connected_ability_opened": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subject: "science",
+    device: "desktop",
+  },
+  "progress.explorer_ask_homa_opened": {
+    family_id: FAMILY_ID,
+    child_id: CHILD_ID,
+    subject: "literacy",
+    device: "phone",
+  },
 } as const;
 
 test("subject lesson event registry contains the retained build and Keep names", () => {
@@ -495,7 +531,7 @@ test("mobile family event wire variants reject identity and family content", () 
   }
 });
 
-test("progress event registry contains all eleven exact names", () => {
+test("progress event registry contains all seventeen exact names", () => {
   assert.deepEqual(
     Object.keys(EVENT_SCHEMAS)
       .filter((name) => name.startsWith("progress."))

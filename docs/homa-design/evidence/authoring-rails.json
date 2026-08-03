@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
-  "contractSourceChecksum": "000dc7a4059396c796a5c731a6672c39ffac1679ce7ba33998abee96b4ce0f99",
-  "manifestFingerprint": "40845b54ff48723c75f9dc8e7020282bd4fa84dc4edef9d127eb7ed3f1b3b275",
+  "contractSourceChecksum": "e35b834293407d95ab57d9f23e07739e235c056ad469916c16e58f9d62c73758",
+  "manifestFingerprint": "6e5ee6e78666c5645205b6cbadfe7e06060573dc8db9c91f96e1ff43012fc178",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "authoringRoots": [
     ".agents/skills/",
@@ -14,15 +14,15 @@
     "packages/design/src/contract/"
   ],
   "counts": {
-    "authoring-rule": 123,
+    "authoring-rule": 124,
     "agent-skill": 46,
     "prompt": 118,
     "evaluator": 7,
     "golden-fixture": 8
   },
-  "expectedPaths": 302,
-  "coveredPaths": 302,
-  "sourceFingerprint": "1aab18fe1244aee0a7640d14387d86e1e06747e37e60717bcde90e24d6765d75",
+  "expectedPaths": 303,
+  "coveredPaths": 303,
+  "sourceFingerprint": "38d2deede39c6a1073f285ffe3734e2b905ea9eaf111666709245f776fec6499",
   "assetGenerator": {
     "paths": [
       "scripts/brand-assets.mts"
@@ -40,7 +40,7 @@
         "path": "packages/design/src/contract/contract.test.ts",
         "rule": "negative-identity-sentinel",
         "reason": "The contract test proves retired fonts and shape words cannot enter the active typed contract. It is a negative assertion, not an authoring instruction.",
-        "sourceHash": "a3151c5653b97548231aa1bd0e07003f95b427832e66640004a651932ef91efb"
+        "sourceHash": "7e5a75a167f0e54ac522456998c4710e9c1d6e3054940a8c943293cd5845691b"
       }
     ]
   },

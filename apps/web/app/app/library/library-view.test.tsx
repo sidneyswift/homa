@@ -107,6 +107,7 @@ describe("LibraryView", () => {
     assert.doesNotMatch(html, /surface=shelf/);
     assert.doesNotMatch(html, /math-practice\.pdf|nature-reader\.epub/);
     assert.doesNotMatch(html, /example\.public\.blob/);
+    assert.doesNotMatch(html, /Before you choose files/);
     assert.doesNotMatch(html, /These files are not private/);
   });
 

@@ -631,6 +631,48 @@ async function emitProgressEvent(
         await emitMapEvent("progress.observation_used", event.props);
       }
       break;
+    case "progress.explorer_opened":
+      if (emitter) {
+        await emitter("progress.explorer_opened", event.props);
+      } else {
+        await emitMapEvent("progress.explorer_opened", event.props);
+      }
+      break;
+    case "progress.explorer_subject_selected":
+      if (emitter) {
+        await emitter("progress.explorer_subject_selected", event.props);
+      } else {
+        await emitMapEvent("progress.explorer_subject_selected", event.props);
+      }
+      break;
+    case "progress.explorer_ability_detail_opened":
+      if (emitter) {
+        await emitter("progress.explorer_ability_detail_opened", event.props);
+      } else {
+        await emitMapEvent("progress.explorer_ability_detail_opened", event.props);
+      }
+      break;
+    case "progress.explorer_find_opened":
+      if (emitter) {
+        await emitter("progress.explorer_find_opened", event.props);
+      } else {
+        await emitMapEvent("progress.explorer_find_opened", event.props);
+      }
+      break;
+    case "progress.explorer_connected_ability_opened":
+      if (emitter) {
+        await emitter("progress.explorer_connected_ability_opened", event.props);
+      } else {
+        await emitMapEvent("progress.explorer_connected_ability_opened", event.props);
+      }
+      break;
+    case "progress.explorer_ask_homa_opened":
+      if (emitter) {
+        await emitter("progress.explorer_ask_homa_opened", event.props);
+      } else {
+        await emitMapEvent("progress.explorer_ask_homa_opened", event.props);
+      }
+      break;
     default: {
       const exhaustiveEvent: never = event;
       return exhaustiveEvent;
