@@ -24,6 +24,30 @@
 
 **Rendered status:** Thirty-one rendered interaction tests pass across the five award journeys and shared primitives. This advances rendered evidence to in progress. It does not verify iOS focus order, system handoffs, physical target frames, spoken cadence, or large-text geometry on a real device.
 
+## OTA fingerprint recovery, 2026-08-02
+
+**Recovery implementation commit:** `428418a33b679590fc517cc87090368632495783`
+
+**Recovery base commit:** `710e6f0eec58c2f4e6d8fabb7045ec2e5474dc33`
+
+**Recovery branch:** `codex/mobile-accessibility-fingerprint-recovery`
+
+**Recovery status:** Implementation verified locally. Production OTA verification remains open until this recovery is merged and the exact main commit is published and read back from EAS.
+
+PR #709 passed its full main CI run at commit `710e6f0eec58c2f4e6d8fabb7045ec2e5474dc33`. The separate Mobile OTA workflow correctly refused to publish that commit. The checkout fingerprint was `d51cce170c4bc078993eaf9d63cce47f2a134271`, while the latest finished production iOS build, `e1e97858-f501-4222-bd22-b00ecd4d66aa`, carries `f33dd2307f31e8694a7b2727641a13a4f5f06f86`. The workflow stopped before waiting for Vercel and before creating an EAS update, so the rendered accessibility changes were not represented as shipped.
+
+The mismatch was test-infrastructure drift, not native product drift. A source-by-source Expo fingerprint comparison found exactly three changed inputs: mobile package scripts, Expo iOS autolinking configuration, and React Native iOS autolinking configuration. The Expo and React Native module rosters, versions, pod names, delegate registrations, script phases, local Swift modules, and native directory hashes were identical. pnpm had satisfied React Native's optional Jest preset peer and Expo Router's React Native Testing Library peer inside the mobile workspace, which changed virtual-store realpaths embedded in autolinking JSON.
+
+The recovery keeps Expo's default fingerprint policy intact:
+
+- Rendered-test dependencies, Jest configuration, setup, TypeScript configuration, and their lockfile now live in the standalone `tooling/mobile-accessibility-tests` pnpm workspace.
+- Homa's root workspace ignores that nested workspace. Its root lockfile is restored byte-for-byte to the production-compatible lock at `8e438e82dc934f5365525d0bc2af2f6f33f81c48`.
+- Jest maps React, React Native, and app-owned native mocks back to `apps/mobile/node_modules`, so mounted components and the runner share one app runtime.
+- `check:mobile-accessibility` frozen-installs the standalone runner before its isolated typecheck and 31 rendered tests.
+- The static accessibility guard now rejects test peers or scripts inside the production package graph, missing isolated-runner dependencies or scripts, an unfrozen runner install, and pnpm-version drift.
+
+After a clean frozen relink, the recovery checkout computes `f33dd2307f31e8694a7b2727641a13a4f5f06f86`, exactly matching the installed production build. Running the standalone install, isolated typecheck, rendered tests, and the full accessibility command leaves that hash unchanged.
+
 ## Verdict
 
 The source implementation commit removes the confirmed source-level P0 and P1 accessibility defects found in the native route gauntlet. It also adds a repeatable accessibility contract to CI and the mobile OTA workflow. The rendered implementation commit exercises that contract through mounted React Native components and fixes three defects exposed by the new tests.
@@ -50,6 +74,8 @@ The 31 rendered tests cover:
 - Material sharing across edited note, opening, handed-off, canceled, failed, announced receipt, normalized telemetry, and missing-family states.
 - Planner's AX5 chronological 31-day list, visible event and activity counts, named selection, and 56-point day actions.
 - Voice idle, connecting, listening, working, speaking, paused, muted, interrupted, expanded controls, full-Voice-route suppression, large text, spoken status, and route-change reset.
+
+The rendered runner is isolated from the production pnpm graph. Test files remain beside the mobile product code for review ownership, while the test runtime and configuration live under `tooling/mobile-accessibility-tests`.
 
 ## What the source foundation changes
 
@@ -84,6 +110,7 @@ The 31 rendered tests cover:
 - Normal text does not use known under-contrast semantic tokens.
 - Bespoke input placeholders do not use the under-contrast placeholder token.
 - Approved text pairs meet 4.5:1 and approved control boundaries meet 3:1.
+- React Native rendered-test peers and scripts remain outside the production fingerprint graph.
 
 ## Source verification
 
@@ -130,6 +157,26 @@ All commands below ran in the isolated worktree against rendered implementation 
 | `corepack pnpm check:em-dash` | PASS, 2,595 tracked text files and 0 violations |
 
 The combined accessibility command additionally reported 14 classified Expo surfaces, 18 registered native or external handoffs, all five priority journeys carrying complete evidence dimensions, and production source using the shared modal, loading, scaling, and announcement policies.
+
+## OTA recovery verification
+
+All commands below ran against recovery implementation commit `428418a33b679590fc517cc87090368632495783` using the repository Node 24 runtime where applicable.
+
+| Check | Result |
+|---|---|
+| Root `corepack pnpm install --frozen-lockfile` | PASS, restored the production-compatible root graph without resolution |
+| Standalone runner `corepack pnpm install --frozen-lockfile` | PASS |
+| Root lock compared with commit `8e438e82` | PASS, byte-for-byte match |
+| Mobile dependency paths to RNTL and `@react-native/jest-preset` | PASS, both absent |
+| Expo iOS fingerprint after the full gate | PASS, exact `f33dd2307f31e8694a7b2727641a13a4f5f06f86` |
+| `corepack pnpm typecheck` | PASS, 4 of 4 workspaces |
+| `corepack pnpm lint` | PASS, mobile has zero warnings; web has 9 unrelated existing warnings |
+| Existing mobile Chat, Bootstrap, Planner, Progress, and Voice checks | PASS, 347 of 347 tests |
+| `corepack pnpm check:mobile-accessibility` | PASS, 16 static and boundary tests plus 31 of 31 rendered tests |
+| `git diff --check` | PASS |
+| `corepack pnpm check:em-dash` | PASS, 0 violations |
+
+The main CI run for PR #709 is [run 30775054684](https://github.com/sidneyswift/homa/actions/runs/30775054684) and completed successfully. The blocked OTA attempt is [run 30775054711](https://github.com/sidneyswift/homa/actions/runs/30775054711); its fingerprint step failed, and its Vercel wait and EAS publish steps were skipped. This recovery is not production evidence until its own exact main commit has a successful Mobile OTA run and the resulting EAS update is read back with the matching runtime fingerprint.
 
 ## Acceptance status
 

@@ -78,6 +78,43 @@ export interface SourceAccessibilityScan {
   violations: AccessibilityViolation[];
 }
 
+export interface PackageManifest {
+  packageManager?: string;
+  scripts?: Readonly<Record<string, string>>;
+  dependencies?: Readonly<Record<string, string>>;
+  devDependencies?: Readonly<Record<string, string>>;
+}
+
+const MOBILE_FORBIDDEN_TEST_DEPENDENCIES = [
+  "@testing-library/react-native",
+  "@types/jest",
+  "jest",
+  "jest-expo",
+  "test-renderer",
+] as const;
+const ROOT_FORBIDDEN_NATIVE_TEST_DEPENDENCIES = [
+  "@react-native/jest-preset",
+  "@testing-library/react-native",
+  "jest-expo",
+  "test-renderer",
+] as const;
+const REQUIRED_ISOLATED_TEST_DEPENDENCIES = [
+  "@testing-library/react-native",
+  "@types/jest",
+  "@types/react",
+  "expo",
+  "jest",
+  "jest-expo",
+  "react",
+  "react-native",
+  "test-renderer",
+  "typescript",
+] as const;
+const MOBILE_FORBIDDEN_TEST_SCRIPTS = [
+  "test:accessibility",
+  "typecheck:accessibility-tests",
+] as const;
+
 function normalized(path: string): string {
   return path.split(sep).join("/");
 }
@@ -345,6 +382,75 @@ export function findJourneyManifestViolations(
   return failures.sort();
 }
 
+/**
+ * Keeps rendered-test peers out of Expo's production fingerprint graph.
+ * pnpm can otherwise satisfy React Native's optional Jest peer across the
+ * whole workspace, changing OTA compatibility without changing native code.
+ */
+export function findAccessibilityTestBoundaryViolations(
+  rootPackage: PackageManifest,
+  mobilePackage: PackageManifest,
+  toolingPackage: PackageManifest,
+): string[] {
+  const failures: string[] = [];
+  const mobileDependencies = {
+    ...mobilePackage.dependencies,
+    ...mobilePackage.devDependencies,
+  };
+  const rootDependencies = {
+    ...rootPackage.dependencies,
+    ...rootPackage.devDependencies,
+  };
+  const toolingDependencies = {
+    ...toolingPackage.dependencies,
+    ...toolingPackage.devDependencies,
+  };
+
+  for (const dependency of MOBILE_FORBIDDEN_TEST_DEPENDENCIES) {
+    if (dependency in mobileDependencies) {
+      failures.push(`apps/mobile cannot own accessibility test dependency: ${dependency}`);
+    }
+  }
+  for (const dependency of ROOT_FORBIDDEN_NATIVE_TEST_DEPENDENCIES) {
+    if (dependency in rootDependencies) {
+      failures.push(`root cannot own React Native test dependency: ${dependency}`);
+    }
+  }
+  for (const dependency of REQUIRED_ISOLATED_TEST_DEPENDENCIES) {
+    if (!(dependency in toolingDependencies)) {
+      failures.push(`isolated accessibility runner is missing dependency: ${dependency}`);
+    }
+  }
+  for (const script of MOBILE_FORBIDDEN_TEST_SCRIPTS) {
+    if (script in (mobilePackage.scripts ?? {})) {
+      failures.push(`apps/mobile cannot own accessibility test script: ${script}`);
+    }
+  }
+  for (const script of ["test", "typecheck"] as const) {
+    if (!(script in (toolingPackage.scripts ?? {}))) {
+      failures.push(`isolated accessibility runner is missing script: ${script}`);
+    }
+  }
+
+  const rootCheck = rootPackage.scripts?.["check:mobile-accessibility"] ?? "";
+  if (
+    !rootCheck.includes(
+      "corepack pnpm --dir tooling/mobile-accessibility-tests install --frozen-lockfile",
+    )
+  ) {
+    failures.push("root check:mobile-accessibility must frozen-install the isolated runner");
+  }
+  if (toolingPackage.packageManager !== rootPackage.packageManager) {
+    failures.push("isolated accessibility runner must use the root pnpm version");
+  }
+
+  return failures.sort();
+}
+
+function readPackageManifest(path: string): PackageManifest {
+  return JSON.parse(readFileSync(resolve(REPO_ROOT, path), "utf8")) as PackageManifest;
+}
+
 function main(): void {
   const appFiles = [...walkSourceFiles(resolve(REPO_ROOT, MOBILE_APP_ROOT))]
     .filter((file) => file.endsWith(".tsx"))
@@ -369,10 +475,16 @@ function main(): void {
     nativeAccessibilityHandoffs,
   );
   const journeyFailures = findJourneyManifestViolations(nativeAccessibilityJourneys);
+  const boundaryFailures = findAccessibilityTestBoundaryViolations(
+    readPackageManifest("package.json"),
+    readPackageManifest("apps/mobile/package.json"),
+    readPackageManifest("tooling/mobile-accessibility-tests/package.json"),
+  );
   const failures = [
     ...surfaceFailures,
     ...handoffFailures,
     ...journeyFailures,
+    ...boundaryFailures,
     ...sourceViolations.map((violation) =>
       `${violation.code}: ${violation.file}:${violation.line} ${violation.detail}`
     ),
@@ -388,6 +500,7 @@ function main(): void {
   console.log(`PASS  ${new Set(discoveredHandoffs.map((item) => `${item.file}|${item.callee}`)).size} native handoffs are registered`);
   console.log(`PASS  ${nativeAccessibilityJourneys.length} priority journeys carry complete evidence dimensions`);
   console.log("PASS  production source uses shared modal, loading, scaling, and announcement policies");
+  console.log("PASS  rendered test tooling is isolated from the production fingerprint graph");
 }
 
 if (process.argv[1]?.endsWith("mobile-accessibility-check.mts")) main();
