@@ -64,6 +64,7 @@ export function QuietChoice({
   const hintId = hint ? `${name}-hint` : undefined;
   const errorId = error ? `${name}-error` : undefined;
   const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
+  const requiredIndex = options.findIndex((option) => !disabled && !option.disabled);
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const current = event.currentTarget.value;
@@ -114,7 +115,7 @@ export function QuietChoice({
                 value={option.value}
                 checked={checked}
                 disabled={optionDisabled}
-                required={required && type === "radio" && index === 0}
+                required={required && type === "radio" && index === requiredIndex}
                 onChange={handleChange}
               />
               <span className="quiet-choice__copy">
