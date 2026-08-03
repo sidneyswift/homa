@@ -20,6 +20,7 @@ import { HomeschoolSection } from "./homeschool-section";
 import { PlanSection } from "./plan-section";
 import { KidsSection } from "./kids-section";
 import { ParentsSection } from "./parents-section";
+import { DeleteFamilyDataCard } from "./delete-family-data-card";
 
 /**
  * /app/settings: the family's account page. Consolidated 2026-07-12
@@ -203,6 +204,8 @@ export default async function SettingsPage({
               loadError={memoriesResult.loadError}
             />
           ) : null}
+
+          <DeleteFamilyDataCard familyName={family.name} />
         </div>
 
         <footer className="mt-6 flex flex-wrap items-center justify-between gap-3 px-1">

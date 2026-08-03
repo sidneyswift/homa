@@ -136,10 +136,18 @@ export async function uploadStudioImageBytes(input: {
 export async function deleteFamilyBlobs(familyId: string): Promise<number> {
   const evalStore = resolveEvalBlobStore(process.env);
   if (evalStore) return evalBlobDeleteFamily(evalStore, familyId);
-  const listed = await list({ prefix: `families/${familyId}/` });
-  const urls = listed.blobs.map((blob) => blob.url);
-  if (urls.length > 0) await del(urls);
-  return urls.length;
+  let cursor: string | undefined;
+  let deleted = 0;
+  do {
+    const listed = await list({ prefix: `families/${familyId}/`, cursor });
+    const urls = listed.blobs.map((blob) => blob.url);
+    if (urls.length > 0) {
+      await del(urls);
+      deleted += urls.length;
+    }
+    cursor = listed.cursor;
+  } while (cursor);
+  return deleted;
 }
 
 export interface MaterialRowInput {
