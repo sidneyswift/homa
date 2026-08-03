@@ -109,10 +109,10 @@ export default async function EvidencePackPage({
   }
 
   return (
-    <div className="min-h-screen bg-page pb-16 print:bg-card">
+    <div data-brand-surface="report-evidence" className="quiet-report quiet-print-surface min-h-screen bg-[var(--homa-canvas)] pb-16 print:bg-[var(--homa-paper)]">
       <main className="mx-auto w-full max-w-2xl px-4 pt-6">
-        <div className="overflow-hidden rounded-[28px] border border-border bg-card shadow-lg print:border-0 print:shadow-none">
-          <div className="px-7 pb-6 pt-8 sm:px-10" style={{ background: "var(--surface-sunken)" }}>
+        <div className="quiet-frame overflow-hidden rounded-[var(--homa-radius-card)] border-[var(--homa-control-boundary)] shadow-lg print:border-0 print:shadow-none">
+          <div className="quiet-report__hero px-7 pb-6 pt-8 sm:px-10" style={{ background: "var(--homa-canvas)" }}>
             <div className="flex items-center gap-3">
               <Logo size={24} />
               <span className="font-mono text-xs uppercase tracking-widest text-strong/70">
@@ -167,7 +167,7 @@ export default async function EvidencePackPage({
                 const line = subjectLine(score, report.childName);
                 const rows = answersByDomain.get(subjectId) ?? [];
                 return (
-                  <div key={subjectId} className="rounded-md border border-border-subtle p-4">
+                  <div key={subjectId} className="rounded-[var(--homa-radius-control)] border border-[var(--homa-soft-boundary)] p-4">
                     <div className="flex flex-wrap items-baseline gap-2">
                       <h3 className="font-semibold text-strong">{domain.displayName}</h3>
                       <span className="font-mono text-xs text-muted">{line.badge}</span>
@@ -208,7 +208,7 @@ export default async function EvidencePackPage({
               })}
             </ul>
 
-            <div className="mt-7 rounded-md bg-[var(--surface-sunken)] p-4 text-xs text-muted">
+            <div className="mt-7 rounded-[var(--homa-radius-control)] bg-[var(--homa-canvas)] p-4 text-xs text-[var(--homa-muted-ink)]">
               <p>
                 <b className="text-strong">What this document is, and is not.</b> This record was
                 built from a parent&apos;s own observations, organized and checked against the
@@ -219,18 +219,18 @@ export default async function EvidencePackPage({
               </p>
               <p className="mt-2">
                 Method, in full:{" "}
-                <Link href="/onboarding/method" className="text-brand underline">
+                <Link href="/onboarding/method" className="text-[var(--homa-brand-text)] underline">
                   thankshoma.com/onboarding/method
                 </Link>
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle px-7 py-4 text-sm text-subtle sm:px-10">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--homa-soft-boundary)] px-7 py-4 text-sm text-[var(--homa-muted-ink)] sm:px-10">
             <span>made with Homa for {report.childName}</span>
             <Link
               href={`/onboarding/r/${token}`}
-              className="text-brand underline-offset-2 hover:underline print:hidden"
+              className="text-[var(--homa-brand-text)] underline-offset-2 hover:underline print:hidden"
             >
               back to the report
             </Link>

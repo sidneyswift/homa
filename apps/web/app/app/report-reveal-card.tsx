@@ -195,7 +195,8 @@ export function ReportRevealCard({
       <section
         aria-busy="true"
         aria-label={`Building ${card.childName}'s progress report`}
-        className="w-full max-w-[26rem] rounded-lg border border-border-subtle bg-card p-4 shadow-md sm:p-5"
+        data-brand-layer="report-reveal"
+        className="quiet-report__reveal w-full max-w-[26rem] rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-4 shadow-md sm:p-5"
       >
         <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-subtle">
           <Logo size={15} variant="mark" />
@@ -209,7 +210,7 @@ export function ReportRevealCard({
             >
               <span
                 aria-hidden="true"
-                className={index < shownLines - 1 ? "text-sage" : "text-subtle"}
+                className={index < shownLines - 1 ? "text-[var(--homa-constructive-ink)]" : "text-[var(--homa-muted-ink)]"}
               >
                 {index < shownLines - 1 ? "✓" : "○"}
               </span>
@@ -224,8 +225,8 @@ export function ReportRevealCard({
   // Spent: the settled receipt, tapping through to the report itself.
   if (!active) {
     return (
-      <p className="inline-flex max-w-full items-baseline gap-1.5 self-start rounded-pill border border-sage/30 bg-sage/10 px-3 py-1.5 text-xs">
-        <span className="font-semibold text-sage">Progress report ready</span>
+      <p data-brand-layer="report-reveal" className="inline-flex max-w-full items-baseline gap-1.5 self-start rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-constructive-tint)] px-3 py-1.5 text-xs">
+        <span className="font-semibold text-[var(--homa-constructive-ink)]">Progress report ready</span>
         <span className="truncate text-body">{card.childName}</span>
       </p>
     );
@@ -238,7 +239,8 @@ export function ReportRevealCard({
 
   return (
     <section
-      className="w-full max-w-[26rem] rounded-lg border border-border-subtle bg-card p-4 shadow-md sm:p-5"
+      data-brand-layer="report-reveal"
+      className="quiet-report__reveal w-full max-w-[26rem] rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-4 shadow-md sm:p-5"
       aria-label={
         narrativeReady
           ? `${card.childName}'s progress report`
@@ -246,7 +248,7 @@ export function ReportRevealCard({
       }
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="shrink-0 rounded-pill bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand">
+        <span className="shrink-0 rounded-[var(--homa-radius-control)] bg-[var(--homa-info-tint)] px-2.5 py-1 text-xs font-bold text-[var(--homa-info-ink)]">
           {card.childName}
         </span>
         <p className="shrink-0 font-mono text-xs text-subtle">
@@ -286,7 +288,7 @@ export function ReportRevealCard({
             {card.strengths.map((strength) => (
               <span
                 key={strength}
-                className="rounded-pill border border-sage/30 bg-sage/10 px-2.5 py-1 text-xs text-body"
+                className="rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-constructive-tint)] px-2.5 py-1 text-xs text-body"
               >
                 {strength}
               </span>
@@ -299,7 +301,7 @@ export function ReportRevealCard({
           type="button"
           disabled={onOpenReport === undefined}
           onClick={() => onOpenReport?.(card.childId)}
-          className="mt-4 flex min-h-12 w-full items-center justify-center gap-2.5 rounded-md bg-brand px-4 py-3 text-base font-bold text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
+          className="quiet-action quiet-action--primary mt-4 min-h-12 w-full px-4 py-3 text-base shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
         >
           See the whole report
         </button>

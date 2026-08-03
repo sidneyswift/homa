@@ -106,8 +106,9 @@ export function MonthButton({
       // Copy-kit shape, and the SAME wording as CallHomaPs's no-session
       // state: one failure, one vocabulary (editor gate, 2026-07-11).
       <p
-        className="mt-3 rounded-md px-3 py-2 text-xs font-semibold print:hidden"
-        style={{ background: "var(--info-soft)", color: "var(--sky-600)" }}
+        data-brand-layer="report-month"
+        className="mt-3 rounded-[var(--homa-radius-control)] px-3 py-2 text-xs font-semibold print:hidden"
+        style={{ background: "var(--homa-info-tint)", color: "var(--homa-info-ink)" }}
       >
         The month didn&apos;t open. I don&apos;t recognize this device yet. Open your email link
         on this device once, then try again.
@@ -118,8 +119,9 @@ export function MonthButton({
   if (state === "walled") {
     return (
       <p
-        className="mt-3 rounded-md px-3 py-2 text-xs font-semibold print:hidden"
-        style={{ background: "var(--info-soft)", color: "var(--sky-600)" }}
+        data-brand-layer="report-month"
+        className="mt-3 rounded-[var(--homa-radius-control)] px-3 py-2 text-xs font-semibold print:hidden"
+        style={{ background: "var(--homa-info-tint)", color: "var(--homa-info-ink)" }}
       >
         {WALL_STALE_MONTH_LINE}
       </p>

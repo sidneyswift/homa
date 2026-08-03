@@ -26,6 +26,8 @@ function artifact(overrides: Partial<MaterialArtifact> = {}): MaterialArtifact {
 describe("MaterialCard", () => {
   it("renders the classic single-page card without a pager", () => {
     const html = renderToStaticMarkup(<MaterialCard material={artifact()} />);
+    assert.match(html, /data-brand-layer="material-card"/u);
+    assert.match(html, /quiet-artifact-card__preview/u);
     assert.match(html, /Worksheet ready/u);
     assert.match(html, /Print it/u);
     assert.doesNotMatch(html, /Page 1 of/u);
@@ -52,6 +54,8 @@ describe("MaterialCard", () => {
     assert.match(html, /Page 1 of 4/u);
     assert.match(html, /Print all 4 pages/u);
     assert.match(html, /aria-label="Next page"/u);
+    assert.match(html, /lucide-arrow-left/u);
+    assert.match(html, /lucide-arrow-right/u);
     assert.match(html, /src="https:\/\/blob\.example\/p1\.jpg"/u);
   });
 

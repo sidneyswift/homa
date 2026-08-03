@@ -43,31 +43,31 @@ export function ReportActions({
   }
 
   return (
-    <span className="inline-flex flex-wrap gap-x-4 gap-y-1 print:hidden">
-      <button type="button" onClick={() => void share()} className="text-brand underline-offset-2 hover:underline">
+    <span data-brand-layer="report-actions" className="inline-flex flex-wrap gap-x-4 gap-y-1 print:hidden">
+      <button type="button" onClick={() => void share()} className="text-[var(--homa-brand-text)] underline-offset-2 hover:underline">
         share this report
       </button>
-      <button type="button" onClick={() => window.print()} className="text-brand underline-offset-2 hover:underline">
+      <button type="button" onClick={() => window.print()} className="text-[var(--homa-brand-text)] underline-offset-2 hover:underline">
         print it
       </button>
       {/* Audience renditions: the same numbers, shaped for who has to be
           convinced (D7: sharing is the marketing; D6: nothing the parent
           told us privately appears on either). */}
-      <a href={`/onboarding/r/${token}/one-pager`} className="text-brand underline-offset-2 hover:underline">
+      <a href={`/onboarding/r/${token}/one-pager`} className="text-[var(--homa-brand-text)] underline-offset-2 hover:underline">
         one-page summary
       </a>
-      <a href={`/onboarding/r/${token}/evidence`} className="text-brand underline-offset-2 hover:underline">
+      <a href={`/onboarding/r/${token}/evidence`} className="text-[var(--homa-brand-text)] underline-offset-2 hover:underline">
         evidence pack
       </a>
       <a
         href={`mailto:hello@mail.thankshoma.com?subject=${encodeURIComponent(`Something looks off on ${childName}'s progress report`)}`}
-        className="text-brand underline-offset-2 hover:underline"
+        className="text-[var(--homa-brand-text)] underline-offset-2 hover:underline"
       >
         something look off? tell me
       </a>
       <a
         href={`mailto:hello@mail.thankshoma.com?subject=${encodeURIComponent("Please delete my family's data")}`}
-        className="text-brand underline-offset-2 hover:underline"
+        className="text-[var(--homa-brand-text)] underline-offset-2 hover:underline"
       >
         delete my family&apos;s data
       </a>

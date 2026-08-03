@@ -65,10 +65,10 @@ export default async function OnePagerPage({
   }
 
   return (
-    <div className="min-h-screen bg-page pb-16 print:bg-card">
+    <div data-brand-surface="report-one-pager" className="quiet-report quiet-print-surface min-h-screen bg-[var(--homa-canvas)] pb-16 print:bg-[var(--homa-paper)]">
       <main className="mx-auto w-full max-w-2xl px-4 pt-6">
-        <div className="overflow-hidden rounded-[28px] border border-border bg-card shadow-lg print:border-0 print:shadow-none">
-          <div style={{ background: "var(--band-sky)" }} className="px-7 pb-6 pt-8 sm:px-10">
+        <div className="quiet-frame overflow-hidden rounded-[var(--homa-radius-card)] border-[var(--homa-control-boundary)] shadow-lg print:border-0 print:shadow-none">
+          <div className="quiet-report__hero px-7 pb-6 pt-8 sm:px-10" style={{ background: "var(--homa-info-tint)" }}>
             <div className="flex items-center gap-3">
               <Logo size={24} />
               <span className="font-mono text-xs uppercase tracking-widest text-strong/70">
@@ -97,11 +97,11 @@ export default async function OnePagerPage({
                 {strengths.map((score) => {
                   const domain = getMapSubject(score.subjectId);
                   return (
-                    <div key={score.subjectId} className="rounded-lg p-4" style={{ background: "var(--gold-100)" }}>
-                      <p className="font-semibold" style={{ color: "var(--gold-ink-strong)" }}>
+                    <div key={score.subjectId} className="rounded-[var(--homa-radius-control)] p-4" style={{ background: "var(--homa-highlight-tint)" }}>
+                      <p className="font-semibold" style={{ color: "var(--homa-highlight-ink)" }}>
                         {domain?.displayName}
                       </p>
-                      <p className="mt-1 font-mono text-2xl" style={{ color: "var(--gold-ink)" }}>
+                      <p className="mt-1 font-mono text-2xl" style={{ color: "var(--homa-highlight-ink)" }}>
                         +{score.monthsAhead}
                         <span className="text-sm"> mo past typical</span>
                       </p>
@@ -115,14 +115,15 @@ export default async function OnePagerPage({
               Every subject, one chart
             </h2>
             <p className="mt-1 text-sm text-muted">
-              One dot per subject against what&apos;s typical for {ageLabel(months)}. Yellow is
-              past typical, green is at it, blue is growing toward it.
+              One dot per subject against what&apos;s typical for {ageLabel(months)}. The warm
+              highlight marks past typical, constructive marks at typical, and info marks growth
+              toward typical.
             </p>
-            <div className="mt-3 rounded-lg border border-border-subtle bg-card p-4">
+            <div className="mt-3 rounded-[var(--homa-radius-control)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-4">
               <ReportChart scores={ordered} prior={null} variant="wide" />
             </div>
 
-            <div className="mt-7 rounded-md bg-[var(--surface-sunken)] p-4 text-xs text-muted">
+            <div className="mt-7 rounded-[var(--homa-radius-control)] bg-[var(--homa-canvas)] p-4 text-xs text-[var(--homa-muted-ink)]">
               <p>
                 Built from a parent&apos;s structured observations, each checked against published
                 national benchmarks: the same sources schools and pediatricians use. Not a test
@@ -141,11 +142,11 @@ export default async function OnePagerPage({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle px-7 py-4 text-sm text-subtle sm:px-10">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--homa-soft-boundary)] px-7 py-4 text-sm text-[var(--homa-muted-ink)] sm:px-10">
             <span>made with Homa for {report.childName}</span>
             <Link
               href={`/onboarding/r/${token}`}
-              className="text-brand underline-offset-2 hover:underline print:hidden"
+              className="text-[var(--homa-brand-text)] underline-offset-2 hover:underline print:hidden"
             >
               see the full report
             </Link>

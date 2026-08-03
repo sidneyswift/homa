@@ -126,7 +126,7 @@ export function ReceiptsList({
             const shown =
               pending[row.itemId]?.answer ?? row.answer;
             return (
-              <li key={row.itemId} className="rounded-md bg-[var(--surface-sunken)] px-4 py-3">
+              <li key={row.itemId} className="rounded-[var(--homa-radius-control)] bg-[var(--homa-canvas)] px-4 py-3">
                 {/* One flowing line: the question, a quiet leader, the
                     answer. Literally what was asked and what she said. */}
                 <p className="text-sm leading-relaxed text-strong">
@@ -140,7 +140,7 @@ export function ReceiptsList({
                   {pending[row.itemId] ? (
                     <span
                       className="ml-1.5 font-mono text-[0.65rem] font-bold"
-                      style={{ color: "var(--sky-600)" }}
+                      style={{ color: "var(--homa-info-ink)" }}
                     >
                       {"\u00b7"} updated
                     </span>
@@ -150,7 +150,7 @@ export function ReceiptsList({
                       type="button"
                       onClick={() => setEditing(row.itemId)}
                       disabled={state === "busy"}
-                      className="ml-2 text-xs font-semibold text-brand underline-offset-2 hover:underline print:hidden"
+                      className="ml-2 text-xs font-semibold text-[var(--homa-brand-text)] underline-offset-2 hover:underline print:hidden"
                     >
                       change
                     </button>
@@ -186,8 +186,8 @@ export function ReceiptsList({
                         }}
                         className={
                           shown === choice
-                            ? "rounded-pill bg-brand px-3 py-1 text-xs font-semibold text-on-brand"
-                            : "rounded-pill border border-border bg-card px-3 py-1 text-xs font-semibold text-strong transition duration-(--dur-fast) ease-out hover:border-brand motion-safe:active:scale-[var(--press-scale)]"
+                            ? "quiet-action quiet-action--primary min-h-8 rounded-[var(--homa-radius-control)] px-3 py-1 text-xs"
+                            : "quiet-action quiet-action--secondary min-h-8 rounded-[var(--homa-radius-control)] px-3 py-1 text-xs motion-safe:active:scale-[var(--press-scale)]"
                         }
                       >
                         {ANSWER_LABELS[choice]}
