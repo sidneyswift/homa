@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 
@@ -19,6 +18,8 @@ import {
 } from "../../../../lib/lessons/retry-state";
 import { lessonMomentSchema } from "../../../../lib/lessons/synthesis";
 import { PageColumn } from "../../../../components/dashboard/page-column";
+import { Icon } from "../../../../components/design/Icon";
+import { QuietAction } from "../../../../components/design/QuietAction";
 import {
   AddLessonPhotos,
   KeptAudioNotice,
@@ -135,16 +136,17 @@ export default async function LessonReviewPage({
     });
     return (
       <PageColumn>
+        <div data-brand-surface="lesson-review" data-brand-fixture="quiet-authority-v1">
         <BackToKid childId={lesson.childId} childName={childName} />
-        <h1 className="mt-2 font-display text-2xl font-semibold text-strong">
+        <h1 className="mt-2 font-display text-2xl font-semibold text-[color:var(--homa-ink)]">
           {childName}&apos;s lesson from {startedAt}
         </h1>
         {lesson.status === "failed" ? (
-          <section className="mt-4 rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
-            <p className="font-display text-lg font-semibold text-strong">
+          <section className="quiet-frame quiet-frame--paper mt-4 p-6">
+            <p className="font-display text-lg font-semibold text-[color:var(--homa-ink)]">
               Homa couldn&apos;t finish this one.
             </p>
-            <p className="mt-1 text-sm text-body">
+            <p className="mt-1 text-sm text-[color:var(--homa-ink)]">
               {failedLessonDetail(retryState, lesson.audioDeletedAt)}
             </p>
             {retryState.status === "available" ? (
@@ -152,8 +154,8 @@ export default async function LessonReviewPage({
             ) : null}
           </section>
         ) : (
-          <section className="mt-4 rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
-            <p className="font-display text-lg font-semibold text-strong">
+          <section className="quiet-frame quiet-frame--paper mt-4 p-6">
+            <p className="font-display text-lg font-semibold text-[color:var(--homa-ink)]">
               Homa is listening back through the lesson.
             </p>
             <LessonStatusPoll
@@ -161,12 +163,13 @@ export default async function LessonReviewPage({
               initialTranscribed={transcribed}
               initialTotal={segments.length}
             />
-            <p className="mt-2 text-xs text-muted">
+            <p className="mt-2 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
               This page updates by itself. Leaving is fine. The review
               will be here when you come back.
             </p>
           </section>
         )}
+        </div>
       </PageColumn>
     );
   }
@@ -195,12 +198,13 @@ export default async function LessonReviewPage({
 
   return (
     <PageColumn>
+      <div data-brand-surface="lesson-review" data-brand-fixture="quiet-authority-v1">
       <BackToKid childId={lesson.childId} childName={childName} />
-      <h1 className="mt-2 font-display text-2xl font-semibold text-strong">
+      <h1 className="mt-2 font-display text-2xl font-semibold text-[color:var(--homa-ink)]">
         {childName}&apos;s lesson from {startedAt}
       </h1>
       {lesson.durationSeconds ? (
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
           {Math.max(1, Math.round(lesson.durationSeconds / 60))} minutes
           together
         </p>
@@ -208,11 +212,11 @@ export default async function LessonReviewPage({
 
       <section
         aria-label="How it went"
-        className="mt-4 rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-5"
+        className="quiet-status quiet-status--constructive mt-4 p-5"
       >
-        <p className="text-body">{review.summary}</p>
+        <p className="text-[color:var(--homa-constructive-ink)]">{review.summary}</p>
         {insights.siblingNote ? (
-          <p className="mt-2 text-sm text-muted">{insights.siblingNote}</p>
+          <p className="mt-2 text-sm text-[color:var(--homa-constructive-ink)]">{insights.siblingNote}</p>
         ) : null}
       </section>
 
@@ -230,7 +234,7 @@ export default async function LessonReviewPage({
 
       {insights.moments.length > 0 ? (
         <section aria-label="Moments" className="mt-4">
-          <h2 className="font-display text-lg font-semibold text-strong">
+          <h2 className="font-display text-lg font-semibold text-[color:var(--homa-ink)]">
             Moments from the lesson
           </h2>
           <ol className="mt-2 space-y-2">
@@ -239,23 +243,23 @@ export default async function LessonReviewPage({
               return (
                 <li
                   key={`${moment.segmentSeq}-${index}`}
-                  className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm"
+                  className="quiet-frame quiet-frame--paper p-4"
                 >
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
                     {MOMENT_LABELS[moment.kind] ?? moment.kind} {"\u00b7"}{" "}
                     {aboutMinute(moment.segmentSeq)}
                   </p>
-                  <p className="mt-1 font-medium text-strong">
+                  <p className="mt-1 font-medium text-[color:var(--homa-ink)]">
                     {moment.headline}
                   </p>
-                  <p className="mt-1 text-sm text-body">{moment.detail}</p>
+                  <p className="mt-1 text-sm text-[color:var(--homa-ink)]">{moment.detail}</p>
                   {photo ? (
                     // Family blob URL; nothing here for next/image.
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={photo.blobUrl}
                       alt={photo.caption ?? "A photo from this lesson"}
-                      className="mt-3 max-h-56 rounded-md border border-border-subtle object-contain"
+                      className="mt-3 max-h-56 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] object-contain"
                     />
                   ) : null}
                 </li>
@@ -267,14 +271,14 @@ export default async function LessonReviewPage({
 
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         {insights.whatWorked.length > 0 ? (
-          <section className="rounded-lg border border-border-subtle bg-card p-5 shadow-sm">
-            <h2 className="font-display text-base font-semibold text-strong">
+          <section className="quiet-frame quiet-frame--paper p-5">
+            <h2 className="font-display text-base font-semibold text-[color:var(--homa-ink)]">
               What worked
             </h2>
-            <ul className="mt-2 space-y-1.5 text-sm text-body">
+            <ul className="mt-2 space-y-1.5 text-sm text-[color:var(--homa-ink)]">
               {insights.whatWorked.map((line) => (
                 <li key={line} className="flex gap-2">
-                  <span aria-hidden="true" className="text-sage">
+                  <span aria-hidden="true" className="text-[color:var(--homa-constructive-ink)]">
                     {"\u2022"}
                   </span>
                   {line}
@@ -284,14 +288,14 @@ export default async function LessonReviewPage({
           </section>
         ) : null}
         {insights.friction.length > 0 ? (
-          <section className="rounded-lg border border-border-subtle bg-card p-5 shadow-sm">
-            <h2 className="font-display text-base font-semibold text-strong">
+          <section className="quiet-frame quiet-frame--paper p-5">
+            <h2 className="font-display text-base font-semibold text-[color:var(--homa-ink)]">
               Where it dragged
             </h2>
-            <ul className="mt-2 space-y-1.5 text-sm text-body">
+            <ul className="mt-2 space-y-1.5 text-sm text-[color:var(--homa-ink)]">
               {insights.friction.map((line) => (
                 <li key={line} className="flex gap-2">
-                  <span aria-hidden="true" className="text-muted">
+                  <span aria-hidden="true" className="text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
                     {"\u2022"}
                   </span>
                   {line}
@@ -303,14 +307,14 @@ export default async function LessonReviewPage({
       </div>
 
       {insights.nextTime.length > 0 ? (
-        <section className="mt-4 rounded-lg border border-border-subtle bg-card p-5 shadow-sm">
-          <h2 className="font-display text-base font-semibold text-strong">
+        <section className="quiet-frame quiet-frame--paper mt-4 p-5">
+          <h2 className="font-display text-base font-semibold text-[color:var(--homa-ink)]">
             Ideas for next time
           </h2>
-          <ul className="mt-2 space-y-1.5 text-sm text-body">
+          <ul className="mt-2 space-y-1.5 text-sm text-[color:var(--homa-ink)]">
             {insights.nextTime.map((line) => (
               <li key={line} className="flex gap-2">
-                <span aria-hidden="true" className="text-brand">
+              <span aria-hidden="true" className="text-[color:var(--homa-visual-coral)]">
                   {"\u2022"}
                 </span>
                 {line}
@@ -318,7 +322,7 @@ export default async function LessonReviewPage({
             ))}
           </ul>
           {insights.openQuestions.length > 0 ? (
-            <p className="mt-3 text-xs text-muted">
+            <p className="mt-3 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
               Homa wasn&apos;t sure about: {insights.openQuestions.join(" ")}
             </p>
           ) : null}
@@ -331,8 +335,8 @@ export default async function LessonReviewPage({
         // The honest line for the all-rejected case (2026-07-21): a
         // review without it reads as if the lesson updated progress
         // when nothing was written anywhere.
-        <section className="mt-4 rounded-lg border border-border-subtle bg-card p-5 shadow-sm">
-          <p className="text-sm text-muted">
+        <section className="quiet-frame quiet-frame--paper mt-4 p-5">
+          <p className="text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
             Your lesson and this review are saved. Homa heard skill
             moments but could not tie them to the recording clearly
             enough to update {childName}&apos;s progress this time.
@@ -341,16 +345,16 @@ export default async function LessonReviewPage({
       ) : null}
 
       {(ledgerNotes.length > 0 || observationNotes.length > 0) ? (
-        <section className="mt-4 rounded-lg border border-border-subtle bg-card p-5 shadow-sm">
-          <h2 className="font-display text-base font-semibold text-strong">
+        <section className="quiet-frame quiet-frame--paper mt-4 p-5">
+          <h2 className="font-display text-base font-semibold text-[color:var(--homa-ink)]">
             What this lesson added to {childName}&apos;s progress
           </h2>
           {ledgerNotes.length > 0 ? (
             <ul className="mt-2 space-y-2 text-sm">
               {ledgerNotes.map((note) => (
                 <li key={note.clause}>
-                  <p className="text-body">{note.clause}</p>
-                  <p className="mt-0.5 text-xs text-muted">
+                  <p className="text-[color:var(--homa-ink)]">{note.clause}</p>
+                  <p className="mt-0.5 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
                     From the lesson, {aboutMinute(note.segmentSeq)}:{" "}
                     {"\u201c"}
                     {note.excerpt}
@@ -361,20 +365,20 @@ export default async function LessonReviewPage({
             </ul>
           ) : null}
           {observationNotes.length > 0 ? (
-            <p className="mt-3 text-xs text-muted">
+            <p className="mt-3 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
               Homa also saved {observationNotes.length} smaller{" "}
               {observationNotes.length === 1 ? "moment" : "moments"} to{" "}
               {childName}&apos;s progress, ready to build on this week.
             </p>
           ) : null}
-          <p className="mt-3 text-xs text-muted">
+          <p className="mt-3 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
             Something look off? Tell Homa in chat and she&apos;ll fix it.
           </p>
         </section>
       ) : null}
 
       <section className="mt-4">
-        <h2 className="font-display text-base font-semibold text-strong">
+        <h2 className="font-display text-base font-semibold text-[color:var(--homa-ink)]">
           Photos from this lesson
         </h2>
         {media.length > 0 ? (
@@ -385,12 +389,12 @@ export default async function LessonReviewPage({
                 key={item.id}
                 src={item.blobUrl}
                 alt={item.caption ?? "A photo from this lesson"}
-                className="h-28 w-28 rounded-md border border-border-subtle object-cover"
+                className="h-28 w-28 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] object-cover"
               />
             ))}
           </div>
         ) : (
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
             Add worksheet photos or anything else you want kept with this
             lesson.
           </p>
@@ -398,8 +402,8 @@ export default async function LessonReviewPage({
         <AddLessonPhotos familyId={family.id} lessonId={lessonId} />
       </section>
 
-      <details className="mt-6 rounded-lg border border-border-subtle bg-card p-5">
-        <summary className="cursor-pointer text-sm font-medium text-body">
+      <details className="quiet-frame quiet-frame--paper mt-6 p-5">
+        <summary className="cursor-pointer text-sm font-medium text-[color:var(--homa-ink)]">
           Read the whole transcript
         </summary>
         <div className="mt-3 space-y-4">
@@ -407,16 +411,17 @@ export default async function LessonReviewPage({
             .filter((segment) => segment.transcript !== null)
             .map((segment) => (
               <div key={segment.id}>
-                <p className="text-xs font-medium uppercase tracking-wide text-muted">
+                <p className="text-xs font-medium uppercase tracking-wide text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
                   {aboutMinute(segment.seq)}
                 </p>
-                <p className="mt-1 whitespace-pre-wrap text-sm text-body">
+                <p className="mt-1 whitespace-pre-wrap text-sm text-[color:var(--homa-ink)]">
                   {segment.transcript}
                 </p>
               </div>
             ))}
         </div>
       </details>
+      </div>
     </PageColumn>
   );
 }
@@ -431,11 +436,14 @@ function BackToKid({
   childName: string;
 }) {
   return (
-    <Link
+    <QuietAction
       href={`/app/${childId}/progress`}
-      className="text-sm font-medium text-muted transition-colors hover:text-strong"
+      kind="quiet"
+      size="default"
+      icon={<Icon name="back" size={16} />}
+      className="min-h-10 px-0 text-sm"
     >
-      {"\u2190"} Back to {childName}&apos;s progress
-    </Link>
+      Back to {childName}&apos;s progress
+    </QuietAction>
   );
 }

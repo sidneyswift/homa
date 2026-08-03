@@ -2,10 +2,11 @@
 
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
 
 import { HOURS_SUBJECTS } from "../../../lib/hours-model";
 import { SUBJECT_LABELS, type HoursEntry } from "../../../lib/hours-view";
+import { Icon } from "../../../components/design/Icon";
+import { QuietAction } from "../../../components/design/QuietAction";
 import {
   deleteHoursEntryAction,
   updateHoursEntryAction,
@@ -35,11 +36,11 @@ function DeleteEntryButton({ entry, onDone }: { entry: HoursEntry; onDone: () =>
 
   if (!confirming) {
     return (
-      <div className="mt-4 border-t border-border-subtle pt-3">
+      <div className="mt-4 border-t border-[var(--homa-control-boundary)] pt-3">
         <button
           type="button"
           onClick={() => setConfirming(true)}
-          className="text-xs font-semibold text-muted hover:underline"
+          className="quiet-action quiet-action--quiet min-h-9 px-0 text-xs"
         >
           Delete this entry
         </button>
@@ -48,14 +49,15 @@ function DeleteEntryButton({ entry, onDone }: { entry: HoursEntry; onDone: () =>
   }
 
   return (
-    <div className="mt-4 border-t border-border-subtle pt-3">
+    <div className="mt-4 border-t border-[var(--homa-control-boundary)] pt-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs font-semibold text-muted">
+        <p className="text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
           {`Delete this ${entry.minutes}-minute ${SUBJECT_LABELS[entry.subject].toLowerCase()} entry? This can't be undone.`}
         </p>
         <div className="flex shrink-0 gap-2">
-          <button
-            type="button"
+          <QuietAction
+            kind="secondary"
+            size="default"
             disabled={pending}
             onClick={() => {
               setError(null);
@@ -69,20 +71,21 @@ function DeleteEntryButton({ entry, onDone }: { entry: HoursEntry; onDone: () =>
                 }
               });
             }}
-            className="rounded-pill border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-strong transition-colors hover:border-brand disabled:opacity-60"
+            className="px-3.5 text-xs text-[color:var(--homa-error-ink)]"
           >
             {pending ? "Deleting\u2026" : "Delete"}
-          </button>
-          <button
-            type="button"
+          </QuietAction>
+          <QuietAction
+            kind="quiet"
+            size="default"
             onClick={() => setConfirming(false)}
-            className="rounded-pill px-3.5 py-1.5 text-xs font-bold text-muted transition-colors hover:text-body"
+            className="px-3.5 text-xs"
           >
             Keep
-          </button>
+          </QuietAction>
         </div>
       </div>
-      {error ? <p className="mt-2 text-xs text-muted">{error}</p> : null}
+      {error ? <p className="mt-2 text-xs text-[color:var(--homa-error-ink)]">{error}</p> : null}
     </div>
   );
 }
@@ -165,15 +168,15 @@ export function HoursEntryOverlay({
       role="dialog"
       aria-modal="true"
       aria-labelledby="hours-entry-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(51,42,33,0.42)] p-4"
+      className="quiet-artifact-backdrop fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <div
-        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[var(--radius-xl)] border border-border-subtle bg-card p-5 shadow-[var(--shadow-xl)]"
+        className="quiet-artifact-dialog quiet-frame quiet-frame--paper"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
-          <h2 id="hours-entry-title" className="font-display text-xl font-semibold text-strong">
+          <h2 id="hours-entry-title" className="font-display text-xl font-semibold text-[color:var(--homa-ink)]">
             Edit recorded time
           </h2>
           <button
@@ -181,26 +184,26 @@ export function HoursEntryOverlay({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-md p-1.5 text-subtle transition-colors duration-(--dur-fast) ease-out hover:bg-page hover:text-body"
+            className="quiet-action quiet-action--quiet min-h-10 min-w-10 px-2 text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]"
           >
-            <X size={18} aria-hidden="true" />
+            <Icon name="close" size={20} />
           </button>
         </div>
 
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
           {entry.childName ? `For ${entry.childName}.` : "For the whole family."}
         </p>
-        <p className="mt-0.5 text-xs text-subtle">
+        <p className="mt-0.5 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
           {SOURCE_EXPLANATIONS[entry.source]}
         </p>
 
         <form action={formAction} className="mt-4 flex flex-col gap-3">
-          <label className="flex flex-col gap-1.5 text-sm font-semibold text-strong">
+          <label className="flex flex-col gap-1.5 text-sm font-semibold text-[color:var(--homa-ink)]">
             Subject
             <select
               name="subject"
               defaultValue={entry.subject}
-              className="min-h-11 rounded-md border border-border bg-card px-3 text-sm font-normal text-body outline-none focus:border-brand"
+              className="min-h-11 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
             >
               {HOURS_SUBJECTS.map((subject) => (
                 <option key={subject} value={subject}>
@@ -209,7 +212,7 @@ export function HoursEntryOverlay({
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1.5 text-sm font-semibold text-strong">
+          <label className="flex flex-col gap-1.5 text-sm font-semibold text-[color:var(--homa-ink)]">
             Minutes
             <input
               type="number"
@@ -218,10 +221,10 @@ export function HoursEntryOverlay({
               max={600}
               step={1}
               defaultValue={entry.minutes}
-              className="min-h-11 rounded-md border border-border bg-card px-3 text-sm font-normal text-body outline-none focus:border-brand"
+              className="min-h-11 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
             />
           </label>
-          <label className="flex flex-col gap-1.5 text-sm font-semibold text-strong">
+          <label className="flex flex-col gap-1.5 text-sm font-semibold text-[color:var(--homa-ink)]">
             Note
             <textarea
               name="note"
@@ -229,25 +232,28 @@ export function HoursEntryOverlay({
               defaultValue={entry.note ?? ""}
               rows={3}
               placeholder="Optional, for your own record"
-              className="rounded-md border border-border bg-card px-3 py-2 text-sm font-normal text-body outline-none focus:border-brand"
+              className="rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 py-2 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
             />
           </label>
-          {state.error ? <p className="text-sm text-muted">{state.error}</p> : null}
+          {state.error ? <p className="text-sm text-[color:var(--homa-error-ink)]">{state.error}</p> : null}
           <div className="mt-1 flex justify-end gap-2">
-            <button
-              type="button"
+            <QuietAction
+              kind="quiet"
+              size="default"
               onClick={onClose}
-              className="rounded-pill px-4 py-2 text-sm font-semibold text-muted transition-colors hover:text-body"
+              className="px-4 text-sm"
             >
               Cancel
-            </button>
-            <button
+            </QuietAction>
+            <QuietAction
+              kind="primary"
+              size="default"
               type="submit"
               disabled={pending}
-              className="rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-60"
+              className="px-5 text-sm"
             >
               {pending ? "Saving\u2026" : "Save changes"}
-            </button>
+            </QuietAction>
           </div>
         </form>
 

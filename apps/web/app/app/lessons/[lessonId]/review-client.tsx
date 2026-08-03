@@ -7,6 +7,7 @@ import { upload } from "@vercel/blob/client";
 import { prepareChildPhotoForUpload } from "../../../../lib/child-photo-prepare";
 import { keptAudioNote } from "../../../../lib/lessons/keep-audio";
 import { requestLessonReviewRetry } from "../../../../lib/lessons/retry-client";
+import { QuietAction } from "../../../../components/design/QuietAction";
 
 /**
  * The review page's client slivers (plan 2026-07-13-lesson-listen.md
@@ -58,7 +59,7 @@ export function LessonStatusPoll({
   }, [lessonId, router]);
 
   return (
-    <p className="mt-2 text-sm text-muted" aria-live="polite">
+    <p className="mt-2 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]" aria-live="polite">
       {total > 0
         ? `Listened through about ${transcribed * 3} of ${total * 3} minutes so far.`
         : "Getting the recording ready."}
@@ -73,8 +74,9 @@ export function RetryLessonAnalysis({ lessonId }: { lessonId: string }) {
 
   return (
     <div>
-      <button
-        type="button"
+      <QuietAction
+        kind="primary"
+        size="default"
         disabled={pending}
         onClick={() => {
           setPending(true);
@@ -89,12 +91,12 @@ export function RetryLessonAnalysis({ lessonId }: { lessonId: string }) {
             setPending(false);
           })();
         }}
-        className="mt-3 min-h-11 cursor-pointer rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover disabled:opacity-60"
+        className="mt-3 px-5 text-sm"
       >
         {pending ? "Homa is trying again\u2026" : "Have Homa try again"}
-      </button>
+      </QuietAction>
       {message ? (
-        <p role="alert" className="mt-3 text-sm text-body">
+        <p role="alert" className="mt-3 text-sm text-[color:var(--homa-error-ink)]">
           {message}
         </p>
       ) : null}
@@ -128,9 +130,9 @@ export function KeptAudioNotice({
     return (
       <section
         aria-label="Recording"
-        className="mt-4 rounded-lg border border-border-subtle bg-card p-5"
+        className="quiet-frame quiet-frame--paper mt-4 p-5"
       >
-        <p className="text-sm text-body">
+        <p className="text-sm text-[color:var(--homa-ink)]">
           The recording is deleted. Everything Homa wrote about the
           lesson is still here.
         </p>
@@ -141,16 +143,17 @@ export function KeptAudioNotice({
   return (
     <section
       aria-label="Recording"
-      className="mt-4 rounded-lg border border-border-subtle bg-card p-5 shadow-sm"
+      className="quiet-frame quiet-frame--paper mt-4 p-5"
     >
-      <p className="font-display text-base font-semibold text-strong">
+      <p className="font-display text-base font-semibold text-[color:var(--homa-ink)]">
         {note.heading}
       </p>
-      <p className="mt-1 text-sm text-body">{note.body}</p>
+      <p className="mt-1 text-sm text-[color:var(--homa-ink)]">{note.body}</p>
       {confirming ? (
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <button
-            type="button"
+          <QuietAction
+            kind="primary"
+            size="default"
             disabled={pending}
             onClick={() => {
               setPending(true);
@@ -163,26 +166,28 @@ export function KeptAudioNotice({
                 })
                 .finally(() => setPending(false));
             }}
-            className="min-h-10 cursor-pointer rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover disabled:opacity-60"
+            className="px-5 text-sm"
           >
             {pending ? "Deleting…" : "Yes, delete the recording"}
-          </button>
-          <button
-            type="button"
+          </QuietAction>
+          <QuietAction
+            kind="quiet"
+            size="default"
             onClick={() => setConfirming(false)}
-            className="min-h-10 cursor-pointer text-sm font-medium text-muted underline underline-offset-4"
+            className="text-sm underline underline-offset-4"
           >
             Keep it
-          </button>
+          </QuietAction>
         </div>
       ) : (
-        <button
-          type="button"
+        <QuietAction
+          kind="quiet"
+          size="default"
           onClick={() => setConfirming(true)}
-          className="mt-3 min-h-10 cursor-pointer text-sm font-medium text-muted underline underline-offset-4"
+          className="mt-3 text-sm underline underline-offset-4"
         >
           {note.action}
-        </button>
+        </QuietAction>
       )}
     </section>
   );
@@ -260,16 +265,17 @@ export function AddLessonPhotos({
         className="sr-only"
         aria-label="Add a photo to this lesson"
       />
-      <button
-        type="button"
+      <QuietAction
+        kind="secondary"
+        size="default"
         disabled={pending}
         onClick={() => inputRef.current?.click()}
-        className="min-h-9 cursor-pointer rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-medium text-body transition-colors hover:border-brand disabled:opacity-60"
+        className="px-4 text-sm"
       >
         {pending ? "Adding\u2026" : "Add photos"}
-      </button>
+      </QuietAction>
       {error ? (
-        <p className="mt-2 text-sm text-danger" role="alert">
+        <p className="mt-2 text-sm text-[color:var(--homa-error-ink)]" role="alert">
           {error}
         </p>
       ) : null}

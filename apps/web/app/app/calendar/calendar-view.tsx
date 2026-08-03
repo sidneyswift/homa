@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 import type { FamilyEventRow } from "../../../lib/family-events";
 import {
@@ -34,6 +33,9 @@ import { setViewContextAction } from "../view-context-actions";
 import { VIEW_CONTEXT_FAMILY } from "../../../lib/view-context";
 import { useAuthenticatedPlanChecks } from "../../../lib/use-authenticated-plan-checks";
 import { avatarTone, KidAvatar } from "../../../components/dashboard/kid-avatar";
+import { Icon } from "../../../components/design/Icon";
+import { QuietAction } from "../../../components/design/QuietAction";
+import { QuietStatus } from "../../../components/design/QuietStatus";
 
 /**
  * /app/calendar (issue #176, CG-03: "calendar and homeschool planner in
@@ -199,7 +201,7 @@ function ActivityCard({
   const [bg, ink] = tone;
 
   return (
-    <div className="rounded-lg p-1.5 shadow-sm" style={{ background: bg }}>
+    <div className="rounded-[var(--homa-radius-control)] border border-[color-mix(in_srgb,var(--homa-control-boundary)_60%,transparent)] p-1.5" style={{ background: bg }}>
       <div className="flex items-center justify-between gap-1">
         <span
           className="text-[0.55rem] font-bold uppercase tracking-[0.05em]"
@@ -218,13 +220,13 @@ function ActivityCard({
           disabled={!writable}
           aria-busy={pending}
           onChange={onToggle}
-          className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 accent-[var(--sage-500)]"
+          className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 accent-[var(--homa-constructive-ink)]"
         />
         <span
           className={
             checked
-              ? "text-[0.7rem] leading-snug text-subtle line-through"
-              : "text-[0.7rem] leading-snug text-body"
+              ? "text-[0.7rem] leading-snug text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))] line-through"
+              : "text-[0.7rem] leading-snug text-[color:var(--homa-ink)]"
           }
         >
           {item.text}
@@ -632,30 +634,29 @@ export function CalendarView({
   const stripeBackground = familyStripeBackground(kids.length);
 
   return (
-    <>
+    <div data-brand-surface="calendar" data-brand-fixture="quiet-authority-v1">
       {planChecks.getMessage() ? (
-        <div
-          role="status"
-          className="mb-3 flex items-start justify-between gap-3 rounded-md border border-border bg-card p-3 text-sm text-body"
-        >
+        <QuietStatus tone="attention" className="mb-3">
+          <div className="flex items-start justify-between gap-3 text-sm">
           <span>{planChecks.getMessage()}</span>
           <button
             type="button"
             onClick={() => planChecks.clearMessage()}
-            className="font-semibold text-brand hover:underline"
+            className="font-semibold text-[color:var(--homa-highlight-ink)] hover:underline"
           >
             Dismiss
           </button>
-        </div>
+          </div>
+        </QuietStatus>
       ) : null}
       {/* One compact header row (a veteran mom's request: the afternoon
           belongs above the fold, not a tall title stack) */}
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="font-display text-[1.45rem] font-semibold leading-tight tracking-[-0.015em] text-strong">
+          <h1 className="font-display text-[1.45rem] font-semibold leading-tight tracking-[-0.015em] text-[color:var(--homa-ink)]">
             {selectedKid ? `${selectedKid.name}'s calendar` : (familyName ?? "Your calendar")}
           </h1>
-          <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
+          <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
             {weekLabel(weekOffset)} {"·"} {spanLabel}
           </p>
         </div>
@@ -663,27 +664,28 @@ export function CalendarView({
           <Link
             href={calendarWeekHref(weekOffset - 1)}
             aria-label="Previous week"
-            className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border bg-card text-body transition-colors hover:border-[var(--clay-200)]"
+            className="flex min-h-10 min-w-10 items-center justify-center rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] text-[color:var(--homa-ink)] transition-colors hover:border-[var(--homa-midnight-action)]"
           >
-            <ChevronLeft size={16} aria-hidden="true" />
+            <Icon name="back" size={20} />
           </Link>
           <Link
             href={calendarWeekHref(weekOffset + 1)}
             aria-label="Next week"
-            className="flex min-h-9 min-w-9 items-center justify-center rounded-pill border border-border bg-card text-body transition-colors hover:border-[var(--clay-200)]"
+            className="flex min-h-10 min-w-10 items-center justify-center rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] text-[color:var(--homa-ink)] transition-colors hover:border-[var(--homa-midnight-action)]"
           >
-            <ChevronRight size={16} aria-hidden="true" />
+            <Icon name="next" size={20} />
           </Link>
           {weekOffset !== 0 ? (
             <Link
               href={calendarWeekHref(0)}
-              className="rounded-pill border border-border bg-card px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.1em] text-subtle transition-colors hover:border-brand"
+              className="rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.1em] text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))] transition-colors hover:border-[var(--homa-midnight-action)]"
             >
               Today
             </Link>
           ) : null}
-          <button
-            type="button"
+          <QuietAction
+            kind="primary"
+            size="default"
             aria-haspopup="dialog"
             onClick={() =>
               openComposerForSlot(
@@ -691,17 +693,19 @@ export function CalendarView({
                 9 * 60,
               )
             }
-            className="flex items-center gap-1.5 rounded-pill bg-brand px-4 py-1.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            icon={<Icon name="add" size={20} />}
+            className="px-4 text-sm"
           >
-            <Plus size={15} aria-hidden="true" />
             Add event
-          </button>
-          <Link
+          </QuietAction>
+          <QuietAction
             href="/app/planner"
-            className="rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
+            kind="secondary"
+            size="default"
+            className="px-4 text-sm"
           >
             Open the week planner
-          </Link>
+          </QuietAction>
         </div>
       </header>
 
@@ -713,10 +717,9 @@ export function CalendarView({
             aria-pressed={selectedKidId === null}
             className={
               selectedKidId === null
-                ? "rounded-pill border border-brand px-4 py-1.5 text-sm font-semibold text-strong"
-                : "rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-semibold text-body transition-colors hover:border-brand"
+                ? "quiet-filter quiet-filter--active"
+                : "quiet-filter"
             }
-            style={selectedKidId === null ? { background: "var(--clay-100)" } : undefined}
           >
             Everyone
           </button>
@@ -731,8 +734,8 @@ export function CalendarView({
                 aria-pressed={active}
                 className={
                   active
-                    ? "flex items-center gap-2 rounded-pill border px-3 py-1.5 text-sm font-semibold"
-                    : "flex items-center gap-2 rounded-pill border border-border bg-card px-3 py-1.5 text-sm font-semibold text-body transition-colors hover:border-brand"
+                    ? "quiet-filter quiet-filter--active flex items-center gap-2"
+                    : "quiet-filter flex items-center gap-2"
                 }
                 style={active ? { background: bg, color: ink, borderColor: ink } : undefined}
               >
@@ -745,8 +748,8 @@ export function CalendarView({
       ) : null}
 
       {kids.length === 0 ? (
-        <div className="mt-6 rounded-lg border border-border-subtle bg-card p-8 text-center shadow-sm">
-          <p className="font-display text-xl font-semibold text-strong">
+        <div className="quiet-frame quiet-frame--paper mt-6 p-8 text-center">
+          <p className="font-display text-xl font-semibold text-[color:var(--homa-ink)]">
             Add a child first to see their calendar.
           </p>
         </div>
@@ -757,7 +760,7 @@ export function CalendarView({
           // almost no family has put their week on real dates yet, and
           // nothing on real dates means nothing for Homa to reshuffle).
           <div className="mt-4 flex flex-wrap items-center gap-3">
-            <p className="text-sm text-muted">
+            <p className="text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
               Nothing on the calendar this week yet.
             </p>
             <button
@@ -766,13 +769,13 @@ export function CalendarView({
               onClick={() =>
                 openComposerForSlot((days.find((day) => day.isToday) ?? days[0]).date, 9 * 60)
               }
-              className="rounded-pill border border-brand px-4 py-1.5 text-sm font-semibold text-strong transition-colors hover:bg-[var(--clay-100)]"
+              className="rounded-[var(--homa-radius-control)] border border-[var(--homa-midnight-action)] px-4 py-1.5 text-sm font-semibold text-[color:var(--homa-ink)] transition-colors hover:bg-[var(--homa-info-tint)]"
             >
               Add an appointment
             </button>
             <Link
               href="/app?draft=schedule-week"
-              className="rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-semibold text-body transition-colors hover:border-brand"
+              className="rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-1.5 text-sm font-semibold text-[color:var(--homa-ink)] transition-colors hover:border-[var(--homa-midnight-action)]"
             >
               Put school on real days
             </Link>
@@ -784,24 +787,24 @@ export function CalendarView({
           // danger tokens only, no new colors.
           <div
             role="status"
-            className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border px-4 py-2.5 text-sm"
+            className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-[var(--homa-radius-control)] border px-4 py-2.5 text-sm"
             style={{
-              borderColor: "var(--danger)",
-              background: "var(--danger-soft)",
-              color: "var(--rose-600)",
+              borderColor: "var(--homa-error-ink)",
+              background: "var(--homa-error-tint)",
+              color: "var(--homa-error-ink)",
             }}
           >
             <span className="font-semibold">{dragError}</span>
             <button
               type="button"
               onClick={() => setDragError(null)}
-              className="rounded-pill border border-border bg-card px-3 py-1 text-xs font-semibold text-body transition-colors hover:border-brand"
+              className="rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 py-1 text-xs font-semibold text-[color:var(--homa-ink)] transition-colors hover:border-[var(--homa-midnight-action)]"
             >
               Dismiss
             </button>
           </div>
         ) : null}
-        <section className="mt-4 overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
+        <section className="quiet-frame quiet-frame--paper mt-4 overflow-x-auto p-0">
           <div className="min-w-[860px]">
             {/* Day headers */}
             <div className="grid" style={{ gridTemplateColumns: GRID_COLUMNS }}>
@@ -809,17 +812,17 @@ export function CalendarView({
               {days.map((day) => (
                 <div
                   key={day.date}
-                  className="flex items-baseline gap-1.5 border-l border-border-subtle px-2 pb-1.5 pt-2.5"
+                  className="flex items-baseline gap-1.5 border-l border-[var(--homa-control-boundary)] px-2 pb-1.5 pt-2.5"
                 >
-                  <span className="text-[0.62rem] font-bold uppercase tracking-[0.08em] text-subtle">
+                  <span className="text-[0.62rem] font-bold uppercase tracking-[0.08em] text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
                     {day.label}
                   </span>
                   {day.isToday ? (
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand text-[0.78rem] font-bold text-white">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--homa-midnight-action)] text-[0.78rem] font-bold text-[var(--homa-paper)]">
                       {day.dayOfMonth}
                     </span>
                   ) : (
-                    <span className="font-display text-[1.05rem] font-semibold text-strong">
+                    <span className="font-display text-[1.05rem] font-semibold text-[color:var(--homa-ink)]">
                       {day.dayOfMonth}
                     </span>
                   )}
@@ -836,7 +839,7 @@ export function CalendarView({
               >
                 <div className="flex items-center justify-end pr-1.5">
                   {trackIndex === 0 ? (
-                    <span className="text-[0.55rem] font-bold uppercase tracking-[0.06em] text-subtle">
+                    <span className="text-[0.55rem] font-bold uppercase tracking-[0.06em] text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
                       All day
                     </span>
                   ) : null}
@@ -864,7 +867,7 @@ export function CalendarView({
                           endTime: banner.endTime,
                         });
                       }}
-                      className="mx-1 flex cursor-pointer items-center justify-between gap-1.5 rounded-md px-2 py-1 text-left transition-shadow hover:shadow-sm"
+                      className="mx-1 flex cursor-pointer items-center justify-between gap-1.5 rounded-[var(--homa-radius-control)] px-2 py-1 text-left transition-shadow hover:shadow-sm"
                       style={{
                         gridColumn: `${banner.startIdx + 2} / ${banner.endIdx + 3}`,
                         gridRow: 1,
@@ -873,7 +876,7 @@ export function CalendarView({
                     >
                       <span
                         className="truncate text-[0.7rem] font-bold"
-                        style={{ color: tone ? tone[1] : "var(--text-strong)" }}
+                        style={{ color: tone ? tone[1] : "var(--homa-ink)" }}
                       >
                         {banner.title}
                       </span>
@@ -908,18 +911,18 @@ export function CalendarView({
                 kid's logged hours, date-true but clock-free on purpose */}
             {hasPlansStrip ? (
               <div
-                className="grid border-t border-border-subtle"
+                className="grid border-t border-[var(--homa-control-boundary)]"
                 style={{ gridTemplateColumns: GRID_COLUMNS }}
               >
                 <div className="flex justify-end pr-1.5 pt-1.5">
-                  <span className="text-[0.55rem] font-bold uppercase tracking-[0.06em] text-subtle">
+                  <span className="text-[0.55rem] font-bold uppercase tracking-[0.06em] text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
                     School
                   </span>
                 </div>
                 {plansStripByDay.map((day) => (
                   <div
                     key={day.date}
-                    className="flex flex-col gap-1 border-l border-border-subtle p-1"
+                    className="flex flex-col gap-1 border-l border-[var(--homa-control-boundary)] p-1"
                   >
                     {day.cards.map(({ item, kidIndex }) => {
                       const kid = kids[kidIndex];
@@ -968,7 +971,7 @@ export function CalendarView({
                       return (
                         <span
                           key={kidIndex}
-                          className="inline-flex w-fit items-center gap-1 rounded-pill px-2 py-0.5 text-[0.6rem] font-bold"
+                          className="inline-flex w-fit items-center gap-1 rounded-[var(--homa-radius-control)] px-2 py-0.5 text-[0.6rem] font-bold"
                           style={{ background: bg, color: ink }}
                         >
                           {formatMinutesAsHours(minutes)} logged
@@ -982,7 +985,7 @@ export function CalendarView({
 
             {/* The time grid: events at their real hour, sized by length */}
             <div
-              className="grid border-t border-border-subtle"
+              className="grid border-t border-[var(--homa-control-boundary)]"
               style={{ gridTemplateColumns: GRID_COLUMNS }}
             >
               <div className="relative" style={{ height: gridHeight }}>
@@ -992,7 +995,7 @@ export function CalendarView({
                 ).map((hour) => (
                   <span
                     key={hour}
-                    className="absolute right-1.5 text-[0.6rem] font-semibold text-subtle"
+                    className="absolute right-1.5 text-[0.6rem] font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]"
                     style={{ top: (hour - hourWindow.startHour) * HOUR_PX + 2 }}
                   >
                     {hourLabel(hour)}
@@ -1022,7 +1025,7 @@ export function CalendarView({
                   <div
                     key={day.date}
                     data-day-date={day.date}
-                    className="relative cursor-pointer border-l border-border-subtle"
+                    className="relative cursor-pointer border-l border-[var(--homa-control-boundary)]"
                     style={{ height: gridHeight }}
                     onClick={(clickEvent) => {
                       const target = clickEvent.target as HTMLElement;
@@ -1046,7 +1049,7 @@ export function CalendarView({
                     ).map((row) => (
                       <div
                         key={row}
-                        className="absolute inset-x-0 border-t border-border-subtle/60"
+                        className="absolute inset-x-0 border-t border-[color-mix(in_srgb,var(--homa-control-boundary)_60%,transparent)]"
                         style={{ top: row * HOUR_PX }}
                         aria-hidden="true"
                       />
@@ -1106,7 +1109,7 @@ export function CalendarView({
                               endTime: block.rawEndTime,
                             });
                           }}
-                          className="absolute cursor-pointer overflow-hidden rounded-lg px-2 py-0.5 text-left shadow-sm transition-shadow hover:shadow-md"
+                          className="absolute cursor-pointer overflow-hidden rounded-[var(--homa-radius-control)] border border-[color-mix(in_srgb,var(--homa-control-boundary)_60%,transparent)] px-2 py-0.5 text-left shadow-sm transition-shadow hover:shadow-md"
                           style={{
                             top,
                             height,
@@ -1166,7 +1169,7 @@ export function CalendarView({
                           {block.slotCount === 1 && height < 34 ? (
                             <p
                               className="flex items-baseline justify-between gap-1 pr-4 pt-0.5 text-[0.7rem] leading-tight"
-                              style={{ color: tone ? tone[1] : "var(--text-strong)" }}
+                              style={{ color: tone ? tone[1] : "var(--homa-ink)" }}
                             >
                               <span className="truncate font-bold">{block.title}</span>
                               <span className="shrink-0 text-[0.62rem] font-medium">
@@ -1189,14 +1192,14 @@ export function CalendarView({
                                       : "truncate pr-4 pt-0.5 text-[0.7rem] font-bold leading-tight"
                                 }
                                 lang="en"
-                                style={{ color: tone ? tone[1] : "var(--text-strong)" }}
+                                style={{ color: tone ? tone[1] : "var(--homa-ink)" }}
                               >
                                 {block.title}
                               </p>
                               {height >= 34 && block.slotCount === 1 ? (
                                 <p
                                   className="mt-0.5 text-[0.68rem] font-medium leading-tight"
-                                  style={{ color: tone ? tone[1] : "var(--text-strong)" }}
+                                  style={{ color: tone ? tone[1] : "var(--homa-ink)" }}
                                 >
                                   {block.timeLabel}
                                 </p>
@@ -1223,25 +1226,25 @@ export function CalendarView({
                           );
                           return (
                             <div
-                              className="pointer-events-none absolute z-20 overflow-hidden rounded-lg px-2 py-0.5 opacity-95 shadow-lg ring-2"
+                              className="pointer-events-none absolute z-20 overflow-hidden rounded-[var(--homa-radius-control)] border border-[var(--homa-midnight-action)] px-2 py-0.5 opacity-95 shadow-lg ring-2"
                               style={{
                                 top,
                                 height,
                                 left: 3,
                                 right: 3,
                                 background: tone ? tone[0] : stripeBackground,
-                                ...({ "--tw-ring-color": "var(--brand)" } as React.CSSProperties),
+                                ...({ "--tw-ring-color": "var(--homa-midnight-action)" } as React.CSSProperties),
                               }}
                             >
                               <p
                                 className="truncate pt-0.5 text-[0.7rem] font-bold leading-tight"
-                                style={{ color: tone ? tone[1] : "var(--text-strong)" }}
+                                style={{ color: tone ? tone[1] : "var(--homa-ink)" }}
                               >
                                 {source.title}
                               </p>
                               <p
                                 className="mt-0.5 text-[0.68rem] font-medium leading-tight"
-                                style={{ color: tone ? tone[1] : "var(--text-strong)" }}
+                                style={{ color: tone ? tone[1] : "var(--homa-ink)" }}
                               >
                                 {formatTimeRange(
                                   minutesToTimeInput(drag.startMin),
@@ -1260,18 +1263,18 @@ export function CalendarView({
                         >
                           <div
                             className="relative border-t-2"
-                            style={{ borderColor: "var(--rose-500)" }}
+                            style={{ borderColor: "var(--homa-visual-coral)" }}
                           >
                             <span
                               className="absolute -top-[5px] left-0 h-2 w-2 rounded-full"
-                              style={{ background: "var(--rose-500)" }}
+                              style={{ background: "var(--homa-visual-coral)" }}
                             />
                           </div>
                         </div>
                       ) : (
                         <div
                           className="pointer-events-none absolute inset-x-0 z-10 border-t"
-                          style={{ top: nowLineTop, borderColor: "var(--rose-100)" }}
+                          style={{ top: nowLineTop, borderColor: "var(--homa-error-tint)" }}
                           aria-hidden="true"
                         />
                       )
@@ -1288,7 +1291,7 @@ export function CalendarView({
       {/* One voice, once: the empty-week nudge above the grid already
           says how to add things, so this caption yields to it. */}
       {!weekIsEmpty ? (
-        <p className="mt-6 text-xs text-muted">
+        <p className="mt-6 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
           Ask Homa to schedule a plan activity onto a real day, or to add an
           appointment or trip; both show up here right away. Hours shown here
           are a quick indicator; edit them on the Hours page.
@@ -1296,7 +1299,7 @@ export function CalendarView({
       ) : null}
 
       {details ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="quiet-artifact-backdrop fixed inset-0 z-50 flex items-center justify-center p-4">
           <button
             type="button"
             aria-label="Close"
@@ -1307,14 +1310,14 @@ export function CalendarView({
             role="dialog"
             aria-modal="true"
             aria-label={details.title}
-            className="relative w-full max-w-sm rounded-xl border border-border bg-card p-5 shadow-lg"
+            className="quiet-artifact-dialog quiet-frame quiet-frame--paper"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="font-display text-lg font-semibold leading-snug text-strong">
+                <p className="font-display text-lg font-semibold leading-snug text-[color:var(--homa-ink)]">
                   {details.title}
                 </p>
-                <p className="mt-1 text-sm text-body">{details.whenLabel}</p>
+                <p className="mt-1 text-sm text-[color:var(--homa-ink)]">{details.whenLabel}</p>
               </div>
               {details.kidIndex !== null && kids[details.kidIndex] ? (
                 <KidAvatar
@@ -1325,49 +1328,52 @@ export function CalendarView({
                 />
               ) : null}
             </div>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
               {details.kidIndex !== null && kids[details.kidIndex]
                 ? `For ${kids[details.kidIndex].name}`
                 : "For the whole family"}
             </p>
-            {details.note ? <p className="mt-2 text-sm text-body">{details.note}</p> : null}
+            {details.note ? <p className="mt-2 text-sm text-[color:var(--homa-ink)]">{details.note}</p> : null}
             {composerError ? (
-              <p className="mt-2 text-sm" style={{ color: "var(--rose-600)" }}>
+              <p className="mt-2 text-sm text-[color:var(--homa-error-ink)]">
                 {composerError}
               </p>
             ) : null}
             <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-              <button
-                type="button"
+              <QuietAction
+                kind="secondary"
+                size="default"
                 disabled={saving}
                 onClick={() => (confirmDelete ? void deleteDetailsEvent() : setConfirmDelete(true))}
-                className="rounded-pill border border-border bg-card px-4 py-2 text-sm font-semibold transition-colors hover:border-[var(--rose-500)] disabled:opacity-50"
-                style={{ color: "var(--rose-600)" }}
+                className="px-4 text-sm text-[color:var(--homa-error-ink)]"
               >
                 {confirmDelete ? "Really delete it" : "Delete"}
-              </button>
+              </QuietAction>
               <div className="flex items-center gap-2">
                 <button
                   ref={detailsCloseRef}
                   type="button"
                   onClick={() => setDetails(null)}
-                  className="rounded-pill border border-border bg-card px-4 py-2 text-sm font-semibold text-body transition-colors hover:border-brand"
+                  className="quiet-action quiet-action--secondary quiet-action--default px-4 text-sm"
                 >
                   Close
                 </button>
-                <button
-                  type="button"
+                <QuietAction
+                  kind="secondary"
+                  size="default"
                   onClick={() => openComposerForEvent(details)}
-                  className="rounded-pill border border-brand px-4 py-2 text-sm font-semibold text-strong transition-colors hover:bg-[var(--clay-100)]"
+                  className="px-4 text-sm"
                 >
                   Edit
-                </button>
-                <Link
+                </QuietAction>
+                <QuietAction
                   href="/app"
-                  className="rounded-pill border border-brand px-4 py-2 text-sm font-semibold text-strong transition-colors hover:bg-[var(--clay-100)]"
+                  kind="quiet"
+                  size="default"
+                  className="px-4 text-sm"
                 >
                   Ask Homa
-                </Link>
+                </QuietAction>
               </div>
             </div>
           </div>
@@ -1375,7 +1381,7 @@ export function CalendarView({
       ) : null}
 
       {composer ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="quiet-artifact-backdrop fixed inset-0 z-50 flex items-center justify-center p-4">
           <button
             type="button"
             aria-label="Close"
@@ -1386,12 +1392,12 @@ export function CalendarView({
             role="dialog"
             aria-modal="true"
             aria-label={composer.eventId ? "Edit event" : "New event"}
-            className="relative w-full max-w-sm rounded-xl border border-border bg-card p-5 shadow-lg"
+            className="quiet-artifact-dialog quiet-frame quiet-frame--paper"
           >
-            <p className="font-display text-lg font-semibold text-strong">
+            <p className="font-display text-lg font-semibold text-[color:var(--homa-ink)]">
               {composer.eventId ? "Edit event" : "New event"}
             </p>
-            <label className="mt-3 block text-sm font-semibold text-body">
+            <label className="mt-3 block text-sm font-semibold text-[color:var(--homa-ink)]">
               What is it?
               <input
                 ref={composerTitleRef}
@@ -1402,17 +1408,17 @@ export function CalendarView({
                   setComposer({ ...composer, title: changeEvent.target.value })
                 }
                 placeholder="Dentist, co-op, museum day…"
-                className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                className="mt-1 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 py-2 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
               />
             </label>
-            <label className="mt-3 block text-sm font-semibold text-body">
+            <label className="mt-3 block text-sm font-semibold text-[color:var(--homa-ink)]">
               Who is it for?
               <select
                 value={composer.childId}
                 onChange={(changeEvent) =>
                   setComposer({ ...composer, childId: changeEvent.target.value })
                 }
-                className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                className="mt-1 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 py-2 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
               >
                 <option value="">The whole family</option>
                 {kids.map((kid) => (
@@ -1423,7 +1429,7 @@ export function CalendarView({
               </select>
             </label>
             <div className="mt-3 flex items-end gap-3">
-              <label className="block flex-1 text-sm font-semibold text-body">
+              <label className="block flex-1 text-sm font-semibold text-[color:var(--homa-ink)]">
                 {composer.allDay ? "Starts" : "Day"}
                 <input
                   type="date"
@@ -1438,23 +1444,23 @@ export function CalendarView({
                           : composer.endsOn,
                     })
                   }
-                  className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                  className="mt-1 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 py-2 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
                 />
               </label>
-              <label className="flex items-center gap-1.5 pb-2.5 text-sm font-semibold text-body">
+              <label className="flex items-center gap-1.5 pb-2.5 text-sm font-semibold text-[color:var(--homa-ink)]">
                 <input
                   type="checkbox"
                   checked={composer.allDay}
                   onChange={(changeEvent) =>
                     setComposer({ ...composer, allDay: changeEvent.target.checked })
                   }
-                  className="h-4 w-4 accent-[var(--sage-500)]"
+                  className="h-4 w-4 accent-[var(--homa-constructive-ink)]"
                 />
                 All day
               </label>
             </div>
             {composer.allDay ? (
-              <label className="mt-3 block text-sm font-semibold text-body">
+              <label className="mt-3 block text-sm font-semibold text-[color:var(--homa-ink)]">
                 Ends
                 <input
                   type="date"
@@ -1463,12 +1469,12 @@ export function CalendarView({
                   onChange={(changeEvent) =>
                     setComposer({ ...composer, endsOn: changeEvent.target.value })
                   }
-                  className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                  className="mt-1 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 py-2 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
                 />
               </label>
             ) : (
               <div className="mt-3 flex gap-3">
-                <label className="block flex-1 text-sm font-semibold text-body">
+                <label className="block flex-1 text-sm font-semibold text-[color:var(--homa-ink)]">
                   From
                   <input
                     type="time"
@@ -1476,10 +1482,10 @@ export function CalendarView({
                     onChange={(changeEvent) =>
                       setComposer({ ...composer, startTime: changeEvent.target.value })
                     }
-                    className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                    className="mt-1 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 py-2 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
                   />
                 </label>
-                <label className="block flex-1 text-sm font-semibold text-body">
+                <label className="block flex-1 text-sm font-semibold text-[color:var(--homa-ink)]">
                   To
                   <input
                     type="time"
@@ -1487,12 +1493,12 @@ export function CalendarView({
                     onChange={(changeEvent) =>
                       setComposer({ ...composer, endTime: changeEvent.target.value })
                     }
-                    className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                    className="mt-1 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 py-2 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
                   />
                 </label>
               </div>
             )}
-            <label className="mt-3 block text-sm font-semibold text-body">
+            <label className="mt-3 block text-sm font-semibold text-[color:var(--homa-ink)]">
               Note (optional)
               <input
                 type="text"
@@ -1502,35 +1508,37 @@ export function CalendarView({
                   setComposer({ ...composer, note: changeEvent.target.value })
                 }
                 placeholder="Bring the insurance card"
-                className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                className="mt-1 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 py-2 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
               />
             </label>
             {composerError ? (
-              <p className="mt-2 text-sm" style={{ color: "var(--rose-600)" }}>
+              <p className="mt-2 text-sm text-[color:var(--homa-error-ink)]">
                 {composerError}
               </p>
             ) : null}
             <div className="mt-4 flex items-center justify-end gap-2">
-              <button
-                type="button"
+              <QuietAction
+                kind="secondary"
+                size="default"
                 onClick={() => setComposer(null)}
-                className="rounded-pill border border-border bg-card px-4 py-2 text-sm font-semibold text-body transition-colors hover:border-brand"
+                className="px-4 text-sm"
               >
                 Cancel
-              </button>
-              <button
-                type="button"
+              </QuietAction>
+              <QuietAction
+                kind="primary"
+                size="default"
                 disabled={saving}
                 onClick={() => void saveComposer()}
-                className="rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="px-5 text-sm"
               >
                 {saving ? "Saving…" : "Save"}
-              </button>
+              </QuietAction>
             </div>
           </div>
         </div>
       ) : null}
-    </>
+    </div>
   );
 }
 

@@ -206,7 +206,7 @@ describe("ProgressView", () => {
     assert.match(html, /aria-label="Lessons"/);
     assert.match(
       html,
-      /<a[^>]*href="\/app\/child-1\/lessons\/record"[^>]*>Record a lesson<\/a>/,
+      /<a[^>]*href="\/app\/child-1\/lessons\/record"[^>]*>[\s\S]*Record a lesson[\s\S]*<\/a>/,
     );
     assert.match(html, /href="\/app\/lessons\/lesson-1"/);
 
