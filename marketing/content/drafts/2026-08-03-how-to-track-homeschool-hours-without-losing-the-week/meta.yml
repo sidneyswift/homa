@@ -1,0 +1,12 @@
+id: 2026-08-03-how-to-track-homeschool-hours-without-losing-the-week
+lifecycle: draft
+source: marketing/signals/2026-08-03-how-to-track-homeschool-hours.md
+lanes: [article, video]
+formats:
+  - {file: article.mdx, channel: blog, status: draft}
+  - {file: video/script.md, channel: tiktok+instagram+youtube+facebook, status: draft}
+gates:
+  article: "reader review completed with revisions 2026-08-03; editor review passed 2026-08-03"
+  script: "shortform-viewer review passed after revisions 2026-08-03; editor review passed after revisions 2026-08-03"
+scorecard: marketing/evals/scorecards/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week.json
+notes: "Staged only. Article and video script gates passed 2026-08-03. Hero, raw 15-second video plate, and thumbnail received visual QA, but the raw plate has a small pseudo-mark/word-like detail on the notebook cover and the 26-second script still needs deterministic timing in post. Do not publish until a human verifies the current product and state-reference boundary, reviews the final edit, and approves each format."

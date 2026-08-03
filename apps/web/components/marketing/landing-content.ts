@@ -56,6 +56,13 @@ export const PAIN_CLOSING = "Homa prepares the week. She keeps the record.";
 
 export type CapabilityId = "practice" | "plan" | "binder" | "records";
 
+export const CAPABILITY_FEATURE_HREFS: Readonly<Record<CapabilityId, string>> = {
+  plan: "/features/homeschool-planner",
+  practice: "/features/personalized-practice-pages",
+  binder: "/features/homeschool-record-keeping",
+  records: "/features/homeschool-hours-tracker",
+};
+
 // Ordered by the parent's day: plan the week, get the pages, keep what
 // happened, prove the hours.
 export const CAPABILITY_ITEMS: ReadonlyArray<{

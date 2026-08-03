@@ -9,6 +9,14 @@ Canonical expanded summary: https://thankshoma.com/llms-full.txt
 
 Homa helps a parent see what a child does comfortably and what they are learning now. It can create printable materials, record school hours, and save useful family context.
 
+## Feature pages
+
+- Homeschool planner: https://thankshoma.com/features/homeschool-planner
+- Homeschool hours tracker: https://thankshoma.com/features/homeschool-hours-tracker
+- Homeschool progress tracker: https://thankshoma.com/features/homeschool-progress-tracker
+- Homeschool record keeping: https://thankshoma.com/features/homeschool-record-keeping
+- Personalized homeschool practice pages: https://thankshoma.com/features/personalized-practice-pages
+
 The progress report covers ages 2 to 16. A parent answers questions about things they have seen their child do. The report compares those answers with cited national sources. It shows what looks solid, what is growing, and one useful next step.
 
 A separate state section summarizes reviewed homeschool-law sources and shows when they were last checked. It is not legal advice and cannot confirm that a family has met a legal requirement.

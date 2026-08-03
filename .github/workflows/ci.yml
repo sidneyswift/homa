@@ -67,6 +67,11 @@ jobs:
       - name: "No-em-dash style law (AGENTS.md: no em dash, ever, anywhere)"
         run: node scripts/em-dash-check.mjs
 
+      - name: SEO contract
+        # This job deliberately has no dependency install. Keep the SEO
+        # contract dependency-free so the fast gate can execute it directly.
+        run: node --experimental-strip-types scripts/seo-contract-check.mts
+
   # Branch protection on main requires a status context named exactly
   # "build-and-check" (the old single job's name). This gate carries that
   # name and verifies the exact job set required by the classified scope.

@@ -12,7 +12,7 @@ import { Icon } from "../design/Icon";
 import { QuietFooter } from "../design/QuietFooter";
 import { ReportPreview } from "../../app/onboarding/report-preview";
 import { FAQ_ITEMS } from "./faq-items";
-import { HERO_COPY, PAIN_CLOSING, PAIN_ITEMS, CAPABILITY_ITEMS, FOUNDER_STORY_COPY, SAMPLE_REPORT_COPY, type CapabilityId, type PainId } from "./landing-content";
+import { HERO_COPY, PAIN_CLOSING, PAIN_ITEMS, CAPABILITY_FEATURE_HREFS, CAPABILITY_ITEMS, FOUNDER_STORY_COPY, SAMPLE_REPORT_COPY, type CapabilityId, type PainId } from "./landing-content";
 import { Nav } from "./Nav";
 import { SignupPopupProvider, useSignupPopup } from "./SignupPopupProvider";
 
@@ -277,7 +277,7 @@ export function QuietLanding() {
 
           <section id="features" className="qa-band qa-section" aria-labelledby="quiet-features-title">
             <div className="qa-section__intro"><div className="qa-eyebrow">One connected record</div><h2 id="quiet-features-title">Plans, pages, and proof in one place.</h2><p className="qa-section__lead">Every piece of the week stays connected, from the first idea to the page you print and the time you share.</p></div>
-            <div className="qa-capability-grid">{CAPABILITY_ITEMS.map(({ id, title, body }) => <QuietFrame as="article" tone="paper" className="qa-frame qa-capability-card" key={id}><h3>{title}</h3><p>{body}</p><div className="qa-capability-card__proof"><QuietCapabilityProof capabilityId={id} /></div></QuietFrame>)}</div>
+            <div className="qa-capability-grid">{CAPABILITY_ITEMS.map(({ id, title, body }) => <QuietFrame as="article" tone="paper" className="qa-frame qa-capability-card" key={id}><h3>{title}</h3><p>{body}</p><div className="qa-capability-card__proof"><QuietCapabilityProof capabilityId={id} /></div><div style={{ marginTop: 18 }}><QuietAction kind="quiet" href={CAPABILITY_FEATURE_HREFS[id]} icon={<Icon name="next" size={16} />}>See this feature</QuietAction></div></QuietFrame>)}</div>
           </section>
 
           <section id="sample-report" className="qa-band qa-section" aria-labelledby="quiet-report-title">
