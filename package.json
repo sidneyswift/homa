@@ -24,7 +24,7 @@
     "check:child-progress": "tsx --tsconfig apps/web/tsconfig.json --test \"packages/core/src/events.test.ts\" \"apps/web/lib/child-progress/*.test.ts\" \"apps/web/lib/map/walk-answer-event.test.ts\" \"scripts/reconcile-child-progress.test.ts\"",
     "dev:token": "node scripts/refresh-oidc-token.mjs",
     "check:design-tokens": "tsx scripts/design-tokens-check.mts && tsx --test scripts/design-tokens-check.test.ts",
-    "check:brand-surfaces": "node --experimental-strip-types scripts/brand-surfaces.mts --check && node --experimental-strip-types --test scripts/brand-surfaces.test.mts",
+    "check:brand-surfaces": "node --experimental-strip-types scripts/brand-surfaces.mts --check && node --experimental-strip-types scripts/brand-inventory-completeness-check.mts && node --experimental-strip-types --test scripts/brand-surfaces.test.mts scripts/brand-inventory-completeness-check.test.mts",
     "check:channel-evidence": "node --experimental-strip-types scripts/channel-evidence-check.mts && node --experimental-strip-types --test scripts/channel-evidence-check.test.mts",
     "check:provider-handoffs": "node --experimental-strip-types scripts/provider-handoff-check.mts && node --experimental-strip-types --test scripts/provider-handoff-check.test.mts",
     "check:brand-assets": "node --experimental-strip-types scripts/brand-assets.mts --check",
