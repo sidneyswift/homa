@@ -70,6 +70,8 @@ export default defineEval({
       ),
     );
 
+    // Name the required artifact explicitly. A plain acknowledgement is not a
+    // successful revision, even when it correctly avoids image generation.
     const layoutRevision = await t.send(
       "Make a new finished printable version now. Keep the art exactly as it is. Move every checkbox below its label, put bath before pajamas, and add a blank notes line at the bottom of the chart.",
     );
