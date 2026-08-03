@@ -124,10 +124,14 @@ export async function getFamilyScreenData(
         plan: string;
         progress: string | null;
         retest_at: string;
+        plan_revision: number;
+        progress_revision: number;
       }[]
     >`
       select child_id, subject_id, plan::text as plan,
-             progress::text as progress, retest_at::text as retest_at
+             progress::text as progress, retest_at::text as retest_at,
+             plan_revision::int as plan_revision,
+             progress_revision::int as progress_revision
       from public.child_plans
       where child_id::text in (select unnest(string_to_array(${childIds}, ',')))
     `;
@@ -143,6 +147,8 @@ export async function getFamilyScreenData(
         plans.push({
           childId: row.child_id,
           subjectId: row.subject_id,
+          planRevision: row.plan_revision,
+          progressRevision: row.progress_revision,
           done: Object.values(progress).filter(Boolean).length,
           total: weeks.reduce((sum, week) => sum + week.activities.length, 0),
           retestAt: row.retest_at,

@@ -332,9 +332,8 @@ export default async function PlanPage({
 
             <PlanWeeks
               weeks={plan.weeks}
-              storageKey={`homa-plan-${token}-${subjectId}`}
               weekLines={weekLines}
-              childId={result.childId}
+              reportToken={token}
               subjectId={subjectId}
               initialChecks={result.progress}
             />

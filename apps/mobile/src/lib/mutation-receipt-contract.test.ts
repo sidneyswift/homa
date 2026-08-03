@@ -17,6 +17,7 @@ const eventComposer = source("../features/planner/event-composer.tsx");
 const scheduleActivitySheet = source("../features/planner/schedule-activity-sheet.tsx");
 const entryEditor = source("../features/hours/entry-editor.tsx");
 const activityRow = source("../features/planner/activity-row.tsx");
+const plannerData = source("../features/planner/use-planner-data.ts");
 const inlineError = source("../components/ui/inline-error.tsx");
 const familyEventChildrenMigration = source(
   "../../../../supabase/migrations/20260802232000_family_event_children.sql",
@@ -31,8 +32,7 @@ describe("native durable mutation contract", () => {
       assert.match(adapter, /requireMutationReceipt/u);
       assert.doesNotMatch(adapter, /return \{ error \}/u);
     }
-    assert.match(childPlans, /requireMutationAcknowledgement/u);
-    assert.match(childPlans, /requireReceiptValue/u);
+    assert.match(childPlans, /executePlanActivityCheck/u);
     for (const operation of [
       "create_family_event",
       "update_family_event",
@@ -50,12 +50,10 @@ describe("native durable mutation contract", () => {
     }
     assert.match(
       childPlans,
-      /requireMutationAcknowledgement\("toggle_plan_activity_check"/u,
+      /\.rpc\("set_plan_activity_check_v2"/u,
     );
-    assert.match(
-      childPlans,
-      /requireMutationReceipt\("verify_plan_activity_check"/u,
-    );
+    assert.doesNotMatch(childPlans, /toggle_plan_activity_check/u);
+    assert.doesNotMatch(childPlans, /verify_plan_activity_check/u);
   });
 
   it("makes event creation idempotent across an ambiguous retry", () => {
@@ -88,6 +86,53 @@ describe("native durable mutation contract", () => {
     assert.match(activityRow, /onToggle: \(\) => Promise<void>/u);
     assert.match(activityRow, /await onToggle/u);
     assert.match(activityRow, /accessibilityState=\{\{[\s\S]*busy:/u);
+  });
+
+  it("applies successful plan receipts without a follow-up read", () => {
+    for (const route of [plannerRoute, voiceOverlay]) {
+      assert.match(
+        route,
+        /if \(outcome\.status === "applied"\) \{\s*applyActivityCheck\(activity, outcome\);\s*return;\s*\}\s*await reload\(\);/u,
+      );
+    }
+  });
+
+  it("reloads ambiguous plan writes before surfacing their error", () => {
+    for (const route of [plannerRoute, voiceOverlay]) {
+      assert.match(
+        route,
+        /catch \(cause\) \{\s*await reconcileAfterAmbiguousWrite\(\);\s*throw cause;\s*\}/u,
+      );
+    }
+    assert.match(plannerData, /for \(const delayMs of \[1_500, 5_000\]\)/u);
+    assert.match(plannerData, /reconciliationScheduled/u);
+  });
+
+  it("rejects out-of-order Planner reads and refreshes only on refocus", () => {
+    assert.match(plannerData, /const requestGeneration = \+\+reloadGeneration\.current/u);
+    assert.match(
+      plannerData,
+      /if \(requestGeneration !== reloadGeneration\.current\) return;/u,
+    );
+    assert.match(plannerData, /mergeChildPlanSnapshots\(current, nextPlans\)/u);
+    assert.match(plannerRoute, /useFocusEffect/u);
+    assert.match(
+      plannerRoute,
+      /navigation\.addListener\("blur", \(\) => \{\s*hasBlurredPlanner\.current = true;/u,
+    );
+    assert.match(
+      plannerRoute,
+      /if \(!hasBlurredPlanner\.current\) return;\s*hasBlurredPlanner\.current = false;\s*void latestReload\.current\(\);/u,
+    );
+  });
+
+  it("shows the intended checkbox state while its receipt is pending", () => {
+    assert.match(activityRow, /setPendingDone\(!activity\.done\)/u);
+    assert.match(activityRow, /const checked = pendingDone \?\? activity\.done/u);
+    assert.match(
+      activityRow,
+      /accessibilityState=\{\{[\s\S]*checked,[\s\S]*busy: pending/u,
+    );
   });
 
   it("freezes the visible mutation snapshot while its receipt is pending", () => {

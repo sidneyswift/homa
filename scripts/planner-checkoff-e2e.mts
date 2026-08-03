@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import postgres from "postgres";
 
 import {
+  EVAL_FIXTURE_FAMILY_ID,
   EVAL_FIXTURE_PARENT_USER_ID,
   EVAL_FIXTURE_PLAN_CHILD_ID,
   EVAL_FIXTURE_PLAN_SUBJECT,
@@ -45,6 +46,7 @@ interface PlanState {
 }
 
 const sql = postgres(databaseUrl, { prepare: false, max: 4 });
+let mapStoreLoaded = false;
 
 function deferredVoid(): {
   promise: Promise<void>;
@@ -548,6 +550,87 @@ try {
   await membershipRemoval;
   assert.equal(removalFinished, true);
 
+  const ownReportToken = `own-${randomUUID()}`;
+  const foreignReportToken = `foreign-${randomUUID()}`;
+  const ownSubjectId = "legacy-own";
+  const untouchedSubjectId = "legacy-untouched";
+  const foreignSubjectId = "legacy-foreign";
+  await sql`
+    insert into public.child_reports (child_id, scores, bank_version, token)
+    values (
+      ${EVAL_FIXTURE_PLAN_CHILD_ID}, '{}'::jsonb, 'legacy-e2e', ${ownReportToken}
+    )
+    on conflict (child_id) do update
+    set token = excluded.token, revoked_at = null
+  `;
+  await sql`
+    insert into public.child_reports (child_id, scores, bank_version, token)
+    values (${foreignChildId}, '{}'::jsonb, 'legacy-e2e', ${foreignReportToken})
+  `;
+  await sql`
+    insert into public.child_plans (
+      child_id, subject_id, plan, bank_version, progress, retest_at
+    ) values
+      (
+        ${EVAL_FIXTURE_PLAN_CHILD_ID}, ${ownSubjectId},
+        ${sql.json(initial.plan)}, 'legacy-e2e', '{}'::jsonb,
+        now() + interval '28 days'
+      ),
+      (
+        ${EVAL_FIXTURE_PLAN_CHILD_ID}, ${untouchedSubjectId},
+        ${sql.json(initial.plan)}, 'legacy-e2e', '{"2.0": true}'::jsonb,
+        now() + interval '28 days'
+      ),
+      (
+        ${foreignChildId}, ${foreignSubjectId},
+        ${sql.json(initial.plan)}, 'legacy-e2e', '{"1.0": false}'::jsonb,
+        now() + interval '28 days'
+      )
+  `;
+
+  const { savePlanProgressForReportToken } = await import(
+    "../apps/web/lib/map/store"
+  );
+  mapStoreLoaded = true;
+  const deniedForeignToken = await savePlanProgressForReportToken(
+    EVAL_FIXTURE_FAMILY_ID,
+    foreignReportToken,
+    foreignSubjectId,
+    { "1.0": true },
+  );
+  assert.equal(deniedForeignToken, null);
+  const [foreignAfterDeniedWrite] = await sql<{ progress: Record<string, boolean> }[]>`
+    select progress
+    from public.child_plans
+    where child_id = ${foreignChildId}
+      and subject_id = ${foreignSubjectId}
+  `;
+  assert.deepEqual(foreignAfterDeniedWrite.progress, { "1.0": false });
+
+  const ownTokenResult = await savePlanProgressForReportToken(
+    EVAL_FIXTURE_FAMILY_ID,
+    ownReportToken,
+    ownSubjectId,
+    { "1.0": true, "9.9": true },
+  );
+  assert.deepEqual(ownTokenResult, {
+    childId: EVAL_FIXTURE_PLAN_CHILD_ID,
+    done: 1,
+  });
+  const [ownAfterWrite, untouchedAfterWrite] = await sql<
+    { subject_id: string; progress: Record<string, boolean> }[]
+  >`
+    select subject_id, progress
+    from public.child_plans
+    where child_id = ${EVAL_FIXTURE_PLAN_CHILD_ID}
+      and subject_id in (${ownSubjectId}, ${untouchedSubjectId})
+    order by subject_id
+  `;
+  assert.equal(ownAfterWrite.subject_id, ownSubjectId);
+  assert.deepEqual(ownAfterWrite.progress, { "1.0": true });
+  assert.equal(untouchedAfterWrite.subject_id, untouchedSubjectId);
+  assert.deepEqual(untouchedAfterWrite.progress, { "2.0": true });
+
   await assert.rejects(
     sql.begin(async (transaction) => {
       await transaction`set local role authenticated`;
@@ -598,7 +681,12 @@ try {
   console.log("PASS  plan and progress revisions track independent meaning");
   console.log("PASS  Planner receipts preserve exact multi-family tenancy");
   console.log("PASS  v2 bounds direct input and retires the unused v1 grant");
+  console.log("PASS  legacy report tokens preserve exact family and plan tenancy");
   console.log("PASS  expand phase preserves the deployed legacy operation");
 } finally {
+  if (mapStoreLoaded) {
+    const { mapDb } = await import("../apps/web/lib/map/db");
+    await mapDb().end({ timeout: 5 });
+  }
   await sql.end({ timeout: 5 });
 }

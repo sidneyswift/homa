@@ -11,6 +11,8 @@ import {
 const PLAN: DashboardPlan = {
   childId: "kid-1",
   subjectId: "math",
+  planRevision: 1,
+  progressRevision: 0,
   done: 0,
   total: 1,
   retestAt: "2026-08-31T00:00:00.000Z",

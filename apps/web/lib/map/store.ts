@@ -737,18 +737,24 @@ export function prunePlanChecks(
   ) as Record<string, boolean>;
 }
 
-export async function savePlanProgress(
+export async function savePlanProgressForReportToken(
   familyId: string,
-  childId: string,
+  reportToken: string,
   subjectId: string,
   checks: Record<string, boolean>,
-): Promise<{ done: number } | null> {
-  if (!(await childBelongsToFamily(childId, familyId))) return null;
+): Promise<{ childId: string; done: number } | null> {
   const sql = mapDb();
-  const rows = await sql<{ id: string; plan: FourWeekPlan }[]>`
-    select id, plan
-    from public.child_plans
-    where child_id = ${childId} and subject_id = ${subjectId}
+  const rows = await sql<{ id: string; child_id: string; plan: FourWeekPlan }[]>`
+    select plan.id, plan.child_id, plan.plan
+    from public.child_reports as report
+    join public.children as child
+      on child.id = report.child_id
+     and child.family_id = ${familyId}
+    join public.child_plans as plan
+      on plan.child_id = child.id
+     and plan.subject_id = ${subjectId}
+    where report.token = ${reportToken}
+      and report.revoked_at is null
   `;
   const plan = rows[0];
   if (!plan) return null;
@@ -760,7 +766,10 @@ export async function savePlanProgress(
     where id = ${plan.id}
   `;
   await touchFamily(familyId);
-  return { done: Object.values(pruned).filter(Boolean).length };
+  return {
+    childId: plan.child_id,
+    done: Object.values(pruned).filter(Boolean).length,
+  };
 }
 
 /** The child's report token, re-scoped to the caller's family (for the
@@ -829,9 +838,12 @@ export async function getPlanBoard(
             plan: FourWeekPlan;
             progress: Record<string, boolean> | null;
             retest_at: string;
+            plan_revision: number | string;
+            progress_revision: number | string;
           }[]
         >`
           select p.child_id, p.subject_id, p.plan, p.progress,
+                 p.plan_revision, p.progress_revision,
                  to_char(p.retest_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') as retest_at
           from public.child_plans p
           join public.children c on c.id = p.child_id

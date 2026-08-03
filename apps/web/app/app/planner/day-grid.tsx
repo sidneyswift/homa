@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo } from "react";
 
 import type { FamilyAssetReference } from "../../../lib/library/family-asset-reference";
-import { planChecksStorageKey, usePlanChecks } from "../../../lib/use-plan-checks";
 import type { WeekdayCell } from "../../../lib/time-zone";
+import { useAuthenticatedPlanCheckSeeds } from "../../../lib/use-authenticated-plan-checks";
 import { KidAvatar } from "../../../components/dashboard/kid-avatar";
 
 /**
@@ -24,8 +25,8 @@ export interface PlannerDayPlan {
   key: string;
   childId: string;
   subjectId: string;
-  /** The report token (storage key + sync identity). */
-  token: string;
+  planRevision: number | null;
+  progressRevision: number | null;
   initialChecks: Record<string, boolean>;
   /**
    * True for a week derived from the child's age, which has no stored
@@ -63,15 +64,19 @@ export interface PlannerDay {
   birthdays?: string[];
 }
 
-function ActivityCard({ item, plan }: { item: PlannerDayItem; plan: PlannerDayPlan }) {
-  const { done, toggle } = usePlanChecks({
-    storageKey: planChecksStorageKey(plan.token, plan.subjectId),
-    childId: plan.childId,
-    subjectId: plan.subjectId,
-    initialChecks: plan.initialChecks,
-  });
-  const checked = Boolean(done[item.checkId]);
-
+function ActivityCard({
+  item,
+  readOnly,
+  checked,
+  pending,
+  onToggle,
+}: {
+  item: PlannerDayItem;
+  readOnly: boolean;
+  checked: boolean;
+  pending: boolean;
+  onToggle: () => void;
+}) {
   return (
     <div className="rounded-md p-2.5" style={{ background: item.toneBg }}>
       <div className="flex items-center justify-between gap-1.5">
@@ -92,9 +97,9 @@ function ActivityCard({ item, plan }: { item: PlannerDayItem; plan: PlannerDayPl
         ) : null}
       </div>
       <label
-        className={`mt-1.5 flex items-start gap-2 ${plan.readOnly ? "" : "cursor-pointer"}`}
+        className={`mt-1.5 flex items-start gap-2 ${readOnly ? "" : "cursor-pointer"}`}
       >
-        {plan.readOnly ? (
+        {readOnly ? (
           // A dot, not a disabled checkbox: a greyed box invites a tap
           // and then refuses it, which reads as broken rather than as
           // not-yet-hers.
@@ -106,7 +111,8 @@ function ActivityCard({ item, plan }: { item: PlannerDayItem; plan: PlannerDayPl
           <input
             type="checkbox"
             checked={checked}
-            onChange={() => toggle(item.checkId)}
+            onChange={onToggle}
+            aria-busy={pending}
             className="mt-0.5 h-4 w-4 flex-shrink-0 accent-[var(--sage-500)]"
           />
         )}
@@ -152,17 +158,57 @@ export function DayGrid({
   days,
   plans,
   singleColumn = false,
+  onRefresh,
 }: {
   days: PlannerDay[];
   plans: PlannerDayPlan[];
   /** The chat's planner canvas is ~half a viewport wide: five viewport-
    * breakpoint columns would crush there, so it stacks the days. */
   singleColumn?: boolean;
+  /** Canvas refreshes its fetched board; the page falls back to router refresh. */
+  onRefresh?: () => void;
 }) {
+  const router = useRouter();
+  const routeRefresh = useCallback(() => router.refresh(), [router]);
+  const refresh = onRefresh ?? routeRefresh;
+  const seeds = useMemo(
+    () =>
+      plans.flatMap((plan) =>
+        plan.planRevision === null || plan.progressRevision === null
+          ? []
+          : [
+              {
+                childId: plan.childId,
+                subjectId: plan.subjectId,
+                planRevision: plan.planRevision,
+                progressRevision: plan.progressRevision,
+                progress: plan.initialChecks,
+              },
+            ],
+      ),
+    [plans],
+  );
+  const checks = useAuthenticatedPlanCheckSeeds({ seeds, refresh });
   const plansByKey = useMemo(() => new Map(plans.map((plan) => [plan.key, plan])), [plans]);
 
   return (
-    <div className={singleColumn ? "grid gap-3" : "grid gap-3 md:grid-cols-5"}>
+    <>
+      {checks.getMessage() ? (
+        <div
+          role="status"
+          className="mb-3 flex items-start justify-between gap-3 rounded-md border border-border bg-card p-3 text-sm text-body"
+        >
+          <span>{checks.getMessage()}</span>
+          <button
+            type="button"
+            onClick={() => checks.clearMessage()}
+            className="font-semibold text-brand hover:underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      ) : null}
+      <div className={singleColumn ? "grid gap-3" : "grid gap-3 md:grid-cols-5"}>
       {days.map((day) => (
         <section
           key={day.cell.label}
@@ -205,11 +251,33 @@ export function DayGrid({
             day.items.map((item) => {
               const plan = plansByKey.get(item.planKey);
               if (!plan) return null;
+              const readOnly = Boolean(plan.readOnly) || !checks.isWritable(
+                plan.childId,
+                plan.subjectId,
+              );
               return (
                 <ActivityCard
                   key={`${item.planKey}-${item.checkId}`}
                   item={item}
-                  plan={plan}
+                  readOnly={readOnly}
+                  checked={checks.isChecked(
+                    plan.childId,
+                    plan.subjectId,
+                    item.checkId,
+                  )}
+                  pending={checks.isPending(
+                    plan.childId,
+                    plan.subjectId,
+                    item.checkId,
+                  )}
+                  onToggle={() =>
+                    checks.toggle({
+                      childId: plan.childId,
+                      subjectId: plan.subjectId,
+                      checkKey: item.checkId,
+                      expectedText: item.text,
+                    })
+                  }
                 />
               );
             })
@@ -225,6 +293,7 @@ export function DayGrid({
           )}
         </section>
       ))}
-    </div>
+      </div>
+    </>
   );
 }

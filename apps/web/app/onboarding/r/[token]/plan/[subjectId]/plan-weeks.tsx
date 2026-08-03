@@ -2,33 +2,38 @@
 
 import type { PlanWeek } from "@homa/core";
 
-import { usePlanChecks } from "../../../../../../lib/use-plan-checks";
+import {
+  legacyTokenPlanChecksStorageKey,
+  useLegacyTokenPlanChecks,
+} from "../../../../../../lib/use-legacy-token-plan-checks";
 
 /**
- * The four weeks with check-off boxes. The check-off store itself
- * (localStorage + debounced server sync, shared with the week planner)
- * lives in lib/use-plan-checks; this renders the full month around it.
+ * The four weeks with check-off boxes. This shareable token page keeps
+ * its own local-first store; authenticated Planner uses atomic checks.
  */
 
 export function PlanWeeks({
   weeks,
-  storageKey,
   weekLines = null,
-  childId,
+  reportToken,
   subjectId,
   initialChecks = {},
 }: {
   weeks: PlanWeek[];
-  storageKey: string;
   /** Model-written framing line per week (D8 overturn), index-aligned;
    * null entries fall back to the template focus line alone. */
   weekLines?: Array<string | null> | null;
-  childId: string;
+  reportToken: string;
   subjectId: string;
   /** The plan row's synced checks: server truth, merged under local. */
   initialChecks?: Record<string, boolean>;
 }) {
-  const { done, toggle } = usePlanChecks({ storageKey, childId, subjectId, initialChecks });
+  const { done, toggle } = useLegacyTokenPlanChecks({
+    storageKey: legacyTokenPlanChecksStorageKey(reportToken, subjectId),
+    reportToken,
+    subjectId,
+    initialChecks,
+  });
 
   const total = weeks.reduce((sum, week) => sum + week.activities.length, 0);
   const doneCount = Object.values(done).filter(Boolean).length;

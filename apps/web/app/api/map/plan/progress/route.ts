@@ -2,8 +2,8 @@ import { mapPlanProgressSchema } from "@homa/core";
 
 import { emitMapEvent } from "../../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../../lib/map/ratelimit";
-import { requireFamily } from "../../../../../lib/map/session";
-import { savePlanProgress } from "../../../../../lib/map/store";
+import { requireFamilyFromRequest } from "../../../../../lib/map/session";
+import { savePlanProgressForReportToken } from "../../../../../lib/map/store";
 
 /**
  * POST /api/map/plan/progress
@@ -18,7 +18,7 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false }, { status: 429 });
   }
 
-  const family = await requireFamily();
+  const family = await requireFamilyFromRequest(request);
   if (!family) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
@@ -33,16 +33,21 @@ export async function POST(request: Request): Promise<Response> {
   if (!parsed.success) {
     return Response.json({ ok: false, reason: "invalid" }, { status: 400 });
   }
-  const { childId, subjectId, checks } = parsed.data;
+  const { reportToken, subjectId, checks } = parsed.data;
 
   try {
-    const result = await savePlanProgress(family.id, childId, subjectId, checks);
+    const result = await savePlanProgressForReportToken(
+      family.id,
+      reportToken,
+      subjectId,
+      checks,
+    );
     if (!result) {
       return Response.json({ ok: false, reason: "unknown-plan" }, { status: 400 });
     }
     await emitMapEvent("map.plan_progress", {
       family_id: family.id,
-      child_id: childId,
+      child_id: result.childId,
       subject: subjectId,
       done_count: result.done,
     });

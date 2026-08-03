@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Check,
   ChevronLeft,
@@ -47,10 +47,7 @@ import {
   weekOffsetDaysForDate,
   weekRangeForDate,
 } from "../../../lib/unified-planner";
-import {
-  planChecksStorageKey,
-  usePlanChecks,
-} from "../../../lib/use-plan-checks";
+import { useAuthenticatedPlanChecks } from "../../../lib/use-authenticated-plan-checks";
 import {
   createFamilyEventAction,
   deleteFamilyEventOccurrenceAction,
@@ -356,40 +353,26 @@ function DialogClose({
 
 function ActivityRow({
   activity,
-  resolvedDone,
-  onDoneChange,
+  checked,
+  pending,
+  writable,
+  onToggle,
   onOpen,
 }: {
   activity: PlannerActivity;
-  resolvedDone: boolean;
-  onDoneChange: (key: string, done: boolean) => void;
+  checked: boolean;
+  pending: boolean;
+  writable: boolean;
+  onToggle: () => void;
   onOpen: () => void;
 }) {
-  const checks = usePlanChecks({
-    storageKey: planChecksStorageKey(activity.token ?? "no-token", activity.subjectId),
-    childId: activity.childId,
-    subjectId: activity.subjectId,
-    initialChecks: { [activity.checkId]: activity.done },
-  });
-  const checked = activity.token ? Boolean(checks.done[activity.checkId]) : activity.done;
-
-  useEffect(() => {
-    if (checked !== resolvedDone) onDoneChange(activity.key, checked);
-  }, [activity.key, checked, onDoneChange, resolvedDone]);
-
-  function toggle() {
-    if (!activity.token) return;
-    const next = !checked;
-    checks.toggle(activity.checkId);
-    onDoneChange(activity.key, next);
-  }
-
   return (
     <div className="grid min-h-[72px] grid-cols-[48px_minmax(0,1fr)] items-center border-b border-border-subtle last:border-b-0">
       <button
         type="button"
-        onClick={toggle}
-        disabled={!activity.token}
+        onClick={onToggle}
+        disabled={!writable}
+        aria-busy={pending}
         aria-pressed={checked}
         aria-label={`${checked ? "Mark not finished" : "Mark finished"}: ${activity.text}`}
         className="grid h-11 w-11 place-items-center rounded-full disabled:cursor-not-allowed disabled:opacity-50"
@@ -1174,7 +1157,6 @@ function EventComposer({
 export function UnifiedPlannerView({
   kids,
   plans,
-  reports,
   familyEvents,
   scheduledActivities,
   hoursEntries,
@@ -1187,7 +1169,6 @@ export function UnifiedPlannerView({
 }: {
   kids: UnifiedPlannerKid[];
   plans: DashboardPlan[];
-  reports: Map<string, { token: string | null }>;
   familyEvents: FamilyEventRow[];
   scheduledActivities: PlanActivityScheduleRow[];
   hoursEntries: HoursEntry[];
@@ -1199,8 +1180,12 @@ export function UnifiedPlannerView({
   focusChildId: string | null;
 }) {
   const router = useRouter();
+  const refreshPlanChecks = useCallback(() => router.refresh(), [router]);
+  const planChecks = useAuthenticatedPlanChecks({
+    plans,
+    refresh: refreshPlanChecks,
+  });
   const [showFinished, setShowFinished] = useState(false);
-  const [doneOverrides, setDoneOverrides] = useState<Record<string, boolean>>({});
   const [selectedActivity, setSelectedActivity] = useState<PlannerActivity | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<FamilyEventRow | null>(null);
   const [composer, setComposer] = useState<ComposerState | null>(null);
@@ -1234,7 +1219,6 @@ export function UnifiedPlannerView({
         happenedOn: entry.happenedOn,
         minutes: entry.minutes,
       })),
-      reportTokens: new Map(kids.map((kid) => [kid.id, reports.get(kid.id)?.token ?? null])),
       now,
       timeZone,
       focusChildId: visibleFocusChildId,
@@ -1246,7 +1230,7 @@ export function UnifiedPlannerView({
     // The server replaces these arrays on refresh. The active date is
     // the only local navigation key.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeDate, familyEvents, visibleFocusChildId, hoursEntries, kids, plans, reports, scheduledActivities],
+    [activeDate, familyEvents, visibleFocusChildId, hoursEntries, kids, plans, scheduledActivities],
   );
   const activeActivities = activitiesForDate(activeBoard, activeDate);
   const activeEvents = eventsForDate(familyEvents, activeDate, visibleFocusChildId);
@@ -1260,7 +1244,16 @@ export function UnifiedPlannerView({
       ),
   );
   const activeHoursMinutes = activeHours.reduce((sum, entry) => sum + entry.minutes, 0);
-  const resolvedDone = (activity: PlannerActivity) => doneOverrides[activity.key] ?? activity.done;
+  const activityWritable = (activity: PlannerActivity) =>
+    planChecks.isWritable(activity.childId, activity.subjectId);
+  const resolvedDone = (activity: PlannerActivity) =>
+    activityWritable(activity)
+      ? planChecks.isChecked(
+          activity.childId,
+          activity.subjectId,
+          activity.checkId,
+        )
+      : activity.done;
   const unfinished = activeActivities.filter((activity) => !resolvedDone(activity));
   const finished = activeActivities.filter(resolvedDone);
 
@@ -1286,7 +1279,7 @@ export function UnifiedPlannerView({
     }
     return boards;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeDate, familyEvents, visibleFocusChildId, hoursEntries, kids, plans, reports, scheduledActivities]);
+  }, [activeDate, familyEvents, visibleFocusChildId, hoursEntries, kids, plans, scheduledActivities]);
   const monthActivityCounts = new Map<string, number>();
   for (const board of monthBoards) {
     for (const day of board.days) {
@@ -1295,8 +1288,13 @@ export function UnifiedPlannerView({
     }
   }
 
-  function setDone(key: string, done: boolean) {
-    setDoneOverrides((current) => ({ ...current, [key]: done }));
+  function toggleActivity(activity: PlannerActivity) {
+    planChecks.toggle({
+      childId: activity.childId,
+      subjectId: activity.subjectId,
+      checkKey: activity.checkId,
+      expectedText: activity.text,
+    });
   }
 
   function openNewAppointment() {
@@ -1443,6 +1441,21 @@ export function UnifiedPlannerView({
 
   return (
     <div className="mx-auto w-full max-w-[820px]">
+      {planChecks.getMessage() ? (
+        <div
+          role="status"
+          className="mb-3 flex items-start justify-between gap-3 rounded-md border border-border bg-card p-3 text-sm text-body"
+        >
+          <span>{planChecks.getMessage()}</span>
+          <button
+            type="button"
+            onClick={() => planChecks.clearMessage()}
+            className="font-semibold text-brand hover:underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      ) : null}
       <header className="flex items-center justify-between gap-4">
         <h1 className="font-display text-[2rem] font-semibold leading-tight tracking-[-0.02em] text-strong">
           Planner
@@ -1612,8 +1625,14 @@ export function UnifiedPlannerView({
                 <ActivityRow
                   key={activity.key}
                   activity={activity}
-                  resolvedDone={resolvedDone(activity)}
-                  onDoneChange={setDone}
+                  checked={resolvedDone(activity)}
+                  pending={planChecks.isPending(
+                    activity.childId,
+                    activity.subjectId,
+                    activity.checkId,
+                  )}
+                  writable={activityWritable(activity)}
+                  onToggle={() => toggleActivity(activity)}
                   onOpen={() => setSelectedActivity(activity)}
                 />
               ))}
@@ -1646,8 +1665,14 @@ export function UnifiedPlannerView({
                         <ActivityRow
                           key={activity.key}
                           activity={activity}
-                          resolvedDone={resolvedDone(activity)}
-                          onDoneChange={setDone}
+                          checked={resolvedDone(activity)}
+                          pending={planChecks.isPending(
+                            activity.childId,
+                            activity.subjectId,
+                            activity.checkId,
+                          )}
+                          writable={activityWritable(activity)}
+                          onToggle={() => toggleActivity(activity)}
                           onOpen={() => setSelectedActivity(activity)}
                         />
                       ))

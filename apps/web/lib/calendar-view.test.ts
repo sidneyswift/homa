@@ -36,6 +36,8 @@ function mayaPlan(overrides: Partial<DashboardPlan> = {}): DashboardPlan {
   return {
     childId: "child-maya",
     subjectId: "math",
+    planRevision: 1,
+    progressRevision: 0,
     done: 0,
     total: 2,
     retestAt: "2026-08-31T00:00:00Z",
@@ -89,10 +91,6 @@ function board(overrides: Partial<BuildCalendarBoardInput> = {}): ReturnType<typ
     scheduledActivities: [],
     familyEvents: [],
     hoursEntries: [],
-    reportTokens: new Map([
-      ["child-maya", "token-maya"],
-      ["child-leo", "token-leo"],
-    ]),
     now: NOW,
     timeZone: TIME_ZONE,
     focusChildId: null,
@@ -206,7 +204,6 @@ describe("buildCalendarBoard: kid lanes", () => {
       checkId: "1.0",
       text: "Count to 20 daily",
       done: true,
-      token: "token-maya",
     });
     // No other day carries it.
     for (const day of maya.days) {
@@ -214,14 +211,16 @@ describe("buildCalendarBoard: kid lanes", () => {
     }
   });
 
-  it("carries no token for a child with no report, so the item stays read-only", () => {
+  it("keeps a persisted scheduled activity writable without a report token", () => {
     const result = board({
       plans: [mayaPlan()],
       scheduledActivities: [schedule()],
-      reportTokens: new Map(),
     });
     const maya = result.kidLanes.find((lane) => lane.childId === "child-maya")!;
-    assert.equal(maya.days.find((day) => day.date === "2026-08-04")!.activities[0].token, null);
+    assert.equal(
+      maya.days.find((day) => day.date === "2026-08-04")!.activities[0].checkId,
+      "1.0",
+    );
   });
 
   it("drops a scheduled activity whose index no longer exists in the current plan", () => {

@@ -25,7 +25,7 @@ import { spreadAcrossWeekdays } from "./spread-week";
  * 2026-07-10; pure render, page.tsx owns auth + data). Each kid's
  * CURRENT week of their real four-week plans is spread across the five
  * weekdays (spread-week.ts, deterministic), checkable in place through
- * the same store as the plan pages. The focus strip above the grid
+ * the authenticated atomic operation. The focus strip above the grid
  * keeps each plan's focus line, week-of-4 position, and full-plan
  * link. Day placement is presentation only, checks stay keyed by plan;
  * persisted day-by-day scheduling is a later milestone (M2-10). When
@@ -89,6 +89,7 @@ export function PlannerView({
   now,
   focusChildId,
   surface = "page",
+  onPlannerRefresh,
 }: {
   kids: PlannerKid[];
   reports: Map<string, { token: string | null }>;
@@ -102,6 +103,7 @@ export function PlannerView({
    * one column for the narrow panel, and month links open a new tab so
    * the conversation is never navigated away from. */
   surface?: "page" | "canvas";
+  onPlannerRefresh?: () => void;
 }) {
   const canvas = surface === "canvas";
   const nowMs = now.getTime();
@@ -150,11 +152,10 @@ export function PlannerView({
     if (focusKid && child.id !== focusKid.id) return;
     const token = reports.get(child.id)?.token;
     const kidPlans = plansByKid.get(child.id) ?? [];
-    // A child with no report still has an age, and an age is enough for
-    // a provisional week (founder ruling onboarding-lesson-per-subject).
-    // Without this the token gate below hid exactly the families this
-    // was built for: the ones who have not answered anything yet.
-    if (!token && !kidPlans.some((plan) => plan.provisional)) return;
+    // A report token can open the full month link, but it is not plan
+    // authority. Persisted plans remain visible and writable through the
+    // authenticated family session even when no report token exists.
+    if (kidPlans.length === 0) return;
 
     // Gather the kid's whole week first, then spread it over the five
     // days, so one kid's activities pace the week instead of piling up.
@@ -171,10 +172,8 @@ export function PlannerView({
         key: planKey,
         childId: plan.childId,
         subjectId: plan.subjectId,
-        // A provisional week has no report behind it. The key still has
-        // to be unique per child so two children's local check state
-        // cannot collide, even though nothing writes to it.
-        token: token ?? `provisional:${plan.childId}`,
+        planRevision: plan.planRevision,
+        progressRevision: plan.progressRevision,
         initialChecks: plan.progress,
         ...(plan.provisional ? { readOnly: true as const } : {}),
       });
@@ -370,7 +369,12 @@ export function PlannerView({
           </div>
 
           <div className="mt-3">
-            <DayGrid days={days} plans={dayPlans} singleColumn={canvas} />
+            <DayGrid
+              days={days}
+              plans={dayPlans}
+              singleColumn={canvas}
+              onRefresh={onPlannerRefresh}
+            />
           </div>
 
           {/* Right under the boxes it forgives (reader gate 2026-07-11:
