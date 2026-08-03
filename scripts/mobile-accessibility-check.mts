@@ -2,18 +2,27 @@ import { createRequire } from "node:module";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, resolve, sep } from "node:path";
 
-import {
-  nativeAccessibilityHandoffs,
-  nativeAccessibilityJourneys,
-  nativeAccessibilitySurfaces,
-  type NativeAccessibilityHandoff,
-  type NativeAccessibilityJourney,
-  type NativeAccessibilitySurface,
+import type {
+  NativeAccessibilityHandoff,
+  NativeAccessibilityJourney,
+  NativeAccessibilitySurface,
 } from "../apps/mobile/src/lib/accessibility/acceptance-manifest";
 
 const REPO_ROOT = process.cwd();
 const MOBILE_SOURCE_ROOT = "apps/mobile/src";
 const MOBILE_APP_ROOT = "apps/mobile/src/app";
+// The checker is imported by node:test as CommonJS in addition to being run
+// directly by tsx. Loading the manifest through require keeps both execution
+// modes on the same runtime shape while the type-only import above preserves
+// compile-time contracts.
+const acceptanceManifest = createRequire(import.meta.url)(
+  resolve(REPO_ROOT, "apps/mobile/src/lib/accessibility/acceptance-manifest.ts"),
+) as typeof import("../apps/mobile/src/lib/accessibility/acceptance-manifest");
+const {
+  nativeAccessibilityHandoffs,
+  nativeAccessibilityJourneys,
+  nativeAccessibilitySurfaces,
+} = acceptanceManifest;
 const requireFromMobile = createRequire(resolve(REPO_ROOT, "apps/mobile/package.json"));
 // TypeScript is a direct mobile workspace dependency. Loading it from that
 // package keeps this guard dependency-neutral at the monorepo root.

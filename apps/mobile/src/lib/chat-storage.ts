@@ -51,6 +51,16 @@ export interface PreparedChat {
 export const FRESH_SESSION_BOUNDARY_HOUR = 4;
 const FALLBACK_TIME_ZONE = "America/Chicago";
 
+function safeTimeZone(timeZone: string | null | undefined): string {
+  if (!timeZone) return FALLBACK_TIME_ZONE;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone }).format();
+    return timeZone;
+  } catch {
+    return FALLBACK_TIME_ZONE;
+  }
+}
+
 /** Scrollback cap; the full record lives in Postgres (recall). */
 export const MAX_ARCHIVED_MESSAGES = 200;
 
@@ -141,7 +151,7 @@ export function shouldStartFreshSession(
   timeZone: string | null | undefined = null,
 ): boolean {
   if (!lastActivityAt) return true;
-  const zone = timeZone || FALLBACK_TIME_ZONE;
+  const zone = safeTimeZone(timeZone);
   return chatDayKey(zone, lastActivityAt) < chatDayKey(zone, now);
 }
 

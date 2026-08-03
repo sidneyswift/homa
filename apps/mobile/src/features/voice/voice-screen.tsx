@@ -410,7 +410,11 @@ export function VoiceScreen() {
   }
 
   function leaveVoice() {
-    if (session.turnActive && !session.muted) session.toggleMute();
+    if (session.status === "connecting") {
+      session.end();
+    } else if (session.turnActive && !session.muted) {
+      session.toggleMute();
+    }
     router.replace("/chat");
   }
 
@@ -531,17 +535,22 @@ export function VoiceScreen() {
     }
   }
 
-  const primaryAction = session.turnActive
-    ? session.toggleMute
+  const endVoiceAction = useCallback(() => session.end(), [session.end]);
+  const primaryAction = session.status === "connecting"
+    ? endVoiceAction
+    : session.turnActive
+      ? session.toggleMute
     : session.status === "paused"
       ? session.resume
       : session.failed
         ? session.retry
         : session.start;
-  const primaryLabel = session.turnActive
-    ? session.muted
-      ? "Unmute"
-      : "Mute"
+  const primaryLabel = session.status === "connecting"
+    ? "Cancel connection"
+    : session.turnActive
+      ? session.muted
+        ? "Unmute"
+        : "Mute"
     : session.status === "paused"
       ? "Resume conversation"
       : session.failed
@@ -592,15 +601,19 @@ export function VoiceScreen() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={
-                session.turnActive
+                session.status === "connecting"
+                  ? "Cancel voice connection"
+                  : session.turnActive
                   ? "End voice conversation"
                   : session.status === "paused"
                     ? "Resume voice conversation"
                     : "Start talking with Homa"
               }
               onPress={
-                session.turnActive
-                  ? session.end
+                session.status === "connecting"
+                  ? endVoiceAction
+                  : session.turnActive
+                  ? endVoiceAction
                   : session.status === "paused"
                     ? session.resume
                     : session.start
@@ -650,6 +663,37 @@ export function VoiceScreen() {
           />
         </ScrollView>
       </View>
+
+      {session.status === "failed" && session.microphonePermissionNeeded ? (
+        <View style={{ paddingHorizontal: space.md, paddingBottom: space.xs }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Open microphone settings"
+            onPress={() => {
+              void session.openMicrophoneSettings().catch((cause) => {
+                reportCrash(cause, {
+                  surface: "native-voice",
+                  operation: "open-microphone-settings",
+                });
+              });
+            }}
+            style={({ pressed }) => ({
+              minHeight: 44,
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: radius.pill,
+              borderWidth: StyleSheet.hairlineWidth,
+              borderColor: controlBorder,
+              backgroundColor: controlFill,
+              opacity: pressed ? 0.7 : 1,
+            })}
+          >
+            <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: controlText }}>
+              Open microphone settings
+            </Text>
+          </Pressable>
+        </View>
+      ) : null}
 
       <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm, paddingHorizontal: space.md, paddingTop: space.sm, paddingBottom: Math.max(insets.bottom, space.md) }}>
         <Pressable

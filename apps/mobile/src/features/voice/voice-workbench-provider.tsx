@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -21,6 +22,7 @@ interface VoiceWorkbenchValue {
 }
 
 interface VisibleActiveObject {
+  userId: string;
   pathname: string;
   reference: ActiveObjectReference;
 }
@@ -35,22 +37,33 @@ const VoiceWorkbenchContext = createContext<VoiceWorkbenchValue | null>(null);
 export function VoiceWorkbenchProvider({ children }: { children: ReactNode }) {
   const { session: authSession } = useSession();
   const pathname = usePathname();
+  const authUserId = authSession?.user.id ?? null;
   const [visibleActiveObject, setVisibleActiveObject] = useState<VisibleActiveObject | null>(null);
-  const activeObject = authSession && visibleActiveObject?.pathname === pathname
+  const previousAuthUserId = useRef<string | null>(authUserId);
+  const activeObject = authUserId !== null
+    && visibleActiveObject?.userId === authUserId
+    && visibleActiveObject.pathname === pathname
     ? visibleActiveObject.reference
     : null;
-  const voiceSession = useVoiceSession(activeObject);
+  const voiceSession = useVoiceSession(activeObject, authUserId);
   const endVoice = voiceSession.end;
 
   useEffect(() => {
-    if (!authSession) {
-      endVoice();
+    if (previousAuthUserId.current !== authUserId) {
+      previousAuthUserId.current = authUserId;
+      setVisibleActiveObject(null);
+      endVoice({ persist: false });
+      return;
     }
-  }, [authSession, endVoice]);
+    if (!authSession) {
+      endVoice({ persist: false });
+    }
+  }, [authSession, authUserId, endVoice]);
 
   const showActiveObject = useCallback((reference: ActiveObjectReference) => {
-    setVisibleActiveObject({ pathname, reference });
-  }, [pathname]);
+    if (!authUserId) return;
+    setVisibleActiveObject({ userId: authUserId, pathname, reference });
+  }, [authUserId, pathname]);
   const clearActiveObject = useCallback((reference?: ActiveObjectReference) => {
     setVisibleActiveObject((current) => {
       if (!current || !reference) return null;

@@ -7,6 +7,7 @@ function source(relativePath: string): string {
 }
 
 const familyEvents = source("./family-events.ts");
+const family = source("./family.ts");
 const hours = source("./hours.ts");
 const planSchedule = source("./plan-schedule.ts");
 const childPlans = source("./child-plans.ts");
@@ -19,6 +20,12 @@ const entryEditor = source("../features/hours/entry-editor.tsx");
 const activityRow = source("../features/planner/activity-row.tsx");
 const plannerData = source("../features/planner/use-planner-data.ts");
 const inlineError = source("../components/ui/inline-error.tsx");
+const familySetupForm = source("../components/family-setup-form.tsx");
+const familyReadinessGate = source("../components/family-readiness-gate.tsx");
+const addChildForm = source("../features/family/add-child-form.tsx");
+const nativeFamilySetupMigration = source(
+  "../../../../supabase/migrations/20260803050000_native_family_setup_receipt.sql",
+);
 const familyEventChildrenMigration = source(
   "../../../../supabase/migrations/20260802232000_family_event_children.sql",
 );
@@ -94,6 +101,38 @@ describe("native durable mutation contract", () => {
     assert.match(planSchedule, /SCHEDULE_ACTIVITY_TIMEOUT_MS = 10_000/u);
     assert.match(planSchedule, /\.abortSignal\(controller\.signal\)/u);
     assert.match(planSchedule, /finally \{\s*clearTimeout\(timeout\);/u);
+  });
+
+  it("keeps native first-use setup receipt-bound and canonically complete", () => {
+    assert.match(family, /\.rpc\("create_my_family"/u);
+    assert.match(family, /\.rpc\("add_my_child_native_v1"/u);
+    assert.match(family, /\.rpc\("complete_my_family_setup"/u);
+    assert.match(family, /requireMutationReceipt\(\s*"add_my_child_native_v1"/u);
+    assert.match(family, /receipt\.child_id === childId/u);
+    assert.match(family, /receipt\.profile_completed_at === "string"/u);
+    assert.match(addChildForm, /requestIdRef\.current \?\?=/u);
+    assert.match(addChildForm, /setAmbiguous\(true\)/u);
+    assert.match(addChildForm, /editable=\{!pending && !ambiguous\}/u);
+    assert.match(addChildForm, /setReceipt\(.*addedName.*\)/u);
+    assert.match(addChildForm, /await waitForReceipt\(\);\s*await onAdded\(\);/u);
+    assert.match(
+      familySetupForm,
+      /setReceipt\("Your family is started\. Next, add a learner\."\);\s*await waitForReceipt\(\);\s*await onCreated\(\);/u,
+    );
+    assert.match(addChildForm, /finally \{\s*setPending\(false\);/u);
+    assert.match(familySetupForm, /Nothing changed\. Try again/u);
+    assert.match(familyReadinessGate, /familyChildren\.length === 0/u);
+    assert.match(familyReadinessGate, /!family\.profile_completed_at/u);
+    assert.match(familyReadinessGate, /completeMyFamilySetup\(\)/u);
+    assert.match(nativeFamilySetupMigration, /on conflict \(id\) do nothing/u);
+    assert.match(nativeFamilySetupMigration, /family_members_one_family_per_user_idx/u);
+    assert.match(nativeFamilySetupMigration, /profile_completed_at = coalesce/u);
+    assert.match(nativeFamilySetupMigration, /grant execute on function public\.add_my_child_native_v1/u);
+    assert.match(nativeFamilySetupMigration, /security definer/u);
+    assert.match(nativeFamilySetupMigration, /set search_path = ''/u);
+    assert.match(nativeFamilySetupMigration, /auth\.uid\(\) is null/u);
+    assert.match(nativeFamilySetupMigration, /revoke execute on function public\.complete_my_family_setup\(text\) from anon/u);
+    assert.match(nativeFamilySetupMigration, /pg_catalog\.pg_timezone_names/u);
   });
 
   it("applies successful plan receipts without a follow-up read", () => {

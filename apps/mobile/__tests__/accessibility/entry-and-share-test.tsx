@@ -159,7 +159,7 @@ describe("native entry and recovery accessibility", () => {
     expect(mockSignInWithPassword).not.toHaveBeenCalled();
 
     await fireEvent.press(
-      view.getByRole("button", { name: "Open onboarding" }),
+      view.getByRole("button", { name: "Create an account on the web" }),
     );
     expect(mockOpenWebOnboarding).toHaveBeenCalledTimes(1);
   });

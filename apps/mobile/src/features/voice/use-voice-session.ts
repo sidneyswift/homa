@@ -1,7 +1,7 @@
 import type { ActiveObjectReference } from "@homa/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { EveMessage } from "eve/react";
-import { AppState } from "react-native";
+import { AppState, Linking } from "react-native";
 import {
   mediaDevices,
   RTCPeerConnection,
@@ -65,9 +65,11 @@ export interface VoiceSession {
   recovering: boolean;
   speaking: boolean;
   handoffReady: boolean;
+  microphonePermissionNeeded: boolean;
   start: () => void;
-  end: () => void;
+  end: (options?: { persist?: boolean }) => void;
   retry: () => void;
+  openMicrophoneSettings: () => Promise<void>;
   sendText: (message: string) => boolean;
   announceResult: (message: string) => void;
   toggleMute: () => void;
@@ -83,6 +85,8 @@ const REASONS: Record<string, string> = {
   "rate-limited": "We have talked a lot today. Let's pick this up tomorrow.",
   "not-configured": "My voice is not set up right now.",
 };
+
+const VOICE_CONNECT_TIMEOUT_MS = 15_000;
 
 function apiUrl(path: string): string {
   return `${env.apiUrl.replace(/\/+$/, "")}${path}`;
@@ -100,6 +104,45 @@ function lastText(turns: readonly VoiceTurn[], role: "user" | "assistant"): stri
   return null;
 }
 
+function awaitConnectionStep<T>(
+  promise: Promise<T>,
+  signal: AbortSignal,
+  onLateValue?: (value: T) => void,
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const cleanup = () => signal.removeEventListener("abort", onAbort);
+    const onAbort = () => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(new Error("voice-connect-timeout"));
+    };
+    if (signal.aborted) {
+      onAbort();
+      return;
+    }
+    signal.addEventListener("abort", onAbort, { once: true });
+    promise.then(
+      (value) => {
+        if (settled) {
+          onLateValue?.(value);
+          return;
+        }
+        settled = true;
+        cleanup();
+        resolve(value);
+      },
+      (cause) => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        reject(cause);
+      },
+    );
+  });
+}
+
 /**
  * Native gpt-realtime-2.1 session. WebRTC owns microphone capture and remote
  * audio playback. The data channel carries only model events and guarded tool
@@ -107,12 +150,14 @@ function lastText(turns: readonly VoiceTurn[], role: "user" | "assistant"): stri
  */
 export function useVoiceSession(
   activeObject: ActiveObjectReference | null = null,
+  ownerUserId: string | null = null,
 ): VoiceSession {
   const [status, setStatus] = useState<VoiceStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [muted, setMuted] = useState(false);
   const [pauseReason, setPauseReason] = useState<string | null>(null);
   const [assistantAudioLevel, setAssistantAudioLevel] = useState<number | null>(null);
+  const [microphonePermissionNeeded, setMicrophonePermissionNeeded] = useState(false);
   const [turns, setTurns] = useState<readonly VoiceTurn[]>([]);
   const [toolEffects, setToolEffects] = useState<readonly VoiceToolEffect[]>([]);
   const peerRef = useRef<RTCPeerConnection | null>(null);
@@ -128,6 +173,7 @@ export function useVoiceSession(
   const statusRef = useRef<VoiceStatus>(status);
   const connectingRef = useRef(false);
   const connectionAttemptRef = useRef(0);
+  const connectAbortRef = useRef<AbortController | null>(null);
   const resumeOnForegroundRef = useRef(false);
   const openingResponseRequestedRef = useRef(false);
 
@@ -177,10 +223,17 @@ export function useVoiceSession(
     };
   }, [status]);
 
-  const authenticatedFetch = useCallback(async (path: string, init: RequestInit = {}) => {
+  const authenticatedFetch = useCallback(async (
+    path: string,
+    init: RequestInit = {},
+    expectedUserId: string | null = null,
+  ) => {
     const { data } = await supabase.auth.getSession();
     const token = data.session?.access_token;
     if (!token) throw new Error("no-session");
+    if (expectedUserId && data.session?.user.id !== expectedUserId) {
+      throw new Error("auth-user-changed");
+    }
     return fetch(apiUrl(path), {
       ...init,
       headers: {
@@ -195,7 +248,7 @@ export function useVoiceSession(
     (finished: boolean) => {
       const { cursor, lines } = settledTurns(turnsRef.current, cursorRef.current, finished);
       cursorRef.current = cursor;
-      if (lines.length === 0) return;
+      if (lines.length === 0 || !ownerUserId) return;
       sessionIdRef.current ??= sessionId();
       for (const { sequence, line } of lines) {
         void authenticatedFetch("/api/voice/realtime/turn", {
@@ -207,13 +260,13 @@ export function useVoiceSession(
             role: line.role,
             content: line.text,
           }),
-        }).catch(() => {
+        }, ownerUserId).catch(() => {
           // The live audio conversation remains useful if one ledger write
           // is lost. The server records the failure without interrupting her.
         });
       }
     },
-    [authenticatedFetch],
+    [authenticatedFetch, ownerUserId],
   );
 
   const acceptEvent = useCallback(
@@ -249,13 +302,28 @@ export function useVoiceSession(
     peerRef.current = null;
   }, []);
 
-  const end = useCallback(() => {
-    if (closedRef.current && statusRef.current === "idle") return;
+  const end = useCallback((options: { persist?: boolean } = {}) => {
+    const shouldPersist = options.persist !== false;
+    if (closedRef.current && statusRef.current === "idle" && shouldPersist) return;
     closedRef.current = true;
     resumeOnForegroundRef.current = false;
     connectionAttemptRef.current += 1;
     connectingRef.current = false;
-    persistSettledTurns(true);
+    connectAbortRef.current?.abort();
+    connectAbortRef.current = null;
+    if (shouldPersist) {
+      persistSettledTurns(true);
+    } else {
+      cursorRef.current = 0;
+      sessionIdRef.current = null;
+      turnsRef.current = [];
+      setTurns([]);
+      setToolEffects([]);
+      homaSessionStateRef.current = undefined;
+      pendingTextRef.current = null;
+      openingResponseRequestedRef.current = false;
+      setAssistantAudioLevel(null);
+    }
     closeTransport();
     setMuted(false);
     setPauseReason(null);
@@ -288,7 +356,7 @@ export function useVoiceSession(
             homaSessionState: homaSessionStateRef.current,
             activeObject: activeObjectRef.current,
           }),
-        });
+        }, ownerUserId);
         const body = (await response.json().catch(() => null)) as
           | { output?: unknown }
           | null;
@@ -332,7 +400,7 @@ export function useVoiceSession(
         channel.send(JSON.stringify(spokenReplyResponseCreateEvent()));
       }
     },
-    [authenticatedFetch],
+    [authenticatedFetch, ownerUserId],
   );
 
   const connect = useCallback((preserveLogicalSession: boolean) => {
@@ -356,24 +424,60 @@ export function useVoiceSession(
     setError(null);
     setPauseReason(null);
     setMuted(false);
+    setMicrophonePermissionNeeded(false);
     setStatus("connecting");
+
+    const connectAbort = new AbortController();
+    connectAbortRef.current = connectAbort;
+    const connectTimeout = setTimeout(
+      () => connectAbort.abort(),
+      VOICE_CONNECT_TIMEOUT_MS,
+    );
+
+    const returnIfStaleOrThrowIfTimedOut = () => {
+      if (closedRef.current || connectionAttemptRef.current !== attempt) return true;
+      if (connectAbort.signal.aborted) {
+        throw new Error("voice-connect-timeout");
+      }
+      return false;
+    };
 
     void (async () => {
       try {
-        const tokenResponse = await authenticatedFetch("/api/voice/realtime/token", {
-          method: "POST",
-        });
-        const tokenBody = (await tokenResponse.json().catch(() => null)) as RealtimeTokenResponse | null;
+        const tokenResponse = await awaitConnectionStep(
+          authenticatedFetch("/api/voice/realtime/token", {
+            method: "POST",
+            signal: connectAbort.signal,
+          }, ownerUserId),
+          connectAbort.signal,
+        );
+        const tokenBody = (await awaitConnectionStep(
+          tokenResponse.json().catch(() => null),
+          connectAbort.signal,
+        )) as RealtimeTokenResponse | null;
         if (!tokenResponse.ok || typeof tokenBody?.token !== "string") {
           const reason = typeof tokenBody?.reason === "string" ? tokenBody.reason : "";
           throw new Error(REASONS[reason] ?? "I could not start listening just now.");
         }
 
-        await prepareVoiceAudioForConversation();
-        const stream = await mediaDevices.getUserMedia({ audio: true, video: false });
+        if (returnIfStaleOrThrowIfTimedOut()) return;
+        await awaitConnectionStep(
+          prepareVoiceAudioForConversation(),
+          connectAbort.signal,
+        );
+        if (returnIfStaleOrThrowIfTimedOut()) return;
+        const stream = await awaitConnectionStep(
+          mediaDevices.getUserMedia({ audio: true, video: false }),
+          connectAbort.signal,
+          (lateStream) => lateStream.getTracks().forEach((track) => track.stop()),
+        );
         if (closedRef.current || connectionAttemptRef.current !== attempt) {
           stream.getTracks().forEach((track) => track.stop());
           return;
+        }
+        if (connectAbort.signal.aborted) {
+          stream.getTracks().forEach((track) => track.stop());
+          throw new Error("voice-connect-timeout");
         }
         streamRef.current = stream;
         const peer = new RTCPeerConnection();
@@ -382,7 +486,7 @@ export function useVoiceSession(
         const channel = peer.createDataChannel("oai-events");
         channelRef.current = channel;
         channel.onopen = () => {
-          if (connectionAttemptRef.current !== attempt) return;
+          if (connectionAttemptRef.current !== attempt || connectAbort.signal.aborted) return;
           channel.send(JSON.stringify({ type: "session.update", session: { tools: tokenBody.tools ?? [] } }));
           if (!openingResponseRequestedRef.current) {
             openingResponseRequestedRef.current = true;
@@ -391,7 +495,7 @@ export function useVoiceSession(
           setStatus("listening");
         };
         channel.onmessage = ({ data }: { data: string }) => {
-          if (connectionAttemptRef.current !== attempt) return;
+          if (connectionAttemptRef.current !== attempt || connectAbort.signal.aborted) return;
           try {
             const event = JSON.parse(data as string) as { type?: string; name?: unknown; arguments?: unknown; call_id?: unknown };
             acceptEvent(event);
@@ -403,32 +507,66 @@ export function useVoiceSession(
           }
         };
         peer.onconnectionstatechange = () => {
-          if (connectionAttemptRef.current !== attempt) return;
+          if (connectionAttemptRef.current !== attempt || connectAbort.signal.aborted) return;
           if (peer.connectionState === "failed" || peer.connectionState === "disconnected") {
             closeTransport();
             setError("Something interrupted us. Worth trying again.");
             setStatus("failed");
           }
         };
-        const offer = await peer.createOffer({ offerToReceiveAudio: true });
-        await peer.setLocalDescription(offer);
-        const answer = await fetch("https://api.openai.com/v1/realtime/calls", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${tokenBody.token}`,
-            "Content-Type": "application/sdp",
-          },
-          body: offer.sdp ?? "",
-        });
+        const offer = await awaitConnectionStep(
+          peer.createOffer({ offerToReceiveAudio: true }),
+          connectAbort.signal,
+        );
+        if (returnIfStaleOrThrowIfTimedOut()) return;
+        await awaitConnectionStep(
+          peer.setLocalDescription(offer),
+          connectAbort.signal,
+        );
+        if (returnIfStaleOrThrowIfTimedOut()) return;
+        const answer = await awaitConnectionStep(
+          fetch("https://api.openai.com/v1/realtime/calls", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${tokenBody.token}`,
+              "Content-Type": "application/sdp",
+            },
+            body: offer.sdp ?? "",
+            signal: connectAbort.signal,
+          }),
+          connectAbort.signal,
+        );
         if (!answer.ok) throw new Error("I could not connect our call just now.");
-        await peer.setRemoteDescription(new RTCSessionDescription({ type: "answer", sdp: await answer.text() }));
+        if (returnIfStaleOrThrowIfTimedOut()) return;
+        const answerSdp = await awaitConnectionStep(
+          answer.text(),
+          connectAbort.signal,
+        );
+        if (returnIfStaleOrThrowIfTimedOut()) return;
+        await awaitConnectionStep(
+          peer.setRemoteDescription(new RTCSessionDescription({ type: "answer", sdp: answerSdp })),
+          connectAbort.signal,
+        );
+        if (returnIfStaleOrThrowIfTimedOut()) return;
       } catch (caught) {
         if (closedRef.current || connectionAttemptRef.current !== attempt) return;
-        const message = caught instanceof Error ? caught.message : "I could not start listening just now.";
+        const rawMessage = caught instanceof Error ? caught.message : "";
+        const message = connectAbort.signal.aborted
+          ? "Voice took too long to connect. Try again, or use text chat."
+          : /permission|denied|not allowed/iu.test(rawMessage)
+            ? "Homa needs microphone permission. Allow it in Settings, then try again."
+            : rawMessage || "I could not start listening just now.";
+        setMicrophonePermissionNeeded(
+          !connectAbort.signal.aborted && /permission|denied|not allowed/iu.test(rawMessage),
+        );
         setError(message === "no-session" ? REASONS[message] : message);
         setStatus("failed");
         closeTransport();
       } finally {
+        clearTimeout(connectTimeout);
+        if (connectAbortRef.current === connectAbort) {
+          connectAbortRef.current = null;
+        }
         if (connectionAttemptRef.current === attempt) connectingRef.current = false;
       }
     })();
@@ -436,12 +574,18 @@ export function useVoiceSession(
 
   const start = useCallback(() => connect(false), [connect]);
   const retry = useCallback(() => connect(true), [connect]);
+  const openMicrophoneSettings = useCallback(
+    () => Linking.openSettings().then(() => undefined),
+    [],
+  );
 
   const pause = useCallback((reason: string, resumeOnForeground: boolean) => {
     if (!["connecting", "listening", "working", "speaking", "failed"].includes(statusRef.current)) return;
     resumeOnForegroundRef.current = resumeOnForeground;
     connectionAttemptRef.current += 1;
     connectingRef.current = false;
+    connectAbortRef.current?.abort();
+    connectAbortRef.current = null;
     persistSettledTurns(true);
     closeTransport();
     setMuted(false);
@@ -552,9 +696,11 @@ export function useVoiceSession(
     recovering: false,
     speaking: status === "speaking",
     handoffReady: status === "listening",
+    microphonePermissionNeeded,
     start,
     end,
     retry,
+    openMicrophoneSettings,
     sendText,
     announceResult,
     toggleMute,

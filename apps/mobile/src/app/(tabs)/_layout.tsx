@@ -32,7 +32,7 @@ export default function AppShellLayout() {
   return (
     <FamilyReadinessGate>
       {(family) => (
-        <BillingGate familyId={family.id}>
+        <BillingGate key={`${session.user.id}:${family.id}`} familyId={family.id}>
           <AppShell />
         </BillingGate>
       )}

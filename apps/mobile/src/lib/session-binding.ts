@@ -31,9 +31,10 @@ export type MobileSessionRestoration =
   | {
       kind: "resumed";
       events: HandleMessageStreamEvent[];
-      session: SessionState;
-    }
-  | { kind: "fresh" };
+    session: SessionState;
+  }
+  | { kind: "fresh" }
+  | { kind: "unavailable"; reason: "auth" | "timeout" };
 
 function bindingPayload(
   value: unknown,
@@ -140,15 +141,20 @@ export async function restoreServerBoundMobileSession(input: {
   fetcher?: typeof fetch;
   now?: () => number;
   sleep?: (ms: number, signal: AbortSignal) => Promise<void>;
+  maxAttempts?: number;
 }): Promise<MobileSessionRestoration | null> {
   const fetcher = input.fetcher ?? fetch;
   const now = input.now ?? Date.now;
   const sleep = input.sleep ?? abortableSleep;
   const origin = input.apiOrigin.replace(/\/+$/, "");
+  const maxAttempts = Math.max(1, input.maxAttempts ?? 3);
+  let attempts = 0;
 
   while (!input.signal.aborted) {
+    attempts += 1;
     try {
       const accessToken = await input.bearer();
+      if (!accessToken) return { kind: "unavailable", reason: "auth" };
       const response = await fetcher(`${origin}/api/chat/session-binding`, {
         cache: "no-store",
         headers: {
@@ -159,6 +165,9 @@ export async function restoreServerBoundMobileSession(input: {
         signal: input.signal,
       });
       if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          return { kind: "unavailable", reason: "auth" };
+        }
         throw new Error(`binding read returned ${response.status}`);
       }
       const payload = bindingPayload(await response.json());
@@ -172,6 +181,9 @@ export async function restoreServerBoundMobileSession(input: {
       });
       if (decision.kind === "fresh") return decision;
       if (decision.kind === "wait") {
+        if (attempts >= maxAttempts) {
+          return { kind: "unavailable", reason: "timeout" };
+        }
         await sleep(Math.min(decision.delayMs, BINDING_RETRY_MS), input.signal);
         continue;
       }
@@ -183,6 +195,9 @@ export async function restoreServerBoundMobileSession(input: {
       if (restored) return restored;
     } catch {
       if (input.signal.aborted) return null;
+    }
+    if (attempts >= maxAttempts) {
+      return { kind: "unavailable", reason: "timeout" };
     }
     await sleep(BINDING_RETRY_MS, input.signal);
   }

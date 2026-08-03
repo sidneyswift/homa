@@ -25,6 +25,18 @@ const familyHookSource = readFileSync(
   new URL("../family/use-family-data.ts", import.meta.url),
   "utf8",
 );
+const settingsSource = readFileSync(
+  new URL("../../app/settings.tsx", import.meta.url),
+  "utf8",
+);
+const voiceWorkbenchSource = readFileSync(
+  new URL("../voice/voice-workbench-provider.tsx", import.meta.url),
+  "utf8",
+);
+const tabsLayoutSource = readFileSync(
+  new URL("../../app/(tabs)/_layout.tsx", import.meta.url),
+  "utf8",
+);
 const familyGateSource = readFileSync(
   new URL("../../components/family-readiness-gate.tsx", import.meta.url),
   "utf8",
@@ -73,6 +85,18 @@ describe("native bootstrap telemetry wiring", () => {
     assert.match(familyGateSource, /Finish setup/u);
     assert.match(familyGateSource, /Check again/u);
     assert.match(familyGateSource, /Use a different account/u);
+  });
+
+  it("shares family data with root routes only after auth is ready", () => {
+    assert.match(rootSource, /<FamilyDataProvider key=\{session\?\.user\.id \?\? "signed-out"\}>/u);
+    assert.match(familyHookSource, /const \{ session, initializing \} = useSession\(\)/u);
+    assert.match(familyHookSource, /if \(!session\)/u);
+    assert.match(settingsSource, /useFamilyData\(\)/u);
+    assert.match(voiceWorkbenchSource, /userId: string;/u);
+    assert.match(voiceWorkbenchSource, /visibleActiveObject\?\.userId === authUserId/u);
+    assert.match(voiceWorkbenchSource, /setVisibleActiveObject\(null\)/u);
+    assert.match(voiceWorkbenchSource, /endVoice\(\{ persist: false \}\)/u);
+    assert.match(tabsLayoutSource, /<BillingGate key=\{`\$\{session\.user\.id\}:\$\{family\.id\}`\}/u);
   });
 
   it("fails consent closed and preserves affirmative durable consent", () => {

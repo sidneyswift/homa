@@ -15,6 +15,7 @@ import type {
 import { ErrorBoundary } from "../components/error-boundary";
 import { LoadingStatus } from "../components/ui/loading-status";
 import { SessionProvider, useSession } from "../features/auth/session-provider";
+import { FamilyDataProvider } from "../features/family/use-family-data";
 import { VoiceWorkbenchProvider } from "../features/voice/voice-workbench-provider";
 import { initCrashReporting } from "../lib/crash-reporting";
 import { installStreamingFetch } from "../lib/streaming-fetch";
@@ -35,7 +36,7 @@ SplashScreen.preventAutoHideAsync();
 
 function RootNavigator() {
   const fonts = useHomaFonts();
-  const { initializing, failureReason: sessionFailure, retry, continueSignedOut } =
+  const { session, initializing, failureReason: sessionFailure, retry, continueSignedOut } =
     useSession();
   const [fontFailure, setFontFailure] =
     useState<MobileBootstrapFailureReason | null>(null);
@@ -119,12 +120,14 @@ function RootNavigator() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: colors.page },
-      }}
-    />
+    <FamilyDataProvider key={session?.user.id ?? "signed-out"}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.page },
+        }}
+      />
+    </FamilyDataProvider>
   );
 }
 

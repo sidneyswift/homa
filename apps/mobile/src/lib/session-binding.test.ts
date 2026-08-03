@@ -53,6 +53,19 @@ describe("mobile session binding restoration", () => {
     );
   });
 
+  it("falls back instead of throwing for an invalid stored time zone", () => {
+    assert.doesNotThrow(() => {
+      mobileSessionBindingDecision({
+        binding: {
+          runtimeSessionId: "legacy-session",
+          lastSeenAtMs: now - 86_400_000,
+        },
+        nowMs: now,
+        timeZone: "Mars/Olympus_Mons",
+      });
+    });
+  });
+
   it("uses mobile bearer auth and replays a waiting session to its exact cursor", async () => {
     let state: SessionState = { sessionId: "waiting-session", streamIndex: 0 };
     const replayed = [
@@ -99,6 +112,56 @@ describe("mobile session binding restoration", () => {
       events: replayed,
       session: { sessionId: "waiting-session", streamIndex: replayed.length },
     });
+  });
+
+  it("stops after bounded binding failures instead of locking the composer forever", async () => {
+    const restored = await restoreServerBoundMobileSession({
+      client: { session: () => ({}) } as Pick<Client, "session">,
+      apiOrigin: "https://homa.test",
+      bearer: async () => "access-token",
+      timeZone: "America/New_York",
+      signal: new AbortController().signal,
+      fetcher: async () => new Response(null, { status: 503 }),
+      sleep: async () => undefined,
+      maxAttempts: 2,
+    });
+
+    assert.deepEqual(restored, { kind: "unavailable", reason: "timeout" });
+  });
+
+  it("bounds an active cross-surface wait as well as network failures", async () => {
+    const restored = await restoreServerBoundMobileSession({
+      client: { session: () => ({}) } as Pick<Client, "session">,
+      apiOrigin: "https://homa.test",
+      bearer: async () => "access-token",
+      timeZone: "America/New_York",
+      signal: new AbortController().signal,
+      fetcher: async () => Response.json({
+        ok: true,
+        binding: {
+          runtimeSessionId: "active-session",
+          lastSeenAtMs: now - 1_000,
+        },
+      }),
+      sleep: async () => undefined,
+      now: () => now,
+      maxAttempts: 2,
+    });
+
+    assert.deepEqual(restored, { kind: "unavailable", reason: "timeout" });
+  });
+
+  it("stops immediately when the session token is gone", async () => {
+    const restored = await restoreServerBoundMobileSession({
+      client: { session: () => ({}) } as Pick<Client, "session">,
+      apiOrigin: "https://homa.test",
+      bearer: async () => "",
+      timeZone: "America/New_York",
+      signal: new AbortController().signal,
+      fetcher: async () => Response.json({ ok: true, binding: null }),
+    });
+
+    assert.deepEqual(restored, { kind: "unavailable", reason: "auth" });
   });
 
   it("keeps the session-binding route bearer-aware and server-scoped", async () => {

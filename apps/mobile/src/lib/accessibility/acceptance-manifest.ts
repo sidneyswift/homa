@@ -170,6 +170,7 @@ export const nativeAccessibilityHandoffs: readonly NativeAccessibilityHandoff[] 
   { file: "apps/mobile/src/features/planner/activity-row.tsx", callee: "Linking.openURL", outcome: "Planner source opens.", owner: "gh#303" },
   { file: "apps/mobile/src/features/state-records/state-records-card.tsx", callee: "Linking.openURL", outcome: "State authority source or PDF opens.", owner: "gh#534" },
   { file: "apps/mobile/src/features/lessons/native-lesson-recorder.tsx", callee: "Linking.openSettings", outcome: "Microphone settings open after denial.", owner: "gh#534" },
+  { file: "apps/mobile/src/features/voice/use-voice-session.ts", callee: "Linking.openSettings", outcome: "Voice microphone settings open after denial.", owner: "gh#534" },
   { file: "apps/mobile/src/features/lessons/native-lesson-recorder.tsx", callee: "AudioModule.requestRecordingPermissionsAsync", outcome: "Microphone permission is requested after an explicit prime.", owner: "gh#534" },
   { file: "apps/mobile/src/features/chat/onboarding-cards.tsx", callee: "WebBrowser.openBrowserAsync", outcome: "Full progress report opens.", owner: "gh#617" },
   { file: "apps/mobile/src/features/auth/google-sign-in.ts", callee: "WebBrowser.openAuthSessionAsync", outcome: "Google authentication session opens.", owner: "gh#304" },

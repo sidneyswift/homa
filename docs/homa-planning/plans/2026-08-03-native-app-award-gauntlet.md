@@ -16,7 +16,7 @@ The product promise to optimize is:
 
 The current no-ship issues are not primarily missing screens. They are trust and continuity failures:
 
-- New families leave native for onboarding and can become authenticated without a ready family.
+- The native first-use setup path now exists, but its production migration, privilege probe, and physical first-win proof are still open.
 - There is no single Today surface that answers what matters now.
 - A Voice request can promise “keep listening,” while the next surface appears muted or incomplete.
 - Planner, Progress, Binder, and Voice do not yet share a fully legible active-object and state contract.
@@ -37,13 +37,20 @@ The award standard is therefore a measured closed loop, not a feature count.
 - Production planner release after PR #759: Vercel alias `thankshoma.com` is Ready, `/` returns 200, `/app/planner` returns the expected 307 auth redirect, main CI is green, and the mobile OTA workflow is green.
 - Main head after merge: `3ca8a606c74e9037e69a79ae06ffb6d2f931c95d`.
 - Native Planner scheduling now has one instrumented capture-to-effect slice in [PR #764](https://github.com/sidneyswift/homa/pull/764): the server owns the schedule receipt binding, the client awaits the best-effort pre-effect telemetry emission before the mutation, and restart recovery plus duplicate receipt claims are covered by deterministic and disposable PostgreSQL tests. GitHub CI run [30792411407](https://github.com/sidneyswift/homa/actions/runs/30792411407) and its Vercel preview passed for commit `e3390652`. This proves the no-false-outcome boundary, not durable telemetry delivery or a physical-device journey.
+- The native first-use branch now creates a family, adds a learner, and completes the canonical profile flag through receipt-checked RPCs with a stable child idempotency key. Contract tests cover the client and migration shape, but the migration has not been applied or privilege-probed in production.
+- Native Chat restore now has bounded server-binding attempts, explicit auth and timeout recovery, and an invalid-time-zone fallback instead of an indefinite spinner. The mobile planner suite reports 63 passing tests on this branch.
+- The accessibility guard now passes its static registry, node tests, isolated runner typecheck, and 31 rendered Jest tests under Node 23.6.1. The runtime manifest load is intentionally compatible with both direct `tsx` execution and `node:test` CommonJS loading.
+- Voice connection now has a bounded abort-aware startup, explicit connecting cancellation, late-stream cleanup, and callback guards against timed-out attempts. This is source and contract evidence, not a spoken-turn device proof.
+- Family data now has one session-aware provider at the authenticated root, so Settings and every tab share the same family snapshot instead of issuing route-specific reads. A bootstrap contract test protects that route boundary.
+- The shared family provider is keyed by authenticated user, BillingGate by user plus family, and Voice active objects carry an owner user ID. This closes the cross-account stale-state window in source and contract review, but still needs an adversarial device and production probe.
 
 ### Not yet proven
 
 - A physical iPhone spoken turn with capture, transport, model response, playback, interruption, and recovery.
 - Native VoiceOver, largest Dynamic Type, weak-network, phone-call, audio-route, and background/foreground journeys on a release build.
-- A fresh-family install-to-first-use journey completed without leaving native.
+- A fresh-family install-to-first-use journey completed on a release build without leaving native. The native setup path is implemented, but [gh#304](https://github.com/sidneyswift/homa/issues/304) remains open until production migration, auth handoff, and first useful outcome are proven.
 - Five-mom comprehension and outcome study.
+- Production tenant-isolation and RPC privilege verification. The local isolation guard could not run because this worktree has no `NEXT_PUBLIC_SUPABASE_URL` or `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 
 The Voice screenshots are useful interaction evidence, but they are a React Native Web prototype with fake family data and an explicit “No product actions” strip. They are not simulator or production proof.
 
@@ -88,11 +95,11 @@ The tables below are the complete parent job map for the current product ambitio
 
 | Mom job | Award-level UX expectation | Current posture |
 |---|---|---|
-| Talk naturally | Voice is the default entry, starts predictably, and makes listening state unmistakable. | Partial |
+| Talk naturally | Voice is the default entry, starts predictably, and makes listening state unmistakable. | Partial, bounded startup and cancellation are implemented; device proof remains |
 | Switch voice and typing | One conversation, one history, one active object across modes. | Partial |
 | Ask “what about this?” | “This” resolves to a server-validated visible object or Homa asks the parent to select it. | Partial, [gh#536](https://github.com/sidneyswift/homa/issues/536) |
 | Navigate while talking | Planner, Binder, Progress, Hours, and Tasks open without ending or duplicating Voice. | Partial, [gh#535](https://github.com/sidneyswift/homa/issues/535) |
-| Know whether Homa is listening | A labeled or highly legible state, not a tiny dot or crossed-out mic that needs inference. | UX gate found a failure |
+| Know whether Homa is listening | A labeled or highly legible state, not a tiny dot or crossed-out mic that needs inference. | UX gate found a failure; connecting now has explicit Cancel connection |
 | Interrupt Homa | One reachable stop action works immediately and preserves the parent's words. | Partial |
 | Know what was heard | Compact transcript, correction path, and clear adult-private visibility. | Partial |
 | Capture now, organize later | One sentence creates a labeled inbox item without forcing a destination choice. | Missing |
@@ -177,7 +184,7 @@ The tables below are the complete parent job map for the current product ambitio
 |---|---|---|
 | Sign in as expected | Apple, Google, and email paths explain what happens next and return to the app. | Partial |
 | Recover a password | Native entry, working link, safe landing, and return to the intended state. | Missing, [gh#327](https://github.com/sidneyswift/homa/issues/327) |
-| Finish setup natively | Account, family, child, first request, first result, and plan choice stay coherent. | Missing, [gh#304](https://github.com/sidneyswift/homa/issues/304) |
+| Finish setup natively | Account, family, child, first request, first result, and plan choice stay coherent. | Partial, receipt-bound family and learner setup is implemented; [gh#304](https://github.com/sidneyswift/homa/issues/304) remains open for production and device proof |
 | Understand price | One Monthly or Annual choice, truthful terms, restore visible, no surprise gate. | Partial |
 | Restore purchase | Progress, result, and next action when no purchase is found. | Partial |
 | Set AI consent | Plain third-party processing explanation, current choice, retry, and reversible Settings control. | Partial |

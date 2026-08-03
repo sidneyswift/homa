@@ -33,10 +33,9 @@ import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, space } from "../../theme/tokens";
 
 /**
- * Google and email + password sign-in, matching the web /signin flow and
- * its ordering. Account creation stays behind the web onboarding entry,
- * so every door gathers the same setup context before a family reaches
- * the app.
+ * Google, Apple, and email + password sign-in, matching the web /signin
+ * flow and its ordering. Apple and Google can continue directly into the
+ * native family setup gate; email account creation still starts on the web.
  */
 
 /**
@@ -80,14 +79,20 @@ export default function SignInScreen() {
   ) {
     setError(null);
     setOauthPending(provider);
-    const result = await flow();
-    setOauthPending(null);
-    // Success: SessionProvider picks up the session and this screen redirects.
-    if (result.status === "signed-in") return;
-    if (result.status === "failed") {
-      console.error(`mobile ${provider} signin failed:`, result.reason);
+    try {
+      const result = await flow();
+      // Success: SessionProvider picks up the session and this screen redirects.
+      if (result.status === "signed-in") return;
+      if (result.status === "failed") {
+        console.error(`mobile ${provider} signin failed:`, result.reason);
+      }
+      setError(describeSignInFailure(result));
+    } catch (cause) {
+      console.error(`mobile ${provider} signin threw:`, cause);
+      setError("That didn't go through. You can try again when you're ready.");
+    } finally {
+      setOauthPending(null);
     }
-    setError(describeSignInFailure(result));
   }
 
   async function submit() {
@@ -98,14 +103,20 @@ export default function SignInScreen() {
     }
     setPending(true);
     setError(null);
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: trimmedEmail,
-      password,
-    });
-    setPending(false);
-    if (signInError) {
-      console.error("mobile signin failed:", signInError.message);
-      setError("That email and password didn't match. You can try again when you're ready.");
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: trimmedEmail,
+        password,
+      });
+      if (signInError) {
+        console.error("mobile signin failed:", signInError.message);
+        setError("That email and password didn't match. You can try again when you're ready.");
+      }
+    } catch (cause) {
+      console.error("mobile signin threw:", cause);
+      setError("We couldn't sign you in yet. You can try again when you're ready.");
+    } finally {
+      setPending(false);
     }
     // Success: SessionProvider picks up the session and this screen redirects.
   }
@@ -125,19 +136,23 @@ export default function SignInScreen() {
     setRecoveryPending(true);
     setRecoverySent(false);
     setError(null);
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-      normalizedEmail,
-      { redirectTo },
-    );
-    setRecoveryPending(false);
-
-    if (resetError) {
-      console.error("mobile password recovery request failed:", resetError.message);
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+        normalizedEmail,
+        { redirectTo },
+      );
+      if (resetError) {
+        console.error("mobile password recovery request failed:", resetError.message);
+        setError("We couldn't send the reset link. Try again in a minute.");
+        return;
+      }
+      setRecoverySent(true);
+    } catch (cause) {
+      console.error("mobile password recovery threw:", cause);
       setError("We couldn't send the reset link. Try again in a minute.");
-      return;
+    } finally {
+      setRecoveryPending(false);
     }
-
-    setRecoverySent(true);
   }
 
   return (
@@ -280,12 +295,17 @@ export default function SignInScreen() {
                 color: colors.textMuted,
               }}
             >
-              New to Homa? Start with the web onboarding, then sign in here.
+              New to Homa? Apple or Google can take you straight into family setup. Email accounts start on the web.
             </Text>
             <Button
-              label="Open onboarding"
+              label="Create an account on the web"
               variant="ghost"
-              onPress={() => void openWebOnboarding()}
+              onPress={() => {
+                void openWebOnboarding().catch((cause) => {
+                  console.error("mobile web onboarding handoff failed:", cause);
+                  setError("We couldn't open onboarding. Try again in a moment.");
+                });
+              }}
             />
           </View>
         </ScrollView>

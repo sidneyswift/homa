@@ -1,5 +1,14 @@
 import type { MobileBootstrapFailureReason } from "@homa/core";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  createElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 import {
   getMyChildren,
@@ -8,9 +17,10 @@ import {
   type ChildRecord,
   type FamilyRecord,
 } from "../../lib/family";
+import { useSession } from "../auth/session-provider";
 import { runMobileBootstrapStep } from "../bootstrap/mobile-bootstrap";
 
-interface FamilyData {
+export interface FamilyData {
   family: FamilyRecord | null;
   children: ChildRecord[];
   memberDisplayName: string | null;
@@ -20,8 +30,10 @@ interface FamilyData {
   reload: () => Promise<void>;
 }
 
-/** Loads the caller's family + children (RLS-scoped) with manual reload. */
-export function useFamilyData(): FamilyData {
+const FamilyDataContext = createContext<FamilyData | null>(null);
+
+function useFamilyDataState(): FamilyData {
+  const { session, initializing } = useSession();
   const [family, setFamily] = useState<FamilyRecord | null>(null);
   const [children, setChildren] = useState<ChildRecord[]>([]);
   const [memberDisplayName, setMemberDisplayName] = useState<string | null>(null);
@@ -33,6 +45,15 @@ export function useFamilyData(): FamilyData {
 
   const reload = useCallback(async () => {
     const attempt = ++attemptRef.current;
+    if (!session) {
+      setFamily(null);
+      setChildren([]);
+      setMemberDisplayName(null);
+      setError(null);
+      setFailureReason(null);
+      setLoading(initializing);
+      return;
+    }
     setLoading(true);
     setError(null);
     setFailureReason(null);
@@ -56,16 +77,17 @@ export function useFamilyData(): FamilyData {
       setFailureReason(result.reason);
     }
     setLoading(false);
-  }, []);
+  }, [initializing, session]);
 
   useEffect(() => {
+    if (initializing) return;
     const timer = setTimeout(() => {
       void reload();
     }, 0);
     return () => {
       clearTimeout(timer);
     };
-  }, [reload]);
+  }, [initializing, reload]);
 
   return {
     family,
@@ -76,4 +98,19 @@ export function useFamilyData(): FamilyData {
     failureReason,
     reload,
   };
+}
+
+/** Shares the caller's family snapshot across the signed-in native shell. */
+export function FamilyDataProvider({ children }: { children: ReactNode }) {
+  const value = useFamilyDataState();
+  return createElement(FamilyDataContext.Provider, { value }, children);
+}
+
+/** Reads the shared family snapshot and its manual reload action. */
+export function useFamilyData(): FamilyData {
+  const value = useContext(FamilyDataContext);
+  if (!value) {
+    throw new Error("useFamilyData must run inside FamilyDataProvider");
+  }
+  return value;
 }
